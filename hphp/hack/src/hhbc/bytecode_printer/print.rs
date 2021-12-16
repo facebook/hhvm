@@ -71,7 +71,7 @@ pub struct ExprEnv<'arena, 'e> {
     pub codegen_env: Option<&'e HhasBodyEnv<'arena>>,
 }
 
-fn print_program<W: Write>(ctx: &mut Context<'_>, w: &mut W, prog: &HhasProgram<'_>) -> Result<()> {
+fn print_program<W: Write>(ctx: &Context<'_>, w: &mut W, prog: &HhasProgram<'_>) -> Result<()> {
     match ctx.path {
         Some(p) => {
             let abs = p.to_absolute();
@@ -117,11 +117,7 @@ fn get_fatal_op(f: &FatalOp) -> &str {
     }
 }
 
-fn print_program_<W: Write>(
-    ctx: &mut Context<'_>,
-    w: &mut W,
-    prog: &HhasProgram<'_>,
-) -> Result<()> {
+fn print_program_<W: Write>(ctx: &Context<'_>, w: &mut W, prog: &HhasProgram<'_>) -> Result<()> {
     if let Just(Triple(fop, p, msg)) = &prog.fatal {
         newline(w)?;
         let HhasPos {
@@ -162,7 +158,7 @@ fn print_program_<W: Write>(
 }
 
 fn print_include_region<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     includes: &Slice<'_, IncludePath<'_>>,
 ) -> Result<()> {
@@ -172,11 +168,7 @@ fn print_include_region<W: Write>(
     fn print_if_exists<W: Write>(w: &mut W, p: &Path) -> Result<()> {
         if p.exists() { print_path(w, p) } else { Ok(()) }
     }
-    fn print_include<W: Write>(
-        ctx: &mut Context<'_>,
-        w: &mut W,
-        inc: IncludePath<'_>,
-    ) -> Result<()> {
+    fn print_include<W: Write>(ctx: &Context<'_>, w: &mut W, inc: IncludePath<'_>) -> Result<()> {
         let include_roots = ctx.include_roots;
         let alloc = bumpalo::Bump::new();
         match inc.into_doc_root_relative(&alloc, include_roots) {
@@ -233,7 +225,7 @@ fn print_include_region<W: Write>(
 }
 
 fn print_symbol_ref_regions<'arena, W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     symbol_refs: &HhasSymbolRefs<'arena>,
 ) -> Result<()> {
@@ -258,18 +250,14 @@ fn print_symbol_ref_regions<'arena, W: Write>(
     print_region("class_refs", &symbol_refs.classes)
 }
 
-fn print_adata_region<W: Write>(
-    ctx: &mut Context<'_>,
-    w: &mut W,
-    adata: &HhasAdata<'_>,
-) -> Result<()> {
+fn print_adata_region<W: Write>(ctx: &Context<'_>, w: &mut W, adata: &HhasAdata<'_>) -> Result<()> {
     concat_str_by(w, " ", [".adata", adata.id.unsafe_as_str(), "= "])?;
     triple_quotes(w, |w| print_adata(ctx, w, &adata.value))?;
     w.write_all(b";")?;
     ctx.newline(w)
 }
 
-fn print_typedef<W: Write>(ctx: &mut Context<'_>, w: &mut W, td: &HhasTypedef<'_>) -> Result<()> {
+fn print_typedef<W: Write>(ctx: &Context<'_>, w: &mut W, td: &HhasTypedef<'_>) -> Result<()> {
     newline(w)?;
     w.write_all(b".alias ")?;
     print_typedef_attributes(ctx, w, td)?;
@@ -284,7 +272,7 @@ fn print_typedef<W: Write>(ctx: &mut Context<'_>, w: &mut W, td: &HhasTypedef<'_
 }
 
 fn print_typedef_attributes<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     td: &HhasTypedef<'_>,
 ) -> Result<()> {
@@ -312,11 +300,7 @@ where
     })
 }
 
-fn print_fun_def<W: Write>(
-    ctx: &mut Context<'_>,
-    w: &mut W,
-    fun_def: &HhasFunction<'_>,
-) -> Result<()> {
+fn print_fun_def<W: Write>(ctx: &Context<'_>, w: &mut W, fun_def: &HhasFunction<'_>) -> Result<()> {
     let body = &fun_def.body;
     newline(w)?;
     w.write_all(b".function ")?;
@@ -354,7 +338,7 @@ fn print_fun_def<W: Write>(
 }
 
 fn print_requirement<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     r: &Pair<ClassType<'_>, hhas_class::TraitReqKind>,
 ) -> Result<()> {
@@ -371,7 +355,7 @@ fn print_requirement<W: Write>(
 }
 
 fn print_type_constant<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     c: &HhasTypeConstant<'_>,
 ) -> Result<()> {
@@ -388,7 +372,7 @@ fn print_type_constant<W: Write>(
 }
 
 fn print_ctx_constant<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     c: &HhasCtxConstant<'_>,
 ) -> Result<()> {
@@ -422,7 +406,7 @@ fn print_property_doc_comment<W: Write>(w: &mut W, p: &HhasProperty<'_>) -> Resu
 }
 
 fn print_property_attributes<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     property: &HhasProperty<'_>,
 ) -> Result<()> {
@@ -477,7 +461,7 @@ fn print_property_type_info<W: Write>(w: &mut W, p: &HhasProperty<'_>) -> Result
 }
 
 fn print_property<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     class_def: &HhasClass<'_>,
     property: &HhasProperty<'_>,
@@ -501,7 +485,7 @@ fn print_property<W: Write>(
     }
 }
 
-fn print_constant<W: Write>(ctx: &mut Context<'_>, w: &mut W, c: &HhasConstant<'_>) -> Result<()> {
+fn print_constant<W: Write>(ctx: &Context<'_>, w: &mut W, c: &HhasConstant<'_>) -> Result<()> {
     ctx.newline(w)?;
     w.write_all(b".const ")?;
     w.write_all(c.name.to_raw_string().as_bytes())?;
@@ -519,7 +503,7 @@ fn print_constant<W: Write>(ctx: &mut Context<'_>, w: &mut W, c: &HhasConstant<'
     w.write_all(b";")
 }
 
-fn print_enum_ty<W: Write>(ctx: &mut Context<'_>, w: &mut W, c: &HhasClass<'_>) -> Result<()> {
+fn print_enum_ty<W: Write>(ctx: &Context<'_>, w: &mut W, c: &HhasClass<'_>) -> Result<()> {
     if let Just(et) = c.enum_type.as_ref() {
         ctx.newline(w)?;
         w.write_all(b".enum_ty ")?;
@@ -530,7 +514,7 @@ fn print_enum_ty<W: Write>(ctx: &mut Context<'_>, w: &mut W, c: &HhasClass<'_>) 
 }
 
 fn print_doc_comment<'arena, W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     doc_comment: &Maybe<Str<'arena>>,
 ) -> Result<()> {
@@ -542,7 +526,7 @@ fn print_doc_comment<'arena, W: Write>(
 }
 
 fn print_use_precedence<'arena, W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     Triple(id1, id2, ids): &Triple<
         ClassType<'arena>,
@@ -568,7 +552,7 @@ fn print_use_as_visibility<W: Write>(w: &mut W, u: UseAsVisibility) -> Result<()
 }
 
 fn print_use_alias<'arena, W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     Quadruple(ido1, id, ido2, kindl): &Quadruple<
         Maybe<ClassType<'arena>>,
@@ -598,11 +582,7 @@ fn print_use_alias<'arena, W: Write>(
     w.write_all(b";")
 }
 
-fn print_uses<'arena, W: Write>(
-    ctx: &mut Context<'_>,
-    w: &mut W,
-    c: &HhasClass<'arena>,
-) -> Result<()> {
+fn print_uses<'arena, W: Write>(ctx: &Context<'_>, w: &mut W, c: &HhasClass<'arena>) -> Result<()> {
     if c.uses.is_empty() {
         Ok(())
     } else {
@@ -649,7 +629,7 @@ fn print_uses<'arena, W: Write>(
 }
 
 fn print_class_special_attributes<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     c: &HhasClass<'_>,
 ) -> Result<()> {
@@ -764,7 +744,7 @@ fn print_shadowed_tparams<'arena, W: Write>(
 }
 
 fn print_method_def<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     method_def: &HhasMethod<'_>,
 ) -> Result<()> {
@@ -806,11 +786,7 @@ fn print_method_def<W: Write>(
     })
 }
 
-fn print_method_attrs<W: Write>(
-    ctx: &mut Context<'_>,
-    w: &mut W,
-    m: &HhasMethod<'_>,
-) -> Result<()> {
+fn print_method_attrs<W: Write>(ctx: &Context<'_>, w: &mut W, m: &HhasMethod<'_>) -> Result<()> {
     use hhas_attribute::*;
     let user_attrs = m.attributes.as_ref();
     let mut special_attrs = vec![];
@@ -859,7 +835,7 @@ fn print_method_attrs<W: Write>(
 }
 
 fn print_class_def<'arena, W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     class_def: &HhasClass<'arena>,
 ) -> Result<()> {
@@ -961,7 +937,7 @@ fn print_adata_id<W: Write>(w: &mut W, id: &AdataId<'_>) -> Result<()> {
 }
 
 fn print_adata_mapped_argument<W, F, V>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     col_type: &str,
     loc: &Option<ast_defs::Pos>,
@@ -970,7 +946,7 @@ fn print_adata_mapped_argument<W, F, V>(
 ) -> Result<()>
 where
     W: Write,
-    F: Fn(&mut Context<'_>, &mut W, &V) -> Result<()>,
+    F: Fn(&Context<'_>, &mut W, &V) -> Result<()>,
 {
     write!(w, "{}:{}:{{", col_type, values.len(),)?;
     print_pos_as_prov_tag(ctx, w, loc)?;
@@ -981,7 +957,7 @@ where
 }
 
 fn print_adata_collection_argument<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     col_type: &str,
     loc: &Option<ast_defs::Pos>,
@@ -991,7 +967,7 @@ fn print_adata_collection_argument<W: Write>(
 }
 
 fn print_adata_dict_collection_argument<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     col_type: &str,
     loc: &Option<ast_defs::Pos>,
@@ -1003,7 +979,7 @@ fn print_adata_dict_collection_argument<W: Write>(
     })
 }
 
-fn print_adata<W: Write>(ctx: &mut Context<'_>, w: &mut W, tv: &TypedValue<'_>) -> Result<()> {
+fn print_adata<W: Write>(ctx: &Context<'_>, w: &mut W, tv: &TypedValue<'_>) -> Result<()> {
     match tv {
         TypedValue::Uninit => w.write_all(b"uninit"),
         TypedValue::Null => w.write_all(b"N;"),
@@ -1041,11 +1017,7 @@ fn print_adata<W: Write>(ctx: &mut Context<'_>, w: &mut W, tv: &TypedValue<'_>) 
     }
 }
 
-fn print_attribute<W: Write>(
-    ctx: &mut Context<'_>,
-    w: &mut W,
-    a: &HhasAttribute<'_>,
-) -> Result<()> {
+fn print_attribute<W: Write>(ctx: &Context<'_>, w: &mut W, a: &HhasAttribute<'_>) -> Result<()> {
     write!(
         w,
         "\"{}\"(\"\"\"{}:{}:{{",
@@ -1058,7 +1030,7 @@ fn print_attribute<W: Write>(
 }
 
 fn print_attributes<'a, W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     al: impl AsRef<[HhasAttribute<'a>]>,
 ) -> Result<()> {
@@ -1077,7 +1049,7 @@ fn print_attributes<'a, W: Write>(
 }
 
 fn print_file_attributes<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     al: &[HhasAttribute<'_>],
 ) -> Result<()> {
@@ -1099,7 +1071,7 @@ fn is_bareword_char(c: &u8) -> bool {
 }
 
 fn print_body<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     body: &HhasBody<'_>,
     coeffects: &HhasCoeffects<'_>,
@@ -1141,12 +1113,13 @@ fn print_body<W: Write>(
 }
 
 fn print_instructions<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     instr_seq: &InstrSeq<'_>,
 ) -> Result<()> {
     use Instruct::*;
     use InstructTry::*;
+    let mut ctx = ctx.clone();
     for instr in instr_seq.compact_iter() {
         match instr {
             ISpecialFlow(_) => {
@@ -2264,7 +2237,7 @@ fn print_fatal_op<W: Write>(w: &mut W, f: &FatalOp) -> Result<()> {
 }
 
 fn print_params<'arena, W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     params: impl AsRef<[HhasParam<'arena>]>,
 ) -> Result<()> {
@@ -2274,7 +2247,7 @@ fn print_params<'arena, W: Write>(
 }
 
 fn print_param<'arena, W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     param: &HhasParam<'arena>,
 ) -> Result<()> {
@@ -2340,7 +2313,7 @@ fn print_int<W: Write>(w: &mut W, i: &usize) -> Result<()> {
 }
 
 fn print_key_value<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     k: &ast::Expr,
@@ -2350,7 +2323,7 @@ fn print_key_value<W: Write>(
 }
 
 fn print_key_value_<W: Write, K, KeyPrinter>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     k: K,
@@ -2358,7 +2331,7 @@ fn print_key_value_<W: Write, K, KeyPrinter>(
     v: &ast::Expr,
 ) -> Result<()>
 where
-    KeyPrinter: FnMut(&mut Context<'_>, &mut W, &ExprEnv<'_, '_>, K) -> Result<()>,
+    KeyPrinter: FnMut(&Context<'_>, &mut W, &ExprEnv<'_, '_>, K) -> Result<()>,
 {
     kp(ctx, w, env, k)?;
     w.write_all(b" => ")?;
@@ -2366,7 +2339,7 @@ where
 }
 
 fn print_afield<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     afield: &ast::Afield,
@@ -2379,7 +2352,7 @@ fn print_afield<W: Write>(
 }
 
 fn print_afields<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     afields: impl AsRef<[ast::Afield]>,
@@ -2404,7 +2377,7 @@ fn print_uop<W: Write>(w: &mut W, op: ast::Uop) -> Result<()> {
 }
 
 fn print_key_values<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     kvs: impl AsRef<[(ast::Expr, ast::Expr)]>,
@@ -2413,14 +2386,14 @@ fn print_key_values<W: Write>(
 }
 
 fn print_key_values_<W: Write, K, KeyPrinter>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     mut kp: KeyPrinter,
     kvs: impl AsRef<[(K, ast::Expr)]>,
 ) -> Result<()>
 where
-    KeyPrinter: Fn(&mut Context<'_>, &mut W, &ExprEnv<'_, '_>, &K) -> Result<()>,
+    KeyPrinter: Fn(&Context<'_>, &mut W, &ExprEnv<'_, '_>, &K) -> Result<()>,
 {
     concat_by(w, ", ", kvs, |w, (k, v)| {
         print_key_value_(ctx, w, env, k, &mut kp, v)
@@ -2428,14 +2401,14 @@ where
 }
 
 fn print_expr_darray<W: Write, K, KeyPrinter>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     kp: KeyPrinter,
     kvs: impl AsRef<[(K, ast::Expr)]>,
 ) -> Result<()>
 where
-    KeyPrinter: Fn(&mut Context<'_>, &mut W, &ExprEnv<'_, '_>, &K) -> Result<()>,
+    KeyPrinter: Fn(&Context<'_>, &mut W, &ExprEnv<'_, '_>, &K) -> Result<()>,
 {
     wrap_by_(w, "darray[", "]", |w| {
         print_key_values_(ctx, w, env, kp, kvs)
@@ -2443,7 +2416,7 @@ where
 }
 
 fn print_expr_varray<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     varray: &[ast::Expr],
@@ -2454,7 +2427,7 @@ fn print_expr_varray<W: Write>(
 }
 
 fn print_shape_field_name<W: Write>(
-    _: &mut Context<'_>,
+    _: &Context<'_>,
     w: &mut W,
     _: &ExprEnv<'_, '_>,
     field: &ast::ShapeFieldName,
@@ -2500,7 +2473,7 @@ fn print_expr_string<W: Write>(w: &mut W, s: &[u8]) -> Result<()> {
 }
 
 fn print_expr_to_string<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     env: &ExprEnv<'_, '_>,
     expr: &ast::Expr,
 ) -> Result<String> {
@@ -2513,7 +2486,7 @@ fn print_expr_to_string<W: Write>(
 }
 
 fn print_expr<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     ast::Expr(_, _, expr): &ast::Expr,
@@ -2555,7 +2528,7 @@ fn print_expr<W: Write>(
         }
     }
     fn get_class_name_from_id<'e>(
-        ctx: &mut Context<'_>,
+        ctx: &Context<'_>,
         env: Option<&'e HhasBodyEnv<'_>>,
         should_format: bool,
         is_class_constant: bool,
@@ -2585,7 +2558,7 @@ fn print_expr<W: Write>(
         }
     }
     fn handle_possible_colon_colon_class_expr<W: Write>(
-        ctx: &mut Context<'_>,
+        ctx: &Context<'_>,
         w: &mut W,
         env: &ExprEnv<'_, '_>,
         is_array_get: bool,
@@ -2963,7 +2936,7 @@ fn print_expr<W: Write>(
 }
 
 fn print_xml<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     id: &str,
@@ -2975,7 +2948,7 @@ fn print_xml<W: Write>(
         Error::NotImpl(String::from("print_xml: unexpected syntax"))
     }
     fn print_xhp_attr<W: Write>(
-        ctx: &mut Context<'_>,
+        ctx: &Context<'_>,
         w: &mut W,
         env: &ExprEnv<'_, '_>,
         attr: &(ast_defs::ShapeFieldName, ast::Expr),
@@ -3016,7 +2989,7 @@ fn print_xml<W: Write>(
 }
 
 fn print_efun<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     f: &ast::Fun_,
@@ -3045,7 +3018,7 @@ fn print_efun<W: Write>(
 }
 
 fn print_block<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     block: &[ast::Stmt],
@@ -3060,7 +3033,7 @@ fn print_block<W: Write>(
 }
 
 fn print_block_<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     block: &[ast::Stmt],
@@ -3076,7 +3049,7 @@ fn print_block_<W: Write>(
 }
 
 fn print_statement<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     stmt: &ast::Stmt,
@@ -3144,7 +3117,7 @@ fn print_statement<W: Write>(
 }
 
 fn print_fparam<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     env: &ExprEnv<'_, '_>,
     param: &ast::FunParam,
@@ -3225,7 +3198,7 @@ fn print_import_flavor<W: Write>(w: &mut W, flavor: &ast::ImportFlavor) -> Resul
 }
 
 fn print_param_user_attributes<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     param: &HhasParam<'_>,
 ) -> Result<()> {
@@ -3239,7 +3212,7 @@ fn print_span<W: Write>(w: &mut W, &HhasSpan(line_begin, line_end): &HhasSpan) -
     write!(w, "({},{})", line_begin, line_end)
 }
 
-fn print_fun_attrs<W: Write>(ctx: &mut Context<'_>, w: &mut W, f: &HhasFunction<'_>) -> Result<()> {
+fn print_fun_attrs<W: Write>(ctx: &Context<'_>, w: &mut W, f: &HhasFunction<'_>) -> Result<()> {
     use hhas_attribute::*;
     let user_attrs = f.attributes.as_ref();
     let mut special_attrs = vec![];
@@ -3274,7 +3247,7 @@ fn print_fun_attrs<W: Write>(ctx: &mut Context<'_>, w: &mut W, f: &HhasFunction<
 }
 
 fn print_special_and_user_attrs<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     specials: &[&str],
     users: &[HhasAttribute<'_>],
@@ -3436,7 +3409,7 @@ fn print_extends<W: Write>(w: &mut W, base: Option<&str>) -> Result<()> {
 }
 
 fn print_record_field<W: Write>(
-    ctx: &mut Context<'_>,
+    ctx: &Context<'_>,
     w: &mut W,
     Field(name, type_info, intial_value): &Field<'_>,
 ) -> Result<()> {
@@ -3459,11 +3432,7 @@ fn print_record_field<W: Write>(
     })
 }
 
-fn print_record_def<W: Write>(
-    ctx: &mut Context<'_>,
-    w: &mut W,
-    record: &HhasRecord<'_>,
-) -> Result<()> {
+fn print_record_def<W: Write>(ctx: &Context<'_>, w: &mut W, record: &HhasRecord<'_>) -> Result<()> {
     newline(w)?;
     if record.is_abstract {
         concat_str_by(w, " ", [".record", record.name.to_raw_string()])?;

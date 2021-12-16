@@ -89,26 +89,24 @@ impl<'a> Context<'a> {
     }
 
     /// Start a new indented block
-    pub(crate) fn block<W, F>(&mut self, w: &mut W, f: F) -> Result<()>
+    pub(crate) fn block<W, F>(&self, w: &mut W, f: F) -> Result<()>
     where
         W: Write,
-        F: FnOnce(&mut Self, &mut W) -> Result<()>,
+        F: FnOnce(&Self, &mut W) -> Result<()>,
     {
-        self.indent.inc();
-        let r = f(self, w);
-        self.indent.dec();
-        r
+        let mut ctx = self.clone();
+        ctx.indent.inc();
+        f(&ctx, w)
     }
 
-    pub(crate) fn unblock<W, F>(&mut self, w: &mut W, f: F) -> Result<()>
+    pub(crate) fn unblock<W, F>(&self, w: &mut W, f: F) -> Result<()>
     where
         W: Write,
-        F: FnOnce(&mut Self, &mut W) -> Result<()>,
+        F: FnOnce(&Self, &mut W) -> Result<()>,
     {
-        self.indent.dec();
-        let r = f(self, w);
-        self.indent.inc();
-        r
+        let mut ctx = self.clone();
+        ctx.indent.dec();
+        f(&ctx, w)
     }
 
     /// Printing instruction list requies manually control indentation,

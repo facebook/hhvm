@@ -30,9 +30,10 @@ impl Indent {
     }
 
     fn write<W: Write>(&self, w: &mut W) -> Result<()> {
-        Ok(for _ in 0..self.0 {
-            w.write("  ")?;
-        })
+        for _ in 0..self.0 {
+            w.write_all(b"  ")?;
+        }
+        Ok(())
     }
 }
 

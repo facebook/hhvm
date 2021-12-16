@@ -52,24 +52,8 @@ impl From<fmt::Error> for Error {
 }
 
 pub trait Write {
-    fn write(&mut self, s: impl AsRef<str>) -> Result<()>;
+    fn write_all(&mut self, s: &[u8]) -> Result<()>;
     fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result<()>;
-
-    fn write_if(&mut self, cond: bool, s: impl AsRef<str>) -> Result<()> {
-        if cond { self.write(s) } else { Ok(()) }
-    }
-}
-
-impl<W: fmt::Write> Write for W {
-    fn write(&mut self, s: impl AsRef<str>) -> Result<()> {
-        self.write_str(s.as_ref())?;
-        Ok(())
-    }
-
-    fn write_fmt(&mut self, fmt: Arguments<'_>) -> Result<()> {
-        self.write_fmt(fmt)?;
-        Ok(())
-    }
 }
 
 pub(crate) struct IoWrite<'a>(pub(crate) &'a mut dyn io::Write);
@@ -81,8 +65,8 @@ impl IoWrite<'_> {
 }
 
 impl Write for IoWrite<'_> {
-    fn write(&mut self, s: impl AsRef<str>) -> Result<()> {
-        self.0.write_all(s.as_ref().as_bytes())?;
+    fn write_all(&mut self, s: &[u8]) -> Result<()> {
+        self.0.write_all(s)?;
         Ok(())
     }
 
@@ -93,7 +77,7 @@ impl Write for IoWrite<'_> {
 }
 
 pub(crate) fn newline<W: Write>(w: &mut W) -> Result<()> {
-    w.write("\n")?;
+    w.write_all(b"\n")?;
     Ok(())
 }
 
@@ -102,9 +86,9 @@ where
     W: Write,
     F: FnOnce(&mut W) -> Result<()>,
 {
-    w.write(s)?;
+    w.write_all(s.as_bytes())?;
     f(w)?;
-    w.write(e)
+    w.write_all(e.as_bytes())
 }
 
 pub(crate) fn wrap_by<W, F>(w: &mut W, s: &str, f: F) -> Result<()>
@@ -136,7 +120,7 @@ wrap_by!(square, "[", "]");
 
 pub(crate) fn concat_str<W: Write, I: AsRef<str>>(w: &mut W, ss: impl AsRef<[I]>) -> Result<()> {
     concat(w, ss, |w, s| {
-        w.write(s)?;
+        w.write_all(s.as_ref().as_bytes())?;
         Ok(())
     })
 }
@@ -147,7 +131,7 @@ pub(crate) fn concat_str_by<W: Write, I: AsRef<str>>(
     ss: impl AsRef<[I]>,
 ) -> Result<()> {
     concat_by(w, sep, ss, |w, s| {
-        w.write(s)?;
+        w.write_all(s.as_ref().as_bytes())?;
         Ok(())
     })
 }
@@ -176,7 +160,7 @@ where
         if first {
             first = false;
         } else {
-            w.write(sep)?;
+            w.write_all(sep.as_bytes())?;
         }
         f(w, i)?;
     })
@@ -204,7 +188,7 @@ where
     F: Fn(&mut W, T) -> Result<()>,
 {
     match i.into() {
-        None => w.write(default),
+        None => w.write_all(default.as_ref().as_bytes()),
         Some(i) => f(w, i),
     }
 }

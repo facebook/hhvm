@@ -56,6 +56,12 @@ use oxidized::{
 use regex::Regex;
 use std::{borrow::Cow, io::Write as _, path::Path, write};
 
+macro_rules! write_if {
+    ($pred:expr, $($rest:tt)*) => {
+        if ($pred) { write!($($rest)*) } else { Ok(()) }
+    };
+}
+
 pub struct ExprEnv<'arena, 'e> {
     pub codegen_env: Option<&'e HhasBodyEnv<'arena>>,
 }
@@ -82,13 +88,13 @@ fn print_program<W: Write>(ctx: &mut Context<'_>, w: &mut W, prog: &HhasProgram<
             newline(w)
         }
         None => {
-            w.write("#starts here")?;
+            w.write_all(b"#starts here")?;
 
             newline(w)?;
             handle_not_impl(|| print_program_(ctx, w, prog))?;
 
             newline(w)?;
-            w.write("#ends here")?;
+            w.write_all(b"#ends here")?;
 
             newline(w)
         }
@@ -207,13 +213,13 @@ fn print_include_region<W: Write>(
         }
     }
     if !includes.is_empty() {
-        w.write("\n.includes {")?;
+        w.write_all(b"\n.includes {")?;
         for inc in includes.as_ref().iter() {
             // TODO(hrust): avoid clone. Rethink onwership of inc in
             // hhas_symbol_refs_rust::IncludePath::into_doc_root_relative
             print_include(ctx, w, inc.clone())?;
         }
-        w.write("\n}\n")?;
+        w.write_all(b"\n}\n")?;
     }
     Ok(())
 }
@@ -230,11 +236,11 @@ fn print_symbol_ref_regions<'arena, W: Write>(
             ctx.block(w, |c, w| {
                 for s in refs.as_ref().iter() {
                     c.newline(w)?;
-                    w.write(s.unsafe_as_str())?;
+                    w.write_all(s.unsafe_as_str().as_bytes())?;
                 }
                 Ok(())
             })?;
-            w.write("\n}\n")
+            w.write_all(b"\n}\n")
         } else {
             Ok(())
         }
@@ -251,22 +257,22 @@ fn print_adata_region<W: Write>(
 ) -> Result<()> {
     concat_str_by(w, " ", [".adata", adata.id.unsafe_as_str(), "= "])?;
     triple_quotes(w, |w| print_adata(ctx, w, &adata.value))?;
-    w.write(";")?;
+    w.write_all(b";")?;
     ctx.newline(w)
 }
 
 fn print_typedef<W: Write>(ctx: &mut Context<'_>, w: &mut W, td: &HhasTypedef<'_>) -> Result<()> {
     newline(w)?;
-    w.write(".alias ")?;
+    w.write_all(b".alias ")?;
     print_typedef_attributes(ctx, w, td)?;
-    w.write(td.name.to_raw_string())?;
-    w.write(" = ")?;
+    w.write_all(td.name.to_raw_string().as_bytes())?;
+    w.write_all(b" = ")?;
     print_typedef_info(w, &td.type_info)?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     print_span(w, &td.span)?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     triple_quotes(w, |w| print_adata(ctx, w, &td.type_structure))?;
-    w.write(";")
+    w.write_all(b";")
 }
 
 fn print_typedef_attributes<W: Write>(
@@ -302,32 +308,32 @@ fn print_fun_def<W: Write>(
 ) -> Result<()> {
     let body = &fun_def.body;
     newline(w)?;
-    w.write(".function ")?;
+    w.write_all(b".function ")?;
     print_upper_bounds_(w, &body.upper_bounds)?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     print_fun_attrs(ctx, w, fun_def)?;
     print_span(w, &fun_def.span)?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     option(
         w,
         &(Option::from(body.return_type_info.clone())),
         |w, ti| {
             print_type_info(w, ti)?;
-            w.write(" ")
+            w.write_all(b" ")
         },
     )?;
-    w.write(fun_def.name.to_raw_string())?;
+    w.write_all(fun_def.name.to_raw_string().as_bytes())?;
     print_params(ctx, w, fun_def.params())?;
     if fun_def.is_generator() {
-        w.write(" isGenerator")?;
+        w.write_all(b" isGenerator")?;
     }
     if fun_def.is_async() {
-        w.write(" isAsync")?;
+        w.write_all(b" isAsync")?;
     }
     if fun_def.is_pair_generator() {
-        w.write(" isPairGenerator")?;
+        w.write_all(b" isPairGenerator")?;
     }
-    w.write(" ")?;
+    w.write_all(b" ")?;
     braces(w, |w| {
         ctx.block(w, |c, w| print_body(c, w, body, &fun_def.coeffects))?;
         newline(w)
@@ -342,7 +348,7 @@ fn print_requirement<W: Write>(
     r: &Pair<ClassType<'_>, hhas_class::TraitReqKind>,
 ) -> Result<()> {
     ctx.newline(w)?;
-    w.write(".require ")?;
+    w.write_all(b".require ")?;
     match r {
         Pair(name, hhas_class::TraitReqKind::MustExtend) => {
             write!(w, "extends <{}>;", name.to_raw_string())
@@ -361,13 +367,13 @@ fn print_type_constant<W: Write>(
     ctx.newline(w)?;
     concat_str_by(w, " ", [".const", c.name.unsafe_as_str(), "isType"])?;
     if c.is_abstract {
-        w.write(" isAbstract")?;
+        w.write_all(b" isAbstract")?;
     }
     option(w, Option::from(c.initializer.as_ref()), |w, init| {
-        w.write(" = ")?;
+        w.write_all(b" = ")?;
         triple_quotes(w, |w| print_adata(ctx, w, init))
     })?;
-    w.write(";")
+    w.write_all(b";")
 }
 
 fn print_ctx_constant<W: Write>(
@@ -378,28 +384,28 @@ fn print_ctx_constant<W: Write>(
     ctx.newline(w)?;
     concat_str_by(w, " ", [".ctx", &c.name.unsafe_as_str()])?;
     if c.is_abstract {
-        w.write(" isAbstract")?;
+        w.write_all(b" isAbstract")?;
     }
     if let Some(coeffects) =
         HhasCoeffects::vec_to_string(&c.coeffects.0.as_ref(), |c| c.to_string())
     {
-        w.write(" ")?;
-        w.write(coeffects)?;
+        w.write_all(b" ")?;
+        w.write_all(coeffects.as_bytes())?;
     }
     if let Some(coeffects) =
         HhasCoeffects::vec_to_string(&c.coeffects.1.as_ref(), |c| c.unsafe_as_str().to_string())
     {
-        w.write(" ")?;
-        w.write(coeffects)?;
+        w.write_all(b" ")?;
+        w.write_all(coeffects.as_bytes())?;
     }
-    w.write(";")?;
+    w.write_all(b";")?;
     Ok(())
 }
 
 fn print_property_doc_comment<W: Write>(w: &mut W, p: &HhasProperty<'_>) -> Result<()> {
     if let Just(s) = p.doc_comment.as_ref() {
-        w.write(triple_quote_string(s.unsafe_as_str()))?;
-        w.write(" ")?;
+        w.write_all(triple_quote_string(s.unsafe_as_str()).as_bytes())?;
+        w.write_all(b" ")?;
     }
     Ok(())
 }
@@ -443,18 +449,20 @@ fn print_property_attributes<W: Write>(
     special_attributes.push(property.visibility.as_ref());
     special_attributes.reverse();
 
-    w.write("[")?;
-    concat_by(w, " ", &special_attributes, |w, a| w.write(a))?;
+    w.write_all(b"[")?;
+    concat_by(w, " ", &special_attributes, |w, a| {
+        w.write_all(a.as_bytes())
+    })?;
     if !special_attributes.is_empty() && !property.attributes.is_empty() {
-        w.write(" ")?;
+        w.write_all(b" ")?;
     }
     print_attributes(ctx, w, &property.attributes)?;
-    w.write("] ")
+    w.write_all(b"] ")
 }
 
 fn print_property_type_info<W: Write>(w: &mut W, p: &HhasProperty<'_>) -> Result<()> {
     print_type_info(w, &p.type_info)?;
-    w.write(" ")
+    w.write_all(b" ")
 }
 
 fn print_property<W: Write>(
@@ -464,48 +472,48 @@ fn print_property<W: Write>(
     property: &HhasProperty<'_>,
 ) -> Result<()> {
     newline(w)?;
-    w.write("  .property ")?;
+    w.write_all(b"  .property ")?;
     print_property_attributes(ctx, w, property)?;
     print_property_doc_comment(w, property)?;
     print_property_type_info(w, property)?;
-    w.write(property.name.to_raw_string())?;
-    w.write(" =\n    ")?;
+    w.write_all(property.name.to_raw_string().as_bytes())?;
+    w.write_all(b" =\n    ")?;
     let initial_value = property.initial_value.as_ref();
     if class_def.is_closure() || initial_value == Just(&TypedValue::Uninit) {
-        w.write("uninit;")
+        w.write_all(b"uninit;")
     } else {
         triple_quotes(w, |w| match initial_value {
-            Nothing => w.write("N;"),
+            Nothing => w.write_all(b"N;"),
             Just(value) => print_adata(ctx, w, &value),
         })?;
-        w.write(";")
+        w.write_all(b";")
     }
 }
 
 fn print_constant<W: Write>(ctx: &mut Context<'_>, w: &mut W, c: &HhasConstant<'_>) -> Result<()> {
     ctx.newline(w)?;
-    w.write(".const ")?;
-    w.write(c.name.to_raw_string())?;
+    w.write_all(b".const ")?;
+    w.write_all(c.name.to_raw_string().as_bytes())?;
     if c.is_abstract {
-        w.write(" isAbstract")?;
+        w.write_all(b" isAbstract")?;
     }
     match c.value.as_ref() {
-        Just(TypedValue::Uninit) => w.write(" = uninit")?,
+        Just(TypedValue::Uninit) => w.write_all(b" = uninit")?,
         Just(value) => {
-            w.write(" = ")?;
+            w.write_all(b" = ")?;
             triple_quotes(w, |w| print_adata(ctx, w, value))?;
         }
         Nothing => {}
     }
-    w.write(";")
+    w.write_all(b";")
 }
 
 fn print_enum_ty<W: Write>(ctx: &mut Context<'_>, w: &mut W, c: &HhasClass<'_>) -> Result<()> {
     if let Just(et) = c.enum_type.as_ref() {
         ctx.newline(w)?;
-        w.write(".enum_ty ")?;
+        w.write_all(b".enum_ty ")?;
         print_type_info_(w, true, et)?;
-        w.write(";")?;
+        w.write_all(b";")?;
     }
     Ok(())
 }
@@ -533,18 +541,18 @@ fn print_use_precedence<'arena, W: Write>(
 ) -> Result<()> {
     ctx.newline(w)?;
     concat_str(w, [id1.to_raw_string(), "::", id2.to_raw_string()])?;
-    w.write(" insteadof ")?;
+    w.write_all(b" insteadof ")?;
     let unique_ids: IndexSet<&str> = ids.as_ref().iter().map(|i| i.to_raw_string()).collect();
     concat_str_by(w, " ", unique_ids.iter().collect::<Vec<_>>())?;
-    w.write(";")
+    w.write_all(b";")
 }
 
 fn print_use_as_visibility<W: Write>(w: &mut W, u: UseAsVisibility) -> Result<()> {
-    w.write(match u {
-        UseAsVisibility::UseAsPublic => "public",
-        UseAsVisibility::UseAsPrivate => "private",
-        UseAsVisibility::UseAsProtected => "protected",
-        UseAsVisibility::UseAsFinal => "final",
+    w.write_all(match u {
+        UseAsVisibility::UseAsPublic => b"public",
+        UseAsVisibility::UseAsPrivate => b"private",
+        UseAsVisibility::UseAsProtected => b"protected",
+        UseAsVisibility::UseAsFinal => b"final",
     })
 }
 
@@ -566,17 +574,17 @@ fn print_use_alias<'arena, W: Write>(
         |w, i: &ClassType<'arena>| concat_str(w, [i.to_raw_string(), "::", id]),
         id,
     )?;
-    w.write(" as ")?;
+    w.write_all(b" as ")?;
     if !kindl.is_empty() {
         square(w, |w| {
             concat_by(w, " ", kindl, |w, k| print_use_as_visibility(w, *k))
         })?;
     }
-    w.write_if(!kindl.is_empty() && ido2.is_just(), " ")?;
+    write_if!(!kindl.is_empty() && ido2.is_just(), w, " ")?;
     option(w, ido2.as_ref(), |w, i: &ClassType<'arena>| {
-        w.write(i.to_raw_string())
+        w.write_all(i.to_raw_string().as_bytes())
     })?;
-    w.write(";")
+    w.write_all(b";")
 }
 
 fn print_uses<'arena, W: Write>(
@@ -596,13 +604,13 @@ fn print_uses<'arena, W: Write>(
         let unique_ids: Vec<_> = unique_ids.into_iter().collect();
 
         newline(w)?;
-        w.write("  .use ")?;
-        concat_by(w, " ", unique_ids, |w, id| w.write(id))?;
+        w.write_all(b"  .use ")?;
+        concat_by(w, " ", unique_ids, |w, id| w.write_all(id.as_bytes()))?;
 
         if c.use_aliases.is_empty() && c.use_precedences.is_empty() {
-            w.write(";")
+            w.write_all(b";")
         } else {
-            w.write(" {")?;
+            w.write_all(b" {")?;
             ctx.block(w, |ctx, w| {
                 let precs: &[Triple<
                     ClassType<'arena>,
@@ -624,7 +632,7 @@ fn print_uses<'arena, W: Write>(
                 Ok(())
             })?;
             newline(w)?;
-            w.write("  }")
+            w.write_all(b"  }")
         }
     }
 }
@@ -686,9 +694,12 @@ fn print_class_special_attributes<W: Write>(
 
     special_attributes.reverse();
     wrap_by_(w, "[", "] ", |w| {
-        concat_by(w, " ", &special_attributes, |w, a| w.write(a))?;
-        w.write_if(
+        concat_by(w, " ", &special_attributes, |w, a| {
+            w.write_all(a.as_bytes())
+        })?;
+        write_if!(
             !special_attributes.is_empty() && !user_attrs.is_empty(),
+            w,
             " ",
         )?;
         print_attributes(ctx, w, &user_attrs)
@@ -699,7 +710,7 @@ fn print_implements<W: Write>(w: &mut W, implements: &[ClassType<'_>]) -> Result
     if implements.is_empty() {
         return Ok(());
     }
-    w.write(" implements (")?;
+    w.write_all(b" implements (")?;
     concat_str_by(
         w,
         " ",
@@ -708,14 +719,14 @@ fn print_implements<W: Write>(w: &mut W, implements: &[ClassType<'_>]) -> Result
             .map(|x| x.to_raw_string())
             .collect::<Vec<_>>(),
     )?;
-    w.write(")")
+    w.write_all(b")")
 }
 
 fn print_enum_includes<W: Write>(w: &mut W, enum_includes: &[ClassType<'_>]) -> Result<()> {
     if enum_includes.is_empty() {
         return Ok(());
     }
-    w.write(" enum_includes (")?;
+    w.write_all(b" enum_includes (")?;
     concat_str_by(
         w,
         " ",
@@ -724,7 +735,7 @@ fn print_enum_includes<W: Write>(w: &mut W, enum_includes: &[ClassType<'_>]) -> 
             .map(|x| x.to_raw_string())
             .collect::<Vec<_>>(),
     )?;
-    w.write(")")
+    w.write_all(b")")
 }
 
 fn print_shadowed_tparams<'arena, W: Write>(
@@ -748,39 +759,39 @@ fn print_method_def<W: Write>(
 ) -> Result<()> {
     let body = &method_def.body;
     newline(w)?;
-    w.write("  .method ")?;
+    w.write_all(b"  .method ")?;
     print_shadowed_tparams(w, &body.shadowed_tparams)?;
     print_upper_bounds_(w, &body.upper_bounds)?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     print_method_attrs(ctx, w, method_def)?;
     print_span(w, &method_def.span)?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     option(w, &(Option::from(body.return_type_info.clone())), |w, t| {
         print_type_info(w, t)?;
-        w.write(" ")
+        w.write_all(b" ")
     })?;
-    w.write(method_def.name.to_raw_string())?;
+    w.write_all(method_def.name.to_raw_string().as_bytes())?;
     print_params(ctx, w, &body.params)?;
     if method_def.flags.contains(HhasMethodFlags::IS_GENERATOR) {
-        w.write(" isGenerator")?;
+        w.write_all(b" isGenerator")?;
     }
     if method_def.flags.contains(HhasMethodFlags::IS_ASYNC) {
-        w.write(" isAsync")?;
+        w.write_all(b" isAsync")?;
     }
     if method_def
         .flags
         .contains(HhasMethodFlags::IS_PAIR_GENERATOR)
     {
-        w.write(" isPairGenerator")?;
+        w.write_all(b" isPairGenerator")?;
     }
     if method_def.flags.contains(HhasMethodFlags::IS_CLOSURE_BODY) {
-        w.write(" isClosureBody")?;
+        w.write_all(b" isClosureBody")?;
     }
-    w.write(" ")?;
+    w.write_all(b" ")?;
     braces(w, |w| {
         ctx.block(w, |c, w| print_body(c, w, body, &method_def.coeffects))?;
         newline(w)?;
-        w.write("  ")
+        w.write_all(b"  ")
     })
 }
 
@@ -842,12 +853,12 @@ fn print_class_def<'arena, W: Write>(
     class_def: &HhasClass<'arena>,
 ) -> Result<()> {
     newline(w)?;
-    w.write(".class ")?;
+    w.write_all(b".class ")?;
     print_upper_bounds(w, class_def.upper_bounds.as_ref())?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     print_class_special_attributes(ctx, w, class_def)?;
-    w.write(class_def.name.to_raw_string())?;
-    w.write(" ")?;
+    w.write_all(class_def.name.to_raw_string().as_bytes())?;
+    w.write_all(b" ")?;
     print_span(w, &class_def.span)?;
     print_extends(
         w,
@@ -855,7 +866,7 @@ fn print_class_def<'arena, W: Write>(
     )?;
     print_implements(w, class_def.implements.as_ref())?;
     print_enum_includes(w, class_def.enum_includes.as_ref())?;
-    w.write(" {")?;
+    w.write_all(b" {")?;
     ctx.block(w, |c, w| {
         print_doc_comment(c, w, &class_def.doc_comment)?;
         print_uses(c, w, class_def)?;
@@ -881,7 +892,7 @@ fn print_class_def<'arena, W: Write>(
         Ok(())
     })?;
     newline(w)?;
-    w.write("}")?;
+    w.write_all(b"}")?;
     newline(w)
 }
 
@@ -911,7 +922,7 @@ fn print_pos_as_prov_tag<W: Write>(
 }
 
 fn print_hhbc_id<'a, W: Write>(w: &mut W, id: &impl Id<'a>) -> Result<()> {
-    quotes(w, |w| w.write(escape(id.to_raw_string())))
+    quotes(w, |w| w.write_all(escape(id.to_raw_string()).as_bytes()))
 }
 
 fn print_function_id<W: Write>(w: &mut W, id: &FunctionId<'_>) -> Result<()> {
@@ -983,8 +994,8 @@ fn print_adata_dict_collection_argument<W: Write>(
 
 fn print_adata<W: Write>(ctx: &mut Context<'_>, w: &mut W, tv: &TypedValue<'_>) -> Result<()> {
     match tv {
-        TypedValue::Uninit => w.write("uninit"),
-        TypedValue::Null => w.write("N;"),
+        TypedValue::Uninit => w.write_all(b"uninit"),
+        TypedValue::Null => w.write_all(b"N;"),
         TypedValue::String(s) => {
             write!(
                 w,
@@ -1004,8 +1015,8 @@ fn print_adata<W: Write>(ctx: &mut Context<'_>, w: &mut W, tv: &TypedValue<'_>) 
         TypedValue::Float(f) => write!(w, "d:{};", float::to_string(*f)),
         TypedValue::Int(i) => write!(w, "i:{};", i),
         // TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why?
-        TypedValue::Bool(false) => w.write("b:0;"),
-        TypedValue::Bool(true) => w.write("b:1;"),
+        TypedValue::Bool(false) => w.write_all(b"b:0;"),
+        TypedValue::Bool(true) => w.write_all(b"b:1;"),
         TypedValue::Vec(values) => {
             print_adata_collection_argument(ctx, w, VEC_PREFIX, &None, values.as_ref())
         }
@@ -1015,7 +1026,7 @@ fn print_adata<W: Write>(ctx: &mut Context<'_>, w: &mut W, tv: &TypedValue<'_>) 
         TypedValue::Keyset(values) => {
             print_adata_collection_argument(ctx, w, KEYSET_PREFIX, &None, values.as_ref())
         }
-        TypedValue::HhasAdata(s) => w.write(escaped(s.unsafe_as_str())),
+        TypedValue::HhasAdata(s) => w.write_all(escaped(s.unsafe_as_str()).as_bytes()),
     }
 }
 
@@ -1032,7 +1043,7 @@ fn print_attribute<W: Write>(
         a.arguments.len()
     )?;
     concat(w, &a.arguments, |w, arg| print_adata(ctx, w, arg))?;
-    w.write("}\"\"\")")
+    w.write_all(b"}\"\"\")")
 }
 
 fn print_attributes<'a, W: Write>(
@@ -1063,9 +1074,9 @@ fn print_file_attributes<W: Write>(
         return Ok(());
     }
     newline(w)?;
-    w.write(".file_attributes [")?;
+    w.write_all(b".file_attributes [")?;
     print_attributes(ctx, w, al)?;
-    w.write("] ;")?;
+    w.write_all(b"] ;")?;
     newline(w)
 }
 
@@ -1085,11 +1096,11 @@ fn print_body<W: Write>(
     print_doc_comment(ctx, w, &body.doc_comment)?;
     if body.is_memoize_wrapper {
         ctx.newline(w)?;
-        w.write(".ismemoizewrapper;")?;
+        w.write_all(b".ismemoizewrapper;")?;
     }
     if body.is_memoize_wrapper_lsb {
         ctx.newline(w)?;
-        w.write(".ismemoizewrapperlsb;")?;
+        w.write_all(b".ismemoizewrapperlsb;")?;
     }
     if body.num_iters > 0 {
         ctx.newline(w)?;
@@ -1097,15 +1108,15 @@ fn print_body<W: Write>(
     }
     if !body.decl_vars.is_empty() {
         ctx.newline(w)?;
-        w.write(".declvars ")?;
+        w.write_all(b".declvars ")?;
         concat_by(w, " ", &body.decl_vars, |w, var| {
             if var.unsafe_as_str().as_bytes().iter().all(is_bareword_char) {
-                w.write(var.unsafe_as_str())
+                w.write_all(var.unsafe_as_str().as_bytes())
             } else {
-                quotes(w, |w| w.write(escaper::escape(var.unsafe_as_str())))
+                quotes(w, |w| w.write_all(escape(var.unsafe_as_str()).as_bytes()))
             }
         })?;
-        w.write(";")?;
+        w.write_all(b";")?;
     }
     if body.num_closures > 0 {
         ctx.newline(w)?;
@@ -1113,7 +1124,7 @@ fn print_body<W: Write>(
     }
     for s in HhasCoeffects::coeffects_to_hhas(&coeffects).iter() {
         ctx.newline(w)?;
-        w.write(s)?;
+        w.write_all(s.as_bytes())?;
     }
     print_instructions(ctx, w, &body.body_instrs)
 }
@@ -1187,39 +1198,43 @@ fn print_fcall_args<W: Write>(
         flags.push("EnforceReadonlyThis")
     });
     angle(w, |w| concat_str_by(w, " ", flags))?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     print_int(w, num_args)?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     print_int(w, num_rets)?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     quotes(w, |w| {
-        concat_by(w, "", inouts, |w, i| w.write(if *i { "1" } else { "0" }))
+        concat_by(w, "", inouts, |w, i| {
+            w.write_all(if *i { b"1" } else { b"0" })
+        })
     })?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     quotes(w, |w| {
-        concat_by(w, "", readonly, |w, i| w.write(if *i { "1" } else { "0" }))
+        concat_by(w, "", readonly, |w, i| {
+            w.write_all(if *i { b"1" } else { b"0" })
+        })
     })?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     option_or(w, async_eager_label.as_ref(), print_label, "-")?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     match context {
-        Just(s) => quotes(w, |w| w.write(s.unsafe_as_str())),
-        Nothing => w.write("\"\""),
+        Just(s) => quotes(w, |w| w.write_all(s.unsafe_as_str().as_bytes())),
+        Nothing => w.write_all(b"\"\""),
     }
 }
 
 fn print_special_cls_ref<W: Write>(w: &mut W, cls_ref: &SpecialClsRef) -> Result<()> {
-    w.write(match cls_ref {
-        SpecialClsRef::Static => "Static",
-        SpecialClsRef::Self_ => "Self",
-        SpecialClsRef::Parent => "Parent",
+    w.write_all(match cls_ref {
+        SpecialClsRef::Static => b"Static",
+        SpecialClsRef::Self_ => b"Self",
+        SpecialClsRef::Parent => b"Parent",
     })
 }
 
 fn print_null_flavor<W: Write>(w: &mut W, f: &ObjNullFlavor) -> Result<()> {
-    w.write(match f {
-        ObjNullFlavor::NullThrows => "NullThrows",
-        ObjNullFlavor::NullSafe => "NullSafe",
+    w.write_all(match f {
+        ObjNullFlavor::NullThrows => b"NullThrows",
+        ObjNullFlavor::NullSafe => b"NullSafe",
     })
 }
 
@@ -1227,83 +1242,83 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct<'_>) -> Result<()> {
     fn print_call<W: Write>(w: &mut W, call: &InstructCall<'_>) -> Result<()> {
         use InstructCall as I;
         match call {
-            I::NewObj => w.write("NewObj"),
-            I::NewObjR => w.write("NewObjR"),
+            I::NewObj => w.write_all(b"NewObj"),
+            I::NewObjR => w.write_all(b"NewObjR"),
             I::NewObjD(cid) => {
-                w.write("NewObjD ")?;
+                w.write_all(b"NewObjD ")?;
                 print_class_id(w, cid)
             }
             I::NewObjRD(cid) => {
-                w.write("NewObjRD ")?;
+                w.write_all(b"NewObjRD ")?;
                 print_class_id(w, cid)
             }
             I::NewObjS(r) => {
-                w.write("NewObjS ")?;
+                w.write_all(b"NewObjS ")?;
                 print_special_cls_ref(w, r)
             }
             I::FCall(fcall_args) => {
-                w.write("FCall ")?;
+                w.write_all(b"FCall ")?;
                 print_fcall_args(w, &fcall_args)?;
-                w.write(r#" "" """#)
+                w.write_all(br#" "" """#)
             }
             I::FCallClsMethod(fcall_args, is_log_as_dynamic_call) => {
-                w.write("FCallClsMethod ")?;
+                w.write_all(b"FCallClsMethod ")?;
                 print_fcall_args(w, fcall_args)?;
-                w.write(r#" "" "#)?;
-                w.write(match is_log_as_dynamic_call {
-                    IsLogAsDynamicCallOp::LogAsDynamicCall => "LogAsDynamicCall",
-                    IsLogAsDynamicCallOp::DontLogAsDynamicCall => "DontLogAsDynamicCall",
+                w.write_all(br#" "" "#)?;
+                w.write_all(match is_log_as_dynamic_call {
+                    IsLogAsDynamicCallOp::LogAsDynamicCall => b"LogAsDynamicCall",
+                    IsLogAsDynamicCallOp::DontLogAsDynamicCall => b"DontLogAsDynamicCall",
                 })
             }
             I::FCallClsMethodD(fcall_args, cid, mid) => {
-                w.write("FCallClsMethodD ")?;
+                w.write_all(b"FCallClsMethodD ")?;
                 print_fcall_args(w, fcall_args)?;
-                w.write(r#" "" "#)?;
+                w.write_all(br#" "" "#)?;
                 print_class_id(w, cid)?;
-                w.write(" ")?;
+                w.write_all(b" ")?;
                 print_method_id(w, mid)
             }
             I::FCallClsMethodS(fcall_args, r) => {
-                w.write("FCallClsMethodS ")?;
+                w.write_all(b"FCallClsMethodS ")?;
                 print_fcall_args(w, fcall_args)?;
-                w.write(r#" "" "#)?;
+                w.write_all(br#" "" "#)?;
                 print_special_cls_ref(w, r)
             }
             I::FCallClsMethodSD(fcall_args, r, mid) => {
-                w.write("FCallClsMethodSD ")?;
+                w.write_all(b"FCallClsMethodSD ")?;
                 print_fcall_args(w, fcall_args)?;
-                w.write(r#" "" "#)?;
+                w.write_all(br#" "" "#)?;
                 print_special_cls_ref(w, r)?;
-                w.write(" ")?;
+                w.write_all(b" ")?;
                 print_method_id(w, mid)
             }
             I::FCallCtor(fcall_args) => {
-                w.write("FCallCtor ")?;
+                w.write_all(b"FCallCtor ")?;
                 print_fcall_args(w, fcall_args)?;
-                w.write(r#" """#)
+                w.write_all(br#" """#)
             }
             I::FCallFunc(fcall_args) => {
-                w.write("FCallFunc ")?;
+                w.write_all(b"FCallFunc ")?;
                 print_fcall_args(w, fcall_args)
             }
             I::FCallFuncD(fcall_args, id) => {
-                w.write("FCallFuncD ")?;
+                w.write_all(b"FCallFuncD ")?;
                 print_fcall_args(w, fcall_args)?;
-                w.write(" ")?;
+                w.write_all(b" ")?;
                 print_function_id(w, id)
             }
             I::FCallObjMethod(fcall_args, nf) => {
-                w.write("FCallObjMethod ")?;
+                w.write_all(b"FCallObjMethod ")?;
                 print_fcall_args(w, fcall_args)?;
-                w.write(r#" "" "#)?;
+                w.write_all(br#" "" "#)?;
                 print_null_flavor(w, nf)
             }
             I::FCallObjMethodD(fcall_args, nf, id) => {
-                w.write("FCallObjMethodD ")?;
+                w.write_all(b"FCallObjMethodD ")?;
                 print_fcall_args(w, fcall_args)?;
-                w.write(r#" "" "#)?;
+                w.write_all(br#" "" "#)?;
                 print_null_flavor(w, nf)?;
-                w.write(" ")?;
+                w.write_all(b" ")?;
                 print_method_id(w, id)
             }
         }
@@ -1313,32 +1328,32 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct<'_>) -> Result<()> {
         use InstructGet as IG;
         match get {
             IG::CGetL(id) => {
-                w.write("CGetL ")?;
+                w.write_all(b"CGetL ")?;
                 print_local(w, id)
             }
             IG::CGetQuietL(id) => {
-                w.write("CGetQuietL ")?;
+                w.write_all(b"CGetQuietL ")?;
                 print_local(w, id)
             }
             IG::CGetL2(id) => {
-                w.write("CGetL2 ")?;
+                w.write_all(b"CGetL2 ")?;
                 print_local(w, id)
             }
             IG::CUGetL(id) => {
-                w.write("CUGetL ")?;
+                w.write_all(b"CUGetL ")?;
                 print_local(w, id)
             }
             IG::PushL(id) => {
-                w.write("PushL ")?;
+                w.write_all(b"PushL ")?;
                 print_local(w, id)
             }
-            IG::CGetG => w.write("CGetG"),
+            IG::CGetG => w.write_all(b"CGetG"),
             IG::CGetS(op) => {
-                w.write("CGetS ")?;
+                w.write_all(b"CGetS ")?;
                 print_readonly_op(w, op)
             }
-            IG::ClassGetC => w.write("ClassGetC"),
-            IG::ClassGetTS => w.write("ClassGetTS"),
+            IG::ClassGetC => w.write_all(b"ClassGetC"),
+            IG::ClassGetTS => w.write_all(b"ClassGetTS"),
         }
     }
 
@@ -1346,12 +1361,12 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct<'_>) -> Result<()> {
     use InstructBasic as IB;
     match instr {
         IIterator(i) => print_iterator(w, i),
-        IBasic(b) => w.write(match b {
-            IB::Nop => "Nop",
-            IB::EntryNop => "EntryNop",
-            IB::PopC => "PopC",
-            IB::PopU => "PopU",
-            IB::Dup => "Dup",
+        IBasic(b) => w.write_all(match b {
+            IB::Nop => b"Nop",
+            IB::EntryNop => b"EntryNop",
+            IB::PopC => b"PopC",
+            IB::PopU => b"PopU",
+            IB::Dup => b"Dup",
         }),
         ILitConst(lit) => print_lit_const(w, lit),
         IOp(op) => print_op(w, op),
@@ -1362,7 +1377,7 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct<'_>) -> Result<()> {
         IMutator(mutator) => print_mutator(w, mutator),
         ILabel(l) => {
             print_label(w, l)?;
-            w.write(":")
+            w.write_all(b":")
         }
         IIsset(i) => print_isset(w, i),
         IBase(i) => print_base(w, i),
@@ -1385,63 +1400,63 @@ fn print_base<W: Write>(w: &mut W, i: &InstructBase<'_>) -> Result<()> {
     use InstructBase as I;
     match i {
         I::BaseGC(si, m) => {
-            w.write("BaseGC ")?;
+            w.write_all(b"BaseGC ")?;
             print_stack_index(w, si)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_member_opmode(w, m)
         }
         I::BaseGL(id, m) => {
-            w.write("BaseGL ")?;
+            w.write_all(b"BaseGL ")?;
             print_local(w, id)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_member_opmode(w, m)
         }
         I::BaseSC(si1, si2, m, op) => {
-            w.write("BaseSC ")?;
+            w.write_all(b"BaseSC ")?;
             print_stack_index(w, si1)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_stack_index(w, si2)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_member_opmode(w, m)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
         I::BaseL(id, m, op) => {
-            w.write("BaseL ")?;
+            w.write_all(b"BaseL ")?;
             print_local(w, id)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_member_opmode(w, m)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
         I::BaseC(si, m) => {
-            w.write("BaseC ")?;
+            w.write_all(b"BaseC ")?;
             print_stack_index(w, si)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_member_opmode(w, m)
         }
-        I::BaseH => w.write("BaseH"),
+        I::BaseH => w.write_all(b"BaseH"),
         I::Dim(m, mk) => {
-            w.write("Dim ")?;
+            w.write_all(b"Dim ")?;
             print_member_opmode(w, m)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_member_key(w, mk)
         }
     }
 }
 
 fn print_stack_index<W: Write>(w: &mut W, si: &StackIndex) -> Result<()> {
-    w.write(si.to_string())
+    w.write_all(&si.to_string().as_bytes())
 }
 
 fn print_member_opmode<W: Write>(w: &mut W, m: &MemberOpMode) -> Result<()> {
     use MemberOpMode as M;
-    w.write(match m {
-        M::ModeNone => "None",
-        M::Warn => "Warn",
-        M::Define => "Define",
-        M::Unset => "Unset",
-        M::InOut => "InOut",
+    w.write_all(match m {
+        M::ModeNone => b"None",
+        M::Warn => b"Warn",
+        M::Define => b"Define",
+        M::Unset => b"Unset",
+        M::InOut => b"InOut",
     })
 }
 
@@ -1449,53 +1464,53 @@ fn print_member_key<W: Write>(w: &mut W, mk: &MemberKey<'_>) -> Result<()> {
     use MemberKey as M;
     match mk {
         M::EC(si, op) => {
-            w.write("EC:")?;
+            w.write_all(b"EC:")?;
             print_stack_index(w, si)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
         M::EL(local, op) => {
-            w.write("EL:")?;
+            w.write_all(b"EL:")?;
             print_local(w, local)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
         M::ET(s, op) => {
-            w.write("ET:")?;
-            quotes(w, |w| w.write(escape(s.unsafe_as_str())))?;
-            w.write(" ")?;
+            w.write_all(b"ET:")?;
+            quotes(w, |w| w.write_all(escape(s.unsafe_as_str()).as_bytes()))?;
+            w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
         M::EI(i, op) => {
             concat_str(w, ["EI:", i.to_string().as_ref()])?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
         M::PC(si, op) => {
-            w.write("PC:")?;
+            w.write_all(b"PC:")?;
             print_stack_index(w, si)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
         M::PL(local, op) => {
-            w.write("PL:")?;
+            w.write_all(b"PL:")?;
             print_local(w, local)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
         M::PT(id, op) => {
-            w.write("PT:")?;
+            w.write_all(b"PT:")?;
             print_prop_id(w, id)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
         M::QT(id, op) => {
-            w.write("QT:")?;
+            w.write_all(b"QT:")?;
             print_prop_id(w, id)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
-        M::W => w.write("W"),
+        M::W => w.write_all(b"W"),
     }
 }
 
@@ -1503,19 +1518,19 @@ fn print_iterator<W: Write>(w: &mut W, i: &InstructIterator<'_>) -> Result<()> {
     use InstructIterator as I;
     match i {
         I::IterInit(iter_args, label) => {
-            w.write("IterInit ")?;
+            w.write_all(b"IterInit ")?;
             print_iter_args(w, iter_args)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_label(w, label)
         }
         I::IterNext(iter_args, label) => {
-            w.write("IterNext ")?;
+            w.write_all(b"IterNext ")?;
             print_iter_args(w, iter_args)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_label(w, label)
         }
         I::IterFree(id) => {
-            w.write("IterFree ")?;
+            w.write_all(b"IterFree ")?;
             print_iterator_id(w, id)
         }
     }
@@ -1523,16 +1538,16 @@ fn print_iterator<W: Write>(w: &mut W, i: &InstructIterator<'_>) -> Result<()> {
 
 fn print_iter_args<W: Write>(w: &mut W, iter_args: &IterArgs<'_>) -> Result<()> {
     print_iterator_id(w, &iter_args.iter_id)?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     match &iter_args.key_id {
-        Nothing => w.write("NK")?,
+        Nothing => w.write_all(b"NK")?,
         Just(k) => {
-            w.write("K:")?;
+            w.write_all(b"K:")?;
             print_local(w, &k)?;
         }
     };
-    w.write(" ")?;
-    w.write("V:")?;
+    w.write_all(b" ")?;
+    w.write_all(b"V:")?;
     print_local(w, &iter_args.val_id)
 }
 
@@ -1543,22 +1558,22 @@ fn print_iterator_id<W: Write>(w: &mut W, i: &IterId) -> Result<()> {
 fn print_async<W: Write>(w: &mut W, a: &AsyncFunctions<'_>) -> Result<()> {
     use AsyncFunctions as A;
     match a {
-        A::WHResult => w.write("WHResult"),
-        A::Await => w.write("Await"),
+        A::WHResult => w.write_all(b"WHResult"),
+        A::Await => w.write_all(b"Await"),
         A::AwaitAll(Just(Pair(Local::Unnamed(id), count))) => {
             write!(w, "AwaitAll L:{}+{}", id, count)
         }
-        A::AwaitAll(Nothing) => w.write("AwaitAll L:0+0"),
+        A::AwaitAll(Nothing) => w.write_all(b"AwaitAll L:0+0"),
         _ => Err(Error::fail("AwaitAll needs an unnamed local")),
     }
 }
 
 fn print_query_op<W: Write>(w: &mut W, q: QueryOp) -> Result<()> {
-    w.write(match q {
-        QueryOp::CGet => "CGet",
-        QueryOp::CGetQuiet => "CGetQuiet",
-        QueryOp::Isset => "Isset",
-        QueryOp::InOut => "InOut",
+    w.write_all(match q {
+        QueryOp::CGet => b"CGet",
+        QueryOp::CGetQuiet => b"CGetQuiet",
+        QueryOp::Isset => b"Isset",
+        QueryOp::InOut => b"InOut",
     })
 }
 
@@ -1566,50 +1581,50 @@ fn print_final<W: Write>(w: &mut W, f: &InstructFinal<'_>) -> Result<()> {
     use InstructFinal as F;
     match f {
         F::QueryM(n, op, mk) => {
-            w.write("QueryM ")?;
+            w.write_all(b"QueryM ")?;
             print_int(w, n)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_query_op(w, *op)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_member_key(w, mk)
         }
         F::UnsetM(n, mk) => {
-            w.write("UnsetM ")?;
+            w.write_all(b"UnsetM ")?;
             print_int(w, n)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_member_key(w, mk)
         }
         F::SetM(i, mk) => {
-            w.write("SetM ")?;
+            w.write_all(b"SetM ")?;
             print_int(w, i)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_member_key(w, mk)
         }
         F::SetOpM(i, op, mk) => {
-            w.write("SetOpM ")?;
+            w.write_all(b"SetOpM ")?;
             print_int(w, i)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_eq_op(w, &op)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_member_key(w, mk)
         }
         F::IncDecM(i, op, mk) => {
-            w.write("IncDecM ")?;
+            w.write_all(b"IncDecM ")?;
             print_int(w, i)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_incdec_op(w, &op)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_member_key(w, mk)
         }
         F::SetRangeM(i, s, op) => {
-            w.write("SetRangeM ")?;
+            w.write_all(b"SetRangeM ")?;
             print_int(w, i)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_int(w, &(*s as usize))?;
-            w.write(" ")?;
-            w.write(match op {
-                SetrangeOp::Forward => "Forward",
-                SetrangeOp::Reverse => "Reverse",
+            w.write_all(b" ")?;
+            w.write_all(match op {
+                SetrangeOp::Forward => b"Forward",
+                SetrangeOp::Reverse => b"Reverse",
             })
         }
     }
@@ -1618,25 +1633,25 @@ fn print_final<W: Write>(w: &mut W, f: &InstructFinal<'_>) -> Result<()> {
 fn print_isset<W: Write>(w: &mut W, isset: &InstructIsset<'_>) -> Result<()> {
     use InstructIsset as I;
     match isset {
-        I::IssetC => w.write("IssetC"),
+        I::IssetC => w.write_all(b"IssetC"),
         I::IssetL(local) => {
-            w.write("IssetL ")?;
+            w.write_all(b"IssetL ")?;
             print_local(w, local)
         }
         I::IsUnsetL(local) => {
-            w.write("IsUnsetL ")?;
+            w.write_all(b"IsUnsetL ")?;
             print_local(w, local)
         }
-        I::IssetG => w.write("IssetG"),
-        I::IssetS => w.write("IssetS"),
+        I::IssetG => w.write_all(b"IssetG"),
+        I::IssetS => w.write_all(b"IssetS"),
         I::IsTypeC(op) => {
-            w.write("IsTypeC ")?;
+            w.write_all(b"IsTypeC ")?;
             print_istype_op(w, op)
         }
         I::IsTypeL(local, op) => {
-            w.write("IsTypeL ")?;
+            w.write_all(b"IsTypeL ")?;
             print_local(w, local)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_istype_op(w, op)
         }
     }
@@ -1645,31 +1660,31 @@ fn print_isset<W: Write>(w: &mut W, isset: &InstructIsset<'_>) -> Result<()> {
 fn print_istype_op<W: Write>(w: &mut W, op: &IstypeOp) -> Result<()> {
     use IstypeOp as Op;
     match op {
-        Op::OpNull => w.write("Null"),
-        Op::OpBool => w.write("Bool"),
-        Op::OpInt => w.write("Int"),
-        Op::OpDbl => w.write("Dbl"),
-        Op::OpStr => w.write("Str"),
-        Op::OpObj => w.write("Obj"),
-        Op::OpRes => w.write("Res"),
-        Op::OpScalar => w.write("Scalar"),
-        Op::OpKeyset => w.write("Keyset"),
-        Op::OpDict => w.write("Dict"),
-        Op::OpVec => w.write("Vec"),
-        Op::OpArrLike => w.write("ArrLike"),
-        Op::OpLegacyArrLike => w.write("LegacyArrLike"),
-        Op::OpClsMeth => w.write("ClsMeth"),
-        Op::OpFunc => w.write("Func"),
-        Op::OpClass => w.write("Class"),
+        Op::OpNull => w.write_all(b"Null"),
+        Op::OpBool => w.write_all(b"Bool"),
+        Op::OpInt => w.write_all(b"Int"),
+        Op::OpDbl => w.write_all(b"Dbl"),
+        Op::OpStr => w.write_all(b"Str"),
+        Op::OpObj => w.write_all(b"Obj"),
+        Op::OpRes => w.write_all(b"Res"),
+        Op::OpScalar => w.write_all(b"Scalar"),
+        Op::OpKeyset => w.write_all(b"Keyset"),
+        Op::OpDict => w.write_all(b"Dict"),
+        Op::OpVec => w.write_all(b"Vec"),
+        Op::OpArrLike => w.write_all(b"ArrLike"),
+        Op::OpLegacyArrLike => w.write_all(b"LegacyArrLike"),
+        Op::OpClsMeth => w.write_all(b"ClsMeth"),
+        Op::OpFunc => w.write_all(b"Func"),
+        Op::OpClass => w.write_all(b"Class"),
     }
 }
 
 fn print_try<W: Write>(w: &mut W, itry: &InstructTry) -> Result<()> {
     use InstructTry as T;
     match itry {
-        T::TryCatchBegin => w.write(".try {"),
-        T::TryCatchMiddle => w.write("} .catch {"),
-        T::TryCatchEnd => w.write("}"),
+        T::TryCatchBegin => w.write_all(b".try {"),
+        T::TryCatchMiddle => w.write_all(b"} .catch {"),
+        T::TryCatchEnd => w.write_all(b"}"),
     }
 }
 
@@ -1677,176 +1692,176 @@ fn print_mutator<W: Write>(w: &mut W, mutator: &InstructMutator<'_>) -> Result<(
     use InstructMutator as M;
     match mutator {
         M::SetL(local) => {
-            w.write("SetL ")?;
+            w.write_all(b"SetL ")?;
             print_local(w, local)
         }
         M::PopL(id) => {
-            w.write("PopL ")?;
+            w.write_all(b"PopL ")?;
             print_local(w, id)
         }
-        M::SetG => w.write("SetG"),
+        M::SetG => w.write_all(b"SetG"),
         M::SetS(op) => {
-            w.write("SetS ")?;
+            w.write_all(b"SetS ")?;
             print_readonly_op(w, op)
         }
         M::SetOpL(id, op) => {
-            w.write("SetOpL ")?;
+            w.write_all(b"SetOpL ")?;
             print_local(w, id)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_eq_op(w, op)
         }
         M::SetOpG(op) => {
-            w.write("SetOpG ")?;
+            w.write_all(b"SetOpG ")?;
             print_eq_op(w, op)
         }
         M::SetOpS(op) => {
-            w.write("SetOpS ")?;
+            w.write_all(b"SetOpS ")?;
             print_eq_op(w, op)
         }
         M::IncDecL(id, op) => {
-            w.write("IncDecL ")?;
+            w.write_all(b"IncDecL ")?;
             print_local(w, id)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_incdec_op(w, op)
         }
         M::IncDecG(op) => {
-            w.write("IncDecG ")?;
+            w.write_all(b"IncDecG ")?;
             print_incdec_op(w, op)
         }
         M::IncDecS(op) => {
-            w.write("IncDecS ")?;
+            w.write_all(b"IncDecS ")?;
             print_incdec_op(w, op)
         }
         M::UnsetL(id) => {
-            w.write("UnsetL ")?;
+            w.write_all(b"UnsetL ")?;
             print_local(w, id)
         }
-        M::UnsetG => w.write("UnsetG"),
+        M::UnsetG => w.write_all(b"UnsetG"),
         M::CheckProp(id) => {
-            w.write("CheckProp ")?;
+            w.write_all(b"CheckProp ")?;
             print_prop_id(w, id)
         }
         M::InitProp(id, op) => {
-            w.write("InitProp ")?;
+            w.write_all(b"InitProp ")?;
             print_prop_id(w, id)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             match op {
-                InitpropOp::Static => w.write("Static"),
-                InitpropOp::NonStatic => w.write("NonStatic"),
+                InitpropOp::Static => w.write_all(b"Static"),
+                InitpropOp::NonStatic => w.write_all(b"NonStatic"),
             }?;
-            w.write(" ")
+            w.write_all(b" ")
         }
     }
 }
 
 fn print_eq_op<W: Write>(w: &mut W, op: &EqOp) -> Result<()> {
-    w.write(match op {
-        EqOp::PlusEqual => "PlusEqual",
-        EqOp::MinusEqual => "MinusEqual",
-        EqOp::MulEqual => "MulEqual",
-        EqOp::ConcatEqual => "ConcatEqual",
-        EqOp::DivEqual => "DivEqual",
-        EqOp::PowEqual => "PowEqual",
-        EqOp::ModEqual => "ModEqual",
-        EqOp::AndEqual => "AndEqual",
-        EqOp::OrEqual => "OrEqual",
-        EqOp::XorEqual => "XorEqual",
-        EqOp::SlEqual => "SlEqual",
-        EqOp::SrEqual => "SrEqual",
-        EqOp::PlusEqualO => "PlusEqualO",
-        EqOp::MinusEqualO => "MinusEqualO",
-        EqOp::MulEqualO => "MulEqualO",
+    w.write_all(match op {
+        EqOp::PlusEqual => b"PlusEqual",
+        EqOp::MinusEqual => b"MinusEqual",
+        EqOp::MulEqual => b"MulEqual",
+        EqOp::ConcatEqual => b"ConcatEqual",
+        EqOp::DivEqual => b"DivEqual",
+        EqOp::PowEqual => b"PowEqual",
+        EqOp::ModEqual => b"ModEqual",
+        EqOp::AndEqual => b"AndEqual",
+        EqOp::OrEqual => b"OrEqual",
+        EqOp::XorEqual => b"XorEqual",
+        EqOp::SlEqual => b"SlEqual",
+        EqOp::SrEqual => b"SrEqual",
+        EqOp::PlusEqualO => b"PlusEqualO",
+        EqOp::MinusEqualO => b"MinusEqualO",
+        EqOp::MulEqualO => b"MulEqualO",
     })
 }
 
 fn print_readonly_op<W: Write>(w: &mut W, op: &ReadonlyOp) -> Result<()> {
-    w.write(match op {
-        ReadonlyOp::Readonly => "Readonly",
-        ReadonlyOp::Mutable => "Mutable",
-        ReadonlyOp::Any => "Any",
-        ReadonlyOp::CheckROCOW => "CheckROCOW",
-        ReadonlyOp::CheckMutROCOW => "CheckMutROCOW",
+    w.write_all(match op {
+        ReadonlyOp::Readonly => b"Readonly",
+        ReadonlyOp::Mutable => b"Mutable",
+        ReadonlyOp::Any => b"Any",
+        ReadonlyOp::CheckROCOW => b"CheckROCOW",
+        ReadonlyOp::CheckMutROCOW => b"CheckMutROCOW",
     })
 }
 
 fn print_incdec_op<W: Write>(w: &mut W, op: &IncdecOp) -> Result<()> {
-    w.write(match op {
-        IncdecOp::PreInc => "PreInc",
-        IncdecOp::PostInc => "PostInc",
-        IncdecOp::PreDec => "PreDec",
-        IncdecOp::PostDec => "PostDec",
-        IncdecOp::PreIncO => "PreIncO",
-        IncdecOp::PostIncO => "PostIncO",
-        IncdecOp::PreDecO => "PreDecO",
-        IncdecOp::PostDecO => "PostDecO",
+    w.write_all(match op {
+        IncdecOp::PreInc => b"PreInc",
+        IncdecOp::PostInc => b"PostInc",
+        IncdecOp::PreDec => b"PreDec",
+        IncdecOp::PostDec => b"PostDec",
+        IncdecOp::PreIncO => b"PreIncO",
+        IncdecOp::PostIncO => b"PostIncO",
+        IncdecOp::PreDecO => b"PreDecO",
+        IncdecOp::PostDecO => b"PostDecO",
     })
 }
 
 fn print_gen_creation_execution<W: Write>(w: &mut W, gen: &GenCreationExecution) -> Result<()> {
     use GenCreationExecution as G;
     match gen {
-        G::CreateCont => w.write("CreateCont"),
-        G::ContEnter => w.write("ContEnter"),
-        G::ContRaise => w.write("ContRaise"),
-        G::Yield => w.write("Yield"),
-        G::YieldK => w.write("YieldK"),
-        G::ContCheck(CheckStarted::IgnoreStarted) => w.write("ContCheck IgnoreStarted"),
-        G::ContCheck(CheckStarted::CheckStarted) => w.write("ContCheck CheckStarted"),
-        G::ContValid => w.write("ContValid"),
-        G::ContKey => w.write("ContKey"),
-        G::ContGetReturn => w.write("ContGetReturn"),
-        G::ContCurrent => w.write("ContCurrent"),
+        G::CreateCont => w.write_all(b"CreateCont"),
+        G::ContEnter => w.write_all(b"ContEnter"),
+        G::ContRaise => w.write_all(b"ContRaise"),
+        G::Yield => w.write_all(b"Yield"),
+        G::YieldK => w.write_all(b"YieldK"),
+        G::ContCheck(CheckStarted::IgnoreStarted) => w.write_all(b"ContCheck IgnoreStarted"),
+        G::ContCheck(CheckStarted::CheckStarted) => w.write_all(b"ContCheck CheckStarted"),
+        G::ContValid => w.write_all(b"ContValid"),
+        G::ContKey => w.write_all(b"ContKey"),
+        G::ContGetReturn => w.write_all(b"ContGetReturn"),
+        G::ContCurrent => w.write_all(b"ContCurrent"),
     }
 }
 
 fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc<'_>) -> Result<()> {
     use InstructMisc as M;
     match misc {
-        M::This => w.write("This"),
-        M::CheckThis => w.write("CheckThis"),
-        M::FuncNumArgs => w.write("FuncNumArgs"),
-        M::ChainFaults => w.write("ChainFaults"),
-        M::SetImplicitContextByValue => w.write("SetImplicitContextByValue"),
-        M::VerifyRetTypeC => w.write("VerifyRetTypeC"),
-        M::VerifyRetTypeTS => w.write("VerifyRetTypeTS"),
-        M::Self_ => w.write("Self"),
-        M::Parent => w.write("Parent"),
-        M::LateBoundCls => w.write("LateBoundCls"),
-        M::ClassName => w.write("ClassName"),
-        M::LazyClassFromClass => w.write("LazyClassFromClass"),
-        M::RecordReifiedGeneric => w.write("RecordReifiedGeneric"),
-        M::CheckReifiedGenericMismatch => w.write("CheckReifiedGenericMismatch"),
-        M::NativeImpl => w.write("NativeImpl"),
-        M::AKExists => w.write("AKExists"),
-        M::Idx => w.write("Idx"),
-        M::ArrayIdx => w.write("ArrayIdx"),
-        M::ArrayMarkLegacy => w.write("ArrayMarkLegacy"),
-        M::ArrayUnmarkLegacy => w.write("ArrayUnmarkLegacy"),
-        M::BreakTraceHint => w.write("BreakTraceHint"),
-        M::CGetCUNop => w.write("CGetCUNop"),
-        M::UGetCUNop => w.write("UGetCUNop"),
-        M::LockObj => w.write("LockObj"),
-        M::ThrowNonExhaustiveSwitch => w.write("ThrowNonExhaustiveSwitch"),
-        M::RaiseClassStringConversionWarning => w.write("RaiseClassStringConversionWarning"),
+        M::This => w.write_all(b"This"),
+        M::CheckThis => w.write_all(b"CheckThis"),
+        M::FuncNumArgs => w.write_all(b"FuncNumArgs"),
+        M::ChainFaults => w.write_all(b"ChainFaults"),
+        M::SetImplicitContextByValue => w.write_all(b"SetImplicitContextByValue"),
+        M::VerifyRetTypeC => w.write_all(b"VerifyRetTypeC"),
+        M::VerifyRetTypeTS => w.write_all(b"VerifyRetTypeTS"),
+        M::Self_ => w.write_all(b"Self"),
+        M::Parent => w.write_all(b"Parent"),
+        M::LateBoundCls => w.write_all(b"LateBoundCls"),
+        M::ClassName => w.write_all(b"ClassName"),
+        M::LazyClassFromClass => w.write_all(b"LazyClassFromClass"),
+        M::RecordReifiedGeneric => w.write_all(b"RecordReifiedGeneric"),
+        M::CheckReifiedGenericMismatch => w.write_all(b"CheckReifiedGenericMismatch"),
+        M::NativeImpl => w.write_all(b"NativeImpl"),
+        M::AKExists => w.write_all(b"AKExists"),
+        M::Idx => w.write_all(b"Idx"),
+        M::ArrayIdx => w.write_all(b"ArrayIdx"),
+        M::ArrayMarkLegacy => w.write_all(b"ArrayMarkLegacy"),
+        M::ArrayUnmarkLegacy => w.write_all(b"ArrayUnmarkLegacy"),
+        M::BreakTraceHint => w.write_all(b"BreakTraceHint"),
+        M::CGetCUNop => w.write_all(b"CGetCUNop"),
+        M::UGetCUNop => w.write_all(b"UGetCUNop"),
+        M::LockObj => w.write_all(b"LockObj"),
+        M::ThrowNonExhaustiveSwitch => w.write_all(b"ThrowNonExhaustiveSwitch"),
+        M::RaiseClassStringConversionWarning => w.write_all(b"RaiseClassStringConversionWarning"),
         M::VerifyParamType(id) => {
-            w.write("VerifyParamType ")?;
+            w.write_all(b"VerifyParamType ")?;
             print_param_id(w, id)
         }
         M::VerifyParamTypeTS(id) => {
-            w.write("VerifyParamTypeTS ")?;
+            w.write_all(b"VerifyParamTypeTS ")?;
             print_param_id(w, id)
         }
         M::Silence(local, op) => {
-            w.write("Silence ")?;
+            w.write_all(b"Silence ")?;
             print_local(w, local)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             match op {
-                OpSilence::Start => w.write("Start"),
-                OpSilence::End => w.write("End"),
+                OpSilence::Start => w.write_all(b"Start"),
+                OpSilence::End => w.write_all(b"End"),
             }
         }
         M::VerifyOutType(id) => {
-            w.write("VerifyOutType ")?;
+            w.write_all(b"VerifyOutType ")?;
             print_param_id(w, id)
         }
         M::CreateCl(n, cid) => concat_str_by(
@@ -1868,43 +1883,43 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc<'_>) -> Result<()> {
         ),
 
         M::MemoGet(label, Just(Pair(Local::Unnamed(first), local_count))) => {
-            w.write("MemoGet ")?;
+            w.write_all(b"MemoGet ")?;
             print_label(w, label)?;
             write!(w, " L:{}+{}", first, local_count)
         }
         M::MemoGet(label, Nothing) => {
-            w.write("MemoGet ")?;
+            w.write_all(b"MemoGet ")?;
             print_label(w, label)?;
-            w.write(" L:0+0")
+            w.write_all(b" L:0+0")
         }
         M::MemoGet(_, _) => Err(Error::fail("MemoGet needs an unnamed local")),
 
         M::MemoSet(Just(Pair(Local::Unnamed(first), local_count))) => {
             write!(w, "MemoSet L:{}+{}", first, local_count)
         }
-        M::MemoSet(Nothing) => w.write("MemoSet L:0+0"),
+        M::MemoSet(Nothing) => w.write_all(b"MemoSet L:0+0"),
         M::MemoSet(_) => Err(Error::fail("MemoSet needs an unnamed local")),
 
         M::MemoGetEager(label1, label2, Just(Pair(Local::Unnamed(first), local_count))) => {
-            w.write("MemoGetEager ")?;
+            w.write_all(b"MemoGetEager ")?;
             print_label(w, label1)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_label(w, label2)?;
             write!(w, " L:{}+{}", first, local_count)
         }
         M::MemoGetEager(label1, label2, Nothing) => {
-            w.write("MemoGetEager ")?;
+            w.write_all(b"MemoGetEager ")?;
             print_label(w, label1)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_label(w, label2)?;
-            w.write(" L:0+0")
+            w.write_all(b" L:0+0")
         }
         M::MemoGetEager(_, _, _) => Err(Error::fail("MemoGetEager needs an unnamed local")),
 
         M::MemoSetEager(Just(Pair(Local::Unnamed(first), local_count))) => {
             write!(w, "MemoSetEager L:{}+{}", first, local_count)
         }
-        M::MemoSetEager(Nothing) => w.write("MemoSetEager L:0+0"),
+        M::MemoSetEager(Nothing) => w.write_all(b"MemoSetEager L:0+0"),
         M::MemoSetEager(_) => Err(Error::fail("MemoSetEager needs an unnamed local")),
 
         M::OODeclExists(k) => concat_str_by(
@@ -1922,10 +1937,10 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc<'_>) -> Result<()> {
             ],
         ),
         M::AssertRATL(local, s) => {
-            w.write("AssertRATL ")?;
+            w.write_all(b"AssertRATL ")?;
             print_local(w, local)?;
-            w.write(" ")?;
-            w.write(s.unsafe_as_str())
+            w.write_all(b" ")?;
+            w.write_all(s.unsafe_as_str().as_bytes())
         }
         M::AssertRATStk(n, s) => concat_str_by(
             w,
@@ -1933,7 +1948,7 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc<'_>) -> Result<()> {
             ["AssertRATStk", n.to_string().as_str(), s.unsafe_as_str()],
         ),
         M::GetMemoKeyL(local) => {
-            w.write("GetMemoKeyL ")?;
+            w.write_all(b"GetMemoKeyL ")?;
             print_local(w, local)
         }
     }
@@ -1942,12 +1957,12 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc<'_>) -> Result<()> {
 fn print_include_eval_define<W: Write>(w: &mut W, ed: &InstructIncludeEvalDefine) -> Result<()> {
     use InstructIncludeEvalDefine::*;
     match ed {
-        Incl => w.write("Incl"),
-        InclOnce => w.write("InclOnce"),
-        Req => w.write("Req"),
-        ReqOnce => w.write("ReqOnce"),
-        ReqDoc => w.write("ReqDoc"),
-        Eval => w.write("Eval"),
+        Incl => w.write_all(b"Incl"),
+        InclOnce => w.write_all(b"InclOnce"),
+        Req => w.write_all(b"Req"),
+        ReqOnce => w.write_all(b"ReqOnce"),
+        ReqDoc => w.write_all(b"ReqDoc"),
+        Eval => w.write_all(b"Eval"),
     }
 }
 
@@ -1955,36 +1970,36 @@ fn print_control_flow<W: Write>(w: &mut W, cf: &InstructControlFlow<'_>) -> Resu
     use InstructControlFlow as CF;
     match cf {
         CF::Jmp(l) => {
-            w.write("Jmp ")?;
+            w.write_all(b"Jmp ")?;
             print_label(w, l)
         }
         CF::JmpNS(l) => {
-            w.write("JmpNS ")?;
+            w.write_all(b"JmpNS ")?;
             print_label(w, l)
         }
         CF::JmpZ(l) => {
-            w.write("JmpZ ")?;
+            w.write_all(b"JmpZ ")?;
             print_label(w, l)
         }
         CF::JmpNZ(l) => {
-            w.write("JmpNZ ")?;
+            w.write_all(b"JmpNZ ")?;
             print_label(w, l)
         }
-        CF::RetC => w.write("RetC"),
-        CF::RetCSuspended => w.write("RetCSuspended"),
+        CF::RetC => w.write_all(b"RetC"),
+        CF::RetCSuspended => w.write_all(b"RetCSuspended"),
         CF::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
-        CF::Throw => w.write("Throw"),
+        CF::Throw => w.write_all(b"Throw"),
         CF::Switch(kind, base, labels) => print_switch(w, kind, base, labels.as_ref()),
         CF::SSwitch(cases) => match cases.as_ref() {
             [] => Err(Error::fail("sswitch should have at least one case")),
             [rest @ .., Pair(_, lastlabel)] => {
-                w.write("SSwitch ")?;
+                w.write_all(b"SSwitch ")?;
                 angle(w, |w| {
                     concat_by(w, " ", rest, |w, Pair(s, l)| {
                         concat_str(w, [quote_string(s.unsafe_as_str()).as_str(), ":"])?;
                         print_label(w, l)
                     })?;
-                    w.write(" -:")?;
+                    w.write_all(b" -:")?;
                     print_label(w, &lastlabel)
                 })
             }
@@ -1998,49 +2013,49 @@ fn print_switch<W: Write>(
     base: &isize,
     labels: &[Label],
 ) -> Result<()> {
-    w.write("Switch ")?;
-    w.write(match kind {
-        Switchkind::Bounded => "Bounded ",
-        Switchkind::Unbounded => "Unbounded ",
+    w.write_all(b"Switch ")?;
+    w.write_all(match kind {
+        Switchkind::Bounded => b"Bounded ",
+        Switchkind::Unbounded => b"Unbounded ",
     })?;
-    w.write(base.to_string())?;
-    w.write(" ")?;
+    w.write_all(base.to_string().as_bytes())?;
+    w.write_all(b" ")?;
     angle(w, |w| concat_by(w, " ", labels, print_label))
 }
 
 fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst<'_>) -> Result<()> {
     use InstructLitConst as LC;
     match lit {
-        LC::Null => w.write("Null"),
+        LC::Null => w.write_all(b"Null"),
         LC::Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
         LC::String(s) => {
-            w.write("String ")?;
-            quotes(w, |w| w.write(escape(s.unsafe_as_str())))
+            w.write_all(b"String ")?;
+            quotes(w, |w| w.write_all(escape(s.unsafe_as_str()).as_bytes()))
         }
         LC::LazyClass(id) => {
-            w.write("LazyClass ")?;
+            w.write_all(b"LazyClass ")?;
             print_class_id(w, id)
         }
-        LC::True => w.write("True"),
-        LC::False => w.write("False"),
+        LC::True => w.write_all(b"True"),
+        LC::False => w.write_all(b"False"),
         LC::Double(d) => concat_str_by(w, " ", ["Double", d.unsafe_as_str()]),
-        LC::AddElemC => w.write("AddElemC"),
-        LC::AddNewElemC => w.write("AddNewElemC"),
-        LC::NewPair => w.write("NewPair"),
-        LC::File => w.write("File"),
-        LC::Dir => w.write("Dir"),
-        LC::Method => w.write("Method"),
-        LC::FuncCred => w.write("FuncCred"),
+        LC::AddElemC => w.write_all(b"AddElemC"),
+        LC::AddNewElemC => w.write_all(b"AddNewElemC"),
+        LC::NewPair => w.write_all(b"NewPair"),
+        LC::File => w.write_all(b"File"),
+        LC::Dir => w.write_all(b"Dir"),
+        LC::Method => w.write_all(b"Method"),
+        LC::FuncCred => w.write_all(b"FuncCred"),
         LC::Dict(id) => {
-            w.write("Dict ")?;
+            w.write_all(b"Dict ")?;
             print_adata_id(w, id)
         }
         LC::Keyset(id) => {
-            w.write("Keyset ")?;
+            w.write_all(b"Keyset ")?;
             print_adata_id(w, id)
         }
         LC::Vec(id) => {
-            w.write("Vec ")?;
+            w.write_all(b"Vec ")?;
             print_adata_id(w, id)
         }
         LC::NewDictArray(i) => concat_str_by(w, " ", ["NewDictArray", i.to_string().as_str()]),
@@ -2048,43 +2063,43 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst<'_>) -> Result<()
         LC::NewKeysetArray(i) => concat_str_by(w, " ", ["NewKeysetArray", i.to_string().as_str()]),
         LC::NewStructDict(l) => {
             let ls: Vec<&str> = l.as_ref().into_iter().map(|s| s.unsafe_as_str()).collect();
-            w.write("NewStructDict ")?;
+            w.write_all(b"NewStructDict ")?;
             angle(w, |w| print_shape_fields(w, &ls[0..]))
         }
         LC::NewRecord(cid, l) => {
             let ls: Vec<&str> = l.as_ref().into_iter().map(|s| s.unsafe_as_str()).collect();
-            w.write("NewRecord ")?;
+            w.write_all(b"NewRecord ")?;
             print_class_id(w, cid)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             angle(w, |w| print_shape_fields(w, &ls[0..]))
         }
         LC::CnsE(id) => {
-            w.write("CnsE ")?;
+            w.write_all(b"CnsE ")?;
             print_const_id(w, id)
         }
         LC::ClsCns(id) => {
-            w.write("ClsCns ")?;
+            w.write_all(b"ClsCns ")?;
             print_const_id(w, id)
         }
         LC::ClsCnsD(const_id, cid) => {
-            w.write("ClsCnsD ")?;
+            w.write_all(b"ClsCnsD ")?;
             print_const_id(w, const_id)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_class_id(w, cid)
         }
         LC::ClsCnsL(id) => {
-            w.write("ClsCnsL ")?;
+            w.write_all(b"ClsCnsL ")?;
             print_local(w, id)
         }
         LC::NewCol(ct) => {
-            w.write("NewCol ")?;
+            w.write_all(b"NewCol ")?;
             print_collection_type(w, ct)
         }
         LC::ColFromArray(ct) => {
-            w.write("ColFromArray ")?;
+            w.write_all(b"ColFromArray ")?;
             print_collection_type(w, ct)
         }
-        LC::NullUninit => w.write("NullUninit"),
+        LC::NullUninit => w.write_all(b"NullUninit"),
         LC::TypedValue(_) => Err(Error::fail("print_lit_const: TypedValue")),
     }
 }
@@ -2092,67 +2107,69 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst<'_>) -> Result<()
 fn print_collection_type<W: Write>(w: &mut W, ct: &CollectionType) -> Result<()> {
     use CollectionType as CT;
     match ct {
-        CT::Vector => w.write("Vector"),
-        CT::Map => w.write("Map"),
-        CT::Set => w.write("Set"),
-        CT::Pair => w.write("Pair"),
-        CT::ImmVector => w.write("ImmVector"),
-        CT::ImmMap => w.write("ImmMap"),
-        CT::ImmSet => w.write("ImmSet"),
-        CT::Dict => w.write("dict"),
-        CT::Array => w.write("array"),
-        CT::Keyset => w.write("keyset"),
-        CT::Vec => w.write("vec"),
+        CT::Vector => w.write_all(b"Vector"),
+        CT::Map => w.write_all(b"Map"),
+        CT::Set => w.write_all(b"Set"),
+        CT::Pair => w.write_all(b"Pair"),
+        CT::ImmVector => w.write_all(b"ImmVector"),
+        CT::ImmMap => w.write_all(b"ImmMap"),
+        CT::ImmSet => w.write_all(b"ImmSet"),
+        CT::Dict => w.write_all(b"dict"),
+        CT::Array => w.write_all(b"array"),
+        CT::Keyset => w.write_all(b"keyset"),
+        CT::Vec => w.write_all(b"vec"),
     }
 }
 
 fn print_shape_fields<W: Write>(w: &mut W, sf: &[&str]) -> Result<()> {
-    concat_by(w, " ", sf, |w, f| quotes(w, |w| w.write(escape(*f))))
+    concat_by(w, " ", sf, |w, f| {
+        quotes(w, |w| w.write_all(escape(*f).as_bytes()))
+    })
 }
 
 fn print_op<W: Write>(w: &mut W, op: &InstructOperator<'_>) -> Result<()> {
     use InstructOperator as I;
     match op {
-        I::Concat => w.write("Concat"),
+        I::Concat => w.write_all(b"Concat"),
         I::ConcatN(n) => concat_str_by(w, " ", ["ConcatN", n.to_string().as_str()]),
-        I::Add => w.write("Add"),
-        I::Sub => w.write("Sub"),
-        I::Mul => w.write("Mul"),
-        I::AddO => w.write("AddO"),
-        I::SubO => w.write("SubO"),
-        I::MulO => w.write("MulO"),
-        I::Div => w.write("Div"),
-        I::Mod => w.write("Mod"),
-        I::Pow => w.write("Pow"),
-        I::Not => w.write("Not"),
-        I::Same => w.write("Same"),
-        I::NSame => w.write("NSame"),
-        I::Eq => w.write("Eq"),
-        I::Neq => w.write("Neq"),
-        I::Lt => w.write("Lt"),
-        I::Lte => w.write("Lte"),
-        I::Gt => w.write("Gt"),
-        I::Gte => w.write("Gte"),
-        I::Cmp => w.write("Cmp"),
-        I::BitAnd => w.write("BitAnd"),
-        I::BitOr => w.write("BitOr"),
-        I::BitXor => w.write("BitXor"),
-        I::BitNot => w.write("BitNot"),
-        I::Shl => w.write("Shl"),
-        I::Shr => w.write("Shr"),
-        I::CastBool => w.write("CastBool"),
-        I::CastInt => w.write("CastInt"),
-        I::CastDouble => w.write("CastDouble"),
-        I::CastString => w.write("CastString"),
-        I::CastVec => w.write("CastVec"),
-        I::CastDict => w.write("CastDict"),
-        I::CastKeyset => w.write("CastKeyset"),
-        I::InstanceOf => w.write("InstanceOf"),
+        I::Add => w.write_all(b"Add"),
+        I::Sub => w.write_all(b"Sub"),
+        I::Mul => w.write_all(b"Mul"),
+        I::AddO => w.write_all(b"AddO"),
+        I::SubO => w.write_all(b"SubO"),
+        I::MulO => w.write_all(b"MulO"),
+        I::Div => w.write_all(b"Div"),
+        I::Mod => w.write_all(b"Mod"),
+        I::Pow => w.write_all(b"Pow"),
+        I::Not => w.write_all(b"Not"),
+        I::Same => w.write_all(b"Same"),
+        I::NSame => w.write_all(b"NSame"),
+        I::Eq => w.write_all(b"Eq"),
+        I::Neq => w.write_all(b"Neq"),
+        I::Lt => w.write_all(b"Lt"),
+        I::Lte => w.write_all(b"Lte"),
+        I::Gt => w.write_all(b"Gt"),
+        I::Gte => w.write_all(b"Gte"),
+        I::Cmp => w.write_all(b"Cmp"),
+        I::BitAnd => w.write_all(b"BitAnd"),
+        I::BitOr => w.write_all(b"BitOr"),
+        I::BitXor => w.write_all(b"BitXor"),
+        I::BitNot => w.write_all(b"BitNot"),
+        I::Shl => w.write_all(b"Shl"),
+        I::Shr => w.write_all(b"Shr"),
+        I::CastBool => w.write_all(b"CastBool"),
+        I::CastInt => w.write_all(b"CastInt"),
+        I::CastDouble => w.write_all(b"CastDouble"),
+        I::CastString => w.write_all(b"CastString"),
+        I::CastVec => w.write_all(b"CastVec"),
+        I::CastDict => w.write_all(b"CastDict"),
+        I::CastKeyset => w.write_all(b"CastKeyset"),
+        I::InstanceOf => w.write_all(b"InstanceOf"),
         I::InstanceOfD(id) => {
-            w.write("InstanceOfD ")?;
+            w.write_all(b"InstanceOfD ")?;
             print_class_id(w, id)
         }
-        I::IsLateBoundCls => w.write("IsLateBoundCls"),
+        I::IsLateBoundCls => w.write_all(b"IsLateBoundCls"),
         I::IsTypeStructC(op) => concat_str_by(
             w,
             " ",
@@ -2164,61 +2181,61 @@ fn print_op<W: Write>(w: &mut W, op: &InstructOperator<'_>) -> Result<()> {
                 },
             ],
         ),
-        I::ThrowAsTypeStructException => w.write("ThrowAsTypeStructException"),
+        I::ThrowAsTypeStructException => w.write_all(b"ThrowAsTypeStructException"),
         I::CombineAndResolveTypeStruct(n) => concat_str_by(
             w,
             " ",
             ["CombineAndResolveTypeStruct", n.to_string().as_str()],
         ),
-        I::Print => w.write("Print"),
-        I::Clone => w.write("Clone"),
-        I::Exit => w.write("Exit"),
+        I::Print => w.write_all(b"Print"),
+        I::Clone => w.write_all(b"Clone"),
+        I::Exit => w.write_all(b"Exit"),
         I::ResolveFunc(id) => {
-            w.write("ResolveFunc ")?;
+            w.write_all(b"ResolveFunc ")?;
             print_function_id(w, id)
         }
         I::ResolveRFunc(id) => {
-            w.write("ResolveRFunc ")?;
+            w.write_all(b"ResolveRFunc ")?;
             print_function_id(w, id)
         }
         I::ResolveMethCaller(id) => {
-            w.write("ResolveMethCaller ")?;
+            w.write_all(b"ResolveMethCaller ")?;
             print_function_id(w, id)
         }
         I::ResolveClsMethod(mid) => {
-            w.write("ResolveClsMethod ")?;
+            w.write_all(b"ResolveClsMethod ")?;
             print_method_id(w, mid)
         }
         I::ResolveClsMethodD(cid, mid) => {
-            w.write("ResolveClsMethodD ")?;
+            w.write_all(b"ResolveClsMethodD ")?;
             print_class_id(w, cid)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_method_id(w, mid)
         }
         I::ResolveClsMethodS(r, mid) => {
-            w.write("ResolveClsMethodS ")?;
+            w.write_all(b"ResolveClsMethodS ")?;
             print_special_cls_ref(w, r)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_method_id(w, mid)
         }
         I::ResolveRClsMethod(mid) => {
-            w.write("ResolveRClsMethod ")?;
+            w.write_all(b"ResolveRClsMethod ")?;
             print_method_id(w, mid)
         }
         I::ResolveRClsMethodD(cid, mid) => {
-            w.write("ResolveRClsMethodD ")?;
+            w.write_all(b"ResolveRClsMethodD ")?;
             print_class_id(w, cid)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_method_id(w, mid)
         }
         I::ResolveRClsMethodS(r, mid) => {
-            w.write("ResolveRClsMethodS ")?;
+            w.write_all(b"ResolveRClsMethodS ")?;
             print_special_cls_ref(w, r)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_method_id(w, mid)
         }
         I::ResolveClass(id) => {
-            w.write("ResolveClass ")?;
+            w.write_all(b"ResolveClass ")?;
             print_class_id(w, id)
         }
         I::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
@@ -2227,9 +2244,9 @@ fn print_op<W: Write>(w: &mut W, op: &InstructOperator<'_>) -> Result<()> {
 
 fn print_fatal_op<W: Write>(w: &mut W, f: &FatalOp) -> Result<()> {
     match f {
-        FatalOp::Parse => w.write("Fatal Parse"),
-        FatalOp::Runtime => w.write("Fatal Runtime"),
-        FatalOp::RuntimeOmitFrame => w.write("Fatal RuntimeOmitFrame"),
+        FatalOp::Parse => w.write_all(b"Fatal Parse"),
+        FatalOp::Runtime => w.write_all(b"Fatal Runtime"),
+        FatalOp::RuntimeOmitFrame => w.write_all(b"Fatal RuntimeOmitFrame"),
     }
 }
 
@@ -2249,14 +2266,14 @@ fn print_param<'arena, W: Write>(
     param: &HhasParam<'arena>,
 ) -> Result<()> {
     print_param_user_attributes(ctx, w, param)?;
-    w.write_if(param.is_inout, "inout ")?;
-    w.write_if(param.is_readonly, "readonly ")?;
-    w.write_if(param.is_variadic, "...")?;
+    write_if!(param.is_inout, w, "inout ")?;
+    write_if!(param.is_readonly, w, "readonly ")?;
+    write_if!(param.is_variadic, w, "...")?;
     option(w, &Option::from(param.type_info.clone()), |w, ty| {
         print_type_info(w, ty)?;
-        w.write(" ")
+        w.write_all(b" ")
     })?;
-    w.write(&param.name.unsafe_as_str())?;
+    w.write_all(param.name.unsafe_as_str().as_bytes())?;
     option(
         w,
         &Option::from(param.default_value.map(|x| (x.0, x.1))),
@@ -2266,8 +2283,8 @@ fn print_param<'arena, W: Write>(
 
 fn print_param_id<W: Write>(w: &mut W, param_id: &ParamId<'_>) -> Result<()> {
     match param_id {
-        ParamId::ParamUnnamed(i) => w.write(i.to_string()),
-        ParamId::ParamNamed(s) => w.write(s.unsafe_as_str()),
+        ParamId::ParamUnnamed(i) => w.write_all(i.to_string().as_bytes()),
+        ParamId::ParamNamed(s) => w.write_all(s.unsafe_as_str().as_bytes()),
     }
 }
 
@@ -2275,21 +2292,21 @@ fn print_param_default_value<'arena, W: Write>(
     w: &mut W,
     default_val: &(Label, Str<'arena>),
 ) -> Result<()> {
-    w.write(" = ")?;
+    w.write_all(b" = ")?;
     print_label(w, &default_val.0)?;
     paren(w, |w| {
-        triple_quotes(w, |w| w.write(default_val.1.unsafe_as_str()))
+        triple_quotes(w, |w| w.write_all(default_val.1.unsafe_as_str().as_bytes()))
     })
 }
 
 fn print_label<W: Write>(w: &mut W, label: &Label) -> Result<()> {
     match label {
         Label::Regular(id) => {
-            w.write("L")?;
+            w.write_all(b"L")?;
             print_int(w, id)
         }
         Label::DefaultArg(id) => {
-            w.write("DV")?;
+            w.write_all(b"DV")?;
             print_int(w, id)
         }
     }
@@ -2298,10 +2315,10 @@ fn print_label<W: Write>(w: &mut W, label: &Label) -> Result<()> {
 fn print_local<W: Write>(w: &mut W, local: &Local<'_>) -> Result<()> {
     match local {
         Local::Unnamed(id) => {
-            w.write("_")?;
+            w.write_all(b"_")?;
             print_int(w, id)
         }
-        Local::Named(id) => w.write(id.unsafe_as_str()),
+        Local::Named(id) => w.write_all(id.unsafe_as_str().as_bytes()),
     }
 }
 
@@ -2331,7 +2348,7 @@ where
     KeyPrinter: FnMut(&mut Context<'_>, &mut W, &ExprEnv<'_, '_>, K) -> Result<()>,
 {
     kp(ctx, w, env, k)?;
-    w.write(" => ")?;
+    w.write_all(b" => ")?;
     print_expr(ctx, w, env, v)
 }
 
@@ -2359,14 +2376,14 @@ fn print_afields<W: Write>(
 
 fn print_uop<W: Write>(w: &mut W, op: ast::Uop) -> Result<()> {
     use ast::Uop as U;
-    w.write(match op {
-        U::Utild => "~",
-        U::Unot => "!",
-        U::Uplus => "+",
-        U::Uminus => "-",
-        U::Uincr => "++",
-        U::Udecr => "--",
-        U::Usilence => "@",
+    w.write_all(match op {
+        U::Utild => b"~",
+        U::Unot => b"!",
+        U::Uplus => b"+",
+        U::Uminus => b"-",
+        U::Uincr => b"++",
+        U::Udecr => b"--",
+        U::Usilence => b"@",
         U::Upincr | U::Updecr => {
             return Err(Error::fail(
                 "string_of_uop - should have been captures earlier",
@@ -2441,7 +2458,7 @@ fn print_shape_field_name<W: Write>(
 
 fn print_expr_int<W: Write>(w: &mut W, i: &str) -> Result<()> {
     match integer::to_decimal(i) {
-        Ok(s) => w.write(s),
+        Ok(s) => w.write_all(s.as_bytes()),
         Err(_) => Err(Error::fail("ParseIntError")),
     }
 }
@@ -2466,7 +2483,9 @@ fn print_expr_string<W: Write>(w: &mut W, s: &[u8]) -> Result<()> {
     // FIXME: This is not safe--string literals are binary strings.
     // There's no guarantee that they're valid UTF-8.
     let s = unsafe { std::str::from_utf8_unchecked(s) };
-    wrap_by(w, "\\\"", |w| w.write(escape_by(s.into(), escape_char)))
+    wrap_by(w, "\\\"", |w| {
+        w.write_all(escape_by(s.into(), escape_char).as_bytes())
+    })
 }
 
 fn print_expr_to_string<W: Write>(
@@ -2474,12 +2493,12 @@ fn print_expr_to_string<W: Write>(
     env: &ExprEnv<'_, '_>,
     expr: &ast::Expr,
 ) -> Result<String> {
-    let mut buf = String::new();
-    print_expr(ctx, &mut buf, env, expr).map_err(|e| match e {
+    let mut buf = Vec::new();
+    print_expr(ctx, &mut write::IoWrite(&mut buf), env, expr).map_err(|e| match e {
         Error::NotImpl(m) => Error::NotImpl(m),
         _ => Error::Fail(format!("Failed: {}", e)),
     })?;
-    Ok(buf)
+    Ok(unsafe { String::from_utf8_unchecked(buf) })
 }
 
 fn print_expr<W: Write>(
@@ -2508,7 +2527,7 @@ fn print_expr<W: Write>(
         escaper::escape(s)
     }
     fn print_expr_id<'a, W: Write>(w: &mut W, env: &ExprEnv<'_, '_>, s: &'a str) -> Result<()> {
-        w.write(adjust_id(env, s))
+        w.write_all(adjust_id(env, s).as_bytes())
     }
     fn fmt_class_name<'a>(is_class_constant: bool, id: Cow<'a, str>) -> Cow<'a, str> {
         let cn: Cow<'a, str> = if is_xhp(strip_global_ns(&id)) {
@@ -2581,7 +2600,7 @@ fn print_expr<W: Write>(
     use ast::Expr_ as E_;
     match expr {
         E_::Id(id) => print_expr_id(w, env, id.1.as_ref()),
-        E_::Lvar(lid) => w.write(escaper::escape(&(lid.1).1)),
+        E_::Lvar(lid) => w.write_all(escape(&(lid.1).1).as_bytes()),
         E_::Float(f) => {
             if f.contains('E') || f.contains('e') {
                 let s = format!(
@@ -2602,21 +2621,21 @@ fn print_expr<W: Write>(
                 let s = UNSIGNED_EXP.replace(&s, "${first}+${second}");
                 // turn mE+n or mE-n into mE+0n or mE-0n (where n is a single digit)
                 let s = SIGNED_SINGLE_DIGIT_EXP.replace(&s, "${first}0${second}");
-                w.write(s)
+                w.write_all(s.as_bytes())
             } else {
-                w.write(f)
+                w.write_all(f.as_bytes())
             }
         }
         E_::Int(i) => print_expr_int(w, i.as_ref()),
         E_::String(s) => print_expr_string(w, s),
-        E_::Null => w.write("NULL"),
-        E_::True => w.write("true"),
-        E_::False => w.write("false"),
+        E_::Null => w.write_all(b"NULL"),
+        E_::True => w.write_all(b"true"),
+        E_::False => w.write_all(b"false"),
         // For arrays and collections, we are making a conscious decision to not
         // match HHMV has HHVM's emitter has inconsistencies in the pretty printer
         // https://fburl.com/tzom2qoe
         E_::Collection(c) if (c.0).1 == "vec" || (c.0).1 == "dict" || (c.0).1 == "keyset" => {
-            w.write(&(c.0).1)?;
+            w.write_all((c.0).1.as_bytes())?;
             square(w, |w| print_afields(ctx, w, env, &c.2))
         }
         E_::Collection(c) => {
@@ -2624,13 +2643,13 @@ fn print_expr<W: Write>(
             let name = types::fix_casing(&name);
             match name {
                 "Set" | "Pair" | "Vector" | "Map" | "ImmSet" | "ImmVector" | "ImmMap" => {
-                    w.write("HH\\\\")?;
-                    w.write(name)?;
+                    w.write_all(b"HH\\\\")?;
+                    w.write_all(name.as_bytes())?;
                     wrap_by_(w, " {", "}", |w| {
                         Ok(if !c.2.is_empty() {
-                            w.write(" ")?;
+                            w.write_all(b" ")?;
                             print_afields(ctx, w, env, &c.2)?;
-                            w.write(" ")?;
+                            w.write_all(b" ")?;
                         })
                     })
                 }
@@ -2644,20 +2663,20 @@ fn print_expr<W: Write>(
         E_::Binop(x) => {
             let (bop, e1, e2) = &**x;
             print_expr(ctx, w, env, e1)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_bop(w, bop)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_expr(ctx, w, env, e2)
         }
         E_::Call(c) => {
             let (e, _, es, unpacked_element) = &**c;
             match e.as_id() {
                 Some(ast_defs::Id(_, call_id)) => {
-                    w.write(lstrip(adjust_id(env, &call_id).as_ref(), "\\\\"))?
+                    w.write_all(lstrip(adjust_id(env, &call_id).as_ref(), "\\\\").as_bytes())?
                 }
                 None => {
                     let buf = print_expr_to_string::<W>(ctx, env, e)?;
-                    w.write(lstrip(&buf, "\\\\"))?
+                    w.write_all(lstrip(&buf, "\\\\").as_bytes())?
                 }
             };
             paren(w, |w| {
@@ -2669,7 +2688,7 @@ fn print_expr<W: Write>(
                     None => Ok(()),
                     Some(e) => {
                         if !es.is_empty() {
-                            w.write(", ")?;
+                            w.write_all(b", ")?;
                         }
                         // TODO: Should probably have ... also but we are not doing that in ocaml
                         print_expr(ctx, w, env, e)
@@ -2681,19 +2700,22 @@ fn print_expr<W: Write>(
             let (cid, _, es, unpacked_element, _) = &**x;
             match cid.2.as_ciexpr() {
                 Some(ci_expr) => {
-                    w.write("new ")?;
+                    w.write_all(b"new ")?;
                     match ci_expr.2.as_id() {
-                        Some(ast_defs::Id(_, cname)) => w.write(lstrip(
-                            &adjust_id(
-                                env,
-                                &ClassType::from_ast_name(&bumpalo::Bump::new(), cname)
-                                    .to_raw_string(),
-                            ),
-                            "\\\\",
-                        ))?,
+                        Some(ast_defs::Id(_, cname)) => w.write_all(
+                            lstrip(
+                                &adjust_id(
+                                    env,
+                                    &ClassType::from_ast_name(&bumpalo::Bump::new(), cname)
+                                        .to_raw_string(),
+                                ),
+                                "\\\\",
+                            )
+                            .as_bytes(),
+                        )?,
                         None => {
                             let buf = print_expr_to_string::<W>(ctx, env, ci_expr)?;
-                            w.write(lstrip(&buf, "\\\\"))?
+                            w.write_all(lstrip(&buf, "\\\\").as_bytes())?
                         }
                     }
                     paren(w, |w| {
@@ -2701,7 +2723,7 @@ fn print_expr<W: Write>(
                         match unpacked_element {
                             None => Ok(()),
                             Some(e) => {
-                                w.write(", ")?;
+                                w.write_all(b", ")?;
                                 print_expr(ctx, w, env, e)
                             }
                         }
@@ -2720,26 +2742,29 @@ fn print_expr<W: Write>(
             }
         }
         E_::Record(r) => {
-            w.write(lstrip(adjust_id(env, &(r.0).1).as_ref(), "\\\\"))?;
+            w.write_all(lstrip(adjust_id(env, &(r.0).1).as_ref(), "\\\\").as_bytes())?;
             print_key_values(ctx, w, env, &r.1)
         }
         E_::ClassGet(cg) => {
             match &(cg.0).2 {
                 ast::ClassId_::CIexpr(e) => match e.as_id() {
-                    Some(id) => w.write(&get_class_name_from_id(
-                        ctx,
-                        env.codegen_env,
-                        true,  /* should_format */
-                        false, /* is_class_constant */
-                        &id.1,
-                    ))?,
+                    Some(id) => w.write_all(
+                        get_class_name_from_id(
+                            ctx,
+                            env.codegen_env,
+                            true,  /* should_format */
+                            false, /* is_class_constant */
+                            &id.1,
+                        )
+                        .as_bytes(),
+                    )?,
                     _ => print_expr(ctx, w, env, e)?,
                 },
                 _ => return Err(Error::fail("TODO Unimplemented unexpected non-CIexpr")),
             }
-            w.write("::")?;
+            w.write_all(b"::")?;
             match &cg.1 {
-                ast::ClassGetExpr::CGstring((_, litstr)) => w.write(escaper::escape(litstr)),
+                ast::ClassGetExpr::CGstring((_, litstr)) => w.write_all(escape(litstr).as_bytes()),
                 ast::ClassGetExpr::CGexpr(e) => print_expr(ctx, w, env, e),
             }
         }
@@ -2756,8 +2781,8 @@ fn print_expr<W: Write>(
                             }
                             _ => {
                                 print_expr(ctx, w, env, e1)?;
-                                w.write("::")?;
-                                w.write(s2)
+                                w.write_all(b"::")?;
+                                w.write_all(s2.as_bytes())
                             }
                         }
                     },
@@ -2770,11 +2795,11 @@ fn print_expr<W: Write>(
         E_::Unop(u) => match u.0 {
             ast::Uop::Upincr => {
                 print_expr(ctx, w, env, &u.1)?;
-                w.write("++")
+                w.write_all(b"++")
             }
             ast::Uop::Updecr => {
                 print_expr(ctx, w, env, &u.1)?;
-                w.write("--")
+                w.write_all(b"--")
             }
             _ => {
                 print_uop(w, u.0)?;
@@ -2783,14 +2808,14 @@ fn print_expr<W: Write>(
         },
         E_::ObjGet(og) => {
             print_expr(ctx, w, env, &og.0)?;
-            w.write(match og.2 {
-                ast::OgNullFlavor::OGNullthrows => "->",
-                ast::OgNullFlavor::OGNullsafe => "?->",
+            w.write_all(match og.2 {
+                ast::OgNullFlavor::OGNullthrows => b"->",
+                ast::OgNullFlavor::OGNullsafe => b"?->",
             })?;
             print_expr(ctx, w, env, &og.1)
         }
         E_::Clone(e) => {
-            w.write("clone ")?;
+            w.write_all(b"clone ")?;
             print_expr(ctx, w, env, e)
         }
         E_::ArrayGet(ag) => {
@@ -2805,15 +2830,15 @@ fn print_expr<W: Write>(
         }
         E_::String2(ss) => concat_by(w, " . ", ss, |w, s| print_expr(ctx, w, env, s)),
         E_::PrefixedString(s) => {
-            w.write(&s.0)?;
-            w.write(" . ")?;
+            w.write_all(s.0.as_bytes())?;
+            w.write_all(b" . ")?;
             print_expr(ctx, w, env, &s.1)
         }
         E_::Eif(eif) => {
             print_expr(ctx, w, env, &eif.0)?;
-            w.write(" ? ")?;
+            w.write_all(b" ? ")?;
             option(w, &eif.1, |w, etrue| print_expr(ctx, w, env, etrue))?;
-            w.write(" : ")?;
+            w.write_all(b" : ")?;
             print_expr(ctx, w, env, &eif.2)
         }
         E_::Cast(c) => {
@@ -2822,17 +2847,17 @@ fn print_expr<W: Write>(
         }
         E_::Pipe(p) => {
             print_expr(ctx, w, env, &p.1)?;
-            w.write(" |> ")?;
+            w.write_all(b" |> ")?;
             print_expr(ctx, w, env, &p.2)
         }
         E_::Is(i) => {
             print_expr(ctx, w, env, &i.0)?;
-            w.write(" is ")?;
+            w.write_all(b" is ")?;
             print_hint(w, true, &i.1)
         }
         E_::As(a) => {
             print_expr(ctx, w, env, &a.0)?;
-            w.write(if a.2 { " ?as " } else { " as " })?;
+            w.write_all(if a.2 { b" ?as " } else { b" as " })?;
             print_hint(w, true, &a.1)
         }
         E_::Varray(va) => print_expr_varray(ctx, w, env, &va.1),
@@ -2845,16 +2870,16 @@ fn print_expr<W: Write>(
             concat_by(w, ", ", l, |w, i| print_expr(ctx, w, env, i))
         }),
         E_::Yield(y) => {
-            w.write("yield ")?;
+            w.write_all(b"yield ")?;
             print_afield(ctx, w, env, y)
         }
         E_::Await(e) => {
-            w.write("await ")?;
+            w.write_all(b"await ")?;
             print_expr(ctx, w, env, e)
         }
         E_::Import(i) => {
             print_import_flavor(w, &i.0)?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
             print_expr(ctx, w, env, &i.1)
         }
         E_::Xml(_) => Err(Error::fail(
@@ -2865,18 +2890,21 @@ fn print_expr<W: Write>(
             let (fp_id, targs) = &**fp;
             match fp_id {
                 ast::FunctionPtrId::FPId(ast::Id(_, sid)) => {
-                    w.write(lstrip(adjust_id(env, &sid).as_ref(), "\\\\"))?
+                    w.write_all(lstrip(adjust_id(env, &sid).as_ref(), "\\\\").as_bytes())?
                 }
                 ast::FunctionPtrId::FPClassConst(ast::ClassId(_, _, class_id), (_, meth_name)) => {
                     match class_id {
                         ast::ClassId_::CIexpr(e) => match e.as_id() {
-                            Some(id) => w.write(&get_class_name_from_id(
-                                ctx,
-                                env.codegen_env,
-                                true,  /* should_format */
-                                false, /* is_class_constant */
-                                &id.1,
-                            ))?,
+                            Some(id) => w.write_all(
+                                get_class_name_from_id(
+                                    ctx,
+                                    env.codegen_env,
+                                    true,  /* should_format */
+                                    false, /* is_class_constant */
+                                    &id.1,
+                                )
+                                .as_bytes(),
+                            )?,
                             _ => print_expr(ctx, w, env, e)?,
                         },
                         _ => {
@@ -2885,12 +2913,12 @@ fn print_expr<W: Write>(
                             ));
                         }
                     }
-                    w.write("::")?;
-                    w.write(meth_name)?
+                    w.write_all(b"::")?;
+                    w.write_all(meth_name.as_bytes())?
                 }
             };
             wrap_by_(w, "<", ">", |w| {
-                concat_by(w, ", ", targs, |w, _targ| w.write("_"))
+                concat_by(w, ", ", targs, |w, _targ| w.write_all(b"_"))
             })
         }
         E_::Omitted => Ok(()),
@@ -2903,7 +2931,7 @@ fn print_expr<W: Write>(
                             print_fparam(ctx, w, env, param)
                         })
                     })?;
-                    w.write(" ==> ")?;
+                    w.write_all(b" ==> ")?;
                     print_block_(ctx, w, env, &fun_.body.fb_ast, None)
                 })
             } else {
@@ -2913,9 +2941,9 @@ fn print_expr<W: Write>(
             }
         }
         E_::ETSplice(splice) => {
-            w.write("${")?;
+            w.write_all(b"${")?;
             print_expr(ctx, w, env, splice)?;
-            w.write("}")
+            w.write_all(b"}")
         }
         _ => Err(Error::fail(format!(
             "TODO Unimplemented: Cannot print: {:?}",
@@ -2971,9 +2999,9 @@ fn print_xml<W: Write>(
         wrap_by_(w, "darray[", "]", |w| {
             concat_by(w, ", ", attrs, |w, attr| print_xhp_attr(ctx, w, &env, attr))
         })?;
-        w.write(", ")?;
+        w.write_all(b", ")?;
         print_expr_varray(ctx, w, &env, children)?;
-        w.write(", __FILE__, __LINE__")
+        w.write_all(b", __FILE__, __LINE__")
     })
 }
 
@@ -2984,23 +3012,24 @@ fn print_efun<W: Write>(
     f: &ast::Fun_,
     use_list: &[ast::Lid],
 ) -> Result<()> {
-    w.write_if(
+    write_if!(
         f.fun_kind.is_fasync() || f.fun_kind.is_fasync_generator(),
+        w,
         "async ",
     )?;
-    w.write("function ")?;
+    w.write_all(b"function ")?;
     paren(w, |w| {
         concat_by(w, ", ", &f.params, |w, p| print_fparam(ctx, w, env, p))
     })?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
     if !use_list.is_empty() {
-        w.write("use ")?;
+        w.write_all(b"use ")?;
         paren(w, |w| {
             concat_by(w, ", ", use_list, |w: &mut W, ast::Lid(_, id)| {
-                w.write(local_id::get_name(id))
+                w.write_all(local_id::get_name(id).as_bytes())
             })
         })?;
-        w.write(" ")?;
+        w.write_all(b" ")?;
     }
     print_block_(ctx, w, env, &f.body.fb_ast, None)
 }
@@ -3029,10 +3058,10 @@ fn print_block_<W: Write>(
 ) -> Result<()> {
     wrap_by_(w, "{\\n", "}\\n", |w| {
         concat(w, block, |w, stmt| {
-            option(w, ident, |w, i: &str| w.write(i))?;
+            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
             print_statement(ctx, w, env, stmt, Some("  "))
         })?;
-        option(w, ident, |w, i: &str| w.write(i))
+        option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))
     })
 }
 
@@ -3046,57 +3075,61 @@ fn print_statement<W: Write>(
     use ast::Stmt_ as S_;
     match &stmt.1 {
         S_::Return(expr) => {
-            option(w, ident, |w, i: &str| w.write(i))?;
+            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
             wrap_by_(w, "return", ";\\n", |w| {
                 option(w, &**expr, |w, e| {
-                    w.write(" ")?;
+                    w.write_all(b" ")?;
                     print_expr(ctx, w, env, e)
                 })
             })
         }
         S_::Expr(expr) => {
-            option(w, ident, |w, i: &str| w.write(i))?;
+            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
             print_expr(ctx, w, env, &**expr)?;
-            w.write(";\\n")
+            w.write_all(b";\\n")
         }
         S_::Throw(expr) => {
-            option(w, ident, |w, i: &str| w.write(i))?;
+            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
             wrap_by_(w, "throw ", ";\\n", |w| print_expr(ctx, w, env, &**expr))
         }
         S_::Break => {
-            option(w, ident, |w, i: &str| w.write(i))?;
-            w.write("break;\\n")
+            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
+            w.write_all(b"break;\\n")
         }
         S_::Continue => {
-            option(w, ident, |w, i: &str| w.write(i))?;
-            w.write("continue;\\n")
+            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
+            w.write_all(b"continue;\\n")
         }
         S_::While(x) => {
             let (cond, block) = &**x;
-            option(w, ident, |w, i: &str| w.write(i))?;
+            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
             wrap_by_(w, "while (", ") ", |w| print_expr(ctx, w, env, cond))?;
             print_block(ctx, w, env, block.as_ref(), ident)
         }
         S_::If(x) => {
             let (cond, if_block, else_block) = &**x;
-            option(w, ident, |w, i: &str| w.write(i))?;
+            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
             wrap_by_(w, "if (", ") ", |w| print_expr(ctx, w, env, cond))?;
             print_block(ctx, w, env, if_block, ident)?;
-            let mut buf = String::new();
-            print_block(ctx, &mut buf, env, else_block, ident).map_err(|e| match e {
-                Error::NotImpl(m) => Error::NotImpl(m),
-                _ => Error::Fail(format!("Failed: {}", e)),
-            })?;
-            w.write_if(!buf.is_empty(), " else ")?;
-            w.write_if(!buf.is_empty(), buf)
+            let mut buf = Vec::new();
+            print_block(ctx, &mut write::IoWrite(&mut buf), env, else_block, ident).map_err(
+                |e| match e {
+                    Error::NotImpl(m) => Error::NotImpl(m),
+                    _ => Error::Fail(format!("Failed: {}", e)),
+                },
+            )?;
+            write_if!(!buf.is_empty(), w, " else ")?;
+            write_if!(!buf.is_empty(), w, "{}", unsafe {
+                std::str::from_utf8_unchecked(&buf)
+            })
         }
         S_::Block(block) => {
-            option(w, ident, |w, i: &str| w.write(i))?;
+            option(w, ident, |w, i: &str| w.write_all(i.as_bytes()))?;
             print_block_(ctx, w, env, block, ident)
         }
         S_::Noop => Ok(()),
         /* TODO(T29869930) */
-        _ => w.write("TODO Unimplemented NYI: Default value printing"),
+        _ => w.write_all(b"TODO Unimplemented NYI: Default value printing"),
     }
 }
 
@@ -3107,18 +3140,18 @@ fn print_fparam<W: Write>(
     param: &ast::FunParam,
 ) -> Result<()> {
     if param.callconv.is_pinout() {
-        w.write("inout ")?;
+        w.write_all(b"inout ")?;
     }
     if param.is_variadic {
-        w.write("...")?;
+        w.write_all(b"...")?;
     }
     option(w, &(param.type_hint).1, |w, h| {
         print_hint(w, true, h)?;
-        w.write(" ")
+        w.write_all(b" ")
     })?;
-    w.write(&param.name)?;
+    w.write_all(param.name.as_bytes())?;
     option(w, &param.expr, |w, e| {
-        w.write(" = ")?;
+        w.write_all(b" = ")?;
         print_expr(ctx, w, env, e)
     })
 }
@@ -3126,35 +3159,35 @@ fn print_fparam<W: Write>(
 fn print_bop<W: Write>(w: &mut W, bop: &ast_defs::Bop) -> Result<()> {
     use ast_defs::Bop;
     match bop {
-        Bop::Plus => w.write("+"),
-        Bop::Minus => w.write("-"),
-        Bop::Star => w.write("*"),
-        Bop::Slash => w.write("/"),
-        Bop::Eqeq => w.write("=="),
-        Bop::Eqeqeq => w.write("==="),
-        Bop::Starstar => w.write("**"),
-        Bop::Eq(None) => w.write("="),
+        Bop::Plus => w.write_all(b"+"),
+        Bop::Minus => w.write_all(b"-"),
+        Bop::Star => w.write_all(b"*"),
+        Bop::Slash => w.write_all(b"/"),
+        Bop::Eqeq => w.write_all(b"=="),
+        Bop::Eqeqeq => w.write_all(b"==="),
+        Bop::Starstar => w.write_all(b"**"),
+        Bop::Eq(None) => w.write_all(b"="),
         Bop::Eq(Some(bop)) => {
-            w.write("=")?;
+            w.write_all(b"=")?;
             print_bop(w, bop)
         }
-        Bop::Ampamp => w.write("&&"),
-        Bop::Barbar => w.write("||"),
-        Bop::Lt => w.write("<"),
-        Bop::Lte => w.write("<="),
-        Bop::Cmp => w.write("<=>"),
-        Bop::Gt => w.write(">"),
-        Bop::Gte => w.write(">="),
-        Bop::Dot => w.write("."),
-        Bop::Amp => w.write("&"),
-        Bop::Bar => w.write("|"),
-        Bop::Ltlt => w.write("<<"),
-        Bop::Gtgt => w.write(">>"),
-        Bop::Percent => w.write("%"),
-        Bop::Xor => w.write("^"),
-        Bop::Diff => w.write("!="),
-        Bop::Diff2 => w.write("!=="),
-        Bop::QuestionQuestion => w.write("??"),
+        Bop::Ampamp => w.write_all(b"&&"),
+        Bop::Barbar => w.write_all(b"||"),
+        Bop::Lt => w.write_all(b"<"),
+        Bop::Lte => w.write_all(b"<="),
+        Bop::Cmp => w.write_all(b"<=>"),
+        Bop::Gt => w.write_all(b">"),
+        Bop::Gte => w.write_all(b">="),
+        Bop::Dot => w.write_all(b"."),
+        Bop::Amp => w.write_all(b"&"),
+        Bop::Bar => w.write_all(b"|"),
+        Bop::Ltlt => w.write_all(b"<<"),
+        Bop::Gtgt => w.write_all(b">>"),
+        Bop::Percent => w.write_all(b"%"),
+        Bop::Xor => w.write_all(b"^"),
+        Bop::Diff => w.write_all(b"!="),
+        Bop::Diff2 => w.write_all(b"!=="),
+        Bop::QuestionQuestion => w.write_all(b"??"),
     }
 }
 
@@ -3165,19 +3198,19 @@ fn print_hint<W: Write>(w: &mut W, ns: bool, hint: &ast::Hint) -> Result<()> {
         _ => Error::fail("Error printing hint"),
     })?;
     if ns {
-        w.write(escaper::escape(h))
+        w.write_all(escape(h).as_bytes())
     } else {
-        w.write(escaper::escape(strip_ns(&h)))
+        w.write_all(escape(strip_ns(&h)).as_bytes())
     }
 }
 
 fn print_import_flavor<W: Write>(w: &mut W, flavor: &ast::ImportFlavor) -> Result<()> {
     use ast::ImportFlavor as F;
-    w.write(match flavor {
-        F::Include => "include",
-        F::Require => "require",
-        F::IncludeOnce => "include_once",
-        F::RequireOnce => "require_once",
+    w.write_all(match flavor {
+        F::Include => b"include",
+        F::Require => b"require",
+        F::IncludeOnce => b"include_once",
+        F::RequireOnce => b"require_once",
     })
 }
 
@@ -3240,11 +3273,11 @@ fn print_special_and_user_attrs<W: Write>(
         square(w, |w| {
             concat_str_by(w, " ", specials)?;
             if !specials.is_empty() && !users.is_empty() {
-                w.write(" ")?;
+                w.write_all(b" ")?;
             }
             print_attributes(ctx, w, users)
         })?;
-        w.write(" ")?;
+        w.write_all(b" ")?;
     }
     Ok(())
 }
@@ -3291,7 +3324,7 @@ fn print_type_flags<W: Write>(w: &mut W, flag: constraint::ConstraintFlags) -> R
     let mut first = true;
     let mut print_space = |w: &mut W| -> Result<()> {
         if !first {
-            w.write(" ")
+            w.write_all(b" ")
         } else {
             Ok(first = false)
         }
@@ -3299,34 +3332,34 @@ fn print_type_flags<W: Write>(w: &mut W, flag: constraint::ConstraintFlags) -> R
     use constraint::ConstraintFlags as F;
     if flag.contains(F::DISPLAY_NULLABLE) {
         print_space(w)?;
-        w.write("display_nullable")?;
+        w.write_all(b"display_nullable")?;
     }
     if flag.contains(F::EXTENDED_HINT) {
         print_space(w)?;
-        w.write("extended_hint")?;
+        w.write_all(b"extended_hint")?;
     }
     if flag.contains(F::NULLABLE) {
         print_space(w)?;
-        w.write("nullable")?;
+        w.write_all(b"nullable")?;
     }
 
     if flag.contains(F::SOFT) {
         print_space(w)?;
-        w.write("soft")?;
+        w.write_all(b"soft")?;
     }
     if flag.contains(F::TYPE_CONSTANT) {
         print_space(w)?;
-        w.write("type_constant")?;
+        w.write_all(b"type_constant")?;
     }
 
     if flag.contains(F::TYPE_VAR) {
         print_space(w)?;
-        w.write("type_var")?;
+        w.write_all(b"type_var")?;
     }
 
     if flag.contains(F::UPPERBOUND) {
         print_space(w)?;
-        w.write("upper_bound")?;
+        w.write_all(b"upper_bound")?;
     }
     Ok(())
 }
@@ -3336,7 +3369,7 @@ fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo<'_>) -
         option_or(
             w,
             opt,
-            |w, s: &String| quotes(w, |w| w.write(escape(s))),
+            |w, s: &String| quotes(w, |w| w.write_all(escape(s).as_bytes())),
             "N",
         )
     };
@@ -3345,7 +3378,7 @@ fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo<'_>) -
             w,
             &Option::from(ti.user_type.map(|n| n.unsafe_as_str().to_owned())),
         )?;
-        w.write(" ")?;
+        w.write_all(b" ")?;
         if !is_enum {
             print_quote_str(
                 w,
@@ -3355,7 +3388,7 @@ fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo<'_>) -
                         .map(|n| n.unsafe_as_str().to_owned()),
                 ),
             )?;
-            w.write(" ")?;
+            w.write_all(b" ")?;
         }
         print_type_flags(w, ti.type_constraint.flags)
     })
@@ -3363,12 +3396,15 @@ fn print_type_info_<W: Write>(w: &mut W, is_enum: bool, ti: &HhasTypeInfo<'_>) -
 
 fn print_typedef_info<W: Write>(w: &mut W, ti: &HhasTypeInfo<'_>) -> Result<()> {
     angle(w, |w| {
-        w.write(quote_string(
-            ti.type_constraint
-                .name
-                .as_ref()
-                .map_or("", |n| n.unsafe_as_str()),
-        ))?;
+        w.write_all(
+            quote_string(
+                ti.type_constraint
+                    .name
+                    .as_ref()
+                    .map_or("", |n| n.unsafe_as_str()),
+            )
+            .as_bytes(),
+        )?;
         let flags = ti.type_constraint.flags & constraint::ConstraintFlags::NULLABLE;
         if !flags.is_empty() {
             wrap_by(w, " ", |w| {
@@ -3395,10 +3431,10 @@ fn print_record_field<W: Write>(
     Field(name, type_info, intial_value): &Field<'_>,
 ) -> Result<()> {
     ctx.newline(w)?;
-    w.write(".property ")?;
+    w.write_all(b".property ")?;
     match intial_value {
-        Just(_) => w.write("[public] ")?,
-        Nothing => w.write("[public sys_initial_val] ")?,
+        Just(_) => w.write_all(b"[public] ")?,
+        Nothing => w.write_all(b"[public sys_initial_val] ")?,
     }
     print_type_info(w, type_info)?;
     concat_str_by(w, " ", ["", name.unsafe_as_str(), "="])?;
@@ -3406,10 +3442,10 @@ fn print_record_field<W: Write>(
     ctx.block(w, |c, w| {
         c.newline(w)?;
         match intial_value {
-            Nothing => w.write("uninit")?,
+            Nothing => w.write_all(b"uninit")?,
             Just(value) => triple_quotes(w, |w| print_adata(c, w, value))?,
         }
-        w.write(";")
+        w.write_all(b";")
     })
 }
 
@@ -3424,13 +3460,13 @@ fn print_record_def<W: Write>(
     } else {
         concat_str_by(w, " ", [".record", "[final]", record.name.to_raw_string()])?;
     }
-    w.write(" ")?;
+    w.write_all(b" ")?;
     print_span(w, &record.span)?;
     print_extends(
         w,
         Option::from(record.base.as_ref().map(|b| b.to_raw_string())),
     )?;
-    w.write(" ")?;
+    w.write_all(b" ")?;
 
     braces(w, |w| {
         ctx.block(w, |c, w| {
@@ -3453,10 +3489,12 @@ pub fn expr_to_string_lossy(mut ctx: Context<'_>, expr: &ast::Expr) -> String {
     ctx.dump_lambdas = true;
 
     let env = ExprEnv { codegen_env: None };
-    let mut escaped_src = String::new();
-    print_expr(&mut ctx, &mut escaped_src, &env, expr).expect("Printing failed");
+    let mut escaped_src = Vec::new();
+    print_expr(&mut ctx, &mut write::IoWrite(&mut escaped_src), &env, expr)
+        .expect("Printing failed");
 
-    let bs = escaper::unescape_double(&escaped_src).expect("Unescaping failed");
+    let bs = escaper::unescape_double(unsafe { std::str::from_utf8_unchecked(&escaped_src) })
+        .expect("Unescaping failed");
     let s = String::from_utf8_lossy(&bs);
     s.to_string()
 }

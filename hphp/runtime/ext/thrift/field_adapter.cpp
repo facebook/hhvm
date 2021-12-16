@@ -47,12 +47,12 @@ Class* getFieldAdapter(const Array& spec) {
 void
 setThriftType(Variant value, const Object& obj, const String& fieldName) {
   auto setter_name = "set_" + fieldName;
-  obj->o_invoke_few_args(setter_name, RuntimeCoeffects::pure(), 1,value);
+  obj->o_invoke_few_args(setter_name, RuntimeCoeffects::defaults(), 1,value);
 }
 
 Variant getThriftType(const Object& obj, const String& fieldName) {
   auto getter_name = "get_" + fieldName;
-  return obj->o_invoke_few_args(getter_name, RuntimeCoeffects::pure(), 0);
+  return obj->o_invoke_few_args(getter_name, RuntimeCoeffects::defaults(), 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

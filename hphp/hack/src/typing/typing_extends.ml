@@ -31,6 +31,26 @@ module MemberKind = struct
     | Static_method
     | Constructor
   [@@deriving eq]
+
+  let is_method member_kind =
+    match member_kind with
+    | Method
+    | Static_method ->
+      true
+    | Property
+    | Static_property
+    | Constructor ->
+      false
+
+  let is_functional member_kind =
+    match member_kind with
+    | Method
+    | Static_method
+    | Constructor ->
+      true
+    | Property
+    | Static_property ->
+      false
 end
 
 (*****************************************************************************)
@@ -131,7 +151,7 @@ let check_members_implemented
     check_private
     parent_reason
     reason
-    (mem_source, parent_members) =
+    (member_kind, parent_members) =
   List.iter parent_members ~f:(fun (member_name, class_elt) ->
       match class_elt.ce_visibility with
       | Vprivate _ when not check_private -> ()
@@ -143,7 +163,7 @@ let check_members_implemented
          * won't have access to private members of the grandparent
          * trait *)
         ()
-      | _ when Option.is_none (get_member mem_source class_ member_name) ->
+      | _ when Option.is_none (get_member member_kind class_ member_name) ->
         let (lazy defn_pos) = class_elt.ce_pos in
         let quickfixes =
           [
@@ -212,13 +232,6 @@ let check_ambiguous_inheritance f parent child pos class_ origin on_error =
     ~then_:(fun error ->
       Errors.ambiguous_inheritance pos (Cls.name class_) origin error on_error)
 
-let is_method member_source =
-  match member_source with
-  | MemberKind.Method
-  | MemberKind.Static_method ->
-    true
-  | _ -> false
-
 (** Checks that we're not overriding a final method. *)
 let check_override_final_method parent_class_elt class_elt on_error =
   let is_override_of_final_method =
@@ -253,14 +266,10 @@ let check_dynamically_callable member_name parent_class_elt class_elt on_error =
 
 (** Check that we are not overriding an __LSB property *)
 let check_lsb_overrides
-    member_source member_name parent_class_elt class_elt on_error =
-  let is_sprop =
-    match member_source with
-    | MemberKind.Static_property -> true
-    | _ -> false
-  in
+    member_kind member_name parent_class_elt class_elt on_error =
   let parent_is_lsb = get_ce_lsb parent_class_elt in
-  if is_sprop && parent_is_lsb then
+  if MemberKind.equal MemberKind.Static_property member_kind && parent_is_lsb
+  then
     (* __LSB attribute is being overridden *)
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
@@ -330,7 +339,7 @@ let check_override
     env
     ~check_member_unique
     member_name
-    mem_source
+    member_kind
     ?(ignore_fun_return = false)
     class_
     parent_class_elt
@@ -367,7 +376,7 @@ let check_override
                 })
   in
 
-  if is_method mem_source then begin
+  if MemberKind.is_method member_kind then begin
     (* We first verify that we aren't overriding a final method *)
     (* We only check for final overrides on methods, not properties *)
     (* we don't check constructors, as they are already checked
@@ -377,22 +386,17 @@ let check_override
   end;
 
   (* Verify that we are not overriding an __LSB property *)
-  check_lsb_overrides mem_source member_name parent_class_elt class_elt on_error;
+  check_lsb_overrides
+    member_kind
+    member_name
+    parent_class_elt
+    class_elt
+    on_error;
   check_lateinit parent_class_elt class_elt on_error;
   check_xhp_attr_required env parent_class_elt class_elt on_error;
   check_class_elt_visibility parent_class_elt class_elt on_error;
   let (lazy pos) = class_elt.ce_pos in
   let (lazy parent_pos) = parent_class_elt.ce_pos in
-  let is_method =
-    match mem_source with
-    | MemberKind.Method
-    | MemberKind.Static_method
-    | MemberKind.Constructor ->
-      true
-    | MemberKind.Property
-    | MemberKind.Static_property ->
-      false
-  in
 
   if Bool.( <> ) (get_ce_const class_elt) (get_ce_const parent_class_elt) then
     Errors.add_typing_error
@@ -406,6 +410,7 @@ let check_override
                parent_is_const = get_ce_const parent_class_elt;
              });
 
+  let is_functional = MemberKind.is_functional member_kind in
   if (not (get_ce_abstract parent_class_elt)) && get_ce_abstract class_elt then
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
@@ -413,13 +418,13 @@ let check_override
     Errors.abstract_concrete_override
       pos
       parent_pos
-      (if is_method then
+      (if is_functional then
         `method_
       else
         `property)
       ~current_decl_and_file:(Env.get_current_decl_and_file env);
   let on_error =
-    (if is_method then
+    (if is_functional then
       Errors.bad_method_override
     else
       Errors.bad_prop_override)
@@ -431,7 +436,7 @@ let check_override
   let (lazy fty_parent) = parent_class_elt.ce_type in
   if
     check_member_unique
-    && (is_method || get_ce_const class_elt)
+    && (is_functional || get_ce_const class_elt)
     && (not (get_ce_abstract parent_class_elt))
     && not (get_ce_abstract class_elt)
   then
@@ -448,7 +453,7 @@ let check_override
                name = member_name;
                class_name = Cls.name class_;
              });
-  if not (MemberKind.equal mem_source MemberKind.Constructor) then
+  if not (MemberKind.equal member_kind MemberKind.Constructor) then
     check_compatible_sound_dynamic_attributes
       member_name
       parent_class_elt
@@ -468,7 +473,7 @@ let check_override
         apply_reasons ~on_error @@ Secondary.Decl_override_missing_hint pos);
     env
   | ((r_parent, Tfun ft_parent), (r_child, Tfun ft_child)) ->
-    (match mem_source with
+    (match member_kind with
     | MemberKind.Constructor ->
       (* we don't check that constructor signatures follow
          * subtyping rules except with __ConsistentConstruct,
@@ -690,10 +695,10 @@ let filter_privates members =
       (not (is_private class_elt)) || is_lsb class_elt)
 
 let add_member_dep
-    env class_ (member_source, member_name, member_origin, origin_pos) =
+    env class_ (member_kind, member_name, member_origin, origin_pos) =
   if not (Pos_or_decl.is_hhi origin_pos) then
     let dep =
-      match member_source with
+      match member_kind with
       | MemberKind.Method -> Dep.Method (member_origin, member_name)
       | MemberKind.Static_method -> Dep.SMethod (member_origin, member_name)
       | MemberKind.Static_property -> Dep.SProp (member_origin, member_name)
@@ -709,7 +714,7 @@ let check_inherited_member_is_dynamically_callable
     env
     inheriting_class
     parent_class
-    (member_source, member_name, parent_class_elt) =
+    (member_kind, member_name, parent_class_elt) =
   let (inheriting_class_pos, inheriting_class) = inheriting_class in
   if
     TypecheckerOptions.enable_sound_dynamic
@@ -722,7 +727,7 @@ let check_inherited_member_is_dynamically_callable
     | Ast_defs.Cclass _
     | Ast_defs.Ctrait ->
       begin
-        match member_source with
+        match member_kind with
         | MemberKind.Method ->
           if not (Typing_defs.get_ce_support_dynamic_type parent_class_elt) then
             (* since the attribute is missing run the inter check *)
@@ -762,7 +767,7 @@ let check_members
     (parent_class, psubst)
     (class_pos, class_)
     on_error
-    (mem_source, parent_members) =
+    (member_kind, parent_members) =
   let parent_members =
     if check_private then
       parent_members
@@ -794,7 +799,7 @@ let check_members
     ~init:env
     parent_members
     ~f:(fun env (member_name, parent_class_elt) ->
-      match get_member mem_source class_ member_name with
+      match get_member member_kind class_ member_name with
       (* We can skip this check if the class elements have the same origin, as we are
        * essentially comparing a method against itself *)
       | Some class_elt
@@ -803,7 +808,7 @@ let check_members
         add_member_dep
           env
           class_
-          ( mem_source,
+          ( member_kind,
             member_name,
             parent_class_elt.ce_origin,
             Cls.pos parent_class );
@@ -812,7 +817,7 @@ let check_members
             (should_check_member_unique class_elt parent_class_elt)
           env
           member_name
-          mem_source
+          member_kind
           class_
           parent_class_elt
           class_elt
@@ -823,7 +828,7 @@ let check_members
           env
           (class_pos, class_)
           parent_class
-          (mem_source, member_name, parent_class_elt);
+          (member_kind, member_name, parent_class_elt);
         env)
 
 let make_all_members ~parent_class =

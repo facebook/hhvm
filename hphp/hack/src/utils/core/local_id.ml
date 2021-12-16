@@ -8,11 +8,7 @@
  *)
 
 module S = struct
-  type t = int * string [@@deriving ord]
-
-  let equal_ref : (t -> t -> bool) ref = ref Caml.( = )
-
-  let equal x y = !equal_ref x y
+  type t = int * string [@@deriving ord, eq]
 
   let compare = compare
 end
@@ -27,10 +23,8 @@ let next () =
 
 let to_string x = snd x
 
-let pp_ref : (Format.formatter -> int * string -> unit) ref =
-  ref (fun fmt x -> Format.pp_print_string fmt (to_string x))
-
-let pp fmt x = !pp_ref fmt x
+let pp : Format.formatter -> int * string -> unit =
+ (fun fmt x -> Format.pp_print_string fmt (to_string x))
 
 let to_int x = fst x
 

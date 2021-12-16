@@ -95,20 +95,15 @@ folly::fs::path getRepoRoot(const RepoOptions& options) {
 std::string
 getCacheBreakerSchemaHash(std::string_view root, const RepoOptions& opts) {
   std::string repoSchemaIdHash = repoSchemaId().toString();
-  std::string runtimeOpts = RuntimeOption::getUnitCacheBreakingOptions();
   std::string optsHash = opts.cacheKeySha1().toString();
   XLOG(INFO) << "Native Facts DB cache breaker."
-             << "\n Repo Schema ID: " << repoSchemaIdHash
-             << "\n RuntimeOptions: " << runtimeOpts << "\n Root: " << root
+             << "\n Repo Schema ID: " << repoSchemaIdHash << "\n Root: " << root
              << "\n RepoOpts hash: " << optsHash;
-  std::string runtimeOptsHash = string_sha1(runtimeOpts);
   std::string rootHash = string_sha1(root);
   repoSchemaIdHash.resize(10);
-  runtimeOptsHash.resize(10);
   optsHash.resize(10);
   rootHash.resize(10);
-  return folly::to<std::string>(
-      repoSchemaIdHash, '_', runtimeOptsHash, '_', optsHash, '_', rootHash);
+  return folly::to<std::string>(repoSchemaIdHash, '_', optsHash, '_', rootHash);
 }
 
 folly::fs::path getDBPath(const RepoOptions& repoOptions) {

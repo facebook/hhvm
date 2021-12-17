@@ -53,7 +53,7 @@ function gzseek(resource $zp, int $offset, int $whence = SEEK_SET);
 <<__PHPStdLib>>
 function gztell(resource $zp);
 <<__PHPStdLib>>
-function gzuncompress(string $data, int $length = 0): mixed;
+function gzuncompress(string $data, int $length = 0)[]: mixed;
 <<__PHPStdLib>>
 function gzwrite(resource $zp, string $str, int $length = 0);
 <<__PHPStdLib>>

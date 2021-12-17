@@ -1,0 +1,9 @@
+(library
+ (name typing_serialization)
+ (wrapped false)
+ (modules typing_preorder_ser)
+ (libraries
+    typing_ast)
+ (preprocess
+  (pps ppx_deriving.std))
+)

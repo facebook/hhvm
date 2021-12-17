@@ -38,6 +38,7 @@ type mode =
   | Dump_nast
   | Dump_stripped_tast
   | Dump_tast
+  | Type
   | Check_tast
   | Rewrite
   | Find_refs of int * int
@@ -376,6 +377,9 @@ let parse_options () =
       ("--outline", Arg.Unit (set_mode Outline), " Print file outline");
       ("--nast", Arg.Unit (set_mode Dump_nast), " Print out the named AST");
       ("--tast", Arg.Unit (set_mode Dump_tast), " Print out the typed AST");
+      ( "--type",
+        Arg.Unit (set_mode Type),
+        " Extract types from the typed AST and print one per line as JSON" );
       ("--tast-check", Arg.Unit (set_mode Check_tast), " Typecheck the tast");
       ( "--stripped-tast",
         Arg.Unit (set_mode Dump_stripped_tast),
@@ -2056,6 +2060,22 @@ let handle_mode
     let errors = check_file ctx parse_errors files_info in
     print_error_list error_format errors max_errors;
     if not (List.is_empty errors) then exit 2
+  | Type ->
+    let path = expect_single_file () in
+    let (errors, tasts, _gi_solved) =
+      compute_tasts_expand_types ctx ~verbosity files_info files_contents
+    in
+    let errors = Errors.get_error_list errors in
+    ignore @@ (errors, parse_errors);
+    if (not (List.is_empty parse_errors)) || not (List.is_empty errors) then begin
+      List.iter ~f:(print_error error_format) (parse_errors @ errors);
+      exit 2
+    end else
+      let tast = Relative_path.Map.find tasts path in
+      Printf.printf
+        "TODO: type json of file %s\n"
+        (Relative_path.to_absolute path);
+      Typing_preorder_ser.tast_to_json tast
   | Decl_compare ->
     let filename = expect_single_file () in
     (* Might raise because of Option.value_exn *)

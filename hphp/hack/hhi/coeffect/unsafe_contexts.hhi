@@ -38,6 +38,12 @@ namespace HH\Contexts\Unsafe {
   type policied_local = \HH\Contexts\defaults;
   type policied_of<T> = mixed;
 
+  type leak_safe = controlled;
+  type zoned = policied;
+  type zoned_shallow = policied_shallow;
+  type zoned_local = policied_local;
+  type zoned_with<T> = policied_of<T>;
+
   type rx = \HH\Contexts\defaults;
   type rx_shallow = \HH\Contexts\defaults;
   type rx_local = \HH\Contexts\defaults;

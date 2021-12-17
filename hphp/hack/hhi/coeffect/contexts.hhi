@@ -123,6 +123,12 @@ namespace HH\Contexts {
     \HH\Capabilities\System &
   );
 
+  type leak_safe = controlled;
+  type zoned = policied;
+  type zoned_shallow = policied_shallow;
+  type zoned_local = policied_local;
+  type zoned_with<T> = policied_of<T>;
+
   type read_globals = \HH\Capabilities\ReadGlobals;
   type globals = \HH\Capabilities\AccessGlobals;
 

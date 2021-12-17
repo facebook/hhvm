@@ -558,7 +558,7 @@ const int CURLSHOPT_UNSHARE = 0;
 
 
 <<__PHPStdLib>>
-function curl_init($url = null);
+function curl_init($url = null)[controlled];
 <<__PHPStdLib>>
 function curl_init_pooled(string $pool_name, $url = null);
 <<__PHPStdLib>>
@@ -566,7 +566,7 @@ function curl_copy_handle(resource $ch);
 <<__PHPStdLib>>
 function curl_version(int $uversion = CURLVERSION_NOW);
 <<__PHPStdLib>>
-function curl_setopt(resource $ch, int $option, $value);
+function curl_setopt(resource $ch, int $option, $value)[write_props];
 <<__PHPStdLib>>
 function curl_setopt_array(resource $ch, $options);
 <<__PHPStdLib>>
@@ -576,11 +576,11 @@ function curl_getinfo(resource $ch, int $opt = 0);
 <<__PHPStdLib>>
 function curl_errno(resource $ch);
 <<__PHPStdLib>>
-function curl_error(resource $ch);
+function curl_error(resource $ch)[];
 <<__PHPStdLib>>
 function curl_strerror(int $code);
 <<__PHPStdLib>>
-function curl_close(resource $ch);
+function curl_close(resource $ch)[controlled];
 <<__PHPStdLib>>
 function curl_multi_init();
 <<__PHPStdLib>>

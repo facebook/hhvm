@@ -16,11 +16,11 @@ const int CLOCK_THREAD_CPUTIME_ID = 3;
 <<__PHPStdLib>>
 function dl(string $_library);
 <<__PHPStdLib>>
-function extension_loaded(string $name);
+function extension_loaded(string $name)[read_globals];
 <<__PHPStdLib>>
-function get_loaded_extensions(bool $zend_extensions = false);
+function get_loaded_extensions(bool $zend_extensions = false)[read_globals];
 <<__PHPStdLib>>
-function get_extension_funcs(string $module_name);
+function get_extension_funcs(string $module_name)[read_globals];
 <<__PHPStdLib>>
 function get_cfg_var(string $_option);
 <<__PHPStdLib>>

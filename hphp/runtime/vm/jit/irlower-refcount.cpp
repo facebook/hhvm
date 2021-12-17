@@ -97,11 +97,10 @@ void ifRefCountedNonPersistent(Vout& v, Type ty, Vloc loc, Then then) {
   });
 }
 
-template<typename T>
-Vreg incrAmount(Vout& v, const TargetProfile<T>& profile) {
+Vreg incrAmount(Vout& v, const TargetProfile<IncRefProfile>& profile) {
   if (!profile.profiling()) return Vreg{};
   auto const sf = v.makeReg();
-  auto const offset = profile.handle() + offsetof(T, total);
+  auto const offset = profile.handle() + offsetof(IncRefProfile, total);
   v << cmplim{-1, rvmtl()[offset], sf};
   auto const r1 = v.makeReg();
   v << setcc{CC_NE, sf, r1};
@@ -110,13 +109,10 @@ Vreg incrAmount(Vout& v, const TargetProfile<T>& profile) {
   return r2;
 }
 
-template<typename T>
-void incrementProfile(Vout& v, const TargetProfile<T>& profile,
+void incrementProfile(Vout& v, const TargetProfile<IncRefProfile>& profile,
                       Vreg incr, size_t offset) {
-  if (profile.profiling()) {
-    v << addlm{incr, rvmtl()[profile.handle() + offset],
-        v.makeReg()};
-  }
+  if (!profile.profiling()) return;
+  v << addlm{incr, rvmtl()[profile.handle() + offset], v.makeReg()};
 }
 
 inline bool useAddrForCountedCheck() {
@@ -263,6 +259,13 @@ CallSpec makeDtorCall(Vout& v, Type ty, Vloc loc, ArgGroup& args) {
     : CallSpec::destruct(loc.reg(1));
 }
 
+namespace {
+static void ProfileAndDecRef(DecRefProfile* profile, TypedValue tv) {
+  profile->update(tv);
+  tvDecRefGen(tv);
+}
+}
+
 void implDecRefProf(Vout& v, IRLS& env, const IRInstruction* inst,
                     const TargetProfile<DecRefProfile>& profile,
                     bool profileOnly = false) {
@@ -275,7 +278,7 @@ void implDecRefProf(Vout& v, IRLS& env, const IRInstruction* inst,
     .typedValue(0);
   auto const target = profileOnly
     ? CallSpec::method(&DecRefProfile::update)
-    : CallSpec::method(&DecRefProfile::updateAndDecRef);
+    : CallSpec::direct(&ProfileAndDecRef);
   cgCallHelper(v, env, target, kVoidDest, SyncOptions::None, args);
 }
 

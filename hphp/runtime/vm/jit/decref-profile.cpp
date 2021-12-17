@@ -58,11 +58,6 @@ void DecRefProfile::update(TypedValue tv) {
   }
 }
 
-void DecRefProfile::updateAndDecRef(TypedValue tv) {
-  update(tv);
-  tvDecRefGen(tv);
-}
-
 folly::dynamic DecRefProfile::toDynamic() const {
   return folly::dynamic::object("total", total)
                                ("uncounted", uncounted())

@@ -85,10 +85,9 @@ struct DecRefProfile {
   }
 
   /*
-   * Update the profile for a dec-ref on tv, then optionally do the dec-ref.
+   * Update the profile for a dec-ref on tv.
    */
   void update(TypedValue tv);
-  void updateAndDecRef(TypedValue tv);
 
   static void reduce(DecRefProfile& a, const DecRefProfile& b);
 

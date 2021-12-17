@@ -10,7 +10,7 @@ namespace {
  * @return void -
  */
 <<__Native>>
-function curl_close(resource $ch)[controlled]: ?bool;
+function curl_close(resource $ch)[leak_safe]: ?bool;
 
 /**
  * Copy a cURL handle along with all of its preferences
@@ -129,7 +129,7 @@ function curl_getinfo(resource $ch,
  * @return resource - Returns a cURL handle on success, FALSE on errors.
  */
 <<__Native>>
-function curl_init(?string $url = null)[controlled]: mixed;
+function curl_init(?string $url = null)[leak_safe]: mixed;
 
 /**
  * Add a normal cURL handle to a cURL multi handle

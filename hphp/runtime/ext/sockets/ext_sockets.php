@@ -54,7 +54,7 @@
  *
  */
 <<__Native>>
-function socket_create(int $domain, int $type, int $protocol)[controlled]: mixed;
+function socket_create(int $domain, int $type, int $protocol)[leak_safe]: mixed;
 
 /**
  * socket_create_listen() creates a new socket resource of type AF_INET
@@ -112,7 +112,7 @@ function socket_create_pair(int $domain,
  *
  */
 <<__Native>>
-function socket_get_option(resource $socket, int $level, int $optname)[controlled]: mixed;
+function socket_get_option(resource $socket, int $level, int $optname)[leak_safe]: mixed;
 
 /**
  * Queries the remote side of the given socket which may either result in
@@ -141,7 +141,7 @@ function socket_getpeername(resource $socket,
                             <<__OutOnly>>
                             inout mixed $address,
                             <<__OutOnly>>
-                            inout mixed $port)[controlled]: bool;
+                            inout mixed $port)[leak_safe]: bool;
 
 /**
  * @param resource $socket - A valid socket resource created with
@@ -182,7 +182,7 @@ function socket_getsockname(resource $socket,
  *
  */
 <<__Native>>
-function socket_set_block(resource $socket)[controlled]: bool;
+function socket_set_block(resource $socket)[leak_safe]: bool;
 
 /**
  * The socket_set_nonblock() function sets the O_NONBLOCK flag on the socket
@@ -199,7 +199,7 @@ function socket_set_block(resource $socket)[controlled]: bool;
  *
  */
 <<__Native>>
-function socket_set_nonblock(resource $socket)[controlled]: bool;
+function socket_set_nonblock(resource $socket)[leak_safe]: bool;
 
 /**
  * The socket_set_option() function sets the option specified by the optname
@@ -224,7 +224,7 @@ function socket_set_nonblock(resource $socket)[controlled]: bool;
 function socket_set_option(resource $socket,
                            int $level,
                            int $optname,
-                           mixed $optval)[controlled]: bool;
+                           mixed $optval)[leak_safe]: bool;
 
 /**
  * Initiate a connection to address using the socket resource socket, which
@@ -247,7 +247,7 @@ function socket_set_option(resource $socket,
  *
  */
 <<__Native>>
-function socket_connect(resource $socket, string $address, int $port = 0)[controlled]: bool;
+function socket_connect(resource $socket, string $address, int $port = 0)[leak_safe]: bool;
 
 /**
  * Binds the name given in address to the socket described by socket. This has
@@ -344,7 +344,7 @@ function socket_select(inout mixed $read,
                        inout mixed $write,
                        inout mixed $except,
                        mixed $vtv_sec,
-                       int $tv_usec = 0)[controlled]: mixed;
+                       int $tv_usec = 0)[leak_safe]: mixed;
 
 <<__Native>>
 function socket_server(string $hostname,

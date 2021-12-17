@@ -66,7 +66,7 @@ function reverse<Tv>(
  */
 function shuffle<Tv>(
   Traversable<Tv> $traversable,
-)[controlled]: vec<Tv> {
+)[leak_safe]: vec<Tv> {
   $vec = cast_clear_legacy_array_mark($traversable);
   \shuffle(inout $vec);
   return $vec;

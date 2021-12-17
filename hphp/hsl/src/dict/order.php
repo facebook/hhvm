@@ -40,7 +40,7 @@ function reverse<Tk as arraykey, Tv>(
  */
 function shuffle<Tk as arraykey, Tv>(
   KeyedTraversable<Tk, Tv> $container,
-)[controlled]: dict<Tk, Tv> {
+)[leak_safe]: dict<Tk, Tv> {
   $dict = cast_clear_legacy_array_mark($container);
   return Vec\keys($container)
     |> Vec\shuffle($$)

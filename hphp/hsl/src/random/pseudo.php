@@ -18,7 +18,7 @@ use namespace HH\Lib\{_Private, Math, SecureRandom};
  *
  * For secure random floats, see `SecureRandom\float`.
  */
-function float()[controlled]: float {
+function float()[leak_safe]: float {
   return (float)(namespace\int(0, Math\INT53_MAX - 1) / Math\INT53_MAX);
 }
 
@@ -31,7 +31,7 @@ function float()[controlled]: float {
 function int(
   int $min = \PHP_INT_MIN,
   int $max = \PHP_INT_MAX,
-)[controlled]: int {
+)[leak_safe]: int {
   invariant(
     $min <= $max,
     'Expected $min (%d) to be less than or equal to $max (%d).',
@@ -51,7 +51,7 @@ function int(
 function string(
   int $length,
   ?string $alphabet = null,
-)[controlled]: string {
+)[leak_safe]: string {
   // This is a temporary alias. You should never, ever depend on this function
   // being cryptographically secure.
   return SecureRandom\string($length, $alphabet);

@@ -2900,8 +2900,6 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 })
                 .collect::<Result<_>>()?,
         ))),
-        ("HH\\FIXME\\UNSAFE_CAST", &[]) => Ok(Some(instr::null(alloc))),
-        ("HH\\FIXME\\UNSAFE_CAST", args) => Ok(Some(emit_expr(e, env, &args[0].1)?)),
         ("HH\\invariant", args) if args.len() >= 2 => {
             let l = e.label_gen_mut().next_regular();
             let expr_id = ast::Expr(

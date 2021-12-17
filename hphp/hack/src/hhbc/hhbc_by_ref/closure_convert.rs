@@ -24,7 +24,9 @@ use hhbc_by_ref_instruction_sequence::{unrecoverable, Error, Result};
 use hhbc_by_ref_options::{CompilerFlags, HhvmFlags, Options};
 use hhbc_by_ref_unique_id_builder::*;
 use hhbc_by_ref_unique_list::UniqueList;
-use naming_special_names_rust::{fb, pseudo_consts, special_idents, superglobals};
+use naming_special_names_rust::{
+    fb, pseudo_consts, pseudo_functions, special_idents, superglobals,
+};
 use ocamlrep::rc::RcOc;
 use oxidized::{
     aast_defs,
@@ -1253,7 +1255,34 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
     //TODO(hrust): do we need special handling for Awaitall?
     fn visit_expr(&mut self, env: &mut Env<'a, 'arena>, Expr(_, pos, e): &mut Expr) -> Result<()> {
         let null = Expr_::mk_null();
-        let e_owned = std::mem::replace(e, null);
+        let mut e_owned = std::mem::replace(e, null);
+        /*
+            If this is a call of the form
+              HH\FIXME\UNSAFE_CAST(e, ...)
+            then treat as a no-op by transforming it to
+              e
+            Repeat in case there are nested occurrences
+        */
+        loop {
+            match e_owned {
+            Expr_::Call(mut x)
+              // Must have at least one argument
+              if !x.2.is_empty() && {
+                // Function name should be HH\FIXME\UNSAFE_CAST
+                if let Expr_::Id(ref id) = (x.0).2 {
+                  id.1 == pseudo_functions::UNSAFE_CAST
+                } else {
+                  false
+                }
+              } =>{
+                // Select first argument
+                let Expr(_, _, e) = x.2.swap_remove(0).1;
+                e_owned = e;
+              }
+            _ => { break; }
+           };
+        }
+
         *e = match e_owned {
             Expr_::Efun(x) => convert_lambda(self.alloc, env, self, x.0, Some(x.1))?,
             Expr_::Lfun(x) => convert_lambda(self.alloc, env, self, x.0, None)?,

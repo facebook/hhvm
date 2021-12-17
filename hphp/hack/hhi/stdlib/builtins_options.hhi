@@ -90,7 +90,7 @@ function php_ini_scanned_files();
 <<__PHPStdLib>>
 function php_logo_guid();
 <<__PHPStdLib>>
-function php_sapi_name();
+function php_sapi_name()[read_globals];
 <<__PHPStdLib>>
 function php_uname(string $mode = "");
 <<__PHPStdLib>>

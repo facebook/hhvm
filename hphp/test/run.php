@@ -1743,6 +1743,7 @@ final class Status {
         return false;
 
       case Status::MSG_SERVER_RESTARTED:
+        list($test, $time, $stime, $etime) = $message;
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (!Status::hasCursorControl()) {
@@ -1751,7 +1752,6 @@ final class Status {
             break;
 
           case Status::MODE_VERBOSE:
-            // FIXME: There is no "$test" variable here.
             Status::sayColor("$test ", Status::YELLOW, "failed",
                              " to talk to server\n");
             break;
@@ -1762,8 +1762,7 @@ final class Status {
           case Status::MODE_RECORD_FAILURES:
             break;
         }
-        // ISSUE: This falls through, seemingly incorrectly.
-        // I suspect that the "restarted" logic has bit-rotted.
+        break;
 
       case Status::MSG_TEST_PASS:
         self::$passed++;
@@ -3262,7 +3261,7 @@ function print_commands(
           $hhbbc_cmds .=
             $c." -vEval.DumpHhas=1 > $test.before.round_trip.hhas\n";
         }
-        // FIXME: There is no "$test_repo" variable here!
+        $test_repo = test_repo($options, $test);
         $hhbbc_cmds .=
           "mv $test_repo/$program.hhbbc $test_repo/$program.hhbc\n";
         $hhbbc_cmds .= $hhbbc_cmd;

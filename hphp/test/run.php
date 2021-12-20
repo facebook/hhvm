@@ -381,7 +381,7 @@ function read_opts_file(?string $file): string {
   invariant($fp is resource, __METHOD__);
 
   $contents = "";
-  while ($line = fgets($fp)) {
+  for ($line = fgets($fp); $line; $line = fgets($fp)) {
     // Compress out white space.
     $line = preg_replace('/\s+/', ' ', $line);
 
@@ -418,7 +418,10 @@ function rel_path(string $to): string {
   $remaining = $from_len - $d - 1;
   if ($remaining > 0) {
     // add traversals up to first matching dir.
-    while ($remaining-- > 0) $relPath[] = '..';
+    do {
+      $relPath[] = '..';
+      $remaining--;
+    } while ($remaining > 0);
   } else {
     $relPath[] = '.';
   }
@@ -2538,7 +2541,8 @@ function count_array_diff(
     $eq1 = 0;
     $st = $steps / 2;
 
-    for ($ofs1 = $idx1 + 1; $ofs1 < $cnt1 && $st-- > 0; $ofs1++) {
+    for ($ofs1 = $idx1 + 1; $ofs1 < $cnt1 && $st > 0; $ofs1++) {
+      $st--;
       $eq = @count_array_diff($ar1, $ar2, $is_reg, $ofs1, $idx2, $cnt1,
                               $cnt2, $st);
 
@@ -2550,7 +2554,8 @@ function count_array_diff(
     $eq2 = 0;
     $st = $steps;
 
-    for ($ofs2 = $idx2 + 1; $ofs2 < $cnt2 && $st-- > 0; $ofs2++) {
+    for ($ofs2 = $idx2 + 1; $ofs2 < $cnt2 && $st > 0; $ofs2++) {
+      $st--;
       $eq = @count_array_diff($ar1, $ar2, $is_reg, $idx1, $ofs2, $cnt1, $cnt2, $st);
       if ($eq > $eq2) {
         $eq2 = $eq;
@@ -2590,12 +2595,16 @@ function generate_array_diff(
                               $cnt2, 10);
 
       if ($c1 > $c2) {
-        $old1[$idx1] = sprintf("%03d- ", $idx1+1) . $w[$idx1++];
+        $old1[$idx1+1] = sprintf("%03d- ", $idx1+1) . $w[$idx1];
+        $idx1++;
       } else if ($c2 > 0) {
-        $old2[$idx2] = sprintf("%03d+ ", $idx2+1) . $ar2[$idx2++];
+        $old2[$idx2+1] = sprintf("%03d+ ", $idx2+1) . $ar2[$idx2];
+        $idx2++;
       } else {
-        $old1[$idx1] = sprintf("%03d- ", $idx1+1) . $w[$idx1++];
-        $old2[$idx2] = sprintf("%03d+ ", $idx2+1) . $ar2[$idx2++];
+        $old1[$idx1+1] = sprintf("%03d- ", $idx1+1) . $w[$idx1];
+        $old2[$idx2+1] = sprintf("%03d+ ", $idx2+1) . $ar2[$idx2];
+        $idx1++;
+        $idx2++;
       }
     }
   }
@@ -2634,11 +2643,13 @@ function generate_array_diff(
   }
 
   while ($idx1 < $cnt1) {
-    $diff[] = sprintf("%03d- ", $idx1 + 1) . $w[$idx1++];
+    $diff[] = sprintf("%03d- ", $idx1 + 1) . $w[$idx1];
+    $idx1++;
   }
 
   while ($idx2 < $cnt2) {
-    $diff[] = sprintf("%03d+ ", $idx2 + 1) . $ar2[$idx2++];
+    $diff[] = sprintf("%03d+ ", $idx2 + 1) . $ar2[$idx2];
+    $idx2++;
   }
 
   return $diff;

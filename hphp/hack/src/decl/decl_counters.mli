@@ -117,4 +117,4 @@ will execution <implementation2> , and will internally keep track of things like
 how long it took, and will log the telemetry appropriately. *)
 val count_subdecl : decl option -> subdecl_kind -> (unit -> 'a) -> 'a
 
-val set_mode : Typing_service_types.profile_decling -> unit
+val set_mode : HackEventLogger.PerFileProfilingConfig.profile_decling -> unit

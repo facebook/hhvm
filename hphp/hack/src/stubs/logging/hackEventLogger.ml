@@ -7,6 +7,36 @@
  *
  *)
 
+module PerFileProfilingConfig = struct
+  type profile_decling =
+    | DeclingOff
+    | DeclingTopCounts
+    | DeclingAllTelemetry of { callstacks: bool }
+
+  type t = {
+    profile_log: bool;
+    profile_type_check_duration_threshold: float;
+    profile_type_check_memory_threshold_mb: int;
+    profile_type_check_twice: bool;
+    profile_decling: profile_decling;
+    profile_owner: string option;
+    profile_desc: string;
+  }
+
+  let default =
+    {
+      profile_log = false;
+      profile_type_check_duration_threshold = 0.05 (* seconds *);
+      profile_type_check_memory_threshold_mb = 100;
+      profile_type_check_twice = false;
+      profile_decling = DeclingOff;
+      profile_owner = None;
+      profile_desc = "";
+    }
+
+  let should_log ~duration:_ ~memory:_ _ = false
+end
+
 type serialized_globals = Serialized_globals
 
 let serialize_globals () = Serialized_globals
@@ -69,8 +99,7 @@ let init
     ~machine_class:_
     ~time:_
     ~max_workers:_
-    ~profile_owner:_
-    ~profile_desc:_ =
+    ~per_file_profiling:_ =
   ()
 
 let init_worker
@@ -82,8 +111,7 @@ let init_worker
     ~rollout_group:_
     ~machine_class:_
     ~time:_
-    ~profile_owner:_
-    ~profile_desc:_ =
+    ~per_file_profiling:_ =
   ()
 
 let init_monitor
@@ -462,11 +490,11 @@ let server_progress_read_exn ~server_progress_file:_ _ = ()
 let worker_exception _ = ()
 
 module ProfileTypeCheck = struct
-  let process_file ~recheck_id:_ ~path:_ ~telemetry:_ = ()
+  let process_file ~recheck_id:_ ~path:_ ~telemetry:_ ~config:_ = ()
 
   let compute_tast ~path:_ ~telemetry:_ ~start_time:_ = ()
 
-  let get_telemetry_url ~init_id:_ ~recheck_id:_ = ""
+  let get_telemetry_url ~init_id:_ ~recheck_id:_ ~config:_ = ""
 end
 
 module CGroup = struct

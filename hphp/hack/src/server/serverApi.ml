@@ -209,11 +209,7 @@ let make_remote_server_api
           init_id;
           recheck_id = Some check_id;
           use_max_typechecker_worker_memory_for_decl_deferral = false;
-          profile_log = true;
-          profile_type_check_twice = false;
-          profile_decling = Typing_service_types.DeclingOff;
-          profile_type_check_duration_threshold = 0.0;
-          profile_type_check_memory_threshold_mb = 0;
+          per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
         }
       in
       (* TODO: use the telemetry *)

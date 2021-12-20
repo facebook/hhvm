@@ -60,11 +60,7 @@ let test () =
       Typing_service_types.init_id = "";
       recheck_id = Some "";
       use_max_typechecker_worker_memory_for_decl_deferral = false;
-      profile_log = false;
-      profile_type_check_twice = false;
-      profile_type_check_duration_threshold = 0.;
-      profile_type_check_memory_threshold_mb = 0;
-      profile_decling = Typing_service_types.DeclingOff;
+      per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
     }
   in
   let delegate_state = Typing_service_delegate.default in

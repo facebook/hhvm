@@ -89,7 +89,7 @@ let test_process_file_deferring () =
   let errors = Errors.empty in
 
   (* Finally, this is what all the setup was for: process this file *)
-  Decl_counters.set_mode Typing_service_types.DeclingTopCounts;
+  Decl_counters.set_mode HackEventLogger.PerFileProfilingConfig.DeclingTopCounts;
   let prev_counter_state = Counters.reset () in
   let { Typing_check_service.deferred_decls; _ } =
     Typing_check_service.process_file ctx errors file ~decl_cap_mb:None

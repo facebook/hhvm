@@ -8,7 +8,7 @@
 
 open Hh_prelude
 
-let mode = ref Typing_service_types.DeclingOff
+let mode = ref HackEventLogger.PerFileProfilingConfig.DeclingOff
 
 type decl_kind =
   | Class
@@ -204,7 +204,8 @@ type decl = {
       (** wall-time at the moment of top-level decl retrieval *)
 }
 
-let set_mode (new_mode : Typing_service_types.profile_decling) : unit =
+let set_mode (new_mode : HackEventLogger.PerFileProfilingConfig.profile_decling)
+    : unit =
   mode := new_mode
 
 let count_decl
@@ -213,12 +214,12 @@ let count_decl
     (decl_name : string)
     (f : decl option -> 'a) : 'a =
   match !mode with
-  | Typing_service_types.DeclingOff ->
+  | HackEventLogger.PerFileProfilingConfig.DeclingOff ->
     (* CARE! This path must be highly performant. *)
     f None
-  | Typing_service_types.DeclingTopCounts ->
+  | HackEventLogger.PerFileProfilingConfig.DeclingTopCounts ->
     Counters.count Counters.Category.Decling (fun () -> f None)
-  | Typing_service_types.DeclingAllTelemetry { callstacks } ->
+  | HackEventLogger.PerFileProfilingConfig.DeclingAllTelemetry { callstacks } ->
     let start_time = Unix.gettimeofday () in
     let start_cpu_time = Sys.time () in
     let decl_id = Random_id.short_string () in

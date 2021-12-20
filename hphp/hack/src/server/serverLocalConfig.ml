@@ -541,19 +541,7 @@ type t = {
   tico_invalidate_smart: bool;  (** Use finer grain hh_server dependencies *)
   use_direct_decl_parser: bool;
       (** Enable use of the direct decl parser for parsing type signatures. *)
-  profile_log: bool;  (** Log per-file performance information. *)
-  profile_type_check_duration_threshold: float;
-      (** If profile_log, we'll record telemetry on typechecks that took longer than the threshold (in seconds). In case of profile_type_check_twice we judge by the second type check. *)
-  profile_type_check_memory_threshold_mb: int;
-      (** If profile_log, we'll record telemetry on any file which allocated more than this many mb on the ocaml heap. In case of profile_type_check_twice we judge by the second type check. *)
-  profile_type_check_twice: bool;
-      (** The flag "--config profile_type_check_twice=true" causes each file to be typechecked twice in succession. If profile_log then both times are logged. *)
-  profile_decling: Typing_service_types.profile_decling;
-      (** The flag "--config profile_decling=..." says what kind of instrumentation we want for each decl *)
-  profile_owner: string option;
-      (** If profile_log, we can use "--config profile_owner=<str>" to send an arbitrary "owner" along with the telemetry *)
-  profile_desc: string;
-      (** If profile_log, we can use "--config profile_desc=<str>" to send an arbitrary "desc" along with telemetry *)
+  per_file_profiling: HackEventLogger.PerFileProfilingConfig.t;
   go_to_implementation: bool;
       (** Allows the IDE to show the 'find all implementations' button *)
   allow_unstable_features: bool;
@@ -675,14 +663,7 @@ let default =
     tico_invalidate_files = false;
     tico_invalidate_smart = false;
     use_direct_decl_parser = false;
-    profile_log = false;
-    profile_type_check_duration_threshold = 0.05;
-    (* seconds *)
-    profile_type_check_memory_threshold_mb = 100;
-    profile_type_check_twice = false;
-    profile_decling = Typing_service_types.DeclingOff;
-    profile_owner = None;
-    profile_desc = "";
+    per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
     go_to_implementation = true;
     allow_unstable_features = false;
     stream_errors = false;
@@ -1250,44 +1231,55 @@ let load_ fn ~silent ~current_version overrides =
   let profile_log =
     bool_if_min_version
       "profile_log"
-      ~default:default.profile_log
+      ~default:HackEventLogger.PerFileProfilingConfig.(default.profile_log)
       ~current_version
       config
   in
   let profile_type_check_duration_threshold =
     float_
       "profile_type_check_duration_threshold"
-      ~default:default.profile_type_check_duration_threshold
+      ~default:
+        HackEventLogger.PerFileProfilingConfig.(
+          default.profile_type_check_duration_threshold)
       config
   in
   let profile_type_check_memory_threshold_mb =
     int_
       "profile_type_check_memory_threshold_mb"
-      ~default:default.profile_type_check_memory_threshold_mb
+      ~default:
+        HackEventLogger.PerFileProfilingConfig.(
+          default.profile_type_check_memory_threshold_mb)
       config
   in
   let profile_type_check_twice =
     bool_if_min_version
       "profile_type_check_twice"
-      ~default:default.profile_type_check_twice
+      ~default:
+        HackEventLogger.PerFileProfilingConfig.(
+          default.profile_type_check_twice)
       ~current_version
       config
   in
   let profile_decling =
     match string_ "profile_decling" ~default:"off" config with
-    | "off" -> Typing_service_types.DeclingOff
-    | "top_counts" -> Typing_service_types.DeclingTopCounts
+    | "off" -> HackEventLogger.PerFileProfilingConfig.DeclingOff
+    | "top_counts" -> HackEventLogger.PerFileProfilingConfig.DeclingTopCounts
     | "all_telemetry" ->
-      Typing_service_types.DeclingAllTelemetry { callstacks = false }
+      HackEventLogger.PerFileProfilingConfig.DeclingAllTelemetry
+        { callstacks = false }
     | "all_telemetry_callstacks" ->
-      Typing_service_types.DeclingAllTelemetry { callstacks = true }
+      HackEventLogger.PerFileProfilingConfig.DeclingAllTelemetry
+        { callstacks = true }
     | _ ->
       failwith
         "profile_decling: off | top_counts | all_telemetry | all_telemetry_callstacks"
   in
   let profile_owner = string_opt "profile_owner" config in
   let profile_desc =
-    string_ "profile_desc" ~default:default.profile_desc config
+    string_
+      "profile_desc"
+      ~default:HackEventLogger.PerFileProfilingConfig.(default.profile_desc)
+      config
   in
   let go_to_implementation =
     bool_if_min_version
@@ -1462,13 +1454,16 @@ let load_ fn ~silent ~current_version overrides =
     tico_invalidate_files;
     tico_invalidate_smart;
     use_direct_decl_parser;
-    profile_log;
-    profile_type_check_duration_threshold;
-    profile_type_check_memory_threshold_mb;
-    profile_type_check_twice;
-    profile_decling;
-    profile_owner;
-    profile_desc;
+    per_file_profiling =
+      {
+        HackEventLogger.PerFileProfilingConfig.profile_log;
+        profile_type_check_duration_threshold;
+        profile_type_check_memory_threshold_mb;
+        profile_type_check_twice;
+        profile_decling;
+        profile_owner;
+        profile_desc;
+      };
     go_to_implementation;
     allow_unstable_features;
     stream_errors;

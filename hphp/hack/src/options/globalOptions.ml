@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 type t = {
   tco_experimental_features: SSet.t;
   tco_migration_flags: SSet.t;
@@ -184,21 +186,21 @@ let tco_experimental_case_sensitive_inheritance = "case_sensitive_inheritance"
 let tco_experimental_supportdynamic_type_hint = "supportdynamic_type_hint"
 
 let tco_experimental_all =
-  SSet.empty
-  |> List.fold_right
-       SSet.add
-       [
-         tco_experimental_generics_arity;
-         tco_experimental_forbid_nullable_cast;
-         tco_experimental_disallow_static_memoized;
-         tco_experimental_abstract_type_const_with_default;
-         tco_experimental_infer_flows;
-         tco_experimental_case_sensitive_inheritance;
-         tco_experimental_supportdynamic_type_hint;
-       ]
+  List.fold_right
+    ~f:SSet.add
+    ~init:SSet.empty
+    [
+      tco_experimental_generics_arity;
+      tco_experimental_forbid_nullable_cast;
+      tco_experimental_disallow_static_memoized;
+      tco_experimental_abstract_type_const_with_default;
+      tco_experimental_infer_flows;
+      tco_experimental_case_sensitive_inheritance;
+      tco_experimental_supportdynamic_type_hint;
+    ]
 
 let tco_migration_flags_all =
-  SSet.empty |> List.fold_right SSet.add ["array_cast"]
+  List.fold_right ~init:SSet.empty ~f:SSet.add ["array_cast"]
 
 let default =
   {

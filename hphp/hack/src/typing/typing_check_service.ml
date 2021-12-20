@@ -264,9 +264,10 @@ let profile_log
   (* "deciding_time" is what we compare against the threshold, to see if we should log. *)
   (* We'll also log if it had been previously deferred, or if it's being deferred right now. *)
   let should_log =
-    Float.(deciding_time >= check_info.profile_type_check_duration_threshold)
-    || end_heap_mb - start_heap_mb
-       >= check_info.profile_type_check_memory_threshold_mb
+    HackEventLogger.PerFileProfilingConfig.should_log
+      ~duration:deciding_time
+      ~memory:(end_heap_mb - start_heap_mb)
+      check_info.per_file_profiling
     || file.was_already_deferred
     || not (List.is_empty result.deferred_decls)
   in
@@ -309,7 +310,8 @@ let profile_log
     HackEventLogger.ProfileTypeCheck.process_file
       ~recheck_id:check_info.recheck_id
       ~path:file.path
-      ~telemetry;
+      ~telemetry
+      ~config:check_info.per_file_profiling;
     ()
   end
 
@@ -402,7 +404,9 @@ let process_files
       None
   in
 
-  Decl_counters.set_mode check_info.profile_decling;
+  Decl_counters.set_mode
+    check_info.per_file_profiling
+      .HackEventLogger.PerFileProfilingConfig.profile_decling;
   let _prev_counters_state = Counters.reset () in
   let (_start_counter_time, start_counters) = read_counters () in
   let tally = ProcessFilesTally.empty in
@@ -446,14 +450,21 @@ let process_files
         | Check file ->
           let process_file () = process_file ctx errors file ~decl_cap_mb in
           let result =
-            if check_info.profile_log then (
+            if
+              check_info.per_file_profiling
+                .HackEventLogger.PerFileProfilingConfig.profile_log
+            then (
               let start_counters = read_counters () in
               let start_heap_mb = heap_mb in
               let result = process_file () in
               let end_counters = read_counters () in
               let end_heap_mb = get_heap_size () in
               let (start_heap_mb, end_heap_mb, second_run_end_counters) =
-                if check_info.profile_type_check_twice then
+                if
+                  check_info.per_file_profiling
+                    .HackEventLogger.PerFileProfilingConfig
+                     .profile_type_check_twice
+                then
                   (* we're running this routine solely for the side effect *)
                   (* of seeing how much time+memory it takes to run. *)
                   let _ignored = process_file () in
@@ -1188,12 +1199,16 @@ let go_with_interrupt
   in
   Typing_deps.register_discovered_dep_edges dep_edges;
 
-  if check_info.profile_log then
+  if
+    check_info.per_file_profiling
+      .HackEventLogger.PerFileProfilingConfig.profile_log
+  then
     Hh_logger.log
       "Typecheck perf: %s"
       (HackEventLogger.ProfileTypeCheck.get_telemetry_url
          ~init_id:check_info.init_id
-         ~recheck_id:check_info.recheck_id);
+         ~recheck_id:check_info.recheck_id
+         ~config:check_info.per_file_profiling);
   let job_size_telemetry =
     Telemetry.create ()
     |> Telemetry.object_

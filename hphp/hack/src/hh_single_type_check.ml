@@ -66,6 +66,7 @@ type options = {
   should_print_position: bool;
   custom_hhi_path: string option;
   profile_type_check_twice: bool;
+  memtrace: string option;
 }
 
 (** If the user passed --root, then all pathnames have to be canonicalized.
@@ -280,6 +281,7 @@ let parse_options () =
   let custom_hhi_path = ref None in
   let explicit_consistent_constructors = ref 0 in
   let profile_type_check_twice = ref false in
+  let memtrace = ref None in
   let options =
     [
       ( "--no-print-position",
@@ -711,6 +713,9 @@ let parse_options () =
       ( "--profile-type-check-twice",
         Arg.Set profile_type_check_twice,
         " Typecheck the file twice" );
+      ( "--memtrace",
+        Arg.String (fun s -> memtrace := Some s),
+        " Write memtrace to this file (typical extension .ctf)" );
     ]
   in
 
@@ -918,6 +923,7 @@ let parse_options () =
       should_print_position = !print_position;
       custom_hhi_path = !custom_hhi_path;
       profile_type_check_twice = !profile_type_check_twice;
+      memtrace = !memtrace;
     },
     root,
     !naming_table,
@@ -1055,21 +1061,32 @@ let print_elapsed fn desc ~start_time =
     desc
     elapsed_ms
 
-let check_file ctx errors files_info ~profile_type_check_twice =
+let check_file ctx errors files_info ~profile_type_check_twice ~memtrace =
   if profile_type_check_twice then
     Relative_path.Map.iter files_info ~f:(fun fn fileinfo ->
         let start_time = Unix.gettimeofday () in
         let _ = Typing_check_utils.type_file ctx fn fileinfo in
         print_elapsed fn "first typecheck+decl" ~start_time);
-  Relative_path.Map.fold
-    files_info
-    ~f:(fun fn fileinfo errors ->
-      let start_time = Unix.gettimeofday () in
-      let (_, new_errors) = Typing_check_utils.type_file ctx fn fileinfo in
-      if profile_type_check_twice then
-        print_elapsed fn "second typecheck" ~start_time;
-      errors @ Errors.get_sorted_error_list new_errors)
-    ~init:errors
+  let tracer =
+    Option.map memtrace ~f:(fun filename ->
+        Memtrace.start_tracing
+          ~context:None
+          ~sampling_rate:Memtrace.default_sampling_rate
+          ~filename)
+  in
+  let errors =
+    Relative_path.Map.fold
+      files_info
+      ~f:(fun fn fileinfo errors ->
+        let start_time = Unix.gettimeofday () in
+        let (_, new_errors) = Typing_check_utils.type_file ctx fn fileinfo in
+        if profile_type_check_twice then
+          print_elapsed fn "second typecheck" ~start_time;
+        errors @ Errors.get_sorted_error_list new_errors)
+      ~init:errors
+  in
+  Option.iter tracer ~f:Memtrace.stop_tracing;
+  errors
 
 let create_nasts ctx files_info =
   let build_nast fn _ =
@@ -1582,6 +1599,7 @@ let handle_mode
     dbg_glean_deps
     ~should_print_position
     ~profile_type_check_twice
+    ~memtrace
     ~verbosity =
   let expect_single_file () : Relative_path.t =
     match filenames with
@@ -1620,7 +1638,7 @@ let handle_mode
       let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
       let error_list = Errors.get_sorted_error_list parse_errors in
       let check_errors =
-        check_file ctx error_list file_info ~profile_type_check_twice
+        check_file ctx error_list file_info ~profile_type_check_twice ~memtrace
       in
       if not (List.is_empty check_errors) then
         print_errors check_errors
@@ -1662,7 +1680,7 @@ let handle_mode
       let (parse_errors, file_info) = parse_name_and_decl ctx files_contents in
       let check_errors =
         let error_list = Errors.get_sorted_error_list parse_errors in
-        check_file ctx error_list file_info ~profile_type_check_twice
+        check_file ctx error_list file_info ~profile_type_check_twice ~memtrace
       in
       if not (List.is_empty check_errors) then
         print_errors check_errors
@@ -2047,6 +2065,7 @@ let handle_mode
                   (Errors.get_sorted_error_list parse_errors)
                   individual_file_info
                   ~profile_type_check_twice
+                  ~memtrace
               in
               write_error_list error_format errors oc max_errors)
         ))
@@ -2081,7 +2100,7 @@ let handle_mode
   | Errors ->
     (* Don't typecheck builtins *)
     let errors =
-      check_file ctx parse_errors files_info ~profile_type_check_twice
+      check_file ctx parse_errors files_info ~profile_type_check_twice ~memtrace
     in
     print_error_list error_format errors max_errors;
     if not (List.is_empty errors) then exit 2
@@ -2375,6 +2394,7 @@ let decl_and_run_mode
       should_print_position;
       custom_hhi_path;
       profile_type_check_twice;
+      memtrace;
     }
     (popt : TypecheckerOptions.t)
     (hhi_root : Path.t)
@@ -2548,6 +2568,7 @@ let decl_and_run_mode
     dbg_glean_deps
     ~should_print_position
     ~profile_type_check_twice
+    ~memtrace
     ~verbosity
 
 let main_hack

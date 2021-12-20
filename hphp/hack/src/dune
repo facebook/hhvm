@@ -26,6 +26,7 @@
   glean_dependency_graph_convert
   hhi
   naming_ast_print
+  memtrace
   parent
   server_coverage_metric_utils
   server_color_file

@@ -147,7 +147,7 @@
                                      };
                                    f_fun_kind = FSync; f_user_attributes = []; 
                                    f_external = false; f_doc_comment = None },
-                                 [([4:22-36], $0splice0); ([4:22-36], $0splice0)]))),
+                                 [([4:22-36], $0splice0)]))),
                              [], [(Pnormal, ((), [4:22-24], (Dollardollar ([4:22-24], $$))))], None)));
                          et_dollardollar_pos = (Some [4:22-24]) }))
                    )))))

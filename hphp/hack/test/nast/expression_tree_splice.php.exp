@@ -217,7 +217,7 @@
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
-                             [([4:25-31], $0splice0); ([4:25-31], $0splice0)]))),
+                             [([4:25-31], $0splice0)]))),
                          [], [], None)));
                      et_dollardollar_pos = None }))))
             ]

@@ -394,7 +394,7 @@
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
-                             [([6:7-10], $0fp0); ([6:7-10], $0fp0)]))),
+                             [([6:7-10], $0fp0)]))),
                          [], [], None)));
                      et_dollardollar_pos = None }))))
             ]

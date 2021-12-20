@@ -112,6 +112,13 @@
   (pps ppx_deriving.std)))
 
 (library
+ (name naming_captures)
+ (modules naming_captures)
+ (libraries nast)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
  (name naming_elaborate_namespaces_endo)
  (modules naming_elaborate_namespaces_endo)
  (libraries annotated_ast parser)
@@ -129,6 +136,7 @@
   fileutils
   full_fidelity
   naming_attributes
+  naming_captures
   naming_elaborate_namespaces_endo
   naming_table
   naming_global

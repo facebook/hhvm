@@ -2481,13 +2481,30 @@ let decl_and_run_mode
   in
   (* We make the following call for the side-effect of updating ctx's "naming-table fallback"
      so it will look in the sqlite database for names it doesn't know.
-     This function returns the forward naming table, but we don't care about that;
-     it's only needed for tools that process file changes, to know in the event
-     of a file-change which old symbols used to be defined in the file. *)
-  let _naming_table_for_root : Naming_table.t option =
+     This function returns the forward naming table. *)
+  let naming_table_for_root : Naming_table.t option =
     Option.map naming_table_path ~f:(fun path ->
         Naming_table.load_from_sqlite ctx path)
   in
+  (* If run in naming-table mode, we first have to remove any old names from the files we're about to redeclare --
+     otherwise when we declare them it'd count as a duplicate definition! *)
+  Option.iter naming_table_for_root ~f:(fun naming_table_for_root ->
+      Relative_path.Map.iter files_contents ~f:(fun file _content ->
+          let file_info =
+            Naming_table.get_file_info naming_table_for_root file
+          in
+          Option.iter file_info ~f:(fun file_info ->
+              let ids_to_strings ids =
+                List.map ids ~f:(fun (_, name, _) -> name)
+              in
+              Naming_global.remove_decls
+                ~backend:(Provider_context.get_backend ctx)
+                ~funs:(ids_to_strings file_info.FileInfo.funs)
+                ~classes:(ids_to_strings file_info.FileInfo.classes)
+                ~record_defs:(ids_to_strings file_info.FileInfo.record_defs)
+                ~typedefs:(ids_to_strings file_info.FileInfo.typedefs)
+                ~consts:(ids_to_strings file_info.FileInfo.consts))));
+
   let (errors, files_info) = parse_name_and_decl ctx to_decl in
   handle_mode
     mode

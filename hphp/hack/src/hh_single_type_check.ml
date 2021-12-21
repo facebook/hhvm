@@ -2116,9 +2116,6 @@ let handle_mode
       exit 2
     end else
       let tast = Relative_path.Map.find tasts path in
-      Printf.printf
-        "TODO: type json of file %s\n"
-        (Relative_path.to_absolute path);
       Typing_preorder_ser.tast_to_json tast
   | Decl_compare ->
     let filename = expect_single_file () in

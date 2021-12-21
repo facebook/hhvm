@@ -17,12 +17,11 @@ open Hh_prelude
  *)
 let tast_to_json tast =
   (object
-     inherit [_] Aast.iter as super
+     inherit [_] Aast.iter as _super
 
-     method! on_'ex _en _ty =
-       Printf.printf "<Ty";
-       super#on_'ex _en _ty;
-       Printf.printf ">\n"
+     method! on_'ex _en ty =
+       let j = Typing_ser_ffi.ty_to_json ty in
+       Printf.printf "%s\n" j
   end)
     #on_program
     ()

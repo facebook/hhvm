@@ -1,9 +1,29 @@
+(data_only_dirs cargo typing_ser_ffi)
+
 (library
  (name typing_serialization)
  (wrapped false)
- (modules typing_preorder_ser)
+ (modules typing_preorder_ser typing_ser_ffi)
  (libraries
-    typing_ast)
+    typing_ast
+    rust_typing_ser_ffi)
  (preprocess
   (pps ppx_deriving.std))
 )
+
+(library
+ (name rust_typing_ser_ffi)
+ (modules)
+ (wrapped false)
+ (foreign_archives typing_ser_ffi))
+
+(rule
+ (targets libtyping_ser_ffi.a)
+ (deps
+  (source_tree %{workspace_root}/src))
+ (locks /cargo)
+ (action
+  (run
+   %{workspace_root}/scripts/build_rust_to_ocaml.sh
+   typing_ser_ffi
+   typing_ser_ffi)))

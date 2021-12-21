@@ -3665,6 +3665,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "typing_ser_ffi"
+version = "0.0.0"
+dependencies = [
+ "bumpalo",
+ "ocamlrep_ocamlpool",
+ "oxidized_by_ref",
+ "serde_json",
+]
+
+[[package]]
 name = "unicode-segmentation"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

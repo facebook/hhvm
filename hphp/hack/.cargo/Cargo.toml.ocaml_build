@@ -170,6 +170,7 @@ members = [
     "src/shmffi/cargo/shmffi",
     "src/typing/cargo/typing_collections_rust",
     "src/typing/cargo/typing_defs_rust",
+    "src/typing/serialization/cargo/typing_ser_ffi",
     "src/utils/arena_deserializer",
     "src/utils/config_file/rust/ffi",
     "src/utils/core",

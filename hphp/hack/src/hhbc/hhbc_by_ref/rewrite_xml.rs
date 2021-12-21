@@ -14,7 +14,6 @@ struct RewriteXmlVisitor<'emitter, 'arena, 'decl> {
 }
 
 struct Ctx<'emitter, 'arena, 'decl> {
-    alloc: &'arena bumpalo::Bump,
     emitter: &'emitter mut Emitter<'arena, 'decl>,
 }
 
@@ -33,10 +32,9 @@ impl<'ast, 'arena, 'emitter, 'decl> VisitorMut<'ast>
         e: &'ast mut ast::Expr,
     ) -> Result<()> {
         let ast::Expr(_, pos, expr) = e;
-        let alloc = &c.alloc;
         let emitter = &mut c.emitter;
         if let ast::Expr_::Xml(cs) = expr {
-            *e = rewrite_xml_(alloc, emitter, pos, cs.as_ref().clone())?;
+            *e = rewrite_xml_(emitter, pos, cs.as_ref().clone())?;
         }
         e.recurse(c, self.object())?;
         Ok(())
@@ -44,20 +42,18 @@ impl<'ast, 'arena, 'emitter, 'decl> VisitorMut<'ast>
 }
 
 pub fn rewrite_xml<'p, 'arena, 'emitter, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &'emitter mut Emitter<'arena, 'decl>,
     prog: &'p mut ast::Program,
 ) -> Result<()> {
     let mut xml_visitor = RewriteXmlVisitor {
         phantom: std::marker::PhantomData,
     };
-    let mut c: Ctx<'emitter, 'arena, 'decl> = Ctx { alloc, emitter };
+    let mut c: Ctx<'emitter, 'arena, 'decl> = Ctx { emitter };
 
     visit_mut(&mut xml_visitor, &mut c, prog)
 }
 
 fn rewrite_xml_<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     pos: &Pos,
     (id, attributes, children): (ast::Sid, Vec<ast::XhpAttribute>, Vec<ast::Expr>),
@@ -99,7 +95,7 @@ fn rewrite_xml_<'arena, 'decl>(
         pos.clone(),
         E_::mk_id(Id(pos.clone(), pseudo_consts::G__LINE__.into())),
     );
-    let renamed_id = class::ClassType::from_ast_name_and_mangle(alloc, &id.1);
+    let renamed_id = class::ClassType::from_ast_name_and_mangle(e.alloc, &id.1);
     let cid = ClassId(
         (),
         pos.clone(),

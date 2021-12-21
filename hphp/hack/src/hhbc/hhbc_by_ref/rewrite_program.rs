@@ -61,7 +61,7 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
 
     emitter.for_debugger_eval = for_debugger_eval;
 
-    rewrite_xml(emitter.alloc, emitter, prog)?;
+    rewrite_xml(emitter, prog)?;
 
     Ok(())
 }

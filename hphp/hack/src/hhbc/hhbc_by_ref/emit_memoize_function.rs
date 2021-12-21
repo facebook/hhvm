@@ -52,7 +52,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         .iter()
         .map(|tp| tp.name.1.as_str())
         .collect::<Vec<_>>();
-    let params = emit_param::from_asts(alloc, emitter, &mut tparams, true, &scope, &f.params)?;
+    let params = emit_param::from_asts(emitter, &mut tparams, true, &scope, &f.params)?;
     let mut attributes = emit_attribute::from_asts(emitter, &f.user_attributes)?;
     attributes.extend(emit_attribute::add_reified_attribute(alloc, &f.tparams));
     let return_type_info = emit_body::emit_return_type_info(

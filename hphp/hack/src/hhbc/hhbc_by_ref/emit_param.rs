@@ -32,7 +32,6 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::marker::PhantomData;
 
 pub fn from_asts<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
@@ -41,7 +40,7 @@ pub fn from_asts<'a, 'arena, 'decl>(
 ) -> Result<Vec<(HhasParam<'arena>, Option<(Label, a::Expr)>)>> {
     ast_params
         .iter()
-        .map(|param| from_ast(alloc, emitter, tparams, generate_defaults, scope, param))
+        .map(|param| from_ast(emitter, tparams, generate_defaults, scope, param))
         .collect::<Result<Vec<_>>>()
         .map(|params| {
             params
@@ -49,7 +48,7 @@ pub fn from_asts<'a, 'arena, 'decl>(
                 .filter_map(|p| p.to_owned())
                 .collect::<Vec<_>>()
         })
-        .map(|params| rename_params(alloc, params))
+        .map(|params| rename_params(emitter.alloc, params))
 }
 
 fn rename_params<'arena>(
@@ -91,7 +90,6 @@ fn rename_params<'arena>(
 }
 
 fn from_ast<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     tparams: &mut Vec<&str>,
     generate_defaults: bool,
@@ -143,7 +141,7 @@ fn from_ast<'a, 'arena, 'decl>(
         };
         if let Some(h) = param_type_hint {
             Some(hint_to_type_info(
-                alloc,
+                emitter.alloc,
                 &Kind::Param,
                 false,
                 nullable,
@@ -185,11 +183,12 @@ fn from_ast<'a, 'arena, 'decl>(
     let attrs = emit_attribute::from_asts(emitter, &param.user_attributes)?;
     Ok(Some((
         HhasParam {
-            name: Str::new_str(alloc, &param.name),
+            name: Str::new_str(emitter.alloc, &param.name),
             is_variadic: param.is_variadic,
             is_inout: param.callconv.is_pinout(),
             is_readonly,
-            user_attributes: Slice::new(alloc.alloc_slice_fill_iter(attrs.into_iter())).into(),
+            user_attributes: Slice::new(emitter.alloc.alloc_slice_fill_iter(attrs.into_iter()))
+                .into(),
             type_info: Maybe::from(type_info),
             // - Write hhas_param.default_value as `Nothing` while keeping `default_value` around
             //   for emitting decl vars and default value setters
@@ -206,7 +205,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
     pos: &Pos,
     params: &[(HhasParam<'arena>, Option<(Label, a::Expr)>)],
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
-    let alloc = env.arena;
+    let alloc = env.arena; // Hmm, should this be emitter.alloc?
     let mut to_setter = |(param, default_value): &(HhasParam<'arena>, Option<(Label, a::Expr)>)| {
         default_value.as_ref().map(|(lbl, expr)| {
             let instrs = InstrSeq::gather(

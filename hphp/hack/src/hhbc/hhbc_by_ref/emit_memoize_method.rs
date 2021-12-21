@@ -215,8 +215,7 @@ fn emit_memoize_wrapper_body<'a, 'arena, 'decl>(
         args.flags.contains(Flags::IS_ASYNC),
         args.ret,
     )?;
-    let hhas_params =
-        emit_param::from_asts(alloc, emitter, &mut tparams, true, args.scope, args.params)?;
+    let hhas_params = emit_param::from_asts(emitter, &mut tparams, true, args.scope, args.params)?;
     args.flags.set(Flags::WITH_LSB, is_memoize_lsb(args.method));
     args.flags.set(Flags::IS_STATIC, args.method.static_);
     emit(emitter, env, hhas_params, return_type_info, args)

@@ -141,14 +141,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
         &tp_names,
     )?;
 
-    let params = make_params(
-        alloc,
-        emitter,
-        &mut tp_names,
-        args.ast_params,
-        &scope,
-        args.flags,
-    )?;
+    let params = make_params(emitter, &mut tp_names, args.ast_params, &scope, args.flags)?;
 
     let upper_bounds = emit_generics_upper_bounds(
         alloc,
@@ -407,7 +400,6 @@ pub fn make_env<'a, 'arena>(
 }
 
 fn make_params<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     tp_names: &mut Vec<&str>,
     ast_params: &[ast::FunParam],
@@ -415,14 +407,7 @@ fn make_params<'a, 'arena, 'decl>(
     flags: Flags,
 ) -> Result<Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>> {
     let generate_defaults = !flags.contains(Flags::MEMOIZE);
-    emit_param::from_asts(
-        alloc,
-        emitter,
-        tp_names,
-        generate_defaults,
-        scope,
-        ast_params,
-    )
+    emit_param::from_asts(emitter, tp_names, generate_defaults, scope, ast_params)
 }
 
 pub fn make_body<'a, 'arena, 'decl>(

@@ -1477,7 +1477,7 @@ enum TempDirRemove: int {
 }
 
 final class Status {
-  private static $results = vec[];
+  private static vec<dict<string, mixed>> $results = vec[];
   private static int $mode = 0;
 
   private static bool $use_color = false;
@@ -1496,7 +1496,7 @@ final class Status {
 
   public static int $passed = 0;
   public static int $skipped = 0;
-  public static $skip_reasons = dict[];
+  public static dict<string, int> $skip_reasons = dict[];
   public static int $failed = 0;
 
   const int MODE_NORMAL = 0;

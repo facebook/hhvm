@@ -61,7 +61,7 @@ fn emit_program_<'a, 'arena, 'decl>(
     let mut functions = emit_functions_from_program(emitter.alloc, emitter, prog)?;
     let classes = emit_classes_from_program(emitter.alloc, emitter, prog)?;
     let record_defs = emit_record_defs_from_program(emitter, prog)?;
-    let typedefs = emit_typedefs_from_program(emitter.alloc, emitter, prog)?;
+    let typedefs = emit_typedefs_from_program(emitter, prog)?;
     let (constants, mut const_inits) = {
         let mut env = Env::default(emitter.alloc, namespace);
         emit_constants_from_program(emitter, &mut env, prog)?

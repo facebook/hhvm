@@ -28,6 +28,8 @@ pub struct Emitter<'arena, 'decl> {
 
     pub for_debugger_eval: bool,
 
+    pub alloc: &'arena bumpalo::Bump,
+
     pub adata_state_: Option<AdataState<'arena>>,
     pub statement_state_: Option<StatementState<'arena>>,
     pub symbol_refs_state_: Option<SymbolRefsState<'arena>>,
@@ -43,6 +45,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         systemlib: bool,
         for_debugger_eval: bool,
         use_decls: bool,
+        alloc: &'arena bumpalo::Bump,
         decl_provider: unified_decl_provider::DeclProvider<'decl>,
     ) -> Emitter<'arena, 'decl> {
         Emitter {
@@ -51,6 +54,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             for_debugger_eval,
             decl_provider,
             use_decls,
+            alloc,
 
             label_gen: Default::default(),
             local_gen: Default::default(),

@@ -289,15 +289,17 @@ pub fn emit_fatal_program<S: AsRef<str>>(
     let is_systemlib = env.flags.contains(EnvFlags::IS_SYSTEMLIB);
     let opts =
         Options::from_configs(&env.config_jsons, &env.config_list).map_err(anyhow::Error::msg)?;
+    let alloc = bumpalo::Bump::new();
     let mut emitter = Emitter::new(
         opts,
         is_systemlib,
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
         env.flags.contains(EnvFlags::ENABLE_DECL),
+        &alloc,
         unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
     );
-    let alloc = &bumpalo::Bump::new();
-    let prog = emit_program::emit_fatal_program(alloc, FatalOp::Parse, &Pos::make_none(), err_msg);
+
+    let prog = emit_program::emit_fatal_program(&alloc, FatalOp::Parse, &Pos::make_none(), err_msg);
     let prog = prog.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
     print_program(
         &mut Context::new(
@@ -321,7 +323,7 @@ pub fn from_text<'arena, 'decl, S: AsRef<str>>(
     native_env: Option<&NativeEnv<S>>,
     decl_provider: unified_decl_provider::DeclProvider<'decl>,
 ) -> anyhow::Result<Option<Profile>> {
-    let mut emitter = create_emitter(env, native_env, decl_provider)?;
+    let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
     let (program, profile) =
         emit_prog_from_text(alloc, &mut emitter, env, stack_limit, source_text)?;
 
@@ -383,7 +385,7 @@ pub fn hhas_from_text<'arena, 'decl, S: AsRef<str>>(
     native_env: Option<&NativeEnv<S>>,
     decl_provider: unified_decl_provider::DeclProvider<'decl>,
 ) -> anyhow::Result<(HhasProgram<'arena>, Option<Profile>)> {
-    let mut emitter = create_emitter(env, native_env, decl_provider)?;
+    let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
     emit_prog_from_text(alloc, &mut emitter, env, stack_limit, source_text)
 }
 
@@ -393,10 +395,12 @@ pub fn hhas_to_string<W: std::io::Write, S: AsRef<str>>(
     writer: &mut W,
     program: &HhasProgram<'_>,
 ) -> anyhow::Result<()> {
+    let alloc = bumpalo::Bump::new();
     let mut emitter = create_emitter(
         env,
         native_env,
         unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
+        &alloc,
     )?;
     let (print_result, _) = time(|| {
         print_program(
@@ -507,6 +511,7 @@ fn create_emitter<'arena, 'decl, S: AsRef<str>>(
     env: &Env<S>,
     native_env: Option<&NativeEnv<S>>,
     decl_provider: unified_decl_provider::DeclProvider<'decl>,
+    alloc: &'arena bumpalo::Bump,
 ) -> anyhow::Result<Emitter<'arena, 'decl>> {
     let opts = match native_env {
         None => Options::from_configs(&env.config_jsons, &env.config_list)
@@ -518,6 +523,7 @@ fn create_emitter<'arena, 'decl, S: AsRef<str>>(
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
         env.flags.contains(EnvFlags::ENABLE_DECL),
+        alloc,
         decl_provider,
     ))
 }
@@ -659,11 +665,13 @@ pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> St
     let opts =
         Options::from_configs(&env.config_jsons, &env.config_list).expect("Malformed options");
 
+    let alloc = bumpalo::Bump::new();
     let mut emitter = Emitter::new(
         opts,
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
         env.flags.contains(EnvFlags::ENABLE_DECL),
+        &alloc,
         unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
     );
     let ctx = Context::new(

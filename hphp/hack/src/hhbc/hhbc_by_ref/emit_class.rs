@@ -58,16 +58,16 @@ fn add_symbol_refs<'arena, 'decl>(
     requirements: &[(class::ClassType<'arena>, TraitReqKind)],
 ) {
     base.iter()
-        .for_each(|x| emit_symbol_refs::add_class(alloc, emitter, *x));
+        .for_each(|x| emit_symbol_refs::add_class(emitter, *x));
     implements
         .iter()
-        .for_each(|x| emit_symbol_refs::add_class(alloc, emitter, *x));
+        .for_each(|x| emit_symbol_refs::add_class(emitter, *x));
     uses.iter().for_each(|x| {
-        emit_symbol_refs::add_class(alloc, emitter, class::ClassType::from_ast_name(alloc, x))
+        emit_symbol_refs::add_class(emitter, class::ClassType::from_ast_name(alloc, x))
     });
     requirements
         .iter()
-        .for_each(|(x, _)| emit_symbol_refs::add_class(alloc, emitter, *x));
+        .for_each(|(x, _)| emit_symbol_refs::add_class(emitter, *x));
 }
 
 fn make_86method<'a, 'arena, 'decl>(

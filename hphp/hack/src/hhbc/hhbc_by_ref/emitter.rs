@@ -142,12 +142,9 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             .as_ref()
             .expect("uninit'd symbol_refs_state")
     }
-    pub fn emit_symbol_refs_state_mut(
-        &mut self,
-        alloc: &'arena bumpalo::Bump,
-    ) -> &mut SymbolRefsState<'arena> {
+    pub fn emit_symbol_refs_state_mut(&mut self) -> &mut SymbolRefsState<'arena> {
         self.symbol_refs_state_
-            .get_or_insert_with(|| SymbolRefsState::init(alloc))
+            .get_or_insert_with(|| SymbolRefsState::init(self.alloc))
     }
 
     pub fn emit_global_state(&self) -> &GlobalState<'arena> {

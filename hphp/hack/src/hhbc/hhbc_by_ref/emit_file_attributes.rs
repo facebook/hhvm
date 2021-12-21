@@ -10,22 +10,20 @@ use itertools::Itertools;
 use oxidized::ast;
 
 fn emit_file_attributes<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     fa: &ast::FileAttribute,
 ) -> Result<Vec<HhasAttribute<'arena>>> {
-    from_asts(alloc, e, &fa.user_attributes[..])
+    from_asts(e, &fa.user_attributes[..])
 }
 
 pub fn emit_file_attributes_from_program<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     prog: &[ast::Def],
 ) -> Result<Vec<HhasAttribute<'arena>>> {
     prog.iter()
         .filter_map(|node| {
             if let ast::Def::FileAttributes(fa) = node {
-                Some(emit_file_attributes(alloc, e, fa))
+                Some(emit_file_attributes(e, fa))
             } else {
                 None
             }

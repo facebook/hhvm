@@ -42,7 +42,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
 ) -> Result<HhasProperty<'arena>> {
     let ast_defs::Id(pos, cv_name) = args.id;
     let pid: prop::PropType<'arena> = prop::PropType::from_ast_name(alloc, cv_name);
-    let attributes = emit_attribute::from_asts(alloc, emitter, args.user_attributes)?;
+    let attributes = emit_attribute::from_asts(emitter, args.user_attributes)?;
 
     let is_const = (!args.is_static && class_is_const)
         || attributes

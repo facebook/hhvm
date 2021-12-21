@@ -39,8 +39,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
         matches!(f.fun_kind, FunKind::FAsync | FunKind::FAsyncGenerator),
     );
 
-    let mut attrs: Vec<HhasAttribute<'arena>> =
-        emit_attribute::from_asts(alloc, e, &f.user_attributes)?;
+    let mut attrs: Vec<HhasAttribute<'arena>> = emit_attribute::from_asts(e, &f.user_attributes)?;
     attrs.extend(emit_attribute::add_reified_attribute(alloc, &f.tparams));
     let memoized = attrs
         .iter()

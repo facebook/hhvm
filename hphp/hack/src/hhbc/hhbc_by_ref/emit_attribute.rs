@@ -16,21 +16,19 @@ use naming_special_names_rust as naming_special_names;
 use oxidized::ast as a;
 
 pub fn from_asts<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     attrs: &[a::UserAttribute],
 ) -> Result<Vec<HhasAttribute<'arena>>> {
-    attrs.iter().map(|attr| from_ast(alloc, e, attr)).collect()
+    attrs.iter().map(|attr| from_ast(e, attr)).collect()
 }
 
 pub fn from_ast<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     attr: &a::UserAttribute,
 ) -> Result<HhasAttribute<'arena>> {
     let arguments = ast_constant_folder::literals_from_exprs(
         &mut attr.params.clone(),
-        alloc,
+        e.alloc,
         e,
     )
     .map_err(|err| {
@@ -43,18 +41,18 @@ pub fn from_ast<'arena, 'decl>(
     })?;
     let fully_qualified_id: &'arena str = if attr.name.1.starts_with("__") {
         // don't do anything to builtin attributes
-        alloc.alloc_str(&attr.name.1)
+        e.alloc.alloc_str(&attr.name.1)
     } else {
         match escaper::escape(
-            hhbc_id::class::ClassType::from_ast_name(alloc, &attr.name.1).to_raw_string(),
+            hhbc_id::class::ClassType::from_ast_name(e.alloc, &attr.name.1).to_raw_string(),
         ) {
             std::borrow::Cow::Borrowed(s) => s,
-            std::borrow::Cow::Owned(s) => alloc.alloc_str(s.as_str()),
+            std::borrow::Cow::Owned(s) => e.alloc.alloc_str(s.as_str()),
         }
     };
     Ok(HhasAttribute {
         name: fully_qualified_id.into(),
-        arguments: alloc.alloc_slice_fill_iter(arguments.into_iter()).into(),
+        arguments: e.alloc.alloc_slice_fill_iter(arguments.into_iter()).into(),
     })
 }
 

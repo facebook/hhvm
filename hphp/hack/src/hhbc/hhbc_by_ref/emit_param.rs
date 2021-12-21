@@ -182,7 +182,7 @@ fn from_ast<'a, 'arena, 'decl>(
         Some(ReadonlyKind::Readonly) => true,
         _ => false,
     };
-    let attrs = emit_attribute::from_asts(alloc, emitter, &param.user_attributes)?;
+    let attrs = emit_attribute::from_asts(emitter, &param.user_attributes)?;
     Ok(Some((
         HhasParam {
             name: Str::new_str(alloc, &param.name),

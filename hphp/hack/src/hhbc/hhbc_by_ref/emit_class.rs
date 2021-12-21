@@ -600,7 +600,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     // TODO: communicate this without looking at the name
     let is_closure = ast_class.name.1.starts_with("Closure$");
 
-    let mut attributes = emit_attribute::from_asts(alloc, emitter, &ast_class.user_attributes)?;
+    let mut attributes = emit_attribute::from_asts(emitter, &ast_class.user_attributes)?;
     if !is_closure {
         attributes
             .extend(emit_attribute::add_reified_attribute(alloc, &ast_class.tparams).into_iter());

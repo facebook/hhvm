@@ -127,7 +127,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
             ScopeItem::Method(ast_scope::Method::new_ref(method)),
         ],
     };
-    let mut attributes = emit_attribute::from_asts(alloc, emitter, &method.user_attributes)?;
+    let mut attributes = emit_attribute::from_asts(emitter, &method.user_attributes)?;
     attributes.extend(emit_attribute::add_reified_attribute(
         alloc,
         &method.tparams,

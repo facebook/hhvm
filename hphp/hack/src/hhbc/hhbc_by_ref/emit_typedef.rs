@@ -41,7 +41,7 @@ fn emit_typedef<'a, 'arena, 'decl>(
     typedef: &'a ast::Typedef,
 ) -> Result<HhasTypedef<'arena>> {
     let name = ClassType::<'arena>::from_ast_name(alloc, &typedef.name.1);
-    let attributes_res = emit_attribute::from_asts(alloc, emitter, &typedef.user_attributes);
+    let attributes_res = emit_attribute::from_asts(emitter, &typedef.user_attributes);
     let tparams = emit_body::get_tp_names(&typedef.tparams.as_slice());
     let type_info_res = kind_to_type_info(alloc, &tparams, &typedef.kind);
     let type_structure_res = kind_to_type_structure(

@@ -247,7 +247,7 @@ fn make_memoize_method_code<'a, 'arena, 'decl>(
         && !args.flags.contains(Flags::IS_REIFIED)
         && !args.flags.contains(Flags::SHOULD_EMIT_IMPLICIT_CONTEXT)
     {
-        make_memoize_method_no_params_code(env.arena, emitter, args)
+        make_memoize_method_no_params_code(emitter, args)
     } else {
         make_memoize_method_with_params_code(emitter, env, pos, hhas_params, args)
     }
@@ -413,13 +413,13 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
 }
 
 fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<InstrSeq<'arena>> {
     let notfound = emitter.label_gen_mut().next_regular();
     let suspended_get = emitter.label_gen_mut().next_regular();
     let eager_set = emitter.label_gen_mut().next_regular();
+    let alloc = emitter.alloc;
     let deprecation_body = emit_body::emit_deprecation_info(
         alloc,
         args.scope,
@@ -509,7 +509,7 @@ fn make_wrapper<'a, 'arena, 'decl>(
     return_type_info: HhasTypeInfo<'arena>,
     args: &Args<'_, 'a, 'arena>,
 ) -> Result<HhasBody<'arena>> {
-    let alloc = env.arena;
+    let alloc = env.arena; // Hmm, should we be using the emitter allocator? Do these point to the same thing?
     let mut decl_vars = vec![];
     if args.flags.contains(Flags::IS_REIFIED) {
         decl_vars.push(reified::GENERICS_LOCAL_NAME.into());

@@ -1075,7 +1075,7 @@ function hhvm_cmd(
     $cmd .= " -vScribe.Tables.hhvm_jit.include.*=deployment_id";
   }
 
-  $env = $_ENV;
+  $env = HH\global_get('_ENV') as dict<_, _>;
   $env['LC_ALL'] = 'C';
 
   // Apply the --env option.
@@ -3431,6 +3431,8 @@ function print_failure(
       ? $options['success-file']
       : Status::getRunTmpDir() . '/tests-passed';
     file_put_contents($passing_tests_file, safe_implode("\n", $passed)."\n");
+  } else {
+    $passing_tests_file = "";
   }
 
   print "\n".count($failed)." tests failed\n";
@@ -3671,7 +3673,9 @@ function get_num_threads(dict<string, mixed> $options): int {
 
 function runner_precheck(): void {
   // Basic checking for runner.
-  if (!((bool)$_SERVER ?? false) || !((bool)$_ENV ?? false)) {
+  $server = HH\global_get('_SERVER');
+  $env = HH\global_get('_ENV');
+  if (!((bool)$server ?? false) || !((bool)$env ?? false)) {
     echo "Warning: \$_SERVER/\$_ENV variables not available, please check \n" .
          "your ini setting: variables_order, it should have both 'E' and 'S'\n";
   }

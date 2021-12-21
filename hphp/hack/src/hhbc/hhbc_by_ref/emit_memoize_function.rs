@@ -35,13 +35,13 @@ pub(crate) fn is_interceptable(opts: &Options) -> bool {
 }
 
 pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     original_id: function::FunctionType<'arena>,
     renamed_id: &function::FunctionType<'arena>,
     deprecation_info: &Option<&[TypedValue<'arena>]>,
     fd: &'a T::FunDef,
 ) -> Result<HhasFunction<'arena>> {
+    let alloc = emitter.alloc;
     let f = &fd.fun;
     emit_memoize_helpers::check_memoize_possible(&(f.name).0, &f.params, false)?;
     let scope = Scope {
@@ -77,7 +77,6 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         });
     let mut env = Env::default(alloc, RcOc::clone(&fd.namespace)).with_scope(scope);
     let body_instrs = make_memoize_function_code(
-        alloc,
         emitter,
         &mut env,
         &f.span,
@@ -91,7 +90,6 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     )?;
     let coeffects = HhasCoeffects::from_ast(alloc, &f.ctxs, &f.params, &f.tparams, vec![]);
     let body = make_wrapper_body(
-        alloc,
         emitter,
         env,
         return_type_info,
@@ -117,7 +115,6 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
 }
 
 fn make_memoize_function_code<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
@@ -130,10 +127,9 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
     should_emit_implicit_context: bool,
 ) -> Result<InstrSeq<'arena>> {
     let fun = if hhas_params.is_empty() && !is_reified && !should_emit_implicit_context {
-        make_memoize_function_no_params_code(alloc, e, env, deprecation_info, renamed_id, is_async)
+        make_memoize_function_no_params_code(e, env, deprecation_info, renamed_id, is_async)
     } else {
         make_memoize_function_with_params_code(
-            alloc,
             e,
             env,
             pos,
@@ -146,11 +142,10 @@ fn make_memoize_function_code<'a, 'arena, 'decl>(
             should_emit_implicit_context,
         )
     }?;
-    Ok(emit_pos_then(alloc, pos, fun))
+    Ok(emit_pos_then(e.alloc, pos, fun))
 }
 
 fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
@@ -162,6 +157,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     is_reified: bool,
     should_emit_implicit_context: bool,
 ) -> Result<InstrSeq<'arena>> {
+    let alloc = e.alloc;
     let param_count = hhas_params.len();
     let notfound = e.label_gen_mut().next_regular();
     let suspended_get = e.label_gen_mut().next_regular();
@@ -276,13 +272,13 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
 }
 
 fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     deprecation_info: Option<&[TypedValue<'arena>]>,
     renamed_id: function::FunctionType<'arena>,
     is_async: bool,
 ) -> Result<InstrSeq<'arena>> {
+    let alloc = e.alloc;
     let notfound = e.label_gen_mut().next_regular();
     let suspended_get = e.label_gen_mut().next_regular();
     let eager_set = e.label_gen_mut().next_regular();
@@ -340,7 +336,6 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
 }
 
 fn make_wrapper_body<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     env: Env<'a, 'arena>,
     return_type_info: HhasTypeInfo<'arena>,
@@ -353,7 +348,7 @@ fn make_wrapper_body<'a, 'arena, 'decl>(
         decl_vars.push(reified::GENERICS_LOCAL_NAME.into());
     }
     emit_body::make_body(
-        alloc,
+        emitter.alloc,
         emitter,
         body_instrs,
         decl_vars,

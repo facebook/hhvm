@@ -157,7 +157,6 @@ pub fn emit_function<'a, 'arena, 'decl>(
     flags.set(HhasFunctionFlags::READONLY_RETURN, is_readonly_return);
     let memoize_wrapper = if memoized {
         Some(emit_memoize_function::emit_wrapper_function(
-            alloc,
             e,
             original_id,
             &renamed_id,

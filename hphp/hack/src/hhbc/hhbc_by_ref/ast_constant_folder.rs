@@ -656,10 +656,9 @@ pub fn fold_expr<'local_arena, 'arena, 'decl>(
 
 pub fn fold_program<'local_arena, 'arena, 'decl>(
     p: &mut ast::Program,
-    alloc: &'local_arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
 ) -> Result<(), Error> {
-    visit_mut(&mut FolderVisitor::new(alloc, e), &mut (), p)
+    visit_mut(&mut FolderVisitor::new(e.alloc, e), &mut (), p)
 }
 
 pub fn literals_from_exprs<'local_arena, 'arena, 'decl>(

@@ -324,8 +324,7 @@ pub fn from_text<'arena, 'decl, S: AsRef<str>>(
     decl_provider: unified_decl_provider::DeclProvider<'decl>,
 ) -> anyhow::Result<Option<Profile>> {
     let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
-    let (program, profile) =
-        emit_prog_from_text(alloc, &mut emitter, env, stack_limit, source_text)?;
+    let (program, profile) = emit_prog_from_text(&mut emitter, env, stack_limit, source_text)?;
 
     let (print_result, printing_t) = time(|| {
         print_program(
@@ -348,33 +347,31 @@ pub fn from_text<'arena, 'decl, S: AsRef<str>>(
 }
 
 fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<S>,
     namespace_env: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
 ) -> Result<HhasProgram<'arena>, Error> {
     // First rewrite.
-    let result = rewrite(alloc, emitter, ast, RcOc::clone(&namespace_env)); // Modifies `ast` in place.
+    let result = rewrite(emitter, ast, RcOc::clone(&namespace_env)); // Modifies `ast` in place.
     match result {
         Ok(()) => {
             // Rewrite ok, now emit.
-            emit_prog_from_ast(alloc, emitter, &env, namespace_env, ast)
+            emit_prog_from_ast(emitter, &env, namespace_env, ast)
         }
         Err(Error::IncludeTimeFatalException(op, pos, msg)) => {
-            emit_program::emit_fatal_program(alloc, op, &pos, msg)
+            emit_program::emit_fatal_program(emitter.alloc, op, &pos, msg)
         }
         Err(e) => Err(e),
     }
 }
 
 fn rewrite<'p, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     ast: &'p mut ast::Program,
     namespace_env: RcOc<NamespaceEnv>,
 ) -> Result<(), Error> {
-    rewrite_program(alloc, emitter, ast, namespace_env)
+    rewrite_program(emitter, ast, namespace_env)
 }
 
 pub fn hhas_from_text<'arena, 'decl, S: AsRef<str>>(
@@ -386,7 +383,7 @@ pub fn hhas_from_text<'arena, 'decl, S: AsRef<str>>(
     decl_provider: unified_decl_provider::DeclProvider<'decl>,
 ) -> anyhow::Result<(HhasProgram<'arena>, Option<Profile>)> {
     let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
-    emit_prog_from_text(alloc, &mut emitter, env, stack_limit, source_text)
+    emit_prog_from_text(&mut emitter, env, stack_limit, source_text)
 }
 
 pub fn hhas_to_string<W: std::io::Write, S: AsRef<str>>(
@@ -418,7 +415,6 @@ pub fn hhas_to_string<W: std::io::Write, S: AsRef<str>>(
 }
 
 fn emit_prog_from_ast<'p, 'arena, 'decl, S: AsRef<str>>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<S>,
     namespace: RcOc<NamespaceEnv>,
@@ -435,11 +431,10 @@ fn emit_prog_from_ast<'p, 'arena, 'decl, S: AsRef<str>>(
         flags |= FromAstFlags::IS_SYSTEMLIB;
     }
 
-    emit_program(alloc, emitter, flags, namespace, ast)
+    emit_program(emitter, flags, namespace, ast)
 }
 
 fn emit_prog_from_text<'arena, 'decl, S: AsRef<str>>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<S>,
     stack_limit: &StackLimit,
@@ -472,10 +467,10 @@ fn emit_prog_from_text<'arena, 'decl, S: AsRef<str>>(
     let (program, codegen_t) = match parse_result {
         Either::Right(mut ast) => {
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
-            time(move || rewrite_and_emit(alloc, emitter, &env, namespace_env, &mut ast))
+            time(move || rewrite_and_emit(emitter, &env, namespace_env, &mut ast))
         }
         Either::Left((pos, msg, is_runtime_error)) => {
-            time(|| emit_fatal(alloc, is_runtime_error, &pos, msg))
+            time(|| emit_fatal(emitter.alloc, is_runtime_error, &pos, msg))
         }
     };
     let profile = if log_extern_compiler_perf {

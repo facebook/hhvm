@@ -38,7 +38,6 @@ fn debugger_eval_should_modify(tast: &[ast::Def]) -> Result<bool> {
 }
 
 pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &'emitter mut Emitter<'arena, 'decl>,
     prog: &'p mut ast::Program,
     namespace_env: RcOc<namespace_env::Env>,
@@ -58,11 +57,11 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
         }
     }
 
-    closure_convert::convert_toplevel_prog(alloc, emitter, prog, namespace_env)?;
+    closure_convert::convert_toplevel_prog(emitter, prog, namespace_env)?;
 
     emitter.for_debugger_eval = for_debugger_eval;
 
-    rewrite_xml(alloc, emitter, prog)?;
+    rewrite_xml(emitter.alloc, emitter, prog)?;
 
     Ok(())
 }

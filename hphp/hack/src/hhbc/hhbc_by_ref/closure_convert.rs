@@ -1734,20 +1734,16 @@ fn extract_debugger_main(
     Ok(())
 }
 
-pub fn convert_toplevel_prog<'arena, 'local_arena, 'decl>(
-    alloc: &'local_arena bumpalo::Bump,
+pub fn convert_toplevel_prog<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     defs: &mut Program,
     namespace_env: RcOc<namespace_env::Env>,
-) -> Result<()>
-where
-    'local_arena: 'arena,
-{
+) -> Result<()> {
     if e.options()
         .hack_compiler_flags
         .contains(CompilerFlags::CONSTANT_FOLDING)
     {
-        hhbc_by_ref_ast_constant_folder::fold_program(defs, alloc, e)
+        hhbc_by_ref_ast_constant_folder::fold_program(defs, e)
             .map_err(|e| unrecoverable(format!("{}", e)))?;
     }
 
@@ -1765,7 +1761,7 @@ where
     }
 
     let mut visitor = ClosureConvertVisitor {
-        alloc,
+        alloc: e.alloc,
         state: State::initial_state(namespace_env),
         phantom_lifetime_a: std::marker::PhantomData,
     };

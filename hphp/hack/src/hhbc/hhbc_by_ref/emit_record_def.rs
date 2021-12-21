@@ -28,16 +28,15 @@ fn valid_tc_for_record_field(tc: &constraint::Constraint<'_>) -> bool {
 }
 
 fn emit_field<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &Emitter<'arena, 'decl>,
     field: &'a (Sid, Hint, Option<Expr>),
 ) -> Result<RecordField<'arena>> {
     let (Id(pos, name), hint, expr_opt) = field;
     let otv = expr_opt
         .as_ref()
-        .and_then(|e| constant_folder::expr_to_typed_value(alloc, emitter, e).ok());
+        .and_then(|e| constant_folder::expr_to_typed_value(emitter.alloc, emitter, e).ok());
     let ti = emit_type_hint::hint_to_type_info(
-        alloc,
+        emitter.alloc,
         &emit_type_hint::Kind::Property,
         false,
         false,
@@ -46,7 +45,7 @@ fn emit_field<'a, 'arena, 'decl>(
     )?;
     if valid_tc_for_record_field(&ti.type_constraint) {
         Ok(RecordField(
-            Str::new_str(alloc, name.as_str()),
+            Str::new_str(emitter.alloc, name.as_str()),
             ti,
             Maybe::from(otv),
         ))
@@ -60,7 +59,6 @@ fn emit_field<'a, 'arena, 'decl>(
 }
 
 fn emit_record_def<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &Emitter<'arena, 'decl>,
     rd: &'a RecordDef,
 ) -> Result<HhasRecord<'arena>> {
@@ -70,7 +68,7 @@ fn emit_record_def<'a, 'arena, 'decl>(
     let parent_name = match &rd.extends {
         Some(Hint(_, h)) => {
             if let Hint_::Happly(id, _) = h.as_ref() {
-                Some(elaborate(alloc, id))
+                Some(elaborate(emitter.alloc, id))
             } else {
                 None
             }
@@ -80,26 +78,22 @@ fn emit_record_def<'a, 'arena, 'decl>(
     let fields = rd
         .fields
         .iter()
-        .map(|f| emit_field(alloc, emitter, &f))
+        .map(|f| emit_field(emitter, &f))
         .collect::<Result<Vec<_>>>()?;
     Ok(HhasRecord {
-        name: elaborate(alloc, &rd.name),
+        name: elaborate(emitter.alloc, &rd.name),
         is_abstract: rd.abstract_,
         base: Maybe::from(parent_name),
-        fields: Slice::fill_iter(alloc, fields.into_iter()),
+        fields: Slice::fill_iter(emitter.alloc, fields.into_iter()),
         span: HhasSpan::from_pos(&rd.span),
     })
 }
 
 pub fn emit_record_defs_from_program<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &Emitter<'arena, 'decl>,
     p: &'a [Def],
 ) -> Result<Vec<HhasRecord<'arena>>> {
     p.iter()
-        .filter_map(|d| {
-            d.as_record_def()
-                .map(|r| emit_record_def(alloc, emitter, r))
-        })
+        .filter_map(|d| d.as_record_def().map(|r| emit_record_def(emitter, r)))
         .collect::<Result<Vec<_>>>()
 }

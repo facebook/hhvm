@@ -617,10 +617,10 @@ function canonical_path_from_base(string $test, string $base): mixed {
     return substr($full, strlen($base) + 1);
   }
   $dirstat = stat($base);
-  if (!is_array($dirstat)) return false;
+  if (!is_dict($dirstat)) return false;
   for ($p = dirname($full); $p && $p !== "/"; $p = dirname($p)) {
     $s = stat($p);
-    if (!is_array($s)) continue;
+    if (!is_dict($s)) continue;
     if ($s['ino'] === $dirstat['ino'] && $s['dev'] === $dirstat['dev']) {
       return substr($full, strlen($p) + 1);
     }
@@ -3916,7 +3916,7 @@ function main(vec<string> $argv): int {
   foreach ($json_results_files as $json_results_file) {
     $contents = file_get_contents($json_results_file);
     $json = json_decode($contents, true);
-    if (!is_array($json)) {
+    if (!is_dict($json)) {
       error(
         "\nNo JSON output was received from a test thread. ".
         "Either you killed it, or it might be a bug in the test script.",

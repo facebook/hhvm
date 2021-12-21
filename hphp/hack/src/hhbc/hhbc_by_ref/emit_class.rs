@@ -749,18 +749,17 @@ pub fn emit_class<'a, 'arena, 'decl>(
     let mut additional_methods: Vec<HhasMethod<'arena>> = vec![];
     if let Some(cats) = xhp_categories {
         additional_methods.push(emit_xhp::from_category_declaration(
-            alloc, emitter, ast_class, &cats,
+            emitter, ast_class, &cats,
         )?)
     }
     if let Some(children) = xhp_children {
         additional_methods.push(emit_xhp::from_children_declaration(
-            alloc, emitter, ast_class, &children,
+            emitter, ast_class, &children,
         )?)
     }
     let no_xhp_attributes = xhp_attributes.is_empty() && ast_class.xhp_attr_uses.is_empty();
     if !no_xhp_attributes {
         additional_methods.push(emit_xhp::from_attribute_declaration(
-            alloc,
             emitter,
             ast_class,
             &xhp_attributes,
@@ -915,7 +914,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
 
     if !no_xhp_attributes {
         properties.extend(emit_xhp::properties_for_cache(
-            alloc, emitter, ast_class, is_const,
+            emitter, ast_class, is_const,
         )?);
     }
     let info = emit_memoize_method::make_info(ast_class, name, &ast_class.methods)?;

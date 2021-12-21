@@ -15,14 +15,13 @@ use hhbc_by_ref_instruction_sequence::{unrecoverable, Result};
 use oxidized::{ast::*, ast_defs, local_id, pos::Pos};
 
 pub fn properties_for_cache<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     class: &'a Class_,
     class_is_const: bool,
 ) -> Result<Option<HhasProperty<'arena>>> {
     let initial_value = Some(Expr((), Pos::make_none(), Expr_::mk_null()));
     let property = emit_property::from_ast(
-        alloc,
+        emitter.alloc,
         emitter,
         class,
         &[],
@@ -43,7 +42,6 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
 }
 
 pub fn from_attribute_declaration<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     class: &'a Class_,
     xal: &[HhasXhpAttribute<'_>],
@@ -124,7 +122,10 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
             _ => return Err(unrecoverable("Xhp use attribute - unexpected attribute")),
         }
     }
-    args.push((ParamKind::Pnormal, emit_xhp_attribute_array(alloc, xal)?));
+    args.push((
+        ParamKind::Pnormal,
+        emit_xhp_attribute_array(emitter.alloc, xal)?,
+    ));
     let array_merge_call = mk_expr(Expr_::mk_call(
         mk_expr(id_from_str("__SystemLib\\merge_xhp_attr_declarations")),
         vec![],
@@ -145,7 +146,6 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
     let token3 = mk_stmt(Stmt_::mk_return(Some(mk_var_r()))); // return $r;
     let body = vec![token1, token2, token3];
     from_xhp_attribute_declaration_method(
-        alloc,
         emitter,
         class,
         None,
@@ -159,7 +159,6 @@ pub fn from_attribute_declaration<'a, 'arena, 'decl>(
 }
 
 pub fn from_children_declaration<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a Class_,
     (pos, children): &(&ast_defs::Pos, Vec<&XhpChild>),
@@ -167,7 +166,6 @@ pub fn from_children_declaration<'a, 'arena, 'decl>(
     let children_arr = mk_expr(emit_xhp_children_array(children)?);
     let body = vec![Stmt((*pos).clone(), Stmt_::mk_return(Some(children_arr)))];
     from_xhp_attribute_declaration_method(
-        alloc,
         emitter,
         ast_class,
         Some((*pos).clone()),
@@ -181,7 +179,6 @@ pub fn from_children_declaration<'a, 'arena, 'decl>(
 }
 
 pub fn from_category_declaration<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a Class_,
     (pos, categories): &(&ast_defs::Pos, Vec<&String>),
@@ -189,7 +186,6 @@ pub fn from_category_declaration<'a, 'arena, 'decl>(
     let category_arr = mk_expr(get_category_array(categories));
     let body = vec![mk_stmt(Stmt_::mk_return(Some(category_arr)))];
     from_xhp_attribute_declaration_method(
-        alloc,
         emitter,
         ast_class,
         Some((*pos).clone()),
@@ -437,7 +433,6 @@ fn emit_xhp_attribute_array<'arena>(
 }
 
 fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     class: &'a Class_,
     pos: Option<Pos>,
@@ -471,7 +466,7 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
         external: false,
         doc_comment: None,
     };
-    emit_method::from_ast(alloc, emitter, class, meth)
+    emit_method::from_ast(emitter.alloc, emitter, class, meth)
 }
 
 fn mk_expr(expr_: Expr_) -> Expr {

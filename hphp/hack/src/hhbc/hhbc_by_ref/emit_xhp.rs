@@ -465,7 +465,7 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
         external: false,
         doc_comment: None,
     };
-    emit_method::from_ast(emitter.alloc, emitter, class, meth)
+    emit_method::from_ast(emitter, class, meth)
 }
 
 fn mk_expr(expr_: Expr_) -> Expr {

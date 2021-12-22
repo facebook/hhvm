@@ -27,19 +27,17 @@ use itertools::Either;
 use std::borrow::Cow;
 
 pub fn from_asts<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     class: &'a T::Class_,
     methods: &'a [T::Method_],
 ) -> Result<Vec<HhasMethod<'arena>>> {
     methods
         .iter()
-        .map(|m| from_ast(alloc, emitter, class, m))
+        .map(|m| from_ast(emitter, class, m))
         .collect()
 }
 
 pub fn from_ast<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     class: &'a T::Class_,
     method_: impl Into<Cow<'a, T::Method_>>,
@@ -55,7 +53,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     let mut attributes = emit_attribute::from_asts(emitter, &method.user_attributes)?;
     if !is_closure_body {
         attributes.extend(emit_attribute::add_reified_attribute(
-            alloc,
+            emitter.alloc,
             &method.tparams[..],
         ));
     };
@@ -125,7 +123,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     };
     let default_dropthrough = if method.abstract_ {
         Some(emit_fatal_runtimeomitframe(
-            alloc,
+            emitter.alloc,
             &&method.name.0,
             format!(
                 "Cannot call abstract method {}::{}()",
@@ -162,11 +160,11 @@ pub fn from_ast<'a, 'arena, 'decl>(
             .emit_global_state()
             .get_lambda_coeffects_of_scope(&class.name.1, &method.name.1);
         parent_coeffects.map_or(HhasCoeffects::default(), |pc| {
-            pc.inherit_to_child_closure(alloc)
+            pc.inherit_to_child_closure(emitter.alloc)
         })
     } else {
         HhasCoeffects::from_ast(
-            alloc,
+            emitter.alloc,
             &method.ctxs,
             &method.params,
             &method.tparams,
@@ -175,7 +173,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     };
 
     if is_closure_body && coeffects.is_86caller() {
-        coeffects = coeffects.with_caller(alloc)
+        coeffects = coeffects.with_caller(emitter.alloc)
     }
 
     if is_native_opcode_impl
@@ -193,7 +191,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         match (class.name.1.as_str(), method.name.1.as_str()) {
             ("\\__SystemLib\\MethCallerHelper", "__invoke")
             | ("\\__SystemLib\\DynMethCallerHelper", "__invoke") => {
-                coeffects = coeffects.with_caller(alloc)
+                coeffects = coeffects.with_caller(emitter.alloc)
             }
             _ => {}
         }
@@ -232,11 +230,11 @@ pub fn from_ast<'a, 'arena, 'decl>(
             coeffects.has_coeffects_local(),
         );
         emit_body::emit_body(
-            alloc,
+            emitter.alloc,
             emitter,
             namespace,
             Either::Right(ast_body_block),
-            instr::null(alloc),
+            instr::null(emitter.alloc),
             scope,
             emit_body::Args {
                 immediate_tparams: &method.tparams,
@@ -255,12 +253,12 @@ pub fn from_ast<'a, 'arena, 'decl>(
     let name = {
         if is_memoize {
             method::MethodType::from_ast_name_and_suffix(
-                alloc,
+                emitter.alloc,
                 &method.name.1,
                 emit_memoize_helpers::MEMOIZE_SUFFIX,
             )
         } else {
-            method::MethodType::from_ast_name(alloc, &method.name.1)
+            method::MethodType::from_ast_name(emitter.alloc, &method.name.1)
         }
     };
     let is_readonly_return = method.readonly_ret.is_some();
@@ -284,7 +282,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     flags.set(HhasMethodFlags::IS_READONLY_THIS, method.readonly_this);
     flags.set(HhasMethodFlags::NO_INJECTION, is_no_injection);
     Ok(HhasMethod {
-        attributes: Slice::fill_iter(alloc, attributes.into_iter()),
+        attributes: Slice::fill_iter(emitter.alloc, attributes.into_iter()),
         visibility: Visibility::from(visibility),
         name,
         body,

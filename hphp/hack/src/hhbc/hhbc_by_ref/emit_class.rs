@@ -896,7 +896,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     additional_methods.extend(linit_method.into_iter());
     additional_methods.extend(cinit_method.into_iter());
 
-    let mut methods = emit_method::from_asts(alloc, emitter, ast_class, &ast_class.methods)?;
+    let mut methods = emit_method::from_asts(emitter, ast_class, &ast_class.methods)?;
     methods.extend(additional_methods.into_iter());
     let (ctxconsts, tconsts): (Vec<_>, Vec<_>) =
         ast_class.typeconsts.iter().partition(|x| x.is_ctx);

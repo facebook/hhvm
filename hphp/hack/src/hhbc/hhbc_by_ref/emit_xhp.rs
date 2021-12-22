@@ -21,7 +21,6 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
 ) -> Result<Option<HhasProperty<'arena>>> {
     let initial_value = Some(Expr((), Pos::make_none(), Expr_::mk_null()));
     let property = emit_property::from_ast(
-        emitter.alloc,
         emitter,
         class,
         &[],

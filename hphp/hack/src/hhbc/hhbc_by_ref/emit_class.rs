@@ -252,7 +252,6 @@ fn from_ctx_constant<'a, 'arena>(
 }
 
 fn from_class_elt_classvars<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     ast_class: &'a ast::Class_,
     class_is_const: bool,
@@ -273,7 +272,6 @@ fn from_class_elt_classvars<'a, 'arena, 'decl>(
             };
 
             emit_property::from_ast(
-                alloc,
                 emitter,
                 ast_class,
                 tparams,
@@ -767,7 +765,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         )?)
     }
     emitter.label_gen_mut().reset();
-    let mut properties = from_class_elt_classvars(alloc, emitter, &ast_class, is_const, &tparams)?;
+    let mut properties = from_class_elt_classvars(emitter, &ast_class, is_const, &tparams)?;
     let constants = from_class_elt_constants(emitter, &env, ast_class)?;
 
     let requirements = from_class_elt_requirements(alloc, ast_class);

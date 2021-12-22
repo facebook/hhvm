@@ -33,13 +33,13 @@ pub struct FromAstArgs<'ast> {
 }
 
 pub fn from_ast<'ast, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     class: &'ast ast::Class_,
     tparams: &[&str],
     class_is_const: bool,
     args: FromAstArgs<'_>,
 ) -> Result<HhasProperty<'arena>> {
+    let alloc = emitter.alloc;
     let ast_defs::Id(pos, cv_name) = args.id;
     let pid: prop::PropType<'arena> = prop::PropType::from_ast_name(alloc, cv_name);
     let attributes = emit_attribute::from_asts(emitter, args.user_attributes)?;

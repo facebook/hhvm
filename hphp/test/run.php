@@ -380,7 +380,7 @@ function read_opts_file(?string $file): string {
     return "";
   }
   $fp = fopen($file, "r");
-  invariant($fp is resource, __METHOD__);
+  invariant($fp is resource, "%s", __METHOD__);
 
   $contents = "";
   for ($line = fgets($fp); $line; $line = fgets($fp)) {
@@ -529,7 +529,7 @@ function get_options(
       }
 
       if (!$found) {
-        $msg = sprintf("Invalid argument: '%s'\nSee {$argv[0]} --help", $arg);
+        $msg = sprintf("Invalid argument: '%s'\nSee %s --help", $arg, $argv[0]);
         error($msg as string);
       }
     } else {
@@ -2185,7 +2185,8 @@ function runif_test_for_feature(
   if ($result === 'ABSENT') return false;
   if ($result === 'PRESENT') return true;
   invariant_violation(
-    "unexpected output from shell_exec in runif_test_for_feature: '$result'"
+    "unexpected output from shell_exec in runif_test_for_feature: '%s'",
+    $result
   );
 }
 
@@ -3045,12 +3046,13 @@ function run_and_log_test(dict<string, mixed> $options, string $test): void {
   } else if ($status is string) {
     invariant(
       preg_match('/^skip-[\w-]+$/', $status),
-      "invalid skip status $status"
+      "invalid skip status %s",
+      $status
     );
     Status::skip($test, substr($status, 5), $time, $stime, $etime);
     clean_intermediate_files($test, $options);
   } else {
-    invariant_violation("invalid status type " . gettype($status));
+    invariant_violation("invalid status type %s", gettype($status));
   }
 }
 
@@ -3851,7 +3853,7 @@ function main(vec<string> $argv): int {
       } else if ($pid) {
         $children[$pid] = $pid;
       } else {
-        invariant($test_bucket is vec<_>, __METHOD__);
+        invariant($test_bucket is vec<_>, "%s", __METHOD__);
         exit(child_main($options, $test_bucket, $json_results_file));
       }
     }

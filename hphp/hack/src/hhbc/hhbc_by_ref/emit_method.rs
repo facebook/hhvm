@@ -202,7 +202,6 @@ pub fn from_ast<'a, 'arena, 'decl>(
     let (body, is_generator, is_pair_generator) = if is_native_opcode_impl {
         (
             emit_native_opcode::emit_body(
-                alloc,
                 emitter,
                 &scope,
                 &class.user_attributes,

@@ -15,7 +15,6 @@ use hhbc_by_ref_local::Local;
 use oxidized::{aast, ast, pos::Pos};
 
 pub fn emit_body<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     scope: &Scope<'a, 'arena>,
     class_attrs: &[ast::UserAttribute],
@@ -23,20 +22,21 @@ pub fn emit_body<'a, 'arena, 'decl>(
     params: &[ast::FunParam],
     ret: Option<&aast::Hint>,
 ) -> Result<HhasBody<'arena>> {
-    let body_instrs = emit_native_opcode_impl(alloc, &name.1, params, class_attrs);
+    let body_instrs = emit_native_opcode_impl(emitter.alloc, &name.1, params, class_attrs);
     let mut tparams = scope
         .get_tparams()
         .iter()
         .map(|tp| tp.name.1.as_str())
         .collect::<Vec<_>>();
     let params = emit_param::from_asts(emitter, &mut tparams, false, scope, params);
-    let return_type_info = emit_body::emit_return_type_info(alloc, tparams.as_slice(), false, ret);
+    let return_type_info =
+        emit_body::emit_return_type_info(emitter.alloc, tparams.as_slice(), false, ret);
 
     body_instrs.and_then(|body_instrs| {
         params.and_then(|params| {
             return_type_info.map(|rti| {
                 let mut body = hhbc_by_ref_hhas_body::default_with_body_instrs(body_instrs);
-                body.params = Slice::fill_iter(alloc, params.into_iter().map(|p| p.0));
+                body.params = Slice::fill_iter(emitter.alloc, params.into_iter().map(|p| p.0));
                 body.return_type_info = Just(rti);
                 body
             })

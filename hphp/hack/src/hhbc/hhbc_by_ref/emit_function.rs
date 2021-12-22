@@ -24,13 +24,13 @@ use oxidized::{ast, ast_defs};
 use itertools::Either;
 
 pub fn emit_function<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     fd: &'a ast::FunDef,
 ) -> Result<Vec<HhasFunction<'arena>>> {
     use ast_defs::FunKind;
     use hhas_function::HhasFunctionFlags;
 
+    let alloc = e.alloc;
     let f = &fd.fun;
     let original_id = FunctionType::from_ast_name(alloc, &f.name.1);
     let mut flags = HhasFunctionFlags::empty();
@@ -183,13 +183,12 @@ pub fn emit_function<'a, 'arena, 'decl>(
 }
 
 pub fn emit_functions_from_program<'a, 'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     ast: &'a [ast::Def],
 ) -> Result<Vec<HhasFunction<'arena>>> {
     Ok(ast
         .iter()
-        .filter_map(|d| d.as_fun().map(|f| emit_function(alloc, e, f)))
+        .filter_map(|d| d.as_fun().map(|f| emit_function(e, f)))
         .collect::<Result<Vec<Vec<_>>>>()?
         .into_iter()
         .flatten()

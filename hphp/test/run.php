@@ -1027,8 +1027,7 @@ function hhvm_cmd(
 
   if (isset($options['cli-server'])) {
     $config = find_file_for_dir(dirname($test), 'config.ini');
-    /* HH_FIXME[4063] ... the container could be null */
-    $ref = $options['servers']['configs'][$config] as ServerRef;
+    $ref = ($options['servers']['configs'] ?? dict[])[$config] as ServerRef;
     $socket = $ref->server['cli-socket'] as string;
     $cmd .= ' -vEval.UseRemoteUnixServer=only';
     $cmd .= ' -vEval.UnixServerPath='.$socket;
@@ -2758,7 +2757,7 @@ function run_config_server(dict<string, mixed> $options, string $test): mixed {
 
   Status::createTestTmpDir($test); // force it to be created
   $config = find_file_for_dir(dirname($test), 'config.ini');
-  $port = $options['servers']['configs'][$config]->server['port'];
+  $port = ($options['servers']['configs'] ?? dict[])[$config]->server['port'];
   $ch = curl_init("localhost:$port/$test");
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_TIMEOUT, SERVER_TIMEOUT);
@@ -3310,11 +3309,10 @@ function msg_loop(int $num_tests, Queue $queue): void {
     Status::hasCursorControl();
   if ($do_progress) {
     $stty = strtolower(Status::getSTTY());
-    $matches = null;
+    $matches = vec[];
     if (preg_match_with_matches("/columns ([0-9]+);/", $stty, inout $matches) ||
         // because BSD has to be different
         preg_match_with_matches("/([0-9]+) columns;/", $stty, inout $matches)) {
-      /* HH_FIXME[4063] ... the container could be null */
       $cols = (int)$matches[1];
     }
   }

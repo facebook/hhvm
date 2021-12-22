@@ -425,7 +425,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     doc_comment: Option<DocComment>,
     opt_env: Option<&Env<'a, 'arena>>,
 ) -> Result<HhasBody<'arena>> {
-    emit_adata::rewrite_typed_values(alloc, emitter, &mut body_instrs)?;
+    emit_adata::rewrite_typed_values(emitter, &mut body_instrs)?;
     if emitter
         .options()
         .hack_compiler_flags

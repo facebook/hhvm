@@ -16,15 +16,13 @@ use hhbc_by_ref_options::HhvmFlags;
 use hhbc_by_ref_runtime::TypedValue;
 
 pub fn rewrite_typed_values<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     instrseq: &mut InstrSeq<'arena>,
 ) -> std::result::Result<(), hhbc_by_ref_instruction_sequence::Error> {
-    instrseq.map_result_mut(&mut |instr| rewrite_typed_value(alloc, emitter, instr))
+    instrseq.map_result_mut(&mut |instr| rewrite_typed_value(emitter, instr))
 }
 
 fn rewrite_typed_value<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     instr: &mut Instruct<'arena>,
 ) -> std::result::Result<(), hhbc_by_ref_instruction_sequence::Error> {
@@ -41,7 +39,7 @@ fn rewrite_typed_value<'arena, 'decl>(
             TypedValue::LazyClass(s) => {
                 let classid: hhbc_by_ref_hhbc_ast::ClassId<'arena> =
                     hhbc_by_ref_hhbc_id::class::ClassType::from_ast_name_and_mangle(
-                        alloc,
+                        e.alloc,
                         s.unsafe_as_str(),
                     );
                 InstructLitConst::LazyClass(classid)
@@ -49,28 +47,28 @@ fn rewrite_typed_value<'arena, 'decl>(
             TypedValue::Float(f) => {
                 let fstr = bumpalo::collections::String::from_str_in(
                     string_utils::float::to_string(*f).as_str(),
-                    alloc,
+                    e.alloc,
                 )
                 .into_bump_str();
                 InstructLitConst::Double(Str::from(fstr))
             }
             TypedValue::Keyset(_) => {
-                let arrayid = Str::from(get_array_identifier(alloc, e, tv));
+                let arrayid = Str::from(get_array_identifier(e, tv));
                 InstructLitConst::Keyset(arrayid)
             }
             TypedValue::Vec(_) => {
-                let arrayid = Str::from(get_array_identifier(alloc, e, tv));
+                let arrayid = Str::from(get_array_identifier(e, tv));
                 InstructLitConst::Vec(arrayid)
             }
             TypedValue::Dict(_) => {
-                let arrayid = Str::from(get_array_identifier(alloc, e, tv));
+                let arrayid = Str::from(get_array_identifier(e, tv));
                 InstructLitConst::Dict(arrayid)
             }
             TypedValue::HhasAdata(d) if d.is_empty() => {
                 return Err(Error::Unrecoverable("HhasAdata may not be empty".into()));
             }
             TypedValue::HhasAdata(d) => {
-                let arrayid = Str::from(get_array_identifier(alloc, e, tv));
+                let arrayid = Str::from(get_array_identifier(e, tv));
                 let d = d.unsafe_as_str();
                 match &d[..1] {
                     VARRAY_PREFIX | VEC_PREFIX => InstructLitConst::Vec(arrayid),
@@ -90,17 +88,16 @@ fn rewrite_typed_value<'arena, 'decl>(
 }
 
 pub fn get_array_identifier<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     tv: &TypedValue<'arena>,
 ) -> &'arena str {
     if e.options().hhvm.flags.contains(HhvmFlags::ARRAY_PROVENANCE) {
-        next_adata_id(alloc, e, tv)
+        next_adata_id(e, tv)
     } else {
-        match e.emit_adata_state_mut(alloc).array_identifier_map.get(tv) {
+        match e.emit_adata_state_mut().array_identifier_map.get(tv) {
             None => {
-                let id = next_adata_id(alloc, e, tv);
-                e.emit_adata_state_mut(alloc)
+                let id = next_adata_id(e, tv);
+                e.emit_adata_state_mut()
                     .array_identifier_map
                     .insert(tv.clone(), id);
                 id
@@ -111,11 +108,11 @@ pub fn get_array_identifier<'arena, 'decl>(
 }
 
 fn next_adata_id<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     value: &TypedValue<'arena>,
 ) -> &'arena str {
-    let mut state = e.emit_adata_state_mut(alloc);
+    let alloc = e.alloc;
+    let mut state = e.emit_adata_state_mut();
     let id: &str = alloc.alloc_str(format!("A_{}", state.array_identifier_counter).as_str());
     state.array_identifier_counter += 1;
     state.adata.push(HhasAdata {
@@ -125,11 +122,8 @@ fn next_adata_id<'arena, 'decl>(
     id
 }
 
-pub fn take<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
-    e: &mut Emitter<'arena, 'decl>,
-) -> AdataState<'arena> {
-    let state = e.emit_adata_state_mut(alloc);
+pub fn take<'arena, 'decl>(e: &mut Emitter<'arena, 'decl>) -> AdataState<'arena> {
+    let state = e.emit_adata_state_mut();
     std::mem::take(state)
 }
 
@@ -147,10 +141,7 @@ mod tests {
     // verify it compiles (no test attribute)
     #[allow(dead_code)]
     #[allow(clippy::needless_lifetimes)]
-    fn mut_state_from_emiter<'arena, 'decl>(
-        alloc: &'arena bumpalo::Bump,
-        e: &mut Emitter<'arena, 'decl>,
-    ) {
-        let _: &mut AdataState<'_> = e.emit_adata_state_mut(alloc);
+    fn mut_state_from_emiter<'arena, 'decl>(e: &mut Emitter<'arena, 'decl>) {
+        let _: &mut AdataState<'_> = e.emit_adata_state_mut();
     }
 }

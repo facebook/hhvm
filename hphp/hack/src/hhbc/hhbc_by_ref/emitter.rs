@@ -116,12 +116,9 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
     pub fn emit_adata_state(&self) -> &AdataState<'arena> {
         self.adata_state_.as_ref().expect("uninit'd adata_state")
     }
-    pub fn emit_adata_state_mut(
-        &mut self,
-        alloc: &'arena bumpalo::Bump,
-    ) -> &mut AdataState<'arena> {
+    pub fn emit_adata_state_mut(&mut self) -> &mut AdataState<'arena> {
         self.adata_state_
-            .get_or_insert_with(|| AdataState::init(alloc))
+            .get_or_insert_with(|| AdataState::init(self.alloc))
     }
 
     pub fn emit_statement_state(&self) -> &StatementState<'arena> {

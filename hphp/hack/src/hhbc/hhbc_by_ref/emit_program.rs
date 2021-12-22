@@ -68,7 +68,7 @@ fn emit_program_<'a, 'arena, 'decl>(
     };
     functions.append(&mut const_inits);
     let file_attributes = emit_file_attributes_from_program(emitter, prog)?;
-    let adata = emit_adata::take(emitter.alloc, emitter).adata;
+    let adata = emit_adata::take(emitter).adata;
     let symbol_refs =
         HhasSymbolRefs::from_symbol_refs_state(emitter.alloc, emit_symbol_refs::take(emitter));
     let fatal = Nothing;

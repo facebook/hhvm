@@ -311,7 +311,7 @@ pub fn get_type_structure_for_hint<'arena, 'decl>(
         false,
         false,
     )?;
-    let i = Str::from(emit_adata::get_array_identifier(e.alloc, e, &tv));
+    let i = Str::from(emit_adata::get_array_identifier(e, &tv));
     Ok(instr::lit_const(e.alloc, InstructLitConst::Dict(i)))
 }
 

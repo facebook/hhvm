@@ -6,7 +6,9 @@
 const int TIMEOUT_SECONDS = 300;
 
 function get_argv(): vec<string> {
-  return \HH\global_get('argv') as vec<string>;
+  return \HH\FIXME\UNSAFE_CAST<vec<mixed>,vec<string>>(
+    \HH\global_get('argv') as vec<_>
+  );
 }
 
 function mtime(): float {

@@ -826,7 +826,6 @@ fn atom_instrs<'a, 'arena, 'decl>(
                                                     &pos,
                                                     InstrSeq::gather(alloc, vec![
                                                         emit_expression::get_type_structure_for_hint(
-                                                            alloc,
                                                             emitter,
                                                             tparams
                                                                 .iter()
@@ -899,7 +898,6 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                             } else {
                                 Ok(Some(InstrSeq::gather(alloc, vec![
                                     emit_expression::get_type_structure_for_hint(
-                                        alloc,
                                         emitter,
                                         tparams
                                             .iter()

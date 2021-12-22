@@ -292,7 +292,6 @@ mod inout_locals {
 } //mod inout_locals
 
 pub fn get_type_structure_for_hint<'arena, 'decl>(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     tparams: &[&str],
     targ_map: &IndexSet<&str>,
@@ -304,7 +303,7 @@ pub fn get_type_structure_for_hint<'arena, 'decl>(
         .map(|(i, n)| (*n, i as i64))
         .collect();
     let tv = emit_type_constant::hint_to_type_constant(
-        alloc,
+        e.alloc,
         e.options(),
         tparams,
         &targ_map,
@@ -312,8 +311,8 @@ pub fn get_type_structure_for_hint<'arena, 'decl>(
         false,
         false,
     )?;
-    let i = Str::from(emit_adata::get_array_identifier(alloc, e, &tv));
-    Ok(instr::lit_const(alloc, InstructLitConst::Dict(i)))
+    let i = Str::from(emit_adata::get_array_identifier(e.alloc, e, &tv));
+    Ok(instr::lit_const(e.alloc, InstructLitConst::Dict(i)))
 }
 
 pub struct Setrange {
@@ -386,7 +385,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     use aast_defs::Lid;
     use ast::Expr_;
-    let alloc = env.arena;
+    let alloc = env.arena; // Should this be emitter.alloc?
     let ast::Expr(_, pos, expr) = expression;
     match expr {
         Expr_::Float(_)
@@ -588,7 +587,7 @@ fn emit_exprs_and_error_on_inout<'a, 'arena, 'decl>(
     exprs: &[(ParamKind, ast::Expr)],
     fn_name: &str,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
+    let alloc = env.arena; // Should this be emitter.alloc?
     if exprs.is_empty() {
         Ok(instr::empty(alloc))
     } else {
@@ -616,7 +615,7 @@ fn emit_exprs<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     exprs: &[ast::Expr],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
+    let alloc = env.arena; // Should this be emitter.alloc?
     if exprs.is_empty() {
         Ok(instr::empty(alloc))
     } else {
@@ -638,7 +637,7 @@ fn emit_id<'a, 'arena, 'decl>(
     use pseudo_consts::*;
     use InstructLitConst::*;
 
-    let alloc = env.arena;
+    let alloc = env.arena; // Should this be emitter.alloc?
     let ast_defs::Id(p, s) = id;
     let res = match s.as_str() {
         G__FILE__ => instr::lit_const(alloc, File),
@@ -671,7 +670,7 @@ fn emit_exit<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     expr_opt: Option<&ast::Expr>,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
+    let alloc = env.arena; // Should this be emitter.alloc?
     Ok(InstrSeq::gather(
         alloc,
         vec![
@@ -687,7 +686,7 @@ fn emit_yield<'a, 'arena, 'decl>(
     pos: &Pos,
     af: &ast::Afield,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
+    let alloc = env.arena; // Should this be emitter.alloc?
     Ok(match af {
         ast::Afield::AFvalue(v) => InstrSeq::gather(
             alloc,
@@ -787,7 +786,7 @@ fn emit_import<'a, 'arena, 'decl>(
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     use ast::ImportFlavor;
-    let alloc = env.arena;
+    let alloc = env.arena; // Should this be emitter.alloc?
     let inc = parse_include(alloc, expr);
     emit_symbol_refs::add_include(e, inc.clone());
     let (expr_instrs, import_op_instr) = match flavor {
@@ -820,7 +819,7 @@ fn emit_string2<'a, 'arena, 'decl>(
     pos: &Pos,
     es: &[ast::Expr],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
+    let alloc = env.arena; // Should this be emitter.alloc?
     if es.is_empty() {
         Err(unrecoverable("String2 with zero araguments is impossible"))
     } else if es.len() == 1 {
@@ -865,7 +864,7 @@ fn emit_clone<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
+    let alloc = env.arena; // Should this be emitter.alloc?
     Ok(InstrSeq::gather(
         alloc,
         vec![emit_expr(e, env, expr)?, instr::clone(alloc)],
@@ -878,7 +877,7 @@ fn emit_lambda<'a, 'arena, 'decl>(
     fndef: &ast::Fun_,
     ids: &[aast_defs::Lid],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
+    let alloc = env.arena; // etc.
     // Closure conversion puts the class number used for CreateCl in the "name"
     // of the function definition
     let fndef_name = &(fndef.name).1;
@@ -983,11 +982,11 @@ fn inline_gena_call<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     arg: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let load_arr = emit_expr(emitter, env, arg)?;
     let async_eager_label = emitter.label_gen_mut().next_regular();
 
-    scope::with_unnamed_local(alloc, emitter, |alloc, e, arr_local| {
+    scope::with_unnamed_local(emitter, |e, arr_local| {
+        let alloc = e.alloc;
         let before = InstrSeq::gather(
             alloc,
             vec![
@@ -1021,7 +1020,6 @@ fn inline_gena_call<'a, 'arena, 'decl>(
                 instr::label(alloc, async_eager_label),
                 instr::popc(alloc),
                 emit_iter(
-                    alloc,
                     e,
                     instr::cgetl(alloc, arr_local),
                     |alloc, val_local, key_local| {
@@ -1056,12 +1054,12 @@ fn emit_iter<
     'decl,
     F: FnOnce(&'arena bumpalo::Bump, Local<'arena>, Local<'arena>) -> InstrSeq<'arena>,
 >(
-    alloc: &'arena bumpalo::Bump,
     e: &mut Emitter<'arena, 'decl>,
     collection: InstrSeq<'arena>,
     f: F,
 ) -> Result<InstrSeq<'arena>> {
-    scope::with_unnamed_locals_and_iterators(alloc, e, |alloc, e| {
+    scope::with_unnamed_locals_and_iterators(e, |e| {
+        let alloc = e.alloc;
         let iter_id = e.iterator_mut().get();
         let val_id = e.local_gen_mut().get_unnamed();
         let key_id = e.local_gen_mut().get_unnamed();
@@ -1994,7 +1992,7 @@ fn emit_call_default<'a, 'arena, 'decl>(
     fcall_args: FcallArgs<'arena>,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    scope::with_unnamed_locals(alloc, e, |alloc, em| {
+    scope::with_unnamed_locals(e, |em| {
         let FcallArgs(_, _, num_ret, _, _, _, _) = &fcall_args;
         let num_uninit = num_ret - 1;
         let (lhs, fcall) = emit_call_lhs_and_fcall(em, env, expr, fcall_args, targs, None)?;
@@ -3518,7 +3516,7 @@ fn emit_is<'a, 'arena, 'decl>(
             _ => InstrSeq::gather(
                 alloc,
                 vec![
-                    get_type_structure_for_hint(alloc, e, &[], &IndexSet::new(), h)?,
+                    get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
                     instr::is_type_structc_resolve(alloc),
                 ],
             ),
@@ -3911,7 +3909,8 @@ fn emit_new<'a, 'arena, 'decl>(
         _ => (cexpr, H::NoGenerics),
     };
     if is_reflection_class_builtin {
-        scope::with_unnamed_locals(alloc, e, |alloc, e| {
+        scope::with_unnamed_locals(e, |e| {
+            let alloc = e.alloc;
             let instr_args = emit_exprs(e, env, args)?;
             let instr_uargs = match uarg {
                 None => instr::empty(alloc),
@@ -3969,7 +3968,8 @@ fn emit_new<'a, 'arena, 'decl>(
                 ],
             ),
         };
-        scope::with_unnamed_locals(alloc, e, |alloc, e| {
+        scope::with_unnamed_locals(e, |e| {
+            let alloc = e.alloc;
             let instr_args = emit_exprs(e, env, args)?;
             let instr_uargs = match uarg {
                 None => instr::empty(alloc),
@@ -5333,10 +5333,10 @@ fn emit_pipe<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     (_, e1, e2): &(aast_defs::Lid, ast::Expr, ast::Expr),
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let lhs_instrs = emit_expr(e, env, e1)?;
-    scope::with_unnamed_local(alloc, e, |alloc, e, local| {
+    scope::with_unnamed_local(e, |e, local| {
         // TODO(hrust) avoid cloning env
+        let alloc = e.alloc;
         let mut pipe_env = env.clone();
         pipe_env.with_pipe_var(local);
         let rhs_instrs = emit_expr(e, &pipe_env, e2)?;
@@ -5394,7 +5394,7 @@ fn emit_as<'a, 'arena, 'decl>(
         };
         let i2 = if is_static {
             main_block(
-                get_type_structure_for_hint(alloc, e, &[], &IndexSet::new(), h)?,
+                get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
                 TypestructResolveOp::Resolve,
             )
         } else {
@@ -6162,7 +6162,8 @@ pub fn emit_lval_op<'a, 'arena, 'decl>(
             if !has_elements {
                 Ok(instr_rhs)
             } else {
-                scope::with_unnamed_local(alloc, e, |alloc, e, local| {
+                scope::with_unnamed_local(e, |e, local| {
+                    let alloc = e.alloc;
                     let loc = if can_use_as_rhs_in_list_assignment(&expr2.2)? {
                         Some(&local)
                     } else {
@@ -6794,11 +6795,11 @@ fn emit_class_expr<'a, 'arena, 'decl>(
     cexpr: ClassExpr<'arena>,
     prop: &ast::ClassGetExpr,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
-    let load_prop = |alloc: &'arena bumpalo::Bump, e: &mut Emitter<'arena, 'decl>| match prop {
+    let load_prop = |e: &mut Emitter<'arena, 'decl>| match prop {
         ast::ClassGetExpr::CGstring((pos, id)) => Ok(emit_pos_then(
-            alloc,
+            e.alloc,
             pos,
-            instr::string(alloc, string_utils::locals::strip_dollar(id)),
+            instr::string(e.alloc, string_utils::locals::strip_dollar(id)),
         )),
         ast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
     };
@@ -6820,7 +6821,7 @@ fn emit_class_expr<'a, 'arena, 'decl>(
                     alloc,
                     vec![
                         cexpr_local,
-                        scope::stash_top_in_unnamed_local(alloc, e, load_prop)?,
+                        scope::stash_top_in_unnamed_local(e, load_prop)?,
                         instr::classgetc(alloc),
                     ],
                 ),
@@ -6831,10 +6832,7 @@ fn emit_class_expr<'a, 'arena, 'decl>(
                 ast::ClassGetExpr::CGstring((pos, _))
                 | ast::ClassGetExpr::CGexpr(ast::Expr(_, pos, _)) => pos,
             };
-            (
-                load_prop(alloc, e)?,
-                emit_load_class_ref(e, env, pos, cexpr)?,
-            )
+            (load_prop(e)?, emit_load_class_ref(e, env, pos, cexpr)?)
         }
     })
 }
@@ -7002,7 +7000,7 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
         }
         _ => {
             let alloc = env.arena;
-            let ts = get_type_structure_for_hint(alloc, e, &[], &collector.acc, hint)?;
+            let ts = get_type_structure_for_hint(e, &[], &collector.acc, hint)?;
             let ts_list = if collector.acc.is_empty() {
                 ts
             } else {

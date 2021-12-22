@@ -160,7 +160,6 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
                             alloc,
                             vec![
                                 emit_expression::get_type_structure_for_hint(
-                                    alloc,
                                     e,
                                     &[],
                                     &IndexSet::new(),

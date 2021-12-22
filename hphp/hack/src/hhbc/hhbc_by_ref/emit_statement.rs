@@ -139,7 +139,8 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
                             let awaited_instrs = emit_await(e, env, await_pos, e_await)?;
                             let has_elements = l.iter().any(|e| !e.2.is_omitted());
                             if has_elements {
-                                scope::with_unnamed_local(alloc, e, |alloc, e, temp| {
+                                scope::with_unnamed_local(e, |e, temp| {
+                                    let alloc = e.alloc;
                                     Ok((
                                         InstrSeq::gather(
                                             alloc,
@@ -316,8 +317,8 @@ fn emit_awaitall_single<'a, 'arena, 'decl>(
     expr: &ast::Expr,
     block: &ast::Block,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
-    scope::with_unnamed_locals(alloc, e, |alloc, e| {
+    scope::with_unnamed_locals(e, |e| {
+        let alloc = e.alloc;
         let load_arg = emit_expr::emit_await(e, env, pos, expr)?;
         let (load, unset) = match lval {
             None => (instr::popc(alloc), instr::empty(alloc)),
@@ -343,8 +344,8 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
     el: &[(Option<ast::Lid>, ast::Expr)],
     block: &ast::Block,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
-    scope::with_unnamed_locals(alloc, e, |alloc, e| {
+    scope::with_unnamed_locals(e, |e| {
+        let alloc = e.alloc;
         let mut instrs = vec![];
         for (_, expr) in el.iter() {
             instrs.push(emit_expr::emit_expr(e, env, expr)?)
@@ -1055,9 +1056,9 @@ fn emit_foreach_<'a, 'arena, 'decl>(
     iterator: &ast::AsExpr,
     block: &[ast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let collection_instrs = emit_expr::emit_expr(e, env, collection)?;
-    scope::with_unnamed_locals_and_iterators(alloc, e, |alloc, e| {
+    scope::with_unnamed_locals_and_iterators(e, |e| {
+        let alloc = e.alloc;
         let iter_id = e.iterator_mut().get();
         let loop_break_label = e.label_gen_mut().next_regular();
         let loop_continue_label = e.label_gen_mut().next_regular();
@@ -1108,9 +1109,9 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
     iterator: &ast::AsExpr,
     block: &[ast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let instr_collection = emit_expr::emit_expr(e, env, collection)?;
-    scope::with_unnamed_local(alloc, e, |alloc, e, iter_temp_local| {
+    scope::with_unnamed_local(e, |e, iter_temp_local| {
+        let alloc = e.alloc;
         let input_is_async_iterator_label = e.label_gen_mut().next_regular();
         let next_label = e.label_gen_mut().next_regular();
         let exit_label = e.label_gen_mut().next_regular();
@@ -1459,12 +1460,11 @@ fn emit_foreach_await_lvalue_storage<'a, 'arena, 'decl>(
     indices: &[isize],
     keep_on_stack: bool,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
-    scope::with_unnamed_local(alloc, e, |alloc, e, local| {
+    scope::with_unnamed_local(e, |e, local| {
         Ok((
-            instr::popl(alloc, local),
+            instr::popl(e.alloc, local),
             (
-                alloc,
+                e.alloc,
                 emit_expr::emit_lval_op_list(
                     e,
                     env,
@@ -1478,9 +1478,9 @@ fn emit_foreach_await_lvalue_storage<'a, 'arena, 'decl>(
             )
                 .into(),
             if keep_on_stack {
-                instr::pushl(alloc, local)
+                instr::pushl(e.alloc, local)
             } else {
-                instr::unsetl(alloc, local)
+                instr::unsetl(e.alloc, local)
             },
         ))
     })
@@ -1791,8 +1791,8 @@ fn emit_await_assignment<'a, 'arena, 'decl>(
         )),
         _ => {
             let awaited_instrs = emit_await(e, env, pos, r)?;
-            scope::with_unnamed_local(alloc, e, |alloc, e, temp| {
-                let rhs_instrs = instr::pushl(alloc, temp);
+            scope::with_unnamed_local(e, |e, temp| {
+                let rhs_instrs = instr::pushl(e.alloc, temp);
                 let (lhs, rhs, setop) = emit_expr::emit_lval_op_nonlist_steps(
                     e,
                     env,
@@ -1805,9 +1805,9 @@ fn emit_await_assignment<'a, 'arena, 'decl>(
                     false, // unnamed local assignment does not need readonly check
                 )?;
                 Ok((
-                    InstrSeq::gather(alloc, vec![awaited_instrs, instr::popl(alloc, temp)]),
+                    InstrSeq::gather(e.alloc, vec![awaited_instrs, instr::popl(e.alloc, temp)]),
                     lhs,
-                    InstrSeq::gather(alloc, vec![rhs, setop, instr::popc(alloc)]),
+                    InstrSeq::gather(e.alloc, vec![rhs, setop, instr::popc(e.alloc)]),
                 ))
             })
         }

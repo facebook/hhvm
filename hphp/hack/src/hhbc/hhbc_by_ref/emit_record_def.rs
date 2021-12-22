@@ -34,7 +34,7 @@ fn emit_field<'a, 'arena, 'decl>(
     let (Id(pos, name), hint, expr_opt) = field;
     let otv = expr_opt
         .as_ref()
-        .and_then(|e| constant_folder::expr_to_typed_value(emitter.alloc, emitter, e).ok());
+        .and_then(|e| constant_folder::expr_to_typed_value(emitter, e).ok());
     let ti = emit_type_hint::hint_to_type_info(
         emitter.alloc,
         &emit_type_hint::Kind::Property,

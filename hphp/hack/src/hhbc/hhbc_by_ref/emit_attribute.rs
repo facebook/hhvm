@@ -28,7 +28,6 @@ pub fn from_ast<'arena, 'decl>(
 ) -> Result<HhasAttribute<'arena>> {
     let arguments = ast_constant_folder::literals_from_exprs(
         &mut attr.params.clone(),
-        e.alloc,
         e,
     )
     .map_err(|err| {

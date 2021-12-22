@@ -116,7 +116,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
             };
             let deep_init = !args.is_static
                 && expr_requires_deep_init(e, emitter.options().emit_class_pointers() > 0);
-            match ast_constant_folder::expr_to_typed_value(alloc, emitter, e) {
+            match ast_constant_folder::expr_to_typed_value(emitter, e) {
                 Ok(tv) if !(deep_init || is_collection_map) => {
                     (Some(tv), None, HhasPropertyFlags::empty())
                 }

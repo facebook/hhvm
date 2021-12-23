@@ -5,24 +5,23 @@
 
 use env::{emitter::Emitter, Env};
 use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
-use hhbc_by_ref_hhas_attribute as hhas_attribute;
-use hhbc_by_ref_hhas_class::{HhasClass, HhasClassFlags, TraitReqKind};
-use hhbc_by_ref_hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
-use hhbc_by_ref_hhas_constant::{self as hhas_constant, HhasConstant};
-use hhbc_by_ref_hhas_method::{HhasMethod, HhasMethodFlags};
-use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhas_pos::HhasSpan;
-use hhbc_by_ref_hhas_property::HhasProperty;
-use hhbc_by_ref_hhas_type::HhasTypeInfo;
-use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
-use hhbc_by_ref_hhas_xhp_attribute::HhasXhpAttribute;
-use hhbc_by_ref_hhbc_ast::{
+use hhas_class::{HhasClass, HhasClassFlags, TraitReqKind};
+use hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
+use hhas_constant::{self as hhas_constant, HhasConstant};
+use hhas_method::{HhasMethod, HhasMethodFlags};
+use hhas_param::HhasParam;
+use hhas_pos::HhasSpan;
+use hhas_property::HhasProperty;
+use hhas_type::HhasTypeInfo;
+use hhas_type_const::HhasTypeConstant;
+use hhas_xhp_attribute::HhasXhpAttribute;
+use hhbc_ast::{
     FatalOp, FcallArgs, FcallFlags, ReadonlyOp, SpecialClsRef, UseAsVisibility, Visibility,
 };
-use hhbc_by_ref_hhbc_id::class::ClassType;
-use hhbc_by_ref_hhbc_id::r#const;
-use hhbc_by_ref_hhbc_id::{self as hhbc_id, class, method, prop, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
+use hhbc_id::class::ClassType;
+use hhbc_id::r#const;
+use hhbc_id::{self as hhbc_id, class, method, prop, Id};
 use instruction_sequence::{instr, InstrSeq, Result};
 use local::Local;
 use naming_special_names_rust as special_names;
@@ -321,7 +320,7 @@ fn from_enum_type<'arena>(
     alloc: &'arena bumpalo::Bump,
     opt: Option<&ast::Enum_>,
 ) -> Result<Option<HhasTypeInfo<'arena>>> {
-    use hhbc_by_ref_hhas_type::constraint::*;
+    use hhas_type::constraint::*;
     opt.map(|e| {
         let type_info_user_type = Just(Str::new_str(
             alloc,
@@ -482,7 +481,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     ast_class: &'a ast::Class_,
 ) -> Result<Option<HhasMethod<'arena>>> {
-    use hhbc_by_ref_hhas_type::constraint::*;
+    use hhas_type::constraint::*;
 
     let alloc = env.arena;
     let num_reified = ast_class

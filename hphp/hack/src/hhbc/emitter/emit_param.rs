@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ast_scope::Scope;
 use emit_type_hint::{hint_to_type_info, Kind};
 use env::{emitter::Emitter, Env};
 use ffi::{Maybe, Nothing, Slice, Str};
-use hhbc_by_ref_ast_scope::Scope;
-use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhas_type::HhasTypeInfo;
+use hhas_param::HhasParam;
+use hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhbc_string_utils::locals::strip_dollar;
 use hhbc_by_ref_options::LangFlags;
 use instruction_sequence::{instr, InstrSeq, Result};

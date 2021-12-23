@@ -10,7 +10,7 @@ path = "../../emit_file_attributes.rs"
 [dependencies]
 emit_attribute = { path = "../emit_attribute" }
 env = { path = "../env" }
-hhbc_by_ref_hhas_attribute = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_attribute" }
+hhas_attribute = { path = "../../../hhbc/cargo/hhas_attribute" }
 instruction_sequence = { path = "../instruction_sequence" }
 itertools = "0.10.3"
 oxidized = { path = "../../../../oxidized" }

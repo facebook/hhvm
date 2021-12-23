@@ -5,12 +5,11 @@
 
 use env::{emitter::Emitter, Env};
 use ffi::Maybe::*;
-use hhbc_by_ref_ast_constant_folder as ast_constant_folder;
-use hhbc_by_ref_hhas_property::{HhasProperty, HhasPropertyFlags};
-use hhbc_by_ref_hhas_type::{constraint, HhasTypeInfo};
-use hhbc_by_ref_hhbc_ast::InitpropOp;
-use hhbc_by_ref_hhbc_id::{prop, Id};
+use hhas_property::{HhasProperty, HhasPropertyFlags};
+use hhas_type::{constraint, HhasTypeInfo};
+use hhbc_ast::InitpropOp;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
+use hhbc_id::{prop, Id};
 use instruction_sequence::{instr, InstrSeq, Result};
 use naming_special_names_rust::{pseudo_consts, user_attributes as ua};
 use oxidized::{aast_defs, ast, ast_defs, doc_comment};
@@ -189,7 +188,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
         initial_value: initial_value.into(),
         initializer_instrs: initializer_instrs.into(),
         flags: hhas_property_flags,
-        visibility: hhbc_by_ref_hhbc_ast::Visibility::from(args.visibility),
+        visibility: hhbc_ast::Visibility::from(args.visibility),
         doc_comment: args
             .doc_comment
             .map(|pstr| ffi::Str::from(alloc.alloc_str(&pstr.0.1)))

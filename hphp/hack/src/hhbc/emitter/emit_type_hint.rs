@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use ffi::{Maybe, Maybe::*, Str};
-use hhbc_by_ref_hhas_type::{constraint, HhasTypeInfo};
-use hhbc_by_ref_hhbc_id::{class, Id as ClassId};
+use hhas_type::{constraint, HhasTypeInfo};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
+use hhbc_id::{class, Id as ClassId};
 use instruction_sequence::{Error::Unrecoverable, Result};
 use naming_special_names_rust::{classes, typehints};
 use oxidized::{

@@ -7,7 +7,7 @@ use crate::emit_statement::Level;
 use crate::reified_generics_helpers as reified;
 use emit_pos::emit_pos;
 use env::{emitter::Emitter, jump_targets as jt, Env};
-use hhbc_by_ref_hhbc_ast::{self as hhbc_ast, Instruct};
+use hhbc_ast::{self as hhbc_ast, Instruct};
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
 

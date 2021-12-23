@@ -3,22 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ast_scope::{self as ast_scope, Scope, ScopeItem};
 use emit_fatal::{raise_fatal_parse, raise_fatal_runtime};
 use emit_pos::emit_pos_then;
 use env::{emitter::Emitter, Env};
 use ffi::Slice;
-use hhbc_by_ref_ast_scope::{self as ast_scope, Scope, ScopeItem};
-use hhbc_by_ref_hhas_attribute::deprecation_info;
-use hhbc_by_ref_hhas_body::HhasBody;
-use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
-use hhbc_by_ref_hhas_method::{HhasMethod, HhasMethodFlags};
-use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhas_pos::HhasSpan;
-use hhbc_by_ref_hhas_type::HhasTypeInfo;
-use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags, SpecialClsRef, Visibility};
-use hhbc_by_ref_hhbc_id::{class, method, Id};
+use hhas_attribute::deprecation_info;
+use hhas_body::HhasBody;
+use hhas_coeffects::HhasCoeffects;
+use hhas_method::{HhasMethod, HhasMethodFlags};
+use hhas_param::HhasParam;
+use hhas_pos::HhasSpan;
+use hhas_type::HhasTypeInfo;
+use hhbc_ast::{FcallArgs, FcallFlags, SpecialClsRef, Visibility};
 use hhbc_by_ref_hhbc_string_utils::reified;
 use hhbc_by_ref_options::{HhvmFlags, Options};
+use hhbc_id::{class, method, Id};
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
 use local::Local;

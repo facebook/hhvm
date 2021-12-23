@@ -3,17 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ast_class_expr::ClassExpr;
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env, Flags as EnvFlags};
 use ffi::{Maybe::Just, Slice, Str};
-use hhbc_by_ref_ast_class_expr::ClassExpr;
-use hhbc_by_ref_ast_constant_folder as ast_constant_folder;
+use hhbc_ast::*;
 use hhbc_by_ref_hhbc_assertion_utils::*;
-use hhbc_by_ref_hhbc_ast::*;
-use hhbc_by_ref_hhbc_id::{class, r#const, function, method, prop, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_options::{CompilerFlags, HhvmFlags, LangFlags, Options};
-use hhbc_by_ref_scope::scope;
+use hhbc_id::{class, r#const, function, method, prop, Id};
 use instruction_sequence::{
     instr, unrecoverable,
     Error::{self, Unrecoverable},
@@ -37,6 +35,7 @@ use oxidized::{
 };
 use regex::Regex;
 use runtime::TypedValue;
+use scope::scope;
 use symbol_refs_state::IncludePath;
 
 use hash::HashSet;

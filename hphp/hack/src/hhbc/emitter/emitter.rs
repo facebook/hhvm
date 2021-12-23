@@ -6,8 +6,8 @@
 use hhbc_by_ref_options::Options;
 use iterator::Iter;
 
+use adata_state::AdataState;
 use global_state::GlobalState;
-use hhbc_by_ref_adata_state::AdataState;
 use oxidized_by_ref::{file_info::NameType, shallow_decl_defs};
 use statement_state::StatementState;
 use symbol_refs_state::SymbolRefsState;

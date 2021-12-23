@@ -8,6 +8,7 @@ edition = "2021"
 path = "../../emit_method.rs"
 
 [dependencies]
+ast_scope = { path = "../../../hhbc/cargo/ast_scope" }
 emit_attribute = { path = "../emit_attribute" }
 emit_body = { path = "../emit_body" }
 emit_fatal = { path = "../emit_fatal" }
@@ -15,15 +16,14 @@ emit_memoize_helpers = { path = "../emit_memoize_helpers" }
 emit_native_opcode = { path = "../emit_native_opcode" }
 env = { path = "../env" }
 ffi = { path = "../../../../utils/ffi" }
-hhbc_by_ref_ast_scope = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_ast_scope" }
-hhbc_by_ref_hhas_attribute = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_attribute" }
-hhbc_by_ref_hhas_coeffects = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_coeffects" }
-hhbc_by_ref_hhas_method = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_method" }
-hhbc_by_ref_hhas_pos = { path = "../../../hhbc_by_ref/cargo/hhas_by_ref_hhas_pos" }
-hhbc_by_ref_hhbc_ast = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_ast" }
-hhbc_by_ref_hhbc_id = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_id" }
+hhas_attribute = { path = "../../../hhbc/cargo/hhas_attribute" }
+hhas_coeffects = { path = "../../../hhbc/cargo/hhas_coeffects" }
+hhas_method = { path = "../../../hhbc/cargo/hhas_method" }
+hhas_pos = { path = "../../../hhbc/cargo/hhas_pos" }
+hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
 hhbc_by_ref_hhbc_string_utils = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_string_utils" }
 hhbc_by_ref_options = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_options" }
+hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
 instruction_sequence = { path = "../instruction_sequence" }
 itertools = "0.10.3"
 naming_special_names_rust = { path = "../../../../naming" }

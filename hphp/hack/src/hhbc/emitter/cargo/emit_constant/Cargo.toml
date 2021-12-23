@@ -13,11 +13,11 @@ emit_body = { path = "../emit_body" }
 emit_type_hint = { path = "../emit_type_hint" }
 env = { path = "../env" }
 ffi = { path = "../../../../utils/ffi" }
-hhbc_by_ref_hhas_coeffects = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_coeffects" }
-hhbc_by_ref_hhas_constant = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_constant" }
-hhbc_by_ref_hhas_function = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_function" }
-hhbc_by_ref_hhas_pos = { path = "../../../hhbc_by_ref/cargo/hhas_by_ref_hhas_pos" }
-hhbc_by_ref_hhbc_id = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_id" }
+hhas_coeffects = { path = "../../../hhbc/cargo/hhas_coeffects" }
+hhas_constant = { path = "../../../hhbc/cargo/hhas_constant" }
+hhas_function = { path = "../../../hhbc/cargo/hhas_function" }
+hhas_pos = { path = "../../../hhbc/cargo/hhas_pos" }
 hhbc_by_ref_hhbc_string_utils = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_string_utils" }
+hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
 instruction_sequence = { path = "../instruction_sequence" }
 oxidized = { path = "../../../../oxidized" }

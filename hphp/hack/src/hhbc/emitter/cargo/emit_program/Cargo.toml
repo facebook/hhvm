@@ -20,9 +20,9 @@ emit_symbol_refs = { path = "../emit_symbol_refs" }
 emit_typedef = { path = "../emit_typedef" }
 env = { path = "../env" }
 ffi = { path = "../../../../utils/ffi" }
-hhbc_by_ref_hhas_program = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_program" }
-hhbc_by_ref_hhas_symbol_refs = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_symbol_refs" }
-hhbc_by_ref_hhbc_ast = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_ast" }
+hhas_program = { path = "../../../hhbc/cargo/hhas_program" }
+hhas_symbol_refs = { path = "../../../hhbc/cargo/hhas_symbol_refs" }
+hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
 instruction_sequence = { path = "../instruction_sequence" }
 ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }

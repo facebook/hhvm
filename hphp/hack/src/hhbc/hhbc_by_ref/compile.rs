@@ -15,8 +15,8 @@ use bytecode_printer::{print_program, Context};
 use decl_provider::NoDeclProvider;
 use emit_program::{emit_program, FromAstFlags};
 use env::emitter::Emitter;
-use hhbc_by_ref_hhas_program::HhasProgram;
-use hhbc_by_ref_hhbc_ast::FatalOp;
+use hhas_program::HhasProgram;
+use hhbc_ast::FatalOp;
 use hhbc_by_ref_options::{
     Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, PhpismFlags, RepoFlags,
 };

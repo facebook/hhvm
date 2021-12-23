@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use emit_attribute::from_asts;
 use env::emitter::Emitter;
-use hhbc_by_ref_hhas_attribute::HhasAttribute;
+use hhas_attribute::HhasAttribute;
 use instruction_sequence::Result;
 use itertools::Itertools;
 use oxidized::ast;

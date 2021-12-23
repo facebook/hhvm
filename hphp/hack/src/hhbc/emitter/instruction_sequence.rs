@@ -8,7 +8,7 @@ use ffi::{
     Maybe::{self, Just, Nothing},
     Pair, Slice, Str,
 };
-use hhbc_by_ref_hhbc_ast::*;
+use hhbc_ast::*;
 use iterator::Id as IterId;
 use label::Label;
 use local::Local;

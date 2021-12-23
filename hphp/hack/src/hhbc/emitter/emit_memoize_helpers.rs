@@ -5,9 +5,9 @@
 
 use emit_fatal::raise_fatal_runtime;
 use ffi::Str;
-use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhbc_ast::{FcallArgs, FcallFlags};
-use hhbc_by_ref_hhbc_id::function;
+use hhas_param::HhasParam;
+use hhbc_ast::{FcallArgs, FcallFlags};
+use hhbc_id::function;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
 use local::Local;

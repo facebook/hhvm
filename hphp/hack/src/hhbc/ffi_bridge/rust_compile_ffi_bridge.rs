@@ -200,10 +200,7 @@ pub struct DeclParserOptions(
 );
 
 #[repr(C)]
-pub struct HhasProgramWrapper(
-    hhbc_by_ref_hhas_program::HhasProgram<'static>,
-    bumpalo::Bump,
-);
+pub struct HhasProgramWrapper(hhas_program::HhasProgram<'static>, bumpalo::Bump);
 
 ///////////////////////////////////////////////////////////////////////////////////
 

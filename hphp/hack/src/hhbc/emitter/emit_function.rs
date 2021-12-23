@@ -5,15 +5,15 @@
 
 mod emit_memoize_function;
 
+use ast_scope::{self as ast_scope, Scope, ScopeItem};
 use emit_body::{self as emit_body};
 use env::emitter::Emitter;
 use ffi::{Slice, Str};
-use hhbc_by_ref_ast_scope::{self as ast_scope, Scope, ScopeItem};
-use hhbc_by_ref_hhas_attribute::{self as hhas_attribute, HhasAttribute};
-use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
-use hhbc_by_ref_hhas_function::{self as hhas_function, HhasFunction};
-use hhbc_by_ref_hhas_pos::HhasSpan;
-use hhbc_by_ref_hhbc_id::{class::ClassType, function::FunctionType, Id};
+use hhas_attribute::{self as hhas_attribute, HhasAttribute};
+use hhas_coeffects::HhasCoeffects;
+use hhas_function::{self as hhas_function, HhasFunction};
+use hhas_pos::HhasSpan;
+use hhbc_id::{class::ClassType, function::FunctionType, Id};
 use instruction_sequence::{instr, Result};
 use naming_special_names_rust::user_attributes as ua;
 use ocamlrep::rc::RcOc;

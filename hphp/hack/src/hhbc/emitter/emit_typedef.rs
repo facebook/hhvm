@@ -4,10 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::emitter::Emitter;
-use hhbc_by_ref_hhas_pos::HhasSpan;
-use hhbc_by_ref_hhas_type::HhasTypeInfo;
-use hhbc_by_ref_hhas_typedef::HhasTypedef;
-use hhbc_by_ref_hhbc_id::{class::ClassType, Id};
+use hhas_pos::HhasSpan;
+use hhas_type::HhasTypeInfo;
+use hhas_typedef::HhasTypedef;
+use hhbc_id::{class::ClassType, Id};
 use instruction_sequence::Result;
 use oxidized::{aast_defs::Hint, ast};
 use runtime::TypedValue;

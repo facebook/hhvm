@@ -5,10 +5,10 @@
 
 use std::borrow::Cow;
 
+use ast_class_expr::ClassExpr;
 use env::emitter::Emitter;
 use ffi::Pair;
-use hhbc_by_ref_ast_class_expr::ClassExpr;
-use hhbc_by_ref_hhas_body::HhasBodyEnv;
+use hhas_body::HhasBodyEnv;
 use oxidized::{ast, ast_defs, pos::Pos};
 
 pub trait SpecialClassResolver {

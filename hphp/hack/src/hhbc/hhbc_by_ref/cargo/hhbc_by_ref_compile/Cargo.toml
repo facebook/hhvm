@@ -17,8 +17,8 @@ decl_provider = { path = "../../../decl_provider" }
 elaborate_namespaces_visitor = { path = "../../../../naming/cargo/elaborate_namespaces" }
 emit_program = { path = "../../../emitter/cargo/emit_program" }
 env = { path = "../../../emitter/cargo/env" }
-hhbc_by_ref_hhas_program = { path = "../hhbc_by_ref_hhas_program" }
-hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
+hhas_program = { path = "../../../hhbc/cargo/hhas_program" }
+hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
 hhbc_by_ref_options = { path = "../hhbc_by_ref_options" }
 hhbc_by_ref_rewrite_program = { path = "../hhbc_by_ref_rewrite_program" }
 instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }

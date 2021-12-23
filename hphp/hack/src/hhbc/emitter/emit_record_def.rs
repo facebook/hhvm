@@ -5,12 +5,11 @@
 
 use env::emitter::Emitter;
 use ffi::{Maybe, Maybe::*, Slice, Str};
-use hhbc_by_ref_ast_constant_folder as constant_folder;
-use hhbc_by_ref_hhas_pos::HhasSpan;
-use hhbc_by_ref_hhas_record_def::{Field as RecordField, HhasRecord};
-use hhbc_by_ref_hhas_type::constraint;
-use hhbc_by_ref_hhbc_id::record::RecordType;
+use hhas_pos::HhasSpan;
+use hhas_record_def::{Field as RecordField, HhasRecord};
+use hhas_type::constraint;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
+use hhbc_id::record::RecordType;
 use instruction_sequence::Result;
 use oxidized::ast::*;
 
@@ -33,7 +32,7 @@ fn emit_field<'a, 'arena, 'decl>(
     let (Id(pos, name), hint, expr_opt) = field;
     let otv = expr_opt
         .as_ref()
-        .and_then(|e| constant_folder::expr_to_typed_value(emitter, e).ok());
+        .and_then(|e| ast_constant_folder::expr_to_typed_value(emitter, e).ok());
     let ti = emit_type_hint::hint_to_type_info(
         emitter.alloc,
         &emit_type_hint::Kind::Property,

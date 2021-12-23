@@ -1,5 +1,5 @@
 use env::emitter::Emitter;
-use hhbc_by_ref_hhbc_id::{class, Id};
+use hhbc_id::{class, Id};
 use instruction_sequence::Result;
 use naming_special_names_rust::pseudo_consts;
 use oxidized::{

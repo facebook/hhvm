@@ -3,18 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ast_scope::{self as ast_scope, Lambda, Scope, ScopeItem};
 use emit_fatal::{emit_fatal_runtimeomitframe, raise_fatal_parse};
 use env::emitter::Emitter;
 use ffi::Slice;
-use hhbc_by_ref_ast_scope::{self as ast_scope, Lambda, Scope, ScopeItem};
-use hhbc_by_ref_hhas_attribute as hhas_attribute;
-use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
-use hhbc_by_ref_hhas_method::{HhasMethod, HhasMethodFlags};
-use hhbc_by_ref_hhas_pos::HhasSpan;
-use hhbc_by_ref_hhbc_ast::Visibility;
-use hhbc_by_ref_hhbc_id::{method, Id};
+use hhas_coeffects::HhasCoeffects;
+use hhas_method::{HhasMethod, HhasMethodFlags};
+use hhas_pos::HhasSpan;
+use hhbc_ast::Visibility;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_options::{HhvmFlags, Options};
+use hhbc_id::{method, Id};
 use instruction_sequence::{instr, Result};
 use naming_special_names_rust::{classes, special_idents, user_attributes};
 use ocamlrep::rc::RcOc;

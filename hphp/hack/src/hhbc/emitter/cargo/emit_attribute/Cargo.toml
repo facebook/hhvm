@@ -8,15 +8,15 @@ edition = "2021"
 path = "../../emit_attribute.rs"
 
 [dependencies]
+ast_constant_folder = { path = "../../../hhbc/cargo/ast_constant_folder" }
 bumpalo = { version = "3.8", features = ["collections"] }
 emit_expression = { path = "../emit_expression" }
 emit_fatal = { path = "../emit_fatal" }
 env = { path = "../env" }
 escaper = { path = "../../../../utils/escaper" }
 ffi = { path = "../../../../utils/ffi" }
-hhbc_by_ref_ast_constant_folder = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_ast_constant_folder" }
-hhbc_by_ref_hhas_attribute = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_attribute" }
-hhbc_by_ref_hhbc_id = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_id" }
+hhas_attribute = { path = "../../../hhbc/cargo/hhas_attribute" }
+hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
 instruction_sequence = { path = "../instruction_sequence" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }

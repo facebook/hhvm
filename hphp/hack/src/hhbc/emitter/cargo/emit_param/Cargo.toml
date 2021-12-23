@@ -8,6 +8,7 @@ edition = "2021"
 path = "../../emit_param.rs"
 
 [dependencies]
+ast_scope = { path = "../../../hhbc/cargo/ast_scope" }
 bumpalo = { version = "3.8", features = ["collections"] }
 emit_attribute = { path = "../emit_attribute" }
 emit_expression = { path = "../emit_expression" }
@@ -16,9 +17,8 @@ emit_pos = { path = "../emit_pos" }
 emit_type_hint = { path = "../emit_type_hint" }
 env = { path = "../env" }
 ffi = { path = "../../../../utils/ffi" }
-hhbc_by_ref_ast_scope = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_ast_scope" }
-hhbc_by_ref_hhas_param = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_param" }
-hhbc_by_ref_hhas_type = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_type" }
+hhas_param = { path = "../../../hhbc/cargo/hhas_param" }
+hhas_type = { path = "../../../hhbc/cargo/hhas_type" }
 hhbc_by_ref_hhbc_string_utils = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_string_utils" }
 hhbc_by_ref_options = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_options" }
 instruction_sequence = { path = "../instruction_sequence" }

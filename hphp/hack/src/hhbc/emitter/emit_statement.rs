@@ -8,14 +8,14 @@ use emit_expression::{self as emit_expr, emit_await, emit_expr, LValOp, Setrange
 use emit_fatal;
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env};
+use hhbc_ast::*;
 use hhbc_by_ref_hhbc_assertion_utils::*;
-use hhbc_by_ref_hhbc_ast::*;
-use hhbc_by_ref_hhbc_id::{self as hhbc_id, Id};
-use hhbc_by_ref_scope::scope;
+use hhbc_id::Id;
 use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use label::Label;
 use label_rewriter;
 use local::Local;
+use scope::scope;
 use statement_state::StatementState;
 
 use ffi::{Maybe, Slice, Str};

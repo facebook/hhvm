@@ -11,26 +11,25 @@ use reified_generics_helpers as RGH;
 
 use aast::TypeHint;
 use aast_defs::{Hint, Hint_::*};
+use ast_body::AstBody;
+use ast_class_expr::ClassExpr;
+use ast_scope::{Scope, ScopeItem};
 use bytecode_printer::{print_expr, Context, ExprEnv};
 use emit_fatal::{emit_fatal_runtime, raise_fatal_parse};
 use emit_pos::emit_pos;
 use env::{emitter::Emitter, Env};
 use hash::HashSet;
-use hhbc_by_ref_ast_body::AstBody;
-use hhbc_by_ref_ast_class_expr::ClassExpr;
-use hhbc_by_ref_ast_scope::{Scope, ScopeItem};
-use hhbc_by_ref_decl_vars as decl_vars;
-use hhbc_by_ref_hhas_body::{HhasBody, HhasBodyEnv};
-use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhas_type::HhasTypeInfo;
-use hhbc_by_ref_hhbc_ast::{
+use hhas_body::{HhasBody, HhasBodyEnv};
+use hhas_param::HhasParam;
+use hhas_type::HhasTypeInfo;
+use hhbc_ast::{
     ClassishKind, FcallArgs, FcallFlags, Instruct, IstypeOp, MemberKey, MemberOpMode, ParamId,
     QueryOp, ReadonlyOp,
 };
-use hhbc_by_ref_hhbc_id::function;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_options::{CompilerFlags, LangFlags};
 use hhbc_by_ref_unique_id_builder::*;
+use hhbc_id::function;
 use instruction_sequence::{instr, unrecoverable, Error, InstrSeq, Result};
 use label::Label;
 use local::Local;
@@ -352,7 +351,7 @@ pub fn emit_return_type_info<'arena>(
     match ret {
         None => Ok(HhasTypeInfo::make(
             Just(Str::new_str(alloc, "")),
-            hhbc_by_ref_hhas_type::constraint::Constraint::default(),
+            hhas_type::constraint::Constraint::default(),
         )),
         Some(hint) => emit_type_hint::hint_to_type_info(
             alloc,

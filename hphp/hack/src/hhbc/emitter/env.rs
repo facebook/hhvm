@@ -6,10 +6,10 @@
 pub mod emitter; // emitter is public API for mutating state
 pub mod jump_targets;
 
+use ast_body::AstBody;
+use ast_scope::{self as ast_scope, Scope, ScopeItem};
 use bitflags::bitflags;
 use emitter::Emitter;
-use hhbc_by_ref_ast_body::AstBody;
-use hhbc_by_ref_ast_scope::{self as ast_scope, Scope, ScopeItem};
 use label::Label;
 use local::Local;
 use ocamlrep::rc::RcOc;

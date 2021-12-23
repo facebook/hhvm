@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Pair;
-use hhbc_by_ref_hhbc_id::{class, Id};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_options::Options;
+use hhbc_id::{class, Id};
 use instruction_sequence::{unrecoverable, Result};
 use naming_special_names_rust::classes;
 use oxidized::{

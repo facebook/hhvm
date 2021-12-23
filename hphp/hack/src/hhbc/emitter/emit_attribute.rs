@@ -4,9 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::{emitter::Emitter, Env};
-use hhbc_by_ref_ast_constant_folder as ast_constant_folder;
-use hhbc_by_ref_hhas_attribute::HhasAttribute;
-use hhbc_by_ref_hhbc_id::{self as hhbc_id, Id};
+use hhas_attribute::HhasAttribute;
+use hhbc_id::Id;
 use instruction_sequence::Result;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;

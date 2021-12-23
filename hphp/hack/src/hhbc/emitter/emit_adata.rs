@@ -3,13 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use adata_state::AdataState;
 use env::emitter::Emitter;
 use ffi::Str;
-use hhbc_by_ref_adata_state::AdataState;
-use hhbc_by_ref_hhas_adata::{
-    HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX,
-};
-use hhbc_by_ref_hhbc_ast::*;
+use hhas_adata::{HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX};
+use hhbc_ast::*;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_options::HhvmFlags;
 use instruction_sequence::{Error, InstrSeq};
@@ -37,11 +35,8 @@ fn rewrite_typed_value<'arena, 'decl>(
             TypedValue::Int(i) => InstructLitConst::Int(*i),
             TypedValue::String(s) => InstructLitConst::String(*s),
             TypedValue::LazyClass(s) => {
-                let classid: hhbc_by_ref_hhbc_ast::ClassId<'arena> =
-                    hhbc_by_ref_hhbc_id::class::ClassType::from_ast_name_and_mangle(
-                        e.alloc,
-                        s.unsafe_as_str(),
-                    );
+                let classid: hhbc_ast::ClassId<'arena> =
+                    hhbc_id::class::ClassType::from_ast_name_and_mangle(e.alloc, s.unsafe_as_str());
                 InstructLitConst::LazyClass(classid)
             }
             TypedValue::Float(f) => {

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
+use hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_unique_id_builder::{get_unique_id_for_method, SMap, SSet};
 use ocamlrep::rc::RcOc;
 use oxidized::{

@@ -6,8 +6,8 @@
 use env::emitter::Emitter;
 use ffi::{Maybe::Just, Pair};
 use hash::{HashMap, HashSet};
-use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhbc_ast::{
+use hhas_param::HhasParam;
+use hhbc_ast::{
     FcallArgs, Instruct, InstructCall, InstructControlFlow, InstructIterator, InstructMisc,
 };
 use instruction_sequence::InstrSeq;

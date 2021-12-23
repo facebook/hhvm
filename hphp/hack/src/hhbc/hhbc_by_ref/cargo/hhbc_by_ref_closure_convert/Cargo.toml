@@ -8,22 +8,22 @@ edition = "2021"
 path = "../../closure_convert.rs"
 
 [dependencies]
+ast_body = { path = "../../../hhbc/cargo/ast_body" }
+ast_constant_folder = { path = "../../../hhbc/cargo/ast_constant_folder" }
+ast_scope = { path = "../../../hhbc/cargo/ast_scope" }
 bumpalo = { version = "3.8", features = ["collections"] }
+decl_vars = { path = "../../../hhbc/cargo/decl_vars" }
 emit_fatal = { path = "../../../emitter/cargo/emit_fatal" }
 env = { path = "../../../emitter/cargo/env" }
 global_state = { path = "../../../emitter/cargo/global_state" }
 hash = { path = "../../../../utils/hash" }
-hhbc_by_ref_ast_body = { path = "../hhbc_by_ref_ast_body" }
-hhbc_by_ref_ast_constant_folder = { path = "../hhbc_by_ref_ast_constant_folder" }
-hhbc_by_ref_ast_scope = { path = "../hhbc_by_ref_ast_scope" }
-hhbc_by_ref_decl_vars = { path = "../decl_vars" }
-hhbc_by_ref_hhas_coeffects = { path = "../hhbc_by_ref_hhas_coeffects" }
+hhas_coeffects = { path = "../../../hhbc/cargo/hhas_coeffects" }
 hhbc_by_ref_hhbc_assertion_utils = { path = "../hhbc_by_ref_hhbc_assertion_utils" }
-hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
 hhbc_by_ref_hhbc_string_utils = { path = "../hhbc_by_ref_hhbc_string_utils" }
 hhbc_by_ref_options = { path = "../hhbc_by_ref_options" }
 hhbc_by_ref_unique_id_builder = { path = "../hhbc_by_ref_unique_id_builder" }
 hhbc_by_ref_unique_list = { path = "../unique_list" }
+hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
 instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 itertools = "0.10.3"
 naming_special_names_rust = { path = "../../../../naming" }

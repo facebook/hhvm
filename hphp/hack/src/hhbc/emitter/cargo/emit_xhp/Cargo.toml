@@ -12,11 +12,11 @@ bumpalo = { version = "3.8", features = ["collections"] }
 emit_method = { path = "../emit_method" }
 emit_property = { path = "../emit_property" }
 env = { path = "../env" }
-hhbc_by_ref_hhas_method = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_method" }
-hhbc_by_ref_hhas_property = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_property" }
-hhbc_by_ref_hhas_xhp_attribute = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_xhp_attribute" }
-hhbc_by_ref_hhbc_id = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_id" }
+hhas_method = { path = "../../../hhbc/cargo/hhas_method" }
+hhas_property = { path = "../../../hhbc/cargo/hhas_property" }
+hhas_xhp_attribute = { path = "../../../hhbc/cargo/hhas_xhp_attribute" }
 hhbc_by_ref_hhbc_string_utils = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_string_utils" }
+hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
 instruction_sequence = { path = "../instruction_sequence" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }

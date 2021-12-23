@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_by_ref_ast_scope::{Scope, ScopeItem};
+use ast_scope::{Scope, ScopeItem};
 
 pub type SMap<T> = std::collections::BTreeMap<String, T>;
 pub type SSet = std::collections::BTreeSet<String>;

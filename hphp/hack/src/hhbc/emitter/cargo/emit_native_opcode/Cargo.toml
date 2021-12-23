@@ -8,14 +8,14 @@ edition = "2021"
 path = "../../emit_native_opcode.rs"
 
 [dependencies]
+ast_scope = { path = "../../../hhbc/cargo/ast_scope" }
 bumpalo = { version = "3.8", features = ["collections"] }
 emit_body = { path = "../emit_body" }
 emit_fatal = { path = "../emit_fatal" }
 emit_param = { path = "../emit_param" }
 env = { path = "../env" }
 ffi = { path = "../../../../utils/ffi" }
-hhbc_by_ref_ast_scope = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_ast_scope" }
-hhbc_by_ref_hhas_body = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_body" }
+hhas_body = { path = "../../../hhbc/cargo/hhas_body" }
 instruction_sequence = { path = "../instruction_sequence" }
 local = { path = "../local" }
 oxidized = { path = "../../../../oxidized" }

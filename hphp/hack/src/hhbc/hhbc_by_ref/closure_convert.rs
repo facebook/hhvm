@@ -3,21 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ast_scope::{
+    self as ast_scope, Lambda, LongLambda, Scope as AstScope, ScopeItem as AstScopeItem,
+};
 use env::emitter::Emitter;
 use global_state::{ClosureEnclosingClassInfo, GlobalState};
 use hash::HashSet;
-use hhbc_by_ref_ast_scope::{
-    self as ast_scope, Lambda, LongLambda, Scope as AstScope, ScopeItem as AstScopeItem,
-};
-use hhbc_by_ref_decl_vars as decl_vars;
-use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
+use hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhbc_assertion_utils::*;
-use hhbc_by_ref_hhbc_id as hhbc_id;
-use hhbc_by_ref_hhbc_id::class;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_options::{CompilerFlags, HhvmFlags, Options};
 use hhbc_by_ref_unique_id_builder::*;
 use hhbc_by_ref_unique_list::UniqueList;
+use hhbc_id::class;
 use instruction_sequence::{unrecoverable, Error, Result};
 use itertools::{Either, EitherOrBoth::*, Itertools};
 use naming_special_names_rust::{
@@ -387,10 +385,7 @@ fn add_generic(env: &mut Env<'_, '_>, st: &mut State<'_>, var: &str) {
     }
 }
 
-fn get_vars(
-    params: &[FunParam],
-    body: hhbc_by_ref_ast_body::AstBody<'_>,
-) -> Result<HashSet<String>> {
+fn get_vars(params: &[FunParam], body: ast_body::AstBody<'_>) -> Result<HashSet<String>> {
     decl_vars::vars_from_ast(params, &body).map_err(unrecoverable)
 }
 
@@ -1740,8 +1735,7 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
         .hack_compiler_flags
         .contains(CompilerFlags::CONSTANT_FOLDING)
     {
-        hhbc_by_ref_ast_constant_folder::fold_program(defs, e)
-            .map_err(|e| unrecoverable(format!("{}", e)))?;
+        ast_constant_folder::fold_program(defs, e).map_err(|e| unrecoverable(format!("{}", e)))?;
     }
 
     let mut env = Env::toplevel(

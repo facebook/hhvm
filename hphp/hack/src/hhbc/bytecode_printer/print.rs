@@ -14,29 +14,29 @@ use crate::{
 use core_utils_rust::add_ns;
 use escaper::{escape, escape_by, is_lit_printable};
 use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
-use hhbc_by_ref_hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX};
-use hhbc_by_ref_hhas_attribute::{self as hhas_attribute, HhasAttribute};
-use hhbc_by_ref_hhas_body::{HhasBody, HhasBodyEnv};
-use hhbc_by_ref_hhas_class::{self as hhas_class, HhasClass};
-use hhbc_by_ref_hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
-use hhbc_by_ref_hhas_constant::HhasConstant;
-use hhbc_by_ref_hhas_function::HhasFunction;
-use hhbc_by_ref_hhas_method::{HhasMethod, HhasMethodFlags};
-use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_hhas_pos::{HhasPos, HhasSpan};
-use hhbc_by_ref_hhas_program::HhasProgram;
-use hhbc_by_ref_hhas_property::HhasProperty;
-use hhbc_by_ref_hhas_record_def::{Field, HhasRecord};
-use hhbc_by_ref_hhas_symbol_refs::{HhasSymbolRefs, IncludePath};
-use hhbc_by_ref_hhas_type::{constraint, HhasTypeInfo};
-use hhbc_by_ref_hhas_type_const::HhasTypeConstant;
-use hhbc_by_ref_hhas_typedef::HhasTypedef;
-use hhbc_by_ref_hhbc_ast::*;
-use hhbc_by_ref_hhbc_id::{class::ClassType, Id};
+use hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX};
+use hhas_attribute::{self as hhas_attribute, HhasAttribute};
+use hhas_body::{HhasBody, HhasBodyEnv};
+use hhas_class::{self as hhas_class, HhasClass};
+use hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
+use hhas_constant::HhasConstant;
+use hhas_function::HhasFunction;
+use hhas_method::{HhasMethod, HhasMethodFlags};
+use hhas_param::HhasParam;
+use hhas_pos::{HhasPos, HhasSpan};
+use hhas_program::HhasProgram;
+use hhas_property::HhasProperty;
+use hhas_record_def::{Field, HhasRecord};
+use hhas_symbol_refs::{HhasSymbolRefs, IncludePath};
+use hhas_type::{constraint, HhasTypeInfo};
+use hhas_type_const::HhasTypeConstant;
+use hhas_typedef::HhasTypedef;
+use hhbc_ast::*;
 use hhbc_by_ref_hhbc_string_utils::{
     float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, mangle, quote_string,
     quote_string_with_escape, strip_global_ns, strip_ns, triple_quote_string, types,
 };
+use hhbc_id::{class::ClassType, Id};
 use indexmap::IndexSet;
 use instruction_sequence::{Error::Unrecoverable, InstrSeq};
 use iterator::Id as IterId;
@@ -668,7 +668,7 @@ fn print_class_special_attributes(
     if c.is_sealed() {
         special_attributes.push("sealed");
     }
-    if c.enum_type.is_just() && !hhbc_by_ref_hhas_attribute::has_enum_class(user_attrs) {
+    if c.enum_type.is_just() && !hhas_attribute::has_enum_class(user_attrs) {
         special_attributes.push("enum");
     }
     if c.is_abstract() {

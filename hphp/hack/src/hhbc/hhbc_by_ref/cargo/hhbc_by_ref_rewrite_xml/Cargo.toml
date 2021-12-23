@@ -10,7 +10,7 @@ path = "../../rewrite_xml.rs"
 [dependencies]
 emit_symbol_refs = { path = "../../../emitter/cargo/emit_symbol_refs" }
 env = { path = "../../../emitter/cargo/env" }
-hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
+hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
 instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }

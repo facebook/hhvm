@@ -7,12 +7,12 @@ use core_utils_rust as utils;
 use emit_type_hint::{self as emit_type_hint, Kind};
 use env::{emitter::Emitter, Env};
 use ffi::{Slice, Str};
-use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
-use hhbc_by_ref_hhas_constant::{self as hhas_constant, HhasConstant};
-use hhbc_by_ref_hhas_function::{HhasFunction, HhasFunctionFlags};
-use hhbc_by_ref_hhas_pos::HhasSpan;
-use hhbc_by_ref_hhbc_id::{r#const, function, Id};
+use hhas_coeffects::HhasCoeffects;
+use hhas_constant::{self as hhas_constant, HhasConstant};
+use hhas_function::{HhasFunction, HhasFunctionFlags};
+use hhas_pos::HhasSpan;
 use hhbc_by_ref_hhbc_string_utils::strip_global_ns;
+use hhbc_id::{r#const, function, Id};
 use instruction_sequence::{instr, InstrSeq, Result};
 use oxidized::ast;
 

@@ -14,10 +14,10 @@ emit_body = { path = "../emit_body" }
 emit_type_constant = { path = "../emit_type_constant" }
 emit_type_hint = { path = "../emit_type_hint" }
 env = { path = "../env" }
-hhbc_by_ref_hhas_pos = { path = "../../../hhbc_by_ref/cargo/hhas_by_ref_hhas_pos" }
-hhbc_by_ref_hhas_type = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_type" }
-hhbc_by_ref_hhas_typedef = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhas_typedef" }
-hhbc_by_ref_hhbc_id = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_id" }
+hhas_pos = { path = "../../../hhbc/cargo/hhas_pos" }
+hhas_type = { path = "../../../hhbc/cargo/hhas_type" }
+hhas_typedef = { path = "../../../hhbc/cargo/hhas_typedef" }
+hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
 instruction_sequence = { path = "../instruction_sequence" }
 oxidized = { path = "../../../../oxidized" }
 runtime = { path = "../runtime" }

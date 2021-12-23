@@ -2,11 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use ast_scope::Scope;
 use emit_fatal::raise_fatal_runtime;
 use env::emitter::Emitter;
 use ffi::{Maybe::Just, Slice, Str};
-use hhbc_by_ref_ast_scope::Scope;
-use hhbc_by_ref_hhas_body::HhasBody;
+use hhas_body::HhasBody;
 use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use local::Local;
 use oxidized::{aast, ast, pos::Pos};
@@ -32,7 +32,7 @@ pub fn emit_body<'a, 'arena, 'decl>(
     body_instrs.and_then(|body_instrs| {
         params.and_then(|params| {
             return_type_info.map(|rti| {
-                let mut body = hhbc_by_ref_hhas_body::default_with_body_instrs(body_instrs);
+                let mut body = hhas_body::default_with_body_instrs(body_instrs);
                 body.params = Slice::fill_iter(emitter.alloc, params.into_iter().map(|p| p.0));
                 body.return_type_info = Just(rti);
                 body

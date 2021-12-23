@@ -4,11 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::emitter::Emitter;
-use hhbc_by_ref_hhas_method::HhasMethod;
-use hhbc_by_ref_hhas_property::HhasProperty;
-use hhbc_by_ref_hhas_xhp_attribute::HhasXhpAttribute;
-use hhbc_by_ref_hhbc_id::{class, Id};
+use hhas_method::HhasMethod;
+use hhas_property::HhasProperty;
+use hhas_xhp_attribute::HhasXhpAttribute;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
+use hhbc_id::{class, Id};
 use instruction_sequence::{unrecoverable, Result};
 use oxidized::{ast::*, ast_defs, local_id, pos::Pos};
 

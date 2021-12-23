@@ -599,7 +599,6 @@ let keywords ctx entry : Result_set.elt list =
 
   let rec aux ctx acc s =
     match s.syntax with
-    | Script s -> aux ctx acc s.script_declarations
     | ClassishDeclaration cd ->
       let decl_kind =
         match cd.classish_keyword.syntax with
@@ -611,19 +610,13 @@ let keywords ctx entry : Result_set.elt list =
         | _ -> DKclass
       in
       let ctx = Some (Decl decl_kind) in
-      let acc = aux ctx acc cd.classish_modifiers in
-      let acc = aux ctx acc cd.classish_extends_keyword in
-      aux ctx acc cd.classish_body
-    | ClassishBody cb -> aux ctx acc cb.classish_body_elements
-    | MethodishDeclaration md ->
-      aux (Some Method) acc md.methodish_function_decl_header
-    | FunctionDeclaration fd -> aux ctx acc fd.function_declaration_header
+      List.fold (children s) ~init:acc ~f:(aux ctx)
+    | MethodishDeclaration _ ->
+      List.fold (children s) ~init:acc ~f:(aux (Some Method))
     | FunctionDeclarationHeader fdh ->
       let acc = aux ctx acc fdh.function_modifiers in
       let acc = aux ctx acc fdh.function_parameter_list in
       aux (Some ReturnType) acc fdh.function_readonly_return
-    | SyntaxList sl -> List.fold sl ~init:acc ~f:(aux ctx)
-    | ListItem li -> aux ctx acc li.list_item
     | ParameterDeclaration pd -> aux (Some Parameter) acc pd.parameter_readonly
     | Token t ->
       (match t.Token.kind with
@@ -661,13 +654,13 @@ let keywords ctx entry : Result_set.elt list =
               | Some Method -> ReadonlyOnMethod
               | Some Parameter -> ReadonlyOnParameter
               | Some ReturnType -> ReadonlyOnReturnType
-              | _ -> ReadonlyOnParameter);
+              | _ -> ReadonlyOnExpression);
           is_declaration = false;
           pos = token_pos t;
         }
         :: acc
       | _ -> acc)
-    | _ -> acc
+    | _ -> List.fold (children s) ~init:acc ~f:(aux ctx)
   in
 
   aux None [] tree

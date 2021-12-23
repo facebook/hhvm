@@ -274,6 +274,7 @@ let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
     ^ "\n\nAn interface can extend multiple interfaces."
   | SymbolOccurrence.ReadonlyOnMethod ->
     "A `readonly` method treats `$this` as `readonly`."
+  | SymbolOccurrence.ReadonlyOnExpression
   | SymbolOccurrence.ReadonlyOnParameter ->
     "A `readonly` value is a reference that cannot modify the underlying value."
   | SymbolOccurrence.ReadonlyOnReturnType ->

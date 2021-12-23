@@ -32,6 +32,7 @@ type keyword_with_hover_docs =
   | ReadonlyOnMethod
   | ReadonlyOnParameter
   | ReadonlyOnReturnType
+  | ReadonlyOnExpression
 [@@deriving ord, eq]
 
 type kind =

@@ -807,6 +807,10 @@ void iopLockObj() {
 }
 
 void iopFCall(const Func* func, const FCallArgs& fca) {
+  if (func == nullptr) {
+    return;
+  }
+
   auto name = func->fullName()->data();
   FTRACE(
       1,

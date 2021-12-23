@@ -5,11 +5,11 @@
 
 use crate::utils;
 use ::anyhow::anyhow;
+use compile::Profile;
 use decl_provider::NoDeclProvider;
-use hhbc_by_ref_compile::Profile;
-use hhbc_by_ref_options::Options;
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
+use options::Options;
 use oxidized::relative_path::{self, RelativePath};
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
@@ -151,23 +151,20 @@ fn process_single_file_impl(
     let rel_path = RelativePath::make(relative_path::Prefix::Dummy, filepath.to_owned());
     let source_text = SourceText::make(RcOc::new(rel_path.clone()), content);
     let mut output = Vec::new();
-    let mut flags = hhbc_by_ref_compile::EnvFlags::empty();
+    let mut flags = compile::EnvFlags::empty();
     flags.set(
-        hhbc_by_ref_compile::EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
+        compile::EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
         opts.disable_toplevel_elaboration,
     );
-    flags.set(
-        hhbc_by_ref_compile::EnvFlags::DUMP_SYMBOL_REFS,
-        opts.dump_symbol_refs,
-    );
-    let env: hhbc_by_ref_compile::Env<String> = hhbc_by_ref_compile::Env {
+    flags.set(compile::EnvFlags::DUMP_SYMBOL_REFS, opts.dump_symbol_refs);
+    let env: compile::Env<String> = compile::Env {
         filepath: rel_path,
         config_jsons: vec![],
         config_list: vec![],
         flags,
     };
     let alloc = bumpalo::Bump::new();
-    hhbc_by_ref_compile::from_text(
+    compile::from_text(
         &alloc,
         &env,
         stack_limit,

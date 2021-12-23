@@ -9,7 +9,6 @@ use env::{emitter::Emitter, Env, Flags as EnvFlags};
 use ffi::{Maybe::Just, Slice, Str};
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
-use hhbc_by_ref_options::{CompilerFlags, HhvmFlags, LangFlags, Options};
 use hhbc_id::{class, r#const, function, method, prop, Id};
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{
@@ -25,6 +24,7 @@ use naming_special_names_rust::{
     emitter_special_functions, fb, pseudo_consts, pseudo_functions, special_functions,
     special_idents, superglobals, typehints, user_attributes,
 };
+use options::{CompilerFlags, HhvmFlags, LangFlags, Options};
 use oxidized::{
     aast, aast_defs,
     aast_visitor::{visit, visit_mut, AstParams, Node, NodeMut, Visitor, VisitorMut},
@@ -6316,7 +6316,7 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl>(
     rhs_readonly: bool,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     use ast::Expr_ as E_;
-    use hhbc_by_ref_options::Php7Flags;
+    use options::Php7Flags;
     let alloc = env.arena;
     let is_ltr = e.options().php7_flags.contains(Php7Flags::LTR_ASSIGN);
     match &expr.2 {

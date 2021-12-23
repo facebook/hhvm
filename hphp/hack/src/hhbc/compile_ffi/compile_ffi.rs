@@ -49,11 +49,10 @@ extern "C" fn compile_from_text_ffi(
                 let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
                 let output_config =
                     unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
-                let env =
-                    unsafe { hhbc_by_ref_compile::Env::<OcamlStr<'_>>::from_ocaml(env).unwrap() };
+                let env = unsafe { compile::Env::<OcamlStr<'_>>::from_ocaml(env).unwrap() };
                 let mut w = Vec::new();
                 let alloc = bumpalo::Bump::new();
-                match hhbc_by_ref_compile::from_text(
+                match compile::from_text(
                     &alloc,
                     &env,
                     stack_limit,
@@ -84,8 +83,8 @@ extern "C" fn compile_from_text_ffi(
                 unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
 
             let mut w = Vec::new();
-            let env = unsafe { hhbc_by_ref_compile::Env::<OcamlStr<'_>>::from_ocaml(env).unwrap() };
-            hhbc_by_ref_compile::emit_fatal_program(&env, &mut w, panic_msg)
+            let env = unsafe { compile::Env::<OcamlStr<'_>>::from_ocaml(env).unwrap() };
+            compile::emit_fatal_program(&env, &mut w, panic_msg)
                 .and_then(|_| print_output(w, output_config, &env.filepath, None))
                 .map(|_| unsafe { to_ocaml(&<Result<(), String>>::Ok(())) })
                 .map_err(|e| e.to_string())
@@ -134,7 +133,7 @@ fn print_output(
 }
 
 ocamlrep_ocamlpool::ocaml_ffi! {
-  fn desugar_and_print_expr_trees(env: hhbc_by_ref_compile::Env<OcamlStr<'_>>) {
-    hhbc_by_ref_compile::dump_expr_tree::desugar_and_print(&env);
+  fn desugar_and_print_expr_trees(env: compile::Env<OcamlStr<'_>>) {
+    compile::dump_expr_tree::desugar_and_print(&env);
   }
 }

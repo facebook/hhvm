@@ -5,9 +5,9 @@
 
 use crate::{expr_to_string_lossy, parse_file, Env, EnvFlags};
 // use crate::compile_rust as compile;
-use hhbc_by_ref_options::{LangFlags, Options};
 use itertools::Either::*;
 use ocamlrep::rc::RcOc;
+use options::{LangFlags, Options};
 use oxidized::namespace_env::Env as NamespaceEnv;
 use oxidized::pos::Pos;
 use oxidized::{

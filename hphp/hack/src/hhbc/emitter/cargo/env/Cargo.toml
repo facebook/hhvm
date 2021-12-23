@@ -15,11 +15,11 @@ bitflags = "1.3"
 bumpalo = { version = "3.8", features = ["collections"] }
 decl_provider = { path = "../../../decl_provider" }
 global_state = { path = "../global_state" }
-hhbc_by_ref_options = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_options" }
 iterator = { path = "../iterator" }
 label = { path = "../label" }
 local = { path = "../local" }
 ocamlrep = { path = "../../../../ocamlrep" }
+options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 statement_state = { path = "../statement_state" }

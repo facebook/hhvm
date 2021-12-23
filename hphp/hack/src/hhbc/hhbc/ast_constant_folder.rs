@@ -7,10 +7,10 @@ use std::{collections::hash_map::RandomState, fmt};
 
 use env::emitter::Emitter;
 use ffi::Pair;
-use hhbc_by_ref_options::HhvmFlags;
 use hhbc_id::Id;
 use hhbc_string_utils as string_utils;
 use naming_special_names_rust::{math, members, special_functions, typehints};
+use options::HhvmFlags;
 use oxidized::{
     aast,
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},

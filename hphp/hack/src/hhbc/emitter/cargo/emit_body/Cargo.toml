@@ -31,7 +31,6 @@ hhas_param = { path = "../../../hhbc/cargo/hhas_param" }
 hhas_type = { path = "../../../hhbc/cargo/hhas_type" }
 hhbc_assertion_utils = { path = "../../../utils/cargo/hhbc_assertion_utils" }
 hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
-hhbc_by_ref_options = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_options" }
 hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
 hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 indexmap = { version = "1.7.0", features = ["rayon", "serde-1"] }
@@ -44,6 +43,7 @@ lazy_static = "1.0"
 local = { path = "../local" }
 naming_special_names_rust = { path = "../../../../naming" }
 ocamlrep = { path = "../../../../ocamlrep" }
+options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 regex = "1.5.4"

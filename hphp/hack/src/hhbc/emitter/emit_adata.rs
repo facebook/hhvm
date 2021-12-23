@@ -8,9 +8,9 @@ use env::emitter::Emitter;
 use ffi::Str;
 use hhas_adata::{HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX};
 use hhbc_ast::*;
-use hhbc_by_ref_options::HhvmFlags;
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{Error, InstrSeq};
+use options::HhvmFlags;
 use runtime::TypedValue;
 
 pub fn rewrite_typed_values<'arena, 'decl>(

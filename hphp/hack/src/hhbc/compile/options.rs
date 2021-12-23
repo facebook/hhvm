@@ -38,7 +38,7 @@
 
 mod options_cli;
 
-use hhbc_by_ref_options_serde::prefix_all;
+use options_serde::prefix_all;
 
 use lru::LruCache;
 

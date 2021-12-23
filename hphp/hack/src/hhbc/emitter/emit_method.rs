@@ -11,12 +11,12 @@ use hhas_coeffects::HhasCoeffects;
 use hhas_method::{HhasMethod, HhasMethodFlags};
 use hhas_pos::HhasSpan;
 use hhbc_ast::Visibility;
-use hhbc_by_ref_options::{HhvmFlags, Options};
 use hhbc_id::{method, Id};
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{instr, Result};
 use naming_special_names_rust::{classes, special_idents, user_attributes};
 use ocamlrep::rc::RcOc;
+use options::{HhvmFlags, Options};
 use oxidized::{ast as T, ast_defs};
 
 use itertools::Either;

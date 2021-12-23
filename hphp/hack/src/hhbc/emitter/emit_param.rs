@@ -9,11 +9,11 @@ use env::{emitter::Emitter, Env};
 use ffi::{Maybe, Nothing, Slice, Str};
 use hhas_param::HhasParam;
 use hhas_type::HhasTypeInfo;
-use hhbc_by_ref_options::LangFlags;
 use hhbc_string_utils::locals::strip_dollar;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
 use local::Local;
+use options::LangFlags;
 use oxidized::{
     aast_defs::{Hint, Hint_},
     aast_visitor::{self, AstParams, Node},

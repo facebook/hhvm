@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_by_ref_options::Options;
 use iterator::Iter;
+use options::Options;
 
 use adata_state::AdataState;
 use global_state::GlobalState;

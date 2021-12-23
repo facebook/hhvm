@@ -4,11 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Pair;
-use hhbc_by_ref_options::Options;
 use hhbc_id::{class, Id};
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{unrecoverable, Result};
 use naming_special_names_rust::classes;
+use options::Options;
 use oxidized::{
     aast, aast_defs,
     aast_defs::{Hint, NastShapeInfo, ShapeFieldInfo},

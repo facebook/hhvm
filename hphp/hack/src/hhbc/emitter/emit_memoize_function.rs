@@ -14,13 +14,13 @@ use hhas_param::HhasParam;
 use hhas_pos::HhasSpan;
 use hhas_type::HhasTypeInfo;
 use hhbc_ast::{FcallArgs, FcallFlags};
-use hhbc_by_ref_options::{HhvmFlags, Options, RepoFlags};
 use hhbc_id::function;
 use hhbc_string_utils::reified;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
 use local::Local;
 use ocamlrep::rc::RcOc;
+use options::{HhvmFlags, Options, RepoFlags};
 use oxidized::{ast as T, pos::Pos};
 use runtime::TypedValue;
 

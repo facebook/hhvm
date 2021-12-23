@@ -10,10 +10,10 @@ path = "../../emit_type_constant.rs"
 [dependencies]
 bumpalo = { version = "3.8", features = ["collections"] }
 ffi = { path = "../../../../utils/ffi" }
-hhbc_by_ref_options = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_options" }
 hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
 hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 instruction_sequence = { path = "../instruction_sequence" }
 naming_special_names_rust = { path = "../../../../naming" }
+options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
 runtime = { path = "../runtime" }

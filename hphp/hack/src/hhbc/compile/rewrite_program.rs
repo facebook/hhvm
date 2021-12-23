@@ -4,11 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::emitter::Emitter;
-use hhbc_by_ref_closure_convert as closure_convert;
-use hhbc_by_ref_rewrite_xml::rewrite_xml;
 use instruction_sequence::{unrecoverable, Result};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env};
+use rewrite_xml::rewrite_xml;
 
 fn debugger_eval_should_modify(tast: &[ast::Def]) -> Result<bool> {
     /*

@@ -12,5 +12,5 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 compile_ffi = { path = "../compile_ffi" }
-hhbc_by_ref_options = { path = "../../hhbc_by_ref/cargo/hhbc_by_ref_options" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
+options = { path = "../../compile/cargo/options" }

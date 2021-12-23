@@ -11,10 +11,10 @@ mod rust_compile_ffi_impl;
 use anyhow::{anyhow, Result};
 use arena_deserializer::serde::Deserialize;
 use bincode::Options;
+use compile::EnvFlags;
 use cxx::CxxString;
 use external_decl_provider::{ExternalDeclProvider, ExternalDeclProviderResult};
 use facts_rust::{facts, facts_parser};
-use hhbc_by_ref_compile::EnvFlags;
 use libc::{c_char, c_int};
 use no_pos_hash::position_insensitive_hash;
 use oxidized::file_info::NameType;
@@ -235,11 +235,9 @@ fn make_env_flags(
 }
 
 impl compile_ffi::NativeEnv {
-    fn to_compile_env<'a>(
-        env: &'a compile_ffi::NativeEnv,
-    ) -> Option<hhbc_by_ref_compile::NativeEnv<&'a str>> {
+    fn to_compile_env<'a>(env: &'a compile_ffi::NativeEnv) -> Option<compile::NativeEnv<&'a str>> {
         use std::os::unix::ffi::OsStrExt;
-        Some(hhbc_by_ref_compile::NativeEnv {
+        Some(compile::NativeEnv {
             filepath: RelativePath::make(
                 oxidized::relative_path::Prefix::Dummy,
                 std::path::PathBuf::from(std::ffi::OsStr::from_bytes(env.filepath.as_bytes())),
@@ -248,9 +246,9 @@ impl compile_ffi::NativeEnv {
             include_roots: &env.include_roots,
             emit_class_pointers: env.emit_class_pointers,
             check_int_overflow: env.check_int_overflow,
-            hhbc_flags: hhbc_by_ref_compile::HHBCFlags::from_bits(env.hhbc_flags)?,
-            parser_flags: hhbc_by_ref_compile::ParserFlags::from_bits(env.parser_flags)?,
-            flags: hhbc_by_ref_compile::EnvFlags::from_bits(env.flags)?,
+            hhbc_flags: compile::HHBCFlags::from_bits(env.hhbc_flags)?,
+            parser_flags: compile::ParserFlags::from_bits(env.parser_flags)?,
+            flags: compile::EnvFlags::from_bits(env.flags)?,
         })
     }
 }
@@ -260,9 +258,9 @@ fn hackc_compile_from_text_cpp_ffi<'a>(
     source_text: &CxxString,
 ) -> Result<Vec<u8>, String> {
     stack_limit::with_elastic_stack(|stack_limit| {
-        let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
+        let native_env: compile::NativeEnv<&str> =
             compile_ffi::NativeEnv::to_compile_env(&env).unwrap();
-        let compile_env = hhbc_by_ref_compile::Env::<&str> {
+        let compile_env = compile::Env::<&str> {
             filepath: native_env.filepath.clone(),
             config_jsons: vec![],
             config_list: vec![],
@@ -291,7 +289,7 @@ fn hackc_compile_from_text_cpp_ffi<'a>(
             unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
 
         let decl_allocator = bumpalo::Bump::new();
-        hhbc_by_ref_compile::from_text(
+        compile::from_text(
             &alloc,
             &compile_env,
             &stack_limit,
@@ -341,8 +339,7 @@ pub fn hackc_create_direct_decl_parse_options(
     let alloc: &'static bumpalo::Bump =
         unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
     let config_opts =
-        hhbc_by_ref_options::Options::from_configs(&[aliased_namespaces.to_str().unwrap()], &[])
-            .unwrap();
+        options::Options::from_configs(&[aliased_namespaces.to_str().unwrap()], &[]).unwrap();
     let auto_namespace_map = match config_opts.hhvm.aliased_namespaces.get().as_map() {
         Some(m) => bumpalo::collections::Vec::from_iter_in(
             m.iter().map(|(k, v)| {
@@ -458,9 +455,9 @@ fn hackc_compile_hhas_from_text_cpp_ffi(
         let bump = bumpalo::Bump::new();
         let alloc: &'static bumpalo::Bump =
             unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
-        let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
+        let native_env: compile::NativeEnv<&str> =
             compile_ffi::NativeEnv::to_compile_env(&env).unwrap();
-        let compile_env = hhbc_by_ref_compile::Env::<&str> {
+        let compile_env = compile::Env::<&str> {
             filepath: native_env.filepath.clone(),
             config_jsons: vec![],
             config_list: vec![],
@@ -486,7 +483,7 @@ fn hackc_compile_hhas_from_text_cpp_ffi(
             unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
 
         let decl_allocator = bumpalo::Bump::new();
-        let compile_result = hhbc_by_ref_compile::hhas_from_text(
+        let compile_result = compile::hhas_from_text(
             alloc,
             &compile_env,
             &stack_limit,
@@ -514,16 +511,15 @@ pub fn hackc_hhas_to_string_cpp_ffi(
     env: &compile_ffi::NativeEnv,
     prog: &HhasProgramWrapper,
 ) -> Result<Vec<u8>, String> {
-    let native_env: hhbc_by_ref_compile::NativeEnv<&str> =
-        compile_ffi::NativeEnv::to_compile_env(env).unwrap();
-    let env = hhbc_by_ref_compile::Env::<&str> {
+    let native_env: compile::NativeEnv<&str> = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
+    let env = compile::Env::<&str> {
         filepath: native_env.filepath.clone(),
         config_jsons: vec![],
         config_list: vec![],
         flags: native_env.flags,
     };
     let mut output = Vec::new();
-    hhbc_by_ref_compile::hhas_to_string(&env, Some(&native_env), &mut output, &prog.0)
+    compile::hhas_to_string(&env, Some(&native_env), &mut output, &prog.0)
         .map(|_| output)
         .map_err(|e| e.to_string())
 }

@@ -17,14 +17,13 @@ use emit_program::{emit_program, FromAstFlags};
 use env::emitter::Emitter;
 use hhas_program::HhasProgram;
 use hhbc_ast::FatalOp;
-use hhbc_by_ref_options::{
-    Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, PhpismFlags, RepoFlags,
-};
-use hhbc_by_ref_rewrite_program::rewrite_program;
 use instruction_sequence::Error;
 use itertools::{Either, Either::*};
 use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use options::{
+    Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, PhpismFlags, RepoFlags,
+};
 use oxidized::{
     ast, namespace_env::Env as NamespaceEnv, parser_options::ParserOptions, pos::Pos,
     relative_path::RelativePath,
@@ -32,6 +31,7 @@ use oxidized::{
 use parser_core_types::{
     indexed_source_text::IndexedSourceText, source_text::SourceText, syntax_error::ErrorType,
 };
+use rewrite_program::rewrite_program;
 use stack_limit::StackLimit;
 
 /// Common input needed for compilation.  Extra care is taken

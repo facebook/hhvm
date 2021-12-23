@@ -9,7 +9,6 @@ use global_state::{ClosureEnclosingClassInfo, GlobalState};
 use hash::HashSet;
 use hhas_coeffects::HhasCoeffects;
 use hhbc_assertion_utils::*;
-use hhbc_by_ref_options::{CompilerFlags, HhvmFlags, Options};
 use hhbc_id::class;
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{unrecoverable, Error, Result};
@@ -18,6 +17,7 @@ use naming_special_names_rust::{
     fb, pseudo_consts, pseudo_functions, special_idents, superglobals,
 };
 use ocamlrep::rc::RcOc;
+use options::{CompilerFlags, HhvmFlags, Options};
 use oxidized::{
     aast_defs,
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},

@@ -13,6 +13,7 @@ anyhow = "1.0.51"
 arena_deserializer = { path = "../../utils/arena_deserializer" }
 bincode = "1.3.3"
 bumpalo = { version = "3.8", features = ["collections"] }
+compile = { path = "../compile/cargo/compile" }
 cxx = "1.0.54"
 decl_provider = { path = "../decl_provider" }
 direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
@@ -20,12 +21,11 @@ external_decl_provider = { path = "../hhvm_decl_provider" }
 facts_rust = { path = "../../facts/cargo/facts_rust" }
 ffi = { path = "../../utils/ffi" }
 hhas_program = { path = "../hhbc/cargo/hhas_program" }
-hhbc_by_ref_compile = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_compile" }
-hhbc_by_ref_options = { path = "../hhbc_by_ref/cargo/hhbc_by_ref_options" }
 libc = "0.2.98"
 log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
 no_pos_hash = { path = "../../utils/no_pos_hash" }
 ocamlrep = { path = "../../ocamlrep" }
+options = { path = "../compile/cargo/options" }
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 parser_core_types = { path = "../../parser/cargo/core_types" }

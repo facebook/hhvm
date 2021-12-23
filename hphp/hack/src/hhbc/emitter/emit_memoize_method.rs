@@ -16,13 +16,13 @@ use hhas_param::HhasParam;
 use hhas_pos::HhasSpan;
 use hhas_type::HhasTypeInfo;
 use hhbc_ast::{FcallArgs, FcallFlags, SpecialClsRef, Visibility};
-use hhbc_by_ref_options::{HhvmFlags, Options};
 use hhbc_id::{class, method, Id};
 use hhbc_string_utils::reified;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
 use local::Local;
 use naming_special_names_rust::{members, user_attributes as ua};
+use options::{HhvmFlags, Options};
 use oxidized::{ast as T, pos::Pos};
 use runtime::TypedValue;
 

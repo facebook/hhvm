@@ -178,12 +178,12 @@ dependencies = [
  "bumpalo",
  "env",
  "ffi",
- "hhbc_by_ref_options",
  "hhbc_id",
  "hhbc_string_utils",
  "indexmap",
  "itertools 0.10.3",
  "naming_special_names_rust",
+ "options",
  "oxidized",
  "runtime",
 ]
@@ -419,6 +419,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "closure_convert"
+version = "0.0.0"
+dependencies = [
+ "ast_body",
+ "ast_constant_folder",
+ "ast_scope",
+ "bumpalo",
+ "decl_vars",
+ "emit_fatal",
+ "env",
+ "global_state",
+ "hash",
+ "hhas_coeffects",
+ "hhbc_assertion_utils",
+ "hhbc_id",
+ "hhbc_string_utils",
+ "instruction_sequence",
+ "itertools 0.10.3",
+ "naming_special_names_rust",
+ "ocamlrep",
+ "options",
+ "oxidized",
+ "unique_id_builder",
+ "unique_list",
+]
+
+[[package]]
 name = "codespan-reporting"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -429,13 +456,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "compile"
+version = "0.0.0"
+dependencies = [
+ "aast_parser",
+ "anyhow",
+ "bitflags",
+ "bumpalo",
+ "bytecode_printer",
+ "decl_provider",
+ "elaborate_namespaces_visitor",
+ "emit_program",
+ "env",
+ "hhas_program",
+ "hhbc_ast",
+ "instruction_sequence",
+ "itertools 0.10.3",
+ "ocamlrep",
+ "ocamlrep_derive",
+ "options",
+ "oxidized",
+ "parser_core_types",
+ "profile_rust",
+ "rewrite_program",
+ "stack_limit",
+ "unified_decl_provider",
+]
+
+[[package]]
 name = "compile_ffi"
 version = "0.0.0"
 dependencies = [
  "anyhow",
  "bumpalo",
+ "compile",
  "decl_provider",
- "hhbc_by_ref_compile",
  "ocamlrep",
  "ocamlrep_derive",
  "ocamlrep_ocamlpool",
@@ -850,10 +905,10 @@ dependencies = [
  "ffi",
  "hhas_adata",
  "hhbc_ast",
- "hhbc_by_ref_options",
  "hhbc_id",
  "hhbc_string_utils",
  "instruction_sequence",
+ "options",
  "runtime",
 ]
 
@@ -903,7 +958,6 @@ dependencies = [
  "hhas_type",
  "hhbc_assertion_utils",
  "hhbc_ast",
- "hhbc_by_ref_options",
  "hhbc_id",
  "hhbc_string_utils",
  "indexmap",
@@ -916,6 +970,7 @@ dependencies = [
  "local",
  "naming_special_names_rust",
  "ocamlrep",
+ "options",
  "oxidized",
  "oxidized_by_ref",
  "regex",
@@ -1003,7 +1058,6 @@ dependencies = [
  "hash",
  "hhbc_assertion_utils",
  "hhbc_ast",
- "hhbc_by_ref_options",
  "hhbc_id",
  "hhbc_string_utils",
  "indexmap",
@@ -1013,6 +1067,7 @@ dependencies = [
  "lazy_static",
  "local",
  "naming_special_names_rust",
+ "options",
  "oxidized",
  "regex",
  "runtime",
@@ -1063,7 +1118,6 @@ dependencies = [
  "hhas_pos",
  "hhas_type",
  "hhbc_ast",
- "hhbc_by_ref_options",
  "hhbc_id",
  "hhbc_string_utils",
  "instruction_sequence",
@@ -1072,6 +1126,7 @@ dependencies = [
  "local",
  "naming_special_names_rust",
  "ocamlrep",
+ "options",
  "oxidized",
  "runtime",
 ]
@@ -1115,13 +1170,13 @@ dependencies = [
  "hhas_pos",
  "hhas_type",
  "hhbc_ast",
- "hhbc_by_ref_options",
  "hhbc_id",
  "hhbc_string_utils",
  "instruction_sequence",
  "label",
  "local",
  "naming_special_names_rust",
+ "options",
  "oxidized",
  "runtime",
 ]
@@ -1143,13 +1198,13 @@ dependencies = [
  "hhas_method",
  "hhas_pos",
  "hhbc_ast",
- "hhbc_by_ref_options",
  "hhbc_id",
  "hhbc_string_utils",
  "instruction_sequence",
  "itertools 0.10.3",
  "naming_special_names_rust",
  "ocamlrep",
+ "options",
  "oxidized",
 ]
 
@@ -1185,12 +1240,12 @@ dependencies = [
  "ffi",
  "hhas_param",
  "hhas_type",
- "hhbc_by_ref_options",
  "hhbc_string_utils",
  "instruction_sequence",
  "label",
  "local",
  "naming_special_names_rust",
+ "options",
  "oxidized",
 ]
 
@@ -1284,11 +1339,11 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "ffi",
- "hhbc_by_ref_options",
  "hhbc_id",
  "hhbc_string_utils",
  "instruction_sequence",
  "naming_special_names_rust",
+ "options",
  "oxidized",
  "runtime",
 ]
@@ -1361,11 +1416,11 @@ dependencies = [
  "bumpalo",
  "decl_provider",
  "global_state",
- "hhbc_by_ref_options",
  "iterator",
  "label",
  "local",
  "ocamlrep",
+ "options",
  "oxidized",
  "oxidized_by_ref",
  "statement_state",
@@ -1705,15 +1760,15 @@ dependencies = [
  "aast_parser",
  "anyhow",
  "bumpalo",
+ "compile",
  "decl_provider",
  "direct_decl_parser",
  "env_logger 0.7.1",
- "hhbc_by_ref_compile",
- "hhbc_by_ref_options",
  "jwalk",
  "log",
  "multifile_rust",
  "ocamlrep",
+ "options",
  "oxidized",
  "parser_core_types",
  "positioned_by_ref_parser",
@@ -1996,110 +2051,6 @@ dependencies = [
  "local",
  "oxidized",
  "runtime",
-]
-
-[[package]]
-name = "hhbc_by_ref_closure_convert"
-version = "0.0.0"
-dependencies = [
- "ast_body",
- "ast_constant_folder",
- "ast_scope",
- "bumpalo",
- "decl_vars",
- "emit_fatal",
- "env",
- "global_state",
- "hash",
- "hhas_coeffects",
- "hhbc_assertion_utils",
- "hhbc_by_ref_options",
- "hhbc_id",
- "hhbc_string_utils",
- "instruction_sequence",
- "itertools 0.10.3",
- "naming_special_names_rust",
- "ocamlrep",
- "oxidized",
- "unique_id_builder",
- "unique_list",
-]
-
-[[package]]
-name = "hhbc_by_ref_compile"
-version = "0.0.0"
-dependencies = [
- "aast_parser",
- "anyhow",
- "bitflags",
- "bumpalo",
- "bytecode_printer",
- "decl_provider",
- "elaborate_namespaces_visitor",
- "emit_program",
- "env",
- "hhas_program",
- "hhbc_ast",
- "hhbc_by_ref_options",
- "hhbc_by_ref_rewrite_program",
- "instruction_sequence",
- "itertools 0.10.3",
- "ocamlrep",
- "ocamlrep_derive",
- "oxidized",
- "parser_core_types",
- "profile_rust",
- "stack_limit",
- "unified_decl_provider",
-]
-
-[[package]]
-name = "hhbc_by_ref_options"
-version = "0.0.0"
-dependencies = [
- "bitflags",
- "fnv",
- "hhbc_by_ref_options_serde",
- "itertools 0.10.3",
- "lazy_static",
- "lru",
- "pretty_assertions",
- "serde",
- "serde_derive",
- "serde_json",
-]
-
-[[package]]
-name = "hhbc_by_ref_options_serde"
-version = "0.0.0"
-dependencies = [
- "quote",
- "syn",
-]
-
-[[package]]
-name = "hhbc_by_ref_rewrite_program"
-version = "0.0.0"
-dependencies = [
- "emit_fatal",
- "env",
- "hhbc_by_ref_closure_convert",
- "hhbc_by_ref_rewrite_xml",
- "instruction_sequence",
- "ocamlrep",
- "oxidized",
-]
-
-[[package]]
-name = "hhbc_by_ref_rewrite_xml"
-version = "0.0.0"
-dependencies = [
- "emit_symbol_refs",
- "env",
- "hhbc_id",
- "instruction_sequence",
- "naming_special_names_rust",
- "oxidized",
 ]
 
 [[package]]
@@ -2663,12 +2614,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "options"
+version = "0.0.0"
+dependencies = [
+ "bitflags",
+ "fnv",
+ "itertools 0.10.3",
+ "lazy_static",
+ "lru",
+ "options_serde",
+ "pretty_assertions",
+ "serde",
+ "serde_derive",
+ "serde_json",
+]
+
+[[package]]
 name = "options_ffi"
 version = "0.0.0"
 dependencies = [
  "compile_ffi",
- "hhbc_by_ref_options",
  "ocamlrep_ocamlpool",
+ "options",
+]
+
+[[package]]
+name = "options_serde"
+version = "0.0.0"
+dependencies = [
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -3065,6 +3040,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "rewrite_program"
+version = "0.0.0"
+dependencies = [
+ "closure_convert",
+ "emit_fatal",
+ "env",
+ "instruction_sequence",
+ "ocamlrep",
+ "oxidized",
+ "rewrite_xml",
+]
+
+[[package]]
+name = "rewrite_xml"
+version = "0.0.0"
+dependencies = [
+ "emit_symbol_refs",
+ "env",
+ "hhbc_id",
+ "instruction_sequence",
+ "naming_special_names_rust",
+ "oxidized",
+]
+
+[[package]]
 name = "runtime"
 version = "0.0.0"
 dependencies = [
@@ -3107,6 +3107,7 @@ dependencies = [
  "arena_deserializer",
  "bincode",
  "bumpalo",
+ "compile",
  "cxx",
  "cxx-build",
  "decl_provider",
@@ -3115,12 +3116,11 @@ dependencies = [
  "facts_rust",
  "ffi",
  "hhas_program",
- "hhbc_by_ref_compile",
- "hhbc_by_ref_options",
  "libc",
  "log",
  "no_pos_hash",
  "ocamlrep",
+ "options",
  "oxidized",
  "oxidized_by_ref",
  "parser_core_types",

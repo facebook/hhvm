@@ -26,15 +26,15 @@ use hhbc_ast::{
     ClassishKind, FcallArgs, FcallFlags, Instruct, IstypeOp, MemberKey, MemberOpMode, ParamId,
     QueryOp, ReadonlyOp,
 };
-use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_options::{CompilerFlags, LangFlags};
-use hhbc_by_ref_unique_id_builder::*;
 use hhbc_id::function;
+use hhbc_string_utils as string_utils;
 use instruction_sequence::{instr, unrecoverable, Error, InstrSeq, Result};
 use label::Label;
 use local::Local;
 use runtime::TypedValue;
 use statement_state::StatementState;
+use unique_id_builder::*;
 
 use naming_special_names_rust::user_attributes as ua;
 

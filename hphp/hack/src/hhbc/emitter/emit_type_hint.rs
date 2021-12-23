@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 use ffi::{Maybe, Maybe::*, Str};
 use hhas_type::{constraint, HhasTypeInfo};
-use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_id::{class, Id as ClassId};
+use hhbc_string_utils as string_utils;
 use instruction_sequence::{Error::Unrecoverable, Result};
 use naming_special_names_rust::{classes, typehints};
 use oxidized::{

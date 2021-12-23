@@ -8,8 +8,8 @@ use ffi::{Maybe, Maybe::*, Slice, Str};
 use hhas_pos::HhasSpan;
 use hhas_record_def::{Field as RecordField, HhasRecord};
 use hhas_type::constraint;
-use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_id::record::RecordType;
+use hhbc_string_utils as string_utils;
 use instruction_sequence::Result;
 use oxidized::ast::*;
 

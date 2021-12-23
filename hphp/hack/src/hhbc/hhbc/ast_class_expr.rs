@@ -7,7 +7,7 @@ use ast_scope::{self as ast_scope, Scope};
 use env::emitter::Emitter;
 use hhbc_ast::SpecialClsRef;
 use hhbc_ast::{ClassishKind, ClassishKind::*};
-use hhbc_by_ref_hhbc_string_utils as string_utils;
+use hhbc_string_utils as string_utils;
 use instruction_sequence::InstrSeq;
 use naming_special_names_rust::classes;
 use oxidized::{aast::*, ast, ast_defs};

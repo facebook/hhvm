@@ -32,11 +32,11 @@ use hhas_type::{constraint, HhasTypeInfo};
 use hhas_type_const::HhasTypeConstant;
 use hhas_typedef::HhasTypedef;
 use hhbc_ast::*;
-use hhbc_by_ref_hhbc_string_utils::{
+use hhbc_id::{class::ClassType, Id};
+use hhbc_string_utils::{
     float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, mangle, quote_string,
     quote_string_with_escape, strip_global_ns, strip_ns, triple_quote_string, types,
 };
-use hhbc_id::{class::ClassType, Id};
 use indexmap::IndexSet;
 use instruction_sequence::{Error::Unrecoverable, InstrSeq};
 use iterator::Id as IterId;

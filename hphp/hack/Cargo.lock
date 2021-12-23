@@ -163,7 +163,7 @@ dependencies = [
  "ast_scope",
  "env",
  "hhbc_ast",
- "hhbc_by_ref_hhbc_string_utils",
+ "hhbc_string_utils",
  "instruction_sequence",
  "naming_special_names_rust",
  "oxidized",
@@ -178,9 +178,9 @@ dependencies = [
  "bumpalo",
  "env",
  "ffi",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_options",
  "hhbc_id",
+ "hhbc_string_utils",
  "indexmap",
  "itertools 0.10.3",
  "naming_special_names_rust",
@@ -331,8 +331,8 @@ dependencies = [
  "hhas_type_const",
  "hhas_typedef",
  "hhbc_ast",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_id",
+ "hhbc_string_utils",
  "indexmap",
  "instruction_sequence",
  "iterator",
@@ -725,11 +725,11 @@ dependencies = [
  "ffi",
  "hash",
  "hhas_param",
- "hhbc_by_ref_unique_id_builder",
- "hhbc_by_ref_unique_list",
  "label",
  "naming_special_names_rust",
  "oxidized",
+ "unique_id_builder",
+ "unique_list",
 ]
 
 [[package]]
@@ -850,9 +850,9 @@ dependencies = [
  "ffi",
  "hhas_adata",
  "hhbc_ast",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_options",
  "hhbc_id",
+ "hhbc_string_utils",
  "instruction_sequence",
  "runtime",
 ]
@@ -901,12 +901,11 @@ dependencies = [
  "hhas_body",
  "hhas_param",
  "hhas_type",
+ "hhbc_assertion_utils",
  "hhbc_ast",
- "hhbc_by_ref_hhbc_assertion_utils",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_options",
- "hhbc_by_ref_unique_id_builder",
  "hhbc_id",
+ "hhbc_string_utils",
  "indexmap",
  "instruction_sequence",
  "iterator",
@@ -923,6 +922,7 @@ dependencies = [
  "runtime",
  "scope",
  "statement_state",
+ "unique_id_builder",
 ]
 
 [[package]]
@@ -956,8 +956,8 @@ dependencies = [
  "hhas_type_const",
  "hhas_xhp_attribute",
  "hhbc_ast",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_id",
+ "hhbc_string_utils",
  "instruction_sequence",
  "label",
  "local",
@@ -979,8 +979,8 @@ dependencies = [
  "hhas_constant",
  "hhas_function",
  "hhas_pos",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_id",
+ "hhbc_string_utils",
  "instruction_sequence",
  "oxidized",
 ]
@@ -1001,11 +1001,11 @@ dependencies = [
  "env",
  "ffi",
  "hash",
+ "hhbc_assertion_utils",
  "hhbc_ast",
- "hhbc_by_ref_hhbc_assertion_utils",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_options",
  "hhbc_id",
+ "hhbc_string_utils",
  "indexmap",
  "instruction_sequence",
  "itertools 0.10.3",
@@ -1063,9 +1063,9 @@ dependencies = [
  "hhas_pos",
  "hhas_type",
  "hhbc_ast",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_options",
  "hhbc_id",
+ "hhbc_string_utils",
  "instruction_sequence",
  "itertools 0.10.3",
  "label",
@@ -1115,9 +1115,9 @@ dependencies = [
  "hhas_pos",
  "hhas_type",
  "hhbc_ast",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_options",
  "hhbc_id",
+ "hhbc_string_utils",
  "instruction_sequence",
  "label",
  "local",
@@ -1143,9 +1143,9 @@ dependencies = [
  "hhas_method",
  "hhas_pos",
  "hhbc_ast",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_options",
  "hhbc_id",
+ "hhbc_string_utils",
  "instruction_sequence",
  "itertools 0.10.3",
  "naming_special_names_rust",
@@ -1185,8 +1185,8 @@ dependencies = [
  "ffi",
  "hhas_param",
  "hhas_type",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_options",
+ "hhbc_string_utils",
  "instruction_sequence",
  "label",
  "local",
@@ -1242,8 +1242,8 @@ dependencies = [
  "hhas_property",
  "hhas_type",
  "hhbc_ast",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_id",
+ "hhbc_string_utils",
  "instruction_sequence",
  "naming_special_names_rust",
  "oxidized",
@@ -1263,8 +1263,8 @@ dependencies = [
  "hhas_pos",
  "hhas_record_def",
  "hhas_type",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_id",
+ "hhbc_string_utils",
  "instruction_sequence",
  "oxidized",
 ]
@@ -1284,9 +1284,9 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "ffi",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_by_ref_options",
  "hhbc_id",
+ "hhbc_string_utils",
  "instruction_sequence",
  "naming_special_names_rust",
  "oxidized",
@@ -1300,8 +1300,8 @@ dependencies = [
  "bumpalo",
  "ffi",
  "hhas_type",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_id",
+ "hhbc_string_utils",
  "instruction_sequence",
  "naming_special_names_rust",
  "oxidized",
@@ -1337,8 +1337,8 @@ dependencies = [
  "hhas_method",
  "hhas_property",
  "hhas_xhp_attribute",
- "hhbc_by_ref_hhbc_string_utils",
  "hhbc_id",
+ "hhbc_string_utils",
  "instruction_sequence",
  "naming_special_names_rust",
  "oxidized",
@@ -1454,7 +1454,7 @@ dependencies = [
  "facts_parser",
  "facts_smart_constructors",
  "hex",
- "hhbc_by_ref_hhbc_string_utils",
+ "hhbc_string_utils",
  "md-5",
  "naming_special_names_rust",
  "ocamlrep",
@@ -1590,9 +1590,9 @@ name = "global_state"
 version = "0.0.0"
 dependencies = [
  "hhas_coeffects",
- "hhbc_by_ref_unique_id_builder",
  "ocamlrep",
  "oxidized",
+ "unique_id_builder",
 ]
 
 [[package]]
@@ -1823,7 +1823,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "ffi",
- "hhbc_by_ref_hhbc_string_utils",
+ "hhbc_string_utils",
  "naming_special_names_rust",
  "oxidized",
 ]
@@ -1976,6 +1976,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hhbc_assertion_utils"
+version = "0.0.0"
+dependencies = [
+ "emit_fatal",
+ "instruction_sequence",
+ "oxidized",
+]
+
+[[package]]
 name = "hhbc_ast"
 version = "0.0.0"
 dependencies = [
@@ -2003,17 +2012,17 @@ dependencies = [
  "global_state",
  "hash",
  "hhas_coeffects",
- "hhbc_by_ref_hhbc_assertion_utils",
- "hhbc_by_ref_hhbc_string_utils",
+ "hhbc_assertion_utils",
  "hhbc_by_ref_options",
- "hhbc_by_ref_unique_id_builder",
- "hhbc_by_ref_unique_list",
  "hhbc_id",
+ "hhbc_string_utils",
  "instruction_sequence",
  "itertools 0.10.3",
  "naming_special_names_rust",
  "ocamlrep",
  "oxidized",
+ "unique_id_builder",
+ "unique_list",
 ]
 
 [[package]]
@@ -2042,28 +2051,6 @@ dependencies = [
  "profile_rust",
  "stack_limit",
  "unified_decl_provider",
-]
-
-[[package]]
-name = "hhbc_by_ref_hhbc_assertion_utils"
-version = "0.0.0"
-dependencies = [
- "emit_fatal",
- "instruction_sequence",
- "oxidized",
-]
-
-[[package]]
-name = "hhbc_by_ref_hhbc_string_utils"
-version = "0.0.0"
-dependencies = [
- "escaper",
- "lazy_static",
- "libc",
- "naming_special_names_rust",
- "ocaml_helper",
- "pretty_assertions",
- "regex",
 ]
 
 [[package]]
@@ -2116,33 +2103,25 @@ dependencies = [
 ]
 
 [[package]]
-name = "hhbc_by_ref_unique_id_builder"
-version = "0.0.0"
-dependencies = [
- "ast_scope",
-]
-
-[[package]]
-name = "hhbc_by_ref_unique_list"
-version = "0.0.0"
-dependencies = [
- "indexmap",
-]
-
-[[package]]
-name = "hhbc_by_ref_unique_list_bench"
-version = "0.0.0"
-dependencies = [
- "hhbc_by_ref_unique_list",
-]
-
-[[package]]
 name = "hhbc_id"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
  "ffi",
- "hhbc_by_ref_hhbc_string_utils",
+ "hhbc_string_utils",
+]
+
+[[package]]
+name = "hhbc_string_utils"
+version = "0.0.0"
+dependencies = [
+ "escaper",
+ "lazy_static",
+ "libc",
+ "naming_special_names_rust",
+ "ocaml_helper",
+ "pretty_assertions",
+ "regex",
 ]
 
 [[package]]
@@ -3173,7 +3152,7 @@ name = "rust_facts_ffi"
 version = "0.0.0"
 dependencies = [
  "facts_rust",
- "hhbc_by_ref_hhbc_string_utils",
+ "hhbc_string_utils",
  "ocamlrep",
  "ocamlrep_ocamlpool",
  "oxidized",
@@ -3692,6 +3671,27 @@ dependencies = [
  "decl_provider",
  "external_decl_provider",
  "oxidized_by_ref",
+]
+
+[[package]]
+name = "unique_id_builder"
+version = "0.0.0"
+dependencies = [
+ "ast_scope",
+]
+
+[[package]]
+name = "unique_list"
+version = "0.0.0"
+dependencies = [
+ "indexmap",
+]
+
+[[package]]
+name = "unique_list_bench"
+version = "0.0.0"
+dependencies = [
+ "unique_list",
 ]
 
 [[package]]

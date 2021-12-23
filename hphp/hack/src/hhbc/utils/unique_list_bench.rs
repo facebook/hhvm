@@ -14,8 +14,8 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use hhbc_by_ref_unique_list::UniqueList;
     use test::Bencher;
+    use unique_list::UniqueList;
 
     fn make_sample_unique_list() -> UniqueList<String> {
         let mut ul = UniqueList::new();

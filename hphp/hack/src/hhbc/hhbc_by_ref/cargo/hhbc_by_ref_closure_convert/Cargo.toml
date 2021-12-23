@@ -18,14 +18,14 @@ env = { path = "../../../emitter/cargo/env" }
 global_state = { path = "../../../emitter/cargo/global_state" }
 hash = { path = "../../../../utils/hash" }
 hhas_coeffects = { path = "../../../hhbc/cargo/hhas_coeffects" }
-hhbc_by_ref_hhbc_assertion_utils = { path = "../hhbc_by_ref_hhbc_assertion_utils" }
-hhbc_by_ref_hhbc_string_utils = { path = "../hhbc_by_ref_hhbc_string_utils" }
+hhbc_assertion_utils = { path = "../../../utils/cargo/hhbc_assertion_utils" }
 hhbc_by_ref_options = { path = "../hhbc_by_ref_options" }
-hhbc_by_ref_unique_id_builder = { path = "../hhbc_by_ref_unique_id_builder" }
-hhbc_by_ref_unique_list = { path = "../unique_list" }
 hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 itertools = "0.10.3"
 naming_special_names_rust = { path = "../../../../naming" }
 ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }
+unique_id_builder = { path = "../../../utils/cargo/unique_id_builder" }
+unique_list = { path = "../../../utils/cargo/unique_list" }

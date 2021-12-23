@@ -11,8 +11,8 @@ use hhas_coeffects::HhasCoeffects;
 use hhas_constant::{self as hhas_constant, HhasConstant};
 use hhas_function::{HhasFunction, HhasFunctionFlags};
 use hhas_pos::HhasSpan;
-use hhbc_by_ref_hhbc_string_utils::strip_global_ns;
 use hhbc_id::{r#const, function, Id};
+use hhbc_string_utils::strip_global_ns;
 use instruction_sequence::{instr, InstrSeq, Result};
 use oxidized::ast;
 

@@ -3,19 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ast_scope::{
-    self as ast_scope, Lambda, LongLambda, Scope as AstScope, ScopeItem as AstScopeItem,
-};
+use ast_scope::{Lambda, LongLambda, Scope as AstScope, ScopeItem as AstScopeItem};
 use env::emitter::Emitter;
 use global_state::{ClosureEnclosingClassInfo, GlobalState};
 use hash::HashSet;
 use hhas_coeffects::HhasCoeffects;
-use hhbc_by_ref_hhbc_assertion_utils::*;
-use hhbc_by_ref_hhbc_string_utils as string_utils;
+use hhbc_assertion_utils::*;
 use hhbc_by_ref_options::{CompilerFlags, HhvmFlags, Options};
-use hhbc_by_ref_unique_id_builder::*;
-use hhbc_by_ref_unique_list::UniqueList;
 use hhbc_id::class;
+use hhbc_string_utils as string_utils;
 use instruction_sequence::{unrecoverable, Error, Result};
 use itertools::{Either, EitherOrBoth::*, Itertools};
 use naming_special_names_rust::{
@@ -33,6 +29,8 @@ use oxidized::{
     s_map::SMap,
 };
 use std::path::PathBuf;
+use unique_id_builder::*;
+use unique_list::UniqueList;
 
 type Scope<'a, 'arena> = AstScope<'a, 'arena>;
 type ScopeItem<'a, 'arena> = AstScopeItem<'a, 'arena>;

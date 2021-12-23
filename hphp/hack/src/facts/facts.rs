@@ -7,7 +7,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use digest::Digest;
-use hhbc_by_ref_hhbc_string_utils::{mangle_xhp_id, strip_global_ns};
+use hhbc_string_utils::{mangle_xhp_id, strip_global_ns};
 use naming_special_names_rust::user_attributes;
 use oxidized_by_ref::{
     ast_defs::{Abstraction, ClassishKind},

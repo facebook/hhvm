@@ -9,6 +9,6 @@ path = "../../global_state.rs"
 
 [dependencies]
 hhas_coeffects = { path = "../../../hhbc/cargo/hhas_coeffects" }
-hhbc_by_ref_unique_id_builder = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_unique_id_builder" }
 ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }
+unique_id_builder = { path = "../../../utils/cargo/unique_id_builder" }

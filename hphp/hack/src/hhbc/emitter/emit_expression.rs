@@ -7,11 +7,11 @@ use ast_class_expr::ClassExpr;
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env, Flags as EnvFlags};
 use ffi::{Maybe::Just, Slice, Str};
+use hhbc_assertion_utils::*;
 use hhbc_ast::*;
-use hhbc_by_ref_hhbc_assertion_utils::*;
-use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_options::{CompilerFlags, HhvmFlags, LangFlags, Options};
 use hhbc_id::{class, r#const, function, method, prop, Id};
+use hhbc_string_utils as string_utils;
 use instruction_sequence::{
     instr, unrecoverable,
     Error::{self, Unrecoverable},

@@ -10,6 +10,6 @@ path = "../../hhas_coeffects.rs"
 [dependencies]
 bumpalo = { version = "3.8", features = ["collections"] }
 ffi = { path = "../../../../utils/ffi" }
-hhbc_by_ref_hhbc_string_utils = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_string_utils" }
+hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }

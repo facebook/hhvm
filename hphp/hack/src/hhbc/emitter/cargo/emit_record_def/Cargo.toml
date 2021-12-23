@@ -17,7 +17,7 @@ ffi = { path = "../../../../utils/ffi" }
 hhas_pos = { path = "../../../hhbc/cargo/hhas_pos" }
 hhas_record_def = { path = "../../../hhbc/cargo/hhas_record_def" }
 hhas_type = { path = "../../../hhbc/cargo/hhas_type" }
-hhbc_by_ref_hhbc_string_utils = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_string_utils" }
 hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 instruction_sequence = { path = "../instruction_sequence" }
 oxidized = { path = "../../../../oxidized" }

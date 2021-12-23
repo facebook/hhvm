@@ -7,7 +7,6 @@ use ast_body::AstBody;
 use ffi::{Just, Maybe};
 use hash::HashSet;
 use hhas_param::HhasParam;
-use hhbc_by_ref_unique_id_builder::SSet;
 use label::Label;
 use naming_special_names_rust::{emitter_special_functions, special_idents};
 use oxidized::{
@@ -15,8 +14,9 @@ use oxidized::{
     aast_visitor::{visit, AstParams, Node, Visitor},
     ast::*,
 };
+use unique_id_builder::SSet;
 
-use hhbc_by_ref_unique_list::UniqueList;
+use unique_list::UniqueList;
 
 struct DeclvarVisitorContext<'a> {
     explicit_use_set_opt: Option<&'a SSet>,

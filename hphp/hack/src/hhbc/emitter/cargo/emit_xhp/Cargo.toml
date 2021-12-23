@@ -15,8 +15,8 @@ env = { path = "../env" }
 hhas_method = { path = "../../../hhbc/cargo/hhas_method" }
 hhas_property = { path = "../../../hhbc/cargo/hhas_property" }
 hhas_xhp_attribute = { path = "../../../hhbc/cargo/hhas_xhp_attribute" }
-hhbc_by_ref_hhbc_string_utils = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_string_utils" }
 hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 instruction_sequence = { path = "../instruction_sequence" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }

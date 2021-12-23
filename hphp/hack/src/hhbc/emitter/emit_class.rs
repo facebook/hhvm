@@ -18,10 +18,10 @@ use hhas_xhp_attribute::HhasXhpAttribute;
 use hhbc_ast::{
     FatalOp, FcallArgs, FcallFlags, ReadonlyOp, SpecialClsRef, UseAsVisibility, Visibility,
 };
-use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_id::class::ClassType;
 use hhbc_id::r#const;
 use hhbc_id::{self as hhbc_id, class, method, prop, Id};
+use hhbc_string_utils as string_utils;
 use instruction_sequence::{instr, InstrSeq, Result};
 use local::Local;
 use naming_special_names_rust as special_names;

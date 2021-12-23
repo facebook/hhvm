@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::{Pair, Slice, Str, Triple};
-use hhbc_by_ref_hhbc_string_utils as string_utils;
-use hhbc_by_ref_hhbc_string_utils::strip_ns;
+use hhbc_string_utils as string_utils;
+use hhbc_string_utils::strip_ns;
 use naming_special_names_rust::{self as sn, coeffects as c, coeffects::Ctx};
 use oxidized::{
     aast as a,

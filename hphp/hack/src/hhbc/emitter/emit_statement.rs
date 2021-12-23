@@ -8,8 +8,8 @@ use emit_expression::{self as emit_expr, emit_await, emit_expr, LValOp, Setrange
 use emit_fatal;
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env};
+use hhbc_assertion_utils::*;
 use hhbc_ast::*;
-use hhbc_by_ref_hhbc_assertion_utils::*;
 use hhbc_id::Id;
 use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use label::Label;

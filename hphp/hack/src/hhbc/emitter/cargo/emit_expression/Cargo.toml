@@ -20,11 +20,11 @@ emit_type_constant = { path = "../emit_type_constant" }
 env = { path = "../env" }
 ffi = { path = "../../../../utils/ffi" }
 hash = { path = "../../../../utils/hash" }
+hhbc_assertion_utils = { path = "../../../utils/cargo/hhbc_assertion_utils" }
 hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
-hhbc_by_ref_hhbc_assertion_utils = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_assertion_utils" }
-hhbc_by_ref_hhbc_string_utils = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_hhbc_string_utils" }
 hhbc_by_ref_options = { path = "../../../hhbc_by_ref/cargo/hhbc_by_ref_options" }
 hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 indexmap = { version = "1.7.0", features = ["rayon", "serde-1"] }
 instruction_sequence = { path = "../instruction_sequence" }
 itertools = "0.10.3"

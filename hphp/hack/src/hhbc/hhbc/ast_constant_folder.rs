@@ -7,9 +7,9 @@ use std::{collections::hash_map::RandomState, fmt};
 
 use env::emitter::Emitter;
 use ffi::Pair;
-use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_options::HhvmFlags;
 use hhbc_id::Id;
+use hhbc_string_utils as string_utils;
 use naming_special_names_rust::{math, members, special_functions, typehints};
 use oxidized::{
     aast,
@@ -582,7 +582,7 @@ fn value_to_expr_<'arena>(v: TypedValue<'arena>) -> Result<ast::Expr_, Error> {
     use TypedValue::*;
     Ok(match v {
         Int(i) => Expr_::Int(i.to_string()),
-        Float(i) => Expr_::Float(hhbc_by_ref_hhbc_string_utils::float::to_string(i)),
+        Float(i) => Expr_::Float(hhbc_string_utils::float::to_string(i)),
         Bool(false) => Expr_::False,
         Bool(true) => Expr_::True,
         String(s) => Expr_::String(s.unsafe_as_str().into()),

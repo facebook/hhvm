@@ -14,9 +14,7 @@ pub trait Id<'arena>: Sized {
 
     fn to_unmangled_str(&self) -> std::borrow::Cow<'arena, str> {
         if Self::MANGLE {
-            std::borrow::Cow::from(hhbc_by_ref_hhbc_string_utils::unmangle(
-                self.to_raw_string().into(),
-            ))
+            std::borrow::Cow::from(hhbc_string_utils::unmangle(self.to_raw_string().into()))
         } else {
             std::borrow::Cow::from(self.to_raw_string())
         }
@@ -104,9 +102,7 @@ pub mod class {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> ClassType<'arena> {
             ClassType(Str::new_str(
                 alloc,
-                hhbc_by_ref_hhbc_string_utils::strip_global_ns(
-                    &hhbc_by_ref_hhbc_string_utils::mangle(s.to_string()),
-                ),
+                hhbc_string_utils::strip_global_ns(&hhbc_string_utils::mangle(s.to_string())),
             ))
         }
     });
@@ -131,10 +127,7 @@ pub mod prop {
 
     impl_id!(PropType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> PropType<'arena> {
-            PropType(Str::new_str(
-                alloc,
-                hhbc_by_ref_hhbc_string_utils::strip_global_ns(s),
-            ))
+            PropType(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
         }
     });
     impl_add_suffix!(PropType);
@@ -149,10 +142,7 @@ pub mod method {
 
     impl_id!(MethodType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> MethodType<'arena> {
-            MethodType(Str::new_str(
-                alloc,
-                hhbc_by_ref_hhbc_string_utils::strip_global_ns(s),
-            ))
+            MethodType(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
         }
     });
     impl_add_suffix!(MethodType);
@@ -163,11 +153,7 @@ pub mod method {
             s: &str,
             suffix: &str,
         ) -> Self {
-            from_raw_string_with_suffix(
-                alloc,
-                hhbc_by_ref_hhbc_string_utils::strip_global_ns(s),
-                suffix,
-            )
+            from_raw_string_with_suffix(alloc, hhbc_string_utils::strip_global_ns(s), suffix)
         }
     }
 }
@@ -181,10 +167,7 @@ pub mod function {
 
     impl_id!(FunctionType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> FunctionType<'arena> {
-            FunctionType(Str::new_str(
-                alloc,
-                hhbc_by_ref_hhbc_string_utils::strip_global_ns(s),
-            ))
+            FunctionType(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
         }
     });
     impl_add_suffix!(FunctionType);
@@ -200,10 +183,7 @@ pub mod r#const {
 
     impl_id!(ConstType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> ConstType<'arena> {
-            ConstType(Str::new_str(
-                alloc,
-                hhbc_by_ref_hhbc_string_utils::strip_global_ns(s),
-            ))
+            ConstType(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
         }
     });
 }
@@ -217,10 +197,7 @@ pub mod record {
 
     impl_id!(RecordType, mangle = false, {
         fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> RecordType<'arena> {
-            RecordType(Str::new_str(
-                alloc,
-                hhbc_by_ref_hhbc_string_utils::strip_global_ns(s),
-            ))
+            RecordType(Str::new_str(alloc, hhbc_string_utils::strip_global_ns(s)))
         }
     });
 }

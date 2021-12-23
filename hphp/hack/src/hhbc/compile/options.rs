@@ -424,7 +424,7 @@ impl Options {
                     let key = key.to_ascii_lowercase();
                     let key = key.as_ref();
                     let key: &str = options_cli::CANON_BY_ALIAS.get(key).unwrap_or(&key);
-                    if let Some(val) = options_cli::to_json(key)(&val) {
+                    if let Some(val) = options_cli::to_json(key)(val) {
                         json.as_object_mut().map(|m| {
                             m.insert(
                                 key.to_owned(),
@@ -572,7 +572,7 @@ fn deserialize_flags<'de, D: Deserializer<'de>, P: PrefixedFlags>(
             };
             while let Some((ref k, ref v)) = map.next_entry::<String, Arg<GlobalValue>>()? {
                 let mut found = None;
-                let k: &str = &k;
+                let k: &str = k;
                 let k: &str = options_cli::CANON_BY_ALIAS.get(k).unwrap_or(&k);
                 if k.starts_with(P::PREFIX) {
                     found = by_name.get(&k[prefix_len..]).cloned();
@@ -650,7 +650,7 @@ mod tests {
     use super::*;
     use pretty_assertions::assert_eq; // make assert_eq print huge diffs more human-readable
 
-    const HHVM_1: &'static str = r#"{
+    const HHVM_1: &str = r#"{
   "hhvm.aliased_namespaces": {
     "global_value": {
       "bar": "baz",

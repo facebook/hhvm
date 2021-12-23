@@ -203,9 +203,9 @@ mod tests {
             name: ua::MEMOIZE_LSB.into(),
             arguments: ffi::Slice::empty(),
         };
-        assert_eq!(true, attr.is(ua::is_memoized));
-        assert_eq!(false, attr.is(|s| s == ua::MEMOIZE));
-        assert_eq!(true, attr.is(|s| s == ua::MEMOIZE_LSB));
+        assert!(attr.is(ua::is_memoized));
+        assert!(!attr.is(|s| s == ua::MEMOIZE));
+        assert!(attr.is(|s| s == ua::MEMOIZE_LSB));
     }
 
     #[test]
@@ -218,6 +218,6 @@ mod tests {
         let has_result = attrs
             .iter()
             .any(|a| a.name.unsafe_as_str() == ua::DYNAMICALLY_CALLABLE);
-        assert_eq!(true, has_result);
+        assert!(has_result);
     }
 }

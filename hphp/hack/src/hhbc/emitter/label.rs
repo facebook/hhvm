@@ -21,8 +21,8 @@ impl Label {
 
     pub fn map<F: FnOnce(&Id) -> Id>(&self, f: F) -> Label {
         match self {
-            Label::Regular(id) => Label::Regular(f(&id)),
-            Label::DefaultArg(id) => Label::DefaultArg(f(&id)),
+            Label::Regular(id) => Label::Regular(f(id)),
+            Label::DefaultArg(id) => Label::DefaultArg(f(id)),
         }
     }
 }

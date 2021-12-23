@@ -159,7 +159,7 @@ pub fn strip_ns(s: &str) -> &str {
 
 // Remove \HH\ or HH\ preceding a string
 pub fn strip_hh_ns(s: &str) -> Cow<'_, str> {
-    HH_NS_RE.replace(&s, "")
+    HH_NS_RE.replace(s, "")
 }
 
 pub fn has_ns(s: &str) -> bool {
@@ -167,7 +167,7 @@ pub fn has_ns(s: &str) -> bool {
 }
 
 pub fn strip_type_list(s: &str) -> Cow<'_, str> {
-    TYPE_RE.replace_all(&s, "")
+    TYPE_RE.replace_all(s, "")
 }
 
 pub fn cmp(s1: &str, s2: &str, case_sensitive: bool, ignore_ns: bool) -> bool {
@@ -181,7 +181,7 @@ pub fn cmp(s1: &str, s2: &str, case_sensitive: bool, ignore_ns: bool) -> bool {
     if case_sensitive {
         s1 == s2
     } else {
-        s1.eq_ignore_ascii_case(&s2)
+        s1.eq_ignore_ascii_case(s2)
     }
 }
 
@@ -414,23 +414,20 @@ mod string_utils_tests {
     #[test]
     fn quote_string_test() {
         let some_string = "test";
-        assert_eq!(super::quote_string(&some_string), "\"test\"");
+        assert_eq!(super::quote_string(some_string), "\"test\"");
     }
 
     #[test]
     fn quote_string_with_escape_test() {
         let some_string = "test";
-        assert_eq!(
-            super::quote_string_with_escape(&some_string),
-            "\\\"test\\\""
-        );
+        assert_eq!(super::quote_string_with_escape(some_string), "\\\"test\\\"");
     }
 
     #[test]
     fn single_quote_string_with_escape_test() {
         let some_string = "test";
         assert_eq!(
-            super::single_quote_string_with_escape(&some_string),
+            super::single_quote_string_with_escape(some_string),
             "'test'"
         );
     }
@@ -438,63 +435,60 @@ mod string_utils_tests {
     #[test]
     fn triple_quote_string_test() {
         let some_string = "test";
-        assert_eq!(super::triple_quote_string(&some_string), "\"\"\"test\"\"\"");
+        assert_eq!(super::triple_quote_string(some_string), "\"\"\"test\"\"\"");
     }
 
     #[test]
     fn prefix_namespace_test() {
         let namespace = "ns";
         let some_string = "test";
-        assert_eq!(
-            super::prefix_namespace(&namespace, &some_string),
-            "ns\\test"
-        );
+        assert_eq!(super::prefix_namespace(namespace, some_string), "ns\\test");
     }
 
     #[test]
     fn strip_global_ns_test() {
         let some_string = "\\test";
         let another_string = "\\\\";
-        assert_eq!(super::strip_global_ns(&some_string), "test");
-        assert_eq!(super::strip_global_ns(&another_string), "\\");
+        assert_eq!(super::strip_global_ns(some_string), "test");
+        assert_eq!(super::strip_global_ns(another_string), "\\");
     }
 
     #[test]
     fn strip_ns_test() {
         let with_ns = "ns1\\test";
         let without_ns = "test";
-        assert_eq!(super::strip_ns(&with_ns), "test");
-        assert_eq!(super::strip_ns(&without_ns), without_ns);
+        assert_eq!(super::strip_ns(with_ns), "test");
+        assert_eq!(super::strip_ns(without_ns), without_ns);
     }
 
     #[test]
     fn strip_hh_ns() {
         let with_ns = "HH\\test";
         let without_ns = "test";
-        assert_eq!(super::strip_ns(&with_ns), "test");
-        assert_eq!(super::strip_ns(&without_ns), without_ns);
+        assert_eq!(super::strip_ns(with_ns), "test");
+        assert_eq!(super::strip_ns(without_ns), without_ns);
     }
 
     #[test]
     fn strip_hh_ns_2() {
         let with_ns = "\\HH\\test";
         let without_ns = "test";
-        assert_eq!(super::strip_ns(&with_ns), "test");
-        assert_eq!(super::strip_ns(&without_ns), without_ns);
+        assert_eq!(super::strip_ns(with_ns), "test");
+        assert_eq!(super::strip_ns(without_ns), without_ns);
     }
 
     #[test]
     fn has_ns_test() {
         let with_ns = "\\test";
         let without_ns = "test";
-        assert_eq!(super::has_ns(&with_ns), true);
-        assert_eq!(super::has_ns(&without_ns), false);
+        assert!(super::has_ns(with_ns));
+        assert!(!super::has_ns(without_ns));
     }
 
     #[test]
     fn strip_type_list_test() {
         let s = "MutableMap<Tk, Tv>";
-        assert_eq!(super::strip_type_list(&s).into_owned(), "MutableMap");
+        assert_eq!(super::strip_type_list(s).into_owned(), "MutableMap");
     }
 
     #[test]
@@ -507,25 +501,25 @@ mod string_utils_tests {
 
         let ns2_s2 = "ns2\\s2";
 
-        assert_eq!(true, super::cmp(&s1, &s1_uppercase, false, false));
-        assert_eq!(false, super::cmp(&s1, &s1_uppercase, true, false));
-        assert_eq!(true, super::cmp(&s1, &s1_uppercase, false, true));
-        assert_eq!(false, super::cmp(&s1, &s1_uppercase, true, true));
+        assert!(super::cmp(s1, s1_uppercase, false, false));
+        assert!(!super::cmp(s1, s1_uppercase, true, false));
+        assert!(super::cmp(s1, s1_uppercase, false, true));
+        assert!(!super::cmp(s1, s1_uppercase, true, true));
 
-        assert_eq!(false, super::cmp(&s1, &ns2_s1, false, false));
-        assert_eq!(false, super::cmp(&s1, &ns2_s1, true, false));
-        assert_eq!(true, super::cmp(&s1, &ns2_s1, false, true));
-        assert_eq!(true, super::cmp(&s1, &ns2_s1, true, true));
+        assert!(!super::cmp(s1, ns2_s1, false, false));
+        assert!(!super::cmp(s1, ns2_s1, true, false));
+        assert!(super::cmp(s1, ns2_s1, false, true));
+        assert!(super::cmp(s1, ns2_s1, true, true));
 
-        assert_eq!(false, super::cmp(&s1, &ns2_s1_uppercase, false, false));
-        assert_eq!(false, super::cmp(&s1, &ns2_s1_uppercase, true, false));
-        assert_eq!(true, super::cmp(&s1, &ns2_s1_uppercase, false, true));
-        assert_eq!(false, super::cmp(&s1, &ns2_s1_uppercase, true, true));
+        assert!(!super::cmp(s1, ns2_s1_uppercase, false, false));
+        assert!(!super::cmp(s1, ns2_s1_uppercase, true, false));
+        assert!(super::cmp(s1, ns2_s1_uppercase, false, true));
+        assert!(!super::cmp(s1, ns2_s1_uppercase, true, true));
 
-        assert_eq!(false, super::cmp(&s1, &ns2_s2, false, false));
-        assert_eq!(false, super::cmp(&s1, &ns2_s2, true, false));
-        assert_eq!(false, super::cmp(&s1, &ns2_s2, false, true));
-        assert_eq!(false, super::cmp(&s1, &ns2_s2, true, true));
+        assert!(!super::cmp(s1, ns2_s2, false, false));
+        assert!(!super::cmp(s1, ns2_s2, true, false));
+        assert!(!super::cmp(s1, ns2_s2, false, true));
+        assert!(!super::cmp(s1, ns2_s2, true, true));
     }
 
     #[test]
@@ -533,8 +527,8 @@ mod string_utils_tests {
         let s1 = "self";
         let s2 = "not_self";
 
-        assert_eq!(super::is_self(&s1), true);
-        assert_eq!(super::is_self(&s2), false);
+        assert!(super::is_self(s1));
+        assert!(!super::is_self(s2));
     }
 
     #[test]
@@ -542,8 +536,8 @@ mod string_utils_tests {
         let s1 = "parent";
         let s2 = "not_parent";
 
-        assert_eq!(super::is_parent(&s1), true);
-        assert_eq!(super::is_parent(&s2), false);
+        assert!(super::is_parent(s1));
+        assert!(!super::is_parent(s2));
     }
 
     #[test]
@@ -551,8 +545,8 @@ mod string_utils_tests {
         let s1 = "static";
         let s2 = "not_static";
 
-        assert_eq!(super::is_static(&s1), true);
-        assert_eq!(super::is_static(&s2), false);
+        assert!(super::is_static(s1));
+        assert!(!super::is_static(s2));
     }
 
     #[test]
@@ -560,8 +554,8 @@ mod string_utils_tests {
         let s1 = "class";
         let s2 = "not_a_class";
 
-        assert_eq!(super::is_class(&s1), true);
-        assert_eq!(super::is_class(&s2), false);
+        assert!(super::is_class(s1));
+        assert!(!super::is_class(s2));
     }
 
     #[test]

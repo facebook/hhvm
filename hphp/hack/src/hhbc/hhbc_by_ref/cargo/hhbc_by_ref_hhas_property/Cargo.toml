@@ -14,5 +14,5 @@ hhbc_by_ref_hhas_attribute = { path = "../hhbc_by_ref_hhas_attribute" }
 hhbc_by_ref_hhas_type = { path = "../hhbc_by_ref_hhas_type" }
 hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
-hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }
-hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
+instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
+runtime = { path = "../../../emitter/cargo/runtime" }

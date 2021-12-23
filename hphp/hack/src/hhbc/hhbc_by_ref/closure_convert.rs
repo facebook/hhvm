@@ -3,27 +3,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::path::PathBuf;
-
-use itertools::{Either, EitherOrBoth::*, Itertools};
-
+use env::emitter::Emitter;
+use global_state::{ClosureEnclosingClassInfo, GlobalState};
 use hash::HashSet;
 use hhbc_by_ref_ast_scope::{
     self as ast_scope, Lambda, LongLambda, Scope as AstScope, ScopeItem as AstScopeItem,
 };
 use hhbc_by_ref_decl_vars as decl_vars;
-use hhbc_by_ref_emit_fatal as emit_fatal;
-use hhbc_by_ref_env::emitter::Emitter;
-use hhbc_by_ref_global_state::{ClosureEnclosingClassInfo, GlobalState};
 use hhbc_by_ref_hhas_coeffects::HhasCoeffects;
 use hhbc_by_ref_hhbc_assertion_utils::*;
 use hhbc_by_ref_hhbc_id as hhbc_id;
 use hhbc_by_ref_hhbc_id::class;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
-use hhbc_by_ref_instruction_sequence::{unrecoverable, Error, Result};
 use hhbc_by_ref_options::{CompilerFlags, HhvmFlags, Options};
 use hhbc_by_ref_unique_id_builder::*;
 use hhbc_by_ref_unique_list::UniqueList;
+use instruction_sequence::{unrecoverable, Error, Result};
+use itertools::{Either, EitherOrBoth::*, Itertools};
 use naming_special_names_rust::{
     fb, pseudo_consts, pseudo_functions, special_idents, superglobals,
 };
@@ -38,6 +34,7 @@ use oxidized::{
     relative_path::{Prefix, RelativePath},
     s_map::SMap,
 };
+use std::path::PathBuf;
 
 type Scope<'a, 'arena> = AstScope<'a, 'arena>;
 type ScopeItem<'a, 'arena> = AstScopeItem<'a, 'arena>;

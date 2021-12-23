@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{special_class_resolver::SpecialClassResolver, write::newline};
-use hhbc_by_ref_env::emitter::Emitter;
+use env::emitter::Emitter;
 use oxidized::relative_path::RelativePath;
 use std::collections::BTreeMap;
 use std::io::{Result, Write};

@@ -12,4 +12,4 @@ bumpalo = { version = "3.8", features = ["collections"] }
 ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_hhas_attribute = { path = "../hhbc_by_ref_hhas_attribute" }
 hhbc_by_ref_hhas_type = { path = "../hhbc_by_ref_hhas_type" }
-hhbc_by_ref_label = { path = "../hhbc_by_ref_label" }
+label = { path = "../../../emitter/cargo/label" }

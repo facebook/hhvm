@@ -7,14 +7,13 @@
 // unlike formal parameters and return types. We might consider fixing this.
 // Also interestingly, abstract constants are not emitted at all.
 
+use env::{emitter::Emitter, Env};
 use ffi::Maybe;
 use hhbc_by_ref_ast_constant_folder as ast_constant_folder;
-use hhbc_by_ref_emit_expression as emit_expr;
-use hhbc_by_ref_env::{emitter::Emitter, Env};
 use hhbc_by_ref_hhbc_id::{self as hhbc_id, Id};
-use hhbc_by_ref_instruction_sequence::{InstrSeq, Result};
-use hhbc_by_ref_runtime::TypedValue;
+use instruction_sequence::{InstrSeq, Result};
 use oxidized::ast;
+use runtime::TypedValue;
 
 #[derive(Debug)]
 #[repr(C)]
@@ -39,7 +38,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
             Ok(v) => (Some(v), None),
             Err(_) => (
                 Some(TypedValue::Uninit),
-                Some(emit_expr::emit_expr(emitter, env, init)?),
+                Some(emit_expression::emit_expr(emitter, env, init)?),
             ),
         },
     };

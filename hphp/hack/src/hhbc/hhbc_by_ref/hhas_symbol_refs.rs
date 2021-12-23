@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::{Slice, Str};
-pub use hhbc_by_ref_symbol_refs_state::IncludePath;
-use hhbc_by_ref_symbol_refs_state::SymbolRefsState;
+pub use symbol_refs_state::IncludePath;
+use symbol_refs_state::SymbolRefsState;
 
 /// Data structure for keeping track of symbols (and includes) we
 /// encounter in the course of emitting bytecode for an AST. We split

@@ -8,10 +8,9 @@ edition = "2021"
 path = "../../rewrite_xml.rs"
 
 [dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
-hhbc_by_ref_emit_symbol_refs = { path = "../hhbc_by_ref_emit_symbol_refs" }
-hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
+emit_symbol_refs = { path = "../../../emitter/cargo/emit_symbol_refs" }
+env = { path = "../../../emitter/cargo/env" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
-hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }
+instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }

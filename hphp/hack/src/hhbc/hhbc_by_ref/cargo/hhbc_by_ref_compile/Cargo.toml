@@ -15,13 +15,13 @@ bumpalo = { version = "3.8", features = ["collections"] }
 bytecode_printer = { path = "../../../bytecode_printer" }
 decl_provider = { path = "../../../decl_provider" }
 elaborate_namespaces_visitor = { path = "../../../../naming/cargo/elaborate_namespaces" }
-hhbc_by_ref_emit_program = { path = "../hhbc_by_ref_emit_program" }
-hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
+emit_program = { path = "../../../emitter/cargo/emit_program" }
+env = { path = "../../../emitter/cargo/env" }
 hhbc_by_ref_hhas_program = { path = "../hhbc_by_ref_hhas_program" }
 hhbc_by_ref_hhbc_ast = { path = "../hhbc_by_ref_hhbc_ast" }
-hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }
 hhbc_by_ref_options = { path = "../hhbc_by_ref_options" }
 hhbc_by_ref_rewrite_program = { path = "../hhbc_by_ref_rewrite_program" }
+instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 itertools = "0.10.3"
 ocamlrep = { path = "../../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../../ocamlrep_derive" }

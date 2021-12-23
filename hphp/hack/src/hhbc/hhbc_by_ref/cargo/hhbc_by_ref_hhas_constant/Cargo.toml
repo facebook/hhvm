@@ -8,11 +8,11 @@ edition = "2021"
 path = "../../hhas_constant.rs"
 
 [dependencies]
+emit_expression = { path = "../../../emitter/cargo/emit_expression" }
+env = { path = "../../../emitter/cargo/env" }
 ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_ast_constant_folder = { path = "../hhbc_by_ref_ast_constant_folder" }
-hhbc_by_ref_emit_expression = { path = "../hhbc_by_ref_emit_expression" }
-hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
-hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }
-hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
+instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 oxidized = { path = "../../../../oxidized" }
+runtime = { path = "../../../emitter/cargo/runtime" }

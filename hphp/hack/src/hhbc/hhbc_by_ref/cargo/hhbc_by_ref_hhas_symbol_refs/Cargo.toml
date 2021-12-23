@@ -10,4 +10,4 @@ path = "../../hhas_symbol_refs.rs"
 [dependencies]
 bumpalo = { version = "3.8", features = ["collections"] }
 ffi = { path = "../../../../utils/ffi" }
-hhbc_by_ref_symbol_refs_state = { path = "../hhbc_by_ref_symbol_refs_state" }
+symbol_refs_state = { path = "../../../emitter/cargo/symbol_refs_state" }

@@ -17,7 +17,7 @@
 #pragma once
 
 #include "hphp/hack/src/hhbc/ffi_bridge/rust_compile_ffi_bridge.rs"
-#include "hphp/hack/src/hhbc/hhbc_by_ref/hhbc-ast.h"
+#include "hphp/hack/src/hhbc/hhbc-ast.h"
 
 namespace HPHP::hackc::hhbc {
 

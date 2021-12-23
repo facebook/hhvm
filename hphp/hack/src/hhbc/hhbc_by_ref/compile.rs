@@ -13,15 +13,15 @@ use anyhow::anyhow;
 use bitflags::bitflags;
 use bytecode_printer::{print_program, Context};
 use decl_provider::NoDeclProvider;
-use hhbc_by_ref_emit_program::{self as emit_program, emit_program, FromAstFlags};
-use hhbc_by_ref_env::emitter::Emitter;
+use emit_program::{emit_program, FromAstFlags};
+use env::emitter::Emitter;
 use hhbc_by_ref_hhas_program::HhasProgram;
 use hhbc_by_ref_hhbc_ast::FatalOp;
-use hhbc_by_ref_instruction_sequence::Error;
 use hhbc_by_ref_options::{
     Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, PhpismFlags, RepoFlags,
 };
 use hhbc_by_ref_rewrite_program::rewrite_program;
+use instruction_sequence::Error;
 use itertools::{Either, Either::*};
 use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};

@@ -125,33 +125,33 @@ else()
   set(PROFILE "release")
 endif()
 
-set(HHBC_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/hhbc/hhbc_by_ref")
+set(HHBC_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/hhbc")
 set(HHBC_AST_SRCS
-  "hhas_adata.rs"
-  "hhas_attribute.rs"
-  "hhas_body.rs"
-  "hhas_class.rs"
-  "hhas_coeffects.rs"
-  "hhas_constant.rs"
-  "hhas_function.rs"
-  "hhas_method.rs"
-  "hhas_param.rs"
-  "hhas_pos.rs"
-  "hhas_program.rs"
-  "hhas_property.rs"
-  "hhas_record_def.rs"
-  "hhas_symbol_refs.rs"
-  "hhas_type.rs"
-  "hhas_type_const.rs"
-  "hhas_typedef.rs"
-  "hhbc_ast.rs"
-  "hhbc_ast_ffi_cbindgen.rs"
-  "hhbc_id.rs"
-  "instruction_sequence.rs"
-  "label.rs"
-  "local.rs"
-  "symbol_refs_state.rs"
-  "typed_value.rs"
+  "hhbc_by_ref/hhas_adata.rs"
+  "hhbc_by_ref/hhas_attribute.rs"
+  "hhbc_by_ref/hhas_body.rs"
+  "hhbc_by_ref/hhas_class.rs"
+  "hhbc_by_ref/hhas_coeffects.rs"
+  "hhbc_by_ref/hhas_constant.rs"
+  "hhbc_by_ref/hhas_function.rs"
+  "hhbc_by_ref/hhas_method.rs"
+  "hhbc_by_ref/hhas_param.rs"
+  "hhbc_by_ref/hhas_pos.rs"
+  "hhbc_by_ref/hhas_program.rs"
+  "hhbc_by_ref/hhas_property.rs"
+  "hhbc_by_ref/hhas_record_def.rs"
+  "hhbc_by_ref/hhas_symbol_refs.rs"
+  "hhbc_by_ref/hhas_type.rs"
+  "hhbc_by_ref/hhas_type_const.rs"
+  "hhbc_by_ref/hhas_typedef.rs"
+  "hhbc_by_ref/hhbc_ast.rs"
+  "hhbc_by_ref/hhbc_ast_ffi_cbindgen.rs"
+  "hhbc_by_ref/hhbc_id.rs"
+  "emitter/instruction_sequence.rs"
+  "emitter/label.rs"
+  "emitter/local.rs"
+  "emitter/symbol_refs_state.rs"
+  "emitter/typed_value.rs"
 )
 foreach(src ${HHBC_AST_SRCS})
   string(APPEND HHBC_AST_SRC_ARG "${HHBC_PREFIX}/${src},")
@@ -175,7 +175,7 @@ foreach(src ${FFI_SRCS})
   string(APPEND FFI_SRC_ARG "${FFI_PREFIX}/${src},")
 endforeach()
 
-set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hhbc/hhbc_by_ref/hhbc-ast.h")
+set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hhbc/hhbc-ast.h")
 set(FFI_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/utils/ffi.h")
 set(NAMING_SPECIAL_NAMES_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/naming/naming-special-names.h")
 add_custom_command(

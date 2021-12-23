@@ -10,4 +10,4 @@ path = "../../adata_state.rs"
 [dependencies]
 bumpalo = { version = "3.8", features = ["collections"] }
 hhbc_by_ref_hhas_adata = { path = "../hhbc_by_ref_hhas_adata" }
-hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
+runtime = { path = "../../../emitter/cargo/runtime" }

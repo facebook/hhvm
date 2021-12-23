@@ -14,7 +14,6 @@ use crate::{
 use core_utils_rust::add_ns;
 use escaper::{escape, escape_by, is_lit_printable};
 use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
-use hhbc_by_ref_emit_type_hint as emit_type_hint;
 use hhbc_by_ref_hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX};
 use hhbc_by_ref_hhas_attribute::{self as hhas_attribute, HhasAttribute};
 use hhbc_by_ref_hhas_body::{HhasBody, HhasBodyEnv};
@@ -38,14 +37,13 @@ use hhbc_by_ref_hhbc_string_utils::{
     float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, mangle, quote_string,
     quote_string_with_escape, strip_global_ns, strip_ns, triple_quote_string, types,
 };
-use hhbc_by_ref_instruction_sequence::{Error::Unrecoverable, InstrSeq};
-use hhbc_by_ref_iterator::Id as IterId;
-use hhbc_by_ref_label::Label;
-use hhbc_by_ref_local::Local;
-use hhbc_by_ref_runtime::TypedValue;
 use indexmap::IndexSet;
+use instruction_sequence::{Error::Unrecoverable, InstrSeq};
+use iterator::Id as IterId;
 use itertools::Itertools;
+use label::Label;
 use lazy_static::lazy_static;
+use local::Local;
 use naming_special_names_rust::classes;
 use ocaml_helper::escaped;
 use oxidized::{
@@ -54,6 +52,7 @@ use oxidized::{
     local_id,
 };
 use regex::Regex;
+use runtime::TypedValue;
 use std::{
     borrow::Cow,
     io::{self, Result, Write},

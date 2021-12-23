@@ -5,14 +5,13 @@
 use indexmap::IndexMap;
 use std::{collections::hash_map::RandomState, fmt};
 
+use env::emitter::Emitter;
 use ffi::Pair;
 use hhbc_by_ref_ast_class_expr as ast_class_expr;
 use hhbc_by_ref_ast_scope as ast_scope;
-use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhbc_id::Id;
 use hhbc_by_ref_hhbc_string_utils as string_utils;
 use hhbc_by_ref_options::HhvmFlags;
-use hhbc_by_ref_runtime::TypedValue;
 use naming_special_names_rust::{math, members, special_functions, typehints};
 use oxidized::{
     aast,
@@ -20,6 +19,7 @@ use oxidized::{
     ast, ast_defs,
     pos::Pos,
 };
+use runtime::TypedValue;
 
 use itertools::Itertools;
 

@@ -5,9 +5,9 @@
 
 use std::borrow::Cow;
 
+use env::emitter::Emitter;
 use ffi::Pair;
 use hhbc_by_ref_ast_class_expr::ClassExpr;
-use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhas_body::HhasBodyEnv;
 use oxidized::{ast, ast_defs, pos::Pos};
 

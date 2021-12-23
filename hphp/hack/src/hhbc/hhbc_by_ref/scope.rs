@@ -3,12 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 pub mod scope {
-    use hhbc_by_ref_env::emitter::Emitter;
-    use hhbc_by_ref_instruction_sequence::{instr, InstrSeq, Result};
-    use hhbc_by_ref_iterator as iterator;
-    use hhbc_by_ref_label as label;
-    use hhbc_by_ref_local as local;
-    use hhbc_by_ref_local::Local;
+    use env::emitter::Emitter;
+    use instruction_sequence::{instr, InstrSeq, Result};
+    use local::Local;
 
     /// Run emit () in a new unnamed local scope, which produces three instruction
     /// blocks -- before, inner, after. If emit () registered any unnamed locals, the

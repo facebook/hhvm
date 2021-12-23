@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use env::emitter::Emitter;
 use hhbc_by_ref_ast_scope::{self as ast_scope, Scope};
-use hhbc_by_ref_env::emitter::Emitter;
 use hhbc_by_ref_hhbc_ast::SpecialClsRef;
 use hhbc_by_ref_hhbc_ast::{ClassishKind, ClassishKind::*};
 use hhbc_by_ref_hhbc_string_utils as string_utils;
-use hhbc_by_ref_instruction_sequence::InstrSeq;
+use instruction_sequence::InstrSeq;
 use naming_special_names_rust::classes;
 use oxidized::{aast::*, ast, ast_defs};
 

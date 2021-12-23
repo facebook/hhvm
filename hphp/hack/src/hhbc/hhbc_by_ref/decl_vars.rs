@@ -7,8 +7,8 @@ use ffi::{Just, Maybe};
 use hash::HashSet;
 use hhbc_by_ref_ast_body::AstBody;
 use hhbc_by_ref_hhas_param::HhasParam;
-use hhbc_by_ref_label::Label;
 use hhbc_by_ref_unique_id_builder::SSet;
+use label::Label;
 use naming_special_names_rust::{emitter_special_functions, special_idents};
 use oxidized::{
     aast,

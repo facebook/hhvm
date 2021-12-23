@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::{BumpSliceMut, Maybe, Pair, Slice, Str};
-use hhbc_by_ref_label::Label;
-use hhbc_by_ref_local::Local;
+use label::Label;
+use local::Local;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
@@ -108,7 +108,7 @@ impl<'arena> FcallArgs<'arena> {
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub struct IterArgs<'arena> {
-    pub iter_id: hhbc_by_ref_iterator::Id,
+    pub iter_id: iterator::Id,
     pub key_id: Maybe<Local<'arena>>,
     pub val_id: Local<'arena>,
 }
@@ -238,7 +238,7 @@ pub enum InstructLitConst<'arena> {
     LazyClass(ClassId<'arena>),
     /// Pseudo instruction that will get translated into appropraite literal
     /// bytecode, with possible reference to .adata *)
-    TypedValue(hhbc_by_ref_runtime::TypedValue<'arena>),
+    TypedValue(runtime::TypedValue<'arena>),
     Vec(AdataId<'arena>),
     Dict(AdataId<'arena>),
     Keyset(AdataId<'arena>),
@@ -525,7 +525,7 @@ pub enum InstructFinal<'arena> {
 pub enum InstructIterator<'arena> {
     IterInit(IterArgs<'arena>, Label),
     IterNext(IterArgs<'arena>, Label),
-    IterFree(hhbc_by_ref_iterator::Id),
+    IterFree(iterator::Id),
 }
 
 #[derive(Clone, Debug)]

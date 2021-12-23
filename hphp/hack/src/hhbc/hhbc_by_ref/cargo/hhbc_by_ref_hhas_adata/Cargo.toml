@@ -9,4 +9,4 @@ path = "../../hhas_adata.rs"
 
 [dependencies]
 ffi = { path = "../../../../utils/ffi" }
-hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
+runtime = { path = "../../../emitter/cargo/runtime" }

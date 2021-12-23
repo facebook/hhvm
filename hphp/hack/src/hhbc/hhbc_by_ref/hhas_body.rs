@@ -6,7 +6,7 @@ use ffi::{Maybe, Pair, Slice, Str};
 use hhbc_by_ref_hhas_param::HhasParam;
 use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhbc_ast::ClassishKind;
-use hhbc_by_ref_instruction_sequence::InstrSeq;
+use instruction_sequence::InstrSeq;
 
 #[derive(Default, Debug, Clone)]
 #[repr(C)]

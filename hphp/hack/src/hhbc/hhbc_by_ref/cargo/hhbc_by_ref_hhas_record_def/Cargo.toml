@@ -12,4 +12,4 @@ ffi = { path = "../../../../utils/ffi" }
 hhbc_by_ref_hhas_pos = { path = "../hhas_by_ref_hhas_pos" }
 hhbc_by_ref_hhas_type = { path = "../hhbc_by_ref_hhas_type" }
 hhbc_by_ref_hhbc_id = { path = "../hhbc_by_ref_hhbc_id" }
-hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
+runtime = { path = "../../../emitter/cargo/runtime" }

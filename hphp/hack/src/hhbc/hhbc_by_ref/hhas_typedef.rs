@@ -8,7 +8,7 @@ use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_pos::HhasSpan;
 use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhbc_id::class::ClassType;
-use hhbc_by_ref_runtime::TypedValue;
+use runtime::TypedValue;
 
 #[derive(Debug)]
 #[repr(C)]

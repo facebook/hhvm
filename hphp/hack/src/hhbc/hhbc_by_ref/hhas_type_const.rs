@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::{Maybe, Str};
-use hhbc_by_ref_runtime::TypedValue;
+use runtime::TypedValue;
 
 #[derive(Debug)]
 #[repr(C)]

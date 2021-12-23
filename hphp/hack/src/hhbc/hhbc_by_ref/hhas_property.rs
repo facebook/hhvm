@@ -9,7 +9,7 @@ use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_type::HhasTypeInfo;
 use hhbc_by_ref_hhbc_ast::Visibility;
 use hhbc_by_ref_hhbc_id as hhbc_id;
-use hhbc_by_ref_instruction_sequence::InstrSeq;
+use instruction_sequence::InstrSeq;
 
 bitflags! {
     #[repr(C)]
@@ -35,7 +35,7 @@ pub struct HhasProperty<'arena> {
     pub flags: HhasPropertyFlags,
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub visibility: Visibility,
-    pub initial_value: Maybe<hhbc_by_ref_runtime::TypedValue<'arena>>,
+    pub initial_value: Maybe<runtime::TypedValue<'arena>>,
     pub initializer_instrs: Maybe<InstrSeq<'arena>>,
     pub type_info: HhasTypeInfo<'arena>,
     pub doc_comment: Maybe<Str<'arena>>,

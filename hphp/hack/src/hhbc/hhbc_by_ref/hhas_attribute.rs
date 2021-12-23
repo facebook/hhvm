@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::{Slice, Str};
-use hhbc_by_ref_runtime::TypedValue;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
+use runtime::TypedValue;
 
 /// Attributes with a name from [naming_special_names::user_attributes] and
 /// a series of arguments.  Emitter code can match on an attribute as follows:

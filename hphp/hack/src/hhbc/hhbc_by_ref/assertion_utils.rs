@@ -3,8 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_by_ref_emit_fatal as emit_fatal;
-use hhbc_by_ref_instruction_sequence::Result;
+use instruction_sequence::Result;
 use oxidized::{ast, ast_defs::ParamKind};
 
 pub fn expect_normal_paramkind(arg: &(ParamKind, ast::Expr)) -> Result<&ast::Expr> {

@@ -3,11 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use env::emitter::Emitter;
 use hhbc_by_ref_closure_convert as closure_convert;
-use hhbc_by_ref_emit_fatal as emit_fatal;
-use hhbc_by_ref_env::emitter::Emitter;
-use hhbc_by_ref_instruction_sequence::{unrecoverable, Result};
 use hhbc_by_ref_rewrite_xml::rewrite_xml;
+use instruction_sequence::{unrecoverable, Result};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env};
 

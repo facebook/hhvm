@@ -12,8 +12,8 @@ ffi = { path = "../../../../utils/ffi" }
 hash = { path = "../../../../utils/hash" }
 hhbc_by_ref_ast_body = { path = "../hhbc_by_ref_ast_body" }
 hhbc_by_ref_hhas_param = { path = "../hhbc_by_ref_hhas_param" }
-hhbc_by_ref_label = { path = "../hhbc_by_ref_label" }
 hhbc_by_ref_unique_id_builder = { path = "../hhbc_by_ref_unique_id_builder" }
 hhbc_by_ref_unique_list = { path = "../unique_list" }
+label = { path = "../../../emitter/cargo/label" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }

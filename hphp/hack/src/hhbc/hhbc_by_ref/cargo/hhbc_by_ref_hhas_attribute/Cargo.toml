@@ -9,5 +9,5 @@ path = "../../hhas_attribute.rs"
 
 [dependencies]
 ffi = { path = "../../../../utils/ffi" }
-hhbc_by_ref_runtime = { path = "../hhbc_by_ref_runtime" }
 naming_special_names_rust = { path = "../../../../naming" }
+runtime = { path = "../../../emitter/cargo/runtime" }

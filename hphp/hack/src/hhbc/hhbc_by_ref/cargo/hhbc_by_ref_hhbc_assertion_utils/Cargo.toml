@@ -8,6 +8,6 @@ edition = "2021"
 path = "../../assertion_utils.rs"
 
 [dependencies]
-hhbc_by_ref_emit_fatal = { path = "../hhbc_by_ref_emit_fatal" }
-hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }
+emit_fatal = { path = "../../../emitter/cargo/emit_fatal" }
+instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 oxidized = { path = "../../../../oxidized" }

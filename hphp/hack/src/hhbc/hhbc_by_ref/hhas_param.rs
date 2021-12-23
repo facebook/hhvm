@@ -6,7 +6,7 @@
 use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 use hhbc_by_ref_hhas_attribute::HhasAttribute;
 use hhbc_by_ref_hhas_type::{constraint, HhasTypeInfo};
-use hhbc_by_ref_label::Label;
+use label::Label;
 
 #[derive(Clone, Debug)]
 #[repr(C)]

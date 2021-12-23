@@ -9,8 +9,8 @@ path = "../../scope.rs"
 
 [dependencies]
 bumpalo = { version = "3.8", features = ["collections"] }
-hhbc_by_ref_env = { path = "../hhbc_by_ref_env" }
-hhbc_by_ref_instruction_sequence = { path = "../hhbc_by_ref_instruction_sequence" }
-hhbc_by_ref_iterator = { path = "../hhbc_by_ref_iterator" }
-hhbc_by_ref_label = { path = "../hhbc_by_ref_label" }
-hhbc_by_ref_local = { path = "../hhbc_by_ref_local" }
+env = { path = "../../../emitter/cargo/env" }
+instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
+iterator = { path = "../../../emitter/cargo/iterator" }
+label = { path = "../../../emitter/cargo/label" }
+local = { path = "../../../emitter/cargo/local" }

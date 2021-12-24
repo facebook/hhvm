@@ -311,7 +311,8 @@ let profile_log
       ~recheck_id:check_info.recheck_id
       ~path:file.path
       ~telemetry
-      ~config:check_info.per_file_profiling;
+      ~config:check_info.per_file_profiling
+      ~typing_duration:deciding_time;
     ()
   end
 
@@ -1205,10 +1206,12 @@ let go_with_interrupt
   then
     Hh_logger.log
       "Typecheck perf: %s"
-      (HackEventLogger.ProfileTypeCheck.get_telemetry_url
-         ~init_id:check_info.init_id
-         ~recheck_id:check_info.recheck_id
-         ~config:check_info.per_file_profiling);
+      (String.concat
+         ~sep:", "
+         (HackEventLogger.ProfileTypeCheck.get_telemetry_urls
+            ~init_id:check_info.init_id
+            ~recheck_id:check_info.recheck_id
+            ~config:check_info.per_file_profiling));
   let job_size_telemetry =
     Telemetry.create ()
     |> Telemetry.object_

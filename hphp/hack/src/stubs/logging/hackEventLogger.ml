@@ -21,6 +21,7 @@ module PerFileProfilingConfig = struct
     profile_decling: profile_decling;
     profile_owner: string option;
     profile_desc: string;
+    profile_slow_threshold: float;
   }
 
   let default =
@@ -32,6 +33,7 @@ module PerFileProfilingConfig = struct
       profile_decling = DeclingOff;
       profile_owner = None;
       profile_desc = "";
+      profile_slow_threshold = 0.;
     }
 
   let should_log ~duration:_ ~memory:_ _ = false
@@ -490,11 +492,13 @@ let server_progress_read_exn ~server_progress_file:_ _ = ()
 let worker_exception _ = ()
 
 module ProfileTypeCheck = struct
-  let process_file ~recheck_id:_ ~path:_ ~telemetry:_ ~config:_ = ()
+  let process_file
+      ~recheck_id:_ ~path:_ ~telemetry:_ ~config:_ ~typing_duration:_ =
+    ()
 
   let compute_tast ~path:_ ~telemetry:_ ~start_time:_ = ()
 
-  let get_telemetry_url ~init_id:_ ~recheck_id:_ ~config:_ = ""
+  let get_telemetry_urls ~init_id:_ ~recheck_id:_ ~config:_ = []
 end
 
 module CGroup = struct

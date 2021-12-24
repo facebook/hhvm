@@ -1281,6 +1281,13 @@ let load_ fn ~silent ~current_version overrides =
       ~default:HackEventLogger.PerFileProfilingConfig.(default.profile_desc)
       config
   in
+  let profile_slow_threshold =
+    float_
+      "profile_slow_threshold"
+      ~default:
+        HackEventLogger.PerFileProfilingConfig.(default.profile_slow_threshold)
+      config
+  in
   let go_to_implementation =
     bool_if_min_version
       "go_to_implementation"
@@ -1463,6 +1470,7 @@ let load_ fn ~silent ~current_version overrides =
         profile_decling;
         profile_owner;
         profile_desc;
+        profile_slow_threshold;
       };
     go_to_implementation;
     allow_unstable_features;

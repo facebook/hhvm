@@ -338,7 +338,6 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
                     .alloc_str(unsafe { std::str::from_utf8_unchecked(s) }),
             ))
         }
-        EnumClassLabel(expr) => Ok(TypedValue::mk_string(emitter.alloc.alloc_str(&expr.1))),
         Float(s) => {
             if s == math::INF {
                 Ok(TypedValue::float(std::f64::INFINITY))

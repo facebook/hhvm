@@ -1379,8 +1379,10 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
           if (p == NULL) {
             char pwd[PATH_MAX];
             memset(pwd, 0, PATH_MAX);
-            getcwd(pwd, PATH_MAX);
-            snprintf(fullpath, PATH_MAX, "%s/%s", pwd, name);
+            if (getcwd(pwd, PATH_MAX))
+                snprintf(fullpath, PATH_MAX, "%s/%s", pwd, name);
+            else
+                nerr_raise (NERR_ASSERT, "Could not get current path");
           } else {
             int dir_len = p - path + 1;
             snprintf(fullpath, PATH_MAX, "%s", path);

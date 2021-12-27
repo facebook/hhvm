@@ -603,8 +603,16 @@ let typing_env_pseudofunctions =
 let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
   match explicit_targs with
   | [targ] ->
-    let (env, expected_ty) =
+    let (env, (expected_ty, _)) =
       Phase.localize_targ ~check_well_kinded:true env (snd targ)
+    in
+    let right_expected_ty =
+      if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+        MakeType.locl_like
+          (Reason.Renforceable (get_pos expected_ty))
+          expected_ty
+      else
+        expected_ty
     in
     (match tys with
     | [expr_ty] ->
@@ -612,7 +620,7 @@ let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
         SubType.sub_type_res
           env
           expr_ty
-          (fst expected_ty)
+          right_expected_ty
           Typing_error.(
             Reasons_callback.of_primary_error
             @@ Primary.Hh_expect { pos = p; equivalent })
@@ -622,7 +630,7 @@ let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
         if equivalent then
           SubType.sub_type
             env
-            (fst expected_ty)
+            expected_ty
             expr_ty
             Typing_error.(
               Reasons_callback.of_primary_error

@@ -26,4 +26,27 @@ type t =
         * The first parameter is (optionally) a path to an existing custom 64-bit
         * dependency graph. If it is present, only new edges will be written,
         * of not, all edges will be written. *)
-[@@deriving show]
+
+let to_opaque_json (t : t) : Hh_json.json =
+  let open Hh_json in
+  let opaque opt = Option.map (fun _ -> "<opaque>") opt in
+  match t with
+  | InMemoryMode base ->
+    JSON_Object
+      [
+        ("mode", string_ "InMemoryMode");
+        ("props", JSON_Object [("base", opt_string_to_json (opaque base))]);
+      ]
+  | SaveToDiskMode { graph; new_edges_dir = _; human_readable_dep_map_dir } ->
+    JSON_Object
+      [
+        ("mode", string_ "SaveToDiskMode");
+        ( "props",
+          JSON_Object
+            [
+              ("graph", opt_string_to_json (opaque graph));
+              ( "human_readable_dep_map_dir",
+                opt_string_to_json (opaque human_readable_dep_map_dir) );
+            ] );
+      ]
+  [@@deriving show]

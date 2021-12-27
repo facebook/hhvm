@@ -25,6 +25,7 @@
   file_info
   heap_shared_mem
   heap_shared_mem_hash
+  hh_json
   logging
   ocamlpool
   relative_path

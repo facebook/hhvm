@@ -105,7 +105,7 @@ class EmptyArray {
 }
 
 class NoHitSmallArray {
-  private $array2 = array('abc' => 4);
+  private $array2 = darray['abc' => 4];
 
   public function indexNoHitSmall() {
     return (idx($this->array2, "xyz", 0));

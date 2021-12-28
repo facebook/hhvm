@@ -1,7 +1,9 @@
 #!/usr/local/bin/php -j
 <?hh
 
-# Returns true iff $sample contains a line containing $func.
+/**
+ * Returns true iff $sample contains a line containing $func.
+ */
 function contains_frame(Vector $sample, string $func): bool {
   foreach ($sample as $frame) {
     if (strstr($frame, $func) !== false) return true;
@@ -9,16 +11,20 @@ function contains_frame(Vector $sample, string $func): bool {
   return false;
 }
 
-# Node is used to construct to call graph. It contains an inclusive count of
-# samples for itself and all of its children, along with a map from function
-# names to children.
+/**
+ * Node is used to construct to call graph. It contains an inclusive count of
+ * samples for itself and all of its children, along with a map from function
+ * names to children.
+ */
 class Node {
   private $kids = Map {};
 
   public function __construct(private $name, private $count = 0) {}
 
-  # Add an edge from this function to $name, increasing the count of the child
-  # Node by one and returning it.
+  /**
+   * Add an edge from this function to $name, increasing the count of the child
+   * Node by one and returning it.
+   */
   public function followEdge($name) {
     if (!isset($this->kids[$name])) $this->kids[$name] = new Node($name);
 
@@ -27,17 +33,19 @@ class Node {
     return $new_node;
   }
 
-  # Print out the current node and all children.
+  /**
+   * Print out the current node and all children.
+   */
   public function show(
     $total_count = null,
     $indent = '',
   ) {
     if ($total_count === null) {
-      # We're the parent node and don't contain a useful name.
+      // We're the parent node and don't contain a useful name.
       $total_count = $this->count;
     } else {
-      # Prune any subtrees that are <0.5% of the total to keep the output
-      # readable.
+      // Prune any subtrees that are <0.5% of the total to keep the output
+      // readable.
       if ($this->count / $total_count < 0.005) return;
       printf("%s%.1f%% %s\n",
              $indent,
@@ -49,8 +57,8 @@ class Node {
     $items = $this->kids->items()->toVector();
     if ($items->count() == 0) return;
 
-    # If our only printable child is the body of this function, leave it out to
-    # keep the results clean.
+    // If our only printable child is the body of this function, leave it out to
+    // keep the results clean.
     if ($items[0][0] == '<body>' &&
         ($items->count() == 1 || $items[1][1]->count / $total_count < 0.005)) {
       return;
@@ -63,10 +71,12 @@ class Node {
   }
 }
 
-# Build and print a perf-annotated call graph of each stack trace in $samples.
-# If $top is set, each trace will be truncated at the highest frame containing
-# $top, if $root_last == false, or the lowest frame containing $top, if
-# $root_last == true.
+/**
+ * Build and print a perf-annotated call graph of each stack trace in $samples.
+ * If $top is set, each trace will be truncated at the highest frame containing
+ * $top, if $root_last == false, or the lowest frame containing $top, if
+ * $root_last == true.
+ */
 function treeify(
   Vector $samples,
   bool $reverse,
@@ -101,8 +111,8 @@ function treeify(
       $node = $node->followEdge($func);
     }
     if (!$reverse) {
-      # Add a final entry for exclusive time spent in the body of the bottom
-      # function.
+      // Add a final entry for exclusive time spent in the body of the bottom
+      // function.
       $node->followEdge('<body>');
     }
   }

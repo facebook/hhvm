@@ -190,7 +190,7 @@ function parse_cpp_methods(string $file):
     "#^(?:static )?(\S+) +HHVM_(?:STATIC_)?METHOD\(([^,)]+),\s+([^,)]+)(?:, *)?([^)]*)\)#m";
 
   $methods = Map {};
-  $matches = [];
+  $matches = dict[];
 
   if (preg_match_all($method_regex, $source, $matches, PREG_SET_ORDER)) {
     foreach($matches as $match) {
@@ -351,7 +351,7 @@ function check_types(ConstMap<string, Pair<string, ConstVector<string>>> $php,
 function main() {
   $argv = $_SERVER['argv'];
   // expects argv[1] to be the C++ file, argv[2] to be the PHP file
-  if (empty($argv[2])) {
+  if (!isset($argv[2]) || !$argv[2]) {
     fwrite(STDERR, "Usage: {$argv[0]} <extfile.cpp> <extfile.php>\n");
     exit(1);
   }

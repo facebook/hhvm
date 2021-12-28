@@ -2881,6 +2881,7 @@ function run_config_post(
     return false;
   }
 
+  $wanted = null;
   if ($type === 'expect' || $type === 'hhvm.expect') {
     $wanted = trim(file_get_contents($file));
     if (isset($options['ignore-oids']) || isset($options['repo'])) {
@@ -2983,7 +2984,7 @@ function run_config_post(
   if ($repeats) {
     $wanted_re = "($wanted_re\s*)".'{'.$repeats.'}';
   }
-  if (!isset($wanted)) $wanted = $wanted_re;
+  if ($wanted is null) $wanted = $wanted_re;
   $passed = @preg_match("/^$wanted_re\$/s", $output);
   if ($passed) return true;
   if ($passed === false && $repeats) {

@@ -848,7 +848,7 @@ function find_file_for_dir(string $dir, string $name): ?string {
   return null;
 }
 
-function find_debug_config(string $test, $name): string {
+function find_debug_config(string $test, string $name): string {
   $debug_config = find_file_for_dir(dirname($test), $name);
   if ($debug_config is nonnull) {
     return "-m debug --debug-config ".$debug_config;
@@ -899,8 +899,8 @@ function extra_compiler_args(dict<string, mixed> $options): string {
 
 function hhvm_cmd_impl(
   dict<string, mixed> $options,
-  $config,
-  $autoload_db_prefix,
+  string $config,
+  ?string $autoload_db_prefix,
   ...$extra_args
 ): vec<string> {
   $cmds = vec[];
@@ -989,7 +989,7 @@ function hhvm_cmd_impl(
   return $cmds;
 }
 
-function repo_separate(dict<string, mixed> $options, string $test) {
+function repo_separate(dict<string, mixed> $options, string $test): bool {
   return isset($options['repo-separate']) &&
          !file_exists($test . ".hhbbc_opts");
 }
@@ -1009,9 +1009,11 @@ function hhvm_cmd(
        ? '-c ' . $test . $hdf_suffix
        : "";
   $extra_opts = read_opts_file(find_test_ext($test, 'opts'));
+  $config = find_test_ext($test, 'ini');
+  invariant($config is nonnull, "%s", __METHOD__);
   $cmds = hhvm_cmd_impl(
     $options,
-    find_test_ext($test, 'ini'),
+    $config,
     Status::getTestTmpPath($test, 'autoloadDB'),
     $hdf,
     find_debug_config($test, 'hphpd.ini'),
@@ -1189,9 +1191,9 @@ function hhbbc_cmd(
   ]);
 }
 
-// Execute $cmd and return its output, including any stacktrace.log
-// file it generated.  Can also return true!
-function exec_with_stack(string $cmd) {
+// Execute $cmd and return its output on failure, including any stacktrace.log
+// file it generated. Return null on success.
+function exec_with_stack(string $cmd): ?string {
   $pipes = null;
   $proc = proc_open($cmd,
                     dict[0 => vec['pipe', 'r'],
@@ -1254,7 +1256,7 @@ function exec_with_stack(string $cmd) {
     !$status['exitcode'] &&
     !preg_match('/\\b(error|exception|fatal)\\b/', $s)
   ) {
-    return true;
+    return null;
   }
   $pid = $status['pid'];
   $stack =
@@ -1271,11 +1273,11 @@ function repo_mode_compile(
 ): bool {
   $hphp = hphp_cmd($options, $test, $program);
   $result = exec_with_stack($hphp);
-  if ($result === true && repo_separate($options, $test)) {
+  if ($result is null && repo_separate($options, $test)) {
     $hhbbc = hhbbc_cmd($options, $test, $program);
     $result = exec_with_stack($hhbbc);
   }
-  if ($result === true) return true;
+  if ($result is null) return true;
   Status::writeDiff($test, $result);
   return false;
 }
@@ -1565,7 +1567,7 @@ final class Status {
     return $diff === false ? '' : $diff;
   }
 
-  public static function removeDirectory($dir): void {
+  public static function removeDirectory(string $dir): void {
     $files = scandir($dir);
     foreach ($files as $file) {
       if ($file === '.' || $file === '..') {
@@ -1587,7 +1589,7 @@ final class Status {
   // if all the tests in them passed, but it leaves test tmpdirs of failed
   // tests (that we didn't remove with clean_intermediate_files because the
   // test failed) and directores under them alone even if they're empty.
-  public static function removeEmptyTestParentDirs($dir): bool {
+  public static function removeEmptyTestParentDirs(string $dir): bool {
     $is_now_empty = true;
     $files = scandir($dir);
     foreach ($files as $file) {
@@ -1624,7 +1626,9 @@ final class Status {
     self::$use_color = $use;
   }
 
-  public static function addTestTimesSerial($results): float {
+  public static function addTestTimesSerial(
+    dict<string, dict<string, mixed>> $results,
+  ): float {
     $time = 0.0;
     foreach ($results as $result) {
       $time += $result['time'];
@@ -1673,7 +1677,7 @@ final class Status {
     }
   }
 
-  public static function destroyFromSignal($_signo): void {
+  public static function destroyFromSignal(int $_signo): void {
     self::destroy();
   }
 
@@ -1907,7 +1911,7 @@ final class Status {
     self::say($start, $end);
   }
 
-  public static function getResults() {
+  public static function getResults(): vec<dict<string, mixed>> {
     return self::$results;
   }
 
@@ -1949,25 +1953,12 @@ final class Status {
     return $stty;
   }
 
-  public static function utf8Sanitize($str): string {
-    if (!is_string($str)) {
-      // We sometimes get called with the
-      // return value of file_get_contents()
-      // when fgc() has failed.
-      return '';
-    }
-
+  public static function utf8Sanitize(string $str): string {
     return UConverter::transcode($str, 'UTF-8', 'UTF-8');
   }
 
-  public static function jsonEncode($data): string {
-    // JSON_UNESCAPED_SLASHES is Zend 5.4+.
-    if (defined("JSON_UNESCAPED_SLASHES")) {
-      return json_encode($data, JSON_UNESCAPED_SLASHES);
-    }
-
-    $json = json_encode($data);
-    return str_replace('\\/', '/', $json);
+  public static function jsonEncode(mixed $data): string {
+    return json_encode($data, JSON_UNESCAPED_SLASHES);
   }
 
   public static function getQueue(): Queue {
@@ -2578,7 +2569,7 @@ function generate_array_diff(
   vec<string> $ar1,
   vec<string> $ar2,
   bool $is_reg,
-  $w,
+  vec<string> $w,
 ): vec<string> {
   $idx1 = 0; $cnt1 = @count($ar1);
   $idx2 = 0; $cnt2 = @count($ar2);
@@ -2657,7 +2648,11 @@ function generate_array_diff(
   return $diff;
 }
 
-function generate_diff($wanted, $wanted_re, $output): string {
+function generate_diff(
+  string $wanted,
+  ?string $wanted_re,
+  string $output
+): string {
   $m = null;
   $w = explode("\n", $wanted);
   $o = explode("\n", $output);
@@ -3130,7 +3125,7 @@ function run_test(dict<string, mixed> $options, string $test): mixed {
       $hphp = hphp_cmd($options, $test, $program);
       if (repo_separate($options, $test)) {
         $result = exec_with_stack($hphp);
-        if ($result !== true) return false;
+        if ($result is string) return false;
         $hhbbc = hhbbc_cmd($options, $test, $program);
         return run_foreach_config($options, $test, vec[$hhbbc], $hhvm_env);
       } else {
@@ -3157,7 +3152,7 @@ function run_test(dict<string, mixed> $options, string $test): mixed {
       shell_exec("mv $test_repo/$program.hhbbc $test_repo/$program.hhbc");
       $hhbbc = hhbbc_cmd($options, $test, $program);
       $result = exec_with_stack($hhbbc);
-      if ($result !== true) {
+      if ($result is string) {
         Status::writeDiff($test, $result);
         return false;
       }

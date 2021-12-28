@@ -1407,9 +1407,9 @@ class Queue {
 
   // Receive one message (pid, type, message).
   // Note that the raw body is processed using "unserialize()".
-  public function receiveMessage(): (int, int, mixed) {
+  public function receiveMessage(): (int, int, ?Message) {
     list($pid, $type, $body) = $this->receive();
-    $msg = unserialize($body);
+    $msg = unserialize($body) as ?Message;
     return tuple($pid, $type, $msg);
   }
 
@@ -1435,7 +1435,7 @@ class Queue {
     fflush($output);
   }
 
-  // Send one raw message.
+  // Send one serialized message.
   public function send(int $type, string $body): void {
     $pid = \posix_getpid();
     $blen = \strlen($body);
@@ -1450,9 +1450,8 @@ class Queue {
     }
   }
 
-  // Send one message.
-  // Note that the raw body is computed using "serialize()".
-  public function sendMessage(int $type, mixed $msg): void {
+  // Send one message after serializing it.
+  public function sendMessage(int $type, ?Message $msg): void {
     $body = serialize($msg);
     $this->send($type, $body);
   }
@@ -1470,6 +1469,17 @@ class Queue {
       \unlink($this->path);
       $this->path = null;
     }
+  }
+}
+
+final class Message {
+  public function __construct(
+    public string $test,
+    public float $time,
+    public int $stime,
+    public int $etime,
+    public ?string $reason = null,
+  ) {
   }
 }
 
@@ -1707,7 +1717,10 @@ final class Status {
                              'start_time' => $stime,
                              'end_time' => $etime,
                              'time' => $time];
-    self::send(self::MSG_TEST_PASS, vec[$test, $time, $stime, $etime]);
+    self::send(
+      self::MSG_TEST_PASS,
+      new Message($test, $time, $stime, $etime),
+    );
   }
 
   public static function skip(
@@ -1724,8 +1737,10 @@ final class Status {
       'end_time' => $etime,
       'time' => $time,
     ];
-    self::send(self::MSG_TEST_SKIP,
-               vec[$test, $reason, $time, $stime, $etime]);
+    self::send(
+      self::MSG_TEST_SKIP,
+      new Message($test, $time, $stime, $etime, $reason),
+    );
   }
 
   public static function fail(
@@ -1739,10 +1754,13 @@ final class Status {
       'end_time' => $etime,
       'time' => $time
     ];
-    self::send(self::MSG_TEST_FAIL, vec[$test, $time, $stime, $etime]);
+    self::send(
+      self::MSG_TEST_FAIL,
+      new Message($test, $time, $stime, $etime),
+    );
   }
 
-  public static function handle_message(int $type, mixed $message): bool {
+  public static function handle_message(int $type, ?Message $message): bool {
     switch ($type) {
       case Status::MSG_STARTED:
         break;
@@ -1751,7 +1769,6 @@ final class Status {
         return false;
 
       case Status::MSG_SERVER_RESTARTED:
-        list($test, $time, $stime, $etime) = $message;
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (!Status::hasCursorControl()) {
@@ -1760,8 +1777,10 @@ final class Status {
             break;
 
           case Status::MODE_VERBOSE:
-            Status::sayColor("$test ", Status::YELLOW, "failed",
-                             " to talk to server\n");
+            Status::sayColor(
+              Status::YELLOW,
+              "failed to talk to server\n"
+            );
             break;
 
           case Status::MODE_TESTPILOT:
@@ -1774,7 +1793,7 @@ final class Status {
 
       case Status::MSG_TEST_PASS:
         self::$passed++;
-        list($test, $time, $stime, $etime) = $message;
+        invariant($message is nonnull, "%s", __METHOD__);
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (!Status::hasCursorControl()) {
@@ -1783,12 +1802,21 @@ final class Status {
             break;
 
           case Status::MODE_VERBOSE:
-            Status::sayColor("$test ", Status::GREEN,
-                             sprintf("passed (%.2fs)\n", $time));
+            Status::sayColor(
+              $message->test." ",
+              Status::GREEN,
+              sprintf("passed (%.2fs)\n", $message->time),
+            );
             break;
 
           case Status::MODE_TESTPILOT:
-            Status::sayTestpilot($test, 'passed', $stime, $etime, $time);
+            Status::sayTestpilot(
+              $message->test,
+              'passed',
+              $message->stime,
+              $message->etime,
+              $message->time,
+            );
             break;
 
           case Status::MODE_RECORD_FAILURES:
@@ -1798,7 +1826,9 @@ final class Status {
 
       case Status::MSG_TEST_SKIP:
         self::$skipped++;
-        list($test, $reason, $time, $stime, $etime) = $message;
+        invariant($message is nonnull, "%s", __METHOD__);
+        $reason = $message->reason;
+        invariant($reason is nonnull, "%s", __METHOD__);
         self::$skip_reasons[$reason] ??= 0;
         self::$skip_reasons[$reason]++;
 
@@ -1810,16 +1840,22 @@ final class Status {
             break;
 
           case Status::MODE_VERBOSE:
-            Status::sayColor("$test ", Status::YELLOW, "skipped");
+            Status::sayColor($message->test." ", Status::YELLOW, "skipped");
 
             if ($reason is nonnull) {
               Status::sayColor(" - reason: $reason");
             }
-            Status::sayColor(sprintf(" (%.2fs)\n", $time));
+            Status::sayColor(sprintf(" (%.2fs)\n", $message->time));
             break;
 
           case Status::MODE_TESTPILOT:
-            Status::sayTestpilot($test, 'not_relevant', $stime, $etime, $time);
+            Status::sayTestpilot(
+              $message->test,
+              'not_relevant',
+              $message->stime,
+              $message->etime,
+              $message->time,
+            );
             break;
 
           case Status::MODE_RECORD_FAILURES:
@@ -1829,24 +1865,36 @@ final class Status {
 
       case Status::MSG_TEST_FAIL:
         self::$failed++;
-        list($test, $time, $stime, $etime) = $message;
+        invariant($message is nonnull, "%s", __METHOD__);
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (Status::hasCursorControl()) {
               print "\033[2K\033[1G";
             }
-            $diff = Status::diffForTest($test);
-            Status::sayColor(Status::RED, "\nFAILED",
-                             ": $test\n$diff\n");
+            $diff = Status::diffForTest($message->test);
+            $test = $message->test;
+            Status::sayColor(
+              Status::RED,
+              "\nFAILED: $test\n$diff\n",
+            );
             break;
 
           case Status::MODE_VERBOSE:
-            Status::sayColor("$test ", Status::RED,
-                             sprintf("FAILED (%.2fs)\n", $time));
+            Status::sayColor(
+              $message->test." ",
+              Status::RED,
+              sprintf("FAILED (%.2fs)\n", $message->time),
+            );
             break;
 
           case Status::MODE_TESTPILOT:
-            Status::sayTestpilot($test, 'failed', $stime, $etime, $time);
+            Status::sayTestpilot(
+              $message->test,
+              'failed',
+              $message->stime,
+              $message->etime,
+              $message->time,
+            );
             break;
 
           case Status::MODE_RECORD_FAILURES:
@@ -1860,7 +1908,7 @@ final class Status {
     return true;
   }
 
-  private static function send(int $type, $msg): void {
+  private static function send(int $type, ?Message $msg): void {
     if (self::$killed) {
       return;
     }

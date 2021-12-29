@@ -818,15 +818,37 @@ let requires_consistent_construct = function
 let expand_expected_and_get_node
     ?(allow_supportdyn = false) env (expected : ExpectedTy.t option) =
   let rec unbox ty =
-    match get_node ty with
-    | Tunion [ty1; ty2] when is_dynamic ty1 -> unbox ty2
-    | Tunion [ty1; ty2] when is_dynamic ty2 -> unbox ty1
-    | Tunion [ty] -> unbox ty
-    | Toption ty -> unbox ty
-    | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn ->
-      let (ty, _) = unbox ty in
-      (ty, true)
-    | _ -> (ty, false)
+    match TUtils.try_strip_dynamic ty with
+    | Some stripped_ty ->
+      if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
+        match TUtils.try_push_like stripped_ty with
+        | None -> unbox stripped_ty
+        | Some (ty, tyl) ->
+          let dyn = MakeType.dynamic Reason.Rnone in
+          if
+            List.for_all tyl ~f:(fun ty ->
+                SubType.is_sub_type_for_union
+                  ~coerce:(Some Typing_logic.CoerceToDynamic)
+                  env
+                  ty
+                  dyn)
+          then
+            unbox ty
+          else
+            unbox stripped_ty
+      else
+        unbox stripped_ty
+    | None ->
+      begin
+        match get_node ty with
+        | Tunion [ty] -> unbox ty
+        | Toption ty -> unbox ty
+        | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn
+          ->
+          let (ty, _) = unbox ty in
+          (ty, true)
+        | _ -> (ty, false)
+      end
   in
   match expected with
   | None -> (env, None)

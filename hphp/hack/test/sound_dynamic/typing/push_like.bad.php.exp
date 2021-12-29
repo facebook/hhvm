@@ -1,0 +1,18 @@
+File "push_like.bad.php", line 12, characters 10-30:
+Invalid return type (Typing[4110])
+  File "push_like.bad.php", line 11, characters 31-38:
+  Expected `~(int, C)`
+  File "push_like.bad.php", line 12, characters 10-30:
+  But got `(~int, C)`
+File "push_like.bad.php", line 12, characters 10-30:
+Invalid return type (Typing[4110])
+  File "push_like.bad.php", line 11, characters 33-35:
+  Expected `int`
+  File "push_like.bad.php", line 7, characters 16-19:
+  But got `dynamic`
+File "push_like.bad.php", line 17, characters 10-11:
+Invalid return type (Typing[4110])
+  File "push_like.bad.php", line 15, characters 24-31:
+  Expected `~(int, C)`
+  File "push_like.bad.php", line 16, characters 8-28:
+  But got `(~int, C)`

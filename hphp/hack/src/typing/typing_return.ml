@@ -202,19 +202,16 @@ let check_inout_return ret_pos env =
       | _ -> env)
 
 let rec remove_like_for_return ty =
-  match get_node ty with
-  | Tunion [ty1; ty2] when is_dynamic ty1 -> ty2
-  | Tunion [ty1; ty2] when is_dynamic ty2 ->
-    (* We do not expect this case to catch like types because fun_implicit_return is
-     * called on a type constructed directly from a decl ty, which for a ~T would have
-     * the shape (dynamic | T). *)
-    ty1
-  | Tclass ((p, class_name), exact, [ty])
-    when String.equal class_name Naming_special_names.Classes.cAwaitable ->
-    mk
-      ( get_reason ty,
-        Tclass ((p, class_name), exact, [remove_like_for_return ty]) )
-  | _ -> ty
+  match TUtils.try_strip_dynamic ty with
+  | Some ty -> ty
+  | None ->
+    (match get_node ty with
+    | Tclass ((p, class_name), exact, [ty])
+      when String.equal class_name Naming_special_names.Classes.cAwaitable ->
+      mk
+        ( get_reason ty,
+          Tclass ((p, class_name), exact, [remove_like_for_return ty]) )
+    | _ -> ty)
 
 let fun_implicit_return env pos ret =
   let ret =

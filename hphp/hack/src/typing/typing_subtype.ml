@@ -1085,7 +1085,37 @@ and simplify_subtype_i
                 | Tdependent _
                 | Tgeneric _ ->
                   default_subtype env
-                | _ -> invalid_env env
+                | _ ->
+                  if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
+                    match TUtils.try_strip_dynamic ty_super with
+                    | None -> invalid_env env
+                    | Some ty ->
+                      begin
+                        match TUtils.try_push_like ty with
+                        | None -> invalid_env env
+                        | Some (ty, tyl) ->
+                          let rec check_arg_dynamic tyl env =
+                            match tyl with
+                            | [] ->
+                              env
+                              |> simplify_subtype ~subtype_env ~this_ty lty ty
+                            | ty :: tyl ->
+                              env
+                              |> simplify_subtype
+                                   ~subtype_env:
+                                     {
+                                       subtype_env with
+                                       coerce = Some TL.CoerceToDynamic;
+                                     }
+                                   ~this_ty
+                                   ty
+                                   (MakeType.dynamic Reason.Rnone)
+                              &&& check_arg_dynamic tyl
+                          in
+                          check_arg_dynamic tyl env
+                      end
+                  else
+                    invalid_env env
               end
             | _ -> invalid_env env)
           | ty :: tys ->

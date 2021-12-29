@@ -701,3 +701,54 @@ and has_ancestor_including_req_refl env sub_id super_id =
   match Env.get_class env sub_id with
   | None -> false
   | Some cls -> has_ancestor_including_req env cls super_id
+
+let try_strip_dynamic ty =
+  match get_node ty with
+  | Tunion [t1; t2] ->
+    (match (get_node t1, get_node t2) with
+    | (Tdynamic, _) -> Some t2
+    | (_, Tdynamic) -> Some t1
+    | _ -> None)
+  | _ -> None
+
+let strip_dynamic ty =
+  match try_strip_dynamic ty with
+  | None -> ty
+  | Some ty -> ty
+
+let make_like acc ty =
+  if Typing_defs.is_dynamic ty then
+    (acc, ty)
+  else
+    let r = get_reason ty in
+    (ty :: acc, Typing_make_type.union r [Typing_make_type.dynamic r; ty])
+
+let try_push_like ty =
+  match deref ty with
+  | (r, Ttuple tyl) ->
+    let (acc, tyl) = List.map_env [] tyl ~f:make_like in
+    if List.is_empty acc then
+      None
+    else
+      Some (mk (r, Ttuple tyl), acc)
+  | (r, Tshape (kind, fields)) ->
+    let add_like_to_shape_field acc _name { sft_optional; sft_ty } =
+      let (acc, sft_ty) = make_like acc sft_ty in
+      (acc, { sft_optional; sft_ty })
+    in
+    let (acc, fields) = TShapeMap.map_env add_like_to_shape_field [] fields in
+    if List.is_empty acc then
+      None
+    else
+      Some (mk (r, Tshape (kind, fields)), acc)
+  | (r, Tclass ((p, n), exact, tyl))
+    when String.equal n SN.Collections.cDict
+         || String.equal n SN.Collections.cVec
+         || String.equal n SN.Collections.cKeyset
+         || String.equal n SN.Classes.cAwaitable ->
+    let (acc, tyl) = List.map_env [] tyl ~f:make_like in
+    if List.is_empty acc then
+      None
+    else
+      Some (mk (r, Tclass ((p, n), exact, tyl)), acc)
+  | _ -> None

@@ -7693,6 +7693,13 @@ and class_expr
         | None -> make_result env [] (Aast.CI c) (Typing_utils.mk_tany env p)
         | Some class_ ->
           TVis.check_classname_access ~use_pos:p ~in_signature:false env class_;
+          (* Don't add Exact superfluously to class type if it's final *)
+          let exact =
+            if Cls.final class_ then
+              Nonexact
+            else
+              exact
+          in
           let (env, ty, tal) =
             List.map ~f:snd tal
             |> Phase.localize_targs_and_check_constraints

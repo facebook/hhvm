@@ -1133,7 +1133,7 @@ ObjectData* ExecutionContext::initObject(const Class* class_,
     throw_param_is_not_container();
   }
   tvDecRefGen(invokeFunc(ctor, params, o, nullptr, RuntimeCoeffects::fixme(),
-                         true, false, true, Array()));
+                         true, false, true, false, Array()));
   return o;
 }
 
@@ -1616,6 +1616,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
                                         bool checkRefAnnot /* = false */,
                                         bool allowDynCallNoPointer
                                                               /* = false */,
+                                        bool readonlyReturn /* = false */,
                                         Array&& generics /* = Array() */) {
   VMRegAnchor _;
 
@@ -1643,7 +1644,7 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
 
   // Caller checks.
   if (dynamic) callerDynamicCallChecks(f, allowDynCallNoPointer);
-  if (f->attrs() & AttrReadonlyReturn) {
+  if (f->attrs() & AttrReadonlyReturn && !readonlyReturn) {
     throwReadonlyMismatch(f, kReadonlyReturnId);
   }
 

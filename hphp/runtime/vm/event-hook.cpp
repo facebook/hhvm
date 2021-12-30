@@ -391,7 +391,8 @@ const StaticString
 static Variant call_intercept_handler_callback(
   ActRec* ar,
   const Variant& function,
-  bool prepend_this
+  bool prepend_this,
+  bool readonly_return
 ) {
   CallCtx callCtx;
   auto const origCallee = ar->func();
@@ -433,7 +434,7 @@ static Variant call_intercept_handler_callback(
   return Variant::attach(
     g_context->invokeFunc(f, args, callCtx.this_, callCtx.cls,
                           RuntimeCoeffects::defaults(),
-                          callCtx.dynamic, false, false,
+                          callCtx.dynamic, false, false, readonly_return,
                           std::move(reifiedGenerics))
   );
 }
@@ -505,10 +506,12 @@ bool EventHook::RunInterceptHandler(ActRec* ar) {
   } else if (retArr.exists(s_callback)) {
     bool prepend_this = retArr.exists(s_prepend_this) ?
       retArr[s_prepend_this].toBoolean() : false;
+    bool readonly_return = func->attrs() & AttrReadonlyReturn;
     ret = call_intercept_handler_callback(
       ar,
       retArr[s_callback],
-      prepend_this
+      prepend_this,
+      readonly_return
     );
   } else {
     // neither value or callback are present, call the original function

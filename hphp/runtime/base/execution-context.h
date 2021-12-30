@@ -470,6 +470,7 @@ public:
                         bool dynamic = true,
                         bool checkRefAnnot = false,
                         bool allowDynCallNoPointer = false,
+                        bool readonlyReturn = false,
                         Array&& reifiedGenerics = Array());
 
   TypedValue invokeFunc(const CallCtx& ctx,

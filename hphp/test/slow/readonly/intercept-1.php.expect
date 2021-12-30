@@ -1,0 +1,9 @@
+----HANDLER----
+string(3) "foo"
+vec(1) {
+  object(C) (0) {
+  }
+}
+---------------
+in bar
+foo() returns readonly, but the caller expects a mutable value

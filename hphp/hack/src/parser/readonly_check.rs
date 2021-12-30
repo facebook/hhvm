@@ -259,12 +259,11 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             context.get_rty(&var_name)
         }
         // First put it in typechecker, then HHVM
-        Clone(e) if context.is_typechecker => {
+        Clone(e) => {
             // Clone only clones shallowly, so we need to respect readonly even if you clone it
             let expr = &**e;
             rty_expr(context, expr)
         }
-        Clone(_) => Rty::Mutable,
         Call(c) => {
             if let (aast::Expr(_, _, Id(i)), _, args, _) = &**c {
                 if is_special_builtin(&i.1) && args.len() >= 1 {

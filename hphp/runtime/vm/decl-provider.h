@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "hphp/hack/src/hhbc/ffi_bridge/rust_compile_ffi_bridge.rs"
+#include "hphp/hack/src/hackc/ffi_bridge/rust_compile_ffi_bridge.rs"
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/type-string.h"
 

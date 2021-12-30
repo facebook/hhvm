@@ -12,15 +12,15 @@ path = "hh_compile.rs"
 aast_parser = { path = "../parser/cargo/aast_parser" }
 anyhow = "1.0.51"
 bumpalo = { version = "3.8", features = ["collections"] }
-compile = { path = "../hhbc/compile/cargo/compile" }
-decl_provider = { path = "../hhbc/decl_provider" }
+compile = { path = "../hackc/compile/cargo/compile" }
+decl_provider = { path = "../hackc/decl_provider" }
 direct_decl_parser = { path = "../parser/api/cargo/direct_decl_parser" }
 env_logger = "0.7"
 jwalk = "0.6"
 log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
 multifile_rust = { path = "../utils/multifile" }
 ocamlrep = { path = "../ocamlrep" }
-options = { path = "../hhbc/compile/cargo/options" }
+options = { path = "../hackc/compile/cargo/options" }
 oxidized = { path = "../oxidized" }
 parser_core_types = { path = "../parser/cargo/core_types" }
 positioned_by_ref_parser = { path = "../parser/api/cargo/positioned_by_ref_parser" }
@@ -32,4 +32,4 @@ stack_limit = { path = "../utils/stack_limit" }
 structopt = "0.3.23"
 strum = "0.21"
 strum_macros = "0.21"
-unified_decl_provider = { path = "../hhbc/unified_decl_provider" }
+unified_decl_provider = { path = "../hackc/unified_decl_provider" }

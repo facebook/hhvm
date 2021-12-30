@@ -125,7 +125,7 @@ else()
   set(PROFILE "release")
 endif()
 
-set(HHBC_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/hhbc")
+set(HHBC_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc")
 set(HHBC_AST_SRCS
   "hhbc/hhas_adata.rs"
   "hhbc/hhas_attribute.rs"
@@ -175,7 +175,7 @@ foreach(src ${FFI_SRCS})
   string(APPEND FFI_SRC_ARG "${FFI_PREFIX}/${src},")
 endforeach()
 
-set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hhbc/hhbc-ast.h")
+set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hackc/hhbc-ast.h")
 set(FFI_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/utils/ffi.h")
 set(NAMING_SPECIAL_NAMES_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/naming/naming-special-names.h")
 add_custom_command(
@@ -242,7 +242,7 @@ function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
 endfunction()
 
 build_cxx_bridge(rust_parser "src/parser/ffi_bridge")
-build_cxx_bridge(rust_compile "src/hhbc/ffi_bridge")
+build_cxx_bridge(rust_compile "src/hackc/ffi_bridge")
 
 if (NOT LZ4_FOUND)
   add_dependencies(hack_dune lz4)

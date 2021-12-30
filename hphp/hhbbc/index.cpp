@@ -830,9 +830,8 @@ std::string show(const Class& c) {
   );
 }
 
-Func::Func(const Index* idx, Rep val)
-  : index(idx)
-  , val(val)
+Func::Func(Rep val)
+  : val(val)
 {}
 
 SString Func::name() const {
@@ -5364,7 +5363,7 @@ res::Func Index::resolve_method(Context ctx,
                                 Type clsType,
                                 SString name) const {
   auto name_only = [&] {
-    return res::Func { this, res::Func::MethodName { name } };
+    return res::Func { res::Func::MethodName { name } };
   };
 
   if (!is_specialized_cls(clsType)) {
@@ -5380,14 +5379,14 @@ res::Func Index::resolve_method(Context ctx,
   auto const find_extra_method = [&] {
     auto singleMethIt = cinfo->singleMethodFamilies.find(name);
     if (singleMethIt != cinfo->singleMethodFamilies.end()) {
-      return res::Func { this, singleMethIt->second };
+      return res::Func { singleMethIt->second };
     }
     auto methIt = cinfo->methodFamilies.find(name);
     if (methIt == end(cinfo->methodFamilies)) return name_only();
     // If there was a sole implementer we can resolve to a single method, even
     // if the method was not declared on the interface itself.
     assertx(methIt->second->possibleFuncs().size() > 1);
-    return res::Func { this, methIt->second };
+    return res::Func { methIt->second };
   };
 
   // Interfaces *only* have the extra methods defined for all
@@ -5453,7 +5452,7 @@ res::Func Index::resolve_method(Context ctx,
 
   auto resolve = [&] {
     create_func_info(*m_data, ftarget);
-    return res::Func { this, mteFromIt(methIt) };
+    return res::Func { mteFromIt(methIt) };
   };
 
   switch (dcls.type) {
@@ -5468,12 +5467,12 @@ res::Func Index::resolve_method(Context ctx,
     {
       auto const singleFamIt = cinfo->singleMethodFamilies.find(name);
       if (singleFamIt != cinfo->singleMethodFamilies.end()) {
-        return res::Func { this, singleFamIt->second };
+        return res::Func { singleFamIt->second };
       }
       auto const famIt = cinfo->methodFamilies.find(name);
       if (famIt == end(cinfo->methodFamilies)) return name_only();
       assertx(famIt->second->possibleFuncs().size() > 1);
-      return res::Func { this, famIt->second };
+      return res::Func { famIt->second };
     }
   }
   not_reached();
@@ -5491,25 +5490,25 @@ Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
   auto const ctor = mteFromIt(cit);
   if (exact || ctor->second.attrs & AttrNoOverride) {
     create_func_info(*m_data, ctor->second.func);
-    return res::Func { this, ctor };
+    return res::Func { ctor };
   }
 
   if (!options.FuncFamilies) return std::nullopt;
 
   auto const singleFamIt = cinfo->singleMethodFamilies.find(s_construct.get());
   if (singleFamIt != cinfo->singleMethodFamilies.end()) {
-    return res::Func { this, singleFamIt->second};
+    return res::Func { singleFamIt->second};
   }
   auto const famIt = cinfo->methodFamilies.find(s_construct.get());
   if (famIt == end(cinfo->methodFamilies)) return std::nullopt;
   assertx(famIt->second->possibleFuncs().size() > 1);
-  return res::Func { this, famIt->second };
+  return res::Func { famIt->second };
 }
 
 res::Func
 Index::resolve_func_helper(const php::Func* func, SString name) const {
   auto name_only = [&] (bool renamable) {
-    return res::Func { this, res::Func::FuncName { name, renamable } };
+    return res::Func { res::Func::FuncName { name, renamable } };
   };
 
   // no resolution
@@ -7470,7 +7469,7 @@ std::unique_ptr<ArrayTypeTable::Builder>& Index::array_table_builder() const {
 
 res::Func Index::do_resolve(const php::Func* f) const {
   auto const finfo = create_func_info(*m_data, f);
-  return res::Func { this, finfo };
+  return res::Func { finfo };
 };
 
 // Return true if we know for sure that one php::Class must derive

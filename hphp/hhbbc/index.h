@@ -518,11 +518,10 @@ private:
                             >;
 
 private:
-  Func(const Index*, Rep);
+  explicit Func(Rep);
   friend std::string show(const Func&);
 
 private:
-  const Index* index;
   Rep val;
 };
 

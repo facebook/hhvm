@@ -10,6 +10,9 @@ namespace __hhvm_intrinsics {
 <<__Native>>
 function trigger_oom(bool $oom): void;
 
+<<__Native>>
+function trigger_crash(): void;
+
 /**
  * Return the given value. This function is purposefully not optimized. It can
  * be used to hide information about values from the optimizer for unit testing.

@@ -40,6 +40,10 @@ void HHVM_FUNCTION(trigger_oom, bool oom) {
   }
 }
 
+void HHVM_FUNCTION(trigger_crash) {
+  always_assert(false);
+}
+
 TypedValue HHVM_FUNCTION(launder_value, const Variant& val) {
   return tvReturn(val);
 }
@@ -442,6 +446,7 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\builtin_io_foldable, builtin_io_foldable);
 
   HHVM_FALIAS(__hhvm_intrinsics\\trigger_oom, trigger_oom);
+  HHVM_FALIAS(__hhvm_intrinsics\\trigger_crash, trigger_crash);
   HHVM_FALIAS(__hhvm_intrinsics\\launder_value, launder_value);
 
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_varray_builtin, dummy_varray_builtin);

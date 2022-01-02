@@ -901,7 +901,7 @@ function hhvm_cmd_impl(
   dict<string, mixed> $options,
   string $config,
   ?string $autoload_db_prefix,
-  ...$extra_args
+  string ...$extra_args
 ): vec<string> {
   $cmds = vec[];
   foreach (mode_cmd($options) as $mode_num => $mode) {
@@ -1924,7 +1924,7 @@ final class Status {
    * and any one of the arguments is preceded by an integer (see the color
    * constants above), that argument will be given the indicated color.
    */
-  public static function sayColor(...$args): void {
+  public static function sayColor(arraykey ...$args): void {
     $n = count($args);
     for ($i = 0; $i < $n;) {
       $color = null;
@@ -1964,7 +1964,7 @@ final class Status {
   }
 
   /** Output is in the format expected by JsonTestRunner. */
-  public static function say(...$args): void {
+  public static function say(dict<string, mixed> ...$args): void {
     $data = array_map(
       $row ==> self::jsonEncode($row) . "\n",
       $args

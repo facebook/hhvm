@@ -2435,7 +2435,9 @@ function runif_should_skip_test(
       default:
         return shape('valid' => false, 'error' => "bad match type '$type'");
     }
-    if (!$result['valid'] || !$result['match']) return $result;
+    if (!$result['valid'] || !Shapes::idx($result, 'match', false)) {
+      return $result;
+    }
   }
   if ($file_empty) return shape('valid' => false, 'error' => 'empty runif file');
   return shape('valid' => true, 'match' => true);
@@ -3107,23 +3109,23 @@ function run_test(dict<string, mixed> $options, string $test): mixed {
   if (!($options['no-skipif'] ?? false)) {
     $result = runif_should_skip_test($options, $test);
     if (!$result['valid']) {
-      invariant($result['error'] is string, 'missing runif error');
+      invariant(Shapes::keyExists($result, 'error'), 'missing runif error');
       Status::writeDiff($test, 'Invalid .runif file: ' . $result['error']);
       return false;
     }
-    if (!$result['match']) {
-      invariant($result['skip_reason'] is string, 'missing skip_reason');
+    if (!($result['match'] ?? false)) {
+      invariant(Shapes::keyExists($result, 'skip_reason'), 'missing skip_reason');
       return $result['skip_reason'];
     }
 
     $result = skipif_should_skip_test($options, $test);
     if (!$result['valid']) {
-      invariant($result['error'] is string, 'missing skipif error');
+      invariant(Shapes::keyExists($result, 'error'), 'missing skipif error');
       Status::writeDiff($test, $result['error']);
       return false;
     }
-    if (!$result['match']) {
-      invariant($result['skip_reason'] is string, 'missing skip_reason');
+    if (!($result['match'] ?? false)) {
+      invariant(Shapes::keyExists($result, 'skip_reason'), 'missing skip_reason');
       return $result['skip_reason'];
     }
   }

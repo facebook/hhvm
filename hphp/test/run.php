@@ -1397,8 +1397,8 @@ class Queue {
         $chunks = $this->partials[$pid] ?? null;
         if ($chunks is nonnull) {
           $chunks[] = $body;
-          $body = \join("", $chunks);
-          unset($this->partials[$pid]);
+          $body = \implode("", $chunks);
+          $this->partials->removeKey($pid);
         }
         return tuple($pid, $type, $body);
       }
@@ -1920,29 +1920,28 @@ final class Status {
   }
 
   /**
-   * Takes a variable number of string arguments. If color output is enabled
-   * and any one of the arguments is preceded by an integer (see the color
-   * constants above), that argument will be given the indicated color.
+    * Takes a variable number of string or int arguments. If color output is
+    * enabled and any one of the arguments is preceded by an integer (see the
+    * color constants above), that argument will be given the indicated color.
    */
   public static function sayColor(arraykey ...$args): void {
     $n = count($args);
     for ($i = 0; $i < $n;) {
-      $color = null;
-      $str = $args[$i];
+      $arg = $args[$i];
       $i++;
-      if (is_integer($str)) {
-        $color = $str;
+      if ($arg is int) {
+        $color = $arg;
         if (self::$use_color) {
           print "\033[0;{$color}m";
         }
-        $str = $args[$i];
+        $arg = $args[$i];
         $i++;
-      }
-
-      print $str;
-
-      if (self::$use_color && !is_null($color)) {
-        print "\033[0m";
+        print $arg;
+        if (self::$use_color) {
+          print "\033[0m";
+        }
+      } else {
+        print $arg;
       }
     }
   }

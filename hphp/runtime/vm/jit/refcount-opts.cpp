@@ -3397,36 +3397,46 @@ void optimizeRefcounts(IRUnit& unit) {
 }
 
 /*
- * If our profiled type is better than the known type, generate type specific DecRef.
- * This involves modifying the current block by inserting a CheckType instruction and performing
- * a type specific DecRef in its branch and a generic DecRef if the check fails.
+ * If our profiled type is better than the known type, generate type-specific
+ * DecRef codegen. Doing so involves adding a CheckType for the profiled type,
+ * then emitting a type-specific DecRef in the next block and a generic one
+ * in the taken block.
  */
-void optimizeDecRefForProfiledType(IRUnit& unit,  const DecRefProfile& data, Block* block, IRInstruction* inst) {
-  auto source = inst->src(0);
-  always_assert_flog(inst->is(DecRef), "instruction should be DecRef instead of {}", inst->op());
-  auto it = block->iteratorTo(inst);
-  FTRACE(4, "    * optimizing for datatype {}\n", data.type.toString());
+void optimizeDecRefForProfiledType(
+    IRUnit& unit,  const DecRefProfile& profile, IRInstruction* inst) {
+  assertx(profile.type.isKnownDataType());
+  assertx(inst->is(DecRef));
 
-  auto newBlk = unit.defBlock(block->profCount(), block->hint());
-  newBlk->splice(newBlk->end(), block, std::next(it), block->end());
+  auto const src = inst->src(0);
+  auto const bcctx = inst->bcctx();
+  auto const block = inst->block();
+  auto const it = block->iteratorTo(inst);
+  FTRACE(4, "    {}: optimizing for type: {}\n",
+         inst->toString(), profile.type.toString());
 
-  // Generic DecRef if CheckType fails
-  auto branch = unit.defBlock(0,Block::Hint::Unlikely);
-  branch->push_back(unit.gen(DecRef, inst->bcctx(), *(inst->extra<DecRefData>()), source));
-  branch->push_back(unit.gen(Jmp, inst->bcctx(), newBlk));
+  // "remainder" contains the contents of this block after this DecRef.
+  auto const remainder = unit.defBlock(block->profCount(), block->hint());
+  remainder->splice(remainder->end(), block, std::next(it), block->end());
 
-  auto check = unit.gen(CheckType, inst->bcctx(), Type(data.type.toDataType()), branch, source);
-  auto dst = check->dst();
+  // "taken" contains the generic DecRef if the CheckType fails.
+  auto const data = *inst->extra<DecRefData>();
+  auto const taken = unit.defBlock(0, Block::Hint::Unlikely);
+  taken->push_back(unit.gen(DecRef, bcctx, data, src));
+  taken->push_back(unit.gen(Jmp, bcctx, remainder));
 
-  // type-specific DecRef if CheckType succeeds
-  auto fallthrough = unit.defBlock(block->profCount());
-  fallthrough->push_back(unit.gen(DecRef, inst->bcctx(), *(inst->extra<DecRefData>()), dst));
-  fallthrough->push_back(unit.gen(Jmp, inst->bcctx(), newBlk));
+  auto const type = Type(profile.type.toDataType());
+  auto const check = unit.gen(CheckType, bcctx, type, taken, src);
+  auto const dst = check->dst();
 
-  check->setNext(fallthrough);
+  // "next" contains the type-specific DecRef if the CheckType succeeds.
+  auto const next = unit.defBlock(block->profCount());
+  next->push_back(unit.gen(DecRef, bcctx, data, dst));
+  next->push_back(unit.gen(Jmp, bcctx, remainder));
 
-  // Replace current DecRef with CheckType
-  block->insert(it,check);
+  check->setNext(next);
+
+  // Replace the DecRef with the new CheckType.
+  block->insert(it, check);
   block->erase(inst);
 }
 
@@ -3452,9 +3462,10 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
   auto const cowFree = TStr | TUncounted;
   auto const TAwaitable = Type::SubObj(c_Awaitable::classof());
 
-  // Keep track of DecRef instructions that are eligible to be optimized using profiled
-  // type information and apply the optimization outside the for loop for correctness.
-  jit::vector<std::pair<IRInstruction*, DecRefProfile>> profiledTypeCandidates;
+  // Keep track of DecRef instructions that are eligible to be optimized using
+  // profiled type information. We do the optimization outside the loop because
+  // it introduces new control flow.
+  jit::vector<std::pair<DecRefProfile, IRInstruction*>> profiledTypeCandidates;
 
   for (auto& block : blocks) {
     for (auto& inst : *block) {
@@ -3477,8 +3488,8 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
               : RuntimeOption::EvalJitPGODecRefNZReleasePercentCOW;
             if (destroyPct < destroyPctLimit && !(type <= TAwaitable)) {
               inst.setOpcode(DecRefNZ);
-            } else if (data.type.isKnownDataType() && !inst.src(0)->type().isKnownDataType()) {
-              profiledTypeCandidates.emplace_back(&inst, data);
+            } else if (data.type.isKnownDataType() && !type.isKnownDataType()) {
+              profiledTypeCandidates.emplace_back(data, &inst);
             }
           }
         }
@@ -3486,8 +3497,8 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
     }
   }
 
-  for (auto& pair : profiledTypeCandidates) {
-      optimizeDecRefForProfiledType(unit, pair.second, pair.first->block(), pair.first);
+  for (auto const& pair : profiledTypeCandidates) {
+    optimizeDecRefForProfiledType(unit, pair.first, pair.second);
   }
 }
 

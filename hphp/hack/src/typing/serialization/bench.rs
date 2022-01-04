@@ -1,0 +1,201 @@
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
+use std::{
+    hash::Hasher,
+    io::{BufRead, BufReader, ErrorKind, Read},
+    path::PathBuf,
+    process::{Child, Command, Stdio},
+};
+
+use rayon::iter::{ParallelBridge, ParallelIterator};
+use structopt::{clap::arg_enum, StructOpt};
+
+arg_enum! {
+    #[derive(Debug)]
+    enum Mode {
+        CheckOnly,
+        TastOnly,
+        Ser,
+        SerDe,
+    }
+}
+
+#[derive(StructOpt, Debug)]
+#[structopt(no_version)] // don't consult CARGO_PKG_VERSION (Buck doesn't set it)
+#[allow(dead_code)]
+struct Opts {
+    #[structopt(name = "HH_SINGLE_TYPE_CHECK_BINARY")]
+    hh_single_type_check_path: PathBuf,
+
+    /// Do not do any type-related phase: check, serialization, deserialization
+    /// (useful for measuring overhead of the benchmark itself)
+    #[structopt(long, short = "n")]
+    dry_run: bool,
+
+    #[structopt(
+        long,
+        possible_values = &Mode::variants(),
+        case_insensitive = true,
+        default_value = "serde",
+    )]
+    mode: Mode,
+
+    /// The number of threads and concurrent hh_single_type_check processes
+    #[structopt(long, default_value = "1")]
+    num_workers: u16,
+
+    /// Increase output (-v to print (de)serialized types, -v -v to print Hack errors)
+    #[structopt(short, parse(from_occurrences))]
+    verbosity: u8,
+
+    /// The (partial) list of input Hack files or directories to process
+    /// (the rest is read from the standard input, for practical reasons)
+    #[structopt(name = "PATH")]
+    paths: Vec<PathBuf>,
+}
+
+struct Context {
+    proc: Child,
+    filepath: String,
+    hasher: fnv::FnvHasher,
+    verbosity: u8,
+}
+
+impl Context {
+    fn hash_and_maybe_println(&mut self, s: &str, min_verbosity: u8) {
+        self.hasher.write(s.as_bytes());
+        if self.verbosity >= min_verbosity {
+            println!("{}", s);
+        }
+    }
+}
+
+fn typecheck_only(ctx: &mut Context) {
+    let err = || panic!("typechecker reported errors on: {}", ctx.filepath);
+    let expected_1st_line = "No errors";
+    let mut buf: Vec<u8> = vec![0; expected_1st_line.as_bytes().len()];
+    ctx.proc
+        .stdout
+        .take()
+        .unwrap()
+        .read_exact(&mut buf)
+        .unwrap_or_else(|_| err());
+    match std::str::from_utf8(&buf) {
+        Ok(actual_1st_line) if actual_1st_line == expected_1st_line => {}
+        _ => err(),
+    }
+}
+
+fn read_lines(proc: &mut Child) -> impl Iterator<Item = String> {
+    BufReader::new(proc.stdout.take().unwrap())
+        .lines()
+        .map(|line| line.unwrap())
+}
+
+fn serialize_only(ctx: &mut Context) {
+    for json in read_lines(&mut ctx.proc) {
+        ctx.hash_and_maybe_println(&json, 1);
+    }
+}
+
+fn ser_de(ctx: &mut Context, arena: &bumpalo::Bump) {
+    for ty in de::into_types(&arena, read_lines(&mut ctx.proc)) {
+        ctx.hash_and_maybe_println(&format!("{:?}", ty), 1);
+    }
+}
+
+fn main() {
+    let opts = Opts::from_args();
+    let job = |filepath| {
+        let proc = {
+            let mut cmd = Command::new(&opts.hh_single_type_check_path);
+            if let Mode::CheckOnly = &opts.mode {
+                &mut cmd
+            } else {
+                cmd.arg(if let Mode::TastOnly = &opts.mode {
+                    "--tast"
+                } else {
+                    "--type"
+                })
+            }
+            .arg(&filepath)
+            .stdin(Stdio::null())
+            .stdout(Stdio::piped());
+            if opts.dry_run {
+                return (true, 0); // don't run a process
+            }
+            if opts.verbosity < 2 {
+                cmd.stderr(Stdio::null())
+            } else {
+                &mut cmd
+            }
+            .spawn()
+            .expect("failed to run typechecker")
+        };
+        // Rust recently no longer waits on spawned process in destructors,
+        // so do that automatically when the handle goes out of scope, see:
+        //   https://doc.rust-lang.org/std/process/struct.Child.html
+        //   https://github.com/rust-lang/rust/issues/13854
+        impl Drop for Context {
+            fn drop(&mut self) {
+                match self.proc.kill() {
+                    Err(e) if e.kind() == ErrorKind::InvalidInput => { /* already finished */ }
+                    Err(_) => eprintln!("failed to kill typechecker with PID: {}", self.proc.id()),
+                    Ok(_) => {}
+                }
+            }
+        }
+
+        let mut ctx = Context {
+            proc,
+            filepath,
+            hasher: Default::default(),
+            verbosity: opts.verbosity,
+        };
+        match &opts.mode {
+            Mode::CheckOnly => typecheck_only(&mut ctx),
+            Mode::SerDe => {
+                let arena = bumpalo::Bump::new();
+                ser_de(&mut ctx, &arena);
+            }
+            _ => serialize_only(&mut ctx),
+        }
+        let exit = ctx.proc.wait().expect("failed to wait on typechecker");
+        (exit.success(), ctx.hasher.finish())
+    };
+
+    rayon::ThreadPoolBuilder::new()
+        .num_threads(opts.num_workers.into())
+        .build_global()
+        .unwrap();
+
+    // lazily compute list of files to process in parallel
+    let filepaths = {
+        let (tx, rx) = std::sync::mpsc::channel();
+        // avoid eager eval of for-loop to avoid hitting channel capacity
+        opts.paths.iter().for_each(|path| {
+            tx.send(path.to_str().expect("non-UTF8 input path").to_owned())
+                .unwrap()
+        });
+        // note: this is specially important here because of huge input
+        std::io::stdin()
+            .lock()
+            .lines()
+            .for_each(|line| tx.send(line.unwrap()).unwrap());
+        rx.into_iter()
+    };
+    // combine checksums using a _commutative_ monoid (bitwise XOR, 0),
+    // since the execution order is arbitrary
+    let (ok, checksum) = filepaths
+        .par_bridge()
+        .map(job)
+        .reduce(|| (true, 0u64), |(ok1, n1), (ok2, n2)| (ok1 & ok2, n1 ^ n2));
+    if ok {
+        println!("output-checksum={:#016x}", checksum);
+    } else {
+        panic!("some workers failed");
+    }
+}

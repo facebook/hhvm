@@ -90,4 +90,6 @@ module Codes = struct
   let invalid_disjointness_check = 5638
 
   let inferred_variance = 5639
+
+  let switch_nonexhaustive = 5640
 end

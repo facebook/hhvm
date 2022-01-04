@@ -11,6 +11,8 @@ open Aast
 module Env = Tast_env
 module Reason = Typing_reason
 module MakeType = Typing_make_type
+module Typing = Typing_defs
+module Cls = Decl_provider.Class
 
 let ensure_valid_switch_case_value_types env scrutinee_ty casel =
   let is_subtype ty_sub ty_super = Env.can_subtype env ty_sub ty_super in
@@ -37,13 +39,42 @@ let ensure_valid_switch_case_value_types env scrutinee_ty casel =
   in
   List.iter casel ~f:ensure_valid_switch_case_value_type
 
+let check_exhaustiveness_lint env pos ty caselist =
+  let rec has_infinite_values ty =
+    match Typing.get_node ty with
+    | Typing.Tunion tyl -> List.exists tyl ~f:has_infinite_values
+    | Typing.Tintersection tyl -> List.for_all tyl ~f:has_infinite_values
+    | Typing.Tprim (Tstring | Tint | Tfloat | Tarraykey | Tnum) -> true
+    | Typing.Tclass ((_, name), _, _) ->
+      begin
+        match Decl_provider.get_class (Env.get_ctx env) name with
+        | Some class_decl
+          when not
+                 (Cls.final class_decl
+                 || Option.is_some (Cls.sealed_whitelist class_decl)) ->
+          true
+        | _ -> false
+      end
+    | _ -> false
+  in
+  let has_default cases =
+    List.exists
+      ~f:(function
+        | Default _ -> true
+        | _ -> false)
+      cases
+  in
+  if has_infinite_values ty && not (has_default caselist) then
+    Lints_errors.switch_nonexhaustive pos
+
 let handler =
   object
     inherit Tast_visitor.handler_base
 
     method! at_stmt env x =
       match snd x with
-      | Switch ((scrutinee_ty, _, _), casel) ->
-        ensure_valid_switch_case_value_types env scrutinee_ty casel
+      | Switch ((scrutinee_ty, scrutinee_pos, _), casel) ->
+        ensure_valid_switch_case_value_types env scrutinee_ty casel;
+        check_exhaustiveness_lint env scrutinee_pos scrutinee_ty casel
       | _ -> ()
   end

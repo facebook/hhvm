@@ -379,3 +379,13 @@ let loose_unsafe_cast_upper_bound p =
     Lint_error
     p
     "HH\\FIXME\\UNSAFE_CAST output type annotation is too loose, please use a more specific type."
+
+let switch_nonexhaustive p =
+  Lints.add
+    Codes.switch_nonexhaustive
+    Lint_warning
+    p
+    ("This switch statement is not exhaustive."
+    ^ " The expression it scrutinises has a type with infinitely many values and the statement does not have a default case."
+    ^ " If none of the cases match, an exception will be thrown."
+    ^ " Consider adding a default case.")

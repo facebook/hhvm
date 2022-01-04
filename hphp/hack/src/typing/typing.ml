@@ -4223,7 +4223,8 @@ and expr_
       match e with
       | (_, p, Aast.Call ((_, _, Aast.Id (_, func)), _, _, _))
         when String.equal func SN.PseudoFunctions.unsafe_cast ->
-        Errors.unsafe_cast_await p
+        Errors.add_typing_error
+          Typing_error.(primary @@ Primary.Unsafe_cast_await p)
       | _ -> ()
     end;
     let env = might_throw env in
@@ -6536,7 +6537,8 @@ and dispatch_call
         (match valkind with
         | `lvalue
         | `lvalue_subexpr ->
-          Errors.unsafe_cast_lvalue p
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Unsafe_cast_lvalue p)
         | `other -> ());
         let result =
           match el with

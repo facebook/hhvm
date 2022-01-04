@@ -39,6 +39,7 @@ let handler =
                            decl_pos = p |> Pos_or_decl.of_raw_pos;
                            kind = `ty_const;
                            name;
+                           quickfixes = [];
                          })
               | _ -> ()
           end;

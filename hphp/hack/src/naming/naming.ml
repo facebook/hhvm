@@ -834,12 +834,19 @@ let rec class_ ctx c =
     Option.iter
       (Naming_attributes.mem_pos SN.UserAttributes.uaConsistentConstruct attrs)
       ~f:(fun pos ->
-        match c.Aast.c_kind with
-        | Ast_defs.Ctrait ->
-          Errors.explicit_consistent_constructor c.Aast.c_kind pos
-        | _ when e > 1 ->
-          Errors.explicit_consistent_constructor c.Aast.c_kind pos
-        | _ -> ());
+        let err_opt =
+          match c.Aast.c_kind with
+          | Ast_defs.Ctrait ->
+            Some
+              (Naming_error.Explicit_consistent_constructor
+                 { classish_kind = c.Aast.c_kind; pos })
+          | _ when e > 1 ->
+            Some
+              (Naming_error.Explicit_consistent_constructor
+                 { classish_kind = c.Aast.c_kind; pos })
+          | _ -> None
+        in
+        Option.iter err_opt ~f:Errors.add_naming_error);
   let req_implements = List.map ~f:(hint env) c_req_implements in
   let req_implements = List.map ~f:(fun h -> (h, false)) req_implements in
   if

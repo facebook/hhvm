@@ -252,19 +252,6 @@ val typeconst_concrete_concrete_override :
   current_decl_and_file:Pos_or_decl.ctx ->
   unit
 
-val implement_abstract :
-  ?quickfixes:Quickfix.t list ->
-  is_final:bool ->
-  Pos.t ->
-  Pos_or_decl.t ->
-  string ->
-  string ->
-  unit
-
-val unsafe_cast_lvalue : Pos.t -> unit
-
-val unsafe_cast_await : Pos.t -> unit
-
 val bad_method_override :
   Typing_error.Reasons_callback.t ->
   pos:Pos_or_decl.t ->
@@ -331,5 +318,3 @@ val method_is_not_dynamically_callable :
   unit
 
 val function_is_not_dynamically_callable : Pos.t -> string -> error -> unit
-
-val explicit_consistent_constructor : Ast_defs.classish_kind -> Pos.t -> unit

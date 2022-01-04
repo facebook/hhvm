@@ -1056,13 +1056,18 @@ let check_extend_abstract_meth ~is_final c_name seq =
         let quickfixes =
           [Quickfix.make_classish ~title ~new_text ~classish_name:(snd c_name)]
         in
-        Errors.implement_abstract
-          ~quickfixes
-          ~is_final
-          (fst c_name)
-          (get_pos ty)
-          "method"
-          meth_name
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Implement_abstract
+                 {
+                   quickfixes;
+                   is_final;
+                   pos = fst c_name;
+                   decl_pos = get_pos ty;
+                   kind = `meth;
+                   name = meth_name;
+                 })
       | _ -> ())
 
 let check_extend_abstract_prop ~is_final p seq =
@@ -1079,6 +1084,7 @@ let check_extend_abstract_prop ~is_final p seq =
                    decl_pos = ce_pos;
                    kind = `prop;
                    name = x;
+                   quickfixes = [];
                  }))
 
 (* Type constants must be bound to a concrete type for non-abstract classes.
@@ -1097,6 +1103,7 @@ let check_extend_abstract_typeconst ~is_final p seq =
                    decl_pos = fst tc.ttc_name;
                    kind = `ty_const;
                    name = x;
+                   quickfixes = [];
                  })
       | _ -> ())
 
@@ -1115,6 +1122,7 @@ let check_extend_abstract_const ~is_final p seq =
                    decl_pos = cc_pos;
                    kind = `const;
                    name = x;
+                   quickfixes = [];
                  })
       | _ -> ())
 

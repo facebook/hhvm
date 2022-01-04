@@ -231,6 +231,10 @@ type t =
       used_class_in_def_name: string;
       used_class_tparam_name: string;
     }
+  | Explicit_consistent_constructor of {
+      pos: Pos.t;
+      classish_kind: Ast_defs.classish_kind;
+    }
 
 let const_without_typehint pos name type_ =
   let name = Utils.strip_all_ns name in
@@ -1033,6 +1037,24 @@ let hkt_alias_with_implicit_constraints
         ^ "." );
     ]
 
+let explicit_consistent_constructor ck pos =
+  let classish_kind =
+    match ck with
+    | Ast_defs.Cclass _ -> "class "
+    | Ast_defs.Ctrait -> "trait "
+    | Ast_defs.Cinterface -> "interface "
+    | Ast_defs.Cenum_class _ -> "enum class "
+    | Ast_defs.Cenum -> "enum "
+  in
+  User_error.make
+    Error_code.(to_enum ExplicitConsistentConstructor)
+    ( pos,
+      "This "
+      ^ classish_kind
+      ^ "is marked <<__ConsistentConstruct>>, so it must declare a constructor explicitly"
+    )
+    []
+
 let to_user_error = function
   | Unsupported_trait_use_as pos -> unsupported_trait_use_as pos
   | Unsupported_instead_of pos -> unsupported_instead_of pos
@@ -1156,3 +1178,5 @@ let to_user_error = function
       used_class_tparam_name
       typedef_tparam_name
       pos
+  | Explicit_consistent_constructor { pos; classish_kind } ->
+    explicit_consistent_constructor classish_kind pos

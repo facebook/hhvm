@@ -227,6 +227,10 @@ type t =
       used_class_in_def_name: string;
       used_class_tparam_name: string;
     }
+  | Explicit_consistent_constructor of {
+      pos: Pos.t;
+      classish_kind: Ast_defs.classish_kind;
+    }
 
 include
   Phase_error.S with type t := t and module Error_code = Error_codes.Naming

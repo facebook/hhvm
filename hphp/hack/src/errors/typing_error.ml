@@ -2043,6 +2043,7 @@ module Primary = struct
         decl_pos: Pos_or_decl.t;
         name: string;
         kind: [ `meth | `prop | `const | `ty_const ];
+        quickfixes: Quickfix.t list;
       }
     | Generic_static of {
         pos: Pos.t;
@@ -2172,6 +2173,8 @@ module Primary = struct
         expected_ty: string Lazy.t;
         actual_ty: string Lazy.t;
       }
+    | Unsafe_cast_lvalue of Pos.t
+    | Unsafe_cast_await of Pos.t
     (* == Primary and secondary =============================================== *)
     | Smember_not_found of {
         pos: Pos.t;
@@ -4201,7 +4204,7 @@ module Primary = struct
       [],
       [] )
 
-  let implement_abstract pos1 is_final pos2 x kind =
+  let implement_abstract pos1 is_final pos2 x kind qfxs =
     let kind =
       match kind with
       | `meth -> "method"
@@ -4221,7 +4224,7 @@ module Primary = struct
     ( Error_code.ImplementAbstract,
       (pos1, msg1),
       [(pos2, "Declaration is here")],
-      [] )
+      qfxs )
 
   let generic_static pos x =
     ( Error_code.GenericStatic,
@@ -4553,6 +4556,20 @@ module Primary = struct
         ^ Markdown_lite.md_codify expected_ty
         ^ ", got "
         ^ Markdown_lite.md_codify actual_ty ),
+      [],
+      [] )
+
+  let unsafe_cast_lvalue pos =
+    ( Error_code.UnsafeCastLvalue,
+      ( pos,
+        "UNSAFE_CAST cannot be used on a collection in an update or append operation"
+      ),
+      [],
+      [] )
+
+  let unsafe_cast_await pos =
+    ( Error_code.UnsafeCastAwait,
+      (pos, "UNSAFE_CAST cannot be used as the operand of an await operation"),
       [],
       [] )
 
@@ -5031,8 +5048,8 @@ module Primary = struct
     | Trait_prop_const_class { pos; name } -> trait_prop_const_class pos name
     | Read_before_write { pos; member_name } ->
       read_before_write (pos, member_name)
-    | Implement_abstract { pos; is_final; decl_pos; name; kind } ->
-      implement_abstract pos is_final decl_pos name kind
+    | Implement_abstract { pos; is_final; decl_pos; name; kind; quickfixes } ->
+      implement_abstract pos is_final decl_pos name kind quickfixes
     | Generic_static { pos; typaram_name } -> generic_static pos typaram_name
     | Ellipsis_strict_mode { pos; require } -> ellipsis_strict_mode pos require
     | Untyped_lambda_strict_mode pos -> untyped_lambda_strict_mode pos
@@ -5087,6 +5104,8 @@ module Primary = struct
         pos
         ~expected_ty:(Lazy.force expected_ty)
         ~actual_ty:(Lazy.force actual_ty)
+    | Unsafe_cast_lvalue pos -> unsafe_cast_lvalue pos
+    | Unsafe_cast_await pos -> unsafe_cast_await pos
 
   let code err =
     let (code, _, _, _) = to_error err in

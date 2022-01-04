@@ -1086,6 +1086,7 @@ module Primary : sig
         decl_pos: Pos_or_decl.t;
         name: string;
         kind: [ `meth | `prop | `const | `ty_const ];
+        quickfixes: Quickfix.t list;
       }
     | Generic_static of {
         pos: Pos.t;
@@ -1215,6 +1216,8 @@ module Primary : sig
         expected_ty: string Lazy.t;
         actual_ty: string Lazy.t;
       }
+    | Unsafe_cast_lvalue of Pos.t
+    | Unsafe_cast_await of Pos.t
     (* == Primary and secondary =============================================== *)
     | Smember_not_found of {
         pos: Pos.t;

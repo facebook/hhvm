@@ -1085,34 +1085,6 @@ let internal_compiler_error_msg =
     Error_message_sentinel.remediation_message
     Error_message_sentinel.please_file_a_bug_message
 
-let implement_abstract ?(quickfixes = []) ~is_final pos1 pos2 kind x =
-  let name = "abstract " ^ kind ^ " " ^ Markdown_lite.md_codify x in
-  let msg1 =
-    if is_final then
-      "This class was declared as `final`. It must provide an implementation for the "
-      ^ name
-    else
-      "This class must be declared `abstract`, or provide an implementation for the "
-      ^ name
-  in
-  add_list
-    ~quickfixes
-    (Typing.err_code Typing.ImplementAbstract)
-    (pos1, msg1)
-    [(pos2, "Declaration is here")]
-
-let unsafe_cast_lvalue pos =
-  add
-    (Typing.err_code Typing.UnsafeCastLvalue)
-    pos
-    "UNSAFE_CAST cannot be used on a collection in an update or append operation"
-
-let unsafe_cast_await pos =
-  add
-    (Typing.err_code Typing.UnsafeCastAwait)
-    pos
-    "UNSAFE_CAST cannot be used as the operand of an await operation"
-
 (** TODO: Remove use of explicit side-effects *)
 let exception_occurred pos e =
   let pos_str = pos |> Pos.to_absolute |> Pos.string in
@@ -1140,13 +1112,6 @@ let invariant_violation ~report_to_user ~desc pos telemetry =
       (Typing.err_code Typing.InvariantViolated)
       pos
       internal_compiler_error_msg
-
-let classish_kind_to_string = function
-  | Ast_defs.Cclass _ -> "class "
-  | Ast_defs.Ctrait -> "trait "
-  | Ast_defs.Cinterface -> "interface "
-  | Ast_defs.Cenum_class _ -> "enum class "
-  | Ast_defs.Cenum -> "enum "
 
 (** TODO: Remove use of `User_error.t` representation for nested error  *)
 let function_is_not_dynamically_callable pos function_name error =
@@ -1216,15 +1181,6 @@ let method_is_not_dynamically_callable
       ^ class_name
       ^ " is not dynamically callable." )
     (parent_class_reason @ attribute_reason @ nested_error_reason)
-
-let explicit_consistent_constructor ck pos =
-  add
-    (Naming.err_code Naming.ExplicitConsistentConstructor)
-    pos
-    ("This "
-    ^ classish_kind_to_string ck
-    ^ "is marked <<__ConsistentConstruct>>, so it must declare a constructor explicitly"
-    )
 
 (*****************************************************************************)
 (* Printing *)

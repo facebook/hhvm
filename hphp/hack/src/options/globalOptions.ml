@@ -38,7 +38,6 @@ type t = {
   tco_disallow_array_typehint: bool;
   tco_disallow_array_literal: bool;
   tco_language_feature_logging: bool;
-  tco_disallow_scrutinee_case_value_type_mismatch: bool;
   tco_timeout: int;
   tco_disallow_invalid_arraykey: bool;
   tco_disallow_byref_dynamic_calls: bool;
@@ -234,7 +233,6 @@ let default =
     tco_disallow_array_typehint = false;
     tco_disallow_array_literal = false;
     tco_language_feature_logging = false;
-    tco_disallow_scrutinee_case_value_type_mismatch = false;
     tco_timeout = 0;
     tco_disallow_invalid_arraykey = true;
     tco_disallow_byref_dynamic_calls = false;
@@ -365,8 +363,6 @@ let make
     ?(tco_disallow_array_typehint = default.tco_disallow_array_typehint)
     ?(tco_disallow_array_literal = default.tco_disallow_array_literal)
     ?(tco_language_feature_logging = default.tco_language_feature_logging)
-    ?(tco_disallow_scrutinee_case_value_type_mismatch =
-      default.tco_disallow_scrutinee_case_value_type_mismatch)
     ?(tco_timeout = default.tco_timeout)
     ?(tco_disallow_invalid_arraykey = default.tco_disallow_invalid_arraykey)
     ?(tco_disallow_byref_dynamic_calls =
@@ -522,7 +518,6 @@ let make
     tco_disallow_array_typehint;
     tco_disallow_array_literal;
     tco_language_feature_logging;
-    tco_disallow_scrutinee_case_value_type_mismatch;
     tco_timeout;
     tco_disallow_invalid_arraykey;
     tco_disallow_byref_dynamic_calls;
@@ -679,9 +674,6 @@ let tco_disallow_array_typehint t = t.tco_disallow_array_typehint
 let tco_disallow_array_literal t = t.tco_disallow_array_literal
 
 let tco_language_feature_logging t = t.tco_language_feature_logging
-
-let tco_disallow_scrutinee_case_value_type_mismatch t =
-  t.tco_disallow_scrutinee_case_value_type_mismatch
 
 let tco_timeout t = t.tco_timeout
 

@@ -34,7 +34,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_disallow_array_typehint: false,
     tco_disallow_array_literal: false,
     tco_language_feature_logging: false,
-    tco_disallow_scrutinee_case_value_type_mismatch: false,
     tco_timeout: 0,
     tco_disallow_invalid_arraykey: false,
     tco_disallow_byref_dynamic_calls: false,

@@ -84,11 +84,6 @@ type t = {
    *)
   tco_language_feature_logging: bool;
   (*
-   * When enabled, mismatches between the types of the scrutinee and case value
-   * of a switch expression are reported as type errors.
-   *)
-  tco_disallow_scrutinee_case_value_type_mismatch: bool;
-  (*
    * If non-zero, give up type checking a class or function after this many seconds
    *)
   tco_timeout: int;
@@ -347,7 +342,6 @@ val make :
   ?tco_disallow_array_typehint:bool ->
   ?tco_disallow_array_literal:bool ->
   ?tco_language_feature_logging:bool ->
-  ?tco_disallow_scrutinee_case_value_type_mismatch:bool ->
   ?tco_timeout:int ->
   ?tco_disallow_invalid_arraykey:bool ->
   ?tco_disallow_byref_dynamic_calls:bool ->
@@ -503,8 +497,6 @@ val tco_disallow_array_typehint : t -> bool
 val tco_disallow_array_literal : t -> bool
 
 val tco_language_feature_logging : t -> bool
-
-val tco_disallow_scrutinee_case_value_type_mismatch : t -> bool
 
 val tco_timeout : t -> int
 

@@ -81,9 +81,6 @@ let experimental_all = GlobalOptions.tco_experimental_all
 
 let migration_flags_all = GlobalOptions.tco_migration_flags_all
 
-let disallow_scrutinee_case_value_type_mismatch =
-  GlobalOptions.tco_disallow_scrutinee_case_value_type_mismatch
-
 let timeout = GlobalOptions.tco_timeout
 
 let disallow_invalid_arraykey = GlobalOptions.tco_disallow_invalid_arraykey

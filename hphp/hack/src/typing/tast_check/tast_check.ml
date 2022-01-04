@@ -41,22 +41,7 @@ let visitor ctx =
           Some Tautology_check.handler;
           Some Enforceable_hint_check.handler;
           Some Const_write_check.handler;
-          Some
-            (Switch_check.handler (fun t ->
-                 if
-                   TypecheckerOptions
-                   .disallow_scrutinee_case_value_type_mismatch
-                     t
-                 then
-                   fun pos case_value_ty scrutinee_ty ->
-                 Errors.add_typing_error
-                   Typing_error.(
-                     primary
-                     @@ Primary.Invalid_switch_case_value_type
-                          { pos; case_value_ty; scrutinee_ty })
-                 else
-                   fun _ _ _ ->
-                 ()));
+          Some Switch_check.handler;
           Some Void_return_check.handler;
           Some Rvalue_check.handler;
           Some Callconv_check.handler;

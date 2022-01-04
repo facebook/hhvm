@@ -349,8 +349,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
           Some local_config.remote_type_check.worker_vfs_checkout_threshold)
       ?so_naming_sqlite_path:local_config.naming_sqlite_path
       ?tco_language_feature_logging:(bool_opt "language_feature_logging" config)
-      ?tco_disallow_scrutinee_case_value_type_mismatch:
-        (bool_opt "disallow_scrutinee_case_value_type_mismatch" config)
       ?tco_timeout:(int_opt "timeout" config)
       ?tco_disallow_invalid_arraykey:
         (bool_opt "disallow_invalid_arraykey" config)

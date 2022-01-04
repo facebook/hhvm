@@ -524,7 +524,7 @@ let saved_naming_filename = "test_saved_naming"
 
 let in_daemon f =
   let handle =
-    Daemon.fork
+    Daemon.fork_FOR_TESTING_ON_UNIX_ONLY
       ~channel_mode:`socket
       Unix.(stdout, stderr)
       (fun () _channels -> f ())

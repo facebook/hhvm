@@ -61,6 +61,7 @@ let test () =
       recheck_id = Some "";
       use_max_typechecker_worker_memory_for_decl_deferral = false;
       per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
+      memtrace_dir = None;
     }
   in
   let delegate_state = Typing_service_delegate.default in

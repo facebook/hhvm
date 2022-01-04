@@ -617,6 +617,9 @@ let load_and_process_files
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : typing_result * computation_progress =
+  Option.iter check_info.memtrace_dir ~f:(fun temp_dir ->
+      let file = Caml.Filename.temp_file ~temp_dir "memtrace.worker." ".ctf" in
+      Daemon.start_memtracing file);
   (* When the type-checking worker receives SIGUSR1, display a position which
      corresponds approximately with the function/expression being checked. *)
   Sys_utils.set_signal
@@ -1008,6 +1011,8 @@ let process_sequentially
   let progress =
     { completed = []; remaining = BigList.as_list fnl; deferred = [] }
   in
+  (* Since we're running sequentially here, we don't want 'process_files' to activate its own memtracing: *)
+  let check_info = { check_info with memtrace_dir = None } in
   let (typing_result, progress) =
     process_files
       ctx

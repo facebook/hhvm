@@ -210,6 +210,7 @@ let make_remote_server_api
           recheck_id = Some check_id;
           use_max_typechecker_worker_memory_for_decl_deferral = false;
           per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
+          memtrace_dir = None;
         }
       in
       (* TODO: use the telemetry *)

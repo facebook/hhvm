@@ -102,6 +102,7 @@ let get_check_info genv env : Typing_service_types.check_info =
       genv.local_config
         .ServerLocalConfig.use_max_typechecker_worker_memory_for_decl_deferral;
     per_file_profiling = genv.local_config.ServerLocalConfig.per_file_profiling;
+    memtrace_dir = genv.local_config.ServerLocalConfig.memtrace_dir;
   }
 
 type user_filter =

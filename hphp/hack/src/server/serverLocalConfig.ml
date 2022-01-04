@@ -542,6 +542,8 @@ type t = {
   use_direct_decl_parser: bool;
       (** Enable use of the direct decl parser for parsing type signatures. *)
   per_file_profiling: HackEventLogger.PerFileProfilingConfig.t;
+      (** turns on memtrace .ctf writes to this directory *)
+  memtrace_dir: string option;
   go_to_implementation: bool;
       (** Allows the IDE to show the 'find all implementations' button *)
   allow_unstable_features: bool;
@@ -664,6 +666,7 @@ let default =
     tico_invalidate_smart = false;
     use_direct_decl_parser = false;
     per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
+    memtrace_dir = None;
     go_to_implementation = true;
     allow_unstable_features = false;
     stream_errors = false;
@@ -1288,6 +1291,7 @@ let load_ fn ~silent ~current_version overrides =
         HackEventLogger.PerFileProfilingConfig.(default.profile_slow_threshold)
       config
   in
+  let memtrace_dir = string_opt "memtrace_dir" config in
   let go_to_implementation =
     bool_if_min_version
       "go_to_implementation"
@@ -1472,6 +1476,7 @@ let load_ fn ~silent ~current_version overrides =
         profile_desc;
         profile_slow_threshold;
       };
+    memtrace_dir;
     go_to_implementation;
     allow_unstable_features;
     stream_errors;

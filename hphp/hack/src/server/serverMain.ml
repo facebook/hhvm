@@ -1499,6 +1499,8 @@ let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   let (config, local_config) =
     ServerConfig.(load ~silent:false filename options)
   in
+  Option.iter local_config.ServerLocalConfig.memtrace_dir ~f:(fun dir ->
+      Daemon.start_memtracing (Filename.concat dir "memtrace.server.ctf"));
   let (genv, env) =
     setup_server
       options

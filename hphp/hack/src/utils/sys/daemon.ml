@@ -256,7 +256,7 @@ let descr_as_channels (descr_in, descr_out) =
 
 (* This only works on Unix, and should be avoided as far as possible. Use
  * Daemon.spawn instead. *)
-let fork
+let fork_FOR_TESTING_ON_UNIX_ONLY
     ?(channel_mode = `pipe)
     (type param)
     (log_stdout, log_stderr)
@@ -379,3 +379,12 @@ let close_in = Timeout.close_in
 let input_char ic = Timeout.input_char ic
 
 let input_value ic = Timeout.input_value ic
+
+let start_memtracing filename =
+  let _tracer : Memtrace.tracer =
+    Memtrace.start_tracing
+      ~context:None
+      ~sampling_rate:Memtrace.default_sampling_rate
+      ~filename
+  in
+  ()

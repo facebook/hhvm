@@ -3,7 +3,7 @@
  (wrapped false)
  (flags
   (:standard -safe-string))
- (libraries collections disk exec_command str unix utils_core)
+ (libraries collections disk exec_command memtrace str unix utils_core)
  (foreign_stubs
   (language c)
   (names

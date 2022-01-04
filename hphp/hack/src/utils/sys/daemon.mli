@@ -88,8 +88,8 @@ val fd_of_path : string -> Unix.file_descr
 
 val null_fd : unit -> Unix.file_descr
 
-(** Fork and run a function that communicates via the typed channels *)
-val fork :
+(** Fork and run a function that communicates via the typed channels. Doesn't work with start_memtracing. *)
+val fork_FOR_TESTING_ON_UNIX_ONLY :
   ?channel_mode:[ `pipe | `socket ] ->
   (* Where the daemon's output should go *)
   Unix.file_descr * Unix.file_descr ->
@@ -113,6 +113,16 @@ val close : ('a, 'b) handle -> unit
 
 (** Force quit the spawned child process and close the associated typed channels. *)
 val force_quit : ('a, 'b) handle -> unit
+
+(** This will start the current process memtracing to the named file. It is suggested
+that any process which is interesting to trace should call this function near the start
+of its lifetime, so long as `--config memtrace_dir` is set. Callers are responsible
+for constructing a filename that's in that directory and is unique with respect to
+all other filenames used by the hh_server instance. The conventional suffix is ".ctf".
+Recent versions of the memtrace library will suppress tracing after fork, but in
+case we don't have the most recent version, then better not to fork!
+However, it's okay to call Daemon.spawn while memtracing. *)
+val start_memtracing : string -> unit
 
 (** Main function, that executes an alternate entry point.
     It should be called only once, just before the main entry point.

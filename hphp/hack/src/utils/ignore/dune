@@ -5,6 +5,7 @@
   (libraries
     hh_json
     str
+    string
     (select filesToIgnore.ml from
       (facebook -> facebook/filesToIgnore.ml)
       (-> filesToIgnore.stubs.ml))))

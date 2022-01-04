@@ -850,7 +850,7 @@ let make_all_members ~parent_class =
  *
  * It isn't added to the tc_construct only because that's used to
  * determine whether a child class needs to call parent::__construct *)
-let default_constructor_ce ~pure class_ =
+let default_constructor_ce class_ =
   let (pos, name) = (Cls.pos class_, Cls.name class_) in
   let r = Reason.Rwitness_from_decl pos in
   (* reason doesn't get used in, e.g. arity checks *)
@@ -860,14 +860,7 @@ let default_constructor_ce ~pure class_ =
       ft_tparams = [];
       ft_where_constraints = [];
       ft_params = [];
-      ft_implicit_params =
-        {
-          capability =
-            (if pure then
-              CapTy (MakeType.mixed r)
-            else
-              CapDefaults pos);
-        };
+      ft_implicit_params = { capability = CapTy (MakeType.mixed r) };
       ft_ret = { et_type = MakeType.void r; et_enforced = Unenforced };
       ft_flags = 0;
       ft_ifc_decl = default_ifc_fun_decl;
@@ -917,12 +910,7 @@ let check_constructors env parent_class class_ psubst on_error =
       let parent_cstr =
         match opt_parent_cstr with
         | Some parent_cstr -> parent_cstr
-        | None ->
-          let pure =
-            TypecheckerOptions.pure_default_consistent_constructors
-              (Env.get_tcopt env)
-          in
-          default_constructor_ce ~pure parent_class
+        | None -> default_constructor_ce parent_class
       in
       if String.( <> ) parent_cstr.ce_origin cstr.ce_origin then begin
         let parent_cstr = Inst.instantiate_ce psubst parent_cstr in

@@ -866,7 +866,6 @@ let parse_options () =
       ~tco_enforce_sealed_subclasses:!enforce_sealed_subclasses
       ~tco_everything_sdt:!everything_sdt
       ~tco_pessimise_builtins:!pessimise_builtins
-      ~tco_pure_default_consistent_constructors:true
       ~tco_explicit_consistent_constructors:!explicit_consistent_constructors
       ()
   in

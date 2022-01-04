@@ -297,9 +297,6 @@ type t = {
   (* All collections and Hack arrays are treated as containing ~T *)
   tco_pessimise_builtins: bool;
   tco_enable_disk_heap: bool;
-  (* Resolves unsoundness arising from incorrect [defaults] context generated for default
-   * constructors during __ConsistentConstruct check *)
-  tco_pure_default_consistent_constructors: bool;
   (* Raises an error when a classish is declared <<__ConsistentConstruct>> but lacks an
    * explicit constructor declaration. 0 does not raise, 1 raises for traits, 2 raises
    * for all classish *)
@@ -429,7 +426,6 @@ val make :
   ?tco_everything_sdt:bool ->
   ?tco_pessimise_builtins:bool ->
   ?tco_enable_disk_heap:bool ->
-  ?tco_pure_default_consistent_constructors:bool ->
   ?tco_explicit_consistent_constructors:int ->
   unit ->
   t
@@ -711,7 +707,5 @@ val tco_everything_sdt : t -> bool
 val tco_pessimise_builtins : t -> bool
 
 val tco_enable_disk_heap : t -> bool
-
-val tco_pure_default_consistent_constructors : t -> bool
 
 val tco_explicit_consistent_constructors : t -> int

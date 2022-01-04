@@ -71,14 +71,6 @@ type t = {
   (* Print types of size bigger than 1000 after performing a type union. *)
   tco_log_inference_constraints: bool;
   (*
-   * Flag to disallow array typehints
-   *)
-  tco_disallow_array_typehint: bool;
-  (*
-   * Flag to disallow array literal expressions
-   *)
-  tco_disallow_array_literal: bool;
-  (*
    * Flag to enable logging of statistics regarding use of language features.
    * Currently used for lambdas.
    *)
@@ -339,8 +331,6 @@ val make :
   ?so_remote_worker_vfs_checkout_threshold:int ->
   ?so_naming_sqlite_path:string ->
   ?po_auto_namespace_map:(string * string) list ->
-  ?tco_disallow_array_typehint:bool ->
-  ?tco_disallow_array_literal:bool ->
   ?tco_language_feature_logging:bool ->
   ?tco_timeout:int ->
   ?tco_disallow_invalid_arraykey:bool ->
@@ -491,10 +481,6 @@ val po_disable_nontoplevel_declarations : t -> bool
 val po_codegen : t -> bool
 
 val tco_log_inference_constraints : t -> bool
-
-val tco_disallow_array_typehint : t -> bool
-
-val tco_disallow_array_literal : t -> bool
 
 val tco_language_feature_logging : t -> bool
 

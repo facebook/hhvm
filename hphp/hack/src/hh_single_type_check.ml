@@ -194,8 +194,6 @@ let parse_options () =
   let error_format = ref Errors.Highlighted in
   let forbid_nullable_cast = ref false in
   let deregister_attributes = ref None in
-  let disallow_array_typehint = ref None in
-  let disallow_array_literal = ref None in
   let auto_namespace_map = ref None in
   let log_inference_constraints = ref None in
   let timeout = ref None in
@@ -435,12 +433,6 @@ let parse_options () =
       ( "--forbid_nullable_cast",
         Arg.Set forbid_nullable_cast,
         " Forbid casting from nullable values." );
-      ( "--disallow-array-typehint",
-        Arg.Unit (set_bool disallow_array_typehint),
-        " Disallow usage of array typehints." );
-      ( "--disallow-array-literal",
-        Arg.Unit (set_bool disallow_array_literal),
-        " Disallow usage of array literals." );
       ( "--get-member",
         Arg.String
           (fun class_and_member_id ->
@@ -784,8 +776,6 @@ let parse_options () =
     GlobalOptions.make
       ?po_disable_array_typehint:(Some false)
       ?po_deregister_php_stdlib:!deregister_attributes
-      ?tco_disallow_array_typehint:!disallow_array_typehint
-      ?tco_disallow_array_literal:!disallow_array_literal
       ?tco_log_inference_constraints:!log_inference_constraints
       ?tco_timeout:!timeout
       ?po_auto_namespace_map:!auto_namespace_map

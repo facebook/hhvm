@@ -35,8 +35,6 @@ type t = {
   po_disable_nontoplevel_declarations: bool;
   po_allow_unstable_features: bool;
   tco_log_inference_constraints: bool;
-  tco_disallow_array_typehint: bool;
-  tco_disallow_array_literal: bool;
   tco_language_feature_logging: bool;
   tco_timeout: int;
   tco_disallow_invalid_arraykey: bool;
@@ -230,8 +228,6 @@ let default =
     po_disable_nontoplevel_declarations = false;
     po_allow_unstable_features = false;
     tco_log_inference_constraints = false;
-    tco_disallow_array_typehint = false;
-    tco_disallow_array_literal = false;
     tco_language_feature_logging = false;
     tco_timeout = 0;
     tco_disallow_invalid_arraykey = true;
@@ -360,8 +356,6 @@ let make
       default.so_remote_worker_vfs_checkout_threshold)
     ?so_naming_sqlite_path
     ?(po_auto_namespace_map = default.po_auto_namespace_map)
-    ?(tco_disallow_array_typehint = default.tco_disallow_array_typehint)
-    ?(tco_disallow_array_literal = default.tco_disallow_array_literal)
     ?(tco_language_feature_logging = default.tco_language_feature_logging)
     ?(tco_timeout = default.tco_timeout)
     ?(tco_disallow_invalid_arraykey = default.tco_disallow_invalid_arraykey)
@@ -515,8 +509,6 @@ let make
     po_disable_nontoplevel_declarations;
     po_allow_unstable_features;
     tco_log_inference_constraints;
-    tco_disallow_array_typehint;
-    tco_disallow_array_literal;
     tco_language_feature_logging;
     tco_timeout;
     tco_disallow_invalid_arraykey;
@@ -668,10 +660,6 @@ let tco_log_inference_constraints t = t.tco_log_inference_constraints
 let po_codegen t = t.po_codegen
 
 let po_disallow_toplevel_requires t = t.po_disallow_toplevel_requires
-
-let tco_disallow_array_typehint t = t.tco_disallow_array_typehint
-
-let tco_disallow_array_literal t = t.tco_disallow_array_literal
 
 let tco_language_feature_logging t = t.tco_language_feature_logging
 

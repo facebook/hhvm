@@ -31,8 +31,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     po_disable_nontoplevel_declarations: false,
     po_allow_unstable_features: false,
     tco_log_inference_constraints: false,
-    tco_disallow_array_typehint: false,
-    tco_disallow_array_literal: false,
     tco_language_feature_logging: false,
     tco_timeout: 0,
     tco_disallow_invalid_arraykey: false,

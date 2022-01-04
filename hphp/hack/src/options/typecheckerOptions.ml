@@ -40,10 +40,6 @@ let stream_errors = GlobalOptions.tco_stream_errors
 
 let remote_version_specifier = GlobalOptions.so_remote_version_specifier
 
-let disallow_array_typehint = GlobalOptions.tco_disallow_array_typehint
-
-let disallow_array_literal = GlobalOptions.tco_disallow_array_literal
-
 let language_feature_logging = GlobalOptions.tco_language_feature_logging
 
 let experimental_feature_enabled =

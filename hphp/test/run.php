@@ -1302,9 +1302,8 @@ class Queue {
   // The path to the FIFO, until destroyed.
   private ?string $path = null;
 
-  // TODO: Use proper types.
-  private mixed $input = null;
-  private mixed $output = null;
+  private ?resource $input = null;
+  private ?resource $output = null;
 
   // Pipes writes are atomic up to 512 bytes (up to 4096 bytes on linux),
   // and we use a 16 byte header, leaving this many bytes available for
@@ -1328,7 +1327,7 @@ class Queue {
     $this->path = $path;
   }
 
-  private function getInput(): mixed {
+  private function getInput(): resource {
     $input = $this->input;
     if ($input is null) {
       $path = $this->path;
@@ -1341,7 +1340,7 @@ class Queue {
     return $input;
   }
 
-  private function getOutput(): mixed {
+  private function getOutput(): resource {
     $output = $this->output;
     if ($output is null) {
       $path = $this->path;

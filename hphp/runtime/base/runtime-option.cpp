@@ -32,7 +32,6 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -3038,9 +3037,6 @@ void RuntimeOption::Load(
 
   // Initialize defaults for repo-specific parser configuration options.
   RepoOptions::setDefaults(config, ini);
-
-  // Start profiling RDS, if enabled. We'll stop when we hit retranslateAll.
-  if (rds::shouldProfileAccesses()) rds::startProfiling();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

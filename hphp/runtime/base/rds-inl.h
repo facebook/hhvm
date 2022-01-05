@@ -15,6 +15,7 @@
 */
 #pragma once
 
+#include "hphp/runtime/vm/type-profile.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/safe-cast.h"
 
@@ -65,8 +66,6 @@ extern AllocDescriptorList s_local_alloc_descs;
 extern std::atomic<size_t> s_normal_alloc_descs_size;
 extern std::atomic<size_t> s_local_alloc_descs_size;
 
-extern std::atomic<bool> s_profile_rds;
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -74,7 +73,7 @@ extern std::atomic<bool> s_profile_rds;
 template<class T, Mode M, bool P>
 T* handleToPtr(void* base, Handle h) {
   using namespace detail;
-  if (P && UNLIKELY(profiling())) markAccess(h);
+  if (P && UNLIKELY(shouldProfileAccesses())) markAccess(h);
   if (M == Mode::Persistent) {
     assertx(isPersistentHandle(h));
     return reinterpret_cast<T*>(s_persistent_base + h);
@@ -407,22 +406,9 @@ inline void uninitHandle(Handle handle) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-inline bool profiling() {
-  return detail::s_profile_rds.load(std::memory_order_acquire);
-}
-
 inline bool shouldProfileAccesses() {
-  return isJitSerializing() && RO::EvalReorderRDS;
-}
-
-inline void startProfiling() {
-  assertx(!profiling());
-  assertx(shouldProfileAccesses());
-  detail::s_profile_rds.store(true, std::memory_order_release);
-}
-
-inline void stopProfiling() {
-  detail::s_profile_rds.store(false, std::memory_order_release);
+  return isJitSerializing() && RO::EvalReorderRDS && isFullyInitialized() &&
+    isStandardRequest();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

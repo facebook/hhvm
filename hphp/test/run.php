@@ -791,7 +791,7 @@ function find_tests(
   if ($options['include-pattern'] ?? false) {
     $include = $options['include-pattern'];
     $tests = vec(array_filter($tests, function($test) use ($include) {
-      return preg_match($include, $test);
+      return (bool)preg_match($include, $test);
     }));
   }
   return $tests;
@@ -1078,7 +1078,9 @@ function hhvm_cmd(
     $cmd .= " -vScribe.Tables.hhvm_jit.include.*=deployment_id";
   }
 
-  $env = HH\global_get('_ENV') as dict<_, _>;
+  $env = \HH\FIXME\UNSAFE_CAST<dict<arraykey,mixed>,dict<string,mixed>>(
+      \HH\global_get('_ENV') as dict<_, _>
+  );
   $env['LC_ALL'] = 'C';
 
   // Apply the --env option.
@@ -1641,7 +1643,7 @@ final class Status {
   ): float {
     $time = 0.0;
     foreach ($results as $result) {
-      $time += $result['time'];
+      $time += $result['time'] as float;
     }
     return $time;
   }
@@ -3402,7 +3404,7 @@ function msg_loop(int $num_tests, Queue $queue): void {
       print Status::$skipped ." tests \033[1;33mskipped\033[0m\n";
       $reasons = Status::$skip_reasons;
       arsort(inout $reasons);
-      Status::$skip_reasons = $reasons;
+      Status::$skip_reasons = $reasons as dict<_, _>;
       foreach (Status::$skip_reasons as $reason => $count) {
         printf("%12s: %d\n", $reason, $count);
       }

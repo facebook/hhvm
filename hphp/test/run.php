@@ -1490,8 +1490,17 @@ enum TempDirRemove: int {
   NEVER = 2;
 }
 
+type TestResult = shape(
+  'name' => string,
+  'status' => string,
+  'start_time' => int,
+  'end_time' => int,
+  'time' => float,
+  ?'details' => string,
+);
+
 final class Status {
-  private static vec<dict<string, mixed>> $results = vec[];
+  private static vec<TestResult> $results = vec[];
   private static int $mode = 0;
 
   private static bool $use_color = false;
@@ -1638,11 +1647,11 @@ final class Status {
   }
 
   public static function addTestTimesSerial(
-    dict<string, dict<string, mixed>> $results,
+    dict<string, TestResult> $results,
   ): float {
     $time = 0.0;
     foreach ($results as $result) {
-      $time += $result['time'] as float;
+      $time += $result['time'];
     }
     return $time;
   }
@@ -1713,11 +1722,13 @@ final class Status {
   public static function pass(
     string $test, float $time, int $stime, int $etime,
   ): void {
-    self::$results[] = dict['name' => $test,
-                             'status' => 'passed',
-                             'start_time' => $stime,
-                             'end_time' => $etime,
-                             'time' => $time];
+    self::$results[] = shape(
+      'name' => $test,
+      'status' => 'passed',
+      'start_time' => $stime,
+      'end_time' => $etime,
+      'time' => $time
+    );
     self::send(
       self::MSG_TEST_PASS,
       new Message($test, $time, $stime, $etime),
@@ -1727,7 +1738,7 @@ final class Status {
   public static function skip(
     string $test, string $reason, float $time, int $stime, int $etime,
   ): void {
-    self::$results[] = dict[
+    self::$results[] = shape(
       'name' => $test,
       /* testpilot needs a positive response for every test run, report
        * that this test isn't relevant so it can silently drop. */
@@ -1737,7 +1748,7 @@ final class Status {
       'start_time' => $stime,
       'end_time' => $etime,
       'time' => $time,
-    ];
+    );
     self::send(
       self::MSG_TEST_SKIP,
       new Message($test, $time, $stime, $etime, $reason),
@@ -1747,14 +1758,14 @@ final class Status {
   public static function fail(
     string $test, float $time, int $stime, int $etime, string $diff,
   ): void {
-    self::$results[] = dict[
+    self::$results[] = shape(
       'name' => $test,
       'status' => 'failed',
-      'details' => self::utf8Sanitize($diff),
       'start_time' => $stime,
       'end_time' => $etime,
-      'time' => $time
-    ];
+      'time' => $time,
+      'details' => self::utf8Sanitize($diff),
+    );
     self::send(
       self::MSG_TEST_FAIL,
       new Message($test, $time, $stime, $etime),
@@ -1959,7 +1970,7 @@ final class Status {
     self::say($start, $end);
   }
 
-  public static function getResults(): vec<dict<string, mixed>> {
+  public static function getResults(): vec<TestResult> {
     return self::$results;
   }
 
@@ -2084,7 +2095,7 @@ function child_main(
   }
   $results = Status::getResults();
   file_put_contents($json_results_file, json_encode($results));
-  foreach (Status::getResults() as $result) {
+  foreach ($results as $result) {
     if ($result['status'] === 'failed') {
       return 1;
     }
@@ -3410,7 +3421,7 @@ function msg_loop(int $num_tests, Queue $queue): void {
 
 function print_success(
   vec<string> $tests,
-  dict<string, dict<string, mixed>> $results,
+  dict<string, TestResult> $results,
   dict<string, mixed> $options,
 ): void {
   // We didn't run any tests, not even skipped. Clowntown!
@@ -3452,7 +3463,7 @@ function print_success(
 
 function print_failure(
   vec<string> $argv,
-  dict<string, dict<string, mixed>> $results,
+  dict<string, TestResult> $results,
   dict<string, mixed> $options,
 ): void {
   $failed = vec[];
@@ -3460,8 +3471,7 @@ function print_failure(
   foreach ($results as $result) {
     if ($result['status'] === 'failed') {
       $failed[] = $result['name'];
-    }
-    if ($result['status'] === 'passed') {
+    } else if ($result['status'] === 'passed') {
       $passed[] = $result['name'];
     }
   }

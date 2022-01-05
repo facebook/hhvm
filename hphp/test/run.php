@@ -3744,7 +3744,7 @@ function main(vec<string> $argv): int {
 
   $tests = find_tests($files, $options);
   if (isset($options['shuffle'])) {
-    shuffle($tests);
+    shuffle(inout $tests);
   }
 
   // Explicit path given by --hhvm-binary-path takes priority. Then, if an

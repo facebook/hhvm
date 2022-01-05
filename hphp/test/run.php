@@ -2818,16 +2818,15 @@ function run_config_server(dict<string, mixed> $options, string $test): mixed {
   }
   curl_close($ch);
 
-  return run_config_post(vec[$output, ''], $test, $options);
+  return run_config_post(tuple($output, ''), $test, $options);
 }
 
-// Returns (string, string) or false.
 function run_config_cli(
   dict<string, mixed> $options,
   string $test,
   string $cmd,
   dict<string, mixed> $cmd_env,
-): mixed {
+): ?(string, string) {
   $cmd = timeout_prefix() . $cmd;
 
   if (isset($options['repo']) && !isset($options['repo-out'])) {
@@ -2853,7 +2852,7 @@ function run_config_cli(
   );
   if (!is_resource($process)) {
     Status::writeDiff($test, "Couldn't invoke $cmd");
-    return false;
+    return null;
   }
 
   fclose($pipes[0]);
@@ -2864,7 +2863,7 @@ function run_config_cli(
   fclose($pipes[2]);
   proc_close($process);
 
-  return vec[$output, $stderr];
+  return tuple($output, $stderr);
 }
 
 function replace_object_resource_ids(string $str, string $replacement): string {
@@ -2878,12 +2877,11 @@ function replace_object_resource_ids(string $str, string $replacement): string {
 
 // NOTE: Returns "(string | bool)".
 function run_config_post(
-  vec<string> $outputs,
+  (string, string) $outputs,
   string $test,
   dict<string, mixed> $options,
 ): mixed {
-  $output = $outputs[0];
-  $stderr = $outputs[1];
+  list($output, $stderr) = $outputs;
   file_put_contents(Status::getTestOutputPath($test, 'out'), $output);
 
   $check_hhbbc_error = isset($options['repo'])
@@ -3066,7 +3064,7 @@ function run_foreach_config(
   $result = false;
   foreach ($cmds as $cmd) {
     $outputs = run_config_cli($options, $test, $cmd, $cmd_env);
-    if ($outputs === false) return false;
+    if ($outputs is null) return false;
     $result = run_config_post($outputs, $test, $options);
     if (!$result) return $result;
   }
@@ -3222,10 +3220,10 @@ function run_test(dict<string, mixed> $options, string $test): mixed {
       invariant(count($hhvm) === 1, 'get_options enforces jit mode only');
       $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
       $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
-      if ($outputs === false) return false;
+      if ($outputs is null) return false;
       $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
       $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
-      if ($outputs === false) return false;
+      if ($outputs is null) return false;
       $hhvm[0] = jit_serialize_option($hhvm[0], $test, $options, false);
     }
 

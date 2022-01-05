@@ -532,7 +532,17 @@ void uninitHandle(Handle handle);
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * shouldProfileAccesses is true if we should *start* profiling in a given
+ * runtime configuration. profiling is true if we are *currently* profiling.
+ *
+ * We stop profiling when we hit retranslateAll; after this point, profiling
+ * will be false even if shouldProfileAccesses is true.
+ */
+bool profiling();
 bool shouldProfileAccesses();
+void startProfiling();
+void stopProfiling();
 
 Handle profileForHandle(Handle);
 

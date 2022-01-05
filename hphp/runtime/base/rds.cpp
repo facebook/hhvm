@@ -191,6 +191,8 @@ AllocDescriptorList s_local_alloc_descs;
 std::atomic<size_t> s_normal_alloc_descs_size;
 std::atomic<size_t> s_local_alloc_descs_size;
 
+std::atomic<bool> s_profile_rds;
+
 /*
  * Round base up to align, which must be a power of two.
  */
@@ -435,9 +437,8 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
   auto const handle = alloc(mode, sizeBytes, align, tyIndex, &key);
   recordRds(handle, sizeBytes, key);
 
-  if (shouldProfileAccesses() && !boost::apply_visitor(IsProfile(), key)) {
-    // Allocate an integer in the local section to profile this
-    // symbol.
+  if (profiling() && !boost::apply_visitor(IsProfile(), key)) {
+    // Allocate an integer in the local section to profile this symbol.
     auto const profile = alloc(
       Mode::Local,
       sizeof(uint64_t),
@@ -484,9 +485,8 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
     auto const h = allocUnlocked(mode, size, align, tsi, &sym);
     recordRds(h, size, sym);
 
-    if (shouldProfileAccesses() && !boost::apply_visitor(IsProfile(), sym)) {
-      // Allocate an integer in the local section to profile this
-      // symbol.
+    if (profiling() && !boost::apply_visitor(IsProfile(), sym)) {
+      // Allocate an integer in the local section to profile this symbol.
       auto const profile = allocUnlocked(
         Mode::Local,
         sizeof(uint64_t),

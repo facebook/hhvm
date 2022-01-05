@@ -375,6 +375,8 @@ void retranslateAll(bool skipSerialize) {
                          isJitSerializing();
   const bool serializeOpt = serialize && serializeOptProfEnabled();
 
+  rds::stopProfiling();
+
   // 1) Obtain function ordering in code.hot.
 
   if (FuncOrder::get().empty()) {

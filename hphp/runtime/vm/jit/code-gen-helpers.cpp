@@ -609,7 +609,7 @@ void markRDSHandleInitialized(Vout& v, Vreg ch) {
 }
 
 void markRDSAccess(Vout& v, rds::Handle ch) {
-  if (!rds::shouldProfileAccesses()) return;
+  if (!rds::profiling()) return;
   auto const& vunit = v.unit();
   if (vunit.context && !isProfiling(vunit.context->kind)) return;
   auto const profile = rds::profileForHandle(ch);
@@ -618,7 +618,7 @@ void markRDSAccess(Vout& v, rds::Handle ch) {
 }
 
 void markRDSAccess(Vout& v, Vreg ch) {
-  if (!rds::shouldProfileAccesses()) return;
+  if (!rds::profiling()) return;
   auto const& vunit = v.unit();
   if (vunit.context && !isProfiling(vunit.context->kind)) return;
   v << vcall{

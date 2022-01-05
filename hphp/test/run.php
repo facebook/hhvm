@@ -3482,9 +3482,7 @@ function print_failure(
     : Status::getRunTmpDir() . '/test-failures';
   file_put_contents($failing_tests_file, safe_implode("\n", $failed)."\n");
   if ($passed) {
-    $passing_tests_file = ($options['success-file'] ?? false)
-      ? $options['success-file']
-      : Status::getRunTmpDir() . '/tests-passed';
+    $passing_tests_file = Status::getRunTmpDir() . '/tests-passed';
     file_put_contents($passing_tests_file, safe_implode("\n", $passed)."\n");
   } else {
     $passing_tests_file = "";

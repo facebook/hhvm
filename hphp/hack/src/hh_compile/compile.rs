@@ -58,7 +58,8 @@ pub struct Opts {
     #[structopt(flatten)]
     single_file_opts: SingleFileOpts,
 
-    /// Number of parallel worker threads. By default, or if set to 0 or 1, use num-cpu threads.
+    /// Number of parallel worker threads. By default, use num-cpu worker threads.
+    /// If 0 or 1, uses the main (single) thread.
     #[structopt(long)]
     thread_num: Option<usize>,
 }

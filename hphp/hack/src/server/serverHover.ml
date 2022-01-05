@@ -256,6 +256,12 @@ let make_hover_attr_docs name =
   | _ -> []
 
 let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
+  let await_explanation =
+    "\n\nThis does not give you threads. Only one function is running at any point in time."
+    ^ " Instead, the runtime may switch to another function at an `await` expression, and come back to this function later."
+    ^ "\n\nThis allows data fetching (e.g. database requests) to happen in parallel."
+  in
+
   match khi with
   | SymbolOccurrence.FinalOnClass ->
     "A `final` class cannot be extended by other classes.\n\nTo restrict which classes can extend this, use `<<__Sealed()>>`."
@@ -279,6 +285,34 @@ let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
     "A `readonly` value is a reference that cannot modify the underlying value."
   | SymbolOccurrence.ReadonlyOnReturnType ->
     "This function/method may return a `readonly` value."
+  | SymbolOccurrence.Async ->
+    "An `async` function can use `await` to get results from other `async` functions. You may still return plain values, e.g. `return 1;` is permitted in an `Awaitable<int>` function."
+    ^ await_explanation
+  | SymbolOccurrence.AsyncBlock ->
+    "An `async` block is syntactic sugar for an `async` lambda that is immediately called."
+    ^ "\n\n```"
+    ^ "\n$f = async { return 1; };"
+    ^ "\n// Equivalent to:"
+    ^ "\n$f = (async () ==> { return 1; })();"
+    ^ "\n```"
+    ^ "\n\nThis is useful when building more complex async expressions."
+    ^ "\n\n```"
+    ^ "\nconcurrent {"
+    ^ "\n  $group_name = await async {"
+    ^ "\n    return $group is null ? '' : await $group->genName();"
+    ^ "\n  };"
+    ^ "\n  await async {"
+    ^ "\n    try {"
+    ^ "\n      await gen_log_request();"
+    ^ "\n    } catch (LogRequestFailed $_) {}"
+    ^ "\n  }"
+    ^ "\n}"
+    ^ "\n```"
+  | SymbolOccurrence.Await ->
+    "`await` waits for the result of an `Awaitable<_>` value."
+    ^ await_explanation
+  | SymbolOccurrence.Concurrent ->
+    "`concurrent` allows you to `await` multiple values at once. This is similar to `Vec\\map_async`, but `concurrent` allows awaiting unrelated values of different types."
 
 let make_hover_info ctx env_and_ty entry occurrence def_opt =
   SymbolOccurrence.(

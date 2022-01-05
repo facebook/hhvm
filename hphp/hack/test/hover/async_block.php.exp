@@ -1,0 +1,25 @@
+Awaitable<int>
+An `async` block is syntactic sugar for an `async` lambda that is immediately called.
+
+```
+$f = async { return 1; };
+// Equivalent to:
+$f = (async () ==> { return 1; })();
+```
+
+This is useful when building more complex async expressions.
+
+```
+concurrent {
+  $group_name = await async {
+    return $group is null ? '' : await $group->genName();
+  };
+  await async {
+    try {
+      await gen_log_request();
+    } catch (LogRequestFailed $_) {}
+  }
+}
+```
+-------------
+Awaitable<int>

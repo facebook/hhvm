@@ -39,6 +39,10 @@ type keyword_with_hover_docs =
   | ReadonlyOnParameter
   | ReadonlyOnReturnType
   | ReadonlyOnExpression
+  | Async
+  | AsyncBlock
+  | Await
+  | Concurrent
 [@@deriving ord, eq]
 
 type kind =

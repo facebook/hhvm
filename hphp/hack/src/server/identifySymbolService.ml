@@ -580,6 +580,7 @@ type keyword_context =
   | Method
   | Parameter
   | ReturnType
+  | AsyncBlockHeader
 
 (** Get keyword positions from the FFP for every keyword that has hover
     documentation. **)
@@ -618,6 +619,10 @@ let keywords ctx entry : Result_set.elt list =
       let acc = aux ctx acc fdh.function_parameter_list in
       aux (Some ReturnType) acc fdh.function_readonly_return
     | ParameterDeclaration pd -> aux (Some Parameter) acc pd.parameter_readonly
+    | AwaitableCreationExpression ace ->
+      let acc = aux ctx acc ace.awaitable_attribute_spec in
+      let acc = aux (Some AsyncBlockHeader) acc ace.awaitable_async in
+      aux ctx acc ace.awaitable_compound_statement
     | Token t ->
       (match t.Token.kind with
       | Token.TokenKind.Extends ->
@@ -641,6 +646,34 @@ let keywords ctx entry : Result_set.elt list =
               (match ctx with
               | Some Method -> FinalOnMethod
               | _ -> FinalOnClass);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
+      | Token.TokenKind.Async ->
+        {
+          name = "async";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some AsyncBlockHeader -> AsyncBlock
+              | _ -> Async);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
+      | Token.TokenKind.Await ->
+        {
+          name = "await";
+          type_ = Keyword Await;
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
+      | Token.TokenKind.Concurrent ->
+        {
+          name = "concurrent";
+          type_ = Keyword Concurrent;
           is_declaration = false;
           pos = token_pos t;
         }

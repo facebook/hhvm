@@ -2745,13 +2745,12 @@ function dump_hhas_cmd(
   return $cmd;
 }
 
-// ISSUE: Return "?string" or "(string | bool)".
-function dump_hhas_to_temp(string $hhvm_cmd, string $test): mixed {
+function dump_hhas_to_temp(string $hhvm_cmd, string $test): ?string {
   $temp_file = Status::getTestTmpPath($test, 'round_trip.hhas');
   $cmd = dump_hhas_cmd($hhvm_cmd, $test, $temp_file);
   $ret = -1;
   system("$cmd &> /dev/null", inout $ret);
-  return $ret === 0 ? $temp_file : false;
+  return $ret === 0 ? $temp_file : null;
 }
 
 const vec<string> SERVER_EXCLUDE_PATHS = vec[
@@ -3193,7 +3192,7 @@ function run_test(dict<string, mixed> $options, string $test): mixed {
       // create tmpdir now so that we can write hhas
       Status::createTestTmpDir($test);
       $hhas_temp1 = dump_hhas_to_temp($hhvm[0], "$test.before");
-      if ($hhas_temp1 === false) {
+      if ($hhas_temp1 is null) {
         Status::writeDiff($test, "dumping hhas after first hhbbc pass failed");
         return false;
       }
@@ -3205,7 +3204,7 @@ function run_test(dict<string, mixed> $options, string $test): mixed {
         return false;
       }
       $hhas_temp2 = dump_hhas_to_temp($hhvm[0], "$test.after");
-      if ($hhas_temp2 === false) {
+      if ($hhas_temp2 is null) {
         Status::writeDiff($test, "dumping hhas after second hhbbc pass failed");
         return false;
       }
@@ -3246,7 +3245,7 @@ function run_test(dict<string, mixed> $options, string $test): mixed {
     Status::createTestTmpDir($test);
     // dumping hhas, not running code so arbitrarily picking a mode
     $hhas_temp = dump_hhas_to_temp($hhvm[0], $test);
-    if ($hhas_temp === false) {
+    if ($hhas_temp is null) {
       $err = "system failed: " .
         dump_hhas_cmd($hhvm[0], $test,
           Status::getTestTmpPath($test, 'round_trip.hhas')) .

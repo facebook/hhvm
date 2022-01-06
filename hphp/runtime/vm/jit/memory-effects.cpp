@@ -427,15 +427,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case GenericRetDecRefs:
     /*
-     * The may-store information here is AUnknown: even though we know it
-     * doesn't really "store" to the frame locals, the values that used to be
-     * there are no longer available because they are DecRef'd, which we are
-     * required to report as may-store information to make it visible to
-     * reference count optimizations.  It's conceptually the same as if it was
-     * storing an Uninit over each of the locals, but the stores of uninits
+     * The may-store information here is ALocalAny: even though we
+     * know it doesn't really "store" to the frame locals, the values
+     * that used to be there are no longer available because they are
+     * DecRef'd, which we are required to report as may-store
+     * information to make it visible to reference count
+     * optimizations.  It's conceptually the same as if it was storing
+     * an Uninit over each of the locals, but the stores of uninits
      * would be dead so we're not actually doing that.
      */
-    return may_load_store_kill(AUnknown, AUnknown, AMIStateAny);
+    return may_load_store_kill(
+      ALocalAny | AHeapAny,
+      ALocalAny | AHeapAny,
+      AMIStateAny
+    );
 
   case EndCatch: {
     auto const stack_kills = stack_below(inst.extra<EndCatch>()->offset);

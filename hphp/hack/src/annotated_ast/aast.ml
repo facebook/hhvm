@@ -233,7 +233,7 @@ and ('ex, 'en) class_id_ =
   | CIexpr of ('ex, 'en) expr
       (** Dynamic class name.
 
-          TODO: Syntactically this can only be an Lvar/This/Lplacehodller.
+          TODO: Syntactically this can only be an Lvar/This/Lplaceholder.
           We should use lid rather than expr.
 
           // Assume $d has type dynamic.
@@ -507,7 +507,8 @@ and ('ex, 'en) expr_ =
 
           !$foo
           -$foo
-          +$foo *)
+          +$foo
+          $foo++ *)
   | Binop of Ast_defs.bop * ('ex, 'en) expr * ('ex, 'en) expr
       (** Binary operator.
 

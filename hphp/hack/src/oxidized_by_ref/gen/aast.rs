@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b9697c0d15efe221081da8d95b301df6>>
+// @generated SignedSource<<9e1d0c68a8a6ba2e3ca8bfe58c1783f1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -384,7 +384,7 @@ pub enum ClassId_<'a, Ex, En> {
     CIstatic,
     /// Dynamic class name.
     ///
-    /// TODO: Syntactically this can only be an Lvar/This/Lplacehodller.
+    /// TODO: Syntactically this can only be an Lvar/This/Lplaceholder.
     /// We should use lid rather than expr.
     ///
     /// // Assume $d has type dynamic.
@@ -828,6 +828,7 @@ pub enum Expr_<'a, Ex, En> {
     /// !$foo
     /// -$foo
     /// +$foo
+    /// $foo++
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Unop(&'a (oxidized::ast_defs::Uop, &'a Expr<'a, Ex, En>)),
     /// Binary operator.

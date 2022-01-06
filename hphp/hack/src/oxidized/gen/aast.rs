@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6af001564a2a6cadd5e5a124f78e7242>>
+// @generated SignedSource<<47089c7635715d1c97d87abd688e7b3b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -721,10 +721,6 @@ pub enum Expr_<Ex, En> {
             Ex,
         )>,
     ),
-    /// Record literal.
-    ///
-    /// MyRecord['x' => $foo, 'y' => $bar]
-    Record(Box<(Sid, Vec<(Expr<Ex, En>, Expr<Ex, En>)>)>),
     /// PHP-style lambda. Does not capture variables unless explicitly
     /// specified.
     ///
@@ -1759,36 +1755,6 @@ pub struct Gconst<Ex, En> {
     ToOcamlRep
 )]
 #[repr(C)]
-pub struct RecordDef<Ex, En> {
-    pub annotation: En,
-    pub name: Sid,
-    pub extends: Option<RecordHint>,
-    pub abstract_: bool,
-    pub fields: Vec<(Sid, Hint, Option<Expr<Ex, En>>)>,
-    pub user_attributes: Vec<UserAttribute<Ex, En>>,
-    pub namespace: Nsenv,
-    pub span: Pos,
-    pub doc_comment: Option<DocComment>,
-    pub emit_id: Option<EmitId>,
-}
-
-pub type RecordHint = Hint;
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
 pub struct FunDef<Ex, En> {
     pub namespace: Nsenv,
     pub file_attributes: Vec<FileAttribute<Ex, En>>,
@@ -1814,7 +1780,6 @@ pub struct FunDef<Ex, En> {
 pub enum Def<Ex, En> {
     Fun(Box<FunDef<Ex, En>>),
     Class(Box<Class_<Ex, En>>),
-    RecordDef(Box<RecordDef<Ex, En>>),
     Stmt(Box<Stmt<Ex, En>>),
     Typedef(Box<Typedef<Ex, En>>),
     Constant(Box<Gconst<Ex, En>>),

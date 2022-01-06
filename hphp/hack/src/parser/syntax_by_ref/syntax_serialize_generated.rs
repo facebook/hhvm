@@ -170,29 +170,6 @@ ss.serialize_field("enum_class_enumerator_initializer", &self.with(initializer))
 ss.serialize_field("enum_class_enumerator_semicolon", &self.with(semicolon))?;
       ss.end()
 } 
-SyntaxVariant::RecordDeclaration (RecordDeclarationChildren{attribute_spec,modifier,keyword,name,extends_keyword,extends_opt,left_brace,fields,right_brace} ) => {
-      let mut ss = s.serialize_struct("", 10)?;
-      ss.serialize_field("kind", "record_declaration")?;
-      ss.serialize_field("record_attribute_spec", &self.with(attribute_spec))?;
-ss.serialize_field("record_modifier", &self.with(modifier))?;
-ss.serialize_field("record_keyword", &self.with(keyword))?;
-ss.serialize_field("record_name", &self.with(name))?;
-ss.serialize_field("record_extends_keyword", &self.with(extends_keyword))?;
-ss.serialize_field("record_extends_opt", &self.with(extends_opt))?;
-ss.serialize_field("record_left_brace", &self.with(left_brace))?;
-ss.serialize_field("record_fields", &self.with(fields))?;
-ss.serialize_field("record_right_brace", &self.with(right_brace))?;
-      ss.end()
-} 
-SyntaxVariant::RecordField (RecordFieldChildren{type_,name,init,semi} ) => {
-      let mut ss = s.serialize_struct("", 5)?;
-      ss.serialize_field("kind", "record_field")?;
-      ss.serialize_field("record_field_type", &self.with(type_))?;
-ss.serialize_field("record_field_name", &self.with(name))?;
-ss.serialize_field("record_field_init", &self.with(init))?;
-ss.serialize_field("record_field_semi", &self.with(semi))?;
-      ss.end()
-} 
 SyntaxVariant::AliasDeclaration (AliasDeclarationChildren{attribute_spec,keyword,name,generic_parameter,constraint,equal,type_,semicolon} ) => {
       let mut ss = s.serialize_struct("", 9)?;
       ss.serialize_field("kind", "alias_declaration")?;
@@ -1081,15 +1058,6 @@ SyntaxVariant::ConstructorCall (ConstructorCallChildren{type_,left_paren,argumen
 ss.serialize_field("constructor_call_left_paren", &self.with(left_paren))?;
 ss.serialize_field("constructor_call_argument_list", &self.with(argument_list))?;
 ss.serialize_field("constructor_call_right_paren", &self.with(right_paren))?;
-      ss.end()
-} 
-SyntaxVariant::RecordCreationExpression (RecordCreationExpressionChildren{type_,left_bracket,members,right_bracket} ) => {
-      let mut ss = s.serialize_struct("", 5)?;
-      ss.serialize_field("kind", "record_creation_expression")?;
-      ss.serialize_field("record_creation_type", &self.with(type_))?;
-ss.serialize_field("record_creation_left_bracket", &self.with(left_bracket))?;
-ss.serialize_field("record_creation_members", &self.with(members))?;
-ss.serialize_field("record_creation_right_bracket", &self.with(right_bracket))?;
       ss.end()
 } 
 SyntaxVariant::DarrayIntrinsicExpression (DarrayIntrinsicExpressionChildren{keyword,explicit_type,left_bracket,members,right_bracket} ) => {

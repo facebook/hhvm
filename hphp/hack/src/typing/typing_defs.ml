@@ -125,21 +125,6 @@ type class_const = {
 }
 [@@deriving show]
 
-type record_field_req =
-  | ValueRequired
-  | HasDefaultValue
-[@@deriving show]
-
-type record_def_type = {
-  rdt_module: Ast_defs.id option;
-  rdt_name: pos_id;
-  rdt_extends: pos_id option;
-  rdt_fields: (pos_id * record_field_req) list;
-  rdt_abstract: bool;
-  rdt_pos: Pos_or_decl.t;
-}
-[@@deriving show]
-
 (** The position is that of the hint in the `use` / `implements` AST node
  * that causes a class to have this requirement applied to it. E.g.
  *

@@ -313,63 +313,6 @@ where
         }
     }
 
-    fn parse_record_field(&mut self) -> S::R {
-        // SPEC
-        //  record_field:
-        //    type-specifier name (= expression)? ;
-        let field_type = self.parse_type_specifier(false, true);
-        let name = self.require_name_allow_non_reserved();
-        let init = self.parse_simple_initializer_opt();
-        let semi = self.require_semicolon();
-        S!(make_record_field, self, field_type, name, init, semi)
-    }
-
-    fn parse_record_fields(&mut self) -> S::R {
-        // SPEC
-        //  record-list:
-        //    record-field
-        //    record-list record-field
-        self.parse_terminated_list(|x| x.parse_record_field(), TokenKind::RightBrace)
-    }
-
-    fn parse_single_extends_opt(&mut self) -> (S::R, S::R) {
-        let token_kind = self.peek_token_kind();
-        if token_kind != TokenKind::Extends {
-            let missing1 = S!(make_missing, self, self.pos());
-            let missing2 = S!(make_missing, self, self.pos());
-            (missing1, missing2)
-        } else {
-            let token = self.next_token();
-            let extends_token = S!(make_token, self, token);
-            let extends_type = self.parse_type_specifier(false, false);
-            (extends_token, extends_type)
-        }
-    }
-
-    fn parse_record_declaration(&mut self, attrs: S::R) -> S::R {
-        // record-declaration:
-        //   abstract? record name extends-single? { record-list }
-        let abstract_ = self.optional_token(TokenKind::Abstract);
-        let record = self.require_token(TokenKind::RecordDec, Errors::error1037);
-        let name = self.require_name();
-        let (record_extends, record_extends_type) = self.parse_single_extends_opt();
-        let (left_brace, record_fields, right_brace) =
-            self.parse_braced_list(|x| x.parse_record_fields());
-        S!(
-            make_record_declaration,
-            self,
-            attrs,
-            abstract_,
-            record,
-            name,
-            record_extends,
-            record_extends_type,
-            left_brace,
-            record_fields,
-            right_brace
-        )
-    }
-
     pub fn parse_leading_markup_section(&mut self) -> Option<S::R> {
         let mut parser1 = self.clone();
         let (markup_section, has_suffix) =
@@ -764,9 +707,7 @@ where
                 let list_item = S!(make_list_item, self, item, comma);
                 (list_item, is_missing)
             }
-            TokenKind::Enum | TokenKind::RecordDec | TokenKind::Shape
-                if self.env.hhvm_compat_mode =>
-            {
+            TokenKind::Enum | TokenKind::Shape if self.env.hhvm_compat_mode => {
                 // HHVM allows these keywords here for some reason
                 let item = self.parse_simple_type_or_type_constant();
                 let comma = self.optional_token(TokenKind::Comma);
@@ -2549,10 +2490,6 @@ where
                 let missing_mod = S!(make_missing, self, self.pos());
                 self.parse_enum_or_enum_class_declaration(missing_attr, missing_mod)
             }
-            TokenKind::RecordDec => {
-                let missing = S!(make_missing, self, self.pos());
-                self.parse_record_declaration(missing)
-            }
             // The keyword namespace before a name should be parsed as
             // "the current namespace we are in", essentially a no op.
             // example:
@@ -2569,10 +2506,7 @@ where
             }
             TokenKind::Abstract | TokenKind::Final | TokenKind::XHP => {
                 let missing = S!(make_missing, self, self.pos());
-                match parser1.peek_token_kind() {
-                    TokenKind::RecordDec => self.parse_record_declaration(missing),
-                    _ => self.parse_classish_declaration(missing),
-                }
+                self.parse_classish_declaration(missing)
             }
             TokenKind::Async | TokenKind::Function => {
                 self.with_statement_parser(|p: &mut StatementParser<'a, S>| {

@@ -193,7 +193,6 @@ module FileInfoTable = struct
         CLASSES TEXT,
         CONSTS TEXT,
         FUNS TEXT,
-        RECS TEXT,
         TYPEDEFS TEXT
       );
       "
@@ -217,10 +216,9 @@ module FileInfoTable = struct
           CLASSES,
           CONSTS,
           FUNS,
-          RECS,
           TYPEDEFS
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
       "
       table_name
 
@@ -248,7 +246,7 @@ module FileInfoTable = struct
     Printf.sprintf
       "
         SELECT
-          TYPE_CHECKER_MODE, DECL_HASH, CLASSES, CONSTS, FUNS, RECS, TYPEDEFS
+          TYPE_CHECKER_MODE, DECL_HASH, CLASSES, CONSTS, FUNS, TYPEDEFS
         FROM %s
         WHERE PATH_PREFIX_TYPE = ? AND PATH_SUFFIX = ?;
       "
@@ -265,7 +263,6 @@ module FileInfoTable = struct
           CLASSES,
           CONSTS,
           FUNS,
-          RECS,
           TYPEDEFS
         FROM %s
         ORDER BY PATH_PREFIX_TYPE, PATH_SUFFIX;
@@ -293,7 +290,6 @@ module FileInfoTable = struct
       ~(classes : FileInfo.id list)
       ~(consts : FileInfo.id list)
       ~(funs : FileInfo.id list)
-      ~(recs : FileInfo.id list)
       ~(typedefs : FileInfo.id list) =
     let prefix_type =
       Sqlite3.Data.INT
@@ -333,8 +329,7 @@ module FileInfoTable = struct
     Sqlite3.bind insert_stmt 5 (names_to_data_type classes) |> check_rc db;
     Sqlite3.bind insert_stmt 6 (names_to_data_type consts) |> check_rc db;
     Sqlite3.bind insert_stmt 7 (names_to_data_type funs) |> check_rc db;
-    Sqlite3.bind insert_stmt 8 (names_to_data_type recs) |> check_rc db;
-    Sqlite3.bind insert_stmt 9 (names_to_data_type typedefs) |> check_rc db;
+    Sqlite3.bind insert_stmt 8 (names_to_data_type typedefs) |> check_rc db;
     Sqlite3.step insert_stmt |> check_rc db
 
   let read_row ~stmt ~path ~base_index =
@@ -367,27 +362,13 @@ module FileInfoTable = struct
         ~value:(Sqlite3.column stmt (base_index + 4))
         ~name_type:FileInfo.Fun
     in
-    let record_defs =
-      to_ids
-        ~value:(Sqlite3.column stmt (base_index + 5))
-        ~name_type:FileInfo.RecordDef
-    in
     let typedefs =
       to_ids
-        ~value:(Sqlite3.column stmt (base_index + 6))
+        ~value:(Sqlite3.column stmt (base_index + 5))
         ~name_type:FileInfo.Typedef
     in
     FileInfo.
-      {
-        hash;
-        file_mode;
-        funs;
-        classes;
-        record_defs;
-        typedefs;
-        consts;
-        comments = None;
-      }
+      { hash; file_mode; funs; classes; typedefs; consts; comments = None }
 
   let get_file_info db stmt_cache path =
     let get_stmt = StatementCache.make_stmt stmt_cache get_sqlite in
@@ -595,7 +576,6 @@ let save_file_info db stmt_cache relative_path file_info :
     ~consts:file_info.FileInfo.consts
     ~classes:file_info.FileInfo.classes
     ~funs:file_info.FileInfo.funs
-    ~recs:file_info.FileInfo.record_defs
     ~typedefs:file_info.FileInfo.typedefs;
   let file_info_id = ref None in
   Sqlite3.exec_not_null_no_headers
@@ -664,15 +644,6 @@ let save_file_info db stmt_cache relative_path file_info :
       ~f:
         (insert
            ~name_kind:Naming_types.(Type_kind TTypedef)
-           ~dep_ctor:(fun name -> Typing_deps.Dep.Type name))
-  in
-  let results =
-    List.fold
-      file_info.FileInfo.record_defs
-      ~init:results
-      ~f:
-        (insert
-           ~name_kind:Naming_types.(Type_kind TRecordDef)
            ~dep_ctor:(fun name -> Typing_deps.Dep.Type name))
   in
   let results =

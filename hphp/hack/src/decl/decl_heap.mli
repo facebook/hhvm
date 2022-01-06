@@ -20,8 +20,6 @@ module Fun : SharedMem.Value with type t = fun_elt
 
 module Typedef : SharedMem.Value with type t = typedef_type
 
-module RecordDef : SharedMem.Value with type t = record_def_type
-
 module GConst : SharedMem.Value with type t = const_decl
 
 module Property : SharedMem.Value with type t = decl_ty
@@ -48,13 +46,6 @@ module Classes :
       SharedMem.HeapWithLocalCache
         (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
         (Class)
-        (Capacity)
-
-module RecordDefs :
-    module type of
-      SharedMem.HeapWithLocalCache
-        (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
-        (RecordDef)
         (Capacity)
 
 module Typedefs :

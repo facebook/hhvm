@@ -19,8 +19,6 @@ val rpc_get_class : t -> string -> Shallow_decl_defs.shallow_class option
 
 val rpc_get_typedef : t -> string -> Typing_defs.typedef_type option
 
-val rpc_get_record_def : t -> string -> Typing_defs.record_def_type option
-
 val rpc_get_gconst : t -> string -> Typing_defs.const_decl option
 
 val rpc_get_gconst_path :

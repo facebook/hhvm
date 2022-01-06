@@ -192,15 +192,8 @@ let compute_comments ~(popt : ParserOptions.t) ~(entry : Provider_context.entry)
 let compute_file_info
     ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) : FileInfo.t =
   let ast = compute_ast ~popt ~entry in
-  let (funs, classes, record_defs, typedefs, consts) = Nast.get_defs ast in
-  {
-    FileInfo.empty_t with
-    FileInfo.funs;
-    classes;
-    record_defs;
-    typedefs;
-    consts;
-  }
+  let (funs, classes, _, typedefs, consts) = Nast.get_defs ast in
+  { FileInfo.empty_t with FileInfo.funs; classes; typedefs; consts }
 
 let get_ast_with_error ?(full = false) ctx path =
   Counters.count Counters.Category.Get_ast @@ fun () ->
@@ -282,11 +275,6 @@ let find_class_impl (def : Nast.def) : (Nast.class_ * string) option =
   | Aast.Class c -> Some (c, snd c.Aast.c_name)
   | _ -> None
 
-let find_record_def_impl def =
-  match def with
-  | Aast.RecordDef rd -> Some (rd, snd rd.Aast.rd_name)
-  | _ -> None
-
 let find_fun_impl def =
   match def with
   | Aast.Fun f -> Some (f, snd f.Aast.fd_fun.Aast.f_name)
@@ -311,12 +299,6 @@ let find_class_in_file ?(full = false) ctx file_name name =
 
 let find_iclass_in_file ctx file_name iname =
   get_def ctx file_name find_class_impl (iequal iname)
-
-let find_record_def_in_file ?(full = false) ctx file_name name =
-  get_def ~full ctx file_name find_record_def_impl (String.equal name)
-
-let find_irecord_def_in_file ctx file_name iname =
-  get_def ctx file_name find_record_def_impl (iequal iname)
 
 let find_fun_in_file ?(full = false) ctx file_name name =
   get_def ~full ctx file_name find_fun_impl (String.equal name)

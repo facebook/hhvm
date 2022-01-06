@@ -38,12 +38,6 @@ module Fun = struct
   let description = "Decl_Fun"
 end
 
-module RecordDef = struct
-  type t = Typing_defs.record_def_type
-
-  let description = "Decl_RecordDef"
-end
-
 module Typedef = struct
   type t = Typing_defs.typedef_type
 
@@ -83,11 +77,6 @@ module Classes = struct
       add class_name decl
 end
 
-module RecordDefs =
-  SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
-    (RecordDef)
-    (Capacity)
 module Typedefs =
   SharedMem.HeapWithLocalCache
     (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)

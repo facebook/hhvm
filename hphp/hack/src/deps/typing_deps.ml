@@ -562,7 +562,6 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
   let {
     FileInfo.funs;
     classes;
-    record_defs;
     typedefs;
     consts;
     comments = _;
@@ -598,16 +597,6 @@ let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =
         begin
           fun acc (_, class_id, _) ->
           Dep.make (Dep.Type class_id) :: acc
-        end
-      ~init:defs
-  in
-  let defs =
-    List.fold_left
-      record_defs
-      ~f:
-        begin
-          fun acc (_, type_id, _) ->
-          Dep.make (Dep.Type type_id) :: acc
         end
       ~init:defs
   in

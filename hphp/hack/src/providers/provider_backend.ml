@@ -24,7 +24,6 @@ module Decl_cache_entry = struct
   type _ t =
     | Fun_decl : string -> Typing_defs.fun_elt t
     | Class_decl : string -> Obj.t t
-    | Record_decl : string -> Typing_defs.record_def_type t
     | Typedef_decl : string -> Typing_defs.typedef_type t
     | Gconst_decl : string -> Typing_defs.const_decl t
 
@@ -39,7 +38,6 @@ module Decl_cache_entry = struct
     match key with
     | Fun_decl s -> "FunDecl" ^ s
     | Class_decl s -> "ClassDecl" ^ s
-    | Record_decl s -> "RecordDecl" ^ s
     | Typedef_decl s -> "TypedefDecl" ^ s
     | Gconst_decl s -> "GconstDecl" ^ s
 end

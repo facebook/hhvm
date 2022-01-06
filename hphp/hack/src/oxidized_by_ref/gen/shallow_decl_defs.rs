@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b87a8a806c2e11b4eeaf2b4521ecfb05>>
+// @generated SignedSource<<64c470b540387fc4f48702c2862fce66>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -220,8 +220,6 @@ pub type FunDecl<'a> = FunElt<'a>;
 
 pub type ClassDecl<'a> = ShallowClass<'a>;
 
-pub type RecordDecl<'a> = RecordDefType<'a>;
-
 pub type TypedefDecl<'a> = TypedefType<'a>;
 
 #[derive(
@@ -246,8 +244,6 @@ pub enum Decl<'a> {
     Class(&'a ClassDecl<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Fun(&'a FunDecl<'a>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Record(&'a RecordDecl<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Typedef(&'a TypedefDecl<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

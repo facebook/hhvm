@@ -314,26 +314,6 @@ let summarize_class class_ ~no_children =
     docblock = None;
   }
 
-let summarize_record_decl rd =
-  let kind = SymbolDefinition.RecordDef in
-  let name = Utils.strip_ns (snd rd.rd_name) in
-  let id = get_symbol_id kind None name in
-  let full_name = get_full_name None name in
-  let pos = fst rd.rd_name in
-  let span = rd.rd_span in
-  {
-    kind;
-    name;
-    full_name;
-    id;
-    pos;
-    span;
-    modifiers = [];
-    children = None;
-    params = None;
-    docblock = None;
-  }
-
 let summarize_typedef tdef =
   let kind = SymbolDefinition.Typedef in
   let name = Utils.strip_ns (snd tdef.t_name) in

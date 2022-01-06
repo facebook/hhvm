@@ -66,7 +66,7 @@ impl From<NameType> for DepType {
         match name_type {
             NameType::Fun => DepType::Fun,
             NameType::Const => DepType::GConst,
-            NameType::Class | NameType::RecordDef | NameType::Typedef => DepType::Type,
+            NameType::Class | NameType::Typedef => DepType::Type,
         }
     }
 }

@@ -14,7 +14,6 @@ module SN = Naming_special_names
 type elaborate_kind =
   | ElaborateFun
   | ElaborateClass
-  | ElaborateRecord
   | ElaborateConst
 
 let elaborate_into_ns ns_name id =
@@ -90,7 +89,6 @@ let elaborate_raw_id nsenv kind id =
           | ElaborateClass -> nsenv.ns_class_uses
           | ElaborateFun -> nsenv.ns_fun_uses
           | ElaborateConst -> nsenv.ns_const_uses
-          | ElaborateRecord -> nsenv.ns_record_def_uses
         in
         (match SMap.find_opt prefix uses with
         | Some use -> Utils.add_ns (use ^ String_utils.lstrip id prefix)

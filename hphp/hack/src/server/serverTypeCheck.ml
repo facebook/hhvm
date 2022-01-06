@@ -121,7 +121,6 @@ let remove_decls env fast_parsed =
           {
             FileInfo.funs;
             classes;
-            record_defs;
             typedefs;
             consts;
             file_mode = _;
@@ -134,7 +133,6 @@ let remove_decls env fast_parsed =
           ~backend:(Provider_backend.get ())
           ~funs:(List.map funs ~f:snd)
           ~classes:(List.map classes ~f:snd)
-          ~record_defs:(List.map record_defs ~f:snd)
           ~typedefs:(List.map typedefs ~f:snd)
           ~consts:(List.map consts ~f:snd))
 

@@ -1,66 +1,66 @@
 [(Class
-    { c_span = [4:3-13:4]; c_annotation = (); c_mode = Mstrict; c_final = false;
-      c_is_xhp = true; c_has_xhp_keyword = false; c_kind = (Cclass Concrete);
-      c_name = ([4:9-17], "\\XhpSpread\\:element"); c_tparams = []; c_extends = [];
-      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = [];
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = [];
+    { c_span = [4:3-13:4]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = true; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+      c_name = ([4:9-17], "\\XhpSpread\\:element"); c_tparams = []; c_extends = []; 
+      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
       c_consts = []; c_typeconsts = [];
       c_vars =
-      [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false;
+      [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; cv_readonly = false; 
          cv_visibility = Public; cv_type = ((dict<string, dynamic>), (Some ([8:14-37], (Happly (([8:14-20], "\\HH\\dict"), [([8:21-27], (Hprim Tstring)); ([8:29-36], Hdynamic)])))));
-         cv_id = ([8:38-49], "attributes"); cv_expr = None; cv_user_attributes = [];
-         cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false;
+         cv_id = ([8:38-49], "attributes"); cv_expr = None; cv_user_attributes = []; 
+         cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
          cv_span = [8:38-49] };
-        { cv_final = false; cv_xhp_attr = None; cv_abstract = false;
-          cv_readonly = false; cv_visibility = Public; cv_type = ((vec<dynamic>), (Some ([9:14-29], (Happly (([9:14-20], "\\HH\\vec"), [([9:21-28], Hdynamic)])))));
-          cv_id = ([9:30-39], "children"); cv_expr = None; cv_user_attributes = [];
-          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false;
+        { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+          cv_readonly = false; cv_visibility = Public; cv_type = ((vec<dynamic>), (Some ([9:14-29], (Happly (([9:14-20], "\\HH\\vec"), [([9:21-28], Hdynamic)]))))); 
+          cv_id = ([9:30-39], "children"); cv_expr = None; cv_user_attributes = []; 
+          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
           cv_span = [9:30-39] };
-        { cv_final = false; cv_xhp_attr = None; cv_abstract = false;
-          cv_readonly = false; cv_visibility = Public; cv_type = ((string), (Some ([10:14-20], (Hprim Tstring))));
-          cv_id = ([10:21-26], "file"); cv_expr = None; cv_user_attributes = [];
-          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false;
+        { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+          cv_readonly = false; cv_visibility = Public; cv_type = ((string), (Some ([10:14-20], (Hprim Tstring)))); 
+          cv_id = ([10:21-26], "file"); cv_expr = None; cv_user_attributes = []; 
+          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
           cv_span = [10:21-26] };
-        { cv_final = false; cv_xhp_attr = None; cv_abstract = false;
-          cv_readonly = false; cv_visibility = Public; cv_type = ((int), (Some ([11:14-17], (Hprim Tint))));
-          cv_id = ([11:18-23], "line"); cv_expr = None; cv_user_attributes = [];
-          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false;
+        { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+          cv_readonly = false; cv_visibility = Public; cv_type = ((int), (Some ([11:14-17], (Hprim Tint)))); 
+          cv_id = ([11:18-23], "line"); cv_expr = None; cv_user_attributes = []; 
+          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
           cv_span = [11:18-23] };
-        { cv_final = false; cv_xhp_attr = (Some { xai_tag = None; xai_enum_values = [] });
-          cv_abstract = false; cv_readonly = false; cv_visibility = Public;
-          cv_type = ((?int), (Some ([5:15-18], (Hoption ([5:15-18], (Hprim Tint))))));
-          cv_id = ([5:19-24], ":prop1"); cv_expr = None; cv_user_attributes = [];
-          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false;
+        { cv_final = false; cv_xhp_attr = (Some { xai_tag = None; xai_enum_values = [] }); 
+          cv_abstract = false; cv_readonly = false; cv_visibility = Public; 
+          cv_type = ((?int), (Some ([5:15-18], (Hoption ([5:15-18], (Hprim Tint)))))); 
+          cv_id = ([5:19-24], ":prop1"); cv_expr = None; cv_user_attributes = []; 
+          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
           cv_span = [5:19-24] };
-        { cv_final = false; cv_xhp_attr = (Some { xai_tag = None; xai_enum_values = [] });
-          cv_abstract = false; cv_readonly = false; cv_visibility = Public;
-          cv_type = ((?int), (Some ([6:15-18], (Hoption ([6:15-18], (Hprim Tint))))));
-          cv_id = ([6:19-24], ":prop3"); cv_expr = None; cv_user_attributes = [];
-          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false;
+        { cv_final = false; cv_xhp_attr = (Some { xai_tag = None; xai_enum_values = [] }); 
+          cv_abstract = false; cv_readonly = false; cv_visibility = Public; 
+          cv_type = ((?int), (Some ([6:15-18], (Hoption ([6:15-18], (Hprim Tint)))))); 
+          cv_id = ([6:19-24], ":prop3"); cv_expr = None; cv_user_attributes = []; 
+          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
           cv_span = [6:19-24] }
         ];
       c_methods =
-      [{ m_span = [7:5-12:9]; m_annotation = (); m_final = false; m_abstract = false;
-         m_static = false; m_readonly_this = false; m_visibility = Public;
-         m_name = ([7:21-32], "__construct"); m_tparams = []; m_where_constraints = [];
+      [{ m_span = [7:5-12:9]; m_annotation = (); m_final = false; m_abstract = false; 
+         m_static = false; m_readonly_this = false; m_visibility = Public; 
+         m_name = ([7:21-32], "__construct"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
          [{ param_annotation = (dict<string, dynamic>);
-            param_type_hint = ((dict<string, dynamic>), (Some ([8:14-37], (Happly (([8:14-20], "\\HH\\dict"), [([8:21-27], (Hprim Tstring)); ([8:29-36], Hdynamic)])))));
-            param_is_variadic = false; param_pos = [8:38-49]; param_name = "$attributes";
-            param_expr = None; param_readonly = None; param_callconv = Pnormal;
+            param_type_hint = ((dict<string, dynamic>), (Some ([8:14-37], (Happly (([8:14-20], "\\HH\\dict"), [([8:21-27], (Hprim Tstring)); ([8:29-36], Hdynamic)]))))); 
+            param_is_variadic = false; param_pos = [8:38-49]; param_name = "$attributes"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = (Some Public) };
-           { param_annotation = (vec<dynamic>); param_type_hint = ((vec<dynamic>), (Some ([9:14-29], (Happly (([9:14-20], "\\HH\\vec"), [([9:21-28], Hdynamic)])))));
-             param_is_variadic = false; param_pos = [9:30-39]; param_name = "$children";
-             param_expr = None; param_readonly = None; param_callconv = Pnormal;
+           { param_annotation = (vec<dynamic>); param_type_hint = ((vec<dynamic>), (Some ([9:14-29], (Happly (([9:14-20], "\\HH\\vec"), [([9:21-28], Hdynamic)]))))); 
+             param_is_variadic = false; param_pos = [9:30-39]; param_name = "$children"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = (Some Public) };
-           { param_annotation = (string); param_type_hint = ((string), (Some ([10:14-20], (Hprim Tstring))));
-             param_is_variadic = false; param_pos = [10:21-26]; param_name = "$file";
-             param_expr = None; param_readonly = None; param_callconv = Pnormal;
+           { param_annotation = (string); param_type_hint = ((string), (Some ([10:14-20], (Hprim Tstring)))); 
+             param_is_variadic = false; param_pos = [10:21-26]; param_name = "$file"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = (Some Public) };
-           { param_annotation = (int); param_type_hint = ((int), (Some ([11:14-17], (Hprim Tint))));
-             param_is_variadic = false; param_pos = [11:18-23]; param_name = "$line";
-             param_expr = None; param_readonly = None; param_callconv = Pnormal;
+           { param_annotation = (int); param_type_hint = ((int), (Some ([11:14-17], (Hprim Tint)))); 
+             param_is_variadic = false; param_pos = [11:18-23]; param_name = "$line"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = (Some Public) }
            ];
          m_ctxs = None; m_unsafe_ctxs = None;
@@ -89,82 +89,81 @@
                      ((int), [11:18-23], (Lvar ([11:18-23], $line))))))));
              ([Pos.none], Noop)]
            };
-         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
-         m_ret = ((void), (Some ([7:21-32], (Hprim Tvoid)))); m_external = false;
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+         m_ret = ((void), (Some ([7:21-32], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
-        ns_name = (Some "XhpSpread"); ns_auto_ns_map = []; ns_is_codegen = false;
-        ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "XhpSpread"); 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
       c_doc_comment = None; c_emit_id = None });
   (Class
-     { c_span = [14:3-23:4]; c_annotation = (); c_mode = Mstrict; c_final = false;
-       c_is_xhp = true; c_has_xhp_keyword = false; c_kind = (Cclass Concrete);
-       c_name = ([14:9-18], "\\XhpSpread\\:element2"); c_tparams = [];
-       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = [];
-       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = [];
+     { c_span = [14:3-23:4]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+       c_is_xhp = true; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+       c_name = ([14:9-18], "\\XhpSpread\\:element2"); c_tparams = []; 
+       c_extends = []; c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; 
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = []; c_implements = []; 
        c_where_constraints = []; c_consts = []; c_typeconsts = [];
        c_vars =
-       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false;
+       [{ cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
           cv_readonly = false; cv_visibility = Public;
-          cv_type = ((dict<string, dynamic>), (Some ([18:14-37], (Happly (([18:14-20], "\\HH\\dict"), [([18:21-27], (Hprim Tstring)); ([18:29-36], Hdynamic)])))));
-          cv_id = ([18:38-49], "attributes"); cv_expr = None; cv_user_attributes = [];
-          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false;
+          cv_type = ((dict<string, dynamic>), (Some ([18:14-37], (Happly (([18:14-20], "\\HH\\dict"), [([18:21-27], (Hprim Tstring)); ([18:29-36], Hdynamic)]))))); 
+          cv_id = ([18:38-49], "attributes"); cv_expr = None; cv_user_attributes = []; 
+          cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
           cv_span = [18:38-49] };
-         { cv_final = false; cv_xhp_attr = None; cv_abstract = false;
+         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
            cv_readonly = false; cv_visibility = Public; cv_type = ((vec<dynamic>), (Some ([19:14-29], (Happly (([19:14-20], "\\HH\\vec"), [([19:21-28], Hdynamic)])))));
-           cv_id = ([19:30-39], "children"); cv_expr = None; cv_user_attributes = [];
-           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false;
+           cv_id = ([19:30-39], "children"); cv_expr = None; cv_user_attributes = []; 
+           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
            cv_span = [19:30-39] };
-         { cv_final = false; cv_xhp_attr = None; cv_abstract = false;
-           cv_readonly = false; cv_visibility = Public; cv_type = ((string), (Some ([20:14-20], (Hprim Tstring))));
-           cv_id = ([20:21-26], "file"); cv_expr = None; cv_user_attributes = [];
-           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false;
+         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+           cv_readonly = false; cv_visibility = Public; cv_type = ((string), (Some ([20:14-20], (Hprim Tstring)))); 
+           cv_id = ([20:21-26], "file"); cv_expr = None; cv_user_attributes = []; 
+           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
            cv_span = [20:21-26] };
-         { cv_final = false; cv_xhp_attr = None; cv_abstract = false;
-           cv_readonly = false; cv_visibility = Public; cv_type = ((int), (Some ([21:14-17], (Hprim Tint))));
-           cv_id = ([21:18-23], "line"); cv_expr = None; cv_user_attributes = [];
-           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false;
+         { cv_final = false; cv_xhp_attr = None; cv_abstract = false; 
+           cv_readonly = false; cv_visibility = Public; cv_type = ((int), (Some ([21:14-17], (Hprim Tint)))); 
+           cv_id = ([21:18-23], "line"); cv_expr = None; cv_user_attributes = []; 
+           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
            cv_span = [21:18-23] };
-         { cv_final = false; cv_xhp_attr = (Some { xai_tag = None; xai_enum_values = [] });
-           cv_abstract = false; cv_readonly = false; cv_visibility = Public;
-           cv_type = ((?string), (Some ([15:15-21], (Hoption ([15:15-21], (Hprim Tstring))))));
-           cv_id = ([15:22-27], ":prop1"); cv_expr = None; cv_user_attributes = [];
-           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false;
+         { cv_final = false; cv_xhp_attr = (Some { xai_tag = None; xai_enum_values = [] }); 
+           cv_abstract = false; cv_readonly = false; cv_visibility = Public; 
+           cv_type = ((?string), (Some ([15:15-21], (Hoption ([15:15-21], (Hprim Tstring)))))); 
+           cv_id = ([15:22-27], ":prop1"); cv_expr = None; cv_user_attributes = []; 
+           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
            cv_span = [15:22-27] };
-         { cv_final = false; cv_xhp_attr = (Some { xai_tag = None; xai_enum_values = [] });
-           cv_abstract = false; cv_readonly = false; cv_visibility = Public;
-           cv_type = ((?int), (Some ([16:15-18], (Hoption ([16:15-18], (Hprim Tint))))));
-           cv_id = ([16:19-24], ":prop2"); cv_expr = None; cv_user_attributes = [];
-           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false;
+         { cv_final = false; cv_xhp_attr = (Some { xai_tag = None; xai_enum_values = [] }); 
+           cv_abstract = false; cv_readonly = false; cv_visibility = Public; 
+           cv_type = ((?int), (Some ([16:15-18], (Hoption ([16:15-18], (Hprim Tint)))))); 
+           cv_id = ([16:19-24], ":prop2"); cv_expr = None; cv_user_attributes = []; 
+           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
            cv_span = [16:19-24] }
          ];
        c_methods =
-       [{ m_span = [17:5-22:9]; m_annotation = (); m_final = false; m_abstract = false;
-          m_static = false; m_readonly_this = false; m_visibility = Public;
-          m_name = ([17:21-32], "__construct"); m_tparams = []; m_where_constraints = [];
+       [{ m_span = [17:5-22:9]; m_annotation = (); m_final = false; m_abstract = false; 
+          m_static = false; m_readonly_this = false; m_visibility = Public; 
+          m_name = ([17:21-32], "__construct"); m_tparams = []; m_where_constraints = []; 
           m_variadic = FVnonVariadic;
           m_params =
           [{ param_annotation = (dict<string, dynamic>);
              param_type_hint = ((dict<string, dynamic>), (Some ([18:14-37], (Happly (([18:14-20], "\\HH\\dict"), [([18:21-27], (Hprim Tstring)); ([18:29-36], Hdynamic)])))));
-             param_is_variadic = false; param_pos = [18:38-49]; param_name = "$attributes";
-             param_expr = None; param_readonly = None; param_callconv = Pnormal;
+             param_is_variadic = false; param_pos = [18:38-49]; param_name = "$attributes"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
              param_user_attributes = []; param_visibility = (Some Public) };
-            { param_annotation = (vec<dynamic>); param_type_hint = ((vec<dynamic>), (Some ([19:14-29], (Happly (([19:14-20], "\\HH\\vec"), [([19:21-28], Hdynamic)])))));
-              param_is_variadic = false; param_pos = [19:30-39]; param_name = "$children";
-              param_expr = None; param_readonly = None; param_callconv = Pnormal;
+            { param_annotation = (vec<dynamic>); param_type_hint = ((vec<dynamic>), (Some ([19:14-29], (Happly (([19:14-20], "\\HH\\vec"), [([19:21-28], Hdynamic)]))))); 
+              param_is_variadic = false; param_pos = [19:30-39]; param_name = "$children"; 
+              param_expr = None; param_readonly = None; param_callconv = Pnormal; 
               param_user_attributes = []; param_visibility = (Some Public) };
-            { param_annotation = (string); param_type_hint = ((string), (Some ([20:14-20], (Hprim Tstring))));
-              param_is_variadic = false; param_pos = [20:21-26]; param_name = "$file";
-              param_expr = None; param_readonly = None; param_callconv = Pnormal;
+            { param_annotation = (string); param_type_hint = ((string), (Some ([20:14-20], (Hprim Tstring)))); 
+              param_is_variadic = false; param_pos = [20:21-26]; param_name = "$file"; 
+              param_expr = None; param_readonly = None; param_callconv = Pnormal; 
               param_user_attributes = []; param_visibility = (Some Public) };
-            { param_annotation = (int); param_type_hint = ((int), (Some ([21:14-17], (Hprim Tint))));
-              param_is_variadic = false; param_pos = [21:18-23]; param_name = "$line";
-              param_expr = None; param_readonly = None; param_callconv = Pnormal;
+            { param_annotation = (int); param_type_hint = ((int), (Some ([21:14-17], (Hprim Tint)))); 
+              param_is_variadic = false; param_pos = [21:18-23]; param_name = "$line"; 
+              param_expr = None; param_readonly = None; param_callconv = Pnormal; 
               param_user_attributes = []; param_visibility = (Some Public) }
             ];
           m_ctxs = None; m_unsafe_ctxs = None;
@@ -193,34 +192,32 @@
                       ((int), [21:18-23], (Lvar ([21:18-23], $line))))))));
               ([Pos.none], Noop)]
             };
-          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
-          m_ret = ((void), (Some ([17:21-32], (Hprim Tvoid)))); m_external = false;
+          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+          m_ret = ((void), (Some ([17:21-32], (Hprim Tvoid)))); m_external = false; 
           m_doc_comment = None }
          ];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
-         ns_name = (Some "XhpSpread"); ns_auto_ns_map = []; ns_is_codegen = false;
-         ns_disable_xhp_element_mangling = false };
-       c_user_attributes = []; c_file_attributes = []; c_enum = None;
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "XhpSpread"); 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+       c_user_attributes = []; c_file_attributes = []; c_enum = None; 
        c_doc_comment = None; c_emit_id = None });
   (Fun
      { fd_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
-         ns_name = (Some "XhpSpread"); ns_auto_ns_map = []; ns_is_codegen = false;
-         ns_disable_xhp_element_mangling = false };
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = (Some "XhpSpread"); 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
-       { f_span = [25:3-28:4]; f_readonly_this = None; f_annotation = ();
-         f_readonly_ret = None; f_ret = ((void), (Some ([25:52-56], (Hprim Tvoid))));
-         f_name = ([25:12-32], "\\XhpSpread\\xhp_spread_attribute");
+       { f_span = [25:3-28:4]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([25:52-56], (Hprim Tvoid)))); 
+         f_name = ([25:12-32], "\\XhpSpread\\xhp_spread_attribute"); 
          f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = (XhpSpread\:element2); param_type_hint = ((XhpSpread\:element2), (Some ([25:33-42], (Happly (([25:33-42], "\\XhpSpread\\:element2"), [])))));
-            param_is_variadic = false; param_pos = [25:43-49]; param_name = "$props";
-            param_expr = None; param_readonly = None; param_callconv = Pnormal;
+         [{ param_annotation = (XhpSpread\:element2); param_type_hint = ((XhpSpread\:element2), (Some ([25:33-42], (Happly (([25:33-42], "\\XhpSpread\\:element2"), []))))); 
+            param_is_variadic = false; param_pos = [25:43-49]; param_name = "$props"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -232,11 +229,11 @@
                  (Binop ((Eq None), ((XhpSpread\:element), [27:5-10], (Lvar ([27:5-10], $elem))),
                     ((XhpSpread\:element), [27:13-36],
                      (Xml (([27:14-21], "\\XhpSpread\\:element"),
-                        [(Xhp_spread ((XhpSpread\:element2), [27:26-32], (Hole (((XhpSpread\:element2), [27:26-32], (Lvar ([27:26-32], $props))), (XhpSpread\:element2), (nothing), Typing))))],
+                        [(Xhp_spread ((XhpSpread\:element2), [27:26-32], (Hole (((XhpSpread\:element2), [27:26-32], (Lvar ([27:26-32], $props))), (XhpSpread\:element2), (nothing), Typing))))], 
                         [])))
                     )))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

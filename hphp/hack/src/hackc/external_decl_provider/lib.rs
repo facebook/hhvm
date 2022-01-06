@@ -82,7 +82,6 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
             NameType::Typedef => 3, // HPHP::AutoloadMap::KindOf::TypeAlias
             NameType::Fun => 1,     // HPHP::AutoloadMap::KindOf::Function
             NameType::Const => 2,   // HPHP::AutoloadMap::KindOf::Constant
-            NameType::RecordDef => panic!("RecordDef is not a valid HPHP::AutoloadMap::KindOf"),
         };
         let symbol_ptr = std::ffi::CString::new(symbol).unwrap();
         match unsafe { self.0(self.1, code, symbol_ptr.as_c_str().as_ptr()) } {

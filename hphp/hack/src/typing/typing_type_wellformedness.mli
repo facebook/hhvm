@@ -28,8 +28,6 @@ val typedef : Typing_env_types.env -> Nast.typedef -> unit
 
 val global_constant : Typing_env_types.env -> Nast.gconst -> unit
 
-val record_def : Typing_env_types.env -> Nast.record_def -> unit
-
 (** Check type wellformedness of any hint appearing in this
     expression, e.g. parameter type hints of lambda expressions,
     hints in `is` and `as` expressions, etc. *)

@@ -76,14 +76,13 @@ let lint ctx fn content =
   Errors.ignore_ (fun () ->
       let parser_return = parse_and_lint fn content ctx in
       let { Parser_return.file_mode; comments; ast; _ } = parser_return in
-      let (funs, classes, record_defs, typedefs, consts) = Nast.get_defs ast in
+      let (funs, classes, _, typedefs, consts) = Nast.get_defs ast in
       (* naming and typing currently don't produce any lint errors *)
       let fi =
         {
           FileInfo.file_mode;
           funs;
           classes;
-          record_defs;
           typedefs;
           consts;
           comments = Some comments;

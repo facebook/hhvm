@@ -592,7 +592,6 @@ let check =
       | (_, _, Method_id _)
       | (_, _, FunctionPointer _)
       | (_, _, Lfun _)
-      | (_, _, Record _)
       | (_, _, Null)
       | (_, _, True)
       | (_, _, False)

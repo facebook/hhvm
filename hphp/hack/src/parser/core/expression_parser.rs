@@ -2214,13 +2214,7 @@ where
                     name
                 }
             }
-            TokenKind::LeftBracket => {
-                if self.peek_token_kind_with_lookahead(2) == TokenKind::EqualGreaterThan {
-                    self.parse_record_creation_expression(name)
-                } else {
-                    name
-                }
-            }
+            TokenKind::LeftBracket => name,
             TokenKind::Backtick => {
                 if self.in_expression_tree() {
                     // If we see Foo` whilst parsing an expression tree
@@ -2247,32 +2241,6 @@ where
             }
             _ => name,
         }
-    }
-
-    fn parse_record_creation_expression(&mut self, name: S::R) -> S::R {
-        // SPEC
-        // record-creation:
-        //   record-name [ record-field-initializer-list ]
-        // record-fileld-initilizer-list:
-        //   record-field-initilizer
-        //   record-field-initializer-list, record-field-initializer
-        // record-field-initializer:
-        //   field-name => expression
-        let left_bracket = self.assert_token(TokenKind::LeftBracket);
-        let members = self.parse_comma_list_opt_allow_trailing(
-            TokenKind::RightBracket,
-            Errors::error1015,
-            |x| x.parse_keyed_element_initializer(),
-        );
-        let right_bracket = self.require_right_bracket();
-        S!(
-            make_record_creation_expression,
-            self,
-            name,
-            left_bracket,
-            members,
-            right_bracket
-        )
     }
 
     fn parse_collection_literal_expression(&mut self, name: S::R) -> S::R {

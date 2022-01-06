@@ -35,7 +35,6 @@ val remove_decls :
   backend:Provider_backend.t ->
   funs:string list ->
   classes:string list ->
-  record_defs:string list ->
   typedefs:string list ->
   consts:string list ->
   unit

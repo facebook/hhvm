@@ -36,8 +36,6 @@ type decl_store = {
   get_fun: string -> Typing_defs.fun_elt option;
   add_typedef: string -> Typing_defs.typedef_type -> unit;
   get_typedef: string -> Typing_defs.typedef_type option;
-  add_recorddef: string -> Typing_defs.record_def_type -> unit;
-  get_recorddef: string -> Typing_defs.record_def_type option;
   add_gconst: string -> Typing_defs.const_decl -> unit;
   get_gconst: string -> Typing_defs.const_decl option;
   push_local_changes: unit -> unit;
@@ -46,7 +44,6 @@ type decl_store = {
 
 let push_local_changes () : unit =
   Decl_heap.Funs.LocalChanges.push_stack ();
-  Decl_heap.RecordDefs.LocalChanges.push_stack ();
   Decl_heap.Constructors.LocalChanges.push_stack ();
   Decl_heap.Props.LocalChanges.push_stack ();
   Decl_heap.StaticProps.LocalChanges.push_stack ();
@@ -59,7 +56,6 @@ let push_local_changes () : unit =
 
 let pop_local_changes () : unit =
   Decl_heap.Funs.LocalChanges.pop_stack ();
-  Decl_heap.RecordDefs.LocalChanges.pop_stack ();
   Decl_heap.Constructors.LocalChanges.pop_stack ();
   Decl_heap.Props.LocalChanges.pop_stack ();
   Decl_heap.StaticProps.LocalChanges.pop_stack ();
@@ -89,8 +85,6 @@ let store =
       get_fun = Decl_heap.Funs.get;
       add_typedef = Decl_heap.Typedefs.add;
       get_typedef = Decl_heap.Typedefs.get;
-      add_recorddef = Decl_heap.RecordDefs.add;
-      get_recorddef = Decl_heap.RecordDefs.get;
       add_gconst = Decl_heap.GConsts.add;
       get_gconst = Decl_heap.GConsts.get;
       push_local_changes;

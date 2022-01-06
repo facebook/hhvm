@@ -1,4 +1,10 @@
+File "misspell_dict.php", line 4, characters 19-19:
+A closing square bracket `]` is expected here. (Parsing[1002])
 File "misspell_dict.php", line 4, characters 8-11:
-Unbound name: `Dict` (a record type) (Naming[2049])
+Unbound name: `Dict` (a global constant) (Naming[2049])
+File "misspell_dict.php", line 4, characters 19-20:
+Unbound name: `=>` (a global constant) (Naming[2049])
 File "misspell_dict.php", line 4, characters 8-11:
-Expected a record type, but got `Dict`. (Typing[4364])
+Unbound global constant (Typing) (Typing[4106])
+File "misspell_dict.php", line 4, characters 19-20:
+Unbound global constant (Typing) (Typing[4106])

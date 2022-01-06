@@ -24,7 +24,6 @@ let dedup_decls decls =
   Sequence.filter decls ~f:(fun decl ->
       match decl with
       | (name, Class _)
-      | (name, Record _)
       | (name, Typedef _) ->
         if String.Table.mem seen_types name then
           false
@@ -58,7 +57,6 @@ let remove_naming_conflict_losers ctx file decls =
   Sequence.filter decls ~f:(fun decl ->
       match decl with
       | (name, Class _)
-      | (name, Record _)
       | (name, Typedef _) ->
         (match Naming_provider.get_type_path ctx name with
         | Some nfile -> Relative_path.equal nfile file
@@ -95,7 +93,6 @@ let cache_decls ctx file decls =
           then
             Shallow_classes_heap.MemberFilters.add decl
         | (name, Fun decl) -> Decl_store.((get ()).add_fun name decl)
-        | (name, Record decl) -> Decl_store.((get ()).add_recorddef name decl)
         | (name, Typedef decl) -> Decl_store.((get ()).add_typedef name decl)
         | (name, Const decl) -> Decl_store.((get ()).add_gconst name decl))
   | Provider_backend.(Local_memory { decl_cache; shallow_decl_cache; _ }) ->
@@ -115,14 +112,6 @@ let cache_decls ctx file decls =
             Provider_backend.Decl_cache.find_or_add
               decl_cache
               ~key:(Provider_backend.Decl_cache_entry.Fun_decl name)
-              ~default:(fun () -> Some decl)
-          in
-          ()
-        | (name, Record decl) ->
-          let (_ : record_def_type option) =
-            Provider_backend.Decl_cache.find_or_add
-              decl_cache
-              ~key:(Provider_backend.Decl_cache_entry.Record_decl name)
               ~default:(fun () -> Some decl)
           in
           ()

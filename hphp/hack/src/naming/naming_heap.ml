@@ -187,17 +187,6 @@ module Types = struct
               path_str;
             None
         end
-      | Naming_types.TRecordDef ->
-        begin
-          match Ast_provider.find_irecord_def_in_file ctx path id with
-          | Some cls -> Some (snd cls.Aast.rd_name)
-          | None ->
-            Hh_logger.log
-              "Failed to get canonical name for %s in file %s"
-              id
-              path_str;
-            None
-        end
     in
     let db_path_opt =
       Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)

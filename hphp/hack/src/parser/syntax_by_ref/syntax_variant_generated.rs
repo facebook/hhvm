@@ -41,8 +41,6 @@ pub enum SyntaxVariant<'a, T, V> {
     Enumerator(&'a EnumeratorChildren<'a, T, V>),
     EnumClassDeclaration(&'a EnumClassDeclarationChildren<'a, T, V>),
     EnumClassEnumerator(&'a EnumClassEnumeratorChildren<'a, T, V>),
-    RecordDeclaration(&'a RecordDeclarationChildren<'a, T, V>),
-    RecordField(&'a RecordFieldChildren<'a, T, V>),
     AliasDeclaration(&'a AliasDeclarationChildren<'a, T, V>),
     ContextAliasDeclaration(&'a ContextAliasDeclarationChildren<'a, T, V>),
     PropertyDeclaration(&'a PropertyDeclarationChildren<'a, T, V>),
@@ -141,7 +139,6 @@ pub enum SyntaxVariant<'a, T, V> {
     CollectionLiteralExpression(&'a CollectionLiteralExpressionChildren<'a, T, V>),
     ObjectCreationExpression(&'a ObjectCreationExpressionChildren<'a, T, V>),
     ConstructorCall(&'a ConstructorCallChildren<'a, T, V>),
-    RecordCreationExpression(&'a RecordCreationExpressionChildren<'a, T, V>),
     DarrayIntrinsicExpression(&'a DarrayIntrinsicExpressionChildren<'a, T, V>),
     DictionaryIntrinsicExpression(&'a DictionaryIntrinsicExpressionChildren<'a, T, V>),
     KeysetIntrinsicExpression(&'a KeysetIntrinsicExpressionChildren<'a, T, V>),
@@ -310,27 +307,6 @@ pub struct EnumClassEnumeratorChildren<'a, T, V> {
     pub name: Syntax<'a, T, V>,
     pub initializer: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct RecordDeclarationChildren<'a, T, V> {
-    pub attribute_spec: Syntax<'a, T, V>,
-    pub modifier: Syntax<'a, T, V>,
-    pub keyword: Syntax<'a, T, V>,
-    pub name: Syntax<'a, T, V>,
-    pub extends_keyword: Syntax<'a, T, V>,
-    pub extends_opt: Syntax<'a, T, V>,
-    pub left_brace: Syntax<'a, T, V>,
-    pub fields: Syntax<'a, T, V>,
-    pub right_brace: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct RecordFieldChildren<'a, T, V> {
-    pub type_: Syntax<'a, T, V>,
-    pub name: Syntax<'a, T, V>,
-    pub init: Syntax<'a, T, V>,
-    pub semi: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -1123,14 +1099,6 @@ pub struct ConstructorCallChildren<'a, T, V> {
     pub left_paren: Syntax<'a, T, V>,
     pub argument_list: Syntax<'a, T, V>,
     pub right_paren: Syntax<'a, T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct RecordCreationExpressionChildren<'a, T, V> {
-    pub type_: Syntax<'a, T, V>,
-    pub left_bracket: Syntax<'a, T, V>,
-    pub members: Syntax<'a, T, V>,
-    pub right_bracket: Syntax<'a, T, V>,
 }
 
 #[derive(Debug, Clone)]

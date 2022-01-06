@@ -101,8 +101,6 @@ type t =
   | Public
   | Real
   | Reify
-  | Record
-  | RecordDec
   | Require
   | Require_once
   | Required
@@ -316,8 +314,6 @@ let from_string keyword ~only_reserved =
   | "public" -> Some Public
   | "real" when not only_reserved -> Some Real
   | "reify" when not only_reserved -> Some Reify
-  | "recordname" -> Some Record
-  | "record" -> Some RecordDec
   | "require" -> Some Require
   | "require_once" -> Some Require_once
   | "required" -> Some Required
@@ -506,8 +502,6 @@ let to_string kind =
   | Public -> "public"
   | Real -> "real"
   | Reify -> "reify"
-  | Record -> "recordname"
-  | RecordDec -> "record"
   | Require -> "require"
   | Require_once -> "require_once"
   | Required -> "required"

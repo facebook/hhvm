@@ -2108,116 +2108,6 @@ let gconst_def ctx cst =
     Aast.cst_emit_id = cst.cst_emit_id;
   }
 
-let record_field env f =
-  let (id, hint, e) = f in
-  let (p, _) = hint in
-  let (env, cty) = Phase.localize_hint_no_subst env ~ignore_errors:false hint in
-  let expected = ExpectedTy.make p Reason.URhint cty in
-  match e with
-  | Some e ->
-    let (env, te, ty) = Typing.expr_with_pure_coeffects env ~expected e in
-    let env =
-      Typing_coercion.coerce_type
-        p
-        Reason.URhint
-        env
-        ty
-        (MakeType.unenforced cty)
-        Typing_error.Callback.record_init_value_does_not_match_hint
-    in
-    (env, (id, hint, Some te))
-  | None -> (env, (id, hint, None))
-
-let record_def_parent env rd parent_hint =
-  match snd parent_hint with
-  | Aast.Happly ((parent_pos, parent_name), []) ->
-    (match Decl_provider.get_record_def (Env.get_ctx env) parent_name with
-    | Some parent_rd ->
-      (* We can only inherit from abstract records. *)
-      (if not parent_rd.rdt_abstract then
-        let (parent_pos, parent_name) = parent_rd.rdt_name in
-        Errors.add_typing_error
-          Typing_error.(
-            primary
-            @@ Primary.Extend_non_abstract_record
-                 {
-                   name = parent_name;
-                   pos = fst rd.rd_name;
-                   decl_pos = parent_pos;
-                 }));
-
-      (* Ensure we aren't defining fields that overlap with
-         inherited fields. *)
-      let inherited_fields = Typing_helpers.all_record_fields env parent_rd in
-      List.iter rd.rd_fields ~f:(fun ((pos, name), _, _) ->
-          match SMap.find_opt name inherited_fields with
-          | Some ((prev_pos, _), _) ->
-            Errors.add_nast_check_error
-            @@ Nast_check_error.Repeated_record_field_name
-                 { name; pos; prev_pos }
-          | None -> ())
-    | None ->
-      (* Something exists with this name (naming succeeded), but it's
-         not a record. *)
-      Errors.add_naming_error
-      @@ Naming_error.Unbound_name
-           {
-             pos = parent_pos;
-             name = parent_name;
-             kind = Name_context.RecordContext;
-           })
-  | _ ->
-    failwith
-      "Record parent was not an Happly. This should have been a syntax error."
-
-(* Report an error if we have inheritance cycles in record declarations. *)
-let check_record_inheritance_cycle env ((rd_pos, rd_name) : Aast.sid) : unit =
-  let rec worker name trace seen =
-    match Decl_provider.get_record_def (Env.get_ctx env) name with
-    | Some rd ->
-      (match rd.rdt_extends with
-      | Some (_, parent_name) when String.equal parent_name rd_name ->
-        (* This record is in an inheritance cycle.*)
-        Errors.add_typing_error
-          Typing_error.(
-            primary @@ Primary.Cyclic_record_def { names = trace; pos = rd_pos })
-      | Some (_, parent_name) when SSet.mem parent_name seen ->
-        (* There's an inheritance cycle higher in the chain. *)
-        ()
-      | Some (_, parent_name) ->
-        worker parent_name (parent_name :: trace) (SSet.add parent_name seen)
-      | None -> ())
-    | None -> ()
-  in
-  worker rd_name [rd_name] (SSet.singleton rd_name)
-
-let record_def_def ctx rd =
-  Counters.count Counters.Category.Typecheck @@ fun () ->
-  let env = EnvFromDef.record_def_env ~origin:Decl_counters.TopLevel ctx rd in
-  Typing_type_wellformedness.record_def env rd;
-  (match rd.rd_extends with
-  | Some parent -> record_def_parent env rd parent
-  | None -> ());
-
-  check_record_inheritance_cycle env rd.rd_name;
-
-  let (env, attributes) =
-    Typing.attributes_check_def env SN.AttributeKinds.cls rd.rd_user_attributes
-  in
-  let (_env, fields) = List.map_env env rd.rd_fields ~f:record_field in
-  {
-    Aast.rd_annotation = Env.save (Env.get_tpenv env) env;
-    Aast.rd_name = rd.rd_name;
-    Aast.rd_extends = rd.rd_extends;
-    Aast.rd_abstract = rd.rd_abstract;
-    Aast.rd_fields = fields;
-    Aast.rd_user_attributes = attributes;
-    Aast.rd_namespace = rd.rd_namespace;
-    Aast.rd_span = rd.rd_span;
-    Aast.rd_doc_comment = rd.rd_doc_comment;
-    Aast.rd_emit_id = rd.rd_emit_id;
-  }
-
 let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
     _ * Typing_inference_env.t_global_with_pos list =
   let convert_def = function
@@ -2238,7 +2128,6 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
         | Some (c, envs) -> Some (Aast.Class c, envs)
         | None -> None
       end
-    | RecordDef rd -> Some (Aast.RecordDef (record_def_def ctx rd), [])
     (* We don't typecheck top level statements:
      * https://docs.hhvm.com/hack/unsupported/top-level
      * so just create the minimal env for us to construct a Stmt.

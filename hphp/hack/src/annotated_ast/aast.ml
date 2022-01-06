@@ -555,10 +555,6 @@ and ('ex, 'en) expr_ =
           new Foo(1, 2);
           new Foo<int, T>();
           new Foo('blah', ...$rest); *)
-  | Record of sid * (('ex, 'en) expr * ('ex, 'en) expr) list
-      (** Record literal.
-
-          MyRecord['x' => $foo, 'y' => $bar] *)
   | Efun of ('ex, 'en) fun_ * lid list
       (** PHP-style lambda. Does not capture variables unless explicitly
           specified.
@@ -1010,21 +1006,6 @@ and ('ex, 'en) gconst = {
   cst_emit_id: emit_id option;
 }
 
-and ('ex, 'en) record_def = {
-  rd_annotation: 'en;
-  rd_name: sid;
-  rd_extends: record_hint option;
-  rd_abstract: bool;
-  rd_fields: (sid * hint * ('ex, 'en) expr option) list;
-  rd_user_attributes: ('ex, 'en) user_attribute list;
-  rd_namespace: nsenv;
-  rd_span: pos;
-  rd_doc_comment: doc_comment option;
-  rd_emit_id: emit_id option;
-}
-
-and record_hint = hint
-
 and ('ex, 'en) fun_def = {
   fd_namespace: nsenv;
   fd_file_attributes: ('ex, 'en) file_attribute list;
@@ -1035,7 +1016,6 @@ and ('ex, 'en) fun_def = {
 and ('ex, 'en) def =
   | Fun of ('ex, 'en) fun_def
   | Class of ('ex, 'en) class_
-  | RecordDef of ('ex, 'en) record_def
   | Stmt of ('ex, 'en) stmt
   | Typedef of ('ex, 'en) typedef
   | Constant of ('ex, 'en) gconst

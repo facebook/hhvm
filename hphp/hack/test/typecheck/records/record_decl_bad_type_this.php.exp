@@ -1,2 +1,0 @@
-File "record_decl_bad_type_this.php", line 4, characters 3-6:
-Cannot use `this` outside of a class (Naming[2045])

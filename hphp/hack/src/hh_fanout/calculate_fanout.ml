@@ -105,10 +105,6 @@ let get_symbol_edges_for_file_info (file_info : FileInfo.t) : symbol_edge list =
         ~symbol_type:FileInfo.Typedef
         ~ids:file_info.FileInfo.typedefs
         ~f:(fun name -> Typing_deps.Dep.Type name);
-      make_edges
-        ~symbol_type:FileInfo.RecordDef
-        ~ids:file_info.FileInfo.record_defs
-        ~f:(fun name -> Typing_deps.Dep.Type name);
     ]
 
 let file_info_to_dep_set

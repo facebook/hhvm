@@ -57,9 +57,6 @@ struct Env<'a, 'arena> {
     variable_scopes: Vec<Variables>,
     /// How many existing classes are there?
     defined_class_count: usize,
-    /// How many existing records are there?
-    #[allow(dead_code)]
-    defined_record_count: usize,
     /// How many existing functions are there?
     #[allow(dead_code)]
     defined_function_count: usize,
@@ -79,7 +76,6 @@ struct PerFunctionState {
 impl<'a, 'arena> Env<'a, 'arena> {
     pub fn toplevel(
         class_count: usize,
-        record_count: usize,
         function_count: usize,
         defs: &[Def],
         options: &'a Options,
@@ -96,7 +92,6 @@ impl<'a, 'arena> Env<'a, 'arena> {
                 parameter_names: HashSet::default(),
             }],
             defined_class_count: class_count,
-            defined_record_count: record_count,
             defined_function_count: function_count,
             in_using: false,
             options,
@@ -1103,10 +1098,6 @@ fn count_classes(defs: &[Def]) -> usize {
     defs.iter().filter(|x| x.is_class()).count()
 }
 
-fn count_records(defs: &[Def]) -> usize {
-    defs.iter().filter(|x| x.is_record_def()).count()
-}
-
 struct ClosureConvertVisitor<'a, 'arena> {
     alloc: &'arena bumpalo::Bump,
     state: State<'arena>,
@@ -1738,7 +1729,6 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
 
     let mut env = Env::toplevel(
         count_classes(defs.as_slice()),
-        count_records(defs.as_slice()),
         1,
         defs.as_slice(),
         e.options(),
@@ -1757,7 +1747,6 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
 
     let mut new_defs = vec![];
     let mut class_count = 0;
-    let mut record_count = 0;
     let mut typedef_count = 0;
     let mut const_count = 0;
 
@@ -1768,11 +1757,6 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
                 x.emit_id = Some(EmitId::EmitId(class_count));
                 class_count += 1;
                 new_defs.push(Def::Class(x));
-            }
-            Def::RecordDef(mut x) => {
-                x.emit_id = Some(EmitId::EmitId(record_count));
-                record_count += 1;
-                new_defs.push(Def::RecordDef(x));
             }
             Def::Typedef(mut x) => {
                 x.emit_id = Some(EmitId::EmitId(typedef_count));

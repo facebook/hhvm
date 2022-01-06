@@ -47,7 +47,6 @@ impl NamespaceEnv for namespace_env::Env {
                     ElaborateKind::Class => &self.class_uses,
                     ElaborateKind::Fun => &self.fun_uses,
                     ElaborateKind::Const => &self.const_uses,
-                    ElaborateKind::Record => &self.record_def_uses,
                 }
             }
         };
@@ -82,7 +81,6 @@ impl NamespaceEnv for oxidized_by_ref::namespace_env::Env<'_> {
                     ElaborateKind::Class => self.class_uses,
                     ElaborateKind::Fun => self.fun_uses,
                     ElaborateKind::Const => self.const_uses,
-                    ElaborateKind::Record => self.record_def_uses,
                 }
             }
         };
@@ -94,7 +92,6 @@ impl NamespaceEnv for oxidized_by_ref::namespace_env::Env<'_> {
 pub enum ElaborateKind {
     Fun,
     Class,
-    Record,
     Const,
 }
 
@@ -361,12 +358,6 @@ pub mod toplevel_elaborator {
                     .for_each(|ref mut x| on_hint(nsenv, x));
                 c.namespace = RcOc::clone(nsenv);
                 acc.push(Def::Class(x));
-            }
-            D::RecordDef(mut x) => {
-                let r = x.as_mut();
-                elaborate_defined_id(nsenv, &mut r.name);
-                r.namespace = RcOc::clone(nsenv);
-                acc.push(Def::RecordDef(x));
             }
             D::Fun(mut x) => {
                 let f = x.as_mut();

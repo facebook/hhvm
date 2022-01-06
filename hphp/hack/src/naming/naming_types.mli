@@ -14,7 +14,6 @@ we also have to store what kind of type that symbol was. *)
 type kind_of_type =
   | TClass
   | TTypedef
-  | TRecordDef
 [@@deriving show, eq]
 
 type name_kind =

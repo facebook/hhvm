@@ -47,7 +47,6 @@ type keyword_with_hover_docs =
 
 type kind =
   | Class of class_id_type
-  | Record
   | Function
   | Method of receiver_class * string
   | LocalVar

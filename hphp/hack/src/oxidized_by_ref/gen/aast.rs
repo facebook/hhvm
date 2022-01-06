@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9e1d0c68a8a6ba2e3ca8bfe58c1783f1>>
+// @generated SignedSource<<9ac2d4e5ca7e9f68a9f07976c5a4bc8e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -898,11 +898,6 @@ pub enum Expr_<'a, Ex, En> {
             Ex,
         ),
     ),
-    /// Record literal.
-    ///
-    /// MyRecord['x' => $foo, 'y' => $bar]
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Record(&'a (Sid<'a>, &'a [(&'a Expr<'a, Ex, En>, &'a Expr<'a, Ex, En>)])),
     /// PHP-style lambda. Does not capture variables unless explicitly
     /// specified.
     ///
@@ -2241,50 +2236,6 @@ arena_deserializer::impl_deserialize_in_arena!(Gconst<'arena, Ex, En>);
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
 #[repr(C)]
-pub struct RecordDef<'a, Ex, En> {
-    #[serde(deserialize_with = "arena_deserializer::arena")]
-    pub annotation: En,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub name: Sid<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub extends: Option<&'a RecordHint<'a>>,
-    pub abstract_: bool,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub fields: &'a [(Sid<'a>, &'a Hint<'a>, Option<&'a Expr<'a, Ex, En>>)],
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub namespace: &'a Nsenv<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub span: &'a Pos<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub doc_comment: Option<&'a DocComment<'a>>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub emit_id: Option<&'a oxidized::aast::EmitId>,
-}
-impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for RecordDef<'a, Ex, En> {}
-arena_deserializer::impl_deserialize_in_arena!(RecordDef<'arena, Ex, En>);
-
-pub type RecordHint<'a> = Hint<'a>;
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[serde(bound(
-    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
-))]
-#[repr(C)]
 pub struct FunDef<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub namespace: &'a Nsenv<'a>,
@@ -2321,8 +2272,6 @@ pub enum Def<'a, Ex, En> {
     Fun(&'a FunDef<'a, Ex, En>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Class(&'a Class_<'a, Ex, En>),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    RecordDef(&'a RecordDef<'a, Ex, En>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Stmt(&'a Stmt<'a, Ex, En>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

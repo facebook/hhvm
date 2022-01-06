@@ -533,37 +533,3 @@ let get_classes_deps ~ctx old_classes new_classes classes =
     (get_class_deps ctx old_classes new_classes (VisitedSet.make ()))
     classes
     ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)
-
-(*****************************************************************************)
-(* Determine which top level definitions have to be rechecked if the record
- * changed.
- *)
-(*****************************************************************************)
-let get_record_def_deps
-    ~mode
-    old_record_defs
-    rdid
-    ((changed, to_redecl, to_recheck), old_record_defs_missing) =
-  match (SMap.find rdid old_record_defs, Decl_heap.RecordDefs.get rdid) with
-  | (None, _)
-  | (_, None) ->
-    let dep = Dep.Type rdid in
-    let where_record_is_used = Typing_deps.get_ideps mode dep in
-    let to_recheck = DepSet.union where_record_is_used to_recheck in
-    ( (add_changed changed dep, to_redecl, to_recheck),
-      old_record_defs_missing + 1 )
-  | (Some rd1, Some rd2) ->
-    if Poly.( = ) rd1 rd2 then
-      ((changed, to_redecl, to_recheck), old_record_defs_missing)
-    else
-      let dep = Dep.Type rdid in
-      let where_record_is_used = Typing_deps.get_ideps mode dep in
-      let to_recheck = DepSet.union where_record_is_used to_recheck in
-      ((add_changed changed dep, to_redecl, to_recheck), old_record_defs_missing)
-
-let get_record_defs_deps ~ctx old_record_defs record_defs =
-  let mode = Provider_context.get_deps_mode ctx in
-  SSet.fold
-    (get_record_def_deps ~mode old_record_defs)
-    record_defs
-    ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)

@@ -504,26 +504,6 @@ let global_constant tenv gconst =
   maybe hint env cst_type;
   ()
 
-let record_def tenv record =
-  let env = { typedef_tparams = []; tenv } in
-  let {
-    rd_annotation = _;
-    rd_name = _;
-    rd_extends;
-    rd_abstract = _;
-    rd_fields;
-    rd_user_attributes = _;
-    rd_namespace = _;
-    rd_span = _;
-    rd_doc_comment = _;
-    rd_emit_id = _;
-  } =
-    record
-  in
-  maybe hint env rd_extends;
-  List.iter rd_fields ~f:(fun (_id, h, _expr) -> hint env h);
-  ()
-
 let hint tenv h =
   let env = { typedef_tparams = []; tenv } in
   hint ~via_label:false ~in_signature:false env h
@@ -585,7 +565,6 @@ let expr : Typing_env_types.env -> Nast.expr -> unit =
   | Pipe _
   | Eif _
   | New _
-  | Record _
   | Xml _
   | Import _
   | Collection _
@@ -610,7 +589,6 @@ let _toplevel_def tenv = function
   | Constant gc -> global_constant tenv gc
   | Typedef td -> typedef tenv td
   | Class c -> class_ tenv c
-  | RecordDef rd -> record_def tenv rd
   | Stmt _
   | Namespace _
   | NamespaceUse _

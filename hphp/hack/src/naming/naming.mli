@@ -19,8 +19,6 @@ val fun_def : Provider_context.t -> Nast.fun_def -> Nast.fun_def
 (* Solves the local names of a class *)
 val class_ : Provider_context.t -> Nast.class_ -> Nast.class_
 
-val record_def : Provider_context.t -> Nast.record_def -> Nast.record_def
-
 (* Solves the local names in an typedef *)
 val typedef : Provider_context.t -> Nast.typedef -> Nast.typedef
 

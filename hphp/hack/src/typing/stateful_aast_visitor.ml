@@ -24,8 +24,6 @@ class type virtual ['env] nast_visitor_with_state =
 
     method at_method_ : 'env -> Nast.method_ -> 'env
 
-    method at_record_def : 'env -> Nast.record_def -> 'env
-
     method at_expr : 'env -> Nast.expr -> 'env
 
     method at_stmt : 'env -> Nast.stmt -> 'env
@@ -52,8 +50,6 @@ class type virtual ['env] nast_visitor_with_state =
 
     method at_trait_hint : 'env -> Nast.trait_hint -> 'env
 
-    method at_record_hint : 'env -> Nast.record_hint -> 'env
-
     method at_xhp_attr_hint : 'env -> Nast.xhp_attr_hint -> 'env
   end
 
@@ -67,8 +63,6 @@ class virtual ['env] default_nast_visitor_with_state :
     method at_class_ env _ = env
 
     method at_method_ env _ = env
-
-    method at_record_def env _ = env
 
     method at_expr env _ = env
 
@@ -96,8 +90,6 @@ class virtual ['env] default_nast_visitor_with_state :
 
     method at_trait_hint env _ = env
 
-    method at_record_hint env _ = env
-
     method at_xhp_attr_hint env _ = env
   end
 
@@ -115,8 +107,6 @@ let combine_visitors =
       method at_class_ = visit visitor1#at_class_ visitor2#at_class_
 
       method at_method_ = visit visitor1#at_method_ visitor2#at_method_
-
-      method at_record_def = visit visitor1#at_record_def visitor2#at_record_def
 
       method at_expr = visit visitor1#at_expr visitor2#at_expr
 
@@ -147,9 +137,6 @@ let combine_visitors =
 
       method at_trait_hint = visit visitor1#at_trait_hint visitor2#at_trait_hint
 
-      method at_record_hint =
-        visit visitor1#at_record_hint visitor2#at_record_hint
-
       method at_xhp_attr_hint =
         visit visitor1#at_xhp_attr_hint visitor2#at_xhp_attr_hint
     end
@@ -173,10 +160,6 @@ let checker (visitor : 'env nast_visitor_with_state) =
     method! on_method_ env m =
       let env = visitor#at_method_ env m in
       super#on_method_ env m
-
-    method! on_record_def env rd =
-      let env = visitor#at_record_def env rd in
-      super#on_record_def env rd
 
     method! on_expr env e =
       let env = visitor#at_expr env e in
@@ -229,10 +212,6 @@ let checker (visitor : 'env nast_visitor_with_state) =
     method! on_trait_hint env th =
       let env = visitor#at_trait_hint env th in
       super#on_trait_hint env th
-
-    method! on_record_hint env rh =
-      let env = visitor#at_record_hint env rh in
-      super#on_record_hint env rh
 
     method! on_xhp_attr_hint env xhp_attr =
       let env = visitor#at_xhp_attr_hint env xhp_attr in

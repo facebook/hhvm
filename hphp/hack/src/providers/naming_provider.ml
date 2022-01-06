@@ -356,13 +356,10 @@ let remove_type_batch (backend : Provider_backend.t) (names : string list) :
     (* Removing cache items is not the responsibility of hh_worker. *)
     not_implemented backend
 
-let get_entry_symbols_for_type { FileInfo.classes; typedefs; record_defs; _ } =
+let get_entry_symbols_for_type { FileInfo.classes; typedefs; _ } =
   let classes = List.map classes ~f:(attach_name_type FileInfo.Class) in
   let typedefs = List.map typedefs ~f:(attach_name_type FileInfo.Typedef) in
-  let record_defs =
-    List.map record_defs ~f:(attach_name_type FileInfo.RecordDef)
-  in
-  List.concat [classes; typedefs; record_defs]
+  List.concat [classes; typedefs]
 
 let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
     (FileInfo.pos * Naming_types.kind_of_type) option =
@@ -436,9 +433,6 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     | Naming_types.TTypedef ->
       Ast_provider.find_itypedef_in_file ctx path name
       >>| fun { Aast.t_name = (_, canon_name); _ } -> canon_name
-    | Naming_types.TRecordDef ->
-      Ast_provider.find_irecord_def_in_file ctx path name
-      >>| fun { Aast.rd_name = (_, canon_name); _ } -> canon_name
   in
 
   match symbol_opt with
@@ -480,7 +474,7 @@ let get_class_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
   match get_type_path_and_kind ctx name with
   | Some (fn, Naming_types.TClass) -> Some fn
-  | Some (_, (Naming_types.TRecordDef | Naming_types.TTypedef))
+  | Some (_, Naming_types.TTypedef)
   | None ->
     None
 
@@ -488,23 +482,11 @@ let add_class
     (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
   add_type backend name pos Naming_types.TClass
 
-let get_record_def_path (ctx : Provider_context.t) (name : string) :
-    Relative_path.t option =
-  match get_type_path_and_kind ctx name with
-  | Some (fn, Naming_types.TRecordDef) -> Some fn
-  | Some (_, (Naming_types.TClass | Naming_types.TTypedef))
-  | None ->
-    None
-
-let add_record_def
-    (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
-  add_type backend name pos Naming_types.TRecordDef
-
 let get_typedef_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =
   match get_type_path_and_kind ctx name with
   | Some (fn, Naming_types.TTypedef) -> Some fn
-  | Some (_, (Naming_types.TClass | Naming_types.TRecordDef))
+  | Some (_, Naming_types.TClass)
   | None ->
     None
 
@@ -576,9 +558,6 @@ let get_type_full_pos ctx (pos, name) =
         | FileInfo.Typedef ->
           Decl_service_client.rpc_get_typedef decl_service name
           |> Option.map ~f:(fun decl -> decl.Typing_defs.td_pos)
-        | FileInfo.RecordDef ->
-          Decl_service_client.rpc_get_record_def decl_service name
-          |> Option.map ~f:(fun decl -> decl.Typing_defs.rdt_pos)
         | _ -> None
       end
       |> Option.map ~f:(resolve_position ctx)
@@ -590,9 +569,6 @@ let get_type_full_pos ctx (pos, name) =
       | FileInfo.Typedef ->
         Ast_provider.find_typedef_in_file ctx fn name
         |> Option.map ~f:(fun ast -> fst ast.Aast.t_name)
-      | FileInfo.RecordDef ->
-        Ast_provider.find_record_def_in_file ctx fn name
-        |> Option.map ~f:(fun ast -> fst ast.Aast.rd_name)
       | _ -> None))
 
 (** This removes the name->path mapping from the naming table (i.e. the combination
@@ -682,7 +658,6 @@ let add
             Naming_sqlite.get_fun_path_by_name db_path name
         in
         Option.map pos ~f:(fun sqlite_path -> (FileInfo.Fun, sqlite_path))
-      | FileInfo.RecordDef
       | FileInfo.Class
       | FileInfo.Typedef ->
         let pos =
@@ -719,7 +694,6 @@ let update
     Option.iter old_file_info ~f:(fun old_file_info ->
         remove_type_batch backend (strip_positions old_file_info.classes);
         remove_type_batch backend (strip_positions old_file_info.typedefs);
-        remove_type_batch backend (strip_positions old_file_info.record_defs);
         remove_fun_batch backend (strip_positions old_file_info.funs);
         remove_const_batch backend (strip_positions old_file_info.consts));
     (* Add new entries. Note: the caller is expected to have a solution
@@ -731,8 +705,6 @@ let update
             add_fun backend name pos);
         List.iter new_file_info.classes ~f:(fun (pos, name, _) ->
             add_class backend name pos);
-        List.iter new_file_info.record_defs ~f:(fun (pos, name, _) ->
-            add_record_def backend name pos);
         List.iter new_file_info.typedefs ~f:(fun (pos, name, _) ->
             add_typedef backend name pos);
         List.iter new_file_info.consts ~f:(fun (pos, name, _) ->
@@ -783,7 +755,6 @@ let update
     update oldfi.consts newfi.consts deltas.consts FileInfo.Const;
     update oldfi.classes newfi.classes deltas.types FileInfo.Class;
     update oldfi.typedefs newfi.typedefs deltas.types FileInfo.Typedef;
-    update oldfi.record_defs newfi.record_defs deltas.types FileInfo.RecordDef;
     (* update canon names too *)
     let updatei = update ~case_insensitive:true in
     updatei oldfi.funs newfi.funs deltas.funs_canon_key FileInfo.Fun;
@@ -793,11 +764,6 @@ let update
       newfi.typedefs
       deltas.types_canon_key
       FileInfo.Typedef;
-    updatei
-      oldfi.record_defs
-      newfi.record_defs
-      deltas.types_canon_key
-      FileInfo.RecordDef;
     ()
 
 let local_changes_push_sharedmem_stack () : unit =

@@ -19,8 +19,6 @@ type fun_decl = Typing_defs.fun_elt
 
 type class_decl = Typing_classes_heap.Api.t
 
-type record_def_decl = Typing_defs.record_def_type
-
 type typedef_decl = Typing_defs.typedef_type
 
 type gconst_decl = Typing_defs.const_decl
@@ -261,71 +259,6 @@ let get_typedef
         | None -> None)
   | Provider_backend.Decl_service { decl; _ } ->
     Decl_service_client.rpc_get_typedef decl typedef_name
-
-let declare_record_def_in_file_DEPRECATED
-    (ctx : Provider_context.t) (file : Relative_path.t) (name : type_key) :
-    Typing_defs.record_def_type =
-  match Ast_provider.find_record_def_in_file ctx file name with
-  | Some rd ->
-    let (_name, decl) =
-      (* TODO(T106202074): Modules and records? *)
-      Decl_nast.record_def_naming_and_decl_DEPRECATED ctx rd None
-    in
-    decl
-  | None -> err_not_found file name
-
-let get_record_def
-    ?(tracing_info : Decl_counters.tracing_info option)
-    (ctx : Provider_context.t)
-    (record_name : type_key) : record_def_decl option =
-  Decl_counters.count_decl Decl_counters.Record_def ?tracing_info record_name
-  @@ fun _counter ->
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Analysis -> Decl_store.((get ()).get_recorddef record_name)
-  | Provider_backend.Shared_memory ->
-    (match Decl_store.((get ()).get_recorddef record_name) with
-    | Some c -> Some c
-    | None ->
-      (match Naming_provider.get_record_def_path ctx record_name with
-      | Some filename ->
-        if use_direct_decl_parser ctx then
-          direct_decl_parse_and_cache ctx filename record_name
-          |> List.find_map ~f:(function
-                 | (name, Shallow_decl_defs.Record decl, _)
-                   when String.equal record_name name ->
-                   Some decl
-                 | _ -> None)
-        else
-          let record_decl =
-            Errors.run_in_decl_mode filename (fun () ->
-                declare_record_def_in_file_DEPRECATED ctx filename record_name)
-          in
-          Decl_store.((get ()).add_recorddef record_name record_decl);
-          Some record_decl
-      | None -> None))
-  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
-    Provider_backend.Decl_cache.find_or_add
-      decl_cache
-      ~key:(Provider_backend.Decl_cache_entry.Record_decl record_name)
-      ~default:(fun () ->
-        match Naming_provider.get_record_def_path ctx record_name with
-        | Some filename ->
-          if use_direct_decl_parser ctx then
-            direct_decl_parse_and_cache ctx filename record_name
-            |> List.find_map ~f:(function
-                   | (name, Shallow_decl_defs.Record decl, _)
-                     when String.equal record_name name ->
-                     Some decl
-                   | _ -> None)
-          else
-            let rdecl =
-              Errors.run_in_decl_mode filename (fun () ->
-                  declare_record_def_in_file_DEPRECATED ctx filename record_name)
-            in
-            Some rdecl
-        | None -> None)
-  | Provider_backend.Decl_service { decl; _ } ->
-    Decl_service_client.rpc_get_record_def decl record_name
 
 let declare_const_in_file_DEPRECATED
     (ctx : Provider_context.t) (file : Relative_path.t) (name : gconst_key) :

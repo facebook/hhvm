@@ -9,7 +9,6 @@
 type env = {
   ns_ns_uses: string SMap.t;
   ns_class_uses: string SMap.t;
-  ns_record_def_uses: string SMap.t;
   ns_fun_uses: string SMap.t;
   ns_const_uses: string SMap.t;
   ns_name: string option;

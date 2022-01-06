@@ -61,8 +61,6 @@ type fun_variadicity = (unit, unit) Aast.fun_variadicity
 
 type typedef = (unit, unit) Aast.typedef
 
-type record_def = (unit, unit) Aast.record_def
-
 type tparam = (unit, unit) Aast.tparam
 
 type gconst = (unit, unit) Aast.gconst
@@ -92,8 +90,6 @@ type shape_field_name = Ast_defs.shape_field_name
 type class_hint = Aast.class_hint
 
 type trait_hint = Aast.trait_hint
-
-type record_hint = Aast.record_hint
 
 type xhp_attr_hint = Aast.xhp_attr_hint
 
@@ -182,6 +178,7 @@ let get_defs ast =
    * declared twice in the same file, the error will say that the declaration
    * with the larger line number is a duplicate. *)
   let to_id (a, b) = (a, b, None) in
+  (* TODO(hgoldstein): Just have this return four values, not five *)
   let rec get_defs ast acc =
     List.fold_right
       ast
@@ -197,12 +194,6 @@ let get_defs ast =
               acc5 )
           | Class c ->
             (acc1, FileInfo.pos_full (to_id c.c_name) :: acc2, acc3, acc4, acc5)
-          | RecordDef rd ->
-            ( acc1,
-              acc2,
-              FileInfo.pos_full (to_id rd.rd_name) :: acc3,
-              acc4,
-              acc5 )
           | Typedef t ->
             (acc1, acc2, acc3, FileInfo.pos_full (to_id t.t_name) :: acc4, acc5)
           | Constant cst ->
@@ -555,8 +546,6 @@ module Visitor_DEPRECATED = struct
 
       method on_class_ : 'a -> class_ -> 'a
 
-      method on_record_def : 'a -> record_def -> 'a
-
       method on_gconst : 'a -> gconst -> 'a
 
       method on_typedef : 'a -> typedef -> 'a
@@ -776,7 +765,6 @@ module Visitor_DEPRECATED = struct
         | New (cid, _, el, unpacked_element, _) ->
           this#on_new acc cid el unpacked_element
         | Efun (f, idl) -> this#on_efun acc f idl
-        | Record (cid, fl) -> this#on_record acc cid fl
         | Xml (sid, attrl, el) -> this#on_xml acc sid attrl el
         | ValCollection (s, ta, el) -> this#on_valCollection acc s ta el
         | KeyValCollection (s, tap, fl) -> this#on_keyValCollection acc s tap fl
@@ -1128,10 +1116,6 @@ module Visitor_DEPRECATED = struct
 
       method on_class_req acc (h, _) = this#on_hint acc h
 
-      method on_record_def acc rd =
-        let acc = this#on_id acc rd.rd_name in
-        acc
-
       method on_gconst acc g =
         let acc = this#on_id acc g.cst_name in
         let acc = this#on_expr acc g.cst_value in
@@ -1171,7 +1155,6 @@ module Visitor_DEPRECATED = struct
         function
         | Fun f -> this#on_fun_def acc f
         | Class c -> this#on_class_ acc c
-        | RecordDef rd -> this#on_record_def acc rd
         | Stmt s -> this#on_stmt acc s
         | Typedef t -> this#on_typedef acc t
         | Constant g -> this#on_gconst acc g

@@ -183,10 +183,6 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
                 Rty::Mutable
             }
         }
-        Record(r) => {
-            let (_, fields) = &**r;
-            ro_expr_list2(context, &fields)
-        }
         Xml(_) | Efun(_) | Lfun(_) => Rty::Mutable,
         Tuple(t) => ro_expr_list(context, t),
         // Only list destructuring

@@ -22,8 +22,6 @@ type fun_decl = Typing_defs.fun_elt
 
 type class_decl = Class.t
 
-type record_def_decl = Typing_defs.record_def_type
-
 type typedef_decl = Typing_defs.typedef_type
 
 type gconst_decl = Typing_defs.const_decl
@@ -42,12 +40,6 @@ val get_class :
   Provider_context.t ->
   type_key ->
   class_decl option
-
-val get_record_def :
-  ?tracing_info:Decl_counters.tracing_info ->
-  Provider_context.t ->
-  type_key ->
-  record_def_decl option
 
 val get_typedef :
   ?tracing_info:Decl_counters.tracing_info ->

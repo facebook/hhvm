@@ -156,8 +156,6 @@ let given_text_tokens =
     make_token_node "Public" "public" ();
     make_token_node "Real" "real" ~allowed_as_identifier:true ();
     make_token_node "Reify" "reify" ~allowed_as_identifier:true ();
-    make_token_node "Record" "recordname" ();
-    make_token_node "RecordDec" "record" ();
     make_token_node "Require" "require" ();
     make_token_node "Require_once" "require_once" ();
     make_token_node "Required" "required" ();

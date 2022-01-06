@@ -218,22 +218,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let env = { env with namespace = fa.fa_namespace } in
       super#on_file_attribute env fa
 
-    method! on_record_def env rd =
-      let env = { env with namespace = rd.rd_namespace } in
-      let rd_name =
-        NS.elaborate_id env.namespace NS.ElaborateRecord rd.rd_name
-      in
-      let rd_extends =
-        match rd.rd_extends with
-        | Some (p, Aast.Happly (name, hl)) ->
-          let name = NS.elaborate_id env.namespace NS.ElaborateRecord name in
-          let hl = List.map ~f:(self#on_hint env) hl in
-          Some (p, Aast.Happly (name, hl))
-        | _ -> Option.map ~f:(self#on_hint env) rd.rd_extends
-      in
-      let rd = super#on_record_def env rd in
-      { rd with rd_name; rd_extends }
-
     (* Sets let local env correctly *)
     method on_block_helper env b =
       let aux (env, stmts) stmt = (env, super#on_stmt env stmt :: stmts) in
@@ -325,13 +309,6 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
             List.map el ~f:(self#on_expr env),
             Option.map unpacked_element ~f:(self#on_expr env),
             ex )
-      | Record (id, l) ->
-        let id = elaborate_type_name env id in
-        let l =
-          List.map l ~f:(fun (e1, e2) ->
-              (self#on_expr env e1, self#on_expr env e2))
-        in
-        Record (id, l)
       | Class_const ((_, p1, CIexpr (ty, p2, Id x1)), pstr) ->
         let name = elaborate_type_name env x1 in
         Class_const (((), p1, CIexpr (ty, p2, Id name)), pstr)

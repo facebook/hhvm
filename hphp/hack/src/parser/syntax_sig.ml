@@ -106,23 +106,6 @@ module type Syntax_S = sig
         enum_class_enumerator_initializer: t;
         enum_class_enumerator_semicolon: t;
       }
-    | RecordDeclaration of {
-        record_attribute_spec: t;
-        record_modifier: t;
-        record_keyword: t;
-        record_name: t;
-        record_extends_keyword: t;
-        record_extends_opt: t;
-        record_left_brace: t;
-        record_fields: t;
-        record_right_brace: t;
-      }
-    | RecordField of {
-        record_field_type: t;
-        record_field_name: t;
-        record_field_init: t;
-        record_field_semi: t;
-      }
     | AliasDeclaration of {
         alias_attribute_spec: t;
         alias_keyword: t;
@@ -715,12 +698,6 @@ module type Syntax_S = sig
         constructor_call_argument_list: t;
         constructor_call_right_paren: t;
       }
-    | RecordCreationExpression of {
-        record_creation_type: t;
-        record_creation_left_bracket: t;
-        record_creation_members: t;
-        record_creation_right_bracket: t;
-      }
     | DarrayIntrinsicExpression of {
         darray_intrinsic_keyword: t;
         darray_intrinsic_explicit_type: t;
@@ -1118,10 +1095,6 @@ module type Syntax_S = sig
 
   val make_enum_class_enumerator : t -> t -> t -> t -> t -> t
 
-  val make_record_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
-
-  val make_record_field : t -> t -> t -> t -> t
-
   val make_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
 
   val make_context_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
@@ -1325,8 +1298,6 @@ module type Syntax_S = sig
 
   val make_constructor_call : t -> t -> t -> t -> t
 
-  val make_record_creation_expression : t -> t -> t -> t -> t
-
   val make_darray_intrinsic_expression : t -> t -> t -> t -> t -> t
 
   val make_dictionary_intrinsic_expression : t -> t -> t -> t -> t -> t
@@ -1477,10 +1448,6 @@ module type Syntax_S = sig
   val is_enum_class_declaration : t -> bool
 
   val is_enum_class_enumerator : t -> bool
-
-  val is_record_declaration : t -> bool
-
-  val is_record_field : t -> bool
 
   val is_alias_declaration : t -> bool
 
@@ -1677,8 +1644,6 @@ module type Syntax_S = sig
   val is_object_creation_expression : t -> bool
 
   val is_constructor_call : t -> bool
-
-  val is_record_creation_expression : t -> bool
 
   val is_darray_intrinsic_expression : t -> bool
 

@@ -19,8 +19,6 @@ val fun_def :
 
 val gconst_def : Provider_context.t -> Nast.gconst -> Tast.gconst
 
-val record_def_def : Provider_context.t -> Nast.record_def -> Tast.record_def
-
 val nast_to_tast_gienv :
   do_tast_checks:bool ->
   Provider_context.t ->

@@ -64,20 +64,6 @@ let type_class (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
         def_opt)
   | None -> None
 
-let type_record_def
-    (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :
-    Tast.def option =
-  match Ast_provider.find_record_def_in_file ~full:true ctx fn x with
-  | Some rd ->
-    handle_exn_as_error rd.Aast.rd_span (fun () ->
-        let rd = Naming.record_def ctx rd in
-        Nast_check.def ctx (Aast.RecordDef rd);
-
-        let def = Aast.RecordDef (Typing_toplevel.record_def_def ctx rd) in
-        Tast_check.def ctx def;
-        Some def)
-  | None -> None
-
 let check_typedef (ctx : Provider_context.t) (fn : Relative_path.t) (x : string)
     : Tast.def option =
   match Ast_provider.find_typedef_in_file ~full:true ctx fn x with

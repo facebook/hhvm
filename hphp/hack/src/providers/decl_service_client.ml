@@ -22,7 +22,6 @@ module SymbolMap = Reordered_argument_map (WrappedMap.Make (CacheKey))
 type decl = Shallow_decl_defs.decl =
   | Class of Shallow_decl_defs.class_decl
   | Fun of Shallow_decl_defs.fun_decl
-  | Record of Shallow_decl_defs.record_decl
   | Typedef of Shallow_decl_defs.typedef_decl
   | Const of Shallow_decl_defs.const_decl
 
@@ -106,20 +105,6 @@ let rpc_get_typedef (t : t) (name : string) : Typing_defs.typedef_type option =
       | Some (Typedef t) -> Some t
       | _ -> None))
 
-let rpc_get_record_def (t : t) (name : string) :
-    Typing_defs.record_def_type option =
-  let key = Typing_deps.(Dep.make (Dep.Type name)) in
-  match SymbolMap.find_opt t.current_file_decls key with
-  | Some (Record decl) -> Some decl
-  | _ ->
-    (match Decls.get key with
-    | Some (Some (Record decl)) -> Some decl
-    | Some _ -> None
-    | None ->
-      (match get_and_cache_decl t key with
-      | Some (Record r) -> Some r
-      | _ -> None))
-
 let rpc_get_gconst (t : t) (name : string) : Typing_defs.const_decl option =
   let key = Typing_deps.(Dep.make (Dep.GConst name)) in
   match SymbolMap.find_opt t.current_file_decls key with
@@ -177,7 +162,6 @@ let parse_and_cache_decls_in
           | Fun _ -> hash (Typing_deps.Dep.Fun name)
           | Class _ -> hash (Typing_deps.Dep.Type name)
           | Typedef _ -> hash (Typing_deps.Dep.Type name)
-          | Record _ -> hash (Typing_deps.Dep.Type name)
           | Const _ -> hash (Typing_deps.Dep.GConst name)
         in
         SymbolMap.add map ~key ~data:decl)

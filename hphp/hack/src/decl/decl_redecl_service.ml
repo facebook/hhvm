@@ -114,16 +114,6 @@ let compute_types_deps ctx old_types (changed, to_redecl, to_recheck) types =
   let to_recheck = DepSet.union rdc to_recheck in
   ((changed, to_redecl, to_recheck), old_types_missing)
 
-let compute_record_defs_deps ctx old_record_defs acc record_defs =
-  let (changed, to_redecl, to_recheck) = acc in
-  let ((rc, rdd, rdc), old_record_defs_missing) =
-    Decl_compare.get_record_defs_deps ~ctx old_record_defs record_defs
-  in
-  let changed = DepSet.union rc changed in
-  let to_redecl = DepSet.union rdd to_redecl in
-  let to_recheck = DepSet.union rdc to_recheck in
-  ((changed, to_redecl, to_recheck), old_record_defs_missing)
-
 (*****************************************************************************)
 (* Given a set of global constants, compare the old and the new type and
  * deduce what must be rechecked accordingly.
@@ -164,9 +154,7 @@ let compute_deps ctx fast (filel : Relative_path.t list) =
   let names =
     List.fold_left infol ~f:FileInfo.merge_names ~init:FileInfo.empty_names
   in
-  let { FileInfo.n_classes; n_record_defs; n_funs; n_types; n_consts } =
-    names
-  in
+  let { FileInfo.n_classes; n_funs; n_types; n_consts } = names in
   let empty = DepSet.make () in
   let acc = (empty, empty, empty) in
   (* Fetching everything at once is faster *)
@@ -174,10 +162,6 @@ let compute_deps ctx fast (filel : Relative_path.t list) =
   let (acc, old_funs_missing) = compute_funs_deps ctx old_funs acc n_funs in
   let old_types = Decl_heap.Typedefs.get_old_batch n_types in
   let (acc, old_types_missing) = compute_types_deps ctx old_types acc n_types in
-  let old_record_defs = Decl_heap.RecordDefs.get_old_batch n_record_defs in
-  let (acc, old_record_defs_missing) =
-    compute_record_defs_deps ctx old_record_defs acc n_record_defs
-  in
   let old_consts = Decl_heap.GConsts.get_old_batch n_consts in
   let (acc, old_gconsts_missing) =
     compute_gconsts_deps ctx old_consts acc n_consts
@@ -195,7 +179,6 @@ let compute_deps ctx fast (filel : Relative_path.t list) =
   let old_decl_missing_count =
     old_funs_missing
     + old_types_missing
-    + old_record_defs_missing
     + old_gconsts_missing
     + old_classes_missing
   in
@@ -331,14 +314,13 @@ let parallel_on_the_fly_decl
 (*****************************************************************************)
 let oldify_defs
     (ctx : Provider_context.t)
-    { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts }
+    { FileInfo.n_funs; n_classes; n_types; n_consts }
     (elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
   Decl_heap.Funs.oldify_batch n_funs;
   Decl_class_elements.oldify_all elems;
   Decl_heap.Classes.oldify_batch n_classes;
   Shallow_classes_provider.oldify_batch ctx n_classes;
-  Decl_heap.RecordDefs.oldify_batch n_record_defs;
   Decl_heap.Typedefs.oldify_batch n_types;
   Decl_heap.GConsts.oldify_batch n_consts;
   if collect_garbage then SharedMem.GC.collect `gentle;
@@ -346,13 +328,12 @@ let oldify_defs
 
 let remove_old_defs
     (ctx : Provider_context.t)
-    { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts }
+    { FileInfo.n_funs; n_classes; n_types; n_consts }
     (elems : Decl_class_elements.t SMap.t) : unit =
   Decl_heap.Funs.remove_old_batch n_funs;
   Decl_class_elements.remove_old_all elems;
   Decl_heap.Classes.remove_old_batch n_classes;
   Shallow_classes_provider.remove_old_batch ctx n_classes;
-  Decl_heap.RecordDefs.remove_old_batch n_record_defs;
   Decl_heap.Typedefs.remove_old_batch n_types;
   Decl_heap.GConsts.remove_old_batch n_consts;
   SharedMem.GC.collect `gentle;
@@ -360,7 +341,7 @@ let remove_old_defs
 
 let remove_defs
     (ctx : Provider_context.t)
-    { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts }
+    { FileInfo.n_funs; n_classes; n_types; n_consts }
     (elems : Decl_class_elements.t SMap.t)
     ~(collect_garbage : bool) : unit =
   Decl_heap.Funs.remove_batch n_funs;
@@ -368,7 +349,6 @@ let remove_defs
   Decl_heap.Classes.remove_batch n_classes;
   Shallow_classes_provider.remove_batch ctx n_classes;
   Linearization_provider.remove_batch ctx n_classes;
-  Decl_heap.RecordDefs.remove_batch n_record_defs;
   Decl_heap.Typedefs.remove_batch n_types;
   Decl_heap.GConsts.remove_batch n_consts;
   if collect_garbage then SharedMem.GC.collect `gentle;

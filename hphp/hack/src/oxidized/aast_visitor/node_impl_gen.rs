@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<646e80392ef7d5379265903a973687f2>>
+// @generated SignedSource<<e29271bc7a76baf699d1b302b8eead24>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -646,10 +646,6 @@ impl<P: Params> Node<P> for Def<P::Ex, P::En> {
                 a0.accept(c, v)?;
                 Ok(())
             }
-            Def::RecordDef(a0) => {
-                a0.accept(c, v)?;
-                Ok(())
-            }
             Def::Stmt(a0) => {
                 a0.accept(c, v)?;
                 Ok(())
@@ -965,11 +961,6 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::En> {
                 a.2.accept(c, v)?;
                 a.3.accept(c, v)?;
                 v.visit_ex(c, &a.4)?;
-                Ok(())
-            }
-            Expr_::Record(a) => {
-                a.0.accept(c, v)?;
-                a.1.accept(c, v)?;
                 Ok(())
             }
             Expr_::Efun(a) => {
@@ -1720,32 +1711,6 @@ impl<P: Params> Node<P> for ReadonlyKind {
         match self {
             ReadonlyKind::Readonly => Ok(()),
         }
-    }
-}
-impl<P: Params> Node<P> for RecordDef<P::Ex, P::En> {
-    fn accept<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_record_def(c, self)
-    }
-    fn recurse<'node>(
-        &'node self,
-        c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_en(c, &self.annotation)?;
-        self.name.accept(c, v)?;
-        self.extends.accept(c, v)?;
-        self.abstract_.accept(c, v)?;
-        self.fields.accept(c, v)?;
-        self.user_attributes.accept(c, v)?;
-        self.namespace.accept(c, v)?;
-        self.span.accept(c, v)?;
-        self.doc_comment.accept(c, v)?;
-        self.emit_id.accept(c, v)?;
-        Ok(())
     }
 }
 impl<P: Params> Node<P> for ReifyKind {

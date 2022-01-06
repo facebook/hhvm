@@ -13,7 +13,6 @@ impl From<KindOfType> for NameType {
         match kind {
             KindOfType::TClass => NameType::Class,
             KindOfType::TTypedef => NameType::Typedef,
-            KindOfType::TRecordDef => NameType::RecordDef,
         }
     }
 }
@@ -30,8 +29,6 @@ impl FromSql for NameType {
                     Ok(NameType::Class)
                 } else if i == NameType::Typedef as i64 {
                     Ok(NameType::Typedef)
-                } else if i == NameType::RecordDef as i64 {
-                    Ok(NameType::RecordDef)
                 } else {
                     Err(FromSqlError::OutOfRange(i))
                 }

@@ -22,9 +22,3 @@ const vec<vec<int>> gconstNested = vec[
 const gconstWithoutHintNested = vec[
   HH\array_mark_legacy(vec[]),
 ];
-
-record recordNested {
-  vec<vec<int>> a = vec[
-    HH\array_mark_legacy(vec[]),
-  ];
-}

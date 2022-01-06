@@ -108,8 +108,6 @@ type tparam = (ty, saved_env) Aast.tparam
 
 type typedef = (ty, saved_env) Aast.typedef
 
-type record_def = (ty, saved_env) Aast.record_def
-
 type gconst = (ty, saved_env) Aast.gconst
 
 let empty_saved_env tcopt : saved_env =

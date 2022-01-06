@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9dcc2af27d0308212a4a98edd60db564>>
+// @generated SignedSource<<eafc70b97d83029b6b323cb178a21aaf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -69,7 +69,6 @@ arena_deserializer::impl_deserialize_in_arena!(Mode);
 pub enum NameType {
     Fun = 3,
     Class = 0,
-    RecordDef = 2,
     Typedef = 1,
     Const = 4,
 }
@@ -119,7 +118,6 @@ pub enum Pos {
 pub struct Names {
     pub funs: s_set::SSet,
     pub classes: s_set::SSet,
-    pub record_defs: s_set::SSet,
     pub types: s_set::SSet,
     pub consts: s_set::SSet,
 }
@@ -143,7 +141,6 @@ pub struct Names {
 pub struct SavedNames {
     pub funs: s_set::SSet,
     pub classes: s_set::SSet,
-    pub record_defs: s_set::SSet,
     pub types: s_set::SSet,
     pub consts: s_set::SSet,
 }

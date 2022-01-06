@@ -8,7 +8,6 @@ use emit_class::emit_classes_from_program;
 use emit_constant::emit_constants_from_program;
 use emit_file_attributes::emit_file_attributes_from_program;
 use emit_function::emit_functions_from_program;
-use emit_record_def::emit_record_defs_from_program;
 use emit_typedef::emit_typedefs_from_program;
 use env::{self, emitter::Emitter, Env};
 use ffi::{Maybe::*, Slice, Str};
@@ -58,7 +57,6 @@ fn emit_program_<'a, 'arena, 'decl>(
 ) -> Result<HhasProgram<'arena>> {
     let mut functions = emit_functions_from_program(emitter, prog)?;
     let classes = emit_classes_from_program(emitter.alloc, emitter, prog)?;
-    let record_defs = emit_record_defs_from_program(emitter, prog)?;
     let typedefs = emit_typedefs_from_program(emitter, prog)?;
     let (constants, mut const_inits) = {
         let mut env = Env::default(emitter.alloc, namespace);
@@ -72,7 +70,6 @@ fn emit_program_<'a, 'arena, 'decl>(
     let fatal = Nothing;
 
     Ok(HhasProgram {
-        record_defs: Slice::fill_iter(emitter.alloc, record_defs.into_iter()),
         classes: Slice::fill_iter(emitter.alloc, classes.into_iter()),
         functions: Slice::fill_iter(emitter.alloc, functions.into_iter()),
         typedefs: Slice::fill_iter(emitter.alloc, typedefs.into_iter()),

@@ -36,8 +36,6 @@ type t =
   | Enumerator
   | EnumClassDeclaration
   | EnumClassEnumerator
-  | RecordDeclaration
-  | RecordField
   | AliasDeclaration
   | ContextAliasDeclaration
   | PropertyDeclaration
@@ -136,7 +134,6 @@ type t =
   | CollectionLiteralExpression
   | ObjectCreationExpression
   | ConstructorCall
-  | RecordCreationExpression
   | DarrayIntrinsicExpression
   | DictionaryIntrinsicExpression
   | KeysetIntrinsicExpression
@@ -215,8 +212,6 @@ let to_string kind =
   | Enumerator -> "enumerator"
   | EnumClassDeclaration -> "enum_class_declaration"
   | EnumClassEnumerator -> "enum_class_enumerator"
-  | RecordDeclaration -> "record_declaration"
-  | RecordField -> "record_field"
   | AliasDeclaration -> "alias_declaration"
   | ContextAliasDeclaration -> "context_alias_declaration"
   | PropertyDeclaration -> "property_declaration"
@@ -315,7 +310,6 @@ let to_string kind =
   | CollectionLiteralExpression -> "collection_literal_expression"
   | ObjectCreationExpression -> "object_creation_expression"
   | ConstructorCall -> "constructor_call"
-  | RecordCreationExpression -> "record_creation_expression"
   | DarrayIntrinsicExpression -> "darray_intrinsic_expression"
   | DictionaryIntrinsicExpression -> "dictionary_intrinsic_expression"
   | KeysetIntrinsicExpression -> "keyset_intrinsic_expression"

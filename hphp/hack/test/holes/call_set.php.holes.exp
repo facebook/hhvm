@@ -1,71 +1,69 @@
 [(Class
-    { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false;
-      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete);
-      c_name = ([3:7-14], "\\TestSet"); c_tparams = []; c_extends = [];
-      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = [];
-      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = [];
+    { c_span = [3:1-5:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+      c_name = ([3:7-14], "\\TestSet"); c_tparams = []; c_extends = []; 
+      c_uses = []; c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
+      c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = []; 
       c_consts = []; c_typeconsts = []; c_vars = [];
       c_methods =
-      [{ m_span = [4:3-42]; m_annotation = (); m_final = false; m_abstract = false;
-         m_static = false; m_readonly_this = false; m_visibility = Public;
-         m_name = ([4:19-20], "h"); m_tparams = []; m_where_constraints = [];
+      [{ m_span = [4:3-42]; m_annotation = (); m_final = false; m_abstract = false; 
+         m_static = false; m_readonly_this = false; m_visibility = Public; 
+         m_name = ([4:19-20], "h"); m_tparams = []; m_where_constraints = []; 
          m_variadic = FVnonVariadic;
          m_params =
-         [{ param_annotation = (Set<int>); param_type_hint = ((Set<int>), (Some ([4:21-29], (Happly (([4:21-24], "\\HH\\Set"), [([4:25-28], (Hprim Tint))])))));
-            param_is_variadic = false; param_pos = [4:30-32]; param_name = "$h";
-            param_expr = None; param_readonly = None; param_callconv = Pnormal;
+         [{ param_annotation = (Set<int>); param_type_hint = ((Set<int>), (Some ([4:21-29], (Happly (([4:21-24], "\\HH\\Set"), [([4:25-28], (Hprim Tint))]))))); 
+            param_is_variadic = false; param_pos = [4:30-32]; param_name = "$h"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
-         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] };
-         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None;
-         m_ret = ((void), (Some ([4:35-39], (Hprim Tvoid)))); m_external = false;
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+         m_ret = ((void), (Some ([4:35-39], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace =
-      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-        ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
-        ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
-      c_user_attributes = []; c_file_attributes = []; c_enum = None;
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_enum = None; 
       c_doc_comment = None; c_emit_id = None });
   (Fun
      { fd_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
-         ns_disable_xhp_element_mangling = false };
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
-       { f_span = [7:1-33]; f_readonly_this = None; f_annotation = ();
-         f_readonly_ret = None; f_ret = ((void), (Some ([7:26-30], (Hprim Tvoid))));
-         f_name = ([7:10-11], "\\h"); f_tparams = []; f_where_constraints = [];
+       { f_span = [7:1-33]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([7:26-30], (Hprim Tvoid)))); 
+         f_name = ([7:10-11], "\\h"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = (Set<int>); param_type_hint = ((Set<int>), (Some ([7:12-20], (Happly (([7:12-15], "\\HH\\Set"), [([7:16-19], (Hprim Tint))])))));
-            param_is_variadic = false; param_pos = [7:21-23]; param_name = "$h";
-            param_expr = None; param_readonly = None; param_callconv = Pnormal;
+         [{ param_annotation = (Set<int>); param_type_hint = ((Set<int>), (Some ([7:12-20], (Happly (([7:12-15], "\\HH\\Set"), [([7:16-19], (Hprim Tint))]))))); 
+            param_is_variadic = false; param_pos = [7:21-23]; param_name = "$h"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
-         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+         f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
   (Fun
      { fd_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
-         ns_disable_xhp_element_mangling = false };
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
-       { f_span = [9:1-19:2]; f_readonly_this = None; f_annotation = ();
-         f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid))));
-         f_name = ([9:10-18], "\\call_set"); f_tparams = []; f_where_constraints = [];
+       { f_span = [9:1-19:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([11:4-8], (Hprim Tvoid)))); 
+         f_name = ([9:10-18], "\\call_set"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = (Set<string>); param_type_hint = ((Set<string>), (Some ([10:3-14], (Happly (([10:3-6], "\\HH\\Set"), [([10:7-13], (Hprim Tstring))])))));
-            param_is_variadic = false; param_pos = [10:15-17]; param_name = "$h";
-            param_expr = None; param_readonly = None; param_callconv = Pnormal;
+         [{ param_annotation = (Set<string>); param_type_hint = ((Set<string>), (Some ([10:3-14], (Happly (([10:3-6], "\\HH\\Set"), [([10:7-13], (Hprim Tstring))]))))); 
+            param_is_variadic = false; param_pos = [10:15-17]; param_name = "$h"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -74,7 +72,7 @@
            [([13:3-9],
              (Expr
                 ((void), [13:3-8],
-                 (Call ((((function(Set<int> $h): void)), [13:3-4], (Id ([13:3-4], "\\h"))),
+                 (Call ((((function(Set<int> $h): void)), [13:3-4], (Id ([13:3-4], "\\h"))), 
                     [], [(Pnormal, ((Set<string>), [13:5-7], (Hole (((Set<string>), [13:5-7], (Lvar ([13:5-7], $h))), (Set<string>), (Set<int>), Typing))))], None)))));
              ([15:3-24],
               (Expr
@@ -89,25 +87,24 @@
                      [], [(Pnormal, ((Set<string>), [18:11-13], (Hole (((Set<string>), [18:11-13], (Lvar ([18:11-13], $h))), (Set<string>), (Set<int>), Typing))))], None)))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
   (Fun
      { fd_namespace =
-       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>;
-         ns_record_def_uses = <opaque>; ns_fun_uses = <opaque>; ns_const_uses = <opaque>;
-         ns_name = None; ns_auto_ns_map = []; ns_is_codegen = false;
-         ns_disable_xhp_element_mangling = false };
+       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+         ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+         ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        fd_file_attributes = []; fd_mode = Mstrict;
        fd_fun =
-       { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = ();
-         f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid))));
-         f_name = ([21:10-23], "\\call_set_cast"); f_tparams = []; f_where_constraints = [];
+       { f_span = [21:1-31:2]; f_readonly_this = None; f_annotation = (); 
+         f_readonly_ret = None; f_ret = ((void), (Some ([23:4-8], (Hprim Tvoid)))); 
+         f_name = ([21:10-23], "\\call_set_cast"); f_tparams = []; f_where_constraints = []; 
          f_variadic = FVnonVariadic;
          f_params =
-         [{ param_annotation = (Set<string>); param_type_hint = ((Set<string>), (Some ([22:3-14], (Happly (([22:3-6], "\\HH\\Set"), [([22:7-13], (Hprim Tstring))])))));
-            param_is_variadic = false; param_pos = [22:15-17]; param_name = "$h";
-            param_expr = None; param_readonly = None; param_callconv = Pnormal;
+         [{ param_annotation = (Set<string>); param_type_hint = ((Set<string>), (Some ([22:3-14], (Happly (([22:3-6], "\\HH\\Set"), [([22:7-13], (Hprim Tstring))]))))); 
+            param_is_variadic = false; param_pos = [22:15-17]; param_name = "$h"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
@@ -116,7 +113,7 @@
            [([25:3-54],
              (Expr
                 ((void), [25:3-53],
-                 (Call ((((function(Set<int> $h): void)), [25:3-4], (Id ([25:3-4], "\\h"))),
+                 (Call ((((function(Set<int> $h): void)), [25:3-4], (Id ([25:3-4], "\\h"))), 
                     [],
                     [(Pnormal,
                       ((Set<int>), [25:5-52],
@@ -147,6 +144,6 @@
                      None)))))
              ]
            };
-         f_fun_kind = FSync; f_user_attributes = []; f_external = false;
+         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

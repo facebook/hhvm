@@ -34,7 +34,7 @@ let find_positions_of_classes
                  child_class
                  (Relative_path.to_absolute path))
           | Some { Aast.c_span; _ } -> (child_class, c_span))
-        | Some FileInfo.(File ((Fun | RecordDef | Typedef | Const), _path)) ->
+        | Some FileInfo.(File ((Fun | Typedef | Const), _path)) ->
           failwith
             (Printf.sprintf
                "Information for class %s was returned as not a class"
@@ -180,7 +180,6 @@ let go ~(action : action) ~(genv : ServerEnv.genv) ~(env : ServerEnv.env) :
     search_class ctx class_name genv env
   | Member (class_name, member) -> search_member ctx class_name member genv env
   | Function _
-  | Record _
   | GConst _
   | LocalVar _ ->
     (env, Done [])

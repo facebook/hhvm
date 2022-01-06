@@ -88,12 +88,6 @@ let class_env ?origin ctx c =
   in
   env
 
-let record_def_env ?origin ctx rd =
-  let file = Pos.filename (fst rd.rd_name) in
-  let droot = Some (Typing_deps.Dep.Type (snd rd.rd_name)) in
-  let env = Typing_env_types.empty ?origin ctx file ~droot in
-  env
-
 let typedef_env ?origin ctx t =
   let file = Pos.filename (fst t.t_kind) in
   let droot = Some (Typing_deps.Dep.Type (snd t.t_name)) in

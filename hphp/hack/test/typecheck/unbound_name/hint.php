@@ -11,11 +11,6 @@ final class Test extends Bar {
   use TraitAlias;
 }
 
-record A {}
-type RecordAlias = A;
-
-record B extends RecordAlias {}
-
 // But allow typedefs if they are nested within a concrete class
 class Baz<T> {}
 

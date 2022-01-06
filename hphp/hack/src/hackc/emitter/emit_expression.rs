@@ -474,7 +474,6 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, false, c),
         Expr_::New(e) => emit_new(emitter, env, pos, e, false),
         Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, pos, &fp.0, &fp.1),
-        Expr_::Record(e) => emit_record(emitter, env, pos, e),
         Expr_::Darray(e) => Ok(emit_pos_then(
             alloc,
             pos,
@@ -1695,21 +1694,6 @@ fn emit_value_only_collection<'a, 'arena, 'decl, F: FnOnce(isize) -> InstructLit
             let inline_instrs = inline(alloc, e, x1)?;
             InstrSeq::gather(alloc, vec![inline_instrs, outofline_instrs])
         }
-    })
-}
-
-fn emit_record<'a, 'arena, 'decl>(
-    e: &mut Emitter<'arena, 'decl>,
-    env: &Env<'a, 'arena>,
-    pos: &Pos,
-    (cid, es): &(ast::Sid, Vec<(ast::Expr, ast::Expr)>),
-) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
-    let es = mk_afkvalues(es);
-    let id = class::ClassType::from_ast_name_and_mangle(alloc, &cid.1);
-    emit_symbol_refs::add_class(e, id);
-    emit_struct_array(e, env, pos, &es, |alloc, _, keys| {
-        Ok(instr::new_record(alloc, id, keys))
     })
 }
 
@@ -6218,7 +6202,6 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
         | E_::Call(_)
         | E_::FunctionPointer(_)
         | E_::New(_)
-        | E_::Record(_)
         | E_::Yield(_)
         | E_::Cast(_)
         | E_::Eif(_)

@@ -141,14 +141,6 @@ where
         Node(self.0.make_enum_class_enumerator(modifiers.0, type_.0, name.0, initializer.0, semicolon.0), self.1.make_enum_class_enumerator(modifiers.1, type_.1, name.1, initializer.1, semicolon.1))
     }
 
-    fn make_record_declaration(&mut self, attribute_spec: Self::R, modifier: Self::R, keyword: Self::R, name: Self::R, extends_keyword: Self::R, extends_opt: Self::R, left_brace: Self::R, fields: Self::R, right_brace: Self::R) -> Self::R {
-        Node(self.0.make_record_declaration(attribute_spec.0, modifier.0, keyword.0, name.0, extends_keyword.0, extends_opt.0, left_brace.0, fields.0, right_brace.0), self.1.make_record_declaration(attribute_spec.1, modifier.1, keyword.1, name.1, extends_keyword.1, extends_opt.1, left_brace.1, fields.1, right_brace.1))
-    }
-
-    fn make_record_field(&mut self, type_: Self::R, name: Self::R, init: Self::R, semi: Self::R) -> Self::R {
-        Node(self.0.make_record_field(type_.0, name.0, init.0, semi.0), self.1.make_record_field(type_.1, name.1, init.1, semi.1))
-    }
-
     fn make_alias_declaration(&mut self, attribute_spec: Self::R, keyword: Self::R, name: Self::R, generic_parameter: Self::R, constraint: Self::R, equal: Self::R, type_: Self::R, semicolon: Self::R) -> Self::R {
         Node(self.0.make_alias_declaration(attribute_spec.0, keyword.0, name.0, generic_parameter.0, constraint.0, equal.0, type_.0, semicolon.0), self.1.make_alias_declaration(attribute_spec.1, keyword.1, name.1, generic_parameter.1, constraint.1, equal.1, type_.1, semicolon.1))
     }
@@ -539,10 +531,6 @@ where
 
     fn make_constructor_call(&mut self, type_: Self::R, left_paren: Self::R, argument_list: Self::R, right_paren: Self::R) -> Self::R {
         Node(self.0.make_constructor_call(type_.0, left_paren.0, argument_list.0, right_paren.0), self.1.make_constructor_call(type_.1, left_paren.1, argument_list.1, right_paren.1))
-    }
-
-    fn make_record_creation_expression(&mut self, type_: Self::R, left_bracket: Self::R, members: Self::R, right_bracket: Self::R) -> Self::R {
-        Node(self.0.make_record_creation_expression(type_.0, left_bracket.0, members.0, right_bracket.0), self.1.make_record_creation_expression(type_.1, left_bracket.1, members.1, right_bracket.1))
     }
 
     fn make_darray_intrinsic_expression(&mut self, keyword: Self::R, explicit_type: Self::R, left_bracket: Self::R, members: Self::R, right_bracket: Self::R) -> Self::R {

@@ -45,7 +45,6 @@ let handle_unbound_name env (pos, name) kind =
       | TypeNamespace -> Typing_deps.Dep.Type name
       | ConstantNamespace -> Typing_deps.Dep.GConst name
       | TraitContext -> Typing_deps.Dep.Type name
-      | RecordContext -> Typing_deps.Dep.Type name
       | ClassContext -> Typing_deps.Dep.Type name
     in
     Typing_deps.add_idep (Provider_context.get_deps_mode env.ctx) env.droot dep
@@ -245,13 +244,6 @@ let handler ctx =
         hint_allow_typedef = false;
       }
 
-    method! at_record_hint env _ =
-      {
-        env with
-        hint_context = Name_context.RecordContext;
-        hint_allow_typedef = false;
-      }
-
     method! at_xhp_attr_hint env _ = { env with hint_allow_typedef = false }
 
     (* Below are the methods where we check for unbound names *)
@@ -280,16 +272,6 @@ let handler ctx =
             ~allow_typedef:false
             ~allow_generics:false
             ~kind:Name_context.ClassContext
-            id
-        in
-        env
-      | Aast.Record (id, _) ->
-        let () =
-          check_type_name
-            env
-            ~allow_typedef:false
-            ~allow_generics:false
-            ~kind:Name_context.RecordContext
             id
         in
         env

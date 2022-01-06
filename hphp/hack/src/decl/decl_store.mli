@@ -40,8 +40,6 @@ type decl_store = {
   get_fun: string -> Typing_defs.fun_elt option;
   add_typedef: string -> Typing_defs.typedef_type -> unit;
   get_typedef: string -> Typing_defs.typedef_type option;
-  add_recorddef: string -> Typing_defs.record_def_type -> unit;
-  get_recorddef: string -> Typing_defs.record_def_type option;
   add_gconst: string -> Typing_defs.const_decl -> unit;
   get_gconst: string -> Typing_defs.const_decl option;
   push_local_changes: unit -> unit;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<08e9e0f73fd1d61395ff772bec7bb2a8>>
+// @generated SignedSource<<63f4973ca91e0e3f2c72b3826f9e088a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,7 +11,6 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
@@ -247,63 +246,6 @@ pub struct ClassConst<'a> {
 }
 impl<'a> TrivialDrop for ClassConst<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ClassConst<'arena>);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum RecordFieldReq {
-    ValueRequired,
-    HasDefaultValue,
-}
-impl TrivialDrop for RecordFieldReq {}
-arena_deserializer::impl_deserialize_in_arena!(RecordFieldReq);
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub struct RecordDefType<'a> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub module: Option<ast_defs::Id<'a>>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub name: PosId<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub extends: Option<PosId<'a>>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub fields: &'a [(PosId<'a>, RecordFieldReq)],
-    pub abstract_: bool,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub pos: &'a pos_or_decl::PosOrDecl<'a>,
-}
-impl<'a> TrivialDrop for RecordDefType<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(RecordDefType<'arena>);
 
 /// The position is that of the hint in the `use` / `implements` AST node
 /// that causes a class to have this requirement applied to it. E.g.

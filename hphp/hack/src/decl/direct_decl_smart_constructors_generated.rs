@@ -126,14 +126,6 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         <Self as FlattenSmartConstructors<'src, Self>>::make_enum_class_enumerator(self, modifiers, type_, name, initializer, semicolon)
     }
 
-    fn make_record_declaration(&mut self, attribute_spec: Self::R, modifier: Self::R, keyword: Self::R, name: Self::R, extends_keyword: Self::R, extends_opt: Self::R, left_brace: Self::R, fields: Self::R, right_brace: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_record_declaration(self, attribute_spec, modifier, keyword, name, extends_keyword, extends_opt, left_brace, fields, right_brace)
-    }
-
-    fn make_record_field(&mut self, type_: Self::R, name: Self::R, init: Self::R, semi: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_record_field(self, type_, name, init, semi)
-    }
-
     fn make_alias_declaration(&mut self, attribute_spec: Self::R, keyword: Self::R, name: Self::R, generic_parameter: Self::R, constraint: Self::R, equal: Self::R, type_: Self::R, semicolon: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, Self>>::make_alias_declaration(self, attribute_spec, keyword, name, generic_parameter, constraint, equal, type_, semicolon)
     }
@@ -524,10 +516,6 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
 
     fn make_constructor_call(&mut self, type_: Self::R, left_paren: Self::R, argument_list: Self::R, right_paren: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, Self>>::make_constructor_call(self, type_, left_paren, argument_list, right_paren)
-    }
-
-    fn make_record_creation_expression(&mut self, type_: Self::R, left_bracket: Self::R, members: Self::R, right_bracket: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_record_creation_expression(self, type_, left_bracket, members, right_bracket)
     }
 
     fn make_darray_intrinsic_expression(&mut self, keyword: Self::R, explicit_type: Self::R, left_bracket: Self::R, members: Self::R, right_bracket: Self::R) -> Self::R {

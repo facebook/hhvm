@@ -263,8 +263,6 @@ type fun_decl = fun_elt [@@deriving show]
 
 type class_decl = shallow_class [@@deriving show]
 
-type record_decl = record_def_type [@@deriving show]
-
 type typedef_decl = typedef_type [@@deriving show]
 
 type const_decl = Typing_defs.const_decl [@@deriving show]
@@ -272,7 +270,6 @@ type const_decl = Typing_defs.const_decl [@@deriving show]
 type decl =
   | Class of class_decl
   | Fun of fun_decl
-  | Record of record_decl
   | Typedef of typedef_decl
   | Const of const_decl
 [@@deriving show]

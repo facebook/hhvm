@@ -9,7 +9,6 @@
 type kind_of_type =
   | TClass
   | TTypedef
-  | TRecordDef
 [@@deriving show, eq]
 
 type name_kind =
@@ -21,7 +20,6 @@ type name_kind =
 let type_kind_to_name_type (kind_of_type : kind_of_type) : FileInfo.name_type =
   match kind_of_type with
   | TClass -> FileInfo.Class
-  | TRecordDef -> FileInfo.RecordDef
   | TTypedef -> FileInfo.Typedef
 
 let name_kind_to_name_type (name_kind : name_kind) : FileInfo.name_type =
@@ -34,7 +32,6 @@ let name_kind_of_name_type (name_type : FileInfo.name_type) : name_kind =
   match name_type with
   | FileInfo.Class -> Type_kind TClass
   | FileInfo.Typedef -> Type_kind TTypedef
-  | FileInfo.RecordDef -> Type_kind TRecordDef
   | FileInfo.Fun -> Fun_kind
   | FileInfo.Const -> Const_kind
 
@@ -43,7 +40,6 @@ let type_kind_of_name_type (name_type : FileInfo.name_type) :
   match name_type with
   | FileInfo.Class -> Some TClass
   | FileInfo.Typedef -> Some TTypedef
-  | FileInfo.RecordDef -> Some TRecordDef
   | FileInfo.Fun
   | FileInfo.Const ->
     None

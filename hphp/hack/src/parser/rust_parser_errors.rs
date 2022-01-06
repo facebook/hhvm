@@ -5388,7 +5388,6 @@ where
                 );
                 self.check_constant_expression(&init)
             }
-            RecordField(x) => self.check_constant_expression(&x.init),
             XHPClassAttribute(x) => self.check_constant_expression(&x.initializer),
             OldAttributeSpecification(_) => self.disabled_legacy_attribute_syntax_errors(node),
             SoftTypeSpecifier(_) => self.disabled_legacy_soft_typehint_errors(node),

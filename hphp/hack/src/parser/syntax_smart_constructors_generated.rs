@@ -125,16 +125,6 @@ where
         Self::R::make_enum_class_enumerator(self.state_mut(), arg0, arg1, arg2, arg3, arg4)
     }
 
-    fn make_record_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R, arg8 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8]);
-        Self::R::make_record_declaration(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
-    }
-
-    fn make_record_field(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3]);
-        Self::R::make_record_field(self.state_mut(), arg0, arg1, arg2, arg3)
-    }
-
     fn make_alias_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R) -> Self::R {
         self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7]);
         Self::R::make_alias_declaration(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7)
@@ -623,11 +613,6 @@ where
     fn make_constructor_call(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
         self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3]);
         Self::R::make_constructor_call(self.state_mut(), arg0, arg1, arg2, arg3)
-    }
-
-    fn make_record_creation_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3]);
-        Self::R::make_record_creation_expression(self.state_mut(), arg0, arg1, arg2, arg3)
     }
 
     fn make_darray_intrinsic_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {

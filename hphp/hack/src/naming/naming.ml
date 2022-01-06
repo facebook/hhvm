@@ -2171,10 +2171,6 @@ and expr_ env p (e : Nast.expr_) =
         oexpr env unpacked_element,
         () )
   | Aast.New _ -> failwith "ast_to_nast aast.new"
-  | Aast.Record (id, l) ->
-    let () = check_name id in
-    let l = List.map l ~f:(fun (e1, e2) -> (expr env e1, expr env e2)) in
-    N.Record (id, l)
   | Aast.Efun (f, idl) ->
     let f = expr_lambda env f in
     N.Efun (f, idl)
@@ -2347,39 +2343,6 @@ and attr env at =
 
 and string2 env idl = List.map idl ~f:(expr env)
 
-let record_field env rf =
-  let (id, h, e) = rf in
-  let h = hint env h in
-  let e = oexpr env e in
-  (id, h, e)
-
-let record_def ctx rd =
-  let env = Env.make_top_level_env ctx in
-  let rd =
-    elaborate_namespaces#on_record_def
-      (Naming_elaborate_namespaces_endo.make_env env.namespace)
-      rd
-  in
-  let attrs = user_attributes env rd.Aast.rd_user_attributes in
-  let extends =
-    match rd.Aast.rd_extends with
-    | Some extends -> Some (hint env extends)
-    | None -> None
-  in
-  let fields = List.map rd.Aast.rd_fields ~f:(record_field env) in
-  {
-    N.rd_annotation = ();
-    rd_name = rd.Aast.rd_name;
-    rd_abstract = rd.Aast.rd_abstract;
-    rd_extends = extends;
-    rd_fields = fields;
-    rd_user_attributes = attrs;
-    rd_namespace = rd.Aast.rd_namespace;
-    rd_span = rd.Aast.rd_span;
-    rd_doc_comment = rd.Aast.rd_doc_comment;
-    rd_emit_id = rd.Aast.rd_emit_id;
-  }
-
 (**************************************************************************)
 (* Typedefs *)
 (**************************************************************************)
@@ -2454,7 +2417,6 @@ let program ctx ast =
     | Aast.Stmt (_, Aast.Markup _) ->
       acc
     | Aast.Stmt s -> N.Stmt (stmt !top_level_env s) :: acc
-    | Aast.RecordDef rd -> N.RecordDef (record_def ctx rd) :: acc
     | Aast.Typedef t -> N.Typedef (typedef ctx t) :: acc
     | Aast.Constant cst -> N.Constant (global_const ctx cst) :: acc
     | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc

@@ -101,7 +101,6 @@ let expr_name = function
   | A.As _ -> "As"
   | A.Upcast _ -> "Upcast"
   | A.New _ -> "New"
-  | A.Record _ -> "Record"
   | A.Efun _ -> "Efun"
   | A.Lfun _ -> "Lfun"
   | A.Xml _ -> "Xml"

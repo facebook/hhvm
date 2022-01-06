@@ -171,22 +171,6 @@ pub trait FlattenSmartConstructors<'src, State>
         }
     }
 
-    fn make_record_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R, arg8: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) && Self::is_zero(&arg8) {
-          Self::zero(SyntaxKind::RecordDeclaration)
-        } else {
-          self.flatten(SyntaxKind::RecordDeclaration, vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
-        }
-    }
-
-    fn make_record_field(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
-          Self::zero(SyntaxKind::RecordField)
-        } else {
-          self.flatten(SyntaxKind::RecordField, vec!(arg0, arg1, arg2, arg3))
-        }
-    }
-
     fn make_alias_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R, arg7: Self::R) -> Self::R {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) {
           Self::zero(SyntaxKind::AliasDeclaration)
@@ -968,14 +952,6 @@ pub trait FlattenSmartConstructors<'src, State>
           Self::zero(SyntaxKind::ConstructorCall)
         } else {
           self.flatten(SyntaxKind::ConstructorCall, vec!(arg0, arg1, arg2, arg3))
-        }
-    }
-
-    fn make_record_creation_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
-          Self::zero(SyntaxKind::RecordCreationExpression)
-        } else {
-          self.flatten(SyntaxKind::RecordCreationExpression, vec!(arg0, arg1, arg2, arg3))
         }
     }
 

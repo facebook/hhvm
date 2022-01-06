@@ -139,7 +139,6 @@ set(HHBC_AST_SRCS
   "hhbc/hhas_pos.rs"
   "hhbc/hhas_program.rs"
   "hhbc/hhas_property.rs"
-  "hhbc/hhas_record_def.rs"
   "hhbc/hhas_symbol_refs.rs"
   "hhbc/hhas_type.rs"
   "hhbc/hhas_type_const.rs"

@@ -2170,13 +2170,6 @@ where
                 }
                 Ok(E_::mk_id(Self::pos_name(&c.class_type, env)?))
             }
-            RecordCreationExpression(c) => {
-                let id = Self::pos_name(&c.type_, env)?;
-                Ok(E_::mk_record(
-                    id,
-                    Self::could_map(Self::p_member, &c.members, env)?,
-                ))
-            }
             LiteralExpression(c) => Self::p_expr_lit(location, node, &c.expression, env),
             PrefixedStringExpression(c) => {
                 /* Temporarily allow only`re`- prefixed strings */
@@ -2379,11 +2372,12 @@ where
                     Self::check_lvalue(i, env);
                 }
             }
-            Darray(_) | Varray(_) | Shape(_) | Collection(_) | Record(_) | Null | True | False
-            | Id(_) | Clone(_) | ClassConst(_) | Int(_) | Float(_) | PrefixedString(_)
-            | String(_) | String2(_) | Yield(_) | Await(_) | Cast(_) | Unop(_) | Binop(_)
-            | Eif(_) | New(_) | Efun(_) | Lfun(_) | Xml(_) | Import(_) | Pipe(_) | Is(_)
-            | As(_) | Call(_) => raise("Invalid lvalue"),
+            Darray(_) | Varray(_) | Shape(_) | Collection(_) | Null | True | False | Id(_)
+            | Clone(_) | ClassConst(_) | Int(_) | Float(_) | PrefixedString(_) | String(_)
+            | String2(_) | Yield(_) | Await(_) | Cast(_) | Unop(_) | Binop(_) | Eif(_) | New(_)
+            | Efun(_) | Lfun(_) | Xml(_) | Import(_) | Pipe(_) | Is(_) | As(_) | Call(_) => {
+                raise("Invalid lvalue")
+            }
             _ => {}
         }
     }
@@ -5520,30 +5514,6 @@ where
                     }
                 }
                 Ok(vec![ast::Def::mk_class(enum_class)])
-            }
-            RecordDeclaration(c) => {
-                let p_field = |n: S<'a, T, V>, e: &mut Env<'a, TF>| match &n.children {
-                    RecordField(c) => Ok((
-                        Self::pos_name(&c.name, e)?,
-                        Self::p_hint(&c.type_, e)?,
-                        Self::mp_optional(Self::p_simple_initializer, &c.init, e)?,
-                    )),
-                    _ => Self::missing_syntax("record_field", n, e),
-                };
-                Ok(vec![ast::Def::mk_record_def(ast::RecordDef {
-                    annotation: (),
-                    name: Self::pos_name(&c.name, env)?,
-                    extends: Self::could_map(Self::p_hint, &c.extends_opt, env)?
-                        .into_iter()
-                        .next(),
-                    abstract_: Self::token_kind(&c.modifier) == Some(TK::Abstract),
-                    user_attributes: Self::p_user_attributes(&c.attribute_spec, env)?,
-                    fields: Self::could_map(p_field, &c.fields, env)?,
-                    namespace: Self::mk_empty_ns_env(env),
-                    span: Self::p_pos(node, env),
-                    doc_comment: doc_comment_opt,
-                    emit_id: None,
-                })])
             }
             InclusionDirective(c) if env.file_mode() != file_info::Mode::Mhhi || env.codegen() => {
                 let expr = Self::p_expr(&c.expression, env)?;

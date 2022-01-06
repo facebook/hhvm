@@ -134,8 +134,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       tag validate_enum_declaration (fun x -> TLDEnum x) x
     | Syntax.EnumClassDeclaration _ ->
       tag validate_enum_class_declaration (fun x -> TLDEnumClass x) x
-    | Syntax.RecordDeclaration _ ->
-      tag validate_record_declaration (fun x -> TLDRecord x) x
     | Syntax.AliasDeclaration _ ->
       tag validate_alias_declaration (fun x -> TLDAlias x) x
     | Syntax.ContextAliasDeclaration _ ->
@@ -214,7 +212,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       invalidate_file_attribute_specification (value, thing)
     | TLDEnum thing -> invalidate_enum_declaration (value, thing)
     | TLDEnumClass thing -> invalidate_enum_class_declaration (value, thing)
-    | TLDRecord thing -> invalidate_record_declaration (value, thing)
     | TLDAlias thing -> invalidate_alias_declaration (value, thing)
     | TLDContextAlias thing ->
       invalidate_context_alias_declaration (value, thing)
@@ -340,8 +337,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
         x
     | Syntax.ObjectCreationExpression _ ->
       tag validate_object_creation_expression (fun x -> ExprObjectCreation x) x
-    | Syntax.RecordCreationExpression _ ->
-      tag validate_record_creation_expression (fun x -> ExprRecordCreation x) x
     | Syntax.DarrayIntrinsicExpression _ ->
       tag
         validate_darray_intrinsic_expression
@@ -445,8 +440,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       invalidate_collection_literal_expression (value, thing)
     | ExprObjectCreation thing ->
       invalidate_object_creation_expression (value, thing)
-    | ExprRecordCreation thing ->
-      invalidate_record_creation_expression (value, thing)
     | ExprDarrayIntrinsic thing ->
       invalidate_darray_intrinsic_expression (value, thing)
     | ExprDictionaryIntrinsic thing ->
@@ -828,11 +821,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
         validate_object_creation_expression
         (fun x -> LambdaObjectCreation x)
         x
-    | Syntax.RecordCreationExpression _ ->
-      tag
-        validate_record_creation_expression
-        (fun x -> LambdaRecordCreation x)
-        x
     | Syntax.DarrayIntrinsicExpression _ ->
       tag
         validate_darray_intrinsic_expression
@@ -938,8 +926,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       invalidate_collection_literal_expression (value, thing)
     | LambdaObjectCreation thing ->
       invalidate_object_creation_expression (value, thing)
-    | LambdaRecordCreation thing ->
-      invalidate_record_creation_expression (value, thing)
     | LambdaDarrayIntrinsic thing ->
       invalidate_darray_intrinsic_expression (value, thing)
     | LambdaDictionaryIntrinsic thing ->
@@ -1048,8 +1034,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
         x
     | Syntax.ObjectCreationExpression _ ->
       tag validate_object_creation_expression (fun x -> CExprObjectCreation x) x
-    | Syntax.RecordCreationExpression _ ->
-      tag validate_record_creation_expression (fun x -> CExprRecordCreation x) x
     | Syntax.DarrayIntrinsicExpression _ ->
       tag
         validate_darray_intrinsic_expression
@@ -1154,8 +1138,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       invalidate_collection_literal_expression (value, thing)
     | CExprObjectCreation thing ->
       invalidate_object_creation_expression (value, thing)
-    | CExprRecordCreation thing ->
-      invalidate_record_creation_expression (value, thing)
     | CExprDarrayIntrinsic thing ->
       invalidate_darray_intrinsic_expression (value, thing)
     | CExprDictionaryIntrinsic thing ->
@@ -1691,84 +1673,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
                 x.enum_class_enumerator_initializer;
             enum_class_enumerator_semicolon =
               invalidate_token x.enum_class_enumerator_semicolon;
-          };
-      Syntax.value = v;
-    }
-
-  and validate_record_declaration : record_declaration validator = function
-    | { Syntax.syntax = Syntax.RecordDeclaration x; value = v } ->
-      ( v,
-        {
-          record_right_brace = validate_token x.record_right_brace;
-          record_fields =
-            validate_list_with validate_record_field x.record_fields;
-          record_left_brace = validate_token x.record_left_brace;
-          record_extends_opt =
-            validate_option_with validate_type_constraint x.record_extends_opt;
-          record_extends_keyword =
-            validate_option_with validate_token x.record_extends_keyword;
-          record_name = validate_token x.record_name;
-          record_keyword = validate_token x.record_keyword;
-          record_modifier = validate_token x.record_modifier;
-          record_attribute_spec =
-            validate_option_with
-              validate_attribute_specification
-              x.record_attribute_spec;
-        } )
-    | s -> validation_fail (Some SyntaxKind.RecordDeclaration) s
-
-  and invalidate_record_declaration : record_declaration invalidator =
-   fun (v, x) ->
-    {
-      Syntax.syntax =
-        Syntax.RecordDeclaration
-          {
-            record_attribute_spec =
-              invalidate_option_with
-                invalidate_attribute_specification
-                x.record_attribute_spec;
-            record_modifier = invalidate_token x.record_modifier;
-            record_keyword = invalidate_token x.record_keyword;
-            record_name = invalidate_token x.record_name;
-            record_extends_keyword =
-              invalidate_option_with invalidate_token x.record_extends_keyword;
-            record_extends_opt =
-              invalidate_option_with
-                invalidate_type_constraint
-                x.record_extends_opt;
-            record_left_brace = invalidate_token x.record_left_brace;
-            record_fields =
-              invalidate_list_with invalidate_record_field x.record_fields;
-            record_right_brace = invalidate_token x.record_right_brace;
-          };
-      Syntax.value = v;
-    }
-
-  and validate_record_field : record_field validator = function
-    | { Syntax.syntax = Syntax.RecordField x; value = v } ->
-      ( v,
-        {
-          record_field_semi = validate_token x.record_field_semi;
-          record_field_init =
-            validate_option_with validate_simple_initializer x.record_field_init;
-          record_field_name = validate_token x.record_field_name;
-          record_field_type = validate_type_constraint x.record_field_type;
-        } )
-    | s -> validation_fail (Some SyntaxKind.RecordField) s
-
-  and invalidate_record_field : record_field invalidator =
-   fun (v, x) ->
-    {
-      Syntax.syntax =
-        Syntax.RecordField
-          {
-            record_field_type = invalidate_type_constraint x.record_field_type;
-            record_field_name = invalidate_token x.record_field_name;
-            record_field_init =
-              invalidate_option_with
-                invalidate_simple_initializer
-                x.record_field_init;
-            record_field_semi = invalidate_token x.record_field_semi;
           };
       Syntax.value = v;
     }
@@ -4950,44 +4854,6 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
               invalidate_option_with
                 invalidate_token
                 x.constructor_call_right_paren;
-          };
-      Syntax.value = v;
-    }
-
-  and validate_record_creation_expression : record_creation_expression validator
-      = function
-    | { Syntax.syntax = Syntax.RecordCreationExpression x; value = v } ->
-      ( v,
-        {
-          record_creation_right_bracket =
-            validate_token x.record_creation_right_bracket;
-          record_creation_members =
-            validate_list_with
-              validate_element_initializer
-              x.record_creation_members;
-          record_creation_left_bracket =
-            validate_token x.record_creation_left_bracket;
-          record_creation_type = validate_todo_aggregate x.record_creation_type;
-        } )
-    | s -> validation_fail (Some SyntaxKind.RecordCreationExpression) s
-
-  and invalidate_record_creation_expression :
-      record_creation_expression invalidator =
-   fun (v, x) ->
-    {
-      Syntax.syntax =
-        Syntax.RecordCreationExpression
-          {
-            record_creation_type =
-              invalidate_todo_aggregate x.record_creation_type;
-            record_creation_left_bracket =
-              invalidate_token x.record_creation_left_bracket;
-            record_creation_members =
-              invalidate_list_with
-                invalidate_element_initializer
-                x.record_creation_members;
-            record_creation_right_bracket =
-              invalidate_token x.record_creation_right_bracket;
           };
       Syntax.value = v;
     }

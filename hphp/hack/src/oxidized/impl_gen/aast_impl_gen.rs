@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<619a175fde72979d2a3e2f04b860848d>>
+// @generated SignedSource<<673629b5b2841c813badca554c70e10e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -969,9 +969,6 @@ impl<Ex, En> Expr_<Ex, En> {
     ) -> Self {
         Expr_::New(Box::new((p0, p1, p2, p3, p4)))
     }
-    pub fn mk_record(p0: Sid, p1: Vec<(Expr<Ex, En>, Expr<Ex, En>)>) -> Self {
-        Expr_::Record(Box::new((p0, p1)))
-    }
     pub fn mk_efun(p0: Fun_<Ex, En>, p1: Vec<Lid>) -> Self {
         Expr_::Efun(Box::new((p0, p1)))
     }
@@ -1252,12 +1249,6 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn is_new(&self) -> bool {
         match self {
             Expr_::New(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_record(&self) -> bool {
-        match self {
-            Expr_::Record(..) => true,
             _ => false,
         }
     }
@@ -1576,12 +1567,6 @@ impl<Ex, En> Expr_<Ex, En> {
     )> {
         match self {
             Expr_::New(p0) => Some((&p0.0, &p0.1, &p0.2, &p0.3, &p0.4)),
-            _ => None,
-        }
-    }
-    pub fn as_record(&self) -> Option<(&Sid, &Vec<(Expr<Ex, En>, Expr<Ex, En>)>)> {
-        match self {
-            Expr_::Record(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
@@ -1936,12 +1921,6 @@ impl<Ex, En> Expr_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_record_mut(&mut self) -> Option<(&mut Sid, &mut Vec<(Expr<Ex, En>, Expr<Ex, En>)>)> {
-        match self {
-            Expr_::Record(p0) => Some((&mut p0.0, &mut p0.1)),
-            _ => None,
-        }
-    }
     pub fn as_efun_mut(&mut self) -> Option<(&mut Fun_<Ex, En>, &mut Vec<Lid>)> {
         match self {
             Expr_::Efun(p0) => Some((&mut p0.0, &mut p0.1)),
@@ -2279,12 +2258,6 @@ impl<Ex, En> Expr_<Ex, En> {
     )> {
         match self {
             Expr_::New(p0) => Some(((*p0).0, (*p0).1, (*p0).2, (*p0).3, (*p0).4)),
-            _ => None,
-        }
-    }
-    pub fn as_record_into(self) -> Option<(Sid, Vec<(Expr<Ex, En>, Expr<Ex, En>)>)> {
-        match self {
-            Expr_::Record(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }
@@ -2999,9 +2972,6 @@ impl<Ex, En> Def<Ex, En> {
     pub fn mk_class(p0: Class_<Ex, En>) -> Self {
         Def::Class(Box::new(p0))
     }
-    pub fn mk_record_def(p0: RecordDef<Ex, En>) -> Self {
-        Def::RecordDef(Box::new(p0))
-    }
     pub fn mk_stmt(p0: Stmt<Ex, En>) -> Self {
         Def::Stmt(Box::new(p0))
     }
@@ -3032,12 +3002,6 @@ impl<Ex, En> Def<Ex, En> {
     pub fn is_class(&self) -> bool {
         match self {
             Def::Class(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_record_def(&self) -> bool {
-        match self {
-            Def::RecordDef(..) => true,
             _ => false,
         }
     }
@@ -3095,12 +3059,6 @@ impl<Ex, En> Def<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_record_def(&self) -> Option<&RecordDef<Ex, En>> {
-        match self {
-            Def::RecordDef(p0) => Some(&p0),
-            _ => None,
-        }
-    }
     pub fn as_stmt(&self) -> Option<&Stmt<Ex, En>> {
         match self {
             Def::Stmt(p0) => Some(&p0),
@@ -3155,12 +3113,6 @@ impl<Ex, En> Def<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_record_def_mut(&mut self) -> Option<&mut RecordDef<Ex, En>> {
-        match self {
-            Def::RecordDef(p0) => Some(p0.as_mut()),
-            _ => None,
-        }
-    }
     pub fn as_stmt_mut(&mut self) -> Option<&mut Stmt<Ex, En>> {
         match self {
             Def::Stmt(p0) => Some(p0.as_mut()),
@@ -3212,12 +3164,6 @@ impl<Ex, En> Def<Ex, En> {
     pub fn as_class_into(self) -> Option<Class_<Ex, En>> {
         match self {
             Def::Class(p0) => Some(*p0),
-            _ => None,
-        }
-    }
-    pub fn as_record_def_into(self) -> Option<RecordDef<Ex, En>> {
-        match self {
-            Def::RecordDef(p0) => Some(*p0),
             _ => None,
         }
     }

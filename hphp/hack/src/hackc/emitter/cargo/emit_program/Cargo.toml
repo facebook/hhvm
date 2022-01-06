@@ -15,7 +15,6 @@ emit_class = { path = "../emit_class" }
 emit_constant = { path = "../emit_constant" }
 emit_file_attributes = { path = "../emit_file_attributes" }
 emit_function = { path = "../emit_function" }
-emit_record_def = { path = "../emit_record_def" }
 emit_symbol_refs = { path = "../emit_symbol_refs" }
 emit_typedef = { path = "../emit_typedef" }
 env = { path = "../env" }

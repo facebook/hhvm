@@ -52,9 +52,6 @@ let split_defs defs split_if_in_defs =
     let (n_classes1, n_classes2) =
       split_sets defs.n_classes split_if_in_defs.n_classes
     in
-    let (n_record_defs1, n_record_defs2) =
-      split_sets defs.n_record_defs split_if_in_defs.n_record_defs
-    in
     let (n_types1, n_types2) =
       split_sets defs.n_types split_if_in_defs.n_types
     in
@@ -65,7 +62,6 @@ let split_defs defs split_if_in_defs =
       {
         n_funs = n_funs1;
         n_classes = n_classes1;
-        n_record_defs = n_record_defs1;
         n_types = n_types1;
         n_consts = n_consts1;
       }
@@ -74,7 +70,6 @@ let split_defs defs split_if_in_defs =
       {
         n_funs = n_funs2;
         n_classes = n_classes2;
-        n_record_defs = n_record_defs2;
         n_types = n_types2;
         n_consts = n_consts2;
       }

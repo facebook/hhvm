@@ -10,7 +10,6 @@ use hhas_class::HhasClass;
 use hhas_constant::HhasConstant;
 use hhas_function::HhasFunction;
 use hhas_pos::HhasPos;
-use hhas_record_def::HhasRecord;
 use hhas_symbol_refs::HhasSymbolRefs;
 use hhas_typedef::HhasTypedef;
 use hhbc_ast::FatalOp;
@@ -21,7 +20,6 @@ pub struct HhasProgram<'arena> {
     pub adata: Slice<'arena, HhasAdata<'arena>>,
     pub functions: Slice<'arena, HhasFunction<'arena>>,
     pub classes: Slice<'arena, HhasClass<'arena>>,
-    pub record_defs: Slice<'arena, HhasRecord<'arena>>,
     pub typedefs: Slice<'arena, HhasTypedef<'arena>>,
     pub file_attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub symbol_refs: HhasSymbolRefs<'arena>,

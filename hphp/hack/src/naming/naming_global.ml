@@ -67,10 +67,7 @@ module GEnv = struct
 
   let type_info ctx name =
     match Naming_provider.get_type_pos_and_kind ctx name with
-    | Some
-        ( pos,
-          (( Naming_types.TClass | Naming_types.TTypedef
-           | Naming_types.TRecordDef ) as kind) ) ->
+    | Some (pos, ((Naming_types.TClass | Naming_types.TTypedef) as kind)) ->
       let (p, _) = get_type_full_pos ctx (pos, name) in
       Some (p, kind)
     | None -> None
@@ -88,7 +85,6 @@ module GEnv = struct
       let (p, _) = get_type_full_pos ctx (pos, name) in
       Some p
     | Some (_, Naming_types.TClass)
-    | Some (_, Naming_types.TRecordDef)
     | None ->
       None
 
@@ -173,8 +169,8 @@ let should_report_duplicate
     | (Full b, (File (Const, _) as a)) ->
       let a = fst (GEnv.get_const_full_pos ctx (a, canonical)) in
       Pos.compare a b = 0
-    | ((File ((Class | Typedef | RecordDef), _) as a), Full b)
-    | (Full b, (File ((Class | Typedef | RecordDef), _) as a)) ->
+    | ((File ((Class | Typedef), _) as a), Full b)
+    | (Full b, (File ((Class | Typedef), _) as a)) ->
       let a = fst (GEnv.get_type_full_pos ctx (a, canonical)) in
       Pos.compare a b = 0
     | (File (a, fna), File (b, fnb)) ->
@@ -332,8 +328,8 @@ end
 (*****************************************************************************)
 (* Updating the environment *)
 (*****************************************************************************)
-let remove_decls ~backend ~funs ~classes ~record_defs ~typedefs ~consts =
-  Naming_provider.remove_type_batch backend (record_defs @ typedefs @ classes);
+let remove_decls ~backend ~funs ~classes ~typedefs ~consts =
+  Naming_provider.remove_type_batch backend (typedefs @ classes);
   Naming_provider.remove_fun_batch backend funs;
   Naming_provider.remove_const_batch backend consts
 
@@ -360,16 +356,6 @@ let make_env_error_if_already_bound ctx fileinfo =
            fileinfo
            ~kind:Naming_types.TClass)
   in
-  let current_file_symbols_acc =
-    List.fold
-      fileinfo.FileInfo.record_defs
-      ~init:current_file_symbols_acc
-      ~f:
-        (Env.new_type_error_if_already_bound
-           ctx
-           fileinfo
-           ~kind:Naming_types.TRecordDef)
-  in
   let (_ : FileInfo.pos list) =
     List.fold
       fileinfo.FileInfo.typedefs
@@ -394,9 +380,6 @@ let make_env_skip_if_already_bound ctx fn fileinfo =
   List.iter
     fileinfo.FileInfo.classes
     ~f:(Env.new_type_skip_if_already_bound ctx fn ~kind:Naming_types.TClass);
-  List.iter
-    fileinfo.FileInfo.record_defs
-    ~f:(Env.new_type_skip_if_already_bound ctx fn ~kind:Naming_types.TRecordDef);
   List.iter
     fileinfo.FileInfo.typedefs
     ~f:(Env.new_type_skip_if_already_bound ctx fn ~kind:Naming_types.TTypedef);
@@ -484,9 +467,6 @@ let ndecl_file_error_if_already_bound ctx fn fileinfo =
     in
     let failed =
       add_files_to_rename failed fileinfo.FileInfo.classes type_canon_pos
-    in
-    let failed =
-      add_files_to_rename failed fileinfo.FileInfo.record_defs type_canon_pos
     in
     let failed =
       add_files_to_rename failed fileinfo.FileInfo.typedefs type_canon_pos

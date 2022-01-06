@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<696a2e200492e86bf312d39a9e797019>>
+// @generated SignedSource<<b88a56d44a4106d712ea045b32201086>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -38,8 +38,6 @@ pub struct Env<'a> {
     pub ns_uses: s_map::SMap<'a, &'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub class_uses: s_map::SMap<'a, &'a str>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub record_def_uses: s_map::SMap<'a, &'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub fun_uses: s_map::SMap<'a, &'a str>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

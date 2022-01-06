@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d7a0a56cd11a9ff51622dbd2dea38da9>>
+// @generated SignedSource<<99d3daefa09552a2064f9bb70195e844>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -20,7 +20,6 @@ use crate::*;
 pub use crate::ast_defs::shape_map;
 
 pub use aast::ClassHint;
-pub use aast::RecordHint;
 pub use aast::Sid;
 pub use aast::TraitHint;
 pub use aast::XhpAttrHint;
@@ -61,8 +60,6 @@ pub type FunParam = aast::FunParam<(), ()>;
 pub type FunVariadicity = aast::FunVariadicity<(), ()>;
 
 pub type Typedef = aast::Typedef<(), ()>;
-
-pub type RecordDef = aast::RecordDef<(), ()>;
 
 pub type Tparam = aast::Tparam<(), ()>;
 

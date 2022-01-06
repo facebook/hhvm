@@ -250,79 +250,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env semi;
           Newline;
         ]
-    | Syntax.RecordDeclaration
-        {
-          record_attribute_spec = attr;
-          record_modifier = modifier;
-          record_keyword = kw;
-          record_name = name;
-          record_extends_keyword = extends_kw;
-          record_extends_opt = extends;
-          record_left_brace = left_b;
-          record_fields = fields;
-          record_right_brace = right_b;
-        } ->
-      let after_each_ancestor is_last =
-        if is_last then
-          Nothing
-        else
-          space_split ()
-      in
-      Concat
-        [
-          t env attr;
-          when_present attr newline;
-          t env modifier;
-          Space;
-          t env kw;
-          Space;
-          t env name;
-          Space;
-          when_present extends_kw (fun () ->
-              Concat
-                [
-                  Space;
-                  Split;
-                  WithRule
-                    ( Rule.Parental,
-                      Nest
-                        [
-                          Span
-                            [
-                              t env extends_kw;
-                              Space;
-                              Split;
-                              WithRule
-                                ( Rule.Parental,
-                                  Nest
-                                    [
-                                      handle_possible_list
-                                        env
-                                        ~after_each:after_each_ancestor
-                                        extends;
-                                    ] );
-                            ];
-                        ] );
-                ]);
-          braced_block_nest env left_b right_b [handle_possible_list env fields];
-          Newline;
-        ]
-    | Syntax.RecordField
-        {
-          record_field_type;
-          record_field_name = name;
-          record_field_init;
-          record_field_semi = semi_kw;
-        } ->
-      Concat
-        [
-          t env record_field_type;
-          Space;
-          t env name;
-          t env record_field_init;
-          t env semi_kw;
-          Newline;
-        ]
     | Syntax.AliasDeclaration
         {
           alias_attribute_spec = attr;
@@ -1687,14 +1614,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           constructor_call_right_paren = right_p;
         } ->
       Concat [t env obj_type; transform_argish env left_p arg_list right_p]
-    | Syntax.RecordCreationExpression
-        {
-          record_creation_type = rec_type;
-          record_creation_left_bracket = left_b;
-          record_creation_members = members;
-          record_creation_right_bracket = right_b;
-        } ->
-      transform_container_literal env rec_type left_b members right_b
     | Syntax.AnonymousClass
         {
           anonymous_class_class_keyword = classkw;

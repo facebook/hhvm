@@ -11,7 +11,6 @@ module Decl_cache_entry : sig
   type _ t =
     | Fun_decl : string -> Typing_defs.fun_elt t
     | Class_decl : string -> Obj.t t
-    | Record_decl : string -> Typing_defs.record_def_type t
     | Typedef_decl : string -> Typing_defs.typedef_type t
     | Gconst_decl : string -> Typing_defs.const_decl t
 

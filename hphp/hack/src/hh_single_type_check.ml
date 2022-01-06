@@ -1124,14 +1124,11 @@ let parse_and_name ctx files_contents =
         let { Parser_return.file_mode; comments; ast; _ } = parsed_file in
         (* If the feature is turned on, deregister functions with attribute
            __PHPStdLib. This does it for all functions, not just hhi files *)
-        let (funs, classes, record_defs, typedefs, consts) =
-          Nast.get_defs ast
-        in
+        let (funs, classes, _, typedefs, consts) = Nast.get_defs ast in
         {
           FileInfo.file_mode;
           funs;
           classes;
-          record_defs;
           typedefs;
           consts;
           comments = Some comments;
@@ -1573,10 +1570,6 @@ let dump_dep_hashes (nast : Nast.program) : unit =
       method! on_gconst cls x =
         process_variant @@ GConst (snd x.cst_name);
         super#on_gconst cls x
-
-      method! on_record_def _cls x =
-        process_variant @@ Type (snd x.rd_name);
-        super#on_record_def (Some (snd x.rd_name)) x
     end
   in
   handler#on_program None nast
@@ -2542,7 +2535,6 @@ let decl_and_run_mode
                 ~backend:(Provider_context.get_backend ctx)
                 ~funs:(ids_to_strings file_info.FileInfo.funs)
                 ~classes:(ids_to_strings file_info.FileInfo.classes)
-                ~record_defs:(ids_to_strings file_info.FileInfo.record_defs)
                 ~typedefs:(ids_to_strings file_info.FileInfo.typedefs)
                 ~consts:(ids_to_strings file_info.FileInfo.consts))));
 

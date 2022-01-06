@@ -49,8 +49,6 @@ let invalidate_local_decl_caches_for_file
       Decl_cache.remove local_memory.decl_cache ~key:(Gconst_decl name));
   List.iter file_info.funs ~f:(fun (_, name, _) ->
       Decl_cache.remove local_memory.decl_cache ~key:(Fun_decl name));
-  List.iter file_info.record_defs ~f:(fun (_, name, _) ->
-      Decl_cache.remove local_memory.decl_cache ~key:(Record_decl name));
   List.iter file_info.typedefs ~f:(fun (_, name, _) ->
       Decl_cache.remove local_memory.decl_cache ~key:(Typedef_decl name));
   List.iter file_info.classes ~f:(fun (_, name, _) ->
@@ -70,13 +68,12 @@ let invalidate_local_decl_caches_for_entries
     match entry.Provider_context.parser_return with
     | None -> () (* hasn't been parsed, hence nothing to invalidate *)
     | Some { Parser_return.ast; _ } ->
-      let (funs, classes, record_defs, typedefs, consts) = Nast.get_defs ast in
+      let (funs, classes, _, typedefs, consts) = Nast.get_defs ast in
       invalidate_local_decl_caches_for_file
         local_memory
         {
           FileInfo.funs;
           classes;
-          record_defs;
           typedefs;
           consts;
           hash = None;

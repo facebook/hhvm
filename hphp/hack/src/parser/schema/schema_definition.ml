@@ -237,41 +237,6 @@ let schema : schema_node list =
         ];
     };
     {
-      kind_name = "RecordDeclaration";
-      type_name = "record_declaration";
-      func_name = "record_declaration";
-      description = "record_declaration";
-      prefix = "record";
-      aggregates = [TopLevelDeclaration];
-      fields =
-        [
-          ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
-          ("modifier", Token);
-          ("keyword", Token);
-          ("name", Token);
-          ("extends_keyword", ZeroOrOne Token);
-          ("extends_opt", ZeroOrOne (Just "TypeConstraint"));
-          ("left_brace", Token);
-          ("fields", ZeroOrMore (Just "RecordField"));
-          ("right_brace", Token);
-        ];
-    };
-    {
-      kind_name = "RecordField";
-      type_name = "record_field";
-      func_name = "record_field";
-      description = "record_field";
-      prefix = "record_field";
-      aggregates = [];
-      fields =
-        [
-          ("type", Just "TypeConstraint");
-          ("name", Token);
-          ("init", ZeroOrOne (Just "SimpleInitializer"));
-          ("semi", Token);
-        ];
-    };
-    {
       kind_name = "AliasDeclaration";
       type_name = "alias_declaration";
       func_name = "alias_declaration";
@@ -1646,21 +1611,6 @@ let schema : schema_node list =
           ("left_paren", ZeroOrOne Token);
           ("argument_list", ZeroOrMore (Aggregate Expression));
           ("right_paren", ZeroOrOne Token);
-        ];
-    };
-    {
-      kind_name = "RecordCreationExpression";
-      type_name = "record_creation_expression";
-      func_name = "record_creation_expression";
-      description = "record_creation_expression";
-      prefix = "record_creation";
-      aggregates = [Expression; ConstructorExpression; LambdaBody];
-      fields =
-        [
-          ("type", Aggregate TODO);
-          ("left_bracket", Token);
-          ("members", ZeroOrMore (Just "ElementInitializer"));
-          ("right_bracket", Token);
         ];
     };
     {

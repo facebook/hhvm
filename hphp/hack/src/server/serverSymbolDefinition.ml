@@ -102,9 +102,6 @@ let summarize_class_typedef ctx x =
   | Naming_types.TTypedef ->
     Ast_provider.find_typedef_in_file ctx fn x >>= fun tdef ->
     Some (FileOutline.summarize_typedef tdef)
-  | Naming_types.TRecordDef ->
-    Ast_provider.find_record_def_in_file ctx fn x >>= fun rd ->
-    Some (FileOutline.summarize_record_decl rd)
 
 let go ctx ast result =
   let module SO = SymbolOccurrence in
@@ -176,7 +173,6 @@ let go ctx ast result =
     get_gconst_by_name ctx result.SO.name >>= fun cst ->
     Some (FileOutline.summarize_gconst cst)
   | SO.Class _ -> summarize_class_typedef ctx result.SO.name
-  | SO.Record -> summarize_class_typedef ctx result.SO.name
   | SO.Typeconst (c_name, typeconst_name) ->
     Decl_provider.get_class ctx c_name >>= fun class_ ->
     Cls.get_typeconst class_ typeconst_name >>= fun m ->
@@ -209,7 +205,6 @@ let get_definition_cst_node_from_pos ctx entry kind pos =
         | (SymbolDefinition.Method, SyntaxKind.MethodishDeclaration)
         | (SymbolDefinition.Property, SyntaxKind.PropertyDeclaration)
         | (SymbolDefinition.Property, SyntaxKind.XHPClassAttribute)
-        | (SymbolDefinition.RecordDef, SyntaxKind.RecordDeclaration)
         | (SymbolDefinition.Const, SyntaxKind.ConstDeclaration)
         | (SymbolDefinition.Enum, SyntaxKind.EnumDeclaration)
         | (SymbolDefinition.Enum, SyntaxKind.EnumClassDeclaration)

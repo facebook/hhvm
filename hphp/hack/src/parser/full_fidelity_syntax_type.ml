@@ -236,23 +236,6 @@ struct
         enum_class_enumerator_initializer: t;
         enum_class_enumerator_semicolon: t;
       }
-    | RecordDeclaration of {
-        record_attribute_spec: t;
-        record_modifier: t;
-        record_keyword: t;
-        record_name: t;
-        record_extends_keyword: t;
-        record_extends_opt: t;
-        record_left_brace: t;
-        record_fields: t;
-        record_right_brace: t;
-      }
-    | RecordField of {
-        record_field_type: t;
-        record_field_name: t;
-        record_field_init: t;
-        record_field_semi: t;
-      }
     | AliasDeclaration of {
         alias_attribute_spec: t;
         alias_keyword: t;
@@ -845,12 +828,6 @@ struct
         constructor_call_argument_list: t;
         constructor_call_right_paren: t;
       }
-    | RecordCreationExpression of {
-        record_creation_type: t;
-        record_creation_left_bracket: t;
-        record_creation_members: t;
-        record_creation_right_bracket: t;
-      }
     | DarrayIntrinsicExpression of {
         darray_intrinsic_keyword: t;
         darray_intrinsic_explicit_type: t;
@@ -1177,7 +1154,6 @@ struct
     | TLDFileAttributeSpecification of file_attribute_specification
     | TLDEnum of enum_declaration
     | TLDEnumClass of enum_class_declaration
-    | TLDRecord of record_declaration
     | TLDAlias of alias_declaration
     | TLDContextAlias of context_alias_declaration
     | TLDNamespace of namespace_declaration
@@ -1244,7 +1220,6 @@ struct
     | ExprList of list_expression
     | ExprCollectionLiteral of collection_literal_expression
     | ExprObjectCreation of object_creation_expression
-    | ExprRecordCreation of record_creation_expression
     | ExprDarrayIntrinsic of darray_intrinsic_expression
     | ExprDictionaryIntrinsic of dictionary_intrinsic_expression
     | ExprKeysetIntrinsic of keyset_intrinsic_expression
@@ -1367,7 +1342,6 @@ struct
     | LambdaList of list_expression
     | LambdaCollectionLiteral of collection_literal_expression
     | LambdaObjectCreation of object_creation_expression
-    | LambdaRecordCreation of record_creation_expression
     | LambdaDarrayIntrinsic of darray_intrinsic_expression
     | LambdaDictionaryIntrinsic of dictionary_intrinsic_expression
     | LambdaKeysetIntrinsic of keyset_intrinsic_expression
@@ -1416,7 +1390,6 @@ struct
     | CExprList of list_expression
     | CExprCollectionLiteral of collection_literal_expression
     | CExprObjectCreation of object_creation_expression
-    | CExprRecordCreation of record_creation_expression
     | CExprDarrayIntrinsic of darray_intrinsic_expression
     | CExprDictionaryIntrinsic of dictionary_intrinsic_expression
     | CExprKeysetIntrinsic of keyset_intrinsic_expression
@@ -1528,25 +1501,6 @@ struct
     enum_class_enumerator_name: Token.t value;
     enum_class_enumerator_initializer: simple_initializer option value;
     enum_class_enumerator_semicolon: Token.t value;
-  }
-
-  and record_declaration = {
-    record_attribute_spec: attribute_specification option value;
-    record_modifier: Token.t value;
-    record_keyword: Token.t value;
-    record_name: Token.t value;
-    record_extends_keyword: Token.t option value;
-    record_extends_opt: type_constraint option value;
-    record_left_brace: Token.t value;
-    record_fields: record_field listesque value;
-    record_right_brace: Token.t value;
-  }
-
-  and record_field = {
-    record_field_type: type_constraint value;
-    record_field_name: Token.t value;
-    record_field_init: simple_initializer option value;
-    record_field_semi: Token.t value;
   }
 
   and alias_declaration = {
@@ -2239,13 +2193,6 @@ struct
     constructor_call_left_paren: Token.t option value;
     constructor_call_argument_list: expression listesque value;
     constructor_call_right_paren: Token.t option value;
-  }
-
-  and record_creation_expression = {
-    record_creation_type: todo_aggregate value;
-    record_creation_left_bracket: Token.t value;
-    record_creation_members: element_initializer listesque value;
-    record_creation_right_bracket: Token.t value;
   }
 
   and darray_intrinsic_expression = {

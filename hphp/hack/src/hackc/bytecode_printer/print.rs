@@ -26,7 +26,6 @@ use hhas_param::HhasParam;
 use hhas_pos::{HhasPos, HhasSpan};
 use hhas_program::HhasProgram;
 use hhas_property::HhasProperty;
-use hhas_record_def::{Field, HhasRecord};
 use hhas_symbol_refs::{HhasSymbolRefs, IncludePath};
 use hhas_type::{constraint, HhasTypeInfo};
 use hhas_type_const::HhasTypeConstant;
@@ -144,7 +143,6 @@ fn print_program_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HhasProgram<'_>) 
     concat(w, &prog.adata, |w, a| print_adata_region(ctx, w, a))?;
     concat(w, &prog.functions, |w, f| print_fun_def(ctx, w, f))?;
     concat(w, &prog.classes, |w, cd| print_class_def(ctx, w, cd))?;
-    concat(w, &prog.record_defs, |w, rd| print_record_def(ctx, w, rd))?;
     concat(w, &prog.constants, |w, c| print_constant(ctx, w, c))?;
     concat(w, &prog.typedefs, |w, td| print_typedef(ctx, w, td))?;
     print_file_attributes(ctx, w, prog.file_attributes.as_ref())?;
@@ -2370,15 +2368,6 @@ fn print_uop(w: &mut dyn Write, op: ast::Uop) -> Result<()> {
     })
 }
 
-fn print_key_values(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    env: &ExprEnv<'_, '_>,
-    kvs: impl AsRef<[(ast::Expr, ast::Expr)]>,
-) -> Result<()> {
-    print_key_values_(ctx, w, env, print_expr, kvs)
-}
-
 fn print_key_values_<K, KeyPrinter>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
@@ -2718,10 +2707,6 @@ fn print_expr(
                     }
                 }
             }
-        }
-        E_::Record(r) => {
-            w.write_all(lstrip(adjust_id(env, &(r.0).1).as_ref(), "\\\\").as_bytes())?;
-            print_key_values(ctx, w, env, &r.1)
         }
         E_::ClassGet(cg) => {
             match &(cg.0).2 {
@@ -3381,54 +3366,6 @@ fn print_extends(w: &mut dyn Write, base: Option<&str>) -> Result<()> {
         None => Ok(()),
         Some(b) => concat_str_by(w, " ", [" extends", b]),
     }
-}
-
-fn print_record_field(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    Field(name, type_info, intial_value): &Field<'_>,
-) -> Result<()> {
-    ctx.newline(w)?;
-    w.write_all(b".property ")?;
-    match intial_value {
-        Just(_) => w.write_all(b"[public] ")?,
-        Nothing => w.write_all(b"[public sys_initial_val] ")?,
-    }
-    print_type_info(w, type_info)?;
-    concat_str_by(w, " ", ["", name.unsafe_as_str(), "="])?;
-
-    ctx.block(w, |c, w| {
-        c.newline(w)?;
-        match intial_value {
-            Nothing => w.write_all(b"uninit")?,
-            Just(value) => triple_quotes(w, |w| print_adata(c, w, value))?,
-        }
-        w.write_all(b";")
-    })
-}
-
-fn print_record_def(ctx: &Context<'_>, w: &mut dyn Write, record: &HhasRecord<'_>) -> Result<()> {
-    newline(w)?;
-    if record.is_abstract {
-        concat_str_by(w, " ", [".record", record.name.to_raw_string()])?;
-    } else {
-        concat_str_by(w, " ", [".record", "[final]", record.name.to_raw_string()])?;
-    }
-    w.write_all(b" ")?;
-    print_span(w, &record.span)?;
-    print_extends(
-        w,
-        Option::from(record.base.as_ref().map(|b| b.to_raw_string())),
-    )?;
-    w.write_all(b" ")?;
-
-    braces(w, |w| {
-        ctx.block(w, |c, w| {
-            concat(w, &record.fields, |w, rf| print_record_field(c, w, rf))
-        })?;
-        ctx.newline(w)
-    })?;
-    newline(w)
 }
 
 /// Convert an `Expr` to a `String` of the equivalent source code.

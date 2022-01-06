@@ -70,33 +70,6 @@ end = struct
     make_and_allow_coercion pos reason (MakeType.unenforced locl_ty)
 end
 
-(* Return a map describing all the fields in this record, including
-   inherited fields, and whether they have a default value. *)
-let all_record_fields (env : env) (rd : Decl_provider.record_def_decl) :
-    (Typing_defs.pos_id * Typing_defs.record_field_req) SMap.t =
-  let record_fields rd =
-    List.fold
-      rd.rdt_fields
-      ~init:SMap.empty
-      ~f:(fun acc (((_, name), _) as f) -> SMap.add name f acc)
-  in
-  let rec loop rd fields decls_seen =
-    match rd.rdt_extends with
-    | Some (_, parent_name) when SSet.mem parent_name decls_seen ->
-      (* Inheritance loop, so we've seen all the records. *)
-      fields
-    | Some (_, parent_name) ->
-      (match Decl_provider.get_record_def (Env.get_ctx env) parent_name with
-      | Some rd ->
-        loop
-          rd
-          (SMap.union fields (record_fields rd))
-          (SSet.add (snd rd.rdt_name) decls_seen)
-      | None -> fields)
-    | None -> fields
-  in
-  loop rd (record_fields rd) (SSet.singleton (snd rd.rdt_name))
-
 let add_decl_errors = function
   | None -> ()
   | Some errors -> Errors.merge_into_current errors

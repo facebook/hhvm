@@ -12,7 +12,6 @@ open Hh_prelude
 type env = {
   ns_ns_uses: string SMap.t; [@opaque]
   ns_class_uses: string SMap.t; [@opaque]
-  ns_record_def_uses: string SMap.t; [@opaque]
   ns_fun_uses: string SMap.t; [@opaque]
   ns_const_uses: string SMap.t; [@opaque]
   ns_name: string option;
@@ -37,7 +36,6 @@ let empty auto_ns_map is_codegen disable_xhp_element_mangling =
   {
     ns_ns_uses = SMap.union (SMap.of_list auto_ns_map) default_ns_uses;
     ns_class_uses = default_class_uses;
-    ns_record_def_uses = SMap.empty;
     ns_fun_uses = default_fun_uses;
     ns_const_uses = default_const_uses;
     ns_name = None;

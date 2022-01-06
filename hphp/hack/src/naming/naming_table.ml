@@ -504,9 +504,6 @@ let update_reverse_entries_helper
         Naming_provider.remove_type_batch
           backend
           (fi.FileInfo.typedefs |> List.map ~f:(fun (_, x, _) -> x));
-        Naming_provider.remove_type_batch
-          backend
-          (fi.FileInfo.record_defs |> List.map ~f:(fun (_, x, _) -> x));
         Naming_provider.remove_fun_batch
           backend
           (fi.FileInfo.funs |> List.map ~f:(fun (_, x, _) -> x));
@@ -524,10 +521,6 @@ let update_reverse_entries_helper
         List.iter
           ~f:(fun (pos, name, _) -> Naming_provider.add_class backend name pos)
           fi.FileInfo.classes;
-        List.iter
-          ~f:(fun (pos, name, _) ->
-            Naming_provider.add_record_def backend name pos)
-          fi.FileInfo.record_defs;
         List.iter
           ~f:(fun (pos, name, _) ->
             Naming_provider.add_typedef backend name pos)

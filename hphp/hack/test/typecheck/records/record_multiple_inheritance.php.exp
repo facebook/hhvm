@@ -1,4 +1,0 @@
-File "record_multiple_inheritance.php", line 6, characters 19-19:
-A left brace `{` is expected here. (Parsing[1002])
-File "record_multiple_inheritance.php", line 6, characters 19-19:
-Encountered unexpected text `,`, was expecting a type hint. (Parsing[1002])

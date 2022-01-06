@@ -188,33 +188,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_record_declaration(ctx: &C, attribute_spec: Self, modifier: Self, keyword: Self, name: Self, extends_keyword: Self, extends_opt: Self, left_brace: Self, fields: Self, right_brace: Self) -> Self {
-        let syntax = SyntaxVariant::RecordDeclaration(ctx.get_arena().alloc(RecordDeclarationChildren {
-            attribute_spec,
-            modifier,
-            keyword,
-            name,
-            extends_keyword,
-            extends_opt,
-            left_brace,
-            fields,
-            right_brace,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_record_field(ctx: &C, type_: Self, name: Self, init: Self, semi: Self) -> Self {
-        let syntax = SyntaxVariant::RecordField(ctx.get_arena().alloc(RecordFieldChildren {
-            type_,
-            name,
-            init,
-            semi,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_alias_declaration(ctx: &C, attribute_spec: Self, keyword: Self, name: Self, generic_parameter: Self, constraint: Self, equal: Self, type_: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::AliasDeclaration(ctx.get_arena().alloc(AliasDeclarationChildren {
             attribute_spec,
@@ -1296,17 +1269,6 @@ where
             left_paren,
             argument_list,
             right_paren,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_record_creation_expression(ctx: &C, type_: Self, left_bracket: Self, members: Self, right_bracket: Self) -> Self {
-        let syntax = SyntaxVariant::RecordCreationExpression(ctx.get_arena().alloc(RecordCreationExpressionChildren {
-            type_,
-            left_bracket,
-            members,
-            right_bracket,
         }));
         let value = V::from_values(syntax.iter_children().map(|child| &child.value));
         Self::make(syntax, value)

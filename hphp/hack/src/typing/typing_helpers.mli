@@ -35,11 +35,6 @@ val set_tyvars_variance_in_callable :
 
 val has_accept_disposable_attribute : ('a, 'b) Aast.fun_param -> bool
 
-val all_record_fields :
-  Typing_env_types.env ->
-  Decl_provider.record_def_decl ->
-  (Typing_defs.pos_id * Typing_defs.record_field_req) SMap.t
-
 val add_decl_errors : Errors.t option -> unit
 
 val with_timeout :

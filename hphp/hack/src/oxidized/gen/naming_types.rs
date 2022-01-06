@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cb65135eff7a6ad7e8b7aa131bf08170>>
+// @generated SignedSource<<27dc781e1359ac5c83f601536ade2a89>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -41,7 +41,6 @@ use crate::*;
 pub enum KindOfType {
     TClass,
     TTypedef,
-    TRecordDef,
 }
 impl TrivialDrop for KindOfType {}
 arena_deserializer::impl_deserialize_in_arena!(KindOfType);

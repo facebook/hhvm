@@ -184,31 +184,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
-            RecordDeclaration(x) => {
-                get_index(9).and_then(|index| { match index {
-                        0 => Some(&x.attribute_spec),
-                    1 => Some(&x.modifier),
-                    2 => Some(&x.keyword),
-                    3 => Some(&x.name),
-                    4 => Some(&x.extends_keyword),
-                    5 => Some(&x.extends_opt),
-                    6 => Some(&x.left_brace),
-                    7 => Some(&x.fields),
-                    8 => Some(&x.right_brace),
-                        _ => None,
-                    }
-                })
-            },
-            RecordField(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.type_),
-                    1 => Some(&x.name),
-                    2 => Some(&x.init),
-                    3 => Some(&x.semi),
-                        _ => None,
-                    }
-                })
-            },
             AliasDeclaration(x) => {
                 get_index(8).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),
@@ -1193,16 +1168,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     1 => Some(&x.left_paren),
                     2 => Some(&x.argument_list),
                     3 => Some(&x.right_paren),
-                        _ => None,
-                    }
-                })
-            },
-            RecordCreationExpression(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.type_),
-                    1 => Some(&x.left_bracket),
-                    2 => Some(&x.members),
-                    3 => Some(&x.right_bracket),
                         _ => None,
                     }
                 })

@@ -41,7 +41,6 @@ type keyword_with_hover_docs =
 
 type kind =
   | Class of class_id_type
-  | Record
   | Function
   | Method of receiver_class * string
   | LocalVar
@@ -70,7 +69,6 @@ let to_absolute x = { x with pos = Pos.to_absolute x.pos }
 
 let kind_to_string = function
   | Class _ -> "type_id"
-  | Record -> "record"
   | Method _ -> "method"
   | Function -> "function"
   | LocalVar -> "local"

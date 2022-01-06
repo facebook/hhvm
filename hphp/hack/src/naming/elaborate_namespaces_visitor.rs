@@ -179,29 +179,6 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
         fa.recurse(&mut env, self.object())
     }
 
-    fn visit_record_def(&mut self, env: &mut Env, rd: &mut RecordDef) -> Result<(), ()> {
-        rd.name =
-            namespaces::elaborate_id(&env.namespace, namespaces::ElaborateKind::Record, &rd.name);
-        match &mut rd.extends {
-            Some(Hint(_, h_)) => {
-                let h = h_.as_mut();
-                match h {
-                    Hint_::Happly(sid, _hl) => {
-                        let new_name = namespaces::elaborate_id(
-                            &env.namespace,
-                            namespaces::ElaborateKind::Record,
-                            &sid,
-                        );
-                        *sid = new_name;
-                    }
-                    _ => {}
-                }
-            }
-            _ => {}
-        }
-        rd.recurse(env, self.object())
-    }
-
     // I don't think we need to visit blocks because we got rid of let bindings :)
 
     fn visit_catch(&mut self, env: &mut Env, catch: &mut Catch) -> Result<(), ()> {
@@ -292,10 +269,6 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 targs.accept(env, self.object())?;
                 args.accept(env, self.object())?;
                 unpacked_el.accept(env, self.object())?;
-            }
-            Expr_::Record(r) => {
-                let record_name = &mut r.0;
-                env.elaborate_type_name(record_name);
             }
             Expr_::ClassConst(cc) => {
                 let type_ = &mut cc.0;

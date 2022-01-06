@@ -553,7 +553,6 @@ and expr_ env acc p e =
     let acc = exprl acc el in
     let acc = Option.value_map ~default:acc ~f:(expr acc) unpacked_element in
     acc
-  | Record (_, fdl) -> List.fold_left ~f:field ~init:acc fdl
   | Pair (_, e1, e2) ->
     let acc = expr acc e1 in
     expr acc e2

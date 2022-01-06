@@ -17,16 +17,6 @@ val find_class_in_file :
 val find_iclass_in_file :
   Provider_context.t -> Relative_path.t -> string -> Nast.class_ option
 
-val find_record_def_in_file :
-  ?full:bool ->
-  Provider_context.t ->
-  Relative_path.t ->
-  string ->
-  Nast.record_def option
-
-val find_irecord_def_in_file :
-  Provider_context.t -> Relative_path.t -> string -> Nast.record_def option
-
 val find_fun_in_file :
   ?full:bool ->
   Provider_context.t ->

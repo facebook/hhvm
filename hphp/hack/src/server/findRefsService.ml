@@ -21,7 +21,6 @@ type member_class =
 type action_internal =
   | IClass of string
   | IExplicitClass of string
-  | IRecord of string
   | IMember of member_class * member
   | IFunction of string
   | IGConst of string
@@ -35,7 +34,6 @@ let action_internal_to_string (action : action_internal) : string =
   match action with
   | IClass s -> "IClass " ^ s
   | IExplicitClass s -> "IExplicitClass " ^ s
-  | IRecord s -> "IRecord " ^ s
   | IFunction s -> "IFunction " ^ s
   | IGConst s -> "IGConst " ^ s
   | IMember (member_class, member) ->
@@ -362,16 +360,7 @@ let get_definitions ctx action =
          Some [(class_name, Cls.pos class_)]
        | Naming_types.TTypedef ->
          Decl_provider.get_typedef ctx class_name >>= fun type_ ->
-         Some [(class_name, type_.td_pos)]
-       | Naming_types.TRecordDef ->
-         Decl_provider.get_record_def ctx class_name >>= fun rd ->
-         Some [(class_name, rd.rdt_pos)])
-  | IRecord record_name ->
-    begin
-      match Decl_provider.get_record_def ctx record_name with
-      | Some rd -> [(record_name, rd.rdt_pos)]
-      | None -> []
-    end
+         Some [(class_name, type_.td_pos)])
   | IFunction fun_name ->
     begin
       match Decl_provider.get_fun ctx fun_name with

@@ -19,7 +19,6 @@ type member_class =
 type action_internal =
   | IClass of string
   | IExplicitClass of string
-  | IRecord of string
   | IMember of member_class * ServerCommandTypes.Find_refs.member
   | IFunction of string
   | IGConst of string

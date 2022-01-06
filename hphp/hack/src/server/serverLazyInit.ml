@@ -479,9 +479,6 @@ let naming_from_saved_state
             Naming_provider.remove_type_batch
               backend
               (v.FileInfo.typedefs |> List.map ~f:snd);
-            Naming_provider.remove_type_batch
-              backend
-              (v.FileInfo.record_defs |> List.map ~f:snd);
             Naming_provider.remove_fun_batch
               backend
               (v.FileInfo.funs |> List.map ~f:snd);
@@ -535,16 +532,13 @@ let get_dirty_fast
 
 let names_to_deps (names : FileInfo.names) : Typing_deps.DepSet.t =
   let open Typing_deps in
-  let { FileInfo.n_funs; n_classes; n_record_defs; n_types; n_consts } =
-    names
-  in
+  let { FileInfo.n_funs; n_classes; n_types; n_consts } = names in
   let add_deps_of_sset dep_ctor sset depset =
     SSet.fold sset ~init:depset ~f:(fun n acc ->
         DepSet.add acc (Dep.make (dep_ctor n)))
   in
   let deps = add_deps_of_sset (fun n -> Dep.Fun n) n_funs (DepSet.make ()) in
   let deps = add_deps_of_sset (fun n -> Dep.Type n) n_classes deps in
-  let deps = add_deps_of_sset (fun n -> Dep.Type n) n_record_defs deps in
   let deps = add_deps_of_sset (fun n -> Dep.Type n) n_types deps in
   let deps = add_deps_of_sset (fun n -> Dep.GConst n) n_consts deps in
   let deps = add_deps_of_sset (fun n -> Dep.GConstName n) n_consts deps in

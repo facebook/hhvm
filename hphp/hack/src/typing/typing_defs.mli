@@ -82,21 +82,6 @@ type class_const = {
 }
 [@@deriving show]
 
-type record_field_req =
-  | ValueRequired
-  | HasDefaultValue
-[@@deriving show]
-
-type record_def_type = {
-  rdt_module: Ast_defs.id option;
-  rdt_name: pos_id;
-  rdt_extends: pos_id option;
-  rdt_fields: (pos_id * record_field_req) list;
-  rdt_abstract: bool;
-  rdt_pos: Pos_or_decl.t;
-}
-[@@deriving show]
-
 type requirement = Pos_or_decl.t * decl_ty
 
 and abstract_typeconst = {

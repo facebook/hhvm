@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e56ba5c9179f332c679d19d9442b72a8>>
+// @generated SignedSource<<e233eae7e622cb1a4e8c44d1791473a1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -35,7 +35,6 @@ use crate::*;
 pub struct Env {
     pub ns_uses: s_map::SMap<String>,
     pub class_uses: s_map::SMap<String>,
-    pub record_def_uses: s_map::SMap<String>,
     pub fun_uses: s_map::SMap<String>,
     pub const_uses: s_map::SMap<String>,
     pub name: Option<String>,

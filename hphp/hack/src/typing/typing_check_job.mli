@@ -19,9 +19,6 @@ val type_class :
   string ->
   (Tast.def * Typing_inference_env.t_global_with_pos list) option
 
-val type_record_def :
-  Provider_context.t -> Relative_path.t -> string -> Tast.def option
-
 val check_typedef :
   Provider_context.t -> Relative_path.t -> string -> Tast.def option
 

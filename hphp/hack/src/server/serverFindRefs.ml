@@ -139,19 +139,6 @@ let search_class ctx class_name include_defs include_all_ci_types genv env =
   in
   search ctx target include_defs files genv
 
-let search_record ctx record_name include_defs genv env =
-  let record_name = add_ns record_name in
-  handle_prechecked_files genv env Typing_deps.(Dep.(make (Type record_name)))
-  @@ fun () ->
-  let files =
-    FindRefsService.get_dependent_files
-      ctx
-      genv.ServerEnv.workers
-      (SSet.singleton record_name)
-    |> Relative_path.Set.elements
-  in
-  search ctx (FindRefsService.IRecord record_name) include_defs files genv
-
 let search_localvar ~ctx ~entry ~line ~char =
   let results = ServerFindLocals.go ~ctx ~entry ~line ~char in
   match results with
@@ -173,7 +160,6 @@ let go ctx action include_defs genv env =
   | ExplicitClass class_name ->
     let include_all_ci_types = false in
     search_class ctx class_name include_defs include_all_ci_types genv env
-  | Record record_name -> search_record ctx record_name include_defs genv env
   | GConst cst_name -> search_gconst ctx cst_name include_defs genv env
   | LocalVar { filename; file_content; line; char } ->
     let (ctx, entry) =
@@ -200,7 +186,6 @@ let get_action symbol (filename, file_content, line, char) =
   | SO.Property (SO.ClassName class_name, prop_name)
   | SO.XhpLiteralAttr (class_name, prop_name) ->
     Some (Member (class_name, Property prop_name))
-  | SO.Record -> Some (Record name)
   | SO.ClassConst (SO.ClassName class_name, const_name) ->
     Some (Member (class_name, Class_const const_name))
   | SO.Typeconst (class_name, tconst_name) ->

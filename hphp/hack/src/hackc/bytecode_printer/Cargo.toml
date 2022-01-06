@@ -28,7 +28,6 @@ hhas_param = { path = "../hhbc/cargo/hhas_param" }
 hhas_pos = { path = "../hhbc/cargo/hhas_pos" }
 hhas_program = { path = "../hhbc/cargo/hhas_program" }
 hhas_property = { path = "../hhbc/cargo/hhas_property" }
-hhas_record_def = { path = "../hhbc/cargo/hhas_record_def" }
 hhas_symbol_refs = { path = "../hhbc/cargo/hhas_symbol_refs" }
 hhas_type = { path = "../hhbc/cargo/hhas_type" }
 hhas_type_const = { path = "../hhbc/cargo/hhas_type_const" }

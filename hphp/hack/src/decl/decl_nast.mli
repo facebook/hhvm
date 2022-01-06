@@ -19,15 +19,6 @@ val fun_naming_and_decl_DEPRECATED :
 (** DEPRECATED: When TypecheckerOptions.use_direct_decl_parser is enabled, parse
     the source text using the direct decl parser (or ast_and_decl_parser, if the
     AST is also needed) instead of transforming the AST to a decl. *)
-val record_def_naming_and_decl_DEPRECATED :
-  Provider_context.t ->
-  Nast.record_def ->
-  Ast_defs.id option ->
-  string * Typing_defs.record_def_type
-
-(** DEPRECATED: When TypecheckerOptions.use_direct_decl_parser is enabled, parse
-    the source text using the direct decl parser (or ast_and_decl_parser, if the
-    AST is also needed) instead of transforming the AST to a decl. *)
 val typedef_naming_and_decl_DEPRECATED :
   Provider_context.t -> Nast.typedef -> string * Typing_defs.typedef_type
 

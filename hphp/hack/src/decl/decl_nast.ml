@@ -129,66 +129,6 @@ and fun_decl_in_env
   }
 
 (*****************************************************************************)
-(* Dealing with records *)
-(*****************************************************************************)
-
-let record_def_decl
-    (ctx : Provider_context.t)
-    (rd : Nast.record_def)
-    (module_ : Ast_defs.id option) : Typing_defs.record_def_type =
-  let {
-    rd_annotation = _;
-    rd_name;
-    rd_doc_comment = _;
-    rd_emit_id = _;
-    rd_extends;
-    rd_abstract;
-    rd_fields;
-    rd_namespace = _;
-    rd_span;
-    _;
-  } =
-    rd
-  in
-  let env =
-    {
-      Decl_env.mode = FileInfo.Mstrict;
-      droot = Some (Typing_deps.Dep.Type (Ast_defs.get_id rd_name));
-      ctx;
-    }
-  in
-  let extends =
-    match rd_extends with
-    (* The only valid type hint for record parents is a record
-       name. Records do not support generics. *)
-    | Some (_, Happly (id, [])) -> Some id
-    | _ -> None
-  in
-  let fields =
-    List.map rd_fields ~f:(fun (id, _, default) ->
-        let id = Decl_env.make_decl_posed env id in
-        match default with
-        | Some _ -> (id, Typing_defs.HasDefaultValue)
-        | None -> (id, ValueRequired))
-  in
-  {
-    rdt_module = module_;
-    rdt_name = Decl_env.make_decl_posed env rd_name;
-    rdt_extends = Option.map ~f:(Decl_env.make_decl_posed env) extends;
-    rdt_fields = fields;
-    rdt_abstract = rd_abstract;
-    rdt_pos = Decl_env.make_decl_pos env rd_span;
-  }
-
-let record_def_naming_and_decl_DEPRECATED
-    (ctx : Provider_context.t)
-    (rd : Nast.record_def)
-    (module_ : Ast_defs.id option) : string * Typing_defs.record_def_type =
-  let rd = Errors.ignore_ (fun () -> Naming.record_def ctx rd) in
-  let tdecl = record_def_decl ctx rd module_ in
-  (snd rd.rd_name, tdecl)
-
-(*****************************************************************************)
 (* Dealing with typedefs *)
 (*****************************************************************************)
 and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :

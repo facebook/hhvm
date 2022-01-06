@@ -43,9 +43,9 @@ use oxidized_by_ref::{
     typing_defs::{
         self, AbstractTypeconst, Capability::*, ClassConstKind, ConcreteTypeconst, ConstDecl,
         Enforcement, EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType,
-        IfcFunDecl, ParamMode, PosByteString, PosId, PosString, PossiblyEnforcedTy, RecordFieldReq,
-        ShapeFieldType, ShapeKind, TaccessType, Tparam, TshapeFieldName, Ty, Ty_, Typeconst,
-        TypedefType, WhereConstraint, XhpAttrTag,
+        IfcFunDecl, ParamMode, PosByteString, PosId, PosString, PossiblyEnforcedTy, ShapeFieldType,
+        ShapeKind, TaccessType, Tparam, TshapeFieldName, Ty, Ty_, Typeconst, TypedefType,
+        WhereConstraint, XhpAttrTag,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -443,7 +443,6 @@ impl<'a> NamespaceBuilder<'a> {
                 class_uses,
                 fun_uses: SMap::empty(),
                 const_uses: SMap::empty(),
-                record_def_uses: SMap::empty(),
                 name: None,
                 auto_ns_map,
                 is_codegen: false,
@@ -847,8 +846,6 @@ pub enum Node<'a> {
     Expr(&'a nast::Expr<'a>),
     TypeParameters(&'a &'a [&'a Tparam<'a>]),
     WhereConstraint(&'a WhereConstraint<'a>),
-    RecordField(&'a (Id<'a>, RecordFieldReq)),
-
     // Non-ignored, fixed-width tokens (e.g., keywords, operators, braces, etc.).
     Token(FixedWidthToken),
 }
@@ -1028,9 +1025,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     fn add_const(&mut self, name: &'a str, decl: &'a typing_defs::ConstDecl<'a>) {
         self.decls.add(name, Decl::Const(decl), self.arena);
     }
-    fn add_record(&mut self, name: &'a str, decl: &'a typing_defs::RecordDefType<'a>) {
-        self.decls.add(name, Decl::Record(decl), self.arena);
-    }
 
     #[inline]
     fn concat(&self, str1: &str, str2: &str) -> &'a str {
@@ -1198,7 +1192,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         | ExpressionTree(_) | FunctionPointer(_) | FunId(_) | Id(_) | Import(_)
                         | Is(_) | KeyValCollection(_) | Lfun(_) | List(_) | Lplaceholder(_)
                         | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_) | ObjGet(_)
-                        | Omitted | Pair(_) | Pipe(_) | ReadonlyExpr(_) | Record(_) | Shape(_)
+                        | Omitted | Pair(_) | Pipe(_) | ReadonlyExpr(_) | Shape(_)
                         | SmethodId(_) | Tuple(_) | Upcast(_) | ValCollection(_) | Varray(_)
                         | Xml(_) | Yield(_) => None,
                     }
@@ -2693,7 +2687,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             | TokenKind::Static
             | TokenKind::Trait
             | TokenKind::Lateinit
-            | TokenKind::RecordDec
             | TokenKind::RightBrace
             | TokenKind::Enum
             | TokenKind::Const
@@ -3083,61 +3076,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 }
             }
         }
-    }
-
-    fn make_record_declaration(
-        &mut self,
-        attribute_spec: Self::R,
-        modifier: Self::R,
-        record_keyword: Self::R,
-        name: Self::R,
-        _extends_keyword: Self::R,
-        extends_opt: Self::R,
-        _left_brace: Self::R,
-        fields: Self::R,
-        right_brace: Self::R,
-    ) -> Self::R {
-        let name = match self.elaborate_defined_id(name) {
-            Some(name) => name,
-            None => return Node::Ignored(SK::RecordDeclaration),
-        };
-        let parsed_attributes = self.to_attributes(attribute_spec);
-        self.add_record(
-            name.1,
-            self.alloc(typing_defs::RecordDefType {
-                module: parsed_attributes.module,
-                name: name.into(),
-                extends: self
-                    .expect_name(extends_opt)
-                    .map(|id| self.elaborate_id(id).into()),
-                fields: self.slice(fields.iter().filter_map(|node| match node {
-                    Node::RecordField(&(id, req)) => Some((id.into(), req)),
-                    _ => None,
-                })),
-                abstract_: modifier.is_token(TokenKind::Abstract),
-                pos: self.pos_from_slice(&[attribute_spec, modifier, record_keyword, right_brace]),
-            }),
-        );
-        Node::Ignored(SK::RecordDeclaration)
-    }
-
-    fn make_record_field(
-        &mut self,
-        _type_: Self::R,
-        name: Self::R,
-        initializer: Self::R,
-        _semicolon: Self::R,
-    ) -> Self::R {
-        let name = match self.expect_name(name) {
-            Some(name) => name,
-            None => return Node::Ignored(SK::RecordField),
-        };
-        let field_req = if initializer.is_ignored() {
-            RecordFieldReq::ValueRequired
-        } else {
-            RecordFieldReq::HasDefaultValue
-        };
-        Node::RecordField(self.alloc((name, field_req)))
     }
 
     fn make_alias_declaration(

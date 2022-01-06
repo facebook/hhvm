@@ -1647,14 +1647,6 @@ end = struct
         ( class_id,
           (targs, (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) exprs, expr_opt))
         )
-    | Aast.Record ((_, name), flds) ->
-      Fmt.(
-        pair ~sep:nop string
-        @@ brackets
-        @@ list ~sep:comma
-        @@ pair ~sep:fat_arrow pp_expr pp_expr)
-        ppf
-        (name, flds)
     | Aast.Lplaceholder _ -> Fmt.string ppf "$_"
     | Aast.Fun_id (_, name) ->
       Fmt.(prefix (const string "fun") @@ quote string) ppf name

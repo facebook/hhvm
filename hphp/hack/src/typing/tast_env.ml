@@ -279,7 +279,6 @@ let def_env ctx d =
   | Class x -> class_env ctx x
   | Typedef x -> typedef_env ctx x
   | Constant x -> gconst_env ctx x
-  | RecordDef _ -> empty ctx
   (* TODO T44306013 *)
   (* The following nodes are included in the TAST, but are not typechecked.
    * However, we need to return an env here so for now create an empty env using

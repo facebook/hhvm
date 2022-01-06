@@ -20,12 +20,6 @@ val class_env :
   ('a, 'b) Aast.class_ ->
   Typing_env_types.env
 
-val record_def_env :
-  ?origin:Decl_counters.origin ->
-  Provider_context.t ->
-  ('a, 'b) Aast.record_def ->
-  Typing_env_types.env
-
 val typedef_env :
   ?origin:Decl_counters.origin ->
   Provider_context.t ->

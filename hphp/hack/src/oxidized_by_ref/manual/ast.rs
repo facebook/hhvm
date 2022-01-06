@@ -45,7 +45,6 @@ pub type FunVariadicity<'a> = aast::FunVariadicity<'a, Ex, En>;
 pub type Gconst<'a> = aast::Gconst<'a, Ex, En>;
 pub type Method_<'a> = aast::Method_<'a, Ex, En>;
 pub type Program<'a> = aast::Program<'a, Ex, En>;
-pub type RecordDef<'a> = aast::RecordDef<'a, Ex, En>;
 pub type Stmt<'a> = aast::Stmt<'a, Ex, En>;
 pub type Stmt_<'a> = aast::Stmt_<'a, Ex, En>;
 pub type Targ<'a> = aast::Targ<'a, Ex>;

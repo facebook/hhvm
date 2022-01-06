@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c838441c8df752b767ba0ef1e0a57c68>>
+// @generated SignedSource<<9180bd8609c049f90ac80a6b2c9db14f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -81,8 +81,6 @@ pub struct SavedNames<'a> {
     pub funs: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub classes: s_set::SSet<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub record_defs: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub types: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

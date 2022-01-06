@@ -182,33 +182,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_record_declaration(_: &C, record_attribute_spec: Self, record_modifier: Self, record_keyword: Self, record_name: Self, record_extends_keyword: Self, record_extends_opt: Self, record_left_brace: Self, record_fields: Self, record_right_brace: Self) -> Self {
-        let syntax = SyntaxVariant::RecordDeclaration(Box::new(RecordDeclarationChildren {
-            record_attribute_spec,
-            record_modifier,
-            record_keyword,
-            record_name,
-            record_extends_keyword,
-            record_extends_opt,
-            record_left_brace,
-            record_fields,
-            record_right_brace,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
-    fn make_record_field(_: &C, record_field_type: Self, record_field_name: Self, record_field_init: Self, record_field_semi: Self) -> Self {
-        let syntax = SyntaxVariant::RecordField(Box::new(RecordFieldChildren {
-            record_field_type,
-            record_field_name,
-            record_field_init,
-            record_field_semi,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_alias_declaration(_: &C, alias_attribute_spec: Self, alias_keyword: Self, alias_name: Self, alias_generic_parameter: Self, alias_constraint: Self, alias_equal: Self, alias_type: Self, alias_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::AliasDeclaration(Box::new(AliasDeclarationChildren {
             alias_attribute_spec,
@@ -1295,17 +1268,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_record_creation_expression(_: &C, record_creation_type: Self, record_creation_left_bracket: Self, record_creation_members: Self, record_creation_right_bracket: Self) -> Self {
-        let syntax = SyntaxVariant::RecordCreationExpression(Box::new(RecordCreationExpressionChildren {
-            record_creation_type,
-            record_creation_left_bracket,
-            record_creation_members,
-            record_creation_right_bracket,
-        }));
-        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
-        Self::make(syntax, value)
-    }
-
     fn make_darray_intrinsic_expression(_: &C, darray_intrinsic_keyword: Self, darray_intrinsic_explicit_type: Self, darray_intrinsic_left_bracket: Self, darray_intrinsic_members: Self, darray_intrinsic_right_bracket: Self) -> Self {
         let syntax = SyntaxVariant::DarrayIntrinsicExpression(Box::new(DarrayIntrinsicExpressionChildren {
             darray_intrinsic_keyword,
@@ -2027,27 +1989,6 @@ where
                 let acc = f(enum_class_enumerator_name, acc);
                 let acc = f(enum_class_enumerator_initializer, acc);
                 let acc = f(enum_class_enumerator_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::RecordDeclaration(x) => {
-                let RecordDeclarationChildren { record_attribute_spec, record_modifier, record_keyword, record_name, record_extends_keyword, record_extends_opt, record_left_brace, record_fields, record_right_brace } = *x;
-                let acc = f(record_attribute_spec, acc);
-                let acc = f(record_modifier, acc);
-                let acc = f(record_keyword, acc);
-                let acc = f(record_name, acc);
-                let acc = f(record_extends_keyword, acc);
-                let acc = f(record_extends_opt, acc);
-                let acc = f(record_left_brace, acc);
-                let acc = f(record_fields, acc);
-                let acc = f(record_right_brace, acc);
-                acc
-            },
-            SyntaxVariant::RecordField(x) => {
-                let RecordFieldChildren { record_field_type, record_field_name, record_field_init, record_field_semi } = *x;
-                let acc = f(record_field_type, acc);
-                let acc = f(record_field_name, acc);
-                let acc = f(record_field_init, acc);
-                let acc = f(record_field_semi, acc);
                 acc
             },
             SyntaxVariant::AliasDeclaration(x) => {
@@ -2842,14 +2783,6 @@ where
                 let acc = f(constructor_call_right_paren, acc);
                 acc
             },
-            SyntaxVariant::RecordCreationExpression(x) => {
-                let RecordCreationExpressionChildren { record_creation_type, record_creation_left_bracket, record_creation_members, record_creation_right_bracket } = *x;
-                let acc = f(record_creation_type, acc);
-                let acc = f(record_creation_left_bracket, acc);
-                let acc = f(record_creation_members, acc);
-                let acc = f(record_creation_right_bracket, acc);
-                acc
-            },
             SyntaxVariant::DarrayIntrinsicExpression(x) => {
                 let DarrayIntrinsicExpressionChildren { darray_intrinsic_keyword, darray_intrinsic_explicit_type, darray_intrinsic_left_bracket, darray_intrinsic_members, darray_intrinsic_right_bracket } = *x;
                 let acc = f(darray_intrinsic_keyword, acc);
@@ -3296,8 +3229,6 @@ where
             SyntaxVariant::Enumerator {..} => SyntaxKind::Enumerator,
             SyntaxVariant::EnumClassDeclaration {..} => SyntaxKind::EnumClassDeclaration,
             SyntaxVariant::EnumClassEnumerator {..} => SyntaxKind::EnumClassEnumerator,
-            SyntaxVariant::RecordDeclaration {..} => SyntaxKind::RecordDeclaration,
-            SyntaxVariant::RecordField {..} => SyntaxKind::RecordField,
             SyntaxVariant::AliasDeclaration {..} => SyntaxKind::AliasDeclaration,
             SyntaxVariant::ContextAliasDeclaration {..} => SyntaxKind::ContextAliasDeclaration,
             SyntaxVariant::PropertyDeclaration {..} => SyntaxKind::PropertyDeclaration,
@@ -3396,7 +3327,6 @@ where
             SyntaxVariant::CollectionLiteralExpression {..} => SyntaxKind::CollectionLiteralExpression,
             SyntaxVariant::ObjectCreationExpression {..} => SyntaxKind::ObjectCreationExpression,
             SyntaxVariant::ConstructorCall {..} => SyntaxKind::ConstructorCall,
-            SyntaxVariant::RecordCreationExpression {..} => SyntaxKind::RecordCreationExpression,
             SyntaxVariant::DarrayIntrinsicExpression {..} => SyntaxKind::DarrayIntrinsicExpression,
             SyntaxVariant::DictionaryIntrinsicExpression {..} => SyntaxKind::DictionaryIntrinsicExpression,
             SyntaxVariant::KeysetIntrinsicExpression {..} => SyntaxKind::KeysetIntrinsicExpression,
@@ -3555,25 +3485,6 @@ where
                  enum_class_enumerator_name: ts.pop().unwrap(),
                  enum_class_enumerator_type: ts.pop().unwrap(),
                  enum_class_enumerator_modifiers: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::RecordDeclaration, 9) => SyntaxVariant::RecordDeclaration(Box::new(RecordDeclarationChildren {
-                 record_right_brace: ts.pop().unwrap(),
-                 record_fields: ts.pop().unwrap(),
-                 record_left_brace: ts.pop().unwrap(),
-                 record_extends_opt: ts.pop().unwrap(),
-                 record_extends_keyword: ts.pop().unwrap(),
-                 record_name: ts.pop().unwrap(),
-                 record_keyword: ts.pop().unwrap(),
-                 record_modifier: ts.pop().unwrap(),
-                 record_attribute_spec: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::RecordField, 4) => SyntaxVariant::RecordField(Box::new(RecordFieldChildren {
-                 record_field_semi: ts.pop().unwrap(),
-                 record_field_init: ts.pop().unwrap(),
-                 record_field_name: ts.pop().unwrap(),
-                 record_field_type: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::AliasDeclaration, 8) => SyntaxVariant::AliasDeclaration(Box::new(AliasDeclarationChildren {
@@ -4270,13 +4181,6 @@ where
                  constructor_call_type: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::RecordCreationExpression, 4) => SyntaxVariant::RecordCreationExpression(Box::new(RecordCreationExpressionChildren {
-                 record_creation_right_bracket: ts.pop().unwrap(),
-                 record_creation_members: ts.pop().unwrap(),
-                 record_creation_left_bracket: ts.pop().unwrap(),
-                 record_creation_type: ts.pop().unwrap(),
-                 
-             })),
              (SyntaxKind::DarrayIntrinsicExpression, 5) => SyntaxVariant::DarrayIntrinsicExpression(Box::new(DarrayIntrinsicExpressionChildren {
                  darray_intrinsic_right_bracket: ts.pop().unwrap(),
                  darray_intrinsic_members: ts.pop().unwrap(),
@@ -4758,27 +4662,6 @@ pub struct EnumClassEnumeratorChildren<T, V> {
     pub enum_class_enumerator_name: Syntax<T, V>,
     pub enum_class_enumerator_initializer: Syntax<T, V>,
     pub enum_class_enumerator_semicolon: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct RecordDeclarationChildren<T, V> {
-    pub record_attribute_spec: Syntax<T, V>,
-    pub record_modifier: Syntax<T, V>,
-    pub record_keyword: Syntax<T, V>,
-    pub record_name: Syntax<T, V>,
-    pub record_extends_keyword: Syntax<T, V>,
-    pub record_extends_opt: Syntax<T, V>,
-    pub record_left_brace: Syntax<T, V>,
-    pub record_fields: Syntax<T, V>,
-    pub record_right_brace: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct RecordFieldChildren<T, V> {
-    pub record_field_type: Syntax<T, V>,
-    pub record_field_name: Syntax<T, V>,
-    pub record_field_init: Syntax<T, V>,
-    pub record_field_semi: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -5574,14 +5457,6 @@ pub struct ConstructorCallChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct RecordCreationExpressionChildren<T, V> {
-    pub record_creation_type: Syntax<T, V>,
-    pub record_creation_left_bracket: Syntax<T, V>,
-    pub record_creation_members: Syntax<T, V>,
-    pub record_creation_right_bracket: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct DarrayIntrinsicExpressionChildren<T, V> {
     pub darray_intrinsic_keyword: Syntax<T, V>,
     pub darray_intrinsic_explicit_type: Syntax<T, V>,
@@ -6024,8 +5899,6 @@ pub enum SyntaxVariant<T, V> {
     Enumerator(Box<EnumeratorChildren<T, V>>),
     EnumClassDeclaration(Box<EnumClassDeclarationChildren<T, V>>),
     EnumClassEnumerator(Box<EnumClassEnumeratorChildren<T, V>>),
-    RecordDeclaration(Box<RecordDeclarationChildren<T, V>>),
-    RecordField(Box<RecordFieldChildren<T, V>>),
     AliasDeclaration(Box<AliasDeclarationChildren<T, V>>),
     ContextAliasDeclaration(Box<ContextAliasDeclarationChildren<T, V>>),
     PropertyDeclaration(Box<PropertyDeclarationChildren<T, V>>),
@@ -6124,7 +5997,6 @@ pub enum SyntaxVariant<T, V> {
     CollectionLiteralExpression(Box<CollectionLiteralExpressionChildren<T, V>>),
     ObjectCreationExpression(Box<ObjectCreationExpressionChildren<T, V>>),
     ConstructorCall(Box<ConstructorCallChildren<T, V>>),
-    RecordCreationExpression(Box<RecordCreationExpressionChildren<T, V>>),
     DarrayIntrinsicExpression(Box<DarrayIntrinsicExpressionChildren<T, V>>),
     DictionaryIntrinsicExpression(Box<DictionaryIntrinsicExpressionChildren<T, V>>),
     KeysetIntrinsicExpression(Box<KeysetIntrinsicExpressionChildren<T, V>>),
@@ -6341,31 +6213,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     2 => Some(&x.enum_class_enumerator_name),
                     3 => Some(&x.enum_class_enumerator_initializer),
                     4 => Some(&x.enum_class_enumerator_semicolon),
-                        _ => None,
-                    }
-                })
-            },
-            RecordDeclaration(x) => {
-                get_index(9).and_then(|index| { match index {
-                        0 => Some(&x.record_attribute_spec),
-                    1 => Some(&x.record_modifier),
-                    2 => Some(&x.record_keyword),
-                    3 => Some(&x.record_name),
-                    4 => Some(&x.record_extends_keyword),
-                    5 => Some(&x.record_extends_opt),
-                    6 => Some(&x.record_left_brace),
-                    7 => Some(&x.record_fields),
-                    8 => Some(&x.record_right_brace),
-                        _ => None,
-                    }
-                })
-            },
-            RecordField(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.record_field_type),
-                    1 => Some(&x.record_field_name),
-                    2 => Some(&x.record_field_init),
-                    3 => Some(&x.record_field_semi),
                         _ => None,
                     }
                 })
@@ -7354,16 +7201,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     1 => Some(&x.constructor_call_left_paren),
                     2 => Some(&x.constructor_call_argument_list),
                     3 => Some(&x.constructor_call_right_paren),
-                        _ => None,
-                    }
-                })
-            },
-            RecordCreationExpression(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.record_creation_type),
-                    1 => Some(&x.record_creation_left_bracket),
-                    2 => Some(&x.record_creation_members),
-                    3 => Some(&x.record_creation_right_bracket),
                         _ => None,
                     }
                 })

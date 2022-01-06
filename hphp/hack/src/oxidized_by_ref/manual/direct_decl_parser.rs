@@ -120,16 +120,9 @@ impl<'a> Decls<'a> {
             _ => None,
         })
     }
-    pub fn records(&self) -> impl Iterator<Item = (&'a str, &'a typing_defs::RecordDefType<'a>)> {
-        self.iter().filter_map(|(name, decl)| match decl {
-            Decl::Record(decl) => Some((name, decl)),
-            _ => None,
-        })
-    }
-
     pub fn types(&self) -> impl Iterator<Item = (&'a str, Decl<'a>)> {
         self.iter().filter(|(_, decl)| match decl.kind() {
-            NameType::Class | NameType::Typedef | NameType::RecordDef => true,
+            NameType::Class | NameType::Typedef => true,
             NameType::Fun | NameType::Const => false,
         })
     }
@@ -155,7 +148,6 @@ impl<'a> Decl<'a> {
         match self {
             Decl::Class(..) => NameType::Class,
             Decl::Fun(..) => NameType::Fun,
-            Decl::Record(..) => NameType::RecordDef,
             Decl::Typedef(..) => NameType::Typedef,
             Decl::Const(..) => NameType::Const,
         }
@@ -165,9 +157,7 @@ impl<'a> Decl<'a> {
         match self {
             Decl::Fun(..) => typing_deps_hash::DepType::Fun,
             Decl::Const(..) => typing_deps_hash::DepType::GConst,
-            Decl::Class(..) | Decl::Record(..) | Decl::Typedef(..) => {
-                typing_deps_hash::DepType::Type
-            }
+            Decl::Class(..) | Decl::Typedef(..) => typing_deps_hash::DepType::Type,
         }
     }
 

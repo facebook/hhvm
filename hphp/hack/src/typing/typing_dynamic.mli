@@ -61,4 +61,6 @@ val relax_method_type :
  * Output: dict<(arraykey & ~int), ~string>
  *)
 val try_push_like :
-  Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty option
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  Typing_env_types.env * Typing_defs.locl_ty option

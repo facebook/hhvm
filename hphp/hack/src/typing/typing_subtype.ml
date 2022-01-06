@@ -1111,23 +1111,18 @@ and simplify_subtype_i
           match TUtils.try_strip_dynamic ty_super with
           | None -> try_each tyl_super env
           | Some ty ->
-            begin
-              match Typing_dynamic.try_push_like env ty with
-              | None -> try_each tyl_super env
-              | Some ty ->
-                env
-                |> simplify_dynamic_aware_subtype
-                     ~subtype_env
-                     ~this_ty
-                     ty
-                     (MakeType.dynamic Reason.Rnone)
-                &&& simplify_subtype_i
-                      ~subtype_env
-                      ~this_ty
-                      ty_sub
-                      (LoclType ty)
-                ||| try_each tyl_super
-            end
+            let (env, opt_ty) = Typing_dynamic.try_push_like env ty in
+            (match opt_ty with
+            | None -> try_each tyl_super env
+            | Some ty ->
+              env
+              |> simplify_dynamic_aware_subtype
+                   ~subtype_env
+                   ~this_ty
+                   ty
+                   (MakeType.dynamic Reason.Rnone)
+              &&& simplify_subtype_i ~subtype_env ~this_ty ty_sub (LoclType ty)
+              ||| try_each tyl_super)
         else
           try_each tyl_super env
       in

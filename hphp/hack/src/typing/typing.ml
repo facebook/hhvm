@@ -817,12 +817,13 @@ let requires_consistent_construct = function
  *)
 let expand_expected_and_get_node
     ?(allow_supportdyn = false) env (expected : ExpectedTy.t option) =
-  let rec unbox ty =
+  let rec unbox env ty =
     match TUtils.try_strip_dynamic ty with
     | Some stripped_ty ->
       if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-        match Typing_dynamic.try_push_like env stripped_ty with
-        | None -> unbox stripped_ty
+        let (env, opt_ty) = Typing_dynamic.try_push_like env stripped_ty in
+        match opt_ty with
+        | None -> unbox env stripped_ty
         | Some ty ->
           let dyn = MakeType.dynamic Reason.Rnone in
           if
@@ -832,28 +833,28 @@ let expand_expected_and_get_node
               ty
               dyn
           then
-            unbox ty
+            unbox env ty
           else
-            unbox stripped_ty
+            unbox env stripped_ty
       else
-        unbox stripped_ty
+        unbox env stripped_ty
     | None ->
       begin
         match get_node ty with
-        | Tunion [ty] -> unbox ty
-        | Toption ty -> unbox ty
+        | Tunion [ty] -> unbox env ty
+        | Toption ty -> unbox env ty
         | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn
           ->
-          let (ty, _) = unbox ty in
-          (ty, true)
-        | _ -> (ty, false)
+          let (env, ty, _) = unbox env ty in
+          (env, ty, true)
+        | _ -> (env, ty, false)
       end
   in
   match expected with
   | None -> (env, None)
   | Some ExpectedTy.{ pos = p; reason = ur; ty = { et_type = ty; _ }; _ } ->
     let (env, ty) = Env.expand_type env ty in
-    let (uty, supportdyn) = unbox ty in
+    let (env, uty, supportdyn) = unbox env ty in
     if supportdyn && not allow_supportdyn then
       (env, None)
     else

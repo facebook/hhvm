@@ -4554,26 +4554,18 @@ and expr_
         Errors.add_typing_error
           Typing_error.(enum @@ Primary.Enum.Enum_class_label_as_expr p)
       else
-        let reasons =
-          match lty_opt with
-          | Some lty ->
-            let r = get_reason lty in
-            let expect_str = Typing_print.error env lty in
-            Reason.to_string (Format.sprintf "Expected %s" expect_str) r
-            @ [
-                ( Pos_or_decl.of_raw_pos p,
-                  Format.sprintf "But got an enum class label: `#%s`" s );
-              ]
-          | None ->
-            [
-              ( Pos_or_decl.of_raw_pos p,
-                Format.sprintf "Unexpected enum class label: `#%s`" s );
-            ]
+        let expected_ty_msg_opt =
+          Option.map lty_opt ~f:(fun lty ->
+              let ty_str = lazy (Typing_print.error env lty) in
+              let r = get_reason lty in
+              Lazy.map ty_str ~f:(fun ty_str ->
+                  Reason.to_string (Format.sprintf "Expected %s" ty_str) r))
         in
-        Errors.apply_typing_error_callback
-          Typing_error.Callback.unify_error
-          ~claim:(p, "Enum class label/member mismatch")
-          ~reasons
+        Errors.add_typing_error
+          Typing_error.(
+            enum
+            @@ Primary.Enum.Enum_class_label_member_mismatch
+                 { pos = p; label = s; expected_ty_msg_opt })
     in
     make_result
       env
@@ -6225,23 +6217,26 @@ and arraykey_value
         match deref ty with
         | (_, Toption ty_inner) ->
           ( (fun env ->
-              let r =
-                Reason.to_string "Expected `arraykey`" (Reason.Ridx_dict pos)
-                @ [
-                    ( get_pos ty,
-                      Format.sprintf
-                        "But got `?%s`"
-                        (Typing_print.full_strip_ns env ty_inner) );
-                  ]
+              let ty_str = lazy (Typing_print.full_strip_ns env ty_inner) in
+              let reasons_opt =
+                Some
+                  (Lazy.map ty_str ~f:(fun ty_str ->
+                       Reason.to_string
+                         "Expected `arraykey`"
+                         (Reason.Ridx_dict pos)
+                       @ [(get_pos ty, Format.sprintf "But got `?%s`" ty_str)]))
               in
               (* We actually failed so generate the error we should
                  have seen *)
-              Errors.(
-                apply_typing_error_callback
-                  Typing_error.Callback.unify_error
-                  ~claim:(p, Reason.string_of_ureason reason)
-                  ~reasons:r);
-
+              Errors.add_typing_error
+                Typing_error.(
+                  primary
+                  @@ Primary.Unify_error
+                       {
+                         pos;
+                         msg_opt = Some (Reason.string_of_ureason reason);
+                         reasons_opt;
+                       });
               (env, Some (ty, ty_inner))),
             ty_inner )
         | _ -> ((fun env -> (env, None)), ty)

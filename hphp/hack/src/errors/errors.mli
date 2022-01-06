@@ -70,14 +70,6 @@ val add_naming_error : Naming_error.t -> unit
 
 val add_nast_check_error : Nast_check_error.t -> unit
 
-val apply_typing_error_callback :
-  ?code:Typing.t ->
-  ?reasons:Pos_or_decl.t Message.t list ->
-  ?quickfixes:Quickfix.t list ->
-  Typing_error.Callback.t ->
-  claim:Pos.t Message.t ->
-  unit
-
 val apply_error_from_reasons_callback :
   ?code:Typing.t ->
   ?claim:Pos.t Message.t ->

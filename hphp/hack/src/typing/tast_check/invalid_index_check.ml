@@ -48,26 +48,32 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
       then
         Ok ()
       else
-        let (_, ty_have) = Env.expand_type env ty_have in
-        let (_, ty_expect) = Env.expand_type env ty_expect in
-        let ty_expect_str = Env.print_error_ty env ty_expect in
-        let ty_have_str = Env.print_error_ty env ty_have in
-        let err =
-          if is_covariant_index then
-            Typing_error.Callback.covariant_index_type_mismatch
-          else
-            Typing_error.Callback.index_type_mismatch
+        let reasons_opt =
+          Some
+            (lazy
+              (let (_, ty_have) = Env.expand_type env ty_have in
+               let (_, ty_expect) = Env.expand_type env ty_expect in
+               let ty_expect_str = Env.print_error_ty env ty_expect in
+               let ty_have_str = Env.print_error_ty env ty_have in
+
+               Typing_reason.to_string
+                 ("This is " ^ ty_expect_str)
+                 (get_reason ty_expect)
+               @ Typing_reason.to_string
+                   ("It is incompatible with " ^ ty_have_str)
+                   (get_reason ty_have)))
         in
-        Errors.apply_typing_error_callback
-          err
-          ~claim:(expr_pos, Reason.string_of_ureason reason)
-          ~reasons:
-            (Typing_reason.to_string
-               ("This is " ^ ty_expect_str)
-               (get_reason ty_expect)
-            @ Typing_reason.to_string
-                ("It is incompatible with " ^ ty_have_str)
-                (get_reason ty_have));
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Index_type_mismatch
+                 {
+                   pos = expr_pos;
+                   msg_opt = Some (Reason.string_of_ureason reason);
+                   reasons_opt;
+                   is_covariant_container = is_covariant_index;
+                 });
+
         Error ()
   in
   let (_, ety) = Env.expand_type env array_ty in

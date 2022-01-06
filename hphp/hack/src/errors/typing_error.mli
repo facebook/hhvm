@@ -117,6 +117,11 @@ module Primary : sig
           pos: Pos.t;
           is_proj: bool;
         }
+      | Enum_class_label_member_mismatch of {
+          pos: Pos.t;
+          label: string;
+          expected_ty_msg_opt: Pos_or_decl.t Message.t list Lazy.t option;
+        }
       | Incompatible_enum_inclusion_base of {
           pos: Pos.t;
           classish_name: string;
@@ -345,7 +350,11 @@ module Primary : sig
         seconds: int;
       }
     | Unresolved_tyvar of Pos.t
-    | Unify_error of Pos.t
+    | Unify_error of {
+        pos: Pos.t;
+        msg_opt: string option;
+        reasons_opt: Pos_or_decl.t Message.t list Lazy.t option;
+      }
     | Generic_unify of {
         pos: Pos.t;
         msg: string;
@@ -386,7 +395,12 @@ module Primary : sig
         req_name: string;
       }
     | Invalid_echo_argument of Pos.t
-    | Index_type_mismatch of Pos.t
+    | Index_type_mismatch of {
+        pos: Pos.t;
+        is_covariant_container: bool;
+        msg_opt: string option;
+        reasons_opt: Pos_or_decl.t Message.t list Lazy.t option;
+      }
     | Member_not_found of {
         pos: Pos.t;
         kind: [ `method_ | `property ];
@@ -1496,24 +1510,6 @@ module Callback : sig
   (** A mechanism to apply transformations to primary errors *)
   type t
 
-  (** Evaluate the `Callback.t` to a `(Pos.t,Pos_or_decl.t) User_error.t`
-      for use in error reporting.
-
-     The claim and optional code, reasons, and quickfixes are the 'starting'
-     values of the user error and may be ignored or override the defaults
-     specified in the callback.
-
-      Only a claim is required for application since a callback will always
-      have a default code by construction and we can use the empty list as the
-      default for both the reasons or quickfixes.
-   *)
-  val apply :
-    ?code:Error_code.t ->
-    ?reasons:Pos_or_decl.t Message.t list ->
-    ?quickfixes:Quickfix.t list ->
-    t ->
-    claim:Pos.t Message.t ->
-    (Pos.t, Pos_or_decl.t) User_error.t
   (* -- Constructors -------------------------------------------------------- *)
 
   (** Ignore any arguments and always return the given base error *)

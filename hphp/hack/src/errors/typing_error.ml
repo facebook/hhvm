@@ -359,6 +359,11 @@ module Primary = struct
           pos: Pos.t;
           is_proj: bool;
         }
+      | Enum_class_label_member_mismatch of {
+          pos: Pos.t;
+          label: string;
+          expected_ty_msg_opt: Pos_or_decl.t Message.t list Lazy.t option;
+        }
       | Incompatible_enum_inclusion_base of {
           pos: Pos.t;
           classish_name: string;
@@ -376,6 +381,24 @@ module Primary = struct
         }
       | Enum_classes_reserved_syntax of Pos.t
       | Enum_supertyping_reserved_syntax of Pos.t
+
+    let enum_class_label_member_mismatch pos label expected_ty_msg_opt =
+      let claim = (pos, "Enum class label/member mismatch")
+      and reasons =
+        match expected_ty_msg_opt with
+        | Some expected_ty_msg ->
+          Lazy.force expected_ty_msg
+          @ [
+              ( Pos_or_decl.of_raw_pos pos,
+                Format.sprintf "But got an enum class label: `#%s`" label );
+            ]
+        | None ->
+          [
+            ( Pos_or_decl.of_raw_pos pos,
+              Format.sprintf "Unexpected enum class label: `#%s`" label );
+          ]
+      in
+      (Error_code.UnifyError, claim, reasons, [])
 
     let enum_type_bad pos is_enum_class ty_name trail =
       let ty = Markdown_lite.md_codify @@ Lazy.force ty_name in
@@ -541,6 +564,8 @@ module Primary = struct
       | Enum_class_label_as_expr pos -> enum_class_label_as_expr pos
       | Enum_class_label_invalid_argument { pos; is_proj } ->
         enum_class_label_invalid_argument pos is_proj
+      | Enum_class_label_member_mismatch { pos; label; expected_ty_msg_opt } ->
+        enum_class_label_member_mismatch pos label expected_ty_msg_opt
       | Incompatible_enum_inclusion_base
           { pos; classish_name; src_classish_name } ->
         incompatible_enum_inclusion_base pos classish_name src_classish_name
@@ -1302,7 +1327,11 @@ module Primary = struct
         seconds: int;
       }
     | Unresolved_tyvar of Pos.t
-    | Unify_error of Pos.t
+    | Unify_error of {
+        pos: Pos.t;
+        msg_opt: string option;
+        reasons_opt: Pos_or_decl.t Message.t list Lazy.t option;
+      }
     | Generic_unify of {
         pos: Pos.t;
         msg: string;
@@ -1343,7 +1372,12 @@ module Primary = struct
         req_name: string;
       }
     | Invalid_echo_argument of Pos.t
-    | Index_type_mismatch of Pos.t
+    | Index_type_mismatch of {
+        pos: Pos.t;
+        is_covariant_container: bool;
+        msg_opt: string option;
+        reasons_opt: Pos_or_decl.t Message.t list Lazy.t option;
+      }
     | Member_not_found of {
         pos: Pos.t;
         kind: [ `method_ | `property ];
@@ -2218,9 +2252,10 @@ module Primary = struct
 
   (* == User error helpers ================================================== *)
 
-  let unify_error pos =
-    let claim = (pos, "Typing error") in
-    (Error_code.UnifyError, claim, [], [])
+  let unify_error pos msg_opt reasons_opt =
+    let claim = (pos, Option.value ~default:"Typing error" msg_opt)
+    and reasons = Option.value_map ~default:[] ~f:Lazy.force reasons_opt in
+    (Error_code.UnifyError, claim, reasons, [])
 
   let generic_unify pos msg =
     let claim = (pos, msg) in
@@ -2355,8 +2390,15 @@ module Primary = struct
     in
     (Error_code.InvalidEchoArgument, claim, [], [])
 
-  let index_type_mismatch pos =
-    (Error_code.IndexTypeMismatch, (pos, "Invalid index expression"), [], [])
+  let index_type_mismatch pos is_covariant_container msg_opt reasons_opt =
+    let code =
+      if is_covariant_container then
+        Error_code.CovariantIndexTypeMismatch
+      else
+        Error_code.IndexTypeMismatch
+    and claim = (pos, Option.value ~default:"Invalid index expression" msg_opt)
+    and reasons = Option.value_map reasons_opt ~default:[] ~f:Lazy.force in
+    (code, claim, reasons, [])
 
   let member_not_found pos kind member_name class_name class_pos hint reason =
     let kind_str =
@@ -4584,7 +4626,8 @@ module Primary = struct
     | Shape err -> Shape.to_error err
     | Wellformedness err -> Wellformedness.to_error err
     | Xhp err -> Xhp.to_error err
-    | Unify_error pos -> unify_error pos
+    | Unify_error { pos; msg_opt; reasons_opt } ->
+      unify_error pos msg_opt reasons_opt
     | Generic_unify { pos; msg } -> generic_unify pos msg
     | Internal_error { pos; msg } -> internal_error pos msg
     | Typechecker_timeout { pos; fn_name; seconds } ->
@@ -4605,7 +4648,9 @@ module Primary = struct
     | Unsatisfied_req { pos; trait_pos; req_name; req_pos } ->
       unsatisfied_req pos trait_pos req_name req_pos
     | Invalid_echo_argument pos -> invalid_echo_argument pos
-    | Index_type_mismatch pos -> index_type_mismatch pos
+    | Index_type_mismatch { pos; is_covariant_container; msg_opt; reasons_opt }
+      ->
+      index_type_mismatch pos is_covariant_container msg_opt reasons_opt
     | Member_not_found
         { pos; kind; member_name; class_name; class_pos; hint; reason } ->
       member_not_found
@@ -5166,8 +5211,7 @@ end = struct
       | Apply (cb, err) ->
         aux err ~k:(function
             | Some (code, claim, reasons, quickfixes) ->
-              k
-              @@ Some (Callback.apply_help cb ~code ~claim ~reasons ~quickfixes)
+              k @@ Some (Callback.apply cb ~code ~claim ~reasons ~quickfixes)
             | _ -> k None)
     in
 
@@ -6139,21 +6183,13 @@ end
 and Callback : sig
   type t
 
-  val apply_help :
-    ?code:Error_code.t ->
-    ?reasons:Pos_or_decl.t Message.t list ->
-    ?quickfixes:Quickfix.t list ->
-    t ->
-    claim:Pos.t Message.t ->
-    error
-
   val apply :
     ?code:Error_code.t ->
     ?reasons:Pos_or_decl.t Message.t list ->
     ?quickfixes:Quickfix.t list ->
     t ->
     claim:Pos.t Message.t ->
-    (Pos.t, Pos_or_decl.t) User_error.t
+    error
 
   val always : Primary.t -> t
 
@@ -6253,16 +6289,11 @@ end = struct
     | Retain_code t -> eval t { st with code_opt = None }
     | With_code default -> with_code (Option.value ~default st.code_opt) st
 
-  let apply_help ?code ?(reasons = []) ?(quickfixes = []) t ~claim =
+  let apply ?code ?(reasons = []) ?(quickfixes = []) t ~claim =
     let st = { code_opt = code; claim_opt = Some claim; reasons; quickfixes } in
     let (code, claim_opt, reasons, quickfixes) = eval t st in
     (code, Option.value ~default:claim claim_opt, reasons, quickfixes)
 
-  let apply ?code ?reasons ?quickfixes t ~claim =
-    let (code, claim, reasons, quickfixes) =
-      apply_help ?code ?reasons ?quickfixes t ~claim
-    in
-    User_error.make (Error_code.to_enum code) claim reasons ~quickfixes
   (* -- Constructors -------------------------------------------------------- *)
 
   let always err = Always err
@@ -6512,7 +6543,7 @@ end = struct
   let eval_callback
       cb Error_state.{ code_opt; reasons_opt; quickfixes_opt; _ } ~claim =
     Some
-      (Callback.apply_help
+      (Callback.apply
          ?code:code_opt
          ?reasons:reasons_opt
          ?quickfixes:quickfixes_opt
@@ -6593,7 +6624,10 @@ end = struct
     Option.map ~f @@ apply_help ?code ?claim ?reasons ?quickfixes t
   (* -- Specific callbacks -------------------------------------------------- *)
 
-  let unify_error_at pos = of_error @@ Error.primary @@ Primary.Unify_error pos
+  let unify_error_at pos =
+    of_error
+    @@ Error.primary
+    @@ Primary.Unify_error { pos; msg_opt = None; reasons_opt = None }
 
   let bad_enum_decl pos =
     retain_code
@@ -6651,7 +6685,14 @@ end = struct
     of_primary_error @@ Primary.Invalid_echo_argument pos
 
   let index_type_mismatch_at pos =
-    of_primary_error @@ Primary.Index_type_mismatch pos
+    of_primary_error
+    @@ Primary.Index_type_mismatch
+         {
+           pos;
+           msg_opt = None;
+           reasons_opt = None;
+           is_covariant_container = false;
+         }
 end
 
 include Error

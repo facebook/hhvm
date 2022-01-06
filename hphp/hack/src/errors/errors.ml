@@ -740,9 +740,6 @@ let add_naming_error err = add_error @@ Naming_error.to_user_error err
 
 let add_nast_check_error err = add_error @@ Nast_check_error.to_user_error err
 
-let apply_typing_error_callback ?code ?reasons ?quickfixes err ~claim =
-  add_error @@ Typing_error.Callback.apply err ~claim ?reasons ?code ?quickfixes
-
 let apply_error_from_reasons_callback ?code ?claim ?reasons ?quickfixes err =
   Option.iter ~f:add_error
   @@ Typing_error.Reasons_callback.apply ?code ?claim ?reasons ?quickfixes err

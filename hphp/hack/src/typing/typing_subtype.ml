@@ -681,7 +681,13 @@ and simplify_subtype_i
   log_subtype_i
     ~level:2
     ~this_ty
-    ~function_name:"simplify_subtype"
+    ~function_name:
+      ("simplify_subtype"
+      ^
+      match subtype_env.coerce with
+      | None -> ""
+      | Some TL.CoerceToDynamic -> " <:D"
+      | Some TL.CoerceFromDynamic -> " D<:")
     env
     ty_sub
     ty_super;
@@ -1086,37 +1092,7 @@ and simplify_subtype_i
                 | Tdependent _
                 | Tgeneric _ ->
                   default_subtype env
-                | _ ->
-                  if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-                    match TUtils.try_strip_dynamic ty_super with
-                    | None -> invalid_env env
-                    | Some ty ->
-                      begin
-                        match TUtils.try_push_like ty with
-                        | None -> invalid_env env
-                        | Some (ty, tyl) ->
-                          let rec check_arg_dynamic tyl env =
-                            match tyl with
-                            | [] ->
-                              env
-                              |> simplify_subtype ~subtype_env ~this_ty lty ty
-                            | ty :: tyl ->
-                              env
-                              |> simplify_subtype
-                                   ~subtype_env:
-                                     {
-                                       subtype_env with
-                                       coerce = Some TL.CoerceToDynamic;
-                                     }
-                                   ~this_ty
-                                   ty
-                                   (MakeType.dynamic Reason.Rnone)
-                              &&& check_arg_dynamic tyl
-                          in
-                          check_arg_dynamic tyl env
-                      end
-                  else
-                    invalid_env env
+                | _ -> invalid_env env
               end
             | _ -> invalid_env env)
           | ty :: tys ->
@@ -1125,7 +1101,35 @@ and simplify_subtype_i
             |> simplify_subtype_i ~subtype_env ~this_ty ty_sub ty
             ||| try_each tys
         in
-        try_each tyl_super env
+        (* Implement the declarative subtyping rule C<~t1,...,~tn> <: ~C<t1,...,tn>
+         * for a type C<t1,...,tn> that supports dynamic. Algorithmically,
+         *   t <: ~C<t1,...,tn> iff
+         *   t <: C<~t1,...,~tn> /\ C<~t1,...,~tn> <:D dynamic.
+         * An SDT class C generalizes to other SDT constructors such as tuples and shapes.
+         *)
+        if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
+          match TUtils.try_strip_dynamic ty_super with
+          | None -> try_each tyl_super env
+          | Some ty ->
+            begin
+              match Typing_dynamic.try_push_like env ty with
+              | None -> try_each tyl_super env
+              | Some ty ->
+                env
+                |> simplify_dynamic_aware_subtype
+                     ~subtype_env
+                     ~this_ty
+                     ty
+                     (MakeType.dynamic Reason.Rnone)
+                &&& simplify_subtype_i
+                      ~subtype_env
+                      ~this_ty
+                      ty_sub
+                      (LoclType ty)
+                ||| try_each tyl_super
+            end
+        else
+          try_each tyl_super env
       in
       (match ety_sub with
       | ConstraintType cty when is_constraint_type_union cty ->

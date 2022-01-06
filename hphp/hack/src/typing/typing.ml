@@ -821,17 +821,16 @@ let expand_expected_and_get_node
     match TUtils.try_strip_dynamic ty with
     | Some stripped_ty ->
       if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-        match TUtils.try_push_like stripped_ty with
+        match Typing_dynamic.try_push_like env stripped_ty with
         | None -> unbox stripped_ty
-        | Some (ty, tyl) ->
+        | Some ty ->
           let dyn = MakeType.dynamic Reason.Rnone in
           if
-            List.for_all tyl ~f:(fun ty ->
-                SubType.is_sub_type_for_union
-                  ~coerce:(Some Typing_logic.CoerceToDynamic)
-                  env
-                  ty
-                  dyn)
+            SubType.is_sub_type_for_union
+              ~coerce:(Some Typing_logic.CoerceToDynamic)
+              env
+              ty
+              dyn
           then
             unbox ty
           else

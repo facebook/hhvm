@@ -9,9 +9,11 @@
 
 open Hh_prelude
 open Typing_defs
+open Common
 module Env = Typing_env
 module SN = Naming_special_names
 module Reason = Typing_reason
+module Cls = Decl_provider.Class
 
 (* Add `dynamic` lower and upper bound to any type parameters that are marked <<__RequireDynamic>>
  * Just add the upper bound to others. *)
@@ -158,3 +160,69 @@ let relax_method_type env relax r ft =
         Tintersection [mk (lr, Tfun ft); mk (lr, Tfun (build_dyn_fun_ty ft))] )
   else
     mk (lr, Tfun ft)
+
+(* Given t, construct ~t.
+ * acc is a boolean that remains false if no change was made (e.g. t = dynamic)
+ *)
+let make_like env acc ty =
+  if Typing_defs.is_dynamic ty then
+    (acc, ty)
+  else
+    let r = get_reason ty in
+    let (_env, ty) = Typing_union.union env (Typing_make_type.dynamic r) ty in
+    (true, ty)
+
+let try_push_like env ty =
+  match deref ty with
+  | (r, Ttuple tyl) ->
+    let (acc, tyl) = List.map_env false tyl ~f:(make_like env) in
+    if acc then
+      Some (mk (r, Ttuple tyl))
+    else
+      None
+  | (r, Tshape (kind, fields)) ->
+    let add_like_to_shape_field acc _name { sft_optional; sft_ty } =
+      let (acc, sft_ty) = make_like env acc sft_ty in
+      (acc, { sft_optional; sft_ty })
+    in
+    let (acc, fields) =
+      TShapeMap.map_env add_like_to_shape_field false fields
+    in
+    if acc then
+      Some (mk (r, Tshape (kind, fields)))
+    else
+      None
+  | (r, Tclass ((p, n), exact, tyl)) ->
+    begin
+      match Env.get_class env n with
+      | None -> None
+      | Some cd ->
+        let make_like acc ty tp =
+          let (acc, ty) = make_like env acc ty in
+          if acc then
+            let upper_bounds =
+              List.filter_map tp.tp_constraints ~f:(fun (c, ty) ->
+                  match c with
+                  | Ast_defs.Constraint_as ->
+                    let (_env, ty) =
+                      Typing_phase.localize_no_subst env ~ignore_errors:true ty
+                    in
+                    Some ty
+                  | _ -> None)
+            in
+            let (_env, ty) =
+              Typing_intersection.intersect_list env r (ty :: upper_bounds)
+            in
+            (acc, ty)
+          else
+            (acc, ty)
+        in
+        let (acc, tyl) =
+          List.map2_env false tyl (Cls.tparams cd) ~f:make_like
+        in
+        if acc then
+          Some (mk (r, Tclass ((p, n), exact, tyl)))
+        else
+          None
+    end
+  | _ -> None

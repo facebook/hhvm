@@ -1,18 +1,24 @@
-File "push_like.bad.php", line 12, characters 10-30:
+File "push_like.bad.php", line 24, characters 10-35:
 Invalid return type (Typing[4110])
-  File "push_like.bad.php", line 11, characters 31-38:
-  Expected `~(int, C)`
-  File "push_like.bad.php", line 12, characters 10-30:
-  But got `(~int, C)`
-File "push_like.bad.php", line 12, characters 10-30:
+  File "push_like.bad.php", line 23, characters 31-43:
+  Expected `~(int, NoSDTC)`
+  File "push_like.bad.php", line 24, characters 10-35:
+  But got `(~int, NoSDTC)`
+File "push_like.bad.php", line 24, characters 10-35:
 Invalid return type (Typing[4110])
-  File "push_like.bad.php", line 11, characters 33-35:
+  File "push_like.bad.php", line 23, characters 33-35:
   Expected `int`
-  File "push_like.bad.php", line 7, characters 16-19:
+  File "push_like.bad.php", line 19, characters 16-19:
   But got `dynamic`
-File "push_like.bad.php", line 17, characters 10-11:
+File "push_like.bad.php", line 29, characters 10-11:
 Invalid return type (Typing[4110])
-  File "push_like.bad.php", line 15, characters 24-31:
-  Expected `~(int, C)`
-  File "push_like.bad.php", line 16, characters 8-28:
-  But got `(~int, C)`
+  File "push_like.bad.php", line 27, characters 24-36:
+  Expected `~(int, NoSDTC)`
+  File "push_like.bad.php", line 28, characters 8-33:
+  But got `(~int, NoSDTC)`
+File "push_like.bad.php", line 37, characters 10-11:
+Invalid return type (Typing[4110])
+  File "push_like.bad.php", line 32, characters 41-47:
+  Expected `~Box<C>`
+  File "push_like.bad.php", line 32, characters 30-35:
+  But got `Box<B>`

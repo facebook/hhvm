@@ -522,17 +522,6 @@ val has_ancestor_including_req_refl :
 val has_ancestor_including_req :
   Typing_env_types.env -> Decl_provider.Class.t -> string -> bool
 
-(* Make element types of tuples, shapes, vec, dict or Awaitable into like types
- * Return None if no change was made.
- * Otherwise return Some (ty, tyl) where ty is the transformed type,
- * and tyl is the list of type arguments for which ~ was added.
- *
- * Example input: shape('a' => int, 'b' => string)
- * Output: (shape('a' => ~int, 'b' => ~string), [int; string])
- *)
-val try_push_like :
-  Typing_defs.locl_ty -> (Typing_defs.locl_ty * Typing_defs.locl_ty list) option
-
 (* If input is dynamic | t or t | dynamic then return Some t.
  * Otherwise return None.
  *)

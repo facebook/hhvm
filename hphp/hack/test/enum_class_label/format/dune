@@ -1,0 +1,19 @@
+(rule
+ (alias enum_class_label_format)
+ (deps
+  %{exe:../../../src/hackfmt.exe}
+  %{project_root}/test/verify.py
+  %{project_root}/test/review.sh
+  (glob_files %{project_root}/test/enum_class_label/format/*.php)
+  (glob_files %{project_root}/test/enum_class_label/format/*.php.exp))
+ (action
+  (run
+   %{project_root}/test/verify.py
+   %{project_root}/test/enum_class_label/format
+   --program
+   %{exe:../../../src/hackfmt.exe})))
+
+(alias
+ (name runtest)
+ (deps
+  (alias enum_class_label_format)))

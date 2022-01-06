@@ -2745,10 +2745,11 @@ and handle_xhp_open_right_angle_token env attrs node =
   | _ -> failwith "expected xhp_open right_angle token"
 
 and handle_possible_chaining env node =
-  let rec handle_member_selection acc (receiver, arrow, member, targs) args =
+  let rec handle_member_selection
+      acc (receiver, arrow, member, targs, enum_class_label) args =
     let (first_receiver, acc) = handle_chaining acc receiver in
-    (first_receiver, (arrow, member, targs, args) :: acc)
-  and handle_fun_call acc node receiver targs lp args rp =
+    (first_receiver, (arrow, member, targs, enum_class_label, args) :: acc)
+  and handle_fun_call acc node receiver targs enum_class_label lp args rp =
     match Syntax.syntax receiver with
     | Syntax.MemberSelectionExpression
         { member_object = obj; member_operator = arrow; member_name = member }
@@ -2763,10 +2764,11 @@ and handle_possible_chaining env node =
         ( obj,
           arrow,
           member,
-          if Syntax.is_missing targs then
+          (if Syntax.is_missing targs then
             None
           else
-            Some targs )
+            Some targs),
+          enum_class_label )
         (Some (lp, args, rp))
     | _ -> (node, [])
   and handle_chaining acc node =
@@ -2775,12 +2777,12 @@ and handle_possible_chaining env node =
         {
           function_call_receiver = receiver;
           function_call_type_args = targs;
-          function_call_enum_class_label = _enum_class_label;
+          function_call_enum_class_label = enum_class_label;
           function_call_left_paren = lp;
           function_call_argument_list = args;
           function_call_right_paren = rp;
         } ->
-      handle_fun_call acc node receiver targs lp args rp
+      handle_fun_call acc node receiver targs (Some enum_class_label) lp args rp
     | Syntax.MemberSelectionExpression
         { member_object = obj; member_operator = arrow; member_name = member }
     | Syntax.SafeMemberSelectionExpression
@@ -2789,7 +2791,7 @@ and handle_possible_chaining env node =
           safe_member_operator = arrow;
           safe_member_name = member;
         } ->
-      handle_member_selection acc (obj, arrow, member, None) None
+      handle_member_selection acc (obj, arrow, member, None, None) None
     | _ -> (node, [])
   in
   (* It's easy to end up with an infinite loop by passing an unexpected node
@@ -2810,12 +2812,13 @@ and handle_possible_chaining env node =
      E.g., transform $x->a->b->c into ($x, [->a; ->b; ->c]) *)
   let (first_receiver, chain_list) = handle_chaining [] node in
   let chain_list = List.rev chain_list in
-  let transform_chain (arrow, member, targs, argish) =
+  let transform_chain (arrow, member, targs, enum_class_label, argish) =
     Concat
       [
         t env arrow;
         t env member;
         Option.value_map targs ~default:Nothing ~f:(t env);
+        Option.value_map enum_class_label ~default:Nothing ~f:(t env);
         Option.value_map argish ~default:Nothing ~f:(fun (lp, args, rp) ->
             transform_argish env lp args rp);
       ]
@@ -2828,12 +2831,18 @@ and handle_possible_chaining env node =
         {
           function_call_receiver = receiver;
           function_call_type_args = targs;
-          function_call_enum_class_label = _enum_class_label;
+          function_call_enum_class_label = enum_class_label;
           function_call_left_paren = lp;
           function_call_argument_list = args;
           function_call_right_paren = rp;
         } ->
-      Concat [t env receiver; t env targs; transform_argish env lp args rp]
+      Concat
+        [
+          t env receiver;
+          t env targs;
+          t env enum_class_label;
+          transform_argish env lp args rp;
+        ]
     | Syntax.MemberSelectionExpression _
     | Syntax.SafeMemberSelectionExpression _ ->
       failwith
@@ -2860,9 +2869,9 @@ and handle_possible_chaining env node =
     let tl = List.map tl ~f:transform_chain in
     let rule_type =
       match hd with
-      | (_, trailing, None, None)
-      | (_, _, Some trailing, None)
-      | (_, _, _, Some (_, _, trailing)) ->
+      | (_, trailing, None, _, None)
+      | (_, _, Some trailing, _, None)
+      | (_, _, _, _, Some (_, _, trailing)) ->
         if node_has_trailing_newline trailing then
           Rule.Always
         else if first_receiver_has_trailing_newline then

@@ -188,9 +188,14 @@ let rec eliminate ~ty_orig ~rtv_pos ~name ~ubs ~lbs renv v =
     (renv, ubty, Elim (rtv_pos, name))
   | Ast_defs.Invariant ->
     let name = Markdown_lite.md_codify name in
-    Errors.apply_error_from_reasons_callback
-      renv.on_error
-      ~reasons:[(rtv_pos, "Rigid type variable " ^ name ^ " is escaping")];
+    let snd_err =
+      Typing_error.Secondary.Rigid_tvar_escape { pos = rtv_pos; name }
+    in
+    Errors.add_typing_error
+      Typing_error.(
+        apply_reasons
+          ~on_error:(Reasons_callback.retain_code renv.on_error)
+          snd_err);
     (renv, ty_orig, Unchanged)
 
 and refresh_type renv v ty_orig =

@@ -713,21 +713,22 @@ and simplify_subtype_i
     in
     let left = Reason.to_string ("Expected " ^ ty_super_descr) r_super in
     let right = Reason.to_string ("But got " ^ ty_sub_descr) r_sub @ suffix in
-    match subtype_env.tparam_constraints with
-    | _ :: _ ->
-      let reasons =
-        Typing_error.Secondary.Violated_constraint
-          { cstrs = subtype_env.tparam_constraints; reasons = left @ right }
-      in
-      let error =
-        Typing_error.apply_reasons ~on_error:subtype_env.on_error reasons
-      in
-      Errors.add_typing_error error
-    | _ ->
-      Errors.apply_error_from_reasons_callback
-        subtype_env.on_error
-        ~reasons:(left @ right)
+    let error =
+      let open Typing_error.Secondary in
+      match subtype_env.tparam_constraints with
+      | [] ->
+        let snd_err = Subtyping_error (left @ right) in
+        Typing_error.(
+          apply_reasons
+            ~on_error:(Reasons_callback.retain_code subtype_env.on_error)
+            snd_err)
+      | cstrs ->
+        let snd_err = Violated_constraint { cstrs; reasons = left @ right } in
+        Typing_error.apply_reasons ~on_error:subtype_env.on_error snd_err
+    in
+    Errors.add_typing_error error
   in
+
   let fail () = fail_with_suffix [] in
   let ( ||| ) = ( ||| ) ~fail in
   (* We *know* that the assertion is unsatisfiable *)

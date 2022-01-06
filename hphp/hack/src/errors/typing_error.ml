@@ -5293,6 +5293,10 @@ and Secondary : sig
         member_name: string;
         kind: [ `class_typeconst | `method_ | `property ];
       }
+    | Rigid_tvar_escape of {
+        pos: Pos_or_decl.t;
+        name: string;
+      }
     (* == Secondary only ====================================================== *)
     | Violated_constraint of {
         cstrs: (Pos_or_decl.t * Pos_or_decl.t Message.t) list;
@@ -5440,6 +5444,7 @@ and Secondary : sig
     | Bad_method_override of {
         pos: Pos_or_decl.t;
         member_name: string;
+        reasons: Pos_or_decl.t Message.t list;
       }
     | Bad_prop_override of {
         pos: Pos_or_decl.t;
@@ -5474,6 +5479,7 @@ and Secondary : sig
         ty_name: string Lazy.t;
         dynamic_part: Pos_or_decl.t Message.t list;
       }
+    | Subtyping_error of Pos_or_decl.t Message.t list
 
   val eval : t -> (Error_code.t * Pos_or_decl.t Message.t list) option
 end = struct
@@ -5519,6 +5525,10 @@ end = struct
         member_name: string;
         kind: [ `class_typeconst | `method_ | `property ];
       }
+    | Rigid_tvar_escape of {
+        pos: Pos_or_decl.t;
+        name: string;
+      }
     (* == Secondary only ====================================================== *)
     | Violated_constraint of {
         cstrs: (Pos_or_decl.t * Pos_or_decl.t Message.t) list;
@@ -5666,6 +5676,7 @@ end = struct
     | Bad_method_override of {
         pos: Pos_or_decl.t;
         member_name: string;
+        reasons: Pos_or_decl.t Message.t list;
       }
     | Bad_prop_override of {
         pos: Pos_or_decl.t;
@@ -5700,6 +5711,7 @@ end = struct
         ty_name: string Lazy.t;
         dynamic_part: Pos_or_decl.t Message.t list;
       }
+    | Subtyping_error of Pos_or_decl.t Message.t list
 
   let eval = function
     | Of_error err ->
@@ -6152,21 +6164,25 @@ end = struct
           decl_pos
       in
       Some (code, claim :: reasons)
+    | Rigid_tvar_escape { pos; name } ->
+      Some
+        ( Error_code.RigidTVarEscape,
+          [(pos, "Rigid type variable " ^ name ^ " is escaping")] )
     | Smember_not_found { pos; kind; member_name; class_name; class_pos; hint }
       ->
       let (code, claim, reasons) =
         Common.smember_not_found pos kind member_name class_name class_pos hint
       in
       Some (code, claim :: reasons)
-    | Bad_method_override { pos; member_name; _ } ->
+    | Bad_method_override { pos; member_name; reasons } ->
       let reasons =
-        [
-          ( pos,
-            "The method "
-            ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
-            ^ " is not compatible with the overridden method" );
-        ]
+        ( pos,
+          "The method "
+          ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
+          ^ " is not compatible with the overridden method" )
+        :: reasons
       in
+
       Some (Error_code.BadMethodOverride, reasons)
     | Bad_prop_override { pos; member_name; _ } ->
       let reasons =
@@ -6178,6 +6194,7 @@ end = struct
         ]
       in
       Some (Error_code.BadMethodOverride, reasons)
+    | Subtyping_error reasons -> Some (Error_code.UnifyError, reasons)
 end
 
 and Callback : sig

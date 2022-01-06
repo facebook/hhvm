@@ -1323,6 +1323,10 @@ module Secondary : sig
         member_name: string;
         kind: [ `class_typeconst | `method_ | `property ];
       }
+    | Rigid_tvar_escape of {
+        pos: Pos_or_decl.t;
+        name: string;
+      }
     (* == Secondary only ====================================================== *)
     | Violated_constraint of {
         cstrs: (Pos_or_decl.t * Pos_or_decl.t Message.t) list;
@@ -1470,6 +1474,7 @@ module Secondary : sig
     | Bad_method_override of {
         pos: Pos_or_decl.t;
         member_name: string;
+        reasons: Pos_or_decl.t Message.t list;
       }
     | Bad_prop_override of {
         pos: Pos_or_decl.t;
@@ -1504,6 +1509,7 @@ module Secondary : sig
         ty_name: string Lazy.t;
         dynamic_part: Pos_or_decl.t Message.t list;
       }
+    | Subtyping_error of Pos_or_decl.t Message.t list
 end
 
 module Callback : sig

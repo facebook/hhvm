@@ -299,8 +299,25 @@ let autocomplete_member ~is_static env class_ cid id =
     autocomplete_identifier := Some id;
     argument_global_type := Some Acclass_get;
     let add kind (name, ty) =
-      add_partial_result name (Phase.decl ty) kind (Some class_)
+      let res_ty = Tast_env.print_decl_ty env ty in
+      let ty = Phase.decl ty in
+      let complete =
+        {
+          res_pos = get_pos_for env ty;
+          res_replace_pos = replace_pos_of_id id;
+          res_base_class = Some (Cls.name class_);
+          res_ty;
+          res_name = name;
+          res_fullname = name;
+          res_kind = kind;
+          func_details = get_func_details_for env ty;
+          ranking_details = None;
+          res_documentation = None;
+        }
+      in
+      add_res (Complete complete)
     in
+
     let sort : 'a. (string * 'a) list -> (string * 'a) list =
      fun list ->
       List.sort ~compare:(fun (a, _) (b, _) -> String.compare a b) list

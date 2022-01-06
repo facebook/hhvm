@@ -100,7 +100,22 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     | Tclass (_, _, ltys) -> List.for_all ~f:is_valid_base ltys
     | Tunion [ty1; ty2] when is_dynamic ty1 && sd env -> is_valid_base ty2
     | Tunion [ty1; ty2] when is_dynamic ty2 && sd env -> is_valid_base ty1
-    | _ -> false
+    | Tshape (_, shapemap) ->
+      TShapeMap.for_all (fun _name sfty -> is_valid_base sfty.sft_ty) shapemap
+    | Tany _
+    | Terr
+    | Tdynamic
+    | Tfun _
+    | Tvar _
+    | Tgeneric _
+    | Tunion _
+    | Tintersection _
+    | Tvec_or_dict _
+    | Taccess _
+    | Tunapplied_alias _
+    | Tdependent _
+    | Tneg _ ->
+      false
   in
   match ty_interface with
   | Some interface ->

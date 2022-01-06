@@ -509,11 +509,11 @@ final class Pair implements \ConstVector {
    */
   public function concat<Tu super mixed>(Traversable<Tu> $traversable)[]:
     ImmVector<Tu> {
-    $ret = $this->toVector();
-    foreach($traversable as $value) {
-      $ret->append($value);
+    $ret = vec($this);
+    foreach ($traversable as $value) {
+      $ret[] = $value;
     }
-    return $ret->toImmVector();
+    return new ImmVector($ret);
   }
 
   /**

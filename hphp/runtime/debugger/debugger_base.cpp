@@ -16,13 +16,13 @@
 
 #include "hphp/runtime/debugger/debugger_base.h"
 
+#include <cstring>
 #include <utility>
 #include <vector>
 #include <boost/algorithm/string/replace.hpp>
 
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/debugger/break_point.h"
-#include "hphp/parser/scanner.h"
 #include "hphp/util/text-util.h"
 #include "hphp/runtime/base/config.h"
 
@@ -297,103 +297,6 @@ const char *PHP_KEYWORDS[] = {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void get_color(int tokid, int prev, int next,
-                      const char *&color, const char *&end,
-                      const char **palette =
-                      DebuggerClient::DefaultCodeColors) {
-
-  TRACE(7, "debugger_base:get_color\n");
-#undef YYTOKENTYPE
-#undef YYTOKEN_MAP
-#undef YYTOKEN
-#define YYTOKEN(num, name) (char)(CodeColorKeyword * 2),
-#define YYTOKEN_MAP static char code[] =
-#include "hphp/parser/hphp.tab.hpp"
-#undef YYTOKEN_MAP
-#undef YYTOKEN
-
-#define COLOR_ENTRY(name, type) \
-  code[name - YYTOKEN_MIN] = (char)(CodeColor ## type * 2)
-
-  static bool code_inited = false;
-  if (!code_inited) {
-    code_inited = true;
-
-    COLOR_ENTRY(T_SR_EQUAL,                 None        );
-    COLOR_ENTRY(T_SL_EQUAL,                 None        );
-    COLOR_ENTRY(T_XOR_EQUAL,                None        );
-    COLOR_ENTRY(T_OR_EQUAL,                 None        );
-    COLOR_ENTRY(T_AND_EQUAL,                None        );
-    COLOR_ENTRY(T_MOD_EQUAL,                None        );
-    COLOR_ENTRY(T_CONCAT_EQUAL,             None        );
-    COLOR_ENTRY(T_POW_EQUAL,                None        );
-    COLOR_ENTRY(T_DIV_EQUAL,                None        );
-    COLOR_ENTRY(T_MUL_EQUAL,                None        );
-    COLOR_ENTRY(T_MINUS_EQUAL,              None        );
-    COLOR_ENTRY(T_PLUS_EQUAL,               None        );
-    COLOR_ENTRY(T_BOOLEAN_OR,               None        );
-    COLOR_ENTRY(T_BOOLEAN_AND,              None        );
-    COLOR_ENTRY(T_IS_NOT_IDENTICAL,         None        );
-    COLOR_ENTRY(T_IS_IDENTICAL,             None        );
-    COLOR_ENTRY(T_IS_NOT_EQUAL,             None        );
-    COLOR_ENTRY(T_IS_EQUAL,                 None        );
-    COLOR_ENTRY(T_IS_GREATER_OR_EQUAL,      None        );
-    COLOR_ENTRY(T_IS_SMALLER_OR_EQUAL,      None        );
-    COLOR_ENTRY(T_SPACESHIP,                None        );
-    COLOR_ENTRY(T_SR,                       None        );
-    COLOR_ENTRY(T_SL,                       None        );
-    COLOR_ENTRY(T_DEC,                      None        );
-    COLOR_ENTRY(T_INC,                      None        );
-    COLOR_ENTRY(T_LNUMBER,                  None        );
-    COLOR_ENTRY(T_DNUMBER,                  None        );
-    COLOR_ENTRY(T_ONUMBER,                  None        );
-    COLOR_ENTRY(T_STRING,                   None        );
-    COLOR_ENTRY(T_STRING_VARNAME,           Variable    );
-    COLOR_ENTRY(T_VARIABLE,                 Variable    );
-    COLOR_ENTRY(T_NUM_STRING,               None        );
-    COLOR_ENTRY(T_INLINE_HTML,              Html        );
-    COLOR_ENTRY(T_ENCAPSED_AND_WHITESPACE,  String      );
-    COLOR_ENTRY(T_CONSTANT_ENCAPSED_STRING, String      );
-    COLOR_ENTRY(T_OBJECT_OPERATOR,          None        );
-    COLOR_ENTRY(T_DOUBLE_ARROW,             None        );
-    COLOR_ENTRY(T_CLASS_C,                  Constant    );
-    COLOR_ENTRY(T_METHOD_C,                 Constant    );
-    COLOR_ENTRY(T_FUNC_C,                   Constant    );
-    COLOR_ENTRY(T_LINE,                     Constant    );
-    COLOR_ENTRY(T_FILE,                     Constant    );
-    COLOR_ENTRY(T_DIR,                      Constant    );
-    COLOR_ENTRY(T_COMMENT,                  Comment     );
-    COLOR_ENTRY(T_DOC_COMMENT,              Comment     );
-    COLOR_ENTRY(T_OPEN_TAG,                 Tag         );
-    COLOR_ENTRY(T_OPEN_TAG_WITH_ECHO,       Tag         );
-    COLOR_ENTRY(T_CLOSE_TAG,                Tag         );
-    COLOR_ENTRY(T_WHITESPACE,               None        );
-    COLOR_ENTRY(T_DOLLAR_OPEN_CURLY_BRACES, None        );
-    COLOR_ENTRY(T_CURLY_OPEN,               None        );
-    COLOR_ENTRY(T_DOUBLE_COLON,             None        );
-  }
-
-  if (tokid == T_STRING) {
-    int type = CodeColorConstant;
-    if (prev == '$') {
-      type = CodeColorVariable;
-    } else if (prev == T_FUNCTION || prev == T_CLASS || prev == T_INTERFACE) {
-      type = CodeColorDeclaration;
-    } else if (next == '(') {
-      type = CodeColorNone;
-    }
-    color = palette[type * 2];
-    end = palette[type * 2 + 1];
-  } else if (tokid >= YYTOKEN_MIN && tokid <= YYTOKEN_MAX) {
-    tokid -= YYTOKEN_MIN;
-    char c = code[tokid];
-    color = palette[(int)c];
-    end = palette[(int)(c+1)];
-  } else {
-    color = end = nullptr;
-  }
-}
-
 static void color_line_no(StringBuffer &sb, int line, int lineFocus0,
                           int lineFocus1, const char *color) {
   TRACE(7, "debugger_base:color_line_no\n");
@@ -407,6 +310,11 @@ static void color_line_no(StringBuffer &sb, int line, int lineFocus0,
   }
 }
 
+/**
+ * Given a token and a string buffer, append the token to the string buffer, along with
+ * color information and line number where applicable. Tokens can span multiple lines and
+ * therefore contain a newline char.
+*/
 static void
 append_line_no(StringBuffer& sb, const char* text, int& line, const char* color,
                const char* end, int lineFocus0, int /*charFocus0*/,
@@ -416,25 +324,29 @@ append_line_no(StringBuffer& sb, const char* text, int& line, const char* color,
   const char *colorLineNo = palette[CodeColorLineNo * 2];
   const char *endLineNo = palette[CodeColorLineNo * 2 + 1];
 
-  // beginning
+  // Beginning of the source file
   if (line && sb.empty()) {
+    // Add color information to the buffer if line number should be highlighted
     if (colorLineNo) color_line_no(sb, line, lineFocus0, lineFocus1,
                                    colorLineNo);
     sb.printf(DebuggerClient::LineNoFormat, line);
     if (endLineNo) sb.append(endLineNo);
   }
 
-  // ending
+  // End of the source file
   if (text == nullptr) {
     if (line) {
+      // Add color information to the buffer if line number should be highlighted
       if (colorLineNo) color_line_no(sb, line, lineFocus0, lineFocus1,
                                      colorLineNo);
+      // Do not append a line number, only an END statement
       sb.append("(END)\n");
       if (endLineNo) sb.append(endLineNo);
     }
     return;
   }
 
+  // Add color information to the buffer if token should be highlighted
   if (color) sb.append(color);
 
   if (line == 0) {
@@ -443,6 +355,11 @@ append_line_no(StringBuffer& sb, const char* text, int& line, const char* color,
     const char *begin = text;
     const char *p = begin;
     for (; *p; p++) {
+      /**
+      * For any token including a newline, we must handle a new line number. This logic adds
+      * the current token, color information for the current line (for both token and line number), newline,
+      * line number for the next line, and color information for the next line.
+      */
       if (*p == '\n') {
         ++line;
         sb.append(begin, p - begin);
@@ -450,17 +367,20 @@ append_line_no(StringBuffer& sb, const char* text, int& line, const char* color,
         sb.append('\n');
         if (colorLineNo) color_line_no(sb, line, lineFocus0, lineFocus1,
                                        colorLineNo);
+        // If the current line is the only focus line or one of multiple focus lines, print the line number with an asterisk
         if ((line == lineFocus0 && lineFocus1 == 0) ||
             (line >= lineFocus0 && line <= lineFocus1)) {
           sb.printf(DebuggerClient::LineNoFormatWithStar, line);
+        // If the current line is not a focus line, print the line number by itself
         } else {
           sb.printf(DebuggerClient::LineNoFormat, line);
         }
         if (endLineNo) sb.append(endLineNo);
         if (color) sb.append(color);
+        // Advance to the next line
         begin = p + 1;
       }
-    }
+    } // If token does not span multiple lines, just add it to the buffer
     if (p - begin > 0) {
       sb.append(begin, p - begin);
     }
@@ -481,6 +401,10 @@ String highlight_code(const String& source, int line /* = 0 */,
   return highlighted.substr(pos + 1);
 }
 
+/*
+ * Given a background color to highlight with, check that the passed in token location
+ * resides within the focus area and if so, return a string encoding the background and foreground color.
+ */
 string check_char_highlight(int lineFocus0, int charFocus0,
                             int lineFocus1, int charFocus1,
                             Location &loc) {
@@ -495,98 +419,34 @@ string check_char_highlight(int lineFocus0, int charFocus0,
   return "";
 }
 
+/*
+ * Given a source file, iterate through each line, leaving it up to append_line_no() to write to the string
+ * buffer with line number and color information. Add a nullptr termination END line for the last line of
+ * the file.
+ */
 String highlight_php(const String& source, int line /* = 0 */,
                      int lineFocus0 /* = 0 */, int charFocus0 /* = 0 */,
                      int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   TRACE(7, "debugger_base:highlight_php\n");
+  const char *begin = source.data();
   StringBuffer res;
-  Scanner scanner(source.data(), source.size(),
-                  Scanner::AllowShortTags | Scanner::ReturnAllTokens);
-  ScannerToken tok1, tok2;
-  std::vector<std::pair<int, std::string> > ahead_tokens;
-  Location loc1, loc2;
-
-  const char *colorComment = nullptr, *endComment = nullptr;
-  get_color(T_COMMENT, 0, 0, colorComment, endComment);
-
-  int prev = 0;
-  int tokid = scanner.getNextToken(tok1, loc1);
-  int next = 0;
-  while (tokid) {
-    // look ahead
-    next = scanner.getNextToken(tok2, loc2);
-    while (next == T_WHITESPACE ||
-           next == T_COMMENT ||
-           next == T_DOC_COMMENT) {
-
-      string text = tok2.text();
-      string hcolor = check_char_highlight(lineFocus0, charFocus0,
-                                           lineFocus1, charFocus1, loc2);
-      if (!hcolor.empty()) {
-        text = hcolor + text + ANSI_COLOR_END;
-      }
-
-      ahead_tokens.push_back(std::pair<int, string>(next, text));
-      next = scanner.getNextToken(tok2, loc2);
+  for (const char *p = begin; *p; p++) {
+    if (*p == '\0') {
+      break;
     }
-
-    string hcolor = check_char_highlight(lineFocus0, charFocus0,
-                                         lineFocus1, charFocus1, loc1);
-
-    if (tokid < 256) {
-      if (!hcolor.empty()) {
-        res.append(hcolor);
-        res.append((char)tokid);
-        res.append(ANSI_COLOR_END);
-      } else {
-        res.append((char)tokid);
-      }
-    } else {
-      const char *color = nullptr, *end = nullptr;
-      get_color(tokid, prev, next, color, end);
-      if (!hcolor.empty()) {
-        color = hcolor.c_str();
-        end = ANSI_COLOR_END;
-      }
-
-      const std::string &text = tok1.text();
-      int offset = 0;
-      if (text[0] == '$') {
-        if (!hcolor.empty()) {
-          res.append(hcolor);
-          res.append('$');
-          res.append(ANSI_COLOR_END);
-        } else {
-          res.append('$');
-        }
-        offset = 1;
-      }
-      append_line_no(res, text.c_str() + offset, line, color, end,
-                     lineFocus0, charFocus0, lineFocus1, charFocus1);
+    if (*p == '\n') {
+      size_t text_len = p - begin + 1;
+      // Add space for null terminating character
+      size_t total_len = text_len + 2;
+      char *text = new char[total_len];
+      strncpy(text, begin, text_len);
+      text[text_len] = '\0';
+      append_line_no(res, text, line, nullptr, nullptr, lineFocus0, charFocus0, lineFocus1, charFocus1);
+      begin = p + 1;
     }
-
-    if (!ahead_tokens.empty()) {
-      for (unsigned int i = 0; i < ahead_tokens.size(); i++) {
-        bool comment = ahead_tokens[i].first != T_WHITESPACE;
-        append_line_no(res, ahead_tokens[i].second.c_str(), line,
-                       comment ? colorComment : nullptr,
-                       comment ? endComment : nullptr,
-                       lineFocus0, charFocus0, lineFocus1, charFocus1);
-      }
-      ahead_tokens.clear();
-    }
-
-    if (!(tokid == T_WHITESPACE || tokid == T_COMMENT ||
-          tokid == T_DOC_COMMENT)) {
-      prev = tokid;
-    }
-    tok1 = tok2;
-    loc1 = loc2;
-    tokid = next;
   }
-
   append_line_no(res, nullptr, line, nullptr, nullptr,
-                 lineFocus0, charFocus0, lineFocus1, charFocus1);
+                  lineFocus0, charFocus0, lineFocus1, charFocus1);
   return res.detach();
 }
 

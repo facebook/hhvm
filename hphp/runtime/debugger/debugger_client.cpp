@@ -1346,6 +1346,10 @@ bool DebuggerClient::code(const String& source, int line1 /*= 0*/,
   int line = 1;
   const char *begin = highlighted.data();
   StringBuffer sb;
+  /*
+   * Separate out only the lines specified by the bounds line1 and line2 from
+   * the whole source file, which at this point is highlighted.
+   */
   for (const char *p = begin; *p; p++) {
     if (*p == '\n') {
       if (line >= line1) {

@@ -706,7 +706,10 @@ function serial_only_tests(vec<string> $tests): vec<string> {
 function exec_find(vec<string> $files, string $extra): vec<string> {
   $results = vec[];
   foreach (array_chunk($files, 500) as $chunk) {
-    $efa = safe_implode(' ', array_map(escapeshellarg<>, $chunk));
+    $efa = implode(' ', array_map(
+      $line ==> escapeshellarg($line as string),
+      $chunk as dict<_, _>,
+    ));
     $output = shell_exec("find $efa $extra");
     foreach (explode("\n", $output) as $result) {
       // Collect the (non-empty) results, which should all be file paths.

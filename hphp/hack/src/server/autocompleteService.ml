@@ -143,15 +143,8 @@ let autocomplete_result_to_json res =
       (* legacy field, left here in case clients need it *)
     ]
 
-let get_partial_result name ty kind class_opt =
-  let base_class = Option.map ~f:(fun class_ -> Cls.name class_) class_opt in
-  Partial { ty; name; kind_ = kind; base_class }
-
 let add_res (res : autocomplete_result) : unit =
   autocomplete_results := res :: !autocomplete_results
-
-let add_partial_result name ty kind class_opt =
-  add_res (get_partial_result name ty kind class_opt)
 
 let autocomplete_token ac_type env x =
   if is_auto_complete (snd x) then (
@@ -651,17 +644,31 @@ let autocomplete_enum_class_label_call env fty pos_labelname =
   ac_env := Some env;
   autocomplete_identifier := Some pos_labelname;
   argument_global_type := Some Acclass_get;
+
   let suggest_members cls =
     match cls with
     | Some cls ->
       List.iter (Cls.consts cls) ~f:(fun (name, cc) ->
           (* Filter out the constant used for ::class if present *)
           if String.(name <> Naming_special_names.Members.mClass) then
-            add_partial_result
-              name
-              (Phase.decl cc.cc_type)
-              SearchUtils.SI_ClassConstant
-              (Some cls))
+            let res_ty = Tast_env.print_decl_ty env cc.cc_type in
+            let ty = Phase.decl cc.cc_type in
+            let kind = SearchUtils.SI_ClassConstant in
+            let complete =
+              {
+                res_pos = get_pos_for env ty;
+                res_replace_pos = replace_pos_of_id pos_labelname;
+                res_base_class = Some (Cls.name cls);
+                res_ty;
+                res_name = name;
+                res_fullname = name;
+                res_kind = kind;
+                func_details = get_func_details_for env ty;
+                ranking_details = None;
+                res_documentation = None;
+              }
+            in
+            add_res (Complete complete))
     | _ -> ()
   in
   let suggest_members_from_ty env ty =

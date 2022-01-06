@@ -223,7 +223,7 @@ let get_func_details_for env ty =
   | Tfun ft -> Some (tfun_to_func_details env ft)
   | _ -> None
 
-let autocomplete_shape_key env fields id =
+let autocomplete_shape_key autocomplete_context env fields id =
   if is_auto_complete (snd id) then (
     ac_env := Some env;
     autocomplete_identifier := Some id;
@@ -258,8 +258,31 @@ let autocomplete_shape_key env fields id =
               (Reason.Rwitness_from_decl pos, Typing_defs.make_tany ()) )
       in
       if (not have_prefix) || string_starts_with code prefix then
-        add_partial_result code (Phase.decl ty) kind None
+        let ty = Phase.decl ty in
+        let pos = get_pos_for env ty in
+        let res_name =
+          if autocomplete_context.is_before_apostrophe then
+            rstrip code "'"
+          else
+            code
+        in
+        let complete =
+          {
+            res_pos = pos;
+            res_replace_pos = replace_pos_of_id id;
+            res_base_class = None;
+            res_ty = kind_to_string kind;
+            res_name;
+            res_fullname = code;
+            res_kind = kind;
+            func_details = get_func_details_for env ty;
+            ranking_details = None;
+            res_documentation = None;
+          }
+        in
+        add_res (Complete complete)
     in
+
     List.iter (TShapeMap.keys fields) ~f:add
   )
 
@@ -638,7 +661,24 @@ let autocomplete_shape_literal_in_call
     let ty = Tprim Aast_defs.Tstring in
     let reason = Typing_reason.Rwitness pos in
     let ty = mk (reason, ty) in
-    add_partial_result key (Phase.locl ty) SI_Literal None
+
+    let kind = SI_Literal in
+    let lty = Phase.locl ty in
+    let complete =
+      {
+        res_pos = get_pos_for env lty;
+        res_replace_pos = replace_pos_of_id (pos, key);
+        res_base_class = None;
+        res_ty = kind_to_string kind;
+        res_name = key;
+        res_fullname = key;
+        res_kind = kind;
+        func_details = get_func_details_for env lty;
+        ranking_details = None;
+        res_documentation = None;
+      }
+    in
+    add_res (Complete complete)
   in
 
   (* If this shape field name is of the form "fooAUTO332", return "foo". *)
@@ -887,7 +927,7 @@ let find_global_results
     ()
   )
 
-let visitor =
+let visitor autocomplete_context =
   object (self)
     inherit Tast_visitor.iter as super
 
@@ -945,7 +985,8 @@ let visitor =
           match get_node ty with
           | Tshape (_, fields) ->
             (match key with
-            | Aast.Id (_, mid) -> autocomplete_shape_key env fields (pos, mid)
+            | Aast.Id (_, mid) ->
+              autocomplete_shape_key autocomplete_context env fields (pos, mid)
             | Aast.String mid ->
               (* autocomplete generally assumes that there's a token ending with the suffix; *)
               (* This isn't the case for `$shape['a`, unless it's at the end of the file *)
@@ -955,7 +996,7 @@ let visitor =
                   mid
               in
               if Int.equal offset (-1) then
-                autocomplete_shape_key env fields (pos, mid)
+                autocomplete_shape_key autocomplete_context env fields (pos, mid)
               else
                 let mid =
                   Str.string_before
@@ -974,7 +1015,7 @@ let visitor =
                         + offset
                         + AutocompleteTypes.autocomplete_token_length )
                 in
-                autocomplete_shape_key env fields (pos, mid)
+                autocomplete_shape_key autocomplete_context env fields (pos, mid)
             | _ -> ())
           | _ -> ()
         end
@@ -1157,7 +1198,7 @@ let go_ctx
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
   reset ();
-  visitor#go ctx tast;
+  (visitor autocomplete_context)#go ctx tast;
   Errors.ignore_ (fun () ->
       let start_time = Unix.gettimeofday () in
       let kind_filter = ref None in

@@ -2678,13 +2678,13 @@ function generate_array_diff(
   $iter2 = 0; $end2 = count($old2);
 
   while ($iter1 < $end1 || $iter2 < $end2) {
-    $k1 = $iter1 < $end1 ? $old1_keys[$iter1] : null;
-    $k2 = $iter2 < $end2 ? $old2_keys[$iter2] : null;
-    if ($k1 === $l1 + 1 || $k2 is null) {
+    $k1 = $iter1 < $end1 ? $old1_keys[$iter1] : -2;
+    $k2 = $iter2 < $end2 ? $old2_keys[$iter2] : -2;
+    if ($k1 === $l1 + 1 || $iter2 >= $end2) {
       $l1 = $k1;
       $diff[] = $old1_values[$iter1];
       $iter1++;
-    } else if ($k2 === $l2 + 1 || $k1 is null) {
+    } else if ($k2 === $l2 + 1 || $iter1 >= $end1) {
       $l2 = $k2;
       $diff[] = $old2_values[$iter2];
       $iter2++;

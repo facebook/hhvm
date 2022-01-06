@@ -301,6 +301,9 @@ type t = {
    * explicit constructor declaration. 0 does not raise, 1 raises for traits, 2 raises
    * for all classish *)
   tco_explicit_consistent_constructors: int;
+  (* Sets the amount of fuel that the type printer can use to display an
+   * individual type. More of a type is printed as the value increases. *)
+  tco_type_printer_fuel: int;
 }
 [@@deriving eq, show]
 
@@ -427,6 +430,7 @@ val make :
   ?tco_pessimise_builtins:bool ->
   ?tco_enable_disk_heap:bool ->
   ?tco_explicit_consistent_constructors:int ->
+  ?tco_type_printer_fuel:int ->
   unit ->
   t
 
@@ -709,3 +713,5 @@ val tco_pessimise_builtins : t -> bool
 val tco_enable_disk_heap : t -> bool
 
 val tco_explicit_consistent_constructors : t -> int
+
+val tco_type_printer_fuel : t -> int

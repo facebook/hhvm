@@ -59,7 +59,7 @@ let rec validate_capability env pos ty =
     | _ ->
       Errors.add_nast_check_error
       @@ Nast_check_error.Illegal_context
-           { pos; name = Typing_print.full_decl ty })
+           { pos; name = Typing_print.full_decl (Env.get_tcopt env) ty })
   | Tgeneric (name, []) when SN.Coeffects.is_generated_generic name -> ()
   | Taccess (root, (_p, c)) ->
     let (env, root) =
@@ -78,7 +78,7 @@ let rec validate_capability env pos ty =
             if not tc.Typing_defs.ttc_is_ctx then
               Errors.add_nast_check_error
               @@ Nast_check_error.Illegal_context
-                   { pos; name = Typing_print.full_decl ty }
+                   { pos; name = Typing_print.full_decl (Env.get_tcopt env) ty }
           | None -> () (* typeconst not found *))
         | None -> () (* unbound name error *))
       | _ -> ()
@@ -87,7 +87,7 @@ let rec validate_capability env pos ty =
   | _ ->
     Errors.add_nast_check_error
     @@ Nast_check_error.Illegal_context
-         { pos; name = Typing_print.full_decl ty }
+         { pos; name = Typing_print.full_decl (Env.get_tcopt env) ty }
 
 let pretty env ty =
   lazy

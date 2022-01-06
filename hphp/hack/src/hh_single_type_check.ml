@@ -278,6 +278,9 @@ let parse_options () =
   let pessimise_builtins = ref false in
   let custom_hhi_path = ref None in
   let explicit_consistent_constructors = ref 0 in
+  let type_printer_fuel =
+    ref (TypecheckerOptions.type_printer_fuel GlobalOptions.default)
+  in
   let profile_type_check_twice = ref false in
   let memtrace = ref None in
   let options =
@@ -708,6 +711,11 @@ let parse_options () =
       ( "--memtrace",
         Arg.String (fun s -> memtrace := Some s),
         " Write memtrace to this file (typical extension .ctf)" );
+      ( "--type-printer-fuel",
+        Arg.Int (( := ) type_printer_fuel),
+        " Sets the amount of fuel that the type printer can use to display an individual type. Default: "
+        ^ string_of_int
+            (TypecheckerOptions.type_printer_fuel GlobalOptions.default) );
     ]
   in
 
@@ -867,6 +875,7 @@ let parse_options () =
       ~tco_everything_sdt:!everything_sdt
       ~tco_pessimise_builtins:!pessimise_builtins
       ~tco_explicit_consistent_constructors:!explicit_consistent_constructors
+      ~tco_type_printer_fuel:!type_printer_fuel
       ()
   in
   Errors.allowed_fixme_codes_strict :=

@@ -131,6 +131,7 @@ impl Default for GlobalOptions {
             tco_pessimise_builtins: false,
             tco_enable_disk_heap: true,
             tco_explicit_consistent_constructors: 0,
+            tco_type_printer_fuel: 100,
         }
     }
 }

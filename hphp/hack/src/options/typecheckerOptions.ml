@@ -213,3 +213,5 @@ let enable_disk_heap = GlobalOptions.tco_enable_disk_heap
 
 let explicit_consistent_constructors =
   GlobalOptions.tco_explicit_consistent_constructors
+
+let type_printer_fuel = GlobalOptions.tco_type_printer_fuel

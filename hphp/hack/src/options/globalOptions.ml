@@ -133,6 +133,7 @@ type t = {
   tco_pessimise_builtins: bool;
   tco_enable_disk_heap: bool;
   tco_explicit_consistent_constructors: int;
+  tco_type_printer_fuel: int;
 }
 [@@deriving eq, show]
 
@@ -325,6 +326,7 @@ let default =
     tco_pessimise_builtins = false;
     tco_enable_disk_heap = true;
     tco_explicit_consistent_constructors = 0;
+    tco_type_printer_fuel = 100;
   }
 
 let make
@@ -475,6 +477,7 @@ let make
     ?(tco_enable_disk_heap = default.tco_enable_disk_heap)
     ?(tco_explicit_consistent_constructors =
       default.tco_explicit_consistent_constructors)
+    ?(tco_type_printer_fuel = default.tco_type_printer_fuel)
     () =
   {
     tco_experimental_features;
@@ -600,6 +603,7 @@ let make
     tco_pessimise_builtins;
     tco_enable_disk_heap;
     tco_explicit_consistent_constructors;
+    tco_type_printer_fuel;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -880,3 +884,5 @@ let tco_enable_disk_heap t = t.tco_enable_disk_heap
 
 let tco_explicit_consistent_constructors t =
   t.tco_explicit_consistent_constructors
+
+let tco_type_printer_fuel t = t.tco_type_printer_fuel

@@ -23,6 +23,26 @@ module Cls = Decl_provider.Class
 module Nast = Aast
 module ITySet = Internal_type_set
 
+(* Fuel ensures that types are curtailed while printing them. This avoids
+   performance regressions and increases readibility of errors overall. *)
+module Fuel : sig
+  type t
+
+  val init : int -> t
+
+  val deplete : t -> t
+
+  val has_enough : t -> bool
+end = struct
+  type t = int
+
+  let init fuel = fuel
+
+  let deplete fuel = fuel - 1
+
+  let has_enough fuel = fuel >= 0
+end
+
 (** For sake of typing_print, either we wish to print a locl_ty in which case we need
 the env to look up the typing environment and constraints and the like, or a decl_ty
 in which case we don't need anything. [penv] stands for "printing env". *)
@@ -61,10 +81,14 @@ module Full = struct
 
   let comma_sep = Concat [text ","; Space]
 
-  let id x = x
+  let id ~fuel x = (fuel, x)
 
-  let list_sep ?(split = true) (s : Doc.t) (f : 'a -> Doc.t) (l : 'a list) :
-      Doc.t =
+  let list_sep
+      ~fuel
+      ?(split = true)
+      (s : Doc.t)
+      (f : fuel:Fuel.t -> 'a -> Fuel.t * Doc.t)
+      (l : 'a list) : Fuel.t * Doc.t =
     let split =
       if split then
         Split
@@ -72,146 +96,197 @@ module Full = struct
         Nothing
     in
     let max_idx = List.length l - 1 in
-    let elements =
-      List.mapi l ~f:(fun idx element ->
+    let (fuel, elements) =
+      List.fold_mapi l ~init:fuel ~f:(fun idx fuel element ->
+          let (fuel, d) = f ~fuel element in
           if Int.equal idx max_idx then
-            f element
+            (fuel, d)
           else
-            Concat [f element; s; split])
+            (fuel, Concat [d; s; split]))
     in
-    match elements with
-    | [] -> Nothing
-    | xs -> Nest [split; Concat xs; split]
+    let d =
+      match elements with
+      | [] -> Nothing
+      | xs -> Nest [split; Concat xs; split]
+    in
+    (fuel, d)
 
-  let delimited_list sep left_delimiter f l right_delimiter =
-    Span
-      [
-        text left_delimiter;
-        WithRule (Rule.Parental, Concat [list_sep sep f l; text right_delimiter]);
-      ]
+  let delimited_list ~fuel sep left_delimiter f l right_delimiter :
+      Fuel.t * Doc.t =
+    let (fuel, doc) = list_sep ~fuel sep f l in
+    let doc =
+      Span
+        [
+          text left_delimiter;
+          WithRule (Rule.Parental, Concat [doc; text right_delimiter]);
+        ]
+    in
+    (fuel, doc)
 
-  let list : type c. _ -> (c -> Doc.t) -> c list -> _ -> _ =
-   (fun ld x y rd -> delimited_list comma_sep ld x y rd)
+  let list
+      ~fuel
+      ld
+      (printer : fuel:Fuel.t -> 'a -> Fuel.t * Doc.t)
+      (items : 'a list)
+      rd : Fuel.t * Doc.t =
+    delimited_list ~fuel comma_sep ld printer items rd
 
-  let shape_map fdm f_field =
+  let shape_map ~fuel fdm f_field =
     let compare (k1, _) (k2, _) =
       String.compare
         (Typing_defs.TShapeField.name k1)
         (Typing_defs.TShapeField.name k2)
     in
     let fields = List.sort ~compare (TShapeMap.bindings fdm) in
-    List.map fields ~f:f_field
+    List.fold_map fields ~f:f_field ~init:fuel
 
-  let rec fun_type ~ty to_doc st penv ft =
-    let params = List.map ft.ft_params ~f:(fun_param ~ty to_doc st penv) in
-    let variadic_param =
+  let rec fun_type ~fuel ~ty to_doc st penv ft =
+    let (fuel, params_doc) =
+      List.fold_map ft.ft_params ~init:fuel ~f:(fun fuel ->
+          fun_param ~fuel ~ty to_doc st penv)
+    in
+    let (fuel, variadic_param_doc) =
       match ft.ft_arity with
-      | Fstandard -> None
+      | Fstandard -> (fuel, None)
       | Fvariadic p ->
-        Some
-          (Concat
-             [
-               (match ty to_doc st penv p.fp_type.et_type with
-               | Text ("_", 1) ->
-                 (* Handle the case of missing a type by not printing it *)
-                 Nothing
-               | _ -> fun_param ~ty to_doc st penv p);
-               text "...";
-             ])
+        let (fuel, fp_type_doc) = ty ~fuel to_doc st penv p.fp_type.et_type in
+        let (fuel, d) =
+          match fp_type_doc with
+          | Text ("_", 1) ->
+            (* Handle the case of missing a type by not printing it *)
+            (fuel, Nothing)
+          | _ -> fun_param ~fuel ~ty to_doc st penv p
+        in
+        let d = Concat [d; text "..."] in
+        (fuel, Some d)
     in
     let params =
-      match variadic_param with
-      | None -> params
-      | Some variadic_param -> params @ [variadic_param]
+      match variadic_param_doc with
+      | None -> params_doc
+      | Some variadic_param_doc -> params_doc @ [variadic_param_doc]
     in
-    Span
-      [
-        (* only print tparams when they have been instantiated with targs
-         * so that they correctly express reified parameterization *)
-        (match (ft.ft_tparams, get_ft_ftk ft) with
-        | ([], _)
-        | (_, FTKtparams) ->
-          Nothing
-        | (l, FTKinstantiated_targs) ->
-          list "<" (tparam ~ty to_doc st penv) l ">");
-        list "(" id params "):";
-        Space;
-        (if get_ft_returns_readonly ft then
-          text "readonly" ^^ Space
-        else
-          Nothing);
-        possibly_enforced_ty ~ty to_doc st penv ft.ft_ret;
-      ]
+    let (fuel, tparams_doc) =
+      (* only print tparams when they have been instantiated with targs
+       * so that they correctly express reified parameterization *)
+      match (ft.ft_tparams, get_ft_ftk ft) with
+      | ([], _)
+      | (_, FTKtparams) ->
+        (fuel, Nothing)
+      | (l, FTKinstantiated_targs) ->
+        list ~fuel "<" (tparam ~ty to_doc st penv) l ">"
+    in
+    let (fuel, params_doc) = list ~fuel "(" id params "):" in
+    let (fuel, return_doc) =
+      possibly_enforced_ty ~fuel ~ty to_doc st penv ft.ft_ret
+    in
+    let tparams_doc =
+      Span
+        [
+          tparams_doc;
+          params_doc;
+          Space;
+          (if get_ft_returns_readonly ft then
+            text "readonly" ^^ Space
+          else
+            Nothing);
+          return_doc;
+        ]
+    in
+    (fuel, tparams_doc)
 
-  and possibly_enforced_ty ~ty to_doc st penv { et_enforced; et_type } =
-    Concat
-      [
-        (if show_verbose penv then
-          match et_enforced with
-          | Enforced -> text "enforced" ^^ Space
-          | Unenforced -> Nothing
-        else
-          Nothing);
-        ty to_doc st penv et_type;
-      ]
+  and possibly_enforced_ty ~fuel ~ty to_doc st penv { et_enforced; et_type } =
+    let (fuel, d) = ty ~fuel to_doc st penv et_type in
+    let d =
+      Concat
+        [
+          (if show_verbose penv then
+            match et_enforced with
+            | Enforced -> text "enforced" ^^ Space
+            | Unenforced -> Nothing
+          else
+            Nothing);
+          d;
+        ]
+    in
+    (fuel, d)
 
-  and fun_param ~ty to_doc st penv ({ fp_name; fp_type; _ } as fp) =
-    Concat
-      [
-        (match get_fp_mode fp with
-        | FPinout -> text "inout" ^^ Space
-        | _ -> Nothing);
-        (match get_fp_readonly fp with
-        | true -> text "readonly" ^^ Space
-        | false -> Nothing);
-        (match (fp_name, ty to_doc st penv fp_type.et_type) with
-        | (None, _) -> possibly_enforced_ty ~ty to_doc st penv fp_type
-        | (Some param_name, Text ("_", 1)) ->
-          (* Handle the case of missing a type by not printing it *)
-          text param_name
-        | (Some param_name, _) ->
-          Concat
-            [
-              possibly_enforced_ty ~ty to_doc st penv fp_type;
-              Space;
-              text param_name;
-            ]);
-        (if get_fp_has_default fp then
-          text "=_"
-        else
-          Nothing);
-      ]
+  and fun_param ~fuel ~ty to_doc st penv ({ fp_name; fp_type; _ } as fp) =
+    let (fuel, d) = ty ~fuel to_doc st penv fp_type.et_type in
+    let (fuel, d) =
+      match (fp_name, d) with
+      | (None, _) -> possibly_enforced_ty ~fuel ~ty to_doc st penv fp_type
+      | (Some param_name, Text ("_", 1)) ->
+        (* Handle the case of missing a type by not printing it *)
+        (fuel, text param_name)
+      | (Some param_name, _) ->
+        let (fuel, d) = possibly_enforced_ty ~fuel ~ty to_doc st penv fp_type in
+        let d = Concat [d; Space; text param_name] in
+        (fuel, d)
+    in
+    let d =
+      Concat
+        [
+          (match get_fp_mode fp with
+          | FPinout -> text "inout" ^^ Space
+          | _ -> Nothing);
+          (match get_fp_readonly fp with
+          | true -> text "readonly" ^^ Space
+          | false -> Nothing);
+          d;
+          (if get_fp_has_default fp then
+            text "=_"
+          else
+            Nothing);
+        ]
+    in
+    (fuel, d)
 
   and tparam
+      ~fuel
       ~ty
       to_doc
       st
       env
       { tp_name = (_, x); tp_constraints = cstrl; tp_reified = r; _ } =
-    Concat
-      [
-        begin
-          match r with
-          | Nast.Erased -> Nothing
-          | Nast.SoftReified -> text "<<__Soft>> reify" ^^ Space
-          | Nast.Reified -> text "reify" ^^ Space
-        end;
-        text x;
-        list_sep ~split:false Space (tparam_constraint ~ty to_doc st env) cstrl;
-      ]
+    let (fuel, tparam_constraints_doc) =
+      list_sep
+        ~fuel
+        ~split:false
+        Space
+        (tparam_constraint ~ty to_doc st env)
+        cstrl
+    in
+    let tparam_doc =
+      Concat
+        [
+          begin
+            match r with
+            | Nast.Erased -> Nothing
+            | Nast.SoftReified -> text "<<__Soft>> reify" ^^ Space
+            | Nast.Reified -> text "reify" ^^ Space
+          end;
+          text x;
+          tparam_constraints_doc;
+        ]
+    in
+    (fuel, tparam_doc)
 
-  and tparam_constraint ~ty to_doc st penv (ck, cty) =
-    Concat
-      [
-        Space;
-        text
-          (match ck with
-          | Ast_defs.Constraint_as -> "as"
-          | Ast_defs.Constraint_super -> "super"
-          | Ast_defs.Constraint_eq -> "=");
-        Space;
-        ty to_doc st penv cty;
-      ]
+  and tparam_constraint ~fuel ~ty to_doc st penv (ck, cty) =
+    let (fuel, contraint_ty_doc) = ty ~fuel to_doc st penv cty in
+    let constraint_doc =
+      Concat
+        [
+          Space;
+          text
+            (match ck with
+            | Ast_defs.Constraint_as -> "as"
+            | Ast_defs.Constraint_super -> "super"
+            | Ast_defs.Constraint_eq -> "=");
+          Space;
+          contraint_ty_doc;
+        ]
+    in
+    (fuel, constraint_doc)
 
   let terr () =
     text
@@ -235,7 +310,7 @@ module Full = struct
     | Nast.Tarraykey -> "arraykey"
     | Nast.Tnoreturn -> "noreturn"
 
-  let tfun ~ty to_doc st penv ft =
+  let tfun ~fuel ~ty to_doc st penv ft =
     let sdt =
       match penv with
       | Loclenv env when TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
@@ -246,54 +321,62 @@ module Full = struct
           Nothing
       | _ -> Nothing
     in
-    Concat
-      [
-        text "(";
-        (if get_ft_readonly_this ft then
-          text "readonly "
-        else
-          Nothing);
-        sdt;
-        text "function";
-        fun_type ~ty to_doc st penv ft;
-        text ")";
-      ]
+    let (fuel, fun_type_doc) = fun_type ~fuel ~ty to_doc st penv ft in
+    let tfun_doc =
+      Concat
+        [
+          text "(";
+          (if get_ft_readonly_this ft then
+            text "readonly "
+          else
+            Nothing);
+          sdt;
+          text "function";
+          fun_type_doc;
+          text ")";
+        ]
+    in
+    (fuel, tfun_doc)
 
-  let ttuple k tyl = list "(" k tyl ")"
+  let ttuple ~fuel k tyl = list ~fuel "(" k tyl ")"
 
-  let tshape k to_doc shape_kind fdm =
-    let fields =
-      let f_field (shape_map_key, { sft_optional; sft_ty }) =
+  let tshape ~fuel k to_doc shape_kind fdm =
+    let (fuel, fields_doc) =
+      let f_field fuel (shape_map_key, { sft_optional; sft_ty }) =
         let key_delim =
           match shape_map_key with
           | Typing_defs.TSFlit_str _ -> text "'"
           | _ -> Nothing
         in
-        Concat
-          [
-            (if sft_optional then
-              text "?"
-            else
-              Nothing);
-            key_delim;
-            to_doc (Typing_defs.TShapeField.name shape_map_key);
-            key_delim;
-            Space;
-            text "=>";
-            Space;
-            k sft_ty;
-          ]
+        let (fuel, sft_ty_doc) = k ~fuel sft_ty in
+        let field_doc =
+          Concat
+            [
+              (if sft_optional then
+                text "?"
+              else
+                Nothing);
+              key_delim;
+              to_doc (Typing_defs.TShapeField.name shape_map_key);
+              key_delim;
+              Space;
+              text "=>";
+              Space;
+              sft_ty_doc;
+            ]
+        in
+        (fuel, field_doc)
       in
-      shape_map fdm f_field
+      shape_map ~fuel fdm f_field
     in
-    let fields =
+    let fields_doc =
       match shape_kind with
-      | Closed_shape -> fields
-      | Open_shape -> fields @ [text "..."]
+      | Closed_shape -> fields_doc
+      | Open_shape -> fields_doc @ [text "..."]
     in
-    list "shape(" id fields ")"
+    list ~fuel "shape(" id fields_doc ")"
 
-  let thas_member k hm =
+  let thas_member ~fuel k hm =
     let { hm_name = (_, name); hm_type; hm_class_id = _; hm_explicit_targs } =
       hm
     in
@@ -303,28 +386,40 @@ module Full = struct
       | None -> text "None"
       | Some _ -> text "Some <targs>"
     in
-    Concat
-      [
-        text "has_member";
-        text "(";
-        text name;
-        comma_sep;
-        k hm_type;
-        comma_sep;
-        printed_explicit_targs;
-        text ")";
-      ]
-
-  let tdestructure k d =
-    let { d_required; d_optional; d_variadic; d_kind } = d in
-    let e_required = List.map d_required ~f:k in
-    let e_optional =
-      List.map d_optional ~f:(fun v -> Concat [text "=_"; k v])
+    let (fuel, hm_ty_doc) = k ~fuel hm_type in
+    let has_member_doc =
+      Concat
+        [
+          text "has_member";
+          text "(";
+          text name;
+          comma_sep;
+          hm_ty_doc;
+          comma_sep;
+          printed_explicit_targs;
+          text ")";
+        ]
     in
-    let e_variadic =
+    (fuel, has_member_doc)
+
+  let tdestructure ~fuel (k : fuel:Fuel.t -> locl_ty -> Fuel.t * Doc.t) d =
+    let { d_required; d_optional; d_variadic; d_kind } = d in
+    let (fuel, e_required) =
+      List.fold_map d_required ~f:(fun fuel ty -> k ~fuel ty) ~init:fuel
+    in
+    let (fuel, e_optional) =
+      List.fold_map d_optional ~init:fuel ~f:(fun fuel v ->
+          let (fuel, ty_doc) = k ~fuel v in
+          let doc = Concat [text "=_"; ty_doc] in
+          (fuel, doc))
+    in
+    let (fuel, e_variadic) =
       Option.value_map
-        ~default:[]
-        ~f:(fun v -> [Concat [text "..."; k v]])
+        ~default:(fuel, [])
+        ~f:(fun v ->
+          let (fuel, ty_doc) = k ~fuel v in
+          let doc = [Concat [text "..."; ty_doc]] in
+          (fuel, doc))
         d_variadic
     in
     let prefix =
@@ -332,39 +427,68 @@ module Full = struct
       | ListDestructure -> text "list"
       | SplatUnpack -> text "splat"
     in
-    Concat [prefix; list "(" id (e_required @ e_optional @ e_variadic) ")"]
+    let (fuel, doc) =
+      list ~fuel "(" id (e_required @ e_optional @ e_variadic) ")"
+    in
+    let doc = Concat [prefix; doc] in
+    (fuel, doc)
 
-  let rec decl_ty to_doc st penv x = decl_ty_ to_doc st penv (get_node x)
+  (* Prints a decl_ty. If there isn't enough fuel, the type is omitted. Each
+     recursive call to print a type depletes the fuel by one. *)
+  let rec decl_ty ~fuel : _ -> _ -> _ -> decl_ty -> Fuel.t * Doc.t =
+   fun to_doc st penv x ->
+    if Fuel.has_enough fuel then
+      let fuel = Fuel.deplete fuel in
+      decl_ty_ ~fuel to_doc st penv (get_node x)
+    else
+      (fuel, text "[truncated]")
 
-  and decl_ty_ : _ -> _ -> _ -> decl_phase ty_ -> Doc.t =
+  and decl_ty_ ~fuel : _ -> _ -> _ -> decl_phase ty_ -> Fuel.t * Doc.t =
    fun to_doc st penv x ->
     let ty = decl_ty in
-    let k x = ty to_doc st penv x in
+    let k ~fuel x = ty ~fuel to_doc st penv x in
     match x with
-    | Tany _ -> text "_"
-    | Terr -> terr ()
-    | Tthis -> text SN.Typehints.this
-    | Tmixed -> text "mixed"
-    | Tdynamic -> text "dynamic"
-    | Tnonnull -> text "nonnull"
-    | Tvec_or_dict (x, y) -> list "vec_or_dict<" k [x; y] ">"
-    | Tapply ((_, s), []) -> to_doc s
-    | Tgeneric (s, []) -> to_doc s
-    | Taccess (root_ty, id) -> Concat [k root_ty; text "::"; to_doc (snd id)]
-    | Toption x -> Concat [text "?"; k x]
-    | Tlike x -> Concat [text "~"; k x]
-    | Tprim x -> tprim x
-    | Tvar x -> text (Printf.sprintf "#%d" x)
-    | Tfun ft -> tfun ~ty to_doc st penv ft
+    | Tany _ -> (fuel, text "_")
+    | Terr -> (fuel, terr ())
+    | Tthis -> (fuel, text SN.Typehints.this)
+    | Tmixed -> (fuel, text "mixed")
+    | Tdynamic -> (fuel, text "dynamic")
+    | Tnonnull -> (fuel, text "nonnull")
+    | Tvec_or_dict (x, y) -> list ~fuel "vec_or_dict<" k [x; y] ">"
+    | Tapply ((_, s), []) -> (fuel, to_doc s)
+    | Tgeneric (s, []) -> (fuel, to_doc s)
+    | Taccess (root_ty, id) ->
+      let (fuel, root_ty_doc) = k ~fuel root_ty in
+      let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in
+      (fuel, access_doc)
+    | Toption x ->
+      let (fuel, ty_doc) = k ~fuel x in
+      let option_doc = Concat [text "?"; ty_doc] in
+      (fuel, option_doc)
+    | Tlike x ->
+      let (fuel, ty_doc) = k ~fuel x in
+      let like_doc = Concat [text "~"; ty_doc] in
+      (fuel, like_doc)
+    | Tprim x -> (fuel, tprim x)
+    | Tvar x -> (fuel, text (Printf.sprintf "#%d" x))
+    | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
     | Tapply ((_, s), tyl)
     | Tgeneric (s, tyl) ->
-      to_doc s ^^ list "<" k tyl ">"
-    | Ttuple tyl -> ttuple k tyl
-    | Tunion tyl -> Concat [text "|"; ttuple k tyl]
-    | Tintersection tyl -> Concat [text "&"; ttuple k tyl]
-    | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
+      let (fuel, tys_doc) = list ~fuel "<" k tyl ">" in
+      let generic_doc = to_doc s ^^ tys_doc in
+      (fuel, generic_doc)
+    | Ttuple tyl -> ttuple ~fuel k tyl
+    | Tunion tyl ->
+      let (fuel, tys_doc) = ttuple ~fuel k tyl in
+      let union_doc = Concat [text "|"; tys_doc] in
+      (fuel, union_doc)
+    | Tintersection tyl ->
+      let (fuel, tys_doc) = ttuple ~fuel k tyl in
+      let intersection_doc = Concat [text "&"; tys_doc] in
+      (fuel, intersection_doc)
+    | Tshape (shape_kind, fdm) -> tshape ~fuel k to_doc shape_kind fdm
 
   (* For a given type parameter, construct a list of its constraints *)
   let get_constraints_on_tparam penv tparam =
@@ -392,15 +516,24 @@ module Full = struct
         @ List.map (TySet.elements upper) ~f:(fun ty ->
               (tparam, Ast_defs.Constraint_as, ty))
 
-  let rec locl_ty : _ -> _ -> _ -> locl_ty -> Doc.t =
+  (* Prints a locl_ty. If there isn't enough fuel, the type is omitted. Each
+     recursive call to print a type depletes the fuel by one. *)
+  let rec locl_ty ~fuel : _ -> _ -> _ -> locl_ty -> Fuel.t * Doc.t =
    fun to_doc st penv ty ->
-    let (r, x) = deref ty in
-    let d = locl_ty_ to_doc st penv x in
-    match r with
-    | Typing_reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
-    | _ -> d
+    if Fuel.has_enough fuel then
+      let fuel = Fuel.deplete fuel in
+      let (r, x) = deref ty in
+      let (fuel, d) = locl_ty_ ~fuel to_doc st penv x in
+      let d =
+        match r with
+        | Typing_reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
+        | _ -> d
+      in
+      (fuel, d)
+    else
+      (fuel, text "[truncated]")
 
-  and locl_ty_ : _ -> _ -> _ -> locl_phase ty_ -> Doc.t =
+  and locl_ty_ ~fuel : _ -> _ -> _ -> locl_phase ty_ -> Fuel.t * Doc.t =
    fun to_doc st penv x ->
     let ty = locl_ty in
     let verbose = show_verbose penv in
@@ -409,31 +542,33 @@ module Full = struct
       | Declenv -> failwith "must provide a locl-env here"
       | Loclenv env -> env
     in
-    let k x = ty to_doc st (Loclenv env) x in
+    let k ~fuel x = ty ~fuel to_doc st (Loclenv env) x in
     match x with
-    | Tany _ -> text "_"
-    | Terr -> terr ()
-    | Tdynamic -> text "dynamic"
-    | Tnonnull -> text "nonnull"
-    | Tvec_or_dict (x, y) -> list "vec_or_dict<" k [x; y] ">"
+    | Tany _ -> (fuel, text "_")
+    | Terr -> (fuel, terr ())
+    | Tdynamic -> (fuel, text "dynamic")
+    | Tnonnull -> (fuel, text "nonnull")
+    | Tvec_or_dict (x, y) -> list ~fuel "vec_or_dict<" k [x; y] ">"
     | Tclass ((_, s), Exact, []) when !debug_mode ->
-      Concat [text "exact"; Space; to_doc s]
-    | Tclass ((_, s), _, []) -> to_doc s
+      (fuel, Concat [text "exact"; Space; to_doc s])
+    | Tclass ((_, s), _, []) -> (fuel, to_doc s)
     | Toption ty ->
       begin
         match deref ty with
-        | (_, Tnonnull) -> text "mixed"
+        | (_, Tnonnull) -> (fuel, text "mixed")
         | (r, Tunion tyl)
           when TypecheckerOptions.like_type_hints env.genv.tcopt
                && List.exists ~f:is_dynamic tyl ->
           (* Unions with null become Toption, which leads to the awkward ?~...
            * The Tunion case can better handle this *)
-          k (mk (r, Tunion (mk (r, Tprim Nast.Tnull) :: tyl)))
-        | _ -> Concat [text "?"; k ty]
+          k ~fuel (mk (r, Tunion (mk (r, Tprim Nast.Tnull) :: tyl)))
+        | _ ->
+          let (fuel, d) = k ~fuel ty in
+          (fuel, Concat [text "?"; d])
       end
-    | Tprim x -> tprim x
-    | Tneg (Neg_prim x) -> Concat [text "not "; tprim x]
-    | Tneg (Neg_class c) -> Concat [text "not "; to_doc (snd c)]
+    | Tprim x -> (fuel, tprim x)
+    | Tneg (Neg_prim x) -> (fuel, Concat [text "not "; tprim x])
+    | Tneg (Neg_class c) -> (fuel, Concat [text "not "; to_doc (snd c)])
     | Tvar n ->
       let (_, ety) =
         Typing_inference_env.expand_type
@@ -444,12 +579,15 @@ module Full = struct
         match deref ety with
         (* For unsolved type variables, always show the type variable *)
         | (_, Tvar n') ->
-          if ISet.mem n' st then
-            text "[rec]"
-          else if !blank_tyvars then
-            text "[unresolved]"
-          else
-            text ("#" ^ string_of_int n')
+          let tvar_doc =
+            if ISet.mem n' st then
+              text "[rec]"
+            else if !blank_tyvars then
+              text "[unresolved]"
+            else
+              text ("#" ^ string_of_int n')
+          in
+          (fuel, tvar_doc)
         | _ ->
           let prepend =
             if ISet.mem n st then
@@ -463,46 +601,55 @@ module Full = struct
               Nothing
           in
           let st = ISet.add n st in
-          Concat [prepend; ty to_doc st penv ety]
+          let (fuel, ty_doc) = ty ~fuel to_doc st penv ety in
+          (fuel, Concat [prepend; ty_doc])
       end
-    | Tfun ft -> tfun ~ty to_doc st penv ft
+    | Tfun ft -> tfun ~fuel ~ty to_doc st penv ft
     | Tclass ((_, s), exact, tyl) ->
-      let d = to_doc s ^^ list "<" k tyl ">" in
-      begin
+      let (fuel, targs_doc) = list ~fuel "<" k tyl ">" in
+      let class_doc = to_doc s ^^ targs_doc in
+      let class_doc =
         match exact with
-        | Exact when !debug_mode -> Concat [text "exact"; Space; d]
-        | _ -> d
-      end
+        | Exact when !debug_mode -> Concat [text "exact"; Space; class_doc]
+        | _ -> class_doc
+      in
+      (fuel, class_doc)
     | Tgeneric (s, []) when SN.Coeffects.is_generated_generic s ->
       begin
         match String.get s 2 with
         | '[' ->
           (* has the form T/[...] *)
-          to_doc (String.sub s ~pos:3 ~len:(String.length s - 4))
+          (fuel, to_doc (String.sub s ~pos:3 ~len:(String.length s - 4)))
         | '$' ->
           (* Generic replacement type for parameter used for dependent context *)
           begin
             match get_constraints_on_tparam env s with
             | [(_, Ast_defs.Constraint_as, ty)] ->
-              locl_ty to_doc st (Loclenv env) ty
-            | _ -> (* this case shouldn't occur *) to_doc s
+              locl_ty ~fuel to_doc st (Loclenv env) ty
+            | _ -> (* this case shouldn't occur *) (fuel, to_doc s)
           end
-        | _ -> to_doc s
+        | _ -> (fuel, to_doc s)
       end
     | Tunapplied_alias s
     | Tnewtype (s, [], _)
     | Tgeneric (s, []) ->
-      to_doc s
+      (fuel, to_doc s)
     | Tnewtype (s, tyl, _)
     | Tgeneric (s, tyl) ->
-      to_doc s ^^ list "<" k tyl ">"
+      let (fuel, tys_doc) = list ~fuel "<" k tyl ">" in
+      let generic_doc = to_doc s ^^ tys_doc in
+      (fuel, generic_doc)
     | Tdependent (dep, cstr) ->
-      let cstr_info = Concat [Space; text "as"; Space; k cstr] in
-      Concat [to_doc @@ DependentKind.to_string dep; cstr_info]
+      let (fuel, cstr_doc) = k ~fuel cstr in
+      let cstr_info = Concat [Space; text "as"; Space; cstr_doc] in
+      let dependent_doc =
+        Concat [to_doc @@ DependentKind.to_string dep; cstr_info]
+      in
+      (fuel, dependent_doc)
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
-    | Ttuple tyl -> ttuple k tyl
-    | Tunion [] -> text "nothing"
+    | Ttuple tyl -> ttuple ~fuel k tyl
+    | Tunion [] -> (fuel, text "nothing")
     | Tunion tyl when TypecheckerOptions.like_type_hints env.genv.tcopt ->
       let tyl =
         List.fold_right tyl ~init:Typing_set.empty ~f:Typing_set.add
@@ -519,70 +666,92 @@ module Full = struct
         match
           (not @@ List.is_empty dynamic, not @@ List.is_empty null, nonnull)
         with
-        | (false, false, []) -> text "nothing"
+        | (false, false, []) -> (fuel, text "nothing")
         (* type isn't nullable or dynamic *)
         | (false, false, [ty]) ->
           if verbose then
-            Concat [text "("; k ty; text ")"]
+            let (fuel, ty_doc) = k ~fuel ty in
+            let doc = Concat [text "("; ty_doc; text ")"] in
+            (fuel, doc)
           else
-            k ty
+            k ~fuel ty
         | (false, false, _ :: _) ->
-          delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
+          delimited_list ~fuel (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
         (* Type only is null *)
         | (false, true, []) ->
-          if verbose then
-            text "(null)"
-          else
-            text "null"
+          let doc =
+            if verbose then
+              text "(null)"
+            else
+              text "null"
+          in
+          (fuel, doc)
         (* Type only is dynamic *)
         | (true, false, []) ->
-          if verbose then
-            text "(dynamic)"
-          else
-            text "dynamic"
+          let doc =
+            if verbose then
+              text "(dynamic)"
+            else
+              text "dynamic"
+          in
+          (fuel, doc)
         (* Type is nullable single type *)
         | (false, true, [ty]) ->
-          if verbose then
-            Concat [text "(null |"; k ty; text ")"]
-          else
-            Concat [text "?"; k ty]
+          let (fuel, ty_doc) = k ~fuel ty in
+          let doc =
+            if verbose then
+              Concat [text "(null |"; ty_doc; text ")"]
+            else
+              Concat [text "?"; ty_doc]
+          in
+          (fuel, doc)
         (* Type is like single type *)
         | (true, false, [ty]) ->
-          if verbose then
-            Concat [text "(dynamic |"; k ty; text ")"]
-          else
-            Concat [text "~"; k ty]
+          let (fuel, ty_doc) = k ~fuel ty in
+          let doc =
+            if verbose then
+              Concat [text "(dynamic |"; ty_doc; text ")"]
+            else
+              Concat [text "~"; ty_doc]
+          in
+          (fuel, doc)
         (* Type is like null *)
         | (true, true, []) ->
-          if verbose then
-            text "(dynamic | null)"
-          else
-            text "~null"
+          let doc =
+            if verbose then
+              text "(dynamic | null)"
+            else
+              text "~null"
+          in
+          (fuel, doc)
         (* Type is like nullable single type *)
         | (true, true, [ty]) ->
-          if verbose then
-            Concat [text "(dynamic | null |"; k ty; text ")"]
-          else
-            Concat [text "~?"; k ty]
+          let (fuel, ty_doc) = k ~fuel ty in
+          let doc =
+            if verbose then
+              Concat [text "(dynamic | null |"; ty_doc; text ")"]
+            else
+              Concat [text "~?"; ty_doc]
+          in
+          (fuel, doc)
         | (true, false, _ :: _) ->
-          Concat
-            [
-              text "~";
-              delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")";
-            ]
+          let (fuel, tys_doc) =
+            delimited_list ~fuel (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
+          in
+          let doc = Concat [text "~"; tys_doc] in
+          (fuel, doc)
         | (false, true, _ :: _) ->
-          Concat
-            [
-              text "?";
-              delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")";
-            ]
+          let (fuel, tys_doc) =
+            delimited_list ~fuel (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
+          in
+          let doc = Concat [text "?"; tys_doc] in
+          (fuel, doc)
         | (true, true, _ :: _) ->
-          Concat
-            [
-              text "~";
-              text "?";
-              delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")";
-            ]
+          let (fuel, tys_doc) =
+            delimited_list ~fuel (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
+          in
+          let doc = Concat [text "~"; text "?"; tys_doc] in
+          (fuel, doc)
       end
     | Tunion tyl ->
       let tyl =
@@ -597,70 +766,99 @@ module Full = struct
         match (null, nonnull) with
         (* type isn't nullable *)
         | ([], [ty]) ->
-          if verbose then
-            Concat [text "("; k ty; text ")"]
-          else
-            k ty
+          let (fuel, ty_doc) = k ~fuel ty in
+          let doc =
+            if verbose then
+              Concat [text "("; ty_doc; text ")"]
+            else
+              ty_doc
+          in
+          (fuel, doc)
         | ([], _) ->
-          delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
+          delimited_list ~fuel (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
         (* Type only is null *)
         | (_, []) ->
-          if verbose then
-            text "(null)"
-          else
-            text "null"
+          let doc =
+            if verbose then
+              text "(null)"
+            else
+              text "null"
+          in
+          (fuel, doc)
         (* Type is nullable single type *)
         | (_, [ty]) ->
-          if verbose then
-            Concat [text "(null |"; k ty; text ")"]
-          else
-            Concat [text "?"; k ty]
+          let (fuel, ty_doc) = k ~fuel ty in
+          let doc =
+            if verbose then
+              Concat [text "(null |"; ty_doc; text ")"]
+            else
+              Concat [text "?"; ty_doc]
+          in
+          (fuel, doc)
         (* Type is nullable union type *)
         | (_, _) ->
-          Concat
-            [
-              text "?";
-              delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")";
-            ]
+          let (fuel, tys_doc) =
+            delimited_list ~fuel (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
+          in
+          let doc = Concat [text "?"; tys_doc] in
+          (fuel, doc)
       end
-    | Tintersection [] -> text "mixed"
+    | Tintersection [] -> (fuel, text "mixed")
     | Tintersection tyl ->
-      delimited_list (Space ^^ text "&" ^^ Space) "(" k tyl ")"
-    | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
-    | Taccess (root_ty, id) -> Concat [k root_ty; text "::"; to_doc (snd id)]
+      delimited_list ~fuel (Space ^^ text "&" ^^ Space) "(" k tyl ")"
+    | Tshape (shape_kind, fdm) -> tshape ~fuel k to_doc shape_kind fdm
+    | Taccess (root_ty, id) ->
+      let (fuel, root_ty_doc) = k ~fuel root_ty in
+      let access_doc = Concat [root_ty_doc; text "::"; to_doc (snd id)] in
+      (fuel, access_doc)
 
-  let rec constraint_type_ to_doc st penv x =
-    let k lty = locl_ty to_doc st penv lty in
-    let k' cty = constraint_type to_doc st penv cty in
+  let rec constraint_type_ ~fuel to_doc st penv x =
+    let k ~fuel lty = locl_ty ~fuel to_doc st penv lty in
+    let k' ~fuel cty = constraint_type ~fuel to_doc st penv cty in
     match x with
-    | Thas_member hm -> thas_member k hm
-    | Tdestructure d -> tdestructure k d
-    | TCunion (lty, cty) -> Concat [text "("; k lty; text "|"; k' cty; text ")"]
+    | Thas_member hm -> thas_member ~fuel k hm
+    | Tdestructure d -> tdestructure ~fuel k d
+    | TCunion (lty, cty) ->
+      let (fuel, lty_doc) = k ~fuel lty in
+      let (fuel, cty_doc) = k' ~fuel cty in
+      let cunion_doc =
+        Concat [text "("; lty_doc; text "|"; cty_doc; text ")"]
+      in
+      (fuel, cunion_doc)
     | TCintersection (lty, cty) ->
-      Concat [text "("; k lty; text "&"; k' cty; text ")"]
+      let (fuel, lty_doc) = k ~fuel lty in
+      let (fuel, cty_doc) = k' ~fuel cty in
+      let cintersection_doc =
+        Concat [text "("; lty_doc; text "&"; cty_doc; text ")"]
+      in
+      (fuel, cintersection_doc)
 
-  and constraint_type to_doc st penv ty =
+  and constraint_type ~fuel to_doc st penv ty =
     let (r, x) = deref_constraint_type ty in
-    let d = constraint_type_ to_doc st penv x in
-    match r with
-    | Typing_reason.Rsolve_fail _ -> Concat [text "{suggest:"; d; text "}"]
-    | _ -> d
+    let (fuel, constraint_ty_doc) = constraint_type_ ~fuel to_doc st penv x in
+    let constraint_ty_doc =
+      match r with
+      | Typing_reason.Rsolve_fail _ ->
+        Concat [text "{suggest:"; constraint_ty_doc; text "}"]
+      | _ -> constraint_ty_doc
+    in
+    (fuel, constraint_ty_doc)
 
-  let internal_type to_doc st penv ty =
+  let internal_type ~fuel to_doc st penv ty =
     match ty with
-    | LoclType ty -> locl_ty to_doc st penv ty
-    | ConstraintType ty -> constraint_type to_doc st penv ty
+    | LoclType ty -> locl_ty ~fuel to_doc st penv ty
+    | ConstraintType ty -> constraint_type ~fuel to_doc st penv ty
 
-  let to_string ~ty to_doc env x =
-    ty to_doc ISet.empty env x
-    |> Libhackfmt.format_doc_unbroken format_env
-    |> String.strip
+  let to_string ~fuel ~ty to_doc env x =
+    let (fuel, doc) = ty ~fuel to_doc ISet.empty env x in
+    let str = Libhackfmt.format_doc_unbroken format_env doc |> String.strip in
+    (fuel, str)
 
   (* Print a suffix for type parameters in typ that have constraints
    * If the type itself is a type parameter with a single constraint, just
    * represent this as `as t` or `super t`, otherwise use full `where` syntax
    *)
-  let constraints_for_type to_doc env typ =
+  let constraints_for_type ~fuel to_doc env typ =
     let tparams =
       SSet.elements
         (Typing_env_types.get_tparams_in_ty_and_acc env SSet.empty typ)
@@ -671,54 +869,51 @@ module Full = struct
     let (_, typ) = Typing_inference_env.expand_type env.inference_env typ in
     let penv = Loclenv env in
     match (get_node typ, constraints) with
-    | (_, []) -> Nothing
+    | (_, []) -> (fuel, Nothing)
     | (Tgeneric (tparam, []), [(tparam', ck, typ)])
       when String.equal tparam tparam' ->
-      tparam_constraint ~ty:locl_ty to_doc ISet.empty penv (ck, typ)
+      tparam_constraint ~fuel ~ty:locl_ty to_doc ISet.empty penv (ck, typ)
     | _ ->
-      Concat
-        [
-          Newline;
-          text "where";
-          Space;
-          WithRule
-            ( Rule.Parental,
-              list_sep
-                comma_sep
-                begin
-                  fun (tparam, ck, typ) ->
-                  Concat
-                    [
-                      text tparam;
-                      tparam_constraint
-                        ~ty:locl_ty
-                        to_doc
-                        ISet.empty
-                        penv
-                        (ck, typ);
-                    ]
-                end
-                constraints );
-        ]
+      let to_tparam_constraint_doc ~fuel (tparam, ck, typ) =
+        let (fuel, tparam_constraint_doc) =
+          tparam_constraint ~fuel ~ty:locl_ty to_doc ISet.empty penv (ck, typ)
+        in
+        let doc = Concat [text tparam; tparam_constraint_doc] in
+        (fuel, doc)
+      in
+      let (fuel, tparam_constraints_doc) =
+        list_sep ~fuel comma_sep to_tparam_constraint_doc constraints
+      in
+      let doc =
+        Concat
+          [
+            Newline;
+            text "where";
+            Space;
+            WithRule (Rule.Parental, tparam_constraints_doc);
+          ]
+      in
+      (fuel, doc)
 
-  let to_string_rec penv n x =
-    locl_ty Doc.text (ISet.add n ISet.empty) penv x
-    |> Libhackfmt.format_doc_unbroken format_env
-    |> String.strip
+  let to_string_rec ~fuel penv n x =
+    let (fuel, doc) = locl_ty ~fuel Doc.text (ISet.add n ISet.empty) penv x in
+    let str = Libhackfmt.format_doc_unbroken format_env doc |> String.strip in
+    (fuel, str)
 
-  let to_string_strip_ns ~ty env x = to_string ~ty text_strip_ns env x
+  let to_string_strip_ns ~fuel ~ty env x =
+    to_string ~fuel ~ty text_strip_ns env x
 
-  let to_string_decl (x : decl_ty) =
+  let to_string_decl ~fuel (x : decl_ty) =
     let ty = decl_ty in
-    to_string ~ty Doc.text Declenv x
+    to_string ~fuel ~ty Doc.text Declenv x
 
-  let fun_to_string (x : decl_fun_type) =
+  let fun_to_string ~fuel (x : decl_fun_type) =
     let ty = decl_ty in
-    fun_type ~ty Doc.text ISet.empty Declenv x
-    |> Libhackfmt.format_doc_unbroken format_env
-    |> String.strip
+    let (fuel, doc) = fun_type ~fuel ~ty Doc.text ISet.empty Declenv x in
+    let str = Libhackfmt.format_doc_unbroken format_env doc |> String.strip in
+    (fuel, str)
 
-  let to_string_with_identity env x occurrence definition_opt =
+  let to_string_with_identity ~fuel env x occurrence definition_opt =
     let ty = locl_ty in
     let penv = Loclenv env in
     let prefix =
@@ -735,34 +930,39 @@ module Full = struct
             | ms -> Concat (List.map ms ~f:print_mod) ^^ SplitWith Cost.Base
           end)
     in
-    let body =
+    let (fuel, body_doc) =
       SymbolOccurrence.(
         match (occurrence, get_node x) with
         | ({ type_ = Class _; name; _ }, _) ->
-          Concat [text "class"; Space; text_strip_ns name]
+          (fuel, Concat [text "class"; Space; text_strip_ns name])
         | ({ type_ = Function; name; _ }, Tfun ft)
         | ({ type_ = Method (_, name); _ }, Tfun ft) ->
           (* Use short names for function types since they display a lot more
              information to the user. *)
-          Concat
-            [
-              text "function";
-              Space;
-              text_strip_ns name;
-              fun_type ~ty text_strip_ns ISet.empty penv ft;
-            ]
+          let (fuel, fun_ty_doc) =
+            fun_type ~fuel ~ty text_strip_ns ISet.empty penv ft
+          in
+          let fun_doc =
+            Concat [text "function"; Space; text_strip_ns name; fun_ty_doc]
+          in
+          (fuel, fun_doc)
         | ({ type_ = Property _; name; _ }, _)
         | ({ type_ = XhpLiteralAttr _; name; _ }, _)
         | ({ type_ = ClassConst _; name; _ }, _)
         | ({ type_ = GConst; name; _ }, _)
         | ({ type_ = EnumClassLabel _; name; _ }, _) ->
-          Concat [ty text_strip_ns ISet.empty penv x; Space; text_strip_ns name]
-        | _ -> ty text_strip_ns ISet.empty penv x)
+          let (fuel, ty_doc) = ty ~fuel text_strip_ns ISet.empty penv x in
+          let doc = Concat [ty_doc; Space; text_strip_ns name] in
+          (fuel, doc)
+        | _ -> ty ~fuel text_strip_ns ISet.empty penv x)
     in
-    let constraints = constraints_for_type text_strip_ns env x in
-    Concat [prefix; body; constraints]
-    |> Libhackfmt.format_doc format_env
-    |> String.strip
+    let (fuel, constraints) = constraints_for_type ~fuel text_strip_ns env x in
+    let str =
+      Concat [prefix; body_doc; constraints]
+      |> Libhackfmt.format_doc format_env
+      |> String.strip
+    in
+    (fuel, str)
 end
 
 let with_blank_tyvars f =
@@ -789,91 +989,106 @@ module ErrorString = struct
     | Nast.Tarraykey -> "an array key (int | string)"
     | Nast.Tnoreturn -> "noreturn (throws or exits)"
 
-  let rec type_ ?(ignore_dynamic = false) env ty =
+  let rec type_ ~fuel ?(ignore_dynamic = false) env ty =
     match ty with
-    | Tany _ -> "an untyped value"
-    | Terr -> "a type error"
-    | Tdynamic -> "a dynamic value"
+    | Tany _ -> (fuel, "an untyped value")
+    | Terr -> (fuel, "a type error")
+    | Tdynamic -> (fuel, "a dynamic value")
     | Tunion l when ignore_dynamic ->
-      union env (List.filter l ~f:(fun x -> not (is_dynamic x)))
-    | Tunion l -> union env l
-    | Tintersection [] -> "a mixed value"
-    | Tintersection l -> intersection env l
-    | Tvec_or_dict _ -> "a vec_or_dict"
-    | Ttuple l -> "a tuple of size " ^ string_of_int (List.length l)
-    | Tnonnull -> "a nonnull value"
+      union ~fuel env (List.filter l ~f:(fun x -> not (is_dynamic x)))
+    | Tunion l -> union ~fuel env l
+    | Tintersection [] -> (fuel, "a mixed value")
+    | Tintersection l -> intersection ~fuel env l
+    | Tvec_or_dict _ -> (fuel, "a vec_or_dict")
+    | Ttuple l -> (fuel, "a tuple of size " ^ string_of_int (List.length l))
+    | Tnonnull -> (fuel, "a nonnull value")
     | Toption x ->
-      begin
+      let str =
         match get_node x with
         | Tnonnull -> "a mixed value"
         | _ -> "a nullable type"
-      end
-    | Tprim tp -> tprim tp
-    | Tvar _ -> "some value"
-    | Tfun _ -> "a function"
+      in
+      (fuel, str)
+    | Tprim tp -> (fuel, tprim tp)
+    | Tvar _ -> (fuel, "some value")
+    | Tfun _ -> (fuel, "a function")
     | Tgeneric (s, tyl) when DependentKind.is_generic_dep_ty s ->
-      "the expression dependent type " ^ s ^ inst env tyl
-    | Tgeneric (x, tyl) -> "a value of generic type " ^ x ^ inst env tyl
+      let (fuel, tyl_str) = inst ~fuel env tyl in
+      (fuel, "the expression dependent type " ^ s ^ tyl_str)
+    | Tgeneric (x, tyl) ->
+      let (fuel, tyl_str) = inst ~fuel env tyl in
+      (fuel, "a value of generic type " ^ x ^ tyl_str)
     | Tnewtype (x, _, _) when String.equal x SN.Classes.cClassname ->
-      "a classname string"
+      (fuel, "a classname string")
     | Tnewtype (x, _, _) when String.equal x SN.Classes.cTypename ->
-      "a typename string"
-    | Tnewtype (x, tyl, _) -> "a value of type " ^ strip_ns x ^ inst env tyl
-    | Tdependent (dep, _cstr) -> dependent dep
+      (fuel, "a typename string")
+    | Tnewtype (x, tyl, _) ->
+      let (fuel, tyl_str) = inst ~fuel env tyl in
+      (fuel, "a value of type " ^ strip_ns x ^ tyl_str)
+    | Tdependent (dep, _cstr) -> (fuel, dependent dep)
     | Tclass ((_, x), Exact, tyl) ->
-      "an object of exactly the class " ^ strip_ns x ^ inst env tyl
+      let (fuel, tyl_str) = inst ~fuel env tyl in
+      (fuel, "an object of exactly the class " ^ strip_ns x ^ tyl_str)
     | Tclass ((_, x), Nonexact, tyl) ->
-      "an object of type " ^ strip_ns x ^ inst env tyl
-    | Tshape _ -> "a shape"
+      let (fuel, tyl_str) = inst ~fuel env tyl in
+      (fuel, "an object of type " ^ strip_ns x ^ tyl_str)
+    | Tshape _ -> (fuel, "a shape")
     | Tunapplied_alias _ ->
       (* FIXME it seems like this function is only for
          fully-applied types? Tunapplied_alias should only appear
          in a type argument position then, which inst below
          prints with a different function (namely Full.locl_ty) *)
       failwith "Tunapplied_alias is not a type"
-    | Taccess (_ty, _id) -> "a type constant"
-    | Tneg (Neg_prim p) -> "anything but a " ^ tprim p
-    | Tneg (Neg_class (_, c)) -> "anything but a " ^ strip_ns c
+    | Taccess (_ty, _id) -> (fuel, "a type constant")
+    | Tneg (Neg_prim p) -> (fuel, "anything but a " ^ tprim p)
+    | Tneg (Neg_class (_, c)) -> (fuel, "anything but a " ^ strip_ns c)
 
-  and inst env tyl =
+  and inst ~fuel env tyl =
     if List.is_empty tyl then
-      ""
+      (fuel, "")
     else
       with_blank_tyvars (fun () ->
-          "<"
-          ^ String.concat
-              ~sep:", "
-              (List.map
-                 tyl
-                 ~f:(Full.to_string_strip_ns ~ty:Full.locl_ty (Loclenv env)))
-          ^ ">")
+          let (fuel, arg_strs) =
+            List.fold_map tyl ~init:fuel ~f:(fun fuel ->
+                Full.to_string_strip_ns ~fuel ~ty:Full.locl_ty (Loclenv env))
+          in
+          let str = "<" ^ String.concat ~sep:", " arg_strs ^ ">" in
+          (fuel, str))
 
   and dependent dep =
     let x = strip_ns @@ DependentKind.to_string dep in
     match dep with
     | DTexpr _ -> "the expression dependent type " ^ x
 
-  and union env l =
+  and union ~fuel env l =
     let (null, nonnull) =
       List.partition_tf l ~f:(fun ty ->
           equal_locl_ty_ (get_node ty) (Tprim Nast.Tnull))
     in
-    let l = List.map nonnull ~f:(to_string env) in
+    let (fuel, l) =
+      List.fold_map nonnull ~init:fuel ~f:(fun fuel -> to_string ~fuel env)
+    in
     let s = List.fold_right l ~f:SSet.add ~init:SSet.empty in
     let l = SSet.elements s in
-    if List.is_empty null then
-      union_ l
-    else
-      "a nullable type"
+    let str =
+      if List.is_empty null then
+        union_ l
+      else
+        "a nullable type"
+    in
+    (fuel, str)
 
   and union_ = function
     | [] -> "an undefined value"
     | [x] -> x
     | x :: rl -> x ^ " or " ^ union_ rl
 
-  and intersection env l =
-    let l = List.map l ~f:(to_string env) in
-    String.concat l ~sep:" and "
+  and intersection ~fuel env l =
+    let (fuel, l) =
+      List.fold_map l ~init:fuel ~f:(fun fuel -> to_string ~fuel env)
+    in
+    let str = String.concat l ~sep:" and " in
+    (fuel, str)
 
   and classish_kind c_kind final =
     let fs =
@@ -895,9 +1110,9 @@ module ErrorString = struct
       | Ast_defs.Abstract -> "an abstract enum class"
       | Ast_defs.Concrete -> "an enum class")
 
-  and to_string ?(ignore_dynamic = false) env ty =
+  and to_string ~fuel ?(ignore_dynamic = false) env ty =
     let (_, ety) = Typing_inference_env.expand_type env.inference_env ty in
-    type_ ~ignore_dynamic env (get_node ety)
+    type_ ~fuel ~ignore_dynamic env (get_node ety)
 end
 
 module Json = struct
@@ -1424,10 +1639,16 @@ module PrintClass = struct
     (* TODO: do we need to distinguish ? *)
     | Ast_defs.Cenum_class _ -> "Cenum_class"
 
-  let constraint_ty = function
-    | (Ast_defs.Constraint_as, ty) -> "as " ^ Full.to_string_decl ty
-    | (Ast_defs.Constraint_eq, ty) -> "= " ^ Full.to_string_decl ty
-    | (Ast_defs.Constraint_super, ty) -> "super " ^ Full.to_string_decl ty
+  let constraint_ty ~fuel = function
+    | (Ast_defs.Constraint_as, ty) ->
+      let (fuel, ty_str) = Full.to_string_decl ~fuel ty in
+      (fuel, "as " ^ ty_str)
+    | (Ast_defs.Constraint_eq, ty) ->
+      let (fuel, ty_str) = Full.to_string_decl ~fuel ty in
+      (fuel, "= " ^ ty_str)
+    | (Ast_defs.Constraint_super, ty) ->
+      let (fuel, ty_str) = Full.to_string_decl ~fuel ty in
+      (fuel, "super " ^ ty_str)
 
   let variance = function
     | Ast_defs.Covariant -> "+"
@@ -1435,6 +1656,7 @@ module PrintClass = struct
     | Ast_defs.Invariant -> ""
 
   let rec tparam
+      ~fuel
       {
         tp_variance = var;
         tp_name = (position, name);
@@ -1443,32 +1665,45 @@ module PrintClass = struct
         tp_reified = reified;
         tp_user_attributes = _;
       } =
-    let params_string =
+    let (fuel, params_string) =
       if List.is_empty params then
-        ""
+        (fuel, "")
       else
-        "<" ^ tparam_list params ^ ">"
+        let (fuel, tparam_list_str) = tparam_list ~fuel params in
+        (fuel, "<" ^ tparam_list_str ^ ">")
     in
-    variance var
-    ^ pos_or_decl position
-    ^ " "
-    ^ name
-    ^ params_string
-    ^ " "
-    ^ List.fold_right
-        cstrl
-        ~f:(fun x acc -> constraint_ty x ^ " " ^ acc)
-        ~init:""
-    ^
-    match reified with
-    | Nast.Erased -> ""
-    | Nast.SoftReified -> " soft reified"
-    | Nast.Reified -> " reified"
+    let (fuel, constraints_str) =
+      let handle_constraint x (fuel, acc) =
+        let (fuel, constraint_str) = constraint_ty ~fuel x in
+        (fuel, constraint_str ^ " " ^ acc)
+      in
+      List.fold_right cstrl ~f:handle_constraint ~init:(fuel, "")
+    in
+    let tparam_str =
+      variance var
+      ^ pos_or_decl position
+      ^ " "
+      ^ name
+      ^ params_string
+      ^ " "
+      ^ constraints_str
+      ^
+      match reified with
+      | Nast.Erased -> ""
+      | Nast.SoftReified -> " soft reified"
+      | Nast.Reified -> " reified"
+    in
+    (fuel, tparam_str)
 
-  and tparam_list l =
-    List.fold_right l ~f:(fun x acc -> tparam x ^ ", " ^ acc) ~init:""
+  and tparam_list ~fuel l =
+    let handle_tparam x (fuel, acc) =
+      let (fuel, tparam_str) = tparam ~fuel x in
+      (fuel, tparam_str ^ ", " ^ acc)
+    in
+    let (fuel, str) = List.fold_right l ~f:handle_tparam ~init:(fuel, "") in
+    (fuel, str)
 
-  let class_elt ({ ce_visibility; ce_type = (lazy ty); _ } as ce) =
+  let class_elt ~fuel ({ ce_visibility; ce_type = (lazy ty); _ } as ce) =
     let vis =
       match ce_visibility with
       | Vpublic -> "public"
@@ -1482,28 +1717,50 @@ module PrintClass = struct
       else
         ""
     in
-    let type_ = Full.to_string_decl ty in
-    synth ^ vis ^ " " ^ type_
+    let (fuel, type_str) = Full.to_string_decl ~fuel ty in
+    (fuel, synth ^ vis ^ " " ^ type_str)
 
-  let class_elts m =
-    List.fold m ~init:"" ~f:(fun acc (field, v) ->
-        "(" ^ field ^ ": " ^ class_elt v ^ ") " ^ acc)
+  let class_elts ~fuel m =
+    let handle_class_elt (fuel, acc) (field, v) =
+      let (fuel, class_elt_str) = class_elt ~fuel v in
+      let class_elt_str = "(" ^ field ^ ": " ^ class_elt_str ^ ") " ^ acc in
+      (fuel, class_elt_str)
+    in
+    let (fuel, class_elts_str) =
+      List.fold m ~init:(fuel, "") ~f:handle_class_elt
+    in
+    (fuel, class_elts_str)
 
-  let class_elts_with_breaks m =
-    List.fold m ~init:"" ~f:(fun acc (field, v) ->
-        "\n" ^ indent ^ field ^ ": " ^ class_elt v ^ acc)
+  let class_elts_with_breaks ~fuel m =
+    let handle_class_elt (fuel, acc) (field, v) =
+      let (fuel, class_elt_str) = class_elt ~fuel v in
+      let class_elt_str = "\n" ^ indent ^ field ^ ": " ^ class_elt_str ^ acc in
+      (fuel, class_elt_str)
+    in
+    let (fuel, elts_str) = List.fold m ~init:(fuel, "") ~f:handle_class_elt in
+    (fuel, elts_str)
 
-  let class_consts m =
-    List.fold m ~init:"" ~f:(fun acc (field, cc) ->
-        let synth =
-          if cc.cc_synthesized then
-            "synthetic "
-          else
-            ""
-        in
-        "(" ^ field ^ ": " ^ synth ^ Full.to_string_decl cc.cc_type ^ ") " ^ acc)
+  let class_consts ~fuel m =
+    let handle_class_const (fuel, acc) (field, cc) =
+      let synth =
+        if cc.cc_synthesized then
+          "synthetic "
+        else
+          ""
+      in
+      let (fuel, class_const_ty_str) = Full.to_string_decl ~fuel cc.cc_type in
+      let class_const_ty_str =
+        "(" ^ field ^ ": " ^ synth ^ class_const_ty_str ^ ") " ^ acc
+      in
+      (fuel, class_const_ty_str)
+    in
+    let (fuel, class_consts_str) =
+      List.fold m ~init:(fuel, "") ~f:handle_class_const
+    in
+    (fuel, class_consts_str)
 
   let typeconst
+      ~fuel
       {
         ttc_synthesized = synthetic;
         ttc_name = tc_name;
@@ -1515,69 +1772,95 @@ module PrintClass = struct
         ttc_is_ctx = _;
       } =
     let name = snd tc_name in
-    let ty x = Full.to_string_decl x in
-    let type_info =
+    let ty ~fuel x = Full.to_string_decl ~fuel x in
+    let (fuel, type_info) =
       match kind with
-      | TCConcrete { tc_type = t } -> Printf.sprintf " = %s" (ty t)
+      | TCConcrete { tc_type = t } ->
+        let (fuel, ty_str) = ty ~fuel t in
+        let type_info_str = Printf.sprintf " = %s" ty_str in
+        (fuel, type_info_str)
       | TCAbstract
           { atc_as_constraint = a; atc_super_constraint = s; atc_default = d }
         ->
-        let m = Option.value_map ~default:"" in
-        let a = m a ~f:(fun x -> Printf.sprintf " as %s" (ty x)) in
-        let s = m s ~f:(fun x -> Printf.sprintf " super %s" (ty x)) in
-        let d = m d ~f:(fun x -> Printf.sprintf " = %s" (ty x)) in
-        a ^ s ^ d
+        let m ~fuel printer =
+          Option.value_map ~default:(fuel, "") ~f:(fun x ->
+              let (fuel, ty_str) = ty ~fuel x in
+              (fuel, printer ty_str))
+        in
+        let (fuel, a) = m ~fuel (Printf.sprintf " as %s") a in
+        let (fuel, s) = m ~fuel (Printf.sprintf " super %s") s in
+        let (fuel, d) = m ~fuel (Printf.sprintf " = %s") d in
+        (fuel, a ^ s ^ d)
     in
-    name
-    ^ type_info
-    ^ " (origin:"
-    ^ origin
-    ^ ")"
-    ^ (if synthetic then
-        " (synthetic)"
+    let typeconst_str =
+      name
+      ^ type_info
+      ^ " (origin:"
+      ^ origin
+      ^ ")"
+      ^ (if synthetic then
+          " (synthetic)"
+        else
+          "")
+      ^ (if enforceable then
+          " (enforceable)"
+        else
+          "")
+      ^
+      if Option.is_some reifiable then
+        " (reifiable)"
       else
-        "")
-    ^ (if enforceable then
-        " (enforceable)"
-      else
-        "")
-    ^
-    if Option.is_some reifiable then
-      " (reifiable)"
-    else
-      ""
+        ""
+    in
+    (fuel, typeconst_str)
 
-  let typeconsts m =
-    List.fold m ~init:"" ~f:(fun acc (_, v) -> "\n(" ^ typeconst v ^ ")" ^ acc)
+  let typeconsts ~fuel m =
+    let handle_typeconst (fuel, acc) (_, v) =
+      let (fuel, typeconst_str) = typeconst ~fuel v in
+      let typeconst_str = "\n(" ^ typeconst_str ^ ")" ^ acc in
+      (fuel, typeconst_str)
+    in
+    let (fuel, typeconsts_str) =
+      List.fold m ~init:(fuel, "") ~f:handle_typeconst
+    in
+    (fuel, typeconsts_str)
 
-  let ancestors ctx m =
+  let ancestors ~fuel ctx m =
     (* Format is as follows:
      *    ParentKnownToHack
      *  ! ParentCompletelyUnknown
      *)
-    List.fold m ~init:"" ~f:(fun acc (field, v) ->
-        let (sigil, kind) =
-          match Decl_provider.get_class ctx field with
-          | None -> ("!", "")
-          | Some cls -> (" ", " (" ^ classish_kind (Cls.kind cls) ^ ")")
-        in
-        let ty_str = Full.to_string_decl v in
-        "\n" ^ indent ^ sigil ^ " " ^ ty_str ^ kind ^ acc)
-
-  let constructor (ce_opt, (consist : consistent_kind)) =
-    let consist_str = Format.asprintf "(%a)" pp_consistent_kind consist in
-    let ce_str =
-      match ce_opt with
-      | None -> ""
-      | Some ce -> class_elt ce
+    let handle_ancestor (fuel, acc) (field, v) =
+      let (sigil, kind) =
+        match Decl_provider.get_class ctx field with
+        | None -> ("!", "")
+        | Some cls -> (" ", " (" ^ classish_kind (Cls.kind cls) ^ ")")
+      in
+      let (fuel, ty_str) = Full.to_string_decl ~fuel v in
+      (fuel, "\n" ^ indent ^ sigil ^ " " ^ ty_str ^ kind ^ acc)
     in
-    ce_str ^ consist_str
+    let (fuel, str) = List.fold m ~init:(fuel, "") ~f:handle_ancestor in
+    (fuel, str)
 
-  let req_ancestors xs =
-    List.fold xs ~init:"" ~f:(fun acc (_p, x) ->
-        acc ^ Full.to_string_decl x ^ ", ")
+  let constructor ~fuel (ce_opt, (consist : consistent_kind)) =
+    let consist_str = Format.asprintf "(%a)" pp_consistent_kind consist in
+    let (fuel, ce_str) =
+      match ce_opt with
+      | None -> (fuel, "")
+      | Some ce -> class_elt ~fuel ce
+    in
+    (fuel, ce_str ^ consist_str)
 
-  let class_type ctx c =
+  let req_ancestors ~fuel xs =
+    let handle_req_ancestor (fuel, acc) (_p, x) =
+      let (fuel, req_ancestor_str) = Full.to_string_decl ~fuel x in
+      let req_ancestor_str = acc ^ req_ancestor_str ^ ", " in
+      (fuel, req_ancestor_str)
+    in
+    let (fuel, str) = List.fold xs ~init:(fuel, "") ~f:handle_req_ancestor in
+    (fuel, str)
+
+  let class_type ~fuel ctx c =
     let tenv = Typing_env_types.empty ctx Relative_path.default ~droot:None in
     let tc_need_init = bool (Cls.need_init c) in
     let tc_abstract = bool (Cls.abstract c) in
@@ -1593,72 +1876,77 @@ module PrintClass = struct
     in
     let tc_kind = classish_kind (Cls.kind c) in
     let tc_name = Cls.name c in
-    let tc_tparams = tparam_list (Cls.tparams c) in
-    let tc_consts = class_consts (Cls.consts c) in
-    let tc_typeconsts = typeconsts (Cls.typeconsts c) in
-    let tc_props = class_elts (Cls.props c) in
-    let tc_sprops = class_elts (Cls.sprops c) in
-    let tc_methods = class_elts_with_breaks (Cls.methods c) in
-    let tc_smethods = class_elts_with_breaks (Cls.smethods c) in
-    let tc_construct = constructor (Cls.construct c) in
-    let tc_ancestors = ancestors ctx (Cls.all_ancestors c) in
-    let tc_req_ancestors = req_ancestors (Cls.all_ancestor_reqs c) in
+    let (fuel, tc_tparams) = tparam_list ~fuel (Cls.tparams c) in
+    let (fuel, tc_consts) = class_consts ~fuel (Cls.consts c) in
+    let (fuel, tc_typeconsts) = typeconsts ~fuel (Cls.typeconsts c) in
+    let (fuel, tc_props) = class_elts ~fuel (Cls.props c) in
+    let (fuel, tc_sprops) = class_elts ~fuel (Cls.sprops c) in
+    let (fuel, tc_methods) = class_elts_with_breaks ~fuel (Cls.methods c) in
+    let (fuel, tc_smethods) = class_elts_with_breaks ~fuel (Cls.smethods c) in
+    let (fuel, tc_construct) = constructor ~fuel (Cls.construct c) in
+    let (fuel, tc_ancestors) = ancestors ~fuel ctx (Cls.all_ancestors c) in
+    let (fuel, tc_req_ancestors) =
+      req_ancestors ~fuel (Cls.all_ancestor_reqs c)
+    in
     let tc_req_ancestors_extends =
       String.concat ~sep:" " (Cls.all_ancestor_req_names c)
     in
-    "tc_need_init: "
-    ^ tc_need_init
-    ^ "\n"
-    ^ "tc_abstract: "
-    ^ tc_abstract
-    ^ "\n"
-    ^ "tc_deferred_init_members: "
-    ^ tc_deferred_init_members
-    ^ "\n"
-    ^ "tc_kind: "
-    ^ tc_kind
-    ^ "\n"
-    ^ "tc_name: "
-    ^ tc_name
-    ^ "\n"
-    ^ "tc_tparams: "
-    ^ tc_tparams
-    ^ "\n"
-    ^ "tc_consts: "
-    ^ tc_consts
-    ^ "\n"
-    ^ "tc_typeconsts: "
-    ^ tc_typeconsts
-    ^ "\n"
-    ^ "tc_props: "
-    ^ tc_props
-    ^ "\n"
-    ^ "tc_sprops: "
-    ^ tc_sprops
-    ^ "\n"
-    ^ "tc_methods: "
-    ^ tc_methods
-    ^ "\n"
-    ^ "tc_smethods: "
-    ^ tc_smethods
-    ^ "\n"
-    ^ "tc_construct: "
-    ^ tc_construct
-    ^ "\n"
-    ^ "tc_ancestors: "
-    ^ tc_ancestors
-    ^ "\n"
-    ^ "tc_req_ancestors: "
-    ^ tc_req_ancestors
-    ^ "\n"
-    ^ "tc_req_ancestors_extends: "
-    ^ tc_req_ancestors_extends
-    ^ "\n"
-    ^ ""
+    let class_ty_str =
+      "tc_need_init: "
+      ^ tc_need_init
+      ^ "\n"
+      ^ "tc_abstract: "
+      ^ tc_abstract
+      ^ "\n"
+      ^ "tc_deferred_init_members: "
+      ^ tc_deferred_init_members
+      ^ "\n"
+      ^ "tc_kind: "
+      ^ tc_kind
+      ^ "\n"
+      ^ "tc_name: "
+      ^ tc_name
+      ^ "\n"
+      ^ "tc_tparams: "
+      ^ tc_tparams
+      ^ "\n"
+      ^ "tc_consts: "
+      ^ tc_consts
+      ^ "\n"
+      ^ "tc_typeconsts: "
+      ^ tc_typeconsts
+      ^ "\n"
+      ^ "tc_props: "
+      ^ tc_props
+      ^ "\n"
+      ^ "tc_sprops: "
+      ^ tc_sprops
+      ^ "\n"
+      ^ "tc_methods: "
+      ^ tc_methods
+      ^ "\n"
+      ^ "tc_smethods: "
+      ^ tc_smethods
+      ^ "\n"
+      ^ "tc_construct: "
+      ^ tc_construct
+      ^ "\n"
+      ^ "tc_ancestors: "
+      ^ tc_ancestors
+      ^ "\n"
+      ^ "tc_req_ancestors: "
+      ^ tc_req_ancestors
+      ^ "\n"
+      ^ "tc_req_ancestors_extends: "
+      ^ tc_req_ancestors_extends
+      ^ "\n"
+      ^ ""
+    in
+    (fuel, class_ty_str)
 end
 
 module PrintTypedef = struct
-  let typedef = function
+  let typedef ~fuel = function
     | {
         td_pos;
         td_module = _;
@@ -1669,59 +1957,89 @@ module PrintTypedef = struct
         td_type;
         td_is_ctx;
       } ->
-      let tparaml_s = PrintClass.tparam_list td_tparams in
-      let constr_s =
+      let (fuel, tparaml_s) = PrintClass.tparam_list ~fuel td_tparams in
+      let (fuel, constr_s) =
         match td_constraint with
-        | None -> "[None]"
-        | Some constr -> Full.to_string_decl constr
+        | None -> (fuel, "[None]")
+        | Some constr -> Full.to_string_decl ~fuel constr
       in
-      let ty_s = Full.to_string_decl td_type in
+      let (fuel, ty_s) = Full.to_string_decl ~fuel td_type in
       let pos_s = PrintClass.pos_or_decl td_pos in
       let is_ctx_s = Bool.to_string td_is_ctx in
-      "ty: "
-      ^ ty_s
-      ^ "\n"
-      ^ "tparaml: "
-      ^ tparaml_s
-      ^ "\n"
-      ^ "constraint: "
-      ^ constr_s
-      ^ "\n"
-      ^ "pos: "
-      ^ pos_s
-      ^ "\n"
-      ^ "is_ctx: "
-      ^ is_ctx_s
-      ^ "\n"
-      ^ ""
+      let typedef_str =
+        "ty: "
+        ^ ty_s
+        ^ "\n"
+        ^ "tparaml: "
+        ^ tparaml_s
+        ^ "\n"
+        ^ "constraint: "
+        ^ constr_s
+        ^ "\n"
+        ^ "pos: "
+        ^ pos_s
+        ^ "\n"
+        ^ "is_ctx: "
+        ^ is_ctx_s
+        ^ "\n"
+        ^ ""
+      in
+      (fuel, typedef_str)
 end
+
+let supply_fuel tcopt printer =
+  let type_printer_fuel = TypecheckerOptions.type_printer_fuel tcopt in
+  let fuel = Fuel.init type_printer_fuel in
+  let (fuel, str) = printer ~fuel in
+  if Fuel.has_enough fuel then
+    str
+  else
+    Printf.sprintf
+      "%s [This type was truncated. If you need more of the type, use `hh stop; hh --config type_printer_fuel=N`. At this time, N is %d.]"
+      str
+      type_printer_fuel
 
 (*****************************************************************************)
 (* User API *)
 (*****************************************************************************)
 
 let error ?(ignore_dynamic = false) env ty =
-  ErrorString.to_string ~ignore_dynamic env ty
+  supply_fuel env.genv.tcopt (ErrorString.to_string ~ignore_dynamic env ty)
 
-let full env ty = Full.to_string ~ty:Full.locl_ty Doc.text (Loclenv env) ty
+let full env ty =
+  supply_fuel
+    env.genv.tcopt
+    (Full.to_string ~ty:Full.locl_ty Doc.text (Loclenv env) ty)
 
 let full_i env ty =
-  Full.to_string ~ty:Full.internal_type Doc.text (Loclenv env) ty
+  supply_fuel
+    env.genv.tcopt
+    (Full.to_string ~ty:Full.internal_type Doc.text (Loclenv env) ty)
 
-let full_rec env n ty = Full.to_string_rec (Loclenv env) n ty
+let full_rec env n ty =
+  supply_fuel env.genv.tcopt (Full.to_string_rec (Loclenv env) n ty)
 
 let full_strip_ns env ty =
-  Full.to_string_strip_ns ~ty:Full.locl_ty (Loclenv env) ty
+  supply_fuel
+    env.genv.tcopt
+    (Full.to_string_strip_ns ~ty:Full.locl_ty (Loclenv env) ty)
 
 let full_strip_ns_i env ty =
-  Full.to_string_strip_ns ~ty:Full.internal_type (Loclenv env) ty
+  supply_fuel
+    env.genv.tcopt
+    (Full.to_string_strip_ns ~ty:Full.internal_type (Loclenv env) ty)
 
 let full_strip_ns_decl env ty =
-  Full.to_string_strip_ns ~ty:Full.decl_ty (Loclenv env) ty
+  supply_fuel
+    env.genv.tcopt
+    (Full.to_string_strip_ns ~ty:Full.decl_ty (Loclenv env) ty)
 
-let full_with_identity = Full.to_string_with_identity
+let full_with_identity env x occurrence definition_opt =
+  supply_fuel
+    env.genv.tcopt
+    (Full.to_string_with_identity env x occurrence definition_opt)
 
-let full_decl = Full.to_string_decl
+let full_decl tcopt ty = supply_fuel tcopt (Full.to_string_decl ty)
 
 let debug env ty =
   Full.debug_mode := true;
@@ -1741,20 +2059,26 @@ let debug_i env ty =
   Full.debug_mode := false;
   f_str
 
-let class_ ctx c = PrintClass.class_type ctx c
+let class_ ctx c =
+  supply_fuel (Provider_context.get_tcopt ctx) (PrintClass.class_type ctx c)
 
-let gconst gc = Full.to_string_decl gc.cd_type
+let gconst tcopt gc = supply_fuel tcopt (Full.to_string_decl gc.cd_type)
 
-let fun_ { fe_type; _ } = Full.to_string_decl fe_type
+let fun_ tcopt { fe_type; _ } = supply_fuel tcopt (Full.to_string_decl fe_type)
 
-let fun_type f = Full.fun_to_string f
+let fun_type tcopt f = supply_fuel tcopt (Full.fun_to_string f)
 
-let typedef td = PrintTypedef.typedef td
+let typedef tcopt td = supply_fuel tcopt (PrintTypedef.typedef td)
 
 let constraints_for_type env ty =
-  Full.constraints_for_type Full.text_strip_ns env ty
-  |> Libhackfmt.format_doc_unbroken Full.format_env
-  |> String.strip
+  supply_fuel env.genv.tcopt (fun ~fuel ->
+      let (fuel, doc) =
+        Full.constraints_for_type ~fuel Full.text_strip_ns env ty
+      in
+      let str =
+        Libhackfmt.format_doc_unbroken Full.format_env doc |> String.strip
+      in
+      (fuel, str))
 
 let classish_kind c_kind final = ErrorString.classish_kind c_kind final
 
@@ -1779,16 +2103,19 @@ let subtype_prop env prop =
   p_str
 
 let coeffects env ty =
-  let to_string ty =
+  supply_fuel env.genv.tcopt @@ fun ~fuel ->
+  let to_string ~fuel ty =
     with_blank_tyvars (fun () ->
         Full.to_string
+          ~fuel
           ~ty:Full.locl_ty
           (fun s -> Doc.text (Utils.strip_all_ns s))
           (Loclenv env)
           ty)
   in
   let exception UndesugarableCoeffect of locl_ty in
-  let rec desugar_simple_intersection (ty : locl_ty) : string list =
+  let rec desugar_simple_intersection ~fuel (ty : locl_ty) :
+      Fuel.t * string list =
     match snd @@ deref ty with
     | Tvar v ->
       (* We are interested in the upper bounds because coeffects are parameters (contravariant).
@@ -1803,9 +2130,22 @@ let coeffects env ty =
                  | _ -> Some lty)
                | ConstraintType _ -> None)
       in
-      List.concat_map ~f:desugar_simple_intersection upper_bounds
-    | Tintersection tyl -> List.concat_map ~f:desugar_simple_intersection tyl
-    | Tunion [ty] -> desugar_simple_intersection ty
+      let (fuel, tyll) =
+        List.fold_map
+          ~init:fuel
+          ~f:(fun fuel -> desugar_simple_intersection ~fuel)
+          upper_bounds
+      in
+      (fuel, List.concat tyll)
+    | Tintersection tyl ->
+      let (fuel, tyll) =
+        List.fold_map
+          ~init:fuel
+          ~f:(fun fuel -> desugar_simple_intersection ~fuel)
+          tyl
+      in
+      (fuel, List.concat tyll)
+    | Tunion [ty] -> desugar_simple_intersection ~fuel ty
     | Tunion _
     | Tnonnull
     | Tdynamic ->
@@ -1813,10 +2153,12 @@ let coeffects env ty =
     | Toption ty' ->
       begin
         match deref ty' with
-        | (_, Tnonnull) -> [] (* another special case of `mixed` *)
+        | (_, Tnonnull) -> (fuel, []) (* another special case of `mixed` *)
         | _ -> raise (UndesugarableCoeffect ty)
       end
-    | _ -> [to_string ty]
+    | _ ->
+      let (fuel, str) = to_string ~fuel ty in
+      (fuel, [str])
   in
 
   try
@@ -1843,13 +2185,17 @@ let coeffects env ty =
         | _ -> Typing_make_type.intersection r upper_bounds)
       | _ -> ty
     in
-    match desugar_simple_intersection ty with
-    | [cap] -> "the capability " ^ cap
-    | caps ->
-      "the capability set {"
-      ^ (caps
-        |> List.dedup_and_sort ~compare:String.compare
-        |> String.concat ~sep:", ")
-      ^ "}"
+    let (fuel, tyl) = desugar_simple_intersection ~fuel ty in
+    let coeffect_str =
+      match tyl with
+      | [cap] -> "the capability " ^ cap
+      | caps ->
+        "the capability set {"
+        ^ (caps
+          |> List.dedup_and_sort ~compare:String.compare
+          |> String.concat ~sep:", ")
+        ^ "}"
+    in
+    (fuel, coeffect_str)
   with
-  | UndesugarableCoeffect _ -> to_string ty
+  | UndesugarableCoeffect _ -> to_string ~fuel ty

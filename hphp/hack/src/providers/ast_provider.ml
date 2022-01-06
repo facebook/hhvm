@@ -33,7 +33,7 @@ module ParserHeap =
     end)
 
 module LocalParserCache =
-  SharedMem.MultiCache
+  SharedMem.FreqCache
     (Relative_path.S)
     (struct
       type t = Nast.program

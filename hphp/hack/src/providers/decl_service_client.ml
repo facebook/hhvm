@@ -27,7 +27,7 @@ type decl = Shallow_decl_defs.decl =
   | Const of Shallow_decl_defs.const_decl
 
 module Decls =
-  SharedMem.MultiCache
+  SharedMem.FreqCache
     (CacheKey)
     (struct
       type t = decl option
@@ -39,7 +39,7 @@ module Decls =
     end)
 
 module Filenames =
-  SharedMem.MultiCache
+  SharedMem.FreqCache
     (CacheKey)
     (struct
       type t = (Relative_path.t * FileInfo.name_type) option

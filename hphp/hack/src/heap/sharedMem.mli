@@ -334,9 +334,7 @@ module Heap (_ : Backend) (Key : Key) (Value : Value) :
 (** A worker-local cache layer.
 
     Each local cache defines its own eviction strategy.
-    For example, we currently have [FreqCache] and [OrderedCache].
-
-    We even have one that combines the two strategies in [MultiCache]. *)
+    For example, we currently have [FreqCache] and [OrderedCache]. *)
 module type LocalCacheLayer = sig
   type key
 
@@ -382,13 +380,6 @@ module FreqCache (Key : Key) (Value : Value) (_ : Capacity) :
 
     It is Hashtbl.t-based with a bounded number of elements. *)
 module OrderedCache (Key : Key) (Value : Value) (_ : Capacity) :
-  LocalCacheLayer with type key = Key.t and type value = Value.t
-
-(** MultiCache uses both FreqCache and OrderedCache simultaneously.
-
-    It uses both caches with the hope that each one will paper over the
-    other's weaknesses. *)
-module MultiCache (Key : Key) (Value : Value) (_ : Capacity) :
   LocalCacheLayer with type key = Key.t and type value = Value.t
 
 (** Same as [Heap] but provides a layer of worker-local caching. *)

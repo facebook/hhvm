@@ -1154,6 +1154,32 @@ module FreqCache (Key : Key) (Value : Value) (Capacity : Capacity) :
   let remove x =
     if Hashtbl.mem cache x then decr size;
     Hashtbl.remove cache x
+
+  let get_telemetry (telemetry : Telemetry.t) : Telemetry.t =
+    let (objs, keys) = get_telemetry_items_and_keys () in
+    let count = Seq.fold_left (fun a _ -> a + 1) 0 keys in
+    if count = 0 then
+      telemetry
+    else
+      let bytes =
+        if SMTelemetry.hh_log_level () > 0 then
+          Some (Obj.reachable_words (Obj.repr objs) * Sys.word_size / 8)
+        else
+          None
+      in
+      telemetry
+      |> Telemetry.object_
+           ~key:(Value.description ^ "__local")
+           ~value:
+             (Telemetry.create ()
+             |> Telemetry.int_ ~key:"count" ~value:count
+             |> Telemetry.int_opt ~key:"bytes" ~value:bytes)
+
+  let () =
+    SMTelemetry.get_telemetry_list :=
+      get_telemetry :: !SMTelemetry.get_telemetry_list;
+    invalidate_local_caches_callback_list :=
+      clear :: !invalidate_local_caches_callback_list
 end
 
 module OrderedCache (Key : Key) (Value : Value) (Capacity : Capacity) :
@@ -1198,59 +1224,6 @@ module OrderedCache (Key : Key) (Value : Value) (Capacity : Capacity) :
       decr size;
       Hashtbl.remove cache x
     end
-end
-
-module MultiCache (Key : Key) (Value : Value) (Capacity : Capacity) :
-  LocalCacheLayer with type key = Key.t and type value = Value.t = struct
-  type key = Key.t
-
-  type value = Value.t
-
-  (* Young values cache *)
-  module L1 = OrderedCache (Key) (Value) (Capacity)
-
-  (* Frequent values cache *)
-  module L2 = FreqCache (Key) (Value) (Capacity)
-  module KeySet = Set.Make (Key)
-
-  let add x y =
-    L1.add x y;
-    L2.add x y
-
-  let get x =
-    match L1.get x with
-    | None ->
-      (match L2.get x with
-      | None -> None
-      | Some v as result ->
-        L1.add x v;
-        result)
-    | Some v as result ->
-      L2.add x v;
-      result
-
-  let remove x =
-    L1.remove x;
-    L2.remove x
-
-  let clear () =
-    L1.clear ();
-    L2.clear ()
-
-  let get_telemetry_items_and_keys () =
-    (* Many items are stored in both L1 (ordered) and L2 (freq) caches.
-       We don't want to double-count them.
-       So: we'll figure out the reachable words of the (L1,L2) tuple,
-       and we'll figure out the set union of keys in both of them. *)
-    let (obj1, keys1) = L1.get_telemetry_items_and_keys () in
-    let (obj2, keys2) = L2.get_telemetry_items_and_keys () in
-    let combined =
-      KeySet.empty
-      |> KeySet.add_seq keys1
-      |> KeySet.add_seq keys2
-      |> KeySet.to_seq
-    in
-    (Obj.repr (obj1, obj2), combined)
 
   let get_telemetry (telemetry : Telemetry.t) : Telemetry.t =
     let (objs, keys) = get_telemetry_items_and_keys () in
@@ -1276,12 +1249,7 @@ module MultiCache (Key : Key) (Value : Value) (Capacity : Capacity) :
     SMTelemetry.get_telemetry_list :=
       get_telemetry :: !SMTelemetry.get_telemetry_list;
     invalidate_local_caches_callback_list :=
-      begin
-        fun () ->
-        L1.clear ();
-        L2.clear ()
-      end
-      :: !invalidate_local_caches_callback_list
+      clear :: !invalidate_local_caches_callback_list
 end
 
 (** Create a new value, but append the "__cache" prefix to its description *)
@@ -1319,7 +1287,7 @@ end = struct
   module KeyHasher = Direct.KeyHasher
   module KeySet = Direct.KeySet
   module KeyMap = Direct.KeyMap
-  module Cache = MultiCache (Key) (ValueForCache (Value)) (Capacity)
+  module Cache = FreqCache (Key) (ValueForCache (Value)) (Capacity)
 
   let add x y =
     Direct.add x y;

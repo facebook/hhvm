@@ -49,19 +49,6 @@ type complete_autocomplete_result = {
   res_documentation: string option;
 }
 
-(* Results that still need a typing environment to convert ty information
-   into strings *)
-type partial_autocomplete_result = {
-  ty: Typing_defs.phase_ty;
-  name: string;
-  kind_: SearchUtils.si_kind;
-  base_class: string option;
-}
-
-type autocomplete_result =
-  | Partial of partial_autocomplete_result
-  | Complete of complete_autocomplete_result
-
 (* The type returned to the client *)
 type ide_result = {
   completions: complete_autocomplete_result list;

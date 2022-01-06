@@ -20,7 +20,7 @@ module Cls = Decl_provider.Class
 
 let ac_env = ref None
 
-let autocomplete_results : autocomplete_result list ref = ref []
+let autocomplete_results : complete_autocomplete_result list ref = ref []
 
 let autocomplete_is_complete : bool ref = ref true
 
@@ -143,7 +143,7 @@ let autocomplete_result_to_json res =
       (* legacy field, left here in case clients need it *)
     ]
 
-let add_res (res : autocomplete_result) : unit =
+let add_res (res : complete_autocomplete_result) : unit =
   autocomplete_results := res :: !autocomplete_results
 
 let autocomplete_token ac_type env x =
@@ -273,7 +273,7 @@ let autocomplete_shape_key autocomplete_context env fields id =
             res_documentation = None;
           }
         in
-        add_res (Complete complete)
+        add_res complete
     in
 
     List.iter (TShapeMap.keys fields) ~f:add
@@ -308,7 +308,7 @@ let autocomplete_member ~is_static env class_ cid id =
           res_documentation = None;
         }
       in
-      add_res (Complete complete)
+      add_res complete
     in
 
     let sort : 'a. (string * 'a) list -> (string * 'a) list =
@@ -385,7 +385,7 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
               res_documentation = None;
             }
           in
-          add_res (Complete complete))
+          add_res complete)
   )
 
 let autocomplete_xhp_bool_value attr_ty id_id env =
@@ -423,9 +423,8 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
         }
       in
 
-      add_res (Complete complete);
-      add_res
-        (Complete { complete with res_name = "false"; res_fullname = "false" })
+      add_res complete;
+      add_res { complete with res_name = "false"; res_fullname = "false" }
     )
   end
 
@@ -476,7 +475,7 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
           res_documentation = None;
         }
       in
-      add_res (Complete complete)
+      add_res complete
     in
 
     match SMap.find_opt (":" ^ attr_name) enum_values with
@@ -556,7 +555,7 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
                       res_documentation = None;
                     }
                   in
-                  add_res (Complete complete)))
+                  add_res complete))
   end
 
 let autocomplete_lvar id env =
@@ -567,67 +566,6 @@ let autocomplete_lvar id env =
     ac_env := Some env;
     autocomplete_identifier := Some (fst id, text)
   )
-
-(* Print a descriptive "detail" element *)
-let get_desc_string_for env ty kind =
-  match kind with
-  | SearchUtils.SI_ClassMethod
-  | SearchUtils.SI_ClassConstant
-  | SearchUtils.SI_Property
-  | SearchUtils.SI_Function
-  | SearchUtils.SI_Constructor ->
-    let result =
-      match ty with
-      | DeclTy declt -> Tast_env.print_decl_ty env declt
-      | LoclTy loclt -> Tast_env.print_ty env loclt
-    in
-    result
-  | _ -> kind_to_string kind
-
-(* Here we turn partial_autocomplete_results into complete_autocomplete_results *)
-(* by using typing environment to convert ty information into strings. *)
-let resolve_ty
-    (env : Tast_env.t)
-    (autocomplete_context : legacy_autocomplete_context)
-    (x : partial_autocomplete_result)
-    (replace_pos : Ide_api_types.range) : complete_autocomplete_result =
-  (* XHP class+attribute names are stored internally with a leading colon.    *)
-  (* We'll render them without it if and only if we're in an XHP context.     *)
-  (*   $x = new :class1() -- do strip the colon in front of :class1           *)
-  (*   $x = <:class1      -- don't strip it                                   *)
-  (*   $x->:attr1         -- don't strip the colon in front of :attr1         *)
-  (*   <class1 :attr="a"  -- do strip it                                      *)
-  (* The logic is thorny here because we're relying upon regexes to figure    *)
-  (* out the context. Once we switch autocomplete to FFP, it'll be cleaner.   *)
-  let (res_name, res_fullname) =
-    match (x.kind_, autocomplete_context, !argument_global_type) with
-    | ( SearchUtils.SI_Property,
-        { AutocompleteTypes.is_instance_member = false; _ },
-        _ )
-    | (SearchUtils.SI_XHP, { AutocompleteTypes.is_xhp_classname = true; _ }, _)
-    | (SearchUtils.SI_Class, { AutocompleteTypes.is_xhp_classname = true; _ }, _)
-      ->
-      let newname = lstrip x.name ":" in
-      (newname, x.name)
-    | ( SearchUtils.SI_Literal,
-        { AutocompleteTypes.is_before_apostrophe = true; _ },
-        Some Acshape_key ) ->
-      let n = rstrip x.name "'" in
-      (n, x.name)
-    | _ -> (x.name, x.name)
-  in
-  {
-    res_pos = get_pos_for env x.ty;
-    res_replace_pos = replace_pos;
-    res_base_class = x.base_class;
-    res_ty = get_desc_string_for env x.ty x.kind_;
-    res_name;
-    res_fullname;
-    res_kind = x.kind_;
-    func_details = get_func_details_for env x.ty;
-    ranking_details = None;
-    res_documentation = None;
-  }
 
 let autocomplete_typed_member ~is_static env class_ty cid mid =
   Tast_env.get_class_ids env class_ty
@@ -668,7 +606,7 @@ let autocomplete_enum_class_label_call env fty pos_labelname =
                 res_documentation = None;
               }
             in
-            add_res (Complete complete))
+            add_res complete)
     | _ -> ()
   in
   let suggest_members_from_ty env ty =
@@ -758,7 +696,7 @@ let autocomplete_shape_literal_in_call
         res_documentation = None;
       }
     in
-    add_res (Complete complete)
+    add_res complete
   in
 
   (* If this shape field name is of the form "fooAUTO332", return "foo". *)
@@ -974,7 +912,7 @@ let find_global_results
             res_documentation = None;
           }
         in
-        add_res (Complete complete));
+        add_res complete);
     autocomplete_is_complete := List.length !autocomplete_results < max_results;
 
     (* Add any builtins that match *)
@@ -991,20 +929,18 @@ let find_global_results
            String_utils.string_starts_with name query_text)
     |> List.iter ~f:(fun (name, documentation, kind, _) ->
            add_res
-             (Complete
-                {
-                  res_pos = absolute_none;
-                  res_replace_pos = replace_pos;
-                  res_base_class = None;
-                  res_ty = "builtin";
-                  res_name = name;
-                  res_fullname = name;
-                  res_kind = kind;
-                  func_details = None;
-                  ranking_details = None;
-                  res_documentation = Some documentation;
-                }));
-    ()
+             {
+               res_pos = absolute_none;
+               res_replace_pos = replace_pos;
+               res_base_class = None;
+               res_ty = "builtin";
+               res_name = name;
+               res_fullname = name;
+               res_kind = kind;
+               func_details = None;
+               ranking_details = None;
+               res_documentation = Some documentation;
+             })
   )
 
 let visitor autocomplete_context =
@@ -1257,7 +1193,7 @@ let compute_complete_local ctx tast =
           res_documentation = None;
         }
       in
-      add_res (Complete complete))
+      add_res complete)
     locals
 
 let reset () =
@@ -1307,16 +1243,8 @@ let go_ctx
         try get_replace_pos_exn () with
         | _ -> Pos.none |> Pos.to_absolute |> Ide_api_types.pos_to_range
       in
-      let resolve (result : autocomplete_result) : complete_autocomplete_result
-          =
-        match result with
-        | Partial res ->
-          resolve_ty tast_env autocomplete_context res replace_pos
-        | Complete res -> res
-      in
-      let complete_autocomplete_results =
-        !autocomplete_results |> List.map ~f:resolve
-      in
+
+      let complete_autocomplete_results = !autocomplete_results in
       let results =
         {
           With_complete_flag.is_complete = !autocomplete_is_complete;

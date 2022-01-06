@@ -375,11 +375,24 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
                (fun key -> String.equal (":" ^ key) name)
                existing_attr_names)
         then
-          add_partial_result
-            name
-            (Phase.decl ty)
-            SearchUtils.SI_Property
-            (Some class_))
+          let kind = SearchUtils.SI_Property in
+          let res_ty = Tast_env.print_decl_ty env ty in
+          let ty = Phase.decl ty in
+          let complete =
+            {
+              res_pos = get_pos_for env ty;
+              res_replace_pos = replace_pos_of_id id;
+              res_base_class = Some (Cls.name class_);
+              res_ty;
+              res_name = lstrip name ":";
+              res_fullname = name;
+              res_kind = kind;
+              func_details = get_func_details_for env ty;
+              ranking_details = None;
+              res_documentation = None;
+            }
+          in
+          add_res (Complete complete))
   )
 
 let autocomplete_xhp_bool_value attr_ty id_id env =
@@ -400,12 +413,26 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
     in
 
     if is_bool_or_bool_option attr_ty then (
-      add_partial_result "true" (Phase.locl attr_ty) SearchUtils.SI_Literal None;
-      add_partial_result
-        "false"
-        (Phase.locl attr_ty)
-        SearchUtils.SI_Literal
-        None
+      let kind = SearchUtils.SI_Literal in
+      let ty = Phase.locl attr_ty in
+      let complete =
+        {
+          res_pos = get_pos_for env ty;
+          res_replace_pos = replace_pos_of_id id_id;
+          res_base_class = None;
+          res_ty = kind_to_string kind;
+          res_name = "true";
+          res_fullname = "true";
+          res_kind = kind;
+          func_details = None;
+          ranking_details = None;
+          res_documentation = None;
+        }
+      in
+
+      add_res (Complete complete);
+      add_res
+        (Complete { complete with res_name = "false"; res_fullname = "false" })
     )
   end
 
@@ -439,12 +466,26 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
         | Ast_defs.XEV_Int value -> string_of_int value
         | Ast_defs.XEV_String value -> "\"" ^ value ^ "\""
       in
-      add_partial_result
-        (suggestion xev)
-        (Phase.locl ty)
-        SearchUtils.SI_Enum
-        None
+      let name = suggestion xev in
+      let kind = SearchUtils.SI_Enum in
+      let ty = Phase.locl ty in
+      let complete =
+        {
+          res_pos = get_pos_for env ty;
+          res_replace_pos = replace_pos_of_id id_id;
+          res_base_class = None;
+          res_ty = kind_to_string kind;
+          res_name = name;
+          res_fullname = name;
+          res_kind = kind;
+          func_details = get_func_details_for env ty;
+          ranking_details = None;
+          res_documentation = None;
+        }
+      in
+      add_res (Complete complete)
     in
+
     match SMap.find_opt (":" ^ attr_name) enum_values with
     | Some enum_values -> List.iter enum_values ~f:add_enum_value_result
     | None -> ()
@@ -503,11 +544,26 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
 
            enum_constants
            |> List.iter ~f:(fun (const_name, ty) ->
-                  add_partial_result
-                    (Utils.strip_ns class_name ^ "::" ^ const_name)
-                    (Phase.decl ty.cc_type)
-                    SearchUtils.SI_Enum
-                    enum_class))
+                  let dty = Phase.decl ty.cc_type in
+                  let name = Utils.strip_ns class_name ^ "::" ^ const_name in
+                  let kind = SearchUtils.SI_Enum in
+                  let res_base_class = Option.map ~f:Cls.name enum_class in
+
+                  let complete =
+                    {
+                      res_pos = get_pos_for env dty;
+                      res_replace_pos = replace_pos_of_id id_id;
+                      res_base_class;
+                      res_ty = kind_to_string kind;
+                      res_name = name;
+                      res_fullname = name;
+                      res_kind = kind;
+                      func_details = get_func_details_for env dty;
+                      ranking_details = None;
+                      res_documentation = None;
+                    }
+                  in
+                  add_res (Complete complete)))
   end
 
 let autocomplete_lvar id env =

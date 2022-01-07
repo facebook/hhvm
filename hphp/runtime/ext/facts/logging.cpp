@@ -102,6 +102,7 @@ public:
     std::string owner;
     int period_multiple = 1;
     bool flush_after_write = true;
+    bool drop_on_error = true;
   };
 
   explicit CronoLogWriter(const Options& options)
@@ -111,7 +112,8 @@ public:
             options.owner,
             options.period_multiple)}
       , m_tty{isTtyHelper(m_crono.wlock()->getOutputFile())}
-      , m_flush{options.flush_after_write} {
+      , m_flush{options.flush_after_write}
+      , m_drop_on_error{options.drop_on_error} {
   }
 
   void writeMessage(folly::StringPiece buffer, uint32_t flags = 0) override {
@@ -119,9 +121,18 @@ public:
 
     FILE* output = crono->getOutputFile();
     if (output != nullptr) {
-      always_assert(::fwrite(buffer.data(), buffer.size(), 1, output) == 1);
-      if (m_flush || (flags & folly::LogWriter::Flags::NEVER_DISCARD)) {
-        always_assert(::fflush(output) == 0);
+      bool should_flush =
+          m_flush || (flags & folly::LogWriter::Flags::NEVER_DISCARD);
+
+      bool write_failed =
+          ::fwrite(buffer.data(), buffer.size(), 1, output) != 1;
+      bool flush_failed = should_flush && ::fflush(output) != 1;
+
+      if ((write_failed || flush_failed) && !m_drop_on_error) {
+        std::cerr << buffer;
+        if (should_flush) {
+          std::cerr << std::flush;
+        }
       }
     }
   }
@@ -131,11 +142,14 @@ public:
   }
 
   void flush() override {
-    auto wlock = m_crono.wlock();
+    // Only flush if we aren't already flushing after every write.
+    if (!m_flush) {
+      auto wlock = m_crono.wlock();
 
-    FILE* output = wlock->getOutputFile();
-    if (output != nullptr) {
-      always_assert(::fflush(output) == 0);
+      FILE* output = wlock->getOutputFile();
+      if (output != nullptr) {
+        ::fflush(output);
+      }
     }
   }
 
@@ -147,6 +161,7 @@ private:
   folly::SynchronizedPtr<std::unique_ptr<Cronolog>> m_crono;
   const bool m_tty;
   const bool m_flush;
+  const bool m_drop_on_error;
 };
 
 /*
@@ -183,6 +198,12 @@ private:
  * has been written.  If using asynchronously, the flush will occur after the
  * file write has occurred.  If async is disabled, this setting may have
  * performance impacts.  The default setting is true.
+ *
+ * drop_on_error - If a write error occurs while logging the message will be
+ * dropped if this is set to true, or written to stderr if set to false.  The
+ * default setting is true.  Note that setting this to false does not guarantee
+ * that nothing will be dropped.  If a previous write is buffered, it may be
+ * lost.
  */
 struct CronoLogHandlerFactory::WriterFactory final
     : public folly::StandardLogHandlerFactory::WriterFactory {
@@ -212,6 +233,9 @@ public:
         return true;
       } else if (name == "period_multiple") {
         m_options.period_multiple = folly::to<int>(value);
+        return true;
+      } else if (name == "drop_on_error") {
+        m_options.drop_on_error = folly::to<bool>(value);
         return true;
       }
     } catch (...) {

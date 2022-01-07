@@ -70,6 +70,7 @@ bitflags! {
     }
 }
 
+// Keep in sync with rust_compile_ffi_bridge.rs
 bitflags! {
       pub struct HHBCFlags: u32 {
         const LTR_ASSIGN=1 << 0;
@@ -91,7 +92,7 @@ bitflags! {
     }
 }
 
-// Mapping must match getParserFlags() in runtime-option.cpp
+// Mapping must match getParserFlags() in runtime-option.cpp and rust_compile_ffi_bridge.rs
 bitflags! {
     pub struct ParserFlags: u32 {
         const ABSTRACT_STATIC_PROPS=1 << 0;

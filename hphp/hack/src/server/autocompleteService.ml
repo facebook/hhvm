@@ -153,15 +153,6 @@ let autocomplete_token ac_type x =
 
 let autocomplete_id id = autocomplete_token Acid id
 
-let autocomplete_hint = autocomplete_token Actype
-
-let autocomplete_trait_only = autocomplete_token Actrait_only
-
-let autocomplete_new cid =
-  match cid with
-  | Aast.CI sid -> autocomplete_token Acnew sid
-  | _ -> ()
-
 let get_class_elt_types env class_ cid elts =
   let is_visible (_, elt) =
     Tast_env.is_visible env (elt.ce_visibility, get_ce_lsb elt) cid class_
@@ -768,7 +759,7 @@ let builtins =
 
 (* Find global autocomplete results *)
 let find_global_results
-    ~(kind_filter : SearchUtils.si_kind option ref)
+    ~(id : Pos.t * string)
     ~(completion_type : SearchUtils.autocomplete_type option)
     ~(autocomplete_context : AutocompleteTypes.legacy_autocomplete_context)
     ~(sienv : SearchUtils.si_env)
@@ -783,11 +774,9 @@ let find_global_results
   (* We do this by checking the identifier length, as the string will       *)
   (* include the current namespace.                                         *)
   let have_user_prefix =
-    match !autocomplete_identifier with
-    | None -> failwith "No autocomplete position was set"
-    | Some (pos, _) ->
-      Pos.length pos > AutocompleteTypes.autocomplete_token_length
+    Pos.length (fst id) > AutocompleteTypes.autocomplete_token_length
   in
+
   let tast_env = Tast_env.empty pctx in
   let ctx = autocomplete_context in
   if
@@ -812,17 +801,11 @@ let find_global_results
          --> Allow autocompletion
     *)
     ()
-  else (
-    (kind_filter :=
-       match completion_type with
-       | Some Acnew -> Some SI_Class
-       | Some Actrait_only -> Some SI_Trait
-       | _ -> None);
-    let replace_pos = get_replace_pos_exn () in
+  else
     (* Ensure that we do not have a leading backslash for Hack classes,
      * while ensuring that we have colons for XHP classes.  That's how we
      * differentiate between them. *)
-    let query_text = strip_suffix !auto_complete_for_global in
+    let query_text = strip_suffix (snd id) in
     let query_text =
       if autocomplete_context.is_xhp_classname then
         Utils.add_xhp_ns query_text
@@ -832,12 +815,19 @@ let find_global_results
     auto_complete_for_global := query_text;
     let (ns, _) = Utils.split_ns_from_name query_text in
     let absolute_none = Pos.none |> Pos.to_absolute in
+    let kind_filter =
+      match completion_type with
+      | Some Acnew -> Some SI_Class
+      | Some Actrait_only -> Some SI_Trait
+      | _ -> None
+    in
+
     let results =
       SymbolIndex.find_matching_symbols
         ~sienv
         ~query_text
         ~max_results
-        ~kind_filter:!kind_filter
+        ~kind_filter
         ~context:completion_type
     in
     (* Looking up a function signature using Tast_env.get_fun consumes ~67KB
@@ -890,7 +880,7 @@ let find_global_results
         let complete =
           {
             res_pos;
-            res_replace_pos = replace_pos;
+            res_replace_pos = replace_pos_of_id id;
             res_base_class = None;
             res_ty;
             res_name;
@@ -920,7 +910,7 @@ let find_global_results
            add_res
              {
                res_pos = absolute_none;
-               res_replace_pos = replace_pos;
+               res_replace_pos = replace_pos_of_id id;
                res_base_class = None;
                res_ty = "builtin";
                res_name = name;
@@ -930,14 +920,26 @@ let find_global_results
                ranking_details = None;
                res_documentation = Some documentation;
              })
-  )
 
-let visitor autocomplete_context =
+let visitor ctx autocomplete_context sienv =
   object (self)
     inherit Tast_visitor.iter as super
 
+    method complete_global id ac_type : unit =
+      if is_auto_complete (snd id) then
+        let completion_type = Some ac_type in
+        find_global_results
+          ~id
+          ~completion_type
+          ~autocomplete_context
+          ~sienv
+          ~pctx:ctx
+
+    method complete_id (id : Ast_defs.id) : unit = self#complete_global id Acid
+
     method! on_Id env id =
       autocomplete_id id;
+      self#complete_id id;
       super#on_Id env id
 
     method! on_Call env f targs args unpack_arg =
@@ -951,14 +953,17 @@ let visitor autocomplete_context =
 
     method! on_Fun_id env id =
       autocomplete_id id;
+      self#complete_id id;
       super#on_Fun_id env id
 
     method! on_New env ((_, _, cid_) as cid) el unpacked_element =
-      autocomplete_new (to_nast_class_id_ cid_);
+      (match cid_ with
+      | Aast.CI id -> self#complete_global id Acnew
+      | _ -> ());
       super#on_New env cid el unpacked_element
 
     method! on_Happly env sid hl =
-      autocomplete_hint sid;
+      self#complete_global sid Actype;
       super#on_Happly env sid hl
 
     method! on_Lvar env lid =
@@ -1048,6 +1053,8 @@ let visitor autocomplete_context =
          use that as the search term. *)
       let trimmed_sid = (fst sid, snd sid |> Utils.strip_both_ns) in
       autocomplete_id trimmed_sid;
+      self#complete_id trimmed_sid;
+
       let cid = Aast.CI sid in
       Decl_provider.get_class (Tast_env.get_ctx env) (snd sid)
       |> Option.iter ~f:(fun (c : Cls.t) ->
@@ -1078,8 +1085,8 @@ let visitor autocomplete_context =
     method! on_class_ env cls =
       List.iter cls.Aast.c_uses ~f:(fun hint ->
           match snd hint with
-          | Aast.Happly (sid, params) ->
-            autocomplete_trait_only sid;
+          | Aast.Happly (id, params) ->
+            self#complete_global id Actrait_only;
             List.iter params ~f:(self#on_hint env)
           | _ -> ());
 
@@ -1202,32 +1209,28 @@ let go_ctx
     Tast_provider.compute_tast_quarantined ~ctx ~entry
   in
   reset ();
-  (visitor autocomplete_context)#go ctx tast;
+  (visitor ctx autocomplete_context sienv)#go ctx tast;
+
   Errors.ignore_ (fun () ->
       let start_time = Unix.gettimeofday () in
-      let kind_filter = ref None in
       let completion_type = !argument_global_type in
       let ( = ) = Option.equal equal_autocomplete_type in
-      if
-        completion_type = Some Acid
-        || completion_type = Some Acnew
-        || completion_type = Some Actype
-        || completion_type = Some Actrait_only
-      then
-        find_global_results
-          ~kind_filter
-          ~completion_type
-          ~autocomplete_context
-          ~sienv
-          ~pctx:ctx;
 
       if completion_type = Some Acprop then compute_complete_local ctx tast;
+
       let replace_pos =
         try get_replace_pos_exn () with
         | _ -> Pos.none |> Pos.to_absolute |> Ide_api_types.pos_to_range
       in
 
       let complete_autocomplete_results = !autocomplete_results in
+      let kind_filter =
+        match completion_type with
+        | Some Acnew -> Some SI_Class
+        | Some Actrait_only -> Some SI_Trait
+        | _ -> None
+      in
+
       let results =
         {
           With_complete_flag.is_complete = !autocomplete_is_complete;
@@ -1242,7 +1245,7 @@ let go_ctx
                   ~results:complete_autocomplete_results
                   ~max_results:3
                   ~context:completion_type
-                  ~kind_filter:!kind_filter
+                  ~kind_filter
                   ~replace_pos
               in
               AutocompleteRankService.log_ranked_autocomplete
@@ -1262,7 +1265,7 @@ let go_ctx
         ~start_time
         ~query_text:!auto_complete_for_global
         ~max_results
-        ~kind_filter:!kind_filter
+        ~kind_filter
         ~results:(List.length results.With_complete_flag.value)
         ~context:completion_type
         ~caller:"AutocompleteService.go";

@@ -31,7 +31,7 @@ let test () =
   let expected_errors =
     [
       "File \"/foo.php\", line 3, characters 1-1:\n"
-      ^ "Toplevel statements are not allowed. Use `__EntryPoint` attribute instead (Parsing[1002])";
+      ^ "Hack does not support top level statements. Use the `__EntryPoint` attribute on a function instead (Parsing[1002])";
       "File \"/foo.php\", line 3, characters 2-2:\n"
       ^ "A right brace `}` is expected here. (Parsing[1002])\n";
     ]

@@ -149,6 +149,12 @@
   (:standard
    (:include dune_config/ld-opts.sexp))))
 
+(library
+ (name full_fidelity_parse_args)
+ (wrapped false)
+ (modules fullFidelityParseArgs)
+ (libraries global_options parser_options parser))
+
 (executable
  (name hh_parse)
  (modes exe byte_complete)
@@ -156,7 +162,13 @@
  (link_flags
   (:standard
    (:include dune_config/ld-opts.sexp)))
- (libraries default_injector_config global_config hackfmt parser utils_core))
+ (libraries
+  default_injector_config
+  full_fidelity_parse_args
+  global_config
+  hackfmt
+  parser
+  utils_core))
 
 (executable
  (name hh_single_decl)

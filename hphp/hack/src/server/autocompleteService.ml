@@ -22,10 +22,6 @@ let autocomplete_results : complete_autocomplete_result list ref = ref []
 
 let autocomplete_is_complete : bool ref = ref true
 
-(* The position we're autocompleting at. This is used when computing completions
- * for global identifiers. *)
-let autocomplete_identifier : (Pos.t * string) option ref = ref None
-
 (*
  * Take the results, look them up, and add file position information.
  *)
@@ -102,11 +98,6 @@ let replace_pos_of_id (pos, text) : Ide_api_types.range =
     let st = { range.st with column = ed.column - String.length name } in
     { st; ed })
 
-let get_replace_pos_exn () =
-  match !autocomplete_identifier with
-  | None -> failwith "No autocomplete position was set."
-  | Some (pos, text) -> replace_pos_of_id (pos, text)
-
 let autocomplete_result_to_json res =
   let func_param_to_json param =
     Hh_json.JSON_Object
@@ -146,7 +137,6 @@ let add_res (res : complete_autocomplete_result) : unit =
 
 let autocomplete_token ac_type x =
   if is_auto_complete (snd x) then (
-    autocomplete_identifier := Some x;
     argument_global_type := Some ac_type;
     auto_complete_for_global := snd x
   )
@@ -206,7 +196,6 @@ let get_func_details_for env ty =
 
 let autocomplete_shape_key autocomplete_context env fields id =
   if is_auto_complete (snd id) then (
-    autocomplete_identifier := Some id;
     argument_global_type := Some Acshape_key;
 
     (* not the same as `prefix == ""` in namespaces *)
@@ -275,7 +264,6 @@ let autocomplete_member ~is_static env class_ cid id =
       | Some Aast.CIparent -> true
       | _ -> false
     in
-    autocomplete_identifier := Some id;
     argument_global_type := Some Acclass_get;
     let add kind (name, ty) =
       let res_ty = Tast_env.print_decl_ty env ty in
@@ -333,7 +321,6 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
   (* This is used for "<nt:fb:text |" XHP attributes, in which case  *)
   (* class_ is ":nt:fb:text" and its attributes are in tc_props.     *)
   if is_auto_complete (snd id) && Cls.is_xhp class_ then (
-    autocomplete_identifier := Some id;
     argument_global_type := Some Acprop;
     let existing_attr_names : SSet.t =
       attrs
@@ -376,7 +363,6 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
 let autocomplete_xhp_bool_value attr_ty id_id env =
   if is_auto_complete (snd id_id) then begin
     argument_global_type := Some Acprop;
-    autocomplete_identifier := Some id_id;
 
     let is_bool_or_bool_option ty : bool =
       let is_bool = function
@@ -420,7 +406,6 @@ let autocomplete_xhp_bool_value attr_ty id_id env =
 let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
   if is_auto_complete (snd id_id) then begin
     argument_global_type := Some Acprop;
-    autocomplete_identifier := Some id_id;
 
     let attr_origin =
       Cls.props cls
@@ -478,7 +463,6 @@ let autocomplete_xhp_enum_attribute_value attr_name ty id_id env cls =
 let autocomplete_xhp_enum_class_value attr_ty id_id env =
   if is_auto_complete (snd id_id) then begin
     argument_global_type := Some Acprop;
-    autocomplete_identifier := Some id_id;
 
     let get_class_name ty : string option =
       let get_name : type phase. phase Typing_defs.ty_ -> _ = function
@@ -543,10 +527,7 @@ let autocomplete_xhp_enum_class_value attr_ty id_id env =
 let autocomplete_lvar id =
   (* This is used for "$|" and "$x = $|" local variables. *)
   let text = Local_id.get_name (snd id) in
-  if is_auto_complete text then (
-    argument_global_type := Some Acprop;
-    autocomplete_identifier := Some (fst id, text)
-  )
+  if is_auto_complete text then argument_global_type := Some Acprop
 
 let autocomplete_typed_member ~is_static env class_ty cid mid =
   Tast_env.get_class_ids env class_ty
@@ -560,7 +541,6 @@ let autocomplete_static_member env (ty, _, cid) mid =
   autocomplete_typed_member ~is_static:true env ty (Some cid) mid
 
 let autocomplete_enum_class_label_call env fty pos_labelname =
-  autocomplete_identifier := Some pos_labelname;
   argument_global_type := Some Acclass_get;
 
   let suggest_members cls =
@@ -652,7 +632,6 @@ let autocomplete_shape_literal_in_call
     (ft : Typing_defs.locl_fun_type)
     (args : (Ast_defs.param_kind * Tast.expr) list) : unit =
   let add_shape_key_result pos key =
-    autocomplete_identifier := Some (pos, key);
     argument_global_type := Some Acshape_key;
 
     let ty = Tprim Aast_defs.Tstring in
@@ -1195,7 +1174,6 @@ let compute_complete_local ctx tast =
 let reset () =
   auto_complete_for_global := "";
   argument_global_type := None;
-  autocomplete_identifier := None;
   autocomplete_results := [];
   autocomplete_is_complete := true
 
@@ -1218,12 +1196,13 @@ let go_ctx
 
       if completion_type = Some Acprop then compute_complete_local ctx tast;
 
+      let complete_autocomplete_results = !autocomplete_results in
       let replace_pos =
-        try get_replace_pos_exn () with
-        | _ -> Pos.none |> Pos.to_absolute |> Ide_api_types.pos_to_range
+        match List.hd complete_autocomplete_results with
+        | Some r -> r.res_replace_pos
+        | None -> Pos.none |> Pos.to_absolute |> Ide_api_types.pos_to_range
       in
 
-      let complete_autocomplete_results = !autocomplete_results in
       let kind_filter =
         match completion_type with
         | Some Acnew -> Some SI_Class

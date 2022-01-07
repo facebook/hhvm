@@ -183,25 +183,29 @@ let get_defs ast =
     List.fold_right
       ast
       ~init:acc
-      ~f:(fun def ((acc1, acc2, acc3, acc4, acc5) as acc) ->
+      ~f:(fun def ((funs, classes, typedefs, constants) as acc) ->
         Aast.(
           match def with
           | Fun f ->
-            ( FileInfo.pos_full (to_id f.fd_fun.f_name) :: acc1,
-              acc2,
-              acc3,
-              acc4,
-              acc5 )
+            ( FileInfo.pos_full (to_id f.fd_fun.f_name) :: funs,
+              classes,
+              typedefs,
+              constants )
           | Class c ->
-            (acc1, FileInfo.pos_full (to_id c.c_name) :: acc2, acc3, acc4, acc5)
+            ( funs,
+              FileInfo.pos_full (to_id c.c_name) :: classes,
+              typedefs,
+              constants )
           | Typedef t ->
-            (acc1, acc2, acc3, FileInfo.pos_full (to_id t.t_name) :: acc4, acc5)
+            ( funs,
+              classes,
+              FileInfo.pos_full (to_id t.t_name) :: typedefs,
+              constants )
           | Constant cst ->
-            ( acc1,
-              acc2,
-              acc3,
-              acc4,
-              FileInfo.pos_full (to_id cst.cst_name) :: acc5 )
+            ( funs,
+              classes,
+              typedefs,
+              FileInfo.pos_full (to_id cst.cst_name) :: constants )
           | Namespace (_, defs) -> get_defs defs acc
           | NamespaceUse _
           | SetNamespaceEnv _ ->
@@ -211,7 +215,7 @@ let get_defs ast =
           | Stmt _ ->
             acc))
   in
-  get_defs ast ([], [], [], [], [])
+  get_defs ast ([], [], [], [])
 
 type ignore_attribute_env = { ignored_attributes: string list }
 

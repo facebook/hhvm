@@ -192,7 +192,7 @@ let compute_comments ~(popt : ParserOptions.t) ~(entry : Provider_context.entry)
 let compute_file_info
     ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) : FileInfo.t =
   let ast = compute_ast ~popt ~entry in
-  let (funs, classes, _, typedefs, consts) = Nast.get_defs ast in
+  let (funs, classes, typedefs, consts) = Nast.get_defs ast in
   { FileInfo.empty_t with FileInfo.funs; classes; typedefs; consts }
 
 let get_ast_with_error ?(full = false) ctx path =

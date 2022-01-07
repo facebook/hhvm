@@ -38,7 +38,7 @@ let format_node ?config ?(indent = 0) node =
   node
   |> Hack_format.transform env
   |> nest indent
-  |> Chunk_builder.build
+  |> Chunk_builder.build env
   |> Line_splitter.solve env ~source_text
 
 let text_with_formatted_ranges
@@ -72,7 +72,7 @@ let format_tree ?config tree =
     tree
     |> SyntaxTransforms.editable_from_positioned
     |> Hack_format.transform env
-    |> Chunk_builder.build
+    |> Chunk_builder.build env
   in
   let line_boundaries = get_line_boundaries text in
   let noformat_ranges =
@@ -110,7 +110,7 @@ let format_range ?config range tree =
     tree
     |> SyntaxTransforms.editable_from_positioned
     |> Hack_format.transform env
-    |> Chunk_builder.build
+    |> Chunk_builder.build env
   in
   let line_boundaries = get_line_boundaries text in
   let noformat_ranges =
@@ -136,7 +136,7 @@ let format_intervals ?config intervals tree =
     tree
     |> SyntaxTransforms.editable_from_positioned
     |> Hack_format.transform env
-    |> Chunk_builder.build
+    |> Chunk_builder.build env
   in
   let line_boundaries = get_line_boundaries text in
   let atom_boundaries = get_atom_boundaries chunk_groups in
@@ -201,7 +201,7 @@ let format_at_offset ?config (tree : SyntaxTree.t) offset =
     tree
     |> SyntaxTransforms.editable_from_positioned
     |> Hack_format.transform env
-    |> Chunk_builder.build
+    |> Chunk_builder.build env
   in
   let module PS = Full_fidelity_positioned_syntax in
   (* Grab the node which is the direct parent of the token at offset. If the
@@ -255,10 +255,10 @@ let format_at_offset ?config (tree : SyntaxTree.t) offset =
   (range, formatted)
 
 let format_doc (env : Env.t) (doc : Doc.t) =
-  doc |> Chunk_builder.build |> Line_splitter.solve env
+  doc |> Chunk_builder.build env |> Line_splitter.solve env
 
 let format_doc_unbroken (env : Env.t) (doc : Doc.t) =
   doc
-  |> Chunk_builder.build
+  |> Chunk_builder.build env
   |> Line_splitter.unbroken env
   |> Line_splitter.print env

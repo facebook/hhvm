@@ -8,6 +8,7 @@
  *)
 
 open Hh_prelude
+module Env = Format_env
 
 type open_span = { open_span_start: int }
 
@@ -37,6 +38,8 @@ let is_doc_string_close = function
 let builder =
   object (this)
     val open_spans = Caml.Stack.create ()
+
+    val mutable env = Env.default
 
     val mutable rules = []
 
@@ -77,7 +80,8 @@ let builder =
     (* TODO: Make builder into an instantiable class instead of
      * having this reset method
      *)
-    method private reset () =
+    method private reset new_env =
+      env <- new_env;
       Caml.Stack.clear open_spans;
       rules <- [];
       lazy_rules <- ISet.empty;
@@ -169,7 +173,7 @@ let builder =
       after_next_string <- None
 
     method private set_pending_comma present_in_original_source =
-      if not (is_doc_string_close last_string_type) then
+      if not (is_doc_string_close last_string_type) then (
         let range =
           if not present_in_original_source then
             None
@@ -182,7 +186,9 @@ let builder =
             { hd with Chunk.comma = Some (List.hd_exn rules, range) } :: tl
           | _ ->
             pending_comma <- Some (List.hd_exn rules, range);
-            chunks)
+            chunks);
+        if Env.version_gte env 3 then last_string_type <- Other
+      )
 
     method private add_space () =
       pending_space <- true;
@@ -382,8 +388,8 @@ let builder =
 
     method private advance n = seen_chars <- seen_chars + n
 
-    method build_chunk_groups node =
-      this#reset ();
+    method build_chunk_groups env node =
+      this#reset env;
       this#consume_doc node;
       this#_end ()
 
@@ -412,7 +418,8 @@ let builder =
           end;
           seen_chars <- prev_seen + width
         | DocLiteral node ->
-          this#set_next_split_rule (RuleKind (Rule.Simple Cost.Base));
+          if not (Env.version_gte env 3) then
+            this#set_next_split_rule (RuleKind (Rule.Simple Cost.Base));
           this#consume_doc node;
           last_string_type <- DocStringClose
         | NumericLiteral node ->
@@ -485,7 +492,7 @@ let builder =
             this#add_string "," 1;
             this#advance (-1)
           );
-          last_string_type <- Other)
+          if not (Env.version_gte env 3) then last_string_type <- Other)
   end
 
-let build node = builder#build_chunk_groups node
+let build env node = builder#build_chunk_groups env node

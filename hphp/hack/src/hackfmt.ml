@@ -530,7 +530,7 @@ let debug_print ?range ?config text_source =
   let doc =
     Hack_format.transform env (SyntaxTransforms.editable_from_positioned tree)
   in
-  let chunk_groups = Chunk_builder.build doc in
+  let chunk_groups = Chunk_builder.build env doc in
   Hackfmt_debug.debug env ~range source_text doc chunk_groups
 
 let main

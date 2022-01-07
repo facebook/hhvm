@@ -2950,13 +2950,46 @@ and transform_argish
     if spaces then
       true
     else
+      let unwrap_list_item x =
+        match Syntax.syntax x with
+        | Syntax.ListItem { list_item; _ } -> list_item
+        | _ -> x
+      in
+      let is_doc_string_literal x =
+        let x = unwrap_list_item x in
+        match Syntax.syntax x with
+        | Syntax.LiteralExpression { literal_expression } ->
+          (match Syntax.syntax literal_expression with
+          | Syntax.Token t ->
+            (match Token.kind t with
+            | TokenKind.(HeredocStringLiteral | NowdocStringLiteral) -> true
+            | _ -> false)
+          | Syntax.SyntaxList (x :: _) ->
+            (match Syntax.syntax x with
+            | Syntax.Token t ->
+              (match Token.kind t with
+              | TokenKind.HeredocStringLiteralHead -> true
+              | _ -> false)
+            | _ -> false)
+          | _ -> false)
+        | _ -> false
+      in
+      let leading_trivia_is_all_whitespace x =
+        List.for_all (Syntax.leading_trivia x) ~f:(fun t ->
+            match Trivia.kind t with
+            | TriviaKind.WhiteSpace -> true
+            | _ -> false)
+      in
       match Syntax.syntax arg_list with
       | Syntax.SyntaxList [] -> true
       | Syntax.SyntaxList [x] ->
         let has_surrounding_whitespace =
           not
             (List.is_empty (Syntax.trailing_trivia left_p)
-            && List.is_empty (Syntax.trailing_trivia arg_list))
+            && (List.is_empty (Syntax.trailing_trivia arg_list)
+               || Env.version_gte env 3
+                  && is_doc_string_literal x
+                  && leading_trivia_is_all_whitespace right_p))
         in
         if has_surrounding_whitespace then
           true
@@ -2967,7 +3000,10 @@ and transform_argish
         let has_surrounding_whitespace =
           not
             (List.is_empty (Syntax.leading_trivia last)
-            && List.is_empty (Syntax.trailing_trivia last))
+            && (List.is_empty (Syntax.trailing_trivia arg_list)
+               || Env.version_gte env 3
+                  && is_doc_string_literal last
+                  && leading_trivia_is_all_whitespace right_p))
         in
         if has_surrounding_whitespace then
           true

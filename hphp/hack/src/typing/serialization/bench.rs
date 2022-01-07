@@ -6,7 +6,7 @@
 use std::{
     hash::Hasher,
     io::{BufRead, BufReader, ErrorKind, Read},
-    path::PathBuf,
+    path::{Path, PathBuf},
     process::{Child, Command, Stdio},
 };
 
@@ -50,6 +50,12 @@ struct Opts {
     /// Increase output (-v to print (de)serialized types, -v -v to print Hack errors)
     #[structopt(short, parse(from_occurrences))]
     verbosity: u8,
+
+    #[structopt(long)]
+    naming_table: Option<PathBuf>,
+
+    #[structopt(long)]
+    www_root: Option<PathBuf>,
 
     /// The (partial) list of input Hack files or directories to process
     /// (the rest is read from the standard input, for practical reasons)
@@ -107,8 +113,14 @@ fn ser_de(ctx: &mut Context, arena: &bumpalo::Bump) {
     }
 }
 
+fn path_to_str(path: &Path) -> &str {
+    path.to_str().expect("non-UTF8 input path")
+}
+
 fn main() {
     let opts = Opts::from_args();
+    let www_root = opts.www_root.as_ref().map(|p| path_to_str(p));
+    let naming_table = opts.naming_table.as_ref().map(|p| path_to_str(p));
     let job = |filepath| {
         let proc = {
             let mut cmd = Command::new(&opts.hh_single_type_check_path);
@@ -127,7 +139,12 @@ fn main() {
             .arg(&filepath)
             .stdin(Stdio::null())
             .stdout(Stdio::piped());
+            if let Some(naming_table) = naming_table {
+                cmd.arg("--naming-table").arg(naming_table);
+                cmd.arg("--root").arg(www_root.unwrap());
+            }
             if opts.dry_run {
+                eprintln!("DRY RUN: {:?}", cmd);
                 return (true, 0); // don't run a process
             }
             if opts.verbosity < 2 {
@@ -179,10 +196,9 @@ fn main() {
     let filepaths = {
         let (tx, rx) = std::sync::mpsc::channel();
         // avoid eager eval of for-loop to avoid hitting channel capacity
-        opts.paths.iter().for_each(|path| {
-            tx.send(path.to_str().expect("non-UTF8 input path").to_owned())
-                .unwrap()
-        });
+        opts.paths
+            .iter()
+            .for_each(|path| tx.send(path_to_str(path).to_owned()).unwrap());
         // note: this is specially important here because of huge input
         std::io::stdin()
             .lock()

@@ -42,24 +42,37 @@ let negate_type env r ty ~approx =
   in
   (env, neg_ty)
 
-(** Decompose types as union of "atomic" elements.
-In this context, "atomic" means: which can't be broken down in a union of smaller
-types.
-For now, only break Toption. We might also break down things like num or arraykey
-in the future if necessary. Inverted by recompose_atomic. *)
-let decompose_atomic env ty =
-  let rec decompose_list tyl acc_tyl =
-    match tyl with
-    | [] -> acc_tyl
-    | ty :: tyl -> decompose ty tyl acc_tyl
-  and decompose ty tyl acc_tyl =
+(** Decompose nullable types into unions with null
+
+      decompose_nullable ?A = null | A
+      decompose_nullable ?(A | ?B) = null | A | B
+
+    The implementation has the side-effect of flattening unions if the type is
+    nullable, e.g.,
+
+      decompose_optional ?(A | (B | C)) = null | A | B | C
+  *)
+let decompose_nullable ty =
+  let rec has_option (ty : 'a ty) : bool =
     match deref ty with
-    | (r, Toption ty) -> decompose_list (ty :: tyl) (MkType.null r :: acc_tyl)
-    | _ -> decompose_list tyl (ty :: acc_tyl)
+    | (_, Toption _) -> true
+    | (_, Tunion tyl) -> List.exists ~f:has_option tyl
+    | _ -> false
   in
-  let tyl = decompose ty [] [] in
-  let tyl = TySet.elements (TySet.of_list tyl) in
-  (env, MkType.union (get_reason ty) tyl)
+  let rec peel (ty_acc : 'a ty list) (ty : 'a ty) : 'a ty list =
+    match deref ty with
+    | (_, Toption ty) -> peel ty_acc ty
+    | (_, Tunion tyl) -> List.fold ~init:ty_acc ~f:peel tyl
+    | _ -> ty :: ty_acc
+  in
+  if has_option ty then
+    let r = get_reason ty in
+    let null_ty = MkType.null r in
+    let tyl = peel [null_ty] ty in
+    let tyl = TySet.elements (TySet.of_list tyl) in
+    MkType.union r tyl
+  else
+    ty
 
 (** Build a union from a list of types. Flatten if any of the types themselves are union.
     Also, pull nullable out to a top-level Toption. Undoes decompose atomic.
@@ -150,8 +163,8 @@ let rec intersect env ~r ty1 ty2 =
       Typing_log.log_intersection ~level:2 env r ty1 ty2 ~inter_ty;
       (env, inter_ty)
     ) else
-      let (env, ty1) = decompose_atomic env ty1 in
-      let (env, ty2) = decompose_atomic env ty2 in
+      let ty1 = decompose_nullable ty1 in
+      let ty2 = decompose_nullable ty2 in
       let (env, inter_ty) =
         try
           match (deref ty1, deref ty2) with

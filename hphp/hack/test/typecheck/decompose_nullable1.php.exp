@@ -1,0 +1,36 @@
+File "decompose_nullable1.php", line 13, characters 32-33:
+Typing error (Typing[4064])
+  File "decompose_nullable1.php", line 13, characters 36-36:
+  You are trying to access the property `i` but this object can be null.
+  File "decompose_nullable1.php", line 13, characters 16-17:
+  This can be null
+File "decompose_nullable1.php", line 14, characters 32-33:
+Typing error (Typing[4064])
+  File "decompose_nullable1.php", line 14, characters 36-36:
+  You are trying to access the property `i` but this object can be null.
+  File "decompose_nullable1.php", line 14, characters 16-17:
+  This can be null
+File "decompose_nullable1.php", line 15, characters 38-39:
+Typing error (Typing[4064])
+  File "decompose_nullable1.php", line 15, characters 42-42:
+  You are trying to access the property `i` but this object can be null.
+  File "decompose_nullable1.php", line 15, characters 17-18:
+  This can be null
+File "decompose_nullable1.php", line 16, characters 44-45:
+Typing error (Typing[4064])
+  File "decompose_nullable1.php", line 16, characters 48-48:
+  You are trying to access the property `i` but this object can be null.
+  File "decompose_nullable1.php", line 16, characters 17-18:
+  This can be null
+File "decompose_nullable1.php", line 17, characters 51-52:
+Typing error (Typing[4064])
+  File "decompose_nullable1.php", line 17, characters 55-55:
+  You are trying to access the property `i` but this object can be null.
+  File "decompose_nullable1.php", line 17, characters 17-18:
+  This can be null
+File "decompose_nullable1.php", line 18, characters 45-46:
+Typing error (Typing[4064])
+  File "decompose_nullable1.php", line 18, characters 49-49:
+  You are trying to access the property `i` but this object can be null.
+  File "decompose_nullable1.php", line 18, characters 17-18:
+  This can be null

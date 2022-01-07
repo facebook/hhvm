@@ -468,8 +468,6 @@ module Flags = struct
 
   let get_fp_ifc_can_call fp = is_set fp.fp_flags fp_flags_ifc_can_call
 
-  let get_fp_via_label fp = is_set fp.fp_flags fp_flags_via_label
-
   let get_fp_readonly fp = is_set fp.fp_flags fp_flags_readonly
 
   let fun_kind_to_flags kind =
@@ -505,14 +503,12 @@ module Flags = struct
       ~has_default
       ~ifc_external
       ~ifc_can_call
-      ~via_label
       ~readonly =
     let flags = mode_to_flags mode in
     let flags = set_bit fp_flags_accept_disposable accept_disposable flags in
     let flags = set_bit fp_flags_has_default has_default flags in
     let flags = set_bit fp_flags_ifc_external ifc_external flags in
     let flags = set_bit fp_flags_ifc_can_call ifc_can_call flags in
-    let flags = set_bit fp_flags_via_label via_label flags in
     let flags = set_bit fp_flags_readonly readonly flags in
     flags
 
@@ -905,11 +901,6 @@ module Pp = struct
 
       Format.fprintf fmt "@[~%s:" "ifc_can_call";
       Format.fprintf fmt "%B" (get_fp_ifc_can_call fp);
-      Format.fprintf fmt "@]";
-      Format.fprintf fmt "@ ";
-
-      Format.fprintf fmt "@[~%s:" "via_label";
-      Format.fprintf fmt "%B" (get_fp_via_label fp);
       Format.fprintf fmt "@]";
       Format.fprintf fmt "@ ";
 

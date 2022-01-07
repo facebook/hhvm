@@ -938,7 +938,6 @@ dependencies = [
  "ast_class_expr",
  "ast_scope",
  "bitflags",
- "bstr",
  "bumpalo",
  "bytecode_printer",
  "decl_vars",
@@ -1243,8 +1242,6 @@ dependencies = [
  "instruction_sequence",
  "label",
  "local",
- "naming_special_names_rust",
- "options",
  "oxidized",
 ]
 
@@ -2715,7 +2712,6 @@ dependencies = [
  "bumpalo",
  "itertools 0.10.3",
  "line_break_map",
- "naming_special_names_rust",
  "ocaml_helper",
  "ocamlrep",
  "ocamlrep_derive",

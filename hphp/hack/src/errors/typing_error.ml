@@ -355,10 +355,6 @@ module Primary = struct
           class_name: string;
         }
       | Enum_class_label_as_expr of Pos.t
-      | Enum_class_label_invalid_argument of {
-          pos: Pos.t;
-          is_proj: bool;
-        }
       | Enum_class_label_member_mismatch of {
           pos: Pos.t;
           label: string;
@@ -483,17 +479,6 @@ module Primary = struct
       in
       (Error_code.EnumClassLabelAsExpression, claim, [], [])
 
-    let enum_class_label_invalid_argument pos is_proj =
-      let msg =
-        "An enum class label is required here"
-        ^
-        if is_proj then
-          ", not a class constant projection."
-        else
-          "."
-      in
-      (Error_code.EnumClassLabelInvalidArgument, (pos, msg), [], [])
-
     let incompatible_enum_inclusion_base pos classish_name src_classish_name =
       let claim =
         ( pos,
@@ -562,8 +547,6 @@ module Primary = struct
       | Enum_class_label_unknown { pos; label_name; class_name } ->
         enum_class_label_unknown pos label_name class_name
       | Enum_class_label_as_expr pos -> enum_class_label_as_expr pos
-      | Enum_class_label_invalid_argument { pos; is_proj } ->
-        enum_class_label_invalid_argument pos is_proj
       | Enum_class_label_member_mismatch { pos; label; expected_ty_msg_opt } ->
         enum_class_label_member_mismatch pos label expected_ty_msg_opt
       | Incompatible_enum_inclusion_base
@@ -1082,16 +1065,6 @@ module Primary = struct
           with_value_pos: Pos.t;
           without_value_pos_opt: Pos.t option;
         }
-      | Fn_ptr_with_via_label of {
-          pos: Pos.t;
-          decl_pos: Pos_or_decl.t;
-        }
-      | Via_label_invalid_param of Pos.t
-      | Via_label_invalid_param_in_enum_class of Pos.t
-      | Via_label_invalid_generic of {
-          pos: Pos.t;
-          name: string;
-        }
       | Missing_assign of Pos.t
       | Non_void_annotation_on_return_void_function of {
           pos: Pos.t;
@@ -1136,48 +1109,6 @@ module Primary = struct
       in
       (Error_code.ReturnsWithAndWithoutValue, claim, reason, [])
 
-    let fn_ptr_with_via_label pos decl_pos =
-      let via_label = Naming_special_names.UserAttributes.uaViaLabel in
-      let claim =
-        ( pos,
-          "Function pointer on functions/methods using "
-          ^ via_label
-          ^ " is not supported." )
-      and reason = [(decl_pos, via_label ^ " is used here.")] in
-      (Error_code.FunctionPointerWithViaLabel, claim, reason, [])
-
-    let via_label_invalid_param pos =
-      let claim =
-        ( pos,
-          "Attribute "
-          ^ Naming_special_names.UserAttributes.uaViaLabel
-          ^ " is only allowed on "
-          ^ Naming_special_names.Classes.cMemberOf )
-      in
-      (Error_code.ViaLabelInvalidParameter, claim, [], [])
-
-    let via_label_invalid_param_in_enum_class pos =
-      let claim =
-        ( pos,
-          "When using "
-          ^ Naming_special_names.UserAttributes.uaViaLabel
-          ^ ", only type parameters bounded by enum classes and "
-          ^ "enum classes are allowed as the first parameters of "
-          ^ Naming_special_names.Classes.cMemberOf )
-      in
-      (Error_code.ViaLabelInvalidParameter, claim, [], [])
-
-    let via_label_invalid_generic pos name =
-      let claim =
-        ( pos,
-          "The type "
-          ^ name
-          ^ " must be a type constant or a reified generic "
-          ^ "in order to be used with "
-          ^ Naming_special_names.UserAttributes.uaViaLabel )
-      in
-      (Error_code.ViaLabelInvalidParameter, claim, [], [])
-
     let missing_assign pos =
       (Error_code.MissingAssign, (pos, "Please assign a value"), [], [])
 
@@ -1210,13 +1141,6 @@ module Primary = struct
       | Returns_with_and_without_value
           { pos; with_value_pos; without_value_pos_opt } ->
         returns_with_and_without_value pos with_value_pos without_value_pos_opt
-      | Fn_ptr_with_via_label { pos; decl_pos } ->
-        fn_ptr_with_via_label pos decl_pos
-      | Via_label_invalid_param pos -> via_label_invalid_param pos
-      | Via_label_invalid_param_in_enum_class pos ->
-        via_label_invalid_param_in_enum_class pos
-      | Via_label_invalid_generic { pos; name } ->
-        via_label_invalid_generic pos name
       | Missing_assign pos -> missing_assign pos
       | Non_void_annotation_on_return_void_function { pos; is_async } ->
         non_void_annotation_on_return_void_function is_async pos

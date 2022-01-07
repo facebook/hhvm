@@ -401,8 +401,6 @@ module Flags : sig
 
   val get_fp_ifc_external : 'a fun_param -> bool
 
-  val get_fp_via_label : 'a fun_param -> bool
-
   val get_fp_readonly : 'a fun_param -> bool
 
   val fun_kind_to_flags : Ast_defs.fun_kind -> Hh_prelude.Int.t
@@ -423,7 +421,6 @@ module Flags : sig
     has_default:bool ->
     ifc_external:bool ->
     ifc_can_call:bool ->
-    via_label:bool ->
     readonly:bool ->
     Hh_prelude.Int.t
 

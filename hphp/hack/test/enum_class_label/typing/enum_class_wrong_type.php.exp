@@ -1,6 +1,0 @@
-File "enum_class_wrong_type.php", line 4, characters 26-28:
-Attribute __ViaLabel is only allowed on \HH\MemberOf (Typing[4395])
-File "enum_class_wrong_type.php", line 5, characters 26-31:
-Attribute __ViaLabel is only allowed on \HH\MemberOf (Typing[4395])
-File "enum_class_wrong_type.php", line 9, characters 26-26:
-Attribute __ViaLabel is only allowed on \HH\MemberOf (Typing[4395])

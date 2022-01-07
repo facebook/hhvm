@@ -8109,8 +8109,7 @@ and call
               (* To avoid ambiguity, we only support the case where
                * there is a single upper bound that is an EnumClass.
                * We might want to relax that later (e.g. with  the
-               * support for intersections.
-               * See Typing_type_wellformedness.check_via_label_on_param.
+               * support for intersections).
                *)
               begin
                 match get_node upper_bound with
@@ -8151,11 +8150,8 @@ and call
       let check_arg env param_kind ((_, pos, arg) as e) opt_param ~is_variadic =
         match opt_param with
         | Some param ->
-          (* First check if __ViaLabel is used or if the parameter is
-           * a HH\Label.
-           *)
+          (* First check if the parameter is a HH\EnumClass\Label.  *)
           let (env, label_type) =
-            let via_label = get_fp_via_label param in
             let ety = param.fp_type.et_type in
             let (env, ety) = Env.expand_type env ety in
             let is_label =
@@ -8165,7 +8161,7 @@ and call
               | _ -> false
             in
             match arg with
-            | EnumClassLabel (None, label_name) when via_label || is_label ->
+            | EnumClassLabel (None, label_name) when is_label ->
               (match get_node ety with
               | Tnewtype (name, [ty_enum; _ty_interface], _)
                 when String.equal name SN.Classes.cMemberOf
@@ -8187,20 +8183,6 @@ and call
             | EnumClassLabel (Some _, _) ->
               (* Full info is here, use normal inference *)
               (env, EnumClassLabelOps.Skip)
-            | Class_const _ when via_label ->
-              Errors.add_typing_error
-                Typing_error.(
-                  enum
-                  @@ Primary.Enum.Enum_class_label_invalid_argument
-                       { pos; is_proj = true });
-              (env, EnumClassLabelOps.Invalid)
-            | _ when via_label ->
-              Errors.add_typing_error
-                Typing_error.(
-                  enum
-                  @@ Primary.Enum.Enum_class_label_invalid_argument
-                       { pos; is_proj = false });
-              (env, EnumClassLabelOps.Invalid)
             | _ -> (env, EnumClassLabelOps.Skip)
           in
           let (env, te, ty) =
@@ -8488,7 +8470,6 @@ and call
               ~has_default:false
               ~ifc_external:false
               ~ifc_can_call:false
-              ~via_label:false
               ~readonly:false
           in
           {

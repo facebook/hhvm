@@ -75,7 +75,7 @@ module Codes = struct
 
   let bool_method_return_hint = 5631
 
-  let missing_via_label_attribute = 5632
+  (* let deprecated_missing_via_label_attribute = 5632 *)
 
   let nullsafe_not_needed = 5633
 

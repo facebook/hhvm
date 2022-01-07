@@ -8,33 +8,11 @@
  *)
 
 open Hh_prelude
-open Aast
-open Typing_defs
 module Env = Tast_env
 
 let handler =
   object
     inherit Tast_visitor.handler_base
-
-    method! at_expr env expr =
-      let _ctx = Env.get_ctx env in
-      let (ty, pos, expr_) = expr in
-      match (expr_, get_node ty) with
-      | (FunctionPointer _, Tfun fun_ty) ->
-        let params = fun_ty.ft_params in
-        let err_opt =
-          Option.map ~f:(fun Typing_defs.{ fp_pos = decl_pos; _ } ->
-              Typing_error.(
-                wellformedness
-                @@ Primary.Wellformedness.Fn_ptr_with_via_label
-                     { pos; decl_pos }))
-          @@ List.find
-               ~f:(fun fp ->
-                 Typing_defs_flags.(is_set fp_flags_via_label fp.fp_flags))
-               params
-        in
-        Option.iter err_opt ~f:(fun err -> Errors.add_typing_error err)
-      | _ -> ()
 
     method! at_class_ env c =
       let tcopt = Env.get_tcopt env in

@@ -39,7 +39,7 @@
                    fp_flags =
                    (make_fp_flags ~accept_disposable:false ~has_default:false
                      ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                     ~ifc_can_call:false ~via_label:false ~readonly:false);
+                     ~ifc_can_call:false ~readonly:false);
                     };
                   { fp_pos = [4:35-37]; fp_name = (Some "$c");
                     fp_type =
@@ -49,7 +49,7 @@
                     (make_fp_flags ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal
                       ~ifc_external:false ~ifc_can_call:false
-                      ~via_label:false ~readonly:false);
+                      ~readonly:false);
                      }
                   ];
                 ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
@@ -89,7 +89,7 @@
                     (make_fp_flags ~accept_disposable:false
                       ~has_default:false ~mode:Typing_defs_core.FPnormal
                       ~ifc_external:false ~ifc_can_call:false
-                      ~via_label:false ~readonly:false);
+                      ~readonly:false);
                      };
                    { fp_pos = [8:35-37]; fp_name = (Some "$d");
                      fp_type =
@@ -99,7 +99,7 @@
                      (make_fp_flags ~accept_disposable:false
                        ~has_default:false ~mode:Typing_defs_core.FPnormal
                        ~ifc_external:false ~ifc_can_call:false
-                       ~via_label:false ~readonly:false);
+                       ~readonly:false);
                       }
                    ];
                  ft_implicit_params =

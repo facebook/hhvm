@@ -1005,7 +1005,6 @@ struct Attributes<'a> {
     ifc_attribute: IfcFunDecl<'a>,
     external: bool,
     can_call: bool,
-    via_label: bool,
     soft: bool,
     support_dynamic_type: bool,
     module: Option<Id<'a>>,
@@ -1392,7 +1391,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             ifc_attribute: default_ifc_fun_decl(),
             external: false,
             can_call: false,
-            via_label: false,
             soft: false,
             support_dynamic_type: false,
             module: self.module,
@@ -1472,9 +1470,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     }
                     "__CanCall" => {
                         attributes.can_call = true;
-                    }
-                    naming_special_names::user_attributes::VIA_LABEL => {
-                        attributes.via_label = true;
                     }
                     "__Soft" => {
                         attributes.soft = true;
@@ -1771,9 +1766,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                             }
                             if attributes.can_call {
                                 flags |= FunParamFlags::IFC_CAN_CALL
-                            }
-                            if attributes.via_label {
-                                flags |= FunParamFlags::VIA_LABEL
                             }
                             if readonly {
                                 flags |= FunParamFlags::READONLY

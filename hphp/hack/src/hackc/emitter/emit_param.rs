@@ -13,7 +13,6 @@ use hhbc_string_utils::locals::strip_dollar;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
 use local::Local;
-use options::LangFlags;
 use oxidized::{
     aast_defs::{Hint, Hint_},
     aast_visitor::{self, AstParams, Node},
@@ -21,8 +20,6 @@ use oxidized::{
     ast_defs::{Id, ReadonlyKind},
     pos::Pos,
 };
-
-use naming_special_names_rust::user_attributes as ua;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::marker::PhantomData;
@@ -113,23 +110,6 @@ fn from_ast<'a, 'arena, 'decl>(
                         .get_hint()
                         .as_ref()
                         .map_or(vec![], |h| vec![h.clone()]),
-                )),
-            ))
-        } else if emitter
-            .options()
-            .hhvm
-            .hack_lang
-            .flags
-            .contains(LangFlags::ENABLE_ENUM_CLASSES)
-            && param.user_attributes.iter().any(|a| match &a.name {
-                Id(_, s) => s == ua::VIA_LABEL,
-            })
-        {
-            Some(Hint(
-                Pos::make_none(),
-                Box::new(Hint_::mk_happly(
-                    Id(Pos::make_none(), "HH\\string".to_string()),
-                    vec![],
                 )),
             ))
         } else {

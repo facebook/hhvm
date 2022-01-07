@@ -1,5 +1,5 @@
 <?hh //strict
-<<file: __EnableUnstableFeatures('enum_class_label')>>
+
 function testing_area(): void {
 
 }
@@ -28,10 +28,5 @@ function call_lambda(int $n, (function(int): int) $param): void {
 }
 function testing_area_for_lambdas(): void {
   $mylambda = ($n) ==> $n * 5;
-
-}
-
-function call_via_label<T>(<<__ViaLabel>> HH\MemberOf<MyEnumClass, T> $m): void {}
-function testing_area_for_enum_via_label(): void {
 
 }

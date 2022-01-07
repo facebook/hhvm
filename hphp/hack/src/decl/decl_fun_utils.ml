@@ -39,9 +39,6 @@ let has_external_attribute user_attributes =
 let has_can_call_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaCanCall user_attributes
 
-let has_via_label_attribute user_attributes =
-  Naming_attributes.mem SN.UserAttributes.uaViaLabel user_attributes
-
 let has_return_disposable_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaReturnDisposable user_attributes
 
@@ -164,7 +161,6 @@ let make_param_ty env ~is_lambda param =
         ~has_default:(Option.is_some param.param_expr)
         ~ifc_external:(has_external_attribute param.param_user_attributes)
         ~ifc_can_call:(has_can_call_attribute param.param_user_attributes)
-        ~via_label:(has_via_label_attribute param.param_user_attributes)
         ~readonly:(Option.is_some param.param_readonly);
   }
 

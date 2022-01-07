@@ -613,7 +613,6 @@ let default_fun_param ?(pos = Pos_or_decl.none) ty : 'a fun_param =
         ~has_default:false
         ~ifc_external:false
         ~ifc_can_call:false
-        ~via_label:false
         ~readonly:false;
   }
 

@@ -1868,69 +1868,6 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .notification(
-                comment="Add 'call_via_label#'",
-                method="textDocument/didChange",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "contentChanges": [
-                        {
-                            "range": {
-                                "start": {"line": 35, "character": 0},
-                                "end": {"line": 35, "character": 0},
-                            },
-                            "text": "  call_via_label#",
-                        }
-                    ],
-                },
-            )
-            .request(
-                line=line(),
-                comment="autocomplete results for 'call_via_label#'",
-                method="textDocument/completion",
-                params={
-                    "textDocument": {"uri": "${php_file_uri}"},
-                    "position": {"line": 35, "character": 17},
-                },
-                result={
-                    "isIncomplete": False,
-                    "items": [
-                        {
-                            "label": "First",
-                            "kind": 21,
-                            "detail": "HH\\MemberOf<MyEnumClass, MyEnumClassKind>",
-                            "inlineDetail": "HH\\MemberOf<MyEnumClass, MyEnumClassKind>",
-                            "sortText": "First",
-                            "insertText": "First",
-                            "insertTextFormat": 1,
-                            "data": {
-                                "fullname": "First",
-                                "filename": "${root_path}/definition.php",
-                                "line": 51,
-                                "char": 19,
-                                "base_class": "\\MyEnumClass",
-                            },
-                        },
-                        {
-                            "label": "Second",
-                            "kind": 21,
-                            "detail": "HH\\MemberOf<MyEnumClass, MyEnumClassKind>",
-                            "inlineDetail": "HH\\MemberOf<MyEnumClass, MyEnumClassKind>",
-                            "sortText": "Second",
-                            "insertText": "Second",
-                            "insertTextFormat": 1,
-                            "data": {
-                                "fullname": "Second",
-                                "filename": "${root_path}/definition.php",
-                                "line": 52,
-                                "char": 19,
-                                "base_class": "\\MyEnumClass",
-                            },
-                        },
-                    ],
-                },
-                powered_by="serverless_ide",
-            )
-            .notification(
                 comment="Add '<xhp:enum-attribute enum-attribute={}'",
                 method="textDocument/didChange",
                 params={

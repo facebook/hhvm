@@ -220,17 +220,6 @@ let missing_override_attribute p ~class_name ~method_name =
   in
   Lints.add Codes.missing_override_attribute Lint_error p @@ msg
 
-let missing_via_label_attribute p ~class_name ~method_name =
-  let msg =
-    Printf.sprintf
-      "Method %s is also defined on %s, but its first parameter is missing
-      `<<%s>>`."
-      (Markdown_lite.md_codify method_name)
-      (Utils.strip_ns class_name |> Markdown_lite.md_codify)
-      Naming_special_names.UserAttributes.uaViaLabel
-  in
-  Lints.add Codes.missing_via_label_attribute Lint_error p @@ msg
-
 let sketchy_null_check pos name kind =
   let name = Option.value name ~default:"$x" in
   Lints.add Codes.sketchy_null_check Lint_warning pos

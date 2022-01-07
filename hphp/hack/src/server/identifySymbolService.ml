@@ -254,9 +254,6 @@ let visitor =
               ~is_method:true
               ~is_const:false
         | Aast.EnumClassLabel (enum_name, label_name) ->
-          (* We currently only support labels, not HH\Members using
-           * __ViaLabel. TODO(T86724606)
-           *)
           begin
             match enum_name with
             | None ->
@@ -269,7 +266,6 @@ let visitor =
                 | Tgeneric (enum_class_name, _) ->
                   Result_set.singleton
                     {
-                      (* TODO(T86724606) use "::" for __ViaLabel *)
                       name = Utils.strip_ns enum_class_name ^ "#" ^ label_name;
                       type_ = EnumClassLabel (enum_class_name, label_name);
                       is_declaration = false;

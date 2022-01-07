@@ -113,10 +113,6 @@ module Primary : sig
           class_name: string;
         }
       | Enum_class_label_as_expr of Pos.t
-      | Enum_class_label_invalid_argument of {
-          pos: Pos.t;
-          is_proj: bool;
-        }
       | Enum_class_label_member_mismatch of {
           pos: Pos.t;
           label: string;
@@ -275,16 +271,6 @@ module Primary : sig
           pos: Pos.t;
           with_value_pos: Pos.t;
           without_value_pos_opt: Pos.t option;
-        }
-      | Fn_ptr_with_via_label of {
-          pos: Pos.t;
-          decl_pos: Pos_or_decl.t;
-        }
-      | Via_label_invalid_param of Pos.t
-      | Via_label_invalid_param_in_enum_class of Pos.t
-      | Via_label_invalid_generic of {
-          pos: Pos.t;
-          name: string;
         }
       | Missing_assign of Pos.t
       | Non_void_annotation_on_return_void_function of {

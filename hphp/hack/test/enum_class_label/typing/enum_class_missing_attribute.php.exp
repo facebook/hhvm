@@ -1,6 +1,0 @@
-File "enum_class_missing_attribute.php", line 14, characters 5-6:
-Enum class label/member mismatch (Typing[4110])
-  File "enum_class_missing_attribute.php", line 8, characters 12-30:
-  Expected a value of type HH\MemberOf<E, int>
-  File "enum_class_missing_attribute.php", line 14, characters 5-6:
-  But got an enum class label: `#A`

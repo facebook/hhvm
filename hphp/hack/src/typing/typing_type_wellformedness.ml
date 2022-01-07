@@ -28,90 +28,6 @@ type env = {
   tenv: Typing_env_types.env;
 }
 
-(* Check if the __ViaLabel attributes is on the parameter. If that's the case,
- * we check that it is only involving an enum class or a generic
- *)
-let check_via_label_on_param env pos dty lty =
-  (* If lty is HH\MemberOf<Foo, Bar>, we need to check that Foo is
-   * - an enum class
-   * - a generic
-   *
-   * If it is a generic, we need to check that it is
-   * - a reified generic
-   * - a type constant
-   *
-   * in both cases, it must be bounded by an enum class
-   *
-   * In all cases, we check that the requested label is part of the
-   * detected enum class.
-   *)
-  let check_tgeneric name =
-    let is_taccess_this =
-      match get_node dty with
-      | Tapply ((_, _name), [ty_enum; _ty_interface]) ->
-        (match get_node ty_enum with
-        | Taccess (dty, _) ->
-          (match get_node dty with
-          | Tthis -> true
-          | _ -> false)
-        | _ -> false)
-      | _ -> assert false
-      (* we just checked that *)
-    in
-    let is_reified =
-      match Env.get_reified env name with
-      | Erased -> false
-      | Reified
-      | SoftReified ->
-        true
-    in
-    if is_taccess_this || is_reified then
-      ()
-    else
-      Errors.add_typing_error
-        Typing_error.(
-          wellformedness
-          @@ Primary.Wellformedness.Via_label_invalid_generic { pos; name })
-  in
-  match get_node lty with
-  | Tnewtype (name, [ty_enum; _ty_interface], _)
-    when String.equal name SN.Classes.cMemberOf ->
-    (match get_node ty_enum with
-    | Tclass ((_, enum_name), _, _) when Env.is_enum_class env enum_name -> env
-    | Tgeneric (name, _) ->
-      let () = check_tgeneric name in
-      let (env, upper_bounds) =
-        Typing_utils.collect_enum_class_upper_bounds env name
-      in
-      let err =
-        Typing_error.(
-          wellformedness
-          @@ Primary.Wellformedness.Via_label_invalid_param_in_enum_class pos)
-      in
-      let () =
-        match upper_bounds with
-        | Some upper_bound ->
-          if Typing_utils.is_tintersection env upper_bound then
-            Errors.add_typing_error err
-        | None -> Errors.add_typing_error err
-      in
-      env
-    | _ ->
-      let err =
-        Typing_error.(
-          wellformedness
-          @@ Primary.Wellformedness.Via_label_invalid_param_in_enum_class pos)
-      in
-      let () = Errors.add_typing_error err in
-      env)
-  | _ ->
-    let err =
-      Typing_error.(
-        wellformedness @@ Primary.Wellformedness.Via_label_invalid_param pos)
-    in
-    let () = Errors.add_typing_error err in
-    env
-
 let check_tparams_constraints env use_pos tparams targs =
   let ety_env : expand_env =
     { empty_expand_env with substs = Subst.make_locl tparams targs }
@@ -119,7 +35,7 @@ let check_tparams_constraints env use_pos tparams targs =
   Typing_phase.check_tparams_constraints ~use_pos ~ety_env env tparams
 
 (** Mostly check constraints on type parameters. *)
-let check_happly ?(via_label = false) unchecked_tparams env h =
+let check_happly unchecked_tparams env h =
   let hint_pos = fst h in
   let decl_ty = Decl_hint.hint env.decl_env h in
   let unchecked_tparams =
@@ -135,12 +51,6 @@ let check_happly ?(via_label = false) unchecked_tparams env h =
   let decl_ty = Inst.instantiate subst decl_ty in
   let ety_env = { empty_expand_env with expand_visible_newtype = false } in
   let (env, locl_ty) = Phase.localize env ~ety_env decl_ty in
-  let env =
-    if via_label then
-      check_via_label_on_param env hint_pos decl_ty locl_ty
-    else
-      env
-  in
   match get_node locl_ty with
   | Tnewtype (type_name, targs, _cstr_ty) ->
     (match Env.get_typedef env type_name with
@@ -156,27 +66,15 @@ let check_happly ?(via_label = false) unchecked_tparams env h =
       | None -> env)
     | _ -> env)
 
-let rec context_hint ?(via_label = false) ?(in_signature = true) env (p, h) =
+let rec context_hint ?(in_signature = true) env (p, h) =
   Typing_kinding.Simple.check_well_kinded_context_hint
     ~in_signature
     env.tenv
     (p, h);
-  hint_ ~via_label ~in_signature env p h
+  hint_ ~in_signature env p h
 
-and hint_ ~via_label ~in_signature env p h_ =
-  let hint env (p, h) = hint_ ~via_label:false ~in_signature env p h in
-  let () =
-    if via_label then
-      (* __ViaLabel is only allowed on HH\MemberOf, so we check everything that
-       * is not a class with this, and make a more refined check for Happly
-       *)
-      match h_ with
-      | Happly _ -> () (* checked in check_happly *)
-      | _ ->
-        Errors.add_typing_error
-          Typing_error.(
-            wellformedness @@ Primary.Wellformedness.Via_label_invalid_param p)
-  in
+and hint_ ~in_signature env p h_ =
+  let hint env (p, h) = hint_ ~in_signature env p h in
   match h_ with
   | Hany
   | Herr
@@ -237,12 +135,12 @@ and hint_ ~via_label ~in_signature env p h_ =
       | None -> ()
       | Some (Env.TypedefResult _) ->
         let (_ : Typing_env_types.env) =
-          check_happly ~via_label env.typedef_tparams env.tenv (p, h)
+          check_happly env.typedef_tparams env.tenv (p, h)
         in
         List.iter hl ~f:(hint env)
       | Some (Env.ClassResult _) ->
         let (_ : Typing_env_types.env) =
-          check_happly ~via_label env.typedef_tparams env.tenv (p, h)
+          check_happly env.typedef_tparams env.tenv (p, h)
         in
         List.iter hl ~f:(hint env)
     end
@@ -258,21 +156,14 @@ and hint_ ~via_label ~in_signature env p h_ =
 
 and contexts env (_, hl) = List.iter ~f:(context_hint env) hl
 
-let hint ?(via_label = false) ?(in_signature = true) env (p, h) =
+let hint ?(in_signature = true) env (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
   Typing_kinding.Simple.check_well_kinded_hint ~in_signature env.tenv (p, h);
-  hint_ ~via_label ~in_signature env p h
+  hint_ ~in_signature env p h
 
-let type_hint ?via_label env th =
-  maybe (hint ?via_label) env (hint_of_type_hint th)
+let type_hint env th = maybe hint env (hint_of_type_hint th)
 
-let fun_param env param =
-  let via_label =
-    Naming_attributes.mem
-      SN.UserAttributes.uaViaLabel
-      param.param_user_attributes
-  in
-  type_hint ~via_label env param.param_type_hint
+let fun_param env param = type_hint env param.param_type_hint
 
 let variadic_param env vparam =
   match vparam with
@@ -349,8 +240,7 @@ let method_ env m =
   List.iter m.m_where_constraints ~f:(where_constr env);
   type_hint env m.m_ret
 
-let hint_no_kind_check env (p, h) =
-  hint_ ~via_label:false ~in_signature:true env p h
+let hint_no_kind_check env (p, h) = hint_ ~in_signature:true env p h
 
 let class_attr env = function
   | CA_name _ -> ()
@@ -506,7 +396,7 @@ let global_constant tenv gconst =
 
 let hint tenv h =
   let env = { typedef_tparams = []; tenv } in
-  hint ~via_label:false ~in_signature:false env h
+  hint ~in_signature:false env h
 
 (** Check well-formedness of type hints. See .mli file for more. *)
 let expr : Typing_env_types.env -> Nast.expr -> unit =

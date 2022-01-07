@@ -5505,9 +5505,6 @@ where
             OldAttributeSpecification(x) => {
                 let attributes = self.text(&x.attributes).split(',');
                 attributes.for_each(|attr| match attr.trim() {
-                    sn::user_attributes::VIA_LABEL => {
-                        self.check_can_use_feature(node, &UnstableFeatures::EnumClassLabel)
-                    }
                     sn::user_attributes::ENABLE_METHOD_TRAIT_DIAMOND => {
                         self.check_can_use_feature(node, &UnstableFeatures::MethodTraitDiamond)
                     }

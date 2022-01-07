@@ -40,7 +40,7 @@ bitflags! {
         const HAS_DEFAULT            = 1 << 2;
         const IFC_EXTERNAL           = 1 << 3;
         const IFC_CAN_CALL           = 1 << 4;
-        const VIA_LABEL              = 1 << 5;
+        // const VIA_LABEL_DEPRECATED              = 1 << 5;
 
         // These flags apply to the parameter type.
         const MUTABLE_FLAGS_OWNED    = 1 << 6;

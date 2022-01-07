@@ -9,37 +9,29 @@ mod try_finally_rewriter;
 use emit_statement::emit_final_stmts;
 use reified_generics_helpers as RGH;
 
-use aast::TypeHint;
-use aast_defs::{Hint, Hint_::*};
 use ast_body::AstBody;
 use ast_class_expr::ClassExpr;
 use ast_scope::{Scope, ScopeItem};
 use bytecode_printer::{print_expr, Context, ExprEnv};
-use emit_fatal::{emit_fatal_runtime, raise_fatal_parse};
 use emit_pos::emit_pos;
 use env::{emitter::Emitter, Env};
 use hash::HashSet;
 use hhas_body::{HhasBody, HhasBodyEnv};
 use hhas_param::HhasParam;
 use hhas_type::HhasTypeInfo;
-use hhbc_ast::{
-    ClassishKind, FcallArgs, FcallFlags, Instruct, IstypeOp, MemberKey, MemberOpMode, ParamId,
-    QueryOp, ReadonlyOp,
-};
+use hhbc_ast::{FcallArgs, FcallFlags, Instruct, IstypeOp, ParamId};
 use hhbc_id::function;
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{instr, unrecoverable, Error, InstrSeq, Result};
 use label::Label;
 use local::Local;
-use options::{CompilerFlags, LangFlags};
+use options::CompilerFlags;
 use runtime::TypedValue;
 use statement_state::StatementState;
 use unique_id_builder::*;
 
-use naming_special_names_rust::user_attributes as ua;
-
 use ocamlrep::rc::RcOc;
-use oxidized::{aast, aast_defs, ast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
+use oxidized::{aast, ast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
 
 use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
 
@@ -597,274 +589,6 @@ pub fn has_type_constraint<'a, 'arena>(
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// atom_helpers
-
-mod atom_helpers {
-    use crate::*;
-    use aast_defs::ReifyKind::Erased;
-    use ast::Tparam;
-    use ast_defs::Id;
-    use instruction_sequence::{instr, unrecoverable, InstrSeq, Result};
-    use local::Local::Named;
-
-    fn strip_ns(name: &str) -> &str {
-        match name.chars().next() {
-            Some('\\') => &name[1..],
-            _ => name,
-        }
-    }
-
-    pub fn is_generic(name: &str, tparams: &[Tparam]) -> bool {
-        tparams.iter().any(|t| match t.name {
-            Id(_, ref s) => s == self::strip_ns(name),
-        })
-    }
-
-    pub fn is_erased_generic(name: &str, tparams: &[Tparam]) -> bool {
-        tparams.iter().any(|t| match t.name {
-            Id(_, ref s) if s == self::strip_ns(name) => t.reified == Erased,
-            _ => false,
-        })
-    }
-
-    pub fn index_of_generic(tparams: &[Tparam], name: &str) -> Result<usize> {
-        match tparams.iter().enumerate().find_map(|(i, t)| match t.name {
-            Id(_, ref s) if s == self::strip_ns(name) => Some(i),
-            _ => None,
-        }) {
-            Some(u) => Ok(u),
-            None => Err(unrecoverable("Expected generic")),
-        }
-    }
-
-    pub fn emit_clscnsl<'arena>(
-        alloc: &'arena bumpalo::Bump,
-        param: &HhasParam<'arena>,
-        pos: &Pos,
-        cls_instrs: InstrSeq<'arena>,
-        msg: &str,
-        label_not_a_class: Label,
-        label_done: Label,
-    ) -> Result<InstrSeq<'arena>> {
-        let loc = Named(Str::new_str(alloc, param.name.unsafe_as_str()));
-        Ok(InstrSeq::gather(
-            alloc,
-            vec![
-                cls_instrs,
-                instr::classgetc(alloc),
-                instr::clscnsl(alloc, loc.clone()),
-                instr::popl(alloc, loc),
-                instr::jmp(alloc, label_done.clone()),
-                instr::label(alloc, label_not_a_class),
-                emit_fatal_runtime(alloc, &pos, msg),
-                instr::label(alloc, label_done),
-            ],
-        ))
-    }
-} //mod atom_helpers
-
-////////////////////////////////////////////////////////////////////////////////
-// atom_instrs
-
-fn atom_instrs<'a, 'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    env: &mut Env<'a, 'arena>,
-    param: &HhasParam<'arena>,
-    ast_param: &ast::FunParam,
-    tparams: &[ast::Tparam],
-) -> Result<Option<InstrSeq<'arena>>> {
-    let alloc = env.arena;
-    if !param
-        .user_attributes
-        .as_ref()
-        .iter()
-        .any(|a| a.is(|x| x == ua::VIA_LABEL))
-    {
-        return Ok(None); // Not an atom. Nothing to do.
-    }
-    match &ast_param.type_hint {
-        TypeHint(_, None) => Err(raise_fatal_parse(
-            &ast_param.pos,
-            ua::VIA_LABEL.to_owned() + " param type hint unavailable",
-        )),
-        TypeHint(_, Some(Hint(_, h))) => {
-            let label_done = emitter.label_gen_mut().next_regular();
-            let label_not_a_class = emitter.label_gen_mut().next_regular();
-            match &**h {
-                Happly(ast_defs::Id(_, ref ctor), vec) if ctor == "\\HH\\MemberOf" => {
-                    match &vec[..] {
-                        [hint, _] => {
-                            let Hint(_, e) = hint;
-                            match &**e {
-                                // Immediate type.
-                                Happly(ast_defs::Id(pos, ref tag), _) => {
-                                    if atom_helpers::is_erased_generic(tag, tparams) {
-                                        Err(raise_fatal_parse(
-                                            &pos,
-                                            "Erased generic as HH\\MemberOf enum type",
-                                        ))
-                                    } else {
-                                        if !atom_helpers::is_generic(tag, tparams) {
-                                            //'tag' is just a name.
-                                            Ok(Some(atom_helpers::emit_clscnsl(
-                                                alloc,
-                                                param,
-                                                &pos,
-                                                InstrSeq::gather(
-                                                    alloc,
-                                                    vec![
-                                                        emit_expression::emit_expr(
-                                                            emitter,
-                                                            env,
-                                                            &(ast::Expr(
-                                                                (),
-                                                                Pos::make_none(),
-                                                                aast::Expr_::String(
-                                                                    bstr::BString::from(
-                                                                        tag.to_owned(),
-                                                                    ),
-                                                                ),
-                                                            )),
-                                                        )?,
-                                                        emit_expression::emit_expr(
-                                                            emitter,
-                                                            env,
-                                                            &(ast::Expr(
-                                                                (),
-                                                                Pos::make_none(),
-                                                                aast::Expr_::True,
-                                                            )),
-                                                        )?,
-                                                        instr::oodeclexists(
-                                                            alloc,
-                                                            ClassishKind::Class,
-                                                        ),
-                                                        instr::jmpz(
-                                                            alloc,
-                                                            label_not_a_class.clone(),
-                                                        ),
-                                                        emit_expression::emit_expr(
-                                                            emitter,
-                                                            env,
-                                                            &(ast::Expr(
-                                                                (),
-                                                                Pos::make_none(),
-                                                                aast::Expr_::String(
-                                                                    bstr::BString::from(
-                                                                        tag.to_owned(),
-                                                                    ),
-                                                                ),
-                                                            )),
-                                                        )?,
-                                                    ],
-                                                ),
-                                                "Type is not a class",
-                                                label_not_a_class,
-                                                label_done,
-                                            )?))
-                                        } else {
-                                            //'tag' is a reified generic.
-                                            Ok(Some(atom_helpers::emit_clscnsl(
-                                                alloc,
-                                                param,
-                                                &pos,
-                                                InstrSeq::gather(
-                                                    alloc,
-                                                    vec![
-                                                    emit_expression::emit_reified_generic_instrs(
-                                                        alloc,
-                                                        &Pos::make_none(),
-                                                        true,
-                                                        atom_helpers::index_of_generic(
-                                                            tparams, tag,
-                                                        )?,
-                                                    )?,
-                                                    instr::basec(alloc, 0, MemberOpMode::ModeNone),
-                                                    instr::querym(
-                                                        alloc,
-                                                        1,
-                                                        QueryOp::CGetQuiet,
-                                                        MemberKey::ET(
-                                                            "classname".into(),
-                                                            ReadonlyOp::Any,
-                                                        ),
-                                                    ),
-                                                    instr::dup(alloc),
-                                                    instr::istypec(alloc, IstypeOp::OpNull),
-                                                    instr::jmpnz(alloc, label_not_a_class.clone()),
-                                                ],
-                                                ),
-                                                "Generic type parameter does not resolve to a class",
-                                                label_not_a_class,
-                                                label_done,
-                                            )?))
-                                        }
-                                    }
-                                }
-                                // Type constant.
-                                Haccess(Hint(_, h), _) => {
-                                    match &**h {
-                                        Happly(ast_defs::Id(pos, ref tag), _) => {
-                                            if atom_helpers::is_erased_generic(tag, tparams) {
-                                                Err(raise_fatal_parse(
-                                                    &pos,
-                                                    "Erased generic as HH\\MemberOf enum type",
-                                                ))
-                                            } else {
-                                                //'tag' is a type constant.
-                                                Ok(Some(atom_helpers::emit_clscnsl(
-                                                    alloc,
-                                                    param,
-                                                    &pos,
-                                                    InstrSeq::gather(alloc, vec![
-                                                        emit_expression::get_type_structure_for_hint(
-                                                            emitter,
-                                                            tparams
-                                                                .iter()
-                                                                .map(|fp| fp.name.1.as_str())
-                                                                .collect::<Vec<_>>()
-                                                                .as_slice(),
-                                                            &IndexSet::new(),
-                                                            hint,
-                                                        )?,
-                                                        instr::combine_and_resolve_type_struct(alloc, 1),
-                                                        instr::basec(alloc, 0, MemberOpMode::ModeNone),
-                                                        instr::querym(alloc, 1, QueryOp::CGetQuiet, MemberKey::ET(Str::from("classname"), ReadonlyOp::Any)),
-                                                        instr::dup(alloc),
-                                                        instr::istypec(alloc, IstypeOp::OpNull),
-                                                        instr::jmpnz(alloc, label_not_a_class.clone()),
-                                                    ]),
-                                                    "Type constant does not resolve to a class",
-                                                    label_not_a_class,
-                                                    label_done,
-                                            )?))
-                                            }
-                                        }
-                                        _ => Err(unrecoverable(
-                                            "Unexpected case for HH\\MemberOf enum type",
-                                        )),
-                                    }
-                                }
-                                _ => {
-                                    Err(unrecoverable("Unexpected case for HH\\MemberOf enum type"))
-                                }
-                            }
-                        }
-                        _ => Err(unrecoverable(
-                            "Wrong number of type arguments to HH\\MemberOf",
-                        )),
-                    }
-                }
-                _ => Err(raise_fatal_parse(
-                    &ast_param.pos,
-                    "'".to_owned() + ua::VIA_LABEL + "' applied to a non-HH\\MemberOf parameter",
-                )),
-            }
-        }
-    }
-}
-
 pub fn emit_method_prolog<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
@@ -920,25 +644,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                         }
                         _ => Err(unrecoverable("impossible")),
                     }?;
-
-                let atom_instrs = if emitter
-                    .options()
-                    .hhvm
-                    .hack_lang
-                    .flags
-                    .contains(LangFlags::ENABLE_ENUM_CLASSES)
-                {
-                    atom_instrs(emitter, env, param, ast_param, tparams)?
-                } else {
-                    None
-                };
-
-                match (param_checks, atom_instrs) {
-                    (None, None) => Ok(None),
-                    (Some(is), None) => Ok(Some(is)),
-                    (Some(is), Some(js)) => Ok(Some(InstrSeq::gather(alloc, vec![is, js]))),
-                    (None, Some(js)) => Ok(Some(js)),
-                }
+                Ok(param_checks)
             }
         };
 

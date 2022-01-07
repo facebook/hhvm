@@ -594,9 +594,9 @@ module Typing = struct
     | UnnecessaryAttribute [@value 4392]
     | InheritedMethodCaseDiffers [@value 4393]
     | EnumClassLabelUnknown [@value 4394]
-    | ViaLabelInvalidParameter [@value 4395]
+    (* | ViaLabelInvalidParameterDEPRECATED [@value 4395] *)
     | EnumClassLabelAsExpression [@value 4396]
-    | EnumClassLabelInvalidArgument [@value 4397]
+    (* | EnumClassLabelInvalidArgumentDEPRECATED [@value 4397] *)
     | IFCInternalError [@value 4398]
     | IFCExternalContravariant [@value 4399]
     | IFCPolicyMismatch [@value 4400]
@@ -636,7 +636,7 @@ module Typing = struct
     | ReadonlyInvalidAsMut [@value 4434]
     | InvalidKeysetValue [@value 4435]
     | UnresolvedTypeVariableProjection [@value 4436]
-    | FunctionPointerWithViaLabel [@value 4437]
+    (* | FunctionPointerWithViaLabelDEPRECATED [@value 4437] *)
     | InvalidEchoArgument [@value 4438]
     | DiamondTraitMethod [@value 4439]
     | ReifiedStaticMethodInExprTree [@value 4440]

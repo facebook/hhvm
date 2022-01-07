@@ -25,7 +25,6 @@ let typed_linters =
     Linter_is_checks.handler;
     Linter_switch_check.handler;
     Linter_missing_override_attribute.handler;
-    Linter_missing_via_label_attribute.handler;
     Linter_sketchy_null_check.handler;
     Linter_truthiness_test.handler;
     Linter_redundant_generics.handler;

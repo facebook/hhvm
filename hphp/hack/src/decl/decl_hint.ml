@@ -154,7 +154,6 @@ and hint_ p env = function
               (* Currently do not support external and cancall on parameters of function parameters *)
             ~ifc_external:false
             ~ifc_can_call:false
-            ~via_label:false
             ~readonly;
       }
     in

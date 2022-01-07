@@ -100,14 +100,14 @@ function expect_int(int $_): void {}
 function main(): void {
   $cont = new SomeController();
 
-  $cont->set#Name("zuck");
-  $cont->set#Age(42);
+  $cont->set(#Name, "zuck");
+  $cont->set(#Age, 42);
 
-  $name = $cont->get#Name();
-  $age = $cont->get#Age();
-  $foo = $cont->get#Foo();
+  $name = $cont->get(#Name);
+  $age = $cont->get(#Age);
+  $foo = $cont->get(#Foo);
 
-  // $cont->get#XXX(); // Hack error
+  // $cont->get(#XXX); // Hack error
 
   if ($name is nonnull) {
     expect_string($name);

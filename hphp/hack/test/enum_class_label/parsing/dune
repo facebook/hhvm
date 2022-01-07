@@ -4,17 +4,15 @@
   %{exe:../../../src/hh_parse.exe}
   %{project_root}/test/verify.py
   %{project_root}/test/review.sh
-  (glob_files %{project_root}/test/enum_class_label/parsing/*.good.php)
+  (glob_files %{project_root}/test/enum_class_label/parsing/*.php)
   (glob_files %{project_root}/test/enum_class_label/parsing/HH_FLAGS)
-  (glob_files %{project_root}/test/enum_class_label/parsing/*.good.php.exp))
+  (glob_files %{project_root}/test/enum_class_label/parsing/*.php.exp))
  (action
   (run
    %{project_root}/test/verify.py
    %{project_root}/test/enum_class_label/parsing
    --program
    %{exe:../../../src/hh_parse.exe}
-   --in-extension
-   .good.php
    --flags
    --full-fidelity-errors
    --full-fidelity-errors-all

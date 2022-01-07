@@ -1,4 +1,5 @@
 <?hh
+<<file:__EnableUnstableFeatures('enum_class_label')>>
 
 interface IXParam {
 }

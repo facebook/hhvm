@@ -8,8 +8,7 @@ cpp_library(
         "FBSerialize.h",
         "FBSerialize-inl.h",
     ],
-    unexported_deps_by_default = False,
-    deps = [
+    exported_deps = [
         "//folly:bits",
         "//folly:conv",
     ],

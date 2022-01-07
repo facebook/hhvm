@@ -11,8 +11,8 @@
 #ifndef HHVM_VERSION_OVERRIDE
 # define HHVM_VERSION_MAJOR 4
 # define HHVM_VERSION_MINOR 102
-# define HHVM_VERSION_PATCH 6
-# define HHVM_VERSION_SUFFIX ""
+# define HHVM_VERSION_PATCH 7
+# define HHVM_VERSION_SUFFIX "-dev"
 #endif
 
 /* HHVM_VERSION_ID minus the patch number

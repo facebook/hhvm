@@ -702,19 +702,27 @@ let copy_and_update
   Sqlite3.exec new_db "BEGIN TRANSACTION;" |> check_rc new_db;
   Sqlite3.exec new_db SymbolTable.create_temporary_index_sqlite
   |> check_rc new_db;
+
+  (*
+     First do all symbol deletions to prevent file_deltas order from causing duplicate
+     symbol sqlite errors
+
+     * if there are truly no symbol collisions then we won't fail due to order of inserts
+     * if there truly is a symbol collision then we will fail
+  *)
+  Relative_path.Map.iter local_changes.file_deltas ~f:(fun path _ ->
+      let file_info_id =
+        FileInfoTable.get_file_info_id new_db stmt_cache path
+      in
+      Option.iter file_info_id ~f:(fun file_info_id ->
+          SymbolTable.delete new_db stmt_cache file_info_id;
+          FileInfoTable.delete new_db stmt_cache path));
+
   let result =
     Relative_path.Map.fold
       local_changes.file_deltas
       ~init:empty_save_result
       ~f:(fun path file_info acc ->
-        let file_info_id =
-          FileInfoTable.get_file_info_id new_db stmt_cache path
-        in
-        if Option.is_some file_info_id then (
-          let file_info_id = Option.value_exn file_info_id in
-          SymbolTable.delete new_db stmt_cache file_info_id;
-          FileInfoTable.delete new_db stmt_cache path
-        );
         match file_info with
         | Deleted -> acc
         | Modified file_info ->

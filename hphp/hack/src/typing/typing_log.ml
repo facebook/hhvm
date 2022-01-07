@@ -462,6 +462,12 @@ let log_pos_or_decl p ?function_name f =
       | Some n -> " {" ^ n ^ "}")
       f
 
+let log_with_level env key ~level log_f =
+  if Typing_env_types.get_log_level env key >= level then
+    log_f ()
+  else
+    ()
+
 let log_subtype_prop env message prop =
   lprintf (Tty.Bold Tty.Green) "%s: " message;
   lprintf (Tty.Normal Tty.Green) "%s" (Typing_print.subtype_prop env prop);
@@ -611,11 +617,13 @@ let log_env_diff p ?function_name old_env new_env =
 
 (* Log the environment: local_types, subst, tenv and tpenv *)
 let hh_show_env ?function_name p env =
+  log_with_level env "show" ~level:0 @@ fun () ->
   let old_env = !lastenv in
   lastenv := env;
   log_env_diff ?function_name p old_env env
 
 let hh_show_full_env p env =
+  log_with_level env "show" ~level:0 @@ fun () ->
   let empty_env =
     { env with inference_env = Typing_inference_env.empty_inference_env }
   in
@@ -623,6 +631,7 @@ let hh_show_full_env p env =
 
 (* Log the type of an expression *)
 let hh_show p env ty =
+  log_with_level env "show" ~level:0 @@ fun () ->
   let s1 = Pr.with_blank_tyvars (fun () -> Pr.debug env ty) in
   let s2 = Typing_print.constraints_for_type env ty in
   log_position p (fun () ->
@@ -636,12 +645,6 @@ type log_structure =
   | Log_type of string * Typing_defs.locl_ty
   | Log_decl_type of string * Typing_defs.decl_ty
   | Log_type_i of string * Typing_defs.internal_type
-
-let log_with_level env key ~level log_f =
-  if Typing_env_types.get_log_level env key >= level then
-    log_f ()
-  else
-    ()
 
 let log_types p env items =
   log_pos_or_decl p (fun () ->

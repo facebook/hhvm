@@ -121,6 +121,9 @@ fn main() {
                     "--type"
                 })
             }
+            .arg("--hh-log-level")
+            .arg("show")
+            .arg("-1")
             .arg(&filepath)
             .stdin(Stdio::null())
             .stdout(Stdio::piped());

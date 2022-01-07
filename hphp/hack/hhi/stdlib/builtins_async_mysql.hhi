@@ -97,7 +97,9 @@ class AsyncMysqlConnectionPool {
     string $password,
     int $timeout_micros = -1,
     string $caller = "",
-    int $tcp_timeout_micros = 0): Awaitable<AsyncMysqlConnection> { }
+    ?MySSLContextProvider $ssl_provider = null,
+    int $tcp_timeout_micros = 0,
+    string $sni_server_name = ""): Awaitable<AsyncMysqlConnection> { }
   public function connectWithOpts(
     string $host,
     int $port,

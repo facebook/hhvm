@@ -296,9 +296,13 @@ class AsyncMysqlConnectionPool {
    * @param $extra_key - An extra parameter to help the internal connection
    *                     pool infrastructure separate connections even better.
    *                     Usually, the default `""` is fine.
+   * @param $ssl_context - Optionally allow the connection to tunnel via SSL.
    * @param $tcp_timeout_micros - Timeout, in microseconds, for the tcp phase of
    *                          connect operation; Default: 0 for no timeout.
+   * @param $sni_server_name - SNI hostname to use when connecting via SSL.
    *
+   * @return - an `Awaitable` representing an `AsyncMysqlConnection`. `await`
+   * or `join` this result to obtain the actual connection.
    */
   <<__Native>>
   public function connect(string $host,
@@ -308,7 +312,9 @@ class AsyncMysqlConnectionPool {
                           string $password,
                           int $timeout_micros = -1,
                           string $extra_key = "",
-                          int $tcp_timeout_micros = 0
+                          ?MySSLContextProvider $ssl_context = null,
+                          int $tcp_timeout_micros = 0,
+                          string $sni_server_name = "",
                          ): Awaitable<AsyncMysqlConnection>;
 
   <<__Native>>

@@ -747,7 +747,9 @@ static Object HHVM_METHOD(
     const String& password,
     int64_t timeout_micros,
     const String& extra_key,
-    int64_t tcp_timeout_micros) {
+    const Variant& sslContextProvider,
+    int64_t tcp_timeout_micros,
+    const String& sni_server_name) {
   auto* data = Native::data<AsyncMysqlConnectionPool>(this_);
   auto op = data->m_async_pool->beginConnection(
       static_cast<std::string>(host),
@@ -756,6 +758,11 @@ static Object HHVM_METHOD(
       static_cast<std::string>(user),
       static_cast<std::string>(password),
       static_cast<std::string>(extra_key));
+  if (!sslContextProvider.isNull()) {
+    auto* mysslContextProvider = getSSLContextProvider(
+            sslContextProvider.toObject());
+    op->setSSLOptionsProvider(mysslContextProvider->getSSLProvider());
+  }
   if (timeout_micros < 0) {
     timeout_micros = mysqlExtension::ConnectTimeout * 1000;
   }
@@ -765,6 +772,10 @@ static Object HHVM_METHOD(
   // If tcp_timeout_micros is <= 0, skip setting the timeout
   if (tcp_timeout_micros > 0) {
     op->setTcpTimeout(am::Duration(tcp_timeout_micros));
+  }
+  // If ssl sni name is not empty, set it
+  if (!sni_server_name.empty()) {
+    op->setSniServerName(static_cast<std::string>(sni_server_name));
   }
 
   return newAsyncMysqlConnectEvent(

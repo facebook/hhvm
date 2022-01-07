@@ -123,6 +123,9 @@ void replacePlaceholders(std::string& s) {
     if (user == nullptr) user = getenv("USER");
     return user != nullptr ? user : "%{user}";
   });
+  replacePlaceholder(s, "%{pid}", [] {
+    return folly::to<std::string>(getpid());
+  });
 }
 
 ////////////////////////////////////////////////////////////////////////////////

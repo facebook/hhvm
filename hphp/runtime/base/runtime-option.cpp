@@ -2039,6 +2039,8 @@ void RuntimeOption::Load(
     }();
     Config::Bind(EvalJitSerdesFile, ini, config,
                  "Eval.JitSerdesFile", EvalJitSerdesFile);
+    replacePlaceholders(EvalJitSerdesFile);
+
     // DumpPreciseProfileData defaults to true only when we can possibly write
     // profile data to disk.  It can be set to false to avoid the performance
     // penalty of only running the interpreter during retranslateAll.  We will

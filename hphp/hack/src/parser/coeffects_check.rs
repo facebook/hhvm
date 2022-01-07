@@ -23,22 +23,6 @@ use parser_core_types::{
     syntax_error::{Error as ErrorMsg, SyntaxError},
 };
 
-fn is_pure(ctxs: &Option<ast::Contexts>) -> bool {
-    match ctxs {
-        Some(c) => c.1.len() == 0,
-        None => false,
-    }
-}
-
-// This distinguishes between specified not-pure contexts and unspecified contexts (both of which are not pure).
-// The latter is important because for e.g. lambdas without contexts, they should inherit from enclosing functions.
-fn is_pure_with_inherited_val(c: &Context, ctxs: &Option<ast::Contexts>) -> bool {
-    match ctxs {
-        Some(_) => is_pure(ctxs),
-        None => c.is_pure(),
-    }
-}
-
 fn hints_contain_capability(hints: &Vec<aast_defs::Hint>, capability: Ctx) -> bool {
     for hint in hints {
         if let aast::Hint_::Happly(ast_defs::Id(_, id), _) = &*hint.1 {
@@ -175,15 +159,14 @@ fn has_ignore_coeffect_local_errors_attr(attrs: &Vec<aast::UserAttribute<(), ()>
 bitflags! {
     pub struct ContextFlags: u16 {
         const IN_METHODISH = 1 << 0;
-        const IS_PURE = 1 << 1;
+        const IS_TYPECHECKER = 1 << 1;
         const IS_CONSTRUCTOR = 1 << 2;
         const IGNORE_COEFFECT_LOCAL_ERRORS = 1 << 3;
-        const IS_TYPECHECKER = 1 << 4;
-        const HAS_DEFAULTS = 1 << 5;
-        const HAS_WRITE_PROPS = 1 << 6;
-        const HAS_WRITE_THIS_PROPS = 1 << 7;
-        const HAS_READ_GLOBALS = 1 << 8;
-        const HAS_ACCESS_GLOBALS = 1 << 9;
+        const HAS_DEFAULTS = 1 << 4;
+        const HAS_WRITE_PROPS = 1 << 5;
+        const HAS_WRITE_THIS_PROPS = 1 << 6;
+        const HAS_READ_GLOBALS = 1 << 7;
+        const HAS_ACCESS_GLOBALS = 1 << 8;
     }
 }
 
@@ -201,7 +184,6 @@ impl Context {
     fn from_context(&self) -> Self {
         let mut c = Context::new();
         c.set_in_methodish(self.in_methodish());
-        c.set_is_pure(self.is_pure());
         c.set_is_constructor(self.is_constructor());
         c.set_ignore_coeffect_local_errors(self.ignore_coeffect_local_errors());
         c.set_is_typechecker(self.is_typechecker());
@@ -213,10 +195,6 @@ impl Context {
 
     fn in_methodish(&self) -> bool {
         return self.bitflags.contains(ContextFlags::IN_METHODISH);
-    }
-
-    fn is_pure(&self) -> bool {
-        return self.bitflags.contains(ContextFlags::IS_PURE);
     }
 
     fn is_constructor(&self) -> bool {
@@ -255,10 +233,6 @@ impl Context {
 
     fn set_in_methodish(&mut self, in_methodish: bool) {
         self.bitflags.set(ContextFlags::IN_METHODISH, in_methodish);
-    }
-
-    fn set_is_pure(&mut self, is_pure: bool) {
-        self.bitflags.set(ContextFlags::IS_PURE, is_pure);
     }
 
     fn set_is_constructor(&mut self, is_constructor: bool) {
@@ -418,7 +392,6 @@ impl<'ast> Visitor<'ast> for Checker {
     fn visit_method_(&mut self, c: &mut Context, m: &aast::Method_<(), ()>) -> Result<(), ()> {
         let mut new_context = Context::from_context(c);
         new_context.set_in_methodish(true);
-        new_context.set_is_pure(is_pure(&m.ctxs));
         new_context.set_is_constructor(is_constructor(&m.name));
         new_context.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
             &m.user_attributes,
@@ -433,7 +406,6 @@ impl<'ast> Visitor<'ast> for Checker {
 
     fn visit_fun_def(&mut self, c: &mut Context, d: &aast::FunDef<(), ()>) -> Result<(), ()> {
         let mut new_context = Context::from_context(c);
-        new_context.set_is_pure(is_pure(&d.fun.ctxs));
         new_context.set_has_defaults(has_defaults(&d.fun.ctxs));
         new_context.set_is_constructor(is_constructor(&d.fun.name));
         new_context.set_has_write_props(has_capability(&d.fun.ctxs, Ctx::WriteProps));
@@ -446,7 +418,6 @@ impl<'ast> Visitor<'ast> for Checker {
     fn visit_fun_(&mut self, c: &mut Context, f: &aast::Fun_<(), ()>) -> Result<(), ()> {
         let mut new_context = Context::from_context(c);
         new_context.set_in_methodish(true);
-        new_context.set_is_pure(is_pure_with_inherited_val(c, &f.ctxs));
         new_context.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
             &f.user_attributes,
         ));
@@ -476,16 +447,13 @@ impl<'ast> Visitor<'ast> for Checker {
 
     fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
         if c.in_methodish() && !c.ignore_coeffect_local_errors() && !c.has_defaults() {
-            if !c.has_write_props()
-            // TODO(T106528721) Turn on coeffect enforcement in runtime outside of pure functions
-            && (c.is_typechecker() || c.is_pure())
-            {
+            if !c.has_write_props() {
                 self.do_write_props_check(&p);
                 if !c.has_write_this_props() {
                     self.do_write_this_props_check(c, &p);
                 }
             }
-            if !c.has_access_globals() && c.is_typechecker() {
+            if !c.has_access_globals() {
                 self.do_access_globals_check(&p);
                 if !c.has_read_globals() {
                     self.do_read_globals_check(&p);

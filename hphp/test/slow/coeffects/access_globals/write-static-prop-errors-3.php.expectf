@@ -1,0 +1,1 @@
+Fatal error: Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`). in %s on line 16

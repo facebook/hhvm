@@ -62,10 +62,9 @@ let add_minor_change_fanout
   let recheck_descendants_and_their_member_dependents acc make_dep =
     let changed_and_descendants = Lazy.force changed_and_descendants in
     DepSet.fold changed_and_descendants ~init:acc ~f:(fun dep acc ->
-        let needs_recheck =
-          Typing_deps.add_typing_deps mode (DepSet.singleton dep)
+        let acc =
+          AffectedDeps.mark_as_needing_recheck acc (DepSet.singleton dep)
         in
-        let acc = AffectedDeps.mark_as_needing_recheck acc needs_recheck in
         AffectedDeps.mark_all_dependents_as_needing_recheck_from_hash
           mode
           acc

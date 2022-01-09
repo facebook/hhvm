@@ -1,5 +1,6 @@
 === Shape analysis results for dynamic_access.php
 Constraints for \f:
-DK [5:3-9] : dyn
+DK ?1 : dyn
 EX [5:3-9]
+[5:3-9] ⊆ ?1
 

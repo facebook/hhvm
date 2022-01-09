@@ -1,11 +1,4 @@
 === Shape analysis results for switch3.php
 Summary for \f:
-[4:8-14] :
-  shape(
-    a => int
-    c => bool
-  )
-[11:12-18] :
-  shape(
-    b => string
-  )
+[4:8-14] : shape()
+[11:12-18] : shape()

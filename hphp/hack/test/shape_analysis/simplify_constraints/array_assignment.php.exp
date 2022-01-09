@@ -3,6 +3,4 @@ Summary for \f:
 [4:8-23] :
   shape(
     a => int
-    b => bool
-    c => string
   )

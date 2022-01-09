@@ -8,6 +8,9 @@
 
 open Shape_analysis_types
 
+(** Generates a fresh variable entity *)
+val fresh_var : unit -> entity_
+
 (** Initialise shape analysis environment *)
 val init : Tast.saved_env -> env
 

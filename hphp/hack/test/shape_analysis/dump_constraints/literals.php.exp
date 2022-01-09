@@ -3,9 +3,11 @@ Constraints for \darray_constraints:
 EX [8:3-36]
 SK [8:3-36] => a : int
 SK [8:3-36] => c : string
+[8:3-36] ⊆ ?2
 
 Constraints for \dict_constraints:
 EX [4:3-31]
 SK [4:3-31] => a : int
 SK [4:3-31] => b : bool
+[4:3-31] ⊆ ?1
 

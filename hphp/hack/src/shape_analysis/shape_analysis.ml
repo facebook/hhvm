@@ -80,6 +80,11 @@ let add_key_constraint
     Env.add_constraint env constraint_
   | None -> env
 
+let redirect (env : env) (entity_ : entity_) : env * entity_ =
+  let var = Env.fresh_var () in
+  let env = Env.add_constraint env (Subset (entity_, var)) in
+  (env, var)
+
 let rec assign
     (env : env)
     ((_, pos, lval) : T.expr)
@@ -87,10 +92,17 @@ let rec assign
     (ty_rhs : Typing_defs.locl_ty) : env =
   match lval with
   | A.Lvar (_, lid) -> Env.set_local env lid rhs
-  | A.Array_get (base, Some ix) ->
-    (* TODO: keep track of assignments to statically known keys in the environment *)
-    let (env, entity) = expr env base in
-    add_key_constraint env entity ix ty_rhs
+  | A.Array_get ((_, _, A.Lvar (pos, lid)), Some ix) ->
+    let entity = Env.get_local env lid in
+    let env = add_key_constraint env entity ix ty_rhs in
+
+    (* Handle copy-on-write by creating a variable indirection *)
+    let (env, var) =
+      match entity with
+      | Some entity_ -> redirect env entity_
+      | None -> failwithpos pos "Trying to assign to an undefined variable"
+    in
+    Env.set_local env lid (Some var)
   | _ -> failwithpos pos "An lvalue is not yet supported"
 
 and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
@@ -112,7 +124,10 @@ and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
       add_key_constraint env entity key ty
     in
     let env = List.fold ~init:env ~f:add_key_constraint key_value_pairs in
-    (env, entity)
+
+    (* Handle copy-on-write by creating a variable indirection *)
+    let (env, var) = redirect env entity_ in
+    (env, Some var)
   | A.Array_get (base, Some ix) ->
     let (env, entity_exp) = expr env base in
     let (env, _entity_ix) = expr env ix in

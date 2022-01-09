@@ -10,7 +10,7 @@ open Hh_prelude
 open Shape_analysis_types
 
 type constraints = {
-  exists: entity_ list;
+  exists: Pos.t list;
   static_accesses: (entity_ * shape_key * Typing_defs.locl_ty) list;
   dynamic_accesses: entity_ list;
   subsets: (entity_ * entity_) list;
@@ -36,7 +36,8 @@ let rec transitive_closure (set : PointsToSet.t) : PointsToSet.t =
     transitive_closure new_set
 
 let partition_constraint constraints = function
-  | Exists entity -> { constraints with exists = entity :: constraints.exists }
+  | Exists (_, entity) ->
+    { constraints with exists = entity :: constraints.exists }
   | Has_static_key (entity, key, ty) ->
     {
       constraints with
@@ -114,7 +115,6 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
   (* Start collecting shape results starting with empty shapes of candidates *)
   let static_shape_results : Typing_defs.locl_ty ShapeKeyMap.t Pos.Map.t =
     exists
-    |> List.concat_map ~f:all_concrete_supersets
     |> List.fold
          ~f:(fun map pos -> Pos.Map.add pos ShapeKeyMap.empty map)
          ~init:Pos.Map.empty

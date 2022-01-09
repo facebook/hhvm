@@ -26,8 +26,12 @@ type entity = entity_ option
 
 type shape_key = SK_string of string [@@deriving eq, ord]
 
+type exists_kind =
+  | Allocation
+  | Extension
+
 type constraint_ =
-  | Exists of entity_
+  | Exists of exists_kind * Pos.t
   | Has_static_key of entity_ * shape_key * Typing_defs.locl_ty
   | Has_dynamic_key of entity_
   | Subset of entity_ * entity_

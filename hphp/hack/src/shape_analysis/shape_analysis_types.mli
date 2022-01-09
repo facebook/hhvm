@@ -33,8 +33,12 @@ type entity = entity_ option
 
 type shape_key = SK_string of string [@@deriving eq, ord]
 
+type exists_kind =
+  | Allocation  (** A dict allocation such as `dict[]` or `dict['a' => 42]` *)
+  | Extension  (** A dict extension such as `$d['a'] = 42` *)
+
 type constraint_ =
-  | Exists of entity_  (** Records existence of a dict *)
+  | Exists of exists_kind * Pos.t  (** Records creation of a dict *)
   | Has_static_key of entity_ * shape_key * Typing_defs.locl_ty
       (** Records the static key an entity is accessed with along with the Hack
           type of the key *)

@@ -86,22 +86,27 @@ let redirect (env : env) (entity_ : entity_) : env * entity_ =
   (env, var)
 
 let rec assign
+    (assignment_pos : Pos.t)
     (env : env)
     ((_, pos, lval) : T.expr)
     (rhs : entity)
     (ty_rhs : Typing_defs.locl_ty) : env =
   match lval with
   | A.Lvar (_, lid) -> Env.set_local env lid rhs
-  | A.Array_get ((_, _, A.Lvar (pos, lid)), Some ix) ->
+  | A.Array_get ((_, _, A.Lvar (_, lid)), Some ix) ->
     let entity = Env.get_local env lid in
-    let env = add_key_constraint env entity ix ty_rhs in
-
-    (* Handle copy-on-write by creating a variable indirection *)
-    let (env, var) =
+    let current_assignment = Literal assignment_pos in
+    let env =
       match entity with
-      | Some entity_ -> redirect env entity_
+      | Some entity_ ->
+        Env.add_constraint env (Subset (entity_, current_assignment))
       | None -> failwithpos pos "Trying to assign to an undefined variable"
     in
+    let env = Env.add_constraint env (Exists (Extension, assignment_pos)) in
+    let env = add_key_constraint env (Some current_assignment) ix ty_rhs in
+
+    (* Handle copy-on-write by creating a variable indirection *)
+    let (env, var) = redirect env current_assignment in
     Env.set_local env lid (Some var)
   | _ -> failwithpos pos "An lvalue is not yet supported"
 
@@ -117,7 +122,7 @@ and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
   | A.KeyValCollection (A.Dict, _, key_value_pairs) ->
     let entity_ = Literal pos in
     let entity = Some entity_ in
-    let env = Env.add_constraint env (Exists entity_) in
+    let env = Env.add_constraint env (Exists (Allocation, pos)) in
     let add_key_constraint env (key, ((ty, _, _) as value)) : env =
       let (env, _key_entity) = expr env key in
       let (env, _val_entity) = expr env value in
@@ -138,7 +143,7 @@ and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
     (env, entity)
   | A.Binop (Ast_defs.Eq None, e1, ((ty_rhs, _, _) as e2)) ->
     let (env, entity_rhs) = expr env e2 in
-    let env = assign env e1 entity_rhs ty_rhs in
+    let env = assign pos env e1 entity_rhs ty_rhs in
     (env, None)
   | _ -> failwithpos pos "An expression is not yet handled"
 

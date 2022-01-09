@@ -1,6 +1,6 @@
 === Shape analysis results for entity_assignment.php
 Constraints for \f:
-EX [4:8-23]
+Allocated at [4:8-23]
 SK ?1 => b : int
 SK [4:8-23] => a : int
 [4:8-23] ⊆ ?1

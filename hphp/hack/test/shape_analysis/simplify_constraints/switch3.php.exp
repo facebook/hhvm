@@ -1,4 +1,23 @@
 === Shape analysis results for switch3.php
 Summary for \f:
 [4:8-14] : shape()
+[8:7-19] :
+  shape(
+    a => int
+  )
 [11:12-18] : shape()
+[12:7-21] :
+  shape(
+    b => string
+  )
+[15:7-22] :
+  shape(
+    c => bool
+  )
+[17:3-17] :
+  shape(
+    a => int
+    b => string
+    c => bool
+    d => float
+  )

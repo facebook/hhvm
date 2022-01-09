@@ -9,3 +9,9 @@ Summary for \f:
   shape(
     c => bool
   )
+[15:3-18] :
+  shape(
+    a => string
+    b => int
+    c => bool
+  )

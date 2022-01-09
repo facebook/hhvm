@@ -1034,8 +1034,9 @@ function hhvm_cmd(
 
   if (isset($options['cli-server'])) {
     $config = find_file_for_dir(dirname($test), 'config.ini');
-    $ref = ($options['servers']['configs'] ?? dict[])[$config] as ServerRef;
-    $socket = $ref->server['cli-socket'] as string;
+    $servers = $options['servers'] as Servers;
+    $server = $servers->configs[$config];
+    $socket = $server->cli_socket;
     $cmd .= ' -vEval.UseRemoteUnixServer=only';
     $cmd .= ' -vEval.UnixServerPath='.$socket;
     $cmd .= ' --count=3';
@@ -2818,7 +2819,8 @@ function run_config_server(dict<string, mixed> $options, string $test): mixed {
 
   Status::createTestTmpDir($test); // force it to be created
   $config = find_file_for_dir(dirname($test), 'config.ini');
-  $port = ($options['servers']['configs'] ?? dict[])[$config]->server['port'];
+  $servers = $options['servers'] as Servers;
+  $port = $servers->configs[$config]->port;
   $ch = curl_init("localhost:$port/$test");
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_TIMEOUT, SERVER_TIMEOUT);
@@ -3559,7 +3561,7 @@ function start_server_proc(
   dict<string, mixed> $options,
   string $config,
   int $port,
-): dict<string, mixed> {
+): Server {
   if (isset($options['cli-server'])) {
     $cli_sock = tempnam(sys_get_temp_dir(), 'hhvm-cli-');
   } else {
@@ -3626,26 +3628,33 @@ function start_server_proc(
   }
   // NOTE: This is a "dict<string, mixed>".
   $status = proc_get_status($proc);
-  $status['proc'] = $proc;
-  $status['port'] = $port;
-  $status['config'] = $config;
-  $status['cli-socket'] = $cli_sock;
-  return $status;
+  $pid = $status['pid'] as int;
+  $server = new Server($proc, $pid, $port, $config, $cli_sock);
+  return $server;
 }
 
-final class ServerRef {
-  public function __construct(public dict<string, mixed> $server) {
+final class Server {
+  public function __construct(
+    public resource $proc,
+    public int $pid,
+    public int $port,
+    public string $config,
+    public string $cli_socket,
+  ) {
   }
 }
 
+final class Servers {
+  public dict<int, Server> $pids = dict[];
+  public dict<string, Server> $configs = dict[];
+}
+
 // For each config file in $configs, start up a server on a randomly-determined
-// port. Return value is a dict mapping "pids" to a dict from pid (an int) to
-// ServerRef, and "configs" to a dict from config (a string) to ServerRef.
-// ISSUE: Returning two separate properly typed dicts might be cleaner.
+// port.
 function start_servers(
   dict<string, mixed> $options,
   keyset<string> $configs,
-): dict<string, dict<arraykey, ServerRef>> {
+): Servers {
   if (isset($options['server'])) {
     $prelude = <<<'EOT'
 <?hh
@@ -3665,17 +3674,17 @@ EOT;
   }
 
   $start_time = mtime();
-  $servers = dict['pids' => dict[], 'configs' => dict[]];
+  $servers = new Servers();
 
   // Wait for all servers to come up.
   while (count($starting) > 0) {
     $still_starting = vec[];
 
     foreach ($starting as $server) {
-      $config = $server['config'] as string;
-      $pid = $server['pid'] as int;
-      $port = $server['port'] as int;
-      $proc = $server['proc'] as resource;
+      $config = $server->config;
+      $pid = $server->pid;
+      $port = $server->port;
+      $proc = $server->proc;
 
       $new_status = proc_get_status($proc);
 
@@ -3693,9 +3702,8 @@ EOT;
       } else if (!port_is_listening($port)) {
         $still_starting[] = $server;
       } else {
-        $ref = new ServerRef($server);
-        $servers['pids'][$pid] = $ref;
-        $servers['configs'][$config] = $ref;
+        $servers->pids[$pid] = $server;
+        $servers->configs[$config] = $server;
       }
     }
 
@@ -3804,7 +3812,6 @@ function main(vec<string> $argv): int {
             "mode. (".count($configs)." required)");
     }
 
-    // ISSUE: This might be the only non-string stored in "$options".
     $servers = start_servers($options, $configs);
     $options['servers'] = $servers;
   }
@@ -3928,21 +3935,19 @@ function main(vec<string> $argv): int {
       if ($pid === $printer_pid) {
         // We should be finishing up soon.
         $printer_pid = 0;
-      } else if ($servers && isset($servers['pids'][$pid])) {
+      } else if ($servers && isset($servers->pids[$pid])) {
         // A server crashed. Restart it.
         if (getenv('HHVM_TEST_SERVER_LOG')) {
           echo "\nServer $pid crashed. Restarting.\n";
         }
         Status::serverRestarted();
-        $ref = $servers['pids'][$pid];
-        $config = $ref->server['config'] as string;
-        $port = $ref->server['port'] as int;
-        $ref->server = start_server_proc($options, $config, $port);
+        $server = $servers->pids[$pid];
+        $server = start_server_proc($options, $server->config, $server->port);
 
         // Unset the old $pid entry and insert the new one.
-        unset($servers['pids'][$pid]);
-        $pid = $ref->server['pid'] as int;
-        $servers['pids'][$pid] = $ref;
+        unset($servers->pids[$pid]);
+        $pid = $server->pid;
+        $servers->pids[$pid] = $server;
       } elseif (isset($children[$pid])) {
         unset($children[$pid]);
         $return_value |= pcntl_wexitstatus($status);
@@ -3964,10 +3969,9 @@ function main(vec<string> $argv): int {
 
   // Kill the servers.
   if ($servers) {
-    foreach ($servers['pids'] as $ref) {
-      $proc = $ref->server['proc'] as resource;
-      proc_terminate($proc);
-      proc_close($proc);
+    foreach ($servers->pids as $server) {
+      proc_terminate($server->proc);
+      proc_close($server->proc);
     }
   }
 

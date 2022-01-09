@@ -30,7 +30,7 @@ type constraint_ =
   | Exists of entity_
   | Has_static_key of entity_ * shape_key * Typing_defs.locl_ty
   | Has_dynamic_key of entity_
-  | Points_to of entity_ * entity_
+  | Subset of entity_ * entity_
 
 type shape_result =
   | Shape_like_dict of Pos.t * (shape_key * Typing_defs.locl_ty) list
@@ -57,4 +57,16 @@ module ShapeKeyMap = Map.Make (struct
   type t = shape_key
 
   let compare = compare_shape_key
+end)
+
+module EntityMap = Map.Make (struct
+  type t = entity_
+
+  let compare = compare_entity_
+end)
+
+module EntitySet = Set.Make (struct
+  type t = entity_
+
+  let compare = compare_entity_
 end)

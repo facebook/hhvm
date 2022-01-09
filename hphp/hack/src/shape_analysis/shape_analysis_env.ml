@@ -22,7 +22,7 @@ let union_continuation_at_lid (entity1 : entity) (entity2 : entity) :
   match (entity1, entity2) with
   | (Some entity1_, Some entity2_) ->
     let var = fresh_var () in
-    let constraints = [Points_to (var, entity1_); Points_to (var, entity2_)] in
+    let constraints = [Subset (entity1_, var); Subset (entity2_, var)] in
     (constraints, Some var)
   | (entity, None)
   | (None, entity) ->

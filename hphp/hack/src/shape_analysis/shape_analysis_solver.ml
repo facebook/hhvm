@@ -13,11 +13,11 @@ type constraints = {
   exists: entity_ list;
   static_accesses: (entity_ * shape_key * Typing_defs.locl_ty) list;
   dynamic_accesses: entity_ list;
-  points_tos: (entity_ * entity_) list;
+  subsets: (entity_ * entity_) list;
 }
 
 let constraints_init =
-  { exists = []; static_accesses = []; dynamic_accesses = []; points_tos = [] }
+  { exists = []; static_accesses = []; dynamic_accesses = []; subsets = [] }
 
 let rec transitive_closure (set : PointsToSet.t) : PointsToSet.t =
   let immediate_consequence (x, y) set =
@@ -47,51 +47,74 @@ let partition_constraint constraints = function
       constraints with
       dynamic_accesses = entity :: constraints.dynamic_accesses;
     }
-  | Points_to (pointer_entity, pointed_entity) ->
-    {
-      constraints with
-      points_tos = (pointer_entity, pointed_entity) :: constraints.points_tos;
-    }
+  | Subset (sub, sup) ->
+    { constraints with subsets = (sub, sup) :: constraints.subsets }
 
+(* The following program roughly summarises the solver.
+
+  subset'(A,B) :- subset(A,B).
+  subset'(A,C) :- subset(A,B), subset'(B,C).
+
+  subset''(A, Literal Pos) :- subset'(A, Literal Pos).
+
+  has_static_key'(Literal Pos, Key, Ty) :- has_static_key(Literal Pos, Key, Ty).
+  has_static_key'(B, Key, Ty) :- has_static_key(A, Key, Ty), subset''(A,B).
+
+  has_dynamic_key'(Literal Pos) :- has_dynamic_key(Literal Pos).
+  has_dynamic_key'(B) :- has_dynamic_key(A), subset''(A,B).
+
+  static_shape_result(A) :- exists(A), not has_dynamic_key'(A).
+  static_shape_result_key(A,K,Ty) :- has_static_key'(A,K,Ty)
+
+  dynamic_shape_result(A) :- exists(A), has_dynamic_key'(A).
+*)
 let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
     shape_result list =
-  let { exists; static_accesses; dynamic_accesses; points_tos } =
+  let { exists; static_accesses; dynamic_accesses; subsets } =
     List.fold ~init:constraints_init ~f:partition_constraint constraints
   in
 
-  let variable_to_literal_map =
-    let add_pointer_to_literal points_to map =
-      match points_to with
-      | (Variable pointer, Literal pointed) ->
-        IMap.add pointer (Pos.Set.singleton pointed) map ~combine:Pos.Set.union
-      | _ -> map
+  let subsets = PointsToSet.of_list subsets |> transitive_closure in
+  let subset_of_literal_index =
+    let f elt map =
+      match elt with
+      | (_, Variable _) -> map
+      | (e1, Literal pos) ->
+        EntityMap.update
+          e1
+          (function
+            | None -> Some (Pos.Set.singleton pos)
+            | Some s -> Some (Pos.Set.add pos s))
+          map
     in
-    PointsToSet.of_list points_tos |> transitive_closure |> fun points_to_set ->
-    PointsToSet.fold add_pointer_to_literal points_to_set IMap.empty
+    PointsToSet.fold f subsets EntityMap.empty
+  in
+  (* Find all concrete supersets. This means all concrete positions that are
+     supersets of a variable, or in the case of a literal all concrete
+     positions that are supersets of a variable + the concrete position we have
+     at hand. *)
+  let all_concrete_supersets entity =
+    let find_super_poss entity =
+      match EntityMap.find_opt entity subset_of_literal_index with
+      | Some poss -> Pos.Set.elements poss
+      | None -> []
+    in
+    match entity with
+    | Literal pos -> pos :: find_super_poss entity
+    | Variable _ -> find_super_poss entity
   in
 
-  let poss_of_entity = function
-    | Literal pos -> [pos]
-    | Variable var ->
-      begin
-        match IMap.find_opt var variable_to_literal_map with
-        | Some poss -> Pos.Set.elements poss
-        | None ->
-          failwith
-            (Format.sprintf "Could not find which entity %d points to" var)
-      end
-  in
   let static_accesses =
     List.concat_map
       ~f:(fun (entity, key, ty) ->
-        poss_of_entity entity |> List.map ~f:(fun pos -> (pos, key, ty)))
+        all_concrete_supersets entity |> List.map ~f:(fun pos -> (pos, key, ty)))
       static_accesses
   in
 
   (* Start collecting shape results starting with empty shapes of candidates *)
   let static_shape_results : Typing_defs.locl_ty ShapeKeyMap.t Pos.Map.t =
     exists
-    |> List.concat_map ~f:poss_of_entity
+    |> List.concat_map ~f:all_concrete_supersets
     |> List.fold
          ~f:(fun map pos -> Pos.Map.add pos ShapeKeyMap.empty map)
          ~init:Pos.Map.empty
@@ -99,7 +122,9 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
 
   (* Invalidate candidates that are observed to experience dynamic access *)
   let dynamic_accesses =
-    dynamic_accesses |> List.concat_map ~f:poss_of_entity |> Pos.Set.of_list
+    dynamic_accesses
+    |> List.concat_map ~f:all_concrete_supersets
+    |> Pos.Set.of_list
   in
   let static_shape_results : Typing_defs.locl_ty ShapeKeyMap.t Pos.Map.t =
     static_shape_results
@@ -132,6 +157,7 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
            Shape_like_dict (pos, ShapeKeyMap.bindings keys_and_types))
   in
 
+  (* TODO: only consider existing candidates to report a summary *)
   let dynamic_shape_results =
     Pos.Set.elements dynamic_accesses
     |> List.map ~f:(fun entity_ -> Dynamically_accessed_dict (Literal entity_))

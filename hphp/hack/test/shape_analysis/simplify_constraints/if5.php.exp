@@ -1,10 +1,4 @@
 === Shape analysis results for if5.php
 Summary for \f:
-[4:8-14] :
-  shape(
-    a => int
-  )
-[7:10-16] :
-  shape(
-    a => int
-  )
+[4:8-14] : shape()
+[7:10-16] : shape()

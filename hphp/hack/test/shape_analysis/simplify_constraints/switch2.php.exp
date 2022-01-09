@@ -1,16 +1,11 @@
 === Shape analysis results for switch2.php
 Summary for \f:
-[7:12-18] :
-  shape(
-    a => string
-  )
+[7:12-18] : shape()
 [10:12-27] :
   shape(
-    a => string
     b => int
   )
 [13:12-29] :
   shape(
-    a => string
     c => bool
   )

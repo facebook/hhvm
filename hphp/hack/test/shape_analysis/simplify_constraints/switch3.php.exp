@@ -4,10 +4,8 @@ Summary for \f:
   shape(
     a => int
     c => bool
-    d => float
   )
 [11:12-18] :
   shape(
     b => string
-    d => float
   )

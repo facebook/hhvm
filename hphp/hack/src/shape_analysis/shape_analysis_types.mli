@@ -40,8 +40,9 @@ type constraint_ =
           type of the key *)
   | Has_dynamic_key of entity_
       (** Records that an entity is accessed with a dynamic key *)
-  | Points_to of entity_ * entity_
-      (** Records that the first entity points to the second one *)
+  | Subset of entity_ * entity_
+      (** Records that the first keys of the first entity are all present in
+          the second. *)
 
 type shape_result =
   | Shape_like_dict of Pos.t * (shape_key * Typing_defs.locl_ty) list
@@ -67,3 +68,7 @@ type env = {
 module PointsToSet : Set.S with type elt = entity_ * entity_
 
 module ShapeKeyMap : Map.S with type key = shape_key
+
+module EntityMap : Map.S with type key = entity_
+
+module EntitySet : Set.S with type elt = entity_

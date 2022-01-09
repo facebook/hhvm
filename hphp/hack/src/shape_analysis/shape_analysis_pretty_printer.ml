@@ -25,8 +25,7 @@ let show_constraint_ env =
   | Has_static_key (entity, key, ty) ->
     "SK " ^ show_entity entity ^ " => " ^ show_key key ^ " : " ^ show_ty ty
   | Has_dynamic_key entity -> "DK " ^ show_entity entity ^ " : dyn"
-  | Points_to (pointer_entity, pointed_entity) ->
-    show_entity pointer_entity ^ " -> " ^ show_entity pointed_entity
+  | Subset (sub, sup) -> show_entity sub ^ " ⊆ " ^ show_entity sup
 
 let show_shape_result env = function
   | Shape_like_dict (pos, keys_and_types) ->

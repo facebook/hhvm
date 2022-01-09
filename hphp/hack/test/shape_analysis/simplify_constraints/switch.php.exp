@@ -1,0 +1,8 @@
+=== Shape analysis results for switch.php
+Summary for \f:
+[4:8-14] :
+  shape(
+    a => int
+    b => string
+    c => bool
+  )

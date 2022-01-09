@@ -9,6 +9,7 @@
 open Hh_prelude
 open Shape_analysis_types
 open Shape_analysis_pretty_printer
+module Cont = Typing_continuations
 module A = Aast
 module T = Tast
 module SN = Naming_special_names
@@ -85,7 +86,7 @@ let rec assign
     (rhs : entity)
     (ty_rhs : Typing_defs.locl_ty) : env =
   match lval with
-  | A.Lvar (_, lid) -> Env.set_local lid rhs env
+  | A.Lvar (_, lid) -> Env.set_local env lid rhs
   | A.Array_get (base, Some ix) ->
     (* TODO: keep track of assignments to statically known keys in the environment *)
     let (env, entity) = expr env base in
@@ -118,7 +119,7 @@ and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let env = add_key_constraint env entity_exp ix ty in
     (env, None)
   | A.Lvar (_, lid) ->
-    let entity = Env.get_local lid env in
+    let entity = Env.get_local env lid in
     (env, entity)
   | A.Binop (Ast_defs.Eq None, e1, ((ty_rhs, _, _) as e2)) ->
     let (env, entity_rhs) = expr env e2 in
@@ -128,7 +129,25 @@ and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
 
 let expr (env : env) (e : T.expr) : env = expr env e |> fst
 
-let rec stmt (env : env) ((pos, stmt) : T.stmt) : env =
+let rec case_list
+    (parent_locals : lenv) (env : env) (cases : ('ex, 'en) A.case list) : env =
+  let initialize_next_cont env =
+    let env = Env.restore_conts_from env ~from:parent_locals [Cont.Next] in
+    let env = Env.update_next_from_conts env [Cont.Next; Cont.Fallthrough] in
+    Env.drop_cont env Cont.Fallthrough
+  in
+  let handle_case env = function
+    | A.Default (_, b) ->
+      let env = initialize_next_cont env in
+      block env b
+    | A.Case (e, b) ->
+      let env = initialize_next_cont env in
+      let env = expr env e in
+      block env b
+  in
+  List.fold ~init:env ~f:handle_case cases
+
+and stmt (env : env) ((pos, stmt) : T.stmt) : env =
   match stmt with
   | A.Expr e
   | A.Return (Some e) ->
@@ -139,6 +158,18 @@ let rec stmt (env : env) ((pos, stmt) : T.stmt) : env =
     let then_env = block base_env then_bl in
     let else_env = block base_env else_bl in
     Env.union parent_env then_env else_env
+  | A.Switch (cond, cases) ->
+    let env = expr env cond in
+    (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.
+     * See the note in
+     * http://php.net/manual/en/control-structures.continue.php *)
+    Env.stash_and_do env [Cont.Continue; Cont.Break] @@ fun env ->
+    let parent_locals = env.lenv in
+    let env = case_list parent_locals env cases in
+    Env.update_next_from_conts env [Cont.Continue; Cont.Break; Cont.Next]
+  | A.Fallthrough -> Env.move_and_merge_next_in_cont env Cont.Fallthrough
+  | A.Continue -> Env.move_and_merge_next_in_cont env Cont.Continue
+  | A.Break -> Env.move_and_merge_next_in_cont env Cont.Break
   | A.Noop
   | A.AssertEnv _
   | A.Markup _ ->

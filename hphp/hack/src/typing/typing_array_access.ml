@@ -871,7 +871,9 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
         when String.equal n SN.Collections.cKeyset ->
         let (env, err_res) = check_keyset_value env expr_pos ty1 ty2 in
         let (env, tk') =
-          let dyn_t = MakeType.dynamic Reason.Rnone in
+          let ak_t =
+            MakeType.arraykey (Reason.Rkey_value_collection_key expr_pos)
+          in
           if
             (* TODO: Remove the test for sound dynamic. It is never ok to put
                dynamic as the key to a dict since the key must be a
@@ -880,7 +882,7 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
               TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
             &&
             match err_res with
-            | Ok _ -> Typing_utils.is_sub_type_for_union env dyn_t ty2
+            | Ok _ -> not (Typing_utils.is_sub_type_for_union env ty2 ak_t)
             | _ -> false
           then
             (* if there weren't any errors with the key then either it is dynamic
@@ -888,7 +890,7 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
                set the keytype to arraykey, since that the only thing that hhvm won't
                error on.
             *)
-            (env, MakeType.arraykey (Reason.Rkey_value_collection_key expr_pos))
+            (env, ak_t)
           else
             Typing_union.union env tv ty2
         in
@@ -1140,7 +1142,8 @@ let assign_array_get_with_err
             (any, any)
         in
         let (env, tk') =
-          let dyn_t = MakeType.dynamic Reason.Rnone in
+          let (_, p, _) = key in
+          let ak_t = MakeType.arraykey (Reason.Ridx_dict p) in
           if
             (* TODO: Remove the test for sound dynamic. It is never ok to put
                dynamic as the key to a dict since the key must be a
@@ -1149,7 +1152,7 @@ let assign_array_get_with_err
               TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
             &&
             match idx_err with
-            | Ok _ -> Typing_utils.is_sub_type_for_union env dyn_t tkey
+            | Ok _ -> not (Typing_utils.is_sub_type_for_union env tkey ak_t)
             | _ -> false
           then
             (* if there weren't any errors with the key then either it is dynamic
@@ -1160,8 +1163,7 @@ let assign_array_get_with_err
             if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
               pessimised_vec_dict_assign expr_pos env tk tkey
             else
-              let (_, p, _) = key in
-              (env, MakeType.arraykey (Reason.Ridx_dict p))
+              (env, ak_t)
           else
             Typing_union.union env tk tkey
         in

@@ -28,6 +28,12 @@ extern const int64_t k_DEBUG_BACKTRACE_PROVIDE_METADATA;
 
 extern const int64_t k_DEBUG_BACKTRACE_HASH_CONSIDER_METADATA;
 
+// Run a single step of hphp_debug_caller_info. This function is called on
+// each frame in the backtrace, starting at the deepest one. We stop when it
+// returns true (i.e. when it has found a non-skip-frame caller.)
+bool hphp_debug_caller_info_impl(
+    Array& result, bool& skipped, const Func* func, Offset offset);
+
 Array HHVM_FUNCTION(debug_backtrace,
                     int64_t options = k_DEBUG_BACKTRACE_PROVIDE_OBJECT,
                     int64_t limit = 0);

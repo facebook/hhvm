@@ -46,6 +46,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
+#include "hphp/runtime/ext/std/ext_std_errorfunc.h"
 
 #include "hphp/util/text-util.h"
 
@@ -197,6 +198,25 @@ SSATmp* opt_chr(IRGS& env, const ParamPrep& params) {
   }
 
   return nullptr;
+}
+
+SSATmp* opt_hphp_debug_caller_info(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 0) return nullptr;
+
+  Array result = empty_dict_array();
+  auto skipped = false;
+  auto found = true;
+
+  for (auto i = env.inlineState.depth; i > 0; i--) {
+    auto const sk = env.inlineState.bcStateStack[i - 1];
+    found = hphp_debug_caller_info_impl(
+        result, skipped, sk.func(), sk.offset());
+    if (found) break;
+  }
+
+  if (!found) return nullptr;
+  auto const ad = ArrayData::GetScalarArray(std::move(result));
+  return cns(env, ad);
 }
 
 SSATmp* opt_ini_get(IRGS& env, const ParamPrep& params) {
@@ -1082,6 +1102,7 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"abs", opt_abs},
   {"ord", opt_ord},
   {"chr", opt_chr},
+  {"hphp_debug_caller_info", opt_hphp_debug_caller_info},
   {"hh\\array_key_cast", opt_array_key_cast},
   {"hh\\type_structure", opt_type_structure},
   {"hh\\type_structure_no_throw", opt_type_structure_no_throw},

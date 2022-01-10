@@ -74,6 +74,40 @@ ArrayData* debug_backtrace_jit(int64_t options) {
   return HHVM_FN(debug_backtrace)(options).detach();
 }
 
+bool hphp_debug_caller_info_impl(
+    Array& result, bool& skipped, const Func* func, Offset offset) {
+  if (!skipped && func->isSkipFrame()) return false;
+  if (!skipped) {
+    skipped = true;
+    return false;
+  }
+
+  if (func->name()->isame(s_call_user_func.get())) return false;
+  if (func->name()->isame(s_call_user_func_array.get())) return false;
+
+  auto const line = func->getLineNumber(offset);
+  if (line == -1) return false;
+
+  auto const cls = func->cls();
+  auto const path = func->originalFilename() ?
+    func->originalFilename() : func->unit()->filepath();
+  if (cls && !func->isClosureBody()) {
+    result = make_dict_array(
+      s_class, const_cast<StringData*>(cls->name()),
+      s_file, const_cast<StringData*>(path),
+      s_function, const_cast<StringData*>(func->name()),
+      s_line, line
+    );
+  } else {
+    result = make_dict_array(
+      s_file, const_cast<StringData*>(path),
+      s_function, const_cast<StringData*>(func->name()),
+      s_line, line
+    );
+  }
+  return true;
+}
+
 /**
  * hphp_debug_caller_info - returns an array of info about the "caller"
  *
@@ -86,39 +120,13 @@ ArrayData* debug_backtrace_jit(int64_t options) {
  * class name (if in class context) where the "caller" called the "callee".
  */
 Array HHVM_FUNCTION(hphp_debug_caller_info) {
-  Array ret = empty_dict_array();
+  Array result = empty_dict_array();
   bool skipped = false;
   walkStack([&] (const BTFrame& frm) {
-    auto const func = frm.func();
-    if (!skipped && func->isSkipFrame()) return false;
-    if (!skipped) {
-      skipped = true;
-      return false;
-    }
-    if (func->name()->isame(s_call_user_func.get())) return false;
-    if (func->name()->isame(s_call_user_func_array.get())) return false;
-    auto const line = func->getLineNumber(frm.bcOff());
-    if (line == -1) return false;
-    auto const cls = func->cls();
-    auto const path = func->originalFilename() ?
-      func->originalFilename() : func->unit()->filepath();
-    if (cls && !func->isClosureBody()) {
-      ret = make_dict_array(
-        s_class, const_cast<StringData*>(cls->name()),
-        s_file, const_cast<StringData*>(path),
-        s_function, const_cast<StringData*>(func->name()),
-        s_line, line
-      );
-    } else {
-      ret = make_dict_array(
-        s_file, const_cast<StringData*>(path),
-        s_function, const_cast<StringData*>(func->name()),
-        s_line, line
-      );
-    }
-    return true;
+    return hphp_debug_caller_info_impl(
+        result, skipped, frm.func(), frm.bcOff());
   });
-  return ret;
+  return result;
 }
 
 int64_t HHVM_FUNCTION(hphp_debug_backtrace_hash, int64_t options /* = 0 */) {

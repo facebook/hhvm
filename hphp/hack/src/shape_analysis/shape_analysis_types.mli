@@ -33,6 +33,10 @@ type entity = entity_ option
 
 type shape_key = SK_string of string [@@deriving eq, ord]
 
+module ShapeKeyMap : Map.S with type key = shape_key
+
+type shape_keys = Typing_defs.locl_ty ShapeKeyMap.t
+
 type exists_kind =
   | Allocation  (** A dict allocation such as `dict[]` or `dict['a' => 42]` *)
   | Extension  (** A dict extension such as `$d['a'] = 42` *)
@@ -40,9 +44,9 @@ type exists_kind =
 
 type constraint_ =
   | Exists of exists_kind * Pos.t  (** Records creation of a dict *)
-  | Has_static_key of entity_ * shape_key * Typing_defs.locl_ty
-      (** Records the static key an entity is accessed with along with the Hack
-          type of the key *)
+  | Has_static_keys of entity_ * shape_keys
+      (** Records the static keys an entity is accessed with along with the Hack
+          types of those keys *)
   | Has_dynamic_key of entity_
       (** Records that an entity is accessed with a dynamic key *)
   | Subset of entity_ * entity_
@@ -71,8 +75,6 @@ type env = {
 }
 
 module PointsToSet : Set.S with type elt = entity_ * entity_
-
-module ShapeKeyMap : Map.S with type key = shape_key
 
 module EntityMap : Map.S with type key = entity_
 

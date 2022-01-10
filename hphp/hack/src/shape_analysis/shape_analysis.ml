@@ -15,6 +15,7 @@ module T = Tast
 module SN = Naming_special_names
 module Env = Shape_analysis_env
 module Solver = Shape_analysis_solver
+module Logic = Shape_analysis_logic
 
 (* A program analysis to find shape like dicts and the static keys used in
    these dicts. *)
@@ -74,7 +75,7 @@ let add_key_constraint
       match key with
       | A.String str ->
         let ty = fully_expand_type env ty in
-        Has_static_key (entity, SK_string str, ty)
+        Has_static_keys (entity, Logic.singleton (SK_string str) ty)
       | _ -> Has_dynamic_key entity
     in
     Env.add_constraint env constraint_

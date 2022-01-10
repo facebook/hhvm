@@ -26,6 +26,14 @@ type entity = entity_ option
 
 type shape_key = SK_string of string [@@deriving eq, ord]
 
+module ShapeKeyMap = Map.Make (struct
+  type t = shape_key
+
+  let compare = compare_shape_key
+end)
+
+type shape_keys = Typing_defs.locl_ty ShapeKeyMap.t
+
 type exists_kind =
   | Allocation
   | Extension
@@ -33,7 +41,7 @@ type exists_kind =
 
 type constraint_ =
   | Exists of exists_kind * Pos.t
-  | Has_static_key of entity_ * shape_key * Typing_defs.locl_ty
+  | Has_static_keys of entity_ * shape_keys
   | Has_dynamic_key of entity_
   | Subset of entity_ * entity_
 
@@ -56,12 +64,6 @@ module PointsToSet = Set.Make (struct
     match compare_entity_ a c with
     | 0 -> compare_entity_ b d
     | x -> x
-end)
-
-module ShapeKeyMap = Map.Make (struct
-  type t = shape_key
-
-  let compare = compare_shape_key
 end)
 
 module EntityMap = Map.Make (struct

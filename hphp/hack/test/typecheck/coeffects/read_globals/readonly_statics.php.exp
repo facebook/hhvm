@@ -1,0 +1,34 @@
+File "readonly_statics.php", line 16, characters 10-16:
+Creating mutable references to static properties requires the capability Globals, which is not provided by the context. Enclose the static in a readonly expression. (Parsing[1002])
+File "readonly_statics.php", line 17, characters 5-11:
+Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`). (Parsing[1002])
+File "readonly_statics.php", line 22, characters 10-16:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
+File "readonly_statics.php", line 23, characters 5-11:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
+File "readonly_statics.php", line 23, characters 5-11:
+Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`). (Parsing[1002])
+File "readonly_statics.php", line 24, characters 19-25:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context. Add the context `[read_globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `read_globals`). (Parsing[1002])
+File "readonly_statics.php", line 16, characters 15-16:
+Creating mutable references to static properties requires the capability AccessGlobals, which is not provided by the context. (Typing[4401])
+  File "readonly_statics.php", line 15, characters 41-52:
+  The local (enclosing) context provides the capability ReadGlobals
+  File "readonly_statics.php", line 16, characters 15-16:
+  Please enclose the static in a readonly expression
+File "readonly_statics.php", line 17, characters 5-15:
+Modifying static properties requires the capability AccessGlobals, which is not provided by the context. (Typing[4401])
+  File "readonly_statics.php", line 15, characters 41-52:
+  The local (enclosing) context provides the capability ReadGlobals
+File "readonly_statics.php", line 22, characters 15-16:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context. (Typing[4401])
+  File "readonly_statics.php", line 21, characters 42-43:
+  The local (enclosing) context provides the capability set {}
+File "readonly_statics.php", line 23, characters 5-15:
+Modifying static properties requires the capability AccessGlobals, which is not provided by the context. (Typing[4401])
+  File "readonly_statics.php", line 21, characters 42-43:
+  The local (enclosing) context provides the capability set {}
+File "readonly_statics.php", line 23, characters 10-11:
+Reading static properties requires the capability ReadGlobals, which is not provided by the context. (Typing[4401])
+  File "readonly_statics.php", line 21, characters 42-43:
+  The local (enclosing) context provides the capability set {}

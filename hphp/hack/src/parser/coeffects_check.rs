@@ -327,31 +327,6 @@ impl Checker {
         }
     }
 
-    fn do_access_globals_check(&mut self, e: &aast::Expr<(), ()>) {
-        if let Some((bop, lhs, _)) = e.2.as_binop() {
-            if let ast_defs::Bop::Eq(_) = bop {
-                self.check_is_static_property(&lhs, Ctx::Globals);
-            }
-        }
-    }
-
-    fn do_read_globals_check(&mut self, e: &aast::Expr<(), ()>) {
-        self.check_is_static_property(e, Ctx::ReadGlobals);
-    }
-
-    fn check_is_static_property(&mut self, e: &aast::Expr<(), ()>, capability: Ctx) {
-        if let Some((_, _, prop_or_method)) = e.2.as_class_get() {
-            if let ast_defs::PropOrMethod::IsProp = prop_or_method {
-                if capability == Ctx::ReadGlobals {
-                    self.add_error(&e.1, syntax_error::read_globals_without_capability)
-                }
-                if capability == Ctx::Globals {
-                    self.add_error(&e.1, syntax_error::access_globals_without_capability)
-                }
-            }
-        }
-    }
-
     fn check_is_obj_property_write_expr(
         &mut self,
         top_level_expr: &aast::Expr<(), ()>,
@@ -454,9 +429,51 @@ impl<'ast> Visitor<'ast> for Checker {
                 }
             }
             if !c.has_access_globals() {
-                self.do_access_globals_check(&p);
-                if !c.has_read_globals() {
-                    self.do_read_globals_check(&p);
+                // Do access globals check e.g. C::$x = 5;
+                if let Some((bop, lhs, rhs)) = p.2.as_binop() {
+                    if let ast_defs::Bop::Eq(_) = bop {
+                        if let Some((_, _, prop_or_method)) = lhs.2.as_class_get() {
+                            if let ast_defs::PropOrMethod::IsProp = prop_or_method {
+                                self.add_error(
+                                    &lhs.1,
+                                    syntax_error::access_globals_without_capability,
+                                );
+                                // TODO(T109525099): Turn on runtime enforcement for enclosing
+                                // statics in readonly expressions
+                                // Skipping one level of recursion when read_globals are present
+                                // ensures the left hand side global is not subject to read_global
+                                // enforcement, thus duplicating the error message.
+                                if c.has_read_globals() && c.is_typechecker() {
+                                    return rhs.recurse(c, self);
+                                }
+                            }
+                        }
+                    }
+                }
+                // TODO(T109525099): Turn on runtime enforcement for enclosing statics in readonly
+                // expressions
+                if c.is_typechecker() {
+                    // Skipping one level of recursion for a readonly expression when read_globals are
+                    // present ensures globals enclosed in read_globals are not subject to enforcement.
+                    if let Some(e) = p.2.as_readonly_expr() {
+                        if c.has_read_globals() {
+                            // Do not subject the readonly static itself to read_globals check, only its potential children
+                            return e.recurse(c, self);
+                        }
+                    }
+                }
+                if let Some((_, _, prop_or_method)) = p.2.as_class_get() {
+                    if let ast_defs::PropOrMethod::IsProp = prop_or_method {
+                        if !c.has_read_globals() {
+                            self.add_error(&p.1, syntax_error::read_globals_without_capability)
+                        } else {
+                            // TODO(T109525099): Turn on runtime enforcement for enclosing
+                            // statics in readonly expressions
+                            if c.is_typechecker() {
+                                self.add_error(&p.1, syntax_error::read_globals_without_readonly)
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -1115,3 +1115,7 @@ pub const access_globals_without_capability: Error = Cow::Borrowed(
 pub fn module_attr_arity(len: usize) -> Error {
     Cow::Owned(format!("`__Module` takes 1 argument, but got {}", len))
 }
+
+pub const read_globals_without_readonly: Error = Cow::Borrowed(
+    "Creating mutable references to static properties requires the capability Globals, which is not provided by the context. Enclose the static in a readonly expression.",
+);

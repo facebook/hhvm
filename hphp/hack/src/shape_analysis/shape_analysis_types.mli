@@ -36,6 +36,7 @@ type shape_key = SK_string of string [@@deriving eq, ord]
 type exists_kind =
   | Allocation  (** A dict allocation such as `dict[]` or `dict['a' => 42]` *)
   | Extension  (** A dict extension such as `$d['a'] = 42` *)
+  | Parameter  (** A dict parameter to a function or method *)
 
 type constraint_ =
   | Exists of exists_kind * Pos.t  (** Records creation of a dict *)

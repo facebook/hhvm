@@ -76,17 +76,21 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
   in
 
   let subsets = PointsToSet.of_list subsets |> transitive_closure in
-  let subset_of_literal_index =
-    let f elt map =
+  let concrete_superset_map =
+    let update entity pos map =
+      EntityMap.update
+        entity
+        (function
+          | None -> Some (Pos.Set.singleton pos)
+          | Some set -> Some (Pos.Set.add pos set))
+        map
+    in
+    let f elt concrete_superset_map =
       match elt with
-      | (_, Variable _) -> map
-      | (e1, Literal pos) ->
-        EntityMap.update
-          e1
-          (function
-            | None -> Some (Pos.Set.singleton pos)
-            | Some s -> Some (Pos.Set.add pos s))
-          map
+      | (e, Literal pos) ->
+        let concrete_superset_map = update e pos concrete_superset_map in
+        concrete_superset_map
+      | (_, Variable _) -> concrete_superset_map
     in
     PointsToSet.fold f subsets EntityMap.empty
   in
@@ -94,22 +98,26 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
      supersets of a variable, or in the case of a literal all concrete
      positions that are supersets of a variable + the concrete position we have
      at hand. *)
-  let all_concrete_supersets entity =
-    let find_super_poss entity =
-      match EntityMap.find_opt entity subset_of_literal_index with
+  let collect_concrete map entity =
+    let find_poss entity =
+      match EntityMap.find_opt entity map with
       | Some poss -> Pos.Set.elements poss
       | None -> []
     in
     match entity with
-    | Literal pos -> pos :: find_super_poss entity
-    | Variable _ -> find_super_poss entity
+    | Literal pos -> pos :: find_poss entity
+    | Variable _ -> find_poss entity
   in
+  let collect_concrete_supersets = collect_concrete concrete_superset_map in
 
-  let static_accesses =
+  let static_accesses collect_all_concrete =
     List.concat_map
       ~f:(fun (entity, key, ty) ->
-        all_concrete_supersets entity |> List.map ~f:(fun pos -> (pos, key, ty)))
+        collect_all_concrete entity |> List.map ~f:(fun pos -> (pos, key, ty)))
       static_accesses
+  in
+  let static_accesses_upwards_closed =
+    static_accesses collect_concrete_supersets
   in
 
   (* Start collecting shape results starting with empty shapes of candidates *)
@@ -123,7 +131,7 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
   (* Invalidate candidates that are observed to experience dynamic access *)
   let dynamic_accesses =
     dynamic_accesses
-    |> List.concat_map ~f:all_concrete_supersets
+    |> List.concat_map ~f:collect_concrete_supersets
     |> Pos.Set.of_list
   in
   let static_shape_results : Typing_defs.locl_ty ShapeKeyMap.t Pos.Map.t =
@@ -144,7 +152,7 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
       | Some shape_key_map ->
         Some (ShapeKeyMap.update key (update_shape_key ty) shape_key_map)
     in
-    static_accesses
+    static_accesses_upwards_closed
     |> List.fold ~init:static_shape_results ~f:(fun pos_map (pos, key, ty) ->
            Pos.Map.update pos (update_entity key ty) pos_map)
   in

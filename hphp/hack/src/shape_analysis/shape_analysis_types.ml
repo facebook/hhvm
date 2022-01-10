@@ -29,6 +29,7 @@ type shape_key = SK_string of string [@@deriving eq, ord]
 type exists_kind =
   | Allocation
   | Extension
+  | Parameter
 
 type constraint_ =
   | Exists of exists_kind * Pos.t

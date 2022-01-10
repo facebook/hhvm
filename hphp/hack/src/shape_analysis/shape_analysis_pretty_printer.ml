@@ -23,6 +23,7 @@ let show_constraint_ env =
   function
   | Exists (Allocation, pos) -> Format.asprintf "Allocated at %a" Pos.pp pos
   | Exists (Extension, pos) -> Format.asprintf "Extended at %a" Pos.pp pos
+  | Exists (Parameter, pos) -> Format.asprintf "Parameter at %a" Pos.pp pos
   | Has_static_key (entity, key, ty) ->
     "SK " ^ show_entity entity ^ " => " ^ show_key key ^ " : " ^ show_ty ty
   | Has_dynamic_key entity -> "DK " ^ show_entity entity ^ " : dyn"

@@ -220,23 +220,66 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
 
 and block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 
-let callable ~saved_env body : constraint_ list =
-  let env = Env.init saved_env in
+(* Is the type a suitable dict that can be coverted into shape. For the moment,
+   that's only the case if the key is a string. TODO: support int and arraykey
+   once we support constant keys. *)
+let is_suitable_target_ty ty =
+  match Typing_defs.get_node ty with
+  | Typing_defs.Tclass ((_, id), _, [key_ty; _])
+    when String.equal id SN.Collections.cDict ->
+    (match Typing_defs.get_node key_ty with
+    | Typing_defs.Tprim A.Tstring -> true
+    | _ -> false)
+  | _ -> false
+
+let init_params (params : T.fun_param list) : constraint_ list * entity LMap.t =
+  let add_param (constraints, lmap) = function
+    | A.
+        {
+          param_pos;
+          param_name;
+          param_type_hint = (ty, _);
+          param_is_variadic = false;
+          _;
+        } ->
+      if is_suitable_target_ty ty then
+        let param_lid = Local_id.make_unscoped param_name in
+        let entity_ = Literal param_pos in
+        let lmap = LMap.add param_lid (Some entity_) lmap in
+        let constraints = Exists (Parameter, param_pos) :: constraints in
+        (constraints, lmap)
+      else
+        (constraints, lmap)
+    | _ -> (constraints, lmap)
+  in
+  List.fold ~f:add_param ~init:([], LMap.empty) params
+
+let callable ~saved_env params body : constraint_ list =
+  let (param_constraints, param_env) = init_params params in
+  let env = Env.init saved_env param_constraints param_env in
   let env = block env body.A.fb_ast in
   env.constraints
 
 let walk_tast (tast : Tast.program) : constraint_ list SMap.t =
   let def : T.def -> (string * constraint_ list) list = function
     | A.Fun fd ->
-      let A.{ f_body; f_name = (_, id); f_annotation = saved_env; _ } =
+      let A.{ f_body; f_name = (_, id); f_annotation = saved_env; f_params; _ }
+          =
         fd.A.fd_fun
       in
-      [(id, callable ~saved_env f_body)]
+      [(id, callable ~saved_env f_params f_body)]
     | A.Class A.{ c_methods; c_name = (_, class_name); _ } ->
       let handle_method
-          A.{ m_body; m_name = (_, method_name); m_annotation = saved_env; _ } =
+          A.
+            {
+              m_body;
+              m_name = (_, method_name);
+              m_annotation = saved_env;
+              m_params;
+              _;
+            } =
         let id = class_name ^ "::" ^ method_name in
-        (id, callable ~saved_env m_body)
+        (id, callable ~saved_env m_params m_body)
       in
       List.map ~f:handle_method c_methods
     | _ -> failwith "A definition is not yet handled"

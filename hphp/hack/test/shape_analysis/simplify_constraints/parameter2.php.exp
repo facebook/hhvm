@@ -1,0 +1,12 @@
+=== Shape analysis results for parameter2.php
+Summary for \f:
+[3:38-40] : shape()
+[4:3-15] :
+  shape(
+    k => int
+  )
+[5:3-15] :
+  shape(
+    k => int
+    l => int
+  )

@@ -50,7 +50,7 @@ let union_continuation (constraints : constraint_ list) cont1 cont2 =
 module LEnv = struct
   type t = lenv
 
-  let init : t = Cont.Map.add Cont.Next LMap.empty Cont.Map.empty
+  let init bindings : t = Cont.Map.add Cont.Next bindings Cont.Map.empty
 
   let get_local_in_continuation lenv cont lid : entity =
     let open Option.Monad_infix in
@@ -93,7 +93,8 @@ module LEnv = struct
     Cont.Map.union_env [] lenv1 lenv2 ~combine
 end
 
-let init saved_env = { constraints = []; lenv = LEnv.init; saved_env }
+let init saved_env constraints bindings =
+  { constraints; lenv = LEnv.init bindings; saved_env }
 
 let add_constraint env constraint_ =
   { env with constraints = constraint_ :: env.constraints }

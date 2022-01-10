@@ -16,17 +16,33 @@ module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
 module SN = Naming_special_names
 
-let get_constant tc (seen, has_default) = function
-  | Default _ -> (seen, true)
-  | Case ((_, pos, Class_const ((_, _, CI (_, cls)), (_, const))), _) ->
+type kind =
+  | Enum
+  | EnumClass
+  | EnumClassLabel
+
+let get_constant tc kind (seen, has_default) case =
+  let (kind, is_enum_class_label) =
+    match kind with
+    | Enum -> ("enum ", false)
+    | EnumClass -> ("enum class ", false)
+    | EnumClassLabel -> ("enum class ", true)
+  in
+  let check_case pos cls const =
+    (* wish:T109260699 *)
     if String.( <> ) cls (Cls.name tc) then (
       Errors.add_typing_error
         Typing_error.(
           enum
           @@ Primary.Enum.Enum_switch_wrong_class
-               { pos; expected = strip_ns (Cls.name tc); actual = strip_ns cls });
+               {
+                 pos;
+                 kind;
+                 expected = strip_ns (Cls.name tc);
+                 actual = strip_ns cls;
+               });
       (seen, has_default)
-    ) else (
+    ) else
       match SMap.find_opt const seen with
       | None -> (SMap.add const pos seen, has_default)
       | Some old_pos ->
@@ -36,17 +52,31 @@ let get_constant tc (seen, has_default) = function
             @@ Primary.Enum.Enum_switch_redundant
                  { const_name = const; first_pos = old_pos; pos });
         (seen, has_default)
-    )
+  in
+  match case with
+  | Default _ -> (seen, true)
+  | Case ((_, pos, Class_const ((_, _, CI (_, cls)), (_, const))), _)
+    when not is_enum_class_label ->
+    check_case pos cls const
+  | Case ((_, pos, EnumClassLabel (Some (_, cls), const)), _) ->
+    check_case pos cls const
   | Case ((_, pos, _), _) ->
     Errors.add_typing_error
       Typing_error.(enum @@ Primary.Enum.Enum_switch_not_const pos);
     (seen, has_default)
 
-let check_enum_exhaustiveness pos tc caselist coming_from_unresolved =
+let check_enum_exhaustiveness pos tc kind caselist coming_from_unresolved =
+  let str_kind =
+    match kind with
+    | Enum -> "Enum"
+    | EnumClass
+    | EnumClassLabel ->
+      "Enum class"
+  in
   (* If this check comes from an enum inside a Tunion, then
      don't punish for having an extra default case *)
   let (seen, has_default) =
-    List.fold_left ~f:(get_constant tc) ~init:(SMap.empty, false) caselist
+    List.fold_left ~f:(get_constant tc kind) ~init:(SMap.empty, false) caselist
   in
   let unhandled =
     Cls.consts tc
@@ -69,13 +99,14 @@ let check_enum_exhaustiveness pos tc caselist coming_from_unresolved =
         (Primary.Enum.Enum_switch_nonexhaustive
            {
              pos;
+             kind = str_kind;
              missing = List.sort unhandled ~compare:String.compare;
              decl_pos = Cls.pos tc;
            })
     | (true, true, false) ->
       Some
         (Primary.Enum.Enum_switch_redundant_default
-           { pos; decl_pos = Cls.pos tc })
+           { pos; kind = str_kind; decl_pos = Cls.pos tc })
     | _ -> None
   in
   Option.iter enum_err_opt ~f:(fun err ->
@@ -94,18 +125,25 @@ let check_enum_exhaustiveness pos tc caselist coming_from_unresolved =
  * class, or something else.
  *)
 let apply_if_enum_or_enum_class
-    env ~(default : 'a) ~(f : Env.env -> string -> 'a) name args =
-  if Env.is_enum env name then
-    f env name
-  else
-    match args with
+    env ~(default : 'a) ~(f : kind -> Env.env -> string -> 'a) name args =
+  let check_ec kind = function
     | [enum; _interface] ->
       begin
         match get_node enum with
-        | Tclass ((_, cid), _, _) when Env.is_enum_class env cid -> f env cid
+        | Tclass ((_, cid), _, _) when Env.is_enum_class env cid ->
+          f kind env cid
         | _ -> default
       end
     | _ -> default
+  in
+  if Env.is_enum env name then
+    f Enum env name
+  else if String.equal name SN.Classes.cMemberOf then
+    check_ec EnumClass args
+  else if String.equal name SN.Classes.cEnumClassLabel then
+    check_ec EnumClassLabel args
+  else
+    default
 
 let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
   (* Right now we only do exhaustiveness checking for enums. *)
@@ -113,13 +151,13 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
      inside then it tells the enum exhaustiveness checker to
      not punish for extra default *)
   let (env, ty) = Env.expand_type env ty in
-  let check env id =
+  let check kind env id =
     let dep = Typing_deps.Dep.AllMembers id in
     let decl_env = Env.get_decl_env env in
     Option.iter decl_env.Decl_env.droot ~f:(fun root ->
         Typing_deps.add_idep (Env.get_deps_mode env) root dep);
     let tc = unsafe_opt @@ Env.get_enum env id in
-    check_enum_exhaustiveness pos tc caselist enum_coming_from_unresolved;
+    check_enum_exhaustiveness pos tc kind caselist enum_coming_from_unresolved;
     env
   in
   match get_node ty with
@@ -134,7 +172,7 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
                   apply_if_enum_or_enum_class
                     env
                     ~default:false
-                    ~f:(fun _ _ -> true)
+                    ~f:(fun _ _ _ -> true)
                     name
                     args
                 | _ -> false)

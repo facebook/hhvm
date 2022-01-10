@@ -323,16 +323,19 @@ module Primary = struct
         }
       | Enum_switch_nonexhaustive of {
           pos: Pos.t;
+          kind: string;
           decl_pos: Pos_or_decl.t;
           missing: string list;
         }
       | Enum_switch_redundant_default of {
           pos: Pos.t;
+          kind: string;
           decl_pos: Pos_or_decl.t;
         }
       | Enum_switch_not_const of Pos.t
       | Enum_switch_wrong_class of {
           pos: Pos.t;
+          kind: string;
           expected: string;
           actual: string;
         }
@@ -431,33 +434,34 @@ module Primary = struct
       in
       (Error_code.EnumSwitchRedundant, claim, reason, [])
 
-    let enum_switch_nonexhaustive pos decl_pos missing =
+    let enum_switch_nonexhaustive pos kind decl_pos missing =
       let claim =
         ( pos,
           "`switch` statement nonexhaustive; the following cases are missing: "
           ^ (List.map ~f:Markdown_lite.md_codify missing
             |> String.concat ~sep:", ") )
-      and reason = [(decl_pos, "Enum declared here")] in
+      and reason = [(decl_pos, kind ^ " declared here")] in
       (Error_code.EnumSwitchNonexhaustive, claim, reason, [])
 
-    let enum_switch_redundant_default pos decl_pos =
+    let enum_switch_redundant_default pos kind decl_pos =
       let claim =
         ( pos,
           "All cases already covered; a redundant `default` case prevents "
           ^ "detecting future errors. If your goal is to guard against "
           ^ "invalid values for this type, do an `is` check before the switch."
         )
-      and reason = [(decl_pos, "Enum declared here")] in
+      and reason = [(decl_pos, kind ^ " declared here")] in
       (Error_code.EnumSwitchRedundantDefault, claim, reason, [])
 
     let enum_switch_not_const pos =
       let claim = (pos, "Case in `switch` on enum is not an enum constant") in
       (Error_code.EnumSwitchNotConst, claim, [], [])
 
-    let enum_switch_wrong_class pos expected actual =
+    let enum_switch_wrong_class pos kind expected actual =
       let claim =
         ( pos,
-          "Switching on enum "
+          "Switching on "
+          ^ kind
           ^ Markdown_lite.md_codify expected
           ^ " but using constant from "
           ^ Markdown_lite.md_codify actual )
@@ -537,13 +541,13 @@ module Primary = struct
       | Enum_type_typedef_nonnull pos -> enum_type_typedef_nonnull pos
       | Enum_switch_redundant { pos; first_pos; const_name } ->
         enum_switch_redundant pos first_pos const_name
-      | Enum_switch_nonexhaustive { pos; decl_pos; missing } ->
-        enum_switch_nonexhaustive pos decl_pos missing
-      | Enum_switch_redundant_default { pos; decl_pos } ->
-        enum_switch_redundant_default pos decl_pos
+      | Enum_switch_nonexhaustive { pos; kind; decl_pos; missing } ->
+        enum_switch_nonexhaustive pos kind decl_pos missing
+      | Enum_switch_redundant_default { pos; kind; decl_pos } ->
+        enum_switch_redundant_default pos kind decl_pos
       | Enum_switch_not_const pos -> enum_switch_not_const pos
-      | Enum_switch_wrong_class { pos; expected; actual } ->
-        enum_switch_wrong_class pos expected actual
+      | Enum_switch_wrong_class { pos; kind; expected; actual } ->
+        enum_switch_wrong_class pos kind expected actual
       | Enum_class_label_unknown { pos; label_name; class_name } ->
         enum_class_label_unknown pos label_name class_name
       | Enum_class_label_as_expr pos -> enum_class_label_as_expr pos

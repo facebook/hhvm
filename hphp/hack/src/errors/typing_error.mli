@@ -81,16 +81,19 @@ module Primary : sig
         }
       | Enum_switch_nonexhaustive of {
           pos: Pos.t;
+          kind: string;
           decl_pos: Pos_or_decl.t;
           missing: string list;
         }
       | Enum_switch_redundant_default of {
           pos: Pos.t;
+          kind: string;
           decl_pos: Pos_or_decl.t;
         }
       | Enum_switch_not_const of Pos.t
       | Enum_switch_wrong_class of {
           pos: Pos.t;
+          kind: string;
           expected: string;
           actual: string;
         }

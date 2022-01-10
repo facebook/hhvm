@@ -1,0 +1,12 @@
+=== Shape analysis results for identical_keys_different_shapes.php
+Summary for \f:
+[3:32-35] : shape()
+[3:57-60] : shape()
+[4:3-16] :
+  shape(
+    k => int
+  )
+[5:3-18] :
+  shape(
+    k => bool
+  )

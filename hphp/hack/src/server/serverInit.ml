@@ -123,7 +123,6 @@ let remote_init genv env root worker_key nonce check_id _profiling =
     ~init_start_t
     ~bin_root
     ~root;
-  (* TODO(milliechen): sample cgorup memory stats during remote init *)
   let _ = Hh_logger.log_duration "Remote type check" t in
   (env, Load_state_declined "Out-of-band naming table initialization only")
 

@@ -1533,7 +1533,9 @@ and simplify_subtype_i
             (* This should have been caught already in the naming phase *)
             valid env
           | Some class_sub ->
-            if Cls.get_support_dynamic_type class_sub then
+            if
+              Cls.get_support_dynamic_type class_sub || Env.is_enum env class_id
+            then
               (* If a class has the __SupportDynamicType annotation, then
                  a type formed from it is a dynamic-aware subtype of dynamic if
                  the type arguments are correctly supplied, which depends on the

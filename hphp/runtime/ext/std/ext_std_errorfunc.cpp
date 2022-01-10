@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/bespoke-runtime.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -47,7 +48,8 @@ const StaticString
   s_args("args"),
   s_message("message"),
   s_call_user_func("call_user_func"),
-  s_call_user_func_array("call_user_func_array");
+  s_call_user_func_array("call_user_func_array"),
+  s_hphp_debug_caller_info("hphp_debug_caller_info");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -88,23 +90,35 @@ bool hphp_debug_caller_info_impl(
   auto const line = func->getLineNumber(offset);
   if (line == -1) return false;
 
+  static constexpr auto s_file_idx = 0;
+  static constexpr auto s_line_idx = 1;
+  static constexpr auto s_class_idx = 2;
+  static constexpr auto s_function_idx = 3;
+  static const RuntimeStruct::FieldIndexVector s_fields = {
+    {s_file_idx, s_file},
+    {s_line_idx, s_line},
+    {s_class_idx, s_class},
+    {s_function_idx, s_function},
+  };
+  static auto const s_struct =
+    RuntimeStruct::registerRuntimeStruct(s_hphp_debug_caller_info, s_fields);
+
   auto const cls = func->cls();
   auto const path = func->originalFilename() ?
     func->originalFilename() : func->unit()->filepath();
-  if (cls && !func->isClosureBody()) {
-    result = make_dict_array(
-      s_class, const_cast<StringData*>(cls->name()),
-      s_file, const_cast<StringData*>(path),
-      s_function, const_cast<StringData*>(func->name()),
-      s_line, line
-    );
-  } else {
-    result = make_dict_array(
-      s_file, const_cast<StringData*>(path),
-      s_function, const_cast<StringData*>(func->name()),
-      s_line, line
-    );
+
+  auto const has_cls = cls && !func->isClosureBody();
+  StructDictInit init(s_struct, has_cls ? 4 : 3);
+  if (has_cls) {
+    init.set(s_class_idx, s_class,
+             Variant(VarNR(const_cast<StringData*>(cls->name()))));
   }
+  init.set(s_file_idx, s_file,
+           Variant(VarNR(const_cast<StringData*>(path))));
+  init.set(s_function_idx, s_function,
+           Variant(VarNR(const_cast<StringData*>(func->name()))));
+  init.set(s_line_idx, s_line, line);
+  result = init.toArray();
   return true;
 }
 

@@ -215,8 +215,10 @@ SSATmp* opt_hphp_debug_caller_info(IRGS& env, const ParamPrep& params) {
   }
 
   if (!found) return nullptr;
-  auto const ad = ArrayData::GetScalarArray(std::move(result));
-  return cns(env, ad);
+  auto const layout = ArrayLayout::FromArray(result.get());
+  auto const vad = ArrayData::GetScalarArray(std::move(result));
+  auto const bad = layout.apply(vad);
+  return cns(env, bad);
 }
 
 SSATmp* opt_ini_get(IRGS& env, const ParamPrep& params) {

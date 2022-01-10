@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/hash-map.h"
 
@@ -348,13 +349,16 @@ void LoggingProfile::logEventImpl(const EventKey& key) {
 
   DEBUG_ONLY auto const count =
     incrementCounter(data->events, data->mapLock, key.toUInt64());
-  DEBUG_ONLY auto const op = key.getOp();
-  DEBUG_ONLY auto const has_sink =
-    op != ArrayOp::Release && op != ArrayOp::ReleaseUncounted;
-  DEBUG_ONLY auto const sink = has_sink ? getSrcKey() : SrcKey{};
-  FTRACE(6, "{} -> {}: {} [count={}]\n", key.toString(),
-         (sink.valid() ? sink.getSymbol() : "<unknown>"),
-         EventKey(key).toString(), count);
+
+  if (Trace::moduleEnabled(Trace::bespoke, 6)) {
+    DEBUG_ONLY auto const op = key.getOp();
+    DEBUG_ONLY auto const has_sink =
+      op != ArrayOp::Release && op != ArrayOp::ReleaseUncounted;
+    DEBUG_ONLY auto const sink = has_sink ? getSrcKey() : SrcKey{};
+    FTRACE(6, "{} -> {}: {} [count={}]\n", key.toString(),
+           (sink.valid() ? sink.getSymbol() : "<unknown>"),
+           EventKey(key).toString(), count);
+  }
 }
 
 void LoggingProfile::logEntryTypes(EntryTypes before, EntryTypes after) {

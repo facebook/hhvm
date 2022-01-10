@@ -161,7 +161,15 @@ struct VMRegAnchor {
   explicit VMRegAnchor(Mode mode = Hard);
 
   ~VMRegAnchor() {
-    if (m_old < VMRegState::GUARDED_THRESHOLD) {
+    // In debug mode, we use VMProtect to ensure that we don't write back to
+    // VMRegs from the JIT. When we drop a soft VMRegAnchor and fail to sync
+    // VMRegs, don't store the (unchanged) state - doing so asserts.
+    //
+    // We don't do this check in release mode, because VMRegAnchor is hot and
+    // we don't need the extra check. We just do an idempotent store instead.
+    if (debug && regState() != VMRegState::CLEAN) {
+      assertx(regState() == m_old);
+    } else if (m_old < VMRegState::GUARDED_THRESHOLD) {
       regState() = m_old;
     }
   }

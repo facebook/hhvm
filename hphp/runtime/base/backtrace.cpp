@@ -398,7 +398,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
       StructDictInit frame(s_runtimeStruct, btArgs.m_parserFrame ? 4 : 2);
       frame.set(s_file_idx, s_file,
-                Variant{const_cast<StringData*>(func->filename())});
+                Variant(VarNR(const_cast<StringData*>(func->filename()))));
       frame.set(s_line_idx, s_line, func->getLineNumber(curFrm.bcOff()));
       if (btArgs.m_parserFrame) {
         frame.set(s_function_idx, s_function, s_include);
@@ -431,7 +431,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         : prevFunc->unit()->filepath();
 
       assertx(prevFile != nullptr);
-      frame.set(s_file_idx, s_file, Variant{const_cast<StringData*>(prevFile)});
+      frame.set(s_file_idx, s_file,
+                Variant(VarNR(const_cast<StringData*>(prevFile))));
       frame.set(s_line_idx, s_line, prevFunc->getLineNumber(prev.bcOff()));
     }
 

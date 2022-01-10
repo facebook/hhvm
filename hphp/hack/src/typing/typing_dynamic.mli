@@ -51,14 +51,14 @@ val relax_method_type :
   Typing_defs.locl_ty Typing_defs_core.fun_type ->
   Typing_defs.locl_ty
 
-(* Make parameters of SDT types (tuples, shapes, and classes) into like types.
+(* Make parameters of SDT types (tuples, shapes, and classes) into like types,
+ * if that results in a well-formed type, otherwise leave them alone.
  * Return None if no change was made.
  * Example input: shape('a' => int, 'b' => string)
  * Output: shape('a' => ~int, 'b' => ~string)
  *
- * When the type parameters have `as` constraints, intersect with this constraint.
  * Example input: dict<int,string>
- * Output: dict<(arraykey & ~int), ~string>
+ * Output: dict<int,~string> (because ~int doesn't subtype arraykey)
  *)
 val try_push_like :
   Typing_env_types.env ->

@@ -1075,6 +1075,39 @@ and simplify_subtype_i
       simplify_subtype_i ~subtype_env ~this_ty ty_sub (LoclType ty_super') env
     | (_, Tunion (_ :: _ as tyl_super)) ->
       let simplify_sub_union env ty_sub tyl_super =
+        (* Implement the declarative subtyping rule C<~t1,...,~tn> <: ~C<t1,...,tn>
+         * for a type C<t1,...,tn> that supports dynamic. Algorithmically,
+         *   t <: ~C<t1,...,tn> iff
+         *   t <: C<~t1,...,~tn> /\ C<~t1,...,~tn> <:D dynamic.
+         * An SDT class C generalizes to other SDT constructors such as tuples and shapes.
+         *)
+        let try_push env =
+          if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
+            match TUtils.try_strip_dynamic ty_super with
+            | None -> invalid_env env
+            | Some ty ->
+              let (env, opt_ty) = Typing_dynamic.try_push_like env ty in
+              (match opt_ty with
+              | None -> invalid_env env
+              | Some ty ->
+                let simplify_pushed_like env =
+                  env
+                  |> simplify_dynamic_aware_subtype
+                       ~subtype_env
+                       ~this_ty
+                       ty
+                       (MakeType.dynamic Reason.Rnone)
+                  &&& simplify_subtype_i
+                        ~subtype_env
+                        ~this_ty
+                        ty_sub
+                        (LoclType ty)
+                in
+                env |> simplify_pushed_like)
+          else
+            invalid_env env
+        in
+
         (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
          * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
          * But we deal with unions on the left first (see case above), so this
@@ -1092,39 +1125,16 @@ and simplify_subtype_i
                 | Tdependent _
                 | Tgeneric _ ->
                   default_subtype env
-                | _ -> invalid_env env
+                | _ -> try_push env
               end
-            | _ -> invalid_env env)
+            | _ -> try_push env)
           | ty :: tys ->
             let ty = LoclType ty in
             env
             |> simplify_subtype_i ~subtype_env ~this_ty ty_sub ty
             ||| try_each tys
         in
-        (* Implement the declarative subtyping rule C<~t1,...,~tn> <: ~C<t1,...,tn>
-         * for a type C<t1,...,tn> that supports dynamic. Algorithmically,
-         *   t <: ~C<t1,...,tn> iff
-         *   t <: C<~t1,...,~tn> /\ C<~t1,...,~tn> <:D dynamic.
-         * An SDT class C generalizes to other SDT constructors such as tuples and shapes.
-         *)
-        if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-          match TUtils.try_strip_dynamic ty_super with
-          | None -> try_each tyl_super env
-          | Some ty ->
-            let (env, opt_ty) = Typing_dynamic.try_push_like env ty in
-            (match opt_ty with
-            | None -> try_each tyl_super env
-            | Some ty ->
-              env
-              |> simplify_dynamic_aware_subtype
-                   ~subtype_env
-                   ~this_ty
-                   ty
-                   (MakeType.dynamic Reason.Rnone)
-              &&& simplify_subtype_i ~subtype_env ~this_ty ty_sub (LoclType ty)
-              ||| try_each tyl_super)
-        else
-          try_each tyl_super env
+        env |> try_each tyl_super
       in
       (match ety_sub with
       | ConstraintType cty when is_constraint_type_union cty ->

@@ -164,33 +164,32 @@ let relax_method_type env relax r ft =
 (* Given t, construct ~t.
  * acc is a boolean that remains false if no change was made (e.g. t = dynamic)
  *)
-let make_like (acc, env) ty =
+let make_like changed ty =
   if Typing_defs.is_dynamic ty then
-    ((acc, env), ty)
+    (changed, ty)
   else
     let r = get_reason ty in
-    let (env, ty) = Typing_union.union env (Typing_make_type.dynamic r) ty in
-    ((true, env), ty)
+    (true, Typing_make_type.locl_like r ty)
 
 let try_push_like env ty =
   match deref ty with
   | (r, Ttuple tyl) ->
-    let ((acc, env), tyl) = List.map_env (false, env) tyl ~f:make_like in
+    let (changed, tyl) = List.map_env false tyl ~f:make_like in
     ( env,
-      if acc then
+      if changed then
         Some (mk (r, Ttuple tyl))
       else
         None )
   | (r, Tshape (kind, fields)) ->
-    let add_like_to_shape_field (acc, env) _name { sft_optional; sft_ty } =
-      let ((acc, env), sft_ty) = make_like (acc, env) sft_ty in
-      ((acc, env), { sft_optional; sft_ty })
+    let add_like_to_shape_field changed _name { sft_optional; sft_ty } =
+      let (changed, sft_ty) = make_like changed sft_ty in
+      (changed, { sft_optional; sft_ty })
     in
-    let ((acc, env), fields) =
-      TShapeMap.map_env add_like_to_shape_field (false, env) fields
+    let (changed, fields) =
+      TShapeMap.map_env add_like_to_shape_field false fields
     in
     ( env,
-      if acc then
+      if changed then
         Some (mk (r, Tshape (kind, fields)))
       else
         None )
@@ -202,35 +201,36 @@ let try_push_like env ty =
         if List.length tyl <> List.length (Cls.tparams cd) then
           (env, None)
         else
-          let make_like (acc, env) ty tp =
-            let ((acc, env), ty) = make_like (acc, env) ty in
-            if acc then
-              let upper_bounds =
-                List.filter_map tp.tp_constraints ~f:(fun (c, ty) ->
-                    match c with
-                    | Ast_defs.Constraint_as ->
-                      let (_env, ty) =
-                        Typing_phase.localize_no_subst
-                          env
-                          ~ignore_errors:true
-                          ty
-                      in
-                      Some ty
-                    | _ -> None)
-              in
-              let (env, ty) =
-                Typing_intersection.intersect_list env r (ty :: upper_bounds)
-              in
-              ((acc, env), ty)
+          (* Only push like onto type argument if it produces a well-formed type
+           * i.e. satisfies any as constraints
+           *)
+          let make_like changed ty tp =
+            let (changed', ty') = make_like changed ty in
+            if
+              List.for_all tp.tp_constraints ~f:(fun (c, cty) ->
+                  match c with
+                  | Ast_defs.Constraint_as ->
+                    let (_env, cty) =
+                      Typing_phase.localize_no_subst env ~ignore_errors:true cty
+                    in
+                    Typing_utils.is_sub_type_for_union
+                      ~coerce:(Some Typing_logic.CoerceToDynamic)
+                      env
+                      ty'
+                      cty
+                  | _ -> true)
+            then
+              (changed', ty')
             else
-              ((acc, env), ty)
+              (changed, ty)
           in
-          let ((acc, env), tyl) =
-            List.map2_env (false, env) tyl (Cls.tparams cd) ~f:make_like
+          let (changed, tyl) =
+            List.map2_env false tyl (Cls.tparams cd) ~f:make_like
           in
           ( env,
-            if acc then
-              Some (mk (r, Tclass ((p, n), exact, tyl)))
+            if changed then
+              let rty = mk (r, Tclass ((p, n), exact, tyl)) in
+              Some rty
             else
               None )
     end

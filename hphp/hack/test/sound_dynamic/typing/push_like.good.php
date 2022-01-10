@@ -14,6 +14,13 @@ class Box<T as B> {
   public function __construct(public ~T $item) { }
 }
 
+class NonSDT { }
+
+// Should just use ordinary union subtyping
+function basic(NonSDT $c):~NonSDT {
+  return $c;
+}
+
 function test_constraint_good(Box<B> $b):~Box<C> {
   // This is dynamic-aware subtype but not
   // an ordinary subtype because we could lose errors.
@@ -48,7 +55,18 @@ function return_vec_direct():~vec<int> {
 }
 
 function return_vec_direct2():~vec<int> {
-  return makeVec(get());
+  $x = makeVec(get());
+  // Unfortunately we can't yet do return makeVec(get());
+  // Why not?
+  // Because we will generate two constraints
+  //   ~int <: #1
+  //   vec<#1> <: ~vec<int>
+  // And from the second we will conclude that #1 <: int
+  // Then by transitivity we have ~int <: int which is not true
+  // If instead we proceeded from the second constraint by pushing
+  // the like-type, to get vec<#1> <: vec<~int> and then top #1 <: ~int
+  // we would succeed.
+  return $x;
 }
 
 function return_vec():~vec<int> {
@@ -99,4 +117,20 @@ function return_dict_vec_direct():~dict<string,vec<int>> {
 function return_dict_vec():~dict<string,vec<int>> {
   $x = dict['a' => vec[get()]];
   return $x;
+}
+
+// Some regression tests that failed with a previous change
+<<__SupportDynamicType>>
+function f<Tk as dynamic >(~Vector<?Tk> $x): ~Vector<Tk> {
+  return Vector {};
+}
+
+<<__SupportDynamicType>>
+function test1(~Vector<?int> $x): ~Vector<?int> {
+  return f($x);
+}
+
+<<__SupportDynamicType>>
+function test2(~Vector<?int> $x): ~Vector<int> {
+  return f($x);
 }

@@ -95,19 +95,25 @@ let rec assign
   | A.Lvar (_, lid) -> Env.set_local env lid rhs
   | A.Array_get ((_, _, A.Lvar (_, lid)), Some ix) ->
     let entity = Env.get_local env lid in
-    let current_assignment = Literal assignment_pos in
-    let env =
+    begin
       match entity with
       | Some entity_ ->
-        Env.add_constraint env (Subset (entity_, current_assignment))
-      | None -> failwithpos pos "Trying to assign to an undefined variable"
-    in
-    let env = Env.add_constraint env (Exists (Extension, assignment_pos)) in
-    let env = add_key_constraint env (Some current_assignment) ix ty_rhs in
+        let current_assignment = Literal assignment_pos in
+        let env =
+          Env.add_constraint env (Subset (entity_, current_assignment))
+        in
+        let env = Env.add_constraint env (Exists (Extension, assignment_pos)) in
+        let env = add_key_constraint env (Some current_assignment) ix ty_rhs in
 
-    (* Handle copy-on-write by creating a variable indirection *)
-    let (env, var) = redirect env current_assignment in
-    Env.set_local env lid (Some var)
+        (* Handle copy-on-write by creating a variable indirection *)
+        let (env, var) = redirect env current_assignment in
+        Env.set_local env lid (Some var)
+      | None ->
+        (* We might end up here as a result of deadcode, such as a dictionary
+           assignment after an unconditional break in a loop. In this
+           situation, it is not meaningful to report a candidate. *)
+        env
+    end
   | _ -> failwithpos pos "An lvalue is not yet supported"
 
 and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
@@ -190,6 +196,22 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
   | A.Fallthrough -> Env.move_and_merge_next_in_cont env Cont.Fallthrough
   | A.Continue -> Env.move_and_merge_next_in_cont env Cont.Continue
   | A.Break -> Env.move_and_merge_next_in_cont env Cont.Break
+  | A.While (cond, bl) ->
+    Env.stash_and_do env [Cont.Continue; Cont.Break] @@ fun env ->
+    let env = Env.save_and_merge_next_in_cont env Cont.Continue in
+    let env_before_iteration = env in
+    let env_after_iteration =
+      let env = expr env cond in
+      let env = block env bl in
+      env
+    in
+    let env =
+      Env.loop_continuation Cont.Next ~env_before_iteration ~env_after_iteration
+    in
+    let env = Env.update_next_from_conts env [Cont.Continue; Cont.Next] in
+    let env = expr env cond in
+    let env = Env.update_next_from_conts env [Cont.Break; Cont.Next] in
+    env
   | A.Noop
   | A.AssertEnv _
   | A.Markup _ ->

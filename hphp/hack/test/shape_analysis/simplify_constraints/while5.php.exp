@@ -1,0 +1,21 @@
+=== Shape analysis results for while5.php
+Summary for \f:
+[5:8-23] :
+  shape(
+    d => int
+  )
+[6:8-25] :
+  shape(
+    e => string
+  )
+[7:8-25] :
+  shape(
+    f => float
+  )
+[9:5-26] :
+  shape(
+    d => int
+    e => string
+    f => float
+    fixpoint => bool
+  )

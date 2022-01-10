@@ -1,0 +1,19 @@
+=== Shape analysis results for break2.php
+Summary for \f:
+[5:8-14] : shape()
+[7:5-19] :
+  shape(
+    a => bool
+    b => int
+  )
+[9:5-17] :
+  shape(
+    a => bool
+    b => int
+  )
+[11:3-17] :
+  shape(
+    a => bool
+    b => int
+    c => float
+  )

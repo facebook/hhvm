@@ -1,0 +1,12 @@
+=== Shape analysis results for continue.php
+Summary for \f:
+[5:8-14] : shape()
+[7:5-19] :
+  shape(
+    a => bool
+  )
+[11:3-17] :
+  shape(
+    a => bool
+    c => float
+  )

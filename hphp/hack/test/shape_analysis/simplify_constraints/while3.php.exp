@@ -1,0 +1,16 @@
+=== Shape analysis results for while3.php
+Summary for \f:
+[4:8-23] :
+  shape(
+    a => int
+  )
+[7:10-26] :
+  shape(
+    b => string
+  )
+[9:3-17] :
+  shape(
+    a => int
+    b => string
+    c => bool
+  )

@@ -41,3 +41,11 @@ val drop_cont : env -> Typing_continuations.t -> env
 val restore_conts_from : env -> from:lenv -> Typing_continuations.t list -> env
 
 val move_and_merge_next_in_cont : env -> Typing_continuations.t -> env
+
+val save_and_merge_next_in_cont : env -> Typing_continuations.t -> env
+
+val loop_continuation :
+  Typing_continuations.t ->
+  env_before_iteration:env ->
+  env_after_iteration:env ->
+  env

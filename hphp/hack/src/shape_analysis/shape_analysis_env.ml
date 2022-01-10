@@ -175,3 +175,32 @@ let save_and_merge_next_in_cont env to_cont =
 let move_and_merge_next_in_cont env cont_key =
   let env = save_and_merge_next_in_cont env cont_key in
   drop_cont env Cont.Next
+
+let loop_continuation cont_key ~env_before_iteration ~env_after_iteration =
+  let cont_before_iteration_opt =
+    Cont.Map.find_opt cont_key env_before_iteration.lenv
+  in
+  let cont_after_iteration_opt =
+    Cont.Map.find_opt cont_key env_after_iteration.lenv
+  in
+  let new_constraints =
+    let combine constraints _key entity_before_opt entity_after_opt =
+      let new_constraints =
+        match (entity_before_opt, entity_after_opt) with
+        | (Some (Some entity_before), Some (Some entity_after)) ->
+          [Subset (entity_after, entity_before)]
+        | _ -> []
+      in
+      let constraints = new_constraints @ constraints in
+      (constraints, None)
+    in
+    match (cont_before_iteration_opt, cont_after_iteration_opt) with
+    | (Some cont_before_iteration, Some cont_after_iteration) ->
+      fst
+      @@ LMap.merge_env [] cont_before_iteration cont_after_iteration ~combine
+    | _ -> []
+  in
+  {
+    env_after_iteration with
+    constraints = new_constraints @ env_after_iteration.constraints;
+  }

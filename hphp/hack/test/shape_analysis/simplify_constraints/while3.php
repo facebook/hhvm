@@ -1,0 +1,10 @@
+<?hh
+
+function f(): void {
+  $d = dict['a' => 42];
+  $b = false;
+  while ($b) {
+    $d = dict['b' => 'h'];
+  }
+  $d['c'] = true;
+}

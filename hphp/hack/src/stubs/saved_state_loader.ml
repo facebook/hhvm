@@ -51,6 +51,7 @@ module Naming_and_dep_table_info = struct
     mergebase_global_rev: Hg.global_rev option;
     dirty_files_promise: dirty_files Future.t;
     saved_state_distance: int option;
+    saved_state_age: int option;
   }
 end
 

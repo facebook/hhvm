@@ -55,6 +55,7 @@ type init_env = {
   (* Additional data associated with init that we want to log when a first full
    * check completes. *)
   state_distance: int option;
+  state_age: int option;
   naming_table_manifold_path: string option;
       (** The manifold path for remote typechecker workers to download the naming table
           saved state. This value will be None in the case of full init *)

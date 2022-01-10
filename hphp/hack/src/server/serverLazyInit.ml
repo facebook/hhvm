@@ -157,6 +157,7 @@ let merge_saved_state_futures
         Saved_state_loader.Naming_and_dep_table_info.mergebase_global_rev;
         dirty_files_promise;
         saved_state_distance;
+        saved_state_age;
       } =
         additional_info
       in
@@ -213,6 +214,7 @@ let merge_saved_state_futures
         let dirty_naming_files = Relative_path.Set.of_list dirty_naming_files in
         let dirty_master_files = dirty_master_files in
         let dirty_local_files = dirty_local_files in
+
         Ok
           {
             naming_table_fn = Path.to_string deptable_naming_table_blob_path;
@@ -227,6 +229,7 @@ let merge_saved_state_futures
             old_naming_table;
             old_errors;
             state_distance = saved_state_distance;
+            state_age = saved_state_age;
             naming_table_manifold_path;
           })
   in
@@ -444,6 +447,7 @@ let use_precomputed_state_exn
     old_naming_table;
     old_errors;
     state_distance = None;
+    state_age = None;
     naming_table_manifold_path = None;
   }
 
@@ -1133,6 +1137,7 @@ let post_saved_state_initialization
     naming_table_fn = _;
     corresponding_rev = _;
     state_distance;
+    state_age;
     naming_table_manifold_path;
   } =
     loaded_info
@@ -1154,6 +1159,7 @@ let post_saved_state_initialization
           mergebase;
           naming_table_manifold_path;
           state_distance;
+          state_age;
         };
       deps_mode =
         (match ServerArgs.save_64bit genv.options with

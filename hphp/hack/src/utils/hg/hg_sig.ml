@@ -34,6 +34,8 @@ module type S = sig
   val get_old_version_of_files :
     rev:rev -> files:string list -> out:string -> repo:string -> unit Future.t
 
+  val get_hg_revision_time : rev -> string -> int option
+
   val current_mergebase_hg_rev : string -> hg_rev Future.t
 
   val current_working_copy_hg_rev :
@@ -69,6 +71,8 @@ module type S = sig
     val current_working_copy_hg_rev_returns : (hg_rev * bool) Future.t -> unit
 
     val current_working_copy_base_rev_returns : global_rev Future.t -> unit
+
+    val get_hg_revision_time : hg_rev -> string -> int option
 
     val reset_current_working_copy_base_rev_returns : unit -> unit
 

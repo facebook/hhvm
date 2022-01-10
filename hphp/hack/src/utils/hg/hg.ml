@@ -105,6 +105,23 @@ module Hg_actual = struct
     else
       (result, false)
 
+  (** Return the timestamp of a specific hg revision in seconds since Unix epoch.
+   * Manually removing timezone offset.
+   * hg log -r rev -T "{date|hgdate} --cwd repo"
+   *)
+
+  let get_hg_revision_time rev repo =
+    let process =
+      exec_hg
+        ["log"; "-r"; rev_string rev; "-T"; "{date|hgdate}"; "--cwd"; repo]
+    in
+    let future = FutureProcess.make process String.trim in
+    match Future.get future with
+    | Error _ -> None
+    | Ok date_string ->
+      let date_list = String.split_on_char ' ' date_string in
+      Some (date_list |> List.hd |> int_of_string)
+
   (* hg log -r 'p2()' -T '{node}' *)
   let get_p2_node repo =
     let process =
@@ -215,6 +232,8 @@ module Hg_actual = struct
     let files_changed_in_rev_returns ~rev:_ _ =
       raise Cannot_set_when_mocks_disabled
 
+    let get_hg_revision_time _ _ = raise Cannot_set_when_mocks_disabled
+
     let files_changed_since_rev_to_rev_returns ~start:_ ~finish:_ _ =
       raise Cannot_set_when_mocks_disabled
 
@@ -238,6 +257,8 @@ module Hg_mock = struct
     let current_working_copy_base_rev = ref @@ Future.of_value 0
 
     let current_mergebase_hg_rev = ref @@ Future.of_value ""
+
+    let get_hg_revision_time _ _ = Some 123
 
     let closest_global_ancestor = Hashtbl.create 10
 
@@ -282,6 +303,8 @@ module Hg_mock = struct
   let current_working_copy_hg_rev _ = !Mocking.current_working_copy_hg_rev
 
   let current_working_copy_base_rev _ = !Mocking.current_working_copy_base_rev
+
+  let get_hg_revision_time rev repo = Mocking.get_hg_revision_time rev repo
 
   let get_closest_global_ancestor hg_rev _ =
     Hashtbl.find Mocking.closest_global_ancestor hg_rev

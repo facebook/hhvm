@@ -79,6 +79,7 @@ let additional_info_of_json
         mergebase_global_rev;
         dirty_files_promise = Future.of_value { master_changes; local_changes };
         saved_state_distance = None;
+        saved_state_age = None;
       }
 
 let replay_info_of_json
@@ -140,6 +141,7 @@ let make_replay_token_of_additional_info
             mergebase_global_rev;
             dirty_files_promise;
             saved_state_distance = _;
+            saved_state_age = _;
           } =
       additional_info
     in

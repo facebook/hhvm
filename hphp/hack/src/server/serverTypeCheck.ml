@@ -1766,6 +1766,7 @@ functor
         Telemetry.duration telemetry ~key:"typecheck_start" ~start_time
       in
       let state_distance = env.init_env.state_distance in
+      let state_age = env.init_env.state_age in
 
       (* Typecheck all of the files we determined might need rechecking as a
          consequence of the changes (or, in a lazy check, the subset of those
@@ -1803,6 +1804,7 @@ functor
       in
       let t = Hh_logger.log_duration logstring t in
       Hh_logger.log "Total: %f\n%!" (t -. start_time);
+
       let telemetry =
         telemetry
         |> Telemetry.duration ~key:"typecheck_end" ~start_time
@@ -1853,6 +1855,7 @@ functor
              ~key:"typecheck_longlived_workers"
              ~value:genv.local_config.ServerLocalConfig.longlived_workers
         |> Telemetry.int_opt ~key:"state_distance" ~value:state_distance
+        |> Telemetry.int_opt ~key:"state_age" ~value:state_age
       in
 
       (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)

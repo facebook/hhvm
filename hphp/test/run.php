@@ -1086,6 +1086,7 @@ function hhvm_cmd(
       \HH\global_get('_ENV') as dict<_, _>
   );
   $env['LC_ALL'] = 'C';
+  $env['INPUTRC'] = test_dir().'/inputrc';
 
   // Apply the --env option.
   if (isset($options['env'])) {

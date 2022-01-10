@@ -78,6 +78,7 @@ let additional_info_of_json
       {
         mergebase_global_rev;
         dirty_files_promise = Future.of_value { master_changes; local_changes };
+        saved_state_distance = None;
       }
 
 let replay_info_of_json
@@ -135,7 +136,11 @@ let make_replay_token_of_additional_info
   | Saved_state_loader.Symbol_index -> Hh_json.JSON_Null
   | Saved_state_loader.Naming_and_dep_table { naming_sqlite = _ } ->
     let Saved_state_loader.Naming_and_dep_table_info.
-          { mergebase_global_rev; dirty_files_promise } =
+          {
+            mergebase_global_rev;
+            dirty_files_promise;
+            saved_state_distance = _;
+          } =
       additional_info
     in
     let Saved_state_loader.Naming_and_dep_table_info.

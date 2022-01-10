@@ -156,6 +156,7 @@ let merge_saved_state_futures
       let {
         Saved_state_loader.Naming_and_dep_table_info.mergebase_global_rev;
         dirty_files_promise;
+        saved_state_distance;
       } =
         additional_info
       in
@@ -225,7 +226,7 @@ let merge_saved_state_futures
             dirty_local_files;
             old_naming_table;
             old_errors;
-            state_distance = None;
+            state_distance = saved_state_distance;
             naming_table_manifold_path;
           })
   in
@@ -1131,7 +1132,7 @@ let post_saved_state_initialization
     deptable_fn;
     naming_table_fn = _;
     corresponding_rev = _;
-    state_distance = _;
+    state_distance;
     naming_table_manifold_path;
   } =
     loaded_info
@@ -1147,7 +1148,13 @@ let post_saved_state_initialization
   let env =
     {
       env with
-      init_env = { env.init_env with mergebase; naming_table_manifold_path };
+      init_env =
+        {
+          env.init_env with
+          mergebase;
+          naming_table_manifold_path;
+          state_distance;
+        };
       deps_mode =
         (match ServerArgs.save_64bit genv.options with
         | Some new_edges_dir ->

@@ -142,6 +142,7 @@ let log_type_check_end
     ~typecheck_telemetry
     ~adhoc_profiling : unit =
   let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
+  let state_distance = env.init_env.state_distance in
   let telemetry =
     Telemetry.create ()
     |> Telemetry.object_ ~key:"init" ~value:init_telemetry
@@ -160,6 +161,7 @@ let log_type_check_end
     ~count
     ~desc
     ~experiments:genv.local_config.ServerLocalConfig.experiments
+    ~state_distance
     ~start_t
 
 let type_check

@@ -352,7 +352,8 @@ let type_check_end
     ~adhoc_profiling:_
     ~desc:_
     ~experiments:_
-    ~start_t:_ =
+    ~start_t:_
+    ~state_distance:_ =
   ()
 
 let notifier_returned _ _ = ()

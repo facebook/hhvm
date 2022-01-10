@@ -1765,6 +1765,7 @@ functor
       let telemetry =
         Telemetry.duration telemetry ~key:"typecheck_start" ~start_time
       in
+      let state_distance = env.init_env.state_distance in
 
       (* Typecheck all of the files we determined might need rechecking as a
          consequence of the changes (or, in a lazy check, the subset of those
@@ -1851,6 +1852,7 @@ functor
         |> Telemetry.bool_
              ~key:"typecheck_longlived_workers"
              ~value:genv.local_config.ServerLocalConfig.longlived_workers
+        |> Telemetry.int_opt ~key:"state_distance" ~value:state_distance
       in
 
       (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)
@@ -1965,8 +1967,8 @@ functor
         ~experiments:genv.local_config.ServerLocalConfig.experiments
         ~desc:"serverTypeCheck"
         ~start_t:type_check_start_t
+        ~state_distance
         ~adhoc_profiling:(Adhoc_profiler.CallTree.to_string adhoc_profiling);
-
       ( env,
         {
           CheckStats.reparse_count;

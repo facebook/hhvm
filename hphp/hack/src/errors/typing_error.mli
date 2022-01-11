@@ -1463,7 +1463,6 @@ module Secondary : sig
     | Bad_method_override of {
         pos: Pos_or_decl.t;
         member_name: string;
-        reasons: Pos_or_decl.t Message.t list;
       }
     | Bad_prop_override of {
         pos: Pos_or_decl.t;
@@ -1499,6 +1498,10 @@ module Secondary : sig
         dynamic_part: Pos_or_decl.t Message.t list;
       }
     | Subtyping_error of Pos_or_decl.t Message.t list
+    | Method_not_dynamically_callable of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
 end
 
 module Callback : sig
@@ -1693,6 +1696,15 @@ module Reasons_callback : sig
   *)
   val always : Error.t -> t
 
+  (** Applying the `Reasons_callback.t` `(prepend_on_apply err snd_err1) snd_err2`
+      is the same as applying `err` the secondary error created by prepending
+      `snd_err1` to `snd_err2`.
+
+      The `Secondary.t` error created by the prepending operation has the same
+      code of `snd_err1` and the reasons from `snd_err1` prepended to those of
+      `snd_err2`.
+  *)
+  val prepend_on_apply : t -> Secondary.t -> t
   (* -- Specific callbacks -------------------------------------------------- *)
 
   val unify_error_at : Pos.t -> t

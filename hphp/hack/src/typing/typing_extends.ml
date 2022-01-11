@@ -255,14 +255,17 @@ let check_dynamically_callable member_name parent_class_elt class_elt on_error =
   then
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
-    let errorl =
-      [
-        (parent_pos, "This method is `__DynamicallyCallable`.");
-        (pos, "This method is **not**.");
-      ]
+    let (snd_err1, snd_err2) =
+      Typing_error.Secondary.
+        ( Bad_method_override { pos; member_name },
+          Method_not_dynamically_callable { pos; parent_pos } )
     in
-    let err = Errors.bad_method_override on_error ~pos ~member_name in
-    Errors.apply_error_from_reasons_callback err ~reasons:errorl
+    (* Modify the callback so that we append `snd_err2` to `snd_err1` when
+       evaluating *)
+    let on_error =
+      Typing_error.Reasons_callback.prepend_on_apply on_error snd_err1
+    in
+    Errors.add_typing_error @@ Typing_error.apply_reasons ~on_error snd_err2
 
 (** Check that we are not overriding an __LSB property *)
 let check_lsb_overrides
@@ -423,15 +426,21 @@ let check_override
       else
         `property)
       ~current_decl_and_file:(Env.get_current_decl_and_file env);
-  let on_error =
-    (if is_functional then
-      Errors.bad_method_override
+  let snd_err =
+    let open Typing_error.Secondary in
+    if is_functional then
+      Bad_method_override { pos; member_name }
     else
-      Errors.bad_prop_override)
-      on_error
-      ~pos
-      ~member_name
+      Bad_prop_override { pos; member_name }
   in
+  (* Modify the `Typing_error.Reasons_callback.t` so that we always end up
+     with the error code given by `snd_err` and the reasons of whatever
+     error it is applied to are appended to the reasons give n by `snd_err`
+  *)
+  let on_error =
+    Typing_error.Reasons_callback.prepend_on_apply on_error snd_err
+  in
+
   let (lazy fty_child) = class_elt.ce_type in
   let (lazy fty_parent) = parent_class_elt.ce_type in
   if
@@ -453,6 +462,7 @@ let check_override
                name = member_name;
                class_name = Cls.name class_;
              });
+
   if not (MemberKind.equal member_kind MemberKind.Constructor) then
     check_compatible_sound_dynamic_attributes
       member_name

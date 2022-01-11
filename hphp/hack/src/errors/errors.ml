@@ -966,38 +966,6 @@ let typeconst_concrete_concrete_override pos parent_pos =
 (* Typing errors *)
 (*****************************************************************************)
 
-(** TODO: alter calling pattern to fit standard error combinators  *)
-let bad_method_override err ~pos ~member_name =
-  let code = Error_codes.Typing.BadMethodOverride
-  and reason =
-    ( pos,
-      "The method "
-      ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
-      ^ " is not compatible with the overridden method" )
-  in
-
-  Typing_error.Reasons_callback.(
-    prepend_reason ~reason
-    @@ retain_code
-    @@ with_code ~code
-    @@ retain_quickfixes err)
-
-(** TODO: alter calling pattern to fit standard error combinators  *)
-let bad_prop_override err ~pos ~member_name =
-  let code = Error_codes.Typing.BadMethodOverride
-  and reason =
-    ( pos,
-      "The property "
-      ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
-      ^ " has the wrong type" )
-  in
-
-  Typing_error.Reasons_callback.(
-    prepend_reason ~reason
-    @@ retain_code
-    @@ with_code ~code
-    @@ retain_quickfixes err)
-
 (** TODO: lift into a `Typing.Secondary.t` error *)
 let this_final (id_pos, id) pos2 =
   let n = Render.strip_ns id |> Markdown_lite.md_codify in

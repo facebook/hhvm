@@ -244,18 +244,6 @@ val typeconst_concrete_concrete_override :
   current_decl_and_file:Pos_or_decl.ctx ->
   unit
 
-val bad_method_override :
-  Typing_error.Reasons_callback.t ->
-  pos:Pos_or_decl.t ->
-  member_name:string ->
-  Typing_error.Reasons_callback.t
-
-val bad_prop_override :
-  Typing_error.Reasons_callback.t ->
-  pos:Pos_or_decl.t ->
-  member_name:string ->
-  Typing_error.Reasons_callback.t
-
 val this_final :
   Pos_or_decl.t * string -> Pos_or_decl.t -> (Pos_or_decl.t * string) list
 

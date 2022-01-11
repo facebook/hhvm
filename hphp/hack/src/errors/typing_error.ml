@@ -5372,7 +5372,6 @@ and Secondary : sig
     | Bad_method_override of {
         pos: Pos_or_decl.t;
         member_name: string;
-        reasons: Pos_or_decl.t Message.t list;
       }
     | Bad_prop_override of {
         pos: Pos_or_decl.t;
@@ -5408,6 +5407,10 @@ and Secondary : sig
         dynamic_part: Pos_or_decl.t Message.t list;
       }
     | Subtyping_error of Pos_or_decl.t Message.t list
+    | Method_not_dynamically_callable of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
 
   val eval : t -> (Error_code.t * Pos_or_decl.t Message.t list) option
 end = struct
@@ -5604,7 +5607,6 @@ end = struct
     | Bad_method_override of {
         pos: Pos_or_decl.t;
         member_name: string;
-        reasons: Pos_or_decl.t Message.t list;
       }
     | Bad_prop_override of {
         pos: Pos_or_decl.t;
@@ -5640,6 +5642,10 @@ end = struct
         dynamic_part: Pos_or_decl.t Message.t list;
       }
     | Subtyping_error of Pos_or_decl.t Message.t list
+    | Method_not_dynamically_callable of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
 
   let eval = function
     | Of_error err ->
@@ -6102,17 +6108,17 @@ end = struct
         Common.smember_not_found pos kind member_name class_name class_pos hint
       in
       Some (code, claim :: reasons)
-    | Bad_method_override { pos; member_name; reasons } ->
+    | Bad_method_override { pos; member_name } ->
       let reasons =
-        ( pos,
-          "The method "
-          ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
-          ^ " is not compatible with the overridden method" )
-        :: reasons
+        [
+          ( pos,
+            "The method "
+            ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
+            ^ " is not compatible with the overridden method" );
+        ]
       in
-
       Some (Error_code.BadMethodOverride, reasons)
-    | Bad_prop_override { pos; member_name; _ } ->
+    | Bad_prop_override { pos; member_name } ->
       let reasons =
         [
           ( pos,
@@ -6123,6 +6129,14 @@ end = struct
       in
       Some (Error_code.BadMethodOverride, reasons)
     | Subtyping_error reasons -> Some (Error_code.UnifyError, reasons)
+    | Method_not_dynamically_callable { pos; parent_pos } ->
+      let reasons =
+        [
+          (parent_pos, "This method is `__DynamicallyCallable`.");
+          (pos, "This method is **not**.");
+        ]
+      in
+      Some (Error_code.BadMethodOverride, reasons)
 end
 
 and Callback : sig
@@ -6352,6 +6366,8 @@ and Reasons_callback : sig
 
   val retain_quickfixes : t -> t
 
+  val prepend_on_apply : t -> Secondary.t -> t
+
   val apply_help :
     ?code:Error_code.t ->
     ?claim:Pos.t Message.t ->
@@ -6427,6 +6443,7 @@ end = struct
     | With_reasons of t * Pos_or_decl.t Message.t list
     | Add_reason of t * op * Pos_or_decl.t Message.t
     | From_on_error of on_error
+    | Prepend_on_apply of t * Secondary.t
 
   (* -- Constructors -------------------------------------------------------- *)
 
@@ -6460,6 +6477,8 @@ end = struct
 
   let always err = Always err
 
+  let prepend_on_apply t snd_err = Prepend_on_apply (t, snd_err)
+
   (* -- Evaluation ------------------------------------------------------------ *)
 
   module Error_state = struct
@@ -6472,6 +6491,18 @@ end = struct
 
     let with_code t code_opt =
       { t with code_opt = Option.first_some t.code_opt code_opt }
+
+    let prepend_secondary
+        ({ claim_opt; reasons_opt; quickfixes_opt; _ } as st) snd_err =
+      match Secondary.eval snd_err with
+      | Some (code, reasons) ->
+        {
+          code_opt = Some code;
+          claim_opt;
+          reasons_opt = Some (reasons @ Option.value ~default:[] reasons_opt);
+          quickfixes_opt;
+        }
+      | _ -> st
   end
 
   (** Replace any missing values in the error state with those of the error *)
@@ -6523,6 +6554,8 @@ end = struct
           | (Some rs, Append) -> (code, claim, reasons @ rs, qfxs)
           | (Some rs, Prepend) -> (code, claim, rs @ reasons, qfxs))
       @@ eval err Error_state.{ st with reasons_opt = None }
+    | Prepend_on_apply (t, snd_err) ->
+      eval t @@ Error_state.prepend_secondary st snd_err
 
   and eval_reason_op op err base_reason (Error_state.{ reasons_opt; _ } as st) =
     let reasons_opt =

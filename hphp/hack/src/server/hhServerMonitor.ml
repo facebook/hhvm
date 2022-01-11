@@ -67,7 +67,7 @@ let monitor_daemon_main
   let (config, local_config) =
     ServerConfig.(load ~silent:false filename options)
   in
-  if Sys_utils.is_test_mode () then
+  if not (Sys_utils.enable_telemetry ()) then
     EventLogger.init_fake ()
   else
     HackEventLogger.init_monitor

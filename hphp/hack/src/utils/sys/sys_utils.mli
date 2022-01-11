@@ -150,7 +150,15 @@ val try_touch : touch_mode -> string -> unit
 
 val splitext : string -> string * string
 
-val is_test_mode : unit -> bool
+(** Do we want HackEventLogger to work? *)
+val enable_telemetry : unit -> bool
+
+(** This flag controls whether at runtime we pick A/B experiments to test;
+if not, then the output behavior will be solely a function of the inputs
+(environment variables, hh.conf, .hhconfig, command-line arguments, repository).
+It also controls whether certain key lines out output e.g. times or upload URLs,
+which tests can't avoid looking at, will print fixed outputs. *)
+val deterministic_behavior_for_tests : unit -> bool
 
 val sleep : seconds:float -> unit
 

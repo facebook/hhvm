@@ -1344,7 +1344,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     Hh_logger.Level.set_min_level local_config.ServerLocalConfig.min_log_level;
     Hh_logger.Level.set_categories local_config.ServerLocalConfig.log_categories;
 
-    if Sys_utils.is_test_mode () then
+    if not (Sys_utils.enable_telemetry ()) then
       EventLogger.init_fake ()
     else if is_worker then
       HackEventLogger.init_worker

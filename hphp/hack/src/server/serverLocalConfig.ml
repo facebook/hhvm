@@ -697,7 +697,7 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
   let config = Config_file.apply_overrides ~from:None ~config ~overrides in
   (* Now is the time for JustKnobs (though it's skipped for tests) *)
   let config =
-    if Sys_utils.is_test_mode () then
+    if Sys_utils.deterministic_behavior_for_tests () then
       config
     else
       ServerLocalConfigKnobs.apply_justknobs_overrides ~silent config

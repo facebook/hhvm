@@ -1716,7 +1716,7 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
     let open In_init_env in
     let time = Unix.time () in
     let delay_in_secs =
-      if Sys_utils.is_test_mode () then
+      if Sys_utils.deterministic_behavior_for_tests () then
         (* we avoid raciness in our tests by not showing a real time *)
         "<test>"
       else
@@ -4177,7 +4177,7 @@ let handle_client_message
             IdMap.add id (request, handler) !requests_outstanding
       end;
 
-      if not @@ Sys_utils.is_test_mode () then
+      if not (Sys_utils.deterministic_behavior_for_tests ()) then
         Lsp_helpers.telemetry_log
           to_stdout
           ("Version in hhconfig and switch=" ^ !hhconfig_version_and_switch);

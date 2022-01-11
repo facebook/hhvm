@@ -256,7 +256,7 @@ let log_telemetry
       ~secs_above_total_gb_summary:SMap.empty
 
 let step_group name ~log f =
-  let log = log && not (Sys_utils.is_test_mode ()) in
+  let log = log && Sys_utils.enable_telemetry () in
   let profiling =
     {
       name;

@@ -230,7 +230,7 @@ function gethostbynamel(string $hostname): mixed;
  *   otherwise FALSE is returned.
  */
 <<__Native>>
-function gethostname(): mixed;
+function gethostname()[]: mixed;
 
 /**
  * Get MX records corresponding to a given Internet host name

@@ -4,14 +4,3 @@ Summary for \f:
   shape(
     a => int
   )
-[5:3-17] :
-  shape(
-    a => int
-    b => bool
-  )
-[6:3-17] :
-  shape(
-    a => int
-    b => bool
-    c => string
-  )

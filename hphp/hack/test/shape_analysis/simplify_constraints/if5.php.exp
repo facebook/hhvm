@@ -2,10 +2,6 @@
 Summary for \f:
 [4:8-14] : shape()
 [7:10-16] : shape()
-[9:3-15] :
-  shape(
-    a => int
-  )
 [10:11-13] :
   shape(
     a => int

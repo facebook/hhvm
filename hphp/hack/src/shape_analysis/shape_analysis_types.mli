@@ -39,7 +39,6 @@ type shape_keys = Typing_defs.locl_ty ShapeKeyMap.t
 
 type exists_kind =
   | Allocation  (** A dict allocation such as `dict[]` or `dict['a' => 42]` *)
-  | Extension  (** A dict extension such as `$d['a'] = 42` *)
   | Parameter
       (** A dict parameter to a function or method such as `function
           f(dict<string,int> $d)` *)

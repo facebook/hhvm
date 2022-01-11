@@ -8,11 +8,6 @@ Summary for \f:
   shape(
     b => string
   )
-[8:5-19] :
-  shape(
-    b => string
-    c => bool
-  )
 [9:13-15] :
   shape(
     b => string

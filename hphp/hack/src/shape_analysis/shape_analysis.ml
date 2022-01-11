@@ -115,7 +115,6 @@ let rec assign
         let env =
           Env.add_constraint env (Subset (entity_, current_assignment))
         in
-        let env = Env.add_constraint env (Exists (Extension, assignment_pos)) in
         let env = add_key_constraint env (Some current_assignment) ix ty_rhs in
 
         (* Handle copy-on-write by creating a variable indirection *)

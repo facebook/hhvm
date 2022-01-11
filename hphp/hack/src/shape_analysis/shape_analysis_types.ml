@@ -36,7 +36,6 @@ type shape_keys = Typing_defs.locl_ty ShapeKeyMap.t
 
 type exists_kind =
   | Allocation
-  | Extension
   | Parameter
   | Argument
 

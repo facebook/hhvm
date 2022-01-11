@@ -20,15 +20,6 @@ Summary for \f:
   shape(
     e => int
   )
-[22:3-15] :
-  shape(
-    a => int
-    b => float
-    c => bool
-    d => bool
-    e => int
-    f => int
-  )
 [23:11-13] :
   shape(
     a => int

@@ -8,12 +8,6 @@ Summary for \f:
   shape(
     b => bool
   )
-[10:3-20] :
-  shape(
-    a => int
-    b => bool
-    c => string
-  )
 [11:11-13] :
   shape(
     a => int

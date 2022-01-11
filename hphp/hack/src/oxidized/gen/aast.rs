@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<47089c7635715d1c97d87abd688e7b3b>>
+// @generated SignedSource<<592730b8e4a643f2bc654dc0bd9d839d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1499,6 +1499,7 @@ pub enum ClassConstKind<Ex, En> {
 )]
 #[repr(C)]
 pub struct ClassConst<Ex, En> {
+    pub user_attributes: Vec<UserAttribute<Ex, En>>,
     pub type_: Option<Hint>,
     pub id: Sid,
     pub kind: ClassConstKind<Ex, En>,

@@ -4327,6 +4327,7 @@ where
         };
         match &node.children {
             ConstDeclaration(c) => {
+                let user_attributes = Self::p_user_attributes(&c.attribute_spec, env)?;
                 let kinds = Self::p_kinds(&c.modifiers, env)?;
                 let has_abstract = kinds.has(modifier::ABSTRACT);
                 // TODO: make wrap `type_` `doc_comment` by `Rc` in ClassConst to avoid clone
@@ -4350,6 +4351,7 @@ where
                                     CCConcrete(Self::p_simple_initializer(&c.initializer, e)?)
                                 };
                                 Ok(ast::ClassConst {
+                                    user_attributes: user_attributes.clone(),
                                     type_: type_.clone(),
                                     id,
                                     kind,
@@ -5319,6 +5321,7 @@ where
                     |n: S<'a, T, V>, e: &mut Env<'a, TF>| -> Result<ast::ClassConst, Error> {
                         match &n.children {
                             Enumerator(c) => Ok(ast::ClassConst {
+                                user_attributes: vec![],
                                 type_: None,
                                 id: Self::pos_name(&c.name, e)?,
                                 kind: ast::ClassConstKind::CCConcrete(Self::p_expr(&c.value, e)?),
@@ -5479,6 +5482,7 @@ where
                                 )?)
                             };
                             let class_const = ast::ClassConst {
+                                user_attributes: vec![],
                                 type_: Some(full_type),
                                 id: name,
                                 kind,

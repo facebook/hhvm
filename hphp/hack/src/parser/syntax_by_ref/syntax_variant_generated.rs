@@ -523,6 +523,7 @@ pub struct RequireClauseChildren<'a, T, V> {
 
 #[derive(Debug, Clone)]
 pub struct ConstDeclarationChildren<'a, T, V> {
+    pub attribute_spec: Syntax<'a, T, V>,
     pub modifiers: Syntax<'a, T, V>,
     pub keyword: Syntax<'a, T, V>,
     pub type_specifier: Syntax<'a, T, V>,

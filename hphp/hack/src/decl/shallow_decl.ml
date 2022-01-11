@@ -63,7 +63,15 @@ let make_visibility attrs = function
 
 let class_const env (cc : Nast.class_const) =
   let gather_constants = gather_constants#on_expr CCRSet.empty in
-  let { cc_id = name; cc_type = h; cc_kind = k; cc_doc_comment = _ } = cc in
+  let {
+    cc_id = name;
+    cc_type = h;
+    cc_kind = k;
+    cc_doc_comment = _;
+    cc_user_attributes = _;
+  } =
+    cc
+  in
   let pos = Decl_env.make_decl_pos env (fst name) in
   let (abstract, scc_refs) =
     match k with

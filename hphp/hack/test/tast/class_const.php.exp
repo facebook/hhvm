@@ -7,7 +7,7 @@ Errors:
       c_use_as_alias = []; c_insteadof_alias = []; c_xhp_attr_uses = []; 
       c_xhp_category = None; c_reqs = []; c_implements = []; c_where_constraints = [];
       c_consts =
-      [{ cc_type = None; cc_id = ([5:9-12], "FOO");
+      [{ cc_user_attributes = []; cc_type = None; cc_id = ([5:9-12], "FOO");
          cc_kind =
          (CCConcrete
             ((dict<string, int>), [5:15-8:4],

@@ -203,6 +203,8 @@ end
 module AttributeKinds = struct
   let cls = "\\HH\\ClassAttribute"
 
+  let clscst = "\\HH\\ClassConstantAttribute"
+
   let enum = "\\HH\\EnumAttribute"
 
   let typealias = "\\HH\\TypeAliasAttribute"
@@ -233,6 +235,7 @@ module AttributeKinds = struct
       ~f:(fun acc (k, v) -> SMap.add k v acc)
       [
         (cls, "a class");
+        (clscst, "a constant of a class");
         (enum, "an enum");
         (typealias, "a typealias");
         (fn, "a function");

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9ac2d4e5ca7e9f68a9f07976c5a4bc8e>>
+// @generated SignedSource<<7a9b5c6c1d991189f1d2b470190448aa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1888,6 +1888,8 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConstKind<'arena, Ex, En>);
 ))]
 #[repr(C)]
 pub struct ClassConst<'a, Ex, En> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub type_: Option<&'a Hint<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

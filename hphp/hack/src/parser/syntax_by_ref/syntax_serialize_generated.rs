@@ -407,10 +407,11 @@ ss.serialize_field("require_name", &self.with(name))?;
 ss.serialize_field("require_semicolon", &self.with(semicolon))?;
       ss.end()
 } 
-SyntaxVariant::ConstDeclaration (ConstDeclarationChildren{modifiers,keyword,type_specifier,declarators,semicolon} ) => {
-      let mut ss = s.serialize_struct("", 6)?;
+SyntaxVariant::ConstDeclaration (ConstDeclarationChildren{attribute_spec,modifiers,keyword,type_specifier,declarators,semicolon} ) => {
+      let mut ss = s.serialize_struct("", 7)?;
       ss.serialize_field("kind", "const_declaration")?;
-      ss.serialize_field("const_modifiers", &self.with(modifiers))?;
+      ss.serialize_field("const_attribute_spec", &self.with(attribute_spec))?;
+ss.serialize_field("const_modifiers", &self.with(modifiers))?;
 ss.serialize_field("const_keyword", &self.with(keyword))?;
 ss.serialize_field("const_type_specifier", &self.with(type_specifier))?;
 ss.serialize_field("const_declarators", &self.with(declarators))?;

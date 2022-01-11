@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,388 +1,384 @@
+@@ -1,409 +1,405 @@
  [("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -17,18 +17,34 @@
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
         sc_enum_type = None }));
+   ("\\Cc",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cclass Concrete); sc_module = None;
+         sc_name = ([6:7-9], "\\Cc"); sc_tparams = [];
+         sc_where_constraints = []; sc_extends = []; sc_uses = [];
+         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+         sc_req_implements = [];
+         sc_implements =
+         [(Rhint ([6:21-46]),
+           (Tapply (([6:21-46], "\\HH\\ClassConstantAttribute"), [])))];
+         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+         sc_props = []; sc_sprops = []; sc_constructor = None;
+         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+         sc_enum_type = None }));
    ("\\E",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([6:7-8], "\\E"); sc_tparams = [];
+         sc_name = ([7:7-8], "\\E"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = [];
          sc_implements =
-         [(Rhint ([6:20-36]),
-           (Tapply (([6:20-36], "\\HH\\EnumAttribute"), [])))];
+         [(Rhint ([7:20-36]),
+           (Tapply (([7:20-36], "\\HH\\EnumAttribute"), [])))];
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -38,13 +54,13 @@
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([7:7-8], "\\F"); sc_tparams = [];
+         sc_name = ([8:7-8], "\\F"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = [];
          sc_implements =
-         [(Rhint ([7:20-40]),
-           (Tapply (([7:20-40], "\\HH\\FunctionAttribute"), [])))];
+         [(Rhint ([8:20-40]),
+           (Tapply (([8:20-40], "\\HH\\FunctionAttribute"), [])))];
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -54,13 +70,13 @@
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([8:7-10], "\\Met"); sc_tparams = [];
+         sc_name = ([9:7-10], "\\Met"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = [];
          sc_implements =
-         [(Rhint ([8:22-40]),
-           (Tapply (([8:22-40], "\\HH\\MethodAttribute"), [])))];
+         [(Rhint ([9:22-40]),
+           (Tapply (([9:22-40], "\\HH\\MethodAttribute"), [])))];
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -70,13 +86,13 @@
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([9:7-12], "\\IProp"); sc_tparams = [];
+         sc_name = ([10:7-12], "\\IProp"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = [];
          sc_implements =
-         [(Rhint ([9:24-52]),
-           (Tapply (([9:24-52], "\\HH\\InstancePropertyAttribute"), [])))];
+         [(Rhint ([10:24-52]),
+           (Tapply (([10:24-52], "\\HH\\InstancePropertyAttribute"), [])))];
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -86,13 +102,13 @@
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([10:7-12], "\\SProp"); sc_tparams = [];
+         sc_name = ([11:7-12], "\\SProp"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = [];
          sc_implements =
-         [(Rhint ([10:24-50]),
-           (Tapply (([10:24-50], "\\HH\\StaticPropertyAttribute"), [])))];
+         [(Rhint ([11:24-50]),
+           (Tapply (([11:24-50], "\\HH\\StaticPropertyAttribute"), [])))];
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -102,13 +118,13 @@
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([11:7-8], "\\P"); sc_tparams = [];
+         sc_name = ([12:7-8], "\\P"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = [];
          sc_implements =
-         [(Rhint ([11:20-41]),
-           (Tapply (([11:20-41], "\\HH\\ParameterAttribute"), [])))];
+         [(Rhint ([12:20-41]),
+           (Tapply (([12:20-41], "\\HH\\ParameterAttribute"), [])))];
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -118,13 +134,13 @@
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([12:7-8], "\\T"); sc_tparams = [];
+         sc_name = ([13:7-8], "\\T"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = [];
          sc_implements =
-         [(Rhint ([12:20-41]),
-           (Tapply (([12:20-41], "\\HH\\TypeAliasAttribute"), [])))];
+         [(Rhint ([13:20-41]),
+           (Tapply (([13:20-41], "\\HH\\TypeAliasAttribute"), [])))];
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -134,13 +150,13 @@
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([13:7-9], "\\Fi"); sc_tparams = [];
+         sc_name = ([14:7-9], "\\Fi"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = [];
          sc_implements =
-         [(Rhint ([13:21-37]),
-           (Tapply (([13:21-37], "\\HH\\FileAttribute"), [])))];
+         [(Rhint ([14:21-37]),
+           (Tapply (([14:21-37], "\\HH\\FileAttribute"), [])))];
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -150,13 +166,13 @@
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([14:7-9], "\\Ec"); sc_tparams = [];
+         sc_name = ([15:7-9], "\\Ec"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = [];
          sc_implements =
-         [(Rhint ([14:21-42]),
-           (Tapply (([14:21-42], "\\HH\\EnumClassAttribute"), [])))];
+         [(Rhint ([15:21-42]),
+           (Tapply (([15:21-42], "\\HH\\EnumClassAttribute"), [])))];
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -166,13 +182,13 @@
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([15:7-13], "\\TParam"); sc_tparams = [];
+         sc_name = ([16:7-13], "\\TParam"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = [];
          sc_implements =
-         [(Rhint ([15:25-50]),
-           (Tapply (([15:25-50], "\\HH\\TypeParameterAttribute"), [])))];
+         [(Rhint ([16:25-50]),
+           (Tapply (([16:25-50], "\\HH\\TypeParameterAttribute"), [])))];
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -182,13 +198,13 @@
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([16:7-9], "\\Tc"); sc_tparams = [];
+         sc_name = ([17:7-9], "\\Tc"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = [];
          sc_implements =
-         [(Rhint ([16:21-45]),
-           (Tapply (([16:21-45], "\\HH\\TypeConstantAttribute"), [])))];
+         [(Rhint ([17:21-45]),
+           (Tapply (([17:21-45], "\\HH\\TypeConstantAttribute"), [])))];
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -198,13 +214,13 @@
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([17:7-8], "\\L"); sc_tparams = [];
+         sc_name = ([18:7-8], "\\L"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = [];
          sc_implements =
-         [(Rhint ([17:20-38]),
-           (Tapply (([17:20-38], "\\HH\\LambdaAttribute"), [])))];
+         [(Rhint ([18:20-38]),
+           (Tapply (([18:20-38], "\\HH\\LambdaAttribute"), [])))];
          sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
@@ -214,75 +230,80 @@
        { Typing_defs.fe_deprecated = None; fe_module = None;
          fe_internal = false;
          fe_type =
-         (Rwitness_from_decl ([20:10-12]),
+         (Rwitness_from_decl ([21:10-12]),
           (Tfun
              { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = [];
                ft_params =
-               [{ fp_pos = [20:22-24]; fp_name = (Some "$i");
+               [{ fp_pos = [21:22-24]; fp_name = (Some "$i");
                   fp_type =
                   { et_enforced = Typing_defs_core.Unenforced;
-                    et_type = (Rhint ([20:18-21]), (Tprim Tint)) };
+                    et_type = (Rhint ([21:18-21]), (Tprim Tint)) };
                   fp_flags =
                   (make_fp_flags ~accept_disposable:false ~has_default:false
                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
                     ~ifc_can_call:false ~readonly:false);
                    }
                  ];
-               ft_implicit_params = { capability = (CapDefaults [20:10-12]) };
+               ft_implicit_params = { capability = (CapDefaults [21:10-12]) };
                ft_ret =
                { et_enforced = Typing_defs_core.Unenforced;
-                 et_type = (Rhint ([20:27-31]), (Tprim Tvoid)) };
+                 et_type = (Rhint ([21:27-31]), (Tprim Tvoid)) };
                ft_flags =
                (make_ft_flags FSync ~return_disposable:false
                  ~returns_readonly:false ~support_dynamic_type:false
                  ~readonly_this:false);
                ft_ifc_decl = FDPolicied {PUBLIC} }));
-         fe_pos = [20:10-12]; fe_php_std_lib = false;
+         fe_pos = [21:10-12]; fe_php_std_lib = false;
          fe_support_dynamic_type = false }));
-   ("\\CC",
+   ("\\CCC",
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([26:7-9], "\\CC"); sc_tparams = [];
+         sc_name = ([27:7-10], "\\CCC"); sc_tparams = [];
          sc_where_constraints = []; sc_extends = []; sc_uses = [];
          sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
          sc_req_implements = []; sc_implements = [];
-         sc_support_dynamic_type = false; sc_consts = [];
+         sc_support_dynamic_type = false;
+         sc_consts =
+         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+            scc_name = ([29:13-16], "VAL");
+            scc_type = (Rhint ([29:9-12]), (Tprim Tint)); scc_refs = [] }
+           ];
          sc_typeconsts =
-         [{ Shallow_decl_defs.stc_name = ([32:14-16], "Tu");
+         [{ Shallow_decl_defs.stc_name = ([35:14-16], "Tu");
             stc_kind =
             (Typing_defs.TCConcrete
-               { Typing_defs.tc_type = (Rhint ([32:19-25]), (Tprim Tstring)) });
+               { Typing_defs.tc_type = (Rhint ([35:19-25]), (Tprim Tstring)) });
             stc_enforceable = ([Pos.none], false); stc_reifiable = None;
             stc_is_ctx = false }
            ];
          sc_props =
-         [{ Shallow_decl_defs.sp_name = ([28:15-19], "mem");
+         [{ Shallow_decl_defs.sp_name = ([31:15-19], "mem");
             sp_xhp_attr = None;
-            sp_type = (Some (Rhint ([28:11-14]), (Tprim Tint)));
+            sp_type = (Some (Rhint ([31:11-14]), (Tprim Tint)));
             sp_visibility = Private; sp_flags = (empty) }
            ];
          sc_sprops =
-         [{ Shallow_decl_defs.sp_name = ([30:22-27], "$smem");
+         [{ Shallow_decl_defs.sp_name = ([33:22-27], "$smem");
             sp_xhp_attr = None;
-            sp_type = (Some (Rhint ([30:18-21]), (Tprim Tint)));
+            sp_type = (Some (Rhint ([33:18-21]), (Tprim Tint)));
             sp_visibility = Private; sp_flags = (empty) }
            ];
          sc_constructor = None; sc_static_methods = [];
          sc_methods =
-         [{ Shallow_decl_defs.sm_name = ([34:20-23], "met");
+         [{ Shallow_decl_defs.sm_name = ([37:20-23], "met");
             sm_type =
-            (Rwitness_from_decl ([34:20-23]),
+            (Rwitness_from_decl ([37:20-23]),
              (Tfun
                 { ft_arity = (Fstandard ()); ft_tparams = [];
                   ft_where_constraints = []; ft_params = [];
                   ft_implicit_params =
-                  { capability = (CapDefaults [34:20-23]) };
+                  { capability = (CapDefaults [37:20-23]) };
                   ft_ret =
                   { et_enforced = Typing_defs_core.Unenforced;
-                    et_type = (Rhint ([34:27-31]), (Tprim Tvoid)) };
+                    et_type = (Rhint ([37:27-31]), (Tprim Tvoid)) };
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
@@ -292,7 +313,7 @@
             sm_attributes = [] }
            ];
          sc_user_attributes =
-         [{ Typing_defs_core.ua_name = ([25:3-4], "\\C");
+         [{ Typing_defs_core.ua_name = ([26:3-4], "\\C");
             ua_classname_params = [] }
            ];
          sc_enum_type = None }));
@@ -301,13 +322,13 @@
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cclass Concrete); sc_module = None;
-         sc_name = ([37:7-9], "\\CT");
+         sc_name = ([40:7-9], "\\CT");
          sc_tparams =
          [{ Typing_defs_core.tp_variance = Invariant;
-            tp_name = ([37:27-29], "T1"); tp_tparams = [];
+            tp_name = ([40:27-29], "T1"); tp_tparams = [];
             tp_constraints = []; tp_reified = Reified;
             tp_user_attributes =
-            [{ Typing_defs_core.ua_name = ([37:12-18], "\\TParam");
+            [{ Typing_defs_core.ua_name = ([40:12-18], "\\TParam");
                ua_classname_params = [] }
               ]
             }
@@ -323,12 +344,12 @@
     (Shallow_decl_defs.Class
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
-         sc_kind = Cenum; sc_module = None; sc_name = ([40:6-8], "\\EE");
+         sc_kind = Cenum; sc_module = None; sc_name = ([43:6-8], "\\EE");
          sc_tparams = []; sc_where_constraints = [];
          sc_extends =
-         [(Rhint ([40:6-8]),
-           (Tapply (([40:6-8], "\\HH\\BuiltinEnum"),
-              [(Rhint ([40:6-8]), (Tapply (([40:6-8], "\\EE"), [])))])))
+         [(Rhint ([43:6-8]),
+           (Tapply (([43:6-8], "\\HH\\BuiltinEnum"),
+              [(Rhint ([43:6-8]), (Tapply (([43:6-8], "\\EE"), [])))])))
            ];
          sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
          sc_req_extends = []; sc_req_implements = []; sc_implements = [];
@@ -336,20 +357,20 @@
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = [];
          sc_user_attributes =
-         [{ Typing_defs_core.ua_name = ([39:3-4], "\\E");
+         [{ Typing_defs_core.ua_name = ([42:3-4], "\\E");
             ua_classname_params = [] }
            ];
          sc_enum_type =
-         (Some { Typing_defs.te_base = (Rhint ([40:10-13]), (Tprim Tint));
+         (Some { Typing_defs.te_base = (Rhint ([43:10-13]), (Tprim Tint));
                  te_constraint = None; te_includes = [] })
          }));
    ("\\tt",
     (Shallow_decl_defs.Typedef
-       { Typing_defs.td_module = None; td_pos = [43:6-8];
+       { Typing_defs.td_module = None; td_pos = [46:6-8];
          td_vis = Transparent; td_tparams = []; td_constraint = None;
-         td_type = (Rhint ([43:11-14]), (Tprim Tint)); td_is_ctx = false;
+         td_type = (Rhint ([46:11-14]), (Tprim Tint)); td_is_ctx = false;
 -        td_attributes =
--        [{ Typing_defs_core.ua_name = ([42:3-4], "\\T");
+-        [{ Typing_defs_core.ua_name = ([45:3-4], "\\T");
 -           ua_classname_params = [] }
 -          ]
 -        }));
@@ -359,15 +380,15 @@
        { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
          sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
          sc_kind = (Cenum_class Concrete); sc_module = None;
-         sc_name = ([46:12-15], "\\Ecc"); sc_tparams = [];
+         sc_name = ([49:12-15], "\\Ecc"); sc_tparams = [];
          sc_where_constraints = [];
          sc_extends =
-         [(Rhint ([46:12-15]),
-           (Tapply (([46:12-15], "\\HH\\BuiltinEnumClass"),
-              [(Rhint ([46:12-15]),
-                (Tapply (([46:12-15], "\\HH\\MemberOf"),
-                   [(Rhint ([46:12-15]), (Tapply (([46:12-15], "\\Ecc"), [])));
-                     (Rhint ([46:18-20]), (Tapply (([46:18-20], "\\EE"), [])))
+         [(Rhint ([49:12-15]),
+           (Tapply (([49:12-15], "\\HH\\BuiltinEnumClass"),
+              [(Rhint ([49:12-15]),
+                (Tapply (([49:12-15], "\\HH\\MemberOf"),
+                   [(Rhint ([49:12-15]), (Tapply (([49:12-15], "\\Ecc"), [])));
+                     (Rhint ([49:18-20]), (Tapply (([49:18-20], "\\EE"), [])))
                      ]
                    )))
                 ]
@@ -379,14 +400,14 @@
          sc_props = []; sc_sprops = []; sc_constructor = None;
          sc_static_methods = []; sc_methods = [];
          sc_user_attributes =
-         [{ Typing_defs_core.ua_name = ([46:12-15], "__EnumClass");
+         [{ Typing_defs_core.ua_name = ([49:12-15], "__EnumClass");
             ua_classname_params = [] };
-           { Typing_defs_core.ua_name = ([45:3-5], "\\Ec");
+           { Typing_defs_core.ua_name = ([48:3-5], "\\Ec");
              ua_classname_params = [] }
            ];
          sc_enum_type =
          (Some { Typing_defs.te_base =
-                 (Rhint ([46:18-20]), (Tapply (([46:18-20], "\\EE"), [])));
+                 (Rhint ([49:18-20]), (Tapply (([49:18-20], "\\EE"), [])));
                  te_constraint = None; te_includes = [] })
          }))
    ]

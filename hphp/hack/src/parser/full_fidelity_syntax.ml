@@ -1146,12 +1146,14 @@ module WithToken (Token : TokenType) = struct
         acc
       | ConstDeclaration
           {
+            const_attribute_spec;
             const_modifiers;
             const_keyword;
             const_type_specifier;
             const_declarators;
             const_semicolon;
           } ->
+        let acc = f acc const_attribute_spec in
         let acc = f acc const_modifiers in
         let acc = f acc const_keyword in
         let acc = f acc const_type_specifier in
@@ -2820,6 +2822,7 @@ module WithToken (Token : TokenType) = struct
         [require_keyword; require_kind; require_name; require_semicolon]
       | ConstDeclaration
           {
+            const_attribute_spec;
             const_modifiers;
             const_keyword;
             const_type_specifier;
@@ -2827,6 +2830,7 @@ module WithToken (Token : TokenType) = struct
             const_semicolon;
           } ->
         [
+          const_attribute_spec;
           const_modifiers;
           const_keyword;
           const_type_specifier;
@@ -4414,6 +4418,7 @@ module WithToken (Token : TokenType) = struct
         ["require_keyword"; "require_kind"; "require_name"; "require_semicolon"]
       | ConstDeclaration
           {
+            const_attribute_spec;
             const_modifiers;
             const_keyword;
             const_type_specifier;
@@ -4421,6 +4426,7 @@ module WithToken (Token : TokenType) = struct
             const_semicolon;
           } ->
         [
+          "const_attribute_spec";
           "const_modifiers";
           "const_keyword";
           "const_type_specifier";
@@ -6146,6 +6152,7 @@ module WithToken (Token : TokenType) = struct
           { require_keyword; require_kind; require_name; require_semicolon }
       | ( SyntaxKind.ConstDeclaration,
           [
+            const_attribute_spec;
             const_modifiers;
             const_keyword;
             const_type_specifier;
@@ -6154,6 +6161,7 @@ module WithToken (Token : TokenType) = struct
           ] ) ->
         ConstDeclaration
           {
+            const_attribute_spec;
             const_modifiers;
             const_keyword;
             const_type_specifier;
@@ -8071,6 +8079,7 @@ module WithToken (Token : TokenType) = struct
         make syntax value
 
       let make_const_declaration
+          const_attribute_spec
           const_modifiers
           const_keyword
           const_type_specifier
@@ -8079,6 +8088,7 @@ module WithToken (Token : TokenType) = struct
         let syntax =
           ConstDeclaration
             {
+              const_attribute_spec;
               const_modifiers;
               const_keyword;
               const_type_specifier;

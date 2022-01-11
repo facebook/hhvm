@@ -2616,6 +2616,10 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             validate_option_with validate_specifier x.const_type_specifier;
           const_keyword = validate_token x.const_keyword;
           const_modifiers = validate_list_with validate_token x.const_modifiers;
+          const_attribute_spec =
+            validate_option_with
+              validate_attribute_specification
+              x.const_attribute_spec;
         } )
     | s -> validation_fail (Some SyntaxKind.ConstDeclaration) s
 
@@ -2625,6 +2629,10 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       Syntax.syntax =
         Syntax.ConstDeclaration
           {
+            const_attribute_spec =
+              invalidate_option_with
+                invalidate_attribute_specification
+                x.const_attribute_spec;
             const_modifiers =
               invalidate_list_with invalidate_token x.const_modifiers;
             const_keyword = invalidate_token x.const_keyword;

@@ -469,8 +469,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_const_declaration(_: &C, const_modifiers: Self, const_keyword: Self, const_type_specifier: Self, const_declarators: Self, const_semicolon: Self) -> Self {
+    fn make_const_declaration(_: &C, const_attribute_spec: Self, const_modifiers: Self, const_keyword: Self, const_type_specifier: Self, const_declarators: Self, const_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ConstDeclaration(Box::new(ConstDeclarationChildren {
+            const_attribute_spec,
             const_modifiers,
             const_keyword,
             const_type_specifier,
@@ -2204,7 +2205,8 @@ where
                 acc
             },
             SyntaxVariant::ConstDeclaration(x) => {
-                let ConstDeclarationChildren { const_modifiers, const_keyword, const_type_specifier, const_declarators, const_semicolon } = *x;
+                let ConstDeclarationChildren { const_attribute_spec, const_modifiers, const_keyword, const_type_specifier, const_declarators, const_semicolon } = *x;
+                let acc = f(const_attribute_spec, acc);
                 let acc = f(const_modifiers, acc);
                 let acc = f(const_keyword, acc);
                 let acc = f(const_type_specifier, acc);
@@ -3674,12 +3676,13 @@ where
                  require_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::ConstDeclaration, 5) => SyntaxVariant::ConstDeclaration(Box::new(ConstDeclarationChildren {
+             (SyntaxKind::ConstDeclaration, 6) => SyntaxVariant::ConstDeclaration(Box::new(ConstDeclarationChildren {
                  const_semicolon: ts.pop().unwrap(),
                  const_declarators: ts.pop().unwrap(),
                  const_type_specifier: ts.pop().unwrap(),
                  const_keyword: ts.pop().unwrap(),
                  const_modifiers: ts.pop().unwrap(),
+                 const_attribute_spec: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::ConstantDeclarator, 2) => SyntaxVariant::ConstantDeclarator(Box::new(ConstantDeclaratorChildren {
@@ -4878,6 +4881,7 @@ pub struct RequireClauseChildren<T, V> {
 
 #[derive(Debug, Clone)]
 pub struct ConstDeclarationChildren<T, V> {
+    pub const_attribute_spec: Syntax<T, V>,
     pub const_modifiers: Syntax<T, V>,
     pub const_keyword: Syntax<T, V>,
     pub const_type_specifier: Syntax<T, V>,
@@ -6480,12 +6484,13 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ConstDeclaration(x) => {
-                get_index(5).and_then(|index| { match index {
-                        0 => Some(&x.const_modifiers),
-                    1 => Some(&x.const_keyword),
-                    2 => Some(&x.const_type_specifier),
-                    3 => Some(&x.const_declarators),
-                    4 => Some(&x.const_semicolon),
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.const_attribute_spec),
+                    1 => Some(&x.const_modifiers),
+                    2 => Some(&x.const_keyword),
+                    3 => Some(&x.const_type_specifier),
+                    4 => Some(&x.const_declarators),
+                    5 => Some(&x.const_semicolon),
                         _ => None,
                     }
                 })

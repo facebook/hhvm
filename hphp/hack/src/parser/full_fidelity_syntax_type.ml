@@ -397,6 +397,7 @@ struct
         require_semicolon: t;
       }
     | ConstDeclaration of {
+        const_attribute_spec: t;
         const_modifiers: t;
         const_keyword: t;
         const_type_specifier: t;
@@ -1689,6 +1690,7 @@ struct
   }
 
   and const_declaration = {
+    const_attribute_spec: attribute_specification option value;
     const_modifiers: Token.t listesque value;
     const_keyword: Token.t value;
     const_type_specifier: specifier option value;

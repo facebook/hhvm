@@ -1336,6 +1336,7 @@ and class_const env ~in_enum_class cc =
     N.cc_id = cc.Aast.cc_id;
     N.cc_kind = kind;
     N.cc_doc_comment = cc.Aast.cc_doc_comment;
+    N.cc_user_attributes = user_attributes env cc.Aast.cc_user_attributes;
   }
 
 and typeconst env t =

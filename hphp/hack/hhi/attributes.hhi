@@ -5,6 +5,7 @@ namespace HH {
 // class-like
 interface ClassLikeAttribute {}
 interface ClassAttribute extends ClassLikeAttribute {}
+interface ClassConstantAttribute {}
 interface EnumAttribute extends ClassLikeAttribute {}
 interface EnumClassAttribute extends ClassLikeAttribute {}
 

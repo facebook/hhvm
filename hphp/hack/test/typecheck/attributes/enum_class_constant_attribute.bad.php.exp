@@ -1,0 +1,4 @@
+File "enum_class_constant_attribute.bad.php", line 5, characters 26-26:
+A colon `:` is expected here. (Parsing[1002])
+File "enum_class_constant_attribute.bad.php", line 5, characters 26-26:
+Encountered unexpected text `{`, was expecting a type hint. (Parsing[1002])

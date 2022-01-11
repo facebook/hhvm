@@ -1,7 +1,7 @@
 *** Testing get_declared_interfaces() : basic functionality ***
 
 -- Testing get_declared_interfaces() function with Zero arguments --
-vec(125) {
+vec(126) {
   string(23) "HH\Rx\IteratorAggregate"
   string(19) "HH\Rx\KeyedIterator"
   string(26) "HH\Lib\IO\SeekableFDHandle"
@@ -74,6 +74,7 @@ vec(125) {
   string(16) "HH\EnumAttribute"
   string(40) "HH\Lib\IO\CloseableSeekableWriteFDHandle"
   string(21) "HH\ClassLikeAttribute"
+  string(25) "HH\ClassConstantAttribute"
   string(24) "HH\Lib\Str\SprintfFormat"
   string(32) "HH\Asio\ResultOrExceptionWrapper"
   string(16) "OutputCollection"

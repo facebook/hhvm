@@ -3574,6 +3574,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
     fn make_const_declaration(
         &mut self,
+        _attributes: Self::R,
         modifiers: Self::R,
         const_keyword: Self::R,
         hint: Self::R,

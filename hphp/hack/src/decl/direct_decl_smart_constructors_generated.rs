@@ -226,8 +226,8 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         <Self as FlattenSmartConstructors<'src, Self>>::make_require_clause(self, keyword, kind, name, semicolon)
     }
 
-    fn make_const_declaration(&mut self, modifiers: Self::R, keyword: Self::R, type_specifier: Self::R, declarators: Self::R, semicolon: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_const_declaration(self, modifiers, keyword, type_specifier, declarators, semicolon)
+    fn make_const_declaration(&mut self, attribute_spec: Self::R, modifiers: Self::R, keyword: Self::R, type_specifier: Self::R, declarators: Self::R, semicolon: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_const_declaration(self, attribute_spec, modifiers, keyword, type_specifier, declarators, semicolon)
     }
 
     fn make_constant_declarator(&mut self, name: Self::R, initializer: Self::R) -> Self::R {

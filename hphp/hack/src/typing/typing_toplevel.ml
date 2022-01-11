@@ -1438,12 +1438,25 @@ let class_const_def ~in_enum_class c env cc =
       (env, CCAbstract (Some tdefault), ty')
     | CCAbstract None -> (env, CCAbstract None, hint_ty.et_type)
   in
+  let (env, user_attributes) =
+    if Ast_defs.is_c_class c.Aast.c_kind || Ast_defs.is_c_trait c.Aast.c_kind
+    then
+      Typing.attributes_check_def
+        env
+        SN.AttributeKinds.clscst
+        cc.cc_user_attributes
+    else begin
+      assert (List.is_empty cc.cc_user_attributes);
+      (env, [])
+    end
+  in
   ( env,
     ( {
         Aast.cc_type = cc.cc_type;
         Aast.cc_id = cc.cc_id;
         Aast.cc_kind = kind;
         Aast.cc_doc_comment = cc.cc_doc_comment;
+        Aast.cc_user_attributes = user_attributes;
       },
       ty ) )
 

@@ -217,8 +217,8 @@ impl<'src> SmartConstructors for FactsSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_require_clause(self, arg0, arg1, arg2, arg3)
     }
 
-    fn make_const_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_const_declaration(self, arg0, arg1, arg2, arg3, arg4)
+    fn make_const_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_const_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5)
     }
 
     fn make_constant_declarator(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {

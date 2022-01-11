@@ -622,6 +622,7 @@ let schema : schema_node list =
       aggregates = [ClassBodyDeclaration; TopLevelDeclaration];
       fields =
         [
+          ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
           ("modifiers", ZeroOrMore Token);
           ("keyword", Token);
           ("type_specifier", ZeroOrOne (Aggregate Specifier));

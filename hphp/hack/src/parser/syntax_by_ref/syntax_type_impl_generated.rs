@@ -475,8 +475,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_const_declaration(ctx: &C, modifiers: Self, keyword: Self, type_specifier: Self, declarators: Self, semicolon: Self) -> Self {
+    fn make_const_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, keyword: Self, type_specifier: Self, declarators: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ConstDeclaration(ctx.get_arena().alloc(ConstDeclarationChildren {
+            attribute_spec,
             modifiers,
             keyword,
             type_specifier,

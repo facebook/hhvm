@@ -254,6 +254,7 @@ function dynamic_class_meth_force(string $cls, string $meth): mixed;
 // class-like
 interface ClassLikeAttribute {}
 interface ClassAttribute extends ClassLikeAttribute {}
+interface ClassConstantAttribute {}
 interface EnumAttribute extends ClassLikeAttribute {}
 interface EnumClassAttribute extends ClassLikeAttribute {}
 

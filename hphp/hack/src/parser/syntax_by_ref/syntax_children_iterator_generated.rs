@@ -447,12 +447,13 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             ConstDeclaration(x) => {
-                get_index(5).and_then(|index| { match index {
-                        0 => Some(&x.modifiers),
-                    1 => Some(&x.keyword),
-                    2 => Some(&x.type_specifier),
-                    3 => Some(&x.declarators),
-                    4 => Some(&x.semicolon),
+                get_index(6).and_then(|index| { match index {
+                        0 => Some(&x.attribute_spec),
+                    1 => Some(&x.modifiers),
+                    2 => Some(&x.keyword),
+                    3 => Some(&x.type_specifier),
+                    4 => Some(&x.declarators),
+                    5 => Some(&x.semicolon),
                         _ => None,
                     }
                 })

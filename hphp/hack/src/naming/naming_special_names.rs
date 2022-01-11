@@ -370,6 +370,8 @@ pub mod attribute_kinds {
 
     pub const CLS: &str = "\\HH\\ClassAttribute";
 
+    pub const CLS_CST: &str = "\\HH\\ClassConstantAttribute";
+
     pub const ENUM: &str = "\\HH\\EnumAttribute";
 
     pub const TYPE_ALIAS: &str = "\\HH\\TypeAliasAttribute";
@@ -396,6 +398,7 @@ pub mod attribute_kinds {
 
     pub static PLAIN_ENGLISH: &[(&str, &str)] = &[
         (CLS, "a class"),
+        (CLS_CST, "a constant of a class"),
         (ENUM, "an enum"),
         (TYPE_ALIAS, "a typealias"),
         (FN, "a function"),

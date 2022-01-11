@@ -241,8 +241,8 @@ where
         Node(self.0.make_require_clause(keyword.0, kind.0, name.0, semicolon.0), self.1.make_require_clause(keyword.1, kind.1, name.1, semicolon.1))
     }
 
-    fn make_const_declaration(&mut self, modifiers: Self::R, keyword: Self::R, type_specifier: Self::R, declarators: Self::R, semicolon: Self::R) -> Self::R {
-        Node(self.0.make_const_declaration(modifiers.0, keyword.0, type_specifier.0, declarators.0, semicolon.0), self.1.make_const_declaration(modifiers.1, keyword.1, type_specifier.1, declarators.1, semicolon.1))
+    fn make_const_declaration(&mut self, attribute_spec: Self::R, modifiers: Self::R, keyword: Self::R, type_specifier: Self::R, declarators: Self::R, semicolon: Self::R) -> Self::R {
+        Node(self.0.make_const_declaration(attribute_spec.0, modifiers.0, keyword.0, type_specifier.0, declarators.0, semicolon.0), self.1.make_const_declaration(attribute_spec.1, modifiers.1, keyword.1, type_specifier.1, declarators.1, semicolon.1))
     }
 
     fn make_constant_declarator(&mut self, name: Self::R, initializer: Self::R) -> Self::R {

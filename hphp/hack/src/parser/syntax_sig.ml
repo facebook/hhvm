@@ -267,6 +267,7 @@ module type Syntax_S = sig
         require_semicolon: t;
       }
     | ConstDeclaration of {
+        const_attribute_spec: t;
         const_modifiers: t;
         const_keyword: t;
         const_type_specifier: t;
@@ -1148,7 +1149,7 @@ module type Syntax_S = sig
 
   val make_require_clause : t -> t -> t -> t -> t
 
-  val make_const_declaration : t -> t -> t -> t -> t -> t
+  val make_const_declaration : t -> t -> t -> t -> t -> t -> t
 
   val make_constant_declarator : t -> t -> t
 

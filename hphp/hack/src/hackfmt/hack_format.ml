@@ -728,6 +728,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         ]
     | Syntax.ConstDeclaration
         {
+          const_attribute_spec = attr;
           const_modifiers = modifiers;
           const_keyword = kw;
           const_type_specifier = const_type;
@@ -736,6 +737,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       Concat
         [
+          t env attr;
+          when_present attr newline;
           handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
           t env kw;
           when_present const_type space;

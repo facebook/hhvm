@@ -395,9 +395,9 @@ impl<'a> SmartConstructors for VerifySmartConstructors<'a>
         r
     }
 
-    fn make_const_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
-        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4);
-        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_const_declaration(self, arg0, arg1, arg2, arg3, arg4);
+    fn make_const_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_const_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5);
         self.state_mut().verify(&args);
         self.state_mut().push(r.kind());
         r

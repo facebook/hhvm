@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e29271bc7a76baf699d1b302b8eead24>>
+// @generated SignedSource<<6672b1e15b28000e4f835e4dbd877cdb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -305,6 +305,7 @@ impl<P: Params> Node<P> for ClassConst<P::Ex, P::En> {
         c: &mut P::Context,
         v: &mut dyn Visitor<'node, P = P>,
     ) -> Result<(), P::Error> {
+        self.user_attributes.accept(c, v)?;
         self.type_.accept(c, v)?;
         self.id.accept(c, v)?;
         self.kind.accept(c, v)?;

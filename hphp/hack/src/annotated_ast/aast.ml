@@ -896,6 +896,7 @@ and ('ex, 'en) class_const_kind =
        *)
 
 and ('ex, 'en) class_const = {
+  cc_user_attributes: ('ex, 'en) user_attribute list;
   cc_type: hint option;
   cc_id: sid;
   cc_kind: ('ex, 'en) class_const_kind;

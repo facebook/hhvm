@@ -3,6 +3,7 @@
 <<file: Fi>>
 
 class C implements HH\ClassAttribute {}
+class Cc implements HH\ClassConstantAttribute {}
 class E implements HH\EnumAttribute {}
 class F implements HH\FunctionAttribute {}
 class Met implements HH\MethodAttribute {}
@@ -23,7 +24,9 @@ function ff(<<P>>int $i): void {
 }
 
 <<C>>
-class CC {
+class CCC {
+  <<Cc>>
+  const int VAL = 64;
   <<IProp>>
   private int $mem = 4;
   <<SProp>>

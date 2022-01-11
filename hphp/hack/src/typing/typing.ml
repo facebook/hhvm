@@ -882,11 +882,12 @@ let uninstantiable_error env reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
 let coerce_to_throwable pos env exn_ty =
   let throwable_ty = MakeType.throwable (Reason.Rthrow pos) in
   Typing_coercion.coerce_type
+    ~coerce_for_op:true
     pos
     Reason.URthrow
     env
     exn_ty
-    { et_type = throwable_ty; et_enforced = Unenforced }
+    { et_type = throwable_ty; et_enforced = Enforced }
     Typing_error.Callback.unify_error
 
 let set_valid_rvalue p env x ty =

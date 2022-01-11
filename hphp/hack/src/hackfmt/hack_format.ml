@@ -548,8 +548,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
               when_present xhp space;
               t env kw;
               Space;
-              SplitWith Cost.Base;
-              Nest [t env name; t env type_params];
+              t env name;
+              t env type_params;
             ];
           WithRule
             ( Rule.Parental,

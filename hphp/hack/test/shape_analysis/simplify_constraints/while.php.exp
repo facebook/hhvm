@@ -9,3 +9,14 @@ Summary for \f:
     a => int
     b => string
   )
+[8:13-15] :
+  shape(
+    a => int
+    b => string
+  )
+[10:11-13] :
+  shape(
+    a => int
+    b => string
+  )
+Summary for \inspect:

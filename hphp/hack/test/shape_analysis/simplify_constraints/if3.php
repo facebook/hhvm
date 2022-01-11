@@ -8,4 +8,7 @@ function f(): void {
     $d = dict['b' => true];
   }
   $d['c'] = 'apple';
+  inspect($d);
 }
+
+function inspect(mixed $_): void {}

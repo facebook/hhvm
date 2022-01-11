@@ -5,20 +5,41 @@ Summary for \f:
   shape(
     a => int
   )
-[11:12-18] : shape()
-[12:7-21] :
+[9:15-17] :
+  shape(
+    a => int
+  )
+[12:12-18] : shape()
+[13:7-21] :
   shape(
     b => string
   )
-[15:7-22] :
+[14:15-17] :
+  shape(
+    b => string
+  )
+[17:7-22] :
   shape(
     b => string
     c => bool
   )
-[17:3-17] :
+[18:15-17] :
+  shape(
+    b => string
+    c => bool
+  )
+[20:3-17] :
   shape(
     a => int
     b => string
     c => bool
     d => float
   )
+[21:11-13] :
+  shape(
+    a => int
+    b => string
+    c => bool
+    d => float
+  )
+Summary for \inspect:

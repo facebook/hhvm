@@ -5,5 +5,9 @@ function f(): void {
   $b = false;
   while ($b) {
     $d['b'] = 'hi';
+    inspect($d);
   }
+  inspect($d);
 }
+
+function inspect(mixed $_): void {}

@@ -7,7 +7,10 @@ function f(): void {
   $f = dict['f' => 42.0];
   while ($b) {
     $f['fixpoint'] = true;
+    inspect($f);
     $f = $e;
     $e = $d;
   }
 }
+
+function inspect(mixed $_): void {}

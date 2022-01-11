@@ -13,3 +13,9 @@ Summary for \f:
     b => string
     c => bool
   )
+[9:13-15] :
+  shape(
+    b => string
+    c => bool
+  )
+Summary for \inspect:

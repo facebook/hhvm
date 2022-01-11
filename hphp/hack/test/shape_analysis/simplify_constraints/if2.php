@@ -5,7 +5,12 @@ function f(): void {
   $c = true;
   if ($c) {
     $d['b'] = 'hi';
+    inspect($d);
   } else {
     $d['c'] = true;
+    inspect($d);
   }
+  inspect($d);
 }
+
+function inspect(mixed $_): void {}

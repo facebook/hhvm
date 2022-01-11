@@ -6,5 +6,8 @@ function f(): void {
   while ($b) {
     $d = dict['b' => 'h'];
     $d['c'] = true;
+    inspect($d);
   }
 }
+
+function inspect(mixed $_): void {}

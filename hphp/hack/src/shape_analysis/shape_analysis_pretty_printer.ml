@@ -24,6 +24,7 @@ let show_constraint_ env =
   | Exists (Allocation, pos) -> Format.asprintf "Allocated at %a" Pos.pp pos
   | Exists (Extension, pos) -> Format.asprintf "Extended at %a" Pos.pp pos
   | Exists (Parameter, pos) -> Format.asprintf "Parameter at %a" Pos.pp pos
+  | Exists (Argument, pos) -> Format.asprintf "Argument at %a" Pos.pp pos
   | Has_static_keys (entity, shape_keys) ->
     let static_keys =
       ShapeKeyMap.bindings shape_keys

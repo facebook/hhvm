@@ -19,3 +19,11 @@ Summary for \f:
     f => float
     fixpoint => bool
   )
+[10:13-15] :
+  shape(
+    d => int
+    e => string
+    f => float
+    fixpoint => bool
+  )
+Summary for \inspect:

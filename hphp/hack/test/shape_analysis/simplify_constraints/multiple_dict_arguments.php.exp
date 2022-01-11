@@ -1,0 +1,11 @@
+=== Shape analysis results for multiple_dict_arguments.php
+Summary for \f:
+[4:8-23] :
+  shape(
+    a => int
+  )
+[5:8-25] :
+  shape(
+    b => bool
+  )
+Summary for \inspect:

@@ -13,4 +13,7 @@ function f(): void {
       $d = dict['c' => true];
   }
   $d['a'] = 'hey';
+  inspect($d);
 }
+
+function inspect(mixed $_): void {}

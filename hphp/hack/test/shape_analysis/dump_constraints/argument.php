@@ -1,8 +1,7 @@
 <?hh
 
-function f(dict<string, int> $d): void {
+function f(): void {
   $d = dict[];
-  $d['k'] = 42;
   inspect($d);
 }
 

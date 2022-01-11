@@ -7,4 +7,7 @@ function f(): void {
     $d = dict[];
   }
   $d['a'] = 42;
+  inspect($d);
 }
+
+function inspect(mixed $_): void {}

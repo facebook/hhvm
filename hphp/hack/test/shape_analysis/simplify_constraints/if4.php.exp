@@ -29,3 +29,13 @@ Summary for \f:
     e => int
     f => int
   )
+[23:11-13] :
+  shape(
+    a => int
+    b => float
+    c => bool
+    d => bool
+    e => int
+    f => int
+  )
+Summary for \inspect:

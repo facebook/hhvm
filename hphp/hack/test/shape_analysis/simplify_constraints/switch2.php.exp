@@ -15,3 +15,10 @@ Summary for \f:
     b => int
     c => bool
   )
+[16:11-13] :
+  shape(
+    a => string
+    b => int
+    c => bool
+  )
+Summary for \inspect:

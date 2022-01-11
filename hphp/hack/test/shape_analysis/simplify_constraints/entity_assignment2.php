@@ -5,4 +5,7 @@ function f(): void {
   $y = 42; // Irrelevant
   $z = $x;
   $z['a'];
+  inspect($z);
 }
+
+function inspect(mixed $_): void {}

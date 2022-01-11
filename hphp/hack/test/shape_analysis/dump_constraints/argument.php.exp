@@ -1,0 +1,7 @@
+=== Shape analysis results for argument.php
+Constraints for \f:
+Allocated at [4:8-14]
+[4:8-14] ⊆ ?1
+
+Constraints for \inspect:
+

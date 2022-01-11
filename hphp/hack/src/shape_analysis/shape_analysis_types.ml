@@ -38,6 +38,7 @@ type exists_kind =
   | Allocation
   | Extension
   | Parameter
+  | Argument
 
 type constraint_ =
   | Exists of exists_kind * Pos.t

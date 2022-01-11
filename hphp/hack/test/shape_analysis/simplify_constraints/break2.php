@@ -5,8 +5,13 @@ function f(): void {
   $d = dict[];
   while ($b) {
     $d['a'] = true;
+    inspect($d);
     if ($b) { break; }
     $d['b'] = 42;
+    inspect($d);
   }
   $d['c'] = 42.0;
+  inspect($d);
 }
+
+function inspect(mixed $_): void {}

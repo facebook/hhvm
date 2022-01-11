@@ -20,4 +20,7 @@ function f(): void {
     }
   }
   $d['f'] = 42;
+  inspect($d);
 }
+
+function inspect(mixed $_): void {}

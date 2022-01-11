@@ -67,6 +67,18 @@ let collect_analysis_targets =
       this#plus accumulator (super#on_hint env hint)
   end
 
+(* Is the type a suitable dict that can be coverted into shape. For the moment,
+   that's only the case if the key is a string. TODO: support int and arraykey
+   once we support constant keys. *)
+let is_suitable_target_ty ty =
+  match Typing_defs.get_node ty with
+  | Typing_defs.Tclass ((_, id), _, [key_ty; _])
+    when String.equal id SN.Collections.cDict ->
+    (match Typing_defs.get_node key_ty with
+    | Typing_defs.Tprim A.Tstring -> true
+    | _ -> false)
+  | _ -> false
+
 let add_key_constraint
     (env : env) entity ((_, _, key) : T.expr) (ty : Typing_defs.locl_ty) : env =
   match entity with
@@ -152,6 +164,24 @@ and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, entity_rhs) = expr env e2 in
     let env = assign pos env e1 entity_rhs ty_rhs in
     (env, None)
+  | A.Call (_base, _targs, args, _unpacked) ->
+    (* TODO: This is obviously incomplete. It just adds a constraint to each
+       dict argument so that we know what shape type that reaches to the
+       given position is. *)
+    let expr_arg env (_param_kind, ((ty, pos, _exp) as arg)) =
+      let (env, arg_entity) = expr env arg in
+      if is_suitable_target_ty ty then
+        let env = Env.add_constraint env (Exists (Argument, pos)) in
+        match arg_entity with
+        | Some arg_entity_ ->
+          let new_entity_ = Literal pos in
+          Env.add_constraint env (Subset (arg_entity_, new_entity_))
+        | None -> env
+      else
+        env
+    in
+    let env = List.fold ~f:expr_arg ~init:env args in
+    (env, None)
   | _ -> failwithpos pos "An expression is not yet handled"
 
 let expr (env : env) (e : T.expr) : env = expr env e |> fst
@@ -220,18 +250,6 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
   | _ -> failwithpos pos "A statement is not yet handled"
 
 and block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
-
-(* Is the type a suitable dict that can be coverted into shape. For the moment,
-   that's only the case if the key is a string. TODO: support int and arraykey
-   once we support constant keys. *)
-let is_suitable_target_ty ty =
-  match Typing_defs.get_node ty with
-  | Typing_defs.Tclass ((_, id), _, [key_ty; _])
-    when String.equal id SN.Collections.cDict ->
-    (match Typing_defs.get_node key_ty with
-    | Typing_defs.Tprim A.Tstring -> true
-    | _ -> false)
-  | _ -> false
 
 let init_params (params : T.fun_param list) : constraint_ list * entity LMap.t =
   let add_param (constraints, lmap) = function

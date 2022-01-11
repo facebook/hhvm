@@ -6,14 +6,31 @@ Summary for \f:
     a => bool
     b => int
   )
-[9:5-17] :
+[8:13-15] :
   shape(
     a => bool
     b => int
   )
-[11:3-17] :
+[10:5-17] :
+  shape(
+    a => bool
+    b => int
+  )
+[11:13-15] :
+  shape(
+    a => bool
+    b => int
+  )
+[13:3-17] :
   shape(
     a => bool
     b => int
     c => float
   )
+[14:11-13] :
+  shape(
+    a => bool
+    b => int
+    c => float
+  )
+Summary for \inspect:

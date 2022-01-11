@@ -6,3 +6,8 @@ Summary for \f:
   shape(
     a => int
   )
+[10:11-13] :
+  shape(
+    a => int
+  )
+Summary for \inspect:

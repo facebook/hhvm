@@ -9,5 +9,3 @@ function f(): void {
   $d['a'] = 42;
   inspect($d);
 }
-
-function inspect(mixed $_): void {}

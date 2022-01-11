@@ -7,5 +7,3 @@ function f(): void {
   $z['a'];
   inspect($z);
 }
-
-function inspect(mixed $_): void {}

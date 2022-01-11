@@ -15,5 +15,3 @@ function f(): void {
   $d['a'] = 'hey';
   inspect($d);
 }
-
-function inspect(mixed $_): void {}

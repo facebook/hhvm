@@ -12,5 +12,3 @@ function f(): void {
     $e = $d;
   }
 }
-
-function inspect(mixed $_): void {}

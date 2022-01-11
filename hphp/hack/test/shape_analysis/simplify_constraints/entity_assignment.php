@@ -5,5 +5,3 @@ function f(): void {
   $x['b'];
   inspect($x);
 }
-
-function inspect(mixed $_): void {}

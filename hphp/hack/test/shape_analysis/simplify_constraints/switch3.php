@@ -20,5 +20,3 @@ function f(): void {
   $d['d'] = 3.14;
   inspect($d);
 }
-
-function inspect(mixed $_): void {}

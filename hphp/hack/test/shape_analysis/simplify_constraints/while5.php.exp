@@ -19,4 +19,3 @@ Summary for \f:
     f => float
     fixpoint => bool
   )
-Summary for \inspect:

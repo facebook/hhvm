@@ -14,4 +14,3 @@ Summary for \f:
     b => bool
     c => string
   )
-Summary for \inspect:

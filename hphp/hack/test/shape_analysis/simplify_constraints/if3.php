@@ -10,5 +10,3 @@ function f(): void {
   $d['c'] = 'apple';
   inspect($d);
 }
-
-function inspect(mixed $_): void {}

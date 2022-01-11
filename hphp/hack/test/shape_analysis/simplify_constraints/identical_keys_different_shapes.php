@@ -7,5 +7,3 @@ function f(dict<string, mixed> $d1, dict<string, mixed> $d2): void {
   inspect($d1);
   inspect($d2);
 }
-
-function inspect(mixed $_): void {}

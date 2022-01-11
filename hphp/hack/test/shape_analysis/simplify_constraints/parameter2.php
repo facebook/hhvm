@@ -6,5 +6,3 @@ function f(int $i, dict<string, int> $d): void {
   $d['l'] = $i;
   inspect($d);
 }
-
-function inspect(mixed $_): void {}

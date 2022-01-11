@@ -78,7 +78,8 @@ struct RefineTmps {
    * non-passthrough. DefLabels have special handling. If all sources
    * of the DefLabel canonicalize to the same SSATmp, we treat it as a
    * passthrough. If not, they're considered "normal" defining
-   * instructions.
+   * instructions. Canonical values for DefLabels are pre-calculated
+   * using dataflow.
    *
    * A SSATmp can be rewritten to another SSATmp, or to a phi. For
    * each block, union together the rewrite maps in each
@@ -134,7 +135,10 @@ struct RefineTmps {
     };
     Trace::Indent indenter;
 
-    // First calculate the dataflow to see which rewrites are present
+    // First calculate canonical values for DefLabels
+    calcDefLabelCanons();
+
+    // Then calculate the dataflow to see which rewrites are present
     // at each block. Non-phi SSATmps are rewritten as we go. If no
     // phis are created, this is sufficient.
     auto const changed = dataflow();
@@ -511,66 +515,204 @@ struct RefineTmps {
     return phi;
   }
 
-  using VisitedSet = jit::fast_set<std::pair<Block*, uint32_t>>;
+  /*
+   * Canonicalizing DefLabels on the fly is tricky. Doing it naively
+   * can lead to exponential path blowup, and caching schemes run into
+   * problems when mutually recursive DefLabels are involved. Instead
+   * of doing it on demand, pre-calculate all of the canonical values
+   * for every DefLabel in the unit.
+   *
+   * This is essentially a dataflow problem, and it's solved in the
+   * typical way. First we record all DefLabels, and record the
+   * dependencies between DefLabels (a DefLabel depends on another if
+   * the dst of one is the src of another).
+   *
+   * We then use a worklist algorithm. For every DefLabel on the list,
+   * calculate the canonical value for it. This is is done by
+   * examining the DefLabel sources and looking up their canonical
+   * values. If the source's canonical value isn't a DefLabel, then
+   * that's the source's final canonical value. Otherwise we lookup
+   * that DefLabel's current canonical value. If all sources
+   * canonicalize to the same value, that ends up being the canonical
+   * value of the DefLabel. If not (they differ), the DefLabel
+   * canonicalizes to itself. If this round of processing has changed
+   * the canonical value, we then reschedule any other DefLabels which
+   * depend on this value. The process repeats until the worklist
+   * empties.
+   *
+   * During the above process, when we go to lookup a DefLabel's
+   * canonical value, one might not be present. This can happen for
+   * two reasons. The first is the DefLabel hasn't been processed at
+   * all yet, or the DefLabel is entirely defined recursively. If we
+   * encounter such a situation, we simply skip that source (in this
+   * round). The dataflow ensures that we eventually will calculate a
+   * value and revisit this DefLabel. This is the equivalent of a
+   * Bottom.
+   */
 
-  // "Canonicalize" a SSATmp by walking backwards through passthrough
-  // instructions, stopping at the SSATmp defined by a
-  // non-passthrough.
-  //
-  // We don't use canonical for this, because it includes
-  // ConvPtrToLval (which isn't a passthrough for our purposes), and
-  // we want special handling for DefLabel.
-  static SSATmp* canonicalize(SSATmp* v, VisitedSet* visited = nullptr) {
-    while (v->inst()->isPassthrough()) v = v->inst()->getPassthroughValue();
-    auto const inst = v->inst();
+  // State for DefLabel canonicalization. The canonical value and the
+  // other DefLabels which use this value.
+  struct DefLabelCanon {
+    SSATmp* canon{nullptr};
+    jit::fast_set<SSATmp*> usedBy;
+  };
+  jit::fast_map<SSATmp*, DefLabelCanon> defLabelCanons;
 
-    // Not a passthrough and not a DefLabel. This is canonical.
-    if (!inst->is(DefLabel)) return v;
-    // We deal with DefLabels specially. A DefLabel is considered
-    // "passthrough" if all of its associated sources canonicalize
-    // to the same SSATmp. If not, it's considered a normal
-    // defining instruction.
+  void calcDefLabelCanons() {
+    jit::fast_set<SSATmp*> onWorklist;
+    jit::deque<SSATmp*> worklist;
 
-    auto const dstIdx = inst->findDst(v);
-    assertx(dstIdx != inst->numDsts());
+    // Iterate over every block, record all DefLabels and build the
+    // "usedBy" dependencies between them. Initially put all on the
+    // worklist.
+    for (auto const block : rpoBlocks) {
+      auto const& defLabel = block->front();
+      if (!defLabel.is(DefLabel)) continue;
 
-    // We need to canonicalize each of the DefLabel's sources
-    // recursively. Since this can visit more DefLabels (and
-    // DefLabels can be mutually recursive), we need to keep a
-    // visited set.
-    Optional<VisitedSet> optVisited;
-    if (visited) {
-      // If we visited this DefLabel already, return nullptr. This
-      // is a special value (only allowed for DefLabels) which
-      // means "ignore this branch".
-      if (!visited->emplace(inst->block(), dstIdx).second) return nullptr;
-    } else {
-      optVisited.emplace();
-      visited = optVisited.get_pointer();
+      auto const numDsts = defLabel.numDsts();
+      for (uint32_t dstIdx = 0; dstIdx < numDsts; ++dstIdx) {
+        auto const dst = defLabel.dst(dstIdx);
+        block->forEachSrc(
+          dstIdx,
+          [&] (IRInstruction*, SSATmp* src) {
+            // NB: "chase", not "canonical" here since we don't want
+            // to consult the DefLabel state yet.
+            src = chase(src);
+            if (!src->inst()->is(DefLabel)) return;
+            defLabelCanons[src].usedBy.emplace(dst);
+          }
+        );
+
+        auto const DEBUG_ONLY inserted = onWorklist.emplace(dst).second;
+        assertx(inserted);
+        worklist.emplace_back(dst);
+      }
     }
 
-    // Visit each source and see if they all canonicalize the same
-    Optional<SSATmp*> commonCanon;
-    inst->block()->forEachSrc(
-      dstIdx,
-      [&] (IRInstruction*, SSATmp* src) {
-        if (commonCanon && !*commonCanon) return;
-        auto const canon = canonicalize(src, visited);
-        // If nullptr, ignore this source
-        if (!canon) return;
+    // Now do the dataflow. For each DefLabel on the worklist,
+    // calculate its canonical value from its sources. If it changes,
+    // reschedule any DefLabels using this canonical value onto the
+    // worklist.
+    while (!worklist.empty()) {
+      // Remove from worklist
+      auto const defLabel = worklist.front();
+      worklist.pop_front();
+      onWorklist.erase(defLabel);
 
-        if (!commonCanon) {
-          commonCanon = canon;
-        } else if (*commonCanon != canon) {
-          commonCanon = nullptr;
+      auto const dstIdx = defLabel->inst()->findDst(defLabel);
+      assertx(dstIdx != defLabel->inst()->numDsts());
+
+      auto& state = defLabelCanons[defLabel];
+      // Canonical value being the DefLabel itself is most pessimistic
+      // state. The value cannot change at this point, so no point in
+      // trying to recalculate it.
+      if (state.canon == defLabel) continue;
+
+      // Calculate the new canonical value.
+      SSATmp* canon = nullptr;
+      defLabel->inst()->block()->forEachSrc(
+        dstIdx,
+        [&] (IRInstruction*, SSATmp* src) {
+          // If we reach the most pessimistic state, we can stop
+          // looking at sources.
+          if (canon == defLabel) return;
+
+          // Chase back to defining instruction for this source and
+          // find associated canonical value. We want "chase" here,
+          // not "canonical" because they differ in how nullptr
+          // state.canon values are handled.
+          src = chase(src);
+          auto const srcCanon = [&] {
+            if (!src->inst()->is(DefLabel)) return src;
+            auto const it = defLabelCanons.find(src);
+            assertx(it != defLabelCanons.end());
+            return it->second.canon;
+          }();
+          // A nullptr means we don't yet have a canonical value for
+          // the DefLabel associated with src. Ignore this src for
+          // now.
+          if (!srcCanon) return;
+
+          // If we haven't gotten a value yet, take the first one we
+          // get.
+          if (!canon) {
+            canon = srcCanon;
+            return;
+          }
+
+          // Otherwise check if this value matches the one found in
+          // previous loop iteration. If not, pessimize (which causes
+          // us to short-circuit out of this loop).
+          if (srcCanon != canon) {
+            canon = defLabel;
+            return;
+          }
+        }
+      );
+
+      // The newly calculated canonical value is different. Update the
+      // state and reschedule any dependent DefLabels.
+      if (state.canon != canon) {
+        state.canon = canon;
+        for (auto const used : state.usedBy) {
+          if (onWorklist.emplace(used).second) {
+            worklist.emplace_back(used);
+          }
         }
       }
-    );
-    if (!commonCanon) {
-      return optVisited.has_value() ? v : nullptr;
     }
-    if (*commonCanon) return *commonCanon;
+
+    ONTRACE(
+      4,
+      ITRACE(4, "DefLabel canonical values:\n");
+      Trace::Indent indenter;
+      for (auto const& kv : defLabelCanons) {
+        ITRACE(
+          4,
+          "{} -> {} [{}]\n",
+          *kv.first,
+          [&] () -> std::string {
+            if (!kv.second.canon) return "*";
+            return kv.second.canon->toString();
+          }(),
+          [&] {
+            std::string str;
+            auto first = true;
+            for (auto const u : kv.second.usedBy) {
+              folly::format(&str, "{}{}", first ? "" : ",", *u);
+              first = false;
+            }
+            return str;
+          }()
+        );
+      }
+    );
+  }
+
+  // "Chase" a SSATmp's definition back to the first non passthrough
+  // value. We don't use canonical for this, because it includes
+  // ConvPtrToLval (which isn't a passthrough for our purposes).
+  static SSATmp* chase(SSATmp* v) {
+    while (v->inst()->isPassthrough()) v = v->inst()->getPassthroughValue();
     return v;
+  }
+
+  // "Canonicalize" a SSATmp by chasing its definition back to the
+  // first non passthrough value. If this hits a DefLabel, consult the
+  // already calculated canonical value for it.
+  SSATmp* canonicalize(SSATmp* v) {
+    v = chase(v);
+
+    // Not a DefLabel. This is canonical.
+    if (!v->inst()->is(DefLabel)) return v;
+
+    // DefLabel. Look up the state to get its canonical value. We
+    // should have state for every possible DefLabel encountered here.
+    auto const it = defLabelCanons.find(v);
+    assertx(it != defLabelCanons.end());
+
+    if (!it->second.canon) return v;
+    return it->second.canon;
   }
 
   struct RemapTo {

@@ -417,6 +417,7 @@ let expr : Typing_env_types.env -> Nast.expr -> unit =
   | Upcast (_, h)
   | Cast (h, _) ->
     hint tenv h
+  | Call (_, hl, _, _) -> List.iter hl ~f:(fun (_, h) -> hint tenv h)
   | Lfun (f, _)
   | Efun (f, _) ->
     fun_ tenv f
@@ -438,7 +439,6 @@ let expr : Typing_env_types.env -> Nast.expr -> unit =
   | Obj_get _
   | Class_get _
   | Class_const _
-  | Call _
   | FunctionPointer _
   | Int _
   | Float _

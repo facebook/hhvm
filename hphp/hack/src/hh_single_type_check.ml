@@ -736,7 +736,7 @@ let parse_options () =
   Arg.parse options (fun fn -> fn_ref := fn :: !fn_ref) usage;
   let fns =
     match (!fn_ref, !mode) with
-    | ([], Get_member _) -> []
+    | ([], (Get_member _ | Type)) -> []
     | ([], _) -> die usage
     | (x, _) -> x
   in
@@ -2096,18 +2096,31 @@ let handle_mode
     print_error_list error_format errors max_errors;
     if not (List.is_empty errors) then exit 2
   | Type ->
-    let path = expect_single_file () in
-    let (errors, tasts, _gi_solved) =
-      compute_tasts_expand_types ctx ~verbosity files_info files_contents
+    let path_stream =
+      match filenames with
+      | [] ->
+        Stream.from (fun _ ->
+            try
+              Some
+                (let path = Caml.input_line Caml.stdin |> String.strip in
+                 Relative_path.(create Dummy path))
+            with
+            | End_of_file -> None)
+      | filenames -> Stream.of_list filenames
     in
-    let errors = Errors.get_error_list errors in
-    ignore @@ (errors, parse_errors);
-    if (not (List.is_empty parse_errors)) || not (List.is_empty errors) then begin
-      List.iter ~f:(print_error error_format) (parse_errors @ errors);
-      exit 2
-    end else
-      let tast = Relative_path.Map.find tasts path in
-      Typing_preorder_ser.tast_to_json tast
+    let process path =
+      let (errors, tasts, _gi_solved) =
+        compute_tasts_expand_types ctx ~verbosity files_info files_contents
+      in
+      let errors = Errors.get_error_list errors in
+      if (not (List.is_empty parse_errors)) || not (List.is_empty errors) then begin
+        List.iter ~f:(print_error error_format) (parse_errors @ errors);
+        exit 2
+      end else
+        let tast = Relative_path.Map.find tasts path in
+        Typing_preorder_ser.tast_to_json tast
+    in
+    Stream.iter process path_stream
   | Decl_compare ->
     let filename = expect_single_file () in
     (* Might raise because of Option.value_exn *)

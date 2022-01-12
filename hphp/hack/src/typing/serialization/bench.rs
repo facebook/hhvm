@@ -10,6 +10,7 @@ use std::{
     process::{Child, Command, Stdio},
 };
 
+use itertools::Itertools;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use structopt::{clap::arg_enum, StructOpt};
 
@@ -57,6 +58,9 @@ struct Opts {
     #[structopt(long)]
     www_root: Option<PathBuf>,
 
+    #[structopt(long, default_value = "0")]
+    batch_min_bytes: u64,
+
     /// The (partial) list of input Hack files or directories to process
     /// (the rest is read from the standard input, for practical reasons)
     #[structopt(name = "PATH")]
@@ -65,7 +69,7 @@ struct Opts {
 
 struct Context {
     proc: Child,
-    filepath: String,
+    filepaths: Vec<String>,
     hasher: fnv::FnvHasher,
     verbosity: u8,
 }
@@ -80,7 +84,7 @@ impl Context {
 }
 
 fn typecheck_only(ctx: &mut Context) {
-    let err = || panic!("typechecker reported errors on: {}", ctx.filepath);
+    let err = || panic!("typechecker reported errors on: {:?}", ctx.filepaths);
     let expected_1st_line = "No errors";
     let mut buf: Vec<u8> = vec![0; expected_1st_line.as_bytes().len()];
     ctx.proc
@@ -117,11 +121,33 @@ fn path_to_str(path: &Path) -> &str {
     path.to_str().expect("non-UTF8 input path")
 }
 
+fn batch(
+    min_bytes: u64,
+    path_iter: impl Iterator<Item = String>,
+) -> impl Iterator<Item = Vec<String>> {
+    path_iter
+        .batching(move |path_it| {
+            let mut paths = Vec::<String>::new();
+            let mut byte_count: u64 = 0;
+            while let Some(path) = path_it.next() {
+                byte_count += std::fs::metadata(&path)
+                    .unwrap_or_else(|_| panic!("failed to get file size of: {}", path))
+                    .len();
+                paths.push(path);
+                if byte_count >= min_bytes {
+                    break;
+                }
+            }
+            if paths.is_empty() { None } else { Some(paths) }
+        })
+        .into_iter()
+}
+
 fn main() {
     let opts = Opts::from_args();
     let www_root = opts.www_root.as_ref().map(|p| path_to_str(p));
     let naming_table = opts.naming_table.as_ref().map(|p| path_to_str(p));
-    let job = |filepath| {
+    let job = |filepaths: Vec<String>| {
         let proc = {
             let mut cmd = Command::new(&opts.hh_single_type_check_path);
             if let Mode::CheckOnly = &opts.mode {
@@ -136,15 +162,17 @@ fn main() {
             .arg("--hh-log-level")
             .arg("show")
             .arg("-1")
-            .arg(&filepath)
             .stdin(Stdio::null())
             .stdout(Stdio::piped());
             if let Some(naming_table) = naming_table {
                 cmd.arg("--naming-table").arg(naming_table);
                 cmd.arg("--root").arg(www_root.unwrap());
             }
+            for filepath in &filepaths {
+                cmd.arg(filepath);
+            }
             if opts.dry_run {
-                eprintln!("DRY RUN: {:?}", cmd);
+                eprintln!("DRY RUN {} files: {:?}", filepaths.len(), cmd);
                 return (true, 0); // don't run a process
             }
             if opts.verbosity < 2 {
@@ -171,7 +199,7 @@ fn main() {
 
         let mut ctx = Context {
             proc,
-            filepath,
+            filepaths,
             hasher: Default::default(),
             verbosity: opts.verbosity,
         };
@@ -206,6 +234,8 @@ fn main() {
             .for_each(|line| tx.send(line.unwrap()).unwrap());
         rx.into_iter()
     };
+    let filepaths = batch(opts.batch_min_bytes, filepaths);
+
     // combine checksums using a _commutative_ monoid (bitwise XOR, 0),
     // since the execution order is arbitrary
     let (ok, checksum) = filepaths

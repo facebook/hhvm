@@ -151,13 +151,13 @@ struct alignas(16) Resumable {
     assertx(func->isResumable());
     assertx(func->contains(suspendOffset));
     // Check memory alignment
-    assertx((((uintptr_t) actRec()) & (sizeof(TypedValue) - 1)) == 0);
+    assertx(((uintptr_t) actRec()) % sizeof(TypedValue) == 0);
 
     if (!clone) {
       // Copy ActRec, locals and iterators
       auto src = reinterpret_cast<const char*>(fp) - frameSize;
       auto dst = reinterpret_cast<char*>(actRec()) - frameSize;
-      wordcpy(dst, src, frameSize + sizeof(ActRec));
+      memcpy16_inline(dst, src, frameSize + sizeof(ActRec));
     } else {
       // If we are cloning a Resumable, only copy the ActRec. The
       // caller will take care of copying locals, setting the VarEnv, etc.
@@ -165,9 +165,9 @@ struct alignas(16) Resumable {
       // going to overwrite m_sfp and m_savedRip, so don't copy them here.
       auto src = reinterpret_cast<const char*>(fp);
       auto dst = reinterpret_cast<char*>(actRec());
-      wordcpy(dst + kNativeFrameSize,
-              src + kNativeFrameSize,
-              sizeof(ActRec) - kNativeFrameSize);
+      memcpy16_inline(dst + kNativeFrameSize,
+                      src + kNativeFrameSize,
+                      sizeof(ActRec) - kNativeFrameSize);
     }
 
     // Populate Resumable.

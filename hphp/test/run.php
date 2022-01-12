@@ -15,15 +15,7 @@ function mtime(): float {
   return microtime(true) as float;
 }
 
-function safe_realpath(string $path): string {
-  return realpath($path) as string;
-}
-
-function safe_implode(string $delim, mixed $strs): string {
-  return implode($delim, $strs) as string;
-}
-
-// NOTE: The "HPHP_HOME" environment variable can be set (to ".../fbcode"), to
+// The "HPHP_HOME" environment variable can be set (to ".../fbcode"), to
 // define "hphp_home()" and (indirectly) "test_dir()".  Otherwise, we will use
 // "__DIR__" as "test_dir()", and its grandparent directory for "hphp_home()"
 // (unless we are testing a dso extensions).
@@ -42,19 +34,19 @@ function is_testing_dso_extension(): bool {
 function hphp_home(): string {
   $home = getenv("HPHP_HOME");
   if ($home is string) {
-    return safe_realpath($home);
+    return realpath($home);
   }
   if (is_testing_dso_extension()) {
-    return safe_realpath(__DIR__);
+    return realpath(__DIR__);
   }
-  return safe_realpath(__DIR__."/../..");
+  return realpath(__DIR__."/../..");
 }
 
 <<__Memoize>>
 function test_dir(): string {
   $home = getenv("HPHP_HOME");
   if ($home is string) {
-    return safe_realpath($home)."/hphp/test";
+    return realpath($home)."/hphp/test";
   }
   return __DIR__;
 }
@@ -128,7 +120,7 @@ function jit_serialize_option(
   if ($options->jitsample is nonnull && $serialize) {
     $cmds[0] .= ' -vDeploymentId="' . $options->jitsample . '-serialize"';
   }
-  return safe_implode(' -- ', $cmds);
+  return implode(' -- ', $cmds);
 }
 
 function usage(): string {
@@ -215,12 +207,6 @@ function error(string $message): noreturn {
   exit(1);
 }
 
-function success(): noreturn {
-  // ISSUE: Is this newline important?
-  print "\n";
-  exit(0);
-}
-
 // If a user-supplied path is provided, let's make sure we have a valid
 // executable. Returns canonicanalized path or exits.
 function check_executable(string $path): string {
@@ -233,8 +219,7 @@ function check_executable(string $path): string {
   $output = vec[];
   $return_var = -1;
   exec($rpath . " --version 2> /dev/null", inout $output, inout $return_var);
-  // ISSUE: Should just use "starts_with".
-  if (strpos(safe_implode("", $output), "HipHop ") !== 0) {
+  if (strpos(implode("", $output), "HipHop ") !== 0) {
     error("Provided file ($rpath) is not an HHVM executable.\n" .
           "If using HHVM_BIN, make sure that is set correctly.");
   }
@@ -293,7 +278,7 @@ function hhvm_path(): string {
   $file = "";
   $hhvm_bin = getenv("HHVM_BIN");
   if ($hhvm_bin is string) {
-    $file = safe_realpath($hhvm_bin);
+    $file = realpath($hhvm_bin);
   } else {
     $file = bin_root().'/hhvm';
   }
@@ -317,7 +302,7 @@ function hhvm_path(): string {
 function bin_root(): string {
   $hhvm_bin = getenv("HHVM_BIN");
   if ($hhvm_bin is string) {
-    return dirname(safe_realpath($hhvm_bin));
+    return dirname(realpath($hhvm_bin));
   }
 
   $home = hphp_home();
@@ -342,7 +327,7 @@ function hh_codegen_path(): string {
   $file = "";
   $hh = getenv("HH_CODEGEN_BIN");
   if ($hh is string) {
-    $file = safe_realpath($hh);
+    $file = realpath($hh);
   } else {
     $file = hh_codegen_bin_root().'/hh_single_compile.opt';
   }
@@ -431,7 +416,7 @@ function rel_path(string $to): string {
     $relPath[] = $to[$d];
     $d++;
   }
-  return safe_implode('/', $relPath);
+  return implode('/', $relPath);
 }
 
 // Keep this in sync with the dict in get_options() below.
@@ -600,19 +585,16 @@ function get_options(
   $repo_out = $options->repo_out;
   if ($repo_out is string && !is_dir($repo_out)) {
     if (!mkdir($repo_out) && !is_dir($repo_out)) {
-      echo "Unable to create repo-out dir " . $repo_out . "\n";
-      exit(1);
+      error("Unable to create repo-out dir " . $repo_out);
     }
   }
   if ($options->hhbbc2) {
     $options->repo_separate = true;
     if ($options->repo || $options->repo_single) {
-      echo "repo-single/repo and hhbbc2 are mutually exclusive options\n";
-      exit(1);
+      error("repo-single/repo and hhbbc2 are mutually exclusive options");
     }
     if (isset($options['mode'])) {
-      echo "hhbbc2 doesn't support modes; it compares hhas, doesn't run code\n";
-      exit(1);
+      error("hhbbc2 doesn't support modes; it compares hhas, doesn't run code");
     }
   }
 
@@ -625,36 +607,30 @@ function get_options(
 
   if ($options->jit_serialize is nonnull) {
     if (!$options->repo) {
-      echo "jit-serialize only works in repo mode\n";
-      exit(1);
+      error("jit-serialize only works in repo mode");
     }
     if ($options->mode is nonnull && $options->mode !== 'jit') {
-      echo "jit-serialize only works in jit mode\n";
-      exit(1);
+      error("jit-serialize only works in jit mode");
     }
   }
 
   if ($options->split_hphpc) {
     if (!$options->repo) {
-      echo "split-hphpc only works in repo mode\n";
-      exit(1);
+      error("split-hphpc only works in repo mode");
     }
     if (!$options->repo_separate) {
-      echo "split-hphpc only works in repo-separate mode\n";
-      exit(1);
+      error("split-hphpc only works in repo-separate mode");
     }
   }
 
   if ($options->repo && $options->hhas_round_trip) {
-    echo "repo and hhas-round-trip are mutually exclusive options\n";
-    exit(1);
+    error("repo and hhas-round-trip are mutually exclusive options");
   }
 
   $multi_request_modes = multi_request_modes($options);
   if (count($multi_request_modes) > 1) {
-    echo "The options\n -", safe_implode("\n -", $multi_request_modes),
-         "\nare mutually exclusive options\n";
-    exit(1);
+    error("The options\n -" . implode("\n -", $multi_request_modes) .
+          "\nare mutually exclusive options");
   }
 
   if ($options->write_to_checkout) {
@@ -669,7 +645,7 @@ function get_options(
  * contain test.
  */
 function canonical_path_from_base(string $test, string $base): mixed {
-  $full = safe_realpath($test);
+  $full = realpath($test);
   if (substr($full, 0, strlen($base)) === $base) {
     return substr($full, strlen($base) + 1);
   }
@@ -685,14 +661,12 @@ function canonical_path_from_base(string $test, string $base): mixed {
   return false;
 }
 
-// ISSUE: This should probably return string.
 function canonical_path(string $test): mixed {
   $attempt = canonical_path_from_base($test, test_dir());
   if ($attempt === false) {
-    // ISSUE: What if this is false?
     return canonical_path_from_base($test, hphp_home());
   } else {
-   return $attempt;
+    return $attempt;
   }
 }
 
@@ -755,7 +729,7 @@ function serial_only_tests(vec<string> $tests): vec<string> {
   return $serial_tests;
 }
 
-// NOTE: If "files" is very long, then the shell may reject the desired
+// If "files" is very long, then the shell may reject the desired
 // "find" command (especially because "escapeshellarg()" adds two single
 // quote characters to each file), so we split "files" into chunks below.
 function exec_find(vec<string> $files, string $extra): vec<string> {
@@ -796,7 +770,7 @@ function find_tests(
     if (!@stat($file)) {
       error("Not valid file or directory: '$file'");
     }
-    $file = preg_replace(',//+,', '/', safe_realpath($file));
+    $file = preg_replace(',//+,', '/', realpath($file));
     $file = preg_replace(',^'.getcwd().'/,', '', $file);
     $files[] = $file;
   }
@@ -856,7 +830,7 @@ function find_tests(
 }
 
 function list_tests(vec<string> $files, Options $options): void {
-  $args = safe_implode(' ', \HH\global_get('recorded_options'));
+  $args = implode(' ', \HH\global_get('recorded_options'));
 
   // Disable escaping of test info when listing. We check if the environment
   // variable is set so we can make the change in a backwards compatible way.
@@ -1041,7 +1015,7 @@ function hhvm_cmd_impl(
       $args[] = '-vServer.APC.MemModelTreadmill=true';
     }
 
-    $cmds[] = safe_implode(' ', array_merge($args, $extra_args));
+    $cmds[] = implode(' ', array_merge($args, $extra_args));
   }
   return $cmds;
 }
@@ -1199,7 +1173,7 @@ function hphp_cmd(
     }
   }
 
-  return safe_implode(" ", vec[
+  return implode(" ", vec[
     hphpc_path($options),
     '--hphp',
     '-vUseHHBBC='. (repo_separate($options, $test) ? 'false' : 'true'),
@@ -1240,7 +1214,7 @@ function hhbbc_cmd(
   Options $options, string $test, string $program,
 ): string {
   $test_repo = test_repo($options, $test);
-  return safe_implode(" ", vec[
+  return implode(" ", vec[
     hphpc_path($options),
     '--hhbbc',
     '--no-logging',
@@ -1354,7 +1328,7 @@ function repo_mode_compile(
 //   4 byte zero-padded hex body size
 //   N byte string body
 //
-// NOTE: The first call to "getInput()" or "getOutput()" in any process will
+// The first call to "getInput()" or "getOutput()" in any process will
 // block until some other process calls the other method.
 //
 class Queue {
@@ -1375,12 +1349,11 @@ class Queue {
   // is received, and the chunks can be reassembled.
   private Map<int, Vector<string>> $partials = Map {};
 
-
-  // NOTE: Only certain directories support "posix_mkfifo()".
   public function __construct(?string $dir = null): void {
     $path = \tempnam($dir ?? \sys_get_temp_dir(), "queue.mkfifo.");
     \unlink($path);
     if (!\posix_mkfifo($path, 0700)) {
+      // Only certain directories support "posix_mkfifo()".
       throw new \Exception("Failed to create FIFO at '$path'");
     }
     $this->path = $path;
@@ -1482,7 +1455,7 @@ class Queue {
     if ($n !== 16 + $blen) {
       throw new \Exception("Illegal packet");
     }
-    // NOTE: Hack's "fwrite()" is never buffered, which is especially
+    // Hack's "fwrite()" is never buffered, which is especially
     // critical for pipe writes, to ensure that they are actually atomic.
     // See the documentation for "PlainFile::writeImpl()".  But just in
     // case, we add an explicit "fflush()" below.
@@ -2039,7 +2012,7 @@ final class Status {
       $row ==> self::jsonEncode($row) . "\n",
       $args
     );
-    fwrite(STDERR, safe_implode("", $data));
+    fwrite(STDERR, implode("", $data));
   }
 
   public static function hasCursorControl(): bool {
@@ -2235,7 +2208,7 @@ function runif_os_matches(vec<string> $words): RunifResult {
   return shape(
     'valid' => true,
     'match' => false,
-    'skip_reason' => 'skip-runif-os-' . safe_implode('-', $words)
+    'skip_reason' => 'skip-runif-os-' . implode('-', $words)
   );
 }
 
@@ -2320,7 +2293,7 @@ function runif_euid_matches(
   return shape(
     'valid' => true,
     'match' => false,
-    'skip_reason' => 'skip-runif-euid-' . safe_implode('-', $words)
+    'skip_reason' => 'skip-runif-euid-' . implode('-', $words)
   );
 }
 
@@ -2427,7 +2400,7 @@ function runif_locale_matches(
   if (!preg_match('/^LC_[A-Z]+$/', $category)) {
     return shape('valid' => false, 'error' => "bad locale category '$category'");
   }
-  $locale_args = safe_implode(', ', array_map($word ==> "'$word'", $words));
+  $locale_args = implode(', ', array_map($word ==> "'$word'", $words));
   $matches = runif_test_for_feature(
     $options,
     $test,
@@ -2796,13 +2769,13 @@ function generate_diff(
   }
   $diff = generate_array_diff($r, $o, !is_null($wanted_re), $w);
 
-  return safe_implode("\r\n", $diff);
+  return implode("\r\n", $diff);
 }
 
 function dump_hhas_cmd(
   string $hhvm_cmd, string $test, string $hhas_file,
 ): string {
-  $dump_flags = safe_implode(' ', vec[
+  $dump_flags = implode(' ', vec[
     '-vEval.AllowHhas=true',
     '-vEval.DumpHhas=1',
     '-vEval.DumpHhasToFile='.escapeshellarg($hhas_file),
@@ -2943,7 +2916,6 @@ function replace_object_resource_ids(string $str, string $replacement): string {
   );
 }
 
-// NOTE: Returns "(string | bool)".
 function run_config_post(
   (string, string) $outputs,
   string $test,
@@ -3121,7 +3093,6 @@ function timeout_prefix(): string {
   }
 }
 
-// NOTE: Returns "(string | bool)".
 function run_foreach_config(
   Options $options,
   string $test,
@@ -3168,7 +3139,7 @@ function run_and_log_test(Options $options, string $test): void {
   }
 }
 
-// NOTE: Returns "(string | bool)".
+// Returns "(string | bool)".
 function run_test(Options $options, string $test): mixed {
   $skip_reason = should_skip_test_simple($options, $test);
   if ($skip_reason is nonnull) return $skip_reason;
@@ -3537,10 +3508,10 @@ function print_failure(
 
   $failing_tests_file = $options->failure_file ??
     Status::getRunTmpDir() . '/test-failures';
-  file_put_contents($failing_tests_file, safe_implode("\n", $failed)."\n");
+  file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
   if ($passed) {
     $passing_tests_file = Status::getRunTmpDir() . '/tests-passed';
-    file_put_contents($passing_tests_file, safe_implode("\n", $passed)."\n");
+    file_put_contents($passing_tests_file, implode("\n", $passed)."\n");
   } else {
     $passing_tests_file = "";
   }
@@ -3591,7 +3562,7 @@ function print_failure(
   print
     make_header("Re-run just the failing tests:") .
     str_replace("run.php", "run", $argv[0]) . ' ' .
-    safe_implode(' ', \HH\global_get('recorded_options')) .
+    implode(' ', \HH\global_get('recorded_options')) .
     sprintf(' $(cat %s)%s', $failing_tests_file, "\n");
 }
 
@@ -3678,8 +3649,7 @@ function start_server_proc(
   if (!$proc) {
     error("Failed to start server process");
   }
-  // NOTE: This is a "dict<string, mixed>".
-  $status = proc_get_status($proc);
+  $status = proc_get_status($proc); // dict<string, mixed>
   $pid = $status['pid'] as int;
   $server = new Server($proc, $pid, $port, $config, $cli_sock);
   return $server;
@@ -3808,7 +3778,8 @@ function main(vec<string> $argv): int {
   }
   if ($options->list_tests) {
     list_tests($files, $options);
-    success();
+    print "\n";
+    exit(0);
   }
 
   $tests = find_tests($files, $options);
@@ -3943,7 +3914,7 @@ function main(vec<string> $argv): int {
     $printer_pid = -1;
   }
 
-  // NOTE: This unblocks the Queue (if needed).
+  // Unblock the Queue (if needed).
   Status::started();
 
   // Fork "worker" children (if needed).
@@ -4071,7 +4042,7 @@ function main(vec<string> $argv): int {
       count($failed_tests), $new_fails, $new_passes
     );
     sort(inout $failed_tests);
-    file_put_contents($fail_file, safe_implode("\n", $failed_tests));
+    file_put_contents($fail_file, implode("\n", $failed_tests));
   } else if ($options->testpilot) {
     Status::say(dict['op' => 'all_done', 'results' => $results]);
     return $return_value;
@@ -4099,7 +4070,7 @@ function run_main(): void {
   exit(main(get_argv()));
 }
 
-// NOTE: Inline ASCII art moved to end-of-file to avoid confusing emacs.
+// Inline ASCII art moved to end-of-file to avoid confusing emacs.
 
 function print_clown(): void {
   print <<<CLOWN

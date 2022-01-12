@@ -61,7 +61,7 @@ function test_dir(): string {
 
 function get_expect_file_and_type(
   string $test,
-  dict<string, mixed> $options,
+  Options $options,
 ): vec<?string> {
   $types = vec[
     'expect',
@@ -70,7 +70,7 @@ function get_expect_file_and_type(
     'hhvm.expect',
     'hhvm.expectf',
   ];
-  if (isset($options['repo'])) {
+  if ($options->repo) {
     if (file_exists($test . '.hphpc_assert')) {
       return vec[$test . '.hphpc_assert', 'expectf'];
     }
@@ -94,39 +94,39 @@ function get_expect_file_and_type(
   return vec[null, null];
 }
 
-function multi_request_modes(): vec<string> {
-  return vec['retranslate-all',
-               'recycle-tc',
-               'jit-serialize',
-               'cli-server'];
+function multi_request_modes(Options $options): vec<string> {
+  $r = vec[];
+  if ($options->retranslate_all is nonnull) $r []= 'retranslate-all';
+  if ($options->recycle_tc is nonnull) $r []= 'recycle-tc';
+  if ($options->jit_serialize is nonnull) $r []= 'jit-serialize';
+  if ($options->cli_server) $r []= 'cli-server';
+  return $r;
 }
 
-function has_multi_request_mode(dict<string, mixed> $options): bool {
-  foreach (multi_request_modes() as $option) {
-    if (isset($options[$option])) return true;
-  }
-  return false;
+function has_multi_request_mode(Options $options): bool {
+  return count(multi_request_modes($options)) != 0;
 }
 
-function test_repo(dict<string, mixed> $options, string $test): string {
-  if (isset($options['repo-out'])) {
-    return $options['repo-out'] . '/' . str_replace('/', '.', $test) . '.repo';
+function test_repo(Options $options, string $test): string {
+  if ($options->repo_out is nonnull) {
+    return $options->repo_out . '/' . str_replace('/', '.', $test) . '.repo';
   }
   return Status::getTestTmpPath($test, 'repo');
 }
 
 function jit_serialize_option(
-  string $cmd, string $test, dict<string, mixed> $options, bool $serialize,
+  string $cmd, string $test, Options $options, bool $serialize,
 ): string {
   $serialized = test_repo($options, $test) . "/jit.dump";
   $cmds = explode(' -- ', $cmd, 2);
+  $jit_serialize = (int)($options->jit_serialize ?? 0);
   $cmds[0] .=
-    ' --count=' . ($serialize ? (int)$options['jit-serialize'] + 1 : 1) .
+    ' --count=' . ($serialize ? $jit_serialize + 1 : 1) .
     " -vEval.JitSerdesFile=\"" . $serialized . "\"" .
     " -vEval.JitSerdesMode=" . ($serialize ? 'Serialize' : 'DeserializeOrFail') .
-    ($serialize ? " -vEval.JitSerializeOptProfRequests=" . (int)$options['jit-serialize'] : '');
-  if (isset($options['jitsample']) && $serialize) {
-    $cmds[0] .= ' -vDeploymentId="' . $options['jitsample'] . '-serialize"';
+    ($serialize ? " -vEval.JitSerializeOptProfRequests=" . $jit_serialize : '');
+  if ($options->jitsample is nonnull && $serialize) {
+    $cmds[0] .= ' -vDeploymentId="' . $options->jitsample . '-serialize"';
   }
   return safe_implode(' -- ', $cmds);
 }
@@ -434,9 +434,65 @@ function rel_path(string $to): string {
   return safe_implode('/', $relPath);
 }
 
+// Keep this in sync with the dict in get_options() below.
+// Options taking a value (with a trailing `:` in the dict key)
+// should be ?string. Otherwise they should be bool.
+final class Options {
+    public ?string $env;
+    public ?string $exclude;
+    public ?string $exclude_pattern;
+    public ?string $exclude_recorded_failures;
+    public ?string $include;
+    public ?string $include_pattern;
+    public bool $repo = false;
+    public bool $split_hphpc = false;
+    public bool $repo_single = false;
+    public bool $repo_separate = false;
+    public ?string $repo_threads;
+    public ?string $repo_out;
+    public bool $hhbbc2 = false;
+    public ?string $mode;
+    public bool $server = false;
+    public bool $cli_server = false;
+    public bool $shuffle = false;
+    public bool $help = false;
+    public bool $verbose = false;
+    public bool $testpilot = false;
+    public ?string $threads;
+    public ?string $args;
+    public ?string $compiler_args;
+    public bool $log = false;
+    public ?string $failure_file;
+    public bool $wholecfg = false;
+    public bool $hhas_round_trip = false;
+    public bool $color = false;
+    public bool $no_fun = false;
+    public bool $no_skipif = false;
+    public bool $cores = false;
+    public bool $dump_tc = false;
+    public bool $no_clean = false;
+    public bool $list_tests = false;
+    public ?string $recycle_tc;
+    public ?string $retranslate_all;
+    public ?string $jit_serialize;
+    public ?string $hhvm_binary_path;
+    public ?string $vendor;
+    public ?string $record_failures;
+    public ?string $ignore_oids;
+    public ?string $jitsample;
+    public ?string $hh_single_type_check;
+    public bool $write_to_checkout = false;
+    public bool $bespoke = false;
+    public bool $lazyclass = false;
+
+    // Additional state added for convenience since Options is plumbed
+    // around almost everywhere.
+    public ?Servers $servers = null;
+}
+
 function get_options(
   vec<string> $argv,
-): (dict<string, mixed>, vec<string>) {
+): (Options, vec<string>) {
   // Options marked * affect test behavior, and need to be reported by list_tests.
   // Options with a trailing : take a value.
   $parameters = dict[
@@ -487,7 +543,7 @@ function get_options(
     'bespoke' => '',
     'lazyclass' => '',
   ];
-  $options = dict[];
+  $options = new Options() as dynamic;
   $files = vec[];
   $recorded = vec[];
 
@@ -522,7 +578,8 @@ function get_options(
           } else {
             $value = true;
           }
-          $options[str_replace(vec[':', '*'], vec['', ''], $long)] = $value;
+          $name = str_replace(vec[':', '*', '-'], vec['', '', '_'], $long);
+          $options->{$name} = $value;
           $found = true;
           break;
         }
@@ -536,19 +593,20 @@ function get_options(
       $files[] = $arg;
     }
   }
+  $options = $options as Options;
 
   \HH\global_set('recorded_options', $recorded);
 
-  $repo_out = $options['repo-out'] ?? null;
+  $repo_out = $options->repo_out;
   if ($repo_out is string && !is_dir($repo_out)) {
     if (!mkdir($repo_out) && !is_dir($repo_out)) {
       echo "Unable to create repo-out dir " . $repo_out . "\n";
       exit(1);
     }
   }
-  if (isset($options['hhbbc2'])) {
-    $options['repo-separate'] = true;
-    if (isset($options['repo']) || isset($options['repo-single'])) {
+  if ($options->hhbbc2) {
+    $options->repo_separate = true;
+    if ($options->repo || $options->repo_single) {
       echo "repo-single/repo and hhbbc2 are mutually exclusive options\n";
       exit(1);
     }
@@ -558,51 +616,48 @@ function get_options(
     }
   }
 
-  if (isset($options['repo-single']) || isset($options['repo-separate'])) {
-    $options['repo'] = true;
-  } else if (isset($options['repo'])) {
+  if ($options->repo_single || $options->repo_separate) {
+    $options->repo = true;
+  } else if ($options->repo) {
     // if only repo was set, then it means repo single
-    $options['repo-single'] = true;
+    $options->repo_single = true;
   }
 
-  if (isset($options['jit-serialize'])) {
-    if (!isset($options['repo'])) {
+  if ($options->jit_serialize is nonnull) {
+    if (!$options->repo) {
       echo "jit-serialize only works in repo mode\n";
       exit(1);
     }
-    if (isset($options['mode']) && $options['mode'] !== 'jit') {
+    if ($options->mode is nonnull && $options->mode !== 'jit') {
       echo "jit-serialize only works in jit mode\n";
       exit(1);
     }
   }
 
-  if (isset($options['split-hphpc'])) {
-    if (!isset($options['repo'])) {
+  if ($options->split_hphpc) {
+    if (!$options->repo) {
       echo "split-hphpc only works in repo mode\n";
       exit(1);
     }
-    if (!isset($options['repo-separate'])) {
+    if (!$options->repo_separate) {
       echo "split-hphpc only works in repo-separate mode\n";
       exit(1);
     }
   }
 
-  if (isset($options['repo']) && isset($options['hhas-round-trip'])) {
+  if ($options->repo && $options->hhas_round_trip) {
     echo "repo and hhas-round-trip are mutually exclusive options\n";
     exit(1);
   }
 
-  $multi_request_modes = array_filter(multi_request_modes(),
-                                      function($x) use ($options) {
-                                        return isset($options[$x]);
-                                      });
+  $multi_request_modes = multi_request_modes($options);
   if (count($multi_request_modes) > 1) {
     echo "The options\n -", safe_implode("\n -", $multi_request_modes),
          "\nare mutually exclusive options\n";
     exit(1);
   }
 
-  if (isset($options['write-to-checkout'])) {
+  if ($options->write_to_checkout) {
     Status::$write_to_checkout = true;
   }
 
@@ -721,7 +776,7 @@ function exec_find(vec<string> $files, string $extra): vec<string> {
 
 function find_tests(
   vec<string> $files,
-  dict<string, mixed> $options,
+  Options $options,
 ): vec<string> {
   if (!$files) {
     $files = vec['quick'];
@@ -766,33 +821,33 @@ function find_tests(
   }
   asort(inout $tests);
   $tests = vec(array_filter($tests));
-  if ($options['exclude'] ?? false) {
-    $exclude = $options['exclude'];
+  if ($options->exclude is nonnull) {
+    $exclude = $options->exclude;
     $tests = vec(array_filter($tests, function($test) use ($exclude) {
       return (false === strpos($test, $exclude));
     }));
   }
-  if ($options['exclude-pattern'] ?? false) {
-    $exclude = $options['exclude-pattern'];
+  if ($options->exclude_pattern is nonnull) {
+    $exclude = $options->exclude_pattern;
     $tests = vec(array_filter($tests, function($test) use ($exclude) {
       return !preg_match($exclude, $test);
     }));
   }
-  if ($options['exclude-recorded-failures'] ?? false) {
-    $exclude_file = $options['exclude-recorded-failures'];
+  if ($options->exclude_recorded_failures is nonnull) {
+    $exclude_file = $options->exclude_recorded_failures;
     $exclude = file($exclude_file, FILE_IGNORE_NEW_LINES);
     $tests = vec(array_filter($tests, function($test) use ($exclude) {
       return (false === in_array(canonical_path($test), $exclude));
     }));
   }
-  if ($options['include'] ?? false) {
-    $include = $options['include'];
+  if ($options->include is nonnull) {
+    $include = $options->include;
     $tests = vec(array_filter($tests, function($test) use ($include) {
       return (false !== strpos($test, $include));
     }));
   }
-  if ($options['include-pattern'] ?? false) {
-    $include = $options['include-pattern'];
+  if ($options->include_pattern is nonnull) {
+    $include = $options->include_pattern;
     $tests = vec(array_filter($tests, function($test) use ($include) {
       return (bool)preg_match($include, $test);
     }));
@@ -800,7 +855,7 @@ function find_tests(
   return $tests;
 }
 
-function list_tests(vec<string> $files, dict<string, mixed> $options): void {
+function list_tests(vec<string> $files, Options $options): void {
   $args = safe_implode(' ', \HH\global_get('recorded_options'));
 
   // Disable escaping of test info when listing. We check if the environment
@@ -859,14 +914,14 @@ function find_debug_config(string $test, string $name): string {
   return "";
 }
 
-function mode_cmd(dict<string, mixed> $options): vec<string> {
+function mode_cmd(Options $options): vec<string> {
   $repo_args = '';
-  if (!isset($options['repo'])) {
+  if (!$options->repo) {
     $repo_args = "-vUnitFileCache.Path=".unit_cache_file();
   }
   $interp_args = "$repo_args -vEval.Jit=0";
   $jit_args = "$repo_args -vEval.Jit=true";
-  $mode = idx($options, 'mode', '');
+  $mode = $options->mode ?? '';
   switch ($mode) {
     case '':
     case 'jit':
@@ -880,28 +935,27 @@ function mode_cmd(dict<string, mixed> $options): vec<string> {
   }
 }
 
-function extra_args(dict<string, mixed> $options): string {
-  $args = $options['args'] ?? '';
+function extra_args(Options $options): string {
+  $args = $options->args ?? '';
 
-  $vendor = $options['vendor'] ?? null;
-  if ($vendor is nonnull) {
+  if ($options->vendor is nonnull) {
     $args .= ' -d auto_prepend_file=';
-    $args .= escapeshellarg($vendor.'/hh_autoload.php');
+    $args .= escapeshellarg($options->vendor.'/hh_autoload.php');
   }
 
-  if (isset($options['lazyclass'])) {
+  if ($options->lazyclass) {
     $args .= ' -vEval.EmitClassPointers=2';
     $args .= ' -vEval.ClassPassesClassname=true';
   }
   return $args;
 }
 
-function extra_compiler_args(dict<string, mixed> $options): string {
-  return $options['compiler-args'] ?? '';
+function extra_compiler_args(Options $options): string {
+  return $options->compiler_args ?? '';
 }
 
 function hhvm_cmd_impl(
-  dict<string, mixed> $options,
+  Options $options,
   string $config,
   ?string $autoload_db_prefix,
   string ...$extra_args
@@ -922,7 +976,7 @@ function hhvm_cmd_impl(
       '-vEval.FoldLazyClassKeys=false',
       '-vEval.CoeffectEnforcementLevels.zoned=1',
       $mode,
-      isset($options['wholecfg']) ? '-vEval.JitPGORegionSelector=wholecfg' : '',
+      $options->wholecfg ? '-vEval.JitPGORegionSelector=wholecfg' : '',
 
       // load/store counters don't work on Ivy Bridge so disable for tests
       '-vEval.ProfileHWEnable=false',
@@ -943,46 +997,46 @@ function hhvm_cmd_impl(
         '-vAutoload.DB.Path='.escapeshellarg("$autoload_db_prefix.$mode_num");
     }
 
-    if (isset($options['retranslate-all'])) {
-      $args[] = '--count='.((int)$options['retranslate-all'] * 2);
+    if ($options->retranslate_all is nonnull) {
+      $args[] = '--count='.((int)$options->retranslate_all * 2);
       $args[] = '-vEval.JitPGO=true';
-      $args[] = '-vEval.JitRetranslateAllRequest='.$options['retranslate-all'];
+      $args[] = '-vEval.JitRetranslateAllRequest='.$options->retranslate_all;
       // Set to timeout.  We want requests to trigger retranslate all.
       $args[] = '-vEval.JitRetranslateAllSeconds=' . TIMEOUT_SECONDS;
     }
 
-    if (isset($options['recycle-tc'])) {
-      $args[] = '--count='.$options['recycle-tc'];
+    if ($options->recycle_tc is nonnull) {
+      $args[] = '--count='.$options->recycle_tc;
       $args[] = '-vEval.StressUnitCacheFreq=1';
       $args[] = '-vEval.EnableReusableTC=true';
     }
 
-    if (isset($options['jit-serialize'])) {
+    if ($options->jit_serialize is nonnull) {
       $args[] = '-vEval.JitPGO=true';
-      $args[] = '-vEval.JitRetranslateAllRequest='.$options['jit-serialize'];
+      $args[] = '-vEval.JitRetranslateAllRequest='.$options->jit_serialize;
       // Set to timeout.  We want requests to trigger retranslate all.
       $args[] = '-vEval.JitRetranslateAllSeconds=' . TIMEOUT_SECONDS;
     }
 
-    if (isset($options['hhas-round-trip'])) {
+    if ($options->hhas_round_trip) {
       $args[] = '-vEval.AllowHhas=1';
       $args[] = '-vEval.LoadFilepathFromUnitCache=1';
     }
 
-    if (!isset($options['cores'])) {
+    if (!$options->cores) {
       $args[] = '-vResourceLimit.CoreFileSize=0';
     }
 
-    if (isset($options['dump-tc'])) {
+    if ($options->dump_tc) {
       $args[] = '-vEval.DumpIR=1';
       $args[] = '-vEval.DumpTC=1';
     }
 
-    if (isset($options['hh_single_type_check'])) {
-      $args[] = '--hh_single_type_check='.$options['hh_single_type_check'];
+    if ($options->hh_single_type_check is nonnull) {
+      $args[] = '--hh_single_type_check='.$options->hh_single_type_check;
     }
 
-    if (isset($options['bespoke'])) {
+    if ($options->bespoke) {
       $args[] = '-vEval.BespokeArrayLikeMode=1';
       $args[] = '-vServer.APC.MemModelTreadmill=true';
     }
@@ -992,14 +1046,14 @@ function hhvm_cmd_impl(
   return $cmds;
 }
 
-function repo_separate(dict<string, mixed> $options, string $test): bool {
-  return isset($options['repo-separate']) &&
+function repo_separate(Options $options, string $test): bool {
+  return $options->repo_separate &&
          !file_exists($test . ".hhbbc_opts");
 }
 
 // Return the command and the env to run it in.
 function hhvm_cmd(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
   ?string $test_run = null,
   bool $is_temp_file = false
@@ -1032,10 +1086,10 @@ function hhvm_cmd(
     $cmd .= " -m verify";
   }
 
-  if (isset($options['cli-server'])) {
+  if ($options->cli_server) {
     $config = find_file_for_dir(dirname($test), 'config.ini');
-    $servers = $options['servers'] as Servers;
-    $server = $servers->configs[$config];
+    $servers = $options->servers as Servers;
+    $server = $servers->configs[$config ?? ''];
     $socket = $server->cli_socket;
     $cmd .= ' -vEval.UseRemoteUnixServer=only';
     $cmd .= ' -vEval.UnixServerPath='.$socket;
@@ -1064,7 +1118,7 @@ function hhvm_cmd(
     }
   }
 
-  if (isset($options['repo'])) {
+  if ($options->repo) {
     $repo_suffix = repo_separate($options, $test) ? 'hhbbc' : 'hhbc';
 
     $program = "hhvm";
@@ -1074,8 +1128,8 @@ function hhvm_cmd(
     $cmd .= " -vRepo.Path=$hhbbc_repo";
   }
 
-  if (isset($options['jitsample'])) {
-    $cmd .= ' -vDeploymentId="' . $options['jitsample'] . '"';
+  if ($options->jitsample is nonnull) {
+    $cmd .= ' -vDeploymentId="' . $options->jitsample . '"';
     $cmd .= ' --instance-id="' . $test . '"';
     $cmd .= ' -vEval.JitSampleRate=1';
     $cmd .= " -vScribe.Tables.hhvm_jit.include.*=instance_id";
@@ -1089,8 +1143,8 @@ function hhvm_cmd(
   $env['INPUTRC'] = test_dir().'/inputrc';
 
   // Apply the --env option.
-  if (isset($options['env'])) {
-    foreach (explode(",", $options['env']) as $arg) {
+  if ($options->env is nonnull) {
+    foreach (explode(",", $options->env) as $arg) {
       $i = strpos($arg, '=');
       if ($i) {
         $key = substr($arg, 0, $i);
@@ -1120,7 +1174,7 @@ function hhvm_cmd(
 }
 
 function hphp_cmd(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
   string $program,
 ): string {
@@ -1157,7 +1211,7 @@ function hphp_cmd(
     '-vRuntime.Eval.EnableArgsInBacktraces=true',
     '-vRuntime.Eval.FoldLazyClassKeys=false',
     '-vRuntime.Eval.CoeffectEnforcementLevels.zoned=1',
-    '-vParserThreadCount=' . ($options['repo-threads'] ?? 1),
+    '-vParserThreadCount=' . ($options->repo_threads ?? 1),
     '--nofork=1 -thhbc -l1 -k1',
     '-o "' . test_repo($options, $test) . '"',
     "--program $program.hhbc \"$test\"",
@@ -1168,8 +1222,8 @@ function hphp_cmd(
   ]);
 }
 
-function hphpc_path(dict<string, mixed> $options): string {
-  if (isset($options['split-hphpc'])) {
+function hphpc_path(Options $options): string {
+  if ($options->split_hphpc) {
     $file = "";
     $file = bin_root().'/hphpc';
 
@@ -1183,7 +1237,7 @@ function hphpc_path(dict<string, mixed> $options): string {
 }
 
 function hhbbc_cmd(
-  dict<string, mixed> $options, string $test, string $program,
+  Options $options, string $test, string $program,
 ): string {
   $test_repo = test_repo($options, $test);
   return safe_implode(" ", vec[
@@ -1191,8 +1245,8 @@ function hhbbc_cmd(
     '--hhbbc',
     '--no-logging',
     '--no-cores',
-    '--parallel-num-threads=' . ($options['repo-threads'] ?? 1),
-    '--parallel-final-threads=' . ($options['repo-threads'] ?? 1),
+    '--parallel-num-threads=' . ($options->repo_threads ?? 1),
+    '--parallel-final-threads=' . ($options->repo_threads ?? 1),
     read_opts_file("$test.hhbbc_opts"),
     "-o \"$test_repo/$program.hhbbc\" \"$test_repo/$program.hhbc\"",
   ]);
@@ -1276,7 +1330,7 @@ function exec_with_stack(string $cmd): ?string {
 }
 
 function repo_mode_compile(
-  dict<string, mixed> $options, string $test, string $program,
+  Options $options, string $test, string $program,
 ): bool {
   $hphp = hphp_cmd($options, $test, $program);
   $result = exec_with_stack($hphp);
@@ -2034,13 +2088,11 @@ final class Status {
   }
 }
 
-function clean_intermediate_files(
-  string $test, dict<string, mixed> $options,
-): void {
-  if (isset($options['no-clean'])) {
+function clean_intermediate_files(string $test, Options $options): void {
+  if ($options->no_clean) {
     return;
   }
-  if (isset($options['write-to-checkout'])) {
+  if ($options->write_to_checkout) {
     // in --write-to-checkout mode, normal test output goes next to the test
     $exts = vec[
       'out',
@@ -2091,7 +2143,7 @@ function clean_intermediate_files(
 }
 
 function child_main(
-  dict<string, mixed> $options,
+  Options $options,
   vec<string> $tests,
   string $json_results_file,
 ): int {
@@ -2210,7 +2262,7 @@ function runif_file_matches(vec<string> $words): RunifResult {
 }
 
 function runif_test_for_feature(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
   string $bool_expression,
 ): bool {
@@ -2225,8 +2277,8 @@ function runif_test_for_feature(
 
   // Run the check in non-repo mode to avoid building the repo (same features
   // should be available). Pick the mode arbitrarily for the same reason.
-  $options_without_repo = $options;
-  unset($options_without_repo['repo']);
+  $options_without_repo = clone $options;
+  $options_without_repo->repo = false;
   list($hhvm, $_) = hhvm_cmd($options_without_repo, $test, $tmp, true);
   $hhvm = $hhvm[0];
   // Remove any --count <n> from the command
@@ -2246,7 +2298,7 @@ function runif_test_for_feature(
 }
 
 function runif_euid_matches(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
   vec<string> $words,
 ): RunifResult {
@@ -2273,7 +2325,7 @@ function runif_euid_matches(
 }
 
 function runif_extension_matches(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
   vec<string> $words,
 ): RunifResult {
@@ -2291,7 +2343,7 @@ function runif_extension_matches(
 }
 
 function runif_function_matches(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
   vec<string> $words,
 ): RunifResult {
@@ -2309,7 +2361,7 @@ function runif_function_matches(
 }
 
 function runif_class_matches(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
   vec<string> $words,
 ): RunifResult {
@@ -2327,7 +2379,7 @@ function runif_class_matches(
 }
 
 function runif_method_matches(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
   vec<string> $words,
 ): RunifResult {
@@ -2346,7 +2398,7 @@ function runif_method_matches(
 }
 
 function runif_const_matches(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
   vec<string> $words,
 ): RunifResult {
@@ -2364,7 +2416,7 @@ function runif_const_matches(
 }
 
 function runif_locale_matches(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
   vec<string> $words,
 ): RunifResult {
@@ -2392,7 +2444,7 @@ function runif_locale_matches(
 }
 
 function runif_should_skip_test(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
 ): RunifResult {
   $runif_path = find_test_ext($test, 'runif');
@@ -2461,19 +2513,19 @@ function runif_should_skip_test(
 }
 
 function should_skip_test_simple(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
 ): ?string {
-  if ((isset($options['cli-server']) || isset($options['server'])) &&
+  if (($options->cli_server || $options->server) &&
       !can_run_server_test($test, $options)) {
     return 'skip-server';
   }
 
-  if (isset($options['hhas-round-trip']) && substr($test, -5) === ".hhas") {
+  if ($options->hhas_round_trip && substr($test, -5) === ".hhas") {
     return 'skip-hhas';
   }
 
-  if (isset($options['hhbbc2']) || isset($options['hhas-round-trip'])) {
+  if ($options->hhbbc2 || $options->hhas_round_trip) {
     $no_hhas_tag = 'nodumphhas';
     if (file_exists("$test.$no_hhas_tag") ||
         file_exists(dirname($test).'/'.$no_hhas_tag)) {
@@ -2484,8 +2536,8 @@ function should_skip_test_simple(
     }
   }
 
-  if (has_multi_request_mode($options) || isset($options['repo']) ||
-      isset($options['server'])) {
+  if (has_multi_request_mode($options) || $options->repo ||
+      $options->server) {
     if (file_exists($test . ".verify")) {
       return 'skip-verify';
     }
@@ -2500,20 +2552,20 @@ function should_skip_test_simple(
   }
 
   $no_bespoke_tag = "nobespoke";
-  if (isset($options['bespoke']) &&
+  if ($options->bespoke &&
       file_exists("$test.$no_bespoke_tag")) {
       // Skip due to changes in array identity
       return 'skip-bespoke';
   }
 
   $no_lazyclass_tag = "nolazyclass";
-  if (isset($options['lazyclass']) &&
+  if ($options->lazyclass &&
       file_exists("$test.$no_lazyclass_tag")) {
     return 'skip-lazyclass';
   }
 
   $no_jitserialize_tag = "nojitserialize";
-  if (isset($options['jit-serialize']) &&
+  if ($options->jit_serialize is nonnull &&
       file_exists("$test.$no_jitserialize_tag")) {
     return 'skip-jit-serialize';
   }
@@ -2522,7 +2574,7 @@ function should_skip_test_simple(
 }
 
 function skipif_should_skip_test(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
 ): RunifResult {
   $skipif_test = find_test_ext($test, 'skipif');
@@ -2533,8 +2585,8 @@ function skipif_should_skip_test(
   // Run the .skipif in non-repo mode since building a repo for it is
   // inconvenient and the same features should be available. Pick the mode
   // arbitrarily for the same reason.
-  $options_without_repo = $options;
-  unset($options_without_repo['repo']);
+  $options_without_repo = clone $options;
+  $options_without_repo->repo = false;
   list($hhvm, $_) = hhvm_cmd($options_without_repo, $test, $skipif_test);
   $hhvm = $hhvm[0];
   // Remove any --count <n> from the command
@@ -2780,10 +2832,10 @@ const vec<string> SERVER_EXCLUDE_PATHS = vec[
 
 const string HHAS_EXT = '.hhas';
 
-function can_run_server_test(string $test, dict<string, mixed> $options): bool {
+function can_run_server_test(string $test, Options $options): bool {
   // explicitly disabled
   if (is_file("$test.noserver") ||
-      (is_file("$test.nowebserver") && isset($options['server']))) {
+      (is_file("$test.nowebserver") && $options->server)) {
     return false;
   }
 
@@ -2812,15 +2864,15 @@ function can_run_server_test(string $test, dict<string, mixed> $options): bool {
 
 const int SERVER_TIMEOUT = 45;
 
-function run_config_server(dict<string, mixed> $options, string $test): mixed {
+function run_config_server(Options $options, string $test): mixed {
   invariant(
     can_run_server_test($test, $options),
     'should_skip_test_simple should have skipped this',
   );
 
   Status::createTestTmpDir($test); // force it to be created
-  $config = find_file_for_dir(dirname($test), 'config.ini');
-  $servers = $options['servers'] as Servers;
+  $config = find_file_for_dir(dirname($test), 'config.ini') ?? '';
+  $servers = $options->servers as Servers;
   $port = $servers->configs[$config]->port;
   $ch = curl_init("localhost:$port/$test");
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -2838,21 +2890,21 @@ function run_config_server(dict<string, mixed> $options, string $test): mixed {
 }
 
 function run_config_cli(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
   string $cmd,
   dict<string, mixed> $cmd_env,
 ): ?(string, string) {
   $cmd = timeout_prefix() . $cmd;
 
-  if (isset($options['repo']) && !isset($options['repo-out'])) {
+  if ($options->repo && $options->repo_out is null) {
     // we already created it in run_test
     $cmd_env['HPHP_TEST_TMPDIR'] = Status::getTestTmpPath($test, 'tmpdir');
   } else {
     $cmd_env['HPHP_TEST_TMPDIR'] = Status::createTestTmpDir($test);
   }
   $cmd_env['HPHP_TEST_SOURCE_FILE'] = $test;
-  if (isset($options['log'])) {
+  if ($options->log) {
     $cmd_env['TRACE'] = 'printir:1';
     $cmd_env['HPHP_TRACE_FILE'] = $test . '.log';
   }
@@ -2895,12 +2947,12 @@ function replace_object_resource_ids(string $str, string $replacement): string {
 function run_config_post(
   (string, string) $outputs,
   string $test,
-  dict<string, mixed> $options,
+  Options $options,
 ): mixed {
   list($output, $stderr) = $outputs;
   file_put_contents(Status::getTestOutputPath($test, 'out'), $output);
 
-  $check_hhbbc_error = isset($options['repo'])
+  $check_hhbbc_error = $options->repo
     && (file_exists($test . '.hhbbc_assert') ||
         file_exists($test . '.hphpc_assert'));
 
@@ -2915,15 +2967,15 @@ function run_config_post(
 
   $repeats = 0;
   if (!$check_hhbbc_error) {
-    if (isset($options['retranslate-all'])) {
-      $repeats = (int)$options['retranslate-all'] * 2;
+    if ($options->retranslate_all is nonnull) {
+      $repeats = (int)$options->retranslate_all * 2;
     }
 
-    if (isset($options['recycle-tc'])) {
-      $repeats = (int)$options['recycle-tc'];
+    if ($options->recycle_tc is nonnull) {
+      $repeats = (int)$options->recycle_tc;
     }
 
-    if (isset($options['cli-server'])) {
+    if ($options->cli_server) {
       $repeats = 3;
     }
   }
@@ -2943,7 +2995,7 @@ function run_config_post(
   $wanted = null;
   if ($type === 'expect' || $type === 'hhvm.expect') {
     $wanted = trim(file_get_contents($file));
-    if (isset($options['ignore-oids']) || isset($options['repo'])) {
+    if ($options->ignore_oids || $options->repo) {
       $output = replace_object_resource_ids($output, 'n');
       $wanted = replace_object_resource_ids($wanted, 'n');
     }
@@ -2958,7 +3010,7 @@ function run_config_post(
     $wanted_re = preg_quote($wanted, '/');
   } else if ($type === 'expectf' || $type === 'hhvm.expectf') {
     $wanted = trim(file_get_contents($file));
-    if (isset($options['ignore-oids']) || isset($options['repo'])) {
+    if ($options->ignore_oids || $options->repo) {
       $wanted = replace_object_resource_ids($wanted, '%d');
     }
     $wanted_re = $wanted;
@@ -3071,7 +3123,7 @@ function timeout_prefix(): string {
 
 // NOTE: Returns "(string | bool)".
 function run_foreach_config(
-  dict<string, mixed> $options,
+  Options $options,
   string $test,
   vec<string> $cmds,
   dict<string, mixed> $cmd_env,
@@ -3087,7 +3139,7 @@ function run_foreach_config(
   return $result;
 }
 
-function run_and_log_test(dict<string, mixed> $options, string $test): void {
+function run_and_log_test(Options $options, string $test): void {
   $stime = time();
   $time = mtime();
   $status = run_test($options, $test);
@@ -3117,11 +3169,11 @@ function run_and_log_test(dict<string, mixed> $options, string $test): void {
 }
 
 // NOTE: Returns "(string | bool)".
-function run_test(dict<string, mixed> $options, string $test): mixed {
+function run_test(Options $options, string $test): mixed {
   $skip_reason = should_skip_test_simple($options, $test);
   if ($skip_reason is nonnull) return $skip_reason;
 
-  if (!($options['no-skipif'] ?? false)) {
+  if (!$options->no_skipif) {
     $result = runif_should_skip_test($options, $test);
     if (!$result['valid']) {
       invariant(Shapes::keyExists($result, 'error'), 'missing runif error');
@@ -3151,7 +3203,7 @@ function run_test(dict<string, mixed> $options, string $test): mixed {
     // we got --count from 2 sources (e.g. .opts file and multi_request_mode)
     // this can't work so skip the test
     return 'skip-count';
-  } else if (isset($options['jit-serialize'])) {
+  } else if ($options->jit_serialize is nonnull) {
     // jit-serialize adds the --count option later, so even 1 --count in the
     // command means we have to skip
     if (preg_grep('/ --count[ =][0-9]+( |$)/', $hhvm)) {
@@ -3159,17 +3211,17 @@ function run_test(dict<string, mixed> $options, string $test): mixed {
     }
   }
 
-  if (isset($options['repo'])) {
+  if ($options->repo) {
     if (file_exists($test.'.norepo')) {
       return 'skip-norepo';
     }
     if (file_exists($test.'.onlyjumpstart') &&
-       (!isset($options['jit-serialize']) || (int)$options['jit-serialize'] < 1)) {
+       ($options->jit_serialize is null || (int)$options->jit_serialize < 1)) {
       return 'skip-onlyjumpstart';
     }
 
     $test_repo = test_repo($options, $test);
-    if (isset($options['repo-out'])) {
+    if ($options->repo_out is nonnull) {
       // we may need to clean up after a previous run
       $repo_files = vec['hhvm.hhbc', 'hhvm.hhbbc'];
       foreach ($repo_files as $repo_file) {
@@ -3201,7 +3253,7 @@ function run_test(dict<string, mixed> $options, string $test): mixed {
       return false;
     }
 
-    if (isset($options['hhbbc2'])) {
+    if ($options->hhbbc2) {
       invariant(
         count($hhvm) === 1,
         "get_options forbids modes because we're not runnig code"
@@ -3232,7 +3284,7 @@ function run_test(dict<string, mixed> $options, string $test): mixed {
       }
     }
 
-    if (isset($options['jit-serialize'])) {
+    if ($options->jit_serialize is nonnull) {
       invariant(count($hhvm) === 1, 'get_options enforces jit mode only');
       $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
       $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
@@ -3253,7 +3305,7 @@ function run_test(dict<string, mixed> $options, string $test): mixed {
     return 'skip-onlyjumpstart';
   }
 
-  if (isset($options['hhas-round-trip'])) {
+  if ($options->hhas_round_trip) {
     invariant(
       substr($test, -5) !== ".hhas",
       'should_skip_test_simple should have skipped this',
@@ -3273,7 +3325,7 @@ function run_test(dict<string, mixed> $options, string $test): mixed {
     list($hhvm, $hhvm_env) = hhvm_cmd($options, $test, $hhas_temp);
   }
 
-  if (isset($options['server'])) {
+  if ($options->server) {
     return run_config_server($options, $test);
   }
   return run_foreach_config($options, $test, $hhvm, $hhvm_env);
@@ -3305,9 +3357,9 @@ function make_header(string $str): string {
 
 function print_commands(
   vec<string> $tests,
-  dict<string, mixed> $options,
+  Options $options,
 ): void {
-  if (isset($options['verbose'])) {
+  if ($options->verbose) {
     print make_header("Run these by hand:");
   } else {
     $test = $tests[0];
@@ -3317,7 +3369,7 @@ function print_commands(
 
   foreach ($tests as $test) {
     list($commands, $_) = hhvm_cmd($options, $test);
-    if (!isset($options['repo'])) {
+    if (!$options->repo) {
       foreach ($commands as $c) {
         print "$c\n";
       }
@@ -3330,7 +3382,7 @@ function print_commands(
     if (repo_separate($options, $test)) {
       $hhbbc_cmd  = hhbbc_cmd($options, $test, $program)."\n";
       $hhbbc_cmds .= $hhbbc_cmd;
-      if (isset($options['hhbbc2'])) {
+      if ($options->hhbbc2) {
         foreach ($commands as $c) {
           $hhbbc_cmds .=
             $c." -vEval.DumpHhas=1 > $test.before.round_trip.hhas\n";
@@ -3347,7 +3399,7 @@ function print_commands(
           "diff $test.before.round_trip.hhas $test.after.round_trip.hhas\n";
       }
     }
-    if (isset($options['jit-serialize'])) {
+    if ($options->jit_serialize is nonnull) {
       invariant(count($commands) === 1, 'get_options enforces jit mode only');
       $hhbbc_cmds .=
         jit_serialize_option($commands[0], $test, $options, true) . "\n";
@@ -3428,12 +3480,12 @@ function msg_loop(int $num_tests, Queue $queue): void {
 function print_success(
   vec<string> $tests,
   dict<string, TestResult> $results,
-  dict<string, mixed> $options,
+  Options $options,
 ): void {
   // We didn't run any tests, not even skipped. Clowntown!
   if (!$tests) {
     print "\nCLOWNTOWN: No tests!\n";
-    if (!($options['no-fun'] ?? false)) {
+    if (!$options->no_fun) {
       print_clown();
     }
     return;
@@ -3450,19 +3502,19 @@ function print_success(
   // We just had skipped tests
   if (!$ran_tests) {
     print "\nSKIP-ALOO: Only skipped tests!\n";
-    if (!($options['no-fun'] ?? false)) {
+    if (!$options->no_fun) {
       print_skipper();
     }
     return;
   }
   print "\nAll tests passed.\n";
-  if (!($options['no-fun'] ?? false)) {
+  if (!$options->no_fun) {
     print_ship();
   }
-  if ($options['failure-file'] ?? false) {
-    @unlink($options['failure-file']);
+  if ($options->failure_file is nonnull) {
+    @unlink($options->failure_file);
   }
-  if (isset($options['verbose'])) {
+  if ($options->verbose) {
     print_commands($tests, $options);
   }
 }
@@ -3470,7 +3522,7 @@ function print_success(
 function print_failure(
   vec<string> $argv,
   dict<string, TestResult> $results,
-  dict<string, mixed> $options,
+  Options $options,
 ): void {
   $failed = vec[];
   $passed = vec[];
@@ -3483,9 +3535,8 @@ function print_failure(
   }
   sort(inout $failed);
 
-  $failing_tests_file = ($options['failure-file'] ?? false)
-    ? $options['failure-file']
-    : Status::getRunTmpDir() . '/test-failures';
+  $failing_tests_file = $options->failure_file ??
+    Status::getRunTmpDir() . '/test-failures';
   file_put_contents($failing_tests_file, safe_implode("\n", $failed)."\n");
   if ($passed) {
     $passing_tests_file = Status::getRunTmpDir() . '/tests-passed';
@@ -3495,7 +3546,7 @@ function print_failure(
   }
 
   print "\n".count($failed)." tests failed\n";
-  if (!($options['no-fun'] ?? false)) {
+  if (!$options->no_fun) {
     // Unicode for table-flipping emoticon
     // https://knowyourmeme.com/memes/flipping-tables
     print "(\u{256F}\u{00B0}\u{25A1}\u{00B0}\u{FF09}\u{256F}\u{FE35} \u{253B}";
@@ -3517,7 +3568,7 @@ function print_failure(
     }
 
     // only print 3 tests worth unless verbose is on
-    if ($n === 2 && !isset($options['verbose'])) {
+    if ($n === 2 && !$options->verbose) {
       $remaining = count($failed) - 1 - $n;
       if ($remaining > 0) {
         print make_header("... and $remaining more.");
@@ -3559,21 +3610,21 @@ function find_open_port(): int {
 }
 
 function start_server_proc(
-  dict<string, mixed> $options,
+  Options $options,
   string $config,
   int $port,
 ): Server {
-  if (isset($options['cli-server'])) {
+  if ($options->cli_server) {
     $cli_sock = tempnam(sys_get_temp_dir(), 'hhvm-cli-');
   } else {
     // still want to test that an unwritable socket works...
     $cli_sock = '/var/run/hhvm-cli.sock';
   }
   $threads = get_num_threads($options);
-  $thread_option = isset($options['cli-server'])
+  $thread_option = $options->cli_server
     ? '-vEval.UnixServerWorkers='.$threads
     : '-vServer.ThreadCount='.$threads;
-  $prelude = isset($options['server'])
+  $prelude = $options->server
     ? '-vEval.PreludePath=' . Status::getRunTmpDir() . '/server-prelude.php'
     : "";
   $command = hhvm_cmd_impl(
@@ -3653,10 +3704,10 @@ final class Servers {
 // For each config file in $configs, start up a server on a randomly-determined
 // port.
 function start_servers(
-  dict<string, mixed> $options,
+  Options $options,
   keyset<string> $configs,
 ): Servers {
-  if (isset($options['server'])) {
+  if ($options->server) {
     $prelude = <<<'EOT'
 <?hh
 <<__EntryPoint>> function UNIQUE_NAME_I_DONT_EXIST_IN_ANY_TEST(): void {
@@ -3723,14 +3774,14 @@ EOT;
   return $servers;
 }
 
-function get_num_threads(dict<string, mixed> $options): int {
-  if (isset($options['threads'])) {
-    $threads = (int)$options['threads'];
-    if ((string)$threads !== $options['threads'] || $threads < 1) {
+function get_num_threads(Options $options): int {
+  if ($options->threads is nonnull) {
+    $threads = (int)$options->threads;
+    if ((string)$threads !== $options->threads || $threads < 1) {
       error("--threads must be an integer >= 1");
     }
   } else {
-    $threads = isset($options['server']) || isset($options['cli-server'])
+    $threads = $options->server || $options->cli_server
       ? num_cpus() * 2 : num_cpus();
   }
   return $threads;
@@ -3752,24 +3803,24 @@ function main(vec<string> $argv): int {
   ini_set('pcre.backtrack_limit', PHP_INT_MAX);
 
   list($options, $files) = get_options($argv);
-  if (isset($options['help'])) {
+  if ($options->help) {
     error(help());
   }
-  if (isset($options['list-tests'])) {
+  if ($options->list_tests) {
     list_tests($files, $options);
     success();
   }
 
   $tests = find_tests($files, $options);
-  if (isset($options['shuffle'])) {
+  if ($options->shuffle) {
     shuffle(inout $tests);
   }
 
   // Explicit path given by --hhvm-binary-path takes priority. Then, if an
   // HHVM_BIN env var exists, and the file it points to exists, that trumps
   // any default hhvm executable path.
-  if (isset($options['hhvm-binary-path'])) {
-    $binary_path = check_executable($options['hhvm-binary-path']);
+  if ($options->hhvm_binary_path is nonnull) {
+    $binary_path = check_executable($options->hhvm_binary_path);
     putenv("HHVM_BIN=" . $binary_path);
   } else if (getenv("HHVM_BIN") !== false) {
     $binary_path = check_executable(getenv("HHVM_BIN"));
@@ -3778,18 +3829,18 @@ function main(vec<string> $argv): int {
     $binary_path = hhvm_path();
   }
 
-  if (isset($options['verbose'])) {
+  if ($options->verbose) {
     print "You are using the binary located at: " . $binary_path . "\n";
   }
 
   Status::createTmpDir();
 
   $servers = null;
-  if (isset($options['server']) || isset($options['cli-server'])) {
-    if (isset($options['server']) && isset($options['cli-server'])) {
+  if ($options->server || $options->cli_server) {
+    if ($options->server && $options->cli_server) {
       error("Server mode and CLI Server mode are mutually exclusive");
     }
-    if (isset($options['repo'])) {
+    if ($options->repo) {
       error("Server mode repo tests are not supported");
     }
 
@@ -3814,7 +3865,7 @@ function main(vec<string> $argv): int {
     }
 
     $servers = start_servers($options, $configs);
-    $options['servers'] = $servers;
+    $options->servers = $servers;
   }
 
   // Try to construct the buckets so the test results are ready in
@@ -3856,22 +3907,22 @@ function main(vec<string> $argv): int {
 
   // Remember that the serial tests are also in the tests array too,
   // so they are part of the total count.
-  if (!isset($options['testpilot'])) {
+  if (!$options->testpilot) {
     print "Running ".count($tests)." tests in ".
       count($test_buckets)." threads (" . count($serial_tests) .
       " in serial)\n";
   }
 
-  if (isset($options['verbose'])) {
+  if ($options->verbose) {
     Status::setMode(Status::MODE_VERBOSE);
   }
-  if (isset($options['testpilot'])) {
+  if ($options->testpilot) {
     Status::setMode(Status::MODE_TESTPILOT);
   }
-  if (isset($options['record-failures'])) {
+  if ($options->record_failures is nonnull) {
     Status::setMode(Status::MODE_RECORD_FAILURES);
   }
-  Status::setUseColor(isset($options['color']) ? true : posix_isatty(STDOUT));
+  Status::setUseColor($options->color || posix_isatty(STDOUT));
 
   Status::$nofork = count($tests) === 1 && !$servers;
 
@@ -3900,7 +3951,7 @@ function main(vec<string> $argv): int {
   // We write results as json in each child and collate them at the end
   $json_results_files = vec[];
   if (Status::$nofork) {
-    Status::registerCleanup(isset($options['no-clean']));
+    Status::registerCleanup($options->no_clean);
     $json_results_file = tempnam('/tmp', 'test-run-');
     $json_results_files[] = $json_results_file;
     invariant(count($test_buckets) === 1, "nofork was set erroneously");
@@ -3922,7 +3973,7 @@ function main(vec<string> $argv): int {
 
     // Make sure to clean up on exit, or on SIGTERM/SIGINT.
     // Do this here so no children inherit this.
-    Status::registerCleanup(isset($options['no-clean']));
+    Status::registerCleanup($options->no_clean);
 
     // Have the parent wait for all forked children to exit.
     $return_value = 0;
@@ -3992,8 +4043,8 @@ function main(vec<string> $argv): int {
   }
 
   // Print results.
-  if (isset($options['record-failures'])) {
-    $fail_file = $options['record-failures'];
+  if ($options->record_failures is nonnull) {
+    $fail_file = $options->record_failures;
     $failed_tests = vec[];
     $prev_failing = vec[];
     if (file_exists($fail_file)) {
@@ -4021,7 +4072,7 @@ function main(vec<string> $argv): int {
     );
     sort(inout $failed_tests);
     file_put_contents($fail_file, safe_implode("\n", $failed_tests));
-  } else if (isset($options['testpilot'])) {
+  } else if ($options->testpilot) {
     Status::say(dict['op' => 'all_done', 'results' => $results]);
     return $return_value;
   } else if (!$return_value) {

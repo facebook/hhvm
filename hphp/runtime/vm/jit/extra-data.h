@@ -2694,6 +2694,7 @@ X(LdLocAddr,                    LocalId);
 X(LdLoc,                        LocalId);
 X(LdClsInitElem,                IndexData);
 X(StClsInitElem,                IndexData);
+X(KillLoc,                      LocalId);
 X(StLoc,                        LocalId);
 X(StLocMeta,                    LocalId);
 X(StLocRange,                   LocalIdRange);

@@ -243,6 +243,7 @@ struct Vgen {
   void emit(const copy2& i);
   void emit(const debugtrap& /*i*/) { a->Brk(0); }
   void emit(const fallthru& /*i*/);
+  void emit(const killeffects& /*i*/) {}
   void emit(const ldimmb& i);
   void emit(const ldimml& i);
   void emit(const ldimmq& i);

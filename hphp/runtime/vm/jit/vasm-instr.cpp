@@ -106,6 +106,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::copyargs:
     case Vinstr::debugtrap:
     case Vinstr::fallthru:
+    case Vinstr::killeffects:
     case Vinstr::ldimmb:
     case Vinstr::ldimmw:
     case Vinstr::ldimml:

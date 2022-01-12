@@ -2657,11 +2657,22 @@ To string conversions:
   Free the iterator variable with id `iterId` in the stack frame of S0.
   For non-local iterators, this instruction will dec-ref the stored base.
 
+| KillActRec, ND, S(FramePtr), NF
+
+| KillLoc<localId>, ND, S(FramePtr), NF
+
 | KillIter<iterId>, ND, S(FramePtr), NF
 
-  Mark the iterator at `iterId` as no longer containing a meaningful value.
-  We can use this operation to elide stores for iterator fields that do not
-  get loaded again. In debug builds, it will write poison values to the fields.
+  Mark a given ActRec, local, or iterator as being dead for the purposes of
+  memory effects. It no longer contains a meaningful value.
+
+  These operations are used for both correctness and performance. Inserting a
+  kill can help us do store-elimination; if a write is followed by a kill on
+  all paths before any reads, then it can be eliminated. However, we also use
+  kills to mark when a given location cannot be reused by load-elimination or
+  similar optimizations, in which case, the kill ops are required.
+
+  In debug builds, these ops will write poison values to these fields.
 
 | GetDictPtrIter, D(PtrToElem), S(Dict) S(Int), NF
 

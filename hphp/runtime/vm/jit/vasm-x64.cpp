@@ -89,6 +89,7 @@ struct Vgen {
   void emit(const copy2& i);
   void emit(const debugtrap& /*i*/) { a.int3(); }
   void emit(const fallthru&);
+  void emit(const killeffects& /*i*/) {}
   void emit(const ldimmb& i);
   void emit(const ldimml& i);
   void emit(const ldimmq& i);

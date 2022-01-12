@@ -72,6 +72,7 @@ struct Vunit;
   O(copy2, Inone, UH(s0,d0) UH(s1,d1), DH(d0,s0) DH(d1,s1))\
   O(copyargs, Inone, UH(s,d), DH(d,s))\
   O(debugtrap, Inone, Un, Dn)\
+  O(killeffects, Inone, Un, Dn)\
   O(fallthru, Inone, U(args), Dn)\
   O(ldimmb, I(s), Un, D(d))\
   O(ldimmw, I(s), Un, D(d))\
@@ -500,6 +501,14 @@ struct copyargs { Vtuple s, d; };
  * Process may abort if no debugger is attached.
  */
 struct debugtrap {};
+
+/*
+ * Indicates that the associated IR op is doing some kind of "kill" operation.
+ * Only used to make IR-level memory effects visible in vasm. Our new register
+ * allocator, vasm-graph-color, uses these memory effects to rematerialize
+ * values using an analysis similar to load-elimination's.
+ */
+struct killeffects {};
 
 /*
  * No-op.

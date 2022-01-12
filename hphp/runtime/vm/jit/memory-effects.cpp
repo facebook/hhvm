@@ -744,6 +744,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StIterEnd:
     return PureStore { aiter_end(inst.src(0), iterId(inst)), inst.src(1) };
 
+  case KillActRec:
+    return may_load_store_kill(AEmpty, AEmpty, AActRec { inst.src(0) });
+
+  case KillLoc: {
+    auto const local = inst.extra<LocalId>()->locId;
+    return may_load_store_kill(AEmpty, AEmpty, ALocal { inst.src(0), local });
+  }
+
   case KillIter: {
     auto const iters = aiter_all(inst.src(0), iterId(inst));
     return may_load_store_kill(AEmpty, AEmpty, iters);

@@ -87,6 +87,7 @@ Vreg getSFUseReg(const Vinstr& inst) {
 }
 
 bool touchesMemory(Vinstr::Opcode op) {
+  if (op == Vinstr::killeffects) return true;
   if (op == Vinstr::lea) return false;
   if (isCall(op)) return true;
 #define O(name, imms, uses, defs) \
@@ -114,6 +115,7 @@ bool touchesMemory(Vinstr::Opcode op) {
 }
 
 bool writesMemory(Vinstr::Opcode op) {
+  if (op == Vinstr::killeffects) return true;
   if (isCall(op)) return true;
 #define O(name, imms, uses, defs)               \
   case Vinstr::name: { using T = name; return uses false; }
@@ -382,6 +384,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::jmpi:
     case Vinstr::jmpm:
     case Vinstr::jmpr:
+    case Vinstr::killeffects:
     case Vinstr::landingpad:
     case Vinstr::leavetc:
     case Vinstr::loadstubret:

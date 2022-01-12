@@ -41,6 +41,8 @@ Vcost instrSize(const Vunit& u, AreaIndex area, Vinstr inst) {
   case Vinstr::bindjmp:
   case Vinstr::fallback:
     return {1, area == AreaIndex::Main};
+  case Vinstr::killeffects:
+    return {0, false};
 
   default:
     return {1, false};

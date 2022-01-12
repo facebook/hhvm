@@ -8,6 +8,7 @@
 
 val coerce_type :
   ?coerce_for_op:bool ->
+  ?coerce:Typing_logic.coercion_direction option ->
   Pos.t ->
   Typing_defs.Reason.ureason ->
   Typing_env_types.env ->
@@ -18,6 +19,7 @@ val coerce_type :
 
 val coerce_type_res :
   ?coerce_for_op:bool ->
+  ?coerce:Typing_logic.coercion_direction option ->
   Pos.t ->
   Typing_defs.Reason.ureason ->
   Typing_env_types.env ->

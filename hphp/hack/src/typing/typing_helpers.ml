@@ -28,12 +28,18 @@ module ExpectedTy : sig
     pos: Pos.t;
     reason: Typing_reason.ureason;
     ty: locl_possibly_enforced_ty;
+    coerce: Typing_logic.coercion_direction option;
   }
   [@@deriving show]
 
   [@@@warning "+32"]
 
-  val make : Pos.t -> Typing_reason.ureason -> locl_ty -> t
+  val make :
+    ?coerce:Typing_logic.coercion_direction option ->
+    Pos.t ->
+    Typing_reason.ureason ->
+    locl_ty ->
+    t
 
   (* We will allow coercion to this expected type, if et_enforced=Enforced *)
   val make_and_allow_coercion :
@@ -54,6 +60,7 @@ end = struct
     pos: Pos.t;
     reason: Typing_reason.ureason;
     ty: locl_possibly_enforced_ty;
+    coerce: Typing_logic.coercion_direction option;
   }
   [@@deriving show]
 
@@ -62,12 +69,17 @@ end = struct
     if is_tyvar ety then
       None
     else
-      Some { pos; reason; ty }
+      Some { pos; reason; ty; coerce = None }
 
-  let make_and_allow_coercion pos reason ty = { pos; reason; ty }
+  let make_and_allow_coercion pos reason ty = { pos; reason; ty; coerce = None }
 
-  let make pos reason locl_ty =
-    make_and_allow_coercion pos reason (MakeType.unenforced locl_ty)
+  let make ?coerce pos reason locl_ty =
+    let res =
+      make_and_allow_coercion pos reason (MakeType.unenforced locl_ty)
+    in
+    match coerce with
+    | None -> res
+    | Some coerce -> { res with coerce }
 end
 
 let add_decl_errors = function

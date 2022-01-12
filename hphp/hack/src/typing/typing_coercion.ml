@@ -44,6 +44,7 @@ open Typing_env_types
 (* does coercion, including subtyping *)
 let coerce_type_impl
     ~coerce_for_op
+    ~coerce
     env
     ty_have
     ty_expect
@@ -66,12 +67,7 @@ let coerce_type_impl
       in
       Typing_utils.sub_type_res ~coerce:None env ty_have tunion on_error
     else
-      Typing_utils.sub_type_res
-        ~coerce:None
-        env
-        ty_have
-        ty_expect.et_type
-        on_error
+      Typing_utils.sub_type_res ~coerce env ty_have ty_expect.et_type on_error
   else
     let complex_coercion =
       TypecheckerOptions.complex_coercion (Typing_env.get_tcopt env)
@@ -105,6 +101,7 @@ let result t ~on_ok ~on_err =
 
 let coerce_type
     ?(coerce_for_op = false)
+    ?(coerce = None)
     p
     ur
     env
@@ -112,20 +109,21 @@ let coerce_type
     ty_expect
     (on_error : Typing_error.Callback.t) =
   result ~on_ok:Fn.id ~on_err:Fn.id
-  @@ coerce_type_impl ~coerce_for_op env ty_have ty_expect
+  @@ coerce_type_impl ~coerce_for_op ~coerce env ty_have ty_expect
   @@ Typing_error.Reasons_callback.with_claim
        on_error
        ~claim:(p, Reason.string_of_ureason ur)
 
 let coerce_type_res
     ?(coerce_for_op = false)
+    ?(coerce = None)
     p
     ur
     env
     ty_have
     ty_expect
     (on_error : Typing_error.Callback.t) =
-  coerce_type_impl ~coerce_for_op env ty_have ty_expect
+  coerce_type_impl ~coerce_for_op ~coerce env ty_have ty_expect
   @@ Typing_error.Reasons_callback.with_claim
        on_error
        ~claim:(p, Reason.string_of_ureason ur)
@@ -146,6 +144,7 @@ let try_coerce env ty_have ty_expect =
         Some
           (result ~on_ok:Fn.id ~on_err:Fn.id
           @@ coerce_type_impl
+               ~coerce:None
                ~coerce_for_op:false
                env
                ty_have

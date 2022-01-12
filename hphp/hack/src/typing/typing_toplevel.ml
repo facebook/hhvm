@@ -1501,8 +1501,9 @@ let class_var_def ~is_static cls env cv =
       let env =
         match expected with
         | None -> env
-        | Some ExpectedTy.{ pos = p; reason = ur; ty = cty } ->
+        | Some ExpectedTy.{ pos = p; reason = ur; ty = cty; coerce } ->
           Typing_coercion.coerce_type
+            ~coerce
             p
             ur
             env

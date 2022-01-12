@@ -11,9 +11,15 @@ module ExpectedTy : sig
     pos: Pos.t;
     reason: Typing_reason.ureason;
     ty: Typing_defs.locl_possibly_enforced_ty;
+    coerce: Typing_logic.coercion_direction option;
   }
 
-  val make : Pos.t -> Typing_reason.ureason -> Typing_defs.locl_ty -> t
+  val make :
+    ?coerce:Typing_logic.coercion_direction option ->
+    Pos.t ->
+    Typing_reason.ureason ->
+    Typing_defs.locl_ty ->
+    t
 
   val make_and_allow_coercion :
     Pos.t -> Typing_reason.ureason -> Typing_defs.locl_possibly_enforced_ty -> t

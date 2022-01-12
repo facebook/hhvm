@@ -417,7 +417,7 @@ let check_expected_ty_res
     (expected : ExpectedTy.t option) : (env, env) result =
   match expected with
   | None -> Ok env
-  | Some ExpectedTy.{ pos = p; reason = ur; ty } ->
+  | Some ExpectedTy.{ pos = p; reason = ur; ty; coerce } ->
     Typing_log.(
       log_with_level env "typing" ~level:1 (fun () ->
           log_types
@@ -438,6 +438,7 @@ let check_expected_ty_res
             ]));
     Typing_coercion.coerce_type_res
       ~coerce_for_op
+      ~coerce
       p
       ur
       env
@@ -7940,10 +7941,16 @@ and call
           ~default:el
           unpacked_element
       in
+      let expected_arg_ty =
+        ExpectedTy.make
+          ~coerce:(Some Typing_logic.CoerceToDynamic)
+          pos
+          Reason.URparam
+          ty
+      in
       let (env, tel) =
         List.map_env env el ~f:(fun env (pk, elt) ->
-            (* TODO(sowens): Pass the expected type to expr *)
-            let (env, te, e_ty) = expr env elt in
+            let (env, te, e_ty) = expr ~expected:expected_arg_ty env elt in
             let env =
               match pk with
               | Ast_defs.Pinout _ ->

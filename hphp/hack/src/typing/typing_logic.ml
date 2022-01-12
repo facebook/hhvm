@@ -13,6 +13,7 @@ open Typing_defs
 type coercion_direction =
   | CoerceToDynamic
   | CoerceFromDynamic
+[@@deriving show]
 
 (* See comment in .mli file *)
 type subtype_prop =

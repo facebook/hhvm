@@ -1152,9 +1152,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     }
 
     fn make_supportdynamic(&self, pos: &'a Pos<'a>) -> Ty_<'a> {
-        let name = "\\HH\\supportdyn";
         Ty_::Tapply(self.alloc((
-            (pos, name),
+            (pos, naming_special_names::typehints::HH_SUPPORTDYN),
             self.alloc([self.alloc(Ty(
                 self.alloc(Reason::witness_from_decl(pos)),
                 Ty_::Tnonnull,
@@ -2128,6 +2127,71 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             .into_bump_str()
     }
 
+    // For a polymorphic context with form `ctx $f` (represented here as
+    // `Tapply "$f"`), add a type parameter named `Tctx$f`, and rewrite the
+    // parameter `(function (ts)[_]: t) $f` as `(function (ts)[Tctx$f]: t) $f`
+    fn rewrite_fun_ctx(
+        &self,
+        tparams: &mut Vec<'_, &'a Tparam<'a>>,
+        ty: &Ty<'a>,
+        param_name: &str,
+    ) -> Ty<'a> {
+        match ty.1 {
+            Ty_::Tfun(ft) => {
+                let cap_ty = match ft.implicit_params.capability {
+                    CapTy(&Ty(_, Ty_::Tintersection(&[ty]))) | CapTy(ty) => ty,
+                    _ => return ty.clone(),
+                };
+                let pos = match cap_ty.1 {
+                    Ty_::Tapply(((pos, "_"), _)) => pos,
+                    _ => return ty.clone(),
+                };
+                let name = self.ctx_generic_for_fun(param_name);
+                let tparam = self.alloc(Tparam {
+                    variance: Variance::Invariant,
+                    name: (pos, name),
+                    tparams: &[],
+                    constraints: &[],
+                    reified: aast::ReifyKind::Erased,
+                    user_attributes: &[],
+                });
+                tparams.push(tparam);
+                let cap_ty = self.alloc(Ty(cap_ty.0, Ty_::Tgeneric(self.alloc((name, &[])))));
+                let ft = self.alloc(FunType {
+                    implicit_params: self.alloc(FunImplicitParams {
+                        capability: CapTy(cap_ty),
+                    }),
+                    ..*ft
+                });
+                Ty(ty.0, Ty_::Tfun(ft))
+            }
+            Ty_::Tlike(ref t) => Ty(
+                ty.0,
+                Ty_::Tlike(self.alloc(self.rewrite_fun_ctx(tparams, t, param_name))),
+            ),
+            Ty_::Toption(ref t) => Ty(
+                ty.0,
+                Ty_::Toption(self.alloc(self.rewrite_fun_ctx(tparams, t, param_name))),
+            ),
+            Ty_::Tapply(((p, name), targs))
+                if *name == naming_special_names::typehints::HH_SUPPORTDYN =>
+            {
+                if let Some(ref t) = targs.first() {
+                    Ty(
+                        ty.0,
+                        Ty_::Tapply(self.alloc((
+                            (p, name),
+                            self.alloc([self.alloc(self.rewrite_fun_ctx(tparams, t, param_name))]),
+                        ))),
+                    )
+                } else {
+                    ty.clone()
+                }
+            }
+            _ => ty.clone(),
+        }
+    }
+
     fn rewrite_effect_polymorphism(
         &self,
         params: &'a [&'a FunParam<'a>],
@@ -2159,36 +2223,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 user_attributes: &[],
             })
         };
-
-        // For a polymorphic context with form `ctx $f` (represented here as
-        // `Tapply "$f"`), add a type parameter named `Tctx$f`, and rewrite the
-        // parameter `(function (ts)[_]: t) $f` as `(function (ts)[Tctx$f]: t) $f`
-        let rewrite_fun_ctx =
-            |tparams: &mut Vec<'_, &'a Tparam<'a>>, ty: &Ty<'a>, param_name: &str| -> Ty<'a> {
-                let ft = match ty.1 {
-                    Ty_::Tfun(ft) => ft,
-                    _ => return ty.clone(),
-                };
-                let cap_ty = match ft.implicit_params.capability {
-                    CapTy(&Ty(_, Ty_::Tintersection(&[ty]))) | CapTy(ty) => ty,
-                    _ => return ty.clone(),
-                };
-                let pos = match cap_ty.1 {
-                    Ty_::Tapply(((pos, "_"), _)) => pos,
-                    _ => return ty.clone(),
-                };
-                let name = self.ctx_generic_for_fun(param_name);
-                let tparam = tp((pos, name), &[]);
-                tparams.push(tparam);
-                let cap_ty = self.alloc(Ty(cap_ty.0, Ty_::Tgeneric(self.alloc((name, &[])))));
-                let ft = self.alloc(FunType {
-                    implicit_params: self.alloc(FunImplicitParams {
-                        capability: CapTy(cap_ty),
-                    }),
-                    ..*ft
-                });
-                Ty(ty.0, Ty_::Tfun(ft))
-            };
 
         // For a polymorphic context with form `$g::C`, if we have a function
         // parameter `$g` with type `G` (where `G` is not a type parameter),
@@ -2268,29 +2302,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 // Hfun_context in the AST.
                 Ty_::Tapply(((_, name), _)) if name.starts_with('$') => {
                     if let Some((param_ty, _)) = ty_by_param.get_mut(name) {
-                        match param_ty.1 {
-                            Ty_::Tlike(ref mut ty) => match ty {
-                                Ty(r, Ty_::Toption(tinner)) => {
-                                    *ty = self.alloc(Ty(
-                                        r,
-                                        Ty_::Toption(self.alloc(rewrite_fun_ctx(
-                                            &mut tparams,
-                                            tinner,
-                                            name,
-                                        ))),
-                                    ))
-                                }
-                                _ => {
-                                    *ty = self.alloc(rewrite_fun_ctx(&mut tparams, ty, name));
-                                }
-                            },
-                            Ty_::Toption(ref mut ty) => {
-                                *ty = self.alloc(rewrite_fun_ctx(&mut tparams, ty, name));
-                            }
-                            _ => {
-                                *param_ty = rewrite_fun_ctx(&mut tparams, param_ty, name);
-                            }
-                        }
+                        *param_ty = self.rewrite_fun_ctx(&mut tparams, param_ty, name);
                     }
                 }
                 Ty_::Taccess(&TaccessType(Ty(_, Ty_::Tapply(((_, name), _))), cst)) => {

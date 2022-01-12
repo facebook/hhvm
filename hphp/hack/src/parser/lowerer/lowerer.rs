@@ -3315,6 +3315,65 @@ where
         }
     }
 
+
+    // For polymorphic context with form `ctx $f`
+    // require that `(function (ts)[_]: t) $f` exists
+    // rewrite as `(function (ts)[ctx $f]: t) $f`
+    // add a type parameter named "T/[ctx $f]"
+    fn rewrite_fun_ctx(
+        env: &mut Env<'a, TF>,
+        tparams: &mut Vec<ast::Tparam>,
+        hint: &mut ast::Hint,
+        name: &str,
+    ) {
+        use ast::{Hint_, ReifyKind, Variance};
+
+        let mut invalid = |p| {
+            Self::raise_parsing_error_pos(p, env, &syntax_error::ctx_fun_invalid_type_hint(name))
+        };
+        match *hint.1 {
+            Hint_::Hfun(ref mut hf) => {
+                if let Some(ast::Contexts(ref p, ref mut hl)) = &mut hf.ctxs {
+                    if let [ref mut h] = *hl.as_mut_slice() {
+                        if let Hint_::Happly(ast::Id(ref pos, s), _) = &*h.1 {
+                            if s == "_" {
+                                *h.1 = Hint_::HfunContext(name.to_string());
+                                tparams.push(ast::Tparam {
+                                    variance: Variance::Invariant,
+                                    name: ast::Id(h.0.clone(), format!("T/[ctx {}]", name)),
+                                    parameters: vec![],
+                                    constraints: vec![],
+                                    reified: ReifyKind::Erased,
+                                    user_attributes: vec![],
+                                });
+                            } else {
+                                invalid(pos);
+                            }
+                        } else {
+                            invalid(p);
+                        }
+                    } else {
+                        invalid(p);
+                    }
+                } else {
+                    invalid(&hint.0);
+                }
+            }
+            Hint_::Hlike(ref mut h) | Hint_::Hoption(ref mut h) => {
+                Self::rewrite_fun_ctx(env, tparams, h, name)
+            }
+            Hint_::Happly(ast::Id(_, ref type_name), ref mut targs)
+                if type_name == special_typehints::SUPPORTDYN =>
+            {
+                if let Some(ref mut h) = targs.first_mut() {
+                    Self::rewrite_fun_ctx(env, tparams, h, name)
+                } else {
+                    invalid(&hint.0)
+                }
+            }
+            _ => invalid(&hint.0),
+        }
+    }
     fn rewrite_effect_polymorphism(
         env: &mut Env<'a, TF>,
         params: &mut Vec<ast::FunParam>,
@@ -3337,47 +3396,6 @@ where
             reified: ReifyKind::Erased,
             user_attributes: vec![],
         };
-
-        // For polymorphic context with form `ctx $f`
-        // require that `(function (ts)[_]: t) $f` exists
-        // rewrite as `(function (ts)[ctx $f]: t) $f`
-        // add a type parameter named "T/[ctx $f]"
-        let rewrite_fun_ctx =
-            |env: &mut Env<'a, TF>, tparams: &mut Vec<ast::Tparam>, hint: &mut Hint, name: &str| {
-                let mut invalid = |p| {
-                    Self::raise_parsing_error_pos(
-                        p,
-                        env,
-                        &syntax_error::ctx_fun_invalid_type_hint(name),
-                    )
-                };
-                match *hint.1 {
-                    Hint_::Hfun(ref mut hf) => {
-                        if let Some(ast::Contexts(ref p, ref mut hl)) = &mut hf.ctxs {
-                            if let [ref mut h] = *hl.as_mut_slice() {
-                                if let Hint_::Happly(ast::Id(ref pos, s), _) = &*h.1 {
-                                    if s == "_" {
-                                        *h.1 = Hint_::HfunContext(name.to_string());
-                                        tparams.push(tp(
-                                            ast::Id(h.0.clone(), format!("T/[ctx {}]", name)),
-                                            vec![],
-                                        ));
-                                    } else {
-                                        invalid(pos);
-                                    }
-                                } else {
-                                    invalid(p);
-                                }
-                            } else {
-                                invalid(p);
-                            }
-                        } else {
-                            invalid(&hint.0);
-                        }
-                    }
-                    _ => invalid(&hint.0),
-                }
-            };
 
         // For polymorphic context with form `$g::C`
         // if $g's type is not a type parameter
@@ -3441,16 +3459,9 @@ where
                 HfunContext(ref name) => match hint_by_param.get_mut::<str>(name) {
                     Some((hint_opt, param_pos, _is_variadic)) => match hint_opt {
                         Some(_) if env.codegen() => {}
-                        Some(ref mut param_hint) => match *param_hint.1 {
-                            Hint_::Hlike(ref mut h) => match *h.1 {
-                                Hint_::Hoption(ref mut hinner) => {
-                                    rewrite_fun_ctx(env, tparams, hinner, name)
-                                }
-                                _ => rewrite_fun_ctx(env, tparams, h, name),
-                            },
-                            Hint_::Hoption(ref mut h) => rewrite_fun_ctx(env, tparams, h, name),
-                            _ => rewrite_fun_ctx(env, tparams, param_hint, name),
-                        },
+                        Some(ref mut param_hint) => {
+                            Self::rewrite_fun_ctx(env, tparams, param_hint, name)
+                        }
                         None => Self::raise_parsing_error_pos(
                             param_pos,
                             env,

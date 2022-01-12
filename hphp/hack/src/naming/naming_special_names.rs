@@ -592,6 +592,10 @@ pub mod typehints {
 
     pub const OBJECT_CAST: &str = "object";
 
+    pub const SUPPORTDYN: &str = "supportdyn";
+
+    pub const HH_SUPPORTDYN: &str = "\\HH\\supportdyn";
+
     pub const WILDCARD: &str = "_";
 
     // matches definition in Tprim

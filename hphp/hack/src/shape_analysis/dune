@@ -16,6 +16,7 @@
   provider_context
   relative_path
   tast_env
-  tast_provider)
+  typing_defs
+  typing_env_types)
  (preprocess
   (pps visitors.ppx ppx_deriving.std)))

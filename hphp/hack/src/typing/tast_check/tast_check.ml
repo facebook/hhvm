@@ -23,9 +23,18 @@ let visitor ctx =
   let irregular_handlers =
     let tco = Provider_context.get_tcopt ctx in
     let log_levels = TypecheckerOptions.log_levels tco in
-    match SMap.find_opt "tany" log_levels with
-    | Some level when level > 0 -> [Bad_type_logger.handler]
-    | _ -> []
+    let add_handler handlers (key, handler) =
+      match SMap.find_opt key log_levels with
+      | Some level when level > 0 -> [handler]
+      | _ -> handlers
+    in
+    let key_handler_pairs =
+      [
+        ("tany", Bad_type_logger.handler);
+        ("shape_analysis", Shape_analysis_logger.handler);
+      ]
+    in
+    List.fold ~init:[] ~f:add_handler key_handler_pairs
   in
   let skip_hierarchy_checks =
     TypecheckerOptions.skip_hierarchy_checks (Provider_context.get_tcopt ctx)

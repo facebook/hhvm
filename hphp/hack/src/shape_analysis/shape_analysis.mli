@@ -8,4 +8,11 @@
 
 open Shape_analysis_types
 
-val analyse : options -> Provider_context.t -> Tast.program -> unit
+val simplify : Typing_env_types.env -> constraint_ list -> shape_result list
+
+val callable :
+  Tast_env.t -> Tast.fun_param list -> Tast.func_body -> constraint_ list
+
+val do_ : options -> Provider_context.t -> Tast.program -> unit
+
+val show_shape_result : Typing_env_types.env -> shape_result -> string

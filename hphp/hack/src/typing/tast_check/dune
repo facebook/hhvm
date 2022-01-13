@@ -1,6 +1,14 @@
 (library
  (name tast_check)
  (wrapped false)
- (libraries ast bad_type_logger core_kernel ifc_lib nast tast_env utils_core)
+ (libraries
+  ast
+  bad_type_logger
+  core_kernel
+  ifc_lib
+  nast
+  shape_analysis
+  tast_env
+  utils_core)
  (preprocess
   (pps ppx_deriving.std)))

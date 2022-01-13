@@ -1613,7 +1613,7 @@ let handle_mode
         let { Tast_provider.Compute_tast.tast; _ } =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in
-        Shape_analysis.analyse opts ctx tast
+        Shape_analysis.do_ opts ctx tast
       | _ ->
         (* We are not interested in partial files and there is nothing in HHI
            files to analyse *)

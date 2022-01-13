@@ -1571,9 +1571,11 @@ CAMLprim value get_hash_ocaml(value key) {
 /* Writes the data in one of the slots of the hashtable. There might be
  * concurrent writers, when that happens, the first writer wins.
  *
- * Returns the number of bytes allocated in the shared heap. If the slot
- * was already written to, a negative value is returned to indicate no new
- * memory was allocated.
+ * Returns a tuple (compressed_size, original_size, total_size) where...
+ *   original_size ("orig_size") is the size in bytes of the marshalled value,
+ *   compressed_size ("alloc_size") is byte size after that blob has been compressed by ZSTD or LZ4,
+ *   total_size ("total_size") is byte size for that compressed blob, plus header, aligned.
+ * If the slot was already written to, a negative value is returned for each element of the tuple.
  */
 /*****************************************************************************/
 static value write_at(unsigned int slot, value data) {
@@ -1615,8 +1617,11 @@ static void raise_hash_table_full(void) {
 /* Adds a key value to the hashtable. This code is perf sensitive, please
  * check the perf before modifying.
  *
- * Returns the number of bytes allocated into the shared heap, or a negative
- * number if no new memory was allocated.
+ * Returns a tuple (compressed_size, original_size, total_size) where
+ *   original_size ("orig_size") is the size in bytes of the marshalled value,
+ *   compressed_size ("alloc_size") is byte size after that blob has been compressed by ZSTD or LZ4,
+ *   total_size ("total_size") is byte size for that compressed blob, plus header, aligned.
+ * But if nothing new was added, then all three numbers returned are negative.
  */
 /*****************************************************************************/
 value hh_add(value evictable, value key, value data) {
@@ -1958,7 +1963,7 @@ CAMLprim value hh_deserialize_raw(value heap_entry) {
 }
 
 /*****************************************************************************/
-/* Returns the size of the value associated to a given key. */
+/* Returns the compressed_size of the value associated to a given key. */
 /* The key MUST be present. */
 /*****************************************************************************/
 CAMLprim value hh_get_size(value key) {
@@ -2004,7 +2009,8 @@ void hh_move(value key1, value key2) {
 }
 
 /*****************************************************************************/
-/* Removes a key from the hash table.
+/* Removes a key from the hash table, and returns the compressed_size that thing used to take.
+ * Undefined behavior if the key doesn't exist.
  * Only the master can perform this operation.
  */
 /*****************************************************************************/

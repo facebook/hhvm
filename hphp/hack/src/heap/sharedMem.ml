@@ -399,18 +399,24 @@ functor
   (Value : Value)
   ->
   struct
-    (* Returns the number of bytes allocated in the heap, or a negative number
-     * if no new memory was allocated *)
+    (** Returns a tuple (compressed_size, original_size, total_size) where
+       - original_size is number of bytes that the value takes after marshalling,
+       - compressed_size is number of bytes after compressing that marshalled blob,
+       - total_size is compressed_size plus hh_shared header plus byte alignment.
+       If nothing was allocated (e.g. because the key already existed) then
+       all three are negative. *)
     external hh_add :
       evictable:bool -> KeyHasher.hash -> Value.t -> int * int * int = "hh_add"
 
     external hh_mem : KeyHasher.hash -> bool = "hh_mem"
 
+    (** Returns the compressed_size for this item. Undefined behavior if the key doesn't already exist. *)
     external hh_get_size : KeyHasher.hash -> int = "hh_get_size"
 
     external hh_get_and_deserialize : KeyHasher.hash -> Value.t option
       = "hh_get_and_deserialize"
 
+    (** Removes the key. Undefined behavior if it doesn't exist. Returns the compressed_size of what was just removed. *)
     external hh_remove : KeyHasher.hash -> int = "hh_remove"
 
     external hh_move : KeyHasher.hash -> KeyHasher.hash -> unit = "hh_move"

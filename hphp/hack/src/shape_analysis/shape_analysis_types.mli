@@ -78,10 +78,8 @@ type lenv = entity LMap.t KMap.t
 type env = {
   constraints: constraint_ list;  (** Append-only set of constraints *)
   lenv: lenv;  (** Local variable information *)
-  saved_env: Tast.saved_env;
-      (** Environment stored in the TAST used to expand types *)
-  empty_typing_env: Typing_env_types.env;
-      (** Carry an empty environment around to do basic subtype queries *)
+  tast_env: Tast_env.env;
+      (** TAST env associated with the definition being analysed *)
 }
 
 module PointsToSet : Set.S with type elt = entity_ * entity_

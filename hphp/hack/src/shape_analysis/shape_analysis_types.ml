@@ -57,8 +57,7 @@ type lenv = entity LMap.t KMap.t
 type env = {
   constraints: constraint_ list;
   lenv: lenv;
-  saved_env: Tast.saved_env;
-  empty_typing_env: Typing_env_types.env;
+  tast_env: Tast_env.t;
 }
 
 module PointsToSet = Set.Make (struct

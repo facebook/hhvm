@@ -65,7 +65,8 @@ pub enum Rty {
     Readonly,
     Mutable,
 }
-
+// For is_typechecker
+#[allow(dead_code)]
 struct Context {
     locals: Lenv,
     readonly_return: Rty,
@@ -382,7 +383,7 @@ fn check_assignment_nonlocal(
         // Support self::$x["x"] assignments
         // Here, if the rhs is readonly we need to be explicit
         aast::Expr_::ClassGet(_) => match rty_expr(context, &rhs) {
-            Rty::Readonly if !checker.is_typechecker => {
+            Rty::Readonly => {
                 explicit_readonly(rhs);
             }
             _ => {}
@@ -633,10 +634,8 @@ impl<'ast> VisitorMut<'ast> for Checker {
     }
 
     fn visit_expr(&mut self, context: &mut Context, p: &mut aast::Expr<(), ()>) -> Result<(), ()> {
-        if !self.is_typechecker {
-            // recurse on inner members first, then assign to value
-            p.recurse(context, self.object())?;
-        }
+        // recurse on inner members first, then assign to value
+        p.recurse(context, self.object())?;
         match &mut p.2 {
             aast::Expr_::Binop(x) => {
                 let (bop, e_lhs, e_rhs) = x.as_mut();
@@ -679,11 +678,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
             }
             _ => {}
         }
-        if self.is_typechecker {
-            p.recurse(context, self.object())
-        } else {
-            Ok(())
-        }
+        Ok(())
     }
 
     fn visit_xhp_simple(
@@ -781,11 +776,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
                     aast::AsExpr::AsV(aast::Expr(_, _, E_::Lvar(id))) => {
                         let var_name = local_id::get_name(&id.1);
                         let rty = rty_expr(context, e);
-                        if !context.is_typechecker {
-                            as_expr_var_info = Some((var_name.to_string(), rty));
-                        } else {
-                            context.add_local(var_name, rty)
-                        }
+                        as_expr_var_info = Some((var_name.to_string(), rty));
                     }
                     aast::AsExpr::AsKv(
                         _, // key is arraykey and does not need to be readonly
@@ -793,20 +784,12 @@ impl<'ast> VisitorMut<'ast> for Checker {
                     ) => {
                         let var_name = local_id::get_name(&value_id.1);
                         let rty = rty_expr(context, e);
-                        if !context.is_typechecker {
-                            as_expr_var_info = Some((var_name.to_string(), rty));
-                        } else {
-                            context.add_local(var_name, rty)
-                        }
+                        as_expr_var_info = Some((var_name.to_string(), rty));
                     }
                     aast::AsExpr::AwaitAsV(_, aast::Expr(_, _, E_::Lvar(id))) => {
                         let var_name = local_id::get_name(&id.1);
                         let rty = rty_expr(context, e);
-                        if !context.is_typechecker {
-                            as_expr_var_info = Some((var_name.to_string(), rty));
-                        } else {
-                            context.add_local(var_name, rty)
-                        }
+                        as_expr_var_info = Some((var_name.to_string(), rty));
                     }
                     aast::AsExpr::AwaitAsKv(
                         _,
@@ -815,11 +798,7 @@ impl<'ast> VisitorMut<'ast> for Checker {
                     ) => {
                         let var_name = local_id::get_name(&value_id.1);
                         let rty = rty_expr(context, e);
-                        if !context.is_typechecker {
-                            as_expr_var_info = Some((var_name.to_string(), rty));
-                        } else {
-                            context.add_local(var_name, rty)
-                        }
+                        as_expr_var_info = Some((var_name.to_string(), rty));
                     }
                     // Any other Foreach here would mean no Lvar
                     // where an Lvar is needed. In those cases

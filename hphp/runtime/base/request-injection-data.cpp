@@ -711,9 +711,6 @@ void RequestInjectionData::reset() {
   m_debuggerStepIn = false;
   m_debuggerStepOut = StepOutState::None;
   m_debuggerNext = false;
-#define HC(Opt, ...) m_suppressHAC##Opt = false;
-  HAC_CHECK_OPTS
-#undef HC
   m_suppressClassConversionWarnings = false;
 
   m_breakPointFilter.clear();

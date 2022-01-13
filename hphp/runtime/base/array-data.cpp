@@ -870,12 +870,6 @@ void throwVecUnsetException() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void raiseHackArrCompatArrHackArrCmp() {
-  raise_hac_compare_notice(Strings::HACKARR_COMPAT_ARR_HACK_ARR_CMP);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 ArrayData* ArrayData::toDictIntishCast(bool copy) {
   auto const base = toDict(copy);
   if (isVecType()) return base;

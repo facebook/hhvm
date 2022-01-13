@@ -56,16 +56,6 @@ inline void RequestInjectionData::setJitFolding(bool flag) {
   m_jitFolding = flag;
 }
 
-#define HC(Opt, ...) \
-  inline bool RequestInjectionData::getSuppressHAC##Opt##Notices() const { \
-    return m_suppressHAC##Opt; \
-  } \
-  inline void RequestInjectionData::setSuppressHAC##Opt##Notices(bool flag) { \
-    m_suppressHAC##Opt = flag; \
-  }
-  HAC_CHECK_OPTS
-#undef HC
-
 inline bool RequestInjectionData::getSuppressClassConversionWarnings() const {
   return m_suppressClassConversionWarnings;
 }

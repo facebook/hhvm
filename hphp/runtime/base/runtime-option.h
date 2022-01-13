@@ -694,10 +694,6 @@ struct RuntimeOption {
 
   static std::vector<std::string> TzdataSearchPaths;
 
-#define HAC_CHECK_OPTS                         \
-  HC(Compare, compare)                         \
-  HC(ArrayKeyCast, array_key_cast)
-
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
   /*                                                                    \

@@ -21,7 +21,6 @@
 
 #include "hphp/util/portability.h"
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/ham-runtime-option.h"
 
 #ifdef ERROR
 #undef ERROR
@@ -176,30 +175,6 @@ void raise_hackarr_compat_is_operator(const char* source, const char* target);
 void raise_hackarr_compat_notice(const std::string& msg);
 
 [[noreturn]] void raise_use_of_specialized_array();
-
-#define HC(Opt, opt) void raise_hac_##opt##_notice(const std::string& msg);
-HAC_CHECK_OPTS
-#undef HC
-
-/*
- * RAII mechanism to temporarily suppress a specific Hack array compat notice
- * within a scope.
- */
-#define HC(Opt, ...) \
-  struct SuppressHAC##Opt##Notices {  \
-    SuppressHAC##Opt##Notices();      \
-    ~SuppressHAC##Opt##Notices();     \
-    SuppressHAC##Opt##Notices(const SuppressHAC##Opt##Notices&) = delete; \
-    SuppressHAC##Opt##Notices(SuppressHAC##Opt##Notices&&) = delete;      \
-    SuppressHAC##Opt##Notices&                              \
-      operator=(const SuppressHAC##Opt##Notices&) = delete; \
-    SuppressHAC##Opt##Notices&                              \
-      operator=(SuppressHAC##Opt##Notices&&) = delete;      \
-  private:    \
-    bool old; \
-  };
-HAC_CHECK_OPTS
-#undef HC
 
 void raise_class_to_string_conversion_warning();
 

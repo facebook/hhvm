@@ -164,14 +164,6 @@ void raise_hackarr_compat_notice(const std::string& msg) {
   raise_notice("Hack Array Compat: %s", msg.c_str());
 }
 
-#define HC(Opt, opt) \
-  void raise_hac_##opt##_notice(const std::string& msg) {       \
-    if (UNLIKELY(RID().getSuppressHAC##Opt##Notices())) return; \
-    raise_notice("Hack Array Compat: %s", msg.c_str());         \
-  }
-HAC_CHECK_OPTS
-#undef HC
-
 void raise_hack_arr_compat_serialize_notice(const ArrayData* arr) {
   auto const type = [&]{
     if (arr->isVecType()) return "vec";
@@ -573,19 +565,6 @@ void raise_clsmeth_compat_type_hint_property_notice(
     isStatic ? "Static property" : "Property",
     declCls->name()->data(), propName->data(), displayName.c_str());
 }
-
-///////////////////////////////////////////////////////////////////////////////
-
-#define HC(Opt, ...) \
-  SuppressHAC##Opt##Notices::SuppressHAC##Opt##Notices()    \
-    : old{RID().getSuppressHAC##Opt##Notices()} {           \
-    RID().setSuppressHAC##Opt##Notices(true);               \
-  }                                                         \
-  SuppressHAC##Opt##Notices::~SuppressHAC##Opt##Notices() { \
-    RID().setSuppressHAC##Opt##Notices(old);                \
-  }
-HAC_CHECK_OPTS
-#undef HC
 
 ///////////////////////////////////////////////////////////////////////////////
 

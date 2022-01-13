@@ -459,12 +459,6 @@ let call
   let check_args caller_ty args unpacked_arg =
     match get_node caller_ty with
     | Tfun fty ->
-      let unpacked_rty =
-        unpacked_arg
-        |> Option.map ~f:(fun e -> (Ast_defs.Pnormal, e))
-        |> Option.to_list
-      in
-      let args = args @ unpacked_rty in
       let rec check args params =
         match (args, params) with
         | (x1 :: args1, x2 :: params2) ->
@@ -476,7 +470,19 @@ let call
         | (_, []) ->
           ()
       in
-      check args fty.ft_params
+      let unpacked_rty =
+        unpacked_arg
+        |> Option.map ~f:(fun e -> (Ast_defs.Pnormal, e))
+        |> Option.to_list
+      in
+      let args = args @ unpacked_rty in
+      let variadic_param =
+        match fty.ft_arity with
+        | Fstandard -> []
+        | Fvariadic p -> [p]
+      in
+      let fun_params = fty.ft_params @ variadic_param in
+      check args fun_params
     | _ -> ()
   in
   check_readonly_closure caller_ty caller_rty;

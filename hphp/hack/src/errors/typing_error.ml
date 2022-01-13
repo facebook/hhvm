@@ -5411,6 +5411,11 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
+    | This_final of {
+        pos_sub: Pos_or_decl.t;
+        pos_super: Pos_or_decl.t;
+        class_name: string;
+      }
 
   val eval : t -> (Error_code.t * Pos_or_decl.t Message.t list) option
 end = struct
@@ -5645,6 +5650,11 @@ end = struct
     | Method_not_dynamically_callable of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
+      }
+    | This_final of {
+        pos_sub: Pos_or_decl.t;
+        pos_super: Pos_or_decl.t;
+        class_name: string;
       }
 
   let eval = function
@@ -6137,6 +6147,11 @@ end = struct
         ]
       in
       Some (Error_code.BadMethodOverride, reasons)
+    | This_final { pos_sub; pos_super; class_name } ->
+      let n = Render.strip_ns class_name |> Markdown_lite.md_codify in
+      let message1 = "Since " ^ n ^ " is not final" in
+      let message2 = "this might not be a " ^ n in
+      Some (Error_code.ThisFinal, [(pos_super, message1); (pos_sub, message2)])
 end
 
 and Callback : sig

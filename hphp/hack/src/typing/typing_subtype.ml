@@ -701,7 +701,7 @@ and simplify_subtype_i
       ~r_sub:(reason ety_sub)
       ~r_super:(reason ety_super)
   in
-  let fail_with_suffix suffix =
+  let fail_with_suffix snd_err_opt =
     let r_super = reason ety_super in
     let r_sub = reason ety_sub in
     let (r_super, ety_super) =
@@ -718,24 +718,39 @@ and simplify_subtype_i
         (ty_super_descr, ty_sub_descr)
     in
     let left = Reason.to_string ("Expected " ^ ty_super_descr) r_super in
-    let right = Reason.to_string ("But got " ^ ty_sub_descr) r_sub @ suffix in
+    let right = Reason.to_string ("But got " ^ ty_sub_descr) r_sub in
     let error =
-      let open Typing_error.Secondary in
+      let open Typing_error in
       match subtype_env.tparam_constraints with
       | [] ->
-        let snd_err = Subtyping_error (left @ right) in
-        Typing_error.(
+        let snd_err1 = Secondary.Subtyping_error (left @ right) in
+        (match snd_err_opt with
+        | Some snd_err2 ->
+          apply_reasons
+            ~on_error:
+              Reasons_callback.(
+                prepend_on_apply (retain_code subtype_env.on_error) snd_err1)
+            snd_err2
+        | _ ->
           apply_reasons
             ~on_error:(Reasons_callback.retain_code subtype_env.on_error)
-            snd_err)
+            snd_err1)
       | cstrs ->
-        let snd_err = Violated_constraint { cstrs; reasons = left @ right } in
-        Typing_error.apply_reasons ~on_error:subtype_env.on_error snd_err
+        let snd_err1 =
+          Secondary.Violated_constraint { cstrs; reasons = left @ right }
+        in
+        (match snd_err_opt with
+        | Some snd_err2 ->
+          apply_reasons
+            ~on_error:
+              (Reasons_callback.prepend_on_apply subtype_env.on_error snd_err1)
+            snd_err2
+        | None -> apply_reasons ~on_error:subtype_env.on_error snd_err1)
     in
     Errors.add_typing_error error
   in
 
-  let fail () = fail_with_suffix [] in
+  let fail () = fail_with_suffix None in
   let ( ||| ) = ( ||| ) ~fail in
   (* We *know* that the assertion is unsatisfiable *)
   let invalid_env env = invalid ~fail env in
@@ -1315,7 +1330,11 @@ and simplify_subtype_i
             if String.equal x y then
               fun () ->
             let p = Reason.to_pos r_sub in
-            fail_with_suffix (Errors.this_final id p)
+            let (pos_super, class_name) = id in
+            fail_with_suffix
+              (Some
+                 (Typing_error.Secondary.This_final
+                    { pos_super; class_name; pos_sub = p }))
             else
               fail
           in

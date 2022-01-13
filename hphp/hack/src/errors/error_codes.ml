@@ -656,6 +656,8 @@ module Typing = struct
     | UnsafeCastLvalue [@value 4454]
     | UnsafeCastAwait [@value 4455]
     | HigherKindedTypesUnsupportedFeature [@value 4456]
+    | ThisFinal [@value 4457]
+    | ExactClassFinal [@value 4458]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

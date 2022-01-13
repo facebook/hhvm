@@ -966,22 +966,6 @@ let typeconst_concrete_concrete_override pos parent_pos =
 (* Typing errors *)
 (*****************************************************************************)
 
-(** TODO: lift into a `Typing.Secondary.t` error *)
-let this_final (id_pos, id) pos2 =
-  let n = Render.strip_ns id |> Markdown_lite.md_codify in
-  let message1 = "Since " ^ n ^ " is not final" in
-  let message2 = "this might not be a " ^ n in
-  [(id_pos, message1); (pos2, message2)]
-
-(** TODO: lift into a `Typing.Secondary.t` error *)
-let exact_class_final id pos2 =
-  let n = Render.strip_ns (snd id) |> Markdown_lite.md_codify in
-  let message1 = "This requires the late-bound type to be exactly " ^ n in
-  let message2 =
-    "Since " ^ n ^ " is not final this might be an instance of a child class"
-  in
-  [(fst id, message1); (pos2, message2)]
-
 (** TODO: Remove use of mutable state *)
 let abstract_concrete_override pos parent_pos kind =
   let kind_str =

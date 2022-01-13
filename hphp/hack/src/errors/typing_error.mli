@@ -1502,6 +1502,11 @@ module Secondary : sig
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
       }
+    | This_final of {
+        pos_sub: Pos_or_decl.t;
+        pos_super: Pos_or_decl.t;
+        class_name: string;
+      }
 end
 
 module Callback : sig

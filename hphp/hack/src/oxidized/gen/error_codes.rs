@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0b33e4ba582d38c5f2345ecb98c27373>>
+// @generated SignedSource<<d9e8ebcb2c25472592b7bd8dbe7b1950>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -565,6 +565,8 @@ pub enum Typing {
     UnsafeCastLvalue = 4454,
     UnsafeCastAwait = 4455,
     HigherKindedTypesUnsupportedFeature = 4456,
+    ThisFinal = 4457,
+    ExactClassFinal = 4458,
 }
 impl TrivialDrop for Typing {}
 arena_deserializer::impl_deserialize_in_arena!(Typing);

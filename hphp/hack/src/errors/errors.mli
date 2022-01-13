@@ -244,12 +244,6 @@ val typeconst_concrete_concrete_override :
   current_decl_and_file:Pos_or_decl.ctx ->
   unit
 
-val this_final :
-  Pos_or_decl.t * string -> Pos_or_decl.t -> (Pos_or_decl.t * string) list
-
-val exact_class_final :
-  Pos_or_decl.t * string -> Pos_or_decl.t -> (Pos_or_decl.t * string) list
-
 val abstract_concrete_override :
   Pos_or_decl.t ->
   Pos_or_decl.t ->

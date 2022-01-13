@@ -1,5 +1,7 @@
 File "list.php", line 16, characters 5-23:
 Invalid lvalue (Parsing[1002])
+File "list.php", line 16, characters 5-23:
+Array updates cannot be applied to function results. Use a local variable instead. (Typing[4454])
 File "list.php", line 16, characters 12-15:
 No instance method `list` in `A` (Typing[4053])
   File "list.php", line 13, characters 19-21:

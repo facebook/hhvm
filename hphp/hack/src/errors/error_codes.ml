@@ -653,7 +653,7 @@ module Typing = struct
     | TraitParentConstructInconsistent [@value 4451]
     | HHExpectEquivalentFailure [@value 4452]
     | HHExpectFailure [@value 4453]
-    | UnsafeCastLvalue [@value 4454]
+    | CallLvalue [@value 4454]
     | UnsafeCastAwait [@value 4455]
     | HigherKindedTypesUnsupportedFeature [@value 4456]
     | ThisFinal [@value 4457]

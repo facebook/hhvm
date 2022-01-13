@@ -2135,7 +2135,7 @@ module Primary = struct
         expected_ty: string Lazy.t;
         actual_ty: string Lazy.t;
       }
-    | Unsafe_cast_lvalue of Pos.t
+    | Call_lvalue of Pos.t
     | Unsafe_cast_await of Pos.t
     (* == Primary and secondary =============================================== *)
     | Smember_not_found of {
@@ -4529,10 +4529,10 @@ module Primary = struct
       [],
       [] )
 
-  let unsafe_cast_lvalue pos =
-    ( Error_code.UnsafeCastLvalue,
+  let call_lvalue pos =
+    ( Error_code.CallLvalue,
       ( pos,
-        "UNSAFE_CAST cannot be used on a collection in an update or append operation"
+        "Array updates cannot be applied to function results. Use a local variable instead."
       ),
       [],
       [] )
@@ -5077,7 +5077,7 @@ module Primary = struct
         pos
         ~expected_ty:(Lazy.force expected_ty)
         ~actual_ty:(Lazy.force actual_ty)
-    | Unsafe_cast_lvalue pos -> unsafe_cast_lvalue pos
+    | Call_lvalue pos -> call_lvalue pos
     | Unsafe_cast_await pos -> unsafe_cast_await pos
 
   let code err =

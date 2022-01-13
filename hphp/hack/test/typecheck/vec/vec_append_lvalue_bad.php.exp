@@ -1,2 +1,2 @@
-File "lvalue.php", line 4, characters 3-52:
+File "vec_append_lvalue_bad.php", line 10, characters 4-9:
 Array updates cannot be applied to function results. Use a local variable instead. (Typing[4454])

@@ -1,0 +1,8 @@
+File "call_lvalue.php", line 23, characters 3-11:
+Array updates cannot be applied to function results. Use a local variable instead. (Typing[4454])
+File "call_lvalue.php", line 24, characters 3-11:
+Array updates cannot be applied to function results. Use a local variable instead. (Typing[4454])
+File "call_lvalue.php", line 25, characters 12-20:
+Array updates cannot be applied to function results. Use a local variable instead. (Typing[4454])
+File "call_lvalue.php", line 28, characters 20-28:
+Array updates cannot be applied to function results. Use a local variable instead. (Typing[4454])

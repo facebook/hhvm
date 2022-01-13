@@ -4,3 +4,5 @@ File "assign_to_function_invocation.php", line 4, characters 19-33:
 Invalid lvalue (Parsing[1002])
 File "assign_to_function_invocation.php", line 4, characters 19-22:
 Unbound name: `Time` (an object type) (Naming[2049])
+File "assign_to_function_invocation.php", line 4, characters 19-33:
+Array updates cannot be applied to function results. Use a local variable instead. (Typing[4454])

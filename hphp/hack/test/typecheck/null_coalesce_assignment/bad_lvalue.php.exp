@@ -2,3 +2,5 @@ File "bad_lvalue.php", line 8, characters 10-12:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "bad_lvalue.php", line 8, characters 10-12:
 Invalid lvalue (Parsing[1002])
+File "bad_lvalue.php", line 8, characters 10-12:
+Array updates cannot be applied to function results. Use a local variable instead. (Typing[4454])

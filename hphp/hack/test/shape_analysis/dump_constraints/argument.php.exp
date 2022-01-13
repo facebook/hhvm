@@ -3,6 +3,7 @@ Constraints for \f:
 ?1 ⊆ [5:11-13]
 Allocated at [4:8-14]
 Argument at [5:11-13]
+SK #{0} [4:8-14] : shape()
 [4:8-14] ⊆ ?1
 
 Constraints for \inspect:

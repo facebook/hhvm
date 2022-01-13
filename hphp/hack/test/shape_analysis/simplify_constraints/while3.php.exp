@@ -1,14 +1,14 @@
 === Shape analysis results for while3.php
 Summary for \f:
-[4:8-23] :
+#{0} [4:8-23] :
   shape(
     a => int
   )
-[7:10-26] :
+#{1} [7:10-26] :
   shape(
     b => string
   )
-[10:11-13] :
+#{0,1} [10:11-13] :
   shape(
     a => int
     b => string

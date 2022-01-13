@@ -8,10 +8,17 @@
 
 open Shape_analysis_types
 
-let singleton = ShapeKeyMap.singleton
+let result_id_counter = ref 0
 
-let ( <> ) ~env sk1 sk2 =
-  let merge _key ty_opt ty_opt' =
+let fresh_result_id () =
+  let result_id = !result_id_counter in
+  result_id_counter := result_id + 1;
+  ResultID.singleton result_id
+
+let singleton result_id key ty = (result_id, ShapeKeyMap.singleton key ty)
+
+let ( <> ) ~env (id1, sk1) (id2, sk2) =
+  let merge_shape_key_map _key ty_opt ty_opt' =
     match (ty_opt, ty_opt') with
     | (Some ty, Some ty') ->
       let (_env, ty) = Typing_union.union env ty ty' in
@@ -21,4 +28,6 @@ let ( <> ) ~env sk1 sk2 =
       ty_opt
     | (None, None) -> None
   in
-  ShapeKeyMap.merge merge sk1 sk2
+  let result_id = ResultID.union id1 id2 in
+  let map = ShapeKeyMap.merge merge_shape_key_map sk1 sk2 in
+  (result_id, map)

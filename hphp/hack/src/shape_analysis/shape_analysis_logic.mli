@@ -8,8 +8,11 @@
 
 open Shape_analysis_types
 
+(** Obtain a fresh result identifier *)
+val fresh_result_id : unit -> ResultID.t
+
 (** Create a singleton shape key, e.g., shape('a' => int) *)
-val singleton : shape_key -> Typing_defs.locl_ty -> shape_keys
+val singleton : ResultID.t -> shape_key -> Typing_defs.locl_ty -> shape_keys
 
 (** Merge shape keys, e.g.,
 

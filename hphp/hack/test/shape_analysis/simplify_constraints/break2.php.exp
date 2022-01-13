@@ -1,17 +1,17 @@
 === Shape analysis results for break2.php
 Summary for \f:
-[5:8-14] : shape()
-[8:13-15] :
+#{} [5:8-14] : shape()
+#{} [8:13-15] :
   shape(
     a => bool
     b => int
   )
-[11:13-15] :
+#{} [11:13-15] :
   shape(
     a => bool
     b => int
   )
-[14:11-13] :
+#{} [14:11-13] :
   shape(
     a => bool
     b => int

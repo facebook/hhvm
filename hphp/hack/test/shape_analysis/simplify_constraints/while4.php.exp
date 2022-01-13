@@ -1,10 +1,10 @@
 === Shape analysis results for while4.php
 Summary for \f:
-[4:8-23] :
+#{0} [4:8-23] :
   shape(
     a => int
   )
-[8:10-26] :
+#{1} [8:10-26] :
   shape(
     b => string
   )

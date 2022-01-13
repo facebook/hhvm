@@ -35,7 +35,10 @@ type shape_key = SK_string of string [@@deriving eq, ord]
 
 module ShapeKeyMap : Map.S with type key = shape_key
 
-type shape_keys = Typing_defs.locl_ty ShapeKeyMap.t
+(** Identifier used to establish the dependence of results *)
+module ResultID = ISet
+
+type shape_keys = ResultID.t * Typing_defs.locl_ty ShapeKeyMap.t
 
 type exists_kind =
   | Allocation  (** A dict allocation such as `dict[]` or `dict['a' => 42]` *)
@@ -58,7 +61,8 @@ type constraint_ =
           the second. *)
 
 type shape_result =
-  | Shape_like_dict of Pos.t * (shape_key * Typing_defs.locl_ty) list
+  | Shape_like_dict of
+      Pos.t * ResultID.t * (shape_key * Typing_defs.locl_ty) list
       (** A dict that acts like a shape along with its keys and types the keys
           point to *)
   | Dynamically_accessed_dict of entity_

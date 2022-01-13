@@ -1,13 +1,13 @@
 === Shape analysis results for literals.php
 Constraints for \darray_constraints:
 Allocated at [8:3-36]
-SK [8:3-36] : shape(a => int)
-SK [8:3-36] : shape(c => string)
+SK #{1} [8:3-36] : shape(a => int)
+SK #{1} [8:3-36] : shape(c => string)
 [8:3-36] ⊆ ?2
 
 Constraints for \dict_constraints:
 Allocated at [4:3-31]
-SK [4:3-31] : shape(a => int)
-SK [4:3-31] : shape(b => bool)
+SK #{0} [4:3-31] : shape(a => int)
+SK #{0} [4:3-31] : shape(b => bool)
 [4:3-31] ⊆ ?1
 

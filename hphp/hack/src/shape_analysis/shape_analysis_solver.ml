@@ -123,10 +123,11 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
   in
 
   (* Start collecting shape results starting with empty shapes of candidates *)
-  let static_shape_results : Typing_defs.locl_ty ShapeKeyMap.t Pos.Map.t =
+  let static_shape_results : shape_keys Pos.Map.t =
     exists
     |> List.fold
-         ~f:(fun map pos -> Pos.Map.add pos ShapeKeyMap.empty map)
+         ~f:(fun map pos ->
+           Pos.Map.add pos (ResultID.empty, ShapeKeyMap.empty) map)
          ~init:Pos.Map.empty
   in
 
@@ -136,13 +137,13 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
     |> List.concat_map ~f:collect_concrete_supersets
     |> Pos.Set.of_list
   in
-  let static_shape_results : Typing_defs.locl_ty ShapeKeyMap.t Pos.Map.t =
+  let static_shape_results : shape_keys Pos.Map.t =
     static_shape_results
     |> Pos.Map.filter (fun pos _ -> not @@ Pos.Set.mem pos dynamic_accesses)
   in
 
   (* Add known keys *)
-  let static_shape_results : Typing_defs.locl_ty ShapeKeyMap.t Pos.Map.t =
+  let static_shape_results : shape_keys Pos.Map.t =
     let update_entity shape_keys = function
       | None -> None
       | Some shape_keys' -> Some (Logic.(shape_keys <> shape_keys') ~env)
@@ -156,8 +157,8 @@ let simplify (env : Typing_env_types.env) (constraints : constraint_ list) :
   let static_shape_results : shape_result list =
     static_shape_results
     |> Pos.Map.bindings
-    |> List.map ~f:(fun (pos, keys_and_types) ->
-           Shape_like_dict (pos, ShapeKeyMap.bindings keys_and_types))
+    |> List.map ~f:(fun (pos, (result_id, keys_and_types)) ->
+           Shape_like_dict (pos, result_id, ShapeKeyMap.bindings keys_and_types))
   in
 
   (* TODO: only consider existing candidates to report a summary *)

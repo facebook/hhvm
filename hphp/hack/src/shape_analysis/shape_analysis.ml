@@ -24,9 +24,9 @@ let failwithpos pos msg = failwith (Format.asprintf "%a: %s" Pos.pp pos msg)
 
 let log_pos = Format.printf "%a\n" Pos.pp
 
-let fully_expand_type env ty =
+let fully_expand_type saved_env ty =
   let (_env, ty) =
-    Typing_inference_env.fully_expand_type env.saved_env.Tast.inference_env ty
+    Typing_inference_env.fully_expand_type saved_env.Tast.inference_env ty
   in
   ty
 
@@ -68,15 +68,17 @@ let collect_analysis_targets =
   end
 
 (* Is the type a suitable dict that can be coverted into shape. For the moment,
-   that's only the case if the key is a string. TODO: support int and arraykey
-   once we support constant keys. *)
-let is_suitable_target_ty ty =
+   that's only the case if the key is a string. *)
+let is_suitable_target_ty saved_env typing_env ty =
+  let ty = fully_expand_type saved_env ty in
   match Typing_defs.get_node ty with
   | Typing_defs.Tclass ((_, id), _, [key_ty; _])
     when String.equal id SN.Collections.cDict ->
-    (match Typing_defs.get_node key_ty with
-    | Typing_defs.Tprim A.Tstring -> true
-    | _ -> false)
+    Typing_subtype.is_sub_type
+      typing_env
+      key_ty
+      (Typing_make_type.arraykey Typing_reason.Rnone)
+    || Typing_utils.is_nothing typing_env key_ty
   | _ -> false
 
 let add_key_constraint
@@ -86,7 +88,7 @@ let add_key_constraint
     let constraint_ =
       match key with
       | A.String str ->
-        let ty = fully_expand_type env ty in
+        let ty = fully_expand_type env.saved_env ty in
         Has_static_keys (entity, Logic.singleton (SK_string str) ty)
       | _ -> Has_dynamic_key entity
     in
@@ -169,7 +171,7 @@ and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
        given position is. *)
     let expr_arg env (_param_kind, ((ty, pos, _exp) as arg)) =
       let (env, arg_entity) = expr env arg in
-      if is_suitable_target_ty ty then
+      if is_suitable_target_ty env.saved_env env.empty_typing_env ty then
         let env = Env.add_constraint env (Exists (Argument, pos)) in
         match arg_entity with
         | Some arg_entity_ ->
@@ -250,7 +252,8 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
 
 and block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 
-let init_params (params : T.fun_param list) : constraint_ list * entity LMap.t =
+let init_params empty_typing_env saved_env (params : T.fun_param list) :
+    constraint_ list * entity LMap.t =
   let add_param (constraints, lmap) = function
     | A.
         {
@@ -260,7 +263,7 @@ let init_params (params : T.fun_param list) : constraint_ list * entity LMap.t =
           param_is_variadic = false;
           _;
         } ->
-      if is_suitable_target_ty ty then
+      if is_suitable_target_ty saved_env empty_typing_env ty then
         let param_lid = Local_id.make_unscoped param_name in
         let entity_ = Literal param_pos in
         let lmap = LMap.add param_lid (Some entity_) lmap in
@@ -272,20 +275,23 @@ let init_params (params : T.fun_param list) : constraint_ list * entity LMap.t =
   in
   List.fold ~f:add_param ~init:([], LMap.empty) params
 
-let callable ~saved_env params body : constraint_ list =
-  let (param_constraints, param_env) = init_params params in
-  let env = Env.init saved_env param_constraints param_env in
+let callable ~empty_typing_env ~saved_env params body : constraint_ list =
+  let (param_constraints, param_env) =
+    init_params empty_typing_env saved_env params
+  in
+  let env = Env.init empty_typing_env saved_env param_constraints param_env in
   let env = block env body.A.fb_ast in
   env.constraints
 
-let walk_tast (tast : Tast.program) : constraint_ list SMap.t =
+let walk_tast ~empty_typing_env (tast : Tast.program) : constraint_ list SMap.t
+    =
   let def : T.def -> (string * constraint_ list) list = function
     | A.Fun fd ->
       let A.{ f_body; f_name = (_, id); f_annotation = saved_env; f_params; _ }
           =
         fd.A.fd_fun
       in
-      [(id, callable ~saved_env f_params f_body)]
+      [(id, callable ~empty_typing_env ~saved_env f_params f_body)]
     | A.Class A.{ c_methods; c_name = (_, class_name); _ } ->
       let handle_method
           A.
@@ -297,7 +303,7 @@ let walk_tast (tast : Tast.program) : constraint_ list SMap.t =
               _;
             } =
         let id = class_name ^ "::" ^ method_name in
-        (id, callable ~saved_env m_params m_body)
+        (id, callable ~empty_typing_env ~saved_env m_params m_body)
       in
       List.map ~f:handle_method c_methods
     | _ -> failwith "A definition is not yet handled"
@@ -327,7 +333,7 @@ let analyse (options : options) (ctx : Provider_context.t) (tast : T.program) =
       |> List.iter ~f:(Format.printf "%s\n");
       Format.printf "\n"
     in
-    walk_tast tast |> SMap.iter print_function_constraints
+    walk_tast ~empty_typing_env tast |> SMap.iter print_function_constraints
   | SimplifyConstraints ->
     let print_callable_summary (id : string) (results : shape_result list) :
         unit =
@@ -338,5 +344,5 @@ let analyse (options : options) (ctx : Provider_context.t) (tast : T.program) =
     let process_callable id constraints =
       Solver.simplify empty_typing_env constraints |> print_callable_summary id
     in
-    walk_tast tast |> SMap.iter process_callable
+    walk_tast ~empty_typing_env tast |> SMap.iter process_callable
   | SolveConstraints -> ()

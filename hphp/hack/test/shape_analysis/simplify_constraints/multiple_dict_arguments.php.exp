@@ -8,4 +8,12 @@ Summary for \f:
   shape(
     b => bool
   )
+[6:12-14] :
+  shape(
+    a => int
+  )
+[6:16-18] :
+  shape(
+    b => bool
+  )
 Summary for \inspect2:

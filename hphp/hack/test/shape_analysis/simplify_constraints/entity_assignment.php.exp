@@ -4,3 +4,8 @@ Summary for \f:
   shape(
     a => int
   )
+[6:11-13] :
+  shape(
+    a => int
+    b => int
+  )

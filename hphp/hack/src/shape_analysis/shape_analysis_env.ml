@@ -93,8 +93,8 @@ module LEnv = struct
     Cont.Map.union_env [] lenv1 lenv2 ~combine
 end
 
-let init saved_env constraints bindings =
-  { constraints; lenv = LEnv.init bindings; saved_env }
+let init empty_typing_env saved_env constraints bindings =
+  { constraints; lenv = LEnv.init bindings; saved_env; empty_typing_env }
 
 let add_constraint env constraint_ =
   { env with constraints = constraint_ :: env.constraints }

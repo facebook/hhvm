@@ -76,6 +76,8 @@ type env = {
   lenv: lenv;  (** Local variable information *)
   saved_env: Tast.saved_env;
       (** Environment stored in the TAST used to expand types *)
+  empty_typing_env: Typing_env_types.env;
+      (** Carry an empty environment around to do basic subtype queries *)
 }
 
 module PointsToSet : Set.S with type elt = entity_ * entity_

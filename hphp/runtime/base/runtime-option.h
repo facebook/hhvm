@@ -1298,13 +1298,6 @@ struct RuntimeOption {
   F(uint32_t, ContextConstantWarningSampleRate, 1)                      \
   F(uint64_t, CoeffectViolationWarningMax, std::numeric_limits<uint64_t>::max()) \
   /*                                                                    \
-   * 0 - Nothing                                                        \
-   * 1 - Warn                                                           \
-   * 2 - Fail unit verification (i.e. fail to load it)                  \
-   */                                                                   \
-  F(int32_t, RxVerifyBody, 0)                                           \
-  F(int32_t, PureVerifyBody, 0)                                         \
-  /*                                                                    \
    * Controls behavior on reflection to default value expressions       \
    * that throw during evaluation                                       \
    * 0 - Nothing                                                        \

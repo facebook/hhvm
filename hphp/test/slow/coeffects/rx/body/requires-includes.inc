@@ -1,3 +1,0 @@
-<?hh
-
-echo "Included\n";

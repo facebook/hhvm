@@ -3034,8 +3034,6 @@ void RuntimeOption::Load(
 
   // Coeffects
   CoeffectsConfig::init(RO::EvalCoeffectEnforcementLevels);
-  RuntimeOption::EvalPureVerifyBody = std::max(
-    RuntimeOption::EvalPureVerifyBody, RuntimeOption::EvalRxVerifyBody);
 
   // Initialize defaults for repo-specific parser configuration options.
   RepoOptions::setDefaults(config, ini);

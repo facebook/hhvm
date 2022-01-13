@@ -9,6 +9,13 @@
 module LMap = Local_id.Map
 module KMap = Typing_continuations.Map
 
+(** Container to collect potential dicts that can be addressed with the shape
+    analysis. *)
+type potential_targets = {
+  expressions_to_modify: Pos.t list;
+  hints_to_modify: Pos.t list;
+}
+
 type mode =
   | FlagTargets
       (** Flag all possible targets, e.g., `dict['k1' => 42, 'k2' =>

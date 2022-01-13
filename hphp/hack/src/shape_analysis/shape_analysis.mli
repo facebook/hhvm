@@ -6,6 +6,9 @@
  *
  *)
 
+(** A program analysis to find shape like dicts and the static keys used in
+    these dicts. *)
+
 open Shape_analysis_types
 
 val simplify : Typing_env_types.env -> constraint_ list -> shape_result list

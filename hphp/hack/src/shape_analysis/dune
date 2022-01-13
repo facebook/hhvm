@@ -10,7 +10,8 @@
   shape_analysis_options
   shape_analysis_pretty_printer
   shape_analysis_solver
-  shape_analysis_types)
+  shape_analysis_types
+  shape_analysis_walker)
  (libraries
   core_kernel
   provider_context

@@ -201,23 +201,10 @@ let get_member member_kind class_ =
 
 (* Check that all the required members are implemented *)
 let check_members_implemented
-    class_
-    parent_name
-    check_private
-    parent_reason
-    reason
-    (member_kind, parent_members) =
+    class_ parent_name parent_reason reason (member_kind, parent_members) =
   List.iter parent_members ~f:(fun (member_name, class_elt) ->
       match class_elt.ce_visibility with
-      | Vprivate _ when not check_private -> ()
-      | Vprivate _ ->
-        (* This case cannot be removed as long as we're forced to
-         * check against every extended parent by the fact that // decl
-         * parents aren't fully checked against grandparents; when
-         * (class) extends (class // decl) use (trait), the grandchild
-         * won't have access to private members of the grandparent
-         * trait *)
-        ()
+      | Vprivate _ -> ()
       | _ when Option.is_none (get_member member_kind class_ member_name) ->
         let (lazy defn_pos) = class_elt.ce_pos in
         let quickfixes =
@@ -968,10 +955,11 @@ let default_constructor_ce class_ =
 
 (* When an interface defines a constructor, we check that they are compatible *)
 let check_constructors env parent_class class_ psubst on_error =
-  let consistent =
+  let parent_is_interface = Ast_defs.is_c_interface (Cls.kind parent_class) in
+  let parent_is_consistent =
     not (equal_consistent_kind (snd (Cls.construct parent_class)) Inconsistent)
   in
-  if Ast_defs.is_c_interface (Cls.kind parent_class) || consistent then
+  if parent_is_interface || parent_is_consistent then
     match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
     | (Some parent_cstr, _) when get_ce_synthesized parent_cstr -> env
     | (Some parent_cstr, None) ->
@@ -984,7 +972,7 @@ let check_constructors env parent_class class_ psubst on_error =
       (* <<__UNSAFE_Construct>> *)
       env
     | (opt_parent_cstr, Some cstr)
-      when Option.is_some opt_parent_cstr || consistent ->
+      when Option.is_some opt_parent_cstr || parent_is_consistent ->
       let parent_cstr =
         match opt_parent_cstr with
         | Some parent_cstr -> parent_cstr
@@ -1392,16 +1380,14 @@ let check_class_implements_parent
   let env =
     check_consts env implements parent_class (name_pos, class_) psubst on_error
   in
-  let memberl = make_all_members ~parent_class in
   let env = check_constructors env parent_class class_ psubst on_error in
-  let check_privates : bool = Ast_defs.is_c_trait (Cls.kind parent_class) in
+  let memberl = make_all_members ~parent_class in
   List.iter
     memberl
     ~f:
       (check_members_implemented
          class_
          (Cls.name parent_class)
-         check_privates
          parent_pos
          name_pos);
   env

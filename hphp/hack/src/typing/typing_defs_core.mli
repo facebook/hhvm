@@ -17,7 +17,7 @@ type ce_visibility =
   | Vprotected of string
   (* When we construct `Vinternal`, we are guaranteed to be inside a module *)
   | Vinternal of Ast_defs.id
-[@@deriving eq, show]
+[@@deriving eq, ord, show]
 
 (* Represents <<Policied()>> or <<InferFlows>> attribute *)
 type ifc_fun_decl =

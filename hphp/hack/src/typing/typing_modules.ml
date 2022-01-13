@@ -14,7 +14,7 @@ open Hh_prelude
   * in the second. This is to avoid [module_ option] having a weird state in
   * [Some []]: "we are in a module with no name."
   *)
-type module_ = string * string list [@@deriving eq, show]
+type module_ = string * string list [@@deriving eq, show, ord]
 
 let of_string s =
   match String.split ~on:'.' s with

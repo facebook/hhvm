@@ -12,6 +12,7 @@
 (*****************************************************************************)
 
 open Hh_prelude
+open Option.Monad_infix
 open Typing_defs
 module Env = Typing_env
 module Dep = Typing_deps.Dep
@@ -30,7 +31,7 @@ module MemberKind = struct
     | Method
     | Static_method
     | Constructor
-  [@@deriving eq]
+  [@@deriving eq, ord]
 
   let is_method member_kind =
     match member_kind with
@@ -52,6 +53,60 @@ module MemberKind = struct
     | Static_property ->
       false
 end
+
+module MemberKindMap = WrappedMap.Make (MemberKind)
+
+(* This is used to merge members from all parents of a class.
+ * Certain class hierarchies are heavy in diamond patterns so merging members avoids doing the
+ * same member subtyping multiple times. *)
+module ClassEltWParent = struct
+  type parent = Pos_or_decl.t * Cls.t
+
+  type t = class_elt * parent
+
+  (* Class elements with the same names and origins should be equal
+     modulo type instantiations, which is why we also need to compare types.
+     For example,
+
+        interface I<T> {
+          public function foo():T;
+        }
+        interface I1 extends I<string> {}
+        interface I2 extends I<int> {}
+        class C implements I1, I2 {
+          public function foo():int { return 3; }
+        }
+
+     When unioning members of I1 and I2, we have two `foo` members with the same
+     origin (`I`) but with different types. *)
+  let compare : t -> t -> int =
+   fun (elt1, _) (elt2, _) ->
+    let {
+      ce_visibility = _;
+      ce_type = type1;
+      ce_origin = origin1;
+      ce_deprecated = _;
+      ce_pos = _;
+      ce_flags = _;
+    } =
+      elt1
+    in
+    let {
+      ce_visibility = _;
+      ce_type = type2;
+      ce_origin = origin2;
+      ce_deprecated = _;
+      ce_pos = _;
+      ce_flags = _;
+    } =
+      elt2
+    in
+    match String.compare origin1 origin2 with
+    | 0 -> compare_decl_ty (Lazy.force type1) (Lazy.force type2)
+    | x -> x
+end
+
+module ClassEltWParentSet = Caml.Set.Make (ClassEltWParent)
 
 (*****************************************************************************)
 (* Helpers *)
@@ -771,75 +826,88 @@ let check_inherited_member_is_dynamically_callable
     | Ast_defs.Cenum ->
       ()
 
-let check_members
-    check_private
-    env
-    (parent_class, psubst)
-    (class_pos, class_)
+let should_check_member_unique class_elt class_ parent_class_elt parent_class =
+  (* We want to check if there are conflicting trait or interface declarations
+   * of a class member. This means that if the parent class is a trait or interface,
+   * we need to check that the child member is *uniquely inherited*.
+   *
+   * A member is uniquely inherited if any of the following hold:
+   * 1. It is synthetic (from a requirement)
+   * 2. It is defined on the child class
+   * 3. It is concretely defined in exactly one place
+   * 4. It is abstract, and all other declarations are identical *)
+  match Cls.kind parent_class with
+  | Ast_defs.Cinterface
+  | Ast_defs.Ctrait ->
+    (* Synthetic  *)
+    (not (get_ce_synthesized class_elt))
+    (* The parent we are checking is synthetic, no point in checking *)
+    && (not (get_ce_synthesized parent_class_elt))
+    (* defined on original class *)
+    && String.( <> ) class_elt.ce_origin (Cls.name class_)
+  | Ast_defs.(Cclass _ | Cenum | Cenum_class _) -> false
+
+let check_class_against_parent_class_elt
     on_error
-    (member_kind, parent_members) =
-  let parent_members =
-    if check_private then
-      parent_members
-    else
-      filter_privates parent_members
-  in
-  let should_check_member_unique class_elt parent_class_elt =
-    (* We want to check if there are conflicting trait or interface declarations
-     * of a class member. This means that if the parent class is a trait or interface,
-     * we need to check that the child member is *uniquely inherited*.
-     *
-     * A member is uniquely inherited if any of the following hold:
-     * 1. It is synthetic (from a requirement)
-     * 2. It is defined on the child class
-     * 3. It is concretely defined in exactly one place
-     * 4. It is abstract, and all other declarations are identical *)
-    match Cls.kind parent_class with
-    | Ast_defs.Cinterface
-    | Ast_defs.Ctrait ->
-      (* Synthetic  *)
-      (not (get_ce_synthesized class_elt))
-      (* The parent we are checking is synthetic, no point in checking *)
-      && (not (get_ce_synthesized parent_class_elt))
-      (* defined on original class *)
-      && String.( <> ) class_elt.ce_origin (Cls.name class_)
-    | Ast_defs.(Cclass _ | Cenum | Cenum_class _) -> false
-  in
-  List.fold
-    ~init:env
-    parent_members
-    ~f:(fun env (member_name, parent_class_elt) ->
-      match get_member member_kind class_ member_name with
-      (* We can skip this check if the class elements have the same origin, as we are
-       * essentially comparing a method against itself *)
-      | Some class_elt
-        when String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin ->
-        let parent_class_elt = Inst.instantiate_ce psubst parent_class_elt in
-        add_member_dep
-          env
-          class_
-          ( member_kind,
-            member_name,
-            parent_class_elt.ce_origin,
-            Cls.pos parent_class );
-        check_override
-          ~check_member_unique:
-            (should_check_member_unique class_elt parent_class_elt)
-          env
-          member_name
-          member_kind
-          class_
-          parent_class_elt
-          class_elt
+    (class_pos, class_)
+    member_kind
+    member_name
+    (parent_class_elt, (parent_name_pos, parent_class))
+    env =
+  match get_member member_kind class_ member_name with
+  (* We can skip this check if the class elements have the same origin, as we are
+   * essentially comparing a method against itself *)
+  | Some class_elt
+    when String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin ->
+    add_member_dep
+      env
+      class_
+      ( member_kind,
+        member_name,
+        parent_class_elt.ce_origin,
+        Cls.pos parent_class );
+    check_override
+      ~check_member_unique:
+        (should_check_member_unique
+           class_elt
+           class_
+           parent_class_elt
+           parent_class)
+      env
+      member_name
+      member_kind
+      class_
+      parent_class_elt
+      class_elt
+      (on_error (parent_name_pos, Cls.name parent_class))
+  | _ ->
+    (* if class implements dynamic, all inherited methods should be dynamically callable *)
+    check_inherited_member_is_dynamically_callable
+      env
+      (class_pos, class_)
+      parent_class
+      (member_kind, member_name, parent_class_elt);
+    env
+
+let check_members_from_all_parents
+    env
+    (class_pos, class_)
+    (on_error : Pos_or_decl.t * string -> Typing_error.Reasons_callback.t)
+    (parent_members : ClassEltWParentSet.t SMap.t MemberKindMap.t) =
+  let check member_kind member_map env =
+    let check member_name class_elts_w_parents env =
+      let check =
+        check_class_against_parent_class_elt
           on_error
-      | _ ->
-        (* if class implements dynamic, all inherited methods should be dynamically callable *)
-        check_inherited_member_is_dynamically_callable
-          env
           (class_pos, class_)
-          parent_class
-          (member_kind, member_name, parent_class_elt);
-        env)
+          member_kind
+          member_name
+      in
+      ClassEltWParentSet.fold check class_elts_w_parents env
+    in
+    SMap.fold check member_map env
+  in
+  MemberKindMap.fold check parent_members env
 
 let make_all_members ~parent_class =
   let wrap_constructor = function
@@ -1229,8 +1297,13 @@ let check_typeconst_override
 (** For type constants we need to check that a child respects the
     constraints specified by its parent, and does not conflict
     with other inherited type constants *)
-let check_typeconsts env implements parent_class class_ on_error =
-  let (parent_pos, parent_class, _) = parent_class in
+let check_typeconsts
+    env
+    implements
+    (parent_class : pos_id * decl_ty list * Cls.t)
+    class_
+    on_error =
+  let ((parent_pos, _), _, parent_class) = parent_class in
   let (pos, class_) = class_ in
   let ptypeconsts = Cls.typeconsts parent_class in
   List.fold ptypeconsts ~init:env ~f:(fun env (tconst_name, parent_tconst) ->
@@ -1303,12 +1376,18 @@ let check_consts env implements parent_class (name_pos, class_) psubst on_error
  *   "Class ... does not correctly implement all required members"
  * message pointing at the class being checked.
  *)
-let check_class_implements
-    env implements parent_class (name_pos, class_) on_error =
+let check_class_implements_parent
+    env
+    implements
+    (parent_class : pos_id * decl_ty list * Cls.t)
+    (name_pos, class_)
+    on_error =
   let env =
     check_typeconsts env implements parent_class (name_pos, class_) on_error
   in
-  let (parent_pos, parent_class, parent_tparaml) = parent_class in
+  let ((parent_pos, _parent_name), parent_tparaml, parent_class) =
+    parent_class
+  in
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
   let env =
     check_consts env implements parent_class (name_pos, class_) psubst on_error
@@ -1325,13 +1404,64 @@ let check_class_implements
          check_privates
          parent_pos
          name_pos);
-  List.fold ~init:env memberl ~f:(fun env ->
-      check_members
-        check_privates
-        env
-        (parent_class, psubst)
-        (name_pos, class_)
-        on_error)
+  env
+
+let filter_privates check_privates =
+  let id m = m in
+  if check_privates then
+    id
+  else
+    filter_privates
+
+let make_parent_member_map
+    ((parent_name_pos, _parent_name), parent_tparaml, parent_class) :
+    ClassEltWParentSet.t SMap.t MemberKindMap.t =
+  let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
+  let check_privates : bool = Ast_defs.is_c_trait (Cls.kind parent_class) in
+  make_all_members ~parent_class
+  |> MemberKindMap.of_list
+  |> MemberKindMap.map (fun members ->
+         members
+         |> filter_privates check_privates
+         |> SMap.of_list
+         |> SMap.map (fun member ->
+                let member : class_elt = Inst.instantiate_ce psubst member in
+                ClassEltWParentSet.singleton
+                  (member, (parent_name_pos, parent_class))))
+
+let merge_member_maps acc_map map =
+  MemberKindMap.fold
+    (fun mem_kind members acc_map ->
+      let new_entry =
+        match MemberKindMap.find_opt mem_kind acc_map with
+        | None -> members
+        | Some prev_members ->
+          let new_members =
+            SMap.merge
+              (fun _member_name -> Option.merge ~f:ClassEltWParentSet.union)
+              prev_members
+              members
+          in
+          new_members
+      in
+      MemberKindMap.add mem_kind new_entry acc_map)
+    map
+    acc_map
+
+let fold_parent_members parents : ClassEltWParentSet.t SMap.t MemberKindMap.t =
+  parents
+  |> List.map ~f:make_parent_member_map
+  |> List.fold ~init:MemberKindMap.empty ~f:merge_member_maps
+
+let check_class_implements_parents
+    env
+    (class_name_pos, class_)
+    (parents : (pos_id * decl_ty list * Cls.t) list)
+    (on_error : Pos_or_decl.t * string -> Typing_error.Reasons_callback.t) =
+  let members : ClassEltWParentSet.t SMap.t MemberKindMap.t =
+    fold_parent_members parents
+  in
+  check_members_from_all_parents env (class_name_pos, class_) on_error members
 
 (*****************************************************************************)
 (* The externally visible function *)
@@ -1345,28 +1475,36 @@ let check_implements_extends_uses env ~implements ~parents (name_pos, class_) =
     | None -> acc
   in
   let implements = List.fold ~f:get_interfaces ~init:[] implements in
-  let name = Cls.name class_ in
-  List.fold ~init:env parents ~f:(fun env parent_type ->
-      let (_, (parent_name_pos, parent_name), parent_tparaml) =
-        TUtils.unwrap_class_type parent_type
-      in
-      let parent_class = Env.get_class env parent_name in
-      match parent_class with
-      | None -> env
-      | Some parent_class ->
-        let parent_class = (parent_name_pos, parent_class, parent_tparaml) in
-        check_class_implements
+  let on_error (parent_name_pos, parent_name) : Typing_error.Reasons_callback.t
+      =
+    (* sadly, enum error reporting requires this to keep the error in the file
+       with the enum *)
+    if String.equal parent_name SN.Classes.cHH_BuiltinEnum then
+      Typing_error.Reasons_callback.bad_enum_decl name_pos
+    else
+      Typing_error.Reasons_callback.bad_decl_override
+        name_pos
+        ~name:(Cls.name class_)
+        ~parent_pos:parent_name_pos
+        ~parent_name
+  in
+  let parents =
+    let destructure_type ty =
+      let (_, name, tparaml) = TUtils.unwrap_class_type ty in
+      Env.get_class env (snd name) >>| fun class_ -> (name, tparaml, class_)
+    in
+    List.filter_map parents ~f:destructure_type
+  in
+  let env =
+    List.fold ~init:env parents ~f:(fun env ((parent_name, _, _) as parent) ->
+        check_class_implements_parent
           env
           implements
-          parent_class
+          parent
           (name_pos, class_)
-          (* sadly, enum error reporting requires this to keep the error in the file
-             with the enum *)
-          (if String.equal parent_name SN.Classes.cHH_BuiltinEnum then
-            Typing_error.Reasons_callback.bad_enum_decl name_pos
-          else
-            Typing_error.Reasons_callback.bad_decl_override
-              name_pos
-              ~name
-              ~parent_pos:parent_name_pos
-              ~parent_name))
+          (on_error parent_name))
+  in
+  let env =
+    check_class_implements_parents env (name_pos, class_) parents on_error
+  in
+  env

@@ -6,7 +6,7 @@
  *
  *)
 
-type module_ [@@deriving eq, show]
+type module_ [@@deriving eq, show, ord]
 
 val of_string : string -> module_ option
 

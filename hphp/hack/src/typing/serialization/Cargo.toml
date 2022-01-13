@@ -12,5 +12,6 @@ path = "bench.rs"
 bumpalo = { version = "3.8", features = ["collections"] }
 de = { path = "de" }
 fnv = "1.0"
+itertools = "0.10.3"
 rayon = "1.2"
 structopt = "0.3.23"

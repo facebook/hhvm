@@ -6104,7 +6104,7 @@ pub fn emit_ignored_expr<'a, 'arena, 'decl>(
     ))
 }
 
-pub fn emit_lval_op<'a, 'arena, 'decl>(
+fn emit_lval_op<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,

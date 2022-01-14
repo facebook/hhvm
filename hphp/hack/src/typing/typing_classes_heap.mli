@@ -31,7 +31,7 @@ module Api : sig
   so that telemetry about APIs can be easily correlated with telemetry
   to the original call to the [get] which fetched the class_t in the
   first place. *)
-  type t = Decl_counters.decl option * class_t
+  type t = Decl_counters.decl option * class_t [@@deriving show]
 
   val need_init : t -> bool
 

@@ -46,8 +46,9 @@ In shallow decl, that view is constructed even more lazily,
 by iterating over the shallow representation of the class
 and its ancestors one at a time. *)
 type class_t =
-  | Lazy of shallow_class * lazy_class_type Lazy.t
-  | Eager of Decl_defs.decl_class_type * eager_members
+  | Lazy of shallow_class * (lazy_class_type Lazy.t[@opaque])
+  | Eager of Decl_defs.decl_class_type * (eager_members[@opaque])
+[@@deriving show]
 
 let make_lazy_class_type ctx class_name =
   match Shallow_classes_provider.get ctx class_name with
@@ -592,7 +593,7 @@ module ApiEager = struct
 end
 
 module Api = struct
-  type t = Decl_counters.decl option * class_t
+  type t = (Decl_counters.decl option[@opaque]) * class_t [@@deriving show]
 
   include ApiShallow
   include ApiLazy

@@ -113,7 +113,7 @@ let add_minor_change_fanout
   in
   let acc =
     add_member_fanouts acc sprops (fun mid type_hash ->
-        Typing_deps.Dep.make_dep_with_type_hash type_hash mid Dep.KProp)
+        Typing_deps.Dep.make_dep_with_type_hash type_hash mid Dep.KSProp)
   in
   let acc =
     add_member_fanouts acc methods (fun mid type_hash ->
@@ -121,7 +121,7 @@ let add_minor_change_fanout
   in
   let acc =
     add_member_fanouts acc smethods (fun mid type_hash ->
-        Typing_deps.Dep.make_dep_with_type_hash type_hash mid Dep.KMethod)
+        Typing_deps.Dep.make_dep_with_type_hash type_hash mid Dep.KSMethod)
   in
   let acc =
     Option.value_map constructor ~default:acc ~f:(fun change ->

@@ -272,16 +272,6 @@ val override_no_default_typeconst :
   current_decl_and_file:Pos_or_decl.ctx ->
   unit
 
-val exception_occurred : Pos.t -> Exception.t -> unit
-
-(* The intention is to introduce invariant violations with `report_to_user`
-set to `false` initially. Then we observe and confirm that the invariant is
-not repeatedly violated. Only then, we set it to `true` in a subsequent
-release. This should prevent us from blocking users unexpectedly while
-gradually introducing signal for unexpected compiler states. *)
-val invariant_violation :
-  report_to_user:bool -> desc:string -> Pos.t -> Telemetry.t -> unit
-
 val method_is_not_dynamically_callable :
   Pos.t ->
   string ->

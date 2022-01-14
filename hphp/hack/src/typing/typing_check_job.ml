@@ -29,7 +29,9 @@ let handle_exn_as_error : type res. Pos.t -> (unit -> res option) -> res option
     (* Cancellation requests must be re-raised *)
     raise e
   | e ->
-    Errors.exception_occurred pos (Exception.wrap e);
+    Errors.add_typing_error
+      Typing_error.(
+        primary @@ Primary.Exception_occurred { pos; exn = Exception.wrap e });
     None
 
 let type_fun (ctx : Provider_context.t) (fn : Relative_path.t) (x : string) :

@@ -329,6 +329,21 @@ module Primary : sig
     | Wellformedness of Wellformedness.t
     | Xhp of Xhp.t
     (* == Primary only ====================================================== *)
+    | Exception_occurred of {
+        pos: Pos.t;
+        exn: Exception.t;
+      }
+    (* The intention is to introduce invariant violations with `report_to_user`
+       set to `false` initially. Then we observe and confirm that the invariant is
+       not repeatedly violated. Only then, we set it to `true` in a subsequent
+       release. This should prevent us from blocking users unexpectedly while
+       gradually introducing signal for unexpected compiler states. *)
+    | Invariant_violation of {
+        pos: Pos.t;
+        telemetry: Telemetry.t;
+        desc: string;
+        report_to_user: bool;
+      }
     | Internal_error of {
         pos: Pos.t;
         msg: string;
@@ -1262,7 +1277,7 @@ module Primary : sig
         kind: [ `class_typeconst | `method_ | `property ];
       }
 
-  val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t
+  val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t option
 end
 
 module Secondary : sig
@@ -1753,6 +1768,11 @@ module Reasons_callback : sig
 end
 
 type t = Error.t
+
+(** Iterate over an error calling `on_prim` and `on_snd` when each `Primary.t`
+    and `Secondary.t` error is encountered, respectively. *)
+val iter :
+  t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
 
 (** Evaluate an error to a `User_error.t` for error reporting; we return an
    option to model ignoring errors *)

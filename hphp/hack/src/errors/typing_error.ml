@@ -1245,6 +1245,16 @@ module Primary = struct
     | Wellformedness of Wellformedness.t
     | Xhp of Xhp.t
     (* == Primary only ====================================================== *)
+    | Exception_occurred of {
+        pos: Pos.t;
+        exn: Exception.t;
+      }
+    | Invariant_violation of {
+        pos: Pos.t;
+        telemetry: Telemetry.t;
+        desc: string;
+        report_to_user: bool;
+      }
     | Internal_error of {
         pos: Pos.t;
         msg: string;
@@ -4543,7 +4553,19 @@ module Primary = struct
       [],
       [] )
 
-  let to_error = function
+  let internal_compiler_error_msg =
+    Printf.sprintf
+      "Encountered an internal compiler error while typechecking this. %s %s"
+      Error_message_sentinel.remediation_message
+      Error_message_sentinel.please_file_a_bug_message
+
+  let invariant_violation pos =
+    (Error_code.InvariantViolated, (pos, internal_compiler_error_msg), [], [])
+
+  let exception_occurred pos =
+    (Error_code.ExceptionOccurred, (pos, internal_compiler_error_msg), [], [])
+
+  let to_error_ = function
     | Coeffect err -> Coeffect.to_error err
     | Enum err -> Enum.to_error err
     | Expr_tree err -> Expr_tree.to_error err
@@ -4557,6 +4579,8 @@ module Primary = struct
     | Unify_error { pos; msg_opt; reasons_opt } ->
       unify_error pos msg_opt reasons_opt
     | Generic_unify { pos; msg } -> generic_unify pos msg
+    | Exception_occurred { pos; _ } -> exception_occurred pos
+    | Invariant_violation { pos; _ } -> invariant_violation pos
     | Internal_error { pos; msg } -> internal_error pos msg
     | Typechecker_timeout { pos; fn_name; seconds } ->
       typechecker_timeout pos fn_name seconds
@@ -5080,17 +5104,25 @@ module Primary = struct
     | Call_lvalue pos -> call_lvalue pos
     | Unsafe_cast_await pos -> unsafe_cast_await pos
 
+  let to_error = function
+    | Invariant_violation { report_to_user = false; _ } -> None
+    | err -> Some (to_error_ err)
+
   let code err =
-    let (code, _, _, _) = to_error err in
+    let (code, _, _, _) = to_error_ err in
     code
 
   let to_user_error t =
-    let (code, claim, reasons, quickfixes) = to_error t in
-    User_error.make (Error_code.to_enum code) claim reasons ~quickfixes
+    Option.map ~f:(fun (code, claim, reasons, quickfixes) ->
+        User_error.make (Error_code.to_enum code) claim reasons ~quickfixes)
+    @@ to_error t
 end
 
 module rec Error : sig
   type t
+
+  val iter :
+    t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
 
   val eval : t -> error option
 
@@ -5127,11 +5159,22 @@ end = struct
     | Apply of Callback.t * t
     | Apply_reasons of Reasons_callback.t * Secondary.t
 
+  let iter t ~on_prim ~on_snd =
+    let rec aux = function
+      | Primary prim -> on_prim prim
+      | Apply (cb, t) ->
+        aux t;
+        Callback.iter cb ~on_prim
+      | Apply_reasons (cb, snd_err) ->
+        Secondary.iter snd_err ~on_prim ~on_snd;
+        Reasons_callback.iter cb ~on_prim ~on_snd
+    in
+    aux t
   (* -- Evaluation ------------------------------------------------------------ *)
 
   let eval t =
     let rec aux ~k = function
-      | Primary base -> k @@ Some (Primary.to_error base)
+      | Primary base -> k @@ Primary.to_error base
       | Apply_reasons (cb, err) ->
         k
         @@ Option.bind (Secondary.eval err) ~f:(fun (code, reasons) ->
@@ -5139,7 +5182,7 @@ end = struct
       | Apply (cb, err) ->
         aux err ~k:(function
             | Some (code, claim, reasons, quickfixes) ->
-              k @@ Some (Callback.apply cb ~code ~claim ~reasons ~quickfixes)
+              k @@ Callback.apply cb ~code ~claim ~reasons ~quickfixes
             | _ -> k None)
     in
 
@@ -5417,6 +5460,9 @@ and Secondary : sig
         class_name: string;
       }
 
+  val iter :
+    t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
+
   val eval : t -> (Error_code.t * Pos_or_decl.t Message.t list) option
 end = struct
   type t =
@@ -5656,6 +5702,11 @@ end = struct
         pos_super: Pos_or_decl.t;
         class_name: string;
       }
+
+  let iter t ~on_prim ~on_snd =
+    match t with
+    | Of_error err -> Error.iter ~on_prim ~on_snd err
+    | snd_err -> on_snd snd_err
 
   let eval = function
     | Of_error err ->
@@ -6157,13 +6208,15 @@ end
 and Callback : sig
   type t
 
+  val iter : t -> on_prim:(Primary.t -> unit) -> unit
+
   val apply :
     ?code:Error_code.t ->
     ?reasons:Pos_or_decl.t Message.t list ->
     ?quickfixes:Quickfix.t list ->
     t ->
     claim:Pos.t Message.t ->
-    error
+    error option
 
   val always : Primary.t -> t
 
@@ -6230,6 +6283,19 @@ end = struct
     | Retain_code of t
     | With_side_effect of t * (unit -> unit)
 
+  let iter t ~on_prim =
+    let rec aux = function
+      | Always prim -> on_prim prim
+      | With_claim_as_reason (t, prim) ->
+        on_prim prim;
+        aux t
+      | Retain_code t
+      | With_side_effect (t, _) ->
+        aux t
+      | With_code _ -> ()
+    in
+    aux t
+
   (* -- Evaluation ---------------------------------------------------------- *)
   type error_state = {
     code_opt: Error_code.t option;
@@ -6239,7 +6305,7 @@ end = struct
   }
 
   let with_code code { claim_opt; reasons; quickfixes; _ } =
-    (code, claim_opt, reasons, quickfixes)
+    Some (code, claim_opt, reasons, quickfixes)
 
   let rec eval t st =
     match t with
@@ -6247,8 +6313,9 @@ end = struct
       eff ();
       eval t st
     | Always err ->
-      let (code, claim, reasons, quickfixes) = Primary.to_error err in
-      (code, Some claim, reasons, quickfixes)
+      Option.map ~f:(fun (code, claim, reasons, quickfixes) ->
+          (code, Some claim, reasons, quickfixes))
+      @@ Primary.to_error err
     | With_claim_as_reason (err, claim_from) ->
       let reasons =
         Option.value_map
@@ -6257,16 +6324,19 @@ end = struct
             Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos claim :: st.reasons)
           st.claim_opt
       in
-      let (_code, claim, _reasons, _quickfixes) = Primary.to_error claim_from in
-      let claim_opt = Some claim in
+      let claim_opt =
+        Option.map ~f:(fun (_, claim, _, _) -> claim)
+        @@ Primary.to_error claim_from
+      in
       eval err { st with claim_opt; reasons }
     | Retain_code t -> eval t { st with code_opt = None }
     | With_code default -> with_code (Option.value ~default st.code_opt) st
 
   let apply ?code ?(reasons = []) ?(quickfixes = []) t ~claim =
     let st = { code_opt = code; claim_opt = Some claim; reasons; quickfixes } in
-    let (code, claim_opt, reasons, quickfixes) = eval t st in
-    (code, Option.value ~default:claim claim_opt, reasons, quickfixes)
+    Option.map ~f:(fun (code, claim_opt, reasons, quickfixes) ->
+        (code, Option.value ~default:claim claim_opt, reasons, quickfixes))
+    @@ eval t st
 
   (* -- Constructors -------------------------------------------------------- *)
 
@@ -6348,6 +6418,9 @@ end
 
 and Reasons_callback : sig
   type t
+
+  val iter :
+    t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
 
   val from_on_error : on_error -> t
     [@@ocaml.deprecated
@@ -6460,6 +6533,25 @@ end = struct
     | From_on_error of on_error
     | Prepend_on_apply of t * Secondary.t
 
+  let iter t ~on_prim ~on_snd =
+    let rec aux = function
+      | Always err
+      | Of_error err ->
+        Error.iter err ~on_prim ~on_snd
+      | Of_callback (cb, _) -> Callback.iter cb ~on_prim
+      | Retain (t, _)
+      | Incoming_reasons (t, _)
+      | With_code (t, _)
+      | With_reasons (t, _)
+      | Add_reason (t, _, _)
+      | Prepend_on_apply (t, _) ->
+        aux t
+      | From_on_error _
+      | Ignore ->
+        ()
+    in
+    aux t
+
   (* -- Constructors -------------------------------------------------------- *)
 
   let from_on_error f = From_on_error f
@@ -6533,13 +6625,12 @@ end = struct
 
   let eval_callback
       cb Error_state.{ code_opt; reasons_opt; quickfixes_opt; _ } ~claim =
-    Some
-      (Callback.apply
-         ?code:code_opt
-         ?reasons:reasons_opt
-         ?quickfixes:quickfixes_opt
-         ~claim
-         cb)
+    Callback.apply
+      ?code:code_opt
+      ?reasons:reasons_opt
+      ?quickfixes:quickfixes_opt
+      ~claim
+      cb
 
   let rec eval t st =
     match t with

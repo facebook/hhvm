@@ -744,7 +744,36 @@ let apply_error_from_reasons_callback ?code ?claim ?reasons ?quickfixes err =
   Option.iter ~f:add_error
   @@ Typing_error.Reasons_callback.apply ?code ?claim ?reasons ?quickfixes err
 
+let log_exception_occurred pos e =
+  let pos_str = pos |> Pos.to_absolute |> Pos.string in
+  HackEventLogger.type_check_exn_bug ~path:(Pos.filename pos) ~pos:pos_str ~e;
+  Hh_logger.error
+    "Exception while typechecking at position %s\n%s"
+    pos_str
+    (Exception.to_string e)
+
+let log_invariant_violation ~desc pos telemetry =
+  let pos_str = pos |> Pos.to_absolute |> Pos.string in
+  HackEventLogger.invariant_violation_bug
+    ~path:(Pos.filename pos)
+    ~pos:pos_str
+    ~desc
+    telemetry;
+  Hh_logger.error
+    "Invariant violation at position %s\n%s"
+    pos_str
+    Telemetry.(telemetry |> string_ ~key:"desc" ~value:desc |> to_string)
+
+let log_primary_typing_error prim_err =
+  let open Typing_error.Primary in
+  match prim_err with
+  | Exception_occurred { pos; exn } -> log_exception_occurred pos exn
+  | Invariant_violation { pos; telemetry; desc; _ } ->
+    log_invariant_violation ~desc pos telemetry
+  | _ -> ()
+
 let add_typing_error err =
+  Typing_error.iter ~on_prim:log_primary_typing_error ~on_snd:(fun _ -> ()) err;
   Option.iter ~f:add_error @@ Typing_error.to_user_error err
 
 let incremental_update ~old ~new_ ~rechecked phase =
@@ -1027,40 +1056,6 @@ let override_no_default_typeconst pos_child pos_parent =
         "It cannot override an abstract type constant that has a default type"
       );
     ]
-
-let internal_compiler_error_msg =
-  Printf.sprintf
-    "Encountered an internal compiler error while typechecking this. %s %s"
-    Error_message_sentinel.remediation_message
-    Error_message_sentinel.please_file_a_bug_message
-
-(** TODO: Remove use of explicit side-effects *)
-let exception_occurred pos e =
-  let pos_str = pos |> Pos.to_absolute |> Pos.string in
-  HackEventLogger.type_check_exn_bug ~path:(Pos.filename pos) ~pos:pos_str ~e;
-  Hh_logger.error
-    "Exception while typechecking at position %s\n%s"
-    pos_str
-    (Exception.to_string e);
-  add (Typing.err_code Typing.ExceptionOccurred) pos internal_compiler_error_msg
-
-(** TODO: Remove use of explicit side-effects *)
-let invariant_violation ~report_to_user ~desc pos telemetry =
-  let pos_str = pos |> Pos.to_absolute |> Pos.string in
-  HackEventLogger.invariant_violation_bug
-    ~path:(Pos.filename pos)
-    ~pos:pos_str
-    ~desc
-    telemetry;
-  Hh_logger.error
-    "Invariant violation at position %s\n%s"
-    pos_str
-    Telemetry.(telemetry |> string_ ~key:"desc" ~value:desc |> to_string);
-  if report_to_user then
-    add
-      (Typing.err_code Typing.InvariantViolated)
-      pos
-      internal_compiler_error_msg
 
 (** TODO: Remove use of `User_error.t` representation for nested error  *)
 let function_is_not_dynamically_callable pos function_name error =

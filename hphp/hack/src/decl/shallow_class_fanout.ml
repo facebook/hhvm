@@ -70,18 +70,30 @@ let add_minor_change_fanout
           acc
           (make_dep dep))
   in
-  let add_member_fanout acc change make_dep =
-    if not (ClassDiff.change_affects_descendants change) then
+  let add_member_fanout ~is_const acc change make_dep =
+    (* Consts and typeconsts have their types copied into descendant classes in
+       folded decl (rather than being stored in a separate heap as methods and
+       properties are). As a result, when using a const, we register a
+       dependency only upon the class type at the use site. In contrast, if we
+       use a method or property B::f which was inherited from A, we register a
+       dependency both upon B::f and A::f, which is what allows us to avoid the
+       more expensive use of recheck_descendants_and_their_member_dependents
+       here. Since we don't register a dependency upon the const at its class of
+       origin in this way, we must always take the more expensive path for
+       consts. *)
+    if
+      is_const || ClassDiff.method_or_property_change_affects_descendants change
+    then
+      recheck_descendants_and_their_member_dependents acc make_dep
+    else
       AffectedDeps.mark_all_dependents_as_needing_recheck_from_hash
         mode
         acc
         (make_dep (Typing_deps.Dep.make (Typing_deps.Dep.Type class_name)))
-    else
-      recheck_descendants_and_their_member_dependents acc make_dep
   in
-  let add_member_fanouts acc changes make_dep =
+  let add_member_fanouts ~is_const acc changes make_dep =
     SMap.fold changes ~init:acc ~f:(fun member_id change acc ->
-        add_member_fanout acc change (make_dep member_id))
+        add_member_fanout ~is_const acc change (make_dep member_id))
   in
   let acc =
     SMap.fold consts ~init:acc ~f:(fun name change acc ->
@@ -100,32 +112,33 @@ let add_minor_change_fanout
               (Dep.AllMembers class_name)
           | _ -> acc
         in
-        add_member_fanout acc change (fun type_hash ->
+        add_member_fanout ~is_const:true acc change (fun type_hash ->
             Typing_deps.Dep.make_dep_with_type_hash type_hash name Dep.KConst))
   in
   let acc =
-    add_member_fanouts acc typeconsts (fun mid type_hash ->
+    add_member_fanouts ~is_const:true acc typeconsts (fun mid type_hash ->
         Typing_deps.Dep.make_dep_with_type_hash type_hash mid Dep.KConst)
   in
   let acc =
-    add_member_fanouts acc props (fun mid type_hash ->
+    add_member_fanouts ~is_const:false acc props (fun mid type_hash ->
         Typing_deps.Dep.make_dep_with_type_hash type_hash mid Dep.KProp)
   in
   let acc =
-    add_member_fanouts acc sprops (fun mid type_hash ->
+    add_member_fanouts ~is_const:false acc sprops (fun mid type_hash ->
         Typing_deps.Dep.make_dep_with_type_hash type_hash mid Dep.KSProp)
   in
   let acc =
-    add_member_fanouts acc methods (fun mid type_hash ->
+    add_member_fanouts ~is_const:false acc methods (fun mid type_hash ->
         Typing_deps.Dep.make_dep_with_type_hash type_hash mid Dep.KMethod)
   in
   let acc =
-    add_member_fanouts acc smethods (fun mid type_hash ->
+    add_member_fanouts ~is_const:false acc smethods (fun mid type_hash ->
         Typing_deps.Dep.make_dep_with_type_hash type_hash mid Dep.KSMethod)
   in
   let acc =
     Option.value_map constructor ~default:acc ~f:(fun change ->
-        add_member_fanout acc change (fun type_hash -> type_hash))
+        add_member_fanout ~is_const:false acc change (fun type_hash ->
+            type_hash))
   in
   acc
 

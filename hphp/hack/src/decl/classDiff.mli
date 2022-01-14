@@ -42,4 +42,4 @@ val empty_member_diff : member_diff
 
 val is_empty_member_diff : member_diff -> bool
 
-val change_affects_descendants : member_change -> bool
+val method_or_property_change_affects_descendants : member_change -> bool

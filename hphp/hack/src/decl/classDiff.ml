@@ -50,7 +50,7 @@ type member_change =
    Changes in positions in members are not considered a change at all by this
    module, since we re-typecheck all files with errors for every global check
    (so errors with positions referring to moved members will be recomputed). *)
-let change_affects_descendants member_change =
+let method_or_property_change_affects_descendants member_change =
   match member_change with
   | Added
   | Removed

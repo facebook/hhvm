@@ -158,8 +158,8 @@ function curl_multi_close(resource $mh): mixed;
  * Run the sub-connections of the current cURL handle
  *
  * @param resource $mh -
- * @param int $still_running - A reference to a flag to tell whether the
- *   operations are still running.
+ * @param int $still_running - A reference to the number of transfers
+ *   that are still running
  *
  * @return int - A cURL code defined in the cURL Predefined Constants.
  *   This only returns errors regarding the whole multi stack. There might
@@ -169,9 +169,7 @@ function curl_multi_close(resource $mh): mixed;
  * See curl_exec() wrt NoFCallBuiltin.
  */
 <<__Native("NoFCallBuiltin")>>
-function curl_multi_exec(resource $mh,
-                         <<__OutOnly("KindOfInt64")>>
-                         inout mixed $still_running): ?int;
+function curl_multi_exec(resource $mh, inout int $still_running): ?int;
 
 /**
  * Return the content of a cURL handle if  is set

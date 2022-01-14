@@ -20,7 +20,7 @@ function main_test_curl_multi_except() {
   curl_multi_add_handle($mh,$ch1);
   curl_multi_add_handle($mh,$ch2);
 
-  $active = null;
+  $active = 0;
   do {
     $mrc = curl_multi_exec($mh, inout $active);
   } while ($mrc == CURLM_CALL_MULTI_PERFORM);

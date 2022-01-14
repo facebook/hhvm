@@ -590,7 +590,7 @@ function curl_multi_add_handle(resource $mh, resource $ch);
 <<__PHPStdLib>>
 function curl_multi_remove_handle(resource $mh, resource $ch);
 <<__PHPStdLib>>
-function curl_multi_exec(resource $mh, inout $still_running);
+function curl_multi_exec(resource $mh, inout int $still_running);
 <<__PHPStdLib>>
 function curl_multi_select(resource $mh, float $timeout = 1.0);
 <<__PHPStdLib>>

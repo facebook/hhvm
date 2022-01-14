@@ -5708,501 +5708,662 @@ end = struct
     | Of_error err -> Error.iter ~on_prim ~on_snd err
     | snd_err -> on_snd snd_err
 
+  (* -- Evaluation ---------------------------------------------------------- *)
+
+  let fun_too_many_args pos decl_pos actual expected =
+    let reasons =
+      [
+        ( pos,
+          Printf.sprintf
+            "Too many mandatory arguments (expected %d but got %d)"
+            expected
+            actual );
+        (decl_pos, "Because of this definition");
+      ]
+    in
+    (Error_code.FunTooManyArgs, reasons)
+
+  let fun_too_few_args pos decl_pos actual expected =
+    let reasons =
+      [
+        ( pos,
+          Printf.sprintf
+            "Too few arguments (required %d but got %d)"
+            expected
+            actual );
+        (decl_pos, "Because of this definition");
+      ]
+    in
+    (Error_code.FunTooFewArgs, reasons)
+
+  let fun_unexpected_nonvariadic pos decl_pos =
+    let reasons =
+      [
+        (pos, "Should have a variadic argument");
+        (decl_pos, "Because of this definition");
+      ]
+    in
+    (Error_code.FunUnexpectedNonvariadic, reasons)
+
+  let fun_variadicity_hh_vs_php56 pos decl_pos =
+    let reasons =
+      [
+        (pos, "Variadic arguments: `...`-style is not a subtype of `...$args`");
+        (decl_pos, "Because of this definition");
+      ]
+    in
+    (Error_code.FunVariadicityHhVsPhp56, reasons)
+
+  let type_arity_mismatch pos actual decl_pos expected =
+    let reasons =
+      [
+        (pos, "This type has " ^ string_of_int actual ^ " arguments");
+        (decl_pos, "This one has " ^ string_of_int expected);
+      ]
+    in
+    (Error_code.TypeArityMismatch, reasons)
+
+  let violated_constraint cstrs reasons =
+    let pos_msg = "This type constraint is violated" in
+    let f (p_cstr, (p_tparam, tparam)) =
+      [
+        ( p_tparam,
+          Printf.sprintf
+            "%s is a constrained type parameter"
+            (Markdown_lite.md_codify tparam) );
+        (p_cstr, pos_msg);
+      ]
+    in
+    let msgs = List.concat_map ~f cstrs in
+    (Error_code.TypeConstraintViolation, msgs @ reasons)
+
+  let concrete_const_interface_override pos parent_pos name parent_origin =
+    let reasons =
+      [
+        ( parent_pos,
+          "You could make "
+          ^ Markdown_lite.md_codify name
+          ^ " abstract in "
+          ^ (Markdown_lite.md_codify @@ Render.strip_ns parent_origin)
+          ^ "." );
+      ]
+    and claim =
+      ( pos,
+        "Non-abstract constants defined in an interface cannot be overridden when implementing or extending that interface."
+      )
+    in
+    (Error_code.ConcreteConstInterfaceOverride, claim :: reasons)
+
+  let interface_or_trait_const_multiple_defs
+      pos origin parent_pos parent_origin name =
+    let parent_origin = Render.strip_ns parent_origin
+    and child_origin = Render.strip_ns origin in
+    let reasons =
+      [
+        ( pos,
+          "Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants."
+        );
+        ( parent_pos,
+          Markdown_lite.md_codify name
+          ^ " inherited from "
+          ^ Markdown_lite.md_codify parent_origin );
+        ( pos,
+          "conflicts with constant "
+          ^ Markdown_lite.md_codify name
+          ^ " inherited from "
+          ^ Markdown_lite.md_codify child_origin
+          ^ "." );
+      ]
+    in
+    (Error_code.ConcreteConstInterfaceOverride, reasons)
+
+  let interface_typeconst_multiple_defs
+      pos parent_pos name origin parent_origin is_abstract =
+    let parent_origin = Render.strip_ns parent_origin
+    and child_origin = Render.strip_ns origin
+    and child_pos = pos
+    and child =
+      if is_abstract then
+        "abstract type constant with default value"
+      else
+        "concrete type constant"
+    in
+    let reasons =
+      [
+        ( pos,
+          "Concrete and abstract type constants with default values in an interface cannot conflict with inherited"
+          ^ " concrete or abstract type constants with default values." );
+        ( parent_pos,
+          Markdown_lite.md_codify name
+          ^ " inherited from "
+          ^ Markdown_lite.md_codify parent_origin );
+        ( child_pos,
+          "conflicts with "
+          ^ Markdown_lite.md_codify child
+          ^ " "
+          ^ Markdown_lite.md_codify name
+          ^ " inherited from "
+          ^ Markdown_lite.md_codify child_origin
+          ^ "." );
+      ]
+    in
+    (Error_code.ConcreteConstInterfaceOverride, reasons)
+
+  let missing_field pos name decl_pos =
+    let reasons =
+      [
+        (pos, "The field " ^ Markdown_lite.md_codify name ^ " is missing");
+        (decl_pos, "The field " ^ Markdown_lite.md_codify name ^ " is defined");
+      ]
+    in
+    (Error_code.MissingField, reasons)
+
+  let shape_fields_unknown pos decl_pos =
+    let reasons =
+      [
+        ( pos,
+          "This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration."
+        );
+        ( decl_pos,
+          "It is incompatible with a shape that does not allow unknown fields."
+        );
+      ]
+    in
+    (Error_code.ShapeFieldsUnknown, reasons)
+
+  let abstract_tconst_not_allowed pos decl_pos tconst_name =
+    let reasons =
+      [
+        (pos, "An abstract type constant is not allowed in this position.");
+        ( decl_pos,
+          Printf.sprintf
+            "%s is abstract here."
+            (Markdown_lite.md_codify tconst_name) );
+      ]
+    in
+    (Error_code.AbstractTconstNotAllowed, reasons)
+
+  let invalid_destructure pos decl_pos ty_name =
+    let reasons =
+      [
+        ( pos,
+          "This expression cannot be destructured with a `list(...)` expression"
+        );
+        (decl_pos, "This is " ^ Markdown_lite.md_codify @@ Lazy.force ty_name);
+      ]
+    in
+    (Error_code.InvalidDestructure, reasons)
+
+  let unpack_array_required_argument pos decl_pos =
+    let reasons =
+      [
+        ( pos,
+          "An array cannot be unpacked into the required arguments of a function"
+        );
+        (decl_pos, "Definition is here");
+      ]
+    in
+    (Error_code.SplatArrayRequired, reasons)
+
+  let unpack_array_variadic_argument pos decl_pos =
+    let reasons =
+      [
+        ( pos,
+          "A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array"
+        );
+        (decl_pos, "Definition is here");
+      ]
+    in
+    (Error_code.SplatArrayRequired, reasons)
+
+  let overriding_prop_const_mismatch pos is_const parent_pos =
+    let (msg, reason_msg) =
+      if is_const then
+        ("This property is `__Const`", "This property is not `__Const`")
+      else
+        ("This property is not `__Const`", "This property is `__Const`")
+    in
+    let reasons = [(pos, msg); (parent_pos, reason_msg)] in
+    (Error_code.OverridingPropConstMismatch, reasons)
+
+  let visibility_extends pos vis parent_pos parent_vis =
+    let reasons =
+      [
+        (pos, "This member visibility is: " ^ Markdown_lite.md_codify vis);
+        (parent_pos, Markdown_lite.md_codify parent_vis ^ " was expected");
+      ]
+    in
+    (Error_code.VisibilityExtends, reasons)
+
+  let visibility_override_internal pos module_name parent_module parent_pos =
+    let msg =
+      match module_name with
+      | None ->
+        Printf.sprintf
+          "Cannot override this member outside module `%s`"
+          parent_module
+      | Some (_, m) ->
+        Printf.sprintf "Cannot override this member in module `%s`" m
+    in
+    let reasons =
+      [
+        (pos, msg);
+        ( parent_pos,
+          Printf.sprintf "This member is internal to module `%s`" parent_module
+        );
+      ]
+    in
+    (Error_code.ModuleError, reasons)
+
+  let missing_constructor pos =
+    let reasons = [(pos, "The constructor is not implemented")] in
+    (Error_code.MissingConstructor, reasons)
+
+  let accept_disposable_invariant pos decl_pos =
+    let reasons =
+      [
+        (pos, "This parameter is marked `<<__AcceptDisposable>>`");
+        (decl_pos, "This parameter is not marked `<<__AcceptDisposable>>`");
+      ]
+    in
+    (Error_code.AcceptDisposableInvariant, reasons)
+
+  let ifc_external_contravariant pos_sub pos_super =
+    let reasons =
+      [
+        ( pos_super,
+          "Parameters with `<<__External>>` must be overridden by other parameters with <<__External>>. This parameter is marked `<<__External>>`"
+        );
+        (pos_sub, "But this parameter is not marked `<<__External>>`");
+      ]
+    in
+    (Error_code.IFCExternalContravariant, reasons)
+
+  let required_field_is_optional pos name decl_pos =
+    let reasons =
+      [
+        (pos, "The field " ^ Markdown_lite.md_codify name ^ " is **optional**");
+        ( decl_pos,
+          "The field "
+          ^ Markdown_lite.md_codify name
+          ^ " is defined as **required**" );
+      ]
+    in
+    (Error_code.RequiredFieldIsOptional, reasons)
+
+  let return_disposable_mismatch pos_sub is_marked_return_disposable pos_super =
+    let (msg, reason_msg) =
+      if is_marked_return_disposable then
+        ( "This is marked `<<__ReturnDisposable>>`.",
+          "This is not marked `<<__ReturnDisposable>>`." )
+      else
+        ( "This is not marked `<<__ReturnDisposable>>`.",
+          "This is marked `<<__ReturnDisposable>>`." )
+    in
+    let reasons = [(pos_super, msg); (pos_sub, reason_msg)] in
+    (Error_code.ReturnDisposableMismatch, reasons)
+
+  let ifc_policy_mismatch pos policy pos_super policy_super =
+    let reasons =
+      [
+        ( pos,
+          "IFC policies must be invariant with respect to inheritance. This method is policied with "
+          ^ policy );
+        ( pos_super,
+          "This is incompatible with its inherited policy, which is "
+          ^ policy_super );
+      ]
+    in
+    (Error_code.IFCPolicyMismatch, reasons)
+
+  let override_final pos parent_pos =
+    let reasons =
+      [
+        (pos, "You cannot override this method");
+        (parent_pos, "It was declared as final");
+      ]
+    in
+    (Error_code.OverrideFinal, reasons)
+
+  let override_lsb pos member_name parent_pos =
+    let reasons =
+      [
+        ( pos,
+          "Member "
+          ^ Markdown_lite.md_codify member_name
+          ^ " may not override `__LSB` member of parent" );
+        (parent_pos, "This is being overridden");
+      ]
+    in
+    (Error_code.OverrideLSB, reasons)
+
+  let multiple_concrete_defs pos origin name parent_pos parent_origin class_name
+      =
+    let child_origin = Markdown_lite.md_codify @@ Render.strip_ns origin
+    and parent_origin = Markdown_lite.md_codify @@ Render.strip_ns parent_origin
+    and class_ = Markdown_lite.md_codify @@ Render.strip_ns class_name
+    and name = Markdown_lite.md_codify name in
+    let reasons =
+      [
+        ( pos,
+          child_origin
+          ^ " and "
+          ^ parent_origin
+          ^ " both declare ambiguous implementations of "
+          ^ name
+          ^ "." );
+        (pos, child_origin ^ "'s definition is here.");
+        (parent_pos, parent_origin ^ "'s definition is here.");
+        ( pos,
+          "Redeclare "
+          ^ name
+          ^ " in "
+          ^ class_
+          ^ " with a compatible signature." );
+      ]
+    in
+    (Error_code.MultipleConcreteDefs, reasons)
+
+  let cyclic_enum_constraint pos =
+    let reasons = [(pos, "Cyclic enum constraint")] in
+    (Error_code.CyclicEnumConstraint, reasons)
+
+  let inoutness_mismatch pos decl_pos =
+    let reasons =
+      [
+        (pos, "This is an `inout` parameter");
+        (decl_pos, "It is incompatible with a normal parameter");
+      ]
+    in
+    (Error_code.InoutnessMismatch, reasons)
+
+  let decl_override_missing_hint pos =
+    let reasons =
+      [
+        ( pos,
+          "When redeclaring class members, both declarations must have a typehint"
+        );
+      ]
+    in
+    (Error_code.DeclOverrideMissingHint, reasons)
+
+  let bad_lateinit_override pos parent_pos parent_is_lateinit =
+    let verb =
+      if parent_is_lateinit then
+        "is"
+      else
+        "is not"
+    in
+    let reasons =
+      [
+        (pos, "Redeclared properties must be consistently declared `__LateInit`");
+        (parent_pos, "The property " ^ verb ^ " declared `__LateInit` here");
+      ]
+    in
+
+    (Error_code.BadLateInitOverride, reasons)
+
+  let bad_xhp_attr_required_override pos parent_pos parent_tag tag =
+    let reasons =
+      [
+        (pos, "Redeclared attribute must not be less strict");
+        ( parent_pos,
+          "The attribute is " ^ parent_tag ^ ", which is stricter than " ^ tag
+        );
+      ]
+    in
+    (Error_code.BadXhpAttrRequiredOverride, reasons)
+
+  let coeffect_subtyping pos cap pos_expected cap_expected =
+    let reasons =
+      [
+        ( pos_expected,
+          "Expected a function that requires " ^ Lazy.force cap_expected );
+        (pos, "But got a function that requires " ^ Lazy.force cap);
+      ]
+    in
+    (Error_code.SubtypeCoeffects, reasons)
+
+  let not_sub_dynamic pos ty_name dynamic_part =
+    let reasons =
+      [
+        ( pos,
+          "Type "
+          ^ (Markdown_lite.md_codify @@ Lazy.force ty_name)
+          ^ " is not a subtype of `dynamic` under dynamic-aware subtyping" );
+      ]
+    in
+    (Error_code.UnifyError, dynamic_part @ reasons)
+
+  let override_method_support_dynamic_type
+      pos method_name parent_origin parent_pos =
+    let reasons =
+      [
+        ( pos,
+          "Method "
+          ^ method_name
+          ^ " must be declared <<__SupportDynamicType>> because it overrides method in class "
+          ^ Render.strip_ns parent_origin
+          ^ " which does." );
+        (parent_pos, "Overridden method is defined here.");
+      ]
+    in
+    (Error_code.ImplementsDynamic, reasons)
+
+  let readonly_mismatch pos kind reason_sub reason_super =
+    let reasons =
+      ( pos,
+        match kind with
+        | `fn -> "Function readonly mismatch"
+        | `fn_return -> "Function readonly return mismatch"
+        | `param -> "Mismatched parameter readonlyness" )
+      :: reason_sub
+      @ reason_super
+    in
+    (Error_code.ReadonlyMismatch, reasons)
+
+  let typing_too_many_args pos decl_pos actual expected =
+    let (code, claim, reasons) =
+      Common.typing_too_many_args pos decl_pos actual expected
+    in
+    (code, claim :: reasons)
+
+  let typing_too_few_args pos decl_pos actual expected =
+    let (code, claim, reasons) =
+      Common.typing_too_few_args pos decl_pos actual expected
+    in
+    (code, claim :: reasons)
+
+  let non_object_member pos ctxt ty_name member_name kind decl_pos =
+    let (code, claim, reasons) =
+      Common.non_object_member
+        pos
+        ctxt
+        (Lazy.force ty_name)
+        member_name
+        kind
+        decl_pos
+    in
+    (code, claim :: reasons)
+
+  let rigid_tvar_escape pos name =
+    ( Error_code.RigidTVarEscape,
+      [(pos, "Rigid type variable " ^ name ^ " is escaping")] )
+
+  let smember_not_found pos kind member_name class_name class_pos hint =
+    let (code, claim, reasons) =
+      Common.smember_not_found pos kind member_name class_name class_pos hint
+    in
+    (code, claim :: reasons)
+
+  let bad_method_override pos member_name =
+    let reasons =
+      [
+        ( pos,
+          "The method "
+          ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
+          ^ " is not compatible with the overridden method" );
+      ]
+    in
+    (Error_code.BadMethodOverride, reasons)
+
+  let bad_prop_override pos member_name =
+    let reasons =
+      [
+        ( pos,
+          "The property "
+          ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
+          ^ " has the wrong type" );
+      ]
+    in
+    (Error_code.BadMethodOverride, reasons)
+
+  let subtyping_error reasons = (Error_code.UnifyError, reasons)
+
+  let method_not_dynamically_callable pos parent_pos =
+    let reasons =
+      [
+        (parent_pos, "This method is `__DynamicallyCallable`.");
+        (pos, "This method is **not**.");
+      ]
+    in
+    (Error_code.BadMethodOverride, reasons)
+
+  let this_final pos_sub pos_super class_name =
+    let n = Render.strip_ns class_name |> Markdown_lite.md_codify in
+    let message1 = "Since " ^ n ^ " is not final" in
+    let message2 = "this might not be a " ^ n in
+    (Error_code.ThisFinal, [(pos_super, message1); (pos_sub, message2)])
+
   let eval = function
     | Of_error err ->
-      let f (code, claim, reasons, _) =
-        (code, Message.map ~f:Pos_or_decl.of_raw_pos claim :: reasons)
-      in
-      Option.map ~f @@ Error.eval err
+      Option.map ~f:(fun (code, claim, reasons, _) ->
+          (code, Message.map ~f:Pos_or_decl.of_raw_pos claim :: reasons))
+      @@ Error.eval err
     | Fun_too_many_args { pos; decl_pos; actual; expected } ->
-      let reasons =
-        [
-          ( pos,
-            Printf.sprintf
-              "Too many mandatory arguments (expected %d but got %d)"
-              expected
-              actual );
-          (decl_pos, "Because of this definition");
-        ]
-      in
-      Some (Error_code.FunTooManyArgs, reasons)
+      Some (fun_too_many_args pos decl_pos actual expected)
     | Fun_too_few_args { pos; decl_pos; actual; expected } ->
-      let reasons =
-        [
-          ( pos,
-            Printf.sprintf
-              "Too few arguments (required %d but got %d)"
-              expected
-              actual );
-          (decl_pos, "Because of this definition");
-        ]
-      in
-      Some (Error_code.FunTooFewArgs, reasons)
+      Some (fun_too_few_args pos decl_pos actual expected)
     | Fun_unexpected_nonvariadic { pos; decl_pos } ->
-      let reasons =
-        [
-          (pos, "Should have a variadic argument");
-          (decl_pos, "Because of this definition");
-        ]
-      in
-      Some (Error_code.FunUnexpectedNonvariadic, reasons)
+      Some (fun_unexpected_nonvariadic pos decl_pos)
     | Fun_variadicity_hh_vs_php56 { pos; decl_pos } ->
-      let reasons =
-        [
-          (pos, "Variadic arguments: `...`-style is not a subtype of `...$args`");
-          (decl_pos, "Because of this definition");
-        ]
-      in
-      Some (Error_code.FunVariadicityHhVsPhp56, reasons)
+      Some (fun_variadicity_hh_vs_php56 pos decl_pos)
     | Type_arity_mismatch { pos; actual; decl_pos; expected } ->
-      let reasons =
-        [
-          (pos, "This type has " ^ string_of_int actual ^ " arguments");
-          (decl_pos, "This one has " ^ string_of_int expected);
-        ]
-      in
-      Some (Error_code.TypeArityMismatch, reasons)
+      Some (type_arity_mismatch pos actual decl_pos expected)
     | Violated_constraint { cstrs; reasons; _ } ->
-      let pos_msg = "This type constraint is violated" in
-      let f (p_cstr, (p_tparam, tparam)) =
-        [
-          ( p_tparam,
-            Printf.sprintf
-              "%s is a constrained type parameter"
-              (Markdown_lite.md_codify tparam) );
-          (p_cstr, pos_msg);
-        ]
-      in
-      let msgs = List.concat_map ~f cstrs in
-      Some (Error_code.TypeConstraintViolation, msgs @ reasons)
+      Some (violated_constraint cstrs reasons)
     | Concrete_const_interface_override { pos; parent_pos; name; parent_origin }
       ->
-      let reasons =
-        [
-          ( parent_pos,
-            "You could make "
-            ^ Markdown_lite.md_codify name
-            ^ " abstract in "
-            ^ (Markdown_lite.md_codify @@ Render.strip_ns parent_origin)
-            ^ "." );
-        ]
-      and claim =
-        ( pos,
-          "Non-abstract constants defined in an interface cannot be overridden when implementing or extending that interface."
-        )
-      in
-      Some (Error_code.ConcreteConstInterfaceOverride, claim :: reasons)
+      Some (concrete_const_interface_override pos parent_pos name parent_origin)
     | Interface_or_trait_const_multiple_defs
         { pos; origin; parent_pos; parent_origin; name } ->
-      let parent_origin = Render.strip_ns parent_origin
-      and child_origin = Render.strip_ns origin in
-      let reasons =
-        [
-          ( pos,
-            "Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants."
-          );
-          ( parent_pos,
-            Markdown_lite.md_codify name
-            ^ " inherited from "
-            ^ Markdown_lite.md_codify parent_origin );
-          ( pos,
-            "conflicts with constant "
-            ^ Markdown_lite.md_codify name
-            ^ " inherited from "
-            ^ Markdown_lite.md_codify child_origin
-            ^ "." );
-        ]
-      in
-      Some (Error_code.ConcreteConstInterfaceOverride, reasons)
+      Some
+        (interface_or_trait_const_multiple_defs
+           pos
+           origin
+           parent_pos
+           parent_origin
+           name)
     | Interface_typeconst_multiple_defs
         { pos; parent_pos; name; origin; parent_origin; is_abstract } ->
-      let parent_origin = Render.strip_ns parent_origin
-      and child_origin = Render.strip_ns origin
-      and child_pos = pos
-      and child =
-        if is_abstract then
-          "abstract type constant with default value"
-        else
-          "concrete type constant"
-      in
-
-      let reasons =
-        [
-          ( pos,
-            "Concrete and abstract type constants with default values in an interface cannot conflict with inherited"
-            ^ " concrete or abstract type constants with default values." );
-          ( parent_pos,
-            Markdown_lite.md_codify name
-            ^ " inherited from "
-            ^ Markdown_lite.md_codify parent_origin );
-          ( child_pos,
-            "conflicts with "
-            ^ Markdown_lite.md_codify child
-            ^ " "
-            ^ Markdown_lite.md_codify name
-            ^ " inherited from "
-            ^ Markdown_lite.md_codify child_origin
-            ^ "." );
-        ]
-      in
-      Some (Error_code.ConcreteConstInterfaceOverride, reasons)
+      Some
+        (interface_typeconst_multiple_defs
+           pos
+           parent_pos
+           name
+           origin
+           parent_origin
+           is_abstract)
     | Missing_field { pos; name; decl_pos } ->
-      let reasons =
-        [
-          (pos, "The field " ^ Markdown_lite.md_codify name ^ " is missing");
-          (decl_pos, "The field " ^ Markdown_lite.md_codify name ^ " is defined");
-        ]
-      in
-      Some (Error_code.MissingField, reasons)
+      Some (missing_field pos name decl_pos)
     | Shape_fields_unknown { pos; decl_pos } ->
-      let reasons =
-        [
-          ( pos,
-            "This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration."
-          );
-          ( decl_pos,
-            "It is incompatible with a shape that does not allow unknown fields."
-          );
-        ]
-      in
-      Some (Error_code.ShapeFieldsUnknown, reasons)
+      Some (shape_fields_unknown pos decl_pos)
     | Abstract_tconst_not_allowed { pos; decl_pos; tconst_name } ->
-      let reasons =
-        [
-          (pos, "An abstract type constant is not allowed in this position.");
-          ( decl_pos,
-            Printf.sprintf
-              "%s is abstract here."
-              (Markdown_lite.md_codify tconst_name) );
-        ]
-      in
-      Some (Error_code.AbstractTconstNotAllowed, reasons)
+      Some (abstract_tconst_not_allowed pos decl_pos tconst_name)
     | Invalid_destructure { pos; decl_pos; ty_name } ->
-      let reasons =
-        [
-          ( pos,
-            "This expression cannot be destructured with a `list(...)` expression"
-          );
-          (decl_pos, "This is " ^ Markdown_lite.md_codify @@ Lazy.force ty_name);
-        ]
-      in
-      Some (Error_code.InvalidDestructure, reasons)
+      Some (invalid_destructure pos decl_pos ty_name)
     | Unpack_array_required_argument { pos; decl_pos } ->
-      let reasons =
-        [
-          ( pos,
-            "An array cannot be unpacked into the required arguments of a function"
-          );
-          (decl_pos, "Definition is here");
-        ]
-      in
-      Some (Error_code.SplatArrayRequired, reasons)
+      Some (unpack_array_required_argument pos decl_pos)
     | Unpack_array_variadic_argument { pos; decl_pos } ->
-      let reasons =
-        [
-          ( pos,
-            "A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array"
-          );
-          (decl_pos, "Definition is here");
-        ]
-      in
-      Some (Error_code.SplatArrayRequired, reasons)
+      Some (unpack_array_variadic_argument pos decl_pos)
     | Overriding_prop_const_mismatch { pos; is_const; parent_pos; _ } ->
-      let (msg, reason_msg) =
-        if is_const then
-          ("This property is `__Const`", "This property is not `__Const`")
-        else
-          ("This property is not `__Const`", "This property is `__Const`")
-      in
-      let reasons = [(pos, msg); (parent_pos, reason_msg)] in
-      Some (Error_code.OverridingPropConstMismatch, reasons)
+      Some (overriding_prop_const_mismatch pos is_const parent_pos)
     | Visibility_extends { pos; vis; parent_pos; parent_vis } ->
-      let reasons =
-        [
-          (pos, "This member visibility is: " ^ Markdown_lite.md_codify vis);
-          (parent_pos, Markdown_lite.md_codify parent_vis ^ " was expected");
-        ]
-      in
-      Some (Error_code.VisibilityExtends, reasons)
+      Some (visibility_extends pos vis parent_pos parent_vis)
     | Visibility_override_internal
         { pos; module_name; parent_module = (_, parent_module); parent_pos } ->
-      let msg =
-        match module_name with
-        | None ->
-          Printf.sprintf
-            "Cannot override this member outside module `%s`"
-            parent_module
-        | Some (_, m) ->
-          Printf.sprintf "Cannot override this member in module `%s`" m
-      in
-      let reasons =
-        [
-          (pos, msg);
-          ( parent_pos,
-            Printf.sprintf
-              "This member is internal to module `%s`"
-              parent_module );
-        ]
-      in
-      Some (Error_code.ModuleError, reasons)
-    | Missing_constructor pos ->
-      let reasons = [(pos, "The constructor is not implemented")] in
-      Some (Error_code.MissingConstructor, reasons)
+      Some
+        (visibility_override_internal pos module_name parent_module parent_pos)
+    | Missing_constructor pos -> Some (missing_constructor pos)
     | Accept_disposable_invariant { pos; decl_pos } ->
-      let reasons =
-        [
-          (pos, "This parameter is marked `<<__AcceptDisposable>>`");
-          (decl_pos, "This parameter is not marked `<<__AcceptDisposable>>`");
-        ]
-      in
-      Some (Error_code.AcceptDisposableInvariant, reasons)
+      Some (accept_disposable_invariant pos decl_pos)
     | Ifc_external_contravariant { pos_sub; pos_super } ->
-      let reasons =
-        [
-          ( pos_super,
-            "Parameters with `<<__External>>` must be overridden by other parameters with <<__External>>. This parameter is marked `<<__External>>`"
-          );
-          (pos_sub, "But this parameter is not marked `<<__External>>`");
-        ]
-      in
-      Some (Error_code.IFCExternalContravariant, reasons)
+      Some (ifc_external_contravariant pos_sub pos_super)
     | Required_field_is_optional { pos; name; decl_pos } ->
-      let reasons =
-        [
-          (pos, "The field " ^ Markdown_lite.md_codify name ^ " is **optional**");
-          ( decl_pos,
-            "The field "
-            ^ Markdown_lite.md_codify name
-            ^ " is defined as **required**" );
-        ]
-      in
-      Some (Error_code.RequiredFieldIsOptional, reasons)
+      Some (required_field_is_optional pos name decl_pos)
     | Return_disposable_mismatch
         { pos_sub; is_marked_return_disposable; pos_super } ->
-      let (msg, reason_msg) =
-        if is_marked_return_disposable then
-          ( "This is marked `<<__ReturnDisposable>>`.",
-            "This is not marked `<<__ReturnDisposable>>`." )
-        else
-          ( "This is not marked `<<__ReturnDisposable>>`.",
-            "This is marked `<<__ReturnDisposable>>`." )
-      in
-      let reasons = [(pos_super, msg); (pos_sub, reason_msg)] in
-      Some (Error_code.ReturnDisposableMismatch, reasons)
+      Some
+        (return_disposable_mismatch
+           pos_sub
+           is_marked_return_disposable
+           pos_super)
     | Ifc_policy_mismatch { pos; policy; pos_super; policy_super } ->
-      let reasons =
-        [
-          ( pos,
-            "IFC policies must be invariant with respect to inheritance. This method is policied with "
-            ^ policy );
-          ( pos_super,
-            "This is incompatible with its inherited policy, which is "
-            ^ policy_super );
-        ]
-      in
-      Some (Error_code.IFCPolicyMismatch, reasons)
-    | Override_final { pos; parent_pos } ->
-      let reasons =
-        [
-          (pos, "You cannot override this method");
-          (parent_pos, "It was declared as final");
-        ]
-      in
-      Some (Error_code.OverrideFinal, reasons)
+      Some (ifc_policy_mismatch pos policy pos_super policy_super)
+    | Override_final { pos; parent_pos } -> Some (override_final pos parent_pos)
     | Override_lsb { pos; member_name; parent_pos } ->
-      let reasons =
-        [
-          ( pos,
-            "Member "
-            ^ Markdown_lite.md_codify member_name
-            ^ " may not override `__LSB` member of parent" );
-          (parent_pos, "This is being overridden");
-        ]
-      in
-      Some (Error_code.OverrideLSB, reasons)
+      Some (override_lsb pos member_name parent_pos)
     | Multiple_concrete_defs
         { pos; origin; name; parent_pos; parent_origin; class_name } ->
-      let child_origin = Markdown_lite.md_codify @@ Render.strip_ns origin
-      and parent_origin =
-        Markdown_lite.md_codify @@ Render.strip_ns parent_origin
-      and class_ = Markdown_lite.md_codify @@ Render.strip_ns class_name
-      and name = Markdown_lite.md_codify name in
-      let reasons =
-        [
-          ( pos,
-            child_origin
-            ^ " and "
-            ^ parent_origin
-            ^ " both declare ambiguous implementations of "
-            ^ name
-            ^ "." );
-          (pos, child_origin ^ "'s definition is here.");
-          (parent_pos, parent_origin ^ "'s definition is here.");
-          ( pos,
-            "Redeclare "
-            ^ name
-            ^ " in "
-            ^ class_
-            ^ " with a compatible signature." );
-        ]
-      in
-      Some (Error_code.MultipleConcreteDefs, reasons)
-    | Cyclic_enum_constraint pos ->
-      let reasons = [(pos, "Cyclic enum constraint")] in
-      Some (Error_code.CyclicEnumConstraint, reasons)
+      Some
+        (multiple_concrete_defs
+           pos
+           origin
+           name
+           parent_pos
+           parent_origin
+           class_name)
+    | Cyclic_enum_constraint pos -> Some (cyclic_enum_constraint pos)
     | Inoutness_mismatch { pos; decl_pos } ->
-      let reasons =
-        [
-          (pos, "This is an `inout` parameter");
-          (decl_pos, "It is incompatible with a normal parameter");
-        ]
-      in
-      Some (Error_code.InoutnessMismatch, reasons)
-    | Decl_override_missing_hint pos ->
-      let reasons =
-        [
-          ( pos,
-            "When redeclaring class members, both declarations must have a typehint"
-          );
-        ]
-      in
-      Some (Error_code.DeclOverrideMissingHint, reasons)
+      Some (inoutness_mismatch pos decl_pos)
+    | Decl_override_missing_hint pos -> Some (decl_override_missing_hint pos)
     | Bad_lateinit_override { pos; parent_pos; parent_is_lateinit } ->
-      let verb =
-        if parent_is_lateinit then
-          "is"
-        else
-          "is not"
-      in
-      let reasons =
-        [
-          ( pos,
-            "Redeclared properties must be consistently declared `__LateInit`"
-          );
-          (parent_pos, "The property " ^ verb ^ " declared `__LateInit` here");
-        ]
-      in
-
-      Some (Error_code.BadLateInitOverride, reasons)
+      Some (bad_lateinit_override pos parent_pos parent_is_lateinit)
     | Bad_xhp_attr_required_override { pos; parent_pos; parent_tag; tag } ->
-      let reasons =
-        [
-          (pos, "Redeclared attribute must not be less strict");
-          ( parent_pos,
-            "The attribute is " ^ parent_tag ^ ", which is stricter than " ^ tag
-          );
-        ]
-      in
-      Some (Error_code.BadXhpAttrRequiredOverride, reasons)
+      Some (bad_xhp_attr_required_override pos parent_pos parent_tag tag)
     | Coeffect_subtyping { pos; cap; pos_expected; cap_expected } ->
-      let reasons =
-        [
-          ( pos_expected,
-            "Expected a function that requires " ^ Lazy.force cap_expected );
-          (pos, "But got a function that requires " ^ Lazy.force cap);
-        ]
-      in
-      Some (Error_code.SubtypeCoeffects, reasons)
+      Some (coeffect_subtyping pos cap pos_expected cap_expected)
     | Not_sub_dynamic { pos; ty_name; dynamic_part } ->
-      let reasons =
-        [
-          ( pos,
-            "Type "
-            ^ (Markdown_lite.md_codify @@ Lazy.force ty_name)
-            ^ " is not a subtype of `dynamic` under dynamic-aware subtyping" );
-        ]
-      in
-      Some (Error_code.UnifyError, dynamic_part @ reasons)
+      Some (not_sub_dynamic pos ty_name dynamic_part)
     | Override_method_support_dynamic_type
         { pos; method_name; parent_origin; parent_pos } ->
-      let reasons =
-        [
-          ( pos,
-            "Method "
-            ^ method_name
-            ^ " must be declared <<__SupportDynamicType>> because it overrides method in class "
-            ^ Render.strip_ns parent_origin
-            ^ " which does." );
-          (parent_pos, "Overridden method is defined here.");
-        ]
-      in
-      Some (Error_code.ImplementsDynamic, reasons)
-    | Readonly_mismatch { pos; kind; reason_sub; reason_super } ->
-      let reasons =
-        ( pos,
-          match kind with
-          | `fn -> "Function readonly mismatch"
-          | `fn_return -> "Function readonly return mismatch"
-          | `param -> "Mismatched parameter readonlyness" )
-        :: reason_sub
-        @ reason_super
-      in
-      Some (Error_code.ReadonlyMismatch, reasons)
-    | Typing_too_many_args { pos; decl_pos; actual; expected } ->
-      let (code, claim, reasons) =
-        Common.typing_too_many_args pos decl_pos actual expected
-      in
-      Some (code, claim :: reasons)
-    | Typing_too_few_args { pos; decl_pos; actual; expected } ->
-      let (code, claim, reasons) =
-        Common.typing_too_few_args pos decl_pos actual expected
-      in
-      Some (code, claim :: reasons)
-    | Non_object_member { pos; ctxt; ty_name; member_name; kind; decl_pos } ->
-      let (code, claim, reasons) =
-        Common.non_object_member
-          pos
-          ctxt
-          (Lazy.force ty_name)
-          member_name
-          kind
-          decl_pos
-      in
-      Some (code, claim :: reasons)
-    | Rigid_tvar_escape { pos; name } ->
       Some
-        ( Error_code.RigidTVarEscape,
-          [(pos, "Rigid type variable " ^ name ^ " is escaping")] )
+        (override_method_support_dynamic_type
+           pos
+           method_name
+           parent_origin
+           parent_pos)
+    | Readonly_mismatch { pos; kind; reason_sub; reason_super } ->
+      Some (readonly_mismatch pos kind reason_sub reason_super)
+    | Typing_too_many_args { pos; decl_pos; actual; expected } ->
+      Some (typing_too_many_args pos decl_pos actual expected)
+    | Typing_too_few_args { pos; decl_pos; actual; expected } ->
+      Some (typing_too_few_args pos decl_pos actual expected)
+    | Non_object_member { pos; ctxt; ty_name; member_name; kind; decl_pos } ->
+      Some (non_object_member pos ctxt ty_name member_name kind decl_pos)
+    | Rigid_tvar_escape { pos; name } -> Some (rigid_tvar_escape pos name)
     | Smember_not_found { pos; kind; member_name; class_name; class_pos; hint }
       ->
-      let (code, claim, reasons) =
-        Common.smember_not_found pos kind member_name class_name class_pos hint
-      in
-      Some (code, claim :: reasons)
+      Some (smember_not_found pos kind member_name class_name class_pos hint)
     | Bad_method_override { pos; member_name } ->
-      let reasons =
-        [
-          ( pos,
-            "The method "
-            ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
-            ^ " is not compatible with the overridden method" );
-        ]
-      in
-      Some (Error_code.BadMethodOverride, reasons)
+      Some (bad_method_override pos member_name)
     | Bad_prop_override { pos; member_name } ->
-      let reasons =
-        [
-          ( pos,
-            "The property "
-            ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
-            ^ " has the wrong type" );
-        ]
-      in
-      Some (Error_code.BadMethodOverride, reasons)
-    | Subtyping_error reasons -> Some (Error_code.UnifyError, reasons)
+      Some (bad_prop_override pos member_name)
+    | Subtyping_error reasons -> Some (subtyping_error reasons)
     | Method_not_dynamically_callable { pos; parent_pos } ->
-      let reasons =
-        [
-          (parent_pos, "This method is `__DynamicallyCallable`.");
-          (pos, "This method is **not**.");
-        ]
-      in
-      Some (Error_code.BadMethodOverride, reasons)
+      Some (method_not_dynamically_callable pos parent_pos)
     | This_final { pos_sub; pos_super; class_name } ->
-      let n = Render.strip_ns class_name |> Markdown_lite.md_codify in
-      let message1 = "Since " ^ n ^ " is not final" in
-      let message2 = "this might not be a " ^ n in
-      Some (Error_code.ThisFinal, [(pos_super, message1); (pos_sub, message2)])
+      Some (this_final pos_sub pos_super class_name)
 end
 
 and Callback : sig

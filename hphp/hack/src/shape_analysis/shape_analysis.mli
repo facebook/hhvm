@@ -11,6 +11,8 @@
 
 open Shape_analysis_types
 
+exception Shape_analysis_exn of string
+
 val simplify : Typing_env_types.env -> constraint_ list -> shape_result list
 
 val callable :

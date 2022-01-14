@@ -9,6 +9,8 @@
 module LMap = Local_id.Map
 module KMap = Typing_continuations.Map
 
+exception Shape_analysis_exn of string
+
 type potential_targets = {
   expressions_to_modify: Pos.t list;
   hints_to_modify: Pos.t list;

@@ -9,6 +9,9 @@
 module LMap = Local_id.Map
 module KMap = Typing_continuations.Map
 
+(** A generic exception for all shape analysis specific failures *)
+exception Shape_analysis_exn of string
+
 (** Container to collect potential dicts that can be addressed with the shape
     analysis. *)
 type potential_targets = {

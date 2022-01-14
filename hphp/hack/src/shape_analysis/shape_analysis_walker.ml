@@ -15,7 +15,8 @@ module SN = Naming_special_names
 module Env = Shape_analysis_env
 module Logic = Shape_analysis_logic
 
-let failwithpos pos msg = failwith (Format.asprintf "%a: %s" Pos.pp pos msg)
+let failwithpos pos msg =
+  raise @@ Shape_analysis_exn (Format.asprintf "%a: %s" Pos.pp pos msg)
 
 let collect_analysis_targets :
     Provider_context.t -> Tast.program -> potential_targets =

@@ -13,6 +13,8 @@ module T = Tast
 module Solver = Shape_analysis_solver
 module Walker = Shape_analysis_walker
 
+exception Shape_analysis_exn = Shape_analysis_exn
+
 let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
   let empty_typing_env = Tast_env.tast_env_as_typing_env (Tast_env.empty ctx) in
   match options.mode with

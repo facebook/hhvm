@@ -1,0 +1,2 @@
+File "missing_call.bad.php", line 16, characters 3-9:
+Encountered unexpected text `$c->f#A`, was expecting a method call. (Parsing[1002])

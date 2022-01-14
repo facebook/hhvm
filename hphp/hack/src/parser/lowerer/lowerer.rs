@@ -2320,8 +2320,9 @@ where
                 } else if c.qualifier.is_name() {
                     let name = Self::pos_name(&c.qualifier, env)?;
                     Ok(E_::mk_enum_class_label(Some(name), label_name))
-                } else {
+                } else if label_name.ends_with("AUTO332") {
                     // This can happen during parsing in auto-complete mode
+                    // In such case, the "label_name" must end with AUTO332
                     // We want to treat this as a method call even though we haven't yet seen the arguments
                     let recv = Self::p_expr_with_loc(ExprLocation::CallReceiver, &c.qualifier, env);
                     match recv {
@@ -2337,6 +2338,8 @@ where
                         }
                         Err(err) => Err(err),
                     }
+                } else {
+                    Self::missing_syntax_(Some(E_::Null), "method call", node, env)
                 }
             }
             _ => Self::missing_syntax_(Some(E_::Null), "expression", node, env),

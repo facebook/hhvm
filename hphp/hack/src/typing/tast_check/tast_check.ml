@@ -25,7 +25,7 @@ let visitor ctx =
     let log_levels = TypecheckerOptions.log_levels tco in
     let add_handler handlers (key, handler) =
       match SMap.find_opt key log_levels with
-      | Some level when level > 0 -> [handler]
+      | Some level when level > 0 -> handler :: handlers
       | _ -> handlers
     in
     let key_handler_pairs =

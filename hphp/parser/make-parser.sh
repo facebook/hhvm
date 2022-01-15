@@ -3,16 +3,10 @@
 unset CDPATH
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
-# If we're using buck, then we'll be in a sandboxed source directory instead of
-# the repo.  We want the path to the repo so we can check in the generated
-# parser artifacts.
-if [ -n "${FBCODE_DIR}" ]; then
-  DIR="${FBCODE_DIR}/hphp/parser"
-fi
-
 INFILE=hphp.y
 
 if [ -z "${INSTALL_DIR}" ]; then
+  # Running manually, not under buck; update files in source tree.
   INSTALL_DIR="${DIR}"
 fi
 
@@ -106,8 +100,5 @@ TOKEN_MAX=$(grep "^\s\+YYTOKEN(" "${OUTHEADER}" | tail -n 1 | \
 
 echo -e "${TOKEN_MIN}\n\n${TOKEN_MAX}" >> "${OUTHEADER}"
 
-# We still want the files in our tree since they are checked in.
-if [ "${INSTALL_DIR}" != "${DIR}" ]; then
-  sed -i -e "1i// @""generated" "${OUTHEADER}"
-  cp "${OUTHEADER}" "${DIR}/hphp.tab.hpp"
-fi
+# Mark the generated parser as generated.
+sed -i -e "1i// @""generated" "${OUTHEADER}"

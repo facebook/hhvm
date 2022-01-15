@@ -145,6 +145,28 @@ let is_full_check_started = function
   | Full_check_started -> true
   | _ -> false
 
+module Init_telemetry = struct
+  type reason =
+    | Init_lazy_dirty
+    | Init_typecheck_disabled_after_init
+    | Init_eager
+    | Init_lazy_full
+    | Init_prechecked_fanout
+  [@@deriving show { with_path = false }]
+
+  type t = {
+    reason: reason;
+    telemetry: Telemetry.t;
+  }
+
+  let make reason telemetry = { reason; telemetry }
+
+  let get { reason; telemetry } =
+    telemetry |> Telemetry.string_ ~key:"reason" ~value:(show_reason reason)
+
+  let get_reason { reason; _ } = show_reason reason
+end
+
 (** In addition to this environment, many functions are storing and
     updating ASTs, NASTs, and types in a shared space
     (see respectively Parser_heap, Naming_table, Typing_env).
@@ -349,8 +371,10 @@ and init_env = {
   init_start_t: float;
   init_type: string;
   mergebase: string option;
-  why_needed_full_init: Telemetry.t option;
-      (** Whether a full check was ever completed since init, and why it was needed *)
+  why_needed_full_check: Init_telemetry.t option;
+      (** This is about the first full check (if any) which was deferred after init.
+      It gets reset after that first full check is completed.
+      First parameter is a string label used in telemetry. Second is opaque telemetry. *)
   recheck_id: string option;
   (* Additional data associated with init that we want to log when a first full
    * check completes. *)

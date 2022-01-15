@@ -39,7 +39,7 @@ val type_check :
   ServerEnv.genv ->
   ServerEnv.env ->
   Relative_path.t list ->
-  Telemetry.t ->
+  ServerEnv.Init_telemetry.t ->
   float ->
   telemetry_label:string ->
   cgroup_steps:CgroupProfiler.step_group ->

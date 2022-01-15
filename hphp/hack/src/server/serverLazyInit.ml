@@ -666,11 +666,6 @@ let type_check_dirty
     (t : float)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
   let start_t = Unix.gettimeofday () in
-  let telemetry =
-    Telemetry.create ()
-    |> Telemetry.float_ ~key:"start_time" ~value:start_t
-    |> Telemetry.string_ ~key:"reason" ~value:"lazy_dirty_init"
-  in
   let dirty_files_unchanged_hash =
     Relative_path.Set.union
       dirty_master_files_unchanged_hash
@@ -826,28 +821,33 @@ let type_check_dirty
         files_to_check
     in
     let init_telemetry =
-      telemetry
-      |> Telemetry.int_
-           ~key:"dirty_master_files_unchanged_hash"
-           ~value:(Relative_path.Set.cardinal dirty_master_files_unchanged_hash)
-      |> Telemetry.int_
-           ~key:"dirty_master_files_changed_hash"
-           ~value:(Relative_path.Set.cardinal dirty_master_files_changed_hash)
-      |> Telemetry.int_
-           ~key:"dirty_local_files_unchanged_hash"
-           ~value:(Relative_path.Set.cardinal dirty_local_files_unchanged_hash)
-      |> Telemetry.int_
-           ~key:"dirty_local_files_changed_hash"
-           ~value:(Relative_path.Set.cardinal dirty_local_files_changed_hash)
-      |> Telemetry.int_
-           ~key:"dirty_files_unchanged_hash"
-           ~value:(Relative_path.Set.cardinal dirty_files_unchanged_hash)
-      |> Telemetry.int_
-           ~key:"dirty_files_changed_hash"
-           ~value:(Relative_path.Set.cardinal dirty_files_changed_hash)
-      |> Telemetry.int_
-           ~key:"to_recheck"
-           ~value:(Relative_path.Set.cardinal to_recheck)
+      ServerEnv.Init_telemetry.make
+        ServerEnv.Init_telemetry.Init_lazy_dirty
+        (Telemetry.create ()
+        |> Telemetry.float_ ~key:"start_time" ~value:start_t
+        |> Telemetry.int_
+             ~key:"dirty_master_files_unchanged_hash"
+             ~value:
+               (Relative_path.Set.cardinal dirty_master_files_unchanged_hash)
+        |> Telemetry.int_
+             ~key:"dirty_master_files_changed_hash"
+             ~value:(Relative_path.Set.cardinal dirty_master_files_changed_hash)
+        |> Telemetry.int_
+             ~key:"dirty_local_files_unchanged_hash"
+             ~value:
+               (Relative_path.Set.cardinal dirty_local_files_unchanged_hash)
+        |> Telemetry.int_
+             ~key:"dirty_local_files_changed_hash"
+             ~value:(Relative_path.Set.cardinal dirty_local_files_changed_hash)
+        |> Telemetry.int_
+             ~key:"dirty_files_unchanged_hash"
+             ~value:(Relative_path.Set.cardinal dirty_files_unchanged_hash)
+        |> Telemetry.int_
+             ~key:"dirty_files_changed_hash"
+             ~value:(Relative_path.Set.cardinal dirty_files_changed_hash)
+        |> Telemetry.int_
+             ~key:"to_recheck"
+             ~value:(Relative_path.Set.cardinal to_recheck))
     in
     let result =
       ServerInitCommon.type_check
@@ -1044,9 +1044,10 @@ let full_init
     (env : ServerEnv.env)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
   let init_telemetry =
-    Telemetry.create ()
-    |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ())
-    |> Telemetry.string_ ~key:"reason" ~value:"lazy_full_init"
+    ServerEnv.Init_telemetry.make
+      ServerEnv.Init_telemetry.Init_lazy_full
+      (Telemetry.create ()
+      |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ()))
   in
   let is_check_mode = ServerArgs.check_mode genv.options in
   let existing_name_count =

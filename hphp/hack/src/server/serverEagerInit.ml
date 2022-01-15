@@ -54,10 +54,12 @@ let init
     (env : ServerEnv.env)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
   let init_telemetry =
-    Telemetry.create ()
-    |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ())
-    |> Telemetry.string_ ~key:"reason" ~value:"eager_init"
+    ServerEnv.Init_telemetry.make
+      ServerEnv.Init_telemetry.Init_eager
+      (Telemetry.create ()
+      |> Telemetry.float_ ~key:"start_time" ~value:(Unix.gettimeofday ()))
   in
+
   (* We don't support a saved state for eager init. *)
   let (get_next, t) =
     ServerInitCommon.indexing ~telemetry_label:"eager.init.indexing" genv

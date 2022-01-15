@@ -145,7 +145,9 @@ let log_type_check_end
   let state_distance = env.init_env.state_distance in
   let telemetry =
     Telemetry.create ()
-    |> Telemetry.object_ ~key:"init" ~value:init_telemetry
+    |> Telemetry.object_
+         ~key:"init"
+         ~value:(ServerEnv.Init_telemetry.get init_telemetry)
     |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
     |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
     |> Telemetry.object_ ~key:"errors" ~value:(Errors.as_telemetry env.errorl)
@@ -168,7 +170,7 @@ let type_check
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (files_to_check : Relative_path.t list)
-    (init_telemetry : Telemetry.t)
+    (init_telemetry : Init_telemetry.t)
     (t : float)
     ~(telemetry_label : string)
     ~(cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
@@ -252,7 +254,7 @@ let type_check
         (* eagerly start rechecking after init *)
         full_check_status = Full_check_started;
         init_env =
-          { env.init_env with why_needed_full_init = Some init_telemetry };
+          { env.init_env with why_needed_full_check = Some init_telemetry };
       }
     in
     (env, t)

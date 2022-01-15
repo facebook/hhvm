@@ -510,11 +510,11 @@ module FullCheckKind : CheckKindType = struct
       else
         (old_env.full_check_status, old_env.remote)
     in
-    let why_needed_full_init =
-      match old_env.init_env.why_needed_full_init with
-      | Some why_needed_full_init
+    let why_needed_full_check =
+      match old_env.init_env.why_needed_full_check with
+      | Some why_needed_full_check
         when not (is_full_check_done full_check_status) ->
-        Some why_needed_full_init
+        Some why_needed_full_check
       | _ -> None
     in
     {
@@ -525,7 +525,7 @@ module FullCheckKind : CheckKindType = struct
       needs_recheck;
       full_check_status;
       remote;
-      init_env = { old_env.init_env with why_needed_full_init };
+      init_env = { old_env.init_env with why_needed_full_check };
       diag_subscribe;
     }
 
@@ -1237,7 +1237,7 @@ functor
        * reading about file-change notifications and communicating with client.
        * We record all our telemetry uniformally with respect to this start.
        * `t` is legacy, used for ad-hoc duration reporting within this function.
-       * For the following, env.int_env.why_needed_full_init is set to Some by
+       * For the following, env.int_env.why_needed_full_check is set to Some by
        * ServerLazyInit, and we include it here, and then it's subsequently
        * set to None at the end of this method by the call to [get_env_after_typing].
        * Thus, if it's present here, it means the typecheck we're about to do is
@@ -1246,7 +1246,10 @@ functor
         Telemetry.create ()
         |> Telemetry.object_opt
              ~key:"init"
-             ~value:env.ServerEnv.init_env.ServerEnv.why_needed_full_init
+             ~value:
+               (Option.map
+                  env.ServerEnv.init_env.ServerEnv.why_needed_full_check
+                  ~f:ServerEnv.Init_telemetry.get)
       in
       let time_first_error = None in
       let env =

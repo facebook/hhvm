@@ -152,7 +152,9 @@ let finalize_init init_env typecheck_telemetry init_telemetry =
   let telemetry =
     Telemetry.create ()
     |> Telemetry.duration ~start_time:init_env.init_start_t
-    |> Telemetry.object_ ~key:"init" ~value:init_telemetry
+    |> Telemetry.object_
+         ~key:"init"
+         ~value:(ServerEnv.Init_telemetry.get init_telemetry)
     |> Telemetry.object_ ~key:"typecheck" ~value:typecheck_telemetry
     |> Telemetry.object_ ~key:"hash" ~value:hash_telemetry
     |> Telemetry.int_
@@ -416,7 +418,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     in
     let check_kind_str = ServerTypeCheck.CheckKind.to_string check_kind in
     let env = { env with can_interrupt = not lazy_check } in
-    let needed_full_init = env.init_env.why_needed_full_init in
+    let needed_full_init = env.init_env.why_needed_full_check in
     let old_errorl = Errors.get_error_list env.errorl in
 
     (* HERE'S WHERE WE DO THE HEAVY WORK! **)
@@ -440,7 +442,7 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
     (* Final telemetry and cleanup... *)
     let env = { env with can_interrupt = true } in
     begin
-      match (needed_full_init, env.init_env.why_needed_full_init) with
+      match (needed_full_init, env.init_env.why_needed_full_check) with
       | (Some needed_full_init, None) ->
         finalize_init env.init_env telemetry needed_full_init
       | _ -> ()
@@ -691,7 +693,7 @@ let serve_one_iteration genv env client_provider =
     | _ -> "working");
   let env = idle_if_no_client env selected_client in
   let stage =
-    if Option.is_some env.init_env.why_needed_full_init then
+    if Option.is_some env.init_env.why_needed_full_check then
       `Init
     else
       `Recheck
@@ -1060,13 +1062,15 @@ let serve genv env in_fds =
    * We're just filling it with placeholder telemetry values since
    * we don't much care about this scenario. *)
   let init_telemetry =
-    Telemetry.create ()
-    |> Telemetry.string_
-         ~key:"mode"
-         ~value:"serve_due_to_disabled_typecheck_after_init"
+    ServerEnv.Init_telemetry.make
+      ServerEnv.Init_telemetry.Init_typecheck_disabled_after_init
+      (Telemetry.create ()
+      |> Telemetry.string_
+           ~key:"mode"
+           ~value:"serve_due_to_disabled_typecheck_after_init")
   in
   let typecheck_telemetry = Telemetry.create () in
-  if Option.is_none env.init_env.why_needed_full_init then
+  if Option.is_none env.init_env.why_needed_full_check then
     finalize_init env.init_env typecheck_telemetry init_telemetry;
 
   let env = setup_interrupts env client_provider in

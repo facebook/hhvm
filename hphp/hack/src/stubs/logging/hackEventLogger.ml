@@ -519,6 +519,7 @@ module ProfileTypeCheck = struct
       ~file:_
       ~file_was_already_deferred:_
       ~decl:_
+      ~error_code:_
       ~file_ends_under_cap:_
       ~file_start_stats:_
       ~file_end_stats:_

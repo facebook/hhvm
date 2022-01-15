@@ -12,7 +12,7 @@ type 'a job_result = 'a * Relative_path.t list
 type seconds_since_epoch = float
 
 type process_file_results = {
-  errors: Errors.t;
+  file_errors: Errors.t;
   deferred_decls: Deferred_decl.deferment list;
 }
 
@@ -21,7 +21,6 @@ val should_enable_deferring :
 
 val process_file :
   Provider_context.t ->
-  Errors.t ->
   Typing_service_types.check_file_computation ->
   decl_cap_mb:int option ->
   process_file_results

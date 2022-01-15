@@ -209,6 +209,8 @@ val get_failed_files : t -> phase -> Relative_path.Set.t
 
 val as_telemetry : t -> Telemetry.t
 
+val choose_code_opt : t -> int option
+
 val sort : error list -> error list
 
 val get_applied_fixmes : t -> applied_fixme list

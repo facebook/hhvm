@@ -940,8 +940,8 @@ let error_count : t -> int =
 
 exception Done of ISet.t
 
-let first_5_distinct_error_codes : t -> error_code list =
- fun ((errors : _ files_t), _fixmes) ->
+let first_n_distinct_error_codes : n:int -> t -> error_code list =
+ fun ~n ((errors : _ files_t), _fixmes) ->
   let codes =
     try
       Relative_path.Map.fold
@@ -954,7 +954,7 @@ let first_5_distinct_error_codes : t -> error_code list =
                 ~init:codes
                 ~f:(fun codes User_error.{ code; _ } ->
                   let codes = ISet.add code codes in
-                  if ISet.cardinal codes >= 5 then
+                  if ISet.cardinal codes >= n then
                     raise (Done codes)
                   else
                     codes)))
@@ -963,13 +963,16 @@ let first_5_distinct_error_codes : t -> error_code list =
   in
   ISet.elements codes
 
+let choose_code_opt (errors : t) : int option =
+  errors |> first_n_distinct_error_codes ~n:1 |> List.hd
+
 let as_telemetry : t -> Telemetry.t =
  fun errors ->
   Telemetry.create ()
   |> Telemetry.int_ ~key:"count" ~value:(error_count errors)
   |> Telemetry.int_list
        ~key:"first_5_distinct_error_codes"
-       ~value:(first_5_distinct_error_codes errors)
+       ~value:(first_n_distinct_error_codes ~n:5 errors)
 
 (*****************************************************************************)
 (* Error code printing. *)

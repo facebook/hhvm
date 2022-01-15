@@ -129,20 +129,19 @@ let should_enable_deferring (file : check_file_computation) =
   not file.was_already_deferred
 
 type process_file_results = {
-  errors: Errors.t;
+  file_errors: Errors.t;
   deferred_decls: Deferred_decl.deferment list;
 }
 
 let process_files_remote_execution
     (re_env : ReEnv.t)
     (ctx : Provider_context.t)
-    (errors : Errors.t)
     (files : check_file_computation list)
     (recheck_id : string option) : process_file_results =
   let fns = List.map files ~f:(fun file -> file.path) in
   let deps_mode = Provider_context.get_deps_mode ctx in
-  let errors' = Re.process_files re_env fns deps_mode recheck_id in
-  { errors = Errors.merge errors' errors; deferred_decls = [] }
+  let file_errors = Re.process_files re_env fns deps_mode recheck_id in
+  { file_errors; deferred_decls = [] }
 
 let scrape_class_names (ast : Nast.program) : SSet.t =
   let names = ref SSet.empty in
@@ -159,13 +158,12 @@ let scrape_class_names (ast : Nast.program) : SSet.t =
 
 let process_file
     (ctx : Provider_context.t)
-    (errors : Errors.t)
     (file : check_file_computation)
     ~(decl_cap_mb : int option) : process_file_results =
   let fn = file.path in
-  let (errors', ast) = Ast_provider.get_ast_with_error ~full:true ctx fn in
-  if not (Errors.is_empty errors') then
-    { errors = Errors.merge errors' errors; deferred_decls = [] }
+  let (file_errors, ast) = Ast_provider.get_ast_with_error ~full:true ctx fn in
+  if not (Errors.is_empty file_errors) then
+    { file_errors; deferred_decls = [] }
   else
     let opts = Provider_context.get_tcopt ctx in
     let (funs, classes, typedefs, gconsts) = Nast.get_defs ast in
@@ -200,13 +198,13 @@ let process_file
         (fun_tasts @ class_tasts, fun_global_tvenvs @ class_global_tvenvs)
       in
       match result with
-      | Ok (errors', (tasts, global_tvenvs)) ->
+      | Ok (file_errors, (tasts, global_tvenvs)) ->
         if GlobalOptions.tco_global_inference opts then
           Typing_global_inference.StateSubConstraintGraphs.build_and_save
             ctx
             tasts
             global_tvenvs;
-        { errors = Errors.merge errors' errors; deferred_decls = [] }
+        { file_errors; deferred_decls = [] }
       | Error () ->
         let deferred_decls =
           ast
@@ -217,7 +215,7 @@ let process_file
                  Naming_provider.get_class_path ctx class_name >>| fun fn ->
                  (fn, class_name))
         in
-        { errors; deferred_decls }
+        { file_errors = Errors.empty; deferred_decls }
     with
     | WorkerCancel.Worker_should_exit as e ->
       (* Cancellation requests must be re-raised *)
@@ -325,10 +323,10 @@ let process_one_file
   in
   let fn = List.hd_exn progress.remaining in
 
-  let (file, decl, mid_stats, errors, deferred, tally) =
+  let (file, decl, mid_stats, file_errors, deferred, tally) =
     match fn with
     | Check file ->
-      let result = process_file ctx errors file ~decl_cap_mb in
+      let result = process_file ctx file ~decl_cap_mb in
       let mid_stats =
         if type_check_twice then
           Some (get_stats ~include_slightly_costly_stats:false tally)
@@ -337,7 +335,7 @@ let process_one_file
       in
       begin
         if type_check_twice then
-          let _ignored = process_file ctx errors file ~decl_cap_mb in
+          let _ignored = process_file ctx file ~decl_cap_mb in
           ()
       end;
       let tally = ProcessFilesTally.incr_checks tally result.deferred_decls in
@@ -348,7 +346,7 @@ let process_one_file
           List.map result.deferred_decls ~f:(fun fn -> Declare fn)
           @ [Check { file with was_already_deferred = true }]
       in
-      (Some file, None, mid_stats, result.errors, deferred, tally)
+      (Some file, None, mid_stats, result.file_errors, deferred, tally)
     | Declare (_path, class_name) ->
       let (_ : Decl_provider.class_decl option) =
         Decl_provider.get_class ctx class_name
@@ -356,13 +354,19 @@ let process_one_file
       ( None,
         Some class_name,
         None,
-        errors,
+        Errors.empty,
         [],
         ProcessFilesTally.incr_decls tally )
     | Prefetch paths ->
       Vfs.prefetch paths;
-      (None, None, None, errors, [], ProcessFilesTally.incr_prefetches tally)
+      ( None,
+        None,
+        None,
+        Errors.empty,
+        [],
+        ProcessFilesTally.incr_prefetches tally )
   in
+  let errors = Errors.merge file_errors errors in
   let file_ends_under_cap = get_heap_size () <= file_cap_mb in
   let final_stats =
     get_stats
@@ -395,12 +399,11 @@ let process_one_file
           process_files_remote_execution
             re_env
             ctx
-            errors
             check_fns
             check_info.recheck_id
         in
         let check_fns = List.map check_fns ~f:(fun f -> Check f) in
-        (fns, check_fns, Errors.merge errors result.errors)
+        (fns, check_fns, Errors.merge errors result.file_errors)
   in
 
   (* If the major heap has exceeded the bounds, we (1) first try and bring the size back down
@@ -431,6 +434,7 @@ let process_one_file
       ~file_was_already_deferred:
         (Option.map file ~f:(fun file -> file.was_already_deferred))
       ~decl
+      ~error_code:(Errors.choose_code_opt file_errors)
       ~file_ends_under_cap
       ~file_start_stats:stats
       ~file_end_stats

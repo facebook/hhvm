@@ -253,10 +253,19 @@ module SMTelemetry = struct
       Telemetry.create ()
     else
       let start_time = Unix.gettimeofday () in
+      let (hcounter, hcounter_filled) = hash_used_slots () in
+      let telemetry =
+        Telemetry.create ()
+        |> Telemetry.int_ ~key:"heap_size" ~value:(heap_size ())
+        |> Telemetry.int_ ~key:"wasted_heap_size" ~value:(wasted_heap_size ())
+        |> Telemetry.int_ ~key:"hash_used_slots" ~value:hcounter
+        |> Telemetry.int_ ~key:"hash_used_slots_filled" ~value:hcounter_filled
+        |> Telemetry.int_ ~key:"hash_slots" ~value:(hash_slots ())
+      in
       let telemetry =
         List.fold
           !get_telemetry_list
-          ~init:(Telemetry.create ())
+          ~init:telemetry
           ~f:(fun acc get_telemetry -> get_telemetry acc)
       in
       telemetry |> Telemetry.duration ~start_time

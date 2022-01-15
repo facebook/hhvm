@@ -22,6 +22,7 @@ let initial_reading_capture : initial_reading =
   let stats =
     HackEventLogger.ProfileTypeCheck.get_stats
       ~include_current_process:false
+      ~shmem_heap_size:0
       (Telemetry.create ())
   in
   (stats, CGroup.get_stats ())

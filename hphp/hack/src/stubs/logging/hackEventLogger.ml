@@ -504,7 +504,7 @@ module ProfileTypeCheck = struct
     start_batch_stats: stats;
   }
 
-  let get_stats ~include_current_process:_ _ = ()
+  let get_stats ~include_current_process:_ ~shmem_heap_size:_ _ = ()
 
   let process_file
       ~config:_

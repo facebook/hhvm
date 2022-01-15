@@ -292,6 +292,7 @@ let get_stats tally : HackEventLogger.ProfileTypeCheck.stats =
   in
   HackEventLogger.ProfileTypeCheck.get_stats
     ~include_current_process:true
+    ~shmem_heap_size:(SharedMem.SMTelemetry.heap_size ())
     telemetry
 
 let get_heap_size () = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024
@@ -1078,6 +1079,7 @@ let go_with_interrupt
   let start_typecheck_stats =
     HackEventLogger.ProfileTypeCheck.get_stats
       ~include_current_process:false
+      ~shmem_heap_size:(SharedMem.SMTelemetry.heap_size ())
       (Telemetry.create ())
   in
   let opts = Provider_context.get_tcopt ctx in

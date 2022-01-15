@@ -223,7 +223,11 @@ let type_check
         ~memory_cap
         ~longlived_workers
         ~remote_execution
-        ~check_info:(ServerCheckUtils.get_check_info genv env)
+        ~check_info:
+          (ServerCheckUtils.get_check_info
+             ~check_reason:(ServerEnv.Init_telemetry.get_reason init_telemetry)
+             genv
+             env)
     in
     let env =
       {

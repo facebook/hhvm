@@ -465,6 +465,7 @@ let process_files
   let batch_info =
     {
       HackEventLogger.ProfileTypeCheck.init_id = check_info.init_id;
+      check_reason = check_info.check_reason;
       recheck_id = check_info.recheck_id;
       worker_id;
       batch_number;

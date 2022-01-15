@@ -377,7 +377,7 @@ let with_rechecked_stats _ _ _ f = f ()
 
 let with_init_type _ f = f ()
 
-let with_check_kind _ f = f ()
+let with_check_kind ~check_kind:_ ~check_reason:_ f = f ()
 
 let state_loader_dirty_files _ = ()
 
@@ -495,6 +495,7 @@ module ProfileTypeCheck = struct
 
   type batch_info = {
     init_id: string;
+    check_reason: string;
     recheck_id: string option;
     worker_id: string;
     batch_number: int;

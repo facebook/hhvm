@@ -665,6 +665,7 @@ module Make : functor (_ : CheckKindType) -> sig
     ServerEnv.genv ->
     ServerEnv.env ->
     float ->
+    check_reason:string ->
     CgroupProfiler.step_group ->
     ServerEnv.env * CheckStats.t * Telemetry.t
 end =
@@ -1064,6 +1065,7 @@ functor
         ~(files_to_check : Relative_path.Set.t)
         ~(files_to_parse : Relative_path.Set.t)
         ~(lazy_check_later : Relative_path.Set.t)
+        ~(check_reason : string)
         ~(cgroup_steps : CgroupProfiler.step_group) : type_checking_result =
       let telemetry = Telemetry.create () in
       if Relative_path.(Set.mem files_to_check default) then
@@ -1110,7 +1112,7 @@ functor
             ~memory_cap
             ~longlived_workers
             ~remote_execution:env.ServerEnv.remote_execution
-            ~check_info:(get_check_info genv env)
+            ~check_info:(get_check_info ~check_reason genv env)
         in
         let env =
           {
@@ -1231,7 +1233,7 @@ functor
       in
       pop_quantiles index files |> Relative_path.Set.of_list
 
-    let type_check_core genv env start_time cgroup_steps =
+    let type_check_core genv env start_time ~check_reason cgroup_steps =
       let t = Unix.gettimeofday () in
       (* `start_time` is when the recheck_loop started and includes preliminaries like
        * reading about file-change notifications and communicating with client.
@@ -1794,6 +1796,7 @@ functor
           ~files_to_check
           ~files_to_parse
           ~lazy_check_later
+          ~check_reason
           ~cgroup_steps
       in
       let time_first_error =
@@ -1989,6 +1992,13 @@ module LC = Make (LazyCheckKind)
 
 let type_check_unsafe genv env kind start_time profiling =
   let check_kind = CheckKind.to_string kind in
+  let check_reason =
+    match (kind, env.ServerEnv.init_env.ServerEnv.why_needed_full_check) with
+    | (CheckKind.Lazy, _) -> "keystroke"
+    | (CheckKind.Full, Some init_telemetry) ->
+      ServerEnv.Init_telemetry.get_reason init_telemetry
+    | (CheckKind.Full, None) -> "incremental"
+  in
   let telemetry =
     Telemetry.create ()
     |> Telemetry.string_ ~key:"kind" ~value:check_kind
@@ -1998,8 +2008,8 @@ let type_check_unsafe genv env kind start_time profiling =
   | CheckKind.Lazy -> HackEventLogger.set_lazy_incremental ()
   | CheckKind.Full -> ());
 
-  (* CAUTION! Lots of alerts/dashboards depend on the exact string of check_kind *)
-  HackEventLogger.with_check_kind check_kind @@ fun () ->
+  (* CAUTION! Lots of alerts/dashboards depend on the exact string of check_kind and check_reason *)
+  HackEventLogger.with_check_kind ~check_kind ~check_reason @@ fun () ->
   Hh_logger.log "******************************************";
   match kind with
   | CheckKind.Lazy ->
@@ -2013,7 +2023,7 @@ let type_check_unsafe genv env kind start_time profiling =
       Telemetry.duration telemetry ~key:"core_start" ~start_time
     in
     let (env, stats, core_telemetry) =
-      LC.type_check_core genv env start_time profiling
+      LC.type_check_core genv env start_time ~check_reason profiling
     in
     let telemetry =
       telemetry
@@ -2040,7 +2050,7 @@ let type_check_unsafe genv env kind start_time profiling =
     in
 
     let (env, stats, core_telemetry) =
-      FC.type_check_core genv env start_time profiling
+      FC.type_check_core genv env start_time ~check_reason profiling
     in
 
     let telemetry =

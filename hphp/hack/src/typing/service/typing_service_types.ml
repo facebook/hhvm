@@ -83,6 +83,7 @@ type job_progress = {
 
 type check_info = {
   init_id: string;
+  check_reason: string;
   recheck_id: string option;
   use_max_typechecker_worker_memory_for_decl_deferral: bool;
   per_file_profiling: HackEventLogger.PerFileProfilingConfig.t;

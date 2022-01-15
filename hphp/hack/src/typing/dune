@@ -381,7 +381,7 @@
  (modules typing_check_service)
  (libraries
   biglist
-  cgroup
+  cgroupprofiler
   core_kernel
   decl_counters
   decl_service

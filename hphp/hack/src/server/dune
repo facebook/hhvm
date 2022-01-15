@@ -289,7 +289,7 @@
   symbolTypeService)
  (libraries
   ast
-  cgroup
+  cgroupprofiler
   decl
   decl_compare
   decl_export
@@ -493,7 +493,7 @@
  (libraries
   base64
   buffered_line_reader
-  cgroup
+  cgroupprofiler
   coverage_level
   decl_redecl_service
   direct_decl_service
@@ -579,7 +579,7 @@
     ast_and_decl_service
     build
     ci_util
-    cgroup
+    cgroupprofiler
     direct_decl_service
     folly_stubs
     load_script

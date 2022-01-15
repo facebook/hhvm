@@ -49,3 +49,6 @@ we'd usually prefer that child process to record numbers relative to the intial_
 that was captured by the initial process upon its initial startup, not the one captured
 by the child upon child process startup. *)
 val use_initial_reading : initial_reading -> unit
+
+(** A helper to fetch just the HackEventLogger-related parts of the initial reading *)
+val get_initial_stats : unit -> HackEventLogger.ProfileTypeCheck.stats

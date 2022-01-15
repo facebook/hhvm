@@ -41,10 +41,6 @@ type typing_result = {
   dep_edges: Typing_deps.dep_edges;
   adhoc_profiling: Adhoc_profiler.CallTree.t;
   telemetry: Telemetry.t;
-  jobs_finished_to_end: Measure.record;
-      (** accumulates information about jobs where process_files finished every file in the bucket *)
-  jobs_finished_early: Measure.record;
-      (** accumulates information about jobs where process_files stopped early, due to memory pressure *)
 }
 
 let make_typing_result () =
@@ -53,8 +49,6 @@ let make_typing_result () =
     dep_edges = Typing_deps.dep_edges_make ();
     telemetry = Telemetry.create ();
     adhoc_profiling = Adhoc_profiler.CallTree.make ();
-    jobs_finished_to_end = Measure.create ();
-    jobs_finished_early = Measure.create ();
   }
 
 let accumulate_job_output
@@ -62,16 +56,6 @@ let accumulate_job_output
     typing_result =
   (* The Measure API is mutating, but we want to be functional, so we'll serialize+deserialize
      This might sound expensive, but the actual implementation makes it cheap. *)
-  let acc_finished_to_end =
-    Measure.deserialize
-      (Measure.serialize accumulated_so_far.jobs_finished_to_end)
-  in
-  let acc_finished_early =
-    Measure.deserialize
-      (Measure.serialize accumulated_so_far.jobs_finished_early)
-  in
-  Measure.merge ~record:acc_finished_to_end produced_by_job.jobs_finished_to_end;
-  Measure.merge ~record:acc_finished_early produced_by_job.jobs_finished_early;
   {
     errors = Errors.merge produced_by_job.errors accumulated_so_far.errors;
     dep_edges =
@@ -84,8 +68,6 @@ let accumulate_job_output
         accumulated_so_far.adhoc_profiling;
     telemetry =
       Telemetry.add produced_by_job.telemetry accumulated_so_far.telemetry;
-    jobs_finished_to_end = acc_finished_to_end;
-    jobs_finished_early = acc_finished_early;
   }
 
 type delegate_job_sig = unit -> typing_result * computation_progress

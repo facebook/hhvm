@@ -23,6 +23,8 @@ let id : string option ref = ref None
 
 let set_id passed_id = id := Some passed_id
 
+let get_id () = !id
+
 let id_string () =
   match !id with
   | None -> ""

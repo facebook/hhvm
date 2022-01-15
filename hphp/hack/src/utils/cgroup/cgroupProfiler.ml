@@ -14,22 +14,31 @@ this many seconds with the value between (subtract_kb_for_array+i) and
 external cgroup_watcher_get : unit -> int * int * float array
   = "cgroup_watcher_get"
 
-type initial_reading = (CGroup.stats, string) result
+type initial_reading =
+  HackEventLogger.ProfileTypeCheck.stats * (CGroup.stats, string) result
 
 (** This is the [initial_reading] that we capture upon module load, i.e. process startup *)
-let initial_reading_capture = CGroup.get_stats ()
+let initial_reading_capture : initial_reading =
+  let stats =
+    HackEventLogger.ProfileTypeCheck.get_stats
+      ~include_current_process:false
+      (Telemetry.create ())
+  in
+  (stats, CGroup.get_stats ())
 
 (** This is the [initial_reading] that we'll actually use, i.e. we'll record data relative to this.
 None means we won't use anything. *)
-let initial_reading = ref None
+let initial_reading : initial_reading option ref = ref None
 
-let get_initial_reading () =
+let get_initial_reading () : initial_reading =
   match !initial_reading with
   | None -> initial_reading_capture
   | Some initial_reading -> initial_reading
 
-let use_initial_reading new_initial_reading =
+let use_initial_reading (new_initial_reading : initial_reading) : unit =
   initial_reading := Some new_initial_reading
+
+let get_initial_stats () = get_initial_reading () |> fst
 
 (** A small helper: returns either (initial_reading, f initial_reading) if (1) someone
 has previously called [use_initial_reading] and provided an Ok one, (2) the [current_cgroup]
@@ -38,7 +47,7 @@ Otherwise, it returns ({0...}, default). *)
 let initial_value_map current_cgroup ~f ~default =
   let open CGroup in
   match (!initial_reading, current_cgroup) with
-  | (Some (Ok initial_cgroup), Ok current_cgroup)
+  | (Some (_stats, Ok initial_cgroup), Ok current_cgroup)
     when String.equal initial_cgroup.cgroup_name current_cgroup.cgroup_name ->
     (initial_cgroup, f initial_cgroup)
   | _ ->

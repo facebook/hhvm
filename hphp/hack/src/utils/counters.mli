@@ -7,6 +7,8 @@
  *)
 
 module Category : sig
+  (** Care: each of these entries adds up to telemetry in [HackEventLogger.ProfileTypeCheck.get_stats],
+  and we should keep the number small... 5 to 10 items here are fine, but more will be a problem. *)
   type t =
     | Decling
         (** Decling is used when --config profile_decling=TopCounts; it's counted by all [Typing_classes_heap] decl accessors.

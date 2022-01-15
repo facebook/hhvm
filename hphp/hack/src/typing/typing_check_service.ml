@@ -229,97 +229,6 @@ let process_file
       in
       Caml.Printexc.raise_with_backtrace e stack
 
-let get_mem_telemetry () : Telemetry.t option =
-  if SharedMem.SMTelemetry.hh_log_level () > 0 then
-    Some
-      (Telemetry.create ()
-      |> Telemetry.object_ ~key:"gc" ~value:(Telemetry.quick_gc_stat ())
-      |> Telemetry.object_
-           ~key:"shmem"
-           ~value:(SharedMem.SMTelemetry.get_telemetry ()))
-  else
-    None
-
-let profile_log
-    ~(check_info : check_info)
-    ~(start_counters : Counters.time_in_sec * Telemetry.t)
-    ~(end_counters : Counters.time_in_sec * Telemetry.t)
-    ~(second_run_end_counters : (Counters.time_in_sec * Telemetry.t) option)
-    ~(start_heap_mb : int)
-    ~(end_heap_mb : int)
-    ~(file : check_file_computation)
-    ~(result : process_file_results) : unit =
-  let (start_time, start_counters) = start_counters in
-  let (end_time, end_counters) = end_counters in
-  let duration = end_time -. start_time in
-  let duration_second_run =
-    Option.map second_run_end_counters ~f:(fun (time, _) -> time -. end_time)
-  in
-  let deciding_time = Option.value duration_second_run ~default:duration in
-  (* "deciding_time" is what we compare against the threshold, to see if we should log. *)
-  (* We'll also log if it had been previously deferred, or if it's being deferred right now. *)
-  let should_log =
-    HackEventLogger.PerFileProfilingConfig.should_log
-      ~duration:deciding_time
-      ~memory:(end_heap_mb - start_heap_mb)
-      check_info.per_file_profiling
-    || file.was_already_deferred
-    || not (List.is_empty result.deferred_decls)
-  in
-  if should_log then begin
-    let profile = Telemetry.diff ~all:false ~prev:start_counters end_counters in
-    let profile_second_run =
-      Option.map second_run_end_counters ~f:(fun (_, counters) ->
-          Telemetry.diff ~all:false ~prev:end_counters counters)
-    in
-    let filesize_opt =
-      try
-        Some (Relative_path.to_absolute file.path |> Unix.stat).Unix.st_size
-      with
-      | Unix.Unix_error _ -> None
-    in
-    let deferment_telemetry =
-      Telemetry.create ()
-      |> Telemetry.bool_
-           ~key:"has_been_deferred"
-           ~value:file.was_already_deferred
-      |> Telemetry.int_
-           ~key:"files_to_declare"
-           ~value:(List.length result.deferred_decls)
-    in
-    let telemetry =
-      Telemetry.create ()
-      |> Telemetry.int_opt ~key:"filesize" ~value:filesize_opt
-      |> Telemetry.object_ ~key:"deferment" ~value:deferment_telemetry
-      |> Telemetry.object_ ~key:"profile" ~value:profile
-      |> Telemetry.int_ ~key:"start_heap_mb" ~value:start_heap_mb
-      |> Telemetry.int_ ~key:"end_heap_mb" ~value:end_heap_mb
-    in
-    let telemetry =
-      Option.fold
-        ~init:telemetry
-        profile_second_run
-        ~f:(fun telemetry profile ->
-          Telemetry.object_ telemetry ~key:"profile_second_run" ~value:profile)
-    in
-    HackEventLogger.ProfileTypeCheck.process_file
-      ~recheck_id:check_info.recheck_id
-      ~path:file.path
-      ~telemetry
-      ~config:check_info.per_file_profiling
-      ~typing_duration:deciding_time;
-    ()
-  end
-
-let read_counters () : Counters.time_in_sec * Telemetry.t =
-  let typecheck_time = Counters.read_time Counters.Category.Typecheck in
-  let mem_telemetry = get_mem_telemetry () in
-  let operations_counters = Counters.get_counters () in
-  ( typecheck_time,
-    Telemetry.create ()
-    |> Telemetry.object_opt ~key:"memory" ~value:mem_telemetry
-    |> Telemetry.object_ ~key:"operations" ~value:operations_counters )
-
 module ProcessFilesTally = struct
   (** Counters for the [file_computation] of each sort being processed *)
   type t = {
@@ -343,8 +252,11 @@ module ProcessFilesTally = struct
 
   let incr_decls tally = { tally with decls = tally.decls + 1 }
 
-  let incr_caps tally =
-    { tally with exceeded_cap_count = tally.exceeded_cap_count + 1 }
+  let record_caps ~file_ends_under_cap tally =
+    if file_ends_under_cap then
+      tally
+    else
+      { tally with exceeded_cap_count = tally.exceeded_cap_count + 1 }
 
   let incr_prefetches tally = { tally with prefetches = tally.prefetches + 1 }
 
@@ -357,186 +269,237 @@ module ProcessFilesTally = struct
         checks_deferred = tally.checks_deferred + 1;
         decls_deferred = tally.decls_deferred + List.length deferred_decls;
       }
+
+  let count tally =
+    tally.checks_done + tally.checks_deferred + tally.decls + tally.prefetches
+
+  let get_telemetry tally =
+    Telemetry.create ()
+    |> Telemetry.int_ ~key:"decls" ~value:tally.decls
+    |> Telemetry.int_ ~key:"prefetches" ~value:tally.prefetches
+    |> Telemetry.int_ ~key:"checks_done" ~value:tally.checks_done
+    |> Telemetry.int_ ~key:"checks_deferred" ~value:tally.checks_deferred
+    |> Telemetry.int_ ~key:"decls_deferred" ~value:tally.decls_deferred
+    |> Telemetry.int_ ~key:"exceeded_cap_count" ~value:tally.exceeded_cap_count
 end
+
+let get_stats tally : HackEventLogger.ProfileTypeCheck.stats =
+  let telemetry =
+    Counters.get_counters ()
+    |> Telemetry.object_
+         ~key:"tally"
+         ~value:(ProcessFilesTally.get_telemetry tally)
+  in
+  HackEventLogger.ProfileTypeCheck.get_stats
+    ~include_current_process:true
+    telemetry
 
 let get_heap_size () = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024
 
 external hh_malloc_trim : unit -> unit = "hh_malloc_trim"
 
-(* At start of file processing or when the memory cap is exceeded, we
- * clear all non-essential state (caches, logger) and force a GC.
- * The call to `hh_malloc_trim` ensures that memory is returned to
- * the system.
- *)
-let clear_caches_and_force_gc () =
-  SharedMem.invalidate_local_caches ();
-  HackEventLogger.flush ();
-  Gc.compact ();
-  hh_malloc_trim ()
-
-let process_files
-    (ctx : Provider_context.t)
-    ({
-       errors;
-       dep_edges;
-       telemetry;
-       adhoc_profiling;
-       jobs_finished_early;
-       jobs_finished_to_end;
-     } :
-      typing_result)
-    (progress : computation_progress)
-    ~(memory_cap : int option)
-    ~(longlived_workers : bool)
-    ~(remote_execution : ReEnv.t option)
-    ~(check_info : check_info) : typing_result * computation_progress =
-  if not longlived_workers then SharedMem.invalidate_local_caches ();
-  File_provider.local_changes_push_sharedmem_stack ();
-  Ast_provider.local_changes_push_sharedmem_stack ();
+let process_one_file
+    ~ctx
+    ~check_info
+    ~batch_info
+    ~memory_cap
+    ~longlived_workers
+    ~remote_execution
+    ~progress
+    ~errors
+    ~stats
+    ~tally =
   let decl_cap_mb =
     if check_info.use_max_typechecker_worker_memory_for_decl_deferral then
       memory_cap
     else
       None
   in
+  let file_cap_mb = Option.value memory_cap ~default:Int.max_value in
+  let type_check_twice =
+    check_info.per_file_profiling
+      .HackEventLogger.PerFileProfilingConfig.profile_type_check_twice
+  in
+  let fn = List.hd_exn progress.remaining in
 
+  let (file, decl, mid_stats, errors, deferred, tally) =
+    match fn with
+    | Check file ->
+      let result = process_file ctx errors file ~decl_cap_mb in
+      let mid_stats =
+        if type_check_twice then
+          Some (get_stats tally)
+        else
+          None
+      in
+      begin
+        if type_check_twice then
+          let _ignored = process_file ctx errors file ~decl_cap_mb in
+          ()
+      end;
+      let tally = ProcessFilesTally.incr_checks tally result.deferred_decls in
+      let deferred =
+        if List.is_empty result.deferred_decls then
+          []
+        else
+          List.map result.deferred_decls ~f:(fun fn -> Declare fn)
+          @ [Check { file with was_already_deferred = true }]
+      in
+      (Some file, None, mid_stats, result.errors, deferred, tally)
+    | Declare (_path, class_name) ->
+      let (_ : Decl_provider.class_decl option) =
+        Decl_provider.get_class ctx class_name
+      in
+      ( None,
+        Some class_name,
+        None,
+        errors,
+        [],
+        ProcessFilesTally.incr_decls tally )
+    | Prefetch paths ->
+      Vfs.prefetch paths;
+      (None, None, None, errors, [], ProcessFilesTally.incr_prefetches tally)
+  in
+  let final_stats = get_stats tally in
+  let (file_end_stats, file_end_second_stats) =
+    match mid_stats with
+    | None -> (final_stats, None)
+    | Some mid_stats -> (mid_stats, Some final_stats)
+  in
+
+  (* This code doesn't belong here. This function should only process one file,
+     not filtering the list of remaining files. *)
+  let fns = List.tl_exn progress.remaining in
+  let (fns, check_fns, errors) =
+    match remote_execution with
+    | None -> (fns, [], errors)
+    | Some re_env ->
+      let (check_fns, fns) =
+        List.partition_map fns ~f:(function
+            | Check file -> First file
+            | fn -> Second fn)
+      in
+      if List.is_empty check_fns then
+        (fns, [], errors)
+      else
+        let result =
+          process_files_remote_execution
+            re_env
+            ctx
+            errors
+            check_fns
+            check_info.recheck_id
+        in
+        let check_fns = List.map check_fns ~f:(fun f -> Check f) in
+        (fns, check_fns, Errors.merge errors result.errors)
+  in
+
+  (* If the major heap has exceeded the bounds, we (1) first try and bring the size back down
+     by flushing the parser cache and doing a major GC; (2) if this fails, we decline to typecheck
+     the remaining files.
+     We use [quick_stat] instead of [stat] in get_heap_size in order to avoid walking the major heap,
+     and we don't change the minor heap because it's small and fixed-size.
+     This test is performed after we've processed at least one item, to ensure we make at least some progress. *)
+  let file_ends_under_cap = get_heap_size () <= file_cap_mb in
+  let tally = ProcessFilesTally.record_caps ~file_ends_under_cap tally in
+  let file_ends_under_cap =
+    if file_ends_under_cap || not longlived_workers then
+      file_ends_under_cap
+    else begin
+      SharedMem.invalidate_local_caches ();
+      HackEventLogger.flush ();
+      Gc.compact ();
+      hh_malloc_trim ();
+      get_heap_size () <= file_cap_mb
+    end
+  in
+
+  if Option.is_none remote_execution then
+    HackEventLogger.ProfileTypeCheck.process_file
+      ~config:check_info.per_file_profiling
+      ~batch_info
+      ~file_index:(ProcessFilesTally.count tally)
+      ~file:(Option.map file ~f:(fun file -> file.path))
+      ~file_was_already_deferred:
+        (Option.map file ~f:(fun file -> file.was_already_deferred))
+      ~decl
+      ~file_ends_under_cap
+      ~file_start_stats:stats
+      ~file_end_stats
+      ~file_end_second_stats;
+
+  let progress =
+    {
+      completed = fn :: check_fns @ progress.completed;
+      remaining = fns;
+      deferred = List.concat [deferred; progress.deferred];
+    }
+  in
+
+  (progress, errors, tally, final_stats, file_ends_under_cap)
+
+let process_files
+    (ctx : Provider_context.t)
+    ({ errors; dep_edges; telemetry; adhoc_profiling } : typing_result)
+    (progress : computation_progress)
+    ~(memory_cap : int option)
+    ~(longlived_workers : bool)
+    ~(remote_execution : ReEnv.t option)
+    ~(check_info : check_info)
+    ~(worker_id : string)
+    ~(batch_number : int)
+    ~(start_typecheck_stats : HackEventLogger.ProfileTypeCheck.stats) :
+    typing_result * computation_progress =
   Decl_counters.set_mode
     check_info.per_file_profiling
       .HackEventLogger.PerFileProfilingConfig.profile_decling;
   let _prev_counters_state = Counters.reset () in
-  let (_start_counter_time, start_counters) = read_counters () in
-  let tally = ProcessFilesTally.empty in
-  let start_file_count = List.length progress.remaining in
-  let start_time = Unix.gettimeofday () in
+  let batch_info =
+    {
+      HackEventLogger.ProfileTypeCheck.init_id = check_info.init_id;
+      recheck_id = check_info.recheck_id;
+      worker_id;
+      batch_number;
+      batch_size = List.length progress.remaining;
+      start_hh_stats = CgroupProfiler.get_initial_stats ();
+      start_typecheck_stats;
+      start_batch_stats = get_stats ProcessFilesTally.empty;
+    }
+  in
+  if not longlived_workers then SharedMem.invalidate_local_caches ();
+  File_provider.local_changes_push_sharedmem_stack ();
+  Ast_provider.local_changes_push_sharedmem_stack ();
+  (* Let's curry up the function now so it's easier to invoke later in the loop. *)
+  let process_one_file =
+    process_one_file
+      ~ctx
+      ~check_info
+      ~batch_info
+      ~memory_cap
+      ~longlived_workers
+      ~remote_execution
+  in
 
-  let rec process_or_exit errors progress tally max_heap_mb =
-    (* If the major heap has exceeded the bounds, we
-         (1) first try and bring the size back down by flushing the parser cache and doing a major GC;
-         (2) if this fails, we decline to typecheck the remaining files.
-       We use [quick_stat] instead of [stat] in get_heap_size in order to avoid walking the major heap,
-       and we don't change the minor heap because it's small and fixed-size.
-       The start-remaining test is to make sure we make at least one file of progress
-       even in case of a crazy low memory cap. *)
-    let heap_mb = get_heap_size () in
-    let max_heap_mb = Int.max heap_mb max_heap_mb in
-    let cap = Option.value memory_cap ~default:Int.max_value in
-    let over_cap =
-      heap_mb > cap && start_file_count > List.length progress.remaining
-    in
-    let (exit_now, tally, heap_mb) =
-      if over_cap then
-        let new_heap_mb =
-          if longlived_workers then begin
-            clear_caches_and_force_gc ();
-            get_heap_size ()
-          end else
-            heap_mb
-        in
-        (new_heap_mb > cap, ProcessFilesTally.incr_caps tally, new_heap_mb)
-      else
-        (false, tally, heap_mb)
-    in
-
+  let rec process_files_loop ~progress ~errors ~stats ~tally =
     match progress.remaining with
-    | [] -> (errors, progress, tally, heap_mb, max_heap_mb)
-    | _ when exit_now -> (errors, progress, tally, heap_mb, max_heap_mb)
-    | fn :: fns ->
-      let (errors, deferred, tally) =
-        match fn with
-        | Check file ->
-          let process_file () = process_file ctx errors file ~decl_cap_mb in
-          let result =
-            if
-              check_info.per_file_profiling
-                .HackEventLogger.PerFileProfilingConfig.profile_log
-            then (
-              let start_counters = read_counters () in
-              let start_heap_mb = heap_mb in
-              let result = process_file () in
-              let end_counters = read_counters () in
-              let end_heap_mb = get_heap_size () in
-              let (start_heap_mb, end_heap_mb, second_run_end_counters) =
-                if
-                  check_info.per_file_profiling
-                    .HackEventLogger.PerFileProfilingConfig
-                     .profile_type_check_twice
-                then
-                  (* we're running this routine solely for the side effect *)
-                  (* of seeing how much time+memory it takes to run. *)
-                  let _ignored = process_file () in
-                  (end_heap_mb, get_heap_size (), Some (read_counters ()))
-                else
-                  (start_heap_mb, end_heap_mb, None)
-              in
-              profile_log
-                ~check_info
-                ~start_counters
-                ~end_counters
-                ~second_run_end_counters
-                ~start_heap_mb
-                ~end_heap_mb
-                ~file
-                ~result;
-              result
-            ) else
-              process_file ()
-          in
-          let tally =
-            ProcessFilesTally.incr_checks tally result.deferred_decls
-          in
-          let deferred =
-            if List.is_empty result.deferred_decls then
-              []
-            else
-              List.map result.deferred_decls ~f:(fun fn -> Declare fn)
-              @ [Check { file with was_already_deferred = true }]
-          in
-          (result.errors, deferred, tally)
-        | Declare (_path, class_name) ->
-          let (_ : Decl_provider.class_decl option) =
-            Decl_provider.get_class ctx class_name
-          in
-          (errors, [], ProcessFilesTally.incr_decls tally)
-        | Prefetch paths ->
-          Vfs.prefetch paths;
-          (errors, [], ProcessFilesTally.incr_prefetches tally)
+    | [] -> (progress, errors)
+    | _ ->
+      let (progress, errors, tally, stats, file_ends_under_cap) =
+        process_one_file ~progress ~errors ~stats ~tally
       in
-      let (fns, check_fns, errors) =
-        match remote_execution with
-        | Some re_env ->
-          let (check_fns, fns) =
-            List.partition_map fns ~f:(function
-                | Check file -> First file
-                | fn -> Second fn)
-          in
-          if List.is_empty check_fns then
-            (fns, [], errors)
-          else
-            let result =
-              process_files_remote_execution
-                re_env
-                ctx
-                errors
-                check_fns
-                check_info.recheck_id
-            in
-            let check_fns = List.map check_fns ~f:(fun f -> Check f) in
-            (fns, check_fns, Errors.merge errors result.errors)
-        | None -> (fns, [], errors)
-      in
-      let progress =
-        {
-          completed = fn :: check_fns @ progress.completed;
-          remaining = fns;
-          deferred = List.concat [deferred; progress.deferred];
-        }
-      in
-      process_or_exit errors progress tally max_heap_mb
+      if file_ends_under_cap then
+        process_files_loop ~progress ~errors ~stats ~tally
+      else
+        (progress, errors)
   in
 
   (* Process as many files as we can, and merge in their errors *)
-  let (errors, progress, tally, final_heap_mb, max_heap_mb) =
-    process_or_exit errors progress tally 0
+  let (progress, errors) =
+    process_files_loop
+      ~progress
+      ~errors
+      ~tally:ProcessFilesTally.empty
+      ~stats:(get_stats ProcessFilesTally.empty)
   in
 
   (* Update edges *)
@@ -546,45 +509,14 @@ let process_files
   let dep_edges = Typing_deps.merge_dep_edges dep_edges new_dep_edges in
 
   (* Gather up our various forms of telemetry... *)
-  let (_end_counter_time, end_counters) = read_counters () in
-  (* Note: the 'add' operation (performed here, and also later in case of
-     MultiWorker.merge) will strip all non-numbers from telemetry. *)
-  let telemetry =
-    Telemetry.add
-      telemetry
-      (Telemetry.diff
-         ~all:false
-         ~suffix_keys:false
-         end_counters
-         ~prev:start_counters)
+  let end_heap_mb = Gc.((quick_stat ()).Stat.heap_words) * 8 / 1024 / 1024 in
+  let this_batch_telemetry =
+    Telemetry.create ()
+    |> Telemetry.object_ ~key:"operations" ~value:(Counters.get_counters ())
+    |> Telemetry.int_ ~key:"end_heap_mb_sum" ~value:end_heap_mb
+    |> Telemetry.int_ ~key:"batch_count" ~value:1
   in
-  let processed_file_count =
-    start_file_count - List.length progress.remaining
-  in
-  let processed_file_fraction =
-    float_of_int processed_file_count /. float_of_int start_file_count
-  in
-  let record =
-    if List.is_empty progress.remaining then
-      jobs_finished_to_end
-    else
-      jobs_finished_early
-  in
-  let open ProcessFilesTally in
-  Measure.sample ~record "seconds" (Unix.gettimeofday () -. start_time);
-  Measure.sample ~record "final_heap_mb" (float_of_int final_heap_mb);
-  Measure.sample ~record "files" (float_of_int processed_file_count);
-  Measure.sample ~record "files_fraction" processed_file_fraction;
-  Measure.sample ~record "decls" (float_of_int tally.decls);
-  Measure.sample ~record "prefetches" (float_of_int tally.prefetches);
-  Measure.sample ~record "checks_done" (float_of_int tally.checks_done);
-  Measure.sample ~record "checks_deferred" (float_of_int tally.checks_deferred);
-  Measure.sample ~record "decls_deferred" (float_of_int tally.decls_deferred);
-  Measure.sample
-    ~record
-    "exceeded_cap_count"
-    (float_of_int tally.exceeded_cap_count);
-  Measure.sample ~record "max_heap_mb" (float_of_int max_heap_mb);
+  let telemetry = Telemetry.add telemetry this_batch_telemetry in
 
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_sharedmem_stack ();
@@ -594,15 +526,7 @@ let process_files
       adhoc_profiling
       (Adhoc_profiler.get_and_reset ())
   in
-  ( {
-      errors;
-      dep_edges;
-      telemetry;
-      adhoc_profiling;
-      jobs_finished_early;
-      jobs_finished_to_end;
-    },
-    progress )
+  ({ errors; dep_edges; telemetry; adhoc_profiling }, progress)
 
 let load_and_process_files
     (ctx : Provider_context.t)
@@ -611,7 +535,11 @@ let load_and_process_files
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
-    ~(check_info : check_info) : typing_result * computation_progress =
+    ~(check_info : check_info)
+    ~(worker_id : string)
+    ~(batch_number : int)
+    ~(start_typecheck_stats : HackEventLogger.ProfileTypeCheck.stats) :
+    typing_result * computation_progress =
   Option.iter check_info.memtrace_dir ~f:(fun temp_dir ->
       let file = Caml.Filename.temp_file ~temp_dir "memtrace.worker." ".ctf" in
       Daemon.start_memtracing file);
@@ -628,6 +556,9 @@ let load_and_process_files
     ~longlived_workers
     ~remote_execution
     ~check_info
+    ~worker_id
+    ~batch_number
+    ~start_typecheck_stats
 
 (*****************************************************************************)
 (* Let's go! That's where the action is *)
@@ -671,6 +602,7 @@ let possibly_push_new_errors_to_lsp_client :
     empty list for the list of unchecked files. *)
 let merge
     ~(should_prefetch_deferred_files : bool)
+    ~(batch_counts_by_worker_id : int SMap.t ref)
     (ctx : Provider_context.t)
     (delegate_state : Delegate.state ref)
     (files_to_process : file_computation BigList.t ref)
@@ -679,16 +611,31 @@ let merge
     (files_checked_count : int ref)
     (diagnostic_pusher : Diagnostic_pusher.t option ref)
     (time_first_error : seconds_since_epoch option ref)
-    ( (produced_by_job : typing_result),
+    ( (worker_id : string),
+      (produced_by_job : typing_result),
       ({ kind = progress_kind; progress : computation_progress } : progress) )
     (acc : typing_result) : typing_result =
-  let () =
+  (* Update batch count *)
+  begin
+    match progress_kind with
+    | Progress ->
+      let prev_batch_count =
+        SMap.find_opt worker_id !batch_counts_by_worker_id
+        |> Option.value ~default:0
+      in
+      batch_counts_by_worker_id :=
+        SMap.add worker_id (prev_batch_count + 1) !batch_counts_by_worker_id
+    | DelegateProgress _ -> ()
+  end;
+
+  (* Merge in remote-worker results *)
+  begin
     match progress_kind with
     | Progress -> ()
     | DelegateProgress _ ->
       delegate_state :=
         Delegate.merge !delegate_state produced_by_job.errors progress
-  in
+  end;
 
   files_to_process := BigList.append progress.remaining !files_to_process;
 
@@ -898,7 +845,8 @@ let process_in_parallel
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
-    ~(check_info : check_info) :
+    ~(check_info : check_info)
+    ~(start_typecheck_stats : HackEventLogger.ProfileTypeCheck.stats) :
     typing_result
     * Delegate.state
     * Telemetry.t
@@ -917,6 +865,7 @@ let process_in_parallel
   let delegate_progress =
     Typing_service_delegate.get_progress !delegate_state
   in
+  let batch_counts_by_worker_id = ref SMap.empty in
   ServerProgress.send_percentage_progress
     ~operation:"typechecking"
     ~done_count:0
@@ -938,21 +887,29 @@ let process_in_parallel
     && TypecheckerOptions.prefetch_deferred_files
          (Provider_context.get_tcopt ctx)
   in
-  let job =
-    load_and_process_files
-      ctx
-      ~memory_cap
-      ~longlived_workers
-      ~remote_execution
-      ~check_info
-  in
+  (* The [job] lambda is marshalled, sent to the worker process, unmarshalled there, and executed.
+     It is marshalled immediately before being executed. *)
   let job (typing_result : typing_result) (progress : progress) =
+    let worker_id = Option.value ~default:"main" (Hh_logger.get_id ()) in
     let (typing_result, computation_progress) =
       match progress.kind with
-      | Progress -> job typing_result progress.progress
+      | Progress ->
+        load_and_process_files
+          ctx
+          ~memory_cap
+          ~longlived_workers
+          ~remote_execution
+          ~check_info
+          ~start_typecheck_stats
+          ~worker_id
+          ~batch_number:
+            (SMap.find_opt worker_id !batch_counts_by_worker_id
+            |> Option.value ~default:0)
+          typing_result
+          progress.progress
       | DelegateProgress job -> Delegate.process job
     in
-    (typing_result, { progress with progress = computation_progress })
+    (worker_id, typing_result, { progress with progress = computation_progress })
   in
   let (typing_result, env, cancelled_results) =
     MultiWorker.call_with_interrupt
@@ -962,6 +919,7 @@ let process_in_parallel
       ~merge:
         (merge
            ~should_prefetch_deferred_files
+           ~batch_counts_by_worker_id
            ctx
            delegate_state
            files_to_process
@@ -975,7 +933,8 @@ let process_in_parallel
       ~interrupt
   in
   let telemetry =
-    Typing_service_delegate.add_telemetry !delegate_state telemetry
+    telemetry
+    |> Typing_service_delegate.add_telemetry !delegate_state
     |> Telemetry.object_
          ~key:"next"
          ~value:(Measure.stats_to_telemetry ~record ())
@@ -1000,9 +959,14 @@ let process_in_parallel
     (!diagnostic_pusher, !time_first_error) )
 
 let process_sequentially
-    ?diagnostic_pusher ctx fnl ~longlived_workers ~remote_execution ~check_info
-    : typing_result * (Diagnostic_pusher.t option * seconds_since_epoch option)
-    =
+    ?diagnostic_pusher
+    ctx
+    fnl
+    ~longlived_workers
+    ~remote_execution
+    ~check_info
+    ~start_typecheck_stats :
+    typing_result * (Diagnostic_pusher.t option * seconds_since_epoch option) =
   let progress =
     { completed = []; remaining = BigList.as_list fnl; deferred = [] }
   in
@@ -1017,6 +981,9 @@ let process_sequentially
       ~longlived_workers
       ~remote_execution
       ~check_info
+      ~worker_id:"master"
+      ~batch_number:(-1)
+      ~start_typecheck_stats
   in
   let push_result =
     possibly_push_new_errors_to_lsp_client
@@ -1108,6 +1075,11 @@ let go_with_interrupt
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : (_ * result) job_result =
+  let start_typecheck_stats =
+    HackEventLogger.ProfileTypeCheck.get_stats
+      ~include_current_process:false
+      (Telemetry.create ())
+  in
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
   let fnl = BigList.create fnl in
@@ -1151,6 +1123,7 @@ let go_with_interrupt
           ~longlived_workers
           ~remote_execution
           ~check_info
+          ~start_typecheck_stats
       in
       ( typing_result,
         delegate_state,
@@ -1186,45 +1159,16 @@ let go_with_interrupt
         ~longlived_workers
         ~remote_execution
         ~check_info
+        ~start_typecheck_stats
     end
   in
-  let {
-    errors;
-    dep_edges;
-    telemetry = typing_telemetry;
-    adhoc_profiling;
-    jobs_finished_early;
-    jobs_finished_to_end;
-  } =
+  let { errors; dep_edges; telemetry = typing_telemetry; adhoc_profiling } =
     typing_result
   in
   Typing_deps.register_discovered_dep_edges dep_edges;
 
-  if
-    check_info.per_file_profiling
-      .HackEventLogger.PerFileProfilingConfig.profile_log
-  then
-    Hh_logger.log
-      "Typecheck perf: %s"
-      (String.concat
-         ~sep:", "
-         (HackEventLogger.ProfileTypeCheck.get_telemetry_urls
-            ~init_id:check_info.init_id
-            ~recheck_id:check_info.recheck_id
-            ~config:check_info.per_file_profiling));
-  let job_size_telemetry =
-    Telemetry.create ()
-    |> Telemetry.object_
-         ~key:"finished_to_end"
-         ~value:(Measure.stats_to_telemetry ~record:jobs_finished_to_end ())
-    |> Telemetry.object_
-         ~key:"finished_early"
-         ~value:(Measure.stats_to_telemetry ~record:jobs_finished_early ())
-  in
   let telemetry =
-    telemetry
-    |> Telemetry.object_ ~key:"profiling_info" ~value:typing_telemetry
-    |> Telemetry.object_ ~key:"job_sizes" ~value:job_size_telemetry
+    telemetry |> Telemetry.object_ ~key:"profiling_info" ~value:typing_telemetry
   in
   ( ( env,
       { errors; delegate_state; telemetry; adhoc_profiling; diagnostic_pusher }

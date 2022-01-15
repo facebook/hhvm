@@ -12,6 +12,8 @@ val set_log : string -> unit
 
 val set_id : string -> unit
 
+val get_id : unit -> string option
+
 val print_with_newline :
   ?exn:Exception.t -> ('a, unit, string, unit) format4 -> 'a
 

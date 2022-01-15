@@ -86,6 +86,15 @@ let get_time (category : Category.t) : unit -> time_in_sec =
        3. clock() / CLOCKS_PER_SPEC *)
     Sys.time
 
+let get_time_label (category : Category.t) : string =
+  match category with
+  | Category.Disk_cat -> "walltime"
+  | Category.Typecheck
+  | Category.Decling
+  | Category.Get_ast
+  | Category.Get_decl ->
+    "cputime"
+
 let count (category : Category.t) (f : unit -> 'a) : 'a =
   let get_time = get_time category in
   let tally = get_counter category in
@@ -102,19 +111,20 @@ let read_time (category : Category.t) : time_in_sec =
   (get_counter category).time
 
 let get_counters () : Telemetry.t =
-  let telemetry_of_counter counter =
+  let telemetry_of_counter category counter =
     Telemetry.create ()
     |> Telemetry.int_ ~key:"count" ~value:counter.count
-    |> Telemetry.float_ ~key:"time" ~value:counter.time
+    |> Telemetry.float_ ~key:(get_time_label category) ~value:counter.time
   in
   let telemetry =
     Array.foldi
       ~f:(fun i telemetry counter ->
+        let category = Category.of_enum_exn i in
         let telemetry =
           Telemetry.object_
             telemetry
-            ~key:(Category.to_string (Category.of_enum_exn i))
-            ~value:(telemetry_of_counter counter)
+            ~key:(Category.to_string category)
+            ~value:(telemetry_of_counter category counter)
         in
         telemetry)
       !counters

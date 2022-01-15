@@ -35,8 +35,6 @@ module PerFileProfilingConfig = struct
       profile_desc = "";
       profile_slow_threshold = 0.;
     }
-
-  let should_log ~duration:_ ~memory:_ _ = false
 end
 
 type serialized_globals = Serialized_globals
@@ -493,13 +491,35 @@ let server_progress_read_exn ~server_progress_file:_ _ = ()
 let worker_exception _ = ()
 
 module ProfileTypeCheck = struct
+  type stats = unit
+
+  type batch_info = {
+    init_id: string;
+    recheck_id: string option;
+    worker_id: string;
+    batch_number: int;
+    batch_size: int;
+    start_hh_stats: stats;
+    start_typecheck_stats: stats;
+    start_batch_stats: stats;
+  }
+
+  let get_stats ~include_current_process:_ _ = ()
+
   let process_file
-      ~recheck_id:_ ~path:_ ~telemetry:_ ~config:_ ~typing_duration:_ =
+      ~config:_
+      ~batch_info:_
+      ~file_index:_
+      ~file:_
+      ~file_was_already_deferred:_
+      ~decl:_
+      ~file_ends_under_cap:_
+      ~file_start_stats:_
+      ~file_end_stats:_
+      ~file_end_second_stats:_ =
     ()
 
   let compute_tast ~path:_ ~telemetry:_ ~start_time:_ = ()
-
-  let get_telemetry_urls ~init_id:_ ~recheck_id:_ ~config:_ = []
 end
 
 module CGroup = struct

@@ -231,6 +231,18 @@ module SMTelemetry = struct
    *)
   (*****************************************************************************)
 
+  external heap_size : unit -> int = "hh_used_heap_size" [@@noalloc]
+
+  external wasted_heap_size : unit -> int = "hh_wasted_heap_size" [@@noalloc]
+
+  external hh_log_level : unit -> int = "hh_log_level" [@@noalloc]
+
+  external hh_sample_rate : unit -> float = "hh_sample_rate"
+
+  external hash_used_slots : unit -> int * int = "hh_hash_used_slots"
+
+  external hash_slots : unit -> int = "hh_hash_slots"
+
   let get_telemetry_list = ref []
 
   let get_telemetry () : Telemetry.t =
@@ -248,18 +260,6 @@ module SMTelemetry = struct
           ~f:(fun acc get_telemetry -> get_telemetry acc)
       in
       telemetry |> Telemetry.duration ~start_time
-
-  external heap_size : unit -> int = "hh_used_heap_size" [@@noalloc]
-
-  external wasted_heap_size : unit -> int = "hh_wasted_heap_size" [@@noalloc]
-
-  external hh_log_level : unit -> int = "hh_log_level" [@@noalloc]
-
-  external hh_sample_rate : unit -> float = "hh_sample_rate"
-
-  external hash_used_slots : unit -> int * int = "hh_hash_used_slots"
-
-  external hash_slots : unit -> int = "hh_hash_slots"
 
   type table_stats = {
     nonempty_slots: int;

@@ -283,7 +283,8 @@ module ProcessFilesTally = struct
     |> Telemetry.int_ ~key:"exceeded_cap_count" ~value:tally.exceeded_cap_count
 end
 
-let get_stats tally : HackEventLogger.ProfileTypeCheck.stats =
+let get_stats ~include_slightly_costly_stats tally :
+    HackEventLogger.ProfileTypeCheck.stats =
   let telemetry =
     Counters.get_counters ()
     |> Telemetry.object_
@@ -292,6 +293,7 @@ let get_stats tally : HackEventLogger.ProfileTypeCheck.stats =
   in
   HackEventLogger.ProfileTypeCheck.get_stats
     ~include_current_process:true
+    ~include_slightly_costly_stats
     ~shmem_heap_size:(SharedMem.SMTelemetry.heap_size ())
     telemetry
 
@@ -329,7 +331,7 @@ let process_one_file
       let result = process_file ctx errors file ~decl_cap_mb in
       let mid_stats =
         if type_check_twice then
-          Some (get_stats tally)
+          Some (get_stats ~include_slightly_costly_stats:false tally)
         else
           None
       in
@@ -361,7 +363,13 @@ let process_one_file
       Vfs.prefetch paths;
       (None, None, None, errors, [], ProcessFilesTally.incr_prefetches tally)
   in
-  let final_stats = get_stats tally in
+  let file_ends_under_cap = get_heap_size () <= file_cap_mb in
+  let final_stats =
+    get_stats
+      ~include_slightly_costly_stats:
+        ((not longlived_workers) && not file_ends_under_cap)
+      tally
+  in
   let (file_end_stats, file_end_second_stats) =
     match mid_stats with
     | None -> (final_stats, None)
@@ -401,7 +409,6 @@ let process_one_file
      We use [quick_stat] instead of [stat] in get_heap_size in order to avoid walking the major heap,
      and we don't change the minor heap because it's small and fixed-size.
      This test is performed after we've processed at least one item, to ensure we make at least some progress. *)
-  let file_ends_under_cap = get_heap_size () <= file_cap_mb in
   let tally = ProcessFilesTally.record_caps ~file_ends_under_cap tally in
   let file_ends_under_cap =
     if file_ends_under_cap || not longlived_workers then
@@ -464,7 +471,8 @@ let process_files
       batch_size = List.length progress.remaining;
       start_hh_stats = CgroupProfiler.get_initial_stats ();
       start_typecheck_stats;
-      start_batch_stats = get_stats ProcessFilesTally.empty;
+      start_batch_stats =
+        get_stats ~include_slightly_costly_stats:true ProcessFilesTally.empty;
     }
   in
   if not longlived_workers then SharedMem.invalidate_local_caches ();
@@ -500,7 +508,8 @@ let process_files
       ~progress
       ~errors
       ~tally:ProcessFilesTally.empty
-      ~stats:(get_stats ProcessFilesTally.empty)
+      ~stats:
+        (get_stats ~include_slightly_costly_stats:true ProcessFilesTally.empty)
   in
 
   (* Update edges *)
@@ -1079,6 +1088,7 @@ let go_with_interrupt
   let start_typecheck_stats =
     HackEventLogger.ProfileTypeCheck.get_stats
       ~include_current_process:false
+      ~include_slightly_costly_stats:true
       ~shmem_heap_size:(SharedMem.SMTelemetry.heap_size ())
       (Telemetry.create ())
   in

@@ -1668,8 +1668,25 @@ and simplify_subtype_i
                   &&& subtype_args tparams tyargs
               in
               subtype_args (Cls.tparams class_sub) tyargs env
-            else
-              default_subtype env)))
+            else (
+              match Cls.kind class_sub with
+              | Ast_defs.Cenum_class _ ->
+                (match Cls.enum_type class_sub with
+                | Some enum_type ->
+                  let (env, subtype) =
+                    Typing_utils.localize_no_subst
+                      ~ignore_errors:true
+                      env
+                      enum_type.te_base
+                  in
+                  simplify_dynamic_aware_subtype
+                    ~subtype_env
+                    subtype
+                    ty_super
+                    env
+                | None -> default_subtype env)
+              | _ -> default_subtype env
+            ))))
     | (_, Tdynamic) ->
       (match ety_sub with
       | LoclType lty when is_dynamic lty -> valid env

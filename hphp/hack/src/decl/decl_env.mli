@@ -14,8 +14,6 @@ type env = {
 
 val tcopt : env -> TypecheckerOptions.t
 
-val add_wclass : env -> string -> unit
-
 val add_extends_dependency : env -> string -> unit
 
 type class_cache = Decl_store.class_entries SMap.t
@@ -29,8 +27,6 @@ val get_construct :
   env ->
   Decl_defs.decl_class_type ->
   Decl_defs.element option * Typing_defs.consistent_kind
-
-val add_constructor_dependency : env -> string -> unit
 
 val make_decl_pos : env -> Pos.t -> Pos_or_decl.t
 

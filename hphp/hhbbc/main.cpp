@@ -361,6 +361,9 @@ void compile_repo() {
     }
   );
 
+  LitstrTable::get().setWriting();
+  LitarrayTable::get().setWriting();
+
   RepoAutoloadMapBuilder autoloadMapBuilder;
   UnitEmitterQueue ueq{&autoloadMapBuilder};
 
@@ -497,8 +500,6 @@ int main(int argc, char** argv) try {
   register_process_init();
 
   hphp_process_init();
-  LitstrTable::get().setWriting();
-  LitarrayTable::get().setWriting();
   SCOPE_EXIT { hphp_process_exit(); };
 
   // When running hhbbc, these options are loaded from GD, and will override CLI.

@@ -48,6 +48,8 @@ module type S = sig
 
   val enable_ifc : options -> string list
 
+  val enable_global_write_check : options -> string list
+
   val from : options -> string
 
   val gen_saved_ignore_type_errors : options -> bool

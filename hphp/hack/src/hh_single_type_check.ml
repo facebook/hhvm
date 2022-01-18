@@ -283,6 +283,7 @@ let parse_options () =
   in
   let profile_type_check_twice = ref false in
   let memtrace = ref None in
+  let enable_global_write_check = ref [] in
   let options =
     [
       ( "--no-print-position",
@@ -716,6 +717,11 @@ let parse_options () =
         " Sets the amount of fuel that the type printer can use to display an individual type. Default: "
         ^ string_of_int
             (TypecheckerOptions.type_printer_fuel GlobalOptions.default) );
+      ( "--enable-global-write-check",
+        Arg.String
+          (fun s -> enable_global_write_check := String_utils.split ',' s),
+        " Run global write checker on any file whose path is prefixed by the argument (use \"\\\" for hh_single_type_check)"
+      );
     ]
   in
 
@@ -856,6 +862,7 @@ let parse_options () =
           ["/"]
         else
           [])
+      ~tco_global_write_check_enabled:!enable_global_write_check
       ~tco_use_direct_decl_parser:!use_direct_decl_parser
       ~po_enable_enum_classes:(not !disable_enum_classes)
       ~po_enable_enum_supertyping:!enable_enum_supertyping

@@ -114,6 +114,7 @@ type t = {
   po_escape_brace: bool;
   tco_use_direct_decl_parser: bool;
   tco_ifc_enabled: string list;
+  tco_global_write_check_enabled: string list;
   po_enable_enum_supertyping: bool;
   po_interpret_soft_types_as_like_types: bool;
   tco_enable_strict_string_concat_interp: bool;
@@ -307,6 +308,7 @@ let default =
     po_escape_brace = false;
     tco_use_direct_decl_parser = false;
     tco_ifc_enabled = [];
+    tco_global_write_check_enabled = [];
     po_enable_enum_supertyping = false;
     po_interpret_soft_types_as_like_types = false;
     tco_enable_strict_string_concat_interp = false;
@@ -450,6 +452,7 @@ let make
     ?(po_escape_brace = default.po_escape_brace)
     ?(tco_use_direct_decl_parser = default.tco_use_direct_decl_parser)
     ?(tco_ifc_enabled = default.tco_ifc_enabled)
+    ?(tco_global_write_check_enabled = default.tco_global_write_check_enabled)
     ?(po_enable_enum_supertyping = default.po_enable_enum_supertyping)
     ?(po_interpret_soft_types_as_like_types =
       default.po_interpret_soft_types_as_like_types)
@@ -584,6 +587,7 @@ let make
     po_escape_brace;
     tco_use_direct_decl_parser;
     tco_ifc_enabled;
+    tco_global_write_check_enabled;
     po_enable_enum_supertyping;
     po_interpret_soft_types_as_like_types;
     tco_enable_strict_string_concat_interp;
@@ -709,6 +713,11 @@ let ifc_enabled t = t.tco_ifc_enabled
 
 (* Fully enable IFC on the tcopt *)
 let enable_ifc t = { t with tco_ifc_enabled = ["/"] }
+
+let global_write_check_enabled t = t.tco_global_write_check_enabled
+
+let enable_global_write_check t =
+  { t with tco_global_write_check_enabled = ["/"] }
 
 let tco_like_casts t = t.tco_like_casts
 

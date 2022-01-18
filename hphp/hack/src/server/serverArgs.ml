@@ -28,6 +28,7 @@ type options = {
   gen_saved_ignore_type_errors: bool;
   ignore_hh_version: bool;
   enable_ifc: string list;
+  enable_global_write_check: string list;
   saved_state_ignore_hhconfig: bool;
   json_mode: bool;
   log_inference_constraints: bool;
@@ -75,6 +76,9 @@ module Messages = struct
 
   let enable_ifc =
     " run IFC analysis on any file whose path is prefixed by the argument (format: comma separated list of path prefixes)"
+
+  let enable_global_write_check =
+    " run global write checker on any file whose path is prefixed by the argument (format: comma separated list of path prefixes)"
 
   let from = " so we know who's invoking - e.g. nuclide, vim, emacs, vscode"
 
@@ -148,6 +152,7 @@ let parse_options () : options =
   let custom_telemetry_data = ref [] in
   let dump_fanout = ref false in
   let enable_ifc = ref [] in
+  let enable_global_write_check = ref [] in
   let from = ref "" in
   let from_emacs = ref false in
   let from_hhclient = ref false in
@@ -181,6 +186,9 @@ let parse_options () : options =
   let set_with_saved_state s = with_saved_state := Some s in
   let set_write_symbol_info s = write_symbol_info := Some s in
   let set_enable_ifc s = enable_ifc := String_utils.split ',' s in
+  let set_enable_global_write_check s =
+    enable_global_write_check := String_utils.split ',' s
+  in
   let set_from s = from := s in
   let options =
     [
@@ -206,6 +214,9 @@ let parse_options () : options =
       ("--daemon", Arg.Set should_detach, Messages.daemon);
       ("--dump-fanout", Arg.Set dump_fanout, Messages.dump_fanout);
       ("--enable-ifc", Arg.String set_enable_ifc, Messages.enable_ifc);
+      ( "--enable-global-write-check",
+        Arg.String set_enable_global_write_check,
+        Messages.enable_global_write_check );
       ("--from-emacs", Arg.Set from_emacs, Messages.from_emacs);
       ("--from-hhclient", Arg.Set from_hhclient, Messages.from_hhclient);
       ("--from-vim", Arg.Set from_vim, Messages.from_vim);
@@ -306,6 +317,7 @@ let parse_options () : options =
     custom_telemetry_data = !custom_telemetry_data;
     dump_fanout = !dump_fanout;
     enable_ifc = !enable_ifc;
+    enable_global_write_check = !enable_global_write_check;
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     ignore_hh_version = !ignore_hh;
@@ -340,6 +352,7 @@ let default_options ~root =
     custom_telemetry_data = [];
     dump_fanout = false;
     enable_ifc = [];
+    enable_global_write_check = [];
     from = "";
     gen_saved_ignore_type_errors = false;
     ignore_hh_version = false;
@@ -387,6 +400,8 @@ let custom_telemetry_data options = options.custom_telemetry_data
 let dump_fanout options = options.dump_fanout
 
 let enable_ifc options = options.enable_ifc
+
+let enable_global_write_check options = options.enable_global_write_check
 
 let from options = options.from
 
@@ -466,6 +481,7 @@ let to_string
       custom_telemetry_data;
       dump_fanout;
       enable_ifc;
+      enable_global_write_check;
       from;
       gen_saved_ignore_type_errors;
       ignore_hh_version;
@@ -559,6 +575,9 @@ let to_string
   let enable_ifc_str =
     Printf.sprintf "[%s]" (String.concat ~sep:"," enable_ifc)
   in
+  let enable_global_write_check_str =
+    Printf.sprintf "[%s]" (String.concat ~sep:"," enable_global_write_check)
+  in
   let custom_telemetry_data_str =
     custom_telemetry_data
     |> List.map ~f:(fun (column, value) -> Printf.sprintf "%s=%s" column value)
@@ -587,6 +606,9 @@ let to_string
     ", ";
     "enable_ifc: ";
     enable_ifc_str;
+    ", ";
+    "enable_global_write_check: ";
+    enable_global_write_check_str;
     ", ";
     "from: ";
     from;

@@ -111,6 +111,10 @@ let enable_ifc = GlobalOptions.enable_ifc
 
 let ifc_enabled = GlobalOptions.ifc_enabled
 
+let enable_global_write_check = GlobalOptions.enable_global_write_check
+
+let global_write_check_enabled = GlobalOptions.global_write_check_enabled
+
 let like_type_hints = GlobalOptions.tco_like_type_hints
 
 let like_casts = GlobalOptions.tco_like_casts

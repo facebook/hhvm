@@ -847,8 +847,8 @@ void FrameStateMgr::startBlock(Block* block, bool hasUnprocessedPred) {
       block->empty(),
       "tried to startBlock a non-empty block while building"
     );
-    ITRACE(4, "Loading state for B{}:\n{}\n", block->id(), show());
     m_stack = it->second.in;
+    ITRACE(4, "Loading state for B{}:\n{}\n", block->id(), show());
     always_assert_flog(
       !m_stack.empty(),
       "invalid startBlock for B{}",

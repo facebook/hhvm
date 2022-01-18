@@ -1127,6 +1127,21 @@ bool IRBuilder::startBlock(Block* block, bool hasUnprocessedPred) {
   always_assert(m_state.sp() != nullptr);
   always_assert(m_state.fp() != nullptr);
 
+  // After setting up the frame state for the block we are starting, ensure the
+  // bytecode marker is as up to date as possible.  Normally starting another
+  // bytecode will update the bytecode marker, but sometimes we will first
+  // generate guard instructions, and they will have incorrect marker data
+  // unless we restore it here.
+  auto const& marker = curMarker();
+  setCurMarker(BCMarker {
+    marker.sk(),
+    fs().bcSPOff(),
+    fs().stublogue(),
+    marker.profTransIDs(),
+    fs().fp(),
+    fs().fixupFP(),
+    fs().sp()
+  });
   FTRACE(2, "IRBuilder switching to block B{}:\n{}\n", block->id(),
          m_state.show());
   return true;

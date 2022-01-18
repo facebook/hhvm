@@ -40,6 +40,12 @@ void HHVM_FUNCTION(trigger_oom, bool oom) {
   }
 }
 
+void HHVM_FUNCTION(trigger_break, bool brk) {
+  if (brk) {
+    raise(SIGTRAP);
+  }
+}
+
 void HHVM_FUNCTION(trigger_crash) {
   always_assert(false);
 }
@@ -446,6 +452,7 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\builtin_io_foldable, builtin_io_foldable);
 
   HHVM_FALIAS(__hhvm_intrinsics\\trigger_oom, trigger_oom);
+  HHVM_FALIAS(__hhvm_intrinsics\\trigger_break, trigger_break);
   HHVM_FALIAS(__hhvm_intrinsics\\trigger_crash, trigger_crash);
   HHVM_FALIAS(__hhvm_intrinsics\\launder_value, launder_value);
 

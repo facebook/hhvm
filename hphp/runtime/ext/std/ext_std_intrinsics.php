@@ -10,6 +10,12 @@ namespace __hhvm_intrinsics {
 <<__Native>>
 function trigger_oom(bool $oom): void;
 
+/**
+ * @return void
+ */
+<<__Native>>
+function trigger_break(bool $break): void;
+
 <<__Native>>
 function trigger_crash(): void;
 

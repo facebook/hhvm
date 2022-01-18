@@ -397,6 +397,8 @@ module Flags : sig
 
   val get_ft_support_dynamic_type : 'a fun_type -> bool
 
+  val get_ft_is_memoized : 'a fun_type -> bool
+
   val get_fp_ifc_can_call : 'a fun_param -> bool
 
   val get_fp_ifc_external : 'a fun_param -> bool
@@ -411,6 +413,7 @@ module Flags : sig
     returns_readonly:bool ->
     readonly_this:bool ->
     support_dynamic_type:bool ->
+    is_memoized:bool ->
     Hh_prelude.Int.t
 
   val mode_to_flags : param_mode -> int

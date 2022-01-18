@@ -55,6 +55,7 @@ and fun_decl_in_env
     FunUtils.has_return_disposable_attribute f.f_user_attributes
   in
   let ft_readonly_this = Option.is_some f.f_readonly_this in
+  let ft_is_memoized = FunUtils.has_memoize_attribute f.f_user_attributes in
   let params = FunUtils.make_params env ~is_lambda f.f_params in
   let (_pos, capability) =
     Decl_hint.aast_contexts_to_decl_capability env f.f_ctxs (fst f.f_name)
@@ -113,7 +114,8 @@ and fun_decl_in_env
                 ~return_disposable
                 ~returns_readonly:(Option.is_some f.f_readonly_ret)
                 ~readonly_this:ft_readonly_this
-                ~support_dynamic_type:fe_support_dynamic_type;
+                ~support_dynamic_type:fe_support_dynamic_type
+                ~is_memoized:ft_is_memoized;
             (* TODO: handle const attribute *)
             ft_ifc_decl = ifc_decl;
           } )

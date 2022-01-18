@@ -33,7 +33,7 @@
               ft_flags =
               (make_ft_flags FAsync ~return_disposable:false
                 ~returns_readonly:true ~support_dynamic_type:false
-                ~readonly_this:false);
+                ~readonly_this:false ~is_memoized:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [5:16-32]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -59,7 +59,7 @@
               ft_flags =
               (make_ft_flags FAsync ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false);
+                ~readonly_this:false ~is_memoized:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [9:16-30]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -116,7 +116,7 @@
                       ft_flags =
                       (make_ft_flags FSync ~return_disposable:false
                         ~returns_readonly:false ~support_dynamic_type:false
-                        ~readonly_this:false);
+                        ~readonly_this:false ~is_memoized:false);
                       ft_ifc_decl = FDPolicied {PUBLIC} }));
                 sm_visibility = Public; sm_deprecated = None;
                 sm_flags = (empty); sm_attributes = [] });
@@ -145,8 +145,8 @@
                             ft_flags =
                             (make_ft_flags FSync ~return_disposable:false
                               ~returns_readonly:false
-                              ~support_dynamic_type:false
-                              ~readonly_this:true);
+                              ~support_dynamic_type:false ~readonly_this:true
+                              ~is_memoized:false);
                             ft_ifc_decl = FDPolicied {PUBLIC} }))
                       };
                     fp_flags =
@@ -164,7 +164,7 @@
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
-                   ~readonly_this:true);
+                   ~readonly_this:true ~is_memoized:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }

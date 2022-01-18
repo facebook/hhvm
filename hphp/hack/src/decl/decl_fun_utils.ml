@@ -42,6 +42,10 @@ let has_can_call_attribute user_attributes =
 let has_return_disposable_attribute user_attributes =
   Naming_attributes.mem SN.UserAttributes.uaReturnDisposable user_attributes
 
+let has_memoize_attribute user_attributes =
+  Naming_attributes.mem SN.UserAttributes.uaMemoize user_attributes
+  || Naming_attributes.mem SN.UserAttributes.uaMemoizeLSB user_attributes
+
 exception Gi_reinfer_type_not_supported
 
 let cut_namespace id =

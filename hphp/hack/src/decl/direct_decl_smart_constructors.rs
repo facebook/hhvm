@@ -995,6 +995,7 @@ struct Attributes<'a> {
     late_init: bool,
     const_: bool,
     lsb: bool,
+    memoize: bool,
     memoizelsb: bool,
     override_: bool,
     enforceable: Option<&'a Pos<'a>>,
@@ -1380,6 +1381,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             late_init: false,
             const_: false,
             lsb: false,
+            memoize: false,
             memoizelsb: false,
             override_: false,
             enforceable: None,
@@ -1422,6 +1424,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     }
                     "__LSB" => {
                         attributes.lsb = true;
+                    }
+                    "__Memoize" => {
+                        attributes.memoize = true;
                     }
                     "__MemoizeLSB" => {
                         attributes.memoizelsb = true;
@@ -1650,6 +1655,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         }
         if header.readonly_return.is_token(TokenKind::Readonly) {
             flags |= FunTypeFlags::RETURNS_READONLY;
+        }
+        if attributes.memoize || attributes.memoizelsb {
+            flags |= FunTypeFlags::IS_MEMOIZED;
         }
         if readonly {
             flags |= FunTypeFlags::READONLY_THIS

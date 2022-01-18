@@ -15,7 +15,7 @@ File root|submodules.php--A.php
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false);
+               ~readonly_this:false ~is_memoized:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [7:10-37]; fe_php_std_lib = false;
        fe_support_dynamic_type = false }))
@@ -38,7 +38,7 @@ File root|submodules.php--AB.php
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false);
+               ~readonly_this:false ~is_memoized:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [6:10-33]; fe_php_std_lib = false;
        fe_support_dynamic_type = false }))
@@ -61,7 +61,7 @@ File root|submodules.php--ABC.php
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false);
+               ~readonly_this:false ~is_memoized:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [6:10-36]; fe_php_std_lib = false;
        fe_support_dynamic_type = false }))
@@ -84,7 +84,7 @@ File root|submodules.php--D.php
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false);
+               ~readonly_this:false ~is_memoized:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [6:10-43]; fe_php_std_lib = false;
        fe_support_dynamic_type = false }))
@@ -107,7 +107,7 @@ File root|submodules.php--no-module.php
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false);
+               ~readonly_this:false ~is_memoized:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:10-34]; fe_php_std_lib = false;
        fe_support_dynamic_type = false }))

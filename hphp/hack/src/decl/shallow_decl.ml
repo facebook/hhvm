@@ -244,6 +244,7 @@ let method_type ~support_dynamic_type env m =
   let return_disposable =
     FunUtils.has_return_disposable_attribute m.m_user_attributes
   in
+  let mt_is_memoized = FunUtils.has_memoize_attribute m.m_user_attributes in
   let params = FunUtils.make_params env ~is_lambda:false m.m_params in
   let (_pos, capability) =
     Decl_hint.aast_contexts_to_decl_capability env m.m_ctxs (fst m.m_name)
@@ -281,7 +282,8 @@ let method_type ~support_dynamic_type env m =
         ~return_disposable
         ~returns_readonly:(Option.is_some m.m_readonly_ret)
         ~readonly_this:m.m_readonly_this
-        ~support_dynamic_type;
+        ~support_dynamic_type
+        ~is_memoized:mt_is_memoized;
     ft_ifc_decl = ifc_decl;
   }
 

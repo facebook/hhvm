@@ -43,7 +43,7 @@
                      ft_flags =
                      (make_ft_flags FSync ~return_disposable:false
                        ~returns_readonly:false ~support_dynamic_type:false
-                       ~readonly_this:false);
+                       ~readonly_this:false ~is_memoized:false);
                      ft_ifc_decl = FDPolicied {PUBLIC} }));
                sm_visibility = Public; sm_deprecated = None;
                sm_flags = (empty); sm_attributes = [] });
@@ -63,7 +63,7 @@
                 ft_flags =
                 (make_ft_flags FSync ~return_disposable:false
                   ~returns_readonly:false ~support_dynamic_type:false
-                  ~readonly_this:false);
+                  ~readonly_this:false ~is_memoized:false);
                 ft_ifc_decl = FDPolicied {PUBLIC} }));
           sm_visibility = Private; sm_deprecated = None; sm_flags = (empty);
           sm_attributes = [] };
@@ -81,7 +81,7 @@
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
-                   ~readonly_this:false);
+                   ~readonly_this:false ~is_memoized:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] };
@@ -99,7 +99,7 @@
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
-                   ~readonly_this:false);
+                   ~readonly_this:false ~is_memoized:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Protected; sm_deprecated = None;
            sm_flags = (empty); sm_attributes = [] };
@@ -146,7 +146,7 @@
                  ft_flags =
                  (make_ft_flags FAsyncGenerator ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
-                   ~readonly_this:false);
+                   ~readonly_this:false ~is_memoized:false);
                  ft_ifc_decl = FDPolicied {PUBLIC} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] }
@@ -281,7 +281,7 @@
                       ft_flags =
                       (make_ft_flags FSync ~return_disposable:false
                         ~returns_readonly:false ~support_dynamic_type:false
-                        ~readonly_this:false);
+                        ~readonly_this:false ~is_memoized:false);
                       ft_ifc_decl = FDPolicied {PUBLIC} }));
                 sm_visibility = Public; sm_deprecated = None;
                 sm_flags = (empty); sm_attributes = [] });

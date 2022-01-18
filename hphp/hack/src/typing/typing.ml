@@ -8530,6 +8530,7 @@ and call
             ~returns_readonly:false
             ~readonly_this:false
             ~support_dynamic_type:false
+            ~is_memoized:false
         in
         let ft_ifc_decl = Typing_defs_core.default_ifc_fun_decl in
         let fun_locl_type =

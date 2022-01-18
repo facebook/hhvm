@@ -57,6 +57,8 @@ let ft_flags_readonly_this = 1 lsl 11
 
 let ft_flags_support_dynamic_type = 1 lsl 12
 
+let ft_flags_is_memoized = 1 lsl 13
+
 (* Class element flags *)
 let ce_flags_abstract            = 1 lsl 0
 

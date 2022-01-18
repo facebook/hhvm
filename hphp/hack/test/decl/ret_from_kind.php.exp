@@ -18,7 +18,7 @@
              ft_flags =
              (make_ft_flags FAsync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false);
+               ~readonly_this:false ~is_memoized:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [4:16-29]; fe_php_std_lib = false;
        fe_support_dynamic_type = false }));
@@ -45,7 +45,7 @@
               ft_flags =
               (make_ft_flags FGenerator ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false);
+                ~readonly_this:false ~is_memoized:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [7:10-27]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -72,7 +72,7 @@
               ft_flags =
               (make_ft_flags FAsyncGenerator ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false);
+                ~readonly_this:false ~is_memoized:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [12:16-39]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }))

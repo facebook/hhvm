@@ -14,7 +14,7 @@
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false);
+               ~readonly_this:false ~is_memoized:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [3:10-23]; fe_php_std_lib = false;
        fe_support_dynamic_type = false }));
@@ -38,7 +38,7 @@
               ft_flags =
               (make_ft_flags FAsync ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false);
+                ~readonly_this:false ~is_memoized:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [5:16-30]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -65,7 +65,7 @@
               ft_flags =
               (make_ft_flags FGenerator ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false);
+                ~readonly_this:false ~is_memoized:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [10:10-28]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -92,7 +92,7 @@
               ft_flags =
               (make_ft_flags FGenerator ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false);
+                ~readonly_this:false ~is_memoized:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [14:10-41]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }));
@@ -119,7 +119,7 @@
               ft_flags =
               (make_ft_flags FAsyncGenerator ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false);
+                ~readonly_this:false ~is_memoized:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [18:16-31]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }))

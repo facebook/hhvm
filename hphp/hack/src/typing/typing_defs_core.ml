@@ -424,6 +424,9 @@ module Flags = struct
   let get_ft_support_dynamic_type ft =
     is_set ft.ft_flags ft_flags_support_dynamic_type
 
+  (* This flag is set true only if the exact method has the memoized attribute. *)
+  let get_ft_is_memoized ft = is_set ft.ft_flags ft_flags_is_memoized
+
   let get_ft_ftk ft =
     if is_set ft.ft_flags ft_flags_instantiated_targs then
       FTKinstantiated_targs
@@ -482,7 +485,8 @@ module Flags = struct
       ~return_disposable
       ~returns_readonly
       ~readonly_this
-      ~support_dynamic_type =
+      ~support_dynamic_type
+      ~is_memoized =
     let flags = fun_kind_to_flags kind in
     let flags = set_bit ft_flags_return_disposable return_disposable flags in
     let flags = set_bit ft_flags_returns_readonly returns_readonly flags in
@@ -490,6 +494,7 @@ module Flags = struct
     let flags =
       set_bit ft_flags_support_dynamic_type support_dynamic_type flags
     in
+    let flags = set_bit ft_flags_is_memoized is_memoized flags in
     flags
 
   let mode_to_flags mode =
@@ -844,6 +849,11 @@ module Pp = struct
 
       Format.fprintf fmt "@[~%s:" "readonly_this";
       Format.fprintf fmt "%B" (get_ft_readonly_this ft);
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
+
+      Format.fprintf fmt "@[~%s:" "is_memoized";
+      Format.fprintf fmt "%B" (get_ft_is_memoized ft);
       Format.fprintf fmt "@]";
 
       Format.fprintf fmt ")@]"

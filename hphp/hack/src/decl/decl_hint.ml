@@ -187,7 +187,8 @@ and hint_ p env = function
             ~return_disposable:false
             ~returns_readonly:(readonly_opt readonly_ret)
             ~readonly_this:(readonly_opt ro)
-            ~support_dynamic_type:false;
+            ~support_dynamic_type:false
+            ~is_memoized:false;
         (* TODO: handle function parameters with <<CanCall>> *)
         ft_ifc_decl = default_ifc_fun_decl;
       }

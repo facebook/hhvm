@@ -4490,7 +4490,7 @@ and expr_
       | Some ety ->
         let (env, lty) = Env.expand_type env ety.ExpectedTy.ty.et_type in
         let expect_label =
-          match get_node (TUtils.strip_dynamic lty) with
+          match get_node (TUtils.strip_dynamic env lty) with
           | Tnewtype (name, _, _) ->
             String.equal SN.Classes.cEnumClassLabel name
           | _ -> false
@@ -8173,14 +8173,14 @@ and call
             let ety = param.fp_type.et_type in
             let (env, ety) = Env.expand_type env ety in
             let is_label =
-              match get_node (TUtils.strip_dynamic ety) with
+              match get_node (TUtils.strip_dynamic env ety) with
               | Tnewtype (name, _, _) ->
                 String.equal SN.Classes.cEnumClassLabel name
               | _ -> false
             in
             match arg with
             | EnumClassLabel (None, label_name) when is_label ->
-              (match get_node (TUtils.strip_dynamic ety) with
+              (match get_node (TUtils.strip_dynamic env ety) with
               | Tnewtype (name, [ty_enum; _ty_interface], _)
                 when String.equal name SN.Classes.cMemberOf
                      || String.equal name SN.Classes.cEnumClassLabel ->

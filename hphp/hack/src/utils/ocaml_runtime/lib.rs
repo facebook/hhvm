@@ -35,6 +35,7 @@ pub unsafe fn named_value<S: AsRef<str>>(name: S) -> Option<Value> {
     }
     Some(*named)
 }
+#[derive(Debug)]
 pub enum Error {
     NotInvokable,
     Exception(Value),

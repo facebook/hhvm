@@ -41,6 +41,7 @@ summary "Write oxidized/gen/"
   hphp/hack/src/annotated_ast/aast.ml                                         \
   hphp/hack/src/annotated_ast/namespace_env.ml                                \
   hphp/hack/src/ast/ast_defs.ml                                               \
+  hphp/hack/src/decl/decl_defs.ml                                             \
   hphp/hack/src/decl/pos/pos_or_decl.ml                                       \
   hphp/hack/src/deps/fileInfo.ml                                              \
   hphp/hack/src/deps/typing_deps_mode.ml                                      \
@@ -55,6 +56,14 @@ summary "Write oxidized/gen/"
   hphp/hack/src/options/parserOptions.ml                                      \
   hphp/hack/src/options/typecheckerOptions.ml                                 \
   hphp/hack/src/parser/full_fidelity_parser_env.ml                            \
+  hphp/hack/src/typing/tast.ml                                                \
+  hphp/hack/src/typing/type_parameter_env.ml                                  \
+  hphp/hack/src/typing/typing_defs_core.ml                                    \
+  hphp/hack/src/typing/typing_defs.ml                                         \
+  hphp/hack/src/typing/typing_inference_env.ml                                \
+  hphp/hack/src/typing/typing_kinding_defs.ml                                 \
+  hphp/hack/src/typing/typing_reason.ml                                       \
+  hphp/hack/src/typing/typing_tyvar_occurrences.ml                            \
   hphp/hack/src/utils/core/prim_defs.ml                                       \
   hphp/hack/src/utils/decl_reference.ml                                       \
   hphp/hack/src/parser/scoured_comments.ml                                    \

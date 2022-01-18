@@ -39,6 +39,12 @@ let visitor ctx =
   let skip_hierarchy_checks =
     TypecheckerOptions.skip_hierarchy_checks (Provider_context.get_tcopt ctx)
   in
+  let is_global_write_check_enabled =
+    0
+    <> List.length
+         (TypecheckerOptions.global_write_check_enabled
+            (Provider_context.get_tcopt ctx))
+  in
   Tast_visitor.iter_with
     (handlers
     @ irregular_handlers
@@ -86,6 +92,10 @@ let visitor ctx =
           else
             Some Class_const_origin_check.handler);
           Some Enum_classes_check.handler;
+          (if is_global_write_check_enabled then
+            Some Global_write_check.handler
+          else
+            None);
         ])
 
 let program ctx = (visitor ctx)#go ctx

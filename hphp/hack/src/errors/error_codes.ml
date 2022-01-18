@@ -658,6 +658,9 @@ module Typing = struct
     | HigherKindedTypesUnsupportedFeature [@value 4456]
     | ThisFinal [@value 4457]
     | ExactClassFinal [@value 4458]
+    | GlobalVariableWrite [@value 4459]
+    | GlobalVariableInFunctionCall [@value 4460]
+    | MemoizedFunctionCall [@value 4461]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

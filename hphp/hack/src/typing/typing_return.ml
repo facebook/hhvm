@@ -201,8 +201,8 @@ let check_inout_return ret_pos env =
           Typing_error.Callback.inout_return_type_mismatch
       | _ -> env)
 
-let rec remove_like_for_return ty =
-  match TUtils.try_strip_dynamic ty with
+let rec remove_like_for_return env ty =
+  match TUtils.try_strip_dynamic env ty with
   | Some ty -> ty
   | None ->
     (match get_node ty with
@@ -210,7 +210,7 @@ let rec remove_like_for_return ty =
       when String.equal class_name Naming_special_names.Classes.cAwaitable ->
       mk
         ( get_reason ty,
-          Tclass ((p, class_name), exact, [remove_like_for_return ty]) )
+          Tclass ((p, class_name), exact, [remove_like_for_return env ty]) )
     | _ -> ty)
 
 let fun_implicit_return env pos ret =
@@ -222,7 +222,7 @@ let fun_implicit_return env pos ret =
        * erroring about a missing `return` statement would stop if the return type were
        * pessimised. This preserves the behavior that a function explicitly returning dynamic
        * can have an implicit return, while requiring an explicit return for like types. *)
-      remove_like_for_return ret
+      remove_like_for_return env ret
     else
       ret
   in

@@ -525,8 +525,10 @@ val has_ancestor_including_req :
 (* If input is dynamic | t or t | dynamic then return Some t.
  * Otherwise return None.
  *)
-val try_strip_dynamic : Typing_defs.locl_ty -> Typing_defs.locl_ty option
+val try_strip_dynamic :
+  Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty option
 
 (* If input is dynamic | t or t | dynamic then return t,
  * otherwise return type unchanged. *)
-val strip_dynamic : Typing_defs.locl_ty -> Typing_defs.locl_ty
+val strip_dynamic :
+  Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty

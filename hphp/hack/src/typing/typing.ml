@@ -819,7 +819,7 @@ let requires_consistent_construct = function
 let expand_expected_and_get_node
     ?(allow_supportdyn = false) env (expected : ExpectedTy.t option) =
   let rec unbox env ty =
-    match TUtils.try_strip_dynamic ty with
+    match TUtils.try_strip_dynamic env ty with
     | Some stripped_ty ->
       if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
         let (env, opt_ty) = Typing_dynamic.try_push_like env stripped_ty in

@@ -701,16 +701,20 @@ and has_ancestor_including_req_refl env sub_id super_id =
   | None -> false
   | Some cls -> has_ancestor_including_req env cls super_id
 
-let try_strip_dynamic ty =
+let rec try_strip_dynamic_from_union env r tyl =
+  let (dyns, nondyns) = List.partition_tf tyl ~f:Typing_defs.is_dynamic in
+  match (dyns, nondyns) with
+  | ([], _) -> None
+  | (_, [ty]) -> Some (strip_dynamic env ty)
+  | (_, _) -> Some (Typing_make_type.union r nondyns)
+
+and try_strip_dynamic env ty =
+  let (env, ty) = Env.expand_type env ty in
   match get_node ty with
-  | Tunion [t1; t2] ->
-    (match (get_node t1, get_node t2) with
-    | (Tdynamic, _) -> Some t2
-    | (_, Tdynamic) -> Some t1
-    | _ -> None)
+  | Tunion tyl -> try_strip_dynamic_from_union env (get_reason ty) tyl
   | _ -> None
 
-let strip_dynamic ty =
-  match try_strip_dynamic ty with
+and strip_dynamic env ty =
+  match try_strip_dynamic env ty with
   | None -> ty
   | Some ty -> ty

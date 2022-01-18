@@ -1098,7 +1098,7 @@ and simplify_subtype_i
          *)
         let try_push env =
           if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-            match TUtils.try_strip_dynamic ty_super with
+            match TUtils.try_strip_dynamic env ty_super with
             | None -> invalid_env env
             | Some ty ->
               let (env, opt_ty) = Typing_dynamic.try_push_like env ty in

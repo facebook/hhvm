@@ -171,6 +171,36 @@ let make_like changed ty =
     let r = get_reason ty in
     (true, Typing_make_type.locl_like r ty)
 
+let push_like_tyargs env tyl tparams =
+  if List.length tyl <> List.length tparams then
+    (false, tyl)
+  else
+    (* Only push like onto type argument if it produces a well-formed type
+     * i.e. satisfies any as constraints
+     *)
+    let make_like changed ty tp =
+      let (changed', ty') = make_like changed ty in
+      if
+        List.for_all tp.tp_constraints ~f:(fun (c, cty) ->
+            match c with
+            | Ast_defs.Constraint_as ->
+              let (_env, cty) =
+                Typing_phase.localize_no_subst env ~ignore_errors:true cty
+              in
+              Typing_utils.is_sub_type_for_union
+                ~coerce:(Some Typing_logic.CoerceToDynamic)
+                env
+                ty'
+                cty
+            | _ -> true)
+      then
+        (changed', ty')
+      else
+        (changed, ty)
+    in
+
+    List.map2_env false tyl tparams ~f:make_like
+
 let try_push_like env ty =
   match deref ty with
   | (r, Ttuple tyl) ->
@@ -193,45 +223,28 @@ let try_push_like env ty =
         Some (mk (r, Tshape (kind, fields)))
       else
         None )
+  | (r, Tnewtype (n, tyl, bound)) ->
+    begin
+      match Env.get_typedef env n with
+      | None -> (env, None)
+      | Some td ->
+        let (changed, tyl) = push_like_tyargs env tyl td.td_tparams in
+        ( env,
+          if changed then
+            Some (mk (r, Tnewtype (n, tyl, bound)))
+          else
+            None )
+    end
   | (r, Tclass ((p, n), exact, tyl)) ->
     begin
       match Env.get_class env n with
       | None -> (env, None)
       | Some cd ->
-        if List.length tyl <> List.length (Cls.tparams cd) then
-          (env, None)
-        else
-          (* Only push like onto type argument if it produces a well-formed type
-           * i.e. satisfies any as constraints
-           *)
-          let make_like changed ty tp =
-            let (changed', ty') = make_like changed ty in
-            if
-              List.for_all tp.tp_constraints ~f:(fun (c, cty) ->
-                  match c with
-                  | Ast_defs.Constraint_as ->
-                    let (_env, cty) =
-                      Typing_phase.localize_no_subst env ~ignore_errors:true cty
-                    in
-                    Typing_utils.is_sub_type_for_union
-                      ~coerce:(Some Typing_logic.CoerceToDynamic)
-                      env
-                      ty'
-                      cty
-                  | _ -> true)
-            then
-              (changed', ty')
-            else
-              (changed, ty)
-          in
-          let (changed, tyl) =
-            List.map2_env false tyl (Cls.tparams cd) ~f:make_like
-          in
-          ( env,
-            if changed then
-              let rty = mk (r, Tclass ((p, n), exact, tyl)) in
-              Some rty
-            else
-              None )
+        let (changed, tyl) = push_like_tyargs env tyl (Cls.tparams cd) in
+        ( env,
+          if changed then
+            Some (mk (r, Tclass ((p, n), exact, tyl)))
+          else
+            None )
     end
   | _ -> (env, None)

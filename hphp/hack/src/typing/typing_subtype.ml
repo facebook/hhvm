@@ -1090,6 +1090,19 @@ and simplify_subtype_i
       simplify_subtype_i ~subtype_env ~this_ty ty_sub (LoclType ty_super') env
     | (_, Tunion (_ :: _ as tyl_super)) ->
       let simplify_sub_union env ty_sub tyl_super =
+        let finish env =
+          match ty_sub with
+          | LoclType lty ->
+            begin
+              match get_node lty with
+              | Tnewtype _
+              | Tdependent _
+              | Tgeneric _ ->
+                default_subtype env
+              | _ -> invalid_env env
+            end
+          | _ -> invalid_env env
+        in
         (* Implement the declarative subtyping rule C<~t1,...,~tn> <: ~C<t1,...,tn>
          * for a type C<t1,...,tn> that supports dynamic. Algorithmically,
          *   t <: ~C<t1,...,tn> iff
@@ -1099,11 +1112,11 @@ and simplify_subtype_i
         let try_push env =
           if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
             match TUtils.try_strip_dynamic env ty_super with
-            | None -> invalid_env env
+            | None -> finish env
             | Some ty ->
               let (env, opt_ty) = Typing_dynamic.try_push_like env ty in
               (match opt_ty with
-              | None -> invalid_env env
+              | None -> finish env
               | Some ty ->
                 let simplify_pushed_like env =
                   env
@@ -1120,7 +1133,7 @@ and simplify_subtype_i
                 in
                 env |> simplify_pushed_like)
           else
-            invalid_env env
+            finish env
         in
 
         (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
@@ -1129,27 +1142,16 @@ and simplify_subtype_i
          * particular situation won't arise.
          * TODO: identify under what circumstances this reduction is complete.
          *)
-        let rec try_each tys env =
+        let rec try_disjuncts tys env =
           match tys with
-          | [] ->
-            (match ty_sub with
-            | LoclType lty ->
-              begin
-                match get_node lty with
-                | Tnewtype _
-                | Tdependent _
-                | Tgeneric _ ->
-                  default_subtype env
-                | _ -> try_push env
-              end
-            | _ -> try_push env)
+          | [] -> try_push env
           | ty :: tys ->
             let ty = LoclType ty in
             env
             |> simplify_subtype_i ~subtype_env ~this_ty ty_sub ty
-            ||| try_each tys
+            ||| try_disjuncts tys
         in
-        env |> try_each tyl_super
+        env |> try_disjuncts tyl_super
       in
       (match ety_sub with
       | ConstraintType cty when is_constraint_type_union cty ->

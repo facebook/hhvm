@@ -521,17 +521,17 @@ module ProfileTypeCheck = struct
       ~start_batch_stats:_ =
     ()
 
-  let process_file
+  let process_workitem
       ~batch_info:_
-      ~file_index:_
+      ~workitem_index:_
       ~file:_
       ~file_was_already_deferred:_
       ~decl:_
       ~error_code:_
-      ~file_ends_under_cap:_
-      ~file_start_stats:_
-      ~file_end_stats:_
-      ~file_end_second_stats:_ =
+      ~workitem_ends_under_cap:_
+      ~workitem_start_stats:_
+      ~workitem_end_stats:_
+      ~workitem_end_second_stats:_ =
     ()
 
   let compute_tast ~path:_ ~telemetry:_ ~start_time:_ = ()

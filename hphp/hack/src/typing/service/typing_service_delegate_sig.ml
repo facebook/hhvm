@@ -28,18 +28,18 @@ module type Delegate_sig = sig
   val stop : state -> state
 
   val next :
-    files_to_process ->
-    file_computation Hash_set.Poly.t ->
+    workitems_to_process ->
+    workitem Hash_set.Poly.t ->
     state ->
     state * delegate_next_result option
 
-  val merge : state -> Errors.t -> computation_progress -> state
+  val merge : state -> Errors.t -> typing_progress -> state
 
-  val on_cancelled : state -> file_computation list * state
+  val on_cancelled : state -> workitem list * state
 
-  val process : delegate_job_sig -> typing_result * computation_progress
+  val process : delegate_job_sig -> typing_result * typing_progress
 
-  val steal : state -> int -> file_computation list * state
+  val steal : state -> int -> workitem list * state
 
   val add_telemetry : state -> Telemetry.t -> Telemetry.t
 

@@ -8,14 +8,14 @@
 
 open Hh_prelude
 
-type check_file_computation = {
+type check_file_workitem = {
   path: Relative_path.t;
   was_already_deferred: bool;
 }
 [@@deriving show]
 
-type file_computation =
-  | Check of check_file_computation
+type workitem =
+  | Check of check_file_workitem
   | Declare of (Relative_path.t * string)
   | Prefetch of Relative_path.t list
 [@@deriving show]
@@ -24,10 +24,10 @@ type file_computation =
 INPUT: [remaining] is the list of files that this job is expected to process, and [completed], [deferred] are empty.
 OUTPUT: all the files that were processed by the job are placed in [completed] or [deferred];
 if the job had to stop early, then [remaining] are the leftover files that the job failed to process. *)
-type computation_progress = {
-  remaining: file_computation list;
-  completed: file_computation list;
-  deferred: file_computation list;
+type typing_progress = {
+  remaining: workitem list;
+  completed: workitem list;
+  deferred: workitem list;
 }
 [@@deriving show]
 
@@ -70,7 +70,7 @@ let accumulate_job_output
       Telemetry.add produced_by_job.telemetry accumulated_so_far.telemetry;
   }
 
-type delegate_job_sig = unit -> typing_result * computation_progress
+type delegate_job_sig = unit -> typing_result * typing_progress
 
 type progress_kind =
   | Progress
@@ -78,7 +78,7 @@ type progress_kind =
 
 type job_progress = {
   kind: progress_kind;
-  progress: computation_progress;
+  progress: typing_progress;
 }
 
 type check_info = {
@@ -90,13 +90,13 @@ type check_info = {
   memtrace_dir: string option;
 }
 
-type files_to_process = file_computation BigList.t
+type workitems_to_process = workitem BigList.t
 
-type files_in_progress = file_computation list
+type workitems_in_progress = workitem list
 
 type delegate_next_result = {
-  current_bucket: file_computation list;
-  remaining_jobs: file_computation BigList.t;
+  current_bucket: workitem list;
+  remaining_jobs: workitem BigList.t;
   job: delegate_job_sig;
 }
 

@@ -16,12 +16,11 @@ type process_file_results = {
   deferred_decls: Deferred_decl.deferment list;
 }
 
-val should_enable_deferring :
-  Typing_service_types.check_file_computation -> bool
+val should_enable_deferring : Typing_service_types.check_file_workitem -> bool
 
 val process_file :
   Provider_context.t ->
-  Typing_service_types.check_file_computation ->
+  Typing_service_types.check_file_workitem ->
   decl_cap_mb:int option ->
   process_file_results
 

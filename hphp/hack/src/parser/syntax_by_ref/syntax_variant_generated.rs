@@ -1200,6 +1200,7 @@ pub struct XHPCategoryDeclarationChildren<'a, T, V> {
 
 #[derive(Debug, Clone)]
 pub struct XHPEnumTypeChildren<'a, T, V> {
+    pub like: Syntax<'a, T, V>,
     pub keyword: Syntax<'a, T, V>,
     pub left_brace: Syntax<'a, T, V>,
     pub values: Syntax<'a, T, V>,

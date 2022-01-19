@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7a9b5c6c1d991189f1d2b470190448aa>>
+// @generated SignedSource<<e0eda81c334e619d25800381853c425b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2025,6 +2025,8 @@ arena_deserializer::impl_deserialize_in_arena!(ClassTypeconstDef<'arena, Ex, En>
 )]
 #[repr(C)]
 pub struct XhpAttrInfo<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub like: Option<&'a Pos<'a>>,
     pub tag: Option<oxidized::aast::XhpAttrTag>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub enum_values: &'a [ast_defs::XhpEnumValue<'a>],

@@ -1169,10 +1169,11 @@ ss.serialize_field("xhp_category_categories", &self.with(categories))?;
 ss.serialize_field("xhp_category_semicolon", &self.with(semicolon))?;
       ss.end()
 } 
-SyntaxVariant::XHPEnumType (XHPEnumTypeChildren{keyword,left_brace,values,right_brace} ) => {
-      let mut ss = s.serialize_struct("", 5)?;
+SyntaxVariant::XHPEnumType (XHPEnumTypeChildren{like,keyword,left_brace,values,right_brace} ) => {
+      let mut ss = s.serialize_struct("", 6)?;
       ss.serialize_field("kind", "xhp_enum_type")?;
-      ss.serialize_field("xhp_enum_keyword", &self.with(keyword))?;
+      ss.serialize_field("xhp_enum_like", &self.with(like))?;
+ss.serialize_field("xhp_enum_keyword", &self.with(keyword))?;
 ss.serialize_field("xhp_enum_left_brace", &self.with(left_brace))?;
 ss.serialize_field("xhp_enum_values", &self.with(values))?;
 ss.serialize_field("xhp_enum_right_brace", &self.with(right_brace))?;

@@ -566,8 +566,8 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         <Self as FlattenSmartConstructors<'src, Self>>::make_xhp_category_declaration(self, keyword, categories, semicolon)
     }
 
-    fn make_xhp_enum_type(&mut self, keyword: Self::R, left_brace: Self::R, values: Self::R, right_brace: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, Self>>::make_xhp_enum_type(self, keyword, left_brace, values, right_brace)
+    fn make_xhp_enum_type(&mut self, like: Self::R, keyword: Self::R, left_brace: Self::R, values: Self::R, right_brace: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_xhp_enum_type(self, like, keyword, left_brace, values, right_brace)
     }
 
     fn make_xhp_lateinit(&mut self, at: Self::R, keyword: Self::R) -> Self::R {

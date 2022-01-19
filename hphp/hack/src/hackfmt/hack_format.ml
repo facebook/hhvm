@@ -1796,12 +1796,14 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         ]
     | Syntax.XHPEnumType
         {
+          xhp_enum_like = l;
           xhp_enum_keyword = kw;
           xhp_enum_left_brace = left_b;
           xhp_enum_values = values;
           xhp_enum_right_brace = right_b;
         } ->
-      Concat [t env kw; Space; transform_argish env left_b values right_b]
+      Concat
+        [t env l; t env kw; Space; transform_argish env left_b values right_b]
     | Syntax.XHPClassAttributeDeclaration
         {
           xhp_attribute_keyword = kw;

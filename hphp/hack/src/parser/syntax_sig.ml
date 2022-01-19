@@ -772,6 +772,7 @@ module type Syntax_S = sig
         xhp_category_semicolon: t;
       }
     | XHPEnumType of {
+        xhp_enum_like: t;
         xhp_enum_keyword: t;
         xhp_enum_left_brace: t;
         xhp_enum_values: t;
@@ -1323,7 +1324,7 @@ module type Syntax_S = sig
 
   val make_xhp_category_declaration : t -> t -> t -> t
 
-  val make_xhp_enum_type : t -> t -> t -> t -> t
+  val make_xhp_enum_type : t -> t -> t -> t -> t -> t
 
   val make_xhp_lateinit : t -> t -> t
 

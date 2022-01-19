@@ -1407,8 +1407,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_xhp_enum_type(ctx: &C, keyword: Self, left_brace: Self, values: Self, right_brace: Self) -> Self {
+    fn make_xhp_enum_type(ctx: &C, like: Self, keyword: Self, left_brace: Self, values: Self, right_brace: Self) -> Self {
         let syntax = SyntaxVariant::XHPEnumType(ctx.get_arena().alloc(XHPEnumTypeChildren {
+            like,
             keyword,
             left_brace,
             values,

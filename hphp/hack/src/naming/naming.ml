@@ -1018,16 +1018,32 @@ and xhp_attribute_decl env (h, cv, tag, maybe_enum) =
         Some (p, Aast.Hoption (p, h))
     | None -> None
   in
+  let (like, enum_values) =
+    match cv.Aast.cv_xhp_attr with
+    | Some xai -> (xai.Aast.xai_like, xai.Aast.xai_enum_values)
+    | None -> (None, [])
+  in
+  let hint_ =
+    Option.map
+      ~f:(fun hint ->
+        match like with
+        | Some plike ->
+          if
+            not
+              (TypecheckerOptions.like_type_hints
+                 (Provider_context.get_tcopt env.ctx))
+          then
+            Errors.experimental_feature p "like-types";
+
+          (plike, Aast.Hlike hint)
+        | _ -> hint)
+      hint_
+  in
   let hint_ = ((), hint_) in
   let hint_ = Aast.type_hint_option_map hint_ ~f:(hint env) in
   let (expr, _) = class_prop_expr_is_xhp env cv in
-  let enum_values =
-    match cv.Aast.cv_xhp_attr with
-    | Some xai -> xai.Aast.xai_enum_values
-    | None -> []
-  in
   let xhp_attr_info =
-    Some { N.xai_tag = tag; N.xai_enum_values = enum_values }
+    Some { N.xai_like = like; N.xai_tag = tag; N.xai_enum_values = enum_values }
   in
   {
     N.cv_final = cv.Aast.cv_final;
@@ -1168,7 +1184,7 @@ and class_prop_expr_is_xhp env cv =
   (expr, is_xhp)
 
 and make_xhp_attr = function
-  | true -> Some { N.xai_tag = None; N.xai_enum_values = [] }
+  | true -> Some { N.xai_like = None; N.xai_tag = None; N.xai_enum_values = [] }
   | false -> None
 
 and class_prop_static env cv =

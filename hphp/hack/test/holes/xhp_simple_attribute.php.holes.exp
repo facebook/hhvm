@@ -26,7 +26,7 @@
           cv_id = ([10:18-23], "line"); cv_expr = None; cv_user_attributes = []; 
           cv_doc_comment = None; cv_is_promoted_variadic = false; cv_is_static = false; 
           cv_span = [10:18-23] };
-        { cv_final = false; cv_xhp_attr = (Some { xai_tag = (Some Required); xai_enum_values = [] }); 
+        { cv_final = false; cv_xhp_attr = (Some { xai_like = None; xai_tag = (Some Required); xai_enum_values = [] }); 
           cv_abstract = false; cv_readonly = false; cv_visibility = Public; 
           cv_type = ((int), (Some ([5:15-18], (Hprim Tint)))); cv_id = ([5:19-23], ":prop"); 
           cv_expr = None; cv_user_attributes = []; cv_doc_comment = None; 

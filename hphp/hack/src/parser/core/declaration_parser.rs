@@ -933,10 +933,30 @@ where
         }
     }
 
+    fn parse_xhp_attribute_enum(&mut self) -> S::R {
+        let like_token = if self.peek_token_kind() == TokenKind::Tilde {
+            self.assert_token(TokenKind::Tilde)
+        } else {
+            S!(make_missing, self, self.pos())
+        };
+        let enum_token = self.assert_token(TokenKind::Enum);
+        let (left_brace, values, right_brace) =
+            self.parse_braced_comma_list_opt_allow_trailing(|x: &mut Self| x.parse_expression());
+        S!(
+            make_xhp_enum_type,
+            self,
+            like_token,
+            enum_token,
+            left_brace,
+            values,
+            right_brace
+        )
+    }
+
     fn parse_xhp_type_specifier(&mut self) -> S::R {
         // SPEC (Draft)
         // xhp-type-specifier:
-        //   enum { xhp-attribute-enum-list  ,-opt  }
+        //   (enum | ~enum) { xhp-attribute-enum-list  ,-opt  }
         //   type-specifier
         //
         // The list of enum values must have at least one value and can be
@@ -956,25 +976,11 @@ where
         //
         // An empty list is illegal, but we allow it here and give an error in
         // a later pass.
-        let mut parser1 = self.clone();
-        let token = parser1.next_token();
-        match token.kind() {
-            TokenKind::Enum => {
-                self.continue_from(parser1);
-                let enum_token = S!(make_token, self, token);
-                let (left_brace, values, right_brace) = self
-                    .parse_braced_comma_list_opt_allow_trailing(|x: &mut Self| {
-                        x.parse_expression()
-                    });
-                S!(
-                    make_xhp_enum_type,
-                    self,
-                    enum_token,
-                    left_brace,
-                    values,
-                    right_brace
-                )
+        match self.peek_token_kind() {
+            TokenKind::Tilde if self.peek_token_kind_with_lookahead(1) == TokenKind::Enum => {
+                self.parse_xhp_attribute_enum()
             }
+            TokenKind::Enum => self.parse_xhp_attribute_enum(),
             _ => self.parse_type_specifier(true, true),
         }
     }

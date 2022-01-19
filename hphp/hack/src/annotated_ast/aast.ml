@@ -932,6 +932,7 @@ and ('ex, 'en) class_typeconst_def = {
 }
 
 and xhp_attr_info = {
+  xai_like: pos option;
   xai_tag: xhp_attr_tag option;
   xai_enum_values: Ast_defs.xhp_enum_value list;
 }

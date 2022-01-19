@@ -581,8 +581,8 @@ where
         Node(self.0.make_xhp_category_declaration(keyword.0, categories.0, semicolon.0), self.1.make_xhp_category_declaration(keyword.1, categories.1, semicolon.1))
     }
 
-    fn make_xhp_enum_type(&mut self, keyword: Self::R, left_brace: Self::R, values: Self::R, right_brace: Self::R) -> Self::R {
-        Node(self.0.make_xhp_enum_type(keyword.0, left_brace.0, values.0, right_brace.0), self.1.make_xhp_enum_type(keyword.1, left_brace.1, values.1, right_brace.1))
+    fn make_xhp_enum_type(&mut self, like: Self::R, keyword: Self::R, left_brace: Self::R, values: Self::R, right_brace: Self::R) -> Self::R {
+        Node(self.0.make_xhp_enum_type(like.0, keyword.0, left_brace.0, values.0, right_brace.0), self.1.make_xhp_enum_type(like.1, keyword.1, left_brace.1, values.1, right_brace.1))
     }
 
     fn make_xhp_lateinit(&mut self, at: Self::R, keyword: Self::R) -> Self::R {

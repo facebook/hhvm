@@ -4776,9 +4776,13 @@ where
                                 Pos::btw(&p, &Self::p_pos(&c.initializer, env))
                                     .map_err(Error::Failwith)?
                             };
-                            let (hint, enum_values, enum_) = match &c.type_.children {
+                            let (hint, like, enum_values, enum_) = match &c.type_.children {
                                 XHPEnumType(c1) => {
                                     let p = Self::p_pos(&c.type_, env);
+                                    let like = match &c1.like.children {
+                                        Missing => None,
+                                        _ => Some(Self::p_pos(&c1.like, env)),
+                                    };
                                     let vals = Self::could_map(Self::p_expr, &c1.values, env)?;
                                     let mut enum_vals = vec![];
                                     for val in vals.clone() {
@@ -4800,9 +4804,9 @@ where
                                             _ => {}
                                         }
                                     }
-                                    (None, enum_vals, Some((p, vals)))
+                                    (None, like, enum_vals, Some((p, vals)))
                                 }
-                                _ => (Some(Self::p_hint(&c.type_, env)?), vec![], None),
+                                _ => (Some(Self::p_hint(&c.type_, env)?), None, vec![], None),
                             };
                             let init_expr =
                                 Self::mp_optional(Self::p_simple_initializer, &c.initializer, env)?;
@@ -4811,6 +4815,7 @@ where
                                 ast::ClassVar {
                                     final_: false,
                                     xhp_attr: Some(ast::XhpAttrInfo {
+                                        like,
                                         tag: req,
                                         enum_values,
                                     }),

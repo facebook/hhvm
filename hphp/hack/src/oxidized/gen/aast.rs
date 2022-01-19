@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<592730b8e4a643f2bc654dc0bd9d839d>>
+// @generated SignedSource<<8e4a623430310afe93b213d33f2dda29>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1606,6 +1606,7 @@ pub struct ClassTypeconstDef<Ex, En> {
 )]
 #[repr(C)]
 pub struct XhpAttrInfo {
+    pub like: Option<Pos>,
     pub tag: Option<XhpAttrTag>,
     pub enum_values: Vec<ast_defs::XhpEnumValue>,
 }

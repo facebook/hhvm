@@ -1803,6 +1803,7 @@ let schema : schema_node list =
       aggregates = [Specifier];
       fields =
         [
+          ("like", ZeroOrOne Token);
           ("keyword", Token);
           ("left_brace", Token);
           ("values", ZeroOrMore (Just "LiteralExpression"));

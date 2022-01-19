@@ -2007,11 +2007,13 @@ module WithToken (Token : TokenType) = struct
         acc
       | XHPEnumType
           {
+            xhp_enum_like;
             xhp_enum_keyword;
             xhp_enum_left_brace;
             xhp_enum_values;
             xhp_enum_right_brace;
           } ->
+        let acc = f acc xhp_enum_like in
         let acc = f acc xhp_enum_keyword in
         let acc = f acc xhp_enum_left_brace in
         let acc = f acc xhp_enum_values in
@@ -3619,12 +3621,14 @@ module WithToken (Token : TokenType) = struct
         [xhp_category_keyword; xhp_category_categories; xhp_category_semicolon]
       | XHPEnumType
           {
+            xhp_enum_like;
             xhp_enum_keyword;
             xhp_enum_left_brace;
             xhp_enum_values;
             xhp_enum_right_brace;
           } ->
         [
+          xhp_enum_like;
           xhp_enum_keyword;
           xhp_enum_left_brace;
           xhp_enum_values;
@@ -5232,12 +5236,14 @@ module WithToken (Token : TokenType) = struct
         ]
       | XHPEnumType
           {
+            xhp_enum_like;
             xhp_enum_keyword;
             xhp_enum_left_brace;
             xhp_enum_values;
             xhp_enum_right_brace;
           } ->
         [
+          "xhp_enum_like";
           "xhp_enum_keyword";
           "xhp_enum_left_brace";
           "xhp_enum_values";
@@ -7036,6 +7042,7 @@ module WithToken (Token : TokenType) = struct
           }
       | ( SyntaxKind.XHPEnumType,
           [
+            xhp_enum_like;
             xhp_enum_keyword;
             xhp_enum_left_brace;
             xhp_enum_values;
@@ -7043,6 +7050,7 @@ module WithToken (Token : TokenType) = struct
           ] ) ->
         XHPEnumType
           {
+            xhp_enum_like;
             xhp_enum_keyword;
             xhp_enum_left_brace;
             xhp_enum_values;
@@ -9264,6 +9272,7 @@ module WithToken (Token : TokenType) = struct
         make syntax value
 
       let make_xhp_enum_type
+          xhp_enum_like
           xhp_enum_keyword
           xhp_enum_left_brace
           xhp_enum_values
@@ -9271,6 +9280,7 @@ module WithToken (Token : TokenType) = struct
         let syntax =
           XHPEnumType
             {
+              xhp_enum_like;
               xhp_enum_keyword;
               xhp_enum_left_brace;
               xhp_enum_values;

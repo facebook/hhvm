@@ -1294,11 +1294,12 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             XHPEnumType(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.keyword),
-                    1 => Some(&x.left_brace),
-                    2 => Some(&x.values),
-                    3 => Some(&x.right_brace),
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.like),
+                    1 => Some(&x.keyword),
+                    2 => Some(&x.left_brace),
+                    3 => Some(&x.values),
+                    4 => Some(&x.right_brace),
                         _ => None,
                     }
                 })

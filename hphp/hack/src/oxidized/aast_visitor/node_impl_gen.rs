@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6672b1e15b28000e4f835e4dbd877cdb>>
+// @generated SignedSource<<4ec9c84faa72364739b6d84c4b2549e8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2252,6 +2252,7 @@ impl<P: Params> Node<P> for XhpAttrInfo {
         c: &mut P::Context,
         v: &mut dyn Visitor<'node, P = P>,
     ) -> Result<(), P::Error> {
+        self.like.accept(c, v)?;
         self.tag.accept(c, v)?;
         self.enum_values.accept(c, v)?;
         Ok(())

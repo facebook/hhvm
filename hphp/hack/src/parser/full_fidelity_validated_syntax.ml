@@ -5307,6 +5307,7 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             validate_list_with validate_literal_expression x.xhp_enum_values;
           xhp_enum_left_brace = validate_token x.xhp_enum_left_brace;
           xhp_enum_keyword = validate_token x.xhp_enum_keyword;
+          xhp_enum_like = validate_option_with validate_token x.xhp_enum_like;
         } )
     | s -> validation_fail (Some SyntaxKind.XHPEnumType) s
 
@@ -5316,6 +5317,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       Syntax.syntax =
         Syntax.XHPEnumType
           {
+            xhp_enum_like =
+              invalidate_option_with invalidate_token x.xhp_enum_like;
             xhp_enum_keyword = invalidate_token x.xhp_enum_keyword;
             xhp_enum_left_brace = invalidate_token x.xhp_enum_left_brace;
             xhp_enum_values =

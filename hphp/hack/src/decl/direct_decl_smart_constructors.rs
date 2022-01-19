@@ -821,7 +821,7 @@ pub enum Node<'a> {
     FloatingLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
     BooleanLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
     Ty(&'a Ty<'a>),
-    XhpEnumTy(&'a (&'a Ty<'a>, &'a [XhpEnumValue<'a>])),
+    XhpEnumTy(&'a (Option<&'a Pos<'a>>, &'a Ty<'a>, &'a [XhpEnumValue<'a>])),
     ListItem(&'a (Node<'a>, Node<'a>)),
     Const(&'a ShallowClassConst<'a>), // For the "X=1" in enums "enum E {X=1}" and enum-classes "enum class C {int X=1}", and also for consts via make_const_declaration
     ConstInitializer(&'a (Node<'a>, Node<'a>, &'a [typing_defs::ClassConstRef<'a>])), // Stores (X,1,refs) for "X=1" in top-level "const int X=1" and class-const "public const int X=1".
@@ -4200,9 +4200,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             let Id(pos, name) = node.name;
             let name = prefix_colon(self.arena, name);
 
-            let (type_, enum_values) = match node.hint {
-                Node::XhpEnumTy((ty, values)) => (Some(*ty), Some(values)),
-                _ => (self.node_to_ty(node.hint), None),
+            let (like, type_, enum_values) = match node.hint {
+                Node::XhpEnumTy((like, ty, values)) => (*like, Some(*ty), Some(values)),
+                _ => (None, self.node_to_ty(node.hint), None),
             };
             if let Some(enum_values) = enum_values {
                 xhp_attr_enum_values.push((name, *enum_values));
@@ -4218,6 +4218,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             } else {
                 type_
             };
+            let type_ = type_.map(|t| match like {
+                Some(p) => self.alloc(Ty(self.alloc(Reason::hint(p)), Ty_::Tlike(t))),
+                None => t,
+            });
 
             let mut flags = PropFlags::empty();
             flags.set(PropFlags::NEEDS_INIT, node.needs_init);
@@ -4253,6 +4257,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
     ///   }
     fn make_xhp_enum_type(
         &mut self,
+        like: Self::R,
         enum_keyword: Self::R,
         _left_brace: Self::R,
         xhp_enum_values: Self::R,
@@ -4269,7 +4274,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 let ty_ = node_ty.1;
                 Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_)))
             });
-
         let mut values = Vec::new_in(self.arena);
         for node in xhp_enum_values.iter() {
             // XHP enum values may only be string or int literals.
@@ -4287,7 +4291,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
 
         match ty {
-            Some(ty) => Node::XhpEnumTy(self.alloc((&ty, values.into_bump_slice()))),
+            Some(ty) => {
+                Node::XhpEnumTy(self.alloc((self.get_pos_opt(like), &ty, values.into_bump_slice())))
+            }
             None => Node::Ignored(SK::XHPEnumType),
         }
     }

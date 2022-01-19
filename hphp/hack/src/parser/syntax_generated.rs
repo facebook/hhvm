@@ -1401,8 +1401,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_xhp_enum_type(_: &C, xhp_enum_keyword: Self, xhp_enum_left_brace: Self, xhp_enum_values: Self, xhp_enum_right_brace: Self) -> Self {
+    fn make_xhp_enum_type(_: &C, xhp_enum_like: Self, xhp_enum_keyword: Self, xhp_enum_left_brace: Self, xhp_enum_values: Self, xhp_enum_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::XHPEnumType(Box::new(XHPEnumTypeChildren {
+            xhp_enum_like,
             xhp_enum_keyword,
             xhp_enum_left_brace,
             xhp_enum_values,
@@ -2882,7 +2883,8 @@ where
                 acc
             },
             SyntaxVariant::XHPEnumType(x) => {
-                let XHPEnumTypeChildren { xhp_enum_keyword, xhp_enum_left_brace, xhp_enum_values, xhp_enum_right_brace } = *x;
+                let XHPEnumTypeChildren { xhp_enum_like, xhp_enum_keyword, xhp_enum_left_brace, xhp_enum_values, xhp_enum_right_brace } = *x;
+                let acc = f(xhp_enum_like, acc);
                 let acc = f(xhp_enum_keyword, acc);
                 let acc = f(xhp_enum_left_brace, acc);
                 let acc = f(xhp_enum_values, acc);
@@ -4268,11 +4270,12 @@ where
                  xhp_category_keyword: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::XHPEnumType, 4) => SyntaxVariant::XHPEnumType(Box::new(XHPEnumTypeChildren {
+             (SyntaxKind::XHPEnumType, 5) => SyntaxVariant::XHPEnumType(Box::new(XHPEnumTypeChildren {
                  xhp_enum_right_brace: ts.pop().unwrap(),
                  xhp_enum_values: ts.pop().unwrap(),
                  xhp_enum_left_brace: ts.pop().unwrap(),
                  xhp_enum_keyword: ts.pop().unwrap(),
+                 xhp_enum_like: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::XHPLateinit, 2) => SyntaxVariant::XHPLateinit(Box::new(XHPLateinitChildren {
@@ -5558,6 +5561,7 @@ pub struct XHPCategoryDeclarationChildren<T, V> {
 
 #[derive(Debug, Clone)]
 pub struct XHPEnumTypeChildren<T, V> {
+    pub xhp_enum_like: Syntax<T, V>,
     pub xhp_enum_keyword: Syntax<T, V>,
     pub xhp_enum_left_brace: Syntax<T, V>,
     pub xhp_enum_values: Syntax<T, V>,
@@ -7331,11 +7335,12 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             XHPEnumType(x) => {
-                get_index(4).and_then(|index| { match index {
-                        0 => Some(&x.xhp_enum_keyword),
-                    1 => Some(&x.xhp_enum_left_brace),
-                    2 => Some(&x.xhp_enum_values),
-                    3 => Some(&x.xhp_enum_right_brace),
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.xhp_enum_like),
+                    1 => Some(&x.xhp_enum_keyword),
+                    2 => Some(&x.xhp_enum_left_brace),
+                    3 => Some(&x.xhp_enum_values),
+                    4 => Some(&x.xhp_enum_right_brace),
                         _ => None,
                     }
                 })

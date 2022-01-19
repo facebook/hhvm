@@ -2230,7 +2230,7 @@ const Object& Generator::getObject(const ObjectType& type) const {
     if (type.name.linkage == ObjectTypeName::Linkage::internal) {
       // Newer clang seems to split some types into different units,
       // or at least we are not able to tell that they are the same.
-      std::cerr << "gen-type-scanners: warning: "
+      std::cout << "gen-type-scanners: warning: "
         "No matching type found for internal linkage type " <<
         type.name.name << " in same compile unit.  "
         "Trying other compile units." << std::endl;

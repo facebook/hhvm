@@ -1294,8 +1294,6 @@ struct RuntimeOption {
    * e.g. {'pure' => 2, 'rx' => 1}                                      \
    */                                                                   \
   F(StringToIntMap, CoeffectEnforcementLevels, {})                      \
-  F(uint32_t, CoeffectViolationWarningSampleRate, 1)                    \
-  F(uint32_t, ContextConstantWarningSampleRate, 1)                      \
   F(uint64_t, CoeffectViolationWarningMax, std::numeric_limits<uint64_t>::max()) \
   /*                                                                    \
    * Controls behavior on reflection to default value expressions       \

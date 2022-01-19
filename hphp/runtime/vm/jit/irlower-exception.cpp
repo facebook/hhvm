@@ -208,7 +208,6 @@ void cgThrowLateInitPropError(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgRaiseCoeffectsCallViolation(IRLS& env, const IRInstruction* inst) {
-  if (RO::EvalCoeffectViolationWarningSampleRate == 0) return;
   auto const data = inst->extra<FuncData>();
   cgCallHelper(vmain(env), env,
                CallSpec::direct(raiseCoeffectsCallViolationHelper),

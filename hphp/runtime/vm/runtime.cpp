@@ -391,12 +391,9 @@ void raiseCoeffectsCallViolation(const Func* callee,
 
   assertx(!provided.canCall(required));
   if (provided.canCallWithWarning(required)) {
-    auto const shouldWarn = []{
-      auto const rate = RO::EvalCoeffectViolationWarningSampleRate;
-      if (!(rate > 0 && folly::Random::rand32(rate) == 0)) return false;
-      return *rl_num_coeffect_violations < RO::EvalCoeffectViolationWarningMax;
-    }();
-    if (!shouldWarn) return;
+    if (*rl_num_coeffect_violations >= RO::EvalCoeffectViolationWarningMax) {
+      return;
+    }
     (*rl_num_coeffect_violations)++;
     raise_warning(errMsg());
   } else {

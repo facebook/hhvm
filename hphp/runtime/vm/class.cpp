@@ -1467,17 +1467,10 @@ const StaticString s_classname("classname");
 Optional<RuntimeCoeffects>
 Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
   auto const slot = m_constants.findIndex(name);
-  auto const coinflip = []{
-    auto const rate = RO::EvalContextConstantWarningSampleRate;
-    return rate > 0 && folly::Random::rand32(rate) == 0;
-  };
-
   if (slot == kInvalidSlot) {
     if (!failIsFatal) return std::nullopt;
-    if (coinflip()) {
-      // TODO: Once coeffect migration is done, convert this back to raise_error
-      raise_warning("Context constant %s does not exist", name->data());
-    }
+    // TODO: Once coeffect migration is done, convert this back to raise_error
+    raise_warning("Context constant %s does not exist", name->data());
     return RuntimeCoeffects::none();
   }
   auto const& cns = m_constants[slot];
@@ -1488,10 +1481,8 @@ Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
   }
   if (cns.isAbstractAndUninit()) {
     if (!failIsFatal) return std::nullopt;
-    if (RO::EvalAbstractContextConstantUninitAccess || coinflip()) {
-      // TODO: Once coeffect migration is done, convert this back to raise_error
-      raise_warning("Context constant %s is abstract", name->data());
-    }
+    // TODO: Once coeffect migration is done, convert this back to raise_error
+    raise_warning("Context constant %s is abstract", name->data());
     return RuntimeCoeffects::none();
   }
 

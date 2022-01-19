@@ -64,6 +64,7 @@ summary "Write oxidized/gen/"
   hphp/hack/src/typing/typing_kinding_defs.ml                                 \
   hphp/hack/src/typing/typing_reason.ml                                       \
   hphp/hack/src/typing/typing_tyvar_occurrences.ml                            \
+  hphp/hack/src/typing/xhp_attribute.ml                            \
   hphp/hack/src/utils/core/prim_defs.ml                                       \
   hphp/hack/src/utils/decl_reference.ml                                       \
   hphp/hack/src/parser/scoured_comments.ml                                    \
@@ -140,6 +141,7 @@ summary "Write oxidized_by_ref/gen/"
   hphp/hack/src/typing/typing_per_cont_env.ml                                 \
   hphp/hack/src/typing/typing_reason.ml                                       \
   hphp/hack/src/typing/typing_tyvar_occurrences.ml                            \
+  hphp/hack/src/typing/xhp_attribute.ml                                       \
   hphp/hack/src/utils/decl_reference.ml                                       \
   hphp/hack/src/utils/core/prim_defs.ml                                       \
 
@@ -160,6 +162,7 @@ summary "Write oxidized_by_ref/decl_visitor/"
   --input "hphp/hack/src/oxidized_by_ref/gen/typing_defs_core.rs"             \
   --input "hphp/hack/src/oxidized_by_ref/gen/typing_defs.rs"                  \
   --input "hphp/hack/src/oxidized_by_ref/gen/typing_reason.rs"                \
+  --input "hphp/hack/src/oxidized_by_ref/gen/xhp_attribute.rs"                \
   --input "hphp/hack/src/oxidized_by_ref/manual/direct_decl_parser.rs"        \
   --input "hphp/hack/src/oxidized_by_ref/manual/t_shape_map.rs"               \
   --extern-input "hphp/hack/src/oxidized/gen/aast_defs.rs"                    \

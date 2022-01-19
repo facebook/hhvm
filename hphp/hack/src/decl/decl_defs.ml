@@ -202,33 +202,28 @@ and element = {
   elt_deprecated: string option;
 }
 
-let get_elt_abstract elt =
-  Typing_defs_flags.(is_set ClassElt.Field.abstract elt.elt_flags)
+let get_elt_abstract elt = Typing_defs_flags.ClassElt.is_abstract elt.elt_flags
 
-let get_elt_final elt =
-  Typing_defs_flags.(is_set ClassElt.Field.final elt.elt_flags)
+let get_elt_final elt = Typing_defs_flags.ClassElt.is_final elt.elt_flags
 
-let get_elt_lsb elt =
-  Typing_defs_flags.(is_set ClassElt.Field.lsb elt.elt_flags)
+let get_elt_lsb elt = Typing_defs_flags.ClassElt.has_lsb elt.elt_flags
 
+(** Whether a class element comes from a `require extends`. *)
 let get_elt_synthesized elt =
-  Typing_defs_flags.(is_set ClassElt.Field.synthesized elt.elt_flags)
+  Typing_defs_flags.ClassElt.is_synthesized elt.elt_flags
 
-let get_elt_xhp_attr elt = Typing_defs.flags_to_xhp_attr elt.elt_flags
+let get_elt_xhp_attr elt = Typing_defs_flags.ClassElt.get_xhp_attr elt.elt_flags
 
-let get_elt_needs_init elt =
-  Typing_defs_flags.(is_set ClassElt.Field.needs_init elt.elt_flags)
+let get_elt_needs_init elt = Typing_defs_flags.ClassElt.needs_init elt.elt_flags
 
-let set_elt_synthesized elt v =
+let set_elt_synthesized elt =
   {
     elt with
-    elt_flags =
-      Typing_defs_flags.(set_bit ClassElt.Field.synthesized v elt.elt_flags);
+    elt_flags = Typing_defs_flags.ClassElt.set_synthesized elt.elt_flags;
   }
 
-let set_elt_override elt v =
+let reset_elt_override elt =
   {
     elt with
-    elt_flags =
-      Typing_defs_flags.(set_bit ClassElt.Field.override v elt.elt_flags);
+    elt_flags = Typing_defs_flags.ClassElt.reset_override elt.elt_flags;
   }

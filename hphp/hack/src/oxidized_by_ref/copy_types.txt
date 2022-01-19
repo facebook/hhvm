@@ -147,7 +147,6 @@ typing_defs_core::Ty_
 typing_defs_core::UserAttributeParam
 typing_defs_core::ValKind
 typing_defs_core::XhpAttr
-typing_defs_core::XhpAttrTag
 typing_defs_flags::class_elt::ClassElt
 typing_defs_flags::FunParamFlags
 typing_defs_flags::FunTypeFlags
@@ -174,7 +173,6 @@ typing_defs::Ty_
 typing_defs::Typeconst
 typing_defs::ValKind
 typing_defs::XhpAttr
-typing_defs::XhpAttrTag
 typing_inference_env::SolvingInfo
 typing_inference_env::Tvenv
 typing_mutability_env::MutabilityEnv
@@ -189,3 +187,5 @@ typing_reason::PosId
 typing_reason::Reason
 typing_reason::T_
 typing_reason::Ureason
+xhp_attribute::Tag
+xhp_attribute::XhpAttribute

@@ -80,3 +80,4 @@ pub use gen::typing_kinding_defs;
 pub use gen::typing_reason;
 pub use gen::typing_tyvar_occurrences;
 pub use gen::user_error;
+pub use gen::xhp_attribute;

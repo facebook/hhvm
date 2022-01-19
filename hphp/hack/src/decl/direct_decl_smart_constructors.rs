@@ -45,10 +45,11 @@ use oxidized_by_ref::{
         Enforcement, EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType,
         IfcFunDecl, ParamMode, PosByteString, PosId, PosString, PossiblyEnforcedTy, ShapeFieldType,
         ShapeKind, TaccessType, Tparam, TshapeFieldName, Ty, Ty_, Typeconst, TypedefType,
-        WhereConstraint, XhpAttrTag,
+        WhereConstraint,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
+    xhp_attribute,
 };
 use parser_core_types::{
     compact_token::CompactToken, indexed_source_text::IndexedSourceText, source_text::SourceText,
@@ -712,7 +713,7 @@ pub struct XhpClassAttributeDeclarationNode<'a> {
 #[derive(Debug)]
 pub struct XhpClassAttributeNode<'a> {
     name: Id<'a>,
-    tag: Option<XhpAttrTag>,
+    tag: Option<xhp_attribute::Tag>,
     needs_init: bool,
     nullable: bool,
     hint: Node<'a>,
@@ -4224,7 +4225,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 name: (pos, name),
                 visibility: aast::Visibility::Public,
                 type_,
-                xhp_attr: Some(shallow_decl_defs::XhpAttr {
+                xhp_attr: Some(xhp_attribute::XhpAttribute {
                     tag: node.tag,
                     has_default: !node.needs_init,
                 }),
@@ -4307,8 +4308,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             hint: type_,
             needs_init: !initializer.is_present(),
             tag: match tag.token_kind() {
-                Some(TokenKind::Required) => Some(XhpAttrTag::Required),
-                Some(TokenKind::Lateinit) => Some(XhpAttrTag::Lateinit),
+                Some(TokenKind::Required) => Some(xhp_attribute::Tag::Required),
+                Some(TokenKind::Lateinit) => Some(xhp_attribute::Tag::LateInit),
                 _ => None,
             },
             nullable: initializer.is_token(TokenKind::NullLiteral) || !initializer.is_present(),

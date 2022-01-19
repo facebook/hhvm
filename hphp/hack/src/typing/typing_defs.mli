@@ -52,7 +52,7 @@ type class_elt = {
   ce_origin: string;
   ce_deprecated: string option;
   ce_pos: Pos_or_decl.t Hh_prelude.Lazy.t;
-  ce_flags: int;
+  ce_flags: Typing_defs_flags.ClassElt.t;
 }
 [@@deriving show]
 
@@ -409,6 +409,7 @@ val get_ce_override : class_elt -> bool
 
 val get_ce_lsb : class_elt -> bool
 
+(** Whether a class element comes from a `require extends`. *)
 val get_ce_synthesized : class_elt -> bool
 
 val get_ce_const : class_elt -> bool
@@ -420,10 +421,6 @@ val get_ce_readonly_prop : class_elt -> bool
 val get_ce_dynamicallycallable : class_elt -> bool
 
 val get_ce_support_dynamic_type : class_elt -> bool
-
-val xhp_attr_to_ce_flags : xhp_attr option -> Hh_prelude.Int.t
-
-val flags_to_xhp_attr : Hh_prelude.Int.t -> xhp_attr option
 
 val get_ce_xhp_attr : class_elt -> xhp_attr option
 
@@ -440,7 +437,7 @@ val make_ce_flags :
   readonly_prop:bool ->
   support_dynamic_type:bool ->
   needs_init:bool ->
-  Hh_prelude.Int.t
+  Typing_defs_flags.ClassElt.t
 
 val error_Tunapplied_alias_in_illegal_context : unit -> 'a
 

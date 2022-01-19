@@ -37,8 +37,7 @@
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([8:41-46], ":props");
            sp_xhp_attr =
-           (Some { Typing_defs_core.xa_tag = (Some Typing_defs_core.Required);
-                   xa_has_default = false });
+           (Some { xa_tag = (Some Required); xa_has_default = false });
            sp_type =
            (Some (Rhint ([8:13-40]),
                   (Tapply (([8:13-26], "\\REACT_XHP_FIX"),

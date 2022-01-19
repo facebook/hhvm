@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eca923251953bcd64274116cf1bab3a8>>
+// @generated SignedSource<<7eed025a75b6addac3f7e29e5e83b97f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -12,7 +12,7 @@
 use super::node::Node;
 use crate::{
     aast_defs::*, ast_defs::*, direct_decl_parser::*, shallow_decl_defs::*, t_shape_map::*,
-    typing_defs::*, typing_defs_core::*, typing_reason::*,
+    typing_defs::*, typing_defs_core::*, typing_reason::*, xhp_attribute::*,
 };
 pub trait Visitor<'a> {
     fn object(&mut self) -> &mut dyn Visitor<'a>;
@@ -145,6 +145,9 @@ pub trait Visitor<'a> {
     fn visit_taccess_type(&mut self, p: &'a TaccessType<'a>) {
         p.recurse(self.object())
     }
+    fn visit_tag(&mut self, p: &'a Tag) {
+        p.recurse(self.object())
+    }
     fn visit_tparam(&mut self, p: &'a Tparam<'a>) {
         p.recurse(self.object())
     }
@@ -181,10 +184,7 @@ pub trait Visitor<'a> {
     fn visit_where_constraint(&mut self, p: &'a WhereConstraint<'a>) {
         p.recurse(self.object())
     }
-    fn visit_xhp_attr(&mut self, p: &'a XhpAttr) {
-        p.recurse(self.object())
-    }
-    fn visit_xhp_attr_tag(&mut self, p: &'a XhpAttrTag) {
+    fn visit_xhp_attribute(&mut self, p: &'a XhpAttribute) {
         p.recurse(self.object())
     }
     fn visit_xhp_enum_value(&mut self, p: &'a XhpEnumValue<'a>) {

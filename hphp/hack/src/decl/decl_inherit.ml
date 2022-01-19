@@ -87,9 +87,7 @@ let add_method name sig_ methods =
      * wins!), but not really OK when the naming conflict is trait vs
      * trait (we rely on HHVM to catch the error at runtime) *)
     else
-      let sig_ =
-        Tuple.T2.map_fst sig_ ~f:(fun elt -> set_elt_override elt false)
-      in
+      let sig_ = Tuple.T2.map_fst sig_ ~f:reset_elt_override in
       SMap.add name sig_ methods
 
 let add_methods methods' acc = SMap.fold add_method methods' acc
@@ -267,9 +265,7 @@ let make_substitution class_type class_parameters =
   Inst.make_subst class_type.dc_tparams class_parameters
 
 let mark_as_synthesized inh =
-  let mark_elt elt =
-    Tuple.T2.map_fst elt ~f:(fun elt -> set_elt_synthesized elt true)
-  in
+  let mark_elt elt = Tuple.T2.map_fst elt ~f:set_elt_synthesized in
   {
     ih_substs =
       SMap.map

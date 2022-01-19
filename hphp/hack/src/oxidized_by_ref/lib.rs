@@ -76,3 +76,4 @@ pub use gen::typing_per_cont_env;
 pub use gen::typing_reason;
 pub use gen::typing_tyvar_occurrences;
 pub use gen::user_error;
+pub use gen::xhp_attribute;

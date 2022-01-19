@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3e7c771458a0dcecee8d23c28f8e7fef>>
+// @generated SignedSource<<ca275988254e1af2472f4b4c8aaecc03>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -14,7 +14,7 @@ use super::node::Node;
 use super::visitor::Visitor;
 use crate::{
     aast_defs::*, ast_defs::*, direct_decl_parser::*, shallow_decl_defs::*, t_shape_map::*,
-    typing_defs::*, typing_defs_core::*, typing_reason::*,
+    typing_defs::*, typing_defs_core::*, typing_reason::*, xhp_attribute::*,
 };
 impl<'a> Node<'a> for AbstractTypeconst<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
@@ -906,6 +906,17 @@ impl<'a> Node<'a> for TaccessType<'a> {
         }
     }
 }
+impl<'a> Node<'a> for Tag {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_tag(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            Tag::Required => {}
+            Tag::LateInit => {}
+        }
+    }
+}
 impl<'a> Node<'a> for Tparam<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_tparam(self)
@@ -1145,13 +1156,13 @@ impl<'a> Node<'a> for WhereConstraint<'a> {
         }
     }
 }
-impl<'a> Node<'a> for XhpAttr {
+impl<'a> Node<'a> for XhpAttribute {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_xhp_attr(self)
+        v.visit_xhp_attribute(self)
     }
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
-            XhpAttr {
+            XhpAttribute {
                 tag: ref __binding_0,
                 has_default: ref __binding_1,
             } => {
@@ -1160,17 +1171,6 @@ impl<'a> Node<'a> for XhpAttr {
                 }
                 { __binding_1.accept(v) }
             }
-        }
-    }
-}
-impl<'a> Node<'a> for XhpAttrTag {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_xhp_attr_tag(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            XhpAttrTag::Required => {}
-            XhpAttrTag::Lateinit => {}
         }
     }
 }

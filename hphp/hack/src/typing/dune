@@ -8,7 +8,8 @@
   typing_defs_flags
   typing_modules
   tanySentinel
-  typing_reason)
+  typing_reason
+  xhp_attribute)
  (libraries
   ast
   core_kernel

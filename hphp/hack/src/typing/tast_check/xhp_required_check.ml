@@ -20,9 +20,10 @@ let collect_attrs_from_ty_sid ?(include_optional = false) env add bag sid =
   | Some c ->
     let should_collect ce =
       match Typing_defs.get_ce_xhp_attr ce with
-      | Some { xa_has_default; xa_tag = None; _ } when include_optional ->
+      | Some { Xhp_attribute.xa_has_default; xa_tag = None; _ }
+        when include_optional ->
         xa_has_default
-      | Some { xa_tag = Some Required; _ } -> true
+      | Some { Xhp_attribute.xa_tag = Some Xhp_attribute.Required; _ } -> true
       | _ -> false
     in
     let required_attrs =

@@ -346,9 +346,9 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
     ()
   else
     let is_less_strict = function
-      | (Some Required, _)
-      | (Some Lateinit, Some Lateinit)
-      | (Some Lateinit, None)
+      | (Some Xhp_attribute.Required, _)
+      | (Some Xhp_attribute.LateInit, Some Xhp_attribute.LateInit)
+      | (Some Xhp_attribute.LateInit, None)
       | (None, None) ->
         false
       | (_, _) -> true
@@ -356,7 +356,8 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
     let parent_attr = get_ce_xhp_attr parent_class_elt in
     let attr = get_ce_xhp_attr class_elt in
     match (parent_attr, attr) with
-    | (Some { xa_tag = parent_tag; _ }, Some { xa_tag = tag; _ })
+    | ( Some { Xhp_attribute.xa_tag = parent_tag; _ },
+        Some { Xhp_attribute.xa_tag = tag; _ } )
       when is_less_strict (tag, parent_tag) ->
       let (lazy parent_pos) = parent_class_elt.ce_pos in
       let (lazy child_pos) = class_elt.ce_pos in
@@ -364,8 +365,8 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
       let required = Markdown_lite.md_codify "@required" in
       let show = function
         | None -> Printf.sprintf "not %s or %s" required lateinit
-        | Some Required -> required
-        | Some Lateinit -> lateinit
+        | Some Xhp_attribute.Required -> required
+        | Some Xhp_attribute.LateInit -> lateinit
       in
       Errors.add_typing_error
       @@ Typing_error.(

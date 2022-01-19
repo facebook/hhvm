@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<29e92def98e87f39101f1d2fdda4d0a3>>
+// @generated SignedSource<<28bd86b9941073fe1f461e020fe224b9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -293,54 +293,7 @@ pub enum ParamMode {
 impl TrivialDrop for ParamMode {}
 arena_deserializer::impl_deserialize_in_arena!(ParamMode);
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum XhpAttrTag {
-    Required,
-    Lateinit,
-}
-impl TrivialDrop for XhpAttrTag {}
-arena_deserializer::impl_deserialize_in_arena!(XhpAttrTag);
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub struct XhpAttr {
-    pub tag: Option<XhpAttrTag>,
-    pub has_default: bool,
-}
-impl TrivialDrop for XhpAttr {}
-arena_deserializer::impl_deserialize_in_arena!(XhpAttr);
+pub type XhpAttr = xhp_attribute::XhpAttribute;
 
 /// Denotes the categories of requirements we apply to constructor overrides.
 ///

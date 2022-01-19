@@ -167,11 +167,11 @@ let typeconst env c tc =
 let make_xhp_attr cv =
   Option.map cv.cv_xhp_attr ~f:(fun xai ->
       {
-        xa_tag =
+        Xhp_attribute.xa_tag =
           (match xai.xai_tag with
           | None -> None
-          | Some Required -> Some Required
-          | Some LateInit -> Some Lateinit);
+          | Some Required -> Some Xhp_attribute.Required
+          | Some LateInit -> Some Xhp_attribute.LateInit);
         xa_has_default = Option.is_some cv.cv_expr;
       })
 

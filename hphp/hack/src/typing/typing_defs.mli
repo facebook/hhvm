@@ -439,6 +439,10 @@ val make_ce_flags :
   needs_init:bool ->
   Typing_defs_flags.ClassElt.t
 
+val class_elt_is_private_not_lsb : class_elt -> bool
+
+val class_elt_is_private_or_protected_not_lsb : class_elt -> bool
+
 val error_Tunapplied_alias_in_illegal_context : unit -> 'a
 
 module Attributes : sig

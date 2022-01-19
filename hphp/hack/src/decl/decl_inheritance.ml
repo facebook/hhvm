@@ -129,39 +129,6 @@ let props ~target ~static child_class_name lin =
                    subst))
   |> Sequence.concat
 
-(** Return true if the element is private and not marked with the __LSB
-    attribute. Private elements are not inherited by child classes and are
-    namespaced to the containing class--if B extends A, then A may define a
-    method A::foo and B may define a method B::foo, and they both will exist in
-    the hierarchy and be callable at runtime (which method is invoked depends on
-    the caller).
-
-    The __LSB attribute can be applied to properties only. LSB properties are
-    (effectively) implicitly cloned into every subclass. This means that in the
-    typechecker, we want to avoid filtering them out in subclasses, so we treat
-    them as non-private here. *)
-let is_private elt =
-  match elt.ce_visibility with
-  | Vprivate _ when get_ce_lsb elt -> false
-  | Vprivate _ -> true
-  | Vprotected _
-  | Vpublic
-  | Vinternal _ ->
-    false
-
-let is_private_or_protected elt =
-  match elt.ce_visibility with
-  | Vprivate _
-  | Vprotected _
-    when get_ce_lsb elt ->
-    false
-  | Vprivate _
-  | Vprotected _ ->
-    true
-  | Vpublic
-  | Vinternal _ ->
-    false
-
 let chown_private_or_protected child_class_name ancestor_sig =
   let ce_visibility =
     match ancestor_sig.ce_visibility with
@@ -180,10 +147,16 @@ let filter_or_chown_privates
   Sequence.filter_map lin ~f:(fun DTT.{ id; inherit_when_private; elt } ->
       let ancestor_name = elt.ce_origin in
       let is_inherited = String.( <> ) ancestor_name child_class_name in
-      if is_private elt && is_inherited && not inherit_when_private then
+      if
+        Typing_defs.class_elt_is_private_not_lsb elt
+        && is_inherited
+        && not inherit_when_private
+      then
         None
       else if
-        is_private_or_protected elt && is_inherited && inherit_when_private
+        Typing_defs.class_elt_is_private_or_protected_not_lsb elt
+        && is_inherited
+        && inherit_when_private
       then
         Some (id, chown_private_or_protected child_class_name elt)
       else

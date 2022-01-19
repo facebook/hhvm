@@ -109,16 +109,6 @@ end
 module ClassEltWParentSet = Caml.Set.Make (ClassEltWParent)
 
 (*****************************************************************************)
-(* Helpers *)
-(*****************************************************************************)
-
-let is_private = function
-  | { ce_visibility = Vprivate _; _ } -> true
-  | _ -> false
-
-let is_lsb ce = get_ce_lsb ce
-
-(*****************************************************************************)
 (* Given a map of members, check that the overriding is correct.
  * Please note that 'members' has a very general meaning here.
  * It can be class variables, methods, static methods etc ... The same logic
@@ -762,7 +752,7 @@ let check_const_override
 (* Privates are only visible in the parent, we don't need to check them *)
 let filter_privates members =
   List.filter members ~f:(fun (_name, class_elt) ->
-      (not (is_private class_elt)) || is_lsb class_elt)
+      not (Typing_defs.class_elt_is_private_not_lsb class_elt))
 
 let add_member_dep
     env class_ (member_kind, member_name, member_origin, origin_pos) =

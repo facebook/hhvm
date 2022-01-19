@@ -161,15 +161,15 @@ const SOCKET_EDQUOT = 0;
 const SOCKET_ENOMEDIUM = 0;
 const SOCKET_EMEDIUMTYPE = 0;
 <<__PHPStdLib>>
-function socket_create(int $domain, int $type, int $protocol)[controlled] { }
+function socket_create(int $domain, int $type, int $protocol)[leak_safe] { }
 <<__PHPStdLib>>
 function socket_create_listen(int $port, int $backlog = 128) { }
 <<__PHPStdLib>>
 function socket_create_pair(int $domain, int $type, int $protocol, inout $fd) { }
 <<__PHPStdLib>>
-function socket_get_option(resource $socket, int $level, int $optname)[controlled] { }
+function socket_get_option(resource $socket, int $level, int $optname)[leak_safe] { }
 <<__PHPStdLib>>
-function socket_getpeername(resource $socket, inout $address, inout $port)[controlled] { }
+function socket_getpeername(resource $socket, inout $address, inout $port)[leak_safe] { }
 <<__PHPStdLib>>
 function socket_getsockname(resource $socket, inout $address, inout $port)[] { }
 <<__PHPStdLib>>
@@ -177,7 +177,7 @@ function socket_set_block(resource $socket) { }
 <<__PHPStdLib>>
 function socket_set_nonblock(resource $socket) { }
 <<__PHPStdLib>>
-function socket_set_option(resource $socket, int $level, int $optname, $optval)[controlled] { }
+function socket_set_option(resource $socket, int $level, int $optname, $optval)[leak_safe] { }
 <<__PHPStdLib>>
 function socket_connect(resource $socket, string $address, int $port = 0) { }
 <<__PHPStdLib>>
@@ -185,7 +185,7 @@ function socket_bind(resource $socket, string $address, int $port = 0) { }
 <<__PHPStdLib>>
 function socket_listen(resource $socket, int $backlog = 0) { }
 <<__PHPStdLib>>
-function socket_select(inout $read, inout $write, inout $except, $vtv_sec, int $tv_usec = 0)[controlled] { }
+function socket_select(inout $read, inout $write, inout $except, $vtv_sec, int $tv_usec = 0)[leak_safe] { }
 <<__PHPStdLib>>
 function socket_server(string $hostname, int $port, inout $errnum, inout $errstr) { }
 <<__PHPStdLib>>

@@ -102,17 +102,17 @@ function idate(string $format, ?int $timestamp = null);
 <<__PHPStdLib>>
 function localtime(?int $timestamp = null, bool $is_associative = false);
 <<__PHPStdLib>>
-function microtime(bool $get_as_float = false)[controlled];
+function microtime(bool $get_as_float = false)[leak_safe];
 <<__PHPStdLib>>
-function mktime(int $hour = PHP_INT_MAX, int $minute = PHP_INT_MAX, int $second = PHP_INT_MAX, int $month = PHP_INT_MAX, int $day = PHP_INT_MAX, int $year = PHP_INT_MAX)[controlled];
+function mktime(int $hour = PHP_INT_MAX, int $minute = PHP_INT_MAX, int $second = PHP_INT_MAX, int $month = PHP_INT_MAX, int $day = PHP_INT_MAX, int $year = PHP_INT_MAX)[leak_safe];
 <<__PHPStdLib>>
-function strftime(string $format, ?int $timestamp = null)[controlled];
+function strftime(string $format, ?int $timestamp = null)[leak_safe];
 <<__PHPStdLib>>
 function strptime(string $date, string $format);
 <<__PHPStdLib>>
-function strtotime(string $input, ?int $timestamp = null)[controlled];
+function strtotime(string $input, ?int $timestamp = null)[leak_safe];
 <<__PHPStdLib>>
-function time()[controlled]: int;
+function time()[leak_safe]: int;
 <<__PHPStdLib>>
 function timezone_abbreviations_list();
 <<__PHPStdLib>>
@@ -155,7 +155,7 @@ class DateTime implements DateTimeInterface {
   const RSS = '';
   const W3C = '';
 
-  public function __construct(string $time = 'now', ?DateTimeZone $timezone = null)[controlled];
+  public function __construct(string $time = 'now', ?DateTimeZone $timezone = null)[leak_safe];
   public function add(DateInterval $interval);
   public function modify(string $modify);
   public function getOffset(): int;

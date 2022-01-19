@@ -225,7 +225,7 @@ function array_unshift(inout $array, $var, ...$args)[];
 <<__PHPStdLib>>
 function array_values<Tv>(Container<Tv> $input)[]: varray<Tv>;
 <<__PHPStdLib>>
-function shuffle(inout $array)[controlled];
+function shuffle(inout $array)[leak_safe];
 <<__Deprecated('Use count(), it does the same thing as sizeof() in PHP and '.
   'doesn\'t suggest that it\'s counting bytes.'), __PHPStdLib>>
 function sizeof($var)[];

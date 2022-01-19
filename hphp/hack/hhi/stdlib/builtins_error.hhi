@@ -16,7 +16,7 @@ function error_get_last();
 <<__PHPStdLib>>
 function error_log(string $message, int $message_type = 0, $destination = null, $extra_headers = null);
 <<__PHPStdLib>>
-function error_reporting($level = null)[controlled];
+function error_reporting($level = null)[leak_safe];
 <<__PHPStdLib>>
 function restore_error_handler();
 <<__PHPStdLib>>

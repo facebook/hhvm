@@ -113,25 +113,25 @@ function stream_get_wrappers();
 <<__PHPStdLib>>
 function stream_resolve_include_path(string $filename, $context = null);
 <<__PHPStdLib>>
-function stream_select(inout $read, inout $write, inout $except, $vtv_sec, int $tv_usec = 0)[controlled];
+function stream_select(inout $read, inout $write, inout $except, $vtv_sec, int $tv_usec = 0)[leak_safe];
 <<__PHPStdLib>>
-function stream_set_blocking(resource $stream, bool $mode)[controlled];
+function stream_set_blocking(resource $stream, bool $mode)[leak_safe];
 <<__PHPStdLib>>
-function stream_set_timeout(resource $stream, int $seconds, int $microseconds = 0)[controlled];
+function stream_set_timeout(resource $stream, int $seconds, int $microseconds = 0)[leak_safe];
 <<__PHPStdLib>>
 function stream_set_write_buffer(resource $stream, int $buffer);
 <<__PHPStdLib>>
 function set_file_buffer(resource $stream, int $buffer);
 <<__PHPStdLib>>
-function stream_socket_accept(resource $server_socket, float $timeout, inout $peername)[controlled];
+function stream_socket_accept(resource $server_socket, float $timeout, inout $peername)[leak_safe];
 <<__PHPStdLib>>
-function stream_socket_server(string $local_socket, inout $errnum, inout $errstr, int $flags = 0, $context = null)[controlled];
+function stream_socket_server(string $local_socket, inout $errnum, inout $errstr, int $flags = 0, $context = null)[leak_safe];
 <<__PHPStdLib>>
 function stream_socket_client(string $remote_socket, inout $errnum, inout $errstr, float $timeout = 0.0, int $flags = 0, $context = null);
 <<__PHPStdLib>>
 function stream_socket_enable_crypto(resource $stream, bool $enable, int $crypto_type = 0, $session_stream = null);
 <<__PHPStdLib>>
-function stream_socket_get_name(resource $handle, bool $want_peer)[controlled];
+function stream_socket_get_name(resource $handle, bool $want_peer)[leak_safe];
 <<__PHPStdLib>>
 function stream_socket_pair(int $domain, int $type, int $protocol);
 <<__PHPStdLib>>

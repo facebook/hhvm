@@ -674,7 +674,7 @@ final class Vector<<<__RequireDynamic>> Tv> implements \MutableVector<Tv> {
   /**
    * Shuffles the values of the current `Vector` randomly in place.
    */
-  public function shuffle()[controlled]: void;
+  public function shuffle()[leak_safe]: void;
 
   /**
    * Returns a `Vector` containing the values from the specified `array`.

@@ -56,9 +56,9 @@ function getrusage(int $who = 0);
 <<__PHPStdLib>>
 function clock_getres(int $clk_id, inout $sec, inout $nsec);
 <<__PHPStdLib>>
-function clock_gettime(int $clk_id, inout $sec, inout $nsec)[controlled];
+function clock_gettime(int $clk_id, inout $sec, inout $nsec)[leak_safe];
 <<__PHPStdLib>>
-function clock_gettime_ns(int $clk_id)[controlled]: int;
+function clock_gettime_ns(int $clk_id)[leak_safe]: int;
 <<__PHPStdLib>>
 function cpu_get_count();
 <<__PHPStdLib>>

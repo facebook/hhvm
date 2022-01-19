@@ -558,7 +558,7 @@ const int CURLSHOPT_UNSHARE = 0;
 
 
 <<__PHPStdLib>>
-function curl_init($url = null)[controlled];
+function curl_init($url = null)[leak_safe];
 <<__PHPStdLib>>
 function curl_init_pooled(string $pool_name, $url = null);
 <<__PHPStdLib>>
@@ -580,7 +580,7 @@ function curl_error(resource $ch)[];
 <<__PHPStdLib>>
 function curl_strerror(int $code);
 <<__PHPStdLib>>
-function curl_close(resource $ch)[controlled];
+function curl_close(resource $ch)[leak_safe];
 <<__PHPStdLib>>
 function curl_multi_init();
 <<__PHPStdLib>>

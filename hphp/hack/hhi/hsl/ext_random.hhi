@@ -9,7 +9,7 @@
  */
 
 namespace HH\Lib\_Private\Native {
-  function pseudorandom_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX)[controlled]: int;
+  function pseudorandom_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX)[leak_safe]: int;
   function pseudorandom_seed(int $seed): void;
-  function random_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX)[controlled]: int;
+  function random_int(int $min = \PHP_INT_MIN, int $max = \PHP_INT_MAX)[leak_safe]: int;
 }

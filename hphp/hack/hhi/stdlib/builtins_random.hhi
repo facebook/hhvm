@@ -9,7 +9,7 @@
  */
 
 <<__PHPStdLib>>
-function random_bytes(int $length)[controlled]: string;
+function random_bytes(int $length)[leak_safe]: string;
 
 <<__PHPStdLib>>
-function random_int(int $min, int $max)[controlled]: int;
+function random_int(int $min, int $max)[leak_safe]: int;

@@ -6,6 +6,8 @@
 *.reparse_out
 *.tast_typecheck_out
 *.type_check_out
+*.php.pess
+hhi/pessimised_hhi
 *.hhvm_out
 *.round_trip.hhas
 *.hhcodegen_messages

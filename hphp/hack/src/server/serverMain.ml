@@ -1148,7 +1148,7 @@ let program_init genv env =
   in
   let (init_approach, approach_name) = resolve_init_approach genv in
   Hh_logger.log "Initing with approach: %s" approach_name;
-  let (env, init_type, init_error, init_error_telemetry, state_distance) =
+  let (env, init_type, init_error, init_error_telemetry, saved_state_delta) =
     let (env, init_result) = ServerInit.init ~init_approach genv env in
     match init_approach with
     | ServerInit.Remote_init _ -> (env, "remote", None, None, None)
@@ -1159,7 +1159,7 @@ let program_init genv env =
     | ServerInit.Saved_state_init _ ->
       begin
         match init_result with
-        | ServerInit.Load_state_succeeded distance ->
+        | ServerInit.Load_state_succeeded saved_state_delta ->
           let init_type =
             match
               Naming_table.get_forward_naming_fallback_path env.naming_table
@@ -1167,7 +1167,7 @@ let program_init genv env =
             | None -> "state_load_blob"
             | Some _ -> "state_load_sqlite"
           in
-          (env, init_type, None, None, distance)
+          (env, init_type, None, None, saved_state_delta)
         | ServerInit.Load_state_failed (err, telemetry) ->
           (env, "state_load_failed", Some err, Some telemetry, None)
         | ServerInit.Load_state_declined reason ->
@@ -1180,7 +1180,7 @@ let program_init genv env =
       init_env =
         {
           env.init_env with
-          state_distance;
+          saved_state_delta;
           approach_name;
           init_error;
           init_type;
@@ -1198,6 +1198,11 @@ let program_init genv env =
     |> Telemetry.json_
          ~key:"deps_mode"
          ~value:(Typing_deps_mode.to_opaque_json env.deps_mode)
+  in
+  let state_distance =
+    match saved_state_delta with
+    | None -> None
+    | Some { distance; _ } -> Some distance
   in
   HackEventLogger.init_lazy_end
     telemetry

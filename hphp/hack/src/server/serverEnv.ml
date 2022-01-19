@@ -167,6 +167,19 @@ module Init_telemetry = struct
   let get_reason { reason; _ } = show_reason reason
 end
 
+(** How "old" a given saved state is relative to the working revision.
+    That is, a saved state has some corresponding revision X, and `hh` is invoked on a commit
+    of mergebase Y.
+
+    Distance tracks the number of revisions between X and Y, using globalrev.
+    Age tracks the time elapsed between X and Y in seconds, according to hg log data.
+*)
+type saved_state_delta = {
+  distance: int;
+  age: int;
+}
+[@@deriving show]
+
 (** In addition to this environment, many functions are storing and
     updating ASTs, NASTs, and types in a shared space
     (see respectively Parser_heap, Naming_table, Typing_env).
@@ -378,8 +391,7 @@ and init_env = {
   recheck_id: string option;
   (* Additional data associated with init that we want to log when a first full
    * check completes. *)
-  state_distance: int option;
-  state_age: int option;
+  saved_state_delta: saved_state_delta option;
   naming_table_manifold_path: string option;
       (** The manifold path for remote typechecker workers to download the naming table
           saved state. This value will be None in the case of full init *)

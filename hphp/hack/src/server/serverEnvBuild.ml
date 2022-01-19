@@ -289,8 +289,7 @@ let make_env ~init_id ~deps_mode config : ServerEnv.env =
         mergebase = None;
         why_needed_full_check = None;
         recheck_id = None;
-        state_distance = None;
-        state_age = None;
+        saved_state_delta = None;
         naming_table_manifold_path = None;
       };
     diag_subscribe = None;

@@ -60,6 +60,19 @@ module Init_telemetry : sig
   val get_reason : t -> string
 end
 
+(** How "old" a given saved state is relative to the working revision.
+    That is, a saved state has some corresponding revision X, and `hh` is invoked on a commit
+    of mergebase Y.
+
+    Distance tracks the number of revisions between X and Y, using globalrev.
+    Age tracks the time elapsed between X and Y in seconds, according to hg log data.
+*)
+type saved_state_delta = {
+  distance: int;
+  age: int;
+}
+[@@deriving show]
+
 type init_env = {
   approach_name: string;
   ci_info: Ci_util.info option Future.t option; [@opaque]
@@ -76,8 +89,7 @@ type init_env = {
   recheck_id: string option;
   (* Additional data associated with init that we want to log when a first full
    * check completes. *)
-  state_distance: int option;
-  state_age: int option;
+  saved_state_delta: saved_state_delta option;
   naming_table_manifold_path: string option;
       (** The manifold path for remote typechecker workers to download the naming table
           saved state. This value will be None in the case of full init *)

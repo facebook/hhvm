@@ -1770,11 +1770,14 @@ functor
       let telemetry =
         Telemetry.duration telemetry ~key:"typecheck_start" ~start_time
       in
-      let state_distance = env.init_env.state_distance in
-      let state_age = env.init_env.state_age in
-
+      let (state_distance, state_age) =
+        match env.init_env.saved_state_delta with
+        | None -> (None, None)
+        | Some { distance; age } -> (Some distance, Some age)
+      in
       (* Typecheck all of the files we determined might need rechecking as a
-         consequence of the changes (or, in a lazy check, the subset of those
+         consequence of the changes (or, in a lazy check,
+         the subset of those
          files which are open in an IDE buffer). *)
       let {
         env;

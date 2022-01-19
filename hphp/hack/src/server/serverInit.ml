@@ -140,9 +140,9 @@ let lazy_saved_state_init genv env root load_state_approach profiling =
   in
   (* Saved-state init is the only kind of init that might error... *)
   match result with
-  | Ok ((env, t), ({ state_distance; _ }, _)) ->
+  | Ok ((env, t), ({ saved_state_delta; _ }, _)) ->
     let env = post_init genv (env, t) in
-    (env, Load_state_succeeded state_distance)
+    (env, Load_state_succeeded saved_state_delta)
   | Error err ->
     let ServerInitTypes.{ message; auto_retry; telemetry } =
       load_state_error_to_verbose_string err

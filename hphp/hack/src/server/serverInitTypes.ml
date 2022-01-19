@@ -43,7 +43,7 @@ type init_approach =
 
 (** Docs are in .mli *)
 type init_result =
-  | Load_state_succeeded of int option
+  | Load_state_succeeded of ServerEnv.saved_state_delta option
   | Load_state_failed of string * Telemetry.t
   | Load_state_declined of string
 
@@ -117,8 +117,7 @@ type loaded_info = {
   dirty_local_files: Relative_path.Set.t; [@printer Relative_path.Set.pp_large]
   old_naming_table: Naming_table.t; [@opaque]
   old_errors: SaveStateServiceTypes.saved_state_errors; [@opaque]
-  state_distance: int option;
-  state_age: int option;
+  saved_state_delta: ServerEnv.saved_state_delta option;
   (* The manifold path for naming table saved state, to be used by remote type checker
      for downloading the naming table in the case of a saved-state init *)
   naming_table_manifold_path: string option;

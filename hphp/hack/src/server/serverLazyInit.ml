@@ -215,6 +215,13 @@ let merge_saved_state_futures
         let dirty_master_files = dirty_master_files in
         let dirty_local_files = dirty_local_files in
 
+        let saved_state_delta =
+          match (saved_state_distance, saved_state_age) with
+          | (_, None)
+          | (None, _) ->
+            None
+          | (Some distance, Some age) -> Some { distance; age }
+        in
         Ok
           {
             naming_table_fn = Path.to_string deptable_naming_table_blob_path;
@@ -228,8 +235,7 @@ let merge_saved_state_futures
             dirty_local_files;
             old_naming_table;
             old_errors;
-            state_distance = saved_state_distance;
-            state_age = saved_state_age;
+            saved_state_delta;
             naming_table_manifold_path;
           })
   in
@@ -446,8 +452,7 @@ let use_precomputed_state_exn
     dirty_local_files = changes;
     old_naming_table;
     old_errors;
-    state_distance = None;
-    state_age = None;
+    saved_state_delta = None;
     naming_table_manifold_path = None;
   }
 
@@ -1136,8 +1141,7 @@ let post_saved_state_initialization
     deptable_fn;
     naming_table_fn = _;
     corresponding_rev = _;
-    state_distance;
-    state_age;
+    saved_state_delta;
     naming_table_manifold_path;
   } =
     loaded_info
@@ -1158,8 +1162,7 @@ let post_saved_state_initialization
           env.init_env with
           mergebase;
           naming_table_manifold_path;
-          state_distance;
-          state_age;
+          saved_state_delta;
         };
       deps_mode =
         (match ServerArgs.save_64bit genv.options with

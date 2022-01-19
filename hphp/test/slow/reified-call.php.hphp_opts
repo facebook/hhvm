@@ -1,0 +1,1 @@
+-vRuntime.Eval.ForbidDynamicCallsToClsMeth=1 -vRuntime.Eval.LogKnownMethodsAsDynamicCalls=0

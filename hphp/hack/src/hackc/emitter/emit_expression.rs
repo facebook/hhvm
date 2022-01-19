@@ -2395,7 +2395,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                                 instr::classgetc(alloc),
                                 instr::fcallclsmethod(
                                     alloc,
-                                    IsLogAsDynamicCallOp::LogAsDynamicCall,
+                                    IsLogAsDynamicCallOp::DontLogAsDynamicCall,
                                     fcall_args,
                                 ),
                             ],

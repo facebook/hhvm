@@ -49,6 +49,14 @@ const StaticString
   s_DynamicContextOverrideUnsafe("__SystemLib\\DynamicContextOverrideUnsafe");
 const StaticString s_attr_Deprecated("__Deprecated");
 
+// If we manipulate the stack before generating a may-throw IR op, we have to
+// record the updated stack offset in the marker, so that the catch block of
+// the IR op will have the correct memory effects.
+void updateStackOffset(IRGS& env) {
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+}
+
 const Class* callContext(IRGS& env, const FCallArgs& fca, const Class* cls) {
   if (!fca.context) return curClass(env);
   if (fca.context->isame(s_DynamicContextOverrideUnsafe.get())) {
@@ -362,10 +370,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
       callKnown(profiledFunc);
     },
     [&] {
-      // Current marker's SP points to the wrong place after callKnown() above.
-      updateMarker(env);
-      env.irb->exceptionStackBoundary();
-
+      updateStackOffset(env);
       auto const unlikely = probability * 100 >=
         RuntimeOption::EvalJitPGOCalledFuncExitThreshold;
       if (unlikely) {
@@ -445,9 +450,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
       (!fca.hasUnpack() && fca.numArgs <= callee->numNonVariadicParams()) ||
       (fca.hasUnpack() && fca.numArgs == callee->numNonVariadicParams()));
 
-    // We may have updated the stack, make sure Call can set up its Catch.
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
+    updateStackOffset(env);
 
     auto const asyncEagerReturn =
       fca.asyncEagerOffset != kInvalidOffset &&
@@ -502,10 +505,7 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   };
 
   if (fca.hasUnpack()) {
-    // We may have updated the stack, make sure the conversion and Call
-    // instructions below can set up their Catch.
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
+    updateStackOffset(env);
 
     if (fca.numArgs == callee->numNonVariadicParams()) {
       if (fca.skipRepack()) return doCall(fca, true /* skipRepack */);
@@ -573,9 +573,7 @@ void prepareAndCallUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     emitCallerDynamicCallChecksUnknown(env, callee);
   }
 
-  // We may have updated the stack, make sure Call opcode can set up its Catch.
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffset(env);
 
   // Okay to request async eager return even if it is not supported.
   auto const asyncEagerReturn = fca.asyncEagerOffset != kInvalidOffset;
@@ -618,8 +616,7 @@ void fcallObjMethodUnknown(
 ) {
   implIncStat(env, Stats::ObjMethod_cached);
 
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
+  updateStackOffset(env);
 
   auto const callerCtx = [&] {
     if (!fca.context) return curClass(env);
@@ -797,11 +794,7 @@ void optimizeProfiledCallMethod(IRGS& env,
   auto const fallback = [&] {
     hint(env, Block::Hint::Unlikely);
     IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
-
-    // Current marker's SP points to the wrong place after the hot path.
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
-
+    updateStackOffset(env);
     emitFCall(nullptr, true /* no call profiling */);
     gen(env, Jmp, makeExit(env, nextSrcKey(env)));
   };
@@ -1074,11 +1067,7 @@ void fcallFuncRFunc(IRGS& env, const FCallArgs& fca) {
 
   gen(env, IncRef, generics);
   push(env, generics);
-
-  // We just wrote to the stack, make sure the function call can proceed.
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
-
+  updateStackOffset(env);
   prepareAndCallProfiled(env, func, fca.withGenerics(), nullptr, false, false);
 }
 
@@ -1101,11 +1090,7 @@ void fcallFuncRClsMeth(IRGS& env, const FCallArgs& fca) {
 
   gen(env, IncRef, generics);
   push(env, generics);
-
-  // We just wrote to the stack, make sure the function call can proceed.
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
-
+  updateStackOffset(env);
   prepareAndCallProfiled(env, func, fca.withGenerics(), cls, false, false);
 }
 
@@ -1117,6 +1102,7 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
   auto const funcN = gen(env, LdFunc, str);
   auto const func = gen(env, CheckNonNull, makeExitSlow(env), funcN);
   popDecRef(env);
+  updateStackOffset(env);
   prepareAndCallProfiled(env, func, fca, nullptr, true, false);
 }
 

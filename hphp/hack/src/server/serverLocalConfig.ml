@@ -1278,12 +1278,7 @@ let load_ fn ~silent ~current_version overrides =
         "profile_decling: off | top_counts | all_telemetry | all_telemetry_callstacks"
   in
   let profile_owner = string_opt "profile_owner" config in
-  let profile_desc =
-    string_
-      "profile_desc"
-      ~default:HackEventLogger.PerFileProfilingConfig.(default.profile_desc)
-      config
-  in
+  let profile_desc = string_opt "profile_desc" config in
   let profile_slow_threshold =
     float_
       "profile_slow_threshold"

@@ -20,7 +20,7 @@ module PerFileProfilingConfig = struct
     profile_type_check_twice: bool;
     profile_decling: profile_decling;
     profile_owner: string option;
-    profile_desc: string;
+    profile_desc: string option;
     profile_slow_threshold: float;
   }
 
@@ -32,7 +32,7 @@ module PerFileProfilingConfig = struct
       profile_type_check_twice = false;
       profile_decling = DeclingOff;
       profile_owner = None;
-      profile_desc = "";
+      profile_desc = None;
       profile_slow_threshold = 0.;
     }
 end
@@ -493,17 +493,9 @@ let worker_exception _ = ()
 module ProfileTypeCheck = struct
   type stats = unit
 
-  type batch_info = {
-    init_id: string;
-    check_reason: string;
-    recheck_id: string option;
-    worker_id: string;
-    batch_number: int;
-    batch_size: int;
-    start_hh_stats: stats;
-    start_typecheck_stats: stats;
-    start_batch_stats: stats;
-  }
+  type batch_info = unit
+
+  type typecheck_info = unit
 
   let get_stats
       ~include_current_process:_
@@ -512,8 +504,24 @@ module ProfileTypeCheck = struct
       _ =
     ()
 
+  let get_typecheck_info
+      ~init_id:_
+      ~check_reason:_
+      ~recheck_id:_
+      ~start_hh_stats:_
+      ~start_typecheck_stats:_
+      ~config:_ =
+    ()
+
+  let get_batch_info
+      ~typecheck_info:_
+      ~worker_id:_
+      ~batch_number:_
+      ~batch_size:_
+      ~start_batch_stats:_ =
+    ()
+
   let process_file
-      ~config:_
       ~batch_info:_
       ~file_index:_
       ~file:_

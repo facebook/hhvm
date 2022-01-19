@@ -427,7 +427,6 @@ let process_one_file
 
   if Option.is_none remote_execution then
     HackEventLogger.ProfileTypeCheck.process_file
-      ~config:check_info.per_file_profiling
       ~batch_info
       ~file_index:(ProcessFilesTally.count tally)
       ~file:(Option.map file ~f:(fun file -> file.path))
@@ -460,26 +459,22 @@ let process_files
     ~(check_info : check_info)
     ~(worker_id : string)
     ~(batch_number : int)
-    ~(start_typecheck_stats : HackEventLogger.ProfileTypeCheck.stats) :
+    ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result * computation_progress =
   Decl_counters.set_mode
     check_info.per_file_profiling
       .HackEventLogger.PerFileProfilingConfig.profile_decling;
   let _prev_counters_state = Counters.reset () in
   let batch_info =
-    {
-      HackEventLogger.ProfileTypeCheck.init_id = check_info.init_id;
-      check_reason = check_info.check_reason;
-      recheck_id = check_info.recheck_id;
-      worker_id;
-      batch_number;
-      batch_size = List.length progress.remaining;
-      start_hh_stats = CgroupProfiler.get_initial_stats ();
-      start_typecheck_stats;
-      start_batch_stats =
-        get_stats ~include_slightly_costly_stats:true ProcessFilesTally.empty;
-    }
+    HackEventLogger.ProfileTypeCheck.get_batch_info
+      ~typecheck_info
+      ~worker_id
+      ~batch_number
+      ~batch_size:(List.length progress.remaining)
+      ~start_batch_stats:
+        (get_stats ~include_slightly_costly_stats:true ProcessFilesTally.empty)
   in
+
   if not longlived_workers then SharedMem.invalidate_local_caches ();
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
@@ -553,7 +548,7 @@ let load_and_process_files
     ~(check_info : check_info)
     ~(worker_id : string)
     ~(batch_number : int)
-    ~(start_typecheck_stats : HackEventLogger.ProfileTypeCheck.stats) :
+    ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result * computation_progress =
   Option.iter check_info.memtrace_dir ~f:(fun temp_dir ->
       let file = Caml.Filename.temp_file ~temp_dir "memtrace.worker." ".ctf" in
@@ -573,7 +568,7 @@ let load_and_process_files
     ~check_info
     ~worker_id
     ~batch_number
-    ~start_typecheck_stats
+    ~typecheck_info
 
 (*****************************************************************************)
 (* Let's go! That's where the action is *)
@@ -861,7 +856,7 @@ let process_in_parallel
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
-    ~(start_typecheck_stats : HackEventLogger.ProfileTypeCheck.stats) :
+    ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result
     * Delegate.state
     * Telemetry.t
@@ -915,7 +910,7 @@ let process_in_parallel
           ~longlived_workers
           ~remote_execution
           ~check_info
-          ~start_typecheck_stats
+          ~typecheck_info
           ~worker_id
           ~batch_number:
             (SMap.find_opt worker_id !batch_counts_by_worker_id
@@ -980,7 +975,7 @@ let process_sequentially
     ~longlived_workers
     ~remote_execution
     ~check_info
-    ~start_typecheck_stats :
+    ~typecheck_info :
     typing_result * (Diagnostic_pusher.t option * seconds_since_epoch option) =
   let progress =
     { completed = []; remaining = BigList.as_list fnl; deferred = [] }
@@ -998,7 +993,7 @@ let process_sequentially
       ~check_info
       ~worker_id:"master"
       ~batch_number:(-1)
-      ~start_typecheck_stats
+      ~typecheck_info
   in
   let push_result =
     possibly_push_new_errors_to_lsp_client
@@ -1090,12 +1085,19 @@ let go_with_interrupt
     ~(longlived_workers : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : (_ * result) job_result =
-  let start_typecheck_stats =
-    HackEventLogger.ProfileTypeCheck.get_stats
-      ~include_current_process:false
-      ~include_slightly_costly_stats:true
-      ~shmem_heap_size:(SharedMem.SMTelemetry.heap_size ())
-      (Telemetry.create ())
+  let typecheck_info =
+    HackEventLogger.ProfileTypeCheck.get_typecheck_info
+      ~init_id:check_info.init_id
+      ~check_reason:check_info.check_reason
+      ~recheck_id:check_info.recheck_id
+      ~start_hh_stats:(CgroupProfiler.get_initial_stats ())
+      ~start_typecheck_stats:
+        (HackEventLogger.ProfileTypeCheck.get_stats
+           ~include_current_process:false
+           ~include_slightly_costly_stats:true
+           ~shmem_heap_size:(SharedMem.SMTelemetry.heap_size ())
+           (Telemetry.create ()))
+      ~config:check_info.per_file_profiling
   in
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
@@ -1140,7 +1142,7 @@ let go_with_interrupt
           ~longlived_workers
           ~remote_execution
           ~check_info
-          ~start_typecheck_stats
+          ~typecheck_info
       in
       ( typing_result,
         delegate_state,
@@ -1176,7 +1178,7 @@ let go_with_interrupt
         ~longlived_workers
         ~remote_execution
         ~check_info
-        ~start_typecheck_stats
+        ~typecheck_info
     end
   in
   let { errors; dep_edges; telemetry = typing_telemetry; adhoc_profiling } =

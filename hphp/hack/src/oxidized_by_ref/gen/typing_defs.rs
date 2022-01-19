@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<63f4973ca91e0e3f2c72b3826f9e088a>>
+// @generated SignedSource<<f712b05cbc3c365968fd5ab937023b4d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -152,7 +152,7 @@ pub struct ClassElt<'a> {
     /// pos of the type of the elt
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub pos: &'a lazy::Lazy<&'a pos_or_decl::PosOrDecl<'a>>,
-    pub flags: isize,
+    pub flags: typing_defs_flags::class_elt::ClassElt,
 }
 impl<'a> TrivialDrop for ClassElt<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ClassElt<'arena>);

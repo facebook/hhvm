@@ -378,7 +378,8 @@ let type_params name params =
   in
   (lifetime, params)
 
-let record_label_declaration ?(pub = false) ?(prefix = "") ld =
+let record_label_declaration
+    ?(pub = false) ?(prefix = "") (ld : label_declaration) : label =
   let doc = doc_comment_of_attribute_list ld.pld_attributes in
   let pub =
     if pub then

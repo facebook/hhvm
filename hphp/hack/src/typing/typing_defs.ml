@@ -89,7 +89,7 @@ type class_elt = {
   ce_origin: string;  (** identifies the class from which this elt originates *)
   ce_deprecated: string option;
   ce_pos: Pos_or_decl.t Lazy.t;  (** pos of the type of the elt *)
-  ce_flags: int;
+  ce_flags: Typing_defs_flags.ClassElt.t;
 }
 [@@deriving show]
 
@@ -1178,27 +1178,27 @@ let equal_const_decl cd1 cd2 =
   Pos_or_decl.equal cd1.cd_pos cd2.cd_pos
   && equal_decl_ty cd1.cd_type cd2.cd_type
 
-let get_ce_abstract ce = is_set ce_flags_abstract ce.ce_flags
+let get_ce_abstract ce = is_set ClassElt.Field.abstract ce.ce_flags
 
-let get_ce_final ce = is_set ce_flags_final ce.ce_flags
+let get_ce_final ce = is_set ClassElt.Field.final ce.ce_flags
 
-let get_ce_override ce = is_set ce_flags_override ce.ce_flags
+let get_ce_override ce = is_set ClassElt.Field.override ce.ce_flags
 
-let get_ce_lsb ce = is_set ce_flags_lsb ce.ce_flags
+let get_ce_lsb ce = is_set ClassElt.Field.lsb ce.ce_flags
 
-let get_ce_synthesized ce = is_set ce_flags_synthesized ce.ce_flags
+let get_ce_synthesized ce = is_set ClassElt.Field.synthesized ce.ce_flags
 
-let get_ce_const ce = is_set ce_flags_const ce.ce_flags
+let get_ce_const ce = is_set ClassElt.Field.const ce.ce_flags
 
-let get_ce_lateinit ce = is_set ce_flags_lateinit ce.ce_flags
+let get_ce_lateinit ce = is_set ClassElt.Field.lateinit ce.ce_flags
 
-let get_ce_readonly_prop ce = is_set ce_flags_readonly_prop ce.ce_flags
+let get_ce_readonly_prop ce = is_set ClassElt.Field.readonly_prop ce.ce_flags
 
 let get_ce_dynamicallycallable ce =
-  is_set ce_flags_dynamicallycallable ce.ce_flags
+  is_set ClassElt.Field.dynamicallycallable ce.ce_flags
 
 let get_ce_support_dynamic_type ce =
-  is_set ce_flags_support_dynamic_type ce.ce_flags
+  is_set ClassElt.Field.support_dynamic_type ce.ce_flags
 
 let xhp_attr_to_ce_flags xa =
   match xa with
@@ -1206,27 +1206,27 @@ let xhp_attr_to_ce_flags xa =
   | Some { xa_tag; xa_has_default; _ } ->
     Int.bit_or
       (if xa_has_default then
-        ce_flags_xa_has_default
+        ClassElt.Field.xa_has_default
       else
         0x0)
     @@
     (match xa_tag with
-    | None -> ce_flags_xa_tag_none
-    | Some Required -> ce_flags_xa_tag_required
-    | Some Lateinit -> ce_flags_xa_tag_lateinit)
+    | None -> ClassElt.Field.xa_tag_none
+    | Some Required -> ClassElt.Field.xa_tag_required
+    | Some Lateinit -> ClassElt.Field.xa_tag_lateinit)
 
 let flags_to_xhp_attr flags =
-  let tag_flags = Int.bit_and ce_flags_xa_tag_mask flags in
+  let tag_flags = Int.bit_and ClassElt.Field.xa_tag_mask flags in
   if Int.equal tag_flags 0 then
     None
   else
     Some
       {
-        xa_has_default = is_set ce_flags_xa_has_default flags;
+        xa_has_default = is_set ClassElt.Field.xa_has_default flags;
         xa_tag =
-          (if Int.equal tag_flags ce_flags_xa_tag_none then
+          (if Int.equal tag_flags ClassElt.Field.xa_tag_none then
             None
-          else if Int.equal tag_flags ce_flags_xa_tag_required then
+          else if Int.equal tag_flags ClassElt.Field.xa_tag_required then
             Some Required
           else
             Some Lateinit);
@@ -1248,20 +1248,22 @@ let make_ce_flags
     ~support_dynamic_type
     ~needs_init =
   let flags = 0 in
-  let flags = set_bit ce_flags_abstract abstract flags in
-  let flags = set_bit ce_flags_final final flags in
-  let flags = set_bit ce_flags_override override flags in
-  let flags = set_bit ce_flags_lsb lsb flags in
-  let flags = set_bit ce_flags_synthesized synthesized flags in
-  let flags = set_bit ce_flags_const const flags in
-  let flags = set_bit ce_flags_lateinit lateinit flags in
-  let flags = set_bit ce_flags_dynamicallycallable dynamicallycallable flags in
-  let flags = Int.bit_or flags (xhp_attr_to_ce_flags xhp_attr) in
-  let flags = set_bit ce_flags_readonly_prop readonly_prop flags in
+  let flags = set_bit ClassElt.Field.abstract abstract flags in
+  let flags = set_bit ClassElt.Field.final final flags in
+  let flags = set_bit ClassElt.Field.override override flags in
+  let flags = set_bit ClassElt.Field.lsb lsb flags in
+  let flags = set_bit ClassElt.Field.synthesized synthesized flags in
+  let flags = set_bit ClassElt.Field.const const flags in
+  let flags = set_bit ClassElt.Field.lateinit lateinit flags in
   let flags =
-    set_bit ce_flags_support_dynamic_type support_dynamic_type flags
+    set_bit ClassElt.Field.dynamicallycallable dynamicallycallable flags
   in
-  let flags = set_bit ce_flags_needs_init needs_init flags in
+  let flags = Int.bit_or flags (xhp_attr_to_ce_flags xhp_attr) in
+  let flags = set_bit ClassElt.Field.readonly_prop readonly_prop flags in
+  let flags =
+    set_bit ClassElt.Field.support_dynamic_type support_dynamic_type flags
+  in
+  let flags = set_bit ClassElt.Field.needs_init needs_init flags in
   flags
 
 (** Tunapplied_alias is a locl phase constructor that always stands for a higher-kinded type.

@@ -9,12 +9,102 @@
 
 open Hh_prelude
 
+type flags = int
+
+type bit_mask = int
+
+(* Is this bit set in the flags? *)
+let is_set (bit : bit_mask) (flags : flags) : bool =
+  not (Int.equal 0 (Int.bit_and bit flags))
+
 type fun_type_flags = int
 
 type fun_param_flags = int
 
-(* Is this bit set in the flags? *)
-let is_set bit flags = not (Int.equal 0 (Int.bit_and bit flags))
+module ClassElt = struct
+  type t = flags
+
+  module Field = struct
+    type t =
+      | Abstract
+      | Final
+      | Override
+      | Lsb
+      | Synthesized
+      | Const
+      | Lateinit
+      | Dynamicallycallable
+      | SupportDynamicType
+      | XaHasDefault
+      | XaTagRequired
+      | XaTagLateinit
+      | ReadonlyProp
+      | NeedsInit
+    [@@deriving enum, show]
+
+    let all : t list =
+      let rec f i acc =
+        if i < 0 then
+          acc
+        else
+          f (i - 1) (Option.value_exn (of_enum i) :: acc)
+      in
+      f max []
+
+    let to_bit_mask (field : t) : bit_mask = 1 lsl to_enum field
+
+    let abstract = to_bit_mask Abstract
+
+    let final = to_bit_mask Final
+
+    let override = to_bit_mask Override
+
+    let lsb = to_bit_mask Lsb
+
+    let synthesized = to_bit_mask Synthesized
+
+    let const = to_bit_mask Const
+
+    let lateinit = to_bit_mask Lateinit
+
+    let dynamicallycallable = to_bit_mask Dynamicallycallable
+
+    let support_dynamic_type = to_bit_mask SupportDynamicType
+
+    (* Three bits used to encode optional XHP attr.
+     * Set 1<<10 (0x400) if xa_has_default=true
+     * Then encode xa_tag as follows:
+     *   Some Required: 1<<11 (0x0800)
+     *   Some lateinit: 1<<12 (0x1000)
+     *   None:          1<<11 | 1<<12 (0x1800)
+     * If attr is not present at all, then masking with 0x1800 will produce zero.
+     *)
+    let xa_has_default = to_bit_mask XaHasDefault
+
+    let xa_tag_required = to_bit_mask XaTagRequired
+
+    let xa_tag_lateinit = to_bit_mask XaTagLateinit
+
+    let xa_tag_none = Int.bit_or xa_tag_required xa_tag_lateinit
+
+    let xa_tag_mask = Int.bit_or xa_tag_required xa_tag_lateinit
+
+    let readonly_prop = to_bit_mask ReadonlyProp
+
+    let needs_init = to_bit_mask NeedsInit
+  end
+
+  let to_string_map (flags : t) : bool SMap.t =
+    Field.all
+    |> List.map ~f:(fun field ->
+           (Field.show field, is_set (Field.to_bit_mask field) flags))
+    |> SMap.of_list
+
+  let show (flags : t) : string = flags |> to_string_map |> SMap.show Bool.pp
+
+  let pp (fmt : Format.formatter) (flags : t) : unit =
+    flags |> to_string_map |> SMap.pp Bool.pp fmt
+end
 
 (* Set a single bit to a boolean value *)
 let set_bit bit value flags =
@@ -58,47 +148,6 @@ let ft_flags_readonly_this = 1 lsl 11
 let ft_flags_support_dynamic_type = 1 lsl 12
 
 let ft_flags_is_memoized = 1 lsl 13
-
-(* Class element flags *)
-let ce_flags_abstract            = 1 lsl 0
-
-let ce_flags_final               = 1 lsl 1
-
-let ce_flags_override            = 1 lsl 2
-
-let ce_flags_lsb                 = 1 lsl 3
-
-let ce_flags_synthesized         = 1 lsl 5
-
-let ce_flags_const               = 1 lsl 6
-
-let ce_flags_lateinit            = 1 lsl 7
-
-let ce_flags_dynamicallycallable = 1 lsl 8
-
-let ce_flags_support_dynamic_type = 1 lsl 9
-
-(* Three bits used to encode optional XHP attr.
- * Set 1<<10 (0x400) if xa_has_default=true
- * Then encode xa_tag as follows:
- *   Some Required: 1<<11 (0x0800)
- *   Some lateinit: 1<<12 (0x1000)
- *   None:          1<<11 | 1<<12 (0x1800)
- * If attr is not present at all, then masking with 0x1800 will produce zero.
- *)
-let ce_flags_xa_has_default      = 1 lsl 10
-
-let ce_flags_xa_tag_required     = 1 lsl 11
-
-let ce_flags_xa_tag_lateinit     = 1 lsl 12
-
-let ce_flags_xa_tag_none         = Int.bit_or ce_flags_xa_tag_required ce_flags_xa_tag_lateinit
-
-let ce_flags_xa_tag_mask         = Int.bit_or ce_flags_xa_tag_required ce_flags_xa_tag_lateinit
-
-let ce_flags_readonly_prop            = 1 lsl 13
-
-let ce_flags_needs_init = 1 lsl 14
 
 (* fun_param flags *)
 let fp_flags_accept_disposable = 1 lsl 0

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<91a1283b4c2cdbdfa7a834254c7bf2a6>>
+// @generated SignedSource<<cd33e62333e1933f84745171f206f697>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -202,7 +202,7 @@ pub struct DeclClassType {
 )]
 #[repr(C)]
 pub struct Element {
-    pub flags: isize,
+    pub flags: typing_defs_flags::class_elt::ClassElt,
     pub origin: String,
     pub visibility: CeVisibility,
     pub deprecated: Option<String>,

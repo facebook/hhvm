@@ -53,6 +53,46 @@ bitflags! {
     }
 }
 
+pub mod class_elt {
+    use eq_modulo_pos::EqModuloPos;
+    use no_pos_hash::NoPosHash;
+    use ocamlrep_derive::FromOcamlRepIn;
+    use serde::Deserialize;
+    use serde::Serialize;
+
+    #[derive(
+        Clone,
+        Debug,
+        Deserialize,
+        Eq,
+        EqModuloPos,
+        FromOcamlRepIn,
+        Hash,
+        NoPosHash,
+        Ord,
+        PartialEq,
+        PartialOrd,
+        Serialize
+    )]
+    pub struct ClassElt(usize);
+
+    impl ocamlrep::ToOcamlRep for ClassElt {
+        fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
+            &self,
+            _alloc: &'a A,
+        ) -> ocamlrep::OpaqueValue<'a> {
+            ocamlrep::OpaqueValue::int(self.0 as isize)
+        }
+    }
+
+    impl ocamlrep::FromOcamlRep for ClassElt {
+        fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+            let int_value = ocamlrep::from::expect_int(value)?;
+            Ok(Self(int_value.try_into()?))
+        }
+    }
+}
+
 impl ocamlrep::ToOcamlRep for FunTypeFlags {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
         ocamlrep::OpaqueValue::int(self.bits() as isize)

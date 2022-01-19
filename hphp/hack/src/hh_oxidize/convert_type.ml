@@ -100,15 +100,10 @@ let owned_builtins =
 let is_owned_builtin = SSet.mem owned_builtins
 
 let rec core_type ?(seen_indirection = false) ct : Rust_type.t =
-  let is_by_box =
+  let (is_by_box, is_by_ref) =
     match Configuration.mode () with
-    | Configuration.ByBox -> true
-    | _ -> false
-  in
-  let is_by_ref =
-    match Configuration.mode () with
-    | Configuration.ByRef -> true
-    | _ -> false
+    | Configuration.ByBox -> (true, false)
+    | Configuration.ByRef -> (false, true)
   in
   match ct.ptyp_desc with
   | Ptyp_var "ty" when is_by_ref ->

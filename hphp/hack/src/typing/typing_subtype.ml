@@ -3311,6 +3311,13 @@ and sub_type_inner
   let (env, prop) =
     simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super env
   in
+  if not (TL.is_valid prop) then
+    Typing_log.log_prop
+      1
+      (Reason.to_pos (reason ty_sub))
+      "sub_type_inner"
+      env
+      prop;
   let (env, prop) = prop_to_env env prop subtype_env.on_error in
   let env = Env.add_subtype_prop env prop in
   let succeeded = process_simplify_subtype_result prop in
@@ -3766,7 +3773,12 @@ and decompose_subtype_add_prop env prop =
   | TL.Disj (_, [prop']) -> decompose_subtype_add_prop env prop'
   | TL.Disj _ ->
     let callable_pos = env.genv.callable_pos in
-    Typing_log.log_prop 2 callable_pos "decompose_subtype_add_prop" env prop;
+    Typing_log.log_prop
+      2
+      (Pos_or_decl.of_raw_pos callable_pos)
+      "decompose_subtype_add_prop"
+      env
+      prop;
     env
   | TL.Coerce (TL.CoerceToDynamic, ty1, ty2) ->
     decompose_subtype_add_bound env ty1 ty2

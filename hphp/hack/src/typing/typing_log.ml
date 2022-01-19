@@ -686,7 +686,7 @@ let log_global_inference_env p env global_tvenv =
 
 let log_prop level p message env prop =
   log_with_level env "prop" ~level (fun () ->
-      log_position p (fun () -> log_subtype_prop env message prop))
+      log_pos_or_decl p (fun () -> log_subtype_prop env message prop))
 
 let log_new_tvar env p tvar message =
   log_with_level env "prop" ~level:2 (fun () ->

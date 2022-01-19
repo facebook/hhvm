@@ -50,7 +50,7 @@ val log_global_inference_env :
 
 val log_prop :
   int ->
-  Pos.t ->
+  Pos_or_decl.t ->
   string ->
   Typing_env_types.env ->
   Typing_logic.subtype_prop ->

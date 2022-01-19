@@ -39,7 +39,7 @@ let log_remaining_prop env =
     if (not (Errors.currently_has_errors ())) && not (TL.is_valid prop) then
       Typing_log.log_prop
         1
-        env.genv.callable_pos
+        (Pos_or_decl.of_raw_pos env.genv.callable_pos)
         "There are remaining unsolved constraints!"
         env
         prop

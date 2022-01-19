@@ -400,7 +400,7 @@ void raiseCoeffectsCallViolation(const Func* callee,
     (*rl_num_coeffect_violations)++;
     raise_warning(errMsg());
   } else {
-    SystemLib::throwBadMethodCallExceptionObject(errMsg());
+    SystemLib::throwCoeffectViolationExceptionObject(errMsg());
   }
 }
 

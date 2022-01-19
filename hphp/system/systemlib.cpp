@@ -240,6 +240,10 @@ Object AllocReadonlyViolationExceptionObject(const Variant& message) {
   return createAndConstructThrowable(s_ReadonlyViolationExceptionClass, message);
 }
 
+Object AllocCoeffectViolationExceptionObject(const Variant& message) {
+  return createAndConstructThrowable(s_CoeffectViolationExceptionClass, message);
+}
+
 void throwExceptionObject(const Variant& message) {
   throw_object(AllocExceptionObject(message));
 }
@@ -329,6 +333,10 @@ void throwTypecastExceptionObject(const Variant& message) {
 
 void throwReadonlyViolationExceptionObject(const Variant& message) {
   throw_object(AllocReadonlyViolationExceptionObject(message));
+}
+
+void throwCoeffectViolationExceptionObject(const Variant& message) {
+  throw_object(AllocCoeffectViolationExceptionObject(message));
 }
 
 #define ALLOC_OBJECT_STUB(name)                                         \

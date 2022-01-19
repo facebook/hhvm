@@ -176,3 +176,8 @@ final class AccessPropertyOnNonObjectException extends LogicException {}
  * Exception thrown when a readonly violation occurs.
  */
 final class ReadonlyViolationException extends LogicException {}
+
+/**
+ * Exception thrown when a coeffect violation occurs.
+ */
+final class CoeffectViolationException extends LogicException {}

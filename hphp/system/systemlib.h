@@ -66,7 +66,8 @@ namespace HPHP { namespace SystemLib {
   x(UndefinedPropertyException)                 \
   x(UndefinedVariableException)                 \
   x(TypecastException)                          \
-  x(ReadonlyViolationException)
+  x(ReadonlyViolationException)                 \
+  x(CoeffectViolationException)
 
 #define SYSTEMLIB_HH_CLASSES(x) \
   x(Traversable)                \
@@ -165,6 +166,7 @@ void throwSoapFaultObject(const Variant& code,
 [[noreturn]] void throwUndefinedVariableExceptionObject(const Variant& message);
 [[noreturn]] void throwTypecastExceptionObject(const Variant& message);
 [[noreturn]] void throwReadonlyViolationExceptionObject(const Variant& message);
+[[noreturn]] void throwCoeffectViolationExceptionObject(const Variant& message);
 
 /**
  * Register a persistent unit to be re-merged (in non-repo mode)

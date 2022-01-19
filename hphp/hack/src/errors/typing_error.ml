@@ -5124,9 +5124,10 @@ module rec Error : sig
   val iter :
     t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
 
-  val eval : t -> error option
+  val eval : t -> current_span:Pos.t -> error option
 
-  val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t option
+  val to_user_error :
+    t -> current_span:Pos.t -> (Pos.t, Pos_or_decl.t) User_error.t option
 
   val primary : Primary.t -> t
 
@@ -5153,11 +5154,14 @@ module rec Error : sig
   val apply_reasons : Secondary.t -> on_error:Reasons_callback.t -> t
 
   val apply : t -> on_error:Callback.t -> t
+
+  val assert_in_current_decl : Secondary.t -> ctx:Pos_or_decl.ctx -> t
 end = struct
   type t =
     | Primary of Primary.t
     | Apply of Callback.t * t
     | Apply_reasons of Reasons_callback.t * Secondary.t
+    | Assert_in_current_decl of Secondary.t * Pos_or_decl.ctx
 
   let iter t ~on_prim ~on_snd =
     let rec aux = function
@@ -5168,22 +5172,79 @@ end = struct
       | Apply_reasons (cb, snd_err) ->
         Secondary.iter snd_err ~on_prim ~on_snd;
         Reasons_callback.iter cb ~on_prim ~on_snd
+      | Assert_in_current_decl (snd_err, _ctx) ->
+        Secondary.iter snd_err ~on_prim ~on_snd
     in
     aux t
-  (* -- Evaluation ------------------------------------------------------------ *)
 
-  let eval t =
+  (* -- Evaluation ------------------------------------------------------------ *)
+  let badpos_message =
+    Printf.sprintf
+      "Incomplete position information! Your type error is in this file, but we could only find related positions in another file. %s"
+      Error_message_sentinel.please_file_a_bug_message
+
+  let badpos_message_2 =
+    Printf.sprintf
+      "Incomplete position information! We couldn't find the exact line of your type error in this definition. %s"
+      Error_message_sentinel.please_file_a_bug_message
+
+  let wrap_error_in_different_file ~current_file ~current_span reasons =
+    let message =
+      List.map reasons ~f:(fun (pos, msg) ->
+          Pos.print_verbose_relative (Pos_or_decl.unsafe_to_raw_pos pos)
+          ^ ": "
+          ^ msg)
+    in
+    let stack =
+      Exception.get_current_callstack_string 99 |> Exception.clean_stack
+    in
+    HackEventLogger.type_check_primary_position_bug
+      ~current_file
+      ~message
+      ~stack;
+    let claim =
+      if Pos.equal current_span Pos.none then
+        (Pos.make_from current_file, badpos_message)
+      else
+        (current_span, badpos_message_2)
+    in
+    (claim, reasons)
+
+  let eval_assert ctx current_span = function
+    | (code, ((pos, msg) :: rest as reasons)) ->
+      let (claim, reasons) =
+        match
+          Pos_or_decl.fill_in_filename_if_in_current_decl
+            ~current_decl_and_file:ctx
+            pos
+        with
+        | Some pos -> ((pos, msg), rest)
+        | _ ->
+          wrap_error_in_different_file
+            ~current_file:ctx.Pos_or_decl.file
+            ~current_span
+            reasons
+      in
+      Some (code, claim, reasons, [])
+    | _ -> None
+
+  let eval t ~current_span =
     let rec aux ~k = function
       | Primary base -> k @@ Primary.to_error base
       | Apply_reasons (cb, err) ->
         k
-        @@ Option.bind (Secondary.eval err) ~f:(fun (code, reasons) ->
-               Reasons_callback.apply_help cb ~code ~reasons)
+        @@ Option.bind
+             (Secondary.eval err ~current_span)
+             ~f:(fun (code, reasons) ->
+               Reasons_callback.apply_help cb ~code ~reasons ~current_span)
       | Apply (cb, err) ->
         aux err ~k:(function
             | Some (code, claim, reasons, quickfixes) ->
               k @@ Callback.apply cb ~code ~claim ~reasons ~quickfixes
             | _ -> k None)
+      | Assert_in_current_decl (snd_err, ctx) ->
+        Option.bind ~f:(eval_assert ctx current_span)
+        @@ Secondary.eval snd_err ~current_span
     in
 
     aux ~k:Fn.id t
@@ -5191,7 +5252,8 @@ end = struct
   let make_error (code, claim, reasons, quickfixes) =
     User_error.make (Error_code.to_enum code) claim reasons ~quickfixes
 
-  let to_user_error t = Option.map ~f:make_error @@ eval t
+  let to_user_error t ~current_span =
+    Option.map ~f:make_error @@ eval t ~current_span
 
   (* -- Constructors ---------------------------------------------------------- *)
   let primary prim_err = Primary prim_err
@@ -5219,6 +5281,8 @@ end = struct
   let apply_reasons t ~on_error = Apply_reasons (on_error, t)
 
   let apply t ~on_error = Apply (on_error, t)
+
+  let assert_in_current_decl snd ~ctx = Assert_in_current_decl (snd, ctx)
 end
 
 and Secondary : sig
@@ -5459,11 +5523,32 @@ and Secondary : sig
         pos_super: Pos_or_decl.t;
         class_name: string;
       }
+    | Typeconst_concrete_concrete_override of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
+    | Abstract_concrete_override of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+        kind: [ `constant | `method_ | `property | `typeconst ];
+      }
+    | Should_be_override of {
+        pos: Pos_or_decl.t;
+        class_id: string;
+        id: string;
+      }
+    | Override_no_default_typeconst of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
 
   val iter :
     t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
 
-  val eval : t -> (Error_code.t * Pos_or_decl.t Message.t list) option
+  val eval :
+    t ->
+    current_span:Pos.t ->
+    (Error_code.t * Pos_or_decl.t Message.t list) option
 end = struct
   type t =
     | Of_error of Error.t
@@ -5701,6 +5786,24 @@ end = struct
         pos_sub: Pos_or_decl.t;
         pos_super: Pos_or_decl.t;
         class_name: string;
+      }
+    | Typeconst_concrete_concrete_override of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
+    | Abstract_concrete_override of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+        kind: [ `constant | `method_ | `property | `typeconst ];
+      }
+    | Should_be_override of {
+        pos: Pos_or_decl.t;
+        class_id: string;
+        id: string;
+      }
+    | Override_no_default_typeconst of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
       }
 
   let iter t ~on_prim ~on_snd =
@@ -6235,11 +6338,52 @@ end = struct
     let message2 = "this might not be a " ^ n in
     (Error_code.ThisFinal, [(pos_super, message1); (pos_sub, message2)])
 
-  let eval = function
+  let typeconst_concrete_concrete_override pos parent_pos =
+    ( Error_code.TypeconstConcreteConcreteOverride,
+      [
+        (pos, "Cannot re-declare this type constant");
+        (parent_pos, "Previously defined here");
+      ] )
+
+  let abstract_concrete_override pos parent_pos kind =
+    let kind_str =
+      match kind with
+      | `method_ -> "method"
+      | `typeconst -> "type constant"
+      | `constant -> "constant"
+      | `property -> "property"
+    in
+    ( Error_code.AbstractConcreteOverride,
+      [
+        (pos, "Cannot re-declare this " ^ kind_str ^ " as abstract");
+        (parent_pos, "Previously defined here");
+      ] )
+
+  let should_be_override pos class_id id =
+    ( Error_code.ShouldBeOverride,
+      [
+        ( pos,
+          Printf.sprintf
+            "%s has no parent class with a method %s to override"
+            (Render.strip_ns class_id |> Markdown_lite.md_codify)
+            (Markdown_lite.md_codify id) );
+      ] )
+
+  let override_no_default_typeconst pos parent_pos =
+    ( Error_code.OverrideNoDefaultTypeconst,
+      [
+        (pos, "This abstract type constant does not have a default type");
+        ( parent_pos,
+          "It cannot override an abstract type constant that has a default type"
+        );
+      ] )
+
+  let eval t ~current_span =
+    match t with
     | Of_error err ->
       Option.map ~f:(fun (code, claim, reasons, _) ->
           (code, Message.map ~f:Pos_or_decl.of_raw_pos claim :: reasons))
-      @@ Error.eval err
+      @@ Error.eval err ~current_span
     | Fun_too_many_args { pos; decl_pos; actual; expected } ->
       Some (fun_too_many_args pos decl_pos actual expected)
     | Fun_too_few_args { pos; decl_pos; actual; expected } ->
@@ -6364,6 +6508,14 @@ end = struct
       Some (method_not_dynamically_callable pos parent_pos)
     | This_final { pos_sub; pos_super; class_name } ->
       Some (this_final pos_sub pos_super class_name)
+    | Typeconst_concrete_concrete_override { pos; parent_pos } ->
+      Some (typeconst_concrete_concrete_override pos parent_pos)
+    | Abstract_concrete_override { pos; parent_pos; kind } ->
+      Some (abstract_concrete_override pos parent_pos kind)
+    | Should_be_override { pos; class_id; id } ->
+      Some (should_be_override pos class_id id)
+    | Override_no_default_typeconst { pos; parent_pos } ->
+      Some (override_no_default_typeconst pos parent_pos)
 end
 
 and Callback : sig
@@ -6623,6 +6775,7 @@ and Reasons_callback : sig
     ?reasons:Pos_or_decl.t Message.t list ->
     ?quickfixes:Quickfix.t list ->
     t ->
+    current_span:Pos.t ->
     error option
 
   val apply :
@@ -6631,6 +6784,7 @@ and Reasons_callback : sig
     ?reasons:Pos_or_decl.t Message.t list ->
     ?quickfixes:Quickfix.t list ->
     t ->
+    current_span:Pos.t ->
     (Pos.t, Pos_or_decl.t) User_error.t option
 
   val unify_error_at : Pos.t -> t
@@ -6761,8 +6915,10 @@ end = struct
       { t with code_opt = Option.first_some t.code_opt code_opt }
 
     let prepend_secondary
-        ({ claim_opt; reasons_opt; quickfixes_opt; _ } as st) snd_err =
-      match Secondary.eval snd_err with
+        ({ claim_opt; reasons_opt; quickfixes_opt; _ } as st)
+        snd_err
+        ~current_span =
+      match Secondary.eval snd_err ~current_span with
       | Some (code, reasons) ->
         {
           code_opt = Some code;
@@ -6771,18 +6927,18 @@ end = struct
           quickfixes_opt;
         }
       | _ -> st
-  end
 
-  (** Replace any missing values in the error state with those of the error *)
-  let with_defaults
-      Error_state.{ code_opt; claim_opt; reasons_opt; quickfixes_opt } err =
-    Option.(
-      map ~f:(fun (code, claim, reasons, quickfixes) ->
-          ( value code_opt ~default:code,
-            value claim_opt ~default:claim,
-            value reasons_opt ~default:reasons,
-            value quickfixes_opt ~default:quickfixes )))
-    @@ Error.eval err
+    (** Replace any missing values in the error state with those of the error *)
+    let with_defaults
+        { code_opt; claim_opt; reasons_opt; quickfixes_opt } err ~current_span =
+      Option.(
+        map ~f:(fun (code, claim, reasons, quickfixes) ->
+            ( value code_opt ~default:code,
+              value claim_opt ~default:claim,
+              value reasons_opt ~default:reasons,
+              value quickfixes_opt ~default:quickfixes )))
+      @@ Error.eval err ~current_span
+  end
 
   let eval_callback
       cb Error_state.{ code_opt; reasons_opt; quickfixes_opt; _ } ~claim =
@@ -6793,58 +6949,60 @@ end = struct
       ~claim
       cb
 
-  let rec eval t st =
-    match t with
-    | From_on_error f ->
-      let code = Option.map ~f:Error_code.to_enum st.Error_state.code_opt
-      and quickfixes = st.Error_state.quickfixes_opt
-      and reasons = Option.value ~default:[] st.Error_state.reasons_opt in
-      f ?code ?quickfixes reasons;
-      None
-    | Ignore -> None
-    | Always err -> Error.eval err
-    | Of_error err -> with_defaults st err
-    | Of_callback (cb, claim) -> eval_callback cb st ~claim
-    | With_code (err, code) ->
-      let st = Error_state.with_code st @@ Some code in
-      eval err st
-    | With_reasons (err, reasons) ->
-      eval err Error_state.{ st with reasons_opt = Some reasons }
-    | Add_reason (err, op, reason) -> eval_reason_op op err reason st
-    | Retain (t, comp) -> eval_retain t comp st
-    | Incoming_reasons (err, op) ->
-      Option.map ~f:(fun ((code, claim, reasons, qfxs) as err) ->
-          match (st.Error_state.reasons_opt, op) with
-          | (None, _)
-          | (Some [], _) ->
-            err
-          | (Some rs, Append) -> (code, claim, reasons @ rs, qfxs)
-          | (Some rs, Prepend) -> (code, claim, rs @ reasons, qfxs))
-      @@ eval err Error_state.{ st with reasons_opt = None }
-    | Prepend_on_apply (t, snd_err) ->
-      eval t @@ Error_state.prepend_secondary st snd_err
-
-  and eval_reason_op op err base_reason (Error_state.{ reasons_opt; _ } as st) =
-    let reasons_opt =
-      match op with
-      | Append ->
-        Option.(
-          first_some (map reasons_opt ~f:(fun rs -> rs @ [base_reason]))
-          @@ Some [base_reason])
-      | Prepend ->
-        Option.(
-          first_some (map reasons_opt ~f:(fun rs -> base_reason :: rs))
-          @@ Some [base_reason])
+  let eval t ~st ~current_span =
+    let rec eval t st =
+      match t with
+      | From_on_error f ->
+        let code = Option.map ~f:Error_code.to_enum st.Error_state.code_opt
+        and quickfixes = st.Error_state.quickfixes_opt
+        and reasons = Option.value ~default:[] st.Error_state.reasons_opt in
+        f ?code ?quickfixes reasons;
+        None
+      | Ignore -> None
+      | Always err -> Error.eval err ~current_span
+      | Of_error err -> Error_state.with_defaults st err ~current_span
+      | Of_callback (cb, claim) -> eval_callback cb st ~claim
+      | With_code (err, code) ->
+        let st = Error_state.with_code st @@ Some code in
+        eval err st
+      | With_reasons (err, reasons) ->
+        eval err Error_state.{ st with reasons_opt = Some reasons }
+      | Add_reason (err, op, reason) -> eval_reason_op op err reason st
+      | Retain (t, comp) -> eval_retain t comp st
+      | Incoming_reasons (err, op) ->
+        Option.map ~f:(fun ((code, claim, reasons, qfxs) as err) ->
+            match (st.Error_state.reasons_opt, op) with
+            | (None, _)
+            | (Some [], _) ->
+              err
+            | (Some rs, Append) -> (code, claim, reasons @ rs, qfxs)
+            | (Some rs, Prepend) -> (code, claim, rs @ reasons, qfxs))
+        @@ eval err Error_state.{ st with reasons_opt = None }
+      | Prepend_on_apply (t, snd_err) ->
+        eval t (Error_state.prepend_secondary st snd_err ~current_span)
+    and eval_reason_op op err base_reason (Error_state.{ reasons_opt; _ } as st)
+        =
+      let reasons_opt =
+        match op with
+        | Append ->
+          Option.(
+            first_some (map reasons_opt ~f:(fun rs -> rs @ [base_reason]))
+            @@ Some [base_reason])
+        | Prepend ->
+          Option.(
+            first_some (map reasons_opt ~f:(fun rs -> base_reason :: rs))
+            @@ Some [base_reason])
+      in
+      eval err Error_state.{ st with reasons_opt }
+    and eval_retain t comp st =
+      match comp with
+      | Code -> eval t Error_state.{ st with code_opt = None }
+      | Reasons -> eval t Error_state.{ st with reasons_opt = None }
+      | Quickfixes -> eval t Error_state.{ st with quickfixes_opt = None }
     in
-    eval err Error_state.{ st with reasons_opt }
+    eval t st
 
-  and eval_retain t comp st =
-    match comp with
-    | Code -> eval t Error_state.{ st with code_opt = None }
-    | Reasons -> eval t Error_state.{ st with reasons_opt = None }
-    | Quickfixes -> eval t Error_state.{ st with quickfixes_opt = None }
-
-  let apply_help ?code ?claim ?reasons ?quickfixes t =
+  let apply_help ?code ?claim ?reasons ?quickfixes t ~current_span =
     let claim = Option.map claim ~f:(Message.map ~f:Pos_or_decl.of_raw_pos) in
     let reasons_opt =
       match (claim, reasons) with
@@ -6854,19 +7012,22 @@ end = struct
     in
     eval
       t
-      Error_state.
-        {
-          code_opt = code;
-          claim_opt = None;
-          reasons_opt;
-          quickfixes_opt = quickfixes;
-        }
+      ~st:
+        Error_state.
+          {
+            code_opt = code;
+            claim_opt = None;
+            reasons_opt;
+            quickfixes_opt = quickfixes;
+          }
+      ~current_span
 
-  let apply ?code ?claim ?reasons ?quickfixes t =
+  let apply ?code ?claim ?reasons ?quickfixes t ~current_span =
     let f (code, claim, reasons, quickfixes) =
       User_error.make (Error_code.to_enum code) claim reasons ~quickfixes
     in
-    Option.map ~f @@ apply_help ?code ?claim ?reasons ?quickfixes t
+    Option.map ~f
+    @@ apply_help ?code ?claim ?reasons ?quickfixes t ~current_span
   (* -- Specific callbacks -------------------------------------------------- *)
 
   let unify_error_at pos =

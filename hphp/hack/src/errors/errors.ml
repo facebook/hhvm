@@ -742,7 +742,13 @@ let add_nast_check_error err = add_error @@ Nast_check_error.to_user_error err
 
 let apply_error_from_reasons_callback ?code ?claim ?reasons ?quickfixes err =
   Option.iter ~f:add_error
-  @@ Typing_error.Reasons_callback.apply ?code ?claim ?reasons ?quickfixes err
+  @@ Typing_error.Reasons_callback.apply
+       ?code
+       ?claim
+       ?reasons
+       ?quickfixes
+       err
+       ~current_span:!current_span
 
 let log_exception_occurred pos e =
   let pos_str = pos |> Pos.to_absolute |> Pos.string in
@@ -774,7 +780,8 @@ let log_primary_typing_error prim_err =
 
 let add_typing_error err =
   Typing_error.iter ~on_prim:log_primary_typing_error ~on_snd:(fun _ -> ()) err;
-  Option.iter ~f:add_error @@ Typing_error.to_user_error err
+  Option.iter ~f:add_error
+  @@ Typing_error.to_user_error err ~current_span:!current_span
 
 let incremental_update ~old ~new_ ~rechecked phase =
   let fold init g =
@@ -875,7 +882,12 @@ let apply_callback_to_errors : t -> Typing_error.Reasons_callback.t -> unit =
   let on_error User_error.{ code; claim; reasons; quickfixes = _ } =
     let code = Option.value_exn (Typing_error.Error_code.of_enum code) in
     Option.iter ~f:add_error
-    @@ Typing_error.Reasons_callback.apply on_error ~code ~claim ~reasons
+    @@ Typing_error.Reasons_callback.apply
+         on_error
+         ~code
+         ~claim
+         ~reasons
+         ~current_span:!current_span
   in
   Relative_path.Map.iter errors ~f:(fun _ ->
       PhaseMap.iter ~f:(fun _ -> List.iter ~f:on_error))
@@ -985,52 +997,16 @@ let unimplemented_feature pos msg = add 0 pos ("Feature not implemented: " ^ msg
 let experimental_feature pos msg =
   add 0 pos ("Cannot use experimental feature: " ^ msg)
 
-(** TODO: Remove use of mutable state *)
-let typeconst_concrete_concrete_override pos parent_pos =
-  add_error_assert_primary_pos_in_current_decl
-    (Typing.err_code Typing.TypeconstConcreteConcreteOverride)
-    [
-      (pos, "Cannot re-declare this type constant");
-      (parent_pos, "Previously defined here");
-    ]
-
 (*****************************************************************************)
 (* Typing errors *)
 (*****************************************************************************)
-
-(** TODO: Remove use of mutable state *)
-let abstract_concrete_override pos parent_pos kind =
-  let kind_str =
-    match kind with
-    | `method_ -> "method"
-    | `typeconst -> "type constant"
-    | `constant -> "constant"
-    | `property -> "property"
-  in
-  add_error_assert_primary_pos_in_current_decl
-    (Typing.err_code Typing.AbstractConcreteOverride)
-    [
-      (pos, "Cannot re-declare this " ^ kind_str ^ " as abstract");
-      (parent_pos, "Previously defined here");
-    ]
 
 (*****************************************************************************)
 (* Typing decl errors *)
 (*****************************************************************************)
 
-(** TODO: Remove use of mutable state *)
-let should_be_override pos class_id id =
-  add_error_assert_primary_pos_in_current_decl
-    (Typing.err_code Typing.ShouldBeOverride)
-    [
-      ( pos,
-        Printf.sprintf
-          "%s has no parent class with a method %s to override"
-          (Render.strip_ns class_id |> Markdown_lite.md_codify)
-          (Markdown_lite.md_codify id) );
-    ]
-
-(** TODO: Remove use callback application *)
+(** TODO: Remove use of `User_error.t` representation for nested error &
+    callback application *)
 let ambiguous_inheritance
     pos class_ origin error (on_error : Typing_error.Reasons_callback.t) =
   let User_error.{ code; claim; reasons; quickfixes = _ } = error in
@@ -1048,17 +1024,6 @@ let ambiguous_inheritance
     on_error
     ~code
     ~reasons:(claim_as_reason claim :: reasons @ [(pos, message)])
-
-(** TODO: Remove use of mutable state *)
-let override_no_default_typeconst pos_child pos_parent =
-  add_error_assert_primary_pos_in_current_decl
-    (Typing.err_code Typing.OverrideNoDefaultTypeconst)
-    [
-      (pos_child, "This abstract type constant does not have a default type");
-      ( pos_parent,
-        "It cannot override an abstract type constant that has a default type"
-      );
-    ]
 
 (** TODO: Remove use of `User_error.t` representation for nested error  *)
 let function_is_not_dynamically_callable pos function_name error =

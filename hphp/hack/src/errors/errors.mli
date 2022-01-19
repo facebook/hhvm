@@ -240,26 +240,6 @@ val unimplemented_feature : Pos.t -> string -> unit
 
 val experimental_feature : Pos.t -> string -> unit
 
-val typeconst_concrete_concrete_override :
-  Pos_or_decl.t ->
-  Pos_or_decl.t ->
-  current_decl_and_file:Pos_or_decl.ctx ->
-  unit
-
-val abstract_concrete_override :
-  Pos_or_decl.t ->
-  Pos_or_decl.t ->
-  [< `method_ | `typeconst | `constant | `property ] ->
-  current_decl_and_file:Pos_or_decl.ctx ->
-  unit
-
-val should_be_override :
-  Pos_or_decl.t ->
-  string ->
-  string ->
-  current_decl_and_file:Pos_or_decl.ctx ->
-  unit
-
 val ambiguous_inheritance :
   Pos_or_decl.t ->
   string ->
@@ -268,19 +248,13 @@ val ambiguous_inheritance :
   Typing_error.Reasons_callback.t ->
   unit
 
-val override_no_default_typeconst :
-  Pos_or_decl.t ->
-  Pos_or_decl.t ->
-  current_decl_and_file:Pos_or_decl.ctx ->
-  unit
-
 val method_is_not_dynamically_callable :
   Pos.t ->
   string ->
   string ->
   bool ->
   (Pos_or_decl.t * string) option ->
-  error option ->
+  (Pos.t, Pos_or_decl.t) User_error.t option ->
   unit
 
 val function_is_not_dynamically_callable : Pos.t -> string -> error -> unit

@@ -1522,6 +1522,24 @@ module Secondary : sig
         pos_super: Pos_or_decl.t;
         class_name: string;
       }
+    | Typeconst_concrete_concrete_override of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
+    | Abstract_concrete_override of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+        kind: [ `constant | `method_ | `property | `typeconst ];
+      }
+    | Should_be_override of {
+        pos: Pos_or_decl.t;
+        class_id: string;
+        id: string;
+      }
+    | Override_no_default_typeconst of {
+        pos: Pos_or_decl.t;
+        parent_pos: Pos_or_decl.t;
+      }
 end
 
 module Callback : sig
@@ -1620,6 +1638,7 @@ module Reasons_callback : sig
     ?reasons:Pos_or_decl.t Message.t list ->
     ?quickfixes:Quickfix.t list ->
     t ->
+    current_span:Pos.t ->
     (Pos.t, Pos_or_decl.t) User_error.t option
 
   (* -- Constructors -------------------------------------------------------- *)
@@ -1776,7 +1795,8 @@ val iter :
 
 (** Evaluate an error to a `User_error.t` for error reporting; we return an
    option to model ignoring errors *)
-val to_user_error : t -> (Pos.t, Pos_or_decl.t) User_error.t option
+val to_user_error :
+  t -> current_span:Pos.t -> (Pos.t, Pos_or_decl.t) User_error.t option
 
 (* -- Constructors -------------------------------------------------------- *)
 
@@ -1820,3 +1840,8 @@ val apply_reasons : Secondary.t -> on_error:Reasons_callback.t -> t
 (** Apply a the `Callback.t` to the supplied `Secondary.t` error, using
    the claim, reasons, quickfixes and error code associated with that error *)
 val apply : t -> on_error:Callback.t -> t
+
+(** Lift a `Secondary.t` error to a `Typing_error.t` by asserting that the
+    position of the first reason is in the current decl and treating it as a
+    claim  *)
+val assert_in_current_decl : Secondary.t -> ctx:Pos_or_decl.ctx -> t

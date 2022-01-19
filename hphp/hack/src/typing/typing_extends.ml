@@ -460,14 +460,19 @@ let check_override
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
      * See override_abstract_concrete.php test case for example. *)
-    Errors.abstract_concrete_override
-      pos
-      parent_pos
-      (if is_functional then
-        `method_
-      else
-        `property)
-      ~current_decl_and_file:(Env.get_current_decl_and_file env);
+    Errors.add_typing_error
+      Typing_error.(
+        assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
+        @@ Secondary.Abstract_concrete_override
+             {
+               pos;
+               parent_pos;
+               kind =
+                 (if is_functional then
+                   `method_
+                 else
+                   `property);
+             });
   let snd_err =
     let open Typing_error.Secondary in
     if is_functional then
@@ -705,35 +710,47 @@ let check_const_override
         parent_class_const.cc_type
     in
 
-    if const_interface_or_trait_member_not_unique then
-      let snd_err =
-        Typing_error.Secondary.Interface_or_trait_const_multiple_defs
-          {
-            pos = class_const.cc_pos;
-            name = const_name;
-            origin = class_const.cc_origin;
-            parent_pos = parent_class_const.cc_pos;
-            parent_origin = parent_class_const.cc_origin;
-          }
-      in
-      Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error snd_err)
-    else if is_bad_interface_const_override then
-      let snd_err =
-        Typing_error.Secondary.Concrete_const_interface_override
-          {
-            pos = class_const.cc_pos;
-            name = const_name;
-            parent_pos = parent_class_const.cc_pos;
-            parent_origin = parent_class_const.cc_origin;
-          }
-      in
-      Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error snd_err)
-    else if is_abstract_concrete_override then
-      Errors.abstract_concrete_override
-        class_const.cc_pos
-        parent_class_const.cc_pos
-        `constant
-        ~current_decl_and_file:(Env.get_current_decl_and_file env);
+    let err_opt =
+      if const_interface_or_trait_member_not_unique then
+        let snd_err =
+          Typing_error.Secondary.Interface_or_trait_const_multiple_defs
+            {
+              pos = class_const.cc_pos;
+              name = const_name;
+              origin = class_const.cc_origin;
+              parent_pos = parent_class_const.cc_pos;
+              parent_origin = parent_class_const.cc_origin;
+            }
+        in
+        Some (Typing_error.apply_reasons ~on_error snd_err)
+      else if is_bad_interface_const_override then
+        let snd_err =
+          Typing_error.Secondary.Concrete_const_interface_override
+            {
+              pos = class_const.cc_pos;
+              name = const_name;
+              parent_pos = parent_class_const.cc_pos;
+              parent_origin = parent_class_const.cc_origin;
+            }
+        in
+        Some (Typing_error.apply_reasons ~on_error snd_err)
+      else if is_abstract_concrete_override then
+        let snd_err =
+          Typing_error.Secondary.Abstract_concrete_override
+            {
+              pos = class_const.cc_pos;
+              parent_pos = parent_class_const.cc_pos;
+              kind = `constant;
+            }
+        in
+        Some
+          (Typing_error.assert_in_current_decl
+             ~ctx:(Env.get_current_decl_and_file env)
+             snd_err)
+      else
+        None
+    in
+    Option.iter err_opt ~f:Errors.add_typing_error;
 
     Phase.sub_type_decl
       env
@@ -1025,20 +1042,20 @@ let tconst_subsumption
   match (parent_typeconst.ttc_kind, child_typeconst.ttc_kind) with
   | ( TCAbstract { atc_default = Some _; _ },
       TCAbstract { atc_default = None; _ } ) ->
-    Errors.override_no_default_typeconst
-      pos
-      parent_pos
-      ~current_decl_and_file:(Env.get_current_decl_and_file env);
+    Errors.add_typing_error
+      Typing_error.(
+        assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
+        @@ Secondary.Override_no_default_typeconst { pos; parent_pos });
     env
   | (TCConcrete _, TCAbstract _) ->
     (* It is valid for abstract class to extend a concrete class, but it cannot
      * redefine already concrete members as abstract.
      * See typecheck/tconst/subsume_tconst5.php test case for example. *)
-    Errors.abstract_concrete_override
-      pos
-      parent_pos
-      `typeconst
-      ~current_decl_and_file:(Env.get_current_decl_and_file env);
+    Errors.add_typing_error
+      Typing_error.(
+        assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
+        @@ Secondary.Abstract_concrete_override
+             { pos; parent_pos; kind = `typeconst });
     env
   | _ ->
     let inherited = not (String.equal child_typeconst.ttc_origin class_name) in
@@ -1114,10 +1131,12 @@ let tconst_subsumption
                 (Env.get_tcopt env)
               && not inherited
             then
-              Errors.typeconst_concrete_concrete_override
-                ~current_decl_and_file:(Env.get_current_decl_and_file env)
-                pos
-                parent_pos
+              Errors.add_typing_error
+                Typing_error.(
+                  assert_in_current_decl
+                    ~ctx:(Env.get_current_decl_and_file env)
+                  @@ Secondary.Typeconst_concrete_concrete_override
+                       { pos; parent_pos })
           | _ -> ()
         end;
         env

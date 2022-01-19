@@ -48,11 +48,11 @@ let check_override_annotations env cls ~static =
                 String.( <> ) meth.ce_origin parent_meth.ce_origin)
           in
           if not parent_method_exists then
-            Errors.should_be_override
-              pos
-              (Cls.name cls)
-              id
-              ~current_decl_and_file:(Env.get_current_decl_and_file env))
+            Errors.add_typing_error
+              Typing_error.(
+                assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
+                @@ Secondary.Should_be_override
+                     { pos; class_id = Cls.name cls; id }))
 
 (** Ensure that all methods which have the override annotation, were inherited
     by [cls], and were originally defined in a trait do in fact override some

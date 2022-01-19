@@ -1794,11 +1794,11 @@ let class_def_ env c tc =
         let pos = method_pos ~is_static ce.ce_origin id in
         (* Method is actually defined in this class *)
         if String.equal ce.ce_origin (snd c.c_name) then
-          Errors.should_be_override
-            pos
-            (snd c.c_name)
-            id
-            ~current_decl_and_file:(Env.get_current_decl_and_file env)
+          Errors.add_typing_error
+            Typing_error.(
+              assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
+              @@ Secondary.Should_be_override
+                   { pos; class_id = snd c.c_name; id })
         else
           match Env.get_class env ce.ce_origin with
           | None -> ()

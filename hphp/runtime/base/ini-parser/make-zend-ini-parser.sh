@@ -3,16 +3,10 @@
 unset CDPATH
 DIR="$( cd "$( dirname "$0" )" && pwd )"
 
-# If we're using buck, then we'll be in a sandboxed source directory instead of
-# the repo.  We want the path to the repo so we can check in the generated
-# parser artifacts.
-if [ -n "${FBCODE_DIR}" ]; then
-  DIR="${FBCODE_DIR}/hphp/runtime/base/ini-parser"
-fi
-
 INFILE=zend-ini.y
 
 if [ -z "${INSTALL_DIR}" ]; then
+  # Running manually, not under buck; update files in source tree.
   INSTALL_DIR="${DIR}"
 fi
 
@@ -38,10 +32,8 @@ sed -i \
     "${OUTFILE}" \
     "${OUTHEADER}"
 
-# We still want the files in our tree since they are checked in.
-if [ "${INSTALL_DIR}" != "${DIR}" ]; then
+# Mark the checked-in files as generated.
+if [ "${INSTALL_DIR}" = "${DIR}" ]; then
   sed -i -e "1i// @""generated" "${OUTFILE}"
   sed -i -e "1i// @""generated" "${OUTHEADER}"
-  cp "${OUTFILE}" "${DIR}/zend-ini.tab.cpp"
-  cp "${OUTHEADER}" "${DIR}/zend-ini.tab.hpp"
 fi

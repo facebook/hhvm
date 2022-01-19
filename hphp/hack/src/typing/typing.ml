@@ -1578,7 +1578,8 @@ let rec class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
     (env, MakeType.tuple reason tyl)
   | _ -> (env, hint_ty)
 
-let refine_and_simplify_intersection env p reason ivar_pos ivar_ty hint_ty =
+let refine_and_simplify_intersection
+    ~hint_first env p reason ivar_pos ivar_ty hint_ty =
   match get_node ivar_ty with
   | Tunion [ty1; ty2]
     when Typing_defs.is_dynamic ty1 || Typing_defs.is_dynamic ty2 ->
@@ -1596,11 +1597,48 @@ let refine_and_simplify_intersection env p reason ivar_pos ivar_ty hint_ty =
     let (env, hint_ty) =
       class_for_refinement env p reason ivar_pos ivar_ty hint_ty
     in
-    Inter.intersect env ~r:reason ivar_ty hint_ty
+    (* Sometimes the type checker is sensitive to the ordering of intersections *)
+    if hint_first then
+      Inter.intersect env ~r:reason hint_ty ivar_ty
+    else
+      Inter.intersect env ~r:reason ivar_ty hint_ty
+
+let refine_for_is ~hint_first env tparamet ivar reason hint =
+  let (env, lset) =
+    match snd hint with
+    | Aast.Hnonnull -> condition_nullity ~nonnull:tparamet env ivar
+    | Aast.Hprim Tnull -> condition_nullity ~nonnull:(not tparamet) env ivar
+    | _ -> (env, Local_id.Set.empty)
+  in
+  let (env, locl) =
+    make_a_local_of ~include_this:true env (Tast.to_nast_expr ivar)
+  in
+  match locl with
+  | Some locl_ivar ->
+    let (env, hint_ty) =
+      Phase.localize_hint_no_subst env ~ignore_errors:false hint
+    in
+    let (env, hint_ty) =
+      if not tparamet then
+        Inter.negate_type env reason hint_ty ~approx:TUtils.ApproxUp
+      else
+        (env, hint_ty)
+    in
+    let (env, refined_ty) =
+      refine_and_simplify_intersection
+        ~hint_first
+        env
+        (fst hint)
+        reason
+        (fst locl_ivar)
+        (fst3 ivar)
+        hint_ty
+    in
+    (set_local env locl_ivar refined_ty, Local_id.Set.singleton (snd locl_ivar))
+  | None -> (env, lset)
 
 type legacy_arrays =
   | PHPArray
-  | AnyArray
   | HackDictOrDArray
   | HackVecOrVArray
 
@@ -1654,7 +1692,6 @@ let safely_refine_is_array env ty p pred_name arg_expr =
       let hint_ty =
         match ty with
         | PHPArray -> array_ty
-        | AnyArray -> MakeType.any_array r tarrkey tfresh
         | HackDictOrDArray ->
           MakeType.union
             r
@@ -4324,7 +4361,14 @@ and expr_
     let refine_type env lpos lty rty =
       let reason = Reason.Ras lpos in
       let (env, rty) = Env.expand_type env rty in
-      refine_and_simplify_intersection env p reason lpos lty rty
+      refine_and_simplify_intersection
+        ~hint_first:false
+        env
+        p
+        reason
+        lpos
+        lty
+        rty
     in
     let (env, te, expr_ty) = expr env e in
     let env = might_throw env in
@@ -8670,8 +8714,17 @@ and condition ?lhs_of_null_coalesce env tparamet ((ty, p, e) as te : Tast.expr)
     when tparamet && String.equal f SN.StdlibFunctions.is_vec_or_varray ->
     safely_refine_is_array env HackVecOrVArray p f lv
   | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
-    when tparamet && String.equal f SN.StdlibFunctions.is_any_array ->
-    safely_refine_is_array env AnyArray p f lv
+    when String.equal f SN.StdlibFunctions.is_any_array ->
+    refine_for_is
+      ~hint_first:true
+      env
+      tparamet
+      lv
+      (Reason.Rpredicated (p, f))
+      ( p,
+        Happly
+          ( (p, "\\HH\\AnyArray"),
+            [(p, Happly ((p, "_"), [])); (p, Happly ((p, "_"), []))] ) )
   | Aast.Call ((_, p, Aast.Id (_, f)), _, [(_, lv)], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_php_array ->
     safely_refine_is_array env PHPArray p f lv
@@ -8689,35 +8742,7 @@ and condition ?lhs_of_null_coalesce env tparamet ((ty, p, e) as te : Tast.expr)
     key_exists env p shape field
   | Aast.Unop (Ast_defs.Unot, e) -> condition env (not tparamet) e
   | Aast.Is (ivar, h) ->
-    let reason = Reason.Ris (fst h) in
-    let refine_type env ivar ivar_ty hint_ty =
-      let (env, refined_ty) =
-        refine_and_simplify_intersection env p reason (fst ivar) ivar_ty hint_ty
-      in
-      (set_local env ivar refined_ty, Local_id.Set.singleton (snd ivar))
-    in
-    let (env, lset) =
-      match snd h with
-      | Aast.Hnonnull -> condition_nullity ~nonnull:tparamet env ivar
-      | Aast.Hprim Tnull -> condition_nullity ~nonnull:(not tparamet) env ivar
-      | _ -> (env, Local_id.Set.empty)
-    in
-    let (env, locl) =
-      make_a_local_of ~include_this:true env (Tast.to_nast_expr ivar)
-    in
-    (match locl with
-    | Some locl_ivar ->
-      let (env, hint_ty) =
-        Phase.localize_hint_no_subst env ~ignore_errors:false h
-      in
-      let (env, hint_ty) =
-        if not tparamet then
-          Inter.negate_type env reason hint_ty ~approx:TUtils.ApproxUp
-        else
-          (env, hint_ty)
-      in
-      refine_type env locl_ivar (fst3 ivar) hint_ty
-    | None -> (env, lset))
+    refine_for_is ~hint_first:false env tparamet ivar (Reason.Ris (fst h)) h
   | _ -> (env, Local_id.Set.empty)
 
 and string2 env idl =

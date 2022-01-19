@@ -1,0 +1,9 @@
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  Int 17
+  PopL $_0
+  IsTypeL $_0 Int
+  String "done"
+  Print
+  PopC
+  RetC
+}

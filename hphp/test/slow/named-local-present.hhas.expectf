@@ -1,0 +1,2 @@
+Fatal error: Uncaught exception 'UndefinedVariableException' with message 'Undefined variable: okay' in %s/named-local-present.hhas:2
+%A

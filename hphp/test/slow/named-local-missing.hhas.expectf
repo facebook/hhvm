@@ -1,0 +1,1 @@
+Fatal error: Assembler Error: line 3: unknown NamedLocal name: "oops" in %s/named-local-missing.hhas on line -1

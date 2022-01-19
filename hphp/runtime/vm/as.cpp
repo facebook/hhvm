@@ -199,6 +199,13 @@ struct Input {
     consumePred(is_extname(), std::back_inserter(name));
     return !name.empty();
   }
+  // Try to consume a particular character, returning true if that character
+  // was the immediate next character. (Does not handle whitespace.)
+  bool tryConsume(char c) {
+    auto const result = peek() == c;
+    if (result) getc();
+    return result;
+  }
   // Try to consume a bareword.  Skips whitespace.  If we can't
   // consume the specified word, returns false.
   bool tryConsume(const std::string& what) {
@@ -1260,6 +1267,39 @@ Id create_litstr_id(AsmState& as) {
   return id;
 }
 
+/*
+ * A NamedLocal immediate separates the concept of a local's slot and its name.
+ * There are three ways that we can encode a NamedLocal in assembly:
+ *
+ *  $x0      // Used by HackC, which does not distinguish slot and name
+ *
+ *  $x0;"x1" // Used by our output, which can undertands the difference
+ *
+ *  $x0;_    // Used by our output, if the local name is unused (e.g. if the
+ *           // name is only used for errors and we prove the op is nothrow)
+ *
+ * Note that as a special case, $x0 and $x0;"x0" are equivalent.
+ */
+NamedLocal read_named_local(AsmState& as) {
+  auto const id = as.getLocalId(read_opcode_arg<std::string>(as));
+  if (!as.in.tryConsume(';')) {
+    return NamedLocal { .name = id, .id = id };
+  }
+  if (as.in.tryConsume('_')) {
+    return NamedLocal { .name = kInvalidId, .id = id };
+  }
+  std::string name;
+  if (!as.in.readQuotedStr(name)) {
+    as.error("expected NamedLocal name");
+  }
+  auto const sd = makeStaticString(name.data());
+  if (!as.fe->hasVar(sd)) {
+    auto const escaped = folly::cEscape<std::string>(name);
+    as.error(folly::sformat("unknown NamedLocal name: \"{}\"", escaped));
+  }
+  return NamedLocal { .name = as.fe->lookupVarId(sd), .id = id };
+}
+
 //////////////////////////////////////////////////////////////////////
 
 std::map<std::string,ParserFunc> opcode_parsers;
@@ -1293,9 +1333,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define IMM_DA     as.fe->emitDouble(read_opcode_arg<double>(as))
 #define IMM_LA     as.fe->emitIVA(as.getLocalId(  \
                      read_opcode_arg<std::string>(as)))
-#define IMM_NLA    auto const loc = as.getLocalId(        \
-                     read_opcode_arg<std::string>(as));   \
-                   as.fe->emitNamedLocal(NamedLocal{loc, loc});
+#define IMM_NLA    as.fe->emitNamedLocal(read_named_local(as));
 #define IMM_ILA    as.fe->emitIVA(as.getLocalId(  \
                      read_opcode_arg<std::string>(as)))
 #define IMM_IA     as.fe->emitIVA(as.getIterId( \

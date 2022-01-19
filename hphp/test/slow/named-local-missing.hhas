@@ -1,0 +1,8 @@
+.function ["__EntryPoint"("""y:0:{}""")] main() {
+  .declvars $okay;
+  IsTypeL $_0;"oops" Int
+  String "done"
+  Print
+  PopC
+  RetC
+}

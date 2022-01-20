@@ -1293,7 +1293,7 @@ struct RuntimeOption {
    * Map from coeffect name to enforcement level                        \
    * e.g. {'pure' => 2, 'rx' => 1}                                      \
    */                                                                   \
-  F(StringToIntMap, CoeffectEnforcementLevels, {})                      \
+  F(StringToIntMap, CoeffectEnforcementLevels, coeffectEnforcementLevelsDefaults()) \
   F(uint64_t, CoeffectViolationWarningMax, std::numeric_limits<uint64_t>::max()) \
   /*                                                                    \
    * Controls behavior on reflection to default value expressions       \
@@ -1536,6 +1536,14 @@ inline bool isJitSerializing() {
 
 inline bool unitPrefetchingEnabled() {
   return RO::EvalUnitPrefetcherMaxThreads > 0;
+}
+
+inline StringToIntMap coeffectEnforcementLevelsDefaults() {
+#ifdef FACEBOOK
+  return {{"zoned", 1}};
+#else
+  return {};
+#endif
 }
 
 uintptr_t lowArenaMinAddr();

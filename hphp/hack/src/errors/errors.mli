@@ -220,19 +220,6 @@ val get_applied_fixmes : t -> applied_fixme list
  *       Specific errors               *
  *                                     *
  ***************************************)
-val unify_error_assert_primary_pos_in_current_decl :
-  current_decl_and_file:Pos_or_decl.ctx ->
-  ?code:int ->
-  ?quickfixes:Quickfix.t list ->
-  Pos_or_decl.t Message.t list ->
-  unit
-
-val invalid_type_hint_assert_primary_pos_in_current_decl :
-  current_decl_and_file:Pos_or_decl.ctx ->
-  ?code:int ->
-  ?quickfixes:Quickfix.t list ->
-  Pos_or_decl.t Message.t list ->
-  unit
 
 val internal_error : Pos.t -> string -> unit
 

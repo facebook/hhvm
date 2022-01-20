@@ -58,14 +58,13 @@ let fill_in_pos_filename_if_in_current_decl env pos =
     pos
 
 let unify_error_assert_primary_pos_in_current_decl env =
-  (Typing_error.Reasons_callback.from_on_error [@alert "-deprecated"])
-  @@ Errors.unify_error_assert_primary_pos_in_current_decl
-       ~current_decl_and_file:(get_current_decl_and_file env)
+  Typing_error.Reasons_callback.unify_error_assert_primary_pos_in_current_decl
+    (get_current_decl_and_file env)
 
 let invalid_type_hint_assert_primary_pos_in_current_decl env =
-  (Typing_error.Reasons_callback.from_on_error [@alert "-deprecated"])
-  @@ Errors.invalid_type_hint_assert_primary_pos_in_current_decl
-       ~current_decl_and_file:(get_current_decl_and_file env)
+  Typing_error.Reasons_callback
+  .invalid_type_hint_assert_primary_pos_in_current_decl
+    (get_current_decl_and_file env)
 
 let get_tracing_info env = env.tracing_info
 

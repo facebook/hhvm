@@ -827,49 +827,6 @@ let as_map : t -> error list Relative_path.Map.t =
     errors
     ~f:(PhaseMap.fold ~init:[] ~f:(fun _ -> List.append))
 
-let add_error_assert_primary_pos_in_current_decl :
-    current_decl_and_file:Pos_or_decl.ctx ->
-    ?quickfixes:Quickfix.t list ->
-    error_code ->
-    Pos_or_decl.t Message.t list ->
-    unit =
- fun ~current_decl_and_file ?quickfixes code reasons ->
-  match reasons with
-  | [] -> ()
-  | ((primary_pos, claim_) as claim) :: remaining_reasons ->
-    let (claim, reasons) =
-      match
-        Pos_or_decl.fill_in_filename_if_in_current_decl
-          ~current_decl_and_file
-          primary_pos
-      with
-      | Some primary_pos -> ((primary_pos, claim_), remaining_reasons)
-      | None ->
-        wrap_error_in_different_file
-          ~current_file:current_decl_and_file.Pos_or_decl.file
-          ~current_span:!current_span
-          claim
-          reasons
-    in
-    add_list ?quickfixes code claim reasons
-
-let error_assert_primary_pos_in_current_decl_callback
-    ~default_code ~current_decl_and_file ?code ?quickfixes reasons =
-  let code = Option.value code ~default:(Typing.err_code default_code) in
-  add_error_assert_primary_pos_in_current_decl
-    ~current_decl_and_file
-    ?quickfixes
-    code
-    reasons
-
-let unify_error_assert_primary_pos_in_current_decl =
-  error_assert_primary_pos_in_current_decl_callback
-    ~default_code:Typing.UnifyError
-
-let invalid_type_hint_assert_primary_pos_in_current_decl =
-  error_assert_primary_pos_in_current_decl_callback
-    ~default_code:Typing.InvalidTypeHint
-
 let merge_into_current errors =
   let merged = merge errors (!error_map, !applied_fixmes) in
   error_map := fst merged;

@@ -104,6 +104,56 @@ module Common = struct
     in
     let claim = (pos, msg) and reasons = [(decl_pos, "Definition is here")] in
     (code, claim, reasons)
+
+  let badpos_message =
+    Printf.sprintf
+      "Incomplete position information! Your type error is in this file, but we could only find related positions in another file. %s"
+      Error_message_sentinel.please_file_a_bug_message
+
+  let badpos_message_2 =
+    Printf.sprintf
+      "Incomplete position information! We couldn't find the exact line of your type error in this definition. %s"
+      Error_message_sentinel.please_file_a_bug_message
+
+  let wrap_error_in_different_file ~current_file ~current_span reasons =
+    let message =
+      List.map reasons ~f:(fun (pos, msg) ->
+          Pos.print_verbose_relative (Pos_or_decl.unsafe_to_raw_pos pos)
+          ^ ": "
+          ^ msg)
+    in
+    let stack =
+      Exception.get_current_callstack_string 99 |> Exception.clean_stack
+    in
+    HackEventLogger.type_check_primary_position_bug
+      ~current_file
+      ~message
+      ~stack;
+    let claim =
+      if Pos.equal current_span Pos.none then
+        (Pos.make_from current_file, badpos_message)
+      else
+        (current_span, badpos_message_2)
+    in
+    (claim, reasons)
+
+  let eval_assert ctx current_span = function
+    | (code, ((pos, msg) :: rest as reasons)) ->
+      let (claim, reasons) =
+        match
+          Pos_or_decl.fill_in_filename_if_in_current_decl
+            ~current_decl_and_file:ctx
+            pos
+        with
+        | Some pos -> ((pos, msg), rest)
+        | _ ->
+          wrap_error_in_different_file
+            ~current_file:ctx.Pos_or_decl.file
+            ~current_span
+            reasons
+      in
+      Some (code, claim, reasons, [])
+    | _ -> None
 end
 
 module Primary = struct
@@ -5178,55 +5228,6 @@ end = struct
     aux t
 
   (* -- Evaluation ------------------------------------------------------------ *)
-  let badpos_message =
-    Printf.sprintf
-      "Incomplete position information! Your type error is in this file, but we could only find related positions in another file. %s"
-      Error_message_sentinel.please_file_a_bug_message
-
-  let badpos_message_2 =
-    Printf.sprintf
-      "Incomplete position information! We couldn't find the exact line of your type error in this definition. %s"
-      Error_message_sentinel.please_file_a_bug_message
-
-  let wrap_error_in_different_file ~current_file ~current_span reasons =
-    let message =
-      List.map reasons ~f:(fun (pos, msg) ->
-          Pos.print_verbose_relative (Pos_or_decl.unsafe_to_raw_pos pos)
-          ^ ": "
-          ^ msg)
-    in
-    let stack =
-      Exception.get_current_callstack_string 99 |> Exception.clean_stack
-    in
-    HackEventLogger.type_check_primary_position_bug
-      ~current_file
-      ~message
-      ~stack;
-    let claim =
-      if Pos.equal current_span Pos.none then
-        (Pos.make_from current_file, badpos_message)
-      else
-        (current_span, badpos_message_2)
-    in
-    (claim, reasons)
-
-  let eval_assert ctx current_span = function
-    | (code, ((pos, msg) :: rest as reasons)) ->
-      let (claim, reasons) =
-        match
-          Pos_or_decl.fill_in_filename_if_in_current_decl
-            ~current_decl_and_file:ctx
-            pos
-        with
-        | Some pos -> ((pos, msg), rest)
-        | _ ->
-          wrap_error_in_different_file
-            ~current_file:ctx.Pos_or_decl.file
-            ~current_span
-            reasons
-      in
-      Some (code, claim, reasons, [])
-    | _ -> None
 
   let eval t ~current_span =
     let rec aux ~k = function
@@ -5243,7 +5244,7 @@ end = struct
               k @@ Callback.apply cb ~code ~claim ~reasons ~quickfixes
             | _ -> k None)
       | Assert_in_current_decl (snd_err, ctx) ->
-        Option.bind ~f:(eval_assert ctx current_span)
+        Option.bind ~f:(Common.eval_assert ctx current_span)
         @@ Secondary.eval snd_err ~current_span
     in
 
@@ -6769,6 +6770,8 @@ and Reasons_callback : sig
 
   val prepend_on_apply : t -> Secondary.t -> t
 
+  val assert_in_current_decl : Error_code.t -> ctx:Pos_or_decl.ctx -> t
+
   val apply_help :
     ?code:Error_code.t ->
     ?claim:Pos.t Message.t ->
@@ -6825,6 +6828,11 @@ and Reasons_callback : sig
   val invalid_echo_argument_at : Pos.t -> t
 
   val index_type_mismatch_at : Pos.t -> t
+
+  val unify_error_assert_primary_pos_in_current_decl : Pos_or_decl.ctx -> t
+
+  val invalid_type_hint_assert_primary_pos_in_current_decl :
+    Pos_or_decl.ctx -> t
 end = struct
   type op =
     | Append
@@ -6847,6 +6855,7 @@ end = struct
     | Add_reason of t * op * Pos_or_decl.t Message.t
     | From_on_error of on_error
     | Prepend_on_apply of t * Secondary.t
+    | Assert_in_current_decl of Error_code.t * Pos_or_decl.ctx
 
   let iter t ~on_prim ~on_snd =
     let rec aux = function
@@ -6862,7 +6871,8 @@ end = struct
       | Prepend_on_apply (t, _) ->
         aux t
       | From_on_error _
-      | Ignore ->
+      | Ignore
+      | Assert_in_current_decl _ ->
         ()
     in
     aux t
@@ -6900,6 +6910,8 @@ end = struct
   let always err = Always err
 
   let prepend_on_apply t snd_err = Prepend_on_apply (t, snd_err)
+
+  let assert_in_current_decl code ~ctx = Assert_in_current_decl (code, ctx)
 
   (* -- Evaluation ------------------------------------------------------------ *)
 
@@ -6962,6 +6974,16 @@ end = struct
       | Always err -> Error.eval err ~current_span
       | Of_error err -> Error_state.with_defaults st err ~current_span
       | Of_callback (cb, claim) -> eval_callback cb st ~claim
+      | Assert_in_current_decl (default, ctx) ->
+        let Error_state.{ code_opt; reasons_opt; quickfixes_opt; _ } = st in
+        let crs =
+          Option.(value ~default code_opt, value ~default:[] reasons_opt)
+        in
+        let res_opt = Common.eval_assert ctx current_span crs in
+        Option.map res_opt ~f:(function
+            | (code, claim, reasons, []) ->
+              (code, claim, reasons, Option.value ~default:[] quickfixes_opt)
+            | res -> res)
       | With_code (err, code) ->
         let st = Error_state.with_code st @@ Some code in
         eval err st
@@ -7099,6 +7121,12 @@ end = struct
            reasons_opt = None;
            is_covariant_container = false;
          }
+
+  let unify_error_assert_primary_pos_in_current_decl ctx =
+    assert_in_current_decl Error_code.UnifyError ~ctx
+
+  let invalid_type_hint_assert_primary_pos_in_current_decl ctx =
+    assert_in_current_decl Error_code.InvalidTypeHint ~ctx
 end
 
 include Error

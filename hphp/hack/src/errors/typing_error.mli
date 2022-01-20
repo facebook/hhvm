@@ -1744,6 +1744,13 @@ module Reasons_callback : sig
       `snd_err2`.
   *)
   val prepend_on_apply : t -> Secondary.t -> t
+
+  (* Applying the `Reasons_callback.t` `(assert_in_current_decl code ctx) err`
+     will evaluate the `Secondary.t` `err` then use the head of the list of
+     reasons as claim in the resulting error, given the position for that
+     reason is in the current decl. *)
+  val assert_in_current_decl : Error_code.t -> ctx:Pos_or_decl.ctx -> t
+
   (* -- Specific callbacks -------------------------------------------------- *)
 
   val unify_error_at : Pos.t -> t
@@ -1784,6 +1791,11 @@ module Reasons_callback : sig
   val invalid_echo_argument_at : Pos.t -> t
 
   val index_type_mismatch_at : Pos.t -> t
+
+  val unify_error_assert_primary_pos_in_current_decl : Pos_or_decl.ctx -> t
+
+  val invalid_type_hint_assert_primary_pos_in_current_decl :
+    Pos_or_decl.ctx -> t
 end
 
 type t = Error.t

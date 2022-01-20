@@ -134,7 +134,7 @@ function ob_get_clean(): mixed;
  * FALSE, if output buffering isn't active.
  */
 <<__Native>>
-function ob_get_contents(): mixed;
+function ob_get_contents()[read_globals]: mixed;
 
 /** ob_get_flush() flushes the output buffer, return it as a string and turns
  * off output buffering. This function is similar to ob_end_flush(), except
@@ -150,14 +150,14 @@ function ob_get_flush(): mixed;
  * no buffering is active.
  */
 <<__Native>>
-function ob_get_length(): int;
+function ob_get_length()[read_globals]: int;
 
 /** Returns the nesting level of the output buffering mechanism.
  * @return int - Returns the level of nested output buffering handlers or zero
  * if output buffering is not active.
  */
 <<__Native>>
-function ob_get_level(): int;
+function ob_get_level()[read_globals]: int;
 
 /** ob_get_status() returns status information on either the top level output
  * buffer or all active output buffer levels if full_status is set to TRUE.
@@ -166,7 +166,7 @@ function ob_get_level(): int;
  * @return array
  */
 <<__Native>>
-function ob_get_status(bool $full_status = false): varray_or_darray;
+function ob_get_status(bool $full_status = false)[read_globals]: varray_or_darray;
 
 /** ob_implicit_flush() will turn implicit flushing on or off. Implicit
  * flushing will result in a flush operation after every output call, so that
@@ -182,7 +182,7 @@ function ob_implicit_flush(bool $flag = true): void;
  * with ob_start(), ob_list_handlers() will return "default output handler".
  */
 <<__Native>>
-function ob_list_handlers(): varray;
+function ob_list_handlers()[read_globals]: varray;
 
 /** Adds an entry to a log file that's written when server crashes. This is
  * useful for diagnose why server crashed. For example, logged-on user's ID.
@@ -207,20 +207,20 @@ function hphp_stats(string $name,
  * @return int - Currently accumulated count.
  */
 <<__Native>>
-function hphp_get_stats(string $name): int;
+function hphp_get_stats(string $name)[read_globals]: int;
 
 /** Returns status of different server threads.
  * @return array - Array of thread statuses.
  */
 <<__Native>>
-function hphp_get_status(): darray;
+function hphp_get_status()[read_globals]: darray;
 
 /** Returns I/O status of current thread. EnableNetworkIOStatus has to be
  * turned on.
  * @return array - Array of all I/O so far for current thread.
  */
 <<__Native>>
-function hphp_get_iostatus(): darray;
+function hphp_get_iostatus()[read_globals]: darray;
 
 <<__Native, __Deprecated("this will be removed")>>
 function hphp_set_iostatus_address(string $name): void;
@@ -234,7 +234,7 @@ function hphp_set_iostatus_address(string $name): void;
  * starts to get processed.
  */
 <<__Native>>
-function hphp_get_timers(bool $get_as_float = true): mixed;
+function hphp_get_timers(bool $get_as_float = true)[read_globals]: mixed;
 
 /** Dumps all variables in global state, including global variables, static
  * variables, class statics and others.
@@ -248,12 +248,12 @@ function hphp_output_global_state(bool $serialize = true): mixed;
 /** @return int - Returns the current instruction counter value.
  */
 <<__Native("NoInjection")>>
-function hphp_instruction_counter(): int;
+function hphp_instruction_counter()[read_globals]: int;
 
 /** @return mixed - An array of hardware counters
  */
 <<__Native("NoInjection")>>
-function hphp_get_hardware_counters(): mixed;
+function hphp_get_hardware_counters()[read_globals]: mixed;
 
 /** @param string $events - comma separated list of hardware events
  * @return bool - returns TRUE on success and FALSE on failure

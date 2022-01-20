@@ -389,7 +389,7 @@ let wrap_union_inter_ty_in_var env r ty =
  * (For example, function foo<Tu as Tv, Tv as Tu>(...))
  * Also breaks apart intersections.
  *****************************************************************************)
-let get_concrete_supertypes ~abstract_enum env ty =
+let get_concrete_supertypes ?(expand_supportdyn = true) ~abstract_enum env ty =
   let rec iter seen env acc tyl =
     match tyl with
     | [] -> (env, acc)
@@ -403,9 +403,10 @@ let get_concrete_supertypes ~abstract_enum env ty =
              && Env.is_enum env cid ->
         iter seen env acc tyl
       (* Don't expand enums or newtype; just return the type itself *)
-      | Tnewtype (_, _, ty)
-      | Tdependent (_, ty) ->
+      | Tnewtype (n, _, ty)
+        when expand_supportdyn || not (String.equal n SN.Classes.cSupportDyn) ->
         iter seen env (TySet.add ty acc) tyl
+      | Tdependent (_, ty) -> iter seen env (TySet.add ty acc) tyl
       | Tgeneric (n, targs) ->
         if SSet.mem n seen then
           iter seen env acc tyl

@@ -58,6 +58,7 @@ val call :
   expected:Typing_helpers.ExpectedTy.t option ->
   ?nullsafe:Pos.t option ->
   ?in_await:Typing_reason.t ->
+  ?in_supportdyn:bool ->
   Pos.t ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->

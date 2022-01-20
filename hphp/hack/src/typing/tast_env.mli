@@ -129,7 +129,11 @@ val non_null : env -> Pos_or_decl.t -> Tast.ty -> env * Tast.ty
     abstract, or as arraykey bound.
      *)
 val get_concrete_supertypes :
-  abstract_enum:bool -> env -> Tast.ty -> env * Tast.ty list
+  ?expand_supportdyn:bool ->
+  abstract_enum:bool ->
+  env ->
+  Tast.ty ->
+  env * Tast.ty list
 
 (** Return {true} if the given {Decl_provider.class_decl} (referred to by the given
     {class_id_}, if provided) allows the current class (the one returned by

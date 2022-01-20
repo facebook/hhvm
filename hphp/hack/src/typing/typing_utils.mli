@@ -424,6 +424,7 @@ val wrap_union_inter_ty_in_var :
   Typing_env_types.env * Typing_defs.locl_ty
 
 val get_concrete_supertypes :
+  ?expand_supportdyn:bool ->
   abstract_enum:bool ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->

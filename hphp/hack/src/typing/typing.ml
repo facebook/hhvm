@@ -1258,7 +1258,14 @@ let generate_splat_type_vars
   in
   (env, (d_required, d_optional, d_variadic))
 
+let strip_dynamic env ty =
+  let (env, ty) = Env.expand_type env ty in
+  match get_node ty with
+  | Tdynamic -> Typing_make_type.nothing (get_reason ty)
+  | _ -> Typing_utils.strip_dynamic env ty
+
 let call_param
+    ~in_supportdyn
     env
     param
     param_kind
@@ -1280,6 +1287,25 @@ let call_param
     match param_kind with
     | Ast_defs.Pnormal -> pos
     | Ast_defs.Pinout pk_pos -> Pos.merge pk_pos pos
+  in
+  let (env, dep_ty) =
+    if in_supportdyn then
+      let dyn_ty = MakeType.dynamic (get_reason dep_ty) in
+      let env =
+        (* If in_supportdyn is set, then the function type is supportdyn<t1 ... tn -> t>
+           and we are trying to call it as though it were dynamic. Hence all of the
+           arguments must be subtypes of dynamic, regardless of whether they have
+           a like to be stripped. *)
+        Typing_subtype.sub_type
+          env
+          ~coerce:(Some Typing_logic.CoerceToDynamic)
+          dep_ty
+          dyn_ty
+          (Typing_error.Reasons_callback.unify_error_at pos)
+      in
+      (env, strip_dynamic env dep_ty)
+    else
+      (env, dep_ty)
   in
   let eff () =
     if env.in_support_dynamic_type_method_check then
@@ -7950,6 +7976,7 @@ and call
     ~(expected : ExpectedTy.t option)
     ?(nullsafe : Pos.t option = None)
     ?in_await
+    ?(in_supportdyn = false)
     pos
     env
     fty
@@ -7961,7 +7988,13 @@ and call
       * locl_ty
       * bool) =
   let expr = expr ~allow_awaitable:(*?*) false in
-  let (env, tyl) = TUtils.get_concrete_supertypes ~abstract_enum:true env fty in
+  let (env, tyl) =
+    TUtils.get_concrete_supertypes
+      ~expand_supportdyn:false
+      ~abstract_enum:true
+      env
+      fty
+  in
   if List.is_empty tyl then begin
     bad_call env pos fty;
     let env = call_untyped_unpack env (get_pos fty) unpacked_element in
@@ -8267,7 +8300,7 @@ and call
                 e
           in
           let (env, err_opt) =
-            call_param env param param_kind (e, ty) ~is_variadic
+            call_param ~in_supportdyn env param param_kind (e, ty) ~is_variadic
           in
           (env, Some (hole_on_err ~err_opt te, ty))
         | None ->
@@ -8449,6 +8482,7 @@ and call
                   ~f:(fun (env, errs) elt param ->
                     let (env, err_opt) =
                       call_param
+                        ~in_supportdyn
                         env
                         param
                         Ast_defs.Pnormal
@@ -8465,6 +8499,7 @@ and call
                   ~f:(fun (env, errs) elt param ->
                     let (env, err_opt) =
                       call_param
+                        ~in_supportdyn
                         env
                         param
                         Ast_defs.Pnormal
@@ -8475,7 +8510,13 @@ and call
               in
               let (env, var_err_opt) =
                 Option.map2 d_variadic var_param ~f:(fun v vp ->
-                    call_param env vp Ast_defs.Pnormal (e, v) ~is_variadic:true)
+                    call_param
+                      ~in_supportdyn
+                      env
+                      vp
+                      Ast_defs.Pnormal
+                      (e, v)
+                      ~is_variadic:true)
                 |> Option.value ~default:(env, None)
               in
               let subtyping_errs = (List.rev err_opts, var_err_opt) in
@@ -8503,7 +8544,13 @@ and call
       let () = check_arity ~did_unpack pos pos_def ft arity in
       (* Variadic params cannot be inout so we can stop early *)
       let env = wfold_left2 inout_write_back env ft.ft_params el in
-      (env, (tel, typed_unpack_element, ft.ft_ret.et_type, should_forget_fakes))
+      let ret =
+        if in_supportdyn then
+          MakeType.locl_like r2 ft.ft_ret.et_type
+        else
+          ft.ft_ret.et_type
+      in
+      (env, (tel, typed_unpack_element, ret, should_forget_fakes))
     | (r, Tvar _)
       when TypecheckerOptions.method_call_inference (Env.get_tcopt env) ->
       (*
@@ -8607,11 +8654,52 @@ and call
       in
       let should_forget_fakes = true in
       (env, (typed_el, typed_unpacked_element, return_ty, should_forget_fakes))
+    | (_, Tnewtype (name, [ty], _))
+      when String.equal name SN.Classes.cSupportDyn ->
+      Errors.try_
+        (fun () ->
+          call ~expected ~nullsafe ?in_await pos env ty el unpacked_element)
+        (fun _ ->
+          call_supportdyn
+            ~expected
+            ~nullsafe
+            ?in_await
+            pos
+            env
+            ty
+            el
+            unpacked_element)
     | _ ->
       bad_call env pos efty;
       let env = call_untyped_unpack env (get_pos efty) unpacked_element in
       let should_forget_fakes = true in
       (env, ([], None, err_witness env pos, should_forget_fakes))
+
+and call_supportdyn ~expected ~nullsafe ?in_await pos env ty el unpacked_element
+    =
+  let (env, ty) = Env.expand_type env ty in
+  match deref ty with
+  | (_, Tfun _) ->
+    call
+      ~expected
+      ~nullsafe
+      ?in_await
+      ~in_supportdyn:true
+      pos
+      env
+      ty
+      el
+      unpacked_element
+  | (r, _) ->
+    call
+      ~expected
+      ~nullsafe
+      ?in_await
+      pos
+      env
+      (MakeType.dynamic r)
+      el
+      unpacked_element
 
 and call_untyped_unpack env f_pos unpacked_element =
   match unpacked_element with

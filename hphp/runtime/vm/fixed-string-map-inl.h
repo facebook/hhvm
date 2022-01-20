@@ -183,24 +183,24 @@ V* FixedStringMap<V,E>::find(const StringData* sd) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<class T, class V, class E>
+template<class T, class E>
 inline
-T& FixedStringMapBuilder<T,V,E>::operator[](V idx) {
+T& FixedStringToSlotMapBuilder<T,E>::operator[](V idx) {
   assertx(idx >= 0);
   assertx(size_t(idx) < m_list.size());
   return m_list[idx];
 }
 
-template<class T, class V, class E>
+template<class T, class E>
 inline
-const T& FixedStringMapBuilder<T,V,E>::operator[](V idx) const {
-  return (*const_cast<FixedStringMapBuilder*>(this))[idx];
+const T& FixedStringToSlotMapBuilder<T,E>::operator[](V idx) const {
+  return (*const_cast<FixedStringToSlotMapBuilder*>(this))[idx];
 }
 
-template<class T, class V, class E>
+template<class T, class E>
 inline
-void FixedStringMapBuilder<T,V,E>::add(const StringData* name,
-                                                      const T& t) {
+void FixedStringToSlotMapBuilder<T,E>::add(const StringData* name,
+                                       const T& t) {
   if (m_list.size() >= size_t(std::numeric_limits<V>::max())) {
     assertx(false && "FixedStringMap::Builder overflowed");
     abort();
@@ -209,15 +209,15 @@ void FixedStringMapBuilder<T,V,E>::add(const StringData* name,
   m_list.push_back(t);
 }
 
-template<class T, class V, class E>
+template<class T, class E>
 inline
-void FixedStringMapBuilder<T,V,E>::addUnnamed(const T& t) {
+void FixedStringToSlotMapBuilder<T,E>::addUnnamed(const T& t) {
   m_list.push_back(t);
 }
 
-template<class T, class V, class E>
+template<class T, class E>
 inline
-void FixedStringMapBuilder<T,V,E>::create(FSMap& map) {
+void FixedStringToSlotMapBuilder<T,E>::create(FSMap& map) {
   map.extra() = size();
   map.init(size(), 0);
   if (!size()) return;

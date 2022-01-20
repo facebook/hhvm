@@ -119,8 +119,9 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-template<class T, class V, class ExtraType = int32_t>
-struct FixedStringMapBuilder {
+template<class T, class ExtraType = int32_t>
+struct FixedStringToSlotMapBuilder {
+  using V = Slot;
   using Map =
     hphp_hash_map<const StringData*, V, string_data_hash, string_data_same>;
   using FSMap = FixedStringMap<V, ExtraType>;
@@ -167,4 +168,3 @@ private:
 }
 
 #include "hphp/runtime/vm/fixed-string-map-inl.h"
-

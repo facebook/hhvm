@@ -395,7 +395,7 @@ struct Class : AtomicCountable {
    * Container types.
    */
   using MethodMap         = FixedStringMap<Slot, Slot>;
-  using MethodMapBuilder  = FixedStringMapBuilder<Func*, Slot, Slot>;
+  using MethodMapBuilder  = FixedStringToSlotMapBuilder<Func*, Slot>;
   using InterfaceMap      = IndexedStringMap<LowPtr<Class>, int>;
   using IncludedEnumMap   = IndexedStringMap<LowPtr<Class>, int>;
   using RequirementMap    = IndexedStringMap<

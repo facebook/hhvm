@@ -441,7 +441,7 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
     fb_ast: Block,
 ) -> Result<HhasMethod<'arena>> {
     let meth = Method_ {
-        span: pos.unwrap_or_else(Pos::make_none),
+        span: pos.clone().unwrap_or_else(Pos::make_none),
         annotation: (),
         final_,
         abstract_,
@@ -453,8 +453,8 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
         where_constraints: vec![],
         variadic: FunVariadicity::FVnonVariadic,
         params: vec![],
-        ctxs: None,        // TODO(T70095684)
-        unsafe_ctxs: None, // TODO(T70095684)
+        ctxs: Some(Contexts(pos.unwrap_or_else(Pos::make_none), vec![])),
+        unsafe_ctxs: None,
         body: FuncBody { fb_ast },
         fun_kind: ast_defs::FunKind::FSync,
         user_attributes: vec![],

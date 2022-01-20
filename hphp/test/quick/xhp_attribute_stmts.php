@@ -3,8 +3,8 @@
 abstract class :base {
   private static $xhpAttributeDeclarationBase = darray[];
 
-  protected static function __xhpAttributeDeclaration() {
-    return self::$xhpAttributeDeclarationBase;
+  protected static function __xhpAttributeDeclaration()[] {
+    return HH\Coeffects\backdoor(()[defaults] ==> self::$xhpAttributeDeclarationBase);
   }
 
   public static function xhpAttributeDeclaration() {

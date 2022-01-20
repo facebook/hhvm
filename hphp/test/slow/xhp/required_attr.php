@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class base {
-  protected static function __xhpAttributeDeclaration(): darray {
+  protected static function __xhpAttributeDeclaration()[]: darray {
     return darray[];
   }
 }

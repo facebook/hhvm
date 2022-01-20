@@ -1379,7 +1379,7 @@ namespace __SystemLib {
     darray $arr1,
     darray $arr2,
     ...$rest
-  ): darray;
+  )[]: darray;
 }
 
 namespace HH {

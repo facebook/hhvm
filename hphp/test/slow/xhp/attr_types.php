@@ -1,7 +1,7 @@
 <?hh
 
 class :base {
-  protected static function __xhpAttributeDeclaration() {
+  protected static function __xhpAttributeDeclaration()[] {
     return darray[];
   }
 }

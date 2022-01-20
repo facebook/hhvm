@@ -71,7 +71,7 @@ struct RewriteResult {
 /// )
 /// ```
 /// Which is the runtime representation of the Expression Tree
-pub fn desugar<TF>(hint: &aast::Hint, e: Expr, env: &Env<'_, TF>) -> DesugarResult {
+pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
     let mut errors = vec![];
 
     let visitor_name = match hint_name(hint) {

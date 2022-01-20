@@ -441,8 +441,6 @@ let extract_facts ~compiler_options ~config_jsons ~filename text =
         Facts_parser.extract_as_json_string
           ~php5_compat_mode:true
           ~hhvm_compat_mode:true
-          ~disable_nontoplevel_declarations:
-            (phpism_disable_nontoplevel_declarations co)
           ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
           ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
           ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
@@ -470,8 +468,6 @@ let parse_hh_file ~config_jsons ~compiler_options filename body =
         ~codegen:true
         ~php5_compat_mode:true
         ~hhvm_compat_mode:true
-        ~disable_nontoplevel_declarations:
-          (phpism_disable_nontoplevel_declarations co)
         ~disable_legacy_soft_typehints:(disable_legacy_soft_typehints co)
         ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
         ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)

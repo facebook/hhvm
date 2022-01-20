@@ -107,7 +107,6 @@ let parse_one_file ~(path : Relative_path.t) : si_capture =
     Facts_parser.from_text
       ~php5_compat_mode:false
       ~hhvm_compat_mode:true
-      ~disable_nontoplevel_declarations:false
       ~disable_legacy_soft_typehints:false
       ~allow_new_attribute_syntax:false
       ~disable_legacy_attribute_syntax:false

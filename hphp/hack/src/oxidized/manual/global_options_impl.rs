@@ -30,7 +30,6 @@ impl Default for GlobalOptions {
             po_codegen: false,
             po_deregister_php_stdlib: false,
             po_disallow_toplevel_requires: false,
-            po_disable_nontoplevel_declarations: false,
             po_allow_unstable_features: false,
             tco_log_inference_constraints: false,
             tco_language_feature_logging: false,

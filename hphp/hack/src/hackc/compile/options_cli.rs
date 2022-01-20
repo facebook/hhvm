@@ -36,8 +36,7 @@ lazy_static! {
             "eval.enableintrinsicsextension" => "hhvm.enable_intrinsics_extension",
             // group 3: we could ignore hhvm. part of prefix in deser.
             "hack.lang.disable_lval_as_an_expression" => "hhvm.hack.lang.disable_lval_as_an_expression",
-            // group 4: combination of group 3 & 1
-            "hack.lang.phpism.disablenontopleveldeclarations" => "hhvm.hack.lang.phpism.disable_nontoplevel_declarations",
+            // group 4: No more
             // group 5: we could assume "hack." between "hhvm." and "lang."
             "hhvm.lang.enable_class_level_where_clauses" => "hhvm.hack.lang.enable_class_level_where_clauses",
             "hhvm.lang.disable_legacy_soft_typehints" => "hhvm.hack.lang.disable_legacy_soft_typehints",

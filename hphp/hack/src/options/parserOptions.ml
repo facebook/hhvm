@@ -22,9 +22,6 @@ let disallow_toplevel_requires = GlobalOptions.po_disallow_toplevel_requires
 
 let default = GlobalOptions.default
 
-let disable_nontoplevel_declarations =
-  GlobalOptions.po_disable_nontoplevel_declarations
-
 let const_default_func_args = GlobalOptions.po_const_default_func_args
 
 let with_const_default_func_args po b =
@@ -154,7 +151,6 @@ let with_everything_sdt po b = { po with GlobalOptions.tco_everything_sdt = b }
 let make
     ~auto_namespace_map
     ~codegen
-    ~disable_nontoplevel_declarations
     ~disable_lval_as_an_expression
     ~enable_class_level_where_clauses
     ~disable_legacy_soft_typehints
@@ -185,7 +181,6 @@ let make
       default with
       po_auto_namespace_map = auto_namespace_map;
       po_codegen = codegen;
-      po_disable_nontoplevel_declarations = disable_nontoplevel_declarations;
       po_disable_lval_as_an_expression = disable_lval_as_an_expression;
       po_enable_class_level_where_clauses = enable_class_level_where_clauses;
       po_disable_legacy_soft_typehints = disable_legacy_soft_typehints;

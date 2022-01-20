@@ -12,7 +12,6 @@ type t = {
   php5_compat_mode: bool;
   codegen: bool;
   disable_lval_as_an_expression: bool;
-  disable_nontoplevel_declarations: bool;
   mode: FileInfo.mode option;
   rust: bool;
   disable_legacy_soft_typehints: bool;
@@ -35,7 +34,6 @@ let default =
     php5_compat_mode = false;
     codegen = false;
     disable_lval_as_an_expression = false;
-    disable_nontoplevel_declarations = false;
     rust = true;
     mode = None;
     disable_legacy_soft_typehints = false;
@@ -56,8 +54,6 @@ let make
     ?(php5_compat_mode = default.php5_compat_mode)
     ?(codegen = default.codegen)
     ?(disable_lval_as_an_expression = default.disable_lval_as_an_expression)
-    ?(disable_nontoplevel_declarations =
-      default.disable_nontoplevel_declarations)
     ?mode
     ?(rust = default.rust)
     ?(disable_legacy_soft_typehints = default.disable_legacy_soft_typehints)
@@ -82,7 +78,6 @@ let make
     php5_compat_mode;
     codegen;
     disable_lval_as_an_expression;
-    disable_nontoplevel_declarations;
     mode;
     rust;
     disable_legacy_soft_typehints;
@@ -105,8 +100,6 @@ let php5_compat_mode e = e.php5_compat_mode
 let codegen e = e.codegen
 
 let disable_lval_as_an_expression e = e.disable_lval_as_an_expression
-
-let disable_nontoplevel_declarations e = e.disable_nontoplevel_declarations
 
 let mode e = e.mode
 

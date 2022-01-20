@@ -19,7 +19,6 @@ let flags_final = 2
 let extract_as_json_string
     ~(php5_compat_mode : bool)
     ~(hhvm_compat_mode : bool)
-    ~(disable_nontoplevel_declarations : bool)
     ~(disable_legacy_soft_typehints : bool)
     ~(allow_new_attribute_syntax : bool)
     ~(disable_legacy_attribute_syntax : bool)
@@ -34,7 +33,6 @@ let extract_as_json_string
     else
       0
   in
-  ignore @@ disable_nontoplevel_declarations;
   ignore @@ disable_legacy_soft_typehints;
   ignore @@ disable_legacy_attribute_syntax;
   Rust_facts_ffi.extract_as_json_ffi
@@ -54,7 +52,6 @@ let extract_as_json_string
 let from_text
     ~(php5_compat_mode : bool)
     ~(hhvm_compat_mode : bool)
-    ~(disable_nontoplevel_declarations : bool)
     ~(disable_legacy_soft_typehints : bool)
     ~(allow_new_attribute_syntax : bool)
     ~(disable_legacy_attribute_syntax : bool)
@@ -66,7 +63,6 @@ let from_text
   extract_as_json_string
     ~php5_compat_mode
     ~hhvm_compat_mode
-    ~disable_nontoplevel_declarations
     ~disable_legacy_soft_typehints
     ~allow_new_attribute_syntax
     ~disable_legacy_attribute_syntax

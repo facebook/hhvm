@@ -274,17 +274,6 @@ impl Default for LangFlags {
 }
 
 prefixed_flags!(
-    PhpismFlags,
-    "hhvm.hack.lang.phpism.",
-    DISABLE_NONTOPLEVEL_DECLARATIONS,
-);
-impl Default for PhpismFlags {
-    fn default() -> PhpismFlags {
-        PhpismFlags::empty()
-    }
-}
-
-prefixed_flags!(
     Php7Flags,
     "hhvm.php7.",
     LTR_ASSIGN, //
@@ -337,13 +326,6 @@ pub struct Options {
         serialize_with = "serialize_flags",
         deserialize_with = "deserialize_flags"
     )]
-    pub phpism_flags: PhpismFlags,
-
-    #[serde(
-        flatten,
-        serialize_with = "serialize_flags",
-        deserialize_with = "deserialize_flags"
-    )]
     pub php7_flags: Php7Flags,
 
     #[serde(
@@ -371,7 +353,6 @@ impl Default for Options {
             max_array_elem_size_on_the_stack: defaults::max_array_elem_size_on_the_stack(),
             hack_compiler_flags: CompilerFlags::default(),
             hhvm: Hhvm::default(),
-            phpism_flags: PhpismFlags::default(),
             php7_flags: Php7Flags::default(),
             repo_flags: RepoFlags::default(),
             server: Server::default(),
@@ -1099,8 +1080,7 @@ bitflags! {
         // No longer using bits 11-13.
         const LOG_EXTERN_COMPILER_PERF = 1 << 14;
         const ENABLE_INTRINSICS_EXTENSION = 1 << 15;
-        // No longer using bits 16-21.
-        const DISABLE_NONTOPLEVEL_DECLARATIONS = 1 << 22;
+        // No longer using bits 16-22.
         // No longer using bits 23-25.
         const EMIT_CLS_METH_POINTERS = 1 << 26;
         // No longer using bit 27.

@@ -313,7 +313,6 @@ std::uint32_t RepoOptions::getCompilerFlags() const {
     SETFLAGS(RuntimeOption::EvalJitEnableRenameFunction, 5)     \
     SETFLAGS(RuntimeOption::EvalLogExternCompilerPerf, 6)       \
     SETFLAGS(RuntimeOption::EnableIntrinsicsExtension, 7)       \
-    SETFLAGS(RuntimeOption::DisableNontoplevelDeclarations, 8)  \
     SETFLAGS(RuntimeOption::EvalEmitClsMethPointers, 10)        \
     SETFLAGS(RuntimeOption::EvalEmitMethCallerFuncPointers, 11) \
     SETFLAGS(RuntimeOption::EvalEnableImplicitContext, 12)      \
@@ -991,7 +990,6 @@ int64_t RuntimeOption::HeapHighWaterMark = 1024;
 uint64_t RuntimeOption::DisableCallUserFunc = 0;
 uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
 uint64_t RuntimeOption::DisableConstant = 0;
-bool RuntimeOption::DisableNontoplevelDeclarations = false;
 bool RuntimeOption::EnableClassLevelWhereClauses = false;
 
 
@@ -1220,7 +1218,6 @@ std::string RuntimeOption::getUnitCacheBreakingOptions() {
     RuntimeOption::EvalAssemblerFoldDefaultValues,
     RuntimeOption::RepoDebugInfo,
     RuntimeOption::CheckIntOverflow,
-    RuntimeOption::DisableNontoplevelDeclarations,
     RuntimeOption::EvalEnableImplicitContext,
     RuntimeOption::EvalEmitClsMethPointers,
     RuntimeOption::EvalIsVecNotices,
@@ -1888,9 +1885,6 @@ void RuntimeOption::Load(
     Config::Bind(DisableCallUserFuncArray, ini, config,
                  "Hack.Lang.Phpism.DisableCallUserFuncArray",
                  DisableCallUserFuncArray);
-    Config::Bind(DisableNontoplevelDeclarations, ini, config,
-                 "Hack.Lang.Phpism.DisableNontoplevelDeclarations",
-                 DisableNontoplevelDeclarations);
     Config::Bind(DisableConstant, ini, config,
                  "Hack.Lang.Phpism.DisableConstant",
                  DisableConstant);

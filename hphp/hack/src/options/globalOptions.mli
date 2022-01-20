@@ -64,8 +64,6 @@ type t = {
   po_deregister_php_stdlib: bool;
   (* Flag to disallow `require`, `require_once` etc as toplevel statements *)
   po_disallow_toplevel_requires: bool;
-  (* Flag to disable PHP's non-top-level declarations *)
-  po_disable_nontoplevel_declarations: bool;
   (* Allows enabling unstable features via the __EnableUnstableFeatures attribute *)
   po_allow_unstable_features: bool;
   (* Print types of size bigger than 1000 after performing a type union. *)
@@ -314,7 +312,6 @@ type t = {
 val make :
   ?po_deregister_php_stdlib:bool ->
   ?po_disallow_toplevel_requires:bool ->
-  ?po_disable_nontoplevel_declarations:bool ->
   ?tco_log_inference_constraints:bool ->
   ?tco_experimental_features:SSet.t ->
   ?tco_migration_flags:SSet.t ->
@@ -480,8 +477,6 @@ val po_auto_namespace_map : t -> (string * string) list
 val po_deregister_php_stdlib : t -> bool
 
 val po_disallow_toplevel_requires : t -> bool
-
-val po_disable_nontoplevel_declarations : t -> bool
 
 val po_codegen : t -> bool
 

@@ -32,7 +32,6 @@ type t = {
   po_codegen: bool;
   po_deregister_php_stdlib: bool;
   po_disallow_toplevel_requires: bool;
-  po_disable_nontoplevel_declarations: bool;
   po_allow_unstable_features: bool;
   tco_log_inference_constraints: bool;
   tco_language_feature_logging: bool;
@@ -226,7 +225,6 @@ let default =
     po_codegen = false;
     po_disallow_toplevel_requires = false;
     po_deregister_php_stdlib = false;
-    po_disable_nontoplevel_declarations = false;
     po_allow_unstable_features = false;
     tco_log_inference_constraints = false;
     tco_language_feature_logging = false;
@@ -334,8 +332,6 @@ let default =
 let make
     ?(po_deregister_php_stdlib = default.po_deregister_php_stdlib)
     ?(po_disallow_toplevel_requires = default.po_disallow_toplevel_requires)
-    ?(po_disable_nontoplevel_declarations =
-      default.po_disable_nontoplevel_declarations)
     ?(tco_log_inference_constraints = default.tco_log_inference_constraints)
     ?(tco_experimental_features = default.tco_experimental_features)
     ?(tco_migration_flags = default.tco_migration_flags)
@@ -508,7 +504,6 @@ let make
     codes_not_raised_partial;
     po_deregister_php_stdlib;
     po_disallow_toplevel_requires;
-    po_disable_nontoplevel_declarations;
     po_allow_unstable_features;
     tco_log_inference_constraints;
     tco_language_feature_logging;
@@ -654,9 +649,6 @@ let so_naming_sqlite_path t = t.so_naming_sqlite_path
 let po_auto_namespace_map t = t.po_auto_namespace_map
 
 let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
-
-let po_disable_nontoplevel_declarations t =
-  t.po_disable_nontoplevel_declarations
 
 let tco_log_inference_constraints t = t.tco_log_inference_constraints
 

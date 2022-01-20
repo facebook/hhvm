@@ -21,9 +21,7 @@ use instruction_sequence::Error;
 use itertools::{Either, Either::*};
 use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-use options::{
-    Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, PhpismFlags, RepoFlags,
-};
+use options::{Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, RepoFlags};
 use oxidized::{
     ast, namespace_env::Env as NamespaceEnv, parser_options::ParserOptions, pos::Pos,
     relative_path::RelativePath,
@@ -80,7 +78,7 @@ bitflags! {
         const JIT_ENABLE_RENAME_FUNCTION=1 << 5;
         const LOG_EXTERN_COMPILER_PERF=1 << 6;
         const ENABLE_INTRINSICS_EXTENSION=1 << 7;
-        const DISABLE_NONTOPLEVEL_DECLARATIONS=1 << 8;
+        // No longer using bit 8.
         // No longer using bit 9.
         const EMIT_CLS_METH_POINTERS=1 << 10;
         const EMIT_METH_CALLER_FUNC_POINTERS=1 << 11;
@@ -162,14 +160,6 @@ impl HHBCFlags {
         }
         if self.contains(HHBCFlags::ENABLE_IMPLICIT_CONTEXT) {
             f |= HhvmFlags::ENABLE_IMPLICIT_CONTEXT;
-        }
-        f
-    }
-
-    fn to_php_flags(self) -> PhpismFlags {
-        let mut f = PhpismFlags::empty();
-        if self.contains(HHBCFlags::DISABLE_NONTOPLEVEL_DECLARATIONS) {
-            f |= PhpismFlags::DISABLE_NONTOPLEVEL_DECLARATIONS;
         }
         f
     }
@@ -262,7 +252,6 @@ impl<S: AsRef<str>> NativeEnv<S> {
         Options {
             hhvm,
             php7_flags: hhbc_flags.to_php7_flags(),
-            phpism_flags: hhbc_flags.to_php_flags(),
             repo_flags: hhbc_flags.to_repo_flags(),
             ..Default::default()
         }
@@ -526,14 +515,10 @@ fn create_emitter<'arena, 'decl, S: AsRef<str>>(
 
 fn create_parser_options(opts: &Options) -> ParserOptions {
     let hack_lang_flags = |flag| opts.hhvm.hack_lang.flags.contains(flag);
-    let phpism_flags = |flag| opts.phpism_flags.contains(flag);
     ParserOptions {
         po_auto_namespace_map: opts.hhvm.aliased_namespaces_cloned().collect(),
         po_codegen: true,
         po_disallow_silence: false,
-        po_disable_nontoplevel_declarations: phpism_flags(
-            PhpismFlags::DISABLE_NONTOPLEVEL_DECLARATIONS,
-        ),
         po_disable_lval_as_an_expression: hack_lang_flags(LangFlags::DISABLE_LVAL_AS_AN_EXPRESSION),
         po_enable_class_level_where_clauses: hack_lang_flags(
             LangFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES,

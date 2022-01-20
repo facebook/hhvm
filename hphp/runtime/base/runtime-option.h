@@ -674,9 +674,6 @@ struct RuntimeOption {
   // valid values are 0 => enabled (default)
   // 1 => warning, 2 => error
   static uint64_t DisableConstant;
-  // Disables non-top-level declarations
-  // true => error, false => default behaviour
-  static bool DisableNontoplevelDeclarations;
   // Enables the class-level where constraints
   // true => allow the feature, false => disable the feature
   static bool EnableClassLevelWhereClauses;

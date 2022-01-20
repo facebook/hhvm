@@ -6,6 +6,8 @@ edition = "2021"
 
 [lib]
 path = "../../stc_ffi.rs"
+test = false
+doctest = false
 
 [dependencies]
 hackrs = { path = "../hackrs" }

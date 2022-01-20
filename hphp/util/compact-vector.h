@@ -18,6 +18,7 @@
 
 #include <stdlib.h>
 #include <cstring>
+#include <memory>
 #include <type_traits>
 #include <initializer_list>
 
@@ -39,12 +40,12 @@ namespace HPHP {
  *     all the elements reside in the allocated block of memory.
  */
 template <typename T, typename Alloc = std::allocator<char>>
-struct CompactVector : private Alloc::template rebind<char>::other {
+struct CompactVector : private std::allocator_traits<Alloc>::template rebind_alloc<char> {
   using size_type = std::size_t;
   using value_type = T;
   using iterator = T*;
   using const_iterator = const T*;
-  using Allocator = typename Alloc::template rebind<char>::other;
+  using Allocator = typename std::allocator_traits<Alloc>::template rebind_alloc<char>;
 
   friend iterator begin(CompactVector& v) { return v.begin(); }
   friend iterator end(CompactVector& v) { return v.end(); }

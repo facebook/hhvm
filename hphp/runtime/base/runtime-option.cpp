@@ -375,7 +375,6 @@ std::uint32_t RepoOptions::getParserFlags() const {
     SETFLAGS(EnableEnumClasses,16)                             \
     SETFLAGS(EnableXHPClassModifier,17)                        \
     SETFLAGS(RuntimeOption::EnableClassLevelWhereClauses, 20)  \
-    SETFLAGS(EscapeBrace, 21)
 
   #define SETFLAGS(flag, n)                                    \
     if (flag) {parser_flags |= 1 << n;}

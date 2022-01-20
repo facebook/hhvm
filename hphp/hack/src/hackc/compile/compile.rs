@@ -113,7 +113,6 @@ bitflags! {
         const ENABLE_XHP_CLASS_MODIFIER=1 << 17;
         // No longer using bits 18-19.
         const ENABLE_CLASS_LEVEL_WHERE_CLAUSES=1 << 20;
-        const ESCAPE_BRACE=1 << 21;
   }
 }
 
@@ -226,9 +225,6 @@ impl ParserFlags {
         }
         if self.contains(ParserFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES) {
             f |= LangFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES;
-        }
-        if self.contains(ParserFlags::ESCAPE_BRACE) {
-            f |= LangFlags::ESCAPE_BRACE;
         }
         f
     }
@@ -546,7 +542,6 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
             LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,
         ),
         po_disallow_inst_meth: hack_lang_flags(LangFlags::DISALLOW_INST_METH),
-        po_escape_brace: hack_lang_flags(LangFlags::ESCAPE_BRACE),
         ..Default::default()
     }
 }

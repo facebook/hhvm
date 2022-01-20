@@ -107,7 +107,6 @@ struct RepoOptions {
   H(bool,           EnableEnumClasses,                true)           \
   H(bool,           DisallowFunAndClsMethPseudoFuncs, false)          \
   H(bool,           DisallowInstMeth,                 false)          \
-  H(bool,           EscapeBrace,                      false)          \
   /**/
 
   /**/

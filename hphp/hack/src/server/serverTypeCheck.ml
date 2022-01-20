@@ -1770,10 +1770,10 @@ functor
       let telemetry =
         Telemetry.duration telemetry ~key:"typecheck_start" ~start_time
       in
-      let (state_distance, state_age) =
+      let state_distance =
         match env.init_env.saved_state_delta with
-        | None -> (None, None)
-        | Some { distance; age } -> (Some distance, Some age)
+        | None -> None
+        | Some { distance; _ } -> Some distance
       in
       (* Typecheck all of the files we determined might need rechecking as a
          consequence of the changes (or, in a lazy check,
@@ -1863,8 +1863,6 @@ functor
         |> Telemetry.bool_
              ~key:"typecheck_longlived_workers"
              ~value:genv.local_config.ServerLocalConfig.longlived_workers
-        |> Telemetry.int_opt ~key:"state_distance" ~value:state_distance
-        |> Telemetry.int_opt ~key:"state_age" ~value:state_age
       in
 
       (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)

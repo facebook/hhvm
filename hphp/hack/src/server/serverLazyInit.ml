@@ -825,6 +825,11 @@ let type_check_dirty
       else
         files_to_check
     in
+    let (state_distance, state_age) =
+      match env.init_env.saved_state_delta with
+      | None -> (None, None)
+      | Some { distance; age } -> (Some distance, Some age)
+    in
     let init_telemetry =
       ServerEnv.Init_telemetry.make
         ServerEnv.Init_telemetry.Init_lazy_dirty
@@ -852,7 +857,9 @@ let type_check_dirty
              ~value:(Relative_path.Set.cardinal dirty_files_changed_hash)
         |> Telemetry.int_
              ~key:"to_recheck"
-             ~value:(Relative_path.Set.cardinal to_recheck))
+             ~value:(Relative_path.Set.cardinal to_recheck)
+        |> Telemetry.int_opt ~key:"state_distance" ~value:state_distance
+        |> Telemetry.int_opt ~key:"state_age" ~value:state_age)
     in
     let result =
       ServerInitCommon.type_check

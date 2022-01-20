@@ -136,7 +136,7 @@ private:
   // SFINAE stuff to support the required ctor and assignment
   // overloads.
   template<typename... Cond>
-  using requires = std::enable_if_t<std::conjunction_v<Cond...>, bool>;
+  using Requires = std::enable_if_t<std::conjunction_v<Cond...>, bool>;
 
   template<typename U>
   using remove_cvref_t =
@@ -189,7 +189,7 @@ public:
     : m_opt(std::move(o.m_opt)) { o.m_opt.reset(); }
 
   template <typename U = T,
-            requires<not_self<U>,
+            Requires<not_self<U>,
                      not_tag<U>,
                      std::is_constructible<T, U>,
                      std::is_convertible<U&&, T>> = true>
@@ -197,7 +197,7 @@ public:
     : m_opt(std::in_place, std::forward<U>(v)) {}
 
   template <typename U = T,
-            requires<not_self<U>,
+            Requires<not_self<U>,
                      not_tag<U>,
                      std::is_constructible<T, U>,
                      std::negation<std::is_convertible<U&&, T>>> = true>
@@ -205,7 +205,7 @@ public:
     : m_opt(std::in_place, std::forward<U>(v)) {}
 
   template <typename U,
-            requires<std::negation<std::is_same<T, U>>,
+            Requires<std::negation<std::is_same<T, U>>,
                      std::is_constructible<T, const U&>,
                      std::is_convertible<const U&, T>,
                      std::negation<converts_from_optional<T, U>>> = true>
@@ -213,7 +213,7 @@ public:
     : m_opt(o.m_opt) {}
 
   template <typename U,
-             requires<std::negation<std::is_same<T, U>>,
+             Requires<std::negation<std::is_same<T, U>>,
                       std::is_constructible<T, const U&>,
                       std::negation<std::is_convertible<const U&, T>>,
                       std::negation<converts_from_optional<T, U>>> = true>
@@ -221,7 +221,7 @@ public:
     : m_opt(o.m_opt) {}
 
   template <typename U,
-            requires<std::negation<std::is_same<T, U>>,
+            Requires<std::negation<std::is_same<T, U>>,
                      std::is_constructible<T, U&&>,
                      std::is_convertible<U&&, T>,
                      std::negation<converts_from_optional<T, U>>> = true>
@@ -229,7 +229,7 @@ public:
     : m_opt(std::move(o.m_opt)) { o.m_opt.reset(); }
 
   template <typename U,
-            requires<std::negation<std::is_same<T, U>>,
+            Requires<std::negation<std::is_same<T, U>>,
                      std::is_constructible<T, U&&>,
                      std::negation<std::is_convertible<U&&, T>>,
                      std::negation<converts_from_optional<T, U>>> = true>
@@ -237,12 +237,12 @@ public:
     : m_opt(std::move(o.m_opt)) { o.m_opt.reset(); }
 
   template<typename... Args,
-           requires<std::is_constructible<T, Args&&...>> = true>
+           Requires<std::is_constructible<T, Args&&...>> = true>
   explicit constexpr Optional(std::in_place_t, Args&&... args)
     : m_opt(std::in_place, std::forward<Args>(args)...) {}
 
   template<typename U, typename... Args,
-           requires<std::is_constructible<T,
+           Requires<std::is_constructible<T,
                                           std::initializer_list<U>&,
                                           Args&&...>> = true>
   explicit constexpr Optional(std::in_place_t,

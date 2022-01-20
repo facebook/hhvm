@@ -359,7 +359,7 @@ void RegionDesc::renumberBlock(BlockId oldId, BlockId newId) {
 }
 
 void RegionDesc::copyArcsFrom(const RegionDesc& srcRegion) {
-  for (auto const b : srcRegion.m_blocks) {
+  for (auto const& b : srcRegion.m_blocks) {
     auto bid = b->id();
     for (auto succId : srcRegion.succs(bid)) {
       addArc(bid, succId);

@@ -146,7 +146,7 @@ struct Former {
     // Add to the region any arc involving the blocks that were added to the
     // region and that satisty the minimum probability (m_minArcProb).
     auto const blocks = m_region->blocks();
-    for (auto const block : blocks) {
+    for (auto const& block : blocks) {
       auto const src = block->id();
       auto const srcWgt = m_cfg.weight(src);
       auto const outArcs = m_cfg.outArcs(src);

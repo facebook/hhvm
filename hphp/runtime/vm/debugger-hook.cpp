@@ -510,7 +510,7 @@ bool phpAddBreakPointLine(const Unit* unit, int line) {
   // Add to the breakpoint filter and the line filter.
   assertx(funcOffsets.size() > 0);
   DEBUG_ONLY std::unordered_set<const Func*> seenFuncs;
-  for (auto const offsets : funcOffsets) {
+  for (auto const& offsets : funcOffsets) {
     auto f = offsets.first;
     assertx(seenFuncs.find(f) == seenFuncs.end());
     for (auto const offset : offsets.second) {

@@ -377,7 +377,7 @@ constexpr auto limits = folly::make_array<std::pair<int, const char *>>(
 
 Variant HHVM_FUNCTION(posix_getrlimit) {
   DictInit ret{2 * limits.size()};
-  for (auto const l : limits) {
+  for (auto const& l : limits) {
     if (!posix_addlimit(l.first, l.second, ret)) {
       return false;
     }

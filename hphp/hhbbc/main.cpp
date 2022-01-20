@@ -485,7 +485,7 @@ int main(int argc, char** argv) try {
   IniSetting::Map ini = IniSetting::Map::object;
 
   // We need to write correct coeffects before we load
-  for (auto const [name, value] : gd.EvalCoeffectEnforcementLevels) {
+  for (auto const& [name, value] : gd.EvalCoeffectEnforcementLevels) {
     config["Eval"]["CoeffectEnforcementLevels"][name] = value;
   }
 

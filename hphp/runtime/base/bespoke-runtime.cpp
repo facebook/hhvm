@@ -47,7 +47,7 @@ RuntimeStruct::RuntimeStruct(
 {
   assertx(stableIdentifier->isStatic());
 
-  for (auto const [idx, key] : fields) {
+  for (auto const& [idx, key] : fields) {
     setKey(idx, key.get());
   }
 }
@@ -75,7 +75,7 @@ RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
 
   if (Trace::moduleEnabled(Trace::bespoke, 2)) {
     FTRACE(2, "Register runtime struct {}\n", stableIdentifier);
-    for (auto const [idx, str] : fields) {
+    for (UNUSED auto const& [idx, str] : fields) {
       FTRACE(2, "  {} -> {}\n", idx, str);
     }
   }
@@ -95,20 +95,20 @@ RuntimeStruct* RuntimeStruct::registerRuntimeStruct(
 
   if (Trace::moduleEnabled(Trace::bespoke, 2)) {
     FTRACE(2, "Register new runtime struct {}\n", stableIdentifier);
-    for (auto const [idx, str] : fields) {
+    for (UNUSED auto const& [idx, str] : fields) {
       FTRACE(2, "  {} -> {}\n", idx, str);
     }
   }
 
   // Validate that no keys are subject to intish cast.
-  for (auto const [_, str] : fields) {
+  for (auto const& [_, str] : fields) {
     int64_t i;
     if (str.get()->isStrictlyInteger(i)) return nullptr;
   }
 
   // The fields are not contiguous, so find out how many we need to allocate.
   auto fieldsLength = 0;
-  for (auto const [idx, _] : fields) {
+  for (auto const& [idx, _] : fields) {
     if (idx >= fieldsLength) fieldsLength = idx + 1;
   }
 
@@ -135,7 +135,7 @@ void RuntimeStruct::validateFieldsMatch(const FieldIndexVector& fields) const {
     ret += "New schema:\n";
     auto newSchema = FieldIndexVector(fields);
     std::sort(newSchema.begin(), newSchema.end());
-    for (auto const [idx, str] : newSchema) {
+    for (auto const& [idx, str] : newSchema) {
       ret += folly::sformat("  {}: {}\n", idx, str);
     }
     return ret;
@@ -146,7 +146,7 @@ void RuntimeStruct::validateFieldsMatch(const FieldIndexVector& fields) const {
     if (key) numFields++;
   }
   always_assert(numFields == fields.size());
-  for (auto const [idx, str] : fields) {
+  for (auto const& [idx, str] : fields) {
     always_assert(getKey(idx)->same(str.get()));
   }
 }

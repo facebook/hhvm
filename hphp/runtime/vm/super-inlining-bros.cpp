@@ -2182,7 +2182,7 @@ Optional<ROMHandle> runInlineInterp(const Func* func, TypedValue context,
       auto const& cs = box->data->constraints;
       DEBUG_ONLY auto const tv = make_tv<KindOfResource>(box->hdr());
       FTRACE(1, "  Found {} constraints for: {}\n", cs.size(), show(tv));
-      for (UNUSED auto const c : cs) {
+      for (UNUSED auto const& c : cs) {
         FTRACE(1, "    {} (ctx: {}, prop decl: {})\n",
                c.tc.displayName(),
                c.ctx ? c.ctx->name()->data() : "null",

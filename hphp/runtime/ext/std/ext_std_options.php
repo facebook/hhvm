@@ -105,6 +105,10 @@ function getmyuid(): mixed;
 <<__Native>>
 function getopt(string $options,
                 mixed $longopts = null): darray;
+<<__Native>>
+function getopt_with_optind(string $options,
+                            mixed $longopts,
+                            inout int $optind): darray;
 
 /* This is an interface to getrusage(2). It gets data returned from the system
  * call.

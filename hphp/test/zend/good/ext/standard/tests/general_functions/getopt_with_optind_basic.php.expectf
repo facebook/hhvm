@@ -1,0 +1,26 @@
+Simple testcase for getopt_with_optind() function
+dict(1) {
+  ["f"]=>
+  bool(false)
+}
+int(2)
+dict(1) {
+  ["g"]=>
+  string(11) "value_for_g"
+}
+int(4)
+dict(1) {
+  ["k"]=>
+  string(11) "value_for_k"
+}
+int(6)
+dict(3) {
+  ["m"]=>
+  bool(false)
+  ["n"]=>
+  bool(false)
+  ["o"]=>
+  bool(false)
+}
+int(7)
+Done

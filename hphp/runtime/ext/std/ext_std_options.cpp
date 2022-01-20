@@ -409,8 +409,9 @@ static req::vector<opt_struct> parse_opts(const char *opts, int opts_len) {
 
 const StaticString s_argv("argv");
 
-static Array HHVM_FUNCTION(getopt, const String& options,
-                                   const Variant& longopts /*=null */) {
+static Array hhvm_getopt_impl(const String& options,
+                              const Variant& longopts,
+                              int64_t& optind) {
   auto opt_vec = parse_opts(options.data(), options.size());
 
   if (!longopts.isNull()) {
@@ -465,7 +466,7 @@ static Array HHVM_FUNCTION(getopt, const String& options,
 
   int o;
   char *php_optarg = nullptr;
-  int php_optind = 1;
+  int php_optind = (int)optind;
 
   SCOPE_EXIT {
     free_longopts(opt_vec);
@@ -539,9 +540,23 @@ static Array HHVM_FUNCTION(getopt, const String& options,
     }
 
     php_optarg = nullptr;
+    optind = php_optind;
   }
 
   return ret;
+}
+
+static Array HHVM_FUNCTION(getopt, const String& options,
+                                   const Variant& longopts /*=null */) {
+  int64_t optind = 1;
+  return hhvm_getopt_impl(options, longopts, optind);
+}
+
+static Array HHVM_FUNCTION(getopt_with_optind,
+                           const String& options,
+                           const Variant& longopts,
+                           int64_t& optind) {
+  return hhvm_getopt_impl(options, longopts, optind);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1122,6 +1137,7 @@ void StandardExtension::initOptions() {
   HHVM_FE(getmypid);
   HHVM_FE(getmyuid);
   HHVM_FE(getopt);
+  HHVM_FE(getopt_with_optind);
   HHVM_FE(getrusage);
   HHVM_FE(clock_getres);
   HHVM_FE(clock_gettime);

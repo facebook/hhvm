@@ -1901,6 +1901,36 @@ where
         );
     }
 
+    fn check_parameter_this(&mut self, node: S<'a, Token, Value>) {
+        let mut this_param = None;
+        if let ParameterDeclaration(p) = &node.children {
+            match &p.name.children {
+                Token(_) => {
+                    // normal parameter $foo
+                    if self.text(&p.name) == sn::special_idents::THIS {
+                        this_param = Some(&p.name);
+                    }
+                }
+                DecoratedExpression(de) => {
+                    // variadic parameter ...$foo
+                    if let Token(_) = de.expression.children {
+                        if self.text(&de.expression) == sn::special_idents::THIS {
+                            this_param = Some(&de.expression);
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        if let Some(this_param) = this_param {
+            self.errors.push(Self::make_error_from_node(
+                this_param,
+                errors::reassign_this,
+            ));
+        }
+    }
+
     fn check_parameter_ifc(&mut self, node: S<'a, Token, Value>) {
         if let ParameterDeclaration(x) = &node.children {
             let attr = &x.attribute;
@@ -2091,6 +2121,7 @@ where
     fn parameter_errors(&mut self, node: S<'a, Token, Value>) {
         let param_errors = |self_: &mut Self, params| {
             for x in Self::syntax_to_list_no_separators(params) {
+                self_.check_parameter_this(x);
                 self_.check_parameter_ifc(x);
                 self_.check_parameter_readonly(x);
             }

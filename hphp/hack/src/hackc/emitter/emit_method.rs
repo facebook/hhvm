@@ -14,7 +14,7 @@ use hhbc_ast::Visibility;
 use hhbc_id::{method, Id};
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{instr, Result};
-use naming_special_names_rust::{classes, special_idents, user_attributes};
+use naming_special_names_rust::{classes, user_attributes};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};
 use oxidized::{ast as T, ast_defs};
@@ -75,13 +75,6 @@ pub fn from_ast<'a, 'arena, 'decl>(
     let is_async = method.fun_kind.is_fasync() || method.fun_kind.is_fasync_generator();
     let is_no_injection = hhas_attribute::is_no_injection(&attributes);
 
-    if !(method.static_ || is_closure_body) {
-        for p in method.params.iter() {
-            if p.name == special_idents::THIS {
-                return Err(raise_fatal_parse(&p.pos, "Cannot re-assign $this"));
-            }
-        }
-    };
     if class.kind.is_cinterface() && !method.body.fb_ast.is_empty() {
         return Err(raise_fatal_parse(
             &method.name.0,

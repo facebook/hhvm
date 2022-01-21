@@ -222,7 +222,7 @@ let make_remote_server_api
           Typing_service_delegate.default
           (Telemetry.create ())
           files_to_check
-          ~memory_cap:None
+          ~memory_cap:(Some 200000)
           ~longlived_workers:false
           ~hulk_lite:false
           ~remote_execution:None

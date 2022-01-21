@@ -7,3 +7,5 @@
  *)
 
 let upload_payloads _ = failwith "upload_payloads not implemented"
+
+let download_payload _ = failwith "download_payload not implemented"

@@ -41,6 +41,12 @@ module type Delegate_sig = sig
 
   val steal : state -> int -> workitem list * state
 
+  val dispatch :
+    state ->
+    workitem BigList.t ->
+    int ->
+    remote_computation_payload list * workitem BigList.t
+
   val add_telemetry : state -> Telemetry.t -> Telemetry.t
 
   (* Get delegate progress message *)

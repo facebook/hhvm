@@ -762,7 +762,8 @@ let next
   in
   fun () ->
     Measure.time ~record "time" @@ fun () ->
-    (if hulk_lite then
+    let workitems_to_process_length = BigList.length !workitems_to_process in
+    (if hulk_lite && workitems_to_process_length = 0 then
       (*
         TODO(bobren): This is going to be the "reduce" part of the mapreduce paradigm. We activate
         this when files_to_check is empty, or in other words the local typechecker is done with its work.
@@ -791,7 +792,6 @@ let next
     | None ->
       (* WARNING: the following List.length is costly - for a full init, files_to_process starts
          out as the size of the entire repo, and we're traversing the entire list. *)
-      let workitems_to_process_length = BigList.length !workitems_to_process in
       (match (workitems_to_process_length, stolen) with
       | (0, []) when Hash_set.Poly.is_empty workitems_in_progress -> Bucket.Done
       | (0, []) -> Bucket.Wait
@@ -899,30 +899,14 @@ let process_in_parallel
 
   if hulk_lite then (
     let workitems_to_process_length = BigList.length !workitems_to_process in
-    (* Create 10 remote payloads using using 10/12 buckets. The remaining 2 buckets will be done locally. *)
-    let payload_size = workitems_to_process_length / 12 in
-    let nonce_prefix =
-      Printf.sprintf
-        "%s-%f-%s"
-        (Sys_utils.get_primary_owner ())
-        (Unix.gettimeofday ())
-        (Random_id.short_string ())
+    let (payloads, workitems) =
+      Typing_service_delegate.dispatch
+        !delegate_state
+        !workitems_to_process
+        workitems_to_process_length
     in
-    let rec create_payloads n files payloads =
-      if n <= 0 then (
-        Hh_logger.log "Done dispatching remote payloads";
-        (payloads, files)
-      ) else
-        let (payload, files) = BigList.split_n files payload_size in
-        let nonce = Printf.sprintf "%s-%d" nonce_prefix n in
-        let remote_payload = { nonce; payload = BigList.create payload } in
-        Hh_logger.log "hh --check --nonce %s" nonce;
-        create_payloads (n - 1) files (remote_payload :: payloads)
-    in
-    let (payloads, workitems) = create_payloads 10 !workitems_to_process [] in
     remote_payloads := payloads;
     workitems_to_process := workitems
-    (* TODO(bobren) marshal and upload payload to manifold path hulk/tree/input/{nonce} *)
     (* TODO(bobren) spawn sandcastle jobs to run commands *)
   );
 

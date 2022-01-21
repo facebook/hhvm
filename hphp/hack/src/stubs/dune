@@ -135,6 +135,14 @@
     (pps lwt_ppx ppx_deriving.std)))
 
 (library
+  (name hulk_rpc_ffi)
+  (wrapped false)
+  (modules
+    hulk_rpc_ffi)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
+
+(library
  (name re_stubs)
  (wrapped false)
  (modules re reEnv)

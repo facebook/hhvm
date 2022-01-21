@@ -40,6 +40,10 @@ let steal state n =
   ignore n;
   ([], state)
 
+let dispatch state files_to_process files_to_process_length =
+  ignore (state, files_to_process, files_to_process_length);
+  ([], files_to_process)
+
 let add_telemetry state telemetry =
   ignore state;
   telemetry

@@ -58,7 +58,7 @@ const int LOG_UUCP = 64;
 const int LOG_WARNING = 4;
 
 <<__PHPStdLib>>
-function gethostname();
+function gethostname()[];
 <<__PHPStdLib>>
 function gethostbyaddr(string $ip_address);
 <<__PHPStdLib>>

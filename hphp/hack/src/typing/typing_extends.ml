@@ -883,28 +883,33 @@ let check_class_against_parent_class_elt
     (parent_class_elt, (parent_name_pos, parent_class))
     env =
   match get_member member_kind class_ member_name with
-  (* We can skip this check if the class elements have the same origin, as we are
-   * essentially comparing a method against itself *)
-  | Some class_elt
-    when String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin ->
-    check_override
-      ~check_member_unique:
-        (should_check_member_unique class_elt class_ parent_class)
+  | Some class_elt ->
+    if String.equal parent_class_elt.ce_origin class_elt.ce_origin then (
+      (* Case where the child's element comes from the parent being checked. *)
+      (* if the child class implements dynamic, all inherited methods should be dynamically callable *)
+      check_inherited_member_is_dynamically_callable
+        env
+        (class_pos, class_)
+        parent_class
+        (member_kind, member_name, parent_class_elt);
       env
-      member_name
-      member_kind
-      class_
-      parent_class
-      parent_class_elt
-      class_elt
-      (on_error (parent_name_pos, Cls.name parent_class))
-  | _ ->
-    (* if class implements dynamic, all inherited methods should be dynamically callable *)
-    check_inherited_member_is_dynamically_callable
-      env
-      (class_pos, class_)
-      parent_class
-      (member_kind, member_name, parent_class_elt);
+    ) else
+      (* We can skip this check if the class elements have the same origin, as we are
+         essentially comparing a method against itself *)
+      check_override
+        ~check_member_unique:
+          (should_check_member_unique class_elt class_ parent_class)
+        env
+        member_name
+        member_kind
+        class_
+        parent_class
+        parent_class_elt
+        class_elt
+        (on_error (parent_name_pos, Cls.name parent_class))
+  | None ->
+    (* The only case when a member belongs to a parent but not the child is if the parent is an
+       interface and the child is a concrete class. Otherwise, the member would have been inherited. *)
     env
 
 let check_members_from_all_parents

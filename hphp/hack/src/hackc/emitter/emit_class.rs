@@ -910,7 +910,6 @@ pub fn emit_class<'a, 'arena, 'decl>(
         &ast_class.methods,
     )?);
     let doc_comment = ast_class.doc_comment.clone();
-    let is_xhp = ast_class.is_xhp || ast_class.has_xhp_keyword;
 
     let mut flags = HhasClassFlags::empty();
     flags.set(HhasClassFlags::IS_FINAL, is_final);
@@ -918,7 +917,6 @@ pub fn emit_class<'a, 'arena, 'decl>(
     flags.set(HhasClassFlags::IS_ABSTRACT, is_abstract);
     flags.set(HhasClassFlags::IS_INTERFACE, is_interface);
     flags.set(HhasClassFlags::IS_TRAIT, is_trait);
-    flags.set(HhasClassFlags::IS_XHP, is_xhp);
     flags.set(HhasClassFlags::IS_CONST, is_const);
     flags.set(HhasClassFlags::NO_DYNAMIC_PROPS, no_dynamic_props);
     flags.set(HhasClassFlags::NEEDS_NO_REIFIEDINIT, needs_no_reifiedinit);

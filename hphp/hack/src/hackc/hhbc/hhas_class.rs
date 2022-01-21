@@ -69,7 +69,6 @@ bitflags! {
         const IS_ABSTRACT = 1 << 3;
         const IS_INTERFACE = 1 << 4;
         const IS_TRAIT = 1 << 5;
-        const IS_XHP = 1 << 6;
         const IS_CONST = 1 << 7;
         const NO_DYNAMIC_PROPS = 1 << 8;
         const NEEDS_NO_REIFIEDINIT = 1 << 9;
@@ -91,9 +90,6 @@ impl<'arena> HhasClass<'arena> {
     }
     pub fn is_trait(&self) -> bool {
         self.flags.contains(HhasClassFlags::IS_TRAIT)
-    }
-    pub fn is_xhp(&self) -> bool {
-        self.flags.contains(HhasClassFlags::IS_XHP)
     }
     pub fn is_const(&self) -> bool {
         self.flags.contains(HhasClassFlags::IS_CONST)

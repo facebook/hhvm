@@ -54,6 +54,15 @@ let empty =
  *)
 (*****************************************************************************)
 
+(** Reasons to keep the old signature:
+  - We don't want to override a concrete method with
+    an abstract one.
+  - We don't want to override a method that's actually
+    implemented by the programmer with one that's "synthetic",
+    e.g. arising merely from a require-extends declaration in
+    a trait.
+When these two considerations conflict, we give precedence to
+abstractness for determining priority of the method. *)
 let should_keep_old_sig (sig_, _) (old_sig, _) =
   ((not (get_elt_abstract old_sig)) && get_elt_abstract sig_)
   || Bool.equal (get_elt_abstract old_sig) (get_elt_abstract sig_)
@@ -66,21 +75,7 @@ let add_method name sig_ methods =
     (* The method didn't exist so far, let's add it *)
     SMap.add name sig_ methods
   | Some old_sig ->
-    if
-      should_keep_old_sig sig_ old_sig
-      (* The then-branch of this if is encountered when the method being
-       * added shouldn't *actually* be added. When's that?
-       * In isolation, we can say that
-       *   - We don't want to override a concrete method with
-       *     an abstract one.
-       *   - We don't want to override a method that's actually
-       *     implemented by the programmer with one that's "synthetic",
-       *     e.g. arising merely from a require-extends declaration in
-       *     a trait.
-       * When these two considerations conflict, we give precedence to
-       * abstractness for determining priority of the method.
-       *)
-    then
+    if should_keep_old_sig sig_ old_sig then
       methods
     (* Otherwise, we *are* overwriting a method definition. This is
      * OK when a naming conflict is parent class vs trait (trait

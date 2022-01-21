@@ -27,4 +27,12 @@ trait TReqExtChild {
 trait TBothTraits {
   use TReqExtChild;
   use TReqExtFoo;
+
+  public function g(): void {
+    $this->f(0);
+  }
+}
+
+class A extends Child {
+  use TBothTraits;
 }

@@ -749,11 +749,6 @@ let check_const_override
       parent_class_const_type
       (Typing_error.Reasons_callback.class_constant_type_mismatch on_error)
 
-(* Privates are only visible in the parent, we don't need to check them *)
-let filter_privates members =
-  List.filter members ~f:(fun (_name, class_elt) ->
-      not (Typing_defs.class_elt_is_private_not_lsb class_elt))
-
 let add_member_dep
     env class_ (member_kind, member_name, member_origin, origin_pos) =
   if not (Pos_or_decl.is_hhi origin_pos) then
@@ -821,7 +816,7 @@ let check_inherited_member_is_dynamically_callable
     | Ast_defs.Cenum ->
       ()
 
-let should_check_member_unique class_elt class_ parent_class_elt parent_class =
+let should_check_member_unique class_elt class_ parent_class =
   (* We want to check if there are conflicting trait or interface declarations
    * of a class member. This means that if the parent class is a trait or interface,
    * we need to check that the child member is *uniquely inherited*.
@@ -836,8 +831,6 @@ let should_check_member_unique class_elt class_ parent_class_elt parent_class =
   | Ast_defs.Ctrait ->
     (* Synthetic  *)
     (not (get_ce_synthesized class_elt))
-    (* The parent we are checking is synthetic, no point in checking *)
-    && (not (get_ce_synthesized parent_class_elt))
     (* defined on original class *)
     && String.( <> ) class_elt.ce_origin (Cls.name class_)
   | Ast_defs.(Cclass _ | Cenum | Cenum_class _) -> false
@@ -863,11 +856,7 @@ let check_class_against_parent_class_elt
         Cls.pos parent_class );
     check_override
       ~check_member_unique:
-        (should_check_member_unique
-           class_elt
-           class_
-           parent_class_elt
-           parent_class)
+        (should_check_member_unique class_elt class_ parent_class)
       env
       member_name
       member_kind
@@ -1402,23 +1391,28 @@ let check_class_implements_parent
          name_pos);
   env
 
-let filter_privates check_privates =
-  let id m = m in
-  if check_privates then
-    id
-  else
-    filter_privates
+(** Eliminate all synthesized members (those from requirements) plus
+all private members unless they're from traits. *)
+let filter_privates_and_synthethized
+    ~(is_trait : bool) (members : ('a * class_elt) list) : ('a * class_elt) list
+    =
+  let eliminate class_elt =
+    get_ce_synthesized class_elt
+    || ((not is_trait) && Typing_defs.class_elt_is_private_not_lsb class_elt)
+  in
+  let keep class_elt = not (eliminate class_elt) in
+  List.filter members ~f:(fun (_name, class_elt) -> keep class_elt)
 
 let make_parent_member_map
     ((parent_name_pos, _parent_name), parent_tparaml, parent_class) :
     ClassEltWParentSet.t SMap.t MemberKindMap.t =
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
-  let check_privates : bool = Ast_defs.is_c_trait (Cls.kind parent_class) in
   make_all_members ~parent_class
   |> MemberKindMap.of_list
   |> MemberKindMap.map (fun members ->
          members
-         |> filter_privates check_privates
+         |> filter_privates_and_synthethized
+              ~is_trait:(Ast_defs.is_c_trait (Cls.kind parent_class))
          |> SMap.of_list
          |> SMap.map (fun member ->
                 let member : class_elt = Inst.instantiate_ce psubst member in
@@ -1463,6 +1457,24 @@ let check_class_implements_parents
 (* The externally visible function *)
 (*****************************************************************************)
 
+(* [parents] also contains traits.
+  Here's a simple example showing why we need to check overriding traits:
+
+    trait T {
+      public function foo(): void {}
+      public function bar(): void {
+        $this->foo();
+      }
+    }
+
+    class A {
+      use T;
+      public function foo(int $x): void {}
+    }
+
+    Overriding foo this way is unsound due to bar using foo,
+    so A::foo needs to be a subtype of T::foo.
+  *)
 let check_implements_extends_uses env ~implements ~parents (name_pos, class_) =
   let get_interfaces acc x =
     let (_, (_, name), _) = TUtils.unwrap_class_type x in

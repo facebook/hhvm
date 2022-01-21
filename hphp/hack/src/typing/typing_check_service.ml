@@ -226,7 +226,7 @@ let process_file
       Caml.Printexc.raise_with_backtrace e stack
 
 module ProcessFilesTally = struct
-  (** Counters for the [file_computation] of each sort being processed *)
+  (** Counters for the [check_file_workitem] of each sort being processed *)
   type t = {
     decls: int;  (** how many [Declare] items we performed *)
     prefetches: int;  (** how many [Prefetch] items we performed *)
@@ -635,12 +635,14 @@ let merge
       batch_counts_by_worker_id :=
         SMap.add worker_id (prev_batch_count + 1) !batch_counts_by_worker_id
     | DelegateProgress _ -> ()
+    | SimpleDelegateProgress _ -> ()
   end;
 
   (* Merge in remote-worker results *)
   begin
     match progress_kind with
     | Progress -> ()
+    | SimpleDelegateProgress _ -> ()
     | DelegateProgress _ ->
       delegate_state :=
         Delegate.merge !delegate_state produced_by_job.errors progress
@@ -763,27 +765,32 @@ let next
   fun () ->
     Measure.time ~record "time" @@ fun () ->
     let workitems_to_process_length = BigList.length !workitems_to_process in
-    if hulk_lite && workitems_to_process_length = 0 then (
-      (*
+    let delegate_job =
+      if hulk_lite then (
+        (*
         This is the "reduce" part of the mapreduce paradigm. We activate this when workitems_to_check is empty,
         or in other words the local typechecker is done with its work. We'll try and download all the remote
         worker outputs in once go. For any payloads that aren't available we'll simply stop waiting on the
         remote worker and have the local worker "steal" the work.
        *)
-      let _ = remote_payloads in
-      let (files, controller) =
-        Typing_service_delegate.collect
-          !delegate_state
-          !workitems_to_process
-          workitems_to_process_length
-      in
-      workitems_to_process := files;
-      delegate_state := controller
-    );
+        let (workitems, controller, payloads, job) =
+          Typing_service_delegate.collect
+            !delegate_state
+            !workitems_to_process
+            workitems_to_process_length
+            !remote_payloads
+        in
+        workitems_to_process := workitems;
+        delegate_state := controller;
+        remote_payloads := payloads;
+        job
+      ) else
+        None
+    in
 
     let (state, delegate_job) =
       if hulk_lite then
-        (!delegate_state, None)
+        (!delegate_state, delegate_job)
       else
         Typing_service_delegate.next
           !workitems_to_process
@@ -805,7 +812,13 @@ let next
        type checking) logic applies. *)
     match delegate_job with
     | Some { current_bucket; remaining_jobs; job } ->
-      return_bucket_job (DelegateProgress job) ~current_bucket ~remaining_jobs
+      if hulk_lite then
+        return_bucket_job
+          (SimpleDelegateProgress job)
+          ~current_bucket
+          ~remaining_jobs
+      else
+        return_bucket_job (DelegateProgress job) ~current_bucket ~remaining_jobs
     | None ->
       (* WARNING: the following List.length is costly - for a full init, files_to_process starts
          out as the size of the entire repo, and we're traversing the entire list. *)
@@ -915,6 +928,7 @@ let process_in_parallel
     ~extra:delegate_progress;
 
   if hulk_lite then (
+    Hh_logger.log "Dispatch hulk lite initial payloads";
     let workitems_to_process_length = BigList.length !workitems_to_process in
     let (payloads, workitems, controller) =
       Typing_service_delegate.dispatch
@@ -925,7 +939,6 @@ let process_in_parallel
     remote_payloads := payloads;
     workitems_to_process := workitems;
     delegate_state := controller
-    (* TODO(bobren) spawn sandcastle jobs to run commands *)
   );
 
   let next =
@@ -965,6 +978,7 @@ let process_in_parallel
           typing_result
           progress.progress
       | DelegateProgress job -> Delegate.process job
+      | SimpleDelegateProgress job -> Delegate.process job
     in
     (worker_id, typing_result, { progress with progress = computation_progress })
   in

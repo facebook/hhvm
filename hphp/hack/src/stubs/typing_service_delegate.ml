@@ -44,9 +44,9 @@ let dispatch state files_to_process files_to_process_length =
   ignore (state, files_to_process, files_to_process_length);
   ([], files_to_process, state)
 
-let collect state files_to_process files_to_process_length =
+let collect state files_to_process files_to_process_length remote_payloads =
   ignore files_to_process_length;
-  (files_to_process, state)
+  (files_to_process, state, remote_payloads, None)
 
 let add_telemetry state telemetry =
   ignore state;

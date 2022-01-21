@@ -78,9 +78,12 @@ let accumulate_job_output
 
 type delegate_job_sig = unit -> typing_result * typing_progress
 
+type simple_delegate_job_sig = unit -> typing_result * typing_progress
+
 type progress_kind =
   | Progress
   | DelegateProgress of delegate_job_sig
+  | SimpleDelegateProgress of simple_delegate_job_sig
 
 type job_progress = {
   kind: progress_kind;

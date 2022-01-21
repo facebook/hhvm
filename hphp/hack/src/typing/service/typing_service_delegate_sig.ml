@@ -47,7 +47,15 @@ module type Delegate_sig = sig
     int ->
     remote_computation_payload list * workitem BigList.t * state
 
-  val collect : state -> workitem BigList.t -> int -> workitem BigList.t * state
+  val collect :
+    state ->
+    workitem BigList.t ->
+    int ->
+    remote_computation_payload list ->
+    workitem BigList.t
+    * state
+    * remote_computation_payload list
+    * delegate_next_result option
 
   val add_telemetry : state -> Telemetry.t -> Telemetry.t
 

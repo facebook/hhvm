@@ -66,11 +66,6 @@ void BespokeArray::setLayoutIndex(bespoke::LayoutIndex index) {
 }
 
 NO_PROFILING
-size_t BespokeArray::heapSize() const {
-  return g_layout_funcs.fnHeapSize[getVtableIndex(this)](this);
-}
-
-NO_PROFILING
 void BespokeArray::scan(type_scan::Scanner& scan) const {
   return g_layout_funcs.fnScan[getVtableIndex(this)](this, scan);
 }
@@ -94,9 +89,8 @@ bool BespokeArray::checkInvariants() const {
 ArrayData* BespokeArray::MakeUncounted(
     ArrayData* ad, const MakeUncountedEnv& env, bool hasApcTv) {
   assertx(ad->isRefCounted());
-  auto const vindex = getVtableIndex(ad);
   auto const extra = uncountedAllocExtra(ad, hasApcTv);
-  auto const bytes = g_layout_funcs.fnHeapSize[vindex](ad);
+  auto const bytes = ad->heapSize();
   assertx(extra % 16 == 0);
 
   // "Help" out by copying the array's raw bytes to an uncounted allocation.
@@ -108,6 +102,7 @@ ArrayData* BespokeArray::MakeUncounted(
   result->initHeader_16(HeaderKind(ad->kind()), UncountedValue, aux);
   assertx(asBespoke(result)->layoutIndex() == asBespoke(ad)->layoutIndex());
 
+  auto const vindex = getVtableIndex(ad);
   g_layout_funcs.fnConvertToUncounted[vindex](result, env);
 
   return result;
@@ -118,7 +113,7 @@ void BespokeArray::ReleaseUncounted(ArrayData* ad) {
   auto const vindex = getVtableIndex(ad);
   g_layout_funcs.fnReleaseUncounted[vindex](ad);
 
-  auto const bytes = g_layout_funcs.fnHeapSize[vindex](ad);
+  auto const bytes = ad->heapSize();
   auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
   FreeUncounted(reinterpret_cast<char*>(ad) - extra, bytes + extra);
 }

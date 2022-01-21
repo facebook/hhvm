@@ -105,7 +105,6 @@ protected:
   void setLayoutIndex(bespoke::LayoutIndex index);
 
 public:
-  size_t heapSize() const;
   void scan(type_scan::Scanner& scan) const;
 
   bool checkInvariants() const;

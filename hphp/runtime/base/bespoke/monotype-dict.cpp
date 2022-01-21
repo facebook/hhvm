@@ -50,10 +50,6 @@ struct StaticStrPtr {
   const StringData* value;
 };
 
-uint16_t packSizeIndexAndAuxBits(uint8_t index, uint8_t aux) {
-  return (static_cast<uint16_t>(index) << 8) | aux;
-}
-
 constexpr size_t kMinSizeIndex = 7;
 constexpr size_t kMinSizeBytes = 128;
 
@@ -175,12 +171,13 @@ bool EmptyMonotypeDict::checkInvariants() const {
   assertx(m_size == 0);
   assertx(m_extra_lo16 == 0);
   assertx(isDictType());
+  assertx(heapSize() == kMinSizeBytes);
+  assertx(sizeIndex() == kMinSizeIndex);
   assertx(layoutIndex() == getEmptyLayoutIndex());
 
   auto const DEBUG_ONLY mad =
     reinterpret_cast<const MonotypeDict<int64_t>*>(this);
   assertx(mad->hasEmptyLayout());
-  assertx(mad->sizeIndex() == kMinSizeIndex);
   assertx(mad->type() == kExtraInvalidDataType);
   assertx(mad->used() == 0);
 
@@ -189,9 +186,6 @@ bool EmptyMonotypeDict::checkInvariants() const {
 
 //////////////////////////////////////////////////////////////////////////////
 
-size_t EmptyMonotypeDict::HeapSize(const Self*) {
-  return kMinSizeBytes;
-}
 void EmptyMonotypeDict::Scan(const Self* ad, type_scan::Scanner& scanner) {
 }
 ArrayData* EmptyMonotypeDict::EscalateToVanilla(
@@ -1112,11 +1106,6 @@ bool MonotypeDict<Key>::hasEmptyLayout() const {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
-template <typename Key>
-size_t MonotypeDict<Key>::HeapSize(const Self* mad) {
-  return scaleBySizeIndex(kMinSize, mad->sizeIndex());
-}
 
 template <typename Key>
 void MonotypeDict<Key>::Scan(const Self* mad, type_scan::Scanner& scanner) {

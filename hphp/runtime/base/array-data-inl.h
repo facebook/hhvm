@@ -132,6 +132,15 @@ inline uint8_t ArrayData::auxBits() const {
   return safe_cast<uint8_t>(m_aux16 & (kLegacyArray | kSampledArray));
 }
 
+inline uint8_t ArrayData::sizeIndex() const {
+  return safe_cast<uint8_t>(m_aux16 >> 8);
+}
+
+inline uint16_t ArrayData::packSizeIndexAndAuxBits(
+    uint8_t sizeIndex, uint8_t auxBits) {
+  return (static_cast<uint16_t>(sizeIndex) << 8) | auxBits;
+}
+
 inline bool ArrayData::isSampledArray() const {
   return m_aux16 & kSampledArray;
 }

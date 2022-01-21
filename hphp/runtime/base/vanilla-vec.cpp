@@ -115,9 +115,11 @@ VanillaDict* VanillaVec::ToMixedHeader(const ArrayData* old,
 
   auto const oldSize = old->m_size;
   auto const scale   = VanillaDict::computeScaleFromSize(neededSize);
-  auto const ad      = VanillaDict::reqAlloc(scale);
+  auto const index   = VanillaDict::computeIndexFromScale(scale);
+  auto const ad      = VanillaDict::reqAllocIndex(index);
   auto const kind    = HeaderKind::Dict;
-  ad->initHeader(kind, OneReference);
+  auto const aux     = packSizeIndexAndAuxBits(index, 0);
+  ad->initHeader_16(kind, OneReference, aux);
   *ad->mutableKeyTypes() = VanillaDictKeys::Ints();
   ad->m_size          = oldSize;
   ad->m_layout_index  = old->m_layout_index;
@@ -208,7 +210,7 @@ ArrayData* VanillaVec::Grow(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->m_size == capacity(adIn));
 
-  auto const sizeIndex = sizeClass(adIn) + kSizeClassesPerDoubling;
+  auto const sizeIndex = adIn->sizeIndex() + kSizeClassesPerDoubling;
   if (UNLIKELY(sizeIndex > MaxSizeIndex)) return nullptr;
   auto ad = static_cast<ArrayData*>(tl_heap->objMallocIndex(sizeIndex));
 
@@ -284,7 +286,7 @@ NEVER_INLINE
 ArrayData* VanillaVec::Copy(const ArrayData* adIn) {
   assertx(checkInvariants(adIn));
 
-  auto ad = static_cast<ArrayData*>(tl_heap->objMallocIndex(sizeClass(adIn)));
+  auto ad = static_cast<ArrayData*>(tl_heap->objMallocIndex(adIn->sizeIndex()));
 
   // CopyPackedHelper will copy the header (including capacity and kind), and
   // m_size.  All we have to do afterwards is fix the refcount on the copy.
@@ -449,7 +451,7 @@ void VanillaVec::Release(ArrayData* ad) {
     }
   }
 
-  tl_heap->objFreeIndex(ad, sizeClass(ad));
+  tl_heap->objFreeIndex(ad, ad->sizeIndex());
   AARCH64_WALKABLE_FRAME();
 }
 

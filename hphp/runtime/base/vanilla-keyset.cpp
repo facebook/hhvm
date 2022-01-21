@@ -42,12 +42,14 @@ std::aligned_storage<kEmptyKeysetSize, 16>::type s_theEmptyKeyset;
 struct VanillaKeyset::Initializer {
   Initializer() {
     static_assert(computeAllocBytes(SmallScale) == kEmptyKeysetSize);
-    auto const ad = reinterpret_cast<VanillaKeyset*>(&s_theEmptyKeyset);
+    auto const index = computeIndexFromScale(SmallScale);
+    auto const ad    = reinterpret_cast<VanillaKeyset*>(&s_theEmptyKeyset);
+    auto const aux   = packSizeIndexAndAuxBits(index, 0);
     ad->initHash(VanillaKeyset::SmallScale);
     ad->m_size = 0;
     ad->m_layout_index = kVanillaLayoutIndex;
     ad->m_scale_used = VanillaKeyset::SmallScale;
-    ad->initHeader(HeaderKind::Keyset, StaticValue);
+    ad->initHeader_16(HeaderKind::Keyset, StaticValue, aux);
     assertx(ad->checkInvariants());
   }
 };
@@ -80,12 +82,15 @@ bool VanillaKeyset::ClearElms(Elm* elms, uint32_t count) {
 
 ArrayData* VanillaKeyset::MakeReserveSet(uint32_t size) {
   auto const scale = computeScaleFromSize(size);
-  auto const ad    = reqAlloc(scale);
+  auto const index = computeIndexFromScale(scale);
+  auto const ad    = reqAllocIndex(index);
 
   assertx(ClearElms(Data(ad), Capacity(scale)));
 
   ad->initHash(scale);
-  ad->initHeader(HeaderKind::Keyset, OneReference);
+
+  auto const aux = packSizeIndexAndAuxBits(index, 0);
+  ad->initHeader_16(HeaderKind::Keyset, OneReference, aux);
   ad->m_size          = 0;
   ad->m_layout_index  = kVanillaLayoutIndex;
   ad->m_scale_used    = scale;               // scale = scale, used = 0
@@ -152,8 +157,10 @@ ArrayData* VanillaKeyset::MakeUncounted(
   memcpy16_inline(dest, src, sizeof(VanillaKeyset) + sizeof(Elm) * used);
   assertx(ClearElms(Data(dest) + used, Capacity(scale) - used));
   CopyHash(HashTab(dest, scale), src->hashTab(), scale);
-  dest->initHeader_16(HeaderKind::Keyset, UncountedValue,
-                      hasApcTv ? ArrayData::kHasApcTv : 0);
+
+  auto const index = computeIndexFromScale(scale);
+  auto const aux = packSizeIndexAndAuxBits(index, hasApcTv ? kHasApcTv : 0);
+  dest->initHeader_16(HeaderKind::Keyset, UncountedValue, aux);
 
   // Make sure all strings are uncounted.
   auto const elms = dest->data();
@@ -174,9 +181,10 @@ ArrayData* VanillaKeyset::MakeUncounted(
 
 VanillaKeyset* VanillaKeyset::CopySet(const VanillaKeyset& other, AllocMode mode) {
   auto const scale = other.m_scale;
+  auto const index = computeIndexFromScale(scale);
   auto const used = other.m_used;
   auto const ad = mode == AllocMode::Request
-    ? reqAlloc(scale)
+    ? reqAllocIndex(index)
     : staticAlloc(scale);
 
   assertx(reinterpret_cast<uintptr_t>(ad) % 16 == 0);
@@ -184,8 +192,10 @@ VanillaKeyset* VanillaKeyset::CopySet(const VanillaKeyset& other, AllocMode mode
   memcpy16_inline(ad, &other, sizeof(VanillaKeyset) + sizeof(Elm) * used);
   assertx(ClearElms(Data(ad) + used, Capacity(scale) - used));
   CopyHash(HashTab(ad, scale), other.hashTab(), scale);
+
   auto const count = mode == AllocMode::Request ? OneReference : StaticValue;
-  ad->initHeader(HeaderKind::Keyset, count);
+  auto const aux = packSizeIndexAndAuxBits(index, 0);
+  ad->initHeader_16(HeaderKind::Keyset, count, aux);
 
   // Bump refcounts.
   auto const elms = other.data();
@@ -324,11 +334,14 @@ VanillaKeyset* VanillaKeyset::grow(bool copy) {
   assertx(Capacity(newScale) >= m_size);
   assertx(newScale >= SmallScale && (newScale & (newScale - 1)) == 0);
 
-  auto ad              = reqAlloc(newScale);
+  auto const index     = computeIndexFromScale(newScale);
+  auto const ad        = reqAllocIndex(index);
   ad->m_size           = m_size;
   ad->m_layout_index   = kVanillaLayoutIndex;
   ad->m_scale_used     = newScale | (uint64_t{oldUsed} << 32);
-  ad->initHeader(HeaderKind::Keyset, OneReference);
+
+  auto const aux = packSizeIndexAndAuxBits(index, 0);
+  ad->initHeader_16(HeaderKind::Keyset, OneReference, aux);
 
   assertx(reinterpret_cast<uintptr_t>(Data(ad)) % 16 == 0);
   assertx(reinterpret_cast<uintptr_t>(data()) % 16 == 0);
@@ -427,6 +440,7 @@ bool VanillaKeyset::checkInvariants() const {
   // All arrays:
   assertx(checkCount());
   assertx(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
+  assertx(sizeIndex() == computeIndexFromScale(m_scale));
   assertx(HashSize(m_scale) == folly::nextPowTwo<uint64_t>(capacity()));
   assertx(m_layout_index == kVanillaLayoutIndex);
 

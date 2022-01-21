@@ -73,7 +73,6 @@ BespokeArray* maybeMonoify(ArrayData*);
 BespokeArray* maybeStructify(ArrayData* ad, const LoggingProfile* profile);
 
 #define BESPOKE_LAYOUT_FUNCTIONS(T) \
-  X(size_t, HeapSize, const T* ad) \
   X(void, Scan, const T* ad, type_scan::Scanner& scanner) \
   X(ArrayData*, EscalateToVanilla, const T*, const char* reason) \
   X(void, ConvertToUncounted, T*, const MakeUncountedEnv& env) \
@@ -148,12 +147,6 @@ struct LayoutFunctionDispatcher {
     return Array::As(ad);
   }
 
-  static size_t HeapSize(const ArrayData* ad) {
-    // NB: The garbage collector relies on this being computable even if
-    // objects referenced by ad have been freed. As a result, we don't check
-    // invariants.
-    return Array::HeapSize(reinterpret_cast<const Array*>(ad));
-  }
   static void Scan(const ArrayData* ad, type_scan::Scanner& scanner) {
     return Array::Scan(Cast(ad, __func__), scanner);
   }

@@ -58,10 +58,6 @@ const LayoutFunctions* structDictVtable() {
   return &result;
 }
 
-uint16_t packSizeIndexAndAuxBits(uint8_t idx, uint8_t aux) {
-  return (static_cast<uint16_t>(idx) << 8) | aux;
-}
-
 std::string describeStructLayout(const StructLayout::FieldVector& fv) {
   std::stringstream ss;
   for (auto i = 0; i < fv.size(); ++i) {
@@ -880,10 +876,6 @@ ArrayData* StructDict::SetLegacyArray(StructDict* sadIn,
 }
 
 ////////////////////////////////////////////////////////////////////////////
-
-size_t StructDict::HeapSize(const StructDict* sad) {
-  return MemoryManager::sizeIndex2Size(sad->sizeIndex());
-}
 
 void StructDict::Scan(const StructDict* sad, type_scan::Scanner& scanner) {
   auto const types = sad->rawTypes();

@@ -78,13 +78,17 @@ ArrayData*      s_theEmptyMarkedDictArrayPtr =
 
 struct VanillaDict::DictInitializer {
   DictInitializer() {
-    auto const ad = reinterpret_cast<VanillaDict*>(s_theEmptyDictArrayPtr);
-    ad->initHash(1);
+    auto constexpr scale = 1;
+    auto const index = computeIndexFromScale(scale);
+    auto const ad    = reinterpret_cast<VanillaDict*>(s_theEmptyDictArrayPtr);
+    auto const flags = kHasStrKeyTable;
+    auto const aux   = packSizeIndexAndAuxBits(index, flags);
+    ad->initHash(scale);
     ad->m_size         = 0;
     ad->m_layout_index = kVanillaLayoutIndex;
-    ad->m_scale_used   = 1;
+    ad->m_scale_used   = scale;
     ad->m_nextKI       = 0;
-    ad->initHeader_16(HeaderKind::Dict, StaticValue, kHasStrKeyTable);
+    ad->initHeader_16(HeaderKind::Dict, StaticValue, aux);
     *ad->mutableKeyTypes() = VanillaDictKeys::Empty();
     ad->mutableStrKeyTable()->reset();
     assertx(ad->checkInvariants());
@@ -94,14 +98,17 @@ VanillaDict::DictInitializer VanillaDict::s_dict_initializer;
 
 struct VanillaDict::MarkedDictArrayInitializer {
   MarkedDictArrayInitializer() {
-    auto const ad = reinterpret_cast<VanillaDict*>(s_theEmptyMarkedDictArrayPtr);
-    ad->initHash(1);
+    auto constexpr scale = 1;
+    auto const index = computeIndexFromScale(scale);
+    auto const ad    = reinterpret_cast<VanillaDict*>(s_theEmptyMarkedDictArrayPtr);
+    auto const flags = kLegacyArray | kHasStrKeyTable;
+    auto const aux   = packSizeIndexAndAuxBits(index, flags);
+    ad->initHash(scale);
     ad->m_size          = 0;
     ad->m_layout_index  = kVanillaLayoutIndex;
-    ad->m_scale_used    = 1;
+    ad->m_scale_used    = scale;
     ad->m_nextKI        = 0;
-    ad->initHeader_16(HeaderKind::Dict, StaticValue,
-                      kLegacyArray | kHasStrKeyTable);
+    ad->initHeader_16(HeaderKind::Dict, StaticValue, aux);
     *ad->mutableKeyTypes() = VanillaDictKeys::Empty();
     ad->mutableStrKeyTable()->reset();
     assertx(ad->checkInvariants());
@@ -113,13 +120,15 @@ VanillaDict::MarkedDictArrayInitializer VanillaDict::s_marked_dict_initializer;
 
 ArrayData* VanillaDict::MakeReserveDict(uint32_t size) {
   auto const scale = computeScaleFromSize(size);
-  auto const ad    = reqAlloc(scale);
+  auto const index = computeIndexFromScale(scale);
+  auto const ad    = reqAllocIndex(index);
 
   // Intialize the hash table first, because the header is already in L1 cache,
   // but the hash table may not be.  So let's issue the cache request ASAP.
   ad->initHash(scale);
 
-  ad->initHeader(HeaderKind::Dict, OneReference);
+  auto const aux = packSizeIndexAndAuxBits(index, 0);
+  ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
   *ad->mutableKeyTypes() = VanillaDictKeys::Empty();
   ad->m_size          = 0;
   ad->m_layout_index  = kVanillaLayoutIndex;
@@ -140,9 +149,11 @@ VanillaDict* VanillaDict::MakeStructDict(uint32_t size,
                                        const TypedValue* values) {
   assertx(size > 0);
   auto const scale = computeScaleFromSize(size);
-  auto const ad    = reqAlloc(scale);
+  auto const index = computeIndexFromScale(scale);
+  auto const ad    = reqAllocIndex(index);
+  auto const aux   = packSizeIndexAndAuxBits(index, 0);
 
-  ad->initHeader(HeaderKind::Dict, OneReference);
+  ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
   *ad->mutableKeyTypes() = VanillaDictKeys::StaticStrs();
   ad->m_size             = size;
   ad->m_layout_index     = kVanillaLayoutIndex;
@@ -180,9 +191,11 @@ VanillaDict* VanillaDict::MakeStructDict(uint32_t size,
 VanillaDict* VanillaDict::AllocStructDict(uint32_t size, const int32_t* hash) {
   assertx(size > 0);
   auto const scale = computeScaleFromSize(size);
-  auto const ad    = reqAlloc(scale);
+  auto const index = computeIndexFromScale(scale);
+  auto const ad    = reqAllocIndex(index);
+  auto const aux   = packSizeIndexAndAuxBits(index, 0);
 
-  ad->initHeader(HeaderKind::Dict, OneReference);
+  ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
   *ad->mutableKeyTypes() = VanillaDictKeys::StaticStrs();
   ad->m_size             = size;
   ad->m_layout_index     = kVanillaLayoutIndex;
@@ -210,10 +223,12 @@ VanillaDict* VanillaDict::AllocStructDict(uint32_t size, const int32_t* hash) {
 VanillaDict* VanillaDict::MakeDict(uint32_t size, const TypedValue* kvs) {
   assertx(size > 0);
   auto const scale = computeScaleFromSize(size);
-  auto const ad    = reqAlloc(scale);
+  auto const index = computeIndexFromScale(scale);
+  auto const ad    = reqAllocIndex(index);
+  auto const aux   = packSizeIndexAndAuxBits(index, 0);
 
   ad->initHash(scale);
-  ad->initHeader(HeaderKind::Dict, OneReference);
+  ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
   *ad->mutableKeyTypes() = VanillaDictKeys::Empty();
   ad->m_size             = size;
   ad->m_layout_index     = kVanillaLayoutIndex;
@@ -270,10 +285,12 @@ VanillaDict* VanillaDict::MakeDictNatural(uint32_t size, const TypedValue* vals)
   assertx(size > 0);
 
   auto const scale = computeScaleFromSize(size);
-  auto const ad    = reqAlloc(scale);
+  auto const index = computeIndexFromScale(scale);
+  auto const ad    = reqAllocIndex(index);
+  auto const aux   = packSizeIndexAndAuxBits(index, 0);
 
   ad->initHash(scale);
-  ad->initHeader(HeaderKind::Dict, OneReference);
+  ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
   *ad->mutableKeyTypes() = VanillaDictKeys::Ints();
   ad->m_size             = size;
   ad->m_layout_index     = kVanillaLayoutIndex;
@@ -333,9 +350,11 @@ VanillaDict* VanillaDict::CopyMixed(const VanillaDict& other, AllocMode mode) {
   auto const sizeOfStrKeyTable =
     shouldCreateStrKeyTable ? sizeof(StrKeyTable) : 0;
   auto const scale = other.m_scale;
+  auto const index = other.sizeIndex();
   auto const ad = mode == AllocMode::Request
-    ? reqAlloc(scale)
+    ? reqAllocIndex(index)
     : staticAlloc(scale, sizeOfStrKeyTable);
+
   // Copy everything including tombstones. This is a requirement for remove() to
   // work correctly, which assumes the position is the same in the original and
   // in the copy of the array, in case copying is needed.
@@ -349,8 +368,9 @@ VanillaDict* VanillaDict::CopyMixed(const VanillaDict& other, AllocMode mode) {
   memcpy(ad, &other, sizeof(VanillaDict) + sizeof(Elm) * other.m_used);
 #endif
   auto const count = mode == AllocMode::Request ? OneReference : StaticValue;
-  auto const aux = other.auxBits() |
-                   (shouldCreateStrKeyTable ? kHasStrKeyTable : 0);
+  auto const flags = other.auxBits() |
+                     (shouldCreateStrKeyTable ? kHasStrKeyTable : 0);
+  auto const aux = packSizeIndexAndAuxBits(index, flags);
   ad->initHeader_16(other.m_kind, count, aux);
   *ad->mutableKeyTypes() = other.keyTypes();
 
@@ -482,7 +502,7 @@ void VanillaDict::SlowRelease(VanillaDict* ad) {
     // and value type to kInvalidDataType, neither of which are refcounted.
     tvDecRefGen(&elm->data);
   }
-  tl_heap->objFree(ad, ad->heapSize());
+  tl_heap->objFreeIndex(ad, ad->sizeIndex());
 }
 
 NEVER_INLINE
@@ -509,7 +529,7 @@ void VanillaDict::Release(ArrayData* in) {
       tvDecRefGen(&elm->data);
     }
   }
-  tl_heap->objFree(ad, ad->heapSize());
+  tl_heap->objFreeIndex(ad, ad->sizeIndex());
   AARCH64_WALKABLE_FRAME();
 }
 
@@ -577,6 +597,7 @@ bool VanillaDict::checkInvariants() const {
   assertx(checkCount());
   assertx(isVanillaDict());
   assertx(m_scale >= 1 && (m_scale & (m_scale - 1)) == 0);
+  assertx(sizeIndex() == computeIndexFromScale(m_scale));
   assertx(VanillaDict::HashSize(m_scale) ==
           folly::nextPowTwo<uint64_t>(capacity()));
   assertx(m_layout_index == kVanillaLayoutIndex);
@@ -721,9 +742,12 @@ VanillaDict* VanillaDict::Grow(VanillaDict* old, uint32_t newScale, bool copy) {
   assertx(VanillaDict::Capacity(newScale) >= old->m_size);
   assertx(newScale >= 1 && (newScale & (newScale - 1)) == 0);
 
-  auto ad            = reqAlloc(newScale);
+  auto const index   = computeIndexFromScale(newScale);
+  auto const ad      = reqAllocIndex(index);
   auto const oldUsed = old->m_used;
-  ad->initHeader_16(old->m_kind, OneReference, old->m_aux16);
+  auto const aux     = packSizeIndexAndAuxBits(index, old->auxBits());
+
+  ad->initHeader_16(old->m_kind, OneReference, aux);
   *ad->mutableKeyTypes() = old->keyTypes();
   ad->m_size = old->m_size;
   ad->m_layout_index = old->m_layout_index;
@@ -1074,11 +1098,12 @@ ArrayData* VanillaDict::AppendMove(ArrayData* ad, TypedValue v) {
  */
 NEVER_INLINE
 VanillaDict* VanillaDict::CopyReserve(const VanillaDict* src,
-                                    size_t expectedSize) {
+                                     size_t expectedSize) {
   auto const scale = computeScaleFromSize(expectedSize);
-  auto const ad    = reqAlloc(scale);
+  auto const index = computeIndexFromScale(scale);
+  auto const ad    = reqAllocIndex(index);
   auto const oldUsed = src->m_used;
-  auto const aux = src->m_aux16 & ~ArrayData::kHasStrKeyTable;
+  auto const aux = packSizeIndexAndAuxBits(index, src->auxBits());
 
   ad->initHeader_16(src->m_kind, OneReference, aux);
   *ad->mutableKeyTypes() = src->keyTypes();
@@ -1167,7 +1192,6 @@ ArrayData* VanillaDict::Merge(ArrayData* ad, const ArrayData* elems) {
   assertx(as(ad)->checkInvariants());
   auto const ret = CopyReserve(as(ad), ad->size() + elems->size());
   assertx(ret->hasExactlyOneRef());
-  ret->initHeader(HeaderKind::Dict, OneReference);
   *ret->mutableKeyTypes() = as(ad)->keyTypes();
 
   if (elems->isVanillaDict()) {

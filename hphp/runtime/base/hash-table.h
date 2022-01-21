@@ -202,9 +202,8 @@ struct HashTable : HashTableCommon {
   /////////////////////////////////////////////////////////////////////////////
 
   static ALWAYS_INLINE
-  ArrayType* reqAlloc(uint32_t scale) {
-    auto const allocBytes = computeAllocBytes(scale);
-    return static_cast<ArrayType*>(tl_heap->objMalloc(allocBytes));
+  ArrayType* reqAllocIndex(uint8_t index) {
+    return static_cast<ArrayType*>(tl_heap->objMallocIndex(index));
   }
 
   static ALWAYS_INLINE
@@ -231,15 +230,15 @@ struct HashTable : HashTableCommon {
            Capacity(scale) * sizeof(Elm);
   }
 
-  ALWAYS_INLINE
-  size_t heapSize() const {
-    return computeAllocBytes(m_scale);
-  }
-
   static ALWAYS_INLINE
   size_t computeAllocBytesFromMaxElms(uint32_t maxElms) {
     auto const scale = computeScaleFromSize(maxElms);
     return computeAllocBytes(scale);
+  }
+
+  static ALWAYS_INLINE
+  uint8_t computeIndexFromScale(uint32_t scale) {
+    return MemoryManager::size2Index(computeAllocBytes(scale));
   }
 
   /////////////////////////////////////////////////////////////////////////////

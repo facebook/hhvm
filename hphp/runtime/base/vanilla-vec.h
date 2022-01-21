@@ -142,7 +142,6 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
   static EntryOffset entryOffset(size_t i);
 
   static uint32_t capacity(const ArrayData*);
-  static size_t heapSize(const ArrayData*);
   static uint16_t packSizeIndexAndAuxBits(uint8_t, uint8_t);
 
   static void scan(const ArrayData*, type_scan::Scanner&);
@@ -194,8 +193,6 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
 
   static constexpr auto SizeIndexOffset = HeaderAuxOffset + 1;
 private:
-  static uint8_t sizeClass(const ArrayData*);
-
   static VanillaDict* ToMixedHeader(const ArrayData*, size_t);
 
   static ArrayData* Grow(ArrayData*, bool);

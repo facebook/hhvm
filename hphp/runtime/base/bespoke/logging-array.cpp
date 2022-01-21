@@ -277,7 +277,9 @@ LoggingArray* LoggingArray::Make(ArrayData* ad, LoggingProfile* profile,
   assertx(ad->isVanilla());
 
   auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(kSizeIndex));
-  auto const aux = ad->isLegacyArray() ? kLegacyArray : 0;
+  auto const flags = ad->isLegacyArray() ? kLegacyArray : 0;
+  auto const aux = packSizeIndexAndAuxBits(kSizeIndex, flags);
+
   lad->initHeader_16(getBespokeKind(ad->kind()), OneReference, aux);
   lad->m_size = ad->size();
   lad->setLayoutIndex(kLayoutIndex);
@@ -296,7 +298,9 @@ LoggingArray* LoggingArray::MakeStatic(ArrayData* ad, LoggingProfile* profile) {
   auto const size = sizeof(LoggingArray);
   auto lad = static_cast<LoggingArray*>(
       RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
-  auto const aux = ad->isLegacyArray() ? kLegacyArray : 0;
+  auto const flags = ad->isLegacyArray() ? kLegacyArray : 0;
+  auto const aux = packSizeIndexAndAuxBits(kSizeIndex, flags);
+
   lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue, aux);
   lad->m_size = ad->size();
   lad->setLayoutIndex(kLayoutIndex);
@@ -317,8 +321,11 @@ LoggingArray* LoggingArray::MakeUncounted(
   auto const extra = uncountedAllocExtra(ad, hasApcTv);
   auto const mem = static_cast<char*>(AllocUncounted(bytes + extra));
   auto const lad = reinterpret_cast<LoggingArray*>(mem + extra);
-  auto const aux = (ad->isLegacyArray() ? kLegacyArray : 0) |
-                   (hasApcTv ? kHasApcTv : 0);
+
+  auto const flags = (ad->isLegacyArray() ? kLegacyArray : 0) |
+                     (hasApcTv ? kHasApcTv : 0);
+  auto const aux = packSizeIndexAndAuxBits(kSizeIndex, flags);
+
   lad->initHeader_16(getBespokeKind(ad->kind()), StaticValue, aux);
   lad->m_size = ad->size();
   lad->setLayoutIndex(kLayoutIndex);
@@ -335,6 +342,7 @@ bool LoggingArray::checkInvariants() const {
   assertx(wrapped->kindIsValid());
   assertx(wrapped->size() == size());
   assertx(wrapped->toDataType() == toDataType());
+  assertx(sizeIndex() == kSizeIndex);
   assertx(layoutIndex() == kLayoutIndex);
   assertx(m_kind == getBespokeKind(wrapped->kind()));
   assertx(isLegacyArray() == wrapped->isLegacyArray());
@@ -356,10 +364,6 @@ void LoggingArray::updateSize() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-
-size_t LoggingArray::HeapSize(const LoggingArray*) {
-  return sizeof(LoggingArray);
-}
 
 void LoggingArray::Scan(const LoggingArray* lad, type_scan::Scanner& scanner) {
   logEvent(lad, ArrayOp::Scan);

@@ -933,6 +933,10 @@ void ArrayData::setLegacyArrayInPlace(bool legacy) {
   }
 }
 
+size_t ArrayData::heapSize() const {
+  return kSizeIndex2Size[sizeIndex()];
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 ArrayData* ArrayData::toVec(bool copy) {

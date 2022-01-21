@@ -257,10 +257,26 @@ public:
   ArrayData* makeSampledStaticArray() const;
 
   /*
-   * Get the aux bits in the header that must be preserved
-   * when we copy or resize the array
+   * All arrays use the m_aux16 field of MaybeCountable to store two bytes:
+   *
+   *  1. The low byte contains the "aux bits", a set of boolean flags for
+   *     various array special cases (e.g. kHasApcTv, kLegacyArray, etc.)
+   *
+   *  2. The high byte is the array's MemoryManager size class.
+   *
+   * Here, we provide helpers to read these fields and to pack them together
+   * into an m_aux16 value used when constructing an array.
+   *
+   * WARNING: For historical reasons, auxBits() only returns those flags that
+   * should be propagated when we COW an array. We should rename it to reflect
+   * this fact. Other bits have their own accessors, like hasApcTv().
    */
   uint8_t auxBits() const;
+  uint8_t sizeIndex() const;
+
+  size_t heapSize() const;
+
+  static uint16_t packSizeIndexAndAuxBits(uint8_t sizeIndex, uint8_t auxBits);
 
   /*
    * Whether the array contains "vector-like" data---i.e., iteration order

@@ -114,26 +114,12 @@ size_t VanillaVec::capacityToSizeIndex(size_t capacity) {
 
 ALWAYS_INLINE
 uint32_t VanillaVec::capacity(const ArrayData* ad) {
-  return kSizeIndex2VanillaVecCapacity[sizeClass(ad)];
+  return kSizeIndex2VanillaVecCapacity[ad->sizeIndex()];
 }
 
-ALWAYS_INLINE
-size_t VanillaVec::heapSize(const ArrayData* ad) {
-  return kSizeIndex2Size[sizeClass(ad)];
-}
-
-// Pack together the size class and the other aux bits into a single 16-bit
-// number which can be stored in the HeapObject object. ArrayData requires the
-// varray/darray state to be in the lower 8-bits, but we're free to use the
-// upper.
 ALWAYS_INLINE
 uint16_t VanillaVec::packSizeIndexAndAuxBits(uint8_t idx, uint8_t aux) {
-  return (static_cast<uint16_t>(idx) << 8) | aux;
-}
-
-ALWAYS_INLINE
-uint8_t VanillaVec::sizeClass(const ArrayData* ad) {
-  return ad->m_aux16 >> 8;
+  return ArrayData::packSizeIndexAndAuxBits(idx, aux);
 }
 
 inline void VanillaVec::scan(const ArrayData* a, type_scan::Scanner& scanner) {

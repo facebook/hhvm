@@ -334,23 +334,13 @@ inline size_t allocSize(const HeapObject* h) {
   size_t size = 0;
   switch (kind) {
     case HeaderKind::Vec:
-      // size = kSizeIndex2Size[h->aux16>>8]
-      size = VanillaVec::heapSize(static_cast<const ArrayData*>(h));
-      assertx(size == MemoryManager::sizeClass(size));
-      return size;
     case HeaderKind::Dict:
-      // size = fn of h->m_scale
-      size = static_cast<const VanillaDict*>(h)->heapSize();
-      break;
     case HeaderKind::Keyset:
-      // size = fn of h->m_scale
-      size = static_cast<const VanillaKeyset*>(h)->heapSize();
-      break;
     case HeaderKind::BespokeVec:
     case HeaderKind::BespokeDict:
     case HeaderKind::BespokeKeyset:
-      size = static_cast<const BespokeArray*>(h)->heapSize();
-      break;
+      // An array's sizeIndex is m_aux16 >> 8. heapSize is computed from it.
+      return static_cast<const ArrayData*>(h)->heapSize();
     case HeaderKind::String:
       // size = isRefCounted ? table[aux16] : m_size+C
       size = static_cast<const StringData*>(h)->heapSize();

@@ -176,7 +176,7 @@ size_t getMemSize(const APCRClsMeth* rclsmeth) {
 size_t getMemSize(const ArrayData* arr, bool recurse) {
   switch (arr->kind()) {
   case ArrayData::ArrayKind::kVecKind: {
-    auto size = VanillaVec::heapSize(arr);
+    auto size = arr->heapSize();
     for (uint32_t i = 0; i < arr->m_size; ++i) {
       auto const tv = VanillaVec::NvGetInt(arr, i);
       size += getIndirectMemSize(&tv);

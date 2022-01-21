@@ -43,10 +43,6 @@ static_assert(sizeof(MonotypeVec) < kMinSizeBytes);
 static_assert(sizeof(EmptyMonotypeVec) < kMinSizeBytes);
 static_assert(kMinSizeBytes == kSizeIndex2Size[kMinSizeIndex]);
 
-uint16_t packSizeIndexAndAuxBits(uint8_t idx, uint8_t aux) {
-  return (static_cast<uint16_t>(idx) << 8) | aux;
-}
-
 inline constexpr uint32_t sizeClassParams2MonotypeVecCapacity(size_t index) {
   if (index < kMinSizeIndex) return 0;
   auto const bytes = kSizeIndex2Size[index];
@@ -144,19 +140,16 @@ bool EmptyMonotypeVec::checkInvariants() const {
   assertx(kindIsValid());
   assertx(size() == 0);
   assertx(isVecType());
+  assertx(heapSize() == kMinSizeBytes);
+  assertx(sizeIndex() == kMinSizeIndex);
   assertx(layoutIndex() == getEmptyLayoutIndex());
 
   // Check that EmptyMonotypeVec puns a MonotypeVec modulo its type().
   // Cast without assertions to avoid an infinite loop of invariant checks.
   auto const DEBUG_ONLY mad = reinterpret_cast<const MonotypeVec*>(this);
   assertx(mad->type() == kExtraInvalidDataType);
-  assertx(mad->sizeIndex() == kMinSizeIndex);
 
   return true;
-}
-
-size_t EmptyMonotypeVec::HeapSize(const EmptyMonotypeVec* ead) {
-  return kMinSizeBytes;
 }
 
 void EmptyMonotypeVec::Scan(const EmptyMonotypeVec* ead, type_scan::Scanner&) {
@@ -414,7 +407,7 @@ MonotypeVec* MonotypeVec::copyHelper(uint8_t newSizeIndex, bool incRef) const {
 
   // Copy elements 16 bytes at a time. We may copy an extra value this way,
   // but our heap allocations are in multiples of 16 bytes, so it is safe.
-  assertx(HeapSize(this) % 16 == 0);
+  assertx(this->heapSize() % 16 == 0);
   auto const bytes = sizeof(MonotypeVec) + m_size * sizeof(Value);
   memcpy16_inline(mad, this, size_t(bytes + 15) & ~size_t(15));
 
@@ -496,10 +489,6 @@ const MonotypeVec* MonotypeVec::As(const ArrayData* ad) {
   auto const mad = reinterpret_cast<const MonotypeVec*>(ad);
   assertx(mad->checkInvariants());
   return mad;
-}
-
-size_t MonotypeVec::HeapSize(const MonotypeVec* mad) {
-  return MemoryManager::sizeIndex2Size(mad->sizeIndex());
 }
 
 void MonotypeVec::Scan(const MonotypeVec* mad, type_scan::Scanner& scan) {

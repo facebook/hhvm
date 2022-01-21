@@ -23,7 +23,7 @@ module type Delegate_sig = sig
     raise_on_failure:bool ->
     state
 
-  val start : delegate_env -> state -> state
+  val start : delegate_env -> state -> bool -> state
 
   val stop : state -> state
 

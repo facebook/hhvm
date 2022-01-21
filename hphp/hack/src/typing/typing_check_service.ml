@@ -774,10 +774,13 @@ let next
       Hh_logger.log "Downloading remote worker results");
 
     let (state, delegate_job) =
-      Typing_service_delegate.next
-        !workitems_to_process
-        workitems_in_progress
-        !delegate_state
+      if hulk_lite then
+        (!delegate_state, None)
+      else
+        Typing_service_delegate.next
+          !workitems_to_process
+          workitems_in_progress
+          !delegate_state
     in
     delegate_state := state;
 

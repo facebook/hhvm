@@ -21,4 +21,5 @@ val init :
   init_start_t:float ->
   bin_root:Path.t ->
   root:Path.t ->
+  hulk_lite:bool ->
   unit

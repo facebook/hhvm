@@ -38,6 +38,7 @@ module type S = sig
     min_log_level:Hh_logger.Level.t ->
     version_specifier:string option ->
     eden:bool ->
+    hulk_lite:bool ->
     command Future.t
 
   val is_alive : status -> bool

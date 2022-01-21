@@ -122,7 +122,8 @@ let remote_init genv env root worker_key nonce check_id _profiling =
     ~init_id
     ~init_start_t
     ~bin_root
-    ~root;
+    ~root
+    ~hulk_lite:genv.local_config.ServerLocalConfig.hulk_lite;
   let _ = Hh_logger.log_duration "Remote type check" t in
   (env, Load_state_declined "Out-of-band naming table initialization only")
 

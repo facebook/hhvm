@@ -403,7 +403,6 @@ let check_override
     ~check_member_unique
     member_name
     member_kind
-    ?(ignore_fun_return = false)
     class_
     parent_class
     parent_class_elt
@@ -562,7 +561,7 @@ let check_override
       check_ambiguous_inheritance
         (check_subtype_methods
            env
-           ~check_return:(not ignore_fun_return)
+           ~check_return:(not (MemberKind.is_constructor member_kind))
            on_error)
         (Typing_reason.localize r_parent, ft_parent)
         (Typing_reason.localize r_child, ft_child)
@@ -992,7 +991,6 @@ let check_constructors env parent_class class_ psubst on_error =
           ~check_member_unique:false
           Naming_special_names.Members.__construct
           (MemberKind.Constructor { is_consistent = true })
-          ~ignore_fun_return:true
           class_
           parent_class
           parent_cstr

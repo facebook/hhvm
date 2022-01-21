@@ -59,6 +59,7 @@ type rollout_flags = {
   max_typechecker_worker_memory_mb: int;
   max_workers: int;
   use_max_typechecker_worker_memory_for_decl_deferral: bool;
+  hulk_lite: bool;
 }
 
 let flush () = ()

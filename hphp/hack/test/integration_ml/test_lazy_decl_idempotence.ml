@@ -75,6 +75,7 @@ let test () =
       [bar_path]
       ~memory_cap
       ~longlived_workers:false
+      ~hulk_lite:false
       ~remote_execution:None
       ~check_info
   in
@@ -88,6 +89,7 @@ let test () =
       [bar_path]
       ~memory_cap
       ~longlived_workers:false
+      ~hulk_lite:false
       ~remote_execution:None
       ~check_info
   in
@@ -102,6 +104,7 @@ let test () =
       [foo_path]
       ~memory_cap
       ~longlived_workers:false
+      ~hulk_lite:false
       ~remote_execution:None
       ~check_info
   in
@@ -115,6 +118,7 @@ let test () =
       [foo_path]
       ~memory_cap
       ~longlived_workers:false
+      ~hulk_lite:false
       ~remote_execution:None
       ~check_info
   in

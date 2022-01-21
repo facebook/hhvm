@@ -1077,6 +1077,7 @@ functor
       let longlived_workers =
         genv.local_config.ServerLocalConfig.longlived_workers
       in
+      let hulk_lite = genv.local_config.ServerLocalConfig.hulk_lite in
 
       let cgroup_typecheck_telemetry = ref None in
       let ( errorl',
@@ -1111,6 +1112,7 @@ functor
             ~interrupt
             ~memory_cap
             ~longlived_workers
+            ~hulk_lite
             ~remote_execution:env.ServerEnv.remote_execution
             ~check_info:(get_check_info ~check_reason genv env)
         in

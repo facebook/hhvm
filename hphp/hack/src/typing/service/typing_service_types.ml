@@ -20,6 +20,11 @@ type workitem =
   | Prefetch of Relative_path.t list
 [@@deriving show]
 
+type remote_computation_payload = {
+  nonce: string;
+  payload: workitem BigList.t;
+}
+
 (** This type is used for both input and output of typechecker jobs.
 INPUT: [remaining] is the list of files that this job is expected to process, and [completed], [deferred] are empty.
 OUTPUT: all the files that were processed by the job are placed in [completed] or [deferred];

@@ -735,8 +735,10 @@ let next
     (delegate_state : Delegate.state ref)
     (workitems_to_process : workitem BigList.t ref)
     (workitems_in_progress : workitem Hash_set.Poly.t)
+    (remote_payloads : remote_computation_payload list ref)
     (record : Measure.record)
-    (remote_execution : ReEnv.t option) : unit -> job_progress Bucket.bucket =
+    (remote_execution : ReEnv.t option)
+    (hulk_lite : bool) : unit -> job_progress Bucket.bucket =
   let max_size =
     match remote_execution with
     | Some _ -> 25000
@@ -760,6 +762,16 @@ let next
   in
   fun () ->
     Measure.time ~record "time" @@ fun () ->
+    (if hulk_lite then
+      (*
+        TODO(bobren): This is going to be the "reduce" part of the mapreduce paradigm. We activate
+        this when files_to_check is empty, or in other words the local typechecker is done with its work.
+        We'll try and download all the remote worker outputs in once go. For any payloads that aren't
+        available we'll simply stop waiting on the remote worker and have the local worker "steal" the work.
+      *)
+      let _ = remote_payloads in
+      Hh_logger.log "Downloading remote worker results");
+
     let (state, delegate_job) =
       Typing_service_delegate.next
         !workitems_to_process
@@ -854,6 +866,7 @@ let process_in_parallel
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
+    ~(hulk_lite : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info)
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
@@ -870,6 +883,7 @@ let process_in_parallel
   let workitems_in_progress = Hash_set.Poly.create () in
   let workitems_processed_count = ref 0 in
   let workitems_initial_count = BigList.length workitems in
+  let remote_payloads = ref [] in
   let diagnostic_pusher = ref diagnostic_pusher in
   let time_first_error = ref None in
   let delegate_progress =
@@ -883,14 +897,31 @@ let process_in_parallel
     ~unit:"files"
     ~extra:delegate_progress;
 
+  if hulk_lite then
+    Hh_logger.log "Activating hulk simple"
+  (*
+      TODO(bobren):
+        1) Split files to process into N / 12 buckets.
+        2) Create 10 remote payloads using using 10/12 buckets. The remaining 2 buckets will be done locally.
+        3) Marshal, compress and upload payload to manifold using nonce as identifier.
+        3) Spawn 10 sandcastle jobs that executes a command that looks something like...
+             `hh --check --nonce payload.nonce`
+           This job will
+             1) Download the payload from manifold path hulk/tree/input/{nonce}
+             2) Typecheck said payload to create an output consisting of errors + discovered dep edges
+             3) Upload output to manifold path hulk/tree/output/{nonce}
+    *);
+
   let next =
     next
       workers
       delegate_state
       workitems_to_process
       workitems_in_progress
+      remote_payloads
       record
       remote_execution
+      hulk_lite
   in
   let should_prefetch_deferred_files =
     Vfs.is_vfs ()
@@ -1084,6 +1115,7 @@ let go_with_interrupt
     ~(interrupt : 'a MultiWorker.interrupt_config)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
+    ~(hulk_lite : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : (_ * result) job_result =
   let typecheck_info =
@@ -1177,6 +1209,7 @@ let go_with_interrupt
         ~interrupt
         ~memory_cap
         ~longlived_workers
+        ~hulk_lite
         ~remote_execution
         ~check_info
         ~typecheck_info
@@ -1203,6 +1236,7 @@ let go
     (fnl : Relative_path.t list)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
+    ~(hulk_lite : bool)
     ~(remote_execution : ReEnv.t option)
     ~(check_info : check_info) : result =
   let interrupt = MultiThreadedCall.no_interrupt () in
@@ -1217,6 +1251,7 @@ let go
       ~interrupt
       ~memory_cap
       ~longlived_workers
+      ~hulk_lite
       ~remote_execution
       ~check_info
   in

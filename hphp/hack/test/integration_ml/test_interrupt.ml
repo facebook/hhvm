@@ -99,6 +99,7 @@ let test () =
       ~interrupt
       ~memory_cap:None
       ~longlived_workers:false
+      ~hulk_lite:false
       ~remote_execution:None
       ~check_info
   in

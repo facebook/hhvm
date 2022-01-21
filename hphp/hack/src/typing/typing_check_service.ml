@@ -897,20 +897,34 @@ let process_in_parallel
     ~unit:"files"
     ~extra:delegate_progress;
 
-  if hulk_lite then
-    Hh_logger.log "Activating hulk simple"
-  (*
-      TODO(bobren):
-        1) Split files to process into N / 12 buckets.
-        2) Create 10 remote payloads using using 10/12 buckets. The remaining 2 buckets will be done locally.
-        3) Marshal, compress and upload payload to manifold using nonce as identifier.
-        3) Spawn 10 sandcastle jobs that executes a command that looks something like...
-             `hh --check --nonce payload.nonce`
-           This job will
-             1) Download the payload from manifold path hulk/tree/input/{nonce}
-             2) Typecheck said payload to create an output consisting of errors + discovered dep edges
-             3) Upload output to manifold path hulk/tree/output/{nonce}
-    *);
+  if hulk_lite then (
+    let workitems_to_process_length = BigList.length !workitems_to_process in
+    (* Create 10 remote payloads using using 10/12 buckets. The remaining 2 buckets will be done locally. *)
+    let payload_size = workitems_to_process_length / 12 in
+    let nonce_prefix =
+      Printf.sprintf
+        "%s-%f-%s"
+        (Sys_utils.get_primary_owner ())
+        (Unix.gettimeofday ())
+        (Random_id.short_string ())
+    in
+    let rec create_payloads n files payloads =
+      if n <= 0 then (
+        Hh_logger.log "Done dispatching remote payloads";
+        (payloads, files)
+      ) else
+        let (payload, files) = BigList.split_n files payload_size in
+        let nonce = Printf.sprintf "%s-%d" nonce_prefix n in
+        let remote_payload = { nonce; payload = BigList.create payload } in
+        Hh_logger.log "hh --check --nonce %s" nonce;
+        create_payloads (n - 1) files (remote_payload :: payloads)
+    in
+    let (payloads, workitems) = create_payloads 10 !workitems_to_process [] in
+    remote_payloads := payloads;
+    workitems_to_process := workitems
+    (* TODO(bobren) marshal and upload payload to manifold path hulk/tree/input/{nonce} *)
+    (* TODO(bobren) spawn sandcastle jobs to run commands *)
+  );
 
   let next =
     next

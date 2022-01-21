@@ -30,7 +30,7 @@ module MemberKind = struct
     | Static_property
     | Method
     | Static_method
-    | Constructor
+    | Constructor of { is_consistent: bool }
   [@@deriving eq, ord]
 
   let is_method member_kind =
@@ -40,18 +40,22 @@ module MemberKind = struct
       true
     | Property
     | Static_property
-    | Constructor ->
+    | Constructor _ ->
       false
 
   let is_functional member_kind =
     match member_kind with
     | Method
     | Static_method
-    | Constructor ->
+    | Constructor _ ->
       true
     | Property
     | Static_property ->
       false
+
+  let is_constructor = function
+    | Constructor _ -> true
+    | _ -> false
 end
 
 module MemberKindMap = WrappedMap.Make (MemberKind)
@@ -107,6 +111,13 @@ module ClassEltWParent = struct
 end
 
 module ClassEltWParentSet = Caml.Set.Make (ClassEltWParent)
+
+let constructor_is_consistent kind =
+  match kind with
+  | ConsistentConstruct
+  | FinalClass ->
+    true
+  | Inconsistent -> false
 
 (*****************************************************************************)
 (* Given a map of members, check that the overriding is correct.
@@ -187,7 +198,7 @@ let get_member member_kind class_ =
   | MemberKind.Static_property -> Cls.get_sprop class_
   | MemberKind.Method -> Cls.get_method class_
   | MemberKind.Static_method -> Cls.get_smethod class_
-  | MemberKind.Constructor -> (fun _ -> fst (Cls.construct class_))
+  | MemberKind.Constructor _ -> (fun _ -> fst (Cls.construct class_))
 
 (* Check that all the required members are implemented *)
 let check_members_implemented
@@ -370,6 +381,22 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
                 })
     | (_, _) -> ()
 
+let add_member_dep
+    env class_ (member_kind, member_name, member_origin, origin_pos) =
+  if not (Pos_or_decl.is_hhi origin_pos) then
+    let dep =
+      match member_kind with
+      | MemberKind.Method -> Dep.Method (member_origin, member_name)
+      | MemberKind.Static_method -> Dep.SMethod (member_origin, member_name)
+      | MemberKind.Static_property -> Dep.SProp (member_origin, member_name)
+      | MemberKind.Property -> Dep.Prop (member_origin, member_name)
+      | MemberKind.Constructor _ -> Dep.Constructor member_origin
+    in
+    Typing_deps.add_idep
+      (Env.get_deps_mode env)
+      (Dep.Type (Cls.name class_))
+      dep
+
 (* Check that overriding is correct *)
 let check_override
     env
@@ -378,9 +405,14 @@ let check_override
     member_kind
     ?(ignore_fun_return = false)
     class_
+    parent_class
     parent_class_elt
     class_elt
     on_error =
+  add_member_dep
+    env
+    class_
+    (member_kind, member_name, parent_class_elt.ce_origin, Cls.pos parent_class);
   (* If the class element is defined in the class that we're checking, then
    * don't wrap with the extra
    * "Class ... does not correctly implement all required members" message *)
@@ -501,7 +533,7 @@ let check_override
                class_name = Cls.name class_;
              });
 
-  if not (MemberKind.equal member_kind MemberKind.Constructor) then
+  if not (MemberKind.is_constructor member_kind) then
     check_compatible_sound_dynamic_attributes
       member_name
       parent_class_elt
@@ -522,10 +554,9 @@ let check_override
     env
   | ((r_parent, Tfun ft_parent), (r_child, Tfun ft_child)) ->
     (match member_kind with
-    | MemberKind.Constructor ->
+    | MemberKind.Constructor { is_consistent = false } ->
       (* we don't check that constructor signatures follow
-         * subtyping rules except with __ConsistentConstruct,
-         * which is checked elsewhere *)
+       * subtyping rules except with __ConsistentConstruct *)
       env
     | _ ->
       check_ambiguous_inheritance
@@ -749,22 +780,6 @@ let check_const_override
       parent_class_const_type
       (Typing_error.Reasons_callback.class_constant_type_mismatch on_error)
 
-let add_member_dep
-    env class_ (member_kind, member_name, member_origin, origin_pos) =
-  if not (Pos_or_decl.is_hhi origin_pos) then
-    let dep =
-      match member_kind with
-      | MemberKind.Method -> Dep.Method (member_origin, member_name)
-      | MemberKind.Static_method -> Dep.SMethod (member_origin, member_name)
-      | MemberKind.Static_property -> Dep.SProp (member_origin, member_name)
-      | MemberKind.Property -> Dep.Prop (member_origin, member_name)
-      | MemberKind.Constructor -> Dep.Constructor member_origin
-    in
-    Typing_deps.add_idep
-      (Env.get_deps_mode env)
-      (Dep.Type (Cls.name class_))
-      dep
-
 let check_inherited_member_is_dynamically_callable
     env
     inheriting_class
@@ -808,7 +823,7 @@ let check_inherited_member_is_dynamically_callable
         | MemberKind.Static_method
         | MemberKind.Static_property
         | MemberKind.Property
-        | MemberKind.Constructor ->
+        | MemberKind.Constructor _ ->
           ()
       end
     | Ast_defs.Cinterface
@@ -847,13 +862,6 @@ let check_class_against_parent_class_elt
    * essentially comparing a method against itself *)
   | Some class_elt
     when String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin ->
-    add_member_dep
-      env
-      class_
-      ( member_kind,
-        member_name,
-        parent_class_elt.ce_origin,
-        Cls.pos parent_class );
     check_override
       ~check_member_unique:
         (should_check_member_unique class_elt class_ parent_class)
@@ -861,6 +869,7 @@ let check_class_against_parent_class_elt
       member_name
       member_kind
       class_
+      parent_class
       parent_class_elt
       class_elt
       (on_error (parent_name_pos, Cls.name parent_class))
@@ -894,17 +903,18 @@ let check_members_from_all_parents
   MemberKindMap.fold check parent_members env
 
 let make_all_members ~parent_class =
-  let wrap_constructor = function
-    | None -> []
-    | Some x -> [(Naming_special_names.Members.__construct, x)]
+  let wrap_constructor (ctor, kind) =
+    ( MemberKind.Constructor { is_consistent = constructor_is_consistent kind },
+      ctor
+      |> Option.map ~f:(fun x -> (Naming_special_names.Members.__construct, x))
+      |> Option.to_list )
   in
   [
     (MemberKind.Property, Cls.props parent_class);
     (MemberKind.Static_property, Cls.sprops parent_class);
     (MemberKind.Method, Cls.methods parent_class);
     (MemberKind.Static_method, Cls.smethods parent_class);
-    ( MemberKind.Constructor,
-      fst (Cls.construct parent_class) |> wrap_constructor );
+    Cls.construct parent_class |> wrap_constructor;
   ]
 
 (* The phantom class element that represents the default constructor:
@@ -954,7 +964,7 @@ let default_constructor_ce class_ =
 let check_constructors env parent_class class_ psubst on_error =
   let parent_is_interface = Ast_defs.is_c_interface (Cls.kind parent_class) in
   let parent_is_consistent =
-    not (equal_consistent_kind (snd (Cls.construct parent_class)) Inconsistent)
+    constructor_is_consistent (snd (Cls.construct parent_class))
   in
   if parent_is_interface || parent_is_consistent then
     match (fst (Cls.construct parent_class), fst (Cls.construct class_)) with
@@ -975,24 +985,20 @@ let check_constructors env parent_class class_ psubst on_error =
         | Some parent_cstr -> parent_cstr
         | None -> default_constructor_ce parent_class
       in
-      if String.( <> ) parent_cstr.ce_origin cstr.ce_origin then begin
+      if String.( <> ) parent_cstr.ce_origin cstr.ce_origin then
         let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
-        if not (Pos_or_decl.is_hhi (Cls.pos parent_class)) then
-          Typing_deps.add_idep
-            (Env.get_deps_mode env)
-            (Dep.Type (Cls.name class_))
-            (Dep.Constructor parent_cstr.ce_origin);
         check_override
           env
           ~check_member_unique:false
-          "__construct"
-          MemberKind.Method
+          Naming_special_names.Members.__construct
+          (MemberKind.Constructor { is_consistent = true })
           ~ignore_fun_return:true
           class_
+          parent_class
           parent_cstr
           cstr
           on_error
-      end else
+      else
         env
     | (_, _) -> env
   else (

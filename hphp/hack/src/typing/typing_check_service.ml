@@ -763,15 +763,23 @@ let next
   fun () ->
     Measure.time ~record "time" @@ fun () ->
     let workitems_to_process_length = BigList.length !workitems_to_process in
-    (if hulk_lite && workitems_to_process_length = 0 then
+    if hulk_lite && workitems_to_process_length = 0 then (
       (*
-        TODO(bobren): This is going to be the "reduce" part of the mapreduce paradigm. We activate
-        this when files_to_check is empty, or in other words the local typechecker is done with its work.
-        We'll try and download all the remote worker outputs in once go. For any payloads that aren't
-        available we'll simply stop waiting on the remote worker and have the local worker "steal" the work.
-      *)
+        This is the "reduce" part of the mapreduce paradigm. We activate this when workitems_to_check is empty,
+        or in other words the local typechecker is done with its work. We'll try and download all the remote
+        worker outputs in once go. For any payloads that aren't available we'll simply stop waiting on the
+        remote worker and have the local worker "steal" the work.
+       *)
       let _ = remote_payloads in
-      Hh_logger.log "Downloading remote worker results");
+      let (files, controller) =
+        Typing_service_delegate.collect
+          !delegate_state
+          !workitems_to_process
+          workitems_to_process_length
+      in
+      workitems_to_process := files;
+      delegate_state := controller
+    );
 
     let (state, delegate_job) =
       if hulk_lite then
@@ -784,7 +792,13 @@ let next
     in
     delegate_state := state;
 
-    let (stolen, state) = Typing_service_delegate.steal state max_size in
+    let (stolen, state) =
+      if hulk_lite then
+        ([], !delegate_state)
+      else
+        Typing_service_delegate.steal state max_size
+    in
+
     (* If a delegate job is returned, then that means that it should be done
        by the next MultiWorker worker (the one for whom we're creating a job
        in this function). If delegate job is None, then the regular (local
@@ -902,14 +916,15 @@ let process_in_parallel
 
   if hulk_lite then (
     let workitems_to_process_length = BigList.length !workitems_to_process in
-    let (payloads, workitems) =
+    let (payloads, workitems, controller) =
       Typing_service_delegate.dispatch
         !delegate_state
         !workitems_to_process
         workitems_to_process_length
     in
     remote_payloads := payloads;
-    workitems_to_process := workitems
+    workitems_to_process := workitems;
+    delegate_state := controller
     (* TODO(bobren) spawn sandcastle jobs to run commands *)
   );
 
@@ -1135,6 +1150,13 @@ let go_with_interrupt
   in
   let opts = Provider_context.get_tcopt ctx in
   let sample_rate = GlobalOptions.tco_typecheck_sample_rate opts in
+  let fnl =
+    if hulk_lite then
+      (* We want to randomize order for hulk simple to reduce variability of remote worker typecheck times *)
+      List.sort fnl ~compare:(fun _a _b -> Random.bits () - Random.bits ())
+    else
+      fnl
+  in
   let fnl = BigList.create fnl in
   let fnl =
     if Float.(sample_rate >= 1.0) then

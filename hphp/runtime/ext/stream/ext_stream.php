@@ -526,7 +526,7 @@ function stream_socket_enable_crypto(
  *
  */
 <<__Native>>
-function stream_socket_get_name(resource $handle, bool $want_peer): mixed;
+function stream_socket_get_name(resource $handle, bool $want_peer)[leak_safe]: mixed;
 
 /**
  * stream_socket_pair() creates a pair of connected, indistinguishable socket

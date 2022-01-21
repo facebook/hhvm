@@ -739,11 +739,6 @@ module Primary : sig
         class_subclass: string;
       }
     | Lateinit_with_default of Pos.t
-    | Invalid_switch_case_value_type of {
-        pos: Pos.t;
-        case_value_ty: string Lazy.t;
-        scrutinee_ty: string Lazy.t;
-      }
     | Unserializable_type of {
         pos: Pos.t;
         message: string;

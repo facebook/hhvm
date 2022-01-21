@@ -1700,11 +1700,6 @@ module Primary = struct
         class_subclass: string;
       }
     | Lateinit_with_default of Pos.t
-    | Invalid_switch_case_value_type of {
-        pos: Pos.t;
-        case_value_ty: string Lazy.t;
-        scrutinee_ty: string Lazy.t;
-      }
     | Unserializable_type of {
         pos: Pos.t;
         message: string;
@@ -3277,16 +3272,6 @@ module Primary = struct
   let lateinit_with_default pos =
     ( Error_code.LateInitWithDefault,
       (pos, "A late-initialized property cannot have a default value"),
-      [],
-      [] )
-
-  let invalid_switch_case_value_type case_value_p case_value_ty scrutinee_ty =
-    ( Error_code.InvalidSwitchCaseValueType,
-      ( case_value_p,
-        Printf.sprintf
-          "Switch statements use `===` equality. Comparing values of type %s with %s may not give the desired result."
-          (case_value_ty |> Markdown_lite.md_codify)
-          (scrutinee_ty |> Markdown_lite.md_codify) ),
       [],
       [] )
 
@@ -4863,11 +4848,6 @@ module Primary = struct
         class_self
         class_subclass
     | Lateinit_with_default pos -> lateinit_with_default pos
-    | Invalid_switch_case_value_type { pos; case_value_ty; scrutinee_ty } ->
-      invalid_switch_case_value_type
-        pos
-        (Lazy.force case_value_ty)
-        (Lazy.force scrutinee_ty)
     | Unserializable_type { pos; message } -> unserializable_type pos message
     | Invalid_arraykey_constraint { pos; ty_name } ->
       invalid_arraykey_constraint pos @@ Lazy.force ty_name

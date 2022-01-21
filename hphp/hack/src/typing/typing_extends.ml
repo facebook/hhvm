@@ -397,6 +397,89 @@ let add_member_dep
       (Dep.Type (Cls.name class_))
       dep
 
+let check_compatible_sound_dynamic_attributes
+    env member_name member_kind parent_class_elt class_elt on_error =
+  if
+    (not (MemberKind.is_constructor member_kind))
+    && TypecheckerOptions.enable_sound_dynamic
+         (Provider_context.get_tcopt (Env.get_ctx env))
+    && get_ce_support_dynamic_type parent_class_elt
+    && not (get_ce_support_dynamic_type class_elt)
+  then
+    let (lazy pos) = class_elt.ce_pos in
+    let (lazy parent_pos) = parent_class_elt.ce_pos in
+    Errors.add_typing_error
+    @@ Typing_error.(
+         apply_reasons ~on_error
+         @@ Secondary.Override_method_support_dynamic_type
+              {
+                pos;
+                parent_pos;
+                parent_origin = parent_class_elt.ce_origin;
+                method_name = member_name;
+              })
+
+let check_prop_const_mismatch parent_class_elt class_elt on_error =
+  if Bool.( <> ) (get_ce_const class_elt) (get_ce_const parent_class_elt) then
+    Errors.add_typing_error
+      Typing_error.(
+        apply_reasons ~on_error
+        @@ Secondary.Overriding_prop_const_mismatch
+             {
+               pos = Lazy.force class_elt.ce_pos;
+               is_const = get_ce_const class_elt;
+               parent_pos = Lazy.force parent_class_elt.ce_pos;
+               parent_is_const = get_ce_const parent_class_elt;
+             })
+
+let check_abstract_overrides_concrete env member_kind parent_class_elt class_elt
+    =
+  if (not (get_ce_abstract parent_class_elt)) && get_ce_abstract class_elt then
+    (* It is valid for abstract class to extend a concrete class, but it cannot
+     * redefine already concrete members as abstract.
+     * See override_abstract_concrete.php test case for example. *)
+    Errors.add_typing_error
+      Typing_error.(
+        assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
+        @@ Secondary.Abstract_concrete_override
+             {
+               pos = Lazy.force class_elt.ce_pos;
+               parent_pos = Lazy.force parent_class_elt.ce_pos;
+               kind =
+                 (if MemberKind.is_functional member_kind then
+                   `method_
+                 else
+                   `property);
+             })
+
+let check_multiple_concrete_definitions
+    check_member_unique
+    class_
+    member_name
+    member_kind
+    parent_class_elt
+    class_elt
+    on_error =
+  if
+    check_member_unique
+    && (MemberKind.is_functional member_kind || get_ce_const class_elt)
+    && (not (get_ce_abstract parent_class_elt))
+    && not (get_ce_abstract class_elt)
+  then
+    (* Multiple concrete trait definitions, error *)
+    Errors.add_typing_error
+      Typing_error.(
+        apply_reasons ~on_error
+        @@ Secondary.Multiple_concrete_defs
+             {
+               pos = Lazy.force class_elt.ce_pos;
+               parent_pos = Lazy.force parent_class_elt.ce_pos;
+               origin = class_elt.ce_origin;
+               parent_origin = parent_class_elt.ce_origin;
+               name = member_name;
+               class_name = Cls.name class_;
+             })
+
 (* Check that overriding is correct *)
 let check_override
     env
@@ -421,27 +504,6 @@ let check_override
     else
       on_error
   in
-  let check_compatible_sound_dynamic_attributes
-      member_name parent_class_elt class_elt =
-    if
-      TypecheckerOptions.enable_sound_dynamic
-        (Provider_context.get_tcopt (Env.get_ctx env))
-      && get_ce_support_dynamic_type parent_class_elt
-      && not (get_ce_support_dynamic_type class_elt)
-    then
-      let (lazy pos) = class_elt.ce_pos in
-      let (lazy parent_pos) = parent_class_elt.ce_pos in
-      Errors.add_typing_error
-      @@ Typing_error.(
-           apply_reasons ~on_error
-           @@ Secondary.Override_method_support_dynamic_type
-                {
-                  pos;
-                  parent_pos;
-                  parent_origin = parent_class_elt.ce_origin;
-                  method_name = member_name;
-                })
-  in
 
   if MemberKind.is_method member_kind then begin
     (* We first verify that we aren't overriding a final method *)
@@ -462,81 +524,45 @@ let check_override
   check_lateinit parent_class_elt class_elt on_error;
   check_xhp_attr_required env parent_class_elt class_elt on_error;
   check_class_elt_visibility parent_class_elt class_elt on_error;
+  check_prop_const_mismatch parent_class_elt class_elt on_error;
+  check_abstract_overrides_concrete env member_kind parent_class_elt class_elt;
+
   let (lazy pos) = class_elt.ce_pos in
   let (lazy parent_pos) = parent_class_elt.ce_pos in
 
-  if Bool.( <> ) (get_ce_const class_elt) (get_ce_const parent_class_elt) then
-    Errors.add_typing_error
-      Typing_error.(
-        apply_reasons ~on_error
-        @@ Secondary.Overriding_prop_const_mismatch
-             {
-               pos;
-               is_const = get_ce_const class_elt;
-               parent_pos;
-               parent_is_const = get_ce_const parent_class_elt;
-             });
-
-  let is_functional = MemberKind.is_functional member_kind in
-  if (not (get_ce_abstract parent_class_elt)) && get_ce_abstract class_elt then
-    (* It is valid for abstract class to extend a concrete class, but it cannot
-     * redefine already concrete members as abstract.
-     * See override_abstract_concrete.php test case for example. *)
-    Errors.add_typing_error
-      Typing_error.(
-        assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
-        @@ Secondary.Abstract_concrete_override
-             {
-               pos;
-               parent_pos;
-               kind =
-                 (if is_functional then
-                   `method_
-                 else
-                   `property);
-             });
   let snd_err =
     let open Typing_error.Secondary in
-    if is_functional then
+    if MemberKind.is_functional member_kind then
       Bad_method_override { pos; member_name }
     else
       Bad_prop_override { pos; member_name }
   in
   (* Modify the `Typing_error.Reasons_callback.t` so that we always end up
      with the error code given by `snd_err` and the reasons of whatever
-     error it is applied to are appended to the reasons give n by `snd_err`
+     error it is applied to are appended to the reasons given by `snd_err`
   *)
   let on_error =
     Typing_error.Reasons_callback.prepend_on_apply on_error snd_err
   in
 
+  check_multiple_concrete_definitions
+    check_member_unique
+    class_
+    member_name
+    member_kind
+    parent_class_elt
+    class_elt
+    on_error;
+  check_compatible_sound_dynamic_attributes
+    env
+    member_name
+    member_kind
+    parent_class_elt
+    class_elt
+    on_error;
+
   let (lazy fty_child) = class_elt.ce_type in
   let (lazy fty_parent) = parent_class_elt.ce_type in
-  if
-    check_member_unique
-    && (is_functional || get_ce_const class_elt)
-    && (not (get_ce_abstract parent_class_elt))
-    && not (get_ce_abstract class_elt)
-  then
-    (* Multiple concrete trait definitions, error *)
-    Errors.add_typing_error
-      Typing_error.(
-        apply_reasons ~on_error
-        @@ Secondary.Multiple_concrete_defs
-             {
-               pos;
-               parent_pos;
-               origin = class_elt.ce_origin;
-               parent_origin = parent_class_elt.ce_origin;
-               name = member_name;
-               class_name = Cls.name class_;
-             });
-
-  if not (MemberKind.is_constructor member_kind) then
-    check_compatible_sound_dynamic_attributes
-      member_name
-      parent_class_elt
-      class_elt;
   match (deref fty_parent, deref fty_child) with
   | ((_, Tany _), (_, Tany _)) -> env
   | ((_, Tany _), _) ->

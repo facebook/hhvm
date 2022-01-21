@@ -122,6 +122,7 @@ class LspTestSpec:
         comment: Optional[str] = None,
         powered_by: Optional[str] = None,
     ) -> "LspTestSpec":
+        """Add a request to this test's messages."""
         traceback = inspect.stack()
         assert traceback is not None, "Failed to get traceback info"
 

@@ -159,16 +159,19 @@ let check_typedef_access ~use_pos ~in_signature env td =
     internal
     td.td_module
 
-let is_visible_for_obj env vis =
+let is_visible_for_obj ?(is_method = false) env vis =
+  let member_name =
+    if is_method then "method" else "property"
+  in
   match vis with
   | Vpublic -> None
   | Vprivate x ->
     (match Env.get_self_id env with
-    | None -> Some "You cannot access this member"
+    | None -> Some ("You cannot access this " ^ member_name)
     | Some self_id -> is_private_visible env x self_id)
   | Vprotected x ->
     (match Env.get_self_id env with
-    | None -> Some "You cannot access this member"
+    | None -> Some ("You cannot access this " ^ member_name)
     | Some self_id -> is_protected_visible env x self_id)
   | Vinternal m -> is_internal_visible env m
 
@@ -238,8 +241,8 @@ let visibility_error p msg (p_vis, vis) =
       @@ Primary.Visibility
            { pos = p; msg; decl_pos = p_vis; reason_msg = msg_vis })
 
-let check_obj_access ~use_pos ~def_pos env vis =
-  match is_visible_for_obj env vis with
+let check_obj_access ?(is_method = false) ~use_pos ~def_pos env vis =
+  match is_visible_for_obj ~is_method env vis with
   | None -> ()
   | Some msg -> visibility_error use_pos msg (def_pos, vis)
 

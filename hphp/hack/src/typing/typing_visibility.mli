@@ -20,7 +20,12 @@ val check_class_access :
   unit
 
 val check_obj_access :
-  use_pos:Pos.t -> def_pos:Pos_or_decl.t -> env -> ce_visibility -> unit
+  ?is_method:bool ->
+  use_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
+  env ->
+  ce_visibility ->
+  unit
 
 val check_inst_meth_access :
   use_pos:Pos.t -> def_pos:Pos_or_decl.t -> ce_visibility -> unit

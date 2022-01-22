@@ -159,19 +159,19 @@ let check_typedef_access ~use_pos ~in_signature env td =
     internal
     td.td_module
 
-let is_visible_for_obj ?(is_method = false) env vis =
-  let member_name =
+let is_visible_for_obj ~is_method env vis =
+  let member_ty =
     if is_method then "method" else "property"
   in
   match vis with
   | Vpublic -> None
   | Vprivate x ->
     (match Env.get_self_id env with
-    | None -> Some ("You cannot access this " ^ member_name)
+    | None -> Some ("You cannot access this " ^ member_ty)
     | Some self_id -> is_private_visible env x self_id)
   | Vprotected x ->
     (match Env.get_self_id env with
-    | None -> Some ("You cannot access this " ^ member_name)
+    | None -> Some ("You cannot access this " ^ member_ty)
     | Some self_id -> is_protected_visible env x self_id)
   | Vinternal m -> is_internal_visible env m
 
@@ -189,11 +189,11 @@ let is_lsb_accessible env vis =
   | Vpublic -> None
   | Vprivate x ->
     (match Env.get_self_id env with
-    | None -> Some "You cannot access this member"
+    | None -> Some "You cannot access this property"
     | Some self_id -> is_private_visible env x self_id)
   | Vprotected x ->
     (match Env.get_self_id env with
-    | None -> Some "You cannot access this member"
+    | None -> Some "You cannot access this property"
     | Some self_id -> is_protected_visible env x self_id)
   | Vinternal m -> is_internal_visible env m
 
@@ -202,19 +202,22 @@ let is_lsb_visible_for_class env vis cid =
   | Some x -> Some x
   | None -> is_lsb_accessible env vis
 
-let is_visible_for_class env (vis, lsb) cid cty =
+let is_visible_for_class ~is_method env (vis, lsb) cid cty =
   if lsb then
     is_lsb_visible_for_class env vis cid
   else
+    let member_ty =
+      if is_method then "method" else "property"
+    in
     match vis with
     | Vpublic -> None
     | Vprivate x ->
       (match Env.get_self_id env with
-      | None -> Some "You cannot access this member"
+      | None -> Some ("You cannot access this " ^ member_ty)
       | Some self_id -> is_private_visible_for_class env x self_id cid cty)
     | Vprotected x ->
       (match Env.get_self_id env with
-      | None -> Some "You cannot access this member"
+      | None -> Some ("You cannot access this " ^ member_ty)
       | Some self_id ->
         let their_class = Env.get_class env x in
         (match (cid, their_class) with
@@ -224,11 +227,11 @@ let is_visible_for_class env (vis, lsb) cid cty =
         | _ -> is_protected_visible env x self_id))
     | Vinternal m -> is_internal_visible env m
 
-let is_visible env (vis, lsb) cid class_ =
+let is_visible ~is_method env (vis, lsb) cid class_ =
   let msg_opt =
     match cid with
-    | Some cid -> is_visible_for_class env (vis, lsb) cid class_
-    | None -> is_visible_for_obj env vis
+    | Some cid -> is_visible_for_class ~is_method env (vis, lsb) cid class_
+    | None -> is_visible_for_obj ~is_method env vis
   in
   Option.is_none msg_opt
 
@@ -241,7 +244,7 @@ let visibility_error p msg (p_vis, vis) =
       @@ Primary.Visibility
            { pos = p; msg; decl_pos = p_vis; reason_msg = msg_vis })
 
-let check_obj_access ?(is_method = false) ~use_pos ~def_pos env vis =
+let check_obj_access ~is_method ~use_pos ~def_pos env vis =
   match is_visible_for_obj ~is_method env vis with
   | None -> ()
   | Some msg -> visibility_error use_pos msg (def_pos, vis)
@@ -290,8 +293,8 @@ let check_meth_caller_access ~use_pos ~def_pos vis =
         @@ Primary.Protected_meth_caller { decl_pos = def_pos; pos = use_pos })
   | _ -> ()
 
-let check_class_access ~use_pos ~def_pos env (vis, lsb) cid class_ =
-  match is_visible_for_class env (vis, lsb) cid class_ with
+let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
+  match is_visible_for_class ~is_method env (vis, lsb) cid class_ with
   | None -> ()
   | Some msg -> visibility_error use_pos msg (def_pos, vis)
 

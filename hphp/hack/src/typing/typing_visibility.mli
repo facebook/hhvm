@@ -11,6 +11,7 @@ open Typing_defs
 open Typing_env_types
 
 val check_class_access :
+  is_method:bool ->
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
   env ->
@@ -20,7 +21,7 @@ val check_class_access :
   unit
 
 val check_obj_access :
-  ?is_method:bool ->
+  is_method:bool ->
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
   env ->
@@ -41,6 +42,7 @@ val check_expression_tree_vis :
   use_pos:Pos.t -> def_pos:Pos_or_decl.t -> env -> ce_visibility -> unit
 
 val is_visible :
+  is_method:bool ->
   env ->
   ce_visibility * bool ->
   Nast.class_id_ option ->

@@ -139,6 +139,7 @@ val get_concrete_supertypes :
     {class_id_}, if provided) allows the current class (the one returned by
     {!get_self}) to access its members with the given {visibility}. *)
 val is_visible :
+  is_method:bool ->
   env ->
   Typing_defs.ce_visibility * bool ->
   Nast.class_id_ option ->

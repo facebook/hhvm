@@ -1,0 +1,6 @@
+File "instance_property_visibility.php", line 9, characters 5-8:
+Typing error (Typing[4112])
+  File "instance_property_visibility.php", line 9, characters 11-13:
+  You cannot access this property
+  File "instance_property_visibility.php", line 4, characters 11-13:
+  This member is private

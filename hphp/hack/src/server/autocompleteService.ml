@@ -143,9 +143,9 @@ let autocomplete_token ac_type x =
 
 let autocomplete_id id = autocomplete_token Acid id
 
-let get_class_elt_types env class_ cid elts =
+let get_class_elt_types ~is_method env class_ cid elts =
   let is_visible (_, elt) =
-    Tast_env.is_visible env (elt.ce_visibility, get_ce_lsb elt) cid class_
+    Tast_env.is_visible ~is_method env (elt.ce_visibility, get_ce_lsb elt) cid class_
   in
   elts
   |> List.filter ~f:is_visible
@@ -294,10 +294,10 @@ let autocomplete_member ~is_static env class_ cid id =
        more stable. *)
     if is_static || match_both_static_and_instance then (
       List.iter
-        (get_class_elt_types env class_ cid (Cls.smethods class_ |> sort))
+        (get_class_elt_types ~is_method:true env class_ cid (Cls.smethods class_ |> sort))
         ~f:(add SearchUtils.SI_ClassMethod);
       List.iter
-        (get_class_elt_types env class_ cid (Cls.sprops class_ |> sort))
+        (get_class_elt_types ~is_method:false env class_ cid (Cls.sprops class_ |> sort))
         ~f:(add SearchUtils.SI_Property);
       List.iter
         (Cls.consts class_ |> sort)
@@ -306,10 +306,10 @@ let autocomplete_member ~is_static env class_ cid id =
     );
     if (not is_static) || match_both_static_and_instance then (
       List.iter
-        (get_class_elt_types env class_ cid (Cls.methods class_ |> sort))
+        (get_class_elt_types ~is_method:true env class_ cid (Cls.methods class_ |> sort))
         ~f:(add SearchUtils.SI_ClassMethod);
       List.iter
-        (get_class_elt_types env class_ cid (Cls.props class_ |> sort))
+        (get_class_elt_types ~is_method:false env class_ cid (Cls.props class_ |> sort))
         ~f:(add SearchUtils.SI_Property)
     )
   )
@@ -332,7 +332,7 @@ let autocomplete_xhp_attributes env class_ cid id attrs =
       |> SSet.of_list
     in
     List.iter
-      (get_class_elt_types env class_ cid (Cls.props class_))
+      (get_class_elt_types ~is_method:false env class_ cid (Cls.props class_))
       ~f:(fun (name, ty) ->
         if
           not

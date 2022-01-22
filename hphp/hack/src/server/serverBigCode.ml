@@ -247,9 +247,9 @@ class visitor ~ctx ~entry ~filename ~source_text =
     (* Helper functions to extract candidate list
      * These are borrowed from autcompleteService.ml
      *)
-    method get_class_elt_types env class_ cid elts =
+    method get_class_elt_types ~is_method env class_ cid elts =
       let is_visible (_, elt) =
-        Tast_env.is_visible env (elt.ce_visibility, get_ce_lsb elt) cid class_
+        Tast_env.is_visible ~is_method env (elt.ce_visibility, get_ce_lsb elt) cid class_
       in
       elts
       |> List.filter ~f:is_visible
@@ -264,20 +264,20 @@ class visitor ~ctx ~entry ~filename ~source_text =
       let add _ (name, _) = candidates := name :: !candidates in
       if is_static || match_both_static_and_instance then (
         List.iter
-          (self#get_class_elt_types env class_ cid (Cls.smethods class_))
+          (self#get_class_elt_types ~is_method:true env class_ cid (Cls.smethods class_))
           ~f:(add SearchUtils.SI_ClassMethod);
         List.iter
-          (self#get_class_elt_types env class_ cid (Cls.sprops class_))
+          (self#get_class_elt_types ~is_method:false env class_ cid (Cls.sprops class_))
           ~f:(add SearchUtils.SI_Property);
         List.iter (Cls.consts class_) ~f:(fun (name, cc) ->
             add SearchUtils.SI_ClassConstant (name, cc.cc_type))
       );
       if (not is_static) || match_both_static_and_instance then (
         List.iter
-          (self#get_class_elt_types env class_ cid (Cls.methods class_))
+          (self#get_class_elt_types ~is_method:true env class_ cid (Cls.methods class_))
           ~f:(add SearchUtils.SI_ClassMethod);
         List.iter
-          (self#get_class_elt_types env class_ cid (Cls.props class_))
+          (self#get_class_elt_types ~is_method:false env class_ cid (Cls.props class_))
           ~f:(add SearchUtils.SI_Property)
       )
 

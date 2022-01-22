@@ -45,6 +45,8 @@ hphp/hack/cargo_home/
 /hphp/ffi/java/classes
 /hphp/ffi/java/hphp_ffi_java.h
 
+/hphp/ext_hsl_systemlib.hack
+
 /bin
 /output_gd/
 
@@ -57,6 +59,8 @@ TAGS
 /hphp/submodules
 /hphp/third_party
 /third-party/libzip/libzip.dylib
+/third-party/opam/opamDownload-prefix/
+/third-party/*/bundled_*-prefix
 
 # eclipse files
 .project
@@ -82,6 +86,9 @@ install_manifest.txt
 
 # CMake-generated files that need to stay in the source tree because
 # of ocamlbuild
+/hphp/hack/dev_env_common.sh
+/hphp/hack/dev_env_rust_only.sh
+/hphp/hack/hsl/
 /hphp/hack/src/options/buildOptions.ml
 /hphp/hack/opam.stamp
 /hphp/hack/test/.mypy_cache

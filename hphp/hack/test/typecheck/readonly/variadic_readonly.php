@@ -1,8 +1,9 @@
 <?hh // strict
-function takes_mutable(string ...$x): string {
+function takes_varargs(string ...$x): string {
   return "";
 }
 
-function test(readonly string $x): void {
-  takes_mutable($x);
+function bar(readonly string $ref): void {
+  takes_varargs($ref); // error
+  takes_varargs("a", $ref); // error
 }

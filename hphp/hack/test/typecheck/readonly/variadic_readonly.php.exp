@@ -1,6 +1,12 @@
-File "variadic_readonly.php", line 7, characters 17-18:
+File "variadic_readonly.php", line 7, characters 17-20:
 Invalid argument (Typing[4411])
-  File "variadic_readonly.php", line 7, characters 17-18:
+  File "variadic_readonly.php", line 7, characters 17-20:
+  This expression is readonly
+  File "variadic_readonly.php", line 2, characters 34-35:
+  It is incompatible with this parameter, which is mutable
+File "variadic_readonly.php", line 8, characters 22-25:
+Invalid argument (Typing[4411])
+  File "variadic_readonly.php", line 8, characters 22-25:
   This expression is readonly
   File "variadic_readonly.php", line 2, characters 34-35:
   It is incompatible with this parameter, which is mutable

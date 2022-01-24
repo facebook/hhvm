@@ -15,4 +15,6 @@ type status = {
 
 val status_for_pid : int -> (status, string) result
 
+val telemetry_for_pid : int -> Telemetry.t
+
 val first_cgroup_for_pid : int -> (string, string) result

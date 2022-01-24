@@ -97,6 +97,17 @@ let status_for_pid pid =
   asset_procfs_supported () >>= fun () ->
   read_proc_file "status" pid >>| parse_status
 
+let telemetry_for_pid pid =
+  match status_for_pid pid with
+  | Error e -> Telemetry.create () |> Telemetry.error ~e
+  | Ok { rss_anon; rss_file; rss_shmem; rss_total; rss_hwm } ->
+    Telemetry.create ()
+    |> Telemetry.int_ ~key:"rss_anon" ~value:rss_anon
+    |> Telemetry.int_ ~key:"rss_file" ~value:rss_file
+    |> Telemetry.int_ ~key:"rss_shmem" ~value:rss_shmem
+    |> Telemetry.int_ ~key:"rss_total" ~value:rss_total
+    |> Telemetry.int_ ~key:"rss_hwm" ~value:rss_hwm
+
 (* In cgroup v1 a pid can be in multiple cgroups. In cgroup v2 it will only be in a single cgroup.
  *)
 let first_cgroup_for_pid pid =

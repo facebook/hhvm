@@ -1135,6 +1135,9 @@ functor
         telemetry
         |> Telemetry.object_opt ~key:"cgroup" ~value:!cgroup_typecheck_telemetry
         |> Telemetry.object_ ~key:"gc" ~value:(Telemetry.quick_gc_stat ())
+        |> Telemetry.object_
+             ~key:"proc"
+             ~value:(ProcFS.telemetry_for_pid (Unix.getpid ()))
       in
 
       let files_checked = files_to_check in

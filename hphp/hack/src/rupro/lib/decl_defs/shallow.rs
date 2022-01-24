@@ -8,20 +8,20 @@ use crate::pos::PosId;
 use crate::reason::Reason;
 
 #[derive(Debug)]
-pub struct ShallowFun<REASON: Reason> {
-    pub fe_pos: REASON::P,
-    pub fe_type: DeclTy<REASON>,
+pub struct ShallowFun<R: Reason> {
+    pub fe_pos: R::P,
+    pub fe_type: DeclTy<R>,
 }
 
 #[derive(Debug)]
-pub struct ShallowMethod<REASON: Reason> {
-    pub sm_name: PosId<REASON::P>,
-    pub sm_type: DeclTy<REASON>,
+pub struct ShallowMethod<R: Reason> {
+    pub sm_name: PosId<R::P>,
+    pub sm_type: DeclTy<R>,
 }
 
 #[derive(Debug)]
-pub struct ShallowClass<REASON: Reason> {
-    pub sc_name: PosId<REASON::P>,
-    pub sc_extends: Vec<DeclTy<REASON>>,
-    pub sc_methods: Vec<ShallowMethod<REASON>>,
+pub struct ShallowClass<R: Reason> {
+    pub sc_name: PosId<R::P>,
+    pub sc_extends: Vec<DeclTy<R>>,
+    pub sc_methods: Vec<ShallowMethod<R>>,
 }

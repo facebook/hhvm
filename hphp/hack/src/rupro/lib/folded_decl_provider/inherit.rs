@@ -10,12 +10,12 @@ use crate::folded_decl_provider::subst::Subst;
 use crate::pos::Symbol;
 use crate::reason::Reason;
 
-pub(crate) struct Inherited<REASON: Reason> {
-    pub(crate) ih_substs: HashMap<Symbol, SubstContext<REASON>>,
+pub(crate) struct Inherited<R: Reason> {
+    pub(crate) ih_substs: HashMap<Symbol, SubstContext<R>>,
     pub(crate) ih_methods: HashMap<Symbol, FoldedElement>,
 }
 
-impl<REASON: Reason> Inherited<REASON> {
+impl<R: Reason> Inherited<R> {
     fn empty() -> Self {
         Self {
             ih_substs: HashMap::new(),
@@ -27,7 +27,7 @@ impl<REASON: Reason> Inherited<REASON> {
         true
     }
 
-    fn add_substs(&mut self, other_substs: HashMap<Symbol, SubstContext<REASON>>) {
+    fn add_substs(&mut self, other_substs: HashMap<Symbol, SubstContext<R>>) {
         for (key, subst) in other_substs {
             self.ih_substs.entry(key.clone()).or_insert(subst);
         }
@@ -58,17 +58,17 @@ impl<REASON: Reason> Inherited<REASON> {
     }
 
     fn make_substitution(
-        _cls: &FoldedClass<REASON>,
-        params: &[DeclTy<REASON>],
-    ) -> HashMap<Symbol, DeclTy<REASON>> {
+        _cls: &FoldedClass<R>,
+        params: &[DeclTy<R>],
+    ) -> HashMap<Symbol, DeclTy<R>> {
         Subst::new((), params).into()
     }
 
     fn inherit_hack_class(
-        child: &ShallowClass<REASON>,
+        child: &ShallowClass<R>,
         parent_name: &Symbol,
-        parent: &FoldedClass<REASON>,
-        argl: &[DeclTy<REASON>],
+        parent: &FoldedClass<R>,
+        argl: &[DeclTy<R>],
     ) -> Self {
         let subst = Self::make_substitution(parent, argl);
         // TODO(hrust): Do we need sharing?
@@ -87,9 +87,9 @@ impl<REASON: Reason> Inherited<REASON> {
     }
 
     fn from_class(
-        sc: &ShallowClass<REASON>,
-        parents: &HashMap<Symbol, Rc<FoldedClass<REASON>>>,
-        parent_ty: &DeclTy<REASON>,
+        sc: &ShallowClass<R>,
+        parents: &HashMap<Symbol, Rc<FoldedClass<R>>>,
+        parent_ty: &DeclTy<R>,
     ) -> Self {
         if let Some((_, parent_pos_id, parent_tyl)) = parent_ty.unwrap_class_type() {
             if let Some(parent_folded_decl) = parents.get(parent_pos_id.id()) {
@@ -104,10 +104,7 @@ impl<REASON: Reason> Inherited<REASON> {
         Self::empty()
     }
 
-    fn from_parent(
-        sc: &ShallowClass<REASON>,
-        parents: &HashMap<Symbol, Rc<FoldedClass<REASON>>>,
-    ) -> Self {
+    fn from_parent(sc: &ShallowClass<R>, parents: &HashMap<Symbol, Rc<FoldedClass<R>>>) -> Self {
         let all_inherited = sc
             .sc_extends
             .iter()
@@ -120,8 +117,8 @@ impl<REASON: Reason> Inherited<REASON> {
     }
 
     pub(crate) fn make(
-        sc: &ShallowClass<REASON>,
-        parents: &HashMap<Symbol, Rc<FoldedClass<REASON>>>,
+        sc: &ShallowClass<R>,
+        parents: &HashMap<Symbol, Rc<FoldedClass<R>>>,
     ) -> Self {
         Self::from_parent(sc, parents)
     }

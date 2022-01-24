@@ -20,11 +20,11 @@ pub trait Reason: Eq + Hash + Clone + ToOcamlRep + std::fmt::Debug {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum ReasonImpl<POS: Pos> {
+pub enum ReasonImpl<P: Pos> {
     Rnone,
-    Rwitness(POS),
-    RwitnessFromDecl(POS),
-    Rhint(POS),
+    Rwitness(P),
+    RwitnessFromDecl(P),
+    Rhint(P),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

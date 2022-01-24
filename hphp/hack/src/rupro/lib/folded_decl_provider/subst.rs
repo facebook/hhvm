@@ -9,26 +9,26 @@ use crate::decl_defs::DeclTy;
 use crate::pos::Symbol;
 use crate::reason::Reason;
 
-pub(crate) struct Subst<REASON: Reason>(HashMap<Symbol, DeclTy<REASON>>);
+pub(crate) struct Subst<R: Reason>(HashMap<Symbol, DeclTy<R>>);
 
-impl<REASON: Reason> From<HashMap<Symbol, DeclTy<REASON>>> for Subst<REASON> {
-    fn from(map: HashMap<Symbol, DeclTy<REASON>>) -> Self {
+impl<R: Reason> From<HashMap<Symbol, DeclTy<R>>> for Subst<R> {
+    fn from(map: HashMap<Symbol, DeclTy<R>>) -> Self {
         Self(map)
     }
 }
 
-impl<REASON: Reason> Into<HashMap<Symbol, DeclTy<REASON>>> for Subst<REASON> {
-    fn into(self) -> HashMap<Symbol, DeclTy<REASON>> {
+impl<R: Reason> Into<HashMap<Symbol, DeclTy<R>>> for Subst<R> {
+    fn into(self) -> HashMap<Symbol, DeclTy<R>> {
         self.0
     }
 }
 
-impl<REASON: Reason> Subst<REASON> {
-    pub(crate) fn new(_tparams: (), _params: &[DeclTy<REASON>]) -> Self {
+impl<R: Reason> Subst<R> {
+    pub(crate) fn new(_tparams: (), _params: &[DeclTy<R>]) -> Self {
         Self(HashMap::new())
     }
 
-    pub(crate) fn instantiate(&self, ty: &DeclTy<REASON>) -> DeclTy<REASON> {
+    pub(crate) fn instantiate(&self, ty: &DeclTy<R>) -> DeclTy<R> {
         if self.0.is_empty() {
             ty.clone()
         } else {

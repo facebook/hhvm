@@ -59,14 +59,14 @@ impl Pos for NPos {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct PosId<POS: Pos>(POS, Symbol);
+pub struct PosId<P: Pos>(P, Symbol);
 
-impl<POS: Pos> PosId<POS> {
-    pub fn new(pos: POS, id: Symbol) -> Self {
+impl<P: Pos> PosId<P> {
+    pub fn new(pos: P, id: Symbol) -> Self {
         Self(pos, id)
     }
 
-    pub fn pos(&self) -> &POS {
+    pub fn pos(&self) -> &P {
         &self.0
     }
 

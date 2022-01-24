@@ -15,16 +15,16 @@ pub struct FoldedElement {
 }
 
 #[derive(Debug, Clone)]
-pub struct SubstContext<REASON: Reason> {
-    pub sc_subst: HashMap<Symbol, DeclTy<REASON>>,
+pub struct SubstContext<R: Reason> {
+    pub sc_subst: HashMap<Symbol, DeclTy<R>>,
     pub sc_class_context: Symbol,
 }
 
 #[derive(Debug, Clone)]
-pub struct FoldedClass<REASON: Reason> {
+pub struct FoldedClass<R: Reason> {
     pub dc_name: Symbol,
-    pub dc_pos: REASON::P,
-    pub dc_substs: HashMap<Symbol, SubstContext<REASON>>,
-    pub dc_ancestors: HashMap<Symbol, DeclTy<REASON>>,
+    pub dc_pos: R::P,
+    pub dc_substs: HashMap<Symbol, SubstContext<R>>,
+    pub dc_ancestors: HashMap<Symbol, DeclTy<R>>,
     pub dc_methods: HashMap<Symbol, FoldedElement>,
 }

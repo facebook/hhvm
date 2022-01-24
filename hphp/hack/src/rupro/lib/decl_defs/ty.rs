@@ -13,50 +13,50 @@ use crate::reason::Reason;
 pub type Prim = oxidized::aast::Tprim;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct FunParam<REASON: Reason, TY> {
-    pub fp_pos: REASON::P,
+pub struct FunParam<R: Reason, TY> {
+    pub fp_pos: R::P,
     pub fp_name: Option<Symbol>,
     pub fp_type: TY,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct FunType<REASON: Reason, TY> {
-    pub ft_params: Vec<FunParam<REASON, TY>>,
+pub struct FunType<R: Reason, TY> {
+    pub ft_params: Vec<FunParam<R, TY>>,
     pub ft_ret: TY,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum DeclTy_<REASON: Reason, TY> {
+pub enum DeclTy_<R: Reason, TY> {
     /// A primitive type.
     DTprim(Prim),
     /// Either an object type or a type alias, ty list are the arguments.
-    DTapply(PosId<REASON::P>, Vec<TY>),
+    DTapply(PosId<R::P>, Vec<TY>),
     /// A wrapper around `FunType`, which contains the full type information
     /// for a function, method, lambda, etc.
-    DTfun(FunType<REASON, TY>),
+    DTfun(FunType<R, TY>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct DeclTy<REASON: Reason>(REASON, Consed<DeclTy_<REASON, DeclTy<REASON>>>);
+pub struct DeclTy<R: Reason>(R, Consed<DeclTy_<R, DeclTy<R>>>);
 
-impl<REASON: Reason> DeclTy<REASON> {
-    pub fn new(reason: REASON, consed: Consed<DeclTy_<REASON, DeclTy<REASON>>>) -> Self {
+impl<R: Reason> DeclTy<R> {
+    pub fn new(reason: R, consed: Consed<DeclTy_<R, DeclTy<R>>>) -> Self {
         Self(reason, consed)
     }
 
-    pub fn pos(&self) -> &REASON::P {
+    pub fn pos(&self) -> &R::P {
         self.0.pos()
     }
 
-    pub fn reason(&self) -> &REASON {
+    pub fn reason(&self) -> &R {
         &self.0
     }
 
-    pub fn node(&self) -> &Consed<DeclTy_<REASON, DeclTy<REASON>>> {
+    pub fn node(&self) -> &Consed<DeclTy_<R, DeclTy<R>>> {
         &self.1
     }
 
-    pub fn unwrap_class_type(&self) -> Option<(&REASON, &PosId<REASON::P>, &[DeclTy<REASON>])> {
+    pub fn unwrap_class_type(&self) -> Option<(&R, &PosId<R::P>, &[DeclTy<R>])> {
         use DeclTy_::*;
         let r = self.reason();
         match &**self.node() {

@@ -12,6 +12,7 @@ arena_deserializer = { path = "../utils/arena_deserializer" }
 arena_trait = { path = "../arena_trait" }
 bitflags = "1.3"
 bstr = { version = "0.2", features = ["serde1"] }
+bumpalo = { version = "3.8", features = ["collections"] }
 eq_modulo_pos = { path = "../utils/eq_modulo_pos" }
 hh_autoimport_rust = { path = "../parser/cargo/hh_autoimport" }
 itertools = "0.10.3"

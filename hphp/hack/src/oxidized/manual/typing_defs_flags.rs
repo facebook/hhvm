@@ -29,6 +29,7 @@ bitflags! {
         const RETURNS_READONLY       = 1 << 10;
         const READONLY_THIS          = 1 << 11;
         const SUPPORT_DYNAMIC_TYPE   = 1 << 12;
+        const IS_MEMOIZED            = 1 << 13;
     }
 }
 
@@ -40,7 +41,7 @@ bitflags! {
         const HAS_DEFAULT            = 1 << 2;
         const IFC_EXTERNAL           = 1 << 3;
         const IFC_CAN_CALL           = 1 << 4;
-        const VIA_LABEL              = 1 << 5;
+        // const VIA_LABEL_DEPRECATED              = 1 << 5;
 
         // These flags apply to the parameter type.
         const MUTABLE_FLAGS_OWNED    = 1 << 6;
@@ -105,6 +106,16 @@ impl ocamlrep::FromOcamlRep for FunTypeFlags {
     }
 }
 
+impl<'a> ocamlrep::FromOcamlRepIn<'a> for FunTypeFlags {
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        _alloc: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        use ocamlrep::FromOcamlRep;
+        Self::from_ocamlrep(value)
+    }
+}
+
 impl no_pos_hash::NoPosHash for FunTypeFlags {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         std::hash::Hash::hash(self, state);
@@ -150,6 +161,16 @@ impl ocamlrep::FromOcamlRep for FunParamFlags {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
         let int_value = ocamlrep::from::expect_int(value)?;
         Ok(Self::from_bits_truncate(int_value.try_into()?))
+    }
+}
+
+impl<'a> ocamlrep::FromOcamlRepIn<'a> for FunParamFlags {
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        _alloc: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        use ocamlrep::FromOcamlRep;
+        Self::from_ocamlrep(value)
     }
 }
 

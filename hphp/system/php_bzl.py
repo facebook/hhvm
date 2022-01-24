@@ -11,11 +11,14 @@ def _read_file_and_gen_bzl(path: str) -> str:
     r += f"# This file is {'@'}generated from `php.txt`.\n"
     r += "# Do not edit manually, run `python3 hphp/system/php_bzl.py` instead.\n"
     r += "SYSTEMLIB_SRCS = [\n"
+    prefix = "hphp/system/"
     with open(path) as f:
         for line in f.readlines():
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
+            if line.startswith(prefix):
+                line = line[len(prefix) :]
             r += f'    "{line}",\n'
     r += "]\n"
     return r

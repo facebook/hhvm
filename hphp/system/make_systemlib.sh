@@ -1,12 +1,6 @@
 #!/bin/sh
 
-cd $FBCODE_DIR
-
-# fbconfig passes a couple --foo arguments.
-shift;
-shift;
-
-SYSTEMLIB=$INSTALL_DIR/systemlib.php
+SYSTEMLIB=$1; shift
 
 # If we put the line we're generating into this file, then the linter will think
 # the generator itself is generated.  Encode it into a variable for safe

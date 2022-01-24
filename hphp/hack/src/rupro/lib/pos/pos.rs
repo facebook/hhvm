@@ -45,6 +45,7 @@ impl Pos for BPos {
     }
 }
 
+/// A stateless sentinal Pos.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct NPos;
 

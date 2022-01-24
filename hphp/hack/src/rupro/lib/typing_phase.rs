@@ -49,7 +49,7 @@ impl Phase {
         env: &TEnv<R>,
         ety_env: &mut ExpandEnv<'_, R>,
         r: R,
-        sid: PosId<R::P>,
+        sid: PosId<R::Pos>,
         ty_args: &[DeclTy<R>],
         class_info: Option<&Class<R>>,
     ) -> Ty<R> {
@@ -82,7 +82,7 @@ impl Phase {
     fn localize_ft<R: Reason>(
         env: &TEnv<R>,
         ety_env: &mut ExpandEnv<'_, R>,
-        _def_pos: R::P,
+        _def_pos: R::Pos,
         ft: &FunType<R, DeclTy<R>>,
     ) -> FunType<R, Ty<R>> {
         // TODO(hrust): tparams

@@ -10,11 +10,11 @@ use crate::pos::{BPos, NPos, Pos};
 
 pub trait Reason: Eq + Hash + Clone + ToOcamlRep + std::fmt::Debug {
     /// Position type.
-    type P: Pos;
+    type Pos: Pos;
 
-    fn mk(cons: &dyn Fn() -> ReasonImpl<Self::P>) -> Self;
+    fn mk(cons: &dyn Fn() -> ReasonImpl<Self::Pos>) -> Self;
 
-    fn pos(&self) -> &Self::P;
+    fn pos(&self) -> &Self::Pos;
 
     fn to_oxidized(&self) -> oxidized::typing_reason::Reason;
 }
@@ -31,9 +31,9 @@ pub enum ReasonImpl<P: Pos> {
 pub struct BReason(Box<ReasonImpl<BPos>>);
 
 impl Reason for BReason {
-    type P = BPos;
+    type Pos = BPos;
 
-    fn mk(cons: &dyn Fn() -> ReasonImpl<Self::P>) -> Self {
+    fn mk(cons: &dyn Fn() -> ReasonImpl<Self::Pos>) -> Self {
         let x = cons();
         Self(Box::new(x))
     }
@@ -57,13 +57,14 @@ impl ToOcamlRep for BReason {
     }
 }
 
+/// A stateless sentinal Reason.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct NReason;
 
 impl Reason for NReason {
-    type P = NPos;
+    type Pos = NPos;
 
-    fn mk(_cons: &dyn Fn() -> ReasonImpl<Self::P>) -> Self {
+    fn mk(_cons: &dyn Fn() -> ReasonImpl<Self::Pos>) -> Self {
         NReason
     }
 

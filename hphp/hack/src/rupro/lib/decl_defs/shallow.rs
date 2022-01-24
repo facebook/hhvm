@@ -9,19 +9,19 @@ use crate::reason::Reason;
 
 #[derive(Debug)]
 pub struct ShallowFun<R: Reason> {
-    pub fe_pos: R::P,
+    pub fe_pos: R::Pos,
     pub fe_type: DeclTy<R>,
 }
 
 #[derive(Debug)]
 pub struct ShallowMethod<R: Reason> {
-    pub sm_name: PosId<R::P>,
+    pub sm_name: PosId<R::Pos>,
     pub sm_type: DeclTy<R>,
 }
 
 #[derive(Debug)]
 pub struct ShallowClass<R: Reason> {
-    pub sc_name: PosId<R::P>,
+    pub sc_name: PosId<R::Pos>,
     pub sc_extends: Vec<DeclTy<R>>,
     pub sc_methods: Vec<ShallowMethod<R>>,
 }

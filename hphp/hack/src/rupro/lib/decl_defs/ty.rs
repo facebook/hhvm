@@ -14,7 +14,7 @@ pub type Prim = oxidized::aast::Tprim;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FunParam<R: Reason, TY> {
-    pub fp_pos: R::P,
+    pub fp_pos: R::Pos,
     pub fp_name: Option<Symbol>,
     pub fp_type: TY,
 }
@@ -30,7 +30,7 @@ pub enum DeclTy_<R: Reason, TY> {
     /// A primitive type.
     DTprim(Prim),
     /// Either an object type or a type alias, ty list are the arguments.
-    DTapply(PosId<R::P>, Vec<TY>),
+    DTapply(PosId<R::Pos>, Vec<TY>),
     /// A wrapper around `FunType`, which contains the full type information
     /// for a function, method, lambda, etc.
     DTfun(FunType<R, TY>),
@@ -44,7 +44,7 @@ impl<R: Reason> DeclTy<R> {
         Self(reason, consed)
     }
 
-    pub fn pos(&self) -> &R::P {
+    pub fn pos(&self) -> &R::Pos {
         self.0.pos()
     }
 
@@ -56,7 +56,7 @@ impl<R: Reason> DeclTy<R> {
         &self.1
     }
 
-    pub fn unwrap_class_type(&self) -> Option<(&R, &PosId<R::P>, &[DeclTy<R>])> {
+    pub fn unwrap_class_type(&self) -> Option<(&R, &PosId<R::Pos>, &[DeclTy<R>])> {
         use DeclTy_::*;
         let r = self.reason();
         match &**self.node() {

@@ -15,14 +15,14 @@ use crate::shallow_decl_provider::ShallowDeclCache;
 
 #[derive(Debug)]
 pub struct ShallowDeclProvider<R: Reason> {
-    cache: Rc<dyn ShallowDeclCache<R = R>>,
+    cache: Rc<dyn ShallowDeclCache<Reason = R>>,
     decl_ty_provider: Rc<DeclTyProvider<R>>,
     relative_path_ctx: Rc<RelativePathCtx>,
 }
 
 impl<R: Reason> ShallowDeclProvider<R> {
     pub fn new(
-        cache: Rc<dyn ShallowDeclCache<R = R>>,
+        cache: Rc<dyn ShallowDeclCache<Reason = R>>,
         decl_ty_provider: Rc<DeclTyProvider<R>>,
         relative_path_ctx: Rc<RelativePathCtx>,
     ) -> Self {

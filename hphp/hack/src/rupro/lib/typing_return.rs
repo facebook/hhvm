@@ -21,7 +21,7 @@ impl TypingReturn {
     pub fn make_default_return<R: Reason>(
         env: &TEnv<R>,
         is_method: bool,
-        fpos: &R::P,
+        fpos: &R::Pos,
         fname: &Symbol,
     ) -> Ty<R> {
         let reason = R::mk(&|| ReasonImpl::Rwitness(fpos.clone()));
@@ -43,7 +43,7 @@ impl TypingReturn {
 
     pub fn make_info<R: Reason>(
         _env: &TEnv<R>,
-        _ret_pos: R::P,
+        _ret_pos: R::Pos,
         _fun_kind: &oxidized::ast_defs::FunKind,
         _attributes: &[oxidized::aast::UserAttribute<(), ()>],
         _is_explicit: bool,

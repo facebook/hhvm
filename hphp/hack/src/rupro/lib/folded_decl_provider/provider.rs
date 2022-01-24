@@ -14,13 +14,13 @@ use crate::shallow_decl_provider::ShallowDeclProvider;
 
 #[derive(Debug)]
 pub struct FoldedDeclProvider<R: Reason> {
-    cache: Rc<dyn FoldedDeclCache<R = R>>,
+    cache: Rc<dyn FoldedDeclCache<Reason = R>>,
     shallow_decl_provider: Rc<ShallowDeclProvider<R>>,
 }
 
 impl<R: Reason> FoldedDeclProvider<R> {
     pub fn new(
-        cache: Rc<dyn FoldedDeclCache<R = R>>,
+        cache: Rc<dyn FoldedDeclCache<Reason = R>>,
         shallow_decl_provider: Rc<ShallowDeclProvider<R>>,
     ) -> Self {
         Self {
@@ -38,7 +38,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
         self.get_folded_class_impl(&mut stack, name)
     }
 
-    fn detect_cycle(&self, stack: &mut HashSet<Symbol>, pos_id: &PosId<R::P>) -> bool {
+    fn detect_cycle(&self, stack: &mut HashSet<Symbol>, pos_id: &PosId<R::Pos>) -> bool {
         if stack.contains(pos_id.id()) {
             unimplemented!("TODO(hrust): register error");
         }

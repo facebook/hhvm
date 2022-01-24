@@ -23,7 +23,7 @@ pub struct SubstContext<R: Reason> {
 #[derive(Debug, Clone)]
 pub struct FoldedClass<R: Reason> {
     pub dc_name: Symbol,
-    pub dc_pos: R::P,
+    pub dc_pos: R::Pos,
     pub dc_substs: HashMap<Symbol, SubstContext<R>>,
     pub dc_ancestors: HashMap<Symbol, DeclTy<R>>,
     pub dc_methods: HashMap<Symbol, FoldedElement>,

@@ -15,11 +15,11 @@ use crate::pos::Symbol;
 use crate::reason::Reason;
 
 pub trait FoldedDeclCache: std::fmt::Debug {
-    type R: Reason;
+    type Reason: Reason;
 
-    fn get_folded_class(&self, name: &Symbol) -> Option<Rc<FoldedClass<Self::R>>>;
+    fn get_folded_class(&self, name: &Symbol) -> Option<Rc<FoldedClass<Self::Reason>>>;
 
-    fn put_folded_class(&self, name: Symbol, cls: Rc<FoldedClass<Self::R>>);
+    fn put_folded_class(&self, name: Symbol, cls: Rc<FoldedClass<Self::Reason>>);
 }
 
 #[derive(Debug)]
@@ -36,7 +36,7 @@ impl<R: Reason> FoldedDeclLocalCache<R> {
 }
 
 impl<R: Reason> FoldedDeclCache for FoldedDeclLocalCache<R> {
-    type R = R;
+    type Reason = R;
 
     fn get_folded_class(&self, name: &Symbol) -> Option<Rc<FoldedClass<R>>> {
         self.classes.borrow().get(name).cloned()

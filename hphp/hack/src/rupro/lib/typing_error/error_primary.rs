@@ -6,7 +6,7 @@ use crate::reason::Reason;
 
 #[derive(Clone, Debug)]
 pub enum Primary<R: Reason> {
-    InvalidTypeHint(R::P),
-    ExpectingTypeHint(R::P),
-    ExpectingReturnTypeHint(R::P),
+    InvalidTypeHint(R::Pos),
+    ExpectingTypeHint(R::Pos),
+    ExpectingReturnTypeHint(R::Pos),
 }

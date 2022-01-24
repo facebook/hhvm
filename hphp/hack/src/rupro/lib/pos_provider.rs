@@ -45,8 +45,8 @@ impl PosProvider {
     }
 
 
-    pub fn mk_pos<R: Reason>(&self, pos: &oxidized::pos::Pos) -> R::P {
-        R::P::mk(&|| {
+    pub fn mk_pos<R: Reason>(&self, pos: &oxidized::pos::Pos) -> R::Pos {
+        R::Pos::mk(&|| {
             let pos_file = self.mk_relative_path(pos.filename());
             let ((start_lnum, start_bol, start_cnum), (end_lnum, end_bol, end_cnum)) =
                 pos.to_start_and_end_lnum_bol_offset();
@@ -64,8 +64,8 @@ impl PosProvider {
         })
     }
 
-    pub fn mk_pos_of_ref<R: Reason>(&self, pos: &oxidized_by_ref::pos::Pos<'_>) -> R::P {
-        R::P::mk(&|| {
+    pub fn mk_pos_of_ref<R: Reason>(&self, pos: &oxidized_by_ref::pos::Pos<'_>) -> R::Pos {
+        R::Pos::mk(&|| {
             let pos_file = self.mk_relative_path_of_ref(pos.filename());
             let ((start_lnum, start_bol, start_cnum), (end_lnum, end_bol, end_cnum)) =
                 pos.to_start_and_end_lnum_bol_offset();
@@ -83,7 +83,7 @@ impl PosProvider {
         })
     }
 
-    pub fn mk_pos_id<R: Reason>(&self, pos_id: &oxidized::ast_defs::Id) -> PosId<R::P> {
+    pub fn mk_pos_id<R: Reason>(&self, pos_id: &oxidized::ast_defs::Id) -> PosId<R::Pos> {
         let pos = self.mk_pos::<R>(&pos_id.0);
         let def = self.mk_symbol(&pos_id.1);
         PosId::new(pos, def)
@@ -92,7 +92,7 @@ impl PosProvider {
     pub fn mk_pos_id_of_ref<R: Reason>(
         &self,
         pos_id: oxidized_by_ref::typing_defs::PosId<'_>,
-    ) -> PosId<R::P> {
+    ) -> PosId<R::Pos> {
         let pos = self.mk_pos_of_ref::<R>(pos_id.0);
         let def = self.mk_symbol(pos_id.1);
         PosId::new(pos, def)

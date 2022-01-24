@@ -11,5 +11,5 @@ use crate::reason::Reason;
 pub struct ClassElt<R: Reason> {
     ce_type: DeclTy<R>,
     ce_origin: Symbol,
-    ce_pos: R::P,
+    ce_pos: R::Pos,
 }

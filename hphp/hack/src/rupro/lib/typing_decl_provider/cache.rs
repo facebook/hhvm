@@ -15,11 +15,11 @@ use crate::reason::Reason;
 use crate::typing_decl_provider::Class;
 
 pub trait TypingDeclCache: std::fmt::Debug {
-    type R: Reason;
+    type Reason: Reason;
 
-    fn get_typing_class(&self, name: &Symbol) -> Option<Rc<Class<Self::R>>>;
+    fn get_typing_class(&self, name: &Symbol) -> Option<Rc<Class<Self::Reason>>>;
 
-    fn put_typing_class(&self, name: Symbol, cls: Rc<Class<Self::R>>);
+    fn put_typing_class(&self, name: Symbol, cls: Rc<Class<Self::Reason>>);
 }
 
 #[derive(Debug)]
@@ -36,13 +36,13 @@ impl<R: Reason> TypingDeclLocalCache<R> {
 }
 
 impl<R: Reason> TypingDeclCache for TypingDeclLocalCache<R> {
-    type R = R;
+    type Reason = R;
 
-    fn get_typing_class(&self, name: &Symbol) -> Option<Rc<Class<Self::R>>> {
+    fn get_typing_class(&self, name: &Symbol) -> Option<Rc<Class<Self::Reason>>> {
         self.classes.borrow().get(name).cloned()
     }
 
-    fn put_typing_class(&self, name: Symbol, cls: Rc<Class<Self::R>>) {
+    fn put_typing_class(&self, name: Symbol, cls: Rc<Class<Self::Reason>>) {
         self.classes.borrow_mut().insert(name, cls);
     }
 }

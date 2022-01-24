@@ -11,7 +11,7 @@ use crate::typing_ctx::TypingCtx;
 use crate::typing_defs::{Ty, Ty_};
 use crate::typing_error::ReasonsCallback;
 
-pub type TypeExpansion<R> = (<R as Reason>::P, Symbol);
+pub type TypeExpansion<R> = (<R as Reason>::Pos, Symbol);
 
 pub struct TypeExpansions<R: Reason> {
     report_cycle: Option<TypeExpansion<R>>,
@@ -27,7 +27,7 @@ pub struct ExpandEnv<'a, R: Reason> {
 }
 
 impl<R: Reason> TypeExpansions<R> {
-    pub fn with_report_cycle(report_cycle: Option<(R::P, Symbol)>) -> Self {
+    pub fn with_report_cycle(report_cycle: Option<(R::Pos, Symbol)>) -> Self {
         TypeExpansions {
             report_cycle,
             expansions: Vec::new(),

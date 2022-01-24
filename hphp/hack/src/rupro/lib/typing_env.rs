@@ -29,7 +29,7 @@ pub struct TEnv<R: Reason> {
 
 struct TGEnv<R: Reason> {
     return_: RefCell<TypingReturnInfo<R>>,
-    params: RefCell<HashMap<LocalId, (Ty<R>, R::P, ParamMode)>>,
+    params: RefCell<HashMap<LocalId, (Ty<R>, R::Pos, ParamMode)>>,
 }
 
 struct TLEnv<R: Reason> {
@@ -125,18 +125,18 @@ impl<R: Reason> TEnv<R> {
         Self::new(ctx)
     }
 
-    pub fn set_param(&self, id: LocalId, ty: Ty<R>, pos: R::P, param_mode: ParamMode) {
+    pub fn set_param(&self, id: LocalId, ty: Ty<R>, pos: R::Pos, param_mode: ParamMode) {
         self.genv
             .params
             .borrow_mut()
             .insert(id, (ty, pos, param_mode));
     }
 
-    pub fn get_params(&self) -> HashMap<LocalId, (Ty<R>, R::P, ParamMode)> {
+    pub fn get_params(&self) -> HashMap<LocalId, (Ty<R>, R::Pos, ParamMode)> {
         self.genv.params.borrow().clone()
     }
 
-    pub fn set_params(&self, m: HashMap<LocalId, (Ty<R>, R::P, ParamMode)>) {
+    pub fn set_params(&self, m: HashMap<LocalId, (Ty<R>, R::Pos, ParamMode)>) {
         *self.genv.params.borrow_mut() = m;
     }
 
@@ -144,7 +144,7 @@ impl<R: Reason> TEnv<R> {
         self.lenv.per_cont_env.add(TypingContKey::Next, x, ty);
     }
 
-    pub fn set_local(&self, immutable: bool, x: LocalId, ty: Ty<R>, pos: R::P) {
+    pub fn set_local(&self, immutable: bool, x: LocalId, ty: Ty<R>, pos: R::Pos) {
         // TODO(hrust): union simplification
         let expr_id = match self.lenv.per_cont_env.get(TypingContKey::Next, &x) {
             None => self.idents.make(),

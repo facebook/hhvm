@@ -53,7 +53,7 @@ impl<'a, R: Reason + 'a> ReasonsCallback<'a, R> {
         Enum::Ignore.into()
     }
 
-    pub fn invalid_type_hint(pos: R::P) -> Inner<R> {
+    pub fn invalid_type_hint(pos: R::Pos) -> Inner<R> {
         Self::retain_quickfixes(Self::of_primary_error(Primary::InvalidTypeHint(pos)))
     }
 

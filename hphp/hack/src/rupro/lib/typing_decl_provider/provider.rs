@@ -11,13 +11,13 @@ use crate::typing_decl_provider::{Class, TypingDeclCache};
 
 #[derive(Debug)]
 pub struct TypingDeclProvider<R: Reason> {
-    cache: Rc<dyn TypingDeclCache<R = R>>,
+    cache: Rc<dyn TypingDeclCache<Reason = R>>,
     folded_decl_provider: Rc<FoldedDeclProvider<R>>,
 }
 
 impl<R: Reason> TypingDeclProvider<R> {
     pub fn new(
-        cache: Rc<dyn TypingDeclCache<R = R>>,
+        cache: Rc<dyn TypingDeclCache<Reason = R>>,
         folded_decl_provider: Rc<FoldedDeclProvider<R>>,
     ) -> Self {
         Self {

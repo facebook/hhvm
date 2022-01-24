@@ -103,7 +103,7 @@ impl Typing {
         env: &TEnv<R>,
         flags: TypingFunFlags,
         return_: TypingReturnInfo<R>,
-        _pos: R::P,
+        _pos: R::Pos,
         named_body: &oxidized::aast::FuncBody<(), ()>,
         _f_kind: &oxidized::ast_defs::FunKind,
     ) -> tast::Block<R> {
@@ -127,7 +127,7 @@ impl Typing {
         env: &TEnv<R>,
         flags: TypingFunFlags,
         return_: TypingReturnInfo<R>,
-        pos: R::P,
+        pos: R::Pos,
         named_body: &oxidized::aast::FuncBody<(), ()>,
         f_kind: &oxidized::ast_defs::FunKind,
     ) -> tast::Block<R> {

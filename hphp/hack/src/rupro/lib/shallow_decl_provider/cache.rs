@@ -11,15 +11,15 @@ use crate::pos::Symbol;
 use crate::reason::Reason;
 
 pub trait ShallowDeclCache: std::fmt::Debug {
-    type R: Reason;
+    type Reason: Reason;
 
-    fn get_shallow_class(&self, name: &Symbol) -> Option<Rc<ShallowClass<Self::R>>>;
+    fn get_shallow_class(&self, name: &Symbol) -> Option<Rc<ShallowClass<Self::Reason>>>;
 
-    fn put_shallow_class(&self, name: Symbol, cls: Rc<ShallowClass<Self::R>>);
+    fn put_shallow_class(&self, name: Symbol, cls: Rc<ShallowClass<Self::Reason>>);
 
-    fn get_shallow_fun(&self, name: &Symbol) -> Option<Rc<ShallowFun<Self::R>>>;
+    fn get_shallow_fun(&self, name: &Symbol) -> Option<Rc<ShallowFun<Self::Reason>>>;
 
-    fn put_shallow_fun(&self, name: Symbol, f: Rc<ShallowFun<Self::R>>);
+    fn put_shallow_fun(&self, name: Symbol, f: Rc<ShallowFun<Self::Reason>>);
 }
 
 #[derive(Debug)]
@@ -38,21 +38,21 @@ impl<R: Reason> ShallowDeclLocalCache<R> {
 }
 
 impl<R: Reason> ShallowDeclCache for ShallowDeclLocalCache<R> {
-    type R = R;
+    type Reason = R;
 
-    fn get_shallow_class(&self, name: &Symbol) -> Option<Rc<ShallowClass<Self::R>>> {
+    fn get_shallow_class(&self, name: &Symbol) -> Option<Rc<ShallowClass<Self::Reason>>> {
         self.classes.borrow().get(name).cloned()
     }
 
-    fn put_shallow_class(&self, name: Symbol, cls: Rc<ShallowClass<Self::R>>) {
+    fn put_shallow_class(&self, name: Symbol, cls: Rc<ShallowClass<Self::Reason>>) {
         self.classes.borrow_mut().insert(name, cls);
     }
 
-    fn get_shallow_fun(&self, name: &Symbol) -> Option<Rc<ShallowFun<Self::R>>> {
+    fn get_shallow_fun(&self, name: &Symbol) -> Option<Rc<ShallowFun<Self::Reason>>> {
         self.funs.borrow().get(name).cloned()
     }
 
-    fn put_shallow_fun(&self, name: Symbol, f: Rc<ShallowFun<Self::R>>) {
+    fn put_shallow_fun(&self, name: Symbol, f: Rc<ShallowFun<Self::Reason>>) {
         self.funs.borrow_mut().insert(name, f);
     }
 }

@@ -12,7 +12,7 @@ use crate::utils::core::{Ident, LocalId};
 #[derive(Debug, Clone)]
 pub struct Local<R: Reason> {
     pub ty: Ty<R>,
-    pub pos: R::P,
+    pub pos: R::Pos,
     pub expr_id: Ident,
 }
 

@@ -1158,26 +1158,6 @@ let check_extend_abstract c_name tc =
     check_extend_abstract_typeconst ~is_final (fst c_name) (Cls.typeconsts tc)
   )
 
-exception Found of Pos_or_decl.t
-
-let contains_generic : Typing_defs.decl_ty -> Pos_or_decl.t option =
- fun ty ->
-  let visitor =
-    object
-      inherit [_] Type_visitor.decl_type_visitor as super
-
-      method! on_type env ty =
-        match get_node ty with
-        | Tgeneric _ -> raise (Found (get_pos ty))
-        | _ -> super#on_type env ty
-    end
-  in
-  try
-    visitor#on_type () ty;
-    None
-  with
-  | Found p -> Some p
-
 (** Check whether the type of a static property (class variable) contains
     any generic type parameters. Outside of traits, this is illegal as static
      * properties are shared across all generic instantiations. *)
@@ -1190,7 +1170,7 @@ let check_no_generic_static_property env tc =
            let (lazy ty) = prop.ce_type in
            let var_ty_pos = get_pos ty in
            let class_pos = Cls.pos tc in
-           match contains_generic ty with
+           match TUtils.contains_generic_decl ty with
            | None -> ()
            | Some generic_pos ->
              Option.iter

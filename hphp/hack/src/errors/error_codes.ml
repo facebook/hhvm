@@ -661,6 +661,7 @@ module Typing = struct
     | GlobalVariableWrite [@value 4459]
     | GlobalVariableInFunctionCall [@value 4460]
     | MemoizedFunctionCall [@value 4461]
+    | DiamondTraitProperty [@value 4462]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

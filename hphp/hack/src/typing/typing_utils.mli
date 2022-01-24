@@ -417,6 +417,8 @@ val simplify_unions_ref : simplify_unions ref
 
 val contains_tvar_decl : Typing_defs.decl_ty -> bool
 
+val contains_generic_decl : Typing_defs.decl_ty -> Pos_or_decl.t option
+
 val wrap_union_inter_ty_in_var :
   Typing_env_types.env ->
   Typing_defs.Reason.t ->

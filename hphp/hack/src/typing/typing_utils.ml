@@ -370,6 +370,26 @@ let contains_tvar_decl (t : decl_ty) =
   in
   finder#on_type false t
 
+exception FoundGeneric of Pos_or_decl.t
+
+let contains_generic_decl : Typing_defs.decl_ty -> Pos_or_decl.t option =
+ fun ty ->
+  let visitor =
+    object
+      inherit [_] Type_visitor.decl_type_visitor as super
+
+      method! on_type env ty =
+        match get_node ty with
+        | Tgeneric _ -> raise (FoundGeneric (get_pos ty))
+        | _ -> super#on_type env ty
+    end
+  in
+  try
+    visitor#on_type () ty;
+    None
+  with
+  | FoundGeneric p -> Some p
+
 let wrap_union_inter_ty_in_var env r ty =
   if is_union_or_inter_type ty then
     let (env, contains_unresolved_tyvars) = contains_unresolved_tyvars env ty in

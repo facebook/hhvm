@@ -9,4 +9,5 @@
   nast
   nast_eval
   nast_visitor
+  typing_utils
   utils_core))

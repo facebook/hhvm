@@ -120,6 +120,17 @@ let trait_use_pos tgenv (type_name : string) (trait_name : string) :
     | None -> Pos_or_decl.none)
   | None -> Pos_or_decl.none
 
+(* all the inherited properties of [type_name], including static properties
+ *)
+let properties tgenv (type_name : string) :
+    (string * Typing_defs.class_elt) list =
+  let decl =
+    Decl_provider.get_class ~tracing_info:tgenv.tracing_info tgenv.ctx type_name
+  in
+  match decl with
+  | Some decl -> Cls.props decl @ Cls.sprops decl
+  | None -> []
+
 (* all the inherited methods of [type_name], both instance and static methods *)
 let methods tgenv (type_name : string) : (string * Typing_defs.class_elt) list =
   let decl =
@@ -374,12 +385,12 @@ let check_reuse_final_method_allow_diamond tgenv (c : Nast.class_) : unit =
 let check_reuse_method_without_override tgenv (c : Nast.class_) : unit =
   let local_method_names = SSet.of_list (local_method_names c) in
   let seen_method_origins = ref SMap.empty in
-  List.iter (traits c) ~f:(fun (_, ut_name) ->
+  List.iter (traits c) ~f:(fun (_, used_trait_name) ->
       let local_method_origins = ref SSet.empty in
       let all_trait_ancestors =
-        SSet.of_list (all_trait_ancestors tgenv ut_name)
+        SSet.of_list (all_trait_ancestors tgenv used_trait_name)
       in
-      List.iter (methods tgenv ut_name) ~f:(fun (m_name, m) ->
+      List.iter (methods tgenv used_trait_name) ~f:(fun (m_name, m) ->
           if
             SSet.mem m.ce_origin all_trait_ancestors
             && (not (get_ce_abstract m))
@@ -392,7 +403,11 @@ let check_reuse_method_without_override tgenv (c : Nast.class_) : unit =
             then
               let (cls_pos, cls_name) = c.c_name in
               let trace1 =
-                class_to_trait_via_trait tgenv cls_name ut_name m.ce_origin
+                class_to_trait_via_trait
+                  tgenv
+                  cls_name
+                  used_trait_name
+                  m.ce_origin
               in
               let trace2 =
                 class_to_trait_via_trait
@@ -415,9 +430,86 @@ let check_reuse_method_without_override tgenv (c : Nast.class_) : unit =
                        })
             else begin
               seen_method_origins :=
-                SMap.add m.ce_origin ut_name !seen_method_origins;
+                SMap.add m.ce_origin used_trait_name !seen_method_origins;
               local_method_origins := SSet.add m.ce_origin !local_method_origins
             end))
+
+(** With diamond inclusion of traits, it is possible to write
+
+     trait Tr<T> { .. }
+     trait T1 { use Tr<int>; ..}
+     trait T2 { use Tr<string>; .. }
+     class C { use T1, T2; .. }
+
+     This is sound only if trait Tr has no mutable state of type T.
+
+     The check_diamond_import_property function below ensures that all properties
+     of reused traits do not define parametric properties.
+  *)
+let require_value_restriction t =
+  Option.is_some (Typing_utils.contains_generic_decl t)
+
+let check_diamond_import_property tgenv (c : Nast.class_) : unit =
+  (* For each trait t used by c, we update the map below, storing for each property p in t
+   * its origin and the fact that it was first imported via t
+   * So seen_properties_origins: property_name -> (origin, trait_name)
+   * If a property with a generic type is encountered via the traits t1 and t2 used by c,
+   * and the two instances of the property same origin, then report an error.
+   *)
+  let seen_properties_origins = ref SMap.empty in
+
+  List.iter (traits c) ~f:(fun (_, used_trait_name) ->
+      let all_trait_ancestors =
+        SSet.of_list (all_trait_ancestors tgenv used_trait_name)
+      in
+      List.iter (properties tgenv used_trait_name) ~f:(fun (p_name, p) ->
+          if SSet.mem p.ce_origin all_trait_ancestors then
+            match SMap.find_opt p_name !seen_properties_origins with
+            | Some (origin, trait) when String.equal origin p.ce_origin ->
+              (match
+                 Decl_provider.get_class
+                   ~tracing_info:tgenv.tracing_info
+                   tgenv.ctx
+                   origin
+               with
+              | Some class_decl ->
+                (match Cls.get_prop class_decl p_name with
+                | Some class_elt ->
+                  if require_value_restriction (Lazy.force class_elt.ce_type)
+                  then
+                    (* A property with a generic type is defined in a trait that *)
+                    let (cls_pos, cls_name) = c.c_name in
+                    let trace1 =
+                      class_to_trait_via_trait
+                        tgenv
+                        cls_name
+                        used_trait_name
+                        p.ce_origin
+                    in
+                    let trace2 =
+                      class_to_trait_via_trait tgenv cls_name trait p.ce_origin
+                    in
+                    let p_pos = Lazy.force p.ce_type |> get_pos in
+                    Errors.add_typing_error
+                      Typing_error.(
+                        primary
+                        @@ Primary.Generic_property_import_via_diamond
+                             {
+                               pos = cls_pos;
+                               class_name = cls_name;
+                               property_pos = p_pos;
+                               property_name = p_name;
+                               trace1;
+                               trace2;
+                             })
+                | None -> ())
+              | None -> ())
+            | _ ->
+              seen_properties_origins :=
+                SMap.add
+                  p_name
+                  (p.ce_origin, used_trait_name)
+                  !seen_properties_origins))
 
 let handler =
   object
@@ -435,6 +527,7 @@ let handler =
         }
       in
 
+      check_diamond_import_property tgenv c;
       if
         Naming_attributes.mem
           SN.UserAttributes.uaEnableMethodTraitDiamond

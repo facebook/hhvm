@@ -873,6 +873,14 @@ module Primary : sig
         trace1: Pos_or_decl.t Message.t list;
         trace2: Pos_or_decl.t Message.t list;
       }
+    | Generic_property_import_via_diamond of {
+        pos: Pos.t;
+        class_name: string;
+        property_pos: Pos_or_decl.t;
+        property_name: string;
+        trace1: Pos_or_decl.t Message.t list;
+        trace2: Pos_or_decl.t Message.t list;
+      }
     | Unification_cycle of {
         pos: Pos.t;
         ty_name: string Lazy.t;

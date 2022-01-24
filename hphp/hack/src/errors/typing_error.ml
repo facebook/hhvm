@@ -1834,6 +1834,14 @@ module Primary = struct
         trace1: Pos_or_decl.t Message.t list;
         trace2: Pos_or_decl.t Message.t list;
       }
+    | Generic_property_import_via_diamond of {
+        pos: Pos.t;
+        class_name: string;
+        property_pos: Pos_or_decl.t;
+        property_name: string;
+        trace1: Pos_or_decl.t Message.t list;
+        trace2: Pos_or_decl.t Message.t list;
+      }
     | Unification_cycle of {
         pos: Pos.t;
         ty_name: string Lazy.t;
@@ -3638,6 +3646,23 @@ module Primary = struct
     let msg2 = (method_pos, "Trait method is defined here") in
     (Error_code.DiamondTraitMethod, msg1, msg2 :: trace1 @ trace2, [])
 
+  let generic_property_import_via_diamond
+      pos class_name property_pos property_name trace1 trace2 =
+    let class_name = Markdown_lite.md_codify (Render.strip_ns class_name) in
+    let property_name =
+      Markdown_lite.md_codify (Render.strip_ns property_name)
+    in
+    let msg1 =
+      ( pos,
+        "Class "
+        ^ class_name
+        ^ " inherits generic trait property "
+        ^ property_name
+        ^ " via multiple traits.  Remove the multiple paths" )
+    in
+    let msg2 = (property_pos, "Trait property is defined here") in
+    (Error_code.DiamondTraitProperty, msg1, msg2 :: trace1 @ trace2, [])
+
   let unification_cycle pos ty =
     ( Error_code.UnificationCycle,
       ( pos,
@@ -4981,6 +5006,15 @@ module Primary = struct
         class_name
         method_pos
         method_name
+        trace1
+        trace2
+    | Generic_property_import_via_diamond
+        { pos; class_name; property_pos; property_name; trace1; trace2 } ->
+      generic_property_import_via_diamond
+        pos
+        class_name
+        property_pos
+        property_name
         trace1
         trace2
     | Unification_cycle { pos; ty_name } ->

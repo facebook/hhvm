@@ -101,7 +101,7 @@ impl<T: Eq + Hash + Clone> Conser<T> {
         Q: ToOwned<Owned = T> + Hash + Eq,
     {
         let mut table = self.table.lock().unwrap();
-        let rc = table.get(x.borrow()).and_then(Weak::upgrade);
+        let rc = table.get(x).and_then(Weak::upgrade);
         match rc {
             Some(rc) => Consed(rc),
             None => {

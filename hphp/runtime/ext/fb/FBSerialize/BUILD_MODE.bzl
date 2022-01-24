@@ -10,11 +10,12 @@ load("@fbcode_macros//build_defs:create_build_mode.bzl", "create_build_mode")
 # (and HHVM builds will not be affected).
 
 _mode = create_build_mode()
+_modes = {
+    "dbg": _mode,
+    "dbgo": _mode,
+    "opt": _mode,
+}
 
 def get_modes():
     """ Return modes for this file """
-    return {
-        "dbg": _mode,
-        "dbgo": _mode,
-        "opt": _mode,
-    }
+    return _modes

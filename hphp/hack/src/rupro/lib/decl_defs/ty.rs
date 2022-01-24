@@ -71,5 +71,5 @@ pub enum Visibility<R: Reason> {
     Public,
     Private(Symbol),
     Protected(Symbol),
-    Internal(PosId<R::P>),
+    Internal(PosId<R::Pos>),
 }

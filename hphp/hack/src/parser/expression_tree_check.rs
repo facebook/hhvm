@@ -15,9 +15,9 @@ struct Checker {
 }
 
 impl<'ast> Visitor<'ast> for Checker {
-    type P = AstParams<(), ()>;
+    type Params = AstParams<(), ()>;
 
-    fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+    fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
         self
     }
 

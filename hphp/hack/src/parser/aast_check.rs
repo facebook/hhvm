@@ -100,9 +100,9 @@ impl Checker {
 }
 
 impl<'ast> Visitor<'ast> for Checker {
-    type P = AstParams<Context, ()>;
+    type Params = AstParams<Context, ()>;
 
-    fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+    fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
         self
     }
 

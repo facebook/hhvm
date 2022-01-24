@@ -13,9 +13,9 @@ pub fn is_function_generator<'a>(body: &AstBody<'a>) -> (bool, bool) {
     struct S((bool, bool));
 
     impl<'ast> Visitor<'ast> for S {
-        type P = AstParams<(), ()>;
+        type Params = AstParams<(), ()>;
 
-        fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+        fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
             self
         }
 

@@ -19,9 +19,9 @@ struct Ctx<'emitter, 'arena, 'decl> {
 impl<'ast, 'arena, 'emitter, 'decl> VisitorMut<'ast>
     for RewriteXmlVisitor<'emitter, 'arena, 'decl>
 {
-    type P = AstParams<Ctx<'emitter, 'arena, 'decl>, instruction_sequence::Error>;
+    type Params = AstParams<Ctx<'emitter, 'arena, 'decl>, instruction_sequence::Error>;
 
-    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
         self
     }
 

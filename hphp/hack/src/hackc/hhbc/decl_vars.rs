@@ -65,8 +65,9 @@ impl<'a> DeclvarVisitor<'a> {
                 use aast::ClassGetExpr::*;
                 match cge {
                     CGstring(pstr) => {
-                        // TODO(thomasjiang): For this to match correctly, we need to adjust ast_to_nast
-                        // because it does not make a distinction between ID and Lvar, which is needed here
+                        // TODO(thomasjiang): For this to match correctly, we need to adjust
+                        // ast_to_nast because it does not make a distinction between ID and Lvar,
+                        // which is needed here
                         if is_call_target {
                             self.add_local(&pstr.1)
                         }
@@ -80,9 +81,9 @@ impl<'a> DeclvarVisitor<'a> {
 }
 
 impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
-    type P = AstParams<(), String>;
+    type Params = AstParams<(), String>;
 
-    fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+    fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
         self
     }
 

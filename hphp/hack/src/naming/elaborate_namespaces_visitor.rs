@@ -124,9 +124,9 @@ fn is_reserved_type_hint(name: &str) -> bool {
 struct ElaborateNamespacesVisitor {}
 
 impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
-    type P = AstParams<Env, ()>;
+    type Params = AstParams<Env, ()>;
 
-    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
         self
     }
 

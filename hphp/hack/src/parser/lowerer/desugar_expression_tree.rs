@@ -262,9 +262,9 @@ struct DollarDollarRewriter {
 }
 
 impl<'ast> VisitorMut<'ast> for DollarDollarRewriter {
-    type P = AstParams<(), ()>;
+    type Params = AstParams<(), ()>;
 
-    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
         self
     }
 
@@ -311,9 +311,9 @@ struct VoidReturnCheck {
 }
 
 impl<'ast> Visitor<'ast> for VoidReturnCheck {
-    type P = AstParams<(), ()>;
+    type Params = AstParams<(), ()>;
 
-    fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+    fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
         self
     }
 
@@ -356,9 +356,9 @@ struct NestedSpliceCheck {
 }
 
 impl<'ast> Visitor<'ast> for NestedSpliceCheck {
-    type P = AstParams<(), ()>;
+    type Params = AstParams<(), ()>;
 
-    fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+    fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
         self
     }
 

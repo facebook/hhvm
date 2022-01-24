@@ -233,9 +233,9 @@ struct Ctx<'a, 'arena, 'decl> {
 }
 
 impl<'ast, 'a, 'arena, 'decl> aast_visitor::Visitor<'ast> for ResolverVisitor<'a, 'arena, 'decl> {
-    type P = AstParams<Ctx<'a, 'arena, 'decl>, ()>;
+    type Params = AstParams<Ctx<'a, 'arena, 'decl>, ()>;
 
-    fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'ast, P = Self::P> {
+    fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'ast, Params = Self::Params> {
         self
     }
 

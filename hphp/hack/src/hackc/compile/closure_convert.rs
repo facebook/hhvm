@@ -1105,9 +1105,9 @@ struct ClosureConvertVisitor<'a, 'arena> {
 }
 
 impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
-    type P = AstParams<Env<'a, 'arena>, Error>;
+    type Params = AstParams<Env<'a, 'arena>, Error>;
 
-    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
         self
     }
 

@@ -545,9 +545,9 @@ impl Checker {
 }
 
 impl<'ast> VisitorMut<'ast> for Checker {
-    type P = AstParams<Context, ()>;
+    type Params = AstParams<Context, ()>;
 
-    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
         self
     }
 

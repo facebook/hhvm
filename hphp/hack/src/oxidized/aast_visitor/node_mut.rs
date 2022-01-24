@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<12ab8293a9b2f7474749905fcb8a52b2>>
+// @generated SignedSource<<402d57383b3308fdfb81350af7efb994>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -15,14 +15,14 @@ pub trait NodeMut<P: Params> {
     fn accept<'node>(
         &'node mut self,
         ctx: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
+        v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.recurse(ctx, v)
     }
     fn recurse<'node>(
         &'node mut self,
         ctx: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
+        v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         Ok(())
     }

@@ -606,9 +606,9 @@ impl<'a, 'arena, 'decl> FolderVisitor<'a, 'arena, 'decl> {
 }
 
 impl<'ast, 'decl> VisitorMut<'ast> for FolderVisitor<'_, '_, 'decl> {
-    type P = AstParams<(), Error>;
+    type Params = AstParams<(), Error>;
 
-    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
         self
     }
 

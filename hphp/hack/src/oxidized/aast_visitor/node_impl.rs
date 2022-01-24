@@ -33,7 +33,7 @@ where
     fn recurse<'node>(
         &'node self,
         c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
+        v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         (*self).accept(c, v)
     }
@@ -46,7 +46,7 @@ where
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
+        v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         (*self).accept(c, v)
     }
@@ -60,7 +60,7 @@ where
     fn recurse<'node>(
         &'node self,
         c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
+        v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         match self {
             Either::Left(i) => i.accept(c, v),
@@ -77,7 +77,7 @@ where
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
+        v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         match self {
             Either::Left(i) => i.accept(c, v),
@@ -93,7 +93,7 @@ where
     fn recurse<'node>(
         &'node self,
         c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
+        v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         Ok(for i in *self {
             i.accept(c, v)?;
@@ -108,7 +108,7 @@ where
     fn recurse<'node>(
         &'node self,
         c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
+        v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         Ok(for i in self {
             i.accept(c, v)?;
@@ -123,7 +123,7 @@ where
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
+        v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         Ok(for i in self {
             i.accept(c, v)?;
@@ -138,7 +138,7 @@ where
     fn recurse<'node>(
         &'node self,
         c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
+        v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         Ok(match self {
             Some(t) => t.accept(c, v)?,
@@ -154,7 +154,7 @@ where
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
+        v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         Ok(match self {
             Some(t) => t.accept(c, v)?,
@@ -170,7 +170,7 @@ where
     fn recurse<'node>(
         &'node self,
         c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
+        v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         Ok(for value in self.values() {
             value.accept(c, v)?;
@@ -185,7 +185,7 @@ where
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
+        v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         Ok(for value in self.values_mut() {
             value.accept(c, v)?;
@@ -200,7 +200,7 @@ where
     fn recurse<'node>(
         &'node self,
         c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
+        v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.as_ref().accept(c, v)
     }
@@ -213,7 +213,7 @@ where
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
+        v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         Ok(if let Some(x) = RcOc::get_mut(self) {
             x.accept(c, v)?;
@@ -228,7 +228,7 @@ where
     fn recurse<'node>(
         &'node self,
         c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
+        v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.as_ref().accept(c, v)
     }
@@ -241,7 +241,7 @@ where
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
+        v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         Ok(if let Some(x) = std::rc::Rc::get_mut(self) {
             x.accept(c, v)?;
@@ -256,7 +256,7 @@ where
     fn recurse<'node>(
         &'node self,
         c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
+        v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.as_ref().accept(c, v)
     }
@@ -269,7 +269,7 @@ where
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
+        v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.as_mut().accept(c, v)
     }
@@ -283,7 +283,7 @@ where
     fn recurse<'node>(
         &'node self,
         c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
+        v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)
@@ -299,7 +299,7 @@ where
     fn recurse<'node>(
         &'node self,
         c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
+        v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)?;
@@ -317,7 +317,7 @@ where
     fn recurse<'node>(
         &'node self,
         c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
+        v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)?;
@@ -334,7 +334,7 @@ where
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
+        v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)
@@ -350,7 +350,7 @@ where
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
+        v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)?;
@@ -368,7 +368,7 @@ where
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
+        v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         self.0.accept(c, v)?;
         self.1.accept(c, v)?;
@@ -381,7 +381,7 @@ impl<P: Params> Node<P> for crate::LocalIdMap<(Pos, P::Ex)> {
     fn recurse<'node>(
         &'node self,
         c: &mut P::Context,
-        v: &mut dyn Visitor<'node, P = P>,
+        v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         Ok(for (key, value) in self.0.iter() {
             key.accept(c, v)?;
@@ -398,7 +398,7 @@ impl<P: Params> NodeMut<P> for crate::LocalIdMap<(Pos, P::Ex)> {
     fn recurse<'node>(
         &'node mut self,
         c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, P = P>,
+        v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         Ok(for value in self.0.values_mut() {
             v.visit_ex(c, &mut value.1)?

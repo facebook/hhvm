@@ -220,9 +220,9 @@ mod inout_locals {
     }
 
     impl<'r, 'ast: 'r, 'arena: 'r> aast_visitor::Visitor<'ast> for Visitor<'r, 'arena> {
-        type P = aast_visitor::AstParams<Ctx<'r, 'ast, 'arena>, ()>;
+        type Params = aast_visitor::AstParams<Ctx<'r, 'ast, 'arena>, ()>;
 
-        fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'ast, P = Self::P> {
+        fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'ast, Params = Self::Params> {
             self
         }
 
@@ -6801,9 +6801,9 @@ pub fn fixup_type_arg<'a, 'b, 'arena>(
         isas: bool,
     }
     impl<'ast, 's> Visitor<'ast> for Checker<'s> {
-        type P = AstParams<(), Option<Error>>;
+        type Params = AstParams<(), Option<Error>>;
 
-        fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+        fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
             self
         }
 
@@ -6846,15 +6846,15 @@ pub fn fixup_type_arg<'a, 'b, 'arena>(
         erased_tparams: &'s [&'s str],
     }
     impl<'ast, 's> VisitorMut<'ast> for Updater<'s> {
-        type P = AstParams<(), ()>;
+        type Params = AstParams<(), ()>;
 
-        fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
+        fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
             self
         }
 
         fn visit_hint_fun(&mut self, c: &mut (), hf: &mut ast::HintFun) -> StdResult<(), ()> {
-            <Vec<ast::Hint> as NodeMut<Self::P>>::accept(&mut hf.param_tys, c, self.object())?;
-            <ast::Hint as NodeMut<Self::P>>::accept(&mut hf.return_ty, c, self.object())
+            <Vec<ast::Hint> as NodeMut<Self::Params>>::accept(&mut hf.param_tys, c, self.object())?;
+            <ast::Hint as NodeMut<Self::Params>>::accept(&mut hf.return_ty, c, self.object())
         }
 
         fn visit_hint_(&mut self, c: &mut (), h: &mut ast::Hint_) -> StdResult<(), ()> {
@@ -6906,9 +6906,9 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
     }
 
     impl<'ast, 'a> Visitor<'ast> for Collector<'ast, 'a> {
-        type P = AstParams<(), ()>;
+        type Params = AstParams<(), ()>;
 
-        fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+        fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
             self
         }
 

@@ -635,9 +635,9 @@ fn token_kind<'a>(node: S<'a>) -> Option<TK> {
 fn check_valid_reified_hint<'a>(env: &mut Env<'a>, node: S<'a>, hint: &ast::Hint) {
     struct Checker<F: FnMut(&String)>(F);
     impl<'ast, F: FnMut(&String)> Visitor<'ast> for Checker<F> {
-        type P = AstParams<(), ()>;
+        type Params = AstParams<(), ()>;
 
-        fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+        fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
             self
         }
 

@@ -34,7 +34,7 @@ trait NodeTrait {
                 fn accept<#node_lifetime>(
                     #receiver,
                     ctx: &mut P::#context,
-                    v: &mut dyn #visitor<#node_lifetime, P = P>,
+                    v: &mut dyn #visitor<#node_lifetime, Params = P>,
                 ) -> Result<(), P::#error> {
                     self.recurse(ctx, v)
                 }
@@ -42,7 +42,7 @@ trait NodeTrait {
                 fn recurse<#node_lifetime>(
                     #receiver,
                     ctx: &mut P::#context,
-                    v: &mut dyn #visitor<#node_lifetime, P = P>,
+                    v: &mut dyn #visitor<#node_lifetime, Params = P>,
                 ) -> Result<(), P::#error> {
                     Ok(())
                 }

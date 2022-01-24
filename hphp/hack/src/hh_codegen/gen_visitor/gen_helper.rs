@@ -20,7 +20,7 @@ pub fn gen_ty_params(tys: impl Iterator<Item = syn::Ident>) -> TokenStream {
 
 pub fn gen_ty_params_with_self(tys: impl Iterator<Item = syn::Ident>) -> TokenStream {
     let ty_idents = tys
-        .map(|ty| quote! { <Self::P as Params>::#ty, })
+        .map(|ty| quote! { <Self::Params as Params>::#ty, })
         .collect::<Vec<_>>();
     if ty_idents.is_empty() {
         quote! {}

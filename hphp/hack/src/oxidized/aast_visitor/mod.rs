@@ -45,8 +45,8 @@ mod tests {
     #[test]
     fn simple() {
         impl<'ast> Visitor<'ast> for usize {
-            type P = type_params_defaults::P<(), (), (), ()>;
-            fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+            type Params = type_params_defaults::P<(), (), (), ()>;
+            fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
                 self
             }
 
@@ -69,8 +69,8 @@ mod tests {
     #[test]
     fn simple_mut() {
         impl<'ast> VisitorMut<'ast> for () {
-            type P = type_params_defaults::P<(), (), (), ()>;
-            fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
+            type Params = type_params_defaults::P<(), (), (), ()>;
+            fn object(&mut self) -> &mut dyn VisitorMut<'ast, Params = Self::Params> {
                 self
             }
 
@@ -105,12 +105,16 @@ mod tests {
         use std::collections::BTreeMap;
 
         impl<'ast> Visitor<'ast> for u8 {
-            type P = type_params_defaults::P<(), (), u8, ()>;
-            fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
+            type Params = type_params_defaults::P<(), (), u8, ()>;
+            fn object(&mut self) -> &mut dyn Visitor<'ast, Params = Self::Params> {
                 self
             }
 
-            fn visit_ex(&mut self, _: &mut (), p: &u8) -> Result<(), <Self::P as Params>::Error> {
+            fn visit_ex(
+                &mut self,
+                _: &mut (),
+                p: &u8,
+            ) -> Result<(), <Self::Params as Params>::Error> {
                 Ok(*self += p)
             }
         }

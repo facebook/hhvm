@@ -65,7 +65,7 @@ pub trait NodeImpl {
                 fn accept<#node_lifetime>(
                     #self_ref_kind self,
                     c: &mut P::#context,
-                    v: &mut dyn #visitor_trait_name<#node_lifetime, P = P>
+                    v: &mut dyn #visitor_trait_name<#node_lifetime, Params = P>
                 ) -> Result<(), P::#error> {
                     v.#visit_fn(c, self)
                 }
@@ -73,7 +73,7 @@ pub trait NodeImpl {
                 fn recurse<#node_lifetime>(
                     #self_ref_kind self,
                     c: &mut P::#context,
-                    v: &mut dyn #visitor_trait_name<#node_lifetime, P = P>
+                    v: &mut dyn #visitor_trait_name<#node_lifetime, Params = P>
                 ) -> Result<(), P::#error> {
                     #recurse_body
                 }

@@ -38,9 +38,9 @@ pub trait VisitorTrait {
             #node_dispatcher_function
 
             pub trait #trait_name<#lifetime> {
-                type P: Params;
+                type Params: Params;
 
-                fn object(&mut self) -> &mut dyn #trait_name<#lifetime, P = Self::P>;
+                fn object(&mut self) -> &mut dyn #trait_name<#lifetime, Params = Self::Params>;
 
                 #(#visit_ty_params)*
 
@@ -60,7 +60,7 @@ pub trait VisitorTrait {
             .map(|ty| {
                 let name = gen_visit_fn_name(ty.to_string());
                 quote! {
-                    fn #name(&mut self, c: &mut <Self::P as Params>::#context, p: #ref_kind <Self::P as Params>::#ty) ->  Result<(), <Self::P as Params>::#error> {
+                    fn #name(&mut self, c: &mut <Self::Params as Params>::#context, p: #ref_kind <Self::Params as Params>::#ty) ->  Result<(), <Self::Params as Params>::#error> {
                         Ok(())
                     }
                 }
@@ -85,7 +85,7 @@ pub trait VisitorTrait {
             let name = gen_visit_fn_name(ty);
             let ty = format_ident!("{}", ty);
             visit_fn.push(quote! {
-                fn #name(&mut self, c: &mut <Self::P as Params>::#context, p: #ref_kind #ty #ty_args) -> Result<(), <Self::P as Params>::#error> {
+                fn #name(&mut self, c: &mut <Self::Params as Params>::#context, p: #ref_kind #ty #ty_args) -> Result<(), <Self::Params as Params>::#error> {
                     p.recurse(c, self.object())
                 }
             });
@@ -102,7 +102,7 @@ pub trait VisitorTrait {
         let node_trait_name = Self::node_trait_name();
         Ok(quote! {
             pub fn visit<#lifetime, P: Params>(
-                v: &mut impl #visitor_trait_name<#lifetime, P = P>,
+                v: &mut impl #visitor_trait_name<#lifetime, Params = P>,
                 c: &mut P::#context,
                 p: #node_ref_kind impl #node_trait_name<P>,
             ) -> Result<(), P::#error> {

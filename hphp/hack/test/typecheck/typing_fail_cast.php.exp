@@ -6,9 +6,9 @@ File "typing_fail_cast.php", line 17, characters 41-41:
 Cannot implement `B` - it is not an interface (NastCheck[3013])
 File "typing_fail_cast.php", line 17, characters 7-7:
 This type doesn't implement the method `g` (Typing[4054])
-File "typing_fail_cast.php", line 17, characters 41-41:
-Which is required by this interface
-File "typing_fail_cast.php", line 13, characters 19-19:
-As defined here
+  File "typing_fail_cast.php", line 17, characters 41-41:
+  Which is required by this interface
+  File "typing_fail_cast.php", line 13, characters 19-19:
+  As defined here
 File "typing_fail_cast.php", line 24, characters 13-13:
 Unbound name (typing): `A` (Typing[4107])

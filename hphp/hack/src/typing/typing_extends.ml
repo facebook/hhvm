@@ -200,37 +200,19 @@ let get_member member_kind class_ =
   | MemberKind.Static_method -> Cls.get_smethod class_
   | MemberKind.Constructor _ -> (fun _ -> fst (Cls.construct class_))
 
-(* Check that all the required members are implemented *)
-let check_members_implemented
-    class_ parent_name parent_reason reason (member_kind, parent_members) =
-  List.iter parent_members ~f:(fun (member_name, class_elt) ->
-      match class_elt.ce_visibility with
-      | Vprivate _ -> ()
-      | _ when Option.is_none (get_member member_kind class_ member_name) ->
-        let (lazy defn_pos) = class_elt.ce_pos in
-        let quickfixes =
-          [
-            stub_meth_quickfix
-              (Cls.name class_)
-              parent_name
-              member_name
-              class_elt;
-          ]
-        in
-        let err =
-          Typing_error.(
-            primary
-            @@ Primary.Member_not_implemented
-                 {
-                   member_name;
-                   parent_pos = parent_reason;
-                   pos = reason;
-                   decl_pos = defn_pos;
-                   quickfixes;
-                 })
-        in
-        Errors.add_typing_error err
-      | _ -> ())
+let member_not_implemented_error
+    class_name parent_name member_name class_elt pos parent_pos =
+  let (lazy defn_pos) = class_elt.ce_pos in
+  let quickfixes =
+    [stub_meth_quickfix class_name parent_name member_name class_elt]
+  in
+  let err =
+    Typing_error.(
+      primary
+      @@ Primary.Member_not_implemented
+           { member_name; parent_pos; pos; decl_pos = defn_pos; quickfixes })
+  in
+  Errors.add_typing_error err
 
 let check_subtype_methods
     env ~check_return on_error (r_ancestor, ft_ancestor) (r_child, ft_child) ()
@@ -646,7 +628,7 @@ let conflict_with_declared_interface_or_trait
       if strict_const_semantics && include_traits then
         true
       else
-        List.fold implements ~init:false ~f:(fun acc iface ->
+        List.fold implements ~init:false ~f:(fun acc (_, iface) ->
             acc
             ||
             match Cls.get_const iface const_name with
@@ -909,7 +891,15 @@ let check_class_against_parent_class_elt
         (on_error (parent_name_pos, Cls.name parent_class))
   | None ->
     (* The only case when a member belongs to a parent but not the child is if the parent is an
-       interface and the child is a concrete class. Otherwise, the member would have been inherited. *)
+       interface and the child is a concrete class. Otherwise, the member would have been inherited.
+       In this case, this is an error because the concrete class fails to implement the parent interface. *)
+    member_not_implemented_error
+      (Cls.name class_)
+      (Cls.name parent_class)
+      member_name
+      parent_class_elt
+      class_pos
+      parent_name_pos;
     env
 
 let check_members_from_all_parents
@@ -1340,6 +1330,8 @@ let check_typeconsts
           parent_class
           on_error
       | None ->
+        (* The only case when a member belongs to a parent but not the child is if the parent is an
+           interface and the child is a concrete class. Otherwise, the member would have been inherited. *)
         let err =
           Typing_error.(
             primary
@@ -1398,7 +1390,7 @@ let check_consts env implements parent_class (name_pos, class_) psubst on_error
  *   "Class ... does not correctly implement all required members"
  * message pointing at the class being checked.
  *)
-let check_class_implements_parent
+let check_class_extends_parent
     env
     implements
     (parent_class : pos_id * decl_ty list * Cls.t)
@@ -1407,23 +1399,12 @@ let check_class_implements_parent
   let env =
     check_typeconsts env implements parent_class (name_pos, class_) on_error
   in
-  let ((parent_pos, _parent_name), parent_tparaml, parent_class) =
-    parent_class
-  in
+  let (_, parent_tparaml, parent_class) = parent_class in
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
   let env =
     check_consts env implements parent_class (name_pos, class_) psubst on_error
   in
   let env = check_constructors env parent_class class_ psubst on_error in
-  let memberl = make_all_members ~parent_class in
-  List.iter
-    memberl
-    ~f:
-      (check_members_implemented
-         class_
-         (Cls.name parent_class)
-         parent_pos
-         name_pos);
   env
 
 (** Eliminate all synthesized members (those from requirements) plus
@@ -1478,7 +1459,7 @@ let fold_parent_members parents : ClassEltWParentSet.t SMap.t MemberKindMap.t =
   |> List.map ~f:make_parent_member_map
   |> List.fold ~init:MemberKindMap.empty ~f:merge_member_maps
 
-let check_class_implements_parents
+let check_class_extends_parents
     env
     (class_name_pos, class_)
     (parents : (pos_id * decl_ty list * Cls.t) list)
@@ -1511,13 +1492,13 @@ let check_class_implements_parents
     so A::foo needs to be a subtype of T::foo.
   *)
 let check_implements_extends_uses env ~implements ~parents (name_pos, class_) =
-  let get_interfaces acc x =
-    let (_, (_, name), _) = TUtils.unwrap_class_type x in
-    match Env.get_class env name with
-    | Some iface -> iface :: acc
-    | None -> acc
+  let implements =
+    let decl_ty_to_cls x =
+      let (_, (pos, name), _) = TUtils.unwrap_class_type x in
+      Env.get_class env name >>| fun class_ -> (pos, class_)
+    in
+    List.filter_map implements ~f:decl_ty_to_cls
   in
-  let implements = List.fold ~f:get_interfaces ~init:[] implements in
   let on_error (parent_name_pos, parent_name) : Typing_error.Reasons_callback.t
       =
     (* sadly, enum error reporting requires this to keep the error in the file
@@ -1540,7 +1521,7 @@ let check_implements_extends_uses env ~implements ~parents (name_pos, class_) =
   in
   let env =
     List.fold ~init:env parents ~f:(fun env ((parent_name, _, _) as parent) ->
-        check_class_implements_parent
+        check_class_extends_parent
           env
           implements
           parent
@@ -1548,6 +1529,6 @@ let check_implements_extends_uses env ~implements ~parents (name_pos, class_) =
           (on_error parent_name))
   in
   let env =
-    check_class_implements_parents env (name_pos, class_) parents on_error
+    check_class_extends_parents env (name_pos, class_) parents on_error
   in
   env

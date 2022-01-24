@@ -379,6 +379,23 @@ let add_member_dep
       (Dep.Type (Cls.name class_))
       dep
 
+let detect_multiple_concrete_defs class_elt class_ parent_class_elt parent_class
+    =
+  (* We want to check if there are conflicting trait declarations of a class member.
+   * If the parent we are checking is a trait and the member's origin both isn't
+   * that parent and isn't the class itself, then it must come from another trait
+   * and there is a conflict.
+   *
+   * We rule out cases where any of the traits' member
+   * is synthetic (from a requirement) or abstract. *)
+  match Cls.kind parent_class with
+  | Ast_defs.Ctrait ->
+    (not (get_ce_synthesized class_elt))
+    && (not (get_ce_abstract class_elt))
+    && (not (get_ce_abstract parent_class_elt))
+    && String.( <> ) class_elt.ce_origin (Cls.name class_)
+  | Ast_defs.(Cinterface | Cclass _ | Cenum | Cenum_class _) -> false
+
 let check_compatible_sound_dynamic_attributes
     env member_name member_kind parent_class_elt class_elt on_error =
   if
@@ -445,8 +462,6 @@ let check_multiple_concrete_definitions
   if
     check_member_unique
     && (MemberKind.is_functional member_kind || get_ce_const class_elt)
-    && (not (get_ce_abstract parent_class_elt))
-    && not (get_ce_abstract class_elt)
   then
     (* Multiple concrete trait definitions, error *)
     Errors.add_typing_error
@@ -691,7 +706,7 @@ let check_const_override
       && is_concrete parent_class_const.cc_abstract
     in
     let const_interface_or_trait_member_not_unique =
-      (* Similar to should_check_member_unique, we check if there are multiple
+      (* Similar to detect_multiple_concrete_defs, we check if there are multiple
          concrete implementations of class constants with no override.
       *)
       conflict_with_declared_interface_or_trait
@@ -838,25 +853,6 @@ let check_inherited_member_is_dynamically_callable
     | Ast_defs.Cenum ->
       ()
 
-let should_check_member_unique class_elt class_ parent_class =
-  (* We want to check if there are conflicting trait or interface declarations
-   * of a class member. This means that if the parent class is a trait or interface,
-   * we need to check that the child member is *uniquely inherited*.
-   *
-   * A member is uniquely inherited if any of the following hold:
-   * 1. It is synthetic (from a requirement)
-   * 2. It is defined on the child class
-   * 3. It is concretely defined in exactly one place
-   * 4. It is abstract, and all other declarations are identical *)
-  match Cls.kind parent_class with
-  | Ast_defs.Cinterface
-  | Ast_defs.Ctrait ->
-    (* Synthetic  *)
-    (not (get_ce_synthesized class_elt))
-    (* defined on original class *)
-    && String.( <> ) class_elt.ce_origin (Cls.name class_)
-  | Ast_defs.(Cclass _ | Cenum | Cenum_class _) -> false
-
 let check_class_against_parent_class_elt
     on_error
     (class_pos, class_)
@@ -880,7 +876,11 @@ let check_class_against_parent_class_elt
          essentially comparing a method against itself *)
       check_override
         ~check_member_unique:
-          (should_check_member_unique class_elt class_ parent_class)
+          (detect_multiple_concrete_defs
+             class_elt
+             class_
+             parent_class_elt
+             parent_class)
         env
         member_name
         member_kind

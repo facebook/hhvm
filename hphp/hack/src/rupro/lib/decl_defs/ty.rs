@@ -65,3 +65,11 @@ impl<REASON: Reason> DeclTy<REASON> {
         }
     }
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Visibility<R: Reason> {
+    Public,
+    Private(Symbol),
+    Protected(Symbol),
+    Internal(PosId<R::P>),
+}

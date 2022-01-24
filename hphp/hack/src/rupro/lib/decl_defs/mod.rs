@@ -8,4 +8,4 @@ mod ty;
 
 pub use folded::{FoldedClass, FoldedElement, SubstContext};
 pub use shallow::{ShallowClass, ShallowFun, ShallowMethod};
-pub use ty::{DeclTy, DeclTy_, FunParam, FunType, Prim, Visibility};
+pub use ty::{CeVisibility, DeclTy, DeclTy_, FunParam, FunType, Prim};

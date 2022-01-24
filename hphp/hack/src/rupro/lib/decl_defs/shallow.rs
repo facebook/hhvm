@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 #![allow(unused)]
-use crate::decl_defs::DeclTy;
+use crate::decl_defs::{CeVisibility, DeclTy};
 use crate::pos::PosId;
 use crate::reason::Reason;
 
@@ -17,6 +17,7 @@ pub struct ShallowFun<R: Reason> {
 pub struct ShallowMethod<R: Reason> {
     pub sm_name: PosId<R::Pos>,
     pub sm_type: DeclTy<R>,
+    pub sm_visibility: oxidized::ast_defs::Visibility,
 }
 
 #[derive(Debug)]

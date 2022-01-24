@@ -121,6 +121,7 @@ impl<R: Reason> ShallowDeclUtils<R> {
         ShallowMethod {
             sm_name: decl_tys.get_pos_provider().mk_pos_id_of_ref::<R>(sm.name),
             sm_type: decl_tys.mk_decl_ty_from_parsed(sm.type_),
+            sm_visibility: sm.visibility,
         }
     }
 

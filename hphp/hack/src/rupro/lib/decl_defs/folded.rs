@@ -5,13 +5,14 @@
 #![allow(unused)]
 use std::collections::HashMap;
 
-use crate::decl_defs::DeclTy;
+use crate::decl_defs::{CeVisibility, DeclTy};
 use crate::pos::Symbol;
 use crate::reason::Reason;
 
 #[derive(Debug, Clone)]
-pub struct FoldedElement {
+pub struct FoldedElement<R: Reason> {
     pub elt_origin: Symbol,
+    pub elt_visibility: CeVisibility<R>,
 }
 
 #[derive(Debug, Clone)]
@@ -26,5 +27,5 @@ pub struct FoldedClass<R: Reason> {
     pub dc_pos: R::Pos,
     pub dc_substs: HashMap<Symbol, SubstContext<R>>,
     pub dc_ancestors: HashMap<Symbol, DeclTy<R>>,
-    pub dc_methods: HashMap<Symbol, FoldedElement>,
+    pub dc_methods: HashMap<Symbol, FoldedElement<R>>,
 }

@@ -5,7 +5,9 @@
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 
-use crate::decl_defs::{DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass, ShallowMethod};
+use crate::decl_defs::{
+    CeVisibility, DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass, ShallowMethod,
+};
 use crate::folded_decl_provider::FoldedDeclCache;
 use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
 use crate::pos::{PosId, Symbol};
@@ -45,14 +47,25 @@ impl<R: Reason> FoldedDeclProvider<R> {
         false
     }
 
+    fn visibility(&self, sym: &Symbol, vis: oxidized::ast_defs::Visibility) -> CeVisibility<R> {
+        use oxidized::ast_defs::Visibility;
+        match vis {
+            Visibility::Public => CeVisibility::Public,
+            Visibility::Private => CeVisibility::Private(sym.clone()),
+            Visibility::Protected => CeVisibility::Protected(sym.clone()),
+            Visibility::Internal => unimplemented!(), // Take modules into account.
+        }
+    }
+
     fn decl_method(
         &self,
-        methods: &mut HashMap<Symbol, FoldedElement>,
+        methods: &mut HashMap<Symbol, FoldedElement<R>>,
         sc: &ShallowClass<R>,
         sm: &ShallowMethod<R>,
     ) {
         let elt = FoldedElement {
             elt_origin: sc.sc_name.id().clone(),
+            elt_visibility: self.visibility(sc.sc_name.id(), sm.sm_visibility),
         };
         methods.insert(sm.sm_name.id().clone(), elt);
     }

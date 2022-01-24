@@ -67,7 +67,7 @@ impl<R: Reason> DeclTy<R> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum Visibility<R: Reason> {
+pub enum CeVisibility<R: Reason> {
     Public,
     Private(Symbol),
     Protected(Symbol),

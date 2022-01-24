@@ -12,7 +12,7 @@ use crate::reason::Reason;
 
 pub(crate) struct Inherited<R: Reason> {
     pub(crate) ih_substs: HashMap<Symbol, SubstContext<R>>,
-    pub(crate) ih_methods: HashMap<Symbol, FoldedElement>,
+    pub(crate) ih_methods: HashMap<Symbol, FoldedElement<R>>,
 }
 
 impl<R: Reason> Inherited<R> {
@@ -23,7 +23,7 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
-    fn should_keep_old_sig(_new_sig: &FoldedElement, _old_sig: &FoldedElement) -> bool {
+    fn should_keep_old_sig(_new_sig: &FoldedElement<R>, _old_sig: &FoldedElement<R>) -> bool {
         true
     }
 
@@ -33,7 +33,7 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
-    fn add_methods(&mut self, other_methods: HashMap<Symbol, FoldedElement>) {
+    fn add_methods(&mut self, other_methods: HashMap<Symbol, FoldedElement<R>>) {
         for (key, mut fe) in other_methods {
             match self.ih_methods.entry(key.clone()) {
                 Entry::Vacant(entry) => {

@@ -4,9 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::rc::Rc;
 
-use crate::decl_defs::{DeclTy, DeclTy_, FunParam, FunType, Prim, Visibility};
+use crate::decl_defs::{DeclTy, DeclTy_, FunParam, FunType, Prim};
 use crate::hcons::Conser;
-use crate::pos::Symbol;
 use crate::pos_provider::PosProvider;
 use crate::reason::Reason;
 
@@ -31,10 +30,6 @@ impl<R: Reason> DeclTyProvider<R> {
 
     pub fn mk_decl_ty(&self, reason: R, ty: &DeclTy_<R, DeclTy<R>>) -> DeclTy<R> {
         DeclTy::new(reason, self.decl_tys.mk(ty))
-    }
-
-    fn mk_symbol(&self, s: &str) -> Symbol {
-        self.pos_provider.mk_symbol(s)
     }
 
     fn mk_aast_prim_from_parsed(prim: &oxidized_by_ref::aast_defs::Tprim) -> Prim {
@@ -100,20 +95,5 @@ impl<R: Reason> DeclTyProvider<R> {
         };
 
         self.mk_decl_ty(reason, &ty)
-    }
-
-    pub fn mk_visibility(
-        &self,
-        vis: &oxidized_by_ref::typing_defs::CeVisibility<'_>,
-    ) -> Visibility<R> {
-        use oxidized_by_ref::{ast_defs::Id, typing_defs::CeVisibility};
-        match vis {
-            CeVisibility::Vpublic => Visibility::Public,
-            CeVisibility::Vprivate(id) => Visibility::Private(self.mk_symbol(id)),
-            CeVisibility::Vprotected(id) => Visibility::Protected(self.mk_symbol(id)),
-            CeVisibility::Vinternal(&Id(pos, id)) => {
-                Visibility::Internal(self.pos_provider.mk_pos_id_of_ref::<R>((pos, id)))
-            }
-        }
     }
 }

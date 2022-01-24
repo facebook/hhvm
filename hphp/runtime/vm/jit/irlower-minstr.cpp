@@ -620,16 +620,7 @@ void cgCheckArrayCOW(IRLS& env, const IRInstruction* inst) {
 
 void cgCopyArray(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  auto const copy = [&] {
-    auto const arr = inst->src(0)->type();
-    if (allowBespokeArrayLikes()) {
-      return copyFuncForArrayLike(arr);
-    }
-    if (arr <= TVec)    return CallSpec::direct(&VanillaVec::Copy);
-    if (arr <= TDict)   return CallSpec::direct(&VanillaDict::Copy);
-    if (arr <= TKeyset) return CallSpec::direct(&VanillaKeyset::Copy);
-    return CallSpec::method(&ArrayData::copy);
-  }();
+  auto const copy = copyFuncForArrayLike(inst->src(0)->type());
   auto const args = argGroup(env, inst).ssa(0);
   cgCallHelper(v, env, copy, callDest(env, inst), SyncOptions::None, args);
 }

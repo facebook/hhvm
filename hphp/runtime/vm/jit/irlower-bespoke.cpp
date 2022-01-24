@@ -53,6 +53,15 @@ bool maybeLogging(Type t) {
   auto const loggingArray = TArrLike.narrowToLayout(loggingLayout);
   return t.maybe(loggingArray);
 }
+
+bool arrayLikeIsVanilla(const Type& type) {
+  if (!allowBespokeArrayLikes()) return true;
+  if (type.arrSpec().layout().vanilla()) return true;
+  if (type.isKnownDataType() && !arrayTypeCouldBeBespoke(type.toDataType())) {
+    return true;
+  }
+  return false;
+}
 }
 
 void cgLogArrayReach(IRLS& env, const IRInstruction* inst) {
@@ -114,7 +123,7 @@ void cgProfileArrLikeProps(IRLS& env, const IRInstruction* inst) {
         return CallSpec::direct(BespokeArray::Fn);                  \
       }                                                             \
     }                                                               \
-    if (layout.vanilla()) {                                         \
+    if (arrayLikeIsVanilla(arr)) {                                  \
       if (arr <= TVec)    return CallSpec::direct(VanillaVec::Fn);  \
       if (arr <= TDict)   return CallSpec::direct(VanillaDict::Fn); \
       if (arr <= TKeyset) return CallSpec::direct(VanillaKeyset::Fn);\
@@ -133,7 +142,7 @@ void cgProfileArrLikeProps(IRLS& env, const IRInstruction* inst) {
         return CallSpec::direct(BespokeArray::Fn);                           \
       }                                                                      \
     }                                                                        \
-    if (layout.vanilla()) {                                                  \
+    if (arrayLikeIsVanilla(arr)) {                                           \
       if (arr <= TVec) {                                                     \
         return CallSpec::direct(SynthesizedArrayFunctions<VanillaVec>::Fn);  \
       }                                                                      \
@@ -149,13 +158,11 @@ void cgProfileArrLikeProps(IRLS& env, const IRInstruction* inst) {
 
 CallSpec destructorForArrayLike(Type arr) {
   assertx(arr <= TArrLike);
-  assertx(allowBespokeArrayLikes());
   return CALL_TARGET(arr, Release, CallSpec::method(&ArrayData::release));
 }
 
 CallSpec copyFuncForArrayLike(Type arr) {
   assertx(arr <= TArrLike);
-  assertx(allowBespokeArrayLikes());
   return CALL_TARGET(arr, Copy, CallSpec::method(&ArrayData::copy));
 }
 

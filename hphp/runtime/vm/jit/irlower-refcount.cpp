@@ -231,9 +231,7 @@ float decRefDestroyedPercent(Vout& v, IRLS& /*env*/,
 CallSpec makeDtorCall(Vout& v, Type ty, Vloc loc, ArgGroup& args) {
   // Even if allowBespokeArrayLikes() is true, we can optimize destructors
   // if we have some layout information about the given array-like.
-  if (ty <= TArrLike && allowBespokeArrayLikes()) {
-    return destructorForArrayLike(ty);
-  }
+  if (ty <= TArrLike)  return destructorForArrayLike(ty);
 
   if (ty <= TObj) {
     if (auto const cls = ty.clsSpec().cls()) {

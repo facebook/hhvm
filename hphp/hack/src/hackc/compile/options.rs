@@ -261,7 +261,6 @@ prefixed_flags!(
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
     ENABLE_ENUM_CLASSES,
     ENABLE_XHP_CLASS_MODIFIER,
-    DISABLE_ARRAY_CAST,
     DISABLE_ARRAY_TYPEHINT,
     DISABLE_ARRAY,
     RUST_EMITTER,
@@ -682,9 +681,6 @@ mod tests {
   "hhvm.hack.lang.disable_array": {
     "global_value": false
   },
-  "hhvm.hack.lang.disable_array_cast": {
-    "global_value": false
-  },
   "hhvm.hack.lang.disable_array_typehint": {
     "global_value": false
   },
@@ -1103,7 +1099,7 @@ bitflags! {
         const DISABLE_XHP_ELEMENT_MANGLING = 1 << 49;
         const DISABLE_ARRAY = 1 << 50;
         const RUST_EMITTER = 1 << 51;
-        const DISABLE_ARRAY_CAST = 1 << 52;
+        // No longer using bit 52.
         const DISABLE_ARRAY_TYPEHINT = 1 << 53;
         // No longer using bit 54.
         const ALLOW_UNSTABLE_FEATURES = 1 << 55;

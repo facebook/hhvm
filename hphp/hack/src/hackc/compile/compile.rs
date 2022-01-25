@@ -99,7 +99,7 @@ bitflags! {
         const CONST_DEFAULT_FUNC_ARGS=1 << 3;
         const CONST_STATIC_PROPS=1 << 4;
         const DISABLE_ARRAY=1 << 5;
-        const DISABLE_ARRAY_CAST=1 << 6;
+        // No longer using bit 6
         const DISABLE_ARRAY_TYPEHINT=1 << 7;
         const DISABLE_LVAL_AS_AN_EXPRESSION=1 << 8;
         const DISABLE_UNSET_CLASS_CONST=1 << 9;
@@ -192,9 +192,6 @@ impl ParserFlags {
         }
         if self.contains(ParserFlags::DISABLE_ARRAY) {
             f |= LangFlags::DISABLE_ARRAY;
-        }
-        if self.contains(ParserFlags::DISABLE_ARRAY_CAST) {
-            f |= LangFlags::DISABLE_ARRAY_CAST;
         }
         if self.contains(ParserFlags::DISABLE_ARRAY_TYPEHINT) {
             f |= LangFlags::DISABLE_ARRAY_TYPEHINT;

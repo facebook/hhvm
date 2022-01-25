@@ -102,7 +102,6 @@ struct RepoOptions {
   H(bool,           EnableXHPClassModifier,           true)           \
   H(bool,           DisableXHPElementMangling,        true)           \
   H(bool,           DisableArray,                     true)           \
-  H(bool,           DisableArrayCast,                 true)           \
   H(bool,           DisableArrayTypehint,             true)           \
   H(bool,           EnableEnumClasses,                true)           \
   H(bool,           DisallowFunAndClsMethPseudoFuncs, false)          \

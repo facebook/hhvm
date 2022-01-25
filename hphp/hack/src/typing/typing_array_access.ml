@@ -251,7 +251,7 @@ let check_set_value =
   check_arraykey_index mk_err
 
 let pessimise_type env ty =
-  Typing_union.union env ty (Typing_make_type.dynamic Reason.none)
+  Typing_union.union env ty (Typing_make_type.dynamic (get_reason ty))
 
 let maybe_pessimise_type env ty =
   if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then

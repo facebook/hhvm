@@ -219,9 +219,7 @@ let idx
       let super_shape =
         if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
           let like_nullable_super_shape =
-            mk
-              ( Reason.Rnone,
-                Tunion [mk (Reason.Rnone, Tdynamic); nullable_super_shape] )
+            MakeType.locl_like (Reason.Rwitness shape_pos) nullable_super_shape
           in
           like_nullable_super_shape
         else
@@ -278,9 +276,7 @@ let at env ~expr_pos ~shape_pos shape_ty ((_, field_p, _) as field) =
           { sft_optional = true; sft_ty = res }
       in
       let like_fake_super_shape_ty =
-        mk
-          ( Reason.Rnone,
-            Tunion [mk (Reason.Rnone, Tdynamic); fake_super_shape_ty] )
+        MakeType.locl_like (Reason.Rwitness shape_pos) fake_super_shape_ty
       in
       let super_shape_ty =
         if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then

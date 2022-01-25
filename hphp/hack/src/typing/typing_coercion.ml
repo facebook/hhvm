@@ -54,16 +54,10 @@ let coerce_type_impl
     if coerce_for_op && is_expected_enforced then
       (* If the coercion is for a built-in operation, then we want to allow it to apply to
          dynamic *)
-      let (env, tunion) =
-        Typing_union.union
-          env
-          ty_expect.et_type
-          (Typing_make_type.dynamic Reason.Rnone)
-      in
       let tunion =
-        with_reason
-          tunion
+        Typing_make_type.locl_like
           (Reason.Rdynamic_coercion (get_reason ty_expect.et_type))
+          ty_expect.et_type
       in
       Typing_utils.sub_type_res ~coerce:None env ty_have tunion on_error
     else

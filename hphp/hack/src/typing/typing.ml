@@ -263,7 +263,7 @@ let get_value_collection_inst env ty =
     Some vty
   (* If we're expecting a mixed or a nonnull then we can just assume
    * that the element type is mixed *)
-  | Tnonnull -> Some (MakeType.mixed Reason.Rnone)
+  | Tnonnull -> Some (MakeType.mixed (get_reason ty))
   | Tany _ -> Some ty
   | Tdynamic when env.in_support_dynamic_type_method_check ->
     Some ty (* interpret dynamic as Traversable<dynamic> *)
@@ -283,7 +283,7 @@ let get_key_value_collection_inst env p ty =
    * that the key type is arraykey and the value type is mixed *)
   | Tnonnull ->
     let arraykey = MakeType.arraykey (Reason.Rkey_value_collection_key p) in
-    let mixed = MakeType.mixed Reason.Rnone in
+    let mixed = MakeType.mixed (Reason.Rwitness p) in
     Some (arraykey, mixed)
   | Tany _ -> Some (ty, ty)
   | Tdynamic when env.in_support_dynamic_type_method_check ->
@@ -2950,7 +2950,7 @@ and expr_
           in
           (env, Some (ExpectedTy.make use_pos reason pess_supertype))
       in
-      let dyn_t = MakeType.dynamic Reason.Rnone in
+      let dyn_t = MakeType.dynamic (Reason.Rwitness use_pos) in
       let subtype_value env ty =
         let (env, ty) =
           if coerce_for_op && Typing_utils.is_sub_type_for_union env dyn_t ty
@@ -6632,7 +6632,7 @@ and dispatch_call
             let tmixed = MakeType.mixed r in
             let super =
               mk
-                ( Reason.Rnone,
+                ( r,
                   Tunion
                     [
                       MakeType.dynamic r;

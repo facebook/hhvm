@@ -7,7 +7,7 @@
  *
  */
 <<__Native>>
-function mb_list_encodings(): varray;
+function mb_list_encodings()[]: varray;
 
 /**
  * @param string $name
@@ -16,7 +16,7 @@ function mb_list_encodings(): varray;
  *
  */
 <<__Native>>
-function mb_list_encodings_alias_names(?string $name = null): mixed;
+function mb_list_encodings_alias_names(?string $name = null)[]: mixed;
 
 /**
  * @param string $name
@@ -25,7 +25,7 @@ function mb_list_encodings_alias_names(?string $name = null): mixed;
  *
  */
 <<__Native>>
-function mb_list_mime_names(?string $name = null): mixed;
+function mb_list_mime_names(?string $name = null)[]: mixed;
 
 /**
  * Checks if the specified byte stream is valid for the specified encoding. It
@@ -39,7 +39,7 @@ function mb_list_mime_names(?string $name = null): mixed;
  *
  */
 <<__Native>>
-function mb_check_encoding(?string $var = null, ?string $encoding = null): bool;
+function mb_check_encoding(?string $var = null, ?string $encoding = null)[read_globals]: bool;
 
 /**
  * Performs case folding on a string, converted in the way specified by mode.
@@ -56,7 +56,7 @@ function mb_check_encoding(?string $var = null, ?string $encoding = null): bool;
  */
 <<__Native>>
 function mb_convert_case(string $str, int $mode,
-                         ?string $encoding = null): mixed;
+                         ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * Converts the character encoding of string str to to_encoding from
@@ -76,7 +76,7 @@ function mb_convert_case(string $str, int $mode,
 <<__Native>>
 function mb_convert_encoding(string $str,
                              string $to_encoding,
-                             mixed $from_encoding = null): mixed;
+                             mixed $from_encoding = null)[read_globals]: mixed;
 
 /**
  * Performs a "han-kaku" - "zen-kaku" conversion for string str. This function
@@ -114,7 +114,7 @@ function mb_convert_encoding(string $str,
 <<__Native>>
 function mb_convert_kana(string $str,
                          ?string $option = null,
-                         ?string $encoding = null): mixed;
+                         ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * Converts character encoding of variables vars in encoding from_encoding to
@@ -140,7 +140,7 @@ function mb_convert_kana(string $str,
 function mb_convert_variables(string $to_encoding,
                               mixed $from_encoding,
                               inout mixed $vars,
-                              ...$argv): mixed;
+                              ...$argv)[read_globals]: mixed;
 
 /**
  * Decodes encoded-word string str in MIME header.
@@ -151,7 +151,7 @@ function mb_convert_variables(string $to_encoding,
  *
  */
 <<__Native>>
-function mb_decode_mimeheader(string $str): mixed;
+function mb_decode_mimeheader(string $str)[read_globals]: mixed;
 
 /**
  * Convert numeric string reference of string str in a specified block to
@@ -169,7 +169,7 @@ function mb_decode_mimeheader(string $str): mixed;
 <<__Native>>
 function mb_decode_numericentity(string $str,
                                  mixed $convmap,
-                                 ?string $encoding = null): mixed;
+                                 ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * Detects character encoding in string str.
@@ -188,7 +188,7 @@ function mb_decode_numericentity(string $str,
 <<__Native>>
 function mb_detect_encoding(string $str,
                             mixed $encoding_list = null,
-                            mixed $strict = null): mixed;
+                            mixed $strict = null)[read_globals]: mixed;
 
 /**
  * Sets the automatic character encoding detection order to encoding_list.
@@ -209,7 +209,7 @@ function mb_detect_encoding(string $str,
  *
  */
 <<__Native>>
-function mb_detect_order(mixed $encoding_list = null): mixed;
+function mb_detect_order(mixed $encoding_list = null)[read_globals]: mixed;
 
 /**
  * Encodes a given string str by the MIME header encoding scheme.
@@ -234,7 +234,7 @@ function mb_encode_mimeheader(string $str,
                               ?string $charset = null,
                               ?string $transfer_encoding = null,
                               string $linefeed = "\r\n",
-                              int $indent = 0): mixed;
+                              int $indent = 0)[read_globals]: mixed;
 
 /**
  * Converts specified character codes in string str from HTML numeric
@@ -252,7 +252,7 @@ function mb_encode_mimeheader(string $str,
 function mb_encode_numericentity(string $str,
                                  mixed $convmap,
                                  ?string $encoding = null,
-                                 bool $is_hex = false): mixed;
+                                 bool $is_hex = false)[read_globals]: mixed;
 
 /**
  * Get aliases of a known encoding type.
@@ -264,7 +264,7 @@ function mb_encode_numericentity(string $str,
  *
  */
 <<__Native>>
-function mb_encoding_aliases(string $str): mixed;
+function mb_encoding_aliases(string $str)[]: mixed;
 
 /**
  * A regular expression match for a multibyte string
@@ -280,7 +280,7 @@ function mb_encoding_aliases(string $str): mixed;
 <<__Native>>
 function mb_ereg_match(string $pattern,
                        string $str,
-                       ?string $option = null): bool;
+                       ?string $option = null)[read_globals]: bool;
 
 /**
  * @param mixed $pattern - The regular expression pattern. Multibyte
@@ -302,7 +302,7 @@ function mb_ereg_match(string $pattern,
 function mb_ereg_replace(mixed $pattern,
                          string $replacement,
                          string $str,
-                         ?string $option = null): mixed;
+                         ?string $option = null)[read_globals]: mixed;
 
 /**
  * @return int - mb_ereg_search_getpos() returns the point to start regular
@@ -312,7 +312,7 @@ function mb_ereg_replace(mixed $pattern,
  *
  */
 <<__Native>>
-function mb_ereg_search_getpos(): int;
+function mb_ereg_search_getpos()[read_globals]: int;
 
 /**
  * @return mixed - An array including the sub-string of matched part by last
@@ -324,7 +324,7 @@ function mb_ereg_search_getpos(): int;
  *
  */
 <<__Native>>
-function mb_ereg_search_getregs(): mixed;
+function mb_ereg_search_getregs()[read_globals]: mixed;
 
 /**
  * mb_ereg_search_init() sets string and pattern for a multibyte regular
@@ -341,7 +341,7 @@ function mb_ereg_search_getregs(): mixed;
 <<__Native>>
 function mb_ereg_search_init(string $str,
                              ?string $pattern = null,
-                             ?string $option = null): bool;
+                             ?string $option = null)[read_globals]: bool;
 
 /**
  * Returns position and length of a matched part of the multibyte regular
@@ -360,7 +360,7 @@ function mb_ereg_search_init(string $str,
  */
 <<__Native>>
 function mb_ereg_search_pos(?string $pattern = null,
-                            ?string $option = null): mixed;
+                            ?string $option = null)[read_globals]: mixed;
 
 /**
  * Returns the matched part of a multibyte regular expression.
@@ -377,7 +377,7 @@ function mb_ereg_search_pos(?string $pattern = null,
  */
 <<__Native>>
 function mb_ereg_search_regs(?string $pattern = null,
-                             ?string $option = null): mixed;
+                             ?string $option = null)[read_globals]: mixed;
 
 /**
  * @param int $position - The position to set.
@@ -386,7 +386,7 @@ function mb_ereg_search_regs(?string $pattern = null,
  *
  */
 <<__Native>>
-function mb_ereg_search_setpos(int $position): bool;
+function mb_ereg_search_setpos(int $position)[leak_safe]: bool;
 
 /**
  * Performs a multibyte regular expression match for a predefined multibyte
@@ -402,7 +402,7 @@ function mb_ereg_search_setpos(int $position): bool;
  *
  */
 <<__Native>>
-function mb_ereg_search(?string $pattern = null, ?string $option = null): mixed;
+function mb_ereg_search(?string $pattern = null, ?string $option = null)[read_globals]: mixed;
 
 /**
  * @param mixed $pattern - The search pattern.
@@ -421,7 +421,7 @@ function mb_ereg_search(?string $pattern = null, ?string $option = null): mixed;
 function mb_ereg(mixed $pattern,
                  string $str,
                  <<__OutOnly>>
-                 inout mixed $regs): mixed;
+                 inout mixed $regs)[leak_safe]: mixed;
 
 /**
  * @param mixed $pattern - The regular expression pattern. Multibyte
@@ -438,7 +438,7 @@ function mb_ereg(mixed $pattern,
 function mb_eregi_replace(mixed $pattern,
                           string $replacement,
                           string $str,
-                          ?string $option = null): mixed;
+                          ?string $option = null)[leak_safe]: mixed;
 
 /**
  * @param mixed $pattern - The regular expression pattern.
@@ -457,7 +457,7 @@ function mb_eregi_replace(mixed $pattern,
 function mb_eregi(mixed $pattern,
                   string $str,
                   <<__OutOnly>>
-                  inout mixed $regs): mixed;
+                  inout mixed $regs)[leak_safe]: mixed;
 
 /**
  * @param string $type - If type isn't specified or is specified to "all", an
@@ -472,7 +472,7 @@ function mb_eregi(mixed $pattern,
  *
  */
 <<__Native>>
-function mb_get_info(?string $type = null): mixed;
+function mb_get_info(?string $type = null)[read_globals]: mixed;
 
 /**
  * @param string $type - Input string specifies the input type. "G" for GET,
@@ -485,7 +485,7 @@ function mb_get_info(?string $type = null): mixed;
  *
  */
 <<__Native>>
-function mb_http_input(?string $type = null): mixed;
+function mb_http_input(?string $type = null)[read_globals]: mixed;
 
 /**
  * Set/Get the HTTP output character encoding. Output after this function is
@@ -501,7 +501,7 @@ function mb_http_input(?string $type = null): mixed;
  *
  */
 <<__Native>>
-function mb_http_output(?string $encoding = null): mixed;
+function mb_http_output(?string $encoding = null)[leak_safe]: mixed;
 
 /**
  * Set/Get the internal character encoding
@@ -517,7 +517,7 @@ function mb_http_output(?string $encoding = null): mixed;
  *
  */
 <<__Native>>
-function mb_internal_encoding(?string $encoding = null): mixed;
+function mb_internal_encoding(?string $encoding = null)[leak_safe]: mixed;
 
 /**
  * Set/Get the current language.
@@ -535,7 +535,7 @@ function mb_internal_encoding(?string $encoding = null): mixed;
  *
  */
 <<__Native>>
-function mb_language(?string $language = null): mixed;
+function mb_language(?string $language = null)[leak_safe]: mixed;
 
 /**
  * mb_output_handler() is ob_start() callback function. mb_output_handler()
@@ -549,7 +549,7 @@ function mb_language(?string $language = null): mixed;
  *
  */
 <<__Native>>
-function mb_output_handler(string $contents, int $status): string;
+function mb_output_handler(string $contents, int $status)[leak_safe]: string;
 
 /**
  * Parses GET/POST/COOKIE data and sets global variables. Since PHP does not
@@ -567,7 +567,7 @@ function mb_output_handler(string $contents, int $status): string;
 <<__Native>>
 function mb_parse_str(string $encoded_string,
                       <<__OutOnly("darray")>>
-                      inout mixed $result): bool;
+                      inout mixed $result)[leak_safe]: bool;
 
 /**
  * Get a MIME charset string for a specific encoding.
@@ -578,7 +578,7 @@ function mb_parse_str(string $encoded_string,
  *
  */
 <<__Native>>
-function mb_preferred_mime_name(string $encoding): mixed;
+function mb_preferred_mime_name(string $encoding)[]: mixed;
 
 /**
  * Returns the current encoding for a multibyte regex as a string.
@@ -591,7 +591,7 @@ function mb_preferred_mime_name(string $encoding): mixed;
  *
  */
 <<__Native>>
-function mb_regex_encoding(?string $encoding = null): mixed;
+function mb_regex_encoding(?string $encoding = null)[leak_safe]: mixed;
 
 /**
  * @param string $options - The options to set. This is a string where each
@@ -609,7 +609,7 @@ function mb_regex_encoding(?string $encoding = null): mixed;
  *
  */
 <<__Native>>
-function mb_regex_set_options(?string $options = null): string;
+function mb_regex_set_options(?string $options = null)[leak_safe]: string;
 
 /**
  * Sends email. Headers and messages are converted and encoded according to
@@ -656,7 +656,7 @@ function mb_send_mail(string $to,
 <<__Native>>
 function mb_split(string $pattern,
                   string $str,
-                  int $count = -1): mixed;
+                  int $count = -1)[leak_safe]: mixed;
 
 /**
  * mb_strcut() performs equivalent operation as mb_substr() with different
@@ -679,7 +679,7 @@ function mb_split(string $pattern,
 function mb_strcut(string $str,
                    int $start,
                    mixed $length = null,
-                   ?string $encoding = null): mixed;
+                   ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * Truncates string str to specified width.
@@ -702,7 +702,7 @@ function mb_strimwidth(string $str,
                        int $start,
                        int $width,
                        ?string $trimmarker = null,
-                       ?string $encoding = null): mixed;
+                       ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * mb_stripos() returns the numeric position of the first occurrence of needle
@@ -724,7 +724,7 @@ function mb_strimwidth(string $str,
 function mb_stripos(string $haystack,
                     string $needle,
                     int $offset = 0,
-                    ?string $encoding = null): mixed;
+                    ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * mb_stristr() finds the first occurrence of needle in haystack and returns
@@ -749,7 +749,7 @@ function mb_stripos(string $haystack,
 function mb_stristr(string $haystack,
                     string $needle,
                     bool $part = false,
-                    ?string $encoding = null): mixed;
+                    ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * Gets the length of a string.
@@ -763,7 +763,7 @@ function mb_stristr(string $haystack,
  *
  */
 <<__Native>>
-function mb_strlen(string $str, ?string $encoding = null): mixed;
+function mb_strlen(string $str, ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * Finds position of the first occurrence of a string in a string. Performs a
@@ -785,7 +785,7 @@ function mb_strlen(string $str, ?string $encoding = null): mixed;
 function mb_strpos(string $haystack,
                    string $needle,
                    int $offset = 0,
-                   ?string $encoding = null): mixed;
+                   ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * mb_strrchr() finds the last occurrence of needle in haystack and returns
@@ -809,7 +809,7 @@ function mb_strpos(string $haystack,
 function mb_strrchr(string $haystack,
                     string $needle,
                     bool $part = false,
-                    ?string $encoding = null): mixed;
+                    ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * mb_strrichr() finds the last occurrence of needle in haystack and returns
@@ -834,7 +834,7 @@ function mb_strrchr(string $haystack,
 function mb_strrichr(string $haystack,
                      string $needle,
                      bool $part = false,
-                     ?string $encoding = null): mixed;
+                     ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * mb_strripos() performs multi-byte safe strripos() operation based on number
@@ -857,7 +857,7 @@ function mb_strrichr(string $haystack,
 function mb_strripos(string $haystack,
                      string $needle,
                      int $offset = 0,
-                     ?string $encoding = null): mixed;
+                     ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * Performs a multibyte safe strrpos() operation based on the number of
@@ -881,7 +881,7 @@ function mb_strripos(string $haystack,
 function mb_strrpos(string $haystack,
                     string $needle,
                     mixed $offset = 0,
-                    ?string $encoding = null): mixed;
+                    ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * mb_strstr() finds the first occurrence of needle in haystack and returns
@@ -905,7 +905,7 @@ function mb_strrpos(string $haystack,
 function mb_strstr(string $haystack,
                    string $needle,
                    bool $part = false,
-                   ?string $encoding = null): mixed;
+                   ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * Returns str with all alphabetic characters converted to lowercase.
@@ -918,7 +918,7 @@ function mb_strstr(string $haystack,
  *
  */
 <<__Native>>
-function mb_strtolower(string $str, ?string $encoding = null): mixed;
+function mb_strtolower(string $str, ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * Returns str with all alphabetic characters converted to uppercase.
@@ -931,7 +931,7 @@ function mb_strtolower(string $str, ?string $encoding = null): mixed;
  *
  */
 <<__Native>>
-function mb_strtoupper(string $str, ?string $encoding = null): mixed;
+function mb_strtoupper(string $str, ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * Returns the width of string str. Multi-byte characters are usually twice
@@ -946,7 +946,7 @@ function mb_strtoupper(string $str, ?string $encoding = null): mixed;
  *
  */
 <<__Native>>
-function mb_strwidth(string $str, ?string $encoding = null): mixed;
+function mb_strwidth(string $str, ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * Specifies a substitution character when input character encoding is invalid
@@ -965,7 +965,7 @@ function mb_strwidth(string $str, ?string $encoding = null): mixed;
  *
  */
 <<__Native>>
-function mb_substitute_character(mixed $substrchar = null): mixed;
+function mb_substitute_character(mixed $substrchar = null)[leak_safe]: mixed;
 
 /**
  * Counts the number of times the needle substring occurs in the haystack
@@ -983,7 +983,7 @@ function mb_substitute_character(mixed $substrchar = null): mixed;
 <<__Native>>
 function mb_substr_count(string $haystack,
                          string $needle,
-                         ?string $encoding = null): mixed;
+                         ?string $encoding = null)[read_globals]: mixed;
 
 /**
  * Performs a multi-byte safe substr() operation based on number of
@@ -1004,4 +1004,4 @@ function mb_substr_count(string $haystack,
 function mb_substr(string $str,
                    int $start,
                    mixed $length = null,
-                   ?string $encoding = null): mixed;
+                   ?string $encoding = null)[read_globals]: mixed;

@@ -34,9 +34,6 @@ fi
 
 ################################################################################
 
-unset CDPATH
-cd "$root" || exit 1
-
 if [ -z "${COMPILER_ID}" ]; then
   COMPILER_ID=$("${compiler[@]}")
 fi
@@ -48,17 +45,25 @@ fi
 ################################################################################
 
 # Compute a hash that can be used as a unique repo schema identifier.  The
-# identifier incorporates the current git revision and local modifications to
+# identifier incorporates the current git or hg revision and local modifications
 # managed files, but it intentionally ignores unmanaged files (even though they
 # could conceivably contain source code that meaningfully changes the repo
 # schema), because for some work flows the added instability of schema IDs is a
 # cure worse than the disease.
 if [ -z "${HHVM_REPO_SCHEMA}" ] ; then
     # Use Perl as BSD grep (MacOS) does not support negated groups
-    HHVM_REPO_SCHEMA=$("${find_files[@]}" |\
-        { perl -ne 'chomp; print "$_\n" if !m#^hphp/(bin|facebook(?!/extensions)|hack(?!/src)|neo|public_tld|test|tools|util|vixl|zend)|(/\.|/test/)# && !-l && -f' | \
-        LC_ALL=C sort | tr "\n" "\0" | \
-        xargs -0 "${xargs_args[@]}" ; } | "${SHA1SUM[@]}" | cut -b-40)
+    HHVM_REPO_SCHEMA=$(
+      unset CDPATH
+      cd "$root" || exit 1
+      "${find_files[@]}" | {
+        perl -ne 'chomp; print "$_\n" if !m#^hphp/(bin|facebook(?!/extensions)|hack(?!/src)|neo|public_tld|test|tools|util|vixl|zend)|(/\.|/test/)# && !-l && -f' |
+        LC_ALL=C sort |
+        tr "\n" "\0" |
+        xargs -0 "${xargs_args[@]}"
+      } |
+      "${SHA1SUM[@]}" |
+      cut -b-40
+    )
 fi
 
 ################################################################################

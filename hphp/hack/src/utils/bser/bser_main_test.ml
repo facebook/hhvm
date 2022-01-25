@@ -22,7 +22,7 @@ let run_test mode path : unit =
   | To_bser ->
     path |> Hh_json.json_of_file ~strict:false |> Bser.json_to_channel stdout;
     output_string stdout "\n"
-  | Roundtrip -> path |> failwith "Not implemented yet"
+  | Roundtrip -> failwith "Not implemented yet"
 
 let () =
   if Array.length Sys.argv != 3 then (

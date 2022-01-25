@@ -15,7 +15,7 @@
 */
 
 #include "hphp/runtime/base/runtime-option.h"
-
+#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/safe-cast.h"
 
@@ -75,6 +75,12 @@ NO_PROFILING
 inline void ArrayData::release() DEBUG_NOEXCEPT {
   assertx(!hasMultipleRefs());
   g_array_funcs.release[kind()](this);
+  AARCH64_WALKABLE_FRAME();
+}
+
+inline void ArrayData::releaseShallow() DEBUG_NOEXCEPT {
+  assertx(!hasMultipleRefs());
+  tl_heap->objFreeIndex(this, this->sizeIndex());
   AARCH64_WALKABLE_FRAME();
 }
 

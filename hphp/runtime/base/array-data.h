@@ -175,6 +175,7 @@ public:
    * when the refcount goes to "uncounted zero", from DecRefUncounted.
    */
   void release() DEBUG_NOEXCEPT;
+  void releaseShallow() DEBUG_NOEXCEPT;
   void releaseUncounted();
 
   /*

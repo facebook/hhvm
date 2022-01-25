@@ -1247,19 +1247,7 @@ end = struct
       | Pinout _ -> Fmt.string ppf "inout"
       | Pnormal -> ())
 
-  let pp_tprim ppf =
-    Aast.(
-      function
-      | Tbool -> Fmt.string ppf "bool"
-      | Tint -> Fmt.string ppf "int"
-      | Tfloat -> Fmt.string ppf "float"
-      | Tnum -> Fmt.string ppf "num"
-      | Tstring -> Fmt.string ppf "string"
-      | Tarraykey -> Fmt.string ppf "arraykey"
-      | Tnull -> Fmt.string ppf "null"
-      | Tvoid -> Fmt.string ppf "void"
-      | Tresource -> Fmt.string ppf "resource"
-      | Tnoreturn -> Fmt.string ppf "noreturn")
+  let pp_tprim ppf prim = Fmt.string ppf (Aast_defs.string_of_tprim prim)
 
   let rec pp_hint ~is_ctx ppf (pos, hint_) =
     match hint_ with

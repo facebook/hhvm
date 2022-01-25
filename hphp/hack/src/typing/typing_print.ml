@@ -295,20 +295,7 @@ module Full = struct
       else
         "_")
 
-  let tprim x =
-    text
-    @@
-    match x with
-    | Nast.Tnull -> "null"
-    | Nast.Tvoid -> "void"
-    | Nast.Tint -> "int"
-    | Nast.Tbool -> "bool"
-    | Nast.Tfloat -> "float"
-    | Nast.Tstring -> "string"
-    | Nast.Tnum -> "num"
-    | Nast.Tresource -> "resource"
-    | Nast.Tarraykey -> "arraykey"
-    | Nast.Tnoreturn -> "noreturn"
+  let tprim x = text @@ Aast_defs.string_of_tprim x
 
   let tfun ~fuel ~ty to_doc st penv ft =
     let sdt =
@@ -1118,18 +1105,6 @@ end
 module Json = struct
   open Hh_json
 
-  let prim = function
-    | Nast.Tnull -> "null"
-    | Nast.Tvoid -> "void"
-    | Nast.Tint -> "int"
-    | Nast.Tbool -> "bool"
-    | Nast.Tfloat -> "float"
-    | Nast.Tstring -> "string"
-    | Nast.Tnum -> "num"
-    | Nast.Tresource -> "resource"
-    | Nast.Tarraykey -> "arraykey"
-    | Nast.Tnoreturn -> "noreturn"
-
   let param_mode_to_string = function
     | FPnormal -> "normal"
     | FPinout -> "inout"
@@ -1205,8 +1180,10 @@ module Json = struct
         | Tnonnull -> obj @@ kind p "mixed"
         | _ -> obj @@ kind p "nullable" @ args [ty]
       end
-    | (p, Tprim tp) -> obj @@ kind p "primitive" @ name (prim tp)
-    | (p, Tneg (Neg_prim tp)) -> obj @@ kind p "negation" @ name (prim tp)
+    | (p, Tprim tp) ->
+      obj @@ kind p "primitive" @ name (Aast_defs.string_of_tprim tp)
+    | (p, Tneg (Neg_prim tp)) ->
+      obj @@ kind p "negation" @ name (Aast_defs.string_of_tprim tp)
     | (p, Tneg (Neg_class (_, c))) -> obj @@ kind p "negation" @ name c
     | (p, Tclass ((_, cid), _, tys)) ->
       obj @@ kind p "class" @ name cid @ args tys

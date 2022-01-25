@@ -59,18 +59,7 @@ let rec reinfer_type_to_string_exn ty =
   | Tdynamic -> "dynamic"
   | Tunion [] -> "nothing"
   | Tthis -> "this"
-  | Tprim prim ->
-    (match prim with
-    | Tnull -> "null"
-    | Tvoid -> "void"
-    | Tint -> "int"
-    | Tnum -> "num"
-    | Tfloat -> "float"
-    | Tstring -> "string"
-    | Tarraykey -> "arraykey"
-    | Tresource -> "resource"
-    | Tnoreturn -> "noreturn"
-    | Tbool -> "bool")
+  | Tprim prim -> string_of_tprim prim
   | Tapply ((_p, id), _tyl) -> cut_namespace id
   | Taccess (ty, id) ->
     let s = reinfer_type_to_string_exn (get_node ty) in

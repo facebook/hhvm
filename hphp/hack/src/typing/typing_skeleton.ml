@@ -15,20 +15,8 @@ open Typing_defs
    represents it. This is lossy: we use mixed if there's no better
    syntax. *)
 let rec of_decl_ty (ty : decl_ty) : string =
-  let open Aast in
   match get_node ty with
-  | Tprim p ->
-    (match p with
-    | Tbool -> "bool"
-    | Tint -> "int"
-    | Tfloat -> "float"
-    | Tnum -> "num"
-    | Tstring -> "string"
-    | Tarraykey -> "arraykey"
-    | Tnull -> "null"
-    | Tvoid -> "void"
-    | Tresource -> "resource"
-    | Tnoreturn -> "noreturn")
+  | Tprim p -> Aast_defs.string_of_tprim p
   | Tmixed
   | Tany _
   | Terr ->

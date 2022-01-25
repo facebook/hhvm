@@ -233,6 +233,19 @@ and reify_kind =
         ancestors = ["endo_defs_base"];
       }]
 
+let string_of_tprim prim =
+  match prim with
+  | Tnull -> "null"
+  | Tvoid -> "void"
+  | Tint -> "int"
+  | Tnum -> "num"
+  | Tfloat -> "float"
+  | Tstring -> "string"
+  | Tarraykey -> "arraykey"
+  | Tresource -> "resource"
+  | Tnoreturn -> "noreturn"
+  | Tbool -> "bool"
+
 let string_of_visibility vis =
   match vis with
   | Private -> "private"

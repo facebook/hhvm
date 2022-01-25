@@ -10,20 +10,6 @@ open Typing_defs
 
 exception Non_denotable
 
-let print_tprim =
-  Aast.(
-    function
-    | Tbool -> "bool"
-    | Tint -> "int"
-    | Tfloat -> "float"
-    | Tnum -> "num"
-    | Tstring -> "string"
-    | Tarraykey -> "arraykey"
-    | Tnull -> "null"
-    | Tvoid -> "void"
-    | Tresource -> "resource"
-    | Tnoreturn -> "noreturn")
-
 let strip_ns str =
   let str' = Utils.strip_ns str in
   (* If we had more than one '\\' patternm then we must keep the first '\\'
@@ -36,7 +22,7 @@ let strip_ns str =
 
 let rec print_ty_exn ?(allow_nothing = false) ty =
   match get_node ty with
-  | Tprim p -> print_tprim p
+  | Tprim p -> Aast_defs.string_of_tprim p
   | Tunion [] when allow_nothing -> "nothing"
   | Tany _
   | Terr

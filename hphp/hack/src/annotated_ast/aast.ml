@@ -1018,6 +1018,8 @@ and ('ex, 'en) fun_def = {
 and ('ex, 'en) module_def = {
   md_name: Ast_defs.id;
   md_user_attributes: ('ex, 'en) user_attribute list;
+  md_span: pos;
+  md_mode: FileInfo.mode; [@visitors.opaque]
 }
 
 and ('ex, 'en) def =

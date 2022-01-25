@@ -2015,11 +2015,7 @@ bool build_class_methods(const IndexData& index,
     it->second.attrs = attrs;
     it->second.hasAncestor = true;
     it->second.topLevel = true;
-    if (it->first != name) {
-      auto mte = it->second;
-      cinfo->methods.erase(it);
-      it = cinfo->methods.emplace(name, mte).first;
-    }
+    assertx(it->first == name);
     return true;
   };
 

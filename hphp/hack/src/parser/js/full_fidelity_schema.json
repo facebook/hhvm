@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2022-01-18-0001",
+  "version" : "2022-01-21-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -151,6 +151,8 @@
       "token_text" : "list" },
     { "token_kind" : "Mixed",
       "token_text" : "mixed" },
+    { "token_kind" : "Module",
+      "token_text" : "module" },
     { "token_kind" : "Namespace",
       "token_text" : "namespace" },
     { "token_kind" : "New",
@@ -2101,6 +2103,17 @@
         { "field_name" : "qualifier" },
         { "field_name" : "hash" },
         { "field_name" : "expression" }
+      ] },
+    { "kind_name" : "ModuleDeclaration",
+      "type_name" : "module_declaration",
+      "description" : "module_declaration",
+      "prefix" : "module_declaration",
+      "fields" : [
+        { "field_name" : "attribute_spec" },
+        { "field_name" : "keyword" },
+        { "field_name" : "name" },
+        { "field_name" : "left_brace" },
+        { "field_name" : "right_brace" }
       ] },
 
     { "kind_name" : "Token",

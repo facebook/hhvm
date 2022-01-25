@@ -57,7 +57,10 @@ let rec name_and_declare_types_program_DEPRECATED
         in
         with_sh (fun _ -> Decl_store.((get ()).add_typedef name decl));
         (name, Shallow_decl_defs.Typedef decl) :: acc
-      | Stmt _ -> acc
+      | Stmt _
+      (* TODO(T108206307) *)
+      | Module _ ->
+        acc
       | Constant cst ->
         let (name, decl) = Decl_nast.const_naming_and_decl_DEPRECATED ctx cst in
         with_sh (fun _ -> Decl_store.((get ()).add_gconst name decl));

@@ -895,4 +895,9 @@ where
         Self::R::make_enum_class_label_expression(self.state_mut(), arg0, arg1, arg2)
     }
 
+    fn make_module_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4]);
+        Self::R::make_module_declaration(self.state_mut(), arg0, arg1, arg2, arg3, arg4)
+    }
+
 }

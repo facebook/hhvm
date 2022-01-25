@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<673629b5b2841c813badca554c70e10e>>
+// @generated SignedSource<<d2b033724e9431cce509e3f8d4059120>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2993,6 +2993,9 @@ impl<Ex, En> Def<Ex, En> {
     pub fn mk_file_attributes(p0: FileAttribute<Ex, En>) -> Self {
         Def::FileAttributes(Box::new(p0))
     }
+    pub fn mk_module(p0: ModuleDef<Ex, En>) -> Self {
+        Def::Module(Box::new(p0))
+    }
     pub fn is_fun(&self) -> bool {
         match self {
             Def::Fun(..) => true,
@@ -3044,6 +3047,12 @@ impl<Ex, En> Def<Ex, En> {
     pub fn is_file_attributes(&self) -> bool {
         match self {
             Def::FileAttributes(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_module(&self) -> bool {
+        match self {
+            Def::Module(..) => true,
             _ => false,
         }
     }
@@ -3101,6 +3110,12 @@ impl<Ex, En> Def<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_module(&self) -> Option<&ModuleDef<Ex, En>> {
+        match self {
+            Def::Module(p0) => Some(&p0),
+            _ => None,
+        }
+    }
     pub fn as_fun_mut(&mut self) -> Option<&mut FunDef<Ex, En>> {
         match self {
             Def::Fun(p0) => Some(p0.as_mut()),
@@ -3155,6 +3170,12 @@ impl<Ex, En> Def<Ex, En> {
             _ => None,
         }
     }
+    pub fn as_module_mut(&mut self) -> Option<&mut ModuleDef<Ex, En>> {
+        match self {
+            Def::Module(p0) => Some(p0.as_mut()),
+            _ => None,
+        }
+    }
     pub fn as_fun_into(self) -> Option<FunDef<Ex, En>> {
         match self {
             Def::Fun(p0) => Some(*p0),
@@ -3206,6 +3227,12 @@ impl<Ex, En> Def<Ex, En> {
     pub fn as_file_attributes_into(self) -> Option<FileAttribute<Ex, En>> {
         match self {
             Def::FileAttributes(p0) => Some(*p0),
+            _ => None,
+        }
+    }
+    pub fn as_module_into(self) -> Option<ModuleDef<Ex, En>> {
+        match self {
+            Def::Module(p0) => Some(*p0),
             _ => None,
         }
     }

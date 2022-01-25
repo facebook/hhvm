@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8e4a623430310afe93b213d33f2dda29>>
+// @generated SignedSource<<e4bf6d3aa2ecdb983c9bd8135c225d5c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1779,6 +1779,26 @@ pub struct FunDef<Ex, En> {
     ToOcamlRep
 )]
 #[repr(C)]
+pub struct ModuleDef<Ex, En> {
+    pub name: ast_defs::Id,
+    pub user_attributes: Vec<UserAttribute<Ex, En>>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
 pub enum Def<Ex, En> {
     Fun(Box<FunDef<Ex, En>>),
     Class(Box<Class_<Ex, En>>),
@@ -1789,6 +1809,7 @@ pub enum Def<Ex, En> {
     NamespaceUse(Vec<(NsKind, Sid, Sid)>),
     SetNamespaceEnv(Box<Nsenv>),
     FileAttributes(Box<FileAttribute<Ex, En>>),
+    Module(Box<ModuleDef<Ex, En>>),
 }
 
 #[derive(

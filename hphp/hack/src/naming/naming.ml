@@ -2443,7 +2443,10 @@ let program ctx ast =
       let genv = { genv with namespace = nsenv } in
       top_level_env := genv;
       acc
-    | Aast.FileAttributes _ -> acc
+    | Aast.FileAttributes _
+    (* TODO(T108206307) *)
+    | Aast.Module _ ->
+      acc
   in
   let on_program aast =
     let nast = List.fold_left ~f:aux ~init:[] aast in

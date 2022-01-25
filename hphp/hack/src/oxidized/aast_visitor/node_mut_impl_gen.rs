@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<22acf0160aaa2c51d84ff70dbfbec06e>>
+// @generated SignedSource<<19a6f5da0da7ba160edc69dfafd841dc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -673,6 +673,10 @@ impl<P: Params> NodeMut<P> for Def<P::Ex, P::En> {
                 Ok(())
             }
             Def::FileAttributes(a0) => {
+                a0.accept(c, v)?;
+                Ok(())
+            }
+            Def::Module(a0) => {
                 a0.accept(c, v)?;
                 Ok(())
             }
@@ -1593,6 +1597,24 @@ impl<P: Params> NodeMut<P> for Method_<P::Ex, P::En> {
         self.ret.accept(c, v)?;
         self.external.accept(c, v)?;
         self.doc_comment.accept(c, v)?;
+        Ok(())
+    }
+}
+impl<P: Params> NodeMut<P> for ModuleDef<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_module_def(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.name.accept(c, v)?;
+        self.user_attributes.accept(c, v)?;
         Ok(())
     }
 }

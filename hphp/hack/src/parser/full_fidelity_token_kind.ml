@@ -87,6 +87,7 @@ type t =
   | Keyset
   | List
   | Mixed
+  | Module
   | Namespace
   | New
   | Newctx
@@ -300,6 +301,7 @@ let from_string keyword ~only_reserved =
   | "keyset" when not only_reserved -> Some Keyset
   | "list" -> Some List
   | "mixed" when not only_reserved -> Some Mixed
+  | "module" -> Some Module
   | "namespace" -> Some Namespace
   | "new" -> Some New
   | "newctx" when not only_reserved -> Some Newctx
@@ -488,6 +490,7 @@ let to_string kind =
   | Keyset -> "keyset"
   | List -> "list"
   | Mixed -> "mixed"
+  | Module -> "module"
   | Namespace -> "namespace"
   | New -> "new"
   | Newctx -> "newctx"

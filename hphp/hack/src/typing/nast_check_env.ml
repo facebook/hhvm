@@ -79,5 +79,7 @@ let def_env ctx x =
   | Namespace _
   | NamespaceUse _
   | SetNamespaceEnv _
-  | FileAttributes _ ->
+  | FileAttributes _
+  (* TODO(T108206307) *)
+  | Module _ ->
     empty_env

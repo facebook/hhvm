@@ -581,6 +581,9 @@ where S: SmartConstructors<State = State>,
     fn make_enum_class_label_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::EnumClassLabelExpression, self.s.make_enum_class_label_expression(arg0.1, arg1.1, arg2.1))
     }
+    fn make_module_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
+        compose(SyntaxKind::ModuleDeclaration, self.s.make_module_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
+    }
 
 }
 

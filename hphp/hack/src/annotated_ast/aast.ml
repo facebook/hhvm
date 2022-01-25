@@ -1015,6 +1015,11 @@ and ('ex, 'en) fun_def = {
   fd_fun: ('ex, 'en) fun_;
 }
 
+and ('ex, 'en) module_def = {
+  md_name: Ast_defs.id;
+  md_user_attributes: ('ex, 'en) user_attribute list;
+}
+
 and ('ex, 'en) def =
   | Fun of ('ex, 'en) fun_def
   | Class of ('ex, 'en) class_
@@ -1025,6 +1030,7 @@ and ('ex, 'en) def =
   | NamespaceUse of (ns_kind * sid * sid) list
   | SetNamespaceEnv of nsenv
   | FileAttributes of ('ex, 'en) file_attribute
+  | Module of ('ex, 'en) module_def
 
 and ns_kind =
   | NSNamespace

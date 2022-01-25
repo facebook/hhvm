@@ -194,6 +194,7 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::ErrorSyntax {..} => SyntaxKind::ErrorSyntax,
             SyntaxVariant::ListItem {..} => SyntaxKind::ListItem,
             SyntaxVariant::EnumClassLabelExpression {..} => SyntaxKind::EnumClassLabelExpression,
+            SyntaxVariant::ModuleDeclaration {..} => SyntaxKind::ModuleDeclaration,
         }
     }
 }

@@ -2376,6 +2376,24 @@ let schema : schema_node list =
           ("expression", Token);
         ];
     };
+    {
+      kind_name = "ModuleDeclaration";
+      type_name = "module_declaration";
+      func_name = "module_declaration";
+      description = "module_declaration";
+      prefix = "module_declaration";
+      aggregates = [TopLevelDeclaration];
+      fields =
+        [
+          ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
+          ("keyword", Token);
+          ("name", Token)
+          (* TODO(T108206307) This might need its own node in the future, to
+           * represent module names *);
+          ("left_brace", Token);
+          ("right_brace", Token);
+        ];
+    };
   ]
 
 (******************************************************************************(

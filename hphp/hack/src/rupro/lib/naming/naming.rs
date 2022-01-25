@@ -103,6 +103,7 @@ impl Naming {
                 NamespaceUse(_) => {}
                 SetNamespaceEnv(_) => {}
                 FileAttributes(_) => {}
+                Module(_) => {}
             }
         }
     }

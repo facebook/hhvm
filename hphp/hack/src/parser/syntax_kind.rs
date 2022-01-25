@@ -195,6 +195,7 @@ pub enum SyntaxKind {
     ErrorSyntax,
     ListItem,
     EnumClassLabelExpression,
+    ModuleDeclaration,
 
 }
 
@@ -373,6 +374,7 @@ impl SyntaxKind {
             SyntaxKind::ErrorSyntax                       => "error",
             SyntaxKind::ListItem                          => "list_item",
             SyntaxKind::EnumClassLabelExpression          => "enum_class_label",
+            SyntaxKind::ModuleDeclaration                 => "module_declaration",
         }
     }
 
@@ -550,6 +552,7 @@ impl SyntaxKind {
             SyntaxKind::ErrorSyntax => 168,
             SyntaxKind::ListItem => 169,
             SyntaxKind::EnumClassLabelExpression => 170,
+            SyntaxKind::ModuleDeclaration => 171,
         }
     }
 }

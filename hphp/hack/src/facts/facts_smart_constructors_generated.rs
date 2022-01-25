@@ -733,4 +733,8 @@ impl<'src> SmartConstructors for FactsSmartConstructors<'src> {
         <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_enum_class_label_expression(self, arg0, arg1, arg2)
     }
 
+    fn make_module_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_module_declaration(self, arg0, arg1, arg2, arg3, arg4)
+    }
+
 }

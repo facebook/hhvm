@@ -202,6 +202,8 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
       tag validate_continue_statement (fun x -> TLDContinue x) x
     | Syntax.EchoStatement _ ->
       tag validate_echo_statement (fun x -> TLDEcho x) x
+    | Syntax.ModuleDeclaration _ ->
+      tag validate_module_declaration (fun x -> TLDModule x) x
     | s -> aggregation_fail Def.TopLevelDeclaration s
 
   and invalidate_top_level_declaration : top_level_declaration invalidator =
@@ -249,6 +251,7 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | TLDBreak thing -> invalidate_break_statement (value, thing)
     | TLDContinue thing -> invalidate_continue_statement (value, thing)
     | TLDEcho thing -> invalidate_echo_statement (value, thing)
+    | TLDModule thing -> invalidate_module_declaration (value, thing)
 
   and validate_expression : expression validator =
    fun x ->
@@ -6524,6 +6527,45 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             enum_class_label_hash = invalidate_token x.enum_class_label_hash;
             enum_class_label_expression =
               invalidate_token x.enum_class_label_expression;
+          };
+      Syntax.value = v;
+    }
+
+  and validate_module_declaration : module_declaration validator = function
+    | { Syntax.syntax = Syntax.ModuleDeclaration x; value = v } ->
+      ( v,
+        {
+          module_declaration_right_brace =
+            validate_token x.module_declaration_right_brace;
+          module_declaration_left_brace =
+            validate_token x.module_declaration_left_brace;
+          module_declaration_name = validate_token x.module_declaration_name;
+          module_declaration_keyword =
+            validate_token x.module_declaration_keyword;
+          module_declaration_attribute_spec =
+            validate_option_with
+              validate_attribute_specification
+              x.module_declaration_attribute_spec;
+        } )
+    | s -> validation_fail (Some SyntaxKind.ModuleDeclaration) s
+
+  and invalidate_module_declaration : module_declaration invalidator =
+   fun (v, x) ->
+    {
+      Syntax.syntax =
+        Syntax.ModuleDeclaration
+          {
+            module_declaration_attribute_spec =
+              invalidate_option_with
+                invalidate_attribute_specification
+                x.module_declaration_attribute_spec;
+            module_declaration_keyword =
+              invalidate_token x.module_declaration_keyword;
+            module_declaration_name = invalidate_token x.module_declaration_name;
+            module_declaration_left_brace =
+              invalidate_token x.module_declaration_left_brace;
+            module_declaration_right_brace =
+              invalidate_token x.module_declaration_right_brace;
           };
       Syntax.value = v;
     }

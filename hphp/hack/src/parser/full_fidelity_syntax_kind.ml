@@ -190,6 +190,7 @@ type t =
   | ErrorSyntax
   | ListItem
   | EnumClassLabelExpression
+  | ModuleDeclaration
 [@@deriving show, eq]
 
 let to_string kind =
@@ -366,3 +367,4 @@ let to_string kind =
   | ErrorSyntax -> "error"
   | ListItem -> "list_item"
   | EnumClassLabelExpression -> "enum_class_label"
+  | ModuleDeclaration -> "module_declaration"

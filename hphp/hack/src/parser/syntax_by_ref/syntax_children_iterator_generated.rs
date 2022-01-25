@@ -1708,6 +1708,17 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            ModuleDeclaration(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.attribute_spec),
+                    1 => Some(&x.keyword),
+                    2 => Some(&x.name),
+                    3 => Some(&x.left_brace),
+                    4 => Some(&x.right_brace),
+                        _ => None,
+                    }
+                })
+            },
 
         };
         if res.is_some() {

@@ -2451,7 +2451,27 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env semicolon;
           Newline;
         ]
-    | Syntax.EnumClassLabelExpression _ -> transform_simple env node)
+    | Syntax.EnumClassLabelExpression _ -> transform_simple env node
+    | Syntax.ModuleDeclaration
+        {
+          module_declaration_attribute_spec = attr;
+          module_declaration_keyword = keyword;
+          module_declaration_name = name;
+          module_declaration_left_brace = lb;
+          module_declaration_right_brace = rb;
+        } ->
+      Concat
+        [
+          t env attr;
+          when_present attr newline;
+          t env keyword;
+          Space;
+          t env name;
+          Space;
+          t env lb;
+          t env rb;
+          Newline;
+        ])
 
 and when_present node f =
   match Syntax.syntax node with

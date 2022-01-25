@@ -2142,7 +2142,7 @@ where
         S!(make_list, self, items, self.pos())
     }
 
-    fn parse_enum_or_classish_or_function_declaration(&mut self) -> S::R {
+    fn parse_toplevel_with_attributes(&mut self) -> S::R {
         // An enum, type alias, function, interface, trait or class may all
         // begin with an attribute.
         let attribute_specification = match self.peek_token_kind() {
@@ -2178,6 +2178,7 @@ where
             | TokenKind::Trait
             | TokenKind::XHP
             | TokenKind::Class => self.parse_classish_declaration(attribute_specification),
+            TokenKind::Module => self.parse_module_declaration(attribute_specification),
             _ => {
                 // ERROR RECOVERY: we encountered an unexpected token, raise an error and continue
                 // TODO: This is wrong; we have lost the attribute specification
@@ -2440,6 +2441,24 @@ where
         S!(make_inclusion_directive, self, expr, semi)
     }
 
+    fn parse_module_declaration(&mut self, attrs: S::R) -> S::R {
+        let module_kw = self.assert_token(TokenKind::Module);
+        // TODO(T108206307) This will probably change if we have a different syntax
+        // for module names.
+        let name = self.require_class_name();
+        let lb = self.require_left_brace();
+        let rb = self.require_right_brace();
+        S!(
+            make_module_declaration,
+            self,
+            attrs,
+            module_kw,
+            name,
+            lb,
+            rb
+        )
+    }
+
     fn parse_declaration(&mut self) -> S::R {
         self.expect_in_new_scope(ExpectedTokens::Classish);
         let mut parser1 = self.clone();
@@ -2491,7 +2510,7 @@ where
                 })
             }
             TokenKind::At if self.env.allow_new_attribute_syntax => {
-                self.parse_enum_or_classish_or_function_declaration()
+                self.parse_toplevel_with_attributes()
             }
             TokenKind::LessThanLessThan => match parser1.peek_token_kind() {
                 TokenKind::File
@@ -2499,7 +2518,7 @@ where
                 {
                     self.parse_file_attribute_specification_opt()
                 }
-                _ => self.parse_enum_or_classish_or_function_declaration(),
+                _ => self.parse_toplevel_with_attributes(),
             },
             // TODO figure out what global const differs from class const
             TokenKind::Const => {
@@ -2508,6 +2527,10 @@ where
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
                 self.parse_const_declaration(missing1, missing2, token)
+            }
+            TokenKind::Module => {
+                let missing = S!(make_missing, self, self.pos());
+                self.parse_module_declaration(missing)
             }
             // TODO: What if it's not a legal statement? Do we still make progress here?
             _ => self.with_statement_parser(|p: &mut StatementParser<'a, S>| p.parse_statement()),

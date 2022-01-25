@@ -1860,6 +1860,18 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_module_declaration(_: &C, module_declaration_attribute_spec: Self, module_declaration_keyword: Self, module_declaration_name: Self, module_declaration_left_brace: Self, module_declaration_right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::ModuleDeclaration(Box::new(ModuleDeclarationChildren {
+            module_declaration_attribute_spec,
+            module_declaration_keyword,
+            module_declaration_name,
+            module_declaration_left_brace,
+            module_declaration_right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
  }
 
 impl<T, V> Syntax<T, V>
@@ -3209,6 +3221,15 @@ where
                 let acc = f(enum_class_label_expression, acc);
                 acc
             },
+            SyntaxVariant::ModuleDeclaration(x) => {
+                let ModuleDeclarationChildren { module_declaration_attribute_spec, module_declaration_keyword, module_declaration_name, module_declaration_left_brace, module_declaration_right_brace } = *x;
+                let acc = f(module_declaration_attribute_spec, acc);
+                let acc = f(module_declaration_keyword, acc);
+                let acc = f(module_declaration_name, acc);
+                let acc = f(module_declaration_left_brace, acc);
+                let acc = f(module_declaration_right_brace, acc);
+                acc
+            },
 
         }
     }
@@ -3387,6 +3408,7 @@ where
             SyntaxVariant::ErrorSyntax {..} => SyntaxKind::ErrorSyntax,
             SyntaxVariant::ListItem {..} => SyntaxKind::ListItem,
             SyntaxVariant::EnumClassLabelExpression {..} => SyntaxKind::EnumClassLabelExpression,
+            SyntaxVariant::ModuleDeclaration {..} => SyntaxKind::ModuleDeclaration,
         }
     }
 
@@ -4551,6 +4573,14 @@ where
                  enum_class_label_expression: ts.pop().unwrap(),
                  enum_class_label_hash: ts.pop().unwrap(),
                  enum_class_label_qualifier: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::ModuleDeclaration, 5) => SyntaxVariant::ModuleDeclaration(Box::new(ModuleDeclarationChildren {
+                 module_declaration_right_brace: ts.pop().unwrap(),
+                 module_declaration_left_brace: ts.pop().unwrap(),
+                 module_declaration_name: ts.pop().unwrap(),
+                 module_declaration_keyword: ts.pop().unwrap(),
+                 module_declaration_attribute_spec: ts.pop().unwrap(),
                  
              })),
              _ => panic!("from_children called with wrong number of children"),
@@ -5886,6 +5916,15 @@ pub struct EnumClassLabelExpressionChildren<T, V> {
     pub enum_class_label_expression: Syntax<T, V>,
 }
 
+#[derive(Debug, Clone)]
+pub struct ModuleDeclarationChildren<T, V> {
+    pub module_declaration_attribute_spec: Syntax<T, V>,
+    pub module_declaration_keyword: Syntax<T, V>,
+    pub module_declaration_name: Syntax<T, V>,
+    pub module_declaration_left_brace: Syntax<T, V>,
+    pub module_declaration_right_brace: Syntax<T, V>,
+}
+
 
 #[derive(Debug, Clone)]
 pub enum SyntaxVariant<T, V> {
@@ -6061,6 +6100,7 @@ pub enum SyntaxVariant<T, V> {
     ErrorSyntax(Box<ErrorSyntaxChildren<T, V>>),
     ListItem(Box<ListItemChildren<T, V>>),
     EnumClassLabelExpression(Box<EnumClassLabelExpressionChildren<T, V>>),
+    ModuleDeclaration(Box<ModuleDeclarationChildren<T, V>>),
 }
 
 impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
@@ -7745,6 +7785,17 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                         0 => Some(&x.enum_class_label_qualifier),
                     1 => Some(&x.enum_class_label_hash),
                     2 => Some(&x.enum_class_label_expression),
+                        _ => None,
+                    }
+                })
+            },
+            ModuleDeclaration(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.module_declaration_attribute_spec),
+                    1 => Some(&x.module_declaration_keyword),
+                    2 => Some(&x.module_declaration_name),
+                    3 => Some(&x.module_declaration_left_brace),
+                    4 => Some(&x.module_declaration_right_brace),
                         _ => None,
                     }
                 })

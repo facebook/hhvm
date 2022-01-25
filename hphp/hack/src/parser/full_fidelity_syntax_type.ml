@@ -1136,6 +1136,13 @@ struct
         enum_class_label_hash: t;
         enum_class_label_expression: t;
       }
+    | ModuleDeclaration of {
+        module_declaration_attribute_spec: t;
+        module_declaration_keyword: t;
+        module_declaration_name: t;
+        module_declaration_left_brace: t;
+        module_declaration_right_brace: t;
+      }
 end
 
 module MakeValidated (Token : TokenType) (SyntaxValue : SyntaxValueType) =
@@ -1186,6 +1193,7 @@ struct
     | TLDBreak of break_statement
     | TLDContinue of continue_statement
     | TLDEcho of echo_statement
+    | TLDModule of module_declaration
 
   and expression =
     | ExprLiteral of literal_expression
@@ -2554,6 +2562,14 @@ struct
     enum_class_label_qualifier: expression option value;
     enum_class_label_hash: Token.t value;
     enum_class_label_expression: Token.t value;
+  }
+
+  and module_declaration = {
+    module_declaration_attribute_spec: attribute_specification option value;
+    module_declaration_keyword: Token.t value;
+    module_declaration_name: Token.t value;
+    module_declaration_left_brace: Token.t value;
+    module_declaration_right_brace: Token.t value;
   }
   [@@deriving show]
 end

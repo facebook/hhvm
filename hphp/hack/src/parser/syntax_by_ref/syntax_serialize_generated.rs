@@ -1540,6 +1540,16 @@ ss.serialize_field("enum_class_label_hash", &self.with(hash))?;
 ss.serialize_field("enum_class_label_expression", &self.with(expression))?;
       ss.end()
 } 
+SyntaxVariant::ModuleDeclaration (ModuleDeclarationChildren{attribute_spec,keyword,name,left_brace,right_brace} ) => {
+      let mut ss = s.serialize_struct("", 6)?;
+      ss.serialize_field("kind", "module_declaration")?;
+      ss.serialize_field("module_declaration_attribute_spec", &self.with(attribute_spec))?;
+ss.serialize_field("module_declaration_keyword", &self.with(keyword))?;
+ss.serialize_field("module_declaration_name", &self.with(name))?;
+ss.serialize_field("module_declaration_left_brace", &self.with(left_brace))?;
+ss.serialize_field("module_declaration_right_brace", &self.with(right_brace))?;
+      ss.end()
+} 
 
         }
     }

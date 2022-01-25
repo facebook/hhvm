@@ -189,5 +189,6 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_error(ctx: &C, error_error: Self) -> Self;
     fn make_list_item(ctx: &C, list_item: Self, list_separator: Self) -> Self;
     fn make_enum_class_label_expression(ctx: &C, enum_class_label_qualifier: Self, enum_class_label_hash: Self, enum_class_label_expression: Self) -> Self;
+    fn make_module_declaration(ctx: &C, module_declaration_attribute_spec: Self, module_declaration_keyword: Self, module_declaration_name: Self, module_declaration_left_brace: Self, module_declaration_right_brace: Self) -> Self;
 
 }

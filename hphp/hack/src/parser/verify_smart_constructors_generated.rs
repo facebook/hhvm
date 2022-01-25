@@ -1427,4 +1427,12 @@ impl<'a> SmartConstructors for VerifySmartConstructors<'a>
         r
     }
 
+    fn make_module_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4);
+        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_module_declaration(self, arg0, arg1, arg2, arg3, arg4);
+        self.state_mut().verify(&args);
+        self.state_mut().push(r.kind());
+        r
+    }
+
 }

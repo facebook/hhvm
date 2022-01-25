@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e0eda81c334e619d25800381853c425b>>
+// @generated SignedSource<<f924dc12c1f201fea6b040a441c90585>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2254,6 +2254,33 @@ arena_deserializer::impl_deserialize_in_arena!(FunDef<'arena, Ex, En>);
 
 #[derive(
     Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+#[repr(C)]
+pub struct ModuleDef<'a, Ex, En> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub name: ast_defs::Id<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub user_attributes: &'a [&'a UserAttribute<'a, Ex, En>],
+}
+impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for ModuleDef<'a, Ex, En> {}
+arena_deserializer::impl_deserialize_in_arena!(ModuleDef<'arena, Ex, En>);
+
+#[derive(
+    Clone,
     Copy,
     Debug,
     Deserialize,
@@ -2290,6 +2317,8 @@ pub enum Def<'a, Ex, En> {
     SetNamespaceEnv(&'a Nsenv<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     FileAttributes(&'a FileAttribute<'a, Ex, En>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Module(&'a ModuleDef<'a, Ex, En>),
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Def<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Def<'arena, Ex, En>);

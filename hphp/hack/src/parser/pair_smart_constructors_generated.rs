@@ -757,4 +757,8 @@ where
         Node(self.0.make_enum_class_label_expression(qualifier.0, hash.0, expression.0), self.1.make_enum_class_label_expression(qualifier.1, hash.1, expression.1))
     }
 
+    fn make_module_declaration(&mut self, attribute_spec: Self::R, keyword: Self::R, name: Self::R, left_brace: Self::R, right_brace: Self::R) -> Self::R {
+        Node(self.0.make_module_declaration(attribute_spec.0, keyword.0, name.0, left_brace.0, right_brace.0), self.1.make_module_declaration(attribute_spec.1, keyword.1, name.1, left_brace.1, right_brace.1))
+    }
+
 }

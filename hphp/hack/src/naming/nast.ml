@@ -212,7 +212,9 @@ let get_defs ast =
             acc
           (* toplevel statements are ignored *)
           | FileAttributes _
-          | Stmt _ ->
+          | Stmt _
+          (* TODO(T108206307) *)
+          | Module _ ->
             acc))
   in
   get_defs ast ([], [], [], [])
@@ -1165,7 +1167,8 @@ module Visitor_DEPRECATED = struct
         | Namespace (_, p) -> this#on_program acc p
         | NamespaceUse _
         | SetNamespaceEnv _
-        | FileAttributes _ ->
+        | FileAttributes _
+        | Module _ ->
           acc
 
       method on_program acc p =

@@ -233,6 +233,7 @@ module WithToken (Token : TokenType) = struct
       | ErrorSyntax _ -> SyntaxKind.ErrorSyntax
       | ListItem _ -> SyntaxKind.ListItem
       | EnumClassLabelExpression _ -> SyntaxKind.EnumClassLabelExpression
+      | ModuleDeclaration _ -> SyntaxKind.ModuleDeclaration
 
     let kind node = to_kind (syntax node)
 
@@ -625,6 +626,8 @@ module WithToken (Token : TokenType) = struct
 
     let is_enum_class_label_expression =
       has_kind SyntaxKind.EnumClassLabelExpression
+
+    let is_module_declaration = has_kind SyntaxKind.ModuleDeclaration
 
     let is_loop_statement node =
       is_for_statement node
@@ -2411,6 +2414,20 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc enum_class_label_hash in
         let acc = f acc enum_class_label_expression in
         acc
+      | ModuleDeclaration
+          {
+            module_declaration_attribute_spec;
+            module_declaration_keyword;
+            module_declaration_name;
+            module_declaration_left_brace;
+            module_declaration_right_brace;
+          } ->
+        let acc = f acc module_declaration_attribute_spec in
+        let acc = f acc module_declaration_keyword in
+        let acc = f acc module_declaration_name in
+        let acc = f acc module_declaration_left_brace in
+        let acc = f acc module_declaration_right_brace in
+        acc
 
     (* The order that the children are returned in should match the order
        that they appear in the source text *)
@@ -3999,6 +4016,21 @@ module WithToken (Token : TokenType) = struct
           enum_class_label_qualifier;
           enum_class_label_hash;
           enum_class_label_expression;
+        ]
+      | ModuleDeclaration
+          {
+            module_declaration_attribute_spec;
+            module_declaration_keyword;
+            module_declaration_name;
+            module_declaration_left_brace;
+            module_declaration_right_brace;
+          } ->
+        [
+          module_declaration_attribute_spec;
+          module_declaration_keyword;
+          module_declaration_name;
+          module_declaration_left_brace;
+          module_declaration_right_brace;
         ]
 
     let children node = children_from_syntax node.syntax
@@ -5620,6 +5652,21 @@ module WithToken (Token : TokenType) = struct
           "enum_class_label_qualifier";
           "enum_class_label_hash";
           "enum_class_label_expression";
+        ]
+      | ModuleDeclaration
+          {
+            module_declaration_attribute_spec;
+            module_declaration_keyword;
+            module_declaration_name;
+            module_declaration_left_brace;
+            module_declaration_right_brace;
+          } ->
+        [
+          "module_declaration_attribute_spec";
+          "module_declaration_keyword";
+          "module_declaration_name";
+          "module_declaration_left_brace";
+          "module_declaration_right_brace";
         ]
 
     let rec to_json_ ?(with_value = false) ?(ignore_missing = false) node =
@@ -7457,6 +7504,22 @@ module WithToken (Token : TokenType) = struct
             enum_class_label_qualifier;
             enum_class_label_hash;
             enum_class_label_expression;
+          }
+      | ( SyntaxKind.ModuleDeclaration,
+          [
+            module_declaration_attribute_spec;
+            module_declaration_keyword;
+            module_declaration_name;
+            module_declaration_left_brace;
+            module_declaration_right_brace;
+          ] ) ->
+        ModuleDeclaration
+          {
+            module_declaration_attribute_spec;
+            module_declaration_keyword;
+            module_declaration_name;
+            module_declaration_left_brace;
+            module_declaration_right_brace;
           }
       | (SyntaxKind.Missing, []) -> Missing
       | (SyntaxKind.SyntaxList, items) -> SyntaxList items
@@ -9839,6 +9902,25 @@ module WithToken (Token : TokenType) = struct
               enum_class_label_qualifier;
               enum_class_label_hash;
               enum_class_label_expression;
+            }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_module_declaration
+          module_declaration_attribute_spec
+          module_declaration_keyword
+          module_declaration_name
+          module_declaration_left_brace
+          module_declaration_right_brace =
+        let syntax =
+          ModuleDeclaration
+            {
+              module_declaration_attribute_spec;
+              module_declaration_keyword;
+              module_declaration_name;
+              module_declaration_left_brace;
+              module_declaration_right_brace;
             }
         in
         let value = ValueBuilder.value_from_syntax syntax in

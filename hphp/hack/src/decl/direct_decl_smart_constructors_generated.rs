@@ -742,4 +742,8 @@ impl<'src, 'text, S: SourceTextAllocator<'text, 'src>> SmartConstructors for Dir
         <Self as FlattenSmartConstructors<'src, Self>>::make_enum_class_label_expression(self, qualifier, hash, expression)
     }
 
+    fn make_module_declaration(&mut self, attribute_spec: Self::R, keyword: Self::R, name: Self::R, left_brace: Self::R, right_brace: Self::R) -> Self::R {
+        <Self as FlattenSmartConstructors<'src, Self>>::make_module_declaration(self, attribute_spec, keyword, name, left_brace, right_brace)
+    }
+
 }

@@ -5319,6 +5319,7 @@ where
                 Some(_) | None => ()
             }
             }),
+            ModuleDeclaration(_) => self.check_can_use_feature(node, &UnstableFeatures::Modules),
             _ => (),
         };
 

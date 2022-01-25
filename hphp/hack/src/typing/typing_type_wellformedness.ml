@@ -484,5 +484,7 @@ let _toplevel_def tenv = function
   | Namespace _
   | NamespaceUse _
   | SetNamespaceEnv _
-  | FileAttributes _ ->
+  | FileAttributes _
+  (* TODO(T108206307) *)
+  | Module _ ->
     ()

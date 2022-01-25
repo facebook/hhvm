@@ -195,6 +195,7 @@ pub enum SyntaxVariant<'a, T, V> {
     ErrorSyntax(&'a ErrorSyntaxChildren<'a, T, V>),
     ListItem(&'a ListItemChildren<'a, T, V>),
     EnumClassLabelExpression(&'a EnumClassLabelExpressionChildren<'a, T, V>),
+    ModuleDeclaration(&'a ModuleDeclarationChildren<'a, T, V>),
 }
 
 #[derive(Debug, Clone)]
@@ -1523,6 +1524,15 @@ pub struct EnumClassLabelExpressionChildren<'a, T, V> {
     pub qualifier: Syntax<'a, T, V>,
     pub hash: Syntax<'a, T, V>,
     pub expression: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ModuleDeclarationChildren<'a, T, V> {
+    pub attribute_spec: Syntax<'a, T, V>,
+    pub keyword: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub left_brace: Syntax<'a, T, V>,
+    pub right_brace: Syntax<'a, T, V>,
 }
 
 

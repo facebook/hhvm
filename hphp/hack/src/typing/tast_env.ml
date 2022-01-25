@@ -288,7 +288,9 @@ let def_env ctx d =
   | Namespace _
   | NamespaceUse _
   | SetNamespaceEnv _
-  | FileAttributes _ ->
+  | FileAttributes _
+  (* TODO(T108206307) *)
+  | Module _ ->
     empty ctx
 
 let typing_env_as_tast_env env = env

@@ -1866,4 +1866,16 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_module_declaration(ctx: &C, attribute_spec: Self, keyword: Self, name: Self, left_brace: Self, right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::ModuleDeclaration(ctx.get_arena().alloc(ModuleDeclarationChildren {
+            attribute_spec,
+            keyword,
+            name,
+            left_brace,
+            right_brace,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
  }

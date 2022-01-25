@@ -21,6 +21,7 @@ impl Nast {
                 Def::Constant(cst) => fi.consts.push(of_id(&cst.name)),
                 Def::Namespace(_) => Self::get_defs_impl(ast, fi),
                 Def::Stmt(_)
+                | Def::Module(_)
                 | Def::NamespaceUse(_)
                 | Def::SetNamespaceEnv(_)
                 | Def::FileAttributes(_) => {}

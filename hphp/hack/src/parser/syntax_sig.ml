@@ -1006,6 +1006,13 @@ module type Syntax_S = sig
         enum_class_label_hash: t;
         enum_class_label_expression: t;
       }
+    | ModuleDeclaration of {
+        module_declaration_attribute_spec: t;
+        module_declaration_keyword: t;
+        module_declaration_name: t;
+        module_declaration_left_brace: t;
+        module_declaration_right_brace: t;
+      }
 
   val rust_parse :
     Full_fidelity_source_text.t ->
@@ -1413,6 +1420,8 @@ module type Syntax_S = sig
 
   val make_enum_class_label_expression : t -> t -> t -> t
 
+  val make_module_declaration : t -> t -> t -> t -> t -> t
+
   val position : Relative_path.t -> t -> Pos.t option
 
   val offset : t -> int option
@@ -1758,6 +1767,8 @@ module type Syntax_S = sig
   val is_list_item : t -> bool
 
   val is_enum_class_label_expression : t -> bool
+
+  val is_module_declaration : t -> bool
 
   val is_specific_token : TokenKind.t -> t -> bool
 

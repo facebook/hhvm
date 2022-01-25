@@ -2,8 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#![allow(unused)]
-use crate::decl_defs::{CeVisibility, DeclTy};
+use crate::decl_defs::DeclTy;
 use crate::pos::PosId;
 use crate::reason::Reason;
 

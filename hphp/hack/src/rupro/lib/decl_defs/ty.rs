@@ -2,10 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#![allow(unused)]
-use std::ops::Deref;
-use std::rc::Rc;
-
 use crate::hcons::Consed;
 use crate::pos::{PosId, Symbol};
 use crate::reason::Reason;

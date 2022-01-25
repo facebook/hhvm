@@ -123,13 +123,12 @@ impl<R: Reason> FoldedDeclProvider<R> {
         }
     }
 
-    #[allow(unreachable_code, unused)]
     fn decl_class_impl(
         &self,
         sc: &ShallowClass<R>,
         parents: &HashMap<Symbol, Rc<FoldedClass<R>>>,
     ) -> Rc<FoldedClass<R>> {
-        let mut inh = Inherited::make(sc, parents);
+        let inh = Inherited::make(sc, parents);
 
         let mut methods = inh.ih_methods;
         sc.sc_methods

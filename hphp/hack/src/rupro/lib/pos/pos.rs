@@ -2,7 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#![allow(unused)]
 use std::hash::Hash;
 
 use crate::pos::{RelativePath, Symbol};

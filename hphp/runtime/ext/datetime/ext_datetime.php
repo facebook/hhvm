@@ -17,11 +17,13 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function add(DateInterval $interval): mixed;
+  public function add(DateInterval $interval)[write_props]: mixed;
 
   <<__Native>>
-  public function __construct(string $time = "now",
-                       ?DateTimeZone $timezone = null)[leak_safe]: void;
+  public function __construct(
+    string $time = "now",
+    ?DateTimeZone $timezone = null,
+  )[read_globals]: void;
 
   /**
    * Parse a date according to a format and create a DateTime object
@@ -34,9 +36,11 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public static function createFromFormat(string $format,
-                                   string $time,
-                                   ?DateTimeZone $timezone = null): mixed;
+  public static function createFromFormat(
+    string $format,
+    string $time,
+    ?DateTimeZone $timezone = null,
+  )[read_globals]: mixed;
 
   /**
    * Find the interval between two DateTime objects
@@ -49,7 +53,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function diff(mixed $datetime2, mixed $absolute = false): mixed;
+  public function diff(mixed $datetime2, mixed $absolute = false)[]: mixed;
 
   /**
    * Returns date formatted according to given format.
@@ -61,7 +65,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function format(mixed $format): string;
+  public function format(mixed $format)[]: string;
 
   /**
    * Returns the last errors encountered by the datetime extension
@@ -70,7 +74,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public static function getLastErrors(): darray;
+  public static function getLastErrors()[read_globals]: darray;
 
   /**
    * Returns the timezone offset.
@@ -80,7 +84,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function getOffset(): int;
+  public function getOffset()[]: int;
 
   /**
    * Returns the unix timestamp representing the date.
@@ -99,7 +103,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function getTimezone(): mixed;
+  public function getTimezone()[]: mixed;
 
   /**
    * Alter the timestamp of a DateTime object by incrementing or
@@ -113,7 +117,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function modify(string $modify): mixed;
+  public function modify(string $modify)[write_props]: mixed;
 
   /**
    * Resets the current date of the DateTime object to a different date.
@@ -128,7 +132,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function setDate(int $year, int $month, int $day): DateTime;
+  public function setDate(int $year, int $month, int $day)[write_props]: DateTime;
 
   /**
    * Set a date according to the ISO 8601  standard - using weeks and day
@@ -144,7 +148,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function setISODate(int $year, int $week, int $day = 1): DateTime;
+  public function setISODate(int $year, int $week, int $day = 1)[write_props]: DateTime;
 
   /**
    * Resets the current time of the DateTime object to a different time.
@@ -159,7 +163,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function setTime(int $hour, int $minute, int $second = 0): DateTime;
+  public function setTime(int $hour, int $minute, int $second = 0)[write_props]: DateTime;
 
   /**
    * Set the DateTime object according to the timestamp provided
@@ -171,7 +175,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function setTimestamp(int $unixtimestamp): DateTime;
+  public function setTimestamp(int $unixtimestamp)[read_globals, write_props]: DateTime;
 
   /**
    * @param DateTimeZone $timezone - DateTime object returned by date_create().
@@ -182,7 +186,7 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function setTimezone(DateTimeZone $timezone): mixed;
+  public function setTimezone(DateTimeZone $timezone)[write_props]: mixed;
 
   /**
    * Subtract an interval from a datetime object
@@ -194,16 +198,16 @@ class DateTime implements DateTimeInterface {
    *
    */
   <<__Native>>
-  public function sub(DateInterval $interval): mixed;
+  public function sub(DateInterval $interval)[write_props]: mixed;
 
   <<__Native>>
-  public function __sleep(): varray;
+  public function __sleep()[write_props]: varray;
 
   <<__Native>>
-  public function __wakeup(): void;
+  public function __wakeup()[]: void;
 
   <<__Native>>
-  public function __debugInfo(): darray;
+  public function __debugInfo()[]: darray;
 
 }
 

@@ -15,16 +15,14 @@ open Ppxlib
 (**
  Read hhi and hsl files from the file system into memory, as AST nodes,
  to used by the ppx rewrite to replace [%hhi_contents] with this. *)
-let get_hhi_contents hhi_dir hsl_dir =
-  let open Ast_helper in
+let get_hhi_contents ~loc hhi_dir hsl_dir =
+  let open Ast_builder in
   Hhi_get.get_hhis hhi_dir hsl_dir
   |> List.map (fun (name, contents) ->
-         Exp.tuple
-           [
-             Exp.constant (Const.string name);
-             Exp.constant (Const.string contents);
-           ])
-  |> Exp.array
+         Default.pexp_tuple
+           ~loc
+           [Default.estring ~loc name; Default.estring ~loc contents])
+  |> Default.pexp_array ~loc
 
 let hhi_dir : string option ref = ref None
 
@@ -33,7 +31,7 @@ let hsl_dir : string option ref = ref None
 let hhi_cache = ref None
 
 (* Whenever we see [%hhi_contents], replace it with all of the hhis *)
-let expand_function ~loc:_ ~path:_ =
+let expand_function ~loc ~path:_ =
   match !hhi_cache with
   | Some result -> result
   | None ->
@@ -47,7 +45,7 @@ let expand_function ~loc:_ ~path:_ =
       | None -> raise (Arg.Bad "-hsl-dir is mandatory")
       | Some dir -> dir
     in
-    let result = get_hhi_contents hhi_dir hsl_dir in
+    let result = get_hhi_contents ~loc hhi_dir hsl_dir in
     hhi_cache := Some result;
     result
 

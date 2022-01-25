@@ -218,7 +218,7 @@ end
 (* Represents information about programming constructs like variables etc. *)
 module SymbolInformation = struct
   (* These numbers should match
-   * https://microsoft.github.io/language-server-protocol/specification#textDocument_documentSymbol
+   * https://microsoft.github.io/language-server-protocol/specifications/specification-3-17/#symbolKind
    *)
   type symbolKind =
     | File [@value 1]
@@ -242,8 +242,11 @@ module SymbolInformation = struct
     | Object [@value 19]
     | Key [@value 20]
     | Null [@value 21]
-    | MemberOf [@value 22]
+    | EnumMember [@value 22]
     | Struct [@value 23]
+    | Event [@value 24]
+    | Operator [@value 25]
+    | TypeParameter [@value 26]
   [@@deriving enum]
 
   type t = {

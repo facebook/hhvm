@@ -68,7 +68,7 @@ type 'a t = {
 let to_absolute x = { x with pos = Pos.to_absolute x.pos }
 
 let kind_to_string = function
-  | Class _ -> "type_id"
+  | Class _ -> "class"
   | Method _ -> "method"
   | Function -> "function"
   | LocalVar -> "local"

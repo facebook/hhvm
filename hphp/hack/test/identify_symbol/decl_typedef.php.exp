@@ -1,4 +1,4 @@
-name: \Foo, kind: type_id, span: line 3, characters 6-8, is_declaration: true
+name: \Foo, kind: class, span: line 3, characters 6-8, is_declaration: true
 definition:
  Foo
    kind: typedef

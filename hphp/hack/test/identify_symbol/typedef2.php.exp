@@ -1,4 +1,4 @@
-name: \SomeTypeAlias, kind: type_id, span: line 8, characters 3-15, is_declaration: false
+name: \SomeTypeAlias, kind: class, span: line 8, characters 3-15, is_declaration: false
 definition:
  SomeTypeAlias
    kind: typedef

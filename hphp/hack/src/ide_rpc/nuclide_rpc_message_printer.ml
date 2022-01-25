@@ -79,22 +79,6 @@ let identify_symbol_response_to_json results =
         (pos, span, id))
     | None -> (JSON_Null, JSON_Null, JSON_Null)
   in
-  let result_type x =
-    SymbolOccurrence.(
-      match x.type_ with
-      | Class _ -> "class"
-      | Method _ -> "method"
-      | Function -> "function"
-      | LocalVar -> "local"
-      | Property _ -> "property"
-      | XhpLiteralAttr _ -> "xhp_literal_attribute"
-      | ClassConst _ -> "class_const"
-      | Typeconst _ -> "typeconst"
-      | GConst -> "global_const"
-      | Attribute _ -> "attribute"
-      | EnumClassLabel _ -> "enum_class_label"
-      | Keyword _ -> "keyword")
-  in
   let symbol_to_json (occurrence, definition) =
     let (definition_pos, definition_span, definition_id) =
       get_definition_data definition
@@ -103,7 +87,7 @@ let identify_symbol_response_to_json results =
       JSON_Object
         [
           ("name", JSON_String occurrence.name);
-          ("result_type", JSON_String (result_type occurrence));
+          ("result_type", JSON_String (kind_to_string occurrence.type_));
           ("pos", Pos.json occurrence.pos);
           ("definition_pos", definition_pos);
           ("definition_span", definition_span);

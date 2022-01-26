@@ -141,64 +141,50 @@ impl<T: Eq + Hash + ?Sized> Conser<T> {
         }
         flag
     }
-}
 
-impl<T: Eq + Hash> Conser<T> {
-    pub fn mk(&self, x: T) -> Hc<T> {
-        let hash = hash(&x);
+    fn mk_helper<U>(
+        &self,
+        hash: u64,
+        x: U,
+        make_rc: impl FnOnce(U) -> Rc<T>,
+        eq: impl FnOnce(&U, &T) -> bool,
+    ) -> Hc<T> {
         let mut table = self.table.lock().unwrap();
         let rc = match table.entry(hash) {
             Entry::Occupied(mut o) => match o.get().upgrade() {
                 Some(rc) => {
                     // TODO: handle collisions
-                    debug_assert!(x == *rc);
+                    debug_assert!(eq(&x, &rc));
                     rc
                 }
                 None => {
-                    let rc = Rc::new(x);
+                    let rc = make_rc(x);
                     o.insert(Rc::downgrade(&rc));
                     rc
                 }
             },
             Entry::Vacant(v) => {
-                let rc = Rc::new(x);
+                let rc = make_rc(x);
                 v.insert(Rc::downgrade(&rc));
                 rc
             }
         };
         Hc(rc)
     }
-}
 
-impl<T: ?Sized + Eq + Hash> Conser<T> {
     pub fn mk_from_ref<'a, Q>(&self, x: &'a Q) -> Hc<T>
     where
         T: Borrow<Q>,
-        Q: 'a + Eq + Hash + ?Sized,
+        Q: 'a + Eq + Hash + PartialEq<T> + ?Sized,
         Rc<T>: From<&'a Q>,
     {
-        let hash = hash(x);
-        let mut table = self.table.lock().unwrap();
-        let rc = match table.entry(hash) {
-            Entry::Occupied(mut o) => match o.get().upgrade() {
-                Some(rc) => {
-                    // TODO: handle collisions
-                    debug_assert!(x == (*rc).borrow());
-                    rc
-                }
-                None => {
-                    let rc = Rc::from(x);
-                    o.insert(Rc::downgrade(&rc));
-                    rc
-                }
-            },
-            Entry::Vacant(v) => {
-                let rc = Rc::from(x);
-                v.insert(Rc::downgrade(&rc));
-                rc
-            }
-        };
-        Hc(rc)
+        self.mk_helper(hash(x), x, Rc::from, |x: &&Q, rc: &T| *x == rc.borrow())
+    }
+}
+
+impl<T: Eq + Hash> Conser<T> {
+    pub fn mk(&self, x: T) -> Hc<T> {
+        self.mk_helper(hash(&x), x, Rc::new, |x: &T, rc: &T| x == rc)
     }
 }
 

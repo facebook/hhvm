@@ -8,18 +8,17 @@ use std::collections::hash_map::Entry;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
-use std::rc::{Rc, Weak};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex, Weak};
 
 use nohash_hasher::IntMap;
 
 /// A hash-consed pointer.
-pub struct Hc<T: ?Sized>(Rc<T>);
+pub struct Hc<T: ?Sized>(Arc<T>);
 
 impl<T: ?Sized> Clone for Hc<T> {
     #[inline]
     fn clone(&self) -> Self {
-        Hc(Rc::clone(&self.0))
+        Hc(Arc::clone(&self.0))
     }
 }
 
@@ -146,7 +145,7 @@ impl<T: Eq + Hash + ?Sized> Conser<T> {
         &self,
         hash: u64,
         x: U,
-        make_rc: impl FnOnce(U) -> Rc<T>,
+        make_rc: impl FnOnce(U) -> Arc<T>,
         eq: impl FnOnce(&U, &T) -> bool,
     ) -> Hc<T> {
         let mut table = self.table.lock().unwrap();
@@ -159,13 +158,13 @@ impl<T: Eq + Hash + ?Sized> Conser<T> {
                 }
                 None => {
                     let rc = make_rc(x);
-                    o.insert(Rc::downgrade(&rc));
+                    o.insert(Arc::downgrade(&rc));
                     rc
                 }
             },
             Entry::Vacant(v) => {
                 let rc = make_rc(x);
-                v.insert(Rc::downgrade(&rc));
+                v.insert(Arc::downgrade(&rc));
                 rc
             }
         };
@@ -176,31 +175,31 @@ impl<T: Eq + Hash + ?Sized> Conser<T> {
     where
         T: Borrow<Q>,
         Q: 'a + Eq + Hash + PartialEq<T> + ?Sized,
-        Rc<T>: From<&'a Q>,
+        Arc<T>: From<&'a Q>,
     {
-        self.mk_helper(hash(x), x, Rc::from, |x: &&Q, rc: &T| *x == rc.borrow())
+        self.mk_helper(hash(x), x, Arc::from, |x: &&Q, rc: &T| *x == rc.borrow())
     }
 }
 
 impl<T: Eq + Hash> Conser<T> {
     pub fn mk(&self, x: T) -> Hc<T> {
-        self.mk_helper(hash(&x), x, Rc::new, |x: &T, rc: &T| x == rc)
+        self.mk_helper(hash(&x), x, Arc::new, |x: &T, rc: &T| x == rc)
     }
 }
 
 impl Conser<[u8]> {
     pub fn mk_str(&self, x: &str) -> Hc<str> {
         let bytes = self.mk_from_ref(x.as_bytes());
-        let ptr: *const [u8] = Rc::into_raw(bytes.0);
+        let ptr: *const [u8] = Arc::into_raw(bytes.0);
         // SAFETY: `x` is known to be a valid `&str`, and `bytes` is just a
         // ref-counted copy of it.
-        unsafe { Hc(Rc::from_raw(ptr as *const str)) }
+        unsafe { Hc(Arc::from_raw(ptr as *const str)) }
     }
 
     pub fn mk_bstr<B: ?Sized + AsRef<[u8]>>(&self, x: &B) -> Hc<bstr::BStr> {
         let bytes = self.mk_from_ref(x.as_ref());
-        let ptr: *const [u8] = Rc::into_raw(bytes.0);
+        let ptr: *const [u8] = Arc::into_raw(bytes.0);
         // SAFETY: `BStr` is a `repr(transparent)` wrapper for `[u8]`.
-        unsafe { Hc(Rc::from_raw(ptr as *const bstr::BStr)) }
+        unsafe { Hc(Arc::from_raw(ptr as *const bstr::BStr)) }
     }
 }

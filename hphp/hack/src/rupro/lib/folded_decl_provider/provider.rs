@@ -168,7 +168,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             None => match self.decl_class(stack, name) {
                 None => None,
                 Some(rc) => {
-                    self.cache.put_folded_class(name.clone(), rc.clone());
+                    self.cache.put_folded_class(name.clone(), Rc::clone(&rc));
                     Some(rc)
                 }
             },

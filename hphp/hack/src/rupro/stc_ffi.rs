@@ -70,36 +70,36 @@ pub extern "C" fn stc_main() {
 
     let options = Rc::new(oxidized::global_options::GlobalOptions::default());
     let pos_provider = Rc::new(PosProvider::new());
-    let sn_provider = Rc::new(SpecialNamesProvider::new(pos_provider.clone()));
+    let sn_provider = Rc::new(SpecialNamesProvider::new(Rc::clone(&pos_provider)));
     let ast_cache = Rc::new(AstLocalCache::new());
     let ast_provider = Rc::new(AstProvider::new(
         ast_cache,
-        relative_path_ctx.clone(),
-        sn_provider.clone(),
-        options.clone(),
+        Rc::clone(&relative_path_ctx),
+        sn_provider,
+        Rc::clone(&options),
     ));
-    let decl_ty_provider = Rc::new(DeclTyProvider::<NReason>::new(pos_provider.clone()));
+    let decl_ty_provider = Rc::new(DeclTyProvider::<NReason>::new(Rc::clone(&pos_provider)));
     let shallow_decl_cache = Rc::new(ShallowDeclLocalCache::new());
     let shallow_decl_provider = Rc::new(ShallowDeclProvider::new(
         shallow_decl_cache,
         decl_ty_provider,
-        relative_path_ctx.clone(),
+        relative_path_ctx,
     ));
     let folded_decl_cache = Rc::new(FoldedDeclLocalCache::new());
     let folded_decl_provider = Rc::new(FoldedDeclProvider::new(
-        folded_decl_cache.clone(),
-        shallow_decl_provider.clone(),
+        folded_decl_cache,
+        Rc::clone(&shallow_decl_provider),
     ));
     let typing_decl_cache = Rc::new(TypingDeclLocalCache::new());
     let typing_decl_provider = Rc::new(TypingDeclProvider::new(
-        typing_decl_cache.clone(),
-        folded_decl_provider.clone(),
+        typing_decl_cache,
+        folded_decl_provider,
     ));
     let typing_ty_provider = Rc::new(TypingTyProvider::new());
     let ctx = Rc::new(TypingCtx::new(
-        typing_decl_provider.clone(),
-        typing_ty_provider.clone(),
-        ast_provider.clone(),
+        typing_decl_provider,
+        typing_ty_provider,
+        Rc::clone(&ast_provider),
     ));
 
     let filenames: Vec<_> = filenames
@@ -123,7 +123,7 @@ pub extern "C" fn stc_main() {
     for fln in &filenames {
         let &(ref ast, ref parsing_errs) = &*ast_provider.get_ast(true, fln).unwrap();
         let fi = Nast::get_defs(ast);
-        let (tast, errs) = TypingCheckUtils::type_file::<NReason>(ctx.clone(), fln, &fi);
+        let (tast, errs) = TypingCheckUtils::type_file::<NReason>(Rc::clone(&ctx), fln, &fi);
         if !errs.is_empty() || !parsing_errs.is_empty() {
             unimplemented!()
         }

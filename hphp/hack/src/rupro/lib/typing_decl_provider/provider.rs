@@ -36,7 +36,7 @@ impl<R: Reason> TypingDeclProvider<R> {
             None => {
                 let folded_decl = self.folded_decl_provider.get_folded_class(name)?;
                 let cls = Rc::new(Class::new(folded_decl));
-                self.cache.put_typing_class(name.clone(), cls.clone());
+                self.cache.put_typing_class(name.clone(), Rc::clone(&cls));
                 Some(cls)
             }
         }

@@ -100,7 +100,7 @@ impl<R: Reason> ShallowDeclProvider<R> {
     }
 
     fn utils(&self) -> ShallowDeclUtils<R> {
-        ShallowDeclUtils::new(self.decl_ty_provider.clone())
+        ShallowDeclUtils::new(Rc::clone(&self.decl_ty_provider))
     }
 }
 

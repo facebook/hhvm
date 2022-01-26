@@ -99,10 +99,11 @@ impl<R: Reason> PerContEnv<R> {
 
 impl<R: Reason> TEnv<R> {
     pub fn new(ctx: Rc<TypingCtx<R>>) -> Self {
+        let genv = Rc::new(TGEnv::new(&ctx));
         Self {
-            ctx: ctx.clone(),
+            ctx,
 
-            genv: Rc::new(TGEnv::new(&ctx)),
+            genv,
             lenv: Rc::new(TLEnv::new()),
 
             idents: IdentGen::new(),

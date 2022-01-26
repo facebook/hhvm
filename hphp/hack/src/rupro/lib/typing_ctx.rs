@@ -30,18 +30,19 @@ impl<R: Reason> TypingCtx<R> {
         typing_ty_provider: Rc<TypingTyProvider<R>>,
         ast_provider: Rc<AstProvider>,
     ) -> Self {
-        let folded_decl_provider = typing_decl_provider.get_folded_decl_provider().clone();
-        let shallow_decl_provider = folded_decl_provider.get_shallow_decl_provider().clone();
-        let decl_ty_provider = shallow_decl_provider.get_decl_ty_provider().clone();
-        let pos_provider = decl_ty_provider.get_pos_provider().clone();
+        let folded_decl_provider = Rc::clone(typing_decl_provider.get_folded_decl_provider());
+        let shallow_decl_provider = Rc::clone(folded_decl_provider.get_shallow_decl_provider());
+        let decl_ty_provider = Rc::clone(shallow_decl_provider.get_decl_ty_provider());
+        let pos_provider = Rc::clone(decl_ty_provider.get_pos_provider());
+        let special_names = Rc::new(SpecialNamesProvider::new(Rc::clone(&pos_provider)));
         Self {
-            pos_provider: pos_provider.clone(),
-            decl_ty_provider: decl_ty_provider.clone(),
-            folded_decl_provider: folded_decl_provider.clone(),
+            pos_provider,
+            decl_ty_provider,
+            folded_decl_provider,
             typing_decl_provider,
             typing_ty_provider,
             ast_provider,
-            special_names: Rc::new(SpecialNamesProvider::new(pos_provider)),
+            special_names,
         }
     }
 }

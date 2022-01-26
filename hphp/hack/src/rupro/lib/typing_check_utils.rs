@@ -31,19 +31,19 @@ impl TypingCheckUtils {
         };
         fi.funs
             .iter()
-            .for_each(|x| accumulate(TypingCheckJob::type_fun(ctx.clone(), fln, &x.id)));
+            .for_each(|x| accumulate(TypingCheckJob::type_fun(Rc::clone(&ctx), fln, &x.id)));
         fi.classes
             .iter()
-            .for_each(|x| accumulate(TypingCheckJob::type_class(ctx.clone(), fln, &x.id)));
+            .for_each(|x| accumulate(TypingCheckJob::type_class(Rc::clone(&ctx), fln, &x.id)));
         fi.record_defs
             .iter()
-            .for_each(|x| accumulate(TypingCheckJob::type_record_def(ctx.clone(), fln, &x.id)));
+            .for_each(|x| accumulate(TypingCheckJob::type_record_def(Rc::clone(&ctx), fln, &x.id)));
         fi.typedefs
             .iter()
-            .for_each(|x| accumulate(TypingCheckJob::type_typedef(ctx.clone(), fln, &x.id)));
+            .for_each(|x| accumulate(TypingCheckJob::type_typedef(Rc::clone(&ctx), fln, &x.id)));
         fi.consts
             .iter()
-            .for_each(|x| accumulate(TypingCheckJob::type_const(ctx.clone(), fln, &x.id)));
+            .for_each(|x| accumulate(TypingCheckJob::type_const(Rc::clone(&ctx), fln, &x.id)));
         (defs, errs)
     }
 }

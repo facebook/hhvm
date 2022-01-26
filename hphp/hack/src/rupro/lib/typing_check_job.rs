@@ -29,7 +29,7 @@ impl TypingCheckJob {
             }
             Ok(Some(ast)) => {
                 errors.extend(ast.as_owner().1.iter().map(|e| e.clone().into()));
-                let (def, typing_errors) = TypingToplevel::fun_def(ctx.clone(), &*ast);
+                let (def, typing_errors) = TypingToplevel::fun_def(Rc::clone(&ctx), &*ast);
                 errors.extend(typing_errors.into_iter().map(|e| e.into()));
                 Some(oxidized::aast::Def::Fun(Box::new(def)))
             }

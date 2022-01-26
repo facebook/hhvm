@@ -25,7 +25,7 @@ pub struct TypingToplevel<'a, R: Reason> {
 
 impl<'a, R: Reason> TypingToplevel<'a, R> {
     fn decl_hint_env(&self) -> DeclHintEnv<R> {
-        DeclHintEnv::new(self.ctx.decl_ty_provider.clone())
+        DeclHintEnv::new(Rc::clone(&self.ctx.decl_ty_provider))
     }
 
     fn hint_fun_header<'ast>(
@@ -153,7 +153,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         ctx: Rc<TypingCtx<R>>,
         fd: &oxidized::aast::FunDef<(), ()>,
     ) -> (tast::FunDef<R>, Vec<TypingError<R>>) {
-        let env = TEnv::fun_env(ctx.clone(), fd);
+        let env = TEnv::fun_env(Rc::clone(&ctx), fd);
         let def = TypingToplevel { ctx, env: &env }.fun_def_impl(fd);
         (def, env.destruct())
     }

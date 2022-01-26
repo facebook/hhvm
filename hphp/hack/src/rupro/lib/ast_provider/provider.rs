@@ -77,11 +77,11 @@ impl AstProvider {
 
     pub fn get_ast(&self, full: bool, name: &RelativePath) -> Result<Rc<AstItem>, ParsingError> {
         match self.cache.get_ast(name) {
-            Some(ast) => Ok(ast.clone()),
+            Some(ast) => Ok(Rc::clone(&ast)),
             None => {
                 let ast = self.get_ast_no_cache(full, name)?;
                 let ast = Rc::new(ast);
-                self.cache.put_ast(name.clone(), ast.clone());
+                self.cache.put_ast(name.clone(), Rc::clone(&ast));
                 Ok(ast)
             }
         }
@@ -190,7 +190,7 @@ impl AstProvider {
             msg,
         })?;
 
-        Naming::program(self.special_names.clone(), &mut ast);
+        Naming::program(Rc::clone(&self.special_names), &mut ast);
 
         Ok((ast, errs))
     }

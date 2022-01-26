@@ -21,11 +21,10 @@ pub struct SpecialNamesProvider {
 
 impl SpecialNamesProvider {
     pub fn new(pos_provider: Rc<PosProvider>) -> Self {
+        let typehints = Typehints::new(Rc::clone(&pos_provider));
         Self {
-            pos_provider: pos_provider.clone(),
-
-            typehints: Typehints::new(pos_provider.clone()),
-
+            pos_provider,
+            typehints,
             construct: OnceCell::new(),
             this: OnceCell::new(),
         }
@@ -59,7 +58,7 @@ pub struct Typehints {
 impl Typehints {
     fn new(pos_provider: Rc<PosProvider>) -> Self {
         Self {
-            pos_provider: pos_provider.clone(),
+            pos_provider,
 
             void: OnceCell::new(),
             int: OnceCell::new(),

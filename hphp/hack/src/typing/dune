@@ -1,4 +1,27 @@
 (library
+ (name format_helpers)
+ (wrapped false)
+ (modules format_helpers)
+ (libraries
+  core_kernel
+  hh_autoimport)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
+ (name hint_print)
+ (wrapped false)
+ (modules hint_print)
+ (libraries
+  annotated_ast
+  ast
+  core_kernel
+  format_helpers
+  naming_special_names)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
  (name typing_defs)
  (wrapped false)
  (modules

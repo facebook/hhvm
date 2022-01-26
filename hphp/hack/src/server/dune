@@ -499,8 +499,10 @@
   direct_decl_service
   dfind
   fileutils
+  format_helpers
   hg
   hhi
+  hint_print
   ide_rpc_api_types
   remote_old_decls_ffi
   linting

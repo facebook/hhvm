@@ -5,6 +5,7 @@
 #![allow(dead_code)]
 use std::collections::HashMap;
 
+use crate::hcons::Hc;
 use crate::pos::Symbol;
 use crate::reason::{Reason, ReasonImpl};
 use crate::typing_ctx::TypingCtx;
@@ -47,7 +48,7 @@ impl<'a, R: Reason> ExpandEnv<'a, R> {
             substs: HashMap::new(),
             this_ty: ctx.typing_ty_provider.mk_ty(
                 R::mk(&|| ReasonImpl::Rnone),
-                Ty_::Tgeneric(ctx.special_names.this().clone(), vec![]),
+                Ty_::Tgeneric(Hc::clone(ctx.special_names.this()), vec![]),
             ),
             on_error: ReasonsCallback::new(&|| ReasonsCallback::ignore()),
         }

@@ -9,6 +9,7 @@ use bumpalo::Bump;
 
 use crate::decl_defs::{ShallowClass, ShallowFun, ShallowMethod};
 use crate::decl_ty_provider::DeclTyProvider;
+use crate::hcons::Hc;
 use crate::pos::{RelativePath, RelativePathCtx, Symbol};
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclCache;
@@ -43,7 +44,8 @@ impl<R: Reason> ShallowDeclProvider<R> {
 
     pub fn add_from_oxidized_class(&self, sc: &oxidized_by_ref::shallow_decl_defs::ClassDecl<'_>) {
         let res = Rc::new(self.utils().mk_shallow_class(sc));
-        self.cache.put_shallow_class(res.sc_name.id().clone(), res);
+        self.cache
+            .put_shallow_class(Hc::clone(res.sc_name.id()), res);
     }
 
     pub fn add_from_oxidized_fun(

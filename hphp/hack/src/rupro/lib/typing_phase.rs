@@ -2,7 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 use crate::decl_defs::{DeclTy, DeclTy_, FunParam, FunType};
+use crate::hcons::Hc;
 use crate::pos::PosId;
 use crate::reason::Reason;
 use crate::typing_decl_provider::Class;
@@ -94,7 +96,7 @@ impl Phase {
                 let ty = Self::localize_possibly_enforced_ty(env, ety_env, fp.fp_type.clone());
                 FunParam {
                     fp_pos: fp.fp_pos.clone(),
-                    fp_name: fp.fp_name.clone(),
+                    fp_name: fp.fp_name.as_ref().map(Hc::clone),
                     fp_type: ty,
                 }
             })

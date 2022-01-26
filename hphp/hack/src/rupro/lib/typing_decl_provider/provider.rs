@@ -5,6 +5,7 @@
 use std::rc::Rc;
 
 use crate::folded_decl_provider::FoldedDeclProvider;
+use crate::hcons::Hc;
 use crate::pos::Symbol;
 use crate::reason::Reason;
 use crate::typing_decl_provider::{Class, TypingDeclCache};
@@ -36,7 +37,8 @@ impl<R: Reason> TypingDeclProvider<R> {
             None => {
                 let folded_decl = self.folded_decl_provider.get_folded_class(name)?;
                 let cls = Rc::new(Class::new(folded_decl));
-                self.cache.put_typing_class(name.clone(), Rc::clone(&cls));
+                self.cache
+                    .put_typing_class(Hc::clone(name), Rc::clone(&cls));
                 Some(cls)
             }
         }

@@ -7,6 +7,7 @@ use std::rc::Rc;
 
 use crate::decl_defs::{DeclTy, FoldedClass, FoldedElement, ShallowClass, SubstContext};
 use crate::folded_decl_provider::subst::Subst;
+use crate::hcons::Hc;
 use crate::pos::Symbol;
 use crate::reason::Reason;
 
@@ -29,13 +30,13 @@ impl<R: Reason> Inherited<R> {
 
     fn add_substs(&mut self, other_substs: HashMap<Symbol, SubstContext<R>>) {
         for (key, subst) in other_substs {
-            self.ih_substs.entry(key.clone()).or_insert(subst);
+            self.ih_substs.entry(Hc::clone(&key)).or_insert(subst);
         }
     }
 
     fn add_methods(&mut self, other_methods: HashMap<Symbol, FoldedElement<R>>) {
         for (key, mut fe) in other_methods {
-            match self.ih_methods.entry(key.clone()) {
+            match self.ih_methods.entry(Hc::clone(&key)) {
                 Entry::Vacant(entry) => {
                     entry.insert(fe);
                 }
@@ -74,10 +75,10 @@ impl<R: Reason> Inherited<R> {
         // TODO(hrust): Do we need sharing?
         let mut substs = parent.dc_substs.clone();
         substs.insert(
-            parent_name.clone(),
+            Hc::clone(parent_name),
             SubstContext {
                 sc_subst: subst,
-                sc_class_context: child.sc_name.id().clone(),
+                sc_class_context: Hc::clone(child.sc_name.id()),
             },
         );
         Self {

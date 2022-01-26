@@ -10,6 +10,7 @@ use crate::decl_defs::{
 };
 use crate::folded_decl_provider::FoldedDeclCache;
 use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
+use crate::hcons::Hc;
 use crate::pos::{PosId, Symbol};
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclProvider;
@@ -51,8 +52,8 @@ impl<R: Reason> FoldedDeclProvider<R> {
         use oxidized::ast_defs::Visibility;
         match vis {
             Visibility::Public => CeVisibility::Public,
-            Visibility::Private => CeVisibility::Private(sym.clone()),
-            Visibility::Protected => CeVisibility::Protected(sym.clone()),
+            Visibility::Private => CeVisibility::Private(Hc::clone(sym)),
+            Visibility::Protected => CeVisibility::Protected(Hc::clone(sym)),
             Visibility::Internal => unimplemented!(), // Take modules into account.
         }
     }
@@ -64,10 +65,10 @@ impl<R: Reason> FoldedDeclProvider<R> {
         sm: &ShallowMethod<R>,
     ) {
         let elt = FoldedElement {
-            elt_origin: sc.sc_name.id().clone(),
+            elt_origin: Hc::clone(sc.sc_name.id()),
             elt_visibility: self.visibility(sc.sc_name.id(), sm.sm_visibility),
         };
-        methods.insert(sm.sm_name.id().clone(), elt);
+        methods.insert(Hc::clone(sm.sm_name.id()), elt);
     }
 
     fn decl_class_type(
@@ -80,7 +81,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             DeclTy_::DTapply(pos_id, _tyl) => {
                 if !self.detect_cycle(stack, pos_id) {
                     if let Some(folded_decl) = self.get_folded_class_impl(stack, pos_id.id()) {
-                        acc.insert(pos_id.id().clone(), folded_decl);
+                        acc.insert(Hc::clone(pos_id.id()), folded_decl);
                     }
                 }
             }
@@ -110,14 +111,14 @@ impl<R: Reason> FoldedDeclProvider<R> {
             None => {}
             Some((_, pos_id, tyl)) => match parents.get(pos_id.id()) {
                 None => {
-                    inst.insert(pos_id.id().clone(), ty.clone());
+                    inst.insert(Hc::clone(pos_id.id()), ty.clone());
                 }
                 Some(cls) => {
                     let subst = Subst::new((), tyl);
                     for (anc_name, anc_ty) in &cls.dc_ancestors {
-                        inst.insert(anc_name.clone(), subst.instantiate(anc_ty));
+                        inst.insert(Hc::clone(anc_name), subst.instantiate(anc_ty));
                     }
-                    inst.insert(pos_id.id().clone(), ty.clone());
+                    inst.insert(Hc::clone(pos_id.id()), ty.clone());
                 }
             },
         }
@@ -153,7 +154,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn decl_class(&self, stack: &mut HashSet<Symbol>, name: &Symbol) -> Option<Rc<FoldedClass<R>>> {
         let shallow_class = self.get_shallow_decl_provider().get_shallow_class(name)?;
-        stack.insert(name.clone());
+        stack.insert(Hc::clone(name));
         let parents = self.decl_class_parents(stack, &shallow_class);
         Some(self.decl_class_impl(&shallow_class, &parents))
     }
@@ -168,7 +169,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             None => match self.decl_class(stack, name) {
                 None => None,
                 Some(rc) => {
-                    self.cache.put_folded_class(name.clone(), Rc::clone(&rc));
+                    self.cache.put_folded_class(Hc::clone(name), Rc::clone(&rc));
                     Some(rc)
                 }
             },

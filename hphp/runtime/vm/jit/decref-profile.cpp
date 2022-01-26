@@ -15,9 +15,14 @@
 */
 
 #include "hphp/runtime/vm/jit/decref-profile.h"
-
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/tv-refcount.h"
 
+namespace {
+  bool isTypedValueRefcounted(const HPHP::TypedValue& tv) {
+    return isRefcountedType(tv.type()) && tv.val().pcnt->isRefCounted();
+  }
+}
 namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,11 +38,13 @@ void DecRefProfile::reduce(DecRefProfile& a, const DecRefProfile& b) {
     scale(a.refcounted, b.refcounted);
     scale(a.released, b.released);
     scale(a.decremented, b.decremented);
+    scale(a.arrayOfUncountedReleaseCount, b.arrayOfUncountedReleaseCount);
   } else {
     a.total       = total;
     a.refcounted  += b.refcounted;
     a.released    += b.released;
     a.decremented += b.decremented;
+    a.arrayOfUncountedReleaseCount += b.arrayOfUncountedReleaseCount;
   }
   a.type |= b.type;
 }
@@ -53,6 +60,16 @@ void DecRefProfile::update(TypedValue tv) {
   auto const countable = tv.val().pcnt;
   if (countable->decWillRelease()) {
     released++;
+    if (type.isKnownDataType() && isArrayLikeType(type.toDataType())) {
+      bool uncountedElements = true;
+      IterateKV(tv.val().parr, [&](TypedValue key, TypedValue value){
+        uncountedElements = uncountedElements &&
+        !isTypedValueRefcounted(key) && !isTypedValueRefcounted(value); 
+      });
+      if (uncountedElements) {
+        arrayOfUncountedReleaseCount++;
+      }
+    }
   } else if (countable->isRefCounted()) {
     decremented++;
   }
@@ -68,20 +85,25 @@ folly::dynamic DecRefProfile::toDynamic() const {
                                ("percentDestroyed", percent(destroyed()))
                                ("survived", survived())
                                ("percentSurvived", percent(survived()))
-                               ("typeStr", type.toString())
+                               ("typeStr", type.toString()) 
+                               ("arrayOfUncountedReleaseCount", percent(arrayOfUncountedReleasedCount())) 
                                ("profileType", "DecRefProfile");
 }
 
 std::string DecRefProfile::toString() const {
   return folly::sformat(
     "total: {:4}\n uncounted: {:4} ({:.1f}%),\n persistent: {:4} ({:.1f}%),\n"
-    " destroyed: {:4} ({:.1f}%),\n survived: {:4} ({:.1f}%),\n typeStr: {}",
+    " destroyed: {:4} ({:.1f}%),\n survived: {:4} ({:.1f}%),\n typeStr: {} \n"
+    "arrayOfUncountedReleasedCount: {:4} ({:.1f}%) \n",
+
+
     total,
     uncounted(),  percent(uncounted()),
     persistent(), percent(persistent()),
     destroyed(),  percent(destroyed()),
     survived(),   percent(survived()),
-    type.toString()
+    type.toString(),
+    arrayOfUncountedReleasedCount(), percent(arrayOfUncountedReleasedCount())
   );
 }
 

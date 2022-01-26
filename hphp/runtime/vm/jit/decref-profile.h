@@ -61,6 +61,10 @@ struct DecRefProfile {
   uint32_t survived() const {
     return decremented;
   }
+ 
+  uint32_t arrayOfUncountedReleasedCount() const {
+    return arrayOfUncountedReleaseCount;
+  }
 
   float percent(uint32_t value) const {
     return total ? 100.0 * value / total : 0.0;
@@ -71,6 +75,7 @@ struct DecRefProfile {
     write_raw(ser, refcounted);
     write_raw(ser, released);
     write_raw(ser, decremented);
+    write_raw(ser, arrayOfUncountedReleaseCount);
 
     type.serialize(ser);
   }
@@ -80,6 +85,7 @@ struct DecRefProfile {
     read_raw(ser, refcounted);
     read_raw(ser, released);
     read_raw(ser, decremented);
+    read_raw(ser, arrayOfUncountedReleaseCount);
 
     type = Type::deserialize(ser);
   }
@@ -112,6 +118,11 @@ struct DecRefProfile {
    * got a non-persistent, refcounted value with count > 1).
    */
   uint32_t decremented;
+
+  /*
+   * The number of times an array of uncounted elements was released.
+   */
+  uint32_t arrayOfUncountedReleaseCount;
 
   /*
    * Union of all the types observed during profiling.

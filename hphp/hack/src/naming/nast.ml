@@ -172,7 +172,7 @@ let get_simple_xhp_attrs =
       | Xhp_spread _ -> None)
 
 (* Given a Nast.program, give me the list of entities it defines *)
-let get_defs ast =
+let get_defs (ast : program) =
   (* fold_right traverses the file from top to bottom, and as such gives nicer
    * error messages than fold_left. E.g. in the case where a function is
    * declared twice in the same file, the error will say that the declaration
@@ -261,7 +261,7 @@ let ast_deregister_attributes_mapper =
       super#on_class_ env this
   end
 
-let deregister_ignored_attributes ast =
+let deregister_ignored_attributes (ast : program) =
   let env =
     {
       (* For now, only ignore the __PHPStdLib *)

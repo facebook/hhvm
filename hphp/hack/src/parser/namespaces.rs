@@ -385,7 +385,7 @@ pub mod toplevel_elaborator {
         }
     }
 
-    fn attach_file_attributes(p: &mut Program) {
+    fn attach_file_attributes(p: &mut Vec<Def>) {
         let file_attrs: Vec<FileAttribute> = p
             .iter()
             .filter_map(|x| x.as_file_attributes())
@@ -399,7 +399,7 @@ pub mod toplevel_elaborator {
         });
     }
 
-    fn on_program_(mut nsenv: RcOc<namespace_env::Env>, p: Program, acc: &mut Vec<Def>) {
+    fn on_program_(mut nsenv: RcOc<namespace_env::Env>, p: Vec<Def>, acc: &mut Vec<Def>) {
         let mut new_acc = vec![];
         for def in p.into_iter() {
             on_def(&mut nsenv, &mut new_acc, def)
@@ -411,8 +411,8 @@ pub mod toplevel_elaborator {
 
     fn on_program(nsenv: RcOc<namespace_env::Env>, p: Program) -> Program {
         let mut acc = vec![];
-        on_program_(nsenv, p, &mut acc);
-        acc
+        on_program_(nsenv, p.0, &mut acc);
+        Program(acc)
     }
 
     /// This function processes only top-level declarations and does not dive

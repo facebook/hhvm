@@ -55,6 +55,7 @@ fn emit_program_<'a, 'arena, 'decl>(
     namespace: RcOc<namespace_env::Env>,
     prog: &'a ast::Program,
 ) -> Result<HhasProgram<'arena>> {
+    let prog = prog.as_slice();
     let mut functions = emit_functions_from_program(emitter, prog)?;
     let classes = emit_classes_from_program(emitter.alloc, emitter, prog)?;
     let typedefs = emit_typedefs_from_program(emitter, prog)?;

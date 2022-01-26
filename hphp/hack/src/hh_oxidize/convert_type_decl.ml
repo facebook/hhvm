@@ -235,6 +235,8 @@ let tuple_aliases =
     ("typing_reason", "PosId");
   ]
 
+let newtypes = [("aast", "Program")]
+
 (*
 A list of (<module>, <ty1>) where ty1 is enum and all non-empty variant fields should
 be wrapped by Box to keep ty1 size down.
@@ -303,6 +305,10 @@ let rename ty_name =
 let should_use_alias_instead_of_tuple_struct ty_name =
   let equal = [%derive.eq: string * string] in
   List.mem tuple_aliases (curr_module_name (), ty_name) ~equal
+
+let should_be_newtype ty_name =
+  let equal = [%derive.eq: string * string] in
+  List.mem newtypes (curr_module_name (), ty_name) ~equal
 
 let doc_comment_of_attribute { attr_name; attr_payload; _ } =
   match (attr_name, attr_payload) with
@@ -667,6 +673,15 @@ let type_declaration name td =
             doc
             (rust_type name lifetime tparams |> rust_type_to_string)
             (rust_type_to_string ty)
+        else if should_be_newtype name then
+          sprintf
+            "%s struct %s (%s pub %s);%s\n%s"
+            (attrs_and_vis ~all_nullary:false ~force_derive_copy:false)
+            (rust_type name lifetime tparams |> rust_type_to_string)
+            (rust_de_field_attr [ty])
+            (rust_type_to_string ty)
+            (implements ~force_derive_copy:false)
+            (deserialize_in_arena_macro ~force_derive_copy:false)
         else
           sprintf
             "%spub type %s = %s;"

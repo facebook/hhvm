@@ -192,7 +192,7 @@ impl<'src> AastParser {
             errors.extend(parse_errors);
             errors.sort_by(SyntaxError::compare_offset);
 
-            let mut empty_program = vec![];
+            let mut empty_program = Program(vec![]);
             let mut aast = aast.unwrap_or(&mut empty_program);
             if uses_readonly {
                 errors.extend(readonly_check::check_program(&mut aast, !env.codegen));

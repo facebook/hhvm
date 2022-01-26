@@ -1538,14 +1538,14 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
     }
 }
 
-fn hoist_toplevel_functions(defs: &mut Program) {
+fn hoist_toplevel_functions(defs: &mut Vec<Def>) {
     // Reorder the functions so that they appear first.
     let (funs, nonfuns): (Vec<Def>, Vec<Def>) = defs.drain(..).partition(|x| x.is_fun());
     defs.extend(funs);
     defs.extend(nonfuns);
 }
 
-fn flatten_ns(defs: &mut Program) -> Program {
+fn flatten_ns(defs: &mut Vec<Def>) -> Vec<Def> {
     defs.drain(..)
         .flat_map(|x| match x {
             Def::Namespace(mut x) => flatten_ns(&mut x.1),
@@ -1556,7 +1556,7 @@ fn flatten_ns(defs: &mut Program) -> Program {
 
 fn extract_debugger_main(
     empty_namespace: &RcOc<namespace_env::Env>,
-    all_defs: &mut Program,
+    all_defs: &mut Vec<Def>,
 ) -> std::result::Result<(), String> {
     let (stmts, mut defs): (Vec<Def>, Vec<Def>) = all_defs.drain(..).partition(|x| x.is_stmt());
     let mut vars = decl_vars::vars_from_ast(&[], &Either::Left(&stmts))?
@@ -1726,6 +1726,7 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
     {
         ast_constant_folder::fold_program(defs, e).map_err(|e| unrecoverable(format!("{}", e)))?;
     }
+    let defs = &mut defs.0;
 
     let mut env = Env::toplevel(
         count_classes(defs.as_slice()),

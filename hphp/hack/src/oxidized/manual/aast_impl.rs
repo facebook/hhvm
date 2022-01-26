@@ -8,6 +8,47 @@ use crate::ast_defs;
 use crate::pos::Pos;
 use std::{borrow::Cow, boxed::Box};
 
+impl<Ex, En> Program<Ex, En> {
+    pub fn as_slice(&self) -> &[Def<Ex, En>] {
+        self.0.as_slice()
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<'_, Def<Ex, En>> {
+        self.0.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, Def<Ex, En>> {
+        self.0.iter_mut()
+    }
+}
+
+impl<Ex, En> IntoIterator for Program<Ex, En> {
+    type Item = Def<Ex, En>;
+    type IntoIter = std::vec::IntoIter<Def<Ex, En>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
+impl<'a, Ex, En> IntoIterator for &'a Program<Ex, En> {
+    type Item = &'a Def<Ex, En>;
+    type IntoIter = std::slice::Iter<'a, Def<Ex, En>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
+impl<'a, Ex, En> IntoIterator for &'a mut Program<Ex, En> {
+    type Item = &'a mut Def<Ex, En>;
+    type IntoIter = std::slice::IterMut<'a, Def<Ex, En>>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter_mut()
+    }
+}
+
 impl<Ex, En> Stmt<Ex, En> {
     pub fn new(pos: Pos, s: Stmt_<Ex, En>) -> Self {
         Self(pos, s)

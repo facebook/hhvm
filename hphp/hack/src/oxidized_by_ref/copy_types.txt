@@ -21,6 +21,7 @@ aast::FunctionPtrId
 aast::FunVariadicity
 aast::HoleSource
 aast::ParamKind
+aast::Program
 aast::ReifyKind
 aast::Sid
 aast::Stmt_

@@ -1028,7 +1028,7 @@ and ('ex, 'en) def =
   | Stmt of ('ex, 'en) stmt
   | Typedef of ('ex, 'en) typedef
   | Constant of ('ex, 'en) gconst
-  | Namespace of sid * ('ex, 'en) program
+  | Namespace of sid * ('ex, 'en) def list
   | NamespaceUse of (ns_kind * sid * sid) list
   | SetNamespaceEnv of nsenv
   | FileAttributes of ('ex, 'en) file_attribute

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a05086201b916d7a5e7472e419ae535f>>
+// @generated SignedSource<<005d6e3d94404b46b310e8b2c848e354>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -25,7 +25,22 @@ pub use doc_comment::DocComment;
 /// Aast.program represents the top-level definitions in a Hack program.
 /// ex: Expression annotation type (when typechecking, the inferred type)
 /// en: Environment (tracking state inside functions and classes)
-pub type Program<Ex, En> = Vec<Def<Ex, En>>;
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct Program<Ex, En>(pub Vec<Def<Ex, En>>);
 
 #[derive(
     Clone,
@@ -1807,7 +1822,7 @@ pub enum Def<Ex, En> {
     Stmt(Box<Stmt<Ex, En>>),
     Typedef(Box<Typedef<Ex, En>>),
     Constant(Box<Gconst<Ex, En>>),
-    Namespace(Box<(Sid, Program<Ex, En>)>),
+    Namespace(Box<(Sid, Vec<Def<Ex, En>>)>),
     NamespaceUse(Vec<(NsKind, Sid, Sid)>),
     SetNamespaceEnv(Box<Nsenv>),
     FileAttributes(Box<FileAttribute<Ex, En>>),

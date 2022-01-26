@@ -90,7 +90,7 @@ pub fn emit_body_with_default_args<'b, 'arena, 'decl>(
         alloc,
         emitter,
         namespace,
-        Either::Left(body),
+        Either::Left(body.as_slice()),
         return_value,
         Scope::toplevel(),
         args,

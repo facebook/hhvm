@@ -251,7 +251,7 @@ impl AstProvider {
         let defs = self.get_ast(full, fln)?;
         let defs = RcRef::new(defs);
         match defs.try_map(|&(ref defs, ref _parsing_errors)| {
-            self.get_def_impl(&defs, &get_node, &get_name, name)
+            self.get_def_impl(&defs.0, &get_node, &get_name, name)
         }) {
             Ok(defs) => Ok(Some(defs)),
             Err(()) => Ok(None),

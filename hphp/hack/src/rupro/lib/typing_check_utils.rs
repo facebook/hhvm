@@ -4,6 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::rc::Rc;
 
+use oxidized::aast;
+
 use crate::errors::HackError;
 use crate::naming::FileInfo;
 use crate::pos::RelativePath;
@@ -20,7 +22,7 @@ impl TypingCheckUtils {
         ctx: Rc<TypingCtx<R>>,
         fln: &RelativePath,
         fi: &FileInfo,
-    ) -> (Vec<tast::Def<R>>, Vec<HackError<R>>) {
+    ) -> (tast::Program<R>, Vec<HackError<R>>) {
         let mut defs = vec![];
         let mut errs = vec![];
         let mut accumulate = |(new_def, new_errs)| {
@@ -44,6 +46,6 @@ impl TypingCheckUtils {
         fi.consts
             .iter()
             .for_each(|x| accumulate(TypingCheckJob::type_const(Rc::clone(&ctx), fln, &x.id)));
-        (defs, errs)
+        (aast::Program(defs), errs)
     }
 }

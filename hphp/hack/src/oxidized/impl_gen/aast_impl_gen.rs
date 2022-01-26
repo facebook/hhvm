@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d2b033724e9431cce509e3f8d4059120>>
+// @generated SignedSource<<d5b445a66dae322ccea030c02b7d2605>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2981,7 +2981,7 @@ impl<Ex, En> Def<Ex, En> {
     pub fn mk_constant(p0: Gconst<Ex, En>) -> Self {
         Def::Constant(Box::new(p0))
     }
-    pub fn mk_namespace(p0: Sid, p1: Program<Ex, En>) -> Self {
+    pub fn mk_namespace(p0: Sid, p1: Vec<Def<Ex, En>>) -> Self {
         Def::Namespace(Box::new((p0, p1)))
     }
     pub fn mk_namespace_use(p0: Vec<(NsKind, Sid, Sid)>) -> Self {
@@ -3086,7 +3086,7 @@ impl<Ex, En> Def<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_namespace(&self) -> Option<(&Sid, &Program<Ex, En>)> {
+    pub fn as_namespace(&self) -> Option<(&Sid, &Vec<Def<Ex, En>>)> {
         match self {
             Def::Namespace(p0) => Some((&p0.0, &p0.1)),
             _ => None,
@@ -3146,7 +3146,7 @@ impl<Ex, En> Def<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_namespace_mut(&mut self) -> Option<(&mut Sid, &mut Program<Ex, En>)> {
+    pub fn as_namespace_mut(&mut self) -> Option<(&mut Sid, &mut Vec<Def<Ex, En>>)> {
         match self {
             Def::Namespace(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
@@ -3206,7 +3206,7 @@ impl<Ex, En> Def<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_namespace_into(self) -> Option<(Sid, Program<Ex, En>)> {
+    pub fn as_namespace_into(self) -> Option<(Sid, Vec<Def<Ex, En>>)> {
         match self {
             Def::Namespace(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,

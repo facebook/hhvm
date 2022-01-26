@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6537b64de3c11459a2113be5ec44ac4c>>
+// @generated SignedSource<<00679d31ffd325e0a7936450bfe932b5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -24,7 +24,30 @@ pub use doc_comment::DocComment;
 /// Aast.program represents the top-level definitions in a Hack program.
 /// ex: Expression annotation type (when typechecking, the inferred type)
 /// en: Environment (tracking state inside functions and classes)
-pub type Program<'a, Ex, En> = [Def<'a, Ex, En>];
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+#[repr(C)]
+pub struct Program<'a, Ex, En>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a [Def<'a, Ex, En>],
+);
+impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Program<'a, Ex, En> {}
+arena_deserializer::impl_deserialize_in_arena!(Program<'arena, Ex, En>);
 
 #[derive(
     Clone,
@@ -2313,7 +2336,7 @@ pub enum Def<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Constant(&'a Gconst<'a, Ex, En>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Namespace(&'a (Sid<'a>, &'a Program<'a, Ex, En>)),
+    Namespace(&'a (Sid<'a>, &'a [Def<'a, Ex, En>])),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     NamespaceUse(&'a [(oxidized::aast::NsKind, Sid<'a>, Sid<'a>)]),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

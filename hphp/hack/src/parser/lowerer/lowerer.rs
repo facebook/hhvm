@@ -5274,9 +5274,9 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>, Error> {
     }
 }
 
-fn post_process<'a>(env: &mut Env<'a>, program: ast::Program, acc: &mut ast::Program) {
+fn post_process<'a>(env: &mut Env<'a>, program: Vec<ast::Def>, acc: &mut Vec<ast::Def>) {
     use aast::{Def, Def::*, Stmt_::*};
-    let mut saw_ns: Option<(ast::Sid, ast::Program)> = None;
+    let mut saw_ns: Option<(ast::Sid, Vec<ast::Def>)> = None;
     for def in program.into_iter() {
         if let Namespace(_) = &def {
             if let Some((n, ns_acc)) = saw_ns {
@@ -5340,14 +5340,14 @@ fn p_program<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Program, Error> 
             EndOfFile(_) => break,
             _ => match p_def(n, env) {
                 Err(Error::MissingSyntax { .. }) if env.fail_open => {}
-                e @ Err(_) => return e,
+                Err(e) => return Err(e),
                 Ok(mut def) => acc.append(&mut def),
             },
         }
     }
     let mut program = vec![];
     post_process(env, acc, &mut program);
-    Ok(program)
+    Ok(ast::Program(program))
 }
 
 fn p_script<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Program, Error> {

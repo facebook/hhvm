@@ -18,12 +18,12 @@ impl<R: Reason> TypingTyProvider<R> {
         }
     }
 
-    pub fn mk_ty(&self, reason: R, ty: &Ty_<R, Ty<R>>) -> Ty<R> {
+    pub fn mk_ty(&self, reason: R, ty: Ty_<R, Ty<R>>) -> Ty<R> {
         Ty::new(reason, self.typing_tys.mk(ty))
     }
 
     pub fn mk_ty_prim(&self, r: R, prim: Prim) -> Ty<R> {
-        self.mk_ty(r, &Ty_::Tprim(prim))
+        self.mk_ty(r, Ty_::Tprim(prim))
     }
 
     pub fn mk_ty_void(&self, r: R) -> Ty<R> {
@@ -31,6 +31,6 @@ impl<R: Reason> TypingTyProvider<R> {
     }
 
     pub fn mk_tany(&self, r: R) -> Ty<R> {
-        self.mk_ty(r, &Ty_::Tany)
+        self.mk_ty(r, Ty_::Tany)
     }
 }

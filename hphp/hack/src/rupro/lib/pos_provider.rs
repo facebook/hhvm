@@ -19,7 +19,7 @@ impl PosProvider {
     }
 
     pub fn mk_symbol(&self, symbol: &str) -> Symbol {
-        Symbol::from(self.symbols.mk(&symbol.to_owned().into_boxed_str()))
+        Symbol::from(self.symbols.mk(symbol.to_owned().into_boxed_str()))
     }
 
 

@@ -28,7 +28,7 @@ impl<R: Reason> DeclTyProvider<R> {
         &self.pos_provider
     }
 
-    pub fn mk_decl_ty(&self, reason: R, ty: &DeclTy_<R, DeclTy<R>>) -> DeclTy<R> {
+    pub fn mk_decl_ty(&self, reason: R, ty: DeclTy_<R, DeclTy<R>>) -> DeclTy<R> {
         DeclTy::new(reason, self.decl_tys.mk(ty))
     }
 
@@ -94,6 +94,6 @@ impl<R: Reason> DeclTyProvider<R> {
             ty => unimplemented!("mk_decl_ty_from_parsed: {:?}", ty),
         };
 
-        self.mk_decl_ty(reason, &ty)
+        self.mk_decl_ty(reason, ty)
     }
 }

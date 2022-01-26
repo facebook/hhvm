@@ -2,8 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::borrow::{Borrow, ToOwned};
-use std::collections::HashMap;
+
+use std::borrow::ToOwned;
+use std::collections::{hash_map::Entry, HashMap};
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::ops::{Deref, DerefMut};
@@ -95,27 +96,29 @@ impl<T: Eq + Hash + Clone> Conser<T> {
         }
     }
 
-    pub fn mk<Q: ?Sized>(&self, x: &Q) -> Consed<T>
-    where
-        T: Borrow<Q>,
-        Q: ToOwned<Owned = T> + Hash + Eq,
-    {
+    pub fn mk(&self, x: T) -> Consed<T> {
+        let make_rc = |x: &T| {
+            let node = x.to_owned();
+            let tag = self.next_tag.fetch_add(1, Ordering::Relaxed);
+            Rc::new(ConsedImpl { node, tag })
+        };
         let mut table = self.table.lock().unwrap();
-        let rc = table.get(x).and_then(Weak::upgrade);
-        match rc {
-            Some(rc) => Consed(rc),
-            None => {
-                let x = x.to_owned();
-                let tag = self.next_tag.fetch_add(1, Ordering::Relaxed);
-                let consed = ConsedImpl {
-                    node: x.clone(),
-                    tag,
-                };
-                let consed = Rc::new(consed);
-                table.insert(x, Rc::downgrade(&consed));
-                Consed(consed)
+        let rc = match table.entry(x) {
+            Entry::Occupied(mut o) => match o.get().upgrade() {
+                Some(rc) => rc,
+                None => {
+                    let rc = make_rc(o.key());
+                    o.insert(Rc::downgrade(&rc));
+                    rc
+                }
+            },
+            Entry::Vacant(v) => {
+                let rc = make_rc(v.key());
+                v.insert(Rc::downgrade(&rc));
+                rc
             }
-        }
+        };
+        Consed(rc)
     }
 
     pub fn gc(&self) -> bool {

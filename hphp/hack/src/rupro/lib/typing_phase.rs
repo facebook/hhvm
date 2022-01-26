@@ -19,7 +19,7 @@ impl Phase {
         let tyf = &env.ctx.typing_ty_provider;
         let r = ty.reason().clone();
         match &**ty.node() {
-            DTprim(p) => tyf.mk_ty(r, &Tprim(p.clone())),
+            DTprim(p) => tyf.mk_ty(r, Tprim(p.clone())),
             DTapply(pos_id, tyl) => match env
                 .ctx
                 .typing_decl_provider
@@ -40,7 +40,7 @@ impl Phase {
             DTfun(ft) => {
                 let pos = r.pos().clone();
                 let ft = Self::localize_ft(env, ety_env, pos, ft);
-                tyf.mk_ty(r, &Tfun(ft))
+                tyf.mk_ty(r, Tfun(ft))
             }
         }
     }
@@ -68,13 +68,13 @@ impl Phase {
                         .map(|ty| Self::localize(env, ety_env, ty.clone()))
                         .collect()
                 });
-                tyf.mk_ty(r, &Tclass(sid, Exact::Nonexact, tyl))
+                tyf.mk_ty(r, Tclass(sid, Exact::Nonexact, tyl))
             }
             Some(_class_info) => {
                 // TODO(hrust): enum_type
                 // TODO(hrust): tparams
                 assert!(ty_args.is_empty());
-                tyf.mk_ty(r, &Tclass(sid, Exact::Nonexact, vec![]))
+                tyf.mk_ty(r, Tclass(sid, Exact::Nonexact, vec![]))
             }
         }
     }

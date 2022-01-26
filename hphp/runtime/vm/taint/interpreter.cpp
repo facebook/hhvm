@@ -568,7 +568,7 @@ void iopRetC(PC& /* pc */) {
   std::string name = func->fullName()->data();
   FTRACE(1, "taint: leaving {}\n", yellow(quote(name)));
 
-  const auto sources = Configuration::get()->sources(name);
+  const auto sources = Configuration::get()->sources(func);
   FTRACE(3, "taint: {} sources\n", sources.size());
 
   // Check if thisjctdkrvujthe origin of a source.
@@ -818,7 +818,7 @@ void iopFCall(const Func* func, const FCallArgs& fca) {
       yellow(name),
       fca.numArgs);
 
-  const auto sinks = Configuration::get()->sinks(name);
+  const auto sinks = Configuration::get()->sinks(func);
   FTRACE(3, "taint: {} sinks\n", sinks.size());
 
   for (const auto& sink : sinks) {
@@ -1096,8 +1096,8 @@ void iopVerifyParamType(local_var param) {
   }
 
   // Taint generation.
-  auto sources = Configuration::get()->sources(func->fullName()->data());
-  for (auto source : sources) {
+  auto sources = Configuration::get()->sources(func);
+  for (auto& source : sources) {
     if (source.index && *source.index == param.index) {
       FTRACE(
           2,

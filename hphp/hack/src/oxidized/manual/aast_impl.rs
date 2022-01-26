@@ -49,6 +49,52 @@ impl<'a, Ex, En> IntoIterator for &'a mut Program<Ex, En> {
     }
 }
 
+impl<Ex, En> Program<Ex, En> {
+    pub fn defs(&self) -> DefsIterator<'_, Ex, En> {
+        let iter = match self.0.as_slice() {
+            [Def::Namespace(defs)] => defs.1.iter(),
+            _ => self.iter(),
+        };
+        DefsIterator { stack: vec![iter] }
+    }
+}
+
+pub struct DefsIterator<'a, Ex, En> {
+    stack: Vec<std::slice::Iter<'a, Def<Ex, En>>>,
+}
+
+impl<'a, Ex, En> Iterator for DefsIterator<'a, Ex, En> {
+    type Item = &'a Def<Ex, En>;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            let iter = match self.stack.last_mut() {
+                Some(iter) => iter,
+                None => return None,
+            };
+            let def = match iter.next() {
+                Some(def) => def,
+                None => {
+                    self.stack.pop();
+                    continue;
+                }
+            };
+            match def {
+                def @ (Def::Fun(_) | Def::Class(_) | Def::Typedef(_) | Def::Constant(_)) => {
+                    return Some(def);
+                }
+                Def::Namespace(defs) => self.stack.push(defs.1.iter()),
+                Def::Stmt(_)
+                | Def::Module(_)
+                | Def::NamespaceUse(_)
+                | Def::SetNamespaceEnv(_)
+                | Def::FileAttributes(_) => {}
+            }
+        }
+    }
+}
+
 impl<Ex, En> Stmt<Ex, En> {
     pub fn new(pos: Pos, s: Stmt_<Ex, En>) -> Self {
         Self(pos, s)

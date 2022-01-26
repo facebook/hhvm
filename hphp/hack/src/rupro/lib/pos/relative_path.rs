@@ -45,7 +45,7 @@ impl RelativePath {
             Prefix::Tmp => &ctx.tmp,
             Prefix::Dummy => &ctx.dummy,
         };
-        prefix.join(&*self.suffix)
+        prefix.join(&self.suffix)
     }
 }
 

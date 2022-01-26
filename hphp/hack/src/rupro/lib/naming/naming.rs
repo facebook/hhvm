@@ -28,11 +28,11 @@ impl Naming {
 
         // TODO(hrust): so much more
         let cls = &cls.1;
-        if cls == &**self.sn.typehints().void() && allow_retonly {
+        if cls == self.sn.typehints().void() && allow_retonly {
             Some(Hprim(Tvoid))
-        } else if cls == &**self.sn.typehints().void() {
+        } else if cls == self.sn.typehints().void() {
             unimplemented!()
-        } else if cls == &**self.sn.typehints().int() {
+        } else if cls == self.sn.typehints().int() {
             Some(Hprim(Tint))
         } else {
             None

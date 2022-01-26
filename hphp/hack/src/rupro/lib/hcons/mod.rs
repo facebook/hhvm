@@ -83,6 +83,65 @@ impl<T> PartialEq for Hc<T> {
     }
 }
 
+macro_rules! impl_str_eq {
+    ($lhs:ty, $rhs:ty) => {
+        impl PartialEq<$rhs> for $lhs {
+            #[inline]
+            fn eq(&self, other: &$rhs) -> bool {
+                PartialEq::eq(&self[..], &other[..])
+            }
+            #[inline]
+            fn ne(&self, other: &$rhs) -> bool {
+                PartialEq::ne(&self[..], &other[..])
+            }
+        }
+
+        impl PartialEq<$lhs> for $rhs {
+            #[inline]
+            fn eq(&self, other: &$lhs) -> bool {
+                PartialEq::eq(&self[..], &other[..])
+            }
+            #[inline]
+            fn ne(&self, other: &$lhs) -> bool {
+                PartialEq::ne(&self[..], &other[..])
+            }
+        }
+    };
+}
+
+impl_str_eq! { Hc<Box<str>>, str }
+impl_str_eq! { Hc<Box<str>>, &str }
+impl_str_eq! { Hc<Box<str>>, String }
+impl_str_eq! { Hc<Box<str>>, Box<str> }
+
+impl AsRef<str> for Hc<Box<str>> {
+    #[inline]
+    fn as_ref(&self) -> &str {
+        &self[..]
+    }
+}
+
+impl AsRef<[u8]> for Hc<Box<str>> {
+    #[inline]
+    fn as_ref(&self) -> &[u8] {
+        self.as_bytes()
+    }
+}
+
+impl AsRef<std::path::Path> for Hc<Box<str>> {
+    #[inline]
+    fn as_ref(&self) -> &std::path::Path {
+        std::path::Path::new(&self[..])
+    }
+}
+
+impl AsRef<std::ffi::OsStr> for Hc<Box<str>> {
+    #[inline]
+    fn as_ref(&self) -> &std::ffi::OsStr {
+        std::ffi::OsStr::new(&self[..])
+    }
+}
+
 #[derive(Debug)]
 pub struct Conser<T> {
     next_tag: AtomicU64,

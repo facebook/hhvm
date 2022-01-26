@@ -9,4 +9,4 @@
 
 use crate::hcons::Hc;
 
-pub type Symbol = Hc<Box<str>>;
+pub type Symbol = Hc<str>;

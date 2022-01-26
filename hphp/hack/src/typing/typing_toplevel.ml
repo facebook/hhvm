@@ -2001,14 +2001,9 @@ let class_def_ env c tc =
     @ static_vars_global_inference_envs
     @ vars_global_inference_envs )
 
-let class_def ctx c =
-  Counters.count Counters.Category.Typecheck @@ fun () ->
-  Errors.run_with_span c.c_span @@ fun () ->
+let setup_env_for_class_def_check ctx c =
   let env = EnvFromDef.class_env ~origin:Decl_counters.TopLevel ctx c in
-  let (name_pos, name) = c.c_name in
-  let tc = Env.get_class env name in
   let env = Env.set_env_pessimize env in
-  Typing_helpers.add_decl_errors (Option.bind tc ~f:Cls.decl_errors);
   let env =
     Env.set_module env
     @@ Naming_attributes_params.get_module_attribute c.c_file_attributes
@@ -2025,6 +2020,15 @@ let class_def ctx c =
          SN.UserAttributes.uaSupportDynamicType
          c.c_user_attributes)
   in
+  env
+
+let class_def ctx c =
+  Counters.count Counters.Category.Typecheck @@ fun () ->
+  Errors.run_with_span c.c_span @@ fun () ->
+  let env = setup_env_for_class_def_check ctx c in
+  let (name_pos, name) = c.c_name in
+  let tc = Env.get_class env name in
+  Typing_helpers.add_decl_errors (Option.bind tc ~f:Cls.decl_errors);
   Typing_type_wellformedness.class_ env c;
   match tc with
   | None ->

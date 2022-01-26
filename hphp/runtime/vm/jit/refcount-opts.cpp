@@ -3396,6 +3396,31 @@ void optimizeRefcounts(IRUnit& unit) {
   }
 }
 
+bool shouldReleaseShallow(const DecRefProfile& data, SSATmp* tmp) {
+  if(!tmp->type().isKnownDataType()) {
+    return false;
+  }
+  return isArrayLikeType(tmp->type().toDataType()) 
+    && data.percent(data.arrayOfUncountedReleasedCount()) 
+    > RuntimeOption::EvalHHIRSpecializedDestructorThreshold;
+}
+
+IRInstruction* makeReleaseShallow(
+    IRUnit& unit, Block* remainder, IRInstruction* inst, SSATmp* tmp) {
+  auto const block = inst->block();
+  auto const bcctx = inst->bcctx();
+  
+  auto const next = unit.defBlock(block->profCount());
+  next->push_back(
+      unit.gen(ReleaseShallow, bcctx, *(inst->extra<DecRefData>()), tmp));
+  next->push_back(unit.gen(Jmp, bcctx, remainder));
+
+  auto const decReleaseCheck = unit.gen(DecReleaseCheck, bcctx, remainder, tmp);
+  decReleaseCheck->setNext(next);
+
+  return decReleaseCheck;
+}
+
 /*
  * If our profiled type is better than the known type, generate type-specific
  * DecRef codegen. Doing so involves adding a CheckType for the profiled type,
@@ -3403,7 +3428,7 @@ void optimizeRefcounts(IRUnit& unit) {
  * in the taken block.
  */
 void optimizeDecRefForProfiledType(
-    IRUnit& unit,  const DecRefProfile& profile, IRInstruction* inst) {
+    IRUnit& unit, const DecRefProfile& profile, IRInstruction* inst) {
   assertx(profile.type.isKnownDataType());
   assertx(inst->is(DecRef));
 
@@ -3430,13 +3455,34 @@ void optimizeDecRefForProfiledType(
 
   // "next" contains the type-specific DecRef if the CheckType succeeds.
   auto const next = unit.defBlock(block->profCount());
-  next->push_back(unit.gen(DecRef, bcctx, data, dst));
-  next->push_back(unit.gen(Jmp, bcctx, remainder));
+  
+  // if this DecRef is eligible for a shallow release replace it with a
+  // combination of DecReleaseCheck and ReleaseShallow IR-ops
+  if (shouldReleaseShallow(profile, dst)) {
+    next->push_back(makeReleaseShallow(unit, remainder, inst, dst));
+  } else {
+    next->push_back(unit.gen(DecRef, bcctx, data, dst));
+    next->push_back(unit.gen(Jmp, bcctx, remainder));
+  }
 
   check->setNext(next);
 
   // Replace the DecRef with the new CheckType.
   block->insert(it, check);
+  block->erase(inst);
+}
+
+void optimizeForReleaseShallow(IRUnit& unit, IRInstruction* inst) {
+  assertx(inst->is(DecRef));
+
+  auto const src = inst->src(0);
+  auto const block = inst->block();
+  auto const it = block->iteratorTo(inst);
+
+  auto remainder = unit.defBlock(block->profCount(), block->hint());
+  remainder->splice(remainder->end(), block, std::next(it), block->end());
+
+  block->insert(it, makeReleaseShallow(unit, remainder, inst, src));
   block->erase(inst);
 }
 
@@ -3465,7 +3511,8 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
   // Keep track of DecRef instructions that are eligible to be optimized using
   // profiled type information. We do the optimization outside the loop because
   // it introduces new control flow.
-  jit::vector<std::pair<DecRefProfile, IRInstruction*>> profiledTypeCandidates;
+  jit::vector<std::pair<IRInstruction*, DecRefProfile>> profiledTypeCandidates;
+  jit::vector<IRInstruction*> releaseShallowCandidates;
 
   for (auto& block : blocks) {
     for (auto& inst : *block) {
@@ -3488,8 +3535,12 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
               : RuntimeOption::EvalJitPGODecRefNZReleasePercentCOW;
             if (destroyPct < destroyPctLimit && !(type <= TAwaitable)) {
               inst.setOpcode(DecRefNZ);
-            } else if (data.type.isKnownDataType() && !type.isKnownDataType()) {
-              profiledTypeCandidates.emplace_back(data, &inst);
+            } else if (data.type.isKnownDataType()) {
+              if (!inst.src(0)->type().isKnownDataType()) {
+                profiledTypeCandidates.emplace_back(&inst, data);
+              } else if (shouldReleaseShallow(data, inst.src(0))){
+                releaseShallowCandidates.emplace_back(&inst);
+              }
             }
           }
         }
@@ -3498,7 +3549,11 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
   }
 
   for (auto const& pair : profiledTypeCandidates) {
-    optimizeDecRefForProfiledType(unit, pair.first, pair.second);
+    optimizeDecRefForProfiledType(unit, pair.second, pair.first);
+  }
+
+  for (auto inst : releaseShallowCandidates) {
+   optimizeForReleaseShallow(unit, inst);
   }
 }
 

@@ -229,9 +229,7 @@ float decRefDestroyedPercent(Vout& v, IRLS& /*env*/,
 }
 
 CallSpec makeDtorCall(Vout& v, Type ty, Vloc loc, ArgGroup& args) {
-  // Even if allowBespokeArrayLikes() is true, we can optimize destructors
-  // if we have some layout information about the given array-like.
-  if (ty <= TArrLike)  return destructorForArrayLike(ty);
+  if (ty <= TArrLike) return destructorForArrayLike(ty);
 
   if (ty <= TObj) {
     if (auto const cls = ty.clsSpec().cls()) {
@@ -589,6 +587,74 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
   });
 }
 
+
+void cgReleaseShallow(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const base = srcLoc(env, inst, 0).reg(0);
+  auto args = argGroup(env, inst).reg(base);
+  auto const dtor = CallSpec::method(&ArrayData::releaseShallow);
+  cgCallHelper(v, env, dtor, kVoidDest, SyncOptions::None, args);
+}
+
+template<class Then, class Else>
+void ifThenElseRefCountedType(Vout& v, Vout& vtaken, Type ty, Vloc loc,
+    Then thenBlock, Else elseBlock) {
+  assertx(ty <= TCell);
+
+  if (!ty.maybe(TCounted)) {
+    elseBlock(vtaken);
+    return;
+  }
+
+  if (ty.isKnownDataType()) {
+    assertx(isRefcountedType(ty.toDataType()));
+    thenBlock(v);
+    return;
+  }
+
+  auto const sf = v.makeReg();
+  auto const cond = emitIsTVTypeRefCounted(v, sf, loc.reg(1));
+  ifThenElse(v, vtaken, cond, sf, thenBlock, elseBlock,
+      tag_from_string("refcount-check"));
+}
+
+void cgDecReleaseCheck(IRLS& env, const IRInstruction* inst) {
+  auto const base = srcLoc(env, inst, 0).reg(0);
+  auto const ty = inst->src(0)->type();
+
+  auto const refcountedTypeImpl = [&](Vout& v) {
+    auto const sf = emitCmpRefCount(v, OneReference, base);
+    ifThenElse(
+      vmain(env), vcold(env), CC_NE, sf,
+      [&](Vout& v) {
+        ifThenElse(v,v, CC_NL, sf,
+            [&](Vout& v) {
+              emitDecRef(v, base, TRAP_REASON);
+              v << jmp{label(env, inst->taken())};
+            },
+            [&](Vout& v) {
+              v << jmp{label(env, inst->taken())};
+            },
+            false,
+            tag_from_string("decref-non-persistent"));
+      },
+      [&](Vout& v) {
+        v << jmp{label(env, inst->next())};
+      },
+      true,
+      tag_from_string("decref-is-one")
+    );
+ };
+
+ auto const notRefcountedTypeImpl = [&](Vout& v){
+  v << jmp{label(env, inst->taken())};
+ };
+
+ ifThenElseRefCountedType(
+     vmain(env), vcold(env), ty, srcLoc(env, inst, 0), 
+     refcountedTypeImpl, notRefcountedTypeImpl);
+}
+
 void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
   auto const ty = inst->src(0)->type();
   auto const loc = srcLoc(env, inst, 0);
@@ -601,7 +667,9 @@ void cgDecRefNZ(IRLS& env, const IRInstruction* inst) {
   }
 
   if (Trace::moduleEnabled(Trace::irlower, 3) && profile.optimizing()) {
-    FTRACE(3, "irlower-refcount: Compiling:\nmarker: {}\ninstruction: {}\ndecRefProfileKey: {}\nDecRefProfile:\n {}\n",
+    FTRACE(
+        3, "irlower-refcount: Compiling:\nmarker: {}\ninstruction: "
+        "{}\ndecRefProfileKey: {}\nDecRefProfile:\n {}\n",
       inst->marker().show(),
       *inst,
       decRefProfileKey(inst)->data(),

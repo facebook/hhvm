@@ -1871,6 +1871,15 @@ To string conversions:
   not actually dec-ref it. We can use this op for e.g. iterator output locals,
   because we don't specialize iterators in profiling translations.
 
+| ReleaseShallow<locId>, ND, S(ArrLike), CRc|LA
+
+  Release memory associated with array S0 without performing any other
+  operations.
+
+| DecReleaseCheck<locId>, ND, S(Cell), B|P
+
+  Decrease the refcount of S0 and fall through if the refcount goes to zero.
+  Otherwise, branch to B.
 
 12. Misc
 

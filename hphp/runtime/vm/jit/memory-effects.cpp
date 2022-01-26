@@ -1657,6 +1657,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case DbgAssertFunc:
   case ProfileCall:
   case ProfileMethod:
+  case DecReleaseCheck:
     return may_load_store(AEmpty, AEmpty);
 
   case BeginCatch:
@@ -1684,6 +1685,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // alias-class.h above AStack for more).
 
   case DecRef:
+    return may_load_store(AHeapAny, AHeapAny);
+
+  case ReleaseShallow:
     return may_load_store(AHeapAny, AHeapAny);
 
   case GetMemoKey:

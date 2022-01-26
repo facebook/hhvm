@@ -478,6 +478,8 @@ bool canDCE(const IRInstruction& inst) {
   case DecRef:
   case DecRefNZ:
   case ProfileDecRef:
+  case ReleaseShallow:
+  case DecReleaseCheck:
   case DefFP:
   case DefFuncEntryFP:
   case DefFrameRelSP:

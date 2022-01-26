@@ -3,12 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::{hash_map::Entry, HashMap};
+use std::collections::hash_map::Entry;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 use std::rc::{Rc, Weak};
 use std::sync::Mutex;
+
+use nohash_hasher::IntMap;
 
 /// A hash-consed pointer.
 #[derive(Clone)]
@@ -103,29 +105,40 @@ impl AsRef<std::ffi::OsStr> for Hc<Box<str>> {
 
 #[derive(Debug)]
 pub struct Conser<T> {
-    table: Mutex<HashMap<T, Weak<T>>>,
+    table: Mutex<IntMap<u64, Weak<T>>>,
 }
 
 impl<T: Eq + Hash + Clone> Conser<T> {
     pub fn new() -> Self {
         Conser {
-            table: Mutex::new(HashMap::new()),
+            table: Mutex::new(IntMap::default()),
         }
     }
 
+    fn hash(value: &T) -> u64 {
+        let mut hasher = fnv::FnvHasher::default();
+        value.hash(&mut hasher);
+        hasher.finish()
+    }
+
     pub fn mk(&self, x: T) -> Hc<T> {
+        let hash = Self::hash(&x);
         let mut table = self.table.lock().unwrap();
-        let rc = match table.entry(x) {
+        let rc = match table.entry(hash) {
             Entry::Occupied(mut o) => match o.get().upgrade() {
-                Some(rc) => rc,
+                Some(rc) => {
+                    // TODO: handle collisions
+                    debug_assert!(x == *rc);
+                    rc
+                }
                 None => {
-                    let rc = Rc::new(o.key().to_owned());
+                    let rc = Rc::new(x);
                     o.insert(Rc::downgrade(&rc));
                     rc
                 }
             },
             Entry::Vacant(v) => {
-                let rc = Rc::new(v.key().to_owned());
+                let rc = Rc::new(x);
                 v.insert(Rc::downgrade(&rc));
                 rc
             }

@@ -196,4 +196,11 @@ impl Conser<[u8]> {
         // ref-counted copy of it.
         unsafe { Hc(Rc::from_raw(ptr as *const str)) }
     }
+
+    pub fn mk_bstr<B: ?Sized + AsRef<[u8]>>(&self, x: &B) -> Hc<bstr::BStr> {
+        let bytes = self.mk_from_ref(x.as_ref());
+        let ptr: *const [u8] = Rc::into_raw(bytes.0);
+        // SAFETY: `BStr` is a `repr(transparent)` wrapper for `[u8]`.
+        unsafe { Hc(Rc::from_raw(ptr as *const bstr::BStr)) }
+    }
 }

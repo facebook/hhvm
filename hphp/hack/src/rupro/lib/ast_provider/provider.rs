@@ -5,8 +5,6 @@
 use std::fs;
 use std::rc::Rc;
 
-use owning_ref::RcRef;
-
 use aast_parser::{AastParser, Error as ParserError};
 use lint_rust::LintError;
 use ocamlrep::rc::RcOc;
@@ -15,11 +13,12 @@ use parser_core_types::{
 };
 use rust_aast_parser_types::Env as ParserEnv;
 
-use crate::ast_provider::{AstCache, AstItem};
 use crate::naming::Naming;
 use crate::parsing_error::ParsingError;
 use crate::pos::{RelativePath, RelativePathCtx};
 use crate::sn_provider::SpecialNamesProvider;
+
+pub type AstItem = (oxidized::aast::Program<(), ()>, Vec<ParsingError>);
 
 struct MakeParserEnv {
     codegen: bool,
@@ -54,7 +53,6 @@ impl Default for MakeParserEnv {
 
 #[derive(Debug)]
 pub struct AstProvider {
-    cache: Rc<dyn AstCache>,
     relative_path_ctx: Rc<RelativePathCtx>,
     special_names: Rc<SpecialNamesProvider>,
     parser_options: Rc<oxidized::parser_options::ParserOptions>,
@@ -62,29 +60,19 @@ pub struct AstProvider {
 
 impl AstProvider {
     pub fn new(
-        cache: Rc<dyn AstCache>,
         relative_path_ctx: Rc<RelativePathCtx>,
         special_names: Rc<SpecialNamesProvider>,
         parser_options: Rc<oxidized::parser_options::ParserOptions>,
     ) -> Self {
         Self {
-            cache,
             relative_path_ctx,
             special_names,
             parser_options,
         }
     }
 
-    pub fn get_ast(&self, full: bool, name: &RelativePath) -> Result<Rc<AstItem>, ParsingError> {
-        match self.cache.get_ast(name) {
-            Some(ast) => Ok(Rc::clone(&ast)),
-            None => {
-                let ast = self.get_ast_no_cache(full, name)?;
-                let ast = Rc::new(ast);
-                self.cache.put_ast(name.clone(), Rc::clone(&ast));
-                Ok(ast)
-            }
-        }
+    pub fn get_ast(&self, name: &RelativePath) -> Result<AstItem, ParsingError> {
+        self.get_ast_no_cache(name)
     }
 
     fn process_scour_comments(
@@ -140,9 +128,9 @@ impl AstProvider {
         }
     }
 
-    fn get_ast_no_cache(&self, full: bool, fln: &RelativePath) -> Result<AstItem, ParsingError> {
+    fn get_ast_no_cache(&self, fln: &RelativePath) -> Result<AstItem, ParsingError> {
         let env = self.make_parser_env(MakeParserEnv {
-            quick_mode: !full,
+            quick_mode: false,
             keep_errors: true,
             ..Default::default()
         });
@@ -208,71 +196,5 @@ impl AstProvider {
             is_systemlib: flags.is_systemlib,
             parser_options: (*self.parser_options).clone(),
         }
-    }
-
-    fn get_def_impl<'node, T: 'node>(
-        &self,
-        defs: &'node [oxidized::aast::Def<(), ()>],
-        get_node: &dyn Fn(&'node oxidized::aast::Def<(), ()>) -> Option<&'node T>,
-        get_name: &dyn Fn(&'node T) -> &'node str,
-        name: &str,
-    ) -> Result<&'node T, ()> {
-        // TODO(hrust): I think the corresponding OCaml code will pick
-        // the last occurrence, while this code will pick the first
-        for def in defs {
-            match def {
-                oxidized::aast::Def::Namespace(ns) => {
-                    match self.get_def_impl(&ns.1, get_node, get_name, name) {
-                        Ok(def) => return Ok(def),
-                        Err(()) => {}
-                    }
-                }
-                def => match get_node(def) {
-                    None => {}
-                    Some(def) => {
-                        if get_name(&def) == name {
-                            return Ok(def);
-                        }
-                    }
-                },
-            }
-        }
-        Err(())
-    }
-
-    fn get_def<T>(
-        &self,
-        full: bool,
-        fln: &RelativePath,
-        get_node: &dyn Fn(&oxidized::aast::Def<(), ()>) -> Option<&T>,
-        get_name: &dyn Fn(&T) -> &str,
-        name: &str,
-    ) -> Result<Option<RcRef<AstItem, T>>, ParsingError> {
-        let defs = self.get_ast(full, fln)?;
-        let defs = RcRef::new(defs);
-        match defs.try_map(|&(ref defs, ref _parsing_errors)| {
-            self.get_def_impl(&defs.0, &get_node, &get_name, name)
-        }) {
-            Ok(defs) => Ok(Some(defs)),
-            Err(()) => Ok(None),
-        }
-    }
-
-    pub fn find_fun_in_file(
-        &self,
-        full: bool,
-        fln: &RelativePath,
-        name: &str,
-    ) -> Result<Option<RcRef<AstItem, oxidized::aast::FunDef<(), ()>>>, ParsingError> {
-        self.get_def(
-            full,
-            fln,
-            &|def| match def {
-                oxidized::aast::Def::Fun(f) => Some(&**f),
-                _ => None,
-            },
-            &|f| &f.fun.name.1,
-            name,
-        )
     }
 }

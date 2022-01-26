@@ -12,7 +12,7 @@ use std::rc::Rc;
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
 
-use hackrs::ast_provider::{AstLocalCache, AstProvider};
+use hackrs::ast_provider::AstProvider;
 use hackrs::decl_ty_provider::DeclTyProvider;
 use hackrs::folded_decl_provider::{FoldedDeclLocalCache, FoldedDeclProvider};
 use hackrs::pos::{Prefix, RelativePath, RelativePathCtx};
@@ -70,13 +70,11 @@ pub extern "C" fn stc_main() {
     let options = Rc::new(oxidized::global_options::GlobalOptions::default());
     let pos_provider = Rc::new(PosProvider::new());
     let sn_provider = Rc::new(SpecialNamesProvider::new(Rc::clone(&pos_provider)));
-    let ast_cache = Rc::new(AstLocalCache::new());
-    let ast_provider = Rc::new(AstProvider::new(
-        ast_cache,
+    let ast_provider = AstProvider::new(
         Rc::clone(&relative_path_ctx),
         sn_provider,
         Rc::clone(&options),
-    ));
+    );
     let decl_ty_provider = Rc::new(DeclTyProvider::<NReason>::new(Rc::clone(&pos_provider)));
     let shallow_decl_cache = Rc::new(ShallowDeclLocalCache::new());
     let shallow_decl_provider = Rc::new(ShallowDeclProvider::new(
@@ -116,10 +114,9 @@ pub extern "C" fn stc_main() {
     // println!("{:#?}", shallow_decl_provider);
 
     for fln in &filenames {
-        let &(ref ast, ref parsing_errs) = &*ast_provider.get_ast(true, fln).unwrap();
-        let errs = parsing_errs.clone();
-        let (tast, errs) = TypingCheckUtils::type_file::<NReason>(Rc::clone(&ctx), ast, errs);
-        if !errs.is_empty() || !parsing_errs.is_empty() {
+        let (ast, errs) = ast_provider.get_ast(fln).unwrap();
+        let (tast, errs) = TypingCheckUtils::type_file::<NReason>(Rc::clone(&ctx), &ast, errs);
+        if !errs.is_empty() {
             unimplemented!()
         }
         print_tast(&options, &tast);

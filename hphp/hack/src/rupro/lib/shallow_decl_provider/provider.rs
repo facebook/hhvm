@@ -2,14 +2,16 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 use std::rc::Rc;
 use std::{fs, io};
 
 use bumpalo::Bump;
 
+use hcons::Hc;
+
 use crate::decl_defs::{ShallowClass, ShallowFun, ShallowMethod};
 use crate::decl_ty_provider::DeclTyProvider;
-use crate::hcons::Hc;
 use crate::pos::{RelativePath, RelativePathCtx, Symbol};
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclCache;

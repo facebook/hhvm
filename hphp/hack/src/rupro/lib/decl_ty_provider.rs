@@ -2,10 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 use std::rc::Rc;
 
+use hcons::Conser;
+
 use crate::decl_defs::{DeclTy, DeclTy_, FunParam, FunType, Prim};
-use crate::hcons::Conser;
 use crate::pos_provider::PosProvider;
 use crate::reason::Reason;
 

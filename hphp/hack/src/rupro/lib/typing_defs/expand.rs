@@ -2,10 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 #![allow(dead_code)]
 use std::collections::HashMap;
 
-use crate::hcons::Hc;
+use hcons::Hc;
+
 use crate::pos::Symbol;
 use crate::reason::{Reason, ReasonImpl};
 use crate::typing_ctx::TypingCtx;

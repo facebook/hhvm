@@ -2,12 +2,14 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 use std::collections::{hash_map::Entry, HashMap};
 use std::rc::Rc;
 
+use hcons::Hc;
+
 use crate::decl_defs::{DeclTy, FoldedClass, FoldedElement, ShallowClass, SubstContext};
 use crate::folded_decl_provider::subst::Subst;
-use crate::hcons::Hc;
 use crate::pos::Symbol;
 use crate::reason::Reason;
 

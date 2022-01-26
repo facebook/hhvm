@@ -2,15 +2,17 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
+
+use hcons::Hc;
 
 use crate::decl_defs::{
     CeVisibility, DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass, ShallowMethod,
 };
 use crate::folded_decl_provider::FoldedDeclCache;
 use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
-use crate::hcons::Hc;
 use crate::pos::{PosId, Symbol};
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclProvider;

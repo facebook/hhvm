@@ -2,12 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#![allow(dead_code)]
+
 use std::convert::From;
 
+use hcons::Hc;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 
-use crate::hcons::Hc;
 use crate::pos::{PosId, Symbol};
 use crate::reason::Reason;
 

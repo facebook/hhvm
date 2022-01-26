@@ -44,12 +44,12 @@ std::string Path::jsonLine() const {
   for (int i = 0; i < hops.size(); i++) {
     auto hop = hops[i];
 
-    if (last != hop.from) {
+    if (last != hop.from && hop.from != nullptr) {
       stream << "\"" << hop.from->fullName()->data() << "\", ";
     }
     last = hop.from;
 
-    if (last != hop.to) {
+    if (last != hop.to && hop.to != nullptr) {
       stream << "\"" << hop.to->fullName()->data() << "\"";
     }
     last = hop.to;

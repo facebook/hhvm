@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::borrow::Borrow;
 use std::collections::hash_map::Entry;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -109,6 +110,12 @@ impl AsRef<std::ffi::OsStr> for Hc<str> {
     }
 }
 
+fn hash<T: Hash + ?Sized>(value: &T) -> u64 {
+    let mut hasher = fnv::FnvHasher::default();
+    value.hash(&mut hasher);
+    hasher.finish()
+}
+
 #[derive(Debug)]
 pub struct Conser<T: ?Sized> {
     table: Mutex<IntMap<u64, Weak<T>>>,
@@ -119,12 +126,6 @@ impl<T: Eq + Hash + ?Sized> Conser<T> {
         Conser {
             table: Mutex::new(IntMap::default()),
         }
-    }
-
-    fn hash(value: &T) -> u64 {
-        let mut hasher = fnv::FnvHasher::default();
-        value.hash(&mut hasher);
-        hasher.finish()
     }
 
     pub fn gc(&self) -> bool {
@@ -144,7 +145,7 @@ impl<T: Eq + Hash + ?Sized> Conser<T> {
 
 impl<T: Eq + Hash> Conser<T> {
     pub fn mk(&self, x: T) -> Hc<T> {
-        let hash = Self::hash(&x);
+        let hash = hash(&x);
         let mut table = self.table.lock().unwrap();
         let rc = match table.entry(hash) {
             Entry::Occupied(mut o) => match o.get().upgrade() {
@@ -169,15 +170,20 @@ impl<T: Eq + Hash> Conser<T> {
     }
 }
 
-impl Conser<str> {
-    pub fn mk_str(&self, x: &str) -> Hc<str> {
-        let hash = Self::hash(&x);
+impl<T: ?Sized + Eq + Hash> Conser<T> {
+    pub fn mk_from_ref<'a, Q>(&self, x: &'a Q) -> Hc<T>
+    where
+        T: Borrow<Q>,
+        Q: 'a + Eq + Hash + ?Sized,
+        Rc<T>: From<&'a Q>,
+    {
+        let hash = hash(x);
         let mut table = self.table.lock().unwrap();
         let rc = match table.entry(hash) {
             Entry::Occupied(mut o) => match o.get().upgrade() {
                 Some(rc) => {
                     // TODO: handle collisions
-                    debug_assert_eq!(&x[..], &rc[..]);
+                    debug_assert!(x == (*rc).borrow());
                     rc
                 }
                 None => {
@@ -193,5 +199,15 @@ impl Conser<str> {
             }
         };
         Hc(rc)
+    }
+}
+
+impl Conser<[u8]> {
+    pub fn mk_str(&self, x: &str) -> Hc<str> {
+        let bytes = self.mk_from_ref(x.as_bytes());
+        let ptr: *const [u8] = Rc::into_raw(bytes.0);
+        // SAFETY: `x` is known to be a valid `&str`, and `bytes` is just a
+        // ref-counted copy of it.
+        unsafe { Hc(Rc::from_raw(ptr as *const str)) }
     }
 }

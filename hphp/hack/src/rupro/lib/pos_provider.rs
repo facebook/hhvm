@@ -8,7 +8,7 @@ use crate::reason::{Reason, ReasonImpl};
 
 #[derive(Debug)]
 pub struct PosProvider {
-    symbols: Conser<str>,
+    symbols: Conser<[u8]>,
 }
 
 impl PosProvider {

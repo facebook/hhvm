@@ -13,18 +13,18 @@ use std::ops::Deref;
 use crate::hcons::Consed;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Symbol(Consed<String>);
+pub struct Symbol(Consed<Box<str>>);
 
 impl Deref for Symbol {
-    type Target = String;
+    type Target = str;
 
-    fn deref(&self) -> &String {
+    fn deref(&self) -> &str {
         &self.0
     }
 }
 
-impl From<Consed<String>> for Symbol {
-    fn from(symbol: Consed<String>) -> Symbol {
+impl From<Consed<Box<str>>> for Symbol {
+    fn from(symbol: Consed<Box<str>>) -> Symbol {
         Symbol(symbol)
     }
 }

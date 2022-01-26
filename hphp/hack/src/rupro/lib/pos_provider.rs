@@ -8,7 +8,7 @@ use crate::reason::{Reason, ReasonImpl};
 
 #[derive(Debug)]
 pub struct PosProvider {
-    symbols: Conser<String>,
+    symbols: Conser<Box<str>>,
 }
 
 impl PosProvider {
@@ -19,7 +19,7 @@ impl PosProvider {
     }
 
     pub fn mk_symbol(&self, symbol: &str) -> Symbol {
-        Symbol::from(self.symbols.mk(symbol))
+        Symbol::from(self.symbols.mk(&symbol.to_owned().into_boxed_str()))
     }
 
 

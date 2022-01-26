@@ -501,6 +501,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "compiler_ffi"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "arena_deserializer",
+ "bincode",
+ "bumpalo",
+ "compile",
+ "cxx",
+ "cxx-build",
+ "decl_provider",
+ "direct_decl_parser",
+ "external_decl_provider",
+ "facts_rust",
+ "ffi",
+ "hhas_program",
+ "libc",
+ "log",
+ "no_pos_hash",
+ "ocamlrep",
+ "options",
+ "oxidized",
+ "oxidized_by_ref",
+ "parser_core_types",
+ "serde_json",
+ "stack_limit",
+ "unified_decl_provider",
+]
+
+[[package]]
 name = "config_file"
 version = "0.0.0"
 dependencies = [
@@ -2723,6 +2753,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "parser_ffi"
+version = "0.0.0"
+dependencies = [
+ "bumpalo",
+ "cxx",
+ "cxx-build",
+ "ocamlrep",
+ "oxidized",
+ "parser_core_types",
+ "positioned_full_trivia_parser",
+ "serde_json",
+ "stack_limit",
+]
+
+[[package]]
 name = "pkg-config"
 version = "0.3.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3065,36 +3110,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rust_compile_ffi_bridge"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "arena_deserializer",
- "bincode",
- "bumpalo",
- "compile",
- "cxx",
- "cxx-build",
- "decl_provider",
- "direct_decl_parser",
- "external_decl_provider",
- "facts_rust",
- "ffi",
- "hhas_program",
- "libc",
- "log",
- "no_pos_hash",
- "ocamlrep",
- "options",
- "oxidized",
- "oxidized_by_ref",
- "parser_core_types",
- "serde_json",
- "stack_limit",
- "unified_decl_provider",
-]
-
-[[package]]
 name = "rust_decl_ffi"
 version = "0.0.0"
 dependencies = [
@@ -3164,21 +3179,6 @@ dependencies = [
  "positioned_by_ref_parser",
  "stack_limit",
  "to_ocaml_impl",
-]
-
-[[package]]
-name = "rust_parser_ffi_bridge"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "cxx",
- "cxx-build",
- "ocamlrep",
- "oxidized",
- "parser_core_types",
- "positioned_full_trivia_parser",
- "serde_json",
- "stack_limit",
 ]
 
 [[package]]

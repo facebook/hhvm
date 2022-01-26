@@ -38,7 +38,7 @@
 #include "hphp/util/hash-map.h"
 #include "hphp/util/sha1.h"
 
-#include "hphp/hack/src/parser/ffi_bridge/rust_parser_ffi_bridge.rs"
+#include "hphp/hack/src/parser/ffi_bridge/parser_ffi.rs"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -6,7 +6,7 @@
 
 // Module containing conversion methods between the Rust Facts and
 // Rust/C++ shared Facts (in the compile_ffi module)
-mod rust_compile_ffi_impl;
+mod compiler_ffi_impl;
 
 use anyhow::{anyhow, Result};
 use arena_deserializer::serde::Deserialize;

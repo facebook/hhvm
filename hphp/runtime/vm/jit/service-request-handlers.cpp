@@ -107,8 +107,6 @@ RegionContext getContext(SrcKey sk, bool profiling) {
   return ctx;
 }
 
-const StaticString s_AlwaysInterp("__ALWAYS_INTERP");
-
 /*
  * Create a translation for the SrcKey specified in args.
  *
@@ -138,13 +136,6 @@ TranslationResult getTranslation(SrcKey sk) {
   if (UNLIKELY(!RO::RepoAuthoritative && sk.unit()->isCoverageEnabled())) {
     assertx(RO::EvalEnablePerFileCoverage);
     SKTRACE(2, sk, "punting because per file code coverage is enabled\n");
-    return TranslationResult::failTransiently();
-  }
-
-  if (UNLIKELY(!RO::EvalHHIRAlwaysInterpIgnoreHint &&
-               sk.func()->userAttributes().count(s_AlwaysInterp.get()))) {
-    SKTRACE(2, sk,
-            "punting because function is annotated with __ALWAYS_INTERP\n");
     return TranslationResult::failTransiently();
   }
 

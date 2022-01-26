@@ -72,6 +72,8 @@ UniqueStubs g_ustubs;
 
 namespace {
 
+const StaticString s_AlwaysInterp("__ALWAYS_INTERP");
+
 std::atomic<uint64_t> s_numTrans;
 SimpleMutex s_codeLock{false, RankCodeCache};
 SimpleMutex s_metadataLock{false, RankCodeMetadata};
@@ -174,6 +176,13 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
   }
 
   auto const func = sk.func();
+  if (!RO::EvalHHIRAlwaysInterpIgnoreHint &&
+      func->userAttributes().count(s_AlwaysInterp.get())) {
+    SKTRACE(2, sk,
+            "punting because function is annotated with __ALWAYS_INTERP\n");
+    return TranslationResult::Scope::Process;
+  }
+
 
   // Do not translate functions from units marked as interpret-only.
   if (func->unit()->isInterpretOnly()) {

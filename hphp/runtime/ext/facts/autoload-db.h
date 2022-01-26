@@ -94,48 +94,47 @@ struct AutoloadDB {
 
   virtual ~AutoloadDB();
 
-  virtual SQLiteTxn begin() = 0;
+  /**
+   * Actually save all changes you've made.
+   *
+   * Changes will not persist unless you call this function before destroying
+   * the AutoloadDB!
+   */
+  virtual void commit() = 0;
 
-  virtual void insertPath(SQLiteTxn& txn, const folly::fs::path& path) = 0;
-  virtual void erasePath(SQLiteTxn& txn, const folly::fs::path& path) = 0;
+  virtual void insertPath(const folly::fs::path& path) = 0;
+  virtual void erasePath(const folly::fs::path& path) = 0;
 
   // Hashes
   virtual void insertSha1Hex(
-      SQLiteTxn& txn,
-      const folly::fs::path& path,
-      const Optional<std::string>& sha1hex) = 0;
-  virtual std::string
-  getSha1Hex(SQLiteTxn& txn, const folly::fs::path& path) = 0;
+      const folly::fs::path& path, const Optional<std::string>& sha1hex) = 0;
+  virtual std::string getSha1Hex(const folly::fs::path& path) = 0;
 
   // Types
   virtual void insertType(
-      SQLiteTxn& txn,
       std::string_view type,
       const folly::fs::path& path,
       TypeKind kind,
       TypeFlagMask flags) = 0;
-  virtual std::vector<folly::fs::path>
-  getTypePath(SQLiteTxn& txn, std::string_view type) = 0;
+  virtual std::vector<folly::fs::path> getTypePath(std::string_view type) = 0;
   virtual std::vector<std::string>
-  getPathTypes(SQLiteTxn& txn, const folly::fs::path& path) = 0;
+  getPathTypes(const folly::fs::path& path) = 0;
 
   /**
    * Return the kind of the given type defined at the given path.
    *
    * If the type is not defined in the given path, return TypeKind::Unknown.
    */
-  virtual std::pair<TypeKind, TypeFlagMask> getKindAndFlags(
-      SQLiteTxn& txn, std::string_view type, const folly::fs::path& path) = 0;
+  virtual std::pair<TypeKind, TypeFlagMask>
+  getKindAndFlags(std::string_view type, const folly::fs::path& path) = 0;
 
   // Inheritance
   virtual void insertBaseType(
-      SQLiteTxn& txn,
       const folly::fs::path& path,
       std::string_view derivedType,
       DeriveKind kind,
       std::string_view baseType) = 0;
   virtual std::vector<std::string> getBaseTypes(
-      SQLiteTxn& txn,
       const folly::fs::path& path,
       std::string_view derivedType,
       DeriveKind kind) = 0;
@@ -146,8 +145,8 @@ struct AutoloadDB {
    *
    * Returns [(pathWhereDerivedTypeExtendsBaseType, derivedType)]
    */
-  virtual std::vector<std::pair<folly::fs::path, std::string>> getDerivedTypes(
-      SQLiteTxn& txn, std::string_view baseType, DeriveKind kind) = 0;
+  virtual std::vector<std::pair<folly::fs::path, std::string>>
+  getDerivedTypes(std::string_view baseType, DeriveKind kind) = 0;
 
   // (type, path, kind, flags)
   using DerivedTypeInfo = std::tuple<
@@ -156,7 +155,7 @@ struct AutoloadDB {
       TypeKind,
       TypeFlagMask>;
   virtual RowIter<DerivedTypeInfo> getTransitiveDerivedTypes(
-      SQLiteTxn& txn,
+
       std::string_view baseType,
       TypeKindMask kinds = kTypeKindAll,
       DeriveKindMask deriveKinds = kDeriveKindAll) = 0;
@@ -164,7 +163,6 @@ struct AutoloadDB {
   // Attributes
 
   virtual void insertTypeAttribute(
-      SQLiteTxn& txn,
       const folly::fs::path& path,
       std::string_view type,
       std::string_view attributeName,
@@ -172,7 +170,6 @@ struct AutoloadDB {
       const folly::dynamic* attributeValue) = 0;
 
   virtual void insertMethodAttribute(
-      SQLiteTxn& txn,
       const folly::fs::path& path,
       std::string_view type,
       std::string_view method,
@@ -181,7 +178,6 @@ struct AutoloadDB {
       const folly::dynamic* attributeValue) = 0;
 
   virtual void insertFileAttribute(
-      SQLiteTxn& txn,
       const folly::fs::path& path,
       std::string_view attributeName,
       Optional<int> attributePosition,
@@ -193,50 +189,44 @@ struct AutoloadDB {
    */
   virtual void analyze() = 0;
 
-  virtual std::vector<std::string> getAttributesOfType(
-      SQLiteTxn& txn, std::string_view type, const folly::fs::path& path) = 0;
+  virtual std::vector<std::string>
+  getAttributesOfType(std::string_view type, const folly::fs::path& path) = 0;
 
   virtual std::vector<std::string> getAttributesOfMethod(
-      SQLiteTxn& txn,
       std::string_view type,
       std::string_view method,
       const folly::fs::path& path) = 0;
 
   virtual std::vector<std::string>
-  getAttributesOfFile(SQLiteTxn& txn, const folly::fs::path& path) = 0;
+  getAttributesOfFile(const folly::fs::path& path) = 0;
 
   virtual std::vector<folly::dynamic> getTypeAttributeArgs(
-      SQLiteTxn& txn,
       std::string_view type,
       std::string_view path,
       std::string_view attributeName) = 0;
 
   virtual std::vector<folly::dynamic> getTypeAliasAttributeArgs(
-      SQLiteTxn& txn,
       std::string_view typeAlias,
       std::string_view path,
       std::string_view attributeName) = 0;
 
   virtual std::vector<folly::dynamic> getMethodAttributeArgs(
-      SQLiteTxn& txn,
       std::string_view type,
       std::string_view method,
       std::string_view path,
       std::string_view attributeName) = 0;
 
   virtual std::vector<folly::dynamic> getFileAttributeArgs(
-      SQLiteTxn& txn,
-      std::string_view path,
-      std::string_view attributeName) = 0;
+      std::string_view path, std::string_view attributeName) = 0;
 
   struct TypeDeclaration {
     std::string m_type;
     folly::fs::path m_path;
   };
   virtual std::vector<TypeDeclaration>
-  getTypesWithAttribute(SQLiteTxn& txn, std::string_view attributeName) = 0;
-  virtual std::vector<TypeDeclaration> getTypeAliasesWithAttribute(
-      SQLiteTxn& txn, std::string_view attributeName) = 0;
+  getTypesWithAttribute(std::string_view attributeName) = 0;
+  virtual std::vector<TypeDeclaration>
+  getTypeAliasesWithAttribute(std::string_view attributeName) = 0;
 
   struct MethodDeclaration {
     std::string m_type;
@@ -245,38 +235,32 @@ struct AutoloadDB {
   };
 
   virtual std::vector<MethodDeclaration>
-  getPathMethods(SQLiteTxn& txn, std::string_view path) = 0;
+  getPathMethods(std::string_view path) = 0;
 
   virtual std::vector<MethodDeclaration>
-  getMethodsWithAttribute(SQLiteTxn& txn, std::string_view attributeName) = 0;
+  getMethodsWithAttribute(std::string_view attributeName) = 0;
 
   virtual std::vector<folly::fs::path>
-  getFilesWithAttribute(SQLiteTxn& txn, std::string_view attributeName) = 0;
+  getFilesWithAttribute(std::string_view attributeName) = 0;
 
-  virtual std::string
-  getTypeCorrectCase(SQLiteTxn& txn, std::string_view type) = 0;
+  virtual std::string getTypeCorrectCase(std::string_view type) = 0;
 
   // Functions
-  virtual void insertFunction(
-      SQLiteTxn& txn,
-      std::string_view function,
-      const folly::fs::path& path) = 0;
+  virtual void
+  insertFunction(std::string_view function, const folly::fs::path& path) = 0;
   virtual std::vector<folly::fs::path>
-  getFunctionPath(SQLiteTxn& txn, std::string_view function) = 0;
+  getFunctionPath(std::string_view function) = 0;
   virtual std::vector<std::string>
-  getPathFunctions(SQLiteTxn& txn, const folly::fs::path& path) = 0;
-  virtual std::string
-  getFunctionCorrectCase(SQLiteTxn& txn, std::string_view function) = 0;
+  getPathFunctions(const folly::fs::path& path) = 0;
+  virtual std::string getFunctionCorrectCase(std::string_view function) = 0;
 
   // Constants
-  virtual void insertConstant(
-      SQLiteTxn& txn,
-      std::string_view constant,
-      const folly::fs::path& path) = 0;
+  virtual void
+  insertConstant(std::string_view constant, const folly::fs::path& path) = 0;
   virtual std::vector<folly::fs::path>
-  getConstantPath(SQLiteTxn& txn, std::string_view constant) = 0;
+  getConstantPath(std::string_view constant) = 0;
   virtual std::vector<std::string>
-  getPathConstants(SQLiteTxn& txn, const folly::fs::path& path) = 0;
+  getPathConstants(const folly::fs::path& path) = 0;
 
   /**
    * Return a list of all paths defined in the given root, as absolute paths.
@@ -286,7 +270,7 @@ struct AutoloadDB {
    * Returns results in the form of a lazy generator.
    */
   using PathAndHash = std::pair<folly::fs::path, const std::string_view>;
-  virtual RowIter<PathAndHash> getAllPathsAndHashes(SQLiteTxn& txn) = 0;
+  virtual RowIter<PathAndHash> getAllPathsAndHashes() = 0;
 
   /**
    * Return a list of all symbols and paths defined in the given root.
@@ -294,12 +278,12 @@ struct AutoloadDB {
    * Returns results in the form of a lazy generator.
    */
   using SymbolPath = std::pair<const std::string_view, folly::fs::path>;
-  virtual RowIter<SymbolPath> getAllTypePaths(SQLiteTxn& txn) = 0;
-  virtual RowIter<SymbolPath> getAllFunctionPaths(SQLiteTxn& txn) = 0;
-  virtual RowIter<SymbolPath> getAllConstantPaths(SQLiteTxn& txn) = 0;
+  virtual RowIter<SymbolPath> getAllTypePaths() = 0;
+  virtual RowIter<SymbolPath> getAllFunctionPaths() = 0;
+  virtual RowIter<SymbolPath> getAllConstantPaths() = 0;
 
-  virtual void insertClock(SQLiteTxn& txn, const Clock& clock) = 0;
-  virtual Clock getClock(SQLiteTxn& txn) = 0;
+  virtual void insertClock(const Clock& clock) = 0;
+  virtual Clock getClock() = 0;
 
   template <typename TValue> class RowIter {
 

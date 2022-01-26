@@ -546,7 +546,6 @@ private:
    */
   void updateDBPath(
       AutoloadDB& db,
-      SQLiteTxn& txn,
       const folly::fs::path& path,
       const FileFacts& facts) const;
 
@@ -567,16 +566,13 @@ private:
    * Load information from the DB about who the given `derivedType` inherits.
    */
   void loadBaseTypesFromDB(
-      AutoloadDB& db,
-      SQLiteTxn& txn,
-      Path path,
-      Symbol<SymKind::Type> derivedType);
+      AutoloadDB& db, Path path, Symbol<SymKind::Type> derivedType);
 
   /**
    * Helper function to read from and write to m_synchronizedData.
    *
    * readFn: ((const Data&) -> Optional<Ret>)
-   * GetFromDBFn: ((AutoloadDB&, SQLiteTxn&) -> DataFromDB)
+   * GetFromDBFn: ((AutoloadDB&) -> DataFromDB)
    * writeFn: ((Data&, DataFromDB) -> Ret)
    */
   template <

@@ -30,27 +30,30 @@
 #include "hphp/runtime/vm/taint/interpreter.h"
 #include "hphp/runtime/vm/taint/state.h"
 
-#include "hphp/util/trace.h"
 #include "hphp/util/text-color.h"
+#include "hphp/util/trace.h"
 
 namespace folly {
 
-template<> class FormatValue<HPHP::taint::Value> {
+template <>
+class FormatValue<HPHP::taint::Value> {
  public:
-  explicit FormatValue(const HPHP::taint::Value& value): m_value(value) {}
-  template<class FormatCallback>
+  explicit FormatValue(const HPHP::taint::Value& value) : m_value(value) {}
+  template <class FormatCallback>
   void format(FormatArg& arg, FormatCallback& cb) const {
     auto value = m_value ? "S" : "_";
     FormatValue<std::string>(value).format(arg, cb);
   }
+
  private:
   const HPHP::taint::Value& m_value;
 };
 
-template<> class FormatValue<HPHP::tv_lval> {
+template <>
+class FormatValue<HPHP::tv_lval> {
  public:
-  explicit FormatValue(const HPHP::tv_lval& value): m_value(value) {}
-  template<class FormatCallback>
+  explicit FormatValue(const HPHP::tv_lval& value) : m_value(value) {}
+  template <class FormatCallback>
   void format(FormatArg& arg, FormatCallback& cb) const {
     if (!m_value.is_set()) {
       FormatValue<std::string>("<nullptr>").format(arg, cb);
@@ -59,24 +62,26 @@ template<> class FormatValue<HPHP::tv_lval> {
     auto string = folly::sformat("<{}>", uintptr_t(&m_value.val()));
     format_value::formatString(string, arg, cb);
   }
+
  private:
   const HPHP::tv_lval& m_value;
 };
 
-template<> class FormatValue<HPHP::MemberKey> {
+template <>
+class FormatValue<HPHP::MemberKey> {
  public:
-  explicit FormatValue(const HPHP::MemberKey& memberKey): m_value(memberKey) {}
-  template<class FormatCallback>
+  explicit FormatValue(const HPHP::MemberKey& memberKey) : m_value(memberKey) {}
+  template <class FormatCallback>
   void format(FormatArg& arg, FormatCallback& cb) const {
     auto string = folly::sformat("{}", HPHP::show(m_value));
     format_value::formatString(string, arg, cb);
   }
+
  private:
   const HPHP::MemberKey& m_value;
 };
 
-} // folly
-
+} // namespace folly
 
 namespace HPHP {
 namespace taint {
@@ -90,19 +95,11 @@ std::string quote(const std::string& string) {
 }
 
 std::string yellow(const std::string& string) {
-  return folly::sformat(
-      "{}{}{}",
-      ANSI_COLOR_YELLOW,
-      string,
-      ANSI_COLOR_END);
+  return folly::sformat("{}{}{}", ANSI_COLOR_YELLOW, string, ANSI_COLOR_END);
 }
 
 std::string gray(const std::string& string) {
-  return folly::sformat(
-      "{}{}{}",
-      ANSI_COLOR_GRAY,
-      string,
-      ANSI_COLOR_END);
+  return folly::sformat("{}{}{}", ANSI_COLOR_GRAY, string, ANSI_COLOR_END);
 }
 
 void iopPreamble(const std::string& name) {
@@ -605,7 +602,8 @@ void iopCGetL(named_local_var fr) {
   auto state = State::instance;
   auto value = state->heap.get(fr.lval);
 
-  FTRACE(2, "taint: getting {} (name: {}, value: {})\n", fr.lval, fr.name, value);
+  FTRACE(
+      2, "taint: getting {} (name: {}, value: {})\n", fr.lval, fr.name, value);
 
   state->stack.push(value);
 }
@@ -812,18 +810,16 @@ void iopFCall(const Func* func, const FCallArgs& fca) {
   }
 
   auto name = func->fullName()->data();
-  FTRACE(
-      1,
-      "taint: entering {} ({} arguments)\n",
-      yellow(name),
-      fca.numArgs);
+  FTRACE(1, "taint: entering {} ({} arguments)\n", yellow(name), fca.numArgs);
 
   const auto sinks = Configuration::get()->sinks(func);
   FTRACE(3, "taint: {} sinks\n", sinks.size());
 
   for (const auto& sink : sinks) {
     auto value = State::instance->stack.peek(fca.numArgs - 1 - sink.index);
-    if (!value) { continue; }
+    if (!value) {
+      continue;
+    }
 
     FTRACE(1, "taint: tainted value flows into sink\n");
     value->hops.push_back(Hop{vmfp()->func(), func});
@@ -864,12 +860,7 @@ TCA iopFCallClsMethodD(
 
   const Func* func;
   auto const res = lookupClsMethod(
-      func,
-      cls,
-      methName,
-      nullptr,
-      ctx,
-      MethodLookupErrorOptions::None);
+      func, cls, methName, nullptr, ctx, MethodLookupErrorOptions::None);
   if (res == LookupResult::MethodNotFound) {
     FTRACE(2, "taint: unable to load method `{}`\n", methName);
     return nullptr;
@@ -911,18 +902,14 @@ TCA iopFCallCtor(
     const StringData*) {
   iopPreamble("FCallCtor");
 
-  auto const obj = vmStack()
-      .indC(fca.numInputs() + (kNumActRecCells - 1))
-      ->m_data.pobj;
+  auto const obj =
+      vmStack().indC(fca.numInputs() + (kNumActRecCells - 1))->m_data.pobj;
 
   const Func* func;
   auto ar = vmfp();
   auto ctx = ar == nullptr ? nullptr : ar->func()->cls();
   lookupCtorMethod(
-      func,
-      obj->getVMClass(),
-      ctx,
-      MethodLookupErrorOptions::RaiseOnNotFound);
+      func, obj->getVMClass(), ctx, MethodLookupErrorOptions::RaiseOnNotFound);
 
   iopFCall(func, fca);
 
@@ -975,9 +962,10 @@ TCA iopFCallObjMethodD(
     const StringData* name) {
   iopPreamble("FCallObjMethodD");
 
-  auto const obj = vmStack()
-      .indC(fca.numInputs() + (kNumActRecCells - 1));
-  if (!isObjectType(obj->m_type)) { return nullptr; }
+  auto const obj = vmStack().indC(fca.numInputs() + (kNumActRecCells - 1));
+  if (!isObjectType(obj->m_type)) {
+    return nullptr;
+  }
 
   auto ar = vmfp();
   auto ctx = ar == nullptr ? nullptr : ar->func()->cls();
@@ -1288,18 +1276,22 @@ TypedValue typedValue(MemberKey memberKey) {
   switch (memberKey.mcode) {
     case MW:
       return TypedValue{};
-    case MEL: case MPL: {
+    case MEL:
+    case MPL: {
       auto const local = frame_local(vmfp(), memberKey.local.id);
       if (type(local) == KindOfUninit) {
         return make_tv<KindOfNull>();
       }
       return tvClassToString(*local);
     }
-    case MEC: case MPC:
+    case MEC:
+    case MPC:
       return tvClassToString(*vmStack().indTV(memberKey.iva));
     case MEI:
       return make_tv<KindOfInt64>(memberKey.int64);
-    case MET: case MPT: case MQT:
+    case MET:
+    case MPT:
+    case MQT:
       return make_tv<KindOfPersistentString>(memberKey.litstr);
   }
   not_reached();
@@ -1316,18 +1308,17 @@ tv_lval resolveMemberKey(const MemberKey& memberKey) {
       ReadonlyOp::Readonly);
 }
 
-}  // namespace
+} // namespace
 
-void iopQueryM(
-    uint32_t /* nDiscard */,
-    QueryMOp op,
-    MemberKey memberKey) {
+void iopQueryM(uint32_t /* nDiscard */, QueryMOp op, MemberKey memberKey) {
   iopPreamble("QueryM");
 
   // TODO(T93491296): re-enable
-  if (true) { return; }
+  if (true) {
+    return;
+  }
 
-  switch(op) {
+  switch (op) {
     case QueryMOp::CGet: {
       auto state = State::instance;
       auto from = resolveMemberKey(memberKey);
@@ -1346,7 +1337,9 @@ void iopSetM(uint32_t /* nDiscard */, MemberKey memberKey) {
   iopPreamble("SetM");
 
   // TODO(T93491296): re-enable
-  if (true) { return; }
+  if (true) {
+    return;
+  }
 
   auto state = State::instance;
   auto value = state->stack.top();

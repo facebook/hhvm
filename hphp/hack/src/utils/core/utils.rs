@@ -11,7 +11,7 @@ use std::borrow::Cow;
 pub fn add_ns(s: &str) -> Cow<'_, str> {
     if !s.starts_with('\\') {
         let mut new_str = String::with_capacity(1 + s.len());
-        new_str.push_str("\\");
+        new_str.push('\\');
         new_str.push_str(s);
         Cow::Owned(new_str)
     } else {

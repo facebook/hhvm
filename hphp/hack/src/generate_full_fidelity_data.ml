@@ -3300,7 +3300,7 @@ module GenerateSchemaVersion = struct
     make_header CStyle ""
     ^ sprintf
         "
-pub const VERSION: &'static str = \"%s\";
+pub const VERSION: &str = \"%s\";
 "
         Full_fidelity_schema.full_fidelity_schema_version_number
 

@@ -80,11 +80,11 @@ fn parse_sign_and_base(p: &[u8], preceding_zero_as_oct: bool) -> (i8, IntKind, &
 }
 
 fn parse_digit(c: u8, int_kind: IntKind) -> Result<u8, ParseIntError> {
-    if c >= b'0' && c <= b'9' {
+    if (b'0'..=b'9').contains(&c) {
         Ok(c - b'0')
-    } else if c >= b'A' && c <= b'F' {
+    } else if (b'A'..=b'F').contains(&c) {
         Ok(c - b'A' + 10)
-    } else if c >= b'a' && c <= b'f' {
+    } else if (b'a'..=b'f').contains(&c) {
         Ok(c - b'a' + 10)
     } else {
         Err(ParseIntError::InvalidDigit(int_kind))
@@ -106,11 +106,11 @@ fn parse(p: &[u8], preceding_zero_as_oct: bool) -> Result<i64, ParseIntError> {
         return Err(ParseIntError::Empty);
     }
     let mut r = 0i64;
-    for i in 0..p.len() {
-        if i != 0 && p[i] == b'_' {
+    for (i, digit) in p.iter().copied().enumerate() {
+        if i != 0 && digit == b'_' {
             continue;
         }
-        let d = parse_digit(p[i], int_kind)?;
+        let d = parse_digit(digit, int_kind)?;
         if d >= base {
             return Err(ParseIntError::InvalidDigit(int_kind));
         } else {
@@ -132,11 +132,11 @@ pub fn int_of_string_wrap(p: &[u8]) -> Result<i64, ParseIntError> {
         return Err(ParseIntError::Empty);
     }
     let mut r = 0i64;
-    for i in 0..p.len() {
-        if i != 0 && p[i] == b'_' {
+    for (i, digit) in p.iter().copied().enumerate() {
+        if i != 0 && digit == b'_' {
             continue;
         }
-        let d = parse_digit(p[i], int_kind)?;
+        let d = parse_digit(digit, int_kind)?;
         if d >= base {
             return Err(ParseIntError::InvalidDigit(int_kind));
         } else {

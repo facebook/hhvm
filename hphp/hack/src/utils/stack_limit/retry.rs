@@ -146,8 +146,8 @@ impl Job {
 /// Some(stack_size) if it is definitely a non-main thread, None otherwise.
 pub type NonMainStackSize = Option<usize>;
 
-// Computes the amount of bytes that must remain before execution is aborted
-// because it would have really hit the stack limit; i.e., cushion space.
+/// Computes the amount of bytes that must remain before execution is aborted
+/// because it would have really hit the stack limit; i.e., cushion space.
 pub type StackSlackFunction = fn(usize) -> usize;
 
 /// Computes stack slack the same way as HHVM does it in

@@ -26,9 +26,9 @@ mod float {
         }
     }
 
-    impl std::convert::Into<f64> for F64 {
-        fn into(self) -> f64 {
-            f64::from_be_bytes(self.0)
+    impl std::convert::From<F64> for f64 {
+        fn from(f: F64) -> f64 {
+            f64::from_be_bytes(f.0)
         }
     }
 }

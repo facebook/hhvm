@@ -60,10 +60,8 @@ where
         iteration += 1;
     }
 
-    return (
-        (now - start) / (if iteration == 0 { 1. } else { iteration as f64 }),
-        iteration,
-    );
+    let avg_time = (now - start) / (if iteration == 0 { 1. } else { iteration as f64 });
+    (avg_time, iteration)
 }
 
 pub fn time<T>(f: impl FnOnce() -> T) -> (T, Duration) {

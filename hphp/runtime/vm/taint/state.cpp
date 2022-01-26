@@ -236,6 +236,8 @@ void State::initialize() {
   heap.clear();
   paths.clear();
   arena = std::make_unique<Arena>();
+  m_sources = Configuration::get()->sources();
+  m_sinks = Configuration::get()->sinks();
 }
 
 namespace {
@@ -267,6 +269,11 @@ void State::teardown() {
   auto identifier = metadata["identifier"].asString();
   FTRACE(1, "taint: processed request `{}`\n", identifier);
 
+  // Update caches for the next request
+  if (m_sources != nullptr && m_sinks != nullptr) {
+    Configuration::get()->updateCachesAfterRequest(m_sources, m_sinks);
+  }
+
   auto outputDirectory = Configuration::get()->outputDirectory;
   if (!outputDirectory) {
     // Print to stderr, useful for integration tests.
@@ -294,6 +301,26 @@ void State::teardown() {
   } catch (std::exception& exception) {
     throw std::runtime_error("unable to write to `" + outputPath + "`");
   }
+}
+
+std::vector<Source> State::sources(const Func* func) {
+  if (!m_sources) {
+    m_sources = Configuration::get()->sources();
+    if (!m_sources) {
+      return std::vector<Source>();
+    }
+  }
+  return m_sources->lookup(func);
+}
+
+std::vector<Sink> State::sinks(const Func* func) {
+  if (!m_sinks) {
+    m_sinks = Configuration::get()->sinks();
+    if (!m_sinks) {
+      return std::vector<Sink>();
+    }
+  }
+  return m_sinks->lookup(func);
 }
 
 } // namespace taint

@@ -28,6 +28,8 @@
 #include <optional>
 #include <set>
 
+#include "hphp/runtime/vm/taint/configuration.h"
+
 template <>
 struct std::hash<HPHP::tv_lval> {
   std::size_t operator()(const HPHP::tv_lval& val) const {
@@ -123,6 +125,9 @@ struct State {
   void initialize();
   void teardown();
 
+  std::vector<Source> sources(const Func* func);
+  std::vector<Sink> sinks(const Func* func);
+
   Stack stack;
   Heap heap;
 
@@ -130,6 +135,9 @@ struct State {
   std::unique_ptr<Arena> arena;
   // Contains all the taint flows found in this request
   std::vector<Path*> paths;
+
+  std::shared_ptr<TaintedFunctionSet<Source>> m_sources;
+  std::shared_ptr<TaintedFunctionSet<Sink>> m_sinks;
 };
 
 } // namespace taint

@@ -27,8 +27,11 @@
 #include <re2/re2.h>
 #include <re2/set.h>
 
+#include <folly/concurrency/AtomicSharedPtr.h>
+#include <folly/container/EvictingCacheMap.h>
+
 #include "hphp/runtime/vm/func.h"
-#include "hphp/util/concurrent-scalable-cache.h"
+#include "hphp/util/hash-map.h"
 
 namespace HPHP {
 namespace taint {
@@ -41,7 +44,6 @@ struct Sink {
   int64_t index;
 };
 
-
 /**
  * A cache for efficiently looking up whether a function is marked as tainted
  * based on its name matching a given set of regexes.
@@ -53,14 +55,9 @@ struct Sink {
  */
 template <class T>
 struct TaintedFunctionSet {
-  typedef typename ConcurrentScalableCache<FuncId::Int, std::vector<T>>::
-      ConstAccessor PositiveCacheConstAccessor;
-  typedef typename ConcurrentScalableCache<FuncId::Int, bool>::ConstAccessor
-      NegativeCacheConstAccessor;
-
   TaintedFunctionSet(std::vector<std::pair<std::string, T>> entries)
       : m_entries(),
-        m_regex_set(std::make_unique<re2::RE2::Set>(
+        m_regex_set(std::make_shared<re2::RE2::Set>(
             re2::RE2::Options(),
             re2::RE2::ANCHOR_BOTH)),
         m_negative_cache(65536),
@@ -77,6 +74,24 @@ struct TaintedFunctionSet {
     }
   }
 
+  TaintedFunctionSet(
+      const std::vector<T>& entries,
+      std::shared_ptr<re2::RE2::Set> regex_set,
+      const folly::EvictingCacheMap<FuncId::Int, bool>& negative_cache,
+      const folly::EvictingCacheMap<FuncId::Int, std::vector<T>>&
+          positive_cache)
+      : m_entries(entries),
+        m_regex_set(regex_set),
+        m_negative_cache(negative_cache.getMaxSize()),
+        m_positive_cache(positive_cache.getMaxSize()) {
+    for (const auto& it : negative_cache) {
+      m_negative_cache.set(it.first, it.second);
+    }
+    for (const auto& it : positive_cache) {
+      m_positive_cache.set(it.first, it.second);
+    }
+  }
+
   std::vector<T> lookup(const Func* func) {
     std::vector<T> results;
 
@@ -89,17 +104,17 @@ struct TaintedFunctionSet {
     // First check if we know for sure this function doesn't exist
     auto id = func->getFuncId().toInt();
     {
-      NegativeCacheConstAccessor accessor;
-      if (m_negative_cache.find(accessor, id)) {
+      auto it = m_negative_cache.find(id);
+      if (it != m_negative_cache.end()) {
         return results;
       }
     }
 
     // Check if we have a cached result
     {
-      PositiveCacheConstAccessor accessor;
-      if (m_positive_cache.find(accessor, id)) {
-        return *accessor;
+      auto it = m_positive_cache.find(id);
+      if (it != m_positive_cache.end()) {
+        return it->second;
       }
     }
 
@@ -117,20 +132,25 @@ struct TaintedFunctionSet {
 
     // Update our caches accordingly
     if (!results.empty()) {
-      m_positive_cache.insert(id, results);
+      m_positive_cache.set(id, results);
     } else {
       // Store the negative result
-      m_negative_cache.insert(id, true);
+      m_negative_cache.set(id, true);
     }
 
     return results;
   }
 
+  std::shared_ptr<TaintedFunctionSet<T>> clone() {
+    return std::make_shared<TaintedFunctionSet<T>>(
+        m_entries, m_regex_set, m_negative_cache, m_positive_cache);
+  }
+
  private:
   std::vector<T> m_entries;
-  std::unique_ptr<re2::RE2::Set> m_regex_set;
-  ConcurrentScalableCache<FuncId::Int, bool> m_negative_cache;
-  ConcurrentScalableCache<FuncId::Int, std::vector<T>> m_positive_cache;
+  std::shared_ptr<re2::RE2::Set> m_regex_set;
+  folly::EvictingCacheMap<FuncId::Int, bool> m_negative_cache;
+  folly::EvictingCacheMap<FuncId::Int, std::vector<T>> m_positive_cache;
 };
 
 struct Configuration {
@@ -139,14 +159,18 @@ struct Configuration {
   void read(const std::string& path);
   void resetConfig(const std::string& contents);
 
-  std::vector<Source> sources(const Func* func);
-  std::vector<Sink> sinks(const Func* func);
+  std::shared_ptr<TaintedFunctionSet<Source>> sources();
+  std::shared_ptr<TaintedFunctionSet<Sink>> sinks();
+
+  void updateCachesAfterRequest(
+      std::shared_ptr<TaintedFunctionSet<Source>> sources,
+      std::shared_ptr<TaintedFunctionSet<Sink>> sinks);
 
   Optional<std::string> outputDirectory;
 
  private:
-  std::unique_ptr<TaintedFunctionSet<Source>> m_sources;
-  std::unique_ptr<TaintedFunctionSet<Sink>> m_sinks;
+  folly::atomic_shared_ptr<TaintedFunctionSet<Source>> m_sources;
+  folly::atomic_shared_ptr<TaintedFunctionSet<Sink>> m_sinks;
 };
 
 } // namespace taint

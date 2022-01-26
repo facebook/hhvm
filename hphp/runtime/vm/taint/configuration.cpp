@@ -67,7 +67,7 @@ void Configuration::resetConfig(const std::string& contents) {
       }
       sources.push_back(std::make_pair(source["name"].asString(), value));
     }
-    m_sources = std::make_unique<TaintedFunctionSet<Source>>(sources);
+    m_sources.store(std::make_shared<TaintedFunctionSet<Source>>(sources));
 
     std::vector<std::pair<std::string, Sink>> sinks;
     for (const auto sink : parsed["sinks"]) {
@@ -75,7 +75,7 @@ void Configuration::resetConfig(const std::string& contents) {
       auto name = sink["name"].asString();
       sinks.push_back(std::make_pair(sink["name"].asString(), value));
     }
-    m_sinks = std::make_unique<TaintedFunctionSet<Sink>>(sinks);
+    m_sinks.store(std::make_unique<TaintedFunctionSet<Sink>>(sinks));
   } catch (std::exception& exception) {
     throw std::invalid_argument(
         std::string("unable to parse configuration: ") + exception.what());
@@ -99,18 +99,27 @@ void Configuration::read(const std::string& path) {
   resetConfig(contents);
 }
 
-std::vector<Source> Configuration::sources(const Func* func) {
-  if (!m_sources) {
-    return std::vector<Source>();
+std::shared_ptr<TaintedFunctionSet<Source>> Configuration::sources() {
+  auto sources = m_sources.load();
+  if (!sources) {
+    return nullptr;
   }
-  return m_sources->lookup(func);
+  return sources->clone();
 }
 
-std::vector<Sink> Configuration::sinks(const Func* func) {
-  if (!m_sinks) {
-    return std::vector<Sink>();
+std::shared_ptr<TaintedFunctionSet<Sink>> Configuration::sinks() {
+  auto sinks = m_sinks.load();
+  if (!sinks) {
+    return nullptr;
   }
-  return m_sinks->lookup(func);
+  return sinks->clone();
+}
+
+void Configuration::updateCachesAfterRequest(
+    std::shared_ptr<TaintedFunctionSet<Source>> sources,
+    std::shared_ptr<TaintedFunctionSet<Sink>> sinks) {
+  m_sources.store(sources);
+  m_sinks.store(sinks);
 }
 
 } // namespace taint

@@ -7,7 +7,7 @@ use std::convert::From;
 
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 
-use crate::hcons::Consed;
+use crate::hcons::Hc;
 use crate::pos::{PosId, Symbol};
 use crate::reason::Reason;
 
@@ -69,18 +69,18 @@ pub enum Ty_<R: Reason, TY> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Ty<R: Reason>(R, Consed<Ty_<R, Ty<R>>>);
+pub struct Ty<R: Reason>(R, Hc<Ty_<R, Ty<R>>>);
 
 impl<R: Reason> Ty<R> {
-    pub fn new(reason: R, consed: Consed<Ty_<R, Ty<R>>>) -> Self {
-        Self(reason, consed)
+    pub fn new(reason: R, ty: Hc<Ty_<R, Ty<R>>>) -> Self {
+        Self(reason, ty)
     }
 
     pub fn reason(&self) -> &R {
         &self.0
     }
 
-    pub fn node(&self) -> &Consed<Ty_<R, Ty<R>>> {
+    pub fn node(&self) -> &Hc<Ty_<R, Ty<R>>> {
         &self.1
     }
 

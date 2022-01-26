@@ -10,10 +10,10 @@ use std::convert::From;
 use std::hash::Hash;
 use std::ops::Deref;
 
-use crate::hcons::Consed;
+use crate::hcons::Hc;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Symbol(Consed<Box<str>>);
+pub struct Symbol(Hc<Box<str>>);
 
 impl Deref for Symbol {
     type Target = str;
@@ -23,8 +23,8 @@ impl Deref for Symbol {
     }
 }
 
-impl From<Consed<Box<str>>> for Symbol {
-    fn from(symbol: Consed<Box<str>>) -> Symbol {
+impl From<Hc<Box<str>>> for Symbol {
+    fn from(symbol: Hc<Box<str>>) -> Symbol {
         Symbol(symbol)
     }
 }

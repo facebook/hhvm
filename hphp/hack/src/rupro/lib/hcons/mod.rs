@@ -12,18 +12,18 @@ use std::rc::{Rc, Weak};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Mutex;
 
-struct ConsedImpl<T> {
+struct HcImpl<T> {
     node: T,
     tag: u64,
 }
 
-impl<T: fmt::Debug> fmt::Debug for ConsedImpl<T> {
+impl<T: fmt::Debug> fmt::Debug for HcImpl<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         self.node.fmt(f)
     }
 }
 
-impl<T> Deref for ConsedImpl<T> {
+impl<T> Deref for HcImpl<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -31,36 +31,37 @@ impl<T> Deref for ConsedImpl<T> {
     }
 }
 
-impl<T> DerefMut for ConsedImpl<T> {
+impl<T> DerefMut for HcImpl<T> {
     fn deref_mut(&mut self) -> &mut T {
         &mut self.node
     }
 }
 
-impl<T> Eq for ConsedImpl<T> {}
+impl<T> Eq for HcImpl<T> {}
 
-impl<T> Hash for ConsedImpl<T> {
+impl<T> Hash for HcImpl<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.tag.hash(state);
     }
 }
 
-impl<T> PartialEq for ConsedImpl<T> {
+impl<T> PartialEq for HcImpl<T> {
     fn eq(&self, other: &Self) -> bool {
         self.tag == other.tag
     }
 }
 
+/// A hash-consed pointer.
 #[derive(Clone)]
-pub struct Consed<T>(Rc<ConsedImpl<T>>);
+pub struct Hc<T>(Rc<HcImpl<T>>);
 
-impl<T: fmt::Debug> fmt::Debug for Consed<T> {
+impl<T: fmt::Debug> fmt::Debug for Hc<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         self.0.fmt(f)
     }
 }
 
-impl<T> Deref for Consed<T> {
+impl<T> Deref for Hc<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -68,15 +69,15 @@ impl<T> Deref for Consed<T> {
     }
 }
 
-impl<T> Eq for Consed<T> {}
+impl<T> Eq for Hc<T> {}
 
-impl<T> Hash for Consed<T> {
+impl<T> Hash for Hc<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.0.hash(state);
     }
 }
 
-impl<T> PartialEq for Consed<T> {
+impl<T> PartialEq for Hc<T> {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0
     }
@@ -85,7 +86,7 @@ impl<T> PartialEq for Consed<T> {
 #[derive(Debug)]
 pub struct Conser<T> {
     next_tag: AtomicU64,
-    table: Mutex<HashMap<T, Weak<ConsedImpl<T>>>>,
+    table: Mutex<HashMap<T, Weak<HcImpl<T>>>>,
 }
 
 impl<T: Eq + Hash + Clone> Conser<T> {
@@ -96,11 +97,11 @@ impl<T: Eq + Hash + Clone> Conser<T> {
         }
     }
 
-    pub fn mk(&self, x: T) -> Consed<T> {
+    pub fn mk(&self, x: T) -> Hc<T> {
         let make_rc = |x: &T| {
             let node = x.to_owned();
             let tag = self.next_tag.fetch_add(1, Ordering::Relaxed);
-            Rc::new(ConsedImpl { node, tag })
+            Rc::new(HcImpl { node, tag })
         };
         let mut table = self.table.lock().unwrap();
         let rc = match table.entry(x) {
@@ -118,7 +119,7 @@ impl<T: Eq + Hash + Clone> Conser<T> {
                 rc
             }
         };
-        Consed(rc)
+        Hc(rc)
     }
 
     pub fn gc(&self) -> bool {

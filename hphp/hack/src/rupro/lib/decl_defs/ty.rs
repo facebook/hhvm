@@ -2,7 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::hcons::Consed;
+
+use crate::hcons::Hc;
 use crate::pos::{PosId, Symbol};
 use crate::reason::Reason;
 
@@ -33,11 +34,11 @@ pub enum DeclTy_<R: Reason, TY> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct DeclTy<R: Reason>(R, Consed<DeclTy_<R, DeclTy<R>>>);
+pub struct DeclTy<R: Reason>(R, Hc<DeclTy_<R, DeclTy<R>>>);
 
 impl<R: Reason> DeclTy<R> {
-    pub fn new(reason: R, consed: Consed<DeclTy_<R, DeclTy<R>>>) -> Self {
-        Self(reason, consed)
+    pub fn new(reason: R, ty: Hc<DeclTy_<R, DeclTy<R>>>) -> Self {
+        Self(reason, ty)
     }
 
     pub fn pos(&self) -> &R::Pos {
@@ -48,7 +49,7 @@ impl<R: Reason> DeclTy<R> {
         &self.0
     }
 
-    pub fn node(&self) -> &Consed<DeclTy_<R, DeclTy<R>>> {
+    pub fn node(&self) -> &Hc<DeclTy_<R, DeclTy<R>>> {
         &self.1
     }
 

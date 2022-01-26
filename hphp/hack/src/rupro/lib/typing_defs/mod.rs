@@ -5,7 +5,9 @@
 mod decl;
 mod expand;
 mod ty;
+mod variance;
 
 pub use decl::ClassElt;
 pub use expand::{ExpandEnv, TypeExpansion, TypeExpansions};
 pub use ty::{Exact, FunParam, FunType, ParamMode, Prim, Ty, Ty_};
+pub use variance::Variance;

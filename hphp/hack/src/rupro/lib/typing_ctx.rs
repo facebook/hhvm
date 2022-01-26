@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::rc::Rc;
 
-use crate::ast_provider::AstProvider;
 use crate::decl_ty_provider::DeclTyProvider;
 use crate::folded_decl_provider::FoldedDeclProvider;
 use crate::pos_provider::PosProvider;
@@ -20,7 +19,6 @@ pub struct TypingCtx<R: Reason> {
     pub folded_decl_provider: Rc<FoldedDeclProvider<R>>,
     pub typing_decl_provider: Rc<TypingDeclProvider<R>>,
     pub typing_ty_provider: Rc<TypingTyProvider<R>>,
-    pub ast_provider: Rc<AstProvider>,
     pub special_names: Rc<SpecialNamesProvider>,
 }
 
@@ -28,7 +26,6 @@ impl<R: Reason> TypingCtx<R> {
     pub fn new(
         typing_decl_provider: Rc<TypingDeclProvider<R>>,
         typing_ty_provider: Rc<TypingTyProvider<R>>,
-        ast_provider: Rc<AstProvider>,
     ) -> Self {
         let folded_decl_provider = Rc::clone(typing_decl_provider.get_folded_decl_provider());
         let shallow_decl_provider = Rc::clone(folded_decl_provider.get_shallow_decl_provider());
@@ -41,7 +38,6 @@ impl<R: Reason> TypingCtx<R> {
             folded_decl_provider,
             typing_decl_provider,
             typing_ty_provider,
-            ast_provider,
             special_names,
         }
     }

@@ -15,7 +15,6 @@ use oxidized::global_options::GlobalOptions;
 use hackrs::ast_provider::{AstLocalCache, AstProvider};
 use hackrs::decl_ty_provider::DeclTyProvider;
 use hackrs::folded_decl_provider::{FoldedDeclLocalCache, FoldedDeclProvider};
-use hackrs::naming::Nast;
 use hackrs::pos::{Prefix, RelativePath, RelativePathCtx};
 use hackrs::pos_provider::PosProvider;
 use hackrs::shallow_decl_provider::{ShallowDeclLocalCache, ShallowDeclProvider};
@@ -96,11 +95,7 @@ pub extern "C" fn stc_main() {
         folded_decl_provider,
     ));
     let typing_ty_provider = Rc::new(TypingTyProvider::new());
-    let ctx = Rc::new(TypingCtx::new(
-        typing_decl_provider,
-        typing_ty_provider,
-        Rc::clone(&ast_provider),
-    ));
+    let ctx = Rc::new(TypingCtx::new(typing_decl_provider, typing_ty_provider));
 
     let filenames: Vec<_> = filenames
         .into_iter()
@@ -122,8 +117,8 @@ pub extern "C" fn stc_main() {
 
     for fln in &filenames {
         let &(ref ast, ref parsing_errs) = &*ast_provider.get_ast(true, fln).unwrap();
-        let fi = Nast::get_defs(ast);
-        let (tast, errs) = TypingCheckUtils::type_file::<NReason>(Rc::clone(&ctx), fln, &fi);
+        let errs = parsing_errs.clone();
+        let (tast, errs) = TypingCheckUtils::type_file::<NReason>(Rc::clone(&ctx), ast, errs);
         if !errs.is_empty() || !parsing_errs.is_empty() {
             unimplemented!()
         }

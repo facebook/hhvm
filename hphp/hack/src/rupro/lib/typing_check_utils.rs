@@ -4,11 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::rc::Rc;
 
-use oxidized::aast;
+use oxidized::{aast, nast};
 
 use crate::errors::HackError;
-use crate::naming::FileInfo;
-use crate::pos::RelativePath;
+use crate::parsing_error::ParsingError;
 use crate::reason::Reason;
 use crate::typing_check_job::TypingCheckJob;
 use crate::typing_ctx::TypingCtx;
@@ -20,32 +19,34 @@ pub struct TypingCheckUtils;
 impl TypingCheckUtils {
     pub fn type_file<R: Reason>(
         ctx: Rc<TypingCtx<R>>,
-        fln: &RelativePath,
-        fi: &FileInfo,
+        ast: &nast::Program,
+        parsing_errors: Vec<ParsingError>,
     ) -> (tast::Program<R>, Vec<HackError<R>>) {
-        let mut defs = vec![];
+        use aast::Def;
+        let mut tast = vec![];
         let mut errs = vec![];
+        errs.extend(parsing_errors.into_iter().map(Into::into));
         let mut accumulate = |(new_def, new_errs)| {
             if let Some(new_def) = new_def {
-                defs.push(new_def);
+                tast.push(new_def);
             }
             errs.extend(new_errs);
         };
-        fi.funs
-            .iter()
-            .for_each(|x| accumulate(TypingCheckJob::type_fun(Rc::clone(&ctx), fln, &x.id)));
-        fi.classes
-            .iter()
-            .for_each(|x| accumulate(TypingCheckJob::type_class(Rc::clone(&ctx), fln, &x.id)));
-        fi.record_defs
-            .iter()
-            .for_each(|x| accumulate(TypingCheckJob::type_record_def(Rc::clone(&ctx), fln, &x.id)));
-        fi.typedefs
-            .iter()
-            .for_each(|x| accumulate(TypingCheckJob::type_typedef(Rc::clone(&ctx), fln, &x.id)));
-        fi.consts
-            .iter()
-            .for_each(|x| accumulate(TypingCheckJob::type_const(Rc::clone(&ctx), fln, &x.id)));
-        (aast::Program(defs), errs)
+        for def in ast.defs() {
+            let ctx = Rc::clone(&ctx);
+            match def {
+                Def::Fun(f) => accumulate(TypingCheckJob::type_fun(ctx, &*f)),
+                Def::Class(c) => accumulate(TypingCheckJob::type_class(ctx, &*c)),
+                Def::Typedef(t) => accumulate(TypingCheckJob::type_typedef(ctx, &*t)),
+                Def::Constant(cst) => accumulate(TypingCheckJob::type_const(ctx, &*cst)),
+                Def::Namespace(_)
+                | Def::Stmt(_)
+                | Def::Module(_)
+                | Def::NamespaceUse(_)
+                | Def::SetNamespaceEnv(_)
+                | Def::FileAttributes(_) => unreachable!("Program::defs won't emit these"),
+            }
+        }
+        (aast::Program(tast), errs)
     }
 }

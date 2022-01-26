@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/util/arena.h"
 
 #include <deque>
 #include <map>
@@ -46,25 +47,50 @@ struct Hop {
   const Func* to;
 };
 
+/*
+ * A Path is a full trace.
+ *
+ * This datastructure is optimized for writes at the expense of reads.
+ * We expect a single tainted value may flow to many others, so we emulate
+ * a tree structure ourselves to make adding children cheap.
+ *
+ * We assume all pointers to Paths are kept alive by the caller.
+ */
 struct Path {
   std::string jsonLine() const;
-  std::vector<Hop> hops;
+
+  // Creates a new, empty Path
+  Path();
+
+  // Creates a new path originating here
+  static Path* origin(Arena* arena, Hop hop);
+
+  // Creates a path going from this path to the new hop
+  // Takes an allocator to help with memory management
+  Path* to(Arena* arena, Hop hop) const;
+
+  ~Path() = default;
+
+ private:
+  // The hop taken here. Can be empty for the root (both pointers null)
+  Hop hop;
+  const Path* parent;
 };
 
-using Value = Optional<Path>;
+using Value = Path*;
 
 struct Stack {
   Stack(const std::deque<Value>& stack = {}) : m_stack(stack) {}
 
-  void push(const Value& value);
-  void pushFront(const Value& value);
+  void push(Value value);
+  void pushFront(Value value);
 
   Value top() const;
   Value peek(int offset) const;
 
   void pop(int n = 1);
   void popFront();
-  void replaceTop(const Value& value);
+  void replaceTop(Value value);
 
   size_t size() const;
   std::string show() const;
@@ -80,7 +106,7 @@ struct Stack {
  * of tainted values (cells) on the heap.
  */
 struct Heap {
-  void set(const tv_lval& typedValue, const Value& value);
+  void set(tv_lval typedValue, Value value);
   Value get(const tv_lval& typedValue) const;
 
   void clear();
@@ -92,13 +118,18 @@ struct Heap {
 struct State {
   static rds::local::RDSLocal<State, rds::local::Initialize::FirstUse> instance;
 
+  State();
+
   void initialize();
   void teardown();
 
   Stack stack;
   Heap heap;
 
-  std::vector<Path> paths;
+  // Arena to hold all the paths
+  std::unique_ptr<Arena> arena;
+  // Contains all the taint flows found in this request
+  std::vector<Path*> paths;
 };
 
 } // namespace taint

@@ -19,14 +19,14 @@
 #include <fstream>
 #include <sstream>
 
-#include <folly/dynamic.h>
 #include <folly/Singleton.h>
+#include <folly/dynamic.h>
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/init-fini-node.h"
 
-#include "hphp/runtime/vm/taint/state.h"
 #include "hphp/runtime/vm/taint/configuration.h"
+#include "hphp/runtime/vm/taint/state.h"
 
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
@@ -39,9 +39,19 @@ TRACE_SET_MOD(taint);
 std::string Path::jsonLine() const {
   const Func* last = nullptr;
 
+  std::vector<Hop> hops;
+  const Path* path = this;
+  while (path != nullptr) {
+    auto hop = path->hop;
+    if (hop.from != nullptr || hop.to != nullptr) {
+      hops.push_back(hop);
+    }
+    path = path->parent;
+  }
+
   std::stringstream stream;
   stream << "{\"hops\": [";
-  for (int i = 0; i < hops.size(); i++) {
+  for (int i = hops.size() - 1; i >= 0; i--) {
     auto hop = hops[i];
 
     if (last != hop.from && hop.from != nullptr) {
@@ -54,12 +64,45 @@ std::string Path::jsonLine() const {
     }
     last = hop.to;
 
-    if (i != hops.size() - 1) {
+    if (i != 0) {
       stream << ", ";
     }
   }
   stream << "]}";
   return stream.str();
+}
+
+Path::Path() : hop{nullptr, nullptr}, parent(nullptr) {}
+
+void destructPath(void* p) {
+  auto path = (Path*)p;
+  path->~Path();
+}
+
+Path* Path::origin(Arena* arena, Hop hop) {
+  Path* path = arena->allocD<Path>([](void* p) {
+    auto path = (Path*)p;
+    path->~Path();
+  });
+  if (!path) {
+    return path;
+  }
+  path->hop = hop;
+  path->parent = nullptr;
+  return path;
+}
+
+Path* Path::to(Arena* arena, Hop hop) const {
+  Path* child = arena->allocD<Path>([](void* p) {
+    auto path = (Path*)p;
+    path->~Path();
+  });
+  if (!child) {
+    return child;
+  }
+  child->hop = hop;
+  child->parent = this;
+  return child;
 }
 
 std::ostream& operator<<(std::ostream& out, const HPHP::taint::Value& value) {
@@ -70,11 +113,11 @@ std::ostream& operator<<(std::ostream& out, const HPHP::taint::Value& value) {
   }
 }
 
-void Stack::push(const Value& value) {
+void Stack::push(Value value) {
   m_stack.push_back(value);
 }
 
-void Stack::pushFront(const Value& value) {
+void Stack::pushFront(Value value) {
   m_stack.push_front(value);
 }
 
@@ -91,7 +134,7 @@ Value Stack::peek(int offset) const {
         "taint: (WARNING) called `Stack::peek({})` on stack of size {}\n",
         offset,
         m_stack.size());
-    return std::nullopt;
+    return nullptr;
   }
   return m_stack[m_stack.size() - 1 - offset];
 }
@@ -113,16 +156,14 @@ void Stack::pop(int n) {
 
 void Stack::popFront() {
   if (m_stack.empty()) {
-    FTRACE(
-        3,
-        "taint: (WARNING) called `Stack::popFront()` on empty stack\n");
+    FTRACE(3, "taint: (WARNING) called `Stack::popFront()` on empty stack\n");
     return;
   }
 
   m_stack.pop_front();
 }
 
-void Stack::replaceTop(const Value& value) {
+void Stack::replaceTop(Value value) {
   if (m_stack.empty()) {
     FTRACE(3, "taint: (WARNING) called `Stack::replaceTop()` on empty stack\n");
     return;
@@ -147,8 +188,8 @@ void Stack::clear() {
   m_stack.clear();
 }
 
-void Heap::set(const tv_lval& typedValue, const Value& value) {
-  m_heap[typedValue] = value;
+void Heap::set(tv_lval typedValue, Value value) {
+  m_heap[std::move(typedValue)] = value;
 }
 
 Value Heap::get(const tv_lval& typedValue) const {
@@ -157,7 +198,7 @@ Value Heap::get(const tv_lval& typedValue) const {
     return value->second;
   }
 
-  return std::nullopt;
+  return nullptr;
 }
 
 void Heap::clear() {
@@ -169,20 +210,18 @@ namespace {
 struct SingletonTag {};
 
 InitFiniNode s_stateInitialization(
-    []() {
-      State::instance->initialize();
-    },
+    []() { State::instance->initialize(); },
     InitFiniNode::When::RequestStart);
 
 InitFiniNode s_stateTeardown(
-    []() {
-      State::instance->teardown();
-    },
+    []() { State::instance->teardown(); },
     InitFiniNode::When::RequestFini);
 
 } // namespace
 
 rds::local::RDSLocal<State, rds::local::Initialize::FirstUse> State::instance;
+
+State::State() : arena(std::make_unique<Arena>()) {}
 
 void State::initialize() {
   FTRACE(1, "taint: initializing state\n");
@@ -190,12 +229,13 @@ void State::initialize() {
   // We don't care about these values but mirroring simplifies
   // consistency checks.
   for (int i = 0; i < 4; i++) {
-    stack.push(std::nullopt);
+    stack.push(nullptr);
   }
 
   stack.clear();
   heap.clear();
   paths.clear();
+  arena = std::make_unique<Arena>();
 }
 
 namespace {
@@ -231,7 +271,7 @@ void State::teardown() {
   if (!outputDirectory) {
     // Print to stderr, useful for integration tests.
     for (auto& path : paths) {
-      std::cerr << path.jsonLine() << std::endl;
+      std::cerr << path->jsonLine() << std::endl;
     }
     return;
   }
@@ -248,7 +288,7 @@ void State::teardown() {
     output.open(outputPath);
     output << folly::toJson(metadata) << std::endl;
     for (auto& path : paths) {
-      output << path.jsonLine() << std::endl;
+      output << path->jsonLine() << std::endl;
     }
     output.close();
   } catch (std::exception& exception) {

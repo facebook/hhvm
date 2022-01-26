@@ -118,7 +118,7 @@ void iopPreamble(const std::string& name) {
         vm_stack_size,
         shadow_stack_size);
     for (int i = shadow_stack_size; i < vm_stack_size; i++) {
-      stack.pushFront(std::nullopt);
+      stack.pushFront(nullptr);
     }
     for (int i = shadow_stack_size; i > vm_stack_size; i--) {
       stack.popFront();
@@ -128,7 +128,7 @@ void iopPreamble(const std::string& name) {
 
 void iopConstant(const std::string& name) {
   iopPreamble(name);
-  State::instance->stack.push(std::nullopt);
+  State::instance->stack.push(nullptr);
 }
 
 void iopUnhandled(const std::string& name) {
@@ -177,7 +177,7 @@ void iopPopL(tv_lval /* to */) {
 
 void iopDup() {
   iopPreamble("Dup");
-  State::instance->stack.push(std::nullopt);
+  State::instance->stack.push(nullptr);
 }
 
 void iopCGetCUNop() {
@@ -240,16 +240,16 @@ void iopNewStructDict(imm_array<int32_t> ids) {
   iopPreamble("NewStructDict");
 
   auto& stack = State::instance->stack;
-  Value structValue = std::nullopt;
+  Value structValue = nullptr;
 
   // We taint the whole struct if one value is tainted. This could eventually
   // be a join operation.
   for (uint32_t i = 0; i < ids.size; i++) {
     auto value = stack.top();
-    stack.pop();
     if (value) {
       structValue = value;
     }
+    stack.pop();
   }
 
   FTRACE(2, "taint: new struct is `{}`\n", structValue);
@@ -264,7 +264,7 @@ void iopNewVec(uint32_t n) {
 
   // Check all arguments to see if they're tainted.
   // One tainted element taints result.
-  Value value = std::nullopt;
+  Value value = nullptr;
   for (int i = 0; i < n; i++) {
     auto argument = stack.peek(i);
     if (argument) {
@@ -556,23 +556,22 @@ void iopSSwitch(
 void iopRetC(PC& /* pc */) {
   iopPreamble("RetC");
 
-  auto& stack = State::instance->stack;
+  auto state = State::instance;
+  auto& stack = state->stack;
   auto saved = stack.top();
 
   auto func = vmfp()->func();
   stack.pop(2 + func->params().size());
 
-  std::string name = func->fullName()->data();
-  FTRACE(1, "taint: leaving {}\n", yellow(quote(name)));
+  FTRACE(1, "taint: leaving {}\n", yellow(quote(func->fullName()->data())));
 
   const auto sources = Configuration::get()->sources(func);
   FTRACE(3, "taint: {} sources\n", sources.size());
 
-  // Check if thisjctdkrvujthe origin of a source.
+  // Check if this is the origin of a source.
   if (!sources.empty()) {
     FTRACE(1, "taint: function returns source\n");
-    Path path;
-    path.hops.push_back(Hop{func, callee()});
+    auto path = Path::origin(state->arena.get(), Hop{func, callee()});
     stack.replaceTop(path);
   }
 
@@ -688,7 +687,7 @@ void iopSetL(tv_lval to) {
 
   FTRACE(2, "taint: setting {} to `{}`\n", to, value);
 
-  state->heap.set(to, value);
+  state->heap.set(std::move(to), value);
 }
 
 void iopSetG() {
@@ -789,7 +788,7 @@ void iopNewObjR() {
 
 void iopNewObjD(Id /* id */) {
   iopPreamble("NewObjD");
-  State::instance->stack.push(std::nullopt);
+  State::instance->stack.push(nullptr);
 }
 
 void iopNewObjRD(Id /* id */) {
@@ -809,21 +808,25 @@ void iopFCall(const Func* func, const FCallArgs& fca) {
     return;
   }
 
-  auto name = func->fullName()->data();
-  FTRACE(1, "taint: entering {} ({} arguments)\n", yellow(name), fca.numArgs);
+  FTRACE(
+      1,
+      "taint: entering {} ({} arguments)\n",
+      yellow(func->fullName()->data()),
+      fca.numArgs);
 
   const auto sinks = Configuration::get()->sinks(func);
   FTRACE(3, "taint: {} sinks\n", sinks.size());
 
+  auto state = State::instance;
   for (const auto& sink : sinks) {
-    auto value = State::instance->stack.peek(fca.numArgs - 1 - sink.index);
+    auto value = state->stack.peek(fca.numArgs - 1 - sink.index);
     if (!value) {
       continue;
     }
 
     FTRACE(1, "taint: tainted value flows into sink\n");
-    value->hops.push_back(Hop{vmfp()->func(), func});
-    State::instance->paths.push_back(*value);
+    auto path = value->to(state->arena.get(), Hop{vmfp()->func(), func});
+    state->paths.push_back(path);
   }
 }
 
@@ -1079,8 +1082,8 @@ void iopVerifyParamType(local_var param) {
         param.lval,
         param.index,
         value);
-    value->hops.push_back(Hop{callee(), func});
-    state->heap.set(param.lval, value);
+    auto path = value->to(state->arena.get(), Hop{callee(), func});
+    state->heap.set(param.lval, path);
   }
 
   // Taint generation.
@@ -1092,7 +1095,8 @@ void iopVerifyParamType(local_var param) {
           "taint: parameter {} (index: {}) is tainted\n",
           param.lval,
           param.index);
-      Path path;
+      // TODO: What hop should we put here?
+      auto path = Path::origin(state->arena.get(), Hop());
       state->heap.set(param.lval, path);
       break;
     }
@@ -1351,7 +1355,7 @@ void iopSetM(uint32_t /* nDiscard */, MemberKey memberKey) {
       memberKey,
       to,
       value);
-  state->heap.set(to, value);
+  state->heap.set(std::move(to), value);
 }
 
 void iopSetRangeM(

@@ -330,7 +330,7 @@ module Typing = struct
     | ReturnInVoid [@value 4084]
     | ShapeFieldClassMismatch [@value 4085]
     | ShapeFieldTypeMismatch [@value 4086]
-    | ShouldBeOverride [@value 4087]
+    | ShouldNotBeOverride [@value 4087]
     (* | SketchyNullCheckDEPRECATED [@value 4088] *)
     (* | SketchyNullCheckPrimitiveDEPRECATED [@value 4089] *)
     | SmemberNotFound [@value 4090]

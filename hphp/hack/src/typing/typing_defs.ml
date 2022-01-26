@@ -1182,7 +1182,8 @@ let get_ce_abstract ce = ClassElt.is_abstract ce.ce_flags
 
 let get_ce_final ce = ClassElt.is_final ce.ce_flags
 
-let get_ce_override ce = ClassElt.has_override ce.ce_flags
+let get_ce_superfluous_override ce =
+  ClassElt.has_superfluous_override ce.ce_flags
 
 let get_ce_lsb ce = ClassElt.has_lsb ce.ce_flags
 

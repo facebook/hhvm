@@ -35,7 +35,7 @@ module ClassElt : sig
     xhp_attr:Xhp_attribute.t option ->
     abstract:bool ->
     final:bool ->
-    override:bool ->
+    superfluous_override:bool ->
     lsb:bool ->
     synthesized:bool ->
     const:bool ->
@@ -50,7 +50,7 @@ module ClassElt : sig
 
   val is_final : t -> bool
 
-  val has_override : t -> bool
+  val has_superfluous_override : t -> bool
 
   val has_lsb : t -> bool
 
@@ -73,7 +73,7 @@ module ClassElt : sig
 
   val set_synthesized : t -> t
 
-  val reset_override : t -> t
+  val reset_superfluous_override : t -> t
 end = struct
   type t = flags
 
@@ -81,7 +81,10 @@ end = struct
     type t =
       | Abstract
       | Final
-      | Override
+      | SuperfluousOverride
+          (** Whether the __Override attribute is erroneous, i.e. there is nothing in parents to override.
+              This is set during decling (because that's the easiest place to spot this error)
+              so that an error can be emitted later during typing. *)
       | Lsb
       | Synthesized
       | Const
@@ -195,7 +198,7 @@ end = struct
 
   let is_final = is_set Field.Final
 
-  let has_override = is_set Field.Override
+  let has_superfluous_override = is_set Field.SuperfluousOverride
 
   let has_lsb = is_set Field.Lsb
 
@@ -240,7 +243,7 @@ end = struct
       ~xhp_attr
       ~abstract
       ~final
-      ~override
+      ~superfluous_override
       ~lsb
       ~synthesized
       ~const
@@ -252,7 +255,7 @@ end = struct
     let flags = 0 in
     let flags = set Field.Abstract abstract flags in
     let flags = set Field.Final final flags in
-    let flags = set Field.Override override flags in
+    let flags = set Field.SuperfluousOverride superfluous_override flags in
     let flags = set Field.Lsb lsb flags in
     let flags = set Field.Synthesized synthesized flags in
     let flags = set Field.Const const flags in
@@ -266,7 +269,7 @@ end = struct
 
   let set_synthesized = set Field.Synthesized true
 
-  let reset_override = set Field.Override false
+  let reset_superfluous_override = set Field.SuperfluousOverride false
 end
 
 [@@@ocamlformat "disable"]

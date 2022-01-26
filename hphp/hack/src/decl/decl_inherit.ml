@@ -82,7 +82,7 @@ let add_method name sig_ methods =
      * wins!), but not really OK when the naming conflict is trait vs
      * trait (we rely on HHVM to catch the error at runtime) *)
     else
-      let sig_ = Tuple.T2.map_fst sig_ ~f:reset_elt_override in
+      let sig_ = Tuple.T2.map_fst sig_ ~f:reset_elt_superfluous_override in
       SMap.add name sig_ methods
 
 let add_methods methods' acc = SMap.fold add_method methods' acc

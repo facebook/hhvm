@@ -222,8 +222,9 @@ let set_elt_synthesized elt =
     elt_flags = Typing_defs_flags.ClassElt.set_synthesized elt.elt_flags;
   }
 
-let reset_elt_override elt =
+let reset_elt_superfluous_override elt =
   {
     elt with
-    elt_flags = Typing_defs_flags.ClassElt.reset_override elt.elt_flags;
+    elt_flags =
+      Typing_defs_flags.ClassElt.reset_superfluous_override elt.elt_flags;
   }

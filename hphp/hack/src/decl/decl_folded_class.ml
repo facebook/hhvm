@@ -346,7 +346,7 @@ let build_constructor
           ~const:false
           ~lsb:false
           ~synthesized:false
-          ~override:false
+          ~superfluous_override:false
           ~dynamicallycallable:false
           ~readonly_prop:false
           ~support_dynamic_type:false
@@ -456,7 +456,7 @@ let prop_decl
           ~final:true
           ~lsb:false
           ~synthesized:false
-          ~override:false
+          ~superfluous_override:false
           ~const:(sp_const sp)
           ~lateinit:(sp_lateinit sp)
           ~abstract:(sp_abstract sp)
@@ -496,7 +496,7 @@ let static_prop_decl
           ~const:(sp_const sp)
           ~lateinit:(sp_lateinit sp)
           ~lsb:(sp_lsb sp)
-          ~override:false
+          ~superfluous_override:false
           ~abstract:(sp_abstract sp)
           ~synthesized:false
           ~dynamicallycallable:false
@@ -598,7 +598,9 @@ let method_decl_acc
     (Decl_defs.element * Typing_defs.fun_elt option) SMap.t * SSet.t =
   (* If method doesn't override anything but has the <<__Override>> attribute, then
    * set the override flag in ce_flags and let typing emit an appropriate error *)
-  let check_override = sm_override m && not (SMap.mem (snd m.sm_name) acc) in
+  let superfluous_override =
+    sm_override m && not (SMap.mem (snd m.sm_name) acc)
+  in
   let (pos, id) = m.sm_name in
   let vis =
     match (SMap.find_opt id acc, m.sm_visibility) with
@@ -615,7 +617,7 @@ let method_decl_acc
           ~xhp_attr:None
           ~final:(sm_final m)
           ~abstract:(sm_abstract m)
-          ~override:check_override
+          ~superfluous_override
           ~synthesized:false
           ~lsb:false
           ~const:false

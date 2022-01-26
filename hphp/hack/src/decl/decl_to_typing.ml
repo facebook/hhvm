@@ -76,7 +76,7 @@ let shallow_method_to_class_elt child_class mname mro subst meth : class_elt =
         ~const:false
         ~lateinit:false
         ~lsb:false
-        ~override:(sm_override meth)
+        ~superfluous_override:(sm_override meth)
         ~dynamicallycallable:(sm_dynamicallycallable meth)
         ~readonly_prop:false
         ~support_dynamic_type:(sm_support_dynamic_type meth)
@@ -131,7 +131,7 @@ let shallow_prop_to_telt child_class mname mro subst prop : tagged_elt =
             ~lateinit:(sp_lateinit prop)
             ~abstract:(sp_abstract prop)
             ~final:true
-            ~override:false
+            ~superfluous_override:false
             ~synthesized:false
             ~dynamicallycallable:false
             ~readonly_prop:(sp_readonly prop)

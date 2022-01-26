@@ -5547,7 +5547,7 @@ and Secondary : sig
         parent_pos: Pos_or_decl.t;
         kind: [ `constant | `method_ | `property | `typeconst ];
       }
-    | Should_be_override of {
+    | Should_not_be_override of {
         pos: Pos_or_decl.t;
         class_id: string;
         id: string;
@@ -5811,7 +5811,7 @@ end = struct
         parent_pos: Pos_or_decl.t;
         kind: [ `constant | `method_ | `property | `typeconst ];
       }
-    | Should_be_override of {
+    | Should_not_be_override of {
         pos: Pos_or_decl.t;
         class_id: string;
         id: string;
@@ -6374,8 +6374,8 @@ end = struct
         (parent_pos, "Previously defined here");
       ] )
 
-  let should_be_override pos class_id id =
-    ( Error_code.ShouldBeOverride,
+  let should_not_be_override pos class_id id =
+    ( Error_code.ShouldNotBeOverride,
       [
         ( pos,
           Printf.sprintf
@@ -6527,8 +6527,8 @@ end = struct
       Some (typeconst_concrete_concrete_override pos parent_pos)
     | Abstract_concrete_override { pos; parent_pos; kind } ->
       Some (abstract_concrete_override pos parent_pos kind)
-    | Should_be_override { pos; class_id; id } ->
-      Some (should_be_override pos class_id id)
+    | Should_not_be_override { pos; class_id; id } ->
+      Some (should_not_be_override pos class_id id)
     | Override_no_default_typeconst { pos; parent_pos } ->
       Some (override_no_default_typeconst pos parent_pos)
 end

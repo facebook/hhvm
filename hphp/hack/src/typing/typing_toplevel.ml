@@ -1737,6 +1737,67 @@ let check_SupportDynamicType env c =
             end
           | None -> ())
 
+(** Check proper usage of the __Override attribute. *)
+let check_override_keyword env c tc =
+  if
+    (not Ast_defs.(is_c_trait c.c_kind))
+    && (* These checks are only for eager mode. The same checks are performed
+          * for shallow mode in Typing_inheritance *)
+    not (shallow_decl_enabled (Env.get_ctx env))
+  then (
+    let check_override ~is_static (id, ce) =
+      if get_ce_superfluous_override ce then
+        if String.equal ce.ce_origin (snd c.c_name) then
+          Errors.add_typing_error
+            Typing_error.(
+              assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
+              @@ Secondary.Should_not_be_override
+                   {
+                     pos =
+                       c.c_methods
+                       |> List.find_map
+                            ~f:(fun { m_name = (p_name, name); _ } ->
+                              Option.some_if (String.equal id name) p_name)
+                       |> Option.value ~default:Pos.none
+                       |> Pos_or_decl.of_raw_pos;
+                     class_id = snd c.c_name;
+                     id;
+                   })
+        else
+          match Env.get_class env ce.ce_origin with
+          | None -> ()
+          | Some parent_class ->
+            (* If it's not defined here, then either it's inherited
+             * (so we have emitted an error already when checking the origin class)
+             * or it's in a trait, and so we need to emit the error now *)
+            if Ast_defs.(is_c_trait (Cls.kind parent_class)) then
+              let (class_pos, class_name) = c.c_name in
+              Errors.add_typing_error
+                Typing_error.(
+                  primary
+                  @@ Primary.Override_per_trait
+                       {
+                         pos = class_pos;
+                         class_name;
+                         meth_name = id;
+                         trait_name = ce.ce_origin;
+                         meth_pos =
+                           (let get_meth =
+                              if is_static then
+                                Decl_store.((get ()).get_static_method)
+                              else
+                                Decl_store.((get ()).get_method)
+                            in
+                            match get_meth (ce.ce_origin, id) with
+                            | Some { fe_pos; _ } -> fe_pos
+                            | None -> Pos_or_decl.none);
+                       })
+    in
+
+    List.iter (Cls.methods tc) ~f:(check_override ~is_static:false);
+    List.iter (Cls.smethods tc) ~f:(check_override ~is_static:true)
+  )
+
 let class_def_ env c tc =
   let (env, user_attributes) =
     let kind =
@@ -1751,60 +1812,7 @@ let class_def_ env c tc =
   in
   let (env, file_attrs) = Typing.file_attributes env c.c_file_attributes in
   let ctx = Env.get_ctx env in
-  if
-    (not (skip_hierarchy_checks ctx))
-    && (not Ast_defs.(is_c_trait c.c_kind))
-    && not (shallow_decl_enabled ctx)
-  then (
-    (* These checks are only for eager mode. The same checks are performed
-     * for shallow mode in Typing_inheritance *)
-    let method_pos ~is_static class_id meth_id =
-      let get_meth =
-        if is_static then
-          Decl_store.((get ()).get_static_method)
-        else
-          Decl_store.((get ()).get_method)
-      in
-      match get_meth (class_id, meth_id) with
-      | Some { fe_pos; _ } -> fe_pos
-      | None -> Pos_or_decl.none
-    in
-    let check_override ~is_static (id, ce) =
-      if get_ce_override ce then
-        let pos = method_pos ~is_static ce.ce_origin id in
-        (* Method is actually defined in this class *)
-        if String.equal ce.ce_origin (snd c.c_name) then
-          Errors.add_typing_error
-            Typing_error.(
-              assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
-              @@ Secondary.Should_be_override
-                   { pos; class_id = snd c.c_name; id })
-        else
-          match Env.get_class env ce.ce_origin with
-          | None -> ()
-          | Some parent_class ->
-            (* If it's not defined here, then either it's inherited (so we have emitted an error already)
-             * or it's in a trait, and so we need to emit the error now *)
-            if not Ast_defs.(is_c_trait (Cls.kind parent_class)) then
-              ()
-            else
-              let (class_pos, class_name) = c.c_name in
-              Errors.add_typing_error
-                Typing_error.(
-                  primary
-                  @@ Primary.Override_per_trait
-                       {
-                         pos = class_pos;
-                         class_name;
-                         meth_name = id;
-                         trait_name = ce.ce_origin;
-                         meth_pos = pos;
-                       })
-    in
-
-    List.iter (Cls.methods tc) ~f:(check_override ~is_static:false);
-    List.iter (Cls.smethods tc) ~f:(check_override ~is_static:true)
-  );
+  if not (skip_hierarchy_checks ctx) then check_override_keyword env c tc;
   if not (skip_hierarchy_checks ctx) then check_enum_includes env c;
   let (pc, c_name) = c.c_name in
   let (req_extends, req_implements) = split_reqs c.c_reqs in

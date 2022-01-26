@@ -405,7 +405,7 @@ val get_ce_abstract : class_elt -> bool
 
 val get_ce_final : class_elt -> bool
 
-val get_ce_override : class_elt -> bool
+val get_ce_superfluous_override : class_elt -> bool
 
 val get_ce_lsb : class_elt -> bool
 
@@ -428,7 +428,7 @@ val make_ce_flags :
   xhp_attr:xhp_attr option ->
   abstract:bool ->
   final:bool ->
-  override:bool ->
+  superfluous_override:bool ->
   lsb:bool ->
   synthesized:bool ->
   const:bool ->

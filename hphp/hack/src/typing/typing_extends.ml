@@ -971,7 +971,7 @@ let default_constructor_ce class_ =
         ~final:false
         ~const:false
         ~lateinit:false
-        ~override:false
+        ~superfluous_override:false
         ~lsb:false
         ~synthesized:true
         ~dynamicallycallable:false
@@ -995,7 +995,7 @@ let check_constructors env parent_class class_ psubst on_error =
         Typing_error.(
           apply_reasons ~on_error @@ Secondary.Missing_constructor pos);
       env
-    | (_, Some cstr) when get_ce_override cstr ->
+    | (_, Some cstr) when get_ce_superfluous_override cstr ->
       (* <<__UNSAFE_Construct>> *)
       env
     | (opt_parent_cstr, Some cstr)

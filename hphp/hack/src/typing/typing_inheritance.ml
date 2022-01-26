@@ -51,7 +51,7 @@ let check_override_annotations env cls ~static =
             Errors.add_typing_error
               Typing_error.(
                 assert_in_current_decl ~ctx:(Env.get_current_decl_and_file env)
-                @@ Secondary.Should_be_override
+                @@ Secondary.Should_not_be_override
                      { pos; class_id = Cls.name cls; id }))
 
 (** Ensure that all methods which have the override annotation, were inherited
@@ -65,7 +65,7 @@ let check_trait_override_annotations env class_pos cls ~static =
       (Cls.methods, Cls.all_inherited_methods)
   in
   List.iter (methods cls) ~f:(fun (id, meth) ->
-      if not (get_ce_override meth) then
+      if not (get_ce_superfluous_override meth) then
         ()
       else if String.equal meth.ce_origin (Cls.name cls) then
         ()

@@ -1534,7 +1534,7 @@ module Secondary : sig
         parent_pos: Pos_or_decl.t;
         kind: [ `constant | `method_ | `property | `typeconst ];
       }
-    | Should_be_override of {
+    | Should_not_be_override of {
         pos: Pos_or_decl.t;
         class_id: string;
         id: string;

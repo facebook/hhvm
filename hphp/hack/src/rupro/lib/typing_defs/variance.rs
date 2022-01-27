@@ -3,7 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-/// Variance of a type wrt to a given type parameter
+/// Variance of a type wrt to a given type parameter.
+///
+/// Standard variance lattice.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Variance {
     /// R is bivariant (or constant) in X when [S/X]R <: [T/X]R for every S and T.
@@ -35,13 +37,11 @@ impl Variance {
         matches!(self, Variance::Bivariant)
     }
 
-    // Standard variance lattice
-
     pub const TOP: Self = Variance::Bivariant;
 
     pub const BOTTOM: Self = Variance::Invariant;
 
-    // The least upper bound of two variances
+    /// The least upper bound of two variances
     pub fn join(&self, other: &Self) -> Self {
         match (*self, *other) {
             (t, u) if t == u => t,
@@ -50,7 +50,7 @@ impl Variance {
         }
     }
 
-    // Compute the greatest lower bound of two variances
+    /// Compute the greatest lower bound of two variances
     pub fn meet(&self, other: &Self) -> Self {
         match (*self, *other) {
             (t, u) if t == u => t,
@@ -68,7 +68,6 @@ impl Default for Variance {
 
 #[cfg(test)]
 mod tests {
-    // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
     #[test]

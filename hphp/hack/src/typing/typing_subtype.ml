@@ -3162,26 +3162,28 @@ and get_tyvar_opt t =
     end
   | _ -> None
 
-and props_to_env env remain props on_error =
+and props_to_env pos env remain props on_error =
   match props with
   | [] -> (env, List.rev remain)
   | prop :: props ->
     (match prop with
-    | TL.Conj props' -> props_to_env env remain (props' @ props) on_error
+    | TL.Conj props' -> props_to_env pos env remain (props' @ props) on_error
     | TL.Disj (f, disj_props) ->
+      if List.length disj_props > 1 then
+        Typing_log.log_prop 1 pos "non-singleton disjunction" env prop;
       (* For now, just find the first prop in the disjunction that works *)
       let rec try_disj disj_props =
         match disj_props with
         | [] ->
           (* For now let it fail later when calling
              process_simplify_subtype_result on the remaining constraints. *)
-          props_to_env env (TL.invalid ~fail:f :: remain) props on_error
+          props_to_env pos env (TL.invalid ~fail:f :: remain) props on_error
         | prop :: disj_props' ->
-          let (env', other) = props_to_env env remain [prop] on_error in
+          let (env', other) = props_to_env pos env remain [prop] on_error in
           if TL.is_unsat (TL.conj_list other) then
             try_disj disj_props'
           else
-            props_to_env env' (remain @ other) props on_error
+            props_to_env pos env' (remain @ other) props on_error
       in
       try_disj disj_props
     | TL.IsSubtype (ty_sub, ty_super) ->
@@ -3204,7 +3206,7 @@ and props_to_env env remain props on_error =
               ty_sub
               on_error
           in
-          props_to_env env remain (prop1 :: prop2 :: props) on_error
+          props_to_env pos env remain (prop1 :: prop2 :: props) on_error
         | (Some var, _) ->
           let (env, prop) =
             add_tyvar_upper_bound_and_close
@@ -3214,7 +3216,7 @@ and props_to_env env remain props on_error =
               ty_super
               on_error
           in
-          props_to_env env remain (prop :: props) on_error
+          props_to_env pos env remain (prop :: props) on_error
         | (_, Some var) ->
           let (env, prop) =
             add_tyvar_lower_bound_and_close
@@ -3224,8 +3226,8 @@ and props_to_env env remain props on_error =
               ty_sub
               on_error
           in
-          props_to_env env remain (prop :: props) on_error
-        | _ -> props_to_env env (prop :: remain) props on_error
+          props_to_env pos env remain (prop :: props) on_error
+        | _ -> props_to_env pos env (prop :: remain) props on_error
       end
     | TL.Coerce (cd, ty_sub, ty_super) ->
       let coerce = Some cd in
@@ -3248,7 +3250,7 @@ and props_to_env env remain props on_error =
               (LoclType ty_sub)
               on_error
           in
-          props_to_env env remain (prop1 :: prop2 :: props) on_error
+          props_to_env pos env remain (prop1 :: prop2 :: props) on_error
         | (Tvar var, _) ->
           let r = get_reason ty_super in
           (* At present, we don't distinguish between coercions (<:D) and subtyping (<:) in the
@@ -3269,7 +3271,7 @@ and props_to_env env remain props on_error =
               (LoclType ty_super)
               on_error
           in
-          props_to_env env remain (prop :: props) on_error
+          props_to_env pos env remain (prop :: props) on_error
         | (_, Tvar var) ->
           let (env, prop) =
             add_tyvar_lower_bound_and_close
@@ -3279,7 +3281,7 @@ and props_to_env env remain props on_error =
               (LoclType ty_sub)
               on_error
           in
-          props_to_env env remain (prop :: props) on_error
+          props_to_env pos env remain (prop :: props) on_error
         | _ -> failwith "Coercion not expected"
       end)
 
@@ -3287,8 +3289,8 @@ and props_to_env env remain props on_error =
  * the type variable environment. To do: use intersection and union to
  * simplify bounds.
  *)
-and prop_to_env env prop on_error =
-  let (env, props') = props_to_env env [] [prop] on_error in
+and prop_to_env pos env prop on_error =
+  let (env, props') = props_to_env pos env [] [prop] on_error in
   (env, TL.conj_list props')
 
 and sub_type_inner
@@ -3320,7 +3322,9 @@ and sub_type_inner
       "sub_type_inner"
       env
       prop;
-  let (env, prop) = prop_to_env env prop subtype_env.on_error in
+  let (env, prop) =
+    prop_to_env (Reason.to_pos (reason ty_sub)) env prop subtype_env.on_error
+  in
   let env = Env.add_subtype_prop env prop in
   let succeeded = process_simplify_subtype_result prop in
   (env, succeeded)
@@ -3910,7 +3914,9 @@ let sub_type_with_dynamic_as_bottom_res
       ty_super
       env
   in
-  let (env, prop) = prop_to_env env prop on_error in
+  let (env, prop) =
+    prop_to_env (Reason.to_pos (get_reason ty_sub)) env prop on_error
+  in
   let env = Env.add_subtype_prop env prop in
   let succeeded = process_simplify_subtype_result prop in
   if succeeded then
@@ -3974,7 +3980,7 @@ let subtype_funs
       ft_super
       env
   in
-  let (env, prop) = prop_to_env env prop on_error in
+  let (env, prop) = prop_to_env (Reason.to_pos r_sub) env prop on_error in
   let env = Env.add_subtype_prop env prop in
   let succeeded = process_simplify_subtype_result prop in
   if succeeded then

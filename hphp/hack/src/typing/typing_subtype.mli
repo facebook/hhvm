@@ -140,6 +140,7 @@ val subtype_funs :
  * unsatisfiable. If any unsatisfiable disjunct remains, return it.
  *)
 val prop_to_env :
+  Pos_or_decl.t ->
   env ->
   Typing_logic.subtype_prop ->
   Typing_error.Reasons_callback.t ->

@@ -87,6 +87,7 @@ let check_param : env -> Nast.fun_param -> unit =
         in
         let (env, prop) =
           SubType.prop_to_env
+            (Pos_or_decl.of_raw_pos pos)
             env
             props
             (Typing_error.Reasons_callback.unify_error_at pos)

@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/util/arena.h"
 
+#include <chrono>
 #include <deque>
 #include <map>
 #include <memory>
@@ -138,6 +139,8 @@ struct State {
 
   std::shared_ptr<TaintedFunctionSet<Source>> m_sources;
   std::shared_ptr<TaintedFunctionSet<Sink>> m_sinks;
+
+  std::chrono::time_point<std::chrono::system_clock> m_request_start;
 };
 
 } // namespace taint

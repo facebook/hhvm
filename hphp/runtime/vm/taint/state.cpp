@@ -224,6 +224,7 @@ rds::local::RDSLocal<State, rds::local::Initialize::FirstUse> State::instance;
 State::State() : arena(std::make_unique<Arena>()) {}
 
 void State::initialize() {
+  m_request_start = std::chrono::system_clock::now();
   FTRACE(1, "taint: initializing state\n");
   // Stack is initialized with 4 values before any operation happens.
   // We don't care about these values but mirroring simplifies
@@ -242,7 +243,8 @@ void State::initialize() {
 
 namespace {
 
-folly::dynamic requestMetadata() {
+folly::dynamic requestMetadata(
+    std::chrono::time_point<std::chrono::system_clock> requestStart) {
   folly::dynamic metadata = folly::dynamic::object;
   metadata["metadata"] = true;
 
@@ -255,9 +257,32 @@ folly::dynamic requestMetadata() {
   auto commandLine = Process::GetCommandLine(getpid());
   metadata["commandLine"] = commandLine;
 
+  std::chrono::time_point<std::chrono::system_clock> endTime =
+      std::chrono::system_clock::now();
+  metadata["requestStartTime"] =
+      std::chrono::duration_cast<std::chrono::seconds>(
+          requestStart.time_since_epoch())
+          .count();
+  metadata["requestEndTime"] = std::chrono::duration_cast<std::chrono::seconds>(
+                                   endTime.time_since_epoch())
+                                   .count();
+  metadata["requestDurationMs"] =
+      std::chrono::duration_cast<std::chrono::milliseconds>(
+          endTime - requestStart)
+          .count();
+
+  auto timeForHash = std::chrono::duration_cast<std::chrono::milliseconds>(
+                         requestStart.time_since_epoch())
+                         .count();
   metadata["identifier"] = requestUrl != ""
-      ? folly::sformat("request-{}", std::hash<std::string>()(requestUrl))
-      : folly::sformat("script-{}", std::hash<std::string>()(commandLine));
+      ? folly::sformat(
+            "request-{}",
+            std::hash<std::string>()(
+                folly::sformat("{}-{}", requestUrl, timeForHash)))
+      : folly::sformat(
+            "script-{}",
+            std::hash<std::string>()(
+                folly::sformat("{}-{}", commandLine, timeForHash)));
 
   return metadata;
 }
@@ -265,7 +290,7 @@ folly::dynamic requestMetadata() {
 } // namespace
 
 void State::teardown() {
-  auto metadata = requestMetadata();
+  auto metadata = requestMetadata(m_request_start);
   auto identifier = metadata["identifier"].asString();
   FTRACE(1, "taint: processed request `{}`\n", identifier);
 

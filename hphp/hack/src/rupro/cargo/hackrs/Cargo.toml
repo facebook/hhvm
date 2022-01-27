@@ -11,11 +11,11 @@ path = "../../lib/mod.rs"
 aast_parser = { path = "../../../parser/cargo/aast_parser" }
 bumpalo = { version = "3.8", features = ["collections"] }
 direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }
+hcons = { path = "../../../hcons" }
 im = { version = "14.2", features = ["rayon", "serde"] }
 lint_rust = { path = "../../../utils/lint" }
 ocamlrep = { path = "../../../ocamlrep" }
 once_cell = "1.8"
-owning_ref = "0.4"
 oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }

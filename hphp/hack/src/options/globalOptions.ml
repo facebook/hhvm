@@ -195,8 +195,7 @@ let tco_experimental_all =
       tco_experimental_supportdynamic_type_hint;
     ]
 
-let tco_migration_flags_all =
-  List.fold_right ~init:SSet.empty ~f:SSet.add ["array_cast"]
+let tco_migration_flags_all = List.fold_right ~init:SSet.empty ~f:SSet.add []
 
 let default =
   {

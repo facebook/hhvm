@@ -24,4 +24,5 @@ pub struct ShallowClass<R: Reason> {
     pub name: PosId<R::Pos>,
     pub extends: Vec<DeclTy<R>>,
     pub methods: Vec<ShallowMethod<R>>,
+    pub module: Option<PosId<R::Pos>>,
 }

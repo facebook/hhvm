@@ -55,6 +55,10 @@ impl<R: Reason> Allocator<R> {
         self.pos_id(self.pos_from_ast(&pos_id.0), &pos_id.1)
     }
 
+    pub fn pos_id_from_ast_ref(&self, pos_id: &oxidized_by_ref::ast_defs::Id<'_>) -> PosId<R::Pos> {
+        self.pos_id(self.pos_from_decl(&pos_id.0), &pos_id.1)
+    }
+
     pub fn pos_id_from_decl(
         &self,
         pos_id: oxidized_by_ref::typing_defs::PosId<'_>,

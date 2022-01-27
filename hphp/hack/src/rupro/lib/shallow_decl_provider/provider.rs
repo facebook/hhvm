@@ -139,6 +139,10 @@ impl<R: Reason> ShallowDeclUtils<R> {
                 .iter()
                 .map(|sm| self.shallow_method(sm))
                 .collect(),
+            module: sc
+                .module
+                .as_ref()
+                .map(|id| self.alloc.pos_id_from_ast_ref(id)),
         }
     }
 

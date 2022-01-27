@@ -46,13 +46,20 @@ impl<R: Reason> FoldedDeclProvider<R> {
         false
     }
 
-    fn visibility(&self, sym: &Symbol, vis: oxidized::ast_defs::Visibility) -> CeVisibility<R> {
+    fn visibility(
+        &self,
+        cls: &Symbol,
+        module: Option<&PosId<R::Pos>>,
+        vis: oxidized::ast_defs::Visibility,
+    ) -> CeVisibility<R> {
         use oxidized::ast_defs::Visibility;
         match vis {
             Visibility::Public => CeVisibility::Public,
-            Visibility::Private => CeVisibility::Private(Hc::clone(sym)),
-            Visibility::Protected => CeVisibility::Protected(Hc::clone(sym)),
-            Visibility::Internal => unimplemented!(), // Take modules into account.
+            Visibility::Private => CeVisibility::Private(Hc::clone(cls)),
+            Visibility::Protected => CeVisibility::Protected(Hc::clone(cls)),
+            Visibility::Internal => module.map_or(CeVisibility::Public, |pid| {
+                CeVisibility::Internal(pid.clone())
+            }),
         }
     }
 
@@ -62,11 +69,23 @@ impl<R: Reason> FoldedDeclProvider<R> {
         sc: &ShallowClass<R>,
         sm: &ShallowMethod<R>,
     ) {
-        let elt = FoldedElement {
-            origin: Hc::clone(sc.name.id()),
-            visibility: self.visibility(sc.name.id(), sm.visibility),
+        let cls = sc.name.id();
+        let meth = sm.name.id();
+        let vis = match (methods.get(meth), sm.visibility) {
+            (
+                Some(FoldedElement {
+                    visibility: CeVisibility::Protected(s),
+                    ..
+                }),
+                oxidized::ast_defs::Visibility::Protected,
+            ) => CeVisibility::Protected(Hc::clone(s)),
+            (_, v) => self.visibility(cls, sc.module.as_ref(), v),
         };
-        methods.insert(Hc::clone(sm.name.id()), elt);
+        let elt = FoldedElement {
+            origin: Hc::clone(cls),
+            visibility: vis,
+        };
+        methods.insert(Hc::clone(meth), elt);
     }
 
     fn decl_class_type(

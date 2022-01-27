@@ -267,6 +267,11 @@ let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
     "A `final` class cannot be extended by other classes.\n\nTo restrict which classes can extend this, use `<<__Sealed()>>`."
   | SymbolOccurrence.FinalOnMethod ->
     "A `final` method cannot be overridden in child classes."
+  | SymbolOccurrence.AbstractOnClass ->
+    "An `abstract` class can only contain `static` methods and `abstract` instance methods.\n\n"
+    ^ "`abstract` classes cannot be instantiated directly. You can only use `new` on child classes that aren't `abstract`."
+  | SymbolOccurrence.AbstractOnMethod ->
+    "An `abstract` method has a signature but no body. Child classes must provide an implementation."
   | SymbolOccurrence.ExtendsOnClass ->
     "Extending a class allows your class to inherit methods from another class."
     ^ "\n\nInheritance allows your class to:"

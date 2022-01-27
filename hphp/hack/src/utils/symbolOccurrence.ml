@@ -27,6 +27,8 @@ type receiver_class =
 type keyword_with_hover_docs =
   | FinalOnClass
   | FinalOnMethod
+  | AbstractOnClass
+  | AbstractOnMethod
   | ExtendsOnClass
   | ExtendsOnInterface
   | ReadonlyOnMethod

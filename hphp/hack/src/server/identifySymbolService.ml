@@ -652,6 +652,18 @@ let keywords ctx entry : Result_set.elt list =
           pos = token_pos t;
         }
         :: acc
+      | Token.TokenKind.Abstract ->
+        {
+          name = "abstract";
+          type_ =
+            Keyword
+              (match ctx with
+              | Some Method -> AbstractOnMethod
+              | _ -> AbstractOnClass);
+          is_declaration = false;
+          pos = token_pos t;
+        }
+        :: acc
       | Token.TokenKind.Final ->
         {
           name = "final";

@@ -326,7 +326,12 @@ fn is_special_builtin(f_name: &str) -> bool {
         stripped.to_string()
     };
     match &namespaced_f_name[..] {
-        "HH\\dict" | "HH\\varray" | "HH\\darray" | "HH\\vec" | "hphp_array_idx" => true,
+        "HH\\dict"
+        | "HH\\varray"
+        | "HH\\darray"
+        | "HH\\vec"
+        | "hphp_array_idx"
+        | "HH\\FIXME\\UNSAFE_CAST" => true,
         /* all other special builtins listed in emit_expresion.rs return mutable:
         specifically, these:
         "array_key_exists" => Some((2, IMisc(AKExists))),

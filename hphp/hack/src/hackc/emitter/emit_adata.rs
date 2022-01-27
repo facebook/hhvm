@@ -128,14 +128,12 @@ mod tests {
 
     // verify it compiles (no test attribute)
     #[allow(dead_code)]
-    #[allow(clippy::needless_lifetimes)]
     fn ref_state_from_emiter<'arena, 'decl>(e: &Emitter<'arena, 'decl>) {
         let _: &AdataState<'_> = e.emit_adata_state();
     }
 
     // verify it compiles (no test attribute)
     #[allow(dead_code)]
-    #[allow(clippy::needless_lifetimes)]
     fn mut_state_from_emiter<'arena, 'decl>(e: &mut Emitter<'arena, 'decl>) {
         let _: &mut AdataState<'_> = e.emit_adata_state_mut();
     }

@@ -575,7 +575,6 @@ fn binop_on_values<'arena>(
     .ok_or(Error::NotLiteral)
 }
 
-#[allow(clippy::needless_lifetimes)]
 fn value_to_expr_<'arena>(v: TypedValue<'arena>) -> Result<ast::Expr_, Error> {
     use ast::*;
     use TypedValue::*;

@@ -44,7 +44,6 @@ impl<'arena> ClassExpr<'arena> {
         None
     }
 
-    #[allow(clippy::needless_lifetimes)]
     pub fn get_parent_class_name<'a>(class: &ast_scope::Class<'a>) -> Option<String> {
         if let [Hint(_, hint)] = class.get_extends() {
             if let Hint_::Happly(ast_defs::Id(_, parent_cid), _) = &**hint {

@@ -145,7 +145,6 @@ pub fn fmt_hint<'arena>(
     })
 }
 
-#[allow(clippy::needless_lifetimes)]
 fn hint_to_string<'a>(h: &'a Hint_) -> &'a str {
     match h {
         Hprim(p) => prim_to_string(p),

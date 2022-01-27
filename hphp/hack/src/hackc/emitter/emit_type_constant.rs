@@ -89,7 +89,6 @@ fn is_resolved_classname(s: &str) -> bool {
     }
 }
 
-#[allow(clippy::needless_lifetimes)]
 fn shape_field_name<'arena>(alloc: &'arena bumpalo::Bump, sf: &ShapeFieldName) -> (String, bool) {
     use oxidized::ast_defs::{Id, ShapeFieldName::*};
     match sf {
@@ -237,7 +236,6 @@ fn get_kind<'arena>(
     )]
 }
 
-#[allow(clippy::needless_lifetimes)]
 fn root_to_string<'arena>(alloc: &'arena bumpalo::Bump, s: &str) -> String {
     if s == "this" {
         string_utils::prefix_namespace("HH", s)

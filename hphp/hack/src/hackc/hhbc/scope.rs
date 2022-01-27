@@ -115,7 +115,6 @@ pub mod scope {
         })
     }
 
-    #[allow(clippy::needless_lifetimes)]
     fn unset_unnamed_locals<'arena>(
         alloc: &'arena bumpalo::Bump,
         start: local::Id,
@@ -130,7 +129,6 @@ pub mod scope {
         )
     }
 
-    #[allow(clippy::needless_lifetimes)]
     fn free_iterators<'arena>(
         alloc: &'arena bumpalo::Bump,
         start: iterator::Id,

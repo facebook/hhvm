@@ -937,7 +937,6 @@ pub fn get_tp_names_set(tparams: &[ast::Tparam]) -> HashSet<&str> {
     tparams.iter().map(get_tp_name).collect()
 }
 
-#[allow(clippy::needless_lifetimes)]
 fn modify_prog_for_debugger_eval<'arena>(_body_instrs: &mut InstrSeq<'arena>) {
     unimplemented!() // SF(2021-03-17): I found it like this.
 }

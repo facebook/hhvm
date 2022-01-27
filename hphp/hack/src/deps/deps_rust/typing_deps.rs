@@ -112,10 +112,7 @@ impl UnsafeDepGraph {
     /// Return a reference to the depgraph.
     ///
     /// The returned depgraph cannot outlive `self`.
-    ///
-    /// Explicit lifetimes for clarity.
-    #[allow(clippy::needless_lifetimes)]
-    pub fn depgraph<'a>(&'a self) -> &'a DepGraph<'a> {
+    pub fn depgraph(&self) -> &DepGraph<'_> {
         &self._do_not_reference_depgraph
     }
 

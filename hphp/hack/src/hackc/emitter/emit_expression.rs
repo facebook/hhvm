@@ -3564,7 +3564,6 @@ fn emit_eval<'a, 'arena, 'decl>(
     ))
 }
 
-#[allow(clippy::needless_lifetimes)]
 fn has_reified_types<'a, 'arena>(env: &Env<'a, 'arena>) -> bool {
     for param in env.scope.get_tparams() {
         match param.reified {
@@ -4961,7 +4960,6 @@ fn binop_to_eqop(opts: &Options, op: &ast_defs::Bop) -> Option<EqOp> {
     }
 }
 
-#[allow(clippy::needless_lifetimes)]
 fn optimize_null_checks<'arena, 'decl>(e: &Emitter<'arena, 'decl>) -> bool {
     e.options()
         .hack_compiler_flags

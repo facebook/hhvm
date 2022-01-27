@@ -30,7 +30,6 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
         is: &'a InstrSeq<'arena>,
         jt_gen: &mut jt::Gen,
     ) -> JumpInstructions<'a, 'arena> {
-        #[allow(clippy::needless_lifetimes)]
         fn get_label_id(jt_gen: &mut jt::Gen, is_break: bool, level: Level) -> label::Id {
             use jt::ResolvedJumpTarget::*;
             match jt_gen.jump_targets().get_target_for_level(is_break, level) {

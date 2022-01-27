@@ -137,7 +137,6 @@ fn remove_awaitable(h: aast::Hint) -> aast::Hint {
     }
 }
 
-#[allow(clippy::needless_lifetimes)]
 pub(crate) fn convert_awaitable<'a, 'arena>(env: &Env<'a, 'arena>, h: aast::Hint) -> aast::Hint {
     if env.scope.is_in_async() {
         remove_awaitable(h)
@@ -178,15 +177,12 @@ pub(crate) fn simplify_verify_type<'a, 'arena, 'decl>(
     }
 }
 
-#[allow(clippy::needless_lifetimes)]
 pub(crate) fn remove_erased_generics<'a, 'arena>(
     env: &Env<'a, 'arena>,
     h: aast::Hint,
 ) -> aast::Hint {
     use aast::*;
-    #[allow(clippy::needless_lifetimes)]
     fn rec<'a, 'arena>(env: &Env<'a, 'arena>, Hint(pos, h_): aast::Hint) -> aast::Hint {
-        #[allow(clippy::needless_lifetimes)]
         fn modify<'a, 'arena>(env: &Env<'a, 'arena>, id: String) -> String {
             if get_erased_tparams(env).any(|p| p == id) {
                 "_".into()

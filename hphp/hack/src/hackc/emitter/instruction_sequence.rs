@@ -188,7 +188,6 @@ impl<'i, 'a> Iterator for InstrIter<'i, 'a> {
     }
 }
 
-#[allow(clippy::needless_lifetimes)]
 pub mod instr {
     use crate::*;
 

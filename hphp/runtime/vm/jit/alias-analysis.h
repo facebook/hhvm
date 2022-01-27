@@ -78,18 +78,13 @@ struct AliasAnalysis {
   using LocationMap = jit::hash_map<AliasClass,ALocBits,AliasClass::Hash>;
 
   /*
-   * If an AStack covers multiple locations, it will have an entry in this
-   * map. It is OK if not all locations covered by the AStack are tracked. We
-   * only store the tracked subset here.
+   * If an AStack, ALocal, or AIter alias class covers multiple locations,
+   * it will have an entry in the appropriate map here. It is okay if not all
+   * the memory locations aliased by the alias class are tracked. We only
+   * store the tracked subset here.
    */
-  LocationMap stack_ranges;
-
-  /*
-   * Similar to `stack_ranges', if an ALocal covers multiple locations, it will
-   * have an entry in this map.
-   */
+  LocationMap stk_expand_map;
   LocationMap loc_expand_map;
-
   LocationMap iter_expand_map;
 
   /*
@@ -151,11 +146,6 @@ struct AliasAnalysis {
    * you need more to work, the implementation will need some improvements.
    */
   ALocBits expand(AliasClass acls) const;
-
-  /*
-   * Sets of alias classes that are used by expand().
-   */
-  jit::hash_map<AliasClass,ALocBits,AliasClass::Hash> stk_expand_map;
 };
 
 //////////////////////////////////////////////////////////////////////

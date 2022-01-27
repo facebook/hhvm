@@ -483,14 +483,8 @@ void mayStore(Local& env, AliasClass acls) {
 
 void store(Local& env, AliasClass acls) {
   mayStore(env, acls);
-  if (auto bit = pure_store_bit(env, acls)) {
-    mustStore(env, *bit);
-  } else {
-    auto const it = env.global.ainfo.stack_ranges.find(canonicalize(acls));
-    if (it != end(env.global.ainfo.stack_ranges)) {
-      mustStoreSet(env, it->second);
-    }
-  }
+  auto const canon = canonicalize(acls);
+  mustStoreSet(env, env.global.ainfo.expand(canon));
 };
 
 void kill(Local& env, AliasClass acls) {

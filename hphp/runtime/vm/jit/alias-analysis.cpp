@@ -184,29 +184,39 @@ template<class T>
 bool collect_component(AliasAnalysis& aa,
                        Optional<T> loc,
                        AliasAnalysis::LocationMap& map) {
-  if (loc) {
-    assertx(!loc->ids.empty());
-    if (loc->ids.hasSingleValue()) {
-      add_class(aa, *loc);
-    } else {
-      auto range = ALocBits{};
-      if (loc->ids.size() <= kMaxExpandedSize) {
-        for (uint32_t id = 0; id < AliasIdSet::BitsetMax; ++id) {
-          if (loc->ids.test(id)) {
-            if (auto const index = add_class(aa, T { loc->frameIdx, id })) {
-              range.set(*index);
-            }
-          }
-        }
+  if (!loc) return false;
+
+  assertx(!loc->ids.empty());
+  if (loc->ids.hasSingleValue()) {
+    add_class(aa, *loc);
+  } else {
+    auto const inserted = map.insert({*loc, {}}).second;
+    if (!inserted && loc->ids.size() <= kMaxExpandedSize) {
+      for (uint32_t id = 0; id < AliasIdSet::BitsetMax; ++id) {
+        if (!loc->ids.test(id)) continue;
+        add_class(aa, T { loc->frameIdx, id });
       }
-      // Even if we choose not to expand the entire map we can still set the
-      // locations we do see into it, similar to how the stk_expand_map is
-      // handled.
-      map[AliasClass { *loc }] = range;
     }
-    return true;
   }
-  return false;
+  return true;
+}
+
+bool collect_component(AliasAnalysis& aa,
+                       Optional<AStack> stk,
+                       AliasAnalysis::LocationMap& map) {
+  if (!stk) return false;
+
+  if (stk->size() == 1) {
+    add_class(aa, *stk);
+  } else {
+    auto const inserted = map.insert({*stk, {}}).second;
+    if (!inserted && stk->size() <= kMaxExpandedSize) {
+      for (auto stkidx = stk->low; stkidx < stk->high; ++stkidx) {
+        add_class(aa, AStack::at(stkidx));
+      }
+    }
+  }
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -423,9 +433,6 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       // ALocal and AIter specializations.
     }
 
-    if (collect_component(ret, acls.iter(), ret.iter_expand_map)) return;
-    if (collect_component(ret, acls.local(), ret.loc_expand_map)) return;
-
     if (acls.is_frame_base() && acls.isSingleLocation()) {
       add_class(ret, acls);
       return;
@@ -443,45 +450,13 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       if (acls.maybe(AVMRetAddr)) add_class(ret, AVMRetAddr);
     }
 
-    /*
-     * Note that unlike the above we're going to assign location ids to the
-     * individual stack slots in AStack portions of AliasClasses that are
-     * unions of AStack ranges with other classes.  (I.e. basically we're using
-     * stack() instead of is_stack() here, so it will match things that are
-     * only partially stacks.)
-     *
-     * The reason for this is that many instructions can have effects like
-     * that, when they can re-enter and do things to the stack in some range
-     * (below the re-entry depth, for example), but also affect some other type
-     * of memory (CastStk, for example).  In particular this means we want that
-     * AliasClass to have an entry in the stack_ranges, so we'll populate
-     * it later.  Currently most of these situations should probably bail at
-     * kMaxExpandedStackRange, although there are some situations that won't
-     * (e.g. instructions like CoerceStk, which will have an AHeapAny (from
-     * re-entry) unioned with a single stack slot).
-     */
-    if (auto const stk = acls.stack()) {
-      if (stk->size() > 1) {
-        ret.stk_expand_map[AliasClass { *stk }];
-      }
-      if (stk->size() > kMaxExpandedSize) return;
-
-      auto complete = true;
-      auto range = ALocBits{};
-      for (auto stkidx = stk->low; stkidx < stk->high; ++stkidx) {
-        AliasClass single = AStack::at(stkidx);
-        if (auto const index = add_class(ret, single)) {
-          range.set(*index);
-        } else {
-          complete = false;
-        }
-      }
-
-      if (stk->size() > 1 && complete) {
-        FTRACE(2, "    range {}:  {}\n", show(acls), show(range));
-        ret.stack_ranges[acls] = range;
-      }
-    }
+    // Note that we're using iter() instead of is_iter(), etc. here. That's
+    // because we often union these types with other, unspecialized AliasClass
+    // types for pessimistic operations (e.g. a may-throw IR op will typically
+    // read (specialized) 86metadata locals, plus (unspecialized) heap data).
+    if (collect_component(ret, acls.iter(), ret.iter_expand_map)) return;
+    if (collect_component(ret, acls.local(), ret.loc_expand_map)) return;
+    if (collect_component(ret, acls.stack(), ret.stk_expand_map)) return;
   });
 
   always_assert(ret.locations.size() <= kMaxTrackedALocs);
@@ -583,6 +558,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
 
   ret.locations_inv.resize(ret.locations.size());
   for (auto& kv : ret.locations) {
+    assertx(kv.first.isSingleLocation());
     make_conflict_set(kv.first, kv.second);
     ret.locations_inv[kv.second.index] = kv.second;
 
@@ -697,7 +673,7 @@ std::string show(const AliasAnalysis& ainfo) {
   tmp.clear();
   folly::format(&ret, " {: <20}       : {}\n",
      "all stack",  show(ainfo.all_stack));
-  for (auto& kv : ainfo.stack_ranges) {
+  for (auto& kv : ainfo.stk_expand_map) {
     tmp.push_back(folly::sformat(" ex {: <17}       : {}\n",
                                  show(kv.first),
                                  show(kv.second)));

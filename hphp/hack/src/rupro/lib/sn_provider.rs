@@ -2,16 +2,15 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::rc::Rc;
 
 use once_cell::sync::OnceCell;
 
+use crate::alloc::GlobalAllocator;
 use crate::pos::Symbol;
-use crate::pos_provider::PosProvider;
 
 #[derive(Debug)]
 pub struct SpecialNamesProvider {
-    pos_provider: Rc<PosProvider>,
+    alloc: &'static GlobalAllocator,
 
     typehints: Typehints,
 
@@ -20,18 +19,17 @@ pub struct SpecialNamesProvider {
 }
 
 impl SpecialNamesProvider {
-    pub fn new(pos_provider: Rc<PosProvider>) -> Self {
-        let typehints = Typehints::new(Rc::clone(&pos_provider));
+    pub fn new(alloc: &'static GlobalAllocator) -> Self {
         Self {
-            pos_provider,
-            typehints,
+            alloc,
+            typehints: Typehints::new(alloc),
             construct: OnceCell::new(),
             this: OnceCell::new(),
         }
     }
 
     fn get<'a>(&self, cell: &'a OnceCell<Symbol>, name: &str) -> &'a Symbol {
-        cell.get_or_init(|| self.pos_provider.mk_symbol(name))
+        cell.get_or_init(|| self.alloc.symbol(name))
     }
 
     pub fn construct(&self) -> &Symbol {
@@ -49,24 +47,22 @@ impl SpecialNamesProvider {
 
 #[derive(Debug, Clone)]
 pub struct Typehints {
-    pos_provider: Rc<PosProvider>,
-
+    alloc: &'static GlobalAllocator,
     void: OnceCell<Symbol>,
     int: OnceCell<Symbol>,
 }
 
 impl Typehints {
-    fn new(pos_provider: Rc<PosProvider>) -> Self {
+    fn new(alloc: &'static GlobalAllocator) -> Self {
         Self {
-            pos_provider,
-
+            alloc,
             void: OnceCell::new(),
             int: OnceCell::new(),
         }
     }
 
     fn get<'a>(&self, cell: &'a OnceCell<Symbol>, name: &str) -> &'a Symbol {
-        cell.get_or_init(|| self.pos_provider.mk_symbol(name))
+        cell.get_or_init(|| self.alloc.symbol(name))
     }
 
     pub fn void(&self) -> &Symbol {

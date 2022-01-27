@@ -48,7 +48,7 @@ impl<'a, R: Reason> ExpandEnv<'a, R> {
             type_expansions: TypeExpansions::new(),
             expand_visible_newtype: true,
             substs: HashMap::new(),
-            this_ty: ctx.typing_ty_provider.mk_ty(
+            this_ty: ctx.alloc.ty(
                 R::mk(&|| ReasonImpl::Rnone),
                 Ty_::Tgeneric(Hc::clone(ctx.special_names.this()), vec![]),
             ),

@@ -4,40 +4,31 @@
 // LICENSE file in the "hack" directory of this source tree.
 use std::rc::Rc;
 
-use crate::decl_ty_provider::DeclTyProvider;
+use crate::alloc::Allocator;
 use crate::folded_decl_provider::FoldedDeclProvider;
-use crate::pos_provider::PosProvider;
 use crate::reason::Reason;
 use crate::sn_provider::SpecialNamesProvider;
 use crate::typing_decl_provider::TypingDeclProvider;
-use crate::typing_ty_provider::TypingTyProvider;
 
 #[derive(Debug)]
 pub struct TypingCtx<R: Reason> {
-    pub pos_provider: Rc<PosProvider>,
-    pub decl_ty_provider: Rc<DeclTyProvider<R>>,
+    pub alloc: &'static Allocator<R>,
     pub folded_decl_provider: Rc<FoldedDeclProvider<R>>,
     pub typing_decl_provider: Rc<TypingDeclProvider<R>>,
-    pub typing_ty_provider: Rc<TypingTyProvider<R>>,
     pub special_names: Rc<SpecialNamesProvider>,
 }
 
 impl<R: Reason> TypingCtx<R> {
     pub fn new(
+        alloc: &'static Allocator<R>,
+        folded_decl_provider: Rc<FoldedDeclProvider<R>>,
         typing_decl_provider: Rc<TypingDeclProvider<R>>,
-        typing_ty_provider: Rc<TypingTyProvider<R>>,
+        special_names: Rc<SpecialNamesProvider>,
     ) -> Self {
-        let folded_decl_provider = Rc::clone(typing_decl_provider.get_folded_decl_provider());
-        let shallow_decl_provider = Rc::clone(folded_decl_provider.get_shallow_decl_provider());
-        let decl_ty_provider = Rc::clone(shallow_decl_provider.get_decl_ty_provider());
-        let pos_provider = Rc::clone(decl_ty_provider.get_pos_provider());
-        let special_names = Rc::new(SpecialNamesProvider::new(Rc::clone(&pos_provider)));
         Self {
-            pos_provider,
-            decl_ty_provider,
+            alloc,
             folded_decl_provider,
             typing_decl_provider,
-            typing_ty_provider,
             special_names,
         }
     }

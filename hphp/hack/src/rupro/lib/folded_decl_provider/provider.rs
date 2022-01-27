@@ -34,10 +34,6 @@ impl<R: Reason> FoldedDeclProvider<R> {
         }
     }
 
-    pub fn get_shallow_decl_provider(&self) -> &Rc<ShallowDeclProvider<R>> {
-        &self.shallow_decl_provider
-    }
-
     pub fn get_folded_class(&self, name: &Symbol) -> Option<Rc<FoldedClass<R>>> {
         let mut stack = HashSet::new();
         self.get_folded_class_impl(&mut stack, name)
@@ -153,7 +149,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
     }
 
     fn decl_class(&self, stack: &mut HashSet<Symbol>, name: &Symbol) -> Option<Rc<FoldedClass<R>>> {
-        let shallow_class = self.get_shallow_decl_provider().get_shallow_class(name)?;
+        let shallow_class = self.shallow_decl_provider.get_shallow_class(name)?;
         stack.insert(Hc::clone(name));
         let parents = self.decl_class_parents(stack, &shallow_class);
         Some(self.decl_class_impl(&shallow_class, &parents))

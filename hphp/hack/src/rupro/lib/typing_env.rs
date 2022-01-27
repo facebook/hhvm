@@ -59,7 +59,7 @@ struct PerContEntry<R: Reason> {
 impl<R: Reason> TGEnv<R> {
     fn new(ctx: &TypingCtx<R>) -> Self {
         Self {
-            return_: RefCell::new(TypingReturnInfo::placeholder(&ctx.typing_ty_provider)),
+            return_: RefCell::new(TypingReturnInfo::placeholder(ctx.alloc)),
             params: RefCell::new(HashMap::new()),
         }
     }

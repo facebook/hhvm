@@ -25,7 +25,7 @@ pub struct TypingToplevel<'a, R: Reason> {
 
 impl<'a, R: Reason> TypingToplevel<'a, R> {
     fn decl_hint_env(&self) -> DeclHintEnv<R> {
-        DeclHintEnv::new(Rc::clone(&self.ctx.decl_ty_provider))
+        DeclHintEnv::new(self.ctx.alloc)
     }
 
     fn hint_fun_header<'ast>(
@@ -54,8 +54,8 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
 
     fn fun_def_impl(&mut self, fd: &oxidized::aast::FunDef<(), ()>) -> tast::FunDef<R> {
         let f = &fd.fun;
-        let fname = self.ctx.pos_provider.mk_symbol(&f.name.1);
-        let fpos = self.ctx.pos_provider.mk_pos::<R>(&f.name.0);
+        let fname = self.ctx.alloc.symbol(&f.name.1);
+        let fpos = self.ctx.alloc.pos_from_ast(&f.name.0);
 
         let (return_decl_ty, params_decl_ty) = self.hint_fun_header(&f.params, &f.ret);
         let return_ty = match return_decl_ty.clone() {
@@ -67,8 +67,8 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             ),
         };
         let ret_pos = match &f.ret.1 {
-            Some(h) => self.ctx.pos_provider.mk_pos::<R>(&h.0),
-            None => self.ctx.pos_provider.mk_pos::<R>(f.name.pos()),
+            Some(h) => self.ctx.alloc.pos_from_ast(&h.0),
+            None => self.ctx.alloc.pos_from_ast(f.name.pos()),
         };
         let return_ = TypingReturn::make_info(
             &self.env,

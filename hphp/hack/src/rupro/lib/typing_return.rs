@@ -2,13 +2,14 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 #![allow(dead_code)]
+use crate::alloc::Allocator;
 use crate::decl_defs::DeclTy;
 use crate::pos::Symbol;
 use crate::reason::{Reason, ReasonImpl};
 use crate::typing_defs::Ty;
 use crate::typing_env::TEnv;
-use crate::typing_ty_provider::TypingTyProvider;
 
 pub struct TypingReturn;
 
@@ -26,9 +27,9 @@ impl TypingReturn {
     ) -> Ty<R> {
         let reason = R::mk(&|| ReasonImpl::Rwitness(fpos.clone()));
         if is_method && fname == env.ctx.special_names.construct() {
-            env.ctx.typing_ty_provider.mk_ty_void(reason)
+            env.ctx.alloc.ty_void(reason)
         } else {
-            env.ctx.typing_ty_provider.mk_tany(reason)
+            env.ctx.alloc.tany(reason)
         }
     }
 
@@ -58,10 +59,10 @@ impl TypingReturn {
 }
 
 impl<R: Reason> TypingReturnInfo<R> {
-    pub fn placeholder(typing_ty_provider: &TypingTyProvider<R>) -> Self {
+    pub fn placeholder(alloc: &Allocator<R>) -> Self {
         // TODO(hrust): Tunion []
         Self {
-            return_type: typing_ty_provider.mk_tany(R::mk(&|| ReasonImpl::Rnone)),
+            return_type: alloc.tany(R::mk(&|| ReasonImpl::Rnone)),
         }
     }
 }

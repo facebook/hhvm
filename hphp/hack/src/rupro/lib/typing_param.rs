@@ -17,9 +17,9 @@ impl TypingParam {
         decl_hint: Option<DeclTy<R>>,
         param: &oxidized::aast::FunParam<(), ()>,
     ) -> Ty<R> {
-        let r = R::mk(&|| ReasonImpl::Rwitness(env.ctx.pos_provider.mk_pos::<R>(&param.pos)));
+        let r = R::mk(&|| ReasonImpl::Rwitness(env.ctx.alloc.pos_from_ast(&param.pos)));
         match decl_hint {
-            None => env.ctx.typing_ty_provider.mk_tany(r),
+            None => env.ctx.alloc.tany(r),
             Some(ty) => {
                 // TODO(hrust): enforceability
                 let ty = Phase::localize_no_subst(env, false, None, ty.clone());
@@ -37,7 +37,7 @@ impl TypingParam {
         // TODO(hrust): variadic+hhi
         let prim_err = match param.type_hint.1 {
             None => Some(Primary::<R>::ExpectingTypeHint(
-                env.ctx.pos_provider.mk_pos::<R>(&param.pos),
+                env.ctx.alloc.pos_from_ast(&param.pos),
             )),
             Some(_) => None,
         };

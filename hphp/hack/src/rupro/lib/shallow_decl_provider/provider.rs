@@ -10,8 +10,8 @@ use bumpalo::Bump;
 
 use hcons::Hc;
 
+use crate::alloc::Allocator;
 use crate::decl_defs::{ShallowClass, ShallowFun, ShallowMethod};
-use crate::decl_ty_provider::DeclTyProvider;
 use crate::pos::{RelativePath, RelativePathCtx, Symbol};
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclCache;
@@ -19,25 +19,21 @@ use crate::shallow_decl_provider::ShallowDeclCache;
 #[derive(Debug)]
 pub struct ShallowDeclProvider<R: Reason> {
     cache: Rc<dyn ShallowDeclCache<Reason = R>>,
-    decl_ty_provider: Rc<DeclTyProvider<R>>,
+    alloc: &'static Allocator<R>,
     relative_path_ctx: Rc<RelativePathCtx>,
 }
 
 impl<R: Reason> ShallowDeclProvider<R> {
     pub fn new(
         cache: Rc<dyn ShallowDeclCache<Reason = R>>,
-        decl_ty_provider: Rc<DeclTyProvider<R>>,
+        alloc: &'static Allocator<R>,
         relative_path_ctx: Rc<RelativePathCtx>,
     ) -> Self {
         Self {
             cache,
-            decl_ty_provider,
+            alloc,
             relative_path_ctx,
         }
-    }
-
-    pub fn get_decl_ty_provider(&self) -> &Rc<DeclTyProvider<R>> {
-        &self.decl_ty_provider
     }
 
     pub fn get_shallow_class(&self, name: &Symbol) -> Option<Rc<ShallowClass<R>>> {
@@ -45,7 +41,7 @@ impl<R: Reason> ShallowDeclProvider<R> {
     }
 
     pub fn add_from_oxidized_class(&self, sc: &oxidized_by_ref::shallow_decl_defs::ClassDecl<'_>) {
-        let res = Rc::new(self.utils().mk_shallow_class(sc));
+        let res = Rc::new(self.utils().shallow_class(sc));
         self.cache.put_shallow_class(Hc::clone(res.name.id()), res);
     }
 
@@ -54,8 +50,8 @@ impl<R: Reason> ShallowDeclProvider<R> {
         name: &str,
         sf: &oxidized_by_ref::shallow_decl_defs::FunDecl<'_>,
     ) {
-        let res = Rc::new(self.utils().mk_shallow_fun(sf));
-        let name = self.decl_ty_provider.get_pos_provider().mk_symbol(name);
+        let res = Rc::new(self.utils().shallow_fun(sf));
+        let name = self.alloc.symbol(name);
         self.cache.put_shallow_fun(name, res);
     }
 
@@ -103,59 +99,53 @@ impl<R: Reason> ShallowDeclProvider<R> {
     }
 
     fn utils(&self) -> ShallowDeclUtils<R> {
-        ShallowDeclUtils::new(Rc::clone(&self.decl_ty_provider))
+        ShallowDeclUtils::new(self.alloc)
     }
 }
 
 struct ShallowDeclUtils<R: Reason> {
-    decl_ty_provider: Rc<DeclTyProvider<R>>,
+    alloc: &'static Allocator<R>,
 }
 
 impl<R: Reason> ShallowDeclUtils<R> {
-    fn new(decl_ty_provider: Rc<DeclTyProvider<R>>) -> Self {
-        Self { decl_ty_provider }
+    fn new(alloc: &'static Allocator<R>) -> Self {
+        Self { alloc }
     }
 
-    fn mk_shallow_method(
+    fn shallow_method(
         &self,
         sm: &oxidized_by_ref::shallow_decl_defs::ShallowMethod<'_>,
     ) -> ShallowMethod<R> {
-        let decl_tys = &self.decl_ty_provider;
         ShallowMethod {
-            name: decl_tys.get_pos_provider().mk_pos_id_of_ref::<R>(sm.name),
-            ty: decl_tys.mk_decl_ty_from_parsed(sm.type_),
+            name: self.alloc.pos_id_from_decl(sm.name),
+            ty: self.alloc.decl_ty_from_ast(sm.type_),
             visibility: sm.visibility,
         }
     }
 
-    fn mk_shallow_class(
+    fn shallow_class(
         &self,
         sc: &oxidized_by_ref::shallow_decl_defs::ClassDecl<'_>,
     ) -> ShallowClass<R> {
-        let decl_tys = &self.decl_ty_provider;
         ShallowClass {
-            name: decl_tys.get_pos_provider().mk_pos_id_of_ref::<R>(sc.name),
+            name: self.alloc.pos_id_from_decl(sc.name),
             extends: sc
                 .extends
                 .iter()
-                .map(|ty| decl_tys.mk_decl_ty_from_parsed(ty))
+                .map(|ty| self.alloc.decl_ty_from_ast(ty))
                 .collect(),
             methods: sc
                 .methods
                 .iter()
-                .map(|sm| self.mk_shallow_method(sm))
+                .map(|sm| self.shallow_method(sm))
                 .collect(),
         }
     }
 
-    fn mk_shallow_fun(
-        &self,
-        sf: &oxidized_by_ref::shallow_decl_defs::FunDecl<'_>,
-    ) -> ShallowFun<R> {
-        let decl_tys = &self.decl_ty_provider;
+    fn shallow_fun(&self, sf: &oxidized_by_ref::shallow_decl_defs::FunDecl<'_>) -> ShallowFun<R> {
         ShallowFun {
-            pos: decl_tys.get_pos_provider().mk_pos_of_ref::<R>(sf.pos),
-            ty: decl_tys.mk_decl_ty_from_parsed(sf.type_),
+            pos: self.alloc.pos_from_decl(sf.pos),
+            ty: self.alloc.decl_ty_from_ast(sf.type_),
         }
     }
 }

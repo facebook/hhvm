@@ -2,27 +2,26 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::rc::Rc;
 
+use crate::alloc::Allocator;
 use crate::decl_defs::{DeclTy, DeclTy_};
-use crate::decl_ty_provider::DeclTyProvider;
 use crate::reason::{Reason, ReasonImpl};
 
 pub struct DeclHintEnv<R: Reason> {
-    decl_ty_provider: Rc<DeclTyProvider<R>>,
+    alloc: &'static Allocator<R>,
 }
 
 impl<R: Reason> DeclHintEnv<R> {
-    pub fn new(decl_ty_provider: Rc<DeclTyProvider<R>>) -> Self {
-        Self { decl_ty_provider }
+    pub fn new(alloc: &'static Allocator<R>) -> Self {
+        Self { alloc }
     }
 
     fn mk_hint_decl_ty(&self, pos: &oxidized::pos::Pos, ty: DeclTy_<R, DeclTy<R>>) -> DeclTy<R> {
         let reason = R::mk(&|| {
-            let pos = self.decl_ty_provider.get_pos_provider().mk_pos::<R>(pos);
+            let pos = self.alloc.pos_from_ast(pos);
             ReasonImpl::Rhint(pos)
         });
-        self.decl_ty_provider.mk_decl_ty(reason, ty)
+        self.alloc.decl_ty(reason, ty)
     }
 
     fn hint_(
@@ -33,7 +32,7 @@ impl<R: Reason> DeclHintEnv<R> {
         use oxidized::aast_defs::Hint_ as OH;
         match hint {
             OH::Happly(id, argl) => {
-                let id = self.decl_ty_provider.get_pos_provider().mk_pos_id::<R>(id);
+                let id = self.alloc.pos_id_from_ast(id);
                 let argl = argl.iter().map(|arg| self.hint(arg)).collect();
                 DeclTy_::DTapply(id, argl)
             }

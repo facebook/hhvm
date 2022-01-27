@@ -2,30 +2,12 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::convert::From;
+
 use std::path::PathBuf;
 
 use crate::pos::Symbol;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum Prefix {
-    Root,
-    Hhi,
-    Dummy,
-    Tmp,
-}
-
-impl From<oxidized::relative_path::Prefix> for Prefix {
-    fn from(prefix: oxidized::relative_path::Prefix) -> Self {
-        use oxidized::relative_path::Prefix as OP;
-        match prefix {
-            OP::Root => Self::Root,
-            OP::Hhi => Self::Hhi,
-            OP::Dummy => Self::Dummy,
-            OP::Tmp => Self::Tmp,
-        }
-    }
-}
+pub use oxidized::relative_path::Prefix;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RelativePath {

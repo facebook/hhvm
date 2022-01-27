@@ -12,18 +12,16 @@ use std::rc::Rc;
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
 
+use hackrs::alloc;
 use hackrs::ast_provider::AstProvider;
-use hackrs::decl_ty_provider::DeclTyProvider;
 use hackrs::folded_decl_provider::{FoldedDeclLocalCache, FoldedDeclProvider};
-use hackrs::pos::{Prefix, RelativePath, RelativePathCtx};
-use hackrs::pos_provider::PosProvider;
+use hackrs::pos::{Prefix, RelativePathCtx};
 use hackrs::shallow_decl_provider::{ShallowDeclLocalCache, ShallowDeclProvider};
 use hackrs::sn_provider::SpecialNamesProvider;
 use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
 use hackrs::typing_decl_provider::{TypingDeclLocalCache, TypingDeclProvider};
-use hackrs::typing_ty_provider::TypingTyProvider;
 
 use hackrs::reason::Reason;
 // use hackrs::reason::BReason;
@@ -68,18 +66,17 @@ pub extern "C" fn stc_main() {
     });
 
     let options = Rc::new(oxidized::global_options::GlobalOptions::default());
-    let pos_provider = Rc::new(PosProvider::new());
-    let sn_provider = Rc::new(SpecialNamesProvider::new(Rc::clone(&pos_provider)));
+    let (global_alloc, alloc, _pos_alloc) = alloc::get_allocators_for_main();
+    let sn_provider = Rc::new(SpecialNamesProvider::new(global_alloc));
     let ast_provider = AstProvider::new(
         Rc::clone(&relative_path_ctx),
-        sn_provider,
+        Rc::clone(&sn_provider),
         Rc::clone(&options),
     );
-    let decl_ty_provider = Rc::new(DeclTyProvider::<NReason>::new(Rc::clone(&pos_provider)));
     let shallow_decl_cache = Rc::new(ShallowDeclLocalCache::new());
     let shallow_decl_provider = Rc::new(ShallowDeclProvider::new(
         shallow_decl_cache,
-        decl_ty_provider,
+        alloc,
         relative_path_ctx,
     ));
     let folded_decl_cache = Rc::new(FoldedDeclLocalCache::new());
@@ -90,21 +87,18 @@ pub extern "C" fn stc_main() {
     let typing_decl_cache = Rc::new(TypingDeclLocalCache::new());
     let typing_decl_provider = Rc::new(TypingDeclProvider::new(
         typing_decl_cache,
-        folded_decl_provider,
+        Rc::clone(&folded_decl_provider),
     ));
-    let typing_ty_provider = Rc::new(TypingTyProvider::new());
-    let ctx = Rc::new(TypingCtx::new(typing_decl_provider, typing_ty_provider));
+    let ctx = Rc::new(TypingCtx::new(
+        alloc,
+        folded_decl_provider,
+        typing_decl_provider,
+        sn_provider,
+    ));
 
     let filenames: Vec<_> = filenames
         .into_iter()
-        .map(|fln| {
-            let suffix = pos_provider.mk_symbol(
-                fln.as_os_str()
-                    .to_str()
-                    .expect("Unly UTF-8 file paths supported"),
-            );
-            RelativePath::new(Prefix::Root, suffix)
-        })
+        .map(|fln| alloc.relative_path(Prefix::Root, &fln))
         .collect();
 
     shallow_decl_provider

@@ -19,10 +19,10 @@ impl Phase {
     fn localize<R: Reason>(env: &TEnv<R>, ety_env: &mut ExpandEnv<'_, R>, ty: DeclTy<R>) -> Ty<R> {
         use DeclTy_::*;
         use Ty_::*;
-        let tyf = &env.ctx.typing_ty_provider;
+        let alloc = env.ctx.alloc;
         let r = ty.reason().clone();
         match &**ty.node() {
-            DTprim(p) => tyf.mk_ty(r, Tprim(p.clone())),
+            DTprim(p) => alloc.ty(r, Tprim(p.clone())),
             DTapply(pos_id, tyl) => match env
                 .ctx
                 .typing_decl_provider
@@ -43,7 +43,7 @@ impl Phase {
             DTfun(ft) => {
                 let pos = r.pos().clone();
                 let ft = Self::localize_ft(env, ety_env, pos, ft);
-                tyf.mk_ty(r, Tfun(ft))
+                alloc.ty(r, Tfun(ft))
             }
         }
     }
@@ -57,7 +57,7 @@ impl Phase {
         class_info: Option<&Class<R>>,
     ) -> Ty<R> {
         use Ty_::*;
-        let tyf = &env.ctx.typing_ty_provider;
+        let alloc = env.ctx.alloc;
         match class_info {
             None => {
                 // Without class info, we don't know the kinds of the arguments.
@@ -71,13 +71,13 @@ impl Phase {
                         .map(|ty| Self::localize(env, ety_env, ty.clone()))
                         .collect()
                 });
-                tyf.mk_ty(r, Tclass(sid, Exact::Nonexact, tyl))
+                alloc.ty(r, Tclass(sid, Exact::Nonexact, tyl))
             }
             Some(_class_info) => {
                 // TODO(hrust): enum_type
                 // TODO(hrust): tparams
                 assert!(ty_args.is_empty());
-                tyf.mk_ty(r, Tclass(sid, Exact::Nonexact, vec![]))
+                alloc.ty(r, Tclass(sid, Exact::Nonexact, vec![]))
             }
         }
     }

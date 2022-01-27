@@ -44,8 +44,8 @@ impl Typing {
         if !param.user_attributes.is_empty() {
             unimplemented!()
         }
-        let name = env.ctx.pos_provider.mk_symbol(&param.name);
-        let pos = env.ctx.pos_provider.mk_pos::<R>(&param.pos);
+        let name = env.ctx.alloc.symbol(&param.name);
+        let pos = env.ctx.alloc.pos_from_ast(&param.pos);
         let id = LocalId::new_unscoped(name);
         let param_mode = ParamMode::from(&param.callconv);
         env.set_param(id.clone(), ty1.clone(), pos.clone(), param_mode);

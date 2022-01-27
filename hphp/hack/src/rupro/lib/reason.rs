@@ -8,7 +8,7 @@ use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 
 use crate::pos::{BPos, NPos, Pos};
 
-pub trait Reason: Eq + Hash + Clone + ToOcamlRep + std::fmt::Debug {
+pub trait Reason: Eq + Hash + Clone + ToOcamlRep + std::fmt::Debug + 'static {
     /// Position type.
     type Pos: Pos;
 

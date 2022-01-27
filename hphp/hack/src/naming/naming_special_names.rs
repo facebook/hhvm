@@ -61,6 +61,8 @@ pub mod classes {
 
     pub const IMEMOIZE_PARAM: &str = "\\HH\\IMemoizeParam";
 
+    pub const UNSAFE_SINGLETON_MEMOIZE_PARAM: &str = "\\HH\\UNSAFESingletonMemoizeParam";
+
     pub const CLASS_NAME: &str = "\\HH\\classname";
 
     pub const TYPE_NAME: &str = "\\HH\\typename";
@@ -70,19 +72,34 @@ pub mod classes {
     pub const IASYNC_DISPOSABLE: &str = "\\IAsyncDisposable";
 
     pub const MEMBER_OF: &str = "\\HH\\MemberOf";
+
+    pub const ENUM_CLASS_LABEL: &str = "\\HH\\EnumClass\\Label";
+
+    /// Classes that can be spliced into ExpressionTrees
+    pub const SPLICEABLE: &str = "\\Spliceable";
+
+    pub const SUPPORT_DYN: &str = "\\HH\\supportdyn";
 }
 
 pub mod collections {
     /* concrete classes */
     pub const VECTOR: &str = "\\HH\\Vector";
 
+    pub const MUTABLE_VECTOR: &str = "\\MutableVector";
+
     pub const IMM_VECTOR: &str = "\\HH\\ImmVector";
 
     pub const SET: &str = "\\HH\\Set";
 
+    pub const CONST_SET: &str = "\\ConstSet";
+
+    pub const MUTABLE_SET: &str = "\\MutableSet";
+
     pub const IMM_SET: &str = "\\HH\\ImmSet";
 
     pub const MAP: &str = "\\HH\\Map";
+
+    pub const MUTABLE_MAP: &str = "\\MutableMap";
 
     pub const IMM_MAP: &str = "\\HH\\ImmMap";
 
@@ -105,6 +122,8 @@ pub mod collections {
 
     pub const CONST_COLLECTION: &str = "\\ConstCollection";
 
+    pub const ANY_ARRAY: &str = "\\HH\\AnyArray";
+
     pub const DICT: &str = "\\HH\\dict";
 
     pub const VEC: &str = "\\HH\\vec";
@@ -115,6 +134,8 @@ pub mod collections {
 pub mod members {
     use hash::{HashMap, HashSet};
     use lazy_static::lazy_static;
+
+    pub const M_GET_INSTANCE_KEY: &str = "getInstanceKey";
 
     pub const M_CLASS: &str = "class";
 
@@ -246,6 +267,8 @@ pub mod user_attributes {
 
     pub const EXPLICIT: &str = "__Explicit";
 
+    pub const NON_DISJOINT: &str = "__NonDisjoint";
+
     pub const SOFT: &str = "__Soft";
 
     pub const WARN: &str = "__Warn";
@@ -262,6 +285,18 @@ pub mod user_attributes {
 
     pub const NEVER_INLINE: &str = "__NEVER_INLINE";
 
+    pub const DISABLE_TYPECHECKER_INTERNAL: &str = "__DisableTypecheckerInternal";
+
+    pub const HAS_TOP_LEVEL_CODE: &str = "__HasTopLevelCode";
+
+    pub const IS_FOLDABLE: &str = "__IsFoldable";
+
+    pub const NATIVE: &str = "__Native";
+
+    pub const OUT_ONLY: &str = "__OutOnly";
+
+    pub const ALWAYS_INLINE: &str = "__ALWAYS_INLINE";
+
     pub const ENABLE_UNSTABLE_FEATURES: &str = "__EnableUnstableFeatures";
 
     pub const ENUM_CLASS: &str = "__EnumClass";
@@ -272,13 +307,21 @@ pub mod user_attributes {
 
     pub const EXTERNAL: &str = "__External";
 
+    pub const CAN_CALL: &str = "__CanCall";
+
     pub const SUPPORT_DYNAMIC_TYPE: &str = "__SupportDynamicType";
+
+    pub const REQUIRE_DYNAMIC: &str = "__RequireDynamic";
 
     pub const MODULE: &str = "__Module";
 
     pub const INTERNAL: &str = "__Internal";
 
     pub const ENABLE_METHOD_TRAIT_DIAMOND: &str = "__EnableMethodTraitDiamond";
+
+    pub const IGNORE_READONLY_LOCAL_ERRORS: &str = "__IgnoreReadonlyLocalErrors";
+
+    pub const IGNORE_COEFFECT_LOCAL_ERRORS: &str = "__IgnoreCoeffectLocalErrors";
 
     lazy_static! {
         pub static ref AS_SET: HashSet<&'static str> = vec![
@@ -300,6 +343,7 @@ pub mod user_attributes {
             NEWABLE,
             ENFORCEABLE,
             EXPLICIT,
+            NON_DISJOINT,
             SOFT,
             WARN,
             MOCK_CLASS,
@@ -308,13 +352,18 @@ pub mod user_attributes {
             DYNAMICALLY_CONSTRUCTIBLE,
             REIFIABLE,
             NEVER_INLINE,
+            DISABLE_TYPECHECKER_INTERNAL,
             ENABLE_UNSTABLE_FEATURES,
             ENUM_CLASS,
             POLICIED,
             INFERFLOWS,
             EXTERNAL,
+            CAN_CALL,
             SUPPORT_DYNAMIC_TYPE,
+            REQUIRE_DYNAMIC,
             MODULE,
+            INTERNAL,
+            ENABLE_METHOD_TRAIT_DIAMOND,
         ]
         .into_iter()
         .collect();
@@ -503,6 +552,8 @@ pub mod pseudo_functions {
 
     pub const UNSAFE_CAST: &str = "\\HH\\FIXME\\UNSAFE_CAST";
 
+    pub const ENFORCED_CAST: &str = "\\HH\\FIXME\\ENFORCED_CAST";
+
     pub static ALL_PSEUDO_FUNCTIONS: &[&str] = &[
         ISSET,
         UNSET,
@@ -546,6 +597,14 @@ pub mod std_lib_functions {
     pub const ARRAY_MARK_LEGACY: &str = "\\HH\\array_mark_legacy";
 
     pub const ARRAY_UNMARK_LEGACY: &str = "\\HH\\array_unmark_legacy";
+
+    pub const IS_PHP_ARRAY: &str = "\\HH\\is_php_array";
+
+    pub const IS_ANY_ARRAY: &str = "\\HH\\is_any_array";
+
+    pub const IS_DICT_OR_DARRAY: &str = "\\HH\\is_dict_or_darray";
+
+    pub const IS_VEC_OR_VARRAY: &str = "\\HH\\is_vec_or_varray";
 }
 
 pub mod typehints {
@@ -572,6 +631,8 @@ pub mod typehints {
 
     pub const DYNAMIC: &str = "dynamic";
 
+    pub const SUPPORTDYNAMIC: &str = "supportdynamic";
+
     pub const NOTHING: &str = "nothing";
 
     pub const INT: &str = "int";
@@ -587,6 +648,8 @@ pub mod typehints {
     pub const VARRAY: &str = "varray";
 
     pub const VARRAY_OR_DARRAY: &str = "varray_or_darray";
+
+    pub const VEC_OR_DICT: &str = "vec_or_dict";
 
     pub const CALLABLE: &str = "callable";
 
@@ -756,6 +819,8 @@ pub mod pseudo_consts {
 pub mod fb {
     pub const ENUM: &str = "\\Enum";
 
+    pub const INNER: &str = "TInner";
+
     pub const IDX: &str = "\\HH\\idx";
 
     pub const IDXREADONLY: &str = "\\HH\\idx_readonly";
@@ -774,6 +839,8 @@ pub mod hh {
 }
 
 pub mod readonly {
+    pub const IDX: &str = "\\HH\\idx_readonly";
+
     pub const AS_MUT: &str = "\\HH\\Readonly\\as_mut";
 }
 
@@ -1033,6 +1100,14 @@ pub mod xhp {
     pub fn is_xhp_category(x: &str) -> bool {
         x.starts_with('%')
     }
+}
+
+pub mod unstable_features {
+    pub const COEFFECTS_PROVISIONAL: &str = "coeffects_provisional";
+    pub const IFC: &str = "ifc";
+    pub const READONLY: &str = "readonly";
+    pub const EXPRESSION_TREES: &str = "expression_trees";
+    pub const MODULES: &str = "modules";
 }
 
 pub mod regex {

@@ -6,6 +6,8 @@
 // These use the same casing as naming_special_names.ml for now.
 #![allow(non_snake_case)]
 
+use naming_special_names_rust as sn;
+
 use crate::alloc::GlobalAllocator;
 use crate::pos::Symbol;
 
@@ -280,8 +282,10 @@ pub struct PseudoFunctions {
 
 #[derive(Debug)]
 pub struct StdlibFunctions {
+    pub is_array: Symbol,
     pub is_null: Symbol,
     pub get_class: Symbol,
+    pub array_filter: Symbol,
     pub call_user_func: Symbol,
     pub type_structure: Symbol,
     pub array_mark_legacy: Symbol,
@@ -315,6 +319,9 @@ pub struct Typehints {
     pub varray_or_darray: Symbol,
     pub vec_or_dict: Symbol,
     pub callable: Symbol,
+    pub object_cast: Symbol,
+    pub supportdyn: Symbol,
+    pub hh_sypportdyn: Symbol,
     pub wildcard: Symbol,
 }
 
@@ -468,36 +475,36 @@ pub struct ExpressionTrees {
 impl Classes {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            cParent: alloc.symbol("parent"),
-            cStatic: alloc.symbol("static"),
-            cSelf: alloc.symbol("self"),
-            cUnknown: alloc.symbol("\\*Unknown*"),
-            cAwaitable: alloc.symbol("\\HH\\Awaitable"),
-            cGenerator: alloc.symbol("\\Generator"),
-            cAsyncGenerator: alloc.symbol("\\HH\\AsyncGenerator"),
-            cHHFormatString: alloc.symbol("\\HH\\FormatString"),
-            cHH_BuiltinEnum: alloc.symbol("\\HH\\BuiltinEnum"),
-            cHH_BuiltinEnumClass: alloc.symbol("\\HH\\BuiltinEnumClass"),
-            cHH_BuiltinAbstractEnumClass: alloc.symbol("\\HH\\BuiltinAbstractEnumClass"),
-            cThrowable: alloc.symbol("\\Throwable"),
-            cStdClass: alloc.symbol("\\stdClass"),
-            cDateTime: alloc.symbol("\\DateTime"),
-            cDateTimeImmutable: alloc.symbol("\\DateTimeImmutable"),
-            cAsyncIterator: alloc.symbol("\\HH\\AsyncIterator"),
-            cAsyncKeyedIterator: alloc.symbol("\\HH\\AsyncKeyedIterator"),
-            cStringish: alloc.symbol("\\Stringish"),
-            cStringishObject: alloc.symbol("\\StringishObject"),
-            cXHPChild: alloc.symbol("\\XHPChild"),
-            cIMemoizeParam: alloc.symbol("\\HH\\IMemoizeParam"),
-            cUNSAFESingletonMemoizeParam: alloc.symbol("\\HH\\UNSAFESingletonMemoizeParam"),
-            cClassname: alloc.symbol("\\HH\\classname"),
-            cTypename: alloc.symbol("\\HH\\typename"),
-            cIDisposable: alloc.symbol("\\IDisposable"),
-            cIAsyncDisposable: alloc.symbol("\\IAsyncDisposable"),
-            cMemberOf: alloc.symbol("\\HH\\MemberOf"),
-            cEnumClassLabel: alloc.symbol("\\HH\\EnumClass\\Label"),
-            cSpliceable: alloc.symbol("\\Spliceable"),
-            cSupportDyn: alloc.symbol("\\HH\\supportdyn"),
+            cParent: alloc.symbol(sn::classes::PARENT),
+            cStatic: alloc.symbol(sn::classes::STATIC),
+            cSelf: alloc.symbol(sn::classes::SELF),
+            cUnknown: alloc.symbol(sn::classes::UNKNOWN),
+            cAwaitable: alloc.symbol(sn::classes::AWAITABLE),
+            cGenerator: alloc.symbol(sn::classes::GENERATOR),
+            cAsyncGenerator: alloc.symbol(sn::classes::ASYNC_GENERATOR),
+            cHHFormatString: alloc.symbol(sn::classes::HH_FORMAT_STRING),
+            cHH_BuiltinEnum: alloc.symbol(sn::classes::HH_BUILTIN_ENUM),
+            cHH_BuiltinEnumClass: alloc.symbol(sn::classes::HH_BUILTIN_ENUM_CLASS),
+            cHH_BuiltinAbstractEnumClass: alloc.symbol(sn::classes::HH_BUILTIN_ABSTRACT_ENUM_CLASS),
+            cThrowable: alloc.symbol(sn::classes::THROWABLE),
+            cStdClass: alloc.symbol(sn::classes::STD_CLASS),
+            cDateTime: alloc.symbol(sn::classes::DATE_TIME),
+            cDateTimeImmutable: alloc.symbol(sn::classes::DATE_TIME_IMMUTABLE),
+            cAsyncIterator: alloc.symbol(sn::classes::ASYNC_ITERATOR),
+            cAsyncKeyedIterator: alloc.symbol(sn::classes::ASYNC_KEYED_ITERATOR),
+            cStringish: alloc.symbol(sn::classes::STRINGISH),
+            cStringishObject: alloc.symbol(sn::classes::STRINGISH_OBJECT),
+            cXHPChild: alloc.symbol(sn::classes::XHP_CHILD),
+            cIMemoizeParam: alloc.symbol(sn::classes::IMEMOIZE_PARAM),
+            cUNSAFESingletonMemoizeParam: alloc.symbol(sn::classes::UNSAFE_SINGLETON_MEMOIZE_PARAM),
+            cClassname: alloc.symbol(sn::classes::CLASS_NAME),
+            cTypename: alloc.symbol(sn::classes::TYPE_NAME),
+            cIDisposable: alloc.symbol(sn::classes::IDISPOSABLE),
+            cIAsyncDisposable: alloc.symbol(sn::classes::IASYNC_DISPOSABLE),
+            cMemberOf: alloc.symbol(sn::classes::MEMBER_OF),
+            cEnumClassLabel: alloc.symbol(sn::classes::ENUM_CLASS_LABEL),
+            cSpliceable: alloc.symbol(sn::classes::SPLICEABLE),
+            cSupportDyn: alloc.symbol(sn::classes::SUPPORT_DYN),
         }
     }
 }
@@ -506,31 +513,31 @@ impl Collections {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
             // concrete classes
-            cVector: alloc.symbol("\\HH\\Vector"),
-            cMutableVector: alloc.symbol("\\MutableVector"),
-            cImmVector: alloc.symbol("\\HH\\ImmVector"),
-            cSet: alloc.symbol("\\HH\\Set"),
-            cConstSet: alloc.symbol("\\ConstSet"),
-            cMutableSet: alloc.symbol("\\MutableSet"),
-            cImmSet: alloc.symbol("\\HH\\ImmSet"),
-            cMap: alloc.symbol("\\HH\\Map"),
-            cMutableMap: alloc.symbol("\\MutableMap"),
-            cImmMap: alloc.symbol("\\HH\\ImmMap"),
-            cPair: alloc.symbol("\\HH\\Pair"),
+            cVector: alloc.symbol(sn::collections::VECTOR),
+            cMutableVector: alloc.symbol(sn::collections::MUTABLE_VECTOR),
+            cImmVector: alloc.symbol(sn::collections::IMM_VECTOR),
+            cSet: alloc.symbol(sn::collections::SET),
+            cConstSet: alloc.symbol(sn::collections::CONST_SET),
+            cMutableSet: alloc.symbol(sn::collections::MUTABLE_SET),
+            cImmSet: alloc.symbol(sn::collections::IMM_SET),
+            cMap: alloc.symbol(sn::collections::MAP),
+            cMutableMap: alloc.symbol(sn::collections::MUTABLE_MAP),
+            cImmMap: alloc.symbol(sn::collections::IMM_MAP),
+            cPair: alloc.symbol(sn::collections::PAIR),
 
             // interfaces
-            cContainer: alloc.symbol("\\HH\\Container"),
-            cKeyedContainer: alloc.symbol("\\HH\\KeyedContainer"),
-            cTraversable: alloc.symbol("\\HH\\Traversable"),
-            cKeyedTraversable: alloc.symbol("\\HH\\KeyedTraversable"),
-            cCollection: alloc.symbol("\\Collection"),
-            cConstVector: alloc.symbol("\\ConstVector"),
-            cConstMap: alloc.symbol("\\ConstMap"),
-            cConstCollection: alloc.symbol("\\ConstCollection"),
-            cAnyArray: alloc.symbol("\\HH\\AnyArray"),
-            cDict: alloc.symbol("\\HH\\dict"),
-            cVec: alloc.symbol("\\HH\\vec"),
-            cKeyset: alloc.symbol("\\HH\\keyset"),
+            cContainer: alloc.symbol(sn::collections::CONTAINER),
+            cKeyedContainer: alloc.symbol(sn::collections::KEYED_CONTAINER),
+            cTraversable: alloc.symbol(sn::collections::TRAVERSABLE),
+            cKeyedTraversable: alloc.symbol(sn::collections::KEYED_TRAVERSABLE),
+            cCollection: alloc.symbol(sn::collections::COLLECTION),
+            cConstVector: alloc.symbol(sn::collections::CONST_VECTOR),
+            cConstMap: alloc.symbol(sn::collections::CONST_MAP),
+            cConstCollection: alloc.symbol(sn::collections::CONST_COLLECTION),
+            cAnyArray: alloc.symbol(sn::collections::ANY_ARRAY),
+            cDict: alloc.symbol(sn::collections::DICT),
+            cVec: alloc.symbol(sn::collections::VEC),
+            cKeyset: alloc.symbol(sn::collections::KEYSET),
         }
     }
 }
@@ -538,25 +545,25 @@ impl Collections {
 impl Members {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            mGetInstanceKey: alloc.symbol("getInstanceKey"),
-            mClass: alloc.symbol("class"),
-            __construct: alloc.symbol("__construct"),
-            __destruct: alloc.symbol("__destruct"),
-            __call: alloc.symbol("__call"),
-            __callStatic: alloc.symbol("__callStatic"),
-            __clone: alloc.symbol("__clone"),
-            __debugInfo: alloc.symbol("__debugInfo"),
-            __dispose: alloc.symbol("__dispose"),
-            __disposeAsync: alloc.symbol("__disposeAsync"),
-            __get: alloc.symbol("__get"),
-            __invoke: alloc.symbol("__invoke"),
-            __isset: alloc.symbol("__isset"),
-            __set: alloc.symbol("__set"),
-            __set_state: alloc.symbol("__set_state"),
-            __sleep: alloc.symbol("__sleep"),
-            __toString: alloc.symbol("__toString"),
-            __unset: alloc.symbol("__unset"),
-            __wakeup: alloc.symbol("__wakeup"),
+            mGetInstanceKey: alloc.symbol(sn::members::M_GET_INSTANCE_KEY),
+            mClass: alloc.symbol(sn::members::M_CLASS),
+            __construct: alloc.symbol(sn::members::__CONSTRUCT),
+            __destruct: alloc.symbol(sn::members::__DESTRUCT),
+            __call: alloc.symbol(sn::members::__CALL),
+            __callStatic: alloc.symbol(sn::members::__CALL_STATIC),
+            __clone: alloc.symbol(sn::members::__CLONE),
+            __debugInfo: alloc.symbol(sn::members::__DEBUG_INFO),
+            __dispose: alloc.symbol(sn::members::__DISPOSE),
+            __disposeAsync: alloc.symbol(sn::members::__DISPOSE_ASYNC),
+            __get: alloc.symbol(sn::members::__GET),
+            __invoke: alloc.symbol(sn::members::__INVOKE),
+            __isset: alloc.symbol(sn::members::__ISSET),
+            __set: alloc.symbol(sn::members::__SET),
+            __set_state: alloc.symbol(sn::members::__SET_STATE),
+            __sleep: alloc.symbol(sn::members::__SLEEP),
+            __toString: alloc.symbol(sn::members::__TO_STRING),
+            __unset: alloc.symbol(sn::members::__UNSET),
+            __wakeup: alloc.symbol(sn::members::__WAKEUP),
         }
     }
 }
@@ -564,20 +571,20 @@ impl Members {
 impl AttributeKinds {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            cls: alloc.symbol("\\HH\\ClassAttribute"),
-            clscst: alloc.symbol("\\HH\\ClassConstantAttribute"),
-            enum_: alloc.symbol("\\HH\\EnumAttribute"),
-            typealias: alloc.symbol("\\HH\\TypeAliasAttribute"),
-            fn_: alloc.symbol("\\HH\\FunctionAttribute"),
-            mthd: alloc.symbol("\\HH\\MethodAttribute"),
-            instProperty: alloc.symbol("\\HH\\InstancePropertyAttribute"),
-            staticProperty: alloc.symbol("\\HH\\StaticPropertyAttribute"),
-            parameter: alloc.symbol("\\HH\\ParameterAttribute"),
-            typeparam: alloc.symbol("\\HH\\TypeParameterAttribute"),
-            file: alloc.symbol("\\HH\\FileAttribute"),
-            typeconst: alloc.symbol("\\HH\\TypeConstantAttribute"),
-            lambda: alloc.symbol("\\HH\\LambdaAttribute"),
-            enumcls: alloc.symbol("\\HH\\EnumClassAttribute"),
+            cls: alloc.symbol(sn::attribute_kinds::CLS),
+            clscst: alloc.symbol(sn::attribute_kinds::CLS_CST),
+            enum_: alloc.symbol(sn::attribute_kinds::ENUM),
+            typealias: alloc.symbol(sn::attribute_kinds::TYPE_ALIAS),
+            fn_: alloc.symbol(sn::attribute_kinds::FN),
+            mthd: alloc.symbol(sn::attribute_kinds::MTHD),
+            instProperty: alloc.symbol(sn::attribute_kinds::INST_PROPERTY),
+            staticProperty: alloc.symbol(sn::attribute_kinds::STATIC_PROPERTY),
+            parameter: alloc.symbol(sn::attribute_kinds::PARAMETER),
+            typeparam: alloc.symbol(sn::attribute_kinds::TYPE_PARAM),
+            file: alloc.symbol(sn::attribute_kinds::FILE),
+            typeconst: alloc.symbol(sn::attribute_kinds::TYPE_CONST),
+            lambda: alloc.symbol(sn::attribute_kinds::LAMBDA),
+            enumcls: alloc.symbol(sn::attribute_kinds::ENUM_CLS),
         }
     }
 }
@@ -585,52 +592,58 @@ impl AttributeKinds {
 impl UserAttributes {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            uaOverride: alloc.symbol("__Override"),
-            uaConsistentConstruct: alloc.symbol("__ConsistentConstruct"),
-            uaConst: alloc.symbol("__Const"),
-            uaDeprecated: alloc.symbol("__Deprecated"),
-            uaEntryPoint: alloc.symbol("__EntryPoint"),
-            uaMemoize: alloc.symbol("__Memoize"),
-            uaMemoizeLSB: alloc.symbol("__MemoizeLSB"),
-            uaPolicyShardedMemoize: alloc.symbol("__PolicyShardedMemoize"),
-            uaPolicyShardedMemoizeLSB: alloc.symbol("__PolicyShardedMemoizeLSB"),
-            uaPHPStdLib: alloc.symbol("__PHPStdLib"),
-            uaAcceptDisposable: alloc.symbol("__AcceptDisposable"),
-            uaReturnDisposable: alloc.symbol("__ReturnDisposable"),
-            uaLSB: alloc.symbol("__LSB"),
-            uaSealed: alloc.symbol("__Sealed"),
-            uaLateInit: alloc.symbol("__LateInit"),
-            uaNewable: alloc.symbol("__Newable"),
-            uaEnforceable: alloc.symbol("__Enforceable"),
-            uaExplicit: alloc.symbol("__Explicit"),
-            uaNonDisjoint: alloc.symbol("__NonDisjoint"),
-            uaSoft: alloc.symbol("__Soft"),
-            uaWarn: alloc.symbol("__Warn"),
-            uaMockClass: alloc.symbol("__MockClass"),
-            uaProvenanceSkipFrame: alloc.symbol("__ProvenanceSkipFrame"),
-            uaDynamicallyCallable: alloc.symbol("__DynamicallyCallable"),
-            uaDynamicallyConstructible: alloc.symbol("__DynamicallyConstructible"),
-            uaReifiable: alloc.symbol("__Reifiable"),
-            uaNeverInline: alloc.symbol("__NEVER_INLINE"),
-            uaDisableTypecheckerInternal: alloc.symbol("__DisableTypecheckerInternal"),
-            uaHasTopLevelCode: alloc.symbol("__HasTopLevelCode"),
-            uaIsFoldable: alloc.symbol("__IsFoldable"),
-            uaNative: alloc.symbol("__Native"),
-            uaOutOnly: alloc.symbol("__OutOnly"),
-            uaAlwaysInline: alloc.symbol("__ALWAYS_INLINE"),
-            uaEnableUnstableFeatures: alloc.symbol("__EnableUnstableFeatures"),
-            uaEnumClass: alloc.symbol("__EnumClass"),
-            uaPolicied: alloc.symbol("__Policied"),
-            uaInferFlows: alloc.symbol("__InferFlows"),
-            uaExternal: alloc.symbol("__External"),
-            uaCanCall: alloc.symbol("__CanCall"),
-            uaSupportDynamicType: alloc.symbol("__SupportDynamicType"),
-            uaRequireDynamic: alloc.symbol("__RequireDynamic"),
-            uaModule: alloc.symbol("__Module"),
-            uaInternal: alloc.symbol("__Internal"),
-            uaEnableMethodTraitDiamond: alloc.symbol("__EnableMethodTraitDiamond"),
-            uaIgnoreReadonlyLocalErrors: alloc.symbol("__IgnoreReadonlyLocalErrors"),
-            uaIgnoreCoeffectLocalErrors: alloc.symbol("__IgnoreCoeffectLocalErrors"),
+            uaOverride: alloc.symbol(sn::user_attributes::OVERRIDE),
+            uaConsistentConstruct: alloc.symbol(sn::user_attributes::CONSISTENT_CONSTRUCT),
+            uaConst: alloc.symbol(sn::user_attributes::CONST),
+            uaDeprecated: alloc.symbol(sn::user_attributes::DEPRECATED),
+            uaEntryPoint: alloc.symbol(sn::user_attributes::ENTRY_POINT),
+            uaMemoize: alloc.symbol(sn::user_attributes::MEMOIZE),
+            uaMemoizeLSB: alloc.symbol(sn::user_attributes::MEMOIZE_LSB),
+            uaPolicyShardedMemoize: alloc.symbol(sn::user_attributes::POLICY_SHARDED_MEMOIZE),
+            uaPolicyShardedMemoizeLSB: alloc
+                .symbol(sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB),
+            uaPHPStdLib: alloc.symbol(sn::user_attributes::PHP_STD_LIB),
+            uaAcceptDisposable: alloc.symbol(sn::user_attributes::ACCEPT_DISPOSABLE),
+            uaReturnDisposable: alloc.symbol(sn::user_attributes::RETURN_DISPOSABLE),
+            uaLSB: alloc.symbol(sn::user_attributes::LSB),
+            uaSealed: alloc.symbol(sn::user_attributes::SEALED),
+            uaLateInit: alloc.symbol(sn::user_attributes::LATE_INIT),
+            uaNewable: alloc.symbol(sn::user_attributes::NEWABLE),
+            uaEnforceable: alloc.symbol(sn::user_attributes::ENFORCEABLE),
+            uaExplicit: alloc.symbol(sn::user_attributes::EXPLICIT),
+            uaNonDisjoint: alloc.symbol(sn::user_attributes::NON_DISJOINT),
+            uaSoft: alloc.symbol(sn::user_attributes::SOFT),
+            uaWarn: alloc.symbol(sn::user_attributes::WARN),
+            uaMockClass: alloc.symbol(sn::user_attributes::MOCK_CLASS),
+            uaProvenanceSkipFrame: alloc.symbol(sn::user_attributes::PROVENANCE_SKIP_FRAME),
+            uaDynamicallyCallable: alloc.symbol(sn::user_attributes::DYNAMICALLY_CALLABLE),
+            uaDynamicallyConstructible: alloc
+                .symbol(sn::user_attributes::DYNAMICALLY_CONSTRUCTIBLE),
+            uaReifiable: alloc.symbol(sn::user_attributes::REIFIABLE),
+            uaNeverInline: alloc.symbol(sn::user_attributes::NEVER_INLINE),
+            uaDisableTypecheckerInternal: alloc
+                .symbol(sn::user_attributes::DISABLE_TYPECHECKER_INTERNAL),
+            uaHasTopLevelCode: alloc.symbol(sn::user_attributes::HAS_TOP_LEVEL_CODE),
+            uaIsFoldable: alloc.symbol(sn::user_attributes::IS_FOLDABLE),
+            uaNative: alloc.symbol(sn::user_attributes::NATIVE),
+            uaOutOnly: alloc.symbol(sn::user_attributes::OUT_ONLY),
+            uaAlwaysInline: alloc.symbol(sn::user_attributes::ALWAYS_INLINE),
+            uaEnableUnstableFeatures: alloc.symbol(sn::user_attributes::ENABLE_UNSTABLE_FEATURES),
+            uaEnumClass: alloc.symbol(sn::user_attributes::ENUM_CLASS),
+            uaPolicied: alloc.symbol(sn::user_attributes::POLICIED),
+            uaInferFlows: alloc.symbol(sn::user_attributes::INFERFLOWS),
+            uaExternal: alloc.symbol(sn::user_attributes::EXTERNAL),
+            uaCanCall: alloc.symbol(sn::user_attributes::CAN_CALL),
+            uaSupportDynamicType: alloc.symbol(sn::user_attributes::SUPPORT_DYNAMIC_TYPE),
+            uaRequireDynamic: alloc.symbol(sn::user_attributes::REQUIRE_DYNAMIC),
+            uaModule: alloc.symbol(sn::user_attributes::MODULE),
+            uaInternal: alloc.symbol(sn::user_attributes::INTERNAL),
+            uaEnableMethodTraitDiamond: alloc
+                .symbol(sn::user_attributes::ENABLE_METHOD_TRAIT_DIAMOND),
+            uaIgnoreReadonlyLocalErrors: alloc
+                .symbol(sn::user_attributes::IGNORE_READONLY_LOCAL_ERRORS),
+            uaIgnoreCoeffectLocalErrors: alloc
+                .symbol(sn::user_attributes::IGNORE_COEFFECT_LOCAL_ERRORS),
         }
     }
 }
@@ -638,8 +651,8 @@ impl UserAttributes {
 impl SpecialFunctions {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            echo: alloc.symbol("echo"),
-            hhas_adata: alloc.symbol("__hhas_adata"),
+            echo: alloc.symbol(sn::special_functions::ECHO),
+            hhas_adata: alloc.symbol(sn::special_functions::HHAS_ADATA),
         }
     }
 }
@@ -647,12 +660,12 @@ impl SpecialFunctions {
 impl AutoimportedFunctions {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            invariant_violation: alloc.symbol("\\HH\\invariant_violation"),
-            invariant: alloc.symbol("\\HH\\invariant"),
-            fun_: alloc.symbol("\\HH\\fun"),
-            inst_meth: alloc.symbol("\\HH\\inst_meth"),
-            class_meth: alloc.symbol("\\HH\\class_meth"),
-            meth_caller: alloc.symbol("\\HH\\meth_caller"),
+            invariant_violation: alloc.symbol(sn::autoimported_functions::INVARIANT_VIOLATION),
+            invariant: alloc.symbol(sn::autoimported_functions::INVARIANT),
+            fun_: alloc.symbol(sn::autoimported_functions::FUN_),
+            inst_meth: alloc.symbol(sn::autoimported_functions::INST_METH),
+            class_meth: alloc.symbol(sn::autoimported_functions::CLASS_METH),
+            meth_caller: alloc.symbol(sn::autoimported_functions::METH_CALLER),
         }
     }
 }
@@ -660,10 +673,10 @@ impl AutoimportedFunctions {
 impl SpecialIdents {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            this: alloc.symbol("$this"),
-            placeholder: alloc.symbol("$_"),
-            dollardollar: alloc.symbol("$$"),
-            tmp_var_prefix: alloc.symbol("__tmp$"),
+            this: alloc.symbol(sn::special_idents::THIS),
+            placeholder: alloc.symbol(sn::special_idents::PLACEHOLDER),
+            dollardollar: alloc.symbol(sn::special_idents::DOLLAR_DOLLAR),
+            tmp_var_prefix: alloc.symbol(sn::special_idents::TMP_VAR_PREFIX),
         }
     }
 }
@@ -671,21 +684,21 @@ impl SpecialIdents {
 impl PseudoFunctions {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            isset: alloc.symbol("\\isset"),
-            unset: alloc.symbol("\\unset"),
-            hh_show: alloc.symbol("\\hh_show"),
-            hh_expect: alloc.symbol("\\hh_expect"),
-            hh_expect_equivalent: alloc.symbol("\\hh_expect_equivalent"),
-            hh_show_env: alloc.symbol("\\hh_show_env"),
-            hh_log_level: alloc.symbol("\\hh_log_level"),
-            hh_force_solve: alloc.symbol("\\hh_force_solve"),
-            hh_loop_forever: alloc.symbol("\\hh_loop_forever"),
-            echo: alloc.symbol("\\echo"),
-            empty: alloc.symbol("\\empty"),
-            exit: alloc.symbol("\\exit"),
-            die: alloc.symbol("\\die"),
-            unsafe_cast: alloc.symbol("\\HH\\FIXME\\UNSAFE_CAST"),
-            enforced_cast: alloc.symbol("\\HH\\FIXME\\ENFORCED_CAST"),
+            isset: alloc.symbol(sn::pseudo_functions::ISSET),
+            unset: alloc.symbol(sn::pseudo_functions::UNSET),
+            hh_show: alloc.symbol(sn::pseudo_functions::HH_SHOW),
+            hh_expect: alloc.symbol(sn::pseudo_functions::HH_EXPECT),
+            hh_expect_equivalent: alloc.symbol(sn::pseudo_functions::HH_EXPECT_EQUIVALENT),
+            hh_show_env: alloc.symbol(sn::pseudo_functions::HH_SHOW_ENV),
+            hh_log_level: alloc.symbol(sn::pseudo_functions::HH_LOG_LEVEL),
+            hh_force_solve: alloc.symbol(sn::pseudo_functions::HH_FORCE_SOLVE),
+            hh_loop_forever: alloc.symbol(sn::pseudo_functions::HH_LOOP_FOREVER),
+            echo: alloc.symbol(sn::pseudo_functions::ECHO),
+            empty: alloc.symbol(sn::pseudo_functions::EMPTY),
+            exit: alloc.symbol(sn::pseudo_functions::EXIT),
+            die: alloc.symbol(sn::pseudo_functions::DIE),
+            unsafe_cast: alloc.symbol(sn::pseudo_functions::UNSAFE_CAST),
+            enforced_cast: alloc.symbol(sn::pseudo_functions::ENFORCED_CAST),
         }
     }
 }
@@ -693,16 +706,18 @@ impl PseudoFunctions {
 impl StdlibFunctions {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            is_null: alloc.symbol("\\is_null"),
-            get_class: alloc.symbol("\\get_class"),
-            call_user_func: alloc.symbol("\\call_user_func"),
-            type_structure: alloc.symbol("\\HH\\type_structure"),
-            array_mark_legacy: alloc.symbol("\\HH\\array_mark_legacy"),
-            array_unmark_legacy: alloc.symbol("\\HH\\array_unmark_legacy"),
-            is_php_array: alloc.symbol("\\HH\\is_php_array"),
-            is_any_array: alloc.symbol("\\HH\\is_any_array"),
-            is_dict_or_darray: alloc.symbol("\\HH\\is_dict_or_darray"),
-            is_vec_or_varray: alloc.symbol("\\HH\\is_vec_or_varray"),
+            is_array: alloc.symbol(sn::std_lib_functions::IS_ARRAY),
+            is_null: alloc.symbol(sn::std_lib_functions::IS_NULL),
+            get_class: alloc.symbol(sn::std_lib_functions::GET_CLASS),
+            array_filter: alloc.symbol(sn::std_lib_functions::ARRAY_FILTER),
+            call_user_func: alloc.symbol(sn::std_lib_functions::CALL_USER_FUNC),
+            type_structure: alloc.symbol(sn::std_lib_functions::TYPE_STRUCTURE),
+            array_mark_legacy: alloc.symbol(sn::std_lib_functions::ARRAY_MARK_LEGACY),
+            array_unmark_legacy: alloc.symbol(sn::std_lib_functions::ARRAY_UNMARK_LEGACY),
+            is_php_array: alloc.symbol(sn::std_lib_functions::IS_PHP_ARRAY),
+            is_any_array: alloc.symbol(sn::std_lib_functions::IS_ANY_ARRAY),
+            is_dict_or_darray: alloc.symbol(sn::std_lib_functions::IS_DICT_OR_DARRAY),
+            is_vec_or_varray: alloc.symbol(sn::std_lib_functions::IS_VEC_OR_VARRAY),
         }
     }
 }
@@ -710,28 +725,31 @@ impl StdlibFunctions {
 impl Typehints {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            null: alloc.symbol("null"),
-            void: alloc.symbol("void"),
-            resource: alloc.symbol("resource"),
-            num: alloc.symbol("num"),
-            arraykey: alloc.symbol("arraykey"),
-            noreturn: alloc.symbol("noreturn"),
-            mixed: alloc.symbol("mixed"),
-            nonnull: alloc.symbol("nonnull"),
-            this: alloc.symbol("this"),
-            dynamic: alloc.symbol("dynamic"),
-            supportdynamic: alloc.symbol("supportdynamic"),
-            nothing: alloc.symbol("nothing"),
-            int: alloc.symbol("int"),
-            bool: alloc.symbol("bool"),
-            float: alloc.symbol("float"),
-            string: alloc.symbol("string"),
-            darray: alloc.symbol("darray"),
-            varray: alloc.symbol("varray"),
-            varray_or_darray: alloc.symbol("varray_or_darray"),
-            vec_or_dict: alloc.symbol("vec_or_dict"),
-            callable: alloc.symbol("callable"),
-            wildcard: alloc.symbol("_"),
+            null: alloc.symbol(sn::typehints::NULL),
+            void: alloc.symbol(sn::typehints::VOID),
+            resource: alloc.symbol(sn::typehints::RESOURCE),
+            num: alloc.symbol(sn::typehints::NUM),
+            arraykey: alloc.symbol(sn::typehints::ARRAYKEY),
+            noreturn: alloc.symbol(sn::typehints::NORETURN),
+            mixed: alloc.symbol(sn::typehints::MIXED),
+            nonnull: alloc.symbol(sn::typehints::NONNULL),
+            this: alloc.symbol(sn::typehints::THIS),
+            dynamic: alloc.symbol(sn::typehints::DYNAMIC),
+            supportdynamic: alloc.symbol(sn::typehints::SUPPORTDYNAMIC),
+            nothing: alloc.symbol(sn::typehints::NOTHING),
+            int: alloc.symbol(sn::typehints::INT),
+            bool: alloc.symbol(sn::typehints::BOOL),
+            float: alloc.symbol(sn::typehints::FLOAT),
+            string: alloc.symbol(sn::typehints::STRING),
+            darray: alloc.symbol(sn::typehints::DARRAY),
+            varray: alloc.symbol(sn::typehints::VARRAY),
+            varray_or_darray: alloc.symbol(sn::typehints::VARRAY_OR_DARRAY),
+            vec_or_dict: alloc.symbol(sn::typehints::VEC_OR_DICT),
+            callable: alloc.symbol(sn::typehints::CALLABLE),
+            object_cast: alloc.symbol(sn::typehints::OBJECT_CAST),
+            supportdyn: alloc.symbol(sn::typehints::SUPPORTDYN),
+            hh_sypportdyn: alloc.symbol(sn::typehints::HH_SUPPORTDYN),
+            wildcard: alloc.symbol(sn::typehints::WILDCARD),
         }
     }
 }
@@ -739,18 +757,18 @@ impl Typehints {
 impl PseudoConsts {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            g__LINE__: alloc.symbol("\\__LINE__"),
-            g__CLASS__: alloc.symbol("\\__CLASS__"),
-            g__TRAIT__: alloc.symbol("\\__TRAIT__"),
-            g__FILE__: alloc.symbol("\\__FILE__"),
-            g__DIR__: alloc.symbol("\\__DIR__"),
-            g__FUNCTION__: alloc.symbol("\\__FUNCTION__"),
-            g__METHOD__: alloc.symbol("\\__METHOD__"),
-            g__NAMESPACE__: alloc.symbol("\\__NAMESPACE__"),
-            g__COMPILER_FRONTEND__: alloc.symbol("\\__COMPILER_FRONTEND__"),
-            g__FUNCTION_CREDENTIAL__: alloc.symbol("\\__FUNCTION_CREDENTIAL__"),
-            exit: alloc.symbol("\\exit"),
-            die: alloc.symbol("\\die"),
+            g__LINE__: alloc.symbol(sn::pseudo_consts::G__LINE__),
+            g__CLASS__: alloc.symbol(sn::pseudo_consts::G__CLASS__),
+            g__TRAIT__: alloc.symbol(sn::pseudo_consts::G__TRAIT__),
+            g__FILE__: alloc.symbol(sn::pseudo_consts::G__FILE__),
+            g__DIR__: alloc.symbol(sn::pseudo_consts::G__DIR__),
+            g__FUNCTION__: alloc.symbol(sn::pseudo_consts::G__FUNCTION__),
+            g__METHOD__: alloc.symbol(sn::pseudo_consts::G__METHOD__),
+            g__NAMESPACE__: alloc.symbol(sn::pseudo_consts::G__NAMESPACE__),
+            g__COMPILER_FRONTEND__: alloc.symbol(sn::pseudo_consts::G__COMPILER_FRONTEND__),
+            g__FUNCTION_CREDENTIAL__: alloc.symbol(sn::pseudo_consts::G__FUNCTION_CREDENTIAL__),
+            exit: alloc.symbol(sn::pseudo_consts::EXIT),
+            die: alloc.symbol(sn::pseudo_consts::DIE),
         }
     }
 }
@@ -758,11 +776,11 @@ impl PseudoConsts {
 impl FB {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            cEnum: alloc.symbol("\\Enum"),
-            tInner: alloc.symbol("TInner"),
-            idx: alloc.symbol("\\HH\\idx"),
-            cTypeStructure: alloc.symbol("\\HH\\TypeStructure"),
-            cIncorrectType: alloc.symbol("\\HH\\INCORRECT_TYPE"),
+            cEnum: alloc.symbol(sn::fb::ENUM),
+            tInner: alloc.symbol(sn::fb::INNER),
+            idx: alloc.symbol(sn::fb::IDX),
+            cTypeStructure: alloc.symbol(sn::fb::TYPE_STRUCTURE),
+            cIncorrectType: alloc.symbol(sn::fb::INCORRECT_TYPE),
         }
     }
 }
@@ -770,8 +788,8 @@ impl FB {
 impl HH {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            contains: alloc.symbol("\\HH\\Lib\\C\\contains"),
-            contains_key: alloc.symbol("\\HH\\Lib\\C\\contains_key"),
+            contains: alloc.symbol(sn::hh::CONTAINS),
+            contains_key: alloc.symbol(sn::hh::CONTAINS_KEY),
         }
     }
 }
@@ -779,13 +797,13 @@ impl HH {
 impl Shapes {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            cShapes: alloc.symbol("\\HH\\Shapes"),
-            idx: alloc.symbol("idx"),
-            at: alloc.symbol("at"),
-            keyExists: alloc.symbol("keyExists"),
-            removeKey: alloc.symbol("removeKey"),
-            toArray: alloc.symbol("toArray"),
-            toDict: alloc.symbol("toDict"),
+            cShapes: alloc.symbol(sn::shapes::SHAPES),
+            idx: alloc.symbol(sn::shapes::IDX),
+            at: alloc.symbol(sn::shapes::AT),
+            keyExists: alloc.symbol(sn::shapes::KEY_EXISTS),
+            removeKey: alloc.symbol(sn::shapes::REMOVE_KEY),
+            toArray: alloc.symbol(sn::shapes::TO_ARRAY),
+            toDict: alloc.symbol(sn::shapes::TO_DICT),
         }
     }
 }
@@ -793,7 +811,7 @@ impl Shapes {
 impl Superglobals {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            globals: alloc.symbol("$GLOBALS"),
+            globals: alloc.symbol(sn::superglobals::GLOBALS),
         }
     }
 }
@@ -801,7 +819,7 @@ impl Superglobals {
 impl Regex {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            tPattern: alloc.symbol("\\HH\\Lib\\Regex\\Pattern"),
+            tPattern: alloc.symbol(sn::regex::T_PATTERN),
         }
     }
 }
@@ -809,9 +827,10 @@ impl Regex {
 impl EmitterSpecialFunctions {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            eval: alloc.symbol("\\eval"),
-            set_frame_metadata: alloc.symbol("\\HH\\set_frame_metadata"),
-            systemlib_reified_generics: alloc.symbol("\\__systemlib_reified_generics"),
+            eval: alloc.symbol(sn::emitter_special_functions::EVAL),
+            set_frame_metadata: alloc.symbol(sn::emitter_special_functions::SET_FRAME_METADATA),
+            systemlib_reified_generics: alloc
+                .symbol(sn::emitter_special_functions::SYSTEMLIB_REIFIED_GENERICS),
         }
     }
 }
@@ -819,9 +838,9 @@ impl EmitterSpecialFunctions {
 impl XHP {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            pcdata: alloc.symbol("pcdata"),
-            any: alloc.symbol("any"),
-            empty: alloc.symbol("empty"),
+            pcdata: alloc.symbol(sn::xhp::PCDATA),
+            any: alloc.symbol(sn::xhp::ANY),
+            empty: alloc.symbol(sn::xhp::EMPTY),
         }
     }
 }
@@ -829,11 +848,11 @@ impl XHP {
 impl UnstableFeatures {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            coeffects_provisional: alloc.symbol("coeffects_provisional"),
-            ifc: alloc.symbol("ifc"),
-            readonly: alloc.symbol("readonly"),
-            expression_trees: alloc.symbol("expression_trees"),
-            modules: alloc.symbol("modules"),
+            coeffects_provisional: alloc.symbol(sn::unstable_features::COEFFECTS_PROVISIONAL),
+            ifc: alloc.symbol(sn::unstable_features::IFC),
+            readonly: alloc.symbol(sn::unstable_features::READONLY),
+            expression_trees: alloc.symbol(sn::unstable_features::EXPRESSION_TREES),
+            modules: alloc.symbol(sn::unstable_features::MODULES),
         }
     }
 }
@@ -855,8 +874,8 @@ impl Coeffects {
 impl Readonly {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            idx: alloc.symbol("\\HH\\idx_readonly"),
-            as_mut: alloc.symbol("\\HH\\Readonly\\as_mut"),
+            idx: alloc.symbol(sn::readonly::IDX),
+            as_mut: alloc.symbol(sn::readonly::AS_MUT),
         }
     }
 }
@@ -896,36 +915,36 @@ impl Capabilities {
 impl ExpressionTrees {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
-            makeTree: alloc.symbol("makeTree"),
-            intType: alloc.symbol("intType"),
-            floatType: alloc.symbol("floatType"),
-            boolType: alloc.symbol("boolType"),
-            stringType: alloc.symbol("stringType"),
-            nullType: alloc.symbol("nullType"),
-            voidType: alloc.symbol("voidType"),
-            symbolType: alloc.symbol("symbolType"),
-            visitInt: alloc.symbol("visitInt"),
-            visitFloat: alloc.symbol("visitFloat"),
-            visitBool: alloc.symbol("visitBool"),
-            visitString: alloc.symbol("visitString"),
-            visitNull: alloc.symbol("visitNull"),
-            visitBinop: alloc.symbol("visitBinop"),
-            visitUnop: alloc.symbol("visitUnop"),
-            visitLocal: alloc.symbol("visitLocal"),
-            visitLambda: alloc.symbol("visitLambda"),
-            visitGlobalFunction: alloc.symbol("visitGlobalFunction"),
-            visitStaticMethod: alloc.symbol("visitStaticMethod"),
-            visitCall: alloc.symbol("visitCall"),
-            visitAssign: alloc.symbol("visitAssign"),
-            visitTernary: alloc.symbol("visitTernary"),
-            visitIf: alloc.symbol("visitIf"),
-            visitWhile: alloc.symbol("visitWhile"),
-            visitReturn: alloc.symbol("visitReturn"),
-            visitFor: alloc.symbol("visitFor"),
-            visitBreak: alloc.symbol("visitBreak"),
-            visitContinue: alloc.symbol("visitContinue"),
-            splice: alloc.symbol("splice"),
-            dollardollarTmpVar: alloc.symbol("$0dollardollar"),
+            makeTree: alloc.symbol(sn::expression_trees::MAKE_TREE),
+            intType: alloc.symbol(sn::expression_trees::INT_TYPE),
+            floatType: alloc.symbol(sn::expression_trees::FLOAT_TYPE),
+            boolType: alloc.symbol(sn::expression_trees::BOOL_TYPE),
+            stringType: alloc.symbol(sn::expression_trees::STRING_TYPE),
+            nullType: alloc.symbol(sn::expression_trees::NULL_TYPE),
+            voidType: alloc.symbol(sn::expression_trees::VOID_TYPE),
+            symbolType: alloc.symbol(sn::expression_trees::SYMBOL_TYPE),
+            visitInt: alloc.symbol(sn::expression_trees::VISIT_INT),
+            visitFloat: alloc.symbol(sn::expression_trees::VISIT_FLOAT),
+            visitBool: alloc.symbol(sn::expression_trees::VISIT_BOOL),
+            visitString: alloc.symbol(sn::expression_trees::VISIT_STRING),
+            visitNull: alloc.symbol(sn::expression_trees::VISIT_NULL),
+            visitBinop: alloc.symbol(sn::expression_trees::VISIT_BINOP),
+            visitUnop: alloc.symbol(sn::expression_trees::VISIT_UNOP),
+            visitLocal: alloc.symbol(sn::expression_trees::VISIT_LOCAL),
+            visitLambda: alloc.symbol(sn::expression_trees::VISIT_LAMBDA),
+            visitGlobalFunction: alloc.symbol(sn::expression_trees::VISIT_GLOBAL_FUNCTION),
+            visitStaticMethod: alloc.symbol(sn::expression_trees::VISIT_STATIC_METHOD),
+            visitCall: alloc.symbol(sn::expression_trees::VISIT_CALL),
+            visitAssign: alloc.symbol(sn::expression_trees::VISIT_ASSIGN),
+            visitTernary: alloc.symbol(sn::expression_trees::VISIT_TERNARY),
+            visitIf: alloc.symbol(sn::expression_trees::VISIT_IF),
+            visitWhile: alloc.symbol(sn::expression_trees::VISIT_WHILE),
+            visitReturn: alloc.symbol(sn::expression_trees::VISIT_RETURN),
+            visitFor: alloc.symbol(sn::expression_trees::VISIT_FOR),
+            visitBreak: alloc.symbol(sn::expression_trees::VISIT_BREAK),
+            visitContinue: alloc.symbol(sn::expression_trees::VISIT_CONTINUE),
+            splice: alloc.symbol(sn::expression_trees::SPLICE),
+            dollardollarTmpVar: alloc.symbol(sn::expression_trees::DOLLARDOLLAR_TMP_VAR),
         }
     }
 }

@@ -812,7 +812,8 @@ let rec check_implements_or_extends_unique impl =
       check_implements_or_extends_unique rest
     | _ -> check_implements_or_extends_unique rest)
 
-let check_constructor_dep env deps =
+(** Add a dependency to constructors or produce an error if not a Tapply. *)
+let check_is_tapply_add_constructor_dep env deps =
   List.iter deps ~f:(fun ((p, _dep_hint), dep) ->
       match get_node dep with
       | Tapply ((_, class_name), _) ->
@@ -1833,18 +1834,18 @@ let class_def_ env c tc =
     | Ast_defs.Ctrait -> implements @ req_implements
     | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> []
   in
-  let check_constructor_dep = check_constructor_dep env in
   if not (skip_hierarchy_checks ctx) then (
     check_implements_or_extends_unique implements;
     check_implements_or_extends_unique extends
   );
-  check_constructor_dep extends;
-  check_constructor_dep uses;
-  check_constructor_dep req_extends;
-  check_constructor_dep additional_parents;
+  check_is_tapply_add_constructor_dep env extends;
+  check_is_tapply_add_constructor_dep env uses;
+  check_is_tapply_add_constructor_dep env req_extends;
+  check_is_tapply_add_constructor_dep env additional_parents;
   begin
     match c.c_enum with
-    | Some e -> check_constructor_dep (hints_and_decl_tys e.e_includes)
+    | Some e ->
+      check_is_tapply_add_constructor_dep env (hints_and_decl_tys e.e_includes)
     | _ -> ()
   end;
   let env =

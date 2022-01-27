@@ -28,6 +28,12 @@ impl<T: fmt::Debug + ?Sized> fmt::Debug for Hc<T> {
     }
 }
 
+impl<T: fmt::Display + ?Sized> fmt::Display for Hc<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
 impl<T: ?Sized> Deref for Hc<T> {
     type Target = T;
 

@@ -50,7 +50,7 @@ impl<'a, R: Reason> ExpandEnv<'a, R> {
             substs: HashMap::new(),
             this_ty: ctx.alloc.ty(
                 R::mk(&|| ReasonImpl::Rnone),
-                Ty_::Tgeneric(Hc::clone(&ctx.special_names.this), vec![]),
+                Ty_::Tgeneric(Hc::clone(&ctx.special_names.special_idents.this), vec![]),
             ),
             on_error: ReasonsCallback::new(&|| ReasonsCallback::ignore()),
         }

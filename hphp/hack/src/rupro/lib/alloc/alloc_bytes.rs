@@ -13,6 +13,12 @@ impl GlobalAllocator {
         self.bytes.mk_str(symbol)
     }
 
+    pub fn concat<S1: AsRef<str>, S2: AsRef<str>>(&self, s1: S1, s2: S2) -> Symbol {
+        let s1 = s1.as_ref();
+        let s2 = s2.as_ref();
+        self.symbol(&format!("{}{}", s1, s2))
+    }
+
     pub fn relative_path(&self, prefix: Prefix, suffix: &std::path::Path) -> RelativePath {
         RelativePath::new(prefix, self.symbol(suffix.to_str().unwrap()))
     }
@@ -35,6 +41,10 @@ impl GlobalAllocator {
 impl<R: Reason> Allocator<R> {
     pub fn symbol(&self, symbol: &str) -> Symbol {
         self.global.symbol(symbol)
+    }
+
+    pub fn concat<S1: AsRef<str>, S2: AsRef<str>>(&self, s1: S1, s2: S2) -> Symbol {
+        self.global.concat(s1, s2)
     }
 
     pub fn relative_path(&self, prefix: Prefix, suffix: &std::path::Path) -> RelativePath {

@@ -113,33 +113,25 @@ let try_with_stack (f : unit -> 'a) : ('a, exn * callstack) result =
 let set_of_list l = List.fold_right l ~f:SSet.add ~init:SSet.empty
 
 (* \A\B\C -> A\B\C *)
-let strip_ns s =
-  if String.length s = 0 || not (Char.equal s.[0] '\\') then
-    s
-  else
-    String.sub s ~pos:1 ~len:(String.length s - 1)
+let strip_ns s = String.chop_prefix_if_exists s ~prefix:"\\"
 
-let strip_xhp_ns s =
-  if String.length s = 0 || not (Char.equal s.[0] ':') then
-    s
-  else
-    String.sub s ~pos:1 ~len:(String.length s - 1)
+let strip_xhp_ns s = String.chop_prefix_if_exists s ~prefix:":"
 
 let strip_both_ns s = s |> strip_ns |> strip_xhp_ns
 
 (* A\B\C -> \A\B\C *)
 let add_ns s =
-  if String.length s = 0 || not (Char.equal s.[0] '\\') then
-    "\\" ^ s
-  else
+  if String.is_prefix s ~prefix:"\\" then
     s
+  else
+    "\\" ^ s
 
 (* A:B:C -> :A:B:C *)
 let add_xhp_ns s =
-  if String.length s = 0 || not (Char.equal s.[0] ':') then
-    ":" ^ s
-  else
+  if String.is_prefix s ~prefix:":" then
     s
+  else
+    ":" ^ s
 
 (* \A\B\C -> C *)
 let strip_all_ns s =

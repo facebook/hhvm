@@ -19,15 +19,15 @@
     "Featherweight Java: A Minimal Core Calculus for Java and GJ", 2002,
     Igarashi, Pierce, Wadler. *)
 
-val fun_ : Typing_env_types.env -> Nast.fun_ -> unit
+val fun_ : Typing_env_types.env -> Nast.fun_ -> Typing_error.t list
 
-val class_ : Typing_env_types.env -> Nast.class_ -> unit
+val class_ : Typing_env_types.env -> Nast.class_ -> Typing_error.t list
 
-val typedef : Typing_env_types.env -> Nast.typedef -> unit
+val typedef : Typing_env_types.env -> Nast.typedef -> Typing_error.t list
 
-val global_constant : Typing_env_types.env -> Nast.gconst -> unit
+val global_constant : Typing_env_types.env -> Nast.gconst -> Typing_error.t list
 
 (** Check type wellformedness of any hint appearing in this
     expression, e.g. parameter type hints of lambda expressions,
     hints in `is` and `as` expressions, etc. *)
-val expr : Typing_env_types.env -> Nast.expr -> unit
+val expr : Typing_env_types.env -> Nast.expr -> Typing_error.t list

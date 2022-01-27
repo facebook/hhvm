@@ -30,7 +30,8 @@ let typedef_def ctx typedef =
       typedef.t_tparams
       []
   in
-  Typing_type_wellformedness.typedef env typedef;
+  List.iter ~f:Errors.add_typing_error
+  @@ Typing_type_wellformedness.typedef env typedef;
   Typing_variance.typedef env typedef;
   let {
     t_annotation = ();

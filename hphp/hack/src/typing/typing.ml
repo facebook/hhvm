@@ -3088,7 +3088,8 @@ and expr_
          basis. *)
       env
   in
-  Typing_type_wellformedness.expr env outer;
+  List.iter ~f:Errors.add_typing_error
+  @@ Typing_type_wellformedness.expr env outer;
   match e with
   | Import _
   | Collection _ ->

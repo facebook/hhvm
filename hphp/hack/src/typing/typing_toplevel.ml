@@ -171,7 +171,7 @@ let fun_def ctx fd :
     else
       env
   in
-  Typing_type_wellformedness.fun_ env f;
+  List.iter ~f:Errors.add_typing_error @@ Typing_type_wellformedness.fun_ env f;
   let env =
     Phase.localize_and_add_ast_generic_parameters_and_where_constraints
       env
@@ -2037,7 +2037,8 @@ let class_def ctx c =
   let (name_pos, name) = c.c_name in
   let tc = Env.get_class env name in
   Typing_helpers.add_decl_errors (Option.bind tc ~f:Cls.decl_errors);
-  Typing_type_wellformedness.class_ env c;
+  List.iter ~f:Errors.add_typing_error
+  @@ Typing_type_wellformedness.class_ env c;
   match tc with
   | None ->
     (* This can happen if there was an error during the declaration
@@ -2070,7 +2071,8 @@ let gconst_def ctx cst =
   Errors.run_with_span cst.cst_span @@ fun () ->
   let env = EnvFromDef.gconst_env ~origin:Decl_counters.TopLevel ctx cst in
   let env = Env.set_env_pessimize env in
-  Typing_type_wellformedness.global_constant env cst;
+  List.iter ~f:Errors.add_typing_error
+  @@ Typing_type_wellformedness.global_constant env cst;
   let (typed_cst_value, env) =
     let value = cst.cst_value in
     match cst.cst_type with

@@ -75,6 +75,8 @@ let rec context_hint ?(in_signature = true) env (p, h) =
 
 and hint_ ~in_signature env p h_ =
   let hint env (p, h) = hint_ ~in_signature env p h in
+  let hint_opt env = Option.value_map ~f:(hint env) ~default:[] in
+  let hints env xs = List.concat_map xs ~f:(hint env) in
   match h_ with
   | Hany
   | Herr
@@ -86,27 +88,26 @@ and hint_ ~in_signature env p h_ =
   | Habstr _
   | Hdynamic
   | Hnothing ->
-    ()
+    []
   | Hoption (_, Hprim Tnull) ->
-    Errors.add_typing_error Typing_error.(primary @@ Primary.Option_null p)
+    [Typing_error.(primary @@ Primary.Option_null p)]
   | Hoption (_, Hprim Tvoid) ->
-    Errors.add_typing_error
+    [
       Typing_error.(
-        primary @@ Primary.Option_return_only_typehint { pos = p; kind = `void })
+        primary @@ Primary.Option_return_only_typehint { pos = p; kind = `void });
+    ]
   | Hoption (_, Hprim Tnoreturn) ->
-    Errors.add_typing_error
+    [
       Typing_error.(
         primary
-        @@ Primary.Option_return_only_typehint { pos = p; kind = `noreturn })
-  | Hoption (_, Hmixed) ->
-    Errors.add_typing_error Typing_error.(primary @@ Primary.Option_mixed p)
-  | Hvec_or_dict (ty1, ty2) ->
-    maybe hint env ty1;
-    hint env ty2
+        @@ Primary.Option_return_only_typehint { pos = p; kind = `noreturn });
+    ]
+  | Hoption (_, Hmixed) -> [Typing_error.(primary @@ Primary.Option_mixed p)]
+  | Hvec_or_dict (ty1, ty2) -> hint_opt env ty1 @ hint env ty2
   | Htuple hl
   | Hunion hl
   | Hintersection hl ->
-    List.iter hl ~f:(hint env)
+    hints env hl
   | Hoption h
   | Hsoft h
   | Hlike h ->
@@ -121,60 +122,72 @@ and hint_ ~in_signature env p h_ =
         hf_return_ty = h;
         hf_is_readonly_return = _;
       } ->
-    List.iter hl ~f:(hint env);
-    hint env h;
-    Option.iter variadic_hint ~f:(hint env);
-    Option.iter ~f:(contexts env) hf_ctxs
+    hints env hl
+    @ hint env h
+    @ hint_opt env variadic_hint
+    @ contexts_opt env hf_ctxs
   | Happly ((p, "\\Tuple"), _)
   | Happly ((p, "\\tuple"), _) ->
-    Errors.add_typing_error
-      Typing_error.(wellformedness @@ Primary.Wellformedness.Tuple_syntax p)
+    [Typing_error.(wellformedness @@ Primary.Wellformedness.Tuple_syntax p)]
   | Happly ((_, x), hl) as h ->
     begin
       match Env.get_class_or_typedef env.tenv x with
-      | None -> ()
+      | None -> []
       | Some (Env.TypedefResult _) ->
         let (_ : Typing_env_types.env) =
           check_happly env.typedef_tparams env.tenv (p, h)
         in
-        List.iter hl ~f:(hint env)
+        hints env hl
       | Some (Env.ClassResult _) ->
         let (_ : Typing_env_types.env) =
           check_happly env.typedef_tparams env.tenv (p, h)
         in
-        List.iter hl ~f:(hint env)
+        hints env hl
     end
   | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
     let compute_hint_for_shape_field_info { sfi_hint; _ } = hint env sfi_hint in
-    List.iter ~f:compute_hint_for_shape_field_info nsi_field_map
+    List.concat_map ~f:compute_hint_for_shape_field_info nsi_field_map
   | Hfun_context _ ->
     (* TODO(coeffects): check if arg is a function type in the locals? *)
-    ()
+    []
   | Hvar _ ->
     (* TODO(coeffects) *)
-    ()
+    []
 
-and contexts env (_, hl) = List.iter ~f:(context_hint env) hl
+and contexts env (_, hl) = List.concat_map ~f:(context_hint env) hl
+
+and contexts_opt env = Option.value_map ~default:[] ~f:(contexts env)
 
 let hint ?(in_signature = true) env (p, h) =
   (* Do not use this one recursively to avoid quadratic runtime! *)
   Typing_kinding.Simple.check_well_kinded_hint ~in_signature env.tenv (p, h);
   hint_ ~in_signature env p h
 
-let type_hint env th = maybe hint env (hint_of_type_hint th)
+let hint_opt ?in_signature env =
+  Option.value_map ~default:[] ~f:(hint ?in_signature env)
+
+let hints ?in_signature env = List.concat_map ~f:(hint ?in_signature env)
+
+let type_hint env th =
+  Option.value_map ~default:[] ~f:(hint env) (hint_of_type_hint th)
 
 let fun_param env param = type_hint env param.param_type_hint
+
+let fun_params env = List.concat_map ~f:(fun_param env)
 
 let variadic_param env vparam =
   match vparam with
   | FVvariadicArg p -> fun_param env p
-  | _ -> ()
+  | _ -> []
 
-let tparam env t = List.iter t.Aast.tp_constraints ~f:(fun (_, h) -> hint env h)
+let tparam env t =
+  List.concat_map t.Aast.tp_constraints ~f:(fun (_, h) -> hint env h)
 
-let where_constr env (h1, _, h2) =
-  hint env h1;
-  hint env h2
+let tparams env = List.concat_map ~f:(tparam env)
+
+let where_constr env (h1, _, h2) = hint env h1 @ hint env h2
+
+let where_constrs env = List.concat_map ~f:(where_constr env)
 
 let fun_ tenv f =
   FunUtils.check_params f.f_params;
@@ -189,34 +202,46 @@ let fun_ tenv f =
       f.f_where_constraints
   in
   let env = { env with tenv } in
-  type_hint env f.f_ret;
+  type_hint env f.f_ret
+  @ tparams env f.f_tparams
+  @ fun_params env f.f_params
+  @ variadic_param env f.f_variadic
 
-  List.iter f.f_tparams ~f:(tparam env);
-  List.iter f.f_params ~f:(fun_param env);
-  variadic_param env f.f_variadic
-
-let enum env e =
-  hint env e.e_base;
-  maybe hint env e.e_constraint
-
-let const env class_const = maybe hint env class_const.Aast.cc_type
-
-let typeconst (env, _) tconst =
-  match tconst.c_tconst_kind with
-  | TCAbstract { c_atc_as_constraint; c_atc_super_constraint; c_atc_default } ->
-    maybe hint env c_atc_as_constraint;
-    maybe hint env c_atc_super_constraint;
-    maybe hint env c_atc_default
-  | TCConcrete { c_tc_type } -> hint env c_tc_type
-
-let class_var env cv =
-  let tenv =
-    Env.set_internal
-      env.tenv
-      (Naming_attributes.mem SN.UserAttributes.uaInternal cv.cv_user_attributes)
+let enum_opt env =
+  let f { e_base; e_constraint; _ } =
+    hint env e_base @ hint_opt env e_constraint
   in
-  let env = { env with tenv } in
-  type_hint env cv.cv_type
+  Option.value_map ~default:[] ~f
+
+let const env { Aast.cc_type; _ } = hint_opt env cc_type
+
+let consts env cs = List.concat_map ~f:(const env) cs
+
+let typeconsts env tcs =
+  let f tconst =
+    match tconst.c_tconst_kind with
+    | TCAbstract { c_atc_as_constraint; c_atc_super_constraint; c_atc_default }
+      ->
+      hint_opt env c_atc_as_constraint
+      @ hint_opt env c_atc_super_constraint
+      @ hint_opt env c_atc_default
+    | TCConcrete { c_tc_type } -> hint env c_tc_type
+  in
+  List.concat_map ~f tcs
+
+let class_vars env cvs =
+  let f cv =
+    let tenv =
+      Env.set_internal
+        env.tenv
+        (Naming_attributes.mem
+           SN.UserAttributes.uaInternal
+           cv.cv_user_attributes)
+    in
+    let env = { env with tenv } in
+    type_hint env cv.cv_type
+  in
+  List.concat_map ~f cvs
 
 let method_ env m =
   (* Add method type parameters to environment and localize the bounds
@@ -234,20 +259,28 @@ let method_ env m =
       (Naming_attributes.mem SN.UserAttributes.uaInternal m.m_user_attributes)
   in
   let env = { env with tenv } in
-  List.iter m.m_params ~f:(fun_param env);
-  variadic_param env m.m_variadic;
-  List.iter m.m_tparams ~f:(tparam env);
-  List.iter m.m_where_constraints ~f:(where_constr env);
-  type_hint env m.m_ret
+  fun_params env m.m_params
+  @ variadic_param env m.m_variadic
+  @ tparams env m.m_tparams
+  @ where_constrs env m.m_where_constraints
+  @ type_hint env m.m_ret
+
+let methods env = List.concat_map ~f:(method_ env)
+
+let method_opt env = Option.value_map ~default:[] ~f:(method_ env)
 
 let hint_no_kind_check env (p, h) = hint_ ~in_signature:true env p h
 
-let class_attr env = function
-  | CA_name _ -> ()
-  | CA_field { ca_type; ca_id = _; ca_value = _; ca_required = _ } ->
-    (match ca_type with
-    | CA_hint h -> hint env h
-    | CA_enum _ -> ())
+let class_attrs env attrs =
+  let f = function
+    | CA_name _ -> []
+    | CA_field { ca_type; ca_id = _; ca_value = _; ca_required = _ } ->
+      (match ca_type with
+      | CA_hint h -> hint env h
+      | CA_enum _ -> [])
+  in
+
+  List.concat_map ~f attrs
 
 let class_ tenv c =
   let env = { typedef_tparams = []; tenv } in
@@ -300,23 +333,28 @@ let class_ tenv c =
   let env = { env with tenv } in
   let (c_constructor, c_statics, c_methods) = split_methods c_methods in
   let (c_static_vars, c_vars) = split_vars c_vars in
-  if not Ast_defs.(is_c_interface c_kind) then maybe method_ env c_constructor;
-  List.iter c_tparams ~f:(tparam env);
-  List.iter c_where_constraints ~f:(where_constr env);
-  List.iter c_extends ~f:(hint env);
-  List.iter c_implements ~f:(hint env);
-  (* Use is not a signature from the point of view of modules because the trait
-     being use'd does not need to be seen by users of the class *)
-  List.iter c_uses ~f:(hint env ~in_signature:false);
-  List.iter c_typeconsts ~f:(typeconst (env, c_tparams));
-  List.iter c_static_vars ~f:(class_var env);
-  List.iter c_vars ~f:(class_var env);
-  List.iter c_consts ~f:(const env);
-  List.iter c_statics ~f:(method_ env);
-  List.iter c_methods ~f:(method_ env);
-  List.iter c_attributes ~f:(class_attr env);
-  maybe enum env c_enum;
-  ()
+  List.concat
+    [
+      (if not Ast_defs.(is_c_interface c_kind) then
+        method_opt env c_constructor
+      else
+        []);
+      tparams env c_tparams;
+      where_constrs env c_where_constraints;
+      hints env c_extends;
+      hints env c_implements;
+      (* Use is not a signature from the point of view of modules because the trait
+         being use'd does not need to be seen by users of the class *)
+      hints ~in_signature:false env c_uses;
+      typeconsts env c_typeconsts;
+      class_vars env c_static_vars;
+      class_vars env c_vars;
+      consts env c_consts;
+      methods env c_statics;
+      methods env c_methods;
+      class_attrs env c_attributes;
+      enum_opt env c_enum;
+    ]
 
 let typedef tenv t =
   let {
@@ -374,8 +412,8 @@ let typedef tenv t =
     }
   in
   (* We checked the kinds already above.  *)
-  maybe hint_no_kind_check env t.t_constraint;
-  hint_no_kind_check env t_kind
+  Option.value_map ~default:[] ~f:(hint_no_kind_check env) t.t_constraint
+  @ hint_no_kind_check env t_kind
 
 let global_constant tenv gconst =
   let env = { typedef_tparams = []; tenv } in
@@ -391,16 +429,14 @@ let global_constant tenv gconst =
   } =
     gconst
   in
-  maybe hint env cst_type;
-  ()
+  hint_opt env cst_type
 
 let hint tenv h =
   let env = { typedef_tparams = []; tenv } in
   hint ~in_signature:false env h
 
 (** Check well-formedness of type hints. See .mli file for more. *)
-let expr : Typing_env_types.env -> Nast.expr -> unit =
- fun tenv ((), _p, e) ->
+let expr tenv ((), _p, e) =
   (* We don't recurse on expressions here because this is called by Typing.expr *)
   match e with
   | ExpressionTree
@@ -419,7 +455,7 @@ let expr : Typing_env_types.env -> Nast.expr -> unit =
     hint tenv h
   | New (_, hl, _, _, _)
   | Call (_, hl, _, _) ->
-    List.iter hl ~f:(fun (_, h) -> hint tenv h)
+    List.concat_map hl ~f:(fun (_, h) -> hint tenv h)
   | Lfun (f, _)
   | Efun (f, _) ->
     fun_ tenv f
@@ -468,7 +504,7 @@ let expr : Typing_env_types.env -> Nast.expr -> unit =
   | EnumClassLabel _
   | ET_Splice _
   | Hole _ ->
-    ()
+    []
 
 (** Check well-formedness of type hints. See .mli file for more. *)
 let _toplevel_def tenv = function
@@ -487,4 +523,4 @@ let _toplevel_def tenv = function
   | FileAttributes _
   (* TODO(T108206307) *)
   | Module _ ->
-    ()
+    []

@@ -3131,10 +3131,13 @@ dependencies = [
 name = "rust_facts_ffi"
 version = "0.0.0"
 dependencies = [
+ "bumpalo",
+ "direct_decl_parser",
  "facts_rust",
  "hhbc_string_utils",
  "ocamlrep",
  "ocamlrep_ocamlpool",
+ "options",
  "oxidized",
 ]
 

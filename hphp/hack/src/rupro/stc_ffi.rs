@@ -17,7 +17,7 @@ use hackrs::ast_provider::AstProvider;
 use hackrs::folded_decl_provider::{FoldedDeclLocalCache, FoldedDeclProvider};
 use hackrs::pos::{Prefix, RelativePathCtx};
 use hackrs::shallow_decl_provider::{ShallowDeclLocalCache, ShallowDeclProvider};
-use hackrs::sn_provider::SpecialNamesProvider;
+use hackrs::special_names::SpecialNames;
 use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
@@ -67,10 +67,10 @@ pub extern "C" fn stc_main() {
 
     let options = Rc::new(oxidized::global_options::GlobalOptions::default());
     let (global_alloc, alloc, _pos_alloc) = alloc::get_allocators_for_main();
-    let sn_provider = Rc::new(SpecialNamesProvider::new(global_alloc));
+    let special_names = SpecialNames::new(global_alloc);
     let ast_provider = AstProvider::new(
         Rc::clone(&relative_path_ctx),
-        Rc::clone(&sn_provider),
+        special_names,
         Rc::clone(&options),
     );
     let shallow_decl_cache = Rc::new(ShallowDeclLocalCache::new());
@@ -93,7 +93,7 @@ pub extern "C" fn stc_main() {
         alloc,
         folded_decl_provider,
         typing_decl_provider,
-        sn_provider,
+        special_names,
     ));
 
     let filenames: Vec<_> = filenames

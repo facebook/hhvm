@@ -26,7 +26,7 @@ impl TypingReturn {
         fname: &Symbol,
     ) -> Ty<R> {
         let reason = R::mk(&|| ReasonImpl::Rwitness(fpos.clone()));
-        if is_method && fname == env.ctx.special_names.construct() {
+        if is_method && fname == env.ctx.special_names.construct {
             env.ctx.alloc.ty_void(reason)
         } else {
             env.ctx.alloc.tany(reason)

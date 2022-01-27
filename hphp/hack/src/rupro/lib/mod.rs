@@ -14,7 +14,7 @@ pub mod parsing_error;
 pub mod pos;
 pub mod reason;
 pub mod shallow_decl_provider;
-pub mod sn_provider;
+pub mod special_names;
 pub mod tast;
 pub mod typing;
 pub mod typing_check_job;

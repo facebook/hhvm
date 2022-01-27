@@ -2,18 +2,17 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::rc::Rc;
 
 use oxidized::aast;
 
-use crate::sn_provider::SpecialNamesProvider;
+use crate::special_names::SpecialNames;
 
 pub struct Naming {
-    sn: Rc<SpecialNamesProvider>,
+    sn: &'static SpecialNames,
 }
 
 impl Naming {
-    pub fn new(sn: Rc<SpecialNamesProvider>) -> Self {
+    pub fn new(sn: &'static SpecialNames) -> Self {
         Self { sn }
     }
 
@@ -28,11 +27,11 @@ impl Naming {
 
         // TODO(hrust): so much more
         let cls = &cls.1;
-        if cls == self.sn.typehints().void() && allow_retonly {
+        if cls == self.sn.typehints.void && allow_retonly {
             Some(Hprim(Tvoid))
-        } else if cls == self.sn.typehints().void() {
+        } else if cls == self.sn.typehints.void {
             unimplemented!()
-        } else if cls == self.sn.typehints().int() {
+        } else if cls == self.sn.typehints.int {
             Some(Hprim(Tint))
         } else {
             None
@@ -108,7 +107,7 @@ impl Naming {
         }
     }
 
-    pub fn program(sn: Rc<SpecialNamesProvider>, p: &mut aast::Program<(), ()>) {
+    pub fn program(sn: &'static SpecialNames, p: &mut aast::Program<(), ()>) {
         Self::new(sn).program_(p);
     }
 }

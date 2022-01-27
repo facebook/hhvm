@@ -16,7 +16,7 @@ use rust_aast_parser_types::Env as ParserEnv;
 use crate::naming::Naming;
 use crate::parsing_error::ParsingError;
 use crate::pos::{RelativePath, RelativePathCtx};
-use crate::sn_provider::SpecialNamesProvider;
+use crate::special_names::SpecialNames;
 
 pub type AstItem = (oxidized::aast::Program<(), ()>, Vec<ParsingError>);
 
@@ -54,14 +54,14 @@ impl Default for MakeParserEnv {
 #[derive(Debug)]
 pub struct AstProvider {
     relative_path_ctx: Rc<RelativePathCtx>,
-    special_names: Rc<SpecialNamesProvider>,
+    special_names: &'static SpecialNames,
     parser_options: Rc<oxidized::parser_options::ParserOptions>,
 }
 
 impl AstProvider {
     pub fn new(
         relative_path_ctx: Rc<RelativePathCtx>,
-        special_names: Rc<SpecialNamesProvider>,
+        special_names: &'static SpecialNames,
         parser_options: Rc<oxidized::parser_options::ParserOptions>,
     ) -> Self {
         Self {
@@ -178,7 +178,7 @@ impl AstProvider {
             msg,
         })?;
 
-        Naming::program(Rc::clone(&self.special_names), &mut ast);
+        Naming::program(self.special_names, &mut ast);
 
         Ok((ast, errs))
     }

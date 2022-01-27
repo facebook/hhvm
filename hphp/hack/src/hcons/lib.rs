@@ -50,6 +50,18 @@ impl<T: ?Sized> PartialEq for Hc<T> {
     }
 }
 
+impl<T: ?Sized> PartialEq<&Hc<T>> for Hc<T> {
+    fn eq(&self, other: &&Hc<T>) -> bool {
+        std::ptr::eq(self.0.as_ref(), other.0.as_ref())
+    }
+}
+
+impl<T: ?Sized> PartialEq<Hc<T>> for &Hc<T> {
+    fn eq(&self, other: &Hc<T>) -> bool {
+        std::ptr::eq(self.0.as_ref(), other.0.as_ref())
+    }
+}
+
 macro_rules! impl_str_eq {
     ($lhs:ty, $rhs:ty) => {
         impl PartialEq<$rhs> for $lhs {
@@ -79,6 +91,7 @@ macro_rules! impl_str_eq {
 impl_str_eq! { Hc<str>, str }
 impl_str_eq! { Hc<str>, &str }
 impl_str_eq! { Hc<str>, String }
+impl_str_eq! { Hc<str>, &String }
 impl_str_eq! { Hc<str>, Box<str> }
 
 impl AsRef<str> for Hc<str> {

@@ -20,8 +20,6 @@ use serde::Serializer;
 use serde_derive::Serialize;
 use serde_json::json;
 
-use crate::facts_parser::add_or_update_classish_decl;
-
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TypeKind {
@@ -365,6 +363,23 @@ impl TypeFacts {
             methods: BTreeMap::new(),
         }
     }
+}
+
+fn add_or_update_classish_decl(name: String, mut delta: TypeFacts, types: &mut TypeFactsByName) {
+    types
+        .entry(name)
+        .and_modify(|tf| {
+            if tf.kind != delta.kind {
+                tf.kind = TypeKind::Mixed;
+            }
+            tf.flags = Flag::MultipleDeclarations.set(tf.flags);
+            tf.flags = Flag::combine(tf.flags, delta.flags);
+            tf.base_types.append(&mut delta.base_types);
+            tf.attributes.append(&mut delta.attributes);
+            tf.require_extends.append(&mut delta.require_extends);
+            tf.require_implements.append(&mut delta.require_implements);
+        })
+        .or_insert(delta);
 }
 
 fn hash_and_hexify<D: Digest>(mut digest: D, text: &[u8]) -> String {

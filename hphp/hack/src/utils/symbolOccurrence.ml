@@ -44,6 +44,7 @@ type kind =
   | Function
   | Method of receiver_class * string
   | LocalVar
+  | TypeVar
   | Property of receiver_class * string
   | XhpLiteralAttr of string * string
   | ClassConst of receiver_class * string
@@ -77,6 +78,7 @@ let kind_to_string = function
   | ClassConst _ -> "member_const"
   | Typeconst _ -> "typeconst"
   | GConst -> "global_const"
+  | TypeVar -> "generic_type_var"
   | Attribute _ -> "attribute"
   | EnumClassLabel _ -> "enum_class_label"
   | Keyword _ -> "keyword"

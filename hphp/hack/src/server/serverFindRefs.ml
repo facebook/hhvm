@@ -192,6 +192,7 @@ let get_action symbol (filename, file_content, line, char) =
     Some (Member (class_name, Typeconst tconst_name))
   | SO.GConst -> Some (GConst name)
   | SO.LocalVar -> Some (LocalVar { filename; file_content; line; char })
+  | SO.TypeVar -> None
   | SO.Attribute _ -> Some (Class name)
   | SO.Keyword _
   | SO.Method (SO.UnknownClass, _)

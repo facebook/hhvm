@@ -1,0 +1,4 @@
+Tfoo
+-------------
+function ;anonymous(Tfoo $x): Tfoo
+Return type: `Tfoo`

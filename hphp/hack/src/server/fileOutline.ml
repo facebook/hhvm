@@ -417,6 +417,7 @@ let should_add_docblock = function
   | RecordDef ->
     true
   | LocalVar
+  | TypeVar
   | Param ->
     false
 

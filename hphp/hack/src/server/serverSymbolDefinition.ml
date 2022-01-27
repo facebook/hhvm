@@ -183,6 +183,10 @@ let go ctx ast result =
       | None -> None
       | Some ast -> get_local_var_def ast result.SO.name result.SO.pos
     end
+  | SO.TypeVar ->
+    (match ast with
+    | None -> None
+    | Some ast -> ServerFindTypeVar.go ast result.SO.pos result.SO.name)
   | SO.EnumClassLabel (class_name, _member_name) ->
     summarize_class_typedef ctx class_name
 

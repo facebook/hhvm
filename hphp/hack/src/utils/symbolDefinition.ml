@@ -19,6 +19,7 @@ type kind =
   | Interface
   | Trait
   | LocalVar
+  | TypeVar
   | Typeconst
   | Param
   | Typedef
@@ -80,6 +81,7 @@ let string_of_kind = function
   | Trait -> "trait"
   | Typeconst -> "typeconst"
   | LocalVar -> "local"
+  | TypeVar -> "type_var"
   | Param -> "param"
   | Typedef -> "typedef"
   | RecordDef -> "record"
@@ -121,6 +123,7 @@ let get_symbol_id kind parent_class name =
     | Const ->
       Some class_const_kind_name
     | LocalVar
+    | TypeVar
     | Param ->
       None
   in

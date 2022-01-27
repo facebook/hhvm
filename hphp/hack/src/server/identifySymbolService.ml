@@ -392,6 +392,14 @@ let visitor =
       in
       self#plus acc (super#on_Haccess env root ids)
 
+    method! on_tparam env tp =
+      let (pos, name) = tp.Aast.tp_name in
+      let acc =
+        Result_set.singleton
+          { name; type_ = TypeVar; is_declaration = true; pos }
+      in
+      self#plus acc (super#on_tparam env tp)
+
     method! on_Lvar env (pos, id) =
       let acc =
         if Local_id.is_user_denotable id then
@@ -400,6 +408,16 @@ let visitor =
           Result_set.empty
       in
       self#plus acc (super#on_Lvar env (pos, id))
+
+    method! on_hint env h =
+      let acc =
+        match h with
+        | (pos, Aast.Habstr (name, _)) ->
+          Result_set.singleton
+            { name; type_ = TypeVar; is_declaration = false; pos }
+        | _ -> Result_set.empty
+      in
+      self#plus acc (super#on_hint env h)
 
     method! on_fun_param env param =
       let acc = process_lvar_id (param.Aast.param_pos, param.Aast.param_name) in

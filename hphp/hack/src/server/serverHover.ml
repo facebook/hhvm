@@ -422,6 +422,11 @@ let go_quarantined
   | identities ->
     identities
     |> List.map ~f:(fun (occurrence, def_opt) ->
+           let env_and_ty =
+             match occurrence.SymbolOccurrence.type_ with
+             | SymbolOccurrence.TypeVar -> None
+             | _ -> env_and_ty
+           in
            let path =
              def_opt
              |> Option.map ~f:(fun def -> def.SymbolDefinition.pos)

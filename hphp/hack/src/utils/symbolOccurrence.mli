@@ -50,6 +50,7 @@ type kind =
   | Function
   | Method of receiver_class * string
   | LocalVar
+  | TypeVar
   | Property of receiver_class * string
   (*
     XhpLiteralAttr is only used for attributes in XHP literals.

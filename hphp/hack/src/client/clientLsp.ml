@@ -2928,6 +2928,7 @@ let rec hack_symbol_tree_to_lsp
     | SymbolDefinition.Trait -> SymbolInformation.Interface
     (* LSP doesn't have traits, so we approximate with interface *)
     | SymbolDefinition.LocalVar -> SymbolInformation.Variable
+    | SymbolDefinition.TypeVar -> SymbolInformation.TypeParameter
     | SymbolDefinition.Typeconst -> SymbolInformation.Class
     (* e.g. "const type Ta = string;" -- absent from LSP *)
     | SymbolDefinition.Typedef -> SymbolInformation.Class

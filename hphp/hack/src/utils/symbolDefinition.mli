@@ -23,6 +23,7 @@ type kind =
   | Interface
   | Trait
   | LocalVar
+  | TypeVar
   | Typeconst
   | Param
   | Typedef

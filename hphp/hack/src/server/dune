@@ -279,6 +279,7 @@
   identifySymbolService
   methodJumps
   saveStateService
+  serverFindTypeVar
   serverFindLocals
   serverFunDepsBatch
   serverGlobalState
@@ -295,6 +296,7 @@
   decl_export
   fileutils
   heap_shared_mem
+  hint_print
   parser
   provider_context
   provider_utils

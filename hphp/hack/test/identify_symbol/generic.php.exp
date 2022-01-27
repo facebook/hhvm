@@ -1,1 +1,10 @@
-None
+name: TFoo, kind: generic_type_var, span: line 5, characters 27-30, is_declaration: false
+definition:
+ TFoo
+   kind: type_var
+   id: TFoo
+   position: line 4, characters 9-12
+   span: line 4, character 9 - line 4, character 12
+   modifiers: 
+
+

@@ -46,8 +46,7 @@ impl<R: Reason> ShallowDeclProvider<R> {
 
     pub fn add_from_oxidized_class(&self, sc: &oxidized_by_ref::shallow_decl_defs::ClassDecl<'_>) {
         let res = Rc::new(self.utils().mk_shallow_class(sc));
-        self.cache
-            .put_shallow_class(Hc::clone(res.sc_name.id()), res);
+        self.cache.put_shallow_class(Hc::clone(res.name.id()), res);
     }
 
     pub fn add_from_oxidized_fun(
@@ -123,9 +122,9 @@ impl<R: Reason> ShallowDeclUtils<R> {
     ) -> ShallowMethod<R> {
         let decl_tys = &self.decl_ty_provider;
         ShallowMethod {
-            sm_name: decl_tys.get_pos_provider().mk_pos_id_of_ref::<R>(sm.name),
-            sm_type: decl_tys.mk_decl_ty_from_parsed(sm.type_),
-            sm_visibility: sm.visibility,
+            name: decl_tys.get_pos_provider().mk_pos_id_of_ref::<R>(sm.name),
+            ty: decl_tys.mk_decl_ty_from_parsed(sm.type_),
+            visibility: sm.visibility,
         }
     }
 
@@ -135,13 +134,13 @@ impl<R: Reason> ShallowDeclUtils<R> {
     ) -> ShallowClass<R> {
         let decl_tys = &self.decl_ty_provider;
         ShallowClass {
-            sc_name: decl_tys.get_pos_provider().mk_pos_id_of_ref::<R>(sc.name),
-            sc_extends: sc
+            name: decl_tys.get_pos_provider().mk_pos_id_of_ref::<R>(sc.name),
+            extends: sc
                 .extends
                 .iter()
                 .map(|ty| decl_tys.mk_decl_ty_from_parsed(ty))
                 .collect(),
-            sc_methods: sc
+            methods: sc
                 .methods
                 .iter()
                 .map(|sm| self.mk_shallow_method(sm))
@@ -155,8 +154,8 @@ impl<R: Reason> ShallowDeclUtils<R> {
     ) -> ShallowFun<R> {
         let decl_tys = &self.decl_ty_provider;
         ShallowFun {
-            fe_pos: decl_tys.get_pos_provider().mk_pos_of_ref::<R>(sf.pos),
-            fe_type: decl_tys.mk_decl_ty_from_parsed(sf.type_),
+            pos: decl_tys.get_pos_provider().mk_pos_of_ref::<R>(sf.pos),
+            ty: decl_tys.mk_decl_ty_from_parsed(sf.type_),
         }
     }
 }

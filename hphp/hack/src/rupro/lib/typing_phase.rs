@@ -89,24 +89,21 @@ impl Phase {
         ft: &FunType<R, DeclTy<R>>,
     ) -> FunType<R, Ty<R>> {
         // TODO(hrust): tparams
-        assert!(ft.ft_params.is_empty());
+        assert!(ft.params.is_empty());
         let params = ft
-            .ft_params
+            .params
             .iter()
             .map(|fp| {
-                let ty = Self::localize_possibly_enforced_ty(env, ety_env, fp.fp_type.clone());
+                let ty = Self::localize_possibly_enforced_ty(env, ety_env, fp.ty.clone());
                 FunParam {
-                    fp_pos: fp.fp_pos.clone(),
-                    fp_name: fp.fp_name.as_ref().map(Hc::clone),
-                    fp_type: ty,
+                    pos: fp.pos.clone(),
+                    name: fp.name.as_ref().map(Hc::clone),
+                    ty,
                 }
             })
             .collect();
-        let ret = Self::localize_possibly_enforced_ty(env, ety_env, ft.ft_ret.clone());
-        FunType {
-            ft_params: params,
-            ft_ret: ret,
-        }
+        let ret = Self::localize_possibly_enforced_ty(env, ety_env, ft.ret.clone());
+        FunType { params, ret }
     }
 
     fn localize_possibly_enforced_ty<R: Reason>(

@@ -56,9 +56,9 @@ impl<R: Reason> DeclTyProvider<R> {
         fp: &oxidized_by_ref::typing_defs_core::FunParam<'_>,
     ) -> FunParam<R, DeclTy<R>> {
         FunParam {
-            fp_pos: self.get_pos_provider().mk_pos_of_ref::<R>(fp.pos),
-            fp_name: fp.name.map(|name| self.get_pos_provider().mk_symbol(name)),
-            fp_type: self.mk_possibly_enforced_decl_ty_from_parsed(fp.type_),
+            pos: self.get_pos_provider().mk_pos_of_ref::<R>(fp.pos),
+            name: fp.name.map(|name| self.get_pos_provider().mk_symbol(name)),
+            ty: self.mk_possibly_enforced_decl_ty_from_parsed(fp.type_),
         }
     }
 
@@ -67,12 +67,12 @@ impl<R: Reason> DeclTyProvider<R> {
         ft: &oxidized_by_ref::typing_defs_core::FunType<'_>,
     ) -> FunType<R, DeclTy<R>> {
         FunType {
-            ft_params: ft
+            params: ft
                 .params
                 .iter()
                 .map(|fp| self.mk_decl_fun_param(fp))
                 .collect(),
-            ft_ret: self.mk_possibly_enforced_decl_ty_from_parsed(ft.ret),
+            ret: self.mk_possibly_enforced_decl_ty_from_parsed(ft.ret),
         }
     }
 

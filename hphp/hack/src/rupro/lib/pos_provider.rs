@@ -49,39 +49,39 @@ impl PosProvider {
 
     pub fn mk_pos<R: Reason>(&self, pos: &oxidized::pos::Pos) -> R::Pos {
         R::Pos::mk(&|| {
-            let pos_file = self.mk_relative_path(pos.filename());
+            let file = self.mk_relative_path(pos.filename());
             let ((start_lnum, start_bol, start_cnum), (end_lnum, end_bol, end_cnum)) =
                 pos.to_start_and_end_lnum_bol_offset();
-            let pos_start = FilePos {
-                pos_lnum: start_lnum as u64,
-                pos_bol: start_bol as u64,
-                pos_cnum: start_cnum as u64,
+            let start = FilePos {
+                lnum: start_lnum as u64,
+                bol: start_bol as u64,
+                cnum: start_cnum as u64,
             };
-            let pos_end = FilePos {
-                pos_lnum: end_lnum as u64,
-                pos_bol: end_bol as u64,
-                pos_cnum: end_cnum as u64,
+            let end = FilePos {
+                lnum: end_lnum as u64,
+                bol: end_bol as u64,
+                cnum: end_cnum as u64,
             };
-            (pos_file, pos_start, pos_end)
+            (file, start, end)
         })
     }
 
     pub fn mk_pos_of_ref<R: Reason>(&self, pos: &oxidized_by_ref::pos::Pos<'_>) -> R::Pos {
         R::Pos::mk(&|| {
-            let pos_file = self.mk_relative_path_of_ref(pos.filename());
+            let file = self.mk_relative_path_of_ref(pos.filename());
             let ((start_lnum, start_bol, start_cnum), (end_lnum, end_bol, end_cnum)) =
                 pos.to_start_and_end_lnum_bol_offset();
-            let pos_start = FilePos {
-                pos_lnum: start_lnum as u64,
-                pos_bol: start_bol as u64,
-                pos_cnum: start_cnum as u64,
+            let start = FilePos {
+                lnum: start_lnum as u64,
+                bol: start_bol as u64,
+                cnum: start_cnum as u64,
             };
-            let pos_end = FilePos {
-                pos_lnum: end_lnum as u64,
-                pos_bol: end_bol as u64,
-                pos_cnum: end_cnum as u64,
+            let end = FilePos {
+                lnum: end_lnum as u64,
+                bol: end_bol as u64,
+                cnum: end_cnum as u64,
             };
-            (pos_file, pos_start, pos_end)
+            (file, start, end)
         })
     }
 

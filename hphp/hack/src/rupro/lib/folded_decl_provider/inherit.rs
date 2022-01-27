@@ -14,15 +14,15 @@ use crate::pos::Symbol;
 use crate::reason::Reason;
 
 pub(crate) struct Inherited<R: Reason> {
-    pub(crate) ih_substs: HashMap<Symbol, SubstContext<R>>,
-    pub(crate) ih_methods: HashMap<Symbol, FoldedElement<R>>,
+    pub(crate) substs: HashMap<Symbol, SubstContext<R>>,
+    pub(crate) methods: HashMap<Symbol, FoldedElement<R>>,
 }
 
 impl<R: Reason> Inherited<R> {
     fn empty() -> Self {
         Self {
-            ih_substs: HashMap::new(),
-            ih_methods: HashMap::new(),
+            substs: HashMap::new(),
+            methods: HashMap::new(),
         }
     }
 
@@ -32,13 +32,13 @@ impl<R: Reason> Inherited<R> {
 
     fn add_substs(&mut self, other_substs: HashMap<Symbol, SubstContext<R>>) {
         for (key, subst) in other_substs {
-            self.ih_substs.entry(Hc::clone(&key)).or_insert(subst);
+            self.substs.entry(Hc::clone(&key)).or_insert(subst);
         }
     }
 
     fn add_methods(&mut self, other_methods: HashMap<Symbol, FoldedElement<R>>) {
         for (key, mut fe) in other_methods {
-            match self.ih_methods.entry(Hc::clone(&key)) {
+            match self.methods.entry(Hc::clone(&key)) {
                 Entry::Vacant(entry) => {
                     entry.insert(fe);
                 }
@@ -52,12 +52,9 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn add_inherited(&mut self, other: Self) {
-        let Inherited {
-            ih_substs,
-            ih_methods,
-        } = other;
-        self.add_substs(ih_substs);
-        self.add_methods(ih_methods);
+        let Inherited { substs, methods } = other;
+        self.add_substs(substs);
+        self.add_methods(methods);
     }
 
     fn make_substitution(
@@ -75,17 +72,17 @@ impl<R: Reason> Inherited<R> {
     ) -> Self {
         let subst = Self::make_substitution(parent, argl);
         // TODO(hrust): Do we need sharing?
-        let mut substs = parent.dc_substs.clone();
+        let mut substs = parent.substs.clone();
         substs.insert(
             Hc::clone(parent_name),
             SubstContext {
-                sc_subst: subst,
-                sc_class_context: Hc::clone(child.sc_name.id()),
+                subst,
+                class_context: Hc::clone(child.name.id()),
             },
         );
         Self {
-            ih_substs: substs,
-            ih_methods: parent.dc_methods.clone(),
+            substs,
+            methods: parent.methods.clone(),
         }
     }
 
@@ -109,7 +106,7 @@ impl<R: Reason> Inherited<R> {
 
     fn from_parent(sc: &ShallowClass<R>, parents: &HashMap<Symbol, Rc<FoldedClass<R>>>) -> Self {
         let all_inherited = sc
-            .sc_extends
+            .extends
             .iter()
             .map(|extends| Self::from_class(sc, parents, extends));
         let mut inh = Self::empty();

@@ -12,15 +12,15 @@ pub type Prim = oxidized::aast::Tprim;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FunParam<R: Reason, TY> {
-    pub fp_pos: R::Pos,
-    pub fp_name: Option<Symbol>,
-    pub fp_type: TY,
+    pub pos: R::Pos,
+    pub name: Option<Symbol>,
+    pub ty: TY,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FunType<R: Reason, TY> {
-    pub ft_params: Vec<FunParam<R, TY>>,
-    pub ft_ret: TY,
+    pub params: Vec<FunParam<R, TY>>,
+    pub ret: TY,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

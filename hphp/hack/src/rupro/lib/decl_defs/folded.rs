@@ -10,21 +10,21 @@ use crate::reason::Reason;
 
 #[derive(Debug, Clone)]
 pub struct FoldedElement<R: Reason> {
-    pub elt_origin: Symbol,
-    pub elt_visibility: CeVisibility<R>,
+    pub origin: Symbol,
+    pub visibility: CeVisibility<R>,
 }
 
 #[derive(Debug, Clone)]
 pub struct SubstContext<R: Reason> {
-    pub sc_subst: HashMap<Symbol, DeclTy<R>>,
-    pub sc_class_context: Symbol,
+    pub subst: HashMap<Symbol, DeclTy<R>>,
+    pub class_context: Symbol,
 }
 
 #[derive(Debug, Clone)]
 pub struct FoldedClass<R: Reason> {
-    pub dc_name: Symbol,
-    pub dc_pos: R::Pos,
-    pub dc_substs: HashMap<Symbol, SubstContext<R>>,
-    pub dc_ancestors: HashMap<Symbol, DeclTy<R>>,
-    pub dc_methods: HashMap<Symbol, FoldedElement<R>>,
+    pub name: Symbol,
+    pub pos: R::Pos,
+    pub substs: HashMap<Symbol, SubstContext<R>>,
+    pub ancestors: HashMap<Symbol, DeclTy<R>>,
+    pub methods: HashMap<Symbol, FoldedElement<R>>,
 }

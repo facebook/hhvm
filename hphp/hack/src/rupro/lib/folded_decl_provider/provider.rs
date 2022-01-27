@@ -67,10 +67,10 @@ impl<R: Reason> FoldedDeclProvider<R> {
         sm: &ShallowMethod<R>,
     ) {
         let elt = FoldedElement {
-            elt_origin: Hc::clone(sc.sc_name.id()),
-            elt_visibility: self.visibility(sc.sc_name.id(), sm.sm_visibility),
+            origin: Hc::clone(sc.name.id()),
+            visibility: self.visibility(sc.name.id(), sm.visibility),
         };
-        methods.insert(Hc::clone(sm.sm_name.id()), elt);
+        methods.insert(Hc::clone(sm.name.id()), elt);
     }
 
     fn decl_class_type(
@@ -97,7 +97,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
         sc: &ShallowClass<R>,
     ) -> HashMap<Symbol, Rc<FoldedClass<R>>> {
         let mut acc = HashMap::new();
-        sc.sc_extends
+        sc.extends
             .iter()
             .for_each(|ty| self.decl_class_type(stack, &mut acc, ty));
         acc
@@ -117,7 +117,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
                 }
                 Some(cls) => {
                     let subst = Subst::new((), tyl);
-                    for (anc_name, anc_ty) in &cls.dc_ancestors {
+                    for (anc_name, anc_ty) in &cls.ancestors {
                         inst.insert(Hc::clone(anc_name), subst.instantiate(anc_ty));
                     }
                     inst.insert(Hc::clone(pos_id.id()), ty.clone());
@@ -133,25 +133,23 @@ impl<R: Reason> FoldedDeclProvider<R> {
     ) -> Rc<FoldedClass<R>> {
         let inh = Inherited::make(sc, parents);
 
-        let mut methods = inh.ih_methods;
-        sc.sc_methods
+        let mut methods = inh.methods;
+        sc.methods
             .iter()
             .for_each(|sm| self.decl_method(&mut methods, sc, sm));
 
         let mut anc = HashMap::new();
-        sc.sc_extends
+        sc.extends
             .iter()
             .for_each(|ty| self.get_implements(parents, ty, &mut anc));
 
-        let tc = FoldedClass {
-            dc_name: sc.sc_name.id().clone(),
-            dc_pos: sc.sc_name.pos().clone(),
-            dc_substs: inh.ih_substs,
-            dc_ancestors: anc,
-            dc_methods: methods,
-        };
-        let tc = Rc::new(tc);
-        tc
+        Rc::new(FoldedClass {
+            name: sc.name.id().clone(),
+            pos: sc.name.pos().clone(),
+            substs: inh.substs,
+            ancestors: anc,
+            methods,
+        })
     }
 
     fn decl_class(&self, stack: &mut HashSet<Symbol>, name: &Symbol) -> Option<Rc<FoldedClass<R>>> {

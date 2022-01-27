@@ -8,9 +8,14 @@ use crate::pos::{RelativePath, Symbol};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FilePos {
-    pub pos_lnum: u64,
-    pub pos_bol: u64,
-    pub pos_cnum: u64,
+    /// 1-indexed line number.
+    pub lnum: u64,
+
+    /// Byte offset from start of file to start of line.
+    pub bol: u64,
+
+    /// Byte offset from start of line.
+    pub cnum: u64,
 }
 
 pub trait Pos: Eq + Hash + Clone + std::fmt::Debug {
@@ -19,11 +24,12 @@ pub trait Pos: Eq + Hash + Clone + std::fmt::Debug {
     fn to_oxidized_pos(&self) -> oxidized::pos::Pos;
 }
 
+/// Represents a closed-ended range [start, end] in a file.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct PosImpl {
-    pos_file: RelativePath,
-    pos_start: FilePos,
-    pos_end: FilePos,
+    file: RelativePath,
+    start: FilePos,
+    end: FilePos,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -31,12 +37,8 @@ pub struct BPos(Box<PosImpl>);
 
 impl Pos for BPos {
     fn mk(cons: &dyn Fn() -> (RelativePath, FilePos, FilePos)) -> Self {
-        let (pos_file, pos_start, pos_end) = cons();
-        Self(Box::new(PosImpl {
-            pos_file,
-            pos_start,
-            pos_end,
-        }))
+        let (file, start, end) = cons();
+        Self(Box::new(PosImpl { file, start, end }))
     }
 
     fn to_oxidized_pos(&self) -> oxidized::pos::Pos {

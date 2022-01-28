@@ -330,6 +330,7 @@ type env = {
   local_symbol_table: SearchUtils.si_env; [@opaque]
       (** Symbols for locally changed files *)
 }
+[@@deriving show]
 
 val is_full_check_done : full_check_status -> bool
 

@@ -186,7 +186,7 @@ type saved_state_delta = {
     The Ast.id are keys to index this shared space. *)
 type env = {
   naming_table: Naming_table.t;
-  deps_mode: Typing_deps_mode.t;
+  deps_mode: Typing_deps_mode.t; [@opaque]
   typing_service: typing_service;
   tcopt: TypecheckerOptions.t;
   popt: ParserOptions.t;
@@ -223,7 +223,7 @@ type env = {
   last_idle_job_time: float;  (** Timestamp of last ServerIdle.go run *)
   remote_execution_files: Relative_path.Set.t;
       (** Files that need to be typechecked via remote execution *)
-  remote_execution: ReEnv.t option;
+  remote_execution: ReEnv.t option; [@opaque]
       (** Whether type check should happen via remote execution *)
   editor_open_files: Relative_path.Set.t;
       (** The map from full path to synchronized file contents *)
@@ -280,11 +280,12 @@ type env = {
       (** The diagnostic subscription information of the current client *)
   diagnostic_pusher: Diagnostic_pusher.t;
       (** Structure tracking errors to push to LSP client. *)
-  last_recheck_loop_stats: RecheckLoopStats.t;
-  last_recheck_loop_stats_for_actual_work: RecheckLoopStats.t option;
+  last_recheck_loop_stats: RecheckLoopStats.t; [@opaque]
+  last_recheck_loop_stats_for_actual_work: RecheckLoopStats.t option; [@opaque]
   local_symbol_table: SearchUtils.si_env; [@opaque]
       (** Symbols for locally changed files *)
 }
+[@@deriving show]
 
 (** Global rechecks in response to file changes can be paused. If the user
   changes the state to `Paused` during an ongoing recheck, we should cancel
@@ -384,7 +385,7 @@ and init_env = {
   init_start_t: float;
   init_type: string;
   mergebase: string option;
-  why_needed_full_check: Init_telemetry.t option;
+  why_needed_full_check: Init_telemetry.t option; [@opaque]
       (** This is about the first full check (if any) which was deferred after init.
       It gets reset after that first full check is completed.
       First parameter is a string label used in telemetry. Second is opaque telemetry. *)

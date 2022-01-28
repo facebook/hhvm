@@ -71,3 +71,9 @@ pub enum CeVisibility<R: Reason> {
     Protected(Symbol),
     Internal(PosId<R::Pos>),
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct UserAttribute<R: Reason> {
+    pub name: PosId<R::Pos>,
+    pub classname_params: Vec<Symbol>,
+}

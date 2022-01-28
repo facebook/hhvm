@@ -3,12 +3,26 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{DeclTy, DeclTy_, FunParam, FunType, Prim};
+use crate::decl_defs::{DeclTy, DeclTy_, FunParam, FunType, Prim, UserAttribute};
 use crate::reason::Reason;
 
 use super::Allocator;
 
 impl<R: Reason> Allocator<R> {
+    pub fn user_attribute(
+        &self,
+        attr: &oxidized_by_ref::typing_defs::UserAttribute<'_>,
+    ) -> UserAttribute<R> {
+        UserAttribute {
+            name: self.pos_id_from_decl(attr.name),
+            classname_params: attr
+                .classname_params
+                .iter()
+                .map(|param| self.symbol(param))
+                .collect(),
+        }
+    }
+
     pub fn decl_ty(&self, reason: R, ty: DeclTy_<R, DeclTy<R>>) -> DeclTy<R> {
         DeclTy::new(reason, self.decl_tys.mk(ty))
     }

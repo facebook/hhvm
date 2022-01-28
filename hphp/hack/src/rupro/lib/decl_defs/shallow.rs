@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::decl_defs::DeclTy;
+use crate::decl_defs::{DeclTy, UserAttribute};
 use crate::pos::PosId;
 use crate::reason::Reason;
 use hcons::Hc;
@@ -21,6 +21,7 @@ pub struct ShallowMethod<R: Reason> {
     pub ty: DeclTy<R>,
     pub visibility: oxidized::ast_defs::Visibility,
     pub deprecated: Option<Hc<str>>, // e.g. "The method foo is deprecated: ..."
+    pub attributes: Vec<UserAttribute<R>>,
 }
 
 #[derive(Debug)]

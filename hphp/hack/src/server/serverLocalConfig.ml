@@ -693,15 +693,25 @@ let path =
 let apply_overrides ~silent ~current_version ~config ~overrides =
   (* We'll apply CLI overrides now at the start so that JustKnobs and experiments_config
      can be informed about them, e.g. "--config rollout_group=foo" will be able
-     to guide the manner in which JustKnobs picks up values. Don't worry though --
-     we'll apply CLI overrides again at the end, so they overwrite any changes
-     brought by JustKnobs and experiments_config. *)
+     to guide the manner in which JustKnobs picks up values, and "--config use_justknobs=false"
+     will be able to disable it. Don't worry though -- we'll apply CLI overrides again at the end,
+     so they overwrite any changes brought by JustKnobs and experiments_config. *)
   let config = Config_file.apply_overrides ~from:None ~config ~overrides in
-  (* Now is the time for JustKnobs (though it's skipped for tests) *)
+  (* Now is the time for JustKnobs *)
+  let use_justknobs = bool_opt "use_justknobs" config in
   let config =
-    if Sys_utils.deterministic_behavior_for_tests () then
+    match (use_justknobs, Sys_utils.deterministic_behavior_for_tests ()) with
+    | (Some false, _)
+    (* --config use_justknobs=false (or in hh.conf) will force JK off, regardless of anything else *)
+    | (None, true)
+    (* if use_justknobs isn't set, HH_TEST_MODE=1 (used in tests) will still turn JK off *)
+      ->
       config
-    else
+    | (Some true, _)
+    (* --config use_justknobs=true (or in hh.conf) will force JK on, regardless of anything else *)
+    | (None, false)
+    (* if use_justknobs isn't set, then HH_TEST_MODE unset or =0 will leave JK on *)
+      ->
       ServerLocalConfigKnobs.apply_justknobs_overrides ~silent config
   in
   (* Now is the time for experiments_config overrides *)

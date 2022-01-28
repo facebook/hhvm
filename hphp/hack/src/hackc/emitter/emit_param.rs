@@ -130,10 +130,12 @@ fn from_ast<'a, 'arena, 'decl>(
     };
     // Do the type check for default value type and hint type
     if !nullable {
-        if let Some(err_msg) = default_type_check(&param.name, &type_info, &param.expr) {
+        if let Some(err_msg) =
+            default_type_check(&param.name, type_info.as_ref(), param.expr.as_ref())
+        {
             return Err(emit_fatal::raise_fatal_parse(&param.pos, err_msg));
         }
-    };
+    }
     aast_visitor::visit(
         &mut ResolverVisitor {
             phantom_a: PhantomData,
@@ -252,8 +254,8 @@ impl<'ast, 'a, 'arena, 'decl> aast_visitor::Visitor<'ast> for ResolverVisitor<'a
 // Return None if it passes type check, otherwise return error msg
 fn default_type_check<'arena>(
     param_name: &str,
-    param_type_info: &Option<HhasTypeInfo<'arena>>,
-    param_expr: &Option<a::Expr>,
+    param_type_info: Option<&HhasTypeInfo<'arena>>,
+    param_expr: Option<&a::Expr>,
 ) -> Option<String> {
     let hint_type = get_hint_display_name(
         param_type_info
@@ -296,7 +298,7 @@ fn get_hint_display_name<'arena>(hint: Option<&Str<'arena>>) -> Option<&'static 
 //    Return None when hint_type and default_value matches (in hh mode,
 //    "class" type matches anything). If not, return default_value type string
 //    for printing fatal parse error
-fn match_default_and_hint(hint_type: &str, param_expr: &Option<a::Expr>) -> Option<&'static str> {
+fn match_default_and_hint(hint_type: &str, param_expr: Option<&a::Expr>) -> Option<&'static str> {
     if hint_type == "class" {
         return None;
     }

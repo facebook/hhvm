@@ -306,14 +306,10 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &HhasFunction<'_
     print_fun_attrs(ctx, w, fun_def)?;
     print_span(w, &fun_def.span)?;
     w.write_all(b" ")?;
-    option(
-        w,
-        &(Option::from(body.return_type_info.clone())),
-        |w, ti| {
-            print_type_info(w, ti)?;
-            w.write_all(b" ")
-        },
-    )?;
+    option(w, body.return_type_info.as_ref(), |w, ti| {
+        print_type_info(w, ti)?;
+        w.write_all(b" ")
+    })?;
     w.write_all(fun_def.name.to_raw_string().as_bytes())?;
     print_params(ctx, w, fun_def.params())?;
     if fun_def.is_generator() {
@@ -361,7 +357,7 @@ fn print_type_constant(
     if c.is_abstract {
         w.write_all(b" isAbstract")?;
     }
-    option(w, Option::from(c.initializer.as_ref()), |w, init| {
+    option(w, c.initializer.as_ref(), |w, init| {
         w.write_all(b" = ")?;
         triple_quotes(w, |w| print_adata(ctx, w, init))
     })?;
@@ -509,7 +505,7 @@ fn print_enum_ty(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'_>) -> Res
 fn print_doc_comment<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    doc_comment: &Maybe<Str<'arena>>,
+    doc_comment: Maybe<&Str<'arena>>,
 ) -> Result<()> {
     if let Just(cmt) = doc_comment {
         ctx.newline(w)?;
@@ -750,7 +746,7 @@ fn print_method_def(
     print_method_attrs(ctx, w, method_def)?;
     print_span(w, &method_def.span)?;
     w.write_all(b" ")?;
-    option(w, &(Option::from(body.return_type_info.clone())), |w, t| {
+    option(w, body.return_type_info.as_ref(), |w, t| {
         print_type_info(w, t)?;
         w.write_all(b" ")
     })?;
@@ -842,13 +838,17 @@ fn print_class_def<'arena>(
     print_span(w, &class_def.span)?;
     print_extends(
         w,
-        Option::from(class_def.base.as_ref()).map(|x: &ClassType<'arena>| x.to_raw_string()),
+        class_def
+            .base
+            .as_ref()
+            .map(|x: &ClassType<'arena>| x.to_raw_string())
+            .into(),
     )?;
     print_implements(w, class_def.implements.as_ref())?;
     print_enum_includes(w, class_def.enum_includes.as_ref())?;
     w.write_all(b" {")?;
     ctx.block(w, |c, w| {
-        print_doc_comment(c, w, &class_def.doc_comment)?;
+        print_doc_comment(c, w, class_def.doc_comment.as_ref())?;
         print_uses(c, w, class_def)?;
         print_enum_ty(c, w, class_def)?;
         for x in class_def.requirements.as_ref() {
@@ -879,7 +879,7 @@ fn print_class_def<'arena>(
 fn print_pos_as_prov_tag(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    loc: &Option<ast_defs::Pos>,
+    loc: Option<&ast_defs::Pos>,
 ) -> Result<()> {
     match loc {
         Some(l) if ctx.array_provenance => {
@@ -933,7 +933,7 @@ fn print_adata_mapped_argument<F, V>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     col_type: &str,
-    loc: &Option<ast_defs::Pos>,
+    loc: Option<&ast_defs::Pos>,
     values: &[V],
     f: F,
 ) -> Result<()>
@@ -952,7 +952,7 @@ fn print_adata_collection_argument(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     col_type: &str,
-    loc: &Option<ast_defs::Pos>,
+    loc: Option<&ast_defs::Pos>,
     values: &[TypedValue<'_>],
 ) -> Result<()> {
     print_adata_mapped_argument(ctx, w, col_type, loc, values, &print_adata)
@@ -962,7 +962,7 @@ fn print_adata_dict_collection_argument(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     col_type: &str,
-    loc: &Option<ast_defs::Pos>,
+    loc: Option<&ast_defs::Pos>,
     pairs: &[Pair<TypedValue<'_>, TypedValue<'_>>],
 ) -> Result<()> {
     print_adata_mapped_argument(ctx, w, col_type, loc, pairs, |ctx, w, Pair(v1, v2)| {
@@ -997,13 +997,13 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Res
         TypedValue::Bool(false) => w.write_all(b"b:0;"),
         TypedValue::Bool(true) => w.write_all(b"b:1;"),
         TypedValue::Vec(values) => {
-            print_adata_collection_argument(ctx, w, VEC_PREFIX, &None, values.as_ref())
+            print_adata_collection_argument(ctx, w, VEC_PREFIX, None, values.as_ref())
         }
         TypedValue::Dict(pairs) => {
-            print_adata_dict_collection_argument(ctx, w, DICT_PREFIX, &None, pairs.as_ref())
+            print_adata_dict_collection_argument(ctx, w, DICT_PREFIX, None, pairs.as_ref())
         }
         TypedValue::Keyset(values) => {
-            print_adata_collection_argument(ctx, w, KEYSET_PREFIX, &None, values.as_ref())
+            print_adata_collection_argument(ctx, w, KEYSET_PREFIX, None, values.as_ref())
         }
         TypedValue::HhasAdata(s) => w.write_all(escaped(s.unsafe_as_str()).as_bytes()),
     }
@@ -1068,7 +1068,7 @@ fn print_body(
     body: &HhasBody<'_>,
     coeffects: &HhasCoeffects<'_>,
 ) -> Result<()> {
-    print_doc_comment(ctx, w, &body.doc_comment)?;
+    print_doc_comment(ctx, w, body.doc_comment.as_ref())?;
     if body.is_memoize_wrapper {
         ctx.newline(w)?;
         w.write_all(b".ismemoizewrapper;")?;
@@ -2247,14 +2247,14 @@ fn print_param<'arena>(
     write_if!(param.is_inout, w, "inout ")?;
     write_if!(param.is_readonly, w, "readonly ")?;
     write_if!(param.is_variadic, w, "...")?;
-    option(w, &Option::from(param.type_info.clone()), |w, ty| {
+    option(w, param.type_info.as_ref(), |w, ty| {
         print_type_info(w, ty)?;
         w.write_all(b" ")
     })?;
     w.write_all(param.name.unsafe_as_str().as_bytes())?;
     option(
         w,
-        &Option::from(param.default_value.map(|x| (x.0, x.1))),
+        param.default_value.map(|x| (x.0, x.1)).as_ref(),
         |w, i| print_param_default_value(w, i),
     )
 }
@@ -3308,29 +3308,19 @@ fn print_type_flags(w: &mut dyn Write, flag: constraint::ConstraintFlags) -> Res
 }
 
 fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &HhasTypeInfo<'_>) -> Result<()> {
-    let print_quote_str = |w: &mut dyn Write, opt: &Option<String>| {
+    let print_quote_str = |w: &mut dyn Write, opt: Option<&str>| {
         option_or(
             w,
             opt,
-            |w, s: &String| quotes(w, |w| w.write_all(escape(s).as_bytes())),
+            |w, s: &str| quotes(w, |w| w.write_all(escape(s).as_bytes())),
             "N",
         )
     };
     angle(w, |w| {
-        print_quote_str(
-            w,
-            &Option::from(ti.user_type.map(|n| n.unsafe_as_str().to_owned())),
-        )?;
+        print_quote_str(w, ti.user_type.map(|n| n.unsafe_as_str()).into())?;
         w.write_all(b" ")?;
         if !is_enum {
-            print_quote_str(
-                w,
-                &Option::from(
-                    ti.type_constraint
-                        .name
-                        .map(|n| n.unsafe_as_str().to_owned()),
-                ),
-            )?;
+            print_quote_str(w, ti.type_constraint.name.map(|n| n.unsafe_as_str()).into())?;
             w.write_all(b" ")?;
         }
         print_type_flags(w, ti.type_constraint.flags)

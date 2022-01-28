@@ -41,7 +41,7 @@ fn hints_contain_capability(hints: &Vec<aast_defs::Hint>, capability: Ctx) -> bo
     return false;
 }
 
-fn has_capability(ctxs: &Option<ast::Contexts>, capability: Ctx) -> bool {
+fn has_capability(ctxs: Option<&ast::Contexts>, capability: Ctx) -> bool {
     match ctxs {
         Some(c) => hints_contain_capability(&c.1, capability),
         // No capabilities context is the same as defaults in scenarios where contexts are not inherited
@@ -64,7 +64,7 @@ fn is_mutating_unop(unop: &ast_defs::Uop) -> bool {
 // The latter is important because for e.g. a lambda without contexts, it should inherit context from its enclosing function.
 fn has_capability_with_inherited_val(
     c: &Context,
-    ctxs: &Option<ast::Contexts>,
+    ctxs: Option<&ast::Contexts>,
     capability: Ctx,
 ) -> bool {
     match ctxs {
@@ -79,7 +79,7 @@ fn has_capability_with_inherited_val(
     }
 }
 
-fn has_defaults_with_inherited_val(c: &Context, ctxs: &Option<ast::Contexts>) -> bool {
+fn has_defaults_with_inherited_val(c: &Context, ctxs: Option<&ast::Contexts>) -> bool {
     match ctxs {
         Some(_) => has_defaults(ctxs),
         None => c.has_defaults(),
@@ -128,7 +128,7 @@ fn has_defaults_implicitly(hints: &Vec<Hint>) -> bool {
     false
 }
 
-fn has_defaults(ctxs: &Option<ast::Contexts>) -> bool {
+fn has_defaults(ctxs: Option<&ast::Contexts>) -> bool {
     match ctxs {
         None => true,
         Some(c) => {
@@ -371,22 +371,24 @@ impl<'ast> Visitor<'ast> for Checker {
         new_context.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
             &m.user_attributes,
         ));
-        new_context.set_has_defaults(has_defaults(&m.ctxs));
-        new_context.set_has_write_props(has_capability(&m.ctxs, Ctx::WriteProps));
-        new_context.set_has_write_this_props(has_capability(&m.ctxs, Ctx::WriteThisProps));
-        new_context.set_has_read_globals(has_capability(&m.ctxs, Ctx::ReadGlobals));
-        new_context.set_has_access_globals(has_capability(&m.ctxs, Ctx::Globals));
+        let ctxs = m.ctxs.as_ref();
+        new_context.set_has_defaults(has_defaults(ctxs));
+        new_context.set_has_write_props(has_capability(ctxs, Ctx::WriteProps));
+        new_context.set_has_write_this_props(has_capability(ctxs, Ctx::WriteThisProps));
+        new_context.set_has_read_globals(has_capability(ctxs, Ctx::ReadGlobals));
+        new_context.set_has_access_globals(has_capability(ctxs, Ctx::Globals));
         m.recurse(&mut new_context, self)
     }
 
     fn visit_fun_def(&mut self, c: &mut Context, d: &aast::FunDef<(), ()>) -> Result<(), ()> {
         let mut new_context = Context::from_context(c);
-        new_context.set_has_defaults(has_defaults(&d.fun.ctxs));
+        let ctxs = d.fun.ctxs.as_ref();
+        new_context.set_has_defaults(has_defaults(ctxs));
         new_context.set_is_constructor(is_constructor(&d.fun.name));
-        new_context.set_has_write_props(has_capability(&d.fun.ctxs, Ctx::WriteProps));
-        new_context.set_has_write_this_props(has_capability(&d.fun.ctxs, Ctx::WriteThisProps));
-        new_context.set_has_read_globals(has_capability(&d.fun.ctxs, Ctx::ReadGlobals));
-        new_context.set_has_access_globals(has_capability(&d.fun.ctxs, Ctx::Globals));
+        new_context.set_has_write_props(has_capability(ctxs, Ctx::WriteProps));
+        new_context.set_has_write_this_props(has_capability(ctxs, Ctx::WriteThisProps));
+        new_context.set_has_read_globals(has_capability(ctxs, Ctx::ReadGlobals));
+        new_context.set_has_access_globals(has_capability(ctxs, Ctx::Globals));
         d.recurse(&mut new_context, self)
     }
 
@@ -396,25 +398,26 @@ impl<'ast> Visitor<'ast> for Checker {
         new_context.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
             &f.user_attributes,
         ));
-        new_context.set_has_defaults(has_defaults_with_inherited_val(c, &f.ctxs));
+        let ctxs = f.ctxs.as_ref();
+        new_context.set_has_defaults(has_defaults_with_inherited_val(c, ctxs));
         new_context.set_has_write_props(has_capability_with_inherited_val(
             c,
-            &f.ctxs,
+            ctxs,
             Ctx::WriteProps,
         ));
         new_context.set_has_write_this_props(has_capability_with_inherited_val(
             c,
-            &f.ctxs,
+            ctxs,
             Ctx::WriteThisProps,
         ));
         new_context.set_has_read_globals(has_capability_with_inherited_val(
             c,
-            &f.ctxs,
+            ctxs,
             Ctx::ReadGlobals,
         ));
         new_context.set_has_access_globals(has_capability_with_inherited_val(
             c,
-            &f.ctxs,
+            ctxs,
             Ctx::Globals,
         ));
         f.recurse(&mut new_context, self)

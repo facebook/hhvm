@@ -443,7 +443,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::As(e) => emit_as(emitter, env, pos, e),
         Expr_::Upcast(e) => emit_expr(emitter, env, &e.0),
         Expr_::Cast(e) => emit_cast(emitter, env, pos, &(e.0).1, &e.1),
-        Expr_::Eif(e) => emit_conditional_expr(emitter, env, pos, &e.0, &e.1, &e.2),
+        Expr_::Eif(e) => emit_conditional_expr(emitter, env, pos, &e.0, e.1.as_ref(), &e.2),
         Expr_::ArrayGet(e) => {
             let (base_expr, opt_elem_expr) = &**e;
             Ok(emit_array_get(
@@ -4666,7 +4666,7 @@ fn emit_conditional_expr<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     etest: &ast::Expr,
-    etrue: &Option<ast::Expr>,
+    etrue: Option<&ast::Expr>,
     efalse: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;

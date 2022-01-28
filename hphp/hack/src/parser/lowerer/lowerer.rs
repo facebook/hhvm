@@ -1525,7 +1525,7 @@ fn p_expr_impl__<'a>(
                     let readonly_ret = mp_optional(p_readonly, &c.readonly_return, env)?;
                     let ctxs = p_contexts(&c.contexts, env)?;
                     let unsafe_ctxs = ctxs.clone();
-                    if has_polymorphic_context(env, &ctxs) {
+                    if has_polymorphic_context(env, ctxs.as_ref()) {
                         raise_parsing_error(
                             &c.contexts,
                             env,
@@ -3082,7 +3082,7 @@ fn has_polymorphic_context_single<'a>(env: &mut Env<'a>, hint: &ast::Hint) -> bo
     }
 }
 
-fn has_polymorphic_context<'a>(env: &mut Env<'a>, contexts: &Option<ast::Contexts>) -> bool {
+fn has_polymorphic_context<'a>(env: &mut Env<'a>, contexts: Option<&ast::Contexts>) -> bool {
     if let Some(ast::Contexts(_, ref context_hints)) = contexts {
         return context_hints
             .iter()
@@ -3092,7 +3092,7 @@ fn has_polymorphic_context<'a>(env: &mut Env<'a>, contexts: &Option<ast::Context
     }
 }
 
-fn has_any_policied_context(contexts: &Option<ast::Contexts>) -> bool {
+fn has_any_policied_context(contexts: Option<&ast::Contexts>) -> bool {
     if let Some(ast::Contexts(_, ref context_hints)) = contexts {
         return context_hints.iter().any(|hint| match &*hint.1 {
             ast::Hint_::Happly(ast::Id(_, id), _) => {
@@ -3166,7 +3166,7 @@ fn rewrite_effect_polymorphism<'a>(
     env: &mut Env<'a>,
     params: &mut Vec<ast::FunParam>,
     tparams: &mut Vec<ast::Tparam>,
-    contexts: &Option<ast::Contexts>,
+    contexts: Option<&ast::Contexts>,
     where_constraints: &mut Vec<ast::WhereConstraintHint>,
 ) {
     use ast::{Hint, Hint_, ReifyKind, Variance};
@@ -3638,7 +3638,7 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr, Error> {
                 env,
                 &mut parameters,
                 &mut type_parameters,
-                &contexts,
+                contexts.as_ref(),
                 &mut constrs,
             );
             let return_type = mp_optional(p_hint, type_, env)?;
@@ -4336,7 +4336,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             let is_static = kinds.has(modifier::STATIC);
             let readonly_this = kinds.has(modifier::READONLY);
             *env.in_static_method() = is_static;
-            check_effect_polymorphic_reification(&hdr.contexts, env, node);
+            check_effect_polymorphic_reification(hdr.contexts.as_ref(), env, node);
             let (mut body, body_has_yield) = mp_yielding(p_function_body, &c.function_body, env)?;
             if env.codegen() {
                 member_init.reverse();
@@ -4347,7 +4347,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             let is_abstract = kinds.has(modifier::ABSTRACT);
             let is_external = !is_abstract && c.function_body.is_external();
             let user_attributes = p_user_attributes(&c.attribute, env)?;
-            check_effect_memoized(&hdr.contexts, &user_attributes, "method", env);
+            check_effect_memoized(hdr.contexts.as_ref(), &user_attributes, "method", env);
             let method = ast::Method_ {
                 span: p_fun_pos(node, env),
                 annotation: (),
@@ -4699,7 +4699,7 @@ fn p_namespace_use_clause<'a>(
 }
 
 fn check_effect_memoized<'a>(
-    contexts: &Option<ast::Contexts>,
+    contexts: Option<&ast::Contexts>,
     user_attributes: &[aast::UserAttribute<(), ()>],
     kind: &str,
     env: &mut Env<'a>,
@@ -4743,7 +4743,7 @@ fn check_effect_memoized<'a>(
     }
 }
 
-fn check_context_has_this<'a>(contexts: &Option<ast::Contexts>, env: &mut Env<'a>) {
+fn check_context_has_this<'a>(contexts: Option<&ast::Contexts>, env: &mut Env<'a>) {
     use ast::Hint_::{Haccess, Happly};
     if let Some(ast::Contexts(pos, ref context_hints)) = contexts {
         context_hints.iter().for_each(|c| match *c.1 {
@@ -4765,7 +4765,7 @@ fn check_context_has_this<'a>(contexts: &Option<ast::Contexts>, env: &mut Env<'a
 }
 
 fn check_effect_polymorphic_reification<'a>(
-    contexts: &Option<ast::Contexts>,
+    contexts: Option<&ast::Contexts>,
     env: &mut Env<'a>,
     node: S<'a>,
 ) {
@@ -4802,8 +4802,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>, Error> {
                 mp_yielding(&p_function_body, body, env)?
             };
             let user_attributes = p_user_attributes(attribute_spec, env)?;
-            check_effect_memoized(&hdr.contexts, &user_attributes, "function", env);
-            check_context_has_this(&hdr.contexts, env);
+            check_effect_memoized(hdr.contexts.as_ref(), &user_attributes, "function", env);
+            check_context_has_this(hdr.contexts.as_ref(), env);
             let variadic = determine_variadicity(&hdr.parameters);
             let ret = ast::TypeHint((), hdr.return_type);
 

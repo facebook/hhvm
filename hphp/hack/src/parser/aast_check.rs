@@ -37,7 +37,7 @@ fn awaitable_type_args(hint: &ast::Hint) -> Option<&[ast::Hint]> {
     }
 }
 
-fn is_policied_local(ctxs: &Option<ast::Contexts>) -> bool {
+fn is_policied_local(ctxs: Option<&ast::Contexts>) -> bool {
     match ctxs {
         Some(c) => {
             for hint in &c.1 {
@@ -124,7 +124,7 @@ impl<'ast> Visitor<'ast> for Checker {
             &mut Context {
                 in_methodish: true,
                 in_static_methodish: m.static_,
-                is_policied_local_fun: is_policied_local(&m.ctxs),
+                is_policied_local_fun: is_policied_local(m.ctxs.as_ref()),
                 ..*c
             },
             self,
@@ -140,7 +140,7 @@ impl<'ast> Visitor<'ast> for Checker {
             &mut Context {
                 in_methodish: true,
                 in_static_methodish: c.in_static_methodish,
-                is_policied_local_fun: is_policied_local(&f.ctxs),
+                is_policied_local_fun: is_policied_local(f.ctxs.as_ref()),
                 ..*c
             },
             self,

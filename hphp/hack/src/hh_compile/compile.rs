@@ -43,8 +43,8 @@ pub struct Opts {
     #[structopt(long)]
     daemon: bool,
 
-    /// read a list of files or stdin (one per line) from the file `input-file-list'"
-    #[structopt(long)]
+    /// Read a list of files or stdin (one per line) from FILE
+    #[structopt(long, name = "FILE")]
     input_file_list: Option<Option<PathBuf>>,
 
     /// Dump configuration settings
@@ -98,7 +98,7 @@ pub fn run(opts: Opts) -> anyhow::Result<()> {
         };
 
         let files: Vec<_> = match &opts.input_file_list {
-            Some(filename) => utils::read_file_list(&filename)?.collect(),
+            Some(filename) => utils::read_file_list(filename.as_ref())?.collect(),
             None => vec![
                 opts.filename
                     .as_ref()

@@ -124,8 +124,8 @@ impl<'a> Fun<'a> {
         self.either(|x| &x.fun.user_attributes[..], |x| &x.user_attributes[..])
     }
 
-    pub fn get_ctxs(&self) -> &Option<ast::Contexts> {
-        self.either(|x| &x.fun.ctxs, |x| &x.ctxs)
+    pub fn get_ctxs(&self) -> Option<&ast::Contexts> {
+        self.either(|x| &x.fun.ctxs, |x| &x.ctxs).as_ref()
     }
 
     pub fn get_params(&self) -> &[ast::FunParam] {
@@ -170,8 +170,8 @@ impl<'a> Method<'a> {
         self.either(|x| &x.user_attributes[..], |x| &x.user_attributes[..])
     }
 
-    pub fn get_ctxs(&self) -> &Option<ast::Contexts> {
-        self.either(|x| &x.ctxs, |x| &x.ctxs)
+    pub fn get_ctxs(&self) -> Option<&ast::Contexts> {
+        self.either(|x| &x.ctxs, |x| &x.ctxs).as_ref()
     }
 
     pub fn get_params(&self) -> &[ast::FunParam] {

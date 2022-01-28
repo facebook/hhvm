@@ -38,13 +38,13 @@ use std::collections::BTreeMap;
 fn add_symbol_refs<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
-    base: &Option<class::ClassType<'arena>>,
+    base: Option<&class::ClassType<'arena>>,
     implements: &[class::ClassType<'arena>],
     uses: &[&str],
     requirements: &[(class::ClassType<'arena>, TraitReqKind)],
 ) {
     base.iter()
-        .for_each(|x| emit_symbol_refs::add_class(emitter, *x));
+        .for_each(|&x| emit_symbol_refs::add_class(emitter, *x));
     implements
         .iter()
         .for_each(|x| emit_symbol_refs::add_class(emitter, *x));
@@ -924,7 +924,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     add_symbol_refs(
         alloc,
         emitter,
-        &base,
+        base.as_ref(),
         &implements,
         uses.as_ref(),
         &requirements,

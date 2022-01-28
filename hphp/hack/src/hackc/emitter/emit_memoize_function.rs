@@ -35,7 +35,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     original_id: function::FunctionType<'arena>,
     renamed_id: &function::FunctionType<'arena>,
-    deprecation_info: &Option<&[TypedValue<'arena>]>,
+    deprecation_info: Option<&[TypedValue<'arena>]>,
     fd: &'a T::FunDef,
 ) -> Result<HhasFunction<'arena>> {
     let alloc = emitter.alloc;
@@ -77,7 +77,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         emitter,
         &mut env,
         &f.span,
-        *deprecation_info,
+        deprecation_info,
         &params,
         &f.params,
         *renamed_id,
@@ -85,7 +85,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         is_reified,
         should_emit_implicit_context,
     )?;
-    let coeffects = HhasCoeffects::from_ast(alloc, &f.ctxs, &f.params, &f.tparams, vec![]);
+    let coeffects = HhasCoeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &f.tparams, vec![]);
     let body = make_wrapper_body(
         emitter,
         env,

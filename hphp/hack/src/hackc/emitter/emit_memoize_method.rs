@@ -134,7 +134,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     // level from the declaring scope when we're in a Memoize wrapper
     let coeffects = HhasCoeffects::from_ast(
         alloc,
-        &method.ctxs,
+        method.ctxs.as_ref(),
         &method.params,
         &method.tparams,
         &class.tparams,

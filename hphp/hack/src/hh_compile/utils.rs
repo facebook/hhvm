@@ -13,7 +13,7 @@ use std::{
     vec::IntoIter,
 };
 
-pub fn read_file_list(input_path: &Option<PathBuf>) -> Result<impl Iterator<Item = PathBuf>> {
+pub fn read_file_list(input_path: Option<&PathBuf>) -> Result<impl Iterator<Item = PathBuf>> {
     fn read_lines(r: impl Read) -> Result<Map<IntoIter<String>, fn(String) -> PathBuf>> {
         Ok(BufReader::new(r)
             .lines()

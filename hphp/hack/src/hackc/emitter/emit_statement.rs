@@ -210,7 +210,7 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
         a::Stmt_::Break => Ok(emit_break(e, env, pos)),
         a::Stmt_::Continue => Ok(emit_continue(e, env, pos)),
         a::Stmt_::Do(x) => emit_do(e, env, &x.0, &x.1),
-        a::Stmt_::For(x) => emit_for(e, env, &x.0, &x.1, &x.2, &x.3),
+        a::Stmt_::For(x) => emit_for(e, env, &x.0, x.1.as_ref(), &x.2, &x.3),
         a::Stmt_::Throw(x) => Ok(InstrSeq::gather(
             alloc,
             vec![
@@ -304,7 +304,7 @@ fn emit_awaitall<'a, 'arena, 'decl>(
     let alloc = env.arena;
     match el {
         [] => Ok(instr::empty(alloc)),
-        [(lvar, expr)] => emit_awaitall_single(e, env, pos, lvar, expr, block),
+        [(lvar, expr)] => emit_awaitall_single(e, env, pos, lvar.as_ref(), expr, block),
         _ => emit_awaitall_multi(e, env, pos, el, block),
     }
 }
@@ -313,7 +313,7 @@ fn emit_awaitall_single<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
-    lval: &Option<ast::Lid>,
+    lval: Option<&ast::Lid>,
     expr: &ast::Expr,
     block: &ast::Block,
 ) -> Result<InstrSeq<'arena>> {
@@ -1570,7 +1570,7 @@ fn emit_for<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     e1: &Vec<ast::Expr>,
-    e2: &Option<ast::Expr>,
+    e2: Option<&ast::Expr>,
     e3: &Vec<ast::Expr>,
     body: &[ast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
@@ -1583,7 +1583,7 @@ fn emit_for<'a, 'arena, 'decl>(
         env: &mut Env<'a, 'arena>,
         jmpz: bool,
         label: Label,
-        cond: &Option<ast::Expr>,
+        cond: Option<&ast::Expr>,
     ) -> Result<InstrSeq<'arena>> {
         let alloc = env.arena;
         Ok(match cond {

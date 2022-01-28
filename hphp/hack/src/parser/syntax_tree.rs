@@ -191,8 +191,8 @@ where
         &self.errors
     }
 
-    pub fn mode(&self) -> &Option<Mode> {
-        &self.mode
+    pub fn mode(&self) -> Option<Mode> {
+        self.mode
     }
 
     pub fn sc_state(&self) -> &State {

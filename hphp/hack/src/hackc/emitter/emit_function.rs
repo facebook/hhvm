@@ -96,7 +96,8 @@ pub fn emit_function<'a, 'arena, 'decl>(
         scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(&fd)));
     }
 
-    let mut coeffects = HhasCoeffects::from_ast(alloc, &f.ctxs, &f.params, &f.tparams, vec![]);
+    let mut coeffects =
+        HhasCoeffects::from_ast(alloc, f.ctxs.as_ref(), &f.params, &f.tparams, vec![]);
     if is_meth_caller {
         coeffects = coeffects.with_caller(alloc)
     }
@@ -158,7 +159,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
             e,
             original_id,
             &renamed_id,
-            &deprecation_info,
+            deprecation_info,
             &fd,
         )?)
     } else {

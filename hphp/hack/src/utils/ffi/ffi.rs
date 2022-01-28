@@ -7,13 +7,15 @@ use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::slice::from_raw_parts;
 
+/// Maybe<T> is similar to C++ `std::option`. It is just like Rust `Option<T>`
+/// but has repr(C) for use with with cbindgen.
 #[derive(Copy, PartialEq, PartialOrd, Eq, Ord, Debug, Hash)]
 #[repr(C)]
-/// Like `std::option`.
 pub enum Maybe<T> {
     Just(T),
     Nothing,
 }
+
 pub use self::Maybe::*;
 impl<T> Default for Maybe<T> {
     #[inline]
@@ -21,6 +23,7 @@ impl<T> Default for Maybe<T> {
         Nothing
     }
 }
+
 impl<T: Clone> Clone for Maybe<T> {
     #[inline]
     fn clone(&self) -> Self {
@@ -41,16 +44,16 @@ impl<T: Clone> Clone for Maybe<T> {
 impl<U> Maybe<U> {
     #[inline]
     pub const fn as_ref(&self) -> Maybe<&U> {
-        match *self {
-            Just(ref x) => Just(x),
+        match self {
+            Just(x) => Just(x),
             Nothing => Nothing,
         }
     }
 
     #[inline]
     pub fn as_mut(&mut self) -> Maybe<&mut U> {
-        match *self {
-            Just(ref mut x) => Just(x),
+        match self {
+            Just(x) => Just(x),
             Nothing => Nothing,
         }
     }
@@ -58,6 +61,11 @@ impl<U> Maybe<U> {
     #[inline]
     pub const fn is_just(&self) -> bool {
         matches!(self, Just(_))
+    }
+
+    #[inline]
+    pub const fn is_nothing(&self) -> bool {
+        matches!(self, Nothing)
     }
 
     #[inline]

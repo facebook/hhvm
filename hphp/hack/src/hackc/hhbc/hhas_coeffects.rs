@@ -159,7 +159,7 @@ impl<'arena> HhasCoeffects<'arena> {
 
     pub fn from_ast<Ex, En>(
         alloc: &'arena bumpalo::Bump,
-        ctxs_opt: &Option<a::Contexts>,
+        ctxs_opt: Option<&a::Contexts>,
         params: impl AsRef<[a::FunParam<Ex, En>]>,
         fun_tparams: impl AsRef<[a::Tparam<Ex, En>]>,
         cls_tparams: impl AsRef<[a::Tparam<Ex, En>]>,

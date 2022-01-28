@@ -154,7 +154,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     } else {
         HhasCoeffects::from_ast(
             emitter.alloc,
-            &method.ctxs,
+            method.ctxs.as_ref(),
             &method.params,
             &method.tparams,
             &class.tparams,

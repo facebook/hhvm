@@ -1833,7 +1833,62 @@ let check_class_where_constraints env c tc =
   in
   env
 
-let class_def_ env c tc =
+type class_parents = {
+  extends: (Aast.hint * decl_ty) list;
+  implements: (Aast.hint * decl_ty) list;
+  uses: (Aast.hint * decl_ty) list;
+  req_extends: (Aast.hint * decl_ty) list;
+  req_implements: (Aast.hint * decl_ty) list;
+  enum_includes: (Aast.hint * decl_ty) list option;
+}
+
+let class_parents_hints_to_types env c : class_parents =
+  let hints_and_decl_tys hints =
+    List.map hints ~f:(fun hint -> (hint, Decl_hint.hint env.decl_env hint))
+  in
+  let extends = hints_and_decl_tys c.c_extends in
+  let implements = hints_and_decl_tys c.c_implements in
+  let uses = hints_and_decl_tys c.c_uses in
+  let (req_extends, req_implements) = split_reqs c.c_reqs in
+  let req_extends = hints_and_decl_tys req_extends in
+  let req_implements = hints_and_decl_tys req_implements in
+  let enum_includes =
+    Option.map c.c_enum ~f:(fun e -> hints_and_decl_tys e.e_includes)
+  in
+  { extends; implements; uses; req_extends; req_implements; enum_includes }
+
+(** Add dependencies to parent constructors or produce errors if they're not a Tapply. *)
+let check_parents_are_tapply_add_constructor_deps env c parents =
+  let { extends; implements; uses; req_extends; req_implements; enum_includes }
+      =
+    parents
+  in
+  let additional_parents =
+    (* In an abstract class or a trait, we assume the interfaces
+       will be implemented in the future, so we take them as
+       part of the class (as requested by dependency injection implementers) *)
+    match c.c_kind with
+    | Ast_defs.Cclass k when Ast_defs.is_abstract k -> implements
+    | Ast_defs.Ctrait -> implements @ req_implements
+    | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> []
+  in
+  check_is_tapply_add_constructor_dep env extends;
+  check_is_tapply_add_constructor_dep env uses;
+  check_is_tapply_add_constructor_dep env req_extends;
+  check_is_tapply_add_constructor_dep env additional_parents;
+  Option.iter enum_includes ~f:(check_is_tapply_add_constructor_dep env);
+  ()
+
+(** Perform all class wellformedness checks which don't involve the hierarchy:
+  - attributes
+  - type parameter checks: `where` constraints + variance
+  - type hint wellformedness, incl. their `where` constraints
+  - generic static properties *)
+let class_wellformedness_checks env c tc (parents : class_parents) =
+  let { extends; implements; uses; _ } = parents in
+  let (pc, _) = c.c_name in
+  List.iter ~f:Errors.add_typing_error
+  @@ Typing_type_wellformedness.class_ env c;
   let (env, user_attributes) =
     let kind =
       if Ast_defs.is_c_enum c.c_kind then
@@ -1846,95 +1901,108 @@ let class_def_ env c tc =
     Typing.attributes_check_def env kind c.c_user_attributes
   in
   let (env, file_attrs) = Typing.file_attributes env c.c_file_attributes in
-  let ctx = Env.get_ctx env in
-  if not (skip_hierarchy_checks ctx) then check_override_keyword env c tc;
-  if not (skip_hierarchy_checks ctx) then check_enum_includes env c;
-  let (pc, c_name) = c.c_name in
-  let (req_extends, req_implements) = split_reqs c.c_reqs in
-  let hints_and_decl_tys hints =
-    List.map hints ~f:(fun hint -> (hint, Decl_hint.hint env.decl_env hint))
-  in
-  let extends = hints_and_decl_tys c.c_extends in
-  let implements = hints_and_decl_tys c.c_implements in
-  let uses = hints_and_decl_tys c.c_uses in
-  let req_extends = hints_and_decl_tys req_extends in
-  let req_implements = hints_and_decl_tys req_implements in
-  let additional_parents =
-    (* In an abstract class or a trait, we assume the interfaces
-       will be implemented in the future, so we take them as
-       part of the class (as requested by dependency injection implementers) *)
-    match c.c_kind with
-    | Ast_defs.Cclass k when Ast_defs.is_abstract k -> implements
-    | Ast_defs.Ctrait -> implements @ req_implements
-    | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> []
-  in
-  if not (skip_hierarchy_checks ctx) then (
-    check_implements_or_extends_unique implements;
-    check_implements_or_extends_unique extends
-  );
-  check_is_tapply_add_constructor_dep env extends;
-  check_is_tapply_add_constructor_dep env uses;
-  check_is_tapply_add_constructor_dep env req_extends;
-  check_is_tapply_add_constructor_dep env additional_parents;
-  begin
-    match c.c_enum with
-    | Some e ->
-      check_is_tapply_add_constructor_dep env (hints_and_decl_tys e.e_includes)
-    | _ -> ()
-  end;
+  check_parents_are_tapply_add_constructor_deps env c parents;
   let env = check_class_where_constraints env c tc in
   Typing_variance.class_def env c;
   check_no_generic_static_property env tc;
-  let impl = extends @ implements @ uses in
-  let impl =
-    if
-      TypecheckerOptions.require_extends_implements_ancestors
-        (Env.get_tcopt env)
-    then
-      impl @ req_extends @ req_implements
-    else
-      impl
-  in
-  let env = check_class_parents_where_constraints env pc impl in
-  if not (skip_hierarchy_checks ctx) then (
-    check_parent env c tc;
-    check_parents_sealed env c tc
-  );
-  if not (skip_hierarchy_checks ctx) then check_sealed env c;
-  let (_ : env) =
-    check_generic_class_with_SupportDynamicType env c (extends @ implements)
-  in
-  if not (skip_hierarchy_checks ctx) then check_extend_abstract c.c_name tc;
-  if (not (skip_hierarchy_checks ctx)) && Cls.const tc then
-    List.iter c.c_uses ~f:(check_non_const_trait_members pc env);
-  let (static_vars, vars) = split_vars c.c_vars in
-  let (constructor, static_methods, methods) = split_methods c.c_methods in
-  if not (skip_hierarchy_checks ctx) then (
-    List.iter static_vars ~f:(fun { cv_id = (p, id); _ } ->
-        check_static_class_element (Cls.get_prop tc) ~elt_type:`prop id p);
-    List.iter vars ~f:(fun { cv_id = (p, id); _ } ->
-        check_dynamic_class_element (Cls.get_sprop tc) ~elt_type:`prop id p);
-    List.iter static_methods ~f:(fun { m_name = (p, id); _ } ->
-        check_static_class_element (Cls.get_method tc) ~elt_type:`meth id p);
-    List.iter methods ~f:(fun { m_name = (p, id); _ } ->
-        check_dynamic_class_element (Cls.get_smethod tc) ~elt_type:`meth id p)
-  );
   let env =
-    if skip_hierarchy_checks ctx then
-      env
-    else
-      let (c_name_pos, _c_name) = c.c_name in
+    check_class_parents_where_constraints env pc (extends @ implements @ uses)
+  in
+  (env, user_attributes, file_attrs)
+
+(** Checks that static (resp. dynamic) members are also static (resp. dynamic) in the parents.*)
+let check_static_keyword_override c tc =
+  let (static_vars, vars) = split_vars c.c_vars in
+  let (_constructor, static_methods, methods) = split_methods c.c_methods in
+  List.iter static_vars ~f:(fun { cv_id = (p, id); _ } ->
+      check_static_class_element (Cls.get_prop tc) ~elt_type:`prop id p);
+  List.iter vars ~f:(fun { cv_id = (p, id); _ } ->
+      check_dynamic_class_element (Cls.get_sprop tc) ~elt_type:`prop id p);
+  List.iter static_methods ~f:(fun { m_name = (p, id); _ } ->
+      check_static_class_element (Cls.get_method tc) ~elt_type:`meth id p);
+  List.iter methods ~f:(fun { m_name = (p, id); _ } ->
+      check_dynamic_class_element (Cls.get_smethod tc) ~elt_type:`meth id p);
+  ()
+
+(** Perform all hierarchy checks,
+  i.e. checking that making this class a child of its parents is legal:
+  - requirements from `require` statements
+  - duplicate parents
+  - parents can have children (not final or const)
+  - __Sealed attribute
+  - dynamic-type related attributes w.r.t. parents
+  - __Disposable attribute w.r.t. parents
+  - individual member checks:
+    - subtyping parent members
+    - __Override attribute check
+    - `static` keyword with respect to parents
+    - enum inclusions
+    - abstract members in concrete class
+    - non-const members in const class*)
+let class_hierarchy_checks env c tc (parents : class_parents) =
+  if skip_hierarchy_checks (Env.get_ctx env) then
+    env
+  else
+    let (pc, _) = c.c_name in
+    let {
+      extends;
+      implements;
+      uses;
+      req_extends;
+      req_implements;
+      enum_includes = _;
+    } =
+      parents
+    in
+    let env = Typing_requirements.check_class env pc tc in
+    if shallow_decl_enabled (Env.get_ctx env) then
+      Typing_inheritance.check_class env pc tc;
+    check_override_keyword env c tc;
+    check_enum_includes env c;
+    check_implements_or_extends_unique implements;
+    check_implements_or_extends_unique extends;
+    check_parent env c tc;
+    check_parents_sealed env c tc;
+    check_sealed env c;
+    let (_ : env) =
+      check_generic_class_with_SupportDynamicType env c (extends @ implements)
+    in
+    check_extend_abstract c.c_name tc;
+    if Cls.const tc then
+      List.iter c.c_uses ~f:(check_non_const_trait_members pc env);
+    check_static_keyword_override c tc;
+    let impl = extends @ implements @ uses in
+    let impl =
+      if
+        TypecheckerOptions.require_extends_implements_ancestors
+          (Env.get_tcopt env)
+      then
+        impl @ req_extends @ req_implements
+      else
+        impl
+    in
+    let env =
       Typing_extends.check_implements_extends_uses
         env
         ~implements:(List.map implements ~f:snd)
         ~parents:(List.map impl ~f:snd)
-        (c_name_pos, tc)
+        (pc, tc)
+    in
+    if Typing_disposable.is_disposable_class env tc then
+      List.iter
+        (c.c_extends @ c.c_uses)
+        ~f:(Typing_disposable.enforce_is_disposable env);
+    env
+
+let class_def_ env c tc =
+  let parents = class_parents_hints_to_types env c in
+  let (env, user_attributes, file_attrs) =
+    class_wellformedness_checks env c tc parents
   in
+  let env = class_hierarchy_checks env c tc parents in
+  let (static_vars, vars) = split_vars c.c_vars in
+  let (constructor, static_methods, methods) = split_methods c.c_methods in
   let is_disposable = Typing_disposable.is_disposable_class env tc in
-  if (not (skip_hierarchy_checks ctx)) && is_disposable then
-    List.iter
-      (c.c_extends @ c.c_uses)
-      ~f:(Typing_disposable.enforce_is_disposable env);
   let (env, typed_vars_and_global_inference_envs) =
     List.map_env env vars ~f:(class_var_def ~is_static:false tc)
   in
@@ -1947,7 +2015,7 @@ let class_def_ env c tc =
   let (env, typed_typeconsts) =
     List.map_env env c.c_typeconsts ~f:(typeconst_def c)
   in
-  let in_enum_class = Env.is_enum_class env c_name in
+  let in_enum_class = Env.is_enum_class env (snd c.c_name) in
   let (env, consts) =
     List.map_env env c.c_consts ~f:(class_const_def ~in_enum_class c)
   in
@@ -2045,8 +2113,6 @@ let class_def ctx c =
   let (name_pos, name) = c.c_name in
   let tc = Env.get_class env name in
   Typing_helpers.add_decl_errors (Option.bind tc ~f:Cls.decl_errors);
-  List.iter ~f:Errors.add_typing_error
-  @@ Typing_type_wellformedness.class_ env c;
   match tc with
   | None ->
     (* This can happen if there was an error during the declaration
@@ -2063,15 +2129,6 @@ let class_def ctx c =
     then
       None
     else
-      let env =
-        if skip_hierarchy_checks ctx then
-          env
-        else
-          let env = Typing_requirements.check_class env name_pos tc in
-          if shallow_decl_enabled ctx then
-            Typing_inheritance.check_class env name_pos tc;
-          env
-      in
       Some (class_def_ env c tc)
 
 let gconst_def ctx cst =

@@ -1811,6 +1811,28 @@ let check_sealed env c =
   else
     sealed_subtype (Env.get_ctx env) c ~is_enum:false ~hard_error
 
+let check_class_where_constraints env c tc =
+  let (pc, _) = c.c_name in
+  let env =
+    Phase.localize_and_add_ast_generic_parameters_and_where_constraints
+      env
+      ~ignore_errors:false
+      c.c_tparams
+      c.c_where_constraints
+  in
+  let env =
+    Phase.check_where_constraints
+      ~in_class:true
+      ~use_pos:pc
+      ~definition_pos:(Pos_or_decl.of_raw_pos pc)
+      ~ety_env:
+        (empty_expand_env_with_on_error
+           (Env.unify_error_assert_primary_pos_in_current_decl env))
+      env
+      (Cls.where_constraints tc)
+  in
+  env
+
 let class_def_ env c tc =
   let (env, user_attributes) =
     let kind =
@@ -1860,24 +1882,7 @@ let class_def_ env c tc =
       check_is_tapply_add_constructor_dep env (hints_and_decl_tys e.e_includes)
     | _ -> ()
   end;
-  let env =
-    Phase.localize_and_add_ast_generic_parameters_and_where_constraints
-      env
-      ~ignore_errors:false
-      c.c_tparams
-      c.c_where_constraints
-  in
-  let env =
-    Phase.check_where_constraints
-      ~in_class:true
-      ~use_pos:pc
-      ~definition_pos:(Pos_or_decl.of_raw_pos pc)
-      ~ety_env:
-        (empty_expand_env_with_on_error
-           (Env.unify_error_assert_primary_pos_in_current_decl env))
-      env
-      (Cls.where_constraints tc)
-  in
+  let env = check_class_where_constraints env c tc in
   Typing_variance.class_def env c;
   check_no_generic_static_property env tc;
   let impl = extends @ implements @ uses in

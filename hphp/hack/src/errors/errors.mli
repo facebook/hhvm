@@ -42,7 +42,7 @@ type format =
 type per_file_errors
 
 (** The type of collections of errors *)
-type t [@@deriving eq]
+type t [@@deriving eq, show]
 
 module ErrorSet : Caml.Set.S with type elt := error
 

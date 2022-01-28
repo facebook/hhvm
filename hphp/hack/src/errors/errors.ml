@@ -74,10 +74,10 @@ module PhaseMap = struct
 end
 
 (** Results of single file analysis. *)
-type 'a file_t = 'a list PhaseMap.t [@@deriving eq]
+type 'a file_t = 'a list PhaseMap.t [@@deriving eq, show]
 
 (** Results of multi-file analysis. *)
-type 'a files_t = 'a file_t Relative_path.Map.t [@@deriving eq]
+type 'a files_t = 'a file_t Relative_path.Map.t [@@deriving eq, show]
 
 let files_t_fold v ~f ~init =
   Relative_path.Map.fold v ~init ~f:(fun path v acc ->
@@ -134,7 +134,7 @@ type applied_fixme = Pos.t * int [@@deriving eq]
 
 type per_file_errors = error file_t
 
-type t = error files_t * applied_fixme files_t [@@deriving eq]
+type t = error files_t * (applied_fixme files_t[@opaque]) [@@deriving eq, show]
 
 module Error = struct
   type t = error [@@deriving ord]

@@ -2008,12 +2008,7 @@ let class_hierarchy_checks env c tc (parents : class_parents) =
         ~f:(Typing_disposable.enforce_is_disposable env);
     env
 
-let class_def_ env c tc =
-  let parents = class_parents_hints_to_types env c in
-  let (env, user_attributes, file_attrs) =
-    class_wellformedness_checks env c tc parents
-  in
-  let env = class_hierarchy_checks env c tc parents in
+let check_class_members env c tc =
   let (static_vars, vars) = split_vars c.c_vars in
   let (constructor, static_methods, methods) = split_methods c.c_methods in
   let is_disposable = Typing_disposable.is_disposable_class env tc in
@@ -2047,11 +2042,42 @@ let class_def_ env c tc =
     List.filter_map static_methods ~f:(method_def ~is_disposable env tc)
     |> List.unzip
   in
-  let (methods, constr_global_inference_env) =
+  let (typed_methods, constr_global_inference_env) =
     match typed_constructor with
     | None -> (typed_static_methods @ typed_methods, [])
     | Some (m, global_inference_env) ->
       (m :: typed_static_methods @ typed_methods, [global_inference_env])
+  in
+  let typed_members =
+    ( typed_consts,
+      typed_typeconsts,
+      typed_vars,
+      typed_static_vars,
+      typed_methods )
+  in
+  let global_inference_envs =
+    methods_global_inference_envs
+    @ static_methods_global_inference_envs
+    @ constr_global_inference_env
+    @ static_vars_global_inference_envs
+    @ vars_global_inference_envs
+  in
+  (env, typed_members, global_inference_envs)
+
+let class_def_ env c tc =
+  let parents = class_parents_hints_to_types env c in
+  let (env, user_attributes, file_attrs) =
+    class_wellformedness_checks env c tc parents
+  in
+  let env = class_hierarchy_checks env c tc parents in
+  let ( env,
+        ( typed_consts,
+          typed_typeconsts,
+          typed_vars,
+          typed_static_vars,
+          typed_methods ),
+        global_inference_envs ) =
+    check_class_members env c tc
   in
   let (env, tparams) = class_type_param env c.c_tparams in
   let env = Typing_solver.solve_all_unsolved_tyvars env in
@@ -2082,7 +2108,7 @@ let class_def_ env c tc =
       Aast.c_consts = typed_consts;
       Aast.c_typeconsts = typed_typeconsts;
       Aast.c_vars = typed_static_vars @ typed_vars;
-      Aast.c_methods = methods;
+      Aast.c_methods = typed_methods;
       Aast.c_file_attributes = file_attrs;
       Aast.c_user_attributes = user_attributes;
       Aast.c_namespace = c.c_namespace;
@@ -2093,11 +2119,7 @@ let class_def_ env c tc =
       Aast.c_xhp_attrs = [];
       Aast.c_emit_id = c.c_emit_id;
     },
-    methods_global_inference_envs
-    @ static_methods_global_inference_envs
-    @ constr_global_inference_env
-    @ static_vars_global_inference_envs
-    @ vars_global_inference_envs )
+    global_inference_envs )
 
 let setup_env_for_class_def_check ctx c =
   let env = EnvFromDef.class_env ~origin:Decl_counters.TopLevel ctx c in

@@ -1049,7 +1049,6 @@ functor
       diag_subscribe: Diagnostic_subscription.t option;
       errors: Errors.t;
       telemetry: Telemetry.t;
-      adhoc_profiling: Adhoc_profiler.CallTree.t;
       files_checked: Relative_path.Set.t;
       full_check_done: bool;
       needs_recheck: Relative_path.Set.t;
@@ -1080,12 +1079,7 @@ functor
       let hulk_lite = genv.local_config.ServerLocalConfig.hulk_lite in
 
       let cgroup_typecheck_telemetry = ref None in
-      let ( errorl',
-            telemetry,
-            adhoc_profiling,
-            env,
-            cancelled,
-            time_first_typing_error ) =
+      let (errorl', telemetry, env, cancelled, time_first_typing_error) =
         let ctx = Provider_utils.ctx_from_server_env env in
         CgroupProfiler.step_start_end
           cgroup_steps
@@ -1097,7 +1091,6 @@ functor
                   Typing_check_service.errors = errorl;
                   delegate_state;
                   telemetry;
-                  adhoc_profiling;
                   diagnostic_pusher =
                     (diagnostic_pusher, time_first_typing_error);
                 } ),
@@ -1124,12 +1117,7 @@ functor
             typing_service = { env.typing_service with delegate_state };
           }
         in
-        ( errorl,
-          telemetry,
-          adhoc_profiling,
-          env,
-          cancelled,
-          time_first_typing_error )
+        (errorl, telemetry, env, cancelled, time_first_typing_error)
       in
       let telemetry =
         telemetry
@@ -1201,7 +1189,6 @@ functor
         diag_subscribe;
         errors;
         telemetry;
-        adhoc_profiling;
         files_checked;
         full_check_done;
         needs_recheck;
@@ -1789,7 +1776,6 @@ functor
         diag_subscribe;
         errors;
         telemetry = typecheck_telemetry;
-        adhoc_profiling;
         files_checked;
         full_check_done = _;
         needs_recheck;
@@ -1982,8 +1968,7 @@ functor
         ~experiments:genv.local_config.ServerLocalConfig.experiments
         ~desc:"serverTypeCheck"
         ~start_t:type_check_start_t
-        ~state_distance
-        ~adhoc_profiling:(Adhoc_profiler.CallTree.to_string adhoc_profiling);
+        ~state_distance;
       ( env,
         {
           CheckStats.reparse_count;

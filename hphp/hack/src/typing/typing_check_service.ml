@@ -450,7 +450,7 @@ let process_one_workitem
 
 let process_workitems
     (ctx : Provider_context.t)
-    ({ errors; dep_edges; telemetry; adhoc_profiling } : typing_result)
+    ({ errors; dep_edges; telemetry } : typing_result)
     (progress : typing_progress)
     ~(memory_cap : int option)
     ~(longlived_workers : bool)
@@ -530,12 +530,7 @@ let process_workitems
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_sharedmem_stack ();
   File_provider.local_changes_pop_sharedmem_stack ();
-  let adhoc_profiling =
-    Adhoc_profiler.CallTree.merge
-      adhoc_profiling
-      (Adhoc_profiler.get_and_reset ())
-  in
-  ({ errors; dep_edges; telemetry; adhoc_profiling }, progress)
+  ({ errors; dep_edges; telemetry }, progress)
 
 let load_and_process_workitems
     (ctx : Provider_context.t)
@@ -1131,7 +1126,6 @@ type result = {
   errors: Errors.t;
   delegate_state: Delegate.state;
   telemetry: Telemetry.t;
-  adhoc_profiling: Adhoc_profiler.CallTree.t;
   diagnostic_pusher: Diagnostic_pusher.t option * seconds_since_epoch option;
 }
 
@@ -1252,17 +1246,13 @@ let go_with_interrupt
         ~typecheck_info
     end
   in
-  let { errors; dep_edges; telemetry = typing_telemetry; adhoc_profiling } =
-    typing_result
-  in
+  let { errors; dep_edges; telemetry = typing_telemetry } = typing_result in
   Typing_deps.register_discovered_dep_edges dep_edges;
 
   let telemetry =
     telemetry |> Telemetry.object_ ~key:"profiling_info" ~value:typing_telemetry
   in
-  ( ( env,
-      { errors; delegate_state; telemetry; adhoc_profiling; diagnostic_pusher }
-    ),
+  ( (env, { errors; delegate_state; telemetry; diagnostic_pusher }),
     cancelled_fnl )
 
 let go

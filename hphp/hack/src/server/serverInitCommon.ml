@@ -133,14 +133,7 @@ let naming
   (env, Hh_logger.log_duration ("Naming " ^ telemetry_label) t)
 
 let log_type_check_end
-    env
-    genv
-    ~start_t
-    ~count
-    ~desc
-    ~init_telemetry
-    ~typecheck_telemetry
-    ~adhoc_profiling : unit =
+    env genv ~start_t ~count ~desc ~init_telemetry ~typecheck_telemetry : unit =
   let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
   let state_distance =
     match env.init_env.saved_state_delta with
@@ -161,7 +154,6 @@ let log_type_check_end
   in
   HackEventLogger.type_check_end
     (Some telemetry)
-    ~adhoc_profiling:(Adhoc_profiler.CallTree.to_string adhoc_profiling)
     ~heap_size:(SharedMem.SMTelemetry.heap_size ())
     ~started_count:count
     ~count
@@ -206,7 +198,6 @@ let type_check
       Typing_check_service.errors = errorl;
       delegate_state;
       telemetry = typecheck_telemetry;
-      adhoc_profiling;
       _;
     } =
       let memory_cap =
@@ -249,8 +240,7 @@ let type_check
       ~count
       ~desc:telemetry_label
       ~init_telemetry
-      ~typecheck_telemetry
-      ~adhoc_profiling;
+      ~typecheck_telemetry;
     (env, Hh_logger.log_duration logstring t)
   ) else
     let needs_recheck =

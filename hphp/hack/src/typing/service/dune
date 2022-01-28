@@ -3,7 +3,6 @@
  (wrapped false)
  (modules typing_service_types)
  (libraries
-  adhoc_profiler
   biglist
   core_kernel
   errors

@@ -1,4 +1,0 @@
-(library
- (name adhoc_profiler)
- (wrapped false)
- (libraries core_kernel))

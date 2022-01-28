@@ -348,7 +348,6 @@ let type_check_end
     ~heap_size:_
     ~started_count:_
     ~count:_
-    ~adhoc_profiling:_
     ~desc:_
     ~experiments:_
     ~start_t:_

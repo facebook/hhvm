@@ -28,7 +28,6 @@ type result = {
   errors: Errors.t;
   delegate_state: Typing_service_delegate.state;
   telemetry: Telemetry.t;
-  adhoc_profiling: Adhoc_profiler.CallTree.t;
   diagnostic_pusher: Diagnostic_pusher.t option * seconds_since_epoch option;
 }
 

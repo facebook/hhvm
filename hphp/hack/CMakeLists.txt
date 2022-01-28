@@ -213,6 +213,7 @@ function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
   set(RUST_PART_CXX "${FFI_BRIDGE_BIN}/${NAME}_ffi.cpp")
   set(RUST_PART_HEADER "${FFI_BRIDGE_BIN}/${NAME}_ffi.rs")
   set(GENERATED "${FFI_BRIDGE_BIN}/cxxbridge/${NAME}_ffi/${NAME}_ffi")
+  set(GENERATED_CXXBRIDGE "${FFI_BRIDGE_BIN}/cxxbridge")
 
   add_custom_command(
       OUTPUT ${RUST_PART_CXX}
@@ -238,6 +239,7 @@ function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
   # - it takes precedence over `-I`
   # - it only applies to `#include "foo"`, not `#include <foo>`
   target_compile_options("${NAME}_ffi" INTERFACE "-iquote" "${RUST_FFI_BUILD_ROOT}")
+  target_compile_options("${NAME}_ffi" PUBLIC "-iquote" "${GENERATED_CXXBRIDGE}")
 endfunction()
 
 build_cxx_bridge(parser "src/parser/ffi_bridge")

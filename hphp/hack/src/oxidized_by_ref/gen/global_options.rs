@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fb3d80e1be949b75f7a71b7ac3cc5283>>
+// @generated SignedSource<<d1d2c837671fed7b4c34847870c35eb0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -47,7 +47,6 @@ pub struct GlobalOptions<'a> {
     pub tco_remote_max_batch_size: isize,
     pub tco_remote_min_batch_size: isize,
     pub tco_num_remote_workers: isize,
-    pub tco_stream_errors: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub so_remote_version_specifier: Option<&'a str>,
     pub so_remote_worker_vfs_checkout_threshold: isize,

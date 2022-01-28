@@ -45,7 +45,6 @@ type rollout_flags = {
   use_direct_decl_parser: bool;
   longlived_workers: bool;
   require_saved_state: bool;
-  stream_errors: bool;
   force_shallow_decl_fanout: bool;
   log_from_client_when_slow_monitor_connections: bool;
   naming_sqlite_in_hack_64: bool;

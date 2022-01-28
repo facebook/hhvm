@@ -548,8 +548,6 @@ type t = {
       (** Allows the IDE to show the 'find all implementations' button *)
   allow_unstable_features: bool;
       (** Allows unstabled features to be enabled within a file via the '__EnableUnstableFeatures' attribute *)
-  stream_errors: bool;
-      (** Whether to send errors to client as soon as they are discovered. *)
   watchman: Watchman.t;
   save_and_upload_naming_table: bool;
       (** If enabled, saves naming table into a temp folder and uploads it to the remote typechecker *)
@@ -670,7 +668,6 @@ let default =
     memtrace_dir = None;
     go_to_implementation = true;
     allow_unstable_features = false;
-    stream_errors = false;
     watchman = Watchman.default;
     save_and_upload_naming_table = false;
     log_from_client_when_slow_monitor_connections = false;
@@ -1313,13 +1310,6 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let stream_errors =
-    bool_if_min_version
-      "stream_errors"
-      ~default:default.stream_errors
-      ~current_version
-      config
-  in
   let save_and_upload_naming_table =
     bool_if_min_version
       "save_and_upload_naming_table"
@@ -1493,7 +1483,6 @@ let load_ fn ~silent ~current_version overrides =
     memtrace_dir;
     go_to_implementation;
     allow_unstable_features;
-    stream_errors;
     watchman;
     force_remote_type_check;
     save_and_upload_naming_table;
@@ -1519,7 +1508,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       use_direct_decl_parser = options.use_direct_decl_parser;
       longlived_workers = options.longlived_workers;
       require_saved_state = options.require_saved_state;
-      stream_errors = options.stream_errors;
       force_shallow_decl_fanout = options.force_shallow_decl_fanout;
       log_from_client_when_slow_monitor_connections =
         options.log_from_client_when_slow_monitor_connections;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::rc::Rc;
+use std::sync::Arc;
 use std::{fs, io};
 
 use bumpalo::Bump;
@@ -18,16 +18,16 @@ use crate::shallow_decl_provider::ShallowDeclCache;
 
 #[derive(Debug)]
 pub struct ShallowDeclProvider<R: Reason> {
-    cache: Rc<dyn ShallowDeclCache<Reason = R>>,
+    cache: Arc<dyn ShallowDeclCache<Reason = R>>,
     alloc: &'static Allocator<R>,
-    relative_path_ctx: Rc<RelativePathCtx>,
+    relative_path_ctx: Arc<RelativePathCtx>,
 }
 
 impl<R: Reason> ShallowDeclProvider<R> {
     pub fn new(
-        cache: Rc<dyn ShallowDeclCache<Reason = R>>,
+        cache: Arc<dyn ShallowDeclCache<Reason = R>>,
         alloc: &'static Allocator<R>,
-        relative_path_ctx: Rc<RelativePathCtx>,
+        relative_path_ctx: Arc<RelativePathCtx>,
     ) -> Self {
         Self {
             cache,
@@ -36,12 +36,12 @@ impl<R: Reason> ShallowDeclProvider<R> {
         }
     }
 
-    pub fn get_shallow_class(&self, name: &Symbol) -> Option<Rc<ShallowClass<R>>> {
+    pub fn get_shallow_class(&self, name: &Symbol) -> Option<Arc<ShallowClass<R>>> {
         self.cache.get_shallow_class(name)
     }
 
     pub fn add_from_oxidized_class(&self, sc: &oxidized_by_ref::shallow_decl_defs::ClassDecl<'_>) {
-        let res = Rc::new(self.utils().shallow_class(sc));
+        let res = Arc::new(self.utils().shallow_class(sc));
         self.cache.put_shallow_class(Hc::clone(res.name.id()), res);
     }
 
@@ -50,7 +50,7 @@ impl<R: Reason> ShallowDeclProvider<R> {
         name: &str,
         sf: &oxidized_by_ref::shallow_decl_defs::FunDecl<'_>,
     ) {
-        let res = Rc::new(self.utils().shallow_fun(sf));
+        let res = Arc::new(self.utils().shallow_fun(sf));
         let name = self.alloc.symbol(name);
         self.cache.put_shallow_fun(name, res);
     }

@@ -2,8 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 mod cache;
 mod provider;
 
-pub use cache::{ShallowDeclCache, ShallowDeclLocalCache};
+pub use cache::{ShallowDeclCache, ShallowDeclGlobalCache};
 pub use provider::ShallowDeclProvider;

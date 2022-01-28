@@ -2,7 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::rc::Rc;
+
+use std::sync::Arc;
 
 use oxidized::{aast, nast};
 
@@ -18,7 +19,7 @@ pub struct TypingCheckUtils;
 
 impl TypingCheckUtils {
     pub fn type_file<R: Reason>(
-        ctx: Rc<TypingCtx<R>>,
+        ctx: Arc<TypingCtx<R>>,
         ast: &nast::Program,
         parsing_errors: Vec<ParsingError>,
     ) -> (tast::Program<R>, Vec<HackError<R>>) {
@@ -33,7 +34,7 @@ impl TypingCheckUtils {
             errs.extend(new_errs);
         };
         for def in ast.defs() {
-            let ctx = Rc::clone(&ctx);
+            let ctx = Arc::clone(&ctx);
             match def {
                 Def::Fun(f) => accumulate(TypingCheckJob::type_fun(ctx, &*f)),
                 Def::Class(c) => accumulate(TypingCheckJob::type_class(ctx, &*c)),

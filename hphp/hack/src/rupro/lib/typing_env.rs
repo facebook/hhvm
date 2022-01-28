@@ -2,9 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 #![allow(dead_code)]
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::reason::Reason;
 use crate::tast::SavedEnv;
@@ -18,7 +20,7 @@ use crate::utils::core::{IdentGen, LocalId};
 use im::HashMap;
 
 pub struct TEnv<R: Reason> {
-    pub ctx: Rc<TypingCtx<R>>,
+    pub ctx: Arc<TypingCtx<R>>,
 
     genv: Rc<TGEnv<R>>,
     lenv: Rc<TLEnv<R>>,
@@ -98,7 +100,7 @@ impl<R: Reason> PerContEnv<R> {
 }
 
 impl<R: Reason> TEnv<R> {
-    pub fn new(ctx: Rc<TypingCtx<R>>) -> Self {
+    pub fn new(ctx: Arc<TypingCtx<R>>) -> Self {
         let genv = Rc::new(TGEnv::new(&ctx));
         Self {
             ctx,
@@ -122,7 +124,7 @@ impl<R: Reason> TEnv<R> {
         self.errors.borrow_mut().push(error)
     }
 
-    pub fn fun_env(ctx: Rc<TypingCtx<R>>, _fd: &oxidized::aast::FunDef<(), ()>) -> Self {
+    pub fn fun_env(ctx: Arc<TypingCtx<R>>, _fd: &oxidized::aast::FunDef<(), ()>) -> Self {
         Self::new(ctx)
     }
 

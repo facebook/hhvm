@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::{HashMap, HashSet};
-use std::rc::Rc;
+use std::sync::Arc;
 
 use hcons::Hc;
 
@@ -19,14 +19,14 @@ use crate::shallow_decl_provider::ShallowDeclProvider;
 
 #[derive(Debug)]
 pub struct FoldedDeclProvider<R: Reason> {
-    cache: Rc<dyn FoldedDeclCache<Reason = R>>,
-    shallow_decl_provider: Rc<ShallowDeclProvider<R>>,
+    cache: Arc<dyn FoldedDeclCache<Reason = R>>,
+    shallow_decl_provider: Arc<ShallowDeclProvider<R>>,
 }
 
 impl<R: Reason> FoldedDeclProvider<R> {
     pub fn new(
-        cache: Rc<dyn FoldedDeclCache<Reason = R>>,
-        shallow_decl_provider: Rc<ShallowDeclProvider<R>>,
+        cache: Arc<dyn FoldedDeclCache<Reason = R>>,
+        shallow_decl_provider: Arc<ShallowDeclProvider<R>>,
     ) -> Self {
         Self {
             cache,
@@ -34,7 +34,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
         }
     }
 
-    pub fn get_folded_class(&self, name: &Symbol) -> Option<Rc<FoldedClass<R>>> {
+    pub fn get_folded_class(&self, name: &Symbol) -> Option<Arc<FoldedClass<R>>> {
         let mut stack = HashSet::new();
         self.get_folded_class_impl(&mut stack, name)
     }
@@ -91,7 +91,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
     fn decl_class_type(
         &self,
         stack: &mut HashSet<Symbol>,
-        acc: &mut HashMap<Symbol, Rc<FoldedClass<R>>>,
+        acc: &mut HashMap<Symbol, Arc<FoldedClass<R>>>,
         ty: &DeclTy<R>,
     ) {
         match &**ty.node() {
@@ -110,7 +110,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
         &self,
         stack: &mut HashSet<Symbol>,
         sc: &ShallowClass<R>,
-    ) -> HashMap<Symbol, Rc<FoldedClass<R>>> {
+    ) -> HashMap<Symbol, Arc<FoldedClass<R>>> {
         let mut acc = HashMap::new();
         sc.extends
             .iter()
@@ -120,7 +120,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn get_implements(
         &self,
-        parents: &HashMap<Symbol, Rc<FoldedClass<R>>>,
+        parents: &HashMap<Symbol, Arc<FoldedClass<R>>>,
         ty: &DeclTy<R>,
         inst: &mut HashMap<Symbol, DeclTy<R>>,
     ) {
@@ -144,8 +144,8 @@ impl<R: Reason> FoldedDeclProvider<R> {
     fn decl_class_impl(
         &self,
         sc: &ShallowClass<R>,
-        parents: &HashMap<Symbol, Rc<FoldedClass<R>>>,
-    ) -> Rc<FoldedClass<R>> {
+        parents: &HashMap<Symbol, Arc<FoldedClass<R>>>,
+    ) -> Arc<FoldedClass<R>> {
         let inh = Inherited::make(sc, parents);
 
         let mut methods = inh.methods;
@@ -163,7 +163,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             .iter()
             .for_each(|ty| self.get_implements(parents, ty, &mut anc));
 
-        Rc::new(FoldedClass {
+        Arc::new(FoldedClass {
             name: sc.name.id().clone(),
             pos: sc.name.pos().clone(),
             substs: inh.substs,
@@ -173,7 +173,11 @@ impl<R: Reason> FoldedDeclProvider<R> {
         })
     }
 
-    fn decl_class(&self, stack: &mut HashSet<Symbol>, name: &Symbol) -> Option<Rc<FoldedClass<R>>> {
+    fn decl_class(
+        &self,
+        stack: &mut HashSet<Symbol>,
+        name: &Symbol,
+    ) -> Option<Arc<FoldedClass<R>>> {
         let shallow_class = self.shallow_decl_provider.get_shallow_class(name)?;
         stack.insert(Hc::clone(name));
         let parents = self.decl_class_parents(stack, &shallow_class);
@@ -184,13 +188,14 @@ impl<R: Reason> FoldedDeclProvider<R> {
         &self,
         stack: &mut HashSet<Symbol>,
         name: &Symbol,
-    ) -> Option<Rc<FoldedClass<R>>> {
+    ) -> Option<Arc<FoldedClass<R>>> {
         match self.cache.get_folded_class(name) {
             Some(rc) => Some(rc),
             None => match self.decl_class(stack, name) {
                 None => None,
                 Some(rc) => {
-                    self.cache.put_folded_class(Hc::clone(name), Rc::clone(&rc));
+                    self.cache
+                        .put_folded_class(Hc::clone(name), Arc::clone(&rc));
                     Some(rc)
                 }
             },

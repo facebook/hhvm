@@ -6,43 +6,44 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::rc::Rc;
+
+use std::sync::Arc;
+
+use dashmap::DashMap;
 
 use crate::decl_defs::FoldedClass;
 use crate::pos::Symbol;
 use crate::reason::Reason;
 
-pub trait FoldedDeclCache: std::fmt::Debug {
+pub trait FoldedDeclCache: std::fmt::Debug + Send + Sync {
     type Reason: Reason;
 
-    fn get_folded_class(&self, name: &Symbol) -> Option<Rc<FoldedClass<Self::Reason>>>;
+    fn get_folded_class(&self, name: &Symbol) -> Option<Arc<FoldedClass<Self::Reason>>>;
 
-    fn put_folded_class(&self, name: Symbol, cls: Rc<FoldedClass<Self::Reason>>);
+    fn put_folded_class(&self, name: Symbol, cls: Arc<FoldedClass<Self::Reason>>);
 }
 
 #[derive(Debug)]
-pub struct FoldedDeclLocalCache<R: Reason> {
-    classes: RefCell<HashMap<Symbol, Rc<FoldedClass<R>>>>,
+pub struct FoldedDeclGlobalCache<R: Reason> {
+    classes: DashMap<Symbol, Arc<FoldedClass<R>>>,
 }
 
-impl<R: Reason> FoldedDeclLocalCache<R> {
+impl<R: Reason> FoldedDeclGlobalCache<R> {
     pub fn new() -> Self {
         Self {
-            classes: RefCell::new(HashMap::new()),
+            classes: DashMap::new(),
         }
     }
 }
 
-impl<R: Reason> FoldedDeclCache for FoldedDeclLocalCache<R> {
+impl<R: Reason> FoldedDeclCache for FoldedDeclGlobalCache<R> {
     type Reason = R;
 
-    fn get_folded_class(&self, name: &Symbol) -> Option<Rc<FoldedClass<R>>> {
-        self.classes.borrow().get(name).cloned()
+    fn get_folded_class(&self, name: &Symbol) -> Option<Arc<FoldedClass<R>>> {
+        self.classes.get(name).as_ref().map(|x| Arc::clone(x))
     }
 
-    fn put_folded_class(&self, name: Symbol, cls: Rc<FoldedClass<R>>) {
-        self.classes.borrow_mut().insert(name, cls);
+    fn put_folded_class(&self, name: Symbol, cls: Arc<FoldedClass<R>>) {
+        self.classes.insert(name, cls);
     }
 }

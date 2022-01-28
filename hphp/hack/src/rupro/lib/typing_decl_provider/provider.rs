@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 use hcons::Hc;
 
@@ -14,14 +14,14 @@ use crate::typing_decl_provider::{Class, TypingDeclCache};
 
 #[derive(Debug)]
 pub struct TypingDeclProvider<R: Reason> {
-    cache: Rc<dyn TypingDeclCache<Reason = R>>,
-    folded_decl_provider: Rc<FoldedDeclProvider<R>>,
+    cache: Arc<dyn TypingDeclCache<Reason = R>>,
+    folded_decl_provider: Arc<FoldedDeclProvider<R>>,
 }
 
 impl<R: Reason> TypingDeclProvider<R> {
     pub fn new(
-        cache: Rc<dyn TypingDeclCache<Reason = R>>,
-        folded_decl_provider: Rc<FoldedDeclProvider<R>>,
+        cache: Arc<dyn TypingDeclCache<Reason = R>>,
+        folded_decl_provider: Arc<FoldedDeclProvider<R>>,
     ) -> Self {
         Self {
             cache,
@@ -29,24 +29,24 @@ impl<R: Reason> TypingDeclProvider<R> {
         }
     }
 
-    pub fn get_folded_decl_provider(&self) -> &Rc<FoldedDeclProvider<R>> {
+    pub fn get_folded_decl_provider(&self) -> &Arc<FoldedDeclProvider<R>> {
         &self.folded_decl_provider
     }
 
-    pub fn get_class(&self, name: &Symbol) -> Option<Rc<Class<R>>> {
+    pub fn get_class(&self, name: &Symbol) -> Option<Arc<Class<R>>> {
         match self.cache.get_typing_class(name) {
             Some(rc) => Some(rc),
             None => {
                 let folded_decl = self.folded_decl_provider.get_folded_class(name)?;
-                let cls = Rc::new(Class::new(folded_decl));
+                let cls = Arc::new(Class::new(folded_decl));
                 self.cache
-                    .put_typing_class(Hc::clone(name), Rc::clone(&cls));
+                    .put_typing_class(Hc::clone(name), Arc::clone(&cls));
                 Some(cls)
             }
         }
     }
 
-    pub fn get_class_or_typedef(&self, name: &Symbol) -> Option<Rc<Class<R>>> {
+    pub fn get_class_or_typedef(&self, name: &Symbol) -> Option<Arc<Class<R>>> {
         self.get_class(name)
     }
 }

@@ -2,57 +2,58 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::rc::Rc;
+
+use std::sync::Arc;
+
+use dashmap::DashMap;
 
 use crate::decl_defs::{ShallowClass, ShallowFun};
 use crate::pos::Symbol;
 use crate::reason::Reason;
 
-pub trait ShallowDeclCache: std::fmt::Debug {
+pub trait ShallowDeclCache: std::fmt::Debug + Send + Sync {
     type Reason: Reason;
 
-    fn get_shallow_class(&self, name: &Symbol) -> Option<Rc<ShallowClass<Self::Reason>>>;
+    fn get_shallow_class(&self, name: &Symbol) -> Option<Arc<ShallowClass<Self::Reason>>>;
 
-    fn put_shallow_class(&self, name: Symbol, cls: Rc<ShallowClass<Self::Reason>>);
+    fn put_shallow_class(&self, name: Symbol, cls: Arc<ShallowClass<Self::Reason>>);
 
-    fn get_shallow_fun(&self, name: &Symbol) -> Option<Rc<ShallowFun<Self::Reason>>>;
+    fn get_shallow_fun(&self, name: &Symbol) -> Option<Arc<ShallowFun<Self::Reason>>>;
 
-    fn put_shallow_fun(&self, name: Symbol, f: Rc<ShallowFun<Self::Reason>>);
+    fn put_shallow_fun(&self, name: Symbol, f: Arc<ShallowFun<Self::Reason>>);
 }
 
 #[derive(Debug)]
-pub struct ShallowDeclLocalCache<R: Reason> {
-    classes: RefCell<HashMap<Symbol, Rc<ShallowClass<R>>>>,
-    funs: RefCell<HashMap<Symbol, Rc<ShallowFun<R>>>>,
+pub struct ShallowDeclGlobalCache<R: Reason> {
+    classes: DashMap<Symbol, Arc<ShallowClass<R>>>,
+    funs: DashMap<Symbol, Arc<ShallowFun<R>>>,
 }
 
-impl<R: Reason> ShallowDeclLocalCache<R> {
+impl<R: Reason> ShallowDeclGlobalCache<R> {
     pub fn new() -> Self {
         Self {
-            classes: RefCell::new(HashMap::new()),
-            funs: RefCell::new(HashMap::new()),
+            classes: DashMap::new(),
+            funs: DashMap::new(),
         }
     }
 }
 
-impl<R: Reason> ShallowDeclCache for ShallowDeclLocalCache<R> {
+impl<R: Reason> ShallowDeclCache for ShallowDeclGlobalCache<R> {
     type Reason = R;
 
-    fn get_shallow_class(&self, name: &Symbol) -> Option<Rc<ShallowClass<Self::Reason>>> {
-        self.classes.borrow().get(name).cloned()
+    fn get_shallow_class(&self, name: &Symbol) -> Option<Arc<ShallowClass<Self::Reason>>> {
+        self.classes.get(name).as_ref().map(|x| Arc::clone(x))
     }
 
-    fn put_shallow_class(&self, name: Symbol, cls: Rc<ShallowClass<Self::Reason>>) {
-        self.classes.borrow_mut().insert(name, cls);
+    fn put_shallow_class(&self, name: Symbol, cls: Arc<ShallowClass<Self::Reason>>) {
+        self.classes.insert(name, cls);
     }
 
-    fn get_shallow_fun(&self, name: &Symbol) -> Option<Rc<ShallowFun<Self::Reason>>> {
-        self.funs.borrow().get(name).cloned()
+    fn get_shallow_fun(&self, name: &Symbol) -> Option<Arc<ShallowFun<Self::Reason>>> {
+        self.funs.get(name).as_ref().map(|x| Arc::clone(x))
     }
 
-    fn put_shallow_fun(&self, name: Symbol, f: Rc<ShallowFun<Self::Reason>>) {
-        self.funs.borrow_mut().insert(name, f);
+    fn put_shallow_fun(&self, name: Symbol, f: Arc<ShallowFun<Self::Reason>>) {
+        self.funs.insert(name, f);
     }
 }

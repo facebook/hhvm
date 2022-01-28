@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::{hash_map::Entry, HashMap};
-use std::rc::Rc;
+use std::sync::Arc;
 
 use hcons::Hc;
 
@@ -112,7 +112,7 @@ impl<R: Reason> Inherited<R> {
 
     fn from_class(
         sc: &ShallowClass<R>,
-        parents: &HashMap<Symbol, Rc<FoldedClass<R>>>,
+        parents: &HashMap<Symbol, Arc<FoldedClass<R>>>,
         parent_ty: &DeclTy<R>,
     ) -> Self {
         if let Some((_, parent_pos_id, parent_tyl)) = parent_ty.unwrap_class_type() {
@@ -128,7 +128,7 @@ impl<R: Reason> Inherited<R> {
         Self::empty()
     }
 
-    fn from_parent(sc: &ShallowClass<R>, parents: &HashMap<Symbol, Rc<FoldedClass<R>>>) -> Self {
+    fn from_parent(sc: &ShallowClass<R>, parents: &HashMap<Symbol, Arc<FoldedClass<R>>>) -> Self {
         let all_inherited = sc
             .extends
             .iter()
@@ -142,7 +142,7 @@ impl<R: Reason> Inherited<R> {
 
     pub(crate) fn make(
         sc: &ShallowClass<R>,
-        parents: &HashMap<Symbol, Rc<FoldedClass<R>>>,
+        parents: &HashMap<Symbol, Arc<FoldedClass<R>>>,
     ) -> Self {
         Self::from_parent(sc, parents)
     }

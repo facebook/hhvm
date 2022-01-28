@@ -2,15 +2,16 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 use std::hash::Hash;
 
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 
 use crate::pos::{BPos, NPos, Pos};
 
-pub trait Reason: Eq + Hash + Clone + ToOcamlRep + std::fmt::Debug + 'static {
+pub trait Reason: Eq + Hash + Clone + ToOcamlRep + std::fmt::Debug + Send + Sync + 'static {
     /// Position type.
-    type Pos: Pos;
+    type Pos: Pos + Send + Sync + 'static;
 
     fn mk(cons: &dyn Fn() -> ReasonImpl<Self::Pos>) -> Self;
 

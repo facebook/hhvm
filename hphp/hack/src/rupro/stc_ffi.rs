@@ -6,26 +6,25 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
+use std::path::PathBuf;
+use std::sync::Arc;
+
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
-use std::path::PathBuf;
-use std::rc::Rc;
 use structopt::StructOpt;
 
 use hackrs::alloc;
 use hackrs::ast_provider::AstProvider;
-use hackrs::folded_decl_provider::{FoldedDeclLocalCache, FoldedDeclProvider};
+use hackrs::folded_decl_provider::{FoldedDeclGlobalCache, FoldedDeclProvider};
 use hackrs::pos::{Prefix, RelativePathCtx};
-use hackrs::shallow_decl_provider::{ShallowDeclLocalCache, ShallowDeclProvider};
+use hackrs::reason::{NReason, Reason};
+use hackrs::shallow_decl_provider::{ShallowDeclGlobalCache, ShallowDeclProvider};
 use hackrs::special_names::SpecialNames;
 use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
-use hackrs::typing_decl_provider::{TypingDeclLocalCache, TypingDeclProvider};
-
-use hackrs::reason::Reason;
-// use hackrs::reason::BReason;
-use hackrs::reason::NReason;
+use hackrs::typing_decl_provider::{TypingDeclGlobalCache, TypingDeclProvider};
 
 // fn create_nast(path: PathBuf) -> oxidized::aast::Program<(), ()> {}
 
@@ -57,38 +56,38 @@ struct CliOptions {
 pub extern "C" fn stc_main() {
     let cli_options = CliOptions::from_args();
 
-    let relative_path_ctx = Rc::new(RelativePathCtx {
+    let relative_path_ctx = Arc::new(RelativePathCtx {
         root: PathBuf::new(),
         hhi: PathBuf::new(),
         dummy: PathBuf::new(),
         tmp: PathBuf::new(),
     });
 
-    let options = Rc::new(oxidized::global_options::GlobalOptions::default());
+    let options = Arc::new(oxidized::global_options::GlobalOptions::default());
     let (global_alloc, alloc, _pos_alloc) = alloc::get_allocators_for_main();
     let special_names = SpecialNames::new(global_alloc);
     let ast_provider = AstProvider::new(
-        Rc::clone(&relative_path_ctx),
+        Arc::clone(&relative_path_ctx),
         special_names,
-        Rc::clone(&options),
+        Arc::clone(&options),
     );
-    let shallow_decl_cache = Rc::new(ShallowDeclLocalCache::new());
-    let shallow_decl_provider = Rc::new(ShallowDeclProvider::new(
+    let shallow_decl_cache = Arc::new(ShallowDeclGlobalCache::new());
+    let shallow_decl_provider = Arc::new(ShallowDeclProvider::new(
         shallow_decl_cache,
         alloc,
         relative_path_ctx,
     ));
-    let folded_decl_cache = Rc::new(FoldedDeclLocalCache::new());
-    let folded_decl_provider = Rc::new(FoldedDeclProvider::new(
+    let folded_decl_cache = Arc::new(FoldedDeclGlobalCache::new());
+    let folded_decl_provider = Arc::new(FoldedDeclProvider::new(
         folded_decl_cache,
-        Rc::clone(&shallow_decl_provider),
+        Arc::clone(&shallow_decl_provider),
     ));
-    let typing_decl_cache = Rc::new(TypingDeclLocalCache::new());
-    let typing_decl_provider = Rc::new(TypingDeclProvider::new(
+    let typing_decl_cache = Arc::new(TypingDeclGlobalCache::new());
+    let typing_decl_provider = Arc::new(TypingDeclProvider::new(
         typing_decl_cache,
-        Rc::clone(&folded_decl_provider),
+        Arc::clone(&folded_decl_provider),
     ));
-    let ctx = Rc::new(TypingCtx::new(
+    let ctx = Arc::new(TypingCtx::new(
         alloc,
         folded_decl_provider,
         typing_decl_provider,
@@ -109,7 +108,7 @@ pub extern "C" fn stc_main() {
 
     for fln in &filenames {
         let (ast, errs) = ast_provider.get_ast(fln).unwrap();
-        let (tast, errs) = TypingCheckUtils::type_file::<NReason>(Rc::clone(&ctx), &ast, errs);
+        let (tast, errs) = TypingCheckUtils::type_file::<NReason>(Arc::clone(&ctx), &ast, errs);
         if !errs.is_empty() {
             unimplemented!()
         }

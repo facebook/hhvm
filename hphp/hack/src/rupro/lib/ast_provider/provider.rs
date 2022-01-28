@@ -2,8 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 use std::fs;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use aast_parser::{AastParser, Error as ParserError};
 use lint_rust::LintError;
@@ -53,16 +54,16 @@ impl Default for MakeParserEnv {
 
 #[derive(Debug)]
 pub struct AstProvider {
-    relative_path_ctx: Rc<RelativePathCtx>,
+    relative_path_ctx: Arc<RelativePathCtx>,
     special_names: &'static SpecialNames,
-    parser_options: Rc<oxidized::parser_options::ParserOptions>,
+    parser_options: Arc<oxidized::parser_options::ParserOptions>,
 }
 
 impl AstProvider {
     pub fn new(
-        relative_path_ctx: Rc<RelativePathCtx>,
+        relative_path_ctx: Arc<RelativePathCtx>,
         special_names: &'static SpecialNames,
-        parser_options: Rc<oxidized::parser_options::ParserOptions>,
+        parser_options: Arc<oxidized::parser_options::ParserOptions>,
     ) -> Self {
         Self {
             relative_path_ctx,

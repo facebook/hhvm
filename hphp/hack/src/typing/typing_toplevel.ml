@@ -1799,6 +1799,18 @@ let check_override_keyword env c tc =
     List.iter (Cls.smethods tc) ~f:(check_override ~is_static:true)
   )
 
+let check_sealed env c =
+  let hard_error =
+    TypecheckerOptions.enforce_sealed_subclasses (Env.get_tcopt env)
+  in
+  if is_enum_or_enum_class c.c_kind then
+    if TypecheckerOptions.enable_enum_supertyping (Env.get_tcopt env) then
+      sealed_subtype (Env.get_ctx env) c ~is_enum:true ~hard_error
+    else
+      ()
+  else
+    sealed_subtype (Env.get_ctx env) c ~is_enum:false ~hard_error
+
 let class_def_ env c tc =
   let (env, user_attributes) =
     let kind =
@@ -1883,17 +1895,7 @@ let class_def_ env c tc =
     check_parent env c tc;
     check_parents_sealed env c tc
   );
-  (if not (skip_hierarchy_checks ctx) then
-    let hard_error =
-      TypecheckerOptions.enforce_sealed_subclasses (Env.get_tcopt env)
-    in
-    if is_enum_or_enum_class c.c_kind then
-      if TypecheckerOptions.enable_enum_supertyping (Env.get_tcopt env) then
-        sealed_subtype ctx c ~is_enum:true ~hard_error
-      else
-        ()
-    else
-      sealed_subtype ctx c ~is_enum:false ~hard_error);
+  if not (skip_hierarchy_checks ctx) then check_sealed env c;
   let (_ : env) =
     check_generic_class_with_SupportDynamicType env c (extends @ implements)
   in

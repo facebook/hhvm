@@ -1,0 +1,6 @@
+File "T66283164.php.pess", line 19, characters 10-38:
+Invalid return type (Typing[4110])
+  File "T66283164.php.pess", line 18, characters 65-99:
+  Expected `~supportdyn<(function(TR): void)>`
+  File "T66283164.php.pess", line 19, characters 10-38:
+  But got `(<<__SupportDynamicType>> function(dynamic $x): dynamic)`

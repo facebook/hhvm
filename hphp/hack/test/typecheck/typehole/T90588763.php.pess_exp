@@ -1,0 +1,6 @@
+File "T90588763.php.pess", line 19, characters 12-13:
+Invalid return type (Typing[4110])
+  File "T90588763.php.pess", line 17, characters 72-78:
+  Expected `dynamic`
+  File "T90588763.php.pess", line 19, characters 12-13:
+  But got `string`

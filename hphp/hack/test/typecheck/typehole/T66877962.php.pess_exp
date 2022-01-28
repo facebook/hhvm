@@ -1,0 +1,6 @@
+File "T66877962.php.pess", line 26, characters 17-18:
+Invalid argument (Typing[4110])
+  File "T66877962.php.pess", line 19, characters 24-30:
+  Expected `dynamic`
+  File "T66877962.php.pess", line 25, characters 12-14:
+  But got `Ref<[unresolved]>`

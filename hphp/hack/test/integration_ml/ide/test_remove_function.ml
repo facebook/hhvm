@@ -30,10 +30,10 @@ let full_diagnostics =
   "
 /bar.php:
 File \"/bar.php\", line 4, characters 3-5:
-Unbound name: `foo` (a global function) (Naming[2049])
+Unbound name (typing): `foo` (Typing[4107])
 
 File \"/bar.php\", line 4, characters 3-5:
-Unbound name (typing): `foo` (Typing[4107])
+Unbound name: `foo` (a global function) (Naming[2049])
 "
 
 let test () =
@@ -44,7 +44,6 @@ let test () =
       [(foo_name, foo_contents); (bar_name, bar_contents) (* no errors *)]
   in
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env in
   let (env, loop_outputs) = Test.(run_loop_once env default_loop_input) in
   Test.assert_no_diagnostics loop_outputs;
 
@@ -60,4 +59,4 @@ let test () =
 
   (* Asking for global error list will trigger recheck of bar.php *)
   let (_, loop_outputs) = Test.full_check_status env in
-  Test.assert_diagnostics loop_outputs full_diagnostics
+  Test.assert_diagnostics_string loop_outputs full_diagnostics

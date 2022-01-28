@@ -60,10 +60,9 @@ let test () =
   Test.assert_env_errors env init_errors;
 
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_output init_diagnostics;
+  Test.assert_diagnostics_string loop_output init_diagnostics;
 
   (* Replace one of the duplicate definitions with a parsing error *)
   let env = Test.open_file env foo2_name ~contents:"<?hh // strict \n {" in
@@ -89,7 +88,7 @@ let test () =
   let (env, _) = Test.edit_file env foo2_name "<?hh // strict" in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_output final_diagnostics;
+  Test.assert_diagnostics_string loop_output final_diagnostics;
 
   (* Trigger a global recheck just to be sure *)
   let (env, _) = Test.status env in

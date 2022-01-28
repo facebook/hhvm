@@ -59,6 +59,8 @@ module ErrorMap = struct
     FileMap.find_opt map k1 >>= fun inner_map -> PhaseMap.find_opt inner_map k2
 
   let mem map k1 k2 = Option.is_some @@ find_opt map k1 k2
+
+  let files = FileMap.keys
 end
 
 (** This keeps track of the set of errors in the current LSP client and
@@ -88,6 +90,8 @@ module ErrorTracker : sig
   (** Reset the tracker for when the previous client has been lost
       and we have got / will get a new one. *)
   val reset_for_new_client : t -> t
+
+  val get_files_with_diagnostics : t -> Relative_path.t list
 
   (** Module to export internal functions for unit testing. Do not use in production code. *)
   module TestExporter : sig
@@ -363,6 +367,9 @@ end = struct
     let all_errors = compute_total_errors errors_in_ide to_push in
     { errors_in_ide = FileMap.empty; to_push = all_errors; errors_beyond_limit }
 
+  let get_files_with_diagnostics : t -> Relative_path.t list =
+   (fun { errors_in_ide; _ } -> ErrorMap.files errors_in_ide)
+
   module TestExporter = struct
     let make ~errors_in_ide ~to_push ~errors_beyond_limit =
       { errors_in_ide; to_push; errors_beyond_limit }
@@ -507,6 +514,10 @@ let push_whats_left : t -> t * seconds_since_epoch option =
     ~phase:Errors.Typing
     pusher
     Errors.empty
+
+let get_files_with_diagnostics : t -> Relative_path.t list =
+ fun { error_tracker; _ } ->
+  ErrorTracker.get_files_with_diagnostics error_tracker
 
 module TestExporter = struct
   module FileMap = FileMap

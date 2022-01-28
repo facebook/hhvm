@@ -129,37 +129,33 @@ let test () =
   let disk_contents = create_bars disk_contents 200 in
   let env = Test.setup_disk env disk_contents in
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env ~error_limit:10 in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  (* At the beggining we get errorrs for 10 of them, and foo() is on line 3 *)
-  assert_10_diagnostics loop_output;
   Test.assert_diagnostics_in
     loop_output
-    bar_107_name
+    ~filename:bar_107_name
     bar_107_foo_line_3_diagnostics;
 
   (* Move foo 2 lines down *)
   let env = Test.open_file env foo_name ~contents:(foo_contents "\n\n") in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  (* See all already received diagnostics updated *)
   assert_10_diagnostics loop_output;
+  let (env, loop_output) = Test.full_check_status env in
   Test.assert_diagnostics_in
     loop_output
-    bar_107_name
+    ~filename:bar_107_name
     bar_107_foo_line_5_diagnostics;
+  Test.assert_diagnostics_in
+    loop_output
+    ~filename:(bar_name 108)
+    bar_108_foo_line_5_diagnostics;
 
   (* Fix one of the errors *)
   let (env, _) = Test.edit_file env bar_107_name "" in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_output bar107_cleared;
-
-  (* Trigger next full recheck to get more global errors *)
-  let (env, loop_output) = Test.full_check_status env in
-  (* Notice that foo position is correct on line 5 *)
-  Test.assert_diagnostics loop_output bar_108_foo_line_5_diagnostics;
+  Test.assert_diagnostics_string loop_output bar107_cleared;
 
   (* Edit foo back to test "edit already opened file" scenario too. *)
   let (env, _) = Test.edit_file env foo_name (foo_contents "") in
@@ -170,8 +166,11 @@ let test () =
   let (env, _) = Test.edit_file env bar_106_name "" in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_output bar106_cleared;
+  Test.assert_diagnostics_string loop_output bar106_cleared;
   let (env, loop_output) = Test.full_check_status env in
   (* Notice that foo position is back to line 3 *)
-  Test.assert_diagnostics loop_output bar_109_foo_line_3_diagnostics;
+  Test.assert_diagnostics_in
+    loop_output
+    ~filename:(bar_name 109)
+    bar_109_foo_line_3_diagnostics;
   ignore env

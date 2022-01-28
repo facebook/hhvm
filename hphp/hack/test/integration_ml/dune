@@ -13,7 +13,11 @@
   server_client_provider
   server_command_types
   server_env
-  test_injector_config))
+  test_injector_config)
+ (preprocess
+  (pps
+   ppx_deriving.show
+   ppx_deriving.eq)))
 
 (library
  (name runner_base)

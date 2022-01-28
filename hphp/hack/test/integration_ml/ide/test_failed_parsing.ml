@@ -72,7 +72,6 @@ let test () =
       [(foo_name, foo_returns_int_contents); (bar_name, bar_contents)]
   in
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env in
   Test.assert_no_errors env;
 
   let env = Test.wait env in
@@ -82,7 +81,7 @@ let test () =
   let env = Test.open_file env bar_name ~contents:parse_error in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_output bar_parse_error_diagnostics;
+  Test.assert_diagnostics_string loop_output bar_parse_error_diagnostics;
 
   let env = Test.open_file env foo_name ~contents:foo_returns_string_contents in
   let env = Test.wait env in

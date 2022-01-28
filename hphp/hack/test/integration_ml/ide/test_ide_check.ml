@@ -57,6 +57,14 @@ class B extends A {
 
 let final_global_diagnostics =
   "
+/a.php:
+File \"/a.php\", line 4, characters 10-12:
+Typing error (Typing[4110])
+  File \"/a.php\", line 4, characters 5-12:
+  Expected `num` because this is used in an arithmetic operation
+  File \"/a.php\", line 4, characters 10-12:
+  But got `string`
+
 /b.php:
 File \"/b.php\", line 4, characters 12-14:
 No instance method `foo` in `B` (Typing[4053])
@@ -79,7 +87,6 @@ let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [(a_name, a_contents1); (b_name, b_contents)] in
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env in
   (* Open a file and send two edits, both with errors, in quick succession. *)
   let env = Test.open_file env a_name in
   let (env, loop_output) = Test.edit_file env a_name a_contents2 in
@@ -94,7 +101,7 @@ let test () =
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
   (* Expect diagnostics only for the most recent version of the file *)
-  Test.assert_diagnostics loop_output a_contents3_diagnostics;
+  Test.assert_diagnostics_string loop_output a_contents3_diagnostics;
 
   (* Check that edit is reflected in autocomplete results *)
   let (env, loop_output) = Test.autocomplete env autocomplete_contents in
@@ -116,4 +123,4 @@ let test () =
         })
   in
   (* Global recheck produces full list of errors, including errors in b.php *)
-  Test.assert_diagnostics loop_output final_global_diagnostics
+  Test.assert_diagnostics_string loop_output final_global_diagnostics

@@ -76,10 +76,9 @@ let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [(foo_name, foo_disk_contents)] in
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
   Test.assertSingleError foo_disk_errors (Errors.get_error_list env.errorl);
-  Test.assert_diagnostics loop_output foo_disk_diagnostics;
+  Test.assert_diagnostics_string loop_output foo_disk_diagnostics;
 
   let env = Test.open_file env foo_name in
   let (env, _) = Test.edit_file env foo_name foo_ide_contents in
@@ -96,7 +95,7 @@ let test () =
     | List.Or_unequal_lengths.Unequal_lengths ->
       Test.fail "Expected 2 errors.\n"
   end;
-  Test.assert_diagnostics loop_output foo_ide_diagnostics;
+  Test.assert_diagnostics_string loop_output foo_ide_diagnostics;
 
   (* Close the file and check that error lists are back to reflecting disk
    * contents *)
@@ -105,4 +104,4 @@ let test () =
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
   let (env, _) = Test.status env in
   Test.assertSingleError foo_disk_errors (Errors.get_error_list env.errorl);
-  Test.assert_diagnostics loop_output foo_disk_diagnostics
+  Test.assert_diagnostics_string loop_output foo_disk_diagnostics

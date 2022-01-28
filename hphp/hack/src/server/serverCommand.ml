@@ -80,8 +80,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | IDE_AUTOCOMPLETE _ -> false
   | IDE_FFP_AUTOCOMPLETE _ -> false
   | CODE_ACTIONS _ -> false
-  | SUBSCRIBE_DIAGNOSTIC _ -> false
-  | UNSUBSCRIBE_DIAGNOSTIC _ -> false
   | OUTLINE _ -> false
   | IDE_IDLE -> false
   | RAGE -> false

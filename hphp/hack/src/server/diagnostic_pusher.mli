@@ -33,6 +33,8 @@ val push_new_errors :
     or None if not, e.g. there was nothing to push or no persistent client or the push failed. *)
 val push_whats_left : t -> t * seconds_since_epoch option
 
+val get_files_with_diagnostics : t -> Relative_path.t list
+
 (** Module to export internal functions for unit testing. Do not use in production code. *)
 module TestExporter : sig
   module FileMap : module type of Relative_path.Map

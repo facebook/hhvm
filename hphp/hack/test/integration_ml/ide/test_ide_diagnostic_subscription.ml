@@ -53,17 +53,15 @@ let test () =
   let env = Test.setup_server () in
   let env = Test.connect_persistent_client env in
   (* Initially there is a single typing error in bar.php *)
-  let env = Test.setup_disk env [(bar_name, bar_contents)] in
-  let env = Test.subscribe_diagnostic ~id:diagnostic_subscription_id env in
-  let (env, loop_outputs) = Test.(run_loop_once env default_loop_input) in
+  let (env, loop_outputs) = Test.change_files env [(bar_name, bar_contents)] in
   (* Initial list of errors is pushed after subscribing *)
-  Test.assert_diagnostics loop_outputs bar_diagnostics;
+  Test.assert_diagnostics_string loop_outputs bar_diagnostics;
 
   (* Open and edit file to have errors *)
   let env = Test.open_file env foo_name ~contents:foo_contents in
   let env = Test.wait env in
   let (env, loop_outputs) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_outputs foo_diagnostics;
+  Test.assert_diagnostics_string loop_outputs foo_diagnostics;
   let env = Test.wait env in
   let (env, loop_outputs) = Test.(run_loop_once env default_loop_input) in
   assert_no_push_message loop_outputs;
@@ -72,7 +70,7 @@ let test () =
   let (env, _) = Test.edit_file env foo_name "" in
   let env = Test.wait env in
   let (env, loop_outputs) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_outputs foo_clear_diagnostics;
+  Test.assert_diagnostics_string loop_outputs foo_clear_diagnostics;
   let env = Test.wait env in
   let (env, loop_outputs) = Test.(run_loop_once env default_loop_input) in
   assert_no_push_message loop_outputs;

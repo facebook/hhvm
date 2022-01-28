@@ -8,7 +8,12 @@
  *
  *)
 
+open Reordered_argument_collections
 open Integration_test_base_types
+module FileMap = SMap
+module ErrorSet = SSet
+
+type error_messages_per_file = ErrorSet.t FileMap.t [@@deriving eq, show]
 
 val setup_server :
   ?custom_config:ServerConfig.t ->
@@ -62,9 +67,6 @@ val run_loop_once :
   ServerEnv.env -> ('a, 'b) loop_inputs -> ServerEnv.env * ('a, 'b) loop_outputs
 
 (* wrappers around run_loop_once for most common operations *)
-
-val subscribe_diagnostic :
-  ?id:int -> ?error_limit:int -> ServerEnv.env -> ServerEnv.env
 
 val open_file : ServerEnv.env -> ?contents:string -> string -> ServerEnv.env
 
@@ -140,9 +142,13 @@ val assert_no_diagnostics : ('a, 'b) loop_outputs -> unit
 
 val assert_has_diagnostics : ('a, 'b) loop_outputs -> unit
 
-val assert_diagnostics : ('a, 'b) loop_outputs -> string -> unit
+val assert_diagnostics :
+  ('a, 'b) loop_outputs -> error_messages_per_file -> unit
 
-val assert_diagnostics_in : ('a, 'b) loop_outputs -> string -> string -> unit
+val assert_diagnostics_string : ('a, 'b) loop_outputs -> string -> unit
+
+val assert_diagnostics_in :
+  ('a, 'b) loop_outputs -> filename:string -> string -> unit
 
 val get_diagnostics :
   ('a, 'b) loop_outputs -> Errors.finalized_error list SMap.t

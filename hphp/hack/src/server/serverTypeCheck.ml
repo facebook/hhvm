@@ -187,18 +187,15 @@ let get_files_with_stale_errors
 (*****************************************************************************)
 
 let push_errors env ~rechecked ~phase new_errors =
-  if TypecheckerOptions.stream_errors env.tcopt then
-    let (diagnostic_pusher, time_errors_pushed) =
-      Diagnostic_pusher.push_new_errors
-        env.diagnostic_pusher
-        ~rechecked
-        new_errors
-        ~phase
-    in
-    let env = { env with diagnostic_pusher } in
-    (env, time_errors_pushed)
-  else
-    (env, None)
+  let (diagnostic_pusher, time_errors_pushed) =
+    Diagnostic_pusher.push_new_errors
+      env.diagnostic_pusher
+      ~rechecked
+      new_errors
+      ~phase
+  in
+  let env = { env with diagnostic_pusher } in
+  (env, time_errors_pushed)
 
 let erase_errors env = push_errors env Errors.empty
 
@@ -535,13 +532,12 @@ end
 module LazyCheckKind : CheckKindType = struct
   let get_files_to_parse env = (env.ide_needs_parsing, true)
 
-  let ide_diagnosed_files env =
-    match env.diag_subscribe with
-    | Some ds -> Diagnostic_subscription.diagnosed_files ds
-    | None -> Relative_path.Set.empty
+  let some_ide_diagnosed_files env =
+    Diagnostic_pusher.get_files_with_diagnostics env.diagnostic_pusher
+    |> fun l -> List.take l 10 |> Relative_path.Set.of_list
 
   let is_ide_file env x =
-    Relative_path.Set.mem (ide_diagnosed_files env) x
+    Relative_path.Set.mem (some_ide_diagnosed_files env) x
     || Relative_path.Set.mem env.editor_open_files x
 
   let get_defs_to_redecl ~reparsed ~env ~ctx =
@@ -549,7 +545,7 @@ module LazyCheckKind : CheckKindType = struct
      * to files that are relevant to IDE *)
     get_files_with_stale_errors
       ~reparsed
-      ~filter:(Some (ide_diagnosed_files env))
+      ~filter:(Some (some_ide_diagnosed_files env))
       ~phases:[Errors.Decl]
       ~errors:env.errorl
       ~ctx
@@ -579,7 +575,9 @@ module LazyCheckKind : CheckKindType = struct
     if Typing_deps.DepSet.cardinal to_redecl_phase2_deps > 1000 then
       (* inspecting tons of dependencies would take more time that just
          * rechecking all relevant files. *)
-      Relative_path.Set.union env.editor_open_files (ide_diagnosed_files env)
+      Relative_path.Set.union
+        env.editor_open_files
+        (some_ide_diagnosed_files env)
     else
       Typing_deps.DepSet.fold
         to_redecl_phase2_deps
@@ -612,7 +610,7 @@ module LazyCheckKind : CheckKindType = struct
       get_files_with_stale_errors
         ~ctx
         ~reparsed
-        ~filter:(Some (ide_diagnosed_files env))
+        ~filter:(Some (some_ide_diagnosed_files env))
         ~phases:[Errors.Decl; Errors.Typing]
         ~errors:env.errorl
     in

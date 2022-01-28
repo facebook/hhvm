@@ -67,7 +67,6 @@ let test () =
       ]
   in
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
   Test.assert_no_diagnostics loop_output;
 
@@ -80,4 +79,4 @@ let test () =
   let (env, _) = Test.edit_file env foo_name foo_contents in
   let env = Test.wait env in
   let (_, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_output bar_diagnostics
+  Test.assert_diagnostics_string loop_output bar_diagnostics

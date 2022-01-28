@@ -454,37 +454,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let actions = CodeActionsService.go ~ctx ~entry ~path ~range in
     (env, actions)
   | DISCONNECT -> (ServerFileSync.clear_sync_data env, ())
-  | SUBSCRIBE_DIAGNOSTIC { id; error_limit } ->
-    if TypecheckerOptions.stream_errors env.tcopt then
-      (env, ())
-    else
-      let initial_errors =
-        if is_full_check_done env.full_check_status then
-          env.errorl
-        else
-          Errors.empty
-      in
-      let new_env =
-        {
-          env with
-          diag_subscribe =
-            Some (Diagnostic_subscription.of_id id ~initial_errors ?error_limit);
-        }
-      in
-      let () = Hh_logger.log "Diag_subscribe: SUBSCRIBE %d" id in
-      (new_env, ())
-  | UNSUBSCRIBE_DIAGNOSTIC id ->
-    let diag_subscribe =
-      match env.diag_subscribe with
-      | Some x when Diagnostic_subscription.get_id x = id ->
-        let () = Hh_logger.log "Diag_subscribe: UNSUBSCRIBE %d" id in
-        None
-      | x ->
-        let () = Hh_logger.log "Diag_subscribe: UNSUBSCRIBE %d no effect" id in
-        x
-    in
-    let new_env = { env with diag_subscribe } in
-    (new_env, ())
   | OUTLINE path ->
     ( env,
       ServerCommandTypes.FileName path

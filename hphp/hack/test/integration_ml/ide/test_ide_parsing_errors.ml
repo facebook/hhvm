@@ -60,7 +60,6 @@ function test(Foo $foo) {
 let test () =
   let env = Test.setup_server () in
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env in
   let env = Test.open_file env foo_parent_name ~contents:foo_parent_contents1 in
   let env = Test.open_file env foo_name ~contents:foo_contents1 in
   let env = Test.wait env in
@@ -72,7 +71,7 @@ let test () =
   let (env, _) = Test.edit_file env foo_name foo_contents2 in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_output foo_diagnostics;
+  Test.assert_diagnostics_string loop_output foo_diagnostics;
 
   (* Change the Foo parent to trigger invalidating Foo *)
   let (env, _) = Test.edit_file env foo_parent_name foo_parent_contents2 in

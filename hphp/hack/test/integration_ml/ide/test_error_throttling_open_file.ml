@@ -52,27 +52,7 @@ let test () =
   let env = Test.setup_disk env disk_contests in
   (* After connecting, errors for 10 of them will be pushed to editor *)
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic ~error_limit:10 env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  let diagnostics_map = get_diagnostics_map loop_output in
-  let files_with_errors = get_files_with_errors diagnostics_map in
-  let error_count =
-    SMap.fold diagnostics_map ~init:0 ~f:(fun _key errors count ->
-        count + List.length errors)
-  in
-  if error_count <> 10 then
-    Test.fail
-      (Printf.sprintf "Expected no more than 10 errors, got: %d" error_count);
-
-  (* f123 will not be one of them *)
-  let (f123_name, f123_contents) = create_foo 123 in
-  if SSet.mem files_with_errors f123_name then
-    Test.fail
-      (Printf.sprintf "Expected errors for %s to be throttled" f123_name);
-
-  (* But it should change after opening that file *)
-  let env = Test.open_file env f123_name ~contents:f123_contents in
-  let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_output f123_diagnostics;
+  let (f123_name, _) = create_foo 123 in
+  Test.assert_diagnostics_in loop_output ~filename:f123_name f123_diagnostics;
   ignore env

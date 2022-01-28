@@ -74,7 +74,6 @@ let test () =
     Test.setup_disk env [(foo_name, foo_returns_int); (bar_name, bar_contents)]
   in
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
   Test.assert_no_errors env;
   Test.assert_no_diagnostics loop_output;
@@ -85,7 +84,7 @@ let test () =
   let (env, _) = Test.edit_file env foo_name foo_returns_string in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_output bar_diagnostics;
+  Test.assert_diagnostics_string loop_output bar_diagnostics;
 
   (* Close bar, make sure that errors is still there, not cleared *)
   let (env, _) = Test.close_file env bar_name in
@@ -98,4 +97,4 @@ let test () =
   let (env, _) = Test.edit_file env foo_name foo_returns_int in
   let env = Test.wait env in
   let (_, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_output bar_clear
+  Test.assert_diagnostics_string loop_output bar_clear

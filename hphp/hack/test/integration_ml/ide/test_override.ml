@@ -72,7 +72,6 @@ let test () =
   Test.assert_no_errors env;
 
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env in
   let env = Test.open_file env a_name ~contents:a_without_foo_contents in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
@@ -81,9 +80,9 @@ let test () =
   let (env, loop_output) = Test.full_check_status env in
   Test.assert_env_errors env c_errors;
 
-  Test.assert_diagnostics loop_output c_diagnostics;
+  Test.assert_diagnostics_string loop_output c_diagnostics;
 
   let (env, _) = Test.edit_file env a_name a_with_foo_contents in
   let env = Test.wait env in
   let (_, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_output c_clear_diagnostics
+  Test.assert_diagnostics_string loop_output c_clear_diagnostics

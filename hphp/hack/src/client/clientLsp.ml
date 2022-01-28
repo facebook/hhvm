@@ -2074,16 +2074,12 @@ let do_shutdown
       (* In Main_loop state, we're expected to unsubscribe diagnostics and tell *)
       (* server to disconnect so it can revert the state of its unsaved files.  *)
       Main_env.(
-        log "Diag_subscribe: clientLsp do_shutdown unsubscribing diagnostic 0 ";
         let%lwt () =
           rpc
             menv.conn
             ref_unblocked_time
             ~desc:"shutdown"
-            (ServerCommandTypes.UNSUBSCRIBE_DIAGNOSTIC 0)
-        in
-        let%lwt () =
-          rpc menv.conn (ref 0.0) ~desc:"shutdown" ServerCommandTypes.DISCONNECT
+            ServerCommandTypes.DISCONNECT
         in
         Lwt.return_unit)
     | In_init _ienv ->
@@ -4763,7 +4759,6 @@ let handle_server_message
 let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
     =
   log "connect_after_hello";
-  let ignore = ref 0.0 in
   let%lwt () =
     try%lwt
       (* tell server we want persistent connection *)
@@ -4780,15 +4775,6 @@ let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
         | _ -> failwith "Didn't get server Connected response"
       end;
 
-      (* tell server we want diagnostics *)
-      log "Diag_subscribe: clientLsp subscribing diagnostic 0";
-      let%lwt () =
-        rpc
-          server_conn
-          ignore
-          ~desc:"connect"
-          ServerCommandTypes.(SUBSCRIBE_DIAGNOSTIC default_subscribe_diagnostic)
-      in
       (* Extract the list of file changes we're tracking *)
       let editor_open_files =
         UriMap.elements

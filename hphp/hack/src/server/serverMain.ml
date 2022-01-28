@@ -515,11 +515,6 @@ let main_loop_command_handler client_kind client result =
       } ->
     finish_command_handling env
 
-let has_pending_disk_changes genv =
-  match genv.notifier_async_reader () with
-  | Some reader when Buffered_line_reader.is_readable reader -> true
-  | _ -> false
-
 let generate_and_update_recheck_id env =
   let recheck_id = new_serve_iteration_id () in
   let env =
@@ -562,44 +557,12 @@ let idle_if_no_client env waiting_client =
 
 (** Push diagnostics (typechecker errors in the IDE are called diagnostics) to IDE.
     Return a reason why nothing was pushed and optionally the timestamp of the push. *)
-let push_diagnostics genv env : env * string * seconds_since_epoch option =
-  if TypecheckerOptions.stream_errors env.tcopt then
-    let (diagnostic_pusher, time_errors_pushed) =
-      Diagnostic_pusher.push_whats_left env.diagnostic_pusher
-    in
-    let env = { env with diagnostic_pusher } in
-    (env, "pushed any leftover", time_errors_pushed)
-  else
-    match env.diag_subscribe with
-    | None -> (env, "no diag subscriptions", None)
-    | Some sub ->
-      let client = Option.value_exn (Ide_info_store.get_client ()) in
-      (* Should we hold off sending diagnostics to the client? *)
-      if ClientProvider.client_has_message client then
-        (env, "client has message", None)
-      else if not @@ Relative_path.Set.is_empty env.ide_needs_parsing then
-        ( env,
-          "ide_needs_parsing: processed edits but didn't recheck them yet",
-          None )
-      else if has_pending_disk_changes genv then
-        (env, "has_pending_disk_changes", None)
-      else
-        let (sub, errors, is_truncated) =
-          Diagnostic_subscription.pop_errors sub ~global_errors:env.errorl
-        in
-        let env = { env with diag_subscribe = Some sub } in
-        if SMap.is_empty errors then
-          (env, "is_empty errors", None)
-        else
-          let res = ServerCommandTypes.DIAGNOSTIC { errors; is_truncated } in
-          (try
-             ClientProvider.send_push_message_to_client client res;
-             let time_errors_pushed = Some (Unix.gettimeofday ()) in
-             (env, "sent push message", time_errors_pushed)
-           with
-          | ClientProvider.Client_went_away ->
-            (* Leaving cleanup of this condition to handled_connection function *)
-            (env, "Client_went_away", None))
+let push_diagnostics env : env * string * seconds_since_epoch option =
+  let (diagnostic_pusher, time_errors_pushed) =
+    Diagnostic_pusher.push_whats_left env.diagnostic_pusher
+  in
+  let env = { env with diagnostic_pusher } in
+  (env, "pushed any leftover", time_errors_pushed)
 
 let log_recheck_end stats ~errors ~diag_reason =
   let telemetry =
@@ -711,7 +674,7 @@ let serve_one_iteration genv env client_provider =
       selected_client
   in
   let t_done_recheck = Unix.gettimeofday () in
-  let (env, diag_reason, time_errors_pushed) = push_diagnostics genv env in
+  let (env, diag_reason, time_errors_pushed) = push_diagnostics env in
   let t_sent_diagnostics = Unix.gettimeofday () in
   let stats =
     ServerEnv.RecheckLoopStats.record_result_sent_ts stats time_errors_pushed

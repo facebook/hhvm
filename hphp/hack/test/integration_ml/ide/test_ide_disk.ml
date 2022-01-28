@@ -57,7 +57,6 @@ let test () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [(foo_name, foo_no_errors)] in
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env in
   (* There are no errors initially *)
   check_has_no_errors env;
 

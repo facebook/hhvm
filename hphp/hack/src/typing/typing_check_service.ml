@@ -569,35 +569,31 @@ let load_and_process_workitems
 (*****************************************************************************)
 
 let possibly_push_new_errors_to_lsp_client :
-    Provider_context.t ->
     progress:Typing_service_types.typing_progress ->
     Errors.t ->
     Diagnostic_pusher.t option ->
     Diagnostic_pusher.t option * seconds_since_epoch option =
- fun ctx ~progress new_errors diag ->
-  if TypecheckerOptions.stream_errors (Provider_context.get_tcopt ctx) then
-    match diag with
-    | None -> (None, None)
-    | Some diag ->
-      let rechecked =
-        progress.completed
-        |> List.filter_map ~f:(function
-               | Check { path; was_already_deferred = _ } -> Some path
-               | Declare _
-               | Prefetch _ ->
-                 None)
-        |> Relative_path.Set.of_list
-      in
-      let (diag, time_errors_pushed) =
-        Diagnostic_pusher.push_new_errors
-          diag
-          ~rechecked
-          new_errors
-          ~phase:Errors.Typing
-      in
-      (Some diag, time_errors_pushed)
-  else
-    (diag, None)
+ fun ~progress new_errors diag ->
+  match diag with
+  | None -> (None, None)
+  | Some diag ->
+    let rechecked =
+      progress.completed
+      |> List.filter_map ~f:(function
+             | Check { path; was_already_deferred = _ } -> Some path
+             | Declare _
+             | Prefetch _ ->
+               None)
+      |> Relative_path.Set.of_list
+    in
+    let (diag, time_errors_pushed) =
+      Diagnostic_pusher.push_new_errors
+        diag
+        ~rechecked
+        new_errors
+        ~phase:Errors.Typing
+    in
+    (Some diag, time_errors_pushed)
 
 (** Merge the results from multiple workers.
 
@@ -607,7 +603,6 @@ let possibly_push_new_errors_to_lsp_client :
 let merge
     ~(should_prefetch_deferred_files : bool)
     ~(batch_counts_by_worker_id : int SMap.t ref)
-    (ctx : Provider_context.t)
     (delegate_state : Delegate.state ref)
     (workitems_to_process : workitem BigList.t ref)
     (workitems_initial_count : int)
@@ -709,7 +704,6 @@ let merge
 
   let (diag_pusher, time_errors_pushed) =
     possibly_push_new_errors_to_lsp_client
-      ctx
       ~progress
       produced_by_job.errors
       !diagnostic_pusher
@@ -986,7 +980,6 @@ let process_in_parallel
         (merge
            ~should_prefetch_deferred_files
            ~batch_counts_by_worker_id
-           ctx
            delegate_state
            workitems_to_process
            workitems_initial_count
@@ -1054,7 +1047,6 @@ let process_sequentially
   in
   let push_result =
     possibly_push_new_errors_to_lsp_client
-      ctx
       ~progress
       typing_result.errors
       diagnostic_pusher

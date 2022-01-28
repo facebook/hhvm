@@ -324,12 +324,6 @@ type cst_search_input = {
 }
 [@@deriving show]
 
-type subscribe_diagnostic = {
-  id: int;
-  error_limit: int option;
-}
-[@@deriving show]
-
 (* The following datatypes can be interpreted as follows:
  * MESSAGE_TAG : Argument type (sent from client to server) -> return type t *)
 type _ t =
@@ -420,8 +414,6 @@ type _ t =
   | IDE_FFP_AUTOCOMPLETE : string * position -> AutocompleteTypes.ide_result t
   | CODE_ACTIONS : string * range -> Lsp.CodeAction.command_or_action list t
   | DISCONNECT : unit t
-  | SUBSCRIBE_DIAGNOSTIC : subscribe_diagnostic -> unit t
-  | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t
   | OUTLINE : string -> Outline.outline t
   | IDE_IDLE : unit t
   | RAGE : ServerRageTypes.result t
@@ -449,8 +441,6 @@ type cmd_metadata = {
   desc: string;
 }
 
-let default_subscribe_diagnostic = { id = 0; error_limit = None }
-
 let is_disconnect_rpc : type a. a t -> bool = function
   | DISCONNECT -> true
   | _ -> false
@@ -464,8 +454,6 @@ let is_critical_rpc : type a. a t -> bool = function
   | OPEN_FILE _ -> true
   | CLOSE_FILE _ -> true
   | EDIT_FILE _ -> true
-  | SUBSCRIBE_DIAGNOSTIC _ -> true
-  | UNSUBSCRIBE_DIAGNOSTIC _ -> true
   | _ -> false
 
 type 'a command =

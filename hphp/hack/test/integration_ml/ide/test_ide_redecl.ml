@@ -70,7 +70,6 @@ let test () =
     Test.setup_disk env [("foo.php", foo_contents); ("bar.php", bar_contents)]
   in
   (* Edit foo, which causes bar.php to be added to "lazy_decl_later" *)
-  let env = Test.subscribe_diagnostic ~id:diagnostic_subscription_id env in
   let (env, _) = Test.(run_loop_once env default_loop_input) in
   let env = Test.open_file env "foo.php" ~contents:foo_contents in
   let env = Test.wait env in

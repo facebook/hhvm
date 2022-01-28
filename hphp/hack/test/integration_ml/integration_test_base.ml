@@ -19,6 +19,11 @@ open Int.Replace_polymorphic_compare
 
 exception Integration_test_failure
 
+module FileMap = SMap
+module ErrorSet = SSet
+
+type error_messages_per_file = ErrorSet.t FileMap.t [@@deriving eq, show]
+
 let root = "/"
 
 let hhi = "/hhi"
@@ -79,7 +84,8 @@ to the test disk and add them to disk_needs_parsing. After one server run loop, 
 This isn't exactly the same as how initialization does it, but the purpose is not to test the hhi
 files, but to test incremental mode behavior with Hhi files present.
 *)
-let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () =
+let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () : ServerEnv.env
+    =
   test_init_common () ~hhi_files;
 
   let init_id = Random_id.short_string () in
@@ -94,7 +100,7 @@ let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () =
         }
     | None -> Typing_deps_mode.InMemoryMode None
   in
-  let result =
+  let env =
     match custom_config with
     | Some config -> ServerEnvBuild.make_env ~init_id ~deps_mode config
     | None -> ServerEnvBuild.make_env ~init_id ~deps_mode !genv.ServerEnv.config
@@ -109,7 +115,7 @@ let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () =
   let sienv =
     SymbolIndex.initialize
       ~globalrev:None
-      ~gleanopt:result.ServerEnv.gleanopt
+      ~gleanopt:env.ServerEnv.gleanopt
       ~namespace_map:[]
       ~provider_name:"LocalIndex"
       ~quiet:true
@@ -119,7 +125,7 @@ let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () =
   in
   (* Return environment *)
   {
-    result with
+    env with
     ServerEnv.disk_needs_parsing = hhi_set;
     ServerEnv.local_symbol_table = sienv;
   }
@@ -226,7 +232,17 @@ let assertEqual expected got =
   let expected = String.strip expected in
   let got = String.strip got in
   if String.( <> ) expected got then
-    fail (Printf.sprintf "Expected:\n%s\nGot:\n%s\n" expected got)
+    fail (Printf.sprintf "Expected:\n%s\n\nBut got:\n%s\n" expected got)
+
+let assert_errors_equal
+    ~(expected : error_messages_per_file) ~(got : error_messages_per_file) :
+    unit =
+  if not (equal_error_messages_per_file expected got) then
+    fail
+      (Printf.sprintf
+         "Expected errors:\n%s\n\nBut got:\n%s\n"
+         (show_error_messages_per_file expected)
+         (show_error_messages_per_file got))
 
 let change_files env disk_changes =
   let (env, loop_output) =
@@ -303,21 +319,6 @@ let assertSingleError expected err_list =
         fmt_actual
     in
     fail msg
-
-let subscribe_diagnostic ?(id = 4) ?error_limit env =
-  let (env, _) =
-    run_loop_once
-      env
-      {
-        default_loop_input with
-        persistent_client_request =
-          Some (Request (SUBSCRIBE_DIAGNOSTIC { id; error_limit }));
-      }
-  in
-  fail_on_none
-    "Expected to subscribe to push diagnostics"
-    env.ServerEnv.diag_subscribe;
-  env
 
 let open_file env ?contents file_name =
   let file_name = root ^ file_name in
@@ -470,32 +471,17 @@ let assert_no_diagnostics loop_output =
   | _ -> ()
 
 let assert_has_diagnostics loop_output =
-  match loop_output.push_messages with
-  | DIAGNOSTIC _ :: _ -> ()
-  | BUSY_STATUS s :: _ ->
-    let msg =
-      match s with
-      | Needs_local_typecheck -> "Needs_local_typecheck"
-      | Doing_local_typecheck -> "Doing_local_typecheck"
-      | Done_local_typecheck -> "Done_local_typecheck"
-      | Doing_global_typecheck _ -> "Doing_global_typecheck"
-      | Done_global_typecheck _ -> "Done_global_typecheck"
-    in
-    let msg =
-      Printf.sprintf "Expected DIAGNOSTIC, but got BUSY_STATUS %s." msg
-    in
-    fail msg
-  | NEW_CLIENT_CONNECTED :: _ ->
-    fail "Expected DIAGNOSTIC, but got NEW_CLIENT_CONNECTED."
-  | FATAL_EXCEPTION e :: _
-  | NONFATAL_EXCEPTION e :: _ ->
-    let msg =
-      Printf.sprintf
-        "Expected DIAGNOSTIC, but got NON/FATAL_EXCEPTION:\n%s"
-        e.Marshal_tools.message
-    in
-    fail msg
-  | [] -> fail "Expected to receive push diagnostics."
+  match
+    List.find loop_output.push_messages ~f:(function
+        | DIAGNOSTIC _ -> true
+        | _ -> false)
+  with
+  | Some _ -> ()
+  | None ->
+    fail
+      (Printf.sprintf
+         "Expected at least one DIAGNOSTIC message, but got %s"
+         (ServerCommandTypes.show_pushes loop_output.push_messages))
 
 let errors_to_string buf x =
   List.iter x ~f:(fun error ->
@@ -750,34 +736,46 @@ let load_state
     Printf.eprintf "> FAILED %s: %s\n" s (Telemetry.to_string telemetry);
     assert false
 
-let diagnostics_to_string x =
+let diagnostics_to_string (x : ServerCommandTypes.diagnostic_errors) =
   let buf = Buffer.create 1024 in
   SMap.iter x ~f:(fun path errors ->
       Printf.bprintf buf "%s:\n" path;
       errors_to_string buf errors);
   Buffer.contents buf
 
+let diagnostics_to_strings (diagnostics : ServerCommandTypes.diagnostic_errors)
+    : error_messages_per_file =
+  FileMap.map diagnostics ~f:(fun errors ->
+      errors
+      |> List.map ~f:(fun err -> err |> Errors.to_string |> String.strip)
+      |> ErrorSet.of_list)
+
 let errors_to_string x =
   let buf = Buffer.create 1024 in
   errors_to_string buf x;
   Buffer.contents buf
 
-let get_diagnostics loop_output =
-  let diags =
-    List.filter_map loop_output.push_messages ~f:(function
-        | DIAGNOSTIC { errors; is_truncated = _ } -> Some errors
-        | _ -> None)
-  in
-  match diags with
-  | m :: _ -> m
-  | [] -> fail "Expected at least one diagnostic message"
+let get_diagnostics loop_output : diagnostic_errors =
+  List.filter_map loop_output.push_messages ~f:(function
+      | DIAGNOSTIC { errors; is_truncated = _ } -> Some errors
+      | _ -> None)
+  |> List.fold
+       ~init:FileMap.empty
+       ~f:
+         (SMap.union ~combine:(fun _ err _ ->
+              (* Only take the most recent diagnostic per file *) Some err))
 
-let assert_diagnostics loop_output expected =
+let assert_diagnostics loop_output (expected : error_messages_per_file) =
+  let diagnostics = get_diagnostics loop_output in
+  let diagnostics_as_strings = diagnostics_to_strings diagnostics in
+  assert_errors_equal ~expected ~got:diagnostics_as_strings
+
+let assert_diagnostics_string loop_output (expected : string) =
   let diagnostics = get_diagnostics loop_output in
   let diagnostics_as_string = diagnostics_to_string diagnostics in
   assertEqual expected diagnostics_as_string
 
-let assert_diagnostics_in loop_output filename expected =
+let assert_diagnostics_in loop_output ~filename expected =
   let diagnostics = get_diagnostics loop_output in
   let diagnostics =
     SMap.filter diagnostics ~f:(fun path _ ->

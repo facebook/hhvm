@@ -93,7 +93,6 @@ let test () =
   let disk_contests = create_bars disk_contests 200 in
   let env = Test.setup_disk env disk_contests in
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env ~error_limit:10 in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
   Test.assert_no_errors env;
   Test.assert_no_diagnostics loop_output;
@@ -113,26 +112,16 @@ let test () =
 
   (* Trigger global recheck *)
   let (env, loop_output) = Test.full_check_status env in
-  let diagnostics_map = get_diagnostics_map loop_output in
-  let files_with_errors = get_files_with_errors diagnostics_map in
-  SSet.iter files_with_errors ~f:print_endline;
-
-  let error_count =
-    SMap.fold diagnostics_map ~init:0 ~f:(fun _key errors count ->
-        count + List.length errors)
-  in
-  if error_count > 10 then
-    Test.fail
-    @@ Printf.sprintf "Expected no more than 10 errors but got %d." error_count;
+  Test.assert_diagnostics_in
+    loop_output
+    ~filename:(bar_name 106)
+    bar_106_diagnostics;
 
   (* Fix one of the remaining errors *)
   let bar_10_name = bar_name 10 in
   let (env, _) = Test.edit_file env bar_10_name "" in
   let env = Test.wait env in
-  let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
+  let (_env, loop_output) = Test.(run_loop_once env default_loop_input) in
   (* Check that the errors from bar10 are removed *)
-  Test.assert_diagnostics loop_output bar_10_clear_diagnostics;
-
-  (* Trigger another global recheck to get more global errors *)
-  let (_, loop_output) = Test.full_check_status env in
-  Test.assert_diagnostics loop_output bar_106_diagnostics
+  Test.assert_diagnostics_string loop_output bar_10_clear_diagnostics;
+  ()

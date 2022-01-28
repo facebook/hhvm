@@ -42,21 +42,25 @@ function bar_%s(): %s {
     x
 
 let foo_unbound_diagnostics =
-  "
-/bar_expects_int.php:
-File \"/bar_expects_int.php\", line 4, characters 10-12:
-Unbound name: `foo` (a global function) (Naming[2049])
-
-File \"/bar_expects_int.php\", line 4, characters 10-12:
-Unbound name (typing): `foo` (Typing[4107])
-
-/bar_expects_string.php:
-File \"/bar_expects_string.php\", line 4, characters 10-12:
-Unbound name: `foo` (a global function) (Naming[2049])
-
-File \"/bar_expects_string.php\", line 4, characters 10-12:
-Unbound name (typing): `foo` (Typing[4107])
-"
+  SMap.of_list
+    [
+      ( "/bar_expects_int.php",
+        SSet.of_list
+          [
+            "File \"/bar_expects_int.php\", line 4, characters 10-12:
+Unbound name: `foo` (a global function) (Naming[2049])";
+            "File \"/bar_expects_int.php\", line 4, characters 10-12:
+Unbound name (typing): `foo` (Typing[4107])";
+          ] );
+      ( "/bar_expects_string.php",
+        SSet.of_list
+          [
+            "File \"/bar_expects_string.php\", line 4, characters 10-12:
+Unbound name: `foo` (a global function) (Naming[2049])";
+            "File \"/bar_expects_string.php\", line 4, characters 10-12:
+Unbound name (typing): `foo` (Typing[4107])";
+          ] );
+    ]
 
 let foo_returns_string_diagnostics =
   "
@@ -105,9 +109,7 @@ allowed_fixme_codes_strict = 4336
 allowed_decl_fixme_codes = 4336
 "
 
-let test () =
-  Relative_path.set_path_prefix Relative_path.Root (Path.make root);
-  TestDisk.set hhconfig_filename hhconfig_contents;
+let load_config hhconfig_filename =
   let hhconfig_path =
     Relative_path.create Relative_path.Root hhconfig_filename
   in
@@ -115,9 +117,16 @@ let test () =
   let (custom_config, _) =
     ServerConfig.load ~silent:false hhconfig_path options
   in
+  custom_config
+
+let test () =
+  Relative_path.set_path_prefix Relative_path.Root (Path.make root);
+  TestDisk.set hhconfig_filename hhconfig_contents;
+  let custom_config = load_config hhconfig_filename in
   let env = Test.setup_server ~custom_config () in
   let env = Test.connect_persistent_client env in
-  let env = Test.subscribe_diagnostic env in
+
+  (* Two bar files use `foo` which is still unbound. *)
   let env =
     Test.open_file env bar_expects_int_name ~contents:(bar_contents "int")
   in
@@ -128,6 +137,7 @@ let test () =
   let (env, loop_outputs) = Test.(run_loop_once env default_loop_input) in
   Test.assert_diagnostics loop_outputs foo_unbound_diagnostics;
 
+  (* Now create `foo` in foo_string.php which returns string. *)
   let env =
     Test.open_file
       env
@@ -136,16 +146,21 @@ let test () =
   in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_output foo_returns_string_diagnostics;
+  Test.assert_diagnostics_string loop_output foo_returns_string_diagnostics;
 
+  (* Create another `foo` in foo_int.php which returns int. *)
   let env =
     Test.open_file env foo_returns_int_name ~contents:foo_returns_int_contents
   in
   let env = Test.wait env in
   let (env, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_output foo_duplicate_diagnostics;
+  Test.assert_diagnostics_in
+    loop_output
+    ~filename:foo_returns_int_name
+    foo_duplicate_diagnostics;
 
+  (* Erase foo_string.php. *)
   let env = Test.open_file env foo_returns_string_name ~contents:"" in
   let env = Test.wait env in
   let (_, loop_output) = Test.(run_loop_once env default_loop_input) in
-  Test.assert_diagnostics loop_output foo_returns_int_diagnostics
+  Test.assert_diagnostics_string loop_output foo_returns_int_diagnostics

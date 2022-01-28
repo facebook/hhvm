@@ -5352,6 +5352,7 @@ function call_method(ClassWithFooBar $mc): void {
         self.test_driver.start_hh_loop_forever_assert_timeout()
         spec = (
             self.initialize_spec(LspTestSpec("non_blocking"), use_serverless_ide=False)
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .wait_for_hh_server_ready()
             .request(
                 line=line(),

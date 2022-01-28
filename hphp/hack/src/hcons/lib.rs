@@ -4,13 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::borrow::Borrow;
-use std::collections::hash_map::Entry;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
-use std::sync::{Arc, Mutex, Weak};
+use std::sync::{Arc, Weak};
 
-use nohash_hasher::IntMap;
+use dashmap::{mapref::entry::Entry, DashMap};
 
 /// A hash-consed pointer.
 pub struct Hc<T: ?Sized>(Arc<T>);
@@ -136,28 +135,20 @@ fn hash<T: Hash + ?Sized>(value: &T) -> u64 {
 
 #[derive(Debug)]
 pub struct Conser<T: ?Sized> {
-    table: Mutex<IntMap<u64, Weak<T>>>,
+    table: DashMap<u64, Weak<T>>,
 }
 
 impl<T: Eq + Hash + ?Sized> Conser<T> {
     pub fn new() -> Self {
         Conser {
-            table: Mutex::new(IntMap::default()),
+            table: DashMap::new(),
         }
     }
 
     pub fn gc(&self) -> bool {
-        let mut table = self.table.lock().unwrap();
-        let mut flag = false;
-        loop {
-            let l = table.len();
-            table.retain(|_, v| v.strong_count() != 0);
-            if l == table.len() {
-                break;
-            }
-            flag = true;
-        }
-        flag
+        let l = self.table.len();
+        self.table.retain(|_, v| v.strong_count() != 0);
+        l != self.table.len()
     }
 
     fn mk_helper<U>(
@@ -167,8 +158,7 @@ impl<T: Eq + Hash + ?Sized> Conser<T> {
         make_rc: impl FnOnce(U) -> Arc<T>,
         eq: impl FnOnce(&U, &T) -> bool,
     ) -> Hc<T> {
-        let mut table = self.table.lock().unwrap();
-        let rc = match table.entry(hash) {
+        let rc = match self.table.entry(hash) {
             Entry::Occupied(mut o) => match o.get().upgrade() {
                 Some(rc) => {
                     // TODO: handle collisions

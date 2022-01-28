@@ -31,23 +31,8 @@ let get_file_content = function
     (* In case of errors, proceed with empty file contents *)
     |> Option.value ~default:""
 
-(** Update diagnostic subscription priority files and errors.
-
-    Warning: this takes O(global error list) time. Should be OK while
-    it's only used in editor, where opening a file is a rare (compared to other
-    kind of queries) operation, but if this ever ends up being called by
-    other automation there is room for improvement (i.e finally changing global
-    error list to be a error map) *)
-let update_diagnostics diag_subscribe editor_open_files errorl =
-  diag_subscribe
-  >>| Diagnostic_subscription.update
-        ~priority_files:editor_open_files
-        ~global_errors:errorl
-        ~full_check_done:true
-
 let open_file ~predeclare env path content =
   let prev_content = get_file_content (ServerCommandTypes.FileName path) in
-  let full_path = path in
   let new_env =
     try_relativize_path path >>= fun path ->
     (* Before making any changes, pre-load (into Decl_heap) currently existing
@@ -60,7 +45,7 @@ let open_file ~predeclare env path content =
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
     File_provider.remove_batch (Relative_path.Set.singleton path);
     File_provider.provide_file_for_ide path content;
-    let (ide_needs_parsing, diag_subscribe) =
+    let ide_needs_parsing =
       if
         String.equal content prev_content
         && is_full_check_done env.full_check_status
@@ -70,23 +55,9 @@ let open_file ~predeclare env path content =
          * errors that were previously throttled. They are available only
          * when full recheck was completed and there were no further changes. In
          * all other cases, we will need to (lazily) recheck the file. *)
-        let diag_subscribe =
-          update_diagnostics env.diag_subscribe editor_open_files env.errorl
-        in
-        let () =
-          match (env.diag_subscribe, diag_subscribe) with
-          | (None, None) ->
-            Hh_logger.log "Diag_subscribe: open, none before or after"
-          | (None, Some _) -> Hh_logger.log "Diag_subscribe: open, now active"
-          | (Some _, Some _) ->
-            Hh_logger.log "Diag_subscribe: open, remains active"
-          | (Some _, None) ->
-            Hh_logger.log "Diag_subscribe: open, REMOVED - %s" full_path
-        in
-        (env.ide_needs_parsing, diag_subscribe)
+        env.ide_needs_parsing
       else
-        let () = Hh_logger.log "open_file; diag_subscribe remains as it was" in
-        (Relative_path.Set.add env.ide_needs_parsing path, env.diag_subscribe)
+        Relative_path.Set.add env.ide_needs_parsing path
     in
     Ide_info_store.open_file path;
     (* Need to re-parse this file during next full check to update
@@ -101,7 +72,6 @@ let open_file ~predeclare env path content =
         editor_open_files;
         ide_needs_parsing;
         last_command_time;
-        diag_subscribe;
         disk_needs_parsing;
       }
   in
@@ -195,7 +165,7 @@ let clear_sync_data env =
         close_relative_path env x)
   in
   Ide_info_store.ide_disconnect ();
-  { env with diag_subscribe = None }
+  env
 
 (** Determine which files are different in the IDE and on disk.
     This is achieved using File_provider for the IDE content and reading file from disk.

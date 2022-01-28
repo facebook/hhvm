@@ -121,7 +121,6 @@
   build_options
   ci_util
   cli_args
-  diagnostic_subscription
   diagnostic_pusher
   disk
   errors
@@ -145,22 +144,6 @@
   utils_core
   utils_www_root
   version)
- (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
-
-(library
- (name diagnostic_subscription)
- (wrapped false)
- (modules diagnostic_subscription)
- (libraries
-  collections
-  core_kernel
-  errors
-  file_info
-  naming
-  pos
-  relative_path
-  utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 

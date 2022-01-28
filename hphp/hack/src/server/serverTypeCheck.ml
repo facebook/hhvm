@@ -409,7 +409,6 @@ module type CheckKindType = sig
     errorl:Errors.t ->
     needs_phase2_redecl:Relative_path.Set.t ->
     needs_recheck:Relative_path.Set.t ->
-    diag_subscribe:Diagnostic_subscription.t option ->
     ServerEnv.env
 
   val is_full : bool
@@ -500,7 +499,7 @@ module FullCheckKind : CheckKindType = struct
     }
 
   let get_env_after_typing
-      ~old_env ~errorl ~needs_phase2_redecl:_ ~needs_recheck ~diag_subscribe =
+      ~old_env ~errorl ~needs_phase2_redecl:_ ~needs_recheck =
     let (full_check_status, remote) =
       if Relative_path.Set.is_empty needs_recheck then
         (Full_check_done, false)
@@ -523,7 +522,6 @@ module FullCheckKind : CheckKindType = struct
       full_check_status;
       remote;
       init_env = { old_env.init_env with why_needed_full_check };
-      diag_subscribe;
     }
 
   let is_full = true
@@ -636,8 +634,8 @@ module LazyCheckKind : CheckKindType = struct
       ide_needs_parsing = Relative_path.Set.empty;
     }
 
-  let get_env_after_typing
-      ~old_env ~errorl ~needs_phase2_redecl ~needs_recheck ~diag_subscribe =
+  let get_env_after_typing ~old_env ~errorl ~needs_phase2_redecl ~needs_recheck
+      =
     (* If it was started, it's still started, otherwise it needs starting *)
     let full_check_status =
       match old_env.full_check_status with
@@ -652,7 +650,6 @@ module LazyCheckKind : CheckKindType = struct
       needs_phase2_redecl;
       needs_recheck;
       full_check_status;
-      diag_subscribe;
     }
 
   let is_full = false
@@ -1044,7 +1041,6 @@ functor
 
     type type_checking_result = {
       env: ServerEnv.env;
-      diag_subscribe: Diagnostic_subscription.t option;
       errors: Errors.t;
       telemetry: Telemetry.t;
       files_checked: Relative_path.Set.t;
@@ -1172,19 +1168,10 @@ functor
       let full_check_done =
         CheckKind.is_full && Relative_path.Set.is_empty needs_recheck
       in
-      let diag_subscribe =
-        Option.map env.diag_subscribe ~f:(fun x ->
-            Diagnostic_subscription.update
-              x
-              ~priority_files:env.editor_open_files
-              ~global_errors:errors
-              ~full_check_done)
-      in
 
       let total_rechecked_count = Relative_path.Set.cardinal files_checked in
       {
         env;
-        diag_subscribe;
         errors;
         telemetry;
         files_checked;
@@ -1771,7 +1758,6 @@ functor
          files which are open in an IDE buffer). *)
       let {
         env;
-        diag_subscribe;
         errors;
         telemetry = typecheck_telemetry;
         files_checked;
@@ -1878,7 +1864,6 @@ functor
           ~errorl:errors
           ~needs_phase2_redecl
           ~needs_recheck
-          ~diag_subscribe
       in
 
       (* STATS LOGGING *********************************************************)
@@ -2049,27 +2034,13 @@ let type_check_unsafe genv env kind start_time profiling =
     in
     let t_sent_done =
       if is_full_check_done env.full_check_status then
-        let (is_truncated, shown) =
-          match env.ServerEnv.diag_subscribe with
-          | None -> (None, 0)
-          | Some ds -> Diagnostic_subscription.get_pushed_error_length ds
-        in
-        let total = Option.value is_truncated ~default:shown in
-        let msg = ServerCommandTypes.Done_global_typecheck { shown; total } in
-        ServerBusyStatus.send msg
+        ServerBusyStatus.send ServerCommandTypes.Done_global_typecheck
       else
         None
     in
     let stats = CheckStats.record_result_sent_ts stats t_sent_done in
     let telemetry =
-      telemetry
-      |> Telemetry.duration ~key:"sent_done" ~start_time
-      |> Telemetry.bool_
-           ~key:"diag_subscribe"
-           ~value:(Option.is_some env.ServerEnv.diag_subscribe)
-      (* If an IDE client is connected [env.diag_subscribe], let's log telemetry about
-         this fact. This way we can look at all recheck telemetry and determine how often
-         it's done with an IDE connected, hence presumably how long users wait in the IDE. *)
+      telemetry |> Telemetry.duration ~key:"sent_done" ~start_time
     in
     (env, stats, telemetry)
 

@@ -8,8 +8,7 @@
  *)
 
 (** We maintains state about editor open files and their contents
-    - some in ServerEnv.env e.g. editor_open_files, some in global sharedmem like FileProvider,
-    some in Diagnostic_subscription.
+    - some in ServerEnv.env e.g. editor_open_files, some in global sharedmem like FileProvider.
     Functions in this module update those states;
     they get invoked when an open/edit/close event happens in the editor.
     These file events are made known to the server via RPC commands. *)

@@ -492,10 +492,7 @@ and busy_status =
   | Doing_local_typecheck
   | Done_local_typecheck
   | Doing_global_typecheck of global_typecheck_kind
-  | Done_global_typecheck of {
-      shown: int;  (** How many errors did we push in DIAGNOSTICS? *)
-      total: int;  (** How many errors total were there? *)
-    }
+  | Done_global_typecheck
 
 and global_typecheck_kind =
   | Blocking

@@ -23,8 +23,6 @@ let tests =
     ("ide/ide_check", run Test_ide_check.test);
     ("ide/ide_close", run Test_ide_close.test);
     ("ide/ide_consistency", run Test_ide_consistency.test);
-    ( "ide/ide_diagnostic_subscription",
-      run Test_ide_diagnostic_subscription.test );
     ("ide/ide_disk", run Test_ide_disk.test);
     ("ide/ide_file_sync", run Test_ide_file_sync.test);
     ("ide/identify_symbol", run Test_identify_symbol.test);

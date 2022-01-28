@@ -620,7 +620,7 @@ let update_hh_server_state_if_necessary (event : event) : unit =
     match push with
     | BUSY_STATUS Needs_local_typecheck
     | BUSY_STATUS Done_local_typecheck
-    | BUSY_STATUS (Done_global_typecheck _) ->
+    | BUSY_STATUS Done_global_typecheck ->
       set_hh_server_state Hh_server_handling_or_ready
     | BUSY_STATUS Doing_local_typecheck ->
       set_hh_server_state Hh_server_typechecking_local
@@ -3439,7 +3439,7 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
       ( MessageType.WarningMessage,
         "Hack: remote",
         "hh_server is remote-typechecking the entire project - " ^ message )
-    | Done_global_typecheck _ ->
+    | Done_global_typecheck ->
       ( MessageType.InfoMessage,
         "Hack: ready",
         "hh_server is initialized and running correctly." )
@@ -4701,7 +4701,7 @@ let handle_server_message
           | Doing_local_typecheck -> "doing_local_typecheck"
           | Done_local_typecheck -> "done_local_typecheck"
           | Doing_global_typecheck _ -> "doing_global_typecheck"
-          | Done_global_typecheck _ -> "done_global_typecheck"
+          | Done_global_typecheck -> "done_global_typecheck"
         in
         Lsp_helpers.telemetry_log to_stdout status_message);
       state := do_server_busy !state status;

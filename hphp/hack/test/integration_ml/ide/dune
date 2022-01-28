@@ -15,7 +15,6 @@
   test_ide_check
   test_ide_close
   test_ide_consistency
-  test_ide_diagnostic_subscription
   test_ide_disk
   test_ide_file_sync
   test_identify_symbol
@@ -55,12 +54,6 @@
  (deps ../test_all.exe)
  (action
   (run ../test_all.exe ide/ide_disk)))
-
-(rule
- (alias ide_diagnostic_subscription)
- (deps ../test_all.exe)
- (action
-  (run ../test_all.exe ide/ide_diagnostic_subscription)))
 
 (rule
  (alias ide_check)
@@ -207,7 +200,6 @@
   (alias ide_file_sync)
   (alias ide_consistency)
   (alias ide_disk)
-  (alias ide_diagnostic_subscription)
   (alias ide_check)
   (alias ide_status)
   (alias ide_parsing_errors)

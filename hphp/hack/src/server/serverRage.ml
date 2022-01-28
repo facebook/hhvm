@@ -43,29 +43,18 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
       |> String.concat ~sep:"\n")
   in
 
-  (* include current state of diagnostics on client, as we know it *)
-  let subscription_data =
-    match (env.diag_subscribe, Ide_info_store.get_client ()) with
-    | (None, None) -> "no diag subscription, no client"
-    | (Some _, None) -> "?? diagnostics subscription but no client ??"
-    | (None, Some _) -> "?? client but no diagnostics subscription ??"
-    | (Some sub, Some client) ->
-      let (_is_truncated, count) =
-        Diagnostic_subscription.get_pushed_error_length sub
-      in
-      let (_sub, errors, is_truncated) =
-        Diagnostic_subscription.pop_errors sub ~global_errors:env.errorl
-      in
+  (* include current state of client, as we know it *)
+  let client_data =
+    match Ide_info_store.get_client () with
+    | None -> "no client"
+    | Some client ->
       Printf.sprintf
-        ("client_has_message: %b\nide_needs_parsing: %b\n"
-        ^^ "error_count: %d\nerrors_in_client: %d\nis_truncated: %b\n"
-        ^^ "error_files_to_push: %s\n")
+        ("client_has_message: %b\n"
+        ^^ "ide_needs_parsing: %b\n"
+        ^^ "error_count: %d\n")
         (ClientProvider.client_has_message client)
         (not (Relative_path.Set.is_empty env.ide_needs_parsing))
         (Errors.count env.errorl)
-        count
-        (Option.is_some is_truncated)
-        (errors |> SMap.keys |> String.concat ~sep:",")
   in
 
   (* that's it! *)
@@ -74,7 +63,7 @@ let go (_genv : ServerEnv.genv) (env : ServerEnv.env) : ServerRageTypes.result =
       "PIDS\n%s\n\nPAUSED\n%s\n\nSUBSCRIPTION\n%s\n\nIDE FILES\n%s\n"
       pids_data
       paused_data
-      subscription_data
+      client_data
       (List.map unsaved_items ~f:(fun item -> item.title)
       |> String.concat ~sep:"\n")
   in

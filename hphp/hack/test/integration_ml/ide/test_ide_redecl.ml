@@ -55,8 +55,6 @@ let bar2_contents =
   }
 "
 
-let diagnostic_subscription_id = 223
-
 let assert_no_push_message loop_outputs =
   match loop_outputs.push_messages with
   | _ :: _ -> Test.fail "Unexpected push message"

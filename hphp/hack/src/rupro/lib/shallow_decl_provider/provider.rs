@@ -139,6 +139,11 @@ impl<R: Reason> ShallowDeclUtils<R> {
                 .iter()
                 .map(|sm| self.shallow_method(sm))
                 .collect(),
+            static_methods: sc
+                .static_methods
+                .iter()
+                .map(|sm| self.shallow_method(sm))
+                .collect(),
             module: sc
                 .module
                 .as_ref()

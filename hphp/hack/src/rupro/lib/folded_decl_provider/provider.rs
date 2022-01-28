@@ -153,6 +153,11 @@ impl<R: Reason> FoldedDeclProvider<R> {
             .iter()
             .for_each(|sm| self.decl_method(&mut methods, sc, sm));
 
+        let mut static_methods = inh.static_methods;
+        sc.static_methods
+            .iter()
+            .for_each(|sm| self.decl_method(&mut static_methods, sc, sm));
+
         let mut anc = HashMap::new();
         sc.extends
             .iter()
@@ -164,6 +169,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             substs: inh.substs,
             ancestors: anc,
             methods,
+            static_methods,
         })
     }
 

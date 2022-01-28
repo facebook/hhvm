@@ -14,8 +14,10 @@ use crate::pos::Symbol;
 use crate::reason::Reason;
 
 pub(crate) struct Inherited<R: Reason> {
+    // note(sf, 2022-01-27): c.f. `Decl_inherit.inherited`
     pub(crate) substs: HashMap<Symbol, SubstContext<R>>,
     pub(crate) methods: HashMap<Symbol, FoldedElement<R>>,
+    pub(crate) static_methods: HashMap<Symbol, FoldedElement<R>>,
 }
 
 impl<R: Reason> Inherited<R> {
@@ -23,6 +25,7 @@ impl<R: Reason> Inherited<R> {
         Self {
             substs: HashMap::new(),
             methods: HashMap::new(),
+            static_methods: HashMap::new(),
         }
     }
 
@@ -51,10 +54,30 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
+    fn add_static_methods(&mut self, other_static_methods: HashMap<Symbol, FoldedElement<R>>) {
+        for (key, mut fe) in other_static_methods {
+            match self.static_methods.entry(Hc::clone(&key)) {
+                Entry::Vacant(entry) => {
+                    entry.insert(fe);
+                }
+                Entry::Occupied(mut entry) => {
+                    if !Self::should_keep_old_sig(&fe, entry.get()) {
+                        std::mem::swap(entry.get_mut(), &mut fe);
+                    }
+                }
+            }
+        }
+    }
+
     fn add_inherited(&mut self, other: Self) {
-        let Inherited { substs, methods } = other;
+        let Self {
+            substs,
+            methods,
+            static_methods,
+        } = other;
         self.add_substs(substs);
         self.add_methods(methods);
+        self.add_static_methods(static_methods);
     }
 
     fn make_substitution(
@@ -83,6 +106,7 @@ impl<R: Reason> Inherited<R> {
         Self {
             substs,
             methods: parent.methods.clone(),
+            static_methods: parent.static_methods.clone(),
         }
     }
 

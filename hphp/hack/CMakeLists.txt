@@ -244,6 +244,7 @@ endfunction()
 
 build_cxx_bridge(parser "src/parser/ffi_bridge")
 build_cxx_bridge(compiler "src/hackc/ffi_bridge")
+build_cxx_bridge(hhvm_types "src/hackc/hhvm_cxx/hhvm_types")
 
 if (NOT LZ4_FOUND)
   add_dependencies(hack_dune lz4)

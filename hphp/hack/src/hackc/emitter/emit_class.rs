@@ -5,7 +5,7 @@
 
 use env::{emitter::Emitter, Env};
 use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
-use hhas_class::{HhasClass, HhasClassFlags, TraitReqKind};
+use hhas_class::{HhasClass, TraitReqKind};
 use hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
 use hhas_constant::{self as hhas_constant, HhasConstant};
 use hhas_method::{HhasMethod, HhasMethodFlags};
@@ -22,6 +22,7 @@ use hhbc_id::class::ClassType;
 use hhbc_id::r#const;
 use hhbc_id::{self as hhbc_id, class, method, prop, Id};
 use hhbc_string_utils as string_utils;
+use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq, Result};
 use local::Local;
 use naming_special_names_rust as special_names;
@@ -910,16 +911,34 @@ pub fn emit_class<'a, 'arena, 'decl>(
         &ast_class.methods,
     )?);
     let doc_comment = ast_class.doc_comment.clone();
+    let is_closure = methods.iter().any(|x| x.is_closure_body());
 
-    let mut flags = HhasClassFlags::empty();
-    flags.set(HhasClassFlags::IS_FINAL, is_final);
-    flags.set(HhasClassFlags::IS_SEALED, is_sealed);
-    flags.set(HhasClassFlags::IS_ABSTRACT, is_abstract);
-    flags.set(HhasClassFlags::IS_INTERFACE, is_interface);
-    flags.set(HhasClassFlags::IS_TRAIT, is_trait);
-    flags.set(HhasClassFlags::IS_CONST, is_const);
-    flags.set(HhasClassFlags::NO_DYNAMIC_PROPS, no_dynamic_props);
-    flags.set(HhasClassFlags::NEEDS_NO_REIFIEDINIT, needs_no_reifiedinit);
+    let mut flags = Attr::AttrNone;
+    flags.set(Attr::AttrFinal, is_final);
+    flags.set(Attr::AttrSealed, is_sealed);
+    flags.set(Attr::AttrAbstract, is_abstract);
+    flags.set(Attr::AttrInterface, is_interface);
+    flags.set(Attr::AttrTrait, is_trait);
+    flags.set(Attr::AttrIsConst, is_const);
+    flags.set(Attr::AttrForbidDynamicProps, no_dynamic_props);
+    flags.set(Attr::AttrNoReifiedInit, needs_no_reifiedinit);
+    flags.set(Attr::AttrNoOverride, is_closure);
+    flags.set(
+        Attr::AttrEnumClass,
+        hhas_attribute::has_enum_class(&attributes),
+    );
+    flags.set(
+        Attr::AttrIsFoldable,
+        hhas_attribute::has_foldable(&attributes),
+    );
+    flags.set(
+        Attr::AttrDynamicallyConstructible,
+        hhas_attribute::has_dynamically_constructible(&attributes),
+    );
+    flags.set(
+        Attr::AttrEnum,
+        enum_type.is_some() && !hhas_attribute::has_enum_class(&attributes),
+    );
 
     add_symbol_refs(
         alloc,

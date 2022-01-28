@@ -37,6 +37,7 @@ hhas_xhp_attribute = { path = "../../../hhbc/cargo/hhas_xhp_attribute" }
 hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
 hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
 hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
+hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
 instruction_sequence = { path = "../instruction_sequence" }
 label = { path = "../label" }
 local = { path = "../local" }

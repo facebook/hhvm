@@ -15,47 +15,23 @@
 */
 #pragma once
 
-#include <string>
-
 #include "hphp/runtime/vm/as-attr.h"
-#include "hphp/runtime/vm/type-constraint.h"
+
+#include "rust/cxx.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * This header contains routines shared between as.cpp and disas.cpp.
- * It shouldn't be included by anything else.
+ * This header contains routines linked into HackC.
  */
 
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Convert TypeConstraint flags to a string of space-separated flag names.
+ * Convert an attr to a string of space-separated attribute names, for
+ * a given context.
  */
-std::string type_flags_to_string(TypeConstraint::Flags flags);
-
-/*
- * Convert a string containing a single type flag name into a
- * TypeConstraint::Flag.
- *
- * Returns std::nullopt if the string doesn't name a known attribute.
- */
-Optional<TypeConstraint::Flags> string_to_type_flag(
-    const std::string& name);
-//////////////////////////////////////////////////////////////////////
-struct is_bareword {
-  bool operator()(int i) const {
-    return isalnum(i) || i == '_' || i == '.' || i == '$' || i == '\\';
-  }
-};
-
-/*
- * Convert a string containing a single attribute name into an Attr,
- * for a given context.
- *
- * Returns std::nullopt if the string doesn't name a known attribute.
- */
-Optional<Attr> string_to_attr(AttrContext, const std::string&);
+rust::String attrs_to_string_ffi(AttrContext, Attr);
 }

@@ -25,13 +25,13 @@ pub struct SpecialNames {
     pub stdlib_functions: StdlibFunctions,
     pub typehints: Typehints,
     pub pseudo_consts: PseudoConsts,
-    pub fb: FB,
-    pub hh: HH,
+    pub fb: Fb,
+    pub hh: Hh,
     pub shapes: Shapes,
     pub superglobals: Superglobals,
     pub regex: Regex,
     pub emitter_special_functions: EmitterSpecialFunctions,
-    pub xhp: XHP,
+    pub xhp: Xhp,
     pub unstable_features: UnstableFeatures,
     pub coeffects: Coeffects,
     pub readonly: Readonly,
@@ -56,13 +56,13 @@ impl SpecialNames {
             stdlib_functions: StdlibFunctions::new(alloc),
             typehints: Typehints::new(alloc),
             pseudo_consts: PseudoConsts::new(alloc),
-            fb: FB::new(alloc),
-            hh: HH::new(alloc),
+            fb: Fb::new(alloc),
+            hh: Hh::new(alloc),
             shapes: Shapes::new(alloc),
             superglobals: Superglobals::new(alloc),
             regex: Regex::new(alloc),
             emitter_special_functions: EmitterSpecialFunctions::new(alloc),
-            xhp: XHP::new(alloc),
+            xhp: Xhp::new(alloc),
             unstable_features: UnstableFeatures::new(alloc),
             coeffects,
             readonly: Readonly::new(alloc),
@@ -345,7 +345,7 @@ pub struct PseudoConsts {
 }
 
 #[derive(Debug)]
-pub struct FB {
+pub struct Fb {
     pub cEnum: Symbol,
     pub tInner: Symbol,
     pub idx: Symbol,
@@ -354,7 +354,7 @@ pub struct FB {
 }
 
 #[derive(Debug)]
-pub struct HH {
+pub struct Hh {
     pub contains: Symbol,
     pub contains_key: Symbol,
 }
@@ -391,7 +391,7 @@ pub struct EmitterSpecialFunctions {
 }
 
 #[derive(Debug)]
-pub struct XHP {
+pub struct Xhp {
     pub pcdata: Symbol,
     pub any: Symbol,
     pub empty: Symbol,
@@ -773,7 +773,7 @@ impl PseudoConsts {
     }
 }
 
-impl FB {
+impl Fb {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
             cEnum: alloc.symbol(sn::fb::ENUM),
@@ -785,7 +785,7 @@ impl FB {
     }
 }
 
-impl HH {
+impl Hh {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
             contains: alloc.symbol(sn::hh::CONTAINS),
@@ -835,7 +835,7 @@ impl EmitterSpecialFunctions {
     }
 }
 
-impl XHP {
+impl Xhp {
     fn new(alloc: &GlobalAllocator) -> Self {
         Self {
             pcdata: alloc.symbol(sn::xhp::PCDATA),

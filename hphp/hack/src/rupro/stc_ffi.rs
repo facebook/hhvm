@@ -6,11 +6,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::path::PathBuf;
-use std::rc::Rc;
-
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
+use std::path::PathBuf;
+use std::rc::Rc;
+use structopt::StructOpt;
 
 use hackrs::alloc;
 use hackrs::ast_provider::AstProvider;
@@ -46,17 +46,16 @@ fn print_tast<R: Reason>(opts: &GlobalOptions, tast: &tast::Program<R>) {
     }
 }
 
+#[derive(StructOpt, Debug)]
+struct CliOptions {
+    /// Hack source files
+    #[structopt(value_name("FILEPATH"))]
+    filenames: Vec<PathBuf>,
+}
+
 #[no_mangle]
 pub extern "C" fn stc_main() {
-    let args: Vec<String> = std::env::args().collect();
-    if args.len() != 2 {
-        eprintln!("Usage: {} <FILENAME1> <FILENAME2> <...>", args[0]);
-        std::process::exit(1);
-    }
-    let mut filenames = Vec::new();
-    for arg in &args[1..args.len()] {
-        filenames.push(PathBuf::from(arg));
-    }
+    let cli_options = CliOptions::from_args();
 
     let relative_path_ctx = Rc::new(RelativePathCtx {
         root: PathBuf::new(),
@@ -96,7 +95,8 @@ pub extern "C" fn stc_main() {
         special_names,
     ));
 
-    let filenames: Vec<_> = filenames
+    let filenames: Vec<_> = cli_options
+        .filenames
         .into_iter()
         .map(|fln| alloc.relative_path(Prefix::Root, &fln))
         .collect();

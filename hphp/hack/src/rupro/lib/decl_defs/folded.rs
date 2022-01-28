@@ -7,15 +7,19 @@ use std::collections::HashMap;
 use crate::decl_defs::{CeVisibility, DeclTy};
 use crate::pos::Symbol;
 use crate::reason::Reason;
+use hcons::Hc;
 
 #[derive(Debug, Clone)]
 pub struct FoldedElement<R: Reason> {
+    // note(sf, 2022-01-28): c.f. `Decl_defs.element`
     pub origin: Symbol,
     pub visibility: CeVisibility<R>,
+    pub deprecated: Option<Hc<str>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct SubstContext<R: Reason> {
+    // note(sf, 2022-01-28): c.f. `Decl_defs.subst_context`
     pub subst: HashMap<Symbol, DeclTy<R>>,
     pub class_context: Symbol,
 }

@@ -84,6 +84,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
         let elt = FoldedElement {
             origin: Hc::clone(cls),
             visibility: vis,
+            deprecated: sm.deprecated.as_ref().map(Hc::clone),
         };
         methods.insert(Hc::clone(meth), elt);
     }

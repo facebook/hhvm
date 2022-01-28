@@ -5,6 +5,7 @@
 use crate::decl_defs::DeclTy;
 use crate::pos::PosId;
 use crate::reason::Reason;
+use hcons::Hc;
 
 #[derive(Debug)]
 pub struct ShallowFun<R: Reason> {
@@ -19,6 +20,7 @@ pub struct ShallowMethod<R: Reason> {
     pub name: PosId<R::Pos>,
     pub ty: DeclTy<R>,
     pub visibility: oxidized::ast_defs::Visibility,
+    pub deprecated: Option<Hc<str>>, // e.g. "The method foo is deprecated: ..."
 }
 
 #[derive(Debug)]

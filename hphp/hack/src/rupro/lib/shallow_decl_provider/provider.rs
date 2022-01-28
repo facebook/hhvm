@@ -120,6 +120,7 @@ impl<R: Reason> ShallowDeclUtils<R> {
             name: self.alloc.pos_id_from_decl(sm.name),
             ty: self.alloc.decl_ty_from_ast(sm.type_),
             visibility: sm.visibility,
+            deprecated: sm.deprecated.map(|s| self.alloc.symbol(s)),
         }
     }
 

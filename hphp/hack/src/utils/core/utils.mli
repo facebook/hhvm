@@ -62,6 +62,8 @@ val strip_xhp_ns : string -> string
 (* Strip Both removes either leading backslash and colon, or both *)
 val strip_both_ns : string -> string
 
+val strip_hh_lib_ns : string -> string
+
 (* Strip All removes all backslash-based namespaces, but does nothing to XHP *)
 val strip_all_ns : string -> string
 

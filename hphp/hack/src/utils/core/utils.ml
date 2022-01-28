@@ -119,6 +119,16 @@ let strip_xhp_ns s = String.chop_prefix_if_exists s ~prefix:":"
 
 let strip_both_ns s = s |> strip_ns |> strip_xhp_ns
 
+(* \HH\C -> C 
+ * \HH\Lib\C -> C
+ * \A\B\C -> \A\B\C
+ *)
+let strip_hh_lib_ns s =
+  s
+  |> String.chop_prefix_if_exists ~prefix:"\\HH\\Lib"
+  |> String.chop_prefix_if_exists ~prefix:"\\HH"
+  |> strip_ns
+
 (* A\B\C -> \A\B\C *)
 let add_ns s =
   if String.is_prefix s ~prefix:"\\" then

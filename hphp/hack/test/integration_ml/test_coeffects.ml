@@ -71,7 +71,7 @@ let identify_tests =
       go_hover
         [
           {
-            HoverService.snippet = "HH\\Contexts\\a";
+            HoverService.snippet = "Contexts\\a";
             addendum = [];
             pos = pos_at (11, 18) (11, 18);
           };

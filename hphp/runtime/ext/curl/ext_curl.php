@@ -443,7 +443,8 @@ async function curl_exec(mixed $urlOrHandle,
 
   $mh = \curl_multi_init();
   \curl_multi_add_handle($mh, $ch);
-  $sleep_ms = 10;
+
+  $sleep_count = 0;
   do {
     $active = 1;
     do {
@@ -456,12 +457,12 @@ async function curl_exec(mixed $urlOrHandle,
      * -1, and polling is required.
      */
     if ($select == -1) {
+      // Slow down polling a bit if it's been a while (>100ms) since we had any work to do.
+      $sleep_ms = ($sleep_count >= 10) : 100 : 10;
       await SleepWaitHandle::create($sleep_ms * 1000);
-      if ($sleep_ms < 1000) {
-        $sleep_ms *= 2;
-      }
+      $sleep_count += 1;
     } else {
-      $sleep_ms = 10;
+      $sleep_count = 0;
     }
   } while ($status === \CURLM_OK);
   $content = (string)\curl_multi_getcontent($ch);

@@ -1879,16 +1879,7 @@ let check_parents_are_tapply_add_constructor_deps env c parents =
   Option.iter enum_includes ~f:(check_is_tapply_add_constructor_dep env);
   ()
 
-(** Perform all class wellformedness checks which don't involve the hierarchy:
-  - attributes
-  - type parameter checks: `where` constraints + variance
-  - type hint wellformedness, incl. their `where` constraints
-  - generic static properties *)
-let class_wellformedness_checks env c tc (parents : class_parents) =
-  let { extends; implements; uses; _ } = parents in
-  let (pc, _) = c.c_name in
-  List.iter ~f:Errors.add_typing_error
-  @@ Typing_type_wellformedness.class_ env c;
+let check_class_attributes env c =
   let (env, user_attributes) =
     let kind =
       if Ast_defs.is_c_enum c.c_kind then
@@ -1901,13 +1892,36 @@ let class_wellformedness_checks env c tc (parents : class_parents) =
     Typing.attributes_check_def env kind c.c_user_attributes
   in
   let (env, file_attrs) = Typing.file_attributes env c.c_file_attributes in
-  check_parents_are_tapply_add_constructor_deps env c parents;
+  (env, user_attributes, file_attrs)
+
+(** Check type parameter definition, including variance, and add constraints to the environment. *)
+let check_class_type_parameters_add_constraints env c tc =
   let env = check_class_where_constraints env c tc in
   Typing_variance.class_def env c;
-  check_no_generic_static_property env tc;
+  env
+
+(** Check wellformedness of all type hints in the class. *)
+let check_hint_wellformedness_in_class env c parents =
+  let { extends; implements; uses; _ } = parents in
+  let (pc, _) = c.c_name in
+  check_parents_are_tapply_add_constructor_deps env c parents;
+  List.iter ~f:Errors.add_typing_error
+  @@ Typing_type_wellformedness.class_ env c;
   let env =
     check_class_parents_where_constraints env pc (extends @ implements @ uses)
   in
+  env
+
+(** Perform all class wellformedness checks which don't involve the hierarchy:
+  - attributes
+  - type parameter checks
+  - type hint wellformedness
+  - generic static properties *)
+let class_wellformedness_checks env c tc (parents : class_parents) =
+  let (env, user_attributes, file_attrs) = check_class_attributes env c in
+  let env = check_class_type_parameters_add_constraints env c tc in
+  let env = check_hint_wellformedness_in_class env c parents in
+  check_no_generic_static_property env tc;
   (env, user_attributes, file_attrs)
 
 (** Checks that static (resp. dynamic) members are also static (resp. dynamic) in the parents.*)
@@ -1938,7 +1952,7 @@ let check_static_keyword_override c tc =
     - `static` keyword with respect to parents
     - enum inclusions
     - abstract members in concrete class
-    - non-const members in const class*)
+    - non-const members in const class *)
 let class_hierarchy_checks env c tc (parents : class_parents) =
   if skip_hierarchy_checks (Env.get_ctx env) then
     env

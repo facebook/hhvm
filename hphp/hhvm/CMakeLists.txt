@@ -59,7 +59,8 @@ add_dependencies(hhvm systemlib)
 
 if (CMAKE_HOST_UNIX)
   add_custom_command(TARGET hhvm POST_BUILD
-    COMMAND INSTALL_DIR=${CMAKE_CURRENT_BINARY_DIR} sh ${CMAKE_CURRENT_SOURCE_DIR}/symlinks.sh ${CMAKE_CURRENT_BINARY_DIR}/hhvm
+    COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/symlinks.sh
+      ${CMAKE_CURRENT_BINARY_DIR}/hhvm ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Creating symlinks for hhvm")
 endif()
 

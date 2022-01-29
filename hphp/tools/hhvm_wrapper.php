@@ -251,7 +251,7 @@ function determine_trace_env(OptionMap $opts): string {
     $formatting = 'HPHP_TRACE_FILE=/dev/stdout HPHP_TRACE_TTY=1 ';
   }
   if (!$traces->isEmpty() && $env) $env .= ',';
-  return $formatting.'TRACE='.$env.implode(',', vec($traces)).' ';
+  return $formatting.'TRACE='.(string)$env.implode(',', vec($traces)).' ';
 }
 
 function argv_for_shell(): string {

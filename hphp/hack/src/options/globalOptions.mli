@@ -497,8 +497,6 @@ val tco_experimental_abstract_type_const_with_default : string
 
 val tco_experimental_infer_flows : string
 
-val tco_experimental_case_sensitive_inheritance : string
-
 val tco_experimental_supportdynamic_type_hint : string
 
 val tco_experimental_all : SSet.t

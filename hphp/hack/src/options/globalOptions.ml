@@ -172,12 +172,6 @@ let tco_experimental_abstract_type_const_with_default =
 *)
 let tco_experimental_infer_flows = "ifc_infer_flows"
 
-(*
-* Allow typechecker to raise error when inheriting members
-* that differ only by case
-*)
-let tco_experimental_case_sensitive_inheritance = "case_sensitive_inheritance"
-
 let tco_experimental_supportdynamic_type_hint = "supportdynamic_type_hint"
 
 let tco_experimental_all =
@@ -190,7 +184,6 @@ let tco_experimental_all =
       tco_experimental_disallow_static_memoized;
       tco_experimental_abstract_type_const_with_default;
       tco_experimental_infer_flows;
-      tco_experimental_case_sensitive_inheritance;
       tco_experimental_supportdynamic_type_hint;
     ]
 

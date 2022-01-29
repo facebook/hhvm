@@ -65,9 +65,6 @@ let experimental_type_param_shadowing =
 let experimental_abstract_type_const_with_default =
   GlobalOptions.tco_experimental_abstract_type_const_with_default
 
-let experimental_case_sensitive_inheritance =
-  GlobalOptions.tco_experimental_case_sensitive_inheritance
-
 let experimental_supportdynamic_type_hint =
   GlobalOptions.tco_experimental_supportdynamic_type_hint
 

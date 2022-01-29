@@ -113,7 +113,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
     let default_dropthrough = if method.abstract_ {
         Some(emit_fatal_runtimeomitframe(
             emitter.alloc,
-            &&method.name.0,
+            &method.name.0,
             format!(
                 "Cannot call abstract method {}::{}()",
                 class_name, &method.name.1
@@ -126,8 +126,8 @@ pub fn from_ast<'a, 'arena, 'decl>(
         items: vec![
             ScopeItem::Class(ast_scope::Class::new_ref(class)),
             ScopeItem::Method(match &method_ {
-                Cow::Borrowed(m) => ast_scope::Method::new_ref(&m),
-                Cow::Owned(m) => ast_scope::Method::new_rc(&m),
+                Cow::Borrowed(m) => ast_scope::Method::new_ref(m),
+                Cow::Owned(m) => ast_scope::Method::new_rc(m),
             }),
         ],
     };

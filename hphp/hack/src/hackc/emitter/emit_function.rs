@@ -93,7 +93,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
     };
     let mut scope = Scope::toplevel();
     if !is_debug_main {
-        scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(&fd)));
+        scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(fd)));
     }
 
     let mut coeffects =
@@ -160,7 +160,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
             original_id,
             &renamed_id,
             deprecation_info,
-            &fd,
+            fd,
         )?)
     } else {
         None

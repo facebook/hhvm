@@ -5,7 +5,7 @@
 use crate::try_finally_rewriter as tfr;
 
 use emit_expression::{self as emit_expr, emit_await, emit_expr, LValOp, Setrange};
-use emit_fatal;
+
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env};
 use hhbc_assertion_utils::*;
@@ -13,7 +13,7 @@ use hhbc_ast::*;
 use hhbc_id::Id;
 use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use label::Label;
-use label_rewriter;
+
 use local::Local;
 use scope::scope;
 use statement_state::StatementState;
@@ -61,7 +61,7 @@ fn set_bytes_kind(name: &str) -> Option<Setrange> {
         static ref RE: Regex =
             Regex::new(r#"(?i)^hh\\set_bytes(_rev)?_([a-z0-9]+)(_vec)?$"#).unwrap();
     }
-    RE.captures(name).map_or(None, |groups| {
+    RE.captures(name).and_then(|groups| {
         let op = if groups.get(1).is_some() {
             // == _rev
             SetrangeOp::Reverse
@@ -120,15 +120,13 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
                                 })
                                 .collect::<std::result::Result<Vec<_>, _>>()?,
                         ))
+                    } else if let Some(kind) = set_bytes_kind(fname) {
+                        emit_expr::emit_set_range_expr(e, env, &e_.1, fname, kind, exprs)
                     } else {
-                        if let Some(kind) = set_bytes_kind(fname) {
-                            emit_expr::emit_set_range_expr(e, env, &e_.1, fname, kind, exprs)
-                        } else {
-                            emit_expr::emit_ignored_expr(e, env, &e_.1, e_)
-                        }
+                        emit_expr::emit_ignored_expr(e, env, &e_.1, e_)
                     }
                 } else {
-                    emit_expr::emit_ignored_expr(e, env, pos, e_)
+                    emit_expr::emit_ignored_expr(e, env, &e_.1, e_)
                 }
             }
             a::Expr_::Binop(bop) => {
@@ -187,7 +185,7 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
                 let expr_instr = if let Some(e_) = r.2.as_await() {
                     emit_await(e, env, &r.1, e_)?
                 } else {
-                    emit_expr(e, env, &r)?
+                    emit_expr(e, env, r)?
                 };
                 Ok(InstrSeq::gather(
                     alloc,
@@ -203,7 +201,7 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
                 ],
             )),
         },
-        a::Stmt_::Block(b) => emit_block(env, e, &b),
+        a::Stmt_::Block(b) => emit_block(env, e, b),
         a::Stmt_::If(f) => emit_if(e, env, pos, &f.0, &f.1, &f.2),
         a::Stmt_::While(x) => emit_while(e, env, &x.0, &x.1),
         a::Stmt_::Using(x) => emit_using(e, env, &**x),
@@ -222,17 +220,17 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
         a::Stmt_::Try(x) => {
             let (try_block, catch_list, finally_block) = &**x;
             if catch_list.is_empty() {
-                emit_try_finally(e, env, pos, &try_block, &finally_block)
+                emit_try_finally(e, env, pos, try_block, finally_block)
             } else if finally_block.is_empty() {
-                emit_try_catch(e, env, pos, &try_block, &catch_list[..])
+                emit_try_catch(e, env, pos, try_block, &catch_list[..])
             } else {
-                emit_try_catch_finally(e, env, pos, &try_block, &catch_list[..], &finally_block)
+                emit_try_catch_finally(e, env, pos, try_block, &catch_list[..], finally_block)
             }
         }
         a::Stmt_::Switch(x) => emit_switch(e, env, pos, &x.0, &x.1),
         a::Stmt_::Foreach(x) => emit_foreach(e, env, pos, &x.0, &x.1, &x.2),
         a::Stmt_::Awaitall(x) => emit_awaitall(e, env, pos, &x.0, &x.1),
-        a::Stmt_::Markup(x) => emit_markup(e, env, &x, false),
+        a::Stmt_::Markup(x) => emit_markup(e, env, x, false),
         a::Stmt_::Fallthrough | a::Stmt_::Noop => Ok(instr::empty(alloc)),
         a::Stmt_::AssertEnv(_) => Ok(instr::empty(alloc)),
     }
@@ -271,7 +269,7 @@ fn emit_check_case<'a, 'arena, 'decl>(
         InstrSeq::gather(
             alloc,
             vec![
-                emit_expr::emit_two_exprs(e, env, &case_expr.1, scrutinee_expr, &case_expr)?,
+                emit_expr::emit_two_exprs(e, env, &case_expr.1, scrutinee_expr, case_expr)?,
                 instr::eq(alloc),
                 instr::jmpnz(alloc, case_handler_label),
             ],
@@ -282,7 +280,7 @@ fn emit_check_case<'a, 'arena, 'decl>(
             alloc,
             vec![
                 instr::dup(alloc),
-                emit_expr::emit_expr(e, env, &case_expr)?,
+                emit_expr::emit_expr(e, env, case_expr)?,
                 emit_pos(alloc, &case_expr.1),
                 instr::eq(alloc),
                 instr::jmpz(alloc, next_case_label),
@@ -325,7 +323,7 @@ fn emit_awaitall_single<'a, 'arena, 'decl>(
             Some(ast::Lid(_, id)) => {
                 let l = e
                     .local_gen_mut()
-                    .init_unnamed_for_tempname(local_id::get_name(&id));
+                    .init_unnamed_for_tempname(local_id::get_name(id));
                 (instr::popl(alloc, *l), instr::unsetl(alloc, *l))
             }
         };
@@ -358,7 +356,7 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
                 None => e.local_gen_mut().get_unnamed(),
                 Some(ast::Lid(_, id)) => e
                     .local_gen_mut()
-                    .init_unnamed_for_tempname(local_id::get_name(&id))
+                    .init_unnamed_for_tempname(local_id::get_name(id))
                     .to_owned(),
             });
         }
@@ -448,7 +446,7 @@ fn emit_using<'a, 'arena, 'decl>(
             let (local, preamble) = match &(using.exprs.1[0].2) {
                 ast::Expr_::Binop(x) => match (&x.0, (x.1).2.as_lvar()) {
                     (ast_defs::Bop::Eq(None), Some(ast::Lid(_, id))) => (
-                        Local::Named(Str::new_str(alloc, local_id::get_name(&id).as_str())),
+                        Local::Named(Str::new_str(alloc, local_id::get_name(id).as_str())),
                         InstrSeq::gather(
                             alloc,
                             vec![
@@ -617,7 +615,7 @@ fn block_pos(block: &ast::Block) -> Result<Pos> {
     let mut last = block.len() - 1;
     loop {
         if !block[first].0.is_none() && !block[last].0.is_none() {
-            return Pos::btw(&block[first].0, &block[last].0).map_err(|s| Unrecoverable(s));
+            return Pos::btw(&block[first].0, &block[last].0).map_err(Unrecoverable);
         }
         if block[first].0.is_none() {
             first += 1;
@@ -639,11 +637,9 @@ fn emit_cases<'a, 'arena, 'decl>(
     let alloc = env.arena;
     let has_default = cases.iter().any(|c| c.is_default());
     match cases.split_last() {
-        None => {
-            return Err(Unrecoverable(
-                "impossible - switch statements must have at least one case".into(),
-            ));
-        }
+        None => Err(Unrecoverable(
+            "impossible - switch statements must have at least one case".into(),
+        )),
         Some((last, rest)) => {
             // Emit all the cases except the last one
             let mut res = rest
@@ -729,7 +725,7 @@ fn emit_switch<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     scrutinee_expr: &ast::Expr,
-    cl: &Vec<ast::Case>,
+    cl: &[ast::Case],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let (instr_init, instr_free) = if scrutinee_expr.2.is_lvar() {
@@ -975,7 +971,7 @@ fn emit_try_catch_<'a, 'arena, 'decl>(
     catch_list: &[ast::Catch],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    if is_empty_block(&try_block) {
+    if is_empty_block(try_block) {
         return Ok(instr::empty(alloc));
     };
     let end_label = e.label_gen_mut().next_regular();
@@ -1197,13 +1193,10 @@ fn emit_iterator_key_value_storage<'a, 'arena, 'decl>(
     let alloc = env.arena;
     fn get_id_of_simple_lvar_opt(lvar: &ast::Expr_) -> Result<Option<&str>> {
         if let Some(ast::Lid(pos, id)) = lvar.as_lvar() {
-            let name = local_id::get_name(&id);
+            let name = local_id::get_name(id);
             if name == special_idents::THIS {
-                return Err(emit_fatal::raise_fatal_parse(
-                    &pos,
-                    "Cannot re-assign $this",
-                ));
-            } else if !(superglobals::is_superglobal(&name)) {
+                return Err(emit_fatal::raise_fatal_parse(pos, "Cannot re-assign $this"));
+            } else if !(superglobals::is_superglobal(name)) {
                 return Ok(Some(name));
             }
         };
@@ -1569,9 +1562,9 @@ fn emit_while<'a, 'arena, 'decl>(
 fn emit_for<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
-    e1: &Vec<ast::Expr>,
+    e1: &[ast::Expr],
     e2: Option<&ast::Expr>,
-    e3: &Vec<ast::Expr>,
+    e3: &[ast::Expr],
     body: &[ast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
@@ -1736,7 +1729,7 @@ pub fn emit_markup<'a, 'arena, 'decl>(
         lazy_static! {
             static ref HASHBANG_PAT: regex::Regex = regex::Regex::new(r"^#!.*\n").unwrap();
         }
-        let tail = String::from(match HASHBANG_PAT.shortest_match(&s) {
+        let tail = String::from(match HASHBANG_PAT.shortest_match(s) {
             Some(i) if check_for_hashbang => {
                 // if markup text starts with #!
                 // - extract a line with hashbang
@@ -1778,14 +1771,14 @@ fn emit_await_assignment<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     match lval.2.as_lvar() {
-        Some(ast::Lid(_, id)) if !emit_expr::is_local_this(env, &id) => Ok(InstrSeq::gather(
+        Some(ast::Lid(_, id)) if !emit_expr::is_local_this(env, id) => Ok(InstrSeq::gather(
             alloc,
             vec![
                 emit_expr::emit_await(e, env, pos, r)?,
                 emit_pos(alloc, pos),
                 instr::popl(
                     alloc,
-                    emit_expr::get_local(e, env, pos, local_id::get_name(&id))?,
+                    emit_expr::get_local(e, env, pos, local_id::get_name(id))?,
                 ),
             ],
         )),

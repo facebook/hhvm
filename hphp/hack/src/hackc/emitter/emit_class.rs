@@ -56,7 +56,7 @@ fn add_symbol_refs<'arena, 'decl>(
         .for_each(|(x, _)| emit_symbol_refs::add_class(emitter, *x));
 }
 
-fn make_86method<'a, 'arena, 'decl>(
+fn make_86method<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
     name: method::MethodType<'arena>,
@@ -107,7 +107,7 @@ fn make_86method<'a, 'arena, 'decl>(
         flags,
         span,
         coeffects,
-        visibility: Visibility::from(visibility),
+        visibility,
     })
 }
 
@@ -628,7 +628,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
             .use_as_alias
             .iter()
             .map(|ast::UseAsAlias(ido1, id, ido2, vis)| {
-                let id1 = Maybe::from(ido1.as_ref()).map(|x| elaborate_namespace_id(x));
+                let id1 = Maybe::from(ido1.as_ref()).map(elaborate_namespace_id);
                 let id2 = Maybe::from(ido2.as_ref())
                     .map(|x| hhbc_id::class::ClassType(Str::new_str(alloc, &x.1)));
                 (
@@ -649,7 +649,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
             .map(|ast::InsteadofAlias(id1, id2, ids)| {
                 let id1 = elaborate_namespace_id(id1);
                 let id2 = ClassType(Str::new_str(alloc, &id2.1));
-                let ids = Slice::fill_iter(alloc, ids.iter().map(|x| elaborate_namespace_id(x)));
+                let ids = Slice::fill_iter(alloc, ids.iter().map(elaborate_namespace_id));
                 (id1, id2, ids).into()
             }),
     );
@@ -705,11 +705,12 @@ pub fn emit_class<'a, 'arena, 'decl>(
         )
     };
 
-    if !is_closure
-        && base.as_ref().map_or(false, |cls| {
+    let base_is_closure = || {
+        base.as_ref().map_or(false, |cls| {
             cls.to_raw_string().eq_ignore_ascii_case("closure")
         })
-    {
+    };
+    if !is_closure && base_is_closure() {
         return Err(emit_fatal::raise_fatal_runtime(
             &ast_class.name.0,
             "Class cannot extend Closure",
@@ -751,7 +752,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         )?)
     }
     emitter.label_gen_mut().reset();
-    let mut properties = from_class_elt_classvars(emitter, &ast_class, is_const, &tparams)?;
+    let mut properties = from_class_elt_classvars(emitter, ast_class, is_const, &tparams)?;
     let constants = from_class_elt_constants(emitter, &env, ast_class)?;
 
     let requirements = from_class_elt_requirements(alloc, ast_class);

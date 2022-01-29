@@ -75,7 +75,7 @@ fn print_program(ctx: &Context<'_>, w: &mut dyn Write, prog: &HhasProgram<'_>) -
             let abs = p.to_absolute();
             let p = escape(
                 abs.to_str()
-                    .ok_or(<io::Error as From<Error>>::from(Error::InvalidUTF8))?,
+                    .ok_or_else(|| <io::Error as From<Error>>::from(Error::InvalidUTF8))?,
             );
 
             concat_str_by(w, " ", ["#", p.as_ref(), "starts here"])?;
@@ -366,18 +366,17 @@ fn print_type_constant(
 
 fn print_ctx_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasCtxConstant<'_>) -> Result<()> {
     ctx.newline(w)?;
-    concat_str_by(w, " ", [".ctx", &c.name.unsafe_as_str()])?;
+    concat_str_by(w, " ", [".ctx", c.name.unsafe_as_str()])?;
     if c.is_abstract {
         w.write_all(b" isAbstract")?;
     }
-    if let Some(coeffects) =
-        HhasCoeffects::vec_to_string(&c.coeffects.0.as_ref(), |c| c.to_string())
+    if let Some(coeffects) = HhasCoeffects::vec_to_string(c.coeffects.0.as_ref(), |c| c.to_string())
     {
         w.write_all(b" ")?;
         w.write_all(coeffects.as_bytes())?;
     }
     if let Some(coeffects) =
-        HhasCoeffects::vec_to_string(&c.coeffects.1.as_ref(), |c| c.unsafe_as_str().to_string())
+        HhasCoeffects::vec_to_string(c.coeffects.1.as_ref(), |c| c.unsafe_as_str().to_string())
     {
         w.write_all(b" ")?;
         w.write_all(coeffects.as_bytes())?;
@@ -468,7 +467,7 @@ fn print_property(
     } else {
         triple_quotes(w, |w| match initial_value {
             Nothing => w.write_all(b"N;"),
-            Just(value) => print_adata(ctx, w, &value),
+            Just(value) => print_adata(ctx, w, value),
         })?;
         w.write_all(b";")
     }
@@ -1097,7 +1096,7 @@ fn print_body(
         ctx.newline(w)?;
         write!(w, ".numclosures {};", body.num_closures)?;
     }
-    for s in HhasCoeffects::coeffects_to_hhas(&coeffects).iter() {
+    for s in HhasCoeffects::coeffects_to_hhas(coeffects).iter() {
         ctx.newline(w)?;
         w.write_all(s.as_bytes())?;
     }
@@ -1236,7 +1235,7 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>) -> Result<()> {
             }
             I::FCall(fcall_args) => {
                 w.write_all(b"FCall ")?;
-                print_fcall_args(w, &fcall_args)?;
+                print_fcall_args(w, fcall_args)?;
                 w.write_all(br#" "" """#)
             }
             I::FCallClsMethod(fcall_args, is_log_as_dynamic_call) => {
@@ -1424,7 +1423,7 @@ fn print_base(w: &mut dyn Write, i: &InstructBase<'_>) -> Result<()> {
 }
 
 fn print_stack_index(w: &mut dyn Write, si: &StackIndex) -> Result<()> {
-    w.write_all(&si.to_string().as_bytes())
+    w.write_all(si.to_string().as_bytes())
 }
 
 fn print_member_opmode(w: &mut dyn Write, m: &MemberOpMode) -> Result<()> {
@@ -1521,7 +1520,7 @@ fn print_iter_args(w: &mut dyn Write, iter_args: &IterArgs<'_>) -> Result<()> {
         Nothing => w.write_all(b"NK")?,
         Just(k) => {
             w.write_all(b"K:")?;
-            print_local(w, &k)?;
+            print_local(w, k)?;
         }
     };
     w.write_all(b" ")?;
@@ -1582,7 +1581,7 @@ fn print_final(w: &mut dyn Write, f: &InstructFinal<'_>) -> Result<()> {
             w.write_all(b"SetOpM ")?;
             print_int(w, i)?;
             w.write_all(b" ")?;
-            print_eq_op(w, &op)?;
+            print_eq_op(w, op)?;
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
@@ -1590,7 +1589,7 @@ fn print_final(w: &mut dyn Write, f: &InstructFinal<'_>) -> Result<()> {
             w.write_all(b"IncDecM ")?;
             print_int(w, i)?;
             w.write_all(b" ")?;
-            print_incdec_op(w, &op)?;
+            print_incdec_op(w, op)?;
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
@@ -1978,7 +1977,7 @@ fn print_control_flow(w: &mut dyn Write, cf: &InstructControlFlow<'_>) -> Result
                         print_label(w, l)
                     })?;
                     w.write_all(b" -:")?;
-                    print_label(w, &lastlabel)
+                    print_label(w, lastlabel)
                 })
             }
         },
@@ -2040,12 +2039,12 @@ fn print_lit_const(w: &mut dyn Write, lit: &InstructLitConst<'_>) -> Result<()> 
         LC::NewVec(i) => concat_str_by(w, " ", ["NewVec", i.to_string().as_str()]),
         LC::NewKeysetArray(i) => concat_str_by(w, " ", ["NewKeysetArray", i.to_string().as_str()]),
         LC::NewStructDict(l) => {
-            let ls: Vec<&str> = l.as_ref().into_iter().map(|s| s.unsafe_as_str()).collect();
+            let ls: Vec<&str> = l.as_ref().iter().map(|s| s.unsafe_as_str()).collect();
             w.write_all(b"NewStructDict ")?;
             angle(w, |w| print_shape_fields(w, &ls[0..]))
         }
         LC::NewRecord(cid, l) => {
-            let ls: Vec<&str> = l.as_ref().into_iter().map(|s| s.unsafe_as_str()).collect();
+            let ls: Vec<&str> = l.as_ref().iter().map(|s| s.unsafe_as_str()).collect();
             w.write_all(b"NewRecord ")?;
             print_class_id(w, cid)?;
             w.write_all(b" ")?;
@@ -2338,8 +2337,8 @@ fn print_afield(
 ) -> Result<()> {
     use ast::Afield as A;
     match afield {
-        A::AFvalue(e) => print_expr(ctx, w, env, &e),
-        A::AFkvalue(k, v) => print_key_value(ctx, w, env, &k, &v),
+        A::AFvalue(e) => print_expr(ctx, w, env, e),
+        A::AFkvalue(k, v) => print_key_value(ctx, w, env, k, v),
     }
 }
 
@@ -2607,7 +2606,7 @@ fn print_expr(
         }
         E_::Collection(c) => {
             let name = strip_ns((c.0).1.as_str());
-            let name = types::fix_casing(&name);
+            let name = types::fix_casing(name);
             match name {
                 "Set" | "Pair" | "Vector" | "Map" | "ImmSet" | "ImmVector" | "ImmMap" => {
                     w.write_all(b"HH\\\\")?;
@@ -2639,7 +2638,7 @@ fn print_expr(
             let (e, _, es, unpacked_element) = &**c;
             match e.as_id() {
                 Some(ast_defs::Id(_, call_id)) => {
-                    w.write_all(lstrip(adjust_id(env, &call_id).as_ref(), "\\\\").as_bytes())?
+                    w.write_all(lstrip(adjust_id(env, call_id).as_ref(), "\\\\").as_bytes())?
                 }
                 None => {
                     let buf = print_expr_to_string(ctx, env, e)?;
@@ -2673,7 +2672,7 @@ fn print_expr(
                             lstrip(
                                 &adjust_id(
                                     env,
-                                    &ClassType::from_ast_name(&bumpalo::Bump::new(), cname)
+                                    ClassType::from_ast_name(&bumpalo::Bump::new(), cname)
                                         .to_raw_string(),
                                 ),
                                 "\\\\",
@@ -2853,7 +2852,7 @@ fn print_expr(
             let (fp_id, targs) = &**fp;
             match fp_id {
                 ast::FunctionPtrId::FPId(ast::Id(_, sid)) => {
-                    w.write_all(lstrip(adjust_id(env, &sid).as_ref(), "\\\\").as_bytes())?
+                    w.write_all(lstrip(adjust_id(env, sid).as_ref(), "\\\\").as_bytes())?
                 }
                 ast::FunctionPtrId::FPClassConst(ast::ClassId(_, _, class_id), (_, meth_name)) => {
                     match class_id {
@@ -3002,7 +3001,7 @@ fn print_block(
     env: &ExprEnv<'_, '_>,
     block: &[ast::Stmt],
 ) -> Result<()> {
-    match &block[..] {
+    match block {
         [] | [ast::Stmt(_, ast::Stmt_::Noop)] => Ok(()),
         [ast::Stmt(_, ast::Stmt_::Block(b))] if b.len() == 1 => print_block_(ctx, w, env, b),
         [_, _, ..] => print_block_(ctx, w, env, block),
@@ -3137,7 +3136,7 @@ fn print_bop(w: &mut dyn Write, bop: &ast_defs::Bop) -> Result<()> {
 fn print_hint(w: &mut dyn Write, ns: bool, hint: &ast::Hint) -> Result<()> {
     let alloc = bumpalo::Bump::new();
     let h = emit_type_hint::fmt_hint(&alloc, &[], false, hint).map_err(|e| match e {
-        Unrecoverable(s) => Error::fail(s).into(),
+        Unrecoverable(s) => Error::fail(s),
         _ => Error::fail("Error printing hint"),
     })?;
     if ns {
@@ -3371,7 +3370,7 @@ pub fn expr_to_string_lossy(mut ctx: Context<'_>, expr: &ast::Expr) -> String {
 
     let env = ExprEnv { codegen_env: None };
     let mut escaped_src = Vec::new();
-    print_expr(&mut ctx, &mut escaped_src, &env, expr).expect("Printing failed");
+    print_expr(&ctx, &mut escaped_src, &env, expr).expect("Printing failed");
 
     let bs = escaper::unescape_double(unsafe { std::str::from_utf8_unchecked(&escaped_src) })
         .expect("Unescaping failed");
@@ -3384,9 +3383,7 @@ pub fn external_print_program(
     w: &mut dyn std::io::Write,
     prog: &HhasProgram<'_>,
 ) -> std::result::Result<(), Error> {
-    let mut ctx = ctx.clone();
-    let mut w = Box::new(w);
-    print_program(&mut ctx, &mut w, prog).map_err(write::into_error)?;
+    print_program(ctx, w, prog).map_err(write::into_error)?;
     w.flush().map_err(write::into_error)?;
     Ok(())
 }
@@ -3397,9 +3394,7 @@ pub fn external_print_expr(
     env: &ExprEnv<'_, '_>,
     expr: &ast::Expr,
 ) -> std::result::Result<(), Error> {
-    let mut ctx = ctx.clone();
-    let mut w = Box::new(w);
-    print_expr(&mut ctx, &mut w, env, expr).map_err(write::into_error)?;
+    print_expr(ctx, w, env, expr).map_err(write::into_error)?;
     w.flush().map_err(write::into_error)?;
     Ok(())
 }

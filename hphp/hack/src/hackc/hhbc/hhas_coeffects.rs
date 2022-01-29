@@ -40,7 +40,7 @@ impl<'arena> HhasCoeffects<'arena> {
         if v.is_empty() {
             return None;
         }
-        Some(v.iter().map(|x| f(x)).collect::<Vec<String>>().join(" "))
+        Some(v.iter().map(f).collect::<Vec<String>>().join(" "))
     }
 
     pub fn coeffects_to_hhas(coeffects: &Self) -> Vec<String> {
@@ -212,7 +212,7 @@ impl<'arena> HhasCoeffects<'arena> {
                             if strip_ns(id.as_str()) == sn::typehints::THIS {
                                 cc_this.push(Slice::from_vec(
                                     alloc,
-                                    sids.into_iter()
+                                    sids.iter()
                                         .map(|Id(_, id)| alloc.alloc_str(id).into())
                                         .collect(),
                                 ));
@@ -223,7 +223,7 @@ impl<'arena> HhasCoeffects<'arena> {
                                         idx,
                                         Slice::from_vec(
                                             alloc,
-                                            sids.into_iter()
+                                            sids.iter()
                                                 .map(|Id(_, id)| alloc.alloc_str(id).into())
                                                 .collect(),
                                         ),
@@ -237,7 +237,7 @@ impl<'arena> HhasCoeffects<'arena> {
                                         idx,
                                         Slice::from_vec(
                                             alloc,
-                                            sids.into_iter()
+                                            sids.iter()
                                                 .map(|Id(_, id)| alloc.alloc_str(id).into())
                                                 .collect(),
                                         ),
@@ -378,7 +378,7 @@ impl<'arena> HhasCoeffects<'arena> {
 
     pub fn is_86caller(&self) -> bool {
         !self.has_coeffect_rules()
-            && self.static_coeffects.len() == 0
+            && self.static_coeffects.is_empty()
             && self.unenforced_static_coeffects.len() == 1
             && self.unenforced_static_coeffects.as_ref()[0]
                 == string_utils::coeffects::CALLER.into()

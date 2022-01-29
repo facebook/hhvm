@@ -189,7 +189,7 @@ mod inout_locals {
         // inout $v
         if let (ParamKind::Pinout(_), Expr_::Lvar(lid)) = (pk, e) {
             let Lid(_, lid) = &**lid;
-            if !is_local_this(env, &lid) {
+            if !is_local_this(env, lid) {
                 add_use(&lid.1, acc);
                 return if is_top {
                     add_inout(lid.1.as_str(), i, acc);
@@ -235,9 +235,9 @@ mod inout_locals {
             if let ast::Expr_::Call(expr) = p {
                 let (_, _, args, uarg) = &**expr;
                 args.iter()
-                    .for_each(|(pk, arg)| handle_arg(&c.env, false, c.i, pk, arg, &mut c.state));
+                    .for_each(|(pk, arg)| handle_arg(c.env, false, c.i, pk, arg, c.state));
                 if let Some(arg) = uarg.as_ref() {
-                    handle_arg(&c.env, false, c.i, &ParamKind::Pnormal, arg, &mut c.state)
+                    handle_arg(c.env, false, c.i, &ParamKind::Pnormal, arg, c.state)
                 }
                 Ok(())
             } else {
@@ -261,7 +261,7 @@ mod inout_locals {
                     // $v
                     ast::Expr_::Lvar(expr) => {
                         let Lid(_, (_, id)) = &**expr;
-                        add_use(id, &mut c.state);
+                        add_use(id, c.state);
                     }
                     _ => {}
                 })
@@ -275,9 +275,9 @@ mod inout_locals {
         match &*e {
             ast::Expr_::Lvar(lid) => {
                 let Lid(_, lid) = &**lid;
-                if !is_local_this(&ctx.env, &lid) {
-                    add_use(lid.1.as_str(), &mut ctx.state);
-                    add_write(lid.1.as_str(), ctx.i, &mut ctx.state);
+                if !is_local_this(ctx.env, lid) {
+                    add_use(lid.1.as_str(), ctx.state);
+                    add_write(lid.1.as_str(), ctx.i, ctx.state);
                 }
             }
             ast::Expr_::List(exprs) => exprs.iter().for_each(|expr| collect_lvars_hs(ctx, expr)),
@@ -302,7 +302,7 @@ pub fn get_type_structure_for_hint<'arena, 'decl>(
         e.options(),
         tparams,
         &targ_map,
-        &hint,
+        hint,
         false,
         false,
     )?;
@@ -505,7 +505,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::KeyValCollection(e) => {
             let (kind, _, fields) = &**e;
             let fields = mk_afkvalues(
-                &fields
+                fields
                     .to_owned()
                     .into_iter()
                     .map(|ast::Field(e1, e2)| (e1, e2))
@@ -555,7 +555,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::Tuple(e) => Ok(emit_pos_then(
             alloc,
             pos,
-            emit_collection(emitter, env, expression, &mk_afvalues(&e), None)?,
+            emit_collection(emitter, env, expression, &mk_afvalues(e), None)?,
         )),
 
         Expr_::This | Expr_::Lplaceholder(_) | Expr_::Dollardollar(_) => {
@@ -651,7 +651,7 @@ fn emit_id<'a, 'arena, 'decl>(
         _ => {
             // panic!("TODO: uncomment after D19350786 lands")
             // let cid: ConstId = r#const::ConstType::from_ast_name(&s);
-            let cid = r#const::ConstType(Str::new_str(alloc, string_utils::strip_global_ns(&s)));
+            let cid = r#const::ConstType(Str::new_str(alloc, string_utils::strip_global_ns(s)));
             emit_symbol_refs::add_constant(emitter, cid.clone());
             return Ok(emit_pos_then(alloc, p, instr::lit_const(alloc, CnsE(cid))));
         }
@@ -747,7 +747,7 @@ fn text_of_expr(e: &ast::Expr) -> String {
         ast::Expr_::Lvar(lid) => local_id::get_name(&lid.1).to_string(),
         ast::Expr_::ArrayGet(x) => match ((x.0).2.as_lvar(), x.1.as_ref()) {
             (Some(ast::Lid(_, id)), Some(e_)) => {
-                format!("{}[{}]", local_id::get_name(&id), text_of_expr(e_))
+                format!("{}[{}]", local_id::get_name(id), text_of_expr(e_))
             }
             _ => "unknown".into(),
         },
@@ -1283,7 +1283,7 @@ fn emit_collection<'a, 'arena, 'decl>(
     }
 }
 
-fn emit_static_collection<'a, 'arena, 'decl>(
+fn emit_static_collection<'a, 'arena>(
     env: &Env<'a, 'arena>,
     transform_to_collection: Option<CollectionType>,
     pos: &Pos,
@@ -1399,7 +1399,7 @@ fn non_numeric(s: &str) -> bool {
             u64::from_str_radix(&BINARY.replace(s, "${sign}${digits}"), *BINARY_RADIX)
                 .map(|x| x as i64)
         } else {
-            i64::from_str(&s)
+            i64::from_str(s)
         })
         .map_err(|_| ())
     }
@@ -1426,7 +1426,8 @@ fn non_numeric(s: &str) -> bool {
         }
     }
     fn float_from_str(s: &str) -> std::result::Result<f64, ()> {
-        // Note(hrust): OCaml float_of_string ignores leading whitespace, reads decimal and hexadecimal
+        // Note(hrust): OCaml float_of_string ignores leading whitespace,
+        // reads decimal and hexadecimal
         let s = s.trim_start();
         if HEX.is_match(s) {
             float_from_str_radix(&HEX.replace(s, "${sign}${digits}"), *HEX_RADIX)
@@ -1446,7 +1447,7 @@ fn non_numeric(s: &str) -> bool {
     int_from_str(&s).is_err() && float_from_str(&s).is_err()
 }
 
-fn is_struct_init<'a, 'arena, 'decl>(
+fn is_struct_init<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     fields: &[ast::Afield],
     allow_numerics: bool,
@@ -1745,12 +1746,12 @@ fn emit_call_isset_expr<'a, 'arena, 'decl>(
     }
     if let Some(lid) = expr.2.as_lvar() {
         let name = local_id::get_name(&lid.1);
-        return Ok(if superglobals::is_any_global(&name) {
+        return Ok(if superglobals::is_any_global(name) {
             InstrSeq::gather(
                 alloc,
                 vec![
                     emit_pos(alloc, outer_pos),
-                    instr::string(alloc, string_utils::locals::strip_dollar(&name)),
+                    instr::string(alloc, string_utils::locals::strip_dollar(name)),
                     emit_pos(alloc, outer_pos),
                     instr::issetg(alloc),
                 ],
@@ -2021,7 +2022,7 @@ pub fn emit_reified_targs<'a, 'arena, 'decl>(
                 })
             })
     };
-    Ok(if !is_in_lambda && same_as_targs(&current_fun_tparams) {
+    Ok(if !is_in_lambda && same_as_targs(current_fun_tparams) {
         instr::cgetl(
             alloc,
             Local::Named(Str::new_str(
@@ -2029,7 +2030,7 @@ pub fn emit_reified_targs<'a, 'arena, 'decl>(
                 string_utils::reified::GENERICS_LOCAL_NAME,
             )),
         )
-    } else if !is_in_lambda && same_as_targs(&current_cls_tparams[..]) {
+    } else if !is_in_lambda && same_as_targs(current_cls_tparams) {
         InstrSeq::gather(
             alloc,
             vec![
@@ -2251,7 +2252,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                                         1,
                                         None,
                                     );
-                                    let newobj_instrs = emit_new(e, env, pos, &new_exp, true);
+                                    let newobj_instrs = emit_new(e, env, pos, new_exp, true);
                                     Ok((
                                         InstrSeq::gather(
                                             alloc,
@@ -2310,12 +2311,12 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             let (cid, (_, id)) = &**cls_const;
             let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
             if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
-                if let Some(reified_var_cexpr) = get_reified_var_cexpr(env, pos, &name)? {
+                if let Some(reified_var_cexpr) = get_reified_var_cexpr(env, pos, name)? {
                     cexpr = reified_var_cexpr;
                 }
             }
             let method_id =
-                method::MethodType(Str::new_str(alloc, string_utils::strip_global_ns(&id)));
+                method::MethodType(Str::new_str(alloc, string_utils::strip_global_ns(id)));
             Ok(match cexpr {
                 // Statically known
                 ClassExpr::Id(ast_defs::Id(_, cname)) => {
@@ -2409,7 +2410,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             let (cid, cls_get_expr, _) = &**c;
             let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
             if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
-                if let Some(reified_var_cexpr) = get_reified_var_cexpr(env, pos, &name)? {
+                if let Some(reified_var_cexpr) = get_reified_var_cexpr(env, pos, name)? {
                     cexpr = reified_var_cexpr;
                 }
             }
@@ -2576,7 +2577,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
     }
 }
 
-fn get_reified_var_cexpr<'a, 'arena, 'decl>(
+fn get_reified_var_cexpr<'a, 'arena>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     name: &str,
@@ -2739,7 +2740,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
 /// This function abstracts over these two kinds of calls: given a list of arguments and two
 /// predicates (is this an `inout` argument, is this `readonly`) we build up an `FcallArgs` for the
 /// given function call.
-fn get_fcall_args_common<'arena, 'decl, T>(
+fn get_fcall_args_common<'arena, T>(
     alloc: &'arena bumpalo::Bump,
     args: &[T],
     uarg: Option<&ast::Expr>,
@@ -2773,7 +2774,7 @@ fn get_fcall_args_common<'arena, 'decl, T>(
     )
 }
 
-fn get_fcall_args_no_inout<'arena, 'decl>(
+fn get_fcall_args_no_inout<'arena>(
     alloc: &'arena bumpalo::Bump,
     args: &[ast::Expr],
     uarg: Option<&ast::Expr>,
@@ -2792,12 +2793,12 @@ fn get_fcall_args_no_inout<'arena, 'decl>(
         lock_while_unwinding,
         readonly_return,
         readonly_this,
-        |expr| is_readonly_expr(expr),
+        is_readonly_expr,
         |_| false,
     )
 }
 
-fn get_fcall_args<'arena, 'decl>(
+fn get_fcall_args<'arena>(
     alloc: &'arena bumpalo::Bump,
     args: &[(ParamKind, ast::Expr)],
     uarg: Option<&ast::Expr>,
@@ -3170,7 +3171,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
         _ => Ok(
             match (args, istype_op(lower_fq_name), is_isexp_op(lower_fq_name)) {
                 (&[ref arg_expr], _, Some(ref h)) => {
-                    let is_expr = emit_is(e, env, pos, &h)?;
+                    let is_expr = emit_is(e, env, pos, h)?;
                     Some(InstrSeq::gather(
                         alloc,
                         vec![
@@ -3186,7 +3187,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                     Some(InstrSeq::gather(
                         alloc,
                         vec![
-                            emit_local(e, env, BareThisOp::NoNotice, &arg_id)?,
+                            emit_local(e, env, BareThisOp::NoNotice, arg_id)?,
                             emit_pos(alloc, pos),
                             instr::istypec(alloc, i),
                         ],
@@ -3207,7 +3208,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                     Some(InstrSeq::gather(
                         alloc,
                         vec![
-                            emit_expr(e, env, &arg_expr)?,
+                            emit_expr(e, env, arg_expr)?,
                             emit_pos(alloc, pos),
                             instr::istypec(alloc, i),
                         ],
@@ -3319,7 +3320,7 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
     let alloc = env.arena;
     let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, true, &env.scope, cid);
     if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
-        if let Some(reified_var_cexpr) = get_reified_var_cexpr(env, pos, &name)? {
+        if let Some(reified_var_cexpr) = get_reified_var_cexpr(env, pos, name)? {
             cexpr = reified_var_cexpr;
         }
     }
@@ -3482,7 +3483,7 @@ fn emit_is<'a, 'arena, 'decl>(
     Ok(if is_static {
         match &*h.1 {
             aast_defs::Hint_::Happly(ast_defs::Id(_, id), hs)
-                if hs.is_empty() && string_utils::strip_hh_ns(&id) == typehints::THIS =>
+                if hs.is_empty() && string_utils::strip_hh_ns(id) == typehints::THIS =>
             {
                 instr::islateboundcls(alloc)
             }
@@ -3731,7 +3732,7 @@ pub fn emit_reified_generic_instrs<'arena>(
     ))
 }
 
-fn emit_reified_type<'a, 'arena, 'decl>(
+fn emit_reified_type<'a, 'arena>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     name: &str,
@@ -3740,7 +3741,7 @@ fn emit_reified_type<'a, 'arena, 'decl>(
         .ok_or_else(|| emit_fatal::raise_fatal_runtime(&Pos::make_none(), "Invalid reified param"))
 }
 
-fn emit_reified_type_opt<'a, 'arena, 'decl>(
+fn emit_reified_type_opt<'a, 'arena>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     name: &str,
@@ -3999,7 +4000,7 @@ fn emit_obj_get<'a, 'arena, 'decl>(
     };
     let alloc = env.arena;
     if let Some(ast::Lid(pos, id)) = expr.2.as_lvar() {
-        if local_id::get_name(&id) == special_idents::THIS
+        if local_id::get_name(id) == special_idents::THIS
             && nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe)
         {
             return Err(emit_fatal::raise_fatal_parse(
@@ -4010,7 +4011,7 @@ fn emit_obj_get<'a, 'arena, 'decl>(
     }
     if let Some(ast_defs::Id(_, s)) = prop.2.as_id() {
         if string_utils::is_xhp(s) {
-            return Ok((emit_xhp_obj_get(e, env, pos, &expr, s, nullflavor)?, None));
+            return Ok((emit_xhp_obj_get(e, env, pos, expr, s, nullflavor)?, None));
         }
     }
     let mode = if null_coalesce_assignment {
@@ -4106,7 +4107,7 @@ fn emit_prop_expr<'a, 'arena, 'decl>(
                 // Special case for known property name
                 let pid: prop::PropType<'arena> = prop::PropType::<'arena>::from_ast_name(
                     alloc,
-                    string_utils::strip_global_ns(&name),
+                    string_utils::strip_global_ns(name),
                 );
                 match nullflavor {
                     ast_defs::OgNullFlavor::OGNullthrows => MemberKey::PT(pid, readonly_op),
@@ -4562,8 +4563,7 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                         ));
                     }
                 };
-                let fq_id =
-                    class::ClassType::<'arena>::from_ast_name(alloc, &cname).to_raw_string();
+                let fq_id = class::ClassType::<'arena>::from_ast_name(alloc, cname).to_raw_string();
                 if e.options().emit_class_pointers() > 0 {
                     Ok((
                         MemberKey::ET(Str::from(fq_id), ReadonlyOp::Any),
@@ -4771,7 +4771,7 @@ fn emit_class_const<'a, 'arena, 'decl>(
     let alloc = env.arena;
     let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, true, &env.scope, cid);
     if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
-        if let Some(reified_var_cexpr) = get_reified_var_cexpr(env, pos, &name)? {
+        if let Some(reified_var_cexpr) = get_reified_var_cexpr(env, pos, name)? {
             cexpr = reified_var_cexpr;
         }
     }
@@ -5235,7 +5235,7 @@ fn emit_binop<'a, 'arena, 'decl>(
     let (op, e1, e2) = expr.2.as_binop().unwrap();
     use ast_defs::Bop as B;
     match op {
-        B::Ampamp | B::Barbar => emit_short_circuit_op(e, env, pos, &expr),
+        B::Ampamp | B::Barbar => emit_short_circuit_op(e, env, pos, expr),
         B::Eq(None) => emit_lval_op(e, env, pos, LValOp::Set, e1, Some(e2), false),
         B::Eq(Some(eop)) if eop.is_question_question() => {
             emit_null_coalesce_assignment(e, env, pos, e1, e2)
@@ -5392,7 +5392,7 @@ fn emit_cast<'a, 'arena, 'decl>(
     let op = match hint {
         H_::Happly(ast_defs::Id(_, id), hints) if hints.is_empty() => {
             let id = string_utils::strip_ns(id);
-            match string_utils::strip_hh_ns(&id).as_ref() {
+            match string_utils::strip_hh_ns(id).as_ref() {
                 typehints::INT => instr::cast_int(alloc),
                 typehints::BOOL => instr::cast_bool(alloc),
                 typehints::STRING => instr::cast_string(alloc),
@@ -5522,7 +5522,7 @@ pub fn is_reified_tparam<'a, 'arena>(
     if is_fun {
         is(env.scope.get_fun_tparams())
     } else {
-        is(&env.scope.get_class_tparams()[..])
+        is(env.scope.get_class_tparams())
     }
 }
 
@@ -5613,9 +5613,7 @@ fn is_trivial(env: &Env<'_, '_>, is_base: bool, expr: &ast::Expr) -> bool {
         E_::ArrayGet(_) if !is_base => false,
         E_::ArrayGet(x) => {
             is_trivial(env, is_base, &x.0)
-                && (x.1)
-                    .as_ref()
-                    .map_or(true, |e| is_trivial(env, is_base, &e))
+                && (x.1).as_ref().map_or(true, |e| is_trivial(env, is_base, e))
         }
         _ => false,
     }
@@ -5986,8 +5984,8 @@ fn emit_base_<'a, 'arena, 'decl>(
         E_::ObjGet(x) if x.as_ref().3 == ast::PropOrMethod::IsProp => {
             let (base_expr, prop_expr, null_flavor, _) = &**x;
             Ok(match prop_expr.2.as_id() {
-                Some(ast_defs::Id(_, s)) if string_utils::is_xhp(&s) => {
-                    let base_instrs = emit_xhp_obj_get(e, env, pos, base_expr, &s, null_flavor)?;
+                Some(ast_defs::Id(_, s)) if string_utils::is_xhp(s) => {
+                    let base_instrs = emit_xhp_obj_get(e, env, pos, base_expr, s, null_flavor)?;
                     emit_default(
                         e,
                         base_instrs,
@@ -6233,7 +6231,7 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
 //   Dim Warn EI:i_n ...
 //   Dim Warn EI:i_2
 //   QueryM 0 CGet EI:i_1
-fn emit_array_get_fixed<'arena, 'decl>(
+fn emit_array_get_fixed<'arena>(
     alloc: &'arena bumpalo::Bump,
     last_usage: bool,
     local: Local<'arena>,
@@ -6423,7 +6421,7 @@ pub fn emit_lval_op_nonlist<'a, 'arena, 'decl>(
     .map(|(lhs, rhs, setop)| InstrSeq::gather(alloc, vec![lhs, rhs, setop]))
 }
 
-pub fn emit_final_global_op<'arena, 'decl>(
+pub fn emit_final_global_op<'arena>(
     alloc: &'arena bumpalo::Bump,
     pos: &Pos,
     op: LValOp,
@@ -6437,7 +6435,7 @@ pub fn emit_final_global_op<'arena, 'decl>(
     }
 }
 
-pub fn emit_final_local_op<'arena, 'decl>(
+pub fn emit_final_local_op<'arena>(
     alloc: &'arena bumpalo::Bump,
     pos: &Pos,
     op: LValOp,
@@ -6456,7 +6454,7 @@ pub fn emit_final_local_op<'arena, 'decl>(
     )
 }
 
-fn emit_final_member_op<'arena, 'decl>(
+fn emit_final_member_op<'arena>(
     alloc: &'arena bumpalo::Bump,
     stack_size: usize,
     op: LValOp,
@@ -6471,7 +6469,7 @@ fn emit_final_member_op<'arena, 'decl>(
     }
 }
 
-fn emit_final_static_op<'arena, 'decl>(
+fn emit_final_static_op<'arena>(
     alloc: &'arena bumpalo::Bump,
     cid: &ast::ClassId,
     prop: &ast::ClassGetExpr,

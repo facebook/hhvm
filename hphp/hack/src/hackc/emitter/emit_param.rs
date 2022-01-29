@@ -165,8 +165,7 @@ fn from_ast<'a, 'arena, 'decl>(
             is_variadic: param.is_variadic,
             is_inout: param.callconv.is_pinout(),
             is_readonly,
-            user_attributes: Slice::new(emitter.alloc.alloc_slice_fill_iter(attrs.into_iter()))
-                .into(),
+            user_attributes: Slice::new(emitter.alloc.alloc_slice_fill_iter(attrs.into_iter())),
             type_info: Maybe::from(type_info),
             // - Write hhas_param.default_value as `Nothing` while keeping `default_value` around
             //   for emitting decl vars and default value setters
@@ -189,7 +188,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
             let instrs = InstrSeq::gather(
                 alloc,
                 vec![
-                    emit_expression::emit_expr(emitter, env, &expr)?,
+                    emit_expression::emit_expr(emitter, env, expr)?,
                     emit_pos::emit_pos(alloc, pos),
                     instr::setl(
                         alloc,
@@ -206,7 +205,7 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
     };
     let setters = params
         .iter()
-        .filter_map(|p| Option::from(to_setter(p)))
+        .filter_map(|p| to_setter(p))
         .collect::<Result<Vec<_>>>()?;
     if setters.is_empty() {
         Ok((instr::empty(alloc), instr::empty(alloc)))

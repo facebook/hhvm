@@ -127,7 +127,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
             is_closure_body,
             &fd.params,
             fd.span.clone(),
-            &fd.body.fb_ast.as_slice(),
+            fd.body.fb_ast.as_slice(),
         )
     }
 
@@ -407,7 +407,7 @@ fn make_scope_name(ns: &RcOc<namespace_env::Env>, scope: &ast_scope::Scope<'_, '
                 };
             }
             Some(ast_scope::ScopeItem::Class(x)) => {
-                parts.push(make_class_name(&x));
+                parts.push(make_class_name(x));
                 break;
             }
             Some(ast_scope::ScopeItem::Function(x)) => {
@@ -540,7 +540,7 @@ fn make_closure(
 // literal strings. It's necessary to do this before closure conversion
 // because the enclosing class will be changed.
 fn convert_id(env: &Env<'_, '_>, Id(p, s): Id) -> Expr_ {
-    let ret = |newstr| Expr_::mk_string(newstr);
+    let ret = Expr_::mk_string;
     let name = |c: &ast_scope::Class<'_>| {
         Expr_::mk_string(string_utils::mangle_xhp_id(strip_id(c.get_name()).to_string()).into())
     };
@@ -1149,7 +1149,7 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
             // called both for toplevel functions and lambdas
             Def::Fun(x) => {
                 let mut env = env.clone();
-                env.with_function(&x)?;
+                env.with_function(x)?;
                 self.state.reset_function_counts();
                 let function_state = convert_function_like_body(self, &mut env, &mut x.fun.body)?;
                 self.state.record_function_state(
@@ -1308,7 +1308,7 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                 if let [(pk_c, cexpr), (pk_f, fexpr)] = &mut *x.2 {
                     ensure_normal_paramkind(pk_c)?;
                     ensure_normal_paramkind(pk_f)?;
-                    let mut res = make_dyn_meth_caller_lambda(&*pos, &cexpr, &fexpr, force);
+                    let mut res = make_dyn_meth_caller_lambda(&*pos, cexpr, fexpr, force);
                     res.recurse(env, self.object())?;
                     res
                 } else {
@@ -1579,7 +1579,7 @@ fn extract_debugger_main(
         } else {
             stmts
         };
-    let p = || Pos::make_none();
+    let p = Pos::make_none;
     let id = |n: &str| Expr((), p(), Expr_::mk_id(Id(p(), n.into())));
     let lv = |n: &String| {
         Expr(
@@ -1599,7 +1599,7 @@ fn extract_debugger_main(
                     Expr_::mk_call(
                         id("unset"),
                         vec![],
-                        vec![(ParamKind::Pnormal, lv(&name))],
+                        vec![(ParamKind::Pnormal, lv(name))],
                         None,
                     ),
                 )),
@@ -1611,7 +1611,7 @@ fn extract_debugger_main(
                         (),
                         p(),
                         Expr_::mk_is(
-                            lv(&name),
+                            lv(name),
                             Hint::new(
                                 p(),
                                 Hint_::mk_happly(Id(p(), "__uninitSentinel".into()), vec![]),
@@ -1793,7 +1793,7 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
         .into_iter()
         .map(|(_, fd)| Def::mk_fun(fd));
     *defs = named_fun_defs.collect();
-    defs.extend(new_defs.drain(..));
+    defs.append(&mut new_defs);
     for class in visitor.state.closures.into_iter() {
         defs.push(Def::mk_class(class));
     }

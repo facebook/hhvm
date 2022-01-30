@@ -20,7 +20,7 @@
 #include <curl/multi.h>
 #include <folly/portability/OpenSSL.h>
 
-#if LIBCURL_VERSION_NUM >= 0x074600
+#if (LIBCURL_VERSION_NUM >= 0x074600) && (OPENSSL_VERSION_NUMBER >= 0x10101000L)
 #define CERT_CACHE_SUPPORTED 1
 #else
 #undef CERT_CACHE_SUPPORTED

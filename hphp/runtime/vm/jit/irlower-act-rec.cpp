@@ -67,7 +67,7 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   auto const func = inst->extra<DefFuncEntryFP>()->func;
   auto const prevFP = srcLoc(env, inst, 0).reg();
   auto const newFP = srcLoc(env, inst, 1).reg();
-  auto const callFlags = srcLoc(env, inst, 2).reg();
+  auto const prologueFlags = srcLoc(env, inst, 2).reg();
   auto const ctx = srcLoc(env, inst, 3).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
@@ -79,19 +79,19 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   v << storeli{(int32_t)func->getFuncId().toInt(), newFP[AROFF(m_funcId)]};
 
   int32_t constexpr flagsDelta =
-    CallFlags::Flags::CallOffsetStart - ActRec::CallOffsetStart;
+    PrologueFlags::Flags::CallOffsetStart - ActRec::CallOffsetStart;
   assertx(ActRec::LocalsDecRefd == 0);
   assertx(ActRec::IsInlined == 1);
   assertx(ActRec::AsyncEagerRet == 2);
   assertx(ActRec::CallOffsetStart == 3);
-  assertx(CallFlags::Flags::ReservedZero0 == flagsDelta + 0);
-  assertx(CallFlags::Flags::ReservedZero1 == flagsDelta + 1);
-  assertx(CallFlags::Flags::AsyncEagerReturn == flagsDelta + 2);
-  assertx(CallFlags::Flags::CallOffsetStart == flagsDelta + 3);
-  auto const callFlagsLow32 = v.makeReg();
+  assertx(PrologueFlags::Flags::ReservedZero0 == flagsDelta + 0);
+  assertx(PrologueFlags::Flags::ReservedZero1 == flagsDelta + 1);
+  assertx(PrologueFlags::Flags::AsyncEagerReturn == flagsDelta + 2);
+  assertx(PrologueFlags::Flags::CallOffsetStart == flagsDelta + 3);
+  auto const prologueFlagsLow32 = v.makeReg();
   auto const callOffAndFlags = v.makeReg();
-  v << movtql{callFlags, callFlagsLow32};
-  v << shrli{flagsDelta, callFlagsLow32, callOffAndFlags, v.makeReg()};
+  v << movtql{prologueFlags, prologueFlagsLow32};
+  v << shrli{flagsDelta, prologueFlagsLow32, callOffAndFlags, v.makeReg()};
   v << storel{callOffAndFlags, newFP + AROFF(m_callOffAndFlags)};
 
   if (func->cls() || func->isClosureBody()) {
@@ -106,7 +106,7 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
 
 void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
-  auto const callFlags = srcLoc(env, inst, 0).reg();
+  auto const prologueFlags = srcLoc(env, inst, 0).reg();
   auto const func = inst->extra<FuncData>()->func;
   assertx(func->hasReifiedGenerics());
   auto& v = vmain(env);
@@ -120,7 +120,7 @@ void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
   // Extract generics bitmap from call flags.
   auto const genericsBitmap = v.makeReg();
   auto const genericsBitmap64 = v.makeReg();
-  v << shrqi{32, callFlags, genericsBitmap64, v.makeReg()};
+  v << shrqi{32, prologueFlags, genericsBitmap64, v.makeReg()};
   v << movtqw{genericsBitmap64, genericsBitmap};
 
   // Higher order 16 bits contain the tag in a compact tagged pointer

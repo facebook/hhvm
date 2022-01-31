@@ -26,12 +26,12 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/minstr-state.h"
+#include "hphp/runtime/vm/prologue-flags.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/unit.h"
@@ -87,7 +87,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
 
-  auto const callFlags = CallFlags(
+  auto const prologueFlags = PrologueFlags(
     extra->hasGenerics,
     extra->dynamicCall,
     extra->asyncEagerReturn,
@@ -99,33 +99,33 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
   if (!inst->src(4)->hasConstVal(TInt)) {
     auto const coeffectsShifted = v.makeReg();
     v << shlqi{
-      CallFlags::CoeffectsStart,
+      PrologueFlags::CoeffectsStart,
       coeffects,
       coeffectsShifted,
       v.makeReg()
     };
     v << orq{
       coeffectsShifted,
-      v.cns(callFlags.value()),
-      r_php_call_flags(),
+      v.cns(prologueFlags.value()),
+      r_func_prologue_flags(),
       v.makeReg()
     };
   } else {
-    v << copy{v.cns(callFlags.value()), r_php_call_flags()};
+    v << copy{v.cns(prologueFlags.value()), r_func_prologue_flags()};
   }
 
-  v << copy{callee, r_php_call_func()};
-  v << copy{v.cns(numArgsInclUnpack), r_php_call_num_args()};
+  v << copy{callee, r_func_prologue_callee()};
+  v << copy{v.cns(numArgsInclUnpack), r_func_prologue_num_args()};
 
   auto withCtx = false;
   assertx(inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls) ||
           inst->src(3)->isA(TNullptr));
   if (inst->src(3)->isA(TObj) || inst->src(3)->isA(TCls)) {
     withCtx = true;
-    v << copy{ctx, r_php_call_ctx()};
+    v << copy{ctx, r_func_prologue_ctx()};
   } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
     withCtx = true;
-    v << copy{v.cns(ActRec::kTrashedThisSlot), r_php_call_ctx()};
+    v << copy{v.cns(ActRec::kTrashedThisSlot), r_func_prologue_ctx()};
   }
 
   // Make vmsp() point to the future vmfp().
@@ -141,7 +141,8 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     assertx(
       (!extra->hasUnpack && extra->numArgs <= func->numNonVariadicParams()) ||
       (extra->hasUnpack && extra->numArgs == func->numNonVariadicParams()));
-    v << callphps{tc::ustubs().immutableBindCallStub, php_call_regs(withCtx),
+    v << callphps{tc::ustubs().immutableBindCallStub,
+                  func_prologue_regs(withCtx),
                   func, numArgsInclUnpack};
   } else if (skipRepack) {
     // If we've statically determined the provided number of arguments
@@ -150,9 +151,13 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
     auto const ptrSize = safe_cast<int32_t>(sizeof(LowPtr<uint8_t>));
     auto const dest = v.makeReg();
-    emitLdLowPtr(v, r_php_call_func()[numArgsInclUnpack * ptrSize + pTabOff],
-                 dest, sizeof(LowPtr<uint8_t>));
-    v << callphpr{dest, php_call_regs(withCtx)};
+    emitLdLowPtr(
+      v,
+      r_func_prologue_callee()[numArgsInclUnpack * ptrSize + pTabOff],
+      dest,
+      sizeof(LowPtr<uint8_t>)
+    );
+    v << callphpr{dest, func_prologue_regs(withCtx)};
   } else {
     // It was not statically determined that the arguments are passed in a way
     // the callee expects. Use the redispatch stub to repack them as needed and
@@ -163,7 +168,7 @@ void cgCall(IRLS& env, const IRInstruction* inst) {
     auto const stub = !extra->hasUnpack
       ? tc::ustubs().funcPrologueRedispatch
       : tc::ustubs().funcPrologueRedispatchUnpack;
-    v << callphp{stub, php_call_regs(withCtx)};
+    v << callphp{stub, func_prologue_regs(withCtx)};
   }
 
   // The prologue is responsible for unwinding all inputs. We could have

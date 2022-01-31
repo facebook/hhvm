@@ -16,10 +16,7 @@
 
 #include "hphp/runtime/vm/vm-regs.h"
 
-#include "hphp/runtime/vm/call-flags.h"
-#include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/fixup.h"
-#include "hphp/runtime/vm/jit/vm-protect.h"
 
 namespace HPHP {
 

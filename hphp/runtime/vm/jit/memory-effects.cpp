@@ -1367,11 +1367,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case BespokeIterFirstPos:
   case BespokeIterLastPos:
   case DefFrameRelSP:
+  case DefFuncPrologueCallee:
+  case DefFuncPrologueCtx:
+  case DefFuncPrologueFlags:
+  case DefFuncPrologueNumArgs:
   case DefRegSP:
-  case DefCallFlags:
-  case DefCallFunc:
-  case DefCallNumArgs:
-  case DefCallCtx:
   case EndGuards:
   case EnterPrologue:
   case EqBool:

@@ -27,12 +27,12 @@
 #include "hphp/runtime/base/type-string.h"
 
 #include "hphp/runtime/vm/act-rec.h"
-#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/iter.h"
 #include "hphp/runtime/vm/name-value-table.h"
+#include "hphp/runtime/vm/prologue-flags.h"
 #include "hphp/runtime/vm/unit.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -657,8 +657,8 @@ Class* specialClsRefToCls(SpecialClsRef ref);
 using InterpOneFunc = jit::TCA (*) (ActRec*, TypedValue*, Offset);
 extern InterpOneFunc interpOneEntryPoints[];
 
-void doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
-             void* ctx, jit::TCA retAddr);
+void doFCall(PrologueFlags prologueFlags, const Func* func,
+             uint32_t numArgsInclUnpack, void* ctx, jit::TCA retAddr);
 bool funcEntry();
 jit::TCA dispatchBB();
 Array getDefinedVariables(const ActRec*);

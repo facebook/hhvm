@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/hhbc.h"
 
 #include "hphp/runtime/vm/jit/code-cache.h"
@@ -117,7 +116,7 @@ struct UniqueStubs {
 
   /*
    * Dynamically dispatch to the appropriate func prologue based on the
-   * information in php_call_regs, while repacking arguments as needed.
+   * information in func_prologue_regs, while repacking arguments as needed.
    *
    * @reached:  callphp from TC
    * @context:  func guard

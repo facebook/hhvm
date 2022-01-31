@@ -156,9 +156,9 @@ inline void calleeDynamicCallChecks(const Func* func, bool dynamicCall,
 }
 
 /*
- * Check if the `callee` satisfies the coeffect constraints on the call flags.
- * Returns true if yes, otherwise raise a warning and return false or raise
- * an exception.
+ * Check if the `callee` satisfies the coeffect constraints on the prologue
+ * flags. Returns true if yes, otherwise raise a warning and return false or
+ * raise an exception.
  */
 inline bool calleeCoeffectChecks(const Func* callee,
                                  RuntimeCoeffects providedCoeffects,

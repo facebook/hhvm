@@ -98,8 +98,8 @@ StackCheck stack_check_kind(const Func* func, uint32_t argc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void emitCalleeGenericsChecks(IRGS& env, const Func* callee, SSATmp* callFlags,
-                              bool pushed) {
+void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
+                              SSATmp* prologueFlags, bool pushed) {
   if (!callee->hasReifiedGenerics()) {
     // FIXME: leaks memory if generics were given but not expected nor pushed.
     if (pushed) {
@@ -115,8 +115,8 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee, SSATmp* callFlags,
     env,
     [&] (Block* taken) {
       if (pushed) return;
-      auto constexpr flag = 1 << CallFlags::Flags::HasGenerics;
-      auto const hasGenerics = gen(env, AndInt, callFlags, cns(env, flag));
+      auto constexpr flag = 1 << PrologueFlags::Flags::HasGenerics;
+      auto const hasGenerics = gen(env, AndInt, prologueFlags, cns(env, flag));
       gen(env, JmpZero, taken, hasGenerics);
     },
     [&] {
@@ -150,8 +150,8 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee, SSATmp* callFlags,
       ifThen(
         env,
         [&] (Block* taken) {
-          auto const match =
-            gen(env, IsFunReifiedGenericsMatched, FuncData{callee}, callFlags);
+          auto const match = gen(
+            env, IsFunReifiedGenericsMatched, FuncData{callee}, prologueFlags);
           gen(env, JmpZero, taken, match);
         },
         [&] {
@@ -227,7 +227,7 @@ void emitCalleeArgumentArityChecks(IRGS& env, const Func* callee,
 } // namespace
 
 void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
-                                 SSATmp* callFlags) {
+                                 SSATmp* prologueFlags) {
   if (!RuntimeOption::EvalNoticeOnBuiltinDynamicCalls || !callee->isBuiltin()) {
     return;
   }
@@ -235,9 +235,9 @@ void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
   ifThen(
     env,
     [&] (Block* taken) {
-      auto constexpr flag = 1 << CallFlags::Flags::IsDynamicCall;
-      auto const isDynamicCall = gen(env, AndInt, callFlags, cns(env, flag));
-      gen(env, JmpNZero, taken, isDynamicCall);
+      auto constexpr flag = 1 << PrologueFlags::Flags::IsDynamicCall;
+      auto const isDynCall = gen(env, AndInt, prologueFlags, cns(env, flag));
+      gen(env, JmpNZero, taken, isDynCall);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
@@ -253,11 +253,11 @@ void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
 }
 
 void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
-                              SSATmp* callFlags, SSATmp* providedCoeffects,
+                              SSATmp* prologueFlags, SSATmp* providedCoeffects,
                               bool skipCoeffectsCheck,
                               uint32_t argc, SSATmp* prologueCtx) {
   assertx(callee);
-  assertx(callFlags);
+  assertx(prologueFlags);
 
   if (!CoeffectsConfig::enabled()) {
     if (callee->hasCoeffectsLocal()) {
@@ -269,10 +269,10 @@ void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
   }
 
   // If ambient coeffects are directly provided use them, otherwise extract
-  // them from callFlags
+  // them from prologueFlags
   if (!providedCoeffects) {
     providedCoeffects =
-      gen(env, Lshr, callFlags, cns(env, CallFlags::CoeffectsStart));
+      gen(env, Lshr, prologueFlags, cns(env, PrologueFlags::CoeffectsStart));
   }
 
   if (skipCoeffectsCheck) {
@@ -353,12 +353,12 @@ void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc,
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     // Make sure we are at the right function.
-    auto const callFunc = gen(env, DefCallFunc);
-    auto const callFuncOK = gen(env, EqFunc, callFunc, cns(env, callee));
-    gen(env, JmpZero, makeUnreachable(env, ASSERT_REASON), callFuncOK);
+    auto const calleeSSA = gen(env, DefFuncPrologueCallee);
+    auto const calleeOK = gen(env, EqFunc, calleeSSA, cns(env, callee));
+    gen(env, JmpZero, makeUnreachable(env, ASSERT_REASON), calleeOK);
 
     // Make sure we are at the right prologue.
-    auto const numArgs = gen(env, DefCallNumArgs);
+    auto const numArgs = gen(env, DefFuncPrologueNumArgs);
     auto const numArgsOK = gen(env, EqInt, numArgs, cns(env, argc));
     gen(env, JmpZero, makeUnreachable(env, ASSERT_REASON), numArgsOK);
   }
@@ -377,14 +377,14 @@ void emitPrologueEntry(IRGS& env, const Func* callee, uint32_t argc,
 }
 
 void emitCalleeChecks(IRGS& env, const Func* callee, uint32_t argc,
-                      SSATmp* callFlags, SSATmp* prologueCtx) {
+                      SSATmp* prologueFlags, SSATmp* prologueCtx) {
   // Generics are special and need to be checked first, as they may or may not
   // be on the stack. This check makes sure they materialize on the stack
   // if we expect them.
-  emitCalleeGenericsChecks(env, callee, callFlags, false);
+  emitCalleeGenericsChecks(env, callee, prologueFlags, false);
   emitCalleeArgumentArityChecks(env, callee, argc);
-  emitCalleeDynamicCallChecks(env, callee, callFlags);
-  emitCalleeCoeffectChecks(env, callee, callFlags, nullptr, false,
+  emitCalleeDynamicCallChecks(env, callee, prologueFlags);
+  emitCalleeCoeffectChecks(env, callee, prologueFlags, nullptr, false,
                            argc, prologueCtx);
   emitCalleeRecordFuncCoverage(env, callee);
 
@@ -442,9 +442,9 @@ void emitInitFuncInputs(IRGS& env, const Func* callee, uint32_t argc) {
 namespace {
 
 void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
-                    SSATmp* callFlags, SSATmp* prologueCtx) {
+                    SSATmp* prologueFlags, SSATmp* prologueCtx) {
   gen(env, DefFuncEntryFP, FuncData { callee },
-      fp(env), sp(env), callFlags, prologueCtx);
+      fp(env), sp(env), prologueFlags, prologueCtx);
   auto const irSPOff = SBInvOffset { -callee->numSlotsInFrame() };
   auto const bcSPOff = SBInvOffset { 0 };
   gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));
@@ -519,15 +519,15 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
   definePrologueFrameAndStack(env, callee, argc);
 
   // Define register inputs before doing anything else that may clobber them.
-  auto const callFlags = gen(env, DefCallFlags);
+  auto const prologueFlags = gen(env, DefFuncPrologueFlags);
   auto const prologueCtx = (callee->isClosureBody() || callee->cls())
-    ? gen(env, DefCallCtx, prologueCtxType(callee))
+    ? gen(env, DefFuncPrologueCtx, prologueCtxType(callee))
     : cns(env, nullptr);
 
   emitPrologueEntry(env, callee, argc, transID);
-  emitCalleeChecks(env, callee, argc, callFlags, prologueCtx);
+  emitCalleeChecks(env, callee, argc, prologueFlags, prologueCtx);
   emitInitFuncInputs(env, callee, argc);
-  emitSpillFrame(env, callee, argc, callFlags, prologueCtx);
+  emitSpillFrame(env, callee, argc, prologueFlags, prologueCtx);
   emitJmpFuncBody(env, callee, argc);
 }
 

@@ -564,14 +564,14 @@ bool opcodeMayRaise(Opcode opc) {
   case ReleaseShallow:
   case DecReleaseCheck:
   case DecRefNZ:
-  case DefCallCtx:
-  case DefCallFlags:
-  case DefCallFunc:
-  case DefCallNumArgs:
   case DefConst:
   case DefFP:
   case DefFrameRelSP:
   case DefFuncEntryFP:
+  case DefFuncPrologueCallee:
+  case DefFuncPrologueCtx:
+  case DefFuncPrologueFlags:
+  case DefFuncPrologueNumArgs:
   case DefLabel:
   case DefRegSP:
   case DictFirst:

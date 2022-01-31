@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/bytecode.h"
-#include "hphp/runtime/vm/call-flags.h"
 
 /*
  * This file contains accessors for the three primary VM registers:

@@ -162,6 +162,10 @@ bool canDCE(const IRInstruction& inst) {
   case LdGenericsFromRFunc:
   case LdTVFromRDS:
   case DefConst:
+  case DefFuncPrologueCallee:
+  case DefFuncPrologueCtx:
+  case DefFuncPrologueFlags:
+  case DefFuncPrologueNumArgs:
   case Conjure:
   case LdClsInitData:
   case LookupClsRDS:
@@ -194,10 +198,6 @@ bool canDCE(const IRInstruction& inst) {
   case NewPair:
   case NewRFunc:
   case NewRClsMeth:
-  case DefCallFlags:
-  case DefCallFunc:
-  case DefCallNumArgs:
-  case DefCallCtx:
   case LdRetVal:
   case Mov:
   case CountVec:

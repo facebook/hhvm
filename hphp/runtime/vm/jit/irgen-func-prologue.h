@@ -35,19 +35,19 @@ struct IRGS;
  * Check for presence, count and wildcard match of generics.
  *
  * If `pushed' is true, generics are on the stack. Otherwise, generics may or
- * may not be above the stack, depending on the callFlags.
+ * may not be above the stack, depending on the prologueFlags.
  *
  * After this check, generics will be on the stack iff the function has reified
  * generics.
  */
-void emitCalleeGenericsChecks(IRGS& env, const Func* callee, SSATmp* callFlags,
-                              bool pushed);
+void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
+                              SSATmp* prologueFlags, bool pushed);
 
 void emitCalleeDynamicCallChecks(IRGS& env, const Func* callee,
-                                SSATmp* callFlags);
+                                SSATmp* prologueFlags);
 
 void emitCalleeCoeffectChecks(IRGS& env, const Func* callee,
-                              SSATmp* callFlags, SSATmp* providedCoeffects,
+                              SSATmp* prologueFlags, SSATmp* providedCoeffects,
                               bool skipCoeffectsCheck,
                               uint32_t argc, SSATmp* prologueCtx);
 

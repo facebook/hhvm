@@ -24,13 +24,13 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/vanilla-vec.h"
-#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/cti.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/interp-helpers.h"
+#include "hphp/runtime/vm/prologue-flags.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -169,7 +169,7 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<class Result, class Handler>
-Result withVMRegsForCall(CallFlags callFlags, const Func* func,
+Result withVMRegsForCall(PrologueFlags prologueFlags, const Func* func,
                          uint32_t numArgs, bool hasUnpack, TCA savedRip,
                          Handler handler) {
   // The stub already synced the vmfp() and vmsp() registers, but the vmsp() is
@@ -180,8 +180,8 @@ Result withVMRegsForCall(CallFlags callFlags, const Func* func,
   auto const callerFP = unsafeRegs.fp;
 
   unsafeRegs.stack.nalloc(
-    numArgs + (hasUnpack ? 1 : 0) + (callFlags.hasGenerics() ? 1 : 0));
-  unsafeRegs.pc = callerFP->func()->at(callFlags.callOffset());
+    numArgs + (hasUnpack ? 1 : 0) + (prologueFlags.hasGenerics() ? 1 : 0));
+  unsafeRegs.pc = callerFP->func()->at(prologueFlags.callOffset());
   unsafeRegs.jitReturnAddr = savedRip;
   regState() = VMRegState::CLEAN;
 
@@ -208,11 +208,11 @@ Result withVMRegsForCall(CallFlags callFlags, const Func* func,
   }
 }
 
-uint32_t fcallRepackHelper(CallFlags callFlags, const Func* func,
+uint32_t fcallRepackHelper(PrologueFlags prologueFlags, const Func* func,
                            uint32_t numArgsInclUnpack, TCA savedRip) {
   assert_native_stack_aligned();
   return withVMRegsForCall<uint32_t>(
-      callFlags, func, numArgsInclUnpack - 1, true, savedRip,
+      prologueFlags, func, numArgsInclUnpack - 1, true, savedRip,
       [&] (Stack& stack, TypedValue* calleeFP) {
     // Check for stack overflow as we may unpack arbitrary number of arguments.
     if (checkCalleeStackOverflow(calleeFP, func)) {
@@ -220,19 +220,19 @@ uint32_t fcallRepackHelper(CallFlags callFlags, const Func* func,
     }
 
     // Repack arguments while saving generics.
-    GenericsSaver gs{callFlags.hasGenerics()};
+    GenericsSaver gs{prologueFlags.hasGenerics()};
     return prepareUnpackArgs(func, numArgsInclUnpack - 1, true);
   });
 }
 
-void fcallHelper(CallFlags callFlags, Func* func,
+void fcallHelper(PrologueFlags prologueFlags, Func* func,
                  uint32_t numArgsInclUnpack, void* ctx, TCA savedRip) {
   assert_native_stack_aligned();
   assertx(numArgsInclUnpack <= func->numNonVariadicParams() + 1);
   auto const hasUnpack = numArgsInclUnpack == func->numNonVariadicParams() + 1;
   auto const numArgs = numArgsInclUnpack - (hasUnpack ? 1 : 0);
   withVMRegsForCall<void>(
-      callFlags, func, numArgs, hasUnpack, savedRip,
+      prologueFlags, func, numArgs, hasUnpack, savedRip,
       [&](Stack&, TypedValue* calleeFP) {
     // Check for stack overflow in the same place func prologues make their
     // StackCheck::Early check (see irgen-func-prologue.cpp).
@@ -240,7 +240,7 @@ void fcallHelper(CallFlags callFlags, Func* func,
       throw_stack_overflow();
     }
 
-    doFCall(callFlags, func, numArgsInclUnpack, ctx, savedRip);
+    doFCall(prologueFlags, func, numArgsInclUnpack, ctx, savedRip);
   });
 }
 
@@ -254,15 +254,15 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
   alignCacheLine(cb);
 
   return vwrap(cb, data, [] (Vout& v) {
-    auto const func = v.makeReg();
+    auto const callee = v.makeReg();
     auto const numArgs = v.makeReg();
-    v << copy{r_php_call_func(), func};
-    v << copy{r_php_call_num_args(), numArgs};
+    v << copy{r_func_prologue_callee(), callee};
+    v << copy{r_func_prologue_num_args(), numArgs};
 
     auto const paramCounts = v.makeReg();
     auto const paramCountsMinusOne = v.makeReg();
     auto const numNonVariadicParams = v.makeReg();
-    v << loadl{func[Func::paramCountsOff()], paramCounts};
+    v << loadl{callee[Func::paramCountsOff()], paramCounts};
     v << decl{paramCounts, paramCountsMinusOne, v.makeReg()};
     v << shrli{1, paramCountsMinusOne, numNonVariadicParams, v.makeReg()};
 
@@ -275,9 +275,9 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
     ifThen(v, CC_LE, sf, [&] (Vout& v) {
       // Fast path (numArgs <= numNonVariadicParams). Call the numArgs prologue.
       auto const dest = v.makeReg();
-      emitLdLowPtr(v, func[numArgs * ptrSize + pTabOff],
+      emitLdLowPtr(v, callee[numArgs * ptrSize + pTabOff],
                    dest, sizeof(LowPtr<uint8_t>));
-      v << jmpr{dest, php_call_regs(true)};
+      v << jmpr{dest, func_prologue_regs(true)};
     });
 
     // Slow path: we passed more arguments than declared. Need to pack the extra
@@ -299,7 +299,10 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
     // Pack the extra args into a vec/varray.
     auto const packedArr = v.makeReg();
     {
-      auto const save = r_php_call_flags()|r_php_call_func()|r_php_call_ctx();
+      auto const save =
+        r_func_prologue_flags() |
+        r_func_prologue_callee() |
+        r_func_prologue_ctx();
       PhysRegSaver prs{v, save};
       v << vcall{
         CallSpec::direct(VanillaVec::MakeVec),
@@ -333,13 +336,17 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
     v << storeups{generics, unpackCellPtr[-int32_t(sizeof(TypedValue))]};
 
     // Restore all inputs.
-    v << copy{numNewArgs, r_php_call_num_args()};
+    v << copy{numNewArgs, r_func_prologue_num_args()};
 
     // Call the numNonVariadicParams + 1 prologue.
     auto const dest = v.makeReg();
-    emitLdLowPtr(v, Vreg(r_php_call_func())[numNewArgs * ptrSize + pTabOff],
-                 dest, sizeof(LowPtr<uint8_t>));
-    v << tailcallstubr{dest, php_call_regs(true)};
+    emitLdLowPtr(
+      v,
+      Vreg(r_func_prologue_callee())[numNewArgs * ptrSize + pTabOff],
+      dest,
+      sizeof(LowPtr<uint8_t>)
+    );
+    v << tailcallstubr{dest, func_prologue_regs(true)};
   });
 }
 
@@ -353,24 +360,24 @@ TCA emitFuncPrologueRedispatchUnpack(CodeBlock& main, CodeBlock& cold,
 
     // Save all inputs.
     auto const flags = v.makeReg();
-    auto const func = v.makeReg();
+    auto const callee = v.makeReg();
     auto const numArgs = v.makeReg();
     auto const savedRip = v.makeReg();
-    v << copy{r_php_call_flags(), flags};
-    v << copy{r_php_call_func(), func};
-    v << copy{r_php_call_num_args(), numArgs};
+    v << copy{r_func_prologue_flags(), flags};
+    v << copy{r_func_prologue_callee(), callee};
+    v << copy{r_func_prologue_num_args(), numArgs};
     v << loadstubret{savedRip};
 
     // Call C++ helper to repack arguments.
     auto const numNewArgs = v.makeReg();
     storeVMRegs(v);
     {
-      PhysRegSaver prs{v, RegSet{r_php_call_ctx()}};
+      PhysRegSaver prs{v, RegSet{r_func_prologue_ctx()}};
       auto const done = v.makeBlock();
       auto const ctch = vc.makeBlock();
       v << vinvoke{
         CallSpec::direct(fcallRepackHelper),
-        v.makeVcallArgs({{flags, func, numArgs, savedRip}}),
+        v.makeVcallArgs({{flags, callee, numArgs, savedRip}}),
         v.makeTuple({numNewArgs}),
         {done, ctch},
         Fixup::indirect(prs.qwordsPushed(), SBInvOffset{0}),
@@ -387,17 +394,17 @@ TCA emitFuncPrologueRedispatchUnpack(CodeBlock& main, CodeBlock& cold,
     }
 
     // Restore all inputs.
-    v << copy{flags, r_php_call_flags()};
-    v << copy{func, r_php_call_func()};
-    v << copy{numNewArgs, r_php_call_num_args()};
+    v << copy{flags, r_func_prologue_flags()};
+    v << copy{callee, r_func_prologue_callee()};
+    v << copy{numNewArgs, r_func_prologue_num_args()};
 
     // Call the numNewArgs prologue.
     auto const pTabOff = safe_cast<int32_t>(Func::prologueTableOff());
     auto const ptrSize = safe_cast<int32_t>(sizeof(LowPtr<uint8_t>));
     auto const dest = v.makeReg();
-    emitLdLowPtr(v, func[numNewArgs * ptrSize + pTabOff], dest,
+    emitLdLowPtr(v, callee[numNewArgs * ptrSize + pTabOff], dest,
                  sizeof(LowPtr<uint8_t>));
-    v << tailcallstubr{dest, php_call_regs(true)};
+    v << tailcallstubr{dest, func_prologue_regs(true)};
   });
 
   meta.process(nullptr);
@@ -414,19 +421,19 @@ TCA emitFCallHelperThunkImpl(CodeBlock& main, CodeBlock& cold,
     v << stublogue{false};
 
     // Save all inputs.
-    auto const func = v.makeReg();
+    auto const callee = v.makeReg();
     auto const numArgs = v.makeReg();
-    v << copy{r_php_call_func(), func};
-    v << copy{r_php_call_num_args(), numArgs};
+    v << copy{r_func_prologue_callee(), callee};
+    v << copy{r_func_prologue_num_args(), numArgs};
 
     if (translate) {
       // Try to JIT the prologue first.
       auto const target = v.makeReg();
       {
-        PhysRegSaver prs{v, r_php_call_flags()|r_php_call_ctx()};
+        PhysRegSaver prs{v, r_func_prologue_flags() | r_func_prologue_ctx()};
         v << vcall{
           CallSpec::direct(getFuncPrologueHelper),
-          v.makeVcallArgs({{func, numArgs}}),
+          v.makeVcallArgs({{callee, numArgs}}),
           v.makeTuple({target}),
           Fixup::none(),
           DestType::SSA
@@ -437,17 +444,17 @@ TCA emitFCallHelperThunkImpl(CodeBlock& main, CodeBlock& cold,
       v << testq{target, target, targetSF};
       ifThen(v, CC_NZ, targetSF, [&] (Vout& v) {
           // Restore all inputs and call the resolved prologue.
-          v << copy{func, r_php_call_func()};
-          v << copy{numArgs, r_php_call_num_args()};
-          v << tailcallstubr{target, php_call_regs(true)};
+          v << copy{callee, r_func_prologue_callee()};
+          v << copy{numArgs, r_func_prologue_num_args()};
+          v << tailcallstubr{target, func_prologue_regs(true)};
         });
     }
 
     auto const flags = v.makeReg();
     auto const ctx = v.makeReg();
     auto const savedRip = v.makeReg();
-    v << copy{r_php_call_flags(), flags};
-    v << copy{r_php_call_ctx(), ctx};
+    v << copy{r_func_prologue_flags(), flags};
+    v << copy{r_func_prologue_ctx(), ctx};
     v << loadstubret{savedRip};
 
     // Call C++ helper to perform the equivalent of the func prologue logic.
@@ -456,7 +463,7 @@ TCA emitFCallHelperThunkImpl(CodeBlock& main, CodeBlock& cold,
     storeVMRegs(v);
     v << vinvoke{
       CallSpec::direct(fcallHelper),
-      v.makeVcallArgs({{flags, func, numArgs, ctx, savedRip}}),
+      v.makeVcallArgs({{flags, callee, numArgs, ctx, savedRip}}),
       v.makeTuple({}),
       {done, ctch},
       Fixup::none()
@@ -750,10 +757,10 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
     v << stublogue{false};
 
     // Save all inputs.
-    auto const func = v.makeReg();
+    auto const callee = v.makeReg();
     auto const numArgs = v.makeReg();
-    v << copy{r_php_call_func(), func};
-    v << copy{r_php_call_num_args(), numArgs};
+    v << copy{r_func_prologue_callee(), callee};
+    v << copy{r_func_prologue_num_args(), numArgs};
 
     // Reconstruct the address of the call from the saved RIP.
     auto const savedRip = v.makeReg();
@@ -765,10 +772,10 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
     // Call C++ helper to bind the call.
     auto const target = v.makeReg();
     {
-      PhysRegSaver prs{v, r_php_call_flags()|r_php_call_ctx()};
+      PhysRegSaver prs{v, r_func_prologue_flags() | r_func_prologue_ctx()};
       v << vcall{
         CallSpec::direct(svcreq::handleBindCall),
-        v.makeVcallArgs({{toSmash, func, numArgs}}),
+        v.makeVcallArgs({{toSmash, callee, numArgs}}),
         v.makeTuple({target}),
         Fixup::none(),
         DestType::SSA
@@ -776,9 +783,9 @@ TCA emitBindCallStub(CodeBlock& cb, DataBlock& data) {
     }
 
     // Restore all inputs and call the resolved prologue.
-    v << copy{func, r_php_call_func()};
-    v << copy{numArgs, r_php_call_num_args()};
-    v << tailcallstubr{target, php_call_regs(true)};
+    v << copy{callee, r_func_prologue_callee()};
+    v << copy{numArgs, r_func_prologue_num_args()};
+    v << tailcallstubr{target, func_prologue_regs(true)};
   });
 }
 

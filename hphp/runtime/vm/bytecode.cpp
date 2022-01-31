@@ -3414,20 +3414,20 @@ bool funcEntry() {
     vmfp(), EventHook::NormalFunc, EventHook::Source::Interpreter);
 }
 
-void doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
-             void* ctx, TCA retAddr) {
+void doFCall(PrologueFlags prologueFlags, const Func* func,
+             uint32_t numArgsInclUnpack, void* ctx, TCA retAddr) {
   TRACE(3, "FCall: pc %p func %p\n", vmpc(), vmfp()->func()->entry());
 
   assertx(numArgsInclUnpack <= func->numNonVariadicParams() + 1);
   assertx(kNumActRecCells == 2);
   ActRec* ar = vmStack().indA(
-    numArgsInclUnpack + (callFlags.hasGenerics() ? 1 : 0));
+    numArgsInclUnpack + (prologueFlags.hasGenerics() ? 1 : 0));
 
   // Callee checks and input initialization.
-  calleeGenericsChecks(func, callFlags.hasGenerics());
+  calleeGenericsChecks(func, prologueFlags.hasGenerics());
   calleeArgumentArityChecks(func, numArgsInclUnpack);
-  calleeDynamicCallChecks(func, callFlags.isDynamicCall());
-  calleeCoeffectChecks(func, callFlags.coeffects(), numArgsInclUnpack, ctx);
+  calleeDynamicCallChecks(func, prologueFlags.isDynamicCall());
+  calleeCoeffectChecks(func, prologueFlags.coeffects(), numArgsInclUnpack, ctx);
   func->recordCall();
   initFuncInputs(func, numArgsInclUnpack);
 
@@ -3435,8 +3435,8 @@ void doFCall(CallFlags callFlags, const Func* func, uint32_t numArgsInclUnpack,
   ar->setFunc(func);
   ar->setJitReturn(retAddr);
   ar->m_callOffAndFlags = ActRec::encodeCallOffsetAndFlags(
-    callFlags.callOffset(),
-    callFlags.asyncEagerReturn() ? (1 << ActRec::AsyncEagerRet) : 0
+    prologueFlags.callOffset(),
+    prologueFlags.asyncEagerReturn() ? (1 << ActRec::AsyncEagerRet) : 0
   );
   ar->setThisOrClassAllowNull(ctx);
 
@@ -3487,7 +3487,7 @@ TCA fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
     return fca.numArgs;
   }();
 
-  auto const callFlags = CallFlags(
+  auto const prologueFlags = PrologueFlags(
     fca.hasGenerics(),
     dynamic,
     fca.asyncEagerOffset != kInvalidOffset && func->supportsAsyncEagerReturn(),
@@ -3496,8 +3496,8 @@ TCA fcallImpl(bool retToJit, PC origpc, PC& pc, const FCallArgs& fca,
     vmfp()->providedCoeffectsForCall(isCtor)
   );
 
-  doFCall(callFlags, func, numArgsInclUnpack, takeCtx(std::forward<Ctx>(ctx)),
-          jit::tc::ustubs().retHelper);
+  doFCall(prologueFlags, func, numArgsInclUnpack,
+          takeCtx(std::forward<Ctx>(ctx)), jit::tc::ustubs().retHelper);
 
   if (retToJit) {
     // Let JIT handle FuncEntry if possible.

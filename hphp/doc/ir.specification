@@ -1562,8 +1562,8 @@ To string conversions:
   `func': the function being called
   S0: frame pointer of the caller
   S1: stack pointer pointing to the space reserved for the callee's frame
-  S2: call flags (see CallFlags)
-  S3: call context
+  S2: prologue flags (see PrologueFlags)
+  S3: prologue context
 
 | Call<offset,numParams,callOff,destroyLocals>,
 |   DCall,
@@ -1922,16 +1922,16 @@ To string conversions:
   Gets the bytecode stack pointer from IR stack pointer, for use in eager
   syncing.
 
-| DefCallFlags, D(Int), NA, NF
+| DefFuncPrologueFlags, D(Int), NA, NF
 
-| DefCallFunc, D(Func), NA, NF
+| DefFuncPrologueCallee, D(Func), NA, NF
 
-| DefCallNumArgs, D(Int), NA, NF
+| DefFuncPrologueNumArgs, D(Int), NA, NF
 
-| DefCallCtx, DParam(Cls|Obj), NA, NF
+| DefFuncPrologueCtx, DParam(Cls|Obj), NA, NF
 
-  Creates a temporary D representing flags, function pointer, number of
-  arguments, or context passed to the prologue.
+  Creates a temporary D representing prologue flags, callee function pointer,
+  number of arguments, or context passed to the prologue.
 
   May be used only at the beginning of a prologue or a stub used in a prologue
   context.
@@ -2199,7 +2199,7 @@ To string conversions:
 
 | IsFunReifiedGenericsMatched<func>, D(Bool), S(Int), NF
 
-  Load the generics bitmap from call flags given by S0 and check whether the
+  Load the generics bitmap from prologue flags given by S0 and check whether the
   bitmap proves that the number of given generics and positions of reified vs
   erased generics matches the expectations of the callee `func' (which must use
   reified generics). If this opcode returned false, further checks implemented

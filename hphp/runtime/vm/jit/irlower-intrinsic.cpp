@@ -83,24 +83,24 @@ void cgDefRegSP(IRLS& env, const IRInstruction* inst) {
   v << defvmsp{sp};
 }
 
-void cgDefCallFlags(IRLS& env, const IRInstruction* inst) {
+void cgDefFuncPrologueFlags(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  v << copy{r_php_call_flags(), dstLoc(env, inst, 0).reg()};
+  v << copy{r_func_prologue_flags(), dstLoc(env, inst, 0).reg()};
 }
 
-void cgDefCallFunc(IRLS& env, const IRInstruction* inst) {
+void cgDefFuncPrologueCallee(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  v << copy{r_php_call_func(), dstLoc(env, inst, 0).reg()};
+  v << copy{r_func_prologue_callee(), dstLoc(env, inst, 0).reg()};
 }
 
-void cgDefCallNumArgs(IRLS& env, const IRInstruction* inst) {
+void cgDefFuncPrologueNumArgs(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  v << copy{r_php_call_num_args(), dstLoc(env, inst, 0).reg()};
+  v << copy{r_func_prologue_num_args(), dstLoc(env, inst, 0).reg()};
 }
 
-void cgDefCallCtx(IRLS& env, const IRInstruction* inst) {
+void cgDefFuncPrologueCtx(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  v << copy{r_php_call_ctx(), dstLoc(env, inst, 0).reg()};
+  v << copy{r_func_prologue_ctx(), dstLoc(env, inst, 0).reg()};
 }
 
 void cgStVMFP(IRLS& env, const IRInstruction* inst) {

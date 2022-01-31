@@ -232,7 +232,7 @@ void beginInlining(IRGS& env,
   auto const coeffects = curFunc(env)
     ? curCoeffects(env) : cns(env, RuntimeCoeffects::none().value());
 
-  auto const callFlags = cns(env, CallFlags(
+  auto const prologueFlags = cns(env, PrologueFlags(
     fca.hasGenerics(),
     dynamicCall,
     false, // inline return stub doesn't support async eager return
@@ -242,9 +242,9 @@ void beginInlining(IRGS& env,
   ).value());
 
   // Callee checks and input initialization.
-  emitCalleeGenericsChecks(env, target, callFlags, fca.hasGenerics());
-  emitCalleeDynamicCallChecks(env, target, callFlags);
-  emitCalleeCoeffectChecks(env, target, callFlags, coeffects,
+  emitCalleeGenericsChecks(env, target, prologueFlags, fca.hasGenerics());
+  emitCalleeDynamicCallChecks(env, target, prologueFlags);
+  emitCalleeCoeffectChecks(env, target, prologueFlags, coeffects,
                            fca.skipCoeffectsCheck(),
                            numArgsInclUnpack, ctx);
   emitCalleeRecordFuncCoverage(env, target);

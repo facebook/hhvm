@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include "hphp/runtime/vm/call-flags.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {

@@ -36,7 +36,6 @@ pub fn node_impl() -> TokenStream {
         impl<'a> Node<'a> for crate::tany_sentinel::TanySentinel {}
         impl<'a> Node<'a> for crate::typing_defs_flags::FunParamFlags {}
         impl<'a> Node<'a> for crate::typing_defs_flags::FunTypeFlags {}
-        impl<'a> Node<'a> for crate::typing_modules::Module_<'a> {}
 
         impl<'a, T: Node<'a> + ?Sized> Node<'a> for &'a T {
             fn recurse(&'a self, v: &mut dyn Visitor<'a>) {

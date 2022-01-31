@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<06b07385b415d75719c3d965aeec7889>>
+// @generated SignedSource<<b8c1c3c46e06feee0e7f8dca73a78848>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -22,7 +22,6 @@ impl<'a> Node<'a> for crate::prop_flags::PropFlags {}
 impl<'a> Node<'a> for crate::tany_sentinel::TanySentinel {}
 impl<'a> Node<'a> for crate::typing_defs_flags::FunParamFlags {}
 impl<'a> Node<'a> for crate::typing_defs_flags::FunTypeFlags {}
-impl<'a> Node<'a> for crate::typing_modules::Module_<'a> {}
 impl<'a, T: Node<'a> + ?Sized> Node<'a> for &'a T {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         (*self).accept(v)

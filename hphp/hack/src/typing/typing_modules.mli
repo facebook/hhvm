@@ -6,16 +6,6 @@
  *
  *)
 
-type module_ [@@deriving eq, show, ord]
-
-val of_string : string -> module_ option
-
-val of_maybe_string : string option -> module_ option
-
-val name_of : module_ -> string
-
-type t = module_ option [@@deriving eq, show]
-
 (** [can_acesss env ~current ~target] returns whether a symbol defined in
   * module [current] is allowed to access an internal symbol defined in
   * [target] under [env].

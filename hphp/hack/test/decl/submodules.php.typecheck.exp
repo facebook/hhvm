@@ -1,4 +1,0 @@
-File "submodules.php--AB.php", line 7, characters 3-28:
-Cannot access an internal element from module `A.B.C` in module `A.B` (Typing[4444])
-  File "submodules.php--ABC.php", line 6, characters 10-35:
-  This is from module `A.B.C`

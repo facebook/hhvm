@@ -15,8 +15,8 @@ let show_locl_ty _ = "<locl_ty>"
 let pp_locl_ty _ _ = Printf.printf "%s\n" "<locl_ty>"
 
 (* Along with a type, each local variable has a expression id associated with
-* type. The idea is that if two local variables have the same expression_id
 * it. This is used when generating expression dependent types for the 'this'
+* type. The idea is that if two local variables have the same expression_id
 * then they refer to the same late bound type, and thus have compatible
 * 'this' types.
 * It also has an optional position that indicates where the local got this type.

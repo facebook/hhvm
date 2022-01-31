@@ -9,7 +9,7 @@ path = "lib.rs"
 
 [dependencies]
 hash = { path = "../../hash" }
-indexmap = { version = "1.7.0", features = ["rayon", "serde-1"] }
+indexmap = { version = "1.8.0", features = ["rayon", "serde-1"] }
 libc = "0.2.98"
 once_cell = "1.8"
 thiserror = "1.0.29"

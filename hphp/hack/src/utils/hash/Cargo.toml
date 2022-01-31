@@ -8,5 +8,5 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-indexmap = { version = "1.7.0", features = ["rayon", "serde-1"] }
+indexmap = { version = "1.8.0", features = ["rayon", "serde-1"] }
 rustc-hash = "1.1.0"

@@ -432,6 +432,35 @@ let simplify_subtype_by_physical_equality env ty_sub ty_super simplify_subtype =
   | (LoclType ty1, LoclType ty2) when phys_equal ty1 ty2 -> (env, TL.valid)
   | _ -> simplify_subtype ()
 
+(* If it's clear from the syntax of the type that null isn't in ty, return true.
+ *)
+let rec null_not_subtype ty =
+  match get_node ty with
+  | Tprim (Aast_defs.Tnull | Aast_defs.Tvoid)
+  | Tgeneric _
+  | Tdynamic
+  | Terr
+  | Tany _
+  | Toption _
+  | Tvar _
+  | Taccess _
+  | Tunapplied_alias _
+  | Tneg _
+  | Tintersection _ ->
+    false
+  | Tunion tys -> List.for_all tys ~f:null_not_subtype
+  | Tclass _
+  | Tprim _
+  | Tnonnull
+  | Tfun _
+  | Ttuple _
+  | Tshape _
+  | Tvec_or_dict _ ->
+    true
+  | Tdependent (_, bound)
+  | Tnewtype (_, _, bound) ->
+    null_not_subtype bound
+
 (** Process the constraint proposition. There should only be errors left now,
     i.e. empty disjunction with error functions we call here. *)
 let rec process_simplify_subtype_result prop =
@@ -1309,13 +1338,19 @@ and simplify_subtype_i
            * then t1 <: t2 or t1' <: ?t2.  The converse is obviously
            * true as well.  We can fold the case where t1 is unconstrained
            * into the case analysis below.
+           *
+           * In the case where it's easy to determine that null isn't in t1,
+           * we need only check t1 <: t2.
            *)
           | ((_, (Tnewtype _ | Tdependent _ | Tgeneric _ | Tprim Nast.Tvoid)), _)
             ->
             (* TODO(T69551141) handle type arguments? *)
-            env
-            |> simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super
-            ||| default_subtype
+            if null_not_subtype lty_sub then
+              env |> simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super
+            else
+              env
+              |> simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super
+              ||| default_subtype
           (* If ty_sub <: ?ty_super' and ty_sub does not contain null then we
            * must also have ty_sub <: ty_super'.  The converse follows by
            * widening and transitivity.  Therefore, this step preserves the set

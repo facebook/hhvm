@@ -580,7 +580,6 @@ let method_def ~is_disposable env cls m =
     get_callable_variadicity env variadicity_decl_ty m.m_variadic
   in
   let env = set_tyvars_variance_in_callable env locl_ty param_tys t_variadic in
-  let nb = m.m_body in
   let local_tpenv = Env.get_tpenv env in
   let disable =
     Naming_attributes.mem
@@ -588,7 +587,14 @@ let method_def ~is_disposable env cls m =
       m.m_user_attributes
   in
   let (env, tb) =
-    Typing.fun_ ~abstract:m.m_abstract ~disable env return pos nb m.m_fun_kind
+    Typing.fun_
+      ~abstract:m.m_abstract
+      ~disable
+      env
+      return
+      pos
+      m.m_body
+      m.m_fun_kind
   in
   let type_hint' =
     match hint_of_type_hint m.m_ret with
@@ -1914,11 +1920,13 @@ let check_hint_wellformedness_in_class env c parents =
 
 (** Perform all class wellformedness checks which don't involve the hierarchy:
   - attributes
+  - property initialization checks
   - type parameter checks
   - type hint wellformedness
   - generic static properties *)
 let class_wellformedness_checks env c tc (parents : class_parents) =
   let (env, user_attributes, file_attrs) = check_class_attributes env c in
+  NastInitCheck.class_ env c;
   let env = check_class_type_parameters_add_constraints env c tc in
   let env = check_hint_wellformedness_in_class env c parents in
   check_no_generic_static_property env tc;
@@ -2155,7 +2163,6 @@ let class_def ctx c =
      * of the class. *)
     None
   | Some tc ->
-    NastInitCheck.class_ env c;
     (* If there are duplicate definitions of the class then we will end up
      * checking one AST with respect to the decl corresponding to the other definition.
      * Naming has already detected duplicates, so let's just avoid cascading unhelpful

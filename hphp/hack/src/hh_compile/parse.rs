@@ -110,7 +110,7 @@ fn parse_file(parser: Parser, filepath: PathBuf) -> anyhow::Result<()> {
                     let _ = direct_decl_parser::parse_decls(
                         Default::default(),
                         path,
-                        &content,
+                        content,
                         &arena,
                         Some(stack_limit),
                     );

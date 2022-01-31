@@ -249,7 +249,7 @@ impl Config {
     fn with_merged<T>(
         &mut self,
         json: String,
-        cli_args: &Vec<String>,
+        cli_args: &[String],
         f: impl FnOnce(&Options) -> T,
     ) -> T {
         self.jsons.push(json);
@@ -259,7 +259,7 @@ impl Config {
         ret
     }
 
-    fn to_options(&self, cli_args: &Vec<String>) -> Options {
+    fn to_options(&self, cli_args: &[String]) -> Options {
         Options::from_configs(&self.jsons, cli_args).unwrap()
     }
 

@@ -39,7 +39,7 @@ pub struct Opts {
     paths: Vec<PathBuf>,
 }
 
-fn process_one_file(writer: &SyncWrite, f: &PathBuf) -> Result<()> {
+fn process_one_file(writer: &SyncWrite, f: &Path) -> Result<()> {
     let content = utils::read_file(f)?;
     let files = multifile::to_files(f, content)?;
     for (f, content) in files {
@@ -62,7 +62,7 @@ fn process_one_file(writer: &SyncWrite, f: &PathBuf) -> Result<()> {
     Ok(())
 }
 
-fn crc_files(writer: &SyncWrite, files: &Vec<PathBuf>, num_threads: usize) -> Result<()> {
+fn crc_files(writer: &SyncWrite, files: &[PathBuf], num_threads: usize) -> Result<()> {
     fn to_hms(time: usize) -> String {
         if time >= 5400 {
             // > 90m
@@ -130,8 +130,8 @@ fn crc_files(writer: &SyncWrite, files: &Vec<PathBuf>, num_threads: usize) -> Re
         })
     };
 
-    let process_one_file_ = |f| -> Result<()> {
-        process_one_file(&writer, f)?;
+    let process_one_file_ = |f: &PathBuf| -> Result<()> {
+        process_one_file(writer, f.as_path())?;
         count.fetch_add(1, Ordering::Release);
         Ok(())
     };

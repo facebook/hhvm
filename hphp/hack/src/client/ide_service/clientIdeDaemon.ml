@@ -263,8 +263,16 @@ let load_saved_state
               is_cached = true;
             }
         | None ->
+          let log_saved_state_age_and_distance =
+            ctx
+            |> Provider_context.get_tcopt
+            |> TypecheckerOptions.log_saved_state_age_and_distance
+          in
           let env : Saved_state_loader.env =
-            { Saved_state_loader.saved_state_manifold_api_key = None }
+            {
+              Saved_state_loader.saved_state_manifold_api_key = None;
+              log_saved_state_age_and_distance;
+            }
           in
           let%lwt result =
             State_loader_lwt.load

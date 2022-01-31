@@ -37,6 +37,7 @@ let initialize
         ~workers
         ~ignore_hh_version
         ~savedstate_file_opt
+        ~log_saved_state_age_and_distance:false
     | CustomIndex ->
       CustomSearchService.initialize ~globalrev ~gleanopt;
       sienv

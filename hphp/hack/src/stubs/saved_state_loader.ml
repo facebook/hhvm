@@ -14,7 +14,10 @@
   *
   *)
 
-type env = { saved_state_manifold_api_key: string option }
+type env = {
+  saved_state_manifold_api_key: string option;
+  log_saved_state_age_and_distance: bool;
+}
 
 type process_success = {
   command_line: string;

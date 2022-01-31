@@ -242,7 +242,11 @@ let load_saved_state :
     in
     let%lwt result =
       State_loader_lwt.load
-        ~env:{ Saved_state_loader.saved_state_manifold_api_key = None }
+        ~env:
+          {
+            Saved_state_loader.saved_state_manifold_api_key = None;
+            log_saved_state_age_and_distance = false;
+          }
         ~progress_callback:(fun _ -> ())
         ~watchman_opts
         ~ignore_hh_version:false
@@ -268,7 +272,11 @@ let load_saved_state :
     in
     let%lwt result =
       State_loader_lwt.download_and_unpack_saved_state_from_manifold
-        ~env:{ Saved_state_loader.saved_state_manifold_api_key = None }
+        ~env:
+          {
+            Saved_state_loader.saved_state_manifold_api_key = None;
+            log_saved_state_age_and_distance = false;
+          }
         ~progress_callback:(fun _ -> ())
         ~manifold_path
         ~target_path

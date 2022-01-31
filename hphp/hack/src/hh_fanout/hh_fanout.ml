@@ -76,7 +76,11 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
     | None ->
       let%lwt naming_table_saved_state =
         State_loader_lwt.load
-          ~env:{ Saved_state_loader.saved_state_manifold_api_key = None }
+          ~env:
+            {
+              Saved_state_loader.saved_state_manifold_api_key = None;
+              log_saved_state_age_and_distance = false;
+            }
           ~progress_callback:(fun _ -> ())
           ~watchman_opts:
             Saved_state_loader.Watchman_options.
@@ -109,7 +113,11 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
     | None ->
       let%lwt dep_table_saved_state =
         State_loader_lwt.load
-          ~env:{ Saved_state_loader.saved_state_manifold_api_key = None }
+          ~env:
+            {
+              Saved_state_loader.saved_state_manifold_api_key = None;
+              log_saved_state_age_and_distance = false;
+            }
           ~progress_callback:(fun _ -> ())
           ~watchman_opts:
             Saved_state_loader.Watchman_options.

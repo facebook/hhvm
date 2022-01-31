@@ -52,12 +52,16 @@ let sqlite_escape_str (str : string) : string =
       | _ -> acc ^ String.make 1 char)
 
 (* Attempt to fetch this file *)
-let find_saved_symbolindex ~(ignore_hh_version : bool) :
+let find_saved_symbolindex
+    ~(ignore_hh_version : bool) ~(log_saved_state_age_and_distance : bool) :
     (string, string) Core_kernel.result =
   try
     let repo = Path.make (Relative_path.path_of_prefix Relative_path.Root) in
     let env : Saved_state_loader.env =
-      { Saved_state_loader.saved_state_manifold_api_key = None }
+      {
+        Saved_state_loader.saved_state_manifold_api_key = None;
+        log_saved_state_age_and_distance;
+      }
     in
     let res =
       Future.get_exn
@@ -85,12 +89,17 @@ let find_or_build_sqlite_file
     (workers : MultiWorker.worker list option)
     (savedstate_file_opt : string option)
     ~(silent : bool)
-    ~(ignore_hh_version : bool) : string =
+    ~(ignore_hh_version : bool)
+    ~(log_saved_state_age_and_distance : bool) : string =
   match savedstate_file_opt with
   | Some path -> path
   | None ->
     (* Can we get one from the saved state fetcher? *)
-    (match find_saved_symbolindex ~ignore_hh_version with
+    (match
+       find_saved_symbolindex
+         ~ignore_hh_version
+         ~log_saved_state_age_and_distance
+     with
     | Ok filename -> filename
     | Error errmsg ->
       let repo_path = Relative_path.path_of_prefix Relative_path.Root in
@@ -130,12 +139,14 @@ let initialize
     ~(sienv : si_env)
     ~(workers : MultiWorker.worker list option)
     ~(ignore_hh_version : bool)
-    ~(savedstate_file_opt : string option) : si_env =
+    ~(savedstate_file_opt : string option)
+    ~(log_saved_state_age_and_distance : bool) : si_env =
   (* Find the database and open it *)
   let db_path =
     find_or_build_sqlite_file
       ~silent:sienv.sie_quiet_mode
       ~ignore_hh_version
+      ~log_saved_state_age_and_distance
       workers
       savedstate_file_opt
   in

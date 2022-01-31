@@ -238,13 +238,6 @@ struct RuntimeOption {
   static bool ReadPerUserSettings(const folly::fs::path& confFileName,
                                   IniSettingMap& ini, Hdf& config);
 
-  /**
-   * Return the options which affect the way we parse source files.
-   *
-   * This is used as part of the cache key when we process source files.
-   */
-  static std::string getUnitCacheBreakingOptions();
-
   static std::string getTraceOutputFile();
 
   static bool ServerMode;

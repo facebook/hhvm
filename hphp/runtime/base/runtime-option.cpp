@@ -1195,46 +1195,6 @@ bool RuntimeOption::ReadPerUserSettings(const folly::fs::path& confFileName,
   }
 }
 
-std::string RuntimeOption::getUnitCacheBreakingOptions() {
-  return folly::to<std::string>(
-    RuntimeOption::EnableClassLevelWhereClauses,
-    RuntimeOption::EvalGenerateDocComments,
-    RuntimeOption::EnableXHP,
-    RuntimeOption::EvalEnableCallBuiltin,
-    RuntimeOption::EvalHackArrCompatSerializeNotices,
-    RuntimeOption::EvalHackCompilerVerboseErrors,
-    RuntimeOption::EvalJitEnableRenameFunction,
-    RuntimeOption::EvalLoadFilepathFromUnitCache,
-    RuntimeOption::EvalForbidDynamicCallsToFunc,
-    RuntimeOption::EvalForbidDynamicCallsToClsMeth,
-    RuntimeOption::EvalForbidDynamicCallsToInstMeth,
-    RuntimeOption::EvalForbidDynamicConstructs,
-    RuntimeOption::EvalForbidDynamicCallsWithAttr,
-    RuntimeOption::EvalLogKnownMethodsAsDynamicCalls,
-    RuntimeOption::EvalNoticeOnBuiltinDynamicCalls,
-    RuntimeOption::EvalEnableReadonlyPropertyEnforcement,
-    RuntimeOption::EvalAssemblerFoldDefaultValues,
-    RuntimeOption::RepoDebugInfo,
-    RuntimeOption::CheckIntOverflow,
-    RuntimeOption::EvalEnableImplicitContext,
-    RuntimeOption::EvalEmitClsMethPointers,
-    RuntimeOption::EvalIsVecNotices,
-    RuntimeOption::EvalAllowHhas,
-    RuntimeOption::EvalEnforceGenericsUB,
-    RuntimeOption::EvalEmitMethCallerFuncPointers,
-    RuntimeOption::EvalAssemblerMaxScalarSize,
-    RuntimeOption::EvalEmitClassPointers,
-    RuntimeOption::EvalFoldLazyClassKeys,
-    RuntimeOption::EvalEnableAbstractContextConstants,
-    RuntimeOption::EvalTraitConstantInterfaceBehavior,
-    '|', RuntimeOption::EvalUnitCacheBreaker, '|',
-    RuntimeOption::EvalDiamondTraitMethods,
-    RuntimeOption::PHP7_NoHexNumerics,
-    RuntimeOption::PHP7_Builtins,
-    RuntimeOption::PHP7_Substr,
-    '|', CoeffectsConfig::mangle(), '|');
-}
-
 std::string RuntimeOption::getTraceOutputFile() {
   return folly::sformat("{}/hphp.{}.log",
                         RuntimeOption::RemoteTraceOutputDir, (int64_t)getpid());

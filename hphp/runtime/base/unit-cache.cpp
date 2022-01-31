@@ -1325,12 +1325,18 @@ char mangleExtension(const folly::StringPiece fileName) {
 std::string mangleUnitSha1(const std::string& fileSha1,
                            const folly::StringPiece fileName,
                            const RepoOptions& opts) {
-  std::string t = fileSha1 + '|'
-    + repoSchemaId().toString()
-    + RuntimeOption::getUnitCacheBreakingOptions()
-    + opts.cacheKeySha1().toString()
-    + mangleExtension(fileName);
-  return string_sha1(t);
+  return string_sha1(
+    folly::to<std::string>(
+      fileSha1, '|',
+      repoSchemaId().toString(),
+#define R(Opt)  RuntimeOption::Opt, '|',
+      UNITCACHEFLAGS()
+#undef R
+      CoeffectsConfig::mangle(),
+      opts.cacheKeySha1().toString(),
+      mangleExtension(fileName)
+    )
+  );
 }
 
 size_t numLoadedUnits() {

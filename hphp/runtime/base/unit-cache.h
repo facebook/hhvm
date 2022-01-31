@@ -80,6 +80,45 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
  * Mangle a file's sha1sum with runtime options that affect the Unit output.
  * The parser and this module need to agree on how this is done.
  */
+
+#define UNITCACHEFLAGS()                        \
+  R(EnableClassLevelWhereClauses)               \
+  R(EvalGenerateDocComments)                    \
+  R(EnableXHP)                                  \
+  R(EvalEnableCallBuiltin)                      \
+  R(EvalHackArrCompatSerializeNotices)          \
+  R(EvalHackCompilerVerboseErrors)              \
+  R(EvalJitEnableRenameFunction)                \
+  R(EvalLoadFilepathFromUnitCache)              \
+  R(EvalForbidDynamicCallsToFunc)               \
+  R(EvalForbidDynamicCallsToClsMeth)            \
+  R(EvalForbidDynamicCallsToInstMeth)           \
+  R(EvalForbidDynamicConstructs)                \
+  R(EvalForbidDynamicCallsWithAttr)             \
+  R(EvalLogKnownMethodsAsDynamicCalls)          \
+  R(EvalNoticeOnBuiltinDynamicCalls)            \
+  R(EvalEnableReadonlyPropertyEnforcement)      \
+  R(EvalAssemblerFoldDefaultValues)             \
+  R(RepoDebugInfo)                              \
+  R(CheckIntOverflow)                           \
+  R(EvalEnableImplicitContext)                  \
+  R(EvalEmitClsMethPointers)                    \
+  R(EvalIsVecNotices)                           \
+  R(EvalAllowHhas)                              \
+  R(EvalEnforceGenericsUB)                      \
+  R(EvalEmitMethCallerFuncPointers)             \
+  R(EvalAssemblerMaxScalarSize)                 \
+  R(EvalEmitClassPointers)                      \
+  R(EvalFoldLazyClassKeys)                      \
+  R(EvalEnableAbstractContextConstants)         \
+  R(EvalTraitConstantInterfaceBehavior)         \
+  R(EvalUnitCacheBreaker)                       \
+  R(EvalDiamondTraitMethods)                    \
+  R(PHP7_NoHexNumerics)                         \
+  R(PHP7_Builtins)                              \
+  R(PHP7_Substr)                                \
+  /**/
+
 std::string mangleUnitSha1(const std::string& fileSha1,
                            const folly::StringPiece fileName,
                            const RepoOptions&);

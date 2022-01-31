@@ -17,9 +17,9 @@ get_target_property(re2_INCLUDE_DIR re2 INTERFACE_INCLUDE_DIRECTORIES)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   SQUANGLE_SOURCE_ARGS
   SOURCE_URL
-  "https://github.com/facebook/squangle/archive/refs/tags/v2021.10.18.00.tar.gz"
+  "https://github.com/facebook/squangle/archive/refs/tags/v2022.01.31.00.tar.gz"
   SOURCE_HASH
-  "SHA256=b9a80413b82b78cfb068cd418ac72ed3dac80092778a384487015a79f1ca44dd"
+  "SHA256=78988eacf99d380da4c660161bcb20305e4b54369e17b1bb866c5fb188acff76"
   FILENAME_PREFIX
   "squangle-"
 )

@@ -94,6 +94,25 @@ public:
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Like IsNontrivialSerializable, but checks for the presense of a
+ * static makeForSerde function (with a matching signature) in the
+ * type T.
+ */
+template<typename T, typename SerDe>
+struct HasMakeForSerde {
+private:
+  using yes = std::true_type;
+  using no = std::false_type;
+  template<typename U> static auto test(int) ->
+    decltype(U::makeForSerde(std::declval<SerDe&>()), yes());
+  template<typename> static no test(...);
+public:
+  static constexpr bool value = std::is_same<decltype(test<T>(0)),yes>::value;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 template <typename T> struct BlobEncoderHelper {};
 
 //////////////////////////////////////////////////////////////////////
@@ -235,6 +254,11 @@ struct BlobEncoder {
     encodeOrderedContainer(map);
   }
 
+  template<typename K, typename V, typename C, typename A>
+  void encode(const std::map<K, V, C, A>& map) {
+    encodeOrderedContainer(map);
+  }
+
   template<typename K, typename V, typename H, typename E, typename A>
   void encode(const std::unordered_map<K, V, H, E, A>& map) {
     encodeUnorderedContainer(map);
@@ -335,6 +359,33 @@ struct BlobDecoder {
   }
 
   size_t advanced() const { return m_p - m_start; }
+
+  // Produce a value of type T from the decoder. Uses a specialized
+  // creation function if available, otherwise just default constructs
+  // the value and calls the decoder on it.
+  template <typename T> T make() {
+    if constexpr (HasMakeForSerde<T, BlobDecoder>::value) {
+      return T::makeForSerde(*this);
+    } else {
+      T t;
+      (*this)(t);
+      return t;
+    }
+  }
+
+  // Like make(), except asserts the decoder is done afterwards.
+  template <typename T> T makeWhole() {
+    if constexpr (HasMakeForSerde<T, BlobDecoder>::value) {
+      auto t = T::makeForSerde(*this);
+      assertDone();
+      return t;
+    } else {
+      T t;
+      (*this)(t);
+      assertDone();
+      return t;
+    }
+  }
 
   // See encode() in BlobEncoder for why this only allows integral
   // types.
@@ -474,6 +525,11 @@ struct BlobDecoder {
            typename C, typename A,
            typename G, typename C2>
   void decode(folly::sorted_vector_map<K, V, C, A, G, C2>& map) {
+    decodeMapContainer(map);
+  }
+
+  template<typename K, typename V, typename C, typename A>
+  void decode(std::map<K, V, C, A>& map) {
     decodeMapContainer(map);
   }
 

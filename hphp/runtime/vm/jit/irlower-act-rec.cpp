@@ -67,7 +67,7 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   auto const func = inst->extra<DefFuncEntryFP>()->func;
   auto const prevFP = srcLoc(env, inst, 0).reg();
   auto const newFP = srcLoc(env, inst, 1).reg();
-  auto const prologueFlags = srcLoc(env, inst, 2).reg();
+  auto const arFlags = srcLoc(env, inst, 2).reg();
   auto const ctx = srcLoc(env, inst, 3).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
@@ -77,6 +77,22 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   v << unstublogue{};
   v << phplogue{newFP};
   v << storeli{(int32_t)func->getFuncId().toInt(), newFP[AROFF(m_funcId)]};
+  v << storel{arFlags, newFP + AROFF(m_callOffAndFlags)};
+
+  if (func->cls() || func->isClosureBody()) {
+    v << store{ctx, newFP + AROFF(m_thisUnsafe)};
+  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitImmStoreq(v, ActRec::kTrashedThisSlot, newFP + AROFF(m_thisUnsafe));
+  }
+
+  v << copy{newFP, dst};
+  v << pushvmfp{dst};
+}
+
+void cgConvFuncPrologueFlagsToARFlags(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
 
   int32_t constexpr flagsDelta =
     PrologueFlags::Flags::CallOffsetStart - ActRec::CallOffsetStart;
@@ -89,19 +105,8 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   assertx(PrologueFlags::Flags::AsyncEagerReturn == flagsDelta + 2);
   assertx(PrologueFlags::Flags::CallOffsetStart == flagsDelta + 3);
   auto const prologueFlagsLow32 = v.makeReg();
-  auto const callOffAndFlags = v.makeReg();
-  v << movtql{prologueFlags, prologueFlagsLow32};
-  v << shrli{flagsDelta, prologueFlagsLow32, callOffAndFlags, v.makeReg()};
-  v << storel{callOffAndFlags, newFP + AROFF(m_callOffAndFlags)};
-
-  if (func->cls() || func->isClosureBody()) {
-    v << store{ctx, newFP + AROFF(m_thisUnsafe)};
-  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, ActRec::kTrashedThisSlot, newFP + AROFF(m_thisUnsafe));
-  }
-
-  v << copy{newFP, dst};
-  v << pushvmfp{dst};
+  v << movtql{src, prologueFlagsLow32};
+  v << shrli{flagsDelta, prologueFlagsLow32, dst, v.makeReg()};
 }
 
 void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {

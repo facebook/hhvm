@@ -531,6 +531,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvDblToBool:
   case ConvDblToInt:
   case ConvDblToStr:
+  case ConvFuncPrologueFlagsToARFlags:
   case ConvIntToBool:
   case ConvIntToDbl:
   case ConvIntToStr:

@@ -199,6 +199,7 @@ bool supportsGVN(const IRInstruction* inst) {
   case ConvIntToDbl:
   case ConvBoolToInt:
   case ConvDblToInt:
+  case ConvFuncPrologueFlagsToARFlags:
   case DblAsBits:
   case GtInt:
   case GteInt:

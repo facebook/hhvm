@@ -161,6 +161,7 @@ bool canDCE(const IRInstruction& inst) {
   case LdFuncFromRFunc:
   case LdGenericsFromRFunc:
   case LdTVFromRDS:
+  case ConvFuncPrologueFlagsToARFlags:
   case DefConst:
   case DefFuncPrologueCallee:
   case DefFuncPrologueCtx:

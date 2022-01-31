@@ -443,8 +443,10 @@ namespace {
 
 void emitSpillFrame(IRGS& env, const Func* callee, uint32_t argc,
                     SSATmp* prologueFlags, SSATmp* prologueCtx) {
+  auto const arFlags = gen(env, ConvFuncPrologueFlagsToARFlags, prologueFlags);
+
   gen(env, DefFuncEntryFP, FuncData { callee },
-      fp(env), sp(env), prologueFlags, prologueCtx);
+      fp(env), sp(env), arFlags, prologueCtx);
   auto const irSPOff = SBInvOffset { -callee->numSlotsInFrame() };
   auto const bcSPOff = SBInvOffset { 0 };
   gen(env, DefFrameRelSP, DefStackData { irSPOff, bcSPOff }, fp(env));

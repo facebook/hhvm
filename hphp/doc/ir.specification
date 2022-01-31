@@ -1936,6 +1936,10 @@ To string conversions:
   May be used only at the beginning of a prologue or a stub used in a prologue
   context.
 
+| ConvFuncPrologueFlagsToARFlags, D(Int), S(Int), NF
+
+  Convert a function prologue flags to function entry flags.
+
 | Count, D(Int), S(Cell), NF
 
   Computes the number of elements in S0. The count of an array is the number of

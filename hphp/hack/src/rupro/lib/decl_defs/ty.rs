@@ -5,10 +5,37 @@
 
 use hcons::Hc;
 
+use std::convert::From;
+
 use crate::pos::{PosId, Symbol};
 use crate::reason::Reason;
 
 pub type Prim = oxidized::aast::Tprim;
+pub type Abstraction = oxidized::ast_defs::Abstraction; // `Concrete` or `Abstract`.
+pub type Variance = oxidized::ast_defs::Variance;
+
+// note(sf, 2022-01-31): c.f. oxidized_by_ref::ast_defs::ClassishKind<'_>
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum ClassishKind {
+    Class(Abstraction),
+    Interface,
+    Trait,
+    Enum,
+    EnumClass(Abstraction),
+}
+
+impl From<oxidized_by_ref::ast_defs::ClassishKind<'_>> for ClassishKind {
+    fn from(kind: oxidized_by_ref::ast_defs::ClassishKind<'_>) -> Self {
+        use oxidized_by_ref::ast_defs;
+        match kind {
+            ast_defs::ClassishKind::Cclass(a) => ClassishKind::Class(*a),
+            ast_defs::ClassishKind::Cinterface => ClassishKind::Interface,
+            ast_defs::ClassishKind::Ctrait => ClassishKind::Trait,
+            ast_defs::ClassishKind::Cenum => ClassishKind::Enum,
+            ast_defs::ClassishKind::CenumClass(a) => ClassishKind::EnumClass(*a),
+        }
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FunParam<R: Reason, TY> {
@@ -76,4 +103,14 @@ pub enum CeVisibility<R: Reason> {
 pub struct UserAttribute<R: Reason> {
     pub name: PosId<R::Pos>,
     pub classname_params: Vec<Symbol>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct Tparam<R: Reason> {
+    pub variance: Variance,
+    pub name: PosId<R::Pos>,
+    pub tparams: Vec<Tparam<R>>,
+    pub constraints: Vec<(oxidized::ast_defs::ConstraintKind, DeclTy<R>)>,
+    pub reified: oxidized::aast::ReifyKind,
+    pub user_attributes: Vec<UserAttribute<R>>,
 }

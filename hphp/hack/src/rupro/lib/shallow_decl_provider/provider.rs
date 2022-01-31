@@ -11,7 +11,7 @@ use bumpalo::Bump;
 use hcons::Hc;
 
 use crate::alloc::Allocator;
-use crate::decl_defs::{ShallowClass, ShallowFun, ShallowMethod};
+use crate::decl_defs::{ClassishKind, ShallowClass, ShallowFun, ShallowMethod};
 use crate::pos::{RelativePath, RelativePathCtx, Symbol};
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclCache;
@@ -121,6 +121,7 @@ impl<R: Reason> ShallowDeclUtils<R> {
             ty: self.alloc.decl_ty_from_ast(sm.type_),
             visibility: sm.visibility,
             deprecated: sm.deprecated.map(|s| self.alloc.symbol(s)),
+            flags: sm.flags,
             attributes: sm
                 .attributes
                 .iter()
@@ -134,7 +135,14 @@ impl<R: Reason> ShallowDeclUtils<R> {
         sc: &oxidized_by_ref::shallow_decl_defs::ClassDecl<'_>,
     ) -> ShallowClass<R> {
         ShallowClass {
+            mode: sc.mode,
+            is_final: sc.final_,
+            is_abstract: sc.abstract_,
+            is_xhp: sc.is_xhp,
+            has_xhp_keyword: sc.has_xhp_keyword,
+            kind: ClassishKind::from(sc.kind),
             name: self.alloc.pos_id_from_decl(sc.name),
+            tparams: self.alloc.tparams(sc.tparams),
             extends: sc
                 .extends
                 .iter()

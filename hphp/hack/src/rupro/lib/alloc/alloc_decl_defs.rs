@@ -3,12 +3,35 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{DeclTy, DeclTy_, FunParam, FunType, Prim, UserAttribute};
+use crate::decl_defs::{DeclTy, DeclTy_, FunParam, FunType, Prim, Tparam, UserAttribute};
 use crate::reason::Reason;
 
 use super::Allocator;
 
 impl<R: Reason> Allocator<R> {
+    pub fn tparam(&self, tparam: &oxidized_by_ref::typing_defs::Tparam<'_>) -> Tparam<R> {
+        Tparam {
+            variance: tparam.variance,
+            name: self.pos_id_from_decl(tparam.name),
+            tparams: self.tparams(&tparam.tparams),
+            constraints: tparam
+                .constraints
+                .iter()
+                .map(|&(k, ty)| (k, self.decl_ty_from_ast(ty)))
+                .collect(),
+            reified: tparam.reified,
+            user_attributes: tparam
+                .user_attributes
+                .iter()
+                .map(|ua| self.user_attribute(ua))
+                .collect(),
+        }
+    }
+
+    pub fn tparams(&self, tparams: &[&oxidized_by_ref::typing_defs::Tparam<'_>]) -> Vec<Tparam<R>> {
+        tparams.iter().map(|tp| self.tparam(tp)).collect()
+    }
+
     pub fn user_attribute(
         &self,
         attr: &oxidized_by_ref::typing_defs::UserAttribute<'_>,

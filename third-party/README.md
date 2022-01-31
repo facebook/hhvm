@@ -45,6 +45,8 @@ Overall process:
 10. Check nightly build results the next day. Fix any portability issues that weren't caught by CI.
 
 Steps 2-4 can be done by `update-first-party.sh`
+Step 5 can be done by `upload-first-party-to-manifold.sh`
+
 
 Common Patterns/Targets
 -----------------------

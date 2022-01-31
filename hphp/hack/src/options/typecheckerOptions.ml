@@ -214,3 +214,6 @@ let explicit_consistent_constructors =
   GlobalOptions.tco_explicit_consistent_constructors
 
 let type_printer_fuel = GlobalOptions.tco_type_printer_fuel
+
+let log_saved_state_age_and_distance =
+  GlobalOptions.tco_log_saved_state_age_and_distance

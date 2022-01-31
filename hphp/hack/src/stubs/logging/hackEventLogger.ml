@@ -47,6 +47,7 @@ type rollout_flags = {
   require_saved_state: bool;
   force_shallow_decl_fanout: bool;
   log_from_client_when_slow_monitor_connections: bool;
+  log_saved_state_age_and_distance: bool;
   naming_sqlite_in_hack_64: bool;
   use_hack_64_naming_table: bool;
   enable_disk_heap: bool;

@@ -553,6 +553,8 @@ type t = {
       (** If enabled, saves naming table into a temp folder and uploads it to the remote typechecker *)
   log_from_client_when_slow_monitor_connections: bool;
       (**  Alerts hh users what processes are using hh_server when hh_client is slow to connect. *)
+  log_saved_state_age_and_distance: bool;
+      (** Collects the age of a saved state (in seconds) and distance (in globalrevs) for telemetry *)
   naming_sqlite_in_hack_64: bool;
       (** Add sqlite naming table to hack/64 ss job *)
   workload_quantile: quantile option;
@@ -678,6 +680,7 @@ let default =
     machine_class = None;
     saved_state_manifold_api_key = None;
     hulk_lite = false;
+    log_saved_state_age_and_distance = false;
   }
 
 let path =
@@ -1324,6 +1327,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let log_saved_state_age_and_distance =
+    bool_if_min_version
+      "log_saved_state_age_and_distance"
+      ~default:default.log_saved_state_age_and_distance
+      ~current_version
+      config
+  in
   let naming_sqlite_in_hack_64 =
     bool_if_min_version
       "naming_sqlite_in_hack_64"
@@ -1494,6 +1504,7 @@ let load_ fn ~silent ~current_version overrides =
     machine_class;
     saved_state_manifold_api_key;
     hulk_lite;
+    log_saved_state_age_and_distance;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1511,6 +1522,8 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       force_shallow_decl_fanout = options.force_shallow_decl_fanout;
       log_from_client_when_slow_monitor_connections =
         options.log_from_client_when_slow_monitor_connections;
+      log_saved_state_age_and_distance =
+        options.log_saved_state_age_and_distance;
       naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
       use_hack_64_naming_table = options.use_hack_64_naming_table;
       enable_disk_heap = options.enable_disk_heap;

@@ -132,6 +132,7 @@ type t = {
   tco_enable_disk_heap: bool;
   tco_explicit_consistent_constructors: int;
   tco_type_printer_fuel: int;
+  tco_log_saved_state_age_and_distance: bool;
 }
 [@@deriving eq, show]
 
@@ -315,6 +316,7 @@ let default =
     tco_enable_disk_heap = true;
     tco_explicit_consistent_constructors = 0;
     tco_type_printer_fuel = 100;
+    tco_log_saved_state_age_and_distance = false;
   }
 
 let make
@@ -463,6 +465,8 @@ let make
     ?(tco_explicit_consistent_constructors =
       default.tco_explicit_consistent_constructors)
     ?(tco_type_printer_fuel = default.tco_type_printer_fuel)
+    ?(tco_log_saved_state_age_and_distance =
+      default.tco_log_saved_state_age_and_distance)
     () =
   {
     tco_experimental_features;
@@ -587,6 +591,7 @@ let make
     tco_enable_disk_heap;
     tco_explicit_consistent_constructors;
     tco_type_printer_fuel;
+    tco_log_saved_state_age_and_distance;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -867,3 +872,6 @@ let tco_explicit_consistent_constructors t =
   t.tco_explicit_consistent_constructors
 
 let tco_type_printer_fuel t = t.tco_type_printer_fuel
+
+let tco_log_saved_state_age_and_distance t =
+  t.tco_log_saved_state_age_and_distance

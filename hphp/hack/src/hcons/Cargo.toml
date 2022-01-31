@@ -9,5 +9,5 @@ path = "lib.rs"
 
 [dependencies]
 bstr = { version = "0.2", features = ["serde1"] }
+dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 fnv = "1.0"
-nohash-hasher = "0.2"

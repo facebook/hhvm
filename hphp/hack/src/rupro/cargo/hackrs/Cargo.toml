@@ -10,6 +10,7 @@ path = "../../lib/mod.rs"
 [dependencies]
 aast_parser = { path = "../../../parser/cargo/aast_parser" }
 bumpalo = { version = "3.8", features = ["collections"] }
+dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }
 hcons = { path = "../../../hcons" }
 im = { version = "14.2", features = ["rayon", "serde"] }

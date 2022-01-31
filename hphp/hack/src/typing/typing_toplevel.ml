@@ -449,6 +449,39 @@ let method_dynamically_callable
   in
   if not interface_check then method_body_check ()
 
+let method_return env m ret_decl_ty =
+  let (env, ret_ty) =
+    match ret_decl_ty with
+    | None ->
+      (env, Typing_return.make_default_return ~is_method:true env m.m_name)
+    | Some ret ->
+      (* If a 'this' type appears it needs to be compatible with the
+       * late static type
+       *)
+      let ety_env =
+        empty_expand_env_with_on_error
+          (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
+      in
+      Typing_return.make_return_type (Phase.localize ~ety_env) env ret
+  in
+  let ret_pos =
+    match snd m.m_ret with
+    | Some (ret_pos, _) -> ret_pos
+    | None -> fst m.m_name
+  in
+  let (env, ret_ty) = Typing_return.force_return_kind env ret_pos ret_ty in
+  let return =
+    Typing_return.make_info
+      ret_pos
+      m.m_fun_kind
+      m.m_user_attributes
+      env
+      ~is_explicit:(Option.is_some (hint_of_type_hint m.m_ret))
+      ret_ty
+      ret_decl_ty
+  in
+  (env, return, ret_ty)
+
 let method_def ~is_disposable env cls m =
   Errors.run_with_span m.m_span @@ fun () ->
   with_timeout env m.m_name @@ fun env ->
@@ -517,36 +550,7 @@ let method_def ~is_disposable env cls m =
       env
   in
   let env = Env.set_fn_kind env m.m_fun_kind in
-  let (env, locl_ty) =
-    match ret_decl_ty with
-    | None ->
-      (env, Typing_return.make_default_return ~is_method:true env m.m_name)
-    | Some ret ->
-      (* If a 'this' type appears it needs to be compatible with the
-       * late static type
-       *)
-      let ety_env =
-        empty_expand_env_with_on_error
-          (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
-      in
-      Typing_return.make_return_type (Phase.localize ~ety_env) env ret
-  in
-  let ret_pos =
-    match snd m.m_ret with
-    | Some (ret_pos, _) -> ret_pos
-    | None -> fst m.m_name
-  in
-  let (env, locl_ty) = Typing_return.force_return_kind env ret_pos locl_ty in
-  let return =
-    Typing_return.make_info
-      ret_pos
-      m.m_fun_kind
-      m.m_user_attributes
-      env
-      ~is_explicit:(Option.is_some (hint_of_type_hint m.m_ret))
-      locl_ty
-      ret_decl_ty
-  in
+  let (env, return, return_ty) = method_return env m ret_decl_ty in
   let sound_dynamic_check_saved_env = env in
   let (env, param_tys) =
     List.zip_exn m.m_params params_decl_ty
@@ -579,7 +583,9 @@ let method_def ~is_disposable env cls m =
   let (env, t_variadic) =
     get_callable_variadicity env variadicity_decl_ty m.m_variadic
   in
-  let env = set_tyvars_variance_in_callable env locl_ty param_tys t_variadic in
+  let env =
+    set_tyvars_variance_in_callable env return_ty param_tys t_variadic
+  in
   let local_tpenv = Env.get_tpenv env in
   let disable =
     Naming_attributes.mem
@@ -630,7 +636,7 @@ let method_def ~is_disposable env cls m =
       m
       params_decl_ty
       variadicity_decl_ty
-      locl_ty;
+      return_ty;
   let method_def =
     {
       Aast.m_annotation = Env.save local_tpenv env;
@@ -650,7 +656,7 @@ let method_def ~is_disposable env cls m =
       Aast.m_fun_kind = m.m_fun_kind;
       Aast.m_user_attributes = user_attributes;
       Aast.m_readonly_ret = m.m_readonly_ret;
-      Aast.m_ret = (locl_ty, hint_of_type_hint m.m_ret);
+      Aast.m_ret = (return_ty, hint_of_type_hint m.m_ret);
       Aast.m_body = { Aast.fb_ast = tb };
       Aast.m_external = m.m_external;
       Aast.m_doc_comment = m.m_doc_comment;

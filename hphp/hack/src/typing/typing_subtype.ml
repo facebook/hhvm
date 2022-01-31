@@ -532,6 +532,18 @@ and default_subtype
             ->
             valid env
           | _ -> default env)
+        (* Special case if Tany is in an intersection on the left:
+         *   t1 & ... & _ & ... & tn <: u
+         * simplifies to
+         *   _ <: u
+         *)
+        | (r, Tintersection tyl) when List.exists tyl ~f:is_any ->
+          simplify_subtype_i
+            ~this_ty
+            ~subtype_env
+            (LoclType (mk (r, Typing_defs.make_tany ())))
+            ty_super
+            env
         | (r_sub, Tintersection tyl) ->
           (* A & B <: C iif A <: C | !B *)
           (match find_type_with_exact_negation env tyl with

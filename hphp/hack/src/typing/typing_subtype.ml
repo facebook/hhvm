@@ -450,7 +450,17 @@ let rec process_simplify_subtype_result prop =
     false
   | TL.Disj _ -> failwith "non-empty disjunction"
 
-and simplify_subtype
+let get_tyvar_opt t =
+  match t with
+  | LoclType lt ->
+    begin
+      match get_node lt with
+      | Tvar var -> Some var
+      | _ -> None
+    end
+  | _ -> None
+
+let rec simplify_subtype
     ~(subtype_env : subtype_env)
     ?(this_ty : locl_ty option = None)
     ty_sub
@@ -3027,43 +3037,6 @@ and simplify_subtype_funs
   else
     valid
 
-(* One of the main entry points to this module *)
-and sub_type_i
-    ~subtype_env (env : env) (ty_sub : internal_type) (ty_super : internal_type)
-    : (env, env) result =
-  let old_env = env in
-  let (env, success) =
-    sub_type_inner ~subtype_env env ~this_ty:None ty_sub ty_super
-  in
-  if success then
-    Ok (Env.log_env_change "sub_type" old_env env)
-  else
-    Error (Env.log_env_change "sub_type" old_env old_env)
-
-and sub_type
-    env
-    ?(coerce = None)
-    ?(is_coeffect = false)
-    (ty_sub : locl_ty)
-    (ty_super : locl_ty)
-    on_error =
-  sub_type_i
-    ~subtype_env:(make_subtype_env ~is_coeffect ~coerce on_error)
-    env
-    (LoclType ty_sub)
-    (LoclType ty_super)
-  |> function
-  | Ok env -> env
-  | Error env -> env
-
-and sub_type_res
-    env ?(coerce = None) (ty_sub : locl_ty) (ty_super : locl_ty) on_error =
-  sub_type_i
-    ~subtype_env:(make_subtype_env ~coerce on_error)
-    env
-    (LoclType ty_sub)
-    (LoclType ty_super)
-
 (* Add a new upper bound ty on var.  Apply transitivity of sutyping,
  * so if we already have tyl <: var, then check that for each ty_sub
  * in tyl we have ty_sub <: ty.
@@ -3151,16 +3124,6 @@ and add_tyvar_lower_bound_and_close ~coerce (env, prop) var ty on_error =
       (env, prop)
   in
   (env, prop)
-
-and get_tyvar_opt t =
-  match t with
-  | LoclType lt ->
-    begin
-      match get_node lt with
-      | Tvar var -> Some var
-      | _ -> None
-    end
-  | _ -> None
 
 and props_to_env pos env remain props on_error =
   match props with
@@ -3358,75 +3321,12 @@ and is_sub_type_alt_i ~ignore_generic_params ~no_top_bottom ~coerce env ty1 ty2
   else
     None
 
-and is_sub_type_alt ~ignore_generic_params ~no_top_bottom env ty1 ty2 =
-  is_sub_type_alt_i
-    ~ignore_generic_params
-    ~no_top_bottom
-    env
-    (LoclType ty1)
-    (LoclType ty2)
-
-and is_sub_type env ty1 ty2 =
-  let ( = ) = Option.equal Bool.equal in
-  is_sub_type_alt
-    ~ignore_generic_params:false
-    ~no_top_bottom:false
-    ~coerce:None
-    env
-    ty1
-    ty2
-  = Some true
-
-and is_sub_type_for_coercion env ty1 ty2 =
-  let ( = ) = Option.equal Bool.equal in
-  is_sub_type_alt
-    ~ignore_generic_params:false
-    ~no_top_bottom:false
-    ~coerce:(Some TL.CoerceFromDynamic)
-    env
-    ty1
-    ty2
-  = Some true
-
-and is_sub_type_for_union env ?(coerce = None) ty1 ty2 =
-  let ( = ) = Option.equal Bool.equal in
-  is_sub_type_alt
-    ~ignore_generic_params:false
-    ~no_top_bottom:true
-    ~coerce
-    env
-    ty1
-    ty2
-  = Some true
-
 and is_sub_type_for_union_i env ?(coerce = None) ty1 ty2 =
   let ( = ) = Option.equal Bool.equal in
   is_sub_type_alt_i
     ~ignore_generic_params:false
     ~no_top_bottom:true
     ~coerce
-    env
-    ty1
-    ty2
-  = Some true
-
-and can_sub_type env ty1 ty2 =
-  let ( <> ) a b = not (Option.equal Bool.equal a b) in
-  is_sub_type_alt
-    ~ignore_generic_params:false
-    ~no_top_bottom:true
-    ~coerce:None
-    env
-    ty1
-    ty2
-  <> Some false
-
-and is_sub_type_ignore_generic_params env ty1 ty2 =
-  let ( = ) = Option.equal Bool.equal in
-  is_sub_type_alt
-    ~ignore_generic_params:true
-    ~no_top_bottom:true
-    ~coerce:None
     env
     ty1
     ty2
@@ -3537,6 +3437,106 @@ and try_union env ty tyl =
 
 (* Determines whether the types are definitely disjoint, or whether they might
     overlap (i.e., both contain some particular value). *)
+(* One of the main entry points to this module *)
+let sub_type_i
+    ~subtype_env (env : env) (ty_sub : internal_type) (ty_super : internal_type)
+    : (env, env) result =
+  let old_env = env in
+  let (env, success) =
+    sub_type_inner ~subtype_env env ~this_ty:None ty_sub ty_super
+  in
+  if success then
+    Ok (Env.log_env_change "sub_type" old_env env)
+  else
+    Error (Env.log_env_change "sub_type" old_env old_env)
+
+let sub_type
+    env
+    ?(coerce = None)
+    ?(is_coeffect = false)
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty)
+    on_error =
+  sub_type_i
+    ~subtype_env:(make_subtype_env ~is_coeffect ~coerce on_error)
+    env
+    (LoclType ty_sub)
+    (LoclType ty_super)
+  |> function
+  | Ok env -> env
+  | Error env -> env
+
+let sub_type_res
+    env ?(coerce = None) (ty_sub : locl_ty) (ty_super : locl_ty) on_error =
+  sub_type_i
+    ~subtype_env:(make_subtype_env ~coerce on_error)
+    env
+    (LoclType ty_sub)
+    (LoclType ty_super)
+
+let is_sub_type_alt ~ignore_generic_params ~no_top_bottom env ty1 ty2 =
+  is_sub_type_alt_i
+    ~ignore_generic_params
+    ~no_top_bottom
+    env
+    (LoclType ty1)
+    (LoclType ty2)
+
+let is_sub_type env ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
+  is_sub_type_alt
+    ~ignore_generic_params:false
+    ~no_top_bottom:false
+    ~coerce:None
+    env
+    ty1
+    ty2
+  = Some true
+
+let is_sub_type_for_union env ?(coerce = None) ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
+  is_sub_type_alt
+    ~ignore_generic_params:false
+    ~no_top_bottom:true
+    ~coerce
+    env
+    ty1
+    ty2
+  = Some true
+
+let is_sub_type_for_coercion env ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
+  is_sub_type_alt
+    ~ignore_generic_params:false
+    ~no_top_bottom:false
+    ~coerce:(Some TL.CoerceFromDynamic)
+    env
+    ty1
+    ty2
+  = Some true
+
+let is_sub_type_ignore_generic_params env ty1 ty2 =
+  let ( = ) = Option.equal Bool.equal in
+  is_sub_type_alt
+    ~ignore_generic_params:true
+    ~no_top_bottom:true
+    ~coerce:None
+    env
+    ty1
+    ty2
+  = Some true
+
+let can_sub_type env ty1 ty2 =
+  let ( <> ) a b = not (Option.equal Bool.equal a b) in
+  is_sub_type_alt
+    ~ignore_generic_params:false
+    ~no_top_bottom:true
+    ~coerce:None
+    env
+    ty1
+    ty2
+  <> Some false
+
 let is_type_disjoint env ty1 ty2 =
   (* visited_tyvars record which type variables we've seen, to cut off cycles. *)
   let rec is_type_disjoint visited_tyvars env ty1 ty2 =

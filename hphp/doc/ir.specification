@@ -1554,7 +1554,7 @@ To string conversions:
 
 | DefFuncEntryFP<func>,
 |   D(FramePtr),
-|   S(FramePtr) S(StkPtr) S(Int) S(Cls|Obj|Nullptr),
+|   S(FramePtr) S(StkPtr) S(Int) S(Cls|Obj|Nullptr) S(Int),
 |   NF
 
   Writes a callee's frame and defines a frame pointer.
@@ -1564,6 +1564,7 @@ To string conversions:
   S1: stack pointer pointing to the space reserved for the callee's frame
   S2: prologue flags (see PrologueFlags)
   S3: prologue context
+  S4: callee func id
 
 | Call<offset,numParams,callOff,destroyLocals>,
 |   DCall,

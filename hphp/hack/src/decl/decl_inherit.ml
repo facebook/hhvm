@@ -456,14 +456,8 @@ let heap_entries env class_name (classes : Decl_store.class_entries SMap.t) :
       Decl_env.add_extends_dependency env class_name;
     heap_entries
   | None ->
-    (match Decl_store.((get ()).get_class class_name) with
-    | None ->
-      Decl_env.add_extends_dependency env class_name;
-      None
-    | Some class_ ->
-      if not (Pos_or_decl.is_hhi class_.dc_pos) then
-        Decl_env.add_extends_dependency env class_name;
-      Some (class_, None))
+    Decl_env.add_extends_dependency env class_name;
+    None
 
 (* Include definitions inherited from a class (extends) or a trait (use)
  * or requires extends

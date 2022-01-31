@@ -44,6 +44,8 @@ Overall process:
 9. Land once everything's good :) Don't do this on a Friday.
 10. Check nightly build results the next day. Fix any portability issues that weren't caught by CI.
 
+Steps 2-4 can be done by `update-first-party.sh`
+
 Common Patterns/Targets
 -----------------------
 

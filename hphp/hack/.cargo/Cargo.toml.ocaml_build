@@ -83,6 +83,7 @@ members = [
     "src/hackc/emitter/cargo/statement_state",
     "src/hackc//emitter/cargo/symbol_refs_state",
     "src/hackc/ffi_bridge",
+    "src/hackc/helpers",
     "src/hackc/hhbc/cargo/decl_vars",
     "src/hackc/hhbc/cargo/hhas_pos",
     "src/hackc/hhbc/cargo/adata_state",

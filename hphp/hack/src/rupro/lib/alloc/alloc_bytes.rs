@@ -6,6 +6,7 @@
 use super::{Allocator, GlobalAllocator};
 use crate::reason::Reason;
 use hcons::Hc;
+use intern::path::PathId;
 use pos::{Prefix, RelativePath, Symbol};
 
 impl GlobalAllocator {
@@ -24,7 +25,7 @@ impl GlobalAllocator {
     }
 
     pub fn relative_path(&self, prefix: Prefix, suffix: &std::path::Path) -> RelativePath {
-        RelativePath::new(prefix, self.symbol(suffix.to_str().unwrap()))
+        RelativePath::new(prefix, PathId::from(suffix.to_str().unwrap()))
     }
 
     pub fn relative_path_from_ast(

@@ -70,7 +70,7 @@ impl AstProvider {
         }
     }
 
-    pub fn get_ast(&self, name: &RelativePath) -> Result<AstItem, ParsingError> {
+    pub fn get_ast(&self, name: RelativePath) -> Result<AstItem, ParsingError> {
         self.get_ast_no_cache(name)
     }
 
@@ -127,7 +127,7 @@ impl AstProvider {
         }
     }
 
-    fn get_ast_no_cache(&self, fln: &RelativePath) -> Result<AstItem, ParsingError> {
+    fn get_ast_no_cache(&self, fln: RelativePath) -> Result<AstItem, ParsingError> {
         let env = self.make_parser_env(MakeParserEnv {
             quick_mode: false,
             keep_errors: true,

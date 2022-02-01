@@ -62,10 +62,7 @@ impl<R: Reason> ShallowDeclProvider<R> {
         }
     }
 
-    pub fn add_from_files(
-        &self,
-        filenames: &mut dyn Iterator<Item = &RelativePath>,
-    ) -> io::Result<()> {
+    pub fn add_from_files(&self, filenames: impl Iterator<Item = RelativePath>) -> io::Result<()> {
         for rel_fln in filenames {
             let arena = Bump::new();
             let fln = rel_fln.to_absolute(&self.relative_path_ctx);

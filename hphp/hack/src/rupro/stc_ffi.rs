@@ -19,7 +19,7 @@ use hackrs::typing_ctx::TypingCtx;
 use hackrs::typing_decl_provider::{TypingDeclGlobalCache, TypingDeclProvider};
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
-use pos::{Prefix, RelativePathCtx};
+use pos::{Prefix, RelativePath, RelativePathCtx};
 use std::path::PathBuf;
 use std::sync::Arc;
 use structopt::StructOpt;
@@ -92,19 +92,19 @@ pub extern "C" fn stc_main() {
         special_names,
     ));
 
-    let filenames: Vec<_> = cli_options
+    let filenames: Vec<RelativePath> = cli_options
         .filenames
         .into_iter()
         .map(|fln| alloc.relative_path(Prefix::Root, &fln))
         .collect();
 
     shallow_decl_provider
-        .add_from_files(&mut filenames.iter())
+        .add_from_files(filenames.iter().copied())
         .unwrap();
 
     // println!("{:#?}", shallow_decl_provider);
 
-    for fln in &filenames {
+    for fln in filenames {
         let (ast, errs) = ast_provider.get_ast(fln).unwrap();
         let (tast, errs) = TypingCheckUtils::type_file::<NReason>(Arc::clone(&ctx), &ast, errs);
         if !errs.is_empty() {

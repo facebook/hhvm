@@ -27,19 +27,16 @@ pub trait Pos: Eq + Hash + Clone + std::fmt::Debug {
 
 /// Represents a closed-ended range [start, end] in a file.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct PosImpl {
+pub struct BPos {
     file: RelativePath,
     start: FilePos,
     end: FilePos,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct BPos(Box<PosImpl>);
-
 impl Pos for BPos {
     fn mk(cons: impl FnOnce() -> (RelativePath, FilePos, FilePos)) -> Self {
         let (file, start, end) = cons();
-        Self(Box::new(PosImpl { file, start, end }))
+        Self { file, start, end }
     }
 
     fn to_oxidized_pos(&self) -> oxidized::pos::Pos {

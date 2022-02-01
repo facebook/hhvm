@@ -3,30 +3,32 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::Symbol;
+use intern::path::PathId;
 use std::path::PathBuf;
 
 pub use oxidized::relative_path::Prefix;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct RelativePath {
     prefix: Prefix,
-    suffix: Symbol,
+    suffix: PathId,
 }
 
 impl RelativePath {
-    pub fn new(prefix: Prefix, suffix: Symbol) -> Self {
+    pub fn new(prefix: Prefix, suffix: PathId) -> Self {
         Self { prefix, suffix }
     }
 
     pub fn to_absolute(&self, ctx: &RelativePathCtx) -> PathBuf {
-        let prefix = match self.prefix {
+        let mut buf = match self.prefix {
             Prefix::Root => &ctx.root,
             Prefix::Hhi => &ctx.hhi,
             Prefix::Tmp => &ctx.tmp,
             Prefix::Dummy => &ctx.dummy,
-        };
-        prefix.join(&*self.suffix)
+        }
+        .to_owned();
+        self.suffix.push_to(&mut buf);
+        buf
     }
 }
 

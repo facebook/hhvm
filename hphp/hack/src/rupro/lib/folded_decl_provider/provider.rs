@@ -11,8 +11,7 @@ use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclProvider;
 use hcons::Hc;
-use pos::{PosId, Symbol};
-use std::collections::{HashMap, HashSet};
+use pos::{PosId, Symbol, SymbolMap, SymbolSet};
 use std::sync::Arc;
 
 #[derive(Debug)]
@@ -33,11 +32,11 @@ impl<R: Reason> FoldedDeclProvider<R> {
     }
 
     pub fn get_folded_class(&self, name: &Symbol) -> Option<Arc<FoldedClass<R>>> {
-        let mut stack = HashSet::new();
+        let mut stack = Default::default();
         self.get_folded_class_impl(&mut stack, name)
     }
 
-    fn detect_cycle(&self, stack: &mut HashSet<Symbol>, pos_id: &PosId<R::Pos>) -> bool {
+    fn detect_cycle(&self, stack: &mut SymbolSet, pos_id: &PosId<R::Pos>) -> bool {
         if stack.contains(pos_id.id()) {
             unimplemented!("TODO(hrust): register error");
         }
@@ -63,7 +62,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn decl_method(
         &self,
-        methods: &mut HashMap<Symbol, FoldedElement<R>>,
+        methods: &mut SymbolMap<FoldedElement<R>>,
         sc: &ShallowClass<R>,
         sm: &ShallowMethod<R>,
     ) {
@@ -89,8 +88,8 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn decl_class_type(
         &self,
-        stack: &mut HashSet<Symbol>,
-        acc: &mut HashMap<Symbol, Arc<FoldedClass<R>>>,
+        stack: &mut SymbolSet,
+        acc: &mut SymbolMap<Arc<FoldedClass<R>>>,
         ty: &DeclTy<R>,
     ) {
         match &**ty.node() {
@@ -107,10 +106,10 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn decl_class_parents(
         &self,
-        stack: &mut HashSet<Symbol>,
+        stack: &mut SymbolSet,
         sc: &ShallowClass<R>,
-    ) -> HashMap<Symbol, Arc<FoldedClass<R>>> {
-        let mut acc = HashMap::new();
+    ) -> SymbolMap<Arc<FoldedClass<R>>> {
+        let mut acc = Default::default();
         sc.extends
             .iter()
             .for_each(|ty| self.decl_class_type(stack, &mut acc, ty));
@@ -119,9 +118,9 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn get_implements(
         &self,
-        parents: &HashMap<Symbol, Arc<FoldedClass<R>>>,
+        parents: &SymbolMap<Arc<FoldedClass<R>>>,
         ty: &DeclTy<R>,
-        inst: &mut HashMap<Symbol, DeclTy<R>>,
+        inst: &mut SymbolMap<DeclTy<R>>,
     ) {
         match ty.unwrap_class_type() {
             None => {}
@@ -143,7 +142,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
     fn decl_class_impl(
         &self,
         sc: &ShallowClass<R>,
-        parents: &HashMap<Symbol, Arc<FoldedClass<R>>>,
+        parents: &SymbolMap<Arc<FoldedClass<R>>>,
     ) -> Arc<FoldedClass<R>> {
         let inh = Inherited::make(sc, parents);
 
@@ -157,7 +156,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             .iter()
             .for_each(|sm| self.decl_method(&mut static_methods, sc, sm));
 
-        let mut anc = HashMap::new();
+        let mut anc = Default::default();
         sc.extends
             .iter()
             .for_each(|ty| self.get_implements(parents, ty, &mut anc));
@@ -172,11 +171,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
         })
     }
 
-    fn decl_class(
-        &self,
-        stack: &mut HashSet<Symbol>,
-        name: &Symbol,
-    ) -> Option<Arc<FoldedClass<R>>> {
+    fn decl_class(&self, stack: &mut SymbolSet, name: &Symbol) -> Option<Arc<FoldedClass<R>>> {
         let shallow_class = self.shallow_decl_provider.get_shallow_class(name)?;
         stack.insert(Hc::clone(name));
         let parents = self.decl_class_parents(stack, &shallow_class);
@@ -185,7 +180,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn get_folded_class_impl(
         &self,
-        stack: &mut HashSet<Symbol>,
+        stack: &mut SymbolSet,
         name: &Symbol,
     ) -> Option<Arc<FoldedClass<R>>> {
         match self.cache.get_folded_class(name) {

@@ -5,26 +5,25 @@
 
 use crate::decl_defs::DeclTy;
 use crate::reason::Reason;
-use pos::Symbol;
-use std::collections::HashMap;
+use pos::SymbolMap;
 
-pub(crate) struct Subst<R: Reason>(HashMap<Symbol, DeclTy<R>>);
+pub(crate) struct Subst<R: Reason>(SymbolMap<DeclTy<R>>);
 
-impl<R: Reason> From<HashMap<Symbol, DeclTy<R>>> for Subst<R> {
-    fn from(map: HashMap<Symbol, DeclTy<R>>) -> Self {
+impl<R: Reason> From<SymbolMap<DeclTy<R>>> for Subst<R> {
+    fn from(map: SymbolMap<DeclTy<R>>) -> Self {
         Self(map)
     }
 }
 
-impl<R: Reason> Into<HashMap<Symbol, DeclTy<R>>> for Subst<R> {
-    fn into(self) -> HashMap<Symbol, DeclTy<R>> {
-        self.0
+impl<R: Reason> From<Subst<R>> for SymbolMap<DeclTy<R>> {
+    fn from(subst: Subst<R>) -> Self {
+        subst.0
     }
 }
 
 impl<R: Reason> Subst<R> {
     pub(crate) fn new(_tparams: (), _params: &[DeclTy<R>]) -> Self {
-        Self(HashMap::new())
+        Self(Default::default())
     }
 
     pub(crate) fn instantiate(&self, ty: &DeclTy<R>) -> DeclTy<R> {

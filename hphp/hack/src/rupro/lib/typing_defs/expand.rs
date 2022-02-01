@@ -9,8 +9,7 @@ use crate::typing_ctx::TypingCtx;
 use crate::typing_defs::{Ty, Ty_};
 use crate::typing_error::ReasonsCallback;
 use hcons::Hc;
-use pos::Symbol;
-use std::collections::HashMap;
+use pos::{Symbol, SymbolMap};
 
 pub type TypeExpansion<R> = (<R as Reason>::Pos, Symbol);
 
@@ -22,7 +21,7 @@ pub struct TypeExpansions<R: Reason> {
 pub struct ExpandEnv<'a, R: Reason> {
     type_expansions: TypeExpansions<R>,
     expand_visible_newtype: bool,
-    substs: HashMap<Symbol, Ty<R>>,
+    substs: SymbolMap<Ty<R>>,
     this_ty: Ty<R>,
     on_error: ReasonsCallback<'a, R>,
 }
@@ -45,7 +44,7 @@ impl<'a, R: Reason> ExpandEnv<'a, R> {
         Self {
             type_expansions: TypeExpansions::new(),
             expand_visible_newtype: true,
-            substs: HashMap::new(),
+            substs: Default::default(),
             this_ty: ctx.alloc.ty(
                 R::mk(&|| ReasonImpl::Rnone),
                 Ty_::Tgeneric(Hc::clone(&ctx.special_names.special_idents.this), vec![]),

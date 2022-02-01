@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::{hash_map::Entry, HashMap};
+use std::collections::hash_map::Entry;
 use std::sync::Arc;
 
 use hcons::Hc;
@@ -11,21 +11,21 @@ use hcons::Hc;
 use crate::decl_defs::{DeclTy, FoldedClass, FoldedElement, ShallowClass, SubstContext};
 use crate::folded_decl_provider::subst::Subst;
 use crate::reason::Reason;
-use pos::Symbol;
+use pos::{Symbol, SymbolMap};
 
 pub(crate) struct Inherited<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_inherit.inherited`
-    pub(crate) substs: HashMap<Symbol, SubstContext<R>>,
-    pub(crate) methods: HashMap<Symbol, FoldedElement<R>>,
-    pub(crate) static_methods: HashMap<Symbol, FoldedElement<R>>,
+    pub(crate) substs: SymbolMap<SubstContext<R>>,
+    pub(crate) methods: SymbolMap<FoldedElement<R>>,
+    pub(crate) static_methods: SymbolMap<FoldedElement<R>>,
 }
 
 impl<R: Reason> Inherited<R> {
     fn empty() -> Self {
         Self {
-            substs: HashMap::new(),
-            methods: HashMap::new(),
-            static_methods: HashMap::new(),
+            substs: Default::default(),
+            methods: Default::default(),
+            static_methods: Default::default(),
         }
     }
 
@@ -33,13 +33,13 @@ impl<R: Reason> Inherited<R> {
         true
     }
 
-    fn add_substs(&mut self, other_substs: HashMap<Symbol, SubstContext<R>>) {
+    fn add_substs(&mut self, other_substs: SymbolMap<SubstContext<R>>) {
         for (key, subst) in other_substs {
             self.substs.entry(Hc::clone(&key)).or_insert(subst);
         }
     }
 
-    fn add_methods(&mut self, other_methods: HashMap<Symbol, FoldedElement<R>>) {
+    fn add_methods(&mut self, other_methods: SymbolMap<FoldedElement<R>>) {
         for (key, mut fe) in other_methods {
             match self.methods.entry(Hc::clone(&key)) {
                 Entry::Vacant(entry) => {
@@ -54,7 +54,7 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
-    fn add_static_methods(&mut self, other_static_methods: HashMap<Symbol, FoldedElement<R>>) {
+    fn add_static_methods(&mut self, other_static_methods: SymbolMap<FoldedElement<R>>) {
         for (key, mut fe) in other_static_methods {
             match self.static_methods.entry(Hc::clone(&key)) {
                 Entry::Vacant(entry) => {
@@ -80,10 +80,7 @@ impl<R: Reason> Inherited<R> {
         self.add_static_methods(static_methods);
     }
 
-    fn make_substitution(
-        _cls: &FoldedClass<R>,
-        params: &[DeclTy<R>],
-    ) -> HashMap<Symbol, DeclTy<R>> {
+    fn make_substitution(_cls: &FoldedClass<R>, params: &[DeclTy<R>]) -> SymbolMap<DeclTy<R>> {
         Subst::new((), params).into()
     }
 
@@ -112,7 +109,7 @@ impl<R: Reason> Inherited<R> {
 
     fn from_class(
         sc: &ShallowClass<R>,
-        parents: &HashMap<Symbol, Arc<FoldedClass<R>>>,
+        parents: &SymbolMap<Arc<FoldedClass<R>>>,
         parent_ty: &DeclTy<R>,
     ) -> Self {
         if let Some((_, parent_pos_id, parent_tyl)) = parent_ty.unwrap_class_type() {
@@ -128,7 +125,7 @@ impl<R: Reason> Inherited<R> {
         Self::empty()
     }
 
-    fn from_parent(sc: &ShallowClass<R>, parents: &HashMap<Symbol, Arc<FoldedClass<R>>>) -> Self {
+    fn from_parent(sc: &ShallowClass<R>, parents: &SymbolMap<Arc<FoldedClass<R>>>) -> Self {
         let all_inherited = sc
             .extends
             .iter()
@@ -140,10 +137,7 @@ impl<R: Reason> Inherited<R> {
         inh
     }
 
-    pub(crate) fn make(
-        sc: &ShallowClass<R>,
-        parents: &HashMap<Symbol, Arc<FoldedClass<R>>>,
-    ) -> Self {
+    pub(crate) fn make(sc: &ShallowClass<R>, parents: &SymbolMap<Arc<FoldedClass<R>>>) -> Self {
         Self::from_parent(sc, parents)
     }
 }

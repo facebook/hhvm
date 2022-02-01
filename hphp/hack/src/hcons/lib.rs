@@ -43,9 +43,16 @@ impl<T: ?Sized> Deref for Hc<T> {
 
 impl<T: ?Sized> Eq for Hc<T> {}
 
-impl<T: Hash + ?Sized> Hash for Hc<T> {
+impl<T: ?Sized> Hash for Hc<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.0.hash(state);
+        // hashbrown-based hash tables use the upper byte of the hash code as a
+        // tag which drives SIMD parallelism. If `state` is a Hasher which
+        // doesn't distribute pointer hashes well (e.g., nohash_hasher), then
+        // all upper bytes of Hc hash codes will be the same, and perf of
+        // hashbrown tables containing Hc keys will suffer. If we carefully
+        // avoid such hashers, we could probably just hash the (fat) pointer
+        // here. But as a precaution for now, run it through FNV first.
+        state.write_u64(fnv_hash(&Arc::as_ptr(&self.0)));
     }
 }
 
@@ -127,7 +134,7 @@ impl AsRef<std::ffi::OsStr> for Hc<str> {
     }
 }
 
-fn hash<T: Hash + ?Sized>(value: &T) -> u64 {
+fn fnv_hash<T: Hash + ?Sized>(value: &T) -> u64 {
     let mut hasher = fnv::FnvHasher::default();
     value.hash(&mut hasher);
     hasher.finish()
@@ -186,13 +193,15 @@ impl<T: Eq + Hash + ?Sized> Conser<T> {
         Q: 'a + Eq + Hash + PartialEq<T> + ?Sized,
         Arc<T>: From<&'a Q>,
     {
-        self.mk_helper(hash(x), x, Arc::from, |x: &&Q, rc: &T| *x == rc.borrow())
+        self.mk_helper(fnv_hash(x), x, Arc::from, |x: &&Q, rc: &T| {
+            *x == rc.borrow()
+        })
     }
 }
 
 impl<T: Eq + Hash> Conser<T> {
     pub fn mk(&self, x: T) -> Hc<T> {
-        self.mk_helper(hash(&x), x, Arc::new, |x: &T, rc: &T| x == rc)
+        self.mk_helper(fnv_hash(&x), x, Arc::new, |x: &T, rc: &T| x == rc)
     }
 }
 

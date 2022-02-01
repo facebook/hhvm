@@ -6,7 +6,7 @@
 use crate::reason::Reason;
 use hcons::Hc;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
-use pos::{PosId, Symbol};
+use pos::{Positioned, Symbol};
 
 pub type Prim = crate::decl_defs::Prim;
 
@@ -62,7 +62,7 @@ pub enum Ty_<R: Reason, TY> {
     /// An instance of a class or interface, ty list are the arguments
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
-    Tclass(PosId<R::Pos>, Exact, Vec<TY>),
+    Tclass(Positioned<Symbol, R::Pos>, Exact, Vec<TY>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

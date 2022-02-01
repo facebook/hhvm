@@ -12,7 +12,7 @@ use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclProvider;
 use hcons::Hc;
-use pos::{PosId, Symbol, SymbolMap, SymbolSet};
+use pos::{Positioned, Symbol, SymbolMap, SymbolSet};
 use std::sync::Arc;
 
 #[derive(Debug)]
@@ -37,9 +37,9 @@ impl<R: Reason> FoldedDeclProvider<R> {
         self.get_folded_class_impl(&mut stack, name)
     }
 
-    fn detect_cycle(&self, stack: &mut SymbolSet, pos_id: &PosId<R::Pos>) -> bool {
+    fn detect_cycle(&self, stack: &mut SymbolSet, pos_id: &Positioned<Symbol, R::Pos>) -> bool {
         if stack.contains(pos_id.id()) {
-            unimplemented!("TODO(hrust): register error");
+            todo!("TODO(hrust): register error");
         }
         false
     }
@@ -47,7 +47,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
     fn visibility(
         &self,
         cls: &Symbol,
-        module: Option<&PosId<R::Pos>>,
+        module: Option<&Positioned<Symbol, R::Pos>>,
         vis: oxidized::ast_defs::Visibility,
     ) -> CeVisibility<R> {
         use oxidized::ast_defs::Visibility;

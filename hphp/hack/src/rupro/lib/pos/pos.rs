@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::{RelativePath, Symbol};
+use crate::RelativePath;
 use std::hash::Hash;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -62,22 +62,28 @@ impl Pos for NPos {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct PosId<P: Pos>(P, Symbol);
+pub struct Positioned<S, P> {
+    // Caution: field order will matter if we ever derive ToOcamlRep/FromOcamlRep for this type
+    pos: P,
+    id: S,
+}
 
-impl<P: Pos> PosId<P> {
-    pub fn new(pos: P, id: Symbol) -> Self {
-        Self(pos, id)
+impl<S, P> Positioned<S, P> {
+    pub fn new(pos: P, id: S) -> Self {
+        Self { pos, id }
     }
 
     pub fn pos(&self) -> &P {
-        &self.0
+        &self.pos
     }
 
-    pub fn id(&self) -> &Symbol {
-        &self.1
+    pub fn id(&self) -> &S {
+        &self.id
     }
+}
 
+impl<S: ToString, P: Pos> Positioned<S, P> {
     pub fn to_oxidized(&self) -> oxidized::typing_reason::PosId {
-        (self.pos().to_oxidized_pos(), self.id().to_string())
+        (self.pos.to_oxidized_pos(), self.id.to_string())
     }
 }

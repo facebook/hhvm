@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::reason::Reason;
 use hcons::Hc;
-use pos::{PosId, Symbol};
+use pos::{Positioned, Symbol};
 
 pub type Prim = oxidized::aast::Tprim;
 pub type Abstraction = oxidized::ast_defs::Abstraction; // `Concrete` or `Abstract`.
@@ -51,7 +51,7 @@ pub enum DeclTy_<R: Reason, TY> {
     /// A primitive type.
     DTprim(Prim),
     /// Either an object type or a type alias, ty list are the arguments.
-    DTapply(PosId<R::Pos>, Vec<TY>),
+    DTapply(Positioned<Symbol, R::Pos>, Vec<TY>),
     /// A wrapper around `FunType`, which contains the full type information
     /// for a function, method, lambda, etc.
     DTfun(FunType<R, TY>),
@@ -77,7 +77,7 @@ impl<R: Reason> DeclTy<R> {
         &self.1
     }
 
-    pub fn unwrap_class_type(&self) -> Option<(&R, &PosId<R::Pos>, &[DeclTy<R>])> {
+    pub fn unwrap_class_type(&self) -> Option<(&R, &Positioned<Symbol, R::Pos>, &[DeclTy<R>])> {
         use DeclTy_::*;
         let r = self.reason();
         match &**self.node() {
@@ -92,19 +92,19 @@ pub enum CeVisibility<R: Reason> {
     Public,
     Private(Symbol),
     Protected(Symbol),
-    Internal(PosId<R::Pos>),
+    Internal(Positioned<Symbol, R::Pos>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct UserAttribute<R: Reason> {
-    pub name: PosId<R::Pos>,
+    pub name: Positioned<Symbol, R::Pos>,
     pub classname_params: Vec<Symbol>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Tparam<R: Reason> {
     pub variance: Variance,
-    pub name: PosId<R::Pos>,
+    pub name: Positioned<Symbol, R::Pos>,
     pub tparams: Vec<Tparam<R>>,
     pub constraints: Vec<(oxidized::ast_defs::ConstraintKind, DeclTy<R>)>,
     pub reified: oxidized::aast::ReifyKind,

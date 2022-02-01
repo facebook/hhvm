@@ -10,7 +10,7 @@ use crate::typing_defs::{Exact, ExpandEnv, Ty, Ty_, TypeExpansion, TypeExpansion
 use crate::typing_env::TEnv;
 use crate::typing_error::ReasonsCallback;
 use hcons::Hc;
-use pos::PosId;
+use pos::{Positioned, Symbol};
 
 pub struct Phase;
 
@@ -51,7 +51,7 @@ impl Phase {
         env: &TEnv<R>,
         ety_env: &mut ExpandEnv<'_, R>,
         r: R,
-        sid: PosId<R::Pos>,
+        sid: Positioned<Symbol, R::Pos>,
         ty_args: &[DeclTy<R>],
         class_info: Option<&Class<R>>,
     ) -> Ty<R> {

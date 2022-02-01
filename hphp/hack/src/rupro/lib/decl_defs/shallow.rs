@@ -5,7 +5,7 @@
 use crate::decl_defs::{ClassishKind, DeclTy, Tparam, UserAttribute};
 use crate::reason::Reason;
 use hcons::Hc;
-use pos::PosId;
+use pos::{Positioned, Symbol};
 
 #[derive(Debug)]
 pub struct ShallowFun<R: Reason> {
@@ -20,7 +20,7 @@ pub struct ShallowMethod<R: Reason> {
     //   - c.f.
     //     - `Shallow_decl_defs.shallow_method`
     //     - `oxidized_by_ref::shallow_decl_defs::ShallowMethod<'_>`
-    pub name: PosId<R::Pos>,
+    pub name: Positioned<Symbol, R::Pos>,
     pub ty: DeclTy<R>,
     pub visibility: oxidized::ast_defs::Visibility,
     pub deprecated: Option<Hc<str>>, // e.g. "The method foo is deprecated: ..."
@@ -40,8 +40,8 @@ pub struct ShallowClass<R: Reason> {
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     pub kind: ClassishKind,
-    pub module: Option<PosId<R::Pos>>,
-    pub name: PosId<R::Pos>,
+    pub module: Option<Positioned<Symbol, R::Pos>>,
+    pub name: Positioned<Symbol, R::Pos>,
     pub tparams: Vec<Tparam<R>>,
     pub extends: Vec<DeclTy<R>>,
     pub methods: Vec<ShallowMethod<R>>,

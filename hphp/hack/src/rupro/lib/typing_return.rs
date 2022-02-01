@@ -23,7 +23,7 @@ impl TypingReturn {
         env: &TEnv<R>,
         is_method: bool,
         fpos: &R::Pos,
-        fname: &Symbol,
+        fname: Symbol,
     ) -> Ty<R> {
         let reason = R::mk(|| ReasonImpl::Rwitness(fpos.clone()));
         if is_method && fname == env.ctx.special_names.members.__construct {

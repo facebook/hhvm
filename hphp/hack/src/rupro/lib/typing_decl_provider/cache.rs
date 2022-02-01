@@ -16,7 +16,7 @@ use std::sync::Arc;
 pub trait TypingDeclCache: std::fmt::Debug + Send + Sync {
     type Reason: Reason;
 
-    fn get_typing_class(&self, name: &Symbol) -> Option<Arc<Class<Self::Reason>>>;
+    fn get_typing_class(&self, name: Symbol) -> Option<Arc<Class<Self::Reason>>>;
 
     fn put_typing_class(&self, name: Symbol, cls: Arc<Class<Self::Reason>>);
 }
@@ -37,8 +37,8 @@ impl<R: Reason> TypingDeclGlobalCache<R> {
 impl<R: Reason> TypingDeclCache for TypingDeclGlobalCache<R> {
     type Reason = R;
 
-    fn get_typing_class(&self, name: &Symbol) -> Option<Arc<Class<Self::Reason>>> {
-        self.classes.get(name).as_ref().map(|x| Arc::clone(x))
+    fn get_typing_class(&self, name: Symbol) -> Option<Arc<Class<Self::Reason>>> {
+        self.classes.get(&name).as_ref().map(|x| Arc::clone(x))
     }
 
     fn put_typing_class(&self, name: Symbol, cls: Arc<Class<Self::Reason>>) {

@@ -6,13 +6,12 @@
 use std::collections::hash_map::Entry;
 use std::sync::Arc;
 
-use hcons::Hc;
-
 use crate::decl_defs::{DeclTy, FoldedClass, FoldedElement, ShallowClass, SubstContext};
 use crate::folded_decl_provider::subst::Subst;
 use crate::reason::Reason;
 use pos::{Symbol, SymbolMap};
 
+#[derive(Debug)]
 pub(crate) struct Inherited<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_inherit.inherited`
     pub(crate) substs: SymbolMap<SubstContext<R>>,
@@ -20,28 +19,30 @@ pub(crate) struct Inherited<R: Reason> {
     pub(crate) static_methods: SymbolMap<FoldedElement<R>>,
 }
 
-impl<R: Reason> Inherited<R> {
-    fn empty() -> Self {
+impl<R: Reason> std::default::Default for Inherited<R> {
+    fn default() -> Self {
         Self {
             substs: Default::default(),
             methods: Default::default(),
             static_methods: Default::default(),
         }
     }
+}
 
+impl<R: Reason> Inherited<R> {
     fn should_keep_old_sig(_new_sig: &FoldedElement<R>, _old_sig: &FoldedElement<R>) -> bool {
         true
     }
 
     fn add_substs(&mut self, other_substs: SymbolMap<SubstContext<R>>) {
         for (key, subst) in other_substs {
-            self.substs.entry(Hc::clone(&key)).or_insert(subst);
+            self.substs.entry(key).or_insert(subst);
         }
     }
 
     fn add_methods(&mut self, other_methods: SymbolMap<FoldedElement<R>>) {
         for (key, mut fe) in other_methods {
-            match self.methods.entry(Hc::clone(&key)) {
+            match self.methods.entry(key) {
                 Entry::Vacant(entry) => {
                     entry.insert(fe);
                 }
@@ -56,7 +57,7 @@ impl<R: Reason> Inherited<R> {
 
     fn add_static_methods(&mut self, other_static_methods: SymbolMap<FoldedElement<R>>) {
         for (key, mut fe) in other_static_methods {
-            match self.static_methods.entry(Hc::clone(&key)) {
+            match self.static_methods.entry(key) {
                 Entry::Vacant(entry) => {
                     entry.insert(fe);
                 }
@@ -86,7 +87,7 @@ impl<R: Reason> Inherited<R> {
 
     fn inherit_hack_class(
         child: &ShallowClass<R>,
-        parent_name: &Symbol,
+        parent_name: Symbol,
         parent: &FoldedClass<R>,
         argl: &[DeclTy<R>],
     ) -> Self {
@@ -94,10 +95,10 @@ impl<R: Reason> Inherited<R> {
         // TODO(hrust): Do we need sharing?
         let mut substs = parent.substs.clone();
         substs.insert(
-            Hc::clone(parent_name),
+            parent_name,
             SubstContext {
                 subst,
-                class_context: Hc::clone(child.name.id()),
+                class_context: child.name.id(),
             },
         );
         Self {
@@ -113,7 +114,7 @@ impl<R: Reason> Inherited<R> {
         parent_ty: &DeclTy<R>,
     ) -> Self {
         if let Some((_, parent_pos_id, parent_tyl)) = parent_ty.unwrap_class_type() {
-            if let Some(parent_folded_decl) = parents.get(parent_pos_id.id()) {
+            if let Some(parent_folded_decl) = parents.get(&parent_pos_id.id()) {
                 return Self::inherit_hack_class(
                     sc,
                     parent_pos_id.id(),
@@ -122,7 +123,7 @@ impl<R: Reason> Inherited<R> {
                 );
             }
         }
-        Self::empty()
+        Self::default()
     }
 
     fn from_parent(sc: &ShallowClass<R>, parents: &SymbolMap<Arc<FoldedClass<R>>>) -> Self {
@@ -130,7 +131,7 @@ impl<R: Reason> Inherited<R> {
             .extends
             .iter()
             .map(|extends| Self::from_class(sc, parents, extends));
-        let mut inh = Self::empty();
+        let mut inh = Self::default();
         for parent_inh in all_inherited {
             inh.add_inherited(parent_inh)
         }

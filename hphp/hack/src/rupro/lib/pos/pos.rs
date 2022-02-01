@@ -77,8 +77,14 @@ impl<S, P> Positioned<S, P> {
         &self.pos
     }
 
-    pub fn id(&self) -> &S {
+    pub fn id_ref(&self) -> &S {
         &self.id
+    }
+}
+
+impl<S: Copy, P> Positioned<S, P> {
+    pub fn id(&self) -> S {
+        self.id
     }
 }
 

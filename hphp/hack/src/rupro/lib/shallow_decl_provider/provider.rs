@@ -8,7 +8,6 @@ use crate::decl_defs::{ClassishKind, ShallowClass, ShallowFun, ShallowMethod};
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclCache;
 use bumpalo::Bump;
-use hcons::Hc;
 use pos::{RelativePath, RelativePathCtx, Symbol};
 use std::sync::Arc;
 use std::{fs, io};
@@ -33,13 +32,13 @@ impl<R: Reason> ShallowDeclProvider<R> {
         }
     }
 
-    pub fn get_shallow_class(&self, name: &Symbol) -> Option<Arc<ShallowClass<R>>> {
+    pub fn get_shallow_class(&self, name: Symbol) -> Option<Arc<ShallowClass<R>>> {
         self.cache.get_shallow_class(name)
     }
 
     pub fn add_from_oxidized_class(&self, sc: &oxidized_by_ref::shallow_decl_defs::ClassDecl<'_>) {
         let res = Arc::new(self.utils().shallow_class(sc));
-        self.cache.put_shallow_class(Hc::clone(res.name.id()), res);
+        self.cache.put_shallow_class(res.name.id(), res);
     }
 
     pub fn add_from_oxidized_fun(
@@ -117,7 +116,7 @@ impl<R: Reason> ShallowDeclUtils<R> {
             name: self.alloc.pos_id_from_decl(sm.name),
             ty: self.alloc.decl_ty_from_ast(sm.type_),
             visibility: sm.visibility,
-            deprecated: sm.deprecated.map(|s| self.alloc.symbol(s)),
+            deprecated: sm.deprecated.map(|s| self.alloc.bytes(s)),
             flags: sm.flags,
             attributes: sm
                 .attributes

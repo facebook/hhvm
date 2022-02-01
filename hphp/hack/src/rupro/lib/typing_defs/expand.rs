@@ -8,13 +8,15 @@ use crate::reason::{Reason, ReasonImpl};
 use crate::typing_ctx::TypingCtx;
 use crate::typing_defs::{Ty, Ty_};
 use crate::typing_error::ReasonsCallback;
-use hcons::Hc;
 use pos::{Symbol, SymbolMap};
 
 pub type TypeExpansion<R> = (<R as Reason>::Pos, Symbol);
 
 pub struct TypeExpansions<R: Reason> {
+    #[allow(dead_code)]
     report_cycle: Option<TypeExpansion<R>>,
+
+    #[allow(dead_code)]
     expansions: Vec<TypeExpansion<R>>,
 }
 
@@ -23,6 +25,7 @@ pub struct ExpandEnv<'a, R: Reason> {
     expand_visible_newtype: bool,
     substs: SymbolMap<Ty<R>>,
     this_ty: Ty<R>,
+
     on_error: ReasonsCallback<'a, R>,
 }
 
@@ -47,7 +50,7 @@ impl<'a, R: Reason> ExpandEnv<'a, R> {
             substs: Default::default(),
             this_ty: ctx.alloc.ty(
                 R::mk(|| ReasonImpl::Rnone),
-                Ty_::Tgeneric(Hc::clone(&ctx.special_names.special_idents.this), vec![]),
+                Ty_::Tgeneric(ctx.special_names.special_idents.this, vec![]),
             ),
             on_error: ReasonsCallback::new(&|| ReasonsCallback::ignore()),
         }

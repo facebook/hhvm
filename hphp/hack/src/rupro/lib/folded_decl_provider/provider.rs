@@ -32,13 +32,13 @@ impl<R: Reason> FoldedDeclProvider<R> {
         }
     }
 
-    pub fn get_folded_class(&self, name: &Symbol) -> Option<Arc<FoldedClass<R>>> {
+    pub fn get_folded_class(&self, name: Symbol) -> Option<Arc<FoldedClass<R>>> {
         let mut stack = Default::default();
         self.get_folded_class_impl(&mut stack, name)
     }
 
     fn detect_cycle(&self, stack: &mut SymbolSet, pos_id: &Positioned<Symbol, R::Pos>) -> bool {
-        if stack.contains(pos_id.id()) {
+        if stack.contains(&pos_id.id()) {
             todo!("TODO(hrust): register error");
         }
         false
@@ -46,15 +46,15 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn visibility(
         &self,
-        cls: &Symbol,
+        cls: Symbol,
         module: Option<&Positioned<Symbol, R::Pos>>,
         vis: oxidized::ast_defs::Visibility,
     ) -> CeVisibility<R> {
         use oxidized::ast_defs::Visibility;
         match vis {
             Visibility::Public => CeVisibility::Public,
-            Visibility::Private => CeVisibility::Private(Hc::clone(cls)),
-            Visibility::Protected => CeVisibility::Protected(Hc::clone(cls)),
+            Visibility::Private => CeVisibility::Private(cls),
+            Visibility::Protected => CeVisibility::Protected(cls),
             Visibility::Internal => module.map_or(CeVisibility::Public, |pid| {
                 CeVisibility::Internal(pid.clone())
             }),
@@ -69,21 +69,21 @@ impl<R: Reason> FoldedDeclProvider<R> {
     ) {
         let cls = sc.name.id();
         let meth = sm.name.id();
-        let vis = match (methods.get(meth), sm.visibility) {
+        let vis = match (methods.get(&meth), sm.visibility) {
             (
                 Some(FoldedElement {
                     visibility: CeVisibility::Protected(s),
                     ..
                 }),
                 oxidized::ast_defs::Visibility::Protected,
-            ) => CeVisibility::Protected(Hc::clone(s)),
+            ) => CeVisibility::Protected(*s),
             (_, v) => self.visibility(cls, sc.module.as_ref(), v),
         };
 
         let meth_flags = &sm.flags;
         let is_final = meth_flags.is_final();
         let is_abstract = meth_flags.is_final();
-        let is_superfluous_override = meth_flags.is_override() && !methods.contains_key(meth);
+        let is_superfluous_override = meth_flags.is_override() && !methods.contains_key(&meth);
         let is_dynamicallycallable = meth_flags.is_dynamicallycallable();
         let supports_dynamic_type = meth_flags.supports_dynamic_type();
         let synthesized = false;
@@ -95,7 +95,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
         let xhp_attr = None;
 
         let elt = FoldedElement {
-            origin: Hc::clone(cls),
+            origin: sc.name.id(),
             visibility: vis,
             deprecated: sm.deprecated.as_ref().map(Hc::clone),
             flags: make_ce_flags(
@@ -114,7 +114,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             ),
         };
 
-        methods.insert(Hc::clone(meth), elt);
+        methods.insert(meth, elt);
     }
 
     fn decl_class_type(
@@ -127,7 +127,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             DeclTy_::DTapply(pos_id, _tyl) => {
                 if !self.detect_cycle(stack, pos_id) {
                     if let Some(folded_decl) = self.get_folded_class_impl(stack, pos_id.id()) {
-                        acc.insert(Hc::clone(pos_id.id()), folded_decl);
+                        acc.insert(pos_id.id(), folded_decl);
                     }
                 }
             }
@@ -155,16 +155,16 @@ impl<R: Reason> FoldedDeclProvider<R> {
     ) {
         match ty.unwrap_class_type() {
             None => {}
-            Some((_, pos_id, tyl)) => match parents.get(pos_id.id()) {
+            Some((_, pos_id, tyl)) => match parents.get(&pos_id.id()) {
                 None => {
-                    inst.insert(Hc::clone(pos_id.id()), ty.clone());
+                    inst.insert(pos_id.id(), ty.clone());
                 }
                 Some(cls) => {
                     let subst = Subst::new((), tyl);
-                    for (anc_name, anc_ty) in &cls.ancestors {
-                        inst.insert(Hc::clone(anc_name), subst.instantiate(anc_ty));
+                    for (&anc_name, anc_ty) in &cls.ancestors {
+                        inst.insert(anc_name, subst.instantiate(anc_ty));
                     }
-                    inst.insert(Hc::clone(pos_id.id()), ty.clone());
+                    inst.insert(pos_id.id(), ty.clone());
                 }
             },
         }
@@ -202,9 +202,9 @@ impl<R: Reason> FoldedDeclProvider<R> {
         })
     }
 
-    fn decl_class(&self, stack: &mut SymbolSet, name: &Symbol) -> Option<Arc<FoldedClass<R>>> {
+    fn decl_class(&self, stack: &mut SymbolSet, name: Symbol) -> Option<Arc<FoldedClass<R>>> {
         let shallow_class = self.shallow_decl_provider.get_shallow_class(name)?;
-        stack.insert(Hc::clone(name));
+        stack.insert(name);
         let parents = self.decl_class_parents(stack, &shallow_class);
         Some(self.decl_class_impl(&shallow_class, &parents))
     }
@@ -212,15 +212,14 @@ impl<R: Reason> FoldedDeclProvider<R> {
     fn get_folded_class_impl(
         &self,
         stack: &mut SymbolSet,
-        name: &Symbol,
+        name: Symbol,
     ) -> Option<Arc<FoldedClass<R>>> {
         match self.cache.get_folded_class(name) {
             Some(rc) => Some(rc),
             None => match self.decl_class(stack, name) {
                 None => None,
                 Some(rc) => {
-                    self.cache
-                        .put_folded_class(Hc::clone(name), Arc::clone(&rc));
+                    self.cache.put_folded_class(name, Arc::clone(&rc));
                     Some(rc)
                 }
             },

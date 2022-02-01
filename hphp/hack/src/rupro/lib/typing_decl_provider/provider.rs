@@ -6,7 +6,6 @@
 use crate::folded_decl_provider::FoldedDeclProvider;
 use crate::reason::Reason;
 use crate::typing_decl_provider::{Class, TypingDeclCache};
-use hcons::Hc;
 use pos::Symbol;
 use std::sync::Arc;
 
@@ -31,20 +30,19 @@ impl<R: Reason> TypingDeclProvider<R> {
         &self.folded_decl_provider
     }
 
-    pub fn get_class(&self, name: &Symbol) -> Option<Arc<Class<R>>> {
+    pub fn get_class(&self, name: Symbol) -> Option<Arc<Class<R>>> {
         match self.cache.get_typing_class(name) {
             Some(rc) => Some(rc),
             None => {
                 let folded_decl = self.folded_decl_provider.get_folded_class(name)?;
                 let cls = Arc::new(Class::new(folded_decl));
-                self.cache
-                    .put_typing_class(Hc::clone(name), Arc::clone(&cls));
+                self.cache.put_typing_class(name, Arc::clone(&cls));
                 Some(cls)
             }
         }
     }
 
-    pub fn get_class_or_typedef(&self, name: &Symbol) -> Option<Arc<Class<R>>> {
+    pub fn get_class_or_typedef(&self, name: Symbol) -> Option<Arc<Class<R>>> {
         self.get_class(name)
     }
 }

@@ -60,7 +60,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
 
         let (return_decl_ty, params_decl_ty) = self.hint_fun_header(&f.params, &f.ret);
         let return_ty = match return_decl_ty.clone() {
-            None => TypingReturn::make_default_return(self.env, false, &fpos, &fname),
+            None => TypingReturn::make_default_return(self.env, false, &fpos, fname),
             Some(ty) => TypingReturn::make_return_type(
                 self.env,
                 &|env, ty| Phase::localize_no_subst(env, false, None, ty),

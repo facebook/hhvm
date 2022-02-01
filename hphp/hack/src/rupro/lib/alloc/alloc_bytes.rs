@@ -5,11 +5,16 @@
 
 use super::{Allocator, GlobalAllocator};
 use crate::reason::Reason;
+use hcons::Hc;
 use pos::{Prefix, RelativePath, Symbol};
 
 impl GlobalAllocator {
+    pub fn bytes(&self, s: &str) -> Hc<str> {
+        self.bytes.mk_str(s)
+    }
+
     pub fn symbol(&self, symbol: &str) -> Symbol {
-        self.bytes.mk_str(symbol)
+        Symbol::intern(symbol)
     }
 
     pub fn concat<S1: AsRef<str>, S2: AsRef<str>>(&self, s1: S1, s2: S2) -> Symbol {
@@ -38,6 +43,10 @@ impl GlobalAllocator {
 }
 
 impl<R: Reason> Allocator<R> {
+    pub fn bytes(&self, s: &str) -> Hc<str> {
+        self.global.bytes(s)
+    }
+
     pub fn symbol(&self, symbol: &str) -> Symbol {
         self.global.symbol(symbol)
     }

@@ -9,7 +9,6 @@ use crate::typing_decl_provider::Class;
 use crate::typing_defs::{Exact, ExpandEnv, Ty, Ty_, TypeExpansion, TypeExpansions};
 use crate::typing_env::TEnv;
 use crate::typing_error::ReasonsCallback;
-use hcons::Hc;
 use pos::{Positioned, Symbol};
 
 pub struct Phase;
@@ -96,7 +95,7 @@ impl Phase {
                 let ty = Self::localize_possibly_enforced_ty(env, ety_env, fp.ty.clone());
                 FunParam {
                     pos: fp.pos.clone(),
-                    name: fp.name.as_ref().map(Hc::clone),
+                    name: fp.name,
                     ty,
                 }
             })

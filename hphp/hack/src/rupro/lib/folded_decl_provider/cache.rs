@@ -16,7 +16,7 @@ use std::sync::Arc;
 pub trait FoldedDeclCache: std::fmt::Debug + Send + Sync {
     type Reason: Reason;
 
-    fn get_folded_class(&self, name: &Symbol) -> Option<Arc<FoldedClass<Self::Reason>>>;
+    fn get_folded_class(&self, name: Symbol) -> Option<Arc<FoldedClass<Self::Reason>>>;
 
     fn put_folded_class(&self, name: Symbol, cls: Arc<FoldedClass<Self::Reason>>);
 }
@@ -37,8 +37,8 @@ impl<R: Reason> FoldedDeclGlobalCache<R> {
 impl<R: Reason> FoldedDeclCache for FoldedDeclGlobalCache<R> {
     type Reason = R;
 
-    fn get_folded_class(&self, name: &Symbol) -> Option<Arc<FoldedClass<R>>> {
-        self.classes.get(name).as_ref().map(|x| Arc::clone(x))
+    fn get_folded_class(&self, name: Symbol) -> Option<Arc<FoldedClass<R>>> {
+        self.classes.get(&name).as_ref().map(|x| Arc::clone(x))
     }
 
     fn put_folded_class(&self, name: Symbol, cls: Arc<FoldedClass<R>>) {

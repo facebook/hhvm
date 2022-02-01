@@ -1,1 +1,0 @@
-Warning: Property c of class Foo is readonly, but isn't enclosed in a readonly expression. in %s/querym.php on line 17

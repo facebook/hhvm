@@ -2144,7 +2144,7 @@ To string conversions:
 
   Checks whether readonly-ness of the caller matches that of callees
 
-| ThrowReadonlyMismatch<numArgs, readonlyArgs>, ND, S(Func), NF
+| ThrowReadonlyMismatch<numArgs, readonlyArgs>, ND, S(Func), T
 
   Throw an exception if the readonly-ness of passed arguments given by `readonlyArgs'
   does not match the readonly-ness of parameters of the callee S0. There must be

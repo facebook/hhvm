@@ -1,1 +1,0 @@
-Warning: Property prop of class P is readonly, but isn't enclosed in a readonly expression. in %s on line 14

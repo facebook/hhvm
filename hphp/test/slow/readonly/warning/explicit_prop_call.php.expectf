@@ -1,3 +1,0 @@
-Warning: __invoke() modifies the instance, but the caller has a readonly instance in %s/explicit_prop_call.php on line 10
-hi
-Done

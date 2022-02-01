@@ -1,2 +1,0 @@
-Warning: Property bar of class Foo is readonly, and therefore must be a value type to be modified. in %s on line 19
-Done!

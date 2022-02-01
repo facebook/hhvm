@@ -263,7 +263,6 @@ std::string formatReadonlyThisMismatch(const char* fname) {
 }
 
 void throwReadonlyMismatch(const Func* func, int32_t index) {
-  if (RO::EvalEnableReadonlyCallEnforcement == 0) return;
   auto const msg = [&] {
     if (index == kReadonlyReturnId) {
       return formatReturnReadonlyMismatch(func->fullName()->data());
@@ -273,10 +272,6 @@ void throwReadonlyMismatch(const Func* func, int32_t index) {
     }
     return formatParamReadonlyMismatch(func->fullName()->data(), index);
   }();
-  if (RO::EvalEnableReadonlyCallEnforcement == 1) {
-    raise_warning(msg);
-    return;
-  }
   SystemLib::throwReadonlyViolationExceptionObject(msg);
 }
 

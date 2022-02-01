@@ -1,2 +1,0 @@
-Warning: Foo::bar() modifies the instance, but the caller has a readonly instance in %s/readonly_method_call.php on line 14
-Done

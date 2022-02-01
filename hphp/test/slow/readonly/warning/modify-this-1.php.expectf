@@ -1,4 +1,0 @@
-Warning: Foo::set() modifies the instance, but the caller has a readonly instance in %s/modify-this-1.php on line 23
-
-Warning: Foo::set() modifies the instance, but the caller has a readonly instance in %s/modify-this-1.php on line 27
-Done

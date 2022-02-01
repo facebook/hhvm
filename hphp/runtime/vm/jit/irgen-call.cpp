@@ -127,32 +127,30 @@ void emitCallerInOutChecksUnknown(IRGS& env, SSATmp* callee,
 
 bool emitCallerReadonlyChecksKnown(IRGS& env, const Func* callee,
                                    const FCallArgs& fca) {
-  if (RO::EvalEnableReadonlyCallEnforcement == 0) return true;
   if (fca.enforceReadonly()) {
     for (auto i = 0; i < fca.numArgs; ++i) {
       if (fca.isReadonly(i) && !callee->isReadonly(i)) {
         auto const data = ParamData { i };
         gen(env, ThrowReadonlyMismatch, data, cns(env, callee));
-        if (RO::EvalEnableReadonlyCallEnforcement > 1) return false;
+        return false;
       }
     }
   }
   if (fca.enforceMutableReturn() && (callee->attrs() & AttrReadonlyReturn)) {
     auto const data = ParamData { kReadonlyReturnId };
     gen(env, ThrowReadonlyMismatch, data, cns(env, callee));
-    if (RO::EvalEnableReadonlyCallEnforcement > 1) return false;
+    return false;
   }
   if (fca.enforceReadonlyThis() && !(callee->attrs() & AttrReadonlyThis)) {
     auto const data = ParamData { kReadonlyThisId };
     gen(env, ThrowReadonlyMismatch, data, cns(env, callee));
-    if (RO::EvalEnableReadonlyCallEnforcement > 1) return false;
+    return false;
   }
   return true;
 }
 
 void emitCallerReadonlyChecksUnknown(IRGS& env, SSATmp* callee,
                                       const FCallArgs& fca) {
-  if (RO::EvalEnableReadonlyCallEnforcement == 0) return;
   if (fca.enforceReadonly()) {
     auto const data = BoolVecArgsData { fca.numArgs, fca.readonlyArgs };
     gen(env, CheckReadonlyMismatch, data, callee);

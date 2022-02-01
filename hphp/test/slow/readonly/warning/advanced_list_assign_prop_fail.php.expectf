@@ -1,2 +1,0 @@
-Warning: Cannot store readonly value in a non-readonly property baz of class Foo. in %s on line 19
-Done!

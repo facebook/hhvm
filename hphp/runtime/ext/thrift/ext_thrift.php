@@ -21,7 +21,7 @@ function thrift_protocol_read_binary_struct(object $transportobj,
                                             int $options = 0): mixed;
 
 <<__Native>>
-function thrift_protocol_set_compact_version(int $version): int;
+function thrift_protocol_set_compact_version(int $version)[leak_safe]: int;
 
 <<__Native>>
 function thrift_protocol_write_compact(object $transportobj,

@@ -2,13 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
-use hcons::Hc;
-
-use std::convert::From;
-
-use crate::pos::{PosId, Symbol};
 use crate::reason::Reason;
+use hcons::Hc;
+use pos::{PosId, Symbol};
 
 pub type Prim = oxidized::aast::Tprim;
 pub type Abstraction = oxidized::ast_defs::Abstraction; // `Concrete` or `Abstract`.

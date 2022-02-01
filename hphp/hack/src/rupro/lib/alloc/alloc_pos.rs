@@ -3,10 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::pos::{FilePos, Pos, PosId};
-use crate::reason::Reason;
-
 use super::Allocator;
+use crate::reason::Reason;
+use pos::{FilePos, Pos, PosId};
 
 impl<R: Reason> Allocator<R> {
     pub fn pos_from_ast(&self, pos: &oxidized::pos::Pos) -> R::Pos {

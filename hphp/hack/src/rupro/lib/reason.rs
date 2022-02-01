@@ -3,11 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::hash::Hash;
-
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
-
-use crate::pos::{BPos, NPos, Pos};
+use pos::{BPos, NPos, Pos};
+use std::hash::Hash;
 
 pub trait Reason: Eq + Hash + Clone + ToOcamlRep + std::fmt::Debug + Send + Sync + 'static {
     /// Position type.

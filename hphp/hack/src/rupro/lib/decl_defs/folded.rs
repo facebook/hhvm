@@ -2,12 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::collections::HashMap;
-
 use crate::decl_defs::{CeVisibility, DeclTy};
-use crate::pos::Symbol;
 use crate::reason::Reason;
 use hcons::Hc;
+use pos::Symbol;
+use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct FoldedElement<R: Reason> {

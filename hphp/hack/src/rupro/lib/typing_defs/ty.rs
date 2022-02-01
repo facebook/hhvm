@@ -3,13 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::convert::From;
-
+use crate::reason::Reason;
 use hcons::Hc;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
-
-use crate::pos::{PosId, Symbol};
-use crate::reason::Reason;
+use pos::{PosId, Symbol};
 
 pub type Prim = crate::decl_defs::Prim;
 

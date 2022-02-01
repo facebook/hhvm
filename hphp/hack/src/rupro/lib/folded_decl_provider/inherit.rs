@@ -10,8 +10,8 @@ use hcons::Hc;
 
 use crate::decl_defs::{DeclTy, FoldedClass, FoldedElement, ShallowClass, SubstContext};
 use crate::folded_decl_provider::subst::Subst;
-use crate::pos::Symbol;
 use crate::reason::Reason;
+use pos::Symbol;
 
 pub(crate) struct Inherited<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_inherit.inherited`

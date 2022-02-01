@@ -3,10 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::pos::{Prefix, RelativePath, Symbol};
-use crate::reason::Reason;
-
 use super::{Allocator, GlobalAllocator};
+use crate::reason::Reason;
+use pos::{Prefix, RelativePath, Symbol};
 
 impl GlobalAllocator {
     pub fn symbol(&self, symbol: &str) -> Symbol {

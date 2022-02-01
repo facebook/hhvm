@@ -6,10 +6,10 @@
 #![allow(dead_code)]
 use crate::alloc::Allocator;
 use crate::decl_defs::DeclTy;
-use crate::pos::Symbol;
 use crate::reason::{Reason, ReasonImpl};
 use crate::typing_defs::Ty;
 use crate::typing_env::TEnv;
+use pos::Symbol;
 
 pub struct TypingReturn;
 

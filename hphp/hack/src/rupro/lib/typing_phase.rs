@@ -3,15 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hcons::Hc;
-
 use crate::decl_defs::{DeclTy, DeclTy_, FunParam, FunType};
-use crate::pos::PosId;
 use crate::reason::Reason;
 use crate::typing_decl_provider::Class;
 use crate::typing_defs::{Exact, ExpandEnv, Ty, Ty_, TypeExpansion, TypeExpansions};
 use crate::typing_env::TEnv;
 use crate::typing_error::ReasonsCallback;
+use hcons::Hc;
+use pos::PosId;
 
 pub struct Phase;
 

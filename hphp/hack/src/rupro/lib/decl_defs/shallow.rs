@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::decl_defs::{ClassishKind, DeclTy, Tparam, UserAttribute};
-use crate::pos::PosId;
 use crate::reason::Reason;
 use hcons::Hc;
+use pos::PosId;
 
 #[derive(Debug)]
 pub struct ShallowFun<R: Reason> {

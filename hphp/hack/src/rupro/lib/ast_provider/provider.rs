@@ -3,21 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::fs;
-use std::sync::Arc;
-
+use crate::naming::Naming;
+use crate::parsing_error::ParsingError;
+use crate::special_names::SpecialNames;
 use aast_parser::{AastParser, Error as ParserError};
 use lint_rust::LintError;
 use ocamlrep::rc::RcOc;
 use parser_core_types::{
     indexed_source_text::IndexedSourceText, source_text::SourceText, syntax_error::SyntaxError,
 };
+use pos::{RelativePath, RelativePathCtx};
 use rust_aast_parser_types::Env as ParserEnv;
-
-use crate::naming::Naming;
-use crate::parsing_error::ParsingError;
-use crate::pos::{RelativePath, RelativePathCtx};
-use crate::special_names::SpecialNames;
+use std::fs;
+use std::sync::Arc;
 
 pub type AstItem = (oxidized::aast::Program<(), ()>, Vec<ParsingError>);
 

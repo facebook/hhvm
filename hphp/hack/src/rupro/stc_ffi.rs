@@ -7,17 +7,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::path::PathBuf;
-use std::sync::Arc;
-
-use ocamlrep_derive::ToOcamlRep;
-use oxidized::global_options::GlobalOptions;
-use structopt::StructOpt;
-
 use hackrs::alloc;
 use hackrs::ast_provider::AstProvider;
 use hackrs::folded_decl_provider::{FoldedDeclGlobalCache, FoldedDeclProvider};
-use hackrs::pos::{Prefix, RelativePathCtx};
 use hackrs::reason::{NReason, Reason};
 use hackrs::shallow_decl_provider::{ShallowDeclGlobalCache, ShallowDeclProvider};
 use hackrs::special_names::SpecialNames;
@@ -25,6 +17,12 @@ use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
 use hackrs::typing_decl_provider::{TypingDeclGlobalCache, TypingDeclProvider};
+use ocamlrep_derive::ToOcamlRep;
+use oxidized::global_options::GlobalOptions;
+use pos::{Prefix, RelativePathCtx};
+use std::path::PathBuf;
+use std::sync::Arc;
+use structopt::StructOpt;
 
 // fn create_nast(path: PathBuf) -> oxidized::aast::Program<(), ()> {}
 

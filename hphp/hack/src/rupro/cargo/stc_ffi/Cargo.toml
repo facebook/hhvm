@@ -16,4 +16,5 @@ ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
+pos = { path = "../../lib/pos" }
 structopt = "0.3.23"

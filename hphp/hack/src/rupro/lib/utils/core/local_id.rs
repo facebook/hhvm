@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::pos::Symbol;
+use pos::Symbol;
 
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub struct LocalId(u64, Symbol);

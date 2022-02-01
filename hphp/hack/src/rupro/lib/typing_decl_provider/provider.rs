@@ -3,14 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::sync::Arc;
-
-use hcons::Hc;
-
 use crate::folded_decl_provider::FoldedDeclProvider;
-use crate::pos::Symbol;
 use crate::reason::Reason;
 use crate::typing_decl_provider::{Class, TypingDeclCache};
+use hcons::Hc;
+use pos::Symbol;
+use std::sync::Arc;
 
 #[derive(Debug)]
 pub struct TypingDeclProvider<R: Reason> {

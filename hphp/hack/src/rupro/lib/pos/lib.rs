@@ -6,6 +6,6 @@ mod pos;
 mod relative_path;
 mod symbol;
 
-pub use pos::{BPos, FilePos, NPos, Pos, PosId};
-pub use relative_path::{Prefix, RelativePath, RelativePathCtx};
-pub use symbol::Symbol;
+pub use pos::*;
+pub use relative_path::*;
+pub use symbol::*;

@@ -3,9 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::Symbol;
 use std::path::PathBuf;
-
-use crate::pos::Symbol;
 
 pub use oxidized::relative_path::Prefix;
 

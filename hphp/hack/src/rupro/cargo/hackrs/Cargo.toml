@@ -21,5 +21,6 @@ ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
+pos = { path = "../../lib/pos" }
 rust_aast_parser_types = { path = "../../../parser/cargo/rust_aast_parser_types" }
 stack_limit = { path = "../../../utils/stack_limit" }

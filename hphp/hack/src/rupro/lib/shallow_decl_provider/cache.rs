@@ -3,13 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::sync::Arc;
-
-use dashmap::DashMap;
-
 use crate::decl_defs::{ShallowClass, ShallowFun};
-use crate::pos::Symbol;
 use crate::reason::Reason;
+use dashmap::DashMap;
+use pos::Symbol;
+use std::sync::Arc;
 
 pub trait ShallowDeclCache: std::fmt::Debug + Send + Sync {
     type Reason: Reason;

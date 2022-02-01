@@ -6,10 +6,9 @@
 // These use the same casing as naming_special_names.ml for now.
 #![allow(non_snake_case)]
 
-use naming_special_names_rust as sn;
-
 use crate::alloc::GlobalAllocator;
-use crate::pos::Symbol;
+use naming_special_names_rust as sn;
+use pos::Symbol;
 
 #[derive(Debug)]
 pub struct SpecialNames {

@@ -2,9 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::pos::RelativePath;
-
 use parser_core_types::syntax_error::SyntaxError;
+use pos::RelativePath;
 
 #[derive(Debug, Clone)]
 pub enum ParsingError {

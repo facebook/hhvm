@@ -2,9 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use crate::{RelativePath, Symbol};
 use std::hash::Hash;
-
-use crate::pos::{RelativePath, Symbol};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FilePos {

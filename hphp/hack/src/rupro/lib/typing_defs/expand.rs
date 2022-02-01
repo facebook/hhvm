@@ -4,15 +4,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 #![allow(dead_code)]
-use std::collections::HashMap;
-
-use hcons::Hc;
-
-use crate::pos::Symbol;
 use crate::reason::{Reason, ReasonImpl};
 use crate::typing_ctx::TypingCtx;
 use crate::typing_defs::{Ty, Ty_};
 use crate::typing_error::ReasonsCallback;
+use hcons::Hc;
+use pos::Symbol;
+use std::collections::HashMap;
 
 pub type TypeExpansion<R> = (<R as Reason>::Pos, Symbol);
 

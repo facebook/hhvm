@@ -11,7 +11,6 @@ pub mod errors;
 pub mod folded_decl_provider;
 pub mod naming;
 pub mod parsing_error;
-pub mod pos;
 pub mod reason;
 pub mod shallow_decl_provider;
 pub mod special_names;

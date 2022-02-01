@@ -3,12 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::HashMap;
-use std::convert::{From, Into};
-
 use crate::decl_defs::DeclTy;
-use crate::pos::Symbol;
 use crate::reason::Reason;
+use pos::Symbol;
+use std::collections::HashMap;
 
 pub(crate) struct Subst<R: Reason>(HashMap<Symbol, DeclTy<R>>);
 

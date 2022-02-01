@@ -9,6 +9,6 @@ mod ty;
 pub use folded::{FoldedClass, FoldedElement, SubstContext};
 pub use shallow::{ShallowClass, ShallowFun, ShallowMethod};
 pub use ty::{
-    Abstraction, CeVisibility, ClassishKind, DeclTy, DeclTy_, FunParam, FunType, Prim, Tparam,
-    UserAttribute,
+    make_ce_flags, Abstraction, CeVisibility, ClassishKind, DeclTy, DeclTy_, FunParam, FunType,
+    Prim, Tparam, UserAttribute,
 };

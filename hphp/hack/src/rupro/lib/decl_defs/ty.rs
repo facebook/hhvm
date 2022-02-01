@@ -110,3 +110,36 @@ pub struct Tparam<R: Reason> {
     pub reified: oxidized::aast::ReifyKind,
     pub user_attributes: Vec<UserAttribute<R>>,
 }
+
+pub fn make_ce_flags(
+    _xhp_attr: Option<&oxidized_by_ref::xhp_attribute::XhpAttribute>,
+    abstract_: bool,
+    final_: bool,
+    superfluous_override: bool,
+    lsb: bool,
+    synthesized: bool,
+    const_: bool,
+    lateinit: bool,
+    dynamicallycallable: bool,
+    readonly_prop: bool,
+    support_dynamic_type: bool,
+    needs_init: bool,
+) -> oxidized_by_ref::typing_defs_flags::class_elt::ClassElt {
+    use oxidized_by_ref::typing_defs_flags::class_elt::ClassElt;
+    use oxidized_by_ref::typing_defs_flags::class_elt::ClassEltFlags;
+
+    let mut flags: ClassEltFlags = ClassEltFlags::empty();
+    flags.set(ClassEltFlags::ABSTRACT, abstract_);
+    flags.set(ClassEltFlags::FINAL, final_);
+    flags.set(ClassEltFlags::SUPERFLUOUS_OVERRIDE, superfluous_override);
+    flags.set(ClassEltFlags::LSB, lsb);
+    flags.set(ClassEltFlags::SYNTHESIZED, synthesized);
+    flags.set(ClassEltFlags::CONST, const_);
+    flags.set(ClassEltFlags::LATEINIT, lateinit);
+    flags.set(ClassEltFlags::DYNAMICALLYCALLABLE, dynamicallycallable);
+    //TODO: let flags = set_xhp_attr xhp_attr flags in
+    flags.set(ClassEltFlags::READONLY_PROP, readonly_prop);
+    flags.set(ClassEltFlags::SUPPORT_DYNAMIC_TYPE, support_dynamic_type);
+    flags.set(ClassEltFlags::NEEDS_INIT, needs_init);
+    ClassElt(flags.bits() as usize)
+}

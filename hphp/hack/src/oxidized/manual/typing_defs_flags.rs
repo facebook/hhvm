@@ -54,11 +54,36 @@ bitflags! {
 }
 
 pub mod class_elt {
+    use bitflags::bitflags;
     use eq_modulo_pos::EqModuloPos;
     use no_pos_hash::NoPosHash;
     use ocamlrep_derive::FromOcamlRepIn;
     use serde::Deserialize;
     use serde::Serialize;
+
+    bitflags! {
+        #[derive(EqModuloPos)]
+        pub struct ClassEltFlags: u16 {
+            const ABSTRACT                 = 1 << 0;
+            const FINAL                    = 1 << 1;
+            const SUPERFLUOUS_OVERRIDE     = 1 << 2;
+            //Whether the __Override attribute is erroneous, i.e. there is
+            // nothing in parents to override. This is set during decling
+            // (because that's the easiest place to spot this error) so
+            // that an error can be emitted later during typing.
+            const LSB                      = 1 << 3;
+            const SYNTHESIZED              = 1 << 4;
+            const CONST                    = 1 << 5;
+            const LATEINIT                 = 1 << 6;
+            const DYNAMICALLYCALLABLE      = 1 << 7;
+            const SUPPORT_DYNAMIC_TYPE     = 1 << 8;
+            const XA_HAS_DEFAULT           = 1 << 9;
+            const XA_TAG_REQUIRED          = 1 << 10;
+            const XA_TAG_LATEINIT          = 1 << 11;
+            const READONLY_PROP            = 1 << 12;
+            const NEEDS_INIT               = 1 << 13;
+        }
+    }
 
     #[derive(
         Clone,
@@ -74,7 +99,7 @@ pub mod class_elt {
         PartialOrd,
         Serialize
     )]
-    pub struct ClassElt(usize);
+    pub struct ClassElt(pub usize);
 
     impl ocamlrep::ToOcamlRep for ClassElt {
         fn to_ocamlrep<'a, A: ocamlrep::Allocator>(

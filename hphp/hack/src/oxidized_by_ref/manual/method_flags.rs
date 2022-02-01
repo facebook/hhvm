@@ -24,6 +24,18 @@ impl MethodFlags {
     pub fn is_abstract(&self) -> bool {
         self.contains(Self::ABSTRACT)
     }
+    pub fn is_final(&self) -> bool {
+        self.contains(Self::FINAL)
+    }
+    pub fn is_dynamicallycallable(&self) -> bool {
+        self.contains(Self::DYNAMICALLYCALLABLE)
+    }
+    pub fn is_override(&self) -> bool {
+        self.contains(Self::OVERRIDE)
+    }
+    pub fn supports_dynamic_type(&self) -> bool {
+        self.contains(Self::SUPPORT_DYNAMIC_TYPE)
+    }
 }
 
 impl ocamlrep::ToOcamlRep for MethodFlags {

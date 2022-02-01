@@ -10,6 +10,7 @@ use pos::{Symbol, SymbolMap};
 #[derive(Debug, Clone)]
 pub struct FoldedElement<R: Reason> {
     // note(sf, 2022-01-28): c.f. `Decl_defs.element`
+    pub flags: oxidized_by_ref::typing_defs_flags::class_elt::ClassElt,
     pub origin: Symbol,
     pub visibility: CeVisibility<R>,
     pub deprecated: Option<Hc<str>>,

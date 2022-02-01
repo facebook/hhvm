@@ -4,7 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl_defs::{
-    CeVisibility, DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass, ShallowMethod,
+    make_ce_flags, CeVisibility, DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass,
+    ShallowMethod,
 };
 use crate::folded_decl_provider::FoldedDeclCache;
 use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
@@ -78,11 +79,41 @@ impl<R: Reason> FoldedDeclProvider<R> {
             ) => CeVisibility::Protected(Hc::clone(s)),
             (_, v) => self.visibility(cls, sc.module.as_ref(), v),
         };
+
+        let meth_flags = &sm.flags;
+        let is_final = meth_flags.is_final();
+        let is_abstract = meth_flags.is_final();
+        let is_superfluous_override = meth_flags.is_override() && !methods.contains_key(meth);
+        let is_dynamicallycallable = meth_flags.is_dynamicallycallable();
+        let supports_dynamic_type = meth_flags.supports_dynamic_type();
+        let synthesized = false;
+        let lsb = false;
+        let const_ = false;
+        let lateinit = false;
+        let readonly_prop = false;
+        let needs_init = false;
+        let xhp_attr = None;
+
         let elt = FoldedElement {
             origin: Hc::clone(cls),
             visibility: vis,
             deprecated: sm.deprecated.as_ref().map(Hc::clone),
+            flags: make_ce_flags(
+                xhp_attr,
+                is_final,
+                is_abstract,
+                is_superfluous_override,
+                synthesized,
+                lsb,
+                const_,
+                lateinit,
+                is_dynamicallycallable,
+                readonly_prop,
+                supports_dynamic_type,
+                needs_init,
+            ),
         };
+
         methods.insert(Hc::clone(meth), elt);
     }
 

@@ -125,8 +125,7 @@ pub fn make_ce_flags(
     support_dynamic_type: bool,
     needs_init: bool,
 ) -> oxidized_by_ref::typing_defs_flags::class_elt::ClassElt {
-    use oxidized_by_ref::typing_defs_flags::class_elt::ClassElt;
-    use oxidized_by_ref::typing_defs_flags::class_elt::ClassEltFlags;
+    use oxidized_by_ref::typing_defs_flags::ClassEltFlags;
 
     let mut flags: ClassEltFlags = ClassEltFlags::empty();
     flags.set(ClassEltFlags::ABSTRACT, abstract_);
@@ -141,5 +140,5 @@ pub fn make_ce_flags(
     flags.set(ClassEltFlags::READONLY_PROP, readonly_prop);
     flags.set(ClassEltFlags::SUPPORT_DYNAMIC_TYPE, support_dynamic_type);
     flags.set(ClassEltFlags::NEEDS_INIT, needs_init);
-    ClassElt(flags.bits() as usize)
+    flags
 }

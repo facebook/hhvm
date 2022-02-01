@@ -53,68 +53,93 @@ bitflags! {
     }
 }
 
+bitflags! {
+    #[derive(EqModuloPos)]
+    pub struct ClassEltFlags: u16 {
+        const ABSTRACT                 = 1 << 0;
+        const FINAL                    = 1 << 1;
+        const SUPERFLUOUS_OVERRIDE     = 1 << 2;
+        //Whether the __Override attribute is erroneous, i.e. there is
+        // nothing in parents to override. This is set during decling
+        // (because that's the easiest place to spot this error) so
+        // that an error can be emitted later during typing.
+        const LSB                      = 1 << 3;
+        const SYNTHESIZED              = 1 << 4;
+        const CONST                    = 1 << 5;
+        const LATEINIT                 = 1 << 6;
+        const DYNAMICALLYCALLABLE      = 1 << 7;
+        const SUPPORT_DYNAMIC_TYPE     = 1 << 8;
+        const XA_HAS_DEFAULT           = 1 << 9;
+        const XA_TAG_REQUIRED          = 1 << 10;
+        const XA_TAG_LATEINIT          = 1 << 11;
+        const READONLY_PROP            = 1 << 12;
+        const NEEDS_INIT               = 1 << 13;
+    }
+}
+
+// This alias is only necessary because of how typing_defs.rs is
+// generated (T111144107). TODO(SF, 2022-02-01): Change
+// `typing_defs_flags.ml` so that this is no longer necessary.
 pub mod class_elt {
-    use bitflags::bitflags;
-    use eq_modulo_pos::EqModuloPos;
-    use no_pos_hash::NoPosHash;
-    use ocamlrep_derive::FromOcamlRepIn;
-    use serde::Deserialize;
-    use serde::Serialize;
+    use super::ClassEltFlags;
+    pub type ClassElt = ClassEltFlags;
+}
 
-    bitflags! {
-        #[derive(EqModuloPos)]
-        pub struct ClassEltFlags: u16 {
-            const ABSTRACT                 = 1 << 0;
-            const FINAL                    = 1 << 1;
-            const SUPERFLUOUS_OVERRIDE     = 1 << 2;
-            //Whether the __Override attribute is erroneous, i.e. there is
-            // nothing in parents to override. This is set during decling
-            // (because that's the easiest place to spot this error) so
-            // that an error can be emitted later during typing.
-            const LSB                      = 1 << 3;
-            const SYNTHESIZED              = 1 << 4;
-            const CONST                    = 1 << 5;
-            const LATEINIT                 = 1 << 6;
-            const DYNAMICALLYCALLABLE      = 1 << 7;
-            const SUPPORT_DYNAMIC_TYPE     = 1 << 8;
-            const XA_HAS_DEFAULT           = 1 << 9;
-            const XA_TAG_REQUIRED          = 1 << 10;
-            const XA_TAG_LATEINIT          = 1 << 11;
-            const READONLY_PROP            = 1 << 12;
-            const NEEDS_INIT               = 1 << 13;
-        }
+impl ocamlrep::ToOcamlRep for ClassEltFlags {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
+        ocamlrep::OpaqueValue::int(self.bits() as isize)
     }
+}
 
-    #[derive(
-        Clone,
-        Debug,
-        Deserialize,
-        Eq,
-        EqModuloPos,
-        FromOcamlRepIn,
-        Hash,
-        NoPosHash,
-        Ord,
-        PartialEq,
-        PartialOrd,
-        Serialize
-    )]
-    pub struct ClassElt(pub usize);
-
-    impl ocamlrep::ToOcamlRep for ClassElt {
-        fn to_ocamlrep<'a, A: ocamlrep::Allocator>(
-            &self,
-            _alloc: &'a A,
-        ) -> ocamlrep::OpaqueValue<'a> {
-            ocamlrep::OpaqueValue::int(self.0 as isize)
-        }
+impl ocamlrep::FromOcamlRep for ClassEltFlags {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        let int_value = ocamlrep::from::expect_int(value)?;
+        Ok(Self::from_bits_truncate(int_value.try_into()?))
     }
+}
 
-    impl ocamlrep::FromOcamlRep for ClassElt {
-        fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-            let int_value = ocamlrep::from::expect_int(value)?;
-            Ok(Self(int_value.try_into()?))
+impl<'a> ocamlrep::FromOcamlRepIn<'a> for ClassEltFlags {
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        _alloc: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        use ocamlrep::FromOcamlRep;
+        Self::from_ocamlrep(value)
+    }
+}
+
+impl no_pos_hash::NoPosHash for ClassEltFlags {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        std::hash::Hash::hash(self, state);
+    }
+}
+
+impl serde::Serialize for ClassEltFlags {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_u16(self.bits())
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for ClassEltFlags {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct Visitor;
+        impl<'de> serde::de::Visitor<'de> for Visitor {
+            type Value = ClassEltFlags;
+
+            fn expecting(&self, formatter: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                write!(formatter, "a u16 for ClassEltFlags")
+            }
+            fn visit_u16<E: serde::de::Error>(self, value: u16) -> Result<Self::Value, E> {
+                Ok(Self::Value::from_bits_truncate(value))
+            }
+
+            fn visit_u64<E: serde::de::Error>(self, value: u64) -> Result<Self::Value, E> {
+                Ok(Self::Value::from_bits_truncate(
+                    u16::try_from(value).expect("expect an u16, but got u64"),
+                ))
+            }
         }
+        deserializer.deserialize_u16(Visitor)
     }
 }
 

@@ -9,4 +9,4 @@
 
 open Typing_defs_core
 
-external ty_to_json : locl_ty -> string = "ty_to_json"
+external encode_ty_to_stdout : locl_ty -> unit = "ty_to_stdout"

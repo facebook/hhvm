@@ -6,17 +6,25 @@
 use arena_deserializer::serde::Deserialize;
 use typing_defs_rust::typing_defs_core::Ty;
 
-pub fn into_types<'a, I: AsRef<str>>(
+pub fn into_types<'a>(
     arena: &'a bumpalo::Bump,
-    jsons: impl Iterator<Item = I>,
+    chunks: impl Iterator<Item = Vec<u8>>,
 ) -> impl Iterator<Item = Ty<'a>> {
-    jsons.map(|json| {
-        let json = json.as_ref();
-        let mut de = serde_json::Deserializer::from_str(json);
-        let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
-        let ty: serde_json::Result<Ty<'_>> = Ty::deserialize(de);
-        ty.unwrap_or_else(|_| panic!("cannot deserialize Ty from JSON: {}", json))
+    let op = bincode::config::Options::with_native_endian(bincode::options());
+    chunks.map(move |bs| {
+        let mut de = bincode::de::Deserializer::from_slice(&bs, op);
+        to_type(arena, &bs, &mut de)
     })
+}
+
+fn to_type<'a, 'de>(
+    arena: &'a bumpalo::Bump,
+    bs: &[u8],
+    de: impl serde::Deserializer<'de>,
+) -> Ty<'a> {
+    let de = arena_deserializer::ArenaDeserializer::new(arena, de);
+    let ty = Ty::deserialize(de);
+    ty.unwrap_or_else(|_| panic!("cannot deserialize Ty from: {:?}", bs))
 }
 
 #[cfg(test)]
@@ -37,8 +45,12 @@ mod tests {
 
         let mut act: Vec<Json> = Vec::new();
         let arena = bumpalo::Bump::new();
-        let j_strs = js.into_iter().map(|j| serde_json::to_string(j).unwrap());
-        for ty in into_types(&arena, j_strs) {
+        let chunks = js
+            .iter()
+            .map(|j| serde_json::to_string(j).unwrap().into_bytes());
+        for chunk in chunks {
+            let mut de = serde_json::Deserializer::from_slice(&chunk);
+            let ty = to_type(&arena, &chunk, &mut de);
             act.on_type(&ty)
         }
         act

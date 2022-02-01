@@ -5,17 +5,30 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bumpalo::Bump;
-use serde_json::json;
+use lazy_static::lazy_static;
 
+use framing::LineFeedEscaper;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
 use oxidized_by_ref::typing_defs_core;
 
 ocaml_ffi_with_arena! {
-    fn ty_to_json<'a>(
+    fn ty_to_stdout<'a>(
         arena: &'a Bump,
         ty: typing_defs_core::Ty<'_>,
-    ) -> String {
-        let j = json!(ty);
-        serde_json::to_string(&j).unwrap().to_string()
+    ) {
+        lazy_static! {
+            static ref LF_ESCAPER: LineFeedEscaper = LineFeedEscaper::new(false);
+        }
+        let op = bincode::config::Options::with_native_endian(bincode::options());
+        use bincode::Options;
+        let bs = op.serialize(&ty).unwrap();
+
+        let bs = lz4::block::compress(&bs, None, true).unwrap();
+        let bs = LF_ESCAPER.escape(&bs);
+        use std::io::Write;
+        let mut stdio = std::io::stdout();
+        stdio.write_all(&bs).unwrap();
+        stdio.write_all(b"\n").unwrap();
+        stdio.flush().unwrap();
     }
 }

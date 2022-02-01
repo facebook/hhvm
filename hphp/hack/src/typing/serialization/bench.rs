@@ -5,7 +5,7 @@
 
 use std::{
     hash::Hasher,
-    io::{BufRead, BufReader, ErrorKind, Read},
+    io::{BufRead, ErrorKind, Read},
     path::{Path, PathBuf},
     process::{Child, Command, Stdio},
 };
@@ -13,6 +13,8 @@ use std::{
 use itertools::Itertools;
 use rayon::iter::{ParallelBridge, ParallelIterator};
 use structopt::{clap::arg_enum, StructOpt};
+
+use framing::LineFeedUnescaper;
 
 arg_enum! {
     #[derive(Debug)]
@@ -75,10 +77,10 @@ struct Context {
 }
 
 impl Context {
-    fn hash_and_maybe_println(&mut self, s: &str, min_verbosity: u8) {
-        self.hasher.write(s.as_bytes());
+    fn hash_and_maybe_println(&mut self, bs: &[u8], min_verbosity: u8) {
+        self.hasher.write(bs);
         if self.verbosity >= min_verbosity {
-            println!("{}", s);
+            println!("{:02X?}", bs);
         }
     }
 }
@@ -99,21 +101,23 @@ fn typecheck_only(ctx: &mut Context) {
     }
 }
 
-fn read_lines(proc: &mut Child) -> impl Iterator<Item = String> {
-    BufReader::new(proc.stdout.take().unwrap())
-        .lines()
-        .map(|line| line.unwrap())
-}
-
 fn serialize_only(ctx: &mut Context) {
-    for json in read_lines(&mut ctx.proc) {
-        ctx.hash_and_maybe_println(&json, 1);
+    for bs in framing::read_lines_as_bytes(ctx.proc.stdout.take().unwrap()) {
+        ctx.hash_and_maybe_println(&bs, 1);
     }
 }
 
 fn ser_de(ctx: &mut Context, arena: &bumpalo::Bump) {
-    for ty in de::into_types(&arena, read_lines(&mut ctx.proc)) {
-        ctx.hash_and_maybe_println(&format!("{:?}", ty), 1);
+    fn decode(bs: Vec<u8>) -> Vec<u8> {
+        lazy_static::lazy_static! {
+            static ref LF_UNESCAPER: LineFeedUnescaper = LineFeedUnescaper::new();
+        }
+        let bs = &LF_UNESCAPER.unescape(&bs);
+        lz4::block::decompress(bs, None).unwrap()
+    }
+    let chunk_iter = framing::read_lines_as_bytes(ctx.proc.stdout.take().unwrap()).map(decode);
+    for ty in de::into_types(arena, chunk_iter) {
+        ctx.hash_and_maybe_println(format!("{:?}", ty).as_bytes(), 1);
     }
 }
 

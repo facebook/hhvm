@@ -2125,7 +2125,7 @@ let handle_mode
         exit 2
       end else
         let tast = Relative_path.Map.find tasts path in
-        Typing_preorder_ser.tast_to_json tast
+        Typing_preorder_ser.encode_tys_as_stdout_lines tast
     in
     Stream.iter process path_stream
   | Decl_compare ->

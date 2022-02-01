@@ -9,6 +9,10 @@ path = "../de.rs"
 
 [dependencies]
 arena_deserializer = { path = "../../../utils/arena_deserializer" }
+bincode = "1.3.3"
 bumpalo = { version = "3.8", features = ["collections"] }
-serde_json = { version = "1.0.64", features = ["float_roundtrip", "unbounded_depth"] }
+serde = { version = "1.0.126", features = ["derive", "rc"] }
 typing_defs_rust = { path = "../../cargo/typing_defs_rust" }
+
+[dev-dependencies]
+serde_json = { version = "1.0.64", features = ["float_roundtrip", "unbounded_depth"] }

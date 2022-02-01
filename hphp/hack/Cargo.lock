@@ -1596,6 +1596,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
+name = "framing"
+version = "0.0.0"
+dependencies = [
+ "regex",
+]
+
+[[package]]
 name = "full_fidelity_schema_version_number"
 version = "0.0.0"
 
@@ -3608,10 +3615,13 @@ dependencies = [
 name = "typing_ser_ffi"
 version = "0.0.0"
 dependencies = [
+ "bincode",
  "bumpalo",
+ "framing",
+ "lazy_static",
+ "lz4",
  "ocamlrep_ocamlpool",
  "oxidized_by_ref",
- "serde_json",
 ]
 
 [[package]]

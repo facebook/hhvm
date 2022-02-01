@@ -8,4 +8,4 @@
 
 open Typing_defs
 
-val tast_to_json : (locl_ty, _) Aast.program -> unit
+val encode_tys_as_stdout_lines : (locl_ty, _) Aast.program -> unit

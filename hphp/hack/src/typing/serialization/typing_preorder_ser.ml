@@ -13,15 +13,14 @@ open Hh_prelude
 [@@@warning "+33"]
 
 (** Does preorder traversal of typed AST and serializes the
- * topmost types as JSONs, one per line.
+ * topmost types one per line, each of which contains arbitrary bytes
+ * (not necessarily valid UTF-8, so be careful with reading it)
  *)
-let tast_to_json tast =
+let encode_tys_as_stdout_lines tast =
   (object
      inherit [_] Aast.iter as _super
 
-     method! on_'ex _en ty =
-       let j = Typing_ser_ffi.ty_to_json ty in
-       Printf.printf "%s\n" j
+     method! on_'ex _en ty = Typing_ser_ffi.encode_ty_to_stdout ty
   end)
     #on_program
     ()

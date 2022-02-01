@@ -19,9 +19,9 @@ get_target_property(JEMALLOC_INCLUDE_DIR jemalloc INTERFACE_INCLUDE_DIRECTORIES)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   PROXYGEN_SOURCE_ARGS
   SOURCE_URL
-  "https://github.com/facebook/proxygen/releases/download/v2021.10.18.00/proxygen-v2021.10.18.00.tar.gz"
+  "https://github.com/facebook/proxygen/releases/download/v2022.01.31.00/proxygen-v2022.01.31.00.tar.gz"
   SOURCE_HASH
-  "SHA256=7de4002ab5aa0b59343533cc9c26efbafed3401b1579b948cd2678f10fc9382e"
+  "SHA256=5360a8ccdfb2f5a6c7b3eed331ec7ab0e2c792d579c6fff499c85c516c11fe14"
 )
 
 ExternalProject_Add(

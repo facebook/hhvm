@@ -5,8 +5,8 @@ include(HPHPFunctions)
 
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   MCROUTER_DOWNLOAD_ARGS
-  SOURCE_URL "https://github.com/facebook/mcrouter/archive/refs/tags/v2021.10.18.00.tar.gz"
-  SOURCE_HASH "SHA256=ba38a89ef3b1b358d53e0485a9fa146fcecf4422e142edf566f955b2447b79e5"
+  SOURCE_URL "https://github.com/facebook/mcrouter/archive/refs/tags/v2022.01.31.00.tar.gz"
+  SOURCE_HASH "SHA256=478b8d0b88bdca7c65863764b50dc46f92d849c39f8b34ecc657884106c9b4e6"
   # The tarball name is just the tag name, which can conflict in the cache
   FILENAME_PREFIX "mcrouter-"
 )

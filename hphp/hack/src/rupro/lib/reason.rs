@@ -11,7 +11,9 @@ pub trait Reason: Eq + Hash + Clone + ToOcamlRep + std::fmt::Debug + Send + Sync
     /// Position type.
     type Pos: Pos + Send + Sync + 'static;
 
-    fn mk(cons: &dyn Fn() -> ReasonImpl<Self::Pos>) -> Self;
+    /// Make a new instance. If the implementing Reason is stateful,
+    /// it will call cons() to obtain the ReasonImpl to construct the instance.
+    fn mk(cons: impl FnOnce() -> ReasonImpl<Self::Pos>) -> Self;
 
     fn pos(&self) -> &Self::Pos;
 
@@ -32,7 +34,7 @@ pub struct BReason(Box<ReasonImpl<BPos>>);
 impl Reason for BReason {
     type Pos = BPos;
 
-    fn mk(cons: &dyn Fn() -> ReasonImpl<Self::Pos>) -> Self {
+    fn mk(cons: impl FnOnce() -> ReasonImpl<Self::Pos>) -> Self {
         let x = cons();
         Self(Box::new(x))
     }
@@ -63,7 +65,7 @@ pub struct NReason;
 impl Reason for NReason {
     type Pos = NPos;
 
-    fn mk(_cons: &dyn Fn() -> ReasonImpl<Self::Pos>) -> Self {
+    fn mk(_cons: impl FnOnce() -> ReasonImpl<Self::Pos>) -> Self {
         NReason
     }
 

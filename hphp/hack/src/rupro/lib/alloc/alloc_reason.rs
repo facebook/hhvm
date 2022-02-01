@@ -9,7 +9,7 @@ use super::Allocator;
 
 impl<R: Reason> Allocator<R> {
     pub fn reason(&self, reason: &oxidized_by_ref::typing_reason::T_<'_>) -> R {
-        R::mk(&|| {
+        R::mk(|| {
             use crate::reason::ReasonImpl as RI;
             use oxidized_by_ref::typing_reason::T_ as OR;
             match reason {

@@ -9,7 +9,7 @@ use pos::{FilePos, Pos, PosId};
 
 impl<R: Reason> Allocator<R> {
     pub fn pos_from_ast(&self, pos: &oxidized::pos::Pos) -> R::Pos {
-        R::Pos::mk(&|| {
+        R::Pos::mk(|| {
             let pos_file = self.relative_path_from_ast(pos.filename());
             let ((start_lnum, start_bol, start_cnum), (end_lnum, end_bol, end_cnum)) =
                 pos.to_start_and_end_lnum_bol_offset();
@@ -28,7 +28,7 @@ impl<R: Reason> Allocator<R> {
     }
 
     pub fn pos_from_decl(&self, pos: &oxidized_by_ref::pos::Pos<'_>) -> R::Pos {
-        R::Pos::mk(&|| {
+        R::Pos::mk(|| {
             let pos_file = self.relative_path_from_decl(pos.filename());
             let ((start_lnum, start_bol, start_cnum), (end_lnum, end_bol, end_cnum)) =
                 pos.to_start_and_end_lnum_bol_offset();

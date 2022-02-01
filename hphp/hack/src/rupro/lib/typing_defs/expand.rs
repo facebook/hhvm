@@ -46,7 +46,7 @@ impl<'a, R: Reason> ExpandEnv<'a, R> {
             expand_visible_newtype: true,
             substs: Default::default(),
             this_ty: ctx.alloc.ty(
-                R::mk(&|| ReasonImpl::Rnone),
+                R::mk(|| ReasonImpl::Rnone),
                 Ty_::Tgeneric(Hc::clone(&ctx.special_names.special_idents.this), vec![]),
             ),
             on_error: ReasonsCallback::new(&|| ReasonsCallback::ignore()),

@@ -17,7 +17,7 @@ impl TypingParam {
         decl_hint: Option<DeclTy<R>>,
         param: &oxidized::aast::FunParam<(), ()>,
     ) -> Ty<R> {
-        let r = R::mk(&|| ReasonImpl::Rwitness(env.ctx.alloc.pos_from_ast(&param.pos)));
+        let r = R::mk(|| ReasonImpl::Rwitness(env.ctx.alloc.pos_from_ast(&param.pos)));
         match decl_hint {
             None => env.ctx.alloc.tany(r),
             Some(ty) => {

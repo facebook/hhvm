@@ -18,7 +18,9 @@ pub struct FilePos {
 }
 
 pub trait Pos: Eq + Hash + Clone + std::fmt::Debug {
-    fn mk(cons: &dyn Fn() -> (RelativePath, FilePos, FilePos)) -> Self;
+    /// Make a new instance. If the implementing Pos is stateful,
+    /// it will call cons() to obtain interned values to construct the instance.
+    fn mk(cons: impl FnOnce() -> (RelativePath, FilePos, FilePos)) -> Self;
 
     fn to_oxidized_pos(&self) -> oxidized::pos::Pos;
 }
@@ -35,7 +37,7 @@ struct PosImpl {
 pub struct BPos(Box<PosImpl>);
 
 impl Pos for BPos {
-    fn mk(cons: &dyn Fn() -> (RelativePath, FilePos, FilePos)) -> Self {
+    fn mk(cons: impl FnOnce() -> (RelativePath, FilePos, FilePos)) -> Self {
         let (file, start, end) = cons();
         Self(Box::new(PosImpl { file, start, end }))
     }
@@ -50,7 +52,7 @@ impl Pos for BPos {
 pub struct NPos;
 
 impl Pos for NPos {
-    fn mk(_cons: &dyn Fn() -> (RelativePath, FilePos, FilePos)) -> Self {
+    fn mk(_cons: impl FnOnce() -> (RelativePath, FilePos, FilePos)) -> Self {
         NPos
     }
 

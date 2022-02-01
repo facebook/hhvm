@@ -1382,7 +1382,6 @@ bool irrelevant_inst(const IRInstruction& inst) {
 
       if (g.loads <= AEmpty &&
           g.backtrace <= AEmpty &&
-          g.coeffect <= AEmpty &&
           g.stores <= AEmpty &&
           g.inout <= AEmpty) {
         return true;
@@ -3400,8 +3399,8 @@ bool shouldReleaseShallow(const DecRefProfile& data, SSATmp* tmp) {
   if(!tmp->type().isKnownDataType()) {
     return false;
   }
-  return isArrayLikeType(tmp->type().toDataType()) 
-    && data.percent(data.arrayOfUncountedReleasedCount()) 
+  return isArrayLikeType(tmp->type().toDataType())
+    && data.percent(data.arrayOfUncountedReleasedCount())
     > RuntimeOption::EvalHHIRSpecializedDestructorThreshold;
 }
 
@@ -3409,7 +3408,7 @@ IRInstruction* makeReleaseShallow(
     IRUnit& unit, Block* remainder, IRInstruction* inst, SSATmp* tmp) {
   auto const block = inst->block();
   auto const bcctx = inst->bcctx();
-  
+
   auto const next = unit.defBlock(block->profCount());
   next->push_back(
       unit.gen(ReleaseShallow, bcctx, *(inst->extra<DecRefData>()), tmp));
@@ -3455,7 +3454,7 @@ void optimizeDecRefForProfiledType(
 
   // "next" contains the type-specific DecRef if the CheckType succeeds.
   auto const next = unit.defBlock(block->profCount());
-  
+
   // if this DecRef is eligible for a shallow release replace it with a
   // combination of DecReleaseCheck and ReleaseShallow IR-ops
   if (shouldReleaseShallow(profile, dst)) {

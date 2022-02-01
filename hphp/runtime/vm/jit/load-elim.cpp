@@ -469,7 +469,6 @@ Flags handle_general_effects(Local& env,
   auto const handleCheck = [&](Type typeParam) -> Optional<Flags> {
     assertx(m.inout == AEmpty);
     assertx(m.backtrace == AEmpty);
-    assertx(m.coeffect == AEmpty);
     auto const meta = env.global.ainfo.find(canonicalize(m.loads));
     if (!meta) return std::nullopt;
 
@@ -537,7 +536,6 @@ Flags handle_general_effects(Local& env,
       case CheckIter: {
         assertx(m.inout == AEmpty);
         assertx(m.backtrace == AEmpty);
-        assertx(m.coeffect == AEmpty);
         auto const meta = env.global.ainfo.find(canonicalize(m.loads));
         if (!meta || !env.state.avail[meta->index]) return std::nullopt;
         auto const& type = env.state.tracked[meta->index].knownType;
@@ -1383,7 +1381,6 @@ void save_taken_state(Global& genv, const IRInstruction& inst,
     auto const ge = boost::get<GeneralEffects>(effects);
     assertx(ge.inout == AEmpty);
     assertx(ge.backtrace == AEmpty);
-    assertx(ge.coeffect == AEmpty);
     auto const meta = genv.ainfo.find(canonicalize(ge.loads));
     auto const newType = inst.is(CheckInitMem) ? TUninit : Type::cns(false);
     if (auto const tloc = find_tracked(outState, meta)) {

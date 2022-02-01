@@ -492,8 +492,7 @@ bool conflicts(const IRInstruction& instr,
       return
         load.src.maybe(g.stores) ||
         load.src.maybe(g.kills) ||
-        load.src.maybe(g.inout) ||
-        load.src.maybe(g.coeffect);
+        load.src.maybe(g.inout);
     },
     [&] (const PureLoad&)            { return false; },
     [&] (const PureStore& store)     { return load.src.maybe(store.dst); },
@@ -506,8 +505,7 @@ bool conflicts(const IRInstruction& instr,
 bool conflicts(const IRInstruction& instr,
                const IRInstruction& sinkee,
                const GeneralEffects& g) {
-  assertx(g.stores == AEmpty && g.kills == AEmpty &&
-          g.inout == AEmpty && g.coeffect == AEmpty);
+  assertx(g.stores == AEmpty && g.kills == AEmpty && g.inout == AEmpty);
 
   auto const test_reads = [&] (const AliasClass& acls) {
     return g.loads.maybe(acls) || g.backtrace.maybe(acls);
@@ -536,8 +534,7 @@ bool conflicts(const IRInstruction& instr,
       return
         test_reads(g2.stores) ||
         test_reads(g2.kills) ||
-        test_reads(g2.inout) ||
-        test_reads(g2.coeffect);
+        test_reads(g2.inout);
     },
     [&] (const PureLoad&)            { return false; },
     [&] (const PureStore& store)     { return test_reads(store.dst); },
@@ -617,8 +614,7 @@ TriBool will_conflict(const IRInstruction& inst) {
     effects,
     [&] (const IrrelevantEffects&)   { return TriBool::No; },
     [&] (const GeneralEffects& g)    {
-      if (g.stores != AEmpty || g.kills != AEmpty ||
-          g.inout != AEmpty || g.coeffect != AEmpty) {
+      if (g.stores != AEmpty || g.kills != AEmpty || g.inout != AEmpty) {
         return TriBool::Maybe;
       }
       // A load out something ref-counted can be blocked.
@@ -1104,13 +1100,8 @@ State make_state(IRUnit& unit,
       effects,
       [&] (const IrrelevantEffects&)   { return true; },
       [&] (const GeneralEffects& g)    {
-        // GeneralEffects is okay as long as it doesn't store
-        // anything.
-        return
-          g.stores == AEmpty &&
-          g.kills == AEmpty &&
-          g.inout == AEmpty &&
-          g.coeffect == AEmpty;
+        // GeneralEffects is okay as long as it doesn't store anything.
+        return g.stores == AEmpty && g.kills == AEmpty && g.inout == AEmpty;
       },
       [&] (const PureLoad&)            { return true; },
       [&] (const ReturnEffects&)       { return false; },

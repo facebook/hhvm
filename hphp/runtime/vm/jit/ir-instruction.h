@@ -156,13 +156,6 @@ struct IRInstruction {
   bool maySyncVMRegsWithSources() const;
 
   /*
-   * Returns true if the instruction may obtain the containing function's
-   * polymorphic coeffects. This signals that the coeffect local should be
-   * stored prior to the instruction.
-   */
-  bool maySyncCoeffectsWithSources() const;
-
-  /*
    * consumesReference covers two similar conditions. Either it decRefs
    * the input, or it transfers ownership of the input to a new location.
    */

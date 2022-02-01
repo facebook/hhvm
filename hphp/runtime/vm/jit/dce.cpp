@@ -1018,7 +1018,6 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
           process_stack(x.inout) ||
           process_stack(x.stores) ||
           process_stack(x.backtrace) ||
-          process_stack(x.coeffect) ||
           process_stack(x.kills);
       },
       [&] (PureLoad x)           { return process_stack(x.src); },

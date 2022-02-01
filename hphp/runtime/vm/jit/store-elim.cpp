@@ -621,7 +621,6 @@ void visit(Local& env, IRInstruction& inst) {
       load(env, l.loads);
       load(env, l.inout);
       load(env, l.backtrace);
-      load(env, l.coeffect);
       mayStore(env, l.stores);
       mayStore(env, l.inout);
       kill(env, l.kills);

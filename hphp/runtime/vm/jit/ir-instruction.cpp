@@ -862,8 +862,4 @@ bool IRInstruction::maySyncVMRegsWithSources() const {
 
 }
 
-bool IRInstruction::maySyncCoeffectsWithSources() const {
-  return false;
-}
-
 }}

@@ -102,15 +102,6 @@ bool any_frame_has_metadata(SSATmp* fp) {
   return false;
 }
 
-AliasClass coeffect_local(const IRInstruction& inst) {
-  auto const fp = inst.marker().fp();
-  if (!fp) return ALocalAny;
-  auto const func = func_from_fp(fp);
-  auto const coeff = func->lookupVarId(s_coeffects_var.get());
-  return coeff != kInvalidId ? ALocal  { fp, (uint32_t)coeff } : AEmpty;
-}
-
-
 AliasClass backtrace_locals(const IRInstruction& inst) {
   auto eachFunc = [&] (auto fn) {
     auto ac = AEmpty;
@@ -216,38 +207,33 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
     return kills_union ? *kills_union : killed_stack;
   }();
 
-  auto const coeffects = inst.maySyncCoeffectsWithSources()
-    ? coeffect_local(inst)
-    : AEmpty;
-
   return GeneralEffects {
     x.loads | AHeapAny | ARdsAny | AVMRegAny | AVMRegState,
     x.stores | AHeapAny | ARdsAny | AVMRegAny,
     x.moves,
     new_kills,
     x.inout,
-    backtrace_locals(inst),
-    coeffects
+    backtrace_locals(inst)
   };
 }
 
 //////////////////////////////////////////////////////////////////////
 
 GeneralEffects may_load_store(AliasClass loads, AliasClass stores) {
-  return GeneralEffects { loads, stores, AEmpty, AEmpty, AEmpty, AEmpty, AEmpty };
+  return GeneralEffects { loads, stores, AEmpty, AEmpty, AEmpty, AEmpty };
 }
 
 GeneralEffects may_load_store_kill(AliasClass loads,
                                    AliasClass stores,
                                    AliasClass kill) {
-  return GeneralEffects { loads, stores, AEmpty, kill, AEmpty, AEmpty, AEmpty };
+  return GeneralEffects { loads, stores, AEmpty, kill, AEmpty, AEmpty };
 }
 
 GeneralEffects may_load_store_move(AliasClass loads,
                                    AliasClass stores,
                                    AliasClass move) {
   assertx(move <= loads);
-  return GeneralEffects { loads, stores, move, AEmpty, AEmpty, AEmpty, AEmpty };
+  return GeneralEffects { loads, stores, move, AEmpty, AEmpty, AEmpty };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -618,7 +604,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         AEmpty,
         stack_below(extra->spOffset) | AMIStateAny,
         inout,
-        AEmpty, AEmpty
+        AEmpty
       };
     }
 
@@ -1846,23 +1832,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // If we ignore the DbgTrashStk it looks like the StStk is redundant
 
   case DbgTrashStk:
-    return GeneralEffects {
-      AEmpty, AEmpty, AEmpty,
-      AStack::at(inst.extra<DbgTrashStk>()->offset),
-      AEmpty, AEmpty, AEmpty
-    };
+    return may_load_store_kill(
+      AEmpty, AEmpty, AStack::at(inst.extra<DbgTrashStk>()->offset));
   case DbgTrashFrame:
-    return GeneralEffects {
-      AEmpty, AEmpty, AEmpty,
-      actrec(inst.src(0), inst.extra<DbgTrashFrame>()->offset),
-      AEmpty, AEmpty, AEmpty
-    };
+    return may_load_store_kill(
+      AEmpty, AEmpty, actrec(inst.src(0), inst.extra<DbgTrashFrame>()->offset));
   case DbgTrashMem:
-    return GeneralEffects {
-      AEmpty, AEmpty, AEmpty,
-      pointee(inst.src(0)),
-      AEmpty, AEmpty, AEmpty
-    };
+    return may_load_store_kill(AEmpty, AEmpty, pointee(inst.src(0)));
 
   //////////////////////////////////////////////////////////////////////
 
@@ -1901,7 +1877,6 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
       check(x.kills);
       check(x.inout);
       check(x.backtrace);
-      check(x.coeffect);
 
       // Locations may-moved always should also count as may-loads.
       always_assert(x.moves <= x.loads);
@@ -1951,7 +1926,6 @@ MemEffects memory_effects(const IRInstruction& inst) {
   auto const inner = memory_effects_impl(inst);
   auto const ret = [&] () -> MemEffects {
     if (!inst.mayRaiseErrorWithSources()) {
-      assertx(!inst.maySyncCoeffectsWithSources());
       if (inst.maySyncVMRegsWithSources()) {
         auto fail = [&] {
           always_assert_flog(
@@ -1969,7 +1943,7 @@ MemEffects memory_effects(const IRInstruction& inst) {
             return GeneralEffects {
               x.loads | AVMRegAny | AVMRegState,
               x.stores | AVMRegAny,
-              x.moves, x.kills, x.inout, x.backtrace, x.coeffect
+              x.moves, x.kills, x.inout, x.backtrace,
             };
           },
           [&] (CallEffects x)      { return fail(); },
@@ -2162,7 +2136,6 @@ MemEffects canonicalize(MemEffects me) {
         canonicalize(x.kills),
         canonicalize(x.inout),
         canonicalize(x.backtrace),
-        canonicalize(x.coeffect)
       };
     },
     [&] (PureLoad x) -> R {
@@ -2205,14 +2178,13 @@ std::string show(MemEffects effects) {
   return match<std::string>(
     effects,
     [&] (GeneralEffects x) {
-      return sformat("mlsmkibc({} ; {} ; {} ; {} ; {} ; {}; {})",
+      return sformat("mlsmkib({} ; {} ; {} ; {} ; {} ; {})",
         show(x.loads),
         show(x.stores),
         show(x.moves),
         show(x.kills),
         show(x.inout),
-        show(x.backtrace),
-        show(x.coeffect)
+        show(x.backtrace)
       );
     },
     [&] (ExitEffects x) {
@@ -2245,7 +2217,7 @@ std::string show(MemEffects effects) {
 
 GeneralEffects general_effects_for_vmreg_liveness(
     GeneralEffects l, KnownRegState liveness) {
-  auto ret = GeneralEffects { l.loads, l.stores, l.moves, l.kills, l.inout, l.backtrace, l.coeffect };
+  auto ret = GeneralEffects { l.loads, l.stores, l.moves, l.kills, l.inout, l.backtrace };
 
   if (liveness == KnownRegState::Dead) {
     ret.loads = l.loads.exclude_vm_reg().value_or(AEmpty);

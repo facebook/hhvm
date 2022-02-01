@@ -28,7 +28,7 @@ struct MakeParserEnv {
     quick_mode: bool,
     show_all_errors: bool,
     fail_open: bool,
-    #[allow(unused)]
+    #[allow(dead_code)]
     disable_global_state_mutation: bool,
     is_systemlib: bool,
 }

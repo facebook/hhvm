@@ -46,7 +46,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
                     fp.type_hint
                         .1
                         .as_ref()
-                        .map(|h| self.decl_hint_env().hint(&h)),
+                        .map(|h| self.decl_hint_env().hint(h)),
                 )
             })
             .collect();
@@ -60,9 +60,9 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
 
         let (return_decl_ty, params_decl_ty) = self.hint_fun_header(&f.params, &f.ret);
         let return_ty = match return_decl_ty.clone() {
-            None => TypingReturn::make_default_return(&self.env, false, &fpos, &fname),
+            None => TypingReturn::make_default_return(self.env, false, &fpos, &fname),
             Some(ty) => TypingReturn::make_return_type(
-                &self.env,
+                self.env,
                 &|env, ty| Phase::localize_no_subst(env, false, None, ty),
                 ty,
             ),
@@ -72,7 +72,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             None => self.ctx.alloc.pos_from_ast(f.name.pos()),
         };
         let return_ = TypingReturn::make_info(
-            &self.env,
+            self.env,
             ret_pos,
             &f.fun_kind,
             &f.user_attributes,
@@ -85,19 +85,19 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             .map(|(param, hint)| {
                 (
                     param,
-                    TypingParam::make_param_local_ty(&self.env, hint.clone(), param),
+                    TypingParam::make_param_local_ty(self.env, hint.clone(), param),
                 )
             })
             .collect();
         param_tys
             .iter()
-            .for_each(|(param, ty)| TypingParam::check_param_has_hint(&self.env, param, ty));
+            .for_each(|(param, ty)| TypingParam::check_param_has_hint(self.env, param, ty));
         // TOOD(hrust): capabilities, immutable
         let typed_params: Vec<_> = param_tys
             .iter()
             .map(|(param, ty)| {
                 Typing::bind_param(
-                    &self.env,
+                    self.env,
                     BindParamFlags {
                         immutable: false,
                         can_read_globals: true,
@@ -110,7 +110,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         // TODO(variance)
         // TODO(memoize)
         let tb = Typing::fun_(
-            &self.env,
+            self.env,
             Default::default(),
             return_,
             fpos.clone(),

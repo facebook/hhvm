@@ -16,18 +16,10 @@ pub struct BindParamFlags {
     pub can_read_globals: bool,
 }
 
+#[derive(Default)]
 pub struct TypingFunFlags {
     pub abstract_: bool,
     pub disable: bool,
-}
-
-impl Default for TypingFunFlags {
-    fn default() -> Self {
-        Self {
-            abstract_: false,
-            disable: false,
-        }
-    }
 }
 
 impl Typing {

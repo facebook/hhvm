@@ -56,8 +56,8 @@ impl<R: Reason> ShallowDeclProvider<R> {
         for (name, decl) in decls.iter() {
             use oxidized_by_ref::direct_decl_parser::Decl::*;
             match decl {
-                Class(sc) => drop(self.add_from_oxidized_class(sc)),
-                Fun(sf) => drop(self.add_from_oxidized_fun(name, sf)),
+                Class(sc) => self.add_from_oxidized_class(sc),
+                Fun(sf) => self.add_from_oxidized_fun(name, sf),
                 decl => unimplemented!("new_local_with_decls: {:?}", decl),
             }
         }

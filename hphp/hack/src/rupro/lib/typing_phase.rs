@@ -32,11 +32,11 @@ impl Phase {
                     ety_env,
                     r,
                     pos_id.clone(),
-                    &tyl,
+                    tyl,
                     Some(&cls),
                 ),
                 None => {
-                    Self::localize_class_instantiation(env, ety_env, r, pos_id.clone(), &tyl, None)
+                    Self::localize_class_instantiation(env, ety_env, r, pos_id.clone(), tyl, None)
                 }
             },
             DTfun(ft) => {

@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 #![allow(dead_code)]
-use std::convert::From;
 
 use crate::reason::Reason;
 use crate::typing_error::TypingErrorCode;
@@ -26,6 +25,7 @@ enum Enum<R: Reason> {
     Retain(Box<Inner<R>>, Component),
 }
 
+// Wrapping here allows Enum variants and their fields to remain private.
 #[derive(Clone, Debug)]
 pub struct Inner<R: Reason>(Enum<R>);
 

@@ -15,7 +15,7 @@ pub struct Lazy<'a, T> {
 
 impl<'a, T: std::fmt::Debug> std::fmt::Debug for Lazy<'a, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        Self::force(&self).fmt(f)
+        Self::force(self).fmt(f)
     }
 }
 

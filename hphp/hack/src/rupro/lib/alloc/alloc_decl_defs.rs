@@ -13,7 +13,7 @@ impl<R: Reason> Allocator<R> {
         Tparam {
             variance: tparam.variance,
             name: self.pos_id_from_decl(tparam.name),
-            tparams: self.tparams(&tparam.tparams),
+            tparams: self.tparams(tparam.tparams),
             constraints: tparam
                 .constraints
                 .iter()

@@ -2,8 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use std::convert::From;
-
 use crate::parsing_error::ParsingError;
 use crate::reason::Reason;
 use crate::typing_error::TypingError;

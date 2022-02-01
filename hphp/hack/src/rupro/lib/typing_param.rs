@@ -22,9 +22,8 @@ impl TypingParam {
             None => env.ctx.alloc.tany(r),
             Some(ty) => {
                 // TODO(hrust): enforceability
-                let ty = Phase::localize_no_subst(env, false, None, ty.clone());
                 // TODO(hrust): variadic
-                ty
+                Phase::localize_no_subst(env, false, None, ty)
             }
         }
     }

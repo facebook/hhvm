@@ -531,6 +531,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "compiler_helpers_ffi"
+version = "0.0.0"
+dependencies = [
+ "compile",
+ "cxx",
+ "cxx-build",
+ "hhvm_options",
+]
+
+[[package]]
 name = "config_file"
 version = "0.0.0"
 dependencies = [
@@ -1709,6 +1719,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "hdf"
+version = "0.0.0"
+dependencies = [
+ "hash",
+ "indexmap",
+ "libc",
+ "once_cell",
+ "thiserror",
+]
+
+[[package]]
 name = "heapless"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2074,6 +2095,26 @@ dependencies = [
  "ocaml_helper",
  "pretty_assertions",
  "regex",
+]
+
+[[package]]
+name = "hhvm_options"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "hdf",
+ "hhvm_runtime_options",
+ "structopt",
+]
+
+[[package]]
+name = "hhvm_runtime_options"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "cxx",
+ "hdf",
+ "log",
 ]
 
 [[package]]

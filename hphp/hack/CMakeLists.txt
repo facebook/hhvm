@@ -244,6 +244,10 @@ endfunction()
 
 build_cxx_bridge(parser "src/parser/ffi_bridge")
 build_cxx_bridge(compiler "src/hackc/ffi_bridge")
+build_cxx_bridge(compiler_helpers "src/hackc/helpers")
+
+add_executable(hh_single_compile "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hh_single_compile.cpp")
+target_link_libraries(hh_single_compile parser_ffi compiler_ffi compiler_helpers_ffi hhbc_ast_header)
 
 if (NOT LZ4_FOUND)
   add_dependencies(hack_dune lz4)

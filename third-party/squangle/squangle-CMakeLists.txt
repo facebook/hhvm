@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # TODO when Ubuntu 18.04 support is dropped:
 # - use CONFIGURE_DEPENDS in these globs
 
-file(GLOB_RECURSE SOURCES "*.cpp")
+file(GLOB_RECURSE SOURCES "squangle/*.cpp")
 
 add_library(squangle STATIC ${SOURCES})
 target_include_directories(squangle PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

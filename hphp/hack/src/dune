@@ -126,29 +126,6 @@
   utils_core
   utils_exit))
 
-(executable
- (name hh_single_compile)
- (modules hh_single_compile)
- (modes exe byte_complete)
- (libraries
-  compile_ffi
-  compiler_id
-  default_injector_config
-  facts
-  global_config
-  global_options
-  hhbc
-  hhi
-  heap_ident
-  logging
-  utils_multifile
-  naming
-  naming_elaborate_namespaces_endo
-  memory_stats)
- (link_flags
-  (:standard
-   (:include dune_config/ld-opts.sexp))))
-
 (library
  (name full_fidelity_parse_args)
  (wrapped false)
@@ -220,7 +197,6 @@
   hh_fanout/hh_fanout.exe
   hh_parse.exe
   hh_server.exe
-  hh_single_compile.exe
   hh_single_decl.exe
   hh_single_type_check.exe
   hh_single_complete.exe
@@ -233,11 +209,11 @@
 
 (alias
  (name single)
- (deps hh_single_type_check.exe hh_single_compile.exe))
+ (deps hh_single_type_check.exe))
 
 (alias
  (name debug-single)
- (deps hh_single_type_check.bc.exe hh_single_compile.bc.exe))
+ (deps hh_single_type_check.bc.exe))
 
 (alias
  (name debug)
@@ -247,7 +223,6 @@
   hh_fanout/hh_fanout.bc.exe
   hh_parse.bc.exe
   hh_server.bc.exe
-  hh_single_compile.bc.exe
   hh_single_type_check.bc.exe
   hh_single_complete.bc.exe
   hh_single_ai.bc.exe))

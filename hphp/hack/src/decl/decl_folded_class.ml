@@ -828,7 +828,7 @@ and class_decl
   let deferred_members =
     Decl_init_check.nonprivate_deferred_init_props
       ~has_own_cstr
-      ~class_cache:parents
+      ~class_cache:(Some parents)
       env
       c
   in

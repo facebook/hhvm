@@ -209,9 +209,9 @@ module Env = struct
         let decl_env = tenv.Typing_env_types.decl_env in
         ( DICheck.init_not_required_props c,
           DICheck.trait_props decl_env c,
-          DICheck.parent_props decl_env c,
-          DICheck.parent decl_env c,
-          DICheck.parent_initialized_members decl_env c
+          DICheck.parent_props ~class_cache:None decl_env c,
+          DICheck.parent ~class_cache:None decl_env c,
+          DICheck.parent_initialized_members ~class_cache:None decl_env c
           |> filter_props_by_type tenv (snd c.c_name) )
     in
     let init_not_required_props = add_init_not_required_props SSet.empty in

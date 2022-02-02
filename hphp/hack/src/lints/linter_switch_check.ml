@@ -11,6 +11,7 @@ open Aast
 module Env = Tast_env
 module Reason = Typing_reason
 module MakeType = Typing_make_type
+module SN = Naming_special_names
 module Typing = Typing_defs
 module Cls = Decl_provider.Class
 
@@ -20,8 +21,22 @@ let ensure_valid_switch_case_value_types env scrutinee_ty casel =
   let ty_arraykey = MakeType.arraykey Reason.Rnone in
   let ty_mixed = MakeType.mixed Reason.Rnone in
   let ty_traversable = MakeType.traversable Typing_reason.Rnone ty_mixed in
+  (* Enum class label === only consider the label name. No type information
+   * is enforced as they might not be available to the runtime in all
+   * use cases.
+   * If one of the two type is a label, we don't run this linter as it
+   * would fire wrong warnings. Note that if one is a label and the other
+   * is not, a Hack error 4020 is fired.
+   *)
+  let is_label ty =
+    let open Typing_defs in
+    match get_node ty with
+    | Tnewtype (name, [_; _], _) -> String.equal name SN.Classes.cEnumClassLabel
+    | _ -> false
+  in
   let compatible_types ty1 ty2 =
-    (is_subtype ty1 ty_num && is_subtype ty2 ty_num)
+    (is_label ty1 || is_label ty2)
+    || (is_subtype ty1 ty_num && is_subtype ty2 ty_num)
     || (is_subtype ty1 ty_arraykey && is_subtype ty2 ty_arraykey)
     || is_subtype ty1 ty_traversable
        && is_subtype ty2 ty_traversable

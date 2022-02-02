@@ -6,6 +6,8 @@
 use bitflags::bitflags;
 use eq_modulo_pos::EqModuloPos;
 
+use crate::xhp_attribute::{self, XhpAttribute};
+
 // NB: Keep the values of these flags in sync with typing_defs_flags.ml.
 
 bitflags! {
@@ -75,6 +77,89 @@ bitflags! {
         const XA_TAG_LATEINIT          = 1 << 11;
         const READONLY_PROP            = 1 << 12;
         const NEEDS_INIT               = 1 << 13;
+
+        const XA_FLAGS_MASK = Self::XA_HAS_DEFAULT.bits | Self::XA_TAG_REQUIRED.bits | Self::XA_TAG_LATEINIT.bits;
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
+pub struct ClassEltFlagsArgs {
+    pub xhp_attr: Option<XhpAttribute>,
+    pub is_abstract: bool,
+    pub is_final: bool,
+    pub has_superfluous_override: bool,
+    pub is_lsb: bool,
+    pub is_synthesized: bool,
+    pub is_const: bool,
+    pub is_lateinit: bool,
+    pub is_dynamicallycallable: bool,
+    pub is_readonly_prop: bool,
+    pub supports_dynamic_type: bool,
+    pub needs_init: bool,
+}
+
+impl From<xhp_attribute::Tag> for ClassEltFlags {
+    fn from(tag: xhp_attribute::Tag) -> Self {
+        use xhp_attribute::Tag;
+        match tag {
+            Tag::Required => Self::XA_TAG_REQUIRED,
+            Tag::LateInit => Self::XA_TAG_LATEINIT,
+        }
+    }
+}
+
+impl From<Option<XhpAttribute>> for ClassEltFlags {
+    fn from(xhp_attr: Option<XhpAttribute>) -> Self {
+        let mut flags = Self::empty();
+        if let Some(XhpAttribute { tag, has_default }) = xhp_attr {
+            if let Some(tag) = tag {
+                flags.insert(Self::from(tag));
+            } else {
+                flags.insert(Self::XA_TAG_REQUIRED | Self::XA_TAG_LATEINIT);
+            }
+            if has_default {
+                flags.insert(Self::XA_HAS_DEFAULT);
+            }
+        }
+        flags
+    }
+}
+
+impl ClassEltFlags {
+    pub fn new(args: ClassEltFlagsArgs) -> Self {
+        let ClassEltFlagsArgs {
+            xhp_attr,
+            is_abstract,
+            is_final,
+            has_superfluous_override,
+            is_lsb,
+            is_synthesized,
+            is_const,
+            is_lateinit,
+            is_dynamicallycallable,
+            is_readonly_prop,
+            supports_dynamic_type,
+            needs_init,
+        } = args;
+        let mut flags = Self::empty();
+        flags.set(Self::ABSTRACT, is_abstract);
+        flags.set(Self::FINAL, is_final);
+        flags.set(Self::SUPERFLUOUS_OVERRIDE, has_superfluous_override);
+        flags.set(Self::LSB, is_lsb);
+        flags.set(Self::SYNTHESIZED, is_synthesized);
+        flags.set(Self::CONST, is_const);
+        flags.set(Self::LATEINIT, is_lateinit);
+        flags.set(Self::DYNAMICALLYCALLABLE, is_dynamicallycallable);
+        flags.set_xhp_attr(xhp_attr);
+        flags.set(Self::READONLY_PROP, is_readonly_prop);
+        flags.set(Self::SUPPORT_DYNAMIC_TYPE, supports_dynamic_type);
+        flags.set(Self::NEEDS_INIT, needs_init);
+        flags
+    }
+
+    fn set_xhp_attr(&mut self, xa: Option<XhpAttribute>) {
+        self.remove(Self::XA_FLAGS_MASK);
+        self.insert(Self::from(xa));
     }
 }
 

@@ -4,8 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl_defs::{
-    make_ce_flags, CeVisibility, DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass,
-    ShallowMethod,
+    CeVisibility, DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass, ShallowMethod,
 };
 use crate::folded_decl_provider::FoldedDeclCache;
 use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
@@ -80,37 +79,25 @@ impl<R: Reason> FoldedDeclProvider<R> {
         };
 
         let meth_flags = &sm.flags;
-        let is_final = meth_flags.is_final();
-        let is_abstract = meth_flags.is_final();
-        let is_superfluous_override = meth_flags.is_override() && !methods.contains_key(&meth);
-        let is_dynamicallycallable = meth_flags.is_dynamicallycallable();
-        let supports_dynamic_type = meth_flags.supports_dynamic_type();
-        let synthesized = false;
-        let lsb = false;
-        let const_ = false;
-        let lateinit = false;
-        let readonly_prop = false;
-        let needs_init = false;
-        let xhp_attr = None;
-
+        let flag_args = oxidized_by_ref::typing_defs_flags::ClassEltFlagsArgs {
+            xhp_attr: None,
+            is_abstract: meth_flags.is_abstract(),
+            is_final: meth_flags.is_final(),
+            has_superfluous_override: meth_flags.is_override() && !methods.contains_key(&meth),
+            is_lsb: false,
+            is_synthesized: false,
+            is_const: false,
+            is_lateinit: false,
+            is_dynamicallycallable: meth_flags.is_dynamicallycallable(),
+            is_readonly_prop: false,
+            supports_dynamic_type: meth_flags.supports_dynamic_type(),
+            needs_init: false,
+        };
         let elt = FoldedElement {
             origin: sc.name.id(),
             visibility: vis,
             deprecated: sm.deprecated,
-            flags: make_ce_flags(
-                xhp_attr,
-                is_final,
-                is_abstract,
-                is_superfluous_override,
-                synthesized,
-                lsb,
-                const_,
-                lateinit,
-                is_dynamicallycallable,
-                readonly_prop,
-                supports_dynamic_type,
-                needs_init,
-            ),
+            flags: oxidized_by_ref::typing_defs::ClassEltFlags::new(flag_args),
         };
 
         methods.insert(meth, elt);

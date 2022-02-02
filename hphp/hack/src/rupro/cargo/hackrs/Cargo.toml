@@ -14,6 +14,7 @@ dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }
 hcons = { path = "../../../hcons" }
 im = { version = "14.2", features = ["rayon", "serde"] }
+intern = { path = "../../../../../../relay/oss/crates/intern" }
 lazy_static = "1.0"
 lint_rust = { path = "../../../utils/lint" }
 naming_special_names_rust = { path = "../../../naming" }

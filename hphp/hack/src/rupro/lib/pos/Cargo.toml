@@ -8,6 +8,5 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-hash = { path = "../../../utils/hash" }
-hcons = { path = "../../../hcons" }
+intern = { path = "../../../../../../relay/oss/crates/intern" }
 oxidized = { path = "../../../oxidized" }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f712b05cbc3c365968fd5ab937023b4d>>
+// @generated SignedSource<<4b72fca08708966735e1c6f392c6b8e4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -190,29 +190,7 @@ pub struct FunElt<'a> {
 impl<'a> TrivialDrop for FunElt<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(FunElt<'arena>);
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum ClassConstKind {
-    CCAbstract(bool),
-    CCConcrete,
-}
-impl TrivialDrop for ClassConstKind {}
-arena_deserializer::impl_deserialize_in_arena!(ClassConstKind);
+pub use oxidized::typing_defs::ClassConstKind;
 
 #[derive(
     Clone,
@@ -232,7 +210,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConstKind);
 #[repr(C)]
 pub struct ClassConst<'a> {
     pub synthesized: bool,
-    pub abstract_: ClassConstKind,
+    pub abstract_: oxidized::typing_defs::ClassConstKind,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub pos: &'a pos_or_decl::PosOrDecl<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

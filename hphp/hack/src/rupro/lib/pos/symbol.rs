@@ -30,6 +30,17 @@ impl std::convert::AsRef<str> for Symbol {
     }
 }
 
+impl PartialOrd for Symbol {
+    fn partial_cmp(&self, other: &Symbol) -> Option<std::cmp::Ordering> {
+        self.0.as_str().partial_cmp(other.0.as_str())
+    }
+}
+impl Ord for Symbol {
+    fn cmp(&self, other: &Symbol) -> std::cmp::Ordering {
+        self.0.as_str().cmp(other.0.as_str())
+    }
+}
+
 impl ToString for Symbol {
     fn to_string(&self) -> String {
         self.0.to_string()

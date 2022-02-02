@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::alloc::Allocator;
-use crate::decl_defs::{ClassishKind, ShallowClass, ShallowFun, ShallowMethod};
+use crate::decl_defs::ShallowClass;
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclCache;
 use bumpalo::Bump;
@@ -37,7 +37,7 @@ impl<R: Reason> ShallowDeclProvider<R> {
     }
 
     pub fn add_from_oxidized_class(&self, sc: &oxidized_by_ref::shallow_decl_defs::ClassDecl<'_>) {
-        let res = Arc::new(self.utils().shallow_class(sc));
+        let res = Arc::new(self.alloc.shallow_class(sc));
         self.cache.put_shallow_class(res.name.id(), res);
     }
 
@@ -46,7 +46,7 @@ impl<R: Reason> ShallowDeclProvider<R> {
         name: &str,
         sf: &oxidized_by_ref::shallow_decl_defs::FunDecl<'_>,
     ) {
-        let res = Arc::new(self.utils().shallow_fun(sf));
+        let res = Arc::new(self.alloc.shallow_fun(sf));
         let name = self.alloc.symbol(name);
         self.cache.put_shallow_fun(name, res);
     }
@@ -89,79 +89,5 @@ impl<R: Reason> ShallowDeclProvider<R> {
             self.add_from_oxidized_decls(&parsed_file.decls);
         }
         Ok(())
-    }
-
-    fn utils(&self) -> ShallowDeclUtils<R> {
-        ShallowDeclUtils::new(self.alloc)
-    }
-}
-
-struct ShallowDeclUtils<R: Reason> {
-    alloc: &'static Allocator<R>,
-}
-
-impl<R: Reason> ShallowDeclUtils<R> {
-    fn new(alloc: &'static Allocator<R>) -> Self {
-        Self { alloc }
-    }
-
-    fn shallow_method(
-        &self,
-        sm: &oxidized_by_ref::shallow_decl_defs::ShallowMethod<'_>,
-    ) -> ShallowMethod<R> {
-        ShallowMethod {
-            name: self.alloc.pos_id_from_decl(sm.name),
-            ty: self.alloc.decl_ty_from_ast(sm.type_),
-            visibility: sm.visibility,
-            deprecated: sm.deprecated.map(|s| self.alloc.bytes(s)),
-            flags: sm.flags,
-            attributes: sm
-                .attributes
-                .iter()
-                .map(|attr| self.alloc.user_attribute(attr))
-                .collect(),
-        }
-    }
-
-    fn shallow_class(
-        &self,
-        sc: &oxidized_by_ref::shallow_decl_defs::ClassDecl<'_>,
-    ) -> ShallowClass<R> {
-        ShallowClass {
-            mode: sc.mode,
-            is_final: sc.final_,
-            is_abstract: sc.abstract_,
-            is_xhp: sc.is_xhp,
-            has_xhp_keyword: sc.has_xhp_keyword,
-            kind: ClassishKind::from(sc.kind),
-            name: self.alloc.pos_id_from_decl(sc.name),
-            tparams: self.alloc.tparams(sc.tparams),
-            extends: sc
-                .extends
-                .iter()
-                .map(|ty| self.alloc.decl_ty_from_ast(ty))
-                .collect(),
-            methods: sc
-                .methods
-                .iter()
-                .map(|sm| self.shallow_method(sm))
-                .collect(),
-            static_methods: sc
-                .static_methods
-                .iter()
-                .map(|sm| self.shallow_method(sm))
-                .collect(),
-            module: sc
-                .module
-                .as_ref()
-                .map(|id| self.alloc.pos_id_from_ast_ref(id)),
-        }
-    }
-
-    fn shallow_fun(&self, sf: &oxidized_by_ref::shallow_decl_defs::FunDecl<'_>) -> ShallowFun<R> {
-        ShallowFun {
-            pos: self.alloc.pos_from_decl(sf.pos),
-            ty: self.alloc.decl_ty_from_ast(sf.type_),
-        }
     }
 }

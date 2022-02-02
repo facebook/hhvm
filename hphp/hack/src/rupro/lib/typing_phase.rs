@@ -3,10 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{DeclTy, DeclTy_, FunParam, FunType};
+use crate::decl_defs::{self, DeclTy, DeclTy_};
 use crate::reason::Reason;
 use crate::typing_decl_provider::Class;
-use crate::typing_defs::{Exact, ExpandEnv, Ty, Ty_, TypeExpansion, TypeExpansions};
+use crate::typing_defs::{
+    Exact, ExpandEnv, FunParam, FunType, Ty, Ty_, TypeExpansion, TypeExpansions,
+};
 use crate::typing_env::TEnv;
 use crate::typing_error::ReasonsCallback;
 use pos::{Positioned, Symbol};
@@ -43,6 +45,7 @@ impl Phase {
                 let ft = Self::localize_ft(env, ety_env, pos, ft);
                 alloc.ty(r, Tfun(ft))
             }
+            _ => todo!(),
         }
     }
 
@@ -84,15 +87,15 @@ impl Phase {
         env: &TEnv<R>,
         ety_env: &mut ExpandEnv<'_, R>,
         _def_pos: R::Pos,
-        ft: &FunType<R, DeclTy<R>>,
-    ) -> FunType<R, Ty<R>> {
+        ft: &decl_defs::ty::FunType<R, DeclTy<R>>,
+    ) -> FunType<R> {
         // TODO(hrust): tparams
         assert!(ft.params.is_empty());
         let params = ft
             .params
             .iter()
             .map(|fp| {
-                let ty = Self::localize_possibly_enforced_ty(env, ety_env, fp.ty.clone());
+                let ty = Self::localize_possibly_enforced_ty(env, ety_env, fp.ty.ty.clone());
                 FunParam {
                     pos: fp.pos.clone(),
                     name: fp.name,
@@ -100,7 +103,7 @@ impl Phase {
                 }
             })
             .collect();
-        let ret = Self::localize_possibly_enforced_ty(env, ety_env, ft.ret.clone());
+        let ret = Self::localize_possibly_enforced_ty(env, ety_env, ft.ret.ty.clone());
         FunType { params, ret }
     }
 

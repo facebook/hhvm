@@ -14,6 +14,12 @@ impl From<u64> for Ident {
     }
 }
 
+impl From<isize> for Ident {
+    fn from(x: isize) -> Self {
+        Self(x.try_into().unwrap())
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct IdentGen {
     next: Rc<RefCell<u64>>,

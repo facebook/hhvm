@@ -87,6 +87,8 @@ type sid = Aast.sid [@@deriving show]
 
 type shape_field_name = Ast_defs.shape_field_name
 
+type hint = Aast.hint
+
 type class_hint = Aast.class_hint
 
 type trait_hint = Aast.trait_hint

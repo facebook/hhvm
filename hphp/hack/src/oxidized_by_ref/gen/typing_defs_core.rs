@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<28bd86b9941073fe1f461e020fe224b9>>
+// @generated SignedSource<<d5df50bb5d56254498afa4334e1b29d2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,7 +11,6 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
@@ -79,114 +78,13 @@ pub enum IfcFunDecl<'a> {
 impl<'a> TrivialDrop for IfcFunDecl<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(IfcFunDecl<'arena>);
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum Exact {
-    Exact,
-    Nonexact,
-}
-impl TrivialDrop for Exact {}
-arena_deserializer::impl_deserialize_in_arena!(Exact);
+pub use oxidized::typing_defs_core::Exact;
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum ValKind {
-    Lval,
-    LvalSubexpr,
-    Other,
-}
-impl TrivialDrop for ValKind {}
-arena_deserializer::impl_deserialize_in_arena!(ValKind);
+pub use oxidized::typing_defs_core::ValKind;
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum FunTparamsKind {
-    /// If ft_tparams is empty, the containing fun_type is a concrete function type.
-    /// Otherwise, it is a generic function and ft_tparams specifies its type parameters.
-    FTKtparams,
-    /// The containing fun_type is a concrete function type which is an
-    /// instantiation of a generic function with at least one reified type
-    /// parameter. This means that the function requires explicit type arguments
-    /// at every invocation, and ft_tparams specifies the type arguments with
-    /// which the generic function was instantiated, as well as whether each
-    /// explicit type argument must be reified.
-    FTKinstantiatedTargs,
-}
-impl TrivialDrop for FunTparamsKind {}
-arena_deserializer::impl_deserialize_in_arena!(FunTparamsKind);
+pub use oxidized::typing_defs_core::FunTparamsKind;
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum ShapeKind {
-    ClosedShape,
-    OpenShape,
-}
-impl TrivialDrop for ShapeKind {}
-arena_deserializer::impl_deserialize_in_arena!(ShapeKind);
+pub use oxidized::typing_defs_core::ShapeKind;
 
 #[derive(
     Clone,
@@ -268,65 +166,11 @@ pub enum TshapeFieldName<'a> {
 impl<'a> TrivialDrop for TshapeFieldName<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(TshapeFieldName<'arena>);
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum ParamMode {
-    FPnormal,
-    FPinout,
-}
-impl TrivialDrop for ParamMode {}
-arena_deserializer::impl_deserialize_in_arena!(ParamMode);
+pub use oxidized::typing_defs_core::ParamMode;
 
-pub type XhpAttr = xhp_attribute::XhpAttribute;
+pub type XhpAttr = oxidized::xhp_attribute::XhpAttribute;
 
-/// Denotes the categories of requirements we apply to constructor overrides.
-///
-/// In the default case, we use Inconsistent. If a class has <<__ConsistentConstruct>>,
-/// or if it inherits a class that has <<__ConsistentConstruct>>, we use inherited.
-/// If we have a new final class that doesn't extend from <<__ConsistentConstruct>>,
-/// then we use Final. Only classes that are Inconsistent or Final can have reified
-/// generics.
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum ConsistentKind {
-    Inconsistent,
-    ConsistentConstruct,
-    FinalClass,
-}
-impl TrivialDrop for ConsistentKind {}
-arena_deserializer::impl_deserialize_in_arena!(ConsistentKind);
+pub use oxidized::typing_defs_core::ConsistentKind;
 
 #[derive(
     Clone,
@@ -431,30 +275,7 @@ pub struct WhereConstraint<'a>(
 impl<'a> TrivialDrop for WhereConstraint<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(WhereConstraint<'arena>);
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum Enforcement {
-    Unenforced,
-    Enforced,
-}
-impl TrivialDrop for Enforcement {}
-arena_deserializer::impl_deserialize_in_arena!(Enforcement);
+pub use oxidized::typing_defs_core::Enforcement;
 
 #[derive(
     Clone,
@@ -616,7 +437,7 @@ pub enum Ty_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tshape(
         &'a (
-            ShapeKind,
+            oxidized::typing_defs_core::ShapeKind,
             t_shape_map::TShapeMap<'a, &'a ShapeFieldType<'a>>,
         ),
     ),
@@ -685,7 +506,13 @@ pub enum Ty_<'a> {
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Tclass(&'a (PosId<'a>, Exact, &'a [&'a Ty<'a>])),
+    Tclass(
+        &'a (
+            PosId<'a>,
+            oxidized::typing_defs_core::Exact,
+            &'a [&'a Ty<'a>],
+        ),
+    ),
     /// The negation of the type in neg_type
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Tneg(&'a NegType<'a>),
@@ -854,7 +681,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunArity<'arena>);
 #[repr(C)]
 pub struct PossiblyEnforcedTy<'a> {
     /// True if consumer of this type enforces it at runtime
-    pub enforced: Enforcement,
+    pub enforced: oxidized::typing_defs_core::Enforcement,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub type_: &'a Ty<'a>,
 }
@@ -891,29 +718,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunParam<'arena>);
 
 pub type FunParams<'a> = [&'a FunParam<'a>];
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum DestructureKind {
-    ListDestructure,
-    SplatUnpack,
-}
-impl TrivialDrop for DestructureKind {}
-arena_deserializer::impl_deserialize_in_arena!(DestructureKind);
+pub use oxidized::typing_defs_core::DestructureKind;
 
 #[derive(
     Clone,
@@ -952,7 +757,7 @@ pub struct Destructure<'a> {
     pub variadic: Option<&'a Ty<'a>>,
     /// list() destructuring allows for partial matches on lists, even when the operation
     /// might throw i.e. list($a) = vec[];
-    pub kind: DestructureKind,
+    pub kind: oxidized::typing_defs_core::DestructureKind,
 }
 impl<'a> TrivialDrop for Destructure<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Destructure<'arena>);

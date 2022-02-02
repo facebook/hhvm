@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7a292537ba9b1dfec2711820fedd6829>>
+// @generated SignedSource<<7514d3f805bfd11d2606b66d279ee74a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -90,40 +90,7 @@ pub use oxidized::ast_defs::Reified;
 
 pub use oxidized::ast_defs::Abstraction;
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum ClassishKind<'a> {
-    /// Kind for `class` and `abstract class`
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Cclass(&'a oxidized::ast_defs::Abstraction),
-    /// Kind for `interface`
-    Cinterface,
-    /// Kind for `trait`
-    Ctrait,
-    /// Kind for `enum`
-    Cenum,
-    /// Kind for `enum class` and `abstract enum class`.
-    /// See https://docs.hhvm.com/hack/built-in-types/enum-class
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    CenumClass(&'a oxidized::ast_defs::Abstraction),
-}
-impl<'a> TrivialDrop for ClassishKind<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(ClassishKind<'arena>);
+pub use oxidized::ast_defs::ClassishKind;
 
 #[derive(
     Clone,

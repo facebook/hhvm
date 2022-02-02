@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ca275988254e1af2472f4b4c8aaecc03>>
+// @generated SignedSource<<da07fa35277d8c521e08af7a37a93793>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -132,7 +132,7 @@ impl<'a> Node<'a> for ClassConstRef<'a> {
         }
     }
 }
-impl<'a> Node<'a> for ClassishKind<'a> {
+impl<'a> Node<'a> for ClassishKind {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_classish_kind(self)
     }

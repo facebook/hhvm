@@ -13,17 +13,18 @@ use lazy_static::lazy_static;
 
 use hcons::Conser;
 
-use crate::decl_defs::{DeclTy, DeclTy_};
+use crate::decl_defs::DeclTy_;
 use crate::reason::{BReason, NReason, Reason};
 use crate::typing_defs::{Ty, Ty_};
 
-pub struct GlobalAllocator {
-    bytes: Conser<[u8]>,
-}
+/// For types which are not parameterized over Reason. Currently does not
+/// allocate anything (bytes, strings, and paths are handled by the `intern`
+/// crate, and allocated in its static tables for bytes and paths).
+pub struct GlobalAllocator {}
 
 pub struct Allocator<R: Reason> {
     global: &'static GlobalAllocator,
-    decl_tys: Conser<DeclTy_<R, DeclTy<R>>>,
+    decl_tys: Conser<DeclTy_<R>>,
     typing_tys: Conser<Ty_<R, Ty<R>>>,
 }
 
@@ -53,9 +54,7 @@ lazy_static! {
 
 impl GlobalAllocator {
     fn new() -> Self {
-        Self {
-            bytes: Conser::new(),
-        }
+        Self {}
     }
 }
 

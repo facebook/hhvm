@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::decl_defs::{CeVisibility, DeclTy};
 use crate::reason::Reason;
-use hcons::Hc;
 use pos::{Symbol, SymbolMap};
 
 #[derive(Debug, Clone)]
@@ -12,8 +11,8 @@ pub struct FoldedElement<R: Reason> {
     // note(sf, 2022-01-28): c.f. `Decl_defs.element`
     pub flags: oxidized_by_ref::typing_defs_flags::ClassEltFlags,
     pub origin: Symbol,
-    pub visibility: CeVisibility<R>,
-    pub deprecated: Option<Hc<str>>,
+    pub visibility: CeVisibility<R::Pos>,
+    pub deprecated: Option<intern::string::BytesId>,
 }
 
 #[derive(Debug, Clone)]

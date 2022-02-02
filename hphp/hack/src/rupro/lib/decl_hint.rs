@@ -16,16 +16,12 @@ impl<R: Reason> DeclHintEnv<R> {
         Self { alloc }
     }
 
-    fn mk_hint_decl_ty(&self, pos: &oxidized::pos::Pos, ty: DeclTy_<R, DeclTy<R>>) -> DeclTy<R> {
+    fn mk_hint_decl_ty(&self, pos: &oxidized::pos::Pos, ty: DeclTy_<R>) -> DeclTy<R> {
         let reason = R::mk(|| ReasonImpl::Rhint(self.alloc.pos_from_ast(pos)));
         self.alloc.decl_ty(reason, ty)
     }
 
-    fn hint_(
-        &self,
-        _pos: &oxidized::pos::Pos,
-        hint: &oxidized::aast_defs::Hint_,
-    ) -> DeclTy_<R, DeclTy<R>> {
+    fn hint_(&self, _pos: &oxidized::pos::Pos, hint: &oxidized::aast_defs::Hint_) -> DeclTy_<R> {
         use oxidized::aast_defs::Hint_ as OH;
         match hint {
             OH::Happly(id, argl) => {

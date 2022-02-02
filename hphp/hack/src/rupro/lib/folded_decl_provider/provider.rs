@@ -11,7 +11,6 @@ use crate::folded_decl_provider::FoldedDeclCache;
 use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclProvider;
-use hcons::Hc;
 use pos::{Positioned, Symbol, SymbolMap, SymbolSet};
 use std::sync::Arc;
 
@@ -49,7 +48,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
         cls: Symbol,
         module: Option<&Positioned<Symbol, R::Pos>>,
         vis: oxidized::ast_defs::Visibility,
-    ) -> CeVisibility<R> {
+    ) -> CeVisibility<R::Pos> {
         use oxidized::ast_defs::Visibility;
         match vis {
             Visibility::Public => CeVisibility::Public,
@@ -97,7 +96,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
         let elt = FoldedElement {
             origin: sc.name.id(),
             visibility: vis,
-            deprecated: sm.deprecated.as_ref().map(Hc::clone),
+            deprecated: sm.deprecated,
             flags: make_ce_flags(
                 xhp_attr,
                 is_final,

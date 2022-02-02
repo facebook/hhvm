@@ -5,13 +5,12 @@
 
 use super::{Allocator, GlobalAllocator};
 use crate::reason::Reason;
-use hcons::Hc;
-use intern::path::PathId;
+use intern::{path::PathId, string::BytesId};
 use pos::{Prefix, RelativePath, Symbol};
 
 impl GlobalAllocator {
-    pub fn bytes(&self, s: &str) -> Hc<str> {
-        self.bytes.mk_str(s)
+    pub fn bytes(&self, bytes: impl AsRef<[u8]>) -> BytesId {
+        intern::string::intern_bytes(bytes.as_ref())
     }
 
     pub fn symbol(&self, symbol: &str) -> Symbol {
@@ -44,8 +43,8 @@ impl GlobalAllocator {
 }
 
 impl<R: Reason> Allocator<R> {
-    pub fn bytes(&self, s: &str) -> Hc<str> {
-        self.global.bytes(s)
+    pub fn bytes(&self, bytes: impl AsRef<[u8]>) -> BytesId {
+        self.global.bytes(bytes)
     }
 
     pub fn symbol(&self, symbol: &str) -> Symbol {

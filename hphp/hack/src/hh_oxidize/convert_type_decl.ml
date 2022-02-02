@@ -82,15 +82,10 @@ let derive_copy ty = Convert_type.is_copy (Rust_type.rust_simple_type ty)
 let is_by_box () = not (is_by_ref ())
 
 let additional_derives ty : (string option * string) list =
-  (if derive_copy ty then
-    [(None, "Copy")]
-  else
-    [])
-  @
-  match ty with
-  | "aast::EmitId" when is_by_box () ->
+  if derive_copy ty then
     [(None, "Copy"); (Some "ocamlrep_derive", "FromOcamlRepIn")]
-  | _ -> []
+  else
+    []
 
 module DeriveSkipLists : sig
   val skip_derive : ty:string -> trait:string -> bool

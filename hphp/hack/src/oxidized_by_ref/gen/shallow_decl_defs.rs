@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<64c470b540387fc4f48702c2862fce66>>
+// @generated SignedSource<<d387706c52651d4d42d590f61bda2db2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,7 +40,7 @@ pub use typing_defs::ConstDecl;
 )]
 #[repr(C)]
 pub struct ShallowClassConst<'a> {
-    pub abstract_: typing_defs::ClassConstKind,
+    pub abstract_: oxidized::typing_defs::ClassConstKind,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: typing_defs::PosId<'a>,
     /// This field is used for two different meanings in two different places...
@@ -169,8 +169,7 @@ pub struct ShallowClass<'a> {
     pub abstract_: bool,
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub kind: ast_defs::ClassishKind<'a>,
+    pub kind: oxidized::ast_defs::ClassishKind,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub module: Option<ast_defs::Id<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

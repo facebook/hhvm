@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ab9826821e8f372d185d7be6cd5b44bd>>
+// @generated SignedSource<<6c1a17a47b36934c739c6ddacff5959d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,7 +11,6 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
@@ -22,31 +21,7 @@ use crate::*;
 
 pub type PosId<'a> = (&'a pos_or_decl::PosOrDecl<'a>, &'a ast_defs::Id_<'a>);
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum ArgPosition {
-    Aonly,
-    Afirst,
-    Asecond,
-}
-impl TrivialDrop for ArgPosition {}
-arena_deserializer::impl_deserialize_in_arena!(ArgPosition);
+pub use oxidized::typing_reason::ArgPosition;
 
 #[derive(
     Clone,
@@ -80,32 +55,7 @@ pub enum ExprDepTypeReason<'a> {
 impl<'a> TrivialDrop for ExprDepTypeReason<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(ExprDepTypeReason<'arena>);
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum BlameSource {
-    BScall,
-    BSlambda,
-    BSassignment,
-    BSoutOfScope,
-}
-impl TrivialDrop for BlameSource {}
-arena_deserializer::impl_deserialize_in_arena!(BlameSource);
+pub use oxidized::typing_reason::BlameSource;
 
 #[derive(
     Clone,
@@ -126,7 +76,7 @@ arena_deserializer::impl_deserialize_in_arena!(BlameSource);
 #[repr(C)]
 pub enum Blame<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Blame(&'a (&'a pos::Pos<'a>, BlameSource)),
+    Blame(&'a (&'a pos::Pos<'a>, oxidized::typing_reason::BlameSource)),
 }
 impl<'a> TrivialDrop for Blame<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Blame<'arena>);
@@ -177,10 +127,22 @@ pub enum T_<'a> {
     RarithRet(&'a pos::Pos<'a>),
     /// pos, arg float typing reason, arg position
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    RarithRetFloat(&'a (&'a pos::Pos<'a>, T_<'a>, ArgPosition)),
+    RarithRetFloat(
+        &'a (
+            &'a pos::Pos<'a>,
+            T_<'a>,
+            oxidized::typing_reason::ArgPosition,
+        ),
+    ),
     /// pos, arg num typing reason, arg position
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    RarithRetNum(&'a (&'a pos::Pos<'a>, T_<'a>, ArgPosition)),
+    RarithRetNum(
+        &'a (
+            &'a pos::Pos<'a>,
+            T_<'a>,
+            oxidized::typing_reason::ArgPosition,
+        ),
+    ),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     RarithRetInt(&'a pos::Pos<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

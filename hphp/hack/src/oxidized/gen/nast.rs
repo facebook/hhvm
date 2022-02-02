@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<99d3daefa09552a2064f9bb70195e844>>
+// @generated SignedSource<<01f9f7a54fca434cb266bba03149210f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -20,6 +20,7 @@ use crate::*;
 pub use crate::ast_defs::shape_map;
 
 pub use aast::ClassHint;
+pub use aast::Hint;
 pub use aast::Sid;
 pub use aast::TraitHint;
 pub use aast::XhpAttrHint;

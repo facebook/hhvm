@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c81030abf5b3875bb472fd3cd1b592c8>>
+// @generated SignedSource<<26c28eef1a39b40a568865ede1e513be>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,6 +11,7 @@
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
@@ -164,11 +165,13 @@ pub struct FunElt {
 
 #[derive(
     Clone,
+    Copy,
     Debug,
     Deserialize,
     Eq,
     EqModuloPos,
     FromOcamlRep,
+    FromOcamlRepIn,
     Hash,
     NoPosHash,
     Ord,

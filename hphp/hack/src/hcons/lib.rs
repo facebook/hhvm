@@ -74,6 +74,20 @@ impl<T: ?Sized> PartialEq<Hc<T>> for &Hc<T> {
     }
 }
 
+impl<T: ?Sized + PartialOrd> PartialOrd for Hc<T> {
+    #[inline]
+    fn partial_cmp(&self, other: &Hc<T>) -> Option<std::cmp::Ordering> {
+        (**self).partial_cmp(&**other)
+    }
+}
+
+impl<T: ?Sized + Ord> Ord for Hc<T> {
+    #[inline]
+    fn cmp(&self, other: &Hc<T>) -> std::cmp::Ordering {
+        (**self).cmp(&**other)
+    }
+}
+
 macro_rules! impl_str_eq {
     ($lhs:ty, $rhs:ty) => {
         impl PartialEq<$rhs> for $lhs {

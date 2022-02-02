@@ -3851,9 +3851,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             Some(TokenKind::Interface) => ClassishKind::Cinterface,
             Some(TokenKind::Trait) => ClassishKind::Ctrait,
             _ => ClassishKind::Cclass(if abstract_ {
-                &Abstraction::Abstract
+                Abstraction::Abstract
             } else {
-                &Abstraction::Concrete
+                Abstraction::Concrete
             }),
         };
 
@@ -4609,9 +4609,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
 
         let class_kind = if is_abstract {
-            ClassishKind::CenumClass(&Abstraction::Abstract)
+            ClassishKind::CenumClass(Abstraction::Abstract)
         } else {
-            ClassishKind::CenumClass(&Abstraction::Concrete)
+            ClassishKind::CenumClass(Abstraction::Concrete)
         };
 
         let builtin_enum_class_ty = {

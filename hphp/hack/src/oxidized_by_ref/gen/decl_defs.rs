@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e296c7bb90e15e45eac0ec6d43559c82>>
+// @generated SignedSource<<e808d10549e720c58d3c031f763b79db>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,7 +11,6 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
@@ -78,61 +77,9 @@ pub struct SubstContext<'a> {
 impl<'a> TrivialDrop for SubstContext<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(SubstContext<'arena>);
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum SourceType {
-    Child,
-    Parent,
-    Trait,
-    XHPAttr,
-    Interface,
-    IncludedEnum,
-    ReqImpl,
-    ReqExtends,
-}
-impl TrivialDrop for SourceType {}
-arena_deserializer::impl_deserialize_in_arena!(SourceType);
+pub use oxidized::decl_defs::SourceType;
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum LinearizationKind {
-    MemberResolution,
-    AncestorTypes,
-}
-impl TrivialDrop for LinearizationKind {}
-arena_deserializer::impl_deserialize_in_arena!(LinearizationKind);
+pub use oxidized::decl_defs::LinearizationKind;
 
 #[derive(
     Clone,
@@ -158,8 +105,7 @@ pub struct DeclClassType<'a> {
     pub internal: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub deferred_init_members: s_set::SSet<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub kind: ast_defs::ClassishKind<'a>,
+    pub kind: oxidized::ast_defs::ClassishKind,
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

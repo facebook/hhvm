@@ -412,7 +412,7 @@ fn format<'a>(original_name: &'a str) -> String {
     }
 }
 
-fn modifiers_to_flags(flags: isize, is_final: bool, abstraction: &Abstraction) -> isize {
+fn modifiers_to_flags(flags: isize, is_final: bool, abstraction: Abstraction) -> isize {
     let flags = match abstraction {
         Abstraction::Abstract => Flag::Abstract.set(flags),
         Abstraction::Concrete => flags,

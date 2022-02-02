@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<00679d31ffd325e0a7936450bfe932b5>>
+// @generated SignedSource<<55d7678041260c5cb4ed42a12c3e58e2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1679,8 +1679,7 @@ pub struct Class_<'a, Ex, En> {
     pub final_: bool,
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub kind: ast_defs::ClassishKind<'a>,
+    pub kind: oxidized::ast_defs::ClassishKind,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub name: &'a ClassName<'a>,
     /// The type parameters of a class A<T> (T is the parameter)
@@ -1732,8 +1731,7 @@ pub struct Class_<'a, Ex, En> {
     pub enum_: Option<&'a Enum_<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub doc_comment: Option<&'a DocComment<'a>>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub emit_id: Option<&'a oxidized::aast::EmitId>,
+    pub emit_id: Option<oxidized::aast::EmitId>,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Class_<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Class_<'arena, Ex, En>);
@@ -2200,8 +2198,7 @@ pub struct Typedef<'a, Ex, En> {
     pub namespace: &'a Nsenv<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub span: &'a Pos<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub emit_id: Option<&'a oxidized::aast::EmitId>,
+    pub emit_id: Option<oxidized::aast::EmitId>,
     pub is_ctx: bool,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Typedef<'a, Ex, En> {}
@@ -2239,8 +2236,7 @@ pub struct Gconst<'a, Ex, En> {
     pub namespace: &'a Nsenv<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub span: &'a Pos<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub emit_id: Option<&'a oxidized::aast::EmitId>,
+    pub emit_id: Option<oxidized::aast::EmitId>,
 }
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Gconst<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Gconst<'arena, Ex, En>);

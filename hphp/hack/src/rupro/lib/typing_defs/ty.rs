@@ -10,9 +10,20 @@ use pos::{Positioned, Symbol};
 
 pub type Prim = crate::decl_defs::Prim;
 
-pub type FunParam<R> = crate::decl_defs::FunParam<R, Ty<R>>;
+// TODO: Share the representation from decl_defs
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct FunParam<R: Reason> {
+    pub pos: R::Pos,
+    pub name: Option<Symbol>,
+    pub ty: Ty<R>,
+}
 
-pub type FunType<R> = crate::decl_defs::FunType<R, Ty<R>>;
+// TODO: Share the representation from decl_defs
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct FunType<R: Reason> {
+    pub params: Vec<FunParam<R>>,
+    pub ret: Ty<R>,
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ParamMode {

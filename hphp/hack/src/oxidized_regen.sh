@@ -37,6 +37,7 @@ summary "Write oxidized/gen/"
   --out-dir hphp/hack/src/oxidized/gen                                        \
   --regen-command "$REGEN_COMMAND"                                            \
   --rustfmt-path "$RUSTFMT_PATH"                                              \
+  --copy-types-file hphp/hack/src/oxidized/copy_types.txt                     \
   hphp/hack/src/annotated_ast/aast_defs.ml                                    \
   hphp/hack/src/annotated_ast/aast.ml                                         \
   hphp/hack/src/annotated_ast/namespace_env.ml                                \
@@ -167,5 +168,9 @@ summary "Write oxidized_by_ref/decl_visitor/"
   --input "hphp/hack/src/oxidized_by_ref/manual/t_shape_map.rs"               \
   --extern-input "hphp/hack/src/oxidized/gen/aast_defs.rs"                    \
   --extern-input "hphp/hack/src/oxidized/gen/ast_defs.rs"                     \
+  --extern-input "hphp/hack/src/oxidized/gen/typing_defs.rs"                  \
+  --extern-input "hphp/hack/src/oxidized/gen/typing_defs_core.rs"             \
+  --extern-input "hphp/hack/src/oxidized/gen/typing_reason.rs"                \
+  --extern-input "hphp/hack/src/oxidized/gen/xhp_attribute.rs"                \
   --output "hphp/hack/src/oxidized_by_ref/decl_visitor/"                      \
   --root "Decls"                                                              \

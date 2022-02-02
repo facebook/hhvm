@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<747705742e2d21930389160ae35b577b>>
+// @generated SignedSource<<6421b641d4e1ee9c1a682931213b6c59>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,7 +11,6 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
@@ -263,7 +262,7 @@ pub enum Hint_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     HvecOrDict(&'a (Option<&'a Hint<'a>>, &'a Hint<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Hprim(&'a Tprim),
+    Hprim(&'a oxidized::aast_defs::Tprim),
     Hthis,
     Hdynamic,
     Hnothing,
@@ -279,39 +278,7 @@ pub enum Hint_<'a> {
 impl<'a> TrivialDrop for Hint_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(Hint_<'arena>);
 
-/// AST types such as Happly("int", []) are resolved to Hprim values
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum Tprim {
-    Tnull,
-    Tvoid,
-    Tint,
-    Tbool,
-    Tfloat,
-    Tstring,
-    Tresource,
-    Tnum,
-    Tarraykey,
-    Tnoreturn,
-}
-impl TrivialDrop for Tprim {}
-arena_deserializer::impl_deserialize_in_arena!(Tprim);
+pub use oxidized::aast_defs::Tprim;
 
 #[derive(
     Clone,

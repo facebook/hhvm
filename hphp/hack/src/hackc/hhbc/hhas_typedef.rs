@@ -8,6 +8,7 @@ use hhas_attribute::HhasAttribute;
 use hhas_pos::HhasSpan;
 use hhas_type::HhasTypeInfo;
 use hhbc_id::class::ClassType;
+use hhvm_types_ffi::ffi::Attr;
 use runtime::TypedValue;
 
 #[derive(Debug)]
@@ -18,4 +19,5 @@ pub struct HhasTypedef<'arena> {
     pub type_info: HhasTypeInfo<'arena>,
     pub type_structure: TypedValue<'arena>,
     pub span: HhasSpan,
+    pub attrs: Attr,
 }

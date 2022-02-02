@@ -916,17 +916,21 @@ pub fn emit_class<'a, 'arena, 'decl>(
     )?);
     let doc_comment = ast_class.doc_comment.clone();
     let is_closure = methods.iter().any(|x| x.is_closure_body());
+    let is_systemlib = emitter.systemlib();
 
     let mut flags = Attr::AttrNone;
-    flags.set(Attr::AttrFinal, is_final);
-    flags.set(Attr::AttrSealed, is_sealed);
     flags.set(Attr::AttrAbstract, is_abstract);
-    flags.set(Attr::AttrInterface, is_interface);
-    flags.set(Attr::AttrTrait, is_trait);
-    flags.set(Attr::AttrIsConst, is_const);
+    flags.set(Attr::AttrBuiltin, is_systemlib);
+    flags.set(Attr::AttrFinal, is_final);
     flags.set(Attr::AttrForbidDynamicProps, no_dynamic_props);
-    flags.set(Attr::AttrNoReifiedInit, needs_no_reifiedinit);
+    flags.set(Attr::AttrInterface, is_interface);
+    flags.set(Attr::AttrIsConst, is_const);
     flags.set(Attr::AttrNoOverride, is_closure);
+    flags.set(Attr::AttrNoReifiedInit, needs_no_reifiedinit);
+    flags.set(Attr::AttrPersistent, is_systemlib);
+    flags.set(Attr::AttrSealed, is_sealed);
+    flags.set(Attr::AttrTrait, is_trait);
+    flags.set(Attr::AttrUnique, is_systemlib);
     flags.set(
         Attr::AttrEnumClass,
         hhas_attribute::has_enum_class(&attributes),

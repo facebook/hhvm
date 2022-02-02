@@ -258,7 +258,13 @@ fn print_adata_region(ctx: &Context<'_>, w: &mut dyn Write, adata: &HhasAdata<'_
 fn print_typedef(ctx: &Context<'_>, w: &mut dyn Write, td: &HhasTypedef<'_>) -> Result<()> {
     newline(w)?;
     w.write_all(b".alias ")?;
-    print_typedef_attributes(ctx, w, td)?;
+    print_special_and_user_attrs(
+        ctx,
+        w,
+        td.attributes.as_ref(),
+        &AttrContext::Alias,
+        &td.attrs,
+    )?;
     w.write_all(td.name.to_raw_string().as_bytes())?;
     w.write_all(b" = ")?;
     print_typedef_info(w, &td.type_info)?;
@@ -267,18 +273,6 @@ fn print_typedef(ctx: &Context<'_>, w: &mut dyn Write, td: &HhasTypedef<'_>) -> 
     w.write_all(b" ")?;
     triple_quotes(w, |w| print_adata(ctx, w, &td.type_structure))?;
     w.write_all(b";")
-}
-
-fn print_typedef_attributes(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    td: &HhasTypedef<'_>,
-) -> Result<()> {
-    let mut specials = vec![];
-    if ctx.is_system_lib() {
-        specials.push("persistent");
-    }
-    print_special_and_user_attrs(ctx, w, &specials[..], td.attributes.as_ref())
 }
 
 fn handle_not_impl<F>(f: F) -> Result<()>
@@ -304,7 +298,13 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &HhasFunction<'_
     w.write_all(b".function ")?;
     print_upper_bounds_(w, &body.upper_bounds)?;
     w.write_all(b" ")?;
-    print_fun_attrs(ctx, w, fun_def)?;
+    print_special_and_user_attrs(
+        ctx,
+        w,
+        fun_def.attributes.as_ref(),
+        &AttrContext::Func,
+        &fun_def.attrs,
+    )?;
     print_span(w, &fun_def.span)?;
     w.write_all(b" ")?;
     option(w, body.return_type_info.as_ref(), |w, ti| {
@@ -394,21 +394,6 @@ fn print_property_doc_comment(w: &mut dyn Write, p: &HhasProperty<'_>) -> Result
     Ok(())
 }
 
-fn print_property_attributes(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    property: &HhasProperty<'_>,
-) -> Result<()> {
-    w.write_all(b"[")?;
-    write!(
-        w,
-        "{}",
-        attrs_to_string_ffi(AttrContext::Prop, property.flags)
-    )?;
-    print_attributes(ctx, w, &property.attributes)?;
-    w.write_all(b"] ")
-}
-
 fn print_property_type_info(w: &mut dyn Write, p: &HhasProperty<'_>) -> Result<()> {
     print_type_info(w, &p.type_info)?;
     w.write_all(b" ")
@@ -422,7 +407,13 @@ fn print_property(
 ) -> Result<()> {
     newline(w)?;
     w.write_all(b"  .property ")?;
-    print_property_attributes(ctx, w, property)?;
+    print_special_and_user_attrs(
+        ctx,
+        w,
+        property.attributes.as_ref(),
+        &AttrContext::Prop,
+        &property.flags,
+    )?;
     print_property_doc_comment(w, property)?;
     print_property_type_info(w, property)?;
     w.write_all(property.name.to_raw_string().as_bytes())?;
@@ -582,33 +573,6 @@ fn print_uses<'arena>(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'arena
     }
 }
 
-fn print_class_special_attributes(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    c: &HhasClass<'_>,
-) -> Result<()> {
-    let user_attrs = c.attributes.as_ref();
-    let is_system_lib = ctx.is_system_lib();
-    let mut flags = c.flags;
-
-    if is_system_lib {
-        flags.set(Attr::AttrPersistent, true);
-        flags.set(Attr::AttrBuiltin, true);
-        flags.set(Attr::AttrUnique, true);
-    }
-
-    if flags == Attr::AttrNone && user_attrs.is_empty() {
-        return Ok(());
-    }
-    wrap_by_(w, "[", "] ", |w| {
-        write!(w, "{}", attrs_to_string_ffi(AttrContext::Class, flags))?;
-        if !user_attrs.is_empty() && flags != Attr::AttrNone {
-            w.write_all(b" ")?
-        };
-        print_attributes(ctx, w, &user_attrs)
-    })
-}
-
 fn print_implements(w: &mut dyn Write, implements: &[ClassType<'_>]) -> Result<()> {
     if implements.is_empty() {
         return Ok(());
@@ -666,7 +630,13 @@ fn print_method_def(
     print_shadowed_tparams(w, &body.shadowed_tparams)?;
     print_upper_bounds_(w, &body.upper_bounds)?;
     w.write_all(b" ")?;
-    print_method_attrs(ctx, w, method_def)?;
+    print_special_and_user_attrs(
+        ctx,
+        w,
+        method_def.attributes.as_ref(),
+        &AttrContext::Func,
+        &method_def.attrs,
+    )?;
     print_span(w, &method_def.span)?;
     w.write_all(b" ")?;
     option(w, body.return_type_info.as_ref(), |w, t| {
@@ -698,19 +668,6 @@ fn print_method_def(
     })
 }
 
-fn print_method_attrs(ctx: &Context<'_>, w: &mut dyn Write, m: &HhasMethod<'_>) -> Result<()> {
-    let user_attrs = m.attributes.as_ref();
-    square(w, |w| {
-        write!(w, "{}", attrs_to_string_ffi(AttrContext::Func, m.attrs))?;
-        if !user_attrs.is_empty() {
-            w.write_all(b" ")?;
-        }
-        print_attributes(ctx, w, user_attrs)
-    })?;
-    w.write_all(b" ")?;
-    Ok(())
-}
-
 fn print_class_def<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
@@ -720,7 +677,13 @@ fn print_class_def<'arena>(
     w.write_all(b".class ")?;
     print_upper_bounds(w, class_def.upper_bounds.as_ref())?;
     w.write_all(b" ")?;
-    print_class_special_attributes(ctx, w, class_def)?;
+    print_special_and_user_attrs(
+        ctx,
+        w,
+        class_def.attributes.as_ref(),
+        &AttrContext::Class,
+        &class_def.flags,
+    )?;
     w.write_all(class_def.name.to_raw_string().as_bytes())?;
     w.write_all(b" ")?;
     print_span(w, &class_def.span)?;
@@ -3060,29 +3023,17 @@ fn print_span(w: &mut dyn Write, &HhasSpan(line_begin, line_end): &HhasSpan) -> 
     write!(w, "({},{})", line_begin, line_end)
 }
 
-fn print_fun_attrs(ctx: &Context<'_>, w: &mut dyn Write, f: &HhasFunction<'_>) -> Result<()> {
-    let user_attrs = f.attributes.as_ref();
-    square(w, |w| {
-        write!(w, "{}", attrs_to_string_ffi(AttrContext::Func, f.attrs))?;
-        if !user_attrs.is_empty() {
-            w.write_all(b" ")?;
-        }
-        print_attributes(ctx, w, user_attrs)
-    })?;
-    w.write_all(b" ")?;
-    Ok(())
-}
-
 fn print_special_and_user_attrs(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    specials: &[&str],
     users: &[HhasAttribute<'_>],
+    attr_ctx: &AttrContext,
+    attrs: &Attr,
 ) -> Result<()> {
-    if !users.is_empty() || !specials.is_empty() {
+    if !users.is_empty() || !attrs.is_empty() {
         square(w, |w| {
-            concat_str_by(w, " ", specials)?;
-            if !specials.is_empty() && !users.is_empty() {
+            write!(w, "{}", attrs_to_string_ffi(*attr_ctx, *attrs))?;
+            if !users.is_empty() {
                 w.write_all(b" ")?;
             }
             print_attributes(ctx, w, users)

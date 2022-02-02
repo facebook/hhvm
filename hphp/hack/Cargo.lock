@@ -1389,6 +1389,7 @@ dependencies = [
  "hhas_type",
  "hhas_typedef",
  "hhbc_id",
+ "hhvm_types_ffi",
  "instruction_sequence",
  "oxidized",
  "runtime",
@@ -2030,6 +2031,7 @@ dependencies = [
  "hhas_pos",
  "hhas_type",
  "hhbc_id",
+ "hhvm_types_ffi",
  "runtime",
 ]
 

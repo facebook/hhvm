@@ -289,7 +289,6 @@ pub fn emit_fatal_program<S: AsRef<str>>(
             &mut emitter,
             Some(&env.filepath),
             env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
-            is_systemlib,
         ),
         writer,
         &prog,
@@ -315,7 +314,6 @@ pub fn from_text<'arena, 'decl, S: AsRef<str>>(
                 &mut emitter,
                 Some(&env.filepath),
                 env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
-                env.flags.contains(EnvFlags::IS_SYSTEMLIB),
             ),
             writer,
             &program,
@@ -388,7 +386,6 @@ pub fn hhas_to_string<W: std::io::Write, S: AsRef<str>>(
                 &mut emitter,
                 Some(&env.filepath),
                 env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
-                env.flags.contains(EnvFlags::IS_SYSTEMLIB),
             ),
             writer,
             program,
@@ -651,7 +648,6 @@ pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> St
         &mut emitter,
         Some(&env.filepath),
         env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
-        env.flags.contains(EnvFlags::IS_SYSTEMLIB),
     );
 
     bytecode_printer::expr_to_string_lossy(ctx, expr)

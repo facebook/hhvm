@@ -198,6 +198,9 @@ impl Attr {
     pub fn is_interceptable(&self) -> bool {
         (*self & Attr::AttrInterceptable) != 0
     }
+    pub fn is_empty(&self) -> bool {
+        (*self == Attr::AttrNone)
+    }
 }
 
 impl BitOr for Attr {

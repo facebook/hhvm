@@ -18,6 +18,7 @@ hhas_pos = { path = "../../../hhbc/cargo/hhas_pos" }
 hhas_type = { path = "../../../hhbc/cargo/hhas_type" }
 hhas_typedef = { path = "../../../hhbc/cargo/hhas_typedef" }
 hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
+hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
 instruction_sequence = { path = "../instruction_sequence" }
 oxidized = { path = "../../../../oxidized" }
 runtime = { path = "../runtime" }

@@ -8,6 +8,7 @@ use hhas_pos::HhasSpan;
 use hhas_type::HhasTypeInfo;
 use hhas_typedef::HhasTypedef;
 use hhbc_id::{class::ClassType, Id};
+use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::Result;
 use oxidized::{aast_defs::Hint, ast};
 use runtime::TypedValue;
@@ -46,6 +47,8 @@ fn emit_typedef<'a, 'arena, 'decl>(
         typedef.vis.is_opaque(),
     );
     let span = HhasSpan::from_pos(&typedef.span);
+    let mut attrs = Attr::AttrNone;
+    attrs.set(Attr::AttrPersistent, emitter.systemlib());
 
     attributes_res.and_then(|attributes| {
         type_info_res.and_then(|type_info| {
@@ -58,6 +61,7 @@ fn emit_typedef<'a, 'arena, 'decl>(
                 type_info,
                 type_structure,
                 span,
+                attrs,
             })
         })
     })

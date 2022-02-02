@@ -13,4 +13,5 @@ hhas_attribute = { path = "../hhas_attribute" }
 hhas_pos = { path = "../hhas_pos" }
 hhas_type = { path = "../hhas_type" }
 hhbc_id = { path = "../hhbc_id" }
+hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
 runtime = { path = "../../../emitter/cargo/runtime" }

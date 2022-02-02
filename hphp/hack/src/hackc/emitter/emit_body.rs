@@ -451,7 +451,7 @@ pub fn make_body<'a, 'arena, 'decl>(
             default_value
                 .as_ref()
                 .map(|(l, expr)| {
-                    let mut ctx = Context::new(emitter, None, false, emitter.systemlib());
+                    let mut ctx = Context::new(emitter, None, false);
                     let expr_env = ExprEnv {
                         codegen_env: body_env.as_ref(),
                     };

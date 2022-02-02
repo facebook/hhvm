@@ -43,7 +43,6 @@ pub struct Context<'a> {
     dump_symbol_refs: bool,
     pub(crate) dump_lambdas: bool,
     indent: Indent,
-    is_system_lib: bool,
 
     pub(crate) include_roots: &'a BTreeMap<String, String>,
     pub(crate) include_search_paths: &'a [String],
@@ -56,7 +55,6 @@ impl<'a> Context<'a> {
         emitter: &'a Emitter<'arena, 'decl>,
         path: Option<&'a RelativePath>,
         dump_symbol_refs: bool,
-        is_system_lib: bool,
     ) -> Self {
         let include_roots = emitter.options().hhvm.include_roots.get();
         let include_search_paths = emitter.options().server.include_search_paths.get();
@@ -69,7 +67,6 @@ impl<'a> Context<'a> {
             dump_symbol_refs,
             dump_lambdas: false,
             indent: Indent::new(),
-            is_system_lib,
 
             include_roots,
             include_search_paths,
@@ -115,9 +112,5 @@ impl<'a> Context<'a> {
 
     pub(crate) fn indent_dec(&mut self) {
         self.indent.dec();
-    }
-
-    pub(crate) fn is_system_lib(&self) -> bool {
-        self.is_system_lib
     }
 }

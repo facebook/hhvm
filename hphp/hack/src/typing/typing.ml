@@ -8852,7 +8852,7 @@ and string2 env idl =
               [
                 MakeType.arraykey r;
                 MakeType.dynamic r;
-                MakeType.new_type r SN.Classes.cHHFormatString [formatter_tyvar];
+                MakeType.hh_formatstring r formatter_tyvar;
               ]
           in
           let (env, err_opt) =

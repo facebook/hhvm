@@ -30,7 +30,7 @@ let sub_string_err (p : Pos.t) (env : env) (ty : locl_ty) :
       MakeType.float r;
       MakeType.resource r;
       MakeType.dynamic r;
-      MakeType.new_type r SN.Classes.cHHFormatString [formatter_tyvar];
+      MakeType.hh_formatstring r formatter_tyvar;
     ]
   in
   let stringish = MakeType.class_type r SN.Classes.cStringish [] in

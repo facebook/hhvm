@@ -114,6 +114,9 @@ let mixed r = mk (r, Toption (nonnull r))
 
 let nullablesupportdynamic r = supportdyn r (mixed r)
 
+let hh_formatstring r ty =
+  mk (r, Tnewtype (SN.Classes.cHHFormatString, [ty], mixed r))
+
 let resource r = prim_type r Nast.Tresource
 
 let tyvar r v = mk (r, Tvar v)
@@ -125,8 +128,6 @@ let this r = mk (r, Tgeneric (SN.Typehints.this, []))
 let err r = mk (r, Terr)
 
 let taccess r ty id = mk (r, Taccess (ty, id))
-
-let new_type r name tyl = mk (r, Tnewtype (name, tyl, mixed r))
 
 let nullable_decl r ty =
   (* Cheap avoidance of double nullable *)

@@ -364,8 +364,61 @@ pub struct TypedefType<R: Reason> {
     pub attributes: Vec<UserAttribute<R::Pos>>,
 }
 
+fn xhp_attr_to_flags(
+    xhp_attr: Option<&oxidized_by_ref::xhp_attribute::XhpAttribute>,
+) -> Vec<oxidized::typing_defs_flags::ClassEltFlags> {
+    use oxidized_by_ref::typing_defs_flags::ClassEltFlags;
+
+    fn xhp_tag_to_flag(
+        tag: oxidized_by_ref::xhp_attribute::Tag,
+    ) -> oxidized_by_ref::typing_defs_flags::ClassEltFlags {
+        match tag {
+            Tag::Required => ClassEltFlags::XA_TAG_REQUIRED,
+            Tag::LateInit => ClassEltFlags::XA_TAG_LATEINIT,
+        }
+    }
+
+    match xhp_attr {
+        None => vec![],
+        Some(&XhpAttribute { tag, has_default }) => {
+            let mut tag_fields = tag.map_or(
+                vec![
+                    ClassEltFlags::XA_TAG_REQUIRED,
+                    ClassEltFlags::XA_TAG_LATEINIT,
+                ],
+                |tag| vec![xhp_tag_to_flag(tag)],
+            );
+            if has_default {
+                tag_fields.push(ClassEltFlags::XA_HAS_DEFAULT);
+            }
+
+            tag_fields
+        }
+    }
+}
+
+fn set_xhp_attr(
+    xa: Option<&oxidized_by_ref::xhp_attribute::XhpAttribute>,
+    flags: oxidized_by_ref::typing_defs_flags::ClassEltFlags,
+) -> oxidized_by_ref::typing_defs_flags::ClassEltFlags {
+    use oxidized_by_ref::typing_defs_flags::ClassEltFlags;
+
+    let xhp_attr_as_flags = xhp_attr_to_flags(xa)
+        .iter()
+        .fold(ClassEltFlags::empty(), |acc, &flag| acc | flag);
+    let xhp_attr_mask = [
+        ClassEltFlags::XA_HAS_DEFAULT,
+        ClassEltFlags::XA_TAG_LATEINIT,
+        ClassEltFlags::XA_TAG_REQUIRED,
+    ]
+    .iter()
+    .fold(ClassEltFlags::empty(), |acc, &flag| acc | flag);
+
+    (!xhp_attr_mask & flags) | xhp_attr_as_flags
+}
+
 pub fn make_ce_flags(
-    _xhp_attr: Option<&oxidized_by_ref::xhp_attribute::XhpAttribute>,
+    xhp_attr: Option<&oxidized_by_ref::xhp_attribute::XhpAttribute>,
     abstract_: bool,
     final_: bool,
     superfluous_override: bool,
@@ -377,7 +430,7 @@ pub fn make_ce_flags(
     readonly_prop: bool,
     support_dynamic_type: bool,
     needs_init: bool,
-) -> oxidized_by_ref::typing_defs_flags::class_elt::ClassElt {
+) -> oxidized_by_ref::typing_defs_flags::ClassEltFlags {
     use oxidized_by_ref::typing_defs_flags::ClassEltFlags;
 
     let mut flags: ClassEltFlags = ClassEltFlags::empty();
@@ -389,9 +442,10 @@ pub fn make_ce_flags(
     flags.set(ClassEltFlags::CONST, const_);
     flags.set(ClassEltFlags::LATEINIT, lateinit);
     flags.set(ClassEltFlags::DYNAMICALLYCALLABLE, dynamicallycallable);
-    //TODO: let flags = set_xhp_attr xhp_attr flags in
+    flags = set_xhp_attr(xhp_attr, flags);
     flags.set(ClassEltFlags::READONLY_PROP, readonly_prop);
     flags.set(ClassEltFlags::SUPPORT_DYNAMIC_TYPE, support_dynamic_type);
     flags.set(ClassEltFlags::NEEDS_INIT, needs_init);
+
     flags
 }

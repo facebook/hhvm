@@ -58,9 +58,7 @@ Unit* compile_string(const char* s,
   // NB: fname needs to be long-lived if generating a bytecode repo because it
   // can be cached via a Location ultimately contained by ErrorInfo for printing
   // code errors.
-  LazyUnitContentsLoader loader{
-    sha1, String{s, sz, CopyStringMode{}}, options.flags()
-  };
+  LazyUnitContentsLoader loader{sha1, {s, sz}, options.flags()};
   return g_hphp_compiler_parse(
     loader,
     fname,

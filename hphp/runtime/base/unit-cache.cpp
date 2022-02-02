@@ -2176,6 +2176,7 @@ LazyUnitContentsLoader::LazyUnitContentsLoader(const char* path,
   , m_wrapper{wrapper}
   , m_options{options}
   , m_file_length{fileLength}
+  , m_loaded{false}
 {
   assertx(m_path);
 
@@ -2186,7 +2187,7 @@ LazyUnitContentsLoader::LazyUnitContentsLoader(const char* path,
       if (auto const h = getHashFromEden()) return *h;
     }
     load();
-    return string_sha1(m_contents->slice());
+    return string_sha1(m_contents.slice());
   }();
 
   m_file_hash = SHA1{file_hash_str};
@@ -2198,14 +2199,15 @@ LazyUnitContentsLoader::LazyUnitContentsLoader(const char* path,
 }
 
 LazyUnitContentsLoader::LazyUnitContentsLoader(SHA1 sha,
-                                               String contents,
+                                               folly::StringPiece contents,
                                                const RepoOptionsFlags& options)
   : m_path{nullptr}
   , m_wrapper{nullptr}
   , m_options{options}
   , m_hash{sha}
-  , m_contents{std::move(contents)}
-  , m_file_length{(size_t)m_contents->size()}
+  , m_file_length{contents.size()}
+  , m_contents_ptr{contents}
+  , m_loaded{true}
 {
 }
 
@@ -2228,8 +2230,8 @@ Optional<std::string> LazyUnitContentsLoader::getHashFromEden() const {
 #endif
 }
 
-const String& LazyUnitContentsLoader::contents() {
-  if (!m_contents.has_value()) {
+folly::StringPiece LazyUnitContentsLoader::contents() {
+  if (!m_loaded) {
     auto const oldSize = m_file_length;
     load();
     // The file might have changed after we read the hash from the
@@ -2237,19 +2239,21 @@ const String& LazyUnitContentsLoader::contents() {
     // there's a mismatch, throw Inconsistency to let the caller know
     // and deal with it (usually by restarting the whole loading
     // process).
-    auto const read_file_hash = SHA1{string_sha1(m_contents->slice())};
+    auto const read_file_hash = SHA1{string_sha1(m_contents.slice())};
     if (read_file_hash != m_file_hash) {
       m_contents.reset();
       m_file_length = oldSize;
+      m_contents_ptr = {};
+      m_loaded = false;
       throw Inconsistency{};
     }
   }
-  return *m_contents;
+  return m_contents_ptr;
 }
 
 void LazyUnitContentsLoader::load() {
   assertx(m_path);
-  m_loaded = true;
+  assertx(!m_loaded);
 
   tracing::Block _{
     "read-file", [&] { return tracing::Props{}.add("path", m_path); }
@@ -2261,7 +2265,9 @@ void LazyUnitContentsLoader::load() {
     assertx(m_wrapper->isNormalFileStream());
     if (auto const f = m_wrapper->open(String{m_path}, "r", 0, nullptr)) {
       m_contents = f->read();
-      m_file_length = m_contents->size();
+      m_file_length = m_contents.size();
+      m_contents_ptr = m_contents.slice();
+      m_loaded = true;
       return;
     }
     throw LoadError{};
@@ -2271,7 +2277,9 @@ void LazyUnitContentsLoader::load() {
   if (fd < 0) throw LoadError{};
   auto file = req::make<PlainFile>(fd);
   m_contents = file->read();
-  m_file_length = m_contents->size();
+  m_file_length = m_contents.size();
+  m_contents_ptr = m_contents.slice();
+  m_loaded = true;
 }
 
 //////////////////////////////////////////////////////////////////////

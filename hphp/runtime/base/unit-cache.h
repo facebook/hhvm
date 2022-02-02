@@ -255,9 +255,11 @@ struct LazyUnitContentsLoader {
                          size_t fileLength,
                          bool forceEager);
 
-  // When we have the contents already
+  // When we have the contents already. The loader does not manage the
+  // contents' lifetime and the caller must ensure it remains alive
+  // for the lifetime of the loader.
   LazyUnitContentsLoader(SHA1 sha,
-                         String contents,
+                         folly::StringPiece contents,
                          const RepoOptionsFlags& options);
 
   LazyUnitContentsLoader(const LazyUnitContentsLoader&) = delete;
@@ -275,7 +277,7 @@ struct LazyUnitContentsLoader {
   // Return the contents of the file. If the contents are already
   // loaded, this just returns them. Otherwise it performs the I/O to
   // load the file.
-  const String& contents();
+  folly::StringPiece contents();
 
   // Some error happened during file I/O
   struct LoadError : public std::exception {};
@@ -302,10 +304,14 @@ private:
 
   SHA1 m_hash;
   SHA1 m_file_hash;
-  Optional<String> m_contents;
   size_t m_file_length;
 
-  bool m_loaded{false};
+  // Points to either m_contents (if loaded from file), or some
+  // external string (if provided in ctor).
+  folly::StringPiece m_contents_ptr;
+  String m_contents;
+  // Is m_contents_ptr valid?
+  bool m_loaded;
 };
 
 //////////////////////////////////////////////////////////////////////

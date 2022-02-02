@@ -23,10 +23,10 @@ use parser_core_types::{
     syntax_error::{Error as ErrorMsg, SyntaxError},
 };
 
-fn hints_contain_capability(hints: &Vec<aast_defs::Hint>, capability: Ctx) -> bool {
+fn hints_contain_capability(hints: &[aast_defs::Hint], capability: Ctx) -> bool {
     for hint in hints {
         if let aast::Hint_::Happly(ast_defs::Id(_, id), _) = &*hint.1 {
-            let (_, name) = utils::split_ns_from_name(&id);
+            let (_, name) = utils::split_ns_from_name(id);
             let c = coeffects::ctx_str_to_enum(name);
             match c {
                 Some(val) => {
@@ -38,7 +38,7 @@ fn hints_contain_capability(hints: &Vec<aast_defs::Hint>, capability: Ctx) -> bo
             }
         }
     }
-    return false;
+    false
 }
 
 fn has_capability(ctxs: Option<&ast::Contexts>, capability: Ctx) -> bool {
@@ -86,12 +86,12 @@ fn has_defaults_with_inherited_val(c: &Context, ctxs: Option<&ast::Contexts>) ->
     }
 }
 
-fn has_defaults_implicitly(hints: &Vec<Hint>) -> bool {
+fn has_defaults_implicitly(hints: &[Hint]) -> bool {
     for hint in hints {
         let Hint(_, h) = hint;
         match &**h {
             Hint_::Happly(ast_defs::Id(_, id), _) => {
-                let (_, name) = utils::split_ns_from_name(&id);
+                let (_, name) = utils::split_ns_from_name(id);
                 match coeffects::ctx_str_to_enum(name) {
                     Some(c) => match c {
                         Ctx::Defaults => {
@@ -143,10 +143,10 @@ fn has_defaults(ctxs: Option<&ast::Contexts>) -> bool {
 
 fn is_constructor(s: &ast_defs::Id) -> bool {
     let ast_defs::Id(_, name) = s;
-    return name == members::__CONSTRUCT;
+    name == members::__CONSTRUCT
 }
 
-fn has_ignore_coeffect_local_errors_attr(attrs: &Vec<aast::UserAttribute<(), ()>>) -> bool {
+fn has_ignore_coeffect_local_errors_attr(attrs: &[aast::UserAttribute<(), ()>]) -> bool {
     for attr in attrs.iter() {
         let ast_defs::Id(_, name) = &attr.name;
         if user_attributes::ignore_coeffect_local_errors(name) {
@@ -177,7 +177,7 @@ struct Context {
 impl Context {
     fn new() -> Self {
         Self {
-            bitflags: ContextFlags::from_bits_truncate(0 as u16),
+            bitflags: ContextFlags::from_bits_truncate(0_u16),
         }
     }
 
@@ -194,41 +194,40 @@ impl Context {
     }
 
     fn in_methodish(&self) -> bool {
-        return self.bitflags.contains(ContextFlags::IN_METHODISH);
+        self.bitflags.contains(ContextFlags::IN_METHODISH)
     }
 
     fn is_constructor(&self) -> bool {
-        return self.bitflags.contains(ContextFlags::IS_CONSTRUCTOR);
+        self.bitflags.contains(ContextFlags::IS_CONSTRUCTOR)
     }
 
     fn ignore_coeffect_local_errors(&self) -> bool {
-        return self
-            .bitflags
-            .contains(ContextFlags::IGNORE_COEFFECT_LOCAL_ERRORS);
+        self.bitflags
+            .contains(ContextFlags::IGNORE_COEFFECT_LOCAL_ERRORS)
     }
 
     fn has_defaults(&self) -> bool {
-        return self.bitflags.contains(ContextFlags::HAS_DEFAULTS);
+        self.bitflags.contains(ContextFlags::HAS_DEFAULTS)
     }
 
     fn is_typechecker(&self) -> bool {
-        return self.bitflags.contains(ContextFlags::IS_TYPECHECKER);
+        self.bitflags.contains(ContextFlags::IS_TYPECHECKER)
     }
 
     fn has_write_props(&self) -> bool {
-        return self.bitflags.contains(ContextFlags::HAS_WRITE_PROPS);
+        self.bitflags.contains(ContextFlags::HAS_WRITE_PROPS)
     }
 
     fn has_write_this_props(&self) -> bool {
-        return self.bitflags.contains(ContextFlags::HAS_WRITE_THIS_PROPS);
+        self.bitflags.contains(ContextFlags::HAS_WRITE_THIS_PROPS)
     }
 
     fn has_read_globals(&self) -> bool {
-        return self.bitflags.contains(ContextFlags::HAS_READ_GLOBALS);
+        self.bitflags.contains(ContextFlags::HAS_READ_GLOBALS)
     }
 
     fn has_access_globals(&self) -> bool {
-        return self.bitflags.contains(ContextFlags::HAS_ACCESS_GLOBALS);
+        self.bitflags.contains(ContextFlags::HAS_ACCESS_GLOBALS)
     }
 
     fn set_in_methodish(&mut self, in_methodish: bool) {
@@ -293,16 +292,12 @@ impl Checker {
     }
 
     fn do_write_props_check(&mut self, e: &aast::Expr<(), ()>) {
-        if let Some((bop, lhs, _)) = e.2.as_binop() {
-            if let ast_defs::Bop::Eq(_) = bop {
-                self.check_is_obj_property_write_expr(&e, &lhs, true /* ignore_this_writes */);
-            }
+        if let Some((ast_defs::Bop::Eq(_), lhs, _)) = e.2.as_binop() {
+            self.check_is_obj_property_write_expr(e, lhs, true /* ignore_this_writes */);
         }
         if let Some((unop, expr)) = e.2.as_unop() {
-            if is_mutating_unop(&unop) {
-                self.check_is_obj_property_write_expr(
-                    &e, &expr, true, /* ignore_this_writes */
-                );
+            if is_mutating_unop(unop) {
+                self.check_is_obj_property_write_expr(e, expr, true /* ignore_this_writes */);
             }
         }
     }
@@ -311,18 +306,12 @@ impl Checker {
         if c.is_constructor() {
             return;
         }
-        if let Some((bop, lhs, _)) = e.2.as_binop() {
-            if let ast_defs::Bop::Eq(_) = bop {
-                self.check_is_obj_property_write_expr(
-                    &e, &lhs, false, /* ignore_this_writes */
-                );
-            }
+        if let Some((ast_defs::Bop::Eq(_), lhs, _)) = e.2.as_binop() {
+            self.check_is_obj_property_write_expr(e, lhs, false /* ignore_this_writes */);
         }
         if let Some((unop, expr)) = e.2.as_unop() {
-            if is_mutating_unop(&unop) {
-                self.check_is_obj_property_write_expr(
-                    &e, &expr, false, /* ignore_this_writes */
-                );
+            if is_mutating_unop(unop) {
+                self.check_is_obj_property_write_expr(e, expr, false /* ignore_this_writes */);
             }
         }
     }
@@ -350,9 +339,8 @@ impl Checker {
                 &top_level_expr.1,
                 syntax_error::write_props_without_capability,
             );
-            return;
         } else if let Some((arr, _)) = expr.2.as_array_get() {
-            self.check_is_obj_property_write_expr(top_level_expr, &arr, ignore_this_writes);
+            self.check_is_obj_property_write_expr(top_level_expr, arr, ignore_this_writes);
         }
     }
 }
@@ -426,55 +414,48 @@ impl<'ast> Visitor<'ast> for Checker {
     fn visit_expr(&mut self, c: &mut Context, p: &aast::Expr<(), ()>) -> Result<(), ()> {
         if c.in_methodish() && !c.ignore_coeffect_local_errors() && !c.has_defaults() {
             if !c.has_write_props() {
-                self.do_write_props_check(&p);
+                self.do_write_props_check(p);
                 if !c.has_write_this_props() {
-                    self.do_write_this_props_check(c, &p);
+                    self.do_write_this_props_check(c, p);
                 }
             }
             if !c.has_access_globals() {
                 // Do access globals check e.g. C::$x = 5;
-                if let Some((bop, lhs, rhs)) = p.2.as_binop() {
-                    if let ast_defs::Bop::Eq(_) = bop {
-                        if let Some((_, _, prop_or_method)) = lhs.2.as_class_get() {
-                            if let ast_defs::PropOrMethod::IsProp = prop_or_method {
-                                self.add_error(
-                                    &lhs.1,
-                                    syntax_error::access_globals_without_capability,
-                                );
-                                // TODO(T109525099): Turn on runtime enforcement for enclosing
-                                // statics in readonly expressions
-                                // Skipping one level of recursion when read_globals are present
-                                // ensures the left hand side global is not subject to read_global
-                                // enforcement, thus duplicating the error message.
-                                if c.has_read_globals() && c.is_typechecker() {
-                                    return rhs.recurse(c, self);
-                                }
-                            }
+                if let Some((ast_defs::Bop::Eq(_), lhs, rhs)) = p.2.as_binop() {
+                    if let Some((_, _, ast_defs::PropOrMethod::IsProp)) = lhs.2.as_class_get() {
+                        self.add_error(&lhs.1, syntax_error::access_globals_without_capability);
+                        // TODO(T109525099): Turn on runtime enforcement for enclosing
+                        // statics in readonly expressions
+                        // Skipping one level of recursion when read_globals are present
+                        // ensures the left hand side global is not subject to read_global
+                        // enforcement, thus duplicating the error message.
+                        if c.has_read_globals() && c.is_typechecker() {
+                            return rhs.recurse(c, self);
                         }
                     }
                 }
                 // TODO(T109525099): Turn on runtime enforcement for enclosing statics in readonly
                 // expressions
                 if c.is_typechecker() {
-                    // Skipping one level of recursion for a readonly expression when read_globals are
-                    // present ensures globals enclosed in read_globals are not subject to enforcement.
+                    // Skipping one level of recursion for a readonly expression when
+                    // read_globals are present ensures globals enclosed in read_globals
+                    // are not subject to enforcement.
                     if let Some(e) = p.2.as_readonly_expr() {
                         if c.has_read_globals() {
-                            // Do not subject the readonly static itself to read_globals check, only its potential children
+                            // Do not subject the readonly static itself to read_globals check,
+                            // only its potential children
                             return e.recurse(c, self);
                         }
                     }
                 }
-                if let Some((_, _, prop_or_method)) = p.2.as_class_get() {
-                    if let ast_defs::PropOrMethod::IsProp = prop_or_method {
-                        if !c.has_read_globals() {
-                            self.add_error(&p.1, syntax_error::read_globals_without_capability)
-                        } else {
-                            // TODO(T109525099): Turn on runtime enforcement for enclosing
-                            // statics in readonly expressions
-                            if c.is_typechecker() {
-                                self.add_error(&p.1, syntax_error::read_globals_without_readonly)
-                            }
+                if let Some((_, _, ast_defs::PropOrMethod::IsProp)) = p.2.as_class_get() {
+                    if !c.has_read_globals() {
+                        self.add_error(&p.1, syntax_error::read_globals_without_capability)
+                    } else {
+                        // TODO(T109525099): Turn on runtime enforcement for enclosing
+                        // statics in readonly expressions
+                        if c.is_typechecker() {
+                            self.add_error(&p.1, syntax_error::read_globals_without_readonly)
                         }
                     }
                 }

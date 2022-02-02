@@ -283,14 +283,12 @@ impl<'a> Env<'a> {
     }
 
     // avoids returning a reference to the env
-    pub fn get_reification(&self, id: &String) -> Option<bool> {
+    pub fn get_reification(&self, id: &str) -> Option<bool> {
         let s = self.state.borrow();
         if let Some(reif) = s.fn_generics.get(id) {
             Some(*reif)
-        } else if let Some(reif) = s.cls_generics.get(id) {
-            Some(*reif)
         } else {
-            None
+            s.cls_generics.get(id).copied()
         }
     }
 
@@ -326,7 +324,7 @@ impl<'a> Env<'a> {
 
     fn next_local_id(&self) -> isize {
         let mut id = RefMut::map(self.state.borrow_mut(), |s| &mut s.local_id_counter);
-        *id = *id + 1;
+        *id += 1;
         *id
     }
 
@@ -361,9 +359,9 @@ impl<'a> Env<'a> {
     }
 
     fn check_stack_limit(&self) {
-        self.stack_limit
-            .as_ref()
-            .map(|limit| limit.panic_if_exceeded());
+        if let Some(limit) = &self.stack_limit {
+            limit.panic_if_exceeded()
+        }
     }
 }
 
@@ -492,7 +490,7 @@ fn pos_qualified_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Sid, Er
                         s += text_str(&li.item, env);
                         s += text_str(&li.separator, env);
                     }
-                    _ => s += text_str(&i, env),
+                    _ => s += text_str(i, env),
                 }
             }
             return Ok(ast::Id(p, s));
@@ -529,7 +527,7 @@ fn p_pstring_<'a>(
 }
 
 fn drop_prefix(s: &str, prefix: char) -> &str {
-    if s.len() > 0 && s.chars().nth(0) == Some(prefix) {
+    if !s.is_empty() && s.starts_with(prefix) {
         &s[1..]
     } else {
         s
@@ -559,7 +557,7 @@ fn mk_str<'a, F>(node: S<'a>, env: &mut Env<'a>, unescaper: F, mut content: &str
 where
     F: Fn(&str) -> Result<BString, InvalidString>,
 {
-    if let Some('b') = content.chars().nth(0) {
+    if let Some('b') = content.chars().next() {
         content = content.get(1..).unwrap();
     }
 
@@ -621,7 +619,7 @@ fn get_quoted_content(s: &[u8]) -> &[u8] {
     }
     QUOTED
         .captures(s)
-        .map_or(None, |c| c.get(1))
+        .and_then(|c| c.get(1))
         .map_or(s, |m| m.as_bytes())
 }
 
@@ -717,7 +715,7 @@ fn p_shape_field_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFi
                     unesc_dbl
                 };
                 let str_ = mk_str(node, env, unescp, &n);
-                if let Some(_) = int_of_string_opt(&str_) {
+                if int_of_string_opt(&str_).is_some() {
                     raise_parsing_error(node, env, &syntax_error::shape_field_int_like_string)
                 }
                 return Ok(SFlitStr((p, str_)));
@@ -794,9 +792,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_, Error> {
                 suggest(&name, special_typehints::INT);
             } else if "boolean".eq_ignore_ascii_case(&name) {
                 suggest(&name, special_typehints::BOOL);
-            } else if "double".eq_ignore_ascii_case(&name) {
-                suggest(&name, special_typehints::FLOAT);
-            } else if "real".eq_ignore_ascii_case(&name) {
+            } else if "double".eq_ignore_ascii_case(&name) || "real".eq_ignore_ascii_case(&name) {
                 suggest(&name, special_typehints::FLOAT);
             }
 
@@ -1067,12 +1063,7 @@ fn fail_if_invalid_class_creation<'a>(node: S<'a>, env: &mut Env<'a>, id: impl A
 
 fn fail_if_invalid_reified_generic<'a>(node: S<'a>, env: &mut Env<'a>, id: impl AsRef<str>) {
     let is_in_static_method = *env.in_static_method();
-    if is_in_static_method
-        && *env
-            .cls_generics_mut()
-            .get(id.as_ref())
-            .unwrap_or_else(|| &false)
-    {
+    if is_in_static_method && *env.cls_generics_mut().get(id.as_ref()).unwrap_or(&false) {
         raise_parsing_error(
             node,
             env,
@@ -1102,9 +1093,9 @@ fn prep_string2<'a>(
     use TokenOp::*;
     let is_qoute = |c| c == b'\"' || c == b'`';
     let start_is_qoute = |s: &[u8]| {
-        (s.len() > 0 && is_qoute(s[0])) || (s.len() > 1 && (s[0] == b'b' && s[1] == b'\"'))
+        (!s.is_empty() && is_qoute(s[0])) || (s.len() > 1 && (s[0] == b'b' && s[1] == b'\"'))
     };
-    let last_is_qoute = |s: &[u8]| s.len() > 0 && is_qoute(s[s.len() - 1]);
+    let last_is_qoute = |s: &[u8]| !s.is_empty() && is_qoute(s[s.len() - 1]);
     let is_heredoc = |s: &[u8]| (s.len() > 3 && &s[0..3] == b"<<<");
     let mut nodes = nodes.iter();
     let first = nodes.next();
@@ -1375,8 +1366,8 @@ fn p_expr_lit<'a>(
                 (_, Some(TK::FloatingLiteral)) => {
                     // f64::from_str accepts more string than Hacklang, invalid Hack float literal
                     // is caught in lexer.
-                    if let Err(_) = f64::from_str(s) {
-                        raise_parsing_error(expr, env, &syntax_error::out_of_float_range(&s))
+                    if f64::from_str(s).is_err() {
+                        raise_parsing_error(expr, env, &syntax_error::out_of_float_range(s))
                     }
                     Ok(E_::Float(s.into()))
                 }
@@ -2004,7 +1995,7 @@ fn p_expr_impl__<'a>(
                 fail_if_invalid_class_creation(node, env, &name.1);
             }
             Ok(E_::mk_new(
-                ast::ClassId((), pos.clone(), ast::ClassId_::CIexpr(e)),
+                ast::ClassId((), pos, ast::ClassId_::CIexpr(e)),
                 hl,
                 args.into_iter().map(|(_, e)| e).collect(),
                 varargs,
@@ -2103,7 +2094,7 @@ fn p_expr_impl__<'a>(
                 tparams: vec![],
                 where_constraints: vec![],
                 body: ast::FuncBody {
-                    fb_ast: if blk.len() == 0 {
+                    fb_ast: if blk.is_empty() {
                         let pos = p_pos(&c.compound_statement, env);
                         vec![ast::Stmt::noop(pos)]
                     } else {
@@ -2236,8 +2227,7 @@ where
             let p = p_pos(node, env);
             /* for XHP string literals (attribute values) just extract
             value from quotes and decode HTML entities  */
-            let text =
-                html_entities::decode(&get_quoted_content(node.full_text(env.source_text())));
+            let text = html_entities::decode(get_quoted_content(node.full_text(env.source_text())));
             Ok(ast::Expr::new((), p, E_::make_string(text)))
         } else if env.codegen() && TK::XHPBody == kind {
             let p = p_pos(node, env);
@@ -2390,7 +2380,7 @@ fn p_bop<'a>(
 }
 
 fn p_exprs_with_loc<'a>(n: S<'a>, e: &mut Env<'a>) -> Result<(Pos, Vec<ast::Expr>), Error> {
-    let loc = p_pos(&n, e);
+    let loc = p_pos(n, e);
     let p_expr = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr, Error> {
         p_expr_with_loc(ExprLocation::UsingStatement, n, e)
     };
@@ -2438,7 +2428,7 @@ fn handle_loop_body<'a>(pos: Pos, node: S<'a>, env: &mut Env<'a>) -> Result<ast:
         .into_iter()
         .filter(|stmt| !stmt.1.is_noop())
         .collect();
-    let body = if blk.len() == 0 {
+    let body = if blk.is_empty() {
         vec![mk_noop(env)]
     } else {
         blk
@@ -2586,12 +2576,14 @@ fn lift_await<'a>(
                 let lid = ast::Lid::new(parent_pos, name.clone());
                 let await_lid = ast::Lid::new(expr.1.clone(), name);
                 let await_ = (Some(await_lid), expr);
-                env.lifted_awaits.as_mut().map(|aw| aw.awaits.push(await_));
+                if let Some(aw) = env.lifted_awaits.as_mut() {
+                    aw.awaits.push(await_)
+                }
                 Ok(E_::mk_lvar(lid))
             } else {
-                env.lifted_awaits
-                    .as_mut()
-                    .map(|aw| aw.awaits.push((None, expr)));
+                if let Some(aw) = env.lifted_awaits.as_mut() {
+                    aw.awaits.push((None, expr))
+                }
                 Ok(E_::Null)
             }
         }
@@ -2970,7 +2962,7 @@ fn p_markup<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
                 && !(markup_suffix.is_missing())
             {
                 let ext = f.path().extension().unwrap(); // has_extension ensures this is a Some
-                raise_parsing_error(node, env, &syntax_error::error1060(&ext.to_str().unwrap()));
+                raise_parsing_error(node, env, &syntax_error::error1060(ext.to_str().unwrap()));
             } else if f.has_extension("php")
                 && !markup_suffix.is_missing()
                 && markup_suffix.offset() != Some(expected_suffix_offset)
@@ -2992,7 +2984,7 @@ fn p_modifiers<'a, F: Fn(R, modifier::Kind) -> R, R>(
 ) -> Result<(modifier::KindSet, R), Error> {
     let mut kind_set = modifier::KindSet::new();
     for n in node.syntax_node_to_list_skip_separator() {
-        let token_kind = token_kind(n).map_or(None, modifier::from_token_kind);
+        let token_kind = token_kind(n).and_then(modifier::from_token_kind);
         match token_kind {
             Some(kind) => {
                 kind_set.add(kind);
@@ -3096,7 +3088,7 @@ fn has_any_policied_context(contexts: Option<&ast::Contexts>) -> bool {
     if let Some(ast::Contexts(_, ref context_hints)) = contexts {
         return context_hints.iter().any(|hint| match &*hint.1 {
             ast::Hint_::Happly(ast::Id(_, id), _) => {
-                naming_special_names_rust::coeffects::is_any_zoned(&id)
+                naming_special_names_rust::coeffects::is_any_zoned(id)
             }
             _ => false,
         });
@@ -3319,13 +3311,13 @@ fn rewrite_effect_polymorphism<'a>(
                         Some(false) => raise_parsing_error_pos(
                             &root.0,
                             env,
-                            &syntax_error::ctx_generic_invalid(id, haccess_string(id, &csts)),
+                            &syntax_error::ctx_generic_invalid(id, haccess_string(id, csts)),
                         ),
                         Some(true) if env.codegen() => {}
                         Some(true) => {
                             let left_id = ast::Id(
                                 context_hint.0.clone(),
-                                format!("T/[{}]", haccess_string(id, &csts)),
+                                format!("T/[{}]", haccess_string(id, csts)),
                             );
                             tparams.push(tp(left_id.clone(), vec![]));
                             let left =
@@ -3603,7 +3595,7 @@ fn p_context_list_to_intersection<'a>(
     ctx_list: S<'a>,
     env: &mut Env<'a>,
 ) -> Result<Option<ast::Hint>, Error> {
-    Ok(p_contexts(&ctx_list, env)?.map(|t| ast::Hint::new(t.0, ast::Hint_::Hintersection(t.1))))
+    Ok(p_contexts(ctx_list, env)?.map(|t| ast::Hint::new(t.0, ast::Hint_::Hintersection(t.1))))
 }
 
 fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr, Error> {
@@ -3717,13 +3709,13 @@ fn p_block<'a>(remove_noop: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast:
         if remove_noop && blk.len() == 1 && blk[0].1.is_noop() {
             return Ok(vec![]);
         }
-        return Ok(blk);
+        Ok(blk)
     } else {
         Ok(vec![ast::Stmt(p, stmt_)])
     }
 }
 
-fn mk_noop<'a>(env: &Env<'_>) -> ast::Stmt {
+fn mk_noop(env: &Env<'_>) -> ast::Stmt {
     ast::Stmt::noop(env.mk_none_pos())
 }
 
@@ -3837,7 +3829,6 @@ fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>) {
             nodes,
             env,
         );
-        ()
     };
     match &node.children {
         ParenthesizedExpression(c) => is_valid_attribute_arg(&c.expression, env),
@@ -4193,25 +4184,21 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                     super_constraint,
                     default: context,
                 })
-            } else {
-                if let Some(c_tc_type) = context {
-                    if env.is_typechecker()
-                        && (super_constraint.is_some() || as_constraint.is_some())
-                    {
-                        raise_parsing_error(
-                            node,
-                            env,
-                            "Constraints on a context constant requires it to be abstract",
-                        )
-                    };
-                    TCConcrete(ast::ClassConcreteTypeconst { c_tc_type })
-                } else {
-                    raise_hh_error(
+            } else if let Some(c_tc_type) = context {
+                if env.is_typechecker() && (super_constraint.is_some() || as_constraint.is_some()) {
+                    raise_parsing_error(
+                        node,
                         env,
-                        NastCheck::not_abstract_without_typeconst(name.0.clone()),
-                    );
-                    missing_syntax("value for the context constant", node, env)?
-                }
+                        "Constraints on a context constant requires it to be abstract",
+                    )
+                };
+                TCConcrete(ast::ClassConcreteTypeconst { c_tc_type })
+            } else {
+                raise_hh_error(
+                    env,
+                    NastCheck::not_abstract_without_typeconst(name.0.clone()),
+                );
+                missing_syntax("value for the context constant", node, env)?
             };
             Ok(class.typeconsts.push(ast::ClassTypeconstDef {
                 name,
@@ -4249,8 +4236,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 env,
             )?;
 
-            let mut i = 0;
-            for name_expr in name_exprs.into_iter() {
+            for (i, name_expr) in name_exprs.into_iter().enumerate() {
                 class.vars.push(ast::ClassVar {
                     final_: kinds.has(modifier::FINAL),
                     xhp_attr: None,
@@ -4266,7 +4252,6 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                     is_static: kinds.has(modifier::STATIC),
                     span: name_expr.0,
                 });
-                i += 1;
             }
             Ok(())
         }
@@ -4685,7 +4670,7 @@ fn p_namespace_use_clause<'a>(
                 kind,
                 ast::Id(
                     p,
-                    if n.len() > 0 && n.chars().nth(0) == Some('\\') {
+                    if !n.is_empty() && n.starts_with('\\') {
                         n
                     } else {
                         String::from("\\") + &n
@@ -4975,7 +4960,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>, Error> {
             let (_super_constraint, as_constraint) = p_ctx_constraints(&c.as_constraint, env)?;
 
             let pos_name = pos_name(&c.name, env)?;
-            if let Some(first_char) = pos_name.1.chars().nth(0) {
+            if let Some(first_char) = pos_name.1.chars().next() {
                 if first_char.is_lowercase() {
                     raise_parsing_error(
                         &c.name,
@@ -5366,10 +5351,7 @@ pub fn lower<'a>(env: &mut Env<'a>, script: S<'a>) -> Result<ast::Program, Strin
             kind,
         } => format!(
             "missing case in {:?}.\n - pos: {:?}\n - unexpected: '{:?}'\n - kind: {:?}\n",
-            expecting.to_string(),
-            pos,
-            node_name.to_string(),
-            kind,
+            expecting, pos, node_name, kind,
         ),
         Error::Failwith(msg) => msg,
     })

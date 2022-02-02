@@ -32,7 +32,7 @@ fn awaitable_type_args(hint: &ast::Hint) -> Option<&[ast::Hint]> {
         {
             Some(args)
         }
-        Hsoft(h) => awaitable_type_args(&h),
+        Hsoft(h) => awaitable_type_args(h),
         _ => None,
     }
 }
@@ -157,7 +157,7 @@ impl<'ast> Visitor<'ast> for Checker {
         } else if let Some((Expr(_, _, f), ..)) = p.2.as_call() {
             if let Some((ClassId(_, _, CIexpr(Expr(_, pos, Id(id)))), ..)) = f.as_class_const() {
                 if Self::name_eq_this_and_in_static_method(c, &id.1) {
-                    self.add_error(&pos, syntax_error::this_in_static);
+                    self.add_error(pos, syntax_error::this_in_static);
                 }
             }
         } else if let Some(Lid(pos, (_, name))) = p.2.as_lvar() {

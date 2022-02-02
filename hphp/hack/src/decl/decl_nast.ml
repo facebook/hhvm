@@ -115,7 +115,11 @@ and fun_decl_in_env
                 ~returns_readonly:(Option.is_some f.f_readonly_ret)
                 ~readonly_this:ft_readonly_this
                 ~support_dynamic_type:fe_support_dynamic_type
-                ~is_memoized:ft_is_memoized;
+                ~is_memoized:ft_is_memoized
+                ~variadic:
+                  (match arity with
+                  | Fvariadic _ -> true
+                  | _ -> false);
             (* TODO: handle const attribute *)
             ft_ifc_decl = ifc_decl;
           } )

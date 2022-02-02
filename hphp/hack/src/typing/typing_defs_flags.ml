@@ -308,6 +308,8 @@ let ft_flags_support_dynamic_type = 1 lsl 12
 
 let ft_flags_is_memoized = 1 lsl 13
 
+let ft_flags_variadic          = 1 lsl 14
+
 (* fun_param flags *)
 let fp_flags_accept_disposable = 1 lsl 0
 

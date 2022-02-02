@@ -283,7 +283,11 @@ let method_type ~support_dynamic_type env m =
         ~returns_readonly:(Option.is_some m.m_readonly_ret)
         ~readonly_this:m.m_readonly_this
         ~support_dynamic_type
-        ~is_memoized:mt_is_memoized;
+        ~is_memoized:mt_is_memoized
+        ~variadic:
+          (match arity with
+          | Fvariadic _ -> true
+          | _ -> false);
     ft_ifc_decl = ifc_decl;
   }
 

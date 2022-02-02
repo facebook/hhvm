@@ -1663,6 +1663,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         if readonly {
             flags |= FunTypeFlags::READONLY_THIS
         }
+        if let FunArity::Fvariadic(_) = arity {
+            flags |= FunTypeFlags::VARIADIC
+        }
 
         let ifc_decl = attributes.ifc_attribute;
 
@@ -5202,6 +5205,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         }
         if readonly_keyword.is_token(TokenKind::Readonly) {
             flags |= FunTypeFlags::READONLY_THIS;
+        }
+        if let FunArity::Fvariadic(_) = arity {
+            flags |= FunTypeFlags::VARIADIC
         }
 
         self.hint_ty(

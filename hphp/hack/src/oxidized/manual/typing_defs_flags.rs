@@ -30,6 +30,7 @@ bitflags! {
         const READONLY_THIS          = 1 << 11;
         const SUPPORT_DYNAMIC_TYPE   = 1 << 12;
         const IS_MEMOIZED            = 1 << 13;
+        const VARIADIC               = 1 << 14;
     }
 }
 

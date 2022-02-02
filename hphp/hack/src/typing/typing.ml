@@ -1147,8 +1147,9 @@ let check_arity ?(did_unpack = false) pos pos_def ft (arity : int) =
         primary
         @@ Primary.Typing_too_few_args
              { expected = exp_min; actual = arity; pos; decl_pos = pos_def });
-  match ft.ft_arity with
-  | Fstandard ->
+  if get_ft_variadic ft then
+    ()
+  else
     let exp_max = List.length ft.ft_params in
     let arity =
       if did_unpack then
@@ -1162,7 +1163,6 @@ let check_arity ?(did_unpack = false) pos pos_def ft (arity : int) =
           primary
           @@ Primary.Typing_too_many_args
                { expected = exp_max; actual = arity; pos; decl_pos = pos_def })
-  | Fvariadic _ -> ()
 
 let check_lambda_arity lambda_pos def_pos lambda_ft expected_ft =
   match (lambda_ft.ft_arity, expected_ft.ft_arity) with
@@ -8642,6 +8642,10 @@ and call
             ~readonly_this:false
             ~support_dynamic_type:false
             ~is_memoized:false
+            ~variadic:
+              (match ft_arity with
+              | Fvariadic _ -> true
+              | _ -> false)
         in
         let ft_ifc_decl = Typing_defs_core.default_ifc_fun_decl in
         let fun_locl_type =

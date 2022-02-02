@@ -451,6 +451,8 @@ module Flags = struct
   let get_ft_is_function_pointer ft =
     is_set ft.ft_flags ft_flags_is_function_pointer
 
+  let get_ft_variadic ft = is_set ft.ft_flags ft_flags_variadic
+
   let get_ft_fun_kind ft =
     match (get_ft_async ft, get_ft_generator ft) with
     | (false, false) -> Ast_defs.FSync
@@ -477,7 +479,8 @@ module Flags = struct
       ~returns_readonly
       ~readonly_this
       ~support_dynamic_type
-      ~is_memoized =
+      ~is_memoized
+      ~variadic =
     let flags = fun_kind_to_flags kind in
     let flags = set_bit ft_flags_return_disposable return_disposable flags in
     let flags = set_bit ft_flags_returns_readonly returns_readonly flags in
@@ -486,6 +489,7 @@ module Flags = struct
       set_bit ft_flags_support_dynamic_type support_dynamic_type flags
     in
     let flags = set_bit ft_flags_is_memoized is_memoized flags in
+    let flags = set_bit ft_flags_variadic variadic flags in
     flags
 
   let mode_to_flags mode =
@@ -845,6 +849,11 @@ module Pp = struct
 
       Format.fprintf fmt "@[~%s:" "is_memoized";
       Format.fprintf fmt "%B" (get_ft_is_memoized ft);
+      Format.fprintf fmt "@]";
+      Format.fprintf fmt "@ ";
+
+      Format.fprintf fmt "@[~%s:" "variadic";
+      Format.fprintf fmt "%B" (get_ft_variadic ft);
       Format.fprintf fmt "@]";
 
       Format.fprintf fmt ")@]"

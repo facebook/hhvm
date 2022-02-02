@@ -168,10 +168,10 @@ and hint_ p env = function
       { capability }
     in
     let ret = possibly_enforced_hint env h in
-    let arity =
+    let (arity, variadic) =
       match vh with
-      | Some t -> Fvariadic (make_param t None)
-      | None -> Fstandard
+      | Some t -> (Fvariadic (make_param t None), true)
+      | None -> (Fstandard, false)
     in
     Tfun
       {
@@ -188,7 +188,8 @@ and hint_ p env = function
             ~returns_readonly:(readonly_opt readonly_ret)
             ~readonly_this:(readonly_opt ro)
             ~support_dynamic_type:false
-            ~is_memoized:false;
+            ~is_memoized:false
+            ~variadic;
         (* TODO: handle function parameters with <<CanCall>> *)
         ft_ifc_decl = default_ifc_fun_decl;
       }

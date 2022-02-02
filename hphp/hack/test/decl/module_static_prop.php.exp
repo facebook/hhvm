@@ -33,7 +33,7 @@ File root|module_static_prop.php--A.php
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false);
+                ~readonly_this:false ~is_memoized:false ~variadic:false);
               ft_ifc_decl = FDPolicied {PUBLIC} }));
         fe_pos = [12:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }))
@@ -56,7 +56,7 @@ File root|module_static_prop.php--B.php
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false ~is_memoized:false);
+               ~readonly_this:false ~is_memoized:false ~variadic:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [7:10-11]; fe_php_std_lib = false;
        fe_support_dynamic_type = false }))
@@ -79,7 +79,7 @@ File root|module_static_prop.php--no-module.php
              ft_flags =
              (make_ft_flags FSync ~return_disposable:false
                ~returns_readonly:false ~support_dynamic_type:false
-               ~readonly_this:false ~is_memoized:false);
+               ~readonly_this:false ~is_memoized:false ~variadic:false);
              ft_ifc_decl = FDPolicied {PUBLIC} }));
        fe_pos = [4:10-14]; fe_php_std_lib = false;
        fe_support_dynamic_type = false }))

@@ -38,7 +38,7 @@
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
-                   ~readonly_this:false ~is_memoized:false);
+                   ~readonly_this:false ~is_memoized:false ~variadic:false);
                  ft_ifc_decl = FDPolicied {Test} }));
            sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
            sm_attributes = [] };
@@ -56,7 +56,7 @@
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
-                    ~readonly_this:false ~is_memoized:false);
+                    ~readonly_this:false ~is_memoized:false ~variadic:false);
                   ft_ifc_decl = FDPolicied {Public} }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
@@ -74,7 +74,7 @@
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
-                    ~readonly_this:false ~is_memoized:false);
+                    ~readonly_this:false ~is_memoized:false ~variadic:false);
                   ft_ifc_decl = FDPolicied {} }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
@@ -92,7 +92,7 @@
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
-                    ~readonly_this:false ~is_memoized:false);
+                    ~readonly_this:false ~is_memoized:false ~variadic:false);
                   ft_ifc_decl = FDInferFlows }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
@@ -110,7 +110,7 @@
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
-                    ~readonly_this:false ~is_memoized:false);
+                    ~readonly_this:false ~is_memoized:false ~variadic:false);
                   ft_ifc_decl = FDPolicied {\Policy} }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
@@ -128,7 +128,7 @@
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
-                    ~readonly_this:false ~is_memoized:false);
+                    ~readonly_this:false ~is_memoized:false ~variadic:false);
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] };
@@ -170,7 +170,8 @@
                               (make_ft_flags FSync ~return_disposable:false
                                 ~returns_readonly:false
                                 ~support_dynamic_type:false
-                                ~readonly_this:false ~is_memoized:false);
+                                ~readonly_this:false ~is_memoized:false
+                                ~variadic:false);
                               ft_ifc_decl = FDPolicied {PUBLIC} }))
                         };
                       fp_flags =
@@ -188,7 +189,7 @@
                   ft_flags =
                   (make_ft_flags FSync ~return_disposable:false
                     ~returns_readonly:false ~support_dynamic_type:false
-                    ~readonly_this:false ~is_memoized:false);
+                    ~readonly_this:false ~is_memoized:false ~variadic:false);
                   ft_ifc_decl = FDPolicied {PUBLIC} }));
             sm_visibility = Public; sm_deprecated = None; sm_flags = (empty);
             sm_attributes = [] }
@@ -210,7 +211,7 @@
               ft_flags =
               (make_ft_flags FSync ~return_disposable:false
                 ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false);
+                ~readonly_this:false ~is_memoized:false ~variadic:false);
               ft_ifc_decl = FDInferFlows }));
         fe_pos = [31:10-20]; fe_php_std_lib = false;
         fe_support_dynamic_type = false }))

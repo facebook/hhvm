@@ -231,4 +231,12 @@ let retype_magic_func
   in
   match f env ft.ft_params el with
   | (env, None) -> (env, ft)
-  | (env, Some xs) -> (env, { ft with ft_params = xs; ft_arity = Fstandard })
+  | (env, Some xs) ->
+    ( env,
+      {
+        ft with
+        ft_params = xs;
+        ft_arity = Fstandard;
+        ft_flags =
+          Typing_defs_flags.(set_bit ft_flags_variadic false ft.ft_flags);
+      } )

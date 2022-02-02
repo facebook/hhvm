@@ -10,6 +10,7 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 cxx = "1.0.54"
+oxidized = { path = "../../../oxidized" }
 
 [build-dependencies]
 cxx-build = "1.0.54"

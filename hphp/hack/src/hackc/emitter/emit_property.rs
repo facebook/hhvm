@@ -5,11 +5,12 @@
 
 use env::{emitter::Emitter, Env};
 use ffi::Maybe::*;
-use hhas_property::{HhasProperty, HhasPropertyFlags};
+use hhas_property::HhasProperty;
 use hhas_type::{constraint, HhasTypeInfo};
 use hhbc_ast::InitpropOp;
 use hhbc_id::{prop, Id};
 use hhbc_string_utils as string_utils;
+use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq, Result};
 use naming_special_names_rust::{pseudo_consts, user_attributes as ua};
 use oxidized::{aast_defs, ast, ast_defs, doc_comment};
@@ -92,7 +93,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
             } else {
                 None
             };
-            (initial_value, None, HhasPropertyFlags::HAS_SYSTEM_INITIAL)
+            (initial_value, None, Attr::AttrSystemInitialValue)
         }
         Some(_) if is_late_init => {
             return Err(emit_fatal::raise_fatal_parse(
@@ -112,9 +113,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
             let deep_init = !args.is_static
                 && expr_requires_deep_init(e, emitter.options().emit_class_pointers() > 0);
             match ast_constant_folder::expr_to_typed_value(emitter, e) {
-                Ok(tv) if !(deep_init || is_collection_map) => {
-                    (Some(tv), None, HhasPropertyFlags::empty())
-                }
+                Ok(tv) if !(deep_init || is_collection_map) => (Some(tv), None, Attr::AttrNone),
                 _ => {
                     let label = emitter.label_gen_mut().next_regular();
                     let (prolog, epilog) = if args.is_static {
@@ -155,8 +154,8 @@ pub fn from_ast<'ast, 'arena, 'decl>(
                             ),
                         )
                     };
-                    let mut flags = HhasPropertyFlags::empty();
-                    flags.set(HhasPropertyFlags::IS_DEEP_INIT, deep_init);
+                    let mut flags = Attr::AttrNone;
+                    flags.set(Attr::AttrDeepInit, deep_init);
                     (
                         Some(TypedValue::Uninit),
                         Some(InstrSeq::gather(
@@ -174,12 +173,13 @@ pub fn from_ast<'ast, 'arena, 'decl>(
         }
     };
 
-    hhas_property_flags.set(HhasPropertyFlags::IS_ABSTRACT, args.is_abstract);
-    hhas_property_flags.set(HhasPropertyFlags::IS_STATIC, args.is_static);
-    hhas_property_flags.set(HhasPropertyFlags::IS_LSB, is_lsb);
-    hhas_property_flags.set(HhasPropertyFlags::IS_CONST, is_const);
-    hhas_property_flags.set(HhasPropertyFlags::IS_LATE_INIT, is_late_init);
-    hhas_property_flags.set(HhasPropertyFlags::IS_READONLY, args.is_readonly);
+    hhas_property_flags.set(Attr::AttrAbstract, args.is_abstract);
+    hhas_property_flags.set(Attr::AttrStatic, args.is_static);
+    hhas_property_flags.set(Attr::AttrLSB, is_lsb);
+    hhas_property_flags.set(Attr::AttrIsConst, is_const);
+    hhas_property_flags.set(Attr::AttrLateInit, is_late_init);
+    hhas_property_flags.set(Attr::AttrIsReadonly, args.is_readonly);
+    hhas_property_flags.add(Attr::from(args.visibility));
 
     Ok(HhasProperty {
         name: pid,

@@ -399,47 +399,12 @@ fn print_property_attributes(
     w: &mut dyn Write,
     property: &HhasProperty<'_>,
 ) -> Result<()> {
-    let mut special_attributes = vec![];
-    if property.is_late_init() {
-        special_attributes.push("late_init")
-    };
-    if property.is_no_bad_redeclare() {
-        special_attributes.push("no_bad_redeclare")
-    };
-    if property.initial_satisfies_tc() {
-        special_attributes.push("initial_satisfies_tc")
-    }
-    if property.no_implicit_null() {
-        special_attributes.push("no_implicit_null")
-    }
-    if property.has_system_initial() {
-        special_attributes.push("sys_initial_val")
-    }
-    if property.is_const() {
-        special_attributes.push("is_const")
-    }
-    if property.is_readonly() {
-        special_attributes.push("readonly")
-    }
-    if property.is_deep_init() {
-        special_attributes.push("deep_init")
-    }
-    if property.is_lsb() {
-        special_attributes.push("lsb")
-    }
-    if property.is_static() {
-        special_attributes.push("static")
-    }
-    special_attributes.push(property.visibility.as_ref());
-    special_attributes.reverse();
-
     w.write_all(b"[")?;
-    concat_by(w, " ", &special_attributes, |w, a| {
-        w.write_all(a.as_bytes())
-    })?;
-    if !special_attributes.is_empty() && !property.attributes.is_empty() {
-        w.write_all(b" ")?;
-    }
+    write!(
+        w,
+        "{}",
+        attrs_to_string_ffi(AttrContext::Prop, property.flags)
+    )?;
     print_attributes(ctx, w, &property.attributes)?;
     w.write_all(b"] ")
 }

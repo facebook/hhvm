@@ -758,9 +758,9 @@ pub fn emit_class<'a, 'arena, 'decl>(
 
     let requirements = from_class_elt_requirements(alloc, ast_class);
 
-    let pinit_filter = |p: &HhasProperty<'_>| !p.is_static();
-    let sinit_filter = |p: &HhasProperty<'_>| p.is_static() && !p.is_lsb();
-    let linit_filter = |p: &HhasProperty<'_>| p.is_static() && p.is_lsb();
+    let pinit_filter = |p: &HhasProperty<'_>| !p.flags.is_static();
+    let sinit_filter = |p: &HhasProperty<'_>| p.flags.is_static() && !p.flags.is_lsb();
+    let linit_filter = |p: &HhasProperty<'_>| p.flags.is_static() && p.flags.is_lsb();
 
     let pinit_method =
         make_init_method(alloc, emitter, &properties, &pinit_filter, "86pinit", span)?;

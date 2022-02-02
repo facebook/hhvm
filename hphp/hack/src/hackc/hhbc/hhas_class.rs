@@ -61,30 +61,6 @@ pub struct HhasClass<'arena> {
 }
 
 impl<'arena> HhasClass<'arena> {
-    pub fn is_final(&self) -> bool {
-        (self.flags & Attr::AttrFinal) != 0
-    }
-    pub fn is_sealed(&self) -> bool {
-        (self.flags & Attr::AttrSealed) != 0
-    }
-    pub fn is_abstract(&self) -> bool {
-        (self.flags & Attr::AttrAbstract) != 0
-    }
-    pub fn is_interface(&self) -> bool {
-        (self.flags & Attr::AttrInterface) != 0
-    }
-    pub fn is_trait(&self) -> bool {
-        (self.flags & Attr::AttrTrait) != 0
-    }
-    pub fn is_const(&self) -> bool {
-        (self.flags & Attr::AttrIsConst) != 0
-    }
-    pub fn no_dynamic_props(&self) -> bool {
-        (self.flags & Attr::AttrForbidDynamicProps) != 0
-    }
-    pub fn needs_no_reifiedinit(&self) -> bool {
-        (self.flags & Attr::AttrNoReifiedInit) != 0
-    }
     pub fn is_closure(&self) -> bool {
         self.methods.as_ref().iter().any(|x| x.is_closure_body())
     }

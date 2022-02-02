@@ -1326,6 +1326,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_types_ffi",
  "instruction_sequence",
  "naming_special_names_rust",
  "oxidized",
@@ -1978,12 +1979,12 @@ dependencies = [
 name = "hhas_property"
 version = "0.0.0"
 dependencies = [
- "bitflags",
  "ffi",
  "hhas_attribute",
  "hhas_type",
  "hhbc_ast",
  "hhbc_id",
+ "hhvm_types_ffi",
  "instruction_sequence",
  "runtime",
 ]
@@ -2084,6 +2085,7 @@ version = "0.0.0"
 dependencies = [
  "cxx",
  "cxx-build",
+ "oxidized",
 ]
 
 [[package]]

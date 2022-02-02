@@ -89,6 +89,18 @@ impl From<u32> for Attr {
     }
 }
 
+impl From<oxidized::ast_defs::Visibility> for Attr {
+    fn from(k: oxidized::ast_defs::Visibility) -> Attr {
+        use oxidized::ast_defs::Visibility::*;
+        match k {
+            Private => Attr::AttrPrivate,
+            Public => Attr::AttrPublic,
+            Protected => Attr::AttrProtected,
+            Internal => Attr::AttrPublic,
+        }
+    }
+}
+
 impl From<Attr> for u32 {
     fn from(attr: Attr) -> Self {
         attr.repr
@@ -96,12 +108,15 @@ impl From<Attr> for u32 {
 }
 
 impl Attr {
-    pub fn set(&mut self, attr: Attr, b: bool) {
-        if b {
-            self.repr = *self | attr
-        }
+    pub fn add(&mut self, attr: Attr) {
+        self.repr = *self | attr
     }
 
+    pub fn set(&mut self, attr: Attr, b: bool) {
+        if b {
+            self.add(attr)
+        }
+    }
     pub fn is_final(&self) -> bool {
         (*self & Attr::AttrFinal) != 0
     }
@@ -125,6 +140,33 @@ impl Attr {
     }
     pub fn needs_no_reifiedinit(&self) -> bool {
         (*self & Attr::AttrNoReifiedInit) != 0
+    }
+    pub fn is_late_init(&self) -> bool {
+        (*self & Attr::AttrLateInit) != 0
+    }
+    pub fn is_no_bad_redeclare(&self) -> bool {
+        (*self & Attr::AttrNoBadRedeclare) != 0
+    }
+    pub fn initial_satisfies_tc(&self) -> bool {
+        (*self & Attr::AttrInitialSatisfiesTC) != 0
+    }
+    pub fn no_implicit_null(&self) -> bool {
+        (*self & Attr::AttrNoImplicitNullable) != 0
+    }
+    pub fn has_system_initial(&self) -> bool {
+        (*self & Attr::AttrSystemInitialValue) != 0
+    }
+    pub fn is_deep_init(&self) -> bool {
+        (*self & Attr::AttrDeepInit) != 0
+    }
+    pub fn is_lsb(&self) -> bool {
+        (*self & Attr::AttrLSB) != 0
+    }
+    pub fn is_static(&self) -> bool {
+        (*self & Attr::AttrStatic) != 0
+    }
+    pub fn is_readonly(&self) -> bool {
+        (*self & Attr::AttrIsReadonly) != 0
     }
 }
 

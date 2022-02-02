@@ -1,5 +1,5 @@
 .function ["__EntryPoint"("""y:0:{}""")] (5,5) <"" N  > main() {
-  String "FAIL: this file should not run\n"
+  String "Parses Ok\n"
   Print
   PopC
   Null

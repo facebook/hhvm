@@ -215,6 +215,17 @@ bool UnitChecker::checkPreClasses() {
         error("Class %s is a final interface\n", preclass->name()->data());
     }
 
+    if (classAttrs & AttrIsConst) {
+      if (classAttrs & (AttrEnum | AttrEnumClass | AttrInterface | AttrTrait)) {
+        error("Class %s violates that interfaces, traits and enums may not be const",
+              preclass->name()->data());
+      }
+      if (!(classAttrs & AttrForbidDynamicProps)) {
+        error("Const class %s missing ForbidDynamicProps attribute",
+              preclass->name()->data());
+      }
+    }
+
     if (classAttrs & AttrSealed) {
       const auto sealed_attr =
         preclass->userAttributes().find(s___Sealed.get())->second;
@@ -250,6 +261,12 @@ bool UnitChecker::checkPreClasses() {
         ok = false;
         error("Property %s in class %s has no access modifier\n",
                prop.name()->data(), preclass->name()->data());
+      }
+      if (attributes & AttrIsConst) {
+        if (attributes & AttrLateInit) {
+          error("Const property %s in class %s may not also be late init",
+                prop.name()->data(), preclass->name()->data());
+        }
       }
     }
 

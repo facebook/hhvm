@@ -2799,16 +2799,23 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
   return tvInit;
 }
 
-template<typename AttrValidator, typename Adder>
-void parse_prop_or_field_impl(AsmState& as,
-                              AttrValidator validate,
-                              Adder add,
-                              const UpperBoundMap& class_ubs) {
+/*
+ * directive-property : attribute-list maybe-long-string-literal type-info
+ *                      identifier member-tv-initializer
+ *                    ;
+ *
+ * Define a property with an associated type and heredoc.
+ */
+void parse_property(AsmState& as, const UpperBoundMap& class_ubs) {
   as.in.skipWhitespace();
 
   UserAttributeMap userAttributes;
   Attr attrs = parse_attribute_list(as, AttrContext::Prop, &userAttributes);
-  validate(attrs);
+
+  if (!(attrs & AttrIsConst) && (as.pce->attrs() & AttrIsConst) &&
+      !(attrs & AttrStatic)) {
+    as.error("all instance properties of a const class must be const");
+  }
 
   auto const heredoc = makeDocComment(parse_maybe_long_string(as));
 
@@ -2836,7 +2843,8 @@ void parse_prop_or_field_impl(AsmState& as,
   }
 
   TypedValue tvInit = parse_member_tv_initializer(as);
-  add(makeStaticString(name),
+  as.pce->addProperty(
+      makeStaticString(name),
       attrs,
       userTyStr,
       typeConstraint,
@@ -2845,33 +2853,6 @@ void parse_prop_or_field_impl(AsmState& as,
       &tvInit,
       RepoAuthType{},
       userAttributes);
-}
-
-/*
- * directive-property : attribute-list maybe-long-string-literal type-info
- *                      identifier member-tv-initializer
- *                    ;
- *
- * Define a property with an associated type and heredoc.
- */
-void parse_property(AsmState& as, bool class_is_const,
-                    const UpperBoundMap& class_ubs) {
-  parse_prop_or_field_impl(
-    as,
-    [&](Attr attrs) {
-      if (attrs & AttrIsConst) {
-        if (attrs & AttrLateInit) {
-          as.error("const properties may not also be late init");
-        }
-      } else if (class_is_const && !(attrs & AttrStatic)) {
-        as.error("all instance properties of a const class must be const");
-      }
-    },
-    [&](auto&&... args) {
-      as.pce->addProperty(std::forward<decltype(args)>(args)...);
-    },
-    class_ubs
-  );
 }
 
 /*
@@ -3139,12 +3120,11 @@ void parse_cls_doccomment(AsmState& as) {
  *                 | ".doc"          directive-doccomment
  *                 ;
  */
-void parse_class_body(AsmState& as, bool class_is_const,
-                      const UpperBoundMap& class_ubs) {
+void parse_class_body(AsmState& as, const UpperBoundMap& class_ubs) {
   std::string directive;
   while (as.in.readword(directive)) {
     if (directive == ".property") {
-      parse_property(as, class_is_const, class_ubs);
+      parse_property(as, class_ubs);
       continue;
     }
     if (directive == ".method")       { parse_method(as, class_ubs); continue; }
@@ -3185,14 +3165,6 @@ void parse_class(AsmState& as) {
   Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs);
   if (!SystemLib::s_inited) {
     attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
-  }
-  if (attrs & AttrIsConst) {
-    if (attrs & (AttrEnum | AttrEnumClass | AttrInterface | AttrTrait)) {
-      as.error("interfaces, traits and enums may not be const");
-    }
-    if (!(attrs & AttrForbidDynamicProps)) {
-      as.error("const class missing ForbidDynamicProps attribute");
-    }
   }
 
   std::string name;
@@ -3258,7 +3230,7 @@ void parse_class(AsmState& as) {
   as.pce->setUserAttributes(userAttrs);
 
   as.in.expectWs('{');
-  parse_class_body(as, attrs & AttrIsConst, ubs);
+  parse_class_body(as, ubs);
 
   as.finishClass();
 }

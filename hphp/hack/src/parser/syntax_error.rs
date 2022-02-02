@@ -525,7 +525,6 @@ pub const no_const_interfaces_traits_enums: Error =
     Cow::Borrowed("Interfaces, traits and enums may not be declared `__Const`");
 pub const no_const_late_init_props: Error =
     Cow::Borrowed("`__Const` properties may not also be `__LateInit`");
-pub const no_const_static_props: Error = Cow::Borrowed("Static properties may not be `__Const`");
 pub const no_const_abstract_final_class: Error =
     Cow::Borrowed("Cannot apply `__Const` attribute to an abstract final class");
 pub const no_legacy_attribute_syntax: Error = Cow::Borrowed(

@@ -3428,7 +3428,7 @@ IRInstruction* makeReleaseShallow(
  */
 void optimizeDecRefForProfiledType(
     IRUnit& unit, const DecRefProfile& profile, IRInstruction* inst) {
-  assertx(profile.type.isKnownDataType());
+  assertx(isRealType(profile.datatype));
   assertx(inst->is(DecRef));
 
   auto const src = inst->src(0);
@@ -3436,7 +3436,7 @@ void optimizeDecRefForProfiledType(
   auto const block = inst->block();
   auto const it = block->iteratorTo(inst);
   FTRACE(4, "    {}: optimizing for type: {}\n",
-         inst->toString(), profile.type.toString());
+      inst->toString(), profile.datatype);
 
   // "remainder" contains the contents of this block after this DecRef.
   auto const remainder = unit.defBlock(block->profCount(), block->hint());
@@ -3448,8 +3448,8 @@ void optimizeDecRefForProfiledType(
   taken->push_back(unit.gen(DecRef, bcctx, data, src));
   taken->push_back(unit.gen(Jmp, bcctx, remainder));
 
-  auto const type = Type(profile.type.toDataType());
-  auto const check = unit.gen(CheckType, bcctx, type, taken, src);
+  auto const check = unit.gen(
+      CheckType, bcctx, Type(profile.datatype), taken, src);
   auto const dst = check->dst();
 
   // "next" contains the type-specific DecRef if the CheckType succeeds.
@@ -3534,7 +3534,7 @@ void selectiveWeakenDecRefs(IRUnit& unit) {
               : RuntimeOption::EvalJitPGODecRefNZReleasePercentCOW;
             if (destroyPct < destroyPctLimit && !(type <= TAwaitable)) {
               inst.setOpcode(DecRefNZ);
-            } else if (data.type.isKnownDataType()) {
+            } else if (isRealType(data.datatype)) {
               if (!inst.src(0)->type().isKnownDataType()) {
                 profiledTypeCandidates.emplace_back(&inst, data);
               } else if (shouldReleaseShallow(data, inst.src(0))){

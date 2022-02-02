@@ -522,11 +522,13 @@ void cgDecRef(IRLS& env, const IRInstruction *inst) {
   }
 
   if (Trace::moduleEnabled(Trace::irlower, 3) && profile.optimizing()) {
-    FTRACE(3, "irlower-refcount: Compiling:\nmarker: {}\ninstruction: {}\ndecRefProfileKey: {}\nDecRefProfile:\n {}\n",
-      inst->marker().show(),
-      *inst,
-      decRefProfileKey(inst)->data(),
-      profile.data());
+    FTRACE(
+        3, "irlower-refcount: Compiling:\nmarker: {}\ninstruction: "
+        "{}\ndecRefProfileKey: {}\nDecRefProfile:\n {}\n",
+        inst->marker().show(),
+        *inst,
+        decRefProfileKey(inst)->data(),
+        profile.data());
   }
 
   if (RuntimeOption::EvalHHIROutlineGenericIncDecRef &&

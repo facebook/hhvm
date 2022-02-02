@@ -16,9 +16,9 @@
 
 #pragma once
 
+#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
-#include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 
 #include <folly/dynamic.h>
@@ -42,6 +42,13 @@ namespace HPHP { namespace jit {
  *     the type was refcounted, non-persistent, but wasn't destroyed (count > 1)
  *
  */
+
+constexpr DataType kNoDataTypesSeen = kExtraInvalidDataType;
+constexpr DataType kMultipleDataTypesSeen = kInvalidDataType;
+
+// Necessary because profile data is 0-initialized.
+static_assert(static_cast<int>(kNoDataTypesSeen) == 0);
+
 struct DecRefProfile {
 
   uint32_t uncounted() const {
@@ -61,7 +68,7 @@ struct DecRefProfile {
   uint32_t survived() const {
     return decremented;
   }
- 
+
   uint32_t arrayOfUncountedReleasedCount() const {
     return arrayOfUncountedReleaseCount;
   }
@@ -76,8 +83,7 @@ struct DecRefProfile {
     write_raw(ser, released);
     write_raw(ser, decremented);
     write_raw(ser, arrayOfUncountedReleaseCount);
-
-    type.serialize(ser);
+    write_raw(ser, datatype);
   }
 
   void deserialize(ProfDataDeserializer& ser) {
@@ -86,14 +92,15 @@ struct DecRefProfile {
     read_raw(ser, released);
     read_raw(ser, decremented);
     read_raw(ser, arrayOfUncountedReleaseCount);
-
-    type = Type::deserialize(ser);
+    read_raw(ser, datatype);
   }
 
   /*
    * Update the profile for a dec-ref on tv.
    */
   void update(TypedValue tv);
+
+  void updateDataType(DataType newDT);
 
   static void reduce(DecRefProfile& a, const DecRefProfile& b);
 
@@ -125,9 +132,12 @@ struct DecRefProfile {
   uint32_t arrayOfUncountedReleaseCount;
 
   /*
-   * Union of all the types observed during profiling.
+   * 'datatype' is populated with a unique datatype, if we see one, during
+   * profiling. It is initialized to 0 (kNoDataTypesSeen) before any datatypes
+   * are seen. If non-unique datatypes are seen, it is set to
+   * kMultipleDataTypesSeen.
    */
-  Type type;
+  DataType datatype;
 
   // In RDS, but can't contain pointers to request-allocated data.
   TYPE_SCAN_IGNORE_ALL;

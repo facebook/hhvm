@@ -1066,6 +1066,7 @@ dependencies = [
  "hhas_pos",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_types_ffi",
  "instruction_sequence",
  "oxidized",
 ]
@@ -1150,6 +1151,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_types_ffi",
  "instruction_sequence",
  "itertools 0.10.3",
  "label",
@@ -1927,6 +1929,7 @@ dependencies = [
  "hhas_param",
  "hhas_pos",
  "hhbc_id",
+ "hhvm_types_ffi",
 ]
 
 [[package]]

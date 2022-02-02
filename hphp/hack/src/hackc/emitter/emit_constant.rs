@@ -13,6 +13,7 @@ use hhas_function::{HhasFunction, HhasFunctionFlags};
 use hhas_pos::HhasSpan;
 use hhbc_id::{r#const, function, Id};
 use hhbc_string_utils::strip_global_ns;
+use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq, Result};
 use oxidized::ast;
 
@@ -74,7 +75,8 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
             body,
             span: HhasSpan::from_pos(&constant.span),
             coeffects: HhasCoeffects::default(),
-            flags: HhasFunctionFlags::NO_INJECTION,
+            flags: HhasFunctionFlags::empty(),
+            attrs: Attr::AttrNoInjection,
         })
     }))
     .transpose()

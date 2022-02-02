@@ -7,6 +7,7 @@ use ast_scope::{self as ast_scope, Scope, ScopeItem};
 use emit_pos::emit_pos_then;
 use env::{emitter::Emitter, Env};
 use ffi::Slice;
+use hhas_attribute::*;
 use hhas_body::HhasBody;
 use hhas_coeffects::HhasCoeffects;
 use hhas_function::{HhasFunction, HhasFunctionFlags};
@@ -16,6 +17,7 @@ use hhas_type::HhasTypeInfo;
 use hhbc_ast::{FcallArgs, FcallFlags};
 use hhbc_id::function;
 use hhbc_string_utils::reified;
+use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
 use local::Local;
@@ -24,11 +26,37 @@ use options::{HhvmFlags, Options, RepoFlags};
 use oxidized::{ast as T, pos::Pos};
 use runtime::TypedValue;
 
-pub(crate) fn is_interceptable(opts: &Options) -> bool {
+pub fn is_interceptable(opts: &Options) -> bool {
     opts.hhvm
         .flags
         .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION)
         && !opts.repo_flags.contains(RepoFlags::AUTHORITATIVE)
+}
+
+pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    fd: &'a T::FunDef,
+    user_attrs: &'a [HhasAttribute<'arena>],
+    is_memoize_impl: bool,
+) -> Attr {
+    let f = &fd.fun;
+    let is_systemlib = emitter.systemlib();
+    let is_dyn_call = is_systemlib || (has_dynamically_callable(user_attrs) && !is_memoize_impl);
+    let is_prov_skip_frame = has_provenance_skip_frame(user_attrs);
+    let is_meth_caller = has_meth_caller(user_attrs);
+
+    let mut attrs = Attr::AttrNone;
+    attrs.set(Attr::AttrBuiltin, is_meth_caller | is_systemlib);
+    attrs.set(Attr::AttrDynamicallyCallable, is_dyn_call);
+    attrs.set(Attr::AttrInterceptable, is_interceptable(emitter.options()));
+    attrs.set(Attr::AttrIsFoldable, has_foldable(user_attrs));
+    attrs.set(Attr::AttrIsMethCaller, is_meth_caller);
+    attrs.set(Attr::AttrNoInjection, is_no_injection(user_attrs));
+    attrs.set(Attr::AttrPersistent, is_systemlib);
+    attrs.set(Attr::AttrProvenanceSkipFrame, is_prov_skip_frame);
+    attrs.set(Attr::AttrReadonlyReturn, f.readonly_ret.is_some());
+    attrs.set(Attr::AttrUnique, is_systemlib);
+    attrs
 }
 
 pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
@@ -97,9 +125,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
 
     let mut flags = HhasFunctionFlags::empty();
     flags.set(HhasFunctionFlags::ASYNC, f.fun_kind.is_fasync());
-    let is_interceptable = is_interceptable(emitter.options());
-    flags.set(HhasFunctionFlags::INTERCEPTABLE, is_interceptable);
-    flags.set(HhasFunctionFlags::READONLY_RETURN, f.readonly_ret.is_some());
+    let attrs = get_attrs_for_fun(emitter, fd, &attributes, false);
 
     Ok(HhasFunction {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),
@@ -108,6 +134,7 @@ pub(crate) fn emit_wrapper_function<'a, 'arena, 'decl>(
         span: HhasSpan::from_pos(&f.span),
         coeffects,
         flags,
+        attrs,
     })
 }
 

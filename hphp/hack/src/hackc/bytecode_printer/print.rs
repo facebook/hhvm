@@ -3061,37 +3061,16 @@ fn print_span(w: &mut dyn Write, &HhasSpan(line_begin, line_end): &HhasSpan) -> 
 }
 
 fn print_fun_attrs(ctx: &Context<'_>, w: &mut dyn Write, f: &HhasFunction<'_>) -> Result<()> {
-    use hhas_attribute::*;
     let user_attrs = f.attributes.as_ref();
-    let mut special_attrs = vec![];
-    if has_meth_caller(user_attrs) {
-        special_attrs.push("builtin");
-        special_attrs.push("is_meth_caller");
-    }
-    if f.is_interceptable() {
-        special_attrs.push("interceptable");
-    }
-    if has_foldable(user_attrs) {
-        special_attrs.push("foldable");
-    }
-    if has_provenance_skip_frame(user_attrs) {
-        special_attrs.push("prov_skip_frame");
-    }
-    if f.is_no_injection() {
-        special_attrs.push("no_injection");
-    }
-    if f.is_readonly_return() {
-        special_attrs.push("readonly_return");
-    }
-    if ctx.is_system_lib() || (has_dynamically_callable(user_attrs) && !f.is_memoize_impl()) {
-        special_attrs.push("dyn_callable")
-    }
-    if ctx.is_system_lib() {
-        special_attrs.push("unique");
-        special_attrs.push("builtin");
-        special_attrs.push("persistent");
-    }
-    print_special_and_user_attrs(ctx, w, &special_attrs, user_attrs)
+    square(w, |w| {
+        write!(w, "{}", attrs_to_string_ffi(AttrContext::Func, f.attrs))?;
+        if !user_attrs.is_empty() {
+            w.write_all(b" ")?;
+        }
+        print_attributes(ctx, w, user_attrs)
+    })?;
+    w.write_all(b" ")?;
+    Ok(())
 }
 
 fn print_special_and_user_attrs(

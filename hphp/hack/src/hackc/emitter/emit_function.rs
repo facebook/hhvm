@@ -36,17 +36,13 @@ pub fn emit_function<'a, 'arena, 'decl>(
         HhasFunctionFlags::ASYNC,
         matches!(f.fun_kind, FunKind::FAsync | FunKind::FAsyncGenerator),
     );
-
-    let mut attrs: Vec<HhasAttribute<'arena>> = emit_attribute::from_asts(e, &f.user_attributes)?;
-    attrs.extend(emit_attribute::add_reified_attribute(alloc, &f.tparams));
-    let memoized = attrs
+    let mut user_attrs: Vec<HhasAttribute<'arena>> =
+        emit_attribute::from_asts(e, &f.user_attributes)?;
+    user_attrs.extend(emit_attribute::add_reified_attribute(alloc, &f.tparams));
+    let memoized = user_attrs
         .iter()
         .any(|a| ua::is_memoized(a.name.unsafe_as_str()));
     flags.set(HhasFunctionFlags::MEMOIZE_IMPL, memoized);
-    flags.set(
-        HhasFunctionFlags::NO_INJECTION,
-        hhas_attribute::is_no_injection(&attrs),
-    );
 
     let renamed_id = {
         if memoized {
@@ -55,10 +51,6 @@ pub fn emit_function<'a, 'arena, 'decl>(
             original_id
         }
     };
-    flags.set(
-        HhasFunctionFlags::INTERCEPTABLE,
-        emit_memoize_function::is_interceptable(e.options()),
-    );
     let is_meth_caller = f.name.1.starts_with("\\MethCaller$");
     let call_context = if is_meth_caller {
         match &f.user_attributes[..] {
@@ -108,10 +100,12 @@ pub fn emit_function<'a, 'arena, 'decl>(
         coeffects = coeffects.with_backdoor(alloc)
     }
     let ast_body = &f.body.fb_ast;
-    let deprecation_info = hhas_attribute::deprecation_info(attrs.iter());
+    let deprecation_info = hhas_attribute::deprecation_info(user_attrs.iter());
     let (body, is_gen, is_pair_gen) = {
         let deprecation_info = if memoized { None } else { deprecation_info };
-        let native = attrs.iter().any(|a| ua::is_native(a.name.unsafe_as_str()));
+        let native = user_attrs
+            .iter()
+            .any(|a| ua::is_native(a.name.unsafe_as_str()));
         use emit_body::{Args as EmitBodyArgs, Flags as EmitBodyFlags};
         let mut body_flags = EmitBodyFlags::empty();
         body_flags.set(
@@ -150,10 +144,8 @@ pub fn emit_function<'a, 'arena, 'decl>(
             },
         )?
     };
-    let is_readonly_return = f.readonly_ret.is_some();
     flags.set(HhasFunctionFlags::GENERATOR, is_gen);
     flags.set(HhasFunctionFlags::PAIR_GENERATOR, is_pair_gen);
-    flags.set(HhasFunctionFlags::READONLY_RETURN, is_readonly_return);
     let memoize_wrapper = if memoized {
         Some(emit_memoize_function::emit_wrapper_function(
             e,
@@ -165,13 +157,15 @@ pub fn emit_function<'a, 'arena, 'decl>(
     } else {
         None
     };
+    let attrs = emit_memoize_function::get_attrs_for_fun(e, fd, &user_attrs, memoized);
     let normal_function = HhasFunction {
-        attributes: Slice::fill_iter(alloc, attrs.into_iter()),
+        attributes: Slice::fill_iter(alloc, user_attrs.into_iter()),
         name: FunctionType(Str::new_str(alloc, renamed_id.to_raw_string())),
         span: HhasSpan::from_pos(&f.span),
         coeffects,
         body,
         flags,
+        attrs,
     };
 
     Ok(if let Some(memoize_wrapper) = memoize_wrapper {

@@ -10,6 +10,7 @@ use hhas_coeffects::HhasCoeffects;
 use hhas_param::HhasParam;
 use hhas_pos::HhasSpan;
 use hhbc_id::function::FunctionType;
+use hhvm_types_ffi::ffi::Attr;
 
 use bitflags::bitflags;
 
@@ -23,18 +24,16 @@ pub struct HhasFunction<'arena> {
     pub span: HhasSpan,
     pub coeffects: HhasCoeffects<'arena>,
     pub flags: HhasFunctionFlags,
+    pub attrs: Attr,
 }
 
 bitflags! {
     #[repr(C)]
     pub struct HhasFunctionFlags: u8 {
-        const ASYNC =          1 << 1;
-        const GENERATOR =      1 << 2;
-        const PAIR_GENERATOR = 1 << 3;
-        const NO_INJECTION =   1 << 4;
-        const INTERCEPTABLE =  1 << 5;
-        const MEMOIZE_IMPL =   1 << 6;
-        const READONLY_RETURN = 1 << 7;
+        const ASYNC =          1 << 0;
+        const GENERATOR =      1 << 1;
+        const PAIR_GENERATOR = 1 << 2;
+        const MEMOIZE_IMPL =   1 << 3;
     }
 }
 
@@ -51,20 +50,8 @@ impl<'arena> HhasFunction<'arena> {
         self.flags.contains(HhasFunctionFlags::PAIR_GENERATOR)
     }
 
-    pub fn is_interceptable(&self) -> bool {
-        self.flags.contains(HhasFunctionFlags::INTERCEPTABLE)
-    }
-
-    pub fn is_no_injection(&self) -> bool {
-        self.flags.contains(HhasFunctionFlags::NO_INJECTION)
-    }
-
     pub fn is_memoize_impl(&self) -> bool {
         self.flags.contains(HhasFunctionFlags::MEMOIZE_IMPL)
-    }
-
-    pub fn is_readonly_return(&self) -> bool {
-        self.flags.contains(HhasFunctionFlags::READONLY_RETURN)
     }
 
     pub fn with_body<F, T>(&mut self, body: HhasBody<'arena>, f: F) -> T

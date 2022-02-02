@@ -412,19 +412,23 @@ module Simple = struct
       begin
         match Env.get_class_or_typedef env cid with
         | Some (Env.ClassResult class_info) ->
-          Typing_visibility.check_classname_access
-            ~use_pos
-            ~in_signature
-            env
-            class_info;
+          Option.iter
+            ~f:Errors.add_typing_error
+            (Typing_visibility.check_classname_access
+               ~use_pos
+               ~in_signature
+               env
+               class_info);
           let tparams = Cls.tparams class_info in
           check_against_tparams ~in_signature (Cls.pos class_info) argl tparams
         | Some (Env.TypedefResult typedef) ->
-          Typing_visibility.check_typedef_access
-            ~use_pos
-            ~in_signature
-            env
-            typedef;
+          Option.iter
+            ~f:Errors.add_typing_error
+            (Typing_visibility.check_typedef_access
+               ~use_pos
+               ~in_signature
+               env
+               typedef);
           check_against_tparams
             ~in_signature
             typedef.td_pos

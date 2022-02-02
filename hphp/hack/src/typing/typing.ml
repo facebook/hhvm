@@ -1049,7 +1049,9 @@ let fun_type_of_id env x tal el =
           (get_reason fe_type)
           ft
       in
-      TVis.check_deprecated ~use_pos ~def_pos fe_deprecated;
+      Option.iter
+        ~f:Errors.add_typing_error
+        (TVis.check_deprecated ~use_pos ~def_pos fe_deprecated);
       let err_opt =
         let open Typing_error.Primary.Modules in
         if fe_internal then
@@ -3650,7 +3652,9 @@ and expr_
           in
           let ty = mk (r, Tfun ft) in
           let use_pos = fst meth in
-          TVis.check_deprecated ~use_pos ~def_pos ce_deprecated;
+          Option.iter
+            ~f:Errors.add_typing_error
+            (TVis.check_deprecated ~use_pos ~def_pos ce_deprecated);
           (match ce_visibility with
           | Vpublic
           | Vinternal _ ->
@@ -7425,15 +7429,19 @@ and class_get_inner
                _;
              } as ce) ->
           let def_pos = get_pos member_decl_ty in
-          TVis.check_class_access
-            ~is_method
-            ~use_pos:p
-            ~def_pos
-            env
-            (vis, get_ce_lsb ce)
-            cid_
-            class_;
-          TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated;
+          Option.iter
+            ~f:Errors.add_typing_error
+            (TVis.check_class_access
+               ~is_method
+               ~use_pos:p
+               ~def_pos
+               env
+               (vis, get_ce_lsb ce)
+               cid_
+               class_);
+          Option.iter
+            ~f:Errors.add_typing_error
+            (TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated);
           check_class_get env p def_pos c mid ce cid is_function_pointer;
           let (env, member_ty, et_enforced, tal) =
             match deref member_decl_ty with
@@ -7731,7 +7739,13 @@ and class_expr
         (match class_ with
         | None -> make_result env [] (Aast.CI c) (Typing_utils.mk_tany env p)
         | Some class_ ->
-          TVis.check_classname_access ~use_pos:p ~in_signature:false env class_;
+          Option.iter
+            ~f:Errors.add_typing_error
+            (TVis.check_classname_access
+               ~use_pos:p
+               ~in_signature:false
+               env
+               class_);
           (* Don't add Exact superfluously to class type if it's final *)
           let exact =
             if Cls.final class_ then
@@ -7902,8 +7916,12 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
     (env, tel, None, TUtils.terr env Reason.Rnone, should_forget_fakes)
   | Some { ce_visibility = vis; ce_type = (lazy m); ce_deprecated; _ } ->
     let def_pos = get_pos m in
-    TVis.check_obj_access ~is_method:true ~use_pos:p ~def_pos env vis;
-    TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated;
+    Option.iter
+      ~f:Errors.add_typing_error
+      (TVis.check_obj_access ~is_method:true ~use_pos:p ~def_pos env vis);
+    Option.iter
+      ~f:Errors.add_typing_error
+      (TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated);
     (* Obtain the type of the constructor *)
     let (env, m) =
       let r = get_reason m |> Typing_reason.localize in

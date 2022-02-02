@@ -18,7 +18,7 @@ val check_class_access :
   ce_visibility * bool ->
   Nast.class_id_ ->
   Decl_provider.class_decl ->
-  unit
+  Typing_error.t option
 
 val check_obj_access :
   is_method:bool ->
@@ -26,20 +26,33 @@ val check_obj_access :
   def_pos:Pos_or_decl.t ->
   env ->
   ce_visibility ->
-  unit
+  Typing_error.t option
 
 val check_inst_meth_access :
-  use_pos:Pos.t -> def_pos:Pos_or_decl.t -> ce_visibility -> unit
+  use_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
+  ce_visibility ->
+  Typing_error.t option
 
 val check_meth_caller_access :
-  use_pos:Pos.t -> def_pos:Pos_or_decl.t -> ce_visibility -> unit
+  use_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
+  ce_visibility ->
+  Typing_error.t option
 
 val check_deprecated :
-  use_pos:Pos.t -> def_pos:Pos_or_decl.t -> string option -> unit
+  use_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
+  string option ->
+  Typing_error.t option
 
 (* Expression Trees can only access publicly accessible properties *)
 val check_expression_tree_vis :
-  use_pos:Pos.t -> def_pos:Pos_or_decl.t -> env -> ce_visibility -> unit
+  use_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
+  env ->
+  ce_visibility ->
+  Typing_error.t option
 
 val is_visible :
   is_method:bool ->
@@ -55,7 +68,11 @@ val is_visible :
  *     we are in a signature, the signature had better be internal too.
  *)
 val check_classname_access :
-  use_pos:Pos.t -> in_signature:bool -> env -> Decl_provider.class_decl -> unit
+  use_pos:Pos.t ->
+  in_signature:bool ->
+  env ->
+  Decl_provider.class_decl ->
+  Typing_error.t option
 
 (* Can the typdef in a type hint be accessed from code or signature checked under [env]?
  *   If type is public, then yes
@@ -67,4 +84,4 @@ val check_typedef_access :
   in_signature:bool ->
   env ->
   Decl_provider.typedef_decl ->
-  unit
+  Typing_error.t option

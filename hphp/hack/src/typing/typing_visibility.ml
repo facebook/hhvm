@@ -133,8 +133,7 @@ let check_internal_access ~use_pos ~in_signature ~def_pos env internal module_ =
     else
       None
   in
-  Option.iter module_err_opt ~f:(fun err ->
-      Errors.add_typing_error @@ Typing_error.modules err)
+  Option.map ~f:Typing_error.modules module_err_opt
 
 let check_classname_access ~use_pos ~in_signature env cls =
   check_internal_access
@@ -244,72 +243,62 @@ let is_visible ~is_method env (vis, lsb) cid class_ =
 let visibility_error p msg (p_vis, vis) =
   let s = Typing_defs.string_of_visibility vis in
   let msg_vis = "This member is " ^ s in
-  Errors.add_typing_error
-    Typing_error.(
-      primary
-      @@ Primary.Visibility
-           { pos = p; msg; decl_pos = p_vis; reason_msg = msg_vis })
+  Typing_error.(
+    primary
+    @@ Primary.Visibility
+         { pos = p; msg; decl_pos = p_vis; reason_msg = msg_vis })
 
 let check_obj_access ~is_method ~use_pos ~def_pos env vis =
-  match is_visible_for_obj ~is_method env vis with
-  | None -> ()
-  | Some msg -> visibility_error use_pos msg (def_pos, vis)
+  Option.map (is_visible_for_obj ~is_method env vis) ~f:(fun msg ->
+      visibility_error use_pos msg (def_pos, vis))
 
 let check_expression_tree_vis ~use_pos ~def_pos env vis =
   let open Typing_error in
-  let err_opt =
-    if Typing_env.is_in_expr_tree env then
-      match vis with
-      | Vpublic -> None
-      | _ ->
-        Some
-          (expr_tree
-          @@ Primary.Expr_tree.Expression_tree_non_public_member
-               { pos = use_pos; decl_pos = def_pos })
-    else
-      None
-  in
-  Option.iter err_opt ~f:Errors.add_typing_error
+  if Typing_env.is_in_expr_tree env then
+    match vis with
+    | Vpublic -> None
+    | _ ->
+      Some
+        (expr_tree
+        @@ Primary.Expr_tree.Expression_tree_non_public_member
+             { pos = use_pos; decl_pos = def_pos })
+  else
+    None
 
 let check_inst_meth_access ~use_pos ~def_pos vis =
+  let open Typing_error in
   match vis with
   | Vprivate _ ->
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Private_inst_meth { decl_pos = def_pos; pos = use_pos })
+    Some
+      (primary
+      @@ Primary.Private_inst_meth { decl_pos = def_pos; pos = use_pos })
   | Vprotected _ ->
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Protected_inst_meth { decl_pos = def_pos; pos = use_pos })
-  | _ -> ()
+    Some
+      (primary
+      @@ Primary.Protected_inst_meth { decl_pos = def_pos; pos = use_pos })
+  | _ -> None
 
 let check_meth_caller_access ~use_pos ~def_pos vis =
+  let open Typing_error in
   match vis with
   | Vprivate _ ->
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Private_meth_caller { decl_pos = def_pos; pos = use_pos })
+    Some
+      (primary
+      @@ Primary.Private_meth_caller { decl_pos = def_pos; pos = use_pos })
   | Vprotected _ ->
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Protected_meth_caller { decl_pos = def_pos; pos = use_pos })
-  | _ -> ()
+    Some
+      (primary
+      @@ Primary.Protected_meth_caller { decl_pos = def_pos; pos = use_pos })
+  | _ -> None
 
 let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
-  match is_visible_for_class ~is_method env (vis, lsb) cid class_ with
-  | None -> ()
-  | Some msg -> visibility_error use_pos msg (def_pos, vis)
+  Option.map
+    (is_visible_for_class ~is_method env (vis, lsb) cid class_)
+    ~f:(fun msg -> visibility_error use_pos msg (def_pos, vis))
 
 let check_deprecated ~use_pos ~def_pos deprecated =
-  match deprecated with
-  | Some s ->
-    Errors.add_typing_error
+  Option.map deprecated ~f:(fun s ->
       Typing_error.(
         primary
         @@ Primary.Deprecated_use
-             { pos = use_pos; decl_pos_opt = Some def_pos; msg = s })
-  | None -> ()
+             { pos = use_pos; decl_pos_opt = Some def_pos; msg = s }))

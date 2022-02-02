@@ -1,0 +1,8 @@
+File "lsb_property_visibility.php", line 11, characters 8-11:
+You cannot access this property (Typing[4112])
+  File "lsb_property_visibility.php", line 5, characters 18-20:
+  This member is private
+File "lsb_property_visibility.php", line 12, characters 8-11:
+You cannot access this property (Typing[4112])
+  File "lsb_property_visibility.php", line 5, characters 18-20:
+  This member is private

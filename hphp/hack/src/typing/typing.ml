@@ -7426,6 +7426,7 @@ and class_get_inner
              } as ce) ->
           let def_pos = get_pos member_decl_ty in
           TVis.check_class_access
+            ~is_method
             ~use_pos:p
             ~def_pos
             env
@@ -7901,7 +7902,7 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
     (env, tel, None, TUtils.terr env Reason.Rnone, should_forget_fakes)
   | Some { ce_visibility = vis; ce_type = (lazy m); ce_deprecated; _ } ->
     let def_pos = get_pos m in
-    TVis.check_obj_access ~use_pos:p ~def_pos env vis;
+    TVis.check_obj_access ~is_method:true ~use_pos:p ~def_pos env vis;
     TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated;
     (* Obtain the type of the constructor *)
     let (env, m) =

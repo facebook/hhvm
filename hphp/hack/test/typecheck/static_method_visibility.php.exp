@@ -1,0 +1,4 @@
+File "static_method_visibility.php", line 8, characters 8-10:
+You cannot access this method (Typing[4112])
+  File "static_method_visibility.php", line 4, characters 27-29:
+  This member is private

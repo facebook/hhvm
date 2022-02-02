@@ -467,7 +467,12 @@ let rec obj_get_concrete_ty
                              class_subclass = snd x;
                            })
               | _ -> ());
-            TVis.check_obj_access ~use_pos:id_pos ~def_pos:mem_pos env vis;
+            TVis.check_obj_access
+              ~is_method
+              ~use_pos:id_pos
+              ~def_pos:mem_pos
+              env
+              vis;
             TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos ce_deprecated;
             TVis.check_expression_tree_vis
               ~use_pos:id_pos

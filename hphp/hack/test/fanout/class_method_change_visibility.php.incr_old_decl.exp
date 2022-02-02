@@ -1,7 +1,7 @@
 === base errors ===
 No errors!
 === changed errors ===
-use.php:3:14,16: You cannot access this member (Typing[4112])
+use.php:3:14,16: You cannot access this method (Typing[4112])
   a.php:3:20,22: This member is private
 use.php:6:14,16: No instance method `foo` in `B` (Typing[4053])
   use.php:6:8,8: This is why I think it is an object of type B

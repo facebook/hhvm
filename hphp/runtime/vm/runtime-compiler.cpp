@@ -52,12 +52,15 @@ Unit* compile_string(const char* s,
   MemoryManager::SuppressOOM so(*tl_heap);
 
   auto const name = fname ? fname : "";
-  auto const sha1 = SHA1{
-    mangleUnitSha1(string_sha1(folly::StringPiece{s, sz}), name, options)};
+  auto const sha1 = SHA1{mangleUnitSha1(
+    string_sha1(folly::StringPiece{s, sz}), name, options.flags()
+  )};
   // NB: fname needs to be long-lived if generating a bytecode repo because it
   // can be cached via a Location ultimately contained by ErrorInfo for printing
   // code errors.
-  LazyUnitContentsLoader loader{sha1, String{s, sz, CopyStringMode{}}, options};
+  LazyUnitContentsLoader loader{
+    sha1, String{s, sz, CopyStringMode{}}, options.flags()
+  };
   return g_hphp_compiler_parse(
     loader,
     fname,

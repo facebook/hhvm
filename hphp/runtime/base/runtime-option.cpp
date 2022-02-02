@@ -121,7 +121,7 @@ std::vector<std::string> s_RelativeConfigs;
 ////////////////////////////////////////////////////////////////////////////////
 
 void mangleForKey(bool b, std::string& s) { s += (b ? '1' : '0'); }
-void mangleForKey(const RepoOptions::StringMap& map, std::string& s) {
+void mangleForKey(const RepoOptionsFlags::StringMap& map, std::string& s) {
   s += folly::to<std::string>(map.size());
   s += '\0';
   for (auto const& par : map) {
@@ -131,7 +131,7 @@ void mangleForKey(const RepoOptions::StringMap& map, std::string& s) {
     s += '\0';
   }
 }
-void mangleForKey(const RepoOptions::StringVector& vec, std::string& s) {
+void mangleForKey(const RepoOptionsFlags::StringVector& vec, std::string& s) {
   s += folly::to<std::string>(vec.size());
   s += '\0';
   for (auto const& val : vec) {
@@ -149,8 +149,8 @@ void hdfExtract(const Hdf& hdf, const char* name, uint16_t& val, uint16_t dv) {
 void hdfExtract(
   const Hdf& hdf,
   const char* name,
-  RepoOptions::StringMap& map,
-  const RepoOptions::StringMap& dv
+  RepoOptionsFlags::StringMap& map,
+  const RepoOptionsFlags::StringMap& dv
 ) {
   Hdf config = hdf[name];
   if (config.exists() && !config.isEmpty()) config.configGet(map);
@@ -159,8 +159,8 @@ void hdfExtract(
 void hdfExtract(
   const Hdf& hdf,
   const char* name,
-  RepoOptions::StringVector& vec,
-  const RepoOptions::StringVector& dv
+  RepoOptionsFlags::StringVector& vec,
+  const RepoOptionsFlags::StringVector& dv
 ) {
   Hdf config = hdf[name];
   if (config.exists() && !config.isEmpty()) config.configGet(vec);
@@ -178,7 +178,7 @@ folly::dynamic toIniValue(bool b) {
   return b ? "1" : "0";
 }
 
-folly::dynamic toIniValue(const RepoOptions::StringMap& map) {
+folly::dynamic toIniValue(const RepoOptionsFlags::StringMap& map) {
   folly::dynamic obj = folly::dynamic::object();
   for (auto& kv : map) {
     obj[kv.first] = kv.second;
@@ -186,7 +186,7 @@ folly::dynamic toIniValue(const RepoOptions::StringMap& map) {
   return obj;
 }
 
-folly::dynamic toIniValue(const RepoOptions::StringVector& vec) {
+folly::dynamic toIniValue(const RepoOptionsFlags::StringVector& vec) {
   folly::dynamic obj = folly::dynamic::array();
   for (auto& val : vec) {
     obj.push_back(val);
@@ -288,7 +288,7 @@ RDS_LOCAL(std::string, s_lastSeenRepoConfig);
 
 }
 
-ParserEnv RepoOptions::getParserEnvironment() const {
+ParserEnv RepoOptionsFlags::getParserEnvironment() const {
   return ParserEnv {
       true // codegen
     , true  // hhvm_compat_mode
@@ -303,7 +303,7 @@ ParserEnv RepoOptions::getParserEnvironment() const {
 }
 
 // Mapping must match HHBCFlags in compile.rs
-std::uint32_t RepoOptions::getCompilerFlags() const {
+std::uint32_t RepoOptionsFlags::getCompilerFlags() const {
   std::uint32_t hhbc_flags = 0;
 
   #define HHBC_FLAGS()                                          \
@@ -325,14 +325,14 @@ std::uint32_t RepoOptions::getCompilerFlags() const {
   return hhbc_flags;
 }
 
-std::string RepoOptions::getAliasedNamespacesConfig() const {
+std::string RepoOptionsFlags::getAliasedNamespacesConfig() const {
   folly::dynamic m_config = folly::dynamic::object();
   m_config["hhvm.aliased_namespaces"] =
     folly::dynamic::object("global_value", folly::toDynamic(AliasedNamespaces));
   return folly::toJson(m_config);
 }
 
-std::uint32_t RepoOptions::getFactsFlags() const {
+std::uint32_t RepoOptionsFlags::getFactsFlags() const {
   int32_t flags =
     1 << 0 |  //php5_compat_mode
     1 << 1 |  //hhvm_compat_mode
@@ -342,7 +342,7 @@ std::uint32_t RepoOptions::getFactsFlags() const {
   return flags;
 }
 
-std::uint32_t RepoOptions::getDeclFlags() const {
+std::uint32_t RepoOptionsFlags::getDeclFlags() const {
   int32_t flags =
     DisableXHPElementMangling << 0 |
     1 << 1 | // interpret_soft_types_as_like_types
@@ -354,7 +354,7 @@ std::uint32_t RepoOptions::getDeclFlags() const {
 }
 
 // Mapping must match ParserFlags in compile.rs
-std::uint32_t RepoOptions::getParserFlags() const {
+std::uint32_t RepoOptionsFlags::getParserFlags() const {
   std::uint32_t parser_flags = 0;
 
   #define PARSER_FLAGS()                                       \
@@ -511,17 +511,17 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
 
 void RepoOptions::calcCacheKey() {
   std::string raw;
-#define N(_, n, ...) mangleForKey(n, raw);
-#define P(_, n, ...) mangleForKey(n, raw);
-#define H(_, n, ...) mangleForKey(n, raw);
-#define E(_, n, ...) mangleForKey(n, raw);
+#define N(_, n, ...) mangleForKey(m_flags.n, raw);
+#define P(_, n, ...) mangleForKey(m_flags.n, raw);
+#define H(_, n, ...) mangleForKey(m_flags.n, raw);
+#define E(_, n, ...) mangleForKey(m_flags.n, raw);
 PARSERFLAGS()
 AUTOLOADFLAGS()
 #undef N
 #undef P
 #undef H
 #undef E
-  m_sha1 = SHA1{string_sha1(raw)};
+  m_flags.m_sha1 = SHA1{string_sha1(raw)};
 }
 
 std::string RepoOptions::toJSON() const {
@@ -541,10 +541,10 @@ void RepoOptions::calcDynamic() {
     m_cachedDynamic[ini_name] = entry;               \
   }
 
-#define N(_, n, ...) OUT(#n, n)
-#define P(_, n, ...) OUT("PHP7." #n, n)
-#define H(_, n, ...) OUT("Hack.Lang." #n, n)
-#define E(_, n, ...) OUT("Eval." #n, n)
+#define N(_, n, ...) OUT(#n, m_flags.n)
+#define P(_, n, ...) OUT("PHP7." #n, m_flags.n)
+#define H(_, n, ...) OUT("Hack.Lang." #n, m_flags.n)
+#define E(_, n, ...) OUT("Eval." #n, m_flags.n)
 PARSERFLAGS()
 AUTOLOADFLAGS();
 #undef N
@@ -561,11 +561,12 @@ const RepoOptions& RepoOptions::defaults() {
 }
 
 void RepoOptions::filterNamespaces() {
-  for (auto it = AliasedNamespaces.begin(); it != AliasedNamespaces.end(); ) {
+  for (auto it = m_flags.AliasedNamespaces.begin();
+       it != m_flags.AliasedNamespaces.end(); ) {
     if (!is_valid_class_name(it->second)) {
       Logger::Warning("Skipping invalid AliasedNamespace %s\n",
                       it->second.c_str());
-      it = AliasedNamespaces.erase(it);
+      it = m_flags.AliasedNamespaces.erase(it);
       continue;
     }
 
@@ -583,10 +584,10 @@ RepoOptions::RepoOptions(const char* str, const char* file) : m_path(file) {
   config.fromString(str);
   Hdf parserConfig = config["Parser"];
 
-#define N(_, n, ...) hdfExtract(parserConfig, #n, n, s_defaults.n);
-#define P(_, n, ...) hdfExtract(parserConfig, "PHP7." #n, n, s_defaults.n);
-#define H(_, n, ...) hdfExtract(parserConfig, "Hack.Lang." #n, n, s_defaults.n);
-#define E(_, n, ...) hdfExtract(parserConfig, "Eval." #n, n, s_defaults.n);
+#define N(_, n, ...) hdfExtract(parserConfig, #n, m_flags.n, s_defaults.m_flags.n);
+#define P(_, n, ...) hdfExtract(parserConfig, "PHP7." #n, m_flags.n, s_defaults.m_flags.n);
+#define H(_, n, ...) hdfExtract(parserConfig, "Hack.Lang." #n, m_flags.n, s_defaults.m_flags.n);
+#define E(_, n, ...) hdfExtract(parserConfig, "Eval." #n, m_flags.n, s_defaults.m_flags.n);
 PARSERFLAGS();
 #undef N
 #undef P
@@ -594,11 +595,11 @@ PARSERFLAGS();
 #undef E
 
   Hdf autoloadConfig = config["Autoload"];
-#define N(_, n, ...) hdfExtract(autoloadConfig, #n, n, s_defaults.n);
-#define P(_, n, ...) hdfExtract(autoloadConfig, "PHP7." #n, n, s_defaults.n);
-#define H(_, n, ...) hdfExtract(autoloadConfig, "Hack.Lang." #n, n, \
-                                s_defaults.n);
-#define E(_, n, ...) hdfExtract(autoloadConfig, "Eval." #n, n, s_defaults.n);
+#define N(_, n, ...) hdfExtract(autoloadConfig, #n, m_flags.n, s_defaults.m_flags.n);
+#define P(_, n, ...) hdfExtract(autoloadConfig, "PHP7." #n, m_flags.n, s_defaults.m_flags.n);
+#define H(_, n, ...) hdfExtract(autoloadConfig, "Hack.Lang." #n, m_flags.n, \
+                                s_defaults.m_flags.n);
+#define E(_, n, ...) hdfExtract(autoloadConfig, "Eval." #n, m_flags.n, s_defaults.m_flags.n);
 AUTOLOADFLAGS();
 #undef N
 #undef P
@@ -611,10 +612,10 @@ AUTOLOADFLAGS();
 }
 
 void RepoOptions::initDefaults(const Hdf& hdf, const IniSettingMap& ini) {
-#define N(_, n, dv) Config::Bind(n, ini, hdf, #n, dv);
-#define P(_, n, dv) Config::Bind(n, ini, hdf, "PHP7." #n, dv);
-#define H(_, n, dv) Config::Bind(n, ini, hdf, "Hack.Lang." #n, dv);
-#define E(_, n, dv) Config::Bind(n, ini, hdf, "Eval." #n, dv);
+#define N(_, n, dv) Config::Bind(m_flags.n, ini, hdf, #n, dv);
+#define P(_, n, dv) Config::Bind(m_flags.n, ini, hdf, "PHP7." #n, dv);
+#define H(_, n, dv) Config::Bind(m_flags.n, ini, hdf, "Hack.Lang." #n, dv);
+#define E(_, n, dv) Config::Bind(m_flags.n, ini, hdf, "Eval." #n, dv);
 PARSERFLAGS()
 AUTOLOADFLAGS()
 #undef N

@@ -250,7 +250,7 @@ struct CachedFile {
              const struct stat* statInfo,
              const RepoOptions& options)
     : cu(src)
-    , repoOptionsHash(options.cacheKeySha1())
+    , repoOptionsHash(options.flags().cacheKeySha1())
   {
     if (statInfo) {
 #ifdef _MSC_VER
@@ -422,7 +422,7 @@ bool isChanged(
 #endif
          cachedUnit->ino != s->st_ino ||
          cachedUnit->devId != s->st_dev ||
-         cachedUnit->repoOptionsHash != options.cacheKeySha1() ||
+         cachedUnit->repoOptionsHash != options.flags().cacheKeySha1() ||
          stressUnitCache();
 }
 
@@ -566,7 +566,11 @@ CachedFilePtr createUnitFromFile(const StringData* const path,
     tracing::BlockNoTrace _{"create-unit-from-file"};
 
     LazyUnitContentsLoader loader{
-      path->data(), wrapper, options, (size_t)statInfo->st_size, !tryLazy
+      path->data(),
+      wrapper,
+      options.flags(),
+      (size_t)statInfo->st_size,
+      !tryLazy
     };
     SCOPE_EXIT {
       if (loader.didLoad()) {
@@ -1324,7 +1328,7 @@ char mangleExtension(const folly::StringPiece fileName) {
 
 std::string mangleUnitSha1(const std::string& fileSha1,
                            const folly::StringPiece fileName,
-                           const RepoOptions& opts) {
+                           const RepoOptionsFlags& opts) {
   return string_sha1(
     folly::to<std::string>(
       fileSha1, '|',
@@ -2165,7 +2169,7 @@ void shutdownUnitPrefetcher() {
 
 LazyUnitContentsLoader::LazyUnitContentsLoader(const char* path,
                                                Stream::Wrapper* wrapper,
-                                               const RepoOptions& options,
+                                               const RepoOptionsFlags& options,
                                                size_t fileLength,
                                                bool forceEager)
   : m_path{path}
@@ -2195,7 +2199,7 @@ LazyUnitContentsLoader::LazyUnitContentsLoader(const char* path,
 
 LazyUnitContentsLoader::LazyUnitContentsLoader(SHA1 sha,
                                                String contents,
-                                               const RepoOptions& options)
+                                               const RepoOptionsFlags& options)
   : m_path{nullptr}
   , m_wrapper{nullptr}
   , m_options{options}

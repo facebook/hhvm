@@ -1851,7 +1851,7 @@ static int execute_program_impl(int argc, char** argv) {
 
     auto const str = contents.str();
     auto const sha1 = SHA1{
-      mangleUnitSha1(string_sha1(str), file, RepoOptions::defaults())
+      mangleUnitSha1(string_sha1(str), file, RepoOptions::defaults().flags())
     };
 
     if (!registrationComplete) {
@@ -1871,7 +1871,7 @@ static int execute_program_impl(int argc, char** argv) {
     // Ensure write to SystemLib::s_inited is visible by other threads.
     std::atomic_thread_fence(std::memory_order_release);
 
-    LazyUnitContentsLoader loader{sha1, str, RepoOptions::defaults()};
+    LazyUnitContentsLoader loader{sha1, str, RepoOptions::defaults().flags()};
     auto compiled =
       compile_file(loader, file.c_str(), Native::s_noNativeFuncs, nullptr);
 
@@ -2081,13 +2081,13 @@ static int execute_program_impl(int argc, char** argv) {
 
       auto const str = contents.str();
       auto const sha1 =
-        SHA1{mangleUnitSha1(string_sha1(str), file, repoOptions)};
+        SHA1{mangleUnitSha1(string_sha1(str), file, repoOptions.flags())};
 
       // Disable any cache hooks because they're generally not useful
       // if we're just going to lint (and they might be expensive).
       g_unit_emitter_cache_hook = nullptr;
 
-      LazyUnitContentsLoader loader{sha1, str, repoOptions};
+      LazyUnitContentsLoader loader{sha1, str, repoOptions.flags()};
       auto const unit =
         compile_file(loader, file.c_str(), Native::s_noNativeFuncs, nullptr);
       if (!unit) {

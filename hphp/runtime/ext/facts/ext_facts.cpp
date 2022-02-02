@@ -95,7 +95,7 @@ folly::fs::path getRepoRoot(const RepoOptions& options) {
 std::string
 getCacheBreakerSchemaHash(std::string_view root, const RepoOptions& opts) {
   std::string repoSchemaIdHash = repoSchemaId().toString();
-  std::string optsHash = opts.cacheKeySha1().toString();
+  std::string optsHash = opts.flags().cacheKeySha1().toString();
   XLOG(INFO) << "Native Facts DB cache breaker."
              << "\n Repo Schema ID: " << repoSchemaIdHash << "\n Root: " << root
              << "\n RepoOpts hash: " << optsHash;
@@ -175,7 +175,7 @@ DBData getDBData(
   assertx(root.is_absolute());
 
   auto trustedDBPath = [&]() -> folly::fs::path {
-    folly::fs::path trusted{repoOptions.trustedDBPath()};
+    folly::fs::path trusted{repoOptions.flags().trustedDBPath()};
     if (trusted.empty()) {
       return trusted;
     }
@@ -216,7 +216,7 @@ struct WatchmanAutoloadMapKey {
     auto root = getRepoRoot(repoOptions);
 
     auto queryExpr = [&]() -> folly::dynamic {
-      auto queryStr = repoOptions.autoloadQuery();
+      auto queryStr = repoOptions.flags().autoloadQuery();
       if (queryStr.empty()) {
         return {};
       }
@@ -235,7 +235,7 @@ struct WatchmanAutoloadMapKey {
     return WatchmanAutoloadMapKey{
         .m_root = std::move(root),
         .m_queryExpr = std::move(queryExpr),
-        .m_indexedMethodAttrs = repoOptions.indexedMethodAttributes(),
+        .m_indexedMethodAttrs = repoOptions.flags().indexedMethodAttributes(),
         .m_dbData = std::move(dbData)};
   }
 

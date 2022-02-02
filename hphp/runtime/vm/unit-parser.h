@@ -52,9 +52,9 @@ using FfpResult = boost::variant<FfpJSONString, std::string>;
 
 ParseFactsResult extract_facts(const std::string& filename,
                                const std::string& code,
-                               const RepoOptions& options);
+                               const RepoOptionsFlags& options);
 FfpResult ffp_parse_file(const std::string& contents,
-                         const RepoOptions& options);
+                         const RepoOptionsFlags& options);
 
 /*
  * Controls handling for errors detected during compilation. By default errors

@@ -160,7 +160,7 @@ CompilerResult hackc_compile(
   const Native::FuncTable& nativeFuncs,
   bool forDebuggerEval,
   bool& internal_error,
-  const RepoOptions& options,
+  const RepoOptionsFlags& options,
   CompileAbortMode mode
 ) {
   std::string aliased_namespaces = options.getAliasedNamespacesConfig();
@@ -229,7 +229,7 @@ void compilers_start() {
 ParseFactsResult extract_facts(
   const std::string& filename,
   const std::string& code,
-  const RepoOptions& options
+  const RepoOptionsFlags& options
 ) {
   auto const get_facts = [&](const std::string& source_text) -> ParseFactsResult {
     try {
@@ -263,7 +263,7 @@ ParseFactsResult extract_facts(
 
 FfpResult ffp_parse_file(
   const std::string& contents,
-  const RepoOptions& options
+  const RepoOptionsFlags& options
 ) {
   auto const env = options.getParserEnvironment();
   auto const parse_tree = hackc_parse_positioned_full_trivia_cpp_ffi(contents, env);

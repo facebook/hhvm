@@ -470,7 +470,7 @@ bool Package::parseImpl(const std::string* fileName) {
   auto const impl = [&] (bool tryLazy) {
     auto const& options = RepoOptions::forFile(fullPath.data());
     LazyUnitContentsLoader loader{
-      fullPath.c_str(), nullptr, options, (size_t)fst.st_size, !tryLazy
+      fullPath.c_str(), nullptr, options.flags(), (size_t)fst.st_size, !tryLazy
     };
 
     auto const mode =

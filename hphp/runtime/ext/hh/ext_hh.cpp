@@ -610,8 +610,10 @@ String HHVM_FUNCTION(ffp_parse_string_native, const String& str) {
     [] (const BTFrame& frm) { return frm.func()->unit()->filepath()->data(); }
   );
 
-  auto result =
-    ffp_parse_file(str.get()->toCppString(), RepoOptions::forFile(file));
+  auto result = ffp_parse_file(
+    str.get()->toCppString(),
+    RepoOptions::forFile(file).flags()
+  );
 
   FfpJSONString res;
   match<void>(

@@ -121,7 +121,7 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
 
 std::string mangleUnitSha1(const std::string& fileSha1,
                            const folly::StringPiece fileName,
-                           const RepoOptions&);
+                           const RepoOptionsFlags&);
 
 /*
  * Return the number of php files that are currently loaded in this process.
@@ -251,14 +251,14 @@ Unit* compileEvalString(const StringData* code,
 struct LazyUnitContentsLoader {
   LazyUnitContentsLoader(const char* path,
                          Stream::Wrapper* wrapper,
-                         const RepoOptions& options,
+                         const RepoOptionsFlags& options,
                          size_t fileLength,
                          bool forceEager);
 
   // When we have the contents already
   LazyUnitContentsLoader(SHA1 sha,
                          String contents,
-                         const RepoOptions& options);
+                         const RepoOptionsFlags& options);
 
   LazyUnitContentsLoader(const LazyUnitContentsLoader&) = delete;
   LazyUnitContentsLoader(LazyUnitContentsLoader&&) = delete;
@@ -266,7 +266,7 @@ struct LazyUnitContentsLoader {
   LazyUnitContentsLoader& operator=(LazyUnitContentsLoader&&) = delete;
 
   const SHA1& sha1() const { return m_hash; }
-  const RepoOptions& options() const { return m_options; }
+  const RepoOptionsFlags& options() const { return m_options; }
   size_t fileLength() const { return m_file_length; }
 
   // Did we actually perform the load?
@@ -298,7 +298,7 @@ private:
 
   const char* m_path;
   Stream::Wrapper* m_wrapper;
-  const RepoOptions& m_options;
+  const RepoOptionsFlags& m_options;
 
   SHA1 m_hash;
   SHA1 m_file_hash;

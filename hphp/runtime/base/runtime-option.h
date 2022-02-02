@@ -78,16 +78,16 @@ enum class RepoMode {
   ReadWrite = 2,
 };
 
-struct RepoOptions {
-  RepoOptions(const RepoOptions&) = default;
-  RepoOptions(RepoOptions&&) = default;
-
+/*
+ * The bare RepoOptions information that the parser cares about.
+ */
+struct RepoOptionsFlags {
   using StringMap = std::map<std::string, std::string>;
   using StringVector = std::vector<std::string>;
 // (Type, HDFName, DV)
 // (N=no-prefix, P=PHP7, E=Eval, H=Hack.Lang)
 #define PARSERFLAGS() \
-  N(StringMap,      AliasedNamespaces,                StringMap{})    \
+  N(StringMap,      AliasedNamespaces,                {})             \
   P(bool,           UVS,                              s_PHP7_master)  \
   P(bool,           LTRAssign,                        s_PHP7_master)  \
   H(bool,           Hacksperimental,                  false)          \
@@ -116,59 +116,60 @@ struct RepoOptions {
   N(StringVector,   IndexedMethodAttributes,                      {}) \
   /**/
 
-  std::string path() const { return m_path; }
-  SHA1 cacheKeySha1() const { return m_sha1; }
-  std::string toJSON() const;
-  const folly::dynamic& toDynamic() const { return m_cachedDynamic; }
-  std::uint32_t getParserFlags() const;
+  const SHA1& cacheKeySha1() const { return m_sha1; }
+
   std::uint32_t getCompilerFlags() const;
+  ParserEnv getParserEnvironment() const;
   std::uint32_t getFactsFlags() const;
   std::uint32_t getDeclFlags() const;
-  ParserEnv getParserEnvironment() const;
+  std::uint32_t getParserFlags() const;
   std::string getAliasedNamespacesConfig() const;
-  struct stat stat() const { return m_stat; }
-  std::string autoloadQuery() const noexcept { return Query; }
-  std::string trustedDBPath() const noexcept { return TrustedDBPath; }
+
+  std::string autoloadQuery() const { return Query; }
+  std::string trustedDBPath() const { return TrustedDBPath; }
 
   /**
    * Allowlist consisting of the attributes, marking methods, which Facts
    * should index
    */
-  const StringVector& indexedMethodAttributes() const noexcept {
+  const StringVector& indexedMethodAttributes() const {
     return IndexedMethodAttributes;
   }
 
-  bool operator==(const RepoOptions& o) const {
-    // If we have hash collisions of unequal RepoOptions, we have
-    // bigger problems.
-    return m_sha1 == o.m_sha1;
-  }
-  bool operator!=(const RepoOptions& o) const { return !(*this == o); }
-
   // Getters for the parser options we pass to HackC for extracting facts
-  bool allowNewAttributeSyntax() const noexcept {
+  bool allowNewAttributeSyntax() const {
     return AllowNewAttributeSyntax;
   }
-  bool enableXHPClassModifier() const noexcept {
+  bool enableXHPClassModifier() const {
     return EnableXHPClassModifier;
   }
-  bool disableXHPElementMangling() const noexcept {
+  bool disableXHPElementMangling() const {
     return DisableXHPElementMangling;
   }
 
-  static const RepoOptions& defaults();
-  static void setDefaults(const Hdf& hdf, const IniSettingMap& ini);
+  template <typename SerDe> void serde(SerDe& sd) {
+    #define N(t, n, ...) sd(n);
+    #define P(t, n, ...) sd(n);
+    #define H(t, n, ...) sd(n);
+    #define E(t, n, ...) sd(n);
+    PARSERFLAGS()
+    AUTOLOADFLAGS()
+    #undef N
+    #undef P
+    #undef H
+    #undef E
+    sd(m_sha1);
+  }
 
-  static const RepoOptions& forFile(const char* path);
+  template <typename SerDe>
+  static RepoOptionsFlags makeForSerde(SerDe& sd) {
+    RepoOptionsFlags f;
+    sd(f);
+    return f;
+  }
 
 private:
-  RepoOptions() = default;
-  explicit RepoOptions(const char* str, const char* file);
-
-  void filterNamespaces();
-  void initDefaults(const Hdf& hdf, const IniSettingMap& ini);
-  void calcCacheKey();
-  void calcDynamic();
+  RepoOptionsFlags() = default;
 
   #define N(t, n, ...) t n;
   #define P(t, n, ...) t n;
@@ -181,10 +182,48 @@ private:
   #undef H
   #undef E
 
+  SHA1 m_sha1;
+
+  friend struct RepoOptions;
+};
+
+/*
+ * RepoOptionsFlags plus extra state
+ */
+struct RepoOptions {
+  RepoOptions(const RepoOptions&) = default;
+  RepoOptions(RepoOptions&&) = default;
+
+  const RepoOptionsFlags& flags() const { return m_flags; }
+  const std::string& path() const { return m_path; }
+  std::string toJSON() const;
+  const folly::dynamic& toDynamic() const { return m_cachedDynamic; }
+  const struct stat& stat() const { return m_stat; }
+
+  bool operator==(const RepoOptions& o) const {
+    // If we have hash collisions of unequal RepoOptions, we have
+    // bigger problems.
+    return m_flags.m_sha1 == o.m_flags.m_sha1;
+  }
+  bool operator!=(const RepoOptions& o) const { return !(*this == o); }
+
+  static const RepoOptions& defaults();
+  static void setDefaults(const Hdf& hdf, const IniSettingMap& ini);
+
+  static const RepoOptions& forFile(const char* path);
+private:
+  RepoOptions() = default;
+  RepoOptions(const char* str, const char* file);
+
+  void filterNamespaces();
+  void initDefaults(const Hdf& hdf, const IniSettingMap& ini);
+  void calcCacheKey();
+  void calcDynamic();
+
+  RepoOptionsFlags m_flags;
+
   std::string m_path;
   struct stat m_stat;
-
-  SHA1 m_sha1;
 
   folly::dynamic m_cachedDynamic;
 

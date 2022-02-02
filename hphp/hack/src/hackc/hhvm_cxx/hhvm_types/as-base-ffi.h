@@ -15,7 +15,8 @@
 */
 #pragma once
 
-#include "hphp/runtime/vm/as-attr.h"
+#include "hphp/runtime/vm/as-base.h"
+#include "hphp/runtime/vm/type-constraint-flags.h"
 
 #include "rust/cxx.h"
 
@@ -34,4 +35,9 @@ namespace HPHP {
  * a given context.
  */
 rust::String attrs_to_string_ffi(AttrContext, Attr);
+
+/*
+ * Convert a type flag to a string of space-separated type flag names.
+ */
+rust::String type_flags_to_string_ffi(TypeConstraintFlags);
 }

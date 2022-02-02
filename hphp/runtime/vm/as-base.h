@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "hphp/runtime/base/attr.h"
+#include "hphp/runtime/vm/type-constraint-flags.h"
 
 namespace HPHP {
 
@@ -56,4 +57,9 @@ std::vector<std::string> attrs_to_vec(AttrContext, Attr);
  * a given context.
  */
 std::string attrs_to_string(AttrContext, Attr);
+
+/*
+ * Convert TypeConstraint flags to a string of space-separated flag names.
+ */
+std::string type_flags_to_string(TypeConstraintFlags flags);
 }

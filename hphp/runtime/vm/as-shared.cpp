@@ -15,42 +15,17 @@
 */
 #include "hphp/runtime/vm/as-shared.h"
 
-#include "hphp/runtime/vm/as-attr-hhas.h"
+#include "hphp/runtime/vm/as-base-hhas.h"
 
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
 
 namespace HPHP {
 
-namespace {
-
-#define HHAS_TYPE_FLAGS                                     \
-  X(Nullable,        "nullable");                           \
-  X(ExtendedHint,    "extended_hint");                      \
-  X(TypeVar,         "type_var");                           \
-  X(Soft,            "soft");                               \
-  X(TypeConstant,    "type_constant")                       \
-  X(Resolved,        "resolved")                            \
-  X(DisplayNullable, "display_nullable")                    \
-  X(UpperBound,      "upper_bound")
-}
-
-std::string type_flags_to_string(TypeConstraint::Flags flags) {
-  std::vector<std::string> vec;
-
-#define X(flag, str) \
-  if (flags & TypeConstraint::flag) vec.push_back(str);
-  HHAS_TYPE_FLAGS
-#undef X
-
-  using namespace folly::gen;
-  return from(vec) | unsplit<std::string>(" ");
-}
-
-Optional<TypeConstraint::Flags> string_to_type_flag(
+Optional<TypeConstraintFlags> string_to_type_flag(
   const std::string& name) {
 #define X(flag, str) \
-  if (name == str) return TypeConstraint::flag;
+  if (name == str) return TypeConstraintFlags::flag;
   HHAS_TYPE_FLAGS
 #undef X
 

@@ -1102,7 +1102,7 @@ bool tcCouldBeReified(const Func* func, uint32_t paramId) {
 
 //////////////////////////////////////////////////////////////////////
 void applyFlagsToUB(TypeConstraint& ub, const TypeConstraint& tc) {
-  auto const tcFlags = tc.flags() & ~TypeConstraint::Flags::TypeVar;
-  ub.addFlags(static_cast<TypeConstraint::Flags>(tcFlags));
+  auto const tcFlags = tc.flags() & ~TypeConstraintFlags::TypeVar;
+  ub.addFlags(static_cast<TypeConstraintFlags>(tcFlags));
 }
 }

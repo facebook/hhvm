@@ -22,7 +22,7 @@ use hhbc_id::class::ClassType;
 use hhbc_id::r#const;
 use hhbc_id::{self as hhbc_id, class, method, prop, Id};
 use hhbc_string_utils as string_utils;
-use hhvm_types_ffi::ffi::Attr;
+use hhvm_types_ffi::ffi::{Attr, TypeConstraintFlags};
 use instruction_sequence::{instr, InstrSeq, Result};
 use local::Local;
 use naming_special_names_rust as special_names;
@@ -330,7 +330,8 @@ fn from_enum_type<'arena>(
             alloc,
             &emit_type_hint::fmt_hint(alloc, &[], true, &e.base)?,
         ));
-        let type_info_type_constraint = Constraint::make(Nothing, ConstraintFlags::EXTENDED_HINT);
+        let type_info_type_constraint =
+            Constraint::make(Nothing, TypeConstraintFlags::ExtendedHint);
         Ok(HhasTypeInfo::make(
             type_info_user_type,
             type_info_type_constraint,
@@ -500,7 +501,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
     if num_reified == 0 && !maybe_has_reified_parents {
         Ok(None)
     } else {
-        let tc = Constraint::make(Just("HH\\varray".into()), ConstraintFlags::empty());
+        let tc = Constraint::make(Just("HH\\varray".into()), TypeConstraintFlags::NoFlags);
         let params = vec![HhasParam {
             name: Str::new_str(alloc, string_utils::reified::INIT_METH_PARAM_NAME),
             is_variadic: false,

@@ -19,6 +19,7 @@
 #include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/hhbc.h"
+#include "hphp/runtime/vm/type-constraint-flags.h"
 #include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/util/functional.h"
@@ -33,6 +34,8 @@ struct StringData;
 
 namespace HPHP {
 
+using Flags = TypeConstraintFlags;
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -40,74 +43,6 @@ namespace HPHP {
  * function or method parameter typehint at runtime.
  */
 struct TypeConstraint {
-  enum Flags : uint16_t {
-    NoFlags = 0x0,
-
-    /*
-     * Nullable type hints check they are either the specified type,
-     * or null.
-     */
-    Nullable = 0x1,
-
-    /*
-     * Extended hints are hints that do not apply to normal, vanilla
-     * php.  For example "?Foo".
-     */
-    ExtendedHint = 0x4,
-
-    /*
-     * Indicates that a type constraint is a type variable. For example,
-     * the constraint on $x is a TypeVar.
-     * class Foo<T> {
-     *   public function bar(T $x) { ... }
-     * }
-     */
-    TypeVar = 0x8,
-
-    /*
-     * Soft type hints: triggers warning, but never fatals
-     * E.g. "@int"
-     */
-    Soft = 0x10,
-
-    /*
-     * Indicates a type constraint is a type constant, which is similar to a
-     * type alias defined inside a class. For instance, the constraint on $x
-     * is a TypeConstant:
-     *
-     * class Foo {
-     *   const type T = int;
-     *   public function bar(Foo::T $x) { ... }
-     * }
-     */
-    TypeConstant = 0x20,
-
-    /*
-     * Indicates that a Object type-constraint was resolved by hhbbc,
-     * and the actual type is in m_type. When set, Object is guaranteed
-     * to be an object, not a type-alias.
-     */
-    Resolved = 0x40,
-
-    /*
-     * Indicates that no mock object can satisfy this constraint.  This is
-     * resolved by HHBBC.
-     */
-    NoMockObjects = 0x80,
-
-    /*
-     * Indicates that a type-constraint should be displayed as nullable (even if
-     * isNullable()) is false. This is used to maintain proper display of
-     * type-constraints even when resolved.
-     */
-    DisplayNullable = 0x100,
-
-    /*
-     * Indicates that a type-constraint came from an upper-bound constraint.
-     */
-    UpperBound = 0x200,
-  };
-
   /*
    * Special type constraints use a "Type", instead of just
    * underlyingDataType().
@@ -456,13 +391,6 @@ private:
   LowStringPtr m_typeName;
   LowPtr<const NamedEntity> m_namedEntity;
 };
-
-//////////////////////////////////////////////////////////////////////
-
-inline TypeConstraint::Flags
-operator|(TypeConstraint::Flags a, TypeConstraint::Flags b) {
-  return TypeConstraint::Flags(static_cast<int>(a) | static_cast<int>(b));
-}
 
 //////////////////////////////////////////////////////////////////////
 

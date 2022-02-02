@@ -871,8 +871,8 @@ void print_cls(Output& out, const PreClass* cls) {
 }
 
 void print_alias(Output& out, const PreTypeAlias& alias) {
-  auto flags = TypeConstraint::NoFlags;
-  if (alias.nullable) flags = flags | TypeConstraint::Nullable;
+  auto flags = TypeConstraintFlags::NoFlags;
+  if (alias.nullable) flags = flags | TypeConstraintFlags::Nullable;
   TypeConstraint constraint(alias.value, flags);
 
   out.fmtln(".alias{} {} = <{}> ({}, {}) {};",

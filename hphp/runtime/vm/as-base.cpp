@@ -13,9 +13,9 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/vm/as-attr.h"
+#include "hphp/runtime/vm/as-base.h"
 
-#include "hphp/runtime/vm/as-attr-hhas.h"
+#include "hphp/runtime/vm/as-base-hhas.h"
 
 #include <folly/gen/String.h>
 
@@ -35,6 +35,18 @@ std::vector<std::string> attrs_to_vec(AttrContext ctx, Attr attrs) {
 std::string attrs_to_string(AttrContext ctx, Attr attrs) {
   using namespace folly::gen;
   return from(attrs_to_vec(ctx, attrs)) | unsplit<std::string>(" ");
+}
+
+std::string type_flags_to_string(TypeConstraintFlags flags) {
+  std::vector<std::string> vec;
+
+#define X(flag, str) \
+  if (flags & TypeConstraintFlags::flag) vec.push_back(str);
+  HHAS_TYPE_FLAGS
+#undef X
+
+  using namespace folly::gen;
+  return from(vec) | unsplit<std::string>(" ");
 }
 
 }

@@ -1370,6 +1370,7 @@ dependencies = [
  "hhas_type",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_types_ffi",
  "instruction_sequence",
  "naming_special_names_rust",
  "oxidized",
@@ -2009,9 +2010,9 @@ dependencies = [
 name = "hhas_type"
 version = "0.0.0"
 dependencies = [
- "bitflags",
  "bumpalo",
  "ffi",
+ "hhvm_types_ffi",
 ]
 
 [[package]]

@@ -2269,7 +2269,7 @@ std::pair<const StringData *, TypeConstraint> parse_type_info(
   const StringData *typeName = read_maybe_litstr(as);
 
   std::string word;
-  auto flags = TypeConstraint::NoFlags;
+  auto flags = TypeConstraintFlags::NoFlags;
   for (;;) {
     as.in.skipWhitespace();
     if (as.in.peek() == '>') break;
@@ -3345,7 +3345,7 @@ void parse_alias(AsmState& as) {
     attrs,
     typeName,
     typeName->empty() ? AnnotType::Mixed : ty.type(),
-    (ty.flags() & TypeConstraint::Nullable) != 0,
+    (ty.flags() & TypeConstraintFlags::Nullable) != 0,
     ArrNR{ArrayData::GetScalarArray(std::move(ts))},
     Array{}
   );

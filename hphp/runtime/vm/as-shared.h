@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "hphp/runtime/vm/as-attr.h"
+#include "hphp/runtime/vm/as-base.h"
 #include "hphp/runtime/vm/type-constraint.h"
 
 namespace HPHP {
@@ -32,18 +32,12 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Convert TypeConstraint flags to a string of space-separated flag names.
- */
-std::string type_flags_to_string(TypeConstraint::Flags flags);
-
-/*
  * Convert a string containing a single type flag name into a
  * TypeConstraint::Flag.
  *
  * Returns std::nullopt if the string doesn't name a known attribute.
  */
-Optional<TypeConstraint::Flags> string_to_type_flag(
-    const std::string& name);
+Optional<TypeConstraintFlags> string_to_type_flag(const std::string& name);
 //////////////////////////////////////////////////////////////////////
 struct is_bareword {
   bool operator()(int i) const {

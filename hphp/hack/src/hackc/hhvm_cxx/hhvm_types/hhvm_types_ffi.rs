@@ -73,15 +73,76 @@ pub mod ffi {
         Constant = 0x40,
     }
 
+    #[repr(u16)]
+    #[derive(Debug, Copy, Clone)]
+    enum TypeConstraintFlags {
+        NoFlags = 0x0,
+        Nullable = 0x1,
+        ExtendedHint = 0x4,
+        TypeVar = 0x8,
+        Soft = 0x10,
+        TypeConstant = 0x20,
+        Resolved = 0x40,
+        NoMockObjects = 0x80,
+        DisplayNullable = 0x100,
+        UpperBound = 0x200,
+    }
+
     unsafe extern "C++" {
-        include!("hphp/hack/src/hackc/hhvm_cxx/hhvm_types/as-attr-ffi.h");
+        include!("hphp/hack/src/hackc/hhvm_cxx/hhvm_types/as-base-ffi.h");
         type Attr;
+        type TypeConstraintFlags;
         type AttrContext;
         fn attrs_to_string_ffi(ctx: AttrContext, attrs: Attr) -> String;
+        fn type_flags_to_string_ffi(flags: TypeConstraintFlags) -> String;
     }
 }
 
-use ffi::Attr;
+use ffi::{type_flags_to_string_ffi, Attr, TypeConstraintFlags};
+
+impl Default for TypeConstraintFlags {
+    fn default() -> Self {
+        TypeConstraintFlags::NoFlags
+    }
+}
+
+impl std::fmt::Display for TypeConstraintFlags {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", type_flags_to_string_ffi(*self))
+    }
+}
+
+impl TypeConstraintFlags {
+    pub fn is_empty(&self) -> bool {
+        (*self == TypeConstraintFlags::NoFlags)
+    }
+}
+
+impl BitOr for TypeConstraintFlags {
+    type Output = Self;
+
+    fn bitor(self, other: Self) -> Self {
+        Self {
+            repr: (self.repr | other.repr),
+        }
+    }
+}
+
+impl BitAnd for TypeConstraintFlags {
+    type Output = Self;
+
+    fn bitand(self, other: Self) -> Self {
+        TypeConstraintFlags {
+            repr: self.repr & other.repr,
+        }
+    }
+}
+
+impl From<&TypeConstraintFlags> for u16 {
+    fn from(r: &TypeConstraintFlags) -> Self {
+        r.repr
+    }
+}
 
 impl From<u32> for Attr {
     fn from(r: u32) -> Self {

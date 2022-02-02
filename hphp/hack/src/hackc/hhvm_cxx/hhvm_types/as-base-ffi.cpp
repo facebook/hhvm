@@ -13,12 +13,16 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/hack/src/hackc/hhvm_cxx/hhvm_types/as-attr-ffi.h"
+#include "hphp/hack/src/hackc/hhvm_cxx/hhvm_types/as-base-ffi.h"
 
 namespace HPHP {
 
 rust::String attrs_to_string_ffi(AttrContext ctx, Attr attrs) {
   return attrs_to_string(ctx, attrs);
+}
+
+rust::String type_flags_to_string_ffi(TypeConstraintFlags flags) {
+  return type_flags_to_string(flags);
 }
 
 }

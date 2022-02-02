@@ -76,6 +76,16 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrIsMethCaller,             F,       "is_meth_caller");       \
   X(AttrEnumClass,                C,       "enum_class");
   /* */
+
+  #define HHAS_TYPE_FLAGS                                   \
+  X(Nullable,        "nullable");                           \
+  X(ExtendedHint,    "extended_hint");                      \
+  X(TypeVar,         "type_var");                           \
+  X(Soft,            "soft");                               \
+  X(TypeConstant,    "type_constant")                       \
+  X(Resolved,        "resolved")                            \
+  X(DisplayNullable, "display_nullable")                    \
+  X(UpperBound,      "upper_bound")
 }
 
 }

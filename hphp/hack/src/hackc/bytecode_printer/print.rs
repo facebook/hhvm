@@ -27,7 +27,7 @@ use hhas_pos::{HhasPos, HhasSpan};
 use hhas_program::HhasProgram;
 use hhas_property::HhasProperty;
 use hhas_symbol_refs::{HhasSymbolRefs, IncludePath};
-use hhas_type::{constraint, HhasTypeInfo};
+use hhas_type::HhasTypeInfo;
 use hhas_type_const::HhasTypeConstant;
 use hhas_typedef::HhasTypedef;
 use hhbc_ast::*;
@@ -36,7 +36,7 @@ use hhbc_string_utils::{
     float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, mangle, quote_string,
     quote_string_with_escape, strip_global_ns, strip_ns, triple_quote_string, types,
 };
-use hhvm_types_ffi::ffi::{attrs_to_string_ffi, Attr, AttrContext};
+use hhvm_types_ffi::ffi::*;
 use indexmap::IndexSet;
 use instruction_sequence::{Error::Unrecoverable, InstrSeq};
 use iterator::Id as IterId;
@@ -3081,48 +3081,8 @@ fn print_type_info(w: &mut dyn Write, ti: &HhasTypeInfo<'_>) -> Result<()> {
     print_type_info_(w, false, ti)
 }
 
-fn print_type_flags(w: &mut dyn Write, flag: constraint::ConstraintFlags) -> Result<()> {
-    let mut first = true;
-    let mut print_space = |w: &mut dyn Write| -> Result<()> {
-        if !first {
-            w.write_all(b" ")
-        } else {
-            Ok(first = false)
-        }
-    };
-    use constraint::ConstraintFlags as F;
-    if flag.contains(F::DISPLAY_NULLABLE) {
-        print_space(w)?;
-        w.write_all(b"display_nullable")?;
-    }
-    if flag.contains(F::EXTENDED_HINT) {
-        print_space(w)?;
-        w.write_all(b"extended_hint")?;
-    }
-    if flag.contains(F::NULLABLE) {
-        print_space(w)?;
-        w.write_all(b"nullable")?;
-    }
-
-    if flag.contains(F::SOFT) {
-        print_space(w)?;
-        w.write_all(b"soft")?;
-    }
-    if flag.contains(F::TYPE_CONSTANT) {
-        print_space(w)?;
-        w.write_all(b"type_constant")?;
-    }
-
-    if flag.contains(F::TYPE_VAR) {
-        print_space(w)?;
-        w.write_all(b"type_var")?;
-    }
-
-    if flag.contains(F::UPPERBOUND) {
-        print_space(w)?;
-        w.write_all(b"upper_bound")?;
-    }
-    Ok(())
+fn print_type_flags(w: &mut dyn Write, flag: TypeConstraintFlags) -> Result<()> {
+    write!(w, "{}", type_flags_to_string_ffi(flag))
 }
 
 fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &HhasTypeInfo<'_>) -> Result<()> {
@@ -3156,13 +3116,10 @@ fn print_typedef_info(w: &mut dyn Write, ti: &HhasTypeInfo<'_>) -> Result<()> {
             )
             .as_bytes(),
         )?;
-        let flags = ti.type_constraint.flags & constraint::ConstraintFlags::NULLABLE;
+        let flags = ti.type_constraint.flags & TypeConstraintFlags::Nullable;
         if !flags.is_empty() {
             wrap_by(w, " ", |w| {
-                print_type_flags(
-                    w,
-                    ti.type_constraint.flags & constraint::ConstraintFlags::NULLABLE,
-                )
+                print_type_flags(w, ti.type_constraint.flags & TypeConstraintFlags::Nullable)
             })?;
         }
         Ok(())

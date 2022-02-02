@@ -10,6 +10,7 @@ use hhas_coeffects::HhasCoeffects;
 use hhas_pos::HhasSpan;
 use hhbc_ast::Visibility;
 use hhbc_id::method::MethodType;
+use hhvm_types_ffi::ffi::Attr;
 
 use bitflags::bitflags;
 
@@ -23,40 +24,21 @@ pub struct HhasMethod<'arena> {
     pub span: HhasSpan,
     pub coeffects: HhasCoeffects<'arena>,
     pub flags: HhasMethodFlags,
+    pub attrs: Attr,
 }
 
 bitflags! {
     #[repr(C)]
     pub struct HhasMethodFlags: u16 {
-        const IS_STATIC = 1 << 1;
-        const IS_FINAL = 1 << 2;
-        const IS_ABSTRACT = 1 << 3;
-        const IS_ASYNC = 1 << 4;
-        const IS_GENERATOR = 1 << 5;
-        const IS_PAIR_GENERATOR = 1 << 6;
-        const IS_CLOSURE_BODY = 1 << 7;
-        const IS_INTERCEPTABLE = 1 << 8;
-        const IS_MEMOIZE_IMPL = 1 << 9;
-        const IS_READONLY_RETURN = 1 << 10;
-        const IS_READONLY_THIS = 1 << 11;
-        const NO_INJECTION = 1 << 12;
+        const IS_ASYNC = 1 << 0;
+        const IS_GENERATOR = 1 << 1;
+        const IS_PAIR_GENERATOR = 1 << 2;
+        const IS_CLOSURE_BODY = 1 << 3;
     }
 }
 
 impl<'a, 'arena> HhasMethod<'arena> {
     pub fn is_closure_body(&self) -> bool {
         self.flags.contains(HhasMethodFlags::IS_CLOSURE_BODY)
-    }
-
-    pub fn is_no_injection(&self) -> bool {
-        self.flags.contains(HhasMethodFlags::NO_INJECTION)
-    }
-
-    pub fn is_memoize_impl(&self) -> bool {
-        self.flags.contains(HhasMethodFlags::IS_MEMOIZE_IMPL)
-    }
-
-    pub fn is_interceptable(&self) -> bool {
-        self.flags.contains(HhasMethodFlags::IS_INTERCEPTABLE)
     }
 }

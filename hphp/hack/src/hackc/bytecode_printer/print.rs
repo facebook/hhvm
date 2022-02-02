@@ -699,51 +699,16 @@ fn print_method_def(
 }
 
 fn print_method_attrs(ctx: &Context<'_>, w: &mut dyn Write, m: &HhasMethod<'_>) -> Result<()> {
-    use hhas_attribute::*;
     let user_attrs = m.attributes.as_ref();
-    let mut special_attrs = vec![];
-    if has_provenance_skip_frame(user_attrs) {
-        special_attrs.push("prov_skip_frame")
-    }
-    if m.is_interceptable() {
-        special_attrs.push("interceptable");
-    }
-    let visibility = m.visibility.as_ref().to_string();
-    special_attrs.push(&visibility);
-    if m.flags.contains(HhasMethodFlags::IS_STATIC) {
-        special_attrs.push("static");
-    }
-    if m.flags.contains(HhasMethodFlags::IS_FINAL) {
-        special_attrs.push("final");
-    }
-    if m.flags.contains(HhasMethodFlags::IS_ABSTRACT) {
-        special_attrs.push("abstract");
-    }
-    if m.flags.contains(HhasMethodFlags::IS_READONLY_RETURN) {
-        special_attrs.push("readonly_return");
-    }
-    if m.flags.contains(HhasMethodFlags::IS_READONLY_THIS) {
-        special_attrs.push("readonly_this");
-    }
-    if has_foldable(user_attrs) {
-        special_attrs.push("foldable");
-    }
-    if m.is_no_injection() {
-        special_attrs.push("no_injection");
-    }
-    if ctx.is_system_lib() && has_native(user_attrs) && !is_native_opcode_impl(user_attrs) {
-        special_attrs.push("unique");
-    }
-    if ctx.is_system_lib() {
-        special_attrs.push("builtin");
-    }
-    if ctx.is_system_lib() && has_native(user_attrs) && !is_native_opcode_impl(user_attrs) {
-        special_attrs.push("persistent");
-    }
-    if ctx.is_system_lib() || (has_dynamically_callable(user_attrs) && !m.is_memoize_impl()) {
-        special_attrs.push("dyn_callable")
-    }
-    print_special_and_user_attrs(ctx, w, &special_attrs, user_attrs)
+    square(w, |w| {
+        write!(w, "{}", attrs_to_string_ffi(AttrContext::Func, m.attrs))?;
+        if !user_attrs.is_empty() {
+            w.write_all(b" ")?;
+        }
+        print_attributes(ctx, w, user_attrs)
+    })?;
+    w.write_all(b" ")?;
+    Ok(())
 }
 
 fn print_class_def<'arena>(

@@ -101,6 +101,30 @@ impl From<oxidized::ast_defs::Visibility> for Attr {
     }
 }
 
+impl From<&oxidized::ast_defs::Visibility> for Attr {
+    fn from(k: &oxidized::ast_defs::Visibility) -> Attr {
+        use oxidized::ast_defs::Visibility::*;
+        match k {
+            Private => Attr::AttrPrivate,
+            Public => Attr::AttrPublic,
+            Protected => Attr::AttrProtected,
+            Internal => Attr::AttrNone,
+        }
+    }
+}
+
+impl From<hhbc_ast::Visibility> for Attr {
+    fn from(k: hhbc_ast::Visibility) -> Attr {
+        use hhbc_ast::Visibility::*;
+        match k {
+            Private => Attr::AttrPrivate,
+            Public => Attr::AttrPublic,
+            Protected => Attr::AttrProtected,
+            Internal => Attr::AttrNone,
+        }
+    }
+}
+
 impl From<Attr> for u32 {
     fn from(attr: Attr) -> Self {
         attr.repr
@@ -168,13 +192,27 @@ impl Attr {
     pub fn is_readonly(&self) -> bool {
         (*self & Attr::AttrIsReadonly) != 0
     }
+    pub fn is_no_injection(&self) -> bool {
+        (*self & Attr::AttrNoInjection) != 0
+    }
+    pub fn is_interceptable(&self) -> bool {
+        (*self & Attr::AttrInterceptable) != 0
+    }
 }
 
-impl BitOr<Attr> for Attr {
+impl BitOr for Attr {
     type Output = u32;
 
     fn bitor(self, other: Self) -> u32 {
         self.repr | other.repr
+    }
+}
+
+impl BitOr<Attr> for u32 {
+    type Output = u32;
+
+    fn bitor(self, other: Attr) -> u32 {
+        self | other.repr
     }
 }
 
@@ -183,5 +221,13 @@ impl BitAnd for Attr {
 
     fn bitand(self, other: Self) -> u32 {
         self.repr & other.repr
+    }
+}
+
+impl BitAnd<u32> for Attr {
+    type Output = u32;
+
+    fn bitand(self, other: u32) -> u32 {
+        self.repr & other
     }
 }

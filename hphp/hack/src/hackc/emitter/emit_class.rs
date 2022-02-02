@@ -72,12 +72,14 @@ fn make_86method<'arena, 'decl>(
     // TODO: move this. We just know that there are no iterators in 86methods
     emitter.iterator_mut().reset();
 
-    let mut flags = HhasMethodFlags::empty();
-    flags.set(HhasMethodFlags::NO_INJECTION, true);
-    flags.set(HhasMethodFlags::IS_ABSTRACT, is_abstract);
-    flags.set(HhasMethodFlags::IS_STATIC, is_static);
+    let mut attrs = Attr::AttrNone;
+    attrs.add(Attr::AttrNoInjection);
+    attrs.set(Attr::AttrAbstract, is_abstract);
+    attrs.set(Attr::AttrStatic, is_static);
+    attrs.add(Attr::from(visibility));
 
     let attributes = vec![];
+    let flags = HhasMethodFlags::empty();
     let method_decl_vars = vec![];
     let method_return_type = None;
     let method_doc_comment = None;
@@ -109,6 +111,7 @@ fn make_86method<'arena, 'decl>(
         span,
         coeffects,
         visibility,
+        attrs,
     })
 }
 

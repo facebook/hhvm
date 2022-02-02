@@ -5,6 +5,7 @@
 
 use ast_scope::{self as ast_scope, Scope, ScopeItem};
 use emit_fatal::{raise_fatal_parse, raise_fatal_runtime};
+use emit_method::get_attrs_for_method;
 use emit_pos::emit_pos_then;
 use env::{emitter::Emitter, Env};
 use ffi::Slice;
@@ -22,7 +23,7 @@ use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
 use local::Local;
 use naming_special_names_rust::{members, user_attributes as ua};
-use options::{HhvmFlags, Options};
+use options::HhvmFlags;
 use oxidized::{ast as T, pos::Pos};
 use runtime::TypedValue;
 
@@ -153,7 +154,6 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
                 a.name.unsafe_as_str(),
             )
         });
-    let is_interceptable = is_method_interceptable(emitter.options());
     let mut arg_flags = Flags::empty();
     arg_flags.set(Flags::IS_ASYNC, is_async);
     arg_flags.set(Flags::IS_REIFIED, is_reified);
@@ -173,16 +173,17 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
     };
     let body = emit_memoize_wrapper_body(emitter, env, &mut args)?;
     let mut flags = HhasMethodFlags::empty();
-    flags.set(HhasMethodFlags::IS_STATIC, method.static_);
-    flags.set(HhasMethodFlags::IS_ABSTRACT, method.abstract_);
-    flags.set(HhasMethodFlags::IS_FINAL, method.final_);
     flags.set(HhasMethodFlags::IS_ASYNC, is_async);
-    flags.set(HhasMethodFlags::IS_INTERCEPTABLE, is_interceptable);
-    flags.set(
-        HhasMethodFlags::IS_READONLY_RETURN,
-        method.readonly_ret.is_some(),
+
+    let attrs = get_attrs_for_method(
+        emitter,
+        method,
+        &attributes,
+        &method.visibility,
+        class,
+        false,
     );
-    flags.set(HhasMethodFlags::IS_READONLY_THIS, method.readonly_this);
+
     Ok(HhasMethod {
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         visibility: Visibility::from(method.visibility),
@@ -191,6 +192,7 @@ fn make_memoize_wrapper_method<'a, 'arena, 'decl>(
         span: HhasSpan::from_pos(&method.span),
         coeffects,
         flags,
+        attrs,
     })
 }
 
@@ -525,12 +527,6 @@ fn make_wrapper<'a, 'arena, 'decl>(
         None,
         Some(env),
     )
-}
-
-fn is_method_interceptable(opts: &Options) -> bool {
-    opts.hhvm
-        .flags
-        .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION)
 }
 
 fn call_cls_method<'a, 'arena>(

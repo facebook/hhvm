@@ -10,6 +10,7 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 cxx = "1.0.54"
+hhbc_ast = { path = "../../hhbc/cargo/hhbc_ast" }
 oxidized = { path = "../../../oxidized" }
 
 [build-dependencies]

@@ -1188,6 +1188,7 @@ dependencies = [
  "emit_body",
  "emit_fatal",
  "emit_memoize_helpers",
+ "emit_method",
  "emit_param",
  "emit_pos",
  "env",
@@ -1230,6 +1231,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_types_ffi",
  "instruction_sequence",
  "itertools 0.10.3",
  "naming_special_names_rust",
@@ -1939,6 +1941,7 @@ dependencies = [
  "hhas_pos",
  "hhbc_ast",
  "hhbc_id",
+ "hhvm_types_ffi",
 ]
 
 [[package]]
@@ -2085,6 +2088,7 @@ version = "0.0.0"
 dependencies = [
  "cxx",
  "cxx-build",
+ "hhbc_ast",
  "oxidized",
 ]
 

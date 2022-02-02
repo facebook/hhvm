@@ -7,12 +7,14 @@ use ast_scope::{self as ast_scope, Lambda, Scope, ScopeItem};
 use emit_fatal::{emit_fatal_runtimeomitframe, raise_fatal_parse};
 use env::emitter::Emitter;
 use ffi::Slice;
+use hhas_attribute::*;
 use hhas_coeffects::HhasCoeffects;
 use hhas_method::{HhasMethod, HhasMethodFlags};
 use hhas_pos::HhasSpan;
 use hhbc_ast::Visibility;
 use hhbc_id::{method, Id};
 use hhbc_string_utils as string_utils;
+use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, Result};
 use naming_special_names_rust::{classes, user_attributes};
 use ocamlrep::rc::RcOc;
@@ -31,6 +33,42 @@ pub fn from_asts<'a, 'arena, 'decl>(
         .iter()
         .map(|m| from_ast(emitter, class, m))
         .collect()
+}
+
+pub fn get_attrs_for_method<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    method: &'a T::Method_,
+    user_attrs: &'a [HhasAttribute<'arena>],
+    visibility: &'a T::Visibility,
+    class: &'a T::Class_,
+    is_memoize_impl: bool,
+) -> Attr {
+    let is_abstract = class.kind.is_cinterface() || method.abstract_;
+    let is_dyn_callable =
+        emitter.systemlib() || (has_dynamically_callable(user_attrs) && !is_memoize_impl);
+    let is_interceptable = is_method_interceptable(emitter.options());
+    let is_native_opcode_impl = hhas_attribute::is_native_opcode_impl(user_attrs);
+    let is_no_injection = hhas_attribute::is_no_injection(user_attrs);
+    let is_prov_skip_frame = has_provenance_skip_frame(user_attrs);
+    let is_readonly_return = method.readonly_ret.is_some();
+    let is_unique = emitter.systemlib() && has_native(user_attrs) && !is_native_opcode_impl;
+
+    let mut attrs = Attr::AttrNone;
+    attrs.add(Attr::from(visibility));
+    attrs.set(Attr::AttrAbstract, is_abstract);
+    attrs.set(Attr::AttrBuiltin, emitter.systemlib());
+    attrs.set(Attr::AttrDynamicallyCallable, is_dyn_callable);
+    attrs.set(Attr::AttrFinal, method.final_);
+    attrs.set(Attr::AttrInterceptable, is_interceptable);
+    attrs.set(Attr::AttrIsFoldable, has_foldable(user_attrs));
+    attrs.set(Attr::AttrNoInjection, is_no_injection);
+    attrs.set(Attr::AttrPersistent, is_unique);
+    attrs.set(Attr::AttrReadonlyReturn, is_readonly_return);
+    attrs.set(Attr::AttrReadonlyThis, method.readonly_this);
+    attrs.set(Attr::AttrStatic, method.static_);
+    attrs.set(Attr::AttrUnique, is_unique);
+    attrs.set(Attr::AttrProvenanceSkipFrame, is_prov_skip_frame);
+    attrs
 }
 
 pub fn from_ast<'a, 'arena, 'decl>(
@@ -71,9 +109,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         .iter()
         .any(|attr| attr.is(user_attributes::is_native));
     let is_native_opcode_impl = hhas_attribute::is_native_opcode_impl(&attributes);
-    let is_abstract = class.kind.is_cinterface() || method.abstract_;
     let is_async = method.fun_kind.is_fasync() || method.fun_kind.is_fasync_generator();
-    let is_no_injection = hhas_attribute::is_no_injection(&attributes);
 
     if class.kind.is_cinterface() && !method.body.fb_ast.is_empty() {
         return Err(raise_fatal_parse(
@@ -250,26 +286,18 @@ pub fn from_ast<'a, 'arena, 'decl>(
             method::MethodType::from_ast_name(emitter.alloc, &method.name.1)
         }
     };
-    let is_readonly_return = method.readonly_ret.is_some();
-    let is_interceptable = is_method_interceptable(emitter.options());
     let span = if is_native_opcode_impl {
         HhasSpan(0, 0)
     } else {
         HhasSpan::from_pos(&method.span)
     };
     let mut flags = HhasMethodFlags::empty();
-    flags.set(HhasMethodFlags::IS_STATIC, method.static_);
-    flags.set(HhasMethodFlags::IS_FINAL, method.final_);
-    flags.set(HhasMethodFlags::IS_ABSTRACT, is_abstract);
     flags.set(HhasMethodFlags::IS_ASYNC, is_async);
     flags.set(HhasMethodFlags::IS_GENERATOR, is_generator);
     flags.set(HhasMethodFlags::IS_PAIR_GENERATOR, is_pair_generator);
     flags.set(HhasMethodFlags::IS_CLOSURE_BODY, is_closure_body);
-    flags.set(HhasMethodFlags::IS_INTERCEPTABLE, is_interceptable);
-    flags.set(HhasMethodFlags::IS_MEMOIZE_IMPL, is_memoize);
-    flags.set(HhasMethodFlags::IS_READONLY_RETURN, is_readonly_return);
-    flags.set(HhasMethodFlags::IS_READONLY_THIS, method.readonly_this);
-    flags.set(HhasMethodFlags::NO_INJECTION, is_no_injection);
+
+    let attrs = get_attrs_for_method(emitter, method, &attributes, &visibility, class, is_memoize);
     Ok(HhasMethod {
         attributes: Slice::fill_iter(emitter.alloc, attributes.into_iter()),
         visibility: Visibility::from(visibility),
@@ -278,6 +306,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         span,
         coeffects,
         flags,
+        attrs,
     })
 }
 

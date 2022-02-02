@@ -49,8 +49,14 @@ let check_property_sound_for_dynamic_read ~on_error env classname id ty =
   then (
     let pos = get_pos ty in
     Typing_log.log_pessimise_prop env pos (snd id);
-    on_error (fst id) (snd id) classname (pos, Typing_print.full_strip_ns env ty)
-  )
+    Some
+      (on_error
+         (fst id)
+         (snd id)
+         classname
+         (pos, Typing_print.full_strip_ns env ty))
+  ) else
+    None
 
 (* The optional ty should be (if not None) the localisation of the decl_ty.
    This lets us avoid re-localising the decl type when the caller has already
@@ -77,12 +83,16 @@ let check_property_sound_for_dynamic_write ~on_error env classname id decl_ty ty
     then (
       let pos = get_pos decl_ty in
       Typing_log.log_pessimise_prop env pos (snd id);
-      on_error
-        (fst id)
-        (snd id)
-        classname
-        (pos, Typing_print.full_strip_ns_decl env decl_ty)
-    )
+      Some
+        (on_error
+           (fst id)
+           (snd id)
+           classname
+           (pos, Typing_print.full_strip_ns_decl env decl_ty))
+    ) else
+      None
+  else
+    None
 
 let sound_dynamic_interface_check env params_decl_ty ret_locl_ty =
   (* 1. check if all the parameters of the method are enforceable *)

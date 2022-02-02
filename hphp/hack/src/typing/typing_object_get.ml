@@ -658,30 +658,32 @@ let rec obj_get_concrete_ty
             let (env, locl_ty) =
               Phase.localize_no_subst ~ignore_errors:true env ty
             in
-            Typing_dynamic.check_property_sound_for_dynamic_read
-              ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
-                Errors.add_typing_error
-                  Typing_error.(
-                    primary
-                    @@ Primary.Private_property_is_not_dynamic
-                         { pos; prop_name; class_name; prop_pos; prop_type }))
-              env
-              (Cls.name self_class)
-              (id_pos, id_str)
-              locl_ty);
+            Option.iter ~f:Errors.add_typing_error
+            @@ Typing_dynamic.check_property_sound_for_dynamic_read
+                 ~on_error:
+                   (fun pos prop_name class_name (prop_pos, prop_type) ->
+                   Typing_error.(
+                     primary
+                     @@ Primary.Private_property_is_not_dynamic
+                          { pos; prop_name; class_name; prop_pos; prop_type }))
+                 env
+                 (Cls.name self_class)
+                 (id_pos, id_str)
+                 locl_ty);
           if not read_context then
-            Typing_dynamic.check_property_sound_for_dynamic_write
-              ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
-                Errors.add_typing_error
-                  Typing_error.(
-                    primary
-                    @@ Primary.Private_property_is_not_enforceable
-                         { pos; prop_name; class_name; prop_pos; prop_type }))
-              env
-              (Cls.name self_class)
-              (id_pos, id_str)
-              ty
-              None
+            Option.iter ~f:Errors.add_typing_error
+            @@ Typing_dynamic.check_property_sound_for_dynamic_write
+                 ~on_error:
+                   (fun pos prop_name class_name (prop_pos, prop_type) ->
+                   Typing_error.(
+                     primary
+                     @@ Primary.Private_property_is_not_enforceable
+                          { pos; prop_name; class_name; prop_pos; prop_type }))
+                 env
+                 (Cls.name self_class)
+                 (id_pos, id_str)
+                 ty
+                 None
         | _ -> ())
       | _ -> ());
     let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in

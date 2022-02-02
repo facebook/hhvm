@@ -10,21 +10,21 @@ val add_require_dynamic_bounds :
   Typing_env_types.env -> Decl_provider.class_decl -> Typing_env_types.env
 
 val check_property_sound_for_dynamic_read :
-  on_error:('a -> string -> string -> Pos_or_decl.t * string -> unit) ->
+  on_error:('a -> string -> string -> Pos_or_decl.t * string -> Typing_error.t) ->
   Typing_env_types.env ->
   string ->
   'a * string ->
   Typing_defs.locl_ty ->
-  unit
+  Typing_error.t option
 
 val check_property_sound_for_dynamic_write :
-  on_error:('a -> string -> string -> Pos_or_decl.t * string -> unit) ->
+  on_error:('a -> string -> string -> Pos_or_decl.t * string -> Typing_error.t) ->
   Typing_env_types.env ->
   string ->
   'a * string ->
   Typing_defs.decl_ty ->
   Typing_defs.locl_ty option ->
-  unit
+  Typing_error.t option
 
 (* checks that a method can be invoked in a dynamic context by ensuring that
    the types of its arguments are enforceable and its return type can be

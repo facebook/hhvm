@@ -1549,30 +1549,31 @@ let class_var_def ~is_static cls env cv =
     let env_with_require_dynamic =
       Typing_dynamic.add_require_dynamic_bounds env cls
     in
-    Option.iter decl_cty ~f:(fun ty ->
-        Typing_dynamic.check_property_sound_for_dynamic_write
-          ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
-            Errors.add_typing_error
-              Typing_error.(
-                primary
-                @@ Primary.Property_is_not_enforceable
-                     { pos; prop_name; class_name; prop_pos; prop_type }))
-          env_with_require_dynamic
-          (Cls.name cls)
-          cv.cv_id
-          ty
-          (Some cv_type_ty));
-    Typing_dynamic.check_property_sound_for_dynamic_read
-      ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
-        Errors.add_typing_error
-          Typing_error.(
-            primary
-            @@ Primary.Property_is_not_dynamic
-                 { pos; prop_name; class_name; prop_pos; prop_type }))
-      env_with_require_dynamic
-      (Cls.name cls)
-      cv.cv_id
-      cv_type_ty
+    Option.iter ~f:Errors.add_typing_error
+    @@ Option.bind decl_cty ~f:(fun ty ->
+           Typing_dynamic.check_property_sound_for_dynamic_write
+             ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
+               Typing_error.(
+                 primary
+                 @@ Primary.Property_is_not_enforceable
+                      { pos; prop_name; class_name; prop_pos; prop_type }))
+             env_with_require_dynamic
+             (Cls.name cls)
+             cv.cv_id
+             ty
+             (Some cv_type_ty));
+
+    Option.iter ~f:Errors.add_typing_error
+    @@ Typing_dynamic.check_property_sound_for_dynamic_read
+         ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
+           Typing_error.(
+             primary
+             @@ Primary.Property_is_not_dynamic
+                  { pos; prop_name; class_name; prop_pos; prop_type }))
+         env_with_require_dynamic
+         (Cls.name cls)
+         cv.cv_id
+         cv_type_ty
   );
   ( env,
     ( {

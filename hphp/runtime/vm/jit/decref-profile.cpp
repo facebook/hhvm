@@ -19,19 +19,20 @@
 #include "hphp/runtime/base/tv-refcount.h"
 
 namespace {
-  bool isTypedValueRefcounted(const HPHP::TypedValue& tv) {
-    return isRefcountedType(tv.type()) && tv.val().pcnt->isRefCounted();
-  }
+bool isTypedValueRefcounted(const HPHP::TypedValue& tv) {
+  return isRefcountedType(tv.type()) && tv.val().pcnt->isRefCounted();
+}
 }
 namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void DecRefProfile::reduce(DecRefProfile& a, const DecRefProfile& b) {
-  auto const total = static_cast<uint64_t>(a.total + b.total);
+  auto const total = static_cast<uint64_t>(a.total) +
+                     static_cast<uint64_t>(b.total);
   auto constexpr limit = std::numeric_limits<decltype(a.total)>::max();
   if (total > limit) {
-    auto scale = [&] (uint32_t& x, uint64_t y) {
+    auto const scale = [&] (uint32_t& x, uint64_t y) {
       x = ((x + y) * limit + total - 1) / total;
     };
     a.total = limit;

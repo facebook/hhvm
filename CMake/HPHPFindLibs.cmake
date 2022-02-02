@@ -440,6 +440,7 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} hhbc_ast_header)
   target_link_libraries(${target} ${VISIBILITY} compiler_ffi)
   target_link_libraries(${target} ${VISIBILITY} parser_ffi)
+  target_link_libraries(${target} ${VISIBILITY} hhvm_types_ffi)
 
   if (NOT MSVC)
     target_link_libraries(${target} ${VISIBILITY} afdt)

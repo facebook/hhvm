@@ -36,6 +36,7 @@ use hhbc_string_utils::{
     float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, mangle, quote_string,
     quote_string_with_escape, strip_global_ns, strip_ns, triple_quote_string, types,
 };
+use hhvm_types_ffi::ffi::{attrs_to_string_ffi, Attr, AttrContext};
 use indexmap::IndexSet;
 use instruction_sequence::{Error::Unrecoverable, InstrSeq};
 use iterator::Id as IterId;
@@ -623,64 +624,22 @@ fn print_class_special_attributes(
 ) -> Result<()> {
     let user_attrs = c.attributes.as_ref();
     let is_system_lib = ctx.is_system_lib();
+    let mut flags = c.flags;
 
-    let mut special_attributes: Vec<&str> = vec![];
-    if c.needs_no_reifiedinit() {
-        special_attributes.push("noreifiedinit")
-    }
-    if c.no_dynamic_props() {
-        special_attributes.push("no_dynamic_props")
-    }
-    if c.is_const() {
-        special_attributes.push("is_const")
-    }
-    if hhas_attribute::has_foldable(user_attrs) {
-        special_attributes.push("foldable")
-    }
-    if hhas_attribute::has_enum_class(user_attrs) {
-        special_attributes.push("enum_class")
-    }
     if is_system_lib {
-        special_attributes.extend(&["persistent", "builtin", "unique"])
+        flags.set(Attr::AttrPersistent, true);
+        flags.set(Attr::AttrBuiltin, true);
+        flags.set(Attr::AttrUnique, true);
     }
-    if hhas_attribute::has_dynamically_constructible(user_attrs) {
-        special_attributes.push("dyn_constructible");
-    }
-    if c.is_closure() {
-        special_attributes.push("no_override");
-    }
-    if c.is_trait() {
-        special_attributes.push("trait");
-    }
-    if c.is_interface() {
-        special_attributes.push("interface");
-    }
-    if c.is_final() {
-        special_attributes.push("final");
-    }
-    if c.is_sealed() {
-        special_attributes.push("sealed");
-    }
-    if c.enum_type.is_just() && !hhas_attribute::has_enum_class(user_attrs) {
-        special_attributes.push("enum");
-    }
-    if c.is_abstract() {
-        special_attributes.push("abstract");
-    }
-    if special_attributes.is_empty() && user_attrs.is_empty() {
+
+    if flags == Attr::AttrNone && user_attrs.is_empty() {
         return Ok(());
     }
-
-    special_attributes.reverse();
     wrap_by_(w, "[", "] ", |w| {
-        concat_by(w, " ", &special_attributes, |w, a| {
-            w.write_all(a.as_bytes())
-        })?;
-        write_if!(
-            !special_attributes.is_empty() && !user_attrs.is_empty(),
-            w,
-            " ",
-        )?;
+        write!(w, "{}", attrs_to_string_ffi(AttrContext::Class, flags))?;
+        if !user_attrs.is_empty() && flags != Attr::AttrNone {
+            w.write_all(b" ")?
+        };
         print_attributes(ctx, w, &user_attrs)
     })
 }

@@ -332,6 +332,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_types_ffi",
  "indexmap",
  "instruction_sequence",
  "iterator",
@@ -1041,6 +1042,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_types_ffi",
  "instruction_sequence",
  "label",
  "local",
@@ -1871,7 +1873,6 @@ dependencies = [
 name = "hhas_class"
 version = "0.0.0"
 dependencies = [
- "bitflags",
  "ffi",
  "hhas_attribute",
  "hhas_coeffects",
@@ -1883,6 +1884,7 @@ dependencies = [
  "hhas_type_const",
  "hhbc_ast",
  "hhbc_id",
+ "hhvm_types_ffi",
 ]
 
 [[package]]
@@ -2074,6 +2076,14 @@ dependencies = [
  "ocaml_helper",
  "pretty_assertions",
  "regex",
+]
+
+[[package]]
+name = "hhvm_types_ffi"
+version = "0.0.0"
+dependencies = [
+ "cxx",
+ "cxx-build",
 ]
 
 [[package]]

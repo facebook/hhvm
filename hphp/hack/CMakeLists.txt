@@ -231,7 +231,7 @@ function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
     DEPENDS ${RUST_PART_CXX}
   )
 
-  add_library("${NAME}_ffi" STATIC ${RUST_PART_CXX})
+  add_library("${NAME}_ffi" STATIC ${RUST_PART_CXX} ${ARGN})
   add_dependencies("${NAME}_ffi" rustc cargo "${NAME}_cxx")
   add_dependencies(hack_rust_ffi_bridge_targets "${NAME}_ffi")
   target_link_libraries("${NAME}_ffi" PUBLIC ${RUST_PART_LIB})
@@ -244,6 +244,7 @@ endfunction()
 
 build_cxx_bridge(parser "src/parser/ffi_bridge")
 build_cxx_bridge(compiler "src/hackc/ffi_bridge")
+build_cxx_bridge(hhvm_types "src/hackc/hhvm_cxx/hhvm_types" "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_types/as-attr-ffi.cpp")
 
 if (NOT LZ4_FOUND)
   add_dependencies(hack_dune lz4)

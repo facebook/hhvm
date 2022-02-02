@@ -75,7 +75,7 @@ struct TargetGraph {
   void normalizeArcWeights();
 
   template<class L>
-  void printDot(char* fileName, L getLabel) const;
+  void printDot(const char* fileName, L getLabel) const;
 
   std::vector<Target> targets;
   std::unordered_set<Arc, ArcHash> arcs;
@@ -114,7 +114,7 @@ std::vector<Cluster> pettisAndHansen(const TargetGraph& cg);
 /////////////////////////////////////////////////////////////////////////
 
 template<class L>
-void TargetGraph::printDot(char* fileName, L getLabel) const {
+void TargetGraph::printDot(const char* fileName, L getLabel) const {
   FILE* file = fopen(fileName, "wt");
   if (!file) return;
 

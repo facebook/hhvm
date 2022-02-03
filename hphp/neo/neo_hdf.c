@@ -1371,7 +1371,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
           name[l-1] = '\0';
           name++;
         }
-        char fullpath[PATH_MAX];
+        char fullpath[PATH_MAX + 2];
         if (name[0] != '/') {
           memset(fullpath, 0, PATH_MAX);
 
@@ -1380,11 +1380,11 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
             char pwd[PATH_MAX];
             memset(pwd, 0, PATH_MAX);
             getcwd(pwd, PATH_MAX);
-            snprintf(fullpath, PATH_MAX, "%s/%s", pwd, name);
+            snprintf(fullpath, sizeof(fullpath), "%s/%s", pwd, name);
           } else {
             int dir_len = p - path + 1;
-            snprintf(fullpath, PATH_MAX, "%s", path);
-            snprintf(fullpath + dir_len, PATH_MAX - dir_len, "%s", name);
+            snprintf(fullpath, sizeof(fullpath), "%s", path);
+            snprintf(fullpath + dir_len, sizeof(fullpath) - dir_len, "%s", name);
           }
           name = fullpath;
         }

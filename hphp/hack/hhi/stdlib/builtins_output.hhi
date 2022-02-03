@@ -23,42 +23,42 @@ function flush() { }
 <<__PHPStdLib>>
 function ob_get_clean() { }
 <<__PHPStdLib>>
-function ob_get_contents() { }
+function ob_get_contents()[read_globals] { }
 <<__PHPStdLib>>
 function ob_get_flush() { }
 <<__PHPStdLib>>
-function ob_get_length() { }
+function ob_get_length()[read_globals] { }
 <<__PHPStdLib>>
-function ob_get_level() { }
+function ob_get_level()[read_globals] { }
 <<__PHPStdLib>>
-function ob_get_status(bool $full_status = false) { }
+function ob_get_status(bool $full_status = false)[read_globals] { }
 <<__PHPStdLib>>
 function ob_gzhandler($buffer, $mode) { }
 <<__PHPStdLib>>
 function ob_implicit_flush(bool $flag = true) { }
 <<__PHPStdLib>>
-function ob_list_handlers() { }
+function ob_list_handlers()[read_globals] { }
 
 <<__PHPStdLib>>
 function hphp_crash_log(string $name, string $value);
 <<__PHPStdLib>>
 function hphp_stats(string $name, int $value);
 <<__PHPStdLib>>
-function hphp_get_stats(string $name);
+function hphp_get_stats(string $name)[read_globals];
 <<__PHPStdLib>>
-function hphp_get_status() { }
+function hphp_get_status()[read_globals] { }
 <<__PHPStdLib>>
-function hphp_get_iostatus() { }
+function hphp_get_iostatus()[read_globals] { }
 <<__PHPStdLib>>
 function hphp_set_iostatus_address(string $name);
 <<__PHPStdLib>>
-function hphp_get_timers(bool $get_as_float = true);
+function hphp_get_timers(bool $get_as_float = true)[read_globals];
 <<__PHPStdLib>>
 function hphp_output_global_state(bool $serialize = true);
 <<__PHPStdLib>>
-function hphp_instruction_counter() { }
+function hphp_instruction_counter()[read_globals] { }
 <<__PHPStdLib>>
-function hphp_get_hardware_counters() { }
+function hphp_get_hardware_counters()[read_globals] { }
 <<__PHPStdLib>>
 function hphp_set_hardware_events($events = null) { }
 <<__PHPStdLib>>

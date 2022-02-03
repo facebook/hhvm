@@ -63,12 +63,12 @@ fn main() {
 
 fn get_contents(filenames: &[PathBuf]) -> Vec<(RcOc<RelativePath>, String)> {
     filenames
-        .into_iter()
+        .iter()
         .map(|file| {
             (
                 RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(file))),
                 fs::read_to_string(&file)
-                    .expect(&format!("Could not read file {}", file.display())),
+                    .unwrap_or_else(|_| panic!("Could not read file {}", file.display())),
             )
         })
         .collect()

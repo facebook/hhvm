@@ -15,8 +15,8 @@ pub fn parse_script<'a>(
     env: ParserEnv,
     stack_limit: Option<&'a StackLimit>,
 ) -> (Node, Vec<SyntaxError>, HasScriptContent<'a>) {
-    let sc = WithKind::new(FactsSmartConstructors::new(&source));
-    let mut parser = Parser::new(&source, env, sc);
+    let sc = WithKind::new(FactsSmartConstructors::new(source));
+    let mut parser = Parser::new(source, env, sc);
     let root = parser.parse_script(stack_limit);
     let errors = parser.errors();
     let sc_state = parser.into_sc_state();

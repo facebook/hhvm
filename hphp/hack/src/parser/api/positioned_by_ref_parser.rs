@@ -34,7 +34,7 @@ pub fn parse_script<'src, 'arena>(
 ) -> (Syntax<'arena>, Vec<SyntaxError>, State<'arena>) {
     let tf = TokenFactory::new(arena);
     let sc = SmartConstructors::new(State { arena }, tf);
-    let mut parser = Parser::new(&source, env, sc);
+    let mut parser = Parser::new(source, env, sc);
     let root = parser.parse_script(stack_limit);
     let errors = parser.errors();
     let sc_state = parser.into_sc_state();
@@ -65,7 +65,7 @@ pub fn scan_leading_xhp_trivia<'a>(
     offset: usize,
     width: usize,
 ) -> PositionedTrivia<'a> {
-    trivia_lexer(arena, &source_text, offset).scan_leading_xhp_trivia_with_width(width)
+    trivia_lexer(arena, source_text, offset).scan_leading_xhp_trivia_with_width(width)
 }
 
 pub fn scan_trailing_xhp_trivia<'a>(

@@ -46,7 +46,7 @@ pub fn parse_script<'a>(
         let mode = mode.unwrap_or(file_info::Mode::Mstrict);
         DirectDeclSmartConstructors::new(
             opts,
-            &source,
+            source,
             mode,
             arena,
             NoSourceTextAllocator,
@@ -55,7 +55,7 @@ pub fn parse_script<'a>(
         )
     };
     let sc = PairSmartConstructors::new(sc0, sc1);
-    let mut parser = Parser::new(&source, env, sc);
+    let mut parser = Parser::new(source, env, sc);
     let root = parser.parse_script(stack_limit);
     let errors = parser.errors();
     let has_first_pass_parse_errors = !errors.is_empty();

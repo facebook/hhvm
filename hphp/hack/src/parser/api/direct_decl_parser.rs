@@ -123,14 +123,14 @@ fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>
     let mode = mode_opt.unwrap_or(file_info::Mode::Mstrict);
     let sc = DirectDeclSmartConstructors::new(
         opts,
-        &source,
+        source,
         mode,
         arena,
         source_text_allocator,
         retain_or_omit_user_attributes_for_facts,
         simplify_naming_for_facts,
     );
-    let mut parser = Parser::new(&source, env, sc);
+    let mut parser = Parser::new(source, env, sc);
     let root = parser.parse_script(stack_limit);
     let errors = parser.errors();
     let sc_state = parser.into_sc_state();

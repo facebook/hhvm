@@ -35,7 +35,7 @@ pub fn parse_script<'src, 'arena>(
 ) -> (Syntax<'arena>, Vec<SyntaxError>) {
     let tf = TokenFactoryFullTrivia::new(arena);
     let sc = SmartConstructors::new(State { arena }, tf);
-    let mut parser = Parser::new(&source, env, sc);
+    let mut parser = Parser::new(source, env, sc);
     let root = parser.parse_script(stack_limit);
     let errors = parser.errors();
     (root, errors)
@@ -60,7 +60,7 @@ pub fn parse_script_to_json<'src, 'arena, S: Serializer>(
     let mut parser = Parser::new(source.source_text(), env, sc);
     let root = parser.parse_script(stack_limit);
 
-    let parse_tree = serialize::WithContext(&source, &root);
+    let parse_tree = serialize::WithContext(source, &root);
     let output = Output {
         parse_tree,
         program_text: source.source_text().text_as_str(),

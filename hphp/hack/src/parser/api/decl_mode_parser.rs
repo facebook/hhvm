@@ -53,11 +53,11 @@ pub fn parse_script<'src, 'arena>(
     ScState<'src, 'arena>,
 ) {
     let sc = WithKind::new(DeclModeSmartConstructors::new(
-        &source,
+        source,
         TokenFactory::new(arena),
         arena,
     ));
-    let mut parser = Parser::new(&source, env, sc);
+    let mut parser = Parser::new(source, env, sc);
     let root = parser.parse_script(stack_limit);
     let errors = parser.errors();
     let sc_state = parser.into_sc_state();

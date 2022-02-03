@@ -1528,7 +1528,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
           return err;
         }
         char *content = _read_file(f);
-        fclose(f);
+        pclose(f);
         int len = strlen(content);
         if (len > 0 && content[len - 1] == '\n') {
           content[len - 1] = '\0'; // remove \n artifact

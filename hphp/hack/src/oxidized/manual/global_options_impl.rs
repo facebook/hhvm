@@ -131,6 +131,7 @@ impl Default for GlobalOptions {
             tco_explicit_consistent_constructors: 0,
             tco_type_printer_fuel: 100,
             tco_log_saved_state_age_and_distance: false,
+            tco_specify_manifold_api_key: false,
         }
     }
 }

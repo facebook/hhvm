@@ -577,6 +577,7 @@ type t = {
       (** A string from hh.conf. The API key is used for saved state downloads
        when we call out to manifold *)
   hulk_lite: bool;  (** Rewrite of Hulk to be faster and simpler *)
+  specify_manifold_api_key: bool;
 }
 
 let default =
@@ -681,6 +682,7 @@ let default =
     saved_state_manifold_api_key = None;
     hulk_lite = false;
     log_saved_state_age_and_distance = false;
+    specify_manifold_api_key = false;
   }
 
 let path =
@@ -1396,6 +1398,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let specify_manifold_api_key =
+    bool_if_min_version
+      "specify_manifold_api_key"
+      ~default:default.specify_manifold_api_key
+      ~current_version
+      config
+  in
   {
     min_log_level;
     attempt_fix_credentials;
@@ -1505,6 +1514,7 @@ let load_ fn ~silent ~current_version overrides =
     saved_state_manifold_api_key;
     hulk_lite;
     log_saved_state_age_and_distance;
+    specify_manifold_api_key;
   }
 
 (** Loads the config from [path]. Uses JustKnobs and ExperimentsConfig to override.
@@ -1538,4 +1548,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       use_max_typechecker_worker_memory_for_decl_deferral =
         options.use_max_typechecker_worker_memory_for_decl_deferral;
       hulk_lite = options.hulk_lite;
+      specify_manifold_api_key = options.specify_manifold_api_key;
     }

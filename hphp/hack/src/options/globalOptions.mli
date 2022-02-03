@@ -302,7 +302,8 @@ type t = {
    * individual type. More of a type is printed as the value increases. *)
   tco_type_printer_fuel: int;
   tco_log_saved_state_age_and_distance: bool;
-      (* allows saved_state_loader to shell out to hg to find globalrev and timestamp of revisions *)
+  (* allows saved_state_loader to shell out to hg to find globalrev and timestamp of revisions *)
+  tco_specify_manifold_api_key: bool;
 }
 [@@deriving eq, show]
 
@@ -429,6 +430,7 @@ val make :
   ?tco_explicit_consistent_constructors:int ->
   ?tco_type_printer_fuel:int ->
   ?tco_log_saved_state_age_and_distance:bool ->
+  ?tco_specify_manifold_api_key:bool ->
   unit ->
   t
 
@@ -711,3 +713,5 @@ val tco_explicit_consistent_constructors : t -> int
 val tco_type_printer_fuel : t -> int
 
 val tco_log_saved_state_age_and_distance : t -> bool
+
+val tco_specify_manifold_api_key : t -> bool

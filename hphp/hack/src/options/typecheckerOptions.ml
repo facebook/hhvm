@@ -217,3 +217,5 @@ let type_printer_fuel = GlobalOptions.tco_type_printer_fuel
 
 let log_saved_state_age_and_distance =
   GlobalOptions.tco_log_saved_state_age_and_distance
+
+let specify_manifold_api_key = GlobalOptions.tco_specify_manifold_api_key

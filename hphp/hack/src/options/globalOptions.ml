@@ -133,6 +133,7 @@ type t = {
   tco_explicit_consistent_constructors: int;
   tco_type_printer_fuel: int;
   tco_log_saved_state_age_and_distance: bool;
+  tco_specify_manifold_api_key: bool;
 }
 [@@deriving eq, show]
 
@@ -317,6 +318,7 @@ let default =
     tco_explicit_consistent_constructors = 0;
     tco_type_printer_fuel = 100;
     tco_log_saved_state_age_and_distance = false;
+    tco_specify_manifold_api_key = false;
   }
 
 let make
@@ -467,6 +469,7 @@ let make
     ?(tco_type_printer_fuel = default.tco_type_printer_fuel)
     ?(tco_log_saved_state_age_and_distance =
       default.tco_log_saved_state_age_and_distance)
+    ?(tco_specify_manifold_api_key = default.tco_specify_manifold_api_key)
     () =
   {
     tco_experimental_features;
@@ -592,6 +595,7 @@ let make
     tco_explicit_consistent_constructors;
     tco_type_printer_fuel;
     tco_log_saved_state_age_and_distance;
+    tco_specify_manifold_api_key;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -875,3 +879,5 @@ let tco_type_printer_fuel t = t.tco_type_printer_fuel
 
 let tco_log_saved_state_age_and_distance t =
   t.tco_log_saved_state_age_and_distance
+
+let tco_specify_manifold_api_key t = t.tco_specify_manifold_api_key

@@ -179,7 +179,7 @@ private:
     const Func* func;
     const Class* cls;
     ClsMethDataRef pclsmeth;
-    std::atomic<ArrayData*> arr;
+    std::atomic<ArrayData*> arr{};
   } m_data;
   APCHandle m_handle;
 };

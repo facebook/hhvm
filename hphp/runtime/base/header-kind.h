@@ -163,7 +163,7 @@ protected:
       mutable GCBits m_marks;
       mutable uint16_t m_aux16;
     };
-    mutable std::atomic<std::underlying_type<RefCount>::type> m_atomic_count;
+    mutable std::atomic<std::underlying_type<RefCount>::type> m_atomic_count{};
     struct {
       uint32_t m_aux32; // usable if the subclass is not refcounted
       uint32_t m_hi32;

@@ -70,7 +70,7 @@ struct SwitchProfile {
     return const_cast<SwitchProfile*>(this)->cases();
   }
 
-  uint32_t first_case;
+  uint32_t first_case = 0;
 
   // In RDS but can't contain pointers to request-allocated data
   TYPE_SCAN_IGNORE_ALL;

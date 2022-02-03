@@ -157,7 +157,7 @@ struct Configuration {
   static std::shared_ptr<Configuration> get();
 
   void read(const std::string& path);
-  void resetConfig(const std::string& contents);
+  void reset(const std::string& contents);
 
   std::shared_ptr<TaintedFunctionSet<Source>> sources();
   std::shared_ptr<TaintedFunctionSet<Sink>> sinks();

@@ -20,6 +20,7 @@
 #include <folly/json.h>
 
 #include <boost/filesystem/string_file.hpp>
+#include <boost/filesystem/operations.hpp>
 
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -37,10 +38,16 @@ InitFiniNode s_configurationInitialization(
     []() {
       auto configuration = Configuration::get();
 
-      configuration->read(RO::EvalTaintConfigurationPath);
+      auto configurationJson = RO::EvalTaintConfigurationJson;
+      if (configurationJson != "") {
+        configuration->reset(configurationJson);
+      } else {
+        configuration->read(RO::EvalTaintConfigurationPath);
+      }
 
       auto outputDirectory = RO::EvalTaintOutputDirectory;
       if (outputDirectory != "") {
+        boost::filesystem::create_directories(outputDirectory);
         configuration->outputDirectory = outputDirectory;
       }
     },
@@ -54,7 +61,7 @@ folly::Singleton<Configuration, SingletonTag> kSingleton{};
   return kSingleton.try_get();
 }
 
-void Configuration::resetConfig(const std::string& contents) {
+void Configuration::reset(const std::string& contents) {
   try {
     auto parsed = folly::parseJson(contents);
 
@@ -96,7 +103,7 @@ void Configuration::read(const std::string& path) {
         "unable to read configuration at `" + path + "`: " + exception.what());
   }
 
-  resetConfig(contents);
+  reset(contents);
 }
 
 std::shared_ptr<TaintedFunctionSet<Source>> Configuration::sources() {

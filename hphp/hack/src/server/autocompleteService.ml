@@ -715,6 +715,85 @@ let autocomplete_shape_literal_in_call
       | _ -> ())
     (zip_truncate args ft.ft_params)
 
+(* If [name] is an enum, return the list of the constants it defines. *)
+let enum_consts env name : string list option =
+  match Decl_provider.get_class (Tast_env.get_ctx env) name with
+  | Some cls ->
+    (match Cls.kind cls with
+    | Ast_defs.Cenum ->
+      let consts =
+        Cls.consts cls
+        |> List.map ~f:fst
+        |> List.filter ~f:(fun name ->
+               String.(name <> Naming_special_names.Members.mClass))
+      in
+      Some consts
+    | _ -> None)
+  | None -> None
+
+let autocomplete_enum_value_in_call env (ft : Typing_defs.locl_fun_type) args :
+    unit =
+  let add_enum_const_result pos replace_pos prefix const_name =
+    argument_global_type := Some Acid;
+
+    let ty = Tprim Aast_defs.Tstring in
+    let reason = Typing_reason.Rwitness pos in
+    let ty = mk (reason, ty) in
+
+    let kind = SI_ClassConstant in
+    let lty = Phase.locl ty in
+    let key = prefix ^ const_name in
+    let complete =
+      {
+        res_pos = get_pos_for env lty;
+        res_replace_pos = replace_pos;
+        res_base_class = None;
+        res_ty = kind_to_string kind;
+        res_name = key;
+        res_fullname = key;
+        res_kind = kind;
+        func_details = get_func_details_for env lty;
+        ranking_details = None;
+        res_documentation = None;
+      }
+    in
+    add_res complete
+  in
+
+  let args = List.map args ~f:(fun (_, e) -> unwrap_holes e) in
+
+  List.iter
+    ~f:(fun (arg, expected_ty) ->
+      match arg with
+      | (_, _, Aast.Id (pos, id)) when matches_auto_complete_suffix id ->
+        let (_, ty) = Tast_env.expand_type env expected_ty.fp_type.et_type in
+        let (_, ty_) = Typing_defs_core.deref ty in
+        let replace_pos = replace_pos_of_id (pos, id) in
+
+        (match ty_ with
+        | Tnewtype (name, _, _) ->
+          (match enum_consts env name with
+          | Some consts ->
+            let prefix = Utils.strip_ns name ^ "::" in
+            List.iter consts ~f:(add_enum_const_result pos replace_pos prefix)
+          | None -> ())
+        | _ -> ())
+      | (_, _, Aast.Class_const ((_, _, Aast.CI _name), (pos, id)))
+        when matches_auto_complete_suffix id ->
+        let (_, ty) = Tast_env.expand_type env expected_ty.fp_type.et_type in
+        let (_, ty_) = Typing_defs_core.deref ty in
+        let replace_pos = replace_pos_of_id (pos, id) in
+
+        (match ty_ with
+        | Tnewtype (name, _, _) ->
+          (match enum_consts env name with
+          | Some consts ->
+            List.iter consts ~f:(add_enum_const_result pos replace_pos "")
+          | None -> ())
+        | _ -> ())
+      | _ -> ())
+    (zip_truncate args ft.ft_params)
+
 let builtins =
   [
     ( "string",
@@ -1032,7 +1111,9 @@ let visitor ctx autocomplete_context sienv =
         end
       | (_, _, Aast.Call ((recv_ty, _, _), _, args, _)) ->
         (match deref recv_ty with
-        | (_r, Tfun ft) -> autocomplete_shape_literal_in_call env ft args
+        | (_r, Tfun ft) ->
+          autocomplete_shape_literal_in_call env ft args;
+          autocomplete_enum_value_in_call env ft args
         | _ -> ())
       (* Autocomplete is using ...#AUTO332 so is parsed as an EnumClassLabel *)
       | (_, p, Aast.EnumClassLabel (Some (_, id), n)) when is_auto_complete n ->

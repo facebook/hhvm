@@ -114,6 +114,7 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
   R(EvalTraitConstantInterfaceBehavior)         \
   R(EvalUnitCacheBreaker)                       \
   R(EvalDiamondTraitMethods)                    \
+  R(EvalClassPassesClassname)                   \
   R(PHP7_NoHexNumerics)                         \
   R(PHP7_Builtins)                              \
   R(PHP7_Substr)                                \

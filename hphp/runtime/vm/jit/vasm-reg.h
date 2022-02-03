@@ -91,6 +91,10 @@ struct Vreg {
    */
   bool operator==(Vreg r) const { return rn == r.rn; }
   bool operator!=(Vreg r) const { return rn != r.rn; }
+  bool operator==(PhysReg r) const { return rn == Vreg(r); }
+  bool operator!=(PhysReg r) const { return rn != Vreg(r); }
+  bool operator==(RegXMM r) const { return rn == Vreg(r); }
+  bool operator!=(RegXMM r) const { return rn != Vreg(r); }
 
   /*
    * Addressing.
@@ -1100,6 +1104,12 @@ struct Vr {
    */
   bool operator==(Vr<Reg> r) const { return rn == r.rn; }
   bool operator!=(Vr<Reg> r) const { return rn != r.rn; }
+  bool operator==(Vreg r) const { return rn == Vreg(r); }
+  bool operator!=(Vreg r) const { return rn != Vreg(r); }
+  bool operator==(PhysReg r) const { return rn == Vreg(r); }
+  bool operator!=(PhysReg r) const { return rn != Vreg(r); }
+  bool operator==(RegSF r) const { return rn == Vreg(r); }
+  bool operator!=(RegSF r) const { return rn != Vreg(r); }
 
   /*
    * Addressing.

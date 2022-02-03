@@ -36,7 +36,7 @@ mod tests {
     fn roundtrip(js: &[Json]) -> Vec<Json> {
         trait JsonRoundtrip: AsMut<Vec<Json>> {
             fn on_type(&mut self, ty: &Ty<'_>) {
-                let j = serde_json::to_value(ty).unwrap_or(json!(""));
+                let j = serde_json::to_value(ty).unwrap_or_else(|_| json!(""));
                 self.as_mut().push(j);
             }
         }

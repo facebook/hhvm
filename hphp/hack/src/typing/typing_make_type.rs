@@ -62,7 +62,7 @@ pub struct TypeBuilder<'a> {
 impl<'a> Arena for TypeBuilder<'a> {
     #[inline(always)]
     fn alloc<T>(&self, val: T) -> &mut T {
-        return self.bumpalo.alloc(val);
+        self.bumpalo.alloc(val)
     }
 }
 
@@ -106,7 +106,7 @@ impl<'a> TypeBuilder<'a> {
     }
 
     pub fn vec_from_iter<T, I: IntoIterator<Item = T>>(&self, iter: I) -> BVec<'a, T> {
-        BVec::from_iter_in(iter, &self.bumpalo)
+        BVec::from_iter_in(iter, self.bumpalo)
     }
 
     pub fn slice_from_iter<T, I: IntoIterator<Item = T>>(&self, iter: I) -> &'a [T] {
@@ -114,7 +114,7 @@ impl<'a> TypeBuilder<'a> {
     }
 
     pub fn str_from_str(&self, s: &str) -> &'a str {
-        BString::from_str_in(s, &self.bumpalo).into_bump_str()
+        BString::from_str_in(s, self.bumpalo).into_bump_str()
     }
 }
 
@@ -156,7 +156,7 @@ impl<'a> TypeBuilder<'a> {
         self.class(
             reason,
             self.id_traversable,
-            vec![in &self.bumpalo; ty].into_bump_slice(),
+            vec![in self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn keyed_traversable(
@@ -168,7 +168,7 @@ impl<'a> TypeBuilder<'a> {
         self.class(
             reason,
             self.id_keyed_traversable,
-            vec![in &self.bumpalo; kty, vty].into_bump_slice(),
+            vec![in self.bumpalo; kty, vty].into_bump_slice(),
         )
     }
     pub fn keyed_container(
@@ -180,14 +180,14 @@ impl<'a> TypeBuilder<'a> {
         self.class(
             reason,
             self.id_keyed_container,
-            vec![in &self.bumpalo; kty, vty].into_bump_slice(),
+            vec![in self.bumpalo; kty, vty].into_bump_slice(),
         )
     }
     pub fn awaitable(&'a self, reason: &'a Reason<'a>, ty: &'a Ty<'a>) -> &'a Ty<'a> {
         self.class(
             reason,
             self.id_awaitable,
-            vec![in &self.bumpalo; ty].into_bump_slice(),
+            vec![in self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn generator(
@@ -200,7 +200,7 @@ impl<'a> TypeBuilder<'a> {
         self.class(
             reason,
             self.id_generator,
-            vec![in &self.bumpalo; key, value, send].into_bump_slice(),
+            vec![in self.bumpalo; key, value, send].into_bump_slice(),
         )
     }
     pub fn async_generator(
@@ -213,14 +213,14 @@ impl<'a> TypeBuilder<'a> {
         self.class(
             reason,
             self.id_async_generator,
-            vec![in &self.bumpalo; key, value, send].into_bump_slice(),
+            vec![in self.bumpalo; key, value, send].into_bump_slice(),
         )
     }
     pub fn async_iterator(&'a self, reason: &'a Reason<'a>, ty: &'a Ty<'a>) -> &'a Ty<'a> {
         self.class(
             reason,
             self.id_async_iterator,
-            vec![in &self.bumpalo; ty].into_bump_slice(),
+            vec![in self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn async_keyed_iterator(
@@ -232,84 +232,84 @@ impl<'a> TypeBuilder<'a> {
         self.class(
             reason,
             self.id_async_keyed_iterator,
-            vec![in &self.bumpalo; kty, vty].into_bump_slice(),
+            vec![in self.bumpalo; kty, vty].into_bump_slice(),
         )
     }
     pub fn pair(&'a self, reason: &'a Reason<'a>, ty1: &'a Ty<'a>, ty2: &'a Ty<'a>) -> &'a Ty<'a> {
         self.class(
             reason,
             self.id_pair,
-            vec![in &self.bumpalo; ty1, ty2].into_bump_slice(),
+            vec![in self.bumpalo; ty1, ty2].into_bump_slice(),
         )
     }
     pub fn dict(&'a self, reason: &'a Reason<'a>, kty: &'a Ty<'a>, vty: &'a Ty<'a>) -> &'a Ty<'a> {
         self.class(
             reason,
             self.id_dict,
-            vec![in &self.bumpalo; kty, vty].into_bump_slice(),
+            vec![in self.bumpalo; kty, vty].into_bump_slice(),
         )
     }
     pub fn keyset(&'a self, reason: &'a Reason<'a>, ty: &'a Ty<'a>) -> &'a Ty<'a> {
         self.class(
             reason,
             self.id_keyset,
-            vec![in &self.bumpalo; ty].into_bump_slice(),
+            vec![in self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn vec(&'a self, reason: &'a Reason<'a>, ty: &'a Ty<'a>) -> &'a Ty<'a> {
         self.class(
             reason,
             self.id_vec,
-            vec![in &self.bumpalo; ty].into_bump_slice(),
+            vec![in self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn container(&'a self, reason: &'a Reason<'a>, ty: &'a Ty<'a>) -> &'a Ty<'a> {
         self.class(
             reason,
             self.id_container,
-            vec![in &self.bumpalo; ty].into_bump_slice(),
+            vec![in self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn const_vector(&'a self, reason: &'a Reason<'a>, ty: &'a Ty<'a>) -> &'a Ty<'a> {
         self.class(
             reason,
             self.id_const_vector,
-            vec![in &self.bumpalo; ty].into_bump_slice(),
+            vec![in self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn const_collection(&'a self, reason: &'a Reason<'a>, ty: &'a Ty<'a>) -> &'a Ty<'a> {
         self.class(
             reason,
             self.id_const_collection,
-            vec![in &self.bumpalo; ty].into_bump_slice(),
+            vec![in self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn collection(&'a self, reason: &'a Reason<'a>, ty: &'a Ty<'a>) -> &'a Ty<'a> {
         self.class(
             reason,
             self.id_collection,
-            vec![in &self.bumpalo; ty].into_bump_slice(),
+            vec![in self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn throwable(&'a self, reason: &'a Reason<'a>) -> &'a Ty<'a> {
         self.class(
             reason,
             self.id_throwable,
-            vec![in &self.bumpalo; ].into_bump_slice(),
+            vec![in self.bumpalo; ].into_bump_slice(),
         )
     }
     pub fn datetime(&'a self, reason: &'a Reason<'a>) -> &'a Ty<'a> {
         self.class(
             reason,
             self.id_datetime,
-            vec![in &self.bumpalo].into_bump_slice(),
+            vec![in self.bumpalo].into_bump_slice(),
         )
     }
     pub fn datetime_immutable(&'a self, reason: &'a Reason<'a>) -> &'a Ty<'a> {
         self.class(
             reason,
             self.id_datetime_immutable,
-            vec![in &self.bumpalo].into_bump_slice(),
+            vec![in self.bumpalo].into_bump_slice(),
         )
     }
     pub fn int(&'a self, reason: &'a Reason<'a>) -> &'a Ty<'a> {
@@ -473,7 +473,7 @@ impl<'a> TypeBuilder<'a> {
     pub fn env_with_self(&self) -> &mut ExpandEnv<'a> {
         // TODO(hrust) this_ty
         self.alloc(ExpandEnv {
-            type_expansions: vec![in &self.bumpalo],
+            type_expansions: vec![in self.bumpalo],
             substs: SMap::empty(),
         })
     }

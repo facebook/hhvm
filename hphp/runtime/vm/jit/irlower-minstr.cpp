@@ -783,21 +783,14 @@ void cgKeysetLast(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 // Vec.
 
-namespace {
-
-struct LvalPtrs {
-  Vptr type, val;
-};
-LvalPtrs implPackedLayoutElemAddr(IRLS& env, Vloc arrLoc,
-                                  Vloc idxLoc, const SSATmp* idx) {
-  auto const rarr = arrLoc.reg();
-  auto const ridx = idxLoc.reg();
+irlower::LvalPtrs implVecElemLval(IRLS& env, Vreg rarr,
+                                  Vreg ridx, const SSATmp* idx) {
   auto& v = vmain(env);
 
   static_assert(sizeof(TypedValue) == 16, "");
   static_assert(TVOFF(m_data) == 0, "");
 
-  if (idx->hasConstVal()) {
+  if (idx && idx->hasConstVal()) {
     auto const offset = VanillaVec::entryOffset(idx->intVal());
     if (deltaFits(offset.type_offset, sz::dword) &&
         deltaFits(offset.data_offset, sz::dword)) {
@@ -840,21 +833,19 @@ LvalPtrs implPackedLayoutElemAddr(IRLS& env, Vloc arrLoc,
  */
 rds::Link<uint32_t, rds::Mode::Local> s_counter;
 
-}
-
 void cgLdVecElemAddr(IRLS& env, const IRInstruction* inst) {
-  auto const arrLoc = srcLoc(env, inst, 0);
-  auto const idxLoc = srcLoc(env, inst, 1);
+  auto const arr = srcLoc(env, inst, 0).reg();
+  auto const idx = srcLoc(env, inst, 1).reg();
   auto const dstLoc = irlower::dstLoc(env, inst, 0);
-  auto const addr = implPackedLayoutElemAddr(env, arrLoc, idxLoc, inst->src(1));
+  auto const addr = implVecElemLval(env, arr, idx, inst->src(1));
   vmain(env) << lea{addr.val, dstLoc.reg(tv_lval::val_idx)};
   vmain(env) << lea{addr.type, dstLoc.reg(tv_lval::type_idx)};
 }
 
 void cgLdVecElem(IRLS& env, const IRInstruction* inst) {
-  auto const arrLoc = srcLoc(env, inst, 0);
-  auto const idxLoc = srcLoc(env, inst, 1);
-  auto const addr = implPackedLayoutElemAddr(env, arrLoc, idxLoc, inst->src(1));
+  auto const arr = srcLoc(env, inst, 0).reg();
+  auto const idx = srcLoc(env, inst, 1).reg();
+  auto const addr = implVecElemLval(env, arr, idx, inst->src(1));
 
   loadTV(vmain(env), inst->dst()->type(), dstLoc(env, inst, 0),
          addr.type, addr.val);

@@ -21,6 +21,8 @@
 #include "hphp/runtime/vm/member-operations.h"
 
 #include "hphp/util/lock-free-ptr-wrapper.h"
+#include "hphp/runtime/vm/jit/vasm-reg.h"
+#include "hphp/runtime/vm/jit/irlower.h"
 
 #include <memory>
 
@@ -125,5 +127,18 @@ inline KeyType getKeyTypeNoInt(const SSATmp* key) {
   auto kt = getKeyType(key);
   return kt == KeyType::Int ? KeyType::Any : kt;
 }
+
+}
+
+namespace irlower {
+
+struct LvalPtrs {
+  Vptr type, val;
+};
+
+// implVecElemLval gets the Vptrs for the value in rarr stored at
+// idx (if given and an constant), or at ridx otherwise.
+LvalPtrs implVecElemLval(IRLS& env, Vreg rarr,
+                         Vreg ridx, const SSATmp* idx = nullptr);
 
 }}}

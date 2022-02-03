@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
+#include "hphp/runtime/vm/jit/irlower-minstr-internal.h"
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-init.h"
@@ -339,7 +340,7 @@ void cgInitVecElemLoop(IRLS& env, const IRInstruction* inst) {
   v << lea{spIn[cellsToBytes(extra->offset.offset)], sp};
 
   auto const i = v.cns(0);
-  auto const j = v.cns((count - 1) * 2);
+  auto const j = v.cns((count - 1) * 16);
 
   // We know that we have at least one element in the array so we don't have to
   // do an initial bounds check.
@@ -350,34 +351,17 @@ void cgInitVecElemLoop(IRLS& env, const IRInstruction* inst) {
       auto const i1 = in[0],  j1 = in[1];
       auto const i2 = out[0], j2 = out[1];
       auto const sf = v.makeReg();
+      auto const data = v.makeReg();
+      auto const type = v.makeReg();
+      auto const addr = implVecElemLval(env, arr, i1);
 
-      if constexpr (VanillaVec::stores_typed_values) {
-        // Load the value from the stack and store into the array.  It's safe
-        // to copy all 16 bytes of the TV because VanillaVecs don't use m_aux.
-        auto const value = v.makeReg();
-        v << loadups{sp[j1 * 8], value};
-        v << storeups{value, arr[i1 * 8] + VanillaVec::entriesOffset()};
-        v << lea{i1[2], i2};
-      } else {
-        // See PackedBlock::LvalAt for an explanation of this math.
-        auto const x = v.makeReg();
-        auto const a = v.makeReg();
-        auto const b = v.makeReg();
-        v << andqi{-8, i1, x, v.makeReg()};
-        v << lea{arr[x  * 8] + VanillaVec::entriesOffset(), a};
-        v << lea{arr[i1 * 8] + VanillaVec::entriesOffset(), b};
+      v << load {sp[j1], data};
+      v << loadb{sp[j1] + 8, type};
+      v << store {data, addr.val};
+      v << storeb{type, addr.type};
 
-        auto const data = v.makeReg();
-        auto const type = v.makeReg();
-        v << load {sp[j1 * 8], data};
-        v << loadb{sp[j1 * 8] + 8, type};
-        v << store {data, b[x] + 8};
-        v << storeb{type, a[i1]};
-        v << lea{i1[1], i2};
-      }
-
-      // Add 2 to the loop variable because we can only scale by at most 8.
-      v << subqi{2, j1, j2, sf};
+      v << lea{i1[1], i2};
+      v << subqi{16, j1, j2, sf};
       return sf;
     },
     count

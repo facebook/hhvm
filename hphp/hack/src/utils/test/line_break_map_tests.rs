@@ -35,10 +35,9 @@ ocaml_ffi! {
 
     fn position_to_offset(string: String, existing: bool, i: isize, j: isize) -> (isize, bool) {
         let line_break_map = LineBreakMap::new(string.as_bytes());
-        let result = line_break_map.position_to_offset(existing, i, j);
-        match result {
-            Ok(p) => (p, true),
-            Err(_) => (0, false),
+        match line_break_map.position_to_offset(existing, i, j) {
+            Some(p) => (p, true),
+            None => (0, false),
         }
     }
 }

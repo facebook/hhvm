@@ -5,7 +5,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cell::Cell;
-use std::result::Result;
 
 #[derive(Debug)]
 pub struct LineBreakMap {
@@ -103,13 +102,7 @@ impl LineBreakMap {
         (index, offset - line_start + 1)
     }
 
-    #[allow(clippy::result_unit_err)]
-    pub fn position_to_offset(
-        &self,
-        existing: bool,
-        line: isize,
-        column: isize,
-    ) -> Result<isize, ()> {
+    pub fn position_to_offset(&self, existing: bool, line: isize, column: isize) -> Option<isize> {
         fn get(v: &[usize], i: isize) -> isize {
             v[i as usize] as isize
         }
@@ -119,7 +112,7 @@ impl LineBreakMap {
 
         /* Treat all file_line errors the same */
         if file_line <= 0 || file_line > len {
-            Err(())
+            None
         } else {
             let line_start = get(self.lines.as_ref(), file_line - 1);
             let offset = line_start + column - 1;
@@ -128,9 +121,9 @@ impl LineBreakMap {
                 || offset >= 0
                     && offset <= get(self.lines.as_ref(), std::cmp::min(len - 1, file_line))
             {
-                Ok(offset)
+                Some(offset)
             } else {
-                Err(())
+                None
             }
         }
     }

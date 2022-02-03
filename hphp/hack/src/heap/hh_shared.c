@@ -1030,6 +1030,7 @@ value hh_connect(value connector, value worker_id_val) {
     Long_val(Field(connector, 3)),
     Long_val(Field(connector, 4))
   );
+  shm_use_sharded_hashtbl = Bool_val(Field(connector, 5));
   shm_enable_eviction = Bool_val(Field(connector, 6));
   shm_max_evictable_bytes_b = Long_val(Field(connector, 7));
   memfd_shmffi = Handle_val(Field(connector, 8));

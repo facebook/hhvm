@@ -29,6 +29,7 @@ namespace HPHP { namespace jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct SwitchProfile {
+  SwitchProfile() = default;
   SwitchProfile(const SwitchProfile&) = delete;
   SwitchProfile& operator=(const SwitchProfile&) = delete;
 

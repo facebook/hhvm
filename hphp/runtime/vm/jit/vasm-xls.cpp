@@ -2912,9 +2912,9 @@ enum Mode { Light, Heavy };
 template<class Pred>
 const char* draw(Variable* var, unsigned pos, Mode m, Pred covers) {
                                   // Light     Heavy
-  static const char* top[]    = { u8"\u2575", u8"\u2579" };
-  static const char* bottom[] = { u8"\u2577", u8"\u257B" };
-  static const char* both[]   = { u8"\u2502", u8"\u2503" };
+  static const char* top[]    = { (const char*)u8"\u2575", (const char*)u8"\u2579" };
+  static const char* bottom[] = { (const char*)u8"\u2577", (const char*)u8"\u257B" };
+  static const char* both[]   = { (const char*)u8"\u2502", (const char*)u8"\u2503" };
   static const char* empty[]  = { " ", " " };
   auto f = [&](unsigned position) {
     if (!var) return false;

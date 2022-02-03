@@ -43,6 +43,7 @@ namespace HPHP {
 // behavior when using this one iterator type in the sorting context.
 //
 struct PackedBlockRef : tv_lval {
+  PackedBlockRef(tv_val lval): tv_lval(lval) {}
   PackedBlockRef(const PackedBlockRef& x) = delete;
   ALWAYS_INLINE void operator=(const PackedBlockRef& x) { tvCopy(*x, *this); }
   ALWAYS_INLINE void operator=(const TypedValue& x) { tvCopy(x, *this); }

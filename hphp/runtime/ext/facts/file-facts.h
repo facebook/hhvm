@@ -204,6 +204,6 @@ template <> struct fmt::formatter<HPHP::Facts::Clock> {
   auto format(const HPHP::Facts::Clock& c, FormatContext& ctx)
       -> decltype(ctx.out()) {
     return format_to(
-        ctx.out(), folly::sformat("{}", c), c.m_clock, c.m_mergebase);
+        ctx.out(), "{}{}{}", c, c.m_clock, c.m_mergebase);
   }
 };

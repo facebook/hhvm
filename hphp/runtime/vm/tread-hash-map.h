@@ -16,6 +16,7 @@
 #pragma once
 
 #include <atomic>
+#include <memory>
 #include <type_traits>
 
 #include <boost/iterator/iterator_facade.hpp>
@@ -51,8 +52,8 @@ template<class Key, class Val,
          class HashFunc = std::hash<Key>,
          class Alloc = std::allocator<char>>
 struct TreadHashMap : private HashFunc,
-                      private Alloc::template rebind<char>::other {
-  using Allocator = typename Alloc::template rebind<char>::other;
+                      private std::allocator_traits<Alloc>::template rebind_alloc<char> {
+  using Allocator = typename std::allocator_traits<Alloc>::template rebind_alloc<char>;
   using value_type = std::pair<std::atomic<Key>,Val>;
   static_assert(
     std::is_trivially_destructible<Key>::value &&

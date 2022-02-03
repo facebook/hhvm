@@ -6,12 +6,13 @@
  *
  *)
 
-type class_cache = Decl_store.class_entries SMap.t
+type get_class_add_dep =
+  Decl_env.env -> string -> Decl_defs.decl_class_type option
 
 val init_not_required_props : Nast.class_ -> SSet.t -> SSet.t
 
 val parent :
-  class_cache:Decl_env.class_cache option ->
+  get_class_add_dep:get_class_add_dep ->
   Decl_env.env ->
   Nast.class_ ->
   SSet.t ->
@@ -20,22 +21,27 @@ val parent :
 val own_props : Nast.class_ -> SSet.t -> SSet.t
 
 val parent_props :
-  class_cache:class_cache option ->
+  get_class_add_dep:get_class_add_dep ->
   Decl_env.env ->
   Nast.class_ ->
   SSet.t ->
   SSet.t
 
-val trait_props : Decl_env.env -> Nast.class_ -> SSet.t -> SSet.t
+val trait_props :
+  get_class_add_dep:get_class_add_dep ->
+  Decl_env.env ->
+  Nast.class_ ->
+  SSet.t ->
+  SSet.t
 
 val private_deferred_init_props : has_own_cstr:bool -> Nast.class_ -> SSet.t
 
 val nonprivate_deferred_init_props :
   has_own_cstr:bool ->
-  class_cache:class_cache option ->
+  get_class_add_dep:get_class_add_dep ->
   Decl_env.env ->
   Shallow_decl_defs.shallow_class ->
   SSet.t
 
 val parent_initialized_members :
-  class_cache:class_cache option -> Decl_env.env -> Nast.class_ -> SSet.t
+  get_class_add_dep:get_class_add_dep -> Decl_env.env -> Nast.class_ -> SSet.t

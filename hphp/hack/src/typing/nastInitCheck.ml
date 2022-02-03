@@ -167,6 +167,31 @@ module Env = struct
            Shallow_decl.class_DEPRECATED ctx c)
     in
 
+    (* In Zoncolan, we don't support eviction. We don't support lazy reparsing of
+       shallow decls. If we try and the shallow decl is not available, we'll crash
+       Zoncolan. Therefore, we shouldn't fallback. *)
+    let ctx = Typing_env.get_ctx tenv in
+    let supports_eviction =
+      Provider_backend.supports_eviction (Provider_context.get_backend ctx)
+    in
+    let fallback =
+      if not supports_eviction then
+        Decl_env.no_fallback
+      else
+        fun _env x ->
+      Option.map
+        ~f:fst
+        (Decl_folded_class.class_decl_if_missing ~sh:SharedMem.Uses ctx x)
+    in
+    let get_class_add_dep env x =
+      Decl_env.get_class_and_add_dep
+        ~cache:SMap.empty
+        ~shmem_fallback:true
+        ~fallback
+        env
+        x
+    in
+
     (* Error when an abstract class has private properties but lacks a constructor *)
     let has_own_cstr =
       let (c_constructor, _, _) = split_methods c.c_methods in
@@ -208,10 +233,10 @@ module Env = struct
       else
         let decl_env = tenv.Typing_env_types.decl_env in
         ( DICheck.init_not_required_props c,
-          DICheck.trait_props decl_env c,
-          DICheck.parent_props ~class_cache:None decl_env c,
-          DICheck.parent ~class_cache:None decl_env c,
-          DICheck.parent_initialized_members ~class_cache:None decl_env c
+          DICheck.trait_props ~get_class_add_dep decl_env c,
+          DICheck.parent_props ~get_class_add_dep decl_env c,
+          DICheck.parent ~get_class_add_dep decl_env c,
+          DICheck.parent_initialized_members ~get_class_add_dep decl_env c
           |> filter_props_by_type tenv (snd c.c_name) )
     in
     let init_not_required_props = add_init_not_required_props SSet.empty in

@@ -28,7 +28,12 @@ let flatten_parent_class_reqs
     Decl_utils.unwrap_class_type parent_ty
   in
   let parent_type =
-    Decl_env.get_class_add_dep env parent_name ~cache:class_cache
+    Decl_env.get_class_and_add_dep
+      ~cache:class_cache
+      ~shmem_fallback:false
+      ~fallback:Decl_env.no_fallback
+      env
+      parent_name
   in
   match parent_type with
   | None ->
@@ -61,7 +66,14 @@ let flatten_parent_class_reqs
 
 let declared_class_req env class_cache (requirements, req_extends) req_ty =
   let (_, (req_pos, req_name), _) = Decl_utils.unwrap_class_type req_ty in
-  let req_type = Decl_env.get_class_add_dep env req_name ~cache:class_cache in
+  let req_type =
+    Decl_env.get_class_and_add_dep
+      ~cache:class_cache
+      ~shmem_fallback:false
+      ~fallback:Decl_env.no_fallback
+      env
+      req_name
+  in
   let req_extends = SSet.add req_name req_extends in
   (* since the req is declared on this class, we should
    * emphatically *not* substitute: a require extends Foo<T> is

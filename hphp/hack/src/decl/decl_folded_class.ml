@@ -24,6 +24,8 @@ module Inst = Decl_instantiate
 module Attrs = Typing_defs.Attributes
 module SN = Naming_special_names
 
+type class_entries = Decl_defs.decl_class_type * Decl_store.class_members option
+
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent
  * For example, a class cannot extend an interface, an interface cannot
@@ -193,7 +195,14 @@ let get_class_parent_or_trait
   (* If we already had this exact trait, we need to flag trait reuse *)
   let reused_trait = no_trait_reuse && SSet.mem parent parents in
   let parents = SSet.add parent parents in
-  let parent_type = Decl_env.get_class_add_dep env parent ~cache:parent_cache in
+  let parent_type =
+    Decl_env.get_class_and_add_dep
+      ~cache:parent_cache
+      ~shmem_fallback:false
+      ~fallback:Decl_env.no_fallback
+      env
+      parent
+  in
   match parent_type with
   | None -> (parents, pass)
   | Some parent_type ->
@@ -302,7 +311,14 @@ let get_sealed_whitelist (c : Shallow_decl_defs.shallow_class) : SSet.t option =
 let get_implements (env : Decl_env.env) parent_cache (ht : Typing_defs.decl_ty)
     : Typing_defs.decl_ty SMap.t =
   let (_r, (_p, c), paraml) = Decl_utils.unwrap_class_type ht in
-  let class_ = Decl_env.get_class_add_dep env c ~cache:parent_cache in
+  let class_ =
+    Decl_env.get_class_and_add_dep
+      ~cache:parent_cache
+      ~shmem_fallback:false
+      ~fallback:Decl_env.no_fallback
+      env
+      c
+  in
   match class_ with
   | None ->
     (* The class lives in PHP land *)
@@ -779,7 +795,7 @@ and class_decl
     | _ -> true
   in
   let impl = c.sc_extends @ c.sc_implements @ c.sc_uses in
-  let impl =
+  let (impl, parents) =
     match
       List.find c.sc_methods ~f:(fun sm ->
           String.equal (snd sm.sm_name) SN.Members.__toString)
@@ -790,15 +806,20 @@ and class_decl
        * with a __toString method; "string" also implements this interface *)
       (* Declare StringishObject and parents if not already declared *)
       let class_env = { ctx; stack = SSet.empty } in
-      let (_ : _ option) =
+      let parents =
         (* Ensure stringishObject is declared. *)
-        class_decl_if_missing ~sh class_env SN.Classes.cStringishObject
+        match
+          class_decl_if_missing ~sh class_env SN.Classes.cStringishObject
+        with
+        | None -> parents
+        | Some stringish_cls ->
+          SMap.add SN.Classes.cStringishObject stringish_cls parents
       in
       let ty =
         mk (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringishObject), []))
       in
-      ty :: impl
-    | _ -> impl
+      (ty :: impl, parents)
+    | _ -> (impl, parents)
   in
   let impl = List.map impl ~f:(get_implements env parents) in
   let impl = List.fold_right impl ~f:(SMap.fold SMap.add) ~init:SMap.empty in
@@ -826,9 +847,17 @@ and class_decl
   in
   let has_own_cstr = has_concrete_cstr && Option.is_some c.sc_constructor in
   let deferred_members =
+    let get_class_add_dep decl_env cls =
+      Decl_env.get_class_and_add_dep
+        ~cache:parents
+        ~shmem_fallback:false
+        ~fallback:Decl_env.no_fallback
+        decl_env
+        cls
+    in
     Decl_init_check.nonprivate_deferred_init_props
       ~has_own_cstr
-      ~class_cache:(Some parents)
+      ~get_class_add_dep
       env
       c
   in

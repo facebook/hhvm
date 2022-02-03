@@ -17,6 +17,9 @@ module SN = Naming_special_names
 
 (** Helpers for checking initialization of class properties by looking at decls. *)
 
+type get_class_add_dep =
+  Decl_env.env -> string -> Decl_defs.decl_class_type option
+
 let parent_init_prop = "parent::" ^ SN.Members.__construct
 
 (* If we need to call parent::__construct, we treat it as if it were
@@ -24,10 +27,10 @@ let parent_init_prop = "parent::" ^ SN.Members.__construct
  * but it works. The idea here is that if the parent needs to be
  * initialized, we add a phony class variable. *)
 let add_parent_construct
-    ~(class_cache : Decl_env.class_cache option) decl_env c props parent_hint =
+    ~(get_class_add_dep : get_class_add_dep) decl_env c props parent_hint =
   match parent_hint with
   | (_, Happly ((_, parent), _)) ->
-    (match Decl_env.get_class_add_dep decl_env parent ?cache:class_cache with
+    (match get_class_add_dep decl_env parent with
     | Some class_ when class_.dc_need_init ->
       let (c_constructor, _, _) = split_methods c.c_methods in
       if Option.is_some c_constructor then
@@ -39,17 +42,17 @@ let add_parent_construct
 
 (* As above, but for shallow_class decls rather than class NASTs. *)
 let add_parent_construct_from_shallow_decl
-    ~(class_cache : Decl_env.class_cache option) decl_env sc props parent_ty =
+    ~get_class_add_dep decl_env sc props parent_ty =
   match get_node parent_ty with
   | Tapply ((_, parent), _) ->
-    (match Decl_env.get_class_add_dep decl_env parent ?cache:class_cache with
+    (match get_class_add_dep decl_env parent with
     | Some class_ when class_.dc_need_init && Option.is_some sc.sc_constructor
       ->
       SSet.add parent_init_prop props
     | _ -> props)
   | _ -> props
 
-let parent ~(class_cache : Decl_env.class_cache option) decl_env c acc =
+let parent ~(get_class_add_dep : get_class_add_dep) decl_env c acc =
   if FileInfo.is_hhi c.c_mode then
     acc
   else if Ast_defs.is_c_trait c.c_kind then
@@ -57,29 +60,29 @@ let parent ~(class_cache : Decl_env.class_cache option) decl_env c acc =
     List.fold_left
       req_extends
       ~init:acc
-      ~f:(add_parent_construct ~class_cache decl_env c)
+      ~f:(add_parent_construct ~get_class_add_dep decl_env c)
   else
     match c.c_extends with
     | [] -> acc
     | parent_ty :: _ ->
-      add_parent_construct ~class_cache decl_env c acc parent_ty
+      add_parent_construct ~get_class_add_dep decl_env c acc parent_ty
 
 (* As above, but for shallow_class decls rather than class NASTs. *)
 let parent_from_shallow_decl
-    ~(class_cache : Decl_env.class_cache option) decl_env sc acc =
+    ~(get_class_add_dep : get_class_add_dep) decl_env sc acc =
   if FileInfo.is_hhi sc.sc_mode then
     acc
   else if Ast_defs.is_c_trait sc.sc_kind then
     List.fold_left
       sc.sc_req_extends
       ~init:acc
-      ~f:(add_parent_construct_from_shallow_decl ~class_cache decl_env sc)
+      ~f:(add_parent_construct_from_shallow_decl ~get_class_add_dep decl_env sc)
   else
     match sc.sc_extends with
     | [] -> acc
     | parent_ty :: _ ->
       add_parent_construct_from_shallow_decl
-        ~class_cache
+        ~get_class_add_dep
         decl_env
         sc
         acc
@@ -124,15 +127,11 @@ let init_not_required_props c props =
       else
         SSet.add (snd cv.cv_id) acc)
 
-type class_cache = Decl_store.class_entries SMap.t
-
-let parent_props ~(class_cache : class_cache option) decl_env c props =
+let parent_props ~(get_class_add_dep : get_class_add_dep) decl_env c props =
   List.fold_left c.c_extends ~init:props ~f:(fun acc parent ->
       match parent with
       | (_, Happly ((_, parent), _)) ->
-        let tc =
-          Decl_env.get_class_add_dep decl_env parent ?cache:class_cache
-        in
+        let tc = get_class_add_dep decl_env parent in
         (match tc with
         | None -> acc
         | Some { dc_deferred_init_members = members; _ } ->
@@ -141,24 +140,22 @@ let parent_props ~(class_cache : class_cache option) decl_env c props =
 
 (* As above, but for shallow_class decls rather than class NASTs. *)
 let parent_props_from_shallow_decl
-    ~(class_cache : class_cache option) decl_env sc props =
+    ~(get_class_add_dep : get_class_add_dep) decl_env sc props =
   List.fold_left sc.sc_extends ~init:props ~f:(fun acc parent ->
       match get_node parent with
       | Tapply ((_, parent), _) ->
-        let tc =
-          Decl_env.get_class_add_dep decl_env parent ?cache:class_cache
-        in
+        let tc = get_class_add_dep decl_env parent in
         (match tc with
         | None -> acc
         | Some { dc_deferred_init_members = members; _ } ->
           SSet.union members acc)
       | _ -> acc)
 
-let trait_props decl_env c props =
+let trait_props ~(get_class_add_dep : get_class_add_dep) decl_env c props =
   List.fold_left c.c_uses ~init:props ~f:(fun acc trait_hint ->
       match trait_hint with
       | (_, Happly ((_, trait), _)) ->
-        let class_ = Decl_env.get_class_add_dep decl_env trait in
+        let class_ = get_class_add_dep decl_env trait in
         (match class_ with
         | None -> acc
         | Some { dc_construct = cstr; dc_deferred_init_members = members; _ } ->
@@ -196,7 +193,7 @@ let get_private_deferred_init_props c =
 (** return all init-requiring props of the class and its ancestors from the
     given shallow class decl and the ancestors' folded decls. *)
 let get_nonprivate_deferred_init_props
-    ~(class_cache : class_cache option) decl_env sc =
+    ~(get_class_add_dep : get_class_add_dep) decl_env sc =
   let props =
     List.fold_left sc.sc_props ~init:SSet.empty ~f:(fun props sp ->
         if shallow_prop_may_need_init sp then
@@ -204,8 +201,10 @@ let get_nonprivate_deferred_init_props
         else
           props)
   in
-  let props = parent_props_from_shallow_decl ~class_cache decl_env sc props in
-  let props = parent_from_shallow_decl ~class_cache decl_env sc props in
+  let props =
+    parent_props_from_shallow_decl ~get_class_add_dep decl_env sc props
+  in
+  let props = parent_from_shallow_decl ~get_class_add_dep decl_env sc props in
   props
 
 let private_deferred_init_props ~has_own_cstr c =
@@ -216,12 +215,12 @@ let private_deferred_init_props ~has_own_cstr c =
   | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> SSet.empty
 
 let nonprivate_deferred_init_props
-    ~has_own_cstr ~(class_cache : class_cache option) decl_env sc =
+    ~has_own_cstr ~(get_class_add_dep : get_class_add_dep) decl_env sc =
   match sc.sc_kind with
   | Ast_defs.Cclass k when Ast_defs.is_abstract k && not has_own_cstr ->
-    get_nonprivate_deferred_init_props ~class_cache decl_env sc
+    get_nonprivate_deferred_init_props ~get_class_add_dep decl_env sc
   | Ast_defs.Ctrait ->
-    get_nonprivate_deferred_init_props ~class_cache decl_env sc
+    get_nonprivate_deferred_init_props ~get_class_add_dep decl_env sc
   | Ast_defs.(Cclass _ | Cinterface | Cenum | Cenum_class _) -> SSet.empty
 
 (**
@@ -229,7 +228,7 @@ let nonprivate_deferred_init_props
  * the parents of [c], s.t. they should not be readable within [c]'s
  * [__construct] method until _after_ [parent::__construct] has been called.
  *)
-let parent_initialized_members ~(class_cache : class_cache option) decl_env c =
+let parent_initialized_members ~get_class_add_dep decl_env c =
   let parent_initialized_members_helper = function
     | None -> SSet.empty
     | Some { dc_props; _ } ->
@@ -241,7 +240,7 @@ let parent_initialized_members ~(class_cache : class_cache option) decl_env c =
   List.fold_left c.c_extends ~init:SSet.empty ~f:(fun acc parent ->
       match parent with
       | (_, Happly ((_, parent), _)) ->
-        Decl_env.get_class_add_dep decl_env parent ?cache:class_cache
+        get_class_add_dep decl_env parent
         |> parent_initialized_members_helper
         |> SSet.union acc
       | _ -> acc)

@@ -247,3 +247,11 @@ let set_decl_service_backend (decl : Decl_service_client.t) : unit =
   backend_ref := Decl_service { decl; fixmes = empty_fixmes }
 
 let get () : t = !backend_ref
+
+let supports_eviction (t : t) : bool =
+  match t with
+  | Analysis -> false
+  | Local_memory _
+  | Decl_service _
+  | Shared_memory ->
+    true

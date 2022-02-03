@@ -50,11 +50,20 @@ let add_extends_dependency env x =
 
 type class_cache = Decl_store.class_entries SMap.t
 
-let get_class_add_dep env ?(cache : class_cache option) x =
+let no_fallback (_ : env) (_ : string) : Decl_defs.decl_class_type option = None
+
+let get_class_and_add_dep
+    ~(cache : class_cache) ~(shmem_fallback : bool) ~fallback env x =
   let res =
-    match Option.(cache >>= SMap.find_opt x >>| fst) with
+    match SMap.find_opt x cache with
+    | Some c -> Some (fst c)
+    | None when shmem_fallback -> Decl_store.((get ()).get_class x)
+    | None -> None
+  in
+  let res =
+    match res with
     | Some c -> Some c
-    | None -> Decl_store.((get ()).get_class x)
+    | None -> fallback env x
   in
   Option.iter res ~f:(fun cd ->
       if not (is_hhi cd) then add_extends_dependency env x);

@@ -18,10 +18,25 @@ val add_extends_dependency : env -> string -> unit
 
 type class_cache = Decl_store.class_entries SMap.t
 
-(** Add a dependency to the class then get class decl.
-    First look up in cache and if not found lookup in heap. *)
-val get_class_add_dep :
-  env -> ?cache:class_cache -> string -> Decl_defs.decl_class_type option
+(** Auxiliary constant fallback function that returns [None]. *)
+val no_fallback : env -> string -> Decl_defs.decl_class_type option
+
+(** Lookup the class from the cache.
+
+    If [shmem_fallback] and the class is not in the cache, look for the
+    class in the classes heap.
+
+    If the class is not in the cache, and [shmem_fallback] is false or the
+    class is not in the classes heap, call and return [fallback].
+
+    If a class is returned, add a dependency to the class. *)
+val get_class_and_add_dep :
+  cache:class_cache ->
+  shmem_fallback:bool ->
+  fallback:(env -> string -> Decl_defs.decl_class_type option) ->
+  env ->
+  string ->
+  Decl_defs.decl_class_type option
 
 val get_construct :
   env ->

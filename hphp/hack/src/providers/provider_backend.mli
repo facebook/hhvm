@@ -187,3 +187,5 @@ val set_local_memory_backend :
 val set_decl_service_backend : Decl_service_client.t -> unit
 
 val get : unit -> t
+
+val supports_eviction : t -> bool

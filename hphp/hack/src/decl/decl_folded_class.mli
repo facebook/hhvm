@@ -7,6 +7,8 @@
  *
  *)
 
+type class_entries = Decl_defs.decl_class_type * Decl_store.class_members option
+
 (** Check if the class is already in the heap, and if not,
     declare it, its members and its ancestors and add them to
     their respective shared heaps.
@@ -15,10 +17,7 @@
     guarantee that it returns all the member heap entries for that class
     as some might have already been added previously when decling the ancestors. *)
 val class_decl_if_missing :
-  sh:SharedMem.uses ->
-  Provider_context.t ->
-  string ->
-  Decl_store.class_entries option
+  sh:SharedMem.uses -> Provider_context.t -> string -> class_entries option
 
 val class_decl :
   sh:SharedMem.uses ->

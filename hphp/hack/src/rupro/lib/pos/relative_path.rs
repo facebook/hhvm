@@ -11,11 +11,13 @@ pub use oxidized::relative_path::Prefix;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct RelativePath {
     prefix: Prefix,
-    suffix: PathId,
+    // To allow representing RelativePath::empty(), use Option here, since the
+    // intern crate does not allow interning empty paths (it panics).
+    suffix: Option<PathId>,
 }
 
 impl RelativePath {
-    pub fn new(prefix: Prefix, suffix: PathId) -> Self {
+    pub fn new(prefix: Prefix, suffix: Option<PathId>) -> Self {
         Self { prefix, suffix }
     }
 
@@ -27,7 +29,9 @@ impl RelativePath {
             Prefix::Dummy => &ctx.dummy,
         }
         .to_owned();
-        self.suffix.push_to(&mut buf);
+        if let Some(suffix) = self.suffix {
+            suffix.push_to(&mut buf);
+        }
         buf
     }
 }

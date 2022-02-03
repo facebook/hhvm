@@ -24,7 +24,11 @@ impl GlobalAllocator {
     }
 
     pub fn relative_path(&self, prefix: Prefix, suffix: &std::path::Path) -> RelativePath {
-        RelativePath::new(prefix, PathId::from(suffix.to_str().unwrap()))
+        if suffix == std::path::Path::new("") {
+            RelativePath::new(prefix, None)
+        } else {
+            RelativePath::new(prefix, Some(PathId::from(suffix)))
+        }
     }
 
     pub fn relative_path_from_ast(

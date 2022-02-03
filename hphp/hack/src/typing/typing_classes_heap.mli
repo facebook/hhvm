@@ -30,8 +30,17 @@ module Api : sig
   class_t was fetched in the first place. It's used solely for telemetry,
   so that telemetry about APIs can be easily correlated with telemetry
   to the original call to the [get] which fetched the class_t in the
-  first place. *)
-  type t = Decl_counters.decl option * class_t [@@deriving show]
+  first place.
+
+  It also references the provider context that was used to query the class_t,
+  as it might be needed when querying its members when the shallow decl where it
+  was defines is evicted. For Zoncolan, this Provider_context.t is not
+  available, as Zoncolan doesn't support eviction. *)
+  type t =
+    (Decl_counters.decl option[@opaque])
+    * class_t
+    * (Provider_context.t[@opaque]) option
+  [@@deriving show]
 
   val need_init : t -> bool
 

@@ -107,7 +107,7 @@ let get_class
             |> Option.map ~f:Typing_classes_heap.make_eager_class_decl)
       with
       | None -> None
-      | Some v -> Some (counter, v)
+      | Some v -> Some (counter, v, Some ctx)
     end
   | Provider_backend.Shared_memory
   | Provider_backend.Decl_service _ ->
@@ -117,7 +117,7 @@ let get_class
             Typing_classes_heap.get ctx class_name declare_folded_class_in_file)
       with
       | None -> None
-      | Some v -> Some (counter, v)
+      | Some v -> Some (counter, v, Some ctx)
     end
   | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
     let result : Obj.t option =
@@ -134,7 +134,7 @@ let get_class
     | None -> None
     | Some obj ->
       let v : Typing_classes_heap.class_t = Obj.obj obj in
-      Some (counter, v))
+      Some (counter, v, Some ctx))
 
 let declare_fun_in_file_DEPRECATED
     (ctx : Provider_context.t) (file : Relative_path.t) (name : fun_key) :

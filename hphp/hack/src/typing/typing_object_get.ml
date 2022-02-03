@@ -23,6 +23,43 @@ module Phase = Typing_phase
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
 
+let mk_intersection_err env errs_res =
+  Result.fold
+    errs_res
+    ~ok:(fun tys ->
+      let (env, ty) = Typing_intersection.intersect_list env Reason.none tys in
+      (env, Ok ty))
+    ~error:(fun (actuals, expecteds) ->
+      let (env, ty_actual) =
+        Typing_intersection.intersect_list env Reason.none actuals
+      in
+      let (env, ty_expect) =
+        Typing_intersection.intersect_list env Reason.none expecteds
+      in
+      (env, Error (ty_actual, ty_expect)))
+
+let mk_union_err env =
+  Result.fold
+    ~ok:(fun tys ->
+      let (env, ty) = Typing_union.union_list env Reason.none tys in
+      (env, Ok ty))
+    ~error:(fun (actuals, expecteds) ->
+      let (env, ty_acutal) = Typing_union.union_list env Reason.none actuals in
+      let (env, ty_expect) =
+        Typing_union.union_list env Reason.none expecteds
+      in
+      (env, Error (ty_acutal, ty_expect)))
+
+let fold_errs errs =
+  List.fold_left errs ~init:(Ok []) ~f:(fun acc err ->
+      match (acc, err) with
+      | (Ok xs, Ok x) -> Ok (x :: xs)
+      | (Ok xs, Error (x, y)) -> Error (x :: xs, y :: xs)
+      | (Error (xs, ys), Ok x) -> Error (x :: xs, x :: ys)
+      | (Error (xs, ys), Error (x, y)) -> Error (x :: xs, y :: ys))
+
+let fold_opt_errs opt_errs = Option.(map ~f:fold_errs @@ all opt_errs)
+
 let err_witness env p = TUtils.terr env (Reason.Rwitness p)
 
 let smember_not_found
@@ -911,19 +948,6 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error =
           ]));
   let (env, ety1') = Env.expand_type env receiver_ty in
   let was_var = is_tyvar ety1' in
-  let fold_errs errs =
-    List.fold_left errs ~init:(Ok []) ~f:(fun acc err ->
-        match (acc, err) with
-        | (Ok xs, Ok x) -> Ok (x :: xs)
-        | (Ok xs, Error (x, y)) -> Error (x :: xs, y :: xs)
-        | (Error (xs, ys), Ok x) -> Error (x :: xs, x :: ys)
-        | (Error (xs, ys), Error (x, y)) -> Error (x :: xs, y :: ys))
-  in
-  let fold_opt_errs opt_errs = Option.(map ~f:fold_errs @@ all opt_errs) in
-  let dflt_lval_err = Ok receiver_ty
-  and dflt_rval_err =
-    Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
-  in
   let (env, ety1) =
     if args.is_method then
       if TypecheckerOptions.method_call_inference (Env.get_tcopt env) then
@@ -951,68 +975,12 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error =
     else
       (env, ety1)
   in
-  let nullable_obj_get ~read_context ty =
-    nullable_obj_get
-      { args with this_ty = ty; this_ty_conjunct = ty }
-      env
-      ety1
-      id
-      on_error
-      ~read_context
-      ty
-  in
+
   (* coerce_from_ty is used to store the source type for an assignment, so it
    * is a useful marker for whether we're reading or writing *)
   let read_context = Option.is_none args.coerce_from_ty in
   match deref ety1 with
-  | (r, Tunion tyl) ->
-    let (env, resultl, lval_errs, rval_err_opts) =
-      List.fold_left
-        tyl
-        ~init:(env, [], [], [])
-        ~f:(fun (env, tys, lval_errs, rval_err_opts) ty ->
-          let (env, ty, lval_err, rval_err_opt) =
-            obj_get_inner
-              { args with this_ty = ty; this_ty_conjunct = ty }
-              env
-              ty
-              id
-              on_error
-          in
-          (env, ty :: tys, lval_err :: lval_errs, rval_err_opt :: rval_err_opts))
-    in
-    let mk_err env =
-      Result.fold
-        ~ok:(fun tys ->
-          let (env, ty) = Typing_union.union_list env Reason.none tys in
-          (env, Ok ty))
-        ~error:(fun (actuals, expecteds) ->
-          let (env, ty_acutal) =
-            Typing_union.union_list env Reason.none actuals
-          in
-          let (env, ty_expect) =
-            Typing_union.union_list env Reason.none expecteds
-          in
-          (env, Error (ty_acutal, ty_expect)))
-    in
-    let (env, lval_err) = mk_err env @@ fold_errs lval_errs in
-    let (env, rval_err) =
-      Option.value_map ~default:(env, None) ~f:(fun res ->
-          let (env, r) = mk_err env res in
-          (env, Some r))
-      @@ fold_opt_errs rval_err_opts
-    in
-
-    (* TODO: decide what to do about methods with differing generic arity.
-     * See T55414751 *)
-    let tal =
-      match resultl with
-      | [] -> []
-      | (_, tal) :: _ -> tal
-    in
-    let tyl = List.map ~f:fst resultl in
-    let (env, ty) = Union.union_list env r tyl in
-    (env, (ty, tal), lval_err, rval_err)
+  | (r, Tunion tyl) -> obj_get_inner_union args env on_error id r tyl
   | (r, Tintersection tyl) ->
     let is_nonnull =
       args.is_nonnull
@@ -1021,92 +989,31 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error =
            receiver_ty
            (Typing_make_type.nonnull Reason.none)
     in
-    let (env, resultl, lval_errs, rval_err_opts) =
-      TUtils.run_on_intersection_key_value_res env tyl ~f:(fun env ty ->
-          obj_get_inner
-            { args with is_nonnull; this_ty_conjunct = ty }
-            env
-            ty
-            id
-            on_error)
-    in
-    let mk_ty env =
-      Result.fold
-        ~ok:(fun tys ->
-          let (env, ty) =
-            Typing_intersection.intersect_list env Reason.none tys
-          in
-          (env, Ok ty))
-        ~error:(fun (actuals, expecteds) ->
-          let (env, ty_actual) =
-            Typing_intersection.intersect_list env Reason.none actuals
-          in
-          let (env, ty_expect) =
-            Typing_intersection.intersect_list env Reason.none expecteds
-          in
-          (env, Error (ty_actual, ty_expect)))
-    in
-    let (env, lval_err) = mk_ty env @@ fold_errs lval_errs in
-    let (env, rval_err) =
-      Option.value_map ~default:(env, None) ~f:(fun res ->
-          let (env, err) = mk_ty env res in
-          (env, Some err))
-      @@ fold_opt_errs rval_err_opts
-    in
-    (* TODO: decide what to do about methods with differing generic arity.
-     * See T55414751 *)
-    let tal =
-      match resultl with
-      | [] -> []
-      | (_, tal) :: _ -> tal
-    in
-    let tyl = List.map ~f:fst resultl in
-    let (env, ty) = Inter.intersect_list env r tyl in
-    (env, (ty, tal), lval_err, rval_err)
+    obj_get_inner_intersection { args with is_nonnull } env on_error id r tyl
   | (_, Tdependent (_, ty))
   | (_, Tnewtype (_, _, ty)) ->
     obj_get_inner args env ty id on_error
   | (r, Tgeneric (_name, _)) ->
-    let (env, tyl) =
-      TUtils.get_concrete_supertypes ~abstract_enum:true env ety1
-    in
-    if List.is_empty tyl then (
-      let prim_err =
-        Typing_error.(
-          primary
-          @@ Primary.Non_object_member
-               {
-                 pos = id_pos;
-                 ctxt =
-                   (if read_context then
-                     `read
-                   else
-                     `write);
-                 kind =
-                   (if args.is_method then
-                     `method_
-                   else
-                     `property);
-                 member_name = id_str;
-                 ty_name = lazy (Typing_print.error env ety1);
-                 decl_pos = Reason.to_pos r;
-               })
-      in
-      Errors.add_typing_error @@ Typing_error.apply ~on_error prim_err;
-      (env, (err_witness env id_pos, []), dflt_lval_err, dflt_rval_err)
-    ) else
-      let (env, ty) = Typing_intersection.intersect_list env r tyl in
-      let (env, ty) =
-        if args.is_nonnull then
-          Typing_solver.non_null env (Pos_or_decl.of_raw_pos args.obj_pos) ty
-        else
-          (env, ty)
-      in
-      obj_get_inner args env ty id on_error
-  | (_, Toption ty) -> nullable_obj_get ~read_context ty
+    obj_get_inner_generic args env receiver_ty id r ety1 on_error
+  | (_, Toption ty) ->
+    nullable_obj_get
+      { args with this_ty = ty; this_ty_conjunct = ty }
+      env
+      ety1
+      id
+      on_error
+      ~read_context
+      ty
   | (r, Tprim Tnull) ->
     let ty = mk (r, Tunion []) in
-    nullable_obj_get ~read_context ty
+    nullable_obj_get
+      { args with this_ty = ty; this_ty_conjunct = ty }
+      env
+      ety1
+      id
+      on_error
+      ~read_context
+      ty
   (* We are trying to access a member through a value of unknown type *)
   | (r, Tvar _) ->
     Errors.add_typing_error
@@ -1123,12 +1030,110 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error =
                pos = id_pos;
                reason = Reason.to_string "It is unknown" r;
              });
-    let ty_nothing = MakeType.nothing Reason.none in
     ( env,
       (TUtils.terr env r, []),
-      Error (receiver_ty, ty_nothing),
-      dflt_rval_err )
+      Error (receiver_ty, MakeType.nothing Reason.none),
+      Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty )
   | (_, _) -> obj_get_concrete_ty args env ety1 id on_error
+
+and obj_get_inner_generic
+    args env recv_ty ((id_pos, id_str) as id) reason ety1 on_error =
+  match TUtils.get_concrete_supertypes ~abstract_enum:true env ety1 with
+  | (env, []) ->
+    let ctxt =
+      if Option.is_none args.coerce_from_ty then
+        `read
+      else
+        `write
+    and kind =
+      if args.is_method then
+        `method_
+      else
+        `property
+    in
+    let prim_err =
+      Typing_error.(
+        primary
+        @@ Primary.Non_object_member
+             {
+               pos = id_pos;
+               ctxt;
+               kind;
+               member_name = id_str;
+               ty_name = lazy (Typing_print.error env ety1);
+               decl_pos = Reason.to_pos reason;
+             })
+    in
+    let rval_err = Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
+    and lval_err = Ok recv_ty in
+    Errors.add_typing_error @@ Typing_error.apply ~on_error prim_err;
+    (env, (err_witness env id_pos, []), lval_err, rval_err)
+  | (env, tys) ->
+    let (env, ty) = Typing_intersection.intersect_list env reason tys in
+    let (env, ty) =
+      if args.is_nonnull then
+        Typing_solver.non_null env (Pos_or_decl.of_raw_pos args.obj_pos) ty
+      else
+        (env, ty)
+    in
+    obj_get_inner args env ty id on_error
+
+and obj_get_inner_union args env on_error id reason tys =
+  let (env, resultl, lval_errs, rval_err_opts) =
+    List.fold_left
+      tys
+      ~init:(env, [], [], [])
+      ~f:(fun (env, tys, lval_errs, rval_err_opts) ty ->
+        let (env, ty, lval_err, rval_err_opt) =
+          obj_get_inner
+            { args with this_ty = ty; this_ty_conjunct = ty }
+            env
+            ty
+            id
+            on_error
+        in
+        (env, ty :: tys, lval_err :: lval_errs, rval_err_opt :: rval_err_opts))
+  in
+  let (env, lval_err) = mk_union_err env @@ fold_errs lval_errs in
+  let (env, rval_err) =
+    Option.value_map ~default:(env, None) ~f:(fun res ->
+        let (env, r) = mk_union_err env res in
+        (env, Some r))
+    @@ fold_opt_errs rval_err_opts
+  in
+  (* TODO: decide what to do about methods with differing generic arity.
+   * See T55414751 *)
+  let tal =
+    match resultl with
+    | [] -> []
+    | (_, tal) :: _ -> tal
+  in
+  let tyl = List.map ~f:fst resultl in
+  let (env, ty) = Union.union_list env reason tyl in
+  (env, (ty, tal), lval_err, rval_err)
+
+and obj_get_inner_intersection args env on_error id reason tys =
+  let (env, resultl, lval_errs, rval_err_opts) =
+    TUtils.run_on_intersection_key_value_res env tys ~f:(fun env ty ->
+        obj_get_inner { args with this_ty_conjunct = ty } env ty id on_error)
+  in
+  let (env, lval_err) = mk_intersection_err env @@ fold_errs lval_errs in
+  let (env, rval_err) =
+    Option.value_map ~default:(env, None) ~f:(fun res ->
+        let (env, err) = mk_intersection_err env res in
+        (env, Some err))
+    @@ fold_opt_errs rval_err_opts
+  in
+  (* TODO: decide what to do about methods with differing generic arity.
+   * See T55414751 *)
+  let tal =
+    match resultl with
+    | [] -> []
+    | (_, tal) :: _ -> tal
+  in
+  let tyl = List.map ~f:fst resultl in
+  let (env, ty) = Inter.intersect_list env reason tyl in
+  (env, (ty, tal), lval_err, rval_err)
 
 (* Look up the type of the property or method id in the type receiver_ty of the
  * receiver and use the function k to postprocess the result.

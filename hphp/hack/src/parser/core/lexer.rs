@@ -229,7 +229,7 @@ where
     }
 
     fn peek_string(&self, size: usize) -> &[u8] {
-        &self.source.sub(self.offset, size)
+        self.source.sub(self.offset, size)
     }
 
     fn match_string(&self, s: &[u8]) -> bool {
@@ -297,26 +297,26 @@ where
     }
 
     fn is_octal_digit(c: char) -> bool {
-        '0' <= c && c <= '7'
+        ('0'..='7').contains(&c)
     }
 
     fn is_decimal_digit(ch: char) -> bool {
-        '0' <= ch && ch <= '9'
+        ('0'..='9').contains(&ch)
     }
 
     fn is_hexadecimal_digit(c: char) -> bool {
-        ('0' <= c && c <= '9') || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F')
+        ('0'..='9').contains(&c) || ('a'..='f').contains(&c) || ('A'..='F').contains(&c)
     }
 
     fn is_name_nondigit(c: char) -> bool {
-        (c == '_') || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('\x7f' <= c)
+        (c == '_') || ('a'..='z').contains(&c) || ('A'..='Z').contains(&c) || ('\x7f' <= c)
     }
 
     fn is_name_letter(c: char) -> bool {
         (c == '_')
-            || ('0' <= c && c <= '9')
-            || ('a' <= c && c <= 'z')
-            || ('A' <= c && c <= 'Z')
+            || ('0'..='9').contains(&c)
+            || ('a'..='z').contains(&c)
+            || ('A'..='Z').contains(&c)
             || ('\x7f' <= c)
     }
 
@@ -511,7 +511,7 @@ where
             {
                 self.scan_exponent()
             }
-            _ if '0' <= ch && ch <= '9' => {
+            _ if ('0'..='9').contains(&ch) => {
                 // 05
                 let mut lexer_oct = self.clone();
                 lexer_oct.scan_octal_digits();
@@ -696,7 +696,7 @@ where
     fn skip_uninteresting_double_quote_like_string_characters(&mut self) {
         let is_uninteresting = |ch| match ch {
             INVALID | '\\' | '$' | '{' | '[' | ']' | '-' => false,
-            ch if '0' <= ch && ch <= '9' => false,
+            ch if ('0'..='9').contains(&ch) => false,
             ch => ch != '"' && !Self::is_name_nondigit(ch),
         };
         self.skip_while(&is_uninteresting);
@@ -817,7 +817,7 @@ where
 
     fn scan_string_literal_in_progress(&mut self, literal_kind: &StringLiteralKind) -> TokenKind {
         let (is_heredoc, name): (bool, &[u8]) = match literal_kind {
-            StringLiteralKind::LiteralHeredoc { heredoc } => (true, &heredoc),
+            StringLiteralKind::LiteralHeredoc { heredoc } => (true, heredoc),
             _ => (false, b""),
         };
         let ch0 = self.peek_char(0);
@@ -930,7 +930,7 @@ where
                         TokenKind::StringLiteralBody
                     }
                 }
-                ch if '0' <= ch && ch <= '9' => {
+                ch if ('0'..='9').contains(&ch) => {
                     let mut lexer1 = self.clone();
                     let literal = lexer1.scan_integer_literal_in_string();
 
@@ -1394,7 +1394,7 @@ where
                     self.advance(2);
                     TokenKind::DotEqual
                 }
-                ch if '0' <= ch && ch <= '9' => self.scan_after_decimal_point(),
+                ch if ('0'..='9').contains(&ch) => self.scan_after_decimal_point(),
                 '.' => {
                     if (self.peek_char(2)) == '.' {
                         self.advance(3);
@@ -1674,7 +1674,7 @@ where
                 }
                 _ => self.scan_octal_or_float(),
             },
-            ch if '1' <= ch && ch <= '9' => self.scan_decimal_or_float(),
+            ch if ('1'..='9').contains(&ch) => self.scan_decimal_or_float(),
             '\'' => self.scan_single_quote_string_literal(),
             '"' => self.scan_double_quote_like_string_literal_from_start(),
             '`' => {

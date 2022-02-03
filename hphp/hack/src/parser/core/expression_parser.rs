@@ -474,7 +474,7 @@ where
                 self.with_error(Errors::error1015);
                 S!(make_missing, self, self.pos())
             }
-            TokenKind::EndOfFile | _ => self.parse_as_name_or_error(),
+            _ => self.parse_as_name_or_error(),
         }
     }
 
@@ -1184,10 +1184,8 @@ where
         // is the start of a specified function call.
         let maybe_prefix =
             if self.peek_token_kind_with_possible_attributized_type_list() == TokenKind::LessThan {
-                match self.try_parse_specified_function_call(left_term) {
-                    Some(r) => Some(BinaryExpressionPrefixKind::PrefixLessThan(r)),
-                    None => None,
-                }
+                self.try_parse_specified_function_call(left_term)
+                    .map(BinaryExpressionPrefixKind::PrefixLessThan)
             } else {
                 None
             };
@@ -1218,7 +1216,7 @@ where
                         | TokenKind::LessThanLessThanEqual
                         | TokenKind::GreaterThanGreaterThanEqual
                         | TokenKind::QuestionQuestionEqual
-                            if Self::can_be_used_as_lvalue(&left_term) =>
+                            if Self::can_be_used_as_lvalue(left_term) =>
                         {
                             BinaryExpressionPrefixKind::PrefixAssignment
                         }

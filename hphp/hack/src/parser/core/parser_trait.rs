@@ -45,7 +45,7 @@ impl ExpectedTokens {
             TokenKind::Semicolon => Semicolon as ETMask,
             TokenKind::RightParen => RightParen as ETMask,
             TokenKind::Public | TokenKind::Protected | TokenKind::Private => Visibility as ETMask,
-            _ => 0 as ETMask,
+            _ => 0_u16,
         };
         (bit & mask) != 0
     }
@@ -869,10 +869,8 @@ where
                 } else if separator_predicate(kind) {
                     if separator_kind == TokenKind::Empty {
                         separator_kind = kind;
-                    } else {
-                        if separator_kind != kind {
-                            self.with_error(Errors::error1063);
-                        }
+                    } else if separator_kind != kind {
+                        self.with_error(Errors::error1063);
                     }
                     let token = self.next_token();
 
@@ -1259,23 +1257,23 @@ where
 
             let lexer_before = self.lexer().clone();
             let result = parse_item(self);
-            // ERROR RECOVERY: If the item is was parsed as 'missing', then it means
-            // the parser bailed out of that scope. So, pass on whatever's been
-            // accumulated so far, but with a 'Missing' SyntaxNode prepended.
             if result.is_missing() {
+                // ERROR RECOVERY: If the item is was parsed as 'missing', then it means
+                // the parser bailed out of that scope. So, pass on whatever's been
+                // accumulated so far, but with a 'Missing' SyntaxNode prepended.
                 items.push(result);
                 break;
-            } else if lexer_before.start() == self.lexer().start()
+            }
+            if lexer_before.start() == self.lexer().start()
                 && lexer_before.offset() == self.lexer().offset()
             {
                 // INFINITE LOOP PREVENTION: If parse_item does not actually make
                 // progress, just bail
                 items.push(result);
                 break;
-            } else {
-                // Or if nothing's wrong, continue.
-                items.push(result)
             }
+            // Or if nothing's wrong, continue.
+            items.push(result)
         }
         S!(make_list, self, items, self.pos())
     }
@@ -1374,7 +1372,7 @@ where
                 // So, as a second line of defense, check if the current token
                 // is a misspelling, by our existing narrow definition of misspelling.
                 let is_misspelling =
-                    |k: &&TokenKind| Self::is_misspelled_kind(**k, &self.current_token_text());
+                    |k: &&TokenKind| Self::is_misspelled_kind(**k, self.current_token_text());
                 let kind = kinds.iter().find(is_misspelling);
                 match kind {
                     Some(kind) => {
@@ -1409,7 +1407,7 @@ where
                 // ERROR RECOVERY: We know we didn't encounter an extra token.
                 // So, as a second line of defense, check if the current token
                 // is a misspelling, by our existing narrow definition of misspelling.
-                if Self::is_misspelled_kind(kind, &self.current_token_text()) {
+                if Self::is_misspelled_kind(kind, self.current_token_text()) {
                     self.skip_and_log_misspelled_token(kind);
                     S!(make_missing, self, self.pos())
                 } else {
@@ -1436,7 +1434,7 @@ where
                 // ERROR RECOVERY: We know we didn't encounter an extra token.
                 // So, as a second line of defense, check if the current token
                 // is a misspelling, by our existing narrow definition of misspelling.
-                if Self::is_misspelled_kind(kind, &self.current_token_text()) {
+                if Self::is_misspelled_kind(kind, self.current_token_text()) {
                     self.skip_and_log_misspelled_token(kind);
                     None
                 } else {
@@ -1479,9 +1477,8 @@ where
     }
 
     fn check_stack_limit(&self) {
-        self.context()
-            .stack_limit
-            .as_ref()
-            .map(|limit| limit.panic_if_exceeded());
+        if let Some(limit) = self.context().stack_limit.as_ref() {
+            limit.panic_if_exceeded()
+        }
     }
 }

@@ -324,27 +324,25 @@ where
         if has_suffix {
             self.continue_from(parser1);
             Some(markup_section)
-        } else {
-            if self.lexer().source().length() > 0 {
-                if file_path.has_extension("php") {
-                    self.with_error(Errors::error1001);
-                    None
-                } else if !markup_section.is_missing() {
-                    // Anything without a `.php` or `.hackpartial` extension
-                    // should be treated like a `.hack` file (strict), which
-                    // can include a shebang (hashbang).
-                    //
-                    // parse the shebang correctly and continue
-                    //
-                    // Executables do not require an extension.
-                    self.continue_from(parser1);
-                    Some(markup_section)
-                } else {
-                    None
-                }
+        } else if self.lexer().source().length() > 0 {
+            if file_path.has_extension("php") {
+                self.with_error(Errors::error1001);
+                None
+            } else if !markup_section.is_missing() {
+                // Anything without a `.php` or `.hackpartial` extension
+                // should be treated like a `.hack` file (strict), which
+                // can include a shebang (hashbang).
+                //
+                // parse the shebang correctly and continue
+                //
+                // Executables do not require an extension.
+                self.continue_from(parser1);
+                Some(markup_section)
             } else {
                 None
             }
+        } else {
+            None
         }
     }
 
@@ -1228,7 +1226,7 @@ where
         };
         match self.peek_token_kind() {
             TokenKind::Insteadof => self.parse_trait_use_precedence_item(name),
-            TokenKind::As | _ => self.parse_trait_use_alias_item(name),
+            _ => self.parse_trait_use_alias_item(name),
         }
     }
 

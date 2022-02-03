@@ -188,7 +188,7 @@ pub fn desugar(hint: &aast::Hint, e: Expr, env: &Env<'_>) -> DesugarResult {
         &visitor_name,
         et::MAKE_TREE,
         vec![exprpos(&et_literal_pos), metadata, visitor_lambda],
-        &et_hint_pos.clone(),
+        &et_hint_pos,
     );
 
     let runtime_expr = if splice_assignments.is_empty() && function_pointers.is_empty() {
@@ -300,7 +300,7 @@ impl<'ast> VisitorMut<'ast> for DollarDollarRewriter {
 
 fn rewrite_dollardollars(el: &mut Vec<ast::Expr>) -> Option<Pos> {
     let mut rewriter = DollarDollarRewriter { pos: None };
-    for e in el.into_iter() {
+    for e in el.iter_mut() {
         visit_mut(&mut rewriter, &mut (), e).expect("DollarDollarRewriter never errors");
     }
     rewriter.pos
@@ -343,6 +343,7 @@ impl<'ast> Visitor<'ast> for VoidReturnCheck {
     }
 }
 
+#[allow(clippy::ptr_arg)]
 fn only_void_return(lfun_body: &ast::Block) -> bool {
     let mut checker = VoidReturnCheck {
         only_void_return: true,
@@ -409,7 +410,7 @@ fn vec_literal(items: Vec<Expr>) -> Expr {
 }
 
 fn vec_literal_with_pos(pos: &Pos, items: Vec<Expr>) -> Expr {
-    let fields: Vec<_> = items.into_iter().map(|e| ast::Afield::AFvalue(e)).collect();
+    let fields: Vec<_> = items.into_iter().map(ast::Afield::AFvalue).collect();
     Expr::new(
         (),
         pos.clone(),
@@ -528,7 +529,7 @@ fn merge_positions(positions: &[&Pos]) -> Pos {
             Some(res) => Some(Pos::merge(&res, pos).expect("Positions should be in the same file")),
             None => Some((*pos).clone()),
         })
-        .unwrap_or(Pos::make_none())
+        .unwrap_or_else(Pos::make_none)
 }
 
 fn create_temp_statements(exprs: Vec<Expr>, mk_lvar: fn(&Pos, usize) -> Expr) -> Vec<Stmt> {
@@ -849,7 +850,7 @@ fn rewrite_expr(
                 };
                 let virtual_expr = meth_call(
                     rewritten_lhs.virtual_expr,
-                    &binop_str,
+                    binop_str,
                     vec![rewritten_rhs.virtual_expr],
                     &pos,
                 );
@@ -858,7 +859,7 @@ fn rewrite_expr(
                     vec![
                         pos_expr,
                         rewritten_lhs.desugar_expr,
-                        string_literal(pos.clone(), &binop_str),
+                        string_literal(pos.clone(), binop_str),
                         rewritten_rhs.desugar_expr,
                     ],
                     &pos,
@@ -920,13 +921,13 @@ fn rewrite_expr(
                     "__unsupported"
                 }
             };
-            let virtual_expr = meth_call(rewritten_operand.virtual_expr, &op_str, vec![], &pos);
+            let virtual_expr = meth_call(rewritten_operand.virtual_expr, op_str, vec![], &pos);
             let desugar_expr = v_meth_call(
                 et::VISIT_UNOP,
                 vec![
                     pos_expr,
                     rewritten_operand.desugar_expr,
-                    string_literal(pos.clone(), &op_str),
+                    string_literal(pos.clone(), op_str),
                 ],
                 &pos,
             );
@@ -998,11 +999,7 @@ fn rewrite_expr(
             match &recv.2 {
                 // Don't transform calls to `hh_show`.
                 Id(sid) if is_typechecker_fun_name(&sid.1) => {
-                    let call_e = Expr::new(
-                        (),
-                        pos.clone(),
-                        Call(Box::new((recv, targs, args, variadic))),
-                    );
+                    let call_e = Expr::new((), pos, Call(Box::new((recv, targs, args, variadic))));
                     return RewriteResult {
                         desugar_expr: call_e.clone(),
                         virtual_expr: call_e,
@@ -1380,7 +1377,7 @@ fn rewrite_expr(
             }
 
             let (virtual_children, desugar_children) =
-                rewrite_exprs(temps, children.clone(), visitor_name, errors);
+                rewrite_exprs(temps, children, visitor_name, errors);
 
             // Construct :foo::class.
             let hint_pos = hint.0.clone();
@@ -1394,7 +1391,7 @@ fn rewrite_expr(
                         Expr_::Id(Box::new(ast_defs::Id(hint_pos.clone(), hint.1.clone()))),
                     )),
                 ),
-                (hint_pos.clone(), "class".to_string()),
+                (hint_pos, "class".to_string()),
             )));
 
             let virtual_expr = Expr(
@@ -1793,14 +1790,14 @@ fn maketree_metadata(
         .enumerate()
         .map(|(i, expr)| temp_function_pointer_lvar(&expr.1, i))
         .collect();
-    let functions_vec = vec_literal_with_pos(&pos, function_vars);
+    let functions_vec = vec_literal_with_pos(pos, function_vars);
 
     let static_method_vars = static_methods
         .iter()
         .enumerate()
         .map(|(i, expr)| temp_static_method_lvar(&expr.1, i))
         .collect();
-    let static_method_vec = vec_literal_with_pos(&pos, static_method_vars);
+    let static_method_vec = vec_literal_with_pos(pos, static_method_vars);
 
     shape_literal(
         pos,
@@ -1816,7 +1813,7 @@ fn global_func_ptr(sid: &Sid) -> Expr {
     let pos = sid.0.clone();
     Expr::new(
         (),
-        pos.clone(),
+        pos,
         Expr_::FunctionPointer(Box::new((ast::FunctionPtrId::FPId(sid.clone()), vec![]))),
     )
 }

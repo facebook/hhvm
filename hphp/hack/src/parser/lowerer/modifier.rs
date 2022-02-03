@@ -68,7 +68,7 @@ impl KindSet {
     }
 
     pub fn add(&mut self, kind: Kind) {
-        self.0 = self.0 | kind.0
+        self.0 |= kind.0
     }
 
     pub fn has(&self, kind: Kind) -> bool {

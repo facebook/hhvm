@@ -35,7 +35,7 @@ impl<'a, T, V> Syntax<'a, T, V> {
 
     pub fn get_token(&self) -> Option<&T> {
         match &self.children {
-            SyntaxVariant::Token(t) => Some(&t),
+            SyntaxVariant::Token(t) => Some(t),
             _ => None,
         }
     }

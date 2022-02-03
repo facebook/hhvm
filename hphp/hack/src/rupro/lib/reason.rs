@@ -7,7 +7,11 @@ use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 use pos::{BPos, NPos, Pos};
 use std::hash::Hash;
 
-pub trait Reason: Eq + Hash + Clone + ToOcamlRep + std::fmt::Debug + Send + Sync + 'static {
+use crate::walker::Walker;
+
+pub trait Reason:
+    Eq + Hash + Clone + ToOcamlRep + Walker<Self> + std::fmt::Debug + Send + Sync + 'static
+{
     /// Position type.
     type Pos: Pos + Send + Sync + 'static;
 
@@ -52,6 +56,8 @@ impl Reason for BReason {
     }
 }
 
+impl Walker<BReason> for BReason {}
+
 impl ToOcamlRep for BReason {
     fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
         unimplemented!()
@@ -77,6 +83,8 @@ impl Reason for NReason {
         oxidized::typing_reason::Reason::Rnone
     }
 }
+
+impl Walker<NReason> for NReason {}
 
 impl ToOcamlRep for NReason {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {

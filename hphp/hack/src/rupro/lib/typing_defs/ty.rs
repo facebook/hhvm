@@ -18,12 +18,16 @@ pub struct FunParam<R: Reason> {
     pub ty: Ty<R>,
 }
 
+walker!(FunParam<R> => [ty]);
+
 // TODO: Share the representation from decl_defs
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FunType<R: Reason> {
     pub params: Vec<FunParam<R>>,
     pub ret: Ty<R>,
 }
+
+walker!(FunType<R> => [params, ret]);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ParamMode {
@@ -76,8 +80,18 @@ pub enum Ty_<R: Reason, TY> {
     Tclass(Positioned<Symbol, R::Pos>, Exact, Vec<TY>),
 }
 
+walker!(impl<R: Reason, TY> for Ty_<R, TY> =>  {
+    Ty_::Tprim(_) => [],
+    Ty_::Tfun(fun_type) => [fun_type],
+    Ty_::Tany => [],
+    Ty_::Tgeneric(_, args) => [args],
+    Ty_::Tclass(_, _, args) => [args],
+});
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Ty<R: Reason>(R, Hc<Ty_<R, Ty<R>>>);
+
+walker!(Ty<R> as visit_ty => [0, 1]);
 
 impl<R: Reason> Ty<R> {
     pub fn new(reason: R, ty: Hc<Ty_<R, Ty<R>>>) -> Self {

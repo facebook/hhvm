@@ -50,6 +50,7 @@ struct Hop {
   const Func* to;
 };
 
+typedef ArenaImpl<32768> PathArena;
 /*
  * A Path is a full trace.
  *
@@ -66,11 +67,11 @@ struct Path {
   Path();
 
   // Creates a new path originating here
-  static Path* origin(Arena* arena, Hop hop);
+  static Path* origin(PathArena* arena, Hop hop);
 
   // Creates a path going from this path to the new hop
   // Takes an allocator to help with memory management
-  Path* to(Arena* arena, Hop hop) const;
+  Path* to(PathArena* arena, Hop hop) const;
 
   ~Path() = default;
 
@@ -133,7 +134,7 @@ struct State {
   Heap heap;
 
   // Arena to hold all the paths
-  std::unique_ptr<Arena> arena;
+  std::unique_ptr<PathArena> arena;
   // Contains all the taint flows found in this request
   std::vector<Path*> paths;
 

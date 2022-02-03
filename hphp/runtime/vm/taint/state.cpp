@@ -79,11 +79,8 @@ void destructPath(void* p) {
   path->~Path();
 }
 
-Path* Path::origin(Arena* arena, Hop hop) {
-  Path* path = arena->allocD<Path>([](void* p) {
-    auto path = (Path*)p;
-    path->~Path();
-  });
+Path* Path::origin(PathArena* arena, Hop hop) {
+  Path* path = arena->allocD<Path>(&destructPath);
   if (!path) {
     return path;
   }
@@ -92,11 +89,8 @@ Path* Path::origin(Arena* arena, Hop hop) {
   return path;
 }
 
-Path* Path::to(Arena* arena, Hop hop) const {
-  Path* child = arena->allocD<Path>([](void* p) {
-    auto path = (Path*)p;
-    path->~Path();
-  });
+Path* Path::to(PathArena* arena, Hop hop) const {
+  Path* child = arena->allocD<Path>(&destructPath);
   if (!child) {
     return child;
   }
@@ -221,7 +215,7 @@ InitFiniNode s_stateTeardown(
 
 rds::local::RDSLocal<State, rds::local::Initialize::FirstUse> State::instance;
 
-State::State() : arena(std::make_unique<Arena>()) {}
+State::State() : arena(std::make_unique<PathArena>()) {}
 
 void State::initialize() {
   m_request_start = std::chrono::system_clock::now();
@@ -236,7 +230,7 @@ void State::initialize() {
   stack.clear();
   heap.clear();
   paths.clear();
-  arena = std::make_unique<Arena>();
+  arena = std::make_unique<PathArena>();
   m_sources = Configuration::get()->sources();
   m_sinks = Configuration::get()->sinks();
 }

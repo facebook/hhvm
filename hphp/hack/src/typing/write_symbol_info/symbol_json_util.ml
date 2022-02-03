@@ -23,12 +23,6 @@ let get_next_elem_id () =
 
 let json_element_id = get_next_elem_id ()
 
-let get_context_from_hint ctx h =
-  let mode = FileInfo.Mhhi in
-  let decl_env = { mode; droot = None; ctx } in
-  let tcopt = Provider_context.get_tcopt ctx in
-  Typing_print.full_decl tcopt (Decl_hint.context_hint decl_env h)
-
 let get_type_from_hint ctx h =
   let mode = FileInfo.Mhhi in
   let decl_env = { mode; droot = None; ctx } in

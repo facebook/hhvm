@@ -194,7 +194,6 @@ let add_method_defn_fact ctx source_map meth decl_id progress =
             ctx
             source_map
             meth.m_params
-            meth.m_ctxs
             meth.m_variadic
             meth.m_ret );
         ("visibility", build_visibility_json meth.m_visibility);
@@ -348,7 +347,6 @@ let add_func_defn_fact ctx source_map fd decl_id progress =
           ctx
           source_map
           elem.f_params
-          elem.f_ctxs
           elem.f_variadic
           elem.f_ret );
       ("isAsync", build_is_async_json elem.f_fun_kind);

@@ -72,17 +72,12 @@ let build_type_json_nested type_name =
   let ty = Utils.strip_ns type_name in
   JSON_Object [("key", JSON_String ty)]
 
-let build_signature_json_nested parameters ctxs return_type_name =
+let build_signature_json_nested parameters return_type_name =
   let fields =
     let params = [("parameters", JSON_Array parameters)] in
-    let params_return_type =
-      match return_type_name with
-      | None -> params
-      | Some ty -> ("returns", build_type_json_nested ty) :: params
-    in
-    match ctxs with
-    | None -> params_return_type
-    | Some ctxs_name -> ("contexts", JSON_Array ctxs_name) :: params_return_type
+    match return_type_name with
+    | None -> params
+    | Some ty -> ("returns", build_type_json_nested ty) :: params
   in
   JSON_Object [("key", JSON_Object fields)]
 
@@ -189,13 +184,7 @@ let build_parameter_json
   in
   JSON_Object fields
 
-let build_signature_json
-    ctx source_map params (ctxs_hints : Aast.contexts option) vararg ret_ty =
-  let ctx_hint_to_json ctx_hint =
-    JSON_Object [("key", JSON_String (get_context_from_hint ctx ctx_hint))]
-  in
-  let f (_pos, ctx_hint) = List.map ~f:ctx_hint_to_json ctx_hint in
-  let ctxs_hints = Option.map ctxs_hints ~f in
+let build_signature_json ctx source_map params vararg ret_ty =
   let build_param p =
     let ty =
       match hint_of_type_hint p.param_type_hint with
@@ -236,7 +225,7 @@ let build_signature_json
     | None -> None
     | Some h -> Some (get_type_from_hint ctx h)
   in
-  build_signature_json_nested parameters ctxs_hints return_type_name
+  build_signature_json_nested parameters return_type_name
 
 let build_reify_kind_json kind =
   let num =

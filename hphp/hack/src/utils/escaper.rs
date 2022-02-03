@@ -61,7 +61,7 @@ impl GrowableBytes for bumpalo::collections::Vec<'_, u8> {
 }
 
 fn is_printable(c: u8) -> bool {
-    c >= b' ' && c <= b'~'
+    (b' '..=b'~').contains(&c)
 }
 
 pub fn is_lit_printable(c: u8) -> bool {
@@ -69,11 +69,11 @@ pub fn is_lit_printable(c: u8) -> bool {
 }
 
 fn is_hex(c: u8) -> bool {
-    (c >= b'0' && c <= b'9') || (c >= b'a' && c <= b'f') || (c >= b'A' && c <= b'F')
+    (b'0'..=b'9').contains(&c) || (b'a'..=b'f').contains(&c) || (b'A'..=b'F').contains(&c)
 }
 
 fn is_oct(c: u8) -> bool {
-    c >= b'0' && c <= b'7'
+    (b'0'..=b'7').contains(&c)
 }
 
 /// This escapes a string using the format understood by the assembler
@@ -309,7 +309,7 @@ fn unescape_literal(
                 }
                 b'x' | b'X' => {
                     let hex = s.take_if(is_hex, 2);
-                    if hex.len() == 0 {
+                    if hex.is_empty() {
                         output.push(b'\\');
                         output.push(c);
                     } else {
@@ -472,8 +472,8 @@ pub fn unquote_str(content: &str) -> &str {
 }
 
 fn find(s: &[u8], needle: u8) -> Option<usize> {
-    for i in 0..s.len() {
-        if s[i] == needle {
+    for (i, &c) in s.iter().enumerate() {
+        if c == needle {
             return Some(i);
         }
     }
@@ -604,7 +604,9 @@ mod tests {
     #[test]
     fn escape_char_test() {
         let escape_char_ = |c: u8| -> String {
-            let r = escape_char(c).unwrap_or(vec![c].into()).into_owned();
+            let r = escape_char(c)
+                .unwrap_or_else(|| vec![c].into())
+                .into_owned();
             unsafe { String::from_utf8_unchecked(r) }
         };
 
@@ -615,8 +617,8 @@ mod tests {
         assert_eq!(escape("house"), "house");
         assert_eq!(escape("\n"), "\\n");
         assert_eq!(escape("red\n\t\r$?"), "red\\n\\t\\r$?");
-        assert_eq!(is_oct(b'5'), true);
-        assert_eq!(is_oct(b'a'), false);
+        assert!(is_oct(b'5'));
+        assert!(!is_oct(b'a'));
     }
 
     #[test]

@@ -82,12 +82,11 @@ fn main() {
     let header: &path::PathBuf = &opts.header;
     mk_builder(&opts)
         .generate()
-        .expect(
-            format!(
+        .unwrap_or_else(|_| {
+            panic!(
                 "[ffi_cbindgen] Generation of \"{}\" failed.",
                 header.display()
             )
-            .as_ref(),
-        )
+        })
         .write_to_file(header);
 }

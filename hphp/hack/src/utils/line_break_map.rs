@@ -33,7 +33,7 @@ impl LineBreakMap {
         result.push(0);
         for i in 1..(len + 1) {
             let prev = text[i - 1];
-            if prev == ('\r' as u8) && text[i] != ('\n' as u8) || prev == ('\n' as u8) {
+            if prev == b'\r' && text[i] != b'\n' || prev == b'\n' {
                 result.push(i);
             }
         }
@@ -103,6 +103,7 @@ impl LineBreakMap {
         (index, offset - line_start + 1)
     }
 
+    #[allow(clippy::result_unit_err)]
     pub fn position_to_offset(
         &self,
         existing: bool,
@@ -117,7 +118,7 @@ impl LineBreakMap {
         let file_line = line;
 
         /* Treat all file_line errors the same */
-        if file_line - 1 < 0 || file_line - 1 >= len {
+        if file_line <= 0 || file_line > len {
             Err(())
         } else {
             let line_start = get(self.lines.as_ref(), file_line - 1);

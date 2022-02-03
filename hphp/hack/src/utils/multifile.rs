@@ -31,7 +31,7 @@ pub fn to_files<'p, 't>(
         .captures_iter(content)
         .map(|c| c.get(1).unwrap().as_bytes())
         .collect();
-    if content.starts_with(b"////") && delims.len() > 0 {
+    if content.starts_with(b"////") && !delims.is_empty() {
         let mut contents: Vec<Vec<u8>> = DELIM.split(content).skip(1).map(|c| c.into()).collect();
         if contents.len() + 1 == delims.len() {
             contents.push(vec![]);

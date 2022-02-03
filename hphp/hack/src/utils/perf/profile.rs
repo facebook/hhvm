@@ -117,7 +117,7 @@ mod test {
         let mut cnt = 0;
         let (_, nbr_runs) = profile_longer_than(
             || {
-                cnt = cnt + 1;
+                cnt += 1;
             },
             0.0,
             min_runs,

@@ -18,9 +18,9 @@ impl From<i64> for Int64 {
     }
 }
 
-impl Into<i64> for Int64 {
-    fn into(self) -> i64 {
-        self.0
+impl From<Int64> for i64 {
+    fn from(x: Int64) -> i64 {
+        x.0
     }
 }
 

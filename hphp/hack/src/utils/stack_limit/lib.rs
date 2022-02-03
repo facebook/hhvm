@@ -114,7 +114,7 @@ pub fn init() {
                 }
             }
             if !swallow {
-                original_hook(&panic_info);
+                original_hook(panic_info);
             }
         }));
     });

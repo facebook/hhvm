@@ -146,11 +146,3 @@ pub struct ParseConfig {
     /// -vHack.Lang.AllowUnstableFeatures=1
     pub allow_unstable_features: bool,
 }
-
-impl std::default::Default for ParseConfig {
-    fn default() -> Self {
-        Self {
-            allow_unstable_features: false,
-        }
-    }
-}

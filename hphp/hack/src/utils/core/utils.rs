@@ -60,42 +60,42 @@ mod utils_tests {
     #[test]
     fn add_ns_test() {
         let test_string = "\\MyTestClass";
-        assert_eq!(super::add_ns(&test_string), "\\MyTestClass");
+        assert_eq!(super::add_ns(test_string), "\\MyTestClass");
 
         let test_string2 = "MyTestClass";
-        assert_eq!(super::add_ns(&test_string2), "\\MyTestClass");
+        assert_eq!(super::add_ns(test_string2), "\\MyTestClass");
 
         let test_string3 = "SubNamespace\\MyTestClass";
-        assert_eq!(super::add_ns(&test_string3), "\\SubNamespace\\MyTestClass");
+        assert_eq!(super::add_ns(test_string3), "\\SubNamespace\\MyTestClass");
 
         let test_string4 = "\\SubNamespace\\MyTestClass";
-        assert_eq!(super::add_ns(&test_string4), "\\SubNamespace\\MyTestClass");
+        assert_eq!(super::add_ns(test_string4), "\\SubNamespace\\MyTestClass");
 
         let test_string5 = "";
-        assert_eq!(super::add_ns(&test_string5), "\\");
+        assert_eq!(super::add_ns(test_string5), "\\");
     }
 
     #[test]
     fn strip_ns_test() {
         let test_string = "\\MyTestClass";
-        assert_eq!(super::strip_ns(&test_string), "MyTestClass");
+        assert_eq!(super::strip_ns(test_string), "MyTestClass");
 
         let test_string2 = "MyTestClass";
-        assert_eq!(super::strip_ns(&test_string2), "MyTestClass");
+        assert_eq!(super::strip_ns(test_string2), "MyTestClass");
 
         let test_string3 = "SubNamespace\\MyTestClass";
-        assert_eq!(super::strip_ns(&test_string3), "SubNamespace\\MyTestClass");
+        assert_eq!(super::strip_ns(test_string3), "SubNamespace\\MyTestClass");
 
         let test_string4 = "\\SubNamespace\\MyTestClass";
-        assert_eq!(super::strip_ns(&test_string4), "SubNamespace\\MyTestClass");
+        assert_eq!(super::strip_ns(test_string4), "SubNamespace\\MyTestClass");
 
         let test_string5 = "";
-        assert_eq!(super::strip_ns(&test_string5), "");
+        assert_eq!(super::strip_ns(test_string5), "");
     }
 
     #[test]
     fn split_ns_from_name_test() {
-        let f = |s| super::split_ns_from_name(s);
+        let f = super::split_ns_from_name;
         assert_eq!(f("\\A\\B"), ("\\A\\", "B"));
         assert_eq!(f("\\A\\"), ("\\A\\", ""));
         assert_eq!(f(""), ("\\", ""));

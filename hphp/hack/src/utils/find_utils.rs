@@ -33,7 +33,7 @@ fn is_dot_file_or_dir(path: &Path) -> bool {
 }
 
 pub fn is_hack(path: &Path) -> bool {
-    !(is_dot_file_or_dir(&path))
+    !(is_dot_file_or_dir(path))
         && match path.extension() {
             Some(ext) => EXTENSIONS.iter().any(|x| std::ffi::OsStr::new(x) == ext),
             None => false,
@@ -53,7 +53,7 @@ pub fn is_non_ignored_hack(path: &Path) -> bool {
         ])
         .unwrap();
     }
-    is_hack(&path)
+    is_hack(path)
         && match path.to_str() {
             Some(path_str) => !IGNORE_PHPUNIT_VCS_REGEXSET.is_match(path_str),
             None => false,

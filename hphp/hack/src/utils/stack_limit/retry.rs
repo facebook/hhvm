@@ -11,7 +11,7 @@ use std::fmt;
 /// Determining the current thread size cannot be done portably,
 /// therefore assume the worst (running on non-main thread with min size, 2MiB)
 const DEFAULT_CURRENT_STACK_MAX: usize = 2 * MI;
-const DEFAULT_NONMAIN_STACK_MAX: usize = 1 * GI;
+const DEFAULT_NONMAIN_STACK_MAX: usize = GI;
 
 /// Parameters for executing retryable functions on elastic stack;
 /// optional ones have defaults.

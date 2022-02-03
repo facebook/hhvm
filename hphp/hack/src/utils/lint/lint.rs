@@ -40,11 +40,7 @@ pub struct LintError {
 impl LintError {
     pub fn lowercase_constant(p: Pos, cst: &str) -> Self {
         let lower = cst.to_ascii_lowercase();
-        let message = format!(
-            "Please use `{}` instead of `{}`",
-            lower.to_string(),
-            cst.to_string()
-        );
+        let message = format!("Please use `{}` instead of `{}`", lower, cst.to_string());
         Self {
             code: LintCode::LowercaseConstant as usize,
             severity: Severity::Warning,

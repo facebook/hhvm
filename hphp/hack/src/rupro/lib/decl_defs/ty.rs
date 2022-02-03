@@ -3,14 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::BTreeMap;
-
-use hcons::Hc;
-use oxidized::{aast, ast_defs};
-use pos::{Pos, Positioned, Symbol};
-
 use crate::reason::Reason;
 use crate::utils::core::Ident;
+use hcons::Hc;
+use oxidized::{aast, ast_defs};
+use pos::{Positioned, Symbol, TypeName};
+use std::collections::BTreeMap;
 
 pub use oxidized::{
     aast_defs::Tprim as Prim,
@@ -31,10 +29,12 @@ pub enum XhpEnumValue {
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub enum CeVisibility<P: Pos> {
+pub enum CeVisibility<P> {
     Public,
-    Private(Symbol),
-    Protected(Symbol),
+    Private(TypeName),
+    Protected(TypeName),
+
+    // XXX are module names disjoint from class names?
     Internal(Positioned<Symbol, P>),
 }
 
@@ -56,7 +56,7 @@ pub enum IfcFunDecl {
 pub enum TshapeFieldName {
     TSFlitInt(Symbol),
     TSFlitStr(intern::string::BytesId),
-    TSFclassConst(Symbol, Symbol),
+    TSFclassConst(TypeName, Symbol),
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -65,15 +65,15 @@ pub enum DependentType {
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct UserAttribute<P: Pos> {
-    pub name: Positioned<Symbol, P>,
-    pub classname_params: Vec<Symbol>,
+pub struct UserAttribute<P> {
+    pub name: Positioned<TypeName, P>,
+    pub classname_params: Vec<TypeName>,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Tparam<R: Reason, TY> {
     pub variance: ast_defs::Variance,
-    pub name: Positioned<Symbol, R::Pos>,
+    pub name: Positioned<TypeName, R::Pos>,
     pub tparams: Vec<Tparam<R, TY>>,
     pub constraints: Vec<(ast_defs::ConstraintKind, TY)>,
     pub reified: aast::ReifyKind,
@@ -103,7 +103,7 @@ impl<R: Reason> DeclTy<R> {
         &self.1
     }
 
-    pub fn unwrap_class_type(&self) -> Option<(&R, &Positioned<Symbol, R::Pos>, &[DeclTy<R>])> {
+    pub fn unwrap_class_type(&self) -> Option<(&R, &Positioned<TypeName, R::Pos>, &[DeclTy<R>])> {
         use DeclTy_::*;
         let r = self.reason();
         match &**self.node() {
@@ -114,9 +114,9 @@ impl<R: Reason> DeclTy<R> {
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub enum NegType<P: Pos> {
+pub enum NegType<P> {
     NegPrim(aast::Tprim),
-    NegClass(Positioned<Symbol, P>),
+    NegClass(Positioned<TypeName, P>),
 }
 
 /// A shape may specify whether or not fields are required. For example, consider
@@ -139,7 +139,7 @@ pub enum DeclTy_<R: Reason> {
     /// The late static bound type of a class
     DTthis,
     /// Either an object type or a type alias, ty list are the arguments
-    DTapply(Positioned<Symbol, R::Pos>, Vec<DeclTy<R>>),
+    DTapply(Positioned<TypeName, R::Pos>, Vec<DeclTy<R>>),
     /// "Any" is the type of a variable with a missing annotation, and "mixed" is
     /// the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
     /// Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -199,7 +199,7 @@ pub enum DeclTy_<R: Reason> {
     /// is set up when checking the body of a function or method. See uses of
     /// Typing_phase.add_generic_parameters_and_constraints. The list denotes
     /// type arguments.
-    DTgeneric(Symbol, Vec<DeclTy<R>>),
+    DTgeneric(TypeName, Vec<DeclTy<R>>),
     /// Union type.
     /// The values that are members of this type are the union of the values
     /// that are members of the components of the union.
@@ -291,7 +291,7 @@ pub type FunParams<R, TY> = Vec<FunParam<R, TY>>;
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum ClassConstFrom {
     Self_,
-    From(Symbol),
+    From(TypeName),
 }
 
 /// Class Constant References:

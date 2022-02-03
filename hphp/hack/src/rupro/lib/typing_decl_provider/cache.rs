@@ -10,20 +10,20 @@
 use crate::reason::Reason;
 use crate::typing_decl_provider::Class;
 use dashmap::DashMap;
-use pos::Symbol;
+use pos::TypeName;
 use std::sync::Arc;
 
 pub trait TypingDeclCache: std::fmt::Debug + Send + Sync {
     type Reason: Reason;
 
-    fn get_typing_class(&self, name: Symbol) -> Option<Arc<Class<Self::Reason>>>;
+    fn get_typing_class(&self, name: TypeName) -> Option<Arc<Class<Self::Reason>>>;
 
-    fn put_typing_class(&self, name: Symbol, cls: Arc<Class<Self::Reason>>);
+    fn put_typing_class(&self, name: TypeName, cls: Arc<Class<Self::Reason>>);
 }
 
 #[derive(Debug)]
 pub struct TypingDeclGlobalCache<R: Reason> {
-    classes: DashMap<Symbol, Arc<Class<R>>>,
+    classes: DashMap<TypeName, Arc<Class<R>>>,
 }
 
 impl<R: Reason> TypingDeclGlobalCache<R> {
@@ -37,11 +37,11 @@ impl<R: Reason> TypingDeclGlobalCache<R> {
 impl<R: Reason> TypingDeclCache for TypingDeclGlobalCache<R> {
     type Reason = R;
 
-    fn get_typing_class(&self, name: Symbol) -> Option<Arc<Class<Self::Reason>>> {
+    fn get_typing_class(&self, name: TypeName) -> Option<Arc<Class<Self::Reason>>> {
         self.classes.get(&name).as_ref().map(|x| Arc::clone(x))
     }
 
-    fn put_typing_class(&self, name: Symbol, cls: Arc<Class<Self::Reason>>) {
+    fn put_typing_class(&self, name: TypeName, cls: Arc<Class<Self::Reason>>) {
         self.classes.insert(name, cls);
     }
 }

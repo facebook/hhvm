@@ -5,17 +5,17 @@
 
 use crate::decl_defs::DeclTy;
 use crate::reason::Reason;
-use pos::SymbolMap;
+use pos::TypeNameMap;
 
-pub(crate) struct Subst<R: Reason>(SymbolMap<DeclTy<R>>);
+pub(crate) struct Subst<R: Reason>(TypeNameMap<DeclTy<R>>);
 
-impl<R: Reason> From<SymbolMap<DeclTy<R>>> for Subst<R> {
-    fn from(map: SymbolMap<DeclTy<R>>) -> Self {
+impl<R: Reason> From<TypeNameMap<DeclTy<R>>> for Subst<R> {
+    fn from(map: TypeNameMap<DeclTy<R>>) -> Self {
         Self(map)
     }
 }
 
-impl<R: Reason> From<Subst<R>> for SymbolMap<DeclTy<R>> {
+impl<R: Reason> From<Subst<R>> for TypeNameMap<DeclTy<R>> {
     fn from(subst: Subst<R>) -> Self {
         subst.0
     }

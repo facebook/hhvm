@@ -8,7 +8,7 @@ use crate::decl_defs::ShallowClass;
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclCache;
 use bumpalo::Bump;
-use pos::{RelativePath, RelativePathCtx, Symbol};
+use pos::{RelativePath, RelativePathCtx, TypeName};
 use std::sync::Arc;
 use std::{fs, io};
 
@@ -32,7 +32,7 @@ impl<R: Reason> ShallowDeclProvider<R> {
         }
     }
 
-    pub fn get_shallow_class(&self, name: Symbol) -> Option<Arc<ShallowClass<R>>> {
+    pub fn get_shallow_class(&self, name: TypeName) -> Option<Arc<ShallowClass<R>>> {
         self.cache.get_shallow_class(name)
     }
 

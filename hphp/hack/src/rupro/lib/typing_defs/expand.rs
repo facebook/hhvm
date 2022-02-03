@@ -8,7 +8,7 @@ use crate::reason::{Reason, ReasonImpl};
 use crate::typing_ctx::TypingCtx;
 use crate::typing_defs::{Ty, Ty_};
 use crate::typing_error::ReasonsCallback;
-use pos::{Symbol, SymbolMap};
+use pos::{Symbol, SymbolMap, TypeName};
 
 pub type TypeExpansion<R> = (<R as Reason>::Pos, Symbol);
 
@@ -50,7 +50,7 @@ impl<'a, R: Reason> ExpandEnv<'a, R> {
             substs: Default::default(),
             this_ty: ctx.alloc.ty(
                 R::mk(|| ReasonImpl::Rnone),
-                Ty_::Tgeneric(ctx.special_names.special_idents.this, vec![]),
+                Ty_::Tgeneric(TypeName(ctx.special_names.special_idents.this), vec![]),
             ),
             on_error: ReasonsCallback::new(&|| ReasonsCallback::ignore()),
         }

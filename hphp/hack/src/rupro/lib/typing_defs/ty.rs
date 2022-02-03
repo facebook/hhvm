@@ -6,7 +6,7 @@
 use crate::reason::Reason;
 use hcons::Hc;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
-use pos::{Positioned, Symbol};
+use pos::{Positioned, Symbol, TypeName};
 
 pub type Prim = crate::decl_defs::Prim;
 
@@ -63,21 +63,25 @@ impl Exact {
 pub enum Ty_<R: Reason, TY> {
     /// A primitive type
     Tprim(Prim),
+
     /// A wrapper around `FunType`, which contains the full type information
     /// for a function, method, lambda, etc.
     Tfun(FunType<R>),
+
     /// Any type
     Tany,
+
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which
     /// is set up when checking the body of a function or method. See uses of
     /// Typing_phase.add_generic_parameters_and_constraints. The list denotes
     /// type arguments.
-    Tgeneric(Symbol, Vec<TY>),
+    Tgeneric(TypeName, Vec<TY>),
+
     /// An instance of a class or interface, ty list are the arguments
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
-    Tclass(Positioned<Symbol, R::Pos>, Exact, Vec<TY>),
+    Tclass(Positioned<TypeName, R::Pos>, Exact, Vec<TY>),
 }
 
 walker!(impl<R: Reason, TY> for Ty_<R, TY> =>  {

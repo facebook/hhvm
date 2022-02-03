@@ -10,7 +10,7 @@ use crate::folded_decl_provider::FoldedDeclCache;
 use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclProvider;
-use pos::{Positioned, Symbol, SymbolMap, SymbolSet};
+use pos::{Positioned, Symbol, SymbolMap, TypeName, TypeNameMap, TypeNameSet};
 use std::sync::Arc;
 
 #[derive(Debug)]
@@ -30,12 +30,12 @@ impl<R: Reason> FoldedDeclProvider<R> {
         }
     }
 
-    pub fn get_folded_class(&self, name: Symbol) -> Option<Arc<FoldedClass<R>>> {
+    pub fn get_folded_class(&self, name: TypeName) -> Option<Arc<FoldedClass<R>>> {
         let mut stack = Default::default();
         self.get_folded_class_impl(&mut stack, name)
     }
 
-    fn detect_cycle(&self, stack: &mut SymbolSet, pos_id: &Positioned<Symbol, R::Pos>) -> bool {
+    fn detect_cycle(&self, stack: &mut TypeNameSet, pos_id: &Positioned<TypeName, R::Pos>) -> bool {
         if stack.contains(&pos_id.id()) {
             todo!("TODO(hrust): register error");
         }
@@ -44,7 +44,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn visibility(
         &self,
-        cls: Symbol,
+        cls: TypeName,
         module: Option<&Positioned<Symbol, R::Pos>>,
         vis: oxidized::ast_defs::Visibility,
     ) -> CeVisibility<R::Pos> {
@@ -70,11 +70,11 @@ impl<R: Reason> FoldedDeclProvider<R> {
         let vis = match (methods.get(&meth), sm.visibility) {
             (
                 Some(FoldedElement {
-                    visibility: CeVisibility::Protected(s),
+                    visibility: CeVisibility::Protected(cls),
                     ..
                 }),
                 oxidized::ast_defs::Visibility::Protected,
-            ) => CeVisibility::Protected(*s),
+            ) => CeVisibility::Protected(*cls),
             (_, v) => self.visibility(cls, sc.module.as_ref(), v),
         };
 
@@ -94,7 +94,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             needs_init: false,
         };
         let elt = FoldedElement {
-            origin: sc.name.id(),
+            origin: cls,
             visibility: vis,
             deprecated: sm.deprecated,
             flags: oxidized_by_ref::typing_defs::ClassEltFlags::new(flag_args),
@@ -105,8 +105,8 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn decl_class_type(
         &self,
-        stack: &mut SymbolSet,
-        acc: &mut SymbolMap<Arc<FoldedClass<R>>>,
+        stack: &mut TypeNameSet,
+        acc: &mut TypeNameMap<Arc<FoldedClass<R>>>,
         ty: &DeclTy<R>,
     ) {
         match &**ty.node() {
@@ -123,9 +123,9 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn decl_class_parents(
         &self,
-        stack: &mut SymbolSet,
+        stack: &mut TypeNameSet,
         sc: &ShallowClass<R>,
-    ) -> SymbolMap<Arc<FoldedClass<R>>> {
+    ) -> TypeNameMap<Arc<FoldedClass<R>>> {
         let mut acc = Default::default();
         sc.extends
             .iter()
@@ -135,9 +135,9 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn get_implements(
         &self,
-        parents: &SymbolMap<Arc<FoldedClass<R>>>,
+        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
         ty: &DeclTy<R>,
-        inst: &mut SymbolMap<DeclTy<R>>,
+        inst: &mut TypeNameMap<DeclTy<R>>,
     ) {
         match ty.unwrap_class_type() {
             None => {}
@@ -159,7 +159,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
     fn decl_class_impl(
         &self,
         sc: &ShallowClass<R>,
-        parents: &SymbolMap<Arc<FoldedClass<R>>>,
+        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) -> Arc<FoldedClass<R>> {
         let inh = Inherited::make(sc, parents);
 
@@ -188,7 +188,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
         })
     }
 
-    fn decl_class(&self, stack: &mut SymbolSet, name: Symbol) -> Option<Arc<FoldedClass<R>>> {
+    fn decl_class(&self, stack: &mut TypeNameSet, name: TypeName) -> Option<Arc<FoldedClass<R>>> {
         let shallow_class = self.shallow_decl_provider.get_shallow_class(name)?;
         stack.insert(name);
         let parents = self.decl_class_parents(stack, &shallow_class);
@@ -197,8 +197,8 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn get_folded_class_impl(
         &self,
-        stack: &mut SymbolSet,
-        name: Symbol,
+        stack: &mut TypeNameSet,
+        name: TypeName,
     ) -> Option<Arc<FoldedClass<R>>> {
         match self.cache.get_folded_class(name) {
             Some(rc) => Some(rc),

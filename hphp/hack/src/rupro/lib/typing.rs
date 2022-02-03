@@ -78,6 +78,7 @@ impl Typing {
         oxidized::aast::Stmt(pos.clone(), st)
     }
 
+    #[allow(clippy::ptr_arg)]
     fn block<R: Reason>(env: &TEnv<R>, block: &oxidized::aast::Block<(), ()>) -> tast::Block<R> {
         let mut stl = Vec::new();
         for st in block {

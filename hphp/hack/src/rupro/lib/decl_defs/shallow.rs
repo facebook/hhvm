@@ -3,30 +3,33 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::BTreeMap;
-
-use pos::{Positioned, Symbol};
-
 use crate::decl_defs::ty::*;
 use crate::reason::Reason;
-
-pub use oxidized::ast_defs::Visibility;
-pub use oxidized_by_ref::{method_flags::MethodFlags, prop_flags::PropFlags};
+use pos::{Positioned, Symbol, TypeName};
+use std::collections::BTreeMap;
 
 pub use crate::decl_defs::ty::ConstDecl;
+pub use oxidized::ast_defs::Visibility;
+pub use oxidized_by_ref::{method_flags::MethodFlags, prop_flags::PropFlags};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ShallowClassConst<R: Reason> {
     pub is_abstract: ClassConstKind,
     pub name: Positioned<Symbol, R::Pos>,
+
     /// This field is used for two different meanings in two different places...
-    /// enum class A:arraykey {int X="a";} -- here X.scc_type=\HH\MemberOf<A,int>
-    /// enum B:int as arraykey {X="a"; Y=1; Z=B::X;} -- here X.scc_type=string, Y.scc_type=int, Z.scc_type=TAny
-    /// In the later case, the scc_type is just a simple syntactic attempt to retrieve the type from the initializer.
+    /// enum class A:arraykey {int X="a";} --
+    ///   here X.scc_type=\HH\MemberOf<A,int>
+    /// enum B:int as arraykey {X="a"; Y=1; Z=B::X;} --
+    ///   here X.scc_type=string, Y.scc_type=int, Z.scc_type=TAny
+    /// In the later case, the scc_type is just a simple syntactic attempt to retrieve
+    /// the type from the initializer.
     pub ty: DeclTy<R>,
-    /// This is a list of all scope-resolution operators "A::B" that are mentioned in the const initializer,
-    /// for members of regular-enums and enum-class-enums to detect circularity of initializers.
-    /// We don't yet have a similar mechanism for top-level const initializers.
+
+    /// This is a list of all scope-resolution operators "A::B" that are mentioned
+    /// in the const initializer, for members of regular-enums and enum-class-enums
+    /// to detect circularity of initializers. We don't yet have a similar mechanism
+    /// for top-level const initializers.
     pub refs: Vec<ClassConstRef>,
 }
 
@@ -75,7 +78,7 @@ pub struct ShallowClass<R: Reason> {
     pub has_xhp_keyword: bool,
     pub kind: oxidized::ast_defs::ClassishKind,
     pub module: Option<Positioned<Symbol, R::Pos>>,
-    pub name: Positioned<Symbol, R::Pos>,
+    pub name: Positioned<TypeName, R::Pos>,
     pub tparams: Vec<Tparam<R, DeclTy<R>>>,
     pub where_constraints: Vec<WhereConstraint<DeclTy<R>>>,
     pub extends: Vec<DeclTy<R>>,

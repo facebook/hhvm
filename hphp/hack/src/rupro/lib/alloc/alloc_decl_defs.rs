@@ -3,12 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized_by_ref as obr;
-
+use super::Allocator;
 use crate::decl_defs::{self, shallow, ty, DeclTy, DeclTy_, FunParam, FunType, UserAttribute};
 use crate::reason::Reason;
-
-use super::Allocator;
+use oxidized_by_ref as obr;
+use pos::TypeName;
 
 impl<R: Reason> Allocator<R> {
     #[inline]
@@ -43,9 +42,10 @@ impl<R: Reason> Allocator<R> {
         match x {
             Obr::TSFlitInt(&pos_id) => TshapeFieldName::TSFlitInt(self.symbol(pos_id.1)),
             Obr::TSFlitStr(&pos_bytes) => TshapeFieldName::TSFlitStr(self.bytes(pos_bytes.1)),
-            Obr::TSFclassConst(&(pos_id1, pos_id2)) => {
-                TshapeFieldName::TSFclassConst(self.symbol(pos_id1.1), self.symbol(pos_id2.1))
-            }
+            Obr::TSFclassConst(&(pos_id1, pos_id2)) => TshapeFieldName::TSFclassConst(
+                TypeName(self.symbol(pos_id1.1)),
+                self.symbol(pos_id2.1),
+            ),
         }
     }
 
@@ -54,11 +54,11 @@ impl<R: Reason> Allocator<R> {
         attr: &obr::typing_defs::UserAttribute<'_>,
     ) -> UserAttribute<R::Pos> {
         UserAttribute {
-            name: self.pos_id_from_decl(attr.name),
+            name: self.pos_classname_from_decl(attr.name),
             classname_params: attr
                 .classname_params
                 .iter()
-                .map(|param| self.symbol(param))
+                .map(|param| TypeName(self.symbol(param)))
                 .collect(),
         }
     }
@@ -66,7 +66,7 @@ impl<R: Reason> Allocator<R> {
     fn decl_tparam(&self, tparam: &obr::typing_defs::Tparam<'_>) -> ty::Tparam<R, DeclTy<R>> {
         ty::Tparam {
             variance: tparam.variance,
-            name: self.pos_id_from_decl(tparam.name),
+            name: self.pos_classname_from_decl(tparam.name),
             tparams: self.vec(tparam.tparams, Self::decl_tparam),
             constraints: self.vec(tparam.constraints, |alloc, (kind, ty)| {
                 (kind, alloc.ty_from_decl(ty))
@@ -105,7 +105,7 @@ impl<R: Reason> Allocator<R> {
         let ty_ = match ty.1 {
             Tthis => DTthis,
             Tapply(&(pos_id, tys)) => DTapply(
-                self.pos_id_from_decl(pos_id),
+                self.pos_classname_from_decl(pos_id),
                 self.vec(tys, Self::ty_from_decl),
             ),
             Tmixed => DTmixed,
@@ -131,9 +131,10 @@ impl<R: Reason> Allocator<R> {
                     .collect(),
             ),
             Tvar(ident) => DTvar(ident.into()),
-            Tgeneric(&(pos_id, tys)) => {
-                DTgeneric(self.symbol(pos_id), self.vec(tys, Self::ty_from_decl))
-            }
+            Tgeneric(&(pos_id, tys)) => DTgeneric(
+                TypeName(self.symbol(pos_id)),
+                self.vec(tys, Self::ty_from_decl),
+            ),
             Tunion(tys) => DTunion(self.vec(tys, Self::ty_from_decl)),
             Tintersection(tys) => DTintersection(self.vec(tys, Self::ty_from_decl)),
             TvecOrDict((ty1, ty2)) => DTvecOrDict(self.ty_from_decl(ty1), self.ty_from_decl(ty2)),
@@ -222,7 +223,7 @@ impl<R: Reason> Allocator<R> {
         use ty::ClassConstFrom;
         match x {
             Obr::Self_ => ClassConstFrom::Self_,
-            Obr::From(s) => ClassConstFrom::From(self.symbol(s)),
+            Obr::From(s) => ClassConstFrom::From(TypeName(self.symbol(s))),
         }
     }
 
@@ -331,7 +332,7 @@ impl<R: Reason> Allocator<R> {
             has_xhp_keyword: sc.has_xhp_keyword,
             kind: sc.kind,
             module: sc.module.as_ref().map(|id| self.pos_id_from_ast_ref(id)),
-            name: self.pos_id_from_decl(sc.name),
+            name: self.pos_classname_from_decl(sc.name),
             tparams: self.vec(sc.tparams, Self::decl_tparam),
             where_constraints: self.vec(sc.where_constraints, Self::decl_where_constraint),
             extends: self.vec(sc.extends, Self::ty_from_decl),

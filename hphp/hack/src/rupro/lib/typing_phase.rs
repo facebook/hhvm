@@ -11,7 +11,7 @@ use crate::typing_defs::{
 };
 use crate::typing_env::TEnv;
 use crate::typing_error::ReasonsCallback;
-use pos::{Positioned, Symbol};
+use pos::{Positioned, TypeName};
 
 pub struct Phase;
 
@@ -53,7 +53,7 @@ impl Phase {
         env: &TEnv<R>,
         ety_env: &mut ExpandEnv<'_, R>,
         r: R,
-        sid: Positioned<Symbol, R::Pos>,
+        sid: Positioned<TypeName, R::Pos>,
         ty_args: &[DeclTy<R>],
         class_info: Option<&Class<R>>,
     ) -> Ty<R> {

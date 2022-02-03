@@ -6,15 +6,15 @@
 use crate::decl_defs::{ShallowClass, ShallowFun};
 use crate::reason::Reason;
 use dashmap::DashMap;
-use pos::{BuildSymbolHasher, Symbol};
+use pos::{BuildSymbolHasher, BuildTypeNameHasher, Symbol, TypeName};
 use std::sync::Arc;
 
 pub trait ShallowDeclCache: std::fmt::Debug + Send + Sync {
     type Reason: Reason;
 
-    fn get_shallow_class(&self, name: Symbol) -> Option<Arc<ShallowClass<Self::Reason>>>;
+    fn get_shallow_class(&self, name: TypeName) -> Option<Arc<ShallowClass<Self::Reason>>>;
 
-    fn put_shallow_class(&self, name: Symbol, cls: Arc<ShallowClass<Self::Reason>>);
+    fn put_shallow_class(&self, name: TypeName, cls: Arc<ShallowClass<Self::Reason>>);
 
     fn get_shallow_fun(&self, name: Symbol) -> Option<Arc<ShallowFun<Self::Reason>>>;
 
@@ -23,7 +23,7 @@ pub trait ShallowDeclCache: std::fmt::Debug + Send + Sync {
 
 #[derive(Debug)]
 pub struct ShallowDeclGlobalCache<R: Reason> {
-    classes: DashMap<Symbol, Arc<ShallowClass<R>>, BuildSymbolHasher>,
+    classes: DashMap<TypeName, Arc<ShallowClass<R>>, BuildTypeNameHasher>,
     funs: DashMap<Symbol, Arc<ShallowFun<R>>, BuildSymbolHasher>,
 }
 
@@ -39,11 +39,11 @@ impl<R: Reason> ShallowDeclGlobalCache<R> {
 impl<R: Reason> ShallowDeclCache for ShallowDeclGlobalCache<R> {
     type Reason = R;
 
-    fn get_shallow_class(&self, name: Symbol) -> Option<Arc<ShallowClass<Self::Reason>>> {
+    fn get_shallow_class(&self, name: TypeName) -> Option<Arc<ShallowClass<Self::Reason>>> {
         self.classes.get(&name).as_ref().map(|x| Arc::clone(x))
     }
 
-    fn put_shallow_class(&self, name: Symbol, cls: Arc<ShallowClass<Self::Reason>>) {
+    fn put_shallow_class(&self, name: TypeName, cls: Arc<ShallowClass<Self::Reason>>) {
         self.classes.insert(name, cls);
     }
 

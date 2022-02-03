@@ -102,7 +102,7 @@ std::string gray(const std::string& string) {
   return folly::sformat("{}{}{}", ANSI_COLOR_GRAY, string, ANSI_COLOR_END);
 }
 
-void iopPreamble(const std::string& name) {
+void iopPreamble(folly::StringPiece name) {
   auto vm_stack_size = vmStack().count();
 
   FTRACE(1, "taint: {}\n", gray(folly::sformat("iop{}", name)));
@@ -126,12 +126,12 @@ void iopPreamble(const std::string& name) {
   }
 }
 
-void iopConstant(const std::string& name) {
+void iopConstant(folly::StringPiece name) {
   iopPreamble(name);
   State::instance->stack.push(nullptr);
 }
 
-void iopUnhandled(const std::string& name) {
+void iopUnhandled(folly::StringPiece name) {
   iopPreamble(name);
   FTRACE(1, "taint: (WARNING) unhandled opcode\n");
 }

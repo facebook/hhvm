@@ -168,9 +168,6 @@ struct TypeDecl {
   bool operator==(const TypeDecl& o) const {
     return m_name == o.m_name && m_path == o.m_path;
   }
-
-  std::vector<Symbol<SymKind::Type>>
-  getAttributesFromDB(AutoloadDB& db, SQLiteTxn& txn) const;
 };
 
 struct MethodDecl {
@@ -180,9 +177,6 @@ struct MethodDecl {
   bool operator==(const MethodDecl& o) const {
     return m_type == o.m_type && m_method == o.m_method;
   }
-
-  std::vector<Symbol<SymKind::Type>>
-  getAttributesFromDB(AutoloadDB& db, SQLiteTxn& txn) const;
 };
 
 } // namespace Facts

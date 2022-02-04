@@ -363,7 +363,7 @@ impl<R: Reason> Allocator<R> {
         shallow::ShallowFun {
             pos: self.pos_from_decl(sf.pos),
             ty: self.ty_from_decl(sf.type_),
-            deprecated: sf.deprecated.map(|s| self.symbol(s)),
+            deprecated: sf.deprecated.map(|s| self.bytes(s)),
             module: sf.module.map(|pos_id| self.pos_id_from_ast_ref(&pos_id)),
             internal: sf.internal,
             php_std_lib: sf.php_std_lib,

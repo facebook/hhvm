@@ -1842,81 +1842,6 @@ end
 
 (* GenerateRustFlattenSmartConstructors *)
 
-module GenerateRustFactsSmartConstructors = struct
-  let to_constructor_methods x =
-    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i) in
-    let args = String.concat ~sep:", " args in
-    let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
-    let fwd_args = String.concat ~sep:", " fwd_args in
-    sprintf
-      "    fn make_%s(&mut self, %s) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_%s(self, %s)
-    }\n\n"
-      x.type_name
-      args
-      x.type_name
-      fwd_args
-
-  let facts_smart_constructors_template : string =
-    make_header CStyle ""
-    ^ "
-use flatten_smart_constructors::*;
-use smart_constructors::SmartConstructors;
-use parser_core_types::positioned_token::PositionedToken;
-use parser_core_types::token_factory::SimpleTokenFactoryImpl;
-
-use crate::*;
-
-#[derive(Clone)]
-pub struct FactsSmartConstructors<'src> {
-    pub state: HasScriptContent<'src>,
-    pub token_factory: SimpleTokenFactoryImpl<PositionedToken>,
-}
-impl<'src> SmartConstructors for FactsSmartConstructors<'src> {
-    type State = HasScriptContent<'src>;
-    type TF = SimpleTokenFactoryImpl<PositionedToken>;
-    type R = Node;
-
-    fn state_mut(&mut self) -> &mut HasScriptContent<'src> {
-        &mut self.state
-    }
-
-    fn into_state(self) -> HasScriptContent<'src> {
-      self.state
-    }
-
-    fn token_factory_mut(&mut self) -> &mut Self::TF {
-        &mut self.token_factory
-    }
-
-    fn make_missing(&mut self, offset: usize) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_missing(self, offset)
-    }
-
-    fn make_token(&mut self, token: PositionedToken) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_token(self, token)
-    }
-
-    fn make_list(&mut self, items: Vec<Self::R>, offset: usize) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, HasScriptContent<'src>>>::make_list(self, items, offset)
-    }
-
-CONSTRUCTOR_METHODS}
-"
-
-  let facts_smart_constructors =
-    Full_fidelity_schema.make_template_file
-      ~transformations:
-        [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
-      ~filename:
-        (full_fidelity_path_prefix
-        ^ "../facts/facts_smart_constructors_generated.rs")
-      ~template:facts_smart_constructors_template
-      ()
-end
-
-(* GenerateRustFactsSmartConstructors *)
-
 module GenerateRustDirectDeclSmartConstructors = struct
   let to_constructor_methods x =
     let args =
@@ -3338,7 +3263,6 @@ let templates =
     .full_fidelity_syntax_smart_constructors;
     GenerateFFRustDeclModeSmartConstructors.decl_mode_smart_constructors;
     GenerateRustFlattenSmartConstructors.flatten_smart_constructors;
-    GenerateRustFactsSmartConstructors.facts_smart_constructors;
     GenerateRustDirectDeclSmartConstructors.direct_decl_smart_constructors;
     GenerateRustPairSmartConstructors.pair_smart_constructors;
     GenerateFFSmartConstructorsWrappers

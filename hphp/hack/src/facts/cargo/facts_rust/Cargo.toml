@@ -9,16 +9,11 @@ path = "../../lib.rs"
 
 [dependencies]
 digest = "0.8"
-facts_parser = { path = "../../../parser/api/cargo/facts_parser" }
-facts_smart_constructors = { path = "../facts_smart_constructors" }
 hex = "0.4.3"
 hhbc_string_utils = { path = "../../../hackc/utils/cargo/hhbc_string_utils" }
 md-5 = "0.8"
 naming_special_names_rust = { path = "../../../naming" }
-ocamlrep = { path = "../../../ocamlrep" }
-oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
-parser_core_types = { path = "../../../parser/cargo/core_types" }
 serde = { version = "1.0.126", features = ["derive", "rc"] }
 serde_derive = "1.0"
 serde_json = { version = "1.0.64", features = ["float_roundtrip", "unbounded_depth"] }

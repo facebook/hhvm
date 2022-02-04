@@ -14,7 +14,7 @@ use bincode::Options;
 use compile::EnvFlags;
 use cxx::CxxString;
 use external_decl_provider::{ExternalDeclProvider, ExternalDeclProviderResult};
-use facts_rust::{facts, facts_parser};
+use facts_rust::facts;
 use libc::{c_char, c_int};
 use no_pos_hash::position_insensitive_hash;
 use oxidized::file_info::NameType;
@@ -159,18 +159,6 @@ pub mod compile_ffi {
             env: &NativeEnv,
             prog: &HhasProgramWrapper,
         ) -> Result<Vec<u8>>;
-
-        fn hackc_extract_facts_as_json_cpp_ffi(
-            flags: i32,
-            filename: &CxxString,
-            source_text: &CxxString,
-        ) -> String;
-
-        fn hackc_extract_facts_cpp_ffi(
-            flags: i32,
-            filename: &CxxString,
-            source_text: &CxxString,
-        ) -> FactsResult;
 
         fn hackc_facts_to_json_cpp_ffi(facts: FactsResult, source_text: &CxxString) -> String;
 
@@ -522,66 +510,6 @@ pub fn hackc_hhas_to_string_cpp_ffi(
     compile::hhas_to_string(&env, Some(&native_env), &mut output, &prog.0)
         .map(|_| output)
         .map_err(|e| e.to_string())
-}
-
-pub fn hackc_extract_facts_as_json_cpp_ffi(
-    flags: i32,
-    filename: &CxxString,
-    source_text: &CxxString,
-) -> String {
-    use std::os::unix::ffi::OsStrExt;
-    let filepath = RelativePath::make(
-        oxidized::relative_path::Prefix::Dummy,
-        std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes())),
-    );
-    let opts = facts_parser::FactsOpts {
-        php5_compat_mode: ((1 << 0) & flags) != 0,
-        hhvm_compat_mode: ((1 << 1) & flags) != 0,
-        allow_new_attribute_syntax: ((1 << 2) & flags) != 0,
-        enable_xhp_class_modifier: ((1 << 3) & flags) != 0,
-        disable_xhp_element_mangling: ((1 << 4) & flags) != 0,
-        filename: filepath,
-    };
-    match facts_parser::extract_as_json(source_text.as_bytes(), opts) {
-        Some(s) => s,
-        None => String::new(),
-    }
-}
-
-pub fn hackc_extract_facts_cpp_ffi(
-    flags: i32,
-    filename: &CxxString,
-    source_text: &CxxString,
-) -> compile_ffi::FactsResult {
-    use std::os::unix::ffi::OsStrExt;
-    let filepath = RelativePath::make(
-        oxidized::relative_path::Prefix::Dummy,
-        std::path::PathBuf::from(std::ffi::OsStr::from_bytes(filename.as_bytes())),
-    );
-    let opts = facts_parser::FactsOpts {
-        php5_compat_mode: ((1 << 0) & flags) != 0,
-        hhvm_compat_mode: ((1 << 1) & flags) != 0,
-        allow_new_attribute_syntax: ((1 << 2) & flags) != 0,
-        enable_xhp_class_modifier: ((1 << 3) & flags) != 0,
-        disable_xhp_element_mangling: ((1 << 4) & flags) != 0,
-        filename: filepath,
-    };
-    let text = source_text.as_bytes();
-    match facts_parser::from_text(text, opts) {
-        (Some(facts), has_errors) => {
-            let (md5sum, sha1sum) = facts::md5_and_sha1(text);
-            compile_ffi::FactsResult {
-                facts: facts.into(),
-                md5sum,
-                sha1sum,
-                has_errors,
-            }
-        }
-        (None, has_errors) => compile_ffi::FactsResult {
-            has_errors,
-            ..Default::default()
-        },
-    }
 }
 
 pub fn hackc_facts_to_json_cpp_ffi(

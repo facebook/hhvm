@@ -15,7 +15,6 @@ bumpalo = { version = "3.8", features = ["collections"] }
 criterion = "=0.3.1"
 cst_and_decl_parser = { path = "../../api/cargo/cst_and_decl_parser" }
 direct_decl_parser = { path = "../../api/cargo/direct_decl_parser" }
-facts_parser = { path = "../../api/cargo/facts_parser" }
 ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }

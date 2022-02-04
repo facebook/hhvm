@@ -14,9 +14,7 @@ use structopt::StructOpt;
 use aast_parser::rust_aast_parser_types::Env as AastParserEnv;
 use ocamlrep::rc::RcOc;
 use oxidized::relative_path::{Prefix, RelativePath};
-use parser_core_types::{
-    indexed_source_text::IndexedSourceText, parser_env::ParserEnv, source_text::SourceText,
-};
+use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
 
 #[derive(Debug, StructOpt)]
 #[structopt(no_version)] // don't consult CARGO_PKG_VERSION (buck doesn't set it)
@@ -55,7 +53,6 @@ fn main() {
         bench_direct_decl_parse(&mut criterion, &files);
         bench_cst_and_decl_parse(&mut criterion, &files);
         bench_ast_and_decl_parse(&mut criterion, &files);
-        bench_facts_parse(&mut criterion, &files);
     }
 
     criterion.final_summary();
@@ -72,17 +69,6 @@ fn get_contents(filenames: &[PathBuf]) -> Vec<(RcOc<RelativePath>, String)> {
             )
         })
         .collect()
-}
-
-fn bench_facts_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
-    c.bench_function("facts_parse", |b| {
-        b.iter(|| {
-            for (filename, text) in files {
-                let text = SourceText::make(RcOc::clone(filename), text);
-                facts_parser::parse_script(&text, ParserEnv::default(), None);
-            }
-        })
-    });
 }
 
 fn bench_direct_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {

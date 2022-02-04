@@ -77,10 +77,16 @@ let parse_options () =
     | NoMode -> mode := x
     | _ -> raise (Arg.Bad "only a single mode should be specified")
   in
+  let set name reference value =
+    match !reference with
+    | None -> reference := Some value
+    | Some _ -> failwith (Printf.sprintf "Attempted to set %s twice" name)
+  in
   let check_xhp_attribute = ref false in
   let disable_xhp_element_mangling = ref false in
   let disable_xhp_children_declarations = ref false in
   let enable_xhp_class_modifier = ref false in
+  let saved_state_manifold_api_key = ref None in
   let options =
     [
       ( "--extra-builtin",
@@ -114,6 +120,9 @@ let parse_options () =
         Arg.Unit (set_mode Ffp_autocomplete),
         " Produce autocomplete suggestions using the full-fidelity parse tree"
       );
+      ( "--manifold-api-key",
+        Arg.String (set "manifold api key" saved_state_manifold_api_key),
+        " API key used to download a saved state from Manifold (optional)" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -132,6 +141,7 @@ let parse_options () =
       ~po_disable_xhp_element_mangling:!disable_xhp_element_mangling
       ~po_disable_xhp_children_declarations:!disable_xhp_children_declarations
       ~po_enable_xhp_class_modifier:!enable_xhp_class_modifier
+      ~tco_saved_state_manifold_api_key:!saved_state_manifold_api_key
       ()
   in
   (* Configure symbol index settings *)
@@ -146,7 +156,7 @@ let parse_options () =
       ~ignore_hh_version:false
       ~savedstate_file_opt:None
       ~workers:None
-      ~saved_state_manifold_api_key:None
+      ~saved_state_manifold_api_key:!saved_state_manifold_api_key
   in
   let sienv =
     {

@@ -19,7 +19,7 @@ pub trait Reason:
 
     /// Make a new instance. If the implementing Reason is stateful,
     /// it will call cons() to obtain the ReasonImpl to construct the instance.
-    fn mk(cons: impl FnOnce() -> ReasonImpl<Self::Pos>) -> Self;
+    fn mk(cons: impl FnOnce() -> ReasonImpl<Self, Self::Pos>) -> Self;
 
     fn pos(&self) -> &Self::Pos;
 
@@ -40,13 +40,13 @@ pub enum ExprDepTypeReason {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum ReasonImpl<P> {
+pub enum ReasonImpl<R, P> {
     Rnone,
     Rwitness(P),
     RwitnessFromDecl(P),
     /// Used as an index into a vector-like array or string.
     /// Position of indexing, reason for the indexed type
-    Ridx(P, BReason),
+    Ridx(P, R),
     RidxVector(P),
     /// Used as an index, in the Vector case
     RidxVectorFromDecl(P),
@@ -57,9 +57,9 @@ pub enum ReasonImpl<P> {
     Rarith(P),
     RarithRet(P),
     /// pos, arg float typing reason, arg position
-    RarithRetFloat(P, BReason, oxidized::typing_reason::ArgPosition),
+    RarithRetFloat(P, R, oxidized::typing_reason::ArgPosition),
     /// pos, arg num typing reason, arg position
-    RarithRetNum(P, BReason, oxidized::typing_reason::ArgPosition),
+    RarithRetNum(P, R, oxidized::typing_reason::ArgPosition),
     RarithRetInt(P),
     RarithDynamic(P),
     RbitwiseDynamic(P),
@@ -81,8 +81,8 @@ pub enum ReasonImpl<P> {
     RyieldAsyncgen(P),
     RyieldAsyncnull(P),
     RyieldSend(P),
-    RlostInfo(Symbol, BReason, Blame<P>),
-    Rformat(P, Symbol, BReason),
+    RlostInfo(Symbol, R, Blame<P>),
+    Rformat(P, Symbol, R),
     RclassClass(P, Symbol),
     RunknownClass(P),
     RvarParam(P),
@@ -90,10 +90,10 @@ pub enum ReasonImpl<P> {
     /// splat pos, fun def pos, number of args before splat
     RunpackParam(P, P, isize),
     RinoutParam(P),
-    Rinstantiate(BReason, Symbol, BReason),
-    Rtypeconst(BReason, Positioned<Symbol, P>, Symbol, BReason),
-    RtypeAccess(BReason, Vec<(BReason, Symbol)>),
-    RexprDepType(BReason, P, ExprDepTypeReason),
+    Rinstantiate(R, Symbol, R),
+    Rtypeconst(R, Positioned<Symbol, P>, Symbol, R),
+    RtypeAccess(R, Vec<(R, Symbol)>),
+    RexprDepType(R, P, ExprDepTypeReason),
     /// ?-> operator is used
     RnullsafeOp(P),
     RtconstNoCstr(Positioned<Symbol, P>),
@@ -110,8 +110,8 @@ pub enum ReasonImpl<P> {
     RsetElement(P),
     RmissingOptionalField(P, Symbol),
     RunsetField(P, Symbol),
-    RcontravariantGeneric(BReason, Symbol),
-    RinvariantGeneric(BReason, Symbol),
+    RcontravariantGeneric(R, Symbol),
+    RinvariantGeneric(R, Symbol),
     Rregex(P),
     RimplicitUpperBound(P, Symbol),
     RtypeVariable(P),
@@ -119,7 +119,7 @@ pub enum ReasonImpl<P> {
     RglobalTypeVariableGenerics(P, Symbol, Symbol),
     RsolveFail(P),
     RcstrOnGenerics(P, Positioned<Symbol, P>),
-    RlambdaParam(P, BReason),
+    RlambdaParam(P, R),
     Rshape(P, Symbol),
     Renforceable(P),
     Rdestructure(P),
@@ -132,19 +132,19 @@ pub enum ReasonImpl<P> {
     RdefaultCapability(P),
     RconcatOperand(P),
     RinterpOperand(P),
-    RdynamicCoercion(BReason),
+    RdynamicCoercion(R),
     RsupportDynamicType(P),
-    RdynamicPartialEnforcement(P, Symbol, BReason),
-    RrigidTvarEscape(P, Symbol, Symbol, BReason),
+    RdynamicPartialEnforcement(P, Symbol, R),
+    RrigidTvarEscape(P, Symbol, Symbol, R),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct BReason(Box<ReasonImpl<BPos>>);
+pub struct BReason(Box<ReasonImpl<BReason, BPos>>);
 
 impl Reason for BReason {
     type Pos = BPos;
 
-    fn mk(cons: impl FnOnce() -> ReasonImpl<Self::Pos>) -> Self {
+    fn mk(cons: impl FnOnce() -> ReasonImpl<Self, Self::Pos>) -> Self {
         let x = cons();
         Self(Box::new(x))
     }
@@ -178,7 +178,7 @@ pub struct NReason;
 impl Reason for NReason {
     type Pos = NPos;
 
-    fn mk(_cons: impl FnOnce() -> ReasonImpl<Self::Pos>) -> Self {
+    fn mk(_cons: impl FnOnce() -> ReasonImpl<Self, Self::Pos>) -> Self {
         NReason
     }
 

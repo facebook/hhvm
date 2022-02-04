@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::reason::Reason;
+use crate::reason::{Blame, ExprDepTypeReason, Reason};
 
 use super::Allocator;
 
@@ -11,17 +11,25 @@ impl<R: Reason> Allocator<R> {
     pub fn reason(&self, reason: &oxidized_by_ref::typing_reason::T_<'_>) -> R {
         R::mk(|| {
             use crate::reason::ReasonImpl as RI;
+            use oxidized_by_ref::typing_reason::Blame as OBlame;
             use oxidized_by_ref::typing_reason::T_ as OR;
             match reason {
                 OR::Rnone => RI::Rnone,
                 OR::Rwitness(pos) => RI::Rwitness(self.pos_from_decl(pos)),
                 OR::RwitnessFromDecl(pos) => RI::RwitnessFromDecl(self.pos_from_decl(pos)),
+                OR::Ridx((pos, r)) => RI::Ridx(self.pos_from_decl(pos), self.reason(r)),
                 OR::RidxVector(pos) => RI::RidxVector(self.pos_from_decl(pos)),
                 OR::RidxVectorFromDecl(pos) => RI::RidxVectorFromDecl(self.pos_from_decl(pos)),
                 OR::Rforeach(pos) => RI::Rforeach(self.pos_from_decl(pos)),
                 OR::Rasyncforeach(pos) => RI::Rasyncforeach(self.pos_from_decl(pos)),
                 OR::Rarith(pos) => RI::Rarith(self.pos_from_decl(pos)),
                 OR::RarithRet(pos) => RI::RarithRet(self.pos_from_decl(pos)),
+                OR::RarithRetFloat((pos, r, arg_position)) => {
+                    RI::RarithRetFloat(self.pos_from_decl(pos), self.reason(r), *arg_position)
+                }
+                OR::RarithRetNum((pos, r, arg_position)) => {
+                    RI::RarithRetNum(self.pos_from_decl(pos), self.reason(r), *arg_position)
+                }
                 OR::RarithRetInt(pos) => RI::RarithRetInt(self.pos_from_decl(pos)),
                 OR::RarithDynamic(pos) => RI::RarithDynamic(self.pos_from_decl(pos)),
                 OR::RbitwiseDynamic(pos) => RI::RbitwiseDynamic(self.pos_from_decl(pos)),
@@ -47,6 +55,14 @@ impl<R: Reason> Allocator<R> {
                 OR::RyieldAsyncgen(pos) => RI::RyieldAsyncgen(self.pos_from_decl(pos)),
                 OR::RyieldAsyncnull(pos) => RI::RyieldAsyncnull(self.pos_from_decl(pos)),
                 OR::RyieldSend(pos) => RI::RyieldSend(self.pos_from_decl(pos)),
+                OR::RlostInfo((sym, r, OBlame::Blame(&(pos, blame_source)))) => RI::RlostInfo(
+                    self.symbol(sym),
+                    self.reason(r),
+                    Blame(self.pos_from_decl(pos), blame_source),
+                ),
+                OR::Rformat((pos, sym, r)) => {
+                    RI::Rformat(self.pos_from_decl(pos), self.symbol(sym), self.reason(r))
+                }
                 OR::RclassClass(&(pos, s)) => {
                     RI::RclassClass(self.pos_from_decl(pos), self.symbol(s))
                 }
@@ -57,6 +73,26 @@ impl<R: Reason> Allocator<R> {
                     RI::RunpackParam(self.pos_from_decl(pos1), self.pos_from_decl(pos2), i)
                 }
                 OR::RinoutParam(pos) => RI::RinoutParam(self.pos_from_decl(pos)),
+                OR::Rinstantiate((r1, sym, r2)) => {
+                    RI::Rinstantiate(self.reason(r1), self.symbol(sym), self.reason(r2))
+                }
+                OR::Rtypeconst((r1, pos_id, sym, r2)) => RI::Rtypeconst(
+                    self.reason(r1),
+                    self.pos_id_from_decl(*pos_id),
+                    self.symbol(sym),
+                    self.reason(r2),
+                ),
+                OR::RtypeAccess((r, list)) => RI::RtypeAccess(
+                    self.reason(r),
+                    list.iter()
+                        .map(|(r, s)| (self.reason(r), self.symbol(s)))
+                        .collect(),
+                ),
+                OR::RexprDepType((r, pos, edt_reason)) => RI::RexprDepType(
+                    self.reason(r),
+                    self.pos_from_decl(pos),
+                    self.expr_dep_type_reason(*edt_reason),
+                ),
                 OR::RnullsafeOp(pos) => RI::RnullsafeOp(self.pos_from_decl(pos)),
                 OR::RtconstNoCstr(&pos_id) => RI::RtconstNoCstr(self.pos_id_from_decl(pos_id)),
                 OR::Rpredicated(&(pos, s)) => {
@@ -78,6 +114,12 @@ impl<R: Reason> Allocator<R> {
                 OR::RunsetField(&(pos, s)) => {
                     RI::RunsetField(self.pos_from_decl(pos), self.symbol(s))
                 }
+                OR::RcontravariantGeneric((r, s)) => {
+                    RI::RcontravariantGeneric(self.reason(r), self.symbol(s))
+                }
+                OR::RinvariantGeneric((r, s)) => {
+                    RI::RinvariantGeneric(self.reason(r), self.symbol(s))
+                }
                 OR::Rregex(pos) => RI::Rregex(self.pos_from_decl(pos)),
                 OR::RimplicitUpperBound(&(pos, s)) => {
                     RI::RimplicitUpperBound(self.pos_from_decl(pos), self.symbol(s))
@@ -97,6 +139,9 @@ impl<R: Reason> Allocator<R> {
                 OR::RcstrOnGenerics(&(pos, pos_id)) => {
                     RI::RcstrOnGenerics(self.pos_from_decl(pos), self.pos_id_from_decl(pos_id))
                 }
+                OR::RlambdaParam((pos, r)) => {
+                    RI::RlambdaParam(self.pos_from_decl(pos), self.reason(r))
+                }
                 OR::Rshape(&(pos, s)) => RI::Rshape(self.pos_from_decl(pos), self.symbol(s)),
                 OR::Renforceable(pos) => RI::Renforceable(self.pos_from_decl(pos)),
                 OR::Rdestructure(pos) => RI::Rdestructure(self.pos_from_decl(pos)),
@@ -111,9 +156,35 @@ impl<R: Reason> Allocator<R> {
                 OR::RdefaultCapability(pos) => RI::RdefaultCapability(self.pos_from_decl(pos)),
                 OR::RconcatOperand(pos) => RI::RconcatOperand(self.pos_from_decl(pos)),
                 OR::RinterpOperand(pos) => RI::RinterpOperand(self.pos_from_decl(pos)),
+                OR::RdynamicCoercion(r) => RI::RdynamicCoercion(self.reason(r)),
                 OR::RsupportDynamicType(pos) => RI::RsupportDynamicType(self.pos_from_decl(pos)),
-                r => unimplemented!("reason: {:?}", r),
+                OR::RdynamicPartialEnforcement((pos, s, r)) => RI::RdynamicPartialEnforcement(
+                    self.pos_from_decl(pos),
+                    self.symbol(s),
+                    self.reason(r),
+                ),
+                OR::RrigidTvarEscape((pos, s1, s2, r)) => RI::RrigidTvarEscape(
+                    self.pos_from_decl(pos),
+                    self.symbol(s1),
+                    self.symbol(s2),
+                    self.reason(r),
+                ),
             }
         })
+    }
+
+    fn expr_dep_type_reason(
+        &self,
+        edtr: oxidized_by_ref::typing_reason::ExprDepTypeReason<'_>,
+    ) -> ExprDepTypeReason {
+        use oxidized_by_ref::typing_reason::ExprDepTypeReason as Obr;
+        match edtr {
+            Obr::ERexpr(i) => ExprDepTypeReason::ERexpr(i),
+            Obr::ERstatic => ExprDepTypeReason::ERstatic,
+            Obr::ERclass(s) => ExprDepTypeReason::ERclass(self.symbol(s)),
+            Obr::ERparent(s) => ExprDepTypeReason::ERparent(self.symbol(s)),
+            Obr::ERself(s) => ExprDepTypeReason::ERself(self.symbol(s)),
+            Obr::ERpu(s) => ExprDepTypeReason::ERpu(self.symbol(s)),
+        }
     }
 }

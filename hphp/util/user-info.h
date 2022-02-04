@@ -34,6 +34,12 @@ struct PwdGrpBuffer {
     data = std::make_unique<char[]>(size);
   }
 
+  void resize() {
+    data.reset();
+    size *= 2;
+    data = std::make_unique<char[]>(size);
+  }
+
   Entry ent;
   std::unique_ptr<char[]> data;
   long size;

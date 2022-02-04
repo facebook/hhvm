@@ -1515,10 +1515,22 @@ static bool do_chgrp(const String& filename,
     String sgroup = group.toString();
     auto buf = GroupBuffer{};
     struct group *gr;
-    if (getgrnam_r(sgroup.data(), &buf.ent, buf.data.get(), buf.size, &gr)) {
-      // failed to read group info
-      return false;
+
+    while (true) {
+      if (getgrnam_r(sgroup.data(), &buf.ent, buf.data.get(), buf.size, &gr)) {
+        if (errno == ERANGE) {
+          buf.resize();
+          continue;
+        } else if (errno == ENOENT || errno == ESRCH) {
+          gr = nullptr;
+          break;
+        }
+        // failed to read group info
+        return false;
+      }
+      break;
     }
+
     if (!gr) {
       Logger::Verbose("%s/%d: Unable to find gid for %s",
         __FUNCTION__, __LINE__, sgroup.data());

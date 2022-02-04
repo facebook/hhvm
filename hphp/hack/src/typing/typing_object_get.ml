@@ -23,6 +23,21 @@ module Phase = Typing_phase
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
 
+let mk_intersection_err env errs_res =
+  Result.fold
+    errs_res
+    ~ok:(fun tys ->
+      let (env, ty) = Typing_intersection.intersect_list env Reason.none tys in
+      (env, Ok ty))
+    ~error:(fun (actuals, expecteds) ->
+      let (env, ty_actual) =
+        Typing_intersection.intersect_list env Reason.none actuals
+      in
+      let (env, ty_expect) =
+        Typing_intersection.intersect_list env Reason.none expecteds
+      in
+      (env, Error (ty_actual, ty_expect)))
+
 let mk_union_err env =
   Result.fold
     ~ok:(fun tys ->
@@ -987,48 +1002,7 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error =
            receiver_ty
            (Typing_make_type.nonnull Reason.none)
     in
-    let (env, resultl, lval_errs, rval_err_opts) =
-      TUtils.run_on_intersection_key_value_res env tyl ~f:(fun env ty ->
-          obj_get_inner
-            { args with is_nonnull; this_ty_conjunct = ty }
-            env
-            ty
-            id
-            on_error)
-    in
-    let mk_ty env =
-      Result.fold
-        ~ok:(fun tys ->
-          let (env, ty) =
-            Typing_intersection.intersect_list env Reason.none tys
-          in
-          (env, Ok ty))
-        ~error:(fun (actuals, expecteds) ->
-          let (env, ty_actual) =
-            Typing_intersection.intersect_list env Reason.none actuals
-          in
-          let (env, ty_expect) =
-            Typing_intersection.intersect_list env Reason.none expecteds
-          in
-          (env, Error (ty_actual, ty_expect)))
-    in
-    let (env, lval_err) = mk_ty env @@ fold_errs lval_errs in
-    let (env, rval_err) =
-      Option.value_map ~default:(env, None) ~f:(fun res ->
-          let (env, err) = mk_ty env res in
-          (env, Some err))
-      @@ fold_opt_errs rval_err_opts
-    in
-    (* TODO: decide what to do about methods with differing generic arity.
-     * See T55414751 *)
-    let tal =
-      match resultl with
-      | [] -> []
-      | (_, tal) :: _ -> tal
-    in
-    let tyl = List.map ~f:fst resultl in
-    let (env, ty) = Inter.intersect_list env r tyl in
-    (env, (ty, tal), lval_err, rval_err)
+    obj_get_inner_intersection { args with is_nonnull } env on_error id r tyl
   | (_, Tdependent (_, ty))
   | (_, Tnewtype (_, _, ty)) ->
     obj_get_inner args env ty id on_error
@@ -1129,6 +1103,29 @@ and obj_get_inner_union args env on_error id reason tys =
   in
   let tyl = List.map ~f:fst resultl in
   let (env, ty) = Union.union_list env reason tyl in
+  (env, (ty, tal), lval_err, rval_err)
+
+and obj_get_inner_intersection args env on_error id reason tys =
+  let (env, resultl, lval_errs, rval_err_opts) =
+    TUtils.run_on_intersection_key_value_res env tys ~f:(fun env ty ->
+        obj_get_inner { args with this_ty_conjunct = ty } env ty id on_error)
+  in
+  let (env, lval_err) = mk_intersection_err env @@ fold_errs lval_errs in
+  let (env, rval_err) =
+    Option.value_map ~default:(env, None) ~f:(fun res ->
+        let (env, err) = mk_intersection_err env res in
+        (env, Some err))
+    @@ fold_opt_errs rval_err_opts
+  in
+  (* TODO: decide what to do about methods with differing generic arity.
+   * See T55414751 *)
+  let tal =
+    match resultl with
+    | [] -> []
+    | (_, tal) :: _ -> tal
+  in
+  let tyl = List.map ~f:fst resultl in
+  let (env, ty) = Inter.intersect_list env reason tyl in
   (env, (ty, tal), lval_err, rval_err)
 
 (* Look up the type of the property or method id in the type receiver_ty of the

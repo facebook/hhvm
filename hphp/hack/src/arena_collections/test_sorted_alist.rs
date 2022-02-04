@@ -47,7 +47,7 @@ fn len_with_duplicate_keys() {
 #[test]
 fn get_with_many_entries() {
     let b = &Bump::new();
-    let mut entries = bumpalo::collections::Vec::new_in(&b);
+    let mut entries = bumpalo::collections::Vec::new_in(b);
     for i in 0..1024 {
         entries.push((i, &*b.alloc_str(i.to_string().as_str())))
     }

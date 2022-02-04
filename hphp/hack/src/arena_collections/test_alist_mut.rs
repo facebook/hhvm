@@ -113,11 +113,11 @@ fn contains_key() {
     let b = Bump::new();
     let mut alist = AssocListMut::new_in(&b);
     alist.insert(1, "a");
-    assert_eq!(alist.contains_key(&1), true);
-    assert_eq!(alist.contains_key(&2), false);
+    assert!(alist.contains_key(&1));
+    assert!(!alist.contains_key(&2));
     let alist = SortedAssocList::from(alist);
-    assert_eq!(alist.contains_key(&1), true);
-    assert_eq!(alist.contains_key(&2), false);
+    assert!(alist.contains_key(&1));
+    assert!(!alist.contains_key(&2));
 }
 
 #[test]

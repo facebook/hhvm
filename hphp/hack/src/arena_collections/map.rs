@@ -237,7 +237,7 @@ impl<'a, K: TrivialDrop + Clone + Ord, V: TrivialDrop + Clone> Map<'a, K, V> {
             m = m.add(arena, k, v);
         }
 
-        return m;
+        m
     }
 
     /// Returns a pointer the current entry belonging to the key,
@@ -544,8 +544,8 @@ mod tests {
     #[test]
     fn test_is_empty() {
         let arena = Bump::new();
-        assert_eq!(Map::<i64, i64>::empty().is_empty(), true);
-        assert_eq!(map![&arena; 4 => 9].is_empty(), false);
+        assert!(Map::<i64, i64>::empty().is_empty());
+        assert!(!map![&arena; 4 => 9].is_empty());
     }
 
     #[test]
@@ -578,9 +578,9 @@ mod tests_arbitrary {
         fn prop_mem_find(xs: Vec<(u32, u32)>, ys: Vec<u32>) -> bool {
             let a = Bump::new();
             let m = Map::from(&a, xs.clone());
-            let o: HashMap<u32, u32> = xs.clone().into_iter().collect();
+            let o: HashMap<u32, u32> = xs.into_iter().collect();
             for (k, v) in o.iter() {
-                assert_eq!(m.mem(k), true);
+                assert!(m.mem(k));
                 assert_eq!(m.get(k), Some(v));
             }
             for k in ys {
@@ -588,7 +588,7 @@ mod tests_arbitrary {
                   assert_eq!(m.mem(&k), f);
                   assert_eq!(m.get(&k).is_some(), f);
             }
-            return true
+            true
         }
     }
 
@@ -631,7 +631,7 @@ mod tests_arbitrary {
                     actions.push(Action::Add(key, Arbitrary::arbitrary(g)));
                 }
             }
-            return ActionSequence(actions);
+            ActionSequence(actions)
         }
 
         fn shrink(&self) -> Box<dyn Iterator<Item = Self>> {
@@ -672,7 +672,7 @@ mod tests_arbitrary {
                     println!("height difference invariant violated");
                     return false;
                 }
-                return check_height_invariant(*l) && check_height_invariant(*r);
+                check_height_invariant(*l) && check_height_invariant(*r)
             }
         }
     }
@@ -697,9 +697,9 @@ mod tests_arbitrary {
             }
             if !m.into_iter().eq(o.iter()) {
                 println!("EXPECTED {:?} GOT {:?}", o, m);
-                return false;
+                false
             } else {
-                return check_height_invariant(m);
+                check_height_invariant(m)
             }
         }
     }

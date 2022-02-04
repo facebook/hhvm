@@ -121,7 +121,7 @@ impl<'a, K: TrivialDrop + Clone + Ord> Set<'a, K> {
             s = s.add(arena, k);
         }
 
-        return s;
+        s
     }
 
     pub fn add<A: Arena>(self, arena: &'a A, x: K) -> Self {
@@ -200,7 +200,7 @@ impl<'a, T: Ord> Iterator for Intersection<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        while let Some(x) = self.iter.next() {
+        for x in self.iter.by_ref() {
             if self.other.mem(x) {
                 return Some(x);
             }
@@ -234,16 +234,13 @@ pub mod tests_iter {
     #[test]
     fn test_empty() {
         let s: Set<'_, i32> = set![];
-        assert_eq!(s.into_iter().map(|k| *k).eq(vec![].into_iter()), true);
+        assert!(s.into_iter().copied().eq(vec![].into_iter()));
     }
 
     #[test]
     fn test_non_empty() {
         let a = Bump::new();
         let s: Set<'_, i32> = set![&a; 6, 4, 5];
-        assert_eq!(
-            s.into_iter().map(|k| *k).eq(vec![4, 5, 6].into_iter()),
-            true
-        );
+        assert!(s.into_iter().copied().eq(vec![4, 5, 6].into_iter()));
     }
 }

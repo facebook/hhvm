@@ -104,7 +104,7 @@ impl<'a, K, V> AssocList<'a, K, V> {
         K: Borrow<Q>,
         Q: PartialEq,
     {
-        get_last_entry(&self.entries, key).map(|(_, v)| v)
+        get_last_entry(self.entries, key).map(|(_, v)| v)
     }
 
     /// Returns the key-value pair corresponding to the supplied key.
@@ -131,7 +131,7 @@ impl<'a, K, V> AssocList<'a, K, V> {
         K: Borrow<Q>,
         Q: PartialEq,
     {
-        get_last_entry(&self.entries, key).map(|(k, v)| (k, v))
+        get_last_entry(self.entries, key).map(|(k, v)| (k, v))
     }
 
     /// Returns `true` if the list contains a value for the specified key.
@@ -154,7 +154,7 @@ impl<'a, K, V> AssocList<'a, K, V> {
         K: Borrow<Q>,
         Q: PartialEq,
     {
-        get_last_entry(&self.entries, key).is_some()
+        get_last_entry(self.entries, key).is_some()
     }
 
     /// Gets an iterator over the entries of the association list.
@@ -429,7 +429,7 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
         K: Borrow<Q>,
         Q: PartialEq,
     {
-        match get_last_index(&self.entries, &key) {
+        match get_last_index(&self.entries, key) {
             None => None,
             Some(idx) => Some(self.entries.remove(idx).1),
         }
@@ -722,7 +722,7 @@ impl<'a, K, V> SortedAssocList<'a, K, V> {
         K: Borrow<Q>,
         Q: Ord,
     {
-        get_sorted_entry(&self.entries, key).map(|(_, v)| v)
+        get_sorted_entry(self.entries, key).map(|(_, v)| v)
     }
 
     /// Returns the key-value pair corresponding to the supplied key.
@@ -748,7 +748,7 @@ impl<'a, K, V> SortedAssocList<'a, K, V> {
         K: Borrow<Q>,
         Q: Ord,
     {
-        get_sorted_entry(&self.entries, key).map(|(k, v)| (k, v))
+        get_sorted_entry(self.entries, key).map(|(k, v)| (k, v))
     }
 
     /// Returns `true` if the list contains a value for the specified key.
@@ -774,7 +774,7 @@ impl<'a, K, V> SortedAssocList<'a, K, V> {
         K: Borrow<Q>,
         Q: Ord,
     {
-        get_sorted_entry(&self.entries, key).is_some()
+        get_sorted_entry(self.entries, key).is_some()
     }
 
     /// Gets an iterator over the entries of the association list, sorted by

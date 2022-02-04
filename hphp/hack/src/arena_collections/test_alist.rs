@@ -51,8 +51,8 @@ fn get_key_value() {
 fn contains_key() {
     let entries = [(1, "a")];
     let alist = AssocList::new(&entries[..]);
-    assert_eq!(alist.contains_key(&1), true);
-    assert_eq!(alist.contains_key(&2), false);
+    assert!(alist.contains_key(&1));
+    assert!(!alist.contains_key(&2));
 }
 
 #[test]

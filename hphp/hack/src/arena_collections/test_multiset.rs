@@ -96,9 +96,9 @@ fn from_slice() {
 fn insert() {
     let b = Bump::new();
     let mut set = MultiSetMut::new_in(&b);
-    assert_eq!(set.contains(&1), false);
+    assert!(!set.contains(&1));
     set.insert(1);
-    assert_eq!(set.contains(&1), true);
+    assert!(set.contains(&1));
 }
 
 #[test]
@@ -107,8 +107,8 @@ fn remove() {
     let mut set = MultiSetMut::new_in(&b);
 
     set.insert(2);
-    assert_eq!(set.remove(&2), true);
-    assert_eq!(set.remove(&2), false);
+    assert!(set.remove(&2));
+    assert!(!set.remove(&2));
 }
 
 #[test]
@@ -118,6 +118,6 @@ fn remove_all() {
 
     set.insert(2);
     set.insert(2);
-    assert_eq!(set.remove_all(&2), true);
-    assert_eq!(set.remove_all(&2), false);
+    assert!(set.remove_all(&2));
+    assert!(!set.remove_all(&2));
 }

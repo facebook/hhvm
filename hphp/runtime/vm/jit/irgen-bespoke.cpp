@@ -1068,6 +1068,7 @@ enum class LayoutSensitiveCall {
 
 const StaticString
   s_HH_Shapes("HH\\Shapes"),
+  s_HH_Readonly_Shapes("HH\\Readonly\\Shapes"),
   s_at("at"),
   s_idx("idx"),
   s_keyExists("keyExists");
@@ -1082,7 +1083,10 @@ getLayoutSensitiveCall(const IRGS& env, SrcKey sk) {
   auto const cls  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA);
   auto const func = sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA);
 
-  if (!cls->isame(s_HH_Shapes.get())) return std::nullopt;
+  if (!cls->isame(s_HH_Shapes.get()) &&
+      !cls->isame(s_HH_Readonly_Shapes.get())) {
+    return std::nullopt;
+  }
 
   if (func->isame(s_at.get()))        return LayoutSensitiveCall::ShapesAt;
   if (func->isame(s_idx.get()))       return LayoutSensitiveCall::ShapesIdx;
@@ -1116,6 +1120,30 @@ jit::vector<Location> guardsForLayoutSensitiveCall(const IRGS& env, SrcKey sk) {
     return fca.numArgs == 2 || (fca.numArgs == 3 && is_shapes_idx);
   }();
   if (!numArgsOkay) return {};
+
+  auto const readonlyOkay = [&]{
+    auto const callee = [&]() -> Func* {
+      auto const className  = sk.unit()->lookupLitstrId(getImm(sk.pc(), 2).u_SA);
+      auto const funcName = sk.unit()->lookupLitstrId(getImm(sk.pc(), 3).u_SA);
+      auto const cls = Class::lookup(className);
+      if (!cls) return nullptr;
+      return cls->lookupMethod(funcName);
+    }();
+    if (!callee) return false;
+    if (fca.enforceReadonly()) {
+      for (auto i = 0; i < fca.numArgs; ++i) {
+        if (fca.isReadonly(i) && !callee->isReadonly(i)) return false;
+      }
+    }
+    if (fca.enforceMutableReturn() && (callee->attrs() & AttrReadonlyReturn)) {
+      return false;
+    }
+    if (fca.enforceReadonlyThis() && !(callee->attrs() & AttrReadonlyThis)) {
+      return false;
+    }
+    return true;
+  }();
+  if (!readonlyOkay) return {};
 
   auto const numArgs = safe_cast<int32_t>(fca.numArgs);
   auto const al = Location::Stack{env.irb->fs().bcSPOff() - numArgs + 1};

@@ -64,8 +64,28 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn add_substs(&mut self, other_substs: TypeNameMap<SubstContext<R>>) {
-        for (key, subst) in other_substs {
-            self.substs.entry(key).or_insert(subst);
+        for (key, mut new_sc) in other_substs {
+            match self.substs.entry(key) {
+                Entry::Vacant(e) => {
+                    e.insert(new_sc);
+                }
+                Entry::Occupied(mut e) => {
+                    if e.get().from_req_extends && !new_sc.from_req_extends {
+                        // If the old substitution context came via required extends
+                        // then we want to use the substitutions from the actual
+                        // extends instead. e.g.
+                        // ```
+                        // class Base<+T> {}
+                        // trait MyTrait { require extends Base<mixed>; }
+                        // class Child extends Base<int> { use MyTrait; }
+                        // ```
+                        // Here the substitution context `{MyTrait/[T -> mixed]}`
+                        // should be overridden by `{Child/[T -> int]}`, because
+                        // it's the actual extension of class `Base`.
+                        std::mem::swap(e.get_mut(), &mut new_sc);
+                    }
+                }
+            }
         }
     }
 
@@ -151,6 +171,7 @@ impl<R: Reason> Inherited<R> {
             SubstContext {
                 subst,
                 class_context: child.name.id(),
+                from_req_extends: false,
             },
         );
         Self {

@@ -19,11 +19,39 @@ pub struct FoldedElement<R: Reason> {
     pub deprecated: Option<intern::string::BytesId>,
 }
 
+/// A substitution context contains all the information necessary for changing
+/// the type of an inherited class element to the class that is inheriting the
+/// class element. It's best illustrated via an example.
+/// ```
+/// class A<Ta1, Ta2> { public function test(Ta1 $x, Ta2 $y): void {} }
+/// class B<Tb> extends A<Tb, int> {}
+/// class C extends B<string> {}
+/// ```
+
+/// The method `A::test()` has the type `(function(Ta1, Ta2): void)` in the
+/// context of class `A`. However in the context of class `B`, it will have type
+/// `(function(Tb, int): void)`.
+///
+/// The substitution that leads to this change is [Ta1 -> Tb, Ta2 -> int], which
+/// will produce a new type in the context of class B. It's subst_context would
+/// then be:
+///
+/// ```
+/// { subst            = [Ta1 -> Tb, Ta2 -> int];
+///   class_context    = 'B';
+///   from_req_extends = false;
+/// }
+/// ```
+///
+/// The `from_req_extends` field is set to` true` if the context was inherited
+/// via a require extends type. This information is relevant when folding
+/// `substs` during inheritance. See the `inherit` module.
 #[derive(Debug, Clone)]
 pub struct SubstContext<R: Reason> {
     // note(sf, 2022-01-28): c.f. `Decl_defs.subst_context`
     pub subst: TypeNameMap<DeclTy<R>>,
     pub class_context: TypeName,
+    pub from_req_extends: bool,
 }
 
 #[derive(Debug, Clone)]

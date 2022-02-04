@@ -508,8 +508,6 @@ struct TypeStmts {
             "  JOIN method_attributes USING (typeid)"
             "  JOIN all_paths USING (pathid)"
             " WHERE attribute_name = @attribute_name")}
-      , m_getCorrectCase{db.prepare(
-            "SELECT name FROM type_details WHERE name=@name")}
       , m_getAll{db.prepare("SELECT name, path from type_details JOIN "
                             "all_paths USING (pathid)")} {
   }
@@ -532,7 +530,6 @@ struct TypeStmts {
   SQLiteStmt m_getTypeAliasesWithAttribute;
   SQLiteStmt m_getMethodsInPath;
   SQLiteStmt m_getMethodsWithAttribute;
-  SQLiteStmt m_getCorrectCase;
   SQLiteStmt m_getAll;
 };
 
@@ -585,8 +582,6 @@ struct FunctionStmts {
       , m_getPathFunctions{db.prepare("SELECT function FROM function_paths"
                                       " JOIN all_paths USING (pathid)"
                                       " WHERE path=@path")}
-      , m_getCorrectCase{db.prepare(
-            "SELECT function from function_paths where function=@function")}
       , m_getAll{db.prepare("SELECT function, path FROM function_paths JOIN "
                             "all_paths USING (pathid)")} {
   }
@@ -594,7 +589,6 @@ struct FunctionStmts {
   SQLiteStmt m_insert;
   SQLiteStmt m_getFunctionPath;
   SQLiteStmt m_getPathFunctions;
-  SQLiteStmt m_getCorrectCase;
   SQLiteStmt m_getAll;
 };
 
@@ -1178,15 +1172,6 @@ struct AutoloadDBImpl final : public AutoloadDB {
     return args;
   }
 
-  std::string getTypeCorrectCase(std::string_view type) override {
-    auto query = m_txn.query(m_typeStmts.m_getCorrectCase);
-    query.bindString("@name", type);
-    for (query.step(); query.row(); query.step()) {
-      return std::string{query.getString(0)};
-    }
-    return {};
-  }
-
   void insertFunction(
       std::string_view function, const folly::fs::path& path) override {
     assertx(path.is_relative());
@@ -1220,15 +1205,6 @@ struct AutoloadDBImpl final : public AutoloadDB {
       functions.emplace_back(query.getString(0));
     }
     return functions;
-  }
-
-  std::string getFunctionCorrectCase(std::string_view function) override {
-    auto query = m_txn.query(m_functionStmts.m_getCorrectCase);
-    query.bindString("@function", function);
-    for (query.step(); query.row(); query.step()) {
-      return std::string{query.getString(0)};
-    }
-    return {};
   }
 
   void insertConstant(

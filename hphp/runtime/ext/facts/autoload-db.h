@@ -243,8 +243,6 @@ struct AutoloadDB {
   virtual std::vector<folly::fs::path>
   getFilesWithAttribute(std::string_view attributeName) = 0;
 
-  virtual std::string getTypeCorrectCase(std::string_view type) = 0;
-
   // Functions
   virtual void
   insertFunction(std::string_view function, const folly::fs::path& path) = 0;
@@ -252,7 +250,6 @@ struct AutoloadDB {
   getFunctionPath(std::string_view function) = 0;
   virtual std::vector<std::string>
   getPathFunctions(const folly::fs::path& path) = 0;
-  virtual std::string getFunctionCorrectCase(std::string_view function) = 0;
 
   // Constants
   virtual void

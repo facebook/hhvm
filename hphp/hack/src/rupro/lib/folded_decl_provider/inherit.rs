@@ -8,7 +8,6 @@ use crate::decl_defs::{
 };
 use crate::folded_decl_provider::subst::Subst;
 use crate::reason::Reason;
-use oxidized_by_ref as obr;
 use pos::{Symbol, SymbolMap, TypeName, TypeNameMap};
 use std::collections::hash_map::Entry;
 use std::sync::Arc;
@@ -95,8 +94,6 @@ impl<R: Reason> Inherited<R> {
         methods: &mut SymbolMap<FoldedElement<R>>,
         (key, mut fe): (Symbol, FoldedElement<R>),
     ) {
-        use obr::typing_defs_flags::ClassEltFlags;
-
         match methods.entry(key) {
             Entry::Vacant(entry) => {
                 // The method didn't exist so far, let's add it.
@@ -104,7 +101,7 @@ impl<R: Reason> Inherited<R> {
             }
             Entry::Occupied(mut entry) => {
                 if !Self::should_keep_old_sig(&fe, entry.get()) {
-                    fe.flags.set(ClassEltFlags::SUPERFLUOUS_OVERRIDE, false);
+                    fe.set_is_superfluous_override(false);
                     std::mem::swap(entry.get_mut(), &mut fe);
                 } else {
                     // Otherwise, we *are* overwriting a method

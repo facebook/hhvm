@@ -15,12 +15,13 @@ pub use oxidized::{
     aast_defs::Tprim as Prim,
     ast_defs::Abstraction,
     ast_defs::ClassishKind,
+    ast_defs::Visibility,
     typing_defs::ClassConstKind,
     typing_defs_core::{
         ConsistentKind, DestructureKind, Enforcement, Exact, FunTparamsKind, ParamMode, ShapeKind,
         ValKind,
     },
-    typing_defs_flags::{self, FunParamFlags, FunTypeFlags},
+    typing_defs_flags::{self, ClassEltFlags, ClassEltFlagsArgs, FunParamFlags, FunTypeFlags},
     xhp_attribute::{Tag, XhpAttribute},
 };
 

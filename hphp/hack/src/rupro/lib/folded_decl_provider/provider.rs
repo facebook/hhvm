@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl_defs::{
-    CeVisibility, DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass, ShallowMethod,
-    ShallowProp, UserAttribute,
+    CeVisibility, ClassEltFlags, ClassEltFlagsArgs, ConsistentKind, DeclTy, DeclTy_, FoldedClass,
+    FoldedElement, ShallowClass, ShallowMethod, ShallowProp, UserAttribute, Visibility,
 };
 use crate::folded_decl_provider::FoldedDeclCache;
 use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
@@ -53,9 +53,8 @@ impl<R: Reason> FoldedDeclProvider<R> {
         &self,
         cls: TypeName,
         module: Option<&Positioned<Symbol, R::Pos>>,
-        vis: oxidized::ast_defs::Visibility,
+        vis: Visibility,
     ) -> CeVisibility<R::Pos> {
-        use oxidized::ast_defs::Visibility;
         match vis {
             Visibility::Public => CeVisibility::Public,
             Visibility::Private => CeVisibility::Private(cls),
@@ -76,7 +75,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
         let prop = sp.name.id();
         let vis = self.visibility(cls, sc.module.as_ref(), sp.visibility);
         let prop_flags = &sp.flags;
-        let flag_args = oxidized_by_ref::typing_defs_flags::ClassEltFlagsArgs {
+        let flag_args = ClassEltFlagsArgs {
             xhp_attr: sp.xhp_attr,
             is_abstract: prop_flags.is_abstract(),
             is_final: true,
@@ -94,7 +93,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             origin: sc.name.id(),
             visibility: vis,
             deprecated: None,
-            flags: oxidized_by_ref::typing_defs::ClassEltFlags::new(flag_args),
+            flags: ClassEltFlags::new(flag_args),
         };
         props.insert(prop, elt);
     }
@@ -109,7 +108,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
         let prop = sp.name.id();
         let vis = self.visibility(cls, sc.module.as_ref(), sp.visibility);
         let prop_flags = &sp.flags;
-        let flag_args = oxidized_by_ref::typing_defs_flags::ClassEltFlagsArgs {
+        let flag_args = ClassEltFlagsArgs {
             xhp_attr: sp.xhp_attr,
             is_abstract: prop_flags.is_abstract(),
             is_final: true,
@@ -127,7 +126,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             origin: sc.name.id(),
             visibility: vis,
             deprecated: None,
-            flags: oxidized_by_ref::typing_defs::ClassEltFlags::new(flag_args),
+            flags: ClassEltFlags::new(flag_args),
         };
         static_props.insert(prop, elt);
     }
@@ -146,13 +145,13 @@ impl<R: Reason> FoldedDeclProvider<R> {
                     visibility: CeVisibility::Protected(cls),
                     ..
                 }),
-                oxidized::ast_defs::Visibility::Protected,
+                Visibility::Protected,
             ) => CeVisibility::Protected(*cls),
             (_, v) => self.visibility(cls, sc.module.as_ref(), v),
         };
 
         let meth_flags = &sm.flags;
-        let flag_args = oxidized_by_ref::typing_defs_flags::ClassEltFlagsArgs {
+        let flag_args = ClassEltFlagsArgs {
             xhp_attr: None,
             is_abstract: meth_flags.is_abstract(),
             is_final: meth_flags.is_final(),
@@ -170,7 +169,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             origin: cls,
             visibility: vis,
             deprecated: sm.deprecated,
-            flags: oxidized_by_ref::typing_defs::ClassEltFlags::new(flag_args),
+            flags: ClassEltFlags::new(flag_args),
         };
 
         methods.insert(meth, elt);
@@ -207,8 +206,6 @@ impl<R: Reason> FoldedDeclProvider<R> {
     }
 
     fn decl_constructor(&self, constructor: &mut Option<FoldedElement<R>>, sc: &ShallowClass<R>) {
-        use oxidized_by_ref::typing_defs::ConsistentKind;
-
         // Constructors in children of `sc` must be consistent?
         let _consistent_kind = if sc.is_final {
             ConsistentKind::FinalClass
@@ -226,7 +223,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
                 let cls = sc.name.id();
                 let vis = self.visibility(cls, sc.module.as_ref(), sm.visibility);
                 let meth_flags = &sm.flags;
-                let flag_args = oxidized_by_ref::typing_defs_flags::ClassEltFlagsArgs {
+                let flag_args = ClassEltFlagsArgs {
                     xhp_attr: None,
                     is_abstract: meth_flags.is_abstract(),
                     is_final: meth_flags.is_final(),
@@ -244,7 +241,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
                     origin: sc.name.id(),
                     visibility: vis,
                     deprecated: sm.deprecated,
-                    flags: oxidized_by_ref::typing_defs::ClassEltFlags::new(flag_args),
+                    flags: ClassEltFlags::new(flag_args),
                 };
                 *constructor = Some(elt)
             }

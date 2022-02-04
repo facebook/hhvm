@@ -26,6 +26,6 @@ add_library(fmt INTERFACE)
 add_dependencies(fmt bundled_fmt)
 target_include_directories(fmt INTERFACE "${INSTALL_DIR}/include")
 target_link_libraries(fmt INTERFACE
-  "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}fmt${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}fmt$<$<CONFIG:Debug>:d>${CMAKE_STATIC_LIBRARY_SUFFIX}"
 )
 set(FMT_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)

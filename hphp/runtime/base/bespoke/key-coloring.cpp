@@ -123,10 +123,10 @@ Optional<ColorMap> performColoring(
       auto const numFields = layout->numFields();
       for (Slot i = 0; i < numFields; ++i) {
         auto const first = layout->field(i).key;
-        assertx(0 < colors[first] && colors[first] <= StructLayout::kMaxColor);
+        always_assert(0 < colors[first] && colors[first] <= StructLayout::kMaxColor);
         for (Slot j = i + 1; j < numFields; ++j) {
           auto const second = layout->field(j).key;
-          assertx(colors[first] != colors[second]);
+          always_assert(colors[first] != colors[second]);
         }
       }
     });

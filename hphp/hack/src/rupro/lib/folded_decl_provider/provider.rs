@@ -5,12 +5,13 @@
 
 use crate::decl_defs::{
     CeVisibility, DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass, ShallowMethod,
-    ShallowProp,
+    ShallowProp, UserAttribute,
 };
 use crate::folded_decl_provider::FoldedDeclCache;
 use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclProvider;
+use crate::special_names::SpecialNames;
 use pos::{Positioned, Symbol, SymbolMap, TypeName, TypeNameMap, TypeNameSet};
 use std::sync::Arc;
 
@@ -19,16 +20,19 @@ use std::sync::Arc;
 #[derive(Debug)]
 pub struct FoldedDeclProvider<R: Reason> {
     cache: Arc<dyn FoldedDeclCache<Reason = R>>,
+    special_names: &'static SpecialNames,
     shallow_decl_provider: Arc<ShallowDeclProvider<R>>,
 }
 
 impl<R: Reason> FoldedDeclProvider<R> {
     pub fn new(
         cache: Arc<dyn FoldedDeclCache<Reason = R>>,
+        special_names: &'static SpecialNames,
         shallow_decl_provider: Arc<ShallowDeclProvider<R>>,
     ) -> Self {
         Self {
             cache,
+            special_names,
             shallow_decl_provider,
         }
     }
@@ -202,6 +206,51 @@ impl<R: Reason> FoldedDeclProvider<R> {
         acc
     }
 
+    fn decl_constructor(&self, constructor: &mut Option<FoldedElement<R>>, sc: &ShallowClass<R>) {
+        use oxidized_by_ref::typing_defs::ConsistentKind;
+
+        // Constructors in children of `sc` must be consistent?
+        let _consistent_kind = if sc.is_final {
+            ConsistentKind::FinalClass
+        } else if sc.user_attributes.iter().any(|UserAttribute { name, .. }| {
+            name.id() == TypeName(self.special_names.user_attributes.uaConsistentConstruct)
+        }) {
+            ConsistentKind::ConsistentConstruct
+        } else {
+            ConsistentKind::Inconsistent
+        };
+
+        match &sc.constructor {
+            None => {}
+            Some(sm) => {
+                let cls = sc.name.id();
+                let vis = self.visibility(cls, sc.module.as_ref(), sm.visibility);
+                let meth_flags = &sm.flags;
+                let flag_args = oxidized_by_ref::typing_defs_flags::ClassEltFlagsArgs {
+                    xhp_attr: None,
+                    is_abstract: meth_flags.is_abstract(),
+                    is_final: meth_flags.is_final(),
+                    is_superfluous_override: false,
+                    is_lsb: false,
+                    is_synthesized: false,
+                    is_const: false,
+                    is_lateinit: false,
+                    is_dynamicallycallable: false,
+                    is_readonly_prop: false,
+                    supports_dynamic_type: false,
+                    needs_init: false,
+                };
+                let elt = FoldedElement {
+                    origin: sc.name.id(),
+                    visibility: vis,
+                    deprecated: sm.deprecated,
+                    flags: oxidized_by_ref::typing_defs::ClassEltFlags::new(flag_args),
+                };
+                *constructor = Some(elt)
+            }
+        }
+    }
+
     fn get_implements(
         &self,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
@@ -252,20 +301,24 @@ impl<R: Reason> FoldedDeclProvider<R> {
             .iter()
             .for_each(|sm| self.decl_method(&mut static_methods, sc, sm));
 
-        let mut anc = Default::default();
+        let mut constructor = inh.constructor;
+        self.decl_constructor(&mut constructor, sc);
+
+        let mut ancestors = Default::default();
         sc.extends
             .iter()
-            .for_each(|ty| self.get_implements(parents, ty, &mut anc));
+            .for_each(|ty| self.get_implements(parents, ty, &mut ancestors));
 
         Arc::new(FoldedClass {
             name: sc.name.id(),
             pos: sc.name.pos().clone(),
             substs: inh.substs,
-            ancestors: anc,
+            ancestors,
             props,
             static_props,
             methods,
             static_methods,
+            constructor,
         })
     }
 

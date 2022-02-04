@@ -35,4 +35,5 @@ pub struct FoldedClass<R: Reason> {
     pub static_props: SymbolMap<FoldedElement<R>>,
     pub methods: SymbolMap<FoldedElement<R>>,
     pub static_methods: SymbolMap<FoldedElement<R>>,
+    pub constructor: Option<FoldedElement<R>>,
 }

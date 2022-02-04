@@ -21,6 +21,7 @@ pub(crate) struct Inherited<R: Reason> {
     pub(crate) static_props: SymbolMap<FoldedElement<R>>,
     pub(crate) methods: SymbolMap<FoldedElement<R>>,
     pub(crate) static_methods: SymbolMap<FoldedElement<R>>,
+    pub(crate) constructor: Option<FoldedElement<R>>,
 }
 
 impl<R: Reason> std::default::Default for Inherited<R> {
@@ -31,6 +32,7 @@ impl<R: Reason> std::default::Default for Inherited<R> {
             static_props: Default::default(),
             methods: Default::default(),
             static_methods: Default::default(),
+            constructor: Default::default(),
         }
     }
 }
@@ -57,6 +59,15 @@ impl<R: Reason> Inherited<R> {
             || is_old_sig_abstract == is_new_sig_abstract
                 && !is_old_sig_synthesized
                 && is_new_sig_synthesized
+    }
+
+    fn add_constructor(&mut self, constructor: Option<FoldedElement<R>>) {
+        match (constructor.as_ref(), self.constructor.as_ref()) {
+            (None, _) => {}
+            (Some(other_ctor), Some(self_ctor))
+                if Self::should_keep_old_sig(other_ctor, self_ctor) => {}
+            (_, _) => self.constructor = constructor,
+        }
     }
 
     fn add_substs(&mut self, other_substs: TypeNameMap<SubstContext<R>>) {
@@ -123,12 +134,14 @@ impl<R: Reason> Inherited<R> {
             static_props,
             methods,
             static_methods,
+            constructor,
         } = other;
         self.add_substs(substs);
         self.add_props(props);
         self.add_static_props(static_props);
         self.add_methods(methods);
         self.add_static_methods(static_methods);
+        self.add_constructor(constructor);
     }
 
     fn make_substitution(_cls: &FoldedClass<R>, params: &[DeclTy<R>]) -> TypeNameMap<DeclTy<R>> {
@@ -157,6 +170,7 @@ impl<R: Reason> Inherited<R> {
             static_props: parent.static_props.clone(),
             methods: parent.methods.clone(),
             static_methods: parent.static_methods.clone(),
+            constructor: parent.constructor.clone(),
         }
     }
 

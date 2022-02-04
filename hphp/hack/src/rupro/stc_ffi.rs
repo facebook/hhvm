@@ -78,6 +78,7 @@ pub extern "C" fn stc_main() {
     let folded_decl_cache = Arc::new(FoldedDeclGlobalCache::new());
     let folded_decl_provider = Arc::new(FoldedDeclProvider::new(
         folded_decl_cache,
+        special_names,
         Arc::clone(&shallow_decl_provider),
     ));
     let typing_decl_cache = Arc::new(TypingDeclGlobalCache::new());

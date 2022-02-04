@@ -116,15 +116,11 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn add_props(&mut self, other_props: SymbolMap<FoldedElement<R>>) {
-        for (key, fe) in other_props {
-            self.props.insert(key, fe);
-        }
+        self.props.extend(other_props)
     }
 
     fn add_static_props(&mut self, other_static_props: SymbolMap<FoldedElement<R>>) {
-        for (key, fe) in other_static_props {
-            self.static_props.insert(key, fe);
-        }
+        self.static_props.extend(other_static_props)
     }
 
     fn add_inherited(&mut self, other: Self) {

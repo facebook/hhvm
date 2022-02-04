@@ -6,9 +6,12 @@
 use crate::decl_defs::{DeclTy, FoldedClass, FoldedElement, ShallowClass, SubstContext};
 use crate::folded_decl_provider::subst::Subst;
 use crate::reason::Reason;
-use pos::{SymbolMap, TypeName, TypeNameMap};
+use oxidized_by_ref as obr;
+use pos::{Symbol, SymbolMap, TypeName, TypeNameMap};
 use std::collections::hash_map::Entry;
 use std::sync::Arc;
+
+// note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_inherit.ml
 
 #[derive(Debug)]
 pub(crate) struct Inherited<R: Reason> {
@@ -29,8 +32,27 @@ impl<R: Reason> std::default::Default for Inherited<R> {
 }
 
 impl<R: Reason> Inherited<R> {
-    fn should_keep_old_sig(_new_sig: &FoldedElement<R>, _old_sig: &FoldedElement<R>) -> bool {
-        true
+    // Reasons to keep the old signature:
+    //   - We don't want to override a concrete method with an
+    //     abstract one;
+    //   - We don't want to override a method that's actually
+    //     implemented by the programmer with one that's "synthetic",
+    //     e.g. arising merely from a require-extends declaration in a
+    //     trait.
+    // When these two considerations conflict, we give precedence to
+    // abstractness for determining priority of the method.
+    fn should_keep_old_sig(new_sig: &FoldedElement<R>, old_sig: &FoldedElement<R>) -> bool {
+        use obr::typing_defs_flags::ClassEltFlags;
+
+        let is_new_sig_abstract = new_sig.flags.contains(ClassEltFlags::ABSTRACT);
+        let is_old_sig_abstract = old_sig.flags.contains(ClassEltFlags::ABSTRACT);
+        let is_new_sig_synthesized = new_sig.flags.contains(ClassEltFlags::SYNTHESIZED);
+        let is_old_sig_synthesized = old_sig.flags.contains(ClassEltFlags::SYNTHESIZED);
+
+        !is_old_sig_abstract && is_new_sig_abstract
+            || is_old_sig_abstract == is_new_sig_abstract
+                && !is_old_sig_synthesized
+                && is_new_sig_synthesized
     }
 
     fn add_substs(&mut self, other_substs: TypeNameMap<SubstContext<R>>) {
@@ -39,33 +61,42 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
-    fn add_methods(&mut self, other_methods: SymbolMap<FoldedElement<R>>) {
-        for (key, mut fe) in other_methods {
-            match self.methods.entry(key) {
-                Entry::Vacant(entry) => {
-                    entry.insert(fe);
-                }
-                Entry::Occupied(mut entry) => {
-                    if !Self::should_keep_old_sig(&fe, entry.get()) {
-                        std::mem::swap(entry.get_mut(), &mut fe);
-                    }
+    fn add_method(
+        methods: &mut SymbolMap<FoldedElement<R>>,
+        (key, mut fe): (Symbol, FoldedElement<R>),
+    ) {
+        use obr::typing_defs_flags::ClassEltFlags;
+
+        match methods.entry(key) {
+            Entry::Vacant(entry) => {
+                // The method didn't exist so far, let's add it.
+                entry.insert(fe);
+            }
+            Entry::Occupied(mut entry) => {
+                if !Self::should_keep_old_sig(&fe, entry.get()) {
+                    fe.flags.set(ClassEltFlags::SUPERFLUOUS_OVERRIDE, false);
+                    std::mem::swap(entry.get_mut(), &mut fe);
+                } else {
+                    // Otherwise, we *are* overwriting a method
+                    // definition. This is OK when a naming
+                    // conflict is parent class vs trait (trait
+                    // wins!), but not really OK when the naming
+                    // conflict is trait vs trait (we rely on HHVM
+                    // to catch the error at runtime).
                 }
             }
         }
     }
 
+    fn add_methods(&mut self, other_methods: SymbolMap<FoldedElement<R>>) {
+        for (key, fe) in other_methods {
+            Self::add_method(&mut self.methods, (key, fe))
+        }
+    }
+
     fn add_static_methods(&mut self, other_static_methods: SymbolMap<FoldedElement<R>>) {
-        for (key, mut fe) in other_static_methods {
-            match self.static_methods.entry(key) {
-                Entry::Vacant(entry) => {
-                    entry.insert(fe);
-                }
-                Entry::Occupied(mut entry) => {
-                    if !Self::should_keep_old_sig(&fe, entry.get()) {
-                        std::mem::swap(entry.get_mut(), &mut fe);
-                    }
-                }
-            }
+        for (key, fe) in other_static_methods {
+            Self::add_method(&mut self.static_methods, (key, fe))
         }
     }
 

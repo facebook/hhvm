@@ -5,11 +5,11 @@
 
 use super::{Allocator, GlobalAllocator};
 use crate::reason::Reason;
-use intern::{path::PathId, string::BytesId};
+use intern::string::BytesId;
 use pos::{Prefix, RelativePath, Symbol};
 
 impl GlobalAllocator {
-    pub fn bytes(&self, bytes: impl AsRef<[u8]>) -> BytesId {
+    fn bytes(&self, bytes: impl AsRef<[u8]>) -> BytesId {
         intern::string::intern_bytes(bytes.as_ref())
     }
 
@@ -23,26 +23,8 @@ impl GlobalAllocator {
         self.symbol(&format!("{}{}", s1, s2))
     }
 
-    pub fn relative_path(&self, prefix: Prefix, suffix: &std::path::Path) -> RelativePath {
-        if suffix == std::path::Path::new("") {
-            RelativePath::new(prefix, None)
-        } else {
-            RelativePath::new(prefix, Some(PathId::from(suffix)))
-        }
-    }
-
-    pub fn relative_path_from_ast(
-        &self,
-        path: &oxidized::relative_path::RelativePath,
-    ) -> RelativePath {
-        self.relative_path(path.prefix(), path.path())
-    }
-
-    pub fn relative_path_from_decl(
-        &self,
-        path: &oxidized_by_ref::relative_path::RelativePath<'_>,
-    ) -> RelativePath {
-        self.relative_path(path.prefix(), path.path())
+    fn relative_path(&self, prefix: Prefix, suffix: &std::path::Path) -> RelativePath {
+        RelativePath::intern(prefix, suffix)
     }
 }
 
@@ -67,13 +49,13 @@ impl<R: Reason> Allocator<R> {
         &self,
         path: &oxidized::relative_path::RelativePath,
     ) -> RelativePath {
-        self.global.relative_path_from_ast(path)
+        self.global.relative_path(path.prefix(), path.path())
     }
 
     pub fn relative_path_from_decl(
         &self,
         path: &oxidized_by_ref::relative_path::RelativePath<'_>,
     ) -> RelativePath {
-        self.global.relative_path_from_decl(path)
+        self.global.relative_path(path.prefix(), path.path())
     }
 }

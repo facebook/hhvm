@@ -3,21 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use intern::path::PathId;
-use std::path::PathBuf;
+use intern::string::BytesId;
+use std::ffi::OsStr;
+use std::os::unix::ffi::OsStrExt;
+use std::path::{Path, PathBuf};
 
 pub use oxidized::relative_path::Prefix;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct RelativePath {
     prefix: Prefix,
-    // To allow representing RelativePath::empty(), use Option here, since the
-    // intern crate does not allow interning empty paths (it panics).
-    suffix: Option<PathId>,
+    suffix: BytesId,
 }
 
 impl RelativePath {
-    pub fn new(prefix: Prefix, suffix: Option<PathId>) -> Self {
+    pub fn intern<P: AsRef<Path>>(prefix: Prefix, suffix: P) -> Self {
+        let suffix = intern::string::intern_bytes(suffix.as_ref().as_os_str().as_bytes());
         Self { prefix, suffix }
     }
 
@@ -29,9 +30,7 @@ impl RelativePath {
             Prefix::Dummy => &ctx.dummy,
         }
         .to_owned();
-        if let Some(suffix) = self.suffix {
-            suffix.push_to(&mut buf);
-        }
+        buf.push(&OsStr::from_bytes(self.suffix.as_bytes()));
         buf
     }
 }

@@ -218,6 +218,8 @@ let parse_options () =
   let check_xhp_attribute = ref false in
   let check_redundant_generics = ref false in
   let disallow_invalid_arraykey_constraint = ref None in
+  let disallow_static_memoized = ref false in
+  let enable_supportdyn_hint = ref false in
   let enable_class_level_where_clauses = ref false in
   let disallow_trait_reuse = ref None in
   let disable_legacy_soft_typehints = ref false in
@@ -466,6 +468,9 @@ let parse_options () =
       ( "--disallow-invalid-arraykey-constraint",
         Arg.Unit (set_bool disallow_invalid_arraykey_constraint),
         " Disallow using non-string, non-int types as array key constraints" );
+      ( "--disallow-static-memoized",
+        Arg.Set disallow_static_memoized,
+        " Disallow static memoized methods on non-final methods" );
       ( "--check-xhp-attribute",
         Arg.Set check_xhp_attribute,
         " Typechecks xhp required attributes" );
@@ -514,6 +519,9 @@ let parse_options () =
       ( "--symbolindex-file",
         Arg.String (fun str -> symbolindex_file := Some str),
         " Load the symbol index from this file" );
+      ( "--enable-supportdyn-hint",
+        Arg.Set enable_supportdyn_hint,
+        " Allow the supportdyn type hint" );
       ( "--enable-class-level-where-clauses",
         Arg.Set enable_class_level_where_clauses,
         " Enables support for class-level where clauses" );
@@ -893,27 +901,44 @@ let parse_options () =
     GlobalOptions.codes_not_raised_partial tcopt;
   Errors.report_pos_from_reason :=
     GlobalOptions.tco_report_pos_from_reason tcopt;
-  let tcopt =
-    {
-      tcopt with
-      GlobalOptions.tco_experimental_features =
-        SSet.filter
-          begin
-            fun x ->
-            if
-              String.equal x GlobalOptions.tco_experimental_forbid_nullable_cast
-            then
-              !forbid_nullable_cast
-            (* Only enable infer flows in IFC mode *)
-            else if String.equal x GlobalOptions.tco_experimental_infer_flows
-            then
-              is_ifc_mode
-            else
-              true
-          end
-          tcopt.GlobalOptions.tco_experimental_features;
-    }
+
+  let tco_experimental_features =
+    tcopt.GlobalOptions.tco_experimental_features
   in
+  let tco_experimental_features =
+    if !forbid_nullable_cast then
+      SSet.add
+        GlobalOptions.tco_experimental_forbid_nullable_cast
+        tco_experimental_features
+    else
+      tco_experimental_features
+  in
+  let tco_experimental_features =
+    if is_ifc_mode then
+      SSet.add
+        GlobalOptions.tco_experimental_infer_flows
+        tco_experimental_features
+    else
+      tco_experimental_features
+  in
+  let tco_experimental_features =
+    if !disallow_static_memoized then
+      SSet.add
+        GlobalOptions.tco_experimental_disallow_static_memoized
+        tco_experimental_features
+    else
+      tco_experimental_features
+  in
+  let tco_experimental_features =
+    if !enable_supportdyn_hint then
+      SSet.add
+        GlobalOptions.tco_experimental_supportdynamic_type_hint
+        tco_experimental_features
+    else
+      tco_experimental_features
+  in
+
+  let tcopt = { tcopt with GlobalOptions.tco_experimental_features } in
   ( {
       files = fns;
       extra_builtins = !extra_builtins;

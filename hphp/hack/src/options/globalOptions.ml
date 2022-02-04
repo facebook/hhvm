@@ -193,9 +193,7 @@ let tco_migration_flags_all = List.fold_right ~init:SSet.empty ~f:SSet.add []
 
 let default =
   {
-    (* Default all features for testing. Actual options are set by reading
-       * from hhconfig, which defaults to empty. *)
-    tco_experimental_features = tco_experimental_all;
+    tco_experimental_features = SSet.empty;
     tco_migration_flags = SSet.empty;
     tco_num_local_workers = None;
     tco_parallel_type_checking_threshold = 10;

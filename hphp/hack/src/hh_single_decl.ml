@@ -156,6 +156,7 @@ let () =
   let enable_xhp_class_modifier = ref false in
   let disable_xhp_element_mangling = ref false in
   let disable_enum_classes = ref false in
+  let disallow_static_memoized = ref false in
   let enable_enum_supertyping = ref false in
   let interpret_soft_types_as_like_types = ref false in
   let everything_sdt = ref false in
@@ -189,6 +190,9 @@ let () =
       ( "--disable-enum-classes",
         Arg.Set disable_enum_classes,
         "Disable the enum classes extension." );
+      ( "--disallow-static-memoized",
+        Arg.Set disallow_static_memoized,
+        " Disallow static memoized methods on non-final methods" );
       ( "--enable-enum-supertyping",
         Arg.Set enable_enum_supertyping,
         "Enable the enum supertyping extension." );
@@ -295,6 +299,14 @@ let () =
             ~interpret_soft_types_as_like_types
             ~everything_sdt
         in
+        let tco_experimental_features =
+          if !disallow_static_memoized then
+            SSet.singleton
+              GlobalOptions.tco_experimental_disallow_static_memoized
+          else
+            SSet.empty
+        in
+        let popt = { popt with GlobalOptions.tco_experimental_features } in
         let ctx = init (Path.dirname file) popt in
         let file = Relative_path.(create Root (Path.to_string file)) in
         let files = Multifile.file_to_file_list file in

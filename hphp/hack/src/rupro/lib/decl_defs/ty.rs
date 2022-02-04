@@ -13,6 +13,8 @@ use std::collections::BTreeMap;
 
 pub use oxidized::{
     aast_defs::Tprim as Prim,
+    ast_defs::Abstraction,
+    ast_defs::ClassishKind,
     typing_defs::ClassConstKind,
     typing_defs_core::{
         ConsistentKind, DestructureKind, Enforcement, Exact, FunTparamsKind, ParamMode, ShapeKind,

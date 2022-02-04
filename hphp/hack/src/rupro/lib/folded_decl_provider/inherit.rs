@@ -3,7 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{DeclTy, FoldedClass, FoldedElement, ShallowClass, SubstContext};
+use crate::decl_defs::{
+    Abstraction, ClassishKind, DeclTy, FoldedClass, FoldedElement, ShallowClass, SubstContext,
+};
 use crate::folded_decl_provider::subst::Subst;
 use crate::reason::Reason;
 use oxidized_by_ref as obr;
@@ -203,12 +205,30 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn from_parent(sc: &ShallowClass<R>, parents: &TypeNameMap<Arc<FoldedClass<R>>>) -> Self {
-        let all_inherited = sc
-            .extends
+        let mut tys: Vec<&DeclTy<R>> = Vec::new();
+        match sc.kind {
+            ClassishKind::Cclass(Abstraction::Abstract) => {
+                tys.extend(&sc.implements);
+                tys.extend(&sc.extends);
+            }
+            ClassishKind::Ctrait => {
+                tys.extend(&sc.implements);
+                tys.extend(&sc.extends);
+                tys.extend(&sc.req_implements);
+            }
+            ClassishKind::Cclass(_)
+            | ClassishKind::Cinterface
+            | ClassishKind::Cenum
+            | ClassishKind::CenumClass(_) => {
+                tys.extend(&sc.extends);
+            }
+        };
+
+        let all_inherited = tys
             .iter()
-            .map(|extends| Self::from_class(sc, parents, extends));
+            .map(|parent| Self::from_class(sc, parents, parent));
         let mut inh = Self::default();
-        for parent_inh in all_inherited {
+        for parent_inh in all_inherited.rev() {
             inh.add_inherited(parent_inh)
         }
         inh

@@ -1118,3 +1118,5 @@ pub fn module_attr_arity(len: usize) -> Error {
 pub const read_globals_without_readonly: Error = Cow::Borrowed(
     "Creating mutable references to static properties requires the capability Globals, which is not provided by the context. Enclose the static in a readonly expression.",
 );
+
+pub const missing_fn_def_body: Error = Cow::Borrowed("Non-native functions must have a body");

@@ -1,0 +1,2 @@
+File "functions_without_body.php", line 12, characters 39-39:
+Non-native functions must have a body (Parsing[1002])

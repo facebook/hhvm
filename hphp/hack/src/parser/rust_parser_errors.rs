@@ -988,6 +988,14 @@ where
         }
     }
 
+    // whether a function decl has body
+    fn function_declaration_is_external(node: S<'a, Token, Value>) -> bool {
+        match &node.children {
+            FunctionDeclaration(syntax) => syntax.body.is_external(),
+            _ => false,
+        }
+    }
+
     // whether a methodish decl has body
     fn methodish_has_body(node: S<'a, Token, Value>) -> bool {
         match &node.children {
@@ -998,7 +1006,7 @@ where
 
     // whether a methodish decl is native
     fn methodish_is_native(&self, node: S<'a, Token, Value>) -> bool {
-        self.methodish_contains_attribute(node, "__Native")
+        self.methodish_contains_attribute(node, sn::user_attributes::NATIVE)
     }
 
     // By checking the third parent of a methodish node, tests whether the methodish
@@ -1014,6 +1022,15 @@ where
                 }
                 _ => false,
             })
+    }
+
+    // Test whether node is an external function and not native.
+    fn function_declaration_external_not_native(&self, node: S<'a, Token, Value>) -> bool {
+        let in_hhi = self.env.is_hhi_mode();
+        let is_external = Self::function_declaration_is_external(node);
+        let is_native = self.function_declaration_is_native(node);
+
+        !in_hhi && is_external && !is_native
     }
 
     // Test whether node is a non-abstract method without a body and not native.
@@ -1564,6 +1581,10 @@ where
         }
     }
 
+    fn function_declaration_is_native(&self, node: S<'a, Token, Value>) -> bool {
+        self.function_declaration_contains_attribute(node, sn::user_attributes::NATIVE)
+    }
+
     fn methodish_contains_memoize(&self, node: S<'a, Token, Value>) -> bool {
         self.env.is_typechecker()
             && self.is_inside_interface()
@@ -1712,10 +1733,17 @@ where
             }
             FunctionDeclaration(fd) => {
                 let function_attrs = &fd.attribute_spec;
+                let body = &fd.body;
                 self.check_attr_enabled(function_attrs);
                 self.invalid_modifier_errors("Top-level functions", node, |kind| {
                     kind == TokenKind::Async
                 });
+                self.produce_error(
+                    |self_, x| self_.function_declaration_external_not_native(x),
+                    node,
+                    || errors::missing_fn_def_body,
+                    body,
+                );
             }
             MethodishDeclaration(md) => {
                 let header_node = &md.function_decl_header;

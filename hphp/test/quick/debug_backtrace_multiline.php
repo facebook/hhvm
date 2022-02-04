@@ -28,7 +28,7 @@ function newInstanceOfA($line) {
 }
 
 // Box
-function box(inout $_);
+function box(inout $_) {}
 
 <<__EntryPoint>>
 function main(): void {

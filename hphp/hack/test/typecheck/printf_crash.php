@@ -6,7 +6,7 @@
 interface MyPlainSprintf {
 }
 
-function my_sprintf(\HH\FormatString<PlainSprintf> $f, mixed ...$_): string;
+function my_sprintf(\HH\FormatString<PlainSprintf> $f, mixed ...$_): string {}
 
 //// use.php
 <?hh// strict

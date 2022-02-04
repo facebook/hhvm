@@ -48,17 +48,10 @@ impl<R: Reason> Inherited<R> {
     // When these two considerations conflict, we give precedence to
     // abstractness for determining priority of the method.
     fn should_keep_old_sig(new_sig: &FoldedElement<R>, old_sig: &FoldedElement<R>) -> bool {
-        use obr::typing_defs_flags::ClassEltFlags;
-
-        let is_new_sig_abstract = new_sig.flags.contains(ClassEltFlags::ABSTRACT);
-        let is_old_sig_abstract = old_sig.flags.contains(ClassEltFlags::ABSTRACT);
-        let is_new_sig_synthesized = new_sig.flags.contains(ClassEltFlags::SYNTHESIZED);
-        let is_old_sig_synthesized = old_sig.flags.contains(ClassEltFlags::SYNTHESIZED);
-
-        !is_old_sig_abstract && is_new_sig_abstract
-            || is_old_sig_abstract == is_new_sig_abstract
-                && !is_old_sig_synthesized
-                && is_new_sig_synthesized
+        !old_sig.is_abstract() && new_sig.is_abstract()
+            || old_sig.is_abstract() == new_sig.is_abstract()
+                && !old_sig.is_synthesized()
+                && new_sig.is_synthesized()
     }
 
     fn add_constructor(&mut self, constructor: Option<FoldedElement<R>>) {

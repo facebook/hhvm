@@ -27,16 +27,23 @@ pub trait Pos: Eq + Hash + Clone + std::fmt::Debug {
 
 /// Represents a closed-ended range [start, end] in a file.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct BPos {
+struct PosImpl {
     file: RelativePath,
     start: FilePos,
     end: FilePos,
 }
 
+// Putting the contents behind a Box helps ensure that we don't blow up the
+// sizes of all our types containing positions (particularly enums, where we pay
+// for the size of the position even in variants which don't contain a
+// position).
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct BPos(Box<PosImpl>);
+
 impl Pos for BPos {
     fn mk(cons: impl FnOnce() -> (RelativePath, FilePos, FilePos)) -> Self {
         let (file, start, end) = cons();
-        Self { file, start, end }
+        Self(Box::new(PosImpl { file, start, end }))
     }
 
     fn to_oxidized_pos(&self) -> oxidized::pos::Pos {

@@ -31,6 +31,8 @@ pub struct FoldedClass<R: Reason> {
     pub pos: R::Pos,
     pub substs: TypeNameMap<SubstContext<R>>,
     pub ancestors: TypeNameMap<DeclTy<R>>,
+    pub props: SymbolMap<FoldedElement<R>>,
+    pub static_props: SymbolMap<FoldedElement<R>>,
     pub methods: SymbolMap<FoldedElement<R>>,
     pub static_methods: SymbolMap<FoldedElement<R>>,
 }

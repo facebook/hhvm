@@ -87,7 +87,7 @@ pub struct ClassEltFlagsArgs {
     pub xhp_attr: Option<XhpAttribute>,
     pub is_abstract: bool,
     pub is_final: bool,
-    pub has_superfluous_override: bool,
+    pub is_superfluous_override: bool,
     pub is_lsb: bool,
     pub is_synthesized: bool,
     pub is_const: bool,
@@ -131,7 +131,7 @@ impl ClassEltFlags {
             xhp_attr,
             is_abstract,
             is_final,
-            has_superfluous_override,
+            is_superfluous_override,
             is_lsb,
             is_synthesized,
             is_const,
@@ -144,7 +144,7 @@ impl ClassEltFlags {
         let mut flags = Self::empty();
         flags.set(Self::ABSTRACT, is_abstract);
         flags.set(Self::FINAL, is_final);
-        flags.set(Self::SUPERFLUOUS_OVERRIDE, has_superfluous_override);
+        flags.set(Self::SUPERFLUOUS_OVERRIDE, is_superfluous_override);
         flags.set(Self::LSB, is_lsb);
         flags.set(Self::SYNTHESIZED, is_synthesized);
         flags.set(Self::CONST, is_const);

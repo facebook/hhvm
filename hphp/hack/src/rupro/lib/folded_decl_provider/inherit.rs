@@ -17,6 +17,8 @@ use std::sync::Arc;
 pub(crate) struct Inherited<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_inherit.inherited`
     pub(crate) substs: TypeNameMap<SubstContext<R>>,
+    pub(crate) props: SymbolMap<FoldedElement<R>>,
+    pub(crate) static_props: SymbolMap<FoldedElement<R>>,
     pub(crate) methods: SymbolMap<FoldedElement<R>>,
     pub(crate) static_methods: SymbolMap<FoldedElement<R>>,
 }
@@ -25,6 +27,8 @@ impl<R: Reason> std::default::Default for Inherited<R> {
     fn default() -> Self {
         Self {
             substs: Default::default(),
+            props: Default::default(),
+            static_props: Default::default(),
             methods: Default::default(),
             static_methods: Default::default(),
         }
@@ -100,13 +104,29 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
+    fn add_props(&mut self, other_props: SymbolMap<FoldedElement<R>>) {
+        for (key, fe) in other_props {
+            self.props.insert(key, fe);
+        }
+    }
+
+    fn add_static_props(&mut self, other_static_props: SymbolMap<FoldedElement<R>>) {
+        for (key, fe) in other_static_props {
+            self.static_props.insert(key, fe);
+        }
+    }
+
     fn add_inherited(&mut self, other: Self) {
         let Self {
             substs,
+            props,
+            static_props,
             methods,
             static_methods,
         } = other;
         self.add_substs(substs);
+        self.add_props(props);
+        self.add_static_props(static_props);
         self.add_methods(methods);
         self.add_static_methods(static_methods);
     }
@@ -133,6 +153,8 @@ impl<R: Reason> Inherited<R> {
         );
         Self {
             substs,
+            props: parent.props.clone(),
+            static_props: parent.static_props.clone(),
             methods: parent.methods.clone(),
             static_methods: parent.static_methods.clone(),
         }

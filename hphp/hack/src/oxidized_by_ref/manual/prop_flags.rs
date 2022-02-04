@@ -25,6 +25,21 @@ impl PropFlags {
     pub fn is_abstract(&self) -> bool {
         self.contains(Self::ABSTRACT)
     }
+    pub fn is_const(&self) -> bool {
+        self.contains(Self::CONST)
+    }
+    pub fn is_lateinit(&self) -> bool {
+        self.contains(Self::LATEINIT)
+    }
+    pub fn is_readonly(&self) -> bool {
+        self.contains(Self::READONLY)
+    }
+    pub fn needs_init(&self) -> bool {
+        self.contains(Self::NEEDS_INIT)
+    }
+    pub fn is_lsb(&self) -> bool {
+        self.contains(Self::LSB)
+    }
 }
 
 impl ocamlrep::ToOcamlRep for PropFlags {

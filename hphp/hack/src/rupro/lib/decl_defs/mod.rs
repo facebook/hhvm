@@ -8,5 +8,5 @@ pub mod shallow;
 pub mod ty;
 
 pub use folded::{FoldedClass, FoldedElement, SubstContext};
-pub use shallow::{ShallowClass, ShallowFun, ShallowMethod};
+pub use shallow::{ShallowClass, ShallowFun, ShallowMethod, ShallowProp};
 pub use ty::{CeVisibility, DeclTy, DeclTy_, FunParam, FunType, Prim, Tparam, UserAttribute};

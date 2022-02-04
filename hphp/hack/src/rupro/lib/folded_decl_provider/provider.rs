@@ -5,6 +5,7 @@
 
 use crate::decl_defs::{
     CeVisibility, DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass, ShallowMethod,
+    ShallowProp,
 };
 use crate::folded_decl_provider::FoldedDeclCache;
 use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
@@ -12,6 +13,8 @@ use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclProvider;
 use pos::{Positioned, Symbol, SymbolMap, TypeName, TypeNameMap, TypeNameSet};
 use std::sync::Arc;
+
+// note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_folded_class.ml
 
 #[derive(Debug)]
 pub struct FoldedDeclProvider<R: Reason> {
@@ -59,6 +62,72 @@ impl<R: Reason> FoldedDeclProvider<R> {
         }
     }
 
+    fn decl_prop(
+        &self,
+        props: &mut SymbolMap<FoldedElement<R>>,
+        sc: &ShallowClass<R>,
+        sp: &ShallowProp<R>,
+    ) {
+        let cls = sc.name.id();
+        let prop = sp.name.id();
+        let vis = self.visibility(cls, sc.module.as_ref(), sp.visibility);
+        let prop_flags = &sp.flags;
+        let flag_args = oxidized_by_ref::typing_defs_flags::ClassEltFlagsArgs {
+            xhp_attr: sp.xhp_attr,
+            is_abstract: prop_flags.is_abstract(),
+            is_final: true,
+            is_superfluous_override: false,
+            is_lsb: false,
+            is_synthesized: false,
+            is_const: prop_flags.is_const(),
+            is_lateinit: prop_flags.is_lateinit(),
+            is_dynamicallycallable: false,
+            is_readonly_prop: prop_flags.is_readonly(),
+            supports_dynamic_type: false,
+            needs_init: prop_flags.needs_init(),
+        };
+        let elt = FoldedElement {
+            origin: sc.name.id(),
+            visibility: vis,
+            deprecated: None,
+            flags: oxidized_by_ref::typing_defs::ClassEltFlags::new(flag_args),
+        };
+        props.insert(prop, elt);
+    }
+
+    fn decl_static_prop(
+        &self,
+        static_props: &mut SymbolMap<FoldedElement<R>>,
+        sc: &ShallowClass<R>,
+        sp: &ShallowProp<R>,
+    ) {
+        let cls = sc.name.id();
+        let prop = sp.name.id();
+        let vis = self.visibility(cls, sc.module.as_ref(), sp.visibility);
+        let prop_flags = &sp.flags;
+        let flag_args = oxidized_by_ref::typing_defs_flags::ClassEltFlagsArgs {
+            xhp_attr: sp.xhp_attr,
+            is_abstract: prop_flags.is_abstract(),
+            is_final: true,
+            is_superfluous_override: false,
+            is_lsb: prop_flags.is_lsb(),
+            is_synthesized: false,
+            is_const: prop_flags.is_const(),
+            is_lateinit: prop_flags.is_lateinit(),
+            is_dynamicallycallable: false,
+            is_readonly_prop: prop_flags.is_readonly(),
+            supports_dynamic_type: false,
+            needs_init: prop_flags.needs_init(),
+        };
+        let elt = FoldedElement {
+            origin: sc.name.id(),
+            visibility: vis,
+            deprecated: None,
+            flags: oxidized_by_ref::typing_defs::ClassEltFlags::new(flag_args),
+        };
+        static_props.insert(prop, elt);
+    }
+
     fn decl_method(
         &self,
         methods: &mut SymbolMap<FoldedElement<R>>,
@@ -83,7 +152,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             xhp_attr: None,
             is_abstract: meth_flags.is_abstract(),
             is_final: meth_flags.is_final(),
-            has_superfluous_override: meth_flags.is_override() && !methods.contains_key(&meth),
+            is_superfluous_override: meth_flags.is_override() && !methods.contains_key(&meth),
             is_lsb: false,
             is_synthesized: false,
             is_const: false,
@@ -163,6 +232,16 @@ impl<R: Reason> FoldedDeclProvider<R> {
     ) -> Arc<FoldedClass<R>> {
         let inh = Inherited::make(sc, parents);
 
+        let mut props = inh.props;
+        sc.props
+            .iter()
+            .for_each(|sp| self.decl_prop(&mut props, sc, sp));
+
+        let mut static_props = inh.static_props;
+        sc.static_props
+            .iter()
+            .for_each(|ssp| self.decl_static_prop(&mut static_props, sc, ssp));
+
         let mut methods = inh.methods;
         sc.methods
             .iter()
@@ -179,10 +258,12 @@ impl<R: Reason> FoldedDeclProvider<R> {
             .for_each(|ty| self.get_implements(parents, ty, &mut anc));
 
         Arc::new(FoldedClass {
-            name: sc.name.id().clone(),
+            name: sc.name.id(),
             pos: sc.name.pos().clone(),
             substs: inh.substs,
             ancestors: anc,
+            props,
+            static_props,
             methods,
             static_methods,
         })

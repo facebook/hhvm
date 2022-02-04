@@ -19,7 +19,8 @@ let initialize
     ~(quiet : bool)
     ~(ignore_hh_version : bool)
     ~(savedstate_file_opt : string option)
-    ~(workers : MultiWorker.worker list option) : si_env =
+    ~(workers : MultiWorker.worker list option)
+    ~(saved_state_manifold_api_key : string option) : si_env =
   (* Create the object *)
   let sienv =
     {
@@ -38,6 +39,7 @@ let initialize
         ~ignore_hh_version
         ~savedstate_file_opt
         ~log_saved_state_age_and_distance:false
+        ~saved_state_manifold_api_key
     | CustomIndex ->
       CustomSearchService.initialize ~globalrev ~gleanopt;
       sienv

@@ -14,6 +14,6 @@ type env = {
   lsp_log: string option;
 }
 
-let main _ = Exit.exit Exit_status.No_error
+let main _ _ = Exit.exit Exit_status.No_error
 
 let verify_typechecker_err_src () = ()

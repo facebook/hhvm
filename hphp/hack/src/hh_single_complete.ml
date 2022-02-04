@@ -146,6 +146,7 @@ let parse_options () =
       ~ignore_hh_version:false
       ~savedstate_file_opt:None
       ~workers:None
+      ~saved_state_manifold_api_key:None
   in
   let sienv =
     {

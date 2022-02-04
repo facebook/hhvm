@@ -268,10 +268,15 @@ let load_saved_state
             |> Provider_context.get_tcopt
             |> TypecheckerOptions.log_saved_state_age_and_distance
           in
+          let manifold_api_key =
+            ctx
+            |> Provider_context.get_tcopt
+            |> TypecheckerOptions.saved_state_manifold_api_key
+          in
           let env : Saved_state_loader.env =
             {
-              Saved_state_loader.saved_state_manifold_api_key = None;
               log_saved_state_age_and_distance;
+              Saved_state_loader.saved_state_manifold_api_key = manifold_api_key;
             }
           in
           let%lwt result =
@@ -448,6 +453,8 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
       ~quiet:local_config.ServerLocalConfig.symbolindex_quiet
       ~ignore_hh_version:false
       ~savedstate_file_opt:local_config.ServerLocalConfig.symbolindex_file
+      ~saved_state_manifold_api_key:
+        local_config.ServerLocalConfig.saved_state_manifold_api_key
       ~workers:None
   in
   let sienv =

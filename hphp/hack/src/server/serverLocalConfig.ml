@@ -1388,20 +1388,26 @@ let load_ fn ~silent ~current_version overrides =
   in
   let rollout_group = string_opt "rollout_group" config in
   let machine_class = string_opt "machine_class" config in
+  let specify_manifold_api_key =
+    bool_if_min_version
+      "specify_manifold_api_key"
+      ~default:default.specify_manifold_api_key
+      ~current_version
+      config
+  in
   let saved_state_manifold_api_key =
-    string_opt "saved_state_manifold_api_key" config
+    (* overriding the local_config value so consumers of saved_state_manifold_api_key
+       * don't need to explicitly check for specify_manifold_api_key.
+    *)
+    if specify_manifold_api_key then
+      string_opt "saved_state_manifold_api_key" config
+    else
+      None
   in
   let hulk_lite =
     bool_if_min_version
       "hulk_lite"
       ~default:default.hulk_lite
-      ~current_version
-      config
-  in
-  let specify_manifold_api_key =
-    bool_if_min_version
-      "specify_manifold_api_key"
-      ~default:default.specify_manifold_api_key
       ~current_version
       config
   in

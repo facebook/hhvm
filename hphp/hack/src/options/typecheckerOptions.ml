@@ -219,3 +219,6 @@ let log_saved_state_age_and_distance =
   GlobalOptions.tco_log_saved_state_age_and_distance
 
 let specify_manifold_api_key = GlobalOptions.tco_specify_manifold_api_key
+
+let saved_state_manifold_api_key =
+  GlobalOptions.tco_saved_state_manifold_api_key

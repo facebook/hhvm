@@ -127,9 +127,11 @@ let () =
       | ClientCommand.CLsp args ->
         Lwt_utils.run_main (fun () -> ClientLsp.main args ~init_id)
       | ClientCommand.CRage env ->
-        Lwt_utils.run_main (fun () -> ClientRage.main env)
+        Lwt_utils.run_main (fun () ->
+            ClientRage.main env (Option.value_exn local_config))
       | ClientCommand.CDownloadSavedState env ->
-        Lwt_utils.run_main (fun () -> ClientDownloadSavedState.main env)
+        Lwt_utils.run_main (fun () ->
+            ClientDownloadSavedState.main env (Option.value_exn local_config))
     in
     Exit.exit exit_status
   with

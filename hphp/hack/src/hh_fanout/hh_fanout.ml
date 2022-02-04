@@ -39,18 +39,19 @@ type cursor_reference =
   | Cursor_reference_from_saved_state of saved_state_result
   | Cursor_reference_id of string
 
-let set_up_global_environment (env : env) ~(deps_mode : Typing_deps_mode.t) :
-    setup_result =
+let create_global_env (env : env) : ServerEnv.genv =
   let server_args =
     ServerArgs.default_options_with_check_mode ~root:(Path.to_string env.root)
   in
   let (server_config, server_local_config) =
     ServerConfig.load ~silent:false ServerConfig.filename server_args
   in
-  let genv =
-    ServerEnvBuild.make_genv server_args server_config server_local_config []
-    (* no workers *)
-  in
+  ServerEnvBuild.make_genv server_args server_config server_local_config []
+
+let set_up_global_environment (env : env) ~(deps_mode : Typing_deps_mode.t) :
+    setup_result =
+  let genv = create_global_env env (* no workers *) in
+  let server_config = genv.ServerEnv.config in
 
   let popt = ServerConfig.parser_options genv.ServerEnv.config in
   let tcopt = ServerConfig.typechecker_options genv.ServerEnv.config in
@@ -70,6 +71,10 @@ let set_up_global_environment (env : env) ~(deps_mode : Typing_deps_mode.t) :
   { workers; ctx }
 
 let load_saved_state ~(env : env) : saved_state_result Lwt.t =
+  let genv = create_global_env env in
+  let manifold_api_key =
+    genv.ServerEnv.local_config.ServerLocalConfig.saved_state_manifold_api_key
+  in
   let%lwt (naming_table_path, naming_table_changed_files) =
     match env.naming_table_path with
     | Some naming_table_path -> Lwt.return (naming_table_path, [])
@@ -78,8 +83,8 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
         State_loader_lwt.load
           ~env:
             {
-              Saved_state_loader.saved_state_manifold_api_key = None;
               log_saved_state_age_and_distance = false;
+              Saved_state_loader.saved_state_manifold_api_key = manifold_api_key;
             }
           ~progress_callback:(fun _ -> ())
           ~watchman_opts:
@@ -115,8 +120,8 @@ let load_saved_state ~(env : env) : saved_state_result Lwt.t =
         State_loader_lwt.load
           ~env:
             {
-              Saved_state_loader.saved_state_manifold_api_key = None;
               log_saved_state_age_and_distance = false;
+              Saved_state_loader.saved_state_manifold_api_key = manifold_api_key;
             }
           ~progress_callback:(fun _ -> ())
           ~watchman_opts:

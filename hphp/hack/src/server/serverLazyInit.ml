@@ -307,8 +307,9 @@ let download_and_load_state_exn
   in
   let env : Saved_state_loader.env =
     {
-      Saved_state_loader.saved_state_manifold_api_key = None;
       log_saved_state_age_and_distance;
+      Saved_state_loader.saved_state_manifold_api_key =
+        genv.local_config.ServerLocalConfig.saved_state_manifold_api_key;
     }
   in
   (* TODO(hverr): Support the ignore_hhconfig flag, how to do this with Watchman? *)

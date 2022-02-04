@@ -229,12 +229,13 @@ let make_replay_token
 let load_saved_state :
     type main_artifacts additional_info.
     env:env ->
+    local_config:ServerLocalConfig.t ->
     saved_state_type:
       (main_artifacts * additional_info) Saved_state_loader.saved_state_type ->
     ( (main_artifacts, additional_info) Saved_state_loader.load_result,
       Saved_state_loader.load_error )
     Lwt_result.t =
- fun ~env ~saved_state_type ->
+ fun ~env ~local_config ~saved_state_type ->
   match env.replay_token with
   | None ->
     let watchman_opts =
@@ -244,8 +245,9 @@ let load_saved_state :
       State_loader_lwt.load
         ~env:
           {
-            Saved_state_loader.saved_state_manifold_api_key = None;
             log_saved_state_age_and_distance = false;
+            Saved_state_loader.saved_state_manifold_api_key =
+              local_config.ServerLocalConfig.saved_state_manifold_api_key;
           }
         ~progress_callback:(fun _ -> ())
         ~watchman_opts
@@ -274,8 +276,9 @@ let load_saved_state :
       State_loader_lwt.download_and_unpack_saved_state_from_manifold
         ~env:
           {
-            Saved_state_loader.saved_state_manifold_api_key = None;
             log_saved_state_age_and_distance = false;
+            Saved_state_loader.saved_state_manifold_api_key =
+              local_config.ServerLocalConfig.saved_state_manifold_api_key;
           }
         ~progress_callback:(fun _ -> ())
         ~manifold_path
@@ -298,14 +301,15 @@ let load_saved_state :
       Lwt.return_ok load_result
     | Error (load_error, _telemetry) -> Lwt.return_error load_error)
 
-let main (env : env) : Exit_status.t Lwt.t =
+let main (env : env) (local_config : ServerLocalConfig.t) : Exit_status.t Lwt.t
+    =
   Relative_path.set_path_prefix Relative_path.Root env.root;
   match env.saved_state_type with
   | Naming_and_dep_table { naming_sqlite } ->
     let saved_state_type =
       Saved_state_loader.Naming_and_dep_table { naming_sqlite }
     in
-    let%lwt result = load_saved_state ~env ~saved_state_type in
+    let%lwt result = load_saved_state ~env ~local_config ~saved_state_type in
     (match result with
     | Error load_error ->
       print_load_error load_error;
@@ -367,7 +371,7 @@ let main (env : env) : Exit_status.t Lwt.t =
       Lwt.return Exit_status.No_error)
   | Naming_table ->
     let saved_state_type = Saved_state_loader.Naming_table in
-    let%lwt result = load_saved_state ~env ~saved_state_type in
+    let%lwt result = load_saved_state ~env ~local_config ~saved_state_type in
     (match result with
     | Error load_error ->
       print_load_error load_error;

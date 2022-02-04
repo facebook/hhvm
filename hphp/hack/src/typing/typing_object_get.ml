@@ -1007,26 +1007,27 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error =
   | (_, Tnewtype (_, _, ty)) ->
     obj_get_inner args env ty id on_error
   | (r, Tgeneric (_name, _)) ->
-    let (env, tyl) =
-      TUtils.get_concrete_supertypes ~abstract_enum:true env ety1
-    in
-    if List.is_empty tyl then (
+    (match TUtils.get_concrete_supertypes ~abstract_enum:true env ety1 with
+    | (env, []) ->
+      let ctxt =
+        if read_context then
+          `read
+        else
+          `write
+      and kind =
+        if args.is_method then
+          `method_
+        else
+          `property
+      in
       let prim_err =
         Typing_error.(
           primary
           @@ Primary.Non_object_member
                {
                  pos = id_pos;
-                 ctxt =
-                   (if read_context then
-                     `read
-                   else
-                     `write);
-                 kind =
-                   (if args.is_method then
-                     `method_
-                   else
-                     `property);
+                 ctxt;
+                 kind;
                  member_name = id_str;
                  ty_name = lazy (Typing_print.error env ety1);
                  decl_pos = Reason.to_pos r;
@@ -1034,7 +1035,7 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error =
       in
       Errors.add_typing_error @@ Typing_error.apply ~on_error prim_err;
       (env, (err_witness env id_pos, []), dflt_lval_err, dflt_rval_err)
-    ) else
+    | (env, tyl) ->
       let (env, ty) = Typing_intersection.intersect_list env r tyl in
       let (env, ty) =
         if args.is_nonnull then
@@ -1042,7 +1043,7 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error =
         else
           (env, ty)
       in
-      obj_get_inner args env ty id on_error
+      obj_get_inner args env ty id on_error)
   | (_, Toption ty) -> nullable_obj_get ~read_context ty
   | (r, Tprim Tnull) ->
     let ty = mk (r, Tunion []) in

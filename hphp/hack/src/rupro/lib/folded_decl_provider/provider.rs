@@ -213,7 +213,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
         let _consistent_kind = if sc.is_final {
             ConsistentKind::FinalClass
         } else if sc.user_attributes.iter().any(|UserAttribute { name, .. }| {
-            name.id() == TypeName(self.special_names.user_attributes.uaConsistentConstruct)
+            name.id() == self.special_names.user_attributes.uaConsistentConstruct
         }) {
             ConsistentKind::ConsistentConstruct
         } else {

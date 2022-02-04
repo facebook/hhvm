@@ -8,7 +8,7 @@ Invalid return type (Typing[4323])
   Expected `arraykey`
   File "lambda_bad_pos.php", line 25, characters 22-22:
   But got `C`
-  File "hackarray.hhi", line 28, characters 73-73:
+  File "hackarray.hhi", line 45, characters 73-73:
     via this generic `T`
   File "hackarray.hhi", line 19, characters 119-120:
     via this generic `Tv`

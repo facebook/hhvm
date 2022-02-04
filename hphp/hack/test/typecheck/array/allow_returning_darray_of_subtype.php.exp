@@ -1,10 +1,10 @@
 File "allow_returning_darray_of_subtype.php", line 7, characters 44-66:
 Some type arguments violate their constraints (Typing[4323])
-  File "hackarray.hhi", line 24, characters 49-50:
+  File "hackarray.hhi", line 29, characters 49-50:
   `Tk` is a constrained type parameter
-  File "hackarray.hhi", line 24, characters 55-62:
+  File "hackarray.hhi", line 29, characters 55-62:
   This type constraint is violated
-  File "hackarray.hhi", line 24, characters 55-62:
+  File "hackarray.hhi", line 29, characters 55-62:
   Expected `arraykey`
   File "allow_returning_darray_of_subtype.php", line 7, characters 51-55:
   But got `mixed`

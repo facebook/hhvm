@@ -4,7 +4,7 @@ Unexpected `inout` annotation for argument (Typing[4183])
   This is a normal parameter (does not have `inout`)
 File "pseudofunction_with_signature.php", line 9, characters 28-30:
 No class constant `T` in `dict` (Typing[4090])
-  File "hackarray.hhi", line 24, characters 22-25:
+  File "hackarray.hhi", line 29, characters 22-25:
   Declaration of `dict` is here
 File "pseudofunction_with_signature.php", line 10, characters 16-23:
 Unexpected `inout` annotation for argument (Typing[4183])

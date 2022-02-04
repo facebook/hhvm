@@ -1,0 +1,4 @@
+vec
+A `vec` is an ordered, iterable data structure. The name is short for 'vector'.
+
+`vec` is a value type, so any mutation produces a new value.

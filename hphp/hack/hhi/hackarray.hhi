@@ -20,10 +20,27 @@ abstract class AnyArray<<<__RequireDynamic>> +Tk as arraykey, <<__RequireDynamic
 
 }
 
+/**
+ * A dict is an ordered, key-value data structure.
+ *
+ * `dict` is a value type, so any mutation produces a new value.
+ */
 <<__SupportDynamicType>>
 abstract final class dict<<<__RequireDynamic>> +Tk as arraykey, <<__RequireDynamic>> +Tv> extends AnyArray<Tk, Tv> {}
+
+/**
+ * A `keyset` is an ordered data structure without duplicates. `keyset`s can only contain `arraykey` values.
+ *
+ * `keyset` is a value type, so any mutation produces a new value.
+ */
 <<__SupportDynamicType>>
 abstract final class keyset<<<__RequireDynamic>> +T as arraykey> extends AnyArray<T, T> {}
+
+/**
+ * A `vec` is an ordered, iterable data structure. The name is short for 'vector'.
+ *
+ * `vec` is a value type, so any mutation produces a new value.
+ */
 <<__SupportDynamicType>>
 abstract final class vec<<<__RequireDynamic>> +T> extends AnyArray<int, T> {}
 

@@ -1,0 +1,11 @@
+dict(1) {
+  ["foo"]=>
+  int(5)
+}
+int(5)
+NULL
+dict(1) {
+  ["foo"]=>
+  int(5)
+}
+int(5)

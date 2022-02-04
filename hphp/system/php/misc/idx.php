@@ -125,7 +125,7 @@ function idx($arr, $idx, $default=null)[] {
   return $default;
 }
 <<__IgnoreReadonlyLocalErrors>>
-function idx_readonly<Tk as arraykey, Tv>(readonly $arr, $idx, $default=null)[] : readonly Tv {
+function idx_readonly<Tk as arraykey, Tv>(readonly $arr, readonly $idx, readonly $default=null)[] : readonly Tv {
   return readonly idx($arr, $idx, $default);
 }
 

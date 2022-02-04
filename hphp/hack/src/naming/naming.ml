@@ -1308,6 +1308,12 @@ and check_constant_expr env expr =
       Errors.add_naming_error @@ Naming_error.Illegal_constant p;
       false
     )
+  | Aast.ValCollection ((Aast.Vec | Aast.Keyset), _, l) ->
+    (* Only vec/keyset are allowed because they are value types *)
+    List.for_all l ~f:(check_constant_expr env)
+  | Aast.KeyValCollection (Aast.Dict, _, l) ->
+    (* Only dict is allowed because it is a value type *)
+    List.for_all l ~f:(check_field_constant_expr env)
   | Aast.As (e, (_, Aast.Hlike _), _) -> check_constant_expr env e
   | Aast.As (e, (_, Aast.Happly (id, [_])), _) ->
     let (p, cn) = NS.elaborate_id env.namespace NS.ElaborateClass id in
@@ -1326,6 +1332,9 @@ and check_afield_constant_expr env afield =
   | Aast.AFvalue e -> check_constant_expr env e
   | Aast.AFkvalue (e1, e2) ->
     check_constant_expr env e1 && check_constant_expr env e2
+
+and check_field_constant_expr env (e1, e2) =
+  check_constant_expr env e1 && check_constant_expr env e2
 
 and constant_expr env ~in_enum_class e =
   let valid_constant_expression =
@@ -1810,6 +1819,17 @@ and expr_ env p (e : Nast.expr_) =
         @@ Naming_error.Expected_collection { pos = p; cname = cn };
         invalid_expr_ p
     end
+  | Aast.ValCollection (kind, ta, exprs) ->
+    Aast.ValCollection
+      (kind, Option.map ~f:(targ env) ta, List.map exprs ~f:(expr env))
+  | Aast.KeyValCollection (kind, ta, fields) ->
+    Aast.KeyValCollection
+      ( kind,
+        Option.map
+          ~f:(fun (ta_key, ta_val) -> (targ env ta_key, targ env ta_val))
+          ta,
+        List.map fields ~f:(fun (expr_key, expr_val) ->
+            (expr env expr_key, expr env expr_val)) )
   | Aast.Clone e -> N.Clone (expr env e)
   | Aast.Null -> N.Null
   | Aast.True -> N.True
@@ -2210,8 +2230,6 @@ and expr_ env p (e : Nast.expr_) =
     N.EnumClassLabel (opt_sid, x)
   | Aast.ReadonlyExpr e -> N.ReadonlyExpr (expr env e)
   (* The below were not found on the AST.ml so they are not implemented here *)
-  | Aast.ValCollection _
-  | Aast.KeyValCollection _
   | Aast.This
   | Aast.Dollardollar _
   | Aast.Lplaceholder _

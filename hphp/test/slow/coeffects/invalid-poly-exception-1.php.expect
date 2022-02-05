@@ -1,0 +1,1 @@
+ string(92) "Function/method pointer to g() contains polymorphic coeffects but is used as a coeffect rule"

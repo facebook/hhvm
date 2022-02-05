@@ -403,6 +403,9 @@ void raiseCoeffectsFunParamTypeViolation(TypedValue tv,
                    "closure object, function/method pointer or null but "
                    "{} given",
                    paramIdx + 1, describe_actual_type(&tv));
+  if (CoeffectsConfig::throws()) {
+    SystemLib::throwInvalidArgumentExceptionObject(errMsg);
+  }
   raise_warning(errMsg);
 }
 
@@ -412,6 +415,9 @@ void raiseCoeffectsFunParamCoeffectRulesViolation(const Func* f) {
     folly::sformat("Function/method pointer to {}() contains polymorphic "
                    "coeffects but is used as a coeffect rule",
                    f->fullNameWithClosureName());
+  if (CoeffectsConfig::throws()) {
+    SystemLib::throwInvalidArgumentExceptionObject(errMsg);
+  }
   raise_warning(errMsg);
 }
 

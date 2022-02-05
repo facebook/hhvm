@@ -33,6 +33,10 @@ struct CoeffectsConfig {
     assertx(s_instance);
     return s_instance->m_pureLevel > 0;
   }
+  static bool throws() {
+    assertx(s_instance);
+    return s_instance->m_pureLevel > 1;
+  }
   static int pureEnforcementLevel() {
     assertx(s_instance);
     return s_instance->m_pureLevel;

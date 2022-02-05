@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/coeffects-config.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/enum-cache.h"
@@ -1469,7 +1470,9 @@ Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
   auto const slot = m_constants.findIndex(name);
   if (slot == kInvalidSlot) {
     if (!failIsFatal) return std::nullopt;
-    // TODO: Once coeffect migration is done, convert this back to raise_error
+    if (CoeffectsConfig::throws()) {
+      raise_error("Context constant %s does not exist", name->data());
+    }
     raise_warning("Context constant %s does not exist", name->data());
     return RuntimeCoeffects::none();
   }
@@ -1481,7 +1484,9 @@ Class::clsCtxCnsGet(const StringData* name, bool failIsFatal) const {
   }
   if (cns.isAbstractAndUninit()) {
     if (!failIsFatal) return std::nullopt;
-    // TODO: Once coeffect migration is done, convert this back to raise_error
+    if (CoeffectsConfig::throws()) {
+      raise_error("Context constant %s is abstract", name->data());
+    }
     raise_warning("Context constant %s is abstract", name->data());
     return RuntimeCoeffects::none();
   }

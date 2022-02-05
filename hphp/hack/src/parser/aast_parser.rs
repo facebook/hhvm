@@ -131,7 +131,7 @@ impl<'src> AastParser {
         }
         let mode = mode.unwrap_or(Mode::Mstrict);
         let scoured_comments =
-            Self::scour_comments_and_add_fixmes(env, indexed_source_text, &tree.root())?;
+            Self::scour_comments_and_add_fixmes(env, indexed_source_text, tree.root())?;
         let mut lowerer_env = lowerer::Env::make(
             env.codegen,
             env.quick_mode,
@@ -143,8 +143,8 @@ impl<'src> AastParser {
             &env.parser_options,
             RcOc::clone(&ns),
             stack_limit,
-            TokenFactory::new(&arena),
-            &arena,
+            TokenFactory::new(arena),
+            arena,
         );
         let ret = lower(&mut lowerer_env, tree.root());
         let mut ret = if env.elaborate_namespaces {
@@ -153,7 +153,7 @@ impl<'src> AastParser {
             ret
         };
         let syntax_errors = match &mut ret {
-            Ok(aast) => Self::check_syntax_error(&env, indexed_source_text, &tree, Some(aast)),
+            Ok(aast) => Self::check_syntax_error(env, indexed_source_text, &tree, Some(aast)),
             Err(_) => Self::check_syntax_error(env, indexed_source_text, &tree, None),
         };
         let lowpri_errors = lowerer_env.lowpri_errors().borrow().to_vec();
@@ -193,13 +193,13 @@ impl<'src> AastParser {
             errors.sort_by(SyntaxError::compare_offset);
 
             let mut empty_program = Program(vec![]);
-            let mut aast = aast.unwrap_or(&mut empty_program);
+            let aast = aast.unwrap_or(&mut empty_program);
             if uses_readonly {
-                errors.extend(readonly_check::check_program(&mut aast, !env.codegen));
+                errors.extend(readonly_check::check_program(aast, !env.codegen));
             }
-            errors.extend(aast_check::check_program(&aast, !env.codegen));
-            errors.extend(expression_tree_check::check_splices(&aast));
-            errors.extend(coeffects_check::check_program(&aast, !env.codegen));
+            errors.extend(aast_check::check_program(aast, !env.codegen));
+            errors.extend(expression_tree_check::check_splices(aast));
+            errors.extend(coeffects_check::check_program(aast, !env.codegen));
 
             errors
         };
@@ -235,7 +235,7 @@ impl<'src> AastParser {
         Ok((language, mode, tree))
     }
 
-    pub fn make_parser_env<'arena>(
+    pub fn make_parser_env(
         env: &Env,
         source_text: &'src SourceText<'src>,
     ) -> (Language, Option<Mode>, ParserEnv) {

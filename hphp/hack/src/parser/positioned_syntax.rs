@@ -71,7 +71,7 @@ impl PositionedValue {
     fn leading_token(&self) -> Option<&PositionedToken> {
         use PositionedValue::*;
         match self {
-            TokenValue(l) => Some(&l),
+            TokenValue(l) => Some(l),
             TokenSpan(x) => Some(&x.left),
             _ => None,
         }
@@ -80,7 +80,7 @@ impl PositionedValue {
     fn trailing_token(&self) -> Option<&PositionedToken> {
         use PositionedValue::*;
         match self {
-            TokenValue(r) => Some(&r),
+            TokenValue(r) => Some(r),
             TokenSpan(x) => Some(&x.right),
             _ => None,
         }
@@ -95,12 +95,12 @@ impl PositionedValue {
             | (TokenSpan(_), TokenSpan(_)) => {
                 let l = first.leading_token().unwrap();
                 let r = last.trailing_token().unwrap();
-                if RcOc::ptr_eq(&l, &r) {
-                    TokenValue(RcOc::clone(&l))
+                if RcOc::ptr_eq(l, r) {
+                    TokenValue(RcOc::clone(l))
                 } else {
                     TokenSpan(Box::new(Span {
-                        left: RcOc::clone(&l),
-                        right: RcOc::clone(&r),
+                        left: RcOc::clone(l),
+                        right: RcOc::clone(r),
                     }))
                 }
             }

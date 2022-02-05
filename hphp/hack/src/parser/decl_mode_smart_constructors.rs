@@ -74,7 +74,7 @@ impl<S> StateType<S> for State<'_, '_, S> {
         let st_todo = if self.stack.len() > inputs.len() {
             self.stack.split_off(self.stack.len() - inputs.len())
         } else {
-            std::mem::replace(&mut self.stack, vec![])
+            std::mem::take(&mut self.stack)
         };
         let res = st_todo.into_iter().any(|b2| b2);
         self.push(res);

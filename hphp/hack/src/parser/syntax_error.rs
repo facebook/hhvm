@@ -37,7 +37,7 @@ impl SyntaxError {
         message: Error,
     ) -> Self {
         Self {
-            child: child.map(|x| Box::new(x)),
+            child: child.map(Box::new),
             start_offset,
             end_offset,
             error_type,

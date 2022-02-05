@@ -140,10 +140,10 @@ mod tests {
 
     #[test]
     fn test_is_hh_autoimport() {
-        assert_eq!(is_hh_autoimport("vec"), true);
-        assert_eq!(is_hh_autoimport("KeyedIterable"), true);
-        assert_eq!(is_hh_autoimport("non-exisit"), false);
-        assert_eq!(is_hh_autoimport_fun("keyset"), true);
-        assert_eq!(is_hh_autoimport_fun("KeyedIterable"), false);
+        assert!(is_hh_autoimport("vec"));
+        assert!(is_hh_autoimport("KeyedIterable"));
+        assert!(!is_hh_autoimport("non-exisit"));
+        assert!(is_hh_autoimport_fun("keyset"));
+        assert!(!is_hh_autoimport_fun("KeyedIterable"));
     }
 }

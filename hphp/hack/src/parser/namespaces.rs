@@ -99,15 +99,15 @@ fn elaborate_into_ns(ns_name: Option<&str>, id: &str) -> String {
     match ns_name {
         None => {
             let mut s = String::with_capacity(1 + id.len());
-            s.push_str("\\");
+            s.push('\\');
             s.push_str(id);
             s
         }
         Some(ns) => {
             let mut s = String::with_capacity(2 + ns.len() + id.len());
-            s.push_str("\\");
+            s.push('\\');
             s.push_str(ns);
-            s.push_str("\\");
+            s.push('\\');
             s.push_str(id);
             s
         }
@@ -152,7 +152,7 @@ fn elaborate_raw_id<'a>(
         let qualified = elaborate_xhp_namespace(id);
         match qualified {
             None => Cow::Borrowed(id),
-            Some(s) if id.starts_with(":") && simplify_naming_for_facts => {
+            Some(s) if id.starts_with(':') && simplify_naming_for_facts => {
                 // allow :foo:bar to be elaborated into
                 // \currentnamespace\foo\bar rather than \foo\bar
                 Cow::Owned(s.get(1..).unwrap().to_string())
@@ -179,13 +179,13 @@ fn elaborate_raw_id<'a>(
         ElaborateKind::Fun if sn::pseudo_functions::is_pseudo_function(&fqid) => {
             return Cow::Owned(fqid);
         }
-        ElaborateKind::Class if sn::typehints::is_reserved_global_name(&id) => {
+        ElaborateKind::Class if sn::typehints::is_reserved_global_name(id) => {
             return Cow::Owned(fqid);
         }
-        ElaborateKind::Class if sn::typehints::is_reserved_hh_name(&id) && nsenv.is_codegen() => {
-            return Cow::Owned(elaborate_into_ns(Some("HH"), &id));
+        ElaborateKind::Class if sn::typehints::is_reserved_hh_name(id) && nsenv.is_codegen() => {
+            return Cow::Owned(elaborate_into_ns(Some("HH"), id));
         }
-        ElaborateKind::Class if sn::typehints::is_reserved_hh_name(&id) => {
+        ElaborateKind::Class if sn::typehints::is_reserved_hh_name(id) => {
             return Cow::Owned(fqid);
         }
         _ => {}
@@ -193,7 +193,7 @@ fn elaborate_raw_id<'a>(
 
     let (prefix, has_bslash) = match id.find('\\') {
         Some(i) => (&id[..i], true),
-        None => (&id[..], false),
+        None => (id, false),
     };
 
     if has_bslash && prefix == "namespace" {

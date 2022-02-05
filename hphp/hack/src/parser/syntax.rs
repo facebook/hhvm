@@ -320,7 +320,7 @@ where
 
     pub fn get_token(&self) -> Option<&T> {
         match &self.syntax {
-            SyntaxVariant::Token(t) => Some(&t),
+            SyntaxVariant::Token(t) => Some(t),
             _ => None,
         }
     }
@@ -383,7 +383,7 @@ pub struct SyntaxChildrenIterator<'a, T, V> {
 impl<'src, T, V> SyntaxVariant<T, V> {
     pub fn iter_children<'a>(&'a self) -> SyntaxChildrenIterator<'a, T, V> {
         SyntaxChildrenIterator {
-            syntax: &self,
+            syntax: self,
             index: 0,
             index_back: 0,
         }

@@ -6,13 +6,14 @@
 use crate::{indexed_source_text::IndexedSourceText, source_text::SourceText};
 use oxidized::pos::Pos;
 
-// SyntaxTrait defines basic functionality implemented by each Syntax. It corresponds to
-// Syntax_sig::Syntax_S in OCaml implementation. It's a trait and not an  inherent implementation,
-// because different syntaxes have different data to work with; for example full_width is already
-// cached inside PositionedSyntax, while MinimalSyntax will have to iterate through entire subtree
-// to compute it.
-// Because of bugs in implementation and nothing ever enforcing it, in practice the values often
-// will be different depending on the syntax, so be careful.
+/// SyntaxTrait defines basic functionality implemented by each Syntax.
+/// It corresponds to Syntax_sig::Syntax_S in OCaml implementation. It is a trait
+/// and not an inherent implementation, because different syntaxes have different
+/// data to work with; for example full_width is already cached inside
+/// PositionedSyntax, while MinimalSyntax will have to iterate through entire
+/// subtree to compute it. Because of bugs in implementation and nothing ever
+/// enforcing it, in practice the values often will be different depending on
+/// the syntax, so be careful.
 pub trait SyntaxTrait {
     fn offset(&self) -> Option<usize>;
     fn width(&self) -> usize;
@@ -27,9 +28,7 @@ pub trait SyntaxTrait {
     }
 
     fn end_offset(&self) -> usize {
-        let mut w = self.width();
-        w = if w <= 0 { 0 } else { w - 1 };
-        self.start_offset() + w
+        self.start_offset() + self.width().saturating_sub(1)
     }
 
     fn position_exclusive(&self, source_text: &IndexedSourceText<'_>) -> Option<Pos> {

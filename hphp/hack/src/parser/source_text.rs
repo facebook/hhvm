@@ -76,10 +76,7 @@ impl<'a> SourceText<'a> {
     }
 
     pub fn get(&self, index: usize) -> char {
-        self.text()
-            .get(index)
-            .map(|x| *x as char)
-            .unwrap_or(INVALID)
+        self.text().get(index).map_or(INVALID, |x| *x as char)
     }
 
     pub fn sub(&self, start: usize, length: usize) -> &'a [u8] {

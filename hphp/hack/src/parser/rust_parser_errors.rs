@@ -6,7 +6,7 @@
 use itertools::Itertools;
 use std::collections::BTreeMap;
 use std::{matches, str::FromStr};
-use strum;
+
 use strum::IntoEnumIterator;
 use strum_macros::{Display, EnumIter, EnumString, IntoStaticStr};
 
@@ -74,17 +74,8 @@ enum FeatureStatus {
     // and likely only need to be distinguished in the lint rule rather than here
 }
 
-#[derive(
-    Clone,
-    Copy,
-    EnumIter,
-    EnumString,
-    Eq,
-    Display,
-    Hash,
-    IntoStaticStr,
-    PartialEq
-)]
+#[derive(Clone, Copy, Eq, Display, Hash, PartialEq)]
+#[derive(EnumIter, EnumString, IntoStaticStr)]
 #[strum(serialize_all = "snake_case")]
 enum UnstableFeatures {
     // TODO: rename this from unstable to something else
@@ -92,7 +83,7 @@ enum UnstableFeatures {
     ClassLevelWhere,
     ExpressionTrees,
     EnumClassLabel,
-    IFC,
+    Ifc,
     Readonly,
     Modules,
     ContextAliasDeclaration,
@@ -112,7 +103,7 @@ impl UnstableFeatures {
             UnstableFeatures::ClassLevelWhere => Unstable,
             UnstableFeatures::ExpressionTrees => Unstable,
             UnstableFeatures::EnumClassLabel => Preview,
-            UnstableFeatures::IFC => Unstable,
+            UnstableFeatures::Ifc => Unstable,
             UnstableFeatures::Readonly => Preview,
             UnstableFeatures::Modules => Unstable,
             UnstableFeatures::ContextAliasDeclaration => Unstable,
@@ -285,14 +276,12 @@ fn make_first_use_or_def(
     namespace_name: &str,
     name: &str,
 ) -> FirstUseOrDef {
-    let res = FirstUseOrDef {
+    FirstUseOrDef {
         location,
         kind,
         name: combine_names(namespace_name, name),
         global: !is_method && namespace_name == GLOBAL_NAMESPACE_NAME,
-    };
-
-    res
+    }
 }
 struct ParserErrors<'a, Token, Value, State> {
     phantom: std::marker::PhantomData<(*const Token, *const Value, *const State)>,
@@ -491,7 +480,7 @@ where
                 parser_options.tco_union_intersection_type_hints
             }
             UnstableFeatures::ClassLevelWhere => parser_options.po_enable_class_level_where_clauses,
-            UnstableFeatures::IFC => {
+            UnstableFeatures::Ifc => {
                 let file_path = format!("/{}", self.env.text.source_text().file_path().path_str());
                 parser_options
                     .tco_ifc_enabled
@@ -878,7 +867,7 @@ where
         match &node.children {
             FunctionDeclarationHeader(node) if node.name.is_construct() => {
                 let class_var_names: Vec<_> = class_elts(self.env.context.active_classish)
-                    .map(|x| prop_names(x))
+                    .map(prop_names)
                     .flatten()
                     .collect();
                 let params = Self::syntax_to_list_no_separators(&node.parameter_list);
@@ -1148,7 +1137,7 @@ where
                         if open_tag != close_tag {
                             self.errors.push(Self::make_error_from_node(
                                 node,
-                                errors::error2070(&open_tag, &close_tag),
+                                errors::error2070(open_tag, close_tag),
                             ))
                         }
                     }
@@ -1334,7 +1323,7 @@ where
                         return None; // This arm is never reached
                     }
                 }
-                return None;
+                None
             })
     }
 
@@ -1473,7 +1462,7 @@ where
             s,
             e,
             ErrorType::ParseError,
-            report_error(&name, short_name),
+            report_error(name, short_name),
         )
     }
 
@@ -1606,7 +1595,7 @@ where
             match self.attr_name(node) {
                 Some(n) => {
                     if self.is_ifc_attribute(n) {
-                        self.check_can_use_feature(node, &UnstableFeatures::IFC)
+                        self.check_can_use_feature(node, &UnstableFeatures::Ifc)
                     }
                     if (sn::user_attributes::ignore_readonly_local_errors(n)
                         || sn::user_attributes::ignore_coeffect_local_errors(n)
@@ -1656,7 +1645,7 @@ where
         if let ClassishDeclaration(cd) = &active_classish.children {
             return self.attr_spec_contains_enum_class(&cd.attribute);
         }
-        return false;
+        false
     }
 
     fn is_in_reified_class(&self) -> bool {
@@ -1709,7 +1698,7 @@ where
 
                 if let Some(clashing_name) = self.class_constructor_param_promotion_clash(node) {
                     let class_name = self.active_classish_name().unwrap_or("");
-                    let error_msg = errors::error2025(class_name, &clashing_name);
+                    let error_msg = errors::error2025(class_name, clashing_name);
                     self.errors.push(Self::make_error_from_node(
                         function_parameter_list,
                         error_msg,
@@ -1892,7 +1881,7 @@ where
         match &node.children {
             ParameterDeclaration(x)
                 if Self::is_parameter_with_callconv(node)
-                    && Self::is_parameter_with_default_value(&node) =>
+                    && Self::is_parameter_with_default_value(node) =>
             {
                 Some(&x.default_value)
             }
@@ -1963,7 +1952,7 @@ where
         if let ParameterDeclaration(x) = &node.children {
             let attr = &x.attribute;
             if self.attribute_specification_contains(attr, sn::user_attributes::EXTERNAL) {
-                self.check_can_use_feature(attr, &UnstableFeatures::IFC);
+                self.check_can_use_feature(attr, &UnstableFeatures::Ifc);
             }
         }
     }
@@ -1999,19 +1988,15 @@ where
                     }
                     ExpressionStatement(_) => return true,
                     ForStatement(x)
-                        if node as *const _ == &x.initializer as *const _
-                            || node as *const _ == &x.end_of_loop as *const _ =>
+                        if std::ptr::eq(node, &x.initializer)
+                            || std::ptr::eq(node, &x.end_of_loop) =>
                     {
                         return true;
                     }
-                    UsingStatementFunctionScoped(x)
-                        if node as *const _ == &x.expression as *const _ =>
-                    {
+                    UsingStatementFunctionScoped(x) if std::ptr::eq(node, &x.expression) => {
                         return true;
                     }
-                    UsingStatementBlockScoped(x)
-                        if node as *const _ == &x.expressions as *const _ =>
-                    {
+                    UsingStatementBlockScoped(x) if std::ptr::eq(node, &x.expressions) => {
                         return true;
                     }
                     _ => return false,
@@ -2027,9 +2012,7 @@ where
                         node = parent;
                         continue;
                     }
-                    FunctionCallExpression(x)
-                        if node as *const _ == &x.argument_list as *const _ =>
-                    {
+                    FunctionCallExpression(x) if std::ptr::eq(node, &x.argument_list) => {
                         if i == 0 {
                             // probably unreachable, but just in case to avoid crashing on 0-1
                             return Some((parent, &parents[0..0]));
@@ -2061,7 +2044,7 @@ where
                         None => LvalTypeNonFinalInout,
                         Some(parent) => match &parent.children {
                             BinaryExpression(x)
-                                if call_node as *const _ == &x.right_operand as *const _
+                                if std::ptr::eq(call_node, &x.right_operand)
                                     && Self::does_binop_create_write_on_left(Self::token_kind(
                                         &x.operator,
                                     )) =>
@@ -2095,13 +2078,13 @@ where
             let parents = &parents[..parents.len() - 1];
             match &next_node.children {
                 DecoratedExpression(x)
-                    if node as *const _ == &x.expression as *const _
+                    if std::ptr::eq(node, &x.expression)
                         && Self::does_decorator_create_write(Self::token_kind(&x.decorator)) =>
                 {
                     lval_ness_of_function_arg_for_inout(next_node, parents)
                 }
                 PrefixUnaryExpression(_) | PostfixUnaryExpression(_)
-                    if node as *const _ == unary_expression_operand(next_node) as *const _
+                    if std::ptr::eq(node, unary_expression_operand(next_node))
                         && Self::does_unop_create_write(Self::token_kind(
                             unary_expression_operator(next_node),
                         )) =>
@@ -2113,7 +2096,7 @@ where
                     }
                 }
                 BinaryExpression(x)
-                    if node as *const _ == &x.left_operand as *const _
+                    if std::ptr::eq(node, &x.left_operand)
                         && Self::does_binop_create_write_on_left(Self::token_kind(&x.operator)) =>
                 {
                     if is_in_final_lval_position(next_node, parents) {
@@ -2123,8 +2106,7 @@ where
                     }
                 }
                 ForeachStatement(x)
-                    if node as *const _ == &x.key as *const _
-                        || node as *const _ == &x.value as *const _ =>
+                    if std::ptr::eq(node, &x.key) || std::ptr::eq(node, &x.value) =>
                 {
                     LvalTypeFinal
                 }
@@ -2314,7 +2296,7 @@ where
                             NameDef,
                             location,
                             &self.namespace_name,
-                            &function_name,
+                            function_name,
                         );
                         match self.names.functions.get(function_name) {
                             Some(prev_def)
@@ -2353,8 +2335,8 @@ where
 
                                 self.errors.push(Self::make_name_already_used_error(
                                     &f.name,
-                                    &combine_names(&self.namespace_name, &function_name),
-                                    &function_name,
+                                    &combine_names(&self.namespace_name, function_name),
+                                    function_name,
                                     &def.location,
                                     &|x, y| errors::declared_name_is_already_in_use(line_num, x, y),
                                 ))
@@ -2826,7 +2808,7 @@ where
                 | LessThanLessThan
                 | GreaterThanGreaterThan
                 | Carat => BinopAllowAwaitBoth,
-                QuestionQuestionEqual | _ => BinopAllowAwaitNone,
+                _ => BinopAllowAwaitNone,
             },
         }
     }
@@ -2854,21 +2836,19 @@ where
                 | UnsetStatement(_)
                 | EchoStatement(_)
                 | ThrowStatement(_) => break,
-                IfStatement(x) if node as *const _ == &x.condition as *const _ => break,
-                ForStatement(x) if node as *const _ == &x.initializer as *const _ => break,
-                SwitchStatement(x) if node as *const _ == &x.expression as *const _ => break,
-                ForeachStatement(x) if node as *const _ == &x.collection as *const _ => {
+                IfStatement(x) if std::ptr::eq(node, &x.condition) => break,
+                ForStatement(x) if std::ptr::eq(node, &x.initializer) => break,
+                SwitchStatement(x) if std::ptr::eq(node, &x.expression) => break,
+                ForeachStatement(x) if std::ptr::eq(node, &x.collection) => {
                     break;
                 }
-                UsingStatementBlockScoped(x) if node as *const _ == &x.expressions as *const _ => {
+                UsingStatementBlockScoped(x) if std::ptr::eq(node, &x.expressions) => {
                     break;
                 }
-                UsingStatementFunctionScoped(x)
-                    if node as *const _ == &x.expression as *const _ =>
-                {
+                UsingStatementFunctionScoped(x) if std::ptr::eq(node, &x.expression) => {
                     break;
                 }
-                LambdaExpression(x) if node as *const _ == &x.body as *const _ => break,
+                LambdaExpression(x) if std::ptr::eq(node, &x.body) => break,
                 // Dependent awaits are not allowed currently
                 PrefixUnaryExpression(x)
                     if Self::token_kind(&x.operator) == Some(TokenKind::Await) =>
@@ -2891,7 +2871,7 @@ where
                 }
                 // Special case the pipe operator error message
                 BinaryExpression(x)
-                    if node as *const _ == &x.right_operand as *const _
+                    if std::ptr::eq(node, &x.right_operand)
                         && Self::token_kind(&x.operator) == Some(TokenKind::BarGreaterThan) =>
                 {
                     self.errors.push(Self::make_error_from_node(
@@ -2906,8 +2886,8 @@ where
                 BinaryExpression(x)
                     if (match Self::get_positions_binop_allows_await(&x.operator) {
                         BinopAllowAwaitBoth => true,
-                        BinopAllowAwaitLeft => node as *const _ == &x.left_operand as *const _,
-                        BinopAllowAwaitRight => node as *const _ == &x.right_operand as *const _,
+                        BinopAllowAwaitLeft => std::ptr::eq(node, &x.left_operand),
+                        BinopAllowAwaitRight => std::ptr::eq(node, &x.right_operand),
                         BinopAllowAwaitNone => false,
                     }) =>
                 {
@@ -2915,12 +2895,12 @@ where
                 }
                 // test part of conditional expression is considered legal location if
                 //  onditional expression itself is in legal location
-                ConditionalExpression(x) if node as *const _ == &x.test as *const _ => {
+                ConditionalExpression(x) if std::ptr::eq(node, &x.test) => {
                     continue;
                 }
                 FunctionCallExpression(x)
-                    if node as *const _ == &x.receiver as *const _
-                        || node as *const _ == &x.argument_list as *const _
+                    if std::ptr::eq(node, &x.receiver)
+                        || std::ptr::eq(node, &x.argument_list)
                             && !x.receiver.is_safe_member_selection_expression() =>
                 {
                     continue;
@@ -2928,7 +2908,7 @@ where
 
                 // object of member selection expression or safe member selection expression
                 // is in legal position if member selection expression itself is in legal position
-                SafeMemberSelectionExpression(x) if node as *const _ == &x.object as *const _ => {
+                SafeMemberSelectionExpression(x) if std::ptr::eq(node, &x.object) => {
                     continue;
                 }
 
@@ -3098,10 +3078,7 @@ where
                         Some(a)
                             if a.is_attribute_specification()
                                 || a.is_old_attribute_specification()
-                                || a.is_file_attribute_specification() =>
-                        {
-                            ()
-                        }
+                                || a.is_file_attribute_specification() => {}
                         _ => {
                             if ctr_call.left_paren.is_missing() || ctr_call.right_paren.is_missing()
                             {
@@ -3211,7 +3188,7 @@ where
                     ..
                 }) = self.parents.last()
                 {
-                    if node as *const _ == &x.value as *const _ {
+                    if std::ptr::eq(node, &x.value) {
                         self.errors.push(Self::make_error_from_node_with_type(
                             node,
                             errors::error2077,
@@ -3408,7 +3385,7 @@ where
                     Self::token_kind(l) == Some(TokenKind::Name)
                         && Self::token_kind(r) == Some(TokenKind::Name)
                         && self.text(l).eq_ignore_ascii_case("hh")
-                        && is_standard_collection(&self.text(r))
+                        && is_standard_collection(self.text(r))
                 };
 
                 let check_type_specifier = |n, t: &Token| {
@@ -3546,12 +3523,12 @@ where
             let name = self.text(sname);
             // If the name is empty, then there was an earlier
             // parsing error that should supercede this one.
-            if name == "" {
+            if name.is_empty() {
             } else if names.contains(name) {
                 self.errors.push(Self::make_error_from_node(
                     prop,
                     errors::redeclaration_error(
-                        &(Self::strip_ns(&full_name).to_string() + "::" + name),
+                        &(Self::strip_ns(full_name).to_string() + "::" + name),
                     ),
                 ))
             } else {
@@ -3631,7 +3608,7 @@ where
                 let line_num = line_num as usize;
                 let long_name_text = combine_names(&self.namespace_name, name_text);
                 self.errors.push(Self::make_name_already_used_error(
-                    &name,
+                    name,
                     &long_name_text,
                     name_text,
                     location,
@@ -3652,7 +3629,7 @@ where
                     &self.namespace_name,
                     name_text,
                 );
-                self.names.classes.add(&name_text, def)
+                self.names.classes.add(name_text, def)
             }
         }
     }
@@ -3996,7 +3973,7 @@ where
             self.produce_error(
                 |_, x| Self::cant_be_classish_name(x),
                 &classish_name,
-                || errors::reserved_keyword_as_class_name(&classish_name),
+                || errors::reserved_keyword_as_class_name(classish_name),
                 &cd.name,
             );
             if Self::is_token_kind(&cd.keyword, TokenKind::Interface)
@@ -4122,7 +4099,7 @@ where
     fn alias_errors(&mut self, node: S<'a, Token, Value>) {
         if let AliasDeclaration(ad) = &node.children {
             let attrs = &ad.attribute_spec;
-            self.check_attr_enabled(&attrs);
+            self.check_attr_enabled(attrs);
             if Self::token_kind(&ad.keyword) == Some(TokenKind::Type) && !ad.constraint.is_missing()
             {
                 self.errors
@@ -4150,7 +4127,7 @@ where
                 self.check_can_use_feature(node, &UnstableFeatures::ContextAliasDeclaration);
             }
             let attrs = &cad.attribute_spec;
-            self.check_attr_enabled(&attrs);
+            self.check_attr_enabled(attrs);
             if Self::token_kind(&cad.keyword) == Some(TokenKind::Type)
                 && !cad.as_constraint.is_missing()
             {
@@ -4212,7 +4189,7 @@ where
                         .push(Self::make_error_from_node(clause, errors::error2049))
                 });
             self.produce_error(
-                |_, x| Self::is_invalid_group_use_prefix(&x),
+                |_, x| Self::is_invalid_group_use_prefix(x),
                 prefix,
                 || errors::error2048,
                 prefix,
@@ -4253,7 +4230,7 @@ where
                 | {
                     let is_global_namespace = self_.is_global_namespace();
                     let names = get_names(&mut self_.names);
-                    match names.get(&short_name) {
+                    match names.get(short_name) {
                         Some(FirstUseOrDef {
                             location,
                             kind,
@@ -4266,7 +4243,7 @@ where
                                 self_.errors.push(Self::make_name_already_used_error(
                                     name,
                                     name_text,
-                                    &short_name,
+                                    short_name,
                                     location,
                                     report_error,
                                 ))
@@ -4280,7 +4257,7 @@ where
                                 GLOBAL_NAMESPACE_NAME,
                                 &qualified_name,
                             );
-                            names.add(&short_name, new_use)
+                            names.add(short_name, new_use)
                         }
                     }
                 };
@@ -4325,7 +4302,7 @@ where
                         }
                         let location = Self::make_location_of_node(name);
 
-                        match self.names.classes.get(&short_name) {
+                        match self.names.classes.get(short_name) {
                             Some(FirstUseOrDef {
                                 location: loc,
                                 name: def_name,
@@ -4350,11 +4327,7 @@ where
                                     };
 
                                     self.errors.push(Self::make_name_already_used_error(
-                                        name,
-                                        name_text,
-                                        &short_name,
-                                        loc,
-                                        &err_msg,
+                                        name, name_text, short_name, loc, &err_msg,
                                     ))
                                 }
                             }
@@ -4367,11 +4340,11 @@ where
                                     &qualified_name,
                                 );
 
-                                if !self.names.namespaces.mem(&short_name) {
-                                    self.names.namespaces.add(&short_name, new_use.clone());
-                                    self.names.classes.add(&short_name, new_use);
+                                if !self.names.namespaces.mem(short_name) {
+                                    self.names.namespaces.add(short_name, new_use.clone());
+                                    self.names.classes.add(short_name, new_use);
                                 } else {
-                                    self.names.classes.add(&short_name, new_use);
+                                    self.names.classes.add(short_name, new_use);
                                 }
                             }
                         }
@@ -4477,7 +4450,7 @@ where
 
         let check_type_specifier = |self_: &mut Self, x: S<'a, Token, Value>, initializer| {
             if let Token(token) = &x.children {
-                if is_namey(self_, &token) {
+                if is_namey(self_, token) {
                     return Self::syntax_to_list_no_separators(initializer)
                         .for_each(|x| self_.check_constant_expression(x));
                 }
@@ -4486,7 +4459,7 @@ where
         };
 
         let check_collection_members = |self_: &mut Self, x| {
-            Self::syntax_to_list_no_separators(x).for_each(|x| self_.check_constant_expression(&x))
+            Self::syntax_to_list_no_separators(x).for_each(|x| self_.check_constant_expression(x))
         };
         match &node.children {
             Missing | QualifiedName(_) | LiteralExpression(_) => {}
@@ -4715,8 +4688,8 @@ where
 
                         self.errors.push(Self::make_name_already_used_error(
                             &cd.name,
-                            &combine_names(&self.namespace_name, &constant_name),
-                            &constant_name,
+                            &combine_names(&self.namespace_name, constant_name),
+                            constant_name,
                             &def.location,
                             &|x, y| errors::declared_name_is_already_in_use(line_num, x, y),
                         ))
@@ -4950,7 +4923,7 @@ where
     fn enum_decl_errors(&mut self, node: S<'a, Token, Value>) {
         if let EnumDeclaration(x) = &node.children {
             let attrs = &x.attribute_spec;
-            self.check_attr_enabled(&attrs);
+            self.check_attr_enabled(attrs);
             if self.attr_spec_contains_const(attrs) {
                 self.errors.push(Self::make_error_from_node(
                     node,
@@ -5058,13 +5031,13 @@ where
             DecoratedExpression(x) => {
                 let loperand = &x.expression;
                 if Self::does_decorator_create_write(Self::token_kind(&x.decorator)) {
-                    self.check_lvalue(&loperand)
+                    self.check_lvalue(loperand)
                 }
             }
             BinaryExpression(x) => {
                 let loperand = &x.left_operand;
                 if Self::does_binop_create_write_on_left(Self::token_kind(&x.operator)) {
-                    self.check_lvalue(&loperand);
+                    self.check_lvalue(loperand);
                 }
             }
             ForeachStatement(x) => {
@@ -5110,7 +5083,7 @@ where
                 }
             }
         }
-        return self.namespace_name.clone();
+        self.namespace_name.clone()
     }
 
     fn disabled_legacy_soft_typehint_errors(&mut self, node: S<'a, Token, Value>) {
@@ -5174,7 +5147,7 @@ where
                         errors::fewer_than_two_statements_in_concurrent_block,
                     ))
                 }
-                for ref n in statement_list() {
+                for n in statement_list() {
                     if let ExpressionStatement(x) = &n.children {
                         if !self.node_has_await_child(&x.expression) {
                             self.errors.push(Self::make_error_from_node(
@@ -5189,7 +5162,7 @@ where
                         ))
                     }
                 }
-                for ref n in statement_list() {
+                for n in statement_list() {
                     for error in self.find_invalid_lval_usage(n) {
                         self.errors.push(error)
                     }
@@ -5211,17 +5184,16 @@ where
             ..
         }) = self.parents.last()
         {
-        } else {
-            if let QualifiedName(x) = &node.children {
-                let name_parts = &x.parts;
-                let mut parts = Self::syntax_to_list_with_separators(name_parts);
-                let last_part = parts.nth_back(0);
-                match last_part {
-                    Some(t) if Self::token_kind(t) == Some(TokenKind::Backslash) => self
-                        .errors
-                        .push(Self::make_error_from_node(t, errors::error0008)),
-                    _ => {}
-                }
+            // Ok
+        } else if let QualifiedName(x) = &node.children {
+            let name_parts = &x.parts;
+            let mut parts = Self::syntax_to_list_with_separators(name_parts);
+            let last_part = parts.nth_back(0);
+            match last_part {
+                Some(t) if Self::token_kind(t) == Some(TokenKind::Backslash) => self
+                    .errors
+                    .push(Self::make_error_from_node(t, errors::error0008)),
+                _ => {}
             }
         }
     }
@@ -5313,7 +5285,7 @@ where
                 prev_context = Some(self.env.context.clone());
                 self.env.context.active_classish = Some(node)
             }
-            FileAttributeSpecification(_) => Self::attr_spec_to_node_list(node).for_each(|ref node| {
+            FileAttributeSpecification(_) => Self::attr_spec_to_node_list(node).for_each(|node| {
                 match self.attr_name(node) {
                     Some(sn::user_attributes::ENABLE_UNSTABLE_FEATURES) =>
                 {
@@ -5331,7 +5303,7 @@ where
                                 ),
                             ))
                         } else {
-                            args.for_each(|ref arg| self.enable_unstable_feature(node, arg))
+                            args.for_each(|arg| self.enable_unstable_feature(node, arg))
                         }
                     }
                 }
@@ -5444,9 +5416,9 @@ where
                     |self_, x| self_.check_static_in_initializer(x),
                     &init,
                     || errors::parent_static_prop_decl,
-                    &init,
+                    init,
                 );
-                self.check_constant_expression(&init)
+                self.check_constant_expression(init)
             }
             XHPClassAttribute(x) => self.check_constant_expression(&x.initializer),
             OldAttributeSpecification(_) => self.disabled_legacy_attribute_syntax_errors(node),

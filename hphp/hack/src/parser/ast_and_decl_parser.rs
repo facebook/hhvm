@@ -20,7 +20,7 @@ pub fn from_text<'a>(
     stack_limit: Option<&StackLimit>,
 ) -> (AastResult<ParserResult>, ParsedFile<'a>) {
     let source = indexed_source_text.source_text();
-    let (language, mode, parser_env) = AastParser::make_parser_env(&env, source);
+    let (language, mode, parser_env) = AastParser::make_parser_env(env, source);
     let opts = arena.alloc(DeclParserOptions::from_oxidized_parser_options(
         arena,
         &env.parser_options,

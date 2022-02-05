@@ -17,10 +17,7 @@ pub use oxidized::{
     ast_defs::ClassishKind,
     ast_defs::Visibility,
     typing_defs::ClassConstKind,
-    typing_defs_core::{
-        ConsistentKind, DestructureKind, Enforcement, Exact, FunTparamsKind, ParamMode, ShapeKind,
-        ValKind,
-    },
+    typing_defs_core::{ConsistentKind, Enforcement, Exact, ParamMode, ShapeKind},
     typing_defs_flags::{self, ClassEltFlags, ClassEltFlagsArgs, FunParamFlags, FunTypeFlags},
     xhp_attribute::{Tag, XhpAttribute},
 };
@@ -63,6 +60,8 @@ pub enum TshapeFieldName {
     TSFclassConst(TypeName, Symbol),
 }
 
+walkable!(TshapeFieldName);
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum DependentType {
     DTexpr(Ident),
@@ -84,11 +83,17 @@ pub struct Tparam<R: Reason, TY> {
     pub user_attributes: Vec<UserAttribute<R::Pos>>,
 }
 
+walkable!(impl<R: Reason, TY> for Tparam<R, TY> => [tparams, constraints]);
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct WhereConstraint<TY>(pub TY, pub ast_defs::ConstraintKind, pub TY);
 
+walkable!(impl<R: Reason, TY> for WhereConstraint<TY> => [0, 1, 2]);
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct DeclTy<R: Reason>(R, Hc<DeclTy_<R>>);
+
+walkable!(DeclTy<R> as visit_decl_ty => [0, 1]);
 
 impl<R: Reason> DeclTy<R> {
     pub fn new(reason: R, ty: Hc<DeclTy_<R>>) -> Self {
@@ -117,12 +122,6 @@ impl<R: Reason> DeclTy<R> {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub enum NegType<P> {
-    NegPrim(aast::Tprim),
-    NegClass(Positioned<TypeName, P>),
-}
-
 /// A shape may specify whether or not fields are required. For example, consider
 /// this typedef:
 ///
@@ -137,6 +136,8 @@ pub struct ShapeFieldType<R: Reason> {
     pub optional: bool,
     pub ty: DeclTy<R>,
 }
+
+walkable!(ShapeFieldType<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum DeclTy_<R: Reason> {
@@ -219,8 +220,23 @@ pub enum DeclTy_<R: Reason> {
     DTaccess(TaccessType<R, DeclTy<R>>),
 }
 
+walkable!(DeclTy_<R> => {
+    Self::DTthis | Self::DTmixed | Self::DTany | Self::DTerr | Self::DTnonnull | Self::DTdynamic
+    | Self::DTprim(_) | Self::DTvar(_) => [],
+    Self::DTapply(_, args) => [args],
+    Self::DTlike(ty) | Self::DToption(ty) => [ty],
+    Self::DTfun(ft) => [ft],
+    Self::DTtuple(tys) | Self::DTunion(tys) | Self::DTintersection(tys) => [tys],
+    Self::DTshape(_, fields) => [fields],
+    Self::DTgeneric(_, args) => [args],
+    Self::DTvecOrDict(kty, vty) => [kty, vty],
+    Self::DTaccess(tt) => [tt],
+});
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TaccessType<R: Reason, TY>(pub TY, pub Positioned<Symbol, R::Pos>);
+
+walkable!(impl<R: Reason, TY> for TaccessType<R, TY> => [0]);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Capability<R: Reason, TY> {
@@ -228,12 +244,19 @@ pub enum Capability<R: Reason, TY> {
     CapTy(TY),
 }
 
+walkable!(impl<R: Reason, TY> for Capability<R, TY> => {
+    Self::CapDefaults(..) => [],
+    Self::CapTy(ty) => [ty],
+});
+
 /// Companion to fun_params type, intended to consolidate checking of
 /// implicit params for functions.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct FunImplicitParams<R: Reason, TY> {
     pub capability: Capability<R, TY>,
 }
+
+walkable!(impl<R: Reason, TY> for FunImplicitParams<R, TY> => [capability]);
 
 /// The type of a function AND a method.
 /// A function has a min and max arity because of optional arguments
@@ -250,6 +273,10 @@ pub struct FunType<R: Reason, TY> {
     pub ifc_decl: IfcFunDecl,
 }
 
+walkable!(impl<R: Reason, TY> for FunType<R, TY> => [
+    arity, tparams, where_constraints, params, implicit_params, ret
+]);
+
 /// Arity information for a fun_type; indicating the minimum number of
 /// args expected by the function and the maximum number of args for
 /// standard, non-variadic functions or the type of variadic argument taken
@@ -261,12 +288,19 @@ pub enum FunArity<R: Reason, TY> {
     Fvariadic(FunParam<R, TY>),
 }
 
+walkable!(impl<R: Reason, TY> for FunArity<R, TY> => {
+    Self::Fstandard => [],
+    Self::Fvariadic(param) => [param],
+});
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct PossiblyEnforcedTy<TY> {
     /// True if consumer of this type enforces it at runtime
     pub enforced: Enforcement,
     pub ty: TY,
 }
+
+walkable!(impl<R: Reason, TY> for PossiblyEnforcedTy<TY> => [ty]);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct FunParam<R: Reason, TY> {
@@ -275,6 +309,8 @@ pub struct FunParam<R: Reason, TY> {
     pub ty: PossiblyEnforcedTy<TY>,
     pub flags: FunParamFlags,
 }
+
+walkable!(impl<R: Reason, TY> for FunParam<R, TY> => [ty]);
 
 pub type FunParams<R, TY> = Vec<FunParam<R, TY>>;
 
@@ -319,6 +355,8 @@ pub struct ConstDecl<R: Reason> {
     pub ty: DeclTy<R>,
 }
 
+walkable!(ConstDecl<R> => [ty]);
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct FunElt<R: Reason> {
     pub deprecated: Option<BytesId>,
@@ -331,6 +369,8 @@ pub struct FunElt<R: Reason> {
     pub support_dynamic_type: bool,
 }
 
+walkable!(FunElt<R> => [ty]);
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct AbstractTypeconst<R: Reason> {
     pub as_constraint: Option<DeclTy<R>>,
@@ -338,10 +378,14 @@ pub struct AbstractTypeconst<R: Reason> {
     pub default: Option<DeclTy<R>>,
 }
 
+walkable!(AbstractTypeconst<R> => [as_constraint, super_constraint, default]);
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ConcreteTypeconst<R: Reason> {
-    pub tc_type: DeclTy<R>,
+    pub ty: DeclTy<R>,
 }
+
+walkable!(ConcreteTypeconst<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Typeconst<R: Reason> {
@@ -349,12 +393,19 @@ pub enum Typeconst<R: Reason> {
     TCConcrete(ConcreteTypeconst<R>),
 }
 
+walkable!(Typeconst<R> => {
+    Self::TCAbstract(x) => [x],
+    Self::TCConcrete(x) => [x],
+});
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct EnumType<R: Reason> {
     pub base: DeclTy<R>,
     pub constraint: Option<DeclTy<R>>,
     pub includes: Vec<DeclTy<R>>,
 }
+
+walkable!(EnumType<R> => [base, constraint, includes]);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypedefType<R: Reason> {
@@ -367,3 +418,7 @@ pub struct TypedefType<R: Reason> {
     pub is_ctx: bool,
     pub attributes: Vec<UserAttribute<R::Pos>>,
 }
+
+walkable!(TypedefType<R> => [tparams, constraint, ty]);
+
+walkable!(ast_defs::ConstraintKind);

@@ -247,7 +247,7 @@ impl<R: Reason> Allocator<R> {
         x: &obr::typing_defs::ConcreteTypeconst<'_>,
     ) -> ty::ConcreteTypeconst<R> {
         ty::ConcreteTypeconst {
-            tc_type: self.ty_from_decl(x.tc_type),
+            ty: self.ty_from_decl(x.tc_type),
         }
     }
 

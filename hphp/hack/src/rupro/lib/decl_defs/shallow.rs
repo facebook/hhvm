@@ -33,6 +33,8 @@ pub struct ShallowClassConst<R: Reason> {
     pub refs: Vec<ClassConstRef>,
 }
 
+walkable!(ShallowClassConst<R> => [ty]);
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ShallowTypeconst<R: Reason> {
     pub name: Positioned<Symbol, R::Pos>,
@@ -42,6 +44,8 @@ pub struct ShallowTypeconst<R: Reason> {
     pub is_ctx: bool,
 }
 
+walkable!(ShallowTypeconst<R> => [kind]);
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ShallowProp<R: Reason> {
     pub name: Positioned<Symbol, R::Pos>,
@@ -50,6 +54,8 @@ pub struct ShallowProp<R: Reason> {
     pub visibility: Visibility,
     pub flags: PropFlags,
 }
+
+walkable!(ShallowProp<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ShallowMethod<R: Reason> {
@@ -64,6 +70,8 @@ pub struct ShallowMethod<R: Reason> {
     pub flags: MethodFlags,
     pub attributes: Vec<UserAttribute<R::Pos>>,
 }
+
+walkable!(ShallowMethod<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ShallowClass<R: Reason> {
@@ -100,6 +108,12 @@ pub struct ShallowClass<R: Reason> {
     pub enum_type: Option<EnumType<R>>,
 }
 
+walkable!(ShallowClass<R> => [
+    tparams, where_constraints, extends, uses, xhp_attr_uses, req_extends,
+    req_implements, implements, consts, typeconsts, props, static_props,
+    constructor, static_methods, methods, enum_type
+]);
+
 // TODO: Rename to FunDecl for consistency with OCaml and the other definitions
 // here. There's no such thing as a folded function decl, so "ShallowFun" is a
 // little misleading.
@@ -110,10 +124,16 @@ pub type ClassDecl<R> = ShallowClass<R>;
 pub type TypedefDecl<R> = TypedefType<R>;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-#[repr(C)]
 pub enum Decl<R: Reason> {
     Class(ClassDecl<R>),
     Fun(ShallowFun<R>),
     Typedef(TypedefDecl<R>),
     Const(ConstDecl<R>),
 }
+
+walkable!(Decl<R> => {
+    Decl::Class(x) => [x],
+    Decl::Fun(x) => [x],
+    Decl::Typedef(x) => [x],
+    Decl::Const(x) => [x],
+});

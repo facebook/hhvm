@@ -27,7 +27,7 @@
 namespace HPHP {
 namespace Facts {
 
-struct PathAndHash {
+struct PathAndOptionalHash {
   folly::fs::path m_path;
   Optional<std::string> m_hash;
 };

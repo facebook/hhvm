@@ -39,7 +39,7 @@ struct Extractor {
    * for that file.
    */
   virtual folly::SemiFuture<std::string>
-  get(const PathAndHash& pathAndHash) = 0;
+  get(const PathAndOptionalHash& PathAndOptionalHash) = 0;
 
 protected:
   Extractor() = delete;
@@ -68,7 +68,7 @@ std::string facts_json_from_path(const folly::fs::path& path);
  * (or a FactsExtractionExc in the case of an error).
  */
 std::vector<folly::Try<FileFacts>> facts_from_paths(
-    const folly::fs::path& root, const std::vector<PathAndHash>& paths);
+    const folly::fs::path& root, const std::vector<PathAndOptionalHash>& paths);
 
 } // namespace Facts
 } // namespace HPHP

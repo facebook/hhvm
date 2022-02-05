@@ -169,7 +169,7 @@ struct SimpleExtractor final : public Extractor {
 
   ~SimpleExtractor() override = default;
 
-  folly::SemiFuture<std::string> get(const PathAndHash& key) override {
+  folly::SemiFuture<std::string> get(const PathAndOptionalHash& key) override {
     return folly::via(
         &m_exec, [path = key.m_path]() { return facts_json_from_path(path); });
   }
@@ -196,7 +196,7 @@ void setExtractorFactory(ExtractorFactory factory) {
 
 std::vector<folly::Try<FileFacts>> facts_from_paths(
     const folly::fs::path& root,
-    const std::vector<PathAndHash>& pathsAndHashes) {
+    const std::vector<PathAndOptionalHash>& pathsAndHashes) {
 
   folly::CPUThreadPoolExecutor exec{
       std::min(
@@ -227,7 +227,8 @@ std::vector<folly::Try<FileFacts>> facts_from_paths(
                               << pathsAndHashes.size() << " updates.";
 
     assertx(pathAndHash.m_path.is_relative());
-    PathAndHash absPathAndHash{root / pathAndHash.m_path, pathAndHash.m_hash};
+    PathAndOptionalHash absPathAndHash{
+        root / pathAndHash.m_path, pathAndHash.m_hash};
     factsFutures.push_back(
         folly::via(
             &exec,

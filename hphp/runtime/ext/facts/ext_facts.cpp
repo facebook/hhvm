@@ -946,12 +946,12 @@ Array HHVM_FUNCTION(
   }();
 
   // Coerce the given vec<(string, string)> into C++ paths and hashes
-  std::vector<Facts::PathAndHash> alteredPathsAndHashes;
+  std::vector<Facts::PathAndOptionalHash> alteredPathsAndHashes;
   alteredPathsAndHashes.reserve(alteredPathsAndHashesArr.size());
   std::vector<String> alteredPathStrs;
   alteredPathStrs.reserve(alteredPathsAndHashesArr.size());
   IterateV(alteredPathsAndHashesArr.get(), [&](TypedValue v) {
-    Facts::PathAndHash pathAndHash;
+    Facts::PathAndOptionalHash pathAndHash;
     if (UNLIKELY(!tvIsArrayLike(v))) {
       SystemLib::throwTypeAssertionExceptionObject(
           "HH\\Facts\\extract expects vec<(string, ?string)>");

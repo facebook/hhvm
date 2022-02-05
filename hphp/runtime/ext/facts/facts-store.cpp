@@ -361,7 +361,7 @@ std::string curthread() {
 }
 
 std::vector<folly::fs::path>
-removeHashes(std::vector<PathAndHash>&& pathsWithHashes) {
+removeHashes(std::vector<PathAndOptionalHash>&& pathsWithHashes) {
   std::vector<folly::fs::path> paths;
   paths.reserve(pathsWithHashes.size());
   for (auto&& pathAndHash : std::move(pathsWithHashes)) {
@@ -839,7 +839,7 @@ struct FactsStoreImpl final
           std::remove_if(
               alteredPathsAndHashes.begin(),
               alteredPathsAndHashes.end(),
-              [](const PathAndHash& pathAndHash) {
+              [](const PathAndOptionalHash& pathAndHash) {
                 return pathAndHash.m_path.empty();
               }),
           alteredPathsAndHashes.end());
@@ -891,7 +891,7 @@ struct FactsStoreImpl final
    * update when Watchman gives us the full state of the world.
    */
 
-  std::tuple<std::vector<PathAndHash>, std::vector<folly::fs::path>>
+  std::tuple<std::vector<PathAndOptionalHash>, std::vector<folly::fs::path>>
   getFreshDelta(Watcher::Results&& result) const {
 
     auto allPaths = m_map.getAllPathsWithHashes();
@@ -900,7 +900,7 @@ struct FactsStoreImpl final
         "Received fresh query, checking against our list of {} paths.",
         allPaths.size());
 
-    std::vector<PathAndHash> alteredPaths;
+    std::vector<PathAndOptionalHash> alteredPaths;
     std::vector<folly::fs::path> deletedPaths;
     for (auto& pathData : std::move(result.m_files)) {
       assertx(pathData.m_exists);
@@ -951,10 +951,10 @@ struct FactsStoreImpl final
    * Calculate the paths which have changed since the last Watchman
    * update when Watchman gives us an incremental update.
    */
-  std::tuple<std::vector<PathAndHash>, std::vector<folly::fs::path>>
+  std::tuple<std::vector<PathAndOptionalHash>, std::vector<folly::fs::path>>
   getIncrementalDelta(Watcher::Results&& result) const {
 
-    std::vector<PathAndHash> alteredPaths;
+    std::vector<PathAndOptionalHash> alteredPaths;
     std::vector<folly::fs::path> deletedPaths;
     for (auto& pathData : result.m_files) {
       if (!pathData.m_exists) {

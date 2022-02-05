@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 #[macro_use]
-pub mod walker;
+pub mod visitor;
 
 pub mod alloc;
 pub mod ast_provider;

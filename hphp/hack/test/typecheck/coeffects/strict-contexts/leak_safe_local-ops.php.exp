@@ -1,10 +1,10 @@
-File "controlled_local-ops.php", line 14, characters 3-12:
+File "leak_safe_local-ops.php", line 14, characters 3-12:
 Writing to static properties requires the capability Globals, which is not provided by the context. Add the context `[globals]` after the function parameter list (or amend an existing context with a new comma delineated entry `globals`). (Parsing[1002])
-File "controlled_local-ops.php", line 13, characters 3-6:
+File "leak_safe_local-ops.php", line 13, characters 3-6:
 `echo` or `print` builtin requires the capability IO, which is not provided by the context. (Typing[4401])
-  File "controlled_local-ops.php", line 12, characters 31-40:
+  File "leak_safe_local-ops.php", line 12, characters 31-39:
   The local (enclosing) context provides the capability set {ReadGlobals, System, WriteProperty}
-File "controlled_local-ops.php", line 14, characters 3-20:
+File "leak_safe_local-ops.php", line 14, characters 3-20:
 Modifying static properties requires the capability AccessGlobals, which is not provided by the context. (Typing[4401])
-  File "controlled_local-ops.php", line 12, characters 31-40:
+  File "leak_safe_local-ops.php", line 12, characters 31-39:
   The local (enclosing) context provides the capability set {ReadGlobals, System, WriteProperty}

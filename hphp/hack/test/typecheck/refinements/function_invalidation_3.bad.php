@@ -4,7 +4,7 @@ class C {
   public ?int $i = null;
 }
 
-function harmful3(C $c)[policied]: void {}
+function harmful3(C $c)[zoned]: void {}
 
 function takes_int(int $i)[]: void {}
 

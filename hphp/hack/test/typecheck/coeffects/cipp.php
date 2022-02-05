@@ -2,21 +2,21 @@
 
 class A {}
 
-function ctx_policied()[policied]: void {
+function ctx_policied()[zoned]: void {
   ctx_policied_shallow(); // fail
   ctx_policied_local(); // fail
   ctx_policied_of(); // fail
   defaults(); // fail
 }
 
-function ctx_policied_shallow()[policied_shallow]: void {
+function ctx_policied_shallow()[zoned_shallow]: void {
   ctx_policied();
   ctx_policied_local();
   ctx_policied_of(); // fail
   defaults(); // fail
 }
 
-function ctx_policied_local()[policied_local]: void {
+function ctx_policied_local()[zoned_local]: void {
   ctx_policied();
   ctx_policied_shallow();
   // TODO(cipp): these three should fail
@@ -24,7 +24,7 @@ function ctx_policied_local()[policied_local]: void {
   defaults();
 }
 
-function ctx_policied_of()[policied_of<A>]: void {
+function ctx_policied_of()[zoned_with<A>]: void {
   ctx_policied();
   ctx_policied_shallow(); // fail
   ctx_policied_local(); // fail

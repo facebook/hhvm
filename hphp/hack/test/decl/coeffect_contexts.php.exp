@@ -23,11 +23,11 @@
               { Typing_defs.atc_as_constraint = None;
                 atc_super_constraint = None;
                 atc_default =
-                (Some (Rhint ([5:27-45]),
+                (Some (Rhint ([5:27-42]),
                        (Tintersection
-                          [(Rhint ([5:28-44]),
+                          [(Rhint ([5:28-41]),
                             (Tapply (
-                               ([5:28-44], "\\HH\\Contexts\\policied_shallow"),
+                               ([5:28-41], "\\HH\\Contexts\\zoned_shallow"),
                                [])))
                             ])))
                 });
@@ -39,15 +39,15 @@
               { Typing_defs.atc_as_constraint = None;
                 atc_super_constraint = None;
                 atc_default =
-                (Some (Rhint ([6:27-57]),
+                (Some (Rhint ([6:27-54]),
                        (Tintersection
-                          [(Rhint ([6:28-44]),
+                          [(Rhint ([6:28-41]),
                             (Tapply (
-                               ([6:28-44], "\\HH\\Contexts\\policied_shallow"),
+                               ([6:28-41], "\\HH\\Contexts\\zoned_shallow"),
                                [])));
-                            (Rhint ([6:46-56]),
+                            (Rhint ([6:43-53]),
                              (Tapply (
-                                ([6:46-56], "\\HH\\Contexts\\rx_shallow"), 
+                                ([6:43-53], "\\HH\\Contexts\\rx_shallow"), 
                                 [])))
                             ])))
                 });
@@ -84,18 +84,18 @@
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability =
-                   (CapTy (Rhint ([9:32-50]),
+                   (CapTy (Rhint ([9:32-47]),
                            (Tintersection
-                              [(Rhint ([9:33-49]),
+                              [(Rhint ([9:33-46]),
                                 (Tapply (
-                                   ([9:33-49],
-                                    "\\HH\\Contexts\\policied_shallow"),
+                                   ([9:33-46],
+                                    "\\HH\\Contexts\\zoned_shallow"),
                                    [])))
                                 ])))
                    };
                  ft_ret =
                  { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([9:52-56]), (Tprim Tvoid)) };
+                   et_type = (Rhint ([9:49-53]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false
@@ -111,22 +111,22 @@
                  ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability =
-                   (CapTy (Rhint ([10:32-62]),
+                   (CapTy (Rhint ([10:32-59]),
                            (Tintersection
-                              [(Rhint ([10:33-49]),
+                              [(Rhint ([10:33-46]),
                                 (Tapply (
-                                   ([10:33-49],
-                                    "\\HH\\Contexts\\policied_shallow"),
+                                   ([10:33-46],
+                                    "\\HH\\Contexts\\zoned_shallow"),
                                    [])));
-                                (Rhint ([10:51-61]),
+                                (Rhint ([10:48-58]),
                                  (Tapply (
-                                    ([10:51-61], "\\HH\\Contexts\\rx_shallow"),
+                                    ([10:48-58], "\\HH\\Contexts\\rx_shallow"),
                                     [])))
                                 ])))
                    };
                  ft_ret =
                  { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([10:65-69]), (Tprim Tvoid)) };
+                   et_type = (Rhint ([10:62-66]), (Tprim Tvoid)) };
                  ft_flags =
                  (make_ft_flags FSync ~return_disposable:false
                    ~returns_readonly:false ~support_dynamic_type:false

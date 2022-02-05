@@ -1,6 +1,6 @@
 <?hh
 
-function callee()[controlled]: void {}
+function callee()[leak_safe]: void {}
 
 function callable_from_defaults()[defaults]: void {
   callee();
@@ -10,13 +10,13 @@ function callable_from_unannotated(): void {
   callee();
 }
 
-function callable_from_policied()[policied]: void {
+function callable_from_policied()[zoned]: void {
   callee();
 }
 
 class MyP {}
 
-function callable_from_policied_of()[policied_of<\MyP>]: void {
+function callable_from_policied_of()[zoned_with<\MyP>]: void {
   callee();
 }
 

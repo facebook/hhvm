@@ -5,11 +5,11 @@ class MyC {
   public static string $glob = "global";
 }
 
-function controlled_good_ops(MyC $c)[controlled]: void {
+function controlled_good_ops(MyC $c)[leak_safe]: void {
   $c->prop = "ok";
 }
 
-function controlled_bad_ops()[controlled]: void {
+function controlled_bad_ops()[leak_safe]: void {
   echo "bad"; // ERROR: missing `IO`
   MyC::$glob = "bad"; // ERROR: missing `AccessGlobals`
 }

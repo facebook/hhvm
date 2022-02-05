@@ -1,4 +1,4 @@
 File "policied_local_funs.php", line 7, characters 8-30:
-Closures in policied local contexts require explicit annotation. Consider adding [policied_local] or [defaults]. (Parsing[1002])
+Closures in zoned local contexts require explicit annotation. Consider adding [zoned_local] or [defaults]. (Parsing[1002])
 File "policied_local_funs.php", line 9, characters 8-16:
-Closures in policied local contexts require explicit annotation. Consider adding [policied_local] or [defaults]. (Parsing[1002])
+Closures in zoned local contexts require explicit annotation. Consider adding [zoned_local] or [defaults]. (Parsing[1002])

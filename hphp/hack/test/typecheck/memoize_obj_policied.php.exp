@@ -22,5 +22,5 @@ Memoizing object parameters requires the capability AccessGlobals, which is not 
   The local (enclosing) context provides the capability WriteProperty
 File "memoize_obj_policied.php", line 46, characters 26-33:
 Memoizing object parameters requires the capability AccessGlobals, which is not provided by the context. (Typing[4447])
-  File "memoize_obj_policied.php", line 46, characters 39-46:
+  File "memoize_obj_policied.php", line 46, characters 39-43:
   The local (enclosing) context provides the capability set {ImplicitPolicy, ReadGlobals, System, WriteProperty}

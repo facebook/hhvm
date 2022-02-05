@@ -3,7 +3,7 @@
 
 
 <<__EntryPoint>>
-function test()[policied_local]: void {
+function test()[zoned_local]: void {
   $f = function() : void {
   };
   $g = () ==> {};

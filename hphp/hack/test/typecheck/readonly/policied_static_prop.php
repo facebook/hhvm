@@ -4,7 +4,7 @@ class Foo {
   public static ?Foo $x = null;
 }
 
-function foo_policied()[policied] : void {
+function foo_policied()[zoned] : void {
   $y = new Foo();
   $v = readonly $y::$x; // ok
   $z = $y::$x; // not ok

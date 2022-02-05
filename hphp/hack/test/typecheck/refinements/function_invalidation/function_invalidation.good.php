@@ -21,7 +21,7 @@ function takes_int(int $i)[]: void {}
 function refine_ok(
   C $c,
   ((function()[]: void) &  (function()[write_props]: void)) $harmless_intersection1,
-  ((function()[policied]: void) & (function()[globals]: void)) $harmless_intersection2,
+  ((function()[zoned]: void) & (function()[globals]: void)) $harmless_intersection2,
 ): void {
   if ($c->i is nonnull) {
     harmless1($c);

@@ -1,13 +1,13 @@
 <?hh
 
 function call_controlled(
-  (function()[controlled]: void) $f
-)[controlled]: void {
+  (function()[leak_safe]: void) $f
+)[leak_safe]: void {
   $f();
 }
 
 function good_fun_subtyping(): void {
-  $l_controlled = ()[controlled] ==> {};
+  $l_controlled = ()[leak_safe] ==> {};
   call_controlled($l_controlled); // OK (exact type)
 
   $l_write_props_and_globals = ()[write_props, read_globals] ==> {};
@@ -21,10 +21,10 @@ function call_write_props_and_globals(
 }
 
 function bad_fun_subtyping(): void {
-  call_controlled(() ==> {}); // ERROR: `controlled` is purer
-  call_controlled(()[defaults] ==> {}); // ERROR: `controlled` is purer
+  call_controlled(() ==> {}); // ERROR: `leak_safe` is purer
+  call_controlled(()[defaults] ==> {}); // ERROR: `leak_safe` is purer
 
-  $l_controlled_and_write_globals = ()[controlled, globals] ==> {};
+  $l_controlled_and_write_globals = ()[leak_safe, globals] ==> {};
   call_write_props_and_globals($l_controlled_and_write_globals); // ERROR
-  // (`controlled` should allow reads but not writes to globals )
+  // (`leak_safe` should allow reads but not writes to globals )
 }

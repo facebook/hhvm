@@ -359,8 +359,8 @@ impl<R: Reason> Allocator<R> {
         }
     }
 
-    pub fn shallow_fun(&self, sf: &obr::shallow_decl_defs::FunDecl<'_>) -> shallow::ShallowFun<R> {
-        shallow::ShallowFun {
+    pub fn fun_decl(&self, sf: &obr::shallow_decl_defs::FunDecl<'_>) -> shallow::FunDecl<R> {
+        shallow::FunDecl {
             pos: self.pos_from_decl(sf.pos),
             ty: self.ty_from_decl(sf.type_),
             deprecated: sf.deprecated.map(|s| self.bytes(s)),

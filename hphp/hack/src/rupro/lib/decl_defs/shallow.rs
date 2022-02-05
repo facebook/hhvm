@@ -114,10 +114,7 @@ walkable!(ShallowClass<R> => [
     constructor, static_methods, methods, enum_type
 ]);
 
-// TODO: Rename to FunDecl for consistency with OCaml and the other definitions
-// here. There's no such thing as a folded function decl, so "ShallowFun" is a
-// little misleading.
-pub type ShallowFun<R> = FunElt<R>;
+pub type FunDecl<R> = FunElt<R>;
 
 pub type ClassDecl<R> = ShallowClass<R>;
 
@@ -126,7 +123,7 @@ pub type TypedefDecl<R> = TypedefType<R>;
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Decl<R: Reason> {
     Class(ClassDecl<R>),
-    Fun(ShallowFun<R>),
+    Fun(FunDecl<R>),
     Typedef(TypedefDecl<R>),
     Const(ConstDecl<R>),
 }

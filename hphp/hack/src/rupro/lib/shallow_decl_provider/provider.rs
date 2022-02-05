@@ -46,9 +46,9 @@ impl<R: Reason> ShallowDeclProvider<R> {
         name: &str,
         sf: &oxidized_by_ref::shallow_decl_defs::FunDecl<'_>,
     ) {
-        let res = Arc::new(self.alloc.shallow_fun(sf));
+        let res = Arc::new(self.alloc.fun_decl(sf));
         let name = self.alloc.symbol(name);
-        self.cache.put_shallow_fun(name, res);
+        self.cache.put_fun_decl(name, res);
     }
 
     pub fn add_from_oxidized_decls(&self, decls: &oxidized_by_ref::direct_decl_parser::Decls<'_>) {

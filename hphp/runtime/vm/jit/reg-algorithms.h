@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/phys-reg.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Vunit;
@@ -50,5 +50,5 @@ using MovePlan = PhysReg::Map<PhysReg>;
 jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp);
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 

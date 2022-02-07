@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/class.h"
 
-namespace HPHP { namespace thrift {
+namespace HPHP::thrift {
 ///////////////////////////////////////////////////////////////////////////////
 
 Class* getAdapter(const Array& spec);
@@ -31,4 +31,4 @@ Variant transformToHackType(Variant value, Class& adapter);
 Variant transformToThriftType(Variant value, Class& adapter);
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

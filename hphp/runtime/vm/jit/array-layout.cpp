@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -501,4 +501,4 @@ void deserializeBespokeLayouts(ProfDataDeserializer& des) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-}}
+}

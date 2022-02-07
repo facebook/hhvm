@@ -24,7 +24,7 @@
 
 #include "hphp/util/optional.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct Block;
 struct SSATmp;
@@ -144,4 +144,4 @@ private:
 void serializeBespokeLayouts(ProfDataSerializer& ser);
 void deserializeBespokeLayouts(ProfDataDeserializer& des);
 
-}}
+}

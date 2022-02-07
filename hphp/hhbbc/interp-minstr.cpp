@@ -28,7 +28,7 @@
 #include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/type-ops.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 namespace {
 
@@ -2406,4 +2406,4 @@ void in(ISS& env, const bc::UnsetM& op) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -21,7 +21,7 @@
 
 #include <cstdint>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct Vout;
 
@@ -37,4 +37,4 @@ void emitProfileGuardType(Vout& v, Type t);
  */
 void logGuardProfileData();
 
-}}
+}

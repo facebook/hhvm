@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 namespace {
 
 Vcost instrSize(const Vunit& u, AreaIndex area, Vinstr inst) {
@@ -87,4 +87,4 @@ Vcost computeVunitCost(const Vunit& unit) {
   return {cost, incomplete};
 }
 
-}}
+}

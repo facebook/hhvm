@@ -37,7 +37,7 @@
  * total size of allocated memory doesn't decrease significantly.
  */
 
-namespace HPHP { namespace alloc {
+namespace HPHP::alloc {
 
 template<typename T> struct extent_allocator_traits {
  public:
@@ -163,6 +163,6 @@ struct RangeFallbackExtentAllocator : RangeState {
   extent_hooks_t* m_fallback_hooks{nullptr};
 };
 
-}}
+}
 
 #endif // USE_JEMALLOC_EXTENT_HOOKS

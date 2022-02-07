@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-iterator.h"
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 TRACE_SET_MOD(bespoke);
 
@@ -174,4 +174,4 @@ const char* show(KeyTypes kt) {
   not_reached();
 }
 
-}}
+}

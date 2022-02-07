@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/thrift/transport.h"
 
-namespace HPHP { namespace thrift {
+namespace HPHP::thrift {
 
 enum TError {
   ERR_UNKNOWN = 0,
@@ -51,4 +51,4 @@ inline void set_with_intish_key_cast(
         ERR_INVALID_DATA);
   }
 }
-}}
+}

@@ -25,7 +25,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   auto is_numeric = [](Type ty) { return ty.subtypeOfAny(TInt, TDbl); };
@@ -889,4 +889,4 @@ void emitAddO(IRGS& env)   { implAdd(env, Op::AddO); }
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

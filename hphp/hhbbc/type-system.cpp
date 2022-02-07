@@ -40,7 +40,7 @@
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/type-structure.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 TRACE_SET_MOD(hhbbc);
 
@@ -6979,4 +6979,4 @@ Type loosen_mark_for_testing(Type t) {
   return t;
 }
 
-}}
+}

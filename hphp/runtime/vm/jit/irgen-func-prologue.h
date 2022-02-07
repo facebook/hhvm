@@ -21,7 +21,7 @@
 
 #include <cstdint>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct SSATmp;
 
@@ -64,5 +64,5 @@ void emitFuncEntry(IRGS& env);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 

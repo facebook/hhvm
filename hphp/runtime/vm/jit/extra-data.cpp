@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/jit/abi-x64.h"
 #include "hphp/util/text-util.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 std::string KeyedIndexData::show() const {
   auto const escaped = escapeStringForCPP(key->data(), key->size());
@@ -230,4 +230,4 @@ std::string showExtra(Opcode opc, const IRExtraData* data) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

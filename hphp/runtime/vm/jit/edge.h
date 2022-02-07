@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/vm/jit/containers.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct Block;
 struct IRInstruction;
@@ -70,5 +70,5 @@ using EdgeHookOption = boost::intrusive::member_hook<
 using EdgeList = boost::intrusive::list<Edge, EdgeHookOption>;
 using EdgeSet = jit::flat_set<Edge*>;
 
-}}
+}
 

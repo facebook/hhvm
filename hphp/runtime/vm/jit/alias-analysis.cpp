@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/alias-class.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(hhir_alias);
 
@@ -686,4 +686,4 @@ std::string show(const AliasAnalysis& ainfo) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

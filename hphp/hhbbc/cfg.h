@@ -24,7 +24,7 @@
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -183,4 +183,4 @@ void visitExnLeaves(const php::Func& func, Fun f) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

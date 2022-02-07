@@ -33,7 +33,7 @@
   EXPECT_EQ(nullptr, (result).dst); \
   EXPECT_EQ(0, (result).instrs.size());
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -212,4 +212,4 @@ TEST(Simplifier, LdObjInvoke) {
   }
 }
 
-}}
+}

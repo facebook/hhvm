@@ -24,7 +24,7 @@
 #include <folly/portability/SysMman.h>
 #include <folly/portability/Unistd.h>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 
@@ -102,6 +102,6 @@ VMProtect::Pause::~Pause() {
   if (tl_active_prot) protect();
 }
 
-}}
+}
 
 #endif

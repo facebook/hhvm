@@ -18,7 +18,7 @@
 
 #include <folly/Format.h>
 
-namespace HPHP { namespace hfsort {
+namespace HPHP::hfsort {
 
 bool CallGraph::addFunc(
   std::string name,
@@ -74,4 +74,4 @@ std::string CallGraph::toString(TargetId id) const {
                         funcs[id].mangledNames[0]);
 }
 
-}}
+}

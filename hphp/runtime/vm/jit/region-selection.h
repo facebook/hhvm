@@ -36,7 +36,7 @@
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct ProfData;
 struct TransCFG;
@@ -568,4 +568,4 @@ std::string show(const RegionDesc&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

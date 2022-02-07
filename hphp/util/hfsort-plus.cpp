@@ -22,7 +22,7 @@
 
 #include <set>
 
-namespace HPHP { namespace hfsort {
+namespace HPHP::hfsort {
 
 #define HFTRACE(LEVEL, ...)                                     \
   if (HPHP::Trace::moduleEnabled(HPHP::Trace::hfsort, LEVEL)) { \
@@ -672,4 +672,4 @@ std::vector<Cluster> hfsortPlus(const TargetGraph& cg) {
   return HFSortPlus(cg).run();
 }
 
-}}
+}

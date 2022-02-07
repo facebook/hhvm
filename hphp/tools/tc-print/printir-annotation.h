@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-namespace HPHP { namespace printir {
+namespace HPHP::printir {
 using BlockId = unsigned int;
 using InstrId = uint32_t;
 
@@ -134,7 +134,7 @@ struct Unit {
   const std::vector<InliningDecision> inliningDecisions;
 };
 
-}} // namespace HPHP::printir
+} // namespace HPHP::printir
 
 namespace folly {
 using namespace HPHP;

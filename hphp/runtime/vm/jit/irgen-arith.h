@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/vm/hhbc.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct SSATmp;
 
@@ -48,4 +48,4 @@ Opcode promoteBinaryDoubles(IRGS& env, Op op, SSATmp*& lhs, SSATmp*& rhs);
 bool isBitOp(Op);
 Opcode bitOp(Op);
 
-}}}
+}}

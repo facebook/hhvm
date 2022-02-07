@@ -4,7 +4,7 @@
 #include <unicode/ucol.h>
 #include <unicode/usearch.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 
 #define CHECK_CONVERR(error, ret) \
@@ -497,4 +497,4 @@ void IntlExtension::initGrapheme() {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

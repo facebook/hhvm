@@ -79,7 +79,7 @@
  * See DataBlock for details about the allocation strategy and free memory
  * tracking.
  */
-namespace HPHP { namespace jit { namespace tc {
+namespace HPHP::jit::tc {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -484,4 +484,4 @@ void recycleStop() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

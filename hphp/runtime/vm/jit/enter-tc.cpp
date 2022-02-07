@@ -29,7 +29,7 @@
 
 TRACE_SET_MOD(mcg);
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 
@@ -69,4 +69,4 @@ void enterTC(TCA start) {
   postExit();
 }
 
-}}
+}

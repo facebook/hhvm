@@ -35,7 +35,7 @@
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-namespace HPHP { namespace jit { namespace irlower {
+namespace HPHP::jit::irlower {
 
 //////////////////////////////////////////////////////////////////////////////
 // Generic BespokeArrays
@@ -940,4 +940,4 @@ void cgStructDictUnset(IRLS& env, const IRInstruction* inst) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

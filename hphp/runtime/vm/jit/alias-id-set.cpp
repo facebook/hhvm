@@ -23,7 +23,7 @@
 
 #include <utility>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////
 
 /* implicit */ AliasIdSet::AliasIdSet(uint32_t id) {
@@ -247,4 +247,4 @@ std::string AliasIdSet::toString() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-}}
+}

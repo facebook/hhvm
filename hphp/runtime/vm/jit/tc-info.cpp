@@ -34,7 +34,7 @@
 #include <string>
 #include <vector>
 
-namespace HPHP { namespace jit { namespace tc {
+namespace HPHP::jit::tc {
 
 namespace {
 
@@ -230,4 +230,4 @@ std::vector<TCMemInfo> getTCMemoryUsage() {
   return ret;
 }
 
-}}}
+}

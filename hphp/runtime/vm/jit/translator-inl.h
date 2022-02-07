@@ -18,7 +18,7 @@
 #error "translator-inl.h should only be included by translator.h"
 #endif
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Control flow information.
@@ -131,4 +131,4 @@ inline Operands operator|(const Operands& l, const Operands& r) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

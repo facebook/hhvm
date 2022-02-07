@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/vm/class.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -155,4 +155,4 @@ ClassSpec ClassSpec::operator&(const ClassSpec& rhs) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

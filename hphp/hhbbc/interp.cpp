@@ -60,7 +60,7 @@
 
 #include "hphp/hhbbc/interp-internal.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -5912,4 +5912,4 @@ Optional<Type> thisType(const Index& index, Context ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

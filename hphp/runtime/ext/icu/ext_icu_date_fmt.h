@@ -22,7 +22,7 @@
 #include <unicode/udat.h>
 #include <unicode/datefmt.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlDateFormatter;
 
@@ -83,4 +83,4 @@ struct IntlDateFormatter : IntlError {
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

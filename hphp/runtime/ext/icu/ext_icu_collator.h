@@ -5,7 +5,7 @@
 
 #include <unicode/ucol.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_Collator;
 
@@ -47,5 +47,5 @@ struct Collator : IntlError {
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl
 

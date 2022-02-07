@@ -18,7 +18,7 @@
 
 #include <utility>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline IRInstruction::IRInstruction(Opcode op,
@@ -379,4 +379,4 @@ inline bool IRInstruction::isNextEdgeUnreachable() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

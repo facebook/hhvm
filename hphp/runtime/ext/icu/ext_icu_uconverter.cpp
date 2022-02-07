@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define FETCH_CNV(data, obj, def) \
@@ -565,4 +565,4 @@ void IntlExtension::initUConverter() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

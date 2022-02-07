@@ -18,7 +18,7 @@
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 namespace php { struct Class; }
 namespace php { struct Func; }
@@ -36,6 +36,6 @@ int trace_bump_for(const php::Class*,
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 

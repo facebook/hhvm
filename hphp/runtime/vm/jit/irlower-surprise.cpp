@@ -45,7 +45,7 @@
 
 #include "hphp/util/trace.h"
 
-namespace HPHP { namespace jit { namespace irlower {
+namespace HPHP::jit::irlower {
 
 TRACE_SET_MOD(irlower);
 
@@ -172,4 +172,4 @@ IMPL_OPCODE_CALL(ReturnHook)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

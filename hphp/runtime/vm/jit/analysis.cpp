@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/id-set.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -136,4 +136,4 @@ Optional<IRSPRelOffset> offsetOfFrame(SSATmp *fp) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

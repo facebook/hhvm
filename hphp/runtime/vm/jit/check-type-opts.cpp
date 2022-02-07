@@ -27,7 +27,7 @@
 
 #include "hphp/util/dataflow-worklist.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(hhir_checkTypes);
 
@@ -625,4 +625,4 @@ bool optimizeCheckTypes(IRUnit& unit) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -26,7 +26,7 @@
 #include "hphp/util/hfsort.h"
 #include "hphp/util/trace.h"
 
-namespace HPHP { namespace hfsort {
+namespace HPHP::hfsort {
 
 #define HFTRACE(LEVEL, ...)                                     \
   if (HPHP::Trace::moduleEnabled(HPHP::Trace::hfsort, LEVEL)) { \
@@ -63,6 +63,6 @@ struct CallGraph : TargetGraph {
   std::unordered_map<std::string, TargetId> func2TargetId;
 };
 
-}}
+}
 
 #endif

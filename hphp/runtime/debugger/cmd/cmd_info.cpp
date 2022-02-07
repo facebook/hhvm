@@ -29,7 +29,7 @@
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/util/logger.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 using std::string;
@@ -698,4 +698,4 @@ void CmdInfo::PrintInfo(DebuggerClient* client, StringBuffer &sb,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

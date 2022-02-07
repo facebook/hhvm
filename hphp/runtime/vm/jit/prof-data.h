@@ -36,7 +36,7 @@
 #include <vector>
 #include <memory>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct ProfData;
 
@@ -666,4 +666,4 @@ struct ProfData {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

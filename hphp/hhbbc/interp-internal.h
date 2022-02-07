@@ -31,7 +31,7 @@
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/type-system.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 struct LocalRange;
 
@@ -996,4 +996,4 @@ bool checkReadonlyOpMaybeThrows(ReadonlyOp expected = ReadonlyOp::Any,
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -31,7 +31,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/base/program-functions.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 namespace parallel {
 
@@ -278,4 +278,4 @@ void parallel(Funcs&&... funcs) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

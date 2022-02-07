@@ -20,7 +20,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/type-string.h"
 
-namespace HPHP { namespace rqtrace {
+namespace HPHP::rqtrace {
 
 namespace detail { AtomicEventMap g_events{128}; }
 namespace { std::function<void(const Trace&)> s_hook; }
@@ -72,4 +72,4 @@ DisableTracing::~DisableTracing() {
   if (m_trace) g_context->setRequestTrace(m_trace);
 }
 
-}}
+}

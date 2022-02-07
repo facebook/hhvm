@@ -18,7 +18,7 @@
 
 #include "hphp/util/thread-local.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct Vout;
 struct Vreg;
@@ -89,7 +89,7 @@ void emitTLSLoad(Vout& v, TLSDatum<ThreadLocalNoCheck<T>> datum, Vreg d);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #include "hphp/runtime/vm/jit/code-gen-tls-x64.h"
 #include "hphp/runtime/vm/jit/code-gen-tls-arm.h"

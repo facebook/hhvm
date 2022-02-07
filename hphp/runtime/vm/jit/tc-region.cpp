@@ -55,7 +55,7 @@
 
 TRACE_SET_MOD(mcg);
 
-namespace HPHP { namespace jit { namespace tc {
+namespace HPHP::jit::tc {
 
 namespace {
 
@@ -790,4 +790,4 @@ void RegionTranslator::setCachedForProcessFail() {
   srcRec->smashFallbacksToStub(stub);
 }
 
-}}}
+}

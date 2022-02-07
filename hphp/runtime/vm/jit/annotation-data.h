@@ -26,7 +26,7 @@
 
 #include "hphp/runtime/base/rds.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct AnnotationData {
   struct InliningDecision {
@@ -107,5 +107,5 @@ struct AnnotationData {
   Annotations annotations;
 };
 
-}} // namespace HPHP::jit
+} // namespace HPHP::jit
 

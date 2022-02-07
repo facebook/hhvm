@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 TRACE_SET_MOD(bespoke);
 
@@ -272,4 +272,4 @@ std::string dumpColoringInfo() {
   return ss.str();
 }
 
-}}
+}

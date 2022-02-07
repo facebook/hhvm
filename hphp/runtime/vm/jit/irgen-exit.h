@@ -18,7 +18,7 @@
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct Block;
 
@@ -61,5 +61,5 @@ Block* makeUnreachable(IRGS&, AssertReason);
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 

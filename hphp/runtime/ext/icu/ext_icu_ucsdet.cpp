@@ -1,7 +1,7 @@
 #include "hphp/runtime/ext/icu/ext_icu_ucsdet.h"
 #include "hphp/runtime/base/array-init.h"
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 // class EncodingDetector
 
@@ -200,4 +200,4 @@ void IntlExtension::initUcsDet() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

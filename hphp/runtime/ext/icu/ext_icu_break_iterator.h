@@ -7,7 +7,7 @@
 #include <unicode/rbbi.h>
 #include <unicode/utext.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlBreakIterator, s_IntlCodePointBreakIterator;
 
@@ -116,4 +116,4 @@ struct IntlBreakIterator : IntlError {
 
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

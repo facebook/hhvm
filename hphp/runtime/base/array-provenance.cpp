@@ -44,7 +44,7 @@
 #include <sys/mman.h>
 #include <type_traits>
 
-namespace HPHP { namespace arrprov {
+namespace HPHP::arrprov {
 
 TRACE_SET_MOD(runtime);
 
@@ -241,4 +241,4 @@ TypedValue markTvToDepth(TypedValue in, bool legacy, uint32_t depth) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

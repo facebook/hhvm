@@ -5,7 +5,7 @@
 
 #include <unicode/dtptngen.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlDatePatternGenerator;
 
@@ -54,4 +54,4 @@ struct IntlDatePatternGenerator : IntlError {
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

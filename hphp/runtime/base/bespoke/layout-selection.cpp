@@ -26,7 +26,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/union-find.h"
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 TRACE_SET_MOD(bespoke);
 
@@ -907,4 +907,4 @@ void selectBespokeLayouts() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-}}
+}

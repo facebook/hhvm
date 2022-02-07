@@ -25,7 +25,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 namespace {
 
@@ -270,4 +270,4 @@ void emitRetCSuspended(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

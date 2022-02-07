@@ -15,7 +15,7 @@
 */
 #pragma once
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1400,4 +1400,4 @@ private:
 #undef URIP
 };
 
-}}
+}

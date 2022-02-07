@@ -48,7 +48,7 @@
 
 #include <sstream>
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 namespace {
 
@@ -2342,4 +2342,4 @@ void checkPropDimForReadonly(IRGS& env, SSATmp* propPtr, const Class* cls,
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

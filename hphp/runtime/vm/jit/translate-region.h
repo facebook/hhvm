@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-src-key.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace irgen { struct IRGS; }
 
@@ -58,5 +58,5 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

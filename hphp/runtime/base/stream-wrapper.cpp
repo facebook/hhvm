@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 
-namespace HPHP { namespace Stream {
+namespace HPHP::Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Wrapper::registerAs(const std::string &scheme) {
@@ -26,4 +26,4 @@ void Wrapper::registerAs(const std::string &scheme) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

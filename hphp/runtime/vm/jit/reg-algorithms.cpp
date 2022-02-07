@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 
@@ -136,4 +136,4 @@ jit::vector<MoveInfo> doRegMoves(MovePlan& moves, PhysReg rTmp) {
   return howTo;
 }
 
-}}
+}

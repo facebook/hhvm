@@ -32,7 +32,7 @@
 #include "hphp/util/immed.h"
 #include "hphp/util/trace.h"
 
-namespace HPHP { namespace jit { namespace irlower {
+namespace HPHP::jit::irlower {
 
 TRACE_SET_MOD(irlower);
 
@@ -293,4 +293,4 @@ Vreg emitHashInt64(IRLS& env, const IRInstruction* inst, Vreg arr) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

@@ -29,7 +29,7 @@
 
 #include <folly/portability/GTest.h>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 using namespace reg;
 
 template<class T> uint64_t test_const(T val) {
@@ -112,4 +112,4 @@ TEST(Vasm, XlsIntXmm) {
   EXPECT_EQ(test_const(uint32_t(0x80000000)), 0x80000000l);
 }
 
-}}
+}

@@ -19,7 +19,7 @@
 #include "hphp/util/type-scan.h"
 #include <list>
 
-namespace HPHP { namespace req {
+namespace HPHP::req {
 
 template <typename T>
 struct list final : std::list<T, ConservativeAllocator<T>> {
@@ -31,5 +31,5 @@ struct list final : std::list<T, ConservativeAllocator<T>> {
   }
 };
 
-}}
+}
 

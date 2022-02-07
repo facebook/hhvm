@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/static-string-table.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -29,4 +29,4 @@ bool is_systemlib_part(const php::Unit& unit) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

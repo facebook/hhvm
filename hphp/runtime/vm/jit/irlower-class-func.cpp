@@ -38,7 +38,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/low-ptr.h"
 
-namespace HPHP { namespace jit { namespace irlower {
+namespace HPHP::jit::irlower {
 
 TRACE_SET_MOD(irlower);
 
@@ -309,4 +309,4 @@ void cgNewClsMeth(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

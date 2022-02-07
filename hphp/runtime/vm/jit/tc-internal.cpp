@@ -60,7 +60,7 @@ __gxx_personality_v0(int, _Unwind_Action, uint64_t, _Unwind_Exception*,
 
 TRACE_SET_MOD(mcg);
 
-namespace HPHP { namespace jit { namespace tc {
+namespace HPHP::jit::tc {
 
 __thread bool tl_is_jitting = false;
 
@@ -800,4 +800,4 @@ void Translator::publishCodeInternal() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

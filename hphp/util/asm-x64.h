@@ -49,7 +49,7 @@
  */
 #define logical_const /* nothing */
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 #define TRACEMOD ::HPHP::Trace::asmx64
 
@@ -913,7 +913,7 @@ protected:
 
   CodeBlock& codeBlock;
 };
-}}
+}
 
 #ifdef HAVE_LIBXED
   #include "hphp/util/asm-x64-intelxed.h"
@@ -921,7 +921,7 @@ protected:
 
 #include "hphp/util/asm-x64-legacy.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 inline MemoryRef IndexedDispReg::operator*() const {
   return MemoryRef(*this);
 }
@@ -1272,4 +1272,4 @@ inline DecodedInstruction::BranchType& operator|=(
 #undef logical_const
 #undef CCS
 
-}}}
+}}

@@ -30,7 +30,7 @@
 
 #include "hphp/util/word-mem.h"
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 namespace {
 
@@ -909,4 +909,4 @@ bool isMonotypeVecLayout(LayoutIndex index) {
   return byte == kMonotypeVecLayoutByte || byte == kEmptyMonotypeVecLayoutByte;
 }
 
-}}
+}

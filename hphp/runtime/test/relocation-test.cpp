@@ -24,7 +24,7 @@
 
 using namespace vixl;
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace arm {
 
@@ -443,4 +443,4 @@ TEST(Relocation, AdjustMovzMovk) {
   EXPECT_EQ(Instruction::Cast(target), Instruction::Cast(end));
 }
 
-}}}
+}}

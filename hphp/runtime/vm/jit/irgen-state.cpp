@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/resumable.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -97,4 +97,4 @@ std::string show(const IRGS& irgs) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

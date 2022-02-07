@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debuggerflow);
@@ -99,4 +99,4 @@ void CmdOut::onBeginInterrupt(DebuggerProxy &proxy, CmdInterrupt &interrupt) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

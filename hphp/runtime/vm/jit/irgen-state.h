@@ -31,7 +31,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct NormalizedInstruction;
 struct SSATmp;
@@ -131,4 +131,4 @@ std::string show(const IRGS&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}

@@ -49,7 +49,7 @@
 #include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/representation.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -515,4 +515,4 @@ void print_stats(const StatsHolder& stats) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

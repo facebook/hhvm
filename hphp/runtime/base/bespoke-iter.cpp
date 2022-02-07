@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 bool IsStructDict(const ArrayData* ad) {
   if (ad->isVanilla()) return false;
@@ -40,4 +40,4 @@ tv_lval GetStructDictLval(ArrayData* ad, int64_t pos) {
   return tv_lval{&sd->rawTypes()[slot], &sd->rawValues()[slot]};
 }
 
-}}
+}

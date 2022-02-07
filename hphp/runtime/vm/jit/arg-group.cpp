@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -165,4 +165,4 @@ void ArgGroup::push_SIMDarg(const ArgDesc& arg, Type t) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

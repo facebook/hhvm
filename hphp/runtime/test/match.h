@@ -22,7 +22,7 @@
 
 #define EXPECT_MATCH(...) EXPECT_TRUE(match(__VA_ARGS__))
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 //////////////////////////////////////////////////////////////////////
 // match()
@@ -79,5 +79,5 @@ bool match(const IRInstruction& inst, Args... args) {
   return match(&inst, std::forward<Args>(args)...);
 }
 
-}}
+}
 

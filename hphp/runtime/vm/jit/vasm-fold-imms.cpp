@@ -28,7 +28,7 @@
 
 TRACE_SET_MOD(hhir);
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace x64 {
 struct ImmFolder {
@@ -680,4 +680,4 @@ void foldImms(Vunit& unit) {
 template void foldImms<x64::ImmFolder>(Vunit& unit);
 template void foldImms<arm::ImmFolder>(Vunit& unit);
 
-}}
+}

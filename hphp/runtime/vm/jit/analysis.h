@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/vm/jit/cfg.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct SSATmp;
 struct IRInstruction;
@@ -143,4 +143,4 @@ bool visitEveryDefiningInst(
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

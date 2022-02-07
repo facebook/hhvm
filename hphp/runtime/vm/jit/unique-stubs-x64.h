@@ -24,7 +24,7 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -41,5 +41,5 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 

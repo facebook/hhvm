@@ -26,7 +26,7 @@
 #include "hphp/util/text-util.h"
 #include "hphp/runtime/base/config.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 using std::string;
@@ -451,4 +451,4 @@ String highlight_php(const String& source, int line /* = 0 */,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

@@ -21,7 +21,7 @@
 #include <folly/Conv.h>
 #include <algorithm>
 
-namespace HPHP { namespace serialize {
+namespace HPHP::serialize {
 
 struct SerializeError : std::runtime_error {
   explicit SerializeError(const std::string& msg)
@@ -709,5 +709,5 @@ inline void FBUnserializer<V>::advance(size_t delta) {
   p_ += delta;
 }
 
-}}
+}
 

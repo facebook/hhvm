@@ -3,7 +3,7 @@
 #include "hphp/runtime/base/zend-collator.h"
 #include "hphp/runtime/base/zend-qsort.h"
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 // class Collator
 
@@ -362,4 +362,4 @@ void IntlExtension::initCollator() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

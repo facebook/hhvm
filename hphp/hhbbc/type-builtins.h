@@ -17,7 +17,7 @@
 
 #include "hphp/hhbbc/misc.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 namespace php { struct Func; struct Class; }
 
 struct Type;
@@ -38,4 +38,4 @@ Type native_function_return_type(const php::Func* func);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

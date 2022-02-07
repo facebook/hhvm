@@ -22,7 +22,7 @@
 #include <unicode/calendar.h>
 #include <unicode/gregocal.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlCalendar;
 
@@ -79,5 +79,5 @@ struct IntlCalendar : IntlError {
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl
 

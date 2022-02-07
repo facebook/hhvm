@@ -48,7 +48,7 @@
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -925,4 +925,4 @@ void optimize_class_prop_type_hints(const Index& index, Context ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

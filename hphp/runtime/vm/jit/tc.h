@@ -33,7 +33,7 @@
 #include <string>
 #include <vector>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct AsmInfo;
 struct IncomingBranch;
@@ -534,4 +534,4 @@ void recordJump(TCA toSmash, SrcRec* sr);
  */
 void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs);
 
-}}}
+}}

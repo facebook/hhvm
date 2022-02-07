@@ -44,7 +44,7 @@
 
 TRACE_SET_MOD(mcg);
 
-namespace HPHP { namespace jit { namespace svcreq {
+namespace HPHP::jit::svcreq {
 
 namespace {
 
@@ -462,4 +462,4 @@ TCA handleResume(ResumeFlags flags) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

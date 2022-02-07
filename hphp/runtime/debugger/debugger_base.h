@@ -25,7 +25,7 @@
 #include "hphp/runtime/debugger/debugger_thrift_buffer.h"
 #include "hphp/util/hdf.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 // startup options for debugger client
 
@@ -238,5 +238,5 @@ struct DebuggerUsageLogger {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 

@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/vm/srckey.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit { namespace irgen {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -54,4 +54,4 @@ void lowerStructBespokeGetThrow(IRUnit&, IRInstruction*);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

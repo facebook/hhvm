@@ -41,7 +41,7 @@ struct ProfDataDeserializer;
  * involved in instanceof checks in order to set up a bitmask for each class to
  * allow these checks to be performed quickly by the JIT.
  */
-namespace HPHP { namespace InstanceBits {
+namespace HPHP::InstanceBits {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -119,5 +119,5 @@ void deserialize(jit::ProfDataDeserializer&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

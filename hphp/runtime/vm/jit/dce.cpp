@@ -39,7 +39,7 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(hhir_dce);
 
@@ -1384,4 +1384,4 @@ void fullDCE(IRUnit& unit) {
   mandatoryDCE(unit);
 }
 
-}}
+}

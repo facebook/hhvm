@@ -23,7 +23,7 @@
 
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 using LayoutWeightVector =
   std::vector<std::pair<const StructLayout*, double>>;
@@ -34,6 +34,6 @@ jit::ArrayLayout layoutForSource(SrcKey sk);
 SinkLayout layoutForSink(const jit::TransIDSet& ids, SrcKey sk);
 void selectBespokeLayouts();
 
-}}
+}
 
 #endif // HPHP_LAYOUT_SELECTION_H_

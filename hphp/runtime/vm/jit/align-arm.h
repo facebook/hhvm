@@ -21,7 +21,7 @@
 
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct CGMeta;
 
@@ -47,5 +47,5 @@ const AlignInfo& alignment_info(Alignment alignment);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 

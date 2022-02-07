@@ -46,7 +46,7 @@
 
 TRACE_SET_MOD(mcg);
 
-namespace HPHP { namespace jit { namespace tc {
+namespace HPHP::jit::tc {
 
 void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
                           const TCA start, const TCA end) {
@@ -516,4 +516,4 @@ std::string warmupStatusString() {
   return status_str;
 }
 
-}}}
+}

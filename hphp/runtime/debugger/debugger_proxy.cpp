@@ -38,7 +38,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/logger.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
@@ -981,4 +981,4 @@ void DebuggerProxy::unsetBreakableForBreakpointsMatching(CmdInterrupt& cmd) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

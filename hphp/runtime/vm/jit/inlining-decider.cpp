@@ -49,7 +49,7 @@
 #include <vector>
 #include <sstream>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(inlining);
@@ -925,4 +925,4 @@ void deserializeCachedInliningCost(ProfDataDeserializer& ser) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

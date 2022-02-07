@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/srckey.h"
 
-namespace HPHP { namespace jit { namespace tc {
+namespace HPHP::jit::tc {
 
 struct RegionTranslator final : Translator {
   PostConditions pconds;
@@ -55,4 +55,4 @@ struct RegionTranslator final : Translator {
   void publishCodeImpl() override;
 };
 
-}}}
+}

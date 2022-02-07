@@ -21,7 +21,7 @@
 
 #include "hphp/hhbbc/misc.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -54,5 +54,5 @@ const StaticString s_unreachable("static analysis error: supposedly "
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

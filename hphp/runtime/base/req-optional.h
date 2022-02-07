@@ -20,7 +20,7 @@
 #include "hphp/util/optional.h"
 #include "hphp/util/type-scan.h"
 
-namespace HPHP { namespace req {
+namespace HPHP::req {
 
 /*
  * Like Optional, but exactly scans T
@@ -34,4 +34,4 @@ struct Optional: HPHP::Optional<T> {
   }
 };
 
-}}
+}

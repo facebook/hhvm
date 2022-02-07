@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -65,4 +65,4 @@ struct NormalizedInstruction {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

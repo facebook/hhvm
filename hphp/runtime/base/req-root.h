@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include <utility>
 
-namespace HPHP { namespace req {
+namespace HPHP::req {
 
 /*
  * An explicitly-tracked root, registered on construction and de-registered
@@ -143,4 +143,4 @@ struct root : T, root_handle {
 template<> void root<TypedValue>::scan(type_scan::Scanner&) const;
 template<> void root<TypedValue>::detach();
 
-}}
+}

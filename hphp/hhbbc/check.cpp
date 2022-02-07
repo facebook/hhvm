@@ -30,7 +30,7 @@
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/wide-func.h"
 
-namespace HPHP { namespace HHBBC { namespace php {
+namespace HPHP::HHBBC::php {
 
 namespace {
 
@@ -198,4 +198,4 @@ bool check(const php::Program& p) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

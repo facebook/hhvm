@@ -36,7 +36,7 @@
 #include "hphp/util/arch.h"
 #include "hphp/util/trace.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(vasm);
 
@@ -233,4 +233,4 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
   }
 }
 
-}}
+}

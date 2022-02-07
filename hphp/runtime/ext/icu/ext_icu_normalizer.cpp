@@ -3,7 +3,7 @@
 #include <unicode/unorm.h>
 #include <unicode/utypes.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 // class Normalizer
 
@@ -132,4 +132,4 @@ void IntlExtension::initNormalizer() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

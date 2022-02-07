@@ -26,7 +26,7 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/assertions.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -151,4 +151,4 @@ void emitDecRefWork(Vout& v, Vout& vcold, Vreg data,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

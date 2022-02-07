@@ -21,14 +21,14 @@
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 
-namespace HPHP { namespace asio {
+namespace HPHP::asio {
 ///////////////////////////////////////////////////////////////////////////////
 
 void enter_context(c_WaitableWaitHandle* root, context_idx_t ctx_idx);
 void enter_context_impl(c_WaitableWaitHandle* root, context_idx_t ctx_idx);
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
 #include "hphp/runtime/ext/asio/asio-context-enter-inl.h"
 

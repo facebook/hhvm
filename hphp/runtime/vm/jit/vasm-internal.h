@@ -24,7 +24,7 @@
 
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct AsmInfo;
@@ -126,7 +126,7 @@ const uint64_t* alloc_literal(Venv& env, uint64_t val);
 void setCallFuncId(Venv& env, TCA callRetAddr);
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
 #include "hphp/runtime/vm/jit/vasm-internal-inl.h"
 

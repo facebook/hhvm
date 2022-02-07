@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debuggerflow);
@@ -263,4 +263,4 @@ CmdFlowControl::StepDestination::~StepDestination() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

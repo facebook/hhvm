@@ -49,7 +49,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace HPHP { namespace thrift {
+namespace HPHP::thrift {
 /////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -1263,4 +1263,4 @@ Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
   return reader.readStruct(obj_typename);
 }
 
-}}
+}

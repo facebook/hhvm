@@ -40,7 +40,7 @@
 
 #include <vector>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(hhir);
 
@@ -1137,4 +1137,4 @@ Type relaxToGuardable(Type ty) {
   not_reached();
 }
 
-}}
+}

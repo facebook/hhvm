@@ -34,7 +34,7 @@
 #include <sstream>
 #include <folly/small_vector.h>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(hhir_gvn);
 
@@ -830,4 +830,4 @@ void gvn(IRUnit& unit) {
   }
 }
 
-}}
+}

@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 namespace {
 
@@ -584,4 +584,4 @@ void emitInitProp(IRGS& env, const StringData* propName, InitPropOp op) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

@@ -59,7 +59,7 @@
 
 TRACE_SET_MOD(mcg);
 
-namespace HPHP { namespace jit { namespace mcgen {
+namespace HPHP::jit::mcgen {
 
 namespace {
 
@@ -764,4 +764,4 @@ void checkSerializeOptProf() {
   });
 }
 
-}}}
+}

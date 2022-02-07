@@ -216,7 +216,7 @@
   always reach a fixed point.
  */
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(hhir_sinkdefs);
 
@@ -1552,4 +1552,4 @@ void sinkDefs(IRUnit& unit) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

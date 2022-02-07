@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/util/fixed-vector.h"
 
-namespace HPHP { namespace thrift {
+namespace HPHP::thrift {
 
 struct FieldSpec {
   int16_t fieldNum{};
@@ -76,4 +76,4 @@ private:
 
 const FieldSpec* getFieldSlow(const StructSpec& spec, int16_t fieldNum);
 
-}}
+}

@@ -38,7 +38,7 @@
  *    IEEE Transactions on Computers, 2020
  */
 
-namespace HPHP { namespace jit { namespace layout {
+namespace HPHP::jit::layout {
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -888,4 +888,4 @@ void Clusterizer::clusterizeExtTSP() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-}}}
+}

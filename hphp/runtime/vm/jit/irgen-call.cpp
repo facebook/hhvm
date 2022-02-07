@@ -39,7 +39,7 @@
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1921,4 +1921,4 @@ Type awaitedCallReturnType(const Func* callee) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

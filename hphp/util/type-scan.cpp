@@ -101,7 +101,7 @@ std::string stripTemplateArgs(std::string name) {
 
 }
 
-namespace HPHP { namespace type_scan { namespace detail {
+namespace HPHP::type_scan { namespace detail {
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -204,4 +204,4 @@ void init(const std::string& extractPath,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-}}
+}

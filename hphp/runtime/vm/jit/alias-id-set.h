@@ -20,7 +20,7 @@
 
 #include <string>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////
 
 /*
@@ -246,4 +246,4 @@ using IdRange = AliasIdSet::IdRange;
 static_assert(sizeof(AliasIdSet) == sizeof(uint64_t), "");
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

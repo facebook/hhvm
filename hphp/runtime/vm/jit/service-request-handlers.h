@@ -24,7 +24,7 @@ namespace HPHP {
 struct ActRec;
 struct SrcKey;
 
-namespace jit { namespace svcreq {
+namespace jit::svcreq {
 
 /*
  * Handle a request to initially translate the code at the given current
@@ -144,4 +144,4 @@ TCA handleResume(ResumeFlags flags);
  */
 TCA getFuncEntry(const Func* func);
 
-}}}
+}}

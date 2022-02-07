@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/hhbbc/representation.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -117,4 +117,4 @@ Type native_function_return_type(const php::Func* f) {
   return vec(std::move(types));
 }
 
-}}
+}

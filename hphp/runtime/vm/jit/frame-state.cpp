@@ -40,7 +40,7 @@
 
 TRACE_SET_MOD(hhir_fsm);
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 namespace {
 
@@ -2225,4 +2225,4 @@ std::string FrameStateMgr::show() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

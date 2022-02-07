@@ -19,7 +19,7 @@
 #include <memory>
 
 namespace HPHP { struct UnitEmitter; }
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -35,5 +35,5 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index&, php::Unit&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

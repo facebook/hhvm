@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/abi-arm.h"
 #include "hphp/runtime/vm/jit/abi-x64.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -84,4 +84,4 @@ Vflags required_flags(jit::ConditionCode cc) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

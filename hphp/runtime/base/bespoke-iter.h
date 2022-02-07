@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 // We forward-declare these functions so that we don't have to expose any of
 // the internals of StructDict to extension code.
@@ -59,6 +59,6 @@ void StructDictIterateLvals(ArrayData* ad, Fn fn) {
 }
 
 
-}}
+}
 
 #endif // HPHP_BESPOKE_ITER_H_

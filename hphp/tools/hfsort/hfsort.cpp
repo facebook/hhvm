@@ -29,7 +29,7 @@
 
 #include "hphp/util/text-util.h"
 
-namespace HPHP { namespace hfsort {
+namespace HPHP::hfsort {
 
 // some mangled names are very long up to 20k in size
 constexpr uint32_t BUFLEN = 24000;
@@ -298,7 +298,7 @@ Algorithm checkAlgorithm(const char* algorithm) {
   return Algorithm::Invalid;
 }
 
-}}
+}
 
 int main(int argc, char* argv[]) {
   using namespace HPHP::hfsort;

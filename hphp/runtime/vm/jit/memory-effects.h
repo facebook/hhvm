@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/alias-class.h"
 #include "hphp/runtime/vm/jit/vm-reg-liveness.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct SSATmp;
 struct IRInstruction;
@@ -245,4 +245,4 @@ Optional<Type> mInstrBaseEffects(const IRInstruction& inst, Type old);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

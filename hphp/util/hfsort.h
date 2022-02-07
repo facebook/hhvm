@@ -22,7 +22,7 @@
 
 #include "hphp/util/hash.h"
 
-namespace HPHP { namespace hfsort {
+namespace HPHP::hfsort {
 
 using TargetId = int32_t;
 constexpr TargetId InvalidId = -1;
@@ -148,4 +148,4 @@ void TargetGraph::printDot(const char* fileName, L getLabel) const {
   fclose(file);
 }
 
-}}
+}

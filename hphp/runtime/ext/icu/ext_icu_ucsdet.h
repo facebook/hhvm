@@ -8,7 +8,7 @@
 
 #include <memory>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_EncodingDetector;
 
@@ -83,5 +83,5 @@ struct EncodingMatch : IntlError {
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl
 

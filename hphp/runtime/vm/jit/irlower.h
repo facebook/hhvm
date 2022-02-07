@@ -24,7 +24,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRUnit;
 struct Vout;
@@ -96,5 +96,5 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit&,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 

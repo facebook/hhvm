@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/vm/jit/tc.h"
 
-namespace HPHP { namespace jit { namespace tc {
+namespace HPHP::jit::tc {
 
 struct PrologueTranslator final : Translator {
   // Although the srckey (sk member of translator) knows the func,
@@ -52,4 +52,4 @@ private:
   void publishCodeImpl() override;
 };
 
-}}}
+}

@@ -18,7 +18,7 @@
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/base/types.h"
 
-namespace HPHP { namespace thrift {
+namespace HPHP::thrift {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -363,4 +363,4 @@ static struct ThriftExtension final : Extension {
   }
 } s_thrift_extension;
 
-}}
+}

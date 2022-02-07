@@ -22,7 +22,7 @@
 
 #include "hphp/util/thread-local.h"
 
-namespace HPHP { namespace jit { namespace arm { namespace detail {
+namespace HPHP::jit::arm::detail {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -48,5 +48,5 @@ Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}}
+}
 

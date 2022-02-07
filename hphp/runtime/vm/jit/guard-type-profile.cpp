@@ -25,7 +25,7 @@
 
 #include <folly/AtomicHashMap.h>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 folly::AtomicHashMap<const StringData*, rds::Link<int64_t, rds::Mode::Normal>>
@@ -74,4 +74,4 @@ void logGuardProfileData() {
   }
 }
 
-}}
+}

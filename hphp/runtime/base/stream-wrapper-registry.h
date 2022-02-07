@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 
-namespace HPHP { namespace Stream {
+namespace HPHP::Stream {
 ///////////////////////////////////////////////////////////////////////////////
 struct Wrapper;
 
@@ -41,6 +41,6 @@ void RegisterCoreWrappers();
 void setThreadLocalFileHandler(Wrapper* wrapper);
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
 #endif // HPHP_STREAM_WRAPPER_REGISTRY_H

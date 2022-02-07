@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -112,4 +112,4 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

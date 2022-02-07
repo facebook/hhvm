@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define O(name, ...)  \
@@ -436,4 +436,4 @@ void updateIndirectFixupBySpill(Vinstr& inst, size_t spillSize) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

@@ -22,7 +22,7 @@
 #include "hphp/runtime/debugger/debugger_client.h"
 #include "hphp/runtime/vm/runtime.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
@@ -317,4 +317,4 @@ bool CmdVariable::onServer(DebuggerProxy &proxy) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

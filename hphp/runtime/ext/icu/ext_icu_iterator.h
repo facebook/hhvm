@@ -21,7 +21,7 @@
 
 #include <unicode/strenum.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlIterator;
 
@@ -151,5 +151,5 @@ struct BugStringCharEnumeration : icu::StringEnumeration {
 #endif // icu >= 4.2
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl
 

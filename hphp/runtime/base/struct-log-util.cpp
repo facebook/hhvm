@@ -18,7 +18,7 @@
 
 #include "hphp/util/stack-trace.h"
 
-namespace HPHP { namespace StructuredLog {
+namespace HPHP::StructuredLog {
 
 void logSerDes(const char* format, const char* op,
                const String& serialized, const Variant& value) {
@@ -39,4 +39,4 @@ void logSerDes(const char* format, const char* op,
   StructuredLog::log("hhvm_serdes", sample);
 }
 
-}}
+}

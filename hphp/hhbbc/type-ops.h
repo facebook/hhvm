@@ -17,7 +17,7 @@
 
 #include "hphp/runtime/vm/hhbc.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 struct Type;
 
@@ -82,5 +82,5 @@ Type typeNSame(const Type&, const Type&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

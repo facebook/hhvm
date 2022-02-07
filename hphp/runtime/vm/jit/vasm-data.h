@@ -24,7 +24,7 @@
 #include <memory>
 #include <string>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 /*
  * VdataPtr represents a pointer to a value that will end up in the JIT's
@@ -87,5 +87,5 @@ struct VdataBlock {
   size_t align;
 };
 
-}}
+}
 

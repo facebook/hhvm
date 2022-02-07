@@ -19,7 +19,7 @@
 
 #include "hphp/runtime/base/memory-manager.h"
 
-namespace HPHP { namespace jit { namespace irlower {
+namespace HPHP::jit::irlower {
 
 TRACE_SET_MOD(irlower);
 
@@ -95,4 +95,4 @@ void cgVoidPtrAsDataType(IRLS& env, const IRInstruction* inst) {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-}}}
+}

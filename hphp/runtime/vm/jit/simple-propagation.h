@@ -16,7 +16,7 @@
 
 #pragma once
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRInstruction;
 struct IRUnit;
@@ -37,5 +37,5 @@ void constProp(IRUnit&, IRInstruction*);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}
 

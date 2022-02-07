@@ -26,7 +26,7 @@
 
 #include <iterator>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(hhir_phi);
 
@@ -273,4 +273,4 @@ bool optimizePhis(IRUnit& unit) {
   return changed;
 }
 
-}}
+}

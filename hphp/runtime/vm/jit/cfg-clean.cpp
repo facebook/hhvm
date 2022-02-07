@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/pass-tracer.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(hhir_cfg);
 
@@ -288,4 +288,4 @@ void cleanCfg(IRUnit& unit) {
   if (changed) reflowTypes(unit);
 }
 
-}}
+}

@@ -19,7 +19,7 @@
 #include "hphp/util/type-scan.h"
 #include <deque>
 
-namespace HPHP { namespace req {
+namespace HPHP::req {
 
 template <typename T>
 struct deque final : std::deque<T, ConservativeAllocator<T>> {
@@ -31,4 +31,4 @@ struct deque final : std::deque<T, ConservativeAllocator<T>> {
   }
 };
 
-}}
+}

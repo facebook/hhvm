@@ -24,7 +24,7 @@
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -886,4 +886,4 @@ Resolution resolve_type_structure(const Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -41,7 +41,7 @@
 
 TRACE_SET_MOD(mcg);
 
-namespace HPHP { namespace jit { namespace tc {
+namespace HPHP::jit::tc {
 namespace {
 /*
  * Smash the callers of the ProfPrologue associated with `rec' to call a new
@@ -208,4 +208,4 @@ void PrologueTranslator::publishCodeImpl() {
   }
 }
 
-}}}
+}

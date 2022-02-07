@@ -27,7 +27,7 @@
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/bc.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -663,4 +663,4 @@ std::string state_string(const php::Func&, const State&, const CollectedInfo&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

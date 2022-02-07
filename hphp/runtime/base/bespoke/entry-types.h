@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/typed-value.h"
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 enum class KeyTypes : uint8_t {
   Empty,
@@ -90,6 +90,6 @@ struct EntryTypes {
 
 const char* show(KeyTypes kt);
 
-}}
+}
 
 #endif

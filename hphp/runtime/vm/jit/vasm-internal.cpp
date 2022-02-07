@@ -36,7 +36,7 @@
 
 #include <vector>
 
-namespace HPHP { namespace jit { namespace vasm_detail {
+namespace HPHP::jit { namespace vasm_detail {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -394,4 +394,4 @@ void setCallFuncId(Venv& env, TCA callRetAddr) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

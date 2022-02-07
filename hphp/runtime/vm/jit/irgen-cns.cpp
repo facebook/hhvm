@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -202,4 +202,4 @@ void emitClsCnsL(IRGS& env, int32_t id) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

@@ -20,7 +20,7 @@
 #include <folly/Memory.h>
 #include <memory>
 
-namespace HPHP { namespace req {
+namespace HPHP::req {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -198,5 +198,5 @@ static_assert(
 );
 #endif
 
-}}
+}
 

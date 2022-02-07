@@ -24,7 +24,7 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 namespace {
 
@@ -317,4 +317,4 @@ void finishHHBC(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

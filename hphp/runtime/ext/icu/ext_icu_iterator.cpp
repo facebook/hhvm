@@ -16,7 +16,7 @@
 */
 #include "hphp/runtime/ext/icu/ext_icu_iterator.h"
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 //////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_IntlIterator("IntlIterator");
@@ -77,4 +77,4 @@ void IntlExtension::initIterator() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

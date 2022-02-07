@@ -36,7 +36,7 @@
 
 #include <iostream>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(ustubs);
 
@@ -215,4 +215,4 @@ TCA emitCallToExit(CodeBlock& cb, DataBlock& data, const UniqueStubs& us) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}}

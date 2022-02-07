@@ -15,7 +15,7 @@
 */
 #pragma once
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 struct Stats;
 
@@ -51,5 +51,5 @@ void print_stats(const StatsHolder&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

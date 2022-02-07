@@ -32,7 +32,7 @@
 
 TRACE_SET_MOD(vasm);
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 // Remove dead instructions by doing a traditional liveness analysis.
 // instructions that mutate memory, physical registers, or status flags are
@@ -290,4 +290,4 @@ void removeTrivialNops(Vunit& unit) {
   }
 }
 
-}}
+}

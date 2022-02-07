@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 bool IsTypeStructProfile::shouldOptimize() const {
   auto const threshold = RO::EvalHHIRIsTypeStructProfileThreshold;
@@ -50,4 +50,4 @@ folly::dynamic IsTypeStructProfile::toDynamic() const {
   return folly::dynamic::object("class", m_class)("total", m_total);
 }
 
-}}
+}

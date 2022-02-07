@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_break.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CmdException : CmdBreak {
@@ -32,5 +32,5 @@ struct CmdException : CmdBreak {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 

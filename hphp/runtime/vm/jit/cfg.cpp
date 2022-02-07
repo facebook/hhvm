@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(hhir);
 
@@ -295,4 +295,4 @@ bool cfgHasLoop(const IRUnit& unit) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

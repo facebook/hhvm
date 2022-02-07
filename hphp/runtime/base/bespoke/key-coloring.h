@@ -19,7 +19,7 @@
 
 #include <folly/container/F14Map.h>
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 using Color = uint16_t;
 using ColorMap = folly::F14FastMap<const StringData*, Color>;
@@ -43,4 +43,4 @@ void applyColoring(const ColorMap& coloring);
 
 std::string dumpColoringInfo();
 
-}}
+}

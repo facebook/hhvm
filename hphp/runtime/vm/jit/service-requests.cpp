@@ -42,7 +42,7 @@
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 #include "hphp/vixl/a64/disasm-a64.h"
 
-namespace HPHP { namespace jit { namespace svcreq {
+namespace HPHP::jit::svcreq {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -232,4 +232,4 @@ TCA emit_interp_no_translate_stub(SBInvOffset spOff, SrcKey sk) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

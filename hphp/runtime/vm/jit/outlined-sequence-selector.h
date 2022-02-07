@@ -16,7 +16,7 @@
 
 #pragma once
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRUnit;
 struct AsmInfo;
@@ -24,4 +24,4 @@ struct AsmInfo;
 void buildOptimizedHashes();
 void recordIR(const IRUnit& unit, AsmInfo* ai);
 
-}} // namespace HPHP, jit
+} // namespace HPHP, jit

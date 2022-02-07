@@ -18,7 +18,7 @@
 #include "hphp/hhbbc/context.h"
 #include "hphp/hhbbc/misc.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -72,4 +72,4 @@ TypeStructureResolution resolve_type_structure(const Index&,
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

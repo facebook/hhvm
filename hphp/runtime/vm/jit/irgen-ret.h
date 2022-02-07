@@ -15,7 +15,7 @@
 */
 #pragma once
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRSPRelOffset;
 
@@ -33,5 +33,5 @@ IRSPRelOffset offsetToReturnSlot(IRGS&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 

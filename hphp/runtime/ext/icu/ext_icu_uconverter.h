@@ -5,7 +5,7 @@
 
 #include <unicode/ucnv.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 
 extern const StaticString s_UConverter;
@@ -64,5 +64,5 @@ private:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl
 

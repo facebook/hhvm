@@ -22,7 +22,7 @@
 #include <set>
 #include <vector>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -132,5 +132,5 @@ size_t relocate(RelocationInfo& rel,
                 TCA* exitAddr,
                 AreaIndex codeArea);
 
-}}
+}
 

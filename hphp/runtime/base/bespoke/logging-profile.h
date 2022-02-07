@@ -31,7 +31,7 @@
 #include <algorithm>
 #include <atomic>
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 struct LoggingArray;
 
@@ -379,6 +379,6 @@ ArrayOp getEventArrayOp(uint64_t key);
 LowStringPtr getEventStrKey(uint64_t key);
 DataType getEventValType(uint64_t key);
 
-}}
+}
 
 #endif // HPHP_LOGGING_PROFILE_H_

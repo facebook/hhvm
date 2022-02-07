@@ -21,7 +21,7 @@
 
 #include "hphp/util/trace.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct ProfTransRec;
 struct TransArgs;
@@ -64,4 +64,4 @@ bool retranslateAllComplete();
  */
 CompactVector<Trace::BumpRelease> unbumpFunctions();
 
-}}}
+}}

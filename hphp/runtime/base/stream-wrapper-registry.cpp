@@ -29,7 +29,7 @@
 #include "hphp/util/hash-map.h"
 #include "hphp/util/rds-local.h"
 
-namespace HPHP { namespace Stream {
+namespace HPHP::Stream {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Global registry for wrappers
@@ -134,4 +134,4 @@ void setThreadLocalFileHandler(Stream::Wrapper* wrapper) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

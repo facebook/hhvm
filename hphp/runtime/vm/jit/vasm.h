@@ -27,7 +27,7 @@
 #include <folly/Range.h>
 #include <iosfwd>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Abi;
@@ -175,7 +175,7 @@ boost::dynamic_bitset<> backedgeTargets(const Vunit& unit,
                                         const jit::vector<Vlabel>& rpoBlocks);
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
 namespace std {
 template<> struct hash<HPHP::jit::Vlabel> {

@@ -26,7 +26,7 @@
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/asio/ext_async-generator.h"
 
-namespace HPHP { namespace Native {
+namespace HPHP::Native {
 //////////////////////////////////////////////////////////////////////////////
 
 typedef std::unordered_map<const StringData*,NativeDataInfo> NativeDataInfoMap;
@@ -246,4 +246,4 @@ void nativeDataWakeup(ObjectData* obj, const Variant& data) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Native
+} // namespace HPHP::Native

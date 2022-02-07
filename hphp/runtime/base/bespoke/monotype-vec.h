@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 struct EmptyMonotypeVec;
 
@@ -140,6 +140,6 @@ struct TopMonotypeVecLayout : public AbstractLayout {
 
 bool isMonotypeVecLayout(LayoutIndex index);
 
-}}
+}
 
 #endif

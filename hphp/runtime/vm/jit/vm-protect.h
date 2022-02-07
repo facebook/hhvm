@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/vm/vm-regs.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 /*
  * RAII assertion guard that ensures VM state (specifically, all of RDS,
@@ -56,4 +56,4 @@ private:
 #endif
 };
 
-}}
+}

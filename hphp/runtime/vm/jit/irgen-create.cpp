@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 namespace {
 
@@ -529,4 +529,4 @@ void emitCheckReifiedGenericMismatch(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

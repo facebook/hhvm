@@ -40,7 +40,7 @@
  * additional information to all contained events (which will be accessible via
  * the extensible interface).
  */
-namespace HPHP { namespace rqtrace {
+namespace HPHP::rqtrace {
 
 struct EventStats { uint64_t total_duration; uint64_t total_count; };
 using EventMap = folly::F14FastMap<std::string, EventStats>;
@@ -226,6 +226,6 @@ template<class F>
 void visit_process_stats(F&&);
 
 ////////////////////////////////////////////////////////////////////////////////
-}}
+}
 
 #include "hphp/runtime/base/request-tracing-inl.h"

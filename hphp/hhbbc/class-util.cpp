@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -200,4 +200,4 @@ ClassBase::ClassBase(const ClassBase& other) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

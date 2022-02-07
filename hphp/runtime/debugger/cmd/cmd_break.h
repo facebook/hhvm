@@ -21,7 +21,7 @@
 #include "hphp/runtime/debugger/break_point.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CmdBreak : DebuggerCommand {
@@ -94,5 +94,5 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 

@@ -24,7 +24,7 @@
 
 #include <folly/Range.h>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 std::string show_types(const std::vector<Type>& ts) {
@@ -140,4 +140,4 @@ bool CallSpec::verifySignature(const CallDest& dest,
   return true;
 }
 
-}}
+}

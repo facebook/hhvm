@@ -27,7 +27,7 @@
 #include "hphp/util/optional.h"
 #include "hphp/util/hash-set.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -311,4 +311,4 @@ inline std::string show(const Reason &r) {
   return folly::sformat("{}:{}", r.file, r.line);
 }
 
-}}
+}

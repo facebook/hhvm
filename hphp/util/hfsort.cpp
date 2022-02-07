@@ -23,7 +23,7 @@
 #include "hphp/util/hash.h"
 #include "hphp/util/trace.h"
 
-namespace HPHP { namespace hfsort {
+namespace HPHP::hfsort {
 namespace {
 
 TRACE_SET_MOD(hfsort);
@@ -445,4 +445,4 @@ std::vector<Cluster> pettisAndHansen(const TargetGraph& cg) {
   return outClusters;
 }
 
-}}
+}

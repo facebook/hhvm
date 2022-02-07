@@ -26,7 +26,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP::jit::x64 {
 
 namespace {
 
@@ -413,4 +413,4 @@ size_t relocate(RelocationInfo& rel,
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

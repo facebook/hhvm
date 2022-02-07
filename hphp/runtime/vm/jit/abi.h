@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/abi-regs.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -185,5 +185,5 @@ Vflags required_flags(ConditionCode cc);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}
 

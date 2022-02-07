@@ -30,7 +30,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(pgo);
 
@@ -302,4 +302,4 @@ std::vector<ProfData::TargetProfileInfo> ProfData::getTargetProfiles(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-}}
+}

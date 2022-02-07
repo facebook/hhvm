@@ -23,7 +23,7 @@
 #include <memory>
 #include <utility>
 
-namespace HPHP { namespace Treadmill {
+namespace HPHP::Treadmill {
 
 extern std::atomic<int64_t> g_nextThreadIdx;
 extern RDS_LOCAL_NO_CHECK(int64_t, rl_thisRequestIdx);
@@ -84,5 +84,5 @@ void enqueue(F&& f) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

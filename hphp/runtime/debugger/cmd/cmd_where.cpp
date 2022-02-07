@@ -22,7 +22,7 @@
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
@@ -150,4 +150,4 @@ bool CmdWhere::onServer(DebuggerProxy &proxy) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

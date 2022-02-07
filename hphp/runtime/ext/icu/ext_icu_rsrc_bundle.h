@@ -6,7 +6,7 @@
 #include <unicode/ures.h>
 #include <unicode/resbund.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_ResourceBundle;
 
@@ -83,5 +83,5 @@ private:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl
 

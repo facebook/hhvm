@@ -19,7 +19,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"
 #include "hphp/runtime/vm/bytecode.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CmdNext : CmdFlowControl {
@@ -49,5 +49,5 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 

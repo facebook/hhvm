@@ -25,7 +25,7 @@
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/type-system.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 struct PropertiesInfo;
 struct CollectedInfo;
@@ -224,4 +224,4 @@ SString getNameFromType(const Type& t);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

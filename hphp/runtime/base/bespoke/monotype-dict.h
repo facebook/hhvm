@@ -100,7 +100,7 @@
  * careful invocations of find, plus refcounting.
  */
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 struct EmptyMonotypeDict : BespokeArray {
   using Self = EmptyMonotypeDict;
@@ -278,4 +278,4 @@ bool isMonotypeDictLayout(LayoutIndex index);
 
 BespokeArray* MakeMonotypeDictFromVanilla(ArrayData*, DataType, KeyTypes);
 
-}}
+}

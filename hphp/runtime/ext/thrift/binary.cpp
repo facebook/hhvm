@@ -45,7 +45,7 @@
 #include <sys/types.h>
 #include <stdexcept>
 
-namespace HPHP { namespace thrift {
+namespace HPHP::thrift {
 /////////////////////////////////////////////////////////////////////////////
 
 const StaticString
@@ -767,4 +767,4 @@ Variant HHVM_FUNCTION(thrift_protocol_read_binary_struct,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

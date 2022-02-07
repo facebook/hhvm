@@ -17,11 +17,11 @@
 
 #include <cstdint>
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 struct IRGS;
 
 void implIncStat(IRGS& env, uint32_t counter);
 
-}}}
+}
 

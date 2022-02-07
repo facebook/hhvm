@@ -16,7 +16,7 @@
 
 #include "hphp/compiler/json.h"
 
-namespace HPHP { namespace JSON {
+namespace HPHP::JSON {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
@@ -43,4 +43,4 @@ std::string Escape(const char *s) {
   }
   return ret;
 }
-}}
+}

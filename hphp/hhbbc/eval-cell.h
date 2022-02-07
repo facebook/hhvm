@@ -28,7 +28,7 @@
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/type-system.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -85,4 +85,4 @@ eval_cell_value(Pred p) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

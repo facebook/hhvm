@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 
-namespace HPHP { namespace PropertyProfile {
+namespace HPHP::PropertyProfile {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -125,4 +125,4 @@ void deserialize(jit::ProfDataDeserializer& ser) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

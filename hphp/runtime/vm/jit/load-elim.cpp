@@ -49,7 +49,7 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 
@@ -1623,4 +1623,4 @@ void optimizeLoads(IRUnit& unit) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -194,7 +194,7 @@ Outer:                                 | Inner:
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/unwind.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 bool isInlining(const IRGS& env) {
   return env.inlineState.depth > 0;
@@ -716,4 +716,4 @@ bool spillInlinedFrames(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

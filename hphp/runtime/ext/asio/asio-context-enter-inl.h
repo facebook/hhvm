@@ -19,7 +19,7 @@
 #error "This should only be included by asio-context-enter.h"
 #endif
 
-namespace HPHP { namespace asio {
+namespace HPHP::asio {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline void enter_context(c_WaitableWaitHandle* root, context_idx_t ctx_idx) {
@@ -44,4 +44,4 @@ inline void enter_context(c_WaitableWaitHandle* root, context_idx_t ctx_idx) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

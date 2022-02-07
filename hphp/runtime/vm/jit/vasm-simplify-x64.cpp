@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/vasm-util.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP::jit::x64 {
 
 namespace {
 
@@ -266,4 +266,4 @@ bool simplify(Env& env, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

@@ -21,7 +21,7 @@
 
 #include <unicode/unum.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_NumberFormatter;
 
@@ -67,5 +67,5 @@ private:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl
 

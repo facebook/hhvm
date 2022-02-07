@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/vm/hhbc-codec.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 namespace {
 
@@ -143,4 +143,4 @@ Block* makeUnreachable(IRGS& env, AssertReason reason) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

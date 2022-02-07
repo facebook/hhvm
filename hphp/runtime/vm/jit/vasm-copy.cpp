@@ -40,7 +40,7 @@
 #include <string>
 #include <type_traits>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 
@@ -849,4 +849,4 @@ void optimizeCopies(Vunit& unit, const Abi& abi) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

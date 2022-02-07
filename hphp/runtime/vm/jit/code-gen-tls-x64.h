@@ -23,7 +23,7 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/thread-local.h"
 
-namespace HPHP { namespace jit { namespace x64 { namespace detail {
+namespace HPHP::jit::x64::detail {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -140,5 +140,5 @@ Vreg emitTLSLea(Vout& v, TLSDatum<T> datum, int offset) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}}
+}
 

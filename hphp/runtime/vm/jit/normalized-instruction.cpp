@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -88,4 +88,4 @@ SrcKey NormalizedInstruction::nextSk() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

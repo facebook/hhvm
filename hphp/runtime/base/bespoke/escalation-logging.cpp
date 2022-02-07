@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/array-layout.h"
 #include "hphp/util/struct-log.h"
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -71,4 +71,4 @@ void logEscalateToVanilla(const BespokeArray* bad, const char* reason) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-}}
+}

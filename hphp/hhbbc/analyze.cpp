@@ -40,7 +40,7 @@
 
 #include "hphp/runtime/vm/reified-generics.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 namespace {
 
@@ -1156,4 +1156,4 @@ State locally_propagated_bid_state(const Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

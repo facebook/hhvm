@@ -35,7 +35,7 @@
 
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 namespace {
 
@@ -1567,4 +1567,4 @@ void emitAssertRATStk(IRGS& env, uint32_t offset, RepoAuthType rat) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

@@ -21,9 +21,9 @@
 #include "hphp/runtime/vm/jit/array-layout.h"
 #include "hphp/runtime/vm/srckey.h"
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 void logGuardFailure(const ArrayData* ad, jit::ArrayLayout layout, SrcKey sk);
 void logEscalateToVanilla(const BespokeArray* bad, const char* reason);
 
-}}
+}

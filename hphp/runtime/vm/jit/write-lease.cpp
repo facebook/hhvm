@@ -26,7 +26,7 @@
 
 #include <folly/portability/SysMman.h>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 TRACE_SET_MOD(txlease);
 
 namespace {
@@ -302,4 +302,4 @@ bool LeaseHolder::checkKind(TransKind kind) {
   return true;
 }
 
-}}
+}

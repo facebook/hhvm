@@ -30,7 +30,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
@@ -1119,4 +1119,4 @@ void BreakPointInfo::RecvImpl(int version,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

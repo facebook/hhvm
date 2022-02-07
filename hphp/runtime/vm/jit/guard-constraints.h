@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/type-source.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRInstruction;
 
@@ -52,5 +52,5 @@ struct GuardConstraints {
   jit::hash_map<const IRInstruction*, Type> prevTypes;
 };
 
-}}
+}
 

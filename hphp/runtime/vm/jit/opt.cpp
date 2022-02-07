@@ -35,7 +35,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 
@@ -377,4 +377,4 @@ void optimize(IRUnit& unit, TransKind kind) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

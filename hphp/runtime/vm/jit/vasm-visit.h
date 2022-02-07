@@ -29,7 +29,7 @@
 
 #include <utility>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -423,5 +423,5 @@ private:
 using PredVector = jit::vector<TinyVector<Vlabel, 3>>;
 PredVector computePreds(const Vunit& unit);
 
-}}
+}
 

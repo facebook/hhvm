@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/util/hash-set.h"
 
-namespace HPHP { namespace Native {
+namespace HPHP::Native {
 //////////////////////////////////////////////////////////////////////////////
 // Class NativePropHandler
 
@@ -267,6 +267,6 @@ Variant issetProp(const Object& obj, const String& name);
 Variant unsetProp(const Object& obj, const String& name);
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Native
+} // namespace HPHP::Native
 
 #endif // _incl_HPHP_RUNTIME_VM_NATIVE_PROP_HANDLER_H

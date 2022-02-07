@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -83,5 +83,5 @@ void getEffects(const Abi& abi, const Vinstr& i,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}
 

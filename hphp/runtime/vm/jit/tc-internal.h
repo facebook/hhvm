@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/util/mutex.h"
 
-namespace HPHP { namespace jit { namespace tc {
+namespace HPHP::jit::tc {
 
 /*
  * Convenience class for creating TransLocs and TransRecs for new translations.
@@ -250,4 +250,4 @@ void recycleInit();
  */
 void recycleStop();
 
-}}}
+}

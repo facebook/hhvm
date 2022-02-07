@@ -18,7 +18,7 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/ext/string/ext_string.h"
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 //////////////////////////////////////////////////////////////////////////////
 // Internal resource data
 
@@ -594,4 +594,4 @@ void IntlExtension::initNumberFormatter() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

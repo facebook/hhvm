@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/vm/super-inlining-bros.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 namespace {
 //////////////////////////////////////////////////////////////////////
@@ -115,4 +115,4 @@ std::vector<SSATmp*> irgenROM(IRGS& env, const ROMData& rom, SSATmp* ctx,
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

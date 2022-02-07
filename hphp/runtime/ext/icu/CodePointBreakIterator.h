@@ -8,7 +8,7 @@
 #define UTEXT_CURRENT32 utext_current32
 #endif
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 
 struct CodePointBreakIterator : icu::BreakIterator {
@@ -168,4 +168,4 @@ struct CodePointBreakIterator : icu::BreakIterator {
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

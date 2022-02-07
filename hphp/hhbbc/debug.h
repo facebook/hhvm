@@ -22,7 +22,7 @@
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/unit-util.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -63,4 +63,4 @@ inline void state_after(const char* when, const php::Program& program) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -19,7 +19,7 @@
 #include "hphp/util/tiny-vector.h"
 #include "hphp/util/type-scan.h"
 
-namespace HPHP { namespace req {
+namespace HPHP::req {
 
 // Special allocator for TinyVector using request heap allocation.
 template <typename T, typename Element = T> struct TinyVectorReqAllocator {
@@ -58,5 +58,5 @@ struct TinyVector final : HPHP::TinyVector<T,
   }
 };
 
-}}
+}
 

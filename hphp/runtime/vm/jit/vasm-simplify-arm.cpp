@@ -24,7 +24,7 @@
 
 #include "hphp/vixl/a64/assembler-a64.h"
 
-namespace HPHP { namespace jit { namespace arm {
+namespace HPHP::jit::arm {
 
 namespace {
 
@@ -164,4 +164,4 @@ bool simplify(Env& env, Vlabel b, size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

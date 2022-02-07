@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -90,4 +90,4 @@ SrcKey BCMarker::fixupSk() const {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

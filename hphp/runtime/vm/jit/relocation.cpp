@@ -21,7 +21,7 @@
 
 #include "hphp/util/arch.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 void RelocationInfo::recordRange(TCA start, TCA end,
                                  TCA destStart, TCA destEnd) {
@@ -364,4 +364,4 @@ size_t relocate(RelocationInfo& rel,
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

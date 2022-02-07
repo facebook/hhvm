@@ -19,7 +19,7 @@
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/unit-util.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -48,4 +48,4 @@ int trace_bump_for(const php::Class* cls,
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

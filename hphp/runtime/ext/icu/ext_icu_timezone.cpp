@@ -20,7 +20,7 @@
 
 #include <unicode/locid.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 const StaticString s_IntlTimeZone("IntlTimeZone");
 
@@ -430,4 +430,4 @@ void IntlExtension::initTimeZone() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

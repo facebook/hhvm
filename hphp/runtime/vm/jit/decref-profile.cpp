@@ -23,7 +23,7 @@ bool isTypedValueRefcounted(const HPHP::TypedValue& tv) {
   return isRefcountedType(tv.type()) && tv.val().pcnt->isRefCounted();
 }
 }
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -138,4 +138,4 @@ TargetProfile<DecRefProfile> decRefProfile(const TransContext& context,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

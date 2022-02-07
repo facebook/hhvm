@@ -26,7 +26,7 @@
 
 #include "hphp/util/atomic-vector.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(mcg);
 
@@ -313,4 +313,4 @@ bool CGMeta::empty() const {
     smashableCallData.empty();
 }
 
-}}
+}

@@ -17,7 +17,7 @@
 
 #include "hphp/hhbbc/misc.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 namespace php { struct Unit; }
 
 //////////////////////////////////////////////////////////////////////
@@ -30,5 +30,5 @@ bool is_systemlib_part(const php::Unit&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

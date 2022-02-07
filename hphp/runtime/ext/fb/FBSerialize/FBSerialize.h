@@ -17,7 +17,7 @@
 
 #pragma once
 
-namespace HPHP { namespace serialize {
+namespace HPHP::serialize {
 
 /**
  *                         FB Serialize
@@ -185,7 +185,7 @@ struct FBUnserializer : private FBSerializeBase {
   const char* end_;
 };
 
-}}
+}
 
 #include "FBSerialize-inl.h"
 

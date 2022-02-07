@@ -34,7 +34,7 @@
 
 TRACE_SET_MOD(vasm_graph_color);
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -12601,4 +12601,4 @@ void allocateRegistersWithGraphColor(Vunit& unit, const Abi& abi) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

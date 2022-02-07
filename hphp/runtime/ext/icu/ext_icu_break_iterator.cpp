@@ -3,7 +3,7 @@
 using icu::BreakIterator;
 using icu::RuleBasedBreakIterator;
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 
 const StaticString
   s_IntlBreakIterator("IntlBreakIterator"),
@@ -430,4 +430,4 @@ void IntlExtension::initBreakIterator() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

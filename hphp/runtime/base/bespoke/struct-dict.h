@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/string-data.h"
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 struct StructLayout;
 
@@ -272,4 +272,4 @@ struct TopStructLayout : public AbstractLayout {
   Type getTypeBound(Type slot) const override;
 };
 
-}}
+}

@@ -18,11 +18,11 @@
 #include "hphp/runtime/vm/jit/trans-cfg.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 RegionDescPtr selectHotBlock(TransID transId, const ProfData* profData,
                              const TransCFG& /*cfg*/) {
   return profData->transRec(transId)->region();
 }
 
-}}
+}

@@ -20,7 +20,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_up.h"
 #include "hphp/runtime/debugger/cmd/cmd_where.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
@@ -49,4 +49,4 @@ void CmdDown::onClient(DebuggerClient &client) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

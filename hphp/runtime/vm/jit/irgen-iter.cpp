@@ -24,7 +24,7 @@
 
 #include "hphp/util/struct-log.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -168,4 +168,4 @@ void emitLIterFree(IRGS& env, int32_t iterId, int32_t baseLocalId) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

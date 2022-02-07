@@ -16,7 +16,7 @@
 
 #pragma once
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct IRInstruction;
@@ -40,4 +40,4 @@ bool checkOperandTypes(const IRInstruction*, const IRUnit* unit = nullptr);
 bool checkEverything(const IRUnit&);
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

@@ -20,7 +20,7 @@
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 namespace php { struct Func; struct Local; struct Block; }
 
 //////////////////////////////////////////////////////////////////////
@@ -83,4 +83,4 @@ bool has_coeffects_local(const php::Func*);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

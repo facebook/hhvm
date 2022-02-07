@@ -19,7 +19,7 @@
 #include "hphp/runtime/ext/icu/ext_icu_timezone.h"
 #include "hphp/runtime/ext/icu/ext_icu_iterator.h"
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 
 const StaticString
@@ -869,4 +869,4 @@ void IntlExtension::initCalendar() {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

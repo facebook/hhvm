@@ -36,7 +36,7 @@
 
 #include <folly/String.h>
 
-namespace HPHP { namespace proc {
+namespace HPHP::proc {
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -386,4 +386,4 @@ bool EnableForkInDebuggerGuard::isForkEnabledInDebugger() {
   return s_forkEnabledInDebugger;
 }
 
-}}
+}

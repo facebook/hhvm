@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-namespace HPHP { namespace jit { namespace layout {
+namespace HPHP::jit::layout {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -78,4 +78,4 @@ struct Clusterizer {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}}
+}

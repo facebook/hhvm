@@ -63,7 +63,7 @@ using namespace HPHP::TextArt;
 
 #define PHP_WORD_BREAK_CHARACTERS " \t\n\"\\'`@=;,|{[()]}+*%^!~&"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
@@ -2537,4 +2537,4 @@ void DebuggerClient::saveConfig() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

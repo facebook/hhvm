@@ -28,7 +28,7 @@
 
 #include <vector>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRInstruction;
 
@@ -397,4 +397,4 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

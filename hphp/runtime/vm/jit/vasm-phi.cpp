@@ -25,7 +25,7 @@
 
 TRACE_SET_MOD(vasm_phi);
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 /*
  * optimizePhis() performs limited tail duplication in a few specific
@@ -249,4 +249,4 @@ void optimizePhis(Vunit& unit) {
   }
 }
 
-}}
+}

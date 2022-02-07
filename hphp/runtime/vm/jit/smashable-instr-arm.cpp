@@ -27,7 +27,7 @@
 #include "hphp/vixl/a64/constants-a64.h"
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
-namespace HPHP { namespace jit { namespace arm {
+namespace HPHP::jit::arm {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -385,4 +385,4 @@ bool optimizeSmashedJcc(TCA inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

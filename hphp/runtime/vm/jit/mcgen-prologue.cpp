@@ -63,7 +63,7 @@ TRACE_SET_MOD(mcg);
  * translation-time values of vmfp()/vmsp(), since they have an
  * unpredictable relationship to the source.
  */
-namespace HPHP { namespace jit { namespace mcgen {
+namespace HPHP::jit::mcgen {
 
 namespace {
 
@@ -233,4 +233,4 @@ TranslationResult getFuncPrologue(Func* func, int nPassed) {
   return translator.publish();
 }
 
-}}}
+}

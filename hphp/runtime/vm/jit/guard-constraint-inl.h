@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/class.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline GuardConstraint::GuardConstraint(DataTypeCategory cat
@@ -88,4 +88,4 @@ inline const Class* GuardConstraint::desiredClass() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

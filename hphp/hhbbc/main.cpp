@@ -54,7 +54,7 @@
 #include "hphp/util/rds-local.h"
 #include "hphp/util/logger.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 namespace {
 
@@ -534,4 +534,4 @@ catch (std::exception& e) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

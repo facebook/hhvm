@@ -35,7 +35,7 @@
 #include "hphp/util/tiny-vector.h"
 #include "hphp/util/trace.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit { namespace irgen {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1960,4 +1960,4 @@ void lowerStructBespokeGetThrow(IRUnit& unit, IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -22,7 +22,7 @@
 
 #include <unordered_map>
 
-namespace HPHP { namespace rds {
+namespace HPHP::rds {
 
 std::unordered_multimap<
   std::pair<const Func*, const Class*>, Link<TypedValue, Mode::Normal>
@@ -139,4 +139,4 @@ attachTSCache(const Func* func) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

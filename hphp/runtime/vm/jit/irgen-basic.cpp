@@ -28,7 +28,7 @@
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/unit-util.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 void emitClassGetC(IRGS& env) {
   auto const name = topC(env);
@@ -524,4 +524,4 @@ void emitBreakTraceHint(IRGS&)     {}
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

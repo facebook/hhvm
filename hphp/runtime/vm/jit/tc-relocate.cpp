@@ -39,7 +39,7 @@
 #include <cstdio>
 #include <vector>
 
-namespace HPHP { namespace jit { namespace tc {
+namespace HPHP::jit::tc {
 
 TRACE_SET_MOD(mcg);
 
@@ -121,4 +121,4 @@ void relocateTranslation(
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

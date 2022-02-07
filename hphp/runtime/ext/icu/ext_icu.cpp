@@ -30,7 +30,7 @@
 
 using namespace U_ICU_NAMESPACE;
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 ///////////////////////////////////////////////////////////////////////////////
 // Intentionally higher in case ICU adds more constants.
 const int64_t k_UREGEX_OFFSET_CAPTURE   = 1LL<<32;
@@ -364,4 +364,4 @@ void IntlExtension::initICU() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}} // HPHP::Intl
+} // HPHP::Intl

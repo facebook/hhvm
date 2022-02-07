@@ -20,7 +20,7 @@
 #include <vector>
 #include <algorithm>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 // Method ids reported to Vtune JIT API should not be less than 1000 (see
 // the comment in iJIT_Method_Load structure definition.) We use 1000 for
@@ -147,4 +147,4 @@ void reportHelperToVtune(const char *name,
   iJIT_NotifyEvent(iJVM_EVENT_TYPE_METHOD_LOAD_FINISHED, (void *)&methodInfo);
 }
 
-}}
+}

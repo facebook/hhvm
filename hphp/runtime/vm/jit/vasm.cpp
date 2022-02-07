@@ -27,7 +27,7 @@
 
 #include <algorithm>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 folly::Range<Vlabel*> succs(Vinstr& inst) {
@@ -258,4 +258,4 @@ jit::vector<Vlabel> sortBlocks(const Vunit& unit) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

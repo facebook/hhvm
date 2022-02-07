@@ -37,7 +37,7 @@
 
 #include "hphp/util/text-util.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -755,4 +755,4 @@ std::string show(const ClsTypeConstLookupResult<TypeStructureResolution>& r) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

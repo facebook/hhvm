@@ -53,7 +53,7 @@
 #include <algorithm>
 #include <sstream>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 //////////////////////////////////////////////////////////////////////
 
 IRInstruction::IRInstruction(Arena& arena, const IRInstruction* inst, Id id)
@@ -862,4 +862,4 @@ bool IRInstruction::maySyncVMRegsWithSources() const {
 
 }
 
-}}
+}

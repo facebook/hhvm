@@ -24,7 +24,7 @@
 
 #include <type_traits>
 
-namespace HPHP { namespace Native {
+namespace HPHP::Native {
 //////////////////////////////////////////////////////////////////////////////
 // Class NativeData
 
@@ -279,6 +279,6 @@ getNativeNode(const ObjectData* obj, const NativeDataInfo* ndi) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Native
+} // namespace HPHP::Native
 
 #endif // _incl_HPHP_RUNTIME_VM_NATIVE_DATA_H

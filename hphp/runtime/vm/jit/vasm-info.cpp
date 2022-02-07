@@ -21,7 +21,7 @@
 
 #include <utility>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -461,4 +461,4 @@ bool isPure(const Vinstr& inst) {
   return effectsImpl(inst, true);
 }
 
-}}
+}

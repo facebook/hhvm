@@ -51,7 +51,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 TRACE_SET_MOD(hhbbc_dce);
 
@@ -3112,4 +3112,4 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -18,7 +18,7 @@
 
 #include "hphp/util/safe-cast.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 /*
  * When selecting encodings, we often need to assess a two's complement
@@ -123,4 +123,4 @@ private:
   int64_t m_long;
 };
 
-}}
+}

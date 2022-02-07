@@ -21,7 +21,7 @@
 #include "hphp/hhbbc/eval-cell.h"
 #include "hphp/hhbbc/type-system.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -236,4 +236,4 @@ Type typeNSame(const Type& a, const Type& b) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

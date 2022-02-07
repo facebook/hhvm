@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/vm/jit/relocation.h"
 
-namespace HPHP { namespace jit { namespace arm {
+namespace HPHP::jit::arm {
 
 void adjustForRelocation(RelocationInfo&);
 void adjustForRelocation(RelocationInfo& rel, TCA srcStart, TCA srcEnd);
@@ -27,5 +27,5 @@ void findFixups(TCA start, TCA end, CGMeta& meta);
 size_t relocate(RelocationInfo&, CodeBlock&, TCA, TCA, CodeBlock&, CGMeta&,
                 TCA*, AreaIndex);
 
-}}}
+}
 

@@ -26,7 +26,7 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 
@@ -960,4 +960,4 @@ void rename_sf_regs(Vunit& unit, const jit::fast_set<unsigned>& sf_renames) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -25,7 +25,7 @@
 
 #include <set>
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 // Although we dynamically construct bespoke layouts, we only have a small,
 // statically-known list of "families" of these layouts.
@@ -491,4 +491,4 @@ void eachLayout(std::function<void(Layout& layout)> fn);
 // Array of all layout pointers. Useful for accessing from the TC.
 Layout** layoutsForJIT();
 
-}}
+}

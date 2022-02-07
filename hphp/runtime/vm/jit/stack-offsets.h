@@ -74,7 +74,7 @@
  * relative to those stack pointers.
  */
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct BCSPRelOffset;
 struct IRSPRelOffset;
@@ -285,4 +285,4 @@ SBInvOffset::to<IRSPRelOffset>(SBInvOffset sp) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

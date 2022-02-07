@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/req-malloc.h"
 #include <folly/container/F14Map.h>
 
-namespace HPHP { namespace req {
+namespace HPHP::req {
 
 /*
  * hash_map wraps F14NodeMap, which allocates key+value indirectly,
@@ -137,4 +137,4 @@ struct fast_map : std::conditional_t<
   fast_map() : Super() {}
 };
 
-}}
+}

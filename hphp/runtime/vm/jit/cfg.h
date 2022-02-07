@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRUnit;
 struct Block;
@@ -108,7 +108,7 @@ void forEachInst(const BlockList& blocks, Body body);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #include "hphp/runtime/vm/jit/cfg-inl.h"
 

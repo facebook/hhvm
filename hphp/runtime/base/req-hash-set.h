@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/req-malloc.h"
 #include <folly/container/F14Set.h>
 
-namespace HPHP { namespace req {
+namespace HPHP::req {
 
 /*
  * hash_set wraps F14NodeSet, which allocates values indirectly,
@@ -120,4 +120,4 @@ struct fast_set : std::conditional_t<
   fast_set() : Super() {}
 };
 
-}}
+}

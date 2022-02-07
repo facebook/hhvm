@@ -1,7 +1,7 @@
 #include "hphp/runtime/ext/icu/ext_icu_date_pattern_gen.h"
 #include "hphp/runtime/ext/icu/ext_icu_iterator.h"
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 //////////////////////////////////////////////////////////////////////////////
 // Internal Resource Data
 
@@ -381,4 +381,4 @@ void IntlExtension::initDatePatternGenerator() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

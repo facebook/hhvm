@@ -25,7 +25,7 @@
 
 #include "hphp/util/sparse-id-containers.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRUnit;
 
@@ -178,5 +178,5 @@ std::string show(ALocBits);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

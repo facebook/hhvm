@@ -18,7 +18,7 @@
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 namespace res { struct Class; }
 namespace php { struct Class; }
@@ -102,4 +102,4 @@ Type loosen_this_prop_for_serialization(const php::Class& ctx,
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

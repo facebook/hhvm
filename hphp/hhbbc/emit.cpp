@@ -48,7 +48,7 @@
 #include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 TRACE_SET_MOD(hhbbc_emit);
 
@@ -1362,4 +1362,4 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index, php::Unit& unit) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -32,7 +32,7 @@
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 #include "hphp/runtime/vm/jit/type-profile.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -387,4 +387,4 @@ SSATmp* simpleSetOpAction(IRGS&, SetOpOp, SSATmp* lhs, SSATmp* rhs);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

@@ -50,7 +50,7 @@
 
 #include "hphp/util/text-util.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 namespace {
 
@@ -2509,4 +2509,4 @@ void emitSetImplicitContextByValue(IRGS& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
-}}}
+}

@@ -32,7 +32,7 @@
 #include "hphp/util/numa.h"
 #include "hphp/util/trace.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(mcg);
 
@@ -324,4 +324,4 @@ void CodeCache::View::alignForTranslation(bool alignMain) {
   frozen().alignFrontier(tc::Translator::kTranslationAlign);
 }
 
-}}
+}

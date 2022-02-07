@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -63,4 +63,4 @@ inline SSATmp* incDec(IRGS& env, IncDecOp op, SSATmp* src) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

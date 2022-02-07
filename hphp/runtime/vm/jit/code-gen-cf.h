@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -515,4 +515,4 @@ void forLoopUnroll(Vout& v, unsigned iterations, const VregList& regs,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

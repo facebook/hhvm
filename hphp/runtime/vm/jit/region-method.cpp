@@ -23,7 +23,7 @@
 
 #include "hphp/util/arena.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(region);
 
@@ -171,4 +171,4 @@ RegionDescPtr selectMethod(const RegionContext& context) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

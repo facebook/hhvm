@@ -16,7 +16,7 @@
 
 #pragma once
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct Vunit;
 
@@ -29,5 +29,5 @@ void profile_branches(Vunit& unit);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}
 

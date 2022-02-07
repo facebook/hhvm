@@ -21,7 +21,7 @@
 
 #include <sstream>
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 TRACE_SET_MOD(bespoke);
 
@@ -215,4 +215,4 @@ void mergeKeyOrderMap(KeyOrderMap& dst, const KeyOrderMap& src) {
   }
 }
 
-}}
+}

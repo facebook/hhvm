@@ -34,7 +34,7 @@
 
 TRACE_SET_MOD(mcg);
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace mcgen {
 
@@ -76,4 +76,4 @@ bool dumpTCAnnotation(TransKind transKind) {
          transKind == TransKind::OptPrologue;
 }
 
-}}}
+}}

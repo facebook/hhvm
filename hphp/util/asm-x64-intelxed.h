@@ -26,7 +26,7 @@ extern "C" {
  * A macro assembler for x64, based on the Intel XED library, that strives
  * for low coupling to the runtime environment and ease of extendability.
  */
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct XedInit {
   XedInit() {
@@ -1034,4 +1034,4 @@ private:
   }
 };
 
-}}
+}

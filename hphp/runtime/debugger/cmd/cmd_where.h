@@ -19,7 +19,7 @@
 #include "hphp/runtime/debugger/debugger_command.h"
 #include "hphp/runtime/base/req-root.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CmdWhere : DebuggerCommand {
@@ -42,5 +42,5 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 

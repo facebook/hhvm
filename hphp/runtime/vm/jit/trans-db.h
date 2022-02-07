@@ -31,7 +31,7 @@
  * `profTransID', which is just the region block ID (which are globally
  * unique).  This is completely distinct from the Translator's TransID.
  */
-namespace HPHP { namespace jit { namespace transdb {
+namespace HPHP::jit::transdb {
 
 /*
  * Whether the TransDB structures should be used.
@@ -60,5 +60,5 @@ void addTranslation(const TransRec& transRec);
  */
 size_t getNumTranslations();
 
-}}}
+}
 

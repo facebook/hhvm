@@ -52,7 +52,7 @@
 #include <string>
 #include <vector>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(prof_branch);
 
@@ -496,4 +496,4 @@ void profile_branches(Vunit& unit) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -42,7 +42,7 @@
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/wide-func.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 TRACE_SET_MOD(hhbbc);
 
@@ -652,4 +652,4 @@ void whole_program(php::ProgramPtr program,
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

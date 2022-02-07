@@ -21,7 +21,7 @@
 
 #include "hphp/hhbbc/wide-func.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -185,4 +185,4 @@ next_catch_block(const php::WideFunc& func, BlockId id, ExnNodeId exnId) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

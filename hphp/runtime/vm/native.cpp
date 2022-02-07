@@ -24,7 +24,7 @@
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
 
-namespace HPHP { namespace Native {
+namespace HPHP::Native {
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -867,4 +867,4 @@ bool registerConstant(const StringData* cnsName,
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Native
+} // namespace HPHP::Native

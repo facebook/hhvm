@@ -46,7 +46,7 @@
 
 #include "hphp/util/trace.h"
 
-namespace HPHP { namespace jit { namespace irlower {
+namespace HPHP::jit::irlower {
 
 TRACE_SET_MOD(irlower);
 
@@ -347,4 +347,4 @@ void cgIterFree(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

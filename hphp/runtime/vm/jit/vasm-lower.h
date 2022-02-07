@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -62,7 +62,7 @@ void vlower(VLS& env, Vlabel b, size_t i);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #include "hphp/runtime/vm/jit/vasm-lower-inl.h"
 

@@ -47,7 +47,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
-namespace HPHP { namespace rds {
+namespace HPHP::rds {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1082,4 +1082,4 @@ local::RegisterConfig s_rdsLocalConfigRegistration({
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

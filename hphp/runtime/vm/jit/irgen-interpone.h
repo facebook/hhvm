@@ -17,7 +17,7 @@
 
 #include "hphp/util/optional.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct InterpOneData;
 struct NormalizedInstruction;
@@ -37,4 +37,4 @@ void interpOne(IRGS&, Optional<Type>, int popped, int pushed,
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}

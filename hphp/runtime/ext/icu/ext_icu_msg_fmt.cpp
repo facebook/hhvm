@@ -37,7 +37,7 @@ U_NAMESPACE_END
 
 using icu::MessageFormatAdapter;
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 //////////////////////////////////////////////////////////////////////////////
 // Internal resource data
 
@@ -514,4 +514,4 @@ void IntlExtension::initMessageFormatter() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

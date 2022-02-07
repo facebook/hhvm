@@ -22,7 +22,7 @@
 
 #if USE_JEMALLOC_EXTENT_HOOKS
 
-namespace HPHP { namespace alloc {
+namespace HPHP::alloc {
 
 // Trivial jemalloc extent hooks.  If a hook always returns true (indicating
 // failure), setting it to NULL can be more efficient.
@@ -198,6 +198,6 @@ extent_purge(extent_hooks_t* extent_hooks, void* addr, size_t size,
   return fallback_purge(extent_hooks, addr, size, offset, length, arena_ind);
 }
 
-}}
+}
 
 #endif

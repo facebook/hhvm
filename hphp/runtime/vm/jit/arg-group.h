@@ -21,7 +21,7 @@
 
 #include "hphp/util/arch.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct SSATmp;
 struct IRInstruction;
@@ -298,4 +298,4 @@ ArgGroup toArgGroup(const NativeCalls::CallInfo&,
                     const StateVector<SSATmp,Vloc>& locs,
                     const IRInstruction*);
 
-}}
+}

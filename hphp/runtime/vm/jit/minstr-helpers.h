@@ -26,7 +26,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 
-namespace HPHP { namespace jit { namespace MInstrHelpers {
+namespace HPHP::jit::MInstrHelpers {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -699,4 +699,4 @@ void vectorSetImplS(c_Vector* vector, StringData* key, TypedValue value) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

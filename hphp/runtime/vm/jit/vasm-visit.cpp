@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/jit/vasm-visit.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 PredVector computePreds(const Vunit& unit) {
@@ -31,4 +31,4 @@ PredVector computePreds(const Vunit& unit) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

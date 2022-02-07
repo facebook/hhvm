@@ -23,7 +23,7 @@
 #include <cxxabi.h>
 #endif // _GNUG_
 
-namespace HPHP { namespace HHBBC { namespace php {
+namespace HPHP::HHBBC { namespace php {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -574,4 +574,4 @@ void CompressedBlockUpdate::expand(BlockUpdateInfo& out) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

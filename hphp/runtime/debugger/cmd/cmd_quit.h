@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/debugger/debugger_command.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CmdQuit : DebuggerCommand {
@@ -30,5 +30,5 @@ struct CmdQuit : DebuggerCommand {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 

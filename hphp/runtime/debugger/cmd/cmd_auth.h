@@ -19,7 +19,7 @@
 #include "hphp/runtime/debugger/debugger_command.h"
 #include <string>
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CmdAuth : DebuggerCommand {
@@ -47,5 +47,5 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 

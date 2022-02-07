@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/debug/dwarf.h"
 
-namespace HPHP { namespace Debug {
+namespace HPHP::Debug {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -111,6 +111,6 @@ std::string lookupFunction(const Func* func,
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #endif

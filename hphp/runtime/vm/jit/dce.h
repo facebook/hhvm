@@ -15,7 +15,7 @@
 */
 #pragma once
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRInstruction;
 struct IRUnit;
@@ -46,4 +46,4 @@ bool canDCE(const IRInstruction&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

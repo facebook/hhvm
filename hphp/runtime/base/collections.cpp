@@ -24,7 +24,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 
-namespace HPHP { namespace collections {
+namespace HPHP::collections {
 /////////////////////////////////////////////////////////////////////////////
 
 #define X(type) const StaticString s_##type("HH\\" #type);
@@ -535,4 +535,4 @@ Variant shift(ObjectData* obj) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-}}
+}

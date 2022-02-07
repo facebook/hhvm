@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -61,5 +61,5 @@ bool specializeIterNext(IRGS& env, Offset loopOffset,
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}
 

@@ -23,7 +23,7 @@
 #include "hphp/vixl/a64/assembler-a64.h"
 #include "hphp/vixl/a64/constants-a64.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct Abi;
 
@@ -246,5 +246,5 @@ const vixl::Register rAsm_w(vixl::w18);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 

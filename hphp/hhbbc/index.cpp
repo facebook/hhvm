@@ -73,7 +73,7 @@
 
 #include "hphp/zend/zend-string.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 TRACE_SET_MOD(hhbbc_index);
 
@@ -7554,4 +7554,4 @@ void PublicSPropMutations::mergeUnknown(Context ctx) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

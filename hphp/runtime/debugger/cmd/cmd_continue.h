@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/debugger/cmd/cmd_flow_control.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CmdContinue : CmdFlowControl {
@@ -30,5 +30,5 @@ struct CmdContinue : CmdFlowControl {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 

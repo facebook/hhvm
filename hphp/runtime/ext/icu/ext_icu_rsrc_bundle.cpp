@@ -1,7 +1,7 @@
 #include "hphp/runtime/ext/icu/ext_icu_rsrc_bundle.h"
 
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 //////////////////////////////////////////////////////////////////////////////
 
 #define FETCH_RSRC(data, obj) \
@@ -260,4 +260,4 @@ void IntlExtension::initResourceBundle() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

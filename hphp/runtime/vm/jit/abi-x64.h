@@ -21,7 +21,7 @@
 
 #include "hphp/util/asm-x64.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct Abi;
 
@@ -78,5 +78,5 @@ inline Vflags required_flags(jit::ConditionCode /*cc*/) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 

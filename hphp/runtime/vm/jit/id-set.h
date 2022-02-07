@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -332,5 +332,5 @@ void swap(IdSet<K>& a, IdSet<K>& b) noexcept {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

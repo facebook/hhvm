@@ -30,7 +30,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(pgo);
 
@@ -414,4 +414,4 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
   return regions;
 }
 
-}}
+}

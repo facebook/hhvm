@@ -39,7 +39,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(region);
 
@@ -1347,4 +1347,4 @@ std::string show(const RegionDesc& region) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

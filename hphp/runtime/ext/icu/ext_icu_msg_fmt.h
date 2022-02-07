@@ -7,7 +7,7 @@
 #include <unicode/msgfmt.h>
 #include <unicode/fmtable.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_MessageFormatter;
 
@@ -88,5 +88,5 @@ private:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl
 

@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/debugger/debugger_client.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
@@ -178,4 +178,4 @@ void CmdConfig::listVars(DebuggerClient &client) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

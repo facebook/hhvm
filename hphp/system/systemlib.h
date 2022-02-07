@@ -29,7 +29,7 @@ struct Func;
 struct Object;
 } //namespace HPHP
 
-namespace HPHP { namespace SystemLib {
+namespace HPHP::SystemLib {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define SYSTEMLIB_CLASSES(x)                    \
@@ -189,6 +189,6 @@ void setupNullCtor(Class* cls);
 Func* getNull86reifiedinit(Class* cls);
 
 ///////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::SystemLib
+} // namespace HPHP::SystemLib
 
 #endif

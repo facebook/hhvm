@@ -24,7 +24,7 @@
 
 #include <iosfwd>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct AsmInfo;
 struct Block;
@@ -120,4 +120,4 @@ inline void disasmRange(std::ostream& os, TransKind kind, TcaRange r) {
   return disasmRange(os, kind, r.begin(), r.end(), 0);
 }
 
-}}
+}

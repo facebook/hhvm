@@ -24,7 +24,7 @@
 #include "hphp/runtime/debugger/cmd/cmd_break.h"
 #include "hphp/runtime/debugger/cmd/cmd_print.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
@@ -314,4 +314,4 @@ std::string CmdInterrupt::getFileLine() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

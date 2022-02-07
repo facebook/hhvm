@@ -38,7 +38,7 @@
  * counters.
  */
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(pgo);
 
@@ -533,4 +533,4 @@ RegionDescPtr selectHotCFG(HotTransContext& ctx, bool* truncated) {
   return region;
 }
 
-}}
+}

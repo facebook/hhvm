@@ -23,7 +23,7 @@
 #include "hphp/runtime/ext/thrift/util.h"
 #include "hphp/runtime/vm/class.h"
 
-namespace HPHP { namespace thrift {
+namespace HPHP::thrift {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -75,4 +75,4 @@ Variant transformToThriftType(Variant value, Class& adapter) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}  // namespace HPHP::thrift
+}  // namespace HPHP::thrift

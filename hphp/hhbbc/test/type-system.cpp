@@ -39,7 +39,7 @@
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 void PrintTo(const Type& t, ::std::ostream* os) { *os << show(t); }
 void PrintTo(Emptiness e, ::std::ostream* os) {
@@ -6520,4 +6520,4 @@ TEST(Type, IterTypes) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -23,7 +23,7 @@
 
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -56,7 +56,7 @@ void align(CodeBlock& cb, CGMeta* meta,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #include "hphp/runtime/vm/jit/align-internal-inl.h"
 

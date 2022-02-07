@@ -27,7 +27,7 @@
 
 #include <boost/type_traits.hpp>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct IRInstruction;
@@ -245,6 +245,6 @@ TCA vwrap2(CodeBlock& main, CodeBlock& cold, DataBlock& data, GenFunc gen) {
 uint64_t areaWeightFactor(AreaIndex area);
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
 #include "hphp/runtime/vm/jit/vasm-gen-inl.h"

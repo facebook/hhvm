@@ -1,6 +1,6 @@
 #include "hphp/runtime/ext/icu/ext_icu_uspoof.h"
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 // class SpoofChecker
 
@@ -93,4 +93,4 @@ void IntlExtension::initUSpoof() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

@@ -25,7 +25,7 @@
 # endif
 #endif
 
-namespace HPHP { namespace ExtensionRegistry {
+namespace HPHP::ExtensionRegistry {
 /////////////////////////////////////////////////////////////////////////////
 
 // s_exts isn't necessarily initialized by the time Extensions
@@ -400,4 +400,4 @@ static void sortDependencies() {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::ExtensionRegistry
+} // namespace HPHP::ExtensionRegistry

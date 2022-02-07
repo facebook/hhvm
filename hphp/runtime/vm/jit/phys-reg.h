@@ -22,7 +22,7 @@
 
 #include <type_traits>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct Vreg;
 struct Vout;
@@ -490,7 +490,7 @@ static_assert(std::is_trivially_destructible<RegSet>::value,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

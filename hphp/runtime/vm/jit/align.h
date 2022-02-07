@@ -21,7 +21,7 @@
 
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct CGMeta;
 
@@ -49,5 +49,5 @@ size_t cache_line_size();
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}
 

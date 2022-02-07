@@ -27,7 +27,7 @@
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/wide-func.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 TRACE_SET_MOD(hhbbc_cfg);
 
@@ -662,4 +662,4 @@ void split_critical_edges(const Index& index, FuncAnalysis& ainfo,
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

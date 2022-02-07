@@ -648,12 +648,12 @@ public:
 
 // MSVC doesn't instantiate this, causing an undefined symbol at link time
 // if the template<> is present, but other compilers require it.
-namespace rds { namespace local {
+namespace rds::local {
 #ifndef _MSC_VER
 template<>
 #endif
 void RDSLocal<ExecutionContext, Initialize::Explicitly>::destroy();
-}}
+}
 
 // Use AliasedRDSLocal for the ExecutionContext since it is accessed so
 // frequently, and AliasedRDSlocal may save up to 1 instruction and 1 load

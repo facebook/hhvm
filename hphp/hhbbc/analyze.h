@@ -27,7 +27,7 @@
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/context.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -344,4 +344,4 @@ State locally_propagated_bid_state(const Index& index,
                                    BlockId targetBid);
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -49,7 +49,7 @@
 // This file does ugly things with macros so include last.
 #include "hphp/runtime/vm/jit/irlower-minstr-internal.h"
 
-namespace HPHP { namespace jit { namespace irlower {
+namespace HPHP::jit::irlower {
 
 TRACE_SET_MOD(irlower);
 
@@ -1113,4 +1113,4 @@ void cgMapIsset(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

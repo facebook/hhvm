@@ -19,7 +19,7 @@
 #include <stdint.h>
 #include <memory>
 
-namespace HPHP { namespace Treadmill {
+namespace HPHP::Treadmill {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -132,6 +132,6 @@ struct Session final {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #include "hphp/runtime/vm/treadmill-inl.h"

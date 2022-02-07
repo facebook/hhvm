@@ -21,7 +21,7 @@
 
 #include "hphp/util/data-block.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 /*
  * CodeCache contains our Translation Cache, which is partitioned into 3
@@ -206,4 +206,4 @@ private:
   bool m_isLocal;
 };
 
-}}
+}

@@ -21,7 +21,7 @@
 
 #include <gtest/gtest.h>
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP::jit::x64 {
 
 TEST(RegAlgorithms, twoCycle) {
   PhysReg::Map<PhysReg> moves;
@@ -118,4 +118,4 @@ TEST(RegAlgorithms, simdCycle) {
   EXPECT_EQ(howTo[2].m_dst, xmm0);
 }
 
-}}}
+}

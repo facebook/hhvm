@@ -23,7 +23,7 @@
 
 #include <folly/portability/GTest.h>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 
@@ -203,4 +203,4 @@ TEST(Vasm, Simplifier) {
   testSetccXor();
 }
 
-}}
+}

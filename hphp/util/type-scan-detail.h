@@ -72,7 +72,7 @@
  *   pointers to further populate the worklist.
  */
 
-namespace HPHP { namespace type_scan {
+namespace HPHP::type_scan {
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -345,5 +345,5 @@ constexpr const char* const kSilenceForbiddenBaseName =
 
 ////////////////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 

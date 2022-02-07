@@ -27,7 +27,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace irunit_detail {
@@ -291,4 +291,4 @@ template<typename T> SSATmp* IRUnit::cns(T val) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

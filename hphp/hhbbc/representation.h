@@ -42,7 +42,7 @@
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/src-loc.h"
 
-namespace HPHP { namespace HHBBC { namespace php {
+namespace HPHP::HHBBC::php {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -680,4 +680,4 @@ bool check(const Program&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

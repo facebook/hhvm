@@ -21,7 +21,7 @@
 
 #include "hphp/runtime/base/type-variant.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRInstruction;
 struct IRUnit;
@@ -97,4 +97,4 @@ private:
   const uint32_t  m_id;
 };
 
-}}
+}

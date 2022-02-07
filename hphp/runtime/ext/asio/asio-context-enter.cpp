@@ -27,7 +27,7 @@
 #include "hphp/runtime/ext/asio/ext_sleep-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 
-namespace HPHP { namespace asio {
+namespace HPHP::asio {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -199,4 +199,4 @@ void enter_context_impl(c_WaitableWaitHandle* root, context_idx_t ctx_idx) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

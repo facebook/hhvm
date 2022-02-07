@@ -22,7 +22,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/runtime/vm/jit/print.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRUnit;
 struct Vunit;
@@ -84,6 +84,6 @@ using VpassTracer = PassTracerImpl<Vunit>;
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 

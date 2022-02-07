@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 
-namespace HPHP { namespace jit { namespace x64 {
+namespace HPHP::jit::x64 {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -224,4 +224,4 @@ PhysReg r_svcreq_arg(size_t i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

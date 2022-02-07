@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(pgo);
 
@@ -265,4 +265,4 @@ void region_prune_arcs(RegionDesc& region, std::vector<Type>* input) {
   FTRACE(2, "\n");
 }
 
-}}
+}

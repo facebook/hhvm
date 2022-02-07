@@ -26,7 +26,7 @@
 #include <utility>
 #include <vector>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 //////////////////////////////////////////////////////////////////////////////
 // class Locale
 
@@ -750,4 +750,4 @@ void IntlExtension::initLocale() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

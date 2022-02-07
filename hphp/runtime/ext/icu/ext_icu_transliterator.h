@@ -5,7 +5,7 @@
 
 #include <unicode/translit.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_Transliterator;
 
@@ -54,5 +54,5 @@ private:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl
 

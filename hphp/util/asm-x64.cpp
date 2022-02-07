@@ -19,7 +19,7 @@
 
 #include "hphp/util/safe-cast.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 // These are in order according to the binary encoding of the X64
 // condition codes.
@@ -701,4 +701,4 @@ FUSEABLE_INSTRUCTIONS
 
 #undef FUSEABLE_INSTRUCTIONS
 
-}}}
+}}

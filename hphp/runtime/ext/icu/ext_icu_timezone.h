@@ -21,7 +21,7 @@
 
 #include <unicode/timezone.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_IntlTimeZone;
 
@@ -90,5 +90,5 @@ struct IntlTimeZone : IntlError {
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl
 

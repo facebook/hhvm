@@ -29,7 +29,7 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/analysis.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 
@@ -888,4 +888,4 @@ std::string show(AliasClass acls) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

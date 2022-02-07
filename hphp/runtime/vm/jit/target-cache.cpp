@@ -45,7 +45,7 @@
 #include <string>
 #include <vector>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(targetcache);
 
@@ -516,4 +516,4 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

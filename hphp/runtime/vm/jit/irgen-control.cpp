@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 #include "hphp/runtime/vm/jit/irgen-interpone.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 void surpriseCheck(IRGS& env) {
   auto const exit = makeExitSlow(env);
@@ -339,4 +339,4 @@ void emitThrow(IRGS& env) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

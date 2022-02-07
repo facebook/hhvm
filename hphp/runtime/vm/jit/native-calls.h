@@ -27,7 +27,7 @@
 #include <initializer_list>
 #include <vector>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRInstruction;
 
@@ -105,5 +105,5 @@ private:
   CallInfoMap m_map;
 };
 
-}}}
+}}
 

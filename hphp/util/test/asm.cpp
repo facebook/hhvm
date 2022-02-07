@@ -33,7 +33,7 @@
 
 #include "hphp/util/disasm.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 typedef X64Assembler Asm;
 using namespace reg;
@@ -991,6 +991,6 @@ crc32 %rax, %rbx
 }
 #endif
 
-}}
+}
 
 #endif

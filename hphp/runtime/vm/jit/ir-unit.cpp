@@ -21,7 +21,7 @@
 #include "hphp/runtime/vm/jit/frame-state.h"
 #include "hphp/util/timer.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(hhir);
@@ -188,4 +188,4 @@ jit::vector<Block*> findMainExitBlocks(const IRUnit& unit, SrcKey lastSk) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -19,11 +19,11 @@
 #include "hphp/runtime/base/req-malloc.h"
 #include <boost/dynamic_bitset.hpp>
 
-namespace HPHP { namespace req {
+namespace HPHP::req {
 
 using dynamic_bitset = boost::dynamic_bitset<
   unsigned long,
   Allocator<unsigned long>
 >;
 
-}}
+}

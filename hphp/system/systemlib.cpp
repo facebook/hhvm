@@ -30,7 +30,7 @@
 
 #include <vector>
 
-namespace HPHP { namespace SystemLib {
+namespace HPHP::SystemLib {
 /////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -412,4 +412,4 @@ Func* getNull86reifiedinit(Class* cls) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::SystemLib
+} // namespace HPHP::SystemLib

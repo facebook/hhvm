@@ -18,7 +18,7 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/srckey.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct Block;
 struct SSATmp;
@@ -49,5 +49,5 @@ void implCondJmp(IRGS&, Offset taken, bool negate, SSATmp*);
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 

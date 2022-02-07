@@ -17,7 +17,7 @@
 
 #include "translator.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 void reportTraceletToVtune(const Unit* unit,
                            const Func* func,
@@ -26,5 +26,5 @@ void reportTraceletToVtune(const Unit* unit,
 void reportHelperToVtune(const char *name,
                          void *start,
                          void *end);
-}}
+}
 

@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include <algorithm>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 // Information about where code was generated, for pretty-printing.
 struct AsmInfo {
@@ -326,4 +326,4 @@ struct AsmInfo {
   }
 };
 
-}}
+}

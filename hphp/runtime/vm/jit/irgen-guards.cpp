@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 namespace {
 
@@ -146,4 +146,4 @@ SSATmp* loadLocation(IRGS& env, const Location& loc) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

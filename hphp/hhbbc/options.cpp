@@ -26,7 +26,7 @@
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -131,4 +131,4 @@ void summarize_memory(StructuredLogEntry& sample) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

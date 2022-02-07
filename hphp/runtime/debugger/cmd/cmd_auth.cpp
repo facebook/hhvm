@@ -21,7 +21,7 @@
 #include "hphp/util/process-exec.h"
 #include <string>
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
@@ -61,4 +61,4 @@ bool CmdAuth::onServer(DebuggerProxy& proxy) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

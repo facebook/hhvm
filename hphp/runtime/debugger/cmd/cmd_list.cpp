@@ -28,7 +28,7 @@
 
 #include <folly/portability/Unistd.h>
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
@@ -376,4 +376,4 @@ Variant CmdList::GetSourceFile(DebuggerClient &client,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

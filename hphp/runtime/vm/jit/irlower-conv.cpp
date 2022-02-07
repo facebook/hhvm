@@ -43,7 +43,7 @@
 
 #include <limits>
 
-namespace HPHP { namespace jit { namespace irlower {
+namespace HPHP::jit::irlower {
 
 TRACE_SET_MOD(irlower);
 
@@ -333,4 +333,4 @@ void cgDblAsBits(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

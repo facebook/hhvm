@@ -25,7 +25,7 @@
 #include <cstring>
 #include <sstream>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(irlower);
 
@@ -234,4 +234,4 @@ void CallTargetProfile::deserialize(ProfDataDeserializer& ser) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

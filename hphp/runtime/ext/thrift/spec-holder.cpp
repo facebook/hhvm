@@ -30,7 +30,7 @@
 #include <folly/concurrency/ConcurrentHashMap.h>
 #include <folly/Portability.h>
 
-namespace HPHP { namespace thrift {
+namespace HPHP::thrift {
 
 namespace {
 
@@ -310,4 +310,4 @@ Object StructSpec::newObject(Class* cls) const {
   );
 }
 
-}}
+}

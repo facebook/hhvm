@@ -18,7 +18,7 @@
 
 #include "hphp/util/bitset.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TEST(BitSet, 32) {
   using ts = BitSet<32>;
@@ -171,4 +171,4 @@ TEST(BitSet, 65) {
   EXPECT_EQ(3, three.count());
 }
 
-}}
+}

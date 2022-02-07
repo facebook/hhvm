@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct Abi;
 struct AsmInfo;
@@ -70,4 +70,4 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
 Vcost computeVunitCost(const Vunit& unit);
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

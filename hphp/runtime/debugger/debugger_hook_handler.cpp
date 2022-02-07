@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/debugger/debugger_hook_handler.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -193,4 +193,4 @@ void HphpdHook::onDefFunc(const Func* f) {
 }
 
 //////////////////////////////////////////////////////////////////////////
-}}
+}

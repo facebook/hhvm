@@ -21,7 +21,7 @@
 
 #include <string>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRInstruction;
 struct SSATmp;
@@ -81,5 +81,5 @@ typedef jit::flat_set<TypeSource> TypeSourceSet;
 std::string show(const TypeSource&);
 std::string show(const TypeSourceSet&);
 
-}}
+}
 

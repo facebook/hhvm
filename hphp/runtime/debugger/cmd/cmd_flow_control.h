@@ -19,7 +19,7 @@
 #include "hphp/runtime/debugger/debugger_command.h"
 #include "hphp/runtime/debugger/cmd/cmd_interrupt.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 
 struct InterruptSite;
 
@@ -138,5 +138,5 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 

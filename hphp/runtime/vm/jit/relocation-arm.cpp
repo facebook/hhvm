@@ -29,7 +29,7 @@
 
 #include "hphp/vixl/a64/macro-assembler-a64.h"
 
-namespace HPHP { namespace jit { namespace arm {
+namespace HPHP::jit::arm {
 
 using namespace vixl;
 
@@ -1470,4 +1470,4 @@ size_t relocate(RelocationInfo& rel,
 
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

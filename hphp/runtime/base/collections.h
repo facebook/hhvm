@@ -32,7 +32,7 @@ struct c_Set;
 struct c_ImmSet;
 }
 
-namespace HPHP { namespace collections {
+namespace HPHP::collections {
 /////////////////////////////////////////////////////////////////////////////
 
 #define COLLECTIONS_PAIRED_TYPES(MACRO) \
@@ -199,4 +199,4 @@ inline bool isTypeName(const StringData* str) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-}}
+}

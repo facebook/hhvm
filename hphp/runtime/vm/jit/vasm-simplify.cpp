@@ -34,7 +34,7 @@
 
 TRACE_SET_MOD(vasm);
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 
@@ -1844,4 +1844,4 @@ void postRASimplify(Vunit& unit) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

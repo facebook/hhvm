@@ -30,7 +30,7 @@
 #include <map>
 #include <vector>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 /*
  * CGMeta contains a variety of different metadata information that is
@@ -225,7 +225,7 @@ IFrame getInlineFrame(IFrameID id);
 void eraseInlineStack(CTCA addr);
 void eraseInlineStacksInRange(CTCA start, CTCA end);
 
-}}
+}
 
 namespace folly {
 template<> class FormatValue<HPHP::IFrame> {

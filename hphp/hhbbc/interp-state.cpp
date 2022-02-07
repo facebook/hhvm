@@ -27,7 +27,7 @@
 #include "hphp/hhbbc/interp-internal.h"
 #include "hphp/hhbbc/context.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -785,4 +785,4 @@ std::string property_state_string(const PropertiesInfo& props) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -15,7 +15,7 @@
 */
 #pragma once
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct SSATmp;
 
@@ -49,5 +49,5 @@ bool spillInlinedFrames(IRGS& env);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}}
 

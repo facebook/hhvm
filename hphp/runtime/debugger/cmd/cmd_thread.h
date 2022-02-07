@@ -23,7 +23,7 @@
 #include "hphp/runtime/debugger/debugger_base.h"
 #include "hphp/runtime/debugger/debugger_command.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct CmdThread : DebuggerCommand, IDebuggable {
@@ -50,5 +50,5 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 

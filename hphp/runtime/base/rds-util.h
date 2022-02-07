@@ -28,7 +28,7 @@ namespace HPHP {
   struct MemoCacheBase;
 }
 
-namespace HPHP { namespace rds {
+namespace HPHP::rds {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -79,5 +79,5 @@ bindConstMemoCache(const Func*, const Class*,
 void clearConstMemoCache(const Func*, const Class*);
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

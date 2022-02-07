@@ -30,7 +30,7 @@
 #include <limits>
 #include <string>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Block;
@@ -495,6 +495,6 @@ Type thisTypeFromFunc(const Func* func);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #include "hphp/runtime/vm/jit/ir-instruction-inl.h"

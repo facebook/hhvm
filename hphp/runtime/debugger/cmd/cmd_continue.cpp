@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/debugger/debugger_client.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(debugger);
@@ -50,4 +50,4 @@ void CmdContinue::onBeginInterrupt(DebuggerProxy& /*proxy*/,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

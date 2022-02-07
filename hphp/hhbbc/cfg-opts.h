@@ -17,7 +17,7 @@
 
 #include "hphp/hhbbc/representation.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 struct Index;
 struct FuncAnalysis;
@@ -65,5 +65,5 @@ void split_critical_edges(const Index&, FuncAnalysis&, php::WideFunc& func);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

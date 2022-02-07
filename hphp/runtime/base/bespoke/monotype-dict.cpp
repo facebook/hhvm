@@ -36,7 +36,7 @@
 #include <algorithm>
 #include <atomic>
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 TRACE_SET_MOD(bespoke);
 
@@ -1691,4 +1691,4 @@ BespokeArray* MakeMonotypeDictFromVanilla(
 
 //////////////////////////////////////////////////////////////////////////////
 
-}}
+}

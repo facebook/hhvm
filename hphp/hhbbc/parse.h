@@ -19,7 +19,7 @@
 #include <memory>
 
 namespace HPHP { struct UnitEmitter; }
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -29,5 +29,5 @@ void parse_unit(php::Program& prog, const UnitEmitter* ue);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 

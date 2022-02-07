@@ -51,7 +51,7 @@
 
 TRACE_SET_MOD(trans);
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 /*
  * Data used by irGenRegion() and friends to pass information between retries.
@@ -1075,4 +1075,4 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
   }
 }
 
-}}
+}

@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/block.h"
 #include "hphp/runtime/vm/jit/cfg.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRInstruction;
 struct IRUnit;
@@ -138,4 +138,4 @@ SSATmp* deletePhiDest(IRInstruction* label, unsigned i);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

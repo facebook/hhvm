@@ -33,7 +33,7 @@
 
 #include <utility>
 
-namespace HPHP { namespace jit { namespace irlower {
+namespace HPHP::jit::irlower {
 
 TRACE_SET_MOD(irlower);
 
@@ -334,4 +334,4 @@ void cgEqArrayDataPtr(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

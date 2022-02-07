@@ -50,7 +50,7 @@
 // hashes we would like to optimize.  Subsequent retranslate all runs consume
 // this info, and outline the code associated to it.
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 
@@ -373,4 +373,4 @@ void recordIR(const IRUnit& unit, AsmInfo* ai) {
   });
 }
 
-}} // namespace HPHP, jit
+} // namespace HPHP, jit

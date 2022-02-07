@@ -6,7 +6,7 @@
 #include <unicode/uspoof.h>
 #include <unicode/utypes.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 extern const StaticString s_SpoofChecker;
 
@@ -57,5 +57,5 @@ struct SpoofChecker : IntlError {
 };
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl
 

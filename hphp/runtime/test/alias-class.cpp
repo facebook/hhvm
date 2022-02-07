@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 
@@ -530,4 +530,4 @@ TEST(AliasClass, Pointees) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

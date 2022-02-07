@@ -34,7 +34,7 @@
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/parallel.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 namespace fs = boost::filesystem;
 
@@ -251,4 +251,4 @@ void debug_dump_program(const Index& index, const php::Program& program) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

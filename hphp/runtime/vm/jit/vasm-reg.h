@@ -23,7 +23,7 @@
 
 #include <vector>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 enum class Width : uint8_t;
@@ -1350,7 +1350,7 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}
 
 namespace std {
   template<> struct hash<HPHP::jit::Vreg> {

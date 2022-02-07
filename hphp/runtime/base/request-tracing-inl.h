@@ -24,7 +24,7 @@
 
 namespace HPHP { struct StringData; }
 
-namespace HPHP { namespace rqtrace {
+namespace HPHP::rqtrace {
 
 namespace detail {
 
@@ -350,5 +350,5 @@ void visit_process_stats(F&& fun) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-}}
+}
 

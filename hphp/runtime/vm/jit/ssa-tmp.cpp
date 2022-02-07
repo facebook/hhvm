@@ -22,7 +22,7 @@
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/util/low-ptr.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 SSATmp::SSATmp(uint32_t opndId, IRInstruction* i, int dstId /* = 0 */)
   : m_id(opndId)
@@ -126,4 +126,4 @@ std::string SSATmp::toString() const {
   return out.str();
 }
 
-}}
+}

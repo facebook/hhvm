@@ -22,7 +22,7 @@
 
 #include <string>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace detail {
 
@@ -38,4 +38,4 @@ void addTargetProfileInfo(const rds::Profile& key,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}}

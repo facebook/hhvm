@@ -57,7 +57,7 @@
 #include <sstream>
 #include <type_traits>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TRACE_SET_MOD(simplify);
 
@@ -4178,4 +4178,4 @@ void simplifyPass(IRUnit& unit) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-}}
+}

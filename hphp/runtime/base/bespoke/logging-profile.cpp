@@ -37,7 +37,7 @@
 #include <atomic>
 #include <sstream>
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 TRACE_SET_MOD(bespoke);
 
@@ -1245,4 +1245,4 @@ DataType getEventValType(uint64_t key) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-}}
+}

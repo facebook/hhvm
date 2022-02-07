@@ -23,7 +23,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 /*
  * A Block refers to a basic block: single-entry, single-exit, list of
@@ -433,4 +433,4 @@ inline Optional<Block::Hint> nameToHint(const std::string& hintStr) {
   return std::nullopt;
 }
 
-}}
+}

@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 enum class KnownRegState {
   Dead,
@@ -45,4 +45,4 @@ enum class KnownRegState {
 StateVector<IRInstruction,KnownRegState> analyzeVMRegLiveness(
     IRUnit& unit, const BlockList& poBlockList);
 
-}}
+}

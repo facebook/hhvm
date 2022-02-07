@@ -19,7 +19,7 @@
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 
 /*
  * Called by the proxy whenever its breakpoint list is updated.  Since this
@@ -57,5 +57,5 @@ private:
   ~HphpdHook() override {}
 };
 
-}}
+}
 

@@ -23,7 +23,7 @@
 #include <iostream>
 #include <string>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct Vinstr;
@@ -79,4 +79,4 @@ void printInstrs(std::ostream& out,
 extern const char* area_names[];
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

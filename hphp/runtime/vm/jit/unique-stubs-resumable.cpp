@@ -48,7 +48,7 @@
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -590,4 +590,4 @@ void UniqueStubs::emitAllResumable(CodeCache& code, Debug::DebugInfo& dbg) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

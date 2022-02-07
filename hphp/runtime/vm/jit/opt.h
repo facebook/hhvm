@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/types.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -55,4 +55,4 @@ void optimize(IRUnit& unit, TransKind kind);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

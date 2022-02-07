@@ -19,7 +19,7 @@
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/type.h"
 
-namespace HPHP { namespace jit { namespace irlower {
+namespace HPHP::jit::irlower {
 
 /*
  * Compute the best destructor for the given array-like type, taking its
@@ -37,4 +37,4 @@ CallSpec destructorForArrayLike(Type arr);
  */
 CallSpec copyFuncForArrayLike(Type arr);
 
-}}}
+}

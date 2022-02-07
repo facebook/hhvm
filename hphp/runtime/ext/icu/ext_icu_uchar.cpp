@@ -6,7 +6,7 @@
 
 #include <unicode/uchar.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 
 static bool parseUChar32(const Variant& vcp, UChar32& cp) {
@@ -458,4 +458,4 @@ void IntlExtension::initUChar() {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

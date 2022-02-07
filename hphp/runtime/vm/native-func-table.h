@@ -19,7 +19,7 @@
 #include "hphp/runtime/base/string-functors.h"
 #include "hphp/util/hash-map.h"
 
-namespace HPHP { namespace Native {
+namespace HPHP::Native {
 
 struct FuncTable {
   void insert(const StringData* name, const NativeFunctionInfo&);
@@ -30,4 +30,4 @@ struct FuncTable {
                 string_data_hash, string_data_isame> m_infos;
 };
 
-}}
+}

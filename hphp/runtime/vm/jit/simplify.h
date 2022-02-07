@@ -20,7 +20,7 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct IRInstruction;
 struct IRUnit;
@@ -86,4 +86,4 @@ void simplifyPass(IRUnit&);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -32,7 +32,7 @@
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/unit.h"
 
-namespace HPHP { namespace InstanceBits {
+namespace HPHP::InstanceBits {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -270,4 +270,4 @@ void deserialize(jit::ProfDataDeserializer& ser) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

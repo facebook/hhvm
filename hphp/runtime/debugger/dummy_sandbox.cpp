@@ -27,7 +27,7 @@
 
 #include "hphp/util/logger.h"
 
-namespace HPHP { namespace Eval {
+namespace HPHP::Eval {
 ///////////////////////////////////////////////////////////////////////////////
 TRACE_SET_MOD(debugger);
 
@@ -188,4 +188,4 @@ std::string DummySandbox::getStartupDoc(const DSandboxInfo &sandbox) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-}}
+}

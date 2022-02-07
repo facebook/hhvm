@@ -17,7 +17,7 @@
 
 #include <vector>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct RegionDesc;
 struct Type;
@@ -33,6 +33,6 @@ void region_prune_arcs(RegionDesc& region, std::vector<Type>* input = nullptr);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 

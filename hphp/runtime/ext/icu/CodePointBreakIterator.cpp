@@ -1,6 +1,6 @@
 #include "hphp/runtime/ext/icu/CodePointBreakIterator.h"
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 /////////////////////////////////////////////////////////////////////////////
 UOBJECT_DEFINE_RTTI_IMPLEMENTATION(CodePointBreakIterator);
 
@@ -88,4 +88,4 @@ CodePointBreakIterator::refreshInputText(UText *input,
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

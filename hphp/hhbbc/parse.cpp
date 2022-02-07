@@ -51,7 +51,7 @@
 #include "hphp/hhbbc/unit-util.h"
 #include "hphp/hhbbc/wide-func.h"
 
-namespace HPHP { namespace HHBBC {
+namespace HPHP::HHBBC {
 
 TRACE_SET_MOD(hhbbc_parse);
 
@@ -1160,4 +1160,4 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

@@ -1,6 +1,6 @@
 #include "hphp/runtime/ext/icu/ext_icu_transliterator.h"
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 //////////////////////////////////////////////////////////////////////////////
 
 Class* Transliterator::c_Transliterator = nullptr;
@@ -176,4 +176,4 @@ void IntlExtension::initTransliterator() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <string>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -79,7 +79,7 @@ std::string show(Location);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}
 
 #include "hphp/runtime/vm/jit/location-inl.h"
 

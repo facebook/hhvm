@@ -45,7 +45,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-namespace HPHP { namespace rds {
+namespace HPHP::rds {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -576,6 +576,6 @@ std::vector<void*> allTLBases();
 
 extern rds::Link<bool, Mode::Persistent> s_persistentTrue;
 
-}}
+}
 
 #include "hphp/runtime/base/rds-inl.h"

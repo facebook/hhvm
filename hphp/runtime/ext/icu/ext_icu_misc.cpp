@@ -5,7 +5,7 @@
 #include <unicode/uidna.h>
 #include <unicode/parseerr.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 
 /////////////////////////////////////////////////////////////////////////////
 // Global error code/message
@@ -227,4 +227,4 @@ void IntlExtension::initMisc() {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

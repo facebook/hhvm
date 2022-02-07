@@ -31,7 +31,7 @@
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
 
-namespace HPHP { namespace jit { namespace irlower {
+namespace HPHP::jit::irlower {
 
 TRACE_SET_MOD(irlower);
 
@@ -261,4 +261,4 @@ void cgOutlineSetOp(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

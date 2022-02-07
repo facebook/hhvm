@@ -36,7 +36,7 @@
 #include "hphp/runtime/vm/jit/simplify.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 namespace {
 
@@ -1249,4 +1249,4 @@ bool IRBuilder::inUnreachableState() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}}
+}

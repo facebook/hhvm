@@ -20,7 +20,7 @@
 
 #include "hphp/runtime/vm/func.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 //////////////////////////////////////////////////////////////////////
 
 FailedIRGen::FailedIRGen(const char* _file, int _line, const char* _func)
@@ -41,4 +41,4 @@ RetryIRGen::RetryIRGen(const char* why)
 {}
 
 //////////////////////////////////////////////////////////////////////
-}}
+}

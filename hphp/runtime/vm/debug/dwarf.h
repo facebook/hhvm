@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 
-namespace HPHP { namespace Debug {
+namespace HPHP::Debug {
 
 using jit::TCA;
 
@@ -181,6 +181,6 @@ struct DwarfInfo {
   void syncChunks();
 };
 
-}}
+}
 
 #endif

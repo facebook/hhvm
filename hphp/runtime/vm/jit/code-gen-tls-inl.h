@@ -26,7 +26,7 @@
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/thread-local.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -84,4 +84,4 @@ emitTLSLoad(Vout& v, TLSDatum<ThreadLocalNoCheck<T>> datum, Vreg d) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}}
+}

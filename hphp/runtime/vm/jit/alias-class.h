@@ -27,7 +27,7 @@
 #include <cstdint>
 
 namespace HPHP { struct StringData; }
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 struct SSATmp;
 
@@ -538,4 +538,4 @@ std::string show(AliasClass);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

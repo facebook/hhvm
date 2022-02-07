@@ -23,7 +23,7 @@
 #include "hphp/runtime/test/match.h"
 #include "hphp/runtime/test/test-context.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 TEST(PredictionOpts, basic) {
   UNUSED auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
@@ -75,4 +75,4 @@ TEST(PredictionOpts, basic) {
   }
 }
 
-}}
+}

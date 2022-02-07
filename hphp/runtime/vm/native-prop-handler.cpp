@@ -16,7 +16,7 @@
 
 #include "hphp/runtime/vm/native-prop-handler.h"
 
-namespace HPHP { namespace Native {
+namespace HPHP::Native {
 //////////////////////////////////////////////////////////////////////////////
 typedef std::unordered_map
   <const StringData*, NativePropHandler> NativePropHandlerMap;
@@ -123,4 +123,4 @@ Variant unsetProp(const Object& obj, const String& name) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Native
+} // namespace HPHP::Native

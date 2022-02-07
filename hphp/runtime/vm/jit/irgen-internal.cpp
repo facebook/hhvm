@@ -18,7 +18,7 @@
 
 #include "hphp/runtime/vm/jit/fixup.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -122,4 +122,4 @@ void genStVMReturnAddr(IRGS& env) {
   gen(env, StVMReturnAddr, addr);
 }
 
-}}}
+}

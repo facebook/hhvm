@@ -43,7 +43,7 @@
 #include <algorithm>
 #include <string>
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -2984,4 +2984,4 @@ std::string showExtra(Opcode opc, const IRExtraData* data);
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

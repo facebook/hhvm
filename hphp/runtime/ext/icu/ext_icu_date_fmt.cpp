@@ -20,7 +20,7 @@
 #include "hphp/runtime/ext/icu/ext_icu_calendar.h"
 #include <math.h>
 
-namespace HPHP { namespace Intl {
+namespace HPHP::Intl {
 //////////////////////////////////////////////////////////////////////////////
 // Internal Resource Data
 
@@ -495,4 +495,4 @@ void IntlExtension::initDateFormatter() {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::Intl
+} // namespace HPHP::Intl

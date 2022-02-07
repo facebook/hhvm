@@ -25,7 +25,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/srckey.h"
 
-namespace HPHP { namespace bespoke {
+namespace HPHP::bespoke {
 
 struct LoggingProfile;
 
@@ -60,6 +60,6 @@ struct LoggingArray : BespokeArray {
   KeyOrder keyOrder;
 };
 
-}}
+}
 
 #endif // HPHP_LOGGING_ARRAY_H_

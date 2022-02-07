@@ -36,7 +36,7 @@
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/srckey.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 TRACE_SET_MOD(hhir);
 
@@ -983,4 +983,4 @@ void handleConvNoticeLevel(
   const char* const from,
   const char* const to);
 
-}}}
+}

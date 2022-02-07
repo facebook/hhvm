@@ -25,7 +25,7 @@
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
 
-namespace HPHP { namespace jit { namespace irgen {
+namespace HPHP::jit::irgen {
 
 namespace {
 
@@ -374,4 +374,4 @@ void emitResolveClass(IRGS& env, const StringData*)
                                               { interpOne(env); }
 //////////////////////////////////////////////////////////////////////
 
-}}}
+}

@@ -21,7 +21,7 @@
 
 #if USE_JEMALLOC_EXTENT_HOOKS
 
-namespace HPHP { namespace alloc {
+namespace HPHP::alloc {
 
 static_assert(sizeof(RangeState) <= 64, "");
 static_assert(alignof(RangeState) <= 64, "");
@@ -158,6 +158,6 @@ template void ManagedArena<DefaultExtentAllocator>::updateHook();
 template void ManagedArena<RangeFallbackExtentAllocator>::create();
 template void ManagedArena<RangeFallbackExtentAllocator>::updateHook();
 
-}}
+}
 
 #endif

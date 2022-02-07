@@ -134,7 +134,7 @@ ExecutionContext::ExecutionContext()
   m_shutdownsBackup[ShutdownType::PostSend] = empty_vec_array();
 }
 
-namespace rds { namespace local {
+namespace rds::local {
 // See header for why this is required.
 #ifndef _MSC_VER
 template<>
@@ -146,7 +146,7 @@ void rds::local::RDSLocal<ExecutionContext,
     nullOut();
   }
 }
-}}
+}
 
 
 void ExecutionContext::cleanup() {

@@ -27,7 +27,7 @@
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/type-array-elem.h"
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 
 namespace {
 
@@ -2310,4 +2310,4 @@ Optional<Type> mInstrBaseEffects(const IRInstruction& inst, Type old) {
 
 //////////////////////////////////////////////////////////////////////
 
-}}
+}

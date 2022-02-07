@@ -19,7 +19,7 @@
 #include "hphp/util/type-scan.h"
 #include <map>
 
-namespace HPHP { namespace req {
+namespace HPHP::req {
 
 template <typename Key,
           typename T,
@@ -36,5 +36,5 @@ struct map final : std::map<Key, T, Compare,
   }
 };
 
-}}
+}
 

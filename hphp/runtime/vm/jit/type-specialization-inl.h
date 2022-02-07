@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-namespace HPHP { namespace jit {
+namespace HPHP::jit {
 ///////////////////////////////////////////////////////////////////////////////
 
 inline SpecKind operator|(SpecKind l, SpecKind r) {
@@ -271,4 +271,4 @@ inline ClassSpec ClassSpec::operator|(const ClassSpec& rhs) const {
 
 #undef IMPLEMENT_SPEC_OPERS
 
-}}
+}

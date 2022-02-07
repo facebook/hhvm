@@ -273,8 +273,8 @@ impl DepGraphWriter<Phase1AllocateHashSets> {
 
     pub fn size_needed_for_hash_list<H: Copy + Into<u64>>(set: &[H]) -> u32 {
         let len: u32 = set.len().try_into().unwrap();
-        let size = 4 + 4 * len;
-        size
+
+        4 + 4 * len
     }
 
     pub fn open_writer(
@@ -434,7 +434,7 @@ mod tests {
                 }
             });
             let mut all_hashes_vec: Vec<u64> = all_hashes.iter().copied().collect();
-            all_hashes_vec.sort();
+            all_hashes_vec.sort_unstable();
 
             let writer = DepGraphWriter::new(all_hashes_vec).unwrap();
 
@@ -469,7 +469,7 @@ mod tests {
             tmpfile_path
         }
 
-        fn read_check(&self, path: &std::path::PathBuf) -> Option<String> {
+        fn read_check(&self, path: &std::path::Path) -> Option<String> {
             let opener = DepGraphOpener::from_path(path).unwrap();
             let s = opener.open().unwrap();
             s.validate_hash_lists().unwrap();

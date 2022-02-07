@@ -213,7 +213,7 @@ impl DepGraphDelta {
     }
 
     pub fn insert(&mut self, dependent: Dep, dependency: Dep) {
-        let depts = self.0.entry(dependency).or_insert_with(|| HashSet::new());
+        let depts = self.0.entry(dependency).or_default();
         if depts.insert(dependent) {
             self.1 += 1;
         }

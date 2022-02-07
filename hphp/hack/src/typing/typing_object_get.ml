@@ -23,6 +23,22 @@ module Phase = Typing_phase
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
 
+let log_obj_get env helper id_pos ty this_ty =
+  let (fn_name, ty_name) =
+    match helper with
+    | `concrete -> ("obj_get_concrete_ty", "concrete_ty")
+    | `inner -> ("obj_get_inner", "receiver_ty")
+  in
+  Typing_log.(
+    log_with_level env "obj_get" ~level:2 (fun () ->
+        log_types
+          (Pos_or_decl.of_raw_pos id_pos)
+          env
+          [
+            Log_head
+              (fn_name, [Log_type (ty_name, ty); Log_type ("this_ty", this_ty)]);
+          ]))
+
 let mk_ety_env class_info paraml this_ty =
   {
     empty_expand_env with
@@ -327,19 +343,7 @@ type obj_get_args = {
 (** We know that the receiver is a concrete class, not a generic with
     bounds, or a Tunion. *)
 let rec obj_get_concrete_ty args env concrete_ty (id_pos, id_str) on_error =
-  Typing_log.(
-    log_with_level env "obj_get" ~level:2 (fun () ->
-        log_types
-          (Pos_or_decl.of_raw_pos id_pos)
-          env
-          [
-            Log_head
-              ( "obj_get_concrete_ty",
-                [
-                  Log_type ("concrete_ty", concrete_ty);
-                  Log_type ("this_ty", args.this_ty);
-                ] );
-          ]));
+  log_obj_get env `concrete id_pos concrete_ty args.this_ty;
   let dflt_rval_err =
     Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
   and dflt_lval_err = Ok concrete_ty in
@@ -1008,19 +1012,7 @@ and nullable_obj_get
  * separately. Likewise for nullables (special case of union).
  *)
 and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error =
-  Typing_log.(
-    log_with_level env "obj_get" ~level:2 (fun () ->
-        log_types
-          (Pos_or_decl.of_raw_pos id_pos)
-          env
-          [
-            Log_head
-              ( "obj_get_inner",
-                [
-                  Log_type ("receiver_ty", receiver_ty);
-                  Log_type ("this_ty", args.this_ty);
-                ] );
-          ]));
+  log_obj_get env `inner id_pos receiver_ty args.this_ty;
   let (env, ety1') = Env.expand_type env receiver_ty in
   let was_var = is_tyvar ety1' in
   let dflt_lval_err = Ok receiver_ty

@@ -94,6 +94,34 @@ struct AutoloadDB {
 
   virtual ~AutoloadDB();
 
+  struct KindAndFlags {
+    TypeKind m_kind;
+    TypeFlagMask m_flags;
+  };
+
+  struct SymbolPath {
+    std::string m_symbol;
+    folly::fs::path m_path;
+  };
+
+  struct DerivedTypeInfo {
+    std::string m_type;
+    folly::fs::path m_path;
+    TypeKind m_kind;
+    TypeFlagMask m_flags;
+  };
+
+  struct MethodPath {
+    std::string m_type;
+    std::string m_method;
+    folly::fs::path m_path;
+  };
+
+  struct PathAndHash {
+    folly::fs::path m_path;
+    std::string m_hash;
+  };
+
   /**
    * Actually save all changes you've made.
    *
@@ -125,7 +153,7 @@ struct AutoloadDB {
    *
    * If the type is not defined in the given path, return TypeKind::Unknown.
    */
-  virtual std::pair<TypeKind, TypeFlagMask>
+  virtual KindAndFlags
   getKindAndFlags(std::string_view type, const folly::fs::path& path) = 0;
 
   // Inheritance
@@ -145,17 +173,10 @@ struct AutoloadDB {
    *
    * Returns [(pathWhereDerivedTypeExtendsBaseType, derivedType)]
    */
-  virtual std::vector<std::pair<folly::fs::path, std::string>>
+  virtual std::vector<SymbolPath>
   getDerivedTypes(std::string_view baseType, DeriveKind kind) = 0;
 
-  // (type, path, kind, flags)
-  using DerivedTypeInfo = std::tuple<
-      const std::string_view,
-      const std::string_view,
-      TypeKind,
-      TypeFlagMask>;
   virtual RowIter<DerivedTypeInfo> getTransitiveDerivedTypes(
-
       std::string_view baseType,
       TypeKindMask kinds = kTypeKindAll,
       DeriveKindMask deriveKinds = kDeriveKindAll) = 0;
@@ -219,25 +240,14 @@ struct AutoloadDB {
   virtual std::vector<folly::dynamic> getFileAttributeArgs(
       std::string_view path, std::string_view attributeName) = 0;
 
-  struct TypeDeclaration {
-    std::string m_type;
-    folly::fs::path m_path;
-  };
-  virtual std::vector<TypeDeclaration>
+  virtual std::vector<SymbolPath>
   getTypesWithAttribute(std::string_view attributeName) = 0;
-  virtual std::vector<TypeDeclaration>
+  virtual std::vector<SymbolPath>
   getTypeAliasesWithAttribute(std::string_view attributeName) = 0;
 
-  struct MethodDeclaration {
-    std::string m_type;
-    std::string m_method;
-    folly::fs::path m_path;
-  };
+  virtual std::vector<MethodPath> getPathMethods(std::string_view path) = 0;
 
-  virtual std::vector<MethodDeclaration>
-  getPathMethods(std::string_view path) = 0;
-
-  virtual std::vector<MethodDeclaration>
+  virtual std::vector<MethodPath>
   getMethodsWithAttribute(std::string_view attributeName) = 0;
 
   virtual std::vector<folly::fs::path>
@@ -266,7 +276,6 @@ struct AutoloadDB {
    *
    * Returns results in the form of a lazy generator.
    */
-  using PathAndHash = std::pair<folly::fs::path, const std::string_view>;
   virtual RowIter<PathAndHash> getAllPathsAndHashes() = 0;
 
   /**
@@ -274,7 +283,6 @@ struct AutoloadDB {
    *
    * Returns results in the form of a lazy generator.
    */
-  using SymbolPath = std::pair<const std::string_view, folly::fs::path>;
   virtual RowIter<SymbolPath> getAllTypePaths() = 0;
   virtual RowIter<SymbolPath> getAllFunctionPaths() = 0;
   virtual RowIter<SymbolPath> getAllConstantPaths() = 0;

@@ -539,80 +539,16 @@ and obj_get_concrete_class
     in
     begin
       match member_info with
-      | None when Cls.has_upper_bounds_on_this_from_constraints class_info ->
-        Errors.try_with_error
-          (fun () ->
-            get_member_from_constraints
-              args
-              env
-              class_info
-              id
-              reason
-              params
-              on_error)
-          (fun () ->
-            member_not_found
-              env
-              id_pos
-              ~is_method:args.is_method
-              class_info
-              id_str
-              reason
-              on_error;
-            let ty_nothing = MakeType.nothing Reason.none in
-            default ~lval_err:(Error (concrete_ty, ty_nothing)) ())
-      | None when not args.is_method ->
-        let lval_err =
-          if not (SN.Members.is_special_xhp_attribute id_str) then (
-            member_not_found
-              env
-              id_pos
-              ~is_method:args.is_method
-              class_info
-              id_str
-              reason
-              on_error;
-            let ty_nothing = MakeType.nothing Reason.none in
-            Error (concrete_ty, ty_nothing)
-          ) else
-            dflt_lval_err
-        in
-        default ~lval_err ()
-      | None when String.equal id_str SN.Members.__clone ->
-        (* Create a `public function __clone()[]: void {}` for classes that don't declare __clone *)
-        let ft =
-          {
-            ft_arity = Fstandard;
-            ft_tparams = [];
-            ft_where_constraints = [];
-            ft_params = [];
-            ft_implicit_params =
-              { capability = CapTy (MakeType.intersection Reason.Rnone []) };
-            ft_ret =
-              { et_type = MakeType.void Reason.Rnone; et_enforced = Unenforced };
-            ft_flags = 0;
-            ft_ifc_decl = default_ifc_fun_decl;
-          }
-        in
-        (env, (mk (Reason.Rnone, Tfun ft), []), dflt_lval_err, dflt_rval_err)
-      | None when String.equal id_str SN.Members.__construct ->
-        (* __construct is not an instance method and shouldn't be invoked directly *)
-        let () =
-          Errors.add_nast_check_error
-          @@ Nast_check_error.Magic { pos = id_pos; meth_name = id_str }
-        in
-        default ()
       | None ->
-        member_not_found
+        obj_get_concrete_class_without_member_info
+          args
           env
-          id_pos
-          ~is_method:args.is_method
-          class_info
-          id_str
+          concrete_ty
+          id
           reason
-          on_error;
-        let ty_nothing = MakeType.nothing Reason.none in
-        default ~lval_err:(Error (concrete_ty, ty_nothing)) ()
+          class_info
+          params
+          on_error
       | Some
           ({ ce_visibility = vis; ce_type = (lazy member_); ce_deprecated; _ }
           as member_ce) ->
@@ -835,6 +771,97 @@ and obj_get_concrete_class
   (* match member_info *)
 
 (* match Env.get_class env (snd x) *)
+and obj_get_concrete_class_without_member_info
+    args
+    env
+    concrete_ty
+    ((id_pos, id_str) as id)
+    reason
+    class_info
+    params
+    on_error =
+  let dflt_rval_err =
+    Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
+  and dflt_lval_err = Ok concrete_ty in
+  let default ?(lval_err = dflt_lval_err) ?(rval_err = dflt_rval_err) () =
+    (env, (Typing_utils.mk_tany env id_pos, []), lval_err, rval_err)
+  in
+  if Cls.has_upper_bounds_on_this_from_constraints class_info then
+    Errors.try_with_error
+      (fun () ->
+        get_member_from_constraints
+          args
+          env
+          class_info
+          id
+          reason
+          params
+          on_error)
+      (fun () ->
+        member_not_found
+          env
+          id_pos
+          ~is_method:args.is_method
+          class_info
+          id_str
+          reason
+          on_error;
+        let ty_nothing = MakeType.nothing Reason.none in
+        default ~lval_err:(Error (concrete_ty, ty_nothing)) ())
+  else if not args.is_method then
+    let lval_err =
+      if not (SN.Members.is_special_xhp_attribute id_str) then (
+        member_not_found
+          env
+          id_pos
+          ~is_method:args.is_method
+          class_info
+          id_str
+          reason
+          on_error;
+        let ty_nothing = MakeType.nothing Reason.none in
+        Error (concrete_ty, ty_nothing)
+      ) else
+        dflt_lval_err
+    in
+    default ~lval_err ()
+  else if String.equal id_str SN.Members.__clone then
+    (* Create a `public function __clone()[]: void {}` for classes that don't declare __clone *)
+    let ft =
+      {
+        ft_arity = Fstandard;
+        ft_tparams = [];
+        ft_where_constraints = [];
+        ft_params = [];
+        ft_implicit_params =
+          { capability = CapTy (MakeType.intersection Reason.Rnone []) };
+        ft_ret =
+          { et_type = MakeType.void Reason.Rnone; et_enforced = Unenforced };
+        ft_flags = 0;
+        ft_ifc_decl = default_ifc_fun_decl;
+      }
+    in
+    (env, (mk (Reason.Rnone, Tfun ft), []), dflt_lval_err, dflt_rval_err)
+  else if String.equal id_str SN.Members.__construct then
+    (* __construct is not an instance method and shouldn't be invoked directly *)
+    let () =
+      Errors.add_nast_check_error
+      @@ Nast_check_error.Magic { pos = id_pos; meth_name = id_str }
+    in
+    default ()
+  else begin
+    member_not_found
+      env
+      id_pos
+      ~is_method:args.is_method
+      class_info
+      id_str
+      reason
+      on_error;
+    let ty_nothing = MakeType.nothing Reason.none in
+    default ~lval_err:(Error (concrete_ty, ty_nothing)) ()
+  end
+
 and nullable_obj_get
     args env ety1 ((id_pos, id_str) as id) on_error ~read_context ty =
   let dflt_rval_err =

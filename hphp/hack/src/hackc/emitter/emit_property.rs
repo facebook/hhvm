@@ -55,7 +55,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     };
     if !args.is_static && class.final_ && is_cabstract {
         return Err(emit_fatal::raise_fatal_parse(
-            &pos,
+            pos,
             format!(
                 "Class {} contains non-static property declaration and therefore cannot be declared 'abstract final'",
                 string_utils::strip_global_ns(&class.name.1),
@@ -76,7 +76,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     };
     if !(valid_for_prop(&type_info.type_constraint)) {
         return Err(emit_fatal::raise_fatal_parse(
-            &pos,
+            pos,
             format!(
                 "Invalid property type hint for '{}::${}'",
                 string_utils::strip_global_ns(&class.name.1),
@@ -97,7 +97,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
         }
         Some(_) if is_late_init => {
             return Err(emit_fatal::raise_fatal_parse(
-                &pos,
+                pos,
                 format!(
                     "<<__LateInit>> property '{}::${}' cannot have an initial value",
                     string_utils::strip_global_ns(&class.name.1),
@@ -234,7 +234,7 @@ fn expr_requires_deep_init(expr: &ast::Expr, force_class_init: bool) -> bool {
         Expr_::ClassConst(e) if (!force_class_init) => match e.0.as_ciexpr() {
             Some(ci_expr) => match (ci_expr.2).as_id() {
                 Some(ast_defs::Id(_, s)) => {
-                    class_const_requires_deep_init(&s.as_str(), &(e.1).1.as_str())
+                    class_const_requires_deep_init(s.as_str(), (e.1).1.as_str())
                 }
                 _ => true,
             },

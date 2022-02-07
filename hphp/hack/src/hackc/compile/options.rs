@@ -178,8 +178,9 @@ pub struct Hhvm {
     #[serde(default)]
     pub aliased_namespaces: Arg<BTreeMapOrEmptyVec<String, String>>,
 
+    // TODO(leoo) change to HashMap if order doesn't matter
     #[serde(default)]
-    pub include_roots: Arg<BTreeMap<String, String>>, // TODO(leoo) change to HashMap if order doesn't matter
+    pub include_roots: Arg<BTreeMap<String, String>>,
 
     #[serde(default = "defaults::emit_class_pointers")]
     pub emit_class_pointers: Arg<String>,
@@ -369,7 +370,7 @@ mod defaults {
     }
 
     pub fn emit_class_pointers() -> Arg<String> {
-        Arg::new("0".to_string())
+        Arg::new("0".into())
     }
 }
 
@@ -383,7 +384,7 @@ thread_local! {
 pub(crate) type Cache = LruCache<(Vec<String>, Vec<String>), Options, fnv::FnvBuildHasher>;
 
 impl Options {
-    pub fn to_string(&self) -> String {
+    pub fn to_json(&self) -> String {
         serde_json::to_string_pretty(&self).expect("failed to parse JSON")
     }
 
@@ -589,11 +590,12 @@ fn deserialize_flags<'de, D: Deserializer<'de>, P: PrefixedFlags>(
 /// - (de)serialize missing values as [].
 #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 #[serde(untagged)]
-pub enum BTreeMapOrEmptyVec<K: std::cmp::Ord, V> {
+pub enum BTreeMapOrEmptyVec<K: Ord, V> {
     Nonempty(BTreeMap<K, V>),
     Empty(Vec<V>),
 }
-impl<K: std::cmp::Ord, V> BTreeMapOrEmptyVec<K, V> {
+
+impl<K: Ord, V> BTreeMapOrEmptyVec<K, V> {
     pub fn as_map(&self) -> Option<&BTreeMap<K, V>> {
         match self {
             BTreeMapOrEmptyVec::Nonempty(m) => Some(m),
@@ -601,15 +603,17 @@ impl<K: std::cmp::Ord, V> BTreeMapOrEmptyVec<K, V> {
         }
     }
 }
-impl<K: std::cmp::Ord, V> Into<BTreeMap<K, V>> for BTreeMapOrEmptyVec<K, V> {
-    fn into(self) -> BTreeMap<K, V> {
-        match self {
+
+impl<K: Ord, V> From<BTreeMapOrEmptyVec<K, V>> for BTreeMap<K, V> {
+    fn from(m: BTreeMapOrEmptyVec<K, V>) -> Self {
+        match m {
             BTreeMapOrEmptyVec::Nonempty(m) => m,
             _ => BTreeMap::new(),
         }
     }
 }
-impl<K: std::cmp::Ord, V> From<BTreeMap<K, V>> for BTreeMapOrEmptyVec<K, V> {
+
+impl<K: Ord, V> From<BTreeMap<K, V>> for BTreeMapOrEmptyVec<K, V> {
     fn from(m: BTreeMap<K, V>) -> Self {
         if m.is_empty() {
             BTreeMapOrEmptyVec::Empty(vec![])
@@ -618,7 +622,8 @@ impl<K: std::cmp::Ord, V> From<BTreeMap<K, V>> for BTreeMapOrEmptyVec<K, V> {
         }
     }
 }
-impl<K: std::cmp::Ord, V> Default for BTreeMapOrEmptyVec<K, V> {
+
+impl<K: Ord, V> Default for BTreeMapOrEmptyVec<K, V> {
     fn default() -> Self {
         BTreeMapOrEmptyVec::Empty(vec![])
     }

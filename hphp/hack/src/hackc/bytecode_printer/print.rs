@@ -84,7 +84,7 @@ fn print_program(ctx: &Context<'_>, w: &mut dyn Write, prog: &HhasProgram<'_>) -
             newline(w)?;
 
             newline(w)?;
-            concat_str(w, [".filepath ", format!("\"{}\"", p).as_str(), ";"])?;
+            concat_str(w, [".filepath ", &format!("\"{}\"", p), ";"])?;
 
             newline(w)?;
             handle_not_impl(|| print_program_(ctx, w, prog))?;

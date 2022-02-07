@@ -102,5 +102,5 @@ pub fn emit_constants_from_program<'a, 'arena, 'decl>(
         .filter_map(|d| d.as_constant().map(|c| emit_constant(e, env, c)))
         .collect::<Result<Vec<_>>>()?;
     let (contants, inits): (Vec<_>, Vec<_>) = const_tuples.into_iter().unzip();
-    Ok((contants, inits.into_iter().filter_map(|x| x).collect()))
+    Ok((contants, inits.into_iter().flatten().collect()))
 }

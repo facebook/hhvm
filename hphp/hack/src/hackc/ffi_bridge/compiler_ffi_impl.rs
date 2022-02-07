@@ -58,7 +58,7 @@ impl From<compile_ffi::Method> for (String, facts::MethodFacts) {
 impl From<(String, facts::MethodFacts)> for compile_ffi::Method {
     fn from(methodfacts: (String, facts::MethodFacts)) -> compile_ffi::Method {
         compile_ffi::Method {
-            name: methodfacts.0.into(),
+            name: methodfacts.0,
             methfacts: methodfacts.1.into(),
         }
     }
@@ -162,11 +162,11 @@ where
 }
 
 fn vec_to_set<T: std::cmp::Ord>(v: Vec<T>) -> BTreeSet<T> {
-    v.into_iter().map(|item| item).collect()
+    v.into_iter().collect()
 }
 
 fn set_to_vec<T>(s: BTreeSet<T>) -> Vec<T> {
-    s.into_iter().map(|item| item).collect()
+    s.into_iter().collect()
 }
 
 #[cfg(test)]

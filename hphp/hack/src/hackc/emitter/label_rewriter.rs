@@ -57,7 +57,7 @@ fn get_regular_labels<'arena>(instr: &Instruct<'arena>) -> Vec<Label> {
         | ICall(FCallObjMethod(FcallArgs(_, _, _, _, _, Just(l), _), _))
         | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, _, Just(l), _), _, _)) => vec![*l],
         IContFlow(Switch(_, _, ls)) => {
-            let labels = ls.iter().map(|x| *x).collect::<Vec<_>>();
+            let labels = ls.iter().copied().collect::<Vec<_>>();
             labels
         }
         IContFlow(SSwitch(pairs)) => pairs.iter().map(|x| x.1).collect::<Vec<_>>(),
@@ -133,7 +133,7 @@ where
         | IContFlow(JmpNZ(l))
         | IMisc(MemoGet(l, _))
         | ILabel(l) => relabel(l),
-        IContFlow(Switch(_, _, ll)) => ll.iter_mut().for_each(|l| relabel(l)),
+        IContFlow(Switch(_, _, ll)) => ll.iter_mut().for_each(relabel),
         IContFlow(SSwitch(pairs)) => pairs.iter_mut().for_each(|Pair(_, l)| relabel(l)),
         IMisc(MemoGetEager(l1, l2, _)) => {
             relabel(l1);
@@ -153,7 +153,7 @@ fn rewrite_params_and_body<'arena>(
 ) {
     let relabel_id = |id: &Id| -> Id {
         *(refs
-            .get(lookup_def(&id, defs))
+            .get(lookup_def(id, defs))
             .expect("relabel_instrseq: offset not in refs"))
     };
     let mut rewrite_instr = |instr: &mut Instruct<'arena>| -> bool {

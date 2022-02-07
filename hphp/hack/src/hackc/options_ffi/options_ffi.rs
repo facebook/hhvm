@@ -14,6 +14,6 @@ ocaml_ffi! {
         let jsons: Vec<_> = jsons.into_iter().rev().collect();
         Options::from_configs(&jsons, &cli_args)
             .expect("bug in deserializing Hhbc_options from Rust")
-            .to_string()
+            .to_json()
     }
 }

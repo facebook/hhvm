@@ -21,7 +21,7 @@ pub enum ClassExpr<'arena> {
 }
 
 impl<'arena> ClassExpr<'arena> {
-    fn get_original_class_name<'a, 'decl>(
+    fn get_original_class_name<'decl>(
         emitter: &Emitter<'arena, 'decl>,
         check_traits: bool,
         resolve_self: bool,
@@ -53,7 +53,7 @@ impl<'arena> ClassExpr<'arena> {
         None
     }
 
-    fn get_original_parent_class_name<'a, 'decl>(
+    fn get_original_parent_class_name<'decl>(
         emitter: &Emitter<'arena, 'decl>,
         check_traits: bool,
         resolve_self: bool,

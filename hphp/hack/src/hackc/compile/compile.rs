@@ -273,7 +273,7 @@ pub fn emit_fatal_program<S: AsRef<str>>(
     let opts =
         Options::from_configs(&env.config_jsons, &env.config_list).map_err(anyhow::Error::msg)?;
     let alloc = bumpalo::Bump::new();
-    let mut emitter = Emitter::new(
+    let emitter = Emitter::new(
         opts,
         is_systemlib,
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
@@ -285,8 +285,8 @@ pub fn emit_fatal_program<S: AsRef<str>>(
     let prog = emit_program::emit_fatal_program(&alloc, FatalOp::Parse, &Pos::make_none(), err_msg);
     let prog = prog.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
     print_program(
-        &mut Context::new(
-            &mut emitter,
+        &Context::new(
+            &emitter,
             Some(&env.filepath),
             env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
         ),
@@ -310,8 +310,8 @@ pub fn from_text<'arena, 'decl, S: AsRef<str>>(
 
     let (print_result, printing_t) = time(|| {
         print_program(
-            &mut Context::new(
-                &mut emitter,
+            &Context::new(
+                &emitter,
                 Some(&env.filepath),
                 env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
             ),
@@ -338,7 +338,7 @@ fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
     match result {
         Ok(()) => {
             // Rewrite ok, now emit.
-            emit_prog_from_ast(emitter, &env, namespace_env, ast)
+            emit_prog_from_ast(emitter, env, namespace_env, ast)
         }
         Err(Error::IncludeTimeFatalException(op, pos, msg)) => {
             emit_program::emit_fatal_program(emitter.alloc, op, &pos, msg)
@@ -374,7 +374,7 @@ pub fn hhas_to_string<W: std::io::Write, S: AsRef<str>>(
     program: &HhasProgram<'_>,
 ) -> anyhow::Result<()> {
     let alloc = bumpalo::Bump::new();
-    let mut emitter = create_emitter(
+    let emitter = create_emitter(
         env,
         native_env,
         unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
@@ -382,8 +382,8 @@ pub fn hhas_to_string<W: std::io::Write, S: AsRef<str>>(
     )?;
     let (print_result, _) = time(|| {
         print_program(
-            &mut Context::new(
-                &mut emitter,
+            &Context::new(
+                &emitter,
                 Some(&env.filepath),
                 env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
             ),
@@ -447,7 +447,7 @@ fn emit_prog_from_text<'arena, 'decl, S: AsRef<str>>(
     let (program, codegen_t) = match parse_result {
         Either::Right(mut ast) => {
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
-            time(move || rewrite_and_emit(emitter, &env, namespace_env, &mut ast))
+            time(move || rewrite_and_emit(emitter, env, namespace_env, &mut ast))
         }
         Either::Left((pos, msg, is_runtime_error)) => {
             time(|| emit_fatal(emitter.alloc, is_runtime_error, &pos, msg))
@@ -491,7 +491,7 @@ fn create_emitter<'arena, 'decl, S: AsRef<str>>(
     let opts = match native_env {
         None => Options::from_configs(&env.config_jsons, &env.config_list)
             .map_err(anyhow::Error::msg)?,
-        Some(native_env) => NativeEnv::to_options(&native_env),
+        Some(native_env) => NativeEnv::to_options(native_env),
     };
     Ok(Emitter::new(
         opts,
@@ -636,7 +636,7 @@ pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> St
         Options::from_configs(&env.config_jsons, &env.config_list).expect("Malformed options");
 
     let alloc = bumpalo::Bump::new();
-    let mut emitter = Emitter::new(
+    let emitter = Emitter::new(
         opts,
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
@@ -645,7 +645,7 @@ pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> St
         unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
     );
     let ctx = Context::new(
-        &mut emitter,
+        &emitter,
         Some(&env.filepath),
         env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
     );

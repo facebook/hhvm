@@ -102,7 +102,7 @@ fn shape_field_name<'arena>(alloc: &'arena bumpalo::Bump, sf: &ShapeFieldName) -
             )
         }
         SFclassConst(Id(_, cname), (_, s)) => {
-            let id = class::ClassType::from_ast_name(alloc, &cname);
+            let id = class::ClassType::from_ast_name(alloc, cname);
             (format!("{}::{}", id.to_raw_string(), s), true)
         }
     }
@@ -150,7 +150,7 @@ fn shape_info_to_typed_value<'arena>(
     let info = si
         .field_map
         .iter()
-        .map(|sfi| shape_field_to_pair(alloc, opts, tparams, targ_map, &sfi))
+        .map(|sfi| shape_field_to_pair(alloc, opts, tparams, targ_map, sfi))
         .collect::<Result<Vec<_>>>()?;
     Ok(TypedValue::mk_dict(
         alloc.alloc_slice_fill_iter(info.into_iter()),
@@ -339,7 +339,7 @@ fn hint_to_type_constant_list<'arena>(
             let mut return_type = single_hint("return_type", &hf.return_ty)?;
             let mut variadic_type = hf.variadic_ty.as_ref().map_or_else(
                 || Ok(bumpalo::vec![in alloc;]),
-                |h| single_hint("variadic_type", &h),
+                |h| single_hint("variadic_type", h),
             )?;
             let mut param_types = bumpalo::vec![in alloc; Pair(
                 TypedValue::string("param_types", alloc),
@@ -398,7 +398,7 @@ pub fn hint_to_type_constant<'arena>(
     is_typedef: bool,
     is_opaque: bool,
 ) -> std::result::Result<TypedValue<'arena>, instruction_sequence::Error> {
-    let mut tconsts = hint_to_type_constant_list(alloc, opts, tparams, targ_map, &hint)?;
+    let mut tconsts = hint_to_type_constant_list(alloc, opts, tparams, targ_map, hint)?;
     if is_typedef {
         tconsts.append(&mut get_typevars(alloc, tparams));
     };

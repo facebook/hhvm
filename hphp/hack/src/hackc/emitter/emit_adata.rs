@@ -108,7 +108,7 @@ fn next_adata_id<'arena, 'decl>(
 ) -> &'arena str {
     let alloc = e.alloc;
     let mut state = e.emit_adata_state_mut();
-    let id: &str = alloc.alloc_str(format!("A_{}", state.array_identifier_counter).as_str());
+    let id: &str = alloc.alloc_str(&format!("A_{}", state.array_identifier_counter));
     state.array_identifier_counter += 1;
     state.adata.push(HhasAdata {
         id: id.into(),

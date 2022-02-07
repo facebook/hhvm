@@ -202,6 +202,6 @@ mod tests {
         let a = bumpalo::Bump::new();
         let alloc: &bumpalo::Bump = &a;
         let namespace = RcOc::new(NamespaceEnv::empty(vec![], false, false));
-        let _: Env<'_, '_> = Env::default(&alloc, namespace);
+        let _: Env<'_, '_> = Env::default(alloc, namespace);
     }
 }

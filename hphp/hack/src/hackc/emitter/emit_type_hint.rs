@@ -32,8 +32,8 @@ fn fmt_name_or_prim<'arena>(
     if tparams.contains(&name) {
         (alloc.alloc_str(name) as &str).into()
     } else {
-        let id: class::ClassType<'arena> = class::ClassType::from_ast_name(alloc, &name);
-        if string_utils::is_xhp(&string_utils::strip_ns(&name)) {
+        let id: class::ClassType<'arena> = class::ClassType::from_ast_name(alloc, name);
+        if string_utils::is_xhp(string_utils::strip_ns(name)) {
             id.to_unmangled_str()
         } else {
             id.to_raw_string().into()
@@ -115,7 +115,7 @@ pub fn fmt_hint<'arena>(
                 ShapeFieldName::SFlitInt((_, s)) => s.to_owned(),
                 ShapeFieldName::SFlitStr((_, s)) => format!("'{}'", s),
                 ShapeFieldName::SFclassConst(Id(_, cid), (_, s)) => {
-                    format!("{}::{}", fmt_name_or_prim(alloc, tparams, &cid), s)
+                    format!("{}::{}", fmt_name_or_prim(alloc, tparams, cid), s)
                 }
             };
             let fmt_field = |field: &ShapeFieldInfo| {
@@ -132,7 +132,7 @@ pub fn fmt_hint<'arena>(
                 .map(fmt_field)
                 .collect::<Result<Vec<_>>>()
                 .map(|v| v.join(", "))?;
-            string_utils::prefix_namespace("HH", &format!("shape({})", shape_fields).as_str())
+            string_utils::prefix_namespace("HH", &format!("shape({})", shape_fields))
         }
         Htuple(hints) => format!("({})", fmt_hints(alloc, tparams, hints)?),
         Hlike(t) => format!("~{}", fmt_hint(alloc, tparams, false, t)?),
@@ -142,7 +142,7 @@ pub fn fmt_hint<'arena>(
                 "This should be an error caught in naming".into(),
             ));
         }
-        h => fmt_name_or_prim(alloc, tparams, &hint_to_string(&h)).into(),
+        h => fmt_name_or_prim(alloc, tparams, hint_to_string(h)).into(),
     })
 }
 
@@ -165,7 +165,7 @@ fn fmt_hints<'arena>(
 ) -> std::result::Result<String, instruction_sequence::Error> {
     hints
         .iter()
-        .map(|h| fmt_hint(alloc, tparams, false, &h))
+        .map(|h| fmt_hint(alloc, tparams, false, h))
         .collect::<Result<Vec<_>>>()
         .map(|v| v.join(", "))
 }
@@ -227,7 +227,7 @@ fn hint_to_type_constraint<'arena>(
         }
         Hoption(t) => {
             if let Happly(Id(_, s), hs) = &*(t.1) {
-                if skipawaitable && is_awaitable(&s) {
+                if skipawaitable && is_awaitable(s) {
                     match &hs[..] {
                         [] => return Ok(Constraint::default()),
                         [h] => return hint_to_type_constraint(alloc, kind, tparams, false, h),
@@ -236,7 +236,7 @@ fn hint_to_type_constraint<'arena>(
                 }
             } else if let Hsoft(Hint(_, h)) = &*(t.1) {
                 if let Happly(Id(_, s), hs) = &**h {
-                    if skipawaitable && is_awaitable(&s) {
+                    if skipawaitable && is_awaitable(s) {
                         if let [h] = &hs[..] {
                             return make_tc_with_flags_if_non_empty_flags(
                                 alloc,
@@ -266,7 +266,7 @@ fn hint_to_type_constraint<'arena>(
                 [] if s == "\\HH\\dynamic"
                     || s == "\\HH\\mixed"
                     || (skipawaitable && is_awaitable(s))
-                    || (s.eq_ignore_ascii_case("\\hh\\void") && !is_typedef(&kind)) =>
+                    || (s.eq_ignore_ascii_case("\\hh\\void") && !is_typedef(kind)) =>
                 {
                     return Ok(Constraint::default());
                 }
@@ -284,7 +284,7 @@ fn hint_to_type_constraint<'arena>(
             type_application_helper(alloc, tparams, kind, s)?
         }
         Habstr(s, _hs) => type_application_helper(alloc, tparams, kind, s)?,
-        h => type_application_helper(alloc, tparams, kind, &hint_to_string(h))?,
+        h => type_application_helper(alloc, tparams, kind, hint_to_string(h))?,
     })
 }
 
@@ -307,7 +307,7 @@ fn make_tc_with_flags_if_non_empty_flags<'arena>(
     let tc = hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?;
     Ok(match (&tc.name, u16::from(&tc.flags)) {
         (Nothing, 0) => tc,
-        _ => constraint::Constraint::make(tc.name.into(), flags | tc.flags),
+        _ => constraint::Constraint::make(tc.name, flags | tc.flags),
     })
 }
 
@@ -381,23 +381,13 @@ fn param_hint_to_type_info<'arena>(
     let is_simple_hint = match h.as_ref() {
         Hsoft(_) | Hoption(_) | Haccess(_, _) | Hfun(_) | Hdynamic | Hnonnull | Hmixed => false,
         Happly(Id(_, s), hs) => {
-            if !hs.is_empty() {
-                false
-            } else {
-                if s == "\\HH\\dynamic" || s == "\\HH\\nonnull" || s == "\\HH\\mixed" {
-                    false
-                } else {
-                    !tparams.contains(&s.as_str())
-                }
-            }
+            hs.is_empty()
+                && s != "\\HH\\dynamic"
+                && s != "\\HH\\nonnull"
+                && s != "\\HH\\mixed"
+                && !tparams.contains(&s.as_str())
         }
-        Habstr(s, hs) => {
-            if !hs.is_empty() {
-                false
-            } else {
-                !tparams.contains(&s.as_str())
-            }
-        }
+        Habstr(s, hs) => hs.is_empty() && !tparams.contains(&s.as_str()),
         Herr | Hany => {
             return Err(Unrecoverable(
                 "Expected error on Tany in naming: param_hint_to_type_info".into(),
@@ -461,7 +451,7 @@ pub fn hint_to_class<'arena>(
 ) -> class::ClassType<'arena> {
     let Hint(_, h) = hint;
     if let Happly(Id(_, name), _) = &**h {
-        class::ClassType::from_ast_name(alloc, &name)
+        class::ClassType::from_ast_name(alloc, name)
     } else {
         class::from_raw_string(alloc, "__type_is_not_class__")
     }

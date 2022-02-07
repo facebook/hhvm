@@ -879,18 +879,18 @@ mod string_utils_tests {
 
             #[test]
             fn closure_1() {
-                assert_eq!(is_closure_name("Closure$foo"), true)
+                assert!(is_closure_name("Closure$foo"))
             }
 
             #[test]
             fn closure_2() {
-                assert_eq!(is_closure_name("Closure$foo#2"), true)
+                assert!(is_closure_name("Closure$foo#2"))
             }
 
             #[test]
             fn non_closure() {
-                assert_eq!(is_closure_name("SomePrefix$foo"), false);
-                assert_eq!(is_closure_name("SomePrefix$foo#2"), false)
+                assert!(!is_closure_name("SomePrefix$foo"));
+                assert!(!is_closure_name("SomePrefix$foo#2"))
             }
         }
     }

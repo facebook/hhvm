@@ -266,7 +266,7 @@ impl Config {
     fn dump_if_needed(&self, opts: &Opts) {
         if opts.dump_config {
             let hhbc_options = self.to_options(&opts.config_args);
-            print!("===CONFIG===\n{}\n\n", hhbc_options.to_string());
+            print!("===CONFIG===\n{}\n\n", hhbc_options.to_json());
             io::stdout().flush().expect("flushing stdout failed");
         }
     }

@@ -39,7 +39,7 @@ use bitflags::bitflags;
 use indexmap::IndexSet;
 use itertools::Either;
 
-static THIS: &'static str = "$this";
+static THIS: &str = "$this";
 
 /// Optional arguments for emit_body; use Args::default() for defaults
 pub struct Args<'a, 'arena> {
@@ -76,7 +76,7 @@ pub fn emit_body_with_default_args<'b, 'arena, 'decl>(
 ) -> Result<HhasBody<'arena>> {
     let args = Args {
         immediate_tparams: &vec![],
-        class_tparam_names: &vec![],
+        class_tparam_names: &[],
         ast_params: &vec![],
         ret: None,
         pos: &Pos::make_none(),
@@ -107,11 +107,7 @@ pub fn emit_body<'b, 'arena, 'decl>(
     scope: Scope<'_, 'arena>,
     args: Args<'_, 'arena>,
 ) -> Result<(HhasBody<'arena>, bool, bool)> {
-    let tparams = scope
-        .get_tparams()
-        .into_iter()
-        .map(|tp| tp.clone())
-        .collect::<Vec<ast::Tparam>>();
+    let tparams: Vec<ast::Tparam> = scope.get_tparams().into_iter().cloned().collect();
     let mut tp_names = get_tp_names(&tparams);
     let (is_generator, is_pair_generator) = generator::is_function_generator(&body);
 
@@ -182,8 +178,8 @@ pub fn emit_body<'b, 'arena, 'decl>(
         body,
         is_generator,
         args.deprecation_info.clone(),
-        &args.pos,
-        &args.ast_params,
+        args.pos,
+        args.ast_params,
         args.flags,
     )?;
     Ok((
@@ -310,7 +306,7 @@ fn make_decl_vars<'a, 'arena, 'decl>(
         let mut captured_vars = scope.get_captured_vars();
         move_this(&mut decl_vars);
         decl_vars.retain(|v| !captured_vars.contains(v));
-        captured_vars.extend_from_slice(&decl_vars.as_slice());
+        captured_vars.extend_from_slice(decl_vars.as_slice());
         captured_vars
     } else {
         match &scope.items[..] {
@@ -351,7 +347,7 @@ pub fn emit_return_type_info<'arena>(
             skip_awaitable,
             false, // nullable
             tp_names,
-            &hint,
+            hint,
         ),
     }
 }
@@ -451,12 +447,12 @@ pub fn make_body<'a, 'arena, 'decl>(
             default_value
                 .as_ref()
                 .map(|(l, expr)| {
-                    let mut ctx = Context::new(emitter, None, false);
+                    let ctx = Context::new(emitter, None, false);
                     let expr_env = ExprEnv {
                         codegen_env: body_env.as_ref(),
                     };
                     let mut buf = Vec::new();
-                    print_expr(&mut ctx, &mut buf, &expr_env, &expr)
+                    print_expr(&ctx, &mut buf, &expr_env, expr)
                         .map(|_| Pair(l.clone(), Str::from_vec(alloc, buf)))
                         .ok()
                 })
@@ -481,10 +477,10 @@ pub fn make_body<'a, 'arena, 'decl>(
                 .into_iter()
                 .map(|s| Str::new_str(alloc, &s)),
         ),
-        params: Slice::fill_iter(alloc, params.into_iter().map(|x| x.0.to_owned())),
-        return_type_info: Maybe::from(return_type_info),
-        doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &(c.0).1))),
-        env: Maybe::from(body_env),
+        params: Slice::fill_iter(alloc, params.into_iter().map(|(p, _)| p)),
+        return_type_info: return_type_info.into(),
+        doc_comment: doc_comment.map(|c| Str::new_str(alloc, &(c.0).1)).into(),
+        env: body_env.into(),
     })
 }
 
@@ -525,21 +521,21 @@ fn emit_defs<'a, 'arena, 'decl>(
         let alloc = env.arena;
         match defs {
             [Def::SetNamespaceEnv(ns), ..] => {
-                env.namespace = RcOc::clone(&ns);
+                env.namespace = RcOc::clone(ns);
                 aux(env, emitter, &defs[1..])
             }
             [] => emit_statement::emit_dropthrough_return(emitter, env),
             [Def::Stmt(s)] => {
                 // emit last statement in the list as final statement
-                emit_statement::emit_final_stmt(emitter, env, &s)
+                emit_statement::emit_final_stmt(emitter, env, s)
             }
             [Def::Stmt(s1), Def::Stmt(s2)] => match s2.1.as_markup() {
-                Some(id) if id.1.is_empty() => emit_statement::emit_final_stmt(emitter, env, &s1),
+                Some(id) if id.1.is_empty() => emit_statement::emit_final_stmt(emitter, env, s1),
                 _ => Ok(InstrSeq::gather(
                     alloc,
                     vec![
                         emit_statement::emit_stmt(emitter, env, s1)?,
-                        emit_statement::emit_final_stmt(emitter, env, &s2)?,
+                        emit_statement::emit_final_stmt(emitter, env, s2)?,
                     ],
                 )),
             },
@@ -558,7 +554,7 @@ fn emit_defs<'a, 'arena, 'decl>(
                 aux(env, emitter, &prog[1..])?,
             ],
         )),
-        [] | [_] => aux(env, emitter, &prog[..]),
+        [] | [_] => aux(env, emitter, prog),
         [def, ..] => {
             let i1 = emit_def(env, emitter, def)?;
             if i1.is_empty() {
@@ -781,9 +777,7 @@ fn set_emit_statement_state<'arena, 'decl>(
 ) {
     let verify_return = match &return_type_info.user_type {
         Just(s) if s.unsafe_as_str() == "" => None,
-        _ if return_type_info.has_type_constraint() && !is_generator => {
-            return_type.map(|h| h.clone())
-        }
+        _ if return_type_info.has_type_constraint() && !is_generator => return_type.cloned(),
         _ => None,
     };
     let default_dropthrough = if default_dropthrough.is_some() {
@@ -872,7 +866,7 @@ pub fn emit_generics_upper_bounds<'arena>(
                 skip_awaitable,
                 false, // nullable
                 &tparam_names,
-                &hint,
+                hint,
             )
             .ok() //TODO(hrust) propagate Err result
         } else {
@@ -918,7 +912,7 @@ fn emit_shadowed_tparams(
 }
 
 fn move_this(vars: &mut Vec<String>) {
-    if vars.iter().any(|v| v == &THIS) {
+    if vars.iter().any(|v| v == THIS) {
         vars.retain(|s| s != THIS);
         vars.push(String::from(THIS));
     }

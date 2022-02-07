@@ -500,7 +500,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
 
 fn int_expr_to_typed_value<'arena>(s: &str) -> Result<TypedValue<'arena>, Error> {
     Ok(TypedValue::Int(
-        try_type_intlike(&s).unwrap_or(std::i64::MAX),
+        try_type_intlike(s).unwrap_or(std::i64::MAX),
     ))
 }
 

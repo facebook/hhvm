@@ -37,7 +37,7 @@ impl<'arena, 'decl> SpecialClassResolver for Emitter<'arena, 'decl> {
                 body_env
                     .class_info
                     .as_ref()
-                    .map(|Pair(k, s)| (k.clone().into(), s.unsafe_as_str()))
+                    .map(|Pair(k, s)| (k.clone(), s.unsafe_as_str()))
                     .into(),
                 body_env
                     .parent_name

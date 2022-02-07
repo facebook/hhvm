@@ -22,6 +22,7 @@ use oxidized::relative_path::{Prefix, RelativePath};
 use oxidized_by_ref::decl_parser_options;
 use parser_core_types::source_text::SourceText;
 
+#[allow(clippy::derivable_impls)]
 #[cxx::bridge]
 pub mod compile_ffi {
     struct NativeEnv {
@@ -241,13 +242,13 @@ impl compile_ffi::NativeEnv {
     }
 }
 
-fn hackc_compile_from_text_cpp_ffi<'a>(
+fn hackc_compile_from_text_cpp_ffi(
     env: &compile_ffi::NativeEnv,
     source_text: &CxxString,
 ) -> Result<Vec<u8>, String> {
     stack_limit::with_elastic_stack(|stack_limit| {
         let native_env: compile::NativeEnv<&str> =
-            compile_ffi::NativeEnv::to_compile_env(&env).unwrap();
+            compile_ffi::NativeEnv::to_compile_env(env).unwrap();
         let compile_env = compile::Env::<&str> {
             filepath: native_env.filepath.clone(),
             config_jsons: vec![],
@@ -280,7 +281,7 @@ fn hackc_compile_from_text_cpp_ffi<'a>(
         compile::from_text(
             &alloc,
             &compile_env,
-            &stack_limit,
+            stack_limit,
             &mut output,
             text,
             Some(&native_env),
@@ -311,7 +312,7 @@ fn hackc_decl_exists(
     decls.0.get(kind, symbol) != None
 }
 
-fn hackc_print_decls<'a>(decls: &Decls) {
+fn hackc_print_decls(decls: &Decls) {
     println!("{:#?}", decls.0)
 }
 
@@ -444,7 +445,7 @@ fn hackc_compile_hhas_from_text_cpp_ffi(
         let alloc: &'static bumpalo::Bump =
             unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&bump) };
         let native_env: compile::NativeEnv<&str> =
-            compile_ffi::NativeEnv::to_compile_env(&env).unwrap();
+            compile_ffi::NativeEnv::to_compile_env(env).unwrap();
         let compile_env = compile::Env::<&str> {
             filepath: native_env.filepath.clone(),
             config_jsons: vec![],
@@ -474,7 +475,7 @@ fn hackc_compile_hhas_from_text_cpp_ffi(
         let compile_result = compile::hhas_from_text(
             alloc,
             &compile_env,
-            &stack_limit,
+            stack_limit,
             text,
             Some(&native_env),
             unified_decl_provider::DeclProvider::ExternalDeclProvider(ExternalDeclProvider::new(
@@ -541,11 +542,11 @@ pub fn hackc_decls_to_facts_cpp_ffi(
         let disable_xhp_element_mangling = ((1 << 0) & decl_flags) != 0;
         let facts = compile_ffi::Facts::from(facts::Facts::facts_of_decls(
             &(*decl_result.decls).0,
-            &(*decl_result.attributes).0,
+            (*decl_result.attributes).0,
             disable_xhp_element_mangling,
         ));
         compile_ffi::FactsResult {
-            facts: facts.into(),
+            facts,
             md5sum,
             sha1sum,
             has_errors: false,

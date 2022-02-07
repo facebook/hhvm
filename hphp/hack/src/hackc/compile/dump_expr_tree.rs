@@ -117,7 +117,7 @@ pub fn desugar_and_print<S: AsRef<str>>(env: &Env<S>) {
         Left((_, msg, _)) => panic!("Parsing failed: {}", msg),
         Right(ast) => {
             let old_src = String::from_utf8_lossy(&content);
-            let new_src = desugar_and_replace_et_literals(&env, ast, &old_src);
+            let new_src = desugar_and_replace_et_literals(env, ast, &old_src);
             print!("{}", new_src);
         }
     }

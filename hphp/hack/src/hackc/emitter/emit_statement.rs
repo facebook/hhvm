@@ -297,7 +297,7 @@ fn emit_awaitall<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     el: &[(Option<ast::Lid>, ast::Expr)],
-    block: &ast::Block,
+    block: &[ast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     match el {
@@ -313,7 +313,7 @@ fn emit_awaitall_single<'a, 'arena, 'decl>(
     pos: &Pos,
     lval: Option<&ast::Lid>,
     expr: &ast::Expr,
-    block: &ast::Block,
+    block: &[ast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
     scope::with_unnamed_locals(e, |e| {
         let alloc = e.alloc;
@@ -340,7 +340,7 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     el: &[(Option<ast::Lid>, ast::Expr)],
-    block: &ast::Block,
+    block: &[ast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
     scope::with_unnamed_locals(e, |e| {
         let alloc = e.alloc;
@@ -607,7 +607,7 @@ fn emit_using<'a, 'arena, 'decl>(
     }
 }
 
-fn block_pos(block: &ast::Block) -> Result<Pos> {
+fn block_pos(block: &[ast::Stmt]) -> Result<Pos> {
     if block.iter().all(|b| b.0.is_none()) {
         return Ok(Pos::make_none());
     }
@@ -765,7 +765,7 @@ fn emit_try_catch_finally<'a, 'arena, 'decl>(
     pos: &Pos,
     r#try: &[ast::Stmt],
     catch: &[ast::Catch],
-    finally: &ast::Block,
+    finally: &[ast::Stmt],
 ) -> Result<InstrSeq<'arena>> {
     let is_try_block_empty = false;
     let emit_try_block =

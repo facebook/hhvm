@@ -105,7 +105,7 @@ impl JumpTargets {
                 Region::Switch(end_label) => {
                     if level == 1 {
                         label = Some(end_label);
-                        iters.extend_from_slice(&std::mem::replace(&mut acc, vec![]));
+                        iters.extend_from_slice(&std::mem::take(&mut acc));
                         break;
                     } else {
                         level -= 1;
@@ -120,10 +120,10 @@ impl JumpTargets {
                         if is_break {
                             add_iterator(iterator.clone(), &mut acc);
                             label = Some(label_break);
-                            iters.extend_from_slice(&std::mem::replace(&mut acc, vec![]));
+                            iters.extend_from_slice(&std::mem::take(&mut acc));
                         } else {
                             label = Some(label_continue);
-                            iters.extend_from_slice(&std::mem::replace(&mut acc, vec![]));
+                            iters.extend_from_slice(&std::mem::take(&mut acc));
                         };
                         break;
                     } else {

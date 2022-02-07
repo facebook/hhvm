@@ -842,20 +842,18 @@ pub mod instr {
         id: ClassId<'a>,
         keys: &'a [&'a str],
     ) -> InstrSeq<'a> {
-        let keys_ =
-            Slice::new(alloc.alloc_slice_fill_iter(keys.into_iter().map(|s| Str::from(*s))));
+        let keys = Slice::new(alloc.alloc_slice_fill_iter(keys.iter().map(|s| Str::from(*s))));
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::NewRecord(id, keys_)),
+            Instruct::ILitConst(InstructLitConst::NewRecord(id, keys)),
         )
     }
 
     pub fn newstructdict<'a>(alloc: &'a bumpalo::Bump, keys: &'a [&'a str]) -> InstrSeq<'a> {
-        let keys_ =
-            Slice::new(alloc.alloc_slice_fill_iter(keys.into_iter().map(|s| Str::from(*s))));
+        let keys = Slice::new(alloc.alloc_slice_fill_iter(keys.iter().map(|s| Str::from(*s))));
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::NewStructDict(keys_)),
+            Instruct::ILitConst(InstructLitConst::NewStructDict(keys)),
         )
     }
 
@@ -1599,7 +1597,7 @@ impl<'a> InstrSeq<'a> {
     pub fn new_empty(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         InstrSeq::List(BumpSliceMut::new(
             alloc,
-            bumpalo::vec![in &alloc; ].into_bump_slice_mut(),
+            bumpalo::vec![in alloc; ].into_bump_slice_mut(),
         ))
     }
 
@@ -1607,7 +1605,7 @@ impl<'a> InstrSeq<'a> {
     pub fn new_singleton(alloc: &'a bumpalo::Bump, i: Instruct<'a>) -> InstrSeq<'a> {
         InstrSeq::List(BumpSliceMut::new(
             alloc,
-            bumpalo::vec![in &alloc; i].into_bump_slice_mut(),
+            bumpalo::vec![in alloc; i].into_bump_slice_mut(),
         ))
     }
 
@@ -1737,7 +1735,7 @@ impl<'a> InstrSeq<'a> {
             InstrSeq::List(s) if s.len() == 1 => f(&s[0]),
             InstrSeq::List(s) => InstrSeq::Concat(BumpSliceMut::new(
                 alloc,
-                bumpalo::collections::vec::Vec::from_iter_in(s.iter().map(|x| f(x)), alloc)
+                bumpalo::collections::vec::Vec::from_iter_in(s.iter().map(f), alloc)
                     .into_bump_slice_mut(),
             )),
             InstrSeq::Concat(s) => InstrSeq::Concat(BumpSliceMut::new(
@@ -1809,8 +1807,8 @@ impl<'a> InstrSeq<'a> {
             }
             InstrSeq::List(s) => {
                 let mut new_lst = bumpalo::vec![in alloc;];
-                for mut i in s.iter_mut() {
-                    if f(&mut i) {
+                for i in s.iter_mut() {
+                    if f(i) {
                         new_lst.push(i.clone())
                     }
                 }
@@ -1842,7 +1840,7 @@ impl<'a> InstrSeq<'a> {
         match self {
             InstrSeq::List(s) if s.is_empty() => Ok(()),
             InstrSeq::List(s) if s.len() == 1 => f(&mut s[0]),
-            InstrSeq::List(s) => s.iter_mut().try_for_each(|x| f(x)),
+            InstrSeq::List(s) => s.iter_mut().try_for_each(f),
             InstrSeq::Concat(s) => s.iter_mut().try_for_each(|x| x.map_result_mut(f)),
         }
     }
@@ -1966,7 +1964,7 @@ mod tests {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_instruction_sequence<'a, 'arena>(
+pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_instruction_sequence<'arena>(
     _: InstrSeq<'arena>,
 ) {
     unimplemented!()

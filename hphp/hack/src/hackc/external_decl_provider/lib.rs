@@ -103,7 +103,7 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
                 let op = bincode::config::Options::with_native_endian(bincode::options());
                 let mut de = bincode::de::Deserializer::from_slice(data, op);
 
-                let de = arena_deserializer::ArenaDeserializer::new(&arena, &mut de);
+                let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
                 let decls = direct_decl_parser::Decls::deserialize(de)
                     .map_err(|e| format!("failed to deserialize, error: {}", e))
                     .unwrap();

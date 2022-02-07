@@ -64,8 +64,8 @@ pub(crate) fn has_reified_type_constraint<'a, 'arena>(
     }
     match &*h.1 {
         Hint_::Happly(Id(_, id), hs) => {
-            if is_reified_tparam(env, true, &id).is_some()
-                || is_reified_tparam(env, false, &id).is_some()
+            if is_reified_tparam(env, true, id).is_some()
+                || is_reified_tparam(env, false, id).is_some()
             {
                 ReificationLevel::Definitely
             } else if hs.is_empty() || is_all_erased(env, hs.iter()) {
@@ -250,7 +250,7 @@ pub(crate) fn happly_decl_has_no_reified_generics<'arena, 'decl>(
     match h.as_ref() {
         Hint_::Happly(Id(_, id), _) => {
             if let Ok(shallow_decl_defs::Decl::Class(class_decl)) =
-                emitter.get_decl(file_info::NameType::Class, &id)
+                emitter.get_decl(file_info::NameType::Class, id)
             {
                 if class_decl
                     .tparams
@@ -260,7 +260,7 @@ pub(crate) fn happly_decl_has_no_reified_generics<'arena, 'decl>(
                     return true;
                 }
             }
-            return false;
+            false
         }
         Hint_::Hoption(_)
         | Hint_::Hlike(_)

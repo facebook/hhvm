@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use std::borrow::Cow;
 
 pub trait Id<'arena>: Sized {
     const MANGLE: bool;
@@ -12,11 +13,11 @@ pub trait Id<'arena>: Sized {
 
     fn from_ast_name(alloc: &'arena bumpalo::Bump, s: &str) -> Self;
 
-    fn to_unmangled_str(&self) -> std::borrow::Cow<'arena, str> {
+    fn to_unmangled_str(&self) -> Cow<'arena, str> {
         if Self::MANGLE {
-            std::borrow::Cow::from(hhbc_string_utils::unmangle(self.to_raw_string().into()))
+            Cow::from(hhbc_string_utils::unmangle(self.to_raw_string().into()))
         } else {
-            std::borrow::Cow::from(self.to_raw_string())
+            Cow::from(self.to_raw_string())
         }
     }
 }
@@ -55,7 +56,11 @@ macro_rules! impl_id {
         }
 
         #[allow(dead_code)]
-        fn from_raw_string_with_suffix<'arena>(alloc: &'arena bumpalo::Bump, s: &str, suffix: &str) -> $type<'arena> {
+        fn from_raw_string_with_suffix<'arena>(
+            alloc: &'arena bumpalo::Bump,
+            s: &str,
+            suffix: &str
+        ) -> $type<'arena> {
             let mut r = bumpalo::collections::String::<'arena>::with_capacity_in(
                 s.len() + suffix.len(),
                 alloc,
@@ -72,12 +77,12 @@ macro_rules! impl_id {
             }
         }
 
-        impl<'arena> Into<std::string::String> for $type<'arena> {
-            fn into(self) -> std::string::String {
-                self.0.unsafe_as_str().into()
+        impl<'arena> From<$type<'arena>> for std::string::String {
+            fn from(x: $type<'arena>) -> Self {
+                x.0.unsafe_as_str().into()
             }
         }
-  }
+    }
 }
 
 macro_rules! impl_add_suffix {

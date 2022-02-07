@@ -333,11 +333,13 @@ impl<'shm, K: Hash, V, S: BuildHasher> CMapRef<'shm, K, V, S> {
     ///
     /// Will loop over each shard.
     pub fn len(&self) -> usize {
-        let mut count = 0;
-        for map in &self.maps {
-            count += map.read().unwrap().len();
-        }
-        count
+        self.maps.iter().map(|map| map.read().unwrap().len()).sum()
+    }
+
+    /// Return true if the hashmap is empty.
+    /// Will loop over each shard.
+    pub fn is_empty(&self) -> bool {
+        self.maps.iter().all(|map| map.read().unwrap().is_empty())
     }
 }
 

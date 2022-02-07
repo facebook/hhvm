@@ -5,7 +5,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "mod.rs"
+path = "shmrs.rs"
 
 [dependencies]
 hashbrown = { version = "0.11.2", features = ["nightly", "raw", "serde"] }

@@ -19,7 +19,7 @@ pub struct Map<'shm, K, V, S = DefaultHashBuilder> {
 
 struct MapInner<'shm, K, V, S> {
     map: HashMap<K, V, S, &'shm FileAlloc>,
-    #[allow(unused)]
+    #[allow(dead_code)]
     alloc: &'shm FileAlloc,
 }
 
@@ -42,7 +42,7 @@ impl<'shm, K, V> Map<'shm, K, V, DefaultHashBuilder> {
     ///
     /// See `reset_with_hasher`
     pub fn reset(&mut self, alloc: &'shm FileAlloc) {
-        let map = HashMap::new_in(alloc.clone());
+        let map = HashMap::new_in(alloc);
         self.inner = Some(MapInner { map, alloc });
     }
 }
@@ -59,7 +59,7 @@ impl<'shm, K, V, S> Map<'shm, K, V, S> {
     ///
     /// Uses the given file allocator to allocate the hashmap's table.
     pub fn reset_with_hasher(&mut self, alloc: &'shm FileAlloc, hash_builder: S) {
-        let map = HashMap::with_hasher_in(hash_builder, alloc.clone());
+        let map = HashMap::with_hasher_in(hash_builder, alloc);
         self.inner = Some(MapInner { map, alloc })
     }
 }

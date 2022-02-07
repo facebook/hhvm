@@ -338,9 +338,9 @@ SymbolMap::getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind) {
   auto makeVec = [&](const TypeDefs& subtypeDefs) -> TypeVec {
     TypeVec subtypes;
     subtypes.reserve(subtypeDefs.size());
-    for (auto const& [type, defKind, _path] : subtypeDefs) {
-      assertx(defKind == kind);
-      subtypes.push_back(type);
+    for (auto const& subTypeDef : subtypeDefs) {
+      assertx(subTypeDef.m_kind == kind);
+      subtypes.push_back(subTypeDef.m_type);
     }
     return subtypes;
   };
@@ -357,11 +357,11 @@ SymbolMap::getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind) {
         auto const typeDefStrs = db.getDerivedTypes(baseType.slice(), kind);
         std::vector<EdgeToSupertype> typeDefs;
         typeDefs.reserve(typeDefStrs.size());
-        for (auto const& [pathStr, typeStr] : typeDefStrs) {
+        for (auto const& typeDefStr : typeDefStrs) {
           typeDefs.push_back(EdgeToSupertype{
-              .m_type = Symbol<SymKind::Type>{typeStr},
+              .m_type = Symbol<SymKind::Type>{typeDefStr.m_symbol},
               .m_kind = kind,
-              .m_path = Path{pathStr}});
+              .m_path = Path{typeDefStr.m_path}});
         }
         return typeDefs;
       },
@@ -398,10 +398,13 @@ SymbolMap::getTransitiveDerivedTypes(
   waitForDBUpdate();
   auto& db = getDB();
   std::vector<DerivedTypeInfo> derivedTypes;
-  for (auto const& [type, path, kind, flags] :
+  for (auto const& derivedInfo :
        db.getTransitiveDerivedTypes(baseType.slice(), kinds, deriveKinds)) {
     derivedTypes.emplace_back(
-        Symbol<SymKind::Type>{type}, Path{path}, kind, flags);
+        Symbol<SymKind::Type>{derivedInfo.m_type},
+        Path{derivedInfo.m_path},
+        derivedInfo.m_kind,
+        derivedInfo.m_flags);
   }
   return derivedTypes;
 }
@@ -970,11 +973,11 @@ SymbolMap::getKindAndFlags(Symbol<SymKind::Type> type, Path path) {
       [&](const Data& data) -> Optional<std::pair<TypeKind, int>> {
         return data.m_typeKind.getKindAndFlags(type, path);
       },
-      [&](AutoloadDB& db) -> std::pair<TypeKind, TypeFlagMask> {
+      [&](AutoloadDB& db) {
         return db.getKindAndFlags(
             type.slice(), folly::fs::path{std::string{path.slice()}});
       },
-      [&](Data& data, std::pair<TypeKind, TypeFlagMask> kindAndFlags)
+      [&](Data& data, AutoloadDB::KindAndFlags kindAndFlags)
           -> std::pair<TypeKind, TypeFlagMask> {
         auto [kind, flags] = kindAndFlags;
         if (kind != TypeKind::Unknown) {

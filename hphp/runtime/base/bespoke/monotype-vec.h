@@ -75,7 +75,6 @@ private:
   arr_lval elemImpl(int64_t k, bool throwOnMissing);
 
   size_t capacity() const;
-  uint8_t sizeIndex() const;
   Value* rawData();
   const Value* rawData() const;
   Value& valueRefUnchecked(size_t idx);

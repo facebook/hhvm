@@ -45,7 +45,6 @@ struct StructDict : public BespokeArray {
       uint8_t sizeIndex, uint32_t extra, uint32_t size,
       const uint8_t* slots, const TypedValue* vals);
 
-  uint8_t sizeIndex() const;
   static size_t sizeFromLayout(const StructLayout*);
 
   static const StructDict* As(const ArrayData* ad);

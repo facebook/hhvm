@@ -320,10 +320,6 @@ StructDict* StructDict::MakeReserve(const StructLayout* layout, bool legacy) {
   return sad;
 }
 
-uint8_t StructDict::sizeIndex() const {
-  return m_aux16 >> 8;
-}
-
 size_t StructDict::numFields() const {
   return m_extra_lo8;
 }

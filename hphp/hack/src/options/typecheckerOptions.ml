@@ -127,9 +127,6 @@ let disallow_unresolved_type_variables =
 
 let disallow_trait_reuse = GlobalOptions.tco_disallow_trait_reuse
 
-let disallow_invalid_arraykey_constraint =
-  GlobalOptions.tco_disallow_invalid_arraykey_constraint
-
 let const_static_props = GlobalOptions.tco_const_static_props
 
 let global_inference = GlobalOptions.tco_global_inference

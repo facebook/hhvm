@@ -62,7 +62,6 @@ type t = {
   tco_check_redundant_generics: bool;
   tco_disallow_unresolved_type_variables: bool;
   tco_disallow_trait_reuse: bool;
-  tco_disallow_invalid_arraykey_constraint: bool;
   po_enable_class_level_where_clauses: bool;
   po_disable_legacy_soft_typehints: bool;
   po_allowed_decl_fixme_codes: ISet.t;
@@ -246,7 +245,6 @@ let default =
     tco_check_redundant_generics = false;
     tco_disallow_unresolved_type_variables = false;
     tco_disallow_trait_reuse = false;
-    tco_disallow_invalid_arraykey_constraint = false;
     po_enable_class_level_where_clauses = false;
     po_disable_legacy_soft_typehints = true;
     po_allowed_decl_fixme_codes = ISet.of_list [];
@@ -379,8 +377,6 @@ let make
     ?(tco_disallow_unresolved_type_variables =
       default.tco_disallow_unresolved_type_variables)
     ?(tco_disallow_trait_reuse = default.tco_disallow_trait_reuse)
-    ?(tco_disallow_invalid_arraykey_constraint =
-      default.tco_disallow_invalid_arraykey_constraint)
     ?(po_enable_class_level_where_clauses =
       default.po_enable_class_level_where_clauses)
     ?(po_disable_legacy_soft_typehints =
@@ -526,7 +522,6 @@ let make
     tco_check_redundant_generics;
     tco_disallow_unresolved_type_variables;
     tco_disallow_trait_reuse;
-    tco_disallow_invalid_arraykey_constraint;
     po_enable_class_level_where_clauses;
     po_disable_legacy_soft_typehints;
     po_allowed_decl_fixme_codes;
@@ -655,9 +650,6 @@ let tco_language_feature_logging t = t.tco_language_feature_logging
 let tco_timeout t = t.tco_timeout
 
 let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
-
-let tco_disallow_invalid_arraykey_constraint t =
-  t.tco_disallow_invalid_arraykey_constraint
 
 let tco_disallow_byref_dynamic_calls t = t.tco_disallow_byref_dynamic_calls
 

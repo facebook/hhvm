@@ -217,7 +217,6 @@ let parse_options () =
   let symbolindex_file = ref None in
   let check_xhp_attribute = ref false in
   let check_redundant_generics = ref false in
-  let disallow_invalid_arraykey_constraint = ref None in
   let disallow_static_memoized = ref false in
   let enable_supportdyn_hint = ref false in
   let enable_class_level_where_clauses = ref false in
@@ -465,9 +464,6 @@ let parse_options () =
       ( "--batch-files",
         Arg.Set batch_mode,
         " Typecheck each file passed in independently" );
-      ( "--disallow-invalid-arraykey-constraint",
-        Arg.Unit (set_bool disallow_invalid_arraykey_constraint),
-        " Disallow using non-string, non-int types as array key constraints" );
       ( "--disallow-static-memoized",
         Arg.Set disallow_static_memoized,
         " Disallow static memoized methods on non-final methods" );
@@ -809,8 +805,6 @@ let parse_options () =
         (Option.value !allowed_fixme_codes_partial ~default:ISet.empty)
       ~codes_not_raised_partial:
         (Option.value !codes_not_raised_partial ~default:ISet.empty)
-      ?tco_disallow_invalid_arraykey_constraint:
-        !disallow_invalid_arraykey_constraint
       ?tco_disallow_trait_reuse:!disallow_trait_reuse
       ~tco_check_xhp_attribute:!check_xhp_attribute
       ~tco_check_redundant_generics:!check_redundant_generics

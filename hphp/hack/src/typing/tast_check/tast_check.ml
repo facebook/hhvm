@@ -76,7 +76,6 @@ let visitor ctx =
           Some Obj_get_check.handler;
           Some This_hint_check.handler;
           Some Unresolved_type_variable_check.handler;
-          Some Invalid_arraykey_constraint_check.handler;
           Some Type_const_check.handler;
           Some Static_method_generics_check.handler;
           (if skip_hierarchy_checks then

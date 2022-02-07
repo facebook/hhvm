@@ -8,8 +8,10 @@ pub mod visitor;
 
 pub mod alloc;
 pub mod ast_provider;
+pub mod cache;
 pub mod decl_defs;
 pub mod decl_hint;
+pub mod decl_parser;
 pub mod errors;
 pub mod folded_decl_provider;
 pub mod naming;

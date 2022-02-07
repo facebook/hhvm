@@ -62,8 +62,7 @@ struct PathToMethodsMap {
     return m_pathMethodMap.getValuesForKey(path);
   }
   Methods getPathMethods(
-      Path path,
-      const std::vector<AutoloadDB::MethodDeclaration>& methodsFromDB) {
+      Path path, const std::vector<AutoloadDB::MethodPath>& methodsFromDB) {
     std::vector<MethodDecl> decls;
     decls.reserve(methodsFromDB.size());
     for (auto const& [type, method, path] : methodsFromDB) {

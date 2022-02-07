@@ -6,5 +6,5 @@
 mod cache;
 mod provider;
 
-pub use cache::{ShallowDeclCache, ShallowDeclGlobalCache};
+pub use cache::ShallowDeclCache;
 pub use provider::ShallowDeclProvider;

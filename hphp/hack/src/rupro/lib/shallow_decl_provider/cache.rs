@@ -3,55 +3,83 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{FunDecl, ShallowClass};
+use crate::cache::Cache;
+use crate::decl_defs::shallow::{self, ConstDecl, Decl, FunDecl, ShallowClass, TypedefDecl};
 use crate::reason::Reason;
-use dashmap::DashMap;
-use pos::{BuildSymbolHasher, BuildTypeNameHasher, Symbol, TypeName};
+use pos::{Symbol, TypeName};
 use std::sync::Arc;
 
-pub trait ShallowDeclCache: std::fmt::Debug + Send + Sync {
-    type Reason: Reason;
-
-    fn get_shallow_class(&self, name: TypeName) -> Option<Arc<ShallowClass<Self::Reason>>>;
-
-    fn put_shallow_class(&self, name: TypeName, cls: Arc<ShallowClass<Self::Reason>>);
-
-    fn get_fun_decl(&self, name: Symbol) -> Option<Arc<FunDecl<Self::Reason>>>;
-
-    fn put_fun_decl(&self, name: Symbol, f: Arc<FunDecl<Self::Reason>>);
+#[derive(Clone, Debug)]
+pub enum TypeDecl<R: Reason> {
+    Class(Arc<ShallowClass<R>>),
+    Typedef(Arc<TypedefDecl<R>>),
 }
 
 #[derive(Debug)]
-pub struct ShallowDeclGlobalCache<R: Reason> {
-    classes: DashMap<TypeName, Arc<ShallowClass<R>>, BuildTypeNameHasher>,
-    funs: DashMap<Symbol, Arc<FunDecl<R>>, BuildSymbolHasher>,
+pub struct ShallowDeclCache<R: Reason> {
+    types: Box<dyn Cache<TypeName, TypeDecl<R>>>,
+    funs: Box<dyn Cache<Symbol, Arc<FunDecl<R>>>>,
+    consts: Box<dyn Cache<Symbol, Arc<ConstDecl<R>>>>,
 }
 
-impl<R: Reason> ShallowDeclGlobalCache<R> {
-    pub fn new() -> Self {
+impl<R: Reason> ShallowDeclCache<R> {
+    pub fn new(
+        types: Box<dyn Cache<TypeName, TypeDecl<R>>>,
+        funs: Box<dyn Cache<Symbol, Arc<FunDecl<R>>>>,
+        consts: Box<dyn Cache<Symbol, Arc<ConstDecl<R>>>>,
+    ) -> Self {
         Self {
-            classes: DashMap::default(),
-            funs: DashMap::default(),
+            types,
+            funs,
+            consts,
         }
     }
-}
 
-impl<R: Reason> ShallowDeclCache for ShallowDeclGlobalCache<R> {
-    type Reason = R;
-
-    fn get_shallow_class(&self, name: TypeName) -> Option<Arc<ShallowClass<Self::Reason>>> {
-        self.classes.get(&name).as_ref().map(|x| Arc::clone(x))
+    pub fn with_no_eviction() -> Self {
+        use crate::cache::NonEvictingCache;
+        Self::new(
+            Box::new(NonEvictingCache::default()),
+            Box::new(NonEvictingCache::default()),
+            Box::new(NonEvictingCache::default()),
+        )
     }
 
-    fn put_shallow_class(&self, name: TypeName, cls: Arc<ShallowClass<Self::Reason>>) {
-        self.classes.insert(name, cls);
+    pub fn add_decls(&self, decls: Vec<shallow::Decl<R>>) {
+        for decl in decls {
+            match decl {
+                Decl::Class(name, decl) => self.types.insert(name, TypeDecl::Class(Arc::new(decl))),
+                Decl::Fun(name, decl) => self.funs.insert(name, Arc::new(decl)),
+                Decl::Typedef(name, decl) => {
+                    self.types.insert(name, TypeDecl::Typedef(Arc::new(decl)))
+                }
+                Decl::Const(name, decl) => self.consts.insert(name, Arc::new(decl)),
+            }
+        }
     }
 
-    fn get_fun_decl(&self, name: Symbol) -> Option<Arc<FunDecl<Self::Reason>>> {
-        self.funs.get(&name).as_ref().map(|x| Arc::clone(x))
+    pub fn get_type(&self, name: TypeName) -> Option<TypeDecl<R>> {
+        self.types.get(name)
     }
 
-    fn put_fun_decl(&self, name: Symbol, f: Arc<FunDecl<Self::Reason>>) {
-        self.funs.insert(name, f);
+    pub fn get_fun(&self, name: Symbol) -> Option<Arc<FunDecl<R>>> {
+        self.funs.get(name)
+    }
+
+    pub fn get_const(&self, name: Symbol) -> Option<Arc<ConstDecl<R>>> {
+        self.consts.get(name)
+    }
+
+    pub fn get_class(&self, name: TypeName) -> Option<Arc<ShallowClass<R>>> {
+        self.types.get(name).and_then(|decl| match decl {
+            TypeDecl::Class(cls) => Some(cls),
+            TypeDecl::Typedef(..) => None,
+        })
+    }
+
+    pub fn get_typedef(&self, name: TypeName) -> Option<Arc<TypedefDecl<R>>> {
+        self.types.get(name).and_then(|decl| match decl {
+            TypeDecl::Typedef(td) => Some(td),
+            TypeDecl::Class(..) => None,
+        })
     }
 }

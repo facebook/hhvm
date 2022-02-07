@@ -320,7 +320,7 @@ impl<R: Reason> Allocator<R> {
         }
     }
 
-    pub fn shallow_class(
+    fn shallow_class(
         &self,
         sc: &obr::shallow_decl_defs::ClassDecl<'_>,
     ) -> shallow::ShallowClass<R> {
@@ -359,7 +359,7 @@ impl<R: Reason> Allocator<R> {
         }
     }
 
-    pub fn fun_decl(&self, sf: &obr::shallow_decl_defs::FunDecl<'_>) -> shallow::FunDecl<R> {
+    fn fun_decl(&self, sf: &obr::shallow_decl_defs::FunDecl<'_>) -> shallow::FunDecl<R> {
         shallow::FunDecl {
             pos: self.pos_from_decl(sf.pos),
             ty: self.ty_from_decl(sf.type_),
@@ -369,5 +369,47 @@ impl<R: Reason> Allocator<R> {
             php_std_lib: sf.php_std_lib,
             support_dynamic_type: sf.support_dynamic_type,
         }
+    }
+
+    fn typedef_decl(&self, x: &obr::shallow_decl_defs::TypedefDecl<'_>) -> shallow::TypedefDecl<R> {
+        ty::TypedefType {
+            module: x.module.map(|pos_id| self.pos_id_from_ast_ref(&pos_id)),
+            pos: self.pos_from_decl(x.pos),
+            vis: x.vis,
+            tparams: self.vec(x.tparams, Self::decl_tparam),
+            constraint: x.constraint.map(|ty| self.ty_from_decl(ty)),
+            ty: self.ty_from_decl(x.type_),
+            is_ctx: x.is_ctx,
+            attributes: self.vec(x.attributes, Self::user_attribute_from_decl),
+        }
+    }
+
+    fn const_decl(&self, x: &obr::shallow_decl_defs::ConstDecl<'_>) -> shallow::ConstDecl<R> {
+        ty::ConstDecl {
+            pos: self.pos_from_decl(x.pos),
+            ty: self.ty_from_decl(x.type_),
+        }
+    }
+
+    pub fn decl(&self, decl: (&str, obr::shallow_decl_defs::Decl<'_>)) -> shallow::Decl<R> {
+        use obr::shallow_decl_defs::Decl as Obr;
+        use shallow::Decl;
+        match decl {
+            (name, Obr::Class(x)) => {
+                Decl::Class(TypeName(self.symbol(name)), self.shallow_class(x))
+            }
+            (name, Obr::Fun(x)) => Decl::Fun(self.symbol(name), self.fun_decl(x)),
+            (name, Obr::Typedef(x)) => {
+                Decl::Typedef(TypeName(self.symbol(name)), self.typedef_decl(x))
+            }
+            (name, Obr::Const(x)) => Decl::Const(self.symbol(name), self.const_decl(x)),
+        }
+    }
+
+    pub fn decls<'a>(
+        &self,
+        decls: impl Iterator<Item = (&'a str, obr::shallow_decl_defs::Decl<'a>)>,
+    ) -> Vec<shallow::Decl<R>> {
+        decls.map(|decl| self.decl(decl)).collect()
     }
 }

@@ -792,16 +792,17 @@ struct AutoloadDBImpl final : public AutoloadDB {
     return types;
   }
 
-  std::pair<TypeKind, int> getKindAndFlags(
+  KindAndFlags getKindAndFlags(
       const std::string_view type, const folly::fs::path& path) override {
     auto query = m_txn.query(m_typeStmts.m_getKindAndFlags);
     query.bindString("@type", type);
     query.bindString("@path", path.native());
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
-      return {toTypeKind(query.getString(0)), query.getInt(1)};
+      return KindAndFlags{
+          .m_kind = toTypeKind(query.getString(0)), .m_flags = query.getInt(1)};
     }
-    return {TypeKind::Unknown, 0};
+    return {.m_kind = TypeKind::Unknown, .m_flags = 0};
   }
 
   void insertBaseType(
@@ -836,17 +837,17 @@ struct AutoloadDBImpl final : public AutoloadDB {
     return types;
   }
 
-  std::vector<std::pair<folly::fs::path, std::string>>
+  std::vector<SymbolPath>
   getDerivedTypes(const std::string_view base, DeriveKind kind) override {
     auto query = m_txn.query(m_typeStmts.m_getDerivedTypes);
     query.bindString("@base", base);
     query.bindInt("@kind", toDBEnum(kind));
-    std::vector<std::pair<folly::fs::path, std::string>> edges;
+    std::vector<SymbolPath> edges;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
       edges.push_back(
-          {folly::fs::path{std::string{query.getString(0)}},
-           std::string{query.getString(1)}});
+          {.m_symbol = std::string{query.getString(1)},
+           .m_path = folly::fs::path{std::string{query.getString(0)}}});
     }
     return edges;
   }
@@ -875,10 +876,10 @@ struct AutoloadDBImpl final : public AutoloadDB {
     return RowIter<DerivedTypeInfo>{
         std::move(query), [](SQLiteQuery& query) -> DerivedTypeInfo {
           return {
-              query.getString(0),
-              query.getString(1),
-              toTypeKind(query.getString(2)),
-              query.getInt(3)};
+              .m_type = std::string{query.getString(0)},
+              .m_path = {std::string{query.getString(1)}},
+              .m_kind = toTypeKind(query.getString(2)),
+              .m_flags = query.getInt(3)};
         }};
   }
 
@@ -1026,42 +1027,41 @@ struct AutoloadDBImpl final : public AutoloadDB {
     return results;
   }
 
-  std::vector<TypeDeclaration>
+  std::vector<SymbolPath>
   getTypesWithAttribute(const std::string_view attributeName) override {
     auto query = m_txn.query(m_typeStmts.m_getTypesWithAttribute);
     query.bindString("@attribute_name", attributeName);
-    std::vector<TypeDeclaration> results;
+    std::vector<SymbolPath> results;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
-      results.push_back(TypeDeclaration{
-          .m_type = std::string{query.getString(0)},
+      results.push_back(SymbolPath{
+          .m_symbol = std::string{query.getString(0)},
           .m_path = folly::fs::path{std::string{query.getString(1)}}});
     }
     return results;
   }
 
-  std::vector<TypeDeclaration>
+  std::vector<SymbolPath>
   getTypeAliasesWithAttribute(const std::string_view attributeName) override {
     auto query = m_txn.query(m_typeStmts.m_getTypeAliasesWithAttribute);
     query.bindString("@attribute_name", attributeName);
-    std::vector<TypeDeclaration> results;
+    std::vector<SymbolPath> results;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
-      results.push_back(TypeDeclaration{
-          .m_type = std::string{query.getString(0)},
+      results.push_back(SymbolPath{
+          .m_symbol = std::string{query.getString(0)},
           .m_path = folly::fs::path{std::string{query.getString(1)}}});
     }
     return results;
   }
 
-  std::vector<MethodDeclaration>
-  getPathMethods(std::string_view path) override {
+  std::vector<MethodPath> getPathMethods(std::string_view path) override {
     auto query = m_txn.query(m_typeStmts.m_getMethodsInPath);
     query.bindString("@path", path);
-    std::vector<MethodDeclaration> results;
+    std::vector<MethodPath> results;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
-      results.push_back(MethodDeclaration{
+      results.push_back(MethodPath{
           .m_type = std::string{query.getString(0)},
           .m_method = std::string{query.getString(1)},
           .m_path = folly::fs::path{std::string{query.getString(2)}}});
@@ -1069,14 +1069,14 @@ struct AutoloadDBImpl final : public AutoloadDB {
     return results;
   }
 
-  std::vector<MethodDeclaration>
+  std::vector<MethodPath>
   getMethodsWithAttribute(std::string_view attributeName) override {
     auto query = m_txn.query(m_typeStmts.m_getMethodsWithAttribute);
     query.bindString("@attribute_name", attributeName);
-    std::vector<MethodDeclaration> results;
+    std::vector<MethodPath> results;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
-      results.push_back(MethodDeclaration{
+      results.push_back(MethodPath{
           .m_type = std::string{query.getString(0)},
           .m_method = std::string{query.getString(1)},
           .m_path = folly::fs::path{std::string{query.getString(2)}}});
@@ -1247,7 +1247,9 @@ struct AutoloadDBImpl final : public AutoloadDB {
     XLOGF(DBG9, "Running {}", query.sql());
     return RowIter<PathAndHash>{
         std::move(query), [](SQLiteQuery& q) -> PathAndHash {
-          return {std::string{q.getString(0)}, q.getString(1)};
+          return {
+              .m_path = {std::string{q.getString(0)}},
+              .m_hash = std::string{q.getString(1)}};
         }};
   }
 
@@ -1256,7 +1258,9 @@ struct AutoloadDBImpl final : public AutoloadDB {
     XLOGF(DBG9, "Running {}", query.sql());
     return RowIter<SymbolPath>{
         std::move(query), [](SQLiteQuery& q) -> SymbolPath {
-          return {q.getString(0), {std::string{q.getString(1)}}};
+          return {
+              .m_symbol = std::string{q.getString(0)},
+              .m_path = {std::string{q.getString(1)}}};
         }};
   }
 
@@ -1265,7 +1269,9 @@ struct AutoloadDBImpl final : public AutoloadDB {
     XLOGF(DBG9, "Running {}", query.sql());
     return RowIter<SymbolPath>{
         std::move(query), [](SQLiteQuery& q) -> SymbolPath {
-          return {q.getString(0), {std::string{q.getString(1)}}};
+          return {
+              .m_symbol = std::string{q.getString(0)},
+              .m_path = {std::string{q.getString(1)}}};
         }};
   }
 
@@ -1274,7 +1280,9 @@ struct AutoloadDBImpl final : public AutoloadDB {
     XLOGF(DBG9, "Running {}", query.sql());
     return RowIter<SymbolPath>{
         std::move(query), [](SQLiteQuery& q) -> SymbolPath {
-          return {q.getString(0), {std::string{q.getString(1)}}};
+          return {
+              .m_symbol = std::string{q.getString(0)},
+              .m_path = {std::string{q.getString(1)}}};
         }};
   }
 

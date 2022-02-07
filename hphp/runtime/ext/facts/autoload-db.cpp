@@ -342,6 +342,19 @@ std::string getTransitiveDerivedTypesQueryStr(
       typeKindWhereClause);
 }
 
+/**
+ * Move the given query forward one step. If it's at the end, return none.
+ * Otherwise, call the given function `fn()` on the query to extract a result.
+ */
+template <typename T>
+Optional<T> stepThroughQuery(SQLiteQuery& query, T (*fn)(SQLiteQuery&)) {
+  query.step();
+  if (!query.row()) {
+    return {};
+  }
+  return fn(query);
+}
+
 struct PathStmts {
   explicit PathStmts(SQLite& db)
       : m_insert{db.prepare(
@@ -866,20 +879,22 @@ struct AutoloadDBImpl final : public AutoloadDB {
     return it->second;
   }
 
-  RowIter<DerivedTypeInfo> getTransitiveDerivedTypes(
+  MultiResult<DerivedTypeInfo> getTransitiveDerivedTypes(
       const std::string_view baseType,
       TypeKindMask kinds = kTypeKindAll,
       DeriveKindMask deriveKinds = kDeriveKindAll) override {
     auto query = m_txn.query(getTransitiveDerivedTypesStmt(kinds, deriveKinds));
     query.bindString("@base", baseType);
     XLOGF(DBG9, "Running {}", query.sql());
-    return RowIter<DerivedTypeInfo>{
-        std::move(query), [](SQLiteQuery& query) -> DerivedTypeInfo {
-          return {
-              .m_type = std::string{query.getString(0)},
-              .m_path = {std::string{query.getString(1)}},
-              .m_kind = toTypeKind(query.getString(2)),
-              .m_flags = query.getInt(3)};
+    return MultiResult<DerivedTypeInfo>{
+        [query = std::move(query)]() mutable -> Optional<DerivedTypeInfo> {
+          return stepThroughQuery<DerivedTypeInfo>(query, [](SQLiteQuery& q) {
+            return DerivedTypeInfo{
+                .m_type = std::string{q.getString(0)},
+                .m_path = {std::string{q.getString(1)}},
+                .m_kind = toTypeKind(q.getString(2)),
+                .m_flags = q.getInt(3)};
+          });
         }};
   }
 
@@ -1242,48 +1257,52 @@ struct AutoloadDBImpl final : public AutoloadDB {
     return constants;
   }
 
-  RowIter<PathAndHash> getAllPathsAndHashes() override {
+  MultiResult<PathAndHash> getAllPathsAndHashes() override {
     auto query = m_txn.query(m_pathStmts.m_getAll);
     XLOGF(DBG9, "Running {}", query.sql());
-    return RowIter<PathAndHash>{
-        std::move(query), [](SQLiteQuery& q) -> PathAndHash {
-          return {
-              .m_path = {std::string{q.getString(0)}},
-              .m_hash = std::string{q.getString(1)}};
-        }};
+    return MultiResult<PathAndHash>{[query = std::move(query)]() mutable {
+      return stepThroughQuery<PathAndHash>(query, [](SQLiteQuery& q) {
+        return PathAndHash{
+            .m_path = {std::string{q.getString(0)}},
+            .m_hash = std::string{q.getString(1)}};
+      });
+    }};
   }
 
-  RowIter<SymbolPath> getAllTypePaths() override {
+  MultiResult<SymbolPath> getAllTypePaths() override {
     auto query = m_txn.query(m_typeStmts.m_getAll);
     XLOGF(DBG9, "Running {}", query.sql());
-    return RowIter<SymbolPath>{
-        std::move(query), [](SQLiteQuery& q) -> SymbolPath {
-          return {
-              .m_symbol = std::string{q.getString(0)},
-              .m_path = {std::string{q.getString(1)}}};
-        }};
+    return MultiResult<SymbolPath>{[query = std::move(query)]() mutable {
+      return stepThroughQuery<SymbolPath>(query, [](SQLiteQuery& q) {
+        return SymbolPath{
+            .m_symbol = std::string{q.getString(0)},
+            .m_path = {std::string{q.getString(1)}}};
+      });
+    }};
   }
 
-  RowIter<SymbolPath> getAllFunctionPaths() override {
+  MultiResult<SymbolPath> getAllFunctionPaths() override {
     auto query = m_txn.query(m_functionStmts.m_getAll);
     XLOGF(DBG9, "Running {}", query.sql());
-    return RowIter<SymbolPath>{
-        std::move(query), [](SQLiteQuery& q) -> SymbolPath {
-          return {
-              .m_symbol = std::string{q.getString(0)},
-              .m_path = {std::string{q.getString(1)}}};
-        }};
+    return MultiResult<SymbolPath>{[query = std::move(query)]() mutable {
+      return stepThroughQuery<SymbolPath>(query, [](SQLiteQuery& q) {
+        return SymbolPath{
+            .m_symbol = std::string{q.getString(0)},
+            .m_path = {std::string{q.getString(1)}}};
+      });
+    }};
   }
 
-  RowIter<SymbolPath> getAllConstantPaths() override {
+  MultiResult<SymbolPath> getAllConstantPaths() override {
     auto query = m_txn.query(m_constantStmts.m_getAll);
     XLOGF(DBG9, "Running {}", query.sql());
-    return RowIter<SymbolPath>{
-        std::move(query), [](SQLiteQuery& q) -> SymbolPath {
-          return {
-              .m_symbol = std::string{q.getString(0)},
-              .m_path = {std::string{q.getString(1)}}};
-        }};
+    return MultiResult<SymbolPath>{[query = std::move(query)]() mutable {
+      return stepThroughQuery<SymbolPath>(query, [](SQLiteQuery& q) {
+        return SymbolPath{
+            .m_symbol = std::string{q.getString(0)},
+            .m_path = {std::string{q.getString(1)}}};
+      });
+    }};
   }
 
   void insertClock(const Clock& clock) override {

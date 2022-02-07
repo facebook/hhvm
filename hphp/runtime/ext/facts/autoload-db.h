@@ -23,11 +23,13 @@
 #include <utility>
 #include <vector>
 
+#include <folly/Function.h>
 #include <folly/dynamic.h>
 #include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/util/hash-map.h"
+#include "hphp/util/optional.h"
 #include "hphp/util/sqlite-wrapper.h"
 #include "hphp/util/thread-local.h"
 
@@ -84,7 +86,7 @@ private:
  */
 struct AutoloadDB {
 
-  template <typename TValue> class RowIter;
+  template <typename T> class MultiResult;
 
   AutoloadDB() = default;
   AutoloadDB(const AutoloadDB&) = default;
@@ -176,7 +178,7 @@ struct AutoloadDB {
   virtual std::vector<SymbolPath>
   getDerivedTypes(std::string_view baseType, DeriveKind kind) = 0;
 
-  virtual RowIter<DerivedTypeInfo> getTransitiveDerivedTypes(
+  virtual MultiResult<DerivedTypeInfo> getTransitiveDerivedTypes(
       std::string_view baseType,
       TypeKindMask kinds = kTypeKindAll,
       DeriveKindMask deriveKinds = kDeriveKindAll) = 0;
@@ -276,72 +278,97 @@ struct AutoloadDB {
    *
    * Returns results in the form of a lazy generator.
    */
-  virtual RowIter<PathAndHash> getAllPathsAndHashes() = 0;
+  virtual MultiResult<PathAndHash> getAllPathsAndHashes() = 0;
 
   /**
    * Return a list of all symbols and paths defined in the given root.
    *
    * Returns results in the form of a lazy generator.
    */
-  virtual RowIter<SymbolPath> getAllTypePaths() = 0;
-  virtual RowIter<SymbolPath> getAllFunctionPaths() = 0;
-  virtual RowIter<SymbolPath> getAllConstantPaths() = 0;
+  virtual MultiResult<SymbolPath> getAllTypePaths() = 0;
+  virtual MultiResult<SymbolPath> getAllFunctionPaths() = 0;
+  virtual MultiResult<SymbolPath> getAllConstantPaths() = 0;
 
   virtual void insertClock(const Clock& clock) = 0;
   virtual Clock getClock() = 0;
 
-  template <typename TValue> class RowIter {
+  /**
+   * Lazy generator to return results from the DB.
+   */
+  template <typename T> class MultiResult {
+    /**
+     * Advance the internal iterator by one step, then check if we're at
+     * the end. If we are at the end, return `std::nullopt`. If we
+     * aren't at the end, return the value pointed to by the iterator.
+     */
+    using RowFn = folly::Function<Optional<T>()>;
 
-  public:
-    explicit RowIter(SQLiteQuery&& query, TValue (*fn)(SQLiteQuery&))
-        : m_query{std::move(query)}, m_fn{fn} {
-    }
+    class Iterator {
+      using iterator_category = std::forward_iterator_tag;
+      using difference_type = std::ptrdiff_t;
+      using value_type = T;
+      using pointer = value_type*;
+      using reference = value_type&;
 
-    class iterator : std::iterator<std::input_iterator_tag, TValue> {
     public:
-      iterator(RowIter& container, bool done)
-          : m_container{container}, m_done{done} {
-        ++(*this);
+      Iterator(RowFn& rowFn, bool done) : m_rowFn{rowFn}, m_done{done} {
+        if (!m_done) {
+          m_current = m_rowFn();
+          if (!m_current) {
+            m_done = true;
+          }
+        }
       }
-      iterator& operator++() {
+
+      Iterator& operator++() noexcept {
         if (m_done) {
           return *this;
         }
-        m_container.m_query.step();
-        if (m_container.m_query.done()) {
+        m_current = m_rowFn();
+        if (!m_current) {
           m_done = true;
         }
         return *this;
       }
-      TValue operator*() {
-        return m_container.m_fn(m_container.m_query);
+
+      value_type operator*() {
+        assertx(!m_done);
+        if (!m_current) {
+          m_current = m_rowFn();
+        }
+        return *m_current;
       }
+
       explicit operator bool() const {
-        return !m_done && m_container.m_query.row();
+        return !m_done;
       }
-      bool operator==(const iterator& o) const {
-        return m_done == o.m_done;
+
+      friend bool operator==(const Iterator& a, const Iterator& b) noexcept {
+        return a.m_done == b.m_done;
       }
-      bool operator!=(const iterator& o) const {
-        return !(*this == o);
+      friend bool operator!=(const Iterator& a, const Iterator& b) noexcept {
+        return !(a == b);
       }
 
     private:
-      RowIter& m_container;
-      bool m_done;
+      RowFn& m_rowFn;
+      Optional<T> m_current;
+      bool m_done{false};
     };
 
-    friend class iterator;
-    iterator begin() {
-      return iterator{*this, false};
+  public:
+    explicit MultiResult(RowFn rowFn) : m_rowFn{std::move(rowFn)} {
     }
-    iterator end() {
-      return iterator{*this, true};
+
+    Iterator begin() {
+      return {m_rowFn, false};
+    }
+    Iterator end() {
+      return {m_rowFn, true};
     }
 
   private:
-    SQLiteQuery m_query;
-    TValue (*m_fn)(SQLiteQuery&);
+    RowFn m_rowFn;
   };
 };
 

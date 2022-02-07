@@ -583,47 +583,77 @@ and obj_get_concrete_class_with_member_info
     member_info
   in
   let mem_pos = get_pos member_ in
-  (if shadowed then
-    match old_member_info with
-    | Some
-        { ce_visibility = old_vis; ce_type = (lazy old_member); ce_origin; _ }
-      ->
-      if not (String.equal member_info.ce_origin ce_origin) then
-        Errors.add_typing_error
-          Typing_error.(
-            primary
-            @@ Primary.Ambiguous_object_access
-                 {
-                   pos = id_pos;
-                   name = id_str;
-                   self_pos = get_pos member_;
-                   vis = Typing_defs.string_of_visibility old_vis;
-                   subclass_pos = get_pos old_member;
-                   class_self = self_id;
-                   class_subclass = class_name;
-                 })
-    | _ -> ());
+
+  let shadow_err_opt =
+    Option.bind old_member_info ~f:(fun old_member_info ->
+        if
+          shadowed
+          && not (String.equal member_info.ce_origin old_member_info.ce_origin)
+        then
+          let (lazy old_member) = old_member_info.ce_type in
+          Some
+            Typing_error.(
+              primary
+              @@ Primary.Ambiguous_object_access
+                   {
+                     pos = id_pos;
+                     name = id_str;
+                     self_pos = get_pos member_;
+                     vis =
+                       Typing_defs.string_of_visibility
+                         old_member_info.ce_visibility;
+                     subclass_pos = get_pos old_member;
+                     class_self = self_id;
+                     class_subclass = class_name;
+                   })
+        else
+          None)
+  in
+
+  let vis_err_opts =
+    [
+      TVis.check_obj_access
+        ~is_method:args.is_method
+        ~use_pos:id_pos
+        ~def_pos:mem_pos
+        env
+        vis;
+      TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos ce_deprecated;
+      TVis.check_expression_tree_vis ~use_pos:id_pos ~def_pos:mem_pos env vis;
+      (if args.inst_meth then
+        TVis.check_inst_meth_access ~use_pos:id_pos ~def_pos:mem_pos vis
+      else
+        None);
+      (if
+       args.meth_caller
+       && TypecheckerOptions.meth_caller_only_public_visibility
+            (Env.get_tcopt env)
+      then
+        TVis.check_meth_caller_access ~use_pos:id_pos ~def_pos:mem_pos vis
+      else
+        None);
+    ]
+  in
+
+  let parent_abstract_call_err_opt =
+    if args.is_parent_call && get_ce_abstract member_info then
+      Some
+        Typing_error.(
+          primary
+          @@ Primary.Parent_abstract_call
+               { meth_name = id_str; pos = id_pos; decl_pos = mem_pos })
+    else
+      None
+  in
+
   let typing_errs =
     List.filter_map
       ~f:Fn.id
-      [
-        TVis.check_obj_access
-          ~is_method:args.is_method
-          ~use_pos:id_pos
-          ~def_pos:mem_pos
-          env
-          vis;
-        TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos ce_deprecated;
-        TVis.check_expression_tree_vis ~use_pos:id_pos ~def_pos:mem_pos env vis;
-      ]
+      (shadow_err_opt :: parent_abstract_call_err_opt :: vis_err_opts)
   in
+
   List.iter ~f:Errors.add_typing_error typing_errs;
-  if args.is_parent_call && get_ce_abstract member_info then
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Parent_abstract_call
-             { meth_name = id_str; pos = id_pos; decl_pos = mem_pos });
+
   let member_decl_ty = Typing_enum.member_type env member_info in
   let widen_this = this_appears_covariantly ~contra:true env member_decl_ty in
   let ety_env = mk_ety_env class_info params args.this_ty in
@@ -706,17 +736,7 @@ and obj_get_concrete_class_with_member_info
       (* TODO(T52753871): same as for class_get *)
       (env, member_ty, [], et_enforced)
   in
-  if args.inst_meth then
-    Option.iter
-      ~f:Errors.add_typing_error
-      (TVis.check_inst_meth_access ~use_pos:id_pos ~def_pos:mem_pos vis);
-  if
-    args.meth_caller
-    && TypecheckerOptions.meth_caller_only_public_visibility (Env.get_tcopt env)
-  then
-    Option.iter
-      ~f:Errors.add_typing_error
-      (TVis.check_meth_caller_access ~use_pos:id_pos ~def_pos:mem_pos vis);
+
   let (env, (member_ty, tal)) =
     if Cls.has_upper_bounds_on_this_from_constraints class_info then
       let ((env, (ty, tal), _, _), succeed) =

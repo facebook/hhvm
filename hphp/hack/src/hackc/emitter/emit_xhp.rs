@@ -16,6 +16,7 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     class: &'a Class_,
     class_is_const: bool,
+    class_is_closure: bool,
 ) -> Result<Option<HhasProperty<'arena>>> {
     let initial_value = Some(Expr((), Pos::make_none(), Expr_::mk_null()));
     let property = emit_property::from_ast(
@@ -23,6 +24,7 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
         class,
         &[],
         class_is_const,
+        class_is_closure,
         emit_property::FromAstArgs {
             initial_value: &initial_value,
             visibility: Visibility::Private,

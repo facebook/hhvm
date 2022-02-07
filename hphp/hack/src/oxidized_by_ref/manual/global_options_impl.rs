@@ -58,7 +58,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_check_redundant_generics: false,
     tco_disallow_unresolved_type_variables: false,
     tco_disallow_trait_reuse: false,
-    tco_disallow_invalid_arraykey_constraint: false,
     po_enable_class_level_where_clauses: false,
     po_disable_legacy_soft_typehints: true,
     po_allowed_decl_fixme_codes: i_set::ISet::empty(),

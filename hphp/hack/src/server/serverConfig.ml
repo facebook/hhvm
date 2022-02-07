@@ -391,8 +391,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_disallow_unresolved_type_variables:
         (bool_opt "disallow_unresolved_type_variables" config)
       ?tco_disallow_trait_reuse:(bool_opt "disallow_trait_reuse" config)
-      ?tco_disallow_invalid_arraykey_constraint:
-        (bool_opt "disallow_invalid_arraykey_constraint" config)
       ?po_enable_class_level_where_clauses:
         (bool_opt "class_level_where_clauses" config)
       ?po_disable_legacy_soft_typehints:

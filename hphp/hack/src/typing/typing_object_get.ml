@@ -912,7 +912,7 @@ and nullable_obj_get
     in
     (env, (ty, tal), lval_err, rval_err)
   | None ->
-    let ty_expect =
+    let (ty_expect, err) =
       match deref ety1 with
       | (r, Toption opt_ty) ->
         begin
@@ -940,8 +940,7 @@ and nullable_obj_get
                        ty_name = lazy (Typing_print.error env ety1);
                      })
             in
-            Errors.add_typing_error err;
-            MakeType.nothing Reason.none
+            (MakeType.nothing Reason.none, err)
           | _ ->
             let err =
               Typing_error.(
@@ -963,9 +962,8 @@ and nullable_obj_get
                            `write);
                      })
             in
-            Errors.add_typing_error err;
 
-            MakeType.nothing Reason.none
+            (MakeType.nothing Reason.none, err)
         end
       | (r, _) ->
         let err =
@@ -988,9 +986,9 @@ and nullable_obj_get
                        `write);
                  })
         in
-        Errors.add_typing_error err;
-        MakeType.nothing Reason.none
+        (MakeType.nothing Reason.none, err)
     in
+    Errors.add_typing_error err;
     ( env,
       (TUtils.terr env (get_reason ety1), []),
       Error (ety1, ty_expect),

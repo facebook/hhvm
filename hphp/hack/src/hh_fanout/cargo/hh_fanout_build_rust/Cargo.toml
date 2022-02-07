@@ -17,5 +17,5 @@ deps_rust = { path = "../../../deps/cargo/deps_rust" }
 env_logger = "0.7"
 log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
-parking_lot = { version = "0.11.2", features = ["send_guard"] }
+parking_lot = { version = "0.12.0", features = ["send_guard"] }
 rayon = "1.2"

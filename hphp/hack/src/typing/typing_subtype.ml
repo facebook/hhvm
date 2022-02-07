@@ -3172,6 +3172,64 @@ and add_tyvar_lower_bound_and_close ~coerce (env, prop) var ty on_error =
   in
   (env, prop)
 
+(* Traverse a list of disjuncts and remove obviously redundant ones.
+   t1 <: #1 is considered redundant if t2 <: #1 is also a disjunct and
+   t2 <: t1. It does not preserve the ordering. *)
+and simplify_disj env disj =
+  let rec add_new_lower_bound ~coerce ~constr ty bounds =
+    match bounds with
+    | [] -> [(ty, constr)]
+    | ((bound_ty, _) as b) :: bounds ->
+      if is_sub_type_for_union_i ~coerce env bound_ty ty then
+        b :: bounds
+      else if is_sub_type_for_union_i ~coerce env ty bound_ty then
+        add_new_lower_bound ~coerce ~constr ty bounds
+      else
+        b :: add_new_lower_bound ~coerce ~constr ty bounds
+  in
+  (* Map a type variable to a list of lower bound types. For any two types
+     t1 and t2 in the list, it is not the case that t1 <: t2 or t2 <: t1. *)
+  let lower_bound_map = Hashtbl.Poly.create () in
+  let process_lower_bound ~coerce ~constr ty var =
+    match Hashtbl.find lower_bound_map var with
+    | None -> Hashtbl.set lower_bound_map ~key:var ~data:[(ty, constr)]
+    | Some bounds ->
+      let new_bounds = add_new_lower_bound ~coerce ~constr ty bounds in
+      Hashtbl.set lower_bound_map ~key:var ~data:new_bounds
+  in
+  let rec fill_lower_bound_map disj =
+    match disj with
+    | [] -> []
+    | d :: disj ->
+      (match d with
+      | TL.Conj _ -> d :: fill_lower_bound_map disj
+      | TL.Disj (_, props) -> fill_lower_bound_map (props @ disj)
+      | TL.IsSubtype (ty_sub, ty_super) ->
+        (match get_tyvar_opt ty_super with
+        | Some var_super ->
+          process_lower_bound ~coerce:None ~constr:d ty_sub var_super;
+          fill_lower_bound_map disj
+        | _ -> d :: fill_lower_bound_map disj)
+      | TL.Coerce (cd, ty_sub, ty_super) ->
+        let coerce = Some cd in
+        (match get_node ty_super with
+        | Tvar var_super ->
+          process_lower_bound ~coerce ~constr:d (LoclType ty_sub) var_super;
+          fill_lower_bound_map disj
+        | _ -> d :: fill_lower_bound_map disj))
+  in
+  (* Get the constraints from the table that were not removed, and add them to
+     the remaining constraints that were not of the form we were looking for. *)
+  let rec rebuild_disj remaining to_process =
+    match to_process with
+    | [] -> remaining
+    | (_, bounds) :: to_process ->
+      List.map ~f:(fun (_, c) -> c) bounds @ rebuild_disj remaining to_process
+  in
+  let remaining = fill_lower_bound_map disj in
+  let bounds = Hashtbl.to_alist lower_bound_map in
+  rebuild_disj remaining bounds
+
 and props_to_env pos env remain props on_error =
   match props with
   | [] -> (env, List.rev remain)
@@ -3179,8 +3237,6 @@ and props_to_env pos env remain props on_error =
     (match prop with
     | TL.Conj props' -> props_to_env pos env remain (props' @ props) on_error
     | TL.Disj (f, disj_props) ->
-      if List.length disj_props > 1 then
-        Typing_log.log_prop 1 pos "non-singleton disjunction" env prop;
       (* For now, just find the first prop in the disjunction that works *)
       let rec try_disj disj_props =
         match disj_props with
@@ -3195,7 +3251,23 @@ and props_to_env pos env remain props on_error =
           else
             props_to_env pos env' (remain @ other) props on_error
       in
-      try_disj disj_props
+      let rec log_non_singleton_disj msg props =
+        match props with
+        | [] -> ()
+        | [TL.Disj (_, props)] -> log_non_singleton_disj msg props
+        | [_] -> ()
+        | _ ->
+          Typing_log.log_prop
+            1
+            pos
+            ("non-singleton disjunction " ^ msg)
+            env
+            prop
+      in
+      let simplified_disj_props = simplify_disj env disj_props in
+      log_non_singleton_disj "before simplification" disj_props;
+      log_non_singleton_disj "after simplification" simplified_disj_props;
+      try_disj simplified_disj_props
     | TL.IsSubtype (ty_sub, ty_super) ->
       begin
         match (get_tyvar_opt ty_sub, get_tyvar_opt ty_super) with

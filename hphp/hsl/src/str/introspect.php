@@ -146,7 +146,12 @@ function is_empty(
 function length(
   string $string,
 )[]: int {
-  return _Str\strlen_l($string);
+  // This is functionally equivalent to `Str\length_l()` with the bytes locale,
+  // but HHVM's JIT has specific optimizations for `\strlen()`, and it avoids
+  // the virtual dispatch between the {Byte/Libc/ICU}Ops C++ classes.
+  //
+  // Let's do things the fast way :)
+  return \strlen($string);
 }
 
 /**

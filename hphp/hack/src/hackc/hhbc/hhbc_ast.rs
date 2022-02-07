@@ -195,7 +195,7 @@ pub enum InstructBasic {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
-pub enum TypestructResolveOp {
+pub enum TypeStructResolveOp {
     Resolve,
     DontResolve,
 }
@@ -303,7 +303,7 @@ pub enum InstructOperator<'arena> {
     InstanceOf,
     InstanceOfD(ClassId<'arena>),
     IsLateBoundCls,
-    IsTypeStructC(TypestructResolveOp),
+    IsTypeStructC(TypeStructResolveOp),
     ThrowAsTypeStructException,
     CombineAndResolveTypeStruct(isize),
     Print,
@@ -324,7 +324,7 @@ pub enum InstructOperator<'arena> {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
-pub enum Switchkind {
+pub enum SwitchKind {
     Bounded,
     Unbounded,
 }
@@ -337,7 +337,7 @@ pub enum InstructControlFlow<'arena> {
     JmpZ(Label),
     JmpNZ(Label),
     /// bounded, base, offset vector
-    Switch(Switchkind, isize, BumpSliceMut<'arena, Label>),
+    Switch(SwitchKind, isize, BumpSliceMut<'arena, Label>),
     /// litstr id / offset vector
     SSwitch(BumpSliceMut<'arena, Pair<Str<'arena>, Label>>),
     RetC,
@@ -370,7 +370,7 @@ pub enum InstructGet<'arena> {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
-pub enum IstypeOp {
+pub enum IsTypeOp {
     OpNull,
     OpBool,
     OpInt,
@@ -399,13 +399,13 @@ pub enum InstructIsset<'arena> {
     IssetG,
     IssetS,
     IsUnsetL(Local<'arena>),
-    IsTypeC(IstypeOp),
-    IsTypeL(Local<'arena>, IstypeOp),
+    IsTypeC(IsTypeOp),
+    IsTypeL(Local<'arena>, IsTypeOp),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
-pub enum SetrangeOp {
+pub enum SetRangeOp {
     Forward,
     Reverse,
 }
@@ -432,7 +432,7 @@ pub enum EqOp {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
-pub enum IncdecOp {
+pub enum IncDecOp {
     PreInc,
     PostInc,
     PreDec,
@@ -445,7 +445,7 @@ pub enum IncdecOp {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
-pub enum InitpropOp {
+pub enum InitPropOp {
     Static,
     NonStatic,
 }
@@ -461,13 +461,13 @@ pub enum InstructMutator<'arena> {
     SetOpL(Local<'arena>, EqOp),
     SetOpG(EqOp),
     SetOpS(EqOp),
-    IncDecL(Local<'arena>, IncdecOp),
-    IncDecG(IncdecOp),
-    IncDecS(IncdecOp),
+    IncDecL(Local<'arena>, IncDecOp),
+    IncDecG(IncDecOp),
+    IncDecS(IncDecOp),
     UnsetL(Local<'arena>),
     UnsetG,
     CheckProp(PropId<'arena>),
-    InitProp(PropId<'arena>, InitpropOp),
+    InitProp(PropId<'arena>, InitPropOp),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -514,10 +514,10 @@ pub enum InstructBase<'arena> {
 pub enum InstructFinal<'arena> {
     QueryM(NumParams, QueryOp, MemberKey<'arena>),
     SetM(NumParams, MemberKey<'arena>),
-    IncDecM(NumParams, IncdecOp, MemberKey<'arena>),
+    IncDecM(NumParams, IncDecOp, MemberKey<'arena>),
     SetOpM(NumParams, EqOp, MemberKey<'arena>),
     UnsetM(NumParams, MemberKey<'arena>),
-    SetRangeM(NumParams, isize, SetrangeOp),
+    SetRangeM(NumParams, isize, SetRangeOp),
 }
 
 #[derive(Clone, Debug)]
@@ -706,7 +706,7 @@ pub enum InstructTry {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub struct Srcloc {
+pub struct SrcLoc {
     pub line_begin: isize,
     pub col_begin: isize,
     pub line_end: isize,
@@ -732,7 +732,7 @@ pub enum Instruct<'arena> {
     ILabel(Label),
     ITry(InstructTry),
     IComment(Str<'arena>),
-    ISrcLoc(Srcloc),
+    ISrcLoc(SrcLoc),
     IAsync(AsyncFunctions<'arena>),
     IGenerator(GenCreationExecution),
     IIncludeEvalDefine(InstructIncludeEvalDefine),

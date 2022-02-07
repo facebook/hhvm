@@ -7,10 +7,12 @@ use ast_class_expr::ClassExpr;
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env, Flags as EnvFlags};
 use ffi::{Maybe::Just, Slice, Str};
+use hash::HashSet;
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
 use hhbc_id::{class, r#const, function, method, prop, Id};
 use hhbc_string_utils as string_utils;
+use indexmap::IndexSet;
 use instruction_sequence::{
     instr, unrecoverable,
     Error::{self, Unrecoverable},
@@ -36,11 +38,8 @@ use oxidized::{
 use regex::Regex;
 use runtime::TypedValue;
 use scope::scope;
-use symbol_refs_state::IncludePath;
-
-use hash::HashSet;
-use indexmap::IndexSet;
 use std::{collections::BTreeMap, iter, result::Result as StdResult, str::FromStr};
+use symbol_refs_state::IncludePath;
 
 #[derive(Debug)]
 pub struct EmitJmpResult<'arena> {
@@ -56,7 +55,7 @@ pub struct EmitJmpResult<'arena> {
 pub enum LValOp {
     Set,
     SetOp(EqOp),
-    IncDec(IncdecOp),
+    IncDec(IncDecOp),
     Unset,
 }
 
@@ -310,8 +309,8 @@ pub fn get_type_structure_for_hint<'arena, 'decl>(
     Ok(instr::lit_const(e.alloc, InstructLitConst::Dict(i)))
 }
 
-pub struct Setrange {
-    pub op: SetrangeOp,
+pub struct SetRange {
+    pub op: SetRangeOp,
     pub size: usize,
     pub vec: bool,
 }
@@ -961,7 +960,7 @@ pub fn emit_await<'a, 'arena, 'decl>(
                     instrs,
                     emit_pos(alloc, pos),
                     instr::dup(alloc),
-                    instr::istypec(alloc, IstypeOp::OpNull),
+                    instr::istypec(alloc, IsTypeOp::OpNull),
                     instr::jmpnz(alloc, after_await.clone()),
                     instr::await_(alloc),
                     instr::label(alloc, after_await),
@@ -1763,7 +1762,7 @@ fn emit_call_isset_expr<'a, 'arena, 'decl>(
                     emit_pos(alloc, outer_pos),
                     emit_local(e, env, BareThisOp::NoNotice, lid)?,
                     emit_pos(alloc, outer_pos),
-                    instr::istypec(alloc, IstypeOp::OpNull),
+                    instr::istypec(alloc, IsTypeOp::OpNull),
                     instr::not(alloc),
                 ],
             )
@@ -1779,7 +1778,7 @@ fn emit_call_isset_expr<'a, 'arena, 'decl>(
         alloc,
         vec![
             emit_expr(e, env, expr)?,
-            instr::istypec(alloc, IstypeOp::OpNull),
+            instr::istypec(alloc, IsTypeOp::OpNull),
             instr::not(alloc),
         ],
     ))
@@ -3503,8 +3502,8 @@ fn emit_is<'a, 'arena, 'decl>(
     })
 }
 
-fn istype_op(id: impl AsRef<str>) -> Option<IstypeOp> {
-    use IstypeOp::*;
+fn istype_op(id: impl AsRef<str>) -> Option<IsTypeOp> {
+    use IsTypeOp::*;
     match id.as_ref() {
         "is_int" | "is_integer" | "is_long" => Some(OpInt),
         "is_bool" => Some(OpBool),
@@ -4886,14 +4885,14 @@ fn emit_unop<'a, 'arena, 'decl>(
     }
 }
 
-fn unop_to_incdec_op(opts: &Options, op: &ast_defs::Uop) -> Result<IncdecOp> {
+fn unop_to_incdec_op(opts: &Options, op: &ast_defs::Uop) -> Result<IncDecOp> {
+    use ast_defs::Uop;
     let if_check_or = |op1, op2| Ok(if opts.check_int_overflow() { op1 } else { op2 });
-    use {ast_defs::Uop as U, IncdecOp as I};
     match op {
-        U::Uincr => if_check_or(I::PreIncO, I::PreInc),
-        U::Udecr => if_check_or(I::PreDecO, I::PreDec),
-        U::Upincr => if_check_or(I::PostIncO, I::PostInc),
-        U::Updecr => if_check_or(I::PostDecO, I::PostDec),
+        Uop::Uincr => if_check_or(IncDecOp::PreIncO, IncDecOp::PreInc),
+        Uop::Udecr => if_check_or(IncDecOp::PreDecO, IncDecOp::PreDec),
+        Uop::Upincr => if_check_or(IncDecOp::PostIncO, IncDecOp::PostInc),
+        Uop::Updecr => if_check_or(IncDecOp::PostDecO, IncDecOp::PostDec),
         _ => Err(Unrecoverable("invalid incdec op".into())),
     }
 }
@@ -5156,7 +5155,7 @@ fn emit_null_coalesce_assignment<'a, 'arena, 'decl>(
         vec![
             quiet_instr,
             instr::dup(alloc),
-            instr::istypec(alloc, IstypeOp::OpNull),
+            instr::istypec(alloc, IsTypeOp::OpNull),
             instr::jmpnz(alloc, do_set_label),
             instr::popl(alloc, l_nonnull),
             emit_popc_n(querym_n_unpopped),
@@ -5252,7 +5251,7 @@ fn emit_binop<'a, 'arena, 'decl>(
                 vec![
                     emit_quiet_expr(e, env, pos, e1, false)?.0,
                     instr::dup(alloc),
-                    instr::istypec(alloc, IstypeOp::OpNull),
+                    instr::istypec(alloc, IsTypeOp::OpNull),
                     instr::not(alloc),
                     instr::jmpnz(alloc, end_label),
                     instr::popc(alloc),
@@ -5332,8 +5331,8 @@ fn emit_as<'a, 'arena, 'decl>(
                     ts_instrs,
                     instr::setl(alloc, type_struct_local),
                     match resolve {
-                        TypestructResolveOp::Resolve => instr::is_type_structc_resolve(alloc),
-                        TypestructResolveOp::DontResolve => {
+                        TypeStructResolveOp::Resolve => instr::is_type_structc_resolve(alloc),
+                        TypeStructResolveOp::DontResolve => {
                             instr::is_type_structc_dontresolve(alloc)
                         }
                     },
@@ -5359,10 +5358,10 @@ fn emit_as<'a, 'arena, 'decl>(
         let i2 = if is_static {
             main_block(
                 get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
-                TypestructResolveOp::Resolve,
+                TypeStructResolveOp::Resolve,
             )
         } else {
-            main_block(ts_instrs, TypestructResolveOp::DontResolve)
+            main_block(ts_instrs, TypeStructResolveOp::DontResolve)
         };
         let i1 = emit_expr(e, env, expr)?;
         Ok(InstrSeq::gather(
@@ -5437,7 +5436,7 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     pos: &Pos,
     name: &str,
-    kind: Setrange,
+    kind: SetRange,
     args: &[(ParamKind, ast::Expr)],
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
@@ -5493,7 +5492,7 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
                     (base_stack + cls_stack)
                         .try_into()
                         .expect("StackIndex overflow"),
-                    kind.size.try_into().expect("Setrange size overflow"),
+                    kind.size.try_into().expect("SetRange size overflow"),
                     kind.op,
                 )),
             ),
@@ -7011,7 +7010,7 @@ pub fn emit_is_null<'a, 'arena, 'decl>(
             return Ok(instr::istypel(
                 alloc,
                 get_local(e, env, pos, local_id::get_name(id))?,
-                IstypeOp::OpNull,
+                IsTypeOp::OpNull,
             ));
         }
     }
@@ -7020,7 +7019,7 @@ pub fn emit_is_null<'a, 'arena, 'decl>(
         alloc,
         vec![
             emit_expr(e, env, expr)?,
-            instr::istypec(alloc, IstypeOp::OpNull),
+            instr::istypec(alloc, IsTypeOp::OpNull),
         ],
     ))
 }

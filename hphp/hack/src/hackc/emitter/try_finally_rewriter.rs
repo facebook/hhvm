@@ -5,16 +5,14 @@
 
 use crate::emit_statement::Level;
 use crate::reified_generics_helpers as reified;
+use bitflags::bitflags;
 use emit_pos::emit_pos;
 use env::{emitter::Emitter, jump_targets as jt, Env};
 use hhbc_ast::{self as hhbc_ast, Instruct};
+use indexmap::IndexSet;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
-
 use oxidized::pos::Pos;
-
-use bitflags::bitflags;
-use indexmap::IndexSet;
 use std::collections::BTreeMap;
 
 type LabelMap<'a, 'arena> = BTreeMap<label::Id, &'a Instruct<'arena>>;
@@ -166,7 +164,7 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
                                 alloc,
                                 vec![
                                     instr::dup(alloc),
-                                    instr::istypec(alloc, hhbc_ast::IstypeOp::OpNull),
+                                    instr::istypec(alloc, hhbc_ast::IsTypeOp::OpNull),
                                 ],
                             );
                             reified::simplify_verify_type(

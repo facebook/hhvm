@@ -1452,8 +1452,8 @@ fn print_final(w: &mut dyn Write, f: &InstructFinal<'_>) -> Result<()> {
             print_int(w, &(*s as usize))?;
             w.write_all(b" ")?;
             w.write_all(match op {
-                SetrangeOp::Forward => b"Forward",
-                SetrangeOp::Reverse => b"Reverse",
+                SetRangeOp::Forward => b"Forward",
+                SetRangeOp::Reverse => b"Reverse",
             })
         }
     }
@@ -1486,8 +1486,8 @@ fn print_isset(w: &mut dyn Write, isset: &InstructIsset<'_>) -> Result<()> {
     }
 }
 
-fn print_istype_op(w: &mut dyn Write, op: &IstypeOp) -> Result<()> {
-    use IstypeOp as Op;
+fn print_istype_op(w: &mut dyn Write, op: &IsTypeOp) -> Result<()> {
+    use IsTypeOp as Op;
     match op {
         Op::OpNull => w.write_all(b"Null"),
         Op::OpBool => w.write_all(b"Bool"),
@@ -1575,8 +1575,8 @@ fn print_mutator(w: &mut dyn Write, mutator: &InstructMutator<'_>) -> Result<()>
             print_prop_id(w, id)?;
             w.write_all(b" ")?;
             match op {
-                InitpropOp::Static => w.write_all(b"Static"),
-                InitpropOp::NonStatic => w.write_all(b"NonStatic"),
+                InitPropOp::Static => w.write_all(b"Static"),
+                InitPropOp::NonStatic => w.write_all(b"NonStatic"),
             }?;
             w.write_all(b" ")
         }
@@ -1613,16 +1613,16 @@ fn print_readonly_op(w: &mut dyn Write, op: &ReadonlyOp) -> Result<()> {
     })
 }
 
-fn print_incdec_op(w: &mut dyn Write, op: &IncdecOp) -> Result<()> {
+fn print_incdec_op(w: &mut dyn Write, op: &IncDecOp) -> Result<()> {
     w.write_all(match op {
-        IncdecOp::PreInc => b"PreInc",
-        IncdecOp::PostInc => b"PostInc",
-        IncdecOp::PreDec => b"PreDec",
-        IncdecOp::PostDec => b"PostDec",
-        IncdecOp::PreIncO => b"PreIncO",
-        IncdecOp::PostIncO => b"PostIncO",
-        IncdecOp::PreDecO => b"PreDecO",
-        IncdecOp::PostDecO => b"PostDecO",
+        IncDecOp::PreInc => b"PreInc",
+        IncDecOp::PostInc => b"PostInc",
+        IncDecOp::PreDec => b"PreDec",
+        IncDecOp::PostDec => b"PostDec",
+        IncDecOp::PreIncO => b"PreIncO",
+        IncDecOp::PostIncO => b"PostIncO",
+        IncDecOp::PreDecO => b"PreDecO",
+        IncDecOp::PostDecO => b"PostDecO",
     })
 }
 
@@ -1838,14 +1838,14 @@ fn print_control_flow(w: &mut dyn Write, cf: &InstructControlFlow<'_>) -> Result
 
 fn print_switch(
     w: &mut dyn Write,
-    kind: &Switchkind,
+    kind: &SwitchKind,
     base: &isize,
     labels: &[Label],
 ) -> Result<()> {
     w.write_all(b"Switch ")?;
     w.write_all(match kind {
-        Switchkind::Bounded => b"Bounded ",
-        Switchkind::Unbounded => b"Unbounded ",
+        SwitchKind::Bounded => b"Bounded ",
+        SwitchKind::Unbounded => b"Unbounded ",
     })?;
     w.write_all(base.to_string().as_bytes())?;
     w.write_all(b" ")?;
@@ -2005,8 +2005,8 @@ fn print_op(w: &mut dyn Write, op: &InstructOperator<'_>) -> Result<()> {
             [
                 "IsTypeStructC",
                 match op {
-                    TypestructResolveOp::Resolve => "Resolve",
-                    TypestructResolveOp::DontResolve => "DontResolve",
+                    TypeStructResolveOp::Resolve => "Resolve",
+                    TypeStructResolveOp::DontResolve => "DontResolve",
                 },
             ],
         ),

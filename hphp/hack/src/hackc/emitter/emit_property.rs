@@ -7,7 +7,7 @@ use env::{emitter::Emitter, Env};
 use ffi::Maybe::*;
 use hhas_property::HhasProperty;
 use hhas_type::{constraint, HhasTypeInfo};
-use hhbc_ast::InitpropOp;
+use hhbc_ast::InitPropOp;
 use hhbc_id::{prop, Id};
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
@@ -122,7 +122,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
                             emit_pos::emit_pos_then(
                                 alloc,
                                 &class.span,
-                                instr::initprop(alloc, pid, InitpropOp::Static),
+                                instr::initprop(alloc, pid, InitPropOp::Static),
                             ),
                         )
                     } else if args.visibility.is_private() {
@@ -131,7 +131,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
                             emit_pos::emit_pos_then(
                                 alloc,
                                 &class.span,
-                                instr::initprop(alloc, pid, InitpropOp::NonStatic),
+                                instr::initprop(alloc, pid, InitPropOp::NonStatic),
                             ),
                         )
                     } else {
@@ -148,7 +148,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
                                 alloc,
                                 vec![
                                     emit_pos::emit_pos(alloc, &class.span),
-                                    instr::initprop(alloc, pid, InitpropOp::NonStatic),
+                                    instr::initprop(alloc, pid, InitPropOp::NonStatic),
                                     instr::label(alloc, label),
                                 ],
                             ),

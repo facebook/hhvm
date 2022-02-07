@@ -445,7 +445,7 @@ pub mod instr {
         instr(alloc, Instruct::IOp(InstructOperator::IsLateBoundCls))
     }
 
-    pub fn istypestructc<'a>(alloc: &'a bumpalo::Bump, mode: TypestructResolveOp) -> InstrSeq<'a> {
+    pub fn istypestructc<'a>(alloc: &'a bumpalo::Bump, mode: TypeStructResolveOp) -> InstrSeq<'a> {
         instr(alloc, Instruct::IOp(InstructOperator::IsTypeStructC(mode)))
     }
 
@@ -529,11 +529,11 @@ pub mod instr {
         instr(alloc, Instruct::IMisc(InstructMisc::This))
     }
 
-    pub fn istypec<'a>(alloc: &'a bumpalo::Bump, op: IstypeOp) -> InstrSeq<'a> {
+    pub fn istypec<'a>(alloc: &'a bumpalo::Bump, op: IsTypeOp) -> InstrSeq<'a> {
         instr(alloc, Instruct::IIsset(InstructIsset::IsTypeC(op)))
     }
 
-    pub fn istypel<'a>(alloc: &'a bumpalo::Bump, id: Local<'a>, op: IstypeOp) -> InstrSeq<'a> {
+    pub fn istypel<'a>(alloc: &'a bumpalo::Bump, id: Local<'a>, op: IsTypeOp) -> InstrSeq<'a> {
         instr(alloc, Instruct::IIsset(InstructIsset::IsTypeL(id, op)))
     }
 
@@ -636,18 +636,18 @@ pub mod instr {
         instr(alloc, Instruct::IMutator(InstructMutator::UnsetG))
     }
 
-    pub fn incdecl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>, op: IncdecOp) -> InstrSeq<'a> {
+    pub fn incdecl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>, op: IncDecOp) -> InstrSeq<'a> {
         instr(
             alloc,
             Instruct::IMutator(InstructMutator::IncDecL(local, op)),
         )
     }
 
-    pub fn incdecg<'a>(alloc: &'a bumpalo::Bump, op: IncdecOp) -> InstrSeq<'a> {
+    pub fn incdecg<'a>(alloc: &'a bumpalo::Bump, op: IncDecOp) -> InstrSeq<'a> {
         instr(alloc, Instruct::IMutator(InstructMutator::IncDecG(op)))
     }
 
-    pub fn incdecs<'a>(alloc: &'a bumpalo::Bump, op: IncdecOp) -> InstrSeq<'a> {
+    pub fn incdecs<'a>(alloc: &'a bumpalo::Bump, op: IncDecOp) -> InstrSeq<'a> {
         instr(alloc, Instruct::IMutator(InstructMutator::IncDecS(op)))
     }
 
@@ -746,7 +746,7 @@ pub mod instr {
         instr(alloc, Instruct::IMutator(InstructMutator::PopL(l)))
     }
 
-    pub fn initprop<'a>(alloc: &'a bumpalo::Bump, pid: PropId<'a>, op: InitpropOp) -> InstrSeq<'a> {
+    pub fn initprop<'a>(alloc: &'a bumpalo::Bump, pid: PropId<'a>, op: InitPropOp) -> InstrSeq<'a> {
         instr(
             alloc,
             Instruct::IMutator(InstructMutator::InitProp(pid, op)),
@@ -788,7 +788,7 @@ pub mod instr {
         instr(
             alloc,
             Instruct::IContFlow(InstructControlFlow::Switch(
-                Switchkind::Unbounded,
+                SwitchKind::Unbounded,
                 0,
                 BumpSliceMut::new(alloc, labels.into_bump_slice_mut()),
             )),
@@ -1232,7 +1232,7 @@ pub mod instr {
     pub fn incdecm<'a>(
         alloc: &'a bumpalo::Bump,
         num_params: NumParams,
-        op: IncdecOp,
+        op: IncDecOp,
         key: MemberKey<'a>,
     ) -> InstrSeq<'a> {
         instr(
@@ -1556,7 +1556,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ISrcLoc(Srcloc {
+            Instruct::ISrcLoc(SrcLoc {
                 line_begin,
                 line_end,
                 col_begin,
@@ -1569,7 +1569,7 @@ pub mod instr {
         instr(
             alloc,
             Instruct::IOp(InstructOperator::IsTypeStructC(
-                TypestructResolveOp::Resolve,
+                TypeStructResolveOp::Resolve,
             )),
         )
     }
@@ -1578,7 +1578,7 @@ pub mod instr {
         instr(
             alloc,
             Instruct::IOp(InstructOperator::IsTypeStructC(
-                TypestructResolveOp::DontResolve,
+                TypeStructResolveOp::DontResolve,
             )),
         )
     }

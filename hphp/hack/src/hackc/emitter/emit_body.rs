@@ -19,7 +19,7 @@ use hash::HashSet;
 use hhas_body::{HhasBody, HhasBodyEnv};
 use hhas_param::HhasParam;
 use hhas_type::HhasTypeInfo;
-use hhbc_ast::{FcallArgs, FcallFlags, Instruct, IstypeOp, ParamId};
+use hhbc_ast::{FcallArgs, FcallFlags, Instruct, IsTypeOp, ParamId};
 use hhbc_id::function;
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{instr, unrecoverable, Error, InstrSeq, Result};
@@ -631,7 +631,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                                 let check = instr::istypel(
                                     alloc,
                                     Local::Named(Str::new_str(alloc, param.name.unsafe_as_str())),
-                                    IstypeOp::OpNull,
+                                    IsTypeOp::OpNull,
                                 );
                                 let verify_instr = instr::verify_param_type_ts(alloc, param_name());
                                 RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)

@@ -3,23 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::try_finally_rewriter as tfr;
-
-use emit_expression::{self as emit_expr, emit_await, emit_expr, LValOp, Setrange};
-
+use emit_expression::{self as emit_expr, emit_await, emit_expr, LValOp, SetRange};
 use emit_pos::{emit_pos, emit_pos_then};
 use env::{emitter::Emitter, Env};
+use ffi::{Maybe, Slice, Str};
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
 use hhbc_id::Id;
 use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use label::Label;
-
-use local::Local;
-use scope::scope;
-use statement_state::StatementState;
-
-use ffi::{Maybe, Slice, Str};
 use lazy_static::lazy_static;
+use local::Local;
 use naming_special_names_rust::{special_functions, special_idents, superglobals};
 use oxidized::{
     aast as a, ast,
@@ -28,6 +22,8 @@ use oxidized::{
     pos::Pos,
 };
 use regex::Regex;
+use scope::scope;
+use statement_state::StatementState;
 
 // Expose a mutable ref to state for emit_body so that it can set it appropriately
 pub(crate) fn set_state<'arena, 'decl>(
@@ -56,7 +52,7 @@ fn is_readonly_expr(e: &ast::Expr) -> bool {
     }
 }
 
-fn set_bytes_kind(name: &str) -> Option<Setrange> {
+fn set_bytes_kind(name: &str) -> Option<SetRange> {
     lazy_static! {
         static ref RE: Regex =
             Regex::new(r#"(?i)^hh\\set_bytes(_rev)?_([a-z0-9]+)(_vec)?$"#).unwrap();
@@ -64,14 +60,14 @@ fn set_bytes_kind(name: &str) -> Option<Setrange> {
     RE.captures(name).and_then(|groups| {
         let op = if groups.get(1).is_some() {
             // == _rev
-            SetrangeOp::Reverse
+            SetRangeOp::Reverse
         } else {
-            SetrangeOp::Forward
+            SetRangeOp::Forward
         };
         let kind = groups.get(2).unwrap().as_str();
         let vec = groups.get(3).is_some(); // == _vec
         if kind == "string" && !vec {
-            Some(Setrange {
+            Some(SetRange {
                 size: 1,
                 vec: true,
                 op,
@@ -84,7 +80,7 @@ fn set_bytes_kind(name: &str) -> Option<Setrange> {
                 "int64" | "float64" => 8,
                 _ => return None,
             };
-            Some(Setrange { size, vec, op })
+            Some(SetRange { size, vec, op })
         }
     })
 }
@@ -382,7 +378,7 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
                     vec![
                         instr::pushl(alloc, *l),
                         instr::dup(alloc),
-                        instr::istypec(alloc, IstypeOp::OpNull),
+                        instr::istypec(alloc, IsTypeOp::OpNull),
                         instr::jmpnz(alloc, label_done),
                         instr::whresult(alloc),
                         instr::label(alloc, label_done),
@@ -1158,7 +1154,7 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
                 instr::await_(alloc),
                 instr::label(alloc, async_eager_label),
                 instr::dup(alloc),
-                instr::istypec(alloc, IstypeOp::OpNull),
+                instr::istypec(alloc, IsTypeOp::OpNull),
                 instr::jmpnz(alloc, pop_and_exit_label),
                 emit_foreach_await_key_value_storage(e, env, iterator)?,
                 loop_body_instr,

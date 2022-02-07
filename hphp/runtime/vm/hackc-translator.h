@@ -18,11 +18,21 @@
 
 #include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs"
 #include "hphp/hack/src/hackc/hhbc-ast.h"
+#include "hphp/runtime/vm/native-func-table.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
-namespace HPHP::hackc::hhbc {
+namespace HPHP {
 
-inline const HhasProgram* hhasProgramRaw(const ::rust::Box<HhasProgramWrapper>& program) {
-  return (const HhasProgram*)(&(*program));
+inline const hackc::hhbc::HhasProgram* hhasProgramRaw(const ::rust::Box<HhasProgramWrapper>& program) {
+  return (const hackc::hhbc::HhasProgram*)(&(*program));
 }
+
+std::unique_ptr<UnitEmitter> unitEmitterFromHhasProgram(
+  const hackc::hhbc::HhasProgram& prog,
+  const char* filename,
+	const SHA1& sha1,
+  const Native::FuncTable& nativeFuncs,
+  const std::string& hhasString
+);
 
 }

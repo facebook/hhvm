@@ -109,7 +109,6 @@ namespace Trace {
       TM(dispatchBB)    \
       TM(ehframe)       \
       TM(emitter)       \
-      TM(extern_compiler) \
       TM(facts)         \
       TM(fixup)         \
       TM(fr)            \
@@ -196,10 +195,12 @@ namespace Trace {
       TM(targetcache)   \
       TM(tcspace)       \
       TM(trans)         \
+      TM(translate)     \
       TM(treadmill)     \
       TM(txdeps)        \
       TM(txlease)       \
       TM(typeProfile)   \
+      TM(unit_parse)    \
       TM(unwind)        \
       TM(ustubs)        \
       TM(vasm)          \

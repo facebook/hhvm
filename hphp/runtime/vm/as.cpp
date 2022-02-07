@@ -3330,10 +3330,7 @@ void parse_constant(AsmState& as) {
   as.in.skipWhitespace();
 
   Constant constant;
-  Attr attrs = parse_attribute_list(as, AttrContext::Constant);
-  if (!SystemLib::s_inited) {
-    attrs |= AttrPersistent;
-  }
+  Attr attrs = SystemLib::s_inited ? AttrNone : AttrPersistent;
 
   std::string name;
   if (!as.in.readword(name)) {

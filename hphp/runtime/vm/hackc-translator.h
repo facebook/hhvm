@@ -23,6 +23,10 @@
 
 namespace HPHP {
 
+struct TranslationFatal : std::runtime_error {
+  explicit TranslationFatal(const std::string& msg) : std::runtime_error(msg) {}
+};
+
 inline const hackc::hhbc::HhasProgram* hhasProgramRaw(const ::rust::Box<HhasProgramWrapper>& program) {
   return (const hackc::hhbc::HhasProgram*)(&(*program));
 }

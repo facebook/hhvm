@@ -23,6 +23,13 @@ module Phase = Typing_phase
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
 
+let mk_ety_env class_info paraml this_ty =
+  {
+    empty_expand_env with
+    this_ty;
+    substs = TUtils.make_locl_subst_for_class_tparams class_info paraml;
+  }
+
 let mk_intersection_err env errs_res =
   Result.fold
     errs_res
@@ -343,370 +350,19 @@ let rec obj_get_concrete_ty args env concrete_ty (id_pos, id_str) on_error =
   let default ?(lval_err = dflt_lval_err) ?(rval_err = dflt_rval_err) () =
     (env, (Typing_utils.mk_tany env id_pos, []), lval_err, rval_err)
   in
-  let mk_ety_env class_info paraml =
-    {
-      empty_expand_env with
-      this_ty = args.this_ty;
-      substs = TUtils.make_locl_subst_for_class_tparams class_info paraml;
-    }
-  in
   let read_context = Option.is_none args.coerce_from_ty in
   let (env, concrete_ty) = Env.expand_type env concrete_ty in
   match deref concrete_ty with
-  | (r, Tclass (x, _, paraml)) ->
-    let get_member_from_constraints env class_info =
-      let ety_env = mk_ety_env class_info paraml in
-      let upper_bounds = Cls.upper_bounds_on_this class_info in
-      let (env, upper_bounds) =
-        List.map_env env upper_bounds ~f:(fun env up ->
-            Phase.localize ~ety_env env up)
-      in
-      let (env, inter_ty) =
-        Inter.intersect_list env (Reason.Rwitness id_pos) upper_bounds
-      in
-      obj_get_inner
-        {
-          args with
-          nullsafe = None;
-          obj_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos;
-          is_nonnull = true;
-        }
-        env
-        inter_ty
-        (id_pos, id_str)
-        on_error
-    in
-    begin
-      match Env.get_class env (snd x) with
-      | None -> default ()
-      | Some class_info ->
-        let paraml =
-          if List.is_empty paraml then
-            List.map (Cls.tparams class_info) ~f:(fun _ ->
-                Typing_utils.mk_tany env id_pos)
-          else
-            paraml
-        in
-        let old_member_info =
-          Env.get_member args.is_method env class_info id_str
-        in
-        let self_id = Option.value (Env.get_self_id env) ~default:"" in
-        let (member_info, shadowed) =
-          if
-            Cls.has_ancestor class_info self_id
-            || Cls.requires_ancestor class_info self_id
-          then
-            (* We look up the current context to see if there is a field/method with
-             * private visibility. If there is one, that one takes precedence *)
-            match Env.get_self_class env with
-            | None -> (old_member_info, false)
-            | Some self_class ->
-              (match Env.get_member args.is_method env self_class id_str with
-              | Some { ce_visibility = Vprivate _; _ } as member_info ->
-                (member_info, true)
-              | _ -> (old_member_info, false))
-          else
-            (old_member_info, false)
-        in
-        begin
-          match member_info with
-          | None when Cls.has_upper_bounds_on_this_from_constraints class_info
-            ->
-            Errors.try_with_error
-              (fun () -> get_member_from_constraints env class_info)
-              (fun () ->
-                member_not_found
-                  env
-                  id_pos
-                  ~is_method:args.is_method
-                  class_info
-                  id_str
-                  r
-                  on_error;
-                let ty_nothing = MakeType.nothing Reason.none in
-                default ~lval_err:(Error (concrete_ty, ty_nothing)) ())
-          | None when not args.is_method ->
-            let lval_err =
-              if not (SN.Members.is_special_xhp_attribute id_str) then (
-                member_not_found
-                  env
-                  id_pos
-                  ~is_method:args.is_method
-                  class_info
-                  id_str
-                  r
-                  on_error;
-                let ty_nothing = MakeType.nothing Reason.none in
-                Error (concrete_ty, ty_nothing)
-              ) else
-                dflt_lval_err
-            in
-            default ~lval_err ()
-          | None when String.equal id_str SN.Members.__clone ->
-            (* Create a `public function __clone()[]: void {}` for classes that don't declare __clone *)
-            let ft =
-              {
-                ft_arity = Fstandard;
-                ft_tparams = [];
-                ft_where_constraints = [];
-                ft_params = [];
-                ft_implicit_params =
-                  { capability = CapTy (MakeType.intersection Reason.Rnone []) };
-                ft_ret =
-                  {
-                    et_type = MakeType.void Reason.Rnone;
-                    et_enforced = Unenforced;
-                  };
-                ft_flags = 0;
-                ft_ifc_decl = default_ifc_fun_decl;
-              }
-            in
-            (env, (mk (Reason.Rnone, Tfun ft), []), dflt_lval_err, dflt_rval_err)
-          | None when String.equal id_str SN.Members.__construct ->
-            (* __construct is not an instance method and shouldn't be invoked directly *)
-            let () =
-              Errors.add_nast_check_error
-              @@ Nast_check_error.Magic { pos = id_pos; meth_name = id_str }
-            in
-            default ()
-          | None ->
-            member_not_found
-              env
-              id_pos
-              ~is_method:args.is_method
-              class_info
-              id_str
-              r
-              on_error;
-            let ty_nothing = MakeType.nothing Reason.none in
-            default ~lval_err:(Error (concrete_ty, ty_nothing)) ()
-          | Some
-              ({
-                 ce_visibility = vis;
-                 ce_type = (lazy member_);
-                 ce_deprecated;
-                 _;
-               } as member_ce) ->
-            let mem_pos = get_pos member_ in
-            (if shadowed then
-              match old_member_info with
-              | Some
-                  {
-                    ce_visibility = old_vis;
-                    ce_type = (lazy old_member);
-                    ce_origin;
-                    _;
-                  } ->
-                if not (String.equal member_ce.ce_origin ce_origin) then
-                  Errors.add_typing_error
-                    Typing_error.(
-                      primary
-                      @@ Primary.Ambiguous_object_access
-                           {
-                             pos = id_pos;
-                             name = id_str;
-                             self_pos = get_pos member_;
-                             vis = Typing_defs.string_of_visibility old_vis;
-                             subclass_pos = get_pos old_member;
-                             class_self = self_id;
-                             class_subclass = snd x;
-                           })
-              | _ -> ());
-            let typing_errs =
-              List.filter_map
-                ~f:Fn.id
-                [
-                  TVis.check_obj_access
-                    ~is_method:args.is_method
-                    ~use_pos:id_pos
-                    ~def_pos:mem_pos
-                    env
-                    vis;
-                  TVis.check_deprecated
-                    ~use_pos:id_pos
-                    ~def_pos:mem_pos
-                    ce_deprecated;
-                  TVis.check_expression_tree_vis
-                    ~use_pos:id_pos
-                    ~def_pos:mem_pos
-                    env
-                    vis;
-                ]
-            in
-            List.iter ~f:Errors.add_typing_error typing_errs;
-            if args.is_parent_call && get_ce_abstract member_ce then
-              Errors.add_typing_error
-                Typing_error.(
-                  primary
-                  @@ Primary.Parent_abstract_call
-                       { meth_name = id_str; pos = id_pos; decl_pos = mem_pos });
-            let member_decl_ty = Typing_enum.member_type env member_ce in
-            let widen_this =
-              this_appears_covariantly ~contra:true env member_decl_ty
-            in
-            let ety_env = mk_ety_env class_info paraml in
-            let (env, member_ty, tal, et_enforced) =
-              match deref member_decl_ty with
-              | (r, Tfun ft) when args.is_method ->
-                (* We special case function types here to be able to pass explicit type
-                 * parameters. *)
-                let (env, explicit_targs) =
-                  Phase.localize_targs
-                    ~check_well_kinded:true
-                    ~is_method:args.is_method
-                    ~use_pos:id_pos
-                    ~def_pos:mem_pos
-                    ~use_name:(strip_ns id_str)
-                    env
-                    ft.ft_tparams
-                    (List.map ~f:snd args.explicit_targs)
-                in
-                let ft =
-                  Typing_enforceability.compute_enforced_and_pessimize_fun_type
-                    env
-                    ft
-                in
-                let (env, ft1) =
-                  Phase.(
-                    localize_ft
-                      ~instantiation:
-                        {
-                          use_name = strip_ns id_str;
-                          use_pos = id_pos;
-                          explicit_targs;
-                        }
-                      ~ety_env:
-                        {
-                          ety_env with
-                          on_error = Typing_error.Reasons_callback.ignore_error;
-                        }
-                      ~def_pos:mem_pos
-                      env
-                      ft)
-                in
-                let ft_ty1 =
-                  Typing_dynamic.relax_method_type
-                    env
-                    (get_ce_support_dynamic_type member_ce)
-                    r
-                    ft1
-                in
-                let (env, ft_ty) =
-                  if widen_this then
-                    let ety_env =
-                      { ety_env with this_ty = args.this_ty_conjunct }
-                    in
-                    let (env, ft2) =
-                      Phase.(
-                        localize_ft
-                          ~instantiation:
-                            {
-                              use_name = strip_ns id_str;
-                              use_pos = id_pos;
-                              explicit_targs;
-                            }
-                          ~ety_env:
-                            {
-                              ety_env with
-                              on_error =
-                                Typing_error.Reasons_callback.ignore_error;
-                            }
-                          ~def_pos:mem_pos
-                          env
-                          ft)
-                    in
-                    let ft_ty2 = mk (Typing_reason.localize r, Tfun ft2) in
-                    Inter.intersect_list
-                      env
-                      (Typing_reason.localize r)
-                      [ft_ty1; ft_ty2]
-                  else
-                    (env, ft_ty1)
-                in
-                (env, ft_ty, explicit_targs, Unenforced)
-              | _ ->
-                let is_xhp_attr = Option.is_some (get_ce_xhp_attr member_ce) in
-                let { et_type; et_enforced } =
-                  Typing_enforceability.compute_enforced_and_pessimize_ty
-                    env
-                    member_decl_ty
-                    ~explicitly_untrusted:is_xhp_attr
-                in
-                let (env, member_ty) = Phase.localize ~ety_env env et_type in
-                (* TODO(T52753871): same as for class_get *)
-                (env, member_ty, [], et_enforced)
-            in
-            if args.inst_meth then
-              Option.iter
-                ~f:Errors.add_typing_error
-                (TVis.check_inst_meth_access
-                   ~use_pos:id_pos
-                   ~def_pos:mem_pos
-                   vis);
-            if
-              args.meth_caller
-              && TypecheckerOptions.meth_caller_only_public_visibility
-                   (Env.get_tcopt env)
-            then
-              Option.iter
-                ~f:Errors.add_typing_error
-                (TVis.check_meth_caller_access
-                   ~use_pos:id_pos
-                   ~def_pos:mem_pos
-                   vis);
-            let (env, (member_ty, tal)) =
-              if Cls.has_upper_bounds_on_this_from_constraints class_info then
-                let ((env, (ty, tal), _, _), succeed) =
-                  Errors.try_
-                    (fun () ->
-                      (get_member_from_constraints env class_info, true))
-                    (fun _ ->
-                      (* No eligible functions found in constraints *)
-                      ( ( env,
-                          (MakeType.mixed Reason.Rnone, []),
-                          dflt_lval_err,
-                          dflt_rval_err ),
-                        false ))
-                in
-                if succeed then
-                  let (env, member_ty) =
-                    Inter.intersect env ~r:(Reason.Rwitness id_pos) member_ty ty
-                  in
-                  (env, (member_ty, tal))
-                else
-                  (env, (member_ty, tal))
-              else
-                (env, (member_ty, tal))
-            in
-            let eff () =
-              let open Typing_env_types in
-              if env.in_support_dynamic_type_method_check then
-                Typing_log.log_pessimise_prop env mem_pos id_str
-            in
-            let (env, rval_err) =
-              Option.value_map
-                args.coerce_from_ty
-                ~default:(env, dflt_rval_err)
-                ~f:(fun (p, ur, ty) ->
-                  Result.fold
-                    ~ok:(fun env -> (env, Some (Ok ty)))
-                    ~error:(fun env -> (env, Some (Error (ty, member_ty))))
-                  @@ Typing_coercion.coerce_type_res
-                       p
-                       ur
-                       env
-                       ty
-                       { et_type = member_ty; et_enforced }
-                       Typing_error.Callback.(
-                         (with_side_effect
-                            ~eff
-                            unify_error [@alert "-deprecated"])))
-            in
-            (env, (member_ty, tal), dflt_lval_err, rval_err)
-        end
-        (* match member_info *)
-    end
-  (* match Env.get_class env (snd x) *)
+  | (r, Tclass ((_, class_name), _, paraml)) ->
+    obj_get_concrete_class
+      args
+      env
+      concrete_ty
+      (id_pos, id_str)
+      r
+      class_name
+      paraml
+      on_error
   | (_, Tdynamic) ->
     (if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
       (* Any access to a *private* member through dynamic might potentially
@@ -812,6 +468,348 @@ let rec obj_get_concrete_ty args env concrete_ty (id_pos, id_str) on_error =
     let lval_err = Error (concrete_ty, ty_nothing) in
     default ~lval_err ()
 
+and obj_get_concrete_class
+    args env concrete_ty (id_pos, id_str) reason class_name params on_error =
+  let dflt_rval_err =
+    Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
+  and dflt_lval_err = Ok concrete_ty in
+
+  let default ?(lval_err = dflt_lval_err) ?(rval_err = dflt_rval_err) () =
+    (env, (Typing_utils.mk_tany env id_pos, []), lval_err, rval_err)
+  in
+
+  let get_member_from_constraints env class_info =
+    let ety_env = mk_ety_env class_info params args.this_ty in
+    let upper_bounds = Cls.upper_bounds_on_this class_info in
+    let (env, upper_bounds) =
+      List.map_env env upper_bounds ~f:(fun env up ->
+          Phase.localize ~ety_env env up)
+    in
+    let (env, inter_ty) =
+      Inter.intersect_list env (Reason.Rwitness id_pos) upper_bounds
+    in
+    obj_get_inner
+      {
+        args with
+        nullsafe = None;
+        obj_pos = Reason.to_pos reason |> Pos_or_decl.unsafe_to_raw_pos;
+        is_nonnull = true;
+      }
+      env
+      inter_ty
+      (id_pos, id_str)
+      on_error
+  in
+  match Env.get_class env class_name with
+  | None -> default ()
+  | Some class_info ->
+    let params =
+      if List.is_empty params then
+        List.map (Cls.tparams class_info) ~f:(fun _ ->
+            Typing_utils.mk_tany env id_pos)
+      else
+        params
+    in
+    let old_member_info = Env.get_member args.is_method env class_info id_str in
+    let self_id = Option.value (Env.get_self_id env) ~default:"" in
+    let (member_info, shadowed) =
+      if
+        Cls.has_ancestor class_info self_id
+        || Cls.requires_ancestor class_info self_id
+      then
+        (* We look up the current context to see if there is a field/method with
+         * private visibility. If there is one, that one takes precedence *)
+        match Env.get_self_class env with
+        | None -> (old_member_info, false)
+        | Some self_class ->
+          (match Env.get_member args.is_method env self_class id_str with
+          | Some { ce_visibility = Vprivate _; _ } as member_info ->
+            (member_info, true)
+          | _ -> (old_member_info, false))
+      else
+        (old_member_info, false)
+    in
+    begin
+      match member_info with
+      | None when Cls.has_upper_bounds_on_this_from_constraints class_info ->
+        Errors.try_with_error
+          (fun () -> get_member_from_constraints env class_info)
+          (fun () ->
+            member_not_found
+              env
+              id_pos
+              ~is_method:args.is_method
+              class_info
+              id_str
+              reason
+              on_error;
+            let ty_nothing = MakeType.nothing Reason.none in
+            default ~lval_err:(Error (concrete_ty, ty_nothing)) ())
+      | None when not args.is_method ->
+        let lval_err =
+          if not (SN.Members.is_special_xhp_attribute id_str) then (
+            member_not_found
+              env
+              id_pos
+              ~is_method:args.is_method
+              class_info
+              id_str
+              reason
+              on_error;
+            let ty_nothing = MakeType.nothing Reason.none in
+            Error (concrete_ty, ty_nothing)
+          ) else
+            dflt_lval_err
+        in
+        default ~lval_err ()
+      | None when String.equal id_str SN.Members.__clone ->
+        (* Create a `public function __clone()[]: void {}` for classes that don't declare __clone *)
+        let ft =
+          {
+            ft_arity = Fstandard;
+            ft_tparams = [];
+            ft_where_constraints = [];
+            ft_params = [];
+            ft_implicit_params =
+              { capability = CapTy (MakeType.intersection Reason.Rnone []) };
+            ft_ret =
+              { et_type = MakeType.void Reason.Rnone; et_enforced = Unenforced };
+            ft_flags = 0;
+            ft_ifc_decl = default_ifc_fun_decl;
+          }
+        in
+        (env, (mk (Reason.Rnone, Tfun ft), []), dflt_lval_err, dflt_rval_err)
+      | None when String.equal id_str SN.Members.__construct ->
+        (* __construct is not an instance method and shouldn't be invoked directly *)
+        let () =
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Magic { pos = id_pos; meth_name = id_str }
+        in
+        default ()
+      | None ->
+        member_not_found
+          env
+          id_pos
+          ~is_method:args.is_method
+          class_info
+          id_str
+          reason
+          on_error;
+        let ty_nothing = MakeType.nothing Reason.none in
+        default ~lval_err:(Error (concrete_ty, ty_nothing)) ()
+      | Some
+          ({ ce_visibility = vis; ce_type = (lazy member_); ce_deprecated; _ }
+          as member_ce) ->
+        let mem_pos = get_pos member_ in
+        (if shadowed then
+          match old_member_info with
+          | Some
+              {
+                ce_visibility = old_vis;
+                ce_type = (lazy old_member);
+                ce_origin;
+                _;
+              } ->
+            if not (String.equal member_ce.ce_origin ce_origin) then
+              Errors.add_typing_error
+                Typing_error.(
+                  primary
+                  @@ Primary.Ambiguous_object_access
+                       {
+                         pos = id_pos;
+                         name = id_str;
+                         self_pos = get_pos member_;
+                         vis = Typing_defs.string_of_visibility old_vis;
+                         subclass_pos = get_pos old_member;
+                         class_self = self_id;
+                         class_subclass = class_name;
+                       })
+          | _ -> ());
+        let typing_errs =
+          List.filter_map
+            ~f:Fn.id
+            [
+              TVis.check_obj_access
+                ~is_method:args.is_method
+                ~use_pos:id_pos
+                ~def_pos:mem_pos
+                env
+                vis;
+              TVis.check_deprecated
+                ~use_pos:id_pos
+                ~def_pos:mem_pos
+                ce_deprecated;
+              TVis.check_expression_tree_vis
+                ~use_pos:id_pos
+                ~def_pos:mem_pos
+                env
+                vis;
+            ]
+        in
+        List.iter ~f:Errors.add_typing_error typing_errs;
+        if args.is_parent_call && get_ce_abstract member_ce then
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Parent_abstract_call
+                   { meth_name = id_str; pos = id_pos; decl_pos = mem_pos });
+        let member_decl_ty = Typing_enum.member_type env member_ce in
+        let widen_this =
+          this_appears_covariantly ~contra:true env member_decl_ty
+        in
+        let ety_env = mk_ety_env class_info params args.this_ty in
+        let (env, member_ty, tal, et_enforced) =
+          match deref member_decl_ty with
+          | (r, Tfun ft) when args.is_method ->
+            (* We special case function types here to be able to pass explicit type
+             * parameters. *)
+            let (env, explicit_targs) =
+              Phase.localize_targs
+                ~check_well_kinded:true
+                ~is_method:args.is_method
+                ~use_pos:id_pos
+                ~def_pos:mem_pos
+                ~use_name:(strip_ns id_str)
+                env
+                ft.ft_tparams
+                (List.map ~f:snd args.explicit_targs)
+            in
+            let ft =
+              Typing_enforceability.compute_enforced_and_pessimize_fun_type
+                env
+                ft
+            in
+            let (env, ft1) =
+              Phase.(
+                localize_ft
+                  ~instantiation:
+                    {
+                      use_name = strip_ns id_str;
+                      use_pos = id_pos;
+                      explicit_targs;
+                    }
+                  ~ety_env:
+                    {
+                      ety_env with
+                      on_error = Typing_error.Reasons_callback.ignore_error;
+                    }
+                  ~def_pos:mem_pos
+                  env
+                  ft)
+            in
+            let ft_ty1 =
+              Typing_dynamic.relax_method_type
+                env
+                (get_ce_support_dynamic_type member_ce)
+                r
+                ft1
+            in
+            let (env, ft_ty) =
+              if widen_this then
+                let ety_env =
+                  { ety_env with this_ty = args.this_ty_conjunct }
+                in
+                let (env, ft2) =
+                  Phase.(
+                    localize_ft
+                      ~instantiation:
+                        {
+                          use_name = strip_ns id_str;
+                          use_pos = id_pos;
+                          explicit_targs;
+                        }
+                      ~ety_env:
+                        {
+                          ety_env with
+                          on_error = Typing_error.Reasons_callback.ignore_error;
+                        }
+                      ~def_pos:mem_pos
+                      env
+                      ft)
+                in
+                let ft_ty2 = mk (Typing_reason.localize r, Tfun ft2) in
+                Inter.intersect_list
+                  env
+                  (Typing_reason.localize r)
+                  [ft_ty1; ft_ty2]
+              else
+                (env, ft_ty1)
+            in
+            (env, ft_ty, explicit_targs, Unenforced)
+          | _ ->
+            let is_xhp_attr = Option.is_some (get_ce_xhp_attr member_ce) in
+            let { et_type; et_enforced } =
+              Typing_enforceability.compute_enforced_and_pessimize_ty
+                env
+                member_decl_ty
+                ~explicitly_untrusted:is_xhp_attr
+            in
+            let (env, member_ty) = Phase.localize ~ety_env env et_type in
+            (* TODO(T52753871): same as for class_get *)
+            (env, member_ty, [], et_enforced)
+        in
+        if args.inst_meth then
+          Option.iter
+            ~f:Errors.add_typing_error
+            (TVis.check_inst_meth_access ~use_pos:id_pos ~def_pos:mem_pos vis);
+        if
+          args.meth_caller
+          && TypecheckerOptions.meth_caller_only_public_visibility
+               (Env.get_tcopt env)
+        then
+          Option.iter
+            ~f:Errors.add_typing_error
+            (TVis.check_meth_caller_access ~use_pos:id_pos ~def_pos:mem_pos vis);
+        let (env, (member_ty, tal)) =
+          if Cls.has_upper_bounds_on_this_from_constraints class_info then
+            let ((env, (ty, tal), _, _), succeed) =
+              Errors.try_
+                (fun () -> (get_member_from_constraints env class_info, true))
+                (fun _ ->
+                  (* No eligible functions found in constraints *)
+                  ( ( env,
+                      (MakeType.mixed Reason.Rnone, []),
+                      dflt_lval_err,
+                      dflt_rval_err ),
+                    false ))
+            in
+            if succeed then
+              let (env, member_ty) =
+                Inter.intersect env ~r:(Reason.Rwitness id_pos) member_ty ty
+              in
+              (env, (member_ty, tal))
+            else
+              (env, (member_ty, tal))
+          else
+            (env, (member_ty, tal))
+        in
+        let eff () =
+          let open Typing_env_types in
+          if env.in_support_dynamic_type_method_check then
+            Typing_log.log_pessimise_prop env mem_pos id_str
+        in
+        let (env, rval_err) =
+          Option.value_map
+            args.coerce_from_ty
+            ~default:(env, dflt_rval_err)
+            ~f:(fun (p, ur, ty) ->
+              Result.fold
+                ~ok:(fun env -> (env, Some (Ok ty)))
+                ~error:(fun env -> (env, Some (Error (ty, member_ty))))
+              @@ Typing_coercion.coerce_type_res
+                   p
+                   ur
+                   env
+                   ty
+                   { et_type = member_ty; et_enforced }
+                   Typing_error.Callback.(
+                     (with_side_effect ~eff unify_error [@alert "-deprecated"])))
+        in
+        (env, (member_ty, tal), dflt_lval_err, rval_err)
+    end
+  (* match member_info *)
+
+(* match Env.get_class env (snd x) *)
 and nullable_obj_get
     args env ety1 ((id_pos, id_str) as id) on_error ~read_context ty =
   let dflt_rval_err =

@@ -6,7 +6,6 @@
 
 use bumpalo::Bump;
 
-use direct_decl_parser;
 use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
 use ocamlrep_caml_builtins::Int64;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
@@ -110,7 +109,7 @@ fn parse_ast_and_decls<'a>(
     ParsedFile<'a>,
 ) {
     stack_limit::with_elastic_stack(|stack_limit| {
-        ast_and_decl_parser::from_text(&env, &indexed_source_text, arena, Some(stack_limit))
+        ast_and_decl_parser::from_text(env, indexed_source_text, arena, Some(stack_limit))
     })
     .expect("Expression recursion limit reached")
 }

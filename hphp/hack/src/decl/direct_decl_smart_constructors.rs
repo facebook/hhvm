@@ -165,10 +165,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         let mut qualified_name = String::with_capacity_in(len, self.arena);
         for part in parts {
             match part {
-                Node::Name(&(name, _pos)) => qualified_name.push_str(&name),
+                Node::Name(&(name, _pos)) => qualified_name.push_str(name),
                 Node::Token(t) if t.kind() == TokenKind::Backslash => qualified_name.push('\\'),
                 &Node::ListItem(&(Node::Name(&(name, _)), _backslash)) => {
-                    qualified_name.push_str(&name);
+                    qualified_name.push_str(name);
                     qualified_name.push_str("\\");
                 }
                 &Node::ListItem(&(Node::Token(t), _backslash))
@@ -362,15 +362,13 @@ fn concat<'a>(arena: &'a Bump, str1: &str, str2: &str) -> &'a str {
 }
 
 fn strip_dollar_prefix<'a>(name: &'a str) -> &'a str {
-    name.trim_start_matches("$")
+    name.trim_start_matches('$')
 }
 
 const TANY_: Ty_<'_> = Ty_::Tany(oxidized_by_ref::tany_sentinel::TanySentinel);
 const TANY: &Ty<'_> = &Ty(Reason::none(), TANY_);
 
-fn tany() -> &'static Ty<'static> {
-    TANY
-}
+const NO_POS: &Pos<'_> = Pos::none();
 
 fn default_ifc_fun_decl<'a>() -> IfcFunDecl<'a> {
     IfcFunDecl::FDPolicied(Some("PUBLIC"))
@@ -513,7 +511,7 @@ impl<'a> NamespaceBuilder<'a> {
             .expect("Attempted to get the current import map, but namespace stack was empty");
         let aliased_name = aliased_name.unwrap_or_else(|| {
             name.rsplit_terminator('\\')
-                .nth(0)
+                .next()
                 .expect("Expected at least one entry in import name")
         });
         let name = name.trim_end_matches('\\');
@@ -1066,10 +1064,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         pos2: impl Into<Option<&'a Pos<'a>>>,
     ) -> &'a Pos<'a> {
         match (pos1.into(), pos2.into()) {
-            (None, None) => Pos::none(),
+            (None, None) => NO_POS,
             (Some(pos), None) | (None, Some(pos)) => pos,
             (Some(pos1), Some(pos2)) => match (pos1.is_none(), pos2.is_none()) {
-                (true, true) => Pos::none(),
+                (true, true) => NO_POS,
                 (true, false) => pos2,
                 (false, true) => pos1,
                 (false, false) => Pos::merge_without_checking_filename(self.arena, pos1, pos2),
@@ -1082,13 +1080,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     }
 
     fn pos_from_slice(&self, nodes: &[Node<'a>]) -> &'a Pos<'a> {
-        nodes.iter().fold(Pos::none(), |acc, &node| {
-            self.merge(acc, self.get_pos(node))
-        })
+        nodes
+            .iter()
+            .fold(NO_POS, |acc, &node| self.merge(acc, self.get_pos(node)))
     }
 
     fn get_pos(&self, node: Node<'a>) -> &'a Pos<'a> {
-        self.get_pos_opt(node).unwrap_or(Pos::none())
+        self.get_pos_opt(node).unwrap_or(NO_POS)
     }
 
     fn get_pos_opt(&self, node: Node<'a>) -> Option<&'a Pos<'a>> {
@@ -1102,7 +1100,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             | Node::StringLiteral(&(_, pos))
             | Node::BooleanLiteral(&(_, pos)) => pos,
             Node::ListItem(&(fst, snd)) => self.merge_positions(fst, snd),
-            Node::List(items) => self.pos_from_slice(&items),
+            Node::List(items) => self.pos_from_slice(items),
             Node::BracketedList(&(first_pos, inner_list, second_pos)) => self.merge(
                 first_pos,
                 self.merge(self.pos_from_slice(inner_list), second_pos),
@@ -1409,7 +1407,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         // Iterate in reverse, to match the behavior of OCaml decl in error conditions.
         for attribute in nodes.iter().rev() {
             if let Node::Attribute(attribute) = attribute {
-                match attribute.name.1.as_ref() {
+                match attribute.name.1 {
                     "__Deprecated" => {
                         attributes.deprecated = attribute
                             .string_literal_params
@@ -1525,7 +1523,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     }
 
     fn ret_from_fun_kind(&self, kind: FunKind, type_: &'a Ty<'a>) -> &'a Ty<'a> {
-        let pos = type_.get_pos().unwrap_or_else(|| Pos::none());
+        let pos = type_.get_pos().unwrap_or(NO_POS);
         match kind {
             FunKind::FAsyncGenerator => self.alloc(Ty(
                 self.alloc(Reason::RretFunKindFromDecl(self.alloc((pos, kind)))),
@@ -1592,7 +1590,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             (true, _) => self.expect_name(header.name),
             (false, _) => self.elaborate_defined_id(header.name),
         };
-        let id = id_opt.unwrap_or(Id(self.get_pos(header.name), ""));
+        let id = id_opt.unwrap_or_else(|| Id(self.get_pos(header.name), ""));
         let (params, properties, arity) = self.as_fun_params(header.param_list)?;
         let f_pos = self.get_pos(header.name);
         let implicit_params = self.as_fun_implicit_params(header.capability, f_pos);
@@ -1627,12 +1625,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             } else {
                 FunKind::FGenerator
             }
+        } else if async_ {
+            FunKind::FAsync
         } else {
-            if async_ {
-                FunKind::FAsync
-            } else {
-                FunKind::FSync
-            }
+            FunKind::FSync
         };
         let type_ = if !header.ret_hint.is_present() {
             self.ret_from_fun_kind(fun_kind, type_)
@@ -2048,8 +2044,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         // the name with the current namespace (as it does for any
         // Tapply). We need to remove it.
         match id.1.rsplit('\\').next() {
-            Some(name) if self.is_type_param_in_scope(name) => return Some(name),
-            _ => return None,
+            Some(name) if self.is_type_param_in_scope(name) => Some(name),
+            _ => None,
         }
     }
 
@@ -2177,18 +2173,18 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 });
                 Ty(ty.0, Ty_::Tfun(ft))
             }
-            Ty_::Tlike(ref t) => Ty(
+            Ty_::Tlike(t) => Ty(
                 ty.0,
                 Ty_::Tlike(self.alloc(self.rewrite_fun_ctx(tparams, t, param_name))),
             ),
-            Ty_::Toption(ref t) => Ty(
+            Ty_::Toption(t) => Ty(
                 ty.0,
                 Ty_::Toption(self.alloc(self.rewrite_fun_ctx(tparams, t, param_name))),
             ),
             Ty_::Tapply(((p, name), targs))
                 if *name == naming_special_names::typehints::HH_SUPPORTDYN =>
             {
-                if let Some(ref t) = targs.first() {
+                if let Some(t) = targs.first() {
                     Ty(
                         ty.0,
                         Ty_::Tapply(self.alloc((
@@ -2283,8 +2279,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 Ty_::Taccess(self.alloc(TaccessType(ty, cst))),
             ));
             let left_id = (
-                context_reason.pos().unwrap_or(Pos::none()),
-                self.ctx_generic_for_dependent(name, &cst.1),
+                context_reason.pos().unwrap_or(NO_POS),
+                self.ctx_generic_for_dependent(name, cst.1),
             );
             tparams.push(tp(left_id, &[]));
             let left = self.alloc(Ty(
@@ -2351,8 +2347,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 }
                 Ty_::Taccess(&TaccessType(t, cst)) if Self::taccess_root_is_generic(t) => {
                     let left_id = (
-                        context_ty.0.pos().unwrap_or(Pos::none()),
-                        self.ctx_generic_for_generic_taccess(t, &cst.1),
+                        context_ty.0.pos().unwrap_or(NO_POS),
+                        self.ctx_generic_for_generic_taccess(t, cst.1),
                     );
                     tparams.push(tp(left_id, &[]));
                     let left = self.alloc(Ty(
@@ -2391,11 +2387,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 Ty_::Taccess(&TaccessType(Ty(_, Ty_::Tapply(((_, name), &[]))), cst))
                     if name.starts_with('$') =>
                 {
-                    let name = self.ctx_generic_for_dependent(name, &cst.1);
+                    let name = self.ctx_generic_for_dependent(name, cst.1);
                     Ty_::Tgeneric(self.alloc((name, &[])))
                 }
                 Ty_::Taccess(&TaccessType(t, cst)) if Self::taccess_root_is_generic(t) => {
-                    let name = self.ctx_generic_for_generic_taccess(t, &cst.1);
+                    let name = self.ctx_generic_for_generic_taccess(t, cst.1);
                     Ty_::Tgeneric(self.alloc((name, &[])))
                 }
                 _ => return ty,
@@ -2581,7 +2577,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
                 self.arena,
             ) {
-                Ok(text) => Node::StringLiteral(self.alloc((text.into(), token_pos(self)))),
+                Ok(text) => Node::StringLiteral(self.alloc((text, token_pos(self)))),
                 Err(_) => Node::Ignored(SK::Token(kind)),
             },
             TokenKind::HeredocStringLiteral => match escaper::unescape_heredoc_in(
@@ -2589,7 +2585,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 self.arena,
             ) {
                 Ok(text) if !self.retain_or_omit_user_attributes_for_facts => {
-                    Node::StringLiteral(self.alloc((text.into(), token_pos(self))))
+                    Node::StringLiteral(self.alloc((text, token_pos(self))))
                 }
                 _ => Node::Ignored(SK::Token(kind)),
             },
@@ -2971,7 +2967,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             Some(id) => id,
             None => return Node::Ignored(SK::GenericTypeSpecifier),
         };
-        match class_id.1.trim_start_matches("\\") {
+        match class_id.1.trim_start_matches('\\') {
             "varray_or_darray" | "vec_or_dict" => {
                 let id_pos = class_id.0;
                 let pos = self.merge(id_pos, self.get_pos(type_arguments));
@@ -3191,7 +3187,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
     ) -> Self::R {
         let user_attributes = match user_attributes {
             Node::BracketedList((_, attributes, _)) => {
-                self.slice(attributes.into_iter().filter_map(|x| match x {
+                self.slice(attributes.iter().filter_map(|x| match x {
                     Node::Attribute(a) => Some(*a),
                     _ => None,
                 }))
@@ -3245,8 +3241,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let mut tparams_with_name = Vec::with_capacity_in(size, self.arena);
         let mut tparam_names = MultiSetMut::with_capacity_in(size, self.arena);
         for node in tparams.iter() {
-            match node {
-                &Node::TypeParameter(decl) => {
+            match *node {
+                Node::TypeParameter(decl) => {
                     let name = match decl.name.as_id() {
                         Some(name) => name,
                         None => return Node::Ignored(SK::TypeParameters),
@@ -3388,7 +3384,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 let deprecated = parsed_attributes.deprecated.map(|msg| {
                     let mut s = String::new_in(self.arena);
                     s.push_str("The function ");
-                    s.push_str(name.trim_start_matches("\\"));
+                    s.push_str(name.trim_start_matches('\\'));
                     s.push_str(" is deprecated: ");
                     s.push_str(msg);
                     s.into_bump_str()
@@ -3448,17 +3444,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                         // "\\HH\\Contexts\\cipp" rather than
                         // "\\HH\\Contexts\\Unsafe\\cipp").
                         let name = match name.trim_end_matches('\\').split('\\').next_back() {
-                            Some(ctxname) => {
-                                if let Some(first_char) = ctxname.chars().nth(0) {
-                                    if first_char.is_lowercase() {
-                                        self.concat("\\HH\\Contexts\\", ctxname)
-                                    } else {
-                                        name
-                                    }
-                                } else {
-                                    name
+                            Some(ctxname) => match ctxname.chars().next() {
+                                Some(first_char) if first_char.is_lowercase() => {
+                                    self.concat("\\HH\\Contexts\\", ctxname)
                                 }
-                            }
+                                Some(_) | None => name,
+                            },
                             None => name,
                         };
                         Some(self.alloc(Ty(ty.0, Ty_::Tapply(self.alloc(((pos, name), targs))))))
@@ -3558,7 +3549,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                             };
                             let ty = ty
                                 .or_else(|| self.infer_const(name, initializer))
-                                .unwrap_or_else(|| tany());
+                                .unwrap_or(TANY);
                             Some(Node::Const(self.alloc(
                                 shallow_decl_defs::ShallowClassConst {
                                     abstract_,
@@ -3735,13 +3726,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         right_type: Self::R,
     ) -> Self::R {
         Node::WhereConstraint(self.alloc(WhereConstraint(
-            self.node_to_ty(left_type).unwrap_or_else(|| tany()),
+            self.node_to_ty(left_type).unwrap_or(TANY),
             match operator.token_kind() {
                 Some(TokenKind::Equal) => ConstraintKind::ConstraintEq,
                 Some(TokenKind::Super) => ConstraintKind::ConstraintSuper,
                 _ => ConstraintKind::ConstraintAs,
             },
-            self.node_to_ty(right_type).unwrap_or_else(|| tany()),
+            self.node_to_ty(right_type).unwrap_or(TANY),
         )))
     }
 
@@ -3816,8 +3807,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
         let mut user_attributes_len = 0;
         for attribute in attributes.iter() {
-            match attribute {
-                &Node::Attribute(..) => user_attributes_len += 1,
+            match *attribute {
+                Node::Attribute(..) => user_attributes_len += 1,
                 _ => {}
             }
         }
@@ -3881,7 +3872,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let mut user_attributes = Vec::with_capacity_in(user_attributes_len, self.arena);
         for attribute in attributes.iter() {
             match attribute {
-                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(&attr)),
+                Node::Attribute(attr) => user_attributes.push(self.user_attribute_to_decl(attr)),
                 _ => {}
             }
         }
@@ -3923,7 +3914,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 },
                 Node::List(&const_nodes @ [Node::Const(..), ..]) => {
                     for node in const_nodes {
-                        if let &Node::Const(decl) = node {
+                        if let Node::Const(decl) = *node {
                             consts.push(decl)
                         }
                     }
@@ -4204,10 +4195,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             .iter()
             .next()
             .and_then(|node| self.node_to_ty(*node))
-            .and_then(|node_ty| {
+            .map(|node_ty| {
                 let pos = self.merge_positions(enum_keyword, right_brace);
                 let ty_ = node_ty.1;
-                Some(self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_)))
+                self.alloc(Ty(self.alloc(Reason::hint(pos)), ty_))
             });
         let mut values = Vec::new_in(self.arena);
         for node in xhp_enum_values.iter() {
@@ -4227,7 +4218,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
         match ty {
             Some(ty) => {
-                Node::XhpEnumTy(self.alloc((self.get_pos_opt(like), &ty, values.into_bump_slice())))
+                Node::XhpEnumTy(self.alloc((self.get_pos_opt(like), ty, values.into_bump_slice())))
             }
             None => Node::Ignored(SK::XHPEnumType),
         }
@@ -4390,14 +4381,14 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let extends = match self.node_to_ty(self.make_apply(
             (self.get_pos(name), "\\HH\\BuiltinEnum"),
             name,
-            Pos::none(),
+            NO_POS,
         )) {
             Some(ty) => ty,
             None => return Node::Ignored(SK::EnumDeclaration),
         };
         let key = id.1;
-        let consts = self.slice(enumerators.iter().filter_map(|node| match node {
-            &Node::Const(const_) => Some(const_),
+        let consts = self.slice(enumerators.iter().filter_map(|node| match *node {
+            Node::Const(const_) => Some(const_),
             _ => None,
         }));
         let mut user_attributes = Vec::with_capacity_in(attributes.len(), self.arena);
@@ -4569,8 +4560,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             self.alloc(Ty(self.alloc(Reason::hint(pos)), builtin_enum_ty_))
         };
 
-        let consts = self.slice(elements.iter().filter_map(|node| match node {
-            &Node::Const(const_) => Some(const_),
+        let consts = self.slice(elements.iter().filter_map(|node| match *node {
+            Node::Const(const_) => Some(const_),
             _ => None,
         }));
 
@@ -4753,7 +4744,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         let fields_iter = fields.iter();
         let mut fields = AssocListMut::new_in(self.arena);
         for node in fields_iter {
-            if let &Node::ShapeFieldSpecifier(&ShapeFieldNode { name, type_ }) = node {
+            if let Node::ShapeFieldSpecifier(&ShapeFieldNode { name, type_ }) = *node {
                 fields.insert(self.make_t_shape_field_name(name), type_)
             }
         }
@@ -4976,13 +4967,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 if self.retain_or_omit_user_attributes_for_facts =>
             {
                 Some(ClassNameParam {
-                    name: Id(Pos::none(), self.str_from_utf8_for_bytes_in_arena(*name)),
+                    name: Id(NO_POS, self.str_from_utf8_for_bytes_in_arena(*name)),
                     full_pos,
                 })
             }
             Node::IntLiteral((name, full_pos)) if self.retain_or_omit_user_attributes_for_facts => {
                 Some(ClassNameParam {
-                    name: Id(Pos::none(), name),
+                    name: Id(NO_POS, name),
                     full_pos,
                 })
             }
@@ -4994,11 +4985,11 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             _ => false,
         } {
             fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut Vec<'a, u8>) {
-                match expr {
-                    &aast::Expr(_, _, aast::Expr_::String(val)) => acc.extend_from_slice(val),
-                    &aast::Expr(_, _, aast::Expr_::Binop(&(Bop::Dot, e1, e2))) => {
-                        fold_string_concat(&e1, acc);
-                        fold_string_concat(&e2, acc);
+                match *expr {
+                    aast::Expr(_, _, aast::Expr_::String(val)) => acc.extend_from_slice(val),
+                    aast::Expr(_, _, aast::Expr_::Binop(&(Bop::Dot, e1, e2))) => {
+                        fold_string_concat(e1, acc);
+                        fold_string_concat(e2, acc);
                     }
                     _ => {}
                 }
@@ -5105,7 +5096,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 name: None,
                 type_: self.alloc(PossiblyEnforcedTy {
                     enforced: Enforcement::Unenforced,
-                    type_: self.node_to_ty(fp.hint).unwrap_or_else(|| tany()),
+                    type_: self.node_to_ty(fp.hint).unwrap_or(TANY),
                 }),
                 flags,
             })
@@ -5214,15 +5205,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 super_constraint: None,
                 default: type_,
             }))
+        } else if let Some(tc_type) = type_ {
+            // Concrete type constant:
+            //     const type T = Z;
+            Typeconst::TCConcrete(self.alloc(ConcreteTypeconst { tc_type }))
         } else {
-            if let Some(t) = type_ {
-                // Concrete type constant:
-                //     const type T = Z;
-                Typeconst::TCConcrete(self.alloc(ConcreteTypeconst { tc_type: t }))
-            } else {
-                // concrete or type constant requires a value
-                return Node::Ignored(SK::TypeConstDeclaration);
-            }
+            // concrete or type constant requires a value
+            return Node::Ignored(SK::TypeConstDeclaration);
         };
         let name = match name.as_id() {
             Some(name) => name,
@@ -5233,7 +5222,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             kind,
             enforceable: match attributes.enforceable {
                 Some(pos) => (pos, true),
-                None => (Pos::none(), false),
+                None => (NO_POS, false),
             },
             reifiable: attributes.reifiable,
             is_ctx: false,
@@ -5280,18 +5269,16 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 super_constraint,
                 default: context,
             }))
+        } else if let Some(tc_type) = context {
+            Typeconst::TCConcrete(self.alloc(ConcreteTypeconst { tc_type }))
         } else {
-            if let Some(tc_type) = context {
-                Typeconst::TCConcrete(self.alloc(ConcreteTypeconst { tc_type }))
-            } else {
-                /* Concrete type const must have a value */
-                return Node::Ignored(SK::TypeConstDeclaration);
-            }
+            /* Concrete type const must have a value */
+            return Node::Ignored(SK::TypeConstDeclaration);
         };
         Node::TypeConstant(self.alloc(ShallowTypeconst {
             name: name.into(),
             kind,
-            enforceable: (Pos::none(), false),
+            enforceable: (NO_POS, false),
             reifiable: None,
             is_ctx: true,
         }))

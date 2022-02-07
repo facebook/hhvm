@@ -320,7 +320,7 @@ impl<R: Reason> Allocator<R> {
         }
     }
 
-    pub fn shallow_class(
+    fn shallow_class(
         &self,
         sc: &obr::shallow_decl_defs::ClassDecl<'_>,
     ) -> shallow::ShallowClass<R> {
@@ -359,7 +359,7 @@ impl<R: Reason> Allocator<R> {
         }
     }
 
-    pub fn fun_decl(&self, sf: &obr::shallow_decl_defs::FunDecl<'_>) -> shallow::FunDecl<R> {
+    fn fun_decl(&self, sf: &obr::shallow_decl_defs::FunDecl<'_>) -> shallow::FunDecl<R> {
         shallow::FunDecl {
             pos: self.pos_from_decl(sf.pos),
             ty: self.ty_from_decl(sf.type_),
@@ -369,5 +369,26 @@ impl<R: Reason> Allocator<R> {
             php_std_lib: sf.php_std_lib,
             support_dynamic_type: sf.support_dynamic_type,
         }
+    }
+
+    #[allow(unreachable_code)]
+    pub fn decl(&self, decl: (&str, obr::shallow_decl_defs::Decl<'_>)) -> shallow::Decl<R> {
+        use obr::shallow_decl_defs::Decl as Obr;
+        use shallow::Decl;
+        match decl {
+            (name, Obr::Class(x)) => {
+                Decl::Class(TypeName(self.symbol(name)), self.shallow_class(x))
+            }
+            (name, Obr::Fun(x)) => Decl::Fun(self.symbol(name), self.fun_decl(x)),
+            (name, Obr::Typedef(_)) => Decl::Typedef(TypeName(self.symbol(name)), todo!()),
+            (name, Obr::Const(_)) => Decl::Const(self.symbol(name), todo!()),
+        }
+    }
+
+    pub fn decls<'a>(
+        &self,
+        decls: impl Iterator<Item = (&'a str, obr::shallow_decl_defs::Decl<'a>)>,
+    ) -> Vec<shallow::Decl<R>> {
+        decls.map(|decl| self.decl(decl)).collect()
     }
 }

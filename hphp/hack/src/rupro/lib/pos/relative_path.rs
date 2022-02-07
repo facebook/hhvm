@@ -33,6 +33,13 @@ impl RelativePath {
         buf.push(&OsStr::from_bytes(self.suffix.as_bytes()));
         buf
     }
+
+    pub fn to_oxidized(&self) -> oxidized::relative_path::RelativePath {
+        oxidized::relative_path::RelativePath::make(
+            self.prefix,
+            OsStr::from_bytes(self.suffix.as_bytes()).into(),
+        )
+    }
 }
 
 #[derive(Debug, Clone)]

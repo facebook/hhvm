@@ -122,15 +122,15 @@ pub type TypedefDecl<R> = TypedefType<R>;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Decl<R: Reason> {
-    Class(ClassDecl<R>),
-    Fun(FunDecl<R>),
-    Typedef(TypedefDecl<R>),
-    Const(ConstDecl<R>),
+    Class(TypeName, ClassDecl<R>),
+    Fun(Symbol, FunDecl<R>),
+    Typedef(TypeName, TypedefDecl<R>),
+    Const(Symbol, ConstDecl<R>),
 }
 
 walkable!(Decl<R> => {
-    Decl::Class(x) => [x],
-    Decl::Fun(x) => [x],
-    Decl::Typedef(x) => [x],
-    Decl::Const(x) => [x],
+    Decl::Class(_, x) => [x],
+    Decl::Fun(_, x) => [x],
+    Decl::Typedef(_, x) => [x],
+    Decl::Const(_, x) => [x],
 });

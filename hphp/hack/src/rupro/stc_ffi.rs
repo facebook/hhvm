@@ -9,9 +9,10 @@
 
 use hackrs::alloc;
 use hackrs::ast_provider::AstProvider;
+use hackrs::decl_parser::DeclParser;
 use hackrs::folded_decl_provider::{FoldedDeclGlobalCache, FoldedDeclProvider};
 use hackrs::reason::{NReason, Reason};
-use hackrs::shallow_decl_provider::{ShallowDeclGlobalCache, ShallowDeclProvider};
+use hackrs::shallow_decl_provider::{ShallowDeclCache, ShallowDeclProvider};
 use hackrs::special_names::SpecialNames;
 use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
@@ -69,17 +70,17 @@ pub extern "C" fn stc_main() {
         special_names,
         Arc::clone(&options),
     );
-    let shallow_decl_cache = Arc::new(ShallowDeclGlobalCache::new());
+    let decl_parser = DeclParser::new(alloc, Arc::clone(&relative_path_ctx));
+    let shallow_decl_cache = Arc::new(ShallowDeclCache::with_no_eviction());
     let shallow_decl_provider = Arc::new(ShallowDeclProvider::new(
-        shallow_decl_cache,
-        alloc,
+        Arc::clone(&shallow_decl_cache),
         relative_path_ctx,
     ));
     let folded_decl_cache = Arc::new(FoldedDeclGlobalCache::new());
     let folded_decl_provider = Arc::new(FoldedDeclProvider::new(
         folded_decl_cache,
         special_names,
-        Arc::clone(&shallow_decl_provider),
+        shallow_decl_provider,
     ));
     let typing_decl_cache = Arc::new(TypingDeclGlobalCache::new());
     let typing_decl_provider = Arc::new(TypingDeclProvider::new(
@@ -99,9 +100,10 @@ pub extern "C" fn stc_main() {
         .map(|fln| alloc.relative_path(Prefix::Root, &fln))
         .collect();
 
-    shallow_decl_provider
-        .add_from_files(filenames.iter().copied())
-        .unwrap();
+    for &filename in &filenames {
+        let decls = decl_parser.parse(filename).unwrap();
+        shallow_decl_cache.add_decls(decls);
+    }
 
     // println!("{:#?}", shallow_decl_provider);
 

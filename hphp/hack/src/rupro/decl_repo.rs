@@ -15,7 +15,8 @@ use jwalk::WalkDir;
 use rayon::prelude::*;
 use structopt::StructOpt;
 
-use hackrs::shallow_decl_provider::{ShallowDeclGlobalCache, ShallowDeclProvider};
+use hackrs::decl_parser::DeclParser;
+use hackrs::shallow_decl_provider::ShallowDeclCache;
 use hackrs::{alloc, reason::Reason};
 use pos::{Prefix, RelativePath, RelativePathCtx};
 
@@ -67,16 +68,13 @@ fn parse_repo<R: Reason>(
     ctx: Arc<RelativePathCtx>,
     filenames: &[RelativePath],
 ) {
-    let shallow_decl_provider = Arc::new(ShallowDeclProvider::new(
-        Arc::new(ShallowDeclGlobalCache::new()),
-        alloc,
-        ctx,
-    ));
+    let decl_parser = DeclParser::new(alloc, ctx);
+    let shallow_decl_cache = ShallowDeclCache::with_no_eviction();
     let ((), time_taken) = time(|| {
         filenames
             .par_iter()
             .progress_count(filenames.len() as u64)
-            .for_each(|&path| shallow_decl_provider.add_from_file(path).unwrap())
+            .for_each(|&path| shallow_decl_cache.add_decls(decl_parser.parse(path).unwrap()))
     });
     println!("Parsed {} files in {:?}", filenames.len(), time_taken);
 

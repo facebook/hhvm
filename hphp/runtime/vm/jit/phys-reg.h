@@ -121,6 +121,8 @@ public:
   constexpr bool operator!=(Reg64 r) const { return Reg64(n) != r; }
   constexpr bool operator==(Reg32 r) const { return Reg32(n) == r; }
   constexpr bool operator!=(Reg32 r) const { return Reg32(n) != r; }
+  constexpr bool operator==(RegXMM r) const { return n == PhysReg(r).n; }
+  constexpr bool operator!=(RegXMM r) const { return n != PhysReg(r).n; }
 
   size_t hash() const { return n; }
 

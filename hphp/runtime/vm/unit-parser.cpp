@@ -44,9 +44,10 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/decl-provider.h"
-#include "hphp/runtime/vm/hhas-parser.h"
+#include "hphp/runtime/vm/hackc-translator.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/embedded-data.h"
@@ -62,7 +63,7 @@
 
 namespace HPHP {
 
-TRACE_SET_MOD(extern_compiler);
+TRACE_SET_MOD(unit_parse);
 
 UnitEmitterCacheHook g_unit_emitter_cache_hook = nullptr;
 static std::string s_misc_config;
@@ -191,24 +192,60 @@ CompilerResult hackc_compile(
     flags
   };
 
-  if (RO::EvalAssembleHhasProgram) {
-    ::rust::Box<HhasProgramWrapper> prog_wrapped =
-      hackc_compile_hhas_from_text_cpp_ffi(native_env, code);
-    const hackc::hhbc::HhasProgram* program = hackc::hhbc::hhasProgramRaw(prog_wrapped);
-    UNUSED int num_elems = program->functions.len;
-    ITRACE(2, "AssembleHhasProgram: Found {} functions. \n", num_elems);
-  }
-
   ::rust::Vec<std::uint8_t> hhas_vec = hackc_compile_from_text_cpp_ffi(native_env, code);
   auto const hhas = std::string(hhas_vec.begin(), hhas_vec.end());
+  auto res = assemble_string_handle_errors(code,
+                                           hhas,
+                                           filename,
+                                           sha1,
+                                           nativeFuncs,
+                                           internal_error,
+                                           mode);
 
-  return assemble_string_handle_errors(code,
-                                       hhas,
-                                       filename,
-                                       sha1,
-                                       nativeFuncs,
-                                       internal_error,
-                                       mode);
+  if (RO::EvalTranslateHackC) {
+    ::rust::Box<HhasProgramWrapper> prog_wrapped =
+      hackc_compile_hhas_from_text_cpp_ffi(native_env, code);
+    ::rust::Vec<std::uint8_t> hhbc {hackc_hhas_to_string_cpp_ffi(native_env, *prog_wrapped)};
+    std::string hhasString(hhbc.begin(), hhbc.end());
+
+    auto const assemblerOut = [&]() -> std::string {
+      if (res.type() == typeid(std::unique_ptr<UnitEmitter>)) {
+        auto const& ue = boost::get<std::unique_ptr<UnitEmitter>>(res);
+        ue->finish();
+        return disassemble(ue->create().get(), true);
+      }
+      return "";
+    }();
+    const hackc::hhbc::HhasProgram* program = hhasProgramRaw(prog_wrapped);
+    auto const ue =
+      unitEmitterFromHhasProgram(*program, filename, sha1, nativeFuncs, hhasString);
+    auto const hackCTranslatorOut = disassemble(ue->create().get(), true);
+
+    if (hackCTranslatorOut.length() != assemblerOut.length()) {
+      Logger::FError("HackC Translator incorrect length: {}\n", filename);
+    }
+
+    UNUSED auto start_of_line = 0;
+    for(int i = 0; i < hackCTranslatorOut.length(); i++) {
+      if (hackCTranslatorOut[i] == '\n' || assemblerOut[i] == '\n') start_of_line = i;
+      if (hackCTranslatorOut[i] != assemblerOut[i]) {
+        while (i < hackCTranslatorOut.length() &&
+               hackCTranslatorOut[i] != '\n' && assemblerOut[i] != '\n') {
+          i++;
+        }
+        Logger::FError("HackC Translator incorrect: {}\n", filename);
+        ITRACE(3, "HackC Translator: {}\n\nassembler: {}\n\n",
+          hackCTranslatorOut.substr(start_of_line,i),
+          assemblerOut.substr(start_of_line,i)
+        );
+        ITRACE(4,"HackC Translator:\n{}\n", hackCTranslatorOut);
+        ITRACE(4,"assembler:\n{}\n", assemblerOut);
+        break;
+      }
+    }
+  }
+
+  return res;
 }
 ////////////////////////////////////////////////////////////////////////////////
 }

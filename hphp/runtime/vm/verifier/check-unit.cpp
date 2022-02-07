@@ -24,6 +24,8 @@
 #include "hphp/runtime/vm/verifier/util.h"
 #include "hphp/runtime/vm/verifier/pretty.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 namespace HPHP {
 namespace Verifier {
 
@@ -86,6 +88,8 @@ UnitChecker::UnitChecker(const UnitEmitter* unit, ErrorMode mode)
 }
 
 bool UnitChecker::verify() {
+  // For incremental testing HhasProgram Parser, its helpful to not need to pass verifier
+  if (!boost::ends_with(m_unit->m_filepath->data(), ".hhas") && RO::EvalTranslateHackC) return true;
   return checkStrings() &&
          checkArrays() &&
          //checkSourceLocs() &&

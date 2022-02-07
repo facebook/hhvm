@@ -26,10 +26,9 @@ struct UserAttributeMap;
 
 //////////////////////////////////////////////////////////////////////
 
-std::string disassemble(const Unit*);
+std::string disassemble(const Unit* unit, bool isTest=false);
 std::string user_attrs(const UserAttributeMap*);
 
 //////////////////////////////////////////////////////////////////////
 
 }
-

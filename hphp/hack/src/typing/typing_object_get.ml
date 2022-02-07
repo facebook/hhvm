@@ -468,8 +468,38 @@ let rec obj_get_concrete_ty args env concrete_ty (id_pos, id_str) on_error =
     let lval_err = Error (concrete_ty, ty_nothing) in
     default ~lval_err ()
 
+and get_member_from_constraints
+    args env class_info ((id_pos, _) as id) reason params on_error =
+  let ety_env = mk_ety_env class_info params args.this_ty in
+  let upper_bounds = Cls.upper_bounds_on_this class_info in
+  let (env, upper_bounds) =
+    List.map_env env upper_bounds ~f:(fun env up ->
+        Phase.localize ~ety_env env up)
+  in
+  let (env, inter_ty) =
+    Inter.intersect_list env (Reason.Rwitness id_pos) upper_bounds
+  in
+  obj_get_inner
+    {
+      args with
+      nullsafe = None;
+      obj_pos = Reason.to_pos reason |> Pos_or_decl.unsafe_to_raw_pos;
+      is_nonnull = true;
+    }
+    env
+    inter_ty
+    id
+    on_error
+
 and obj_get_concrete_class
-    args env concrete_ty (id_pos, id_str) reason class_name params on_error =
+    args
+    env
+    concrete_ty
+    ((id_pos, id_str) as id)
+    reason
+    class_name
+    params
+    on_error =
   let dflt_rval_err =
     Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
   and dflt_lval_err = Ok concrete_ty in
@@ -478,28 +508,6 @@ and obj_get_concrete_class
     (env, (Typing_utils.mk_tany env id_pos, []), lval_err, rval_err)
   in
 
-  let get_member_from_constraints env class_info =
-    let ety_env = mk_ety_env class_info params args.this_ty in
-    let upper_bounds = Cls.upper_bounds_on_this class_info in
-    let (env, upper_bounds) =
-      List.map_env env upper_bounds ~f:(fun env up ->
-          Phase.localize ~ety_env env up)
-    in
-    let (env, inter_ty) =
-      Inter.intersect_list env (Reason.Rwitness id_pos) upper_bounds
-    in
-    obj_get_inner
-      {
-        args with
-        nullsafe = None;
-        obj_pos = Reason.to_pos reason |> Pos_or_decl.unsafe_to_raw_pos;
-        is_nonnull = true;
-      }
-      env
-      inter_ty
-      (id_pos, id_str)
-      on_error
-  in
   match Env.get_class env class_name with
   | None -> default ()
   | Some class_info ->
@@ -533,7 +541,15 @@ and obj_get_concrete_class
       match member_info with
       | None when Cls.has_upper_bounds_on_this_from_constraints class_info ->
         Errors.try_with_error
-          (fun () -> get_member_from_constraints env class_info)
+          (fun () ->
+            get_member_from_constraints
+              args
+              env
+              class_info
+              id
+              reason
+              params
+              on_error)
           (fun () ->
             member_not_found
               env
@@ -764,7 +780,16 @@ and obj_get_concrete_class
           if Cls.has_upper_bounds_on_this_from_constraints class_info then
             let ((env, (ty, tal), _, _), succeed) =
               Errors.try_
-                (fun () -> (get_member_from_constraints env class_info, true))
+                (fun () ->
+                  ( get_member_from_constraints
+                      args
+                      env
+                      class_info
+                      id
+                      reason
+                      params
+                      on_error,
+                    true ))
                 (fun _ ->
                   (* No eligible functions found in constraints *)
                   ( ( env,

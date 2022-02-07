@@ -113,57 +113,54 @@ let smember_not_found
 let member_not_found
     (env : Typing_env_types.env) pos ~is_method class_ member_name r on_error =
   let cls_name = strip_ns (Cls.name class_) in
-  let err =
-    if
-      env.Typing_env_types.in_expr_tree
-      && is_method
-      && String_utils.string_starts_with member_name "__"
-    then
-      Typing_error.(
-        expr_tree
-        @@ Primary.Expr_tree.Expression_tree_unsupported_operator
-             { class_name = cls_name; member_name; pos })
-    else
-      let (class_pos, class_name) = (Cls.pos class_, Cls.name class_) in
-      let reason =
-        Reason.to_string
-          ("This is why I think it is an object of type " ^ cls_name)
-          r
-      in
-      let method_suggestion = Env.suggest_member is_method class_ member_name in
-      let static_suggestion =
-        Env.suggest_static_member is_method class_ member_name
-      in
-      let hint =
-        lazy
-          (match (method_suggestion, static_suggestion) with
-          (* Prefer suggesting a different method, unless there's a
-             static method whose name matches exactly. *)
-          | (Some _, Some (def_pos, v)) when String.equal v member_name ->
-            Some (`static, def_pos, v)
-          | (Some (def_pos, v), _) -> Some (`instance, def_pos, v)
-          | (None, Some (def_pos, v)) -> Some (`static, def_pos, v)
-          | (None, None) -> None)
-      in
-      Typing_error.(
-        apply ~on_error
-        @@ primary
-        @@ Primary.Member_not_found
-             {
-               pos;
-               kind =
-                 (if is_method then
-                   `method_
-                 else
-                   `property);
-               class_name;
-               class_pos;
-               member_name;
-               hint;
-               reason;
-             })
-  in
-  Errors.add_typing_error err
+  if
+    env.Typing_env_types.in_expr_tree
+    && is_method
+    && String_utils.string_starts_with member_name "__"
+  then
+    Typing_error.(
+      expr_tree
+      @@ Primary.Expr_tree.Expression_tree_unsupported_operator
+           { class_name = cls_name; member_name; pos })
+  else
+    let (class_pos, class_name) = (Cls.pos class_, Cls.name class_) in
+    let reason =
+      Reason.to_string
+        ("This is why I think it is an object of type " ^ cls_name)
+        r
+    in
+    let method_suggestion = Env.suggest_member is_method class_ member_name in
+    let static_suggestion =
+      Env.suggest_static_member is_method class_ member_name
+    in
+    let hint =
+      lazy
+        (match (method_suggestion, static_suggestion) with
+        (* Prefer suggesting a different method, unless there's a
+           static method whose name matches exactly. *)
+        | (Some _, Some (def_pos, v)) when String.equal v member_name ->
+          Some (`static, def_pos, v)
+        | (Some (def_pos, v), _) -> Some (`instance, def_pos, v)
+        | (None, Some (def_pos, v)) -> Some (`static, def_pos, v)
+        | (None, None) -> None)
+    in
+    Typing_error.(
+      apply ~on_error
+      @@ primary
+      @@ Primary.Member_not_found
+           {
+             pos;
+             kind =
+               (if is_method then
+                 `method_
+               else
+                 `property);
+             class_name;
+             class_pos;
+             member_name;
+             hint;
+             reason;
+           })
 
 let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
   match deref ty with
@@ -820,27 +817,33 @@ and obj_get_concrete_class_without_member_info
           params
           on_error)
       (fun () ->
-        member_not_found
-          env
-          id_pos
-          ~is_method:args.is_method
-          class_info
-          id_str
-          reason
-          on_error;
+        let err =
+          member_not_found
+            env
+            id_pos
+            ~is_method:args.is_method
+            class_info
+            id_str
+            reason
+            on_error
+        in
+        Errors.add_typing_error err;
         let ty_nothing = MakeType.nothing Reason.none in
         default ~lval_err:(Error (concrete_ty, ty_nothing)) ())
   else if not args.is_method then
     let lval_err =
       if not (SN.Members.is_special_xhp_attribute id_str) then (
-        member_not_found
-          env
-          id_pos
-          ~is_method:args.is_method
-          class_info
-          id_str
-          reason
-          on_error;
+        let err =
+          member_not_found
+            env
+            id_pos
+            ~is_method:args.is_method
+            class_info
+            id_str
+            reason
+            on_error
+        in
+        Errors.add_typing_error err;
         let ty_nothing = MakeType.nothing Reason.none in
         Error (concrete_ty, ty_nothing)
       ) else
@@ -871,18 +874,20 @@ and obj_get_concrete_class_without_member_info
       @@ Nast_check_error.Magic { pos = id_pos; meth_name = id_str }
     in
     default ()
-  else begin
-    member_not_found
-      env
-      id_pos
-      ~is_method:args.is_method
-      class_info
-      id_str
-      reason
-      on_error;
+  else
+    let err =
+      member_not_found
+        env
+        id_pos
+        ~is_method:args.is_method
+        class_info
+        id_str
+        reason
+        on_error
+    in
+    Errors.add_typing_error err;
     let ty_nothing = MakeType.nothing Reason.none in
     default ~lval_err:(Error (concrete_ty, ty_nothing)) ()
-  end
 
 and nullable_obj_get
     args env ety1 ((id_pos, id_str) as id) on_error ~read_context ty =

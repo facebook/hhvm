@@ -343,12 +343,11 @@ impl<'ast> Visitor<'ast> for VoidReturnCheck {
     }
 }
 
-#[allow(clippy::ptr_arg)]
-fn only_void_return(lfun_body: &ast::Block) -> bool {
+fn only_void_return(lfun_body: &[ast::Stmt]) -> bool {
     let mut checker = VoidReturnCheck {
         only_void_return: true,
     };
-    visit(&mut checker, &mut (), lfun_body).unwrap();
+    visit(&mut checker, &mut (), &lfun_body).unwrap();
     checker.only_void_return
 }
 

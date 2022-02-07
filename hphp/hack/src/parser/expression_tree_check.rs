@@ -42,7 +42,6 @@ impl<'ast> Visitor<'ast> for Checker {
 }
 
 /// Check for splice syntax ${...} outside of an expression tree literal.
-#[allow(clippy::ptr_arg)] // we can't use a slice because Visitor requires a &Program.
 pub fn check_splices(program: &Program<(), ()>) -> Vec<SyntaxError> {
     let mut checker = Checker { errors: vec![] };
     visit(&mut checker, &mut (), program).expect("Unexpected error when checking nested splices");

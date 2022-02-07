@@ -1217,32 +1217,7 @@ void SymbolMap::updateDB(
 
   // ANALYZE after initially building the DB
   if (since.isInitial()) {
-    try {
-      auto DEBUG_ONLY t0 = std::chrono::steady_clock::now();
-      XLOGF(DBG0, "Running ANALYZE on {}...", m_dbData.m_path.native());
-      db.analyze();
-      auto DEBUG_ONLY tf = std::chrono::steady_clock::now();
-      XLOGF(
-          DBG0,
-          "Finished ANALYZE on {} in {:.3} seconds.",
-          m_dbData.m_path.native(),
-          static_cast<double>(
-              std::chrono::duration_cast<std::chrono::milliseconds>(tf - t0)
-                  .count()) /
-              1000);
-    } catch (const SQLiteExc& e) {
-      XLOGF(
-          ERR,
-          "Error while running ANALYZE on {}: {}",
-          m_dbData.m_path.native(),
-          e.what());
-    } catch (std::exception& e) {
-      XLOGF(
-          ERR,
-          "Error while running ANALYZE on {}: {}",
-          m_dbData.m_path.native(),
-          e.what());
-    }
+    db.runPostBuildOptimizations();
   }
 
   db.insertClock(clock);

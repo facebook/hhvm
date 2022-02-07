@@ -997,10 +997,6 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.step();
   }
 
-  void analyze() override {
-    m_db.analyze();
-  }
-
   std::vector<std::string> getAttributesOfType(
       const std::string_view type, const folly::fs::path& path) override {
     auto query = m_txn.query(m_typeStmts.m_getTypeAttributes);
@@ -1323,6 +1319,26 @@ struct AutoloadDBImpl final : public AutoloadDB {
     return {
         .m_clock = std::string{query.getString(0)},
         .m_mergebase = std::string{query.getString(1)}};
+  }
+
+  void runPostBuildOptimizations() override {
+    try {
+      auto DEBUG_ONLY t0 = std::chrono::steady_clock::now();
+      XLOG(DBG0, "Running ANALYZE...");
+      m_db.analyze();
+      auto DEBUG_ONLY tf = std::chrono::steady_clock::now();
+      XLOGF(
+          DBG0,
+          "Finished ANALYZE in {:.3} seconds.",
+          static_cast<double>(
+              std::chrono::duration_cast<std::chrono::milliseconds>(tf - t0)
+                  .count()) /
+              1000);
+    } catch (const SQLiteExc& e) {
+      XLOGF(ERR, "Error while running ANALYZE: {}", e.what());
+    } catch (std::exception& e) {
+      XLOGF(ERR, "Error while running ANALYZE: {}", e.what());
+    }
   }
 
   SQLite m_db;

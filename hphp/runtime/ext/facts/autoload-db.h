@@ -206,12 +206,6 @@ struct AutoloadDB {
       Optional<int> attributePosition,
       const folly::dynamic* attributeValue) = 0;
 
-  /**
-   * Record stats about the DB's tables and indices:
-   * https://sqlite.org/lang_analyze.html
-   */
-  virtual void analyze() = 0;
-
   virtual std::vector<std::string>
   getAttributesOfType(std::string_view type, const folly::fs::path& path) = 0;
 
@@ -291,6 +285,18 @@ struct AutoloadDB {
 
   virtual void insertClock(const Clock& clock) = 0;
   virtual Clock getClock() = 0;
+
+  /**
+   * This should be run once, after initially building a DB. It may take a
+   * while.
+   *
+   * If this DB is backed by SQLite, this method runs the ANALYZE command to
+   * record stats about the DB's tables and indices. This allows SQLite to
+   * create much better query plans.
+   *
+   * https://sqlite.org/lang_analyze.html
+   */
+  virtual void runPostBuildOptimizations() = 0;
 
   /**
    * Lazy generator to return results from the DB.

@@ -2591,7 +2591,12 @@ where
             (missing1, missing2)
         } else {
             let readonly = self.parse_optional_readonly();
-            let return_type = self.with_type_parser(|p| p.parse_return_type());
+            // If readonly keyword is present, return type can be missing
+            let return_type = if readonly.is_missing() {
+                self.with_type_parser(|p| p.parse_return_type())
+            } else {
+                self.with_type_parser(|p| p.parse_return_type_opt())
+            };
             (readonly, return_type)
         };
         (colon, readonly_opt, return_type)

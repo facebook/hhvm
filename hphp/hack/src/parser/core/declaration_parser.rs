@@ -1592,8 +1592,13 @@ where
             let token = self.next_token();
             let colon_token = S!(make_token, self, token);
             let readonly_opt = self.parse_return_readonly_opt();
-            let return_type =
-                self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_return_type());
+            // if no readonly keyword return type must exist
+            // else return type is optional
+            let return_type = if readonly_opt.is_missing() {
+                self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_return_type())
+            } else {
+                self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_return_type_opt())
+            };
             (colon_token, readonly_opt, return_type)
         } else {
             let missing1 = S!(make_missing, self, self.pos());

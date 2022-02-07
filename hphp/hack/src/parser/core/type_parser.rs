@@ -163,8 +163,8 @@ where
         res
     }
 
-    // TODO: What about something like for::for? Is that a legal type constant?
-    pub fn parse_type_specifier(&mut self, allow_var: bool, allow_attr: bool) -> S::R {
+    // parse type specifier but return missing if you fail to parse
+    pub fn parse_type_specifier_opt(&mut self, allow_var: bool, allow_attr: bool) -> S::R {
         // Strictly speaking, "mixed" is a nullable type specifier. We parse it as
         // a simple type specifier here.
         let mut parser1 = self.clone();
@@ -227,11 +227,21 @@ where
             | TokenKind::LessThanLessThan if allow_attr => self.parse_attributized_specifier(),
             | TokenKind::Classname => self.parse_classname_type_specifier(),
             | _ => {
-                self.with_error_on_whole_token(Errors::error1007);
-                let token = self.next_xhp_class_name_or_other_token();
-                let token = S!(make_token, self, token);
-                S!(make_error, self, token)
+                S!(make_missing, self, self.pos())
             }
+        }
+    }
+
+    // TODO: What about something like for::for? Is that a legal type constant?
+    pub fn parse_type_specifier(&mut self, allow_var: bool, allow_attr: bool) -> S::R {
+        let result = self.parse_type_specifier_opt(allow_var, allow_attr);
+        if result.is_missing() {
+            self.with_error_on_whole_token(Errors::error1007);
+            let token = self.next_xhp_class_name_or_other_token();
+            let token = S!(make_token, self, token);
+            S!(make_error, self, token)
+        } else {
+            result
         }
     }
 
@@ -1139,6 +1149,16 @@ where
             S!(make_token, self, token)
         } else {
             self.parse_type_specifier(false, true)
+        }
+    }
+
+    // Same as parse_return_type but can return missing
+    pub fn parse_return_type_opt(&mut self) -> S::R {
+        if self.peek_token_kind() == TokenKind::Noreturn {
+            let token = self.next_token();
+            S!(make_token, self, token)
+        } else {
+            self.parse_type_specifier_opt(false, true)
         }
     }
 }

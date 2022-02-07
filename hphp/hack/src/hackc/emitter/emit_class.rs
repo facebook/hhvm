@@ -246,6 +246,7 @@ fn from_class_elt_classvars<'a, 'arena, 'decl>(
     ast_class: &'a ast::Class_,
     class_is_const: bool,
     tparams: &[&str],
+    is_closure: bool,
 ) -> Result<Vec<HhasProperty<'arena>>> {
     // TODO: we need to emit doc comments for each property,
     // not one per all properties on the same line
@@ -266,6 +267,7 @@ fn from_class_elt_classvars<'a, 'arena, 'decl>(
                 ast_class,
                 tparams,
                 class_is_const,
+                is_closure,
                 emit_property::FromAstArgs {
                     user_attributes: &cv.user_attributes,
                     id: &cv.id,
@@ -757,7 +759,8 @@ pub fn emit_class<'a, 'arena, 'decl>(
         )?)
     }
     emitter.label_gen_mut().reset();
-    let mut properties = from_class_elt_classvars(emitter, ast_class, is_const, &tparams)?;
+    let mut properties =
+        from_class_elt_classvars(emitter, ast_class, is_const, &tparams, is_closure)?;
     let constants = from_class_elt_constants(emitter, &env, ast_class)?;
 
     let requirements = from_class_elt_requirements(alloc, ast_class);
@@ -904,7 +907,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
 
     if !no_xhp_attributes {
         properties.extend(emit_xhp::properties_for_cache(
-            emitter, ast_class, is_const,
+            emitter, ast_class, is_const, is_closure,
         )?);
     }
     let info = emit_memoize_method::make_info(ast_class, name, &ast_class.methods)?;

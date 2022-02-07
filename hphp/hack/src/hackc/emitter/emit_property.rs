@@ -33,6 +33,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     class: &'ast ast::Class_,
     tparams: &[&str],
     class_is_const: bool,
+    class_is_closure: bool,
     args: FromAstArgs<'_>,
 ) -> Result<HhasProperty<'arena>> {
     let alloc = emitter.alloc;
@@ -88,7 +89,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     let env = Env::make_class_env(alloc, class);
     let (initial_value, initializer_instrs, mut hhas_property_flags) = match args.initial_value {
         None => {
-            let initial_value = if is_late_init {
+            let initial_value = if is_late_init || class_is_closure {
                 Some(TypedValue::Uninit)
             } else {
                 None
@@ -106,6 +107,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
             ));
         }
         Some(e) => {
+            assert!(!class_is_closure);
             let is_collection_map = match e.2.as_collection() {
                 Some(c) if (c.0).1 == "Map" || (c.0).1 == "ImmMap" => true,
                 _ => false,

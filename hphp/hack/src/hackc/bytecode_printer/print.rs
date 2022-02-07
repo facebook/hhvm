@@ -399,12 +399,7 @@ fn print_property_type_info(w: &mut dyn Write, p: &HhasProperty<'_>) -> Result<(
     w.write_all(b" ")
 }
 
-fn print_property(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    class_def: &HhasClass<'_>,
-    property: &HhasProperty<'_>,
-) -> Result<()> {
+fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &HhasProperty<'_>) -> Result<()> {
     newline(w)?;
     w.write_all(b"  .property ")?;
     print_special_and_user_attrs(
@@ -419,7 +414,7 @@ fn print_property(
     w.write_all(property.name.to_raw_string().as_bytes())?;
     w.write_all(b" =\n    ")?;
     let initial_value = property.initial_value.as_ref();
-    if class_def.is_closure() || initial_value == Just(&TypedValue::Uninit) {
+    if initial_value == Just(&TypedValue::Uninit) {
         w.write_all(b"uninit;")
     } else {
         triple_quotes(w, |w| match initial_value {
@@ -715,7 +710,7 @@ fn print_class_def<'arena>(
             print_ctx_constant(c, w, x)?;
         }
         for x in class_def.properties.as_ref() {
-            print_property(c, w, class_def, x)?;
+            print_property(c, w, x)?;
         }
         for m in class_def.methods.as_ref() {
             print_method_def(c, w, m)?;

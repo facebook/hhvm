@@ -371,7 +371,26 @@ impl<R: Reason> Allocator<R> {
         }
     }
 
-    #[allow(unreachable_code)]
+    fn typedef_decl(&self, x: &obr::shallow_decl_defs::TypedefDecl<'_>) -> shallow::TypedefDecl<R> {
+        ty::TypedefType {
+            module: x.module.map(|pos_id| self.pos_id_from_ast_ref(&pos_id)),
+            pos: self.pos_from_decl(x.pos),
+            vis: x.vis,
+            tparams: self.vec(x.tparams, Self::decl_tparam),
+            constraint: x.constraint.map(|ty| self.ty_from_decl(ty)),
+            ty: self.ty_from_decl(x.type_),
+            is_ctx: x.is_ctx,
+            attributes: self.vec(x.attributes, Self::user_attribute_from_decl),
+        }
+    }
+
+    fn const_decl(&self, x: &obr::shallow_decl_defs::ConstDecl<'_>) -> shallow::ConstDecl<R> {
+        ty::ConstDecl {
+            pos: self.pos_from_decl(x.pos),
+            ty: self.ty_from_decl(x.type_),
+        }
+    }
+
     pub fn decl(&self, decl: (&str, obr::shallow_decl_defs::Decl<'_>)) -> shallow::Decl<R> {
         use obr::shallow_decl_defs::Decl as Obr;
         use shallow::Decl;
@@ -380,8 +399,10 @@ impl<R: Reason> Allocator<R> {
                 Decl::Class(TypeName(self.symbol(name)), self.shallow_class(x))
             }
             (name, Obr::Fun(x)) => Decl::Fun(self.symbol(name), self.fun_decl(x)),
-            (name, Obr::Typedef(_)) => Decl::Typedef(TypeName(self.symbol(name)), todo!()),
-            (name, Obr::Const(_)) => Decl::Const(self.symbol(name), todo!()),
+            (name, Obr::Typedef(x)) => {
+                Decl::Typedef(TypeName(self.symbol(name)), self.typedef_decl(x))
+            }
+            (name, Obr::Const(x)) => Decl::Const(self.symbol(name), self.const_decl(x)),
         }
     }
 

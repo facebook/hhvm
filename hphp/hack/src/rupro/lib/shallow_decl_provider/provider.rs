@@ -25,6 +25,6 @@ impl<R: Reason> ShallowDeclProvider<R> {
     }
 
     pub fn get_shallow_class(&self, name: TypeName) -> Option<Arc<ShallowClass<R>>> {
-        self.cache.classes.get(name)
+        self.cache.get_class(name)
     }
 }

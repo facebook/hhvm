@@ -424,14 +424,15 @@ let check_shape_keys_validity env keys =
         | Some cd ->
           (match Env.get_const env cd y with
           | None ->
-            Typing_object_get.smember_not_found
-              p
-              ~is_const:true
-              ~is_method:false
-              ~is_function_pointer:false
-              cd
-              y
-              Typing_error.Callback.unify_error;
+            Errors.add_typing_error
+            @@ Typing_object_get.smember_not_found
+                 p
+                 ~is_const:true
+                 ~is_method:false
+                 ~is_function_pointer:false
+                 cd
+                 y
+                 Typing_error.Callback.unify_error;
             (env, key_pos, Some (cls, TUtils.terr env Reason.Rnone))
           | Some { cc_type; _ } ->
             let (env, ty) =

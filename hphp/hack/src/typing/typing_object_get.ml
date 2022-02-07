@@ -97,12 +97,11 @@ let smember_not_found
   in
   let error hint =
     let (class_pos, class_name) = (Cls.pos class_, Cls.name class_) in
-    Errors.add_typing_error
-      Typing_error.(
-        apply ~on_error
-        @@ primary
-        @@ Primary.Smember_not_found
-             { pos; kind; class_name; class_pos; member_name; hint })
+    Typing_error.(
+      apply ~on_error
+      @@ primary
+      @@ Primary.Smember_not_found
+           { pos; kind; class_name; class_pos; member_name; hint })
   in
   let static_suggestion =
     Env.suggest_static_member is_method class_ member_name
@@ -112,11 +111,10 @@ let smember_not_found
   (* If there is a normal method of the same name and the
    * syntax is a function pointer, suggest meth_caller *)
   | (_, Some (_, v)) when is_function_pointer && String.equal v member_name ->
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Consider_meth_caller
-             { pos; class_name = Cls.name class_; meth_name = member_name })
+    Typing_error.(
+      primary
+      @@ Primary.Consider_meth_caller
+           { pos; class_name = Cls.name class_; meth_name = member_name })
   (* If there is a normal method of the same name, suggest it *)
   | (Some _, Some (def_pos, v)) when String.equal v member_name ->
     error (Some (`instance, def_pos, v))

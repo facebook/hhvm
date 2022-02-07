@@ -3575,14 +3575,15 @@ and expr_
       (match smethod with
       | None ->
         (* The static method wasn't found. *)
-        TOG.smember_not_found
-          (fst meth)
-          ~is_const:false
-          ~is_method:true
-          ~is_function_pointer:false
-          class_
-          (snd meth)
-          Typing_error.Callback.unify_error;
+        Errors.add_typing_error
+        @@ TOG.smember_not_found
+             (fst meth)
+             ~is_const:false
+             ~is_method:true
+             ~is_function_pointer:false
+             class_
+             (snd meth)
+             Typing_error.Callback.unify_error;
         expr_error env Reason.Rnone outer
       | Some ({ ce_type = (lazy ty); ce_pos = (lazy ce_pos); _ } as ce) ->
         let () =
@@ -7349,14 +7350,15 @@ and class_get_inner
         Errors.try_with_error
           (fun () -> get_smember_from_constraints env class_info)
           (fun () ->
-            TOG.smember_not_found
-              p
-              ~is_const
-              ~is_method
-              ~is_function_pointer
-              class_info
-              mid
-              Typing_error.Callback.unify_error;
+            Errors.add_typing_error
+            @@ TOG.smember_not_found
+                 p
+                 ~is_const
+                 ~is_method
+                 ~is_function_pointer
+                 class_info
+                 mid
+                 Typing_error.Callback.unify_error;
             (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err))
       in
       if is_const then (
@@ -7376,14 +7378,15 @@ and class_get_inner
         | None when Cls.has_upper_bounds_on_this_from_constraints class_ ->
           try_get_smember_from_constraints env class_
         | None ->
-          TOG.smember_not_found
-            p
-            ~is_const
-            ~is_method
-            ~is_function_pointer
-            class_
-            mid
-            Typing_error.Callback.unify_error;
+          Errors.add_typing_error
+          @@ TOG.smember_not_found
+               p
+               ~is_const
+               ~is_method
+               ~is_function_pointer
+               class_
+               mid
+               Typing_error.Callback.unify_error;
           (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err)
         | Some { cc_type; cc_abstract; cc_pos; _ } ->
           let (env, cc_locl_type) = Phase.localize ~ety_env env cc_type in
@@ -7412,14 +7415,15 @@ and class_get_inner
         | None when Cls.has_upper_bounds_on_this_from_constraints class_ ->
           try_get_smember_from_constraints env class_
         | None ->
-          TOG.smember_not_found
-            p
-            ~is_const
-            ~is_method
-            ~is_function_pointer
-            class_
-            mid
-            Typing_error.Callback.unify_error;
+          Errors.add_typing_error
+          @@ TOG.smember_not_found
+               p
+               ~is_const
+               ~is_method
+               ~is_function_pointer
+               class_
+               mid
+               Typing_error.Callback.unify_error;
           (env, (TUtils.terr env Reason.Rnone, []), dflt_rval_err)
         | Some
             ({

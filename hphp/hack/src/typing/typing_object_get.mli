@@ -65,4 +65,4 @@ val smember_not_found :
   Decl_provider.Class.t ->
   string ->
   Typing_error.Callback.t ->
-  unit
+  Typing_error.t

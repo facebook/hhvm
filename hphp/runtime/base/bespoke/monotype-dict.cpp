@@ -1076,11 +1076,6 @@ uint32_t MonotypeDict<Key>::tombstones() const {
 }
 
 template <typename Key>
-uint8_t MonotypeDict<Key>::sizeIndex() const {
-  return m_aux16 >> 8;
-}
-
-template <typename Key>
 size_t MonotypeDict<Key>::numElms() const {
   return scaleBySizeIndex(kMinNumElms, sizeIndex()) - 1;
 }

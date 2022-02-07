@@ -223,7 +223,6 @@ private:
   DataType type() const;
   uint32_t used() const;
   uint32_t tombstones() const;
-  uint8_t sizeIndex() const;
   size_t numElms() const;
   size_t numIndices() const;
   void setZombie();

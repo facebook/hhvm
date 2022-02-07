@@ -393,10 +393,6 @@ TypedValue MonotypeVec::typedValueUnchecked(size_t idx) const {
   return make_tv_of_type(valueRefUnchecked(idx), type());
 }
 
-uint8_t MonotypeVec::sizeIndex() const {
-  return m_aux16 >> 8;
-}
-
 size_t MonotypeVec::capacity() const {
   return kSizeIndex2MonotypeVecCapacity[sizeIndex()];
 }

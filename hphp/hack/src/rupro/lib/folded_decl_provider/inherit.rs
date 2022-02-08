@@ -8,7 +8,7 @@ use crate::decl_defs::{
 };
 use crate::folded_decl_provider::subst::Subst;
 use crate::reason::Reason;
-use pos::{Symbol, SymbolMap, TypeName, TypeNameMap};
+use pos::{MethodName, MethodNameMap, PropNameMap, TypeName, TypeNameMap};
 use std::collections::hash_map::Entry;
 use std::sync::Arc;
 
@@ -18,10 +18,10 @@ use std::sync::Arc;
 pub(crate) struct Inherited<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_inherit.inherited`
     pub(crate) substs: TypeNameMap<SubstContext<R>>,
-    pub(crate) props: SymbolMap<FoldedElement<R>>,
-    pub(crate) static_props: SymbolMap<FoldedElement<R>>,
-    pub(crate) methods: SymbolMap<FoldedElement<R>>,
-    pub(crate) static_methods: SymbolMap<FoldedElement<R>>,
+    pub(crate) props: PropNameMap<FoldedElement<R>>,
+    pub(crate) static_props: PropNameMap<FoldedElement<R>>,
+    pub(crate) methods: MethodNameMap<FoldedElement<R>>,
+    pub(crate) static_methods: MethodNameMap<FoldedElement<R>>,
     pub(crate) constructor: Option<FoldedElement<R>>,
 }
 
@@ -91,8 +91,8 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn add_method(
-        methods: &mut SymbolMap<FoldedElement<R>>,
-        (key, mut fe): (Symbol, FoldedElement<R>),
+        methods: &mut MethodNameMap<FoldedElement<R>>,
+        (key, mut fe): (MethodName, FoldedElement<R>),
     ) {
         match methods.entry(key) {
             Entry::Vacant(entry) => {
@@ -115,23 +115,23 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
-    fn add_methods(&mut self, other_methods: SymbolMap<FoldedElement<R>>) {
+    fn add_methods(&mut self, other_methods: MethodNameMap<FoldedElement<R>>) {
         for (key, fe) in other_methods {
             Self::add_method(&mut self.methods, (key, fe))
         }
     }
 
-    fn add_static_methods(&mut self, other_static_methods: SymbolMap<FoldedElement<R>>) {
+    fn add_static_methods(&mut self, other_static_methods: MethodNameMap<FoldedElement<R>>) {
         for (key, fe) in other_static_methods {
             Self::add_method(&mut self.static_methods, (key, fe))
         }
     }
 
-    fn add_props(&mut self, other_props: SymbolMap<FoldedElement<R>>) {
+    fn add_props(&mut self, other_props: PropNameMap<FoldedElement<R>>) {
         self.props.extend(other_props)
     }
 
-    fn add_static_props(&mut self, other_static_props: SymbolMap<FoldedElement<R>>) {
+    fn add_static_props(&mut self, other_static_props: PropNameMap<FoldedElement<R>>) {
         self.static_props.extend(other_static_props)
     }
 

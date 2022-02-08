@@ -274,7 +274,7 @@ impl<R: Reason> Allocator<R> {
     ) -> shallow::ShallowClassConst<R> {
         shallow::ShallowClassConst {
             is_abstract: scc.abstract_,
-            name: self.pos_id_from_decl(scc.name),
+            name: self.pos_class_const_from_decl(scc.name),
             ty: self.ty_from_decl(scc.type_),
             refs: self.vec(scc.refs, Self::class_const_ref),
         }
@@ -285,7 +285,7 @@ impl<R: Reason> Allocator<R> {
         stc: &obr::shallow_decl_defs::ShallowTypeconst<'_>,
     ) -> shallow::ShallowTypeconst<R> {
         shallow::ShallowTypeconst {
-            name: self.pos_id_from_decl(stc.name),
+            name: self.pos_type_const_from_decl(stc.name),
             kind: self.typeconst(stc.kind),
             enforceable: (self.pos_from_decl(stc.enforceable.0), stc.enforceable.1),
             reifiable: stc.reifiable.map(|pos| self.pos_from_decl(pos)),
@@ -298,7 +298,7 @@ impl<R: Reason> Allocator<R> {
         sm: &obr::shallow_decl_defs::ShallowMethod<'_>,
     ) -> shallow::ShallowMethod<R> {
         shallow::ShallowMethod {
-            name: self.pos_id_from_decl(sm.name),
+            name: self.pos_method_from_decl(sm.name),
             ty: self.ty_from_decl(sm.type_),
             visibility: sm.visibility,
             deprecated: sm.deprecated.map(|s| self.bytes(s)),
@@ -312,7 +312,7 @@ impl<R: Reason> Allocator<R> {
         sp: &obr::shallow_decl_defs::ShallowProp<'_>,
     ) -> shallow::ShallowProp<R> {
         shallow::ShallowProp {
-            name: self.pos_id_from_decl(sp.name),
+            name: self.pos_prop_from_decl(sp.name),
             xhp_attr: sp.xhp_attr,
             ty: sp.type_.as_ref().map(|ty| self.ty_from_decl(ty)),
             visibility: sp.visibility,

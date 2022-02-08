@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::decl_defs::{CeVisibility, ClassEltFlags, DeclTy};
 use crate::reason::Reason;
-use pos::{SymbolMap, TypeName, TypeNameMap};
+use pos::{MethodNameMap, PropNameMap, TypeName, TypeNameMap};
 
 #[derive(Debug, Clone)]
 pub struct FoldedElement<R: Reason> {
@@ -59,10 +59,10 @@ pub struct FoldedClass<R: Reason> {
     pub pos: R::Pos,
     pub substs: TypeNameMap<SubstContext<R>>,
     pub ancestors: TypeNameMap<DeclTy<R>>,
-    pub props: SymbolMap<FoldedElement<R>>,
-    pub static_props: SymbolMap<FoldedElement<R>>,
-    pub methods: SymbolMap<FoldedElement<R>>,
-    pub static_methods: SymbolMap<FoldedElement<R>>,
+    pub props: PropNameMap<FoldedElement<R>>,
+    pub static_props: PropNameMap<FoldedElement<R>>,
+    pub methods: MethodNameMap<FoldedElement<R>>,
+    pub static_methods: MethodNameMap<FoldedElement<R>>,
     pub constructor: Option<FoldedElement<R>>,
 }
 

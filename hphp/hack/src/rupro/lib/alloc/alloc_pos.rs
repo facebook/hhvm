@@ -5,7 +5,10 @@
 
 use super::Allocator;
 use crate::reason::Reason;
-use pos::{FilePos, ModuleName, Pos, Positioned, Symbol, TypeName};
+use pos::{
+    ClassConstName, FilePos, MethodName, ModuleName, Pos, Positioned, PropName, Symbol,
+    TypeConstName, TypeName,
+};
 
 impl<R: Reason> Allocator<R> {
     pub fn pos_from_ast(&self, pos: &oxidized::pos::Pos) -> R::Pos {
@@ -78,5 +81,33 @@ impl<R: Reason> Allocator<R> {
         oxidized_by_ref::ast_defs::Id(pos, id): &oxidized_by_ref::ast_defs::Id<'_>,
     ) -> Positioned<ModuleName, R::Pos> {
         Positioned::new(self.pos_from_decl(pos), ModuleName(self.symbol(id)))
+    }
+
+    pub fn pos_class_const_from_decl(
+        &self,
+        (pos, id): oxidized_by_ref::typing_defs::PosId<'_>,
+    ) -> Positioned<ClassConstName, R::Pos> {
+        Positioned::new(self.pos_from_decl(pos), ClassConstName(self.symbol(id)))
+    }
+
+    pub fn pos_type_const_from_decl(
+        &self,
+        (pos, id): oxidized_by_ref::typing_defs::PosId<'_>,
+    ) -> Positioned<TypeConstName, R::Pos> {
+        Positioned::new(self.pos_from_decl(pos), TypeConstName(self.symbol(id)))
+    }
+
+    pub fn pos_method_from_decl(
+        &self,
+        (pos, id): oxidized_by_ref::typing_defs::PosId<'_>,
+    ) -> Positioned<MethodName, R::Pos> {
+        Positioned::new(self.pos_from_decl(pos), MethodName(self.symbol(id)))
+    }
+
+    pub fn pos_prop_from_decl(
+        &self,
+        (pos, id): oxidized_by_ref::typing_defs::PosId<'_>,
+    ) -> Positioned<PropName, R::Pos> {
+        Positioned::new(self.pos_from_decl(pos), PropName(self.symbol(id)))
     }
 }

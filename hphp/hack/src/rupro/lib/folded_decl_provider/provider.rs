@@ -12,7 +12,7 @@ use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclProvider;
 use crate::special_names::SpecialNames;
-use pos::{ModuleName, Positioned, SymbolMap, TypeName, TypeNameMap, TypeNameSet};
+use pos::{MethodNameMap, ModuleName, Positioned, PropNameMap, TypeName, TypeNameMap, TypeNameSet};
 use std::sync::Arc;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_folded_class.ml
@@ -67,7 +67,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn decl_prop(
         &self,
-        props: &mut SymbolMap<FoldedElement<R>>,
+        props: &mut PropNameMap<FoldedElement<R>>,
         sc: &ShallowClass<R>,
         sp: &ShallowProp<R>,
     ) {
@@ -100,7 +100,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn decl_static_prop(
         &self,
-        static_props: &mut SymbolMap<FoldedElement<R>>,
+        static_props: &mut PropNameMap<FoldedElement<R>>,
         sc: &ShallowClass<R>,
         sp: &ShallowProp<R>,
     ) {
@@ -133,7 +133,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
 
     fn decl_method(
         &self,
-        methods: &mut SymbolMap<FoldedElement<R>>,
+        methods: &mut MethodNameMap<FoldedElement<R>>,
         sc: &ShallowClass<R>,
         sm: &ShallowMethod<R>,
     ) {

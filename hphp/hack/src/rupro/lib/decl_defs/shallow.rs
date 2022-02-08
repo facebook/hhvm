@@ -8,7 +8,9 @@ use crate::decl_defs::ty::{
     UserAttribute, WhereConstraint, XhpAttribute, XhpEnumValue,
 };
 use crate::reason::Reason;
-use pos::{ModuleName, Positioned, Symbol, TypeName};
+use pos::{
+    ClassConstName, MethodName, ModuleName, Positioned, PropName, Symbol, TypeConstName, TypeName,
+};
 use std::collections::BTreeMap;
 
 pub use crate::decl_defs::ty::ConstDecl;
@@ -18,7 +20,7 @@ pub use oxidized_by_ref::{method_flags::MethodFlags, prop_flags::PropFlags};
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ShallowClassConst<R: Reason> {
     pub is_abstract: ClassConstKind,
-    pub name: Positioned<Symbol, R::Pos>,
+    pub name: Positioned<ClassConstName, R::Pos>,
 
     /// This field is used for two different meanings in two different places:
     ///
@@ -43,7 +45,7 @@ walkable!(ShallowClassConst<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ShallowTypeconst<R: Reason> {
-    pub name: Positioned<Symbol, R::Pos>,
+    pub name: Positioned<TypeConstName, R::Pos>,
     pub kind: Typeconst<R>,
     pub enforceable: (R::Pos, bool),
     pub reifiable: Option<R::Pos>,
@@ -54,7 +56,7 @@ walkable!(ShallowTypeconst<R> => [kind]);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ShallowProp<R: Reason> {
-    pub name: Positioned<Symbol, R::Pos>,
+    pub name: Positioned<PropName, R::Pos>,
     pub xhp_attr: Option<XhpAttribute>,
     pub ty: Option<DeclTy<R>>,
     pub visibility: Visibility,
@@ -69,7 +71,7 @@ pub struct ShallowMethod<R: Reason> {
     //   - c.f.
     //     - `Shallow_decl_defs.shallow_method`
     //     - `oxidized_by_ref::shallow_decl_defs::ShallowMethod<'_>`
-    pub name: Positioned<Symbol, R::Pos>,
+    pub name: Positioned<MethodName, R::Pos>,
     pub ty: DeclTy<R>,
     pub visibility: Visibility,
     pub deprecated: Option<intern::string::BytesId>, // e.g. "The method foo is deprecated: ..."

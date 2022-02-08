@@ -44,15 +44,20 @@ impl Symbol {
     }
 }
 
+// The following newtype wrappers are all for name categories that are
+// disjoint from each other.
+// Toplevel names can have namespace qualifiers, unlike member names.
+// Toplevel names are not case sensitive in HHVM
+//
+// Any one of these name wrappers could turn into an enum if necessary
+// to avoid stringly typed mangled names during compilation.
+
 pub type BuildTypeNameHasher = BuildSymbolHasher;
 pub type TypeNameMap<V> = HashMap<TypeName, V>;
 pub type TypeNameSet = HashSet<TypeName>;
 
 /// A TypeName is the name of a class, interface, trait, type parameter,
 /// type alias, newtype, or primitive type names like int, arraykey, etc.
-///
-/// This could become an enum at some point to distinguish plain user
-/// classes from compiler-generated classes.
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct TypeName(pub Symbol);
 
@@ -62,8 +67,28 @@ impl ToString for TypeName {
     }
 }
 
-/// ModuleNames are used for the experimental Modules feature and `internal`
+/// ModuleName is introduced by the experimental Modules feature and `internal`
 /// visibility. ModuleNames are not bindable names and are not indended
 /// to be interchangeable with any other kind of name.
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct ModuleName(pub Symbol);
+
+/// ClassConstName is the name of a class const, which are disjoint from
+/// global constants, type constants, and other class members.
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+pub struct ClassConstName(pub Symbol);
+
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+pub struct TypeConstName(pub Symbol);
+
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+pub struct MethodName(pub Symbol);
+pub type BuildMethodNameHasher = BuildSymbolHasher;
+pub type MethodNameMap<V> = HashMap<MethodName, V>;
+pub type MethodNameSet = HashSet<MethodName>;
+
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+pub struct PropName(pub Symbol);
+pub type BuildPropNameHasher = BuildSymbolHasher;
+pub type PropNameMap<V> = HashMap<PropName, V>;
+pub type PropNameSet = HashSet<PropName>;

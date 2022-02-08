@@ -12,7 +12,7 @@ use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
 use crate::reason::Reason;
 use crate::shallow_decl_provider::ShallowDeclProvider;
 use crate::special_names::SpecialNames;
-use pos::{Positioned, Symbol, SymbolMap, TypeName, TypeNameMap, TypeNameSet};
+use pos::{ModuleName, Positioned, SymbolMap, TypeName, TypeNameMap, TypeNameSet};
 use std::sync::Arc;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_folded_class.ml
@@ -52,7 +52,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
     fn visibility(
         &self,
         cls: TypeName,
-        module: Option<&Positioned<Symbol, R::Pos>>,
+        module: Option<&Positioned<ModuleName, R::Pos>>,
         vis: Visibility,
     ) -> CeVisibility<R::Pos> {
         match vis {

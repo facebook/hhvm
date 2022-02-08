@@ -3,9 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::ty::*;
+use crate::decl_defs::ty::{
+    ClassConstKind, ClassConstRef, DeclTy, EnumType, FunElt, Tparam, Typeconst, TypedefType,
+    UserAttribute, WhereConstraint, XhpAttribute, XhpEnumValue,
+};
 use crate::reason::Reason;
-use pos::{Positioned, Symbol, TypeName};
+use pos::{ModuleName, Positioned, Symbol, TypeName};
 use std::collections::BTreeMap;
 
 pub use crate::decl_defs::ty::ConstDecl;
@@ -17,13 +20,16 @@ pub struct ShallowClassConst<R: Reason> {
     pub is_abstract: ClassConstKind,
     pub name: Positioned<Symbol, R::Pos>,
 
-    /// This field is used for two different meanings in two different places...
-    /// enum class A:arraykey {int X="a";} --
-    ///   here X.scc_type=\HH\MemberOf<A,int>
-    /// enum B:int as arraykey {X="a"; Y=1; Z=B::X;} --
-    ///   here X.scc_type=string, Y.scc_type=int, Z.scc_type=TAny
-    /// In the later case, the scc_type is just a simple syntactic attempt to retrieve
-    /// the type from the initializer.
+    /// This field is used for two different meanings in two different places:
+    ///
+    ///   enum class A:arraykey { int X = "a"; }
+    ///
+    /// In an enum class, X.ty = \HH\MemberOf<A,int>.
+    ///
+    ///   enum B:int as arraykey { X = "a"; Y = 1; Z = B::X; }
+    ///
+    /// In a legacy enum, X.ty = string, Y.ty = int, and Z.ty = TAny, and ty is
+    /// just a simple syntactic attempt to retrieve the type from the initializer.
     pub ty: DeclTy<R>,
 
     /// This is a list of all scope-resolution operators "A::B" that are mentioned
@@ -85,7 +91,7 @@ pub struct ShallowClass<R: Reason> {
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     pub kind: oxidized::ast_defs::ClassishKind,
-    pub module: Option<Positioned<Symbol, R::Pos>>,
+    pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub name: Positioned<TypeName, R::Pos>,
     pub tparams: Vec<Tparam<R, DeclTy<R>>>,
     pub where_constraints: Vec<WhereConstraint<DeclTy<R>>>,

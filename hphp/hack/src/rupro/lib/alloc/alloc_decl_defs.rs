@@ -331,7 +331,10 @@ impl<R: Reason> Allocator<R> {
             is_xhp: sc.is_xhp,
             has_xhp_keyword: sc.has_xhp_keyword,
             kind: sc.kind,
-            module: sc.module.as_ref().map(|id| self.pos_id_from_ast_ref(id)),
+            module: sc
+                .module
+                .as_ref()
+                .map(|id| self.pos_module_from_ast_ref(id)),
             name: self.pos_classname_from_decl(sc.name),
             tparams: self.vec(sc.tparams, Self::decl_tparam),
             where_constraints: self.vec(sc.where_constraints, Self::decl_where_constraint),
@@ -364,7 +367,9 @@ impl<R: Reason> Allocator<R> {
             pos: self.pos_from_decl(sf.pos),
             ty: self.ty_from_decl(sf.type_),
             deprecated: sf.deprecated.map(|s| self.bytes(s)),
-            module: sf.module.map(|pos_id| self.pos_id_from_ast_ref(&pos_id)),
+            module: sf
+                .module
+                .map(|pos_id| self.pos_module_from_ast_ref(&pos_id)),
             internal: sf.internal,
             php_std_lib: sf.php_std_lib,
             support_dynamic_type: sf.support_dynamic_type,
@@ -373,7 +378,7 @@ impl<R: Reason> Allocator<R> {
 
     fn typedef_decl(&self, x: &obr::shallow_decl_defs::TypedefDecl<'_>) -> shallow::TypedefDecl<R> {
         ty::TypedefType {
-            module: x.module.map(|pos_id| self.pos_id_from_ast_ref(&pos_id)),
+            module: x.module.map(|pos_id| self.pos_module_from_ast_ref(&pos_id)),
             pos: self.pos_from_decl(x.pos),
             vis: x.vis,
             tparams: self.vec(x.tparams, Self::decl_tparam),

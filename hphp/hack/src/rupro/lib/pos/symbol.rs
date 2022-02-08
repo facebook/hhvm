@@ -61,3 +61,9 @@ impl ToString for TypeName {
         self.0.to_string()
     }
 }
+
+/// ModuleNames are used for the experimental Modules feature and `internal`
+/// visibility. ModuleNames are not bindable names and are not indended
+/// to be interchangeable with any other kind of name.
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+pub struct ModuleName(pub Symbol);

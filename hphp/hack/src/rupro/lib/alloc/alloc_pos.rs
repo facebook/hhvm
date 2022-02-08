@@ -5,7 +5,7 @@
 
 use super::Allocator;
 use crate::reason::Reason;
-use pos::{FilePos, Pos, Positioned, Symbol, TypeName};
+use pos::{FilePos, ModuleName, Pos, Positioned, Symbol, TypeName};
 
 impl<R: Reason> Allocator<R> {
     pub fn pos_from_ast(&self, pos: &oxidized::pos::Pos) -> R::Pos {
@@ -46,10 +46,6 @@ impl<R: Reason> Allocator<R> {
         })
     }
 
-    pub fn pos_id_from_ast(&self, pos_id: &oxidized::ast_defs::Id) -> Positioned<Symbol, R::Pos> {
-        Positioned::new(self.pos_from_ast(&pos_id.0), self.symbol(&pos_id.1))
-    }
-
     pub fn pos_classname_from_ast(
         &self,
         pos_id: &oxidized::ast_defs::Id,
@@ -58,13 +54,6 @@ impl<R: Reason> Allocator<R> {
             self.pos_from_ast(&pos_id.0),
             TypeName(self.symbol(&pos_id.1)),
         )
-    }
-
-    pub fn pos_id_from_ast_ref(
-        &self,
-        pos_id: &oxidized_by_ref::ast_defs::Id<'_>,
-    ) -> Positioned<Symbol, R::Pos> {
-        Positioned::new(self.pos_from_decl(pos_id.0), self.symbol(pos_id.1))
     }
 
     pub fn pos_classname_from_decl(
@@ -82,5 +71,12 @@ impl<R: Reason> Allocator<R> {
         pos_id: oxidized_by_ref::typing_defs::PosId<'_>,
     ) -> Positioned<Symbol, R::Pos> {
         Positioned::new(self.pos_from_decl(pos_id.0), self.symbol(pos_id.1))
+    }
+
+    pub fn pos_module_from_ast_ref(
+        &self,
+        oxidized_by_ref::ast_defs::Id(pos, id): &oxidized_by_ref::ast_defs::Id<'_>,
+    ) -> Positioned<ModuleName, R::Pos> {
+        Positioned::new(self.pos_from_decl(pos), ModuleName(self.symbol(id)))
     }
 }

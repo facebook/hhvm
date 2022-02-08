@@ -8,7 +8,7 @@ use crate::utils::core::Ident;
 use hcons::Hc;
 use intern::string::BytesId;
 use oxidized::{aast, ast_defs};
-use pos::{Positioned, Symbol, TypeName};
+use pos::{ModuleName, Positioned, Symbol, TypeName};
 use std::collections::BTreeMap;
 
 pub use oxidized::{
@@ -34,9 +34,7 @@ pub enum CeVisibility<P> {
     Public,
     Private(TypeName),
     Protected(TypeName),
-
-    // XXX are module names disjoint from class names?
-    Internal(Positioned<Symbol, P>),
+    Internal(Positioned<ModuleName, P>),
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -360,7 +358,7 @@ walkable!(ConstDecl<R> => [ty]);
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct FunElt<R: Reason> {
     pub deprecated: Option<BytesId>,
-    pub module: Option<Positioned<Symbol, R::Pos>>,
+    pub module: Option<Positioned<ModuleName, R::Pos>>,
     /// Top-level functions have limited visibilities
     pub internal: bool,
     pub ty: DeclTy<R>,
@@ -409,7 +407,7 @@ walkable!(EnumType<R> => [base, constraint, includes]);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct TypedefType<R: Reason> {
-    pub module: Option<Positioned<Symbol, R::Pos>>,
+    pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub pos: R::Pos,
     pub vis: aast::TypedefVisibility,
     pub tparams: Vec<Tparam<R, DeclTy<R>>>,

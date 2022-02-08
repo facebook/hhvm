@@ -665,6 +665,11 @@ and default_subtype
           if_unsat (invalid ~fail)
         | (_, Tdynamic) when coercing_from_dynamic subtype_env -> valid env
         | (_, Taccess _) -> invalid ~fail env
+        | (_, Tnewtype (_, _, ty)) ->
+          simplify_subtype_i ~subtype_env ~this_ty (LoclType ty) ty_super env
+        | (_, Tdependent (_, ty)) ->
+          let this_ty = Option.first_some this_ty (Some lty_sub) in
+          simplify_subtype_i ~subtype_env ~this_ty (LoclType ty) ty_super env
         | _ -> invalid ~fail env
       end
   in
@@ -684,17 +689,6 @@ and default_subtype
             | Some cd -> (env, TL.Coerce (cd, lty_sub, lty_super))
             | None -> default_subtype_inner env ty_sub ty_super
           end
-        | (_, Tnewtype (_, _, ty)) ->
-          simplify_subtype ~subtype_env ~this_ty ty lty_super env
-        | (_, Tdependent (_, ty)) ->
-          let this_ty = Option.first_some this_ty (Some lty_sub) in
-          simplify_subtype ~subtype_env ~this_ty ty lty_super env
-        | (r_sub, Tany _) ->
-          if subtype_env.no_top_bottom then
-            default env
-          else
-            let ty_sub = anyfy env r_sub lty_super in
-            simplify_subtype ~subtype_env ~this_ty ty_sub lty_super env
         | (r_sub, Tprim Nast.Tvoid) ->
           let r =
             Reason.Rimplicit_upper_bound (Reason.to_pos r_sub, "?nonnull")
@@ -706,6 +700,12 @@ and default_subtype
             lty_super
             env
           |> if_unsat (invalid ~fail)
+        | (r_sub, Tany _) ->
+          if subtype_env.no_top_bottom then
+            default env
+          else
+            let ty_sub = anyfy env r_sub lty_super in
+            simplify_subtype ~subtype_env ~this_ty ty_sub lty_super env
         | _ -> default_subtype_inner env ty_sub ty_super
       end)
   | ConstraintType _ -> default_subtype_inner env ty_sub ty_super

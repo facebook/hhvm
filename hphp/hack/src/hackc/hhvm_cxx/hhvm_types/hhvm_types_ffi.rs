@@ -3,11 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![allow(warnings)]
+use std::ops::{BitAnd, BitOr};
 
-use std::ops::BitAnd;
-use std::ops::BitOr;
-
+#[allow(unreachable_patterns)]
 #[cxx::bridge(namespace = "HPHP")]
 pub mod ffi {
     // This is not a real definition. Cxx just adds static asserts on each of these enum variants
@@ -114,7 +112,7 @@ impl std::fmt::Display for TypeConstraintFlags {
 
 impl TypeConstraintFlags {
     pub fn is_empty(&self) -> bool {
-        (*self == TypeConstraintFlags::NoFlags)
+        *self == TypeConstraintFlags::NoFlags
     }
 }
 
@@ -152,36 +150,36 @@ impl From<u32> for Attr {
 
 impl From<oxidized::ast_defs::Visibility> for Attr {
     fn from(k: oxidized::ast_defs::Visibility) -> Attr {
-        use oxidized::ast_defs::Visibility::*;
+        use oxidized::ast_defs::Visibility;
         match k {
-            Private => Attr::AttrPrivate,
-            Public => Attr::AttrPublic,
-            Protected => Attr::AttrProtected,
-            Internal => Attr::AttrPublic,
+            Visibility::Private => Attr::AttrPrivate,
+            Visibility::Public => Attr::AttrPublic,
+            Visibility::Protected => Attr::AttrProtected,
+            Visibility::Internal => Attr::AttrPublic,
         }
     }
 }
 
 impl From<&oxidized::ast_defs::Visibility> for Attr {
     fn from(k: &oxidized::ast_defs::Visibility) -> Attr {
-        use oxidized::ast_defs::Visibility::*;
+        use oxidized::ast_defs::Visibility;
         match k {
-            Private => Attr::AttrPrivate,
-            Public => Attr::AttrPublic,
-            Protected => Attr::AttrProtected,
-            Internal => Attr::AttrNone,
+            Visibility::Private => Attr::AttrPrivate,
+            Visibility::Public => Attr::AttrPublic,
+            Visibility::Protected => Attr::AttrProtected,
+            Visibility::Internal => Attr::AttrNone,
         }
     }
 }
 
 impl From<hhbc_ast::Visibility> for Attr {
     fn from(k: hhbc_ast::Visibility) -> Attr {
-        use hhbc_ast::Visibility::*;
+        use hhbc_ast::Visibility;
         match k {
-            Private => Attr::AttrPrivate,
-            Public => Attr::AttrPublic,
-            Protected => Attr::AttrProtected,
-            Internal => Attr::AttrNone,
+            Visibility::Private => Attr::AttrPrivate,
+            Visibility::Public => Attr::AttrPublic,
+            Visibility::Protected => Attr::AttrProtected,
+            Visibility::Internal => Attr::AttrNone,
         }
     }
 }
@@ -260,7 +258,7 @@ impl Attr {
         (*self & Attr::AttrInterceptable) != 0
     }
     pub fn is_empty(&self) -> bool {
-        (*self == Attr::AttrNone)
+        *self == Attr::AttrNone
     }
 }
 

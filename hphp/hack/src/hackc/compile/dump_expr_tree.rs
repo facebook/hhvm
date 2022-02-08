@@ -31,9 +31,9 @@ impl<'ast> Visitor<'ast> for ExprTreeLiteralExtractor {
     }
 
     fn visit_expr(&mut self, env: &mut (), e: &ast::Expr) -> Result<(), ()> {
-        use aast::Expr_::*;
+        use aast::Expr_;
         match &e.2 {
-            ExpressionTree(et) => {
+            Expr_::ExpressionTree(et) => {
                 self.literals.push((e.1.clone(), (&**et).clone()));
             }
             _ => e.recurse(env, self)?,

@@ -960,33 +960,31 @@ fn print_instructions(
     w: &mut dyn Write,
     instr_seq: &InstrSeq<'_>,
 ) -> Result<()> {
-    use Instruct::*;
-    use InstructTry::*;
     let mut ctx = ctx.clone();
     for instr in instr_seq.compact_iter() {
         match instr {
-            ISpecialFlow(_) => {
+            Instruct::ISpecialFlow(_) => {
                 return Err(Error::fail("Cannot break/continue 1 level").into());
             }
-            IComment(_) => {
-                // indetation = 0
+            Instruct::IComment(_) => {
+                // indentation = 0
                 newline(w)?;
                 print_instr(w, instr)?;
             }
-            ILabel(_) => ctx.unblock(w, |c, w| {
+            Instruct::ILabel(_) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
                 print_instr(w, instr)
             })?,
-            ITry(TryCatchBegin) => {
+            Instruct::ITry(InstructTry::TryCatchBegin) => {
                 ctx.newline(w)?;
                 print_instr(w, instr)?;
                 ctx.indent_inc();
             }
-            ITry(TryCatchMiddle) => ctx.unblock(w, |c, w| {
+            Instruct::ITry(InstructTry::TryCatchMiddle) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
                 print_instr(w, instr)
             })?,
-            ITry(TryCatchEnd) => {
+            Instruct::ITry(InstructTry::TryCatchEnd) => {
                 ctx.indent_dec();
                 ctx.newline(w)?;
                 print_instr(w, instr)?;
@@ -1186,41 +1184,40 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>) -> Result<()> {
         }
     }
 
-    use Instruct::*;
     use InstructBasic as IB;
     match instr {
-        IIterator(i) => print_iterator(w, i),
-        IBasic(b) => w.write_all(match b {
+        Instruct::IIterator(i) => print_iterator(w, i),
+        Instruct::IBasic(b) => w.write_all(match b {
             IB::Nop => b"Nop",
             IB::EntryNop => b"EntryNop",
             IB::PopC => b"PopC",
             IB::PopU => b"PopU",
             IB::Dup => b"Dup",
         }),
-        ILitConst(lit) => print_lit_const(w, lit),
-        IOp(op) => print_op(w, op),
-        IContFlow(cf) => print_control_flow(w, cf),
-        ICall(c) => print_call(w, c),
-        IMisc(misc) => print_misc(w, misc),
-        IGet(get) => print_get(w, get),
-        IMutator(mutator) => print_mutator(w, mutator),
-        ILabel(l) => {
+        Instruct::ILitConst(lit) => print_lit_const(w, lit),
+        Instruct::IOp(op) => print_op(w, op),
+        Instruct::IContFlow(cf) => print_control_flow(w, cf),
+        Instruct::ICall(c) => print_call(w, c),
+        Instruct::IMisc(misc) => print_misc(w, misc),
+        Instruct::IGet(get) => print_get(w, get),
+        Instruct::IMutator(mutator) => print_mutator(w, mutator),
+        Instruct::ILabel(l) => {
             print_label(w, l)?;
             w.write_all(b":")
         }
-        IIsset(i) => print_isset(w, i),
-        IBase(i) => print_base(w, i),
-        IFinal(i) => print_final(w, i),
-        ITry(itry) => print_try(w, itry),
-        IComment(s) => concat_str_by(w, " ", ["#", s.unsafe_as_str()]),
-        ISrcLoc(p) => write!(
+        Instruct::IIsset(i) => print_isset(w, i),
+        Instruct::IBase(i) => print_base(w, i),
+        Instruct::IFinal(i) => print_final(w, i),
+        Instruct::ITry(itry) => print_try(w, itry),
+        Instruct::IComment(s) => concat_str_by(w, " ", ["#", s.unsafe_as_str()]),
+        Instruct::ISrcLoc(p) => write!(
             w,
             ".srcloc {}:{},{}:{};",
             p.line_begin, p.col_begin, p.line_end, p.col_end
         ),
-        IAsync(a) => print_async(w, a),
-        IGenerator(gen) => print_gen_creation_execution(w, gen),
-        IIncludeEvalDefine(ed) => print_include_eval_define(w, ed),
+        Instruct::IAsync(a) => print_async(w, a),
+        Instruct::IGenerator(gen) => print_gen_creation_execution(w, gen),
+        Instruct::IIncludeEvalDefine(ed) => print_include_eval_define(w, ed),
         _ => Err(Error::fail("invalid instruction").into()),
     }
 }
@@ -1784,14 +1781,13 @@ fn print_misc(w: &mut dyn Write, misc: &InstructMisc<'_>) -> Result<()> {
 }
 
 fn print_include_eval_define(w: &mut dyn Write, ed: &InstructIncludeEvalDefine) -> Result<()> {
-    use InstructIncludeEvalDefine::*;
     match ed {
-        Incl => w.write_all(b"Incl"),
-        InclOnce => w.write_all(b"InclOnce"),
-        Req => w.write_all(b"Req"),
-        ReqOnce => w.write_all(b"ReqOnce"),
-        ReqDoc => w.write_all(b"ReqDoc"),
-        Eval => w.write_all(b"Eval"),
+        InstructIncludeEvalDefine::Incl => w.write_all(b"Incl"),
+        InstructIncludeEvalDefine::InclOnce => w.write_all(b"InclOnce"),
+        InstructIncludeEvalDefine::Req => w.write_all(b"Req"),
+        InstructIncludeEvalDefine::ReqOnce => w.write_all(b"ReqOnce"),
+        InstructIncludeEvalDefine::ReqDoc => w.write_all(b"ReqDoc"),
+        InstructIncludeEvalDefine::Eval => w.write_all(b"Eval"),
     }
 }
 

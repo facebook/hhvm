@@ -21,13 +21,13 @@ pub fn get_unique_id_for_function(fun_name: &str) -> String {
 }
 
 pub fn get_unique_id_for_scope(scope: &Scope<'_, '_>) -> String {
-    use ScopeItem::*;
     match scope.items.as_slice() {
         [] => get_unique_id_for_main(),
-        [.., Class(cls), Method(md)] | [.., Class(cls), Method(md), Lambda(_)] => {
+        [.., ScopeItem::Class(cls), ScopeItem::Method(md)]
+        | [.., ScopeItem::Class(cls), ScopeItem::Method(md), ScopeItem::Lambda(_)] => {
             get_unique_id_for_method(cls.get_name_str(), md.get_name_str())
         }
-        [.., Function(fun)] => get_unique_id_for_function(fun.get_name_str()),
+        [.., ScopeItem::Function(fun)] => get_unique_id_for_function(fun.get_name_str()),
         _ => panic!("unexpected scope shape"),
     }
 }

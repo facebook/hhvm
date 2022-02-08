@@ -648,106 +648,106 @@ mod string_utils_tests {
     }
 
     mod float {
-        use crate::float::*;
+        use crate::float;
         #[test]
         fn test_no_float_part() {
-            assert_eq!(to_string(1.0), "1")
+            assert_eq!(float::to_string(1.0), "1")
         }
 
         #[test]
         fn test_precision() {
-            assert_eq!(to_string(1.1), "1.1000000000000001")
+            assert_eq!(float::to_string(1.1), "1.1000000000000001")
         }
 
         #[test]
         fn test_no_trailing_zeroes() {
-            assert_eq!(to_string(1.2), "1.2")
+            assert_eq!(float::to_string(1.2), "1.2")
         }
 
         #[test]
         fn test_scientific() {
-            assert_eq!(to_string(1e+100), "1e+100")
+            assert_eq!(float::to_string(1e+100), "1e+100")
         }
 
         #[test]
         fn test_scientific_precision() {
-            assert_eq!(to_string(-2.1474836480001e9), "-2147483648.0001001")
+            assert_eq!(float::to_string(-2.1474836480001e9), "-2147483648.0001001")
         }
 
         #[test]
         fn test_negative_nan() {
-            assert_eq!(to_string(-std::f32::NAN), "NAN")
+            assert_eq!(float::to_string(-std::f32::NAN), "NAN")
         }
     }
 
     mod integer {
         mod to_decimal {
-            use crate::integer::*;
+            use crate::integer;
 
             #[test]
             fn decimal_zero() {
-                assert_eq!(to_decimal("0"), Ok("0".to_string()));
+                assert_eq!(integer::to_decimal("0"), Ok("0".to_string()));
             }
 
             #[test]
             fn octal_zero() {
-                assert_eq!(to_decimal("00"), Ok("0".to_string()));
+                assert_eq!(integer::to_decimal("00"), Ok("0".to_string()));
             }
 
             #[test]
             fn binary_zero_lowercase() {
-                assert_eq!(to_decimal("0b0"), Ok("0".to_string()));
+                assert_eq!(integer::to_decimal("0b0"), Ok("0".to_string()));
             }
 
             #[test]
             fn binary_zero_uppercase() {
-                assert_eq!(to_decimal("0B0"), Ok("0".to_string()));
+                assert_eq!(integer::to_decimal("0B0"), Ok("0".to_string()));
             }
 
             #[test]
             fn hex_zero_lowercase() {
-                assert_eq!(to_decimal("0x0"), Ok("0".to_string()));
+                assert_eq!(integer::to_decimal("0x0"), Ok("0".to_string()));
             }
 
             #[test]
             fn hex_zero_uppercase() {
-                assert_eq!(to_decimal("0X0"), Ok("0".to_string()));
+                assert_eq!(integer::to_decimal("0X0"), Ok("0".to_string()));
             }
 
             #[test]
             fn decimal_random_value() {
-                assert_eq!(to_decimal("1245"), Ok("1245".to_string()));
+                assert_eq!(integer::to_decimal("1245"), Ok("1245".to_string()));
             }
 
             #[test]
             fn octal_random_value() {
-                assert_eq!(to_decimal("02335"), Ok("1245".to_string()));
+                assert_eq!(integer::to_decimal("02335"), Ok("1245".to_string()));
             }
 
             #[test]
             fn binary_random_value_lowercase() {
-                assert_eq!(to_decimal("0b10011011101"), Ok("1245".to_string()));
+                assert_eq!(integer::to_decimal("0b10011011101"), Ok("1245".to_string()));
             }
 
             #[test]
             fn binary_random_value_uppercase() {
-                assert_eq!(to_decimal("0B10011011101"), Ok("1245".to_string()));
+                assert_eq!(integer::to_decimal("0B10011011101"), Ok("1245".to_string()));
             }
 
             #[test]
             fn hex_random_value_lowercase() {
-                assert_eq!(to_decimal("0x4DD"), Ok("1245".to_string()));
+                assert_eq!(integer::to_decimal("0x4DD"), Ok("1245".to_string()));
             }
 
             #[test]
             fn hex_random_value_uppercase() {
-                assert_eq!(to_decimal("0X4DD"), Ok("1245".to_string()));
+                assert_eq!(integer::to_decimal("0X4DD"), Ok("1245".to_string()));
             }
 
             #[test]
             fn decimal_max_value() {
                 assert_eq!(
-                    to_decimal("9223372036854775807"),
+                    integer::to_decimal("9223372036854775807"),
                     Ok("9223372036854775807".to_string())
                 );
             }
@@ -755,7 +755,7 @@ mod string_utils_tests {
             #[test]
             fn octal_max_value() {
                 assert_eq!(
-                    to_decimal("0777777777777777777777"),
+                    integer::to_decimal("0777777777777777777777"),
                     Ok("9223372036854775807".to_string())
                 );
             }
@@ -763,7 +763,9 @@ mod string_utils_tests {
             #[test]
             fn binary_max_value_lowercase() {
                 assert_eq!(
-                    to_decimal("0b111111111111111111111111111111111111111111111111111111111111111"),
+                    integer::to_decimal(
+                        "0b111111111111111111111111111111111111111111111111111111111111111"
+                    ),
                     Ok("9223372036854775807".to_string())
                 );
             }
@@ -771,7 +773,9 @@ mod string_utils_tests {
             #[test]
             fn binary_max_value_uppercase() {
                 assert_eq!(
-                    to_decimal("0B111111111111111111111111111111111111111111111111111111111111111"),
+                    integer::to_decimal(
+                        "0B111111111111111111111111111111111111111111111111111111111111111"
+                    ),
                     Ok("9223372036854775807".to_string())
                 );
             }
@@ -779,7 +783,7 @@ mod string_utils_tests {
             #[test]
             fn hex_max_value_lowercase() {
                 assert_eq!(
-                    to_decimal("0x7FFFFFFFFFFFFFFF"),
+                    integer::to_decimal("0x7FFFFFFFFFFFFFFF"),
                     Ok("9223372036854775807".to_string())
                 );
             }
@@ -787,39 +791,39 @@ mod string_utils_tests {
             #[test]
             fn hex_max_value_uppercase() {
                 assert_eq!(
-                    to_decimal("0X7FFFFFFFFFFFFFFF"),
+                    integer::to_decimal("0X7FFFFFFFFFFFFFFF"),
                     Ok("9223372036854775807".to_string())
                 );
             }
 
             #[test]
             fn unparsable_string() {
-                assert!(to_decimal("bad_string").is_err());
+                assert!(integer::to_decimal("bad_string").is_err());
             }
         }
     }
 
     mod locals {
-        use crate::locals::*;
+        use crate::locals;
 
         #[test]
         fn strip_single_leading_dollar() {
-            assert_eq!(strip_dollar("$foo"), "foo");
+            assert_eq!(locals::strip_dollar("$foo"), "foo");
         }
 
         #[test]
         fn return_string_if_no_leading_dollar() {
-            assert_eq!(strip_dollar("foo"), "foo");
+            assert_eq!(locals::strip_dollar("foo"), "foo");
         }
 
         #[test]
         fn empty_string() {
-            assert_eq!(strip_dollar(""), "");
+            assert_eq!(locals::strip_dollar(""), "");
         }
 
         #[test]
         fn string_of_single_dollar() {
-            assert_eq!(strip_dollar("$"), "");
+            assert_eq!(locals::strip_dollar("$"), "");
         }
     }
 
@@ -896,27 +900,27 @@ mod string_utils_tests {
     }
 
     mod reified {
-        use crate::reified::*;
+        use crate::reified;
 
         #[test]
         fn test_mangle_reified_param() {
-            assert_eq!(mangle_reified_param(false, "x"), "$__reified$x");
-            assert_eq!(mangle_reified_param(true, "x"), "__reified$x")
+            assert_eq!(reified::mangle_reified_param(false, "x"), "$__reified$x");
+            assert_eq!(reified::mangle_reified_param(true, "x"), "__reified$x")
         }
 
         #[test]
         fn test_is_captured_generic() {
             assert_eq!(
-                is_captured_generic("$__captured$reifiedgeneric$function$1"),
+                reified::is_captured_generic("$__captured$reifiedgeneric$function$1"),
                 Some((true, 1))
             );
             assert_eq!(
-                is_captured_generic("$__captured$reifiedgeneric$class$1"),
+                reified::is_captured_generic("$__captured$reifiedgeneric$class$1"),
                 Some((false, 1))
             );
-            assert_eq!(is_captured_generic("function$1"), None);
+            assert_eq!(reified::is_captured_generic("function$1"), None);
             assert_eq!(
-                is_captured_generic("$__captured$reifiedgeneric$function1"),
+                reified::is_captured_generic("$__captured$reifiedgeneric$function1"),
                 None
             );
         }
@@ -924,11 +928,11 @@ mod string_utils_tests {
         #[test]
         fn test_captured_name() {
             assert_eq!(
-                captured_name(true, 1),
+                reified::captured_name(true, 1),
                 "$__captured$reifiedgeneric$function$1"
             );
             assert_eq!(
-                captured_name(false, 1),
+                reified::captured_name(false, 1),
                 "$__captured$reifiedgeneric$class$1"
             );
         }

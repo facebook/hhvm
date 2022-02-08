@@ -15,10 +15,9 @@ pub enum DeclProvider<'decl> {
 
 impl<'decl> decl_provider::DeclProvider<'decl> for DeclProvider<'decl> {
     fn get_decl(&self, kind: NameType, sym: &str) -> Result<Decl<'decl>, decl_provider::Error> {
-        use DeclProvider::*;
         match self {
-            ExternalDeclProvider(e) => e.get_decl(kind, sym),
-            NoDeclProvider(e) => e.get_decl(kind, sym),
+            DeclProvider::ExternalDeclProvider(e) => e.get_decl(kind, sym),
+            DeclProvider::NoDeclProvider(e) => e.get_decl(kind, sym),
         }
     }
 }

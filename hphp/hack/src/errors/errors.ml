@@ -853,12 +853,6 @@ let apply_callback_to_errors : t -> Typing_error.Reasons_callback.t -> unit =
 (* Accessors. (All methods delegated to the parameterized module.) *)
 (*****************************************************************************)
 
-let errors_in_file : t -> Relative_path.t -> error list =
- fun (errors, _) file ->
-  Relative_path.Map.find_opt errors file
-  |> Option.value ~default:PhaseMap.empty
-  |> PhaseMap.fold ~init:[] ~f:(fun _phase errors acc -> errors @ acc)
-
 let per_file_error_count : per_file_errors -> int =
   PhaseMap.fold ~init:0 ~f:(fun _phase errors count ->
       List.length errors + count)
@@ -887,13 +881,6 @@ let fold_errors_in ?phase err ~file ~init ~f =
          match phase with
          | Some x when not (equal_phase x p) -> acc
          | _ -> List.fold_right errors ~init:acc ~f)
-
-let fold_per_file :
-    t ->
-    init:'acc ->
-    f:(Relative_path.t -> per_file_errors -> 'acc -> 'acc) ->
-    'acc =
- (fun (errors, _fixmes) -> Relative_path.Map.fold errors)
 
 let get_failed_files err phase =
   files_t_fold (fst err) ~init:Relative_path.Set.empty ~f:(fun source p _ acc ->

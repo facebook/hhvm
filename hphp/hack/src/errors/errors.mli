@@ -182,17 +182,9 @@ val from_file_error_list : ?phase:phase -> (Relative_path.t * error) list -> t
 
 val per_file_error_count : per_file_errors -> int
 
-val errors_in_file : t -> Relative_path.t -> error list
-
 val get_file_errors : t -> Relative_path.t -> per_file_errors
 
 val iter_error_list : (error -> unit) -> t -> unit
-
-val fold_per_file :
-  t ->
-  init:'acc ->
-  f:(Relative_path.t -> per_file_errors -> 'acc -> 'acc) ->
-  'acc
 
 val fold_errors :
   ?phase:phase -> t -> init:'a -> f:(Relative_path.t -> error -> 'a -> 'a) -> 'a

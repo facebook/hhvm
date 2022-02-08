@@ -1,0 +1,14 @@
+{
+  "terminal.integrated.profiles.linux": {
+    "bash": {
+      "path": "/bin/bash",
+      "args": [
+        // This argument is necessary,
+        // because hhvm crashes in a non-login shell.
+        // See https://github.com/hhvm/packaging/issues/276
+        "--login",
+      ]
+    }
+  },
+  "terminal.integrated.defaultProfile.linux": "bash"
+}

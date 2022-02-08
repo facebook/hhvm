@@ -15,6 +15,7 @@
   procs_procs
   server_services
   utils_core
+  version
   uutf)
  (preprocess
   (pps ppx_deriving.std)))

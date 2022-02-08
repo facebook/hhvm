@@ -77,7 +77,7 @@ struct SymbolMap {
 
   explicit SymbolMap(
       folly::fs::path root,
-      DBData dbData,
+      AutoloadDB::Handle dbHandle,
       bool enforceOneDefinition,
       hphp_hash_set<std::string> indexedMethodAttributes = {});
   SymbolMap() = delete;
@@ -603,7 +603,7 @@ private:
 
   const folly::fs::path m_root;
   const std::string m_schemaHash;
-  const DBData m_dbData;
+  AutoloadDB::Handle m_dbHandle;
   const bool m_enforceOneDefinition;
   const hphp_hash_set<std::string> m_indexedMethodAttrs;
 };

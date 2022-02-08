@@ -105,7 +105,7 @@ HPHP::jit::(anonymous namespace)::tl_ownedFunc
 HPHP::jit::tc::tl_is_jitting
 
 # Native Facts is not request-scoped.
-HPHP::Facts::t_adb
+HPHP::Facts::(anonymous namespace)::t_adb
 HPHP::Facts::(anonymous namespace)::t_savedStates
 
 # Thread locals to allow Native Facts to use memcache.

@@ -663,6 +663,10 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
   Treadmill::enqueue(
       [this] { garbageCollectUnusedAutoloadMaps(s_ext.getExpirationTime()); });
 
+  auto dbHandle = [dbData = mapKey->m_dbData]() -> AutoloadDB& {
+    return getDB(dbData);
+  };
+
   if (mapKey->m_dbData.m_rwMode == SQLite::OpenMode::ReadOnly) {
     XLOGF(
         DBG0,
@@ -670,7 +674,8 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
         mapKey->m_root.native(),
         mapKey->m_dbData.m_path.native());
     return m_maps
-        .insert({*mapKey, make_trusted_facts(mapKey->m_root, mapKey->m_dbData)})
+        .insert(
+            {*mapKey, make_trusted_facts(mapKey->m_root, std::move(dbHandle))})
         .first->second.get();
   }
 
@@ -681,7 +686,7 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
           {*mapKey,
            make_watcher_facts(
                mapKey->m_root,
-               mapKey->m_dbData,
+               std::move(dbHandle),
                make_watchman_watcher(
                    mapKey->m_queryExpr, get_watchman_client(mapKey->m_root)),
                RuntimeOption::ServerExecutionMode(),

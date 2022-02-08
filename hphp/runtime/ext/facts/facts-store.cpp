@@ -479,21 +479,21 @@ struct FactsStoreImpl final
 
   FactsStoreImpl(
       folly::fs::path root,
-      DBData dbData,
+      AutoloadDB::Handle dbHandle,
       std::unique_ptr<Watcher> watcher,
       hphp_hash_set<std::string> indexedMethodAttributes)
       : m_updateExec{1, make_thread_factory("Autoload update")}
       , m_root{std::move(root)}
-      , m_map{m_root, std::move(dbData), RuntimeOption::AutoloadEnforceOneDefinitionRule, std::move(indexedMethodAttributes)}
+      , m_map{m_root, std::move(dbHandle), RuntimeOption::AutoloadEnforceOneDefinitionRule, std::move(indexedMethodAttributes)}
       , m_watcher{std::move(watcher)} {
   }
 
-  FactsStoreImpl(folly::fs::path root, DBData dbData)
+  FactsStoreImpl(folly::fs::path root, AutoloadDB::Handle dbHandle)
       : m_updateExec{1, make_thread_factory("Autoload update")}
       , m_root{std::move(root)}
       , m_map{
             m_root,
-            std::move(dbData),
+            std::move(dbHandle),
             RuntimeOption::AutoloadEnforceOneDefinitionRule} {
   }
 
@@ -1199,7 +1199,7 @@ struct FactsStoreImpl final
 
 std::shared_ptr<FactsStore> make_watcher_facts(
     folly::fs::path root,
-    DBData dbData,
+    AutoloadDB::Handle dbHandle,
     std::unique_ptr<Watcher> watcher,
     bool shouldSubscribe,
     std::vector<std::string> indexedMethodAttrsVec) {
@@ -1210,7 +1210,7 @@ std::shared_ptr<FactsStore> make_watcher_facts(
   }
   auto map = std::make_shared<FactsStoreImpl>(
       std::move(root),
-      std::move(dbData),
+      std::move(dbHandle),
       std::move(watcher),
       std::move(indexedMethodAttrs));
   if (shouldSubscribe) {
@@ -1220,8 +1220,8 @@ std::shared_ptr<FactsStore> make_watcher_facts(
 }
 
 std::shared_ptr<FactsStore>
-make_trusted_facts(folly::fs::path root, DBData dbData) {
-  return std::make_shared<FactsStoreImpl>(std::move(root), std::move(dbData));
+make_trusted_facts(folly::fs::path root, AutoloadDB::Handle dbHandle) {
+  return std::make_shared<FactsStoreImpl>(std::move(root), std::move(dbHandle));
 }
 
 } // namespace Facts

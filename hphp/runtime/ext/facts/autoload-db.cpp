@@ -32,7 +32,9 @@
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/hash.h"
+#include "hphp/util/thread-local.h"
 
 namespace HPHP {
 namespace Facts {
@@ -1358,11 +1360,15 @@ struct AutoloadDBImpl final : public AutoloadDB {
   ClockStmts m_clockStmts;
 };
 
+using AutoloadDBThreadLocal = hphp_hash_map<
+    std::pair<std::string, SQLite::OpenMode>,
+    std::unique_ptr<AutoloadDB>>;
+
+THREAD_LOCAL(AutoloadDBThreadLocal, t_adb);
+
 } // namespace
 
 AutoloadDB::~AutoloadDB() = default;
-
-THREAD_LOCAL(AutoloadDBThreadLocal, t_adb);
 
 AutoloadDB& getDB(const DBData& dbData) {
   AutoloadDBThreadLocal& dbVault = *t_adb.get();

@@ -83,13 +83,13 @@ getPathSymMap(typename SymbolMap::Data& data) {
 
 SymbolMap::SymbolMap(
     folly::fs::path root,
-    DBData dbData,
+    AutoloadDB::Handle dbHandle,
     bool enforceOneDefinition,
     hphp_hash_set<std::string> indexedMethodAttrs)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
           1, std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))}
     , m_root{std::move(root)}
-    , m_dbData{std::move(dbData)}
+    , m_dbHandle{std::move(dbHandle)}
     , m_enforceOneDefinition{enforceOneDefinition}
     , m_indexedMethodAttrs{std::move(indexedMethodAttrs)} {
   assertx(m_root.is_absolute());
@@ -1550,7 +1550,7 @@ void SymbolMap::waitForDBUpdate() {
 }
 
 AutoloadDB& SymbolMap::getDB() const {
-  return HPHP::Facts::getDB(m_dbData);
+  return m_dbHandle();
 }
 
 } // namespace Facts

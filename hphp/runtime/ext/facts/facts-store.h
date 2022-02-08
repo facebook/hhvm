@@ -30,21 +30,21 @@ namespace Facts {
 
 /**
  * Create a FactsStore that learns about changed files from its Watcher and
- * updates the DB at `dbData.m_path` accordingly.
+ * accordingly updates the DB that `dbHandle` returns.
  */
 std::shared_ptr<FactsStore> make_watcher_facts(
     folly::fs::path root,
-    DBData dbData,
+    AutoloadDB::Handle dbHandle,
     std::unique_ptr<Watcher> watcher,
     bool shouldSubscribe,
     std::vector<std::string> indexedMethodAttributes);
 
 /**
- * Create a FactsStore that trusts the DB at `dbData.m_path` and never modifies
- * it.
+ * Create a FactsStore that trusts the DB that `dbHandle` returns, and never
+ * modifies it.
  */
 std::shared_ptr<FactsStore>
-make_trusted_facts(folly::fs::path root, DBData dbData);
+make_trusted_facts(folly::fs::path root, AutoloadDB::Handle dbHandle);
 
 } // namespace Facts
 } // namespace HPHP

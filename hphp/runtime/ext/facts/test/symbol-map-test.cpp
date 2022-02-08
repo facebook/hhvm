@@ -286,8 +286,10 @@ protected:
     m_wrappers.push_back(SymbolMapWrapper{
         std::make_unique<SymbolMap>(
             std::move(root),
-            DBData::readWrite(
-                std::move(dbPath), static_cast<::gid_t>(-1), 0644),
+            [dbPath]() -> AutoloadDB& {
+              return getDB(
+                  DBData::readWrite(dbPath, static_cast<::gid_t>(-1), 0644));
+            },
             GetParam(),
             std::move(indexedMethodAttributes)),
         std::move(exec)});

@@ -28,10 +28,8 @@
 #include <folly/experimental/io/FsUtil.h>
 
 #include "hphp/runtime/ext/facts/file-facts.h"
-#include "hphp/util/hash-map.h"
 #include "hphp/util/optional.h"
 #include "hphp/util/sqlite-wrapper.h"
-#include "hphp/util/thread-local.h"
 
 namespace HPHP {
 namespace Facts {
@@ -95,6 +93,11 @@ struct AutoloadDB {
   AutoloadDB& operator=(AutoloadDB&&) noexcept = default;
 
   virtual ~AutoloadDB();
+
+  /**
+   * Function which returns a reference to an AutoloadDB.
+   */
+  using Handle = folly::Function<AutoloadDB&() const>;
 
   struct KindAndFlags {
     TypeKind m_kind;
@@ -383,12 +386,10 @@ struct AutoloadDB {
   };
 };
 
-using AutoloadDBThreadLocal = hphp_hash_map<
-    std::pair<std::string, SQLite::OpenMode>,
-    std::unique_ptr<AutoloadDB>>;
-
-extern THREAD_LOCAL(AutoloadDBThreadLocal, t_adb);
-
+/**
+ * Return a reference to this thread's connection to an AutoloadDB
+ * corresponding to the given data.
+ */
 AutoloadDB& getDB(const DBData& dbData);
 
 } // namespace Facts

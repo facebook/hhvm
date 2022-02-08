@@ -522,7 +522,7 @@ let requires_final_class pos name =
     Error_code.(to_enum RequiresFinalClass)
     ( pos,
       Format.sprintf
-        "%s is not an extendable class."
+        "%s is a `final` class, so it cannot be extended."
         (Markdown_lite.md_codify @@ Render.strip_ns name) )
     []
 

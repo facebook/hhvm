@@ -291,9 +291,10 @@ dynamic getIRInstruction(const IRInstruction& inst,
 
 dynamic getTCRange(const AreaIndex area,
                    const TransKind kind,
-                   const TcaRange& range) {
+                   const TcaRange& range,
+                   uint64_t offset) {
   std::ostringstream disasmStr;
-  disasmRange(disasmStr, kind, range);
+  disasmRange(disasmStr, kind, range.begin(), range.end(), offset);
   auto const startStr = folly::sformat("{}", static_cast<void*>(range.begin()));
   auto const endStr = folly::sformat("{}", static_cast<void*>(range.end()));
   return dynamic::object("area", areaAsString(area))
@@ -416,23 +417,27 @@ dynamic getBlock(const Block* block,
 
       const auto lastEnd = lastRange[(int)currArea].end();
 
+      auto const offset = asmInfo->instRangesForArea(currArea).offset;
       if (lastEnd && lastEnd != instRange.begin()) {
         // There may be gaps between instruction ranges that have been
         // added by the relocator, e.g. adding nops.  This check will
         // determine if the gap belongs to another instruction or not.
         // If it doesn't belong to any other instruction then print it.
-        auto const offset = asmInfo->instRangesForArea(currArea).offset;
         auto const gapRange = TcaRange(lastEnd - offset,
                                        instRange.begin() - offset);
         if (!asmInfo->instRangeExists(currArea, gapRange)) {
           currInstrObj["tc_ranges"].push_back(getTCRange(currArea,
                                                          kind,
-                                                         gapRange));
+                                                         TcaRange(
+                                                           lastEnd,
+                                                           instRange.begin()),
+                                                         offset));
         }
       }
       currInstrObj["tc_ranges"].push_back(getTCRange(currArea,
                                                      kind,
-                                                     instRange));
+                                                     instRange,
+                                                     offset));
       lastRange[(int)currArea] = instRange;
     }
     if (!currInstrObj.isNull()) {

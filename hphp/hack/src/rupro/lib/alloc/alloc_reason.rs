@@ -78,7 +78,7 @@ impl<R: Reason> Allocator<R> {
                 }
                 OR::Rtypeconst((r1, pos_id, sym, r2)) => RI::Rtypeconst(
                     self.reason(r1),
-                    self.pos_id_from_decl(*pos_id),
+                    self.pos_type_const_from_decl(*pos_id),
                     self.symbol(sym),
                     self.reason(r2),
                 ),
@@ -94,7 +94,9 @@ impl<R: Reason> Allocator<R> {
                     self.expr_dep_type_reason(*edt_reason),
                 ),
                 OR::RnullsafeOp(pos) => RI::RnullsafeOp(self.pos_from_decl(pos)),
-                OR::RtconstNoCstr(&pos_id) => RI::RtconstNoCstr(self.pos_id_from_decl(pos_id)),
+                OR::RtconstNoCstr(&pos_id) => {
+                    RI::RtconstNoCstr(self.pos_type_const_from_decl(pos_id))
+                }
                 OR::Rpredicated(&(pos, s)) => {
                     RI::Rpredicated(self.pos_from_decl(pos), self.symbol(s))
                 }
@@ -137,7 +139,7 @@ impl<R: Reason> Allocator<R> {
                 ),
                 OR::RsolveFail(pos) => RI::RsolveFail(self.pos_from_decl(pos)),
                 OR::RcstrOnGenerics(&(pos, pos_id)) => {
-                    RI::RcstrOnGenerics(self.pos_from_decl(pos), self.pos_id_from_decl(pos_id))
+                    RI::RcstrOnGenerics(self.pos_from_decl(pos), self.pos_type_from_decl(pos_id))
                 }
                 OR::RlambdaParam((pos, r)) => {
                     RI::RlambdaParam(self.pos_from_decl(pos), self.reason(r))

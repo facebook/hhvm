@@ -25,7 +25,7 @@ impl<R: Reason> DeclHintEnv<R> {
         use oxidized::aast_defs::Hint_ as OH;
         match hint {
             OH::Happly(id, argl) => {
-                let id = self.alloc.pos_classname_from_ast(id);
+                let id = self.alloc.pos_type_from_ast(id);
                 let argl = argl.iter().map(|arg| self.hint(arg)).collect();
                 DeclTy_::DTapply(id, argl)
             }

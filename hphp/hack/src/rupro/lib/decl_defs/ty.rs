@@ -8,7 +8,7 @@ use crate::utils::core::Ident;
 use hcons::Hc;
 use intern::string::BytesId;
 use oxidized::{aast, ast_defs};
-use pos::{ModuleName, Positioned, Symbol, TypeName};
+use pos::{ModuleName, Positioned, Symbol, TypeConstName, TypeName};
 use std::collections::BTreeMap;
 
 pub use oxidized::{
@@ -214,7 +214,6 @@ pub enum DeclTy_<R: Reason> {
     DTintersection(Vec<DeclTy<R>>),
     /// Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>"
     DTvecOrDict(DeclTy<R>, DeclTy<R>),
-    /// Name of class, name of type const, remaining names of type consts
     DTaccess(TaccessType<R, DeclTy<R>>),
 }
 
@@ -231,10 +230,17 @@ walkable!(DeclTy_<R> => {
     Self::DTaccess(tt) => [tt],
 });
 
+/// A Type const access expression of the form <type expr>::C.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct TaccessType<R: Reason, TY>(pub TY, pub Positioned<Symbol, R::Pos>);
+pub struct TaccessType<R: Reason, TY> {
+    /// Type expression to the left of `::`
+    pub ty: TY,
 
-walkable!(impl<R: Reason, TY> for TaccessType<R, TY> => [0]);
+    /// Name of type const to the right of `::`
+    pub type_const: Positioned<TypeConstName, R::Pos>,
+}
+
+walkable!(impl<R: Reason, TY> for TaccessType<R, TY> => [ty]);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Capability<R: Reason, TY> {

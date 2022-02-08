@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
-use pos::{BPos, NPos, Pos, Positioned, Symbol};
+use pos::{BPos, NPos, Pos, Positioned, Symbol, TypeConstName, TypeName};
 use std::hash::Hash;
 
 use crate::visitor::Walkable;
@@ -91,12 +91,12 @@ pub enum ReasonImpl<R, P> {
     RunpackParam(P, P, isize),
     RinoutParam(P),
     Rinstantiate(R, Symbol, R),
-    Rtypeconst(R, Positioned<Symbol, P>, Symbol, R),
+    Rtypeconst(R, Positioned<TypeConstName, P>, Symbol, R),
     RtypeAccess(R, Vec<(R, Symbol)>),
     RexprDepType(R, P, ExprDepTypeReason),
     /// ?-> operator is used
     RnullsafeOp(P),
-    RtconstNoCstr(Positioned<Symbol, P>),
+    RtconstNoCstr(Positioned<TypeConstName, P>),
     Rpredicated(P, Symbol),
     Ris(P),
     Ras(P),
@@ -118,7 +118,7 @@ pub enum ReasonImpl<R, P> {
     RtypeVariableGenerics(P, Symbol, Symbol),
     RglobalTypeVariableGenerics(P, Symbol, Symbol),
     RsolveFail(P),
-    RcstrOnGenerics(P, Positioned<Symbol, P>),
+    RcstrOnGenerics(P, Positioned<TypeName, P>),
     RlambdaParam(P, R),
     Rshape(P, Symbol),
     Renforceable(P),

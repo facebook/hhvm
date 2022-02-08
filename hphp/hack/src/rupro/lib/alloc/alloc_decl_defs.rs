@@ -54,7 +54,7 @@ impl<R: Reason> Allocator<R> {
         attr: &obr::typing_defs::UserAttribute<'_>,
     ) -> UserAttribute<R::Pos> {
         UserAttribute {
-            name: self.pos_classname_from_decl(attr.name),
+            name: self.pos_type_from_decl(attr.name),
             classname_params: attr
                 .classname_params
                 .iter()
@@ -66,7 +66,7 @@ impl<R: Reason> Allocator<R> {
     fn decl_tparam(&self, tparam: &obr::typing_defs::Tparam<'_>) -> ty::Tparam<R, DeclTy<R>> {
         ty::Tparam {
             variance: tparam.variance,
-            name: self.pos_classname_from_decl(tparam.name),
+            name: self.pos_type_from_decl(tparam.name),
             tparams: self.vec(tparam.tparams, Self::decl_tparam),
             constraints: self.vec(tparam.constraints, |alloc, (kind, ty)| {
                 (kind, alloc.ty_from_decl(ty))
@@ -105,7 +105,7 @@ impl<R: Reason> Allocator<R> {
         let ty_ = match ty.1 {
             Tthis => DTthis,
             Tapply(&(pos_id, tys)) => DTapply(
-                self.pos_classname_from_decl(pos_id),
+                self.pos_type_from_decl(pos_id),
                 self.vec(tys, Self::ty_from_decl),
             ),
             Tmixed => DTmixed,
@@ -150,10 +150,10 @@ impl<R: Reason> Allocator<R> {
         &self,
         taccess_type: &obr::typing_defs::TaccessType<'_>,
     ) -> ty::TaccessType<R, DeclTy<R>> {
-        ty::TaccessType(
-            self.ty_from_decl(taccess_type.0),
-            self.pos_id_from_decl(taccess_type.1),
-        )
+        ty::TaccessType {
+            ty: self.ty_from_decl(taccess_type.0),
+            type_const: self.pos_type_const_from_decl(taccess_type.1),
+        }
     }
 
     fn decl_capability(
@@ -335,7 +335,7 @@ impl<R: Reason> Allocator<R> {
                 .module
                 .as_ref()
                 .map(|id| self.pos_module_from_ast_ref(id)),
-            name: self.pos_classname_from_decl(sc.name),
+            name: self.pos_type_from_decl(sc.name),
             tparams: self.vec(sc.tparams, Self::decl_tparam),
             where_constraints: self.vec(sc.where_constraints, Self::decl_where_constraint),
             extends: self.vec(sc.extends, Self::ty_from_decl),

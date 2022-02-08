@@ -507,9 +507,13 @@ static Object newAsyncMysqlConnectAndQueryEvent(
           query_op->run();
         } catch (...) {
           Logger::Error("Unexpected exception while executing Query");
-          event->abandon();
+          // If this assertion doesn't always hold, then we can add an m_error
+          // flag to AsyncMysqlConnectAndMultiQueryEvent and set it here. But
+          // my guess is that if query_op throws during its execution, then it
+          // will have a non-ok result code.
+          always_assert(!query_op->ok());
+          event->opFinished();
         }
-
     });
     connectOp->run();
     return Object{event->getWaitHandle()};

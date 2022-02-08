@@ -1,7 +1,7 @@
 <?hh
 class foo
 {
-    function __toString()
+    function __toString()[]
     {
         return "Object";
     }

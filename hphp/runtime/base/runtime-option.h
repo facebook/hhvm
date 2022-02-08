@@ -1567,7 +1567,7 @@ inline bool unitPrefetchingEnabled() {
 
 inline StringToIntMap coeffectEnforcementLevelsDefaults() {
 #ifdef FACEBOOK
-  return {{"zoned", 1}};
+  return {{"zoned", 2}};
 #else
   return {};
 #endif

@@ -125,6 +125,11 @@ struct AutoloadDB {
   };
 
   /**
+   * True iff you cannot write to this DB.
+   */
+  virtual bool isReadOnly() const = 0;
+
+  /**
    * Actually save all changes you've made.
    *
    * Changes will not persist unless you call this function before destroying

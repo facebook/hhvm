@@ -79,8 +79,7 @@ struct SymbolMap {
       folly::fs::path root,
       DBData dbData,
       bool enforceOneDefinition,
-      hphp_hash_set<std::string> indexedMethodAttributes = {},
-      SQLite::OpenMode dbMode = SQLite::OpenMode::ReadWrite);
+      hphp_hash_set<std::string> indexedMethodAttributes = {});
   SymbolMap() = delete;
   SymbolMap(const SymbolMap&) = delete;
   SymbolMap(SymbolMap&&) noexcept = delete;
@@ -607,7 +606,6 @@ private:
   const DBData m_dbData;
   const bool m_enforceOneDefinition;
   const hphp_hash_set<std::string> m_indexedMethodAttrs;
-  const SQLite::OpenMode m_dbMode{SQLite::OpenMode::ReadWrite};
 };
 
 } // namespace Facts

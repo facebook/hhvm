@@ -85,15 +85,13 @@ SymbolMap::SymbolMap(
     folly::fs::path root,
     DBData dbData,
     bool enforceOneDefinition,
-    hphp_hash_set<std::string> indexedMethodAttrs,
-    SQLite::OpenMode dbMode)
+    hphp_hash_set<std::string> indexedMethodAttrs)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
           1, std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))}
     , m_root{std::move(root)}
     , m_dbData{std::move(dbData)}
     , m_enforceOneDefinition{enforceOneDefinition}
-    , m_indexedMethodAttrs{std::move(indexedMethodAttrs)}
-    , m_dbMode{dbMode} {
+    , m_indexedMethodAttrs{std::move(indexedMethodAttrs)} {
   assertx(m_root.is_absolute());
 }
 
@@ -1056,7 +1054,7 @@ void SymbolMap::update(
 
   wlock->m_clock = clock;
 
-  if (m_dbMode == SQLite::OpenMode::ReadWrite) {
+  if (!db.isReadOnly()) {
     // Any individual DB update may fail spuriously, but we can't
     // drop updates on failure. So add a work item to the queue
     // and drain the queue as we complete work items successfully.

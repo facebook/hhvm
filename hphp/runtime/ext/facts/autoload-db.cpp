@@ -721,6 +721,10 @@ struct AutoloadDBImpl final : public AutoloadDB {
     return std::make_unique<AutoloadDBImpl>(std::move(db));
   }
 
+  bool isReadOnly() const override {
+    return m_db.isReadOnly();
+  }
+
   void commit() override {
     m_txn.commit();
     m_txn = m_db.begin();

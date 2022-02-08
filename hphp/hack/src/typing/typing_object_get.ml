@@ -23,6 +23,23 @@ module Phase = Typing_phase
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
 
+(** Common arguments to internal `obj_get_...` functions *)
+type obj_get_args = {
+  inst_meth: bool;
+  meth_caller: bool;
+  is_method: bool;
+  is_nonnull: bool;
+  nullsafe: Typing_reason.t option;
+  obj_pos: pos;
+  coerce_from_ty:
+    (MakeType.Nast.pos * Reason.ureason * Typing_defs.locl_ty) option;
+  explicit_targs: Nast.targ list;
+  this_ty: locl_ty;
+  this_ty_conjunct: locl_ty;
+  is_parent_call: bool;
+  dep_kind: Reason.t * Typing_dependent_type.ExprDepTy.dep;
+}
+
 let log_obj_get env helper id_pos ty this_ty =
   let (fn_name, ty_name) =
     match helper with
@@ -176,6 +193,51 @@ let member_not_found
              reason;
            })
 
+let sound_dynamic_err_opt args env ((_, id_str) as id) read_context =
+  if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+    (* Any access to a *private* member through dynamic might potentially
+     * be unsound, if the receiver is an instance of a class that implements dynamic,
+     * as we do no checks on enforceability or subtype-dynamic at the definition site
+     * of private members.
+     *)
+    match Env.get_self_class env with
+    | Some self_class
+      when Cls.get_support_dynamic_type self_class || not (Cls.final self_class)
+      ->
+      (match Env.get_member args.is_method env self_class id_str with
+      | Some { ce_visibility = Vprivate _; ce_type = (lazy ty); _ }
+        when not args.is_method ->
+        if read_context then
+          let (env, locl_ty) =
+            Phase.localize_no_subst ~ignore_errors:true env ty
+          in
+          Typing_dynamic.check_property_sound_for_dynamic_read
+            ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
+              Typing_error.(
+                primary
+                @@ Primary.Private_property_is_not_dynamic
+                     { pos; prop_name; class_name; prop_pos; prop_type }))
+            env
+            (Cls.name self_class)
+            id
+            locl_ty
+        else
+          Typing_dynamic.check_property_sound_for_dynamic_write
+            ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
+              Typing_error.(
+                primary
+                @@ Primary.Private_property_is_not_enforceable
+                     { pos; prop_name; class_name; prop_pos; prop_type }))
+            env
+            (Cls.name self_class)
+            id
+            ty
+            None
+      | _ -> None)
+    | _ -> None
+  else
+    None
+
 let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
   match deref ty with
   | (_, Tprim Tnull) ->
@@ -321,26 +383,10 @@ let rec this_appears_covariantly ~contra env ty =
   | Tgeneric _ ->
     false
 
-(** Common arguments to internal `obj_get_...` functions *)
-type obj_get_args = {
-  inst_meth: bool;
-  meth_caller: bool;
-  is_method: bool;
-  is_nonnull: bool;
-  nullsafe: Typing_reason.t option;
-  obj_pos: pos;
-  coerce_from_ty:
-    (MakeType.Nast.pos * Reason.ureason * Typing_defs.locl_ty) option;
-  explicit_targs: Nast.targ list;
-  this_ty: locl_ty;
-  this_ty_conjunct: locl_ty;
-  is_parent_call: bool;
-  dep_kind: Reason.t * Typing_dependent_type.ExprDepTy.dep;
-}
-
 (** We know that the receiver is a concrete class, not a generic with
     bounds, or a Tunion. *)
-let rec obj_get_concrete_ty args env concrete_ty (id_pos, id_str) on_error =
+let rec obj_get_concrete_ty
+    args env concrete_ty ((id_pos, id_str) as id) on_error =
   log_obj_get env `concrete id_pos concrete_ty args.this_ty;
   let dflt_rval_err =
     Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
@@ -363,51 +409,8 @@ let rec obj_get_concrete_ty args env concrete_ty (id_pos, id_str) on_error =
       paraml
       on_error
   | (_, Tdynamic) ->
-    (if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-      (* Any access to a *private* member through dynamic might potentially
-       * be unsound, if the receiver is an instance of a class that implements dynamic,
-       * as we do no checks on enforceability or subtype-dynamic at the definition site
-       * of private members.
-       *)
-      match Env.get_self_class env with
-      | Some self_class
-        when Cls.get_support_dynamic_type self_class
-             || not (Cls.final self_class) ->
-        (match Env.get_member args.is_method env self_class id_str with
-        | Some { ce_visibility = Vprivate _; ce_type = (lazy ty); _ }
-          when not args.is_method ->
-          (if read_context then
-            let (env, locl_ty) =
-              Phase.localize_no_subst ~ignore_errors:true env ty
-            in
-            Option.iter ~f:Errors.add_typing_error
-            @@ Typing_dynamic.check_property_sound_for_dynamic_read
-                 ~on_error:
-                   (fun pos prop_name class_name (prop_pos, prop_type) ->
-                   Typing_error.(
-                     primary
-                     @@ Primary.Private_property_is_not_dynamic
-                          { pos; prop_name; class_name; prop_pos; prop_type }))
-                 env
-                 (Cls.name self_class)
-                 (id_pos, id_str)
-                 locl_ty);
-          if not read_context then
-            Option.iter ~f:Errors.add_typing_error
-            @@ Typing_dynamic.check_property_sound_for_dynamic_write
-                 ~on_error:
-                   (fun pos prop_name class_name (prop_pos, prop_type) ->
-                   Typing_error.(
-                     primary
-                     @@ Primary.Private_property_is_not_enforceable
-                          { pos; prop_name; class_name; prop_pos; prop_type }))
-                 env
-                 (Cls.name self_class)
-                 (id_pos, id_str)
-                 ty
-                 None
-        | _ -> ())
-      | _ -> ());
+    let err_opt = sound_dynamic_err_opt args env id read_context in
+    Option.iter ~f:Errors.add_typing_error err_opt;
     let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in
     (env, (ty, []), dflt_lval_err, dflt_rval_err)
   | (_, Tany _)

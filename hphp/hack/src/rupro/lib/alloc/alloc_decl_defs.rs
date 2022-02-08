@@ -7,7 +7,7 @@ use super::Allocator;
 use crate::decl_defs::{self, shallow, ty, DeclTy, DeclTy_, FunParam, FunType, UserAttribute};
 use crate::reason::Reason;
 use oxidized_by_ref as obr;
-use pos::TypeName;
+use pos::{ConstName, FunName, TypeName};
 
 impl<R: Reason> Allocator<R> {
     #[inline]
@@ -403,11 +403,11 @@ impl<R: Reason> Allocator<R> {
             (name, Obr::Class(x)) => {
                 Decl::Class(TypeName(self.symbol(name)), self.shallow_class(x))
             }
-            (name, Obr::Fun(x)) => Decl::Fun(self.symbol(name), self.fun_decl(x)),
+            (name, Obr::Fun(x)) => Decl::Fun(FunName(self.symbol(name)), self.fun_decl(x)),
             (name, Obr::Typedef(x)) => {
                 Decl::Typedef(TypeName(self.symbol(name)), self.typedef_decl(x))
             }
-            (name, Obr::Const(x)) => Decl::Const(self.symbol(name), self.const_decl(x)),
+            (name, Obr::Const(x)) => Decl::Const(ConstName(self.symbol(name)), self.const_decl(x)),
         }
     }
 

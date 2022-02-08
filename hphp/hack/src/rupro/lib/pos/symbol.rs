@@ -73,6 +73,14 @@ impl ToString for TypeName {
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct ModuleName(pub Symbol);
 
+/// Name of a top level constant.
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+pub struct ConstName(pub Symbol);
+
+/// Name of a top level function.
+#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+pub struct FunName(pub Symbol);
+
 /// ClassConstName is the name of a class const, which are disjoint from
 /// global constants, type constants, and other class members.
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]

@@ -9,7 +9,8 @@ use crate::decl_defs::ty::{
 };
 use crate::reason::Reason;
 use pos::{
-    ClassConstName, MethodName, ModuleName, Positioned, PropName, Symbol, TypeConstName, TypeName,
+    ClassConstName, ConstName, FunName, MethodName, ModuleName, Positioned, PropName, Symbol,
+    TypeConstName, TypeName,
 };
 use std::collections::BTreeMap;
 
@@ -131,9 +132,9 @@ pub type TypedefDecl<R> = TypedefType<R>;
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Decl<R: Reason> {
     Class(TypeName, ClassDecl<R>),
-    Fun(Symbol, FunDecl<R>),
+    Fun(FunName, FunDecl<R>),
     Typedef(TypeName, TypedefDecl<R>),
-    Const(Symbol, ConstDecl<R>),
+    Const(ConstName, ConstDecl<R>),
 }
 
 walkable!(Decl<R> => {

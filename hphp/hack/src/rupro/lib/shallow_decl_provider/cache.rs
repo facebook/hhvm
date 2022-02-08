@@ -6,7 +6,7 @@
 use crate::cache::Cache;
 use crate::decl_defs::shallow::{self, ConstDecl, Decl, FunDecl, ShallowClass, TypedefDecl};
 use crate::reason::Reason;
-use pos::{Symbol, TypeName};
+use pos::{ConstName, FunName, TypeName};
 use std::sync::Arc;
 
 #[derive(Clone, Debug)]
@@ -18,15 +18,15 @@ pub enum TypeDecl<R: Reason> {
 #[derive(Debug)]
 pub struct ShallowDeclCache<R: Reason> {
     types: Box<dyn Cache<TypeName, TypeDecl<R>>>,
-    funs: Box<dyn Cache<Symbol, Arc<FunDecl<R>>>>,
-    consts: Box<dyn Cache<Symbol, Arc<ConstDecl<R>>>>,
+    funs: Box<dyn Cache<FunName, Arc<FunDecl<R>>>>,
+    consts: Box<dyn Cache<ConstName, Arc<ConstDecl<R>>>>,
 }
 
 impl<R: Reason> ShallowDeclCache<R> {
     pub fn new(
         types: Box<dyn Cache<TypeName, TypeDecl<R>>>,
-        funs: Box<dyn Cache<Symbol, Arc<FunDecl<R>>>>,
-        consts: Box<dyn Cache<Symbol, Arc<ConstDecl<R>>>>,
+        funs: Box<dyn Cache<FunName, Arc<FunDecl<R>>>>,
+        consts: Box<dyn Cache<ConstName, Arc<ConstDecl<R>>>>,
     ) -> Self {
         Self {
             types,
@@ -61,11 +61,11 @@ impl<R: Reason> ShallowDeclCache<R> {
         self.types.get(name)
     }
 
-    pub fn get_fun(&self, name: Symbol) -> Option<Arc<FunDecl<R>>> {
+    pub fn get_fun(&self, name: FunName) -> Option<Arc<FunDecl<R>>> {
         self.funs.get(name)
     }
 
-    pub fn get_const(&self, name: Symbol) -> Option<Arc<ConstDecl<R>>> {
+    pub fn get_const(&self, name: ConstName) -> Option<Arc<ConstDecl<R>>> {
         self.consts.get(name)
     }
 

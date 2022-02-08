@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::decl_defs::{CeVisibility, ClassEltFlags, DeclTy};
+use crate::decl_defs::{CeVisibility, ClassEltFlags, DeclTy, XhpAttribute};
 use crate::reason::Reason;
 use pos::{MethodNameMap, PropNameMap, TypeName, TypeNameMap};
 
@@ -153,5 +153,9 @@ impl<R: Reason> FoldedElement<R> {
 
     pub fn set_needs_init(&mut self, p: bool) {
         self.flags.set(ClassEltFlags::NEEDS_INIT, p)
+    }
+
+    pub fn get_xhp_attr(&self) -> Option<XhpAttribute> {
+        self.flags.get_xhp_attr()
     }
 }

@@ -157,6 +157,25 @@ impl ClassEltFlags {
         flags
     }
 
+    pub fn get_xhp_attr(&self) -> Option<XhpAttribute> {
+        use xhp_attribute::Tag;
+        if self.intersection(Self::XA_FLAGS_MASK).is_empty() {
+            return None;
+        }
+        let has_default = self.contains(Self::XA_HAS_DEFAULT);
+        let tag = match (
+            self.contains(Self::XA_TAG_REQUIRED),
+            self.contains(Self::XA_TAG_LATEINIT),
+        ) {
+            (true, false) => Some(Tag::Required),
+            (false, true) => Some(Tag::LateInit),
+            // If both `XaTagRequired` and `XaTagLateinit` bits are set then
+            // that's code for tag = None.
+            (true, true) | (false, false) => None,
+        };
+        Some(XhpAttribute { tag, has_default })
+    }
+
     fn set_xhp_attr(&mut self, xa: Option<XhpAttribute>) {
         self.remove(Self::XA_FLAGS_MASK);
         self.insert(Self::from(xa));

@@ -201,6 +201,29 @@ impl<R: Reason> Inherited<R> {
         Self::default()
     }
 
+    fn from_class_xhp_attrs_only(
+        _sc: &ShallowClass<R>,
+        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
+        ty: &DeclTy<R>,
+    ) -> Self {
+        if let Some((_, pos_id, _tyl)) = ty.unwrap_class_type() {
+            if let Some(class) = parents.get(&pos_id.id()) {
+                return Self::inherit_hack_xhp_attrs_only(class);
+            }
+        }
+        Self::default()
+    }
+
+    fn add_from_xhp_attr_uses(
+        &mut self,
+        sc: &ShallowClass<R>,
+        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
+    ) {
+        for ty in &sc.xhp_attr_uses {
+            self.add_inherited(Self::from_class_xhp_attrs_only(sc, parents, ty))
+        }
+    }
+
     fn add_from_parents(
         &mut self,
         sc: &ShallowClass<R>,
@@ -244,6 +267,21 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
+    // This logic deals with importing XHP attributes from an XHP class via the
+    // "attribute :foo;" syntax.
+    fn inherit_hack_xhp_attrs_only(class: &FoldedClass<R>) -> Self {
+        // Filter out properties that are not XHP attributes.
+        Inherited {
+            props: class
+                .props
+                .iter()
+                .filter(|(_, prop)| prop.get_xhp_attr().is_some())
+                .map(|(name, prop)| (name.clone(), prop.clone()))
+                .collect(),
+            ..Default::default()
+        }
+    }
+
     fn add_from_traits(
         &mut self,
         sc: &ShallowClass<R>,
@@ -281,6 +319,7 @@ impl<R: Reason> Inherited<R> {
         inh.add_from_parents(sc, parents); // Members inherited from parents ...
         inh.add_from_requirements(sc, parents);
         inh.add_from_traits(sc, parents); // ... can be overridden by traits.
+        inh.add_from_xhp_attr_uses(sc, parents);
 
         inh
     }

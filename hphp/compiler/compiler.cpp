@@ -107,7 +107,6 @@ struct CompilerOptions {
   bool force;
   std::string filecache;
   bool coredump;
-  bool nofork;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -160,22 +159,7 @@ int compiler_main(int argc, char **argv) {
 
     Timer totalTimer(Timer::WallTime, "running hphp");
     createOutputDirectory(po);
-    if (ret == 0) {
-#ifndef _MSC_VER
-      if (!po.nofork && !Process::IsUnderGDB()) {
-        int pid = fork();
-        if (pid == 0) {
-          ret = process(po);
-          _exit(ret);
-        }
-        wait(&ret);
-        ret = WIFEXITED(ret) ? WEXITSTATUS(ret) : -1;
-      } else
-#endif
-      {
-        ret = process(po);
-      }
-    }
+    if (ret == 0) ret = process(po);
     if (ret == 0) {
       if (po.target == "run") {
         ret = runTarget(po);
@@ -338,10 +322,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("coredump",
      value<bool>(&po.coredump)->default_value(false),
      "turn on coredump")
-    ("nofork",
-     value<bool>(&po.nofork)->default_value(false),
-     "forking is needed for large compilation to release memory before g++"
-     "compilation. turning off forking can help gdb debugging.")
     ("compiler-id", "display the git hash for the compiler id")
     ("repo-schema", "display the repo schema id used by this app")
     ;

@@ -1185,7 +1185,7 @@ function hphp_cmd(
     '-vRuntime.Eval.EnableArgsInBacktraces=true',
     '-vRuntime.Eval.FoldLazyClassKeys=false',
     '-vParserThreadCount=' . ($options->repo_threads ?? 1),
-    '--nofork=1 -thhbc -l1 -k1',
+    '-thhbc -l1 -k1',
     '-o "' . test_repo($options, $test) . '"',
     "--program $program.hhbc \"$test\"",
     "-vRuntime.UnitFileCache.Path=".unit_cache_file(),

@@ -82,7 +82,7 @@ fn extract_facts_as_json_ffi(
     } else if mangle_xhp {
         let facts = Facts::facts_of_decls(
             &decls.decls,
-            &decls.file_attributes,
+            decls.file_attributes,
             disable_xhp_element_mangling,
         );
         Some(facts.to_json(text))
@@ -90,7 +90,7 @@ fn extract_facts_as_json_ffi(
         without_xhp_mangling(|| {
             let facts = Facts::facts_of_decls(
                 &decls.decls,
-                &decls.file_attributes,
+                decls.file_attributes,
                 disable_xhp_element_mangling,
             );
             Some(facts.to_json(text))

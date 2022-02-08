@@ -75,7 +75,7 @@ impl Facts {
     pub fn to_json(&self, text: &[u8]) -> String {
         let (md5sum, sha1sum) = md5_and_sha1(text);
         let mut json = json!(&self);
-        json.as_object_mut().map(|m| {
+        if let Some(m) = json.as_object_mut() {
             m.insert(
                 String::from("md5sum0"),
                 json!(hex_number_to_i64(&md5sum[0..16])),
@@ -88,7 +88,7 @@ impl Facts {
             if self.skip_file_attributes() {
                 m.remove("fileAttributes");
             }
-        });
+        };
         serde_json::to_string_pretty(&json).expect("Could not serialize facts to JSON")
     }
 
@@ -198,9 +198,9 @@ fn types_to_json<S: Serializer>(types_by_name: &TypeFactsByName, s: S) -> Result
     for (name, types) in types_by_name.iter() {
         // pull the "name" key into the associated json object, then append to list
         let mut types_json = json!(types);
-        types_json.as_object_mut().map(|m| {
+        if let Some(m) = types_json.as_object_mut() {
             m.insert("name".to_owned(), json!(name));
-        });
+        };
 
         // possibly skip non-empty attributes/require*, depending on the kind
         if types.skip_attributes() {
@@ -302,7 +302,7 @@ impl TypeFacts {
 
         // Collect the requires
         let require_extends = req_extends
-            .into_iter()
+            .iter()
             .filter_map(|&ty| {
                 if check_require {
                     Some(extract_type_name(ty))
@@ -312,7 +312,7 @@ impl TypeFacts {
             })
             .collect::<StringSet>();
         let require_implements = req_implements
-            .into_iter()
+            .iter()
             .filter_map(|&ty| {
                 if check_require {
                     Some(extract_type_name(ty))
@@ -328,7 +328,7 @@ impl TypeFacts {
 
         let methods = methods
             .iter()
-            .chain(static_methods.into_iter())
+            .chain(static_methods.iter())
             .filter_map(|m| {
                 let attributes = to_facts_attributes(m.attributes);
                 // Add this method to the output iff it's
@@ -437,7 +437,7 @@ fn to_facts_attributes<'a>(attributes: &'a [&'a UserAttribute<'a>]) -> Attribute
                     attr_name,
                     ua.classname_params
                         .iter()
-                        .map(|param| format(*param).to_string())
+                        .map(|param| format(*param))
                         .collect::<Vec<String>>(),
                 ))
             }
@@ -543,11 +543,7 @@ mod tests {
                     kind: TypeKind::Unknown,
                     attributes: {
                         let mut map = Attributes::new();
-                        map.insert("A".into(), {
-                            let mut set = Vec::new();
-                            set.push("'B'".into());
-                            set
-                        });
+                        map.insert("A".into(), vec!["'B'".into()]);
                         map.insert("C".into(), Vec::new());
                         map
                     },

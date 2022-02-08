@@ -141,9 +141,9 @@ fn has_defaults(ctxs: Option<&ast::Contexts>) -> bool {
     }
 }
 
-fn is_constructor(s: &ast_defs::Id) -> bool {
+fn is_constructor_or_clone(s: &ast_defs::Id) -> bool {
     let ast_defs::Id(_, name) = s;
-    name == members::__CONSTRUCT
+    name == members::__CONSTRUCT || name == members::__CLONE
 }
 
 fn has_ignore_coeffect_local_errors_attr(attrs: &[aast::UserAttribute<(), ()>]) -> bool {
@@ -160,7 +160,7 @@ bitflags! {
     pub struct ContextFlags: u16 {
         const IN_METHODISH = 1 << 0;
         const IS_TYPECHECKER = 1 << 1;
-        const IS_CONSTRUCTOR = 1 << 2;
+        const IS_CONSTRUCTOR_OR_CLONE = 1 << 2;
         const IGNORE_COEFFECT_LOCAL_ERRORS = 1 << 3;
         const HAS_DEFAULTS = 1 << 4;
         const HAS_WRITE_PROPS = 1 << 5;
@@ -184,7 +184,7 @@ impl Context {
     fn from_context(&self) -> Self {
         let mut c = Context::new();
         c.set_in_methodish(self.in_methodish());
-        c.set_is_constructor(self.is_constructor());
+        c.set_is_constructor_or_clone(self.is_constructor_or_clone());
         c.set_ignore_coeffect_local_errors(self.ignore_coeffect_local_errors());
         c.set_is_typechecker(self.is_typechecker());
         c.set_has_defaults(self.has_defaults());
@@ -197,8 +197,9 @@ impl Context {
         self.bitflags.contains(ContextFlags::IN_METHODISH)
     }
 
-    fn is_constructor(&self) -> bool {
-        self.bitflags.contains(ContextFlags::IS_CONSTRUCTOR)
+    fn is_constructor_or_clone(&self) -> bool {
+        self.bitflags
+            .contains(ContextFlags::IS_CONSTRUCTOR_OR_CLONE)
     }
 
     fn ignore_coeffect_local_errors(&self) -> bool {
@@ -234,9 +235,11 @@ impl Context {
         self.bitflags.set(ContextFlags::IN_METHODISH, in_methodish);
     }
 
-    fn set_is_constructor(&mut self, is_constructor: bool) {
-        self.bitflags
-            .set(ContextFlags::IS_CONSTRUCTOR, is_constructor);
+    fn set_is_constructor_or_clone(&mut self, is_constructor_or_clone: bool) {
+        self.bitflags.set(
+            ContextFlags::IS_CONSTRUCTOR_OR_CLONE,
+            is_constructor_or_clone,
+        );
     }
 
     fn set_ignore_coeffect_local_errors(&mut self, ignore_coeffect_local_errors: bool) {
@@ -303,7 +306,7 @@ impl Checker {
     }
 
     fn do_write_this_props_check(&mut self, c: &mut Context, e: &aast::Expr<(), ()>) {
-        if c.is_constructor() {
+        if c.is_constructor_or_clone() {
             return;
         }
         if let Some((ast_defs::Bop::Eq(_), lhs, _)) = e.2.as_binop() {
@@ -355,7 +358,7 @@ impl<'ast> Visitor<'ast> for Checker {
     fn visit_method_(&mut self, c: &mut Context, m: &aast::Method_<(), ()>) -> Result<(), ()> {
         let mut new_context = Context::from_context(c);
         new_context.set_in_methodish(true);
-        new_context.set_is_constructor(is_constructor(&m.name));
+        new_context.set_is_constructor_or_clone(is_constructor_or_clone(&m.name));
         new_context.set_ignore_coeffect_local_errors(has_ignore_coeffect_local_errors_attr(
             &m.user_attributes,
         ));
@@ -372,7 +375,7 @@ impl<'ast> Visitor<'ast> for Checker {
         let mut new_context = Context::from_context(c);
         let ctxs = d.fun.ctxs.as_ref();
         new_context.set_has_defaults(has_defaults(ctxs));
-        new_context.set_is_constructor(is_constructor(&d.fun.name));
+        new_context.set_is_constructor_or_clone(is_constructor_or_clone(&d.fun.name));
         new_context.set_has_write_props(has_capability(ctxs, Ctx::WriteProps));
         new_context.set_has_write_this_props(has_capability(ctxs, Ctx::WriteThisProps));
         new_context.set_has_read_globals(has_capability(ctxs, Ctx::ReadGlobals));

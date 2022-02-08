@@ -65,7 +65,7 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn add_substs(&mut self, other_substs: TypeNameMap<SubstContext<R>>) {
-        for (key, mut new_sc) in other_substs {
+        for (key, new_sc) in other_substs {
             match self.substs.entry(key) {
                 Entry::Vacant(e) => {
                     e.insert(new_sc);
@@ -83,7 +83,7 @@ impl<R: Reason> Inherited<R> {
                         // Here the substitution context `{MyTrait/[T -> mixed]}`
                         // should be overridden by `{Child/[T -> int]}`, because
                         // it's the actual extension of class `Base`.
-                        std::mem::swap(e.get_mut(), &mut new_sc);
+                        e.insert(new_sc);
                     }
                 }
             }
@@ -102,7 +102,7 @@ impl<R: Reason> Inherited<R> {
             Entry::Occupied(mut entry) => {
                 if !Self::should_keep_old_sig(&fe, entry.get()) {
                     fe.set_is_superfluous_override(false);
-                    std::mem::swap(entry.get_mut(), &mut fe);
+                    entry.insert(fe);
                 } else {
                     // Otherwise, we *are* overwriting a method
                     // definition. This is OK when a naming
@@ -201,7 +201,11 @@ impl<R: Reason> Inherited<R> {
         Self::default()
     }
 
-    fn from_parent(sc: &ShallowClass<R>, parents: &TypeNameMap<Arc<FoldedClass<R>>>) -> Self {
+    fn add_from_parents(
+        &mut self,
+        sc: &ShallowClass<R>,
+        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
+    ) {
         let mut tys: Vec<&DeclTy<R>> = Vec::new();
         match sc.kind {
             ClassishKind::Cclass(Abstraction::Abstract) => {
@@ -221,17 +225,63 @@ impl<R: Reason> Inherited<R> {
             }
         };
 
-        let all_inherited = tys
-            .iter()
-            .map(|parent| Self::from_class(sc, parents, parent));
-        let mut inh = Self::default();
-        for parent_inh in all_inherited.rev() {
-            inh.add_inherited(parent_inh)
+        // Interfaces implemented, classes extended and interfaces required to
+        // be implemented.
+        for ty in tys.iter().rev() {
+            self.add_inherited(Self::from_class(sc, parents, ty));
         }
-        inh
+    }
+
+    fn add_from_requirements(
+        &mut self,
+        sc: &ShallowClass<R>,
+        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
+    ) {
+        for ty in &sc.req_extends {
+            let mut inherited = Self::from_class(sc, parents, ty);
+            inherited.mark_as_synthesized();
+            self.add_inherited(inherited);
+        }
+    }
+
+    fn add_from_traits(
+        &mut self,
+        sc: &ShallowClass<R>,
+        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
+    ) {
+        for ty in &sc.uses {
+            self.add_inherited(Self::from_class(sc, parents, ty));
+        }
+    }
+
+    fn mark_as_synthesized(&mut self) {
+        for (_, ctx) in self.substs.iter_mut() {
+            ctx.from_req_extends = true;
+        }
+        if let Some(ref mut elt) = self.constructor {
+            elt.set_is_synthesized(true);
+        }
+        for (_, prop) in self.props.iter_mut() {
+            prop.set_is_synthesized(true);
+        }
+        for (_, static_prop) in self.static_props.iter_mut() {
+            static_prop.set_is_synthesized(true);
+        }
+        for (_, method) in self.methods.iter_mut() {
+            method.set_is_synthesized(true);
+        }
+        for (_, static_method) in self.static_methods.iter_mut() {
+            static_method.set_is_synthesized(true);
+        }
+        //TODO typeconsts, consts
     }
 
     pub(crate) fn make(sc: &ShallowClass<R>, parents: &TypeNameMap<Arc<FoldedClass<R>>>) -> Self {
-        Self::from_parent(sc, parents)
+        let mut inh = Self::default();
+        inh.add_from_parents(sc, parents); // Members inherited from parents ...
+        inh.add_from_requirements(sc, parents);
+        inh.add_from_traits(sc, parents); // ... can be overridden by traits.
+
+        inh
     }
 }

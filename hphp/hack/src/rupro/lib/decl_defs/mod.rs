@@ -7,9 +7,10 @@ pub mod folded;
 pub mod shallow;
 pub mod ty;
 
-pub use folded::{FoldedClass, FoldedElement, SubstContext};
+pub use folded::{ClassConst, FoldedClass, FoldedElement, SubstContext};
 pub use shallow::{FunDecl, ShallowClass, ShallowMethod, ShallowProp};
 pub use ty::{
-    Abstraction, CeVisibility, ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConsistentKind,
-    DeclTy, DeclTy_, FunParam, FunType, Prim, Tparam, UserAttribute, Visibility, XhpAttribute,
+    Abstraction, CeVisibility, ClassConstFrom, ClassConstKind, ClassConstRef, ClassEltFlags,
+    ClassEltFlagsArgs, ClassishKind, ConsistentKind, DeclTy, DeclTy_, FunParam, FunType, Prim,
+    Tparam, UserAttribute, Visibility, XhpAttribute,
 };

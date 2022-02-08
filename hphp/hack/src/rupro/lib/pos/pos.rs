@@ -67,7 +67,8 @@ impl Pos for NPos {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Positioned<S, P> {
-    // Caution: field order will matter if we ever derive ToOcamlRep/FromOcamlRep for this type
+    // Caution: field order will matter if we ever derive
+    // `ToOcamlRep`/`FromOcamlRep` for this type.
     pos: P,
     id: S,
 }

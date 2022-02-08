@@ -83,7 +83,7 @@ pub enum ReasonImpl<R, P> {
     RyieldSend(P),
     RlostInfo(Symbol, R, Blame<P>),
     Rformat(P, Symbol, R),
-    RclassClass(P, Symbol),
+    RclassClass(P, TypeName),
     RunknownClass(P),
     RvarParam(P),
     RvarParamFromDecl(P),

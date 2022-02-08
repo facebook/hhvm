@@ -85,6 +85,9 @@ pub struct FunName(pub Symbol);
 /// global constants, type constants, and other class members.
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct ClassConstName(pub Symbol);
+pub type BuildClassConstNameHasher = BuildSymbolHasher;
+pub type ClassConstNameMap<V> = HashMap<ClassConstName, V>;
+pub type ClassConstNameSet = HashSet<ClassConstName>;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct TypeConstName(pub Symbol);

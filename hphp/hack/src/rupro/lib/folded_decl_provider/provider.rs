@@ -3,16 +3,21 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::alloc::Allocator;
 use crate::decl_defs::{
-    CeVisibility, ClassEltFlags, ClassEltFlagsArgs, ConsistentKind, DeclTy, DeclTy_, FoldedClass,
-    FoldedElement, ShallowClass, ShallowMethod, ShallowProp, UserAttribute, Visibility,
+    CeVisibility, ClassConst, ClassConstKind, ClassEltFlags, ClassEltFlagsArgs, ConsistentKind,
+    DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass, ShallowMethod, ShallowProp,
+    UserAttribute, Visibility,
 };
 use crate::folded_decl_provider::FoldedDeclCache;
 use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
-use crate::reason::Reason;
+use crate::reason::{Reason, ReasonImpl};
 use crate::shallow_decl_provider::ShallowDeclProvider;
 use crate::special_names::SpecialNames;
-use pos::{MethodNameMap, ModuleName, Positioned, PropNameMap, TypeName, TypeNameMap, TypeNameSet};
+use pos::{
+    ClassConstName, MethodNameMap, ModuleName, Positioned, PropNameMap, TypeName, TypeNameMap,
+    TypeNameSet,
+};
 use std::sync::Arc;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_folded_class.ml
@@ -20,6 +25,7 @@ use std::sync::Arc;
 #[derive(Debug)]
 pub struct FoldedDeclProvider<R: Reason> {
     cache: Arc<dyn FoldedDeclCache<Reason = R>>,
+    alloc: &'static Allocator<R>,
     special_names: &'static SpecialNames,
     shallow_decl_provider: Arc<ShallowDeclProvider<R>>,
 }
@@ -27,11 +33,13 @@ pub struct FoldedDeclProvider<R: Reason> {
 impl<R: Reason> FoldedDeclProvider<R> {
     pub fn new(
         cache: Arc<dyn FoldedDeclCache<Reason = R>>,
+        alloc: &'static Allocator<R>,
         special_names: &'static SpecialNames,
         shallow_decl_provider: Arc<ShallowDeclProvider<R>>,
     ) -> Self {
         Self {
             cache,
+            alloc,
             special_names,
             shallow_decl_provider,
         }
@@ -65,12 +73,37 @@ impl<R: Reason> FoldedDeclProvider<R> {
         }
     }
 
+    /// Every class, interface, and trait implicitly defines a `::class` to allow
+    /// accessing its fully qualified name as a string.
+    fn decl_class_class(&self, class_id: &Positioned<TypeName, R::Pos>) -> ClassConst<R> {
+        // note(sf, 2022-02-08): c.f. Decl_folded_class.class_class_decl
+        let pos = class_id.pos();
+        let name = class_id.id();
+        let reason = R::mk(|| ReasonImpl::RclassClass(pos.clone(), name));
+        let classname_ty = self.alloc.decl_ty(
+            reason.clone(),
+            DeclTy_::DTapply(
+                Positioned::new(pos.clone(), self.special_names.classes.cClassname),
+                vec![self.alloc.decl_ty(reason, DeclTy_::DTthis)],
+            ),
+        );
+        ClassConst {
+            is_synthesized: true,
+            kind: ClassConstKind::CCConcrete,
+            pos: pos.clone(),
+            ty: classname_ty,
+            origin: name.clone(),
+            refs: Vec::new(),
+        }
+    }
+
     fn decl_prop(
         &self,
         props: &mut PropNameMap<FoldedElement<R>>,
         sc: &ShallowClass<R>,
         sp: &ShallowProp<R>,
     ) {
+        // note(sf, 2022-02-08): c.f. Decl_folded_class.prop_decl
         let cls = sc.name.id();
         let prop = sp.name.id();
         let vis = self.visibility(cls, sc.module.as_ref(), sp.visibility);
@@ -306,6 +339,12 @@ impl<R: Reason> FoldedDeclProvider<R> {
             .iter()
             .for_each(|ty| self.get_implements(parents, ty, &mut ancestors));
 
+        let mut consts = inh.consts;
+        consts.insert(
+            ClassConstName(self.special_names.members.mClass),
+            self.decl_class_class(&sc.name),
+        );
+
         Arc::new(FoldedClass {
             name: sc.name.id(),
             pos: sc.name.pos().clone(),
@@ -316,6 +355,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             methods,
             static_methods,
             constructor,
+            consts,
         })
     }
 

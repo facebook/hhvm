@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::reason::{Blame, ExprDepTypeReason, Reason};
+use pos::TypeName;
 
 use super::Allocator;
 
@@ -64,7 +65,7 @@ impl<R: Reason> Allocator<R> {
                     RI::Rformat(self.pos_from_decl(pos), self.symbol(sym), self.reason(r))
                 }
                 OR::RclassClass(&(pos, s)) => {
-                    RI::RclassClass(self.pos_from_decl(pos), self.symbol(s))
+                    RI::RclassClass(self.pos_from_decl(pos), TypeName(self.symbol(s)))
                 }
                 OR::RunknownClass(pos) => RI::RunknownClass(self.pos_from_decl(pos)),
                 OR::RvarParam(pos) => RI::RvarParam(self.pos_from_decl(pos)),

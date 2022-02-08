@@ -1,10 +1,4 @@
 File "interface_method_lookup_10.php", line 26, characters 14-16:
-No instance method `foo` in `C` (Typing[4053])
-  File "interface_method_lookup_10.php", line 15, characters 27-27:
-  This is why I think it is an object of type C
-  File "interface_method_lookup_10.php", line 13, characters 7-7:
-  Declaration of `C` is here
-File "interface_method_lookup_10.php", line 26, characters 14-16:
 No instance method `foo` in `I` (Typing[4053])
   File "interface_method_lookup_10.php", line 25, characters 16-16:
   This is why I think it is an object of type I

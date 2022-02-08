@@ -808,7 +808,7 @@ and obj_get_concrete_class_without_member_info
     (env, (Typing_utils.mk_tany env id_pos, []), lval_err, rval_err)
   in
   if Cls.has_upper_bounds_on_this_from_constraints class_info then
-    Errors.try_with_error
+    Errors.try_
       (fun () ->
         get_member_from_constraints
           args
@@ -818,7 +818,7 @@ and obj_get_concrete_class_without_member_info
           reason
           params
           on_error)
-      (fun () ->
+      (fun (_ : Errors.error) ->
         let err =
           member_not_found
             env

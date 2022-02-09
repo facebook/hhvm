@@ -15,7 +15,7 @@ function thrift_protocol_write_binary($transportobj, string $method_name, int $m
 <<__PHPStdLib>>
 function thrift_protocol_read_binary($transportobj, string $obj_typename, bool $strict_read, int $options = 0);
 <<__PHPStdLib>>
-function thrift_protocol_set_compact_version(int $version);
+function thrift_protocol_set_compact_version(int $version)[leak_safe];
 <<__PHPStdLib>>
 function thrift_protocol_write_compact($transportobj, string $method_name, int $msgtype, $request_struct, int $seqid, bool $oneway = false);
 <<__PHPStdLib>>

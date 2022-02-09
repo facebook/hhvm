@@ -135,11 +135,7 @@ let naming
 let log_type_check_end
     env genv ~start_t ~count ~desc ~init_telemetry ~typecheck_telemetry : unit =
   let hash_telemetry = ServerUtils.log_and_get_sharedmem_load_telemetry () in
-  let state_distance =
-    match env.init_env.saved_state_delta with
-    | None -> None
-    | Some { distance; _ } -> Some distance
-  in
+
   let telemetry =
     Telemetry.create ()
     |> Telemetry.object_
@@ -159,7 +155,6 @@ let log_type_check_end
     ~count
     ~desc
     ~experiments:genv.local_config.ServerLocalConfig.experiments
-    ~state_distance
     ~start_t
 
 let type_check

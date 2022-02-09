@@ -343,14 +343,7 @@ let type_check_exn_bug ~path:_ ~pos:_ ~e:_ = ()
 let invariant_violation_bug ~path:_ ~pos:_ ~desc:_ _ = ()
 
 let type_check_end
-    _
-    ~heap_size:_
-    ~started_count:_
-    ~count:_
-    ~desc:_
-    ~experiments:_
-    ~start_t:_
-    ~state_distance:_ =
+    _ ~heap_size:_ ~started_count:_ ~count:_ ~desc:_ ~experiments:_ ~start_t:_ =
   ()
 
 let notifier_returned _ _ = ()

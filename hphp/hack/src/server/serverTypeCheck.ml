@@ -1747,11 +1747,6 @@ functor
       let telemetry =
         Telemetry.duration telemetry ~key:"typecheck_start" ~start_time
       in
-      let state_distance =
-        match env.init_env.saved_state_delta with
-        | None -> None
-        | Some { distance; _ } -> Some distance
-      in
       (* Typecheck all of the files we determined might need rechecking as a
          consequence of the changes (or, in a lazy check,
          the subset of those
@@ -1950,8 +1945,7 @@ functor
         ~count:total_rechecked_count
         ~experiments:genv.local_config.ServerLocalConfig.experiments
         ~desc:"serverTypeCheck"
-        ~start_t:type_check_start_t
-        ~state_distance;
+        ~start_t:type_check_start_t;
       ( env,
         {
           CheckStats.reparse_count;

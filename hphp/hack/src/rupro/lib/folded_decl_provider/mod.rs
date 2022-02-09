@@ -9,6 +9,7 @@ use pos::{MethodName, PropName, TypeName};
 use std::fmt::Debug;
 use std::sync::Arc;
 
+mod fold;
 mod inherit;
 mod provider;
 mod subst;

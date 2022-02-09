@@ -52,14 +52,14 @@ end
 
 module Funs =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
+    (SharedMem.ProfiledBackend (SharedMem.Evictable)) (StringKey)
     (Fun)
     (Capacity)
 
 module Classes = struct
   include
     SharedMem.HeapWithLocalCache
-      (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
+      (SharedMem.ProfiledBackend (SharedMem.Evictable)) (StringKey)
       (Class)
       (Capacity)
 
@@ -79,12 +79,12 @@ end
 
 module Typedefs =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
+    (SharedMem.ProfiledBackend (SharedMem.Evictable)) (StringKey)
     (Typedef)
     (Capacity)
 module GConsts =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
+    (SharedMem.ProfiledBackend (SharedMem.Evictable)) (StringKey)
     (GConst)
     (Capacity)
 
@@ -133,26 +133,26 @@ end
 
 module Props =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (ClassEltKey)
+    (SharedMem.ProfiledBackend (SharedMem.Evictable)) (ClassEltKey)
     (Property)
     (Capacity)
 module StaticProps =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (ClassEltKey)
+    (SharedMem.ProfiledBackend (SharedMem.Evictable)) (ClassEltKey)
     (StaticProperty)
     (Capacity)
 module Methods =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (ClassEltKey)
+    (SharedMem.ProfiledBackend (SharedMem.Evictable)) (ClassEltKey)
     (Method)
     (Capacity)
 module StaticMethods =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (ClassEltKey)
+    (SharedMem.ProfiledBackend (SharedMem.Evictable)) (ClassEltKey)
     (StaticMethod)
     (Capacity)
 module Constructors =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (StringKey)
+    (SharedMem.ProfiledBackend (SharedMem.Evictable)) (StringKey)
     (Constructor)
     (Capacity)

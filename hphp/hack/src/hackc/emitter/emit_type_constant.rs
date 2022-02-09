@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Pair;
-use hhbc_id::{class, Id};
+use hhbc_id::class;
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{unrecoverable, Result};
 use naming_special_names_rust::classes;
@@ -102,8 +102,8 @@ fn shape_field_name<'arena>(alloc: &'arena bumpalo::Bump, sf: &ShapeFieldName) -
             )
         }
         SFclassConst(Id(_, cname), (_, s)) => {
-            let id = class::ClassType::from_ast_name(alloc, cname);
-            (format!("{}::{}", id.to_raw_string(), s), true)
+            let id = class::ClassType::from_ast_name_and_mangle(alloc, cname);
+            (format!("{}::{}", id.unsafe_as_str(), s), true)
         }
     }
 }
@@ -189,7 +189,7 @@ fn resolve_classname<'arena>(
 ) -> (Option<Pair<TypedValue<'arena>, TypedValue<'arena>>>, String) {
     let is_tparam = s == "_" || tparams.contains(&s.as_str());
     if !is_tparam {
-        s = class::ClassType::from_ast_name(alloc, s.as_str()).into()
+        s = class::ClassType::from_ast_name_and_mangle(alloc, s.as_str()).unsafe_into_string()
     };
     if is_prim(&s) || is_resolved_classname(&s) {
         (None, s)
@@ -240,7 +240,7 @@ fn root_to_string<'arena>(alloc: &'arena bumpalo::Bump, s: &str) -> String {
     if s == "this" {
         string_utils::prefix_namespace("HH", s)
     } else {
-        class::ClassType::from_ast_name(alloc, s).into()
+        class::ClassType::from_ast_name_and_mangle(alloc, s).unsafe_into_string()
     }
 }
 

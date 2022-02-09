@@ -9,7 +9,6 @@ use env::{emitter::Emitter, Env};
 use ffi::{Maybe, Slice, Str};
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
-use hhbc_id::Id;
 use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use label::Label;
 use lazy_static::lazy_static;
@@ -105,7 +104,7 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
             a::Expr_::Call(c) => {
                 if let (a::Expr(_, _, a::Expr_::Id(sid)), _, exprs, None) = c.as_ref() {
                     let ft = hhbc_id::function::FunctionType::from_ast_name(alloc, &sid.1);
-                    let fname = ft.to_raw_string();
+                    let fname = ft.unsafe_as_str();
                     if fname.eq_ignore_ascii_case("unset") {
                         Ok(InstrSeq::gather(
                             alloc,

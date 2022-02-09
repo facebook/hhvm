@@ -8,7 +8,7 @@ use ffi::Maybe::*;
 use hhas_property::HhasProperty;
 use hhas_type::{constraint, HhasTypeInfo};
 use hhbc_ast::InitPropOp;
-use hhbc_id::{prop, Id};
+use hhbc_id::prop;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq, Result};
@@ -81,7 +81,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
             format!(
                 "Invalid property type hint for '{}::${}'",
                 string_utils::strip_global_ns(&class.name.1),
-                prop::PropType::to_raw_string(&pid)
+                pid.unsafe_as_str()
             ),
         ));
     };
@@ -102,7 +102,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
                 format!(
                     "<<__LateInit>> property '{}::${}' cannot have an initial value",
                     string_utils::strip_global_ns(&class.name.1),
-                    prop::PropType::to_raw_string(&pid)
+                    pid.unsafe_as_str()
                 ),
             ));
         }

@@ -294,8 +294,8 @@ impl<'a> Str<'a> {
     /// Cast a `Str<'a>` back into a `&'a BStr`.
     pub fn as_bstr(&self) -> &'a BStr {
         // Safety: Assumes `self` has been constructed via `Slice<'a,
-        // T>::new()` from some `&'a BStr` and so the calls to
-        // `from_raw_parts` and `from_utf8_unchecked` are valid.
+        // T>::new()` from some `&'a BStr` and so the call to
+        // `from_raw_parts` is valid.
         unsafe { std::slice::from_raw_parts(self.data, self.len).into() }
     }
 }

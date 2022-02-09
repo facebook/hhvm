@@ -5,7 +5,6 @@
 
 use env::{emitter::Emitter, Env};
 use hhas_attribute::HhasAttribute;
-use hhbc_id::Id;
 use instruction_sequence::Result;
 use naming_special_names::user_attributes as ua;
 use naming_special_names_rust as naming_special_names;
@@ -40,7 +39,8 @@ pub fn from_ast<'arena, 'decl>(
         e.alloc.alloc_str(&attr.name.1)
     } else {
         match escaper::escape(
-            hhbc_id::class::ClassType::from_ast_name(e.alloc, &attr.name.1).to_raw_string(),
+            hhbc_id::class::ClassType::from_ast_name_and_mangle(e.alloc, &attr.name.1)
+                .unsafe_as_str(),
         ) {
             std::borrow::Cow::Borrowed(s) => s,
             std::borrow::Cow::Owned(s) => e.alloc.alloc_str(s.as_str()),

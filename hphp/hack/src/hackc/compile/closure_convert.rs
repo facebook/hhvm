@@ -1343,7 +1343,6 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                                 None => unreachable!(),
                                 Some((ref mut cid, (_, cs))) => (cid, cs),
                             };
-                            use hhbc_id::Id;
                             visit_class_id(env, self, cid)?;
                             match &cid.2 {
                                 cid if cid.as_ciexpr().and_then(|x| x.as_id()).map_or(
@@ -1358,8 +1357,11 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                                     let alloc = bumpalo::Bump::new();
                                     let id = cid.as_ciexpr().unwrap().as_id().unwrap();
                                     let mangled_class_name =
-                                        class::ClassType::from_ast_name(&alloc, id.as_ref());
-                                    let mangled_class_name = mangled_class_name.to_raw_string();
+                                        class::ClassType::from_ast_name_and_mangle(
+                                            &alloc,
+                                            id.as_ref(),
+                                        );
+                                    let mangled_class_name = mangled_class_name.unsafe_as_str();
                                     convert_meth_caller_to_func_ptr(
                                         env,
                                         self,

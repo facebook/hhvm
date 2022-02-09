@@ -161,7 +161,10 @@ pub fn escaped(s: &str) -> Cow<'_, str> {
     let es = escaped_bytes(s.as_bytes());
     match es {
         Cow::Borrowed(_) => s.into(),
-        Cow::Owned(es) => unsafe { String::from_utf8_unchecked(es) }.into(),
+        Cow::Owned(es) => {
+            // Safety - since the input is &str this should be safe.
+            unsafe { String::from_utf8_unchecked(es) }.into()
+        }
     }
 }
 

@@ -133,6 +133,7 @@ where
     F: Fn(u8) -> Option<Cow<'static, [u8]>>,
 {
     let r = escape_byte_by(cow_str_to_bytes(s), f);
+    // Safety: Since the input is &str these conversions should be safe.
     match r {
         Cow::Borrowed(s) => unsafe { std::str::from_utf8_unchecked(s) }.into(),
         Cow::Owned(s) => unsafe { String::from_utf8_unchecked(s) }.into(),

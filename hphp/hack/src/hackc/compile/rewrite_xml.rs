@@ -1,5 +1,5 @@
 use env::emitter::Emitter;
-use hhbc_id::{class, Id};
+use hhbc_id::class;
 use instruction_sequence::Result;
 use naming_special_names_rust::pseudo_consts;
 use oxidized::{
@@ -98,7 +98,7 @@ fn rewrite_xml_<'arena, 'decl>(
     let cid = ClassId(
         (),
         pos.clone(),
-        ClassId_::CI(Id(id.0.clone(), renamed_id.to_raw_string().into())),
+        ClassId_::CI(Id(id.0.clone(), renamed_id.unsafe_as_str().into())),
     );
 
     emit_symbol_refs::add_class(e, renamed_id);

@@ -9,7 +9,6 @@
 
 use env::{emitter::Emitter, Env};
 use ffi::Maybe;
-use hhbc_id::Id;
 use instruction_sequence::{InstrSeq, Result};
 use oxidized::ast;
 use runtime::TypedValue;

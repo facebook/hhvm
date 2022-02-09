@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use bstr::BStr;
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::slice::from_raw_parts;
@@ -163,6 +164,14 @@ impl<'a, T> AsRef<[T]> for Slice<'a, T> {
     }
 }
 
+impl<'a, T> std::ops::Deref for Slice<'a, T> {
+    type Target = [T];
+
+    fn deref(&self) -> &Self::Target {
+        self.as_ref()
+    }
+}
+
 impl<'a, T: 'a> Slice<'a, T> {
     pub fn new(t: &'a [T]) -> Self {
         Slice {
@@ -280,6 +289,21 @@ impl<'a> Str<'a> {
         // T>::new()` from some `&'a str` and so the calls to
         // `from_raw_parts` and `from_utf8_unchecked` are valid.
         unsafe { std::str::from_utf8_unchecked(std::slice::from_raw_parts(self.data, self.len)) }
+    }
+
+    /// Cast a `Str<'a>` back into a `&'a BStr`.
+    pub fn as_bstr(&self) -> &'a BStr {
+        // Safety: Assumes `self` has been constructed via `Slice<'a,
+        // T>::new()` from some `&'a BStr` and so the calls to
+        // `from_raw_parts` and `from_utf8_unchecked` are valid.
+        unsafe { std::slice::from_raw_parts(self.data, self.len).into() }
+    }
+}
+
+impl<'a> write_bytes::DisplayBytes for Str<'a> {
+    fn fmt(&self, f: &mut write_bytes::BytesFormatter<'_>) -> std::io::Result<()> {
+        use std::io::Write;
+        f.write_all(self.as_ref())
     }
 }
 

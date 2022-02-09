@@ -10,6 +10,7 @@ path = "lib.rs"
 [dependencies]
 anyhow = "1.0.51"
 ast_class_expr = { path = "../hhbc/cargo/ast_class_expr" }
+bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 core_utils_rust = { path = "../../utils/core" }
 emit_type_hint = { path = "../emitter/cargo/emit_type_hint" }
@@ -49,3 +50,4 @@ oxidized = { path = "../../oxidized" }
 regex = "1.5.4"
 runtime = { path = "../emitter/cargo/runtime" }
 thiserror = "1.0.29"
+write_bytes = { path = "../../utils/write_bytes/write_bytes" }

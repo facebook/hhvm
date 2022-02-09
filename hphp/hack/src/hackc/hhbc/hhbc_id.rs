@@ -70,6 +70,12 @@ macro_rules! impl_id {
             $type(ffi::Slice::new(r.into_bump_str().as_bytes()))
         }
 
+        impl write_bytes::DisplayBytes for $type<'_> {
+            fn fmt(&self, f: &mut write_bytes::BytesFormatter<'_>) -> std::io::Result<()> {
+                self.0.fmt(f)
+            }
+        }
+
         impl<'arena> std::fmt::Debug for $type<'arena> {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 use crate::Id;
@@ -99,7 +105,7 @@ macro_rules! impl_add_suffix {
 pub mod class {
     use ffi::Str;
 
-    #[derive(Copy, Clone)]
+    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
     #[repr(C)]
     pub struct ClassType<'arena>(pub Str<'arena>);
 
@@ -126,7 +132,7 @@ pub mod class {
 pub mod prop {
     use ffi::Str;
 
-    #[derive(Copy, Clone)]
+    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
     #[repr(C)]
     pub struct PropType<'arena>(pub Str<'arena>);
 
@@ -141,7 +147,7 @@ pub mod prop {
 pub mod method {
     use ffi::Str;
 
-    #[derive(Copy, Clone)]
+    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
     #[repr(C)]
     pub struct MethodType<'arena>(pub Str<'arena>);
 
@@ -166,7 +172,7 @@ pub mod method {
 pub mod function {
     use ffi::Str;
 
-    #[derive(Copy, Clone)]
+    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
     #[repr(C)]
     pub struct FunctionType<'arena>(pub Str<'arena>);
 
@@ -182,7 +188,7 @@ pub mod function {
 pub mod r#const {
     use ffi::Str;
 
-    #[derive(Copy, Clone)]
+    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
     #[repr(C)]
     pub struct ConstType<'arena>(pub Str<'arena>);
 
@@ -196,7 +202,7 @@ pub mod r#const {
 pub mod record {
     use ffi::Str;
 
-    #[derive(Copy, Clone)]
+    #[derive(Copy, Clone, PartialEq, Eq, Hash)]
     #[repr(C)]
     pub struct RecordType<'arena>(pub Str<'arena>);
 

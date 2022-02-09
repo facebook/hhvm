@@ -110,18 +110,43 @@ pub fn escape<'a>(s: impl Into<Cow<'a, str>>) -> Cow<'a, str> {
     escape_by(s.into(), escape_char)
 }
 
-fn cow_to_bytes(s: Cow<'_, str>) -> Cow<'_, [u8]> {
+pub fn escape_bstr<'a>(s: impl Into<Cow<'a, BStr>>) -> Cow<'a, BStr> {
+    escape_bstr_by(s.into(), escape_char)
+}
+
+fn cow_str_to_bytes(s: Cow<'_, str>) -> Cow<'_, [u8]> {
     match s {
         Cow::Borrowed(s) => s.as_bytes().into(),
-        Cow::Owned(s) => Vec::<u8>::from(s).into(),
+        Cow::Owned(s) => s.into_bytes().into(),
     }
 }
 
-pub fn escape_by<F: Fn(u8) -> Option<Cow<'static, [u8]>>>(s: Cow<'_, str>, f: F) -> Cow<'_, str> {
-    let r = escape_byte_by(cow_to_bytes(s), f);
+fn cow_bstr_to_bytes(s: Cow<'_, BStr>) -> Cow<'_, [u8]> {
+    match s {
+        Cow::Borrowed(s) => s.as_ref().into(),
+        Cow::Owned(s) => <Vec<u8>>::from(s).into(),
+    }
+}
+
+pub fn escape_by<F>(s: Cow<'_, str>, f: F) -> Cow<'_, str>
+where
+    F: Fn(u8) -> Option<Cow<'static, [u8]>>,
+{
+    let r = escape_byte_by(cow_str_to_bytes(s), f);
     match r {
         Cow::Borrowed(s) => unsafe { std::str::from_utf8_unchecked(s) }.into(),
         Cow::Owned(s) => unsafe { String::from_utf8_unchecked(s) }.into(),
+    }
+}
+
+pub fn escape_bstr_by<'a, F>(s: Cow<'a, BStr>, f: F) -> Cow<'a, BStr>
+where
+    F: Fn(u8) -> Option<Cow<'static, [u8]>>,
+{
+    let r = escape_byte_by(cow_bstr_to_bytes(s), f);
+    match r {
+        Cow::Borrowed(s) => <&BStr>::from(s).into(),
+        Cow::Owned(s) => BString::from(s).into(),
     }
 }
 

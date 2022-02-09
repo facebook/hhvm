@@ -128,18 +128,6 @@ pub fn quote_string(s: &str) -> String {
     format!("\"{}\"", escape(s))
 }
 
-pub fn quote_string_with_escape(s: &str) -> String {
-    format!("\\\"{}\\\"", escape(s))
-}
-
-pub fn single_quote_string_with_escape(s: &str) -> String {
-    format!("'{}'", escape(s))
-}
-
-pub fn triple_quote_string(s: &str) -> String {
-    format!("\"\"\"{}\"\"\"", escape(s))
-}
-
 pub fn prefix_namespace(n: &str, s: &str) -> String {
     format!("{}\\{}", n, s)
 }
@@ -206,19 +194,11 @@ pub fn mangle_meth_caller(mangled_cls_name: &str, f_name: &str) -> String {
 }
 
 pub fn lstrip<'a>(s: &'a str, p: &str) -> &'a str {
-    if s.len() < p.len() {
-        s
-    } else {
-        let sb = s.as_bytes();
-        let pb = p.as_bytes();
-        for i in 0..pb.len() {
-            if sb[i] != pb[i] {
-                return s;
-            }
-        }
-        // s and p are valid then unwrap should never panic.
-        std::str::from_utf8(&sb[pb.len()..]).unwrap()
-    }
+    s.strip_prefix(p).unwrap_or(s)
+}
+
+pub fn lstrip_bslice<'a>(s: &'a [u8], p: &[u8]) -> &'a [u8] {
+    s.strip_prefix(p).unwrap_or(s)
 }
 
 pub mod types {
@@ -415,27 +395,6 @@ mod string_utils_tests {
     fn quote_string_test() {
         let some_string = "test";
         assert_eq!(super::quote_string(some_string), "\"test\"");
-    }
-
-    #[test]
-    fn quote_string_with_escape_test() {
-        let some_string = "test";
-        assert_eq!(super::quote_string_with_escape(some_string), "\\\"test\\\"");
-    }
-
-    #[test]
-    fn single_quote_string_with_escape_test() {
-        let some_string = "test";
-        assert_eq!(
-            super::single_quote_string_with_escape(some_string),
-            "'test'"
-        );
-    }
-
-    #[test]
-    fn triple_quote_string_test() {
-        let some_string = "test";
-        assert_eq!(super::triple_quote_string(some_string), "\"\"\"test\"\"\"");
     }
 
     #[test]

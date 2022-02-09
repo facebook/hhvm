@@ -11,8 +11,9 @@ use crate::{
         option_or, paren, quotes, square, triple_quotes, wrap_by, wrap_by_, Error,
     },
 };
+use bstr::{BString, ByteSlice};
 use core_utils_rust::add_ns;
-use escaper::{escape, escape_by, is_lit_printable};
+use escaper::{escape, escape_bstr, escape_bstr_by, is_lit_printable};
 use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
 use hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX};
 use hhas_attribute::{self as hhas_attribute, HhasAttribute};
@@ -33,8 +34,8 @@ use hhas_typedef::HhasTypedef;
 use hhbc_ast::*;
 use hhbc_id::{class::ClassType, Id};
 use hhbc_string_utils::{
-    float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, mangle, quote_string,
-    quote_string_with_escape, strip_global_ns, strip_ns, triple_quote_string, types,
+    float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, lstrip_bslice, mangle,
+    quote_string, strip_global_ns, strip_ns, types,
 };
 use hhvm_types_ffi::ffi::*;
 use indexmap::IndexSet;
@@ -45,7 +46,7 @@ use label::Label;
 use lazy_static::lazy_static;
 use local::Local;
 use naming_special_names_rust::classes;
-use ocaml_helper::escaped;
+use ocaml_helper::escaped_bytes;
 use oxidized::{
     ast,
     ast_defs::{self, ParamKind},
@@ -55,10 +56,13 @@ use regex::Regex;
 use runtime::TypedValue;
 use std::{
     borrow::Cow,
+    ffi::OsStr,
     io::{self, Result, Write},
+    os::unix::ffi::OsStrExt,
     path::Path,
     write,
 };
+use write_bytes::write_bytes;
 
 macro_rules! write_if {
     ($pred:expr, $($rest:tt)*) => {
@@ -125,18 +129,15 @@ fn print_program_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HhasProgram<'_>) 
             col_begin,
             col_end,
         } = p;
-        let pos = format!("{}:{},{}:{}", line_begin, col_begin, line_end, col_end);
-        concat_str(
+        write_bytes!(
             w,
-            [
-                ".fatal ",
-                pos.as_ref(),
-                " ",
-                get_fatal_op(fop),
-                " \"",
-                escape(msg.unsafe_as_str()).as_ref(),
-                "\";",
-            ],
+            ".fatal {}:{},{}:{} {} \"{}\";",
+            line_begin,
+            col_begin,
+            line_end,
+            col_end,
+            get_fatal_op(fop),
+            escape_bstr(msg.as_bstr()),
         )?;
     }
 
@@ -170,19 +171,19 @@ fn print_include_region(
         let include_roots = ctx.include_roots;
         let alloc = bumpalo::Bump::new();
         match inc.into_doc_root_relative(&alloc, include_roots) {
-            IncludePath::Absolute(p) => print_if_exists(w, Path::new(&p.unsafe_as_str())),
+            IncludePath::Absolute(p) => print_if_exists(w, Path::new(OsStr::from_bytes(&p))),
             IncludePath::SearchPathRelative(p) => {
                 let path_from_cur_dirname = ctx
                     .path
                     .and_then(|p| p.path().parent())
                     .unwrap_or_else(|| Path::new(""))
-                    .join(&p.unsafe_as_str());
+                    .join(OsStr::from_bytes(&p));
                 if path_from_cur_dirname.exists() {
                     print_path(w, &path_from_cur_dirname)
                 } else {
                     let search_paths = ctx.include_search_paths;
                     for prefix in search_paths.iter() {
-                        let path = Path::new(prefix).join(&p.unsafe_as_str());
+                        let path = Path::new(prefix).join(OsStr::from_bytes(&p));
                         if path.exists() {
                             return print_path(w, &path);
                         }
@@ -197,7 +198,7 @@ fn print_include_region(
                         .iter()
                         .try_for_each(|ir| {
                             let doc_root = ctx.doc_root;
-                            let resolved = Path::new(doc_root).join(ir).join(&p.unsafe_as_str());
+                            let resolved = Path::new(doc_root).join(ir).join(OsStr::from_bytes(&p));
                             print_if_exists(w, &resolved)
                         })?
                 }
@@ -205,7 +206,7 @@ fn print_include_region(
             }
             IncludePath::DocRootRelative(p) => {
                 let doc_root = ctx.doc_root;
-                let resolved = Path::new(doc_root).join(&p.unsafe_as_str());
+                let resolved = Path::new(doc_root).join(OsStr::from_bytes(&p));
                 print_if_exists(w, &resolved)
             }
         }
@@ -234,7 +235,7 @@ fn print_symbol_ref_regions<'arena>(
             ctx.block(w, |c, w| {
                 for s in refs.as_ref().iter() {
                     c.newline(w)?;
-                    w.write_all(s.unsafe_as_str().as_bytes())?;
+                    w.write_all(s)?;
                 }
                 Ok(())
             })?;
@@ -249,7 +250,7 @@ fn print_symbol_ref_regions<'arena>(
 }
 
 fn print_adata_region(ctx: &Context<'_>, w: &mut dyn Write, adata: &HhasAdata<'_>) -> Result<()> {
-    concat_str_by(w, " ", [".adata", adata.id.unsafe_as_str(), "= "])?;
+    write_bytes!(w, ".adata {} = ", adata.id)?;
     triple_quotes(w, |w| print_adata(ctx, w, &adata.value))?;
     w.write_all(b";")?;
     ctx.newline(w)
@@ -354,7 +355,7 @@ fn print_type_constant(
     c: &HhasTypeConstant<'_>,
 ) -> Result<()> {
     ctx.newline(w)?;
-    concat_str_by(w, " ", [".const", c.name.unsafe_as_str(), "isType"])?;
+    write_bytes!(w, ".const {} isType", c.name)?;
     if c.is_abstract {
         w.write_all(b" isAbstract")?;
     }
@@ -367,7 +368,7 @@ fn print_type_constant(
 
 fn print_ctx_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasCtxConstant<'_>) -> Result<()> {
     ctx.newline(w)?;
-    concat_str_by(w, " ", [".ctx", c.name.unsafe_as_str()])?;
+    write_bytes!(w, ".ctx {}", c.name)?;
     if c.is_abstract {
         w.write_all(b" isAbstract")?;
     }
@@ -389,7 +390,7 @@ fn print_ctx_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasCtxConstant<
 
 fn print_property_doc_comment(w: &mut dyn Write, p: &HhasProperty<'_>) -> Result<()> {
     if let Just(s) = p.doc_comment.as_ref() {
-        w.write_all(triple_quote_string(s.unsafe_as_str()).as_bytes())?;
+        write_bytes!(w, r#""""{}""""#, escape_bstr(s.as_bstr()))?;
         w.write_all(b" ")?;
     }
     Ok(())
@@ -461,7 +462,7 @@ fn print_doc_comment<'arena>(
 ) -> Result<()> {
     if let Just(cmt) = doc_comment {
         ctx.newline(w)?;
-        write!(w, ".doc {};", triple_quote_string(cmt.unsafe_as_str()))?;
+        write_bytes!(w, r#".doc """{}""";"#, escape_bstr(cmt.as_bstr()))?;
     }
     Ok(())
 }
@@ -738,10 +739,10 @@ fn print_pos_as_prov_tag(
             };
             write!(
                 w,
-                "p:i:{};s:{}:{};",
+                r#"p:i:{};s:{}:\"{}\";"#,
                 line,
                 filename.len(),
-                quote_string_with_escape(filename)
+                escape(filename)
             )
         }
         _ => Ok(()),
@@ -773,7 +774,7 @@ fn print_prop_id(w: &mut dyn Write, id: &PropId<'_>) -> Result<()> {
 }
 
 fn print_adata_id(w: &mut dyn Write, id: &AdataId<'_>) -> Result<()> {
-    concat_str(w, ["@", id.unsafe_as_str()])
+    write_bytes!(w, "@{}", id)
 }
 
 fn print_adata_mapped_argument<F, V>(
@@ -823,20 +824,10 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Res
         TypedValue::Uninit => w.write_all(b"uninit"),
         TypedValue::Null => w.write_all(b"N;"),
         TypedValue::String(s) => {
-            write!(
-                w,
-                "s:{}:{};",
-                s.len(),
-                quote_string_with_escape(s.unsafe_as_str())
-            )
+            write_bytes!(w, r#"s:{}:\"{}\";"#, s.len(), escape_bstr(s.as_bstr()))
         }
         TypedValue::LazyClass(s) => {
-            write!(
-                w,
-                "l:{}:{};",
-                s.len(),
-                quote_string_with_escape(s.unsafe_as_str())
-            )
+            write_bytes!(w, r#"l:{}:\"{}\";"#, s.len(), escape_bstr(s.as_bstr()))
         }
         TypedValue::Float(f) => write!(w, "d:{};", float::to_string(*f)),
         TypedValue::Int(i) => write!(w, "i:{};", i),
@@ -852,15 +843,15 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Res
         TypedValue::Keyset(values) => {
             print_adata_collection_argument(ctx, w, KEYSET_PREFIX, None, values.as_ref())
         }
-        TypedValue::HhasAdata(s) => w.write_all(escaped(s.unsafe_as_str()).as_bytes()),
+        TypedValue::HhasAdata(s) => w.write_all(&escaped_bytes(s.as_ref())),
     }
 }
 
 fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &HhasAttribute<'_>) -> Result<()> {
-    write!(
+    write_bytes!(
         w,
         "\"{}\"(\"\"\"{}:{}:{{",
-        a.name.unsafe_as_str(),
+        a.name,
         VEC_PREFIX,
         a.arguments.len()
     )?;
@@ -932,10 +923,10 @@ fn print_body(
         ctx.newline(w)?;
         w.write_all(b".declvars ")?;
         concat_by(w, " ", &body.decl_vars, |w, var| {
-            if var.unsafe_as_str().as_bytes().iter().all(is_bareword_char) {
-                w.write_all(var.unsafe_as_str().as_bytes())
+            if var.iter().all(is_bareword_char) {
+                w.write_all(var)
             } else {
-                quotes(w, |w| w.write_all(escape(var.unsafe_as_str()).as_bytes()))
+                quotes(w, |w| w.write_all(&escape_bstr(var.as_bstr())))
             }
         })?;
         w.write_all(b";")?;
@@ -1041,7 +1032,7 @@ fn print_fcall_args(
     option_or(w, async_eager_label.as_ref(), print_label, "-")?;
     w.write_all(b" ")?;
     match context {
-        Just(s) => quotes(w, |w| w.write_all(s.unsafe_as_str().as_bytes())),
+        Just(s) => quotes(w, |w| w.write_all(s)),
         Nothing => w.write_all(b"\"\""),
     }
 }
@@ -1205,7 +1196,7 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>) -> Result<()> {
         Instruct::IBase(i) => print_base(w, i),
         Instruct::IFinal(i) => print_final(w, i),
         Instruct::ITry(itry) => print_try(w, itry),
-        Instruct::IComment(s) => concat_str_by(w, " ", ["#", s.unsafe_as_str()]),
+        Instruct::IComment(s) => write_bytes!(w, "# {}", s),
         Instruct::ISrcLoc(p) => write!(
             w,
             ".srcloc {}:{},{}:{};",
@@ -1299,7 +1290,7 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>) -> Result<()> {
         }
         M::ET(s, op) => {
             w.write_all(b"ET:")?;
-            quotes(w, |w| w.write_all(escape(s.unsafe_as_str()).as_bytes()))?;
+            quotes(w, |w| w.write_all(&escape_bstr(s.as_bstr())))?;
             w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
@@ -1762,13 +1753,9 @@ fn print_misc(w: &mut dyn Write, misc: &InstructMisc<'_>) -> Result<()> {
             w.write_all(b"AssertRATL ")?;
             print_local(w, local)?;
             w.write_all(b" ")?;
-            w.write_all(s.unsafe_as_str().as_bytes())
+            w.write_all(s)
         }
-        M::AssertRATStk(n, s) => concat_str_by(
-            w,
-            " ",
-            ["AssertRATStk", n.to_string().as_str(), s.unsafe_as_str()],
-        ),
+        M::AssertRATStk(n, s) => write_bytes!(w, "AssertRATStk {} {}", n, s,),
         M::GetMemoKeyL(local) => {
             w.write_all(b"GetMemoKeyL ")?;
             print_local(w, local)
@@ -1817,7 +1804,7 @@ fn print_control_flow(w: &mut dyn Write, cf: &InstructControlFlow<'_>) -> Result
                 w.write_all(b"SSwitch ")?;
                 angle(w, |w| {
                     concat_by(w, " ", rest, |w, Pair(s, l)| {
-                        concat_str(w, [quote_string(s.unsafe_as_str()).as_str(), ":"])?;
+                        write_bytes!(w, r#""{}":"#, escape_bstr(s.as_bstr()))?;
                         print_label(w, l)
                     })?;
                     w.write_all(b" -:")?;
@@ -1851,7 +1838,7 @@ fn print_lit_const(w: &mut dyn Write, lit: &InstructLitConst<'_>) -> Result<()> 
         LC::Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
         LC::String(s) => {
             w.write_all(b"String ")?;
-            quotes(w, |w| w.write_all(escape(s.unsafe_as_str()).as_bytes()))
+            quotes(w, |w| w.write_all(&escape_bstr(s.as_bstr())))
         }
         LC::LazyClass(id) => {
             w.write_all(b"LazyClass ")?;
@@ -1859,7 +1846,7 @@ fn print_lit_const(w: &mut dyn Write, lit: &InstructLitConst<'_>) -> Result<()> 
         }
         LC::True => w.write_all(b"True"),
         LC::False => w.write_all(b"False"),
-        LC::Double(d) => concat_str_by(w, " ", ["Double", d.unsafe_as_str()]),
+        LC::Double(d) => write_bytes!(w, "Double {}", d),
         LC::AddElemC => w.write_all(b"AddElemC"),
         LC::AddNewElemC => w.write_all(b"AddNewElemC"),
         LC::NewPair => w.write_all(b"NewPair"),
@@ -2094,7 +2081,7 @@ fn print_param<'arena>(
         print_type_info(w, ty)?;
         w.write_all(b" ")
     })?;
-    w.write_all(param.name.unsafe_as_str().as_bytes())?;
+    w.write_all(&param.name)?;
     option(
         w,
         param.default_value.map(|x| (x.0, x.1)).as_ref(),
@@ -2105,7 +2092,7 @@ fn print_param<'arena>(
 fn print_param_id(w: &mut dyn Write, param_id: &ParamId<'_>) -> Result<()> {
     match param_id {
         ParamId::ParamUnnamed(i) => w.write_all(i.to_string().as_bytes()),
-        ParamId::ParamNamed(s) => w.write_all(s.unsafe_as_str().as_bytes()),
+        ParamId::ParamNamed(s) => w.write_all(s),
     }
 }
 
@@ -2115,9 +2102,7 @@ fn print_param_default_value<'arena>(
 ) -> Result<()> {
     w.write_all(b" = ")?;
     print_label(w, &default_val.0)?;
-    paren(w, |w| {
-        triple_quotes(w, |w| w.write_all(default_val.1.unsafe_as_str().as_bytes()))
-    })
+    paren(w, |w| triple_quotes(w, |w| w.write_all(&default_val.1)))
 }
 
 fn print_label(w: &mut dyn Write, label: &Label) -> Result<()> {
@@ -2139,7 +2124,7 @@ fn print_local(w: &mut dyn Write, local: &Local<'_>) -> Result<()> {
             w.write_all(b"_")?;
             print_int(w, id)
         }
-        Local::Named(id) => w.write_all(id.unsafe_as_str().as_bytes()),
+        Local::Named(id) => w.write_all(id),
     }
 }
 
@@ -2290,11 +2275,8 @@ fn print_expr_string(w: &mut dyn Write, s: &[u8]) -> Result<()> {
             }
         }
     }
-    // FIXME: This is not safe--string literals are binary strings.
-    // There's no guarantee that they're valid UTF-8.
-    let s = unsafe { std::str::from_utf8_unchecked(s) };
     wrap_by(w, "\\\"", |w| {
-        w.write_all(escape_by(s.into(), escape_char).as_bytes())
+        w.write_all(&escape_bstr_by(s.as_bstr().into(), escape_char))
     })
 }
 
@@ -2302,13 +2284,13 @@ fn print_expr_to_string(
     ctx: &Context<'_>,
     env: &ExprEnv<'_, '_>,
     expr: &ast::Expr,
-) -> Result<String> {
+) -> Result<BString> {
     let mut buf = Vec::new();
     print_expr(ctx, &mut buf, env, expr).map_err(|e| match write::into_error(e) {
         Error::NotImpl(m) => Error::NotImpl(m),
         e => Error::Fail(format!("Failed: {}", e)),
     })?;
-    Ok(unsafe { String::from_utf8_unchecked(buf) })
+    Ok(buf.into())
 }
 
 fn print_expr(
@@ -2334,18 +2316,18 @@ fn print_expr(
             }
             _ => id.into(),
         };
-        escaper::escape(s)
+        escape(s)
     }
     fn print_expr_id<'a>(w: &mut dyn Write, env: &ExprEnv<'_, '_>, s: &'a str) -> Result<()> {
         w.write_all(adjust_id(env, s).as_bytes())
     }
     fn fmt_class_name<'a>(is_class_constant: bool, id: Cow<'a, str>) -> Cow<'a, str> {
         let cn: Cow<'a, str> = if is_xhp(strip_global_ns(&id)) {
-            escaper::escape(strip_global_ns(&mangle(id.into())))
+            escape(strip_global_ns(&mangle(id.into())))
                 .to_string()
                 .into()
         } else {
-            escaper::escape(strip_global_ns(&id)).to_string().into()
+            escape(strip_global_ns(&id)).to_string().into()
         };
         if is_class_constant {
             format!("\\\\{}", cn).into()
@@ -2486,7 +2468,7 @@ fn print_expr(
                 }
                 None => {
                     let buf = print_expr_to_string(ctx, env, e)?;
-                    w.write_all(lstrip(&buf, "\\\\").as_bytes())?
+                    w.write_all(lstrip_bslice(&buf, br"\\"))?
                 }
             };
             paren(w, |w| {
@@ -2525,7 +2507,7 @@ fn print_expr(
                         )?,
                         None => {
                             let buf = print_expr_to_string(ctx, env, ci_expr)?;
-                            w.write_all(lstrip(&buf, "\\\\").as_bytes())?
+                            w.write_all(lstrip_bslice(&buf, br"\\"))?
                         }
                     }
                     paren(w, |w| {
@@ -2907,10 +2889,10 @@ fn print_statement(
                     e => Error::Fail(format!("Failed: {}", e)),
                 }
             })?;
-            write_if!(!buf.is_empty(), w, " else ")?;
-            write_if!(!buf.is_empty(), w, "{}", unsafe {
-                std::str::from_utf8_unchecked(&buf)
-            })
+            if !buf.is_empty() {
+                write_bytes!(w, " else {}", BString::from(buf))?;
+            };
+            Ok(())
         }
         S_::Block(block) => print_block_(ctx, w, env, block),
         S_::Noop => Ok(()),
@@ -3047,7 +3029,7 @@ fn print_upper_bound<'arena>(
     Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'_>>>,
 ) -> Result<()> {
     paren(w, |w| {
-        concat_str_by(w, " ", [id.unsafe_as_str(), "as", ""])?;
+        write_bytes!(w, "{} as ", id)?;
         concat_by(w, ", ", &tys, print_type_info)
     })
 }
@@ -3064,7 +3046,7 @@ fn print_upper_bound_<'arena>(
     Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>,
 ) -> Result<()> {
     paren(w, |w| {
-        concat_str_by(w, " ", [id.unsafe_as_str(), "as", ""])?;
+        write_bytes!(w, "{} as ", id)?;
         concat_by(w, ", ", &tys, print_type_info)
     })
 }

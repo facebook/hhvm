@@ -277,6 +277,7 @@ module Primary : sig
         }
       | Missing_assign of Pos.t
       | Non_void_annotation_on_return_void_function of {
+          hint_pos: Pos.t;
           pos: Pos.t;
           is_async: bool;
         }

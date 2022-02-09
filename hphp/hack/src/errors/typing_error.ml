@@ -1121,6 +1121,7 @@ module Primary = struct
         }
       | Missing_assign of Pos.t
       | Non_void_annotation_on_return_void_function of {
+          hint_pos: Pos.t;
           pos: Pos.t;
           is_async: bool;
         }
@@ -1166,7 +1167,7 @@ module Primary = struct
     let missing_assign pos =
       (Error_code.MissingAssign, (pos, "Please assign a value"), [], [])
 
-    let non_void_annotation_on_return_void_function is_async pos =
+    let non_void_annotation_on_return_void_function is_async pos hint_pos=
       let (async_indicator, return_type) =
         if is_async then
           ("Async f", "Awaitable<void>")
@@ -1179,7 +1180,15 @@ module Primary = struct
           async_indicator
           return_type
       in
-      (Error_code.NonVoidAnnotationOnReturnVoidFun, (pos, message), [], [])
+      let quickfix = [
+        Quickfix.make
+          ~title:
+            ("Change to " ^ Markdown_lite.md_codify("void"))
+          ~new_text: "void"
+          hint_pos;
+      ] 
+      in
+      (Error_code.NonVoidAnnotationOnReturnVoidFun, (pos, message), [], quickfix)
 
     let tuple_syntax p =
       ( Error_code.TupleSyntax,
@@ -1196,8 +1205,8 @@ module Primary = struct
           { pos; with_value_pos; without_value_pos_opt } ->
         returns_with_and_without_value pos with_value_pos without_value_pos_opt
       | Missing_assign pos -> missing_assign pos
-      | Non_void_annotation_on_return_void_function { pos; is_async } ->
-        non_void_annotation_on_return_void_function is_async pos
+      | Non_void_annotation_on_return_void_function { hint_pos; pos; is_async } ->
+        non_void_annotation_on_return_void_function is_async pos hint_pos
       | Tuple_syntax pos -> tuple_syntax pos
   end
 

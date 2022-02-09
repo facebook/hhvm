@@ -83,6 +83,17 @@ let validate_state fun_kind env s =
       is_bad_supertype aw_void ret_type_hint_locl
     in
     if is_void_super_ty || is_awaitable_void_super_ty then
+      match s.return_type with
+      | None -> ( false,
+      lazy
+        (Errors.add_typing_error
+           Typing_error.(
+             wellformedness
+             @@ Primary.Wellformedness
+                .Non_void_annotation_on_return_void_function
+                  { is_async; pos = s.fun_def_pos; hint_pos = s.fun_def_pos })) )
+  
+      | Some (hint_loc, _) -> 
       ( false,
         lazy
           (Errors.add_typing_error
@@ -90,7 +101,7 @@ let validate_state fun_kind env s =
                wellformedness
                @@ Primary.Wellformedness
                   .Non_void_annotation_on_return_void_function
-                    { is_async; pos = s.fun_def_pos })) )
+                    { is_async; pos = s.fun_def_pos; hint_pos = hint_loc })) )
     else
       (true, lazy ())
   in

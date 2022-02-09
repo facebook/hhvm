@@ -333,7 +333,6 @@ dependencies = [
  "hhbc_id",
  "hhbc_string_utils",
  "hhvm_types_ffi",
- "indexmap",
  "instruction_sequence",
  "iterator",
  "itertools 0.10.3",

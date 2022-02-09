@@ -84,6 +84,22 @@ impl<U> Maybe<U> {
             Nothing => default,
         }
     }
+
+    pub fn unwrap_or(self, default: U) -> U {
+        match self {
+            Just(t) => t,
+            Nothing => default,
+        }
+    }
+}
+
+impl<U: Default> Maybe<U> {
+    pub fn unwrap_or_default(self) -> U {
+        match self {
+            Just(t) => t,
+            Nothing => Default::default(),
+        }
+    }
 }
 
 impl<U> std::convert::From<Option<U>> for Maybe<U> {

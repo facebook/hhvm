@@ -3,10 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use std::{
+    cell::Cell,
     fmt::Debug,
     io::{self, Result, Write},
 };
 use thiserror::Error;
+use write_bytes::{BytesFormatter, DisplayBytes};
 
 #[macro_export]
 macro_rules! not_impl {
@@ -171,4 +173,108 @@ where
         None => w.write_all(default.as_ref().as_bytes()),
         Some(i) => f(w, i),
     }
+}
+
+pub(crate) struct FmtSeparated<'a, T, I>
+where
+    T: DisplayBytes,
+    I: Iterator<Item = T>,
+{
+    items: Cell<Option<I>>,
+    sep: &'a str,
+}
+
+impl<'a, Item, I> DisplayBytes for FmtSeparated<'a, Item, I>
+where
+    Item: DisplayBytes,
+    I: Iterator<Item = Item>,
+{
+    fn fmt(&self, f: &mut BytesFormatter<'_>) -> Result<()> {
+        let mut items = self.items.take().unwrap();
+        if let Some(item) = items.next() {
+            item.fmt(f)?;
+        }
+        for item in items {
+            f.write_all(self.sep.as_bytes())?;
+            item.fmt(f)?;
+        }
+        Ok(())
+    }
+}
+
+pub(crate) fn fmt_separated<'a, Item, I, II>(sep: &'a str, items: II) -> FmtSeparated<'a, Item, I>
+where
+    Item: DisplayBytes,
+    I: Iterator<Item = Item>,
+    II: IntoIterator<Item = Item, IntoIter = I>,
+{
+    FmtSeparated {
+        items: Cell::new(Some(items.into_iter())),
+        sep,
+    }
+}
+
+pub(crate) struct FmtSeparatedWith<'a, Item, I, F>
+where
+    I: Iterator<Item = Item>,
+    F: Fn(&mut BytesFormatter<'_>, Item) -> Result<()>,
+{
+    items: Cell<Option<I>>,
+    sep: &'a str,
+    with: F,
+}
+
+impl<'a, Item, I, F> DisplayBytes for FmtSeparatedWith<'a, Item, I, F>
+where
+    I: Iterator<Item = Item>,
+    F: Fn(&mut BytesFormatter<'_>, Item) -> Result<()>,
+{
+    fn fmt(&self, f: &mut BytesFormatter<'_>) -> Result<()> {
+        let mut items = self.items.take().unwrap();
+        if let Some(item) = items.next() {
+            (self.with)(f, item)?;
+        }
+        for item in items {
+            f.write_all(self.sep.as_bytes())?;
+            (self.with)(f, item)?;
+        }
+        Ok(())
+    }
+}
+
+pub(crate) fn fmt_separated_with<'a, Item, I, F, II>(
+    sep: &'a str,
+    items: II,
+    with: F,
+) -> FmtSeparatedWith<'a, Item, I, F>
+where
+    I: Iterator<Item = Item>,
+    F: Fn(&mut BytesFormatter<'_>, Item) -> Result<()>,
+    II: IntoIterator<Item = Item, IntoIter = I>,
+{
+    FmtSeparatedWith {
+        items: Cell::new(Some(items.into_iter())),
+        sep,
+        with,
+    }
+}
+
+#[test]
+fn test_fmt_separated() -> Result<()> {
+    use bstr::BStr;
+    use write_bytes::{format_bytes, write_bytes};
+
+    let v: Vec<&str> = vec!["a", "b"];
+    assert_eq!(
+        format_bytes!("{}", fmt_separated(" ", v)),
+        <&BStr>::from("a b")
+    );
+
+    let v: Vec<&BStr> = vec!["a".into(), "b".into()];
+    assert_eq!(
+        format_bytes!("{}", fmt_separated(" ", v)),
+        <&BStr>::from("a b")
+    );
+
+    Ok(())
 }

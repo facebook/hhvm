@@ -140,6 +140,10 @@ pub fn strip_global_ns(s: &str) -> &str {
     }
 }
 
+pub fn strip_global_ns_bslice(s: &[u8]) -> &[u8] {
+    s.strip_prefix(b"\\").unwrap_or(s)
+}
+
 // Strip zero or more chars followed by a backslash
 pub fn strip_ns(s: &str) -> &str {
     s.rfind('\\').map_or(s, |i| &s[i + 1..])
@@ -410,6 +414,11 @@ mod string_utils_tests {
         let another_string = "\\\\";
         assert_eq!(super::strip_global_ns(some_string), "test");
         assert_eq!(super::strip_global_ns(another_string), "\\");
+
+        let some_string = b"\\test";
+        let another_string = b"\\\\";
+        assert_eq!(super::strip_global_ns_bslice(some_string), b"test");
+        assert_eq!(super::strip_global_ns_bslice(another_string), b"\\");
     }
 
     #[test]

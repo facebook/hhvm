@@ -7,8 +7,9 @@ use crate::{
     context::Context,
     not_impl,
     write::{
-        self, angle, braces, concat, concat_by, concat_str, concat_str_by, newline, option,
-        option_or, paren, quotes, square, triple_quotes, wrap_by, wrap_by_, Error,
+        self, angle, braces, concat, concat_by, concat_str, concat_str_by, fmt_separated,
+        fmt_separated_with, newline, option, option_or, paren, quotes, square, triple_quotes,
+        wrap_by, wrap_by_, Error,
     },
 };
 use bstr::{BString, ByteSlice};
@@ -35,10 +36,9 @@ use hhbc_ast::*;
 use hhbc_id::class::ClassType;
 use hhbc_string_utils::{
     float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, lstrip_bslice, mangle,
-    quote_string, strip_global_ns, strip_ns, types,
+    strip_global_ns, strip_global_ns_bslice, strip_ns, types,
 };
 use hhvm_types_ffi::ffi::*;
-use indexmap::IndexSet;
 use instruction_sequence::{Error::Unrecoverable, InstrSeq};
 use iterator::Id as IterId;
 use itertools::Itertools;
@@ -265,7 +265,7 @@ fn print_typedef(ctx: &Context<'_>, w: &mut dyn Write, td: &HhasTypedef<'_>) -> 
         &AttrContext::Alias,
         &td.attrs,
     )?;
-    w.write_all(td.name.unsafe_as_str().as_bytes())?;
+    w.write_all(td.name.as_bstr())?;
     w.write_all(b" = ")?;
     print_typedef_info(w, &td.type_info)?;
     w.write_all(b" ")?;
@@ -311,7 +311,7 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &HhasFunction<'_
         print_type_info(w, ti)?;
         w.write_all(b" ")
     })?;
-    w.write_all(fun_def.name.unsafe_as_str().as_bytes())?;
+    w.write_all(fun_def.name.as_bstr())?;
     print_params(ctx, w, fun_def.params())?;
     if fun_def.is_generator() {
         w.write_all(b" isGenerator")?;
@@ -340,10 +340,10 @@ fn print_requirement(
     w.write_all(b".require ")?;
     match r {
         Pair(name, hhas_class::TraitReqKind::MustExtend) => {
-            write!(w, "extends <{}>;", name.unsafe_as_str())
+            write_bytes!(w, "extends <{}>;", name)
         }
         Pair(name, hhas_class::TraitReqKind::MustImplement) => {
-            write!(w, "implements <{}>;", name.unsafe_as_str())
+            write_bytes!(w, "implements <{}>;", name)
         }
     }
 }
@@ -412,7 +412,7 @@ fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &HhasProperty<
     )?;
     print_property_doc_comment(w, property)?;
     print_property_type_info(w, property)?;
-    w.write_all(property.name.unsafe_as_str().as_bytes())?;
+    w.write_all(property.name.as_bstr())?;
     w.write_all(b" =\n    ")?;
     let initial_value = property.initial_value.as_ref();
     if initial_value == Just(&TypedValue::Uninit) {
@@ -429,7 +429,7 @@ fn print_property(ctx: &Context<'_>, w: &mut dyn Write, property: &HhasProperty<
 fn print_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasConstant<'_>) -> Result<()> {
     ctx.newline(w)?;
     w.write_all(b".const ")?;
-    w.write_all(c.name.unsafe_as_str().as_bytes())?;
+    w.write_all(c.name.as_bstr())?;
     if c.is_abstract {
         w.write_all(b" isAbstract")?;
     }
@@ -476,11 +476,13 @@ fn print_use_precedence<'arena>(
     >,
 ) -> Result<()> {
     ctx.newline(w)?;
-    concat_str(w, [id1.unsafe_as_str(), "::", id2.unsafe_as_str()])?;
-    w.write_all(b" insteadof ")?;
-    let unique_ids: IndexSet<&str> = ids.as_ref().iter().map(|i| i.unsafe_as_str()).collect();
-    concat_str_by(w, " ", unique_ids.iter().collect::<Vec<_>>())?;
-    w.write_all(b";")
+    write_bytes!(
+        w,
+        "{}::{} insteadof {};",
+        id1,
+        id2,
+        fmt_separated(" ", ids.as_ref().iter().unique())
+    )
 }
 
 fn print_use_as_visibility(w: &mut dyn Write, u: UseAsVisibility) -> Result<()> {
@@ -507,7 +509,7 @@ fn print_use_alias<'arena>(
     option_or(
         w,
         ido1.as_ref(),
-        |w, i: &ClassType<'arena>| concat_str(w, [i.unsafe_as_str(), "::", id]),
+        |w, i: &ClassType<'arena>| write_bytes!(w, "{}::{}", i, id),
         id,
     )?;
     w.write_all(b" as ")?;
@@ -518,7 +520,7 @@ fn print_use_alias<'arena>(
     }
     write_if!(!kindl.is_empty() && ido2.is_just(), w, " ")?;
     option(w, ido2.as_ref(), |w, i: &ClassType<'arena>| {
-        w.write_all(i.unsafe_as_str().as_bytes())
+        w.write_all(i.as_bstr())
     })?;
     w.write_all(b";")
 }
@@ -527,17 +529,10 @@ fn print_uses<'arena>(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'arena
     if c.uses.is_empty() {
         Ok(())
     } else {
-        let unique_ids: IndexSet<&str> = c
-            .uses
-            .as_ref()
-            .iter()
-            .map(|e| strip_global_ns(e.unsafe_as_str()))
-            .collect();
-        let unique_ids: Vec<_> = unique_ids.into_iter().collect();
+        let unique_ids = c.uses.iter().map(|e| strip_global_ns_bslice(e)).unique();
 
         newline(w)?;
-        w.write_all(b"  .use ")?;
-        concat_by(w, " ", unique_ids, |w, id| w.write_all(id.as_bytes()))?;
+        write_bytes!(w, "  .use {}", fmt_separated(" ", unique_ids))?;
 
         if c.use_aliases.is_empty() && c.use_precedences.is_empty() {
             w.write_all(b";")
@@ -573,46 +568,21 @@ fn print_implements(w: &mut dyn Write, implements: &[ClassType<'_>]) -> Result<(
     if implements.is_empty() {
         return Ok(());
     }
-    w.write_all(b" implements (")?;
-    concat_str_by(
-        w,
-        " ",
-        implements
-            .iter()
-            .map(|x| x.unsafe_as_str())
-            .collect::<Vec<_>>(),
-    )?;
-    w.write_all(b")")
+    write_bytes!(w, " implements ({})", fmt_separated(" ", implements))
 }
 
 fn print_enum_includes(w: &mut dyn Write, enum_includes: &[ClassType<'_>]) -> Result<()> {
     if enum_includes.is_empty() {
         return Ok(());
     }
-    w.write_all(b" enum_includes (")?;
-    concat_str_by(
-        w,
-        " ",
-        enum_includes
-            .iter()
-            .map(|x| x.unsafe_as_str())
-            .collect::<Vec<_>>(),
-    )?;
-    w.write_all(b")")
+    write_bytes!(w, " enum_includes ({})", fmt_separated(" ", enum_includes))
 }
 
 fn print_shadowed_tparams<'arena>(
     w: &mut dyn Write,
     shadowed_tparams: impl AsRef<[Str<'arena>]>,
 ) -> Result<()> {
-    braces(w, |w| {
-        let tps: Vec<&str> = shadowed_tparams
-            .as_ref()
-            .iter()
-            .map(|s| s.unsafe_as_str())
-            .collect();
-        concat_str_by(w, ", ", tps)
-    })
+    write_bytes!(w, "{{{}}}", fmt_separated(", ", shadowed_tparams.as_ref()))
 }
 
 fn print_method_def(
@@ -639,7 +609,7 @@ fn print_method_def(
         print_type_info(w, t)?;
         w.write_all(b" ")
     })?;
-    w.write_all(method_def.name.unsafe_as_str().as_bytes())?;
+    w.write_all(method_def.name.as_bstr())?;
     print_params(ctx, w, &body.params)?;
     if method_def.flags.contains(HhasMethodFlags::IS_GENERATOR) {
         w.write_all(b" isGenerator")?;
@@ -680,7 +650,7 @@ fn print_class_def<'arena>(
         &AttrContext::Class,
         &class_def.flags,
     )?;
-    w.write_all(class_def.name.unsafe_as_str().as_bytes())?;
+    w.write_all(class_def.name.as_bstr())?;
     w.write_all(b" ")?;
     print_span(w, &class_def.span)?;
     print_extends(
@@ -749,23 +719,23 @@ fn print_pos_as_prov_tag(
 }
 
 fn print_function_id(w: &mut dyn Write, id: &FunctionId<'_>) -> Result<()> {
-    quotes(w, |w| w.write_all(escape(id.unsafe_as_str()).as_bytes()))
+    write_bytes!(w, r#""{}""#, escape_bstr(id.as_bstr()))
 }
 
 fn print_class_id(w: &mut dyn Write, id: &ClassId<'_>) -> Result<()> {
-    quotes(w, |w| w.write_all(escape(id.unsafe_as_str()).as_bytes()))
+    write_bytes!(w, r#""{}""#, escape_bstr(id.as_bstr()))
 }
 
 fn print_method_id(w: &mut dyn Write, id: &MethodId<'_>) -> Result<()> {
-    quotes(w, |w| w.write_all(escape(id.unsafe_as_str()).as_bytes()))
+    write_bytes!(w, r#""{}""#, escape_bstr(id.as_bstr()))
 }
 
 fn print_const_id(w: &mut dyn Write, id: &ConstId<'_>) -> Result<()> {
-    quotes(w, |w| w.write_all(escape(id.unsafe_as_str()).as_bytes()))
+    write_bytes!(w, r#""{}""#, escape_bstr(id.as_bstr()))
 }
 
 fn print_prop_id(w: &mut dyn Write, id: &PropId<'_>) -> Result<()> {
-    quotes(w, |w| w.write_all(escape(id.unsafe_as_str()).as_bytes()))
+    write_bytes!(w, r#""{}""#, escape_bstr(id.as_bstr()))
 }
 
 fn print_adata_id(w: &mut dyn Write, id: &AdataId<'_>) -> Result<()> {
@@ -857,20 +827,17 @@ fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &HhasAttribute<'_>) 
 fn print_attributes<'a>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    al: impl AsRef<[HhasAttribute<'a>]>,
+    al: &[HhasAttribute<'a>],
 ) -> Result<()> {
     // Adjust for underscore coming before alphabet
-    let al: Vec<&HhasAttribute<'_>> = al
-        .as_ref()
+    let al = al
         .iter()
-        .sorted_by_key(|a| {
-            (
-                !a.name.unsafe_as_str().starts_with("__"),
-                a.name.unsafe_as_str(),
-            )
-        })
-        .collect();
-    concat_by(w, " ", &al, |w, a| print_attribute(ctx, w, a))
+        .sorted_by_key(|a| (!a.name.starts_with(b"__"), a.name));
+    write_bytes!(
+        w,
+        "{}",
+        fmt_separated_with(" ", al, |w, a| print_attribute(ctx, w, a))
+    )
 }
 
 fn print_file_attributes(
@@ -3079,14 +3046,16 @@ fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &HhasTypeInfo<'_>) -> 
 
 fn print_typedef_info(w: &mut dyn Write, ti: &HhasTypeInfo<'_>) -> Result<()> {
     angle(w, |w| {
-        w.write_all(
-            quote_string(
+        write_bytes!(
+            w,
+            r#""{}""#,
+            escape_bstr(
                 ti.type_constraint
                     .name
                     .as_ref()
-                    .map_or("", |n| n.unsafe_as_str()),
+                    .unwrap_or(&Default::default())
+                    .as_bstr()
             )
-            .as_bytes(),
         )?;
         let flags = ti.type_constraint.flags & TypeConstraintFlags::Nullable;
         if !flags.is_empty() {

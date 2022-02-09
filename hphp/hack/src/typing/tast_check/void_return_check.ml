@@ -84,15 +84,7 @@ let validate_state fun_kind env s =
     in
     if is_void_super_ty || is_awaitable_void_super_ty then
       match s.return_type with
-      | None -> ( false,
-      lazy
-        (Errors.add_typing_error
-           Typing_error.(
-             wellformedness
-             @@ Primary.Wellformedness
-                .Non_void_annotation_on_return_void_function
-                  { is_async; pos = s.fun_def_pos; hint_pos = s.fun_def_pos })) )
-  
+      | None -> (true, lazy())
       | Some (hint_loc, _) -> 
       ( false,
         lazy

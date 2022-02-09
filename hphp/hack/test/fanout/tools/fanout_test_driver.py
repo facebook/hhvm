@@ -35,6 +35,8 @@ DEFAULT_HH_SERVER_FLAGS: List[str] = [
     "num_local_workers=1",
     "--config",
     "max_workers=1",
+    "--config",
+    "allow_unstable_features=true",
 ]
 
 

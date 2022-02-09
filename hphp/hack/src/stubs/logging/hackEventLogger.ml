@@ -140,9 +140,7 @@ let server_receipt_to_monitor_write_exn ~server_receipt_to_monitor_file:_ _ = ()
 let server_receipt_to_monitor_read_exn ~server_receipt_to_monitor_file:_ _ _ =
   ()
 
-let init_lazy_end
-    _ ~state_distance:_ ~approach_name:_ ~init_error:_ ~init_type:_ =
-  ()
+let init_lazy_end _ ~approach_name:_ ~init_error:_ ~init_type:_ = ()
 
 let server_is_partially_ready () = ()
 

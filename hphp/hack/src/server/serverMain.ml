@@ -1162,17 +1162,7 @@ let program_init genv env =
          ~key:"deps_mode"
          ~value:(Typing_deps_mode.to_opaque_json env.deps_mode)
   in
-  let state_distance =
-    match saved_state_delta with
-    | None -> None
-    | Some { distance; _ } -> Some distance
-  in
-  HackEventLogger.init_lazy_end
-    telemetry
-    ~state_distance
-    ~approach_name
-    ~init_error
-    ~init_type;
+  HackEventLogger.init_lazy_end telemetry ~approach_name ~init_error ~init_type;
   env
 
 let num_workers options local_config =

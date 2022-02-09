@@ -41,9 +41,9 @@
 #include <string.h>
 #include <signal.h>
 
-#include "php-crypt_r.h"
-#include "crypt-freesec.h"
-#include "zend-md5.h"
+#include "hphp/zend/php-crypt_r.h"
+#include "hphp/zend/crypt-freesec.h"
+#include "hphp/zend/zend-md5.h"
 
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"

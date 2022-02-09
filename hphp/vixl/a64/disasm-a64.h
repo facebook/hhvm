@@ -29,8 +29,8 @@
 
 #include "hphp/vixl/globals.h"
 #include "hphp/vixl/utils.h"
-#include "instructions-a64.h"
-#include "decoder-a64.h"
+#include "hphp/vixl/a64/instructions-a64.h"
+#include "hphp/vixl/a64/decoder-a64.h"
 
 namespace vixl {
 

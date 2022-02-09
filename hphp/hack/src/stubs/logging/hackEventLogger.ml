@@ -403,10 +403,6 @@ let saved_state_dirty_files_failure _ ~start_time:_ = ()
 (** Informant events *)
 let init_informant_prefetcher_runner _ = ()
 
-let informant_decision_on_saved_state
-    ~start_t:_ ~state_distance:_ ~incremental_distance:_ =
-  ()
-
 let informant_induced_kill _ = ()
 
 let informant_induced_restart _ = ()

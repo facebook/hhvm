@@ -36,7 +36,10 @@ impl<R: Reason> TypingDeclProvider<R> {
             Some(rc) => Some(rc),
             None => {
                 let folded_decl = self.folded_decl_provider.get_folded_class(name)?;
-                let cls = Arc::new(Class::new(folded_decl));
+                let cls = Arc::new(Class::new(
+                    Arc::clone(&self.folded_decl_provider),
+                    folded_decl,
+                ));
                 self.cache.insert(name, Arc::clone(&cls));
                 Some(cls)
             }

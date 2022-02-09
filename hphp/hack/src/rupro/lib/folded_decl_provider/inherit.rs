@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl_defs::{
-    Abstraction, ClassConst, ClassishKind, DeclTy, FoldedClass, FoldedElement, ShallowClass,
-    SubstContext,
+    Abstraction, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass, FoldedElement,
+    ShallowClass, SubstContext,
 };
 use crate::folded_decl_provider::subst::Subst;
 use crate::reason::Reason;
@@ -139,7 +139,43 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn add_consts(&mut self, other_consts: ClassConstNameMap<ClassConst<R>>) {
-        self.consts.extend(other_consts)
+        for (name, new_const) in other_consts {
+            match self.consts.entry(name) {
+                Entry::Vacant(e) => {
+                    e.insert(new_const);
+                }
+                Entry::Occupied(mut e) => {
+                    let old_const = e.get();
+                    match (
+                        new_const.is_synthesized,
+                        old_const.is_synthesized,
+                        new_const.kind,
+                        old_const.kind,
+                    ) {
+                        (true, false, _, _) => {
+                            // Don't replace a constant with a synthesized
+                            // constant. This covers the following case:
+                            // ```
+                            // class HasFoo { abstract const int FOO; }
+                            // trait T { require extends Foo; }
+                            // class Child extends HasFoo {
+                            //   use T;
+                            // }
+                            // ```
+                            // In this case, `Child` still doesn't have a value
+                            // for the `FOO` constant.
+                        }
+                        (_, _, ClassConstKind::CCAbstract(_), ClassConstKind::CCConcrete) => {
+                            // Don't replace a concrete constant with an
+                            // abstract constant found later in the MRO.
+                        }
+                        _ => {
+                            e.insert(new_const);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fn add_inherited(&mut self, other: Self) {
@@ -321,7 +357,11 @@ impl<R: Reason> Inherited<R> {
         for (_, static_method) in self.static_methods.iter_mut() {
             static_method.set_is_synthesized(true);
         }
-        //TODO typeconsts, consts
+        for (_, classconst) in self.consts.iter_mut() {
+            classconst.set_is_synthesized(true);
+        }
+
+        //TODO typeconsts
     }
 
     pub(crate) fn make(sc: &ShallowClass<R>, parents: &TypeNameMap<Arc<FoldedClass<R>>>) -> Self {

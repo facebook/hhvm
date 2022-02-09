@@ -65,6 +65,12 @@ pub struct ClassConst<R: Reason> {
     pub refs: Vec<ClassConstRef>,
 }
 
+impl<R: Reason> ClassConst<R> {
+    pub fn set_is_synthesized(&mut self, p: bool) {
+        self.is_synthesized = p;
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct FoldedClass<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_defs.decl_class_type`

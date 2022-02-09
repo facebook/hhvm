@@ -183,7 +183,7 @@ fn print_include_region(
                 } else {
                     let search_paths = ctx.include_search_paths;
                     for prefix in search_paths.iter() {
-                        let path = Path::new(prefix).join(OsStr::from_bytes(&p));
+                        let path = Path::new(OsStr::from_bytes(prefix)).join(OsStr::from_bytes(&p));
                         if path.exists() {
                             return print_path(w, &path);
                         }
@@ -193,20 +193,19 @@ fn print_include_region(
             }
             IncludePath::IncludeRootRelative(v, p) => {
                 if !p.is_empty() {
-                    include_roots
-                        .get(&v.unsafe_as_str().to_owned())
-                        .iter()
-                        .try_for_each(|ir| {
-                            let doc_root = ctx.doc_root;
-                            let resolved = Path::new(doc_root).join(ir).join(OsStr::from_bytes(&p));
-                            print_if_exists(w, &resolved)
-                        })?
+                    include_roots.get(v.as_bstr()).iter().try_for_each(|ir| {
+                        let doc_root = ctx.doc_root;
+                        let resolved = Path::new(OsStr::from_bytes(doc_root))
+                            .join(OsStr::from_bytes(ir))
+                            .join(OsStr::from_bytes(&p));
+                        print_if_exists(w, &resolved)
+                    })?
                 }
                 Ok(())
             }
             IncludePath::DocRootRelative(p) => {
                 let doc_root = ctx.doc_root;
-                let resolved = Path::new(doc_root).join(OsStr::from_bytes(&p));
+                let resolved = Path::new(OsStr::from_bytes(doc_root)).join(OsStr::from_bytes(&p));
                 print_if_exists(w, &resolved)
             }
         }

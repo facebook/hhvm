@@ -2620,6 +2620,7 @@ name = "options"
 version = "0.0.0"
 dependencies = [
  "bitflags",
+ "bstr",
  "fnv",
  "itertools 0.10.3",
  "lazy_static",
@@ -3436,6 +3437,7 @@ checksum = "45f6ee7c7b87caf59549e9fe45d6a69c75c8019e79e212a835c5da0e92f0ba08"
 name = "symbol_refs_state"
 version = "0.0.0"
 dependencies = [
+ "bstr",
  "bumpalo",
  "ffi",
 ]

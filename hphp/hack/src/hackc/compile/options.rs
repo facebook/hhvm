@@ -50,6 +50,7 @@ extern crate lazy_static;
 use serde_derive::{Deserialize, Serialize};
 use serde_json::{json, value::Value as Json};
 
+use bstr::BString;
 use itertools::Either;
 use std::{cell::RefCell, collections::BTreeMap, iter::empty};
 
@@ -172,6 +173,89 @@ impl Default for HhvmFlags {
     }
 }
 
+mod serde_bstr_str {
+    use super::*;
+    use serde::{ser::Error, Deserialize, Serialize};
+    pub(crate) fn serialize<S: Serializer>(s: &Arg<BString>, ser: S) -> Result<S::Ok, S::Error> {
+        let s = Arg::new(String::from_utf8(s.get().to_vec()).map_err(Error::custom)?);
+        s.serialize(ser)
+    }
+    pub(crate) fn deserialize<'de, D: Deserializer<'de>>(de: D) -> Result<Arg<BString>, D::Error> {
+        let s = <Arg<String>>::deserialize(de)?;
+        let s = Arg::new(BString::from(s.global_value.into_bytes()));
+        Ok(s)
+    }
+}
+
+mod serde_bstr_vec {
+    use super::*;
+    use serde::{ser::Error, Deserialize, Serialize};
+    pub(crate) fn serialize<S: Serializer>(
+        s: &Arg<Vec<BString>>,
+        ser: S,
+    ) -> Result<S::Ok, S::Error> {
+        let s: Arg<Vec<String>> = Arg::new(
+            s.get()
+                .iter()
+                .map(|v| {
+                    let v = String::from_utf8(v.to_vec()).map_err(Error::custom)?;
+                    Ok(v)
+                })
+                .collect::<Result<_, _>>()?,
+        );
+        s.serialize(ser)
+    }
+    pub(crate) fn deserialize<'de, D: Deserializer<'de>>(
+        de: D,
+    ) -> Result<Arg<Vec<BString>>, D::Error> {
+        let s = <Arg<Vec<String>>>::deserialize(de)?;
+        let s: Arg<Vec<BString>> = Arg::new(
+            s.global_value
+                .into_iter()
+                .map(|v| BString::from(v.into_bytes()))
+                .collect(),
+        );
+        Ok(s)
+    }
+}
+
+mod serde_bstr_btree {
+    use super::*;
+    use serde::{ser::Error, Deserialize, Serialize};
+    pub(crate) fn serialize<S: Serializer>(
+        s: &Arg<BTreeMap<BString, BString>>,
+        ser: S,
+    ) -> Result<S::Ok, S::Error> {
+        let s: Arg<BTreeMap<String, String>> = Arg::new(
+            s.get()
+                .iter()
+                .map(|(k, v)| {
+                    let k = String::from_utf8(k.to_vec()).map_err(Error::custom)?;
+                    let v = String::from_utf8(v.to_vec()).map_err(Error::custom)?;
+                    Ok((k, v))
+                })
+                .collect::<Result<_, _>>()?,
+        );
+        s.serialize(ser)
+    }
+    pub(crate) fn deserialize<'de, D: Deserializer<'de>>(
+        de: D,
+    ) -> Result<Arg<BTreeMap<BString, BString>>, D::Error> {
+        let s = <Arg<BTreeMap<String, String>>>::deserialize(de)?;
+        let s: Arg<BTreeMap<BString, BString>> = Arg::new(
+            s.global_value
+                .into_iter()
+                .map(|(k, v)| {
+                    let k = BString::from(k.into_bytes());
+                    let v = BString::from(v.into_bytes());
+                    (k, v)
+                })
+                .collect(),
+        );
+        Ok(s)
+    }
+}
+
 #[prefix_all("hhvm.")]
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub struct Hhvm {
@@ -179,8 +263,8 @@ pub struct Hhvm {
     pub aliased_namespaces: Arg<BTreeMapOrEmptyVec<String, String>>,
 
     // TODO(leoo) change to HashMap if order doesn't matter
-    #[serde(default)]
-    pub include_roots: Arg<BTreeMap<String, String>>,
+    #[serde(default, with = "serde_bstr_btree")]
+    pub include_roots: Arg<BTreeMap<BString, BString>>,
 
     #[serde(default = "defaults::emit_class_pointers")]
     pub emit_class_pointers: Arg<String>,
@@ -298,14 +382,14 @@ impl Default for RepoFlags {
 #[prefix_all("hhvm.server.")]
 #[derive(Clone, Serialize, Deserialize, Default, PartialEq, Debug)]
 pub struct Server {
-    #[serde(default)]
-    pub include_search_paths: Arg<Vec<String>>,
+    #[serde(default, with = "serde_bstr_vec")]
+    pub include_search_paths: Arg<Vec<BString>>,
 }
 
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
 pub struct Options {
-    #[serde(default)]
-    pub doc_root: Arg<String>,
+    #[serde(default, with = "serde_bstr_str")]
+    pub doc_root: Arg<BString>,
 
     #[serde(
         flatten,
@@ -356,7 +440,7 @@ impl Default for Options {
             repo_flags: RepoFlags::default(),
             server: Server::default(),
             // the rest is zeroed out (cannot do ..Default::default() as it'd be recursive)
-            doc_root: Arg::new("".to_owned()),
+            doc_root: Arg::new("".into()),
         }
     }
 }
@@ -969,7 +1053,7 @@ mod tests {
 
     #[test]
     fn test_options_de_from_cli_comma_separated_key_value() {
-        let mut exp_include_roots = BTreeMap::<String, String>::new();
+        let mut exp_include_roots = BTreeMap::<BString, BString>::new();
         exp_include_roots.insert("foo".into(), "bar".into());
         exp_include_roots.insert("bar".into(), "baz".into());
         const CLI_ARG: &str = "hhvm.include_roots=foo:bar,bar:baz";

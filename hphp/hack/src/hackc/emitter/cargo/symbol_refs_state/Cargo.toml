@@ -8,5 +8,6 @@ edition = "2021"
 path = "../../symbol_refs_state.rs"
 
 [dependencies]
+bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 ffi = { path = "../../../../utils/ffi" }

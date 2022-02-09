@@ -115,12 +115,9 @@ module Hg_actual = struct
       exec_hg
         ["log"; "-r"; rev_string rev; "-T"; "{date|hgdate}"; "--cwd"; repo]
     in
-    let future = FutureProcess.make process String.trim in
-    match Future.get future with
-    | Error _ -> None
-    | Ok date_string ->
-      let date_list = String.split_on_char ' ' date_string in
-      Some (date_list |> List.hd |> int_of_string)
+    FutureProcess.make process @@ fun date_string ->
+    let date_list = String.split_on_char ' ' (String.trim date_string) in
+    date_list |> List.hd |> int_of_string
 
   (* hg log -r 'p2()' -T '{node}' *)
   let get_p2_node repo =
@@ -258,7 +255,7 @@ module Hg_mock = struct
 
     let current_mergebase_hg_rev = ref @@ Future.of_value ""
 
-    let get_hg_revision_time _ _ = Some 123
+    let get_hg_revision_time _ _ = Future.of_value 123
 
     let closest_global_ancestor = Hashtbl.create 10
 

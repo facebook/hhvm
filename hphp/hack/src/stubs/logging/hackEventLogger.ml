@@ -418,10 +418,6 @@ let find_xdb_match_success _ = ()
 
 let find_xdb_match_timed_out _ = ()
 
-let informant_find_saved_state_failed _ = ()
-
-let informant_find_saved_state_success ~distance:_ _ = ()
-
 let revision_tracker_init_svn_rev_failed _ = ()
 
 let xdb_malformed_result _ = ()

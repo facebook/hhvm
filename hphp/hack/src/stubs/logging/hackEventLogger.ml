@@ -391,32 +391,13 @@ let saved_state_dirty_files_ok ~start_time:_ = ()
 
 let saved_state_dirty_files_failure _ ~start_time:_ = ()
 
-(** Informant events *)
-let init_informant_prefetcher_runner _ = ()
-
 let informant_induced_kill _ = ()
 
 let informant_induced_restart _ = ()
 
-let informant_no_xdb_result _ = ()
-
-let informant_prefetcher_success _ = ()
-
-let informant_prefetcher_failed _ _ = ()
-
-let informant_prefetcher_timed_out _ = ()
-
 let informant_state_leave _ = ()
 
 let find_svn_rev_failed _ _ = ()
-
-let find_svn_rev_success _ = ()
-
-let find_xdb_match_failed _ _ = ()
-
-let find_xdb_match_success _ = ()
-
-let find_xdb_match_timed_out _ = ()
 
 let revision_tracker_init_svn_rev_failed _ = ()
 

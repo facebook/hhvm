@@ -60,6 +60,7 @@ type rollout_flags = {
   use_max_typechecker_worker_memory_for_decl_deferral: bool;
   hulk_lite: bool;
   specify_manifold_api_key: bool;
+  populate_member_heaps: bool;
 }
 
 let flush () = ()

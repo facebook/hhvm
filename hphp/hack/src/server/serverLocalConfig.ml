@@ -491,6 +491,10 @@ type t = {
       default in shallow decl mode. Use this option if using folded decls. *)
   force_load_hot_shallow_decls: bool;
       (** Always load hot shallow decls from saved state. *)
+  populate_member_heaps: bool;
+      (** Populate the member signature heaps.
+
+      If disabled, instead load lazily from shallow classes. *)
   fetch_remote_old_decls: bool;
       (** Option to fetch old decls from remote decl store *)
   use_hack_64_naming_table: bool;
@@ -640,6 +644,7 @@ let default =
     shallow_class_decl = false;
     force_shallow_decl_fanout = false;
     force_load_hot_shallow_decls = false;
+    populate_member_heaps = true;
     fetch_remote_old_decls = false;
     use_hack_64_naming_table = false;
     skip_hierarchy_checks = false;
@@ -1122,6 +1127,13 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
+  let populate_member_heaps =
+    bool_if_min_version
+      "populate_member_heaps"
+      ~default:default.populate_member_heaps
+      ~current_version
+      config
+  in
   let fetch_remote_old_decls =
     bool_if_min_version
       "fetch_remote_old_decls"
@@ -1470,6 +1482,7 @@ let load_ fn ~silent ~current_version overrides =
     shallow_class_decl;
     force_shallow_decl_fanout;
     force_load_hot_shallow_decls;
+    populate_member_heaps;
     fetch_remote_old_decls;
     use_hack_64_naming_table;
     skip_hierarchy_checks;
@@ -1554,4 +1567,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         options.use_max_typechecker_worker_memory_for_decl_deferral;
       hulk_lite = options.hulk_lite;
       specify_manifold_api_key = options.specify_manifold_api_key;
+      populate_member_heaps = options.populate_member_heaps;
     }

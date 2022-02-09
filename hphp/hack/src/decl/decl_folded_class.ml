@@ -100,6 +100,15 @@ let check_extend_kind
 let disallow_trait_reuse (env : Decl_env.env) : bool =
   TypecheckerOptions.disallow_trait_reuse (Decl_env.tcopt env)
 
+let member_heaps_enabled (ctx : Provider_context.t) : bool =
+  (* We can only disable member heaps when the direct decl parser is enabled,
+     as there's no caching mechanism for shallow decls when the FFP is used
+     to parse decls. The absence of such caching makes not writing to the
+     member heaps prohibitively slow. *)
+  let tco = Provider_context.get_tcopt ctx in
+  TypecheckerOptions.(
+    (not (use_direct_decl_parser tco)) || populate_member_heaps tco)
+
 let report_reused_trait
     (parent_type : Decl_defs.decl_class_type)
     (shallow_class : Shallow_decl_defs.shallow_class)
@@ -349,7 +358,7 @@ let visibility
     | None -> Vpublic)
 
 let build_constructor_fun_elt
-    ~(write_shmem : bool)
+    ~(ctx : Provider_context.t)
     ~(elt_origin : string)
     ~(method_ : Shallow_decl_defs.shallow_method) =
   let pos = fst method_.sm_name in
@@ -364,11 +373,12 @@ let build_constructor_fun_elt
       fe_support_dynamic_type = false;
     }
   in
-  (if write_shmem then Decl_store.((get ()).add_constructor elt_origin fe));
+  (if member_heaps_enabled ctx then
+    Decl_store.((get ()).add_constructor elt_origin fe));
   fe
 
 let build_constructor
-    ~(write_shmem : bool)
+    ~(ctx : Provider_context.t)
     ~(origin_class : Shallow_decl_defs.shallow_class)
     (method_ : Shallow_decl_defs.shallow_method) :
     (Decl_defs.element * Typing_defs.fun_elt option) option =
@@ -397,13 +407,12 @@ let build_constructor
       elt_deprecated = method_.sm_deprecated;
     }
   in
-  let fe =
-    build_constructor_fun_elt ~write_shmem ~elt_origin:class_name ~method_
-  in
+  let fe = build_constructor_fun_elt ~ctx ~elt_origin:class_name ~method_ in
   Some (cstr, Some fe)
 
 let constructor_decl_eager
     ~(sh : SharedMem.uses)
+    ~(ctx : Provider_context.t)
     ((parent_cstr, pconsist) :
       (Decl_defs.element * Typing_defs.fun_elt option) option
       * Typing_defs.consistent_kind)
@@ -427,8 +436,7 @@ let constructor_decl_eager
   let cstr =
     match class_.sc_constructor with
     | None -> parent_cstr
-    | Some method_ ->
-      build_constructor ~write_shmem:true ~origin_class:class_ method_
+    | Some method_ -> build_constructor ~ctx ~origin_class:class_ method_
   in
   (cstr, Decl_utils.coalesce_consistent pconsist cconsist)
 
@@ -441,8 +449,7 @@ let constructor_decl_lazy
   | Some class_ ->
     (match class_.sc_constructor with
     | None -> Error LMLEMemberNotFound
-    | Some method_ ->
-      Ok (build_constructor_fun_elt ~write_shmem:true ~elt_origin ~method_))
+    | Some method_ -> Ok (build_constructor_fun_elt ~ctx ~elt_origin ~method_))
 
 let class_const_fold
     (c : Shallow_decl_defs.shallow_class)
@@ -481,7 +488,7 @@ let class_class_decl (class_id : Typing_defs.pos_id) : Typing_defs.class_const =
   }
 
 let build_prop_sprop_ty
-    ~(write_shmem : bool)
+    ~(ctx : Provider_context.t)
     ~(is_static : bool)
     ~(elt_origin : string)
     (sp : Shallow_decl_defs.shallow_prop) : Typing_defs.decl_ty =
@@ -491,7 +498,7 @@ let build_prop_sprop_ty
     | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
     | Some ty' -> ty'
   in
-  (if write_shmem then
+  (if member_heaps_enabled ctx then
     if is_static then
       Decl_store.((get ()).add_static_prop (elt_origin, sp_name) ty)
     else
@@ -499,13 +506,13 @@ let build_prop_sprop_ty
   ty
 
 let prop_decl_eager
-    ~(write_shmem : bool)
+    ~(ctx : Provider_context.t)
     (c : Shallow_decl_defs.shallow_class)
     (acc : (Decl_defs.element * Typing_defs.decl_ty option) SMap.t)
     (sp : Shallow_decl_defs.shallow_prop) :
     (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
   let elt_origin = snd c.sc_name in
-  let ty = build_prop_sprop_ty ~write_shmem ~is_static:false ~elt_origin sp in
+  let ty = build_prop_sprop_ty ~ctx ~is_static:false ~elt_origin sp in
   let vis = visibility (snd c.sc_name) c.sc_module sp.sp_visibility in
   let elt =
     {
@@ -546,17 +553,16 @@ let prop_decl_lazy
            String.equal (snd prop.sp_name) sp_name)
      with
     | None -> Error LMLEMemberNotFound
-    | Some sp ->
-      Ok (build_prop_sprop_ty ~write_shmem:true ~is_static:false ~elt_origin sp))
+    | Some sp -> Ok (build_prop_sprop_ty ~ctx ~is_static:false ~elt_origin sp))
 
 let static_prop_decl_eager
-    ~(write_shmem : bool)
+    ~(ctx : Provider_context.t)
     (c : Shallow_decl_defs.shallow_class)
     (acc : (Decl_defs.element * Typing_defs.decl_ty option) SMap.t)
     (sp : Shallow_decl_defs.shallow_prop) :
     (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
   let elt_origin = snd c.sc_name in
-  let ty = build_prop_sprop_ty ~write_shmem ~is_static:true ~elt_origin sp in
+  let ty = build_prop_sprop_ty ~ctx ~is_static:true ~elt_origin sp in
   let vis = visibility (snd c.sc_name) c.sc_module sp.sp_visibility in
   let elt =
     {
@@ -597,8 +603,7 @@ let static_prop_decl_lazy
            String.equal (snd prop.sp_name) sp_name)
      with
     | None -> Error LMLEMemberNotFound
-    | Some sp ->
-      Ok (build_prop_sprop_ty ~write_shmem:true ~is_static:true ~elt_origin sp))
+    | Some sp -> Ok (build_prop_sprop_ty ~ctx ~is_static:true ~elt_origin sp))
 
 (* each concrete type constant T = <sometype> implicitly defines a
 class constant with the same name which is TypeStructure<sometype> *)
@@ -676,7 +681,7 @@ let typeconst_fold
     (typeconsts, consts)
 
 let build_method_fun_elt
-    ~(write_shmem : bool)
+    ~(ctx : Provider_context.t)
     ~(is_static : bool)
     ~(elt_origin : string)
     (m : Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
@@ -693,7 +698,7 @@ let build_method_fun_elt
       fe_support_dynamic_type = support_dynamic_type;
     }
   in
-  (if write_shmem then
+  (if member_heaps_enabled ctx then
     if is_static then
       Decl_store.((get ()).add_static_method (elt_origin, id) fe)
     else
@@ -701,7 +706,7 @@ let build_method_fun_elt
   fe
 
 let method_decl_eager
-    ~(write_shmem : bool)
+    ~(ctx : Provider_context.t)
     ~(is_static : bool)
     (c : Shallow_decl_defs.shallow_class)
     ((acc, condition_types) :
@@ -743,9 +748,7 @@ let method_decl_eager
       elt_deprecated = m.sm_deprecated;
     }
   in
-  let fe =
-    build_method_fun_elt ~write_shmem ~is_static ~elt_origin:elt.elt_origin m
-  in
+  let fe = build_method_fun_elt ~ctx ~is_static ~elt_origin:elt.elt_origin m in
   let acc = SMap.add id (elt, Some fe) acc in
   (acc, condition_types)
 
@@ -770,8 +773,7 @@ let method_decl_lazy
        List.find methods ~f:(fun m -> String.equal (snd m.sm_name) sm_name)
      with
     | None -> Error LMLEMemberNotFound
-    | Some sm ->
-      Ok (build_method_fun_elt ~write_shmem:true ~is_static ~elt_origin sm))
+    | Some sm -> Ok (build_method_fun_elt ~ctx ~is_static ~elt_origin sm))
 
 let rec declare_class_and_parents
     ~(sh : SharedMem.uses)
@@ -853,15 +855,12 @@ and class_decl
   let inherited = Decl_inherit.make env c ~cache:parents in
   let props = inherited.Decl_inherit.ih_props in
   let props =
-    List.fold_left
-      ~f:(prop_decl_eager ~write_shmem:true c)
-      ~init:props
-      c.sc_props
+    List.fold_left ~f:(prop_decl_eager ~ctx c) ~init:props c.sc_props
   in
   let inherited_methods = inherited.Decl_inherit.ih_methods in
   let (methods, condition_types) =
     List.fold_left
-      ~f:(method_decl_eager ~write_shmem:true ~is_static:false c)
+      ~f:(method_decl_eager ~ctx ~is_static:false c)
       ~init:(inherited_methods, SSet.empty)
       c.sc_methods
   in
@@ -884,7 +883,7 @@ and class_decl
     else
       (typeconsts, consts)
   in
-  let sclass_var = static_prop_decl_eager ~write_shmem:true c in
+  let sclass_var = static_prop_decl_eager ~ctx c in
   let inherited_static_props = inherited.Decl_inherit.ih_sprops in
   let static_props =
     List.fold_left c.sc_sprops ~f:sclass_var ~init:inherited_static_props
@@ -893,11 +892,11 @@ and class_decl
   let (static_methods, condition_types) =
     List.fold_left
       c.sc_static_methods
-      ~f:(method_decl_eager ~write_shmem:true ~is_static:true c)
+      ~f:(method_decl_eager ~ctx ~is_static:true c)
       ~init:(inherited_static_methods, condition_types)
   in
   let parent_cstr = inherited.Decl_inherit.ih_cstr in
-  let cstr = constructor_decl_eager ~sh parent_cstr c in
+  let cstr = constructor_decl_eager ~sh ~ctx parent_cstr c in
   let has_concrete_cstr =
     match fst cstr with
     | None -> false

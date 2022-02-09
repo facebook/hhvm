@@ -586,6 +586,4 @@ module Rage = struct
       ~result:_
       ~start_time:_ =
     ()
-
-  let get_telemetry_url ~(rageid : string) : string = rageid
 end

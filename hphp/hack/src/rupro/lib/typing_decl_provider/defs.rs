@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use super::Class;
 use crate::decl_defs::FoldedClass;
 use crate::folded_decl_provider::FoldedDeclProvider;
 use crate::reason::Reason;
@@ -21,17 +22,17 @@ struct EagerMembers<R: Reason> {
     constructor: OnceCell<Option<Arc<ClassElt<R>>>>,
 }
 
-/// A typing `Class` (c.f. the `Eager` variant of OCaml type
+/// A typing `ClassType` (c.f. the `Eager` variant of OCaml type
 /// `Typing_classes_heap.class_t`) contains a folded decl and a cache of class
 /// members. The purpose of the class-member-cache is to abstract over the fact
 /// that class elements in a folded decl don't contain their type (in hh_server,
 /// the type is stored on a separate heap, to reduce overfetching and
-/// duplication). When asked for a class member, the `Class` checks its
+/// duplication). When asked for a class member, the `ClassType` checks its
 /// member-cache. If not present, it looks up the type of the member using the
 /// `FoldedDeclProvider`, and populates its member-cache with a new `ClassElt`
 /// containing that type and any other metadata from the `FoldedElt`.
 #[derive(Debug)]
-pub struct Class<R: Reason> {
+pub struct ClassType<R: Reason> {
     provider: Arc<FoldedDeclProvider<R>>,
     class: Arc<FoldedClass<R>>,
     members: EagerMembers<R>,
@@ -49,7 +50,7 @@ impl<R: Reason> EagerMembers<R> {
     }
 }
 
-impl<R: Reason> Class<R> {
+impl<R: Reason> ClassType<R> {
     pub fn new(provider: Arc<FoldedDeclProvider<R>>, class: Arc<FoldedClass<R>>) -> Self {
         Self {
             provider,
@@ -57,8 +58,10 @@ impl<R: Reason> Class<R> {
             members: EagerMembers::new(),
         }
     }
+}
 
-    pub fn get_prop(&self, name: PropName) -> Option<Arc<ClassElt<R>>> {
+impl<R: Reason> Class<R> for ClassType<R> {
+    fn get_prop(&self, name: PropName) -> Option<Arc<ClassElt<R>>> {
         if let Some(class_elt) = self.members.props.get(&name) {
             return Some(Arc::clone(&class_elt));
         }
@@ -76,7 +79,7 @@ impl<R: Reason> Class<R> {
         Some(class_elt)
     }
 
-    pub fn get_static_prop(&self, name: PropName) -> Option<Arc<ClassElt<R>>> {
+    fn get_static_prop(&self, name: PropName) -> Option<Arc<ClassElt<R>>> {
         if let Some(class_elt) = self.members.static_props.get(&name) {
             return Some(Arc::clone(&class_elt));
         }
@@ -96,7 +99,7 @@ impl<R: Reason> Class<R> {
         Some(class_elt)
     }
 
-    pub fn get_method(&self, name: MethodName) -> Option<Arc<ClassElt<R>>> {
+    fn get_method(&self, name: MethodName) -> Option<Arc<ClassElt<R>>> {
         if let Some(class_elt) = self.members.methods.get(&name) {
             return Some(Arc::clone(&class_elt));
         }
@@ -114,7 +117,7 @@ impl<R: Reason> Class<R> {
         Some(class_elt)
     }
 
-    pub fn get_static_method(&self, name: MethodName) -> Option<Arc<ClassElt<R>>> {
+    fn get_static_method(&self, name: MethodName) -> Option<Arc<ClassElt<R>>> {
         if let Some(class_elt) = self.members.static_methods.get(&name) {
             return Some(Arc::clone(&class_elt));
         }
@@ -134,7 +137,7 @@ impl<R: Reason> Class<R> {
         Some(class_elt)
     }
 
-    pub fn get_constructor(&self) -> Option<Arc<ClassElt<R>>> {
+    fn get_constructor(&self) -> Option<Arc<ClassElt<R>>> {
         self.members
             .constructor
             .get_or_init(|| {

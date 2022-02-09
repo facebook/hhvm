@@ -5,7 +5,7 @@
 
 use crate::decl_defs::{self, DeclTy, DeclTy_};
 use crate::reason::Reason;
-use crate::typing_decl_provider::Class;
+use crate::typing_decl_provider::{Class, TypeDecl};
 use crate::typing_defs::{
     Exact, ExpandEnv, FunParam, FunType, Ty, Ty_, TypeExpansion, TypeExpansions,
 };
@@ -28,17 +28,15 @@ impl Phase {
                 .typing_decl_provider
                 .get_class_or_typedef(pos_id.id())
             {
-                Some(cls) => Self::localize_class_instantiation(
+                Some(TypeDecl::Class(cls)) => Self::localize_class_instantiation(
                     env,
                     ety_env,
                     r,
                     pos_id.clone(),
                     tyl,
-                    Some(&cls),
+                    Some(&*cls),
                 ),
-                None => {
-                    Self::localize_class_instantiation(env, ety_env, r, pos_id.clone(), tyl, None)
-                }
+                _ => Self::localize_class_instantiation(env, ety_env, r, pos_id.clone(), tyl, None),
             },
             DTfun(ft) => {
                 let pos = r.pos().clone();
@@ -55,7 +53,7 @@ impl Phase {
         r: R,
         sid: Positioned<TypeName, R::Pos>,
         ty_args: &[DeclTy<R>],
-        class_info: Option<&Class<R>>,
+        class_info: Option<&dyn Class<R>>,
     ) -> Ty<R> {
         use Ty_::*;
         let alloc = env.ctx.alloc;

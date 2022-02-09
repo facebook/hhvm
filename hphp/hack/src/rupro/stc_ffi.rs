@@ -18,7 +18,7 @@ use hackrs::special_names::SpecialNames;
 use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
-use hackrs::typing_decl_provider::TypingDeclProvider;
+use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
 use pos::{Prefix, RelativePath, RelativePathCtx};
@@ -85,9 +85,9 @@ pub extern "C" fn stc_main() {
         shallow_decl_provider,
     ));
     let typing_decl_cache = Arc::new(NonEvictingCache::new());
-    let typing_decl_provider = Arc::new(TypingDeclProvider::new(
+    let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
         typing_decl_cache,
-        Arc::clone(&folded_decl_provider),
+        folded_decl_provider,
     ));
     let ctx = Arc::new(TypingCtx::new(alloc, typing_decl_provider, special_names));
 

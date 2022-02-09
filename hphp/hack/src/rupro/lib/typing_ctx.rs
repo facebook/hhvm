@@ -13,14 +13,14 @@ use crate::typing_decl_provider::TypingDeclProvider;
 #[derive(Debug)]
 pub struct TypingCtx<R: Reason> {
     pub alloc: &'static Allocator<R>,
-    pub typing_decl_provider: Arc<TypingDeclProvider<R>>,
+    pub typing_decl_provider: Arc<dyn TypingDeclProvider<R>>,
     pub special_names: &'static SpecialNames,
 }
 
 impl<R: Reason> TypingCtx<R> {
     pub fn new(
         alloc: &'static Allocator<R>,
-        typing_decl_provider: Arc<TypingDeclProvider<R>>,
+        typing_decl_provider: Arc<dyn TypingDeclProvider<R>>,
         special_names: &'static SpecialNames,
     ) -> Self {
         Self {

@@ -88,7 +88,6 @@
  (modules decl_folded_class decl_inherit decl_requirements)
  (libraries
   ast_provider
-  decl_class
   decl_class_elements
   decl_enum
   decl_env
@@ -127,7 +126,13 @@
 (library
  (name decl_class)
  (modules decl_class)
- (libraries decl_defs decl_instantiate decl_store decl_subst typing_defs)
+ (libraries
+   decl_defs
+   decl_folded_class
+   decl_instantiate
+   decl_store
+   decl_subst
+   typing_defs)
  (preprocess
   (pps ppx_deriving.std)))
 

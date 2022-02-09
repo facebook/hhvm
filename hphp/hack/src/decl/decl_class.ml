@@ -11,6 +11,7 @@ open Hh_prelude
 open Typing_defs
 open Decl_defs
 module Inst = Decl_instantiate
+module SN = Naming_special_names
 
 exception Decl_heap_elems_bug
 
@@ -30,6 +31,38 @@ let wrap_not_found (child_class_name : string) find member =
   | Some m -> m
 
 [@@@warning "+3"]
+
+(** Raise an exception when the class element can't be found.
+
+Note that this exception can be raised in two modes:
+
+1. A Provider_context.t was not available (e.g, Zoncolan execution) and the
+   element was not in the member heaps. A bug in decling or invalidation has
+   occurred, potentially due to files being changed on disk while Hack was
+   decling. No [lazy_member_lookup_error] is available, because we didn't do
+   a lazy member lookup.
+2. A Provider_context.t was available (regular Hack execution with eviction),
+   the element was not in the member heap, so we tried falling back to disk.
+   However, the element could not be found in the origin class. This might be
+   due to an inconsistent decl heap (e.g., due to files being changed on disk
+   while Hack was decling) or because the file containing the element was
+   changed while type checking. In this case, we have a
+   [lazy_member_lookup_error] available.
+*)
+let raise_not_found
+    ~(err : Decl_folded_class.lazy_member_lookup_error option)
+    ~(child_class_name : string)
+    ~(elt_origin : string)
+    ~(member_name : string) =
+  Hh_logger.log
+    "Decl_heap_elems_bug: could not find %s::%s (inherited by %s) (%s):\n%s"
+    elt_origin
+    member_name
+    child_class_name
+    (Option.map ~f:Decl_folded_class.show_lazy_member_lookup_error err
+    |> Option.value ~default:"no lazy member lookup performed")
+    Stdlib.Printexc.(raw_backtrace_to_string @@ get_callstack 100);
+  raise Decl_heap_elems_bug
 
 let rec apply_substs substs class_context (pos, ty) =
   match SMap.find_opt class_context substs with
@@ -52,6 +85,21 @@ let element_to_class_elt
 
 let fun_elt_to_ty fe = (fe.fe_pos, fe.fe_type)
 
+let unpack_member_lookup_result
+    (type a)
+    ~child_class_name
+    ~elt_origin
+    ~member_name
+    (res : (a, Decl_folded_class.lazy_member_lookup_error) result option) : a =
+  let res =
+    match res with
+    | None -> Error None
+    | Some res -> Result.map_error ~f:(fun x -> Some x) res
+  in
+  match res with
+  | Ok a -> a
+  | Error err -> raise_not_found ~err ~child_class_name ~elt_origin ~member_name
+
 let find_method class_name x =
   wrap_not_found class_name Decl_store.((get ()).get_method) x |> fun_elt_to_ty
 
@@ -67,11 +115,18 @@ let find_static_property class_name x =
   let ty = wrap_not_found class_name Decl_store.((get ()).get_static_prop) x in
   (get_pos ty, ty)
 
-let find_constructor class_name =
-  wrap_not_found
-    class_name
-    (fun (class_name, _) -> Decl_store.((get ()).get_constructor class_name))
-    (class_name, Naming_special_names.Members.__construct)
+let find_constructor ctx ~child_class_name ~elt_origin =
+  match Decl_store.((get ()).get_constructor elt_origin) with
+  | Some fe -> fe
+  | None ->
+    Option.map
+      ctx
+      ~f:
+        (Decl_folded_class.constructor_decl_lazy ~sh:SharedMem.Uses ~elt_origin)
+    |> unpack_member_lookup_result
+         ~child_class_name
+         ~elt_origin
+         ~member_name:SN.Members.__construct
 
 let map_element dc_substs find name elt =
   let pty =
@@ -92,14 +147,18 @@ let lookup_method_type_lazy dc =
 let lookup_static_method_type_lazy dc =
   map_element dc.dc_substs (find_static_method dc.dc_name)
 
-let lookup_constructor_lazy dc_substs dc_construct =
+let lookup_constructor_lazy
+    (ctx : Provider_context.t option)
+    ~(child_class_name : string)
+    (dc_substs : Decl_defs.subst_context SMap.t)
+    (dc_construct : Decl_defs.element option * Typing_defs.consistent_kind) :
+    Typing_defs.class_elt option * Typing_defs.consistent_kind =
   match dc_construct with
   | (None, consistent) -> (None, consistent)
   | (Some elt, consistent) ->
     let pty =
       lazy
-        (elt.elt_origin
-        |> find_constructor
+        (find_constructor ctx ~child_class_name ~elt_origin:elt.elt_origin
         |> fun_elt_to_ty
         |> apply_substs dc_substs elt.elt_origin)
     in

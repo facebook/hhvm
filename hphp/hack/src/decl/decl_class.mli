@@ -56,6 +56,8 @@ val lookup_static_method_type_lazy :
 
     See [lookup_property_type_lazy] for more information. *)
 val lookup_constructor_lazy :
+  Provider_context.t option ->
+  child_class_name:string ->
   Decl_defs.subst_context SMap.t ->
   Decl_defs.element option * Typing_defs.consistent_kind ->
   Typing_defs.class_elt option * Typing_defs.consistent_kind

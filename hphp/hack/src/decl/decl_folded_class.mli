@@ -9,6 +9,11 @@
 
 type class_entries = Decl_defs.decl_class_type * Decl_store.class_members option
 
+type lazy_member_lookup_error =
+  | LMLEShallowClassNotFound
+  | LMLEMemberNotFound
+[@@deriving show]
+
 (** Check if the class is already in the heap, and if not,
     declare it, its members and its ancestors and add them to
     their respective shared heaps.
@@ -25,3 +30,13 @@ val class_decl :
   Shallow_decl_defs.shallow_class ->
   parents:Decl_store.class_entries SMap.t ->
   Decl_defs.decl_class_type * Decl_store.class_members
+
+(** Extract the constructor signature from the shallow class.
+
+Might return [Error] if the shallow class for [elt_origin] can't be found, or
+if it has no constructor. *)
+val constructor_decl_lazy :
+  sh:SharedMem.uses ->
+  Provider_context.t ->
+  elt_origin:string ->
+  (Typing_defs.fun_elt, lazy_member_lookup_error) result

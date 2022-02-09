@@ -26,6 +26,11 @@ module SN = Naming_special_names
 
 type class_entries = Decl_defs.decl_class_type * Decl_store.class_members option
 
+type lazy_member_lookup_error =
+  | LMLEShallowClassNotFound
+  | LMLEMemberNotFound
+[@@deriving show]
+
 (*****************************************************************************)
 (* Checking that the kind of a class is compatible with its parent
  * For example, a class cannot extend an interface, an interface cannot
@@ -343,14 +348,34 @@ let visibility
     | Some m -> Vinternal m
     | None -> Vpublic)
 
+let build_constructor_fun_elt
+    ~(write_shmem : bool)
+    ~(elt_origin : string)
+    ~(method_ : Shallow_decl_defs.shallow_method) =
+  let pos = fst method_.sm_name in
+  let fe =
+    {
+      fe_module = None;
+      fe_pos = pos;
+      fe_internal = false;
+      fe_deprecated = method_.sm_deprecated;
+      fe_type = method_.sm_type;
+      fe_php_std_lib = false;
+      fe_support_dynamic_type = false;
+    }
+  in
+  (if write_shmem then Decl_store.((get ()).add_constructor elt_origin fe));
+  fe
+
 let build_constructor
     ~(write_shmem : bool)
-    (class_ : Shallow_decl_defs.shallow_class)
+    ~(origin_class : Shallow_decl_defs.shallow_class)
     (method_ : Shallow_decl_defs.shallow_method) :
     (Decl_defs.element * Typing_defs.fun_elt option) option =
-  let (_, class_name) = class_.sc_name in
-  let vis = visibility class_name class_.sc_module method_.sm_visibility in
-  let pos = fst method_.sm_name in
+  let (_, class_name) = origin_class.sc_name in
+  let vis =
+    visibility class_name origin_class.sc_module method_.sm_visibility
+  in
   let cstr =
     {
       elt_flags =
@@ -373,20 +398,11 @@ let build_constructor
     }
   in
   let fe =
-    {
-      fe_module = None;
-      fe_pos = pos;
-      fe_internal = false;
-      fe_deprecated = method_.sm_deprecated;
-      fe_type = method_.sm_type;
-      fe_php_std_lib = false;
-      fe_support_dynamic_type = false;
-    }
+    build_constructor_fun_elt ~write_shmem ~elt_origin:class_name ~method_
   in
-  (if write_shmem then Decl_store.((get ()).add_constructor class_name fe));
   Some (cstr, Some fe)
 
-let constructor_decl
+let constructor_decl_eager
     ~(sh : SharedMem.uses)
     ((parent_cstr, pconsist) :
       (Decl_defs.element * Typing_defs.fun_elt option) option
@@ -411,9 +427,22 @@ let constructor_decl
   let cstr =
     match class_.sc_constructor with
     | None -> parent_cstr
-    | Some method_ -> build_constructor ~write_shmem:true class_ method_
+    | Some method_ ->
+      build_constructor ~write_shmem:true ~origin_class:class_ method_
   in
   (cstr, Decl_utils.coalesce_consistent pconsist cconsist)
+
+let constructor_decl_lazy
+    ~(sh : SharedMem.uses) (ctx : Provider_context.t) ~(elt_origin : string) :
+    (Typing_defs.fun_elt, lazy_member_lookup_error) result =
+  let SharedMem.Uses = sh in
+  match Shallow_classes_provider.get ctx elt_origin with
+  | None -> Error LMLEShallowClassNotFound
+  | Some class_ ->
+    (match class_.sc_constructor with
+    | None -> Error LMLEMemberNotFound
+    | Some method_ ->
+      Ok (build_constructor_fun_elt ~write_shmem:true ~elt_origin ~method_))
 
 let class_const_fold
     (c : Shallow_decl_defs.shallow_class)
@@ -787,7 +816,7 @@ and class_decl
       ~init:(inherited_static_methods, condition_types)
   in
   let parent_cstr = inherited.Decl_inherit.ih_cstr in
-  let cstr = constructor_decl ~sh parent_cstr c in
+  let cstr = constructor_decl_eager ~sh parent_cstr c in
   let has_concrete_cstr =
     match fst cstr with
     | None -> false

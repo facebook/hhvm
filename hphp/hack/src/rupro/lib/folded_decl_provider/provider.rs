@@ -15,8 +15,8 @@ use crate::reason::{Reason, ReasonImpl};
 use crate::shallow_decl_provider::ShallowDeclProvider;
 use crate::special_names::SpecialNames;
 use pos::{
-    ClassConstName, MethodNameMap, ModuleName, Positioned, PropNameMap, TypeName, TypeNameMap,
-    TypeNameSet,
+    ClassConstName, MethodName, MethodNameMap, ModuleName, Positioned, PropName, PropNameMap,
+    TypeName, TypeNameMap, TypeNameSet,
 };
 use std::sync::Arc;
 
@@ -48,6 +48,46 @@ impl<R: Reason> FoldedDeclProvider<R> {
     pub fn get_folded_class(&self, name: TypeName) -> Option<Arc<FoldedClass<R>>> {
         let mut stack = Default::default();
         self.get_folded_class_impl(&mut stack, name)
+    }
+
+    pub fn get_shallow_property_type(
+        &self,
+        class_name: TypeName,
+        property_name: PropName,
+    ) -> Option<DeclTy<R>> {
+        self.shallow_decl_provider
+            .get_property_type(class_name, property_name)
+    }
+
+    pub fn get_shallow_static_property_type(
+        &self,
+        class_name: TypeName,
+        property_name: PropName,
+    ) -> Option<DeclTy<R>> {
+        self.shallow_decl_provider
+            .get_static_property_type(class_name, property_name)
+    }
+
+    pub fn get_shallow_method_type(
+        &self,
+        class_name: TypeName,
+        method_name: MethodName,
+    ) -> Option<DeclTy<R>> {
+        self.shallow_decl_provider
+            .get_method_type(class_name, method_name)
+    }
+
+    pub fn get_shallow_static_method_type(
+        &self,
+        class_name: TypeName,
+        method_name: MethodName,
+    ) -> Option<DeclTy<R>> {
+        self.shallow_decl_provider
+            .get_static_method_type(class_name, method_name)
+    }
+
+    pub fn get_shallow_constructor_type(&self, class_name: TypeName) -> Option<DeclTy<R>> {
+        self.shallow_decl_provider.get_constructor_type(class_name)
     }
 
     fn detect_cycle(&self, stack: &mut TypeNameSet, pos_id: &Positioned<TypeName, R::Pos>) -> bool {

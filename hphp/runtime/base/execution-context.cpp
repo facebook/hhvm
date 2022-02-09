@@ -139,8 +139,7 @@ namespace rds::local {
 #ifndef _MSC_VER
 template<>
 #endif
-void rds::local::RDSLocal<ExecutionContext,
-                          rds::local::Initialize::Explicitly>::destroy() {
+void GContextType::Base::destroy() {
   if (!isNull()) {
     getNoCheck()->sweep();
     nullOut();

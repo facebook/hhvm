@@ -40,3 +40,37 @@ val constructor_decl_lazy :
   Provider_context.t ->
   elt_origin:string ->
   (Typing_defs.fun_elt, lazy_member_lookup_error) result
+
+(** Extract the property signature from the shallow class.
+
+Might return [Error] if the shallow class for [elt_origin] can't be found, or
+if it has no property with the given name. *)
+val prop_decl_lazy :
+  sh:SharedMem.uses ->
+  Provider_context.t ->
+  elt_origin:string ->
+  sp_name:string ->
+  (Typing_defs.decl_ty, lazy_member_lookup_error) result
+
+(** Extract the static property signature from the shallow class.
+
+Might return [Error] if the shallow class for [elt_origin] can't be found, or
+if it has no static property with the given name. *)
+val static_prop_decl_lazy :
+  sh:SharedMem.uses ->
+  Provider_context.t ->
+  elt_origin:string ->
+  sp_name:string ->
+  (Typing_defs.decl_ty, lazy_member_lookup_error) result
+
+(** Extract the method signature from the shallow class.
+
+Might return [Error] if the shallow class for [elt_origin] can't be found, or
+if it has no method with the given name. *)
+val method_decl_lazy :
+  sh:SharedMem.uses ->
+  Provider_context.t ->
+  is_static:bool ->
+  elt_origin:string ->
+  sm_name:string ->
+  (Typing_defs.fun_elt, lazy_member_lookup_error) result

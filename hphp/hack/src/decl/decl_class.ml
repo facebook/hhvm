@@ -15,23 +15,6 @@ module SN = Naming_special_names
 
 exception Decl_heap_elems_bug
 
-[@@@warning "-3"]
-
-let wrap_not_found (child_class_name : string) find member =
-  match find member (* TODO: t13396089 *) with
-  | None ->
-    let (origin, name) = member in
-    Hh_logger.log
-      "Decl_heap_elems_bug: could not find %s::%s (inherited by %s):\n%s"
-      origin
-      name
-      child_class_name
-      Stdlib.Printexc.(raw_backtrace_to_string @@ get_callstack 100);
-    raise Decl_heap_elems_bug
-  | Some m -> m
-
-[@@@warning "+3"]
-
 (** Raise an exception when the class element can't be found.
 
 Note that this exception can be raised in two modes:
@@ -64,6 +47,21 @@ let raise_not_found
     Stdlib.Printexc.(raw_backtrace_to_string @@ get_callstack 100);
   raise Decl_heap_elems_bug
 
+let unpack_member_lookup_result
+    (type a)
+    ~child_class_name
+    ~elt_origin
+    ~member_name
+    (res : (a, Decl_folded_class.lazy_member_lookup_error) result option) : a =
+  let res =
+    match res with
+    | None -> Error None
+    | Some res -> Result.map_error ~f:(fun x -> Some x) res
+  in
+  match res with
+  | Ok a -> a
+  | Error err -> raise_not_found ~err ~child_class_name ~elt_origin ~member_name
+
 let rec apply_substs substs class_context (pos, ty) =
   match SMap.find_opt class_context substs with
   | None -> (pos, ty)
@@ -85,34 +83,90 @@ let element_to_class_elt
 
 let fun_elt_to_ty fe = (fe.fe_pos, fe.fe_type)
 
-let unpack_member_lookup_result
-    (type a)
-    ~child_class_name
-    ~elt_origin
-    ~member_name
-    (res : (a, Decl_folded_class.lazy_member_lookup_error) result option) : a =
-  let res =
-    match res with
-    | None -> Error None
-    | Some res -> Result.map_error ~f:(fun x -> Some x) res
+let find_method ctx ~child_class_name x =
+  let (elt_origin, sm_name) = x in
+  let fun_elt =
+    match Decl_store.((get ()).get_method x) with
+    | Some fe -> fe
+    | None ->
+      Option.map
+        ctx
+        ~f:
+          (Decl_folded_class.method_decl_lazy
+             ~sh:SharedMem.Uses
+             ~is_static:false
+             ~elt_origin
+             ~sm_name)
+      |> unpack_member_lookup_result
+           ~child_class_name
+           ~elt_origin
+           ~member_name:sm_name
   in
-  match res with
-  | Ok a -> a
-  | Error err -> raise_not_found ~err ~child_class_name ~elt_origin ~member_name
 
-let find_method class_name x =
-  wrap_not_found class_name Decl_store.((get ()).get_method) x |> fun_elt_to_ty
+  fun_elt_to_ty fun_elt
 
-let find_static_method class_name x =
-  wrap_not_found class_name Decl_store.((get ()).get_static_method) x
-  |> fun_elt_to_ty
+let find_static_method ctx ~child_class_name x =
+  let (elt_origin, sm_name) = x in
+  let fun_elt =
+    match Decl_store.((get ()).get_static_method x) with
+    | Some fe -> fe
+    | None ->
+      Option.map
+        ctx
+        ~f:
+          (Decl_folded_class.method_decl_lazy
+             ~sh:SharedMem.Uses
+             ~is_static:true
+             ~elt_origin
+             ~sm_name)
+      |> unpack_member_lookup_result
+           ~child_class_name
+           ~elt_origin
+           ~member_name:sm_name
+  in
 
-let find_property class_name x =
-  let ty = wrap_not_found class_name Decl_store.((get ()).get_prop) x in
+  fun_elt_to_ty fun_elt
+
+let find_property ctx ~child_class_name x =
+  let (elt_origin, sp_name) = x in
+  let ty =
+    match Decl_store.((get ()).get_prop x) with
+    | Some ty -> ty
+    | None ->
+      Option.map
+        ctx
+        ~f:
+          (Decl_folded_class.prop_decl_lazy
+             ~sh:SharedMem.Uses
+             ~elt_origin
+             ~sp_name)
+      |> unpack_member_lookup_result
+           ~child_class_name
+           ~elt_origin
+           ~member_name:sp_name
+  in
+
   (get_pos ty, ty)
 
-let find_static_property class_name x =
-  let ty = wrap_not_found class_name Decl_store.((get ()).get_static_prop) x in
+let find_static_property ctx ~child_class_name x =
+  let (elt_origin, sp_name) = x in
+  let ty =
+    match Decl_store.((get ()).get_static_prop x) with
+    | Some ty -> ty
+    | None ->
+      Option.map
+        ctx
+        ~f:
+          (Decl_folded_class.static_prop_decl_lazy
+             ~sh:SharedMem.Uses
+             ~elt_origin
+             ~sp_name)
+      |> unpack_member_lookup_result
+           ~child_class_name
+           ~elt_origin
+           ~member_name:sp_name
+  in
+
   (get_pos ty, ty)
 
 let find_constructor ctx ~child_class_name ~elt_origin =
@@ -135,17 +189,29 @@ let map_element dc_substs find name elt =
   in
   element_to_class_elt pty elt
 
-let lookup_property_type_lazy dc =
-  map_element dc.dc_substs (find_property dc.dc_name)
+let lookup_property_type_lazy
+    (ctx : Provider_context.t option) (dc : Decl_defs.decl_class_type) =
+  map_element
+    dc.dc_substs
+    (find_property ~child_class_name:dc.Decl_defs.dc_name ctx)
 
-let lookup_static_property_type_lazy dc =
-  map_element dc.dc_substs (find_static_property dc.dc_name)
+let lookup_static_property_type_lazy
+    (ctx : Provider_context.t option) (dc : Decl_defs.decl_class_type) =
+  map_element
+    dc.dc_substs
+    (find_static_property ~child_class_name:dc.Decl_defs.dc_name ctx)
 
-let lookup_method_type_lazy dc =
-  map_element dc.dc_substs (find_method dc.dc_name)
+let lookup_method_type_lazy
+    (ctx : Provider_context.t option) (dc : Decl_defs.decl_class_type) =
+  map_element
+    dc.dc_substs
+    (find_method ctx ~child_class_name:dc.Decl_defs.dc_name)
 
-let lookup_static_method_type_lazy dc =
-  map_element dc.dc_substs (find_static_method dc.dc_name)
+let lookup_static_method_type_lazy
+    (ctx : Provider_context.t option) (dc : Decl_defs.decl_class_type) =
+  map_element
+    dc.dc_substs
+    (find_static_method ctx ~child_class_name:dc.Decl_defs.dc_name)
 
 let lookup_constructor_lazy
     (ctx : Provider_context.t option)

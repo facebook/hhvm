@@ -480,18 +480,32 @@ let class_class_decl (class_id : Typing_defs.pos_id) : Typing_defs.class_const =
     cc_refs = [];
   }
 
-let prop_decl
+let build_prop_sprop_ty
     ~(write_shmem : bool)
-    (c : Shallow_decl_defs.shallow_class)
-    (acc : (Decl_defs.element * Typing_defs.decl_ty option) SMap.t)
-    (sp : Shallow_decl_defs.shallow_prop) :
-    (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
+    ~(is_static : bool)
+    ~(elt_origin : string)
+    (sp : Shallow_decl_defs.shallow_prop) : Typing_defs.decl_ty =
   let (sp_pos, sp_name) = sp.sp_name in
   let ty =
     match sp.sp_type with
     | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
     | Some ty' -> ty'
   in
+  (if write_shmem then
+    if is_static then
+      Decl_store.((get ()).add_static_prop (elt_origin, sp_name) ty)
+    else
+      Decl_store.((get ()).add_prop (elt_origin, sp_name) ty));
+  ty
+
+let prop_decl_eager
+    ~(write_shmem : bool)
+    (c : Shallow_decl_defs.shallow_class)
+    (acc : (Decl_defs.element * Typing_defs.decl_ty option) SMap.t)
+    (sp : Shallow_decl_defs.shallow_prop) :
+    (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
+  let elt_origin = snd c.sc_name in
+  let ty = build_prop_sprop_ty ~write_shmem ~is_static:false ~elt_origin sp in
   let vis = visibility (snd c.sc_name) c.sc_module sp.sp_visibility in
   let elt =
     {
@@ -510,27 +524,39 @@ let prop_decl
           ~support_dynamic_type:false
           ~needs_init:(sp_needs_init sp);
       elt_visibility = vis;
-      elt_origin = snd c.sc_name;
+      elt_origin;
       elt_deprecated = None;
     }
   in
-  (if write_shmem then
-    Decl_store.((get ()).add_prop (elt.elt_origin, sp_name) ty));
-  let acc = SMap.add sp_name (elt, Some ty) acc in
+  let acc = SMap.add (snd sp.sp_name) (elt, Some ty) acc in
   acc
 
-let static_prop_decl
+let prop_decl_lazy
+    ~(sh : SharedMem.uses)
+    (ctx : Provider_context.t)
+    ~(elt_origin : string)
+    ~(sp_name : string) : (Typing_defs.decl_ty, lazy_member_lookup_error) result
+    =
+  let SharedMem.Uses = sh in
+  match Shallow_classes_provider.get ctx elt_origin with
+  | None -> Error LMLEShallowClassNotFound
+  | Some class_ ->
+    (match
+       List.find class_.sc_props ~f:(fun prop ->
+           String.equal (snd prop.sp_name) sp_name)
+     with
+    | None -> Error LMLEMemberNotFound
+    | Some sp ->
+      Ok (build_prop_sprop_ty ~write_shmem:true ~is_static:false ~elt_origin sp))
+
+let static_prop_decl_eager
     ~(write_shmem : bool)
     (c : Shallow_decl_defs.shallow_class)
     (acc : (Decl_defs.element * Typing_defs.decl_ty option) SMap.t)
     (sp : Shallow_decl_defs.shallow_prop) :
     (Decl_defs.element * Typing_defs.decl_ty option) SMap.t =
-  let (sp_pos, sp_name) = sp.sp_name in
-  let ty =
-    match sp.sp_type with
-    | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
-    | Some ty' -> ty'
-  in
+  let elt_origin = snd c.sc_name in
+  let ty = build_prop_sprop_ty ~write_shmem ~is_static:true ~elt_origin sp in
   let vis = visibility (snd c.sc_name) c.sc_module sp.sp_visibility in
   let elt =
     {
@@ -553,10 +579,26 @@ let static_prop_decl
       elt_deprecated = None;
     }
   in
-  (if write_shmem then
-    Decl_store.((get ()).add_static_prop (elt.elt_origin, sp_name) ty));
-  let acc = SMap.add sp_name (elt, Some ty) acc in
+  let acc = SMap.add (snd sp.sp_name) (elt, Some ty) acc in
   acc
+
+let static_prop_decl_lazy
+    ~(sh : SharedMem.uses)
+    (ctx : Provider_context.t)
+    ~(elt_origin : string)
+    ~(sp_name : string) : (Typing_defs.decl_ty, lazy_member_lookup_error) result
+    =
+  let SharedMem.Uses = sh in
+  match Shallow_classes_provider.get ctx elt_origin with
+  | None -> Error LMLEShallowClassNotFound
+  | Some class_ ->
+    (match
+       List.find class_.sc_sprops ~f:(fun prop ->
+           String.equal (snd prop.sp_name) sp_name)
+     with
+    | None -> Error LMLEMemberNotFound
+    | Some sp ->
+      Ok (build_prop_sprop_ty ~write_shmem:true ~is_static:true ~elt_origin sp))
 
 (* each concrete type constant T = <sometype> implicitly defines a
 class constant with the same name which is TypeStructure<sometype> *)
@@ -633,7 +675,32 @@ let typeconst_fold
     let typeconsts = SMap.add (snd stc.stc_name) tc typeconsts in
     (typeconsts, consts)
 
-let method_decl_acc
+let build_method_fun_elt
+    ~(write_shmem : bool)
+    ~(is_static : bool)
+    ~(elt_origin : string)
+    (m : Shallow_decl_defs.shallow_method) : Typing_defs.fun_elt =
+  let (pos, id) = m.sm_name in
+  let support_dynamic_type = sm_support_dynamic_type m in
+  let fe =
+    {
+      fe_module = None;
+      fe_pos = pos;
+      fe_internal = false;
+      fe_deprecated = None;
+      fe_type = m.sm_type;
+      fe_php_std_lib = false;
+      fe_support_dynamic_type = support_dynamic_type;
+    }
+  in
+  (if write_shmem then
+    if is_static then
+      Decl_store.((get ()).add_static_method (elt_origin, id) fe)
+    else
+      Decl_store.((get ()).add_method (elt_origin, id) fe));
+  fe
+
+let method_decl_eager
     ~(write_shmem : bool)
     ~(is_static : bool)
     (c : Shallow_decl_defs.shallow_class)
@@ -646,7 +713,7 @@ let method_decl_acc
   let superfluous_override =
     sm_override m && not (SMap.mem (snd m.sm_name) acc)
   in
-  let (pos, id) = m.sm_name in
+  let (_pos, id) = m.sm_name in
   let vis =
     match (SMap.find_opt id acc, m.sm_visibility) with
     | (Some ({ elt_visibility = Vprotected _ as parent_vis; _ }, _), Protected)
@@ -677,23 +744,34 @@ let method_decl_acc
     }
   in
   let fe =
-    {
-      fe_module = None;
-      fe_pos = pos;
-      fe_internal = false;
-      fe_deprecated = None;
-      fe_type = m.sm_type;
-      fe_php_std_lib = false;
-      fe_support_dynamic_type = support_dynamic_type;
-    }
+    build_method_fun_elt ~write_shmem ~is_static ~elt_origin:elt.elt_origin m
   in
-  (if write_shmem then
-    if is_static then
-      Decl_store.((get ()).add_static_method (elt.elt_origin, id) fe)
-    else
-      Decl_store.((get ()).add_method (elt.elt_origin, id) fe));
   let acc = SMap.add id (elt, Some fe) acc in
   (acc, condition_types)
+
+let method_decl_lazy
+    ~(sh : SharedMem.uses)
+    (ctx : Provider_context.t)
+    ~(is_static : bool)
+    ~(elt_origin : string)
+    ~(sm_name : string) : (Typing_defs.fun_elt, lazy_member_lookup_error) result
+    =
+  let SharedMem.Uses = sh in
+  match Shallow_classes_provider.get ctx elt_origin with
+  | None -> Error LMLEShallowClassNotFound
+  | Some class_ ->
+    let methods =
+      if is_static then
+        class_.sc_static_methods
+      else
+        class_.sc_methods
+    in
+    (match
+       List.find methods ~f:(fun m -> String.equal (snd m.sm_name) sm_name)
+     with
+    | None -> Error LMLEMemberNotFound
+    | Some sm ->
+      Ok (build_method_fun_elt ~write_shmem:true ~is_static ~elt_origin sm))
 
 let rec declare_class_and_parents
     ~(sh : SharedMem.uses)
@@ -775,12 +853,15 @@ and class_decl
   let inherited = Decl_inherit.make env c ~cache:parents in
   let props = inherited.Decl_inherit.ih_props in
   let props =
-    List.fold_left ~f:(prop_decl ~write_shmem:true c) ~init:props c.sc_props
+    List.fold_left
+      ~f:(prop_decl_eager ~write_shmem:true c)
+      ~init:props
+      c.sc_props
   in
   let inherited_methods = inherited.Decl_inherit.ih_methods in
   let (methods, condition_types) =
     List.fold_left
-      ~f:(method_decl_acc ~write_shmem:true ~is_static:false c)
+      ~f:(method_decl_eager ~write_shmem:true ~is_static:false c)
       ~init:(inherited_methods, SSet.empty)
       c.sc_methods
   in
@@ -803,7 +884,7 @@ and class_decl
     else
       (typeconsts, consts)
   in
-  let sclass_var = static_prop_decl ~write_shmem:true c in
+  let sclass_var = static_prop_decl_eager ~write_shmem:true c in
   let inherited_static_props = inherited.Decl_inherit.ih_sprops in
   let static_props =
     List.fold_left c.sc_sprops ~f:sclass_var ~init:inherited_static_props
@@ -812,7 +893,7 @@ and class_decl
   let (static_methods, condition_types) =
     List.fold_left
       c.sc_static_methods
-      ~f:(method_decl_acc ~write_shmem:true ~is_static:true c)
+      ~f:(method_decl_eager ~write_shmem:true ~is_static:true c)
       ~init:(inherited_static_methods, condition_types)
   in
   let parent_cstr = inherited.Decl_inherit.ih_cstr in

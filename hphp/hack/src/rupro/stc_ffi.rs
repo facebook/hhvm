@@ -89,12 +89,7 @@ pub extern "C" fn stc_main() {
         typing_decl_cache,
         Arc::clone(&folded_decl_provider),
     ));
-    let ctx = Arc::new(TypingCtx::new(
-        alloc,
-        folded_decl_provider,
-        typing_decl_provider,
-        special_names,
-    ));
+    let ctx = Arc::new(TypingCtx::new(alloc, typing_decl_provider, special_names));
 
     let filenames: Vec<RelativePath> = cli_options
         .filenames

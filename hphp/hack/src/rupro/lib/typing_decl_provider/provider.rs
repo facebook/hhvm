@@ -27,10 +27,6 @@ impl<R: Reason> TypingDeclProvider<R> {
         }
     }
 
-    pub fn get_folded_decl_provider(&self) -> &Arc<FoldedDeclProvider<R>> {
-        &self.folded_decl_provider
-    }
-
     pub fn get_class(&self, name: TypeName) -> Option<Arc<Class<R>>> {
         match self.cache.get(name) {
             Some(rc) => Some(rc),

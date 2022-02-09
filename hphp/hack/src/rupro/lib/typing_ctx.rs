@@ -6,7 +6,6 @@
 use std::sync::Arc;
 
 use crate::alloc::Allocator;
-use crate::folded_decl_provider::FoldedDeclProvider;
 use crate::reason::Reason;
 use crate::special_names::SpecialNames;
 use crate::typing_decl_provider::TypingDeclProvider;
@@ -14,7 +13,6 @@ use crate::typing_decl_provider::TypingDeclProvider;
 #[derive(Debug)]
 pub struct TypingCtx<R: Reason> {
     pub alloc: &'static Allocator<R>,
-    pub folded_decl_provider: Arc<FoldedDeclProvider<R>>,
     pub typing_decl_provider: Arc<TypingDeclProvider<R>>,
     pub special_names: &'static SpecialNames,
 }
@@ -22,13 +20,11 @@ pub struct TypingCtx<R: Reason> {
 impl<R: Reason> TypingCtx<R> {
     pub fn new(
         alloc: &'static Allocator<R>,
-        folded_decl_provider: Arc<FoldedDeclProvider<R>>,
         typing_decl_provider: Arc<TypingDeclProvider<R>>,
         special_names: &'static SpecialNames,
     ) -> Self {
         Self {
             alloc,
-            folded_decl_provider,
             typing_decl_provider,
             special_names,
         }

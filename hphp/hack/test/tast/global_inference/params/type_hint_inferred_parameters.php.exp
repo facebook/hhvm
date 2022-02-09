@@ -10,8 +10,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-8:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((int), (Some ([3:20-23], (Hprim Tint)))); 
-        f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic;
+        f_name = ([3:10-13], "\\foo"); f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (mixed); param_type_hint = ((mixed), None); 
            param_is_variadic = false; param_pos = [3:14-16]; param_name = "$x"; 
@@ -39,8 +38,7 @@ Errors:
        fd_fun =
        { f_span = [10:1-12:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((int), (Some ([10:20-23], (Hprim Tint)))); 
-         f_name = ([10:10-13], "\\bar"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic;
+         f_name = ([10:10-13], "\\bar"); f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (num); param_type_hint = ((num), None); 
             param_is_variadic = false; param_pos = [10:14-16]; param_name = "$x"; 

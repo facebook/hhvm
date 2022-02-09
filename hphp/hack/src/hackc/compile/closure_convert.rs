@@ -461,7 +461,6 @@ fn make_closure(
         name: Id(fd.name.0.clone(), "__invoke".into()),
         tparams: fun_tparams,
         where_constraints: fd.where_constraints.clone(),
-        variadic: fd.variadic.clone(),
         params: fd.params.clone(),
         ctxs: fd.ctxs.clone(),
         unsafe_ctxs: None, // TODO(T70095684)
@@ -932,7 +931,6 @@ fn convert_meth_caller_to_func_ptr(
         name: Id(pos(), mangle_name.clone()),
         tparams: vec![],
         where_constraints: vec![],
-        variadic: FunVariadicity::FVvariadicArg(variadic_param.clone()),
         params: vec![
             make_fn_param(pos(), &obj_var.1, false, false),
             variadic_param,
@@ -1018,7 +1016,6 @@ fn make_dyn_meth_caller_lambda(pos: &Pos, cexpr: &Expr, fexpr: &Expr, force: boo
         name: Id(pos(), ";anonymous".to_string()),
         tparams: vec![],
         where_constraints: vec![],
-        variadic: FunVariadicity::FVvariadicArg(variadic_param.clone()),
         params: vec![
             make_fn_param(pos(), &obj_var.1, false, false),
             make_fn_param(pos(), &meth_var.1, false, false),
@@ -1692,7 +1689,6 @@ fn extract_debugger_main(
         name: Id(Pos::make_none(), "include".into()),
         tparams: vec![],
         where_constraints: vec![],
-        variadic: FunVariadicity::FVnonVariadic,
         params,
         ctxs: None,        // TODO(T70095684)
         unsafe_ctxs: None, // TODO(T70095684)

@@ -15,14 +15,13 @@
       [{ m_span = [6:3-44]; m_annotation = (); m_final = false; m_abstract = true; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([6:28-31], "gen"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
-         m_body = { fb_ast = [] }; m_fun_kind = FSync; m_user_attributes = []; 
-         m_readonly_ret = None; m_ret = ((this::TX), (Some ([6:35-43], (Haccess (([6:35-39], Hthis), [([6:41-43], "TX")]))))); 
+         m_params = []; m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [] }; 
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+         m_ret = ((this::TX), (Some ([6:35-43], (Haccess (([6:35-39], Hthis), [([6:41-43], "TX")]))))); 
          m_external = false; m_doc_comment = None };
         { m_span = [7:3-51]; m_annotation = (); m_final = false; m_abstract = true; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
-          m_name = ([7:28-31], "log"); m_tparams = []; m_where_constraints = []; 
-          m_variadic = FVnonVariadic;
+          m_name = ([7:28-31], "log"); m_tparams = []; m_where_constraints = [];
           m_params =
           [{ param_annotation = (this::TX); param_type_hint = ((this::TX), (Some ([7:32-40], (Haccess (([7:32-36], Hthis), [([7:38-40], "TX")]))))); 
              param_is_variadic = false; param_pos = [7:41-43]; param_name = "$x"; 
@@ -56,8 +55,7 @@
             tp_constraints = [(Constraint_as, ([10:22-38], (Happly (([10:22-38], "\\WithTypeConstant"), []))))]; 
             tp_reified = Erased; tp_user_attributes = [] };
            { tp_variance = Invariant; tp_name = ([10:40-42], "TR"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-         f_where_constraints = [(([10:63-65], (Habstr ("TR", []))), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr ("T", []))), [([10:71-73], "TX")]))))]; 
-         f_variadic = FVnonVariadic;
+         f_where_constraints = [(([10:63-65], (Habstr ("TR", []))), Constraint_eq, ([10:68-73], (Haccess (([10:68-69], (Habstr ("T", []))), [([10:71-73], "TX")]))))];
          f_params =
          [{ param_annotation = (T); param_type_hint = ((T), (Some ([10:44-45], (Habstr ("T", []))))); 
             param_is_variadic = false; param_pos = [10:46-51]; param_name = "$left"; 
@@ -102,8 +100,7 @@
             tp_constraints = [(Constraint_as, ([14:22-38], (Happly (([14:22-38], "\\WithTypeConstant"), []))))]; 
             tp_reified = Erased; tp_user_attributes = [] };
            { tp_variance = Invariant; tp_name = ([14:40-42], "TR"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-         f_where_constraints = [(([16:16-18], (Habstr ("TR", []))), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr ("T", []))), [([16:24-26], "TX")]))))]; 
-         f_variadic = FVnonVariadic;
+         f_where_constraints = [(([16:16-18], (Habstr ("TR", []))), Constraint_eq, ([16:21-26], (Haccess (([16:21-22], (Habstr ("T", []))), [([16:24-26], "TX")]))))];
          f_params =
          [{ param_annotation = (T); param_type_hint = ((T), (Some ([14:44-45], (Habstr ("T", []))))); 
             param_is_variadic = false; param_pos = [14:46-51]; param_name = "$left"; 
@@ -120,8 +117,7 @@
                           { f_span = [17:10-38]; f_readonly_this = None; 
                             f_annotation = (); f_readonly_ret = None; 
                             f_ret = ((void), None); f_name = ([17:10-38], ";anonymous"); 
-                            f_tparams = []; f_where_constraints = []; 
-                            f_variadic = FVnonVariadic;
+                            f_tparams = []; f_where_constraints = [];
                             f_params =
                             [{ param_annotation = (TR); param_type_hint = ((TR), (Some ([17:11-13], (Habstr ("TR", []))))); 
                                param_is_variadic = false; param_pos = [17:14-16]; 
@@ -158,8 +154,7 @@
        fd_fun =
        { f_span = [20:1-27:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([20:62-66], (Hprim Tvoid)))); 
-         f_name = ([20:10-18], "\\my_error"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic;
+         f_name = ([20:10-18], "\\my_error"); f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (WithTypeConstant); param_type_hint = ((WithTypeConstant), (Some ([20:19-35], (Happly (([20:19-35], "\\WithTypeConstant"), []))))); 
             param_is_variadic = false; param_pos = [20:36-38]; param_name = "$x"; 

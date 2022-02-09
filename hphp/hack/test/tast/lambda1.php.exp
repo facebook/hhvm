@@ -8,7 +8,7 @@
       { f_span = [2:1-7:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([2:26-30], (Hprim Tvoid)))); 
         f_name = ([2:10-22], "\\test_lambda1"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([3:3-14], (Expr ((string), [3:3-13], (Binop ((Eq None), ((string), [3:3-5], (Lvar ([3:3-5], $s))), ((string), [3:8-13], (String "foo")))))));
@@ -21,7 +21,7 @@
                         { f_span = [4:8-41]; f_readonly_this = None; 
                           f_annotation = (); f_readonly_ret = None; f_ret = ((string), None); 
                           f_name = ([4:8-41], ";anonymous"); f_tparams = []; 
-                          f_where_constraints = []; f_variadic = FVnonVariadic;
+                          f_where_constraints = [];
                           f_params =
                           [{ param_annotation = ((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>)));
                              param_type_hint = (((dynamic | ?(bool | float | resource | arraykey | HH\FormatString<nothing>))), None); 

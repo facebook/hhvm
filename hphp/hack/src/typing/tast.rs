@@ -42,7 +42,6 @@ pub type Fun_<'a> = aast::Fun_<Ex<'a>, En>;
 pub type FuncBody<'a> = aast::FuncBody<Ex<'a>, En>;
 pub type FunDef<'a> = aast::FunDef<Ex<'a>, En>;
 pub type FunParam<'a> = aast::FunParam<Ex<'a>, En>;
-pub type FunVariadicity<'a> = aast::FunVariadicity<Ex<'a>, En>;
 pub type Gconst<'a> = aast::Gconst<Ex<'a>, En>;
 pub type Method_<'a> = aast::Method_<Ex<'a>, En>;
 pub type Program<'a> = aast::Program<Ex<'a>, En>;

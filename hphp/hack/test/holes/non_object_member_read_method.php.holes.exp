@@ -8,7 +8,7 @@
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:55-59], (Hprim Tvoid)))); 
         f_name = ([3:10-39], "\\non_object_member_read_method"); f_tparams = []; 
-        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_where_constraints = [];
         f_params =
         [{ param_annotation = (nonnull); param_type_hint = ((nonnull), (Some ([3:40-47], Hnonnull))); 
            param_is_variadic = false; param_pos = [3:48-51]; param_name = "$xs"; 

@@ -44,7 +44,6 @@ pub type FuncBody = aast::FuncBody<Ex, En>;
 pub type FunctionPtrId = aast::FunctionPtrId<Ex, En>;
 pub type FunDef = aast::FunDef<Ex, En>;
 pub type FunParam = aast::FunParam<Ex, En>;
-pub type FunVariadicity = aast::FunVariadicity<Ex, En>;
 pub type Gconst = aast::Gconst<Ex, En>;
 pub type Method_ = aast::Method_<Ex, En>;
 pub type Program = aast::Program<Ex, En>;

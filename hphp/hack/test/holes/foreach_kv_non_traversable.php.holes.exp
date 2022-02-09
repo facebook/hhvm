@@ -8,7 +8,7 @@
       { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:47-51], (Hprim Tvoid)))); 
         f_name = ([3:10-36], "\\foreach_kv_non_traversable"); f_tparams = []; 
-        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_where_constraints = [];
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:37-40], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [3:41-44]; param_name = "$xs"; 

@@ -1989,6 +1989,7 @@ let rec bind_param
   in
   let mode = get_param_mode param.param_callconv in
   let id = Local_id.make_unscoped param.param_name in
+
   let env = Env.set_local ~immutable env id ty1 param.param_pos in
   let env = Env.set_param env id (ty1, param.param_pos, mode) in
   let env =
@@ -4651,17 +4652,7 @@ and class_const ?(incl_tc = false) env p (cid, mid) =
   in
   make_result env p (Aast.Class_const (ce, mid)) const_ty
 
-and get_callable_variadicity env variadicity_decl_ty = function
-  | FVvariadicArg vparam ->
-    let (env, ty) =
-      Typing_param.make_param_local_ty env variadicity_decl_ty vparam
-    in
-    let (env, t_variadic) = bind_param env (ty, vparam) in
-    (env, Aast.FVvariadicArg t_variadic)
-  | FVnonVariadic -> (env, Aast.FVnonVariadic)
-
-and function_dynamically_callable
-    env f params_decl_ty variadicity_decl_ty ret_locl_ty =
+and function_dynamically_callable env f params_decl_ty ret_locl_ty =
   let env = { env with in_support_dynamic_type_method_check = true } in
   (* If any of the parameters doesn't have an explicit hint, then we have
    * to treat this is non-enforceable and therefore not dynamically callable
@@ -4671,7 +4662,7 @@ and function_dynamically_callable
         Option.is_some (snd param.param_type_hint))
     && Typing_dynamic.sound_dynamic_interface_check
          env
-         (variadicity_decl_ty :: params_decl_ty)
+         params_decl_ty
          ret_locl_ty
   in
   let function_body_check () =
@@ -4742,15 +4733,7 @@ and function_dynamically_callable
     in
 
     let pos = fst f.f_name in
-    let (env, t_variadic) =
-      get_callable_variadicity
-        env
-        (Some (make_dynamic @@ Pos_or_decl.of_raw_pos pos))
-        f.f_variadic
-    in
-    let env =
-      set_tyvars_variance_in_callable env dynamic_return_ty param_tys t_variadic
-    in
+    let env = set_tyvars_variance_in_callable env dynamic_return_ty param_tys in
     let disable =
       Naming_attributes.mem
         SN.UserAttributes.uaDisableTypecheckerInternal
@@ -4897,10 +4880,11 @@ and lambda ~is_anon ?expected p env f idl =
          *)
         expected_ft_params
     in
+    let f_variadic = List.find f.f_params ~f:(fun p -> p.param_is_variadic) in
     let replace_non_declared_arity variadic declared_arity expected_arity =
       match variadic with
-      | FVvariadicArg { param_type_hint = (_, Some _); _ } -> declared_arity
-      | FVvariadicArg _ ->
+      | Some { param_type_hint = (_, Some _); _ } -> declared_arity
+      | Some _ ->
         begin
           match (declared_arity, expected_arity) with
           | (Fvariadic declared, Fvariadic expected) ->
@@ -4914,7 +4898,7 @@ and lambda ~is_anon ?expected p env f idl =
         expected_ft with
         ft_arity =
           replace_non_declared_arity
-            f.f_variadic
+            f_variadic
             declared_ft.ft_arity
             expected_ft.ft_arity;
         ft_params =
@@ -4932,19 +4916,13 @@ and lambda ~is_anon ?expected p env f idl =
     Typing_log.increment_feature_count env FL.Lambda.contextual_params;
     check_body_under_known_params ~supportdyn env ?ret_ty expected_ft
   | _ ->
-    let explicit_variadic_param_or_non_variadic =
-      match f.f_variadic with
-      | FVvariadicArg { param_type_hint; _ } ->
-        Option.is_some (hint_of_type_hint param_type_hint)
-      | _ -> true
-    in
     (* If all parameters are annotated with explicit types, then type-check
      * the body under those assumptions and pick up the result type *)
     let all_explicit_params =
       List.for_all f.f_params ~f:(fun param ->
           Option.is_some (hint_of_type_hint param.param_type_hint))
     in
-    if all_explicit_params && explicit_variadic_param_or_non_variadic then (
+    if all_explicit_params then (
       Typing_log.increment_feature_count
         env
         (if List.is_empty f.f_params then
@@ -5300,22 +5278,29 @@ and closure_make
        * parameters and return a list of all their types. We'll use this
        * to create a union type when creating the typed variadic arg.
        *)
-      let remaining_params = List.drop ft.ft_params (List.length f.f_params) in
+      let remaining_params =
+        List.drop ft.ft_params (List.length f.f_params - 1)
+      in
       List.map ~f:(fun param -> param.fp_type.et_type) remaining_params
     in
     let r = Reason.Rvar_param varg.param_pos in
     let union = Tunion (tyl @ remaining_types) in
     let (env, t_param) = closure_bind_variadic env varg (mk (r, union)) in
-    (env, Aast.FVvariadicArg t_param)
+    (env, [t_param])
   in
-  let (env, t_variadic) =
-    match (f.f_variadic, ft.ft_arity) with
-    | (FVvariadicArg arg, Fvariadic variadic) ->
+  let (env, t_variadic_params) =
+    match
+      (List.find f.f_params ~f:(fun p -> p.param_is_variadic), ft.ft_arity)
+    with
+    | (Some arg, Fvariadic variadic) ->
       make_variadic_arg env arg [variadic.fp_type.et_type]
-    | (FVvariadicArg arg, Fstandard) -> make_variadic_arg env arg []
-    | (_, _) -> (env, Aast.FVnonVariadic)
+    | (Some arg, Fstandard) -> make_variadic_arg env arg []
+    | (_, _) -> (env, [])
   in
-  let params = ref f.f_params in
+  let non_variadic_params =
+    List.filter f.f_params ~f:(fun p -> not p.param_is_variadic)
+  in
+  let params = ref non_variadic_params in
   let (env, t_params) =
     List.fold_left
       ~f:(closure_bind_param params)
@@ -5337,7 +5322,9 @@ and closure_make
     || supportdyn
   in
   let env = List.fold_left ~f:closure_bind_opt_param ~init:env !params in
-  let env = List.fold_left ~f:closure_check_param ~init:env f.f_params in
+  let env =
+    List.fold_left ~f:closure_check_param ~init:env non_variadic_params
+  in
   let env =
     match el with
     | None -> env
@@ -5434,15 +5421,15 @@ and closure_make
         | Tany _ -> None
         | _ -> Some et_type)
   in
-  let variadicity_decl_ty =
+  let params_decl_ty =
     match decl_ft.ft_arity with
     | Fvariadic { fp_type = { et_type; _ }; _ } ->
       begin
         match get_node et_type with
-        | Tany _ -> None
-        | _ -> Some et_type
+        | Tany _ -> None :: params_decl_ty
+        | _ -> Some et_type :: params_decl_ty
       end
-    | _ -> None
+    | _ -> params_decl_ty
   in
   if
     TypecheckerOptions.enable_sound_dynamic
@@ -5453,7 +5440,6 @@ and closure_make
       sound_dynamic_check_saved_env
       f
       params_decl_ty
-      variadicity_decl_ty
       hret;
   let tfun_ =
     {
@@ -5470,9 +5456,7 @@ and closure_make
       Aast.f_body = { Aast.fb_ast = tb };
       Aast.f_ctxs = f.f_ctxs;
       Aast.f_unsafe_ctxs = f.f_unsafe_ctxs;
-      Aast.f_params = t_params;
-      Aast.f_variadic = t_variadic;
-      (* TODO TAST: Variadic efuns *)
+      Aast.f_params = t_params @ t_variadic_params;
       Aast.f_external = f.f_external;
       Aast.f_doc_comment = f.f_doc_comment;
     }

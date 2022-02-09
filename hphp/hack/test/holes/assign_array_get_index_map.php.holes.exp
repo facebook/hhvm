@@ -12,7 +12,7 @@ Errors:
       { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:50-54], (Hprim Tvoid)))); 
         f_name = ([3:10-36], "\\assign_array_get_index_map"); f_tparams = []; 
-        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_where_constraints = [];
         f_params =
         [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:37-42], Hmixed))); 
            param_is_variadic = false; param_pos = [3:43-47]; param_name = "$idx"; 

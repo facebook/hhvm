@@ -23,7 +23,7 @@ Errors:
                      ]
                    )))));
         f_name = ([4:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([5:3-25],

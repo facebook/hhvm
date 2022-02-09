@@ -453,7 +453,6 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
         name: ast_defs::Id(Pos::make_none(), name.into()),
         tparams: vec![],
         where_constraints: vec![],
-        variadic: FunVariadicity::FVnonVariadic,
         params: vec![],
         ctxs: Some(Contexts(pos.unwrap_or_else(Pos::make_none), vec![])),
         unsafe_ctxs: None,

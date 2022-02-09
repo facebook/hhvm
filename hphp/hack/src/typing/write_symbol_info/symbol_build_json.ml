@@ -184,7 +184,7 @@ let build_parameter_json
   in
   JSON_Object fields
 
-let build_signature_json ctx source_map params vararg ret_ty =
+let build_signature_json ctx source_map params ret_ty =
   let build_param p =
     let ty =
       match hint_of_type_hint p.param_type_hint with
@@ -215,11 +215,6 @@ let build_signature_json ctx source_map params vararg ret_ty =
       p.param_user_attributes
   in
   let parameters = List.map params ~f:(fun param -> build_param param) in
-  let parameters =
-    match vararg with
-    | FVnonVariadic -> parameters
-    | FVvariadicArg vararg -> parameters @ [build_param vararg]
-  in
   let return_type_name =
     match hint_of_type_hint ret_ty with
     | None -> None

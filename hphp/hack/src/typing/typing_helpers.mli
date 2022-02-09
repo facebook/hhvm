@@ -36,7 +36,6 @@ val set_tyvars_variance_in_callable :
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   Typing_defs.locl_ty list ->
-  Tast.fun_variadicity ->
   Typing_env_types.env
 
 val has_accept_disposable_attribute : ('a, 'b) Aast.fun_param -> bool

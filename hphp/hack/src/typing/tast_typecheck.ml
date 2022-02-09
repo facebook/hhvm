@@ -237,11 +237,7 @@ let check_fun env (fd : ETast.fun_def) =
   let gamma = gamma_from_params env f.f_params in
   if
     (not (List.is_empty f.f_tparams))
-    || (not (List.is_empty f.f_where_constraints))
-    ||
-    match f.f_variadic with
-    | FVnonVariadic -> false
-    | _ -> true
+    || not (List.is_empty f.f_where_constraints)
   then
     raise Not_implemented
   else

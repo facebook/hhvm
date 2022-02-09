@@ -42,8 +42,7 @@
       c_methods =
       [{ m_span = [7:5-12:9]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
-         m_name = ([7:21-32], "__construct"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic;
+         m_name = ([7:21-32], "__construct"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (dict<string, dynamic>);
             param_type_hint = ((dict<string, dynamic>), (Some ([8:14-37], (Happly (([8:14-20], "\\HH\\dict"), [([8:21-27], (Hprim Tstring)); ([8:29-36], Hdynamic)]))))); 
@@ -145,8 +144,7 @@
        c_methods =
        [{ m_span = [17:5-22:9]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
-          m_name = ([17:21-32], "__construct"); m_tparams = []; m_where_constraints = []; 
-          m_variadic = FVnonVariadic;
+          m_name = ([17:21-32], "__construct"); m_tparams = []; m_where_constraints = [];
           m_params =
           [{ param_annotation = (dict<string, dynamic>);
              param_type_hint = ((dict<string, dynamic>), (Some ([18:14-37], (Happly (([18:14-20], "\\HH\\dict"), [([18:21-27], (Hprim Tstring)); ([18:29-36], Hdynamic)])))));
@@ -213,7 +211,7 @@
        { f_span = [25:3-28:4]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([25:52-56], (Hprim Tvoid)))); 
          f_name = ([25:12-32], "\\XhpSpread\\xhp_spread_attribute"); 
-         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (XhpSpread\:element2); param_type_hint = ((XhpSpread\:element2), (Some ([25:33-42], (Happly (([25:33-42], "\\XhpSpread\\:element2"), []))))); 
             param_is_variadic = false; param_pos = [25:43-49]; param_name = "$props"; 

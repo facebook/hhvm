@@ -63,16 +63,6 @@ and get_decl_method_header tcopt cls method_id ~is_static =
   else
     None
 
-let get_callable_variadicity env variadicity_decl_ty = function
-  | FVvariadicArg vparam ->
-    let (env, ty) =
-      Typing_param.make_param_local_ty env variadicity_decl_ty vparam
-    in
-    Typing_param.check_param_has_hint env vparam ty;
-    let (env, t_variadic) = Typing.bind_param env (ty, vparam) in
-    (env, Aast.FVvariadicArg t_variadic)
-  | FVnonVariadic -> (env, Aast.FVnonVariadic)
-
 let merge_hint_with_decl_hint env type_hint decl_ty =
   let contains_tvar decl_ty =
     match decl_ty with
@@ -90,7 +80,7 @@ let merge_hint_with_decl_hint env type_hint decl_ty =
    in the ast with the one we created during the decl phase. This function does
    exactly this for the return type, the parameters and the variadic parameters.
    *)
-let merge_decl_header_with_hints ~params ~ret ~variadic decl_header env =
+let merge_decl_header_with_hints ~params ~ret decl_header env =
   let ret_decl_ty =
     merge_hint_with_decl_hint
       env
@@ -98,6 +88,9 @@ let merge_decl_header_with_hints ~params ~ret ~variadic decl_header env =
       (Option.map
          ~f:(fun { ft_ret = { et_type; _ }; _ } -> et_type)
          decl_header)
+  in
+  let non_variadic_params =
+    List.filter params ~f:(fun p -> not p.param_is_variadic)
   in
   let params_decl_ty =
     match decl_header with
@@ -108,9 +101,9 @@ let merge_decl_header_with_hints ~params ~ret ~variadic decl_header env =
             env
             (hint_of_type_hint h.param_type_hint)
             None)
-        params
+        non_variadic_params
     | Some { ft_params; _ } ->
-      List.zip_exn params ft_params
+      List.zip_exn non_variadic_params ft_params
       |> List.map ~f:(fun (h, { fp_type = { et_type; _ }; _ }) ->
              merge_hint_with_decl_hint
                env
@@ -118,18 +111,22 @@ let merge_decl_header_with_hints ~params ~ret ~variadic decl_header env =
                (Some et_type))
   in
   let variadicity_decl_ty =
-    match (decl_header, variadic) with
-    | ( Some { ft_arity = Fvariadic { fp_type = { et_type; _ }; _ }; _ },
-        FVvariadicArg fp ) ->
-      merge_hint_with_decl_hint
-        env
-        (hint_of_type_hint fp.param_type_hint)
-        (Some et_type)
-    | (_, FVvariadicArg fp) ->
-      merge_hint_with_decl_hint env (hint_of_type_hint fp.param_type_hint) None
-    | _ -> None
+    match (decl_header, List.find params ~f:(fun p -> p.param_is_variadic)) with
+    | (Some { ft_arity = Fvariadic { fp_type = { et_type; _ }; _ }; _ }, Some fp)
+      ->
+      [
+        merge_hint_with_decl_hint
+          env
+          (hint_of_type_hint fp.param_type_hint)
+          (Some et_type);
+      ]
+    | (_, Some fp) ->
+      [
+        merge_hint_with_decl_hint env (hint_of_type_hint fp.param_type_hint) None;
+      ]
+    | _ -> []
   in
-  (ret_decl_ty, params_decl_ty, variadicity_decl_ty)
+  (ret_decl_ty, params_decl_ty @ variadicity_decl_ty)
 
 let fun_def ctx fd :
     (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
@@ -180,13 +177,8 @@ let fun_def ctx fd :
       f.f_where_constraints
   in
   let env = Env.set_fn_kind env f.f_fun_kind in
-  let (return_decl_ty, params_decl_ty, variadicity_decl_ty) =
-    merge_decl_header_with_hints
-      ~params:f.f_params
-      ~ret:f.f_ret
-      ~variadic:f.f_variadic
-      decl_header
-      env
+  let (return_decl_ty, params_decl_ty) =
+    merge_decl_header_with_hints ~params:f.f_params ~ret:f.f_ret decl_header env
   in
   let (env, return_ty) =
     match return_decl_ty with
@@ -247,12 +239,7 @@ let fun_def ctx fd :
     in
     List.map_env env (List.zip_exn param_tys f.f_params) ~f:bind_param_and_check
   in
-  let (env, t_variadic) =
-    get_callable_variadicity env variadicity_decl_ty f.f_variadic
-  in
-  let env =
-    set_tyvars_variance_in_callable env return_ty param_tys t_variadic
-  in
+  let env = set_tyvars_variance_in_callable env return_ty param_tys in
   let local_tpenv = Env.get_tpenv env in
   let disable =
     Naming_attributes.mem
@@ -281,7 +268,6 @@ let fun_def ctx fd :
       sound_dynamic_check_saved_env
       f
       params_decl_ty
-      variadicity_decl_ty
       return_ty;
 
   let fun_ =
@@ -294,7 +280,6 @@ let fun_def ctx fd :
       Aast.f_name = f.f_name;
       Aast.f_tparams = tparams;
       Aast.f_where_constraints = f.f_where_constraints;
-      Aast.f_variadic = t_variadic;
       Aast.f_params = typed_params;
       Aast.f_ctxs = f.f_ctxs;
       Aast.f_unsafe_ctxs = f.f_unsafe_ctxs;
@@ -316,8 +301,7 @@ let fun_def ctx fd :
   let (_env, global_inference_env) = Env.extract_global_inference_env env in
   (fundef, (pos, global_inference_env))
 
-let method_dynamically_callable
-    env cls m params_decl_ty variadicity_decl_ty ret_locl_ty =
+let method_dynamically_callable env cls m params_decl_ty ret_locl_ty =
   let env = { env with in_support_dynamic_type_method_check = true } in
   (* Add `dynamic` lower and upper bound to any type parameters that are marked <<__RequireDynamic>> *)
   let env_with_require_dynamic =
@@ -326,7 +310,7 @@ let method_dynamically_callable
   let interface_check =
     Typing_dynamic.sound_dynamic_interface_check
       env_with_require_dynamic
-      (variadicity_decl_ty :: params_decl_ty)
+      params_decl_ty
       ret_locl_ty
   in
   let method_body_check () =
@@ -397,15 +381,7 @@ let method_dynamically_callable
     in
 
     let pos = fst m.m_name in
-    let (env, t_variadic) =
-      get_callable_variadicity
-        env
-        (Some (make_dynamic @@ Pos_or_decl.of_raw_pos pos))
-        m.m_variadic
-    in
-    let env =
-      set_tyvars_variance_in_callable env dynamic_return_ty param_tys t_variadic
-    in
+    let env = set_tyvars_variance_in_callable env dynamic_return_ty param_tys in
 
     let env =
       if Cls.get_support_dynamic_type cls then
@@ -541,13 +517,8 @@ let method_def ~is_disposable env cls m =
       env
   in
   let env = Env.clear_params env in
-  let (ret_decl_ty, params_decl_ty, variadicity_decl_ty) =
-    merge_decl_header_with_hints
-      ~params:m.m_params
-      ~ret:m.m_ret
-      ~variadic:m.m_variadic
-      decl_header
-      env
+  let (ret_decl_ty, params_decl_ty) =
+    merge_decl_header_with_hints ~params:m.m_params ~ret:m.m_ret decl_header env
   in
   let env = Env.set_fn_kind env m.m_fun_kind in
   let (env, return, return_ty) = method_return env m ret_decl_ty in
@@ -580,12 +551,7 @@ let method_def ~is_disposable env cls m =
     in
     List.map_env env (List.zip_exn param_tys m.m_params) ~f:bind_param_and_check
   in
-  let (env, t_variadic) =
-    get_callable_variadicity env variadicity_decl_ty m.m_variadic
-  in
-  let env =
-    set_tyvars_variance_in_callable env return_ty param_tys t_variadic
-  in
+  let env = set_tyvars_variance_in_callable env return_ty param_tys in
   let local_tpenv = Env.get_tpenv env in
   let disable =
     Naming_attributes.mem
@@ -635,7 +601,6 @@ let method_def ~is_disposable env cls m =
       cls
       m
       params_decl_ty
-      variadicity_decl_ty
       return_ty;
   let method_def =
     {
@@ -649,7 +614,6 @@ let method_def ~is_disposable env cls m =
       Aast.m_name = m.m_name;
       Aast.m_tparams = tparams;
       Aast.m_where_constraints = m.m_where_constraints;
-      Aast.m_variadic = t_variadic;
       Aast.m_params = typed_params;
       Aast.m_ctxs = m.m_ctxs;
       Aast.m_unsafe_ctxs = m.m_unsafe_ctxs;

@@ -120,19 +120,12 @@ let with_timeout env fun_name (do_ : env -> 'b) : 'b option =
 (* If the localized types of the return type is a tyvar we force it to be covariant.
   The same goes for parameter types, but this time we force them to be contravariant
 *)
-let set_tyvars_variance_in_callable env return_ty param_tys variadic_param_ty =
+let set_tyvars_variance_in_callable env return_ty param_tys =
   Env.log_env_change "set_tyvars_variance_in_callable" env
   @@
   let set_variance = Env.set_tyvar_variance ~for_all_vars:true in
   let env = set_variance env return_ty in
   let env = List.fold param_tys ~init:env ~f:(set_variance ~flip:true) in
-  let env =
-    match variadic_param_ty with
-    | FVvariadicArg vparam ->
-      let ty = vparam.param_annotation in
-      set_variance env ty ~flip:true
-    | FVnonVariadic -> env
-  in
   env
 
 let reify_kind = function

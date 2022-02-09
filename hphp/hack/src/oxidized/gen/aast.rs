@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<005d6e3d94404b46b310e8b2c848e354>>
+// @generated SignedSource<<73513e749276a1c2ba007c069add7587>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1046,31 +1046,6 @@ pub struct FunParam<Ex, En> {
     pub visibility: Option<Visibility>,
 }
 
-/// Does this function/method take a variable number of arguments?
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C)]
-pub enum FunVariadicity<Ex, En> {
-    /// Named variadic argument.
-    ///
-    /// function foo(int ...$args): void {}
-    FVvariadicArg(FunParam<Ex, En>),
-    /// Function is not variadic, takes an exact number of arguments.
-    FVnonVariadic,
-}
-
 #[derive(
     Clone,
     Debug,
@@ -1095,7 +1070,6 @@ pub struct Fun_<Ex, En> {
     pub name: Sid,
     pub tparams: Vec<Tparam<Ex, En>>,
     pub where_constraints: Vec<WhereConstraintHint>,
-    pub variadic: FunVariadicity<Ex, En>,
     pub params: Vec<FunParam<Ex, En>>,
     pub ctxs: Option<Contexts>,
     pub unsafe_ctxs: Option<Contexts>,
@@ -1683,7 +1657,6 @@ pub struct Method_<Ex, En> {
     pub name: Sid,
     pub tparams: Vec<Tparam<Ex, En>>,
     pub where_constraints: Vec<WhereConstraintHint>,
-    pub variadic: FunVariadicity<Ex, En>,
     pub params: Vec<FunParam<Ex, En>>,
     pub ctxs: Option<Contexts>,
     pub unsafe_ctxs: Option<Contexts>,

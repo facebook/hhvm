@@ -10,8 +10,7 @@ Errors:
       c_methods =
       [{ m_span = [4:3-6:4]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
-         m_name = ([4:19-22], "foo"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic;
+         m_name = ([4:19-22], "foo"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([4:23-26], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [4:27-29]; param_name = "$x"; 

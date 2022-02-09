@@ -8,7 +8,7 @@
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:67-71], (Hprim Tvoid)))); 
         f_name = ([3:10-30], "\\array_get_index_pair"); f_tparams = []; 
-        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_where_constraints = [];
         f_params =
         [{ param_annotation = (Pair<string, int>);
            param_type_hint = ((Pair<string, int>), (Some ([3:31-48], (Happly (([3:31-35], "\\HH\\Pair"), [([3:36-42], (Hprim Tstring)); ([3:44-47], (Hprim Tint))]))))); 

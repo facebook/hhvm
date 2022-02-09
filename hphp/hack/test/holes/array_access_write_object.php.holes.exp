@@ -8,7 +8,7 @@
       { f_span = [4:1-8:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([4:57-61], (Hprim Tvoid)))); 
         f_name = ([4:10-35], "\\array_access_write_object"); f_tparams = []; 
-        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_where_constraints = [];
         f_params =
         [{ param_annotation = (classname<_>); param_type_hint = ((classname<_>), (Some ([4:36-48], (Happly (([4:36-45], "\\HH\\classname"), [([4:46-47], Herr)]))))); 
            param_is_variadic = false; param_pos = [4:49-54]; param_name = "$yolo"; 

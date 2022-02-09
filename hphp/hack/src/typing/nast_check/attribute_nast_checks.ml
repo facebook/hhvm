@@ -22,11 +22,6 @@ let has_attribute (name : string) (attrs : Nast.user_attribute list) : bool =
   | Some _ -> true
   | None -> false
 
-let variadic_pos v : pos option =
-  match v with
-  | FVvariadicArg param -> Some param.param_pos
-  | FVnonVariadic -> None
-
 let check_attribute_arity attrs attr_name arg_spec =
   let attr = Naming_attributes.find attr_name attrs in
   let prim_err_opt =
@@ -107,6 +102,9 @@ let handler =
     inherit Nast_visitor.handler_base
 
     method! at_fun_ env f =
+      let variadic_param =
+        List.find_opt (fun p -> p.param_is_variadic) f.f_params
+      in
       (* Ban arguments on functions with the __EntryPoint attribute. *)
       if has_attribute "__EntryPoint" f.f_user_attributes then begin
         (match f.f_params with
@@ -114,9 +112,10 @@ let handler =
         | param :: _ ->
           Errors.add_nast_check_error
           @@ Nast_check_error.Entrypoint_arguments param.param_pos);
-        (match variadic_pos f.f_variadic with
+        (match variadic_param with
         | Some p ->
-          Errors.add_nast_check_error @@ Nast_check_error.Entrypoint_arguments p
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Entrypoint_arguments p.param_pos
         | None -> ());
         match f.f_tparams with
         | [] -> ()
@@ -126,9 +125,10 @@ let handler =
       end;
       (* Ban variadic arguments on memoized functions. *)
       (if has_attribute "__Memoize" f.f_user_attributes then
-        match variadic_pos f.f_variadic with
+        match variadic_param with
         | Some p ->
-          Errors.add_nast_check_error @@ Nast_check_error.Variadic_memoize p
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Variadic_memoize p.param_pos
         | None -> ());
       check_attribute_arity
         f.f_user_attributes
@@ -162,6 +162,9 @@ let handler =
         (`Exact 0)
 
     method! at_method_ env m =
+      let variadic_param =
+        List.find_opt (fun p -> p.param_is_variadic) m.m_params
+      in
       check_attribute_arity
         m.m_user_attributes
         SN.UserAttributes.uaPolicied
@@ -181,9 +184,10 @@ let handler =
        has_attribute "__Memoize" m.m_user_attributes
        || has_attribute "__MemoizeLSB" m.m_user_attributes
       then
-        match variadic_pos m.m_variadic with
+        match variadic_param with
         | Some p ->
-          Errors.add_nast_check_error @@ Nast_check_error.Variadic_memoize p
+          Errors.add_nast_check_error
+          @@ Nast_check_error.Variadic_memoize p.param_pos
         | None -> ());
       check_attribute_arity
         m.m_user_attributes

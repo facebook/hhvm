@@ -1567,7 +1567,6 @@ fn p_expr_impl__<'a>(
                 where_constraints: vec![],
                 body: ast::FuncBody { fb_ast: body },
                 fun_kind: mk_fun_kind(suspension_kind, yield_),
-                variadic: determine_variadicity(&params),
                 params,
                 ctxs,
                 unsafe_ctxs,
@@ -2067,7 +2066,6 @@ fn p_expr_impl__<'a>(
                 where_constraints: vec![],
                 body: ast::FuncBody { fb_ast: body },
                 fun_kind: mk_fun_kind(suspension_kind, yield_),
-                variadic: determine_variadicity(&params),
                 params,
                 ctxs,
                 unsafe_ctxs,
@@ -2102,7 +2100,6 @@ fn p_expr_impl__<'a>(
                     },
                 },
                 fun_kind: mk_fun_kind(suspension_kind, yld),
-                variadic: determine_variadicity(&[]),
                 params: vec![],
                 ctxs: None,        // TODO(T70095684)
                 unsafe_ctxs: None, // TODO(T70095684)
@@ -3673,19 +3670,6 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr, Error> {
     }
 }
 
-fn determine_variadicity(params: &[ast::FunParam]) -> ast::FunVariadicity {
-    use aast::FunVariadicity::*;
-    if let Some(x) = params.last() {
-        if x.is_variadic {
-            FVvariadicArg(x.clone())
-        } else {
-            FVnonVariadic
-        }
-    } else {
-        FVnonVariadic
-    }
-}
-
 fn p_fun_pos<'a>(node: S<'a>, env: &Env<'_>) -> Pos {
     let get_pos = |n: S<'a>, p: Pos| -> Pos {
         if let FunctionDeclarationHeader(c1) = &n.children {
@@ -4344,7 +4328,6 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 visibility,
                 tparams: hdr.type_parameters,
                 where_constraints: hdr.constrs,
-                variadic: determine_variadicity(&hdr.parameters),
                 params: hdr.parameters,
                 ctxs: hdr.contexts,
                 unsafe_ctxs: hdr.unsafe_contexts,
@@ -4789,7 +4772,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>, Error> {
             let user_attributes = p_user_attributes(attribute_spec, env)?;
             check_effect_memoized(hdr.contexts.as_ref(), &user_attributes, "function", env);
             check_context_has_this(hdr.contexts.as_ref(), env);
-            let variadic = determine_variadicity(&hdr.parameters);
             let ret = ast::TypeHint((), hdr.return_type);
 
             let fun = ast::Fun_ {
@@ -4806,7 +4788,6 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>, Error> {
                 unsafe_ctxs: hdr.unsafe_contexts,
                 body: ast::FuncBody { fb_ast: block },
                 fun_kind: mk_fun_kind(hdr.suspension_kind, yield_),
-                variadic,
                 user_attributes,
                 external: is_external,
                 doc_comment: doc_comment_opt,

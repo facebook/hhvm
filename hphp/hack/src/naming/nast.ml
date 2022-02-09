@@ -57,8 +57,6 @@ type func_body = (unit, unit) Aast.func_body
 
 type fun_param = (unit, unit) Aast.fun_param
 
-type fun_variadicity = (unit, unit) Aast.fun_variadicity
-
 type typedef = (unit, unit) Aast.typedef
 
 type tparam = (unit, unit) Aast.tparam

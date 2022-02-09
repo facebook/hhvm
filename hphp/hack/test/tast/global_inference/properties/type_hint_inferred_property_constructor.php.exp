@@ -17,8 +17,7 @@ Errors:
       c_methods =
       [{ m_span = [4:3-48]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
-         m_name = ([4:19-30], "__construct"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic;
+         m_name = ([4:19-30], "__construct"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (int); param_type_hint = ((int), None); 
             param_is_variadic = false; param_pos = [4:38-40]; param_name = "$x"; 
@@ -55,8 +54,7 @@ Errors:
        fd_fun =
        { f_span = [7:1-30]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([7:23-27], (Hprim Tvoid)))); 
-         f_name = ([7:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic;
+         f_name = ([7:10-13], "\\foo"); f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([7:14-17], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [7:18-20]; param_name = "$_"; 
@@ -77,7 +75,7 @@ Errors:
        { f_span = [9:1-13:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([9:17-21], (Hprim Tvoid)))); 
          f_name = ([9:10-13], "\\bar"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([10:3-19],

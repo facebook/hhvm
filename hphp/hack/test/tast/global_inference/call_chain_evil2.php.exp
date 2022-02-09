@@ -15,7 +15,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((string), None); f_name = ([3:10-12], "\\f1"); 
-        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), None); 
            param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
@@ -34,7 +34,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((string), None); f_name = ([3:10-12], "\\f2"); 
-        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), None); 
            param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
@@ -59,7 +59,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((string), None); f_name = ([3:10-12], "\\f3"); 
-        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), None); 
            param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
@@ -91,8 +91,8 @@ Errors:
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((string), None); f_name = ([3:10-11], "\\f"); 
-        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic; 
-        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+        f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([4:3-25],

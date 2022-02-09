@@ -18,8 +18,7 @@ Errors:
       c_methods =
       [{ m_span = [5:5-63]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
-         m_name = ([5:21-32], "__construct"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic;
+         m_name = ([5:21-32], "__construct"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (string); param_type_hint = ((string), (Some ([5:40-46], (Hprim Tstring)))); 
             param_is_variadic = false; param_pos = [5:47-58]; param_name = "$attr_value"; 

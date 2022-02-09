@@ -8,7 +8,7 @@
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([3:18-22], (Hprim Tvoid)))); 
         f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([4:3-40],
@@ -39,8 +39,7 @@
                                    f_annotation = (); f_readonly_ret = None; 
                                    f_ret = ((), None); f_name = ([4:19-38], ";anonymous"); 
                                    f_tparams = []; f_where_constraints = []; 
-                                   f_variadic = FVnonVariadic; f_params = []; 
-                                   f_ctxs = None; f_unsafe_ctxs = None;
+                                   f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                    f_body = { fb_ast = [([4:19-38], (Return (Some ((), [4:19-38], (ET_Splice ((), [4:22-36], (Lvar ([4:22-36], $0splice0))))))))] }; 
                                    f_fun_kind = FSync; f_user_attributes = []; 
                                    f_external = false; f_doc_comment = None },
@@ -54,8 +53,7 @@
                                  { f_span = [4:19-38]; f_readonly_this = None; 
                                    f_annotation = (); f_readonly_ret = None; 
                                    f_ret = ((), None); f_name = ([4:19-38], ";anonymous"); 
-                                   f_tparams = []; f_where_constraints = []; 
-                                   f_variadic = FVnonVariadic;
+                                   f_tparams = []; f_where_constraints = [];
                                    f_params =
                                    [{ param_annotation = (); param_type_hint = ((), None); 
                                       param_is_variadic = false; param_pos = [4:22-24]; 
@@ -97,8 +95,7 @@
                                                              f_ret = ((), None); 
                                                              f_name = ([4:19-38], ";anonymous"); 
                                                              f_tparams = []; 
-                                                             f_where_constraints = []; 
-                                                             f_variadic = FVnonVariadic;
+                                                             f_where_constraints = [];
                                                              f_params =
                                                              [{ param_annotation = (); 
                                                                 param_type_hint = ((), (Some ([4:8-18], (Happly (([4:8-18], "\\ExampleDsl"), []))))); 

@@ -157,27 +157,18 @@ let check_param : env -> Nast.fun_param -> unit =
     in
     check_memoizable env hint_pos ty
 
-let check :
-    env ->
-    Nast.user_attribute list ->
-    Nast.fun_param list ->
-    Nast.fun_variadicity ->
-    unit =
- fun env user_attributes params variadic ->
+let check : env -> Nast.user_attribute list -> Nast.fun_param list -> unit =
+ fun env user_attributes params ->
   if
     Naming_attributes.mem SN.UserAttributes.uaMemoize user_attributes
     || Naming_attributes.mem SN.UserAttributes.uaMemoizeLSB user_attributes
-  then (
-    List.iter ~f:(check_param env) params;
-    match variadic with
-    | FVvariadicArg vparam -> check_param env vparam
-    | FVnonVariadic -> ()
-  )
+  then
+    List.iter ~f:(check_param env) params
 
 let check_function : env -> Nast.fun_ -> unit =
- fun env { f_user_attributes; f_params; f_variadic; _ } ->
-  check env f_user_attributes f_params f_variadic
+ fun env { f_user_attributes; f_params; _ } ->
+  check env f_user_attributes f_params
 
 let check_method : env -> Nast.method_ -> unit =
- fun env { m_user_attributes; m_params; m_variadic; _ } ->
-  check env m_user_attributes m_params m_variadic
+ fun env { m_user_attributes; m_params; _ } ->
+  check env m_user_attributes m_params

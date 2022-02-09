@@ -700,7 +700,6 @@ let invalid_expr_ (p : Pos.t) : Nast.expr_ =
               f_name = (p, "invalid_expr");
               f_tparams = [];
               f_where_constraints = [];
-              f_variadic = Aast.FVnonVariadic;
               f_params = [];
               f_ctxs = None;
               f_unsafe_ctxs = None;
@@ -1394,7 +1393,7 @@ and method_ genv m =
   let genv = extend_tparams genv m.Aast.m_tparams in
   let env = genv in
   (* Cannot use 'this' if it is a public instance method *)
-  let (variadicity, paraml) = fun_paraml env m.Aast.m_params in
+  let paraml = fun_paraml env m.Aast.m_params in
   let tparam_l = type_paraml env m.Aast.m_tparams in
   let where_constraints =
     type_where_constraints env m.Aast.m_where_constraints
@@ -1430,7 +1429,6 @@ and method_ genv m =
     N.m_fun_kind = m.Aast.m_fun_kind;
     N.m_readonly_ret = m.Aast.m_readonly_ret;
     N.m_ret = ret;
-    N.m_variadic = variadicity;
     N.m_user_attributes = attrs;
     N.m_external = m.Aast.m_external;
     N.m_doc_comment = m.Aast.m_doc_comment;
@@ -1438,22 +1436,9 @@ and method_ genv m =
 
 and fun_paraml env paraml =
   let _ = List.fold_left ~f:check_repetition ~init:SSet.empty paraml in
-  let (variadicity, paraml) = determine_variadicity env paraml in
-  (variadicity, List.map ~f:(fun_param env) paraml)
+  List.map ~f:(fun_param env) paraml
 
 (* Variadic params are removed from the list *)
-and determine_variadicity env paraml =
-  match paraml with
-  | [] -> (N.FVnonVariadic, [])
-  | [x] ->
-    if x.Aast.param_is_variadic then
-      (N.FVvariadicArg (fun_param env x), [])
-    else
-      (N.FVnonVariadic, paraml)
-  | x :: rl ->
-    let (variadicity, rl) = determine_variadicity env rl in
-    (variadicity, x :: rl)
-
 and fun_param env (param : Nast.fun_param) =
   let p = param.Aast.param_pos in
   let name = param.Aast.param_name in
@@ -1514,7 +1499,7 @@ and fun_ genv f =
   let h =
     Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) f.Aast.f_ret
   in
-  let (variadicity, paraml) = fun_paraml env f.Aast.f_params in
+  let paraml = fun_paraml env f.Aast.f_params in
   let f_tparams = type_paraml env f.Aast.f_tparams in
   let f_kind = f.Aast.f_fun_kind in
   let body =
@@ -1544,7 +1529,6 @@ and fun_ genv f =
       f_unsafe_ctxs;
       f_body = body;
       f_fun_kind = f_kind;
-      f_variadic = variadicity;
       f_user_attributes = attrs;
       f_external = f.Aast.f_external;
       f_doc_comment = f.Aast.f_doc_comment;
@@ -2248,7 +2232,7 @@ and expr_lambda env f =
   let h =
     Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) f.Aast.f_ret
   in
-  let (variadicity, paraml) = fun_paraml env f.Aast.f_params in
+  let paraml = fun_paraml env f.Aast.f_params in
   (* The bodies of lambdas go through naming in the containing local
    * environment *)
   let body_nast = f_body env f.Aast.f_body in
@@ -2270,7 +2254,6 @@ and expr_lambda env f =
     f_where_constraints = [];
     f_body = body;
     f_fun_kind = f.Aast.f_fun_kind;
-    f_variadic = variadicity;
     f_user_attributes = user_attributes env f.Aast.f_user_attributes;
     f_external = f.Aast.f_external;
     f_doc_comment = f.Aast.f_doc_comment;

@@ -10,7 +10,7 @@ Errors:
       { f_span = [12:1-15:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([12:18-22], (Hprim Tvoid)))); 
         f_name = ([12:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([13:3-52],
@@ -47,8 +47,8 @@ Errors:
        fd_fun =
        { f_span = [17:1-30]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((_), None); f_name = ([17:10-25], "\\my_php_function"); 
-         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic; 
-         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
+         f_tparams = []; f_where_constraints = []; f_params = []; f_ctxs = None; 
+         f_unsafe_ctxs = None; f_body = { fb_ast = [([Pos.none], Noop)] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

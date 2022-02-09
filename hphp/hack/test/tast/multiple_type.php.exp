@@ -9,8 +9,7 @@
       [{ m_span = [5:3-7:4]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([5:19-22], "foo"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
-         m_body = { fb_ast = [([6:5-14], (Return (Some ((int), [6:12-13], (Int "5")))))] }; 
+         m_params = []; m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([6:5-14], (Return (Some ((int), [6:12-13], (Int "5")))))] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((int), (Some ([5:26-29], (Hprim Tint)))); m_external = false; 
          m_doc_comment = None }
@@ -33,8 +32,7 @@
        [{ m_span = [11:3-13:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([11:19-22], "foo"); m_tparams = []; m_where_constraints = []; 
-          m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
-          m_body = { fb_ast = [([12:5-16], (Return (Some ((string), [12:12-15], (String "s")))))] }; 
+          m_params = []; m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([12:5-16], (Return (Some ((string), [12:12-15], (String "s")))))] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((string), (Some ([11:26-32], (Hprim Tstring)))); m_external = false; 
           m_doc_comment = None }
@@ -55,8 +53,7 @@
        fd_fun =
        { f_span = [16:1-19:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((arraykey), (Some ([16:44-52], (Hprim Tarraykey)))); 
-         f_name = ([16:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic;
+         f_name = ([16:10-14], "\\test"); f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (C1); param_type_hint = ((C1), (Some ([16:15-17], (Happly (([16:15-17], "\\C1"), []))))); 
             param_is_variadic = false; param_pos = [16:18-21]; param_name = "$c1"; 

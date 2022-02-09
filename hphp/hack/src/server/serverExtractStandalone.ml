@@ -1236,18 +1236,7 @@ end = struct
         Fmt.(option pp_fun_param_default)
         param_expr)
 
-  let pp_variadic_fun_param ppf = function
-    | Aast.FVvariadicArg fp -> Fmt.pf ppf {|%a|} pp_fun_param fp
-    | Aast.FVnonVariadic -> ()
-
-  let pp_fun_params ppf = function
-    | ([], variadic) -> Fmt.(parens pp_variadic_fun_param) ppf variadic
-    | tup ->
-      Fmt.(
-        parens
-        @@ pair ~sep:comma (list ~sep:comma pp_fun_param) pp_variadic_fun_param)
-        ppf
-        tup
+  let pp_fun_params ppf = Fmt.(parens @@ list ~sep:comma pp_fun_param) ppf
 
   (* -- Single element depdencies ------------------------------------------- *)
 
@@ -1353,16 +1342,7 @@ end = struct
     (* -- Global functions -------------------------------------------------- *)
 
     let pp_fun ppf (name, fd) =
-      let Aast.
-            {
-              f_user_attributes;
-              f_tparams;
-              f_variadic;
-              f_params;
-              f_ret;
-              f_ctxs;
-              _;
-            } =
+      let Aast.{ f_user_attributes; f_tparams; f_params; f_ret; f_ctxs; _ } =
         fd.Aast.fd_fun
       in
       Fmt.(
@@ -1375,7 +1355,7 @@ end = struct
           pp_tparams
           f_tparams
           pp_fun_params
-          (f_params, f_variadic)
+          f_params
           (option pp_contexts)
           f_ctxs
           (pp_type_hint ~is_ret_type:true)
@@ -1669,7 +1649,6 @@ end = struct
               m_name = (_, name);
               m_tparams;
               m_params;
-              m_variadic;
               m_ctxs;
               m_ret;
               m_static;
@@ -1698,7 +1677,7 @@ end = struct
           pp_tparams
           m_tparams
           pp_fun_params
-          (m_params, m_variadic)
+          m_params
           (option pp_contexts)
           m_ctxs
           (pp_type_hint ~is_ret_type:true)

@@ -9,8 +9,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-42]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:35-39], (Hprim Tvoid)))); 
-        f_name = ([3:10-22], "\\takes_string"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic;
+        f_name = ([3:10-22], "\\takes_string"); f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:23-29], (Hprim Tstring)))); 
            param_is_variadic = false; param_pos = [3:30-32]; param_name = "$s"; 
@@ -31,13 +30,13 @@ Errors:
        { f_span = [5:1-9:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([5:30-34], (Hprim Tvoid)))); 
          f_name = ([5:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
-         f_variadic =
-         (FVvariadicArg
-            { param_annotation = (vec<string>); param_type_hint = ((vec<string>), (Some ([5:12-18], (Hprim Tstring)))); 
-              param_is_variadic = true; param_pos = [5:22-27]; param_name = "$args"; 
-              param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-              param_user_attributes = []; param_visibility = None });
-         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_params =
+         [{ param_annotation = (vec<string>); param_type_hint = ((vec<string>), (Some ([5:12-18], (Hprim Tstring)))); 
+            param_is_variadic = true; param_pos = [5:22-27]; param_name = "$args"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([6:3-8:4],
@@ -65,13 +64,13 @@ Errors:
        [{ m_span = [12:3-42]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([12:19-23], "meth"); m_tparams = []; m_where_constraints = [];
-          m_variadic =
-          (FVvariadicArg
-             { param_annotation = (vec<_>); param_type_hint = ((vec<_>), None); 
-               param_is_variadic = true; param_pos = [12:27-32]; param_name = "$args"; 
-               param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-               param_user_attributes = []; param_visibility = None });
-          m_params = []; m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
+          m_params =
+          [{ param_annotation = (vec<_>); param_type_hint = ((vec<_>), None); 
+             param_is_variadic = true; param_pos = [12:27-32]; param_name = "$args"; 
+             param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+             param_user_attributes = []; param_visibility = None }
+            ];
+          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
           m_ret = ((void), (Some ([12:35-39], (Hprim Tvoid)))); m_external = false; 
           m_doc_comment = None }

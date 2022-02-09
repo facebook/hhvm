@@ -13,7 +13,7 @@
            tp_constraints = [(Constraint_as, ([2:19-33], (Hoption ([2:20-33], (Happly (([2:20-29], "\\HH\\Container"), [([2:30-32], (Habstr ("Tv", [])))]))))))]; 
            tp_reified = Erased; tp_user_attributes = [] };
           { tp_variance = Invariant; tp_name = ([2:35-37], "Tv"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_where_constraints = [];
         f_params =
         [{ param_annotation = (T); param_type_hint = ((T), (Some ([2:45-46], (Habstr ("T", []))))); 
            param_is_variadic = false; param_pos = [2:47-51]; param_name = "$arr"; 
@@ -34,8 +34,7 @@
        { f_span = [5:1-7:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((dynamic), (Some ([5:17-24], Hdynamic))); 
          f_name = ([5:10-13], "\\bar"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([6:3-19], (Return (Some ((vec<nothing>), [6:10-18], (ValCollection (Vec, None, []))))))] }; 
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None; f_body = { fb_ast = [([6:3-19], (Return (Some ((vec<nothing>), [6:10-18], (ValCollection (Vec, None, []))))))] }; 
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -54,7 +53,7 @@
             tp_constraints = [(Constraint_as, ([8:19-33], (Hoption ([8:20-33], (Happly (([8:20-29], "\\HH\\Container"), [([8:30-32], (Habstr ("Tv", [])))]))))))]; 
             tp_reified = Erased; tp_user_attributes = [] };
            { tp_variance = Invariant; tp_name = ([8:35-37], "Tv"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-         f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_where_constraints = [];
          f_params =
          [{ param_annotation = (T); param_type_hint = ((T), (Some ([8:39-40], (Habstr ("T", []))))); 
             param_is_variadic = false; param_pos = [8:41-45]; param_name = "$arr"; 
@@ -82,8 +81,7 @@
        { f_span = [12:1-19:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([12:29-33], (Hprim Tvoid)))); 
          f_name = ([12:10-25], "\\call_refinement"); f_tparams = []; 
-         f_where_constraints = []; f_variadic = FVnonVariadic; f_params = []; 
-         f_ctxs = None; f_unsafe_ctxs = None;
+         f_where_constraints = []; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([13:3-16],

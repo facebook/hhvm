@@ -11,7 +11,7 @@
         f_tparams =
         [{ tp_variance = Invariant; tp_name = ([4:19-20], "T/[ctx $f]"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] };
           { tp_variance = Invariant; tp_name = ([5:23-24], "T/[ctx $nf]"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
-        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_where_constraints = [];
         f_params =
         [{ param_annotation = ();
            param_type_hint =

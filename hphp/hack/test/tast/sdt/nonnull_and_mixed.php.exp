@@ -10,8 +10,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-6:11]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([6:4-8], (Hprim Tvoid)))); 
-        f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic;
+        f_name = ([3:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (supportdynamic); param_type_hint = ((supportdynamic), (Some ([4:3-10], (Happly (([4:3-10], "supportdynamic"), []))))); 
            param_is_variadic = false; param_pos = [4:11-13]; param_name = "$n"; 

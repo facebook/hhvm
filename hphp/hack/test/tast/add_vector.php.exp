@@ -17,7 +17,7 @@
       [{ m_span = [15:3-17:4]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([15:19-30], "__construct"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None;
+         m_params = []; m_ctxs = None; m_unsafe_ctxs = None;
          m_body =
          { fb_ast =
            [([16:5-26],
@@ -32,8 +32,7 @@
          m_doc_comment = None };
         { m_span = [19:3-21:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
-          m_name = ([19:19-22], "add"); m_tparams = []; m_where_constraints = []; 
-          m_variadic = FVnonVariadic;
+          m_name = ([19:19-22], "add"); m_tparams = []; m_where_constraints = [];
           m_params =
           [{ param_annotation = (T); param_type_hint = ((T), (Some ([19:23-24], (Habstr ("T", []))))); 
              param_is_variadic = false; param_pos = [19:25-27]; param_name = "$x"; 
@@ -56,8 +55,7 @@
           m_doc_comment = None };
         { m_span = [23:3-25:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
-          m_name = ([23:19-22], "get"); m_tparams = []; m_where_constraints = []; 
-          m_variadic = FVnonVariadic;
+          m_name = ([23:19-22], "get"); m_tparams = []; m_where_constraints = [];
           m_params =
           [{ param_annotation = (int); param_type_hint = ((int), (Some ([23:23-26], (Hprim Tint)))); 
              param_is_variadic = false; param_pos = [23:27-29]; param_name = "$x"; 
@@ -139,8 +137,7 @@
        fd_fun =
        { f_span = [32:1-37:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([32:37-41], (Hprim Tvoid)))); 
-         f_name = ([32:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic;
+         f_name = ([32:10-14], "\\test"); f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (MyPhonyVector<X>);
             param_type_hint = ((MyPhonyVector<X>), (Some ([32:15-31], (Happly (([32:15-28], "\\MyPhonyVector"), [([32:29-30], (Happly (([32:29-30], "\\X"), [])))]))))); 

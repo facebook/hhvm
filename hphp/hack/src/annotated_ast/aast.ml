@@ -726,15 +726,6 @@ and ('ex, 'en) fun_param = {
   param_visibility: visibility option;
 }
 
-(** Does this function/method take a variable number of arguments? *)
-and ('ex, 'en) fun_variadicity =
-  | FVvariadicArg of ('ex, 'en) fun_param
-      (** Named variadic argument.
-
-      function foo(int ...$args): void {} *)
-  | FVnonVariadic
-      (** Function is not variadic, takes an exact number of arguments. *)
-
 and ('ex, 'en) fun_ = {
   f_span: pos;
   f_readonly_this: Ast_defs.readonly_kind option;
@@ -745,7 +736,6 @@ and ('ex, 'en) fun_ = {
   f_name: sid;
   f_tparams: ('ex, 'en) tparam list;
   f_where_constraints: where_constraint_hint list;
-  f_variadic: ('ex, 'en) fun_variadicity;
   f_params: ('ex, 'en) fun_param list;
   f_ctxs: contexts option;
   f_unsafe_ctxs: contexts option;
@@ -964,7 +954,6 @@ and ('ex, 'en) method_ = {
   m_name: sid;
   m_tparams: ('ex, 'en) tparam list;
   m_where_constraints: where_constraint_hint list;
-  m_variadic: ('ex, 'en) fun_variadicity;
   m_params: ('ex, 'en) fun_param list;
   m_ctxs: contexts option;
   m_unsafe_ctxs: contexts option;

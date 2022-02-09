@@ -7,8 +7,7 @@
       fd_fun =
       { f_span = [12:1-28]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([12:23-27], (Hprim Tvoid)))); 
-        f_name = ([12:10-13], "\\foo"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic;
+        f_name = ([12:10-13], "\\foo"); f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (); param_type_hint = ((), (Some ([12:14-17], (Hprim Tint)))); 
            param_is_variadic = false; param_pos = [12:18-20]; param_name = "$v"; 

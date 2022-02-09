@@ -30,8 +30,7 @@
       c_methods =
       [{ m_span = [9:3-12:4]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
-         m_name = ([9:19-27], "set_prop"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic;
+         m_name = ([9:19-27], "set_prop"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (string); param_type_hint = ((string), (Some ([9:28-34], (Hprim Tstring)))); 
             param_is_variadic = false; param_pos = [9:35-37]; param_name = "$x"; 
@@ -54,7 +53,7 @@
         { m_span = [14:3-17:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([14:19-37], "set_prop_intersect"); m_tparams = []; 
-          m_where_constraints = []; m_variadic = FVnonVariadic;
+          m_where_constraints = [];
           m_params =
           [{ param_annotation = (nothing); param_type_hint = ((nothing), (Some ([14:38-53], (Hintersection [([14:39-43], (Hprim Tbool)); ([14:46-52], (Hprim Tstring))])))); 
              param_is_variadic = false; param_pos = [14:54-56]; param_name = "$x"; 
@@ -75,8 +74,7 @@
           m_doc_comment = None };
         { m_span = [19:3-22:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
-          m_name = ([19:19-33], "set_prop_union"); m_tparams = []; m_where_constraints = []; 
-          m_variadic = FVnonVariadic;
+          m_name = ([19:19-33], "set_prop_union"); m_tparams = []; m_where_constraints = [];
           m_params =
           [{ param_annotation = ((int | string)); param_type_hint = (((int | string)), (Some ([19:34-48], (Hunion [([19:35-38], (Hprim Tint)); ([19:41-47], (Hprim Tstring))]))));
              param_is_variadic = false; param_pos = [19:49-51]; param_name = "$x"; 
@@ -98,8 +96,7 @@
           m_doc_comment = None };
         { m_span = [23:3-26:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
-          m_name = ([23:19-32], "set_pair_prop"); m_tparams = []; m_where_constraints = []; 
-          m_variadic = FVnonVariadic;
+          m_name = ([23:19-32], "set_pair_prop"); m_tparams = []; m_where_constraints = [];
           m_params =
           [{ param_annotation = ((int, bool)); param_type_hint = (((int, bool)), (Some ([23:33-44], (Htuple [([23:34-37], (Hprim Tint)); ([23:39-43], (Hprim Tbool))])))); 
              param_is_variadic = false; param_pos = [23:45-47]; param_name = "$x"; 
@@ -121,8 +118,7 @@
           m_doc_comment = None };
         { m_span = [28:3-31:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
-          m_name = ([28:19-34], "append_vec_prop"); m_tparams = []; m_where_constraints = []; 
-          m_variadic = FVnonVariadic;
+          m_name = ([28:19-34], "append_vec_prop"); m_tparams = []; m_where_constraints = [];
           m_params =
           [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([28:35-39], (Hprim Tbool)))); 
              param_is_variadic = false; param_pos = [28:40-42]; param_name = "$x"; 
@@ -145,7 +141,7 @@
         { m_span = [33:3-36:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([33:19-36], "set_pair_prop_fst"); m_tparams = []; 
-          m_where_constraints = []; m_variadic = FVnonVariadic;
+          m_where_constraints = [];
           m_params =
           [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([33:37-41], (Hprim Tbool)))); 
              param_is_variadic = false; param_pos = [33:42-44]; param_name = "$x"; 
@@ -170,7 +166,7 @@
         { m_span = [38:3-41:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([38:19-36], "set_pair_prop_snd"); m_tparams = []; 
-          m_where_constraints = []; m_variadic = FVnonVariadic;
+          m_where_constraints = [];
           m_params =
           [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([38:37-41], (Hprim Tbool)))); 
              param_is_variadic = false; param_pos = [38:42-44]; param_name = "$x"; 

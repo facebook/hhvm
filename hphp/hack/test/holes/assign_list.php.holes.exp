@@ -11,8 +11,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = (((int, int, int)), (Some ([3:37-52], (Htuple [([3:38-41], (Hprim Tint)); ([3:43-46], (Hprim Tint)); ([3:48-51], (Hprim Tint))]))));
-        f_name = ([3:10-26], "\\__return_3_tuple"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic;
+        f_name = ([3:10-26], "\\__return_3_tuple"); f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:27-31], (Hprim Tbool)))); 
            param_is_variadic = false; param_pos = [3:32-34]; param_name = "$x"; 
@@ -34,7 +33,7 @@ Errors:
        { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = (((int, int)), (Some ([7:37-47], (Htuple [([7:38-41], (Hprim Tint)); ([7:43-46], (Hprim Tint))])))); 
          f_name = ([7:10-26], "\\__return_2_tuple"); f_tparams = []; 
-         f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_where_constraints = [];
          f_params =
          [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([7:27-31], (Hprim Tbool)))); 
             param_is_variadic = false; param_pos = [7:32-34]; param_name = "$x"; 
@@ -54,8 +53,7 @@ Errors:
        fd_fun =
        { f_span = [11:1-13:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([11:35-39], (Hprim Tvoid)))); 
-         f_name = ([11:10-24], "\\assign_list_ok"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic;
+         f_name = ([11:10-24], "\\assign_list_ok"); f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([11:25-29], (Hprim Tbool)))); 
             param_is_variadic = false; param_pos = [11:30-32]; param_name = "$x"; 
@@ -88,7 +86,7 @@ Errors:
        { f_span = [15:1-18:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([15:36-40], (Hprim Tvoid)))); 
          f_name = ([15:10-25], "\\assign_list_bad"); f_tparams = []; 
-         f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_where_constraints = [];
          f_params =
          [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([15:26-30], (Hprim Tbool)))); 
             param_is_variadic = false; param_pos = [15:31-33]; param_name = "$x"; 

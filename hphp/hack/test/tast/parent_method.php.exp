@@ -8,8 +8,7 @@
       c_methods =
       [{ m_span = [4:3-37]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
-         m_name = ([4:19-20], "f"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic;
+         m_name = ([4:19-20], "f"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([4:21-24], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [4:25-27]; param_name = "$i"; 
@@ -39,7 +38,7 @@
        [{ m_span = [7:3-9:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
           m_name = ([7:19-20], "g"); m_tparams = []; m_where_constraints = []; 
-          m_variadic = FVnonVariadic; m_params = []; m_ctxs = None; m_unsafe_ctxs = None;
+          m_params = []; m_ctxs = None; m_unsafe_ctxs = None;
           m_body =
           { fb_ast =
             [([8:5-18],

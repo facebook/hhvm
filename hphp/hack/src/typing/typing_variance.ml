@@ -689,12 +689,6 @@ let fun_param : Env.t -> variance -> Nast.fun_param -> unit =
          (Some
             Aast.{ hfparam_kind = param_callconv; hfparam_readonlyness = None }))
 
-let fun_variadicity : Env.t -> variance -> Nast.fun_variadicity -> unit =
- fun env variance variadicity ->
-  match variadicity with
-  | Aast.FVnonVariadic -> ()
-  | Aast.FVvariadicArg param -> fun_param env variance param
-
 let fun_where_constraint : Env.t -> Aast.where_constraint_hint -> unit =
  fun env (h1, ck, h2) ->
   let pos1 = Ast_defs.get_pos h1 in
@@ -844,7 +838,6 @@ let class_method : Env.t -> Nast.class_ -> Nast.method_ -> unit =
     m_tparams;
     m_params;
     m_readonly_this = _;
-    m_variadic;
     m_ret = (_, m_ret);
     m_name = (_, m_name);
     m_where_constraints;
@@ -879,7 +872,6 @@ let class_method : Env.t -> Nast.class_ -> Nast.method_ -> unit =
         let env = List.fold m_tparams ~f:method_tparam ~init:env in
         let variance = Vcovariant [] in
         List.iter m_params ~f:(fun_param env variance);
-        fun_variadicity env variance m_variadic;
         Option.iter m_ret ~f:(fun_ret env variance);
         List.iter m_where_constraints ~f:(fun_where_constraint env);
         ()

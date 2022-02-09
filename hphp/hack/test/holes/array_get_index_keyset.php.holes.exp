@@ -8,7 +8,7 @@
       { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:46-50], (Hprim Tvoid)))); 
         f_name = ([3:10-32], "\\array_get_index_keyset"); f_tparams = []; 
-        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_where_constraints = [];
         f_params =
         [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([3:33-38], Hmixed))); 
            param_is_variadic = false; param_pos = [3:39-43]; param_name = "$idx"; 

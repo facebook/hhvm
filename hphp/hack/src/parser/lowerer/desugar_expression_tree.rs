@@ -245,7 +245,6 @@ fn wrap_fun_(body: ast::FuncBody, params: Vec<ast::FunParam>, pos: Pos) -> ast::
         name: make_id(pos, ";anonymous"),
         tparams: vec![],
         where_constraints: vec![],
-        variadic: aast::FunVariadicity::FVnonVariadic,
         params,
         body,
         fun_kind: ast::FunKind::FSync,

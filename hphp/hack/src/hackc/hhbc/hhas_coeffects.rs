@@ -17,7 +17,8 @@ use oxidized::{
 #[repr(C)]
 pub struct HhasCtxConstant<'arena> {
     pub name: Str<'arena>,
-    pub coeffects: Pair<Slice<'arena, Ctx>, Slice<'arena, Str<'arena>>>,
+    pub recognized: Slice<'arena, Str<'arena>>,
+    pub unrecognized: Slice<'arena, Str<'arena>>,
     pub is_abstract: bool,
 }
 

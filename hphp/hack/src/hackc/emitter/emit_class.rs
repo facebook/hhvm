@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::{emitter::Emitter, Env};
-use ffi::{Maybe, Maybe::*, Pair, Slice, Str};
+use ffi::{Maybe, Maybe::*, Slice, Str};
 use hhas_class::{HhasClass, TraitReqKind};
 use hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
 use hhas_constant::{self as hhas_constant, HhasConstant};
@@ -212,9 +212,8 @@ fn from_ctx_constant<'a, 'arena>(
     tc: &'a ast::ClassTypeconstDef,
 ) -> Result<HhasCtxConstant<'arena>> {
     use ast::ClassTypeconst::*;
-    use special_names::coeffects::Ctx;
     let name = tc.name.1.to_string();
-    let coeffects = match &tc.kind {
+    let (recognized, unrecognized) = match &tc.kind {
         TCAbstract(ast::ClassAbstractTypeconst { default: None, .. }) => {
             (Slice::empty(), Slice::empty())
         }
@@ -224,10 +223,15 @@ fn from_ctx_constant<'a, 'arena>(
         })
         | TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: hint }) => {
             let x = HhasCoeffects::from_ctx_constant(hint);
-            let p1: Slice<'arena, Ctx> = Slice::from_vec(alloc, x.0);
-            let p2: Slice<'arena, Str<'_>> =
+            let r: Slice<'arena, Str<'_>> = Slice::from_vec(
+                alloc,
+                x.0.iter()
+                    .map(|ctx| Str::new_str(alloc, &ctx.to_string()))
+                    .collect(),
+            );
+            let u: Slice<'arena, Str<'_>> =
                 Slice::from_vec(alloc, x.1.iter().map(|s| Str::new_str(alloc, s)).collect());
-            (p1, p2)
+            (r, u)
         }
     };
     let is_abstract = match &tc.kind {
@@ -236,7 +240,8 @@ fn from_ctx_constant<'a, 'arena>(
     };
     Ok(HhasCtxConstant {
         name: Str::new_str(alloc, &name),
-        coeffects: Pair::from(coeffects),
+        recognized,
+        unrecognized,
         is_abstract,
     })
 }

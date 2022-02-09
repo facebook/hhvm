@@ -371,16 +371,17 @@ fn print_ctx_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasCtxConstant<
     if c.is_abstract {
         w.write_all(b" isAbstract")?;
     }
-    if let Some(coeffects) = HhasCoeffects::vec_to_string(c.coeffects.0.as_ref(), |c| c.to_string())
+    if let Some(recognized) =
+        HhasCoeffects::vec_to_string(c.recognized.as_ref(), |c| c.unsafe_as_str().to_string())
     {
         w.write_all(b" ")?;
-        w.write_all(coeffects.as_bytes())?;
+        w.write_all(recognized.as_bytes())?;
     }
-    if let Some(coeffects) =
-        HhasCoeffects::vec_to_string(c.coeffects.1.as_ref(), |c| c.unsafe_as_str().to_string())
+    if let Some(unrecognized) =
+        HhasCoeffects::vec_to_string(c.unrecognized.as_ref(), |c| c.unsafe_as_str().to_string())
     {
         w.write_all(b" ")?;
-        w.write_all(coeffects.as_bytes())?;
+        w.write_all(unrecognized.as_bytes())?;
     }
     w.write_all(b";")?;
     Ok(())

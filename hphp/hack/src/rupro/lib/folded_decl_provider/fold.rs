@@ -302,6 +302,7 @@ impl<R: Reason> DeclFolder<R> {
             static_methods,
             constructor,
             consts,
+            type_consts: Default::default(), //TODO
         })
     }
 }

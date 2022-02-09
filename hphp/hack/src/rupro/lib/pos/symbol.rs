@@ -91,6 +91,9 @@ pub type ClassConstNameSet = HashSet<ClassConstName>;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct TypeConstName(pub Symbol);
+pub type BuildTypeConstNameHasher = BuildSymbolHasher;
+pub type TypeConstNameMap<V> = HashMap<TypeConstName, V>;
+pub type TypeConstNameSet = HashSet<TypeConstName>;
 
 #[derive(Debug, Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct MethodName(pub Symbol);

@@ -5,11 +5,14 @@
 
 use crate::decl_defs::{
     Abstraction, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass, FoldedElement,
-    ShallowClass, SubstContext,
+    ShallowClass, SubstContext, TypeConst,
 };
 use crate::folded_decl_provider::subst::Subst;
 use crate::reason::Reason;
-use pos::{ClassConstNameMap, MethodName, MethodNameMap, PropNameMap, TypeName, TypeNameMap};
+use pos::{
+    ClassConstNameMap, MethodName, MethodNameMap, PropNameMap, TypeConstNameMap, TypeName,
+    TypeNameMap,
+};
 use std::collections::hash_map::Entry;
 use std::sync::Arc;
 
@@ -25,6 +28,7 @@ pub(crate) struct Inherited<R: Reason> {
     pub(crate) static_methods: MethodNameMap<FoldedElement<R>>,
     pub(crate) constructor: Option<FoldedElement<R>>,
     pub(crate) consts: ClassConstNameMap<ClassConst<R>>,
+    pub(crate) type_consts: TypeConstNameMap<TypeConst<R>>,
 }
 
 impl<R: Reason> std::default::Default for Inherited<R> {
@@ -37,6 +41,7 @@ impl<R: Reason> std::default::Default for Inherited<R> {
             static_methods: Default::default(),
             constructor: Default::default(),
             consts: Default::default(),
+            type_consts: Default::default(),
         }
     }
 }
@@ -178,6 +183,11 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
+    fn add_type_consts(&mut self, other_type_consts: TypeConstNameMap<TypeConst<R>>) {
+        //TODO Fill this in
+        self.type_consts.extend(other_type_consts)
+    }
+
     fn add_inherited(&mut self, other: Self) {
         let Self {
             substs,
@@ -187,6 +197,7 @@ impl<R: Reason> Inherited<R> {
             static_methods,
             constructor,
             consts,
+            type_consts,
         } = other;
         self.add_substs(substs);
         self.add_props(props);
@@ -195,6 +206,7 @@ impl<R: Reason> Inherited<R> {
         self.add_static_methods(static_methods);
         self.add_constructor(constructor);
         self.add_consts(consts);
+        self.add_type_consts(type_consts);
     }
 
     fn make_substitution(_cls: &FoldedClass<R>, params: &[DeclTy<R>]) -> TypeNameMap<DeclTy<R>> {
@@ -226,6 +238,7 @@ impl<R: Reason> Inherited<R> {
             static_methods: parent.static_methods.clone(),
             constructor: parent.constructor.clone(),
             consts: parent.consts.clone(),
+            type_consts: parent.type_consts.clone(),
         }
     }
 

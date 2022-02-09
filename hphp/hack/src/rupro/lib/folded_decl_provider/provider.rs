@@ -22,20 +22,24 @@ use std::sync::Arc;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_folded_class.ml
 
+/// A `FoldedDeclProvider` which, if the requested class name is not present in
+/// its cache, recursively computes the folded decl for that class by requesting
+/// the shallow decls of that class and its ancestors from its
+/// `ShallowDeclProvider`.
 #[derive(Debug)]
-pub struct FoldedDeclProvider<R: Reason> {
+pub struct LazyFoldedDeclProvider<R: Reason> {
     cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
     alloc: &'static Allocator<R>,
     special_names: &'static SpecialNames,
-    shallow_decl_provider: Arc<ShallowDeclProvider<R>>,
+    shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
 }
 
-impl<R: Reason> FoldedDeclProvider<R> {
+impl<R: Reason> LazyFoldedDeclProvider<R> {
     pub fn new(
         cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
         alloc: &'static Allocator<R>,
         special_names: &'static SpecialNames,
-        shallow_decl_provider: Arc<ShallowDeclProvider<R>>,
+        shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
     ) -> Self {
         Self {
             cache,
@@ -44,13 +48,15 @@ impl<R: Reason> FoldedDeclProvider<R> {
             shallow_decl_provider,
         }
     }
+}
 
-    pub fn get_folded_class(&self, name: TypeName) -> Option<Arc<FoldedClass<R>>> {
+impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
+    fn get_class(&self, name: TypeName) -> Option<Arc<FoldedClass<R>>> {
         let mut stack = Default::default();
         self.get_folded_class_impl(&mut stack, name)
     }
 
-    pub fn get_shallow_property_type(
+    fn get_shallow_property_type(
         &self,
         class_name: TypeName,
         property_name: PropName,
@@ -59,7 +65,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             .get_property_type(class_name, property_name)
     }
 
-    pub fn get_shallow_static_property_type(
+    fn get_shallow_static_property_type(
         &self,
         class_name: TypeName,
         property_name: PropName,
@@ -68,7 +74,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             .get_static_property_type(class_name, property_name)
     }
 
-    pub fn get_shallow_method_type(
+    fn get_shallow_method_type(
         &self,
         class_name: TypeName,
         method_name: MethodName,
@@ -77,7 +83,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
             .get_method_type(class_name, method_name)
     }
 
-    pub fn get_shallow_static_method_type(
+    fn get_shallow_static_method_type(
         &self,
         class_name: TypeName,
         method_name: MethodName,
@@ -86,10 +92,12 @@ impl<R: Reason> FoldedDeclProvider<R> {
             .get_static_method_type(class_name, method_name)
     }
 
-    pub fn get_shallow_constructor_type(&self, class_name: TypeName) -> Option<DeclTy<R>> {
+    fn get_shallow_constructor_type(&self, class_name: TypeName) -> Option<DeclTy<R>> {
         self.shallow_decl_provider.get_constructor_type(class_name)
     }
+}
 
+impl<R: Reason> LazyFoldedDeclProvider<R> {
     fn detect_cycle(&self, stack: &mut TypeNameSet, pos_id: &Positioned<TypeName, R::Pos>) -> bool {
         if stack.contains(&pos_id.id()) {
             todo!("TODO(hrust): register error");
@@ -400,7 +408,7 @@ impl<R: Reason> FoldedDeclProvider<R> {
     }
 
     fn decl_class(&self, stack: &mut TypeNameSet, name: TypeName) -> Option<Arc<FoldedClass<R>>> {
-        let shallow_class = self.shallow_decl_provider.get_shallow_class(name)?;
+        let shallow_class = self.shallow_decl_provider.get_class(name)?;
         stack.insert(name);
         let parents = self.decl_class_parents(stack, &shallow_class);
         Some(self.decl_class_impl(&shallow_class, &parents))

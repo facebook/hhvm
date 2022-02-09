@@ -21,13 +21,13 @@ use std::sync::Arc;
 #[derive(Debug)]
 pub struct FoldingTypingDeclProvider<R: Reason> {
     cache: Arc<dyn Cache<TypeName, Arc<ClassType<R>>>>,
-    folded_decl_provider: Arc<FoldedDeclProvider<R>>,
+    folded_decl_provider: Arc<dyn FoldedDeclProvider<R>>,
 }
 
 impl<R: Reason> FoldingTypingDeclProvider<R> {
     pub fn new(
         cache: Arc<dyn Cache<TypeName, Arc<ClassType<R>>>>,
-        folded_decl_provider: Arc<FoldedDeclProvider<R>>,
+        folded_decl_provider: Arc<dyn FoldedDeclProvider<R>>,
     ) -> Self {
         Self {
             cache,
@@ -41,7 +41,7 @@ impl<R: Reason> TypingDeclProvider<R> for FoldingTypingDeclProvider<R> {
         match self.cache.get(name) {
             Some(rc) => Some(rc),
             None => {
-                let folded_decl = self.folded_decl_provider.get_folded_class(name)?;
+                let folded_decl = self.folded_decl_provider.get_class(name)?;
                 let cls = Arc::new(ClassType::new(
                     Arc::clone(&self.folded_decl_provider),
                     folded_decl,

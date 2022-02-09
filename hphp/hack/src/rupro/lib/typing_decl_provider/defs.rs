@@ -33,7 +33,7 @@ struct EagerMembers<R: Reason> {
 /// containing that type and any other metadata from the `FoldedElt`.
 #[derive(Debug)]
 pub struct ClassType<R: Reason> {
-    provider: Arc<FoldedDeclProvider<R>>,
+    provider: Arc<dyn FoldedDeclProvider<R>>,
     class: Arc<FoldedClass<R>>,
     members: EagerMembers<R>,
 }
@@ -51,7 +51,7 @@ impl<R: Reason> EagerMembers<R> {
 }
 
 impl<R: Reason> ClassType<R> {
-    pub fn new(provider: Arc<FoldedDeclProvider<R>>, class: Arc<FoldedClass<R>>) -> Self {
+    pub fn new(provider: Arc<dyn FoldedDeclProvider<R>>, class: Arc<FoldedClass<R>>) -> Self {
         Self {
             provider,
             class,

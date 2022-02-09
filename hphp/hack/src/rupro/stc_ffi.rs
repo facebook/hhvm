@@ -11,9 +11,9 @@ use hackrs::alloc;
 use hackrs::ast_provider::AstProvider;
 use hackrs::cache::NonEvictingCache;
 use hackrs::decl_parser::DeclParser;
-use hackrs::folded_decl_provider::FoldedDeclProvider;
+use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
 use hackrs::reason::{NReason, Reason};
-use hackrs::shallow_decl_provider::{ShallowDeclCache, ShallowDeclProvider};
+use hackrs::shallow_decl_provider::{EagerShallowDeclProvider, ShallowDeclCache};
 use hackrs::special_names::SpecialNames;
 use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
@@ -71,14 +71,13 @@ pub extern "C" fn stc_main() {
         special_names,
         Arc::clone(&options),
     );
-    let decl_parser = DeclParser::new(alloc, Arc::clone(&relative_path_ctx));
+    let decl_parser = DeclParser::new(alloc, relative_path_ctx);
     let shallow_decl_cache = Arc::new(ShallowDeclCache::with_no_eviction());
-    let shallow_decl_provider = Arc::new(ShallowDeclProvider::new(
-        Arc::clone(&shallow_decl_cache),
-        relative_path_ctx,
-    ));
+    let shallow_decl_provider = Arc::new(EagerShallowDeclProvider::new(Arc::clone(
+        &shallow_decl_cache,
+    )));
     let folded_decl_cache = Arc::new(NonEvictingCache::new());
-    let folded_decl_provider = Arc::new(FoldedDeclProvider::new(
+    let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
         folded_decl_cache,
         alloc,
         special_names,

@@ -1,3 +1,2 @@
-function foo(mixed $bar): mixed {
-  var_dump($bar);
-}
+function foo(): mixed {}
+async function bar(): Awaitable<mixed> {}

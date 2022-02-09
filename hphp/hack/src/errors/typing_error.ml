@@ -1183,8 +1183,8 @@ module Primary = struct
       let quickfix = [
         Quickfix.make
           ~title:
-            ("Change to " ^ Markdown_lite.md_codify("void"))
-          ~new_text: "void"
+            ("Change to " ^ Markdown_lite.md_codify(return_type))
+          ~new_text: return_type
           hint_pos;
       ] 
       in

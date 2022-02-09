@@ -4,12 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::alloc::Allocator;
+use crate::cache::Cache;
 use crate::decl_defs::{
     CeVisibility, ClassConst, ClassConstKind, ClassEltFlags, ClassEltFlagsArgs, ConsistentKind,
     DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass, ShallowMethod, ShallowProp,
     UserAttribute, Visibility,
 };
-use crate::folded_decl_provider::FoldedDeclCache;
 use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
 use crate::reason::{Reason, ReasonImpl};
 use crate::shallow_decl_provider::ShallowDeclProvider;
@@ -24,7 +24,7 @@ use std::sync::Arc;
 
 #[derive(Debug)]
 pub struct FoldedDeclProvider<R: Reason> {
-    cache: Arc<dyn FoldedDeclCache<Reason = R>>,
+    cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
     alloc: &'static Allocator<R>,
     special_names: &'static SpecialNames,
     shallow_decl_provider: Arc<ShallowDeclProvider<R>>,
@@ -32,7 +32,7 @@ pub struct FoldedDeclProvider<R: Reason> {
 
 impl<R: Reason> FoldedDeclProvider<R> {
     pub fn new(
-        cache: Arc<dyn FoldedDeclCache<Reason = R>>,
+        cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
         alloc: &'static Allocator<R>,
         special_names: &'static SpecialNames,
         shallow_decl_provider: Arc<ShallowDeclProvider<R>>,
@@ -371,12 +371,12 @@ impl<R: Reason> FoldedDeclProvider<R> {
         stack: &mut TypeNameSet,
         name: TypeName,
     ) -> Option<Arc<FoldedClass<R>>> {
-        match self.cache.get_folded_class(name) {
+        match self.cache.get(name) {
             Some(rc) => Some(rc),
             None => match self.decl_class(stack, name) {
                 None => None,
                 Some(rc) => {
-                    self.cache.put_folded_class(name, Arc::clone(&rc));
+                    self.cache.insert(name, Arc::clone(&rc));
                     Some(rc)
                 }
             },

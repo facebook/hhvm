@@ -17,7 +17,7 @@ use hhas_param::HhasParam;
 use hhas_pos::HhasSpan;
 use hhas_type::HhasTypeInfo;
 use hhbc_ast::{FcallArgs, FcallFlags, SpecialClsRef, Visibility};
-use hhbc_id::{class, method, Id};
+use hhbc_id::{class, method};
 use hhbc_string_utils::reified;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
@@ -71,7 +71,7 @@ pub fn make_info<'arena>(
                     pos,
                     format!(
                         "Abstract method {}::{} cannot be memoized",
-                        class_id.to_raw_string(),
+                        class_id.unsafe_as_str(),
                         &m.name.1,
                     ),
                 ));

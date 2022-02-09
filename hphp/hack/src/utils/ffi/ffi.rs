@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use bstr::BStr;
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::slice::from_raw_parts;
@@ -83,6 +84,22 @@ impl<U> Maybe<U> {
             Nothing => default,
         }
     }
+
+    pub fn unwrap_or(self, default: U) -> U {
+        match self {
+            Just(t) => t,
+            Nothing => default,
+        }
+    }
+}
+
+impl<U: Default> Maybe<U> {
+    pub fn unwrap_or_default(self) -> U {
+        match self {
+            Just(t) => t,
+            Nothing => Default::default(),
+        }
+    }
 }
 
 impl<U> std::convert::From<Option<U>> for Maybe<U> {
@@ -160,6 +177,14 @@ impl<'a, T> AsRef<[T]> for Slice<'a, T> {
         // T>::new()` from some `&'a [T]` and so the call to
         // `from_raw_parts` is a valid.
         unsafe { std::slice::from_raw_parts(self.data, self.len) }
+    }
+}
+
+impl<'a, T> std::ops::Deref for Slice<'a, T> {
+    type Target = [T];
+
+    fn deref(&self) -> &Self::Target {
+        self.as_ref()
     }
 }
 
@@ -280,6 +305,21 @@ impl<'a> Str<'a> {
         // T>::new()` from some `&'a str` and so the calls to
         // `from_raw_parts` and `from_utf8_unchecked` are valid.
         unsafe { std::str::from_utf8_unchecked(std::slice::from_raw_parts(self.data, self.len)) }
+    }
+
+    /// Cast a `Str<'a>` back into a `&'a BStr`.
+    pub fn as_bstr(&self) -> &'a BStr {
+        // Safety: Assumes `self` has been constructed via `Slice<'a,
+        // T>::new()` from some `&'a BStr` and so the call to
+        // `from_raw_parts` is valid.
+        unsafe { std::slice::from_raw_parts(self.data, self.len).into() }
+    }
+}
+
+impl<'a> write_bytes::DisplayBytes for Str<'a> {
+    fn fmt(&self, f: &mut write_bytes::BytesFormatter<'_>) -> std::io::Result<()> {
+        use std::io::Write;
+        f.write_all(self.as_ref())
     }
 }
 

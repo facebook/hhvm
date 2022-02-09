@@ -2,7 +2,7 @@
    Released into the Public Domain by Ulrich Drepper <drepper@redhat.com>.  */
 /* Windows VC++ port by Pierre Joye <pierre@php.net> */
 
-#include "php-crypt_r.h"
+#include "hphp/zend/php-crypt_r.h"
 
 #include <errno.h>
 #include <limits.h>

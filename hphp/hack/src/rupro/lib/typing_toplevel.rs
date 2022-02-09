@@ -132,7 +132,6 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             name: f.name.clone(),
             tparams: vec![],
             where_constraints: vec![],
-            variadic: oxidized::aast::FunVariadicity::FVnonVariadic,
             params: typed_params,
             ctxs: f.ctxs.clone(),
             unsafe_ctxs: f.unsafe_ctxs.clone(),

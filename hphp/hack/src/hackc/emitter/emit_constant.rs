@@ -11,7 +11,7 @@ use hhas_coeffects::HhasCoeffects;
 use hhas_constant::{self as hhas_constant, HhasConstant};
 use hhas_function::{HhasFunction, HhasFunctionFlags};
 use hhas_pos::HhasSpan;
-use hhbc_id::{r#const, function, Id};
+use hhbc_id::{r#const, function};
 use hhbc_string_utils::strip_global_ns;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq, Result};
@@ -25,9 +25,9 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
 ) -> Result<Option<HhasFunction<'arena>>> {
     let alloc = env.arena;
     let const_id = r#const::ConstType::from_ast_name(alloc, &constant.name.1);
-    let (ns, name) = utils::split_ns_from_name(const_id.to_raw_string());
+    let (ns, name) = utils::split_ns_from_name(const_id.unsafe_as_str());
     let name = String::new() + strip_global_ns(ns) + "86cinit_" + name;
-    let original_id = function::FunctionType(Str::new_str(alloc, &name));
+    let original_id = function::FunctionType::new(Str::new_str(alloc, &name));
     let ret = constant.type_.as_ref();
     let return_type_info = ret
         .map(|h| {

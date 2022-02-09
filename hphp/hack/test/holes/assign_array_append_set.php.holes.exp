@@ -8,7 +8,7 @@
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:55-59], (Hprim Tvoid)))); 
         f_name = ([3:10-33], "\\assign_array_append_set"); f_tparams = []; 
-        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_where_constraints = [];
         f_params =
         [{ param_annotation = (Set<arraykey>); param_type_hint = ((Set<arraykey>), (Some ([3:34-47], (Happly (([3:34-37], "\\HH\\Set"), [([3:38-46], (Hprim Tarraykey))])))));
            param_is_variadic = false; param_pos = [3:48-51]; param_name = "$xs"; 

@@ -30,7 +30,7 @@
        { f_span = [7:1-19:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([7:18-22], (Hprim Tvoid)))); 
          f_name = ([7:10-14], "\\main"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([9:3-22],

@@ -415,6 +415,7 @@ module Primary : sig
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option Lazy.t;
         reason: Pos_or_decl.t Message.t list;
       }
+    | Construct_not_instance_method of Pos.t
     | Ambiguous_inheritance of {
         pos: Pos.t;
         class_name: string;

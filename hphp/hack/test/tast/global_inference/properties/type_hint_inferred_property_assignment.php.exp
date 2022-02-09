@@ -22,8 +22,7 @@ Errors:
       c_methods =
       [{ m_span = [7:3-9:4]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
-         m_name = ([7:19-30], "__construct"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic;
+         m_name = ([7:19-30], "__construct"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (string); param_type_hint = ((string), (Some ([7:31-37], (Hprim Tstring)))); 
             param_is_variadic = false; param_pos = [7:38-40]; param_name = "$y"; 
@@ -45,8 +44,7 @@ Errors:
          m_doc_comment = None };
         { m_span = [11:3-13:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = true; m_readonly_this = false; m_visibility = Public; 
-          m_name = ([11:26-30], "setX"); m_tparams = []; m_where_constraints = []; 
-          m_variadic = FVnonVariadic;
+          m_name = ([11:26-30], "setX"); m_tparams = []; m_where_constraints = [];
           m_params =
           [{ param_annotation = (int); param_type_hint = ((int), (Some ([11:31-34], (Hprim Tint)))); 
              param_is_variadic = false; param_pos = [11:35-37]; param_name = "$x"; 

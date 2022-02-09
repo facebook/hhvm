@@ -8,7 +8,7 @@
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((), (Some ([3:18-22], (Hprim Tvoid)))); 
         f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+        f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
           [([4:3-34],
@@ -26,8 +26,7 @@
                                f_annotation = (); f_readonly_ret = None; 
                                f_ret = ((), None); f_name = ([4:14-32], ";anonymous"); 
                                f_tparams = []; f_where_constraints = []; 
-                               f_variadic = FVnonVariadic; f_params = []; 
-                               f_ctxs = None; f_unsafe_ctxs = None;
+                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
                                  [([4:14-32],
@@ -41,7 +40,6 @@
                                                   f_ret = ((), None); 
                                                   f_name = ([4:14-32], ";anonymous"); 
                                                   f_tparams = []; f_where_constraints = []; 
-                                                  f_variadic = FVnonVariadic; 
                                                   f_params = []; f_ctxs = None; 
                                                   f_unsafe_ctxs = None;
                                                   f_body =
@@ -95,8 +93,7 @@
                                 { f_span = [4:14-32]; f_readonly_this = None; 
                                   f_annotation = (); f_readonly_ret = None; 
                                   f_ret = ((), None); f_name = ([4:14-32], ";anonymous"); 
-                                  f_tparams = []; f_where_constraints = []; 
-                                  f_variadic = FVnonVariadic;
+                                  f_tparams = []; f_where_constraints = [];
                                   f_params =
                                   [{ param_annotation = (); param_type_hint = ((), (Some ([4:3-13], (Happly (([4:3-13], "\\ExampleDsl"), []))))); 
                                      param_is_variadic = false; param_pos = [4:3-13]; 

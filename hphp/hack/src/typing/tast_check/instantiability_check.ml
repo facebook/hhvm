@@ -130,11 +130,6 @@ let check_tparams env tparams =
 let check_param env param =
   Option.iter (hint_of_type_hint param.param_type_hint) ~f:(check_hint env)
 
-let check_variadic_param env param =
-  match param with
-  | FVvariadicArg vparam -> check_param env vparam
-  | _ -> ()
-
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -153,13 +148,11 @@ let handler =
     method! at_fun_ env f =
       check_tparams env f.f_tparams;
       List.iter f.f_params ~f:(check_param env);
-      check_variadic_param env f.f_variadic;
       Option.iter (hint_of_type_hint f.f_ret) ~f:(check_hint env)
 
     method! at_method_ env m =
       check_tparams env m.m_tparams;
       List.iter m.m_params ~f:(check_param env);
-      check_variadic_param env m.m_variadic;
       Option.iter (hint_of_type_hint m.m_ret) ~f:(check_hint env)
 
     method! at_hint env (_, h) =

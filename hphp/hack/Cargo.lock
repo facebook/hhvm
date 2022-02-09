@@ -306,6 +306,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "ast_class_expr",
+ "bstr",
  "bumpalo",
  "core_utils_rust",
  "emit_type_hint",
@@ -332,7 +333,6 @@ dependencies = [
  "hhbc_id",
  "hhbc_string_utils",
  "hhvm_types_ffi",
- "indexmap",
  "instruction_sequence",
  "iterator",
  "itertools 0.10.3",
@@ -345,6 +345,7 @@ dependencies = [
  "regex",
  "runtime",
  "thiserror",
+ "write_bytes",
 ]
 
 [[package]]
@@ -1544,7 +1545,9 @@ checksum = "7360491ce676a36bf9bb3c56c1aa791658183a54d2744120f27285738d90465a"
 name = "ffi"
 version = "0.0.0"
 dependencies = [
+ "bstr",
  "bumpalo",
+ "write_bytes",
 ]
 
 [[package]]
@@ -2044,9 +2047,11 @@ dependencies = [
 name = "hhbc_id"
 version = "0.0.0"
 dependencies = [
+ "bstr",
  "bumpalo",
  "ffi",
  "hhbc_string_utils",
+ "write_bytes",
 ]
 
 [[package]]
@@ -2298,9 +2303,9 @@ dependencies = [
 
 [[package]]
 name = "lock_api"
-version = "0.4.5"
+version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "712a4d093c9976e24e7dbca41db895dabcbac38eb5f4045393d17a95bdfb1109"
+checksum = "88943dd7ef4a2e5a4bfa2753aaab3013e34ce2533d1996fb18ef591e315e2b3b"
 dependencies = [
  "scopeguard",
 ]
@@ -2615,6 +2620,7 @@ name = "options"
 version = "0.0.0"
 dependencies = [
  "bitflags",
+ "bstr",
  "fnv",
  "itertools 0.10.3",
  "lazy_static",
@@ -3431,6 +3437,7 @@ checksum = "45f6ee7c7b87caf59549e9fe45d6a69c75c8019e79e212a835c5da0e92f0ba08"
 name = "symbol_refs_state"
 version = "0.0.0"
 dependencies = [
+ "bstr",
  "bumpalo",
  "ffi",
 ]
@@ -3840,3 +3847,20 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
+
+[[package]]
+name = "write_bytes"
+version = "0.0.0"
+dependencies = [
+ "bstr",
+ "write_bytes-macro",
+]
+
+[[package]]
+name = "write_bytes-macro"
+version = "0.0.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]

@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use ffi::{Maybe, Maybe::*, Str};
 use hhas_type::{constraint, HhasTypeInfo};
-use hhbc_id::{class, Id as ClassId};
+use hhbc_id::class;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
 use instruction_sequence::{Error::Unrecoverable, Result};
@@ -32,11 +32,11 @@ fn fmt_name_or_prim<'arena>(
     if tparams.contains(&name) {
         (alloc.alloc_str(name) as &str).into()
     } else {
-        let id: class::ClassType<'arena> = class::ClassType::from_ast_name(alloc, name);
+        let id: class::ClassType<'arena> = class::ClassType::from_ast_name_and_mangle(alloc, name);
         if string_utils::is_xhp(string_utils::strip_ns(name)) {
-            id.to_unmangled_str()
+            id.unsafe_to_unmangled_str()
         } else {
-            id.to_raw_string().into()
+            id.unsafe_as_str().into()
         }
     }
 }
@@ -329,7 +329,8 @@ fn type_application_helper<'arena>(
             TypeConstraintFlags::ExtendedHint | TypeConstraintFlags::TypeVar,
         ))
     } else {
-        let name: String = class::ClassType::from_ast_name(alloc, name).into();
+        let name: String =
+            class::ClassType::from_ast_name_and_mangle(alloc, name).unsafe_into_string();
         Ok(Constraint::make(
             Just(Str::new_str(alloc, &name)),
             TypeConstraintFlags::NoFlags,
@@ -451,7 +452,7 @@ pub fn hint_to_class<'arena>(
 ) -> class::ClassType<'arena> {
     let Hint(_, h) = hint;
     if let Happly(Id(_, name), _) = &**h {
-        class::ClassType::from_ast_name(alloc, name)
+        class::ClassType::from_ast_name_and_mangle(alloc, name)
     } else {
         class::from_raw_string(alloc, "__type_is_not_class__")
     }

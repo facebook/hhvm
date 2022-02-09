@@ -245,7 +245,12 @@ let method_type ~support_dynamic_type env m =
     FunUtils.has_return_disposable_attribute m.m_user_attributes
   in
   let mt_is_memoized = FunUtils.has_memoize_attribute m.m_user_attributes in
-  let params = FunUtils.make_params env ~is_lambda:false m.m_params in
+  let params =
+    FunUtils.make_params
+      env
+      ~is_lambda:false
+      (List.filter m.m_params ~f:(fun p -> not p.param_is_variadic))
+  in
   let (_pos, capability) =
     Decl_hint.aast_contexts_to_decl_capability env m.m_ctxs (fst m.m_name)
   in
@@ -259,11 +264,10 @@ let method_type ~support_dynamic_type env m =
       (hint_of_type_hint m.m_ret)
   in
   let arity =
-    match m.m_variadic with
-    | FVvariadicArg param ->
-      assert param.param_is_variadic;
+    match List.find m.m_params ~f:(fun p -> p.param_is_variadic) with
+    | Some param ->
       Fvariadic (FunUtils.make_param_ty env ~is_lambda:false param)
-    | FVnonVariadic -> Fstandard
+    | None -> Fstandard
   in
   let tparams = List.map m.m_tparams ~f:(FunUtils.type_param env) in
   let where_constraints =

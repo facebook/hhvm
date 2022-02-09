@@ -3,9 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use bstr::BString;
 use ffi::Str;
-use std::cmp::Ordering;
-use std::collections::{BTreeMap, BTreeSet};
+use std::{
+    cmp::Ordering,
+    collections::{BTreeMap, BTreeSet},
+    ffi::OsStr,
+    os::unix::ffi::OsStrExt,
+};
 
 #[derive(Clone, Debug, Default)]
 pub struct SymbolRefsState<'arena> {
@@ -43,13 +48,13 @@ impl<'arena> IncludePath<'arena> {
     pub fn into_doc_root_relative(
         self,
         alloc: &'arena bumpalo::Bump,
-        include_roots: &BTreeMap<String, String>,
+        include_roots: &BTreeMap<BString, BString>,
     ) -> IncludePath<'arena> {
         if let IncludePath::IncludeRootRelative(var, lit) = &self {
             use std::path::Path;
-            match include_roots.get(var.unsafe_as_str()) {
+            match include_roots.get(var.as_bstr()) {
                 Some(prefix) => {
-                    let path = Path::new(prefix).join(lit.unsafe_as_str());
+                    let path = Path::new(OsStr::from_bytes(prefix)).join(OsStr::from_bytes(lit));
                     let relative = path.is_relative();
                     let path_str = Str::new_str(alloc, path.to_str().expect("non UTF-8 path"));
                     return if relative {

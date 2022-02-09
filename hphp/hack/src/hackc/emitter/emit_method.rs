@@ -12,7 +12,7 @@ use hhas_coeffects::HhasCoeffects;
 use hhas_method::{HhasMethod, HhasMethodFlags};
 use hhas_pos::HhasSpan;
 use hhbc_ast::Visibility;
-use hhbc_id::{method, Id};
+use hhbc_id::method;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, Result};

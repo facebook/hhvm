@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{special_class_resolver::SpecialClassResolver, write::newline};
+use bstr::{BStr, BString, ByteSlice};
 use env::emitter::Emitter;
 use oxidized::relative_path::RelativePath;
 use std::collections::BTreeMap;
@@ -44,9 +45,9 @@ pub struct Context<'a> {
     pub(crate) dump_lambdas: bool,
     indent: Indent,
 
-    pub(crate) include_roots: &'a BTreeMap<String, String>,
-    pub(crate) include_search_paths: &'a [String],
-    pub(crate) doc_root: &'a str,
+    pub(crate) include_roots: &'a BTreeMap<BString, BString>,
+    pub(crate) include_search_paths: &'a [BString],
+    pub(crate) doc_root: &'a BStr,
     pub(crate) array_provenance: bool,
 }
 
@@ -70,7 +71,7 @@ impl<'a> Context<'a> {
 
             include_roots,
             include_search_paths,
-            doc_root,
+            doc_root: doc_root.as_bstr(),
             array_provenance,
         }
     }

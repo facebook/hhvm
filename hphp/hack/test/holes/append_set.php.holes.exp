@@ -7,8 +7,7 @@
       fd_fun =
       { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:37-41], (Hprim Tvoid)))); 
-        f_name = ([3:10-26], "\\array_append_set"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic;
+        f_name = ([3:10-26], "\\array_append_set"); f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (bool); param_type_hint = ((bool), (Some ([3:27-31], (Hprim Tbool)))); 
            param_is_variadic = false; param_pos = [3:32-34]; param_name = "$x"; 

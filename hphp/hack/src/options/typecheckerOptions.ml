@@ -92,6 +92,8 @@ let fetch_remote_old_decls = GlobalOptions.tco_fetch_remote_old_decls
 let force_load_hot_shallow_decls =
   GlobalOptions.tco_force_load_hot_shallow_decls
 
+let populate_member_heaps = GlobalOptions.tco_populate_member_heaps
+
 let skip_hierarchy_checks = GlobalOptions.tco_skip_hierarchy_checks
 
 let call_coeffects = GlobalOptions.tco_call_coeffects

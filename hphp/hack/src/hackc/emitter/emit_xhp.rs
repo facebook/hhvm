@@ -7,7 +7,7 @@ use env::emitter::Emitter;
 use hhas_method::HhasMethod;
 use hhas_property::HhasProperty;
 use hhas_xhp_attribute::HhasXhpAttribute;
-use hhbc_id::{class, Id};
+use hhbc_id::class;
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{unrecoverable, Result};
 use oxidized::{ast::*, ast_defs, local_id, pos::Pos};
@@ -361,7 +361,7 @@ fn emit_xhp_attribute_array<'arena>(
         id: &str,
         enum_opt: Option<&Vec<Expr>>,
     ) -> Result<(Expr, Expr)> {
-        let id = class::ClassType::from_ast_name_and_mangle(alloc, id).to_raw_string();
+        let id = class::ClassType::from_ast_name_and_mangle(alloc, id).unsafe_as_str();
         let type_ = hint_to_num(id);
         let type_ident = mk_expr(Expr_::Int(type_.to_string()));
         let class_name = match type_ {
@@ -453,7 +453,6 @@ fn from_xhp_attribute_declaration_method<'a, 'arena, 'decl>(
         name: ast_defs::Id(Pos::make_none(), name.into()),
         tparams: vec![],
         where_constraints: vec![],
-        variadic: FunVariadicity::FVnonVariadic,
         params: vec![],
         ctxs: Some(Contexts(pos.unwrap_or_else(Pos::make_none), vec![])),
         unsafe_ctxs: None,

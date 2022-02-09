@@ -62,12 +62,16 @@ void DecRefProfile::update(TypedValue tv) {
   if (countable->decWillRelease()) {
     released++;
     if (isRealType(datatype) && isArrayLikeType(datatype)) {
-      bool uncountedElements = true;
+      size_t numProfiledElements = 0;
+      bool hasRefcountedElement = false;
       IterateKV(tv.val().parr, [&](TypedValue key, TypedValue value){
-        uncountedElements = uncountedElements &&
-        !isTypedValueRefcounted(key) && !isTypedValueRefcounted(value);
+        numProfiledElements++;
+        hasRefcountedElement = isTypedValueRefcounted(key) ||
+                               isTypedValueRefcounted(value);
+        return hasRefcountedElement ||
+               (numProfiledElements == kMaxNumProfiledElements);
       });
-      if (uncountedElements) {
+      if (!hasRefcountedElement) {
         arrayOfUncountedReleaseCount++;
       }
     }

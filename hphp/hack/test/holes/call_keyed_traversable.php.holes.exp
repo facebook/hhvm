@@ -8,8 +8,7 @@
       c_methods =
       [{ m_span = [4:3-60]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
-         m_name = ([4:19-20], "o"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic;
+         m_name = ([4:19-20], "o"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (KeyedTraversable<int, int>);
             param_type_hint = ((KeyedTraversable<int, int>), (Some ([4:21-47], (Happly (([4:21-37], "\\HH\\KeyedTraversable"), [([4:38-41], (Hprim Tint)); ([4:43-46], (Hprim Tint))])))));
@@ -38,8 +37,7 @@
        fd_fun =
        { f_span = [7:1-51]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([7:44-48], (Hprim Tvoid)))); 
-         f_name = ([7:10-11], "\\o"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic;
+         f_name = ([7:10-11], "\\o"); f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (KeyedTraversable<int, int>);
             param_type_hint = ((KeyedTraversable<int, int>), (Some ([7:12-38], (Happly (([7:12-28], "\\HH\\KeyedTraversable"), [([7:29-32], (Hprim Tint)); ([7:34-37], (Hprim Tint))])))));
@@ -61,7 +59,7 @@
        { f_span = [9:1-24:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([12:4-8], (Hprim Tvoid)))); 
          f_name = ([9:10-32], "\\call_keyed_traversable"); f_tparams = []; 
-         f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_where_constraints = [];
          f_params =
          [{ param_annotation = (KeyedTraversable<string, int>);
             param_type_hint = ((KeyedTraversable<string, int>), (Some ([10:3-32], (Happly (([10:3-19], "\\HH\\KeyedTraversable"), [([10:20-26], (Hprim Tstring)); ([10:28-31], (Hprim Tint))])))));
@@ -143,7 +141,7 @@
        { f_span = [26:1-41:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([29:4-8], (Hprim Tvoid)))); 
          f_name = ([26:10-37], "\\call_keyed_traversable_cast"); f_tparams = []; 
-         f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_where_constraints = [];
          f_params =
          [{ param_annotation = (KeyedTraversable<string, int>);
             param_type_hint = ((KeyedTraversable<string, int>), (Some ([27:3-32], (Happly (([27:3-19], "\\HH\\KeyedTraversable"), [([27:20-26], (Hprim Tstring)); ([27:28-31], (Hprim Tint))])))));

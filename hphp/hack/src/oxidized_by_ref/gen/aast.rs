@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<55d7678041260c5cb4ed42a12c3e58e2>>
+// @generated SignedSource<<43350fbab77af94c0a160d86c2765eca>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1341,38 +1341,6 @@ pub struct FunParam<'a, Ex, En> {
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for FunParam<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(FunParam<'arena, Ex, En>);
 
-/// Does this function/method take a variable number of arguments?
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[serde(bound(
-    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
-))]
-#[repr(C)]
-pub enum FunVariadicity<'a, Ex, En> {
-    /// Named variadic argument.
-    ///
-    /// function foo(int ...$args): void {}
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    FVvariadicArg(&'a FunParam<'a, Ex, En>),
-    /// Function is not variadic, takes an exact number of arguments.
-    FVnonVariadic,
-}
-impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for FunVariadicity<'a, Ex, En> {}
-arena_deserializer::impl_deserialize_in_arena!(FunVariadicity<'arena, Ex, En>);
-
 #[derive(
     Clone,
     Debug,
@@ -1406,8 +1374,6 @@ pub struct Fun_<'a, Ex, En> {
     pub tparams: &'a [&'a Tparam<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub where_constraints: &'a [&'a WhereConstraintHint<'a>],
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub variadic: FunVariadicity<'a, Ex, En>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub params: &'a [&'a FunParam<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -2132,8 +2098,6 @@ pub struct Method_<'a, Ex, En> {
     pub tparams: &'a [&'a Tparam<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub where_constraints: &'a [&'a WhereConstraintHint<'a>],
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub variadic: FunVariadicity<'a, Ex, En>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub params: &'a [&'a FunParam<'a, Ex, En>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

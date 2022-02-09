@@ -108,6 +108,10 @@ type t = {
   tco_fetch_remote_old_decls: bool;
   (* Always load hot shallow decls from saved state *)
   tco_force_load_hot_shallow_decls: bool;
+  (* Populate the member signature heaps.
+
+     If disabled, instead load lazily from shallow classes. *)
+  tco_populate_member_heaps: bool;
   (* Skip checks on hierarchy e.g. overrides, require extend, etc.
      Set to true only for debugging purposes! *)
   tco_skip_hierarchy_checks: bool;
@@ -342,6 +346,7 @@ val make :
   ?tco_force_shallow_decl_fanout:bool ->
   ?tco_fetch_remote_old_decls:bool ->
   ?tco_force_load_hot_shallow_decls:bool ->
+  ?tco_populate_member_heaps:bool ->
   ?tco_skip_hierarchy_checks:bool ->
   ?po_rust_parser_errors:bool ->
   ?tco_like_type_hints:bool ->
@@ -524,6 +529,8 @@ val tco_force_shallow_decl_fanout : t -> bool
 val tco_fetch_remote_old_decls : t -> bool
 
 val tco_force_load_hot_shallow_decls : t -> bool
+
+val tco_populate_member_heaps : t -> bool
 
 val tco_skip_hierarchy_checks : t -> bool
 

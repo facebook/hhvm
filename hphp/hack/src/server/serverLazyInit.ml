@@ -382,7 +382,43 @@ let download_and_load_state_exn
     dependency_table_saved_state_future
     naming_table_saved_state_future
 
+let calculate_state_distance_and_age_from_hg
+    (root : Path.t) (corresponding_base_revision : string) :
+    Hg.hg_rev option * Hg.global_rev option * ServerEnv.saved_state_delta option
+    =
+  let root = Path.to_string root in
+  let future =
+    Future.continue_with_future (Hg.current_mergebase_hg_rev root)
+    @@ fun mergebase_rev ->
+    Future.continue_with_future
+      (Hg.get_closest_global_ancestor mergebase_rev root)
+    @@ fun mergebase_global_rev ->
+    Future.continue_with_future
+      (Hg.get_closest_global_ancestor corresponding_base_revision root)
+    @@ fun corresponding_base_global_rev ->
+    Future.continue_with_future
+      (Hg.get_hg_revision_time (Hg.Hg_rev corresponding_base_revision) root)
+    @@ fun corresponding_time ->
+    Future.continue_with_future
+      (Hg.get_hg_revision_time (Hg.Hg_rev mergebase_rev) root)
+    @@ fun mergebase_time ->
+    let state_distance =
+      abs (mergebase_global_rev - corresponding_base_global_rev)
+    in
+    let state_age = abs (mergebase_time - corresponding_time) in
+    let saved_state_delta = { age = state_age; distance = state_distance } in
+    Future.of_value (mergebase_rev, mergebase_global_rev, saved_state_delta)
+  in
+  match Future.get future with
+  | Ok (a, b, c) -> (Some a, Some b, Some c)
+  | Error e ->
+    Hh_logger.log
+      "[serverLazyInit]: calculate_state_distance_and_age_from_hg failed: %s"
+      (Future.error_to_string e);
+    (None, None, None)
+
 let use_precomputed_state_exn
+    ~(root : Path.t)
     (genv : ServerEnv.genv)
     (ctx : Provider_context.t)
     (info : ServerArgs.saved_state_target_info)
@@ -446,20 +482,30 @@ let use_precomputed_state_exn
       ~shallow_hot_decls_path
       ~errors_path
   in
+  let log_saved_state_age_and_distance =
+    ctx
+    |> Provider_context.get_tcopt
+    |> TypecheckerOptions.log_saved_state_age_and_distance
+  in
+  let (mergebase, mergebase_rev, saved_state_delta) =
+    if log_saved_state_age_and_distance then
+      calculate_state_distance_and_age_from_hg root corresponding_base_revision
+    else
+      (None, None, None)
+  in
   {
     naming_table_fn = naming_table_path;
     deptable_fn;
     naming_table_fallback_fn = naming_table_fallback_path;
-    corresponding_rev =
-      Hg.Global_rev (int_of_string corresponding_base_revision);
-    mergebase_rev = None;
-    mergebase = None;
+    corresponding_rev = Hg.Hg_rev corresponding_base_revision;
+    mergebase_rev;
+    mergebase;
     dirty_naming_files = naming_changes;
     dirty_master_files = prechecked_changes;
     dirty_local_files = changes;
     old_naming_table;
     old_errors;
-    saved_state_delta = None;
+    saved_state_delta;
     naming_table_manifold_path = None;
   }
 
@@ -1379,7 +1425,7 @@ let saved_state_init
       @@ fun _cgroup_step ->
       match load_state_approach with
       | Precomputed info ->
-        Ok (use_precomputed_state_exn genv ctx info cgroup_steps)
+        Ok (use_precomputed_state_exn ~root genv ctx info cgroup_steps)
       | Load_state_natively -> download_and_load_state_exn ~genv ~ctx ~root
     in
     state_result

@@ -71,15 +71,21 @@ let mk_param_decl_info_internal ~context_id ~indicator ~is_variadic pos callconv
 
 let mk_param_decl_info
     ~context_id
-    ~is_variadic
-    Aast.{ param_pos; param_callconv; param_type_hint = (ty, _); _ } =
+    Aast.
+      {
+        param_pos;
+        param_callconv;
+        param_type_hint = (ty, _);
+        param_is_variadic;
+        _;
+      } =
   let indicator = extract_bad_type_indicator ty in
   if has_bad_type indicator then
     let param_decl_info =
       mk_param_decl_info_internal
         ~context_id
         ~indicator
-        ~is_variadic
+        ~is_variadic:param_is_variadic
         param_pos
         param_callconv
     in
@@ -87,20 +93,9 @@ let mk_param_decl_info
   else
     None
 
-let mk_callable_decl_infos ~context_id env variadicity params ret =
-  let variadic_decl_param_info =
-    let is_variadic = true in
-    match variadicity with
-    | Aast.FVvariadicArg param ->
-      mk_param_decl_info ~context_id ~is_variadic param
-    | _ -> None
-  in
-  let non_variadic_param_infos =
-    List.map ~f:(mk_param_decl_info ~context_id ~is_variadic:false) params
-  in
-  List.filter_opt
-  @@ mk_ret_decl_info ~context_id env ret
-     :: variadic_decl_param_info :: non_variadic_param_infos
+let mk_callable_decl_infos ~context_id env params ret =
+  let param_infos = List.map ~f:(mk_param_decl_info ~context_id) params in
+  List.filter_opt @@ mk_ret_decl_info ~context_id env ret :: param_infos
 
 let mk_expr_info_internal ~context_id ~indicator pos ty exp =
   let common_info = mk_common_info ~context_id ~indicator pos in
@@ -154,16 +149,12 @@ let collect_infos_methods_functions context_id =
 
     method plus = ( @ )
 
-    method! on_method_ env (Aast.{ m_params; m_ret; m_variadic; _ } as m) =
-      let infos =
-        mk_callable_decl_infos ~context_id env m_variadic m_params m_ret
-      in
+    method! on_method_ env (Aast.{ m_params; m_ret; _ } as m) =
+      let infos = mk_callable_decl_infos ~context_id env m_params m_ret in
       infos @ super#on_method_ env m
 
-    method! on_fun_ env (Aast.{ f_params; f_ret; f_variadic; _ } as f) =
-      let infos =
-        mk_callable_decl_infos ~context_id env f_variadic f_params f_ret
-      in
+    method! on_fun_ env (Aast.{ f_params; f_ret; _ } as f) =
+      let infos = mk_callable_decl_infos ~context_id env f_params f_ret in
       infos @ super#on_fun_ env f
 
     method! on_expr env exp =

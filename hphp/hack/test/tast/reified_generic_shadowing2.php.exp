@@ -10,8 +10,7 @@ Errors:
       c_methods =
       [{ m_span = [6:3-41]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
-         m_name = ([6:19-20], "f"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic;
+         m_name = ([6:19-20], "f"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (Tc); param_type_hint = ((Tc), (Some ([6:21-28], (Habstr ("Tc", []))))); 
             param_is_variadic = false; param_pos = [6:29-31]; param_name = "$x"; 
@@ -40,8 +39,7 @@ Errors:
        c_methods =
        [{ m_span = [11:3-41]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
-          m_name = ([11:19-20], "f"); m_tparams = []; m_where_constraints = []; 
-          m_variadic = FVnonVariadic;
+          m_name = ([11:19-20], "f"); m_tparams = []; m_where_constraints = [];
           m_params =
           [{ param_annotation = (Tc<int>); param_type_hint = ((Tc<int>), (Some ([11:21-28], (Happly (([11:21-23], "\\Tc"), [([11:24-27], (Hprim Tint))]))))); 
              param_is_variadic = false; param_pos = [11:29-31]; param_name = "$x"; 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d5b445a66dae322ccea030c02b7d2605>>
+// @generated SignedSource<<d9031bfa83c18a196f5cbf10ab9b66b1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2641,44 +2641,6 @@ impl<Ex, En> XhpAttribute<Ex, En> {
     pub fn as_xhp_spread_into(self) -> Option<Expr<Ex, En>> {
         match self {
             XhpAttribute::XhpSpread(p0) => Some(p0),
-            _ => None,
-        }
-    }
-}
-impl<Ex, En> FunVariadicity<Ex, En> {
-    pub fn mk_fvvariadic_arg(p0: FunParam<Ex, En>) -> Self {
-        FunVariadicity::FVvariadicArg(p0)
-    }
-    pub fn mk_fvnon_variadic() -> Self {
-        FunVariadicity::FVnonVariadic
-    }
-    pub fn is_fvvariadic_arg(&self) -> bool {
-        match self {
-            FunVariadicity::FVvariadicArg(..) => true,
-            _ => false,
-        }
-    }
-    pub fn is_fvnon_variadic(&self) -> bool {
-        match self {
-            FunVariadicity::FVnonVariadic => true,
-            _ => false,
-        }
-    }
-    pub fn as_fvvariadic_arg(&self) -> Option<&FunParam<Ex, En>> {
-        match self {
-            FunVariadicity::FVvariadicArg(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_fvvariadic_arg_mut(&mut self) -> Option<&mut FunParam<Ex, En>> {
-        match self {
-            FunVariadicity::FVvariadicArg(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_fvvariadic_arg_into(self) -> Option<FunParam<Ex, En>> {
-        match self {
-            FunVariadicity::FVvariadicArg(p0) => Some(p0),
             _ => None,
         }
     }

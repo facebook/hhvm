@@ -29,7 +29,7 @@ type eager_members = {
   static_props: class_elt String.Table.t;
   methods: class_elt String.Table.t;
   static_methods: class_elt String.Table.t;
-  construct: (class_elt option * consistent_kind) Lazy.t;
+  construct: Provider_context.t option -> class_elt option * consistent_kind;
 }
 
 (** class_t:
@@ -99,10 +99,20 @@ let make_eager_class_decl decl =
         props = String.Table.create ();
         static_props = String.Table.create ();
         construct =
-          lazy
-            (Decl_class.lookup_constructor_lazy
-               decl.Decl_defs.dc_substs
-               decl.Decl_defs.dc_construct);
+          (let cstr_ref = ref None in
+           fun ctx ->
+             match !cstr_ref with
+             | Some cstr -> cstr
+             | None ->
+               let cstr =
+                 Decl_class.lookup_constructor_lazy
+                   ctx
+                   ~child_class_name:decl.Decl_defs.dc_name
+                   decl.Decl_defs.dc_substs
+                   decl.Decl_defs.dc_construct
+               in
+               cstr_ref := Some cstr;
+               cstr);
       } )
 
 let make_eager_class_type ctx class_name declare_folded_class_in_file =
@@ -311,11 +321,11 @@ module ApiShallow = struct
 end
 
 module ApiLazy = struct
-  let construct (decl, t, _ctx) =
+  let construct (decl, t, ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Construct @@ fun () ->
     match t with
     | Lazy (_sc, lc) -> Lazy.force (Lazy.force lc).ih.construct
-    | Eager (_, members) -> Lazy.force members.construct
+    | Eager (_, members) -> members.construct ctx
 
   let need_init (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Need_init @@ fun () ->
@@ -386,7 +396,7 @@ module ApiLazy = struct
       Option.map (SMap.find_opt id c.Decl_defs.dc_typeconsts) ~f:(fun t ->
           t.ttc_enforceable)
 
-  let get_prop (decl, t, _ctx) id =
+  let get_prop (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_prop id) @@ fun () ->
     match t with
     | Lazy (_sc, lc) -> LSTable.get (Lazy.force lc).ih.props id
@@ -397,7 +407,7 @@ module ApiLazy = struct
         (match SMap.find_opt id c.Decl_defs.dc_props with
         | None -> None
         | Some elt ->
-          let elt = Decl_class.lookup_property_type_lazy c id elt in
+          let elt = Decl_class.lookup_property_type_lazy ctx c id elt in
           String.Table.add_exn members.props ~key:id ~data:elt;
           Some elt))
 
@@ -407,7 +417,7 @@ module ApiLazy = struct
     | Lazy (_sc, lc) -> LSTable.mem (Lazy.force lc).ih.props id
     | Eager (c, _) -> SMap.mem id c.Decl_defs.dc_props
 
-  let get_sprop (decl, t, _ctx) id =
+  let get_sprop (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_sprop id) @@ fun () ->
     match t with
     | Lazy (_sc, lc) -> LSTable.get (Lazy.force lc).ih.sprops id
@@ -418,7 +428,7 @@ module ApiLazy = struct
         (match SMap.find_opt id c.Decl_defs.dc_sprops with
         | None -> None
         | Some elt ->
-          let elt = Decl_class.lookup_static_property_type_lazy c id elt in
+          let elt = Decl_class.lookup_static_property_type_lazy ctx c id elt in
           String.Table.add_exn members.static_props ~key:id ~data:elt;
           Some elt))
 
@@ -428,7 +438,7 @@ module ApiLazy = struct
     | Lazy (_sc, lc) -> LSTable.mem (Lazy.force lc).ih.sprops id
     | Eager (c, _) -> SMap.mem id c.Decl_defs.dc_sprops
 
-  let get_method (decl, t, _ctx) id =
+  let get_method (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_method id) @@ fun () ->
     match t with
     | Lazy (_sc, lc) -> LSTable.get (Lazy.force lc).ih.methods id
@@ -439,7 +449,7 @@ module ApiLazy = struct
         (match SMap.find_opt id c.Decl_defs.dc_methods with
         | None -> None
         | Some elt ->
-          let elt = Decl_class.lookup_method_type_lazy c id elt in
+          let elt = Decl_class.lookup_method_type_lazy ctx c id elt in
           String.Table.add_exn members.methods ~key:id ~data:elt;
           Some elt))
 
@@ -449,7 +459,7 @@ module ApiLazy = struct
     | Lazy (_sc, lc) -> LSTable.mem (Lazy.force lc).ih.methods id
     | Eager (c, _) -> SMap.mem id c.Decl_defs.dc_methods
 
-  let get_smethod (decl, t, _ctx) id =
+  let get_smethod (decl, t, ctx) id =
     Decl_counters.count_subdecl decl (Decl_counters.Get_smethod id) @@ fun () ->
     match t with
     | Lazy (_sc, lc) -> LSTable.get (Lazy.force lc).ih.smethods id
@@ -460,7 +470,7 @@ module ApiLazy = struct
         (match SMap.find_opt id c.Decl_defs.dc_smethods with
         | None -> None
         | Some elt ->
-          let elt = Decl_class.lookup_static_method_type_lazy c id elt in
+          let elt = Decl_class.lookup_static_method_type_lazy ctx c id elt in
           String.Table.add_exn members.static_methods ~key:id ~data:elt;
           Some elt))
 
@@ -537,41 +547,41 @@ module ApiEager = struct
     | Lazy (_sc, lc) -> LSTable.to_list (Lazy.force lc).ih.typeconsts
     | Eager (c, _) -> SMap.bindings c.Decl_defs.dc_typeconsts
 
-  let props (decl, t, _ctx) =
+  let props (decl, t, ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Props @@ fun () ->
     match t with
     | Lazy (_sc, lc) -> LSTable.to_list (Lazy.force lc).ih.props
     | Eager (c, _) ->
       SMap.bindings c.Decl_defs.dc_props
       |> List.map ~f:(fun (id, elt) ->
-             (id, Decl_class.lookup_property_type_lazy c id elt))
+             (id, Decl_class.lookup_property_type_lazy ctx c id elt))
 
-  let sprops (decl, t, _ctx) =
+  let sprops (decl, t, ctx) =
     Decl_counters.count_subdecl decl Decl_counters.SProps @@ fun () ->
     match t with
     | Lazy (_sc, lc) -> LSTable.to_list (Lazy.force lc).ih.sprops
     | Eager (c, _) ->
       SMap.bindings c.Decl_defs.dc_sprops
       |> List.map ~f:(fun (id, elt) ->
-             (id, Decl_class.lookup_static_property_type_lazy c id elt))
+             (id, Decl_class.lookup_static_property_type_lazy ctx c id elt))
 
-  let methods (decl, t, _ctx) =
+  let methods (decl, t, ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Methods @@ fun () ->
     match t with
     | Lazy (_sc, lc) -> LSTable.to_list (Lazy.force lc).ih.methods
     | Eager (c, _) ->
       SMap.bindings c.Decl_defs.dc_methods
       |> List.map ~f:(fun (id, elt) ->
-             (id, Decl_class.lookup_method_type_lazy c id elt))
+             (id, Decl_class.lookup_method_type_lazy ctx c id elt))
 
-  let smethods (decl, t, _ctx) =
+  let smethods (decl, t, ctx) =
     Decl_counters.count_subdecl decl Decl_counters.SMethods @@ fun () ->
     match t with
     | Lazy (_sc, lc) -> LSTable.to_list (Lazy.force lc).ih.smethods
     | Eager (c, _) ->
       SMap.bindings c.Decl_defs.dc_smethods
       |> List.map ~f:(fun (id, elt) ->
-             (id, Decl_class.lookup_static_method_type_lazy c id elt))
+             (id, Decl_class.lookup_static_method_type_lazy ctx c id elt))
 
   let all_inherited_methods (decl, t, _ctx) id =
     Decl_counters.count_subdecl decl Decl_counters.All_inherited_methods

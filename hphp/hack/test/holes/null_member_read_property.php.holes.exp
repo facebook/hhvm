@@ -8,7 +8,7 @@
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:53-57], (Hprim Tvoid)))); 
         f_name = ([3:10-40], "\\null_member_read_property_null"); f_tparams = []; 
-        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_where_constraints = [];
         f_params =
         [{ param_annotation = (null); param_type_hint = ((null), (Some ([3:41-45], (Hprim Tnull)))); 
            param_is_variadic = false; param_pos = [3:46-49]; param_name = "$xs"; 
@@ -30,7 +30,7 @@
        { f_span = [8:1-11:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([8:60-64], (Hprim Tvoid)))); 
          f_name = ([8:10-44], "\\null_member_read_property_nullable"); 
-         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (?string); param_type_hint = ((?string), (Some ([8:45-52], (Hoption ([8:46-52], (Hprim Tstring)))))); 
             param_is_variadic = false; param_pos = [8:53-56]; param_name = "$xs"; 
@@ -53,7 +53,7 @@
        { f_span = [13:1-16:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([13:55-59], (Hprim Tvoid)))); 
          f_name = ([13:10-41], "\\null_member_read_property_mixed"); 
-         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (mixed); param_type_hint = ((mixed), (Some ([13:42-47], Hmixed))); 
             param_is_variadic = false; param_pos = [13:48-51]; param_name = "$xs"; 

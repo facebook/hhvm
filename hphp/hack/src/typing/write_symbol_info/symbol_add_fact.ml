@@ -190,12 +190,7 @@ let add_method_defn_fact ctx source_map meth decl_id progress =
       [
         ("declaration", build_id_json decl_id);
         ( "signature",
-          build_signature_json
-            ctx
-            source_map
-            meth.m_params
-            meth.m_variadic
-            meth.m_ret );
+          build_signature_json ctx source_map meth.m_params meth.m_ret );
         ("visibility", build_visibility_json meth.m_visibility);
         ("isAbstract", JSON_Bool meth.m_abstract);
         ("isAsync", build_is_async_json meth.m_fun_kind);
@@ -342,13 +337,7 @@ let add_func_defn_fact ctx source_map fd decl_id progress =
   let json_fields =
     [
       ("declaration", build_id_json decl_id);
-      ( "signature",
-        build_signature_json
-          ctx
-          source_map
-          elem.f_params
-          elem.f_variadic
-          elem.f_ret );
+      ("signature", build_signature_json ctx source_map elem.f_params elem.f_ret);
       ("isAsync", build_is_async_json elem.f_fun_kind);
       ( "attributes",
         build_attributes_json_nested source_map elem.f_user_attributes );

@@ -9,7 +9,7 @@ Errors:
       fd_fun =
       { f_span = [4:1-7:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((?int), None); f_name = ([4:10-13], "\\foo"); 
-        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (MyMap<string, int>); param_type_hint = ((MyMap<string, int>), (Some ([4:14-19], (Happly (([4:14-19], "\\MyMap"), []))))); 
            param_is_variadic = false; param_pos = [4:20-22]; param_name = "$m"; 
@@ -50,8 +50,7 @@ Errors:
       c_methods =
       [{ m_span = [4:3-45]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
-         m_name = ([4:19-22], "add"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic;
+         m_name = ([4:19-22], "add"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (Tk); param_type_hint = ((Tk), (Some ([4:23-25], (Habstr ("Tk", []))))); 
             param_is_variadic = false; param_pos = [4:26-28]; param_name = "$x"; 
@@ -68,8 +67,7 @@ Errors:
          m_doc_comment = None };
         { m_span = [5:3-7:4]; m_annotation = (); m_final = false; m_abstract = false; 
           m_static = false; m_readonly_this = false; m_visibility = Public; 
-          m_name = ([5:19-22], "get"); m_tparams = []; m_where_constraints = []; 
-          m_variadic = FVnonVariadic;
+          m_name = ([5:19-22], "get"); m_tparams = []; m_where_constraints = [];
           m_params =
           [{ param_annotation = (Tk); param_type_hint = ((Tk), (Some ([5:23-25], (Habstr ("Tk", []))))); 
              param_is_variadic = false; param_pos = [5:26-28]; param_name = "$x"; 

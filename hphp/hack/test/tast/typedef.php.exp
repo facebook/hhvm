@@ -9,13 +9,13 @@
       [{ m_span = [3:46-87]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
          m_name = ([3:62-73], "__construct"); m_tparams = []; m_where_constraints = [];
-         m_variadic =
-         (FVvariadicArg
-            { param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([3:74-77], (Hprim Tint)))); 
-              param_is_variadic = true; param_pos = [3:81-83]; param_name = "$x"; 
-              param_expr = None; param_readonly = None; param_callconv = Pnormal; 
-              param_user_attributes = []; param_visibility = None });
-         m_params = []; m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
+         m_params =
+         [{ param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([3:74-77], (Hprim Tint)))); 
+            param_is_variadic = true; param_pos = [3:81-83]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
          m_ret = ((void), (Some ([3:62-73], (Hprim Tvoid)))); m_external = false; 
          m_doc_comment = None }

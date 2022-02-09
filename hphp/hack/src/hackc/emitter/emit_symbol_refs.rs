@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::emitter::Emitter;
-use hhbc_id::{class, r#const, function, Id};
+use hhbc_id::{class, r#const, function};
 use symbol_refs_state::{IncludePath, SymbolRefsState};
 
 pub fn add_include<'arena, 'decl>(e: &mut Emitter<'arena, 'decl>, inc: IncludePath<'arena>) {
@@ -12,14 +12,18 @@ pub fn add_include<'arena, 'decl>(e: &mut Emitter<'arena, 'decl>, inc: IncludePa
 }
 
 pub fn add_constant<'arena, 'decl>(e: &mut Emitter<'arena, 'decl>, s: r#const::ConstType<'arena>) {
-    if !s.to_raw_string().is_empty() {
-        e.emit_symbol_refs_state_mut().constants.insert(s.0);
+    if !s.unsafe_as_str().is_empty() {
+        e.emit_symbol_refs_state_mut()
+            .constants
+            .insert(s.as_ffi_str());
     }
 }
 
 pub fn add_class<'arena, 'decl>(e: &mut Emitter<'arena, 'decl>, s: class::ClassType<'arena>) {
-    if !s.to_raw_string().is_empty() {
-        e.emit_symbol_refs_state_mut().classes.insert(s.0);
+    if !s.unsafe_as_str().is_empty() {
+        e.emit_symbol_refs_state_mut()
+            .classes
+            .insert(s.as_ffi_str());
     }
 }
 
@@ -31,8 +35,10 @@ pub fn add_function<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     s: function::FunctionType<'arena>,
 ) {
-    if !s.to_raw_string().is_empty() {
-        e.emit_symbol_refs_state_mut().functions.insert(s.0);
+    if !s.unsafe_as_str().is_empty() {
+        e.emit_symbol_refs_state_mut()
+            .functions
+            .insert(s.as_ffi_str());
     }
 }
 

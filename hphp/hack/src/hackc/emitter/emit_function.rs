@@ -13,7 +13,7 @@ use hhas_attribute::{self as hhas_attribute, HhasAttribute};
 use hhas_coeffects::HhasCoeffects;
 use hhas_function::{self as hhas_function, HhasFunction};
 use hhas_pos::HhasSpan;
-use hhbc_id::{class::ClassType, function::FunctionType, Id};
+use hhbc_id::{class::ClassType, function::FunctionType};
 use instruction_sequence::{instr, Result};
 use naming_special_names_rust::user_attributes as ua;
 use ocamlrep::rc::RcOc;
@@ -59,13 +59,13 @@ pub fn emit_function<'a, 'arena, 'decl>(
                 params,
             }] if s == "__MethCaller" => match &params[..] {
                 [ast::Expr(_, _, ast::Expr_::String(ref ctx))] if !ctx.is_empty() => Some(
-                    ClassType::from_ast_name(
+                    ClassType::from_ast_name_and_mangle(
                         alloc,
                         // FIXME: This is not safe--string literals are binary strings.
                         // There's no guarantee that they're valid UTF-8.
                         unsafe { std::str::from_utf8_unchecked(ctx.as_slice()) },
                     )
-                    .to_raw_string()
+                    .unsafe_as_str()
                     .into(),
                 ),
                 _ => None,
@@ -160,7 +160,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
     let attrs = emit_memoize_function::get_attrs_for_fun(e, fd, &user_attrs, memoized);
     let normal_function = HhasFunction {
         attributes: Slice::fill_iter(alloc, user_attrs.into_iter()),
-        name: FunctionType(Str::new_str(alloc, renamed_id.to_raw_string())),
+        name: FunctionType::new(Str::new_str(alloc, renamed_id.unsafe_as_str())),
         span: HhasSpan::from_pos(&f.span),
         coeffects,
         body,

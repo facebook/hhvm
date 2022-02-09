@@ -14,7 +14,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((int), None); f_name = ([3:10-12], "\\f1"); 
-        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (num); param_type_hint = ((num), None); 
            param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
@@ -34,7 +34,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((int), None); f_name = ([3:10-12], "\\f2"); 
-        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (num); param_type_hint = ((num), None); 
            param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 
@@ -58,7 +58,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((int), None); f_name = ([3:10-12], "\\f3"); 
-        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (num); param_type_hint = ((num), None); 
            param_is_variadic = false; param_pos = [3:13-15]; param_name = "$x"; 

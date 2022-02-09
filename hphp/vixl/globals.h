@@ -37,7 +37,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stddef.h>
-#include "platform.h"
+#include "hphp/vixl/platform.h"
 
 #include "hphp/util/assertions.h"
 

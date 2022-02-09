@@ -175,11 +175,6 @@ let fun_param env param = type_hint env param.param_type_hint
 
 let fun_params env = List.concat_map ~f:(fun_param env)
 
-let variadic_param env vparam =
-  match vparam with
-  | FVvariadicArg p -> fun_param env p
-  | _ -> []
-
 let tparam env t =
   List.concat_map t.Aast.tp_constraints ~f:(fun (_, h) -> hint env h)
 
@@ -202,10 +197,7 @@ let fun_ tenv f =
       f.f_where_constraints
   in
   let env = { env with tenv } in
-  type_hint env f.f_ret
-  @ tparams env f.f_tparams
-  @ fun_params env f.f_params
-  @ variadic_param env f.f_variadic
+  type_hint env f.f_ret @ tparams env f.f_tparams @ fun_params env f.f_params
 
 let enum_opt env =
   let f { e_base; e_constraint; _ } =
@@ -260,7 +252,6 @@ let method_ env m =
   in
   let env = { env with tenv } in
   fun_params env m.m_params
-  @ variadic_param env m.m_variadic
   @ tparams env m.m_tparams
   @ where_constrs env m.m_where_constraints
   @ type_hint env m.m_ret

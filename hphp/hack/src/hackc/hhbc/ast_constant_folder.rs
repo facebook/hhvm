@@ -7,7 +7,6 @@ use std::{collections::hash_map::RandomState, fmt};
 
 use env::emitter::Emitter;
 use ffi::Pair;
-use hhbc_id::Id;
 use hhbc_string_utils as string_utils;
 use naming_special_names_rust::{math, members, special_functions, typehints};
 use options::HhvmFlags;
@@ -104,14 +103,11 @@ fn class_const_to_typed_value<'arena, 'decl>(
             cid,
         );
         if let ast_class_expr::ClassExpr::Id(ast_defs::Id(_, cname)) = cexpr {
+            let classid = hhbc_id::class::ClassType::from_ast_name_and_mangle(emitter.alloc, cname)
+                .as_ffi_str();
             if emitter.options().emit_class_pointers() == 2 {
-                let classid =
-                    hhbc_id::class::ClassType::from_ast_name_and_mangle(emitter.alloc, &cname)
-                        .to_raw_ffi_str();
                 return Ok(TypedValue::LazyClass(classid));
             } else {
-                let classid = hhbc_id::class::ClassType::from_ast_name(emitter.alloc, &cname)
-                    .to_raw_ffi_str();
                 return Ok(TypedValue::String(classid));
             }
         }

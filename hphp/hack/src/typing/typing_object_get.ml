@@ -872,14 +872,19 @@ and obj_get_concrete_class_without_member_info
       }
     in
     (env, (mk (Reason.Rnone, Tfun ft), []), dflt_lval_err, dflt_rval_err)
-  else if String.equal id_str SN.Members.__construct then
-    (* __construct is not an instance method and shouldn't be invoked directly *)
-    let () =
-      Errors.add_nast_check_error
-      @@ Nast_check_error.Magic { pos = id_pos; meth_name = id_str }
+  else if String.equal id_str SN.Members.__construct then (
+    (* __construct is not an instance method and shouldn't be invoked directly
+       Note that we already raise a NAST check error in `illegal_name_check` but
+       we raise a related typing error here to properly keep track of failure.
+       We prefer a specific error here since the generic 4053 `MemberNotFound`
+       error, below, would be quite confusing telling us there is no instance
+       method `__construct` *)
+    let err =
+      Typing_error.(primary @@ Primary.Construct_not_instance_method id_pos)
     in
+    Errors.add_typing_error err;
     default ()
-  else
+  ) else
     let err =
       member_not_found
         env

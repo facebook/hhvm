@@ -114,6 +114,24 @@ static_assert(sizeof(HotRDSLocals) <= 64,
 extern __thread HotRDSLocals rl_hotSection;
 extern uint32_t s_usedbytes;
 
+struct LocalsStorage {
+  static void* storage(uint32_t offset) {
+    return static_cast<char*>(rl_hotSection.rdslocal_base) + offset;
+  }
+};
+
+template<void* HotRDSLocals::*ptr>
+struct AliasStorage {
+  static void* storage(uint32_t) {
+    assertx(rl_hotSection.*ptr);
+    return rl_hotSection.*ptr;
+  }
+
+  static void set(void* value) {
+    rl_hotSection.*ptr = value;
+  }
+};
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -238,7 +256,7 @@ enum class Initialize : uint8_t {
   Explicitly,
 };
 
-template<typename T, Initialize Init>
+template<typename T, Initialize Init, typename StorageT = detail::LocalsStorage>
 struct RDSLocal : private detail::RDSLocalBase<T> {
   static auto constexpr REH = std::is_base_of<RequestEventHandler, T>::value;
   template<typename T1>
@@ -384,9 +402,8 @@ protected:
     bool hasValue;
   };
 
-  virtual Node& node() const {
-    return *reinterpret_cast<Node*>(
-      ((char*)detail::rl_hotSection.rdslocal_base + m_offset));
+  Node& node() const {
+    return *static_cast<Node*>(StorageT::storage(m_offset));
   }
 
   void* nodeLocation() override { return &node(); }
@@ -406,8 +423,8 @@ protected:
 // On non request threads RDS locals are stored in a block allocated in the
 // heap.  This is destroyed as rds::local::fini is called.
 
-template<typename T, Initialize Init>
-RDSLocal<T, Init>::RDSLocal() {
+template<typename T, Initialize Init, typename StorageT>
+RDSLocal<T, Init, StorageT>::RDSLocal() {
   this->m_next = detail::head;
   detail::head = this;
   auto const align = folly::nextPowTwo(alignof(T)) - 1;
@@ -417,27 +434,27 @@ RDSLocal<T, Init>::RDSLocal() {
   detail::s_usedbytes += sizeof(Node);
 }
 
-template<typename T, Initialize Init>
-void RDSLocal<T, Init>::create() {
+template<typename T, Initialize Init, typename StorageT>
+void RDSLocal<T, Init, StorageT>::create() {
   node().emplace();
 }
 
-template<typename T, Initialize Init>
-void RDSLocal<T, Init>::destroy() {
+template<typename T, Initialize Init, typename StorageT>
+void RDSLocal<T, Init, StorageT>::destroy() {
   if (!isNull()) {
     node().clear();
   }
 }
 
-template<typename T, Initialize Init>
-void RDSLocal<T, Init>::nullOut() {
+template<typename T, Initialize Init, typename StorageT>
+void RDSLocal<T, Init, StorageT>::nullOut() {
   if (!isNull()) {
     node().nullOut();
   }
 }
 
-template<typename T, Initialize Init>
-T* RDSLocal<T, Init>::getCheck() const {
+template<typename T, Initialize Init, typename StorageT>
+T* RDSLocal<T, Init, StorageT>::getCheck() const {
   assertx(detail::rl_hotSection.rdslocal_base);
   if (!node().has_value()) {
     const_cast<RDSLocal*>(this)->create();
@@ -446,17 +463,17 @@ T* RDSLocal<T, Init>::getCheck() const {
   return getNoCheck();
 }
 
-template<typename T, Initialize Init>
-T* RDSLocal<T, Init>::get() const {
+template<typename T, Initialize Init, typename StorageT>
+T* RDSLocal<T, Init, StorageT>::get() const {
   if (Init == Initialize::Explicitly) {
     return getNoCheck();
   }
   return getCheck();
 }
 
-template<typename T, Initialize Init>
+template<typename T, Initialize Init, typename StorageT>
 template<typename... Args>
-void RDSLocal<T, Init>::emplace(Args&&... args) {
+void RDSLocal<T, Init, StorageT>::emplace(Args&&... args) {
   node().emplace(std::forward<Args>(args) ... );
 }
 
@@ -466,22 +483,19 @@ void RDSLocal<T, Init>::emplace(Args&&... args) {
 // saves up to 1 instruction and 1 load per access.  g_context serves as an
 // example for how it is used.  It should be used sparingly as it requires
 // storing a pointer in HotRDSLocals.
-template<typename T, Initialize Init,
-         void* detail::HotRDSLocals::*ptr>
-struct AliasedRDSLocal : RDSLocal<T, Init> {
+template<typename T, Initialize Init, void* detail::HotRDSLocals::*ptr>
+struct AliasedRDSLocal : RDSLocal<T, Init, detail::AliasStorage<ptr>> {
+  using StorageT = detail::AliasStorage<ptr>;
+  using Base = RDSLocal<T, Init, StorageT>;
+
   void init() override {
-    detail::rl_hotSection.*ptr = &RDSLocal<T, Init>::node();
-    RDSLocal<T, Init>::init();
+    StorageT::set(detail::LocalsStorage::storage(this->m_offset));
+    Base::init();
   }
 
   void fini() override {
-    RDSLocal<T, Init>::fini();
-    detail::rl_hotSection.*ptr = nullptr;
-  }
-
-  typename RDSLocal<T, Init>::Node& node() const override {
-    assertx(detail::rl_hotSection.*ptr);
-    return *(typename RDSLocal<T, Init>::Node*)(detail::rl_hotSection.*ptr);
+    Base::fini();
+    StorageT::set(nullptr);
   }
 };
 

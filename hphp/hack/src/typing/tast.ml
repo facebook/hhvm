@@ -94,8 +94,6 @@ type fun_def = (ty, saved_env) Aast.fun_def
 
 type fun_param = (ty, saved_env) Aast.fun_param
 
-type fun_variadicity = (ty, saved_env) Aast.fun_variadicity
-
 type func_body = (ty, saved_env) Aast.func_body
 
 type method_ = (ty, saved_env) Aast.method_

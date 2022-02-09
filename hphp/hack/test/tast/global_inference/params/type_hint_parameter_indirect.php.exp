@@ -17,8 +17,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((int), (Some ([3:30-33], (Hprim Tint)))); 
-        f_name = ([3:10-23], "\\accessorentry"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic;
+        f_name = ([3:10-23], "\\accessorentry"); f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (nothing); param_type_hint = ((nothing), None); 
            param_is_variadic = false; param_pos = [3:24-26]; param_name = "$x"; 
@@ -41,8 +40,7 @@ Errors:
        fd_fun =
        { f_span = [7:1-9:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((int), (Some ([7:34-37], (Hprim Tint)))); 
-         f_name = ([7:10-23], "\\accessorarray"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic;
+         f_name = ([7:10-23], "\\accessorarray"); f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (KeyedContainer<mixed, nothing>); param_type_hint = ((KeyedContainer<mixed, nothing>), None); 
             param_is_variadic = false; param_pos = [7:24-26]; param_name = "$x"; 
@@ -71,8 +69,7 @@ Errors:
        fd_fun =
        { f_span = [11:1-13:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([11:29-33], (Hprim Tvoid)))); 
-         f_name = ([11:10-18], "\\mutentry"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic;
+         f_name = ([11:10-18], "\\mutentry"); f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (mixed); param_type_hint = ((mixed), None); 
             param_is_variadic = false; param_pos = [11:19-21]; param_name = "$x"; 
@@ -108,8 +105,7 @@ Errors:
        fd_fun =
        { f_span = [15:1-17:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([15:42-46], (Hprim Tvoid)))); 
-         f_name = ([15:10-18], "\\mutarray"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic;
+         f_name = ([15:10-18], "\\mutarray"); f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (vec<int>); param_type_hint = ((vec<int>), (Some ([15:19-27], (Happly (([15:19-22], "\\HH\\vec"), [([15:23-26], (Hprim Tint))]))))); 
             param_is_variadic = false; param_pos = [15:28-30]; param_name = "$x"; 

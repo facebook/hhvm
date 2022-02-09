@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<aaa91cbabff5f0674664dae47e7d0a04>>
+// @generated SignedSource<<5de54519146f2acae4935e20172cf6ae>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1172,28 +1172,6 @@ impl<P: Params> NodeMut<P> for FunParam<P::Ex, P::En> {
         Ok(())
     }
 }
-impl<P: Params> NodeMut<P> for FunVariadicity<P::Ex, P::En> {
-    fn accept<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        v.visit_fun_variadicity(c, self)
-    }
-    fn recurse<'node>(
-        &'node mut self,
-        c: &mut P::Context,
-        v: &mut dyn VisitorMut<'node, Params = P>,
-    ) -> Result<(), P::Error> {
-        match self {
-            FunVariadicity::FVvariadicArg(a0) => {
-                a0.accept(c, v)?;
-                Ok(())
-            }
-            FunVariadicity::FVnonVariadic => Ok(()),
-        }
-    }
-}
 impl<P: Params> NodeMut<P> for Fun_<P::Ex, P::En> {
     fn accept<'node>(
         &'node mut self,
@@ -1215,7 +1193,6 @@ impl<P: Params> NodeMut<P> for Fun_<P::Ex, P::En> {
         self.name.accept(c, v)?;
         self.tparams.accept(c, v)?;
         self.where_constraints.accept(c, v)?;
-        self.variadic.accept(c, v)?;
         self.params.accept(c, v)?;
         self.ctxs.accept(c, v)?;
         self.unsafe_ctxs.accept(c, v)?;
@@ -1586,7 +1563,6 @@ impl<P: Params> NodeMut<P> for Method_<P::Ex, P::En> {
         self.name.accept(c, v)?;
         self.tparams.accept(c, v)?;
         self.where_constraints.accept(c, v)?;
-        self.variadic.accept(c, v)?;
         self.params.accept(c, v)?;
         self.ctxs.accept(c, v)?;
         self.unsafe_ctxs.accept(c, v)?;

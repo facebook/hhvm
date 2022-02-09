@@ -7,7 +7,7 @@ use env::emitter::Emitter;
 use hhas_pos::HhasSpan;
 use hhas_type::HhasTypeInfo;
 use hhas_typedef::HhasTypedef;
-use hhbc_id::{class::ClassType, Id};
+use hhbc_id::class::ClassType;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::Result;
 use oxidized::{aast_defs::Hint, ast};
@@ -36,7 +36,7 @@ fn emit_typedef<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     typedef: &'a ast::Typedef,
 ) -> Result<HhasTypedef<'arena>> {
-    let name = ClassType::<'arena>::from_ast_name(emitter.alloc, &typedef.name.1);
+    let name = ClassType::<'arena>::from_ast_name_and_mangle(emitter.alloc, &typedef.name.1);
     let attributes_res = emit_attribute::from_asts(emitter, &typedef.user_attributes);
     let tparams = emit_body::get_tp_names(typedef.tparams.as_slice());
     let type_info_res = kind_to_type_info(emitter.alloc, &tparams, &typedef.kind);

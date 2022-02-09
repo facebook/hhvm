@@ -10,8 +10,7 @@ Errors:
       fd_fun =
       { f_span = [3:1-5:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((Unknown), (Some ([3:32-39], (Happly (([3:32-39], "\\Unknown"), []))))); 
-        f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic;
+        f_name = ([3:10-14], "\\test"); f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (vec<string>); param_type_hint = ((vec<string>), (Some ([3:15-26], (Happly (([3:15-18], "\\HH\\vec"), [([3:19-25], (Hprim Tstring))]))))); 
            param_is_variadic = false; param_pos = [3:27-29]; param_name = "$x"; 

@@ -25,11 +25,7 @@ let add_param vars param : vars =
   let lid = Local_id.make_unscoped param.Aast.param_name in
   add_local_def vars (param.Aast.param_pos, lid)
 
-let add_params vars f : vars =
-  let vars = List.fold f.Aast.f_params ~init:vars ~f:add_param in
-  match f.Aast.f_variadic with
-  | Aast.FVnonVariadic -> vars
-  | Aast.FVvariadicArg param -> add_param vars param
+let add_params vars f : vars = List.fold f.Aast.f_params ~init:vars ~f:add_param
 
 let lvalues (e : Nast.expr) : (Pos.t * Local_id.t) list =
   let rec aux acc (_, _, e) =
@@ -49,7 +45,7 @@ let add_local_ref vars (pos, lid) : vars =
   else
     { vars with free = Local_id.Map.add lid pos vars.free }
 
-(* Walk this AAST, track free variables, and add them to capture lists in 
+(* Walk this AAST, track free variables, and add them to capture lists in
    lambdas.
 
    A free variable is any local that isn't bound as a parameter or directly

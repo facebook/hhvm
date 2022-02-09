@@ -41,7 +41,6 @@ pub type Fun_<'a> = aast::Fun_<'a, Ex, En>;
 pub type FuncBody<'a> = aast::FuncBody<'a, Ex, En>;
 pub type FunDef<'a> = aast::FunDef<'a, Ex, En>;
 pub type FunParam<'a> = aast::FunParam<'a, Ex, En>;
-pub type FunVariadicity<'a> = aast::FunVariadicity<'a, Ex, En>;
 pub type Gconst<'a> = aast::Gconst<'a, Ex, En>;
 pub type Method_<'a> = aast::Method_<'a, Ex, En>;
 pub type Program<'a> = aast::Program<'a, Ex, En>;

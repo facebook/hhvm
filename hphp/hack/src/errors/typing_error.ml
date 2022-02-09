@@ -1384,6 +1384,7 @@ module Primary = struct
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option Lazy.t;
         reason: Pos_or_decl.t Message.t list;
       }
+    | Construct_not_instance_method of Pos.t
     | Ambiguous_inheritance of {
         pos: Pos.t;
         class_name: string;
@@ -2439,6 +2440,14 @@ module Primary = struct
           [Quickfix.make ~title:("Change to ->" ^ new_text) ~new_text pos])
     in
     (Error_code.MemberNotFound, (pos, msg), reasons, quickfixes)
+
+  let construct_not_instance_method pos =
+    let claim =
+      ( pos,
+        "`__construct` is not an instance method and shouldn't be invoked directly"
+      )
+    in
+    (Error_code.ConstructNotInstanceMethod, claim, [], [])
 
   let ambiguous_inheritance pos origin class_name =
     let claim =
@@ -4682,6 +4691,7 @@ module Primary = struct
         class_pos
         (Lazy.force hint)
         reason
+    | Construct_not_instance_method pos -> construct_not_instance_method pos
     | Ambiguous_inheritance { pos; origin; class_name } ->
       ambiguous_inheritance pos origin class_name
     | Expected_tparam { pos; n; decl_pos } -> expected_tparam pos n decl_pos

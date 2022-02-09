@@ -84,6 +84,5 @@ val function_dynamically_callable :
   Typing_env_types.env ->
   Nast.fun_ ->
   Typing_defs.decl_ty option list ->
-  Typing_defs.decl_ty option ->
   Typing_defs.locl_ty ->
   unit

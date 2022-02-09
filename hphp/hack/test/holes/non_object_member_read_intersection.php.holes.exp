@@ -8,7 +8,7 @@
       { f_span = [3:1-6:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:77-81], (Hprim Tvoid)))); 
         f_name = ([3:10-52], "\\non_object_member_read_method_intersection"); 
-        f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (int); param_type_hint = ((int), (Some ([3:53-69], (Hintersection [([3:54-57], (Hprim Tint)); ([3:60-68], (Hprim Tarraykey))])))); 
            param_is_variadic = false; param_pos = [3:70-73]; param_name = "$xs"; 

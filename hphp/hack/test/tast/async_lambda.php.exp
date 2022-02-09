@@ -7,8 +7,7 @@
       fd_fun =
       { f_span = [3:1-70]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((Awaitable<string>), (Some ([3:38-55], (Happly (([3:38-47], "\\HH\\Awaitable"), [([3:48-54], (Hprim Tstring))]))))); 
-        f_name = ([3:16-25], "\\genString"); f_tparams = []; f_where_constraints = []; 
-        f_variadic = FVnonVariadic;
+        f_name = ([3:16-25], "\\genString"); f_tparams = []; f_where_constraints = [];
         f_params =
         [{ param_annotation = (string); param_type_hint = ((string), (Some ([3:26-32], (Hprim Tstring)))); 
            param_is_variadic = false; param_pos = [3:33-35]; param_name = "$s"; 
@@ -29,7 +28,7 @@
        { f_span = [5:1-12:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([5:18-22], (Hprim Tvoid)))); 
          f_name = ([5:10-14], "\\test"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic; f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
            [([6:3-8:5],
@@ -41,8 +40,8 @@
                         { f_span = [6:9-8:4]; f_readonly_this = None; 
                           f_annotation = (); f_readonly_ret = None; f_ret = ((Awaitable<void>), None); 
                           f_name = ([6:9-8:4], ";anonymous"); f_tparams = []; 
-                          f_where_constraints = []; f_variadic = FVnonVariadic; 
-                          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
+                          f_where_constraints = []; f_params = []; f_ctxs = None; 
+                          f_unsafe_ctxs = None;
                           f_body =
                           { fb_ast =
                             [([7:5-35],
@@ -70,8 +69,7 @@
                          { f_span = [9:9-11:4]; f_readonly_this = None; 
                            f_annotation = (); f_readonly_ret = None; 
                            f_ret = ((Awaitable<void>), None); f_name = ([9:9-11:4], ";anonymous"); 
-                           f_tparams = []; f_where_constraints = []; 
-                           f_variadic = FVnonVariadic;
+                           f_tparams = []; f_where_constraints = [];
                            f_params =
                            [{ param_annotation = (string); param_type_hint = ((string), None); 
                               param_is_variadic = false; param_pos = [9:15-17]; 

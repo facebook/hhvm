@@ -20,8 +20,8 @@
 #ifndef incl_HPHP_UTIL_PHP_CRYPT_R_H_
 #define incl_HPHP_UTIL_PHP_CRYPT_R_H_
 
-#include "crypt-blowfish.h"
-#include "crypt-freesec.h"
+#include "hphp/zend/crypt-blowfish.h"
+#include "hphp/zend/crypt-freesec.h"
 
 #define MD5_HASH_MAX_LEN 120
 #define PHP_MAX_SALT_LEN 123

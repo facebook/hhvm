@@ -56,7 +56,12 @@ and fun_decl_in_env
   in
   let ft_readonly_this = Option.is_some f.f_readonly_this in
   let ft_is_memoized = FunUtils.has_memoize_attribute f.f_user_attributes in
-  let params = FunUtils.make_params env ~is_lambda f.f_params in
+  let params =
+    FunUtils.make_params
+      env
+      ~is_lambda
+      (List.filter f.f_params ~f:(fun p -> not p.param_is_variadic))
+  in
   let (_pos, capability) =
     Decl_hint.aast_contexts_to_decl_capability env f.f_ctxs (fst f.f_name)
   in
@@ -69,11 +74,9 @@ and fun_decl_in_env
       (hint_of_type_hint f.f_ret)
   in
   let arity =
-    match f.f_variadic with
-    | FVvariadicArg param ->
-      assert param.param_is_variadic;
-      Fvariadic (FunUtils.make_param_ty env ~is_lambda param)
-    | FVnonVariadic -> Fstandard
+    match List.find f.f_params ~f:(fun p -> p.param_is_variadic) with
+    | Some param -> Fvariadic (FunUtils.make_param_ty env ~is_lambda param)
+    | None -> Fstandard
   in
   let tparams = List.map f.f_tparams ~f:(FunUtils.type_param env) in
   let where_constraints =

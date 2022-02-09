@@ -8,8 +8,7 @@
       c_methods =
       [{ m_span = [6:3-55]; m_annotation = (); m_final = false; m_abstract = false; 
          m_static = false; m_readonly_this = false; m_visibility = Public; 
-         m_name = ([6:19-30], "__construct"); m_tparams = []; m_where_constraints = []; 
-         m_variadic = FVnonVariadic;
+         m_name = ([6:19-30], "__construct"); m_tparams = []; m_where_constraints = [];
          m_params =
          [{ param_annotation = (dict<string, int>);
             param_type_hint = ((dict<string, int>), (Some ([6:31-48], (Happly (([6:31-35], "\\HH\\dict"), [([6:36-42], (Hprim Tstring)); ([6:44-47], (Hprim Tint))]))))); 
@@ -318,8 +317,7 @@
        fd_fun =
        { f_span = [19:1-20:60]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([20:53-57], (Hprim Tvoid)))); 
-         f_name = ([20:10-12], "\\ff"); f_tparams = []; f_where_constraints = []; 
-         f_variadic = FVnonVariadic;
+         f_name = ([20:10-12], "\\ff"); f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (int); param_type_hint = ((int), (Some ([20:44-47], (Hprim Tint)))); 
             param_is_variadic = false; param_pos = [20:48-50]; param_name = "$i"; 
@@ -381,9 +379,8 @@
        [{ m_span = [28:3-29:34]; m_annotation = (); m_final = false; 
           m_abstract = false; m_static = false; m_readonly_this = false; 
           m_visibility = Private; m_name = ([29:20-23], "met"); m_tparams = []; 
-          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = []; 
-          m_ctxs = None; m_unsafe_ctxs = None; m_body = { fb_ast = [([Pos.none], Noop)] }; 
-          m_fun_kind = FSync;
+          m_where_constraints = []; m_params = []; m_ctxs = None; m_unsafe_ctxs = None; 
+          m_body = { fb_ast = [([Pos.none], Noop)] }; m_fun_kind = FSync;
           m_user_attributes =
           [{ ua_name = ([28:5-8], "\\Met");
              ua_params =

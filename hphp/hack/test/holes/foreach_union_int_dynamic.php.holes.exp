@@ -8,7 +8,7 @@
       { f_span = [3:1-7:2]; f_readonly_this = None; f_annotation = (); 
         f_readonly_ret = None; f_ret = ((void), (Some ([3:56-60], (Hprim Tvoid)))); 
         f_name = ([3:10-35], "\\foreach_union_int_dynamic"); f_tparams = []; 
-        f_where_constraints = []; f_variadic = FVnonVariadic;
+        f_where_constraints = [];
         f_params =
         [{ param_annotation = ((dynamic | int)); param_type_hint = (((dynamic | int)), (Some ([3:36-49], (Hunion [([3:37-40], (Hprim Tint)); ([3:41-48], Hdynamic)])))); 
            param_is_variadic = false; param_pos = [3:50-53]; param_name = "$xs"; 

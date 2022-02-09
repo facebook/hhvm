@@ -27,7 +27,7 @@ Errors:
        { f_span = [5:1-8:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([5:51-55], (Hprim Tvoid)))); 
          f_name = ([5:11-42], "\\member_not_found_property_fixme"); f_tparams = []; 
-         f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_where_constraints = [];
          f_params =
          [{ param_annotation = (C); param_type_hint = ((C), (Some ([5:43-44], (Happly (([5:43-44], "\\C"), []))))); 
             param_is_variadic = false; param_pos = [5:45-47]; param_name = "$c"; 
@@ -49,7 +49,7 @@ Errors:
        { f_span = [11:1-13:2]; f_readonly_this = None; f_annotation = (); 
          f_readonly_ret = None; f_ret = ((void), (Some ([11:54-58], (Hprim Tvoid)))); 
          f_name = ([11:11-45], "\\member_not_found_property_no_fixme"); 
-         f_tparams = []; f_where_constraints = []; f_variadic = FVnonVariadic;
+         f_tparams = []; f_where_constraints = [];
          f_params =
          [{ param_annotation = (C); param_type_hint = ((C), (Some ([11:46-47], (Happly (([11:46-47], "\\C"), []))))); 
             param_is_variadic = false; param_pos = [11:48-50]; param_name = "$c"; 

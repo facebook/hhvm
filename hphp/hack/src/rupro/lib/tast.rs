@@ -28,7 +28,6 @@ pub type Fun_<R> = oxidized::aast::Fun_<Ty<R>, SavedEnv>;
 pub type FileAttribute<R> = oxidized::aast::FileAttribute<Ty<R>, SavedEnv>;
 pub type FunDef<R> = oxidized::aast::FunDef<Ty<R>, SavedEnv>;
 pub type FunParam<R> = oxidized::aast::FunParam<Ty<R>, SavedEnv>;
-pub type FunVariadicity<R> = oxidized::aast::FunVariadicity<Ty<R>, SavedEnv>;
 pub type FuncBody<R> = oxidized::aast::FuncBody<Ty<R>, SavedEnv>;
 pub type Method_<R> = oxidized::aast::Method_<Ty<R>, SavedEnv>;
 pub type ClassVar<R> = oxidized::aast::ClassVar<Ty<R>, SavedEnv>;

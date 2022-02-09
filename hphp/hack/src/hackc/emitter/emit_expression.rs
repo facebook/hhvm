@@ -10,7 +10,7 @@ use ffi::{Maybe::Just, Slice, Str};
 use hash::HashSet;
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
-use hhbc_id::{class, r#const, function, method, prop, Id};
+use hhbc_id::{class, r#const, function, method, prop};
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
 use instruction_sequence::{
@@ -650,7 +650,8 @@ fn emit_id<'a, 'arena, 'decl>(
         _ => {
             // panic!("TODO: uncomment after D19350786 lands")
             // let cid: ConstId = r#const::ConstType::from_ast_name(&s);
-            let cid = r#const::ConstType(Str::new_str(alloc, string_utils::strip_global_ns(s)));
+            let cid =
+                r#const::ConstType::new(Str::new_str(alloc, string_utils::strip_global_ns(s)));
             emit_symbol_refs::add_constant(emitter, cid.clone());
             return Ok(emit_pos_then(alloc, p, instr::lit_const(alloc, CnsE(cid))));
         }
@@ -1944,7 +1945,7 @@ fn emit_call<'a, 'arena, 'decl>(
         None => emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args),
         Some(ast_defs::Id(_, id)) => {
             let fq = function::FunctionType::<'arena>::from_ast_name(alloc, id);
-            let lower_fq_name = fq.to_raw_string();
+            let lower_fq_name = fq.unsafe_as_str();
             emit_special_function(e, env, pos, args, uarg, lower_fq_name)
                 .transpose()
                 .unwrap_or_else(|| {
@@ -2196,7 +2197,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                 mut fcall_args,
             | {
                 let name =
-                    method::MethodType(Str::new_str(alloc, string_utils::strip_global_ns(id)));
+                    method::MethodType::new(Str::new_str(alloc, string_utils::strip_global_ns(id)));
                 let obj = emit_object_expr(e, env, obj)?;
                 let generics = emit_generics(e, env, &mut fcall_args)?;
                 let null_flavor = from_ast_null_flavor(*null_flavor);
@@ -2315,7 +2316,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                 }
             }
             let method_id =
-                method::MethodType(Str::new_str(alloc, string_utils::strip_global_ns(id)));
+                method::MethodType::new(Str::new_str(alloc, string_utils::strip_global_ns(id)));
             Ok(match cexpr {
                 // Statically known
                 ClassExpr::Id(ast_defs::Id(_, cname)) => {
@@ -2363,7 +2364,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                             alloc,
                             vec![
                                 generics,
-                                instr::string(alloc, method_id.to_raw_string()),
+                                instr::string(alloc, method_id.unsafe_as_str()),
                                 emit_expr(e, env, &expr)?,
                                 instr::classgetc(alloc),
                                 instr::fcallclsmethod(
@@ -2390,7 +2391,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                         InstrSeq::gather(
                             alloc,
                             vec![
-                                instr::string(alloc, method_id.to_raw_string()),
+                                instr::string(alloc, method_id.unsafe_as_str()),
                                 instr::pushl(alloc, tmp),
                                 instr::classgetc(alloc),
                                 instr::fcallclsmethod(
@@ -2540,7 +2541,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                 "max" if num_args == 2 && !flags.contains(FcallFlags::HAS_UNPACK) => {
                     function::FunctionType::<'arena>::from_ast_name(alloc, "__SystemLib\\max2")
                 }
-                _ => function::FunctionType(Str::new_str(
+                _ => function::FunctionType::new(Str::new_str(
                     alloc,
                     string_utils::strip_global_ns(&id.1),
                 )),
@@ -2559,7 +2560,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
         }
         E_::String(s) => {
             // TODO(hrust) should be able to accept `let fq_id = function::from_raw_string(s);`
-            let fq_id = function::FunctionType(Str::new_str(alloc, s.to_string().as_str()));
+            let fq_id = function::FunctionType::new(Str::new_str(alloc, s.to_string().as_str()));
             let generics = emit_generics(e, env, &mut fcall_args)?;
             Ok((
                 InstrSeq::gather(
@@ -2998,7 +2999,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 // like: `foo(inout "literal")`
                 [(_, E(_, _, E_::String(ref func_name)))] => Ok(Some(instr::resolve_meth_caller(
                     alloc,
-                    function::FunctionType(Str::new_str(
+                    function::FunctionType::new(Str::new_str(
                         alloc,
                         string_utils::strip_global_ns(
                             // FIXME: This is not safe--string literals are binary strings.
@@ -3262,7 +3263,7 @@ fn emit_class_meth<'a, 'arena, 'decl>(
     {
         let method_id = match &meth.2 {
             E_::String(method_name) => {
-                method::MethodType(Str::new_str(alloc, method_name.to_string().as_str()))
+                method::MethodType::new(Str::new_str(alloc, method_name.to_string().as_str()))
             }
             _ => return Err(unrecoverable("emit_class_meth: unhandled method")),
         };
@@ -3283,7 +3284,7 @@ fn emit_class_meth<'a, 'arena, 'decl>(
         if let Some(class_name) = cls.2.as_string() {
             return Ok(instr::resolveclsmethodd(
                 alloc,
-                class::ClassType(Str::new_str(
+                class::ClassType::new(Str::new_str(
                     alloc,
                     string_utils::strip_global_ns(
                         // FIXME: This is not safe--string literals are binary strings.
@@ -3426,7 +3427,7 @@ fn emit_function_pointer<'a, 'arena, 'decl>(
         // class_meth
         ast::FunctionPtrId::FPClassConst(cid, method_id) => {
             // TODO(hrust) should accept `let method_id = method::MethodType::from_ast_name(&(cc.1).1);`
-            let method_id = method::MethodType(Str::new_str(
+            let method_id = method::MethodType::new(Str::new_str(
                 alloc,
                 string_utils::strip_global_ns(&method_id.1),
             ));
@@ -3460,13 +3461,16 @@ fn emit_hh_fun<'a, 'arena, 'decl>(
             alloc,
             vec![
                 generics,
-                instr::resolve_rfunc(alloc, function::FunctionType(Str::new_str(alloc, fname))),
+                instr::resolve_rfunc(
+                    alloc,
+                    function::FunctionType::new(Str::new_str(alloc, fname)),
+                ),
             ],
         ))
     } else {
         Ok(instr::resolve_func(
             alloc,
-            function::FunctionType(Str::new_str(alloc, fname)),
+            function::FunctionType::new(Str::new_str(alloc, fname)),
         ))
     }
 }
@@ -3791,8 +3795,8 @@ fn emit_known_class_id<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     id: &ast_defs::Id,
 ) -> InstrSeq<'arena> {
-    let cid = class::ClassType::from_ast_name(alloc, &id.1);
-    let cid_string = instr::string(alloc, cid.to_raw_string());
+    let cid = class::ClassType::from_ast_name_and_mangle(alloc, &id.1);
+    let cid_string = instr::string(alloc, cid.unsafe_as_str());
     emit_symbol_refs::add_class(e, cid);
     InstrSeq::gather(alloc, vec![cid_string, instr::classgetc(alloc)])
 }
@@ -4562,7 +4566,8 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                         ));
                     }
                 };
-                let fq_id = class::ClassType::<'arena>::from_ast_name(alloc, cname).to_raw_string();
+                let fq_id = class::ClassType::<'arena>::from_ast_name_and_mangle(alloc, cname)
+                    .unsafe_as_str();
                 if e.options().emit_class_pointers() > 0 {
                     Ok((
                         MemberKey::ET(Str::from(fq_id), ReadonlyOp::Any),
@@ -4777,7 +4782,7 @@ fn emit_class_const<'a, 'arena, 'decl>(
     match cexpr {
         ClassExpr::Id(ast_defs::Id(pos, name)) => {
             let cid = class::ClassType::from_ast_name_and_mangle(alloc, &name);
-            let cname = cid.to_raw_string();
+            let cname = cid.unsafe_as_str();
             Ok(if string_utils::is_class(&id.1) {
                 if e.options().emit_class_pointers() == 1 {
                     emit_pos_then(alloc, &pos, instr::resolveclass(alloc, cid))
@@ -4790,8 +4795,10 @@ fn emit_class_const<'a, 'arena, 'decl>(
                 emit_symbol_refs::add_class(e, cid.clone());
                 // TODO(hrust) enabel `let const_id = r#const::ConstType::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
-                let const_id =
-                    r#const::ConstType(Str::new_str(alloc, string_utils::strip_global_ns(&id.1)));
+                let const_id = r#const::ConstType::new(Str::new_str(
+                    alloc,
+                    string_utils::strip_global_ns(&id.1),
+                ));
                 emit_pos_then(alloc, &pos, instr::clscnsd(alloc, const_id, cid))
             })
         }
@@ -4805,8 +4812,10 @@ fn emit_class_const<'a, 'arena, 'decl>(
             } else {
                 // TODO(hrust) enabel `let const_id = r#const::ConstType::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
-                let const_id =
-                    r#const::ConstType(Str::new_str(alloc, string_utils::strip_global_ns(&id.1)));
+                let const_id = r#const::ConstType::new(Str::new_str(
+                    alloc,
+                    string_utils::strip_global_ns(&id.1),
+                ));
                 instr::clscns(alloc, const_id)
             };
             if string_utils::is_class(&id.1) && e.options().emit_class_pointers() == 1 {

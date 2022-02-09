@@ -139,8 +139,13 @@ struct DecRefProfile {
    */
   DataType datatype;
 
-  // In RDS, but can't contain pointers to request-allocated data.
-  TYPE_SCAN_IGNORE_ALL;
+  /*
+   * To ensure that `update` is constant time, we examine at most this many
+   * values when checking when the input is an array of uncounted values.
+   * Arrays with a large number of values are usually monotyped, so we don't
+   * get much benefit from examining more.
+   */
+  static constexpr size_t kMaxNumProfiledElements = 16;
 };
 
 const StringData* decRefProfileKey(int locId);

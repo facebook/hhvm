@@ -85,7 +85,7 @@ function hphp_get_this(): mixed;
  */
 <<__Native>>
 function class_implements(mixed $obj,
-                          bool $autoload = true): mixed;
+                          bool $autoload = true)[]: mixed;
 
 /** This function returns an array with the name of the parent classes of the
  * given class.
@@ -96,7 +96,7 @@ function class_implements(mixed $obj,
  */
 <<__Native>>
 function class_parents(mixed $obj,
-                       bool $autoload = true): mixed;
+                       bool $autoload = true)[]: mixed;
 
 /** This function returns an array with the names of the traits that the given
  * class uses.
@@ -107,7 +107,7 @@ function class_parents(mixed $obj,
  */
 <<__Native>>
 function class_uses(mixed $obj,
-                    bool $autoload = true): mixed;
+                    bool $autoload = true)[]: mixed;
 
 /** Calls a function for every element in an iterator.
  * @param mixed $obj - The class to iterate over.

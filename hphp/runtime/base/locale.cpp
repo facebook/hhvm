@@ -65,7 +65,7 @@ std::shared_ptr<Locale> Locale::getCLocale() {
   if (ret) {
     return ret;
   }
-  auto locale = ::newlocale(LC_ALL, "C", (locale_t) 0);
+  auto locale = ::newlocale(LC_ALL_MASK, "C", (locale_t) 0);
 
   CategoryAndLocaleMap map = {
 #define CATEGORY_LOCALE_MAP_ENTRY(category) \
@@ -84,7 +84,7 @@ std::shared_ptr<Locale> Locale::getEnvLocale() {
   if (ret) {
     return ret;
   }
-  auto locale = ::newlocale(LC_ALL, "", (locale_t) 0);
+  auto locale = ::newlocale(LC_ALL_MASK, "", (locale_t) 0);
   // Per POSIX, a processes' default locale is "C" until `setlocale()` is
   // called; to use env from environment, `setlocale(LC_ALL, "")` should
   // be called.

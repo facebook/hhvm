@@ -955,7 +955,7 @@ fn print_fcall_args(
         num_rets,
         inouts,
         readonly,
-        async_eager_label,
+        async_eager_target,
         context,
     }: &FcallArgs<'_>,
 ) -> Result<()> {
@@ -990,7 +990,7 @@ fn print_fcall_args(
         })
     })?;
     w.write_all(b" ")?;
-    option_or(w, async_eager_label.as_ref(), print_label, "-")?;
+    option_or(w, async_eager_target.as_ref(), print_label, "-")?;
     w.write_all(b" ")?;
     match context {
         Just(s) => quotes(w, |w| w.write_all(s)),
@@ -1686,21 +1686,21 @@ fn print_misc(w: &mut dyn Write, misc: &InstructMisc<'_>) -> Result<()> {
         M::MemoSet(Nothing) => w.write_all(b"MemoSet L:0+0"),
         M::MemoSet(_) => Err(Error::fail("MemoSet needs an unnamed local").into()),
 
-        M::MemoGetEager(label1, label2, Just(Pair(Local::Unnamed(first), local_count))) => {
+        M::MemoGetEager([label1, label2], Just(Pair(Local::Unnamed(first), local_count))) => {
             w.write_all(b"MemoGetEager ")?;
             print_label(w, label1)?;
             w.write_all(b" ")?;
             print_label(w, label2)?;
             write!(w, " L:{}+{}", first, local_count)
         }
-        M::MemoGetEager(label1, label2, Nothing) => {
+        M::MemoGetEager([label1, label2], Nothing) => {
             w.write_all(b"MemoGetEager ")?;
             print_label(w, label1)?;
             w.write_all(b" ")?;
             print_label(w, label2)?;
             w.write_all(b" L:0+0")
         }
-        M::MemoGetEager(_, _, _) => Err(Error::fail("MemoGetEager needs an unnamed local").into()),
+        M::MemoGetEager(_, _) => Err(Error::fail("MemoGetEager needs an unnamed local").into()),
 
         M::MemoSetEager(Just(Pair(Local::Unnamed(first), local_count))) => {
             write!(w, "MemoSetEager L:{}+{}", first, local_count)
@@ -1770,18 +1770,27 @@ fn print_control_flow(w: &mut dyn Write, cf: &InstructControlFlow<'_>) -> Result
         CF::RetCSuspended => w.write_all(b"RetCSuspended"),
         CF::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
         CF::Throw => w.write_all(b"Throw"),
-        CF::Switch { kind, base, labels } => print_switch(w, kind, base, labels.as_ref()),
-        CF::SSwitch { labels } => match labels.as_ref() {
-            [] => Err(Error::fail("sswitch should have at least one case").into()),
-            [rest @ .., Pair(_, lastlabel)] => {
+        CF::Switch {
+            kind,
+            base,
+            targets,
+        } => print_switch(w, kind, base, targets.as_ref()),
+        CF::SSwitch { cases, targets } => match (cases.as_ref(), targets.as_ref()) {
+            ([], _) | (_, []) => Err(Error::fail("sswitch should have at least one case").into()),
+            ([rest_cases @ .., _last_case], [rest_targets @ .., last_target]) => {
                 w.write_all(b"SSwitch ")?;
+                let rest: Vec<_> = rest_cases
+                    .iter()
+                    .zip(rest_targets)
+                    .map(|(case, target)| Pair(case, target))
+                    .collect();
                 angle(w, |w| {
-                    concat_by(w, " ", rest, |w, Pair(s, l)| {
-                        write_bytes!(w, r#""{}":"#, escape_bstr(s.as_bstr()))?;
-                        print_label(w, l)
+                    concat_by(w, " ", rest, |w, Pair(case, target)| {
+                        write_bytes!(w, r#""{}":"#, escape_bstr(case.as_bstr()))?;
+                        print_label(w, target)
                     })?;
                     w.write_all(b" -:")?;
-                    print_label(w, lastlabel)
+                    print_label(w, last_target)
                 })
             }
         },

@@ -286,14 +286,9 @@ pub mod locals {
 pub mod classes {
     pub fn mangle_class(prefix: &str, scope: &str, idx: u32) -> String {
         if idx == 1 {
-            format!("{}${}", prefix.to_string(), scope.to_string())
+            format!("{}${}", prefix, scope)
         } else {
-            format!(
-                "{}${}#{}",
-                prefix.to_string(),
-                scope.to_string(),
-                idx.to_string()
-            )
+            format!("{}${}#{}", prefix, scope, idx)
         }
     }
 }
@@ -345,7 +340,7 @@ pub mod reified {
     pub fn reified_generic_captured_name(is_fun: bool, i: usize) -> String {
         let type_ = if is_fun { "function" } else { "class" };
         // to_string() due to T52404885
-        format!("$__captured$reifiedgeneric${}${}", type_, i.to_string())
+        format!("$__captured$reifiedgeneric${}${}", type_, i)
     }
 
     pub fn mangle_reified_param(no_dollar: bool, s: &str) -> String {

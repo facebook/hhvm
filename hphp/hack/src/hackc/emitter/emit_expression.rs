@@ -2956,10 +2956,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
             } else if nargs != 1 {
                 Err(emit_fatal::raise_fatal_runtime(
                     pos,
-                    format!(
-                        "fun() expects exactly 1 parameter, {} given",
-                        nargs.to_string()
-                    ),
+                    format!("fun() expects exactly 1 parameter, {} given", nargs),
                 ))
             } else {
                 match args {
@@ -2988,10 +2985,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
             if nargs != 1 {
                 return Err(emit_fatal::raise_fatal_runtime(
                     pos,
-                    format!(
-                        "fun() expects exactly 1 parameter, {} given",
-                        nargs.to_string()
-                    ),
+                    format!("fun() expects exactly 1 parameter, {} given", nargs),
                 ));
             }
             match args {
@@ -3063,10 +3057,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
             )?)),
             _ => Err(emit_fatal::raise_fatal_runtime(
                 pos,
-                format!(
-                    "inst_meth() expects exactly 2 parameters, {} given",
-                    nargs.to_string()
-                ),
+                format!("inst_meth() expects exactly 2 parameters, {} given", nargs),
             )),
         },
         ("HH\\class_meth", _) if fun_and_clsmeth_disabled => Err(emit_fatal::raise_fatal_parse(
@@ -3101,10 +3092,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
         }
         ("HH\\class_meth", _) => Err(emit_fatal::raise_fatal_runtime(
             pos,
-            format!(
-                "class_meth() expects exactly 2 parameters, {} given",
-                nargs.to_string()
-            ),
+            format!("class_meth() expects exactly 2 parameters, {} given", nargs),
         )),
         ("HH\\global_set", _) => match *args {
             [ref gkey, ref gvalue] => Ok(Some(InstrSeq::gather(
@@ -3120,10 +3108,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
             ))),
             _ => Err(emit_fatal::raise_fatal_runtime(
                 pos,
-                format!(
-                    "global_set() expects exactly 2 parameters, {} given",
-                    nargs.to_string()
-                ),
+                format!("global_set() expects exactly 2 parameters, {} given", nargs),
             )),
         },
         ("HH\\global_unset", _) => match *args {
@@ -3140,7 +3125,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 pos,
                 format!(
                     "global_unset() expects exactly 1 parameter, {} given",
-                    nargs.to_string()
+                    nargs
                 ),
             )),
         },

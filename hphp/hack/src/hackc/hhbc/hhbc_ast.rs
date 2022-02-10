@@ -378,13 +378,15 @@ pub enum IsTypeOp {
     OpStr,
     OpObj,
     OpRes,
-    OpScalar,
+
     /// Int or Dbl or Str or Bool
+    OpScalar,
     OpKeyset,
     OpDict,
     OpVec,
-    OpArrLike,
+
     /// Arr or Vec or Dict or Keyset
+    OpArrLike,
     OpClsMeth,
     OpFunc,
     OpLegacyArrLike,
@@ -557,15 +559,14 @@ pub enum ClassishKind {
     EnumClass,
 }
 impl std::convert::From<oxidized::ast_defs::ClassishKind> for ClassishKind {
-    fn from(k: oxidized::ast_defs::ClassishKind) -> ClassishKind {
-        use oxidized::ast_defs::ClassishKind::*;
-        use ClassishKind::*;
+    fn from(k: oxidized::ast_defs::ClassishKind) -> Self {
+        use oxidized::ast_defs;
         match k {
-            Cclass(_) => Class,
-            Cinterface => Interface,
-            Ctrait => Trait,
-            Cenum => Enum,
-            CenumClass(_) => EnumClass,
+            ast_defs::ClassishKind::Cclass(_) => Self::Class,
+            ast_defs::ClassishKind::Cinterface => Self::Interface,
+            ast_defs::ClassishKind::Ctrait => Self::Trait,
+            ast_defs::ClassishKind::Cenum => Self::Enum,
+            ast_defs::ClassishKind::CenumClass(_) => Self::EnumClass,
         }
     }
 }
@@ -579,24 +580,23 @@ pub enum Visibility {
     Internal,
 }
 impl std::convert::From<oxidized::ast_defs::Visibility> for Visibility {
-    fn from(k: oxidized::ast_defs::Visibility) -> Visibility {
-        use oxidized::ast_defs::Visibility::*;
+    fn from(k: oxidized::ast_defs::Visibility) -> Self {
+        use oxidized::ast_defs;
         match k {
-            Private => Visibility::Private,
-            Public => Visibility::Public,
-            Protected => Visibility::Protected,
-            Internal => Visibility::Internal,
+            ast_defs::Visibility::Private => Self::Private,
+            ast_defs::Visibility::Public => Self::Public,
+            ast_defs::Visibility::Protected => Self::Protected,
+            ast_defs::Visibility::Internal => Self::Internal,
         }
     }
 }
 impl AsRef<str> for Visibility {
     fn as_ref(&self) -> &str {
-        use Visibility::*;
         match self {
-            Private => "private",
-            Public => "public",
-            Protected => "protected",
-            Internal => "internal",
+            Self::Private => "private",
+            Self::Public => "public",
+            Self::Protected => "protected",
+            Self::Internal => "internal",
         }
     }
 }

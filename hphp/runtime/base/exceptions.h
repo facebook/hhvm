@@ -24,7 +24,7 @@
 
 #include "hphp/util/portability.h"
 #include "hphp/util/exception.h"
-#include "hphp/parser/location.h"
+#include "hphp/runtime/base/location.h"
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/util/rds-local.h"

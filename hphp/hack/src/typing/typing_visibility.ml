@@ -96,7 +96,7 @@ let is_internal_visible env target =
     Module.can_access ~current:(Env.get_module env) ~target:(Some target)
   with
   | `Yes -> None
-  | `Disjoint ((_, current), (_, target)) ->
+  | `Disjoint (current, target) ->
     Some
       (Printf.sprintf
          "You cannot access internal members from module `%s` in module `%s`"
@@ -156,7 +156,7 @@ let check_typedef_access ~use_pos ~in_signature env td =
     ~def_pos:td.td_pos
     env
     internal
-    td.td_module
+    (Option.map td.td_module ~f:snd)
 
 let is_visible_for_obj ~is_method env vis =
   let member_ty =

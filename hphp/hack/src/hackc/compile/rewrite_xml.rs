@@ -71,10 +71,7 @@ fn rewrite_xml_<'arena, 'decl>(
                     }
                     XhpAttribute::XhpSpread(expr) => {
                         attrs.push((
-                            SF::SFlitStr((
-                                expr.1.clone(),
-                                format!("...${}", spread_id.to_string()).into(),
-                            )),
+                            SF::SFlitStr((expr.1.clone(), format!("...${}", spread_id).into())),
                             expr,
                         ));
                         spread_id += 1;

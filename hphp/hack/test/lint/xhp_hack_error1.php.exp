@@ -1,0 +1,2 @@
+File "xhp_hack_error1.php", line 10, characters 25-58:
+DO NOT USE XhpHackError::attributeExpectsBool() IN NEW CODE. XHP has some "unique" rules for how it cast the values of attributes. The first step towards making XHP behave more like typical Hack code is to mark places currently in the code that can possibly rely on XHP's internal casting. If you see this call in your code, remove it and cast the value to the proper type. (Lint[5542])

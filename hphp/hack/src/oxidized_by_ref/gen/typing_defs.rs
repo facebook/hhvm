@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4b72fca08708966735e1c6f392c6b8e4>>
+// @generated SignedSource<<b55e5bc574e9c429f62b89ff7bc66c36>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -53,7 +53,7 @@ pub use typing_defs_core::*;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ClassConstFrom<'a> {
     Self_,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -353,7 +353,7 @@ arena_deserializer::impl_deserialize_in_arena!(PartiallyAbstractTypeconst<'arena
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Typeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TCAbstract(&'a AbstractTypeconst<'a>),
@@ -493,7 +493,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypedefType<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum DeserializationError<'a> {
     /// The type was valid, but some component thereof was a decl_ty when we
     /// expected a locl_phase ty, or vice versa.

@@ -8,13 +8,11 @@
 
 open Hh_prelude
 
-let can_access ~(current : Ast_defs.id option) ~(target : Ast_defs.id option) =
+let can_access ~(current : string option) ~(target : string option) =
   match (current, target) with
   | (None, None)
   | (Some _, None) ->
     `Yes
   | (None, Some m) -> `Outside m
-  | (Some (_, m_current), Some (_, m_target))
-    when String.equal m_current m_target ->
-    `Yes
+  | (Some m_current, Some m_target) when String.equal m_current m_target -> `Yes
   | (Some current, Some target) -> `Disjoint (current, target)

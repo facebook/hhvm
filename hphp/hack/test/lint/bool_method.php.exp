@@ -1,0 +1,2 @@
+File "bool_method.php", line 4, characters 29-32:
+`__bool` methods should return `bool`. They show that an expression tree type can be used in a boolean expression. (Lint[5631])

@@ -1,0 +1,6 @@
+File "class_overrides_trait_properties_bad.php", line 13, characters 7-13:
+Unused trait: `MyClass` is overriding all the methods in `MyTrait` (Lint[5627])
+File "class_overrides_trait_properties_bad.php", line 13, characters 7-13:
+Duplicated property `bar` in `MyClass` (defined in `MyClass` and `MyTrait2`): all instances will be aliased at runtime (Lint[5635])
+File "class_overrides_trait_properties_bad.php", line 13, characters 7-13:
+Duplicated property `foo` in `MyClass` (defined in `MyClass` and `MyTrait`): all instances will be aliased at runtime (Lint[5635])

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cd33e62333e1933f84745171f206f697>>
+// @generated SignedSource<<22270168b938cd32b159fe155d0e6a0d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -91,7 +91,7 @@ pub struct SubstContext {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum SourceType {
     Child,
     Parent,
@@ -122,7 +122,7 @@ arena_deserializer::impl_deserialize_in_arena!(SourceType);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum LinearizationKind {
     MemberResolution,
     AncestorTypes,

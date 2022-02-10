@@ -7,14 +7,12 @@
  *)
 
 open Aast
-open Hh_json
 open Hh_prelude
-open Symbol_add_fact
-open Symbol_build_json
-open Symbol_builder_types
-open Symbol_json_util
-open SymbolDefinition
-open SymbolOccurrence
+open Hh_json
+module Add_fact = Symbol_add_fact
+module Util = Symbol_json_util
+module Build = Symbol_build_json
+module ST = Symbol_builder_types
 
 let is_enum_or_enum_class = function
   | Ast_defs.Cenum
@@ -29,7 +27,7 @@ let process_doc_comment comment decl_ref_json prog =
   match comment with
   | None -> prog
   | Some (pos, _doc) ->
-    let (_, prog) = add_decl_comment_fact pos decl_ref_json prog in
+    let (_, prog) = Add_fact.decl_comment pos decl_ref_json prog in
     prog
 
 let process_decl_loc
@@ -37,29 +35,31 @@ let process_decl_loc
   let (decl_id, prog) = decl_fun id progress in
   let (_, prog) = defn_fun elem decl_id prog in
   let ref_json = decl_ref_fun decl_id in
-  let (_, prog) = add_decl_loc_fact pos ref_json prog in
+  let (_, prog) = Add_fact.decl_loc pos ref_json prog in
   let prog = process_doc_comment doc ref_json prog in
   let prog =
     match span with
     | None -> prog
-    | Some span_pos -> snd (add_decl_span_fact span_pos ref_json prog)
+    | Some span_pos -> snd (Add_fact.decl_span span_pos ref_json prog)
   in
   (decl_id, prog)
 
 let process_container_decl ctx source_map con (all_decls, progress) =
   let (con_pos, con_name) = con.c_name in
-  let (con_type, decl_pred) = parent_decl_predicate (get_parent_kind con) in
+  let (con_type, decl_pred) =
+    Util.parent_decl_predicate (Util.get_parent_kind con)
+  in
   let (con_decl_id, prog) =
-    add_container_decl_fact decl_pred con_name progress
+    Add_fact.container_decl decl_pred con_name progress
   in
   let (prop_decls, prog) =
     List.fold_right con.c_vars ~init:([], prog) ~f:(fun prop (decls, prog) ->
         let (pos, id) = prop.cv_id in
         let (decl_id, prog) =
           process_decl_loc
-            (add_property_decl_fact con_type con_decl_id)
-            (add_property_defn_fact ctx source_map)
-            build_property_decl_json_ref
+            (Add_fact.property_decl con_type con_decl_id)
+            (Add_fact.property_defn ctx source_map)
+            Build.build_property_decl_json_ref
             pos
             (Some prop.cv_span)
             id
@@ -67,16 +67,16 @@ let process_container_decl ctx source_map con (all_decls, progress) =
             prop.cv_doc_comment
             prog
         in
-        (build_property_decl_json_ref decl_id :: decls, prog))
+        (Build.build_property_decl_json_ref decl_id :: decls, prog))
   in
   let (class_const_decls, prog) =
     List.fold_right con.c_consts ~init:([], prog) ~f:(fun const (decls, prog) ->
         let (pos, id) = const.cc_id in
         let (decl_id, prog) =
           process_decl_loc
-            (add_class_const_decl_fact con_type con_decl_id)
-            (add_class_const_defn_fact ctx source_map)
-            build_class_const_decl_json_ref
+            (Add_fact.class_const_decl con_type con_decl_id)
+            (Add_fact.class_const_defn ctx source_map)
+            Build.build_class_const_decl_json_ref
             pos
             None
             id
@@ -84,7 +84,7 @@ let process_container_decl ctx source_map con (all_decls, progress) =
             const.cc_doc_comment
             prog
         in
-        (build_class_const_decl_json_ref decl_id :: decls, prog))
+        (Build.build_class_const_decl_json_ref decl_id :: decls, prog))
   in
   let (type_const_decls, prog) =
     List.fold_right
@@ -94,9 +94,9 @@ let process_container_decl ctx source_map con (all_decls, progress) =
         let (pos, id) = tc.c_tconst_name in
         let (decl_id, prog) =
           process_decl_loc
-            (add_type_const_decl_fact con_type con_decl_id)
-            (add_type_const_defn_fact ctx source_map)
-            build_type_const_decl_json_ref
+            (Add_fact.type_const_decl con_type con_decl_id)
+            (Add_fact.type_const_defn ctx source_map)
+            Build.build_type_const_decl_json_ref
             pos
             (Some tc.c_tconst_span)
             id
@@ -104,16 +104,16 @@ let process_container_decl ctx source_map con (all_decls, progress) =
             tc.c_tconst_doc_comment
             prog
         in
-        (build_type_const_decl_json_ref decl_id :: decls, prog))
+        (Build.build_type_const_decl_json_ref decl_id :: decls, prog))
   in
   let (method_decls, prog) =
     List.fold_right con.c_methods ~init:([], prog) ~f:(fun meth (decls, prog) ->
         let (pos, id) = meth.m_name in
         let (decl_id, prog) =
           process_decl_loc
-            (add_method_decl_fact con_type con_decl_id)
-            (add_method_defn_fact ctx source_map)
-            build_method_decl_json_ref
+            (Add_fact.method_decl con_type con_decl_id)
+            (Add_fact.method_defn ctx source_map)
+            Build.build_method_decl_json_ref
             pos
             (Some meth.m_span)
             id
@@ -121,17 +121,17 @@ let process_container_decl ctx source_map con (all_decls, progress) =
             meth.m_doc_comment
             prog
         in
-        (build_method_decl_json_ref decl_id :: decls, prog))
+        (Build.build_method_decl_json_ref decl_id :: decls, prog))
   in
   let members =
     type_const_decls @ class_const_decls @ prop_decls @ method_decls
   in
   let (_, prog) =
-    add_container_defn_fact ctx source_map con con_decl_id members prog
+    Add_fact.container_defn ctx source_map con con_decl_id members prog
   in
-  let ref_json = build_container_decl_json_ref con_type con_decl_id in
-  let (_, prog) = add_decl_loc_fact con_pos ref_json prog in
-  let (_, prog) = add_decl_span_fact con.c_span ref_json prog in
+  let ref_json = Build.build_container_decl_json_ref con_type con_decl_id in
+  let (_, prog) = Add_fact.decl_loc con_pos ref_json prog in
+  let (_, prog) = Add_fact.decl_span con.c_span ref_json prog in
   let all_decls = all_decls @ [ref_json] @ members in
   let prog = process_doc_comment con.c_doc_comment ref_json prog in
   (all_decls, prog)
@@ -139,15 +139,15 @@ let process_container_decl ctx source_map con (all_decls, progress) =
 let process_xref decl_fun decl_ref_fun symbol_name symbol_pos (xrefs, prog) =
   let (target_id, prog) = decl_fun symbol_name prog in
   let xref_json = decl_ref_fun target_id in
-  let target_json = build_decl_target_json xref_json in
-  let xrefs = add_xref target_json target_id symbol_pos xrefs in
+  let target_json = Build.build_decl_target_json xref_json in
+  let xrefs = Util.add_xref target_json target_id symbol_pos xrefs in
   (xrefs, prog)
 
 let process_container_xref
     (con_type, decl_pred) symbol_name symbol_pos (xrefs, prog) =
   process_xref
-    (add_container_decl_fact decl_pred)
-    (build_container_decl_json_ref con_type)
+    (Add_fact.container_decl decl_pred)
+    (Build.build_container_decl_json_ref con_type)
     symbol_name
     symbol_pos
     (xrefs, prog)
@@ -159,34 +159,34 @@ let process_enum_decl ctx source_map enm (all_decls, progress) =
     Hh_logger.log "WARNING: skipping enum with missing data - %s" id;
     (all_decls, progress)
   | Some enum_data ->
-    let (enum_id, prog) = add_enum_decl_fact id progress in
-    let enum_decl_ref = build_enum_decl_json_ref enum_id in
-    let (_, prog) = add_decl_loc_fact pos enum_decl_ref prog in
-    let (_, prog) = add_decl_span_fact enm.c_span enum_decl_ref prog in
+    let (enum_id, prog) = Add_fact.enum_decl id progress in
+    let enum_decl_ref = Build.build_enum_decl_json_ref enum_id in
+    let (_, prog) = Add_fact.decl_loc pos enum_decl_ref prog in
+    let (_, prog) = Add_fact.decl_span enm.c_span enum_decl_ref prog in
     let (enumerators, decl_refs, prog) =
       List.fold_right
         enm.c_consts
         ~init:([], [], prog)
         ~f:(fun enumerator (decls, refs, prog) ->
           let (pos, id) = enumerator.cc_id in
-          let (decl_id, prog) = add_enumerator_fact enum_id id prog in
-          let ref_json = build_enumerator_decl_json_ref decl_id in
-          let (_, prog) = add_decl_loc_fact pos ref_json prog in
+          let (decl_id, prog) = Add_fact.enumerator enum_id id prog in
+          let ref_json = Build.build_enumerator_decl_json_ref decl_id in
+          let (_, prog) = Add_fact.decl_loc pos ref_json prog in
           let prog =
             process_doc_comment enumerator.cc_doc_comment ref_json prog
           in
-          (build_id_json decl_id :: decls, ref_json :: refs, prog))
+          (Build.build_id_json decl_id :: decls, ref_json :: refs, prog))
     in
     let (_, prog) =
-      add_enum_defn_fact ctx source_map enm enum_id enum_data enumerators prog
+      Add_fact.enum_defn ctx source_map enm enum_id enum_data enumerators prog
     in
     let prog = process_doc_comment enm.c_doc_comment enum_decl_ref prog in
     (all_decls @ enum_decl_ref :: decl_refs, prog)
 
 let process_enum_xref symbol_name pos (xrefs, prog) =
   process_xref
-    add_enum_decl_fact
-    build_enum_decl_json_ref
+    Add_fact.enum_decl
+    Build.build_enum_decl_json_ref
     symbol_name
     pos
     (xrefs, prog)
@@ -196,9 +196,9 @@ let process_func_decl ctx source_map fd (all_decls, progress) =
   let (pos, id) = elem.f_name in
   let (decl_id, prog) =
     process_decl_loc
-      add_func_decl_fact
-      (add_func_defn_fact ctx source_map)
-      build_func_decl_json_ref
+      Add_fact.func_decl
+      (Add_fact.func_defn ctx source_map)
+      Build.build_func_decl_json_ref
       pos
       (Some elem.f_span)
       id
@@ -206,12 +206,12 @@ let process_func_decl ctx source_map fd (all_decls, progress) =
       elem.f_doc_comment
       progress
   in
-  (all_decls @ [build_func_decl_json_ref decl_id], prog)
+  (all_decls @ [Build.build_func_decl_json_ref decl_id], prog)
 
 let process_function_xref symbol_name pos (xrefs, prog) =
   process_xref
-    add_func_decl_fact
-    build_func_decl_json_ref
+    Add_fact.func_decl
+    Build.build_func_decl_json_ref
     symbol_name
     pos
     (xrefs, prog)
@@ -220,9 +220,9 @@ let process_gconst_decl ctx source_map elem (all_decls, progress) =
   let (pos, id) = elem.cst_name in
   let (decl_id, prog) =
     process_decl_loc
-      add_gconst_decl_fact
-      (add_gconst_defn_fact ctx source_map)
-      build_gconst_decl_json_ref
+      Add_fact.gconst_decl
+      (Add_fact.gconst_defn ctx source_map)
+      Build.build_gconst_decl_json_ref
       pos
       (Some elem.cst_span)
       id
@@ -230,18 +230,19 @@ let process_gconst_decl ctx source_map elem (all_decls, progress) =
       None
       progress
   in
-  (all_decls @ [build_gconst_decl_json_ref decl_id], prog)
+  (all_decls @ [Build.build_gconst_decl_json_ref decl_id], prog)
 
 let process_gconst_xref symbol_def pos (xrefs, prog) =
   process_xref
-    add_gconst_decl_fact
-    build_gconst_decl_json_ref
+    Add_fact.gconst_decl
+    Build.build_gconst_decl_json_ref
     symbol_def
     pos
     (xrefs, prog)
 
 let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
-  match Str.split (Str.regexp "::") member.full_name with
+  let SymbolDefinition.{ name; full_name; kind; _ } = member in
+  match Str.split (Str.regexp "::") full_name with
   | [] -> (xrefs, prog)
   | con_name :: _mem_name ->
     let con_name_with_ns = Utils.add_ns con_name in
@@ -250,31 +251,31 @@ let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
       Hh_logger.log
         "WARNING: could not find parent container %s processing reference to %s"
         con_name_with_ns
-        member.full_name;
+        full_name;
       (xrefs, prog)
     | Some cls ->
       if is_enum_or_enum_class cls.c_kind then
-        match member.kind with
-        | Const ->
-          let (enum_id, prog) = add_enum_decl_fact con_name prog in
+        match kind with
+        | SymbolDefinition.Const ->
+          let (enum_id, prog) = Add_fact.enum_decl con_name prog in
           process_xref
-            (add_enumerator_fact enum_id)
-            build_enumerator_decl_json_ref
-            member.name
+            (Add_fact.enumerator enum_id)
+            Build.build_enumerator_decl_json_ref
+            name
             pos
             (xrefs, prog)
         (* This includes references to built-in enum methods *)
         | _ -> (xrefs, prog)
       else
-        let con_kind = get_parent_kind cls in
-        let (con_type, decl_pred) = parent_decl_predicate con_kind in
+        let con_kind = Util.get_parent_kind cls in
+        let (con_type, decl_pred) = Util.parent_decl_predicate con_kind in
         let (con_decl_id, prog) =
-          add_container_decl_fact decl_pred con_name prog
+          Add_fact.container_decl decl_pred con_name prog
         in
         process_xref
           (mem_decl_fun con_type con_decl_id)
           ref_fun
-          member.name
+          name
           pos
           (xrefs, prog))
 
@@ -296,44 +297,47 @@ let process_attribute_xref ctx attr opt_info (xrefs, prog) =
           con_name;
         None
       ) else
-        Some (parent_decl_predicate (get_parent_kind cls))
+        Some Util.(parent_decl_predicate (get_parent_kind cls))
   in
   (* Process <<__Override>>, for which we write a MethodOverrides fact
      instead of a cross-reference *)
-  if String.equal attr.name "__Override" then
+  let SymbolOccurrence.{ name; pos; _ } = attr in
+  if String.equal name "__Override" then
     match opt_info with
     | None ->
       Hh_logger.log "WARNING: no override info for <<__Override>> instance";
       (xrefs, prog)
-    | Some info ->
-      (match get_con_preds_from_name info.class_name with
+    | Some SymbolOccurrence.{ class_name; method_name; _ } ->
+      (match get_con_preds_from_name class_name with
       | None -> (xrefs, prog)
       | Some override_con_pred_types ->
         (match ServerSymbolDefinition.go ctx None attr with
         | None ->
           Hh_logger.log
             "WARNING: could not find source method for <<__Override>> %s::%s"
-            info.class_name
-            info.method_name;
+            class_name
+            method_name;
           (xrefs, prog)
         | Some sym_def ->
-          (match Str.split (Str.regexp "::") sym_def.full_name with
+          (match
+             Str.split (Str.regexp "::") sym_def.SymbolDefinition.full_name
+           with
           | [] -> (xrefs, prog)
           | base_con_name :: _mem_name ->
             (match get_con_preds_from_name base_con_name with
             | None ->
               Hh_logger.log
                 "WARNING: could not compute parent container type for override %s::%s"
-                info.class_name
-                info.method_name;
+                class_name
+                method_name;
               (xrefs, prog)
             | Some base_con_pred_types ->
               let (_fid, prog) =
-                add_method_overrides_fact
-                  info.method_name
+                Add_fact.method_overrides
+                  method_name
                   base_con_name
                   (fst base_con_pred_types)
-                  info.class_name
+                  class_name
                   (fst override_con_pred_types)
                   prog
               in
@@ -341,22 +345,22 @@ let process_attribute_xref ctx attr opt_info (xrefs, prog) =
                  'process_member_xref' here with 'sym_def' and 'attr.pos' *)
               (xrefs, prog)))))
   (* Ignore other built-in attributes *)
-  else if String.is_prefix attr.name ~prefix:"__" then
+  else if String.is_prefix name ~prefix:"__" then
     (xrefs, prog)
   (* Process user-defined attributes *)
   else
     try
       (* Look for a container declaration with the same name as the attribute,
          which will be where it is defined *)
-      match get_con_preds_from_name attr.name with
+      match get_con_preds_from_name name with
       | None -> (xrefs, prog)
       | Some con_pred_types ->
-        process_container_xref con_pred_types attr.name attr.pos (xrefs, prog)
+        process_container_xref con_pred_types name pos (xrefs, prog)
     with
     | e ->
       Hh_logger.log
         "WARNING: error processing reference to attribute %s\n: %s\n"
-        attr.name
+        name
         (Exn.to_string e);
       (xrefs, prog)
 
@@ -364,9 +368,9 @@ let process_typedef_decl ctx source_map elem (all_decls, progress) =
   let (pos, id) = elem.t_name in
   let (decl_id, prog) =
     process_decl_loc
-      add_typedef_decl_fact
-      (add_typedef_defn_fact ctx source_map)
-      build_typedef_decl_json_ref
+      Add_fact.typedef_decl
+      (Add_fact.typedef_defn ctx source_map)
+      Build.build_typedef_decl_json_ref
       pos
       (Some elem.t_span)
       id
@@ -374,21 +378,21 @@ let process_typedef_decl ctx source_map elem (all_decls, progress) =
       None
       progress
   in
-  (all_decls @ [build_typedef_decl_json_ref decl_id], prog)
+  (all_decls @ [Build.build_typedef_decl_json_ref decl_id], prog)
 
 let process_typedef_xref symbol_name pos (xrefs, prog) =
   process_xref
-    add_typedef_decl_fact
-    build_typedef_decl_json_ref
+    Add_fact.typedef_decl
+    Build.build_typedef_decl_json_ref
     symbol_name
     pos
     (xrefs, prog)
 
-let process_decls ctx (files_info : file_info list) =
+let process_decls ctx (files_info : ST.file_info list) =
   let (source_map, progress) =
     List.fold
       files_info
-      ~init:(SMap.empty, init_progress)
+      ~init:(SMap.empty, Util.init_progress)
       ~f:(fun (fm, prog) (fp, _, source_text) ->
         let filepath = Relative_path.to_absolute fp in
         match source_text with
@@ -397,7 +401,7 @@ let process_decls ctx (files_info : file_info list) =
           (fm, prog)
         | Some st ->
           let fm = SMap.add filepath st fm in
-          let (_, prog) = add_file_lines_fact filepath st prog in
+          let (_, prog) = Add_fact.file_lines filepath st prog in
           (fm, prog))
   in
   List.fold files_info ~init:progress ~f:(fun prog (fp, tast, _) ->
@@ -413,10 +417,12 @@ let process_decls ctx (files_info : file_info list) =
             | _ -> acc)
       in
       let filepath = Relative_path.to_absolute fp in
-      let (_, prog) = add_file_decls_fact filepath file_decls prog in
+      let (_, prog) = Add_fact.file_decls filepath file_decls prog in
       prog)
 
 let process_xrefs ctx (tasts : Tast.program list) progress =
+  let open SymbolDefinition in
+  let open SymbolOccurrence in
   List.fold tasts ~init:progress ~f:(fun prog tast ->
       let symbols = IdentifySymbolService.all_symbols ctx tast in
       (* file_xrefs : (Hh_json.json * Relative_path.t Pos.pos list) IMap.t SMap.t *)
@@ -437,10 +443,10 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
                   (match occ.type_ with
                   | Method (receiver_class, name) ->
                     let (target_id, prog) =
-                      add_method_occ_fact receiver_class name prog
+                      Add_fact.method_occ receiver_class name prog
                     in
-                    let xref_json = build_method_occ_json_ref target_id in
-                    let _target_json = build_occ_target_json xref_json in
+                    let xref_json = Build.build_method_occ_json_ref target_id in
+                    let _target_json = Build.build_occ_target_json xref_json in
                     (xrefs, prog)
                   | _ -> (xrefs, prog))
                 | Some sym_def ->
@@ -448,85 +454,92 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
                   let name = sym_def.name in
                   (match sym_def.kind with
                   | Class ->
-                    let con_kind = parent_decl_predicate ClassContainer in
+                    let con_kind =
+                      Util.parent_decl_predicate ST.ClassContainer
+                    in
                     process_container_xref con_kind name pos (xrefs, prog)
                   | Const ->
                     (match occ.type_ with
                     | ClassConst _ ->
-                      let ref_fun = build_class_const_decl_json_ref in
-                      proc_mem add_class_const_decl_fact ref_fun (xrefs, prog)
+                      let ref_fun = Build.build_class_const_decl_json_ref in
+                      proc_mem Add_fact.class_const_decl ref_fun (xrefs, prog)
                     | GConst -> process_gconst_xref name pos (xrefs, prog)
                     | _ -> (xrefs, prog))
                   | Enum -> process_enum_xref name pos (xrefs, prog)
                   | Function -> process_function_xref name pos (xrefs, prog)
                   | Interface ->
-                    let con_kind = parent_decl_predicate InterfaceContainer in
+                    let con_kind =
+                      Util.parent_decl_predicate ST.InterfaceContainer
+                    in
                     process_container_xref con_kind name pos (xrefs, prog)
                   | Method ->
-                    let ref_fun = build_method_decl_json_ref in
-                    proc_mem add_method_decl_fact ref_fun (xrefs, prog)
+                    let ref_fun = Build.build_method_decl_json_ref in
+                    proc_mem Add_fact.method_decl ref_fun (xrefs, prog)
                   | Property ->
-                    let ref_fun = build_property_decl_json_ref in
-                    proc_mem add_property_decl_fact ref_fun (xrefs, prog)
+                    let ref_fun = Build.build_property_decl_json_ref in
+                    proc_mem Add_fact.property_decl ref_fun (xrefs, prog)
                   | Typeconst ->
-                    let ref_fun = build_type_const_decl_json_ref in
-                    proc_mem add_type_const_decl_fact ref_fun (xrefs, prog)
+                    let ref_fun = Build.build_type_const_decl_json_ref in
+                    proc_mem Add_fact.type_const_decl ref_fun (xrefs, prog)
                   | Typedef -> process_typedef_xref name pos (xrefs, prog)
                   | Trait ->
-                    let con_kind = parent_decl_predicate TraitContainer in
+                    let con_kind =
+                      Util.parent_decl_predicate ST.TraitContainer
+                    in
                     process_container_xref con_kind name pos (xrefs, prog)
                   | _ -> (xrefs, prog))))
       in
       SMap.fold
         (fun fp target_map acc ->
-          let (_, res) = add_file_xrefs_fact fp target_map acc in
+          let (_, res) = Add_fact.file_xrefs fp target_map acc in
           res)
         file_xrefs
         prog)
 
 let progress_to_json progress =
+  let resultJson = progress.ST.resultJson in
   let preds =
     (* The order is the reverse of how these items appear in the JSON,
        which is significant because later entries can refer to earlier ones
        by id only *)
-    ("src.FileLines.1", progress.resultJson.fileLines)
+    ("src.FileLines.1", resultJson.ST.fileLines)
     ::
     List.map
       ~f:(fun (pred, res) -> (pred ^ "." ^ Hh_glean_version.hack_version, res))
-      [
-        ("hack.FileDeclarations", progress.resultJson.fileDeclarations);
-        ("hack.FileXRefs", progress.resultJson.fileXRefs);
-        ("hack.MethodOverrides", progress.resultJson.methodOverrides);
-        ("hack.MethodDefinition", progress.resultJson.methodDefinition);
-        ("hack.FunctionDefinition", progress.resultJson.functionDefinition);
-        ("hack.EnumDefinition", progress.resultJson.enumDefinition);
-        ("hack.ClassConstDefinition", progress.resultJson.classConstDefinition);
-        ("hack.PropertyDefinition", progress.resultJson.propertyDefinition);
-        ("hack.TypeConstDefinition", progress.resultJson.typeConstDefinition);
-        ("hack.ClassDefinition", progress.resultJson.classDefinition);
-        ("hack.TraitDefinition", progress.resultJson.traitDefinition);
-        ("hack.InterfaceDefinition", progress.resultJson.interfaceDefinition);
-        ("hack.TypedefDefinition", progress.resultJson.typedefDefinition);
-        ("hack.GlobalConstDefinition", progress.resultJson.globalConstDefinition);
-        ("hack.DeclarationComment", progress.resultJson.declarationComment);
-        ("hack.DeclarationLocation", progress.resultJson.declarationLocation);
-        ("hack.DeclarationSpan", progress.resultJson.declarationSpan);
-        ("hack.MethodDeclaration", progress.resultJson.methodDeclaration);
-        ("hack.ClassConstDeclaration", progress.resultJson.classConstDeclaration);
-        ("hack.PropertyDeclaration", progress.resultJson.propertyDeclaration);
-        ("hack.TypeConstDeclaration", progress.resultJson.typeConstDeclaration);
-        ("hack.FunctionDeclaration", progress.resultJson.functionDeclaration);
-        ("hack.Enumerator", progress.resultJson.enumerator);
-        ("hack.EnumDeclaration", progress.resultJson.enumDeclaration);
-        ("hack.ClassDeclaration", progress.resultJson.classDeclaration);
-        ("hack.TraitDeclaration", progress.resultJson.traitDeclaration);
-        ("hack.InterfaceDeclaration", progress.resultJson.interfaceDeclaration);
-        ("hack.TypedefDeclaration", progress.resultJson.typedefDeclaration);
-        ( "hack.GlobalConstDeclaration",
-          progress.resultJson.globalConstDeclaration );
-        ("hack.NamespaceDeclaration", progress.resultJson.namespaceDeclaration);
-        ("hack.MethodOccurrence", progress.resultJson.methodOccurrence);
-      ]
+      ST.
+        [
+          ("hack.FileDeclarations", resultJson.fileDeclarations);
+          ("hack.FileXRefs", resultJson.fileXRefs);
+          ("hack.MethodOverrides", resultJson.methodOverrides);
+          ("hack.MethodDefinition", resultJson.methodDefinition);
+          ("hack.FunctionDefinition", resultJson.functionDefinition);
+          ("hack.EnumDefinition", resultJson.enumDefinition);
+          ("hack.ClassConstDefinition", resultJson.classConstDefinition);
+          ("hack.PropertyDefinition", resultJson.propertyDefinition);
+          ("hack.TypeConstDefinition", resultJson.typeConstDefinition);
+          ("hack.ClassDefinition", resultJson.classDefinition);
+          ("hack.TraitDefinition", resultJson.traitDefinition);
+          ("hack.InterfaceDefinition", resultJson.interfaceDefinition);
+          ("hack.TypedefDefinition", resultJson.typedefDefinition);
+          ("hack.GlobalConstDefinition", resultJson.globalConstDefinition);
+          ("hack.DeclarationComment", resultJson.declarationComment);
+          ("hack.DeclarationLocation", resultJson.declarationLocation);
+          ("hack.DeclarationSpan", resultJson.declarationSpan);
+          ("hack.MethodDeclaration", resultJson.methodDeclaration);
+          ("hack.ClassConstDeclaration", resultJson.classConstDeclaration);
+          ("hack.PropertyDeclaration", resultJson.propertyDeclaration);
+          ("hack.TypeConstDeclaration", resultJson.typeConstDeclaration);
+          ("hack.FunctionDeclaration", resultJson.functionDeclaration);
+          ("hack.Enumerator", resultJson.enumerator);
+          ("hack.EnumDeclaration", resultJson.enumDeclaration);
+          ("hack.ClassDeclaration", resultJson.classDeclaration);
+          ("hack.TraitDeclaration", resultJson.traitDeclaration);
+          ("hack.InterfaceDeclaration", resultJson.interfaceDeclaration);
+          ("hack.TypedefDeclaration", resultJson.typedefDeclaration);
+          ("hack.GlobalConstDeclaration", resultJson.globalConstDeclaration);
+          ("hack.NamespaceDeclaration", resultJson.namespaceDeclaration);
+          ("hack.MethodOccurrence", resultJson.methodOccurrence);
+        ]
   in
   let json_array =
     List.fold preds ~init:[] ~f:(fun acc (pred, json_lst) ->
@@ -545,7 +558,7 @@ let build_decls_json ctx files_info =
 (* This function processes cross-references, starting with an
 empty fact cache. *)
 let build_xrefs_json ctx tasts =
-  let progress = process_xrefs ctx tasts init_progress in
+  let progress = process_xrefs ctx tasts Util.init_progress in
   progress_to_json progress
 
 (* This function processes both declarations and cross-references,

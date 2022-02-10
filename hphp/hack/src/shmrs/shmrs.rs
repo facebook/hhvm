@@ -10,5 +10,5 @@ pub mod chashmap;
 pub mod error;
 pub mod filealloc;
 pub mod hashmap;
-pub mod mapalloc;
+pub mod shardalloc;
 pub mod sync;

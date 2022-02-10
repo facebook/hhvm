@@ -1,0 +1,26 @@
+File "invalid_disjoint_check.php", line 11, characters 11-51:
+This call to 'contains' will always return the same value, because type Map<string, mixed> is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check.php", line 20, characters 10-25:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check.php", line 23, characters 10-25:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check.php", line 26, characters 10-25:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check.php", line 29, characters 10-25:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check.php", line 32, characters 10-25:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check.php", line 35, characters 10-25:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check.php", line 38, characters 10-25:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check.php", line 41, characters 10-25:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type int. (Lint[5638])
+File "invalid_disjoint_check.php", line 44, characters 10-25:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type Baz. (Lint[5638])
+File "invalid_disjoint_check.php", line 47, characters 10-25:
+This call to 'contains' will always return the same value, because type Foo is disjoint from type <expr#1> as Bar. (Lint[5638])
+File "invalid_disjoint_check.php", line 50, characters 10-25:
+This call to 'contains' will always return the same value, because type Bar is disjoint from type Foo. (Lint[5638])
+File "invalid_disjoint_check.php", line 98, characters 10-25:
+This call to 'contains' will always return the same value, because type string is disjoint from type EnumInt. (Lint[5638])

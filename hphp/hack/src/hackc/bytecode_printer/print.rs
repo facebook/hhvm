@@ -36,7 +36,7 @@ use hhbc_ast::*;
 use hhbc_id::class::ClassType;
 use hhbc_string_utils::{
     float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, lstrip_bslice, mangle,
-    strip_global_ns, strip_global_ns_bslice, strip_ns, types,
+    strip_global_ns, strip_ns, types,
 };
 use hhvm_types_ffi::ffi::*;
 use instruction_sequence::{Error::Unrecoverable, InstrSeq};
@@ -485,23 +485,14 @@ fn print_use_precedence<'arena>(
     )
 }
 
-fn print_use_as_visibility(w: &mut dyn Write, u: UseAsVisibility) -> Result<()> {
-    w.write_all(match u {
-        UseAsVisibility::UseAsPublic => b"public",
-        UseAsVisibility::UseAsPrivate => b"private",
-        UseAsVisibility::UseAsProtected => b"protected",
-        UseAsVisibility::UseAsFinal => b"final",
-    })
-}
-
 fn print_use_alias<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    Quadruple(ido1, id, ido2, kindl): &Quadruple<
+    Quadruple(ido1, id, ido2, attr): &Quadruple<
         Maybe<ClassType<'arena>>,
         ClassType<'arena>,
         Maybe<ClassType<'arena>>,
-        Slice<'arena, UseAsVisibility>,
+        Attr,
     >,
 ) -> Result<()> {
     ctx.newline(w)?;
@@ -513,12 +504,16 @@ fn print_use_alias<'arena>(
         id,
     )?;
     w.write_all(b" as ")?;
-    if !kindl.is_empty() {
+    if !attr.is_empty() {
         square(w, |w| {
-            concat_by(w, " ", kindl, |w, k| print_use_as_visibility(w, *k))
+            write!(
+                w,
+                "{}",
+                attrs_to_string_ffi(AttrContext::TraitImport, *attr)
+            )
         })?;
     }
-    write_if!(!kindl.is_empty() && ido2.is_just(), w, " ")?;
+    write_if!(!attr.is_empty() && ido2.is_just(), w, " ")?;
     option(w, ido2.as_ref(), |w, i: &ClassType<'arena>| {
         w.write_all(i.as_bstr())
     })?;
@@ -529,10 +524,8 @@ fn print_uses<'arena>(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'arena
     if c.uses.is_empty() {
         Ok(())
     } else {
-        let unique_ids = c.uses.iter().map(|e| strip_global_ns_bslice(e)).unique();
-
         newline(w)?;
-        write_bytes!(w, "  .use {}", fmt_separated(" ", unique_ids))?;
+        write_bytes!(w, "  .use {}", fmt_separated(" ", c.uses.iter()))?;
 
         if c.use_aliases.is_empty() && c.use_precedences.is_empty() {
             w.write_all(b";")
@@ -551,7 +544,7 @@ fn print_uses<'arena>(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'arena
                     Maybe<ClassType<'arena>>,
                     ClassType<'arena>,
                     Maybe<ClassType<'arena>>,
-                    Slice<'arena, UseAsVisibility>,
+                    Attr,
                 >] = c.use_aliases.as_ref();
                 for x in aliases {
                     print_use_alias(ctx, w, x)?;
@@ -956,9 +949,15 @@ where
 
 fn print_fcall_args(
     w: &mut dyn Write,
-    FcallArgs(fls, num_args, num_rets, inouts, readonly, async_eager_label, context): &FcallArgs<
-        '_,
-    >,
+    FcallArgs {
+        flags: fls,
+        num_args,
+        num_rets,
+        inouts,
+        readonly,
+        async_eager_label,
+        context,
+    }: &FcallArgs<'_>,
 ) -> Result<()> {
     use FcallFlags as F;
     let mut flags = vec![];
@@ -1037,36 +1036,44 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>) -> Result<()> {
                 print_fcall_args(w, fcall_args)?;
                 w.write_all(br#" "" """#)
             }
-            I::FCallClsMethod(fcall_args, is_log_as_dynamic_call) => {
+            I::FCallClsMethod { fcall_args, log } => {
                 w.write_all(b"FCallClsMethod ")?;
                 print_fcall_args(w, fcall_args)?;
                 w.write_all(br#" "" "#)?;
-                w.write_all(match is_log_as_dynamic_call {
+                w.write_all(match log {
                     IsLogAsDynamicCallOp::LogAsDynamicCall => b"LogAsDynamicCall",
                     IsLogAsDynamicCallOp::DontLogAsDynamicCall => b"DontLogAsDynamicCall",
                 })
             }
-            I::FCallClsMethodD(fcall_args, cid, mid) => {
+            I::FCallClsMethodD {
+                fcall_args,
+                class,
+                method,
+            } => {
                 w.write_all(b"FCallClsMethodD ")?;
                 print_fcall_args(w, fcall_args)?;
                 w.write_all(br#" "" "#)?;
-                print_class_id(w, cid)?;
+                print_class_id(w, class)?;
                 w.write_all(b" ")?;
-                print_method_id(w, mid)
+                print_method_id(w, method)
             }
-            I::FCallClsMethodS(fcall_args, r) => {
+            I::FCallClsMethodS { fcall_args, clsref } => {
                 w.write_all(b"FCallClsMethodS ")?;
                 print_fcall_args(w, fcall_args)?;
                 w.write_all(br#" "" "#)?;
-                print_special_cls_ref(w, r)
+                print_special_cls_ref(w, clsref)
             }
-            I::FCallClsMethodSD(fcall_args, r, mid) => {
+            I::FCallClsMethodSD {
+                fcall_args,
+                clsref,
+                method,
+            } => {
                 w.write_all(b"FCallClsMethodSD ")?;
                 print_fcall_args(w, fcall_args)?;
                 w.write_all(br#" "" "#)?;
-                print_special_cls_ref(w, r)?;
+                print_special_cls_ref(w, clsref)?;
                 w.write_all(b" ")?;
-                print_method_id(w, mid)
+                print_method_id(w, method)
             }
             I::FCallCtor(fcall_args) => {
                 w.write_all(b"FCallCtor ")?;
@@ -1077,25 +1084,29 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>) -> Result<()> {
                 w.write_all(b"FCallFunc ")?;
                 print_fcall_args(w, fcall_args)
             }
-            I::FCallFuncD(fcall_args, id) => {
+            I::FCallFuncD { fcall_args, func } => {
                 w.write_all(b"FCallFuncD ")?;
                 print_fcall_args(w, fcall_args)?;
                 w.write_all(b" ")?;
-                print_function_id(w, id)
+                print_function_id(w, func)
             }
-            I::FCallObjMethod(fcall_args, nf) => {
+            I::FCallObjMethod { fcall_args, flavor } => {
                 w.write_all(b"FCallObjMethod ")?;
                 print_fcall_args(w, fcall_args)?;
                 w.write_all(br#" "" "#)?;
-                print_null_flavor(w, nf)
+                print_null_flavor(w, flavor)
             }
-            I::FCallObjMethodD(fcall_args, nf, id) => {
+            I::FCallObjMethodD {
+                fcall_args,
+                flavor,
+                method,
+            } => {
                 w.write_all(b"FCallObjMethodD ")?;
                 print_fcall_args(w, fcall_args)?;
                 w.write_all(br#" "" "#)?;
-                print_null_flavor(w, nf)?;
+                print_null_flavor(w, flavor)?;
                 w.write_all(b" ")?;
-                print_method_id(w, id)
+                print_method_id(w, method)
             }
         }
     }
@@ -1759,8 +1770,8 @@ fn print_control_flow(w: &mut dyn Write, cf: &InstructControlFlow<'_>) -> Result
         CF::RetCSuspended => w.write_all(b"RetCSuspended"),
         CF::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
         CF::Throw => w.write_all(b"Throw"),
-        CF::Switch(kind, base, labels) => print_switch(w, kind, base, labels.as_ref()),
-        CF::SSwitch(cases) => match cases.as_ref() {
+        CF::Switch { kind, base, labels } => print_switch(w, kind, base, labels.as_ref()),
+        CF::SSwitch { labels } => match labels.as_ref() {
             [] => Err(Error::fail("sswitch should have at least one case").into()),
             [rest @ .., Pair(_, lastlabel)] => {
                 w.write_all(b"SSwitch ")?;

@@ -32,7 +32,7 @@ add_definitions(-DALWAYS_ASSERT=1)
 add_library(hphp_analysis STATIC ${CXX_SOURCES} ${C_SOURCES} ${HEADER_SOURCES})
 auto_source_group("hphp_analysis" "${CMAKE_CURRENT_SOURCE_DIR}"
   ${CXX_SOURCES} ${C_SOURCES} ${HEADER_SOURCES})
-target_link_libraries(hphp_analysis boost hphp_parser hphp_util hphp_system)
+target_link_libraries(hphp_analysis boost hphp_util hphp_system)
 if (ENABLE_COTIRE)
   cotire(hphp_analysis)
 endif()

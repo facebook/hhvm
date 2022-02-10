@@ -140,9 +140,7 @@ let server_receipt_to_monitor_write_exn ~server_receipt_to_monitor_file:_ _ = ()
 let server_receipt_to_monitor_read_exn ~server_receipt_to_monitor_file:_ _ _ =
   ()
 
-let init_lazy_end
-    _ ~state_distance:_ ~approach_name:_ ~init_error:_ ~init_type:_ =
-  ()
+let init_lazy_end _ ~approach_name:_ ~init_error:_ ~init_type:_ = ()
 
 let server_is_partially_ready () = ()
 
@@ -345,14 +343,7 @@ let type_check_exn_bug ~path:_ ~pos:_ ~e:_ = ()
 let invariant_violation_bug ~path:_ ~pos:_ ~desc:_ _ = ()
 
 let type_check_end
-    _
-    ~heap_size:_
-    ~started_count:_
-    ~count:_
-    ~desc:_
-    ~experiments:_
-    ~start_t:_
-    ~state_distance:_ =
+    _ ~heap_size:_ ~started_count:_ ~count:_ ~desc:_ ~experiments:_ ~start_t:_ =
   ()
 
 let notifier_returned _ _ = ()
@@ -400,44 +391,11 @@ let saved_state_dirty_files_ok ~start_time:_ = ()
 
 let saved_state_dirty_files_failure _ ~start_time:_ = ()
 
-(** Informant events *)
-let init_informant_prefetcher_runner _ = ()
-
-let informant_decision_on_saved_state
-    ~start_t:_ ~state_distance:_ ~incremental_distance:_ =
-  ()
-
-let informant_induced_kill _ = ()
-
 let informant_induced_restart _ = ()
-
-let informant_no_xdb_result _ = ()
-
-let informant_prefetcher_success _ = ()
-
-let informant_prefetcher_failed _ _ = ()
-
-let informant_prefetcher_timed_out _ = ()
-
-let informant_state_leave _ = ()
 
 let find_svn_rev_failed _ _ = ()
 
-let find_svn_rev_success _ = ()
-
-let find_xdb_match_failed _ _ = ()
-
-let find_xdb_match_success _ = ()
-
-let find_xdb_match_timed_out _ = ()
-
-let informant_find_saved_state_failed _ = ()
-
-let informant_find_saved_state_success ~distance:_ _ = ()
-
 let revision_tracker_init_svn_rev_failed _ = ()
-
-let xdb_malformed_result _ = ()
 
 (** Watchman Event Watcher client running in the informant *)
 let informant_watcher_not_available _ = ()
@@ -622,6 +580,4 @@ module Rage = struct
       ~result:_
       ~start_time:_ =
     ()
-
-  let get_telemetry_url ~(rageid : string) : string = rageid
 end

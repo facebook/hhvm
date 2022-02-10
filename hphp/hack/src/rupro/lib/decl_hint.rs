@@ -27,7 +27,7 @@ impl<R: Reason> DeclHintEnv<R> {
             OH::Happly(id, argl) => {
                 let id = self.alloc.pos_type_from_ast(id);
                 let argl = argl.iter().map(|arg| self.hint(arg)).collect();
-                DeclTy_::DTapply(id, argl)
+                DeclTy_::DTapply(Box::new((id, argl)))
             }
             OH::Hprim(p) => DeclTy_::DTprim(*p),
             h => unimplemented!("hint_: {:?}", h),

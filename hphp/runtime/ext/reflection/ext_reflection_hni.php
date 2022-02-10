@@ -994,7 +994,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @return     mixed   No value is returned.
    */
-  public function setAccessible(bool $accessible): void {
+  public function setAccessible(bool $accessible)[write_props]: void {
     // Public methods are always accessible. Cannot manually set to not be
     // accessible.
     if ($this->isPublic()) { return; }

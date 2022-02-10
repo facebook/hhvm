@@ -1,0 +1,24 @@
+File "dead_statement.php", line 8, characters 7-55:
+In method \TestUnreachableCode::testContinue: This expression may be unreachable. It appears after a continue. (Other[6001])
+File "dead_statement.php", line 17, characters 5-70:
+In method \TestUnreachableCode::testReturn: This expression may be unreachable. It appears after a return. (Other[6001])
+File "dead_statement.php", line 22, characters 5-58:
+In method \TestUnreachableCode::testYield: This expression may be unreachable. It appears after a break. (Other[6001])
+File "dead_statement.php", line 29, characters 9-32:
+In method \TestUnreachableCode::testSwitch: The next FALLTHROUGH may be unreachable. It appears after a return. (Other[6001])
+File "dead_statement.php", line 45, characters 3-30:
+In function \test_unreachable_function: This expression may be unreachable. It appears after a return. (Other[6001])
+File "dead_statement.php", line 50, characters 5-25:
+In function \test_unreachable_if: This 'return' statement may be unreachable. It appears after a condition which is always false. (Other[6001])
+File "dead_statement.php", line 62, characters 5-25:
+In function \test_unreachable_else: This 'return' statement may be unreachable. It appears after a condition which is always false. (Other[6001])
+File "dead_statement.php", line 67, characters 7-11:
+There are no statements in the body of this `if` branch. (Lint[5556])
+File "dead_statement.php", line 75, characters 7-10:
+There are no statements in the body of this `else` branch. (Lint[5556])
+File "dead_statement.php", line 86, characters 3-23:
+In function \test_unreachable_after_if_true: This 'return' statement may be unreachable.  (Other[6001])
+File "dead_statement.php", line 113, characters 3-23:
+In function \test_unreachable_after_join_3: This 'return' statement may be unreachable. It appears after a return. (Other[6001])
+File "dead_statement.php", line 118, characters 5-23:
+In function \test_unreachable_echo_1: This expression may be unreachable. It appears after a condition which is always false. (Other[6001])

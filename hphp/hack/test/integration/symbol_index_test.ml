@@ -108,10 +108,8 @@ let run_index_builder (harness : Test_harness.t) : si_env =
       ~namespace_map:[]
       ~provider_name:"SqliteIndex"
       ~quiet:true
-      ~ignore_hh_version:false
       ~savedstate_file_opt:file_opt
       ~workers:None
-      ~saved_state_manifold_api_key:None
   in
   Hh_logger.log "Built Sqlite database [%s]" fn;
   sienv

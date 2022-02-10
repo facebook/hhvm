@@ -1,0 +1,20 @@
+File "missing_override_attribute.php", line 28, characters 19-19:
+Method `a` is also defined on `A`, but this method is missing `<<__Override>>`. (Lint[5616])
+File "missing_override_attribute.php", line 29, characters 26-27:
+Method `sa` is also defined on `A`, but this method is missing `<<__Override>>`. (Lint[5616])
+File "missing_override_attribute.php", line 32, characters 19-19:
+Method `b` is also defined on `B`, but this method is missing `<<__Override>>`. (Lint[5616])
+File "missing_override_attribute.php", line 33, characters 26-27:
+Method `sb` is also defined on `B`, but this method is missing `<<__Override>>`. (Lint[5616])
+File "missing_override_attribute.php", line 36, characters 19-19:
+Method `t` is also defined on `T`, but this method is missing `<<__Override>>`. (Lint[5616])
+File "missing_override_attribute.php", line 37, characters 26-27:
+Method `st` is also defined on `T`, but this method is missing `<<__Override>>`. (Lint[5616])
+File "missing_override_attribute.php", line 43, characters 19-19:
+Method `i` is also defined on `I`, but this method is missing `<<__Override>>`. (Lint[5616])
+File "missing_override_attribute.php", line 44, characters 26-27:
+Method `si` is also defined on `I`, but this method is missing `<<__Override>>`. (Lint[5616])
+File "missing_override_attribute.php", line 51, characters 20-20:
+Method `t` is also defined on `T`, but this method is missing `<<__Override>>`. (Lint[5616])
+File "missing_override_attribute.php", line 52, characters 27-28:
+Method `st` is also defined on `T`, but this method is missing `<<__Override>>`. (Lint[5616])

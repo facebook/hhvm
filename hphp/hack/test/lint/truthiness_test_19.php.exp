@@ -1,0 +1,4 @@
+File "truthiness_test_19.php", line 4, characters 7-8:
+Sketchy condition: testing the truthiness of a Stringish may not behave as expected.
+The values `""` and `"0"` are both considered falsy, but objects will be truthy even if their `__toString` returns `""` or `"0"`.
+To check for emptiness, convert to a string and use `Str\is_empty`. (Lint[5623])

@@ -11,7 +11,6 @@ use hhbc_string_utils as string_utils;
 use naming_special_names_rust::{math, members, special_functions, typehints};
 use options::HhvmFlags;
 use oxidized::{
-    aast,
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
     ast, ast_defs,
     pos::Pos,
@@ -318,14 +317,14 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
     allow_maps: bool,
     force_class_const: bool,
 ) -> Result<TypedValue<'arena>, Error> {
-    use aast::Expr_::*;
     // TODO: ML equivalent has this as an implicit parameter that defaults to false.
+    use ast::{Expr, Expr_};
     match &expr.2 {
-        Int(s) => int_expr_to_typed_value(s),
-        ast::Expr_::True => Ok(TypedValue::Bool(true)),
-        False => Ok(TypedValue::Bool(false)),
-        Null => Ok(TypedValue::Null),
-        String(s) => {
+        Expr_::Int(s) => int_expr_to_typed_value(s),
+        Expr_::True => Ok(TypedValue::Bool(true)),
+        Expr_::False => Ok(TypedValue::Bool(false)),
+        Expr_::Null => Ok(TypedValue::Null),
+        Expr_::String(s) => {
             // FIXME: This is not safe--string literals are binary strings.
             // There's no guarantee that they're valid UTF-8.
             Ok(TypedValue::mk_string(
@@ -334,7 +333,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
                     .alloc_str(unsafe { std::str::from_utf8_unchecked(s) }),
             ))
         }
-        Float(s) => {
+        Expr_::Float(s) => {
             if s == math::INF {
                 Ok(TypedValue::float(std::f64::INFINITY))
             } else if s == math::NEG_INF {
@@ -347,14 +346,14 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
                     .map_err(|_| Error::NotLiteral)
             }
         }
-        Call(id)
+        Expr_::Call(id)
             if id
                 .0
                 .as_id()
                 .map_or(false, |x| x.1 == special_functions::HHAS_ADATA) =>
         {
             match id.2[..] {
-                [(ast_defs::ParamKind::Pnormal, ast::Expr(_, _, ast::Expr_::String(ref data)))] => {
+                [(ast_defs::ParamKind::Pnormal, Expr(_, _, Expr_::String(ref data)))] => {
                     // FIXME: This is not safe--string literals are binary strings.
                     // There's no guarantee that they're valid UTF-8.
                     Ok(TypedValue::mk_hhas_adata(
@@ -367,15 +366,15 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
             }
         }
 
-        Varray(fields) => varray_to_typed_value(emitter, &fields.1),
-        Darray(fields) => darray_to_typed_value(emitter, &fields.1),
+        Expr_::Varray(fields) => varray_to_typed_value(emitter, &fields.1),
+        Expr_::Darray(fields) => darray_to_typed_value(emitter, &fields.1),
 
-        Id(id) if id.1 == math::NAN => Ok(TypedValue::float(std::f64::NAN)),
-        Id(id) if id.1 == math::INF => Ok(TypedValue::float(std::f64::INFINITY)),
-        Id(_) => Err(Error::UserDefinedConstant),
+        Expr_::Id(id) if id.1 == math::NAN => Ok(TypedValue::float(std::f64::NAN)),
+        Expr_::Id(id) if id.1 == math::INF => Ok(TypedValue::float(std::f64::INFINITY)),
+        Expr_::Id(_) => Err(Error::UserDefinedConstant),
 
-        Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(emitter, &x.2),
-        Collection(x) if x.0.name().eq("keyset") => {
+        Expr_::Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(emitter, &x.2),
+        Expr_::Collection(x) if x.0.name().eq("keyset") => {
             let keys = emitter.alloc.alloc_slice_fill_iter(
                 x.2.iter()
                     .map(|x| keyset_value_afield_to_typed_value(emitter, x))
@@ -387,7 +386,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
             );
             Ok(TypedValue::mk_keyset(keys))
         }
-        Collection(x)
+        Expr_::Collection(x)
             if x.0.name().eq("dict")
                 || allow_maps
                     && (string_utils::cmp(&(x.0).1, "Map", false, true)
@@ -402,7 +401,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
                 ));
             Ok(TypedValue::mk_dict(values))
         }
-        Collection(x)
+        Expr_::Collection(x)
             if allow_maps
                 && (string_utils::cmp(&(x.0).1, "Set", false, true)
                     || string_utils::cmp(&(x.0).1, "ImmSet", false, true)) =>
@@ -416,7 +415,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
                 ));
             Ok(TypedValue::mk_dict(values))
         }
-        Tuple(x) => {
+        Expr_::Tuple(x) => {
             let v: Vec<_> = x
                 .iter()
                 .map(|e| expr_to_typed_value(emitter, e))
@@ -425,7 +424,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
                 emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
             ))
         }
-        ValCollection(x) if x.0 == ast::VcKind::Vec || x.0 == ast::VcKind::Vector => {
+        Expr_::ValCollection(x) if x.0 == ast::VcKind::Vec || x.0 == ast::VcKind::Vector => {
             let v: Vec<_> =
                 x.2.iter()
                     .map(|e| expr_to_typed_value(emitter, e))
@@ -434,7 +433,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
                 emitter.alloc.alloc_slice_fill_iter(v.into_iter()),
             ))
         }
-        ValCollection(x) if x.0 == ast::VcKind::Keyset => {
+        Expr_::ValCollection(x) if x.0 == ast::VcKind::Keyset => {
             let keys = emitter.alloc.alloc_slice_fill_iter(
                 x.2.iter()
                     .map(|e| {
@@ -460,7 +459,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
             );
             Ok(TypedValue::mk_keyset(keys))
         }
-        ValCollection(x) if x.0 == ast::VcKind::Set || x.0 == ast::VcKind::ImmSet => {
+        Expr_::ValCollection(x) if x.0 == ast::VcKind::Set || x.0 == ast::VcKind::ImmSet => {
             let values = emitter
                 .alloc
                 .alloc_slice_fill_iter(update_duplicates_in_map(
@@ -470,7 +469,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
                 ));
             Ok(TypedValue::mk_dict(values))
         }
-        KeyValCollection(x) => {
+        Expr_::KeyValCollection(x) => {
             let values = emitter
                 .alloc
                 .alloc_slice_fill_iter(update_duplicates_in_map(
@@ -480,16 +479,18 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
                 ));
             Ok(TypedValue::mk_dict(values))
         }
-        Shape(fields) => shape_to_typed_value(emitter, fields),
-        ClassConst(x) => {
+        Expr_::Shape(fields) => shape_to_typed_value(emitter, fields),
+        Expr_::ClassConst(x) => {
             if emitter.options().emit_class_pointers() == 1 && !force_class_const {
                 Err(Error::NotLiteral)
             } else {
                 class_const_to_typed_value(emitter, &x.0, &x.1)
             }
         }
-        ClassGet(_) => Err(Error::UserDefinedConstant),
-        As(x) if (x.1).1.is_hlike() => expr_to_typed_value_(emitter, &x.0, allow_maps, false),
+        Expr_::ClassGet(_) => Err(Error::UserDefinedConstant),
+        ast::Expr_::As(x) if (x.1).1.is_hlike() => {
+            expr_to_typed_value_(emitter, &x.0, allow_maps, false)
+        }
         _ => Err(Error::NotLiteral),
     }
 }
@@ -557,37 +558,36 @@ fn binop_on_values<'arena>(
     v1: TypedValue<'arena>,
     v2: TypedValue<'arena>,
 ) -> Result<TypedValue<'arena>, Error> {
-    use ast_defs::Bop::*;
+    use ast_defs::Bop;
     match binop {
-        Dot => v1.concat(alloc, v2),
-        Plus => v1.add(&v2),
-        Minus => v1.sub(&v2),
-        Star => v1.mul(&v2),
-        Ltlt => v1.shift_left(&v2),
-        Slash => v1.div(&v2),
-        Bar => v1.bitwise_or(&v2),
+        Bop::Dot => v1.concat(alloc, v2),
+        Bop::Plus => v1.add(&v2),
+        Bop::Minus => v1.sub(&v2),
+        Bop::Star => v1.mul(&v2),
+        Bop::Ltlt => v1.shift_left(&v2),
+        Bop::Slash => v1.div(&v2),
+        Bop::Bar => v1.bitwise_or(&v2),
         _ => None,
     }
     .ok_or(Error::NotLiteral)
 }
 
 fn value_to_expr_<'arena>(v: TypedValue<'arena>) -> Result<ast::Expr_, Error> {
-    use ast::*;
-    use TypedValue::*;
-    Ok(match v {
-        Int(i) => Expr_::Int(i.to_string()),
-        Float(i) => Expr_::Float(hhbc_string_utils::float::to_string(i)),
-        Bool(false) => Expr_::False,
-        Bool(true) => Expr_::True,
-        String(s) => Expr_::String(s.unsafe_as_str().into()),
-        LazyClass(_) => return Err(Error::unrecoverable("value_to_expr: lazyclass NYI")),
-        Null => Expr_::Null,
-        Uninit => return Err(Error::unrecoverable("value_to_expr: uninit value")),
-        Vec(_) => return Err(Error::unrecoverable("value_to_expr: vec NYI")),
-        Keyset(_) => return Err(Error::unrecoverable("value_to_expr: keyset NYI")),
-        HhasAdata(_) => return Err(Error::unrecoverable("value_to_expr: HhasAdata NYI")),
-        Dict(_) => return Err(Error::unrecoverable("value_to_expr: dict NYI")),
-    })
+    use ast::Expr_;
+    match v {
+        TypedValue::Int(i) => Ok(Expr_::Int(i.to_string())),
+        TypedValue::Float(i) => Ok(Expr_::Float(hhbc_string_utils::float::to_string(i))),
+        TypedValue::Bool(false) => Ok(Expr_::False),
+        TypedValue::Bool(true) => Ok(Expr_::True),
+        TypedValue::String(s) => Ok(Expr_::String(s.unsafe_as_str().into())),
+        TypedValue::LazyClass(_) => Err(Error::unrecoverable("value_to_expr: lazyclass NYI")),
+        TypedValue::Null => Ok(Expr_::Null),
+        TypedValue::Uninit => Err(Error::unrecoverable("value_to_expr: uninit value")),
+        TypedValue::Vec(_) => Err(Error::unrecoverable("value_to_expr: vec NYI")),
+        TypedValue::Keyset(_) => Err(Error::unrecoverable("value_to_expr: keyset NYI")),
+        TypedValue::HhasAdata(_) => Err(Error::unrecoverable("value_to_expr: HhasAdata NYI")),
+        TypedValue::Dict(_) => Err(Error::unrecoverable("value_to_expr: dict NYI")),
+    }
 }
 
 struct FolderVisitor<'a, 'arena, 'decl> {

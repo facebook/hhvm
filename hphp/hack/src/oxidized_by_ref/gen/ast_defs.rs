@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7514d3f805bfd11d2606b66d279ee74a>>
+// @generated SignedSource<<f2c2c7f11f475e9114c4dfe13073e1c3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -70,7 +70,7 @@ pub type PositionedByteString<'a> = (&'a Pos<'a>, &'a bstr::BStr);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ShapeFieldName<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     SFlitInt(&'a Pstring<'a>),
@@ -108,7 +108,7 @@ pub use oxidized::ast_defs::ClassishKind;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ParamKind<'a> {
     /// Contains the position for an entire `inout` annotated expression, e.g.:
     ///
@@ -145,7 +145,7 @@ pub use oxidized::ast_defs::FunKind;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Bop<'a> {
     Plus,
     Minus,
@@ -202,7 +202,7 @@ pub use oxidized::ast_defs::Visibility;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum XhpEnumValue<'a> {
     XEVInt(isize),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

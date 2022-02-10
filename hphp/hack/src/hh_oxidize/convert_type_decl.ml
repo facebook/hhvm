@@ -445,33 +445,36 @@ let declare_constructor_arguments ?(box_fields = false) types : Rust_type.t list
         [rust_ref (lifetime "a") tys]
       | Configuration.ByBox -> [rust_type "Box" [] [tuple types]])
 
+let variant_constructor_value cd =
+  (* If we see the [@value 42] attribute, assume it's for ppx_deriving enum,
+     and that all the variants are zero-argument (i.e., assume this is a
+     C-like enum and provide custom discriminant values). *)
+  List.find_map cd.pcd_attributes ~f:(fun { attr_name; attr_payload; _ } ->
+      match (attr_name, attr_payload) with
+      | ( { txt = "value"; _ },
+          PStr
+            [
+              {
+                pstr_desc =
+                  Pstr_eval
+                    ( {
+                        pexp_desc =
+                          Pexp_constant (Pconst_integer (discriminant, None));
+                        _;
+                      },
+                      _ );
+                _;
+              };
+            ] ) ->
+        Some discriminant
+      | _ -> None)
+
 let variant_constructor_declaration ?(box_fields = false) cd =
   let doc = doc_comment_of_attribute_list cd.pcd_attributes in
   let name = convert_type_name cd.pcd_name.txt in
-  let discriminant =
-    (* If we see the [@value 42] attribute, assume it's for ppx_deriving enum,
-       and that all the variants are zero-argument (i.e., assume this is a
-       C-like enum and provide custom discriminant values). *)
-    List.find_map cd.pcd_attributes ~f:(fun { attr_name; attr_payload; _ } ->
-        match (attr_name, attr_payload) with
-        | ( { txt = "value"; _ },
-            PStr
-              [
-                {
-                  pstr_desc =
-                    Pstr_eval
-                      ( {
-                          pexp_desc =
-                            Pexp_constant (Pconst_integer (discriminant, None));
-                          _;
-                        },
-                        _ );
-                  _;
-                };
-              ] ) ->
-          Some (" = " ^ discriminant)
-        | _ -> None)
-    |> Option.value ~default:""
+  let value =
+    variant_constructor_value cd
+    |> Option.value_map ~f:(( ^ ) " = ") ~default:""
   in
   match cd.pcd_args with
   | Pcstr_tuple types ->
@@ -485,19 +488,25 @@ let variant_constructor_declaration ?(box_fields = false) cd =
         ""
       else
         map_and_concat ~sep:"," ~f:rust_type_to_string tys |> sprintf "(%s)")
-      discriminant
+      value
   | Pcstr_record labels ->
-    sprintf
-      "%s%s%s%s,\n"
-      doc
-      name
-      (declare_record_arguments labels)
-      discriminant
+    sprintf "%s%s%s%s,\n" doc name (declare_record_arguments labels) value
 
 let ctor_arg_len (ctor_args : constructor_arguments) : int =
   match ctor_args with
   | Pcstr_tuple x -> List.length x
   | Pcstr_record x -> List.length x
+
+(* When converting a variant type to a Rust enum, consider whether the enum will
+   be "C-like" (i.e., a type where all variants take no arguments), and if so,
+   what the maximum [@value] annotation was. *)
+type enum_kind =
+  | C_like of {
+      max_value: int;
+      num_variants: int;
+    }
+  | Sum_type of { num_variants: int }
+  | Not_an_enum
 
 let type_declaration name td =
   let tparam_list =
@@ -532,7 +541,7 @@ let type_declaration name td =
       sprintf "#[serde(bound(deserialize = \"%s\" ))]" bounds
   in
   let doc = doc_comment_of_attribute_list td.ptype_attributes in
-  let attrs_and_vis ~all_nullary ~force_derive_copy =
+  let attrs_and_vis ~enum_kind ~force_derive_copy =
     if
       force_derive_copy
       && Configuration.is_known (Configuration.copy_type name) false
@@ -551,10 +560,9 @@ let type_declaration name td =
     let derive_attr =
       let traits = derived_traits name @ additional_derives in
       let traits =
-        if all_nullary then
-          (Some "ocamlrep_derive", "FromOcamlRep") :: traits
-        else
-          traits
+        match enum_kind with
+        | C_like _ -> (Some "ocamlrep_derive", "FromOcamlRep") :: traits
+        | _ -> traits
       in
       let traits =
         if force_derive_copy then
@@ -571,7 +579,15 @@ let type_declaration name td =
       |> String.concat ~sep:", "
       |> sprintf "#[derive(%s)]"
     in
-    doc ^ derive_attr ^ serde_attr ^ "#[repr(C)]" ^ "\npub"
+    let repr =
+      match enum_kind with
+      | C_like { max_value; num_variants }
+        when max num_variants (max_value + 1) <= 256 ->
+        "\n#[repr(u8)]"
+      | Sum_type { num_variants } when num_variants <= 256 -> "\n#[repr(C, u8)]"
+      | _ -> "\n#[repr(C)]"
+    in
+    doc ^ derive_attr ^ serde_attr ^ repr ^ "\npub"
   in
   let deserialize_in_arena_macro ~force_derive_copy =
     if is_by_ref () || force_derive_copy || String.equal name "EmitId" then
@@ -671,7 +687,7 @@ let type_declaration name td =
         else if should_be_newtype name then
           sprintf
             "%s struct %s (%s pub %s);%s\n%s"
-            (attrs_and_vis ~all_nullary:false ~force_derive_copy:false)
+            (attrs_and_vis ~enum_kind:Not_an_enum ~force_derive_copy:false)
             (rust_type name lifetime tparams |> rust_type_to_string)
             (rust_de_field_attr [ty])
             (rust_type_to_string ty)
@@ -709,7 +725,7 @@ let type_declaration name td =
         in
         sprintf
           "%s struct %s %s;%s\n%s"
-          (attrs_and_vis ~all_nullary:false ~force_derive_copy:false)
+          (attrs_and_vis ~enum_kind:Not_an_enum ~force_derive_copy:false)
           (rust_type name lifetime tparams |> rust_type_to_string)
           ty
           (implements ~force_derive_copy:false)
@@ -731,12 +747,25 @@ let type_declaration name td =
       else
         should_box_variant name
     in
+    let num_variants = List.length ctors in
+    let enum_kind =
+      if not all_nullary then
+        Sum_type { num_variants }
+      else
+        let max_value =
+          ctors
+          |> List.filter_map ~f:variant_constructor_value
+          |> List.map ~f:int_of_string
+          |> List.fold ~init:0 ~f:max
+        in
+        C_like { max_value; num_variants }
+    in
     let ctors =
       map_and_concat ctors ~f:(variant_constructor_declaration ~box_fields)
     in
     sprintf
       "%s enum %s {\n%s}%s\n%s"
-      (attrs_and_vis ~all_nullary ~force_derive_copy)
+      (attrs_and_vis ~enum_kind ~force_derive_copy)
       (rust_type name lifetime tparams |> rust_type_to_string)
       ctors
       (implements ~force_derive_copy)
@@ -746,7 +775,7 @@ let type_declaration name td =
     let labels = declare_record_arguments labels ~pub:true in
     sprintf
       "%s struct %s %s%s\n%s"
-      (attrs_and_vis ~all_nullary:false ~force_derive_copy:false)
+      (attrs_and_vis ~enum_kind:Not_an_enum ~force_derive_copy:false)
       (rust_type name lifetime tparams |> rust_type_to_string)
       labels
       (implements ~force_derive_copy:false)

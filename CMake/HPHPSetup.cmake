@@ -37,7 +37,6 @@ set(HHVM_LINK_LIBRARIES
   ${HHVM_WRAP_SYMS}
   hphp_analysis
   hphp_system
-  hphp_parser
   hphp_zend
   hphp_util
   hphp_hhbbc

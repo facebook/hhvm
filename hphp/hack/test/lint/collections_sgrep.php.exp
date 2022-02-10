@@ -1,0 +1,46 @@
+File "collections_sgrep.php", line 3, characters 10-13:
+collections_sgrep.php only declares `test`, it should be named test.php instead. (Lint[5564])
+File "collections_sgrep.php", line 4, characters 7-12:
+Use 'Vector {}' instead of 'new Vector(null)'. (Lint[5542])
+File "collections_sgrep.php", line 5, characters 7-9:
+Use 'Map {}' instead of 'new Map(null)'. (Lint[5542])
+File "collections_sgrep.php", line 6, characters 7-9:
+Use 'Set {}' instead of 'new Set(null)'. (Lint[5542])
+File "collections_sgrep.php", line 7, characters 7-15:
+Use 'ImmVector {}' instead of 'new ImmVector(null)'. (Lint[5542])
+File "collections_sgrep.php", line 8, characters 7-12:
+Use 'ImmMap {}' instead of 'new ImmMap(null)'. (Lint[5542])
+File "collections_sgrep.php", line 9, characters 7-12:
+Use 'ImmSet {}' instead of 'new ImmSet(null)'. (Lint[5542])
+File "collections_sgrep.php", line 10, characters 7-12:
+Use `Vector {...}` instead of `new Vector(...)` (Lint[5002])
+File "collections_sgrep.php", line 11, characters 7-9:
+Use `Map {...}` instead of `new Map(...)` (Lint[5002])
+File "collections_sgrep.php", line 12, characters 7-9:
+Use `Set {...}` instead of `new Set(...)` (Lint[5002])
+File "collections_sgrep.php", line 13, characters 7-15:
+Use `ImmVector {...}` instead of `new ImmVector(...)` (Lint[5002])
+File "collections_sgrep.php", line 14, characters 7-12:
+Use `ImmMap {...}` instead of `new ImmMap(...)` (Lint[5002])
+File "collections_sgrep.php", line 15, characters 7-12:
+Use `ImmSet {...}` instead of `new ImmSet(...)` (Lint[5002])
+File "collections_sgrep.php", line 16, characters 7-9:
+Consider `Set::fromKeysOf(X)`, which is faster and does the same thing. (Lint[5542])
+File "collections_sgrep.php", line 17, characters 7-12:
+Consider `Vector::fromKeysOf(X)`, which is faster and does the same thing. (Lint[5542])
+File "collections_sgrep.php", line 18, characters 7-9:
+Calling array_values() is redundant because the Set constructor only looks at values. Writing `new Set(...)` is enough. (Lint[5542])
+File "collections_sgrep.php", line 19, characters 7-12:
+Calling array_values() is redundant because the Vector constructor only looks at values. Writing `new Vector(...)` is enough. (Lint[5542])
+File "collections_sgrep.php", line 20, characters 7-9:
+Use `Map {...}` instead of `new Map(...)` (Lint[5002])
+File "collections_sgrep.php", line 21, characters 7-9:
+Use `Set {...}` instead of `new Set(...)` (Lint[5002])
+File "collections_sgrep.php", line 22, characters 7-12:
+Use `Vector {...}` instead of `new Vector(...)` (Lint[5002])
+File "collections_sgrep.php", line 23, characters 7-12:
+Use `ImmMap {...}` instead of `new ImmMap(...)` (Lint[5002])
+File "collections_sgrep.php", line 24, characters 7-12:
+Use `ImmSet {...}` instead of `new ImmSet(...)` (Lint[5002])
+File "collections_sgrep.php", line 25, characters 7-15:
+Use `ImmVector {...}` instead of `new ImmVector(...)` (Lint[5002])

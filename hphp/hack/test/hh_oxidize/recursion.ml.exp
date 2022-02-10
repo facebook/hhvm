@@ -29,7 +29,7 @@ use crate::*;
     Serialize,
     ToOcamlRep,
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum IntList {
     Nil,
     Cons(isize, Box<IntList>),
@@ -50,7 +50,7 @@ pub enum IntList {
     Serialize,
     ToOcamlRep,
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum NAryTree<A> {
     Leaf(A),
     Children(Vec<NAryTree<A>>),

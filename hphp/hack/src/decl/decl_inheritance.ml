@@ -104,7 +104,7 @@ let methods ~target ~static child_class_name lin =
               ~f:
                 (DTT.shallow_method_to_telt
                    child_class_name
-                   cls.sc_module
+                   (Option.map cls.sc_module ~f:snd)
                    mro
                    subst))
   |> Sequence.concat
@@ -124,7 +124,7 @@ let props ~target ~static child_class_name lin =
               ~f:
                 (DTT.shallow_prop_to_telt
                    child_class_name
-                   cls.sc_module
+                   (Option.map cls.sc_module ~f:snd)
                    mro
                    subst))
   |> Sequence.concat
@@ -426,7 +426,7 @@ let constructor_elt child_class_name (mro, cls, subst) =
       ~f:
         (DTT.shallow_method_to_class_elt
            child_class_name
-           cls.sc_module
+           (Option.map cls.sc_module ~f:snd)
            mro
            subst)
   in

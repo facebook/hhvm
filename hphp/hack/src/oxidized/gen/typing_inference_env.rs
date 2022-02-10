@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<66cc696177693118285bef339f4ba32f>>
+// @generated SignedSource<<06d63561fe2c24e36ab021f9e77572a4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -68,7 +68,7 @@ pub struct TyvarConstraints {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum SolvingInfo {
     /// when the type variable is bound to a type
     TVIType(Ty),

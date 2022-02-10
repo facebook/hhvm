@@ -64,5 +64,3 @@ val get_filenames_by_hash :
 val push_local_changes : unit -> unit
 
 val pop_local_changes : unit -> unit
-
-val has_local_changes : unit -> bool

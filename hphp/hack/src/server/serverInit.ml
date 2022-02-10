@@ -78,11 +78,8 @@ let post_init genv (env, t) =
           ~provider_name:
             genv.local_config.ServerLocalConfig.symbolindex_search_provider
           ~quiet:genv.local_config.ServerLocalConfig.symbolindex_quiet
-          ~ignore_hh_version:(ServerArgs.ignore_hh_version genv.options)
           ~savedstate_file_opt:
             genv.local_config.ServerLocalConfig.symbolindex_file
-          ~saved_state_manifold_api_key:
-            genv.local_config.ServerLocalConfig.saved_state_manifold_api_key
           ~workers:genv.workers;
     }
   in

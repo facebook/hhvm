@@ -1,0 +1,2 @@
+File "duplicate_properties_class_constant_bad.php", line 16, characters 7-7:
+Property `x`, defined in T0 and T1, is inherited multiple times by class `C` and one of its instances is initialised with a class or enum constant (Lint[5634])

@@ -244,8 +244,8 @@ module ApiShallow = struct
   let get_module (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Module @@ fun () ->
     match t with
-    | Lazy (sc, _lc) -> sc.sc_module
-    | Eager (c, _) -> c.Decl_defs.dc_module
+    | Lazy (sc, _lc) -> Option.map sc.sc_module ~f:snd
+    | Eager (c, _) -> Option.map c.Decl_defs.dc_module ~f:snd
 
   let internal (decl, t, _ctx) =
     Decl_counters.count_subdecl decl Decl_counters.Internal @@ fun () ->

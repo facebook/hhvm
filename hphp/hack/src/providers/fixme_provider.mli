@@ -41,7 +41,3 @@ val remove_batch : Relative_path.Set.t -> unit
 val local_changes_push_sharedmem_stack : unit -> unit
 
 val local_changes_pop_sharedmem_stack : unit -> unit
-
-val local_changes_commit_batch : Relative_path.Set.t -> unit
-
-val local_changes_revert_batch : Relative_path.Set.t -> unit

@@ -11,8 +11,13 @@ use pos::{ConstName, FunName, TypeName};
 
 impl<R: Reason> Allocator<R> {
     #[inline]
-    fn vec<T: Copy, U>(&self, items: &[T], f: impl Fn(&Self, T) -> U) -> Vec<U> {
-        items.iter().copied().map(|x| f(self, x)).collect()
+    fn slice<T: Copy, U>(&self, items: &[T], f: impl Fn(&Self, T) -> U) -> Box<[U]> {
+        items
+            .iter()
+            .copied()
+            .map(|x| f(self, x))
+            .collect::<Vec<_>>()
+            .into_boxed_slice()
     }
 
     fn xhp_enum_value(&self, x: obr::ast_defs::XhpEnumValue<'_>) -> ty::XhpEnumValue {
@@ -67,12 +72,12 @@ impl<R: Reason> Allocator<R> {
         ty::Tparam {
             variance: tparam.variance,
             name: self.pos_type_from_decl(tparam.name),
-            tparams: self.vec(tparam.tparams, Self::decl_tparam),
-            constraints: self.vec(tparam.constraints, |alloc, (kind, ty)| {
+            tparams: self.slice(tparam.tparams, Self::decl_tparam),
+            constraints: self.slice(tparam.constraints, |alloc, (kind, ty)| {
                 (kind, alloc.ty_from_decl(ty))
             }),
             reified: tparam.reified,
-            user_attributes: self.vec(tparam.user_attributes, Self::user_attribute_from_decl),
+            user_attributes: self.slice(tparam.user_attributes, Self::user_attribute_from_decl),
         }
     }
 
@@ -104,10 +109,10 @@ impl<R: Reason> Allocator<R> {
         let reason = self.reason(ty.0);
         let ty_ = match ty.1 {
             Tthis => DTthis,
-            Tapply(&(pos_id, tys)) => DTapply(
+            Tapply(&(pos_id, tys)) => DTapply(Box::new((
                 self.pos_type_from_decl(pos_id),
-                self.vec(tys, Self::ty_from_decl),
-            ),
+                self.slice(tys, Self::ty_from_decl),
+            ))),
             Tmixed => DTmixed,
             Tlike(ty) => DTlike(self.ty_from_decl(ty)),
             Tany(_) => DTany,
@@ -116,9 +121,9 @@ impl<R: Reason> Allocator<R> {
             Tdynamic => DTdynamic,
             Toption(ty) => DToption(self.ty_from_decl(ty)),
             Tprim(prim) => DTprim(*prim),
-            Tfun(ft) => DTfun(self.decl_fun_type(ft)),
-            Ttuple(tys) => DTtuple(self.vec(tys, Self::ty_from_decl)),
-            Tshape(&(kind, fields)) => DTshape(
+            Tfun(ft) => DTfun(Box::new(self.decl_fun_type(ft))),
+            Ttuple(tys) => DTtuple(self.slice(tys, Self::ty_from_decl)),
+            Tshape(&(kind, fields)) => DTshape(Box::new((
                 kind,
                 fields
                     .iter()
@@ -129,16 +134,18 @@ impl<R: Reason> Allocator<R> {
                         )
                     })
                     .collect(),
-            ),
+            ))),
             Tvar(ident) => DTvar(ident.into()),
-            Tgeneric(&(pos_id, tys)) => DTgeneric(
+            Tgeneric(&(pos_id, tys)) => DTgeneric(Box::new((
                 TypeName(self.symbol(pos_id)),
-                self.vec(tys, Self::ty_from_decl),
-            ),
-            Tunion(tys) => DTunion(self.vec(tys, Self::ty_from_decl)),
-            Tintersection(tys) => DTintersection(self.vec(tys, Self::ty_from_decl)),
-            TvecOrDict((ty1, ty2)) => DTvecOrDict(self.ty_from_decl(ty1), self.ty_from_decl(ty2)),
-            Taccess(taccess_type) => DTaccess(self.decl_taccess_type(taccess_type)),
+                self.slice(tys, Self::ty_from_decl),
+            ))),
+            Tunion(tys) => DTunion(self.slice(tys, Self::ty_from_decl)),
+            Tintersection(tys) => DTintersection(self.slice(tys, Self::ty_from_decl)),
+            TvecOrDict((ty1, ty2)) => {
+                DTvecOrDict(Box::new((self.ty_from_decl(ty1), self.ty_from_decl(ty2))))
+            }
+            Taccess(taccess_type) => DTaccess(Box::new(self.decl_taccess_type(taccess_type))),
             TunappliedAlias(_) | Tnewtype(_) | Tdependent(_) | Tclass(_) | Tneg(_) => {
                 unreachable!("Not used in decl tys")
             }
@@ -180,9 +187,9 @@ impl<R: Reason> Allocator<R> {
     fn decl_fun_type(&self, ft: &obr::typing_defs::FunType<'_>) -> FunType<R, DeclTy<R>> {
         FunType {
             arity: self.decl_fun_arity(ft.arity),
-            tparams: self.vec(ft.tparams, Self::decl_tparam),
-            where_constraints: self.vec(ft.where_constraints, Self::decl_where_constraint),
-            params: self.vec(ft.params, Self::decl_fun_param),
+            tparams: self.slice(ft.tparams, Self::decl_tparam),
+            where_constraints: self.slice(ft.where_constraints, Self::decl_where_constraint),
+            params: self.slice(ft.params, Self::decl_fun_param),
             implicit_params: self.decl_fun_implicit_params(ft.implicit_params),
             ret: self.decl_possibly_enforced_ty(ft.ret),
             flags: ft.flags,
@@ -195,7 +202,7 @@ impl<R: Reason> Allocator<R> {
         use ty::FunArity;
         match x {
             Obr::Fstandard => FunArity::Fstandard,
-            Obr::Fvariadic(param) => FunArity::Fvariadic(self.decl_fun_param(param)),
+            Obr::Fvariadic(param) => FunArity::Fvariadic(Box::new(self.decl_fun_param(param))),
         }
     }
 
@@ -264,7 +271,7 @@ impl<R: Reason> Allocator<R> {
         ty::EnumType {
             base: self.ty_from_decl(x.base),
             constraint: x.constraint.as_ref().map(|ty| self.ty_from_decl(ty)),
-            includes: self.vec(x.includes, Self::ty_from_decl),
+            includes: self.slice(x.includes, Self::ty_from_decl),
         }
     }
 
@@ -273,10 +280,10 @@ impl<R: Reason> Allocator<R> {
         scc: &obr::shallow_decl_defs::ShallowClassConst<'_>,
     ) -> shallow::ShallowClassConst<R> {
         shallow::ShallowClassConst {
-            is_abstract: scc.abstract_,
+            kind: scc.abstract_,
             name: self.pos_class_const_from_decl(scc.name),
             ty: self.ty_from_decl(scc.type_),
-            refs: self.vec(scc.refs, Self::class_const_ref),
+            refs: self.slice(scc.refs, Self::class_const_ref),
         }
     }
 
@@ -302,7 +309,7 @@ impl<R: Reason> Allocator<R> {
             ty: self.ty_from_decl(sm.type_),
             visibility: sm.visibility,
             deprecated: sm.deprecated.map(|s| self.bytes(s)),
-            attributes: self.vec(sm.attributes, Self::user_attribute_from_decl),
+            attributes: self.slice(sm.attributes, Self::user_attribute_from_decl),
             flags: shallow::MethodFlags::empty(),
         }
     }
@@ -336,28 +343,28 @@ impl<R: Reason> Allocator<R> {
                 .as_ref()
                 .map(|id| self.pos_module_from_ast_ref(id)),
             name: self.pos_type_from_decl(sc.name),
-            tparams: self.vec(sc.tparams, Self::decl_tparam),
-            where_constraints: self.vec(sc.where_constraints, Self::decl_where_constraint),
-            extends: self.vec(sc.extends, Self::ty_from_decl),
-            uses: self.vec(sc.uses, Self::ty_from_decl),
-            xhp_attr_uses: self.vec(sc.xhp_attr_uses, Self::ty_from_decl),
+            tparams: self.slice(sc.tparams, Self::decl_tparam),
+            where_constraints: self.slice(sc.where_constraints, Self::decl_where_constraint),
+            extends: self.slice(sc.extends, Self::ty_from_decl),
+            uses: self.slice(sc.uses, Self::ty_from_decl),
+            xhp_attr_uses: self.slice(sc.xhp_attr_uses, Self::ty_from_decl),
             xhp_enum_values: sc
                 .xhp_enum_values
                 .iter()
-                .map(|(k, v)| (self.symbol(k), self.vec(v, Self::xhp_enum_value)))
+                .map(|(k, v)| (self.symbol(k), self.slice(v, Self::xhp_enum_value)))
                 .collect(),
-            req_extends: self.vec(sc.req_extends, Self::ty_from_decl),
-            req_implements: self.vec(sc.req_implements, Self::ty_from_decl),
-            implements: self.vec(sc.implements, Self::ty_from_decl),
+            req_extends: self.slice(sc.req_extends, Self::ty_from_decl),
+            req_implements: self.slice(sc.req_implements, Self::ty_from_decl),
+            implements: self.slice(sc.implements, Self::ty_from_decl),
             support_dynamic_type: sc.support_dynamic_type,
-            consts: self.vec(sc.consts, Self::shallow_class_const),
-            typeconsts: self.vec(sc.typeconsts, Self::shallow_typeconst),
-            props: self.vec(sc.props, Self::shallow_prop),
-            static_props: self.vec(sc.sprops, Self::shallow_prop),
+            consts: self.slice(sc.consts, Self::shallow_class_const),
+            typeconsts: self.slice(sc.typeconsts, Self::shallow_typeconst),
+            props: self.slice(sc.props, Self::shallow_prop),
+            static_props: self.slice(sc.sprops, Self::shallow_prop),
             constructor: sc.constructor.map(|ctor| self.shallow_method(ctor)),
-            static_methods: self.vec(sc.static_methods, Self::shallow_method),
-            methods: self.vec(sc.methods, Self::shallow_method),
-            user_attributes: self.vec(sc.user_attributes, Self::user_attribute_from_decl),
+            static_methods: self.slice(sc.static_methods, Self::shallow_method),
+            methods: self.slice(sc.methods, Self::shallow_method),
+            user_attributes: self.slice(sc.user_attributes, Self::user_attribute_from_decl),
             enum_type: sc.enum_type.as_ref().map(|et| self.enum_type(et)),
         }
     }
@@ -381,11 +388,11 @@ impl<R: Reason> Allocator<R> {
             module: x.module.map(|pos_id| self.pos_module_from_ast_ref(&pos_id)),
             pos: self.pos_from_decl(x.pos),
             vis: x.vis,
-            tparams: self.vec(x.tparams, Self::decl_tparam),
+            tparams: self.slice(x.tparams, Self::decl_tparam),
             constraint: x.constraint.map(|ty| self.ty_from_decl(ty)),
             ty: self.ty_from_decl(x.type_),
             is_ctx: x.is_ctx,
-            attributes: self.vec(x.attributes, Self::user_attribute_from_decl),
+            attributes: self.slice(x.attributes, Self::user_attribute_from_decl),
         }
     }
 

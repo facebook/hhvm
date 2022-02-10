@@ -936,7 +936,7 @@ let set_fn_kind env fn_type =
 
 let set_module env m = { env with genv = { env.genv with this_module = m } }
 
-let get_module env = env.genv.this_module
+let get_module env = Option.map env.genv.this_module ~f:snd
 
 let set_internal env b = { env with genv = { env.genv with this_internal = b } }
 

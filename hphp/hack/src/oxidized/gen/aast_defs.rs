@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c4859dcf7b3a883059e830fb49acdaa4>>
+// @generated SignedSource<<67731a9c7646eba4e1d1b3c6851d6210>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -72,7 +72,7 @@ pub type IsReified = bool;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum ImportFlavor {
     Include,
     Require,
@@ -97,7 +97,7 @@ arena_deserializer::impl_deserialize_in_arena!(ImportFlavor);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum XhpChild {
     ChildName(Sid),
     ChildList(Vec<XhpChild>),
@@ -122,7 +122,7 @@ pub enum XhpChild {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum XhpChildOp {
     ChildStar,
     ChildPlus,
@@ -231,7 +231,7 @@ pub struct HintFun {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Hint_ {
     Hoption(Hint),
     Hlike(Hint),
@@ -295,7 +295,7 @@ pub enum Hint_ {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum Tprim {
     Tnull,
     Tvoid,
@@ -371,7 +371,7 @@ pub struct NastShapeInfo {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum KvcKind {
     Map,
     ImmMap,
@@ -397,7 +397,7 @@ arena_deserializer::impl_deserialize_in_arena!(KvcKind);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum VcKind {
     Vector,
     ImmVector,
@@ -426,7 +426,7 @@ arena_deserializer::impl_deserialize_in_arena!(VcKind);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum UseAsVisibility {
     UseAsPublic,
     UseAsPrivate,
@@ -453,7 +453,7 @@ arena_deserializer::impl_deserialize_in_arena!(UseAsVisibility);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum TypedefVisibility {
     Transparent,
     Opaque,
@@ -519,7 +519,7 @@ pub struct WhereConstraintHint(pub Hint, pub ast_defs::ConstraintKind, pub Hint)
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum ReifyKind {
     Erased,
     SoftReified,

@@ -291,13 +291,6 @@ pub mod instr {
         )
     }
 
-    pub fn goto<'a>(alloc: &'a bumpalo::Bump, label: std::string::String) -> InstrSeq<'_> {
-        instr(
-            alloc,
-            Instruct::ISpecialFlow(InstructSpecialFlow::Goto(Str::new_str(alloc, &label))),
-        )
-    }
-
     pub fn iter_break<'a>(
         alloc: &'a bumpalo::Bump,
         label: Label,
@@ -787,11 +780,11 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IContFlow(InstructControlFlow::Switch(
-                SwitchKind::Unbounded,
-                0,
-                BumpSliceMut::new(alloc, labels.into_bump_slice_mut()),
-            )),
+            Instruct::IContFlow(InstructControlFlow::Switch {
+                kind: SwitchKind::Unbounded,
+                base: 0,
+                labels: BumpSliceMut::new(alloc, labels.into_bump_slice_mut()),
+            }),
         )
     }
 
@@ -803,13 +796,17 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         cases: bumpalo::collections::Vec<'a, (&'a str, Label)>,
     ) -> InstrSeq<'a> {
-        let cases_ = BumpSliceMut::new(
+        let labels = BumpSliceMut::new(
             alloc,
-            alloc.alloc_slice_fill_iter(cases.into_iter().map(|p| Pair(Str::from(p.0), p.1))),
+            alloc.alloc_slice_fill_iter(
+                cases
+                    .into_iter()
+                    .map(|(s, label)| Pair(Str::from(s), label)),
+            ),
         );
         instr(
             alloc,
-            Instruct::IContFlow(InstructControlFlow::SSwitch(cases_)),
+            Instruct::IContFlow(InstructControlFlow::SSwitch { labels }),
         )
     }
 
@@ -1064,58 +1061,55 @@ pub mod instr {
 
     pub fn fcallclsmethod<'a>(
         alloc: &'a bumpalo::Bump,
-        is_log_as_dynamic_call: IsLogAsDynamicCallOp,
+        log: IsLogAsDynamicCallOp,
         fcall_args: FcallArgs<'a>,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallClsMethod(
-                fcall_args,
-                is_log_as_dynamic_call,
-            )),
+            Instruct::ICall(InstructCall::FCallClsMethod { fcall_args, log }),
         )
     }
 
     pub fn fcallclsmethodd<'a>(
         alloc: &'a bumpalo::Bump,
         fcall_args: FcallArgs<'a>,
-        method_name: MethodId<'a>,
-        class_name: ClassId<'a>,
+        method: MethodId<'a>,
+        class: ClassId<'a>,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallClsMethodD(
+            Instruct::ICall(InstructCall::FCallClsMethodD {
                 fcall_args,
-                class_name,
-                method_name,
-            )),
+                class,
+                method,
+            }),
         )
     }
 
     pub fn fcallclsmethods<'a>(
         alloc: &'a bumpalo::Bump,
         fcall_args: FcallArgs<'a>,
-        scref: SpecialClsRef,
+        clsref: SpecialClsRef,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallClsMethodS(fcall_args, scref)),
+            Instruct::ICall(InstructCall::FCallClsMethodS { fcall_args, clsref }),
         )
     }
 
     pub fn fcallclsmethodsd<'a>(
         alloc: &'a bumpalo::Bump,
         fcall_args: FcallArgs<'a>,
-        scref: SpecialClsRef,
-        method_name: MethodId<'a>,
+        clsref: SpecialClsRef,
+        method: MethodId<'a>,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallClsMethodSD(
+            Instruct::ICall(InstructCall::FCallClsMethodSD {
                 fcall_args,
-                scref,
-                method_name,
-            )),
+                clsref,
+                method,
+            }),
         )
     }
 
@@ -1130,11 +1124,11 @@ pub mod instr {
     pub fn fcallfuncd<'a>(
         alloc: &'a bumpalo::Bump,
         fcall_args: FcallArgs<'a>,
-        id: FunctionId<'a>,
+        func: FunctionId<'a>,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallFuncD(fcall_args, id)),
+            Instruct::ICall(InstructCall::FCallFuncD { fcall_args, func }),
         )
     }
 
@@ -1145,7 +1139,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallObjMethod(fcall_args, flavor)),
+            Instruct::ICall(InstructCall::FCallObjMethod { fcall_args, flavor }),
         )
     }
 
@@ -1157,7 +1151,11 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallObjMethodD(fcall_args, flavor, method)),
+            Instruct::ICall(InstructCall::FCallObjMethodD {
+                fcall_args,
+                flavor,
+                method,
+            }),
         )
     }
 
@@ -1746,19 +1744,6 @@ impl<'a> InstrSeq<'a> {
                 )
                 .into_bump_slice_mut(),
             )),
-        }
-    }
-
-    pub fn fold_left<'i, F, A>(&'i self, f: &mut F, init: A) -> A
-    where
-        F: FnMut(A, &'i Instruct<'a>) -> A,
-    {
-        // self:& InstrSeq<'a>
-        match self {
-            InstrSeq::List(s) if s.is_empty() => init,
-            InstrSeq::List(s) if s.len() == 1 => f(init, &s[0]),
-            InstrSeq::List(s) => s.iter().fold(init, f),
-            InstrSeq::Concat(s) => s.iter().fold(init, |acc, x| x.fold_left(f, acc)),
         }
     }
 

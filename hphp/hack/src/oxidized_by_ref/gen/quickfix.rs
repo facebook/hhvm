@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<37f293320af59165776cb63b393ab21c>>
+// @generated SignedSource<<19a28fc0ed6a9601a740f22ee734157a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -35,7 +35,7 @@ use crate::*;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum QfPos<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Qpos(&'a pos::Pos<'a>),

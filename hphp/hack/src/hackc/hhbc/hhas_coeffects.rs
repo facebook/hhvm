@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::{Pair, Slice, Str, Triple};
-use hhbc_string_utils as string_utils;
 use hhbc_string_utils::strip_ns;
 use naming_special_names_rust::{self as sn, coeffects as c, coeffects::Ctx};
 use oxidized::{
@@ -120,16 +119,14 @@ impl<'arena> HhasCoeffects<'arena> {
     }
 
     pub fn local_to_shallow(coeffects: &[Ctx]) -> Vec<Ctx> {
-        use Ctx::*;
-        let mut result = vec![];
-        for c in coeffects.iter() {
-            result.push(match c {
-                RxLocal => RxShallow,
-                ZonedLocal => ZonedShallow,
+        coeffects
+            .iter()
+            .map(|c| match c {
+                Ctx::RxLocal => Ctx::RxShallow,
+                Ctx::ZonedLocal => Ctx::ZonedShallow,
                 _ => *c,
             })
-        }
-        result
+            .collect()
     }
 
     pub fn from_ctx_constant(hint: &Hint) -> (Vec<Ctx>, Vec<String>) {
@@ -382,6 +379,6 @@ impl<'arena> HhasCoeffects<'arena> {
             && self.static_coeffects.is_empty()
             && self.unenforced_static_coeffects.len() == 1
             && self.unenforced_static_coeffects.as_ref()[0]
-                == string_utils::coeffects::CALLER.into()
+                == hhbc_string_utils::coeffects::CALLER.into()
     }
 }

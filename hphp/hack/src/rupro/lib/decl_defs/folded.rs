@@ -3,17 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::decl_defs::{
-    CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, XhpAttribute,
+    CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, Typeconst, XhpAttribute,
 };
 use crate::reason::Reason;
-use pos::{ClassConstNameMap, MethodNameMap, PropNameMap, TypeName, TypeNameMap};
+use pos::{
+    ClassConstNameMap, MethodNameMap, Positioned, PropNameMap, TypeConstName, TypeConstNameMap,
+    TypeName, TypeNameMap,
+};
 
 #[derive(Debug, Clone)]
-pub struct FoldedElement<R: Reason> {
+pub struct FoldedElement {
     // note(sf, 2022-01-28): c.f. `Decl_defs.element`
     pub flags: ClassEltFlags,
     pub origin: TypeName,
-    pub visibility: CeVisibility<R::Pos>,
+    pub visibility: CeVisibility,
 
     /// If the element is deprecated, this holds the deprecation message.
     pub deprecated: Option<intern::string::BytesId>,
@@ -55,6 +58,19 @@ pub struct SubstContext<R: Reason> {
 }
 
 #[derive(Debug, Clone)]
+pub struct TypeConst<R: Reason> {
+    // note(sf, 2022-02-08): c.f. `Typing_defs.typeconst_type`
+    pub is_synthesized: bool,
+    pub name: Positioned<TypeConstName, R::Pos>,
+    pub kind: Typeconst<R>, // abstract or concrete
+    pub origin: TypeName,
+    pub is_enforceable: Positioned<bool, R::Pos>,
+    pub is_reifiable: Option<R::Pos>,
+    pub is_concreteized: bool,
+    pub is_ctx: bool,
+}
+
+#[derive(Debug, Clone)]
 pub struct ClassConst<R: Reason> {
     // note(sf, 2022-02-08): c.f. `Typing_defs.class_const`
     pub is_synthesized: bool,
@@ -65,6 +81,12 @@ pub struct ClassConst<R: Reason> {
     pub refs: Vec<ClassConstRef>,
 }
 
+impl<R: Reason> ClassConst<R> {
+    pub fn set_is_synthesized(&mut self, p: bool) {
+        self.is_synthesized = p;
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct FoldedClass<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_defs.decl_class_type`
@@ -72,15 +94,16 @@ pub struct FoldedClass<R: Reason> {
     pub pos: R::Pos,
     pub substs: TypeNameMap<SubstContext<R>>,
     pub ancestors: TypeNameMap<DeclTy<R>>,
-    pub props: PropNameMap<FoldedElement<R>>,
-    pub static_props: PropNameMap<FoldedElement<R>>,
-    pub methods: MethodNameMap<FoldedElement<R>>,
-    pub static_methods: MethodNameMap<FoldedElement<R>>,
-    pub constructor: Option<FoldedElement<R>>,
+    pub props: PropNameMap<FoldedElement>,
+    pub static_props: PropNameMap<FoldedElement>,
+    pub methods: MethodNameMap<FoldedElement>,
+    pub static_methods: MethodNameMap<FoldedElement>,
+    pub constructor: Option<FoldedElement>,
     pub consts: ClassConstNameMap<ClassConst<R>>,
+    pub type_consts: TypeConstNameMap<TypeConst<R>>,
 }
 
-impl<R: Reason> FoldedElement<R> {
+impl FoldedElement {
     pub fn is_abstract(&self) -> bool {
         self.flags.contains(ClassEltFlags::ABSTRACT)
     }

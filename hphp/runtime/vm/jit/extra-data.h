@@ -2878,7 +2878,6 @@ X(ContValid,                    IsAsyncData);
 X(LdContResumeAddr,             IsAsyncData);
 X(LdContActRec,                 IsAsyncData);
 X(DecRef,                       DecRefData);
-X(ReleaseShallow,               DecRefData);
 X(DecRefNZ,                     DecRefData);
 X(ProfileDecRef,                DecRefData);
 X(LdTVAux,                      LdTVAuxData);

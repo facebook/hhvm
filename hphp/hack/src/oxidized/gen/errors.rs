@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9cf97539acc5ed6e5428b54c00d62d7c>>
+// @generated SignedSource<<e1d9a22fb3cbe2b448375980b43d3d90>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -44,7 +44,7 @@ pub type ErrorCode = isize;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum Phase {
     Init,
     Parsing,
@@ -72,7 +72,7 @@ arena_deserializer::impl_deserialize_in_arena!(Phase);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum Format {
     Context,
     Raw,

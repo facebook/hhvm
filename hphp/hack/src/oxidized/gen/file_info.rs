@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<eafc70b97d83029b6b323cb178a21aaf>>
+// @generated SignedSource<<c5448129a4b61055fd04b512dab5beba>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,7 +39,7 @@ pub use prim_defs::*;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum Mode {
     /// just declare signatures, don't check anything
     Mhhi,
@@ -65,7 +65,7 @@ arena_deserializer::impl_deserialize_in_arena!(Mode);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum NameType {
     Fun = 3,
     Class = 0,
@@ -93,7 +93,7 @@ arena_deserializer::impl_deserialize_in_arena!(NameType);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Pos {
     Full(pos::Pos),
     File(NameType, ocamlrep::rc::RcOc<relative_path::RelativePath>),

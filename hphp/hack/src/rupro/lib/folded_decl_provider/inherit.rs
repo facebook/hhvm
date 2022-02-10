@@ -4,12 +4,15 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl_defs::{
-    Abstraction, ClassConst, ClassishKind, DeclTy, FoldedClass, FoldedElement, ShallowClass,
-    SubstContext,
+    Abstraction, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass, FoldedElement,
+    ShallowClass, SubstContext, TypeConst,
 };
 use crate::folded_decl_provider::subst::Subst;
 use crate::reason::Reason;
-use pos::{ClassConstNameMap, MethodName, MethodNameMap, PropNameMap, TypeName, TypeNameMap};
+use pos::{
+    ClassConstNameMap, MethodName, MethodNameMap, PropNameMap, TypeConstNameMap, TypeName,
+    TypeNameMap,
+};
 use std::collections::hash_map::Entry;
 use std::sync::Arc;
 
@@ -19,12 +22,13 @@ use std::sync::Arc;
 pub(crate) struct Inherited<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_inherit.inherited`
     pub(crate) substs: TypeNameMap<SubstContext<R>>,
-    pub(crate) props: PropNameMap<FoldedElement<R>>,
-    pub(crate) static_props: PropNameMap<FoldedElement<R>>,
-    pub(crate) methods: MethodNameMap<FoldedElement<R>>,
-    pub(crate) static_methods: MethodNameMap<FoldedElement<R>>,
-    pub(crate) constructor: Option<FoldedElement<R>>,
+    pub(crate) props: PropNameMap<FoldedElement>,
+    pub(crate) static_props: PropNameMap<FoldedElement>,
+    pub(crate) methods: MethodNameMap<FoldedElement>,
+    pub(crate) static_methods: MethodNameMap<FoldedElement>,
+    pub(crate) constructor: Option<FoldedElement>,
     pub(crate) consts: ClassConstNameMap<ClassConst<R>>,
+    pub(crate) type_consts: TypeConstNameMap<TypeConst<R>>,
 }
 
 impl<R: Reason> std::default::Default for Inherited<R> {
@@ -37,6 +41,7 @@ impl<R: Reason> std::default::Default for Inherited<R> {
             static_methods: Default::default(),
             constructor: Default::default(),
             consts: Default::default(),
+            type_consts: Default::default(),
         }
     }
 }
@@ -51,14 +56,14 @@ impl<R: Reason> Inherited<R> {
     //     trait.
     // When these two considerations conflict, we give precedence to
     // abstractness for determining priority of the method.
-    fn should_keep_old_sig(new_sig: &FoldedElement<R>, old_sig: &FoldedElement<R>) -> bool {
+    fn should_keep_old_sig(new_sig: &FoldedElement, old_sig: &FoldedElement) -> bool {
         !old_sig.is_abstract() && new_sig.is_abstract()
             || old_sig.is_abstract() == new_sig.is_abstract()
                 && !old_sig.is_synthesized()
                 && new_sig.is_synthesized()
     }
 
-    fn add_constructor(&mut self, constructor: Option<FoldedElement<R>>) {
+    fn add_constructor(&mut self, constructor: Option<FoldedElement>) {
         match (constructor.as_ref(), self.constructor.as_ref()) {
             (None, _) => {}
             (Some(other_ctor), Some(self_ctor))
@@ -94,8 +99,8 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn add_method(
-        methods: &mut MethodNameMap<FoldedElement<R>>,
-        (key, mut fe): (MethodName, FoldedElement<R>),
+        methods: &mut MethodNameMap<FoldedElement>,
+        (key, mut fe): (MethodName, FoldedElement),
     ) {
         match methods.entry(key) {
             Entry::Vacant(entry) => {
@@ -118,28 +123,69 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
-    fn add_methods(&mut self, other_methods: MethodNameMap<FoldedElement<R>>) {
+    fn add_methods(&mut self, other_methods: MethodNameMap<FoldedElement>) {
         for (key, fe) in other_methods {
             Self::add_method(&mut self.methods, (key, fe))
         }
     }
 
-    fn add_static_methods(&mut self, other_static_methods: MethodNameMap<FoldedElement<R>>) {
+    fn add_static_methods(&mut self, other_static_methods: MethodNameMap<FoldedElement>) {
         for (key, fe) in other_static_methods {
             Self::add_method(&mut self.static_methods, (key, fe))
         }
     }
 
-    fn add_props(&mut self, other_props: PropNameMap<FoldedElement<R>>) {
+    fn add_props(&mut self, other_props: PropNameMap<FoldedElement>) {
         self.props.extend(other_props)
     }
 
-    fn add_static_props(&mut self, other_static_props: PropNameMap<FoldedElement<R>>) {
+    fn add_static_props(&mut self, other_static_props: PropNameMap<FoldedElement>) {
         self.static_props.extend(other_static_props)
     }
 
     fn add_consts(&mut self, other_consts: ClassConstNameMap<ClassConst<R>>) {
-        self.consts.extend(other_consts)
+        for (name, new_const) in other_consts {
+            match self.consts.entry(name) {
+                Entry::Vacant(e) => {
+                    e.insert(new_const);
+                }
+                Entry::Occupied(mut e) => {
+                    let old_const = e.get();
+                    match (
+                        new_const.is_synthesized,
+                        old_const.is_synthesized,
+                        new_const.kind,
+                        old_const.kind,
+                    ) {
+                        (true, false, _, _) => {
+                            // Don't replace a constant with a synthesized
+                            // constant. This covers the following case:
+                            // ```
+                            // class HasFoo { abstract const int FOO; }
+                            // trait T { require extends Foo; }
+                            // class Child extends HasFoo {
+                            //   use T;
+                            // }
+                            // ```
+                            // In this case, `Child` still doesn't have a value
+                            // for the `FOO` constant.
+                        }
+                        (_, _, ClassConstKind::CCAbstract(_), ClassConstKind::CCConcrete) => {
+                            // Don't replace a concrete constant with an
+                            // abstract constant found later in the MRO.
+                        }
+                        _ => {
+                            e.insert(new_const);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn add_type_consts(&mut self, other_type_consts: TypeConstNameMap<TypeConst<R>>) {
+        //TODO Fill this in
+        self.type_consts.extend(other_type_consts)
     }
 
     fn add_inherited(&mut self, other: Self) {
@@ -151,6 +197,7 @@ impl<R: Reason> Inherited<R> {
             static_methods,
             constructor,
             consts,
+            type_consts,
         } = other;
         self.add_substs(substs);
         self.add_props(props);
@@ -159,6 +206,7 @@ impl<R: Reason> Inherited<R> {
         self.add_static_methods(static_methods);
         self.add_constructor(constructor);
         self.add_consts(consts);
+        self.add_type_consts(type_consts);
     }
 
     fn make_substitution(_cls: &FoldedClass<R>, params: &[DeclTy<R>]) -> TypeNameMap<DeclTy<R>> {
@@ -190,6 +238,7 @@ impl<R: Reason> Inherited<R> {
             static_methods: parent.static_methods.clone(),
             constructor: parent.constructor.clone(),
             consts: parent.consts.clone(),
+            type_consts: parent.type_consts.clone(),
         }
     }
 
@@ -229,7 +278,7 @@ impl<R: Reason> Inherited<R> {
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) {
-        for ty in &sc.xhp_attr_uses {
+        for ty in sc.xhp_attr_uses.iter() {
             self.add_inherited(Self::from_class_xhp_attrs_only(sc, parents, ty))
         }
     }
@@ -242,19 +291,19 @@ impl<R: Reason> Inherited<R> {
         let mut tys: Vec<&DeclTy<R>> = Vec::new();
         match sc.kind {
             ClassishKind::Cclass(Abstraction::Abstract) => {
-                tys.extend(&sc.implements);
-                tys.extend(&sc.extends);
+                tys.extend(sc.implements.iter());
+                tys.extend(sc.extends.iter());
             }
             ClassishKind::Ctrait => {
-                tys.extend(&sc.implements);
-                tys.extend(&sc.extends);
-                tys.extend(&sc.req_implements);
+                tys.extend(sc.implements.iter());
+                tys.extend(sc.extends.iter());
+                tys.extend(sc.req_implements.iter());
             }
             ClassishKind::Cclass(_)
             | ClassishKind::Cinterface
             | ClassishKind::Cenum
             | ClassishKind::CenumClass(_) => {
-                tys.extend(&sc.extends);
+                tys.extend(sc.extends.iter());
             }
         };
 
@@ -270,7 +319,7 @@ impl<R: Reason> Inherited<R> {
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) {
-        for ty in &sc.req_extends {
+        for ty in sc.req_extends.iter() {
             let mut inherited = Self::from_class(sc, parents, ty);
             inherited.mark_as_synthesized();
             self.add_inherited(inherited);
@@ -297,7 +346,7 @@ impl<R: Reason> Inherited<R> {
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) {
-        for ty in &sc.uses {
+        for ty in sc.uses.iter() {
             self.add_inherited(Self::from_class(sc, parents, ty));
         }
     }
@@ -321,7 +370,11 @@ impl<R: Reason> Inherited<R> {
         for (_, static_method) in self.static_methods.iter_mut() {
             static_method.set_is_synthesized(true);
         }
-        //TODO typeconsts, consts
+        for (_, classconst) in self.consts.iter_mut() {
+            classconst.set_is_synthesized(true);
+        }
+
+        //TODO typeconsts
     }
 
     pub(crate) fn make(sc: &ShallowClass<R>, parents: &TypeNameMap<Arc<FoldedClass<R>>>) -> Self {

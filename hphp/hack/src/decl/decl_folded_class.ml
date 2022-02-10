@@ -354,7 +354,7 @@ let visibility
   | Private -> Vprivate class_id
   | Internal ->
     (match module_ with
-    | Some m -> Vinternal m
+    | Some m -> Vinternal (snd m)
     | None -> Vpublic)
 
 let build_constructor_fun_elt

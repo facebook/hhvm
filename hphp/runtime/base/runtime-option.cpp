@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 
-#include "hphp/parser/scanner.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -75,6 +74,7 @@
 #include <set>
 #include <stdexcept>
 #include <vector>
+#include <sstream>
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <folly/CPortability.h>
@@ -1019,12 +1019,6 @@ bool RuntimeOption::PHP7_NoHexNumerics = false;
 bool RuntimeOption::PHP7_Builtins = false;
 bool RuntimeOption::PHP7_Substr = false;
 bool RuntimeOption::PHP7_DisallowUnsafeCurlUploads = false;
-
-int RuntimeOption::GetScannerType() {
-  int type = 0;
-  if (EnableShortTags) type |= Scanner::AllowShortTags;
-  return type;
-}
 
 const std::string& RuntimeOption::GetServerPrimaryIPv4() {
    static std::string serverPrimaryIPv4 = GetPrimaryIPv4();
@@ -2996,7 +2990,13 @@ void RuntimeOption::Load(
 
 uintptr_t lowArenaMinAddr() {
   const char* str = getenv("HHVM_LOW_ARENA_START");
-  if (str == nullptr) return 1u << 30;
+  if (str == nullptr) {
+#ifndef INSTRUMENTED_BUILD
+   return 1u << 30;
+#else
+   return 1u << 31;
+#endif
+  }
   uintptr_t start = 0;
   if (sscanf(str, "0x%lx", &start) == 1) return start;
   if (sscanf(str, "%lu", &start) == 1) return start;

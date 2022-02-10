@@ -25,7 +25,7 @@ type fixme_map = Provider_backend.fixme_map
 
 module HH_FIXMES =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (Relative_path.S)
+    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
     (struct
       type t = fixme_map
 
@@ -37,7 +37,7 @@ module HH_FIXMES =
 
 module DECL_HH_FIXMES =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (Relative_path.S)
+    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
     (struct
       type t = fixme_map
 
@@ -151,16 +151,6 @@ let local_changes_pop_sharedmem_stack () =
   HH_FIXMES.LocalChanges.pop_stack ();
   DECL_HH_FIXMES.LocalChanges.pop_stack ();
   DISALLOWED_FIXMES.LocalChanges.pop_stack ()
-
-let local_changes_commit_batch paths =
-  HH_FIXMES.LocalChanges.commit_batch paths;
-  DECL_HH_FIXMES.LocalChanges.commit_batch paths;
-  DISALLOWED_FIXMES.LocalChanges.commit_batch paths
-
-let local_changes_revert_batch paths =
-  HH_FIXMES.LocalChanges.revert_batch paths;
-  DECL_HH_FIXMES.LocalChanges.revert_batch paths;
-  DISALLOWED_FIXMES.LocalChanges.revert_batch paths
 
 let fixme_was_applied applied_fixmes fn err_line err_code =
   match Relative_path.Map.find_opt applied_fixmes fn with

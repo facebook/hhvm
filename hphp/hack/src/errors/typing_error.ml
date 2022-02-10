@@ -1218,9 +1218,9 @@ module Primary = struct
         }
       | Module_mismatch of {
           pos: Pos.t;
-          current_module_opt: Ast_defs.id option;
+          current_module_opt: string option;
           decl_pos: Pos_or_decl.t;
-          target_module: Ast_defs.id;
+          target_module: string;
         }
 
     let module_hint pos decl_pos =
@@ -1228,14 +1228,14 @@ module Primary = struct
       and reason = [(decl_pos, "It is declared as `internal` here")] in
       (Error_code.ModuleHintError, claim, reason, [])
 
-    let module_mismatch pos current_module_opt decl_pos (_, target_module) =
+    let module_mismatch pos current_module_opt decl_pos target_module =
       let claim =
         ( pos,
           Printf.sprintf
             "Cannot access an internal element from module `%s` %s"
             target_module
             (match current_module_opt with
-            | Some (_, m) -> Printf.sprintf "in module `%s`" m
+            | Some m -> Printf.sprintf "in module `%s`" m
             | None -> "outside of a module") )
       and reason =
         [(decl_pos, Printf.sprintf "This is from module `%s`" target_module)]
@@ -5400,9 +5400,9 @@ and Secondary : sig
       }
     | Visibility_override_internal of {
         pos: Pos_or_decl.t;
-        module_name: Ast_defs.id option;
+        module_name: string option;
         parent_pos: Pos_or_decl.t;
-        parent_module: Ast_defs.id;
+        parent_module: string;
       }
     | Abstract_tconst_not_allowed of {
         pos: Pos_or_decl.t;
@@ -5664,9 +5664,9 @@ end = struct
       }
     | Visibility_override_internal of {
         pos: Pos_or_decl.t;
-        module_name: Ast_defs.id option;
+        module_name: string option;
         parent_pos: Pos_or_decl.t;
-        parent_module: Ast_defs.id;
+        parent_module: string;
       }
     | Abstract_tconst_not_allowed of {
         pos: Pos_or_decl.t;
@@ -6079,8 +6079,7 @@ end = struct
         Printf.sprintf
           "Cannot override this member outside module `%s`"
           parent_module
-      | Some (_, m) ->
-        Printf.sprintf "Cannot override this member in module `%s`" m
+      | Some m -> Printf.sprintf "Cannot override this member in module `%s`" m
     in
     let reasons =
       [
@@ -6469,7 +6468,7 @@ end = struct
     | Visibility_extends { pos; vis; parent_pos; parent_vis } ->
       Some (visibility_extends pos vis parent_pos parent_vis)
     | Visibility_override_internal
-        { pos; module_name; parent_module = (_, parent_module); parent_pos } ->
+        { pos; module_name; parent_module; parent_pos } ->
       Some
         (visibility_override_internal pos module_name parent_module parent_pos)
     | Missing_constructor pos -> Some (missing_constructor pos)

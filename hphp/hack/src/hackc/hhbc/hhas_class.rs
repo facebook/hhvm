@@ -12,7 +12,6 @@ use hhas_pos::HhasSpan;
 use hhas_property::HhasProperty;
 use hhas_type::HhasTypeInfo;
 use hhas_type_const::HhasTypeConstant;
-use hhbc_ast::UseAsVisibility;
 use hhbc_id::class::ClassType;
 use hhvm_types_ffi::ffi::Attr;
 
@@ -36,12 +35,7 @@ pub struct HhasClass<'arena> {
     // Deprecated - kill please
     pub use_aliases: Slice<
         'arena,
-        Quadruple<
-            Maybe<ClassType<'arena>>,
-            ClassType<'arena>,
-            Maybe<ClassType<'arena>>,
-            Slice<'arena, UseAsVisibility>,
-        >,
+        Quadruple<Maybe<ClassType<'arena>>, ClassType<'arena>, Maybe<ClassType<'arena>>, Attr>,
     >,
     // Deprecated - kill please
     pub use_precedences: Slice<

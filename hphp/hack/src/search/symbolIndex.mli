@@ -14,10 +14,8 @@ val initialize :
   namespace_map:(string * string) list ->
   provider_name:string ->
   quiet:bool ->
-  ignore_hh_version:bool ->
   savedstate_file_opt:string option ->
   workers:MultiWorker.worker list option ->
-  saved_state_manifold_api_key:string option ->
   SearchUtils.si_env
 
 (* This is the proper search function everyone should use *)

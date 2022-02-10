@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::reason::Reason;
+use crate::reason::{self, Reason};
 use crate::utils::core::Ident;
 use hcons::Hc;
 use intern::string::BytesId;
@@ -114,7 +114,10 @@ impl<R: Reason> DeclTy<R> {
         use DeclTy_::*;
         let r = self.reason();
         match &**self.node() {
-            DTapply(pos_id, tyl) => Some((r, pos_id, tyl)),
+            DTapply(id_and_args) => {
+                let (pos_id, args) = &**id_and_args;
+                Some((r, pos_id, args))
+            }
             _ => None,
         }
     }
@@ -142,7 +145,7 @@ pub enum DeclTy_<R: Reason> {
     /// The late static bound type of a class
     DTthis,
     /// Either an object type or a type alias, ty list are the arguments
-    DTapply(Positioned<TypeName, R::Pos>, Box<[DeclTy<R>]>),
+    DTapply(Box<(Positioned<TypeName, R::Pos>, Box<[DeclTy<R>]>)>),
     /// "Any" is the type of a variable with a missing annotation, and "mixed" is
     /// the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
     /// Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -190,19 +193,19 @@ pub enum DeclTy_<R: Reason> {
     DTprim(aast::Tprim),
     /// A wrapper around fun_type, which contains the full type information for a
     /// function, method, lambda, etc.
-    DTfun(FunType<R, DeclTy<R>>),
+    DTfun(Box<FunType<R, DeclTy<R>>>),
     /// Tuple, with ordered list of the types of the elements of the tuple.
     DTtuple(Box<[DeclTy<R>]>),
     /// Whether all fields of this shape are known, types of each of the
     /// known arms.
-    DTshape(ShapeKind, BTreeMap<TshapeFieldName, ShapeFieldType<R>>),
+    DTshape(Box<(ShapeKind, BTreeMap<TshapeFieldName, ShapeFieldType<R>>)>),
     DTvar(Ident),
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which
     /// is set up when checking the body of a function or method. See uses of
     /// Typing_phase.add_generic_parameters_and_constraints. The list denotes
     /// type arguments.
-    DTgeneric(TypeName, Box<[DeclTy<R>]>),
+    DTgeneric(Box<(TypeName, Box<[DeclTy<R>]>)>),
     /// Union type.
     /// The values that are members of this type are the union of the values
     /// that are members of the components of the union.
@@ -213,22 +216,47 @@ pub enum DeclTy_<R: Reason> {
     DTunion(Box<[DeclTy<R>]>),
     DTintersection(Box<[DeclTy<R>]>),
     /// Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>"
-    DTvecOrDict(DeclTy<R>, DeclTy<R>),
-    DTaccess(TaccessType<R, DeclTy<R>>),
+    DTvecOrDict(Box<(DeclTy<R>, DeclTy<R>)>),
+    DTaccess(Box<TaccessType<R, DeclTy<R>>>),
 }
 
-walkable!(DeclTy_<R> => {
-    Self::DTthis | Self::DTmixed | Self::DTany | Self::DTerr | Self::DTnonnull | Self::DTdynamic
-    | Self::DTprim(_) | Self::DTvar(_) => [],
-    Self::DTapply(_, args) => [args],
-    Self::DTlike(ty) | Self::DToption(ty) => [ty],
-    Self::DTfun(ft) => [ft],
-    Self::DTtuple(tys) | Self::DTunion(tys) | Self::DTintersection(tys) => [tys],
-    Self::DTshape(_, fields) => [fields],
-    Self::DTgeneric(_, args) => [args],
-    Self::DTvecOrDict(kty, vty) => [kty, vty],
-    Self::DTaccess(tt) => [tt],
-});
+// We've boxed all variants of DeclTy_ which are larger than two usizes, so the
+// total size should be equal to `[usize; 3]` (one more for the discriminant).
+// This is important because all variants use the same amount of memory and are
+// passed around by value, so adding a large unboxed variant can cause a large
+// regression.
+static_assertions::assert_eq_size!(DeclTy_<reason::NReason>, [usize; 3]);
+static_assertions::assert_eq_size!(DeclTy_<reason::BReason>, [usize; 3]);
+
+impl<R: Reason> crate::visitor::Walkable<R> for DeclTy_<R> {
+    fn recurse(&self, v: &mut dyn crate::visitor::Visitor<R>) {
+        use DeclTy_::*;
+        match self {
+            DTthis | DTmixed | DTany | DTerr | DTnonnull | DTdynamic | DTprim(_) | DTvar(_) => {}
+            DTapply(id_and_args) => {
+                let (_, args) = &**id_and_args;
+                args.accept(v)
+            }
+            DTlike(ty) | DToption(ty) => ty.accept(v),
+            DTfun(ft) => ft.accept(v),
+            DTtuple(tys) | DTunion(tys) | DTintersection(tys) => tys.accept(v),
+            DTshape(kind_and_fields) => {
+                let (_, fields) = &**kind_and_fields;
+                fields.accept(v)
+            }
+            DTgeneric(id_and_args) => {
+                let (_, args) = &**id_and_args;
+                args.accept(v)
+            }
+            DTvecOrDict(key_and_val_tys) => {
+                let (kty, vty) = &**key_and_val_tys;
+                kty.accept(v);
+                vty.accept(v)
+            }
+            DTaccess(tt) => tt.accept(v),
+        }
+    }
+}
 
 /// A Type const access expression of the form <type expr>::C.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]

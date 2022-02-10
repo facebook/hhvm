@@ -58,10 +58,10 @@ impl<R: Reason> DeclFolder<R> {
         let reason = R::mk(|| ReasonImpl::RclassClass(pos.clone(), name));
         let classname_ty = self.alloc.decl_ty(
             reason.clone(),
-            DeclTy_::DTapply(
+            DeclTy_::DTapply(Box::new((
                 Positioned::new(pos.clone(), self.special_names.classes.cClassname),
                 vec![self.alloc.decl_ty(reason, DeclTy_::DTthis)].into_boxed_slice(),
-            ),
+            ))),
         );
         ClassConst {
             is_synthesized: true,

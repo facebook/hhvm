@@ -109,10 +109,10 @@ impl<R: Reason> Allocator<R> {
         let reason = self.reason(ty.0);
         let ty_ = match ty.1 {
             Tthis => DTthis,
-            Tapply(&(pos_id, tys)) => DTapply(
+            Tapply(&(pos_id, tys)) => DTapply(Box::new((
                 self.pos_type_from_decl(pos_id),
                 self.slice(tys, Self::ty_from_decl),
-            ),
+            ))),
             Tmixed => DTmixed,
             Tlike(ty) => DTlike(self.ty_from_decl(ty)),
             Tany(_) => DTany,
@@ -121,9 +121,9 @@ impl<R: Reason> Allocator<R> {
             Tdynamic => DTdynamic,
             Toption(ty) => DToption(self.ty_from_decl(ty)),
             Tprim(prim) => DTprim(*prim),
-            Tfun(ft) => DTfun(self.decl_fun_type(ft)),
+            Tfun(ft) => DTfun(Box::new(self.decl_fun_type(ft))),
             Ttuple(tys) => DTtuple(self.slice(tys, Self::ty_from_decl)),
-            Tshape(&(kind, fields)) => DTshape(
+            Tshape(&(kind, fields)) => DTshape(Box::new((
                 kind,
                 fields
                     .iter()
@@ -134,16 +134,18 @@ impl<R: Reason> Allocator<R> {
                         )
                     })
                     .collect(),
-            ),
+            ))),
             Tvar(ident) => DTvar(ident.into()),
-            Tgeneric(&(pos_id, tys)) => DTgeneric(
+            Tgeneric(&(pos_id, tys)) => DTgeneric(Box::new((
                 TypeName(self.symbol(pos_id)),
                 self.slice(tys, Self::ty_from_decl),
-            ),
+            ))),
             Tunion(tys) => DTunion(self.slice(tys, Self::ty_from_decl)),
             Tintersection(tys) => DTintersection(self.slice(tys, Self::ty_from_decl)),
-            TvecOrDict((ty1, ty2)) => DTvecOrDict(self.ty_from_decl(ty1), self.ty_from_decl(ty2)),
-            Taccess(taccess_type) => DTaccess(self.decl_taccess_type(taccess_type)),
+            TvecOrDict((ty1, ty2)) => {
+                DTvecOrDict(Box::new((self.ty_from_decl(ty1), self.ty_from_decl(ty2))))
+            }
+            Taccess(taccess_type) => DTaccess(Box::new(self.decl_taccess_type(taccess_type))),
             TunappliedAlias(_) | Tnewtype(_) | Tdependent(_) | Tclass(_) | Tneg(_) => {
                 unreachable!("Not used in decl tys")
             }

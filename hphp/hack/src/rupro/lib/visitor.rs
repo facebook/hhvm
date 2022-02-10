@@ -37,7 +37,14 @@ impl<R: Reason, T: Walkable<R>> Walkable<R> for Option<T> {
     }
 }
 
-impl<R: Reason, T: Walkable<R>> Walkable<R> for Vec<T> {
+impl<R: Reason, T: Walkable<R>> Walkable<R> for Box<T> {
+    fn recurse(&self, v: &mut dyn Visitor<R>) {
+        let obj: &T = &**self;
+        obj.accept(v)
+    }
+}
+
+impl<R: Reason, T: Walkable<R>> Walkable<R> for [T] {
     fn recurse(&self, v: &mut dyn Visitor<R>) {
         for obj in self {
             obj.accept(v);
@@ -45,9 +52,9 @@ impl<R: Reason, T: Walkable<R>> Walkable<R> for Vec<T> {
     }
 }
 
-impl<R: Reason, T: Walkable<R>> Walkable<R> for Box<[T]> {
+impl<R: Reason, T: Walkable<R>> Walkable<R> for Vec<T> {
     fn recurse(&self, v: &mut dyn Visitor<R>) {
-        for obj in &self[..] {
+        for obj in self {
             obj.accept(v);
         }
     }

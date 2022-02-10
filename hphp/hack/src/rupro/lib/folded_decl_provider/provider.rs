@@ -105,7 +105,8 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         ty: &DeclTy<R>,
     ) {
         match &**ty.node() {
-            DeclTy_::DTapply(pos_id, _tyl) => {
+            DeclTy_::DTapply(id_and_args) => {
+                let pos_id = &id_and_args.0;
                 if !self.detect_cycle(stack, pos_id) {
                     if let Some(folded_decl) = self.get_folded_class_impl(stack, pos_id.id()) {
                         acc.insert(pos_id.id(), folded_decl);

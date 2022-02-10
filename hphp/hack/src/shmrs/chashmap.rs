@@ -70,7 +70,7 @@ impl<'shm, 'a, K, V, S> Shard<'shm, 'a, K, V, S> {
 pub struct CMap<'shm, K, V, S = DefaultHashBuilder> {
     hash_builder: S,
     max_evictable_bytes_per_shard: usize,
-    file_alloc: FileAlloc,
+    file_alloc: &'shm FileAlloc,
     shard_allocs_non_evictable: [RwLock<ShardAllocControlData>; NUM_SHARDS],
     shard_allocs_evictable: [RwLock<ShardAllocControlData>; NUM_SHARDS],
     maps: [RwLock<Map<'shm, K, V, S>>; NUM_SHARDS],
@@ -96,14 +96,14 @@ impl<'shm, K, V> CMap<'shm, K, V, DefaultHashBuilder> {
     ///
     /// See `initialize_with_hasher`
     pub unsafe fn initialize(
-        file_start: *mut libc::c_void,
-        file_size: usize,
+        cmap: &'shm mut MaybeUninit<Self>,
+        file_alloc: &'shm FileAlloc,
         max_evictable_bytes_per_shard: usize,
     ) -> CMapRef<'shm, K, V, DefaultHashBuilder> {
         Self::initialize_with_hasher(
+            cmap,
             DefaultHashBuilder::new(),
-            file_start,
-            file_size,
+            file_alloc,
             max_evictable_bytes_per_shard,
         )
     }
@@ -116,27 +116,16 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
     ///  - You must only initialize once and exactly once.
     ///  - Use `attach` to attach other processes to this memory location.
     ///  - The hash builder must not contain pointers to process-local memory.
-    ///  - Obviously, `file_start` and `file_size` shouldn't lie.
-    ///  - Make sure the lifetime returned matches the lifetime of the shared
-    ///    memory pointer.
     ///  - Don't mutate or read the shared memory segment outside this API!
     ///
     /// Panics:
     ///  - If `file_size` is not large enough.
     pub unsafe fn initialize_with_hasher(
+        cmap: &'shm mut MaybeUninit<Self>,
         hash_builder: S,
-        file_start: *mut libc::c_void,
-        file_size: usize,
+        file_alloc: &'shm FileAlloc,
         max_evictable_bytes_per_shard: usize,
     ) -> CMapRef<'shm, K, V, S> {
-        let (self_ptr, next_free_byte) =
-            Self::maybe_uninit_ptr_and_initial_next_free_byte(file_start, file_size);
-
-        // Safety: Calling this function assumes:
-        //  - The lifetime matches.
-        //  - We are the sole users of the underlying memory.
-        let cmap: &'shm mut MaybeUninit<Self> = &mut *self_ptr;
-
         // Initialize the memory properly.
         //
         // See MaybeUninit docs for examples.
@@ -160,7 +149,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         cmap.as_mut_ptr().write(CMap {
             hash_builder,
             max_evictable_bytes_per_shard,
-            file_alloc: FileAlloc::new(file_start, file_size, next_free_byte),
+            file_alloc,
             shard_allocs_non_evictable: MaybeUninit::array_assume_init(shard_allocs_non_evictable),
             shard_allocs_evictable: MaybeUninit::array_assume_init(shard_allocs_evictable),
             maps: MaybeUninit::array_assume_init(maps),
@@ -206,7 +195,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         CMapRef {
             hash_builder: cmap.hash_builder.clone(),
             max_evictable_bytes_per_shard: cmap.max_evictable_bytes_per_shard,
-            file_alloc: &cmap.file_alloc,
+            file_alloc: cmap.file_alloc,
             shard_allocs_non_evictable,
             shard_allocs_evictable,
             maps,
@@ -218,23 +207,17 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
     /// Safety:
     ///  - The map at this pointer must already be initialized by a different
     ///    process (or by the calling process itself).
-    pub unsafe fn attach(
-        file_start: *mut libc::c_void,
-        file_size: usize,
-    ) -> CMapRef<'shm, K, V, S> {
-        let (self_ptr, _) =
-            Self::maybe_uninit_ptr_and_initial_next_free_byte(file_start, file_size);
-
+    pub unsafe fn attach(cmap: &'shm MaybeUninit<Self>) -> CMapRef<'shm, K, V, S> {
         // Safety: already initialized!
-        let cmap: &'shm mut Self = (&mut *self_ptr).assume_init_mut();
+        let cmap = cmap.assume_init_ref();
 
         // Attach to the map locks.
-        let maps: Vec<RwLockRef<'shm, _>> = cmap.maps.iter_mut().map(|r| r.attach()).collect();
+        let maps: Vec<RwLockRef<'shm, _>> = cmap.maps.iter().map(|r| r.attach()).collect();
 
         // Attach shard allocators.
         let mut shard_allocs_non_evictable: Vec<ShardAlloc<'shm>> =
             Vec::with_capacity(cmap.shard_allocs_non_evictable.len());
-        for lock in &mut cmap.shard_allocs_non_evictable {
+        for lock in &cmap.shard_allocs_non_evictable {
             shard_allocs_non_evictable.push(ShardAlloc::new(
                 lock.attach(),
                 &cmap.file_alloc,
@@ -244,7 +227,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         }
         let mut shard_allocs_evictable: Vec<ShardAlloc<'shm>> =
             Vec::with_capacity(cmap.shard_allocs_evictable.len());
-        for lock in &mut cmap.shard_allocs_evictable {
+        for lock in &cmap.shard_allocs_evictable {
             shard_allocs_evictable.push(ShardAlloc::new(
                 lock.attach(),
                 &cmap.file_alloc,
@@ -261,20 +244,6 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
             shard_allocs_evictable,
             maps,
         }
-    }
-
-    unsafe fn maybe_uninit_ptr_and_initial_next_free_byte(
-        file_start: *mut libc::c_void,
-        file_size: usize,
-    ) -> (*mut MaybeUninit<Self>, usize) {
-        let layout = std::alloc::Layout::new::<Self>();
-        let file_start = file_start as *mut u8;
-        let align_offset = file_start.align_offset(layout.align());
-        let total_size = align_offset + layout.size();
-        assert!(file_size >= total_size);
-        let ptr = file_start.add(align_offset);
-        let ptr = ptr as *mut MaybeUninit<Self>;
-        (ptr, total_size)
     }
 }
 
@@ -362,6 +331,11 @@ mod integration_tests {
 
         const MEM_HEAP_SIZE: usize = 100 * 1024 * 1024;
 
+        struct Segment<'shm> {
+            file_alloc: MaybeUninit<FileAlloc>,
+            table: MaybeUninit<CMap<'shm, u64, u64>>,
+        }
+
         let mut rng = StdRng::from_seed([0; 32]);
         let scenarios: Vec<Vec<(u64, u64)>> = std::iter::repeat_with(|| {
             std::iter::repeat_with(|| (rng.next_u64() % 10_000, rng.next_u64() % 10_000))
@@ -382,7 +356,23 @@ mod integration_tests {
             )
         };
         assert_ne!(mmap_ptr, libc::MAP_FAILED);
-        let cmap = unsafe { CMap::initialize(mmap_ptr, MEM_HEAP_SIZE, 128) };
+
+        let layout = std::alloc::Layout::new::<Segment<'_>>();
+        assert_eq!(mmap_ptr.align_offset(layout.align()), 0);
+        let segment = mmap_ptr as *mut MaybeUninit<Segment<'static>>;
+        let cmap = unsafe {
+            let segment = &mut *segment;
+            segment.write(Segment {
+                file_alloc: MaybeUninit::uninit(),
+                table: MaybeUninit::uninit(),
+            });
+            let segment = segment.assume_init_mut();
+            segment
+                .file_alloc
+                .write(FileAlloc::new(mmap_ptr, MEM_HEAP_SIZE, layout.size()));
+            let file_alloc = segment.file_alloc.assume_init_mut();
+            CMap::initialize(&mut segment.table, file_alloc, 128)
+        };
 
         let mut child_procs = vec![];
         for scenario in &scenarios {
@@ -392,8 +382,13 @@ mod integration_tests {
                 }
                 ForkResult::Child => {
                     // Exercise attach as well.
-                    let cmap: CMapRef<'static, u64, u64> =
-                        unsafe { CMap::attach(mmap_ptr, MEM_HEAP_SIZE) };
+
+                    let cmap: CMapRef<'static, u64, u64> = unsafe {
+                        let segment = mmap_ptr as *const MaybeUninit<Segment<'static>>;
+                        let segment = &*segment;
+                        let segment = segment.assume_init_ref();
+                        CMap::attach(&segment.table)
+                    };
 
                     for &(key, value) in scenario.iter() {
                         cmap.write_map(&key, |shard| {

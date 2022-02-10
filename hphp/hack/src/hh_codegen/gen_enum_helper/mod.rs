@@ -78,7 +78,7 @@ fn mk_mod_file(mods: Vec<String>) -> Result<String> {
 }
 
 fn parse_input_arg<'a>(file_with_uses: &'a str) -> (&'a str, Vec<&'a str>) {
-    let mut data = file_with_uses.split("|");
+    let mut data = file_with_uses.split('|');
     (data.next().unwrap(), data.collect::<Vec<_>>())
 }
 
@@ -86,7 +86,7 @@ fn mk_file(file: &syn::File, uses: Vec<&str>) -> TokenStream {
     let uses = uses
         .into_iter()
         .map(|u| syn::parse_str::<UseTree>(u).unwrap());
-    let enums = get_enums(&file);
+    let enums = get_enums(file);
     let content = enums.into_iter().map(mk_impl);
     quote! {
         #(use #uses;)*
@@ -141,11 +141,10 @@ fn mk_as_function(
     match &v.fields {
         Fields::Unit => quote! {},
         Fields::Unnamed(FieldsUnnamed { unnamed, .. }) => {
-            let mut i = 0;
             let mut field_match: Vec<TokenStream> = vec![];
             let mut results: Vec<TokenStream> = vec![];
             let mut return_tys: Vec<TokenStream> = vec![];
-            for field in unnamed {
+            for (i, field) in unnamed.into_iter().enumerate() {
                 let matched = format_ident!("p{}", i.to_string());
                 field_match.push(quote! { #matched, });
                 let tys = unbox(&field.ty);
@@ -156,14 +155,11 @@ fn mk_as_function(
                     results.push(ref_kind.mk_value(&matched, true, None));
                     return_tys.push(ref_kind.mk_ty(&tys[0]));
                 } else {
-                    let mut j = 0;
-                    for ty in tys {
+                    for (j, ty) in tys.into_iter().enumerate() {
                         results.push(ref_kind.mk_value(&matched, true, Some(j)));
                         return_tys.push(ref_kind.mk_ty(ty));
-                        j += 1;
                     }
                 }
-                i += 1;
             }
             let sep = <Token![,]>::default();
             let return_tys = if return_tys.len() > 1 {

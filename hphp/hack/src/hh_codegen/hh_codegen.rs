@@ -13,7 +13,13 @@ mod quote_helper;
 use anyhow::{anyhow, Result};
 use common::*;
 use md5::{Digest, Md5};
-use std::{fs, fs::File, io::prelude::*, path::PathBuf, process::Command};
+use std::{
+    fs,
+    fs::File,
+    io::prelude::*,
+    path::{Path, PathBuf},
+    process::Command,
+};
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -87,7 +93,7 @@ fn write_file(output: (PathBuf, String), regencmd: Option<&str>) -> Result<PathB
     Ok(output.0)
 }
 
-fn format(formatter: Option<&str>, file: &PathBuf) -> Result<()> {
+fn format(formatter: Option<&str>, file: &Path) -> Result<()> {
     match formatter {
         Some(formatter) => {
             let output = Command::new(formatter).arg(file).output()?;
@@ -100,7 +106,7 @@ fn format(formatter: Option<&str>, file: &PathBuf) -> Result<()> {
     Ok(())
 }
 
-fn sign(file: &PathBuf) -> Result<()> {
+fn sign(file: &Path) -> Result<()> {
     // avoid putting the obvious literal in this source file, as that makes the
     // file as generated
     let token_tag = format!("@{}", "generated");

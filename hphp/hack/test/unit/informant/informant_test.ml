@@ -33,15 +33,6 @@ end
 let basic_setup_rev_5_and_200_and_start_informant temp_dir =
   Tools.set_hg_to_global_rev_map ();
 
-  (* In XDB table, add an entry for global rev 200. *)
-  Tools.set_xdb
-    ~state_global_rev:200
-    ~for_global_rev:200
-    ~everstore_handle:"dummy_handle_for_global_200";
-  Tools.set_xdb
-    ~state_global_rev:5
-    ~for_global_rev:5
-    ~everstore_handle:"dummy_handle_for_global_5";
   Watchman.Mocking.init_returns @@ Some "test_mock_basic";
   Hg.Mocking.current_working_copy_base_rev_returns
     (Future.of_value Tools.global_rev_1);

@@ -401,8 +401,6 @@ let find_svn_rev_failed _ _ = ()
 
 let revision_tracker_init_svn_rev_failed _ = ()
 
-let xdb_malformed_result _ = ()
-
 (** Watchman Event Watcher client running in the informant *)
 let informant_watcher_not_available _ = ()
 

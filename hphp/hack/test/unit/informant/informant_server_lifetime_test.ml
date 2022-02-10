@@ -143,10 +143,6 @@ let test_restart_server_with_target_saved_state mock_server_config temp_dir =
     1
     (Mock_server_config.get_start_server_count ())
     "First call of start server";
-  Tools.set_xdb
-    ~state_global_rev:200
-    ~for_global_rev:200
-    ~everstore_handle:"dummy_handle_for_global_200";
   Tools.set_next_watchman_state_transition
     Tools.Changed_merge_base
     Tools.hg_rev_200;
@@ -201,10 +197,6 @@ let test_server_restart_suppressed_on_hhconfig_version_change
     "Start server called once to start the first server.";
 
   (* Next we set up next check_and_run_loop to trigger an Informant-directed restart *)
-  Tools.set_xdb
-    ~state_global_rev:200
-    ~for_global_rev:200
-    ~everstore_handle:"dummy_handle_for_global_200";
   Tools.set_next_watchman_state_transition
     Tools.Changed_merge_base
     Tools.hg_rev_200;

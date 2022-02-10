@@ -29,53 +29,9 @@
 
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/util/optional.h"
-#include "hphp/util/sqlite-wrapper.h"
 
 namespace HPHP {
 namespace Facts {
-
-/**
- * Metadata about where the DB should be and what permissions it should have.
- */
-struct DBData {
-
-  static DBData readOnly(folly::fs::path path) {
-    return DBData{
-        std::move(path),
-        SQLite::OpenMode::ReadOnly,
-        static_cast<::gid_t>(-1),
-        0};
-  }
-
-  static DBData readWrite(folly::fs::path path, ::gid_t gid, ::mode_t perms) {
-    return DBData{std::move(path), SQLite::OpenMode::ReadWrite, gid, perms};
-  }
-
-  bool operator==(const DBData& rhs) const;
-
-  /**
-   * Render the DBData as a string
-   */
-  std::string toString() const;
-
-  /**
-   * Hash the DBData into an int
-   */
-  size_t hash() const;
-
-  folly::fs::path m_path;
-  SQLite::OpenMode m_rwMode;
-  ::gid_t m_gid;
-  ::mode_t m_perms;
-
-private:
-  DBData() = delete;
-  DBData(
-      folly::fs::path path,
-      SQLite::OpenMode rwMode,
-      ::gid_t gid,
-      ::mode_t perms);
-};
 
 /**
  * Holds prepared statements to interact with the autoload SQLite DB.
@@ -84,15 +40,16 @@ private:
  */
 struct AutoloadDB {
 
-  template <typename T> class MultiResult;
-
+protected:
   AutoloadDB() = default;
   AutoloadDB(const AutoloadDB&) = default;
   AutoloadDB(AutoloadDB&&) noexcept = default;
   AutoloadDB& operator=(const AutoloadDB&) = default;
   AutoloadDB& operator=(AutoloadDB&&) noexcept = default;
+  virtual ~AutoloadDB() = default;
 
-  virtual ~AutoloadDB();
+public:
+  template <typename T> class MultiResult;
 
   /**
    * Function which returns a reference to an AutoloadDB.
@@ -385,12 +342,6 @@ struct AutoloadDB {
     RowFn m_rowFn;
   };
 };
-
-/**
- * Return a reference to this thread's connection to an AutoloadDB
- * corresponding to the given data.
- */
-AutoloadDB& getDB(const DBData& dbData);
 
 } // namespace Facts
 } // namespace HPHP

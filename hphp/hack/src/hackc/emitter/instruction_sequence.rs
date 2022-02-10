@@ -1068,58 +1068,55 @@ pub mod instr {
 
     pub fn fcallclsmethod<'a>(
         alloc: &'a bumpalo::Bump,
-        is_log_as_dynamic_call: IsLogAsDynamicCallOp,
+        log: IsLogAsDynamicCallOp,
         fcall_args: FcallArgs<'a>,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallClsMethod(
-                fcall_args,
-                is_log_as_dynamic_call,
-            )),
+            Instruct::ICall(InstructCall::FCallClsMethod { fcall_args, log }),
         )
     }
 
     pub fn fcallclsmethodd<'a>(
         alloc: &'a bumpalo::Bump,
         fcall_args: FcallArgs<'a>,
-        method_name: MethodId<'a>,
-        class_name: ClassId<'a>,
+        method: MethodId<'a>,
+        class: ClassId<'a>,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallClsMethodD(
+            Instruct::ICall(InstructCall::FCallClsMethodD {
                 fcall_args,
-                class_name,
-                method_name,
-            )),
+                class,
+                method,
+            }),
         )
     }
 
     pub fn fcallclsmethods<'a>(
         alloc: &'a bumpalo::Bump,
         fcall_args: FcallArgs<'a>,
-        scref: SpecialClsRef,
+        clsref: SpecialClsRef,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallClsMethodS(fcall_args, scref)),
+            Instruct::ICall(InstructCall::FCallClsMethodS { fcall_args, clsref }),
         )
     }
 
     pub fn fcallclsmethodsd<'a>(
         alloc: &'a bumpalo::Bump,
         fcall_args: FcallArgs<'a>,
-        scref: SpecialClsRef,
-        method_name: MethodId<'a>,
+        clsref: SpecialClsRef,
+        method: MethodId<'a>,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallClsMethodSD(
+            Instruct::ICall(InstructCall::FCallClsMethodSD {
                 fcall_args,
-                scref,
-                method_name,
-            )),
+                clsref,
+                method,
+            }),
         )
     }
 
@@ -1134,11 +1131,11 @@ pub mod instr {
     pub fn fcallfuncd<'a>(
         alloc: &'a bumpalo::Bump,
         fcall_args: FcallArgs<'a>,
-        id: FunctionId<'a>,
+        func: FunctionId<'a>,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallFuncD(fcall_args, id)),
+            Instruct::ICall(InstructCall::FCallFuncD { fcall_args, func }),
         )
     }
 
@@ -1149,7 +1146,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallObjMethod(fcall_args, flavor)),
+            Instruct::ICall(InstructCall::FCallObjMethod { fcall_args, flavor }),
         )
     }
 
@@ -1161,7 +1158,11 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallObjMethodD(fcall_args, flavor, method)),
+            Instruct::ICall(InstructCall::FCallObjMethodD {
+                fcall_args,
+                flavor,
+                method,
+            }),
         )
     }
 

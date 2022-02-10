@@ -495,15 +495,39 @@ pub enum InstructCall<'arena> {
     NewObjRD(ClassId<'arena>),
     NewObjS(SpecialClsRef),
     FCall(FcallArgs<'arena>),
-    FCallClsMethod(FcallArgs<'arena>, IsLogAsDynamicCallOp),
-    FCallClsMethodD(FcallArgs<'arena>, ClassId<'arena>, MethodId<'arena>),
-    FCallClsMethodS(FcallArgs<'arena>, SpecialClsRef),
-    FCallClsMethodSD(FcallArgs<'arena>, SpecialClsRef, MethodId<'arena>),
+    FCallClsMethod {
+        fcall_args: FcallArgs<'arena>,
+        log: IsLogAsDynamicCallOp,
+    },
+    FCallClsMethodD {
+        fcall_args: FcallArgs<'arena>,
+        class: ClassId<'arena>,
+        method: MethodId<'arena>,
+    },
+    FCallClsMethodS {
+        fcall_args: FcallArgs<'arena>,
+        clsref: SpecialClsRef,
+    },
+    FCallClsMethodSD {
+        fcall_args: FcallArgs<'arena>,
+        clsref: SpecialClsRef,
+        method: MethodId<'arena>,
+    },
     FCallCtor(FcallArgs<'arena>),
     FCallFunc(FcallArgs<'arena>),
-    FCallFuncD(FcallArgs<'arena>, FunctionId<'arena>),
-    FCallObjMethod(FcallArgs<'arena>, ObjNullFlavor),
-    FCallObjMethodD(FcallArgs<'arena>, ObjNullFlavor, MethodId<'arena>),
+    FCallFuncD {
+        fcall_args: FcallArgs<'arena>,
+        func: FunctionId<'arena>,
+    },
+    FCallObjMethod {
+        fcall_args: FcallArgs<'arena>,
+        flavor: ObjNullFlavor,
+    },
+    FCallObjMethodD {
+        fcall_args: FcallArgs<'arena>,
+        flavor: ObjNullFlavor,
+        method: MethodId<'arena>,
+    },
 }
 
 impl<'arena> InstructCall<'arena> {
@@ -514,16 +538,16 @@ impl<'arena> InstructCall<'arena> {
             | Self::NewObjD(_)
             | Self::NewObjRD(_)
             | Self::NewObjS(_) => None,
-            Self::FCall(args)
-            | Self::FCallClsMethod(args, _)
-            | Self::FCallClsMethodD(args, _, _)
-            | Self::FCallClsMethodS(args, _)
-            | Self::FCallClsMethodSD(args, _, _)
-            | Self::FCallCtor(args)
-            | Self::FCallFunc(args)
-            | Self::FCallFuncD(args, _)
-            | Self::FCallObjMethod(args, _)
-            | Self::FCallObjMethodD(args, _, _) => Some(args),
+            Self::FCall(fcall_args)
+            | Self::FCallClsMethod { fcall_args, .. }
+            | Self::FCallClsMethodD { fcall_args, .. }
+            | Self::FCallClsMethodS { fcall_args, .. }
+            | Self::FCallClsMethodSD { fcall_args, .. }
+            | Self::FCallCtor(fcall_args)
+            | Self::FCallFunc(fcall_args)
+            | Self::FCallFuncD { fcall_args, .. }
+            | Self::FCallObjMethod { fcall_args, .. }
+            | Self::FCallObjMethodD { fcall_args, .. } => Some(fcall_args),
         }
     }
 
@@ -534,16 +558,16 @@ impl<'arena> InstructCall<'arena> {
             | Self::NewObjD(_)
             | Self::NewObjRD(_)
             | Self::NewObjS(_) => None,
-            Self::FCall(args)
-            | Self::FCallClsMethod(args, _)
-            | Self::FCallClsMethodD(args, _, _)
-            | Self::FCallClsMethodS(args, _)
-            | Self::FCallClsMethodSD(args, _, _)
-            | Self::FCallCtor(args)
-            | Self::FCallFunc(args)
-            | Self::FCallFuncD(args, _)
-            | Self::FCallObjMethod(args, _)
-            | Self::FCallObjMethodD(args, _, _) => Some(args),
+            Self::FCall(fcall_args)
+            | Self::FCallClsMethod { fcall_args, .. }
+            | Self::FCallClsMethodD { fcall_args, .. }
+            | Self::FCallClsMethodS { fcall_args, .. }
+            | Self::FCallClsMethodSD { fcall_args, .. }
+            | Self::FCallCtor(fcall_args)
+            | Self::FCallFunc(fcall_args)
+            | Self::FCallFuncD { fcall_args, .. }
+            | Self::FCallObjMethod { fcall_args, .. }
+            | Self::FCallObjMethodD { fcall_args, .. } => Some(fcall_args),
         }
     }
 }

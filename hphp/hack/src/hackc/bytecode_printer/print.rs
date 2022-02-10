@@ -36,7 +36,7 @@ use hhbc_ast::*;
 use hhbc_id::class::ClassType;
 use hhbc_string_utils::{
     float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, lstrip_bslice, mangle,
-    strip_global_ns, strip_global_ns_bslice, strip_ns, types,
+    strip_global_ns, strip_ns, types,
 };
 use hhvm_types_ffi::ffi::*;
 use instruction_sequence::{Error::Unrecoverable, InstrSeq};
@@ -524,10 +524,8 @@ fn print_uses<'arena>(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'arena
     if c.uses.is_empty() {
         Ok(())
     } else {
-        let unique_ids = c.uses.iter().map(|e| strip_global_ns_bslice(e)).unique();
-
         newline(w)?;
-        write_bytes!(w, "  .use {}", fmt_separated(" ", unique_ids))?;
+        write_bytes!(w, "  .use {}", fmt_separated(" ", c.uses.iter()))?;
 
         if c.use_aliases.is_empty() && c.use_precedences.is_empty() {
             w.write_all(b";")

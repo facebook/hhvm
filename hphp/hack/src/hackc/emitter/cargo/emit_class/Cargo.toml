@@ -39,6 +39,7 @@ hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }
 hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
 instruction_sequence = { path = "../instruction_sequence" }
+itertools = "0.10.3"
 label = { path = "../label" }
 local = { path = "../local" }
 naming_special_names_rust = { path = "../../../../naming" }

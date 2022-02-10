@@ -22,6 +22,7 @@ use hhbc_id::{self as hhbc_id, class, method, prop};
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::{Attr, TypeConstraintFlags};
 use instruction_sequence::{instr, InstrSeq, Result};
+use itertools::Itertools;
 use local::Local;
 use naming_special_names_rust as special_names;
 use oxidized::{
@@ -615,23 +616,26 @@ pub fn emit_class<'a, 'arena, 'decl>(
     let is_trait = ast_class.kind == ast::ClassishKind::Ctrait;
     let is_interface = ast_class.kind == ast::ClassishKind::Cinterface;
 
-    let uses = ast_class
+    let uses: Vec<&str> = ast_class
         .uses
         .iter()
-        .filter_map(|x| match x.1.as_ref() {
+        .filter_map(|Hint(pos, hint)| match hint.as_ref() {
             ast::Hint_::Happly(ast::Id(_, name), _) => {
                 if is_interface {
                     Some(Err(emit_fatal::raise_fatal_parse(
-                        &x.0,
+                        pos,
                         "Interfaces cannot use traits",
                     )))
                 } else {
-                    Some(Ok(name.as_str()))
+                    Some(Ok(string_utils::strip_global_ns(name.as_str())))
                 }
             }
             _ => None,
         })
-        .collect::<Result<Vec<_>>>()?;
+        .collect::<Result<Vec<_>>>()?
+        .into_iter()
+        .unique()
+        .collect();
 
     let elaborate_namespace_id =
         |x: &'a ast::Id| hhbc_id::class::ClassType::from_ast_name_and_mangle(alloc, x.name());

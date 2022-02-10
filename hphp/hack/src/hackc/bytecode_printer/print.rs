@@ -949,9 +949,15 @@ where
 
 fn print_fcall_args(
     w: &mut dyn Write,
-    FcallArgs(fls, num_args, num_rets, inouts, readonly, async_eager_label, context): &FcallArgs<
-        '_,
-    >,
+    FcallArgs {
+        flags: fls,
+        num_args,
+        num_rets,
+        inouts,
+        readonly,
+        async_eager_label,
+        context,
+    }: &FcallArgs<'_>,
 ) -> Result<()> {
     use FcallFlags as F;
     let mut flags = vec![];

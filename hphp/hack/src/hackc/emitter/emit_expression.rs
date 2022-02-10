@@ -1967,8 +1967,8 @@ fn emit_call_default<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     scope::with_unnamed_locals(e, |em| {
-        let FcallArgs(_, _, num_ret, _, _, _, _) = &fcall_args;
-        let num_uninit = num_ret - 1;
+        let FcallArgs { num_rets, .. } = &fcall_args;
+        let num_uninit = num_rets - 1;
         let (lhs, fcall) = emit_call_lhs_and_fcall(em, env, expr, fcall_args, targs, None)?;
         let (args, inout_setters) = emit_args_inout_setters(em, env, args)?;
         let uargs = match uarg {
@@ -2130,7 +2130,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             if does_not_have_non_tparam_generics {
                 Ok(instr::empty(alloc))
             } else {
-                fcall_args.0 |= FcallFlags::HAS_GENERICS;
+                fcall_args.flags |= FcallFlags::HAS_GENERICS;
                 emit_reified_targs(
                     e,
                     env,
@@ -2225,7 +2225,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                     )
                 }
                 (E(_, pos, E_::New(new_exp)), E(_, _, E_::Id(id)), null_flavor, _)
-                    if fcall_args.1 == 0 =>
+                    if fcall_args.num_args == 0 =>
                 {
                     let cexpr =
                         ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, &new_exp.0);
@@ -2533,7 +2533,9 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             })
         }
         E_::Id(id) => {
-            let FcallArgs(flags, num_args, _, _, _, _, _) = fcall_args;
+            let FcallArgs {
+                flags, num_args, ..
+            } = fcall_args;
             let fq_id = match string_utils::strip_global_ns(&id.1) {
                 "min" if num_args == 2 && !flags.contains(FcallFlags::HAS_UNPACK) => {
                     function::FunctionType::<'arena>::from_ast_name(alloc, "__SystemLib\\min2")

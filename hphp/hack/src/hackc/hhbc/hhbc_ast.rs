@@ -65,15 +65,15 @@ impl Default for FcallFlags {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub struct FcallArgs<'arena>(
-    pub FcallFlags,
-    pub NumParams,
-    pub NumParams,
-    pub ByRefs<'arena>,
-    pub ByRefs<'arena>,
-    pub Maybe<Label>,
-    pub Maybe<Str<'arena>>,
-);
+pub struct FcallArgs<'arena> {
+    pub flags: FcallFlags,
+    pub num_args: NumParams,
+    pub num_rets: NumParams,
+    pub inouts: ByRefs<'arena>,
+    pub readonly: ByRefs<'arena>,
+    pub async_eager_label: Maybe<Label>,
+    pub context: Maybe<Str<'arena>>,
+}
 
 impl<'arena> FcallArgs<'arena> {
     pub fn new(
@@ -85,23 +85,20 @@ impl<'arena> FcallArgs<'arena> {
         num_args: usize,
         context: Option<&'arena str>,
     ) -> FcallArgs<'arena> {
-        if (!inouts.is_empty() && inouts.len() != num_args)
-            || (!readonly.is_empty() && readonly.len() != num_args)
-        {
-            panic!("length of by_refs must be either zero or num_args");
-        }
-        FcallArgs(
+        assert!(
+            (inouts.is_empty() || inouts.len() == num_args)
+                && (readonly.is_empty() || readonly.len() == num_args),
+            "length of by_refs must be either zero or num_args"
+        );
+        FcallArgs {
             flags,
             num_args,
             num_rets,
             inouts,
             readonly,
-            Maybe::from(async_eager_label),
-            match context {
-                Some(s) => Maybe::Just(Str::new(s.as_bytes())),
-                None => Maybe::Nothing,
-            },
-        )
+            async_eager_label: async_eager_label.into(),
+            context: context.map(|s| Str::new(s.as_bytes())).into(),
+        }
     }
 }
 
@@ -507,6 +504,48 @@ pub enum InstructCall<'arena> {
     FCallFuncD(FcallArgs<'arena>, FunctionId<'arena>),
     FCallObjMethod(FcallArgs<'arena>, ObjNullFlavor),
     FCallObjMethodD(FcallArgs<'arena>, ObjNullFlavor, MethodId<'arena>),
+}
+
+impl<'arena> InstructCall<'arena> {
+    pub fn fcall_args(&self) -> Option<&FcallArgs<'arena>> {
+        match self {
+            Self::NewObj
+            | Self::NewObjR
+            | Self::NewObjD(_)
+            | Self::NewObjRD(_)
+            | Self::NewObjS(_) => None,
+            Self::FCall(args)
+            | Self::FCallClsMethod(args, _)
+            | Self::FCallClsMethodD(args, _, _)
+            | Self::FCallClsMethodS(args, _)
+            | Self::FCallClsMethodSD(args, _, _)
+            | Self::FCallCtor(args)
+            | Self::FCallFunc(args)
+            | Self::FCallFuncD(args, _)
+            | Self::FCallObjMethod(args, _)
+            | Self::FCallObjMethodD(args, _, _) => Some(args),
+        }
+    }
+
+    pub fn fcall_args_mut(&mut self) -> Option<&mut FcallArgs<'arena>> {
+        match self {
+            Self::NewObj
+            | Self::NewObjR
+            | Self::NewObjD(_)
+            | Self::NewObjRD(_)
+            | Self::NewObjS(_) => None,
+            Self::FCall(args)
+            | Self::FCallClsMethod(args, _)
+            | Self::FCallClsMethodD(args, _, _)
+            | Self::FCallClsMethodS(args, _)
+            | Self::FCallClsMethodSD(args, _, _)
+            | Self::FCallCtor(args)
+            | Self::FCallFunc(args)
+            | Self::FCallFuncD(args, _)
+            | Self::FCallObjMethod(args, _)
+            | Self::FCallObjMethodD(args, _, _) => Some(args),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]

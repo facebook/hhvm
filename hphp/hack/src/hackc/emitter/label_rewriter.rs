@@ -7,9 +7,7 @@ use env::emitter::Emitter;
 use ffi::{Maybe::Just, Pair};
 use hash::{HashMap, HashSet};
 use hhas_param::HhasParam;
-use hhbc_ast::{
-    FcallArgs, Instruct, InstructCall, InstructControlFlow, InstructIterator, InstructMisc,
-};
+use hhbc_ast::{FcallArgs, Instruct, InstructControlFlow, InstructIterator, InstructMisc};
 use instruction_sequence::InstrSeq;
 use label::{Id, Label};
 use oxidized::ast;
@@ -35,7 +33,6 @@ fn lookup_def<'h>(l: &Id, defs: &'h HashMap<Id, usize>) -> &'h usize {
 
 fn get_regular_labels<'arena>(instr: &Instruct<'arena>) -> Vec<Label> {
     use Instruct::*;
-    use InstructCall::*;
     use InstructControlFlow::*;
     use InstructIterator::*;
     use InstructMisc::*;
@@ -46,16 +43,14 @@ fn get_regular_labels<'arena>(instr: &Instruct<'arena>) -> Vec<Label> {
         | IContFlow(Jmp(l))
         | IContFlow(JmpNS(l))
         | IContFlow(JmpZ(l))
-        | IContFlow(JmpNZ(l))
-        | ICall(FCall(FcallArgs(_, _, _, _, _, Just(l), _)))
-        | ICall(FCallClsMethod(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallClsMethodD(FcallArgs(_, _, _, _, _, Just(l), _), _, _))
-        | ICall(FCallClsMethodS(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallClsMethodSD(FcallArgs(_, _, _, _, _, Just(l), _), _, _))
-        | ICall(FCallFunc(FcallArgs(_, _, _, _, _, Just(l), _)))
-        | ICall(FCallFuncD(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallObjMethod(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, _, Just(l), _), _, _)) => vec![*l],
+        | IContFlow(JmpNZ(l)) => vec![*l],
+        ICall(call) => match call.fcall_args() {
+            Some(FcallArgs {
+                async_eager_label: Just(l),
+                ..
+            }) => vec![*l],
+            Some(_) | None => vec![],
+        },
         IContFlow(Switch { labels, .. }) => labels.iter().copied().collect(),
         IContFlow(SSwitch { labels }) => labels.iter().map(|Pair(_, label)| *label).collect(),
         IMisc(MemoGetEager(l1, l2, _)) => vec![*l1, *l2],
@@ -108,28 +103,25 @@ where
     F: FnMut(&mut Label),
 {
     use Instruct::*;
-    use InstructCall::*;
     use InstructControlFlow::*;
     use InstructIterator::*;
     use InstructMisc::*;
     match instr {
         IIterator(IterInit(_, l))
         | IIterator(IterNext(_, l))
-        | ICall(FCall(FcallArgs(_, _, _, _, _, Just(l), _)))
-        | ICall(FCallClsMethod(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallClsMethodD(FcallArgs(_, _, _, _, _, Just(l), _), _, _))
-        | ICall(FCallClsMethodS(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallClsMethodSD(FcallArgs(_, _, _, _, _, Just(l), _), _, _))
-        | ICall(FCallFunc(FcallArgs(_, _, _, _, _, Just(l), _)))
-        | ICall(FCallFuncD(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallObjMethod(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, _, Just(l), _), _, _))
         | IContFlow(Jmp(l))
         | IContFlow(JmpNS(l))
         | IContFlow(JmpZ(l))
         | IContFlow(JmpNZ(l))
         | IMisc(MemoGet(l, _))
         | ILabel(l) => relabel(l),
+        ICall(call) => match call.fcall_args_mut() {
+            Some(FcallArgs {
+                async_eager_label: Just(l),
+                ..
+            }) => relabel(l),
+            Some(_) | None => {}
+        },
         IContFlow(Switch { labels, .. }) => labels.iter_mut().for_each(relabel),
         IContFlow(SSwitch { labels }) => labels.iter_mut().for_each(|Pair(_, l)| relabel(l)),
         IMisc(MemoGetEager(l1, l2, _)) => {

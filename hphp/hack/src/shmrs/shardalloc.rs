@@ -53,12 +53,12 @@ impl ChunkPtr {
     }
 }
 
-/// Structure that contains the control data for a map allocator.
+/// Structure that contains the control data for a shard allocator.
 ///
 /// This structure should be allocated in shared memory. Turn it
 /// into an actual allocator by combining it with a `FileAlloc` using
-/// `MapAlloc::new`.
-pub struct MapAllocControlData {
+/// `ShardAlloc::new`.
+pub struct ShardAllocControlData {
     /// A linked-list of filled chunks. Might be null.
     ///
     /// The first word is aligned and points to the next element of the
@@ -87,7 +87,7 @@ pub struct MapAllocControlData {
     current_end: *mut u8,
 }
 
-impl MapAllocControlData {
+impl ShardAllocControlData {
     /// A new empty allocator. Useful as a placeholder.
     pub fn new() -> Self {
         Self {
@@ -100,7 +100,7 @@ impl MapAllocControlData {
     }
 }
 
-impl MapAllocControlData {
+impl ShardAllocControlData {
     /// Mark the current chunk as filled by adding it to the "filled chunks"
     /// list.
     fn mark_current_chunk_as_filled(&mut self) {
@@ -158,18 +158,18 @@ impl MapAllocControlData {
     }
 }
 
-/// An allocator used in shared memory hash maps.
+/// An allocator used for shared memory hash maps.
 ///
-/// For now, the map allocator is a bumping allocator that requests chunks from
+/// For now, each shard allocator is a bumping allocator that requests chunks from
 /// the underlying file allocator.
 ///
 /// Since its control structures lives somewhere in shared memory, it's bound
 /// by a lifetime parameter that represents the lifetime of the shared memory
 /// region.
 #[derive(Clone)]
-pub struct MapAlloc<'shm> {
+pub struct ShardAlloc<'shm> {
     /// Mutable control data.
-    control_data: RwLockRef<'shm, MapAllocControlData>,
+    control_data: RwLockRef<'shm, ShardAllocControlData>,
 
     /// Underlying file allocator used to request new chunks and allocate
     /// large chunks.
@@ -184,14 +184,14 @@ pub struct MapAlloc<'shm> {
     chunk_size: usize,
 }
 
-impl<'shm> MapAlloc<'shm> {
-    /// Create a new map allocator using the given lock-protected control
+impl<'shm> ShardAlloc<'shm> {
+    /// Create a new shard allocator using the given lock-protected control
     /// data and a file allocator.
     ///
     /// This function will fail if `chunk_size` < 64 bytes. As some of the
     /// first bytes of a chunk are used as a header.
     pub unsafe fn new(
-        control_data: RwLockRef<'shm, MapAllocControlData>,
+        control_data: RwLockRef<'shm, ShardAllocControlData>,
         file_alloc: &'shm FileAlloc,
         chunk_size: usize,
         is_fixed_size: bool,
@@ -209,7 +209,7 @@ impl<'shm> MapAlloc<'shm> {
         self.file_alloc.allocate(l)
     }
 
-    fn extend(&self, control_data: &mut MapAllocControlData) -> Result<(), AllocError> {
+    fn extend(&self, control_data: &mut ShardAllocControlData) -> Result<(), AllocError> {
         control_data.mark_current_chunk_as_filled();
         if !control_data.pop_free_chunk(self.chunk_size) {
             let l =
@@ -235,7 +235,7 @@ impl<'shm> MapAlloc<'shm> {
     }
 }
 
-unsafe impl<'shm> Allocator for MapAlloc<'shm> {
+unsafe impl<'shm> Allocator for ShardAlloc<'shm> {
     fn allocate(&self, l: Layout) -> Result<NonNull<[u8]>, AllocError> {
         let size = l.size();
 
@@ -300,9 +300,9 @@ mod tests {
     #[test]
     fn test_alloc_zero() {
         with_file_alloc(|file_alloc| {
-            let core_data = RwLock::new(MapAllocControlData::new());
+            let core_data = RwLock::new(ShardAllocControlData::new());
             let core_data_ref = unsafe { core_data.initialize().unwrap() };
-            let alloc = unsafe { MapAlloc::new(core_data_ref, file_alloc, CHUNK_SIZE, false) };
+            let alloc = unsafe { ShardAlloc::new(core_data_ref, file_alloc, CHUNK_SIZE, false) };
 
             let layout = std::alloc::Layout::from_size_align(0, 1).unwrap();
             let _ = alloc.allocate(layout).unwrap();

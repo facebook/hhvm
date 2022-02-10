@@ -14,7 +14,7 @@ use nohash_hasher::NoHashHasher;
 use once_cell::unsync::OnceCell;
 
 use shmrs::chashmap::{CMap, CMapRef, Shard, NUM_SHARDS};
-use shmrs::mapalloc::MapAlloc;
+use shmrs::shardalloc::ShardAlloc;
 
 use ocamlrep::{ptr::UnsafeOcamlPtr, Value, STRING_TAG};
 use ocamlrep_ocamlpool::catch_unwind;
@@ -146,7 +146,7 @@ impl HeapValue {
         }
     }
 
-    fn clone_in(&self, alloc: &MapAlloc<'static>) -> Result<HeapValue, AllocError> {
+    fn clone_in(&self, alloc: &ShardAlloc<'static>) -> Result<HeapValue, AllocError> {
         let layout = Layout::from_size_align(self.header.buffer_size(), 1).unwrap();
         let mut data = alloc.allocate(layout)?;
         // Safety: we are the only ones with access to the allocated chunk.
@@ -272,7 +272,7 @@ impl<'a> SerializedValue<'a> {
     fn to_heap_value_in(
         &self,
         is_evictable: bool,
-        alloc: &MapAlloc<'static>,
+        alloc: &ShardAlloc<'static>,
     ) -> Result<HeapValue, AllocError> {
         let slice = self.as_slice();
 

@@ -19,3 +19,5 @@ STDOUT: Hello, world
 STDERR: 
 --- Working directory does not exist
   Exception: chdir() failed (%d - %s)
+--- No TypeError for verifying ForkAndExecveOptions
+--- No TypeError for passing ForkAndExecveOptions

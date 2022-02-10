@@ -178,12 +178,21 @@ function flock(FileDescriptor $fd, int $operation): void;
 <<__Native>>
 function request_stdio_fd(int $fd): FileDescriptor;
 
+type ForkAndExecveOptions = shape(
+  ?'cwd' => string,
+  ?'setsid' => bool,
+  ?'execvpe' => bool,
+  ?'setpgid' => int,
+);
+
 <<__Native>>
 function fork_and_execve(
   string $path,
   vec<string> $argv,
   vec<string> $envp,
   dict<int, FileDescriptor> $fds,
+
+  // Don't use ForkAndExecveOptions because native functions does not support type aliases.
   shape(...) $options,
 ): int;
 

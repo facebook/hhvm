@@ -14,7 +14,7 @@ use lz4::liblz4;
 use nohash_hasher::NoHashHasher;
 use once_cell::unsync::OnceCell;
 
-use shmrs::chashmap::{CMap, CMapRef, Shard, NUM_SHARDS};
+use shmrs::chashmap::{CMap, CMapRef, CMapValue, Shard, NUM_SHARDS};
 use shmrs::filealloc::FileAlloc;
 use shmrs::shardalloc::ShardAlloc;
 
@@ -270,6 +270,12 @@ impl HeapValue {
     }
 }
 
+impl CMapValue for HeapValue {
+    fn points_to_evictable_data(&self) -> bool {
+        self.header.is_evictable()
+    }
+}
+
 enum SerializedValue<'a> {
     String(Value<'a>),
     Serialized {
@@ -372,19 +378,13 @@ impl<'a> SerializedValue<'a> {
         }
     }
 
-    fn to_heap_value_in(
-        &self,
-        is_evictable: bool,
-        alloc: &ShardAlloc<'static>,
-    ) -> Result<HeapValue, AllocError> {
-        let slice = self.as_slice();
+    fn layout_for_buffer(&self) -> Layout {
+        Layout::from_size_align(self.as_slice().len(), 1).unwrap()
+    }
 
-        let layout = Layout::from_size_align(slice.len(), 1).unwrap();
-        let mut data = alloc.allocate(layout)?;
-        // Safety: we are the only ones with access to the allocated chunk.
-        unsafe {
-            data.as_mut().copy_from_slice(slice)
-        };
+    fn to_heap_value_in(&self, is_evictable: bool, buffer: &mut [u8]) -> HeapValue {
+        let slice = self.as_slice();
+        buffer.copy_from_slice(slice);
 
         use SerializedValue::*;
         let header = match self {
@@ -410,10 +410,10 @@ impl<'a> SerializedValue<'a> {
             },
         };
 
-        Ok(HeapValue {
+        HeapValue {
             header: header.into(),
-            data: data.cast(),
-        })
+            data: NonNull::from(buffer).cast(),
+        }
     }
 
     pub fn uncompressed_size(&self) -> usize {
@@ -510,38 +510,12 @@ pub extern "C" fn shmffi_add(evictable: bool, hash: u64, data: usize) -> usize {
         let compressed_size = compressed.compressed_size();
         let uncompressed_size = compressed.uncompressed_size();
         let did_insert = with(|segment| {
-            segment.table.write_map(&hash, |mut shard| {
-                let heap_value = if !evictable {
-                    Some(
-                        compressed
-                            .to_heap_value_in(evictable, shard.alloc(evictable))
-                            .unwrap(),
-                    )
-                } else if compressed.as_slice().len()
-                    < segment.table.max_evictable_bytes_per_shard / 2
-                {
-                    match compressed.to_heap_value_in(evictable, shard.alloc(evictable)) {
-                        Ok(heap_value) => Some(heap_value),
-                        Err(AllocError) => {
-                            empty_shard(&mut shard);
-                            Some(
-                                compressed
-                                    .to_heap_value_in(evictable, shard.alloc(evictable))
-                                    .unwrap(),
-                            )
-                        }
-                    }
-                } else {
-                    None
-                };
-                match heap_value {
-                    None => false,
-                    Some(heap_value) => {
-                        shard.map.insert(hash, heap_value);
-                        true
-                    }
-                }
-            })
+            segment.table.insert(
+                hash,
+                Some(compressed.layout_for_buffer()),
+                evictable,
+                |buffer| compressed.to_heap_value_in(evictable, buffer),
+            )
         });
         compressed.free();
 
@@ -622,10 +596,11 @@ pub extern "C" fn shmffi_get_size(hash: u64) -> usize {
 
 #[no_mangle]
 pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
+    // TODO(hverr): race condition: the ptr in value might be deallocated.
     with(|segment| {
         let value = segment
             .table
-            .write_map(&hash1, |shard1| shard1.map.remove(&hash1).unwrap());
+            .write_map(&hash1, |mut shard1| shard1.map.remove(&hash1).unwrap());
         segment.table.write_map(&hash2, |mut shard2| {
             let evictable = value.header.is_evictable();
             let cloned_value = if !evictable {
@@ -647,7 +622,7 @@ pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
 #[no_mangle]
 pub extern "C" fn shmffi_remove(hash: u64) -> usize {
     let size = with(|segment| {
-        segment.table.write_map(&hash, |shard| {
+        segment.table.write_map(&hash, |mut shard| {
             let heap_value = shard.map.remove(&hash).unwrap();
             heap_value.as_slice().len()
         })

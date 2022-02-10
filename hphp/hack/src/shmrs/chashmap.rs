@@ -3,15 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::alloc::{AllocError, Allocator, Layout};
 use std::hash::{BuildHasher, Hash, Hasher};
 use std::mem::MaybeUninit;
+use std::ptr::NonNull;
 
 use hashbrown::hash_map::DefaultHashBuilder;
 
 use crate::filealloc::FileAlloc;
 use crate::hashmap::Map;
 use crate::shardalloc::{ShardAlloc, ShardAllocControlData};
-use crate::sync::{RwLock, RwLockRef};
+use crate::sync::{RwLock, RwLockRef, RwLockWriteGuard};
 
 /// The number of shards.
 ///
@@ -28,7 +30,7 @@ const NON_EVICTABLE_CHUNK_SIZE: usize = 1024 * 1024;
 /// This struct gives access to a shard, including its hashmap and its
 /// allocators.
 pub struct Shard<'shm, 'a, K, V, S> {
-    pub map: &'a mut Map<'shm, K, V, S>,
+    pub map: RwLockWriteGuard<'a, Map<'shm, K, V, S>>,
     alloc_non_evictable: &'a ShardAlloc<'shm>,
     alloc_evictable: &'a ShardAlloc<'shm>,
 }
@@ -46,6 +48,22 @@ impl<'shm, 'a, K, V, S> Shard<'shm, 'a, K, V, S> {
             self.alloc_non_evictable
         }
     }
+}
+
+/// Each value stored in a concurrent hashmap needs to keep track of
+/// some bookkeeping and the concurrent hashmap needs to be able to
+/// access that bookkeeping.
+///
+/// We force the bookkeeping on the value type, because the value type
+/// can optimize representation.
+pub trait CMapValue {
+    /// A hash map contains both references to evictable and non-evictable data.
+    ///
+    /// When we've removed evictable data from the evictable heaps, we also have
+    /// to remove any value that might reference that data. This function tells us
+    /// whether or not the value points to evictable data, and thus whether or not
+    /// it should be evicted.
+    fn points_to_evictable_data(&self) -> bool;
 }
 
 /// A concurrent hash map implemented as multiple sharded non-concurrent
@@ -247,7 +265,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
     }
 }
 
-impl<'shm, K: Hash, V, S: BuildHasher> CMapRef<'shm, K, V, S> {
+impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
     fn shard_index_for(&self, key: &K) -> usize {
         let mut hasher = self.hash_builder.build_hasher();
         key.hash(&mut hasher);
@@ -258,6 +276,18 @@ impl<'shm, K: Hash, V, S: BuildHasher> CMapRef<'shm, K, V, S> {
         let hash: u64 = hash.wrapping_mul(0x9e3779b97f4a7c15);
 
         (hash >> (64 - NUM_SHARDS.trailing_zeros())) as usize
+    }
+
+    fn shard_for_writing<'a>(&'a self, key: &K) -> Shard<'shm, 'a, K, V, S> {
+        let shard_index = self.shard_index_for(key);
+        let map = self.maps[shard_index].write().unwrap();
+        let alloc_non_evictable = &self.shard_allocs_non_evictable[shard_index];
+        let alloc_evictable = &self.shard_allocs_evictable[shard_index];
+        Shard {
+            map,
+            alloc_non_evictable,
+            alloc_evictable,
+        }
     }
 
     /// Access the map that belongs to the given key for reading.
@@ -279,15 +309,77 @@ impl<'shm, K: Hash, V, S: BuildHasher> CMapRef<'shm, K, V, S> {
     /// a read lock) at the same time, because the hasher is abstract. You have
     /// no way of knowing which map you need!
     pub fn write_map<R>(&self, key: &K, f: impl FnOnce(Shard<'shm, '_, K, V, S>) -> R) -> R {
-        let shard_index = self.shard_index_for(key);
-        let mut map = self.maps[shard_index].write().unwrap();
-        let alloc_non_evictable = &self.shard_allocs_non_evictable[shard_index];
-        let alloc_evictable = &self.shard_allocs_evictable[shard_index];
-        f(Shard {
-            map: &mut map,
-            alloc_non_evictable,
-            alloc_evictable,
-        })
+        let shard = self.shard_for_writing(key);
+        f(shard)
+    }
+
+    /// Empty a shard.
+    fn empty_shard<'a>(shard: &mut Shard<'shm, 'a, K, V, S>) {
+        // Remove all values that might point to evictable data.
+        shard
+            .map
+            .retain(|_, value| !value.points_to_evictable_data());
+
+        // Safety: We've just removed all pointers to values in the allocator
+        // on the previous line.
+        unsafe {
+            shard.alloc_evictable.reset();
+        }
+    }
+
+    /// Insert a value into the map.
+    ///
+    /// If a layout is specified, this function will first allocate suitable
+    /// memory and pass it on to the `value` producer. If no layout is
+    /// specified, a reference to an empty byte slice will be used.
+    ///
+    /// If `evictable` is true, the function might choose to not allocate
+    /// memory, in which case the `value` producer will not be called. The
+    /// return type indicates whether or not a value is inserted into the map.
+    ///
+    /// Note that calling `points_to_evictable_data` on the value produced must
+    /// match `evictable`.
+    pub fn insert(
+        &self,
+        key: K,
+        layout: Option<Layout>,
+        evictable: bool,
+        value: impl FnOnce(&mut [u8]) -> V,
+    ) -> bool {
+        let empty_slice: &mut [u8] = &mut [];
+        let mut shard = self.shard_for_writing(&key);
+        let ptr_opt = match layout {
+            None => Some(NonNull::new(empty_slice as *mut [u8]).unwrap()),
+            Some(layout) => {
+                if evictable
+                    && layout.align() + layout.size() > self.max_evictable_bytes_per_shard / 2
+                {
+                    // Requested memory is too large, do not allocate
+                    None
+                } else if evictable {
+                    match shard.alloc_evictable.allocate(layout) {
+                        Ok(ptr) => Some(ptr),
+                        Err(AllocError) => {
+                            // The allocator is full, empty the shard and try again.
+                            // This time allocation MUST succeed.
+                            Self::empty_shard(&mut shard);
+                            Some(shard.alloc_evictable.allocate(layout).unwrap())
+                        }
+                    }
+                } else {
+                    Some(shard.alloc_non_evictable.allocate(layout).unwrap())
+                }
+            }
+        };
+        if let Some(mut ptr) = ptr_opt {
+            // Safety: we are the only ones with access to the allocated chunk
+            let buffer = unsafe { ptr.as_mut() };
+            let v = value(buffer);
+            assert!(v.points_to_evictable_data() == evictable);
+            shard.map.insert(key, v);
+            return true;
+        }
+        false
     }
 
     /// Return the total number of bytes allocated.
@@ -323,6 +415,14 @@ mod integration_tests {
     use nix::unistd::ForkResult;
     use rand::prelude::*;
 
+    struct U64Value(u64);
+
+    impl CMapValue for U64Value {
+        fn points_to_evictable_data(&self) -> bool {
+            false
+        }
+    }
+
     #[test]
     fn test_insert_many() {
         const NUM_PROCS: usize = 20;
@@ -333,7 +433,7 @@ mod integration_tests {
 
         struct Segment<'shm> {
             file_alloc: MaybeUninit<FileAlloc>,
-            table: MaybeUninit<CMap<'shm, u64, u64>>,
+            table: MaybeUninit<CMap<'shm, u64, U64Value>>,
         }
 
         let mut rng = StdRng::from_seed([0; 32]);
@@ -383,7 +483,7 @@ mod integration_tests {
                 ForkResult::Child => {
                     // Exercise attach as well.
 
-                    let cmap: CMapRef<'static, u64, u64> = unsafe {
+                    let cmap: CMapRef<'static, u64, U64Value> = unsafe {
                         let segment = mmap_ptr as *const MaybeUninit<Segment<'static>>;
                         let segment = &*segment;
                         let segment = segment.assume_init_ref();
@@ -391,8 +491,8 @@ mod integration_tests {
                     };
 
                     for &(key, value) in scenario.iter() {
-                        cmap.write_map(&key, |shard| {
-                            shard.map.insert(key, value);
+                        cmap.write_map(&key, |mut shard| {
+                            shard.map.insert(key, U64Value(value));
                             std::thread::sleep(OP_SLEEP);
                         });
                     }
@@ -418,7 +518,7 @@ mod integration_tests {
 
         for (key, values) in expected {
             cmap.read_map(&key, |map| {
-                let value = map[&key];
+                let U64Value(value) = map[&key];
                 assert!(values.contains(&value));
             });
         }

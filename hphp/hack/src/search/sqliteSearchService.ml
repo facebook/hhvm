@@ -51,87 +51,38 @@ let sqlite_escape_str (str : string) : string =
       | '\\' -> acc ^ "\\\\"
       | _ -> acc ^ String.make 1 char)
 
-(* Attempt to fetch this file *)
-let find_saved_symbolindex
-    ~(ignore_hh_version : bool)
-    ~(log_saved_state_age_and_distance : bool)
-    ~(saved_state_manifold_api_key : string option) :
-    (string, string) Core_kernel.result =
-  try
-    let repo = Path.make (Relative_path.path_of_prefix Relative_path.Root) in
-    let env : Saved_state_loader.env =
-      {
-        Saved_state_loader.saved_state_manifold_api_key;
-        log_saved_state_age_and_distance;
-      }
-    in
-    let res =
-      Future.get_exn
-        (State_loader_futures.load
-           ~env
-           ~progress_callback:(fun _ -> ())
-           ~watchman_opts:
-             Saved_state_loader.Watchman_options.
-               { root = repo; sockname = None }
-           ~ignore_hh_version
-           ~saved_state_type:Saved_state_loader.Symbol_index)
-    in
-    match res with
-    | Ok { Saved_state_loader.main_artifacts; _ } ->
-      Ok
-        (Path.to_string
-           main_artifacts.Saved_state_loader.Symbol_index_info.symbol_index_path)
-    | Error load_error ->
-      Error (Saved_state_loader.long_user_message_of_error load_error)
-  with
-  | _ -> Error "Exception searching for saved state"
-
 (* Determine the correct filename to use for the db_path or build it *)
 let find_or_build_sqlite_file
     (workers : MultiWorker.worker list option)
     (savedstate_file_opt : string option)
-    ~(silent : bool)
-    ~(ignore_hh_version : bool)
-    ~(log_saved_state_age_and_distance : bool)
-    ~(saved_state_manifold_api_key : string option) : string =
+    ~(silent : bool) : string =
   match savedstate_file_opt with
   | Some path -> path
   | None ->
-    (* Can we get one from the saved state fetcher? *)
-    (match
-       find_saved_symbolindex
-         ~ignore_hh_version
-         ~log_saved_state_age_and_distance
-         ~saved_state_manifold_api_key
-     with
-    | Ok filename -> filename
-    | Error errmsg ->
-      let repo_path = Relative_path.path_of_prefix Relative_path.Root in
-      if not silent then
-        Hh_logger.log "Unable to fetch sqlite symbol index: %s" errmsg;
-      let tempfilename = Caml.Filename.temp_file "symbolindex" ".db" in
-      if not silent then
-        Hh_logger.log
-          "Generating [%s] from repository [%s]"
-          tempfilename
-          repo_path;
-      let ctxt =
-        {
-          IndexBuilderTypes.repo_folder = repo_path;
-          sqlite_filename = Some tempfilename;
-          text_filename = None;
-          json_filename = None;
-          json_repo_name = None;
-          json_chunk_size = 0;
-          custom_service = None;
-          custom_repo_name = None;
-          set_paths_for_worker = false;
-          hhi_root_folder = Some (Hhi.get_hhi_root ());
-          silent;
-        }
-      in
-      IndexBuilder.go ctxt workers;
-      tempfilename)
+    let repo_path = Relative_path.path_of_prefix Relative_path.Root in
+    let tempfilename = Caml.Filename.temp_file "symbolindex" ".db" in
+    if not silent then
+      Hh_logger.log
+        "Generating [%s] from repository [%s]"
+        tempfilename
+        repo_path;
+    let ctxt =
+      {
+        IndexBuilderTypes.repo_folder = repo_path;
+        sqlite_filename = Some tempfilename;
+        text_filename = None;
+        json_filename = None;
+        json_repo_name = None;
+        json_chunk_size = 0;
+        custom_service = None;
+        custom_repo_name = None;
+        set_paths_for_worker = false;
+        hhi_root_folder = Some (Hhi.get_hhi_root ());
+        silent;
+      }
+    in
+    IndexBuilder.go ctxt workers;
+    tempfilename
 
 (*
  * Ensure the database is available.
@@ -142,17 +93,11 @@ let find_or_build_sqlite_file
 let initialize
     ~(sienv : si_env)
     ~(workers : MultiWorker.worker list option)
-    ~(ignore_hh_version : bool)
-    ~(savedstate_file_opt : string option)
-    ~(log_saved_state_age_and_distance : bool)
-    ~(saved_state_manifold_api_key : string option) : si_env =
+    ~(savedstate_file_opt : string option) : si_env =
   (* Find the database and open it *)
   let db_path =
     find_or_build_sqlite_file
       ~silent:sienv.sie_quiet_mode
-      ~ignore_hh_version
-      ~log_saved_state_age_and_distance
-      ~saved_state_manifold_api_key
       workers
       savedstate_file_opt
   in

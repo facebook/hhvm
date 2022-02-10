@@ -153,10 +153,8 @@ let parse_options () =
       ~namespace_map
       ~provider_name:"LocalIndex"
       ~quiet:true
-      ~ignore_hh_version:false
       ~savedstate_file_opt:None
       ~workers:None
-      ~saved_state_manifold_api_key:!saved_state_manifold_api_key
   in
   let sienv =
     {

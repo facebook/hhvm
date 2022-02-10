@@ -119,10 +119,8 @@ let setup_server ?custom_config ?(hhi_files = []) ?edges_dir () : ServerEnv.env
       ~namespace_map:[]
       ~provider_name:"LocalIndex"
       ~quiet:true
-      ~ignore_hh_version:false
       ~savedstate_file_opt:None
       ~workers:None
-      ~saved_state_manifold_api_key:None
   in
   (* Return environment *)
   {

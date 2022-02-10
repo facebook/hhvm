@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl_defs::{
-    Abstraction, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass, FoldedElement,
-    ShallowClass, SubstContext, TypeConst,
+    AbstractTypeconst, Abstraction, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass,
+    FoldedElement, ShallowClass, SubstContext, TypeConst, Typeconst,
 };
 use crate::folded_decl_provider::subst::Subst;
 use crate::reason::Reason;
@@ -184,8 +184,78 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn add_type_consts(&mut self, other_type_consts: TypeConstNameMap<TypeConst<R>>) {
-        //TODO Fill this in
-        self.type_consts.extend(other_type_consts)
+        for (name, mut new_const) in other_type_consts {
+            match self.type_consts.entry(name) {
+                Entry::Vacant(e) => {
+                    // The type constant didn't exist so far, let's add it.
+                    e.insert(new_const);
+                }
+                Entry::Occupied(mut e) => {
+                    let old_const = e.get();
+                    if new_const.is_enforceable() && !old_const.is_enforceable() {
+                        // If some typeconst in some ancestor was enforceable,
+                        // then the child class' typeconst will be enforceable
+                        // too, even if we didn't take that ancestor typeconst.
+                        e.get_mut().enforceable = new_const.enforceable.clone();
+                    }
+                    let old_const = e.get();
+                    match (&old_const.kind, &new_const.kind) {
+                        // This covers the following case
+                        // ```
+                        // interface I1 { abstract const type T; }
+                        // interface I2 { const type T = int; }
+                        // class C implements I1, I2 {}
+                        // ```
+                        // Then `C::T == I2::T` since `I2::T `is not abstract
+                        (Typeconst::TCConcrete(_), Typeconst::TCAbstract(_)) => {}
+                        // This covers the following case
+                        // ```
+                        // interface I {
+                        //   abstract const type T as arraykey;
+                        // }
+                        //
+                        // abstract class A {
+                        //   abstract const type T as arraykey = string;
+                        // }
+                        //
+                        // final class C extends A implements I {}
+                        // ```
+                        // `C::T` must come from `A`, not `I`, as `A`
+                        // provides the default that will synthesize into a
+                        // concrete type constant in `C`.
+                        (
+                            Typeconst::TCAbstract(AbstractTypeconst {
+                                default: Some(_), ..
+                            }),
+                            Typeconst::TCAbstract(AbstractTypeconst { default: None, .. }),
+                        ) => {}
+                        // When a type constant is declared in multiple
+                        // parents we need to make a subtle choice of what
+                        // type we inherit. For example in:
+                        // ```
+                        // interface I1 { abstract const type t as Container<int>; }
+                        // interface I2 { abstract const type t as KeyedContainer<int, int>; }
+                        // abstract class C implements I1, I2 {}
+                        // ```
+                        // Depending on the order the interfaces are
+                        // declared, we may report an error. Since this
+                        // could be confusing there is special logic in
+                        // `Typing_extends` that checks for this potentially
+                        // ambiguous situation and warns the programmer to
+                        // explicitly declare `T` in `C`.
+                        _ => {
+                            if old_const.is_enforceable() && !new_const.is_enforceable() {
+                                // If a typeconst we already inherited from some
+                                // other ancestor was enforceable, then the one
+                                // we inherit here will be enforceable too.
+                                new_const.enforceable = old_const.enforceable.clone();
+                            }
+                            e.insert(new_const);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fn add_inherited(&mut self, other: Self) {

@@ -64,10 +64,19 @@ pub struct TypeConst<R: Reason> {
     pub name: Positioned<TypeConstName, R::Pos>,
     pub kind: Typeconst<R>, // abstract or concrete
     pub origin: TypeName,
-    pub is_enforceable: Positioned<bool, R::Pos>,
-    pub is_reifiable: Option<R::Pos>,
+    pub enforceable: Option<R::Pos>, // When Some, points to __Enforceable attribute
+    pub reifiable: Option<R::Pos>,   // When Some, points to __Reifiable attribute
     pub is_concreteized: bool,
     pub is_ctx: bool,
+}
+
+impl<R: Reason> TypeConst<R> {
+    pub fn is_enforceable(&self) -> bool {
+        self.enforceable.is_some()
+    }
+    pub fn is_reifiable(&self) -> bool {
+        self.reifiable.is_some()
+    }
 }
 
 #[derive(Debug, Clone)]

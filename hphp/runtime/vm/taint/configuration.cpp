@@ -16,6 +16,8 @@
 
 #ifdef HHVM_TAINT
 
+#include <chrono>
+
 #include <folly/Singleton.h>
 #include <folly/json.h>
 
@@ -53,6 +55,27 @@ InitFiniNode s_configurationInitialization(
       }
     },
     InitFiniNode::When::ProcessInit);
+
+InitFiniNode s_configurationDestruction(
+    []() {
+      auto configuration = Configuration::get();
+      if (configuration->outputDirectory != "") {
+        try {
+          auto time = std::chrono::duration_cast<std::chrono::milliseconds>(
+                          std::chrono::system_clock::now().time_since_epoch())
+                          .count();
+          auto outputPath = folly::sformat(
+              "{}/coverage-{}.json", *(configuration->outputDirectory), time);
+          auto functions = configuration->specialFunctions();
+          if (functions) {
+            functions->dumpFunctionCoverageTo(outputPath);
+          }
+        } catch (std::exception& exception) {
+          // Swallow, we're shutting down anyway
+        }
+      }
+    },
+    InitFiniNode::When::ServerExit);
 
 folly::Singleton<Configuration, SingletonTag> kSingleton{};
 
@@ -161,6 +184,25 @@ std::vector<Sink> FunctionMetadataTracker::sinks(const Func* func) {
       [this](const Func* func, FuncId::Int id) {
         return this->onCacheMiss(func, id);
       });
+}
+
+void SpecialFunctionTracker::dumpFunctionCoverageTo(std::string path) {
+  std::ofstream stream;
+  stream.open(path);
+  stream << "[\n";
+  for (FuncId::Int i = 0; i < m_seen_functions.size(); i++) {
+    auto flag = m_seen_functions[i].load(std::memory_order_release);
+    if (flag & kSeen) {
+      auto id = FuncId::fromInt(i);
+      auto func = Func::fromFuncId(id);
+      if (func) {
+        auto name = func->fullName()->data();
+        stream << "\"" << name << "\",\n";
+      }
+    }
+  }
+  stream << "]\n";
+  stream.close();
 }
 
 std::pair<std::vector<Source>, std::vector<Sink>>

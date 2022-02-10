@@ -73,6 +73,8 @@ struct FunctionMetadataTracker {
   std::vector<Source> sources(const Func* func);
   std::vector<Sink> sinks(const Func* func);
 
+  void dumpFunctionCoverageTo(std::string path);
+
  private:
   std::pair<std::vector<Source>, std::vector<Sink>> onCacheMiss(
       const Func* func,

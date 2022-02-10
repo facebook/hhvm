@@ -202,7 +202,7 @@ impl<R: Reason> Allocator<R> {
         use ty::FunArity;
         match x {
             Obr::Fstandard => FunArity::Fstandard,
-            Obr::Fvariadic(param) => FunArity::Fvariadic(self.decl_fun_param(param)),
+            Obr::Fvariadic(param) => FunArity::Fvariadic(Box::new(self.decl_fun_param(param))),
         }
     }
 

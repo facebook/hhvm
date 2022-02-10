@@ -317,7 +317,7 @@ pub enum FunArity<R: Reason, TY> {
     Fstandard,
     /// PHP5.6-style ...$args finishes the func declaration.
     /// min ; variadic param type
-    Fvariadic(FunParam<R, TY>),
+    Fvariadic(Box<FunParam<R, TY>>),
 }
 
 walkable!(impl<R: Reason, TY> for FunArity<R, TY> => {

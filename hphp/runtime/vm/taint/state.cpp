@@ -220,18 +220,19 @@ State::State() : arena(std::make_unique<PathArena>()) {}
 void State::initialize() {
   m_request_start = std::chrono::system_clock::now();
   FTRACE(1, "taint: initializing state\n");
-  // Stack is initialized with 4 values before any operation happens.
-  // We don't care about these values but mirroring simplifies
-  // consistency checks.
-  for (int i = 0; i < 4; i++) {
-    stack.push(nullptr);
-  }
 
   stack.clear();
   heap.clear();
   paths.clear();
   arena = std::make_unique<PathArena>();
   m_function_metadata = Configuration::get()->functionMetadata();
+
+  // Stack is initialized with 4 values before any operation happens.
+  // We don't care about these values but mirroring simplifies
+  // consistency checks.
+  for (int i = 0; i < 4; i++) {
+    stack.push(nullptr);
+  }
 }
 
 namespace {

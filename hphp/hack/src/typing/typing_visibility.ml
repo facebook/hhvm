@@ -15,6 +15,12 @@ module TUtils = Typing_utils
 module Cls = Decl_provider.Class
 module Module = Typing_modules
 
+let get_member_ty is_method =
+  if is_method then "method" else "property"
+
+let get_member_ty_plural is_method =
+  if is_method then "methods" else "properties"
+
 (* Is a private member defined on class/trait [origin_id] visible
  * from code in class/trait [self_id]?
  *
@@ -27,7 +33,7 @@ module Module = Typing_modules
  *   ...C::foo...
  * }
  *)
-let is_private_visible env origin_id self_id =
+let is_private_visible ~is_method env origin_id self_id =
   if String.equal origin_id self_id then
     None
   else
@@ -43,9 +49,10 @@ let is_private_visible env origin_id self_id =
            && in_bounds (Cls.upper_bounds_on_this_from_constraints cls)
            && in_bounds (Cls.lower_bounds_on_this_from_constraints cls) ->
       None
-    | _ -> Some "You cannot access this member"
+    | _ -> let member_ty = get_member_ty is_method in
+      Some ("You cannot access this " ^ member_ty)
 
-let is_protected_visible env origin_id self_id =
+let is_protected_visible ~is_method env origin_id self_id =
   if TUtils.has_ancestor_including_req_refl env self_id origin_id then
     None
   else
@@ -58,38 +65,46 @@ let is_protected_visible env origin_id self_id =
       if Cls.has_ancestor origin_class self_id then
         None
       else
+        let member_ty = get_member_ty is_method in
         Some
-          ("Cannot access this protected member, you don't extend "
+          ("Cannot access this protected " ^ member_ty ^ ", you don't extend "
           ^ strip_ns origin_id)
 
-let is_private_visible_for_class env x self_id cid class_ =
+let is_private_visible_for_class ~is_method env x self_id cid class_ =
   match cid with
   | CIstatic ->
     let my_class = Env.get_class env self_id in
     (match my_class with
     | Some cls when Cls.final cls -> None
     | _ ->
+      let member_ty_plural = get_member_ty_plural is_method in
       Some
-        "Private members cannot be accessed with static:: since a child class may also have an identically named private member")
-  | CIparent -> Some "You cannot access a private member with parent::"
-  | CIself -> is_private_visible env x self_id
+        ("Private " ^ member_ty_plural ^ " cannot be accessed with static:: since a child class may also have an identically named private member"))
+  | CIparent -> 
+    let member_ty = get_member_ty is_method in
+    Some ("You cannot access a private " ^ member_ty ^ " with parent::")
+  | CIself -> is_private_visible ~is_method env x self_id
   | CI (_, called_ci) ->
-    (match is_private_visible env x self_id with
+    (match is_private_visible ~is_method env x self_id with
     | None -> None
     | Some _ ->
       begin
         match Env.get_class env called_ci with
         | Some cls when Ast_defs.is_c_trait (Cls.kind cls) ->
+          let member_ty_plural = get_member_ty_plural is_method in
           Some
-            "You cannot access private members using the trait's name (did you mean to use self::?)"
-        | _ -> Some "You cannot access this member"
+            ("You cannot access private " ^ member_ty_plural ^ " using the trait's name (did you mean to use self::?)")
+        | _ -> 
+          let member_ty = get_member_ty is_method in
+          Some ("You cannot access this " ^ member_ty)
       end)
   | CIexpr _ ->
     if Cls.final class_ then
       None
     else
+      let member_ty_plural = get_member_ty_plural is_method in
       Some
-        "Private members cannot be accessed dynamically. Did you mean to use 'self::'?"
+        ("Private " ^ member_ty_plural ^ " cannot be accessed dynamically. Did you mean to use 'self::'?")
 
 let is_internal_visible env target =
   match
@@ -159,22 +174,17 @@ let check_typedef_access ~use_pos ~in_signature env td =
     td.td_module
 
 let is_visible_for_obj ~is_method env vis =
-  let member_ty =
-    if is_method then
-      "method"
-    else
-      "property"
-  in
+  let member_ty = get_member_ty is_method in
   match vis with
   | Vpublic -> None
   | Vprivate x ->
     (match Env.get_self_id env with
     | None -> Some ("You cannot access this " ^ member_ty)
-    | Some self_id -> is_private_visible env x self_id)
+    | Some self_id -> is_private_visible ~is_method env x self_id)
   | Vprotected x ->
     (match Env.get_self_id env with
     | None -> Some ("You cannot access this " ^ member_ty)
-    | Some self_id -> is_protected_visible env x self_id)
+    | Some self_id -> is_protected_visible ~is_method env x self_id)
   | Vinternal m -> is_internal_visible env m
 
 (* The only permitted way to access an LSB property is via
@@ -192,11 +202,11 @@ let is_lsb_accessible env vis =
   | Vprivate x ->
     (match Env.get_self_id env with
     | None -> Some "You cannot access this property"
-    | Some self_id -> is_private_visible env x self_id)
+    | Some self_id -> is_private_visible ~is_method:false env x self_id)
   | Vprotected x ->
     (match Env.get_self_id env with
     | None -> Some "You cannot access this property"
-    | Some self_id -> is_protected_visible env x self_id)
+    | Some self_id -> is_protected_visible ~is_method:false env x self_id)
   | Vinternal m -> is_internal_visible env m
 
 let is_lsb_visible_for_class env vis cid =
@@ -208,18 +218,13 @@ let is_visible_for_class ~is_method env (vis, lsb) cid cty =
   if lsb then
     is_lsb_visible_for_class env vis cid
   else
-    let member_ty =
-      if is_method then
-        "method"
-      else
-        "property"
-    in
+    let member_ty = get_member_ty is_method in
     match vis with
     | Vpublic -> None
     | Vprivate x ->
       (match Env.get_self_id env with
       | None -> Some ("You cannot access this " ^ member_ty)
-      | Some self_id -> is_private_visible_for_class env x self_id cid cty)
+      | Some self_id -> is_private_visible_for_class ~is_method env x self_id cid cty)
     | Vprotected x ->
       (match Env.get_self_id env with
       | None -> Some ("You cannot access this " ^ member_ty)
@@ -227,9 +232,10 @@ let is_visible_for_class ~is_method env (vis, lsb) cid cty =
         let their_class = Env.get_class env x in
         (match (cid, their_class) with
         | (CI _, Some cls) when Ast_defs.is_c_trait (Cls.kind cls) ->
+          let member_ty = get_member_ty_plural is_method in
           Some
-            "You cannot access protected members using the trait's name (did you mean to use static:: or self::?)"
-        | _ -> is_protected_visible env x self_id))
+            ("You cannot access protected " ^ member_ty ^ " using the trait's name (did you mean to use static:: or self::?)")
+        | _ -> is_protected_visible ~is_method env x self_id))
     | Vinternal m -> is_internal_visible env m
 
 let is_visible ~is_method env (vis, lsb) cid class_ =
@@ -240,9 +246,10 @@ let is_visible ~is_method env (vis, lsb) cid class_ =
   in
   Option.is_none msg_opt
 
-let visibility_error p msg (p_vis, vis) =
+let visibility_error ~is_method p msg (p_vis, vis) =
   let s = Typing_defs.string_of_visibility vis in
-  let msg_vis = "This member is " ^ s in
+  let member_ty = get_member_ty is_method in
+  let msg_vis = "This " ^ member_ty ^ " is " ^ s in
   Typing_error.(
     primary
     @@ Primary.Visibility
@@ -250,7 +257,7 @@ let visibility_error p msg (p_vis, vis) =
 
 let check_obj_access ~is_method ~use_pos ~def_pos env vis =
   Option.map (is_visible_for_obj ~is_method env vis) ~f:(fun msg ->
-      visibility_error use_pos msg (def_pos, vis))
+      visibility_error ~is_method use_pos msg (def_pos, vis))
 
 let check_expression_tree_vis ~use_pos ~def_pos env vis =
   let open Typing_error in
@@ -294,7 +301,7 @@ let check_meth_caller_access ~use_pos ~def_pos vis =
 let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
   Option.map
     (is_visible_for_class ~is_method env (vis, lsb) cid class_)
-    ~f:(fun msg -> visibility_error use_pos msg (def_pos, vis))
+    ~f:(fun msg -> visibility_error ~is_method use_pos msg (def_pos, vis))
 
 let check_deprecated ~use_pos ~def_pos deprecated =
   Option.map deprecated ~f:(fun s ->

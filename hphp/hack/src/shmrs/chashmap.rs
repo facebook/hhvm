@@ -9,11 +9,12 @@ use std::mem::MaybeUninit;
 use std::ptr::NonNull;
 
 use hashbrown::hash_map::DefaultHashBuilder;
+use owning_ref::OwningRef;
 
 use crate::filealloc::FileAlloc;
 use crate::hashmap::Map;
 use crate::shardalloc::{ShardAlloc, ShardAllocControlData};
-use crate::sync::{RwLock, RwLockRef, RwLockWriteGuard};
+use crate::sync::{RwLock, RwLockReadGuard, RwLockRef, RwLockWriteGuard};
 
 /// The number of shards.
 ///
@@ -65,6 +66,12 @@ pub trait CMapValue {
     /// it should be evicted.
     fn points_to_evictable_data(&self) -> bool;
 }
+
+/// A reference to a value.
+///
+/// Makes sure the underlying locks are released once the value goes out o
+/// scope.
+type CMapValueRef<'shm, 'a, K, V, S> = OwningRef<RwLockReadGuard<'a, Map<'shm, K, V, S>>, V>;
 
 /// A concurrent hash map implemented as multiple sharded non-concurrent
 /// hash maps.
@@ -290,6 +297,11 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
         }
     }
 
+    fn shard_for_reading<'a>(&'a self, key: &K) -> RwLockReadGuard<'a, Map<'shm, K, V, S>> {
+        let shard_index = self.shard_index_for(key);
+        self.maps[shard_index].read().unwrap()
+    }
+
     /// Access the map that belongs to the given key for reading.
     pub fn read_map<R>(&self, key: &K, f: impl FnOnce(&Map<'shm, K, V, S>) -> R) -> R {
         let shard_index = self.shard_index_for(key);
@@ -380,6 +392,16 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
             return true;
         }
         false
+    }
+
+    /// Get a value from the map.
+    pub fn get(&self, key: &K) -> Option<CMapValueRef<'shm, '_, K, V, S>> {
+        let shard = self.shard_for_reading(key);
+        // The OwningRef keeps track of the underlying lock around the table.
+        // It allows us to return a reference to the value, with it's lifetime
+        // bound to this lock.
+        let shard = OwningRef::new(shard);
+        shard.try_map(|m| m.get(key).ok_or(())).ok()
     }
 
     /// Return the total number of bytes allocated.

@@ -109,27 +109,43 @@ let get_check_info ~check_reason genv env : Typing_service_types.check_info =
 type user_filter =
   | UserFilterInclude of Str.regexp list
   | UserFilterExclude of Str.regexp list
+  | UserFilterFiles of SSet.t
 
 let user_filter_of_json (json : Hh_json.json) : user_filter =
   let open Hh_json_helpers in
   let json = Some json in
   let type_ = Jget.string_exn json "type" in
-  let regexes = Jget.string_array_exn json "regexes" in
-  let regexes =
-    List.map regexes ~f:(fun re ->
-        try Str.regexp re with
-        | Failure explanation ->
-          raise
-          @@ Failure
-               (Printf.sprintf
-                  "Could not parse regex \"%s\": %s"
-                  re
-                  explanation))
-  in
   if String.equal type_ "include" then
+    let regexes = Jget.string_array_exn json "regexes" in
+    let regexes =
+      List.map regexes ~f:(fun re ->
+          try Str.regexp re with
+          | Failure explanation ->
+            raise
+            @@ Failure
+                 (Printf.sprintf
+                    "Could not parse regex \"%s\": %s"
+                    re
+                    explanation))
+    in
     UserFilterInclude regexes
   else if String.equal type_ "exclude" then
+    let regexes = Jget.string_array_exn json "regexes" in
+    let regexes =
+      List.map regexes ~f:(fun re ->
+          try Str.regexp re with
+          | Failure explanation ->
+            raise
+            @@ Failure
+                 (Printf.sprintf
+                    "Could not parse regex \"%s\": %s"
+                    re
+                    explanation))
+    in
     UserFilterExclude regexes
+  else if String.equal type_ "specific_files" then
+    let file_list = Jget.string_array_exn json "files" in
+    UserFilterFiles (SSet.of_list file_list)
   else
     raise @@ Failure (Printf.sprintf "Unknown filter type: '%s'" type_)
 
@@ -144,6 +160,7 @@ let user_filter_should_type_check
   match user_filter with
   | UserFilterInclude regexes -> matches_any regexes
   | UserFilterExclude regexes -> not (matches_any regexes)
+  | UserFilterFiles files -> SSet.mem (Relative_path.suffix path) files
 
 let user_filters_should_type_check
     (user_filters : user_filter list) (path : Relative_path.t) : bool =

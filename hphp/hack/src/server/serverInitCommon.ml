@@ -184,7 +184,23 @@ let type_check
       Printf.sprintf "Filter %d files [%s]" count telemetry_label
     in
     Hh_logger.log "Begin %s" logstring;
-
+    let files_to_check =
+      if
+        not
+          genv.ServerEnv.local_config
+            .ServerLocalConfig.enable_type_check_filter_files
+      then
+        files_to_check
+      else
+        let files_to_check_set = Relative_path.Set.of_list files_to_check in
+        let filtered_check =
+          ServerCheckUtils.user_filter_type_check_files
+            ~to_recheck:files_to_check_set
+            ~reparsed:Relative_path.Set.empty
+            ~is_ide_file:(fun _ -> false)
+        in
+        Relative_path.Set.elements filtered_check
+    in
     let (_new_t : float) = Hh_logger.log_duration logstring t in
     let count = List.length files_to_check in
     let logstring = Printf.sprintf "type-check %d files" count in

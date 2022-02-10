@@ -355,10 +355,9 @@ pub enum InstructControlFlow<'arena> {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum InstructSpecialFlow<'arena> {
+pub enum InstructSpecialFlow {
     Continue(isize),
     Break(isize),
-    Goto(Str<'arena>),
 }
 
 #[derive(Clone, Debug)]
@@ -774,7 +773,7 @@ pub enum Instruct<'arena> {
     ILitConst(InstructLitConst<'arena>),
     IOp(InstructOperator<'arena>),
     IContFlow(InstructControlFlow<'arena>),
-    ISpecialFlow(InstructSpecialFlow<'arena>),
+    ISpecialFlow(InstructSpecialFlow),
     ICall(InstructCall<'arena>),
     IMisc(InstructMisc<'arena>),
     IGet(InstructGet<'arena>),

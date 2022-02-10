@@ -291,13 +291,6 @@ pub mod instr {
         )
     }
 
-    pub fn goto<'a>(alloc: &'a bumpalo::Bump, label: std::string::String) -> InstrSeq<'_> {
-        instr(
-            alloc,
-            Instruct::ISpecialFlow(InstructSpecialFlow::Goto(Str::new_str(alloc, &label))),
-        )
-    }
-
     pub fn iter_break<'a>(
         alloc: &'a bumpalo::Bump,
         label: Label,

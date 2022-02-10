@@ -86,8 +86,8 @@ function main(): void {
   list($er, $ew) = _OS\pipe();
   list($fd42r, $fd42w) = _OS\pipe();
   $pid = _OS\fork_and_execve(
-    '/bin/sh',
-    vec['/bin/sh', '-c', 'echo Foo; echo Bar >&2; echo Baz >&42'],
+    '/bin/bash',
+    vec['/bin/bash', '-c', 'echo Foo; echo Bar >&2; echo Baz >&42'],
     vec[],
     dict[
       _OS\STDOUT_FILENO => $ow,

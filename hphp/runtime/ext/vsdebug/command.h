@@ -656,14 +656,6 @@ private:
     int charsToOverwrite
   );
 
-  // Returns the expression of tokens leading up to the context for a completion
-  // For example, given the string $foo->bar->ba, the context for a completion
-  // is "$foo->bar".
-  static std::string getCompletionContext(
-    std::string& text,
-    std::vector<TokenEntry>& processedTokens
-  );
-
   // Adds completions based on the specified SuggestionContext for local
   // variables, and globals visible at the current VM frame for this request.
   void addVariableCompletions(
@@ -730,4 +722,3 @@ struct InfoCommand : public VSCommand {
 
 }
 }
-

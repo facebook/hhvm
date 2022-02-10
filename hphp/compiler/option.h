@@ -123,8 +123,6 @@ struct Option {
   static bool EnableShortTags;
   static int ParserThreadCount;
 
-  static int GetScannerType();
-
   /**
    * "Volatile" means a class or a function can be declared dynamically.
    */

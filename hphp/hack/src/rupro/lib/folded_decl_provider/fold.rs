@@ -36,15 +36,15 @@ impl<R: Reason> DeclFolder<R> {
     fn visibility(
         &self,
         cls: TypeName,
-        module: Option<&Positioned<ModuleName, R::Pos>>,
+        module: Option<ModuleName>,
         vis: Visibility,
-    ) -> CeVisibility<R::Pos> {
+    ) -> CeVisibility {
         match vis {
             Visibility::Public => CeVisibility::Public,
             Visibility::Private => CeVisibility::Private(cls),
             Visibility::Protected => CeVisibility::Protected(cls),
-            Visibility::Internal => module.map_or(CeVisibility::Public, |pid| {
-                CeVisibility::Internal(pid.clone())
+            Visibility::Internal => module.map_or(CeVisibility::Public, |module_name| {
+                CeVisibility::Internal(module_name)
             }),
         }
     }
@@ -75,14 +75,14 @@ impl<R: Reason> DeclFolder<R> {
 
     fn decl_prop(
         &self,
-        props: &mut PropNameMap<FoldedElement<R>>,
+        props: &mut PropNameMap<FoldedElement>,
         sc: &ShallowClass<R>,
         sp: &ShallowProp<R>,
     ) {
         // note(sf, 2022-02-08): c.f. Decl_folded_class.prop_decl
         let cls = sc.name.id();
         let prop = sp.name.id();
-        let vis = self.visibility(cls, sc.module.as_ref(), sp.visibility);
+        let vis = self.visibility(cls, sc.module.as_ref().map(Positioned::id), sp.visibility);
         let prop_flags = &sp.flags;
         let flag_args = ClassEltFlagsArgs {
             xhp_attr: sp.xhp_attr,
@@ -109,13 +109,13 @@ impl<R: Reason> DeclFolder<R> {
 
     fn decl_static_prop(
         &self,
-        static_props: &mut PropNameMap<FoldedElement<R>>,
+        static_props: &mut PropNameMap<FoldedElement>,
         sc: &ShallowClass<R>,
         sp: &ShallowProp<R>,
     ) {
         let cls = sc.name.id();
         let prop = sp.name.id();
-        let vis = self.visibility(cls, sc.module.as_ref(), sp.visibility);
+        let vis = self.visibility(cls, sc.module.as_ref().map(Positioned::id), sp.visibility);
         let prop_flags = &sp.flags;
         let flag_args = ClassEltFlagsArgs {
             xhp_attr: sp.xhp_attr,
@@ -142,7 +142,7 @@ impl<R: Reason> DeclFolder<R> {
 
     fn decl_method(
         &self,
-        methods: &mut MethodNameMap<FoldedElement<R>>,
+        methods: &mut MethodNameMap<FoldedElement>,
         sc: &ShallowClass<R>,
         sm: &ShallowMethod<R>,
     ) {
@@ -156,7 +156,7 @@ impl<R: Reason> DeclFolder<R> {
                 }),
                 Visibility::Protected,
             ) => CeVisibility::Protected(*cls),
-            (_, v) => self.visibility(cls, sc.module.as_ref(), v),
+            (_, v) => self.visibility(cls, sc.module.as_ref().map(Positioned::id), v),
         };
 
         let meth_flags = &sm.flags;
@@ -184,7 +184,7 @@ impl<R: Reason> DeclFolder<R> {
         methods.insert(meth, elt);
     }
 
-    fn decl_constructor(&self, constructor: &mut Option<FoldedElement<R>>, sc: &ShallowClass<R>) {
+    fn decl_constructor(&self, constructor: &mut Option<FoldedElement>, sc: &ShallowClass<R>) {
         // Constructors in children of `sc` must be consistent?
         let _consistent_kind = if sc.is_final {
             ConsistentKind::FinalClass
@@ -200,7 +200,8 @@ impl<R: Reason> DeclFolder<R> {
             None => {}
             Some(sm) => {
                 let cls = sc.name.id();
-                let vis = self.visibility(cls, sc.module.as_ref(), sm.visibility);
+                let vis =
+                    self.visibility(cls, sc.module.as_ref().map(Positioned::id), sm.visibility);
                 let meth_flags = &sm.flags;
                 let flag_args = ClassEltFlagsArgs {
                     xhp_attr: None,

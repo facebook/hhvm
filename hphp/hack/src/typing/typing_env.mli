@@ -239,7 +239,7 @@ val set_internal : env -> bool -> env
 
 val set_support_dynamic_type : env -> bool -> env
 
-val get_module : env -> Ast_defs.id option
+val get_module : env -> string option
 
 val get_internal : env -> bool
 

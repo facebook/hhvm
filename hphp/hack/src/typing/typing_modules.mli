@@ -11,6 +11,6 @@
   * [target] under [env].
   *)
 val can_access :
-  current:Ast_defs.id option ->
-  target:Ast_defs.id option ->
-  [ `Yes | `Disjoint of Ast_defs.id * Ast_defs.id | `Outside of Ast_defs.id ]
+  current:string option ->
+  target:string option ->
+  [ `Yes | `Disjoint of string * string | `Outside of string ]

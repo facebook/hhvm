@@ -22,11 +22,11 @@ use std::sync::Arc;
 pub(crate) struct Inherited<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_inherit.inherited`
     pub(crate) substs: TypeNameMap<SubstContext<R>>,
-    pub(crate) props: PropNameMap<FoldedElement<R>>,
-    pub(crate) static_props: PropNameMap<FoldedElement<R>>,
-    pub(crate) methods: MethodNameMap<FoldedElement<R>>,
-    pub(crate) static_methods: MethodNameMap<FoldedElement<R>>,
-    pub(crate) constructor: Option<FoldedElement<R>>,
+    pub(crate) props: PropNameMap<FoldedElement>,
+    pub(crate) static_props: PropNameMap<FoldedElement>,
+    pub(crate) methods: MethodNameMap<FoldedElement>,
+    pub(crate) static_methods: MethodNameMap<FoldedElement>,
+    pub(crate) constructor: Option<FoldedElement>,
     pub(crate) consts: ClassConstNameMap<ClassConst<R>>,
     pub(crate) type_consts: TypeConstNameMap<TypeConst<R>>,
 }
@@ -56,14 +56,14 @@ impl<R: Reason> Inherited<R> {
     //     trait.
     // When these two considerations conflict, we give precedence to
     // abstractness for determining priority of the method.
-    fn should_keep_old_sig(new_sig: &FoldedElement<R>, old_sig: &FoldedElement<R>) -> bool {
+    fn should_keep_old_sig(new_sig: &FoldedElement, old_sig: &FoldedElement) -> bool {
         !old_sig.is_abstract() && new_sig.is_abstract()
             || old_sig.is_abstract() == new_sig.is_abstract()
                 && !old_sig.is_synthesized()
                 && new_sig.is_synthesized()
     }
 
-    fn add_constructor(&mut self, constructor: Option<FoldedElement<R>>) {
+    fn add_constructor(&mut self, constructor: Option<FoldedElement>) {
         match (constructor.as_ref(), self.constructor.as_ref()) {
             (None, _) => {}
             (Some(other_ctor), Some(self_ctor))
@@ -99,8 +99,8 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn add_method(
-        methods: &mut MethodNameMap<FoldedElement<R>>,
-        (key, mut fe): (MethodName, FoldedElement<R>),
+        methods: &mut MethodNameMap<FoldedElement>,
+        (key, mut fe): (MethodName, FoldedElement),
     ) {
         match methods.entry(key) {
             Entry::Vacant(entry) => {
@@ -123,23 +123,23 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
-    fn add_methods(&mut self, other_methods: MethodNameMap<FoldedElement<R>>) {
+    fn add_methods(&mut self, other_methods: MethodNameMap<FoldedElement>) {
         for (key, fe) in other_methods {
             Self::add_method(&mut self.methods, (key, fe))
         }
     }
 
-    fn add_static_methods(&mut self, other_static_methods: MethodNameMap<FoldedElement<R>>) {
+    fn add_static_methods(&mut self, other_static_methods: MethodNameMap<FoldedElement>) {
         for (key, fe) in other_static_methods {
             Self::add_method(&mut self.static_methods, (key, fe))
         }
     }
 
-    fn add_props(&mut self, other_props: PropNameMap<FoldedElement<R>>) {
+    fn add_props(&mut self, other_props: PropNameMap<FoldedElement>) {
         self.props.extend(other_props)
     }
 
-    fn add_static_props(&mut self, other_static_props: PropNameMap<FoldedElement<R>>) {
+    fn add_static_props(&mut self, other_static_props: PropNameMap<FoldedElement>) {
         self.static_props.extend(other_static_props)
     }
 

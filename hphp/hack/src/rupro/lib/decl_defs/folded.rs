@@ -12,11 +12,11 @@ use pos::{
 };
 
 #[derive(Debug, Clone)]
-pub struct FoldedElement<R: Reason> {
+pub struct FoldedElement {
     // note(sf, 2022-01-28): c.f. `Decl_defs.element`
     pub flags: ClassEltFlags,
     pub origin: TypeName,
-    pub visibility: CeVisibility<R::Pos>,
+    pub visibility: CeVisibility,
 
     /// If the element is deprecated, this holds the deprecation message.
     pub deprecated: Option<intern::string::BytesId>,
@@ -94,16 +94,16 @@ pub struct FoldedClass<R: Reason> {
     pub pos: R::Pos,
     pub substs: TypeNameMap<SubstContext<R>>,
     pub ancestors: TypeNameMap<DeclTy<R>>,
-    pub props: PropNameMap<FoldedElement<R>>,
-    pub static_props: PropNameMap<FoldedElement<R>>,
-    pub methods: MethodNameMap<FoldedElement<R>>,
-    pub static_methods: MethodNameMap<FoldedElement<R>>,
-    pub constructor: Option<FoldedElement<R>>,
+    pub props: PropNameMap<FoldedElement>,
+    pub static_props: PropNameMap<FoldedElement>,
+    pub methods: MethodNameMap<FoldedElement>,
+    pub static_methods: MethodNameMap<FoldedElement>,
+    pub constructor: Option<FoldedElement>,
     pub consts: ClassConstNameMap<ClassConst<R>>,
     pub type_consts: TypeConstNameMap<TypeConst<R>>,
 }
 
-impl<R: Reason> FoldedElement<R> {
+impl FoldedElement {
     pub fn is_abstract(&self) -> bool {
         self.flags.contains(ClassEltFlags::ABSTRACT)
     }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c3fafc47e650bf442822bbc8fae7c6c8>>
+// @generated SignedSource<<f29cc99c9e7bf3b10068c3d0d1b40b7a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -45,7 +45,7 @@ pub enum CeVisibility {
     Vpublic,
     Vprivate(String),
     Vprotected(String),
-    Vinternal(ast_defs::Id),
+    Vinternal(String),
 }
 
 #[derive(

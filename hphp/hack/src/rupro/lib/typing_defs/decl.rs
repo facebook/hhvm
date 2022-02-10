@@ -14,7 +14,7 @@ pub struct ClassElt<R: Reason> {
 }
 
 impl<R: Reason> ClassElt<R> {
-    pub fn new(folded_elt: &folded::FoldedElement<R>, ty: DeclTy<R>) -> Self {
+    pub fn new(folded_elt: &folded::FoldedElement, ty: DeclTy<R>) -> Self {
         Self {
             ty,
             origin: folded_elt.origin,

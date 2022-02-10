@@ -30,11 +30,11 @@ pub enum XhpEnumValue {
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub enum CeVisibility<P> {
+pub enum CeVisibility {
     Public,
     Private(TypeName),
     Protected(TypeName),
-    Internal(Positioned<ModuleName, P>),
+    Internal(ModuleName),
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]

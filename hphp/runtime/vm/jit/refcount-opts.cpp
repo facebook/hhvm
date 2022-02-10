@@ -3408,15 +3408,12 @@ IRInstruction* makeReleaseShallow(
     IRUnit& unit, Block* remainder, IRInstruction* inst, SSATmp* tmp) {
   auto const block = inst->block();
   auto const bcctx = inst->bcctx();
-
   auto const next = unit.defBlock(block->profCount());
-  next->push_back(
-      unit.gen(ReleaseShallow, bcctx, *(inst->extra<DecRefData>()), tmp));
+  next->push_back(unit.gen(ReleaseShallow, bcctx, tmp));
   next->push_back(unit.gen(Jmp, bcctx, remainder));
 
   auto const decReleaseCheck = unit.gen(DecReleaseCheck, bcctx, remainder, tmp);
   decReleaseCheck->setNext(next);
-
   return decReleaseCheck;
 }
 

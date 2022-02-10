@@ -1,0 +1,6 @@
+File "duplicate_key.php", line 14, characters 5-7:
+This assignment to key `'a'` overwrites previous assignment on line 13. (Lint[5575])
+File "duplicate_key.php", line 30, characters 5-7:
+This assignment to key `'p'` overwrites previous assignments on lines 28, 29. (Lint[5575])
+File "duplicate_key.php", line 46, characters 5-7:
+This assignment to key `'x'` overwrites previous assignments on lines 44, 45. (Lint[5575])

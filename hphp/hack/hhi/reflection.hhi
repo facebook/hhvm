@@ -253,8 +253,8 @@ class ReflectionProperty implements Reflector {
   public function __construct($class, string $name)[];
   public function __toString()[];
   public function getName()[];
-  public function getValue($object = null);
-  public function setValue($object, $value = null);
+  public function getValue($obj = null)[read_globals];
+  public function setValue($obj, $value = null)[globals, write_props];
   public function isPublic()[];
   public function isPrivate()[];
   public function isProtected()[];

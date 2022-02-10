@@ -1,0 +1,4 @@
+File "include_use.php", line 4, characters 1-18:
+Prefer `require` and `require_once` to `include` and `include_once`. (Lint[5549])
+File "include_use.php", line 5, characters 1-23:
+Prefer `require` and `require_once` to `include` and `include_once`. (Lint[5549])

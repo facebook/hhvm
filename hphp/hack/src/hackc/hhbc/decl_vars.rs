@@ -55,16 +55,15 @@ impl<'a> DeclvarVisitor<'a> {
         cge: &ClassGetExpr,
         is_call_target: bool,
     ) -> Result<(), String> {
-        use aast::ClassId_::*;
+        use aast::ClassId_;
         match &cid.2 {
-            CIparent | CIself | CIstatic | CI(_) => {
+            ClassId_::CIparent | ClassId_::CIself | ClassId_::CIstatic | ClassId_::CI(_) => {
                 Err("Expects CIexpr as class_id on aast where expr was on ast".into())
             }
-            CIexpr(e) => {
+            ClassId_::CIexpr(e) => {
                 self.visit_expr(&mut (), e)?;
-                use aast::ClassGetExpr::*;
                 match cge {
-                    CGstring(pstr) => {
+                    ClassGetExpr::CGstring(pstr) => {
                         // TODO(thomasjiang): For this to match correctly, we need to adjust
                         // ast_to_nast because it does not make a distinction between ID and Lvar,
                         // which is needed here
@@ -73,7 +72,7 @@ impl<'a> DeclvarVisitor<'a> {
                         }
                         Ok(())
                     }
-                    CGexpr(e2) => self.visit_expr(&mut (), e2),
+                    ClassGetExpr::CGexpr(e2) => self.visit_expr(&mut (), e2),
                 }
             }
         }
@@ -103,25 +102,25 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
     }
 
     fn visit_expr_(&mut self, env: &mut (), e: &Expr_) -> Result<(), String> {
-        use aast::Expr_::*;
+        use aast::Expr_;
         match e {
-            ObjGet(x) if x.as_ref().3 == PropOrMethod::IsProp => {
+            Expr_::ObjGet(x) if x.as_ref().3 == PropOrMethod::IsProp => {
                 let (receiver_e, prop_e) = (&x.0, &x.1);
                 match &receiver_e.2 {
-                    Lvar(id) if id.name() == "$this" => {}
+                    Expr_::Lvar(id) if id.name() == "$this" => {}
                     _ => receiver_e.recurse(env, self.object())?,
                 }
                 match &prop_e.2 {
-                    Lvar(id) => self.add_local(id.name()),
+                    Expr_::Lvar(id) => self.add_local(id.name()),
                     _ => prop_e.recurse(env, self.object())?,
                 }
                 Ok(())
             }
 
-            Binop(x) => {
+            Expr_::Binop(x) => {
                 let (binop, e1, e2) = (&x.0, &x.1, &x.2);
                 match (binop, &e2.2) {
-                    (Bop::Eq(_), Await(_)) | (Bop::Eq(_), Yield(_)) => {
+                    (Bop::Eq(_), Expr_::Await(_)) | (Bop::Eq(_), Expr_::Yield(_)) => {
                         // Visit e2 before e1. The ordering of declvars in async
                         // expressions matters to HHVM. See D5674623.
                         self.visit_expr(env, e2)?;
@@ -131,13 +130,13 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 }
             }
 
-            Lvar(x) => Ok(self.add_local(x.name())),
-            ClassGet(x) if x.as_ref().2 == PropOrMethod::IsProp => {
+            Expr_::Lvar(x) => Ok(self.add_local(x.name())),
+            Expr_::ClassGet(x) if x.as_ref().2 == PropOrMethod::IsProp => {
                 self.on_class_get(&x.0, &x.1, false)
             }
             // For an Lfun, we don't want to recurse, because it's a separate scope.
-            Lfun(_) => Ok(()),
-            Efun(x) => {
+            Expr_::Lfun(_) => Ok(()),
+            Expr_::Efun(x) => {
                 // at this point AST is already rewritten so use lists on EFun nodes
                 // contain list of captured variables. However if use list was initially absent
                 // it is not correct to traverse such nodes to collect locals because it will impact
@@ -165,9 +164,9 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 }
                 Ok(())
             }
-            Call(x) => {
+            Expr_::Call(x) => {
                 let (func_e, pos_args, unpacked_arg) = (&x.0, &x.2, &x.3);
-                if let Id(x) = &func_e.2 {
+                if let Expr_::Id(x) = &func_e.2 {
                     let call_name = &x.1;
                     if call_name == emitter_special_functions::SET_FRAME_METADATA {
                         self.add_local("$86metadata");
@@ -175,11 +174,11 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 }
                 let on_arg = |self_: &mut Self, env: &mut (), x: &Expr| match &x.2 {
                     // Only add $this to locals if it's bare
-                    Lvar(id) if &(id.1).1 == "$this" => Ok(()),
+                    Expr_::Lvar(id) if &(id.1).1 == "$this" => Ok(()),
                     _ => self_.visit_expr(env, x),
                 };
                 match &func_e.2 {
-                    ClassGet(x) if x.as_ref().2 == PropOrMethod::IsMethod => {
+                    Expr_::ClassGet(x) if x.as_ref().2 == PropOrMethod::IsMethod => {
                         let (id, prop) = (&x.0, &x.1);
                         self.on_class_get(id, prop, true)?
                     }
@@ -195,11 +194,11 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                 }
                 Ok(())
             }
-            New(x) => {
+            Expr_::New(x) => {
                 let (exprs1, expr2) = (&x.2, &x.3);
 
                 let add_bare_expr = |self_: &mut Self, env: &mut (), expr: &Expr| match &expr.2 {
-                    Lvar(x) if &(x.1).1 == "$this" => Ok(()),
+                    Expr_::Lvar(x) if &(x.1).1 == "$this" => Ok(()),
                     _ => self_.visit_expr(env, expr),
                 };
                 for expr in exprs1 {

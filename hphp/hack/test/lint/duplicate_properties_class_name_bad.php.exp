@@ -1,0 +1,2 @@
+File "duplicate_properties_class_name_bad.php", line 15, characters 7-7:
+Duplicated property `x` in `C` (defined in `T0` and `T1`): all instances will be aliased at runtime (Lint[5635])

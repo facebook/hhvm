@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/parser/scanner.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
@@ -126,136 +125,8 @@ CompletionsCommand::parseCompletionExpression(
   std::string text = expr;
   SuggestionContext context;
   context.type = SuggestionType::None;
-
-  // The tokenizer requires the expression to look like inline PHP, which must
-  // start with <?
-  auto it = expr.find("<?");
-  if (it != 0) {
-    text = "<? " + text;
-  }
-
-  // Use the PHP tokenizer to determine what the string we were given most
-  // likely contains. This will tell us what sort of completions we should
-  // be trying to recommend.
-  Scanner scanner(
-    text.c_str(),
-    text.size(),
-    RuntimeOption::GetScannerType() | Scanner::ReturnAllTokens
-  );
-
-  ScannerToken token;
-  Location location;
-  int tokenId;
-  std::vector<TokenEntry> processedTokens;
-
-  while ((tokenId = scanner.getNextToken(token, location))) {
-    TokenEntry te;
-    te.tokenType = tokenId;
-    te.tokenValue = token.text();
-
-    // Convert token position to 0-based.
-    te.tokenPosition = location.r.char0 - 1;
-    processedTokens.push_back(te);
-  }
-
-  // Start with the last token and search backwards through the token types
-  // to determine what sort of completion context we are in.
-  if (processedTokens.size() > 0) {
-    TokenEntry trailingToken =
-      processedTokens[processedTokens.size() - 1];
-
-    int trailingTokenType = trailingToken.tokenType;
-    TokenEntry preceedingToken;
-    int preceedingTokenType = T_CLOSE_TAG;
-    if (processedTokens.size() > 1) {
-      preceedingToken = processedTokens[processedTokens.size() - 2];
-      preceedingTokenType = preceedingToken.tokenType;
-    }
-
-    context.matchPrefix = trailingToken.tokenValue;
-    context.matchContext = getCompletionContext(text, processedTokens);
-
-    if (trailingTokenType == T_VARIABLE || trailingTokenType == (int)'$') {
-      if (preceedingTokenType == T_DOUBLE_COLON) {
-        // A static variable reference {classname}::${variable}
-        context.type = SuggestionType::ClassStatic;
-      } else {
-        // A simple variable name of the from ${variable}.
-        context.type = SuggestionType::Variable;
-      }
-    } else if (trailingTokenType == T_STRING) {
-      if (preceedingTokenType == T_DOUBLE_COLON) {
-        // A variable constant of the form {classname}::{constant}
-        // Constant is a string, so it could be an actual class constant,
-        // or the name of a static method on the class.
-        context.type = SuggestionType::ClassConstant;
-      } else if (preceedingTokenType == T_OBJECT_OPERATOR) {
-        // A property dereference of the form ${expr}->{text}
-        //   Note: {expr} could be a simple variable name, or a more
-        //   complicated expression or property chain, including
-        //   $foo->bar->{text} or even $foo[3]->bar[2]->{text}, etc...
-        //
-        //   Suggest instances members of the object referred to by the left
-        //   of the -> operator, as well as instances methods of the same
-        //   object.
-        context.type = SuggestionType::Member;
-      } else {
-        // Expression ends in a string. Suggest function names and constants.
-        context.type = SuggestionType::FuncsAndConsts;
-      }
-    } else if (trailingTokenType == T_OBJECT_OPERATOR) {
-      // Ending with ->, try to match all members of the context object.
-      context.type = SuggestionType::Member;
-      context.matchPrefix = "";
-    } else if (trailingTokenType == T_DOUBLE_COLON) {
-      // Ending with ::, try to match all members of the context class.
-      context.type = SuggestionType::ClassConstant;
-      context.matchPrefix = "";
-    }
-  }
-
-  // No suggestions to make for this input.
   return context;
 }
-
-std::string CompletionsCommand::getCompletionContext(
-  std::string& text,
-  std::vector<TokenEntry>& processedTokens
-) {
-  int size = processedTokens.size();
-  if (size < 2) {
-    return "";
-  }
-
-  // Search backwards from where the context is going to start until
-  // we reach the beginning of the input or find a whitespace token.
-  int searchStartIndex =
-    processedTokens[size - 1].tokenType == T_OBJECT_OPERATOR ||
-    processedTokens[size - 1].tokenType == T_DOUBLE_COLON
-      ? size - 1
-      : size - 2;
-
-  int startToken;
-  for (startToken = searchStartIndex; startToken > 0; startToken--) {
-    TokenEntry te = processedTokens[startToken];
-    if (te.tokenType == T_WHITESPACE ||
-        te.tokenType == (int)',' ||
-        te.tokenType == (int)'(') {
-
-      startToken++;
-      break;
-    }
-  }
-
-  if (startToken >= searchStartIndex || startToken < 0) {
-    return "";
-  }
-
-  int startPos = processedTokens[startToken].tokenPosition;
-  int length = processedTokens[searchStartIndex].tokenPosition - startPos;
-  return text.substr(startPos, length);
-}
-
 
 bool CompletionsCommand::executeImpl(
   DebuggerSession* session,

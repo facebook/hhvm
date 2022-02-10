@@ -1,0 +1,32 @@
+File "foreach_shadow.php", line 5, characters 19-20:
+Loop variable `$x` shadows a local variable defined or last assigned here:
+File "foreach_shadow.php", line 4, characters 3-4: (Lint[5568])
+File "foreach_shadow.php", line 14, characters 19-20:
+Loop variable `$x` shadows a local variable defined or last assigned here:
+File "foreach_shadow.php", line 13, characters 3-4: (Lint[5568])
+File "foreach_shadow.php", line 22, characters 19-20:
+Loop variable `$x` shadows a local variable defined or last assigned here:
+File "foreach_shadow.php", line 21, characters 3-4: (Lint[5568])
+File "foreach_shadow.php", line 30, characters 25-26:
+Loop variable `$x` shadows a local variable defined or last assigned here:
+File "foreach_shadow.php", line 29, characters 3-4: (Lint[5568])
+File "foreach_shadow.php", line 38, characters 30-31:
+Loop variable `$x` shadows a local variable defined or last assigned here:
+File "foreach_shadow.php", line 37, characters 3-4: (Lint[5568])
+File "foreach_shadow.php", line 47, characters 21-22:
+Loop variable `$x` shadows a local variable defined or last assigned here:
+File "foreach_shadow.php", line 45, characters 3-4: (Lint[5568])
+File "foreach_shadow.php", line 58, characters 21-22:
+Loop variable `$x` shadows a local variable defined or last assigned here:
+File "foreach_shadow.php", line 57, characters 5-6: (Lint[5568])
+File "foreach_shadow.php", line 70, characters 21-22:
+Loop variable `$x` shadows a local variable defined or last assigned here:
+File "foreach_shadow.php", line 68, characters 19-20: (Lint[5568])
+File "foreach_shadow.php", line 80, characters 19-20:
+Loop variable `$x` shadows a local variable defined or last assigned here:
+File "foreach_shadow.php", line 79, characters 8-9: (Lint[5568])
+File "foreach_shadow.php", line 92, characters 21-22:
+Loop variable `$x` shadows a local variable defined or last assigned here:
+File "foreach_shadow.php", line 90, characters 22-23: (Lint[5568])
+File "foreach_shadow.php", line 112, characters 5-11:
+In function \f12: This assignment may be unreachable. It appears after a condition which is always false. (Other[6001])

@@ -91,45 +91,25 @@ let test_local_changes
     expect_value ~name:"Filled" (Some 0);
     expect_value ~name:"Empty" None;
 
-    (* Commit changes are reflected in the shared memory *)
     IntHeap.LocalChanges.push_stack ();
-
     expect_add "Filled" 1;
     expect_add "Empty" 2;
-
-    IntHeap.LocalChanges.commit_all ();
     IntHeap.LocalChanges.pop_stack ();
-    expect_value ~name:"Filled" (Some 1);
-    expect_value ~name:"Empty" (Some 2);
-
-    IntHeap.LocalChanges.push_stack ();
-
-    expect_remove "Filled";
-    expect_remove "Empty";
-
-    IntHeap.LocalChanges.pop_stack ();
-    expect_value ~name:"Filled" (Some 1);
-    expect_value ~name:"Empty" (Some 2);
-
-    IntHeap.LocalChanges.push_stack ();
-
-    expect_remove "Filled";
-    expect_remove "Empty";
-
-    IntHeap.LocalChanges.commit_all ();
-    IntHeap.LocalChanges.pop_stack ();
-    expect_value ~name:"Filled" None;
-    expect_value ~name:"Empty" None;
-
-    IntHeap.LocalChanges.push_stack ();
-
-    expect_add "Filled" 0;
-    expect_add "Empty" 2;
-    IntHeap.LocalChanges.commit_batch (IntHeap.KeySet.singleton "Filled");
-    IntHeap.LocalChanges.revert_batch (IntHeap.KeySet.singleton "Empty");
     expect_value ~name:"Filled" (Some 0);
     expect_value ~name:"Empty" None;
 
+    IntHeap.LocalChanges.push_stack ();
+    expect_remove "Filled";
+    expect_remove "Empty";
+    IntHeap.LocalChanges.pop_stack ();
+    expect_value ~name:"Filled" (Some 0);
+    expect_value ~name:"Empty" None;
+
+    IntHeap.LocalChanges.push_stack ();
+    expect_add "Filled" 0;
+    expect_add "Empty" 2;
+    expect_value ~name:"Filled" (Some 0);
+    expect_value ~name:"Empty" (Some 2);
     IntHeap.LocalChanges.pop_stack ();
     expect_value ~name:"Filled" (Some 0);
     expect_value ~name:"Empty" None

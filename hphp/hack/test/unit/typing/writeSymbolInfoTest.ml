@@ -10,7 +10,6 @@ open Asserter
 open Hh_json
 open Hh_json.Access
 open Hh_json_helpers
-open Symbol_add_fact
 open Symbol_build_json
 open Symbol_builder_types
 open Symbol_json_util
@@ -59,7 +58,7 @@ let test_add_fact _test_ctxt =
 let test_add_decl_fact _test_ctxt =
   let progress = init_progress in
   let gconst_name = "TestGConst" in
-  let (id, prog) = add_gconst_decl_fact gconst_name progress in
+  let (id, prog) = Symbol_add_fact.gconst_decl gconst_name progress in
   Int_asserter.assert_equals
     1
     (List.length prog.resultJson.globalConstDeclaration)

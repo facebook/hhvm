@@ -1,0 +1,6 @@
+File "duplicate_properties_bad.php", line 9, characters 7-8:
+Duplicated property `y` in `T1` (defined in `T0` and `T1`): all instances will be aliased at runtime (Lint[5635])
+File "duplicate_properties_bad.php", line 19, characters 7-7:
+Duplicated property `x` in `C` (defined in `T1` and `T2`): all instances will be aliased at runtime (Lint[5635])
+File "duplicate_properties_bad.php", line 19, characters 7-7:
+Duplicated property `z` in `C` (defined in `C` and `T0`): all instances will be aliased at runtime (Lint[5635])

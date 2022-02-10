@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<43350fbab77af94c0a160d86c2765eca>>
+// @generated SignedSource<<aa734a8a69c2840c1b5a33f05bca405b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -92,7 +92,7 @@ arena_deserializer::impl_deserialize_in_arena!(Stmt<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Stmt_<'a, Ex, En> {
     /// Marker for a switch statement that falls through.
     ///
@@ -316,7 +316,7 @@ arena_deserializer::impl_deserialize_in_arena!(UsingStmt<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum AsExpr<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     AsV(&'a Expr<'a, Ex, En>),
@@ -377,7 +377,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassId<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ClassId_<'a, Ex, En> {
     /// The class ID of the parent of the lexically scoped class.
     ///
@@ -469,7 +469,7 @@ arena_deserializer::impl_deserialize_in_arena!(Expr<'arena, Ex, En>);
     ToOcamlRep
 )]
 #[serde(bound(deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>"))]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum CollectionTarg<'a, Ex> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     CollectionTV(&'a Targ<'a, Ex>),
@@ -497,7 +497,7 @@ arena_deserializer::impl_deserialize_in_arena!(CollectionTarg<'arena, Ex>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum FunctionPtrId<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     FPId(&'a Sid<'a>),
@@ -584,7 +584,7 @@ arena_deserializer::impl_deserialize_in_arena!(ExpressionTree<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Expr_<'a, Ex, En> {
     /// darray literal.
     ///
@@ -1095,7 +1095,7 @@ arena_deserializer::impl_deserialize_in_arena!(Expr_<'arena, Ex, En>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum HoleSource<'a> {
     Typing,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -1124,7 +1124,7 @@ arena_deserializer::impl_deserialize_in_arena!(HoleSource<'arena>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ClassGetExpr<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     CGstring(&'a Pstring<'a>),
@@ -1152,7 +1152,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassGetExpr<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Case<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Default(&'a (&'a Pos<'a>, &'a Block<'a, Ex, En>)),
@@ -1231,7 +1231,7 @@ arena_deserializer::impl_deserialize_in_arena!(Field<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Afield<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     AFvalue(&'a Expr<'a, Ex, En>),
@@ -1288,7 +1288,7 @@ arena_deserializer::impl_deserialize_in_arena!(XhpSimple<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum XhpAttribute<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     XhpSimple(&'a XhpSimple<'a, Ex, En>),
@@ -1756,7 +1756,7 @@ arena_deserializer::impl_deserialize_in_arena!(XhpAttr<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ClassAttr<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     CAName(&'a Sid<'a>),
@@ -1811,7 +1811,7 @@ arena_deserializer::impl_deserialize_in_arena!(CaField<'arena, Ex, En>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum CaType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     CAHint(&'a Hint<'a>),
@@ -1839,7 +1839,7 @@ arena_deserializer::impl_deserialize_in_arena!(CaType<'arena>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ClassConstKind<'a, Ex, En> {
     /// CCAbstract represents the states
     ///    abstract const int X;
@@ -1952,7 +1952,7 @@ arena_deserializer::impl_deserialize_in_arena!(ClassConcreteTypeconst<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ClassTypeconst<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TCAbstract(&'a ClassAbstractTypeconst<'a>),
@@ -2283,7 +2283,7 @@ arena_deserializer::impl_deserialize_in_arena!(ModuleDef<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Def<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Fun(&'a FunDef<'a, Ex, En>),

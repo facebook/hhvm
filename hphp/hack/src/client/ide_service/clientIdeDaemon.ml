@@ -451,10 +451,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
       ~provider_name:
         local_config.ServerLocalConfig.ide_symbolindex_search_provider
       ~quiet:local_config.ServerLocalConfig.symbolindex_quiet
-      ~ignore_hh_version:false
       ~savedstate_file_opt:local_config.ServerLocalConfig.symbolindex_file
-      ~saved_state_manifold_api_key:
-        local_config.ServerLocalConfig.saved_state_manifold_api_key
       ~workers:None
   in
   let sienv =

@@ -7,23 +7,23 @@ use env::emitter::Emitter;
 use ffi::{Maybe::Just, Pair};
 use hash::{HashMap, HashSet};
 use hhas_param::HhasParam;
-use hhbc_ast::{
-    FcallArgs, Instruct, InstructCall, InstructControlFlow, InstructIterator, InstructMisc,
-};
+use hhbc_ast::{FcallArgs, Instruct, InstructControlFlow, InstructIterator, InstructMisc};
 use instruction_sequence::InstrSeq;
 use label::{Id, Label};
 use oxidized::ast;
 
 fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<Id, usize> {
-    let mut folder =
+    let (_, map) = instrseq.iter().fold(
+        (0, HashMap::default()),
         |(i, mut map): (usize, HashMap<Id, usize>), instr: &Instruct<'arena>| match instr {
             Instruct::ILabel(l) => {
                 map.insert(*l.id(), i);
                 (i, map)
             }
             _ => (i + 1, map),
-        };
-    instrseq.fold_left(&mut folder, (0, HashMap::default())).1
+        },
+    );
+    map
 }
 
 fn lookup_def<'h>(l: &Id, defs: &'h HashMap<Id, usize>) -> &'h usize {
@@ -35,7 +35,6 @@ fn lookup_def<'h>(l: &Id, defs: &'h HashMap<Id, usize>) -> &'h usize {
 
 fn get_regular_labels<'arena>(instr: &Instruct<'arena>) -> Vec<Label> {
     use Instruct::*;
-    use InstructCall::*;
     use InstructControlFlow::*;
     use InstructIterator::*;
     use InstructMisc::*;
@@ -46,21 +45,16 @@ fn get_regular_labels<'arena>(instr: &Instruct<'arena>) -> Vec<Label> {
         | IContFlow(Jmp(l))
         | IContFlow(JmpNS(l))
         | IContFlow(JmpZ(l))
-        | IContFlow(JmpNZ(l))
-        | ICall(FCall(FcallArgs(_, _, _, _, _, Just(l), _)))
-        | ICall(FCallClsMethod(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallClsMethodD(FcallArgs(_, _, _, _, _, Just(l), _), _, _))
-        | ICall(FCallClsMethodS(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallClsMethodSD(FcallArgs(_, _, _, _, _, Just(l), _), _, _))
-        | ICall(FCallFunc(FcallArgs(_, _, _, _, _, Just(l), _)))
-        | ICall(FCallFuncD(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallObjMethod(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, _, Just(l), _), _, _)) => vec![*l],
-        IContFlow(Switch(_, _, ls)) => {
-            let labels = ls.iter().copied().collect::<Vec<_>>();
-            labels
-        }
-        IContFlow(SSwitch(pairs)) => pairs.iter().map(|x| x.1).collect::<Vec<_>>(),
+        | IContFlow(JmpNZ(l)) => vec![*l],
+        ICall(call) => match call.fcall_args() {
+            Some(FcallArgs {
+                async_eager_label: Just(l),
+                ..
+            }) => vec![*l],
+            Some(_) | None => vec![],
+        },
+        IContFlow(Switch { labels, .. }) => labels.iter().copied().collect(),
+        IContFlow(SSwitch { labels }) => labels.iter().map(|Pair(_, label)| *label).collect(),
         IMisc(MemoGetEager(l1, l2, _)) => vec![*l1, *l2],
         _ => vec![],
     }
@@ -82,28 +76,22 @@ fn create_label_ref_map<'arena>(
             }
             (n, (used, refs))
         };
-    let gather_using =
-        |acc: (usize, (HashSet<Id>, HashMap<Id, usize>)), instrseq: &InstrSeq<'arena>| {
-            let mut folder =
-                |acc: (usize, (HashSet<Id>, HashMap<Id, usize>)), instr: &Instruct<'arena>| {
-                    (get_regular_labels(instr))
-                        .into_iter()
-                        .fold(acc, process_ref)
-                };
-            instrseq.fold_left(&mut folder, acc)
-        };
-    let init = gather_using((0, (HashSet::default(), HashMap::default())), body);
-    let (_, map) = params.iter().fold(
-        init,
-        |
-            acc: (usize, (HashSet<Id>, HashMap<Id, usize>)),
-            (_, default_value): &(HhasParam<'arena>, Option<(Label, ast::Expr)>),
-        | match &default_value {
-            None => acc,
-            Some((l, _)) => process_ref(acc, *l),
-        },
+
+    // Process body
+    let init = body.iter().fold(
+        (0, (HashSet::default(), HashMap::default())),
+        |acc, instr| get_regular_labels(instr).into_iter().fold(acc, process_ref),
     );
-    map
+
+    // Process params
+    let (_, (used, refs)) =
+        params
+            .iter()
+            .fold(init, |acc, (_, default_value)| match &default_value {
+                None => acc,
+                Some((label, _)) => process_ref(acc, *label),
+            });
+    (used, refs)
 }
 
 fn relabel_instr<'arena, F>(instr: &mut Instruct<'arena>, relabel: &mut F)
@@ -111,30 +99,27 @@ where
     F: FnMut(&mut Label),
 {
     use Instruct::*;
-    use InstructCall::*;
     use InstructControlFlow::*;
     use InstructIterator::*;
     use InstructMisc::*;
     match instr {
         IIterator(IterInit(_, l))
         | IIterator(IterNext(_, l))
-        | ICall(FCall(FcallArgs(_, _, _, _, _, Just(l), _)))
-        | ICall(FCallClsMethod(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallClsMethodD(FcallArgs(_, _, _, _, _, Just(l), _), _, _))
-        | ICall(FCallClsMethodS(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallClsMethodSD(FcallArgs(_, _, _, _, _, Just(l), _), _, _))
-        | ICall(FCallFunc(FcallArgs(_, _, _, _, _, Just(l), _)))
-        | ICall(FCallFuncD(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallObjMethod(FcallArgs(_, _, _, _, _, Just(l), _), _))
-        | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, _, Just(l), _), _, _))
         | IContFlow(Jmp(l))
         | IContFlow(JmpNS(l))
         | IContFlow(JmpZ(l))
         | IContFlow(JmpNZ(l))
         | IMisc(MemoGet(l, _))
         | ILabel(l) => relabel(l),
-        IContFlow(Switch(_, _, ll)) => ll.iter_mut().for_each(relabel),
-        IContFlow(SSwitch(pairs)) => pairs.iter_mut().for_each(|Pair(_, l)| relabel(l)),
+        ICall(call) => match call.fcall_args_mut() {
+            Some(FcallArgs {
+                async_eager_label: Just(l),
+                ..
+            }) => relabel(l),
+            Some(_) | None => {}
+        },
+        IContFlow(Switch { labels, .. }) => labels.iter_mut().for_each(relabel),
+        IContFlow(SSwitch { labels }) => labels.iter_mut().for_each(|Pair(_, l)| relabel(l)),
         IMisc(MemoGetEager(l1, l2, _)) => {
             relabel(l1);
             relabel(l2);
@@ -188,31 +173,26 @@ pub fn relabel_function<'arena>(
     rewrite_params_and_body(alloc, &defs, &used, &refs, params, body)
 }
 
-pub fn clone_with_fresh_regular_labels<'arena, 'decl>(
+pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     block: &mut InstrSeq<'arena>,
 ) {
-    let mut folder = |mut regular: HashMap<Id, Label>, instr: &Instruct<'arena>| {
-        match instr {
-            Instruct::ILabel(Label::Regular(id)) => {
-                regular.insert(*id, emitter.label_gen_mut().next_regular());
-            }
-            _ => {}
+    let regular_labels = block.iter().fold(HashMap::default(), |mut acc, instr| {
+        if let Instruct::ILabel(Label::Regular(id)) = instr {
+            acc.insert(*id, emitter.label_gen_mut().next_regular());
         }
-        regular
-    };
-    let regular_labels = block.fold_left(&mut folder, HashMap::default());
+        acc
+    });
 
     if !regular_labels.is_empty() {
-        let relabel = |l: &mut Label| {
-            let new_label = match l {
-                Label::Regular(id) => regular_labels.get(id),
-                _ => None,
-            };
-            if let Some(nl) = new_label {
-                *l = nl.clone();
-            }
-        };
-        block.map_mut(&mut |instr| relabel_instr(instr, &mut |l| relabel(l)));
+        block.map_mut(&mut |instr| {
+            relabel_instr(instr, &mut |label| {
+                if let Label::Regular(id) = label {
+                    if let Some(new_label) = regular_labels.get(id) {
+                        *label = *new_label;
+                    }
+                }
+            })
+        });
     }
 }

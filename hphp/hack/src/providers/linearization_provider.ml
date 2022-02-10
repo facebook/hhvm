@@ -14,7 +14,7 @@ let key_to_local_key (key : string) :
 
 module Cache =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.Evictable)) (StringKey)
+    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
     (struct
       type t = Decl_defs.lin
 

@@ -1044,6 +1044,7 @@ dependencies = [
  "hhbc_string_utils",
  "hhvm_types_ffi",
  "instruction_sequence",
+ "itertools 0.10.3",
  "label",
  "local",
  "naming_special_names_rust",
@@ -1866,7 +1867,6 @@ dependencies = [
  "hhas_property",
  "hhas_type",
  "hhas_type_const",
- "hhbc_ast",
  "hhbc_id",
  "hhvm_types_ffi",
 ]
@@ -2659,6 +2659,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "owning_ref"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ff55baddef9e4ad00f88b6c743a2a8062d4c6ade126c2a528644b8e444d52ce"
+dependencies = [
+ "stable_deref_trait",
+]
+
+[[package]]
 name = "oxidized"
 version = "0.0.0"
 dependencies = [
@@ -3317,6 +3326,7 @@ dependencies = [
  "hashbrown",
  "libc",
  "nix",
+ "owning_ref",
  "rand",
  "static_assertions",
 ]

@@ -1,0 +1,18 @@
+File "perf_bad_smells_sgrep.php", line 3, characters 10-13:
+perf_bad_smells_sgrep.php only declares `test`, it should be named test.php instead. (Lint[5564])
+File "perf_bad_smells_sgrep.php", line 4, characters 3-12:
+consider keys_with_truthy_values from core/utils. array_keys(array_filter(X)) === keys_with_truthy_values(X), but keys_with_truthy_values is faster. (Lint[5542])
+File "perf_bad_smells_sgrep.php", line 5, characters 3-13:
+Use the `dashes(X)` function instead of `str_replace('_', '-', X)` (Lint[5542])
+File "perf_bad_smells_sgrep.php", line 6, characters 7-9:
+Do not invoke the URI constructor directly such as: `new URI()`. Rather, use the helper function: `URI()`. (Lint[5542])
+File "perf_bad_smells_sgrep.php", line 7, characters 3-5:
+do not cast the argument to the URI helper function to a string. this is handled for you. (Lint[5542])
+File "perf_bad_smells_sgrep.php", line 8, characters 3-5:
+do not cast the argument to the URI helper function to a string. this is handled for you. (Lint[5542])
+File "perf_bad_smells_sgrep.php", line 9, characters 3-12:
+Two-argument array_pull() gives you new values, but the subsequent array_keys() just discards them. These are not the droids you're looking for. (Lint[5542])
+File "perf_bad_smells_sgrep.php", line 10, characters 3-10:
+fetching the keys with array_keys(B) and walking through them with in_array(A, B) is an O(N) operation. isset(B[A]) is O(1). use isset(). (Lint[5542])
+File "perf_bad_smells_sgrep.php", line 11, characters 3-14:
+array_keys is already unique by definition, array_unique is unnecessary. (Lint[5542])

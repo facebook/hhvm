@@ -1,0 +1,10 @@
+File "basic_sgrep.php", line 4, characters 7-20:
+There are no statements in the body of this `if` branch. (Lint[5556])
+File "basic_sgrep.php", line 7, characters 7-20:
+There are no statements in the body of this `else` branch. (Lint[5556])
+File "basic_sgrep.php", line 13, characters 7-8:
+X == null is never the right thing to do - you should either do !X or X === null depending on what specific check is desired. (Lint[5542])
+File "basic_sgrep.php", line 16, characters 7-8:
+X != null is never the right thing to do - you should either do if (X), (bool)X or X !== null depending on what specific check is desired. (Lint[5542])
+File "basic_sgrep.php", line 28, characters 8-12:
+Please do not use isset($x), use '$x !== null' instead. isset() hides errors by silently returning false for typos and other undefined variables. See https://our.intern.facebook.com/intern/dex/php-language-pitfalls/ for more information (send an email to ahupp@fb.com if it's a false positive). (Lint[5542])

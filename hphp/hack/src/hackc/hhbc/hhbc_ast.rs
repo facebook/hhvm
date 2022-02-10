@@ -65,15 +65,15 @@ impl Default for FcallFlags {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub struct FcallArgs<'arena>(
-    pub FcallFlags,
-    pub NumParams,
-    pub NumParams,
-    pub ByRefs<'arena>,
-    pub ByRefs<'arena>,
-    pub Maybe<Label>,
-    pub Maybe<Str<'arena>>,
-);
+pub struct FcallArgs<'arena> {
+    pub flags: FcallFlags,
+    pub num_args: NumParams,
+    pub num_rets: NumParams,
+    pub inouts: ByRefs<'arena>,
+    pub readonly: ByRefs<'arena>,
+    pub async_eager_label: Maybe<Label>,
+    pub context: Maybe<Str<'arena>>,
+}
 
 impl<'arena> FcallArgs<'arena> {
     pub fn new(
@@ -85,23 +85,20 @@ impl<'arena> FcallArgs<'arena> {
         num_args: usize,
         context: Option<&'arena str>,
     ) -> FcallArgs<'arena> {
-        if (!inouts.is_empty() && inouts.len() != num_args)
-            || (!readonly.is_empty() && readonly.len() != num_args)
-        {
-            panic!("length of by_refs must be either zero or num_args");
-        }
-        FcallArgs(
+        assert!(
+            (inouts.is_empty() || inouts.len() == num_args)
+                && (readonly.is_empty() || readonly.len() == num_args),
+            "length of by_refs must be either zero or num_args"
+        );
+        FcallArgs {
             flags,
             num_args,
             num_rets,
             inouts,
             readonly,
-            Maybe::from(async_eager_label),
-            match context {
-                Some(s) => Maybe::Just(Str::new(s.as_bytes())),
-                None => Maybe::Nothing,
-            },
-        )
+            async_eager_label: async_eager_label.into(),
+            context: context.map(|s| Str::new(s.as_bytes())).into(),
+        }
     }
 }
 
@@ -336,10 +333,20 @@ pub enum InstructControlFlow<'arena> {
     JmpNS(Label),
     JmpZ(Label),
     JmpNZ(Label),
-    /// bounded, base, offset vector
-    Switch(SwitchKind, isize, BumpSliceMut<'arena, Label>),
-    /// litstr id / offset vector
-    SSwitch(BumpSliceMut<'arena, Pair<Str<'arena>, Label>>),
+
+    /// Integer switch
+    Switch {
+        kind: SwitchKind,
+        base: isize,
+        labels: BumpSliceMut<'arena, Label>,
+    },
+
+    /// String switch
+    SSwitch {
+        /// One (string, Label) pair for each case.
+        labels: BumpSliceMut<'arena, Pair<Str<'arena>, Label>>,
+    },
+
     RetC,
     RetCSuspended,
     RetM(NumParams),
@@ -348,10 +355,9 @@ pub enum InstructControlFlow<'arena> {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum InstructSpecialFlow<'arena> {
+pub enum InstructSpecialFlow {
     Continue(isize),
     Break(isize),
-    Goto(Str<'arena>),
 }
 
 #[derive(Clone, Debug)]
@@ -378,13 +384,15 @@ pub enum IsTypeOp {
     OpStr,
     OpObj,
     OpRes,
-    OpScalar,
+
     /// Int or Dbl or Str or Bool
+    OpScalar,
     OpKeyset,
     OpDict,
     OpVec,
-    OpArrLike,
+
     /// Arr or Vec or Dict or Keyset
+    OpArrLike,
     OpClsMeth,
     OpFunc,
     OpLegacyArrLike,
@@ -486,15 +494,81 @@ pub enum InstructCall<'arena> {
     NewObjRD(ClassId<'arena>),
     NewObjS(SpecialClsRef),
     FCall(FcallArgs<'arena>),
-    FCallClsMethod(FcallArgs<'arena>, IsLogAsDynamicCallOp),
-    FCallClsMethodD(FcallArgs<'arena>, ClassId<'arena>, MethodId<'arena>),
-    FCallClsMethodS(FcallArgs<'arena>, SpecialClsRef),
-    FCallClsMethodSD(FcallArgs<'arena>, SpecialClsRef, MethodId<'arena>),
+    FCallClsMethod {
+        fcall_args: FcallArgs<'arena>,
+        log: IsLogAsDynamicCallOp,
+    },
+    FCallClsMethodD {
+        fcall_args: FcallArgs<'arena>,
+        class: ClassId<'arena>,
+        method: MethodId<'arena>,
+    },
+    FCallClsMethodS {
+        fcall_args: FcallArgs<'arena>,
+        clsref: SpecialClsRef,
+    },
+    FCallClsMethodSD {
+        fcall_args: FcallArgs<'arena>,
+        clsref: SpecialClsRef,
+        method: MethodId<'arena>,
+    },
     FCallCtor(FcallArgs<'arena>),
     FCallFunc(FcallArgs<'arena>),
-    FCallFuncD(FcallArgs<'arena>, FunctionId<'arena>),
-    FCallObjMethod(FcallArgs<'arena>, ObjNullFlavor),
-    FCallObjMethodD(FcallArgs<'arena>, ObjNullFlavor, MethodId<'arena>),
+    FCallFuncD {
+        fcall_args: FcallArgs<'arena>,
+        func: FunctionId<'arena>,
+    },
+    FCallObjMethod {
+        fcall_args: FcallArgs<'arena>,
+        flavor: ObjNullFlavor,
+    },
+    FCallObjMethodD {
+        fcall_args: FcallArgs<'arena>,
+        flavor: ObjNullFlavor,
+        method: MethodId<'arena>,
+    },
+}
+
+impl<'arena> InstructCall<'arena> {
+    pub fn fcall_args(&self) -> Option<&FcallArgs<'arena>> {
+        match self {
+            Self::NewObj
+            | Self::NewObjR
+            | Self::NewObjD(_)
+            | Self::NewObjRD(_)
+            | Self::NewObjS(_) => None,
+            Self::FCall(fcall_args)
+            | Self::FCallClsMethod { fcall_args, .. }
+            | Self::FCallClsMethodD { fcall_args, .. }
+            | Self::FCallClsMethodS { fcall_args, .. }
+            | Self::FCallClsMethodSD { fcall_args, .. }
+            | Self::FCallCtor(fcall_args)
+            | Self::FCallFunc(fcall_args)
+            | Self::FCallFuncD { fcall_args, .. }
+            | Self::FCallObjMethod { fcall_args, .. }
+            | Self::FCallObjMethodD { fcall_args, .. } => Some(fcall_args),
+        }
+    }
+
+    pub fn fcall_args_mut(&mut self) -> Option<&mut FcallArgs<'arena>> {
+        match self {
+            Self::NewObj
+            | Self::NewObjR
+            | Self::NewObjD(_)
+            | Self::NewObjRD(_)
+            | Self::NewObjS(_) => None,
+            Self::FCall(fcall_args)
+            | Self::FCallClsMethod { fcall_args, .. }
+            | Self::FCallClsMethodD { fcall_args, .. }
+            | Self::FCallClsMethodS { fcall_args, .. }
+            | Self::FCallClsMethodSD { fcall_args, .. }
+            | Self::FCallCtor(fcall_args)
+            | Self::FCallFunc(fcall_args)
+            | Self::FCallFuncD { fcall_args, .. }
+            | Self::FCallObjMethod { fcall_args, .. }
+            | Self::FCallObjMethodD { fcall_args, .. } => Some(fcall_args),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -557,15 +631,14 @@ pub enum ClassishKind {
     EnumClass,
 }
 impl std::convert::From<oxidized::ast_defs::ClassishKind> for ClassishKind {
-    fn from(k: oxidized::ast_defs::ClassishKind) -> ClassishKind {
-        use oxidized::ast_defs::ClassishKind::*;
-        use ClassishKind::*;
+    fn from(k: oxidized::ast_defs::ClassishKind) -> Self {
+        use oxidized::ast_defs;
         match k {
-            Cclass(_) => Class,
-            Cinterface => Interface,
-            Ctrait => Trait,
-            Cenum => Enum,
-            CenumClass(_) => EnumClass,
+            ast_defs::ClassishKind::Cclass(_) => Self::Class,
+            ast_defs::ClassishKind::Cinterface => Self::Interface,
+            ast_defs::ClassishKind::Ctrait => Self::Trait,
+            ast_defs::ClassishKind::Cenum => Self::Enum,
+            ast_defs::ClassishKind::CenumClass(_) => Self::EnumClass,
         }
     }
 }
@@ -579,44 +652,23 @@ pub enum Visibility {
     Internal,
 }
 impl std::convert::From<oxidized::ast_defs::Visibility> for Visibility {
-    fn from(k: oxidized::ast_defs::Visibility) -> Visibility {
-        use oxidized::ast_defs::Visibility::*;
+    fn from(k: oxidized::ast_defs::Visibility) -> Self {
+        use oxidized::ast_defs;
         match k {
-            Private => Visibility::Private,
-            Public => Visibility::Public,
-            Protected => Visibility::Protected,
-            Internal => Visibility::Internal,
+            ast_defs::Visibility::Private => Self::Private,
+            ast_defs::Visibility::Public => Self::Public,
+            ast_defs::Visibility::Protected => Self::Protected,
+            ast_defs::Visibility::Internal => Self::Internal,
         }
     }
 }
 impl AsRef<str> for Visibility {
     fn as_ref(&self) -> &str {
-        use Visibility::*;
         match self {
-            Private => "private",
-            Public => "public",
-            Protected => "protected",
-            Internal => "internal",
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum UseAsVisibility {
-    UseAsPublic,
-    UseAsPrivate,
-    UseAsProtected,
-    UseAsFinal,
-}
-impl std::convert::From<oxidized::ast::UseAsVisibility> for UseAsVisibility {
-    fn from(k: oxidized::ast::UseAsVisibility) -> UseAsVisibility {
-        use oxidized::ast::UseAsVisibility::*;
-        match k {
-            UseAsPrivate => UseAsVisibility::UseAsPrivate,
-            UseAsPublic => UseAsVisibility::UseAsPublic,
-            UseAsProtected => UseAsVisibility::UseAsProtected,
-            UseAsFinal => UseAsVisibility::UseAsFinal,
+            Self::Private => "private",
+            Self::Public => "public",
+            Self::Protected => "protected",
+            Self::Internal => "internal",
         }
     }
 }
@@ -721,7 +773,7 @@ pub enum Instruct<'arena> {
     ILitConst(InstructLitConst<'arena>),
     IOp(InstructOperator<'arena>),
     IContFlow(InstructControlFlow<'arena>),
-    ISpecialFlow(InstructSpecialFlow<'arena>),
+    ISpecialFlow(InstructSpecialFlow),
     ICall(InstructCall<'arena>),
     IMisc(InstructMisc<'arena>),
     IGet(InstructGet<'arena>),

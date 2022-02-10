@@ -24,8 +24,6 @@
 
 #include "hphp/compiler/analysis/analysis_result.h"
 
-#include "hphp/parser/scanner.h"
-
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/preg.h"
@@ -80,12 +78,6 @@ std::string Option::ProgramName;
 
 bool Option::EnableShortTags = true;
 int Option::ParserThreadCount = 0;
-
-int Option::GetScannerType() {
-  int type = 0;
-  if (EnableShortTags) type |= Scanner::AllowShortTags;
-  return type;
-}
 
 bool Option::AllVolatile = false;
 

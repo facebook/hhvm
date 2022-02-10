@@ -1,0 +1,2 @@
+File "unsafe_cast_upper_bound.php", line 4, characters 32-38:
+HH\FIXME\UNSAFE_CAST output type annotation is too loose, please use a more specific type. (Lint[5637])

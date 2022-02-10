@@ -6,13 +6,8 @@
  *
  *)
 
-open Aast
-open Ast_defs
-open Decl_env
-open Full_fidelity_source_text
-open Hh_json
 open Hh_prelude
-open Symbol_builder_types
+open Hh_json
 
 let get_next_elem_id () =
   let x = ref 1 in
@@ -25,7 +20,7 @@ let json_element_id = get_next_elem_id ()
 
 let get_type_from_hint ctx h =
   let mode = FileInfo.Mhhi in
-  let decl_env = { mode; droot = None; ctx } in
+  let decl_env = Decl_env.{ mode; droot = None; ctx } in
   let tcopt = Provider_context.get_tcopt ctx in
   Typing_print.full_decl tcopt (Decl_hint.hint decl_env h)
 
@@ -46,8 +41,6 @@ let source_at_span source_text pos =
   let source_text = Full_fidelity_source_text.sub source_text st (fi - st) in
   check_utf8 source_text
 
-(* Values pulled from source code may have quotation marks;
-strip these when present, eg: "\"FOO\"" => "FOO" *)
 let strip_nested_quotes str =
   let len = String.length str in
   let firstc = str.[0] in
@@ -61,22 +54,19 @@ let strip_nested_quotes str =
   else
     str
 
-(* Convert ContainerName<TParam> to ContainerName *)
 let strip_tparams name =
   match String.index name '<' with
   | None -> name
   | Some i -> String.sub name ~pos:0 ~len:i
 
-(* True if source text ends in a newline *)
 let ends_in_newline source_text =
   let last_char =
-    Full_fidelity_source_text.get source_text (source_text.length - 1)
+    Full_fidelity_source_text.(get source_text (source_text.length - 1))
   in
   Char.equal '\n' last_char || Char.equal '\r' last_char
 
-(* True if the source text contains tab characters, multibyte
-UTF-8 codepoints, or malformed UTF-8 *)
 let has_tabs_or_multibyte_codepoints source_text =
+  let open Full_fidelity_source_text in
   let check_codepoint (num, found) _index = function
     | `Uchar u -> (num + 1, found || Uchar.equal u (Uchar.of_char '\t'))
     | `Malformed _ -> (num + 1, true)
@@ -95,9 +85,6 @@ let rec find_fid fid_list pred =
     else
       find_fid tail pred
 
-(* Split name or subnamespace from its parent namespace, and return
-either Some (parent, name), or None if the name has no parent namespace.
-The trailing slash is removed from the parent. *)
 let split_name (s : string) : (string * string) option =
   match String.rindex s '\\' with
   | None -> None
@@ -112,63 +99,64 @@ let split_name (s : string) : (string * string) option =
     else
       Some (parent_namespace, name)
 
-(* Get the container name and predicate type for a given parent
-container kind. *)
 let parent_decl_predicate parent_container_type =
+  let open Symbol_builder_types in
   match parent_container_type with
   | ClassContainer -> ("class_", ClassDeclaration)
   | InterfaceContainer -> ("interface_", InterfaceDeclaration)
   | TraitContainer -> ("trait", TraitDeclaration)
 
 let get_parent_kind clss =
-  match clss.c_kind with
-  | Cenum_class _ ->
+  match clss.Aast.c_kind with
+  | Ast_defs.Cenum_class _ ->
     raise (Failure "Unexpected enum class as parent container kind")
-  | Cenum -> raise (Failure "Unexpected enum as parent container kind")
-  | Cinterface -> InterfaceContainer
-  | Ctrait -> TraitContainer
-  | Cclass _ -> ClassContainer
+  | Ast_defs.Cenum -> raise (Failure "Unexpected enum as parent container kind")
+  | Ast_defs.Cinterface -> Symbol_builder_types.InterfaceContainer
+  | Ast_defs.Ctrait -> Symbol_builder_types.TraitContainer
+  | Ast_defs.Cclass _ -> Symbol_builder_types.ClassContainer
 
 let init_progress =
   let default_json =
-    {
-      classConstDeclaration = [];
-      classConstDefinition = [];
-      classDeclaration = [];
-      classDefinition = [];
-      declarationComment = [];
-      declarationLocation = [];
-      declarationSpan = [];
-      enumDeclaration = [];
-      enumDefinition = [];
-      enumerator = [];
-      fileDeclarations = [];
-      fileLines = [];
-      fileXRefs = [];
-      functionDeclaration = [];
-      functionDefinition = [];
-      globalConstDeclaration = [];
-      globalConstDefinition = [];
-      interfaceDeclaration = [];
-      interfaceDefinition = [];
-      methodDeclaration = [];
-      methodDefinition = [];
-      methodOccurrence = [];
-      methodOverrides = [];
-      namespaceDeclaration = [];
-      propertyDeclaration = [];
-      propertyDefinition = [];
-      traitDeclaration = [];
-      traitDefinition = [];
-      typeConstDeclaration = [];
-      typeConstDefinition = [];
-      typedefDeclaration = [];
-      typedefDefinition = [];
-    }
+    Symbol_builder_types.
+      {
+        classConstDeclaration = [];
+        classConstDefinition = [];
+        classDeclaration = [];
+        classDefinition = [];
+        declarationComment = [];
+        declarationLocation = [];
+        declarationSpan = [];
+        enumDeclaration = [];
+        enumDefinition = [];
+        enumerator = [];
+        fileDeclarations = [];
+        fileLines = [];
+        fileXRefs = [];
+        functionDeclaration = [];
+        functionDefinition = [];
+        globalConstDeclaration = [];
+        globalConstDefinition = [];
+        interfaceDeclaration = [];
+        interfaceDefinition = [];
+        methodDeclaration = [];
+        methodDefinition = [];
+        methodOccurrence = [];
+        methodOverrides = [];
+        namespaceDeclaration = [];
+        propertyDeclaration = [];
+        propertyDefinition = [];
+        traitDeclaration = [];
+        traitDefinition = [];
+        typeConstDeclaration = [];
+        typeConstDefinition = [];
+        typedefDeclaration = [];
+        typedefDefinition = [];
+      }
   in
-  { resultJson = default_json; factIds = JMap.empty }
+  Symbol_builder_types.{ resultJson = default_json; factIds = JMap.empty }
 
 let should_cache predicate =
+  let open Symbol_builder_types in
   match predicate with
   | ClassConstDeclaration
   | ClassDeclaration
@@ -186,6 +174,7 @@ let should_cache predicate =
   | _ -> false
 
 let update_json_data predicate json progress =
+  let open Symbol_builder_types in
   let json =
     match predicate with
     | ClassConstDeclaration ->
@@ -361,24 +350,25 @@ let add_fact predicate json_key progress =
   let add_id =
     let newFactId = json_element_id () in
     let progress =
-      {
-        resultJson = progress.resultJson;
-        factIds =
-          (if should_cache predicate then
-            JMap.add
-              json_key
-              [(predicate, newFactId)]
-              progress.factIds
-              ~combine:List.append
-          else
-            progress.factIds);
-      }
+      Symbol_builder_types.
+        {
+          resultJson = progress.resultJson;
+          factIds =
+            (if should_cache predicate then
+              JMap.add
+                json_key
+                [(predicate, newFactId)]
+                progress.factIds
+                ~combine:List.append
+            else
+              progress.factIds);
+        }
     in
     (newFactId, true, progress)
   in
   let (id, is_new, progress) =
     if should_cache predicate then
-      match JMap.find_opt json_key progress.factIds with
+      match JMap.find_opt json_key progress.Symbol_builder_types.factIds with
       | None -> add_id
       | Some fid_list ->
         (match find_fid fid_list predicate with
@@ -398,7 +388,6 @@ let add_fact predicate json_key progress =
   in
   (id, progress)
 
-(* For building the map of cross-references *)
 let add_xref target_json target_id ref_pos xrefs =
   let filepath = Relative_path.to_absolute (Pos.filename ref_pos) in
   SMap.update

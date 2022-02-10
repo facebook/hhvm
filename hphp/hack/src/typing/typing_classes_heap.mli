@@ -63,7 +63,7 @@ module Api : sig
 
   val name : t -> string
 
-  val get_module : t -> Ast_defs.id option
+  val get_module : t -> string option
 
   val internal : t -> bool
 

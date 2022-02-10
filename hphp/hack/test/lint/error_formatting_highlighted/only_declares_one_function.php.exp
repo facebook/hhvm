@@ -1,0 +1,10 @@
+Lint[5564] only_declares_one_function.php only declares f, it should be named f.php instead. [1]
+
+only_declares_one_function.php:3:10
+    1 | <?hh
+    2 | 
+[1] 3 | function f(int
+    4 |     $x): int {
+    5 |   return $x   + 3;
+
+

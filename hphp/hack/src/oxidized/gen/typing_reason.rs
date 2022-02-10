@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2da0c12de911b403d5a59fb9dfa352da>>
+// @generated SignedSource<<81101ffe8fc2b8fa065d29651fbbaf10>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,7 +39,7 @@ pub type PosId = (pos_or_decl::PosOrDecl, ast_defs::Id_);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum ArgPosition {
     Aonly,
     Afirst,
@@ -63,7 +63,7 @@ arena_deserializer::impl_deserialize_in_arena!(ArgPosition);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ExprDepTypeReason {
     ERexpr(isize),
     ERstatic,
@@ -90,7 +90,7 @@ pub enum ExprDepTypeReason {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum BlameSource {
     BScall,
     BSlambda,
@@ -115,7 +115,7 @@ arena_deserializer::impl_deserialize_in_arena!(BlameSource);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Blame {
     Blame(pos::Pos, BlameSource),
 }
@@ -136,7 +136,7 @@ pub enum Blame {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum T_ {
     Rnone,
     Rwitness(pos::Pos),
@@ -255,7 +255,7 @@ pub type DeclT = T_;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Ureason {
     URnone,
     URassign,

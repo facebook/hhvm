@@ -1,0 +1,4 @@
+File "switch_exhaustiveness_good.php", line 7, characters 10-10:
+Switch statements use `===` equality. Comparing values of type `int` with `mixed` may not give the desired result. (Lint[5614])
+File "switch_exhaustiveness_good.php", line 50, characters 10-13:
+Switch statements use `===` equality. Comparing values of type `bool` with `(bool | C)` may not give the desired result. (Lint[5614])

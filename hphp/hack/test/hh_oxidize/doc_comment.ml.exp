@@ -99,7 +99,7 @@ pub struct Record {
     Serialize,
     ToOcamlRep,
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum Variant {
     /// Again, the comments need to trail the variant declaration.
     /// Multiline comments are understood.

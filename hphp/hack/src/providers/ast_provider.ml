@@ -22,7 +22,7 @@ type parse_type =
 
 module ParserHeap =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.Evictable)) (Relative_path.S)
+    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (Relative_path.S)
     (struct
       type t = Nast.program * parse_type
 
@@ -319,12 +319,6 @@ let local_changes_push_sharedmem_stack () =
   ParserHeap.LocalChanges.push_stack ()
 
 let local_changes_pop_sharedmem_stack () = ParserHeap.LocalChanges.pop_stack ()
-
-let local_changes_commit_batch paths =
-  ParserHeap.LocalChanges.commit_batch paths
-
-let local_changes_revert_batch paths =
-  ParserHeap.LocalChanges.revert_batch paths
 
 let provide_ast_hint
     (path : Relative_path.t) (program : Nast.program) (parse_type : parse_type)

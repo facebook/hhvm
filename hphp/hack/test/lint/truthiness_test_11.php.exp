@@ -1,0 +1,4 @@
+File "truthiness_test_11.php", line 6, characters 7-8:
+Sketchy condition: a value of type Traversable<int> may be truthy even when empty.
+Hack collections and arrays are falsy when empty, but user-defined Traversables will always be truthy, even when empty.
+If you would like to only allow containers which are falsy when empty, use the `Container` or `KeyedContainer` interfaces. (Lint[5623])

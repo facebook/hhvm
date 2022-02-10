@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<26c28eef1a39b40a568865ede1e513be>>
+// @generated SignedSource<<9d42de83572fc85fb656c1d7c3581a65>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -52,7 +52,7 @@ pub use typing_defs_core::*;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ClassConstFrom {
     Self_,
     From(String),
@@ -180,7 +180,7 @@ pub struct FunElt {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ClassConstKind {
     CCAbstract(bool),
     CCConcrete,
@@ -322,7 +322,7 @@ pub struct PartiallyAbstractTypeconst {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Typeconst {
     TCAbstract(AbstractTypeconst),
     TCConcrete(ConcreteTypeconst),
@@ -437,7 +437,7 @@ pub struct TypedefType {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum DeserializationError {
     /// The type was valid, but some component thereof was a decl_ty when we
     /// expected a locl_phase ty, or vice versa.

@@ -708,8 +708,6 @@ struct RuntimeOption {
   // true => allow the feature, false => disable the feature
   static bool EnableClassLevelWhereClauses;
 
-  static int GetScannerType();
-
   static hphp_string_imap<TypedValue> ConstantFunctions;
 
   static const uint32_t kPCREInitialTableSize = 96 * 1024;

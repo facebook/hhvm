@@ -1058,7 +1058,7 @@ let fun_type_of_id env x tal el =
           match
             Typing_modules.can_access
               ~current:(Env.get_module env)
-              ~target:fe_module
+              ~target:(Option.map fe_module ~f:snd)
           with
           | `Yes -> None
           | `Disjoint (current, target) ->

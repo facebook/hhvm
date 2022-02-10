@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include "hphp/parser/location.h"
+#include "hphp/runtime/base/location.h"
 #include "hphp/runtime/base/types.h"
 
 namespace HPHP {

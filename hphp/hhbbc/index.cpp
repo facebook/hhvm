@@ -478,9 +478,9 @@ struct ClassInfo {
   /*
    * A (case-sensitive) map from class constant name to the php::Class* and
    * index into the constants vector that it came from. This map is flattened
-   * across the inheritance hierarchy.
+   * across the inheritance hierarchy. Use a vector_map for stable iteration.
    */
-  hphp_fast_map<SString, ConstIndex> clsConstants;
+  hphp_vector_map<SString, ConstIndex> clsConstants;
 
   /*
    * A vector of the used traits, in class order, mirroring the

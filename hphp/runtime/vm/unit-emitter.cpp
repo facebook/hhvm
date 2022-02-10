@@ -17,12 +17,12 @@
 #include "hphp/runtime/vm/unit-emitter.h"
 
 #include "hphp/compiler/builtin_symbols.h"
-#include "hphp/parser/location.h"
 #include "hphp/system/systemlib.h"
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/location.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/typed-value.h"

@@ -1,0 +1,12 @@
+File "as_invalid_type.php", line 51, characters 10-28:
+A value of type `int` will always throw an exception when refining to `bool` (Lint[5626])
+File "as_invalid_type.php", line 55, characters 10-29:
+A value of type `float` will always throw an exception when refining to `int` (Lint[5626])
+File "as_invalid_type.php", line 58, characters 10-30:
+A value of type `string` will always throw an exception when refining to `int` (Lint[5626])
+File "as_invalid_type.php", line 66, characters 10-34:
+A value of type `HackAsInvalidTypeStringEnum` will always throw an exception when refining to `int` (Lint[5626])
+File "as_invalid_type.php", line 71, characters 10-28:
+A value of type `null` will always throw an exception when refining to `int` (Lint[5626])
+File "as_invalid_type.php", line 72, characters 10-28:
+A value of type `int` will always throw an exception when refining to `null` (Lint[5626])

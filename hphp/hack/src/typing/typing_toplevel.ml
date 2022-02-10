@@ -31,6 +31,7 @@ module TUtils = Typing_utils
 module TCO = TypecheckerOptions
 module Cls = Decl_provider.Class
 module SN = Naming_special_names
+module Profile = Typing_toplevel_profile
 
 (* The two following functions enable us to retrieve the function (or class)
   header from the shared mem. Note that they only return a non None value if
@@ -131,6 +132,8 @@ let merge_decl_header_with_hints ~params ~ret decl_header env =
 let fun_def ctx fd :
     (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
   let f = fd.fd_fun in
+  let tcopt = Provider_context.get_tcopt ctx in
+  Profile.measure_elapsed_time_and_report tcopt None f.f_name @@ fun () ->
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span f.f_span @@ fun () ->
   let env = EnvFromDef.fun_env ~origin:Decl_counters.TopLevel ctx fd in
@@ -459,6 +462,8 @@ let method_return env m ret_decl_ty =
   (env, return, ret_ty)
 
 let method_def ~is_disposable env cls m =
+  let tcopt = Env.get_tcopt env in
+  Profile.measure_elapsed_time_and_report tcopt (Some env) m.m_name @@ fun () ->
   Errors.run_with_span m.m_span @@ fun () ->
   with_timeout env m.m_name @@ fun env ->
   FunUtils.check_params m.m_params;
@@ -1188,6 +1193,8 @@ let typeconst_def
       c_tconst_doc_comment;
       c_tconst_is_ctx;
     } =
+  let tcopt = Env.get_tcopt env in
+  Profile.measure_elapsed_time_and_report tcopt (Some env) id @@ fun () ->
   (if is_enum_or_enum_class cls.c_kind then
     let (class_pos, class_name) = cls.c_name in
     Errors.add_typing_error
@@ -1298,6 +1305,8 @@ let is_literal_expr (_, _, e) =
   | _ -> false
 
 let class_const_def ~in_enum_class c env cc =
+  let tcopt = Env.get_tcopt env in
+  Profile.measure_elapsed_time_and_report tcopt (Some env) cc.cc_id @@ fun () ->
   let { cc_type = h; cc_id = id; cc_kind = k; _ } = cc in
   let (env, hint_ty, opt_expected) =
     match h with
@@ -1423,6 +1432,8 @@ let class_constr_def ~is_disposable env cls constructor =
 
 (** Type-check a property declaration, with optional initializer *)
 let class_var_def ~is_static cls env cv =
+  let tcopt = Env.get_tcopt env in
+  Profile.measure_elapsed_time_and_report tcopt (Some env) cv.cv_id @@ fun () ->
   (* First pick up and localize the hint if it exists *)
   let decl_cty =
     merge_hint_with_decl_hint
@@ -2146,6 +2157,8 @@ let class_def ctx c =
       Some (class_def_ env c tc)
 
 let gconst_def ctx cst =
+  let tcopt = Provider_context.get_tcopt ctx in
+  Profile.measure_elapsed_time_and_report tcopt None cst.cst_name @@ fun () ->
   Counters.count Counters.Category.Typecheck @@ fun () ->
   Errors.run_with_span cst.cst_span @@ fun () ->
   let env = EnvFromDef.gconst_env ~origin:Decl_counters.TopLevel ctx cst in

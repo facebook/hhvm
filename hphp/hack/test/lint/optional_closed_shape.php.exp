@@ -1,0 +1,4 @@
+File "optional_closed_shape.php", line 9, characters 24-34:
+You are calling `Shapes::idx()` on a field known to not exist, with a closed optional shape. (Lint[5006])
+File "optional_closed_shape.php", line 10, characters 8-31:
+You are indexing a closed optional shape with a field known to not exist. (Lint[5006])

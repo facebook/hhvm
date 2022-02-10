@@ -1,0 +1,2 @@
+File "same_expr_in_eqeq.php", line 7, characters 10-18:
+You're comparing the same `EXP == EXP` which is odd. Did you make a typo? (Lint[5552])

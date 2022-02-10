@@ -1,0 +1,8 @@
+File "infer_variance.php", line 5, characters 19-19:
+This generic parameter could be marked covariant. Consider prefixing the generic parameter with `+` (Lint[5639])
+File "infer_variance.php", line 9, characters 19-19:
+This generic parameter could be marked contravariant. Consider prefixing the generic parameter with `-` (Lint[5639])
+File "infer_variance.php", line 25, characters 9-9:
+This generic parameter could be marked covariant. Consider prefixing the generic parameter with `+` (Lint[5639])
+File "infer_variance.php", line 31, characters 9-9:
+This generic parameter could be marked covariant or contravariant. Consider prefixing the generic parameter with `+` or `-` (Lint[5639])

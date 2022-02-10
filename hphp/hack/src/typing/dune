@@ -199,7 +199,12 @@
 (library
  (name typing_toplevel)
  (wrapped false)
- (modules typing typing_memoize typing_toplevel typing_typedef)
+ (modules
+  typing
+  typing_memoize
+  typing_toplevel
+  typing_typedef
+  typing_toplevel_profile)
  (libraries tast_check typing typing_wellformedness))
 
 (library

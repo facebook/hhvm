@@ -54,39 +54,3 @@ let set_next_watchman_state_transition move hg_rev =
         Watchman.Changed_merge_base (hg_rev, files, "dummy_clock")
     in
     Watchman.Mocking.get_changes_returns (Watchman.Watchman_pushed move))
-
-(** Create an entry in XDB table for a saved state.
- *
- * stat_global_rev: The revision on which this saved state was created.
- * for_global_rev: The global_rev lookup in "Xdb.find_nearest" that will locate
- *              this result.
- *)
-let set_xdb ~state_global_rev ~for_global_rev ~everstore_handle =
-  let hh_version = Build_id.build_revision in
-  let hg_hash =
-    match state_global_rev with
-    | 1 -> hg_rev_1
-    | 5 -> hg_rev_5
-    | 200 -> hg_rev_200
-    | 230 -> hg_rev_230
-    | _ ->
-      Printf.eprintf "Error: Invalid global_rev number\n";
-      assert false
-  in
-  let (hhconfig_hash, _config) = Config_file.parse_hhconfig "/tmp/.hhconfig" in
-  let result =
-    {
-      Xdb.global_rev = state_global_rev;
-      hg_hash;
-      everstore_handle;
-      hh_version;
-      hhconfig_hash;
-    }
-  in
-  let result = Future.of_value [result] in
-  Xdb.Mocking.find_nearest_returns
-    ~db:Xdb.hack_db_name
-    ~db_table:Xdb.saved_states_table
-    ~global_rev:for_global_rev
-    ~hh_version:(Some hh_version)
-    result

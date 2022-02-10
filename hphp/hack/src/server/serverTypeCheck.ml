@@ -242,7 +242,7 @@ let wont_do_failed_parsing
   else
     (env, fast, None)
 
-let parsing genv env to_check ~stop_at_errors cgroup_steps =
+let parsing genv env to_check cgroup_steps =
   let (ide_files, disk_files) =
     Relative_path.Set.partition
       (Relative_path.Set.mem env.editor_open_files)
@@ -251,12 +251,6 @@ let parsing genv env to_check ~stop_at_errors cgroup_steps =
   File_provider.remove_batch disk_files;
   Ast_provider.remove_batch disk_files;
   Fixme_provider.remove_batch disk_files;
-
-  if stop_at_errors then (
-    File_provider.local_changes_push_sharedmem_stack ();
-    Ast_provider.local_changes_push_sharedmem_stack ();
-    Fixme_provider.local_changes_push_sharedmem_stack ()
-  );
 
   (* Do not remove ide files from file heap *)
   Ast_provider.remove_batch ide_files;
@@ -321,20 +315,7 @@ let parsing genv env to_check ~stop_at_errors cgroup_steps =
     }
   in
 
-  if stop_at_errors then (
-    File_provider.local_changes_commit_batch ide_files;
-    Ast_provider.local_changes_commit_batch ide_files;
-    Fixme_provider.local_changes_commit_batch ide_files;
-    Ast_provider.local_changes_commit_batch disk_files;
-    Fixme_provider.local_changes_commit_batch disk_files;
-
-    File_provider.local_changes_pop_sharedmem_stack ();
-    Ast_provider.local_changes_pop_sharedmem_stack ();
-    Fixme_provider.local_changes_pop_sharedmem_stack ();
-
-    (env, fast, errors, failed_parsing)
-  ) else
-    (env, fast, errors, failed_parsing)
+  (env, fast, errors, failed_parsing)
 
 let diff_set_and_map_keys set map =
   Relative_path.Map.fold map ~init:set ~f:(fun k _ acc ->
@@ -757,11 +738,10 @@ functor
         (env : env)
         ~(errors : Errors.t)
         ~(files_to_parse : Relative_path.Set.t)
-        ~(stop_at_errors : bool)
         ~(cgroup_steps : CgroupProfiler.step_group) :
         ServerEnv.env * parsing_result =
       let (env, fast_parsed, errorl, failed_parsing) =
-        parsing genv env files_to_parse ~stop_at_errors cgroup_steps
+        parsing genv env files_to_parse cgroup_steps
       in
       let (env, errors, time_errors_pushed) =
         push_and_accumulate_errors
@@ -1315,13 +1295,7 @@ functor
               fast_parsed;
               time_errors_pushed;
             } ) =
-        do_parsing
-          genv
-          env
-          ~errors
-          ~files_to_parse
-          ~stop_at_errors
-          ~cgroup_steps
+        do_parsing genv env ~errors ~files_to_parse ~cgroup_steps
       in
       let time_first_error =
         Option.first_some time_first_error time_errors_pushed
@@ -1747,11 +1721,6 @@ functor
       let telemetry =
         Telemetry.duration telemetry ~key:"typecheck_start" ~start_time
       in
-      let state_distance =
-        match env.init_env.saved_state_delta with
-        | None -> None
-        | Some { distance; _ } -> Some distance
-      in
       (* Typecheck all of the files we determined might need rechecking as a
          consequence of the changes (or, in a lazy check,
          the subset of those
@@ -1950,8 +1919,7 @@ functor
         ~count:total_rechecked_count
         ~experiments:genv.local_config.ServerLocalConfig.experiments
         ~desc:"serverTypeCheck"
-        ~start_t:type_check_start_t
-        ~state_distance;
+        ~start_t:type_check_start_t;
       ( env,
         {
           CheckStats.reparse_count;

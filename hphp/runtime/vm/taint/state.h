@@ -138,8 +138,7 @@ struct State {
   // Contains all the taint flows found in this request
   std::vector<Path*> paths;
 
-  std::shared_ptr<TaintedFunctionSet<Source>> m_sources;
-  std::shared_ptr<TaintedFunctionSet<Sink>> m_sinks;
+  std::shared_ptr<FunctionMetadataTracker> m_function_metadata = nullptr;
 
   std::chrono::time_point<std::chrono::system_clock> m_request_start;
 };

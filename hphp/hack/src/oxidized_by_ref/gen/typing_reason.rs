@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6c1a17a47b36934c739c6ddacff5959d>>
+// @generated SignedSource<<6c9e4c4924b177da2e71ddb0a92ceb6b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -39,7 +39,7 @@ pub use oxidized::typing_reason::ArgPosition;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ExprDepTypeReason<'a> {
     ERexpr(isize),
     ERstatic,
@@ -73,7 +73,7 @@ pub use oxidized::typing_reason::BlameSource;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Blame<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Blame(&'a (&'a pos::Pos<'a>, oxidized::typing_reason::BlameSource)),
@@ -98,7 +98,7 @@ arena_deserializer::impl_deserialize_in_arena!(Blame<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum T_<'a> {
     Rnone,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -330,7 +330,7 @@ pub type DeclT<'a> = T_<'a>;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Ureason<'a> {
     URnone,
     URassign,

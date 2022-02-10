@@ -568,65 +568,6 @@ functor
       ()
   end
 
-type 'a profiled_value =
-  | RawValue of 'a
-  | ProfiledValue of {
-      entry: 'a;
-      write_time: float;
-    }
-
-module ProfiledBackend (Evictability : Evictability) : Backend =
-functor
-  (KeyHasher : KeyHasher)
-  (Value : Value)
-  ->
-  struct
-    module ProfiledValue = struct
-      (** Tagging a value as Raw (the 99.9999% case) only increases its marshalled
-        size by 1 byte, and does not change its unmarshalled memory
-        representation provided Value.t is a record type containing at least one
-        non-float member. *)
-      type t = Value.t profiled_value
-
-      let description = Value.description
-    end
-
-    module Immediate =
-      ImmediateBackend (Evictability) (KeyHasher) (ProfiledValue)
-
-    let add x y =
-      let sample_rate = SMTelemetry.hh_sample_rate () in
-      let entry =
-        if
-          SMTelemetry.hh_log_level () <> 0
-          && Float.(Random.float 1.0 < sample_rate)
-        then
-          ProfiledValue { entry = y; write_time = Unix.gettimeofday () }
-        else
-          RawValue y
-      in
-      Immediate.add x entry
-
-    let get x : Value.t option =
-      match Immediate.get x with
-      | None -> None
-      | Some (RawValue y) -> Some y
-      | Some (ProfiledValue { entry; write_time }) ->
-        EventLogger.(
-          log_if_initialized @@ fun () ->
-          sharedmem_access_sample
-            ~heap_name:Value.description
-            ~key:(KeyHasher.to_bytes x)
-            ~write_time);
-        Some entry
-
-    let mem = Immediate.mem
-
-    let remove = Immediate.remove
-
-    let move = Immediate.move
-  end
-
 (** Heap that provides direct access to shared memory, but with a layer
     of local changes that allows us to decide whether or not to commit
     specific values. *)
@@ -638,19 +579,9 @@ module BackendWithLocalChanges : functor
   include module type of Backend (KeyHasher) (Value)
 
   module LocalChanges : sig
-    val has_local_changes : unit -> bool
-
     val push_stack : unit -> unit
 
     val pop_stack : unit -> unit
-
-    val revert : KeyHasher.hash -> unit
-
-    val commit : KeyHasher.hash -> unit
-
-    val revert_all : unit -> unit
-
-    val commit_all : unit -> unit
   end
 end =
 functor
@@ -670,11 +601,6 @@ functor
       A LocalChanges maintains the same invariants as the shared heap. Except
       add are allowed to overwrite filled keys. This is for convenience so we
       do not need to remove filled keys upfront.
-
-      LocalChanges can be committed. This will apply the changes to the previous
-      stack, or directly to shared memory if there are no other active stacks.
-      Since changes are kept local to the process, this is NOT compatible with
-      the parallelism provided by MultiWorker.ml
       *)
     module LocalChanges = struct
       type action =
@@ -698,8 +624,6 @@ functor
       }
 
       let stack : t option ref = ref None
-
-      let has_local_changes () = Option.is_some !stack
 
       let rec mem stack_opt key =
         match stack_opt with
@@ -791,14 +715,6 @@ functor
           remove stack_opt from_key;
           add stack_opt to_key value
 
-      let commit_action changeset key elem =
-        match elem with
-        | Remove -> remove changeset key
-        | Add value -> add changeset key value
-        | Replace value ->
-          remove changeset key;
-          add changeset key value
-
       (* Public API **)
       let push_stack () =
         stack := Some { current = Hashtbl.create 128; prev = !stack }
@@ -808,30 +724,6 @@ functor
         | None ->
           failwith "There are no active local change stacks. Nothing to pop!"
         | Some { prev; _ } -> stack := prev
-
-      let revert key =
-        match !stack with
-        | None -> ()
-        | Some changeset -> Hashtbl.remove changeset.current key
-
-      let commit key =
-        match !stack with
-        | None -> ()
-        | Some changeset ->
-          (match Hashtbl.find_opt changeset.current key with
-          | None -> ()
-          | Some r -> commit_action changeset.prev key r)
-
-      let revert_all () =
-        match !stack with
-        | None -> ()
-        | Some changeset -> Hashtbl.clear changeset.current
-
-      let commit_all () =
-        match !stack with
-        | None -> ()
-        | Some changeset ->
-          Hashtbl.iter (commit_action changeset.prev) changeset.current
 
       let get_telemetry (telemetry : Telemetry.t) : Telemetry.t =
         let rec rec_actions_and_depth acc_count acc_depth changeset_opt =
@@ -921,19 +813,9 @@ module type Heap = sig
   val revive_batch : KeySet.t -> unit
 
   module LocalChanges : sig
-    val has_local_changes : unit -> bool
-
     val push_stack : unit -> unit
 
     val pop_stack : unit -> unit
-
-    val revert_batch : KeySet.t -> unit
-
-    val commit_batch : KeySet.t -> unit
-
-    val revert_all : unit -> unit
-
-    val commit_all : unit -> unit
   end
 end
 
@@ -1068,22 +950,6 @@ module Heap (Backend : Backend) (Key : Key) (Value : Value) :
 
   module LocalChanges = struct
     include WithLocalChanges.LocalChanges
-
-    let revert_batch keys =
-      KeySet.iter
-        begin
-          fun key ->
-          revert (hash_of_key key)
-        end
-        keys
-
-    let commit_batch keys =
-      KeySet.iter
-        begin
-          fun key ->
-          commit (hash_of_key key)
-        end
-        keys
   end
 end
 
@@ -1402,23 +1268,5 @@ end = struct
     let pop_stack () =
       Direct.LocalChanges.pop_stack ();
       Cache.clear ()
-
-    let revert_batch keys =
-      Direct.LocalChanges.revert_batch keys;
-      KeySet.iter Cache.remove keys
-
-    let commit_batch keys =
-      Direct.LocalChanges.commit_batch keys;
-      KeySet.iter Cache.remove keys
-
-    let revert_all () =
-      Direct.LocalChanges.revert_all ();
-      Cache.clear ()
-
-    let commit_all () =
-      Direct.LocalChanges.commit_all ();
-      Cache.clear ()
-
-    let has_local_changes () = Direct.LocalChanges.has_local_changes ()
   end
 end

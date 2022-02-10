@@ -1176,12 +1176,12 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                 x.recurse(env, self.object())
             }
             Stmt_::Do(x) => {
-                let (b, e) = (&mut x.0, &mut x.1);
+                let (b, e) = &mut **x;
                 env.with_in_using(false, |env| visit_mut(self, env, b))?;
                 self.visit_expr(env, e)
             }
             Stmt_::While(x) => {
-                let (e, b) = (&mut x.0, &mut x.1);
+                let (e, b) = &mut **x;
                 self.visit_expr(env, e)?;
                 env.with_in_using(false, |env| visit_mut(self, env, b))
             }
@@ -1192,7 +1192,7 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                 x.recurse(env, self.object())
             }
             Stmt_::For(x) => {
-                let (e1, e2, e3, b) = (&mut x.0, &mut x.1, &mut x.2, &mut x.3);
+                let (e1, e2, e3, b) = &mut **x;
 
                 for e in e1 {
                     self.visit_expr(env, e)?;
@@ -1207,12 +1207,12 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                 Ok(())
             }
             Stmt_::Switch(x) => {
-                let (e, cl) = (&mut x.0, &mut x.1);
+                let (e, cl) = &mut **x;
                 self.visit_expr(env, e)?;
                 env.with_in_using(false, |env| visit_mut(self, env, cl))
             }
             Stmt_::Try(x) => {
-                let (b1, cl, b2) = (&mut x.0, &mut x.1, &mut x.2);
+                let (b1, cl, b2) = &mut **x;
                 visit_mut(self, env, b1)?;
                 visit_mut(self, env, cl)?;
                 visit_mut(self, env, b2)?;

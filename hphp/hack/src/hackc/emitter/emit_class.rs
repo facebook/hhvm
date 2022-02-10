@@ -15,15 +15,14 @@ use hhas_property::HhasProperty;
 use hhas_type::HhasTypeInfo;
 use hhas_type_const::HhasTypeConstant;
 use hhas_xhp_attribute::HhasXhpAttribute;
-use hhbc_ast::{
-    FatalOp, FcallArgs, FcallFlags, ReadonlyOp, SpecialClsRef, UseAsVisibility, Visibility,
-};
+use hhbc_ast::{FatalOp, FcallArgs, FcallFlags, ReadonlyOp, SpecialClsRef, Visibility};
 use hhbc_id::class::ClassType;
 use hhbc_id::r#const;
 use hhbc_id::{self as hhbc_id, class, method, prop};
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::{Attr, TypeConstraintFlags};
 use instruction_sequence::{instr, InstrSeq, Result};
+use itertools::Itertools;
 use local::Local;
 use naming_special_names_rust as special_names;
 use oxidized::{
@@ -174,16 +173,16 @@ fn from_type_constant<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     tc: &'a ast::ClassTypeconstDef,
 ) -> Result<HhasTypeConstant<'arena>> {
-    use ast::ClassTypeconst::*;
+    use ast::ClassTypeconst;
     let name = tc.name.1.to_string();
 
     let initializer = match &tc.kind {
-        TCAbstract(ast::ClassAbstractTypeconst { default: None, .. }) => None,
-        TCAbstract(ast::ClassAbstractTypeconst {
+        ClassTypeconst::TCAbstract(ast::ClassAbstractTypeconst { default: None, .. }) => None,
+        ClassTypeconst::TCAbstract(ast::ClassAbstractTypeconst {
             default: Some(init),
             ..
         })
-        | TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: init }) => {
+        | ClassTypeconst::TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: init }) => {
             // TODO: Deal with the constraint
             // Type constants do not take type vars hence tparams:[]
             Some(emit_type_constant::hint_to_type_constant(
@@ -199,7 +198,7 @@ fn from_type_constant<'a, 'arena, 'decl>(
     };
 
     let is_abstract = match &tc.kind {
-        TCConcrete(_) => false,
+        ClassTypeconst::TCConcrete(_) => false,
         _ => true,
     };
 
@@ -214,17 +213,17 @@ fn from_ctx_constant<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     tc: &'a ast::ClassTypeconstDef,
 ) -> Result<HhasCtxConstant<'arena>> {
-    use ast::ClassTypeconst::*;
+    use ast::ClassTypeconst;
     let name = tc.name.1.to_string();
     let (recognized, unrecognized) = match &tc.kind {
-        TCAbstract(ast::ClassAbstractTypeconst { default: None, .. }) => {
+        ClassTypeconst::TCAbstract(ast::ClassAbstractTypeconst { default: None, .. }) => {
             (Slice::empty(), Slice::empty())
         }
-        TCAbstract(ast::ClassAbstractTypeconst {
+        ClassTypeconst::TCAbstract(ast::ClassAbstractTypeconst {
             default: Some(hint),
             ..
         })
-        | TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: hint }) => {
+        | ClassTypeconst::TCConcrete(ast::ClassConcreteTypeconst { c_tc_type: hint }) => {
             let x = HhasCoeffects::from_ctx_constant(hint);
             let r: Slice<'arena, Str<'_>> = Slice::from_vec(
                 alloc,
@@ -238,7 +237,7 @@ fn from_ctx_constant<'a, 'arena>(
         }
     };
     let is_abstract = match &tc.kind {
-        TCConcrete(_) => false,
+        ClassTypeconst::TCConcrete(_) => false,
         _ => true,
     };
     Ok(HhasCtxConstant {
@@ -298,14 +297,14 @@ fn from_class_elt_constants<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     class_: &'a ast::Class_,
 ) -> Result<Vec<HhasConstant<'arena>>> {
-    use oxidized::aast::ClassConstKind::*;
+    use oxidized::aast::ClassConstKind;
     class_
         .consts
         .iter()
         .map(|x| {
             let (is_abstract, init_opt) = match &x.kind {
-                CCAbstract(default) => (true, default.as_ref()),
-                CCConcrete(expr) => (false, Some(expr)),
+                ClassConstKind::CCAbstract(default) => (true, default.as_ref()),
+                ClassConstKind::CCConcrete(expr) => (false, Some(expr)),
             };
             hhas_constant::from_ast(emitter, env, &x.id, is_abstract, init_opt)
         })
@@ -334,7 +333,7 @@ fn from_enum_type<'arena>(
     alloc: &'arena bumpalo::Bump,
     opt: Option<&ast::Enum_>,
 ) -> Result<Option<HhasTypeInfo<'arena>>> {
-    use hhas_type::constraint::*;
+    use hhas_type::constraint::Constraint;
     opt.map(|e| {
         let type_info_user_type = Just(Str::new_str(
             alloc,
@@ -496,7 +495,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     ast_class: &'a ast::Class_,
 ) -> Result<Option<HhasMethod<'arena>>> {
-    use hhas_type::constraint::*;
+    use hhas_type::constraint::Constraint;
 
     let alloc = env.arena;
     let num_reified = ast_class
@@ -617,23 +616,26 @@ pub fn emit_class<'a, 'arena, 'decl>(
     let is_trait = ast_class.kind == ast::ClassishKind::Ctrait;
     let is_interface = ast_class.kind == ast::ClassishKind::Cinterface;
 
-    let uses = ast_class
+    let uses: Vec<&str> = ast_class
         .uses
         .iter()
-        .filter_map(|x| match x.1.as_ref() {
+        .filter_map(|Hint(pos, hint)| match hint.as_ref() {
             ast::Hint_::Happly(ast::Id(_, name), _) => {
                 if is_interface {
                     Some(Err(emit_fatal::raise_fatal_parse(
-                        &x.0,
+                        pos,
                         "Interfaces cannot use traits",
                     )))
                 } else {
-                    Some(Ok(name.as_str()))
+                    Some(Ok(string_utils::strip_global_ns(name.as_str())))
                 }
             }
             _ => None,
         })
-        .collect::<Result<Vec<_>>>()?;
+        .collect::<Result<Vec<_>>>()?
+        .into_iter()
+        .unique()
+        .collect();
 
     let elaborate_namespace_id =
         |x: &'a ast::Id| hhbc_id::class::ClassType::from_ast_name_and_mangle(alloc, x.name());
@@ -646,11 +648,15 @@ pub fn emit_class<'a, 'arena, 'decl>(
                 let id1 = Maybe::from(ido1.as_ref()).map(elaborate_namespace_id);
                 let id2 = Maybe::from(ido2.as_ref())
                     .map(|x| hhbc_id::class::ClassType::new(Str::new_str(alloc, &x.1)));
+                let attr = vis
+                    .iter()
+                    .fold(Attr::AttrNone, |attr, &v| Attr::from(attr | Attr::from(v)));
+
                 (
                     id1,
                     hhbc_id::class::ClassType::new(Str::new_str(alloc, &id.1)),
                     id2,
-                    Slice::fill_iter(alloc, vis.iter().map(|&v| UseAsVisibility::from(v))),
+                    attr,
                 )
                     .into()
             }),

@@ -9,15 +9,16 @@
 
 use hackrs::alloc;
 use hackrs::ast_provider::AstProvider;
+use hackrs::cache::NonEvictingCache;
 use hackrs::decl_parser::DeclParser;
-use hackrs::folded_decl_provider::{FoldedDeclGlobalCache, FoldedDeclProvider};
+use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
 use hackrs::reason::{NReason, Reason};
-use hackrs::shallow_decl_provider::{ShallowDeclCache, ShallowDeclProvider};
+use hackrs::shallow_decl_provider::{EagerShallowDeclProvider, ShallowDeclCache};
 use hackrs::special_names::SpecialNames;
 use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
-use hackrs::typing_decl_provider::{TypingDeclGlobalCache, TypingDeclProvider};
+use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
 use pos::{Prefix, RelativePath, RelativePathCtx};
@@ -70,30 +71,24 @@ pub extern "C" fn stc_main() {
         special_names,
         Arc::clone(&options),
     );
-    let decl_parser = DeclParser::new(alloc, Arc::clone(&relative_path_ctx));
+    let decl_parser = DeclParser::new(alloc, relative_path_ctx);
     let shallow_decl_cache = Arc::new(ShallowDeclCache::with_no_eviction());
-    let shallow_decl_provider = Arc::new(ShallowDeclProvider::new(
-        Arc::clone(&shallow_decl_cache),
-        relative_path_ctx,
-    ));
-    let folded_decl_cache = Arc::new(FoldedDeclGlobalCache::new());
-    let folded_decl_provider = Arc::new(FoldedDeclProvider::new(
+    let shallow_decl_provider = Arc::new(EagerShallowDeclProvider::new(Arc::clone(
+        &shallow_decl_cache,
+    )));
+    let folded_decl_cache = Arc::new(NonEvictingCache::new());
+    let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
         folded_decl_cache,
         alloc,
         special_names,
         shallow_decl_provider,
     ));
-    let typing_decl_cache = Arc::new(TypingDeclGlobalCache::new());
-    let typing_decl_provider = Arc::new(TypingDeclProvider::new(
+    let typing_decl_cache = Arc::new(NonEvictingCache::new());
+    let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
         typing_decl_cache,
-        Arc::clone(&folded_decl_provider),
-    ));
-    let ctx = Arc::new(TypingCtx::new(
-        alloc,
         folded_decl_provider,
-        typing_decl_provider,
-        special_names,
     ));
+    let ctx = Arc::new(TypingCtx::new(alloc, typing_decl_provider, special_names));
 
     let filenames: Vec<RelativePath> = cli_options
         .filenames

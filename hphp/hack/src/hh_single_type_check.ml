@@ -283,6 +283,9 @@ let parse_options () =
     ref (TypecheckerOptions.type_printer_fuel GlobalOptions.default)
   in
   let profile_type_check_twice = ref false in
+  let profile_toplevel_definitions =
+    ref (TypecheckerOptions.profile_toplevel_definitions GlobalOptions.default)
+  in
   let memtrace = ref None in
   let enable_global_write_check = ref [] in
   let options =
@@ -713,6 +716,9 @@ let parse_options () =
       ( "--profile-type-check-twice",
         Arg.Set profile_type_check_twice,
         " Typecheck the file twice" );
+      ( "--profile-toplevel-definitions",
+        Arg.Set profile_toplevel_definitions,
+        " Profile typechecking of top-level definitions" );
       ( "--memtrace",
         Arg.String (fun s -> memtrace := Some s),
         " Write memtrace to this file (typical extension .ctf)" );
@@ -885,6 +891,7 @@ let parse_options () =
       ~tco_pessimise_builtins:!pessimise_builtins
       ~tco_explicit_consistent_constructors:!explicit_consistent_constructors
       ~tco_type_printer_fuel:!type_printer_fuel
+      ~tco_profile_toplevel_definitions:!profile_toplevel_definitions
       ()
   in
   Errors.allowed_fixme_codes_strict :=

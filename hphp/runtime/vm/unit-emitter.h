@@ -22,8 +22,7 @@
 #include <utility>
 #include <vector>
 
-#include "hphp/parser/location.h"
-
+#include "hphp/runtime/base/location.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"

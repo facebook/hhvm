@@ -16,8 +16,7 @@
 
 #pragma once
 
-#include "hphp/parser/location.h"
-
+#include "hphp/runtime/base/location.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/req-bitset.h"
 #include "hphp/runtime/base/typed-value.h"

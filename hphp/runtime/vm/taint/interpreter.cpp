@@ -177,7 +177,8 @@ void iopPopL(tv_lval /* to */) {
 
 void iopDup() {
   iopPreamble("Dup");
-  State::instance->stack.push(nullptr);
+  auto& stack = State::instance->stack;
+  stack.push(stack.top());
 }
 
 void iopCGetCUNop() {

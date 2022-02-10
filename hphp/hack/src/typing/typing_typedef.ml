@@ -16,8 +16,11 @@ module Env = Typing_env
 module SN = Naming_special_names
 module Phase = Typing_phase
 module EnvFromDef = Typing_env_from_def
+module Profile = Typing_toplevel_profile
 
 let typedef_def ctx typedef =
+  let tcopt = Provider_context.get_tcopt ctx in
+  Profile.measure_elapsed_time_and_report tcopt None typedef.t_name @@ fun () ->
   let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
   let env =
     Env.set_module env

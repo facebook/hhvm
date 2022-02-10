@@ -2996,7 +2996,13 @@ void RuntimeOption::Load(
 
 uintptr_t lowArenaMinAddr() {
   const char* str = getenv("HHVM_LOW_ARENA_START");
-  if (str == nullptr) return 1u << 30;
+  if (str == nullptr) {
+#ifndef INSTRUMENTED_BUILD
+   return 1u << 30;
+#else
+   return 1u << 31;
+#endif
+  }
   uintptr_t start = 0;
   if (sscanf(str, "0x%lx", &start) == 1) return start;
   if (sscanf(str, "%lu", &start) == 1) return start;

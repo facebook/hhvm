@@ -84,7 +84,13 @@ std::shared_ptr<Locale> Locale::getEnvLocale() {
   if (ret) {
     return ret;
   }
-  auto locale = ::newlocale(LC_ALL_MASK, "", (locale_t) 0);
+  auto locale = ::newlocale(LC_ALL_MASK, "", nullptr);
+  if (locale == nullptr) {
+    // Locale not found. Return C locale instead.
+    assertx(errno == ENOENT);
+    ret = Locale::getCLocale();
+    return ret;
+  }
   // Per POSIX, a processes' default locale is "C" until `setlocale()` is
   // called; to use env from environment, `setlocale(LC_ALL, "")` should
   // be called.

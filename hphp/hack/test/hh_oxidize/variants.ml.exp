@@ -29,7 +29,7 @@ use crate::*;
     Serialize,
     ToOcamlRep,
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum A {
     I,
     J(isize),

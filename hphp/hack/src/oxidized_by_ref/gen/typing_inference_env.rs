@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e817669fad8f663a480e47f7845aa993>>
+// @generated SignedSource<<ed42ffb1bcbb30eee6689faeb6ecccce>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -75,7 +75,7 @@ arena_deserializer::impl_deserialize_in_arena!(TyvarConstraints<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum SolvingInfo<'a> {
     /// when the type variable is bound to a type
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

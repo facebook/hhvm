@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d5df50bb5d56254498afa4334e1b29d2>>
+// @generated SignedSource<<42faa54bd41d15c7e1502a6e675868e1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,7 +40,7 @@ pub use reason::PosId;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum CeVisibility<'a> {
     Vpublic,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -69,7 +69,7 @@ arena_deserializer::impl_deserialize_in_arena!(CeVisibility<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum IfcFunDecl<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     FDPolicied(Option<&'a str>),
@@ -154,7 +154,7 @@ arena_deserializer::impl_deserialize_in_arena!(PosByteString<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum TshapeFieldName<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     TSFlitInt(&'a PosString<'a>),
@@ -188,7 +188,7 @@ pub use oxidized::typing_defs_core::ConsistentKind;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum DependentType {
     DTexpr(ident::Ident),
 }
@@ -312,7 +312,7 @@ arena_deserializer::impl_deserialize_in_arena!(Ty<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum NegType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     NegPrim(&'a aast::Tprim),
@@ -370,7 +370,7 @@ arena_deserializer::impl_deserialize_in_arena!(ShapeFieldType<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Ty_<'a> {
     /// The late static bound type of a class
     Tthis,
@@ -559,7 +559,7 @@ arena_deserializer::impl_deserialize_in_arena!(TaccessType<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Capability<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     CapDefaults(&'a pos_or_decl::PosOrDecl<'a>),
@@ -652,7 +652,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum FunArity<'a> {
     Fstandard,
     /// PHP5.6-style ...$args finishes the func declaration.
@@ -808,7 +808,7 @@ arena_deserializer::impl_deserialize_in_arena!(HasMember<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ConstraintType_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ThasMember(&'a HasMember<'a>),
@@ -857,7 +857,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConstraintType<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum InternalType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     LoclType(&'a Ty<'a>),

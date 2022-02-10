@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cffbc8232c5078a3371c1343b5fd588a>>
+// @generated SignedSource<<c3fafc47e650bf442822bbc8fae7c6c8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,7 +40,7 @@ pub use reason::PosId;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum CeVisibility {
     Vpublic,
     Vprivate(String),
@@ -63,7 +63,7 @@ pub enum CeVisibility {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum IfcFunDecl {
     FDPolicied(Option<String>),
     FDInferFlows,
@@ -86,7 +86,7 @@ pub enum IfcFunDecl {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum Exact {
     Exact,
     Nonexact,
@@ -111,7 +111,7 @@ arena_deserializer::impl_deserialize_in_arena!(Exact);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum ValKind {
     Lval,
     LvalSubexpr,
@@ -137,7 +137,7 @@ arena_deserializer::impl_deserialize_in_arena!(ValKind);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum FunTparamsKind {
     /// If ft_tparams is empty, the containing fun_type is a concrete function type.
     /// Otherwise, it is a generic function and ft_tparams specifies its type parameters.
@@ -170,7 +170,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunTparamsKind);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum ShapeKind {
     ClosedShape,
     OpenShape,
@@ -231,7 +231,7 @@ pub struct PosByteString(pub pos_or_decl::PosOrDecl, pub TByteString);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum TshapeFieldName {
     TSFlitInt(PosString),
     TSFlitStr(PosByteString),
@@ -255,7 +255,7 @@ pub enum TshapeFieldName {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum ParamMode {
     FPnormal,
     FPinout,
@@ -289,7 +289,7 @@ pub type XhpAttr = xhp_attribute::XhpAttribute;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum ConsistentKind {
     Inconsistent,
     ConsistentConstruct,
@@ -313,7 +313,7 @@ arena_deserializer::impl_deserialize_in_arena!(ConsistentKind);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum DependentType {
     DTexpr(ident::Ident),
 }
@@ -399,7 +399,7 @@ pub struct WhereConstraint(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum Enforcement {
     Unenforced,
     Enforced,
@@ -440,7 +440,7 @@ pub struct Ty(pub reason::T_, pub Box<Ty_>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum NegType {
     NegPrim(aast::Tprim),
     NegClass(PosId),
@@ -491,7 +491,7 @@ pub struct ShapeFieldType {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Ty_ {
     /// The late static bound type of a class
     Tthis,
@@ -644,7 +644,7 @@ pub struct TaccessType(pub Ty, pub PosId);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Capability {
     CapDefaults(pos_or_decl::PosOrDecl),
     CapTy(Ty),
@@ -720,7 +720,7 @@ pub struct FunType {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum FunArity {
     Fstandard,
     /// PHP5.6-style ...$args finishes the func declaration.
@@ -791,7 +791,7 @@ pub type FunParams = Vec<FunParam>;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum DestructureKind {
     ListDestructure,
     SplatUnpack,
@@ -875,7 +875,7 @@ pub struct HasMember {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ConstraintType_ {
     ThasMember(HasMember),
     /// The type of container destructuring via list() or splat `...`
@@ -915,7 +915,7 @@ pub struct ConstraintType(pub reason::Reason, pub Box<ConstraintType_>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum InternalType {
     LoclType(Ty),
     ConstraintType(ConstraintType),

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<73513e749276a1c2ba007c069add7587>>
+// @generated SignedSource<<26d1399128f71dc01e1d291bf7a12753>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -73,7 +73,7 @@ pub struct Stmt<Ex, En>(pub Pos, pub Stmt_<Ex, En>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Stmt_<Ex, En> {
     /// Marker for a switch statement that falls through.
     ///
@@ -219,7 +219,7 @@ pub enum Stmt_<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum EnvAnnot {
     Join,
     Refinement,
@@ -263,7 +263,7 @@ pub struct UsingStmt<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum AsExpr<Ex, En> {
     AsV(Expr<Ex, En>),
     AsKv(Expr<Ex, En>, Expr<Ex, En>),
@@ -305,7 +305,7 @@ pub struct ClassId<Ex, En>(pub Ex, pub Pos, pub ClassId_<Ex, En>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ClassId_<Ex, En> {
     /// The class ID of the parent of the lexically scoped class.
     ///
@@ -382,7 +382,7 @@ pub struct Expr<Ex, En>(pub Ex, pub Pos, pub Expr_<Ex, En>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum CollectionTarg<Ex> {
     CollectionTV(Targ<Ex>),
     CollectionTKV(Targ<Ex>, Targ<Ex>),
@@ -402,7 +402,7 @@ pub enum CollectionTarg<Ex> {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum FunctionPtrId<Ex, En> {
     FPId(Sid),
     FPClassConst(ClassId<Ex, En>, Pstring),
@@ -470,7 +470,7 @@ pub struct ExpressionTree<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Expr_<Ex, En> {
     /// darray literal.
     ///
@@ -874,7 +874,7 @@ pub enum Expr_<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum HoleSource {
     Typing,
     UnsafeCast(Vec<Hint>),
@@ -895,7 +895,7 @@ pub enum HoleSource {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ClassGetExpr<Ex, En> {
     CGstring(Pstring),
     CGexpr(Expr<Ex, En>),
@@ -915,7 +915,7 @@ pub enum ClassGetExpr<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Case<Ex, En> {
     Default(Pos, Block<Ex, En>),
     Case(Expr<Ex, En>, Block<Ex, En>),
@@ -969,7 +969,7 @@ pub struct Field<Ex, En>(pub Expr<Ex, En>, pub Expr<Ex, En>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Afield<Ex, En> {
     AFvalue(Expr<Ex, En>),
     AFkvalue(Expr<Ex, En>, Expr<Ex, En>),
@@ -1010,7 +1010,7 @@ pub struct XhpSimple<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum XhpAttribute<Ex, En> {
     XhpSimple(XhpSimple<Ex, En>),
     XhpSpread(Expr<Ex, En>),
@@ -1270,7 +1270,7 @@ pub type IsExtends = bool;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum EmitId {
     EmitId(isize),
     Anonymous,
@@ -1353,7 +1353,7 @@ pub type XhpAttrHint = Hint;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum XhpAttrTag {
     Required,
     LateInit,
@@ -1397,7 +1397,7 @@ pub struct XhpAttr<Ex, En>(
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ClassAttr<Ex, En> {
     CAName(Sid),
     CAField(CaField<Ex, En>),
@@ -1439,7 +1439,7 @@ pub struct CaField<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum CaType {
     CAHint(Hint),
     CAEnum(Vec<String>),
@@ -1459,7 +1459,7 @@ pub enum CaType {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ClassConstKind<Ex, En> {
     /// CCAbstract represents the states
     ///    abstract const int X;
@@ -1549,7 +1549,7 @@ pub struct ClassConcreteTypeconst {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum ClassTypeconst {
     TCAbstract(ClassAbstractTypeconst),
     TCConcrete(ClassConcreteTypeconst),
@@ -1788,7 +1788,7 @@ pub struct ModuleDef<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Def<Ex, En> {
     Fun(Box<FunDef<Ex, En>>),
     Class(Box<Class_<Ex, En>>),
@@ -1818,7 +1818,7 @@ pub enum Def<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum NsKind {
     NSNamespace,
     NSClass,
@@ -1843,7 +1843,7 @@ arena_deserializer::impl_deserialize_in_arena!(NsKind);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum BreakContinueLevel {
     LevelOk(Option<isize>),
     LevelNonLiteral,

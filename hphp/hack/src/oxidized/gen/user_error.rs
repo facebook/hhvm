@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<24e4bb2f69a9124aa58f41ddeff7277f>>
+// @generated SignedSource<<107e01fd41c8a8bb02156ef5cbcd24e4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -58,7 +58,7 @@ pub struct UserError<PrimPos, Pos> {
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(u8)]
 pub enum Severity {
     Warning,
     Error,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6421b641d4e1ee9c1a682931213b6c59>>
+// @generated SignedSource<<88f4ad69842d70cde8afe9c52abe92a0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -78,7 +78,7 @@ pub use oxidized::aast_defs::ImportFlavor;
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum XhpChild<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     ChildName(&'a Sid<'a>),
@@ -215,7 +215,7 @@ arena_deserializer::impl_deserialize_in_arena!(HintFun<'arena>);
     Serialize,
     ToOcamlRep
 )]
-#[repr(C)]
+#[repr(C, u8)]
 pub enum Hint_<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hoption(&'a Hint<'a>),

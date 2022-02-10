@@ -293,19 +293,9 @@ module type Heap = sig
   val revive_batch : KeySet.t -> unit
 
   module LocalChanges : sig
-    val has_local_changes : unit -> bool
-
     val push_stack : unit -> unit
 
     val pop_stack : unit -> unit
-
-    val revert_batch : KeySet.t -> unit
-
-    val commit_batch : KeySet.t -> unit
-
-    val revert_all : unit -> unit
-
-    val commit_all : unit -> unit
   end
 end
 

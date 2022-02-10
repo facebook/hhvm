@@ -137,23 +137,3 @@ let remove_batch paths =
 let local_changes_push_sharedmem_stack () = FileHeap.LocalChanges.push_stack ()
 
 let local_changes_pop_sharedmem_stack () = FileHeap.LocalChanges.pop_stack ()
-
-let local_changes_commit_batch paths =
-  match Provider_backend.get () with
-  | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Shared_memory -> FileHeap.LocalChanges.commit_batch paths
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
-    failwith
-      ("File_provider.local_changes_commit_batch not supported "
-      ^ "with local/decl memory provider")
-
-let local_changes_revert_batch paths =
-  match Provider_backend.get () with
-  | Provider_backend.Analysis -> failwith "invalid"
-  | Provider_backend.Shared_memory -> FileHeap.LocalChanges.revert_batch paths
-  | Provider_backend.Local_memory _
-  | Provider_backend.Decl_service _ ->
-    failwith
-      ("File_provider.local_changes_revert_batch not supported "
-      ^ "with local/decl memory provider")

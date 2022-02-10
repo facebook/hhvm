@@ -1752,8 +1752,8 @@ fn print_control_flow(w: &mut dyn Write, cf: &InstructControlFlow<'_>) -> Result
         CF::RetCSuspended => w.write_all(b"RetCSuspended"),
         CF::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
         CF::Throw => w.write_all(b"Throw"),
-        CF::Switch(kind, base, labels) => print_switch(w, kind, base, labels.as_ref()),
-        CF::SSwitch(cases) => match cases.as_ref() {
+        CF::Switch { kind, base, labels } => print_switch(w, kind, base, labels.as_ref()),
+        CF::SSwitch { labels } => match labels.as_ref() {
             [] => Err(Error::fail("sswitch should have at least one case").into()),
             [rest @ .., Pair(_, lastlabel)] => {
                 w.write_all(b"SSwitch ")?;

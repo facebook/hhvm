@@ -56,11 +56,8 @@ fn get_regular_labels<'arena>(instr: &Instruct<'arena>) -> Vec<Label> {
         | ICall(FCallFuncD(FcallArgs(_, _, _, _, _, Just(l), _), _))
         | ICall(FCallObjMethod(FcallArgs(_, _, _, _, _, Just(l), _), _))
         | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, _, Just(l), _), _, _)) => vec![*l],
-        IContFlow(Switch(_, _, ls)) => {
-            let labels = ls.iter().copied().collect::<Vec<_>>();
-            labels
-        }
-        IContFlow(SSwitch(pairs)) => pairs.iter().map(|x| x.1).collect::<Vec<_>>(),
+        IContFlow(Switch { labels, .. }) => labels.iter().copied().collect(),
+        IContFlow(SSwitch { labels }) => labels.iter().map(|Pair(_, label)| *label).collect(),
         IMisc(MemoGetEager(l1, l2, _)) => vec![*l1, *l2],
         _ => vec![],
     }
@@ -133,8 +130,8 @@ where
         | IContFlow(JmpNZ(l))
         | IMisc(MemoGet(l, _))
         | ILabel(l) => relabel(l),
-        IContFlow(Switch(_, _, ll)) => ll.iter_mut().for_each(relabel),
-        IContFlow(SSwitch(pairs)) => pairs.iter_mut().for_each(|Pair(_, l)| relabel(l)),
+        IContFlow(Switch { labels, .. }) => labels.iter_mut().for_each(relabel),
+        IContFlow(SSwitch { labels }) => labels.iter_mut().for_each(|Pair(_, l)| relabel(l)),
         IMisc(MemoGetEager(l1, l2, _)) => {
             relabel(l1);
             relabel(l2);

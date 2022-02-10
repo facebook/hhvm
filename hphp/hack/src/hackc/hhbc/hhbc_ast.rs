@@ -336,10 +336,20 @@ pub enum InstructControlFlow<'arena> {
     JmpNS(Label),
     JmpZ(Label),
     JmpNZ(Label),
-    /// bounded, base, offset vector
-    Switch(SwitchKind, isize, BumpSliceMut<'arena, Label>),
-    /// litstr id / offset vector
-    SSwitch(BumpSliceMut<'arena, Pair<Str<'arena>, Label>>),
+
+    /// Integer switch
+    Switch {
+        kind: SwitchKind,
+        base: isize,
+        labels: BumpSliceMut<'arena, Label>,
+    },
+
+    /// String switch
+    SSwitch {
+        /// One (string, Label) pair for each case.
+        labels: BumpSliceMut<'arena, Pair<Str<'arena>, Label>>,
+    },
+
     RetC,
     RetCSuspended,
     RetM(NumParams),

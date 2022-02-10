@@ -864,7 +864,7 @@ fn emit_try_finally_<
     let exn_local = e.local_gen_mut().get_unnamed();
     let finally_body = env.do_in_finally_body(e, finally_block, emit_block)?;
     let mut finally_body_for_catch = InstrSeq::clone(alloc, &finally_body);
-    label_rewriter::clone_with_fresh_regular_labels(e, &mut finally_body_for_catch);
+    label_rewriter::rewrite_with_fresh_regular_labels(e, &mut finally_body_for_catch);
 
     //  (3) Finally epilogue
     let finally_epilogue = tfr::emit_finally_epilogue(e, env, pos, jump_instrs, finally_end)?;

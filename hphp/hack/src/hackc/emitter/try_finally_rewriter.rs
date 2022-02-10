@@ -25,7 +25,7 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
 
     /// Collects list of Ret* and non rewritten Break/Continue instructions inside try body.
     pub(super) fn collect(
-        is: &'a InstrSeq<'arena>,
+        instr_seq: &'a InstrSeq<'arena>,
         jt_gen: &mut jt::Gen,
     ) -> JumpInstructions<'a, 'arena> {
         fn get_label_id(jt_gen: &mut jt::Gen, is_break: bool, level: Level) -> label::Id {
@@ -38,30 +38,24 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
                 _ => panic!("impossible"),
             }
         }
-        JumpInstructions(is.fold_left(
-            &mut |mut acc: LabelMap<'a, 'arena>, i| {
-                use hhbc_ast::Instruct::*;
-                use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
-                use hhbc_ast::InstructSpecialFlow::{Break, Continue};
-                match *i {
-                    ISpecialFlow(Break(level)) => {
-                        acc.insert(get_label_id(jt_gen, true, level as Level), i);
-                    }
-                    ISpecialFlow(Continue(level)) => {
-                        acc.insert(get_label_id(jt_gen, false, level as Level), i);
-                    }
-                    IContFlow(ref cont_flow) => match cont_flow {
-                        RetC | RetCSuspended | RetM(_) => {
-                            acc.insert(jt_gen.get_id_for_return(), i);
-                        }
-                        _ => {}
-                    },
-                    _ => {}
-                };
-                acc
-            },
-            LabelMap::new(),
-        ))
+        JumpInstructions(instr_seq.iter().fold(LabelMap::new(), |mut acc, instr| {
+            use hhbc_ast::Instruct::*;
+            use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
+            use hhbc_ast::InstructSpecialFlow::{Break, Continue};
+            match *instr {
+                ISpecialFlow(Break(level)) => {
+                    acc.insert(get_label_id(jt_gen, true, level as Level), instr);
+                }
+                ISpecialFlow(Continue(level)) => {
+                    acc.insert(get_label_id(jt_gen, false, level as Level), instr);
+                }
+                IContFlow(RetC | RetCSuspended | RetM(_)) => {
+                    acc.insert(jt_gen.get_id_for_return(), instr);
+                }
+                _ => {}
+            };
+            acc
+        }))
     }
 }
 

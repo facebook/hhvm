@@ -1747,19 +1747,6 @@ impl<'a> InstrSeq<'a> {
         }
     }
 
-    pub fn fold_left<'i, F, A>(&'i self, f: &mut F, init: A) -> A
-    where
-        F: FnMut(A, &'i Instruct<'a>) -> A,
-    {
-        // self:& InstrSeq<'a>
-        match self {
-            InstrSeq::List(s) if s.is_empty() => init,
-            InstrSeq::List(s) if s.len() == 1 => f(init, &s[0]),
-            InstrSeq::List(s) => s.iter().fold(init, f),
-            InstrSeq::Concat(s) => s.iter().fold(init, |acc, x| x.fold_left(f, acc)),
-        }
-    }
-
     pub fn filter_map<F>(&self, alloc: &'a bumpalo::Bump, f: &mut F) -> Self
     where
         F: FnMut(&Instruct<'a>) -> Option<Instruct<'a>>,

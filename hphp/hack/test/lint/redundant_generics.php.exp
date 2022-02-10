@@ -1,0 +1,18 @@
+File "redundant_generics.php", line 9, characters 42-42:
+This generic parameter is redundant because it only appears in a contravariant (input) position with useless `super` bound. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 13, characters 27-27:
+This generic parameter is unused. (Lint[5624])
+File "redundant_generics.php", line 14, characters 34-34:
+This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 17, characters 38-38:
+This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `I` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 18, characters 38-38:
+This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 21, characters 38-38:
+This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 24, characters 34-34:
+This generic parameter is redundant because it only appears in a covariant (output) position. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 32, characters 5-8:
+This generic parameter is redundant because it only appears in a covariant (output) position with useless `as` bound. Consider replacing uses of generic parameter with `nothing` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])
+File "redundant_generics.php", line 43, characters 23-24:
+This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])

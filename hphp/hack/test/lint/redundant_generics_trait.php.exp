@@ -1,0 +1,2 @@
+File "redundant_generics_trait.php", line 5, characters 23-23:
+This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Lint[5624])

@@ -1,0 +1,7 @@
+File "null_check_strict.php", line 12, characters 7-7:
+null_check_strict.php only declares `X`, it should be named X.php instead. (Lint[5564])
+File "null_check_strict.php", line 16, characters 9-16:
+This is a sketchy null check.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Lint[5618])

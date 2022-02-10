@@ -1,0 +1,2 @@
+File "as_valid_type_with_opaque_alias.php--use_it.php", line 3, characters 10-12:
+as_valid_type_with_opaque_alias.php--use_it.php only declares `foo`, it should be named foo.php instead. (Lint[5564])

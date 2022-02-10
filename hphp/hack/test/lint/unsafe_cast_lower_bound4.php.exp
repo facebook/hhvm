@@ -1,0 +1,4 @@
+File "unsafe_cast_lower_bound4.php", line 4, characters 25-29:
+HH\FIXME\UNSAFE_CAST input type annotation is too loose, please use a more specific type. The typechecker infers `arraykey` as the most specific type. (Lint[5636])
+File "unsafe_cast_lower_bound4.php", line 8, characters 25-29:
+HH\FIXME\UNSAFE_CAST input type annotation is too loose, please use a more specific type. The typechecker infers `num` as the most specific type. (Lint[5636])

@@ -1,0 +1,9 @@
+File "sketchy_null_hiding_under_unresolved2.php", line 3, characters 10-10:
+sketchy_null_hiding_under_unresolved2.php only declares `f`, it should be named f.php instead. (Lint[5564])
+File "sketchy_null_hiding_under_unresolved2.php", line 8, characters 7-8:
+There are no statements in the body of this `if` branch. (Lint[5556])
+File "sketchy_null_hiding_under_unresolved2.php", line 8, characters 7-8:
+This is a sketchy null check.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$y is nonnull` instead (Lint[5618])

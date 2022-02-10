@@ -1,0 +1,2 @@
+File "class_overrides_trait_methods_bad.php", line 13, characters 7-13:
+Unused trait: `MyClass` is overriding all the methods in `MyTrait` (Lint[5627])

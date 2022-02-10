@@ -1,0 +1,2 @@
+File "truthiness_literal_null.php", line 5, characters 7-8:
+Invalid condition: a value of type `null` will always be falsy (Lint[5622])

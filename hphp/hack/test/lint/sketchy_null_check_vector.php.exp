@@ -1,0 +1,9 @@
+File "sketchy_null_check_vector.php", line 3, characters 10-13:
+sketchy_null_check_vector.php only declares `test`, it should be named test.php instead. (Lint[5564])
+File "sketchy_null_check_vector.php", line 4, characters 7-8:
+There are no statements in the body of this `if` branch. (Lint[5556])
+File "sketchy_null_check_vector.php", line 4, characters 7-8:
+This is a sketchy null check.
+It detects nulls, but it will also detect many other falsy values, including `false`, `0`, `0.0`, `""`, `"0"`, empty Containers, and more.
+If you want to test for them, please consider doing so explicitly.
+If you only meant to test for `null`, use `$x is nonnull` instead (Lint[5618])

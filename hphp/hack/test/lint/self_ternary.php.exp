@@ -1,0 +1,4 @@
+File "self_ternary.php", line 3, characters 10-10:
+self_ternary.php only declares `f`, it should be named f.php instead. (Lint[5564])
+File "self_ternary.php", line 4, characters 8-9:
+Prefer writing `X ?: Y` (with an empty left slot) which is more readable. (Lint[5553])

@@ -231,8 +231,7 @@ void State::initialize() {
   heap.clear();
   paths.clear();
   arena = std::make_unique<PathArena>();
-  m_sources = Configuration::get()->sources();
-  m_sinks = Configuration::get()->sinks();
+  m_function_metadata = Configuration::get()->functionMetadata();
 }
 
 namespace {
@@ -288,11 +287,6 @@ void State::teardown() {
   auto identifier = metadata["identifier"].asString();
   FTRACE(1, "taint: processed request `{}`\n", identifier);
 
-  // Update caches for the next request
-  if (m_sources != nullptr && m_sinks != nullptr) {
-    Configuration::get()->updateCachesAfterRequest(m_sources, m_sinks);
-  }
-
   auto outputDirectory = Configuration::get()->outputDirectory;
   if (!outputDirectory) {
     // Print to stderr, useful for integration tests.
@@ -323,23 +317,23 @@ void State::teardown() {
 }
 
 std::vector<Source> State::sources(const Func* func) {
-  if (!m_sources) {
-    m_sources = Configuration::get()->sources();
-    if (!m_sources) {
-      return std::vector<Source>();
+  if (!m_function_metadata) {
+    m_function_metadata = Configuration::get()->functionMetadata();
+    if (!m_function_metadata) {
+      return {};
     }
   }
-  return m_sources->lookup(func);
+  return m_function_metadata->sources(func);
 }
 
 std::vector<Sink> State::sinks(const Func* func) {
-  if (!m_sinks) {
-    m_sinks = Configuration::get()->sinks();
-    if (!m_sinks) {
-      return std::vector<Sink>();
+  if (!m_function_metadata) {
+    m_function_metadata = Configuration::get()->functionMetadata();
+    if (!m_function_metadata) {
+      return {};
     }
   }
-  return m_sinks->lookup(func);
+  return m_function_metadata->sinks(func);
 }
 
 } // namespace taint

@@ -18,6 +18,7 @@
 
 #ifdef HHVM_TAINT
 
+#include <atomic>
 #include <exception>
 #include <memory>
 #include <string>
@@ -27,8 +28,8 @@
 #include <re2/re2.h>
 #include <re2/set.h>
 
+#include <folly/SharedMutex.h>
 #include <folly/concurrency/AtomicSharedPtr.h>
-#include <folly/container/EvictingCacheMap.h>
 
 #include "hphp/runtime/vm/func.h"
 #include "hphp/util/hash-map.h"
@@ -45,132 +46,65 @@ struct Sink {
 };
 
 /**
- * A cache for efficiently looking up whether a function is marked as tainted
- * based on its name matching a given set of regexes.
+ * This class tracks functions which need to be specially tracked
+ * during the interpretation of requests.
  *
- * We use re2::Set to do the actual regex matching, and add a two layer cache
- * on top. The first (`negative`) cache is expected to be hit more frequently
- * as we expect most functions to be untainted. The second (`positive`) cache
- * actually stores the Source/Sink that corresponds to this function
+ * For each function we use a set of bitflags to store why it's
+ * being tracked. This is stored in a fixed-size vector that is pre-allocated
+ * to (hopefully) be big enough.
+ *
+ * This allows lookups to be O(1) and just a few instructions in the
+ * overwhelmingly common case that a function is *not* special. For functions
+ * that are special, we then make an additional hashmap lookup to
+ * actually return the info needed for the interpretation.
+ *
+ * Right now this tracks the following flags for each function:
+ *
+ * 1) Whether we've seen it during execution (useful for coverage reporting)
+ * 2) Whether the function is a source
+ * 3) Whether the function is a sink
+ *
  */
-template <class T>
-struct TaintedFunctionSet {
-  TaintedFunctionSet(std::vector<std::pair<std::string, T>> entries)
-      : m_entries(),
-        m_regex_set(std::make_shared<re2::RE2::Set>(
-            re2::RE2::Options(),
-            re2::RE2::ANCHOR_BOTH)),
-        m_negative_cache(65536),
-        m_positive_cache(16384) {
-    std::string regex_error;
-    for (auto entry : entries) {
-      if (m_regex_set->Add(entry.first, &regex_error) == -1) {
-        throw std::runtime_error("Unable to parse regex: " + regex_error);
-      }
-      m_entries.push_back(entry.second);
-    }
-    if (!m_regex_set->Compile()) {
-      throw std::runtime_error("Unable to compile set due to OOM!");
-    }
-  }
+struct FunctionMetadataTracker {
+  FunctionMetadataTracker(
+      std::vector<std::pair<std::string, Source>> sources,
+      std::vector<std::pair<std::string, Sink>> sinks);
 
-  TaintedFunctionSet(
-      const std::vector<T>& entries,
-      std::shared_ptr<re2::RE2::Set> regex_set,
-      const folly::EvictingCacheMap<FuncId::Int, bool>& negative_cache,
-      const folly::EvictingCacheMap<FuncId::Int, std::vector<T>>&
-          positive_cache)
-      : m_entries(entries),
-        m_regex_set(regex_set),
-        m_negative_cache(negative_cache.getMaxSize()),
-        m_positive_cache(positive_cache.getMaxSize()) {
-    for (const auto& it : negative_cache) {
-      m_negative_cache.set(it.first, it.second);
-    }
-    for (const auto& it : positive_cache) {
-      m_positive_cache.set(it.first, it.second);
-    }
-  }
-
-  std::vector<T> lookup(const Func* func) {
-    std::vector<T> results;
-
-    // It's possible we are running before a proper configuration has been
-    // loaded. If so, bail early
-    if (m_entries.empty()) {
-      return results;
-    }
-
-    // First check if we know for sure this function doesn't exist
-    auto id = func->getFuncId().toInt();
-    {
-      auto it = m_negative_cache.find(id);
-      if (it != m_negative_cache.end()) {
-        return results;
-      }
-    }
-
-    // Check if we have a cached result
-    {
-      auto it = m_positive_cache.find(id);
-      if (it != m_positive_cache.end()) {
-        return it->second;
-      }
-    }
-
-    // Not found. So, compute whether this function is a regex match or not
-    {
-      auto name = func->fullName()->data();
-      std::vector<int> matches;
-      if (m_regex_set->Match(name, &matches)) {
-        results.reserve(matches.size());
-        for (const auto& index : matches) {
-          results.push_back(m_entries[index]);
-        }
-      }
-    }
-
-    // Update our caches accordingly
-    if (!results.empty()) {
-      m_positive_cache.set(id, results);
-    } else {
-      // Store the negative result
-      m_negative_cache.set(id, true);
-    }
-
-    return results;
-  }
-
-  std::shared_ptr<TaintedFunctionSet<T>> clone() {
-    return std::make_shared<TaintedFunctionSet<T>>(
-        m_entries, m_regex_set, m_negative_cache, m_positive_cache);
-  }
+  std::vector<Source> sources(const Func* func);
+  std::vector<Sink> sinks(const Func* func);
 
  private:
-  std::vector<T> m_entries;
-  std::shared_ptr<re2::RE2::Set> m_regex_set;
-  folly::EvictingCacheMap<FuncId::Int, bool> m_negative_cache;
-  folly::EvictingCacheMap<FuncId::Int, std::vector<T>> m_positive_cache;
+  std::pair<std::vector<Source>, std::vector<Sink>> onCacheMiss(
+      const Func* func,
+      FuncId::Int id);
+
+  std::vector<std::atomic<uint8_t>> m_seen_functions;
+  re2::RE2::Set m_sources_regexes;
+  re2::RE2::Set m_sinks_regexes;
+  std::vector<Source> m_sources;
+  std::vector<Sink> m_sinks;
+  hphp_fast_map<FuncId::Int, std::vector<Source>> m_sources_cache;
+  hphp_fast_map<FuncId::Int, std::vector<Sink>> m_sinks_cache;
+  folly::SharedMutex m_mutex;
 };
 
 struct Configuration {
   static std::shared_ptr<Configuration> get();
 
+  Configuration() : m_function_metadata(nullptr) {}
+
   void read(const std::string& path);
   void reset(const std::string& contents);
 
-  std::shared_ptr<TaintedFunctionSet<Source>> sources();
-  std::shared_ptr<TaintedFunctionSet<Sink>> sinks();
+  std::shared_ptr<FunctionMetadataTracker> functionMetadata();
 
-  void updateCachesAfterRequest(
-      std::shared_ptr<TaintedFunctionSet<Source>> sources,
-      std::shared_ptr<TaintedFunctionSet<Sink>> sinks);
+  std::vector<Source> sources(const Func* func);
+  std::vector<Sink> sinks(const Func* func);
 
   Optional<std::string> outputDirectory;
 
  private:
-  folly::atomic_shared_ptr<TaintedFunctionSet<Source>> m_sources;
-  folly::atomic_shared_ptr<TaintedFunctionSet<Sink>> m_sinks;
+  folly::atomic_shared_ptr<FunctionMetadataTracker> m_function_metadata;
 };
 
 } // namespace taint

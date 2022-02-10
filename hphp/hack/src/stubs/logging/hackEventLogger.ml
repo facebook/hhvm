@@ -391,11 +391,7 @@ let saved_state_dirty_files_ok ~start_time:_ = ()
 
 let saved_state_dirty_files_failure _ ~start_time:_ = ()
 
-let informant_induced_kill _ = ()
-
 let informant_induced_restart _ = ()
-
-let informant_state_leave _ = ()
 
 let find_svn_rev_failed _ _ = ()
 

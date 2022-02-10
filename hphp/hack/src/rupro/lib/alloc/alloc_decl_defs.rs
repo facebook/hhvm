@@ -280,7 +280,7 @@ impl<R: Reason> Allocator<R> {
         scc: &obr::shallow_decl_defs::ShallowClassConst<'_>,
     ) -> shallow::ShallowClassConst<R> {
         shallow::ShallowClassConst {
-            is_abstract: scc.abstract_,
+            kind: scc.abstract_,
             name: self.pos_class_const_from_decl(scc.name),
             ty: self.ty_from_decl(scc.type_),
             refs: self.slice(scc.refs, Self::class_const_ref),

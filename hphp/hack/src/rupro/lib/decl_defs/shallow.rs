@@ -20,7 +20,7 @@ pub use oxidized_by_ref::{method_flags::MethodFlags, prop_flags::PropFlags};
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ShallowClassConst<R: Reason> {
-    pub is_abstract: ClassConstKind,
+    pub kind: ClassConstKind,
     pub name: Positioned<ClassConstName, R::Pos>,
 
     /// This field is used for two different meanings in two different places:

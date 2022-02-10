@@ -6,14 +6,15 @@
 use crate::alloc::Allocator;
 use crate::decl_defs::{
     CeVisibility, ClassConst, ClassConstKind, ClassEltFlags, ClassEltFlagsArgs, ConsistentKind,
-    DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass, ShallowMethod, ShallowProp,
-    UserAttribute, Visibility,
+    DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass, ShallowClassConst, ShallowMethod,
+    ShallowProp, UserAttribute, Visibility,
 };
 use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
 use crate::reason::{Reason, ReasonImpl};
 use crate::special_names::SpecialNames;
 use pos::{
-    ClassConstName, MethodNameMap, ModuleName, Positioned, PropNameMap, TypeName, TypeNameMap,
+    ClassConstName, ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap,
+    TypeName, TypeNameMap,
 };
 use std::sync::Arc;
 
@@ -51,10 +52,14 @@ impl<R: Reason> DeclFolder<R> {
 
     /// Every class, interface, and trait implicitly defines a `::class` to allow
     /// accessing its fully qualified name as a string.
-    fn decl_class_class(&self, class_id: &Positioned<TypeName, R::Pos>) -> ClassConst<R> {
+    fn decl_class_class(
+        &self,
+        consts: &mut ClassConstNameMap<ClassConst<R>>,
+        sc: &ShallowClass<R>,
+    ) {
         // note(sf, 2022-02-08): c.f. Decl_folded_class.class_class_decl
-        let pos = class_id.pos();
-        let name = class_id.id();
+        let pos = sc.name.pos();
+        let name = sc.name.id();
         let reason = R::mk(|| ReasonImpl::RclassClass(pos.clone(), name));
         let classname_ty = self.alloc.decl_ty(
             reason.clone(),
@@ -63,14 +68,36 @@ impl<R: Reason> DeclFolder<R> {
                 vec![self.alloc.decl_ty(reason, DeclTy_::DTthis)].into_boxed_slice(),
             ))),
         );
-        ClassConst {
+        let class_const = ClassConst {
             is_synthesized: true,
             kind: ClassConstKind::CCConcrete,
             pos: pos.clone(),
             ty: classname_ty,
-            origin: name.clone(),
+            origin: name,
             refs: Vec::new(),
-        }
+        };
+        consts.insert(
+            ClassConstName(self.special_names.members.mClass),
+            class_const,
+        );
+    }
+
+    fn decl_class_const(
+        &self,
+        consts: &mut ClassConstNameMap<ClassConst<R>>,
+        sc: &ShallowClass<R>,
+        c: &ShallowClassConst<R>,
+    ) {
+        // note(sf, 2022-02-10): c.f. Decl_folded_class.class_const_fold
+        let class_const = ClassConst {
+            is_synthesized: false,
+            kind: c.kind,
+            pos: c.name.pos().clone(),
+            ty: c.ty.clone(),
+            origin: sc.name.id(),
+            refs: c.refs.clone(),
+        };
+        consts.insert(c.name.id(), class_const);
     }
 
     fn decl_prop(
@@ -287,10 +314,10 @@ impl<R: Reason> DeclFolder<R> {
             .for_each(|ty| self.get_implements(parents, ty, &mut ancestors));
 
         let mut consts = inh.consts;
-        consts.insert(
-            ClassConstName(self.special_names.members.mClass),
-            self.decl_class_class(&sc.name),
-        );
+        sc.consts
+            .iter()
+            .for_each(|c| self.decl_class_const(&mut consts, sc, c));
+        self.decl_class_class(&mut consts, sc);
 
         Arc::new(FoldedClass {
             name: sc.name.id(),

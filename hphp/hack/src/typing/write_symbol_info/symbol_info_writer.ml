@@ -6,12 +6,8 @@
  *
  *)
 
-module Hack_bucket = Bucket
 open Hh_prelude
 open Hh_json
-open Provider_context
-open Unix
-module Bucket = Hack_bucket
 
 let write_file file_dir num_tasts json_chunks =
   let (_out_file, channel) =
@@ -55,8 +51,8 @@ let write_json
           in
           write_file file_dir 1 xref_json_chunks);
       let elapsed = Unix.gettimeofday () -. start_time in
-      let time = Unix.gmtime elapsed in
-      Hh_logger.log "Processed batch in %dm%ds" time.tm_min time.tm_sec
+      let { Unix.tm_min; tm_sec; _ } = Unix.gmtime elapsed in
+      Hh_logger.log "Processed batch in %dm%ds" tm_min tm_sec
   with
   | WorkerCancel.Worker_should_exit as e ->
     (* Cancellation requests must be re-raised *)
@@ -78,7 +74,7 @@ let recheck_job
         let { Tast_provider.Compute_tast.tast; _ } =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in
-        (path, tast, entry.source_text))
+        (path, tast, entry.Provider_context.source_text))
   in
   Relative_path.set_path_prefix Relative_path.Root (Path.make root_path);
   Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi_path);

@@ -6,8 +6,6 @@
  *
  *)
 
-open Hh_json
-
 (* Predicate types for the JSON facts emitted *)
 type predicate =
   | ClassConstDeclaration
@@ -44,44 +42,44 @@ type predicate =
   | TypedefDefinition
 
 type glean_json = {
-  classConstDeclaration: json list;
-  classConstDefinition: json list;
-  classDeclaration: json list;
-  classDefinition: json list;
-  declarationComment: json list;
-  declarationLocation: json list;
-  declarationSpan: json list;
-  enumDeclaration: json list;
-  enumDefinition: json list;
-  enumerator: json list;
-  fileDeclarations: json list;
-  fileLines: json list;
-  fileXRefs: json list;
-  functionDeclaration: json list;
-  functionDefinition: json list;
-  globalConstDeclaration: json list;
-  globalConstDefinition: json list;
-  interfaceDeclaration: json list;
-  interfaceDefinition: json list;
-  methodDeclaration: json list;
-  methodDefinition: json list;
-  methodOccurrence: json list;
-  methodOverrides: json list;
-  namespaceDeclaration: json list;
-  propertyDeclaration: json list;
-  propertyDefinition: json list;
-  traitDeclaration: json list;
-  traitDefinition: json list;
-  typeConstDeclaration: json list;
-  typeConstDefinition: json list;
-  typedefDeclaration: json list;
-  typedefDefinition: json list;
+  classConstDeclaration: Hh_json.json list;
+  classConstDefinition: Hh_json.json list;
+  classDeclaration: Hh_json.json list;
+  classDefinition: Hh_json.json list;
+  declarationComment: Hh_json.json list;
+  declarationLocation: Hh_json.json list;
+  declarationSpan: Hh_json.json list;
+  enumDeclaration: Hh_json.json list;
+  enumDefinition: Hh_json.json list;
+  enumerator: Hh_json.json list;
+  fileDeclarations: Hh_json.json list;
+  fileLines: Hh_json.json list;
+  fileXRefs: Hh_json.json list;
+  functionDeclaration: Hh_json.json list;
+  functionDefinition: Hh_json.json list;
+  globalConstDeclaration: Hh_json.json list;
+  globalConstDefinition: Hh_json.json list;
+  interfaceDeclaration: Hh_json.json list;
+  interfaceDefinition: Hh_json.json list;
+  methodDeclaration: Hh_json.json list;
+  methodDefinition: Hh_json.json list;
+  methodOccurrence: Hh_json.json list;
+  methodOverrides: Hh_json.json list;
+  namespaceDeclaration: Hh_json.json list;
+  propertyDeclaration: Hh_json.json list;
+  propertyDefinition: Hh_json.json list;
+  traitDeclaration: Hh_json.json list;
+  traitDefinition: Hh_json.json list;
+  typeConstDeclaration: Hh_json.json list;
+  typeConstDefinition: Hh_json.json list;
+  typedefDeclaration: Hh_json.json list;
+  typedefDefinition: Hh_json.json list;
 }
 
 type result_progress = {
   resultJson: glean_json;
   (* Maps fact JSON key to a list of predicate/fact id pairs *)
-  factIds: (predicate * int) list JMap.t;
+  factIds: (predicate * int) list Hh_json.JMap.t;
 }
 
 type file_info =

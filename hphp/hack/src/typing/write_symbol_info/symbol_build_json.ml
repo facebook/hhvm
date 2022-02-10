@@ -4,17 +4,13 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
- * JSON builder functions. These all return JSON objects, which
- * may be used to build up larger objects. The functions with suffix
- * _nested include the key field because they are used for writing
- * nested facts.
  *)
 
 open Aast
 open Ast_defs
 open Hh_json
 open Hh_prelude
-open Symbol_json_util
+module Util = Symbol_json_util
 
 let build_id_json fact_id =
   JSON_Object [("id", JSON_Number (string_of_int fact_id))]
@@ -30,7 +26,7 @@ let build_name_json_nested name =
 
 let rec build_namespaceqname_json_nested ns =
   let fields =
-    match split_name ns with
+    match Util.split_name ns with
     | None -> [("name", build_name_json_nested ns)]
     | Some (parent_ns, namespace) ->
       [
@@ -42,7 +38,7 @@ let rec build_namespaceqname_json_nested ns =
 
 let build_qname_json_nested qname =
   let fields =
-    match split_name qname with
+    match Util.split_name qname with
     (* Global namespace *)
     | None -> [("name", build_name_json_nested qname)]
     | Some (ns, name) ->
@@ -90,7 +86,9 @@ let build_attributes_json_nested source_map attrs =
               let fp = Relative_path.to_absolute (Pos.filename pos) in
               match SMap.find_opt fp source_map with
               | Some st ->
-                JSON_String (strip_nested_quotes (source_at_span st pos)) :: acc
+                JSON_String
+                  (Util.strip_nested_quotes (Util.source_at_span st pos))
+                :: acc
               | None -> acc)
         in
         let fields =
@@ -129,7 +127,7 @@ let build_constraint_kind_json kind =
   JSON_Number (string_of_int num)
 
 let build_constraint_json ctx (kind, hint) =
-  let type_string = get_type_from_hint ctx hint in
+  let type_string = Util.get_type_from_hint ctx hint in
   JSON_Object
     [
       ("constraintKind", build_constraint_kind_json kind);
@@ -180,7 +178,7 @@ let build_parameter_json
     match def_val with
     | None -> fields
     | Some expr ->
-      ("defaultValue", JSON_String (strip_nested_quotes expr)) :: fields
+      ("defaultValue", JSON_String (Util.strip_nested_quotes expr)) :: fields
   in
   JSON_Object fields
 
@@ -189,7 +187,7 @@ let build_signature_json ctx source_map params ret_ty =
     let ty =
       match hint_of_type_hint p.param_type_hint with
       | None -> None
-      | Some h -> Some (get_type_from_hint ctx h)
+      | Some h -> Some (Util.get_type_from_hint ctx h)
     in
     let is_inout =
       match p.param_callconv with
@@ -202,7 +200,7 @@ let build_signature_json ctx source_map params ret_ty =
       | Some (_, expr_pos, _) ->
         let fp = Relative_path.to_absolute (Pos.filename expr_pos) in
         (match SMap.find_opt fp source_map with
-        | Some st -> Some (source_at_span st expr_pos)
+        | Some st -> Some (Util.source_at_span st expr_pos)
         | None -> None)
     in
     build_parameter_json
@@ -218,7 +216,7 @@ let build_signature_json ctx source_map params ret_ty =
   let return_type_name =
     match hint_of_type_hint ret_ty with
     | None -> None
-    | Some h -> Some (get_type_from_hint ctx h)
+    | Some h -> Some (Util.get_type_from_hint ctx h)
   in
   build_signature_json_nested parameters return_type_name
 

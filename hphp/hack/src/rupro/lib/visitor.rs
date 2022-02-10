@@ -45,6 +45,14 @@ impl<R: Reason, T: Walkable<R>> Walkable<R> for Vec<T> {
     }
 }
 
+impl<R: Reason, T: Walkable<R>> Walkable<R> for Box<[T]> {
+    fn recurse(&self, v: &mut dyn Visitor<R>) {
+        for obj in &self[..] {
+            obj.accept(v);
+        }
+    }
+}
+
 impl<R: Reason, K: Walkable<R>, V: Walkable<R>> Walkable<R> for std::collections::BTreeMap<K, V> {
     fn recurse(&self, v: &mut dyn Visitor<R>) {
         for (key, val) in self {

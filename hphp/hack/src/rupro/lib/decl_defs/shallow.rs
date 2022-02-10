@@ -39,7 +39,7 @@ pub struct ShallowClassConst<R: Reason> {
     /// in the const initializer, for members of regular-enums and enum-class-enums
     /// to detect circularity of initializers. We don't yet have a similar mechanism
     /// for top-level const initializers.
-    pub refs: Vec<ClassConstRef>,
+    pub refs: Box<[ClassConstRef]>,
 }
 
 walkable!(ShallowClassConst<R> => [ty]);
@@ -77,7 +77,7 @@ pub struct ShallowMethod<R: Reason> {
     pub visibility: Visibility,
     pub deprecated: Option<intern::string::BytesId>, // e.g. "The method foo is deprecated: ..."
     pub flags: MethodFlags,
-    pub attributes: Vec<UserAttribute<R::Pos>>,
+    pub attributes: Box<[UserAttribute<R::Pos>]>,
 }
 
 walkable!(ShallowMethod<R> => [ty]);
@@ -96,24 +96,24 @@ pub struct ShallowClass<R: Reason> {
     pub kind: oxidized::ast_defs::ClassishKind,
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub name: Positioned<TypeName, R::Pos>,
-    pub tparams: Vec<Tparam<R, DeclTy<R>>>,
-    pub where_constraints: Vec<WhereConstraint<DeclTy<R>>>,
-    pub extends: Vec<DeclTy<R>>,
-    pub uses: Vec<DeclTy<R>>,
-    pub xhp_attr_uses: Vec<DeclTy<R>>,
-    pub xhp_enum_values: BTreeMap<Symbol, Vec<XhpEnumValue>>,
-    pub req_extends: Vec<DeclTy<R>>,
-    pub req_implements: Vec<DeclTy<R>>,
-    pub implements: Vec<DeclTy<R>>,
+    pub tparams: Box<[Tparam<R, DeclTy<R>>]>,
+    pub where_constraints: Box<[WhereConstraint<DeclTy<R>>]>,
+    pub extends: Box<[DeclTy<R>]>,
+    pub uses: Box<[DeclTy<R>]>,
+    pub xhp_attr_uses: Box<[DeclTy<R>]>,
+    pub xhp_enum_values: BTreeMap<Symbol, Box<[XhpEnumValue]>>,
+    pub req_extends: Box<[DeclTy<R>]>,
+    pub req_implements: Box<[DeclTy<R>]>,
+    pub implements: Box<[DeclTy<R>]>,
     pub support_dynamic_type: bool,
-    pub consts: Vec<ShallowClassConst<R>>,
-    pub typeconsts: Vec<ShallowTypeconst<R>>,
-    pub props: Vec<ShallowProp<R>>,
-    pub static_props: Vec<ShallowProp<R>>,
+    pub consts: Box<[ShallowClassConst<R>]>,
+    pub typeconsts: Box<[ShallowTypeconst<R>]>,
+    pub props: Box<[ShallowProp<R>]>,
+    pub static_props: Box<[ShallowProp<R>]>,
     pub constructor: Option<ShallowMethod<R>>,
-    pub static_methods: Vec<ShallowMethod<R>>,
-    pub methods: Vec<ShallowMethod<R>>,
-    pub user_attributes: Vec<UserAttribute<R::Pos>>,
+    pub static_methods: Box<[ShallowMethod<R>]>,
+    pub methods: Box<[ShallowMethod<R>]>,
+    pub user_attributes: Box<[UserAttribute<R::Pos>]>,
     pub enum_type: Option<EnumType<R>>,
 }
 

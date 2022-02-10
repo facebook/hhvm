@@ -68,17 +68,17 @@ pub enum DependentType {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct UserAttribute<P> {
     pub name: Positioned<TypeName, P>,
-    pub classname_params: Vec<TypeName>,
+    pub classname_params: Box<[TypeName]>,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Tparam<R: Reason, TY> {
     pub variance: ast_defs::Variance,
     pub name: Positioned<TypeName, R::Pos>,
-    pub tparams: Vec<Tparam<R, TY>>,
-    pub constraints: Vec<(ast_defs::ConstraintKind, TY)>,
+    pub tparams: Box<[Tparam<R, TY>]>,
+    pub constraints: Box<[(ast_defs::ConstraintKind, TY)]>,
     pub reified: aast::ReifyKind,
-    pub user_attributes: Vec<UserAttribute<R::Pos>>,
+    pub user_attributes: Box<[UserAttribute<R::Pos>]>,
 }
 
 walkable!(impl<R: Reason, TY> for Tparam<R, TY> => [tparams, constraints]);
@@ -142,7 +142,7 @@ pub enum DeclTy_<R: Reason> {
     /// The late static bound type of a class
     DTthis,
     /// Either an object type or a type alias, ty list are the arguments
-    DTapply(Positioned<TypeName, R::Pos>, Vec<DeclTy<R>>),
+    DTapply(Positioned<TypeName, R::Pos>, Box<[DeclTy<R>]>),
     /// "Any" is the type of a variable with a missing annotation, and "mixed" is
     /// the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
     /// Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -192,7 +192,7 @@ pub enum DeclTy_<R: Reason> {
     /// function, method, lambda, etc.
     DTfun(FunType<R, DeclTy<R>>),
     /// Tuple, with ordered list of the types of the elements of the tuple.
-    DTtuple(Vec<DeclTy<R>>),
+    DTtuple(Box<[DeclTy<R>]>),
     /// Whether all fields of this shape are known, types of each of the
     /// known arms.
     DTshape(ShapeKind, BTreeMap<TshapeFieldName, ShapeFieldType<R>>),
@@ -202,7 +202,7 @@ pub enum DeclTy_<R: Reason> {
     /// is set up when checking the body of a function or method. See uses of
     /// Typing_phase.add_generic_parameters_and_constraints. The list denotes
     /// type arguments.
-    DTgeneric(TypeName, Vec<DeclTy<R>>),
+    DTgeneric(TypeName, Box<[DeclTy<R>]>),
     /// Union type.
     /// The values that are members of this type are the union of the values
     /// that are members of the components of the union.
@@ -210,8 +210,8 @@ pub enum DeclTy_<R: Reason> {
     ///   Tunion []  is the "nothing" type, with no values
     ///   Tunion [int;float] is the same as num
     ///   Tunion [null;t] is the same as Toption t
-    DTunion(Vec<DeclTy<R>>),
-    DTintersection(Vec<DeclTy<R>>),
+    DTunion(Box<[DeclTy<R>]>),
+    DTintersection(Box<[DeclTy<R>]>),
     /// Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>"
     DTvecOrDict(DeclTy<R>, DeclTy<R>),
     DTaccess(TaccessType<R, DeclTy<R>>),
@@ -267,8 +267,8 @@ walkable!(impl<R: Reason, TY> for FunImplicitParams<R, TY> => [capability]);
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct FunType<R: Reason, TY> {
     pub arity: FunArity<R, TY>,
-    pub tparams: Vec<Tparam<R, TY>>,
-    pub where_constraints: Vec<WhereConstraint<TY>>,
+    pub tparams: Box<[Tparam<R, TY>]>,
+    pub where_constraints: Box<[WhereConstraint<TY>]>,
     pub params: FunParams<R, TY>,
     pub implicit_params: FunImplicitParams<R, TY>,
     /// Carries through the sync/async information from the aast
@@ -316,7 +316,7 @@ pub struct FunParam<R: Reason, TY> {
 
 walkable!(impl<R: Reason, TY> for FunParam<R, TY> => [ty]);
 
-pub type FunParams<R, TY> = Vec<FunParam<R, TY>>;
+pub type FunParams<R, TY> = Box<[FunParam<R, TY>]>;
 
 /// Origin of Class Constant References:
 /// In order to be able to detect cycle definitions like
@@ -406,7 +406,7 @@ walkable!(Typeconst<R> => {
 pub struct EnumType<R: Reason> {
     pub base: DeclTy<R>,
     pub constraint: Option<DeclTy<R>>,
-    pub includes: Vec<DeclTy<R>>,
+    pub includes: Box<[DeclTy<R>]>,
 }
 
 walkable!(EnumType<R> => [base, constraint, includes]);
@@ -416,11 +416,11 @@ pub struct TypedefType<R: Reason> {
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub pos: R::Pos,
     pub vis: aast::TypedefVisibility,
-    pub tparams: Vec<Tparam<R, DeclTy<R>>>,
+    pub tparams: Box<[Tparam<R, DeclTy<R>>]>,
     pub constraint: Option<DeclTy<R>>,
     pub ty: DeclTy<R>,
     pub is_ctx: bool,
-    pub attributes: Vec<UserAttribute<R::Pos>>,
+    pub attributes: Box<[UserAttribute<R::Pos>]>,
 }
 
 walkable!(TypedefType<R> => [tparams, constraint, ty]);

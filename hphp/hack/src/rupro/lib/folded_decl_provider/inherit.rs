@@ -278,7 +278,7 @@ impl<R: Reason> Inherited<R> {
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) {
-        for ty in &sc.xhp_attr_uses {
+        for ty in sc.xhp_attr_uses.iter() {
             self.add_inherited(Self::from_class_xhp_attrs_only(sc, parents, ty))
         }
     }
@@ -291,19 +291,19 @@ impl<R: Reason> Inherited<R> {
         let mut tys: Vec<&DeclTy<R>> = Vec::new();
         match sc.kind {
             ClassishKind::Cclass(Abstraction::Abstract) => {
-                tys.extend(&sc.implements);
-                tys.extend(&sc.extends);
+                tys.extend(sc.implements.iter());
+                tys.extend(sc.extends.iter());
             }
             ClassishKind::Ctrait => {
-                tys.extend(&sc.implements);
-                tys.extend(&sc.extends);
-                tys.extend(&sc.req_implements);
+                tys.extend(sc.implements.iter());
+                tys.extend(sc.extends.iter());
+                tys.extend(sc.req_implements.iter());
             }
             ClassishKind::Cclass(_)
             | ClassishKind::Cinterface
             | ClassishKind::Cenum
             | ClassishKind::CenumClass(_) => {
-                tys.extend(&sc.extends);
+                tys.extend(sc.extends.iter());
             }
         };
 
@@ -319,7 +319,7 @@ impl<R: Reason> Inherited<R> {
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) {
-        for ty in &sc.req_extends {
+        for ty in sc.req_extends.iter() {
             let mut inherited = Self::from_class(sc, parents, ty);
             inherited.mark_as_synthesized();
             self.add_inherited(inherited);
@@ -346,7 +346,7 @@ impl<R: Reason> Inherited<R> {
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) {
-        for ty in &sc.uses {
+        for ty in sc.uses.iter() {
             self.add_inherited(Self::from_class(sc, parents, ty));
         }
     }

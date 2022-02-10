@@ -236,16 +236,6 @@ end
 (** Backend that provides immediate access to the underlying hashtable. *)
 module ImmediateBackend (_ : Evictability) : Backend
 
-type 'a profiled_value =
-  | RawValue of 'a
-  | ProfiledValue of {
-      entry: 'a;
-      write_time: float;
-    }
-
-(** Backend that provides profiled access to the underlying hashtable. *)
-module ProfiledBackend (_ : Evictability) : Backend
-
 (** A heap for a user-defined type.
 
     Each heap supports "old" and "new" values.

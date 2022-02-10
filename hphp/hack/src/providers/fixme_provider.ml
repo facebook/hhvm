@@ -25,7 +25,7 @@ type fixme_map = Provider_backend.fixme_map
 
 module HH_FIXMES =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (Relative_path.S)
+    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
     (struct
       type t = fixme_map
 
@@ -37,7 +37,7 @@ module HH_FIXMES =
 
 module DECL_HH_FIXMES =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.NonEvictable)) (Relative_path.S)
+    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (Relative_path.S)
     (struct
       type t = fixme_map
 

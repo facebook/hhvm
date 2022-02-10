@@ -568,65 +568,6 @@ functor
       ()
   end
 
-type 'a profiled_value =
-  | RawValue of 'a
-  | ProfiledValue of {
-      entry: 'a;
-      write_time: float;
-    }
-
-module ProfiledBackend (Evictability : Evictability) : Backend =
-functor
-  (KeyHasher : KeyHasher)
-  (Value : Value)
-  ->
-  struct
-    module ProfiledValue = struct
-      (** Tagging a value as Raw (the 99.9999% case) only increases its marshalled
-        size by 1 byte, and does not change its unmarshalled memory
-        representation provided Value.t is a record type containing at least one
-        non-float member. *)
-      type t = Value.t profiled_value
-
-      let description = Value.description
-    end
-
-    module Immediate =
-      ImmediateBackend (Evictability) (KeyHasher) (ProfiledValue)
-
-    let add x y =
-      let sample_rate = SMTelemetry.hh_sample_rate () in
-      let entry =
-        if
-          SMTelemetry.hh_log_level () <> 0
-          && Float.(Random.float 1.0 < sample_rate)
-        then
-          ProfiledValue { entry = y; write_time = Unix.gettimeofday () }
-        else
-          RawValue y
-      in
-      Immediate.add x entry
-
-    let get x : Value.t option =
-      match Immediate.get x with
-      | None -> None
-      | Some (RawValue y) -> Some y
-      | Some (ProfiledValue { entry; write_time }) ->
-        EventLogger.(
-          log_if_initialized @@ fun () ->
-          sharedmem_access_sample
-            ~heap_name:Value.description
-            ~key:(KeyHasher.to_bytes x)
-            ~write_time);
-        Some entry
-
-    let mem = Immediate.mem
-
-    let remove = Immediate.remove
-
-    let move = Immediate.move
-  end
-
 (** Heap that provides direct access to shared memory, but with a layer
     of local changes that allows us to decide whether or not to commit
     specific values. *)

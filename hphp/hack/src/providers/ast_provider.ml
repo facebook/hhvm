@@ -22,7 +22,7 @@ type parse_type =
 
 module ParserHeap =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ProfiledBackend (SharedMem.Evictable)) (Relative_path.S)
+    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (Relative_path.S)
     (struct
       type t = Nast.program * parse_type
 

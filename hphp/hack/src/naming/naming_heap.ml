@@ -98,7 +98,7 @@ module Types = struct
 
   module TypePosHeap =
     SharedMem.HeapWithLocalCache
-      (SharedMem.ProfiledBackend
+      (SharedMem.ImmediateBackend
          (SharedMem.NonEvictable))
          (Typing_deps.DepHashKey)
       (Position)
@@ -108,14 +108,14 @@ module Types = struct
 
   module TypeCanonHeap =
     SharedMem.Heap
-      (SharedMem.ProfiledBackend
+      (SharedMem.ImmediateBackend
          (SharedMem.NonEvictable))
          (Typing_deps.DepHashKey)
       (CanonName)
 
   module BlockedEntries =
     SharedMem.HeapWithLocalCache
-      (SharedMem.ProfiledBackend
+      (SharedMem.ImmediateBackend
          (SharedMem.NonEvictable))
          (Typing_deps.DepHashKey)
       (struct
@@ -235,20 +235,20 @@ module Funs = struct
 
   module FunPosHeap =
     SharedMem.Heap
-      (SharedMem.ProfiledBackend
+      (SharedMem.ImmediateBackend
          (SharedMem.NonEvictable))
          (Typing_deps.DepHashKey)
       (Position)
   module FunCanonHeap =
     SharedMem.Heap
-      (SharedMem.ProfiledBackend
+      (SharedMem.ImmediateBackend
          (SharedMem.NonEvictable))
          (Typing_deps.DepHashKey)
       (CanonName)
 
   module BlockedEntries =
     SharedMem.Heap
-      (SharedMem.ProfiledBackend
+      (SharedMem.ImmediateBackend
          (SharedMem.NonEvictable))
          (Typing_deps.DepHashKey)
       (struct
@@ -343,14 +343,14 @@ module Consts = struct
 
   module ConstPosHeap =
     SharedMem.Heap
-      (SharedMem.ProfiledBackend
+      (SharedMem.ImmediateBackend
          (SharedMem.NonEvictable))
          (Typing_deps.DepHashKey)
       (Position)
 
   module BlockedEntries =
     SharedMem.Heap
-      (SharedMem.ProfiledBackend
+      (SharedMem.ImmediateBackend
          (SharedMem.NonEvictable))
          (Typing_deps.DepHashKey)
       (struct

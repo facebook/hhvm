@@ -149,37 +149,49 @@ impl From<u32> for Attr {
 }
 
 impl From<oxidized::ast_defs::Visibility> for Attr {
-    fn from(k: oxidized::ast_defs::Visibility) -> Attr {
+    fn from(k: oxidized::ast_defs::Visibility) -> Self {
         use oxidized::ast_defs::Visibility;
         match k {
-            Visibility::Private => Attr::AttrPrivate,
-            Visibility::Public => Attr::AttrPublic,
-            Visibility::Protected => Attr::AttrProtected,
-            Visibility::Internal => Attr::AttrPublic,
+            Visibility::Private => Self::AttrPrivate,
+            Visibility::Public => Self::AttrPublic,
+            Visibility::Protected => Self::AttrProtected,
+            Visibility::Internal => Self::AttrPublic,
         }
     }
 }
 
 impl From<&oxidized::ast_defs::Visibility> for Attr {
-    fn from(k: &oxidized::ast_defs::Visibility) -> Attr {
+    fn from(k: &oxidized::ast_defs::Visibility) -> Self {
         use oxidized::ast_defs::Visibility;
         match k {
-            Visibility::Private => Attr::AttrPrivate,
-            Visibility::Public => Attr::AttrPublic,
-            Visibility::Protected => Attr::AttrProtected,
-            Visibility::Internal => Attr::AttrNone,
+            Visibility::Private => Self::AttrPrivate,
+            Visibility::Public => Self::AttrPublic,
+            Visibility::Protected => Self::AttrProtected,
+            Visibility::Internal => Self::AttrPublic,
         }
     }
 }
 
 impl From<hhbc_ast::Visibility> for Attr {
-    fn from(k: hhbc_ast::Visibility) -> Attr {
+    fn from(k: hhbc_ast::Visibility) -> Self {
         use hhbc_ast::Visibility;
         match k {
-            Visibility::Private => Attr::AttrPrivate,
-            Visibility::Public => Attr::AttrPublic,
-            Visibility::Protected => Attr::AttrProtected,
-            Visibility::Internal => Attr::AttrNone,
+            Visibility::Private => Self::AttrPrivate,
+            Visibility::Public => Self::AttrPublic,
+            Visibility::Protected => Self::AttrProtected,
+            Visibility::Internal => Self::AttrPublic,
+        }
+    }
+}
+
+impl std::convert::From<oxidized::ast::UseAsVisibility> for Attr {
+    fn from(k: oxidized::ast::UseAsVisibility) -> Self {
+        use oxidized::ast::UseAsVisibility;
+        match k {
+            UseAsVisibility::UseAsPrivate => Self::AttrPrivate,
+            UseAsVisibility::UseAsPublic => Self::AttrPublic,
+            UseAsVisibility::UseAsProtected => Self::AttrProtected,
+            UseAsVisibility::UseAsFinal => Self::AttrFinal,
         }
     }
 }
@@ -201,64 +213,64 @@ impl Attr {
         }
     }
     pub fn is_final(&self) -> bool {
-        (*self & Attr::AttrFinal) != 0
+        (*self & Self::AttrFinal) != 0
     }
     pub fn is_sealed(&self) -> bool {
-        (*self & Attr::AttrSealed) != 0
+        (*self & Self::AttrSealed) != 0
     }
     pub fn is_abstract(&self) -> bool {
-        (*self & Attr::AttrAbstract) != 0
+        (*self & Self::AttrAbstract) != 0
     }
     pub fn is_interface(&self) -> bool {
-        (*self & Attr::AttrInterface) != 0
+        (*self & Self::AttrInterface) != 0
     }
     pub fn is_trait(&self) -> bool {
-        (*self & Attr::AttrTrait) != 0
+        (*self & Self::AttrTrait) != 0
     }
     pub fn is_const(&self) -> bool {
-        (*self & Attr::AttrIsConst) != 0
+        (*self & Self::AttrIsConst) != 0
     }
     pub fn no_dynamic_props(&self) -> bool {
-        (*self & Attr::AttrForbidDynamicProps) != 0
+        (*self & Self::AttrForbidDynamicProps) != 0
     }
     pub fn needs_no_reifiedinit(&self) -> bool {
-        (*self & Attr::AttrNoReifiedInit) != 0
+        (*self & Self::AttrNoReifiedInit) != 0
     }
     pub fn is_late_init(&self) -> bool {
-        (*self & Attr::AttrLateInit) != 0
+        (*self & Self::AttrLateInit) != 0
     }
     pub fn is_no_bad_redeclare(&self) -> bool {
-        (*self & Attr::AttrNoBadRedeclare) != 0
+        (*self & Self::AttrNoBadRedeclare) != 0
     }
     pub fn initial_satisfies_tc(&self) -> bool {
-        (*self & Attr::AttrInitialSatisfiesTC) != 0
+        (*self & Self::AttrInitialSatisfiesTC) != 0
     }
     pub fn no_implicit_null(&self) -> bool {
-        (*self & Attr::AttrNoImplicitNullable) != 0
+        (*self & Self::AttrNoImplicitNullable) != 0
     }
     pub fn has_system_initial(&self) -> bool {
-        (*self & Attr::AttrSystemInitialValue) != 0
+        (*self & Self::AttrSystemInitialValue) != 0
     }
     pub fn is_deep_init(&self) -> bool {
-        (*self & Attr::AttrDeepInit) != 0
+        (*self & Self::AttrDeepInit) != 0
     }
     pub fn is_lsb(&self) -> bool {
-        (*self & Attr::AttrLSB) != 0
+        (*self & Self::AttrLSB) != 0
     }
     pub fn is_static(&self) -> bool {
-        (*self & Attr::AttrStatic) != 0
+        (*self & Self::AttrStatic) != 0
     }
     pub fn is_readonly(&self) -> bool {
-        (*self & Attr::AttrIsReadonly) != 0
+        (*self & Self::AttrIsReadonly) != 0
     }
     pub fn is_no_injection(&self) -> bool {
-        (*self & Attr::AttrNoInjection) != 0
+        (*self & Self::AttrNoInjection) != 0
     }
     pub fn is_interceptable(&self) -> bool {
-        (*self & Attr::AttrInterceptable) != 0
+        (*self & Self::AttrInterceptable) != 0
     }
     pub fn is_empty(&self) -> bool {
-        *self == Attr::AttrNone
+        *self == Self::AttrNone
     }
 }
 

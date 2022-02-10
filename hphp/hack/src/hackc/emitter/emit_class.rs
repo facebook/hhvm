@@ -15,9 +15,7 @@ use hhas_property::HhasProperty;
 use hhas_type::HhasTypeInfo;
 use hhas_type_const::HhasTypeConstant;
 use hhas_xhp_attribute::HhasXhpAttribute;
-use hhbc_ast::{
-    FatalOp, FcallArgs, FcallFlags, ReadonlyOp, SpecialClsRef, UseAsVisibility, Visibility,
-};
+use hhbc_ast::{FatalOp, FcallArgs, FcallFlags, ReadonlyOp, SpecialClsRef, Visibility};
 use hhbc_id::class::ClassType;
 use hhbc_id::r#const;
 use hhbc_id::{self as hhbc_id, class, method, prop};
@@ -646,11 +644,15 @@ pub fn emit_class<'a, 'arena, 'decl>(
                 let id1 = Maybe::from(ido1.as_ref()).map(elaborate_namespace_id);
                 let id2 = Maybe::from(ido2.as_ref())
                     .map(|x| hhbc_id::class::ClassType::new(Str::new_str(alloc, &x.1)));
+                let attr = vis
+                    .iter()
+                    .fold(Attr::AttrNone, |attr, &v| Attr::from(attr | Attr::from(v)));
+
                 (
                     id1,
                     hhbc_id::class::ClassType::new(Str::new_str(alloc, &id.1)),
                     id2,
-                    Slice::fill_iter(alloc, vis.iter().map(|&v| UseAsVisibility::from(v))),
+                    attr,
                 )
                     .into()
             }),

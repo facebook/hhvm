@@ -485,23 +485,14 @@ fn print_use_precedence<'arena>(
     )
 }
 
-fn print_use_as_visibility(w: &mut dyn Write, u: UseAsVisibility) -> Result<()> {
-    w.write_all(match u {
-        UseAsVisibility::UseAsPublic => b"public",
-        UseAsVisibility::UseAsPrivate => b"private",
-        UseAsVisibility::UseAsProtected => b"protected",
-        UseAsVisibility::UseAsFinal => b"final",
-    })
-}
-
 fn print_use_alias<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    Quadruple(ido1, id, ido2, kindl): &Quadruple<
+    Quadruple(ido1, id, ido2, attr): &Quadruple<
         Maybe<ClassType<'arena>>,
         ClassType<'arena>,
         Maybe<ClassType<'arena>>,
-        Slice<'arena, UseAsVisibility>,
+        Attr,
     >,
 ) -> Result<()> {
     ctx.newline(w)?;
@@ -513,12 +504,16 @@ fn print_use_alias<'arena>(
         id,
     )?;
     w.write_all(b" as ")?;
-    if !kindl.is_empty() {
+    if !attr.is_empty() {
         square(w, |w| {
-            concat_by(w, " ", kindl, |w, k| print_use_as_visibility(w, *k))
+            write!(
+                w,
+                "{}",
+                attrs_to_string_ffi(AttrContext::TraitImport, *attr)
+            )
         })?;
     }
-    write_if!(!kindl.is_empty() && ido2.is_just(), w, " ")?;
+    write_if!(!attr.is_empty() && ido2.is_just(), w, " ")?;
     option(w, ido2.as_ref(), |w, i: &ClassType<'arena>| {
         w.write_all(i.as_bstr())
     })?;
@@ -551,7 +546,7 @@ fn print_uses<'arena>(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasClass<'arena
                     Maybe<ClassType<'arena>>,
                     ClassType<'arena>,
                     Maybe<ClassType<'arena>>,
-                    Slice<'arena, UseAsVisibility>,
+                    Attr,
                 >] = c.use_aliases.as_ref();
                 for x in aliases {
                     print_use_alias(ctx, w, x)?;

@@ -1866,7 +1866,6 @@ dependencies = [
  "hhas_property",
  "hhas_type",
  "hhas_type_const",
- "hhbc_ast",
  "hhbc_id",
  "hhvm_types_ffi",
 ]

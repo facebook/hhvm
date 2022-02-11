@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::alloc::Allocator;
 use crate::decl_defs::{
     AbstractTypeconst, Abstraction, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass,
     FoldedElement, ShallowClass, SubstContext, TypeConst, Typeconst,
@@ -31,7 +32,7 @@ pub(crate) struct Inherited<R: Reason> {
     pub(crate) type_consts: TypeConstNameMap<TypeConst<R>>,
 }
 
-impl<R: Reason> std::default::Default for Inherited<R> {
+impl<R: Reason> Default for Inherited<R> {
     fn default() -> Self {
         Self {
             substs: Default::default(),
@@ -279,17 +280,22 @@ impl<R: Reason> Inherited<R> {
         self.add_type_consts(type_consts);
     }
 
-    fn make_substitution(_cls: &FoldedClass<R>, params: &[DeclTy<R>]) -> TypeNameMap<DeclTy<R>> {
-        Subst::new((), params).into()
+    fn make_substitution(
+        alloc: &Allocator<R>,
+        cls: &FoldedClass<R>,
+        params: &[DeclTy<R>],
+    ) -> TypeNameMap<DeclTy<R>> {
+        Subst::new(alloc, cls.tparams.as_slice(), params).into()
     }
 
     fn inherit_hack_class(
+        alloc: &Allocator<R>,
         child: &ShallowClass<R>,
         parent_name: TypeName,
         parent: &FoldedClass<R>,
         argl: &[DeclTy<R>],
     ) -> Self {
-        let subst = Self::make_substitution(parent, argl);
+        let subst = Self::make_substitution(alloc, parent, argl);
         // TODO(hrust): Do we need sharing?
         let mut substs = parent.substs.clone();
         substs.insert(
@@ -313,6 +319,7 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn from_class(
+        alloc: &Allocator<R>,
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
         parent_ty: &DeclTy<R>,
@@ -320,6 +327,7 @@ impl<R: Reason> Inherited<R> {
         if let Some((_, parent_pos_id, parent_tyl)) = parent_ty.unwrap_class_type() {
             if let Some(parent_folded_decl) = parents.get(&parent_pos_id.id()) {
                 return Self::inherit_hack_class(
+                    alloc,
                     sc,
                     parent_pos_id.id(),
                     parent_folded_decl,
@@ -331,6 +339,7 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn from_class_xhp_attrs_only(
+        _alloc: &Allocator<R>,
         _sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
         ty: &DeclTy<R>,
@@ -345,16 +354,18 @@ impl<R: Reason> Inherited<R> {
 
     fn add_from_xhp_attr_uses(
         &mut self,
+        alloc: &Allocator<R>,
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) {
         for ty in sc.xhp_attr_uses.iter() {
-            self.add_inherited(Self::from_class_xhp_attrs_only(sc, parents, ty))
+            self.add_inherited(Self::from_class_xhp_attrs_only(alloc, sc, parents, ty))
         }
     }
 
     fn add_from_parents(
         &mut self,
+        alloc: &Allocator<R>,
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) {
@@ -380,17 +391,18 @@ impl<R: Reason> Inherited<R> {
         // Interfaces implemented, classes extended and interfaces required to
         // be implemented.
         for ty in tys.iter().rev() {
-            self.add_inherited(Self::from_class(sc, parents, ty));
+            self.add_inherited(Self::from_class(alloc, sc, parents, ty));
         }
     }
 
     fn add_from_requirements(
         &mut self,
+        alloc: &Allocator<R>,
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) {
         for ty in sc.req_extends.iter() {
-            let mut inherited = Self::from_class(sc, parents, ty);
+            let mut inherited = Self::from_class(alloc, sc, parents, ty);
             inherited.mark_as_synthesized();
             self.add_inherited(inherited);
         }
@@ -413,11 +425,12 @@ impl<R: Reason> Inherited<R> {
 
     fn add_from_traits(
         &mut self,
+        alloc: &Allocator<R>,
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) {
         for ty in sc.uses.iter() {
-            self.add_inherited(Self::from_class(sc, parents, ty));
+            self.add_inherited(Self::from_class(alloc, sc, parents, ty));
         }
     }
 
@@ -447,12 +460,16 @@ impl<R: Reason> Inherited<R> {
         //TODO typeconsts
     }
 
-    pub(crate) fn make(sc: &ShallowClass<R>, parents: &TypeNameMap<Arc<FoldedClass<R>>>) -> Self {
+    pub(crate) fn make(
+        alloc: &Allocator<R>,
+        sc: &ShallowClass<R>,
+        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
+    ) -> Self {
         let mut inh = Self::default();
-        inh.add_from_parents(sc, parents); // Members inherited from parents ...
-        inh.add_from_requirements(sc, parents);
-        inh.add_from_traits(sc, parents); // ... can be overridden by traits.
-        inh.add_from_xhp_attr_uses(sc, parents);
+        inh.add_from_parents(alloc, sc, parents); // Members inherited from parents ...
+        inh.add_from_requirements(alloc, sc, parents);
+        inh.add_from_traits(alloc, sc, parents); // ... can be overridden by traits.
+        inh.add_from_xhp_attr_uses(alloc, sc, parents);
 
         inh
     }

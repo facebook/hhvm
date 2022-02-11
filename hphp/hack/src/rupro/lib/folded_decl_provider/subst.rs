@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::DeclTy;
+use crate::alloc::Allocator;
+use crate::decl_defs::{DeclTy, DeclTy_, Tparam};
 use crate::reason::Reason;
 use pos::TypeNameMap;
 
@@ -22,8 +23,26 @@ impl<R: Reason> From<Subst<R>> for TypeNameMap<DeclTy<R>> {
 }
 
 impl<R: Reason> Subst<R> {
-    pub(crate) fn new(_tparams: (), _params: &[DeclTy<R>]) -> Self {
-        Self(Default::default())
+    pub(crate) fn new(
+        alloc: &Allocator<R>,
+        tparams: &[Tparam<R, DeclTy<R>>],
+        targs: &[DeclTy<R>],
+    ) -> Self {
+        // If there are fewer type arguments than type parameters, we'll have
+        // emitted an error elsewhere. We bind missing types to `Tany` (rather
+        // than `Terr`) here to keep parity with the OCaml implementation, which
+        // produces `Tany` because of a now-dead feature called "silent_mode".
+        let targs = targs
+            .iter()
+            .cloned()
+            .chain(std::iter::repeat(alloc.decl_ty(R::none(), DeclTy_::DTany)));
+        Self(
+            tparams
+                .iter()
+                .map(|tparam| tparam.name.id())
+                .zip(targs)
+                .collect(),
+        )
     }
 
     pub(crate) fn instantiate(&self, ty: &DeclTy<R>) -> DeclTy<R> {

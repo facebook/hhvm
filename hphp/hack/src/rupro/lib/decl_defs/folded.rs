@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::decl_defs::{
-    CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, Typeconst, XhpAttribute,
+    CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, Tparam, Typeconst,
+    XhpAttribute,
 };
 use crate::reason::Reason;
 use pos::{
@@ -110,6 +111,7 @@ pub struct FoldedClass<R: Reason> {
     pub constructor: Option<FoldedElement>,
     pub consts: ClassConstNameMap<ClassConst<R>>,
     pub type_consts: TypeConstNameMap<TypeConst<R>>,
+    pub tparams: Vec<Tparam<R, DeclTy<R>>>,
 }
 
 impl FoldedElement {

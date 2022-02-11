@@ -74,7 +74,7 @@ impl<R: Reason> DeclFolder<R> {
             pos: pos.clone(),
             ty: classname_ty,
             origin: name,
-            refs: Vec::new().into_boxed_slice(),
+            refs: Box::default(),
         };
         consts.insert(
             ClassConstName(self.special_names.members.mClass),

@@ -8,15 +8,27 @@ $argv[] = '-f';
 HH\global_set('argv', $argv);
 
 $optind = -1;
-var_dump(getopt_with_optind('f::', null, inout $optind));
+try {
+    getopt_with_optind('f::', null, inout $optind);
+} catch (InvalidArgumentException $e) {
+    echo $e->getMessage()."\n";
+}
 var_dump($optind);
 
 $optind = -1;
-var_dump(getopt_with_optind('g::', null, inout $optind));
+try {
+    getopt_with_optind('g::', null, inout $optind);
+} catch (InvalidArgumentException $e) {
+    echo $e->getMessage()."\n";
+}
 var_dump($optind);
 
 $optind = 0;
-var_dump(getopt_with_optind('f::', null, inout $optind));
+try {
+    getopt_with_optind('f::', null, inout $optind);
+} catch (InvalidArgumentException $e) {
+    echo $e->getMessage()."\n";
+}
 var_dump($optind);
 
 $optind = 10000;

@@ -414,10 +414,11 @@ static Array HHVM_FUNCTION(getopt_with_optind,
                            const Variant& longopts,
                            int64_t& optind) {
   if (optind <= 0) {
-    raise_warning("optind must be positive");
-    // Be conservative and return an empty dict
-    return Array::CreateDict();
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter optind must be a positive integer"
+    );
   }
+
   auto opt_vec = parse_opts(options.data(), options.size());
 
   if (!longopts.isNull()) {

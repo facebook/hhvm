@@ -3,13 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use super::{inherit::Inherited, subst::Subst};
 use crate::alloc::Allocator;
 use crate::decl_defs::{
     CeVisibility, ClassConst, ClassConstKind, ClassEltFlags, ClassEltFlagsArgs, ConsistentKind,
     DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass, ShallowClassConst, ShallowMethod,
     ShallowProp, UserAttribute, Visibility,
 };
-use crate::folded_decl_provider::{inherit::Inherited, subst::Subst};
 use crate::reason::{Reason, ReasonImpl};
 use crate::special_names::SpecialNames;
 use pos::{

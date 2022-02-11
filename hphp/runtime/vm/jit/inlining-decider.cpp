@@ -100,7 +100,9 @@ std::atomic<uint64_t> s_baseProfCount{0};
 
 const StaticString
   s_AlwaysInline("__ALWAYS_INLINE"),
-  s_NeverInline("__NEVER_INLINE");
+  s_NeverInline("__NEVER_INLINE"),
+  s_HH_Coeffects_Backdoor("HH\\Coeffects\\backdoor"),
+  s_HH_Coeffects_Backdoor_Async("HH\\Coeffects\\backdoor_async");
 
 /*
  * Check if the `callee' has any characteristics which prevent inlining,
@@ -578,6 +580,14 @@ bool shouldInline(const irgen::IRGS& irgs,
     return refuse(
       folly::sformat("region has no returns: callee BC instrs = {} : {}",
                      region.instrSize(), show(region)));
+  }
+
+  if (callee->fullName()->isame(s_HH_Coeffects_Backdoor.get()) ||
+      callee->fullName()->isame(s_HH_Coeffects_Backdoor_Async.get()) ||
+      (callee->isClosureBody() &&
+       (callerSk.func()->fullName()->isame(s_HH_Coeffects_Backdoor.get()) ||
+        callerSk.func()->fullName()->isame(s_HH_Coeffects_Backdoor_Async.get())))) {
+    return accept("coeffect backdoor is always inlined");
   }
 
   // Ignore cost computation for functions marked __ALWAYS_INLINE

@@ -8,7 +8,7 @@ use crate::decl_defs::{DeclTy, DeclTy_, Tparam};
 use crate::reason::Reason;
 use pos::TypeNameMap;
 
-pub(crate) struct Subst<R: Reason>(TypeNameMap<DeclTy<R>>);
+pub struct Subst<R: Reason>(TypeNameMap<DeclTy<R>>);
 
 impl<R: Reason> From<TypeNameMap<DeclTy<R>>> for Subst<R> {
     fn from(map: TypeNameMap<DeclTy<R>>) -> Self {
@@ -23,7 +23,7 @@ impl<R: Reason> From<Subst<R>> for TypeNameMap<DeclTy<R>> {
 }
 
 impl<R: Reason> Subst<R> {
-    pub(crate) fn new(
+    pub fn new(
         alloc: &Allocator<R>,
         tparams: &[Tparam<R, DeclTy<R>>],
         targs: &[DeclTy<R>],
@@ -45,7 +45,7 @@ impl<R: Reason> Subst<R> {
         )
     }
 
-    pub(crate) fn instantiate(&self, ty: &DeclTy<R>) -> DeclTy<R> {
+    pub fn instantiate(&self, ty: &DeclTy<R>) -> DeclTy<R> {
         if self.0.is_empty() {
             ty.clone()
         } else {

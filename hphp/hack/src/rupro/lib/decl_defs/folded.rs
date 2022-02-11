@@ -87,7 +87,7 @@ pub struct ClassConst<R: Reason> {
     pub pos: R::Pos,
     pub ty: DeclTy<R>,
     pub origin: TypeName, // Identifies the class from which this const originates
-    pub refs: Vec<ClassConstRef>,
+    pub refs: Box<[ClassConstRef]>,
 }
 
 impl<R: Reason> ClassConst<R> {

@@ -313,6 +313,7 @@ dependencies = [
  "env",
  "escaper",
  "ffi",
+ "hackc_unit",
  "hhas_adata",
  "hhas_attribute",
  "hhas_body",
@@ -323,7 +324,6 @@ dependencies = [
  "hhas_method",
  "hhas_param",
  "hhas_pos",
- "hhas_program",
  "hhas_property",
  "hhas_symbol_refs",
  "hhas_type",
@@ -466,9 +466,9 @@ dependencies = [
  "bytecode_printer",
  "decl_provider",
  "elaborate_namespaces_visitor",
- "emit_program",
+ "emit_unit",
  "env",
- "hhas_program",
+ "hackc_unit",
  "hhbc_ast",
  "instruction_sequence",
  "itertools 0.10.3",
@@ -517,7 +517,7 @@ dependencies = [
  "external_decl_provider",
  "facts_rust",
  "ffi",
- "hhas_program",
+ "hackc_unit",
  "libc",
  "log",
  "no_pos_hash",
@@ -1292,29 +1292,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "emit_program"
-version = "0.0.0"
-dependencies = [
- "bitflags",
- "bumpalo",
- "emit_adata",
- "emit_class",
- "emit_constant",
- "emit_file_attributes",
- "emit_function",
- "emit_symbol_refs",
- "emit_typedef",
- "env",
- "ffi",
- "hhas_program",
- "hhas_symbol_refs",
- "hhbc_ast",
- "instruction_sequence",
- "ocamlrep",
- "oxidized",
-]
-
-[[package]]
 name = "emit_property"
 version = "0.0.0"
 dependencies = [
@@ -1395,6 +1372,29 @@ dependencies = [
  "instruction_sequence",
  "oxidized",
  "runtime",
+]
+
+[[package]]
+name = "emit_unit"
+version = "0.0.0"
+dependencies = [
+ "bitflags",
+ "bumpalo",
+ "emit_adata",
+ "emit_class",
+ "emit_constant",
+ "emit_file_attributes",
+ "emit_function",
+ "emit_symbol_refs",
+ "emit_typedef",
+ "env",
+ "ffi",
+ "hackc_unit",
+ "hhas_symbol_refs",
+ "hhbc_ast",
+ "instruction_sequence",
+ "ocamlrep",
+ "oxidized",
 ]
 
 [[package]]
@@ -1666,6 +1666,22 @@ dependencies = [
  "aast_parser_ffi",
  "positioned_by_ref_parser_ffi",
  "verify_parser_ffi",
+]
+
+[[package]]
+name = "hackc_unit"
+version = "0.0.0"
+dependencies = [
+ "ffi",
+ "hhas_adata",
+ "hhas_attribute",
+ "hhas_class",
+ "hhas_constant",
+ "hhas_function",
+ "hhas_pos",
+ "hhas_symbol_refs",
+ "hhas_typedef",
+ "hhbc_ast",
 ]
 
 [[package]]
@@ -1942,22 +1958,6 @@ name = "hhas_pos"
 version = "0.0.0"
 dependencies = [
  "oxidized",
-]
-
-[[package]]
-name = "hhas_program"
-version = "0.0.0"
-dependencies = [
- "ffi",
- "hhas_adata",
- "hhas_attribute",
- "hhas_class",
- "hhas_constant",
- "hhas_function",
- "hhas_pos",
- "hhas_symbol_refs",
- "hhas_typedef",
- "hhbc_ast",
 ]
 
 [[package]]

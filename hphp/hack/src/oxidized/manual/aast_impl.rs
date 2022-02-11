@@ -209,22 +209,14 @@ impl<Ex, En> Afield<Ex, En> {
 }
 
 // TODO(hrust): consider codegen the following
-impl<'a, Ex, En> Into<Cow<'a, Method_<Ex, En>>> for Method_<Ex, En>
-where
-    Ex: Clone,
-    En: Clone,
-{
-    fn into(self) -> Cow<'a, Self> {
-        Cow::Owned(self)
+impl<Ex: Clone, En: Clone> From<Method_<Ex, En>> for Cow<'_, Method_<Ex, En>> {
+    fn from(x: Method_<Ex, En>) -> Self {
+        Cow::Owned(x)
     }
 }
 
-impl<'a, Ex, En> Into<Cow<'a, Method_<Ex, En>>> for &'a Method_<Ex, En>
-where
-    Ex: Clone,
-    En: Clone,
-{
-    fn into(self) -> Cow<'a, Method_<Ex, En>> {
-        Cow::Borrowed(self)
+impl<'a, Ex: Clone, En: Clone> From<&'a Method_<Ex, En>> for Cow<'a, Method_<Ex, En>> {
+    fn from(x: &'a Method_<Ex, En>) -> Self {
+        Cow::Borrowed(x)
     }
 }

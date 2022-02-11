@@ -60,12 +60,12 @@ pub fn run(args: &Args) -> Result<Vec<(PathBuf, String)>> {
         Box::new(MutVisitorTrait),
     ];
 
-    Ok(generators
+    generators
         .into_iter()
         .map(|g| {
             let code = g.gen(&ctx)?;
             let filepath = output_dir.join(g.filename());
             Ok((filepath, format!("{}", code)))
         })
-        .collect::<Result<Vec<_>>>()?)
+        .collect::<Result<Vec<_>>>()
 }

@@ -11,7 +11,298 @@ open Hh_prelude
 open Hh_json
 module Util = Symbol_json_util
 module Build_json = Symbol_build_json
-module ST = Symbol_builder_types
+module Predicate = Symbol_predicate
+
+type glean_json = {
+  classConstDeclaration: Hh_json.json list;
+  classConstDefinition: Hh_json.json list;
+  classDeclaration: Hh_json.json list;
+  classDefinition: Hh_json.json list;
+  declarationComment: Hh_json.json list;
+  declarationLocation: Hh_json.json list;
+  declarationSpan: Hh_json.json list;
+  enumDeclaration: Hh_json.json list;
+  enumDefinition: Hh_json.json list;
+  enumerator: Hh_json.json list;
+  fileDeclarations: Hh_json.json list;
+  fileLines: Hh_json.json list;
+  fileXRefs: Hh_json.json list;
+  functionDeclaration: Hh_json.json list;
+  functionDefinition: Hh_json.json list;
+  globalConstDeclaration: Hh_json.json list;
+  globalConstDefinition: Hh_json.json list;
+  interfaceDeclaration: Hh_json.json list;
+  interfaceDefinition: Hh_json.json list;
+  methodDeclaration: Hh_json.json list;
+  methodDefinition: Hh_json.json list;
+  methodOccurrence: Hh_json.json list;
+  methodOverrides: Hh_json.json list;
+  namespaceDeclaration: Hh_json.json list;
+  propertyDeclaration: Hh_json.json list;
+  propertyDefinition: Hh_json.json list;
+  traitDeclaration: Hh_json.json list;
+  traitDefinition: Hh_json.json list;
+  typeConstDeclaration: Hh_json.json list;
+  typeConstDefinition: Hh_json.json list;
+  typedefDeclaration: Hh_json.json list;
+  typedefDefinition: Hh_json.json list;
+}
+
+type t = {
+  resultJson: glean_json;
+  (* Maps fact JSON key to a list of predicate/fact id pairs *)
+  factIds: (Predicate.t * int) list JMap.t;
+}
+
+let rec find_fid fid_list pred =
+  match fid_list with
+  | [] -> None
+  | (p, fid) :: tail ->
+    if phys_equal p pred then
+      Some fid
+    else
+      find_fid tail pred
+
+let get_next_elem_id () =
+  let x = ref 1 in
+  fun () ->
+    let r = !x in
+    x := !x + 1;
+    r
+
+let json_element_id = get_next_elem_id ()
+
+let update_json_data predicate json progress =
+  let open Symbol_predicate in
+  let json =
+    match predicate with
+    | ClassConstDeclaration ->
+      {
+        progress.resultJson with
+        classConstDeclaration =
+          json :: progress.resultJson.classConstDeclaration;
+      }
+    | ClassConstDefinition ->
+      {
+        progress.resultJson with
+        classConstDefinition = json :: progress.resultJson.classConstDefinition;
+      }
+    | ClassDeclaration ->
+      {
+        progress.resultJson with
+        classDeclaration = json :: progress.resultJson.classDeclaration;
+      }
+    | ClassDefinition ->
+      {
+        progress.resultJson with
+        classDefinition = json :: progress.resultJson.classDefinition;
+      }
+    | DeclarationComment ->
+      {
+        progress.resultJson with
+        declarationComment = json :: progress.resultJson.declarationComment;
+      }
+    | DeclarationLocation ->
+      {
+        progress.resultJson with
+        declarationLocation = json :: progress.resultJson.declarationLocation;
+      }
+    | DeclarationSpan ->
+      {
+        progress.resultJson with
+        declarationSpan = json :: progress.resultJson.declarationSpan;
+      }
+    | EnumDeclaration ->
+      {
+        progress.resultJson with
+        enumDeclaration = json :: progress.resultJson.enumDeclaration;
+      }
+    | EnumDefinition ->
+      {
+        progress.resultJson with
+        enumDefinition = json :: progress.resultJson.enumDefinition;
+      }
+    | Enumerator ->
+      {
+        progress.resultJson with
+        enumerator = json :: progress.resultJson.enumerator;
+      }
+    | FileDeclarations ->
+      {
+        progress.resultJson with
+        fileDeclarations = json :: progress.resultJson.fileDeclarations;
+      }
+    | FileLines ->
+      {
+        progress.resultJson with
+        fileLines = json :: progress.resultJson.fileLines;
+      }
+    | FileXRefs ->
+      {
+        progress.resultJson with
+        fileXRefs = json :: progress.resultJson.fileXRefs;
+      }
+    | FunctionDeclaration ->
+      {
+        progress.resultJson with
+        functionDeclaration = json :: progress.resultJson.functionDeclaration;
+      }
+    | FunctionDefinition ->
+      {
+        progress.resultJson with
+        functionDefinition = json :: progress.resultJson.functionDefinition;
+      }
+    | GlobalConstDeclaration ->
+      {
+        progress.resultJson with
+        globalConstDeclaration =
+          json :: progress.resultJson.globalConstDeclaration;
+      }
+    | GlobalConstDefinition ->
+      {
+        progress.resultJson with
+        globalConstDefinition =
+          json :: progress.resultJson.globalConstDefinition;
+      }
+    | InterfaceDeclaration ->
+      {
+        progress.resultJson with
+        interfaceDeclaration = json :: progress.resultJson.interfaceDeclaration;
+      }
+    | InterfaceDefinition ->
+      {
+        progress.resultJson with
+        interfaceDefinition = json :: progress.resultJson.interfaceDefinition;
+      }
+    | MethodDeclaration ->
+      {
+        progress.resultJson with
+        methodDeclaration = json :: progress.resultJson.methodDeclaration;
+      }
+    | MethodDefinition ->
+      {
+        progress.resultJson with
+        methodDefinition = json :: progress.resultJson.methodDefinition;
+      }
+    | MethodOccurrence ->
+      {
+        progress.resultJson with
+        methodOccurrence = json :: progress.resultJson.methodOccurrence;
+      }
+    | MethodOverrides ->
+      {
+        progress.resultJson with
+        methodOverrides = json :: progress.resultJson.methodOverrides;
+      }
+    | NamespaceDeclaration ->
+      {
+        progress.resultJson with
+        namespaceDeclaration = json :: progress.resultJson.namespaceDeclaration;
+      }
+    | PropertyDeclaration ->
+      {
+        progress.resultJson with
+        propertyDeclaration = json :: progress.resultJson.propertyDeclaration;
+      }
+    | PropertyDefinition ->
+      {
+        progress.resultJson with
+        propertyDefinition = json :: progress.resultJson.propertyDefinition;
+      }
+    | TraitDeclaration ->
+      {
+        progress.resultJson with
+        traitDeclaration = json :: progress.resultJson.traitDeclaration;
+      }
+    | TraitDefinition ->
+      {
+        progress.resultJson with
+        traitDefinition = json :: progress.resultJson.traitDefinition;
+      }
+    | TypeConstDeclaration ->
+      {
+        progress.resultJson with
+        typeConstDeclaration = json :: progress.resultJson.typeConstDeclaration;
+      }
+    | TypeConstDefinition ->
+      {
+        progress.resultJson with
+        typeConstDefinition = json :: progress.resultJson.typeConstDefinition;
+      }
+    | TypedefDeclaration ->
+      {
+        progress.resultJson with
+        typedefDeclaration = json :: progress.resultJson.typedefDeclaration;
+      }
+    | TypedefDefinition ->
+      {
+        progress.resultJson with
+        typedefDefinition = json :: progress.resultJson.typedefDefinition;
+      }
+  in
+  { resultJson = json; factIds = progress.factIds }
+
+let should_cache predicate =
+  let open Symbol_predicate in
+  match predicate with
+  | ClassConstDeclaration
+  | ClassDeclaration
+  | EnumDeclaration
+  | Enumerator
+  | FunctionDeclaration
+  | GlobalConstDeclaration
+  | InterfaceDeclaration
+  | MethodDeclaration
+  | PropertyDeclaration
+  | TraitDeclaration
+  | TypeConstDeclaration
+  | TypedefDeclaration ->
+    true
+  | _ -> false
+
+(* Add a fact of the given predicate type to the running result, if an identical
+ fact has not yet been added. Return the fact's id (which can be referenced in
+ other facts), and the updated result. *)
+let add_fact predicate json_key progress =
+  let add_id =
+    let newFactId = json_element_id () in
+    let progress =
+      {
+        resultJson = progress.resultJson;
+        factIds =
+          (if should_cache predicate then
+            JMap.add
+              json_key
+              [(predicate, newFactId)]
+              progress.factIds
+              ~combine:List.append
+          else
+            progress.factIds);
+      }
+    in
+    (newFactId, true, progress)
+  in
+  let (id, is_new, progress) =
+    if should_cache predicate then
+      match JMap.find_opt json_key progress.factIds with
+      | None -> add_id
+      | Some fid_list ->
+        (match find_fid fid_list predicate with
+        | None -> add_id
+        | Some fid -> (fid, false, progress))
+    else
+      add_id
+  in
+  let json_fact =
+    JSON_Object [("id", JSON_Number (string_of_int id)); ("key", json_key)]
+  in
+  let progress =
+    if is_new then
+      update_json_data predicate json_fact progress
+    else
+      progress
+  in
+  (id, progress)
 
 (* Add a namespace fact if the nsenv is non-empty; otherwise,
 return progress unchanged *)
@@ -24,13 +315,13 @@ let namespace_decl nsenv progress =
       [("name", Build_json.build_namespaceqname_json_nested ns)]
     in
     let (_fid, prog) =
-      Util.add_fact ST.NamespaceDeclaration (JSON_Object json_fields) progress
+      add_fact Predicate.NamespaceDeclaration (JSON_Object json_fields) progress
     in
     prog
 
 let container_decl decl_pred name progress =
   let json = JSON_Object [("name", Build_json.build_qname_json_nested name)] in
-  Util.add_fact decl_pred json progress
+  add_fact decl_pred json progress
 
 (* Helper function for adding facts for container parents, given
 a context, a list of declarations, a predicate type, and progress state *)
@@ -64,21 +355,21 @@ let container_defn ctx source_map clss decl_id member_decls prog =
     parent_decls
       ctx
       (List.map req_extends_hints ~f:fst)
-      ST.ClassDeclaration
+      Predicate.ClassDeclaration
       prog
   in
   let (req_implements, prog) =
     parent_decls
       ctx
       (List.map req_implements_hints ~f:fst)
-      ST.InterfaceDeclaration
+      Predicate.InterfaceDeclaration
       prog
   in
   let (defn_pred, json_fields, prog) =
-    match Util.get_parent_kind clss with
-    | ST.InterfaceContainer ->
+    match Predicate.get_parent_kind clss with
+    | Predicate.InterfaceContainer ->
       let (extends, prog) =
-        parent_decls ctx clss.c_extends ST.InterfaceDeclaration prog
+        parent_decls ctx clss.c_extends Predicate.InterfaceDeclaration prog
       in
       let req_fields =
         common_fields
@@ -87,13 +378,13 @@ let container_defn ctx source_map clss decl_id member_decls prog =
             ("requireExtends", JSON_Array req_extends);
           ]
       in
-      (ST.InterfaceDefinition, req_fields, prog)
-    | ST.TraitContainer ->
+      (Predicate.InterfaceDefinition, req_fields, prog)
+    | Predicate.TraitContainer ->
       let (impls, prog) =
-        parent_decls ctx clss.c_implements ST.InterfaceDeclaration prog
+        parent_decls ctx clss.c_implements Predicate.InterfaceDeclaration prog
       in
       let (uses, prog) =
-        parent_decls ctx clss.c_uses ST.TraitDeclaration prog
+        parent_decls ctx clss.c_uses Predicate.TraitDeclaration prog
       in
       let req_fields =
         common_fields
@@ -104,15 +395,15 @@ let container_defn ctx source_map clss decl_id member_decls prog =
             ("requireImplements", JSON_Array req_implements);
           ]
       in
-      (ST.TraitDefinition, req_fields, prog)
-    | ST.ClassContainer ->
+      (Predicate.TraitDefinition, req_fields, prog)
+    | Predicate.ClassContainer ->
       let is_abstract = Ast_defs.is_c_abstract clss.c_kind in
       let (class_fields, prog) =
         let (impls, prog) =
-          parent_decls ctx clss.c_implements ST.InterfaceDeclaration prog
+          parent_decls ctx clss.c_implements Predicate.InterfaceDeclaration prog
         in
         let (uses, prog) =
-          parent_decls ctx clss.c_uses ST.TraitDeclaration prog
+          parent_decls ctx clss.c_uses Predicate.TraitDeclaration prog
         in
         let req_class_fields =
           common_fields
@@ -131,7 +422,7 @@ let container_defn ctx source_map clss decl_id member_decls prog =
             let parent_clss =
               Util.strip_tparams (Util.get_type_from_hint ctx parent)
             in
-            container_decl ST.ClassDeclaration parent_clss prog
+            container_decl Predicate.ClassDeclaration parent_clss prog
           in
           ( ("extends_", Build_json.build_id_json decl_id) :: req_class_fields,
             prog )
@@ -141,9 +432,9 @@ let container_defn ctx source_map clss decl_id member_decls prog =
             (snd clss.c_name);
           (req_class_fields, prog)
       in
-      (ST.ClassDefinition, class_fields, prog)
+      (Predicate.ClassDefinition, class_fields, prog)
   in
-  Util.add_fact defn_pred (JSON_Object json_fields) prog
+  add_fact defn_pred (JSON_Object json_fields) prog
 
 let property_decl con_type decl_id name progress =
   let json =
@@ -153,7 +444,7 @@ let property_decl con_type decl_id name progress =
         ("container", Build_json.build_container_json_ref con_type decl_id);
       ]
   in
-  Util.add_fact ST.PropertyDeclaration json progress
+  add_fact Predicate.PropertyDeclaration json progress
 
 let class_const_decl con_type decl_id name progress =
   let json =
@@ -163,7 +454,7 @@ let class_const_decl con_type decl_id name progress =
         ("container", Build_json.build_container_json_ref con_type decl_id);
       ]
   in
-  Util.add_fact ST.ClassConstDeclaration json progress
+  add_fact Predicate.ClassConstDeclaration json progress
 
 let type_const_decl con_type decl_id name progress =
   let json =
@@ -173,7 +464,7 @@ let type_const_decl con_type decl_id name progress =
         ("container", Build_json.build_container_json_ref con_type decl_id);
       ]
   in
-  Util.add_fact ST.TypeConstDeclaration json progress
+  add_fact Predicate.TypeConstDeclaration json progress
 
 let method_decl con_type decl_id name progress =
   let json =
@@ -183,7 +474,7 @@ let method_decl con_type decl_id name progress =
         ("container", Build_json.build_container_json_ref con_type decl_id);
       ]
   in
-  Util.add_fact ST.MethodDeclaration json progress
+  add_fact Predicate.MethodDeclaration json progress
 
 let method_defn ctx source_map meth decl_id progress =
   let tparams =
@@ -211,7 +502,7 @@ let method_defn ctx source_map meth decl_id progress =
         ("typeParams", JSON_Array tparams);
       ]
   in
-  Util.add_fact ST.MethodDefinition json progress
+  add_fact Predicate.MethodDefinition json progress
 
 let method_overrides
     meth_name base_cont_name base_cont_type der_cont_name der_cont_type prog =
@@ -230,7 +521,7 @@ let method_overrides
             base_cont_type );
       ]
   in
-  Util.add_fact ST.MethodOverrides json prog
+  add_fact Predicate.MethodOverrides json prog
 
 let property_defn ctx source_map prop decl_id progress =
   let base_fields =
@@ -253,7 +544,7 @@ let property_defn ctx source_map prop decl_id progress =
       let ty = Util.get_type_from_hint ctx h in
       ("type", Build_json.build_type_json_nested ty) :: base_fields
   in
-  Util.add_fact ST.PropertyDefinition (JSON_Object json_fields) progress
+  add_fact Predicate.PropertyDefinition (JSON_Object json_fields) progress
 
 let class_const_defn ctx source_map const decl_id progress =
   let base_fields = [("declaration", Build_json.build_id_json decl_id)] in
@@ -277,7 +568,7 @@ let class_const_defn ctx source_map const decl_id progress =
       let ty = Util.get_type_from_hint ctx h in
       ("type", Build_json.build_type_json_nested ty) :: json_fields
   in
-  Util.add_fact ST.ClassConstDefinition (JSON_Object json_fields) progress
+  add_fact Predicate.ClassConstDefinition (JSON_Object json_fields) progress
 
 let type_const_defn ctx source_map tc decl_id progress =
   let base_fields =
@@ -300,16 +591,16 @@ let type_const_defn ctx source_map tc decl_id progress =
       ("type", Build_json.build_type_json_nested ty) :: base_fields
     | TCAbstract { c_atc_default = None; _ } -> base_fields
   in
-  Util.add_fact ST.TypeConstDefinition (JSON_Object json_fields) progress
+  add_fact Predicate.TypeConstDefinition (JSON_Object json_fields) progress
 
 let enum_decl name progress =
   let json = JSON_Object [("name", Build_json.build_qname_json_nested name)] in
-  Util.add_fact ST.EnumDeclaration json progress
+  add_fact Predicate.EnumDeclaration json progress
 
 let enum_defn ctx source_map enm enum_id enum_data enumerators progress =
   let prog = namespace_decl enm.c_namespace progress in
   let (includes, prog) =
-    parent_decls ctx enum_data.e_includes ST.EnumDeclaration prog
+    parent_decls ctx enum_data.e_includes Predicate.EnumDeclaration prog
   in
   let is_enum_class = Aast.is_enum_class enm in
   let json_fields =
@@ -334,7 +625,7 @@ let enum_defn ctx source_map enm enum_id enum_data enumerators progress =
         Build_json.build_type_json_nested (Util.get_type_from_hint ctx c) )
       :: json_fields
   in
-  Util.add_fact ST.EnumDefinition (JSON_Object json_fields) prog
+  add_fact Predicate.EnumDefinition (JSON_Object json_fields) prog
 
 let enumerator decl_id const_name progress =
   let json =
@@ -344,11 +635,11 @@ let enumerator decl_id const_name progress =
         ("enumeration", Build_json.build_id_json decl_id);
       ]
   in
-  Util.add_fact ST.Enumerator json progress
+  add_fact Predicate.Enumerator json progress
 
 let func_decl name progress =
   let json = JSON_Object [("name", Build_json.build_qname_json_nested name)] in
-  Util.add_fact ST.FunctionDeclaration json progress
+  add_fact Predicate.FunctionDeclaration json progress
 
 let func_defn ctx source_map fd decl_id progress =
   let elem = fd.fd_fun in
@@ -370,11 +661,11 @@ let func_defn ctx source_map fd decl_id progress =
       ("typeParams", JSON_Array tparams);
     ]
   in
-  Util.add_fact ST.FunctionDefinition (JSON_Object json_fields) prog
+  add_fact Predicate.FunctionDefinition (JSON_Object json_fields) prog
 
 let typedef_decl name progress =
   let json = JSON_Object [("name", Build_json.build_qname_json_nested name)] in
-  Util.add_fact ST.TypedefDeclaration json progress
+  add_fact Predicate.TypedefDeclaration json progress
 
 let typedef_defn ctx source_map elem decl_id progress =
   let prog = namespace_decl elem.t_namespace progress in
@@ -398,11 +689,11 @@ let typedef_defn ctx source_map elem decl_id progress =
       ("typeParams", JSON_Array tparams);
     ]
   in
-  Util.add_fact ST.TypedefDefinition (JSON_Object json_fields) prog
+  add_fact Predicate.TypedefDefinition (JSON_Object json_fields) prog
 
 let gconst_decl name progress =
   let json = JSON_Object [("name", Build_json.build_qname_json_nested name)] in
-  Util.add_fact ST.GlobalConstDeclaration json progress
+  add_fact Predicate.GlobalConstDeclaration json progress
 
 let gconst_defn ctx source_map elem decl_id progress =
   let prog = namespace_decl elem.cst_namespace progress in
@@ -427,7 +718,7 @@ let gconst_defn ctx source_map elem decl_id progress =
       ("type", Build_json.build_type_json_nested ty) :: req_fields
   in
   let json = JSON_Object json_fields in
-  Util.add_fact ST.GlobalConstDefinition json prog
+  add_fact Predicate.GlobalConstDefinition json prog
 
 let decl_loc pos decl_json progress =
   let filepath = Relative_path.to_absolute (Pos.filename pos) in
@@ -439,7 +730,7 @@ let decl_loc pos decl_json progress =
         ("span", Build_json.build_bytespan_json pos);
       ]
   in
-  Util.add_fact ST.DeclarationLocation json progress
+  add_fact Predicate.DeclarationLocation json progress
 
 let decl_comment pos decl_json progress =
   let filepath = Relative_path.to_absolute (Pos.filename pos) in
@@ -451,7 +742,7 @@ let decl_comment pos decl_json progress =
         ("span", Build_json.build_bytespan_json pos);
       ]
   in
-  Util.add_fact ST.DeclarationComment json progress
+  add_fact Predicate.DeclarationComment json progress
 
 let decl_span pos decl_json progress =
   let filepath = Relative_path.to_absolute (Pos.filename pos) in
@@ -463,7 +754,7 @@ let decl_span pos decl_json progress =
         ("span", Build_json.build_bytespan_json pos);
       ]
   in
-  Util.add_fact ST.DeclarationSpan json progress
+  add_fact Predicate.DeclarationSpan json progress
 
 let file_lines filepath sourceText progress =
   let lineLengths =
@@ -479,7 +770,7 @@ let file_lines filepath sourceText progress =
       endsInNewline
       hasUnicodeOrTabs
   in
-  Util.add_fact ST.FileLines json progress
+  add_fact Predicate.FileLines json progress
 
 let file_xrefs filepath xref_map progress =
   let json =
@@ -489,7 +780,7 @@ let file_xrefs filepath xref_map progress =
         ("xrefs", Build_json.build_xrefs_json xref_map);
       ]
   in
-  Util.add_fact ST.FileXRefs json progress
+  add_fact Predicate.FileXRefs json progress
 
 let file_decls filepath decls progress =
   let json =
@@ -499,7 +790,7 @@ let file_decls filepath decls progress =
         ("declarations", JSON_Array decls);
       ]
   in
-  Util.add_fact ST.FileDeclarations json progress
+  add_fact Predicate.FileDeclarations json progress
 
 let method_occ receiver_class name progress =
   let module SO = SymbolOccurrence in
@@ -513,4 +804,95 @@ let method_occ receiver_class name progress =
          | SO.UnknownClass -> []);
        ]
   in
-  Util.add_fact ST.MethodOccurrence (JSON_Object json) progress
+  add_fact Predicate.MethodOccurrence (JSON_Object json) progress
+
+let init_progress =
+  let default_json =
+    {
+      classConstDeclaration = [];
+      classConstDefinition = [];
+      classDeclaration = [];
+      classDefinition = [];
+      declarationComment = [];
+      declarationLocation = [];
+      declarationSpan = [];
+      enumDeclaration = [];
+      enumDefinition = [];
+      enumerator = [];
+      fileDeclarations = [];
+      fileLines = [];
+      fileXRefs = [];
+      functionDeclaration = [];
+      functionDefinition = [];
+      globalConstDeclaration = [];
+      globalConstDefinition = [];
+      interfaceDeclaration = [];
+      interfaceDefinition = [];
+      methodDeclaration = [];
+      methodDefinition = [];
+      methodOccurrence = [];
+      methodOverrides = [];
+      namespaceDeclaration = [];
+      propertyDeclaration = [];
+      propertyDefinition = [];
+      traitDeclaration = [];
+      traitDefinition = [];
+      typeConstDeclaration = [];
+      typeConstDefinition = [];
+      typedefDeclaration = [];
+      typedefDefinition = [];
+    }
+  in
+  { resultJson = default_json; factIds = JMap.empty }
+
+let progress_to_json progress =
+  let resultJson = progress.resultJson in
+  let preds =
+    (* The order is the reverse of how these items appear in the JSON,
+       which is significant because later entries can refer to earlier ones
+       by id only *)
+    ("src.FileLines.1", resultJson.fileLines)
+    ::
+    List.map
+      ~f:(fun (pred, res) -> (pred ^ "." ^ Hh_glean_version.hack_version, res))
+      [
+        ("hack.FileDeclarations", resultJson.fileDeclarations);
+        ("hack.FileXRefs", resultJson.fileXRefs);
+        ("hack.MethodOverrides", resultJson.methodOverrides);
+        ("hack.MethodDefinition", resultJson.methodDefinition);
+        ("hack.FunctionDefinition", resultJson.functionDefinition);
+        ("hack.EnumDefinition", resultJson.enumDefinition);
+        ("hack.ClassConstDefinition", resultJson.classConstDefinition);
+        ("hack.PropertyDefinition", resultJson.propertyDefinition);
+        ("hack.TypeConstDefinition", resultJson.typeConstDefinition);
+        ("hack.ClassDefinition", resultJson.classDefinition);
+        ("hack.TraitDefinition", resultJson.traitDefinition);
+        ("hack.InterfaceDefinition", resultJson.interfaceDefinition);
+        ("hack.TypedefDefinition", resultJson.typedefDefinition);
+        ("hack.GlobalConstDefinition", resultJson.globalConstDefinition);
+        ("hack.DeclarationComment", resultJson.declarationComment);
+        ("hack.DeclarationLocation", resultJson.declarationLocation);
+        ("hack.DeclarationSpan", resultJson.declarationSpan);
+        ("hack.MethodDeclaration", resultJson.methodDeclaration);
+        ("hack.ClassConstDeclaration", resultJson.classConstDeclaration);
+        ("hack.PropertyDeclaration", resultJson.propertyDeclaration);
+        ("hack.TypeConstDeclaration", resultJson.typeConstDeclaration);
+        ("hack.FunctionDeclaration", resultJson.functionDeclaration);
+        ("hack.Enumerator", resultJson.enumerator);
+        ("hack.EnumDeclaration", resultJson.enumDeclaration);
+        ("hack.ClassDeclaration", resultJson.classDeclaration);
+        ("hack.TraitDeclaration", resultJson.traitDeclaration);
+        ("hack.InterfaceDeclaration", resultJson.interfaceDeclaration);
+        ("hack.TypedefDeclaration", resultJson.typedefDeclaration);
+        ("hack.GlobalConstDeclaration", resultJson.globalConstDeclaration);
+        ("hack.NamespaceDeclaration", resultJson.namespaceDeclaration);
+        ("hack.MethodOccurrence", resultJson.methodOccurrence);
+      ]
+  in
+  let json_array =
+    List.fold preds ~init:[] ~f:(fun acc (pred, json_lst) ->
+        JSON_Object
+          [("predicate", JSON_String pred); ("facts", JSON_Array json_lst)]
+        :: acc)
+  in
+  json_array

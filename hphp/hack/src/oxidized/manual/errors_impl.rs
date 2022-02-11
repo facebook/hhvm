@@ -66,13 +66,13 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> Ord for UserError<PP, P> {
         let Message(other_pos, other_msg) = other_claim;
         // The primary sort order is by file of the claim (main message).
         self_pos
-            .cmp_file(&other_pos)
+            .cmp_file(other_pos)
             // If the files are the same, sort by phase.
             .then(((*self_code / 1000) as isize).cmp(&((*other_code / 1000) as isize)))
             // If the phases are the same, sort by position.
-            .then(self_pos.cmp(&other_pos))
+            .then(self_pos.cmp(other_pos))
             // If the positions are the same, sort by claim message text.
-            .then(self_msg.cmp(&other_msg))
+            .then(self_msg.cmp(other_msg))
             // If the claim message text is the same, compare the reason
             // messages (which contain further explanation for the error
             // reported in the claim message).

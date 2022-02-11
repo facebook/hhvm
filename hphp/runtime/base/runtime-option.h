@@ -839,7 +839,7 @@ struct RuntimeOption {
   F(bool, EnableImplicitContext,       false)                           \
   F(bool, MoreAccurateMemStats,        true)                            \
   F(bool, AllowScopeBinding,           false)                           \
-  F(bool, AssembleHhasProgram,         false)                           \
+  F(bool, TranslateHackC,              false)                           \
   F(bool, JitNoGdb,                    true)                            \
   F(bool, SpinOnCrash,                 false)                           \
   F(uint32_t, DumpRingBufferOnCrash,   0)                               \
@@ -1431,6 +1431,7 @@ struct RuntimeOption {
   F(string, TaintConfigurationPath, std::string(""))                    \
   F(string, TaintConfigurationJson, std::string(""))                    \
   F(string, TaintOutputDirectory, std::string(""))                      \
+  F(bool, TaintLogRequestURLs, false)                                   \
   F(bool, DiamondTraitMethods, false)                                   \
   F(uint32_t, HHIRSpecializedDestructorThreshold, 80)                   \
   /* */

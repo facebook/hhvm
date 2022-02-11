@@ -28,7 +28,7 @@ let write_file file_dir num_tasts json_chunks =
 let write_json
     (ctx : Provider_context.t)
     (file_dir : string)
-    (files_info : Symbol_builder_types.file_info list)
+    (files_info : Symbol_file_info.t list)
     (start_time : float) : unit =
   try
     let (small, large) =

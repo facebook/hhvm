@@ -25,11 +25,10 @@ function ss($s) {
     case 'nope5':
     case 'nope6':
     case 'nope7':
-    default:
-      return 'nope';
-
     case 'hello there':
       return 'hi!';
+    default:
+      return 'nope';
   }
 }
 

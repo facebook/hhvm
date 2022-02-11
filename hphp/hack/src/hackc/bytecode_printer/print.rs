@@ -16,6 +16,7 @@ use bstr::{BString, ByteSlice};
 use core_utils_rust::add_ns;
 use escaper::{escape, escape_bstr, escape_bstr_by, is_lit_printable};
 use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
+use hackc_unit::HackCUnit;
 use hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX};
 use hhas_attribute::{self as hhas_attribute, HhasAttribute};
 use hhas_body::{HhasBody, HhasBodyEnv};
@@ -26,7 +27,6 @@ use hhas_function::HhasFunction;
 use hhas_method::{HhasMethod, HhasMethodFlags};
 use hhas_param::HhasParam;
 use hhas_pos::{HhasPos, HhasSpan};
-use hhas_program::HhasProgram;
 use hhas_property::HhasProperty;
 use hhas_symbol_refs::{HhasSymbolRefs, IncludePath};
 use hhas_type::HhasTypeInfo;
@@ -74,7 +74,7 @@ pub struct ExprEnv<'arena, 'e> {
     pub codegen_env: Option<&'e HhasBodyEnv<'arena>>,
 }
 
-fn print_program(ctx: &Context<'_>, w: &mut dyn Write, prog: &HhasProgram<'_>) -> Result<()> {
+fn print_unit(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Result<()> {
     match ctx.path {
         Some(p) => {
             let abs = p.to_absolute();
@@ -91,7 +91,7 @@ fn print_program(ctx: &Context<'_>, w: &mut dyn Write, prog: &HhasProgram<'_>) -
             concat_str(w, [".filepath ", &format!("\"{}\"", p), ";"])?;
 
             newline(w)?;
-            handle_not_impl(|| print_program_(ctx, w, prog))?;
+            handle_not_impl(|| print_unit_(ctx, w, prog))?;
 
             newline(w)?;
             concat_str_by(w, " ", ["#", p.as_ref(), "ends here"])?;
@@ -102,7 +102,7 @@ fn print_program(ctx: &Context<'_>, w: &mut dyn Write, prog: &HhasProgram<'_>) -
             w.write_all(b"#starts here")?;
 
             newline(w)?;
-            handle_not_impl(|| print_program_(ctx, w, prog))?;
+            handle_not_impl(|| print_unit_(ctx, w, prog))?;
 
             newline(w)?;
             w.write_all(b"#ends here")?;
@@ -120,7 +120,7 @@ fn get_fatal_op(f: &FatalOp) -> &str {
     }
 }
 
-fn print_program_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HhasProgram<'_>) -> Result<()> {
+fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Result<()> {
     if let Just(Triple(fop, p, msg)) = &prog.fatal {
         newline(w)?;
         let HhasPos {
@@ -955,7 +955,7 @@ fn print_fcall_args(
         num_rets,
         inouts,
         readonly,
-        async_eager_label,
+        async_eager_target,
         context,
     }: &FcallArgs<'_>,
 ) -> Result<()> {
@@ -990,7 +990,7 @@ fn print_fcall_args(
         })
     })?;
     w.write_all(b" ")?;
-    option_or(w, async_eager_label.as_ref(), print_label, "-")?;
+    option_or(w, async_eager_target.as_ref(), print_label, "-")?;
     w.write_all(b" ")?;
     match context {
         Just(s) => quotes(w, |w| w.write_all(s)),
@@ -1030,11 +1030,6 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>) -> Result<()> {
             I::NewObjS(r) => {
                 w.write_all(b"NewObjS ")?;
                 print_special_cls_ref(w, r)
-            }
-            I::FCall(fcall_args) => {
-                w.write_all(b"FCall ")?;
-                print_fcall_args(w, fcall_args)?;
-                w.write_all(br#" "" """#)
             }
             I::FCallClsMethod { fcall_args, log } => {
                 w.write_all(b"FCallClsMethod ")?;
@@ -1686,21 +1681,21 @@ fn print_misc(w: &mut dyn Write, misc: &InstructMisc<'_>) -> Result<()> {
         M::MemoSet(Nothing) => w.write_all(b"MemoSet L:0+0"),
         M::MemoSet(_) => Err(Error::fail("MemoSet needs an unnamed local").into()),
 
-        M::MemoGetEager(label1, label2, Just(Pair(Local::Unnamed(first), local_count))) => {
+        M::MemoGetEager([label1, label2], Just(Pair(Local::Unnamed(first), local_count))) => {
             w.write_all(b"MemoGetEager ")?;
             print_label(w, label1)?;
             w.write_all(b" ")?;
             print_label(w, label2)?;
             write!(w, " L:{}+{}", first, local_count)
         }
-        M::MemoGetEager(label1, label2, Nothing) => {
+        M::MemoGetEager([label1, label2], Nothing) => {
             w.write_all(b"MemoGetEager ")?;
             print_label(w, label1)?;
             w.write_all(b" ")?;
             print_label(w, label2)?;
             w.write_all(b" L:0+0")
         }
-        M::MemoGetEager(_, _, _) => Err(Error::fail("MemoGetEager needs an unnamed local").into()),
+        M::MemoGetEager(_, _) => Err(Error::fail("MemoGetEager needs an unnamed local").into()),
 
         M::MemoSetEager(Just(Pair(Local::Unnamed(first), local_count))) => {
             write!(w, "MemoSetEager L:{}+{}", first, local_count)
@@ -1770,18 +1765,27 @@ fn print_control_flow(w: &mut dyn Write, cf: &InstructControlFlow<'_>) -> Result
         CF::RetCSuspended => w.write_all(b"RetCSuspended"),
         CF::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
         CF::Throw => w.write_all(b"Throw"),
-        CF::Switch { kind, base, labels } => print_switch(w, kind, base, labels.as_ref()),
-        CF::SSwitch { labels } => match labels.as_ref() {
-            [] => Err(Error::fail("sswitch should have at least one case").into()),
-            [rest @ .., Pair(_, lastlabel)] => {
+        CF::Switch {
+            kind,
+            base,
+            targets,
+        } => print_switch(w, kind, base, targets.as_ref()),
+        CF::SSwitch { cases, targets } => match (cases.as_ref(), targets.as_ref()) {
+            ([], _) | (_, []) => Err(Error::fail("sswitch should have at least one case").into()),
+            ([rest_cases @ .., _last_case], [rest_targets @ .., last_target]) => {
                 w.write_all(b"SSwitch ")?;
+                let rest: Vec<_> = rest_cases
+                    .iter()
+                    .zip(rest_targets)
+                    .map(|(case, target)| Pair(case, target))
+                    .collect();
                 angle(w, |w| {
-                    concat_by(w, " ", rest, |w, Pair(s, l)| {
-                        write_bytes!(w, r#""{}":"#, escape_bstr(s.as_bstr()))?;
-                        print_label(w, l)
+                    concat_by(w, " ", rest, |w, Pair(case, target)| {
+                        write_bytes!(w, r#""{}":"#, escape_bstr(case.as_bstr()))?;
+                        print_label(w, target)
                     })?;
                     w.write_all(b" -:")?;
-                    print_label(w, lastlabel)
+                    print_label(w, last_target)
                 })
             }
         },
@@ -3106,12 +3110,12 @@ pub fn expr_to_string_lossy(mut ctx: Context<'_>, expr: &ast::Expr) -> String {
     s.to_string()
 }
 
-pub fn external_print_program(
+pub fn external_print_unit(
     ctx: &Context<'_>,
     w: &mut dyn std::io::Write,
-    prog: &HhasProgram<'_>,
+    prog: &HackCUnit<'_>,
 ) -> std::result::Result<(), Error> {
-    print_program(ctx, w, prog).map_err(write::into_error)?;
+    print_unit(ctx, w, prog).map_err(write::into_error)?;
     w.flush().map_err(write::into_error)?;
     Ok(())
 }

@@ -21,6 +21,8 @@ pub trait Reason:
     /// it will call cons() to obtain the ReasonImpl to construct the instance.
     fn mk(cons: impl FnOnce() -> ReasonImpl<Self, Self::Pos>) -> Self;
 
+    fn none() -> Self;
+
     fn pos(&self) -> &Self::Pos;
 
     fn to_oxidized(&self) -> oxidized::typing_reason::Reason;
@@ -149,6 +151,10 @@ impl Reason for BReason {
         Self(Box::new(x))
     }
 
+    fn none() -> Self {
+        BReason(Box::new(ReasonImpl::Rnone))
+    }
+
     fn pos(&self) -> &BPos {
         use ReasonImpl::*;
         match &*self.0 {
@@ -179,6 +185,10 @@ impl Reason for NReason {
     type Pos = NPos;
 
     fn mk(_cons: impl FnOnce() -> ReasonImpl<Self, Self::Pos>) -> Self {
+        NReason
+    }
+
+    fn none() -> Self {
         NReason
     }
 

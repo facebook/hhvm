@@ -185,15 +185,8 @@ void fill_record(const VanillaDict* arr, const void* addr,
       record.setStr("value_memb", memb);
     }
     if (elm->isTombstone()) {
-      record.setStr("skey", "<tombstone>");
       record.setStr("value_type", "<tombstone>");
     } else {
-      if (elm->hasIntKey()) {
-        record.setInt("ikey", elm->ikey);
-      } else {
-        assertx(elm->hasStrKey());
-        record.setStr("skey", elm->skey->data());
-      }
       record.setStr("value_type", tname(elm->data.m_type));
     }
   }

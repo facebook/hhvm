@@ -31,44 +31,15 @@
 
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
+#include "hphp/runtime/ext/facts/sqlite-autoload-db.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash.h"
+#include "hphp/util/sqlite-wrapper.h"
 #include "hphp/util/thread-local.h"
 
 namespace HPHP {
 namespace Facts {
-
-DBData::DBData(
-    folly::fs::path path, SQLite::OpenMode rwMode, ::gid_t gid, ::mode_t perms)
-    : m_path{std::move(path)}, m_rwMode{rwMode}, m_gid{gid}, m_perms{perms} {
-  always_assert(m_path.is_absolute());
-
-  // Coerce DB permissions into unix owner/group/other bits
-  XLOGF(
-      DBG1,
-      "Coercing DB permission bits {:04o} to {:04o}",
-      m_perms,
-      (m_perms | 0600) & 0666);
-  m_perms |= 0600;
-  m_perms &= 0666;
-}
-
-bool DBData::operator==(const DBData& rhs) const {
-  return m_path == rhs.m_path && m_rwMode == rhs.m_rwMode &&
-         m_gid == rhs.m_gid && m_perms == rhs.m_perms;
-}
-
-std::string DBData::toString() const {
-  return folly::sformat("DBData({}, {}, {})", m_path.native(), m_gid, m_perms);
-}
-
-size_t DBData::hash() const {
-  return folly::hash::hash_combine(
-      hash_string_cs(m_path.native().c_str(), m_path.native().size()),
-      std::hash<gid_t>{}(m_gid),
-      std::hash<mode_t>{}(m_perms));
-}
 
 namespace {
 
@@ -91,7 +62,7 @@ void setFilePerms(const folly::fs::path& path, ::gid_t gid, ::mode_t perms) {
   SCOPE_EXIT {
     ::close(dbFd);
   };
-  if (::fchown(dbFd, -1, gid) == -1) {
+  if (::fchown(dbFd, static_cast<uid_t>(-1), gid) == -1) {
     XLOGF(
         ERR,
         "Could not chown({}, -1, {}): errno={}",
@@ -342,19 +313,6 @@ std::string getTransitiveDerivedTypesQueryStr(
       typeKindWhereClause,
       deriveKindWhereClause,
       typeKindWhereClause);
-}
-
-/**
- * Move the given query forward one step. If it's at the end, return none.
- * Otherwise, call the given function `fn()` on the query to extract a result.
- */
-template <typename T>
-Optional<T> stepThroughQuery(SQLiteQuery& query, T (*fn)(SQLiteQuery&)) {
-  query.step();
-  if (!query.row()) {
-    return {};
-  }
-  return fn(query);
 }
 
 struct PathStmts {
@@ -642,8 +600,8 @@ struct ClockStmts {
   SQLiteStmt m_get;
 };
 
-struct AutoloadDBImpl final : public AutoloadDB {
-  explicit AutoloadDBImpl(SQLite db)
+struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
+  explicit SQLiteAutoloadDBImpl(SQLite db)
       : m_db{std::move(db)}
       , m_txn{m_db.begin()}
       , m_pathStmts{m_db}
@@ -657,15 +615,16 @@ struct AutoloadDBImpl final : public AutoloadDB {
 
   // We can't move `m_db` unless it has no outstanding
   // transactions. I've just chosen to solve this by making
-  // `AutoloadDBImpl` unmoveable.
-  AutoloadDBImpl(const AutoloadDBImpl&) = delete;
-  AutoloadDBImpl(AutoloadDBImpl&&) noexcept = delete;
-  AutoloadDBImpl& operator=(const AutoloadDBImpl&) = delete;
-  AutoloadDBImpl& operator=(AutoloadDBImpl&&) noexcept = delete;
+  // `SQLiteAutoloadDBImpl` unmoveable.
+  SQLiteAutoloadDBImpl(const SQLiteAutoloadDBImpl&) = delete;
+  SQLiteAutoloadDBImpl(SQLiteAutoloadDBImpl&&) noexcept = delete;
+  SQLiteAutoloadDBImpl& operator=(const SQLiteAutoloadDBImpl&) = delete;
+  SQLiteAutoloadDBImpl& operator=(SQLiteAutoloadDBImpl&&) noexcept = delete;
 
-  ~AutoloadDBImpl() override = default;
+  ~SQLiteAutoloadDBImpl() override = default;
 
-  static std::unique_ptr<AutoloadDB> get(const DBData& dbData) {
+  static std::unique_ptr<SQLiteAutoloadDB>
+  get(const SQLiteAutoloadDB::Key& dbData) {
     assertx(dbData.m_path.is_absolute());
     auto db = [&]() {
       try {
@@ -720,11 +679,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
       XLOGF(INFO, "Connected to SQLite DB at {}", dbData.m_path.native());
     }
 
-    return std::make_unique<AutoloadDBImpl>(std::move(db));
-  }
-
-  bool isReadOnly() const override {
-    return m_db.isReadOnly();
+    return std::make_unique<SQLiteAutoloadDBImpl>(std::move(db));
   }
 
   void commit() override {
@@ -861,14 +816,14 @@ struct AutoloadDBImpl final : public AutoloadDB {
     auto query = m_txn.query(m_typeStmts.m_getDerivedTypes);
     query.bindString("@base", base);
     query.bindInt("@kind", toDBEnum(kind));
-    std::vector<SymbolPath> edges;
+    std::vector<SymbolPath> derivedTypes;
     XLOGF(DBG9, "Running {}", query.sql());
     for (query.step(); query.row(); query.step()) {
-      edges.push_back(
+      derivedTypes.push_back(
           {.m_symbol = std::string{query.getString(1)},
            .m_path = folly::fs::path{std::string{query.getString(0)}}});
     }
-    return edges;
+    return derivedTypes;
   }
 
   SQLiteStmt& getTransitiveDerivedTypesStmt(
@@ -893,14 +848,16 @@ struct AutoloadDBImpl final : public AutoloadDB {
     query.bindString("@base", baseType);
     XLOGF(DBG9, "Running {}", query.sql());
     return MultiResult<DerivedTypeInfo>{
-        [query = std::move(query)]() mutable -> Optional<DerivedTypeInfo> {
-          return stepThroughQuery<DerivedTypeInfo>(query, [](SQLiteQuery& q) {
-            return DerivedTypeInfo{
-                .m_type = std::string{q.getString(0)},
-                .m_path = {std::string{q.getString(1)}},
-                .m_kind = toTypeKind(q.getString(2)),
-                .m_flags = q.getInt(3)};
-          });
+        [q = std::move(query)]() mutable -> Optional<DerivedTypeInfo> {
+          q.step();
+          if (!q.row()) {
+            return {};
+          }
+          return DerivedTypeInfo{
+              .m_type = std::string{q.getString(0)},
+              .m_path = std::string{q.getString(1)},
+              .m_kind = toTypeKind(q.getString(2)),
+              .m_flags = q.getInt(3)};
         }};
   }
 
@@ -1262,49 +1219,61 @@ struct AutoloadDBImpl final : public AutoloadDB {
   MultiResult<PathAndHash> getAllPathsAndHashes() override {
     auto query = m_txn.query(m_pathStmts.m_getAll);
     XLOGF(DBG9, "Running {}", query.sql());
-    return MultiResult<PathAndHash>{[query = std::move(query)]() mutable {
-      return stepThroughQuery<PathAndHash>(query, [](SQLiteQuery& q) {
-        return PathAndHash{
-            .m_path = {std::string{q.getString(0)}},
-            .m_hash = std::string{q.getString(1)}};
-      });
-    }};
+    return MultiResult<PathAndHash>{
+        [q = std::move(query)]() mutable -> Optional<PathAndHash> {
+          q.step();
+          if (!q.row()) {
+            return {};
+          }
+          return PathAndHash{
+              .m_path = {std::string{q.getString(0)}},
+              .m_hash = std::string{q.getString(1)}};
+        }};
   }
 
   MultiResult<SymbolPath> getAllTypePaths() override {
     auto query = m_txn.query(m_typeStmts.m_getAll);
     XLOGF(DBG9, "Running {}", query.sql());
-    return MultiResult<SymbolPath>{[query = std::move(query)]() mutable {
-      return stepThroughQuery<SymbolPath>(query, [](SQLiteQuery& q) {
-        return SymbolPath{
-            .m_symbol = std::string{q.getString(0)},
-            .m_path = {std::string{q.getString(1)}}};
-      });
-    }};
+    return MultiResult<SymbolPath>{
+        [q = std::move(query)]() mutable -> Optional<SymbolPath> {
+          q.step();
+          if (!q.row()) {
+            return {};
+          }
+          return SymbolPath{
+              .m_symbol = std::string{q.getString(0)},
+              .m_path = {std::string{q.getString(1)}}};
+        }};
   }
 
   MultiResult<SymbolPath> getAllFunctionPaths() override {
     auto query = m_txn.query(m_functionStmts.m_getAll);
     XLOGF(DBG9, "Running {}", query.sql());
-    return MultiResult<SymbolPath>{[query = std::move(query)]() mutable {
-      return stepThroughQuery<SymbolPath>(query, [](SQLiteQuery& q) {
-        return SymbolPath{
-            .m_symbol = std::string{q.getString(0)},
-            .m_path = {std::string{q.getString(1)}}};
-      });
-    }};
+    return MultiResult<SymbolPath>{
+        [q = std::move(query)]() mutable -> Optional<SymbolPath> {
+          q.step();
+          if (!q.row()) {
+            return {};
+          }
+          return SymbolPath{
+              .m_symbol = std::string{q.getString(0)},
+              .m_path = {std::string{q.getString(1)}}};
+        }};
   }
 
   MultiResult<SymbolPath> getAllConstantPaths() override {
     auto query = m_txn.query(m_constantStmts.m_getAll);
     XLOGF(DBG9, "Running {}", query.sql());
-    return MultiResult<SymbolPath>{[query = std::move(query)]() mutable {
-      return stepThroughQuery<SymbolPath>(query, [](SQLiteQuery& q) {
-        return SymbolPath{
-            .m_symbol = std::string{q.getString(0)},
-            .m_path = {std::string{q.getString(1)}}};
-      });
-    }};
+    return MultiResult<SymbolPath>{
+        [q = std::move(query)]() mutable -> Optional<SymbolPath> {
+          q.step();
+          if (!q.row()) {
+            return {};
+          }
+          return SymbolPath{
+              .m_symbol = std::string{q.getString(0)},
+              .m_path = {std::string{q.getString(1)}}};
+        }};
   }
 
   void insertClock(const Clock& clock) override {
@@ -1327,19 +1296,13 @@ struct AutoloadDBImpl final : public AutoloadDB {
         .m_mergebase = std::string{query.getString(1)}};
   }
 
+  bool isReadOnly() const noexcept override {
+    return m_db.isReadOnly();
+  }
+
   void runPostBuildOptimizations() override {
     try {
-      auto DEBUG_ONLY t0 = std::chrono::steady_clock::now();
-      XLOG(DBG0, "Running ANALYZE...");
       m_db.analyze();
-      auto DEBUG_ONLY tf = std::chrono::steady_clock::now();
-      XLOGF(
-          DBG0,
-          "Finished ANALYZE in {:.3} seconds.",
-          static_cast<double>(
-              std::chrono::duration_cast<std::chrono::milliseconds>(tf - t0)
-                  .count()) /
-              1000);
     } catch (const SQLiteExc& e) {
       XLOGF(ERR, "Error while running ANALYZE: {}", e.what());
     } catch (std::exception& e) {
@@ -1347,6 +1310,7 @@ struct AutoloadDBImpl final : public AutoloadDB {
     }
   }
 
+private:
   SQLite m_db;
   SQLiteTxn m_txn;
   PathStmts m_pathStmts;
@@ -1360,21 +1324,51 @@ struct AutoloadDBImpl final : public AutoloadDB {
   ClockStmts m_clockStmts;
 };
 
-using AutoloadDBThreadLocal = hphp_hash_map<
-    std::pair<std::string, SQLite::OpenMode>,
-    std::unique_ptr<AutoloadDB>>;
+using SQLiteAutoloadDBThreadLocal = hphp_hash_map<
+    std::tuple<std::string, SQLite::OpenMode>,
+    std::unique_ptr<SQLiteAutoloadDB>>;
 
-THREAD_LOCAL(AutoloadDBThreadLocal, t_adb);
+THREAD_LOCAL(SQLiteAutoloadDBThreadLocal, t_adb);
 
 } // namespace
 
-AutoloadDB::~AutoloadDB() = default;
+SQLiteAutoloadDB::Key::Key(
+    folly::fs::path path, SQLite::OpenMode rwMode, ::gid_t gid, ::mode_t perms)
+    : m_path{std::move(path)}, m_rwMode{rwMode}, m_gid{gid}, m_perms{perms} {
+  always_assert(m_path.is_absolute());
 
-AutoloadDB& getDB(const DBData& dbData) {
-  AutoloadDBThreadLocal& dbVault = *t_adb.get();
+  // Coerce DB permissions into unix owner/group/other bits
+  XLOGF(
+      DBG1,
+      "Coercing DB permission bits {:04o} to {:04o}",
+      m_perms,
+      (m_perms | 0600) & 0666);
+  m_perms |= 0600;
+  m_perms &= 0666;
+}
+
+bool SQLiteAutoloadDB::Key::operator==(const SQLiteAutoloadDB::Key& rhs) const {
+  return m_path == rhs.m_path && m_rwMode == rhs.m_rwMode &&
+         m_gid == rhs.m_gid && m_perms == rhs.m_perms;
+}
+
+std::string SQLiteAutoloadDB::Key::toString() const {
+  return folly::sformat(
+      "SQLiteAutoloadDB::Key({}, {}, {})", m_path.native(), m_gid, m_perms);
+}
+
+size_t SQLiteAutoloadDB::Key::hash() const {
+  return folly::hash::hash_combine(
+      hash_string_cs(m_path.native().c_str(), m_path.native().size()),
+      std::hash<gid_t>{}(m_gid),
+      std::hash<mode_t>{}(m_perms));
+}
+
+SQLiteAutoloadDB& SQLiteAutoloadDB::getThreadLocal(const Key& dbData) {
+  SQLiteAutoloadDBThreadLocal& dbVault = *t_adb.get();
   auto& dbPtr = dbVault[{dbData.m_path.native(), dbData.m_rwMode}];
   if (!dbPtr) {
-    dbPtr = AutoloadDBImpl::get(dbData);
+    dbPtr = SQLiteAutoloadDBImpl::get(dbData);
   }
   return *dbPtr;
 }

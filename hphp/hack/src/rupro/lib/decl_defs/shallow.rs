@@ -48,12 +48,21 @@ walkable!(ShallowClassConst<R> => [ty]);
 pub struct ShallowTypeconst<R: Reason> {
     pub name: Positioned<TypeConstName, R::Pos>,
     pub kind: Typeconst<R>,
-    pub enforceable: (R::Pos, bool),
-    pub reifiable: Option<R::Pos>,
+    pub enforceable: Option<R::Pos>, // When Some, points to __Enforceable attribute
+    pub reifiable: Option<R::Pos>,   // When Some, points to __Reifiable attribute
     pub is_ctx: bool,
 }
 
 walkable!(ShallowTypeconst<R> => [kind]);
+
+impl<R: Reason> ShallowTypeconst<R> {
+    pub fn is_enforceable(&self) -> bool {
+        self.enforceable.is_some()
+    }
+    pub fn is_reifiable(&self) -> bool {
+        self.reifiable.is_some()
+    }
+}
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ShallowProp<R: Reason> {

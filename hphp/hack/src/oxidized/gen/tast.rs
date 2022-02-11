@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<525694b42d0623e0515312dd3964de0d>>
+// @generated SignedSource<<8348287f780af86e7f14e3efbc869466>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -49,11 +49,7 @@ pub struct FunTastInfo {
     Clone,
     Debug,
     Deserialize,
-    Eq,
     FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
     PartialEq,
     PartialOrd,
     Serialize,

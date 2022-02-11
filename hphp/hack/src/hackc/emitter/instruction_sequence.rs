@@ -776,14 +776,14 @@ pub mod instr {
 
     pub fn switch<'a>(
         alloc: &'a bumpalo::Bump,
-        labels: bumpalo::collections::Vec<'a, Label>,
+        targets: bumpalo::collections::Vec<'a, Label>,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
             Instruct::IContFlow(InstructControlFlow::Switch {
                 kind: SwitchKind::Unbounded,
                 base: 0,
-                labels: BumpSliceMut::new(alloc, labels.into_bump_slice_mut()),
+                targets: BumpSliceMut::new(alloc, targets.into_bump_slice_mut()),
             }),
         )
     }
@@ -796,17 +796,17 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         cases: bumpalo::collections::Vec<'a, (&'a str, Label)>,
     ) -> InstrSeq<'a> {
-        let labels = BumpSliceMut::new(
+        let targets = BumpSliceMut::new(
             alloc,
-            alloc.alloc_slice_fill_iter(
-                cases
-                    .into_iter()
-                    .map(|(s, label)| Pair(Str::from(s), label)),
-            ),
+            alloc.alloc_slice_fill_iter(cases.iter().map(|(_, target)| *target)),
+        );
+        let cases = BumpSliceMut::new(
+            alloc,
+            alloc.alloc_slice_fill_iter(cases.into_iter().map(|(s, _)| Str::from(s))),
         );
         instr(
             alloc,
-            Instruct::IContFlow(InstructControlFlow::SSwitch { labels }),
+            Instruct::IContFlow(InstructControlFlow::SSwitch { cases, targets }),
         )
     }
 
@@ -980,8 +980,7 @@ pub mod instr {
         instr(
             alloc,
             Instruct::IMisc(InstructMisc::MemoGetEager(
-                label1,
-                label2,
+                [label1, label2],
                 range_opt_to_maybe(range),
             )),
         )

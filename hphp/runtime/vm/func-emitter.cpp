@@ -133,16 +133,6 @@ void FuncEmitter::setLineTable(LineTable table) {
   m_lineTable = Func::LineTablePtr::FromPtr(new LineTable{std::move(table)});
 }
 
-void FuncEmitter::setSourceLocTable(const SourceLocTable& table) {
-  m_sourceLocTab.clear();
-  for (auto const& e : table) {
-    m_sourceLocTab.emplace_back(e.pastOffset(), e.val());
-  }
-  for (size_t i = m_sourceLocTab.size(); i > 1; --i) {
-    m_sourceLocTab[i - 1].first = m_sourceLocTab[i - 2].first;
-  }
-}
-
 namespace {
 
 using SrcLoc = std::vector<std::pair<Offset, SourceLoc>>;

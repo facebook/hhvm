@@ -129,7 +129,7 @@ impl<'a> Context<'a> {
             let item = defs
                 .get(&ty)
                 .ok_or_else(|| anyhow!("Type {} not found", ty))?;
-            visited.insert(get_ty_def_name(&item)?);
+            visited.insert(get_ty_def_name(item)?);
             let deps = get_dep_tys(&defined_types, item)?;
             for d in deps.into_iter() {
                 if !visited.contains(&d) {

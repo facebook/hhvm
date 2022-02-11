@@ -127,6 +127,7 @@ endif()
 
 set(HHBC_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc")
 set(HHBC_AST_SRCS
+  "hhbc/hackc_unit.rs"
   "hhbc/hhas_adata.rs"
   "hhbc/hhas_attribute.rs"
   "hhbc/hhas_body.rs"
@@ -137,7 +138,6 @@ set(HHBC_AST_SRCS
   "hhbc/hhas_method.rs"
   "hhbc/hhas_param.rs"
   "hhbc/hhas_pos.rs"
-  "hhbc/hhas_program.rs"
   "hhbc/hhas_property.rs"
   "hhbc/hhas_symbol_refs.rs"
   "hhbc/hhas_type.rs"

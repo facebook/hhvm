@@ -13,10 +13,10 @@ function f($x) {
     print "3-1";
   case "foo":
     print "foo-1";
-  default:
-    print "default";
   case "bar":
     print "bar";
+  default:
+    print "default";
   }
   print "\n";
 }

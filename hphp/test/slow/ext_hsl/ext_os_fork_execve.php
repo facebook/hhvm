@@ -86,8 +86,8 @@ function main(): void {
   list($er, $ew) = _OS\pipe();
   list($fd42r, $fd42w) = _OS\pipe();
   $pid = _OS\fork_and_execve(
-    '/bin/sh',
-    vec['/bin/sh', '-c', 'echo Foo; echo Bar >&2; echo Baz >&42'],
+    '/bin/bash',
+    vec['/bin/bash', '-c', 'echo Foo; echo Bar >&2; echo Baz >&42'],
     vec[],
     dict[
       _OS\STDOUT_FILENO => $ow,
@@ -151,4 +151,12 @@ function main(): void {
       posix_strerror($e->getCode()),
     );
   }
+
+  print("--- No TypeError for verifying ForkAndExecveOptions\n");
+  shape() as \HH\Lib\_Private\_OS\ForkAndExecVeOptions;
+
+  print("--- No TypeError for passing ForkAndExecveOptions\n");
+  $f = (\HH\Lib\_Private\_OS\ForkAndExecveOptions $_options) ==> 42;
+  $f(shape());
+
 }

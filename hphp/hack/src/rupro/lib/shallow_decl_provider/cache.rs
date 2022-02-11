@@ -185,21 +185,21 @@ impl<R: Reason> ShallowDeclCache<R> {
 
     fn add_class(&self, name: TypeName, cls: Arc<ShallowClass<R>>) {
         let cid = cls.name.id();
-        for prop in &cls.props {
+        for prop in cls.props.iter() {
             if let Some(ty) = &prop.ty {
                 self.properties.insert((cid, prop.name.id()), ty.clone())
             }
         }
-        for prop in &cls.static_props {
+        for prop in cls.static_props.iter() {
             if let Some(ty) = &prop.ty {
                 self.static_properties
                     .insert((cid, prop.name.id()), ty.clone())
             }
         }
-        for meth in &cls.methods {
+        for meth in cls.methods.iter() {
             self.methods.insert((cid, meth.name.id()), meth.ty.clone())
         }
-        for meth in &cls.static_methods {
+        for meth in cls.static_methods.iter() {
             self.static_methods
                 .insert((cid, meth.name.id()), meth.ty.clone())
         }

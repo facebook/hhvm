@@ -294,7 +294,11 @@ impl<R: Reason> Allocator<R> {
         shallow::ShallowTypeconst {
             name: self.pos_type_const_from_decl(stc.name),
             kind: self.typeconst(stc.kind),
-            enforceable: (self.pos_from_decl(stc.enforceable.0), stc.enforceable.1),
+            enforceable: if stc.enforceable.1 {
+                Some(self.pos_from_decl(stc.enforceable.0))
+            } else {
+                None
+            },
             reifiable: stc.reifiable.map(|pos| self.pos_from_decl(pos)),
             is_ctx: stc.is_ctx,
         }

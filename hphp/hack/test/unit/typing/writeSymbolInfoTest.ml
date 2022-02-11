@@ -11,12 +11,27 @@ open Hh_json
 open Hh_json.Access
 open Hh_json_helpers
 open Symbol_build_json
-open Symbol_builder_types
+open Symbol_predicate
 open Symbol_json_util
 open OUnit2
+module Util = Symbol_json_util
+module Build_json = Symbol_build_json
+module Predicate = Symbol_predicate
+module Add_fact = Symbol_add_fact
+
+let extract_facts_from_obj pred_name = function
+  | JSON_Object [("predicate", JSON_String p); ("facts", JSON_Array l)]
+    when p = pred_name ->
+    Some l
+  | _ -> None
+
+let extract_facts_exn pred_name json_objects =
+  match List.filter_map ~f:(extract_facts_from_obj pred_name) json_objects with
+  | [facts] -> facts
+  | _ -> failwith ("There should be exactly one predicate " ^ pred_name)
 
 let test_add_fact _test_ctxt =
-  let progress = init_progress in
+  let progress = Add_fact.init_progress in
   let json_key =
     JSON_Object
       [
@@ -29,41 +44,67 @@ let test_add_fact _test_ctxt =
             ] );
       ]
   in
-  let (res_id, progress) = add_fact ClassDeclaration json_key progress in
+  let (res_id, progress) =
+    Add_fact.add_fact ClassDeclaration json_key progress
+  in
+  let facts_class_declaration =
+    extract_facts_exn
+      "hack.ClassDeclaration.5"
+      (Add_fact.progress_to_json progress)
+  in
   Int_asserter.assert_equals
     1
-    (List.length progress.resultJson.classDeclaration)
+    (List.length facts_class_declaration)
     "One class decl fact added to JSON";
-  let fact_json = List.nth progress.resultJson.classDeclaration 0 in
+  let fact_json = List.nth facts_class_declaration 0 in
   let fact_id = Jget.int_d fact_json "id" ~default:(-1) in
   Int_asserter.assert_equals res_id fact_id "Id returned is JSON id of new fact";
-  let (res_id2, progress) = add_fact ClassDeclaration json_key progress in
+  let (res_id2, progress) =
+    Add_fact.add_fact ClassDeclaration json_key progress
+  in
+  let facts_class_declaration =
+    extract_facts_exn
+      "hack.ClassDeclaration.5"
+      (Add_fact.progress_to_json progress)
+  in
   Int_asserter.assert_equals
     res_id
     res_id2
     "Adding identical facts results in same ids";
   Int_asserter.assert_equals
     1
-    (List.length progress.resultJson.classDeclaration)
+    (List.length facts_class_declaration)
     "Only one class decl fact in JSON after identical addition";
-  let (res_id3, progress) = add_fact FunctionDeclaration json_key progress in
+  let (res_id3, progress) =
+    Add_fact.add_fact FunctionDeclaration json_key progress
+  in
+  let facts_function_declaration =
+    extract_facts_exn
+      "hack.FunctionDeclaration.5"
+      (Add_fact.progress_to_json progress)
+  in
   assert_bool
     "Identical keys for different predicates are separate facts"
     (res_id != res_id3);
   Int_asserter.assert_equals
     1
-    (List.length progress.resultJson.functionDeclaration)
+    (List.length facts_function_declaration)
     "One function decl fact added to JSON"
 
 let test_add_decl_fact _test_ctxt =
-  let progress = init_progress in
+  let progress = Add_fact.init_progress in
   let gconst_name = "TestGConst" in
-  let (id, prog) = Symbol_add_fact.gconst_decl gconst_name progress in
+  let (id, prog) = Add_fact.gconst_decl gconst_name progress in
+  let facts_global_const_declaration =
+    extract_facts_exn
+      "hack.GlobalConstDeclaration.5"
+      (Add_fact.progress_to_json prog)
+  in
   Int_asserter.assert_equals
     1
-    (List.length prog.resultJson.globalConstDeclaration)
+    (List.length facts_global_const_declaration)
     "One gconst fact added";
-  let fact_json = List.nth_exn prog.resultJson.globalConstDeclaration 0 in
+  let fact_json = List.nth_exn facts_global_const_declaration 0 in
   let fact_id = Jget.int_d (Some fact_json) "id" ~default:(-1) in
   let decl_name =
     return fact_json

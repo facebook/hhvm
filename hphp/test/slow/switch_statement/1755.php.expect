@@ -16,4 +16,4 @@
   goes to:string(2) "3a"
   goes to:int(3)
   goes to:3.0float(3)
-  goes to:3.0foobazbarfoobazbazdefaultbarfoobaz
+  goes to:3.0foobazdefaultbarfoobazdefaultbazdefaultdefault

@@ -3,7 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{BumpSliceMut, Maybe, Pair, Slice, Str};
+use ffi::{
+    BumpSliceMut,
+    Maybe::{self, *},
+    Pair, Slice, Str,
+};
 use label::Label;
 use local::Local;
 
@@ -71,7 +75,7 @@ pub struct FcallArgs<'arena> {
     pub num_rets: NumParams,
     pub inouts: ByRefs<'arena>,
     pub readonly: ByRefs<'arena>,
-    pub async_eager_label: Maybe<Label>,
+    pub async_eager_target: Maybe<Label>,
     pub context: Maybe<Str<'arena>>,
 }
 
@@ -81,7 +85,7 @@ impl<'arena> FcallArgs<'arena> {
         num_rets: usize,
         inouts: Slice<'arena, bool>,
         readonly: Slice<'arena, bool>,
-        async_eager_label: Option<Label>,
+        async_eager_target: Option<Label>,
         num_args: usize,
         context: Option<&'arena str>,
     ) -> FcallArgs<'arena> {
@@ -96,8 +100,22 @@ impl<'arena> FcallArgs<'arena> {
             num_rets,
             inouts,
             readonly,
-            async_eager_label: async_eager_label.into(),
+            async_eager_target: async_eager_target.into(),
             context: context.map(|s| Str::new(s.as_bytes())).into(),
+        }
+    }
+
+    pub fn targets(&self) -> &[Label] {
+        match &self.async_eager_target {
+            Just(x) => std::slice::from_ref(x),
+            Nothing => &[],
+        }
+    }
+
+    pub fn targets_mut(&mut self) -> &mut [Label] {
+        match &mut self.async_eager_target {
+            Just(x) => std::slice::from_mut(x),
+            Nothing => &mut [],
         }
     }
 }
@@ -338,19 +356,44 @@ pub enum InstructControlFlow<'arena> {
     Switch {
         kind: SwitchKind,
         base: isize,
-        labels: BumpSliceMut<'arena, Label>,
+        targets: BumpSliceMut<'arena, Label>,
     },
 
     /// String switch
     SSwitch {
-        /// One (string, Label) pair for each case.
-        labels: BumpSliceMut<'arena, Pair<Str<'arena>, Label>>,
+        /// One string for each case.
+        cases: BumpSliceMut<'arena, Str<'arena>>,
+
+        /// One Label for each case, congruent to cases.
+        targets: BumpSliceMut<'arena, Label>,
     },
 
     RetC,
     RetCSuspended,
     RetM(NumParams),
     Throw,
+}
+
+impl InstructControlFlow<'_> {
+    pub fn targets(&self) -> &[Label] {
+        match self {
+            Self::Jmp(x) | Self::JmpNS(x) | Self::JmpZ(x) | Self::JmpNZ(x) => {
+                std::slice::from_ref(x)
+            }
+            Self::Switch { targets, .. } | Self::SSwitch { targets, .. } => targets.as_ref(),
+            Self::RetC | Self::RetCSuspended | Self::RetM(_) | Self::Throw => &[],
+        }
+    }
+
+    pub fn targets_mut(&mut self) -> &mut [Label] {
+        match self {
+            Self::Jmp(x) | Self::JmpNS(x) | Self::JmpZ(x) | Self::JmpNZ(x) => {
+                std::slice::from_mut(x)
+            }
+            Self::Switch { targets, .. } | Self::SSwitch { targets, .. } => targets.as_mut(),
+            Self::RetC | Self::RetCSuspended | Self::RetM(_) | Self::Throw => &mut [],
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -493,7 +536,6 @@ pub enum InstructCall<'arena> {
     NewObjD(ClassId<'arena>),
     NewObjRD(ClassId<'arena>),
     NewObjS(SpecialClsRef),
-    FCall(FcallArgs<'arena>),
     FCallClsMethod {
         fcall_args: FcallArgs<'arena>,
         log: IsLogAsDynamicCallOp,
@@ -537,8 +579,7 @@ impl<'arena> InstructCall<'arena> {
             | Self::NewObjD(_)
             | Self::NewObjRD(_)
             | Self::NewObjS(_) => None,
-            Self::FCall(fcall_args)
-            | Self::FCallClsMethod { fcall_args, .. }
+            Self::FCallClsMethod { fcall_args, .. }
             | Self::FCallClsMethodD { fcall_args, .. }
             | Self::FCallClsMethodS { fcall_args, .. }
             | Self::FCallClsMethodSD { fcall_args, .. }
@@ -557,8 +598,7 @@ impl<'arena> InstructCall<'arena> {
             | Self::NewObjD(_)
             | Self::NewObjRD(_)
             | Self::NewObjS(_) => None,
-            Self::FCall(fcall_args)
-            | Self::FCallClsMethod { fcall_args, .. }
+            Self::FCallClsMethod { fcall_args, .. }
             | Self::FCallClsMethodD { fcall_args, .. }
             | Self::FCallClsMethodS { fcall_args, .. }
             | Self::FCallClsMethodSD { fcall_args, .. }
@@ -567,6 +607,20 @@ impl<'arena> InstructCall<'arena> {
             | Self::FCallFuncD { fcall_args, .. }
             | Self::FCallObjMethod { fcall_args, .. }
             | Self::FCallObjMethodD { fcall_args, .. } => Some(fcall_args),
+        }
+    }
+
+    pub fn targets(&self) -> &[Label] {
+        match self.fcall_args() {
+            Some(fcall_args) => fcall_args.targets(),
+            None => &[],
+        }
+    }
+
+    pub fn targets_mut(&mut self) -> &mut [Label] {
+        match self.fcall_args_mut() {
+            Some(fcall_args) => fcall_args.targets_mut(),
+            None => &mut [],
         }
     }
 }
@@ -600,6 +654,22 @@ pub enum InstructIterator<'arena> {
     IterInit(IterArgs<'arena>, Label),
     IterNext(IterArgs<'arena>, Label),
     IterFree(iterator::Id),
+}
+
+impl InstructIterator<'_> {
+    pub fn targets(&self) -> &[Label] {
+        match self {
+            Self::IterInit(_, target) | Self::IterNext(_, target) => std::slice::from_ref(target),
+            Self::IterFree(_) => &[],
+        }
+    }
+
+    pub fn targets_mut(&mut self) -> &mut [Label] {
+        match self {
+            Self::IterInit(_, target) | Self::IterNext(_, target) => std::slice::from_mut(target),
+            Self::IterFree(_) => &mut [],
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -716,13 +786,111 @@ pub enum InstructMisc<'arena> {
     CGetCUNop,
     UGetCUNop,
     MemoGet(Label, Maybe<Pair<Local<'arena>, isize>>),
-    MemoGetEager(Label, Label, Maybe<Pair<Local<'arena>, isize>>),
+    MemoGetEager([Label; 2], Maybe<Pair<Local<'arena>, isize>>),
     MemoSet(Maybe<Pair<Local<'arena>, isize>>),
     MemoSetEager(Maybe<Pair<Local<'arena>, isize>>),
     LockObj,
     ThrowNonExhaustiveSwitch,
     RaiseClassStringConversionWarning,
     SetImplicitContextByValue,
+}
+
+impl InstructMisc<'_> {
+    pub fn targets(&self) -> &[Label] {
+        match self {
+            Self::MemoGet(target, _) => std::slice::from_ref(target),
+            Self::MemoGetEager(targets, _) => targets,
+
+            // Make sure new variants with branch target Labels are handled above
+            // before adding items to this catch-all.
+            Self::This
+            | Self::BareThis(_)
+            | Self::CheckThis
+            | Self::FuncNumArgs
+            | Self::ChainFaults
+            | Self::OODeclExists(_)
+            | Self::VerifyParamType(_)
+            | Self::VerifyParamTypeTS(_)
+            | Self::VerifyOutType(_)
+            | Self::VerifyRetTypeC
+            | Self::VerifyRetTypeTS
+            | Self::Self_
+            | Self::Parent
+            | Self::LateBoundCls
+            | Self::ClassName
+            | Self::LazyClassFromClass
+            | Self::RecordReifiedGeneric
+            | Self::CheckReifiedGenericMismatch
+            | Self::NativeImpl
+            | Self::AKExists
+            | Self::CreateCl(_, _)
+            | Self::Idx
+            | Self::ArrayIdx
+            | Self::ArrayMarkLegacy
+            | Self::ArrayUnmarkLegacy
+            | Self::AssertRATL(_, _)
+            | Self::AssertRATStk(_, _)
+            | Self::BreakTraceHint
+            | Self::Silence(_, _)
+            | Self::GetMemoKeyL(_)
+            | Self::CGetCUNop
+            | Self::UGetCUNop
+            | Self::MemoSet(_)
+            | Self::MemoSetEager(_)
+            | Self::LockObj
+            | Self::ThrowNonExhaustiveSwitch
+            | Self::RaiseClassStringConversionWarning
+            | Self::SetImplicitContextByValue => &[],
+        }
+    }
+
+    pub fn targets_mut(&mut self) -> &mut [Label] {
+        match self {
+            Self::MemoGet(target, _) => std::slice::from_mut(target),
+            Self::MemoGetEager(targets, _) => targets,
+
+            // Make sure new variants with branch target Labels are handled above
+            // before adding items to this catch-all.
+            Self::This
+            | Self::BareThis(_)
+            | Self::CheckThis
+            | Self::FuncNumArgs
+            | Self::ChainFaults
+            | Self::OODeclExists(_)
+            | Self::VerifyParamType(_)
+            | Self::VerifyParamTypeTS(_)
+            | Self::VerifyOutType(_)
+            | Self::VerifyRetTypeC
+            | Self::VerifyRetTypeTS
+            | Self::Self_
+            | Self::Parent
+            | Self::LateBoundCls
+            | Self::ClassName
+            | Self::LazyClassFromClass
+            | Self::RecordReifiedGeneric
+            | Self::CheckReifiedGenericMismatch
+            | Self::NativeImpl
+            | Self::AKExists
+            | Self::CreateCl(_, _)
+            | Self::Idx
+            | Self::ArrayIdx
+            | Self::ArrayMarkLegacy
+            | Self::ArrayUnmarkLegacy
+            | Self::AssertRATL(_, _)
+            | Self::AssertRATStk(_, _)
+            | Self::BreakTraceHint
+            | Self::Silence(_, _)
+            | Self::GetMemoKeyL(_)
+            | Self::CGetCUNop
+            | Self::UGetCUNop
+            | Self::MemoSet(_)
+            | Self::MemoSetEager(_)
+            | Self::LockObj
+            | Self::ThrowNonExhaustiveSwitch
+            | Self::RaiseClassStringConversionWarning
+            | Self::SetImplicitContextByValue => &mut [],
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -788,4 +956,66 @@ pub enum Instruct<'arena> {
     IAsync(AsyncFunctions<'arena>),
     IGenerator(GenCreationExecution),
     IIncludeEvalDefine(InstructIncludeEvalDefine),
+}
+
+impl Instruct<'_> {
+    /// Return a slice of labels for the conditional branch targets of this instruction.
+    /// This excludes the Label in an ILabel instruction, which is not a conditional branch.
+    pub fn targets(&self) -> &[Label] {
+        match self {
+            Self::ICall(x) => x.targets(),
+            Self::IContFlow(x) => x.targets(),
+            Self::IIterator(x) => x.targets(),
+            Self::IMisc(x) => x.targets(),
+
+            // Make sure new variants with branch target Labels are handled above
+            // before adding items to this catch-all.
+            Self::IBasic(_)
+            | Self::ILitConst(_)
+            | Self::IOp(_)
+            | Self::ISpecialFlow(_)
+            | Self::IGet(_)
+            | Self::IMutator(_)
+            | Self::IIsset(_)
+            | Self::IBase(_)
+            | Self::IFinal(_)
+            | Self::ILabel(_)
+            | Self::ITry(_)
+            | Self::IComment(_)
+            | Self::ISrcLoc(_)
+            | Self::IAsync(_)
+            | Self::IGenerator(_)
+            | Self::IIncludeEvalDefine(_) => &[],
+        }
+    }
+
+    /// Return a mutable slice of labels for the conditional branch targets of this instruction.
+    /// This excludes the Label in an ILabel instruction, which is not a conditional branch.
+    pub fn targets_mut(&mut self) -> &mut [Label] {
+        match self {
+            Self::ICall(x) => x.targets_mut(),
+            Self::IContFlow(x) => x.targets_mut(),
+            Self::IIterator(x) => x.targets_mut(),
+            Self::IMisc(x) => x.targets_mut(),
+
+            // Make sure new variants with branch target Labels are handled above
+            // before adding items to this catch-all.
+            Self::IBasic(_)
+            | Self::ILitConst(_)
+            | Self::IOp(_)
+            | Self::ISpecialFlow(_)
+            | Self::IGet(_)
+            | Self::IMutator(_)
+            | Self::IIsset(_)
+            | Self::IBase(_)
+            | Self::IFinal(_)
+            | Self::ILabel(_)
+            | Self::ITry(_)
+            | Self::IComment(_)
+            | Self::ISrcLoc(_)
+            | Self::IAsync(_)
+            | Self::IGenerator(_)
+            | Self::IIncludeEvalDefine(_) => &mut [],
+        }
+    }
 }

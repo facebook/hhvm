@@ -30,6 +30,7 @@
 
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
+#include "hphp/runtime/ext/facts/sqlite-autoload-db.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/symbol-map.h"
 #include "hphp/util/bstring.h"
@@ -287,8 +288,9 @@ protected:
         std::make_unique<SymbolMap>(
             std::move(root),
             [dbPath]() -> AutoloadDB& {
-              return getDB(
-                  DBData::readWrite(dbPath, static_cast<::gid_t>(-1), 0644));
+              return SQLiteAutoloadDB::getThreadLocal(
+                  SQLiteAutoloadDB::Key::readWrite(
+                      dbPath, static_cast<::gid_t>(-1), 0644));
             },
             GetParam(),
             std::move(indexedMethodAttributes)),

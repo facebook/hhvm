@@ -14,14 +14,13 @@ function f_1($x) {
  break;
   case "4abc": print '"4abc"' . "";
  break;
-  default: print "default";
- break;
   case "0": print '"0"' . "";
  break;
   case "": print '""' . "";
  break;
-
   case "Evil": print '"Evil"' . "";
+ break;
+  default: print "default";
  break;
   }
 }
@@ -89,10 +88,10 @@ function h_2($x) {
 }
 function f_3($x) {
   switch ($x) {
-  default: print "default";
   case "bar": print "bar";
   case "foo": print "foo";
   case "baz": print "baz";
+  default: print "default";
   }
 }
 

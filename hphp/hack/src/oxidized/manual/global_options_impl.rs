@@ -137,23 +137,3 @@ impl Default for GlobalOptions {
         }
     }
 }
-
-impl Eq for GlobalOptions {}
-
-impl std::hash::Hash for GlobalOptions {
-    fn hash<H>(&self, _: &mut H) {
-        unimplemented!()
-    }
-}
-
-impl no_pos_hash::NoPosHash for GlobalOptions {
-    fn hash<H>(&self, _: &mut H) {
-        unimplemented!()
-    }
-}
-
-impl Ord for GlobalOptions {
-    fn cmp(&self, _: &Self) -> std::cmp::Ordering {
-        unimplemented!()
-    }
-}

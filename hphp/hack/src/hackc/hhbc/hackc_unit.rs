@@ -16,7 +16,7 @@ use hhbc_ast::FatalOp;
 
 #[derive(Default, Debug)]
 #[repr(C)]
-pub struct HhasProgram<'arena> {
+pub struct HackCUnit<'arena> {
     pub adata: Slice<'arena, HhasAdata<'arena>>,
     pub functions: Slice<'arena, HhasFunction<'arena>>,
     pub classes: Slice<'arena, HhasClass<'arena>>,

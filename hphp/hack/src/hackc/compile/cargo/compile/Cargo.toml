@@ -15,9 +15,9 @@ bumpalo = { version = "3.8", features = ["collections"] }
 bytecode_printer = { path = "../../../bytecode_printer" }
 decl_provider = { path = "../../../decl_provider" }
 elaborate_namespaces_visitor = { path = "../../../../naming/cargo/elaborate_namespaces" }
-emit_program = { path = "../../../emitter/cargo/emit_program" }
+emit_unit = { path = "../../../emitter/cargo/emit_unit" }
 env = { path = "../../../emitter/cargo/env" }
-hhas_program = { path = "../../../hhbc/cargo/hhas_program" }
+hackc_unit = { path = "../../../hhbc/cargo/hackc_unit" }
 hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
 instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 itertools = "0.10.3"

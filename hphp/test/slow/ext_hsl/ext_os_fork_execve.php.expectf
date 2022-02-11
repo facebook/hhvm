@@ -5,7 +5,7 @@
 --- Expecting BAR
 BAR
 --- Not in PATH
-STDERR: /bin/sh: cat: No such file or directory
+STDERR: /bin/sh:%scat: %s
 --- Bad STDOUT
 STDERR: %s: Bad file descriptor
 --- Custom ARGV[0]
@@ -19,3 +19,5 @@ STDOUT: Hello, world
 STDERR: 
 --- Working directory does not exist
   Exception: chdir() failed (%d - %s)
+--- No TypeError for verifying ForkAndExecveOptions
+--- No TypeError for passing ForkAndExecveOptions

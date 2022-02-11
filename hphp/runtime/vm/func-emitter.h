@@ -413,7 +413,6 @@ private:
    */
 
   void setLineTable(LineTable);
-  void setSourceLocTable(const SourceLocTable&);
 
   std::vector<std::pair<Offset,SourceLoc>> m_sourceLocTab;
   Func::LineTablePtr m_lineTable;

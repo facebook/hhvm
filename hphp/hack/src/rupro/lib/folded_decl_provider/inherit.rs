@@ -3,9 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::alloc::Allocator;
 use crate::decl_defs::{
-    Abstraction, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass, FoldedElement,
-    ShallowClass, SubstContext, TypeConst,
+    AbstractTypeconst, Abstraction, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass,
+    FoldedElement, ShallowClass, SubstContext, TypeConst, Typeconst,
 };
 use crate::folded_decl_provider::subst::Subst;
 use crate::reason::Reason;
@@ -31,7 +32,7 @@ pub(crate) struct Inherited<R: Reason> {
     pub(crate) type_consts: TypeConstNameMap<TypeConst<R>>,
 }
 
-impl<R: Reason> std::default::Default for Inherited<R> {
+impl<R: Reason> Default for Inherited<R> {
     fn default() -> Self {
         Self {
             substs: Default::default(),
@@ -184,8 +185,78 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn add_type_consts(&mut self, other_type_consts: TypeConstNameMap<TypeConst<R>>) {
-        //TODO Fill this in
-        self.type_consts.extend(other_type_consts)
+        for (name, mut new_const) in other_type_consts {
+            match self.type_consts.entry(name) {
+                Entry::Vacant(e) => {
+                    // The type constant didn't exist so far, let's add it.
+                    e.insert(new_const);
+                }
+                Entry::Occupied(mut e) => {
+                    let old_const = e.get();
+                    if new_const.is_enforceable() && !old_const.is_enforceable() {
+                        // If some typeconst in some ancestor was enforceable,
+                        // then the child class' typeconst will be enforceable
+                        // too, even if we didn't take that ancestor typeconst.
+                        e.get_mut().enforceable = new_const.enforceable.clone();
+                    }
+                    let old_const = e.get();
+                    match (&old_const.kind, &new_const.kind) {
+                        // This covers the following case
+                        // ```
+                        // interface I1 { abstract const type T; }
+                        // interface I2 { const type T = int; }
+                        // class C implements I1, I2 {}
+                        // ```
+                        // Then `C::T == I2::T` since `I2::T `is not abstract
+                        (Typeconst::TCConcrete(_), Typeconst::TCAbstract(_)) => {}
+                        // This covers the following case
+                        // ```
+                        // interface I {
+                        //   abstract const type T as arraykey;
+                        // }
+                        //
+                        // abstract class A {
+                        //   abstract const type T as arraykey = string;
+                        // }
+                        //
+                        // final class C extends A implements I {}
+                        // ```
+                        // `C::T` must come from `A`, not `I`, as `A`
+                        // provides the default that will synthesize into a
+                        // concrete type constant in `C`.
+                        (
+                            Typeconst::TCAbstract(AbstractTypeconst {
+                                default: Some(_), ..
+                            }),
+                            Typeconst::TCAbstract(AbstractTypeconst { default: None, .. }),
+                        ) => {}
+                        // When a type constant is declared in multiple
+                        // parents we need to make a subtle choice of what
+                        // type we inherit. For example in:
+                        // ```
+                        // interface I1 { abstract const type t as Container<int>; }
+                        // interface I2 { abstract const type t as KeyedContainer<int, int>; }
+                        // abstract class C implements I1, I2 {}
+                        // ```
+                        // Depending on the order the interfaces are
+                        // declared, we may report an error. Since this
+                        // could be confusing there is special logic in
+                        // `Typing_extends` that checks for this potentially
+                        // ambiguous situation and warns the programmer to
+                        // explicitly declare `T` in `C`.
+                        _ => {
+                            if old_const.is_enforceable() && !new_const.is_enforceable() {
+                                // If a typeconst we already inherited from some
+                                // other ancestor was enforceable, then the one
+                                // we inherit here will be enforceable too.
+                                new_const.enforceable = old_const.enforceable.clone();
+                            }
+                            e.insert(new_const);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fn add_inherited(&mut self, other: Self) {
@@ -209,17 +280,22 @@ impl<R: Reason> Inherited<R> {
         self.add_type_consts(type_consts);
     }
 
-    fn make_substitution(_cls: &FoldedClass<R>, params: &[DeclTy<R>]) -> TypeNameMap<DeclTy<R>> {
-        Subst::new((), params).into()
+    fn make_substitution(
+        alloc: &Allocator<R>,
+        cls: &FoldedClass<R>,
+        params: &[DeclTy<R>],
+    ) -> TypeNameMap<DeclTy<R>> {
+        Subst::new(alloc, cls.tparams.as_slice(), params).into()
     }
 
     fn inherit_hack_class(
+        alloc: &Allocator<R>,
         child: &ShallowClass<R>,
         parent_name: TypeName,
         parent: &FoldedClass<R>,
         argl: &[DeclTy<R>],
     ) -> Self {
-        let subst = Self::make_substitution(parent, argl);
+        let subst = Self::make_substitution(alloc, parent, argl);
         // TODO(hrust): Do we need sharing?
         let mut substs = parent.substs.clone();
         substs.insert(
@@ -243,6 +319,7 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn from_class(
+        alloc: &Allocator<R>,
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
         parent_ty: &DeclTy<R>,
@@ -250,6 +327,7 @@ impl<R: Reason> Inherited<R> {
         if let Some((_, parent_pos_id, parent_tyl)) = parent_ty.unwrap_class_type() {
             if let Some(parent_folded_decl) = parents.get(&parent_pos_id.id()) {
                 return Self::inherit_hack_class(
+                    alloc,
                     sc,
                     parent_pos_id.id(),
                     parent_folded_decl,
@@ -261,6 +339,7 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn from_class_xhp_attrs_only(
+        _alloc: &Allocator<R>,
         _sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
         ty: &DeclTy<R>,
@@ -275,16 +354,18 @@ impl<R: Reason> Inherited<R> {
 
     fn add_from_xhp_attr_uses(
         &mut self,
+        alloc: &Allocator<R>,
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) {
         for ty in sc.xhp_attr_uses.iter() {
-            self.add_inherited(Self::from_class_xhp_attrs_only(sc, parents, ty))
+            self.add_inherited(Self::from_class_xhp_attrs_only(alloc, sc, parents, ty))
         }
     }
 
     fn add_from_parents(
         &mut self,
+        alloc: &Allocator<R>,
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) {
@@ -310,17 +391,18 @@ impl<R: Reason> Inherited<R> {
         // Interfaces implemented, classes extended and interfaces required to
         // be implemented.
         for ty in tys.iter().rev() {
-            self.add_inherited(Self::from_class(sc, parents, ty));
+            self.add_inherited(Self::from_class(alloc, sc, parents, ty));
         }
     }
 
     fn add_from_requirements(
         &mut self,
+        alloc: &Allocator<R>,
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) {
         for ty in sc.req_extends.iter() {
-            let mut inherited = Self::from_class(sc, parents, ty);
+            let mut inherited = Self::from_class(alloc, sc, parents, ty);
             inherited.mark_as_synthesized();
             self.add_inherited(inherited);
         }
@@ -343,11 +425,12 @@ impl<R: Reason> Inherited<R> {
 
     fn add_from_traits(
         &mut self,
+        alloc: &Allocator<R>,
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) {
         for ty in sc.uses.iter() {
-            self.add_inherited(Self::from_class(sc, parents, ty));
+            self.add_inherited(Self::from_class(alloc, sc, parents, ty));
         }
     }
 
@@ -377,12 +460,16 @@ impl<R: Reason> Inherited<R> {
         //TODO typeconsts
     }
 
-    pub(crate) fn make(sc: &ShallowClass<R>, parents: &TypeNameMap<Arc<FoldedClass<R>>>) -> Self {
+    pub(crate) fn make(
+        alloc: &Allocator<R>,
+        sc: &ShallowClass<R>,
+        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
+    ) -> Self {
         let mut inh = Self::default();
-        inh.add_from_parents(sc, parents); // Members inherited from parents ...
-        inh.add_from_requirements(sc, parents);
-        inh.add_from_traits(sc, parents); // ... can be overridden by traits.
-        inh.add_from_xhp_attr_uses(sc, parents);
+        inh.add_from_parents(alloc, sc, parents); // Members inherited from parents ...
+        inh.add_from_requirements(alloc, sc, parents);
+        inh.add_from_traits(alloc, sc, parents); // ... can be overridden by traits.
+        inh.add_from_xhp_attr_uses(alloc, sc, parents);
 
         inh
     }

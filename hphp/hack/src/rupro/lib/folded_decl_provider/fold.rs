@@ -74,7 +74,7 @@ impl<R: Reason> DeclFolder<R> {
             pos: pos.clone(),
             ty: classname_ty,
             origin: name,
-            refs: Vec::new(),
+            refs: Vec::new().into_boxed_slice(),
         };
         consts.insert(
             ClassConstName(self.special_names.members.mClass),
@@ -259,20 +259,23 @@ impl<R: Reason> DeclFolder<R> {
         &self,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
         ty: &DeclTy<R>,
-        inst: &mut TypeNameMap<DeclTy<R>>,
+        ancestors: &mut TypeNameMap<DeclTy<R>>,
     ) {
         match ty.unwrap_class_type() {
             None => {}
             Some((_, pos_id, tyl)) => match parents.get(&pos_id.id()) {
                 None => {
-                    inst.insert(pos_id.id(), ty.clone());
+                    // The class lives in PHP land.
+                    ancestors.insert(pos_id.id(), ty.clone());
                 }
                 Some(cls) => {
-                    let subst = Subst::new((), tyl);
+                    let subst = Subst::new(self.alloc, &cls.tparams, tyl);
+                    // Update `ancestors`.
                     for (&anc_name, anc_ty) in &cls.ancestors {
-                        inst.insert(anc_name, subst.instantiate(anc_ty));
+                        ancestors.insert(anc_name, subst.instantiate(anc_ty));
                     }
-                    inst.insert(pos_id.id(), ty.clone());
+                    // Now add `ty`.
+                    ancestors.insert(pos_id.id(), ty.clone());
                 }
             },
         }
@@ -283,7 +286,7 @@ impl<R: Reason> DeclFolder<R> {
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) -> Arc<FoldedClass<R>> {
-        let inh = Inherited::make(sc, parents);
+        let inh = Inherited::make(self.alloc, sc, parents);
 
         let mut props = inh.props;
         sc.props
@@ -331,6 +334,7 @@ impl<R: Reason> DeclFolder<R> {
             constructor,
             consts,
             type_consts: Default::default(), //TODO
+            tparams: vec![],                 //TODO
         })
     }
 }

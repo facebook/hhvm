@@ -55,9 +55,6 @@ function f1($x) {
     case "4abc":
       print '"4abc"';
       break;
-    default:
-      print "default";
-      break;
     case "0":
       print '"0"';
       break;
@@ -66,6 +63,9 @@ function f1($x) {
       break;
     case "Derp":
       print '"Derp"';
+      break;
+    default:
+      print "default";
       break;
   }
   echo "\n";

@@ -85,7 +85,7 @@ mod tests {
         v.visit_expr(&mut (), &mut expr).unwrap();
         match expr.2 {
             Expr_::Null => {}
-            e => assert!(false, "Expect Expr_::Null, but got {:?}", e),
+            e => panic!("Expect Expr_::Null, but got {:?}", e),
         }
 
         let mut expr = Expr((), crate::pos::Pos::make_none(), Expr_::True);
@@ -93,7 +93,7 @@ mod tests {
         visitor_mut::visit(&mut v, &mut (), &mut expr).unwrap();
         match expr.2 {
             Expr_::Null => {}
-            e => assert!(false, "Expect Expr_::Null, but got {:?}", e),
+            e => panic!("Expect Expr_::Null, but got {:?}", e),
         }
     }
 

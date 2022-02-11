@@ -50,11 +50,11 @@
 #include "hphp/runtime/base/watchman-connection.h"
 #include "hphp/runtime/base/watchman.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/ext_facts.h"
 #include "hphp/runtime/ext/facts/fact-extractor.h"
 #include "hphp/runtime/ext/facts/facts-store.h"
 #include "hphp/runtime/ext/facts/logging.h"
+#include "hphp/runtime/ext/facts/sqlite-autoload-db.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/watchman-watcher.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -64,6 +64,7 @@
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/sqlite-wrapper.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/user-info.h"
 #include "hphp/zend/zend-string.h"
@@ -168,7 +169,7 @@ folly::fs::path getDBPath(const RepoOptions& repoOptions) {
   }
 }
 
-DBData getDBData(
+SQLiteAutoloadDB::Key getDBKey(
     const folly::fs::path& root,
     const folly::dynamic& queryExpr,
     const RepoOptions& repoOptions) {
@@ -196,9 +197,10 @@ DBData getDBData(
 
   if (trustedDBPath.empty()) {
     ::gid_t gid = getGroup();
-    return DBData::readWrite(getDBPath(repoOptions), gid, getDBPerms());
+    return SQLiteAutoloadDB::Key::readWrite(
+        getDBPath(repoOptions), gid, getDBPerms());
   } else {
-    return DBData::readOnly(std::move(trustedDBPath));
+    return SQLiteAutoloadDB::Key::readOnly(std::move(trustedDBPath));
   }
 }
 
@@ -230,19 +232,19 @@ struct WatchmanAutoloadMapKey {
       }
     }();
 
-    auto dbData = getDBData(root, queryExpr, repoOptions);
+    auto dbKey = getDBKey(root, queryExpr, repoOptions);
 
     return WatchmanAutoloadMapKey{
         .m_root = std::move(root),
         .m_queryExpr = std::move(queryExpr),
         .m_indexedMethodAttrs = repoOptions.flags().indexedMethodAttributes(),
-        .m_dbData = std::move(dbData)};
+        .m_dbKey = std::move(dbKey)};
   }
 
   bool operator==(const WatchmanAutoloadMapKey& rhs) const noexcept {
     return m_root == rhs.m_root && m_queryExpr == rhs.m_queryExpr &&
            m_indexedMethodAttrs == rhs.m_indexedMethodAttrs &&
-           m_dbData == rhs.m_dbData;
+           m_dbKey == rhs.m_dbKey;
   }
 
   std::string toString() const {
@@ -261,7 +263,7 @@ struct WatchmanAutoloadMapKey {
         m_root.native(),
         folly::toJson(m_queryExpr),
         indexedMethodAttrString,
-        m_dbData.toString());
+        m_dbKey.toString());
   }
 
   strhash_t hash() const noexcept {
@@ -270,7 +272,7 @@ struct WatchmanAutoloadMapKey {
         m_queryExpr.hash(),
         folly::hash::hash_range(
             m_indexedMethodAttrs.begin(), m_indexedMethodAttrs.end()),
-        m_dbData.hash());
+        m_dbKey.hash());
   }
 
   /**
@@ -281,13 +283,13 @@ struct WatchmanAutoloadMapKey {
    */
   bool isAutoloadableRepo() const {
     return m_queryExpr.isObject() ||
-           m_dbData.m_rwMode == SQLite::OpenMode::ReadOnly;
+           m_dbKey.m_rwMode == SQLite::OpenMode::ReadOnly;
   }
 
   folly::fs::path m_root;
   folly::dynamic m_queryExpr;
   std::vector<std::string> m_indexedMethodAttrs;
-  DBData m_dbData;
+  SQLiteAutoloadDB::Key m_dbKey;
 };
 
 // Code to coerce a FileFacts into a userspace shape.
@@ -663,16 +665,16 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
   Treadmill::enqueue(
       [this] { garbageCollectUnusedAutoloadMaps(s_ext.getExpirationTime()); });
 
-  auto dbHandle = [dbData = mapKey->m_dbData]() -> AutoloadDB& {
-    return getDB(dbData);
+  auto dbHandle = [dbKey = mapKey->m_dbKey]() -> AutoloadDB& {
+    return SQLiteAutoloadDB::getThreadLocal(dbKey);
   };
 
-  if (mapKey->m_dbData.m_rwMode == SQLite::OpenMode::ReadOnly) {
+  if (mapKey->m_dbKey.m_rwMode == SQLite::OpenMode::ReadOnly) {
     XLOGF(
         DBG0,
         "Loading {} from trusted Autoload DB at {}",
         mapKey->m_root.native(),
-        mapKey->m_dbData.m_path.native());
+        mapKey->m_dbKey.m_path.native());
     return m_maps
         .insert(
             {*mapKey, make_trusted_facts(mapKey->m_root, std::move(dbHandle))})
@@ -773,7 +775,7 @@ Variant HHVM_FUNCTION(facts_db_path, const String& rootStr) {
 
   try {
     return Variant{Facts::WatchmanAutoloadMapKey::get(repoOptions)
-                       .m_dbData.m_path.native()};
+                       .m_dbKey.m_path.native()};
   } catch (const Facts::RepoOptionsParseExc& e) {
     throw_invalid_operation_exception(makeStaticString(e.what()));
   }

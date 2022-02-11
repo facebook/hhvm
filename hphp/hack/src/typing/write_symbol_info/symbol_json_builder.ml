@@ -8,11 +8,10 @@
 
 open Aast
 open Hh_prelude
-open Hh_json
 module Add_fact = Symbol_add_fact
 module Util = Symbol_json_util
 module Build = Symbol_build_json
-module ST = Symbol_builder_types
+module Predicate = Symbol_predicate
 
 let is_enum_or_enum_class = function
   | Ast_defs.Cenum
@@ -47,7 +46,7 @@ let process_decl_loc
 let process_container_decl ctx source_map con (all_decls, progress) =
   let (con_pos, con_name) = con.c_name in
   let (con_type, decl_pred) =
-    Util.parent_decl_predicate (Util.get_parent_kind con)
+    Predicate.parent_decl_predicate (Predicate.get_parent_kind con)
   in
   let (con_decl_id, prog) =
     Add_fact.container_decl decl_pred con_name progress
@@ -267,8 +266,8 @@ let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
         (* This includes references to built-in enum methods *)
         | _ -> (xrefs, prog)
       else
-        let con_kind = Util.get_parent_kind cls in
-        let (con_type, decl_pred) = Util.parent_decl_predicate con_kind in
+        let con_kind = Predicate.get_parent_kind cls in
+        let (con_type, decl_pred) = Predicate.parent_decl_predicate con_kind in
         let (con_decl_id, prog) =
           Add_fact.container_decl decl_pred con_name prog
         in
@@ -297,7 +296,7 @@ let process_attribute_xref ctx attr opt_info (xrefs, prog) =
           con_name;
         None
       ) else
-        Some Util.(parent_decl_predicate (get_parent_kind cls))
+        Some Predicate.(parent_decl_predicate (get_parent_kind cls))
   in
   (* Process <<__Override>>, for which we write a MethodOverrides fact
      instead of a cross-reference *)
@@ -388,11 +387,11 @@ let process_typedef_xref symbol_name pos (xrefs, prog) =
     pos
     (xrefs, prog)
 
-let process_decls ctx (files_info : ST.file_info list) =
+let process_decls ctx (files_info : Symbol_file_info.t list) =
   let (source_map, progress) =
     List.fold
       files_info
-      ~init:(SMap.empty, Util.init_progress)
+      ~init:(SMap.empty, Add_fact.init_progress)
       ~f:(fun (fm, prog) (fp, _, source_text) ->
         let filepath = Relative_path.to_absolute fp in
         match source_text with
@@ -455,7 +454,7 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
                   (match sym_def.kind with
                   | Class ->
                     let con_kind =
-                      Util.parent_decl_predicate ST.ClassContainer
+                      Predicate.parent_decl_predicate Predicate.ClassContainer
                     in
                     process_container_xref con_kind name pos (xrefs, prog)
                   | Const ->
@@ -469,7 +468,8 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
                   | Function -> process_function_xref name pos (xrefs, prog)
                   | Interface ->
                     let con_kind =
-                      Util.parent_decl_predicate ST.InterfaceContainer
+                      Predicate.parent_decl_predicate
+                        Predicate.InterfaceContainer
                     in
                     process_container_xref con_kind name pos (xrefs, prog)
                   | Method ->
@@ -484,7 +484,7 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
                   | Typedef -> process_typedef_xref name pos (xrefs, prog)
                   | Trait ->
                     let con_kind =
-                      Util.parent_decl_predicate ST.TraitContainer
+                      Predicate.parent_decl_predicate Predicate.TraitContainer
                     in
                     process_container_xref con_kind name pos (xrefs, prog)
                   | _ -> (xrefs, prog))))
@@ -496,70 +496,17 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
         file_xrefs
         prog)
 
-let progress_to_json progress =
-  let resultJson = progress.ST.resultJson in
-  let preds =
-    (* The order is the reverse of how these items appear in the JSON,
-       which is significant because later entries can refer to earlier ones
-       by id only *)
-    ("src.FileLines.1", resultJson.ST.fileLines)
-    ::
-    List.map
-      ~f:(fun (pred, res) -> (pred ^ "." ^ Hh_glean_version.hack_version, res))
-      ST.
-        [
-          ("hack.FileDeclarations", resultJson.fileDeclarations);
-          ("hack.FileXRefs", resultJson.fileXRefs);
-          ("hack.MethodOverrides", resultJson.methodOverrides);
-          ("hack.MethodDefinition", resultJson.methodDefinition);
-          ("hack.FunctionDefinition", resultJson.functionDefinition);
-          ("hack.EnumDefinition", resultJson.enumDefinition);
-          ("hack.ClassConstDefinition", resultJson.classConstDefinition);
-          ("hack.PropertyDefinition", resultJson.propertyDefinition);
-          ("hack.TypeConstDefinition", resultJson.typeConstDefinition);
-          ("hack.ClassDefinition", resultJson.classDefinition);
-          ("hack.TraitDefinition", resultJson.traitDefinition);
-          ("hack.InterfaceDefinition", resultJson.interfaceDefinition);
-          ("hack.TypedefDefinition", resultJson.typedefDefinition);
-          ("hack.GlobalConstDefinition", resultJson.globalConstDefinition);
-          ("hack.DeclarationComment", resultJson.declarationComment);
-          ("hack.DeclarationLocation", resultJson.declarationLocation);
-          ("hack.DeclarationSpan", resultJson.declarationSpan);
-          ("hack.MethodDeclaration", resultJson.methodDeclaration);
-          ("hack.ClassConstDeclaration", resultJson.classConstDeclaration);
-          ("hack.PropertyDeclaration", resultJson.propertyDeclaration);
-          ("hack.TypeConstDeclaration", resultJson.typeConstDeclaration);
-          ("hack.FunctionDeclaration", resultJson.functionDeclaration);
-          ("hack.Enumerator", resultJson.enumerator);
-          ("hack.EnumDeclaration", resultJson.enumDeclaration);
-          ("hack.ClassDeclaration", resultJson.classDeclaration);
-          ("hack.TraitDeclaration", resultJson.traitDeclaration);
-          ("hack.InterfaceDeclaration", resultJson.interfaceDeclaration);
-          ("hack.TypedefDeclaration", resultJson.typedefDeclaration);
-          ("hack.GlobalConstDeclaration", resultJson.globalConstDeclaration);
-          ("hack.NamespaceDeclaration", resultJson.namespaceDeclaration);
-          ("hack.MethodOccurrence", resultJson.methodOccurrence);
-        ]
-  in
-  let json_array =
-    List.fold preds ~init:[] ~f:(fun acc (pred, json_lst) ->
-        JSON_Object
-          [("predicate", JSON_String pred); ("facts", JSON_Array json_lst)]
-        :: acc)
-  in
-  json_array
-
 (* This function processes declarations, starting with an
 empty fact cache. *)
 let build_decls_json ctx files_info =
   let progress = process_decls ctx files_info in
-  progress_to_json progress
+  Add_fact.progress_to_json progress
 
 (* This function processes cross-references, starting with an
 empty fact cache. *)
 let build_xrefs_json ctx tasts =
-  let progress = process_xrefs ctx tasts Util.init_progress in
-  progress_to_json progress
+  let progress = process_xrefs ctx tasts Add_fact.init_progress in
+  Add_fact.progress_to_json progress
 
 (* This function processes both declarations and cross-references,
 sharing the declaration fact cache between them. *)
@@ -571,4 +518,4 @@ let build_json ctx files_info =
       (List.map files_info ~f:(fun (_, tast, _) -> tast))
       progress
   in
-  progress_to_json progress
+  Add_fact.progress_to_json progress

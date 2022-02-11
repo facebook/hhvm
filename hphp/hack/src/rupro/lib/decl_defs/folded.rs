@@ -3,7 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::decl_defs::{
-    CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, Typeconst, XhpAttribute,
+    CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, Tparam, Typeconst,
+    XhpAttribute,
 };
 use crate::reason::Reason;
 use pos::{
@@ -64,10 +65,19 @@ pub struct TypeConst<R: Reason> {
     pub name: Positioned<TypeConstName, R::Pos>,
     pub kind: Typeconst<R>, // abstract or concrete
     pub origin: TypeName,
-    pub is_enforceable: Positioned<bool, R::Pos>,
-    pub is_reifiable: Option<R::Pos>,
+    pub enforceable: Option<R::Pos>, // When Some, points to __Enforceable attribute
+    pub reifiable: Option<R::Pos>,   // When Some, points to __Reifiable attribute
     pub is_concreteized: bool,
     pub is_ctx: bool,
+}
+
+impl<R: Reason> TypeConst<R> {
+    pub fn is_enforceable(&self) -> bool {
+        self.enforceable.is_some()
+    }
+    pub fn is_reifiable(&self) -> bool {
+        self.reifiable.is_some()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -78,7 +88,7 @@ pub struct ClassConst<R: Reason> {
     pub pos: R::Pos,
     pub ty: DeclTy<R>,
     pub origin: TypeName, // Identifies the class from which this const originates
-    pub refs: Vec<ClassConstRef>,
+    pub refs: Box<[ClassConstRef]>,
 }
 
 impl<R: Reason> ClassConst<R> {
@@ -101,6 +111,7 @@ pub struct FoldedClass<R: Reason> {
     pub constructor: Option<FoldedElement>,
     pub consts: ClassConstNameMap<ClassConst<R>>,
     pub type_consts: TypeConstNameMap<TypeConst<R>>,
+    pub tparams: Vec<Tparam<R, DeclTy<R>>>,
 }
 
 impl FoldedElement {

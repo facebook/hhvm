@@ -11,11 +11,11 @@ use aast_parser::{
 };
 use anyhow::anyhow;
 use bitflags::bitflags;
-use bytecode_printer::{print_program, Context};
+use bytecode_printer::{print_unit, Context};
 use decl_provider::NoDeclProvider;
-use emit_program::{emit_program, FromAstFlags};
+use emit_unit::{emit_unit, FromAstFlags};
 use env::emitter::Emitter;
-use hhas_program::HhasProgram;
+use hackc_unit::HackCUnit;
 use hhbc_ast::FatalOp;
 use instruction_sequence::Error;
 use itertools::{Either, Either::*};
@@ -264,7 +264,7 @@ pub struct Profile {
     pub printing_t: f64,
 }
 
-pub fn emit_fatal_program<S: AsRef<str>>(
+pub fn emit_fatal_unit<S: AsRef<str>>(
     env: &Env<S>,
     writer: &mut dyn std::io::Write,
     err_msg: &str,
@@ -282,9 +282,9 @@ pub fn emit_fatal_program<S: AsRef<str>>(
         unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
     );
 
-    let prog = emit_program::emit_fatal_program(&alloc, FatalOp::Parse, &Pos::make_none(), err_msg);
+    let prog = emit_unit::emit_fatal_unit(&alloc, FatalOp::Parse, &Pos::make_none(), err_msg);
     let prog = prog.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
-    print_program(
+    print_unit(
         &Context::new(
             &emitter,
             Some(&env.filepath),
@@ -306,17 +306,17 @@ pub fn from_text<'arena, 'decl, S: AsRef<str>>(
     decl_provider: unified_decl_provider::DeclProvider<'decl>,
 ) -> anyhow::Result<Option<Profile>> {
     let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
-    let (program, profile) = emit_prog_from_text(&mut emitter, env, stack_limit, source_text)?;
+    let (unit, profile) = emit_unit_from_text(&mut emitter, env, stack_limit, source_text)?;
 
     let (print_result, printing_t) = time(|| {
-        print_program(
+        print_unit(
             &Context::new(
                 &emitter,
                 Some(&env.filepath),
                 env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
             ),
             writer,
-            &program,
+            &unit,
         )
     });
     print_result?;
@@ -332,16 +332,16 @@ fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
     env: &Env<S>,
     namespace_env: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
-) -> Result<HhasProgram<'arena>, Error> {
+) -> Result<HackCUnit<'arena>, Error> {
     // First rewrite.
     let result = rewrite(emitter, ast, RcOc::clone(&namespace_env)); // Modifies `ast` in place.
     match result {
         Ok(()) => {
             // Rewrite ok, now emit.
-            emit_prog_from_ast(emitter, env, namespace_env, ast)
+            emit_unit_from_ast(emitter, env, namespace_env, ast)
         }
         Err(Error::IncludeTimeFatalException(op, pos, msg)) => {
-            emit_program::emit_fatal_program(emitter.alloc, op, &pos, msg)
+            emit_unit::emit_fatal_unit(emitter.alloc, op, &pos, msg)
         }
         Err(e) => Err(e),
     }
@@ -355,23 +355,23 @@ fn rewrite<'p, 'arena, 'decl>(
     rewrite_program(emitter, ast, namespace_env)
 }
 
-pub fn hhas_from_text<'arena, 'decl, S: AsRef<str>>(
+pub fn unit_from_text<'arena, 'decl, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
     stack_limit: &StackLimit,
     source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
     decl_provider: unified_decl_provider::DeclProvider<'decl>,
-) -> anyhow::Result<(HhasProgram<'arena>, Option<Profile>)> {
+) -> anyhow::Result<(HackCUnit<'arena>, Option<Profile>)> {
     let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
-    emit_prog_from_text(&mut emitter, env, stack_limit, source_text)
+    emit_unit_from_text(&mut emitter, env, stack_limit, source_text)
 }
 
-pub fn hhas_to_string<W: std::io::Write, S: AsRef<str>>(
+pub fn unit_to_string<W: std::io::Write, S: AsRef<str>>(
     env: &Env<S>,
     native_env: Option<&NativeEnv<S>>,
     writer: &mut W,
-    program: &HhasProgram<'_>,
+    program: &HackCUnit<'_>,
 ) -> anyhow::Result<()> {
     let alloc = bumpalo::Bump::new();
     let emitter = create_emitter(
@@ -381,7 +381,7 @@ pub fn hhas_to_string<W: std::io::Write, S: AsRef<str>>(
         &alloc,
     )?;
     let (print_result, _) = time(|| {
-        print_program(
+        print_unit(
             &Context::new(
                 &emitter,
                 Some(&env.filepath),
@@ -394,12 +394,12 @@ pub fn hhas_to_string<W: std::io::Write, S: AsRef<str>>(
     print_result.map_err(|e| anyhow!("{}", e))
 }
 
-fn emit_prog_from_ast<'p, 'arena, 'decl, S: AsRef<str>>(
+fn emit_unit_from_ast<'p, 'arena, 'decl, S: AsRef<str>>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<S>,
     namespace: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
-) -> Result<HhasProgram<'arena>, Error> {
+) -> Result<HackCUnit<'arena>, Error> {
     let mut flags = FromAstFlags::empty();
     if env.flags.contains(EnvFlags::IS_EVALED) {
         flags |= FromAstFlags::IS_EVALED;
@@ -411,15 +411,15 @@ fn emit_prog_from_ast<'p, 'arena, 'decl, S: AsRef<str>>(
         flags |= FromAstFlags::IS_SYSTEMLIB;
     }
 
-    emit_program(emitter, flags, namespace, ast)
+    emit_unit(emitter, flags, namespace, ast)
 }
 
-fn emit_prog_from_text<'arena, 'decl, S: AsRef<str>>(
+fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<S>,
     stack_limit: &StackLimit,
     source_text: SourceText<'_>,
-) -> anyhow::Result<(HhasProgram<'arena>, Option<Profile>)> {
+) -> anyhow::Result<(HackCUnit<'arena>, Option<Profile>)> {
     let log_extern_compiler_perf = emitter.options().log_extern_compiler_perf();
 
     let namespace_env = RcOc::new(NamespaceEnv::empty(
@@ -473,13 +473,13 @@ fn emit_fatal<'arena>(
     is_runtime_error: bool,
     pos: &Pos,
     msg: impl AsRef<str> + 'arena,
-) -> Result<HhasProgram<'arena>, Error> {
+) -> Result<HackCUnit<'arena>, Error> {
     let op = if is_runtime_error {
         FatalOp::Runtime
     } else {
         FatalOp::Parse
     };
-    emit_program::emit_fatal_program(alloc, op, pos, msg)
+    emit_unit::emit_fatal_unit(alloc, op, pos, msg)
 }
 
 fn create_emitter<'arena, 'decl, S: AsRef<str>>(

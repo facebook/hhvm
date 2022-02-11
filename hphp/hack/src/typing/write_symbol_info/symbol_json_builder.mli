@@ -7,10 +7,10 @@
  *)
 
 val build_decls_json :
-  Provider_context.t -> Symbol_builder_types.file_info list -> Hh_json.json list
+  Provider_context.t -> Symbol_file_info.t list -> Hh_json.json list
 
 val build_xrefs_json :
   Provider_context.t -> Tast.program list -> Hh_json.json list
 
 val build_json :
-  Provider_context.t -> Symbol_builder_types.file_info list -> Hh_json.json list
+  Provider_context.t -> Symbol_file_info.t list -> Hh_json.json list

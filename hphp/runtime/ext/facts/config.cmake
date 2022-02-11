@@ -1,11 +1,11 @@
 HHVM_DEFINE_EXTENSION(
   "facts"
   SOURCES
-    autoload-db.cpp
     exception.cpp
     ext_facts.cpp
     fact-extractor.cpp
     logging.cpp
+    sqlite-autoload-db.cpp
     string-data-ptr.cpp
     symbol-map.cpp
     thread-factory.cpp
@@ -24,6 +24,7 @@ HHVM_DEFINE_EXTENSION(
     logging.h
     path-and-hash.h
     path-symbols-map.h
+    sqlite-autoload-db.h
     string-ptr.h
     symbol-map.h
     symbol-types.h

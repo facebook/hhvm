@@ -1,0 +1,20 @@
+Testcase for getopt_with_optind() function with invalid optind
+Warning: optind must be positive in /build/hhvm/hphp/test/zend/good/ext/standard/tests/general_functions/getopt_with_optind_invalid.php on line 11
+dict(0) {
+}
+int(-1)
+Warning: optind must be positive in /build/hhvm/hphp/test/zend/good/ext/standard/tests/general_functions/getopt_with_optind_invalid.php on line 15
+dict(0) {
+}
+int(-1)
+Warning: optind must be positive in /build/hhvm/hphp/test/zend/good/ext/standard/tests/general_functions/getopt_with_optind_invalid.php on line 19
+dict(0) {
+}
+int(0)
+dict(0) {
+}
+int(10000)
+dict(0) {
+}
+int(1000000000000000)
+Done

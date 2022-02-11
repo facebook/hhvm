@@ -209,10 +209,10 @@ struct opt_struct {
   char* opt_name{nullptr};
 };
 
-static int php_opt_error(const req::vector<char*>& argv, int oint, int optchr,
+static int php_opt_error(const req::vector<char*>& argv, int64_t oint, int optchr,
                          int err, int show_err) {
   if (show_err) {
-    fprintf(stderr, "Error in argument %d, char %d: ", oint, optchr+1);
+    fprintf(stderr, "Error in argument %" PRId64 ", char %d: ", oint, optchr+1);
     switch (err) {
     case OPTERRCOLON:
       fprintf(stderr, ": in flags\n");
@@ -233,7 +233,7 @@ static int php_opt_error(const req::vector<char*>& argv, int oint, int optchr,
 
 static int php_getopt(int argc, req::vector<char*>& argv,
                       req::vector<opt_struct>& opts,
-                      char **optarg, int *optind, int show_err,
+                      char **optarg, int64_t *optind, int show_err,
                       int arg_start, int &optchr, int &dash, int &php_optidx) {
   php_optidx = -1;
 
@@ -306,7 +306,7 @@ static int php_getopt(int argc, req::vector<char*>& argv,
     while (1) {
       php_optidx++;
       if (opts[php_optidx].opt_char == '-') {
-        int errind = *optind;
+        int64_t errind = *optind;
         int errchr = optchr;
 
         if (!argv[*optind][optchr+1]) {
@@ -466,7 +466,7 @@ static Array hhvm_getopt_impl(const String& options,
 
   int o;
   char *php_optarg = nullptr;
-  int php_optind = (int)optind;
+  int64_t php_optind = optind;
 
   SCOPE_EXIT {
     free_longopts(opt_vec);
@@ -556,6 +556,11 @@ static Array HHVM_FUNCTION(getopt_with_optind,
                            const String& options,
                            const Variant& longopts,
                            int64_t& optind) {
+  if (optind <= 0) {
+    raise_warning("optind must be positive");
+    // Be conservative and return an empty dict
+    return Array::CreateDict();
+  }
   return hhvm_getopt_impl(options, longopts, optind);
 }
 

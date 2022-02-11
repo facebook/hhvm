@@ -27,23 +27,6 @@ either Some (parent, name), or None if the name has no parent namespace.
 The trailing slash is removed from the parent. *)
 val split_name : string -> (string * string) option
 
-(* Get the container name and predicate type for a given parent
-container kind. *)
-val parent_decl_predicate :
-  Symbol_builder_types.parent_container_type ->
-  string * Symbol_builder_types.predicate
-
-val get_parent_kind :
-  ('a, 'b) Aast.class_ -> Symbol_builder_types.parent_container_type
-
-val init_progress : Symbol_builder_types.result_progress
-
-val add_fact :
-  Symbol_builder_types.predicate ->
-  Hh_json.JMap.key ->
-  Symbol_builder_types.result_progress ->
-  int * Symbol_builder_types.result_progress
-
 (* For building the map of cross-references *)
 val add_xref :
   'a ->

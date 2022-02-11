@@ -12,15 +12,15 @@ open Hh_prelude
 
 (* This check enforces 3 properties related to return statements and functions' return types:
 
-Property 1: A function annotated with return type void must not contain a return statement with
-  a value.
+   Property 1: A function annotated with return type void must not contain a return statement with
+     a value.
 
-Property 2: A function containing a return statement without a value (or returning implicitly)
-  can only be annotated with a return type if that return type is void (or
-  <Awaitable<void>, for async functions).
+   Property 2: A function containing a return statement without a value (or returning implicitly)
+     can only be annotated with a return type if that return type is void (or
+     <Awaitable<void>, for async functions).
 
-Property 3: A function must not mix return statements with and without a value, even if such a function
-  could be given a sufficiently general type.
+   Property 3: A function must not mix return statements with and without a value, even if such a function
+     could be given a sufficiently general type.
 *)
 
 type state = {
@@ -83,9 +83,11 @@ let validate_state fun_kind env s =
       is_bad_supertype aw_void ret_type_hint_locl
     in
     if is_void_super_ty || is_awaitable_void_super_ty then
-      match s.return_type with
-      | None -> (true, lazy())
-      | Some (hint_loc, _) -> 
+      let hint_loc =
+        match s.return_type with
+        | None -> None
+        | Some (hint_loc, _) -> Some hint_loc
+      in
       ( false,
         lazy
           (Errors.add_typing_error

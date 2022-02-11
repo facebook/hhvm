@@ -1121,9 +1121,9 @@ module Primary = struct
         }
       | Missing_assign of Pos.t
       | Non_void_annotation_on_return_void_function of {
-          hint_pos: Pos.t;
-          pos: Pos.t;
           is_async: bool;
+          pos: Pos.t;
+          hint_pos: Pos.t option;
         }
       | Tuple_syntax of Pos.t
 
@@ -1151,23 +1151,22 @@ module Primary = struct
         (pos, "This function can exit with and without returning a value")
       and reason =
         (Pos_or_decl.of_raw_pos with_value_pos, "Returning a value here.")
-        ::
-        Option.value_map
-          without_value_pos_opt
-          ~default:
-            [
-              ( Pos_or_decl.of_raw_pos pos,
-                "This function does not always return a value" );
-            ]
-          ~f:(fun p ->
-            [(Pos_or_decl.of_raw_pos p, "Returning without a value here")])
+        :: Option.value_map
+             without_value_pos_opt
+             ~default:
+               [
+                 ( Pos_or_decl.of_raw_pos pos,
+                   "This function does not always return a value" );
+               ]
+             ~f:(fun p ->
+               [(Pos_or_decl.of_raw_pos p, "Returning without a value here")])
       in
       (Error_code.ReturnsWithAndWithoutValue, claim, reason, [])
 
     let missing_assign pos =
       (Error_code.MissingAssign, (pos, "Please assign a value"), [], [])
 
-    let non_void_annotation_on_return_void_function is_async pos hint_pos=
+    let non_void_annotation_on_return_void_function is_async pos hint_pos =
       let (async_indicator, return_type) =
         if is_async then
           ("Async f", "Awaitable<void>")
@@ -1180,14 +1179,18 @@ module Primary = struct
           async_indicator
           return_type
       in
-      let quickfix = [
-        Quickfix.make
-          ~title:
-            ("Change to " ^ Markdown_lite.md_codify(return_type))
-          ~new_text: return_type
-          hint_pos;
-      ] 
+      let quickfix =
+        match hint_pos with
+        | None -> []
+        | Some hint_pos ->
+          [
+            Quickfix.make
+              ~title:("Change to " ^ Markdown_lite.md_codify return_type)
+              ~new_text:return_type
+              hint_pos;
+          ]
       in
+
       (Error_code.NonVoidAnnotationOnReturnVoidFun, (pos, message), [], quickfix)
 
     let tuple_syntax p =
@@ -1205,7 +1208,8 @@ module Primary = struct
           { pos; with_value_pos; without_value_pos_opt } ->
         returns_with_and_without_value pos with_value_pos without_value_pos_opt
       | Missing_assign pos -> missing_assign pos
-      | Non_void_annotation_on_return_void_function { hint_pos; pos; is_async } ->
+      | Non_void_annotation_on_return_void_function { is_async; pos; hint_pos }
+        ->
         non_void_annotation_on_return_void_function is_async pos hint_pos
       | Tuple_syntax pos -> tuple_syntax pos
   end
@@ -2889,9 +2893,8 @@ module Primary = struct
         Printf.sprintf
           "%d distinct use types were determined: please add type hints to lambda parameters."
           (List.length uses) )
-      ::
-      List.map uses ~f:(fun (pos, ty) ->
-          (pos, "This use has type " ^ Markdown_lite.md_codify ty))
+      :: List.map uses ~f:(fun (pos, ty) ->
+             (pos, "This use has type " ^ Markdown_lite.md_codify ty))
     in
     (Error_code.AmbiguousLambda, claim, reason, [])
 
@@ -3662,7 +3665,7 @@ module Primary = struct
       )
     in
     let msg2 = (method_pos, "Trait method is defined here") in
-    (Error_code.DiamondTraitMethod, msg1, msg2 :: trace1 @ trace2, [])
+    (Error_code.DiamondTraitMethod, msg1, (msg2 :: trace1) @ trace2, [])
 
   let generic_property_import_via_diamond
       pos class_name property_pos property_name trace1 trace2 =
@@ -3679,7 +3682,7 @@ module Primary = struct
         ^ " via multiple traits.  Remove the multiple paths" )
     in
     let msg2 = (property_pos, "Trait property is defined here") in
-    (Error_code.DiamondTraitProperty, msg1, msg2 :: trace1 @ trace2, [])
+    (Error_code.DiamondTraitProperty, msg1, (msg2 :: trace1) @ trace2, [])
 
   let unification_cycle pos ty =
     ( Error_code.UnificationCycle,
@@ -4106,7 +4109,6 @@ module Primary = struct
       [] )
 
   let array_access_read = array_access Error_code.ArrayAccessRead
-
   let array_access_write = array_access Error_code.ArrayAccessWrite
 
   let keyset_set pos1 pos2 =
@@ -5213,31 +5215,18 @@ module rec Error : sig
     t -> current_span:Pos.t -> (Pos.t, Pos_or_decl.t) User_error.t option
 
   val primary : Primary.t -> t
-
   val coeffect : Primary.Coeffect.t -> t
-
   val enum : Primary.Enum.t -> t
-
   val expr_tree : Primary.Expr_tree.t -> t
-
   val ifc : Primary.Ifc.t -> t
-
   val modules : Primary.Modules.t -> t
-
   val readonly : Primary.Readonly.t -> t
-
   val record : Primary.Record.t -> t
-
   val shape : Primary.Shape.t -> t
-
   val wellformedness : Primary.Wellformedness.t -> t
-
   val xhp : Primary.Xhp.t -> t
-
   val apply_reasons : Secondary.t -> on_error:Reasons_callback.t -> t
-
   val apply : t -> on_error:Callback.t -> t
-
   val assert_in_current_decl : Secondary.t -> ctx:Pos_or_decl.ctx -> t
 end = struct
   type t =
@@ -5291,31 +5280,18 @@ end = struct
 
   (* -- Constructors ---------------------------------------------------------- *)
   let primary prim_err = Primary prim_err
-
   let coeffect err = primary @@ Primary.Coeffect err
-
   let enum err = primary @@ Primary.Enum err
-
   let expr_tree err = primary @@ Primary.Expr_tree err
-
   let ifc err = primary @@ Primary.Ifc err
-
   let modules err = primary @@ Primary.Modules err
-
   let readonly err = primary @@ Primary.Readonly err
-
   let record err = primary @@ Primary.Record err
-
   let shape err = primary @@ Primary.Shape err
-
   let wellformedness err = primary @@ Primary.Wellformedness err
-
   let xhp err = primary @@ Primary.Xhp err
-
   let apply_reasons t ~on_error = Apply_reasons (on_error, t)
-
   let apply t ~on_error = Apply (on_error, t)
-
   let assert_in_current_decl snd ~ctx = Assert_in_current_decl (snd, ctx)
 end
 
@@ -6571,55 +6547,30 @@ and Callback : sig
       "This function will be removed. Please avoid adding side effects to error callbacks."]
 
   val of_primary_error : Primary.t -> t
-
   val with_code : code:Error_code.t -> t
-
   val retain_code : t -> t
-
   val with_claim_as_reason : t -> new_claim:Primary.t -> t
-
   val unify_error : t
-
   val index_type_mismatch : t
-
   val covariant_index_type_mismatch : t
-
   val expected_stringlike : t
-
   val constant_does_not_match_enum_type : t
-
   val enum_underlying_type_must_be_arraykey : t
-
   val enum_constraint_must_be_arraykey : t
-
   val enum_subtype_must_have_compatible_constraint : t
-
   val parameter_default_value_wrong_type : t
-
   val newtype_alias_must_satisfy_constraint : t
-
   val missing_return : t
-
   val inout_return_type_mismatch : t
-
   val class_constant_value_does_not_match_hint : t
-
   val class_property_initializer_type_does_not_match_hint : t
-
   val xhp_attribute_does_not_match_hint : t
-
   val record_init_value_does_not_match_hint : t
-
   val strict_str_concat_type_mismatch : t
-
   val strict_str_interp_type_mismatch : t
-
   val bitwise_math_invalid_argument : t
-
   val inc_dec_invalid_argument : t
-
   val math_invalid_argument : t
-
   val using_error : Pos.t -> has_await:bool -> t
 end = struct
   type t =
@@ -6687,20 +6638,14 @@ end = struct
   (* -- Constructors -------------------------------------------------------- *)
 
   let always err = Always err
-
   let with_side_effect t ~eff = (With_side_effect (t, eff) [@alert.deprecated])
-
   let with_code ~code = With_code code
-
   let of_primary_error err = with_code ~code:(Primary.code err)
-
   let retain_code t = Retain_code t
-
   let with_claim_as_reason t ~new_claim = With_claim_as_reason (t, new_claim)
 
   (* -- Specific errors ----------------------------------------------------- *)
   let unify_error = with_code ~code:Error_code.UnifyError
-
   let index_type_mismatch = with_code ~code:Error_code.IndexTypeMismatch
 
   let covariant_index_type_mismatch =
@@ -6773,35 +6718,20 @@ and Reasons_callback : sig
       "This function will be removed. Please use the provided combinators for constructing error callbacks."]
 
   val ignore_error : t
-
   val always : Error.t -> t
-
   val of_error : Error.t -> t
-
   val of_primary_error : Primary.t -> t
-
   val with_claim : Callback.t -> claim:Pos.t Message.t -> t
-
   val with_code : t -> code:Error_code.t -> t
-
   val with_reasons : t -> reasons:Pos_or_decl.t Message.t list -> t
-
   val prepend_reason : t -> reason:Pos_or_decl.t Message.t -> t
-
   val append_reason : t -> reason:Pos_or_decl.t Message.t -> t
-
   val append_incoming_reasons : t -> t
-
   val prepend_incoming_reasons : t -> t
-
   val retain_code : t -> t
-
   val retain_reasons : t -> t
-
   val retain_quickfixes : t -> t
-
   val prepend_on_apply : t -> Secondary.t -> t
-
   val assert_in_current_decl : Error_code.t -> ctx:Pos_or_decl.ctx -> t
 
   val apply_help :
@@ -6823,7 +6753,6 @@ and Reasons_callback : sig
     (Pos.t, Pos_or_decl.t) User_error.t option
 
   val unify_error_at : Pos.t -> t
-
   val bad_enum_decl : Pos.t -> t
 
   val bad_conditional_support_dynamic :
@@ -6841,13 +6770,9 @@ and Reasons_callback : sig
     Pos.t -> in_class:bool -> decl_pos:Pos_or_decl.t -> t
 
   val explain_constraint : Pos.t -> t
-
   val rigid_tvar_escape_at : Pos.t -> string -> t
-
   val invalid_type_hint : Pos.t -> t
-
   val type_constant_mismatch : t -> t
-
   val class_constant_type_mismatch : t -> t
 
   val unsatisfied_req_callback :
@@ -6858,9 +6783,7 @@ and Reasons_callback : sig
     t
 
   val invalid_echo_argument_at : Pos.t -> t
-
   val index_type_mismatch_at : Pos.t -> t
-
   val unify_error_assert_primary_pos_in_current_decl : Pos_or_decl.ctx -> t
 
   val invalid_type_hint_assert_primary_pos_in_current_decl :
@@ -6912,37 +6835,21 @@ end = struct
   (* -- Constructors -------------------------------------------------------- *)
 
   let from_on_error f = From_on_error f
-
   let ignore_error = Ignore
-
   let of_error err = Of_error err
-
   let of_primary_error prim_err = Of_error (Error.primary prim_err)
-
   let with_claim no_claim ~claim = Of_callback (no_claim, claim)
-
   let with_code t ~code = With_code (t, code)
-
   let with_reasons t ~reasons = With_reasons (t, reasons)
-
   let prepend_reason t ~reason = Add_reason (t, Prepend, reason)
-
   let append_reason t ~reason = Add_reason (t, Append, reason)
-
   let append_incoming_reasons t = Incoming_reasons (t, Append)
-
   let prepend_incoming_reasons t = Incoming_reasons (t, Prepend)
-
   let retain_code t = Retain (t, Code)
-
   let retain_reasons t = Retain (t, Reasons)
-
   let retain_quickfixes t = Retain (t, Quickfixes)
-
   let always err = Always err
-
   let prepend_on_apply t snd_err = Prepend_on_apply (t, snd_err)
-
   let assert_in_current_decl code ~ctx = Assert_in_current_decl (code, ctx)
 
   (* -- Evaluation ------------------------------------------------------------ *)

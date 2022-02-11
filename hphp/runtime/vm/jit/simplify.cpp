@@ -3591,7 +3591,7 @@ SSATmp* simplifyGetMemoKey(State& env, const IRInstruction* inst) {
 
   if (auto ret = simplifyGetMemoKeyScalar(env, inst)) return ret;
   if (src->isA(TUncounted|TStr) &&
-      !RuntimeOption::EvalRaiseClassConversionWarning) {
+      !RuntimeOption::EvalClassMemoNotices) {
     return gen(env, GetMemoKeyScalar, src);
   }
   return nullptr;

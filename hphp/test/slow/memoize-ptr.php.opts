@@ -1,4 +1,4 @@
 -vEval.IsVecNotices=1
 -vEval.VecHintNotices=1
 -vEval.EmitClassPointers=2
--vEval.RaiseClassConversionWarning=true
+-vEval.ClassMemoNotices=true

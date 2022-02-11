@@ -36,6 +36,7 @@
 #include "hphp/runtime/base/opaque-resource.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/request-tracing.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -176,6 +177,20 @@ bool HHVM_FUNCTION(could_include, const String& file) {
 }
 
 namespace {
+
+inline const StringData* classToMemoKeyHelper(const Class* cls) {
+  if (RuntimeOption::EvalClassMemoNotices) {
+   raise_class_to_memokey_conversion_warning();
+ }
+ return cls->name();
+}
+
+const StringData* lazyClassToMemoKeyHelper(const LazyClassData& lclass) {
+  if (RuntimeOption::EvalClassMemoNotices) {
+    raise_class_to_memokey_conversion_warning();
+  }
+  return lclass.name();
+}
 
 /**
  * Param serialization for memoization.
@@ -399,13 +414,13 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
     case KindOfClass:
       serialize_memoize_code(sb, SER_MC_STRING);
       serialize_memoize_string_data(
-        sb, classToStringHelper(tv.m_data.pclass));
+        sb, classToMemoKeyHelper(tv.m_data.pclass));
       break;
 
     case KindOfLazyClass:
       serialize_memoize_code(sb, SER_MC_STRING);
       serialize_memoize_string_data(
-        sb, lazyClassToStringHelper(tv.m_data.plazyclass));
+        sb, lazyClassToMemoKeyHelper(tv.m_data.plazyclass));
       break;
 
     case KindOfPersistentString:
@@ -509,7 +524,7 @@ TypedValue serialize_memoize_param_str(StringData* str) {
 
 TypedValue serialize_memoize_param_lazycls(LazyClassData lcls) {
   return serialize_memoize_string_top(
-    const_cast<StringData*>(lazyClassToStringHelper(lcls)));
+    const_cast<StringData*>(lazyClassToMemoKeyHelper(lcls)));
 }
 
 TypedValue serialize_memoize_param_dbl(double val) {
@@ -536,7 +551,7 @@ TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param) {
   } else if (isLazyClassType(type)) {
     return serialize_memoize_string_top(
       const_cast<StringData*>(
-        lazyClassToStringHelper(param.m_data.plazyclass)));
+        lazyClassToMemoKeyHelper(param.m_data.plazyclass)));
   } else if (type == KindOfBoolean) {
     assertx((uint8_t)s_trueMemoKey.data()[0] == (kCodePrefix | SER_MC_TRUE));
     assertx((uint8_t)s_falseMemoKey.data()[0] == (kCodePrefix | SER_MC_FALSE));

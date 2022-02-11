@@ -394,7 +394,7 @@ bool hasConstParamMemoCache(IRGS& env, const Func* callee, const FCallArgs& fca,
   }
   // Classes are converted to strings before storing to memo caches.
   // Bail out if we need to raise warning for class to string conversation.
-  if (RuntimeOption::EvalRaiseClassConversionWarning) return false;
+  if (RuntimeOption::EvalClassMemoNotices) return false;
   if (objOrClass &&
       (!objOrClass->hasConstVal(TCls) ||
        !objOrClass->clsVal()->isPersistent())) {

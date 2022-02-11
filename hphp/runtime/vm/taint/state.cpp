@@ -24,6 +24,7 @@
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/vm/taint/configuration.h"
 #include "hphp/runtime/vm/taint/state.h"
@@ -246,7 +247,10 @@ folly::dynamic requestMetadata(
   metadata["workingDirectory"] = g_context->getCwd();
 
   auto requestUrl = g_context->getRequestUrl();
-  metadata["requestUrl"] = requestUrl;
+
+  if (RO::EvalTaintLogRequestURLs) {
+    metadata["requestUrl"] = requestUrl;
+  }
 
   auto commandLine = Process::GetCommandLine(getpid());
   metadata["commandLine"] = commandLine;

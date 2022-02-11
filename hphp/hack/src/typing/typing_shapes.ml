@@ -47,9 +47,14 @@ let refine_shape field_name pos env shape =
       shape
   in
   let sft_ty =
-    MakeType.mixed
-      (Reason.Rmissing_optional_field
-         (get_pos shape, TUtils.get_printable_shape_field_name field_name))
+    let r =
+      Reason.Rmissing_optional_field
+        (get_pos shape, TUtils.get_printable_shape_field_name field_name)
+    in
+    if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+      MakeType.nullablesupportdynamic r
+    else
+      MakeType.mixed r
   in
   let sft = { sft_optional = false; sft_ty } in
   Typing_intersection.intersect

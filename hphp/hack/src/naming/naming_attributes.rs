@@ -5,6 +5,6 @@
 
 use oxidized::ast::*;
 
-pub fn mem(x: &str, xs: &Vec<UserAttribute>) -> bool {
+pub fn mem(x: &str, xs: &[UserAttribute]) -> bool {
     xs.iter().any(|ua| ua.name.1 == x)
 }

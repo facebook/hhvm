@@ -977,8 +977,8 @@ pub mod coeffects {
         // Either the capability we are searching for matches exactly, is a subtype
         // of, or is contained in the capability/context we are visiting
         if c == name
-            || self::capability_contained_in_ctx(&c, &name)
-            || self::capability_is_subtype_of_capability(&c, &name)
+            || self::capability_contained_in_ctx(c, name)
+            || self::capability_is_subtype_of_capability(c, name)
         {
             return true;
         }

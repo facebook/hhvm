@@ -66,7 +66,7 @@ InitFiniNode s_configurationDestruction(
                           .count();
           auto outputPath = folly::sformat(
               "{}/coverage-{}.json", *(configuration->outputDirectory), time);
-          auto functions = configuration->specialFunctions();
+          auto functions = configuration->functionMetadata();
           if (functions) {
             functions->dumpFunctionCoverageTo(outputPath);
           }
@@ -186,7 +186,7 @@ std::vector<Sink> FunctionMetadataTracker::sinks(const Func* func) {
       });
 }
 
-void SpecialFunctionTracker::dumpFunctionCoverageTo(std::string path) {
+void FunctionMetadataTracker::dumpFunctionCoverageTo(std::string path) {
   std::ofstream stream;
   stream.open(path);
   stream << "[\n";

@@ -90,6 +90,7 @@ impl<T: ?Sized + Ord> Ord for Hc<T> {
 
 macro_rules! impl_str_eq {
     ($lhs:ty, $rhs:ty) => {
+        #[allow(clippy::partialeq_ne_impl)]
         impl PartialEq<$rhs> for $lhs {
             #[inline]
             fn eq(&self, other: &$rhs) -> bool {
@@ -101,6 +102,7 @@ macro_rules! impl_str_eq {
             }
         }
 
+        #[allow(clippy::partialeq_ne_impl)]
         impl PartialEq<$lhs> for $rhs {
             #[inline]
             fn eq(&self, other: &$lhs) -> bool {

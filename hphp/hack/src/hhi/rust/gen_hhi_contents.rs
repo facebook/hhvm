@@ -31,7 +31,7 @@ fn main() {
 
     hhi_contents.extend(get_hhis_in_dir(&opts.hhi_dir));
     hhi_contents.extend(
-        get_hhis_in_dir(&hsl_dir)
+        get_hhis_in_dir(hsl_dir)
             .map(|(path, contents)| (PathBuf::from("hsl_generated").join(path), contents)),
     );
 

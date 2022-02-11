@@ -409,9 +409,15 @@ static req::vector<opt_struct> parse_opts(const char *opts, int opts_len) {
 
 const StaticString s_argv("argv");
 
-static Array hhvm_getopt_impl(const String& options,
-                              const Variant& longopts,
-                              int64_t& optind) {
+static Array HHVM_FUNCTION(getopt_with_optind,
+                           const String& options,
+                           const Variant& longopts,
+                           int64_t& optind) {
+  if (optind <= 0) {
+    raise_warning("optind must be positive");
+    // Be conservative and return an empty dict
+    return Array::CreateDict();
+  }
   auto opt_vec = parse_opts(options.data(), options.size());
 
   if (!longopts.isNull()) {
@@ -549,19 +555,7 @@ static Array hhvm_getopt_impl(const String& options,
 static Array HHVM_FUNCTION(getopt, const String& options,
                                    const Variant& longopts /*=null */) {
   int64_t optind = 1;
-  return hhvm_getopt_impl(options, longopts, optind);
-}
-
-static Array HHVM_FUNCTION(getopt_with_optind,
-                           const String& options,
-                           const Variant& longopts,
-                           int64_t& optind) {
-  if (optind <= 0) {
-    raise_warning("optind must be positive");
-    // Be conservative and return an empty dict
-    return Array::CreateDict();
-  }
-  return hhvm_getopt_impl(options, longopts, optind);
+  return HHVM_FN(getopt_with_optind)(options, longopts, optind);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

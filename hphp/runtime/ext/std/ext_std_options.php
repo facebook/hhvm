@@ -105,6 +105,11 @@ function getmyuid(): mixed;
 <<__Native>>
 function getopt(string $options,
                 mixed $longopts = null): darray;
+
+/* Similar to getopt but accepts an inout optind which controls the argument
+ * at which parsing begins. Sets the optind to the index of the first unparsed
+ * option.
+ */
 <<__Native>>
 function getopt_with_optind(string $options,
                             mixed $longopts,

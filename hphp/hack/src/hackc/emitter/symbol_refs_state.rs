@@ -70,10 +70,11 @@ impl<'arena> IncludePath<'arena> {
     }
 
     fn extract_str(&self) -> (&str, &str) {
-        use IncludePath::*;
         match self {
-            Absolute(s) | SearchPathRelative(s) | DocRootRelative(s) => (s.unsafe_as_str(), ""),
-            IncludeRootRelative(s1, s2) => (s1.unsafe_as_str(), s2.unsafe_as_str()),
+            IncludePath::Absolute(s)
+            | IncludePath::SearchPathRelative(s)
+            | IncludePath::DocRootRelative(s) => (s.unsafe_as_str(), ""),
+            IncludePath::IncludeRootRelative(s1, s2) => (s1.unsafe_as_str(), s2.unsafe_as_str()),
         }
     }
 }

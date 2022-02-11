@@ -238,14 +238,13 @@ impl Gen {
     }
 
     pub fn release_ids(&mut self) {
-        use Region::*;
         match self
             .jump_targets
             .0
             .last_mut()
             .expect("empty region after executing run_and_release")
         {
-            Loop(LoopLabels {
+            Region::Loop(LoopLabels {
                 label_break,
                 label_continue,
                 ..
@@ -253,10 +252,10 @@ impl Gen {
                 self.label_id_map.remove(&IdKey::IdLabel(*label_break));
                 self.label_id_map.remove(&IdKey::IdLabel(*label_continue));
             }
-            Switch(l) | TryFinally(l) | Using(l) => {
+            Region::Switch(l) | Region::TryFinally(l) | Region::Using(l) => {
                 self.label_id_map.remove(&IdKey::IdLabel(*l));
             }
-            Finally | Function => {}
+            Region::Finally | Region::Function => {}
         };
         // CONSIDER: now HHVM does not release state ids for named labels
         // even after leaving the scope where labels are accessible

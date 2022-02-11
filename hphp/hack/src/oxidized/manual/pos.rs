@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::{borrow::Cow, cmp::Ordering, ops::Range, path::PathBuf, result::Result::*};
+use std::{borrow::Cow, cmp::Ordering, ops::Range, path::PathBuf};
 
 use eq_modulo_pos::EqModuloPos;
 use ocamlrep::rc::RcOc;
@@ -45,13 +45,10 @@ enum PosImpl {
     FromReason(Box<PosImpl>),
 }
 
-use PosImpl::*;
-
 #[derive(
     Clone,
     Debug,
     Deserialize,
-    Hash,
     FromOcamlRep,
     FromOcamlRepIn,
     ToOcamlRep,
@@ -85,16 +82,16 @@ impl Pos {
 
     fn from_raw_span(file: RcOc<RelativePath>, span: PosSpanRaw) -> Self {
         if let Some(span) = PosSpanTiny::make(&span.start, &span.end) {
-            return Pos(Tiny { file, span });
+            return Pos(PosImpl::Tiny { file, span });
         }
         let (lnum, bol, offset) = span.start.line_beg_offset();
         if let Some(start) = FilePosSmall::from_lnum_bol_offset(lnum, bol, offset) {
             let (lnum, bol, offset) = span.end.line_beg_offset();
             if let Some(end) = FilePosSmall::from_lnum_bol_offset(lnum, bol, offset) {
-                return Pos(Small { file, start, end });
+                return Pos(PosImpl::Small { file, start, end });
             }
         }
-        Pos(Large {
+        Pos(PosImpl::Large {
             file,
             start: Box::new(span.start),
             end: Box::new(span.end),
@@ -103,16 +100,16 @@ impl Pos {
 
     fn to_raw_span(&self) -> PosSpanRaw {
         match &self.0 {
-            Tiny { span, .. } => span.to_raw_span(),
-            &Small { start, end, .. } => PosSpanRaw {
-                start: start.into(),
-                end: end.into(),
+            PosImpl::Tiny { span, .. } => span.to_raw_span(),
+            PosImpl::Small { start, end, .. } => PosSpanRaw {
+                start: (*start).into(),
+                end: (*end).into(),
             },
-            Large { start, end, .. } => PosSpanRaw {
+            PosImpl::Large { start, end, .. } => PosSpanRaw {
                 start: **start,
                 end: **end,
             },
-            FromReason(_p) => unimplemented!(),
+            PosImpl::FromReason(_p) => unimplemented!(),
         }
     }
 
@@ -122,15 +119,19 @@ impl Pos {
 
     fn filename_rc_ref(&self) -> &RcOc<RelativePath> {
         match &self.0 {
-            Small { file, .. } | Large { file, .. } | Tiny { file, .. } => &file,
-            FromReason(_p) => unimplemented!(),
+            PosImpl::Small { file, .. }
+            | PosImpl::Large { file, .. }
+            | PosImpl::Tiny { file, .. } => file,
+            PosImpl::FromReason(_p) => unimplemented!(),
         }
     }
 
     fn into_filename(self) -> RcOc<RelativePath> {
         match self.0 {
-            Small { file, .. } | Large { file, .. } | Tiny { file, .. } => file,
-            FromReason(_p) => unimplemented!(),
+            PosImpl::Small { file, .. }
+            | PosImpl::Large { file, .. }
+            | PosImpl::Tiny { file, .. } => file,
+            PosImpl::FromReason(_p) => unimplemented!(),
         }
     }
 
@@ -151,23 +152,23 @@ impl Pos {
             (line, start, end)
         }
         match &self.0 {
-            Small { start, end, .. } => compute(start, end),
-            Large { start, end, .. } => compute(start.as_ref(), end.as_ref()),
-            Tiny { span, .. } => {
+            PosImpl::Small { start, end, .. } => compute(start, end),
+            PosImpl::Large { start, end, .. } => compute(start.as_ref(), end.as_ref()),
+            PosImpl::Tiny { span, .. } => {
                 let PosSpanRaw { start, end } = span.to_raw_span();
                 compute(&start, &end)
             }
-            FromReason(_p) => unimplemented!(),
+            PosImpl::FromReason(_p) => unimplemented!(),
         }
     }
 
     pub fn info_pos_extended(&self) -> (usize, usize, usize, usize) {
         let (line_begin, start, end) = self.info_pos();
         let line_end = match &self.0 {
-            Small { end, .. } => end.line_column_beg(),
-            Large { end, .. } => (*end).line_column_beg(),
-            Tiny { span, .. } => span.to_raw_span().end.line_column_beg(),
-            FromReason(_p) => unimplemented!(),
+            PosImpl::Small { end, .. } => end.line_column_beg(),
+            PosImpl::Large { end, .. } => (*end).line_column_beg(),
+            PosImpl::Tiny { span, .. } => span.to_raw_span().end.line_column_beg(),
+            PosImpl::FromReason(_p) => unimplemented!(),
         }
         .0;
         (line_begin, line_end, start, end)
@@ -179,10 +180,10 @@ impl Pos {
 
     pub fn line(&self) -> usize {
         match &self.0 {
-            Small { start, .. } => start.line(),
-            Large { start, .. } => start.line(),
-            Tiny { span, .. } => span.start_line_number(),
-            FromReason(_p) => unimplemented!(),
+            PosImpl::Small { start, .. } => start.line(),
+            PosImpl::Large { start, .. } => start.line(),
+            PosImpl::Tiny { span, .. } => span.start_line_number(),
+            PosImpl::FromReason(_p) => unimplemented!(),
         }
     }
 
@@ -202,13 +203,13 @@ impl Pos {
         &self,
     ) -> ((usize, usize, usize), (usize, usize, usize)) {
         match &self.0 {
-            Small { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
-            Large { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
-            Tiny { span, .. } => {
+            PosImpl::Small { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
+            PosImpl::Large { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
+            PosImpl::Tiny { span, .. } => {
                 let PosSpanRaw { start, end } = span.to_raw_span();
                 (start.line_beg_offset(), end.line_beg_offset())
             }
-            FromReason(_p) => unimplemented!(),
+            PosImpl::FromReason(_p) => unimplemented!(),
         }
     }
 
@@ -266,9 +267,7 @@ impl Pos {
 
         let start = if span1.start.is_dummy() {
             span2.start
-        } else if span2.start.is_dummy() {
-            span1.start
-        } else if span1.start.offset() < span2.start.offset() {
+        } else if span2.start.is_dummy() || span1.start.offset() < span2.start.offset() {
             span1.start
         } else {
             span2.start
@@ -276,12 +275,10 @@ impl Pos {
 
         let end = if span1.end.is_dummy() {
             span2.end
-        } else if span2.end.is_dummy() {
+        } else if span2.end.is_dummy() || span1.end.offset() >= span2.end.offset() {
             span1.end
-        } else if span1.end.offset() < span2.end.offset() {
-            span2.end
         } else {
-            span1.end
+            span2.end
         };
 
         Ok(Self::from_raw_span(
@@ -316,19 +313,19 @@ impl Pos {
 
     pub fn end_offset(&self) -> usize {
         match &self.0 {
-            Small { end, .. } => end.offset(),
-            Large { end, .. } => end.offset(),
-            Tiny { span, .. } => span.end_offset(),
-            FromReason(_p) => unimplemented!(),
+            PosImpl::Small { end, .. } => end.offset(),
+            PosImpl::Large { end, .. } => end.offset(),
+            PosImpl::Tiny { span, .. } => span.end_offset(),
+            PosImpl::FromReason(_p) => unimplemented!(),
         }
     }
 
     pub fn start_offset(&self) -> usize {
         match &self.0 {
-            Small { start, .. } => start.offset(),
-            Large { start, .. } => start.offset(),
-            Tiny { span, .. } => span.start_offset(),
-            FromReason(_p) => unimplemented!(),
+            PosImpl::Small { start, .. } => start.offset(),
+            PosImpl::Large { start, .. } => start.offset(),
+            PosImpl::Tiny { span, .. } => span.start_offset(),
+            PosImpl::FromReason(_p) => unimplemented!(),
         }
     }
 }
@@ -351,17 +348,17 @@ impl std::fmt::Display for Pos {
             }
         }
         match &self.0 {
-            Small {
+            PosImpl::Small {
                 file, start, end, ..
             } => do_fmt(f, file, start, end),
-            Large {
+            PosImpl::Large {
                 file, start, end, ..
             } => do_fmt(f, file, &**start, &**end),
-            Tiny { file, span } => {
+            PosImpl::Tiny { file, span } => {
                 let PosSpanRaw { start, end } = span.to_raw_span();
                 do_fmt(f, file, &start, &end)
             }
-            FromReason(_p) => unimplemented!(),
+            PosImpl::FromReason(_p) => unimplemented!(),
         }
     }
 }
@@ -389,6 +386,13 @@ impl PartialEq for Pos {
 }
 
 impl Eq for Pos {}
+
+// non-derived impl Hash because PartialEq and Eq are non-derived
+impl std::hash::Hash for Pos {
+    fn hash<H: std::hash::Hasher>(&self, hasher: &mut H) {
+        self.0.hash(hasher)
+    }
+}
 
 impl EqModuloPos for Pos {
     fn eq_modulo_pos(&self, _rhs: &Self) -> bool {
@@ -446,24 +450,22 @@ mod tests {
 
     #[test]
     fn test_pos() {
-        assert_eq!(Pos::make_none().is_none(), true);
-        assert_eq!(
-            Pos::from_lnum_bol_offset(
+        assert!(Pos::make_none().is_none());
+        assert!(
+            !Pos::from_lnum_bol_offset(
                 RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a"))),
                 (0, 0, 0),
                 (0, 0, 0)
             )
             .is_none(),
-            false
         );
-        assert_eq!(
-            Pos::from_lnum_bol_offset(
+        assert!(
+            !Pos::from_lnum_bol_offset(
                 RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(""))),
                 (1, 0, 0),
                 (0, 0, 0)
             )
             .is_none(),
-            false
         );
     }
 

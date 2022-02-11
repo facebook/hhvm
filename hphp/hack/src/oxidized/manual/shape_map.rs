@@ -10,22 +10,22 @@ use serde::{Deserialize, Serialize};
 
 use crate::ast_defs::{Id, ShapeFieldName};
 
-#[derive(Clone, Debug, Deserialize, Hash, FromOcamlRep, ToOcamlRep, Serialize)]
+#[derive(Clone, Debug, Deserialize, FromOcamlRep, ToOcamlRep, Serialize)]
 pub struct ShapeField(pub ShapeFieldName);
 
 impl Ord for ShapeField {
     fn cmp(&self, other: &Self) -> Ordering {
-        use ShapeFieldName::*;
+        use ShapeFieldName as SFN;
         match (&self.0, &other.0) {
-            (SFlitInt((_, s1)), SFlitInt((_, s2))) => s1.cmp(&s2),
-            (SFlitStr((_, s1)), SFlitStr((_, s2))) => s1.cmp(&s2),
-            (SFclassConst(Id(_, c1), (_, m1)), SFclassConst(Id(_, c2), (_, m2))) => {
+            (SFN::SFlitInt((_, s1)), SFN::SFlitInt((_, s2))) => s1.cmp(s2),
+            (SFN::SFlitStr((_, s1)), SFN::SFlitStr((_, s2))) => s1.cmp(s2),
+            (SFN::SFclassConst(Id(_, c1), (_, m1)), SFN::SFclassConst(Id(_, c2), (_, m2))) => {
                 (c1, m1).cmp(&(c2, m2))
             }
-            (SFlitInt(_), _) => Ordering::Less,
-            (SFlitStr(_), SFlitInt(_)) => Ordering::Greater,
-            (SFlitStr(_), _) => Ordering::Less,
-            (SFclassConst(_, _), _) => Ordering::Greater,
+            (SFN::SFlitInt(_), _) => Ordering::Less,
+            (SFN::SFlitStr(_), SFN::SFlitInt(_)) => Ordering::Greater,
+            (SFN::SFlitStr(_), _) => Ordering::Less,
+            (SFN::SFclassConst(_, _), _) => Ordering::Greater,
         }
     }
 }
@@ -43,5 +43,12 @@ impl PartialEq for ShapeField {
 }
 
 impl Eq for ShapeField {}
+
+// non-derived impl Hash because PartialEq and Eq are non-derived
+impl std::hash::Hash for ShapeField {
+    fn hash<H: std::hash::Hasher>(&self, hasher: &mut H) {
+        self.0.hash(hasher)
+    }
+}
 
 pub type ShapeMap<T> = std::collections::BTreeMap<ShapeField, T>;

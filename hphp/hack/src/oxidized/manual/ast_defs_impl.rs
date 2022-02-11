@@ -20,7 +20,7 @@ impl ShapeFieldName {
     pub fn get_pos(&self) -> &Pos {
         use ShapeFieldName::*;
         match self {
-            SFlitInt((p, _)) | SFlitStr((p, _)) | SFclassConst(_, (p, _)) => &p,
+            SFlitInt((p, _)) | SFlitStr((p, _)) | SFclassConst(_, (p, _)) => p,
         }
     }
 }

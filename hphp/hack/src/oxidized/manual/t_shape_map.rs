@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cmp::Ordering;
+use std::hash::{Hash, Hasher};
 
 use serde::{Deserialize, Serialize};
 
@@ -18,7 +19,6 @@ use crate::typing_defs_core::TshapeFieldName;
     Debug,
     Deserialize,
     FromOcamlRep,
-    Hash,
     EqModuloPos,
     NoPosHash,
     Serialize,
@@ -45,5 +45,12 @@ impl PartialEq for TShapeField {
 }
 
 impl Eq for TShapeField {}
+
+// non-derived impl Hash because PartialEq and Eq are non-derived
+impl Hash for TShapeField {
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
+        Hash::hash(&self.0, hasher)
+    }
+}
 
 pub type TShapeMap<T> = std::collections::BTreeMap<TShapeField, T>;

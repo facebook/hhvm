@@ -18,9 +18,6 @@ default: echo "default case: \$v is $v\n";
 
 switch ($v)
 {
-default:
-    echo "default case: \$v is $v\n";
-    break;      // break ends "group" of default statements
 case 20:
     echo "case 20\n";
     break;      // break ends "group" of case 20 statements
@@ -40,11 +37,11 @@ switch ($v)
 case 30:
     echo "case 30-2\n";
     break;
-default:
-    echo "default case: \$v is $v\n";
-    break;
 case 30:
     echo "case 30-1\n";
+    break;
+default:
+    echo "default case: \$v is $v\n";
     break;
 }
 

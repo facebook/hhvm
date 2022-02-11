@@ -40,12 +40,8 @@ enum PosImpl {
 
 static_assertions::assert_eq_size!(PosImpl, u128);
 
-// Putting the contents behind a Box helps ensure that we don't blow up the
-// sizes of all our types containing positions (particularly enums, where we pay
-// for the size of the position even in variants which don't contain a
-// position).
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct BPos(Box<PosImpl>);
+pub struct BPos(PosImpl);
 
 impl Pos for BPos {
     fn mk(cons: impl FnOnce() -> (RelativePath, FilePosLarge, FilePosLarge)) -> Self {
@@ -63,34 +59,34 @@ impl BPos {
         let prefix = file.prefix();
         let suffix = file.suffix();
         if let Some(span) = PosSpanTiny::make(&start, &end) {
-            return BPos(Box::new(PosImpl::Tiny {
+            return BPos(PosImpl::Tiny {
                 prefix,
                 suffix,
                 span,
-            }));
+            });
         }
         let (lnum, bol, offset) = start.line_beg_offset();
         if let Some(start) = FilePosSmall::from_lnum_bol_offset(lnum, bol, offset) {
             let (lnum, bol, offset) = end.line_beg_offset();
             if let Some(end) = FilePosSmall::from_lnum_bol_offset(lnum, bol, offset) {
                 let span = Box::new((start, end));
-                return BPos(Box::new(PosImpl::Small {
+                return BPos(PosImpl::Small {
                     prefix,
                     suffix,
                     span,
-                }));
+                });
             }
         }
         let span = Box::new((start, end));
-        BPos(Box::new(PosImpl::Large {
+        BPos(PosImpl::Large {
             prefix,
             suffix,
             span,
-        }))
+        })
     }
 
     pub fn file(&self) -> RelativePath {
-        match *self.0 {
+        match self.0 {
             PosImpl::Small { prefix, suffix, .. }
             | PosImpl::Large { prefix, suffix, .. }
             | PosImpl::Tiny { prefix, suffix, .. } => RelativePath::new(prefix, suffix),

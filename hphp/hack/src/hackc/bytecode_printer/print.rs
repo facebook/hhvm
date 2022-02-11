@@ -1031,11 +1031,6 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>) -> Result<()> {
                 w.write_all(b"NewObjS ")?;
                 print_special_cls_ref(w, r)
             }
-            I::FCall(fcall_args) => {
-                w.write_all(b"FCall ")?;
-                print_fcall_args(w, fcall_args)?;
-                w.write_all(br#" "" """#)
-            }
             I::FCallClsMethod { fcall_args, log } => {
                 w.write_all(b"FCallClsMethod ")?;
                 print_fcall_args(w, fcall_args)?;

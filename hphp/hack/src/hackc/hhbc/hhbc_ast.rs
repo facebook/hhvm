@@ -536,7 +536,6 @@ pub enum InstructCall<'arena> {
     NewObjD(ClassId<'arena>),
     NewObjRD(ClassId<'arena>),
     NewObjS(SpecialClsRef),
-    FCall(FcallArgs<'arena>),
     FCallClsMethod {
         fcall_args: FcallArgs<'arena>,
         log: IsLogAsDynamicCallOp,
@@ -580,8 +579,7 @@ impl<'arena> InstructCall<'arena> {
             | Self::NewObjD(_)
             | Self::NewObjRD(_)
             | Self::NewObjS(_) => None,
-            Self::FCall(fcall_args)
-            | Self::FCallClsMethod { fcall_args, .. }
+            Self::FCallClsMethod { fcall_args, .. }
             | Self::FCallClsMethodD { fcall_args, .. }
             | Self::FCallClsMethodS { fcall_args, .. }
             | Self::FCallClsMethodSD { fcall_args, .. }
@@ -600,8 +598,7 @@ impl<'arena> InstructCall<'arena> {
             | Self::NewObjD(_)
             | Self::NewObjRD(_)
             | Self::NewObjS(_) => None,
-            Self::FCall(fcall_args)
-            | Self::FCallClsMethod { fcall_args, .. }
+            Self::FCallClsMethod { fcall_args, .. }
             | Self::FCallClsMethodD { fcall_args, .. }
             | Self::FCallClsMethodS { fcall_args, .. }
             | Self::FCallClsMethodSD { fcall_args, .. }

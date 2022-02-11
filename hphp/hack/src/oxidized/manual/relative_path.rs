@@ -28,6 +28,7 @@ use serde::{Deserialize, Serialize};
     PartialOrd,
     Serialize
 )]
+#[repr(u8)]
 pub enum Prefix {
     Root,
     Hhi,

@@ -2,36 +2,43 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::RelativePath;
+use crate::{Prefix, RelativePath};
+use intern::string::BytesId;
+use oxidized::file_pos_small::FilePosSmall;
+use oxidized::pos_span_tiny::PosSpanTiny;
 use std::hash::Hash;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct FilePos {
-    /// 1-indexed line number.
-    pub lnum: u64,
-
-    /// Byte offset from start of file to start of line.
-    pub bol: u64,
-
-    /// Byte offset from start of line.
-    pub cnum: u64,
-}
+pub use oxidized::file_pos_large::FilePosLarge;
 
 pub trait Pos: Eq + Hash + Clone + std::fmt::Debug {
     /// Make a new instance. If the implementing Pos is stateful,
     /// it will call cons() to obtain interned values to construct the instance.
-    fn mk(cons: impl FnOnce() -> (RelativePath, FilePos, FilePos)) -> Self;
+    fn mk(cons: impl FnOnce() -> (RelativePath, FilePosLarge, FilePosLarge)) -> Self;
 
     fn to_oxidized_pos(&self) -> oxidized::pos::Pos;
 }
 
 /// Represents a closed-ended range [start, end] in a file.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-struct PosImpl {
-    file: RelativePath,
-    start: FilePos,
-    end: FilePos,
+enum PosImpl {
+    Small {
+        prefix: Prefix,
+        suffix: BytesId,
+        span: Box<(FilePosSmall, FilePosSmall)>,
+    },
+    Large {
+        prefix: Prefix,
+        suffix: BytesId,
+        span: Box<(FilePosLarge, FilePosLarge)>,
+    },
+    Tiny {
+        prefix: Prefix,
+        suffix: BytesId,
+        span: PosSpanTiny,
+    },
 }
+
+static_assertions::assert_eq_size!(PosImpl, u128);
 
 // Putting the contents behind a Box helps ensure that we don't blow up the
 // sizes of all our types containing positions (particularly enums, where we pay
@@ -41,13 +48,53 @@ struct PosImpl {
 pub struct BPos(Box<PosImpl>);
 
 impl Pos for BPos {
-    fn mk(cons: impl FnOnce() -> (RelativePath, FilePos, FilePos)) -> Self {
+    fn mk(cons: impl FnOnce() -> (RelativePath, FilePosLarge, FilePosLarge)) -> Self {
         let (file, start, end) = cons();
-        Self(Box::new(PosImpl { file, start, end }))
+        Self::new(file, start, end)
     }
 
     fn to_oxidized_pos(&self) -> oxidized::pos::Pos {
         unimplemented!()
+    }
+}
+
+impl BPos {
+    pub fn new(file: RelativePath, start: FilePosLarge, end: FilePosLarge) -> Self {
+        let prefix = file.prefix();
+        let suffix = file.suffix();
+        if let Some(span) = PosSpanTiny::make(&start, &end) {
+            return BPos(Box::new(PosImpl::Tiny {
+                prefix,
+                suffix,
+                span,
+            }));
+        }
+        let (lnum, bol, offset) = start.line_beg_offset();
+        if let Some(start) = FilePosSmall::from_lnum_bol_offset(lnum, bol, offset) {
+            let (lnum, bol, offset) = end.line_beg_offset();
+            if let Some(end) = FilePosSmall::from_lnum_bol_offset(lnum, bol, offset) {
+                let span = Box::new((start, end));
+                return BPos(Box::new(PosImpl::Small {
+                    prefix,
+                    suffix,
+                    span,
+                }));
+            }
+        }
+        let span = Box::new((start, end));
+        BPos(Box::new(PosImpl::Large {
+            prefix,
+            suffix,
+            span,
+        }))
+    }
+
+    pub fn file(&self) -> RelativePath {
+        match *self.0 {
+            PosImpl::Small { prefix, suffix, .. }
+            | PosImpl::Large { prefix, suffix, .. }
+            | PosImpl::Tiny { prefix, suffix, .. } => RelativePath::new(prefix, suffix),
+        }
     }
 }
 
@@ -56,7 +103,7 @@ impl Pos for BPos {
 pub struct NPos;
 
 impl Pos for NPos {
-    fn mk(_cons: impl FnOnce() -> (RelativePath, FilePos, FilePos)) -> Self {
+    fn mk(_cons: impl FnOnce() -> (RelativePath, FilePosLarge, FilePosLarge)) -> Self {
         NPos
     }
 

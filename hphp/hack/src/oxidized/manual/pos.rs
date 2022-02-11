@@ -98,7 +98,7 @@ impl Pos {
         })
     }
 
-    fn to_raw_span(&self) -> PosSpanRaw {
+    pub fn to_raw_span(&self) -> PosSpanRaw {
         match &self.0 {
             PosImpl::Tiny { span, .. } => span.to_raw_span(),
             PosImpl::Small { start, end, .. } => PosSpanRaw {

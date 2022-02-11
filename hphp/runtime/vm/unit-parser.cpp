@@ -191,12 +191,12 @@ CompilerResult hackc_compile(
     flags
   };
 
-  if (RO::EvalAssembleHhasProgram) {
-    ::rust::Box<HhasProgramWrapper> prog_wrapped =
-      hackc_compile_hhas_from_text_cpp_ffi(native_env, code);
-    const hackc::hhbc::HhasProgram* program = hackc::hhbc::hhasProgramRaw(prog_wrapped);
+  if (RO::EvalTranslateHackC) {
+    ::rust::Box<HackCUnitWrapper> prog_wrapped =
+      hackc_compile_unit_from_text_cpp_ffi(native_env, code);
+    const hackc::hhbc::HackCUnit* program = hackc::hhbc::hackCUnitRaw(prog_wrapped);
     UNUSED int num_elems = program->functions.len;
-    ITRACE(2, "AssembleHhasProgram: Found {} functions. \n", num_elems);
+    ITRACE(2, "TranslateHackC: Found {} functions. \n", num_elems);
   }
 
   ::rust::Vec<std::uint8_t> hhas_vec = hackc_compile_from_text_cpp_ffi(native_env, code);

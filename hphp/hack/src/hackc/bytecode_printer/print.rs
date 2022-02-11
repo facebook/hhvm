@@ -16,6 +16,7 @@ use bstr::{BString, ByteSlice};
 use core_utils_rust::add_ns;
 use escaper::{escape, escape_bstr, escape_bstr_by, is_lit_printable};
 use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
+use hackc_unit::HackCUnit;
 use hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX};
 use hhas_attribute::{self as hhas_attribute, HhasAttribute};
 use hhas_body::{HhasBody, HhasBodyEnv};
@@ -26,7 +27,6 @@ use hhas_function::HhasFunction;
 use hhas_method::{HhasMethod, HhasMethodFlags};
 use hhas_param::HhasParam;
 use hhas_pos::{HhasPos, HhasSpan};
-use hhas_program::HhasProgram;
 use hhas_property::HhasProperty;
 use hhas_symbol_refs::{HhasSymbolRefs, IncludePath};
 use hhas_type::HhasTypeInfo;
@@ -74,7 +74,7 @@ pub struct ExprEnv<'arena, 'e> {
     pub codegen_env: Option<&'e HhasBodyEnv<'arena>>,
 }
 
-fn print_program(ctx: &Context<'_>, w: &mut dyn Write, prog: &HhasProgram<'_>) -> Result<()> {
+fn print_unit(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Result<()> {
     match ctx.path {
         Some(p) => {
             let abs = p.to_absolute();
@@ -91,7 +91,7 @@ fn print_program(ctx: &Context<'_>, w: &mut dyn Write, prog: &HhasProgram<'_>) -
             concat_str(w, [".filepath ", &format!("\"{}\"", p), ";"])?;
 
             newline(w)?;
-            handle_not_impl(|| print_program_(ctx, w, prog))?;
+            handle_not_impl(|| print_unit_(ctx, w, prog))?;
 
             newline(w)?;
             concat_str_by(w, " ", ["#", p.as_ref(), "ends here"])?;
@@ -102,7 +102,7 @@ fn print_program(ctx: &Context<'_>, w: &mut dyn Write, prog: &HhasProgram<'_>) -
             w.write_all(b"#starts here")?;
 
             newline(w)?;
-            handle_not_impl(|| print_program_(ctx, w, prog))?;
+            handle_not_impl(|| print_unit_(ctx, w, prog))?;
 
             newline(w)?;
             w.write_all(b"#ends here")?;
@@ -120,7 +120,7 @@ fn get_fatal_op(f: &FatalOp) -> &str {
     }
 }
 
-fn print_program_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HhasProgram<'_>) -> Result<()> {
+fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Result<()> {
     if let Just(Triple(fop, p, msg)) = &prog.fatal {
         newline(w)?;
         let HhasPos {
@@ -3115,12 +3115,12 @@ pub fn expr_to_string_lossy(mut ctx: Context<'_>, expr: &ast::Expr) -> String {
     s.to_string()
 }
 
-pub fn external_print_program(
+pub fn external_print_unit(
     ctx: &Context<'_>,
     w: &mut dyn std::io::Write,
-    prog: &HhasProgram<'_>,
+    prog: &HackCUnit<'_>,
 ) -> std::result::Result<(), Error> {
-    print_program(ctx, w, prog).map_err(write::into_error)?;
+    print_unit(ctx, w, prog).map_err(write::into_error)?;
     w.flush().map_err(write::into_error)?;
     Ok(())
 }

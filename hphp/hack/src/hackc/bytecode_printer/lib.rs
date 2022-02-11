@@ -10,7 +10,7 @@ mod write;
 
 pub use context::Context;
 pub use print::{
-    expr_to_string_lossy, external_print_expr as print_expr,
-    external_print_program as print_program, ExprEnv,
+    expr_to_string_lossy, external_print_expr as print_expr, external_print_unit as print_unit,
+    ExprEnv,
 };
 pub use write::Error;

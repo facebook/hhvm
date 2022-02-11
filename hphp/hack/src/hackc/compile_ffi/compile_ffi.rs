@@ -84,7 +84,7 @@ extern "C" fn compile_from_text_ffi(
 
             let mut w = Vec::new();
             let env = unsafe { compile::Env::<OcamlStr<'_>>::from_ocaml(env).unwrap() };
-            compile::emit_fatal_program(&env, &mut w, panic_msg)
+            compile::emit_fatal_unit(&env, &mut w, panic_msg)
                 .and_then(|_| print_output(w, output_config, &env.filepath, None))
                 .map(|_| unsafe { to_ocaml(&<Result<(), String>>::Ok(())) })
                 .map_err(|e| e.to_string())

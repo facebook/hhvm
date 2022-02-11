@@ -11,7 +11,7 @@ use emit_function::emit_functions_from_program;
 use emit_typedef::emit_typedefs_from_program;
 use env::{self, emitter::Emitter, Env};
 use ffi::{Maybe::*, Slice, Str};
-use hhas_program::HhasProgram;
+use hackc_unit::HackCUnit;
 use hhas_symbol_refs::HhasSymbolRefs;
 use hhbc_ast::FatalOp;
 use instruction_sequence::{Error, Result};
@@ -21,40 +21,40 @@ use oxidized::{ast, namespace_env, pos::Pos};
 // PUBLIC INTERFACE (ENTRY POINTS)
 
 /// This is the entry point from hh_single_compile & fuzzer
-pub fn emit_fatal_program<'arena>(
+pub fn emit_fatal_unit<'arena>(
     alloc: &'arena bumpalo::Bump,
     op: FatalOp,
     pos: &Pos,
     msg: impl AsRef<str> + 'arena,
-) -> Result<HhasProgram<'arena>> {
-    Ok(HhasProgram {
+) -> Result<HackCUnit<'arena>> {
+    Ok(HackCUnit {
         fatal: Just((op, pos.clone().into(), Str::new_str(alloc, msg.as_ref())).into()),
-        ..HhasProgram::default()
+        ..HackCUnit::default()
     })
 }
 
 /// This is the entry point from hh_single_compile
-pub fn emit_program<'a, 'arena, 'decl>(
+pub fn emit_unit<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     flags: FromAstFlags,
     namespace: RcOc<namespace_env::Env>,
     tast: &'a ast::Program,
-) -> Result<HhasProgram<'arena>> {
-    let result = emit_program_(emitter, flags, namespace, tast);
+) -> Result<HackCUnit<'arena>> {
+    let result = emit_unit_(emitter, flags, namespace, tast);
     match result {
         Err(Error::IncludeTimeFatalException(op, pos, msg)) => {
-            emit_fatal_program(emitter.alloc, op, &pos, msg)
+            emit_fatal_unit(emitter.alloc, op, &pos, msg)
         }
         _ => result,
     }
 }
 
-fn emit_program_<'a, 'arena, 'decl>(
+fn emit_unit_<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     _flags: FromAstFlags,
     namespace: RcOc<namespace_env::Env>,
     prog: &'a ast::Program,
-) -> Result<HhasProgram<'arena>> {
+) -> Result<HackCUnit<'arena>> {
     let prog = prog.as_slice();
     let mut functions = emit_functions_from_program(emitter, prog)?;
     let classes = emit_classes_from_program(emitter.alloc, emitter, prog)?;
@@ -70,7 +70,7 @@ fn emit_program_<'a, 'arena, 'decl>(
         HhasSymbolRefs::from_symbol_refs_state(emitter.alloc, emit_symbol_refs::take(emitter));
     let fatal = Nothing;
 
-    Ok(HhasProgram {
+    Ok(HackCUnit {
         classes: Slice::fill_iter(emitter.alloc, classes.into_iter()),
         functions: Slice::fill_iter(emitter.alloc, functions.into_iter()),
         typedefs: Slice::fill_iter(emitter.alloc, typedefs.into_iter()),

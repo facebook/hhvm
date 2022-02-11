@@ -21,8 +21,8 @@
 
 namespace HPHP::hackc::hhbc {
 
-inline const HhasProgram* hhasProgramRaw(const ::rust::Box<HhasProgramWrapper>& program) {
-  return (const HhasProgram*)(&(*program));
+inline const HackCUnit* hackCUnitRaw(const ::rust::Box<HackCUnitWrapper>& unit) {
+  return (const HackCUnit*)(&(*unit));
 }
 
 }

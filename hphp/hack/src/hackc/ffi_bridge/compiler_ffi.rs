@@ -115,7 +115,7 @@ pub mod compile_ffi {
         type Bytes;
         type Decls;
         type DeclParserOptions;
-        type HhasProgramWrapper;
+        type HackCUnitWrapper;
         type FileAttributes;
 
         fn make_env_flags(
@@ -127,10 +127,10 @@ pub mod compile_ffi {
             enable_decl: bool,
         ) -> u8;
 
-        unsafe fn hackc_compile_hhas_from_text_cpp_ffi(
+        unsafe fn hackc_compile_unit_from_text_cpp_ffi(
             env: &NativeEnv,
             source_text: &CxxString,
-        ) -> Result<Box<HhasProgramWrapper>>;
+        ) -> Result<Box<HackCUnitWrapper>>;
 
         fn hackc_compile_from_text_cpp_ffi(
             env: &NativeEnv,
@@ -156,9 +156,9 @@ pub mod compile_ffi {
         fn hackc_print_decls(decls: &Decls);
         fn hackc_print_serialized_size(bytes: &Bytes);
         unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls) -> bool;
-        fn hackc_hhas_to_string_cpp_ffi(
+        fn hackc_unit_to_string_cpp_ffi(
             env: &NativeEnv,
-            prog: &HhasProgramWrapper,
+            prog: &HackCUnitWrapper,
         ) -> Result<Vec<u8>>;
 
         fn hackc_facts_to_json_cpp_ffi(facts: FactsResult, source_text: &CxxString) -> String;
@@ -189,7 +189,7 @@ pub struct DeclParserOptions(
 );
 
 #[repr(C)]
-pub struct HhasProgramWrapper(hhas_program::HhasProgram<'static>, bumpalo::Bump);
+pub struct HackCUnitWrapper(hackc_unit::HackCUnit<'static>, bumpalo::Bump);
 
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -436,10 +436,10 @@ unsafe fn hackc_verify_deserialization(serialized: &Bytes, expected: &Decls) -> 
     decls == expected.0
 }
 
-fn hackc_compile_hhas_from_text_cpp_ffi(
+fn hackc_compile_unit_from_text_cpp_ffi(
     env: &compile_ffi::NativeEnv,
     source_text: &CxxString,
-) -> Result<Box<HhasProgramWrapper>, String> {
+) -> Result<Box<HackCUnitWrapper>, String> {
     stack_limit::with_elastic_stack(|stack_limit| {
         let bump = bumpalo::Bump::new();
         let alloc: &'static bumpalo::Bump =
@@ -472,7 +472,7 @@ fn hackc_compile_hhas_from_text_cpp_ffi(
             unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
 
         let decl_allocator = bumpalo::Bump::new();
-        let compile_result = compile::hhas_from_text(
+        let compile_result = compile::unit_from_text(
             alloc,
             &compile_env,
             stack_limit,
@@ -486,19 +486,19 @@ fn hackc_compile_hhas_from_text_cpp_ffi(
         );
 
         match compile_result {
-            Ok((hhas_prog, _)) => Ok(Box::new(HhasProgramWrapper(hhas_prog, bump))),
+            Ok((unit, _)) => Ok(Box::new(HackCUnitWrapper(unit, bump))),
             Err(e) => Err(anyhow!("{}", e)),
         }
     })
     .map_err(|e| format!("{}", e))
-    .expect("hackc_compile_hhas_from_text_cpp_ffi: retry failed")
+    .expect("hackc_compile_unit_from_text_cpp_ffi: retry failed")
     .map_err(|e| e.to_string())
 }
 
 #[no_mangle]
-pub fn hackc_hhas_to_string_cpp_ffi(
+pub fn hackc_unit_to_string_cpp_ffi(
     env: &compile_ffi::NativeEnv,
-    prog: &HhasProgramWrapper,
+    prog: &HackCUnitWrapper,
 ) -> Result<Vec<u8>, String> {
     let native_env: compile::NativeEnv<&str> = compile_ffi::NativeEnv::to_compile_env(env).unwrap();
     let env = compile::Env::<&str> {
@@ -508,7 +508,7 @@ pub fn hackc_hhas_to_string_cpp_ffi(
         flags: native_env.flags,
     };
     let mut output = Vec::new();
-    compile::hhas_to_string(&env, Some(&native_env), &mut output, &prog.0)
+    compile::unit_to_string(&env, Some(&native_env), &mut output, &prog.0)
         .map(|_| output)
         .map_err(|e| e.to_string())
 }

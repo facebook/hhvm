@@ -17,6 +17,7 @@ emit_type_hint = { path = "../emitter/cargo/emit_type_hint" }
 env = { path = "../emitter/cargo/env" }
 escaper = { path = "../../utils/escaper" }
 ffi = { path = "../../utils/ffi" }
+hackc_unit = { path = "../hhbc/cargo/hackc_unit" }
 hhas_adata = { path = "../hhbc/cargo/hhas_adata" }
 hhas_attribute = { path = "../hhbc/cargo/hhas_attribute" }
 hhas_body = { path = "../hhbc/cargo/hhas_body" }
@@ -27,7 +28,6 @@ hhas_function = { path = "../hhbc/cargo/hhas_function" }
 hhas_method = { path = "../hhbc/cargo/hhas_method" }
 hhas_param = { path = "../hhbc/cargo/hhas_param" }
 hhas_pos = { path = "../hhbc/cargo/hhas_pos" }
-hhas_program = { path = "../hhbc/cargo/hhas_program" }
 hhas_property = { path = "../hhbc/cargo/hhas_property" }
 hhas_symbol_refs = { path = "../hhbc/cargo/hhas_symbol_refs" }
 hhas_type = { path = "../hhbc/cargo/hhas_type" }

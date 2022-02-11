@@ -17,9 +17,24 @@ pub struct RelativePath {
 }
 
 impl RelativePath {
+    #[inline]
+    pub fn new(prefix: Prefix, suffix: BytesId) -> Self {
+        Self { prefix, suffix }
+    }
+
     pub fn intern<P: AsRef<Path>>(prefix: Prefix, suffix: P) -> Self {
         let suffix = intern::string::intern_bytes(suffix.as_ref().as_os_str().as_bytes());
-        Self { prefix, suffix }
+        Self::new(prefix, suffix)
+    }
+
+    #[inline]
+    pub fn prefix(&self) -> Prefix {
+        self.prefix
+    }
+
+    #[inline]
+    pub fn suffix(&self) -> BytesId {
+        self.suffix
     }
 
     pub fn to_absolute(&self, ctx: &RelativePathCtx) -> PathBuf {

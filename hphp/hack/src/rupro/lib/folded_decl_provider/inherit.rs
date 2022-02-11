@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use super::subst::Subst;
 use crate::alloc::Allocator;
 use crate::decl_defs::{
     AbstractTypeconst, Abstraction, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass,
     FoldedElement, ShallowClass, SubstContext, TypeConst, Typeconst,
 };
-use crate::folded_decl_provider::subst::Subst;
 use crate::reason::Reason;
 use pos::{
     ClassConstNameMap, MethodName, MethodNameMap, PropNameMap, TypeConstNameMap, TypeName,
@@ -20,16 +20,16 @@ use std::sync::Arc;
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_inherit.ml
 
 #[derive(Debug)]
-pub(crate) struct Inherited<R: Reason> {
+pub struct Inherited<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_inherit.inherited`
-    pub(crate) substs: TypeNameMap<SubstContext<R>>,
-    pub(crate) props: PropNameMap<FoldedElement>,
-    pub(crate) static_props: PropNameMap<FoldedElement>,
-    pub(crate) methods: MethodNameMap<FoldedElement>,
-    pub(crate) static_methods: MethodNameMap<FoldedElement>,
-    pub(crate) constructor: Option<FoldedElement>,
-    pub(crate) consts: ClassConstNameMap<ClassConst<R>>,
-    pub(crate) type_consts: TypeConstNameMap<TypeConst<R>>,
+    pub substs: TypeNameMap<SubstContext<R>>,
+    pub props: PropNameMap<FoldedElement>,
+    pub static_props: PropNameMap<FoldedElement>,
+    pub methods: MethodNameMap<FoldedElement>,
+    pub static_methods: MethodNameMap<FoldedElement>,
+    pub constructor: Option<FoldedElement>,
+    pub consts: ClassConstNameMap<ClassConst<R>>,
+    pub type_consts: TypeConstNameMap<TypeConst<R>>,
 }
 
 impl<R: Reason> Default for Inherited<R> {
@@ -460,7 +460,7 @@ impl<R: Reason> Inherited<R> {
         //TODO typeconsts
     }
 
-    pub(crate) fn make(
+    pub fn make(
         alloc: &Allocator<R>,
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,

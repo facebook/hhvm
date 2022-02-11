@@ -5,47 +5,25 @@
 
 use super::Allocator;
 use crate::reason::Reason;
+use oxidized::pos_span_raw::PosSpanRaw;
 use pos::{
-    ClassConstName, FilePos, MethodName, ModuleName, Pos, Positioned, PropName, TypeConstName,
-    TypeName,
+    ClassConstName, MethodName, ModuleName, Pos, Positioned, PropName, TypeConstName, TypeName,
 };
 
 impl<R: Reason> Allocator<R> {
     pub fn pos_from_ast(&self, pos: &oxidized::pos::Pos) -> R::Pos {
         R::Pos::mk(|| {
-            let pos_file = self.relative_path_from_ast(pos.filename());
-            let ((start_lnum, start_bol, start_cnum), (end_lnum, end_bol, end_cnum)) =
-                pos.to_start_and_end_lnum_bol_offset();
-            let pos_start = FilePos {
-                lnum: start_lnum as u64,
-                bol: start_bol as u64,
-                cnum: start_cnum as u64,
-            };
-            let pos_end = FilePos {
-                lnum: end_lnum as u64,
-                bol: end_bol as u64,
-                cnum: end_cnum as u64,
-            };
-            (pos_file, pos_start, pos_end)
+            let file = self.relative_path_from_ast(pos.filename());
+            let PosSpanRaw { start, end } = pos.to_raw_span();
+            (file, start, end)
         })
     }
 
     pub fn pos_from_decl(&self, pos: &oxidized_by_ref::pos::Pos<'_>) -> R::Pos {
         R::Pos::mk(|| {
-            let pos_file = self.relative_path_from_decl(pos.filename());
-            let ((start_lnum, start_bol, start_cnum), (end_lnum, end_bol, end_cnum)) =
-                pos.to_start_and_end_lnum_bol_offset();
-            let pos_start = FilePos {
-                lnum: start_lnum as u64,
-                bol: start_bol as u64,
-                cnum: start_cnum as u64,
-            };
-            let pos_end = FilePos {
-                lnum: end_lnum as u64,
-                bol: end_bol as u64,
-                cnum: end_cnum as u64,
-            };
-            (pos_file, pos_start, pos_end)
+            let file = self.relative_path_from_decl(pos.filename());
+            let PosSpanRaw { start, end } = pos.to_raw_span();
+            (file, start, end)
         })
     }
 

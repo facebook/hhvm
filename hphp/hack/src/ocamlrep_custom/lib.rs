@@ -491,6 +491,7 @@ extern "C" fn deserialize_value<T: CamlSerialize>(data_ptr: *mut c_void) -> usiz
             // Safety: len <= capacity. The elements aren't initialized at this
             // time, but we trust that caml_deserialize_block_1 will fill `len`
             // bytes of the buffer.
+            #[allow(clippy::uninit_vec)]
             buf.set_len(len);
 
             // Safety: As above, `deserialize_value` can only be invoked by the

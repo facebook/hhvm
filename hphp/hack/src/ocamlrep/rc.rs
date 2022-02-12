@@ -68,6 +68,7 @@ impl<T: Clone> Clone for OcamlValueCache<T> {
     }
 }
 
+#[allow(clippy::partialeq_ne_impl)]
 impl<T: PartialEq> PartialEq for OcamlValueCache<T> {
     #[inline(always)]
     fn eq(&self, other: &OcamlValueCache<T>) -> bool {
@@ -182,6 +183,7 @@ impl<T> Deref for RcOc<T> {
     }
 }
 
+#[allow(clippy::partialeq_ne_impl)]
 impl<T: PartialEq> PartialEq for RcOc<T> {
     #[inline(always)]
     fn eq(&self, other: &RcOc<T>) -> bool {

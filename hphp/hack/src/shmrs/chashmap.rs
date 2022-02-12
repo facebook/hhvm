@@ -194,7 +194,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         for lock in &mut cmap.shard_allocs_non_evictable {
             shard_allocs_non_evictable.push(ShardAlloc::new(
                 lock.initialize().unwrap(),
-                &cmap.file_alloc,
+                cmap.file_alloc,
                 NON_EVICTABLE_CHUNK_SIZE,
                 false,
             ));
@@ -204,7 +204,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         for lock in &mut cmap.shard_allocs_evictable {
             shard_allocs_evictable.push(ShardAlloc::new(
                 lock.initialize().unwrap(),
-                &cmap.file_alloc,
+                cmap.file_alloc,
                 max_evictable_bytes_per_shard,
                 true,
             ));
@@ -214,7 +214,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         for map in maps.iter() {
             map.write()
                 .unwrap()
-                .reset_with_hasher(&cmap.file_alloc, cmap.hash_builder.clone());
+                .reset_with_hasher(cmap.file_alloc, cmap.hash_builder.clone());
         }
 
         CMapRef {
@@ -245,7 +245,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         for lock in &cmap.shard_allocs_non_evictable {
             shard_allocs_non_evictable.push(ShardAlloc::new(
                 lock.attach(),
-                &cmap.file_alloc,
+                cmap.file_alloc,
                 NON_EVICTABLE_CHUNK_SIZE,
                 false,
             ));
@@ -255,7 +255,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         for lock in &cmap.shard_allocs_evictable {
             shard_allocs_evictable.push(ShardAlloc::new(
                 lock.attach(),
-                &cmap.file_alloc,
+                cmap.file_alloc,
                 cmap.max_evictable_bytes_per_shard,
                 true,
             ));
@@ -264,7 +264,7 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
         CMapRef {
             hash_builder: cmap.hash_builder.clone(),
             max_evictable_bytes_per_shard: cmap.max_evictable_bytes_per_shard,
-            file_alloc: &cmap.file_alloc,
+            file_alloc: cmap.file_alloc,
             shard_allocs_non_evictable,
             shard_allocs_evictable,
             maps,

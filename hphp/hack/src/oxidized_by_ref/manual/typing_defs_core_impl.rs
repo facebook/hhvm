@@ -92,7 +92,7 @@ impl<'a> Ty<'a> {
     }
     pub fn is_prim(&self, kind: Tprim) -> bool {
         match self.get_node() {
-            Ty_::Tprim(k) => &kind == &*k,
+            Ty_::Tprim(k) => kind == *k,
             _ => false,
         }
     }

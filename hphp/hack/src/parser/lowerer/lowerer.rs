@@ -889,7 +889,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_, Error> {
             if variadic_hints.len() > 1 {
                 return failwith(format!(
                     "{} variadic parameters found. There should be no more than one.",
-                    variadic_hints.len().to_string()
+                    variadic_hints.len()
                 ));
             }
             let ctxs = p_contexts(&c.contexts, env)?;

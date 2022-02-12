@@ -52,9 +52,7 @@ impl LineBreakMap {
 
     #[inline]
     fn to_isize(u: usize) -> isize {
-        if (u as isize) < 0 {
-            panic!("{} can not convert to isize", u.to_string())
-        }
+        assert!(u as isize >= 0, "{} can not convert to isize", u);
         u as isize
     }
 

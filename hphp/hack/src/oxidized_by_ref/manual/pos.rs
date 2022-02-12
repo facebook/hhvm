@@ -103,7 +103,7 @@ impl<'a> Pos<'a> {
 
     pub fn filename(&self) -> &'a RelativePath<'a> {
         match &self.0 {
-            Small { file, .. } | Large { file, .. } | Tiny { file, .. } => &file,
+            Small { file, .. } | Large { file, .. } | Tiny { file, .. } => file,
         }
     }
 
@@ -408,7 +408,7 @@ impl Ord for Pos<'_> {
     // Intended to match the implementation of `Pos.compare` in OCaml.
     fn cmp(&self, other: &Pos<'_>) -> Ordering {
         self.filename()
-            .cmp(&other.filename())
+            .cmp(other.filename())
             .then(self.start_offset().cmp(&other.start_offset()))
             .then(self.end_offset().cmp(&other.end_offset()))
     }
@@ -487,17 +487,11 @@ mod tests {
     #[test]
     fn test_pos_is_none() {
         let b = Bump::new();
-        assert_eq!(Pos::none().is_none(), true);
+        assert!(Pos::none().is_none());
         let path_a = b.alloc(RelativePath::make(Prefix::Dummy, "a"));
-        assert_eq!(
-            Pos::from_lnum_bol_offset(&b, path_a, (0, 0, 0), (0, 0, 0)).is_none(),
-            false
-        );
+        assert!(!Pos::from_lnum_bol_offset(&b, path_a, (0, 0, 0), (0, 0, 0)).is_none());
         let empty_path = b.alloc(RelativePath::make(Prefix::Dummy, ""));
-        assert_eq!(
-            Pos::from_lnum_bol_offset(&b, empty_path, (1, 0, 0), (0, 0, 0)).is_none(),
-            false
-        );
+        assert!(!Pos::from_lnum_bol_offset(&b, empty_path, (1, 0, 0), (0, 0, 0)).is_none());
     }
 
     #[test]

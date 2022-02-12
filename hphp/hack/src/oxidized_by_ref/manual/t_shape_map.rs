@@ -36,8 +36,8 @@ impl<'a> Ord for TShapeField<'a> {
     fn cmp(&self, other: &Self) -> Ordering {
         use TshapeFieldName::*;
         match (&self.0, &other.0) {
-            (TSFlitInt(PosString(_, s1)), TSFlitInt(PosString(_, s2))) => s1.cmp(&s2),
-            (TSFlitStr(PosByteString(_, s1)), TSFlitStr(PosByteString(_, s2))) => s1.cmp(&s2),
+            (TSFlitInt(PosString(_, s1)), TSFlitInt(PosString(_, s2))) => s1.cmp(s2),
+            (TSFlitStr(PosByteString(_, s1)), TSFlitStr(PosByteString(_, s2))) => s1.cmp(s2),
             (
                 TSFclassConst(((_, c1), PosString(_, m1))),
                 TSFclassConst(((_, c2), PosString(_, m2))),

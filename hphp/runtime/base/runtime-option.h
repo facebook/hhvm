@@ -534,7 +534,6 @@ struct RuntimeOption {
   static std::string AutoloadLogging;
   static std::vector<std::string> AutoloadExcludedRepos;
   static bool AutoloadLoggingAllowPropagation;
-  static bool AutoloadEnforceOneDefinitionRule;
   static bool AutoloadRethrowExceptions;
 
   static std::string FileCache;

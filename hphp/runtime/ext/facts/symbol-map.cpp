@@ -84,13 +84,11 @@ getPathSymMap(typename SymbolMap::Data& data) {
 SymbolMap::SymbolMap(
     folly::fs::path root,
     AutoloadDB::Handle dbHandle,
-    bool enforceOneDefinition,
     hphp_hash_set<std::string> indexedMethodAttrs)
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
           1, std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))}
     , m_root{std::move(root)}
     , m_dbHandle{std::move(dbHandle)}
-    , m_enforceOneDefinition{enforceOneDefinition}
     , m_indexedMethodAttrs{std::move(indexedMethodAttrs)} {
   assertx(m_root.is_absolute());
 }
@@ -326,7 +324,7 @@ SymbolMap::getBaseTypes(const StringData& derivedType, DeriveKind kind) {
 
 std::vector<Symbol<SymKind::Type>>
 SymbolMap::getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind) {
-  // Return empty results if the given type doesn't have a single definition
+  // Return empty results if the given type is undefined
   if (getSymbolPath(baseType) == nullptr) {
     return {};
   }
@@ -367,17 +365,6 @@ SymbolMap::getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind) {
         return makeVec(data.m_inheritanceInfo.getDerivedTypes(
             baseType, kind, std::move(edgesFromDB)));
       });
-  // Remove types that are duplicate-defined or missing
-  if (m_enforceOneDefinition) {
-    subtypes.erase(
-        std::remove_if(
-            subtypes.begin(),
-            subtypes.end(),
-            [this](const Symbol<SymKind::Type>& subtype) {
-              return getSymbolPath(subtype) == nullptr;
-            }),
-        subtypes.end());
-  }
   return subtypes;
 }
 
@@ -550,17 +537,6 @@ SymbolMap::getTypesWithAttribute(Symbol<SymKind::Type> attr) {
         return makeVec(data.m_typeAttrs.getKeysWithAttribute(
             attr, std::move(typesFromDB)));
       });
-  // Remove types that are duplicate-defined or missing
-  if (m_enforceOneDefinition) {
-    types.erase(
-        std::remove_if(
-            types.begin(),
-            types.end(),
-            [this](const Symbol<SymKind::Type>& type) {
-              return getSymbolPath(type) == nullptr;
-            }),
-        types.end());
-  }
   return types;
 }
 
@@ -602,17 +578,6 @@ SymbolMap::getTypeAliasesWithAttribute(Symbol<SymKind::Type> attr) {
         return makeVec(data.m_typeAliasAttrs.getKeysWithAttribute(
             attr, std::move(typeAliasesFromDB)));
       });
-  // Remove type aliases that are duplicate-defined or missing
-  if (m_enforceOneDefinition) {
-    typeAliases.erase(
-        std::remove_if(
-            typeAliases.begin(),
-            typeAliases.end(),
-            [this](const Symbol<SymKind::Type>& typeAlias) {
-              return getSymbolPath(typeAlias) == nullptr;
-            }),
-        typeAliases.end());
-  }
   return typeAliases;
 }
 
@@ -706,18 +671,6 @@ SymbolMap::getMethodsWithAttribute(Symbol<SymKind::Type> attr) {
         return makeVec(data.m_methodAttrs.getKeysWithAttribute(
             attr, std::move(methodsFromDB)));
       });
-  // Remove types that are duplicate-defined or missing
-  if (m_enforceOneDefinition) {
-    methods.erase(
-        std::remove_if(
-            methods.begin(),
-            methods.end(),
-            [this](const MethodDecl& method) {
-              return getSymbolPath(method.m_type.m_name) !=
-                     method.m_type.m_path;
-            }),
-        methods.end());
-  }
   return methods;
 }
 
@@ -1349,8 +1302,7 @@ Ret SymbolMap::readOrUpdate(
 
 template <SymKind k> Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
   auto symbolPath = [this](auto const& paths) -> Path {
-    if (UNLIKELY(paths.empty()) ||
-        UNLIKELY(m_enforceOneDefinition && paths.size() > 1)) {
+    if (UNLIKELY(paths.empty())) {
       return Path{nullptr};
     } else {
       return *paths.begin();

@@ -484,17 +484,14 @@ struct FactsStoreImpl final
       hphp_hash_set<std::string> indexedMethodAttributes)
       : m_updateExec{1, make_thread_factory("Autoload update")}
       , m_root{std::move(root)}
-      , m_map{m_root, std::move(dbHandle), RuntimeOption::AutoloadEnforceOneDefinitionRule, std::move(indexedMethodAttributes)}
+      , m_map{m_root, std::move(dbHandle), std::move(indexedMethodAttributes)}
       , m_watcher{std::move(watcher)} {
   }
 
   FactsStoreImpl(folly::fs::path root, AutoloadDB::Handle dbHandle)
       : m_updateExec{1, make_thread_factory("Autoload update")}
       , m_root{std::move(root)}
-      , m_map{
-            m_root,
-            std::move(dbHandle),
-            RuntimeOption::AutoloadEnforceOneDefinitionRule} {
+      , m_map{m_root, std::move(dbHandle)} {
   }
 
   ~FactsStoreImpl() override {

@@ -334,7 +334,7 @@ impl<R: Reason> DeclFolder<R> {
             constructor,
             consts,
             type_consts: Default::default(), //TODO
-            tparams: vec![],                 //TODO
+            tparams: Default::default(),     //TODO
         })
     }
 }

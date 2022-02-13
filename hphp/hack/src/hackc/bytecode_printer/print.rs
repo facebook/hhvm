@@ -905,28 +905,28 @@ fn print_instructions(
     let mut ctx = ctx.clone();
     for instr in instr_seq.compact_iter() {
         match instr {
-            Instruct::ISpecialFlow(_) => {
+            Instruct::SpecialFlow(_) => {
                 return Err(Error::fail("Cannot break/continue 1 level").into());
             }
-            Instruct::IComment(_) => {
+            Instruct::Comment(_) => {
                 // indentation = 0
                 newline(w)?;
                 print_instr(w, instr)?;
             }
-            Instruct::ILabel(_) => ctx.unblock(w, |c, w| {
+            Instruct::Label(_) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
                 print_instr(w, instr)
             })?,
-            Instruct::ITry(InstructTry::TryCatchBegin) => {
+            Instruct::Try(InstructTry::TryCatchBegin) => {
                 ctx.newline(w)?;
                 print_instr(w, instr)?;
                 ctx.indent_inc();
             }
-            Instruct::ITry(InstructTry::TryCatchMiddle) => ctx.unblock(w, |c, w| {
+            Instruct::Try(InstructTry::TryCatchMiddle) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
                 print_instr(w, instr)
             })?,
-            Instruct::ITry(InstructTry::TryCatchEnd) => {
+            Instruct::Try(InstructTry::TryCatchEnd) => {
                 ctx.indent_dec();
                 ctx.newline(w)?;
                 print_instr(w, instr)?;
@@ -1141,38 +1141,38 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>) -> Result<()> {
 
     use InstructBasic as IB;
     match instr {
-        Instruct::IIterator(i) => print_iterator(w, i),
-        Instruct::IBasic(b) => w.write_all(match b {
+        Instruct::Iterator(i) => print_iterator(w, i),
+        Instruct::Basic(b) => w.write_all(match b {
             IB::Nop => b"Nop",
             IB::EntryNop => b"EntryNop",
             IB::PopC => b"PopC",
             IB::PopU => b"PopU",
             IB::Dup => b"Dup",
         }),
-        Instruct::ILitConst(lit) => print_lit_const(w, lit),
-        Instruct::IOp(op) => print_op(w, op),
-        Instruct::IContFlow(cf) => print_control_flow(w, cf),
-        Instruct::ICall(c) => print_call(w, c),
-        Instruct::IMisc(misc) => print_misc(w, misc),
-        Instruct::IGet(get) => print_get(w, get),
-        Instruct::IMutator(mutator) => print_mutator(w, mutator),
-        Instruct::ILabel(l) => {
+        Instruct::LitConst(lit) => print_lit_const(w, lit),
+        Instruct::Op(op) => print_op(w, op),
+        Instruct::ContFlow(cf) => print_control_flow(w, cf),
+        Instruct::Call(c) => print_call(w, c),
+        Instruct::Misc(misc) => print_misc(w, misc),
+        Instruct::Get(get) => print_get(w, get),
+        Instruct::Mutator(mutator) => print_mutator(w, mutator),
+        Instruct::Label(l) => {
             print_label(w, l)?;
             w.write_all(b":")
         }
-        Instruct::IIsset(i) => print_isset(w, i),
-        Instruct::IBase(i) => print_base(w, i),
-        Instruct::IFinal(i) => print_final(w, i),
-        Instruct::ITry(itry) => print_try(w, itry),
-        Instruct::IComment(s) => write_bytes!(w, "# {}", s),
-        Instruct::ISrcLoc(p) => write!(
+        Instruct::Isset(i) => print_isset(w, i),
+        Instruct::Base(i) => print_base(w, i),
+        Instruct::Final(i) => print_final(w, i),
+        Instruct::Try(itry) => print_try(w, itry),
+        Instruct::Comment(s) => write_bytes!(w, "# {}", s),
+        Instruct::SrcLoc(p) => write!(
             w,
             ".srcloc {}:{},{}:{};",
             p.line_begin, p.col_begin, p.line_end, p.col_end
         ),
-        Instruct::IAsync(a) => print_async(w, a),
-        Instruct::IGenerator(gen) => print_gen_creation_execution(w, gen),
-        Instruct::IIncludeEvalDefine(ed) => print_include_eval_define(w, ed),
+        Instruct::Async(a) => print_async(w, a),
+        Instruct::Generator(gen) => print_gen_creation_execution(w, gen),
+        Instruct::IncludeEvalDefine(ed) => print_include_eval_define(w, ed),
         _ => Err(Error::fail("invalid instruction").into()),
     }
 }

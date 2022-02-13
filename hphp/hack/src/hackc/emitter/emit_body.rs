@@ -239,7 +239,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
         flags,
     )?;
     let first_instr_is_label = match InstrSeq::first(&stmt_instrs) {
-        Some(Instruct::ILabel(_)) => true,
+        Some(Instruct::Label(_)) => true,
         _ => false,
     };
     let header = if first_instr_is_label && InstrSeq::is_empty(&header_content) {

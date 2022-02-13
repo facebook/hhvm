@@ -204,7 +204,7 @@ pub mod instr {
     }
 
     pub fn lit_const<'a>(alloc: &'a bumpalo::Bump, l: InstructLitConst<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ILitConst(l))
+        instr(alloc, Instruct::LitConst(l))
     }
 
     pub fn iterinit<'a>(
@@ -214,7 +214,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IIterator(InstructIterator::IterInit(args, label)),
+            Instruct::Iterator(InstructIterator::IterInit(args, label)),
         )
     }
 
@@ -225,7 +225,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IIterator(InstructIterator::IterNext(args, label)),
+            Instruct::Iterator(InstructIterator::IterNext(args, label)),
         )
     }
 
@@ -243,51 +243,45 @@ pub mod instr {
         };
         instr(
             alloc,
-            Instruct::IIterator(InstructIterator::IterNext(args, label)),
+            Instruct::Iterator(InstructIterator::IterNext(args, label)),
         )
     }
 
     pub fn iterfree<'a>(alloc: &'a bumpalo::Bump, id: IterId) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IIterator(InstructIterator::IterFree(id)))
+        instr(alloc, Instruct::Iterator(InstructIterator::IterFree(id)))
     }
 
     pub fn whresult<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IAsync(AsyncFunctions::WHResult))
+        instr(alloc, Instruct::Async(AsyncFunctions::WHResult))
     }
 
     pub fn jmp<'a>(alloc: &'a bumpalo::Bump, label: Label) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IContFlow(InstructControlFlow::Jmp(label)))
+        instr(alloc, Instruct::ContFlow(InstructControlFlow::Jmp(label)))
     }
 
     pub fn jmpz<'a>(alloc: &'a bumpalo::Bump, label: Label) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IContFlow(InstructControlFlow::JmpZ(label)))
+        instr(alloc, Instruct::ContFlow(InstructControlFlow::JmpZ(label)))
     }
 
     pub fn jmpnz<'a>(alloc: &'a bumpalo::Bump, label: Label) -> InstrSeq<'a> {
-        instr(
-            alloc,
-            Instruct::IContFlow(InstructControlFlow::JmpNZ(label)),
-        )
+        instr(alloc, Instruct::ContFlow(InstructControlFlow::JmpNZ(label)))
     }
 
     pub fn jmpns<'a>(alloc: &'a bumpalo::Bump, label: Label) -> InstrSeq<'a> {
-        instr(
-            alloc,
-            Instruct::IContFlow(InstructControlFlow::JmpNS(label)),
-        )
+        instr(alloc, Instruct::ContFlow(InstructControlFlow::JmpNS(label)))
     }
 
     pub fn continue_<'a>(alloc: &'a bumpalo::Bump, level: isize) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ISpecialFlow(InstructSpecialFlow::Continue(level)),
+            Instruct::SpecialFlow(InstructSpecialFlow::Continue(level)),
         )
     }
 
     pub fn break_<'a>(alloc: &'a bumpalo::Bump, level: isize) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ISpecialFlow(InstructSpecialFlow::Break(level)),
+            Instruct::SpecialFlow(InstructSpecialFlow::Break(level)),
         )
     }
 
@@ -298,19 +292,19 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         let mut vec = bumpalo::collections::Vec::from_iter_in(
             itrs.into_iter()
-                .map(|id| Instruct::IIterator(InstructIterator::IterFree(id))),
+                .map(|id| Instruct::Iterator(InstructIterator::IterFree(id))),
             alloc,
         );
-        vec.push(Instruct::IContFlow(InstructControlFlow::Jmp(label)));
+        vec.push(Instruct::ContFlow(InstructControlFlow::Jmp(label)));
         instrs(alloc, vec.into_bump_slice_mut())
     }
 
     pub fn false_<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ILitConst(InstructLitConst::False))
+        instr(alloc, Instruct::LitConst(InstructLitConst::False))
     }
 
     pub fn true_<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ILitConst(InstructLitConst::True))
+        instr(alloc, Instruct::LitConst(InstructLitConst::True))
     }
 
     pub fn clscnsd<'a>(
@@ -320,189 +314,189 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::ClsCnsD(const_id, cid)),
+            Instruct::LitConst(InstructLitConst::ClsCnsD(const_id, cid)),
         )
     }
 
     pub fn clscns<'a>(alloc: &'a bumpalo::Bump, const_id: ConstId<'a>) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::ClsCns(const_id)),
+            Instruct::LitConst(InstructLitConst::ClsCns(const_id)),
         )
     }
 
     pub fn clscnsl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ILitConst(InstructLitConst::ClsCnsL(local)))
+        instr(alloc, Instruct::LitConst(InstructLitConst::ClsCnsL(local)))
     }
 
     pub fn eq<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Eq))
+        instr(alloc, Instruct::Op(InstructOperator::Eq))
     }
 
     pub fn neq<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Neq))
+        instr(alloc, Instruct::Op(InstructOperator::Neq))
     }
 
     pub fn gt<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Gt))
+        instr(alloc, Instruct::Op(InstructOperator::Gt))
     }
 
     pub fn gte<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Gte))
+        instr(alloc, Instruct::Op(InstructOperator::Gte))
     }
 
     pub fn lt<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Lt))
+        instr(alloc, Instruct::Op(InstructOperator::Lt))
     }
 
     pub fn lte<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Lte))
+        instr(alloc, Instruct::Op(InstructOperator::Lte))
     }
 
     pub fn concat<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Concat))
+        instr(alloc, Instruct::Op(InstructOperator::Concat))
     }
 
     pub fn concatn<'a>(alloc: &'a bumpalo::Bump, n: isize) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::ConcatN(n)))
+        instr(alloc, Instruct::Op(InstructOperator::ConcatN(n)))
     }
 
     pub fn print<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Print))
+        instr(alloc, Instruct::Op(InstructOperator::Print))
     }
 
     pub fn cast_dict<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::CastDict))
+        instr(alloc, Instruct::Op(InstructOperator::CastDict))
     }
 
     pub fn cast_string<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::CastString))
+        instr(alloc, Instruct::Op(InstructOperator::CastString))
     }
 
     pub fn cast_int<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::CastInt))
+        instr(alloc, Instruct::Op(InstructOperator::CastInt))
     }
 
     pub fn cast_bool<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::CastBool))
+        instr(alloc, Instruct::Op(InstructOperator::CastBool))
     }
 
     pub fn cast_double<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::CastDouble))
+        instr(alloc, Instruct::Op(InstructOperator::CastDouble))
     }
 
     pub fn retc<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IContFlow(InstructControlFlow::RetC))
+        instr(alloc, Instruct::ContFlow(InstructControlFlow::RetC))
     }
 
     pub fn retc_suspended<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IContFlow(InstructControlFlow::RetCSuspended),
+            Instruct::ContFlow(InstructControlFlow::RetCSuspended),
         )
     }
 
     pub fn retm<'a>(alloc: &'a bumpalo::Bump, p: NumParams) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IContFlow(InstructControlFlow::RetM(p)))
+        instr(alloc, Instruct::ContFlow(InstructControlFlow::RetM(p)))
     }
 
     pub fn null<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ILitConst(InstructLitConst::Null))
+        instr(alloc, Instruct::LitConst(InstructLitConst::Null))
     }
 
     pub fn nulluninit<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ILitConst(InstructLitConst::NullUninit))
+        instr(alloc, Instruct::LitConst(InstructLitConst::NullUninit))
     }
 
     pub fn chain_faults<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::ChainFaults))
+        instr(alloc, Instruct::Misc(InstructMisc::ChainFaults))
     }
 
     pub fn dup<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IBasic(InstructBasic::Dup))
+        instr(alloc, Instruct::Basic(InstructBasic::Dup))
     }
 
     pub fn nop<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IBasic(InstructBasic::Nop))
+        instr(alloc, Instruct::Basic(InstructBasic::Nop))
     }
 
     pub fn instanceofd<'a>(alloc: &'a bumpalo::Bump, s: ClassId<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::InstanceOfD(s)))
+        instr(alloc, Instruct::Op(InstructOperator::InstanceOfD(s)))
     }
 
     pub fn instanceof<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::InstanceOf))
+        instr(alloc, Instruct::Op(InstructOperator::InstanceOf))
     }
 
     pub fn islateboundcls<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::IsLateBoundCls))
+        instr(alloc, Instruct::Op(InstructOperator::IsLateBoundCls))
     }
 
     pub fn istypestructc<'a>(alloc: &'a bumpalo::Bump, mode: TypeStructResolveOp) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::IsTypeStructC(mode)))
+        instr(alloc, Instruct::Op(InstructOperator::IsTypeStructC(mode)))
     }
 
     pub fn throwastypestructexception<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IOp(InstructOperator::ThrowAsTypeStructException),
+            Instruct::Op(InstructOperator::ThrowAsTypeStructException),
         )
     }
 
     pub fn throw_non_exhaustive_switch<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMisc(InstructMisc::ThrowNonExhaustiveSwitch),
+            Instruct::Misc(InstructMisc::ThrowNonExhaustiveSwitch),
         )
     }
 
     pub fn raise_class_string_conversion_warning<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMisc(InstructMisc::RaiseClassStringConversionWarning),
+            Instruct::Misc(InstructMisc::RaiseClassStringConversionWarning),
         )
     }
 
     pub fn combine_and_resolve_type_struct<'a>(alloc: &'a bumpalo::Bump, i: isize) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IOp(InstructOperator::CombineAndResolveTypeStruct(i)),
+            Instruct::Op(InstructOperator::CombineAndResolveTypeStruct(i)),
         )
     }
 
     pub fn record_reified_generic<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::RecordReifiedGeneric))
+        instr(alloc, Instruct::Misc(InstructMisc::RecordReifiedGeneric))
     }
 
     pub fn check_reified_generic_mismatch<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMisc(InstructMisc::CheckReifiedGenericMismatch),
+            Instruct::Misc(InstructMisc::CheckReifiedGenericMismatch),
         )
     }
 
     pub fn int<'a>(alloc: &'a bumpalo::Bump, i: isize) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::Int(i.try_into().unwrap())),
+            Instruct::LitConst(InstructLitConst::Int(i.try_into().unwrap())),
         )
     }
 
     pub fn int64<'a>(alloc: &'a bumpalo::Bump, i: i64) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ILitConst(InstructLitConst::Int(i)))
+        instr(alloc, Instruct::LitConst(InstructLitConst::Int(i)))
     }
 
     pub fn int_of_string<'a>(alloc: &'a bumpalo::Bump, litstr: &str) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::Int(litstr.parse::<i64>().unwrap())),
+            Instruct::LitConst(InstructLitConst::Int(litstr.parse::<i64>().unwrap())),
         )
     }
 
     pub fn double<'a>(alloc: &'a bumpalo::Bump, litstr: &str) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::Double(Str::from(
+            Instruct::LitConst(InstructLitConst::Double(Str::from(
                 bumpalo::collections::String::from_str_in(litstr, alloc).into_bump_str(),
             ))),
         )
@@ -511,7 +505,7 @@ pub mod instr {
     pub fn string<'a>(alloc: &'a bumpalo::Bump, litstr: impl Into<String>) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::String(Str::from(
+            Instruct::LitConst(InstructLitConst::String(Str::from(
                 bumpalo::collections::String::from_str_in(litstr.into().as_str(), alloc)
                     .into_bump_str(),
             ))),
@@ -519,259 +513,250 @@ pub mod instr {
     }
 
     pub fn this<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::This))
+        instr(alloc, Instruct::Misc(InstructMisc::This))
     }
 
     pub fn istypec<'a>(alloc: &'a bumpalo::Bump, op: IsTypeOp) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IIsset(InstructIsset::IsTypeC(op)))
+        instr(alloc, Instruct::Isset(InstructIsset::IsTypeC(op)))
     }
 
     pub fn istypel<'a>(alloc: &'a bumpalo::Bump, id: Local<'a>, op: IsTypeOp) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IIsset(InstructIsset::IsTypeL(id, op)))
+        instr(alloc, Instruct::Isset(InstructIsset::IsTypeL(id, op)))
     }
 
     pub fn add<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Add))
+        instr(alloc, Instruct::Op(InstructOperator::Add))
     }
 
     pub fn addo<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::AddO))
+        instr(alloc, Instruct::Op(InstructOperator::AddO))
     }
 
     pub fn sub<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Sub))
+        instr(alloc, Instruct::Op(InstructOperator::Sub))
     }
 
     pub fn subo<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::SubO))
+        instr(alloc, Instruct::Op(InstructOperator::SubO))
     }
 
     pub fn mul<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Mul))
+        instr(alloc, Instruct::Op(InstructOperator::Mul))
     }
 
     pub fn mulo<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::MulO))
+        instr(alloc, Instruct::Op(InstructOperator::MulO))
     }
 
     pub fn shl<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Shl))
+        instr(alloc, Instruct::Op(InstructOperator::Shl))
     }
 
     pub fn shr<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Shr))
+        instr(alloc, Instruct::Op(InstructOperator::Shr))
     }
 
     pub fn cmp<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Cmp))
+        instr(alloc, Instruct::Op(InstructOperator::Cmp))
     }
 
     pub fn mod_<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Mod))
+        instr(alloc, Instruct::Op(InstructOperator::Mod))
     }
 
     pub fn div<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Div))
+        instr(alloc, Instruct::Op(InstructOperator::Div))
     }
 
     pub fn same<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Same))
+        instr(alloc, Instruct::Op(InstructOperator::Same))
     }
 
     pub fn pow<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Pow))
+        instr(alloc, Instruct::Op(InstructOperator::Pow))
     }
 
     pub fn nsame<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::NSame))
+        instr(alloc, Instruct::Op(InstructOperator::NSame))
     }
 
     pub fn not<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Not))
+        instr(alloc, Instruct::Op(InstructOperator::Not))
     }
 
     pub fn bitnot<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::BitNot))
+        instr(alloc, Instruct::Op(InstructOperator::BitNot))
     }
 
     pub fn bitand<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::BitAnd))
+        instr(alloc, Instruct::Op(InstructOperator::BitAnd))
     }
 
     pub fn bitor<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::BitOr))
+        instr(alloc, Instruct::Op(InstructOperator::BitOr))
     }
 
     pub fn bitxor<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::BitXor))
+        instr(alloc, Instruct::Op(InstructOperator::BitXor))
     }
 
     pub fn sets<'a>(alloc: &'a bumpalo::Bump, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
-        instr(
-            alloc,
-            Instruct::IMutator(InstructMutator::SetS(readonly_op)),
-        )
+        instr(alloc, Instruct::Mutator(InstructMutator::SetS(readonly_op)))
     }
 
     pub fn setl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMutator(InstructMutator::SetL(local)))
+        instr(alloc, Instruct::Mutator(InstructMutator::SetL(local)))
     }
 
     pub fn setg<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMutator(InstructMutator::SetG))
+        instr(alloc, Instruct::Mutator(InstructMutator::SetG))
     }
 
     pub fn unsetl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMutator(InstructMutator::UnsetL(local)))
+        instr(alloc, Instruct::Mutator(InstructMutator::UnsetL(local)))
     }
 
     pub fn unsetg<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMutator(InstructMutator::UnsetG))
+        instr(alloc, Instruct::Mutator(InstructMutator::UnsetG))
     }
 
     pub fn incdecl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>, op: IncDecOp) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMutator(InstructMutator::IncDecL(local, op)),
+            Instruct::Mutator(InstructMutator::IncDecL(local, op)),
         )
     }
 
     pub fn incdecg<'a>(alloc: &'a bumpalo::Bump, op: IncDecOp) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMutator(InstructMutator::IncDecG(op)))
+        instr(alloc, Instruct::Mutator(InstructMutator::IncDecG(op)))
     }
 
     pub fn incdecs<'a>(alloc: &'a bumpalo::Bump, op: IncDecOp) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMutator(InstructMutator::IncDecS(op)))
+        instr(alloc, Instruct::Mutator(InstructMutator::IncDecS(op)))
     }
 
     pub fn setopg<'a>(alloc: &'a bumpalo::Bump, op: EqOp) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMutator(InstructMutator::SetOpG(op)))
+        instr(alloc, Instruct::Mutator(InstructMutator::SetOpG(op)))
     }
 
     pub fn setopl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>, op: EqOp) -> InstrSeq<'a> {
-        instr(
-            alloc,
-            Instruct::IMutator(InstructMutator::SetOpL(local, op)),
-        )
+        instr(alloc, Instruct::Mutator(InstructMutator::SetOpL(local, op)))
     }
 
     pub fn setops<'a>(alloc: &'a bumpalo::Bump, op: EqOp) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMutator(InstructMutator::SetOpS(op)))
+        instr(alloc, Instruct::Mutator(InstructMutator::SetOpS(op)))
     }
 
     pub fn issetl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IIsset(InstructIsset::IssetL(local)))
+        instr(alloc, Instruct::Isset(InstructIsset::IssetL(local)))
     }
 
     pub fn issetg<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IIsset(InstructIsset::IssetG))
+        instr(alloc, Instruct::Isset(InstructIsset::IssetG))
     }
 
     pub fn issets<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IIsset(InstructIsset::IssetS))
+        instr(alloc, Instruct::Isset(InstructIsset::IssetS))
     }
 
     pub fn isunsetl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IIsset(InstructIsset::IsUnsetL(local)))
+        instr(alloc, Instruct::Isset(InstructIsset::IsUnsetL(local)))
     }
 
     pub fn cgets<'a>(alloc: &'a bumpalo::Bump, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGet(InstructGet::CGetS(readonly_op)))
+        instr(alloc, Instruct::Get(InstructGet::CGetS(readonly_op)))
     }
 
     pub fn cgetg<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGet(InstructGet::CGetG))
+        instr(alloc, Instruct::Get(InstructGet::CGetG))
     }
 
     pub fn cgetl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGet(InstructGet::CGetL(local)))
+        instr(alloc, Instruct::Get(InstructGet::CGetL(local)))
     }
 
     pub fn cugetl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGet(InstructGet::CUGetL(local)))
+        instr(alloc, Instruct::Get(InstructGet::CUGetL(local)))
     }
 
     pub fn cgetl2<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGet(InstructGet::CGetL2(local)))
+        instr(alloc, Instruct::Get(InstructGet::CGetL2(local)))
     }
 
     pub fn cgetquietl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGet(InstructGet::CGetQuietL(local)))
+        instr(alloc, Instruct::Get(InstructGet::CGetQuietL(local)))
     }
 
     pub fn classgetc<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGet(InstructGet::ClassGetC))
+        instr(alloc, Instruct::Get(InstructGet::ClassGetC))
     }
 
     pub fn classgetts<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGet(InstructGet::ClassGetTS))
+        instr(alloc, Instruct::Get(InstructGet::ClassGetTS))
     }
 
     pub fn classname<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::ClassName))
+        instr(alloc, Instruct::Misc(InstructMisc::ClassName))
     }
 
     pub fn lazyclassfromclass<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::LazyClassFromClass))
+        instr(alloc, Instruct::Misc(InstructMisc::LazyClassFromClass))
     }
 
     pub fn self_<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::Self_))
+        instr(alloc, Instruct::Misc(InstructMisc::Self_))
     }
 
     pub fn lateboundcls<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::LateBoundCls))
+        instr(alloc, Instruct::Misc(InstructMisc::LateBoundCls))
     }
 
     pub fn parent<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::Parent))
+        instr(alloc, Instruct::Misc(InstructMisc::Parent))
     }
 
     pub fn popu<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IBasic(InstructBasic::PopU))
+        instr(alloc, Instruct::Basic(InstructBasic::PopU))
     }
 
     pub fn popc<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IBasic(InstructBasic::PopC))
+        instr(alloc, Instruct::Basic(InstructBasic::PopC))
     }
 
     pub fn popl<'a>(alloc: &'a bumpalo::Bump, l: Local<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMutator(InstructMutator::PopL(l)))
+        instr(alloc, Instruct::Mutator(InstructMutator::PopL(l)))
     }
 
     pub fn initprop<'a>(alloc: &'a bumpalo::Bump, pid: PropId<'a>, op: InitPropOp) -> InstrSeq<'a> {
-        instr(
-            alloc,
-            Instruct::IMutator(InstructMutator::InitProp(pid, op)),
-        )
+        instr(alloc, Instruct::Mutator(InstructMutator::InitProp(pid, op)))
     }
 
     pub fn checkprop<'a>(alloc: &'a bumpalo::Bump, pid: PropId<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMutator(InstructMutator::CheckProp(pid)))
+        instr(alloc, Instruct::Mutator(InstructMutator::CheckProp(pid)))
     }
 
     pub fn pushl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGet(InstructGet::PushL(local)))
+        instr(alloc, Instruct::Get(InstructGet::PushL(local)))
     }
 
     pub fn throw<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IContFlow(InstructControlFlow::Throw))
+        instr(alloc, Instruct::ContFlow(InstructControlFlow::Throw))
     }
 
     pub fn new_vec_array<'a>(alloc: &'a bumpalo::Bump, i: isize) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ILitConst(InstructLitConst::NewVec(i)))
+        instr(alloc, Instruct::LitConst(InstructLitConst::NewVec(i)))
     }
 
     pub fn new_pair<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ILitConst(InstructLitConst::NewPair))
+        instr(alloc, Instruct::LitConst(InstructLitConst::NewPair))
     }
 
     pub fn add_elemc<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ILitConst(InstructLitConst::AddElemC))
+        instr(alloc, Instruct::LitConst(InstructLitConst::AddElemC))
     }
 
     pub fn add_new_elemc<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ILitConst(InstructLitConst::AddNewElemC))
+        instr(alloc, Instruct::LitConst(InstructLitConst::AddNewElemC))
     }
 
     pub fn switch<'a>(
@@ -780,7 +765,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IContFlow(InstructControlFlow::Switch {
+            Instruct::ContFlow(InstructControlFlow::Switch {
                 kind: SwitchKind::Unbounded,
                 base: 0,
                 targets: BumpSliceMut::new(alloc, targets.into_bump_slice_mut()),
@@ -789,7 +774,7 @@ pub mod instr {
     }
 
     pub fn newobj<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ICall(InstructCall::NewObj))
+        instr(alloc, Instruct::Call(InstructCall::NewObj))
     }
 
     pub fn sswitch<'a>(
@@ -806,32 +791,32 @@ pub mod instr {
         );
         instr(
             alloc,
-            Instruct::IContFlow(InstructControlFlow::SSwitch { cases, targets }),
+            Instruct::ContFlow(InstructControlFlow::SSwitch { cases, targets }),
         )
     }
 
     pub fn newobjr<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ICall(InstructCall::NewObjR))
+        instr(alloc, Instruct::Call(InstructCall::NewObjR))
     }
 
     pub fn newobjd<'a>(alloc: &'a bumpalo::Bump, id: ClassId<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ICall(InstructCall::NewObjD(id)))
+        instr(alloc, Instruct::Call(InstructCall::NewObjD(id)))
     }
 
     pub fn newobjrd<'a>(alloc: &'a bumpalo::Bump, id: ClassId<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ICall(InstructCall::NewObjRD(id)))
+        instr(alloc, Instruct::Call(InstructCall::NewObjRD(id)))
     }
 
     pub fn newobjs<'a>(alloc: &'a bumpalo::Bump, scref: SpecialClsRef) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ICall(InstructCall::NewObjS(scref)))
+        instr(alloc, Instruct::Call(InstructCall::NewObjS(scref)))
     }
 
     pub fn lockobj<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::LockObj))
+        instr(alloc, Instruct::Misc(InstructMisc::LockObj))
     }
 
     pub fn clone<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Clone))
+        instr(alloc, Instruct::Op(InstructOperator::Clone))
     }
 
     pub fn new_record<'a>(
@@ -842,7 +827,7 @@ pub mod instr {
         let keys = Slice::new(alloc.alloc_slice_fill_iter(keys.iter().map(|s| Str::from(*s))));
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::NewRecord(id, keys)),
+            Instruct::LitConst(InstructLitConst::NewRecord(id, keys)),
         )
     }
 
@@ -850,14 +835,14 @@ pub mod instr {
         let keys = Slice::new(alloc.alloc_slice_fill_iter(keys.iter().map(|s| Str::from(*s))));
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::NewStructDict(keys)),
+            Instruct::LitConst(InstructLitConst::NewStructDict(keys)),
         )
     }
 
     pub fn newcol<'a>(alloc: &'a bumpalo::Bump, collection_type: CollectionType) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::NewCol(collection_type)),
+            Instruct::LitConst(InstructLitConst::NewCol(collection_type)),
         )
     }
 
@@ -867,16 +852,16 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::ColFromArray(collection_type)),
+            Instruct::LitConst(InstructLitConst::ColFromArray(collection_type)),
         )
     }
 
     pub fn entrynop<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IBasic(InstructBasic::EntryNop))
+        instr(alloc, Instruct::Basic(InstructBasic::EntryNop))
     }
 
     pub fn typedvalue<'a>(alloc: &'a bumpalo::Bump, xs: TypedValue<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ILitConst(InstructLitConst::TypedValue(xs)))
+        instr(alloc, Instruct::LitConst(InstructLitConst::TypedValue(xs)))
     }
 
     pub fn basel<'a>(
@@ -887,7 +872,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IBase(InstructBase::BaseL(local, mode, readonly_op)),
+            Instruct::Base(InstructBase::BaseL(local, mode, readonly_op)),
         )
     }
 
@@ -898,7 +883,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IBase(InstructBase::BaseC(stack_index, mode)),
+            Instruct::Base(InstructBase::BaseC(stack_index, mode)),
         )
     }
 
@@ -909,7 +894,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IBase(InstructBase::BaseGC(stack_index, mode)),
+            Instruct::Base(InstructBase::BaseGC(stack_index, mode)),
         )
     }
 
@@ -918,7 +903,7 @@ pub mod instr {
         local: Local<'a>,
         mode: MemberOpMode,
     ) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IBase(InstructBase::BaseGL(local, mode)))
+        instr(alloc, Instruct::Base(InstructBase::BaseGL(local, mode)))
     }
 
     pub fn basesc<'a>(
@@ -930,20 +915,20 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IBase(InstructBase::BaseSC(y, z, mode, readonly_op)),
+            Instruct::Base(InstructBase::BaseSC(y, z, mode, readonly_op)),
         )
     }
 
     pub fn baseh<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IBase(InstructBase::BaseH))
+        instr(alloc, Instruct::Base(InstructBase::BaseH))
     }
 
     pub fn cgetcunop<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::CGetCUNop))
+        instr(alloc, Instruct::Misc(InstructMisc::CGetCUNop))
     }
 
     pub fn ugetcunop<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::UGetCUNop))
+        instr(alloc, Instruct::Misc(InstructMisc::UGetCUNop))
     }
 
     pub fn memoget<'a>(
@@ -953,7 +938,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMisc(InstructMisc::MemoGet(
+            Instruct::Misc(InstructMisc::MemoGet(
                 label,
                 match range {
                     Some((fst, snd)) => Just(Pair(fst, snd)),
@@ -979,7 +964,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMisc(InstructMisc::MemoGetEager(
+            Instruct::Misc(InstructMisc::MemoGetEager(
                 [label1, label2],
                 range_opt_to_maybe(range),
             )),
@@ -992,7 +977,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMisc(InstructMisc::MemoSet(range_opt_to_maybe(range))),
+            Instruct::Misc(InstructMisc::MemoSet(range_opt_to_maybe(range))),
         )
     }
 
@@ -1002,44 +987,44 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMisc(InstructMisc::MemoSetEager(range_opt_to_maybe(range))),
+            Instruct::Misc(InstructMisc::MemoSetEager(range_opt_to_maybe(range))),
         )
     }
 
     pub fn getmemokeyl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::GetMemoKeyL(local)))
+        instr(alloc, Instruct::Misc(InstructMisc::GetMemoKeyL(local)))
     }
 
     pub fn barethis<'a>(alloc: &'a bumpalo::Bump, notice: BareThisOp) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::BareThis(notice)))
+        instr(alloc, Instruct::Misc(InstructMisc::BareThis(notice)))
     }
 
     pub fn checkthis<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::CheckThis))
+        instr(alloc, Instruct::Misc(InstructMisc::CheckThis))
     }
 
     pub fn verify_ret_type_c<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::VerifyRetTypeC))
+        instr(alloc, Instruct::Misc(InstructMisc::VerifyRetTypeC))
     }
 
     pub fn verify_ret_type_ts<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::VerifyRetTypeTS))
+        instr(alloc, Instruct::Misc(InstructMisc::VerifyRetTypeTS))
     }
 
     pub fn verify_out_type<'a>(alloc: &'a bumpalo::Bump, i: ParamId<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::VerifyOutType(i)))
+        instr(alloc, Instruct::Misc(InstructMisc::VerifyOutType(i)))
     }
 
     pub fn verify_param_type<'a>(alloc: &'a bumpalo::Bump, i: ParamId<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::VerifyParamType(i)))
+        instr(alloc, Instruct::Misc(InstructMisc::VerifyParamType(i)))
     }
 
     pub fn verify_param_type_ts<'a>(alloc: &'a bumpalo::Bump, i: ParamId<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::VerifyParamTypeTS(i)))
+        instr(alloc, Instruct::Misc(InstructMisc::VerifyParamTypeTS(i)))
     }
 
     pub fn dim<'a>(alloc: &'a bumpalo::Bump, op: MemberOpMode, key: MemberKey<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IBase(InstructBase::Dim(op, key)))
+        instr(alloc, Instruct::Base(InstructBase::Dim(op, key)))
     }
 
     pub fn dim_warn_pt<'a>(
@@ -1065,7 +1050,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallClsMethod { fcall_args, log }),
+            Instruct::Call(InstructCall::FCallClsMethod { fcall_args, log }),
         )
     }
 
@@ -1077,7 +1062,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallClsMethodD {
+            Instruct::Call(InstructCall::FCallClsMethodD {
                 fcall_args,
                 class,
                 method,
@@ -1092,7 +1077,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallClsMethodS { fcall_args, clsref }),
+            Instruct::Call(InstructCall::FCallClsMethodS { fcall_args, clsref }),
         )
     }
 
@@ -1104,7 +1089,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallClsMethodSD {
+            Instruct::Call(InstructCall::FCallClsMethodSD {
                 fcall_args,
                 clsref,
                 method,
@@ -1113,11 +1098,11 @@ pub mod instr {
     }
 
     pub fn fcallctor<'a>(alloc: &'a bumpalo::Bump, fcall_args: FcallArgs<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ICall(InstructCall::FCallCtor(fcall_args)))
+        instr(alloc, Instruct::Call(InstructCall::FCallCtor(fcall_args)))
     }
 
     pub fn fcallfunc<'a>(alloc: &'a bumpalo::Bump, fcall_args: FcallArgs<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ICall(InstructCall::FCallFunc(fcall_args)))
+        instr(alloc, Instruct::Call(InstructCall::FCallFunc(fcall_args)))
     }
 
     pub fn fcallfuncd<'a>(
@@ -1127,7 +1112,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallFuncD { fcall_args, func }),
+            Instruct::Call(InstructCall::FCallFuncD { fcall_args, func }),
         )
     }
 
@@ -1138,7 +1123,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallObjMethod { fcall_args, flavor }),
+            Instruct::Call(InstructCall::FCallObjMethod { fcall_args, flavor }),
         )
     }
 
@@ -1150,7 +1135,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ICall(InstructCall::FCallObjMethodD {
+            Instruct::Call(InstructCall::FCallObjMethodD {
                 fcall_args,
                 flavor,
                 method,
@@ -1174,7 +1159,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IFinal(InstructFinal::QueryM(num_params, op, key)),
+            Instruct::Final(InstructFinal::QueryM(num_params, op, key)),
         )
     }
 
@@ -1197,10 +1182,7 @@ pub mod instr {
         num_params: NumParams,
         key: MemberKey<'a>,
     ) -> InstrSeq<'a> {
-        instr(
-            alloc,
-            Instruct::IFinal(InstructFinal::SetM(num_params, key)),
-        )
+        instr(alloc, Instruct::Final(InstructFinal::SetM(num_params, key)))
     }
 
     pub fn unsetm<'a>(
@@ -1210,7 +1192,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IFinal(InstructFinal::UnsetM(num_params, key)),
+            Instruct::Final(InstructFinal::UnsetM(num_params, key)),
         )
     }
 
@@ -1222,7 +1204,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IFinal(InstructFinal::SetOpM(num_params, op, key)),
+            Instruct::Final(InstructFinal::SetOpM(num_params, op, key)),
         )
     }
 
@@ -1234,7 +1216,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IFinal(InstructFinal::IncDecM(num_params, op, key)),
+            Instruct::Final(InstructFinal::IncDecM(num_params, op, key)),
         )
     }
 
@@ -1248,20 +1230,17 @@ pub mod instr {
     }
 
     pub fn resolve_func<'a>(alloc: &'a bumpalo::Bump, func_id: FunctionId<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::ResolveFunc(func_id)))
+        instr(alloc, Instruct::Op(InstructOperator::ResolveFunc(func_id)))
     }
 
     pub fn resolve_rfunc<'a>(alloc: &'a bumpalo::Bump, func_id: FunctionId<'a>) -> InstrSeq<'a> {
-        instr(
-            alloc,
-            Instruct::IOp(InstructOperator::ResolveRFunc(func_id)),
-        )
+        instr(alloc, Instruct::Op(InstructOperator::ResolveRFunc(func_id)))
     }
 
     pub fn resolveclsmethod<'a>(alloc: &'a bumpalo::Bump, method_id: MethodId<'a>) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IOp(InstructOperator::ResolveClsMethod(method_id)),
+            Instruct::Op(InstructOperator::ResolveClsMethod(method_id)),
         )
     }
 
@@ -1272,7 +1251,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IOp(InstructOperator::ResolveClsMethodD(class_id, method_id)),
+            Instruct::Op(InstructOperator::ResolveClsMethodD(class_id, method_id)),
         )
     }
 
@@ -1283,7 +1262,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IOp(InstructOperator::ResolveClsMethodS(scref, method_id)),
+            Instruct::Op(InstructOperator::ResolveClsMethodS(scref, method_id)),
         )
     }
 
@@ -1293,7 +1272,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IOp(InstructOperator::ResolveRClsMethod(method_id)),
+            Instruct::Op(InstructOperator::ResolveRClsMethod(method_id)),
         )
     }
 
@@ -1304,7 +1283,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IOp(InstructOperator::ResolveRClsMethodD(class_id, method_id)),
+            Instruct::Op(InstructOperator::ResolveRClsMethodD(class_id, method_id)),
         )
     }
 
@@ -1315,7 +1294,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IOp(InstructOperator::ResolveRClsMethodS(scref, method_id)),
+            Instruct::Op(InstructOperator::ResolveRClsMethodS(scref, method_id)),
         )
     }
 
@@ -1325,52 +1304,49 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IOp(InstructOperator::ResolveMethCaller(fun_id)),
+            Instruct::Op(InstructOperator::ResolveMethCaller(fun_id)),
         )
     }
 
     pub fn resolveclass<'a>(alloc: &'a bumpalo::Bump, class_id: ClassId<'a>) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IOp(InstructOperator::ResolveClass(class_id)),
+            Instruct::Op(InstructOperator::ResolveClass(class_id)),
         )
     }
 
     pub fn lazyclass<'a>(alloc: &'a bumpalo::Bump, class_id: ClassId<'a>) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ILitConst(InstructLitConst::LazyClass(class_id)),
+            Instruct::LitConst(InstructLitConst::LazyClass(class_id)),
         )
     }
 
     pub fn oodeclexists<'a>(alloc: &'a bumpalo::Bump, class_kind: ClassishKind) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMisc(InstructMisc::OODeclExists(class_kind)),
+            Instruct::Misc(InstructMisc::OODeclExists(class_kind)),
         )
     }
 
     pub fn fatal<'a>(alloc: &'a bumpalo::Bump, op: FatalOp) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Fatal(op)))
+        instr(alloc, Instruct::Op(InstructOperator::Fatal(op)))
     }
 
     pub fn await_<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IAsync(AsyncFunctions::Await))
+        instr(alloc, Instruct::Async(AsyncFunctions::Await))
     }
 
     pub fn yield_<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGenerator(GenCreationExecution::Yield))
+        instr(alloc, Instruct::Generator(GenCreationExecution::Yield))
     }
 
     pub fn yieldk<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGenerator(GenCreationExecution::YieldK))
+        instr(alloc, Instruct::Generator(GenCreationExecution::YieldK))
     }
 
     pub fn createcont<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(
-            alloc,
-            Instruct::IGenerator(GenCreationExecution::CreateCont),
-        )
+        instr(alloc, Instruct::Generator(GenCreationExecution::CreateCont))
     }
 
     pub fn awaitall<'a>(
@@ -1379,12 +1355,12 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IAsync(AsyncFunctions::AwaitAll(range_opt_to_maybe(range))),
+            Instruct::Async(AsyncFunctions::AwaitAll(range_opt_to_maybe(range))),
         )
     }
 
     pub fn label<'a>(alloc: &'a bumpalo::Bump, label: Label) -> InstrSeq<'a> {
-        instr(alloc, Instruct::ILabel(label))
+        instr(alloc, Instruct::Label(label))
     }
 
     pub fn awaitall_list<'a>(
@@ -1418,15 +1394,15 @@ pub mod instr {
     }
 
     pub fn exit<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IOp(InstructOperator::Exit))
+        instr(alloc, Instruct::Op(InstructOperator::Exit))
     }
 
     pub fn idx<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::Idx))
+        instr(alloc, Instruct::Misc(InstructMisc::Idx))
     }
 
     pub fn array_idx<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::ArrayIdx))
+        instr(alloc, Instruct::Misc(InstructMisc::ArrayIdx))
     }
 
     pub fn createcl<'a>(
@@ -1436,112 +1412,112 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMisc(InstructMisc::CreateCl(param_num, cls_num)),
+            Instruct::Misc(InstructMisc::CreateCl(param_num, cls_num)),
         )
     }
 
     pub fn eval<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IIncludeEvalDefine(InstructIncludeEvalDefine::Eval),
+            Instruct::IncludeEvalDefine(InstructIncludeEvalDefine::Eval),
         )
     }
 
     pub fn incl<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IIncludeEvalDefine(InstructIncludeEvalDefine::Incl),
+            Instruct::IncludeEvalDefine(InstructIncludeEvalDefine::Incl),
         )
     }
 
     pub fn inclonce<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IIncludeEvalDefine(InstructIncludeEvalDefine::InclOnce),
+            Instruct::IncludeEvalDefine(InstructIncludeEvalDefine::InclOnce),
         )
     }
 
     pub fn req<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IIncludeEvalDefine(InstructIncludeEvalDefine::Req),
+            Instruct::IncludeEvalDefine(InstructIncludeEvalDefine::Req),
         )
     }
 
     pub fn reqdoc<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IIncludeEvalDefine(InstructIncludeEvalDefine::ReqDoc),
+            Instruct::IncludeEvalDefine(InstructIncludeEvalDefine::ReqDoc),
         )
     }
 
     pub fn reqonce<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IIncludeEvalDefine(InstructIncludeEvalDefine::ReqOnce),
+            Instruct::IncludeEvalDefine(InstructIncludeEvalDefine::ReqOnce),
         )
     }
 
     pub fn silence_start<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMisc(InstructMisc::Silence(local, OpSilence::Start)),
+            Instruct::Misc(InstructMisc::Silence(local, OpSilence::Start)),
         )
     }
 
     pub fn silence_end<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IMisc(InstructMisc::Silence(local, OpSilence::End)),
+            Instruct::Misc(InstructMisc::Silence(local, OpSilence::End)),
         )
     }
 
     pub fn contcheck_check<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IGenerator(GenCreationExecution::ContCheck(CheckStarted::CheckStarted)),
+            Instruct::Generator(GenCreationExecution::ContCheck(CheckStarted::CheckStarted)),
         )
     }
 
     pub fn contcheck_ignore<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IGenerator(GenCreationExecution::ContCheck(CheckStarted::IgnoreStarted)),
+            Instruct::Generator(GenCreationExecution::ContCheck(CheckStarted::IgnoreStarted)),
         )
     }
 
     pub fn contenter<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGenerator(GenCreationExecution::ContEnter))
+        instr(alloc, Instruct::Generator(GenCreationExecution::ContEnter))
     }
 
     pub fn contraise<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGenerator(GenCreationExecution::ContRaise))
+        instr(alloc, Instruct::Generator(GenCreationExecution::ContRaise))
     }
 
     pub fn contvalid<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGenerator(GenCreationExecution::ContValid))
+        instr(alloc, Instruct::Generator(GenCreationExecution::ContValid))
     }
 
     pub fn contcurrent<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IGenerator(GenCreationExecution::ContCurrent),
+            Instruct::Generator(GenCreationExecution::ContCurrent),
         )
     }
 
     pub fn contkey<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IGenerator(GenCreationExecution::ContKey))
+        instr(alloc, Instruct::Generator(GenCreationExecution::ContKey))
     }
 
     pub fn contgetreturn<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IGenerator(GenCreationExecution::ContGetReturn),
+            Instruct::Generator(GenCreationExecution::ContGetReturn),
         )
     }
 
     pub fn nativeimpl<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::IMisc(InstructMisc::NativeImpl))
+        instr(alloc, Instruct::Misc(InstructMisc::NativeImpl))
     }
 
     pub fn srcloc<'a>(
@@ -1553,7 +1529,7 @@ pub mod instr {
     ) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::ISrcLoc(SrcLoc {
+            Instruct::SrcLoc(SrcLoc {
                 line_begin,
                 line_end,
                 col_begin,
@@ -1565,7 +1541,7 @@ pub mod instr {
     pub fn is_type_structc_resolve<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IOp(InstructOperator::IsTypeStructC(
+            Instruct::Op(InstructOperator::IsTypeStructC(
                 TypeStructResolveOp::Resolve,
             )),
         )
@@ -1574,7 +1550,7 @@ pub mod instr {
     pub fn is_type_structc_dontresolve<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::IOp(InstructOperator::IsTypeStructC(
+            Instruct::Op(InstructOperator::IsTypeStructC(
                 TypeStructResolveOp::DontResolve,
             )),
         )
@@ -1667,26 +1643,26 @@ impl<'a> InstrSeq<'a> {
         InstrSeq::gather(
             alloc,
             vec![
-                instr::instr(alloc, Instruct::ITry(InstructTry::TryCatchBegin)),
+                instr::instr(alloc, Instruct::Try(InstructTry::TryCatchBegin)),
                 try_instrs,
                 instr::jmp(alloc, done_label),
-                instr::instr(alloc, Instruct::ITry(InstructTry::TryCatchMiddle)),
+                instr::instr(alloc, Instruct::Try(InstructTry::TryCatchMiddle)),
                 catch_instrs,
                 if skip_throw {
                     instr::empty(alloc)
                 } else {
-                    instr::instr(alloc, Instruct::IContFlow(InstructControlFlow::Throw))
+                    instr::instr(alloc, Instruct::ContFlow(InstructControlFlow::Throw))
                 },
-                instr::instr(alloc, Instruct::ITry(InstructTry::TryCatchEnd)),
+                instr::instr(alloc, Instruct::Try(InstructTry::TryCatchEnd)),
                 instr::label(alloc, done_label),
             ],
         )
     }
 
-    /// Test whether `i` is of case `Instruct::ISrcLoc`.
+    /// Test whether `i` is of case `Instruct::SrcLoc`.
     fn is_srcloc(instruction: &Instruct<'a>) -> bool {
         match instruction {
-            Instruct::ISrcLoc(_) => true,
+            Instruct::SrcLoc(_) => true,
             _ => false,
         }
     }
@@ -1840,7 +1816,7 @@ mod tests {
     fn iter() {
         let a = bumpalo::Bump::new();
         let alloc: &bumpalo::Bump = &a;
-        let mk_i = || Instruct::IComment(Str::from(""));
+        let mk_i = || Instruct::Comment(Str::from(""));
         let empty = || InstrSeq::new_empty(alloc);
 
         let one = || instr(alloc, mk_i());

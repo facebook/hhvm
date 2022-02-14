@@ -1298,7 +1298,7 @@ module Primary = struct
           async_indicator
           return_type
       in
-      let quickfix =
+      let quickfixes =
         match hint_pos with
         | None -> []
         | Some hint_pos ->
@@ -1310,7 +1310,7 @@ module Primary = struct
           ]
       in
 
-      (Error_code.NonVoidAnnotationOnReturnVoidFun, (pos, message), [], quickfix)
+      (Error_code.NonVoidAnnotationOnReturnVoidFun, (pos, message), [], quickfixes)
 
     let tuple_syntax p =
       ( Error_code.TupleSyntax,

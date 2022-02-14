@@ -531,11 +531,6 @@ pub enum ObjNullFlavor {
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructCall<'arena> {
-    NewObj,
-    NewObjR,
-    NewObjD(ClassId<'arena>),
-    NewObjRD(ClassId<'arena>),
-    NewObjS(SpecialClsRef),
     FCallClsMethod {
         fcall_args: FcallArgs<'arena>,
         log: IsLogAsDynamicCallOp,
@@ -571,14 +566,19 @@ pub enum InstructCall<'arena> {
     },
 }
 
+#[derive(Clone, Debug)]
+#[repr(C)]
+pub enum InstructNew<'arena> {
+    NewObj,
+    NewObjR,
+    NewObjD(ClassId<'arena>),
+    NewObjRD(ClassId<'arena>),
+    NewObjS(SpecialClsRef),
+}
+
 impl<'arena> InstructCall<'arena> {
-    pub fn fcall_args(&self) -> Option<&FcallArgs<'arena>> {
+    pub fn fcall_args(&self) -> &FcallArgs<'arena> {
         match self {
-            Self::NewObj
-            | Self::NewObjR
-            | Self::NewObjD(_)
-            | Self::NewObjRD(_)
-            | Self::NewObjS(_) => None,
             Self::FCallClsMethod { fcall_args, .. }
             | Self::FCallClsMethodD { fcall_args, .. }
             | Self::FCallClsMethodS { fcall_args, .. }
@@ -587,17 +587,12 @@ impl<'arena> InstructCall<'arena> {
             | Self::FCallFunc(fcall_args)
             | Self::FCallFuncD { fcall_args, .. }
             | Self::FCallObjMethod { fcall_args, .. }
-            | Self::FCallObjMethodD { fcall_args, .. } => Some(fcall_args),
+            | Self::FCallObjMethodD { fcall_args, .. } => fcall_args,
         }
     }
 
-    pub fn fcall_args_mut(&mut self) -> Option<&mut FcallArgs<'arena>> {
+    pub fn fcall_args_mut(&mut self) -> &mut FcallArgs<'arena> {
         match self {
-            Self::NewObj
-            | Self::NewObjR
-            | Self::NewObjD(_)
-            | Self::NewObjRD(_)
-            | Self::NewObjS(_) => None,
             Self::FCallClsMethod { fcall_args, .. }
             | Self::FCallClsMethodD { fcall_args, .. }
             | Self::FCallClsMethodS { fcall_args, .. }
@@ -606,22 +601,16 @@ impl<'arena> InstructCall<'arena> {
             | Self::FCallFunc(fcall_args)
             | Self::FCallFuncD { fcall_args, .. }
             | Self::FCallObjMethod { fcall_args, .. }
-            | Self::FCallObjMethodD { fcall_args, .. } => Some(fcall_args),
+            | Self::FCallObjMethodD { fcall_args, .. } => fcall_args,
         }
     }
 
     pub fn targets(&self) -> &[Label] {
-        match self.fcall_args() {
-            Some(fcall_args) => fcall_args.targets(),
-            None => &[],
-        }
+        self.fcall_args().targets()
     }
 
     pub fn targets_mut(&mut self) -> &mut [Label] {
-        match self.fcall_args_mut() {
-            Some(fcall_args) => fcall_args.targets_mut(),
-            None => &mut [],
-        }
+        self.fcall_args_mut().targets_mut()
     }
 }
 
@@ -943,6 +932,7 @@ pub enum Instruct<'arena> {
     ContFlow(InstructControlFlow<'arena>),
     SpecialFlow(InstructSpecialFlow),
     Call(InstructCall<'arena>),
+    New(InstructNew<'arena>),
     Misc(InstructMisc<'arena>),
     Get(InstructGet<'arena>),
     Mutator(InstructMutator<'arena>),
@@ -974,6 +964,7 @@ impl Instruct<'_> {
             | Self::LitConst(_)
             | Self::Op(_)
             | Self::SpecialFlow(_)
+            | Self::New(_)
             | Self::Get(_)
             | Self::Mutator(_)
             | Self::Isset(_)
@@ -1004,6 +995,7 @@ impl Instruct<'_> {
             | Self::LitConst(_)
             | Self::Op(_)
             | Self::SpecialFlow(_)
+            | Self::New(_)
             | Self::Get(_)
             | Self::Mutator(_)
             | Self::Isset(_)

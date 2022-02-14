@@ -774,7 +774,7 @@ pub mod instr {
     }
 
     pub fn newobj<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::Call(InstructCall::NewObj))
+        instr(alloc, Instruct::New(InstructNew::NewObj))
     }
 
     pub fn sswitch<'a>(
@@ -796,19 +796,19 @@ pub mod instr {
     }
 
     pub fn newobjr<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        instr(alloc, Instruct::Call(InstructCall::NewObjR))
+        instr(alloc, Instruct::New(InstructNew::NewObjR))
     }
 
     pub fn newobjd<'a>(alloc: &'a bumpalo::Bump, id: ClassId<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::Call(InstructCall::NewObjD(id)))
+        instr(alloc, Instruct::New(InstructNew::NewObjD(id)))
     }
 
     pub fn newobjrd<'a>(alloc: &'a bumpalo::Bump, id: ClassId<'a>) -> InstrSeq<'a> {
-        instr(alloc, Instruct::Call(InstructCall::NewObjRD(id)))
+        instr(alloc, Instruct::New(InstructNew::NewObjRD(id)))
     }
 
     pub fn newobjs<'a>(alloc: &'a bumpalo::Bump, scref: SpecialClsRef) -> InstrSeq<'a> {
-        instr(alloc, Instruct::Call(InstructCall::NewObjS(scref)))
+        instr(alloc, Instruct::New(InstructNew::NewObjS(scref)))
     }
 
     pub fn lockobj<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {

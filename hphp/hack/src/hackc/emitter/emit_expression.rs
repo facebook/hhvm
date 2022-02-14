@@ -37,7 +37,6 @@ use oxidized::{
 };
 use regex::Regex;
 use runtime::TypedValue;
-use scope::scope;
 use std::{collections::BTreeMap, iter, result::Result as StdResult, str::FromStr};
 use symbol_refs_state::IncludePath;
 

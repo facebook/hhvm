@@ -21,7 +21,6 @@ use oxidized::{
     pos::Pos,
 };
 use regex::Regex;
-use scope::scope;
 use statement_state::StatementState;
 
 // Expose a mutable ref to state for emit_body so that it can set it appropriately

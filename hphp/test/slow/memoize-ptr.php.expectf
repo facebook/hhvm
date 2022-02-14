@@ -17,20 +17,20 @@ classMeth{
 }
 A::b(4)
 
-Warning: Class to string conversion in %s/test/slow/memoize-ptr.php on line 16
+Warning: Class to memo key conversion in %s/test/slow/memoize-ptr.php on line 16
 vec(2) {
   string(1) "a"
   string(1) "b"
 }
 A::b(3)
 
-Warning: Class to string conversion in %s/test/slow/memoize-ptr.php on line 16
+Warning: Class to memo key conversion in %s/test/slow/memoize-ptr.php on line 16
 vec(2) {
   string(1) "a"
   string(1) "b"
 }
 A::b(4)
 
-Warning: Class to string conversion in %s/test/slow/memoize-ptr.php on line 16
+Warning: Class to memo key conversion in %s/test/slow/memoize-ptr.php on line 16
 
-Warning: Class to string conversion in %s/test/slow/memoize-ptr.php on line 16
+Warning: Class to memo key conversion in %s/test/slow/memoize-ptr.php on line 16

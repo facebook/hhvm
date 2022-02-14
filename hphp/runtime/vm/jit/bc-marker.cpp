@@ -54,25 +54,20 @@ bool BCMarker::valid() const {
 SBInvOffset BCMarker::fixupSBOff() const {
   assertx(valid());
   if (fp() == fixupFP()) return SBInvOffset{0};
-
-  assertx(fp()->inst()->is(BeginInlining));
-  auto const fpBIData = fp()->inst()->extra<BeginInlining>();
-  auto const fpStackBaseOffset =
-    fpBIData->spOffset - fpBIData->func->numSlotsInFrame();
+  auto const begin_inlining = fp()->inst();
+  assertx(begin_inlining->is(BeginInlining));
+  auto const fpSBOffset = begin_inlining->extra<BeginInlining>()->sbOffset;
 
   auto const fixupFPStackBaseOffset = [&] {
     if (fixupFP()->inst()->is(BeginInlining)) {
-      auto const fixupFPBIData = fixupFP()->inst()->extra<BeginInlining>();
-      return fixupFPBIData->spOffset - fixupFPBIData->func->numSlotsInFrame();
+      return fixupFP()->inst()->extra<BeginInlining>()->sbOffset;
     }
-
     assertx(fixupFP()->inst()->is(DefFP, DefFuncEntryFP));
     auto const defSP = fp()->inst()->src(0)->inst();
     auto const irSPOff = defSP->extra<DefStackData>()->irSPOff;
     return SBInvOffset{0}.to<IRSPRelOffset>(irSPOff);
   }();
-
-  return SBInvOffset{fixupFPStackBaseOffset - fpStackBaseOffset};
+  return SBInvOffset{fixupFPStackBaseOffset - fpSBOffset};
 }
 
 SrcKey BCMarker::fixupSk() const {
@@ -82,7 +77,10 @@ SrcKey BCMarker::fixupSk() const {
   auto curFP = fp();
   do {
     assertx(curFP->inst()->is(BeginInlining));
-    auto const nextFP = curFP->inst()->src(1);
+    // Walking the FP chain created from the marker is suspect, but we aren't
+    // using it to materialize the fp SSATmp, or offsets based on the begin
+    // inlinings.  We are only materializing srckey info.
+    auto const nextFP = curFP->inst()->marker().fp();
     if (nextFP == fixupFP()) return curFP->inst()->marker().sk();
     curFP = nextFP;
   } while (true);

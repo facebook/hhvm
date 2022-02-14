@@ -47,7 +47,7 @@ pub(crate) fn has_reified_type_constraint<'a, 'arena>(
     env: &Env<'a, 'arena>,
     h: &aast::Hint,
 ) -> ReificationLevel {
-    use aast::*;
+    use aast::Hint_;
     fn is_all_erased<'a>(
         env: &'a Env<'_, '_>,
         mut h_iter: impl Iterator<Item = &'a aast::Hint>,
@@ -100,10 +100,9 @@ pub(crate) fn has_reified_type_constraint<'a, 'arena>(
     }
 }
 
-fn remove_awaitable(h: aast::Hint) -> aast::Hint {
-    use aast::*;
-    let Hint(pos, h_) = h;
-    match *h_ {
+fn remove_awaitable(aast::Hint(pos, hint): aast::Hint) -> aast::Hint {
+    use aast::{Hint, Hint_};
+    match *hint {
         Hint_::Happly(sid, mut hs)
             if hs.len() == 1 && sid.1.eq_ignore_ascii_case(sn::classes::AWAITABLE) =>
         {
@@ -123,7 +122,7 @@ fn remove_awaitable(h: aast::Hint) -> aast::Hint {
         | Hint_::Haccess(_, _)
         | Hint_::Happly(_, _)
         | Hint_::HfunContext(_)
-        | Hint_::Hvar(_) => Hint(pos, h_),
+        | Hint_::Hvar(_) => Hint(pos, hint),
         Hint_::Herr
         | Hint_::Hany
         | Hint_::Hmixed
@@ -181,8 +180,8 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
     env: &Env<'a, 'arena>,
     h: aast::Hint,
 ) -> aast::Hint {
-    use aast::*;
-    fn rec<'a, 'arena>(env: &Env<'a, 'arena>, Hint(pos, h_): aast::Hint) -> aast::Hint {
+    use aast::{Hint, Hint_, NastShapeInfo, ShapeFieldInfo};
+    fn rec<'a, 'arena>(env: &Env<'a, 'arena>, Hint(pos, h_): Hint) -> Hint {
         fn modify<'a, 'arena>(env: &Env<'a, 'arena>, id: String) -> String {
             if get_erased_tparams(env).any(|p| p == id) {
                 "_".into()
@@ -239,15 +238,15 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
     rec(env, h)
 }
 
-/// Warning: Experimental usage of decls in compilation
-/// Given a hint, if the hint is an Happly(id, _), checks if the id is a class that has reified generics
+/// Warning: Experimental usage of decls in compilation.
+/// Given a hint, if the hint is an Happly(id, _), checks if the id is a class
+/// that has reified generics.
 pub(crate) fn happly_decl_has_no_reified_generics<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
-    hint: &aast::Hint,
+    aast::Hint(_, hint): &aast::Hint,
 ) -> bool {
-    use aast::*;
-    let Hint(_, h) = hint;
-    match h.as_ref() {
+    use aast::{Hint_, ReifyKind};
+    match hint.as_ref() {
         Hint_::Happly(Id(_, id), _) => {
             if let Ok(shallow_decl_defs::Decl::Class(class_decl)) =
                 emitter.get_decl(file_info::NameType::Class, id)

@@ -534,7 +534,6 @@ struct RuntimeOption {
   static std::string AutoloadLogging;
   static std::vector<std::string> AutoloadExcludedRepos;
   static bool AutoloadLoggingAllowPropagation;
-  static bool AutoloadEnforceOneDefinitionRule;
   static bool AutoloadRethrowExceptions;
 
   static std::string FileCache;
@@ -1224,6 +1223,8 @@ struct RuntimeOption {
   /* Raise a notice if a Class type is passed to function that expects a
      string */                                                          \
   F(bool, ClassStringHintNotices, false)                                \
+  /* Raise a notice if a Class type is used as a memo key */            \
+  F(bool, ClassMemoNotices, false)                                      \
   /* When this options is on, classname type-hints accepts classes */   \
   F(bool, ClassPassesClassname, false)                                  \
   /* Raise notice if a Class type is passed to a classname type-hint */ \

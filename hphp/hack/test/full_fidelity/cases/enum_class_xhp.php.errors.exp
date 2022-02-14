@@ -1,0 +1,10 @@
+(5,12)-(5,13) Encountered unexpected token `:`.
+(5,25)-(5,25) A left brace `{` is expected here.
+(5,25)-(5,29) Concrete enum class constants must have an initial value
+(5,30)-(5,30) A name is expected here.
+(5,30)-(5,31) A type specifier is expected here.
+(5,30)-(5,36) Concrete enum class constants must have an initial value
+(5,37)-(5,37) A semicolon `;` is expected here.
+(5,37)-(5,38) A type specifier is expected here.
+(5,37)-(5,38) Concrete enum class constants must have an initial value
+(5,38)-(5,38) A name is expected here.

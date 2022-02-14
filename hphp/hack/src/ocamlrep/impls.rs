@@ -150,9 +150,7 @@ trivial_from_in_impl!(bool);
 
 impl ToOcamlRep for char {
     fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
-        if *self as u32 > 255 {
-            panic!("char out of range: {}", self.to_string())
-        }
+        assert!(*self as u32 <= 255, "char out of range: {}", self);
         OpaqueValue::int(*self as isize)
     }
 }
@@ -160,7 +158,7 @@ impl ToOcamlRep for char {
 impl FromOcamlRep for char {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
         let c = from::expect_int(value)?;
-        if 0 <= c && c <= 255 {
+        if (0..=255).contains(&c) {
             Ok(c as u8 as char)
         } else {
             Err(FromError::ExpectedChar(c))

@@ -37,7 +37,6 @@ use oxidized::{
 };
 use regex::Regex;
 use runtime::TypedValue;
-use scope::scope;
 use std::{collections::BTreeMap, iter, result::Result as StdResult, str::FromStr};
 use symbol_refs_state::IncludePath;
 
@@ -1882,9 +1881,9 @@ fn emit_array_mark_legacy<'a, 'arena, 'decl>(
         instr::empty(alloc)
     };
     let mark = if legacy {
-        instr::instr(alloc, Instruct::IMisc(InstructMisc::ArrayMarkLegacy))
+        instr::instr(alloc, Instruct::Misc(InstructMisc::ArrayMarkLegacy))
     } else {
-        instr::instr(alloc, Instruct::IMisc(InstructMisc::ArrayUnmarkLegacy))
+        instr::instr(alloc, Instruct::Misc(InstructMisc::ArrayUnmarkLegacy))
     };
     Ok(InstrSeq::gather(
         alloc,
@@ -3388,24 +3387,24 @@ fn get_call_builtin_func_info<'arena, 'decl>(
     id: impl AsRef<str>,
 ) -> Option<(usize, Instruct<'arena>)> {
     match id.as_ref() {
-        "array_key_exists" => Some((2, Instruct::IMisc(InstructMisc::AKExists))),
-        "hphp_array_idx" => Some((3, Instruct::IMisc(InstructMisc::ArrayIdx))),
-        "intval" => Some((1, Instruct::IOp(InstructOperator::CastInt))),
-        "boolval" => Some((1, Instruct::IOp(InstructOperator::CastBool))),
-        "strval" => Some((1, Instruct::IOp(InstructOperator::CastString))),
-        "floatval" | "doubleval" => Some((1, Instruct::IOp(InstructOperator::CastDouble))),
-        "HH\\vec" => Some((1, Instruct::IOp(InstructOperator::CastVec))),
-        "HH\\keyset" => Some((1, Instruct::IOp(InstructOperator::CastKeyset))),
-        "HH\\dict" => Some((1, Instruct::IOp(InstructOperator::CastDict))),
-        "HH\\varray" => Some((1, Instruct::IOp(InstructOperator::CastVec))),
-        "HH\\darray" => Some((1, Instruct::IOp(InstructOperator::CastDict))),
+        "array_key_exists" => Some((2, Instruct::Misc(InstructMisc::AKExists))),
+        "hphp_array_idx" => Some((3, Instruct::Misc(InstructMisc::ArrayIdx))),
+        "intval" => Some((1, Instruct::Op(InstructOperator::CastInt))),
+        "boolval" => Some((1, Instruct::Op(InstructOperator::CastBool))),
+        "strval" => Some((1, Instruct::Op(InstructOperator::CastString))),
+        "floatval" | "doubleval" => Some((1, Instruct::Op(InstructOperator::CastDouble))),
+        "HH\\vec" => Some((1, Instruct::Op(InstructOperator::CastVec))),
+        "HH\\keyset" => Some((1, Instruct::Op(InstructOperator::CastKeyset))),
+        "HH\\dict" => Some((1, Instruct::Op(InstructOperator::CastDict))),
+        "HH\\varray" => Some((1, Instruct::Op(InstructOperator::CastVec))),
+        "HH\\darray" => Some((1, Instruct::Op(InstructOperator::CastDict))),
         "HH\\ImplicitContext\\_Private\\set_implicit_context_by_value" if e.systemlib() => {
-            Some((1, Instruct::IMisc(InstructMisc::SetImplicitContextByValue)))
+            Some((1, Instruct::Misc(InstructMisc::SetImplicitContextByValue)))
         }
         // TODO: enforce that this returns readonly
-        "HH\\global_readonly_get" => Some((1, Instruct::IGet(InstructGet::CGetG))),
-        "HH\\global_get" => Some((1, Instruct::IGet(InstructGet::CGetG))),
-        "HH\\global_isset" => Some((1, Instruct::IIsset(InstructIsset::IssetG))),
+        "HH\\global_readonly_get" => Some((1, Instruct::Get(InstructGet::CGetG))),
+        "HH\\global_get" => Some((1, Instruct::Get(InstructGet::CGetG))),
+        "HH\\global_isset" => Some((1, Instruct::Isset(InstructIsset::IssetG))),
         _ => None,
     }
 }
@@ -5492,7 +5491,7 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
             base_setup,
             instr::instr(
                 alloc,
-                Instruct::IFinal(InstructFinal::SetRangeM(
+                Instruct::Final(InstructFinal::SetRangeM(
                     (base_stack + cls_stack)
                         .try_into()
                         .expect("StackIndex overflow"),

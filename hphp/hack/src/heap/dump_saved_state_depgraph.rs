@@ -232,7 +232,7 @@ fn parse_hex_or_decimal(src: &str) -> std::result::Result<u64, std::num::ParseIn
     if src_trim.len() != src.len() {
         u64::from_str_radix(src_trim, 16)
     } else {
-        u64::from_str_radix(src_trim, 10)
+        src_trim.parse::<u64>()
     }
 }
 

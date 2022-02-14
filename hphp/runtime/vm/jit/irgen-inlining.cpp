@@ -298,6 +298,7 @@ void beginInlining(IRGS& env,
 
   // The top of the stack now points to the space for ActRec.
   IRSPRelOffset calleeAROff = spOffBCFromIRSP(env);
+  IRSPRelOffset calleeSBOff = calleeAROff - target->numSlotsInFrame();
 
   auto const calleeFP = gen(
     env,
@@ -305,13 +306,14 @@ void beginInlining(IRGS& env,
     BeginInliningData{
       calleeAROff,
       target,
+      static_cast<uint32_t>(env.inlineState.depth + 1),
       nextSrcKey(env),
+      calleeSBOff,
       spOffBCFromStackBase(env) - kNumActRecCells + 1,
       cost,
       int(numArgsInclUnpack)
     },
-    sp(env),
-    fp(env)
+    sp(env)
   );
 
   assertx(
@@ -690,28 +692,18 @@ bool spillInlinedFrames(IRGS& env) {
   // Nothing to spill.
   if (!isInlining(env)) return false;
 
-  auto const inlinedFrames = [&] {
-    std::vector<SSATmp*> frames;
-    auto cur = fp(env);
-    auto const fixupFP = env.irb->fs().fixupFP();
-    while (cur != fixupFP) {
-      assertx(cur->inst()->is(BeginInlining));
-      frames.emplace_back(cur);
-      cur = cur->inst()->src(1);
+  auto const fixupFP = env.irb->fs().fixupFP();
+  bool spilled = false;
+  for (size_t depth = 0; depth < env.irb->fs().inlineDepth(); depth++) {
+    auto const parentFP = env.irb->fs()[depth].fp();
+    auto const fp = env.irb->fs()[depth + 1].fp();
+    if (parentFP == fixupFP) spilled = true;
+    if (spilled) {
+      gen(env, InlineCall, fp, parentFP);
+      updateMarker(env);
     }
-    std::reverse(frames.begin(), frames.end());
-    return frames;
-  }();
-
-  // Already spilled everything. This may happen in InterpOne's catch block.
-  if (inlinedFrames.size() == 0) return false;
-
-  for (auto const fp : inlinedFrames) {
-    gen(env, InlineCall, fp, fp->inst()->src(1));
-    updateMarker(env);
   }
-
-  return true;
+  return spilled;
 }
 
 //////////////////////////////////////////////////////////////////////

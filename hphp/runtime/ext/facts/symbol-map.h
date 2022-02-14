@@ -69,16 +69,12 @@ struct UpdateDBWorkItem {
  * Queries the SQLite AutoloadDB when the DB has information
  * we don't, and updates the AutoloadDB when we have
  * information the DB doesn't have.
- *
- * Iff `enforceOneDefinition` is true, we treat multiple definitions of the
- * same symbol as though the symbol were completely undefined.
  */
 struct SymbolMap {
 
   explicit SymbolMap(
       folly::fs::path root,
       AutoloadDB::Handle dbHandle,
-      bool enforceOneDefinition,
       hphp_hash_set<std::string> indexedMethodAttributes = {});
   SymbolMap() = delete;
   SymbolMap(const SymbolMap&) = delete;
@@ -604,7 +600,6 @@ private:
   const folly::fs::path m_root;
   const std::string m_schemaHash;
   AutoloadDB::Handle m_dbHandle;
-  const bool m_enforceOneDefinition;
   const hphp_hash_set<std::string> m_indexedMethodAttrs;
 };
 

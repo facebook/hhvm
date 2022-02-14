@@ -275,7 +275,7 @@ where
         //   attribute-specification-opt modifiers-opt enum class name : base { enum-class-enumerator-list-opt }
         let enum_kw = self.assert_token(TokenKind::Enum);
         let class_kw = self.assert_token(TokenKind::Class);
-        let name = self.require_class_name();
+        let name = self.require_name();
         let colon = self.require_colon();
         let base =
             self.parse_type_specifier(false /* allow_var */, false /* allow_attr */);
@@ -586,7 +586,7 @@ where
         let name = if is_xhp_class {
             self.require_xhp_class_name()
         } else {
-            self.require_class_name()
+            self.require_maybe_xhp_class_name()
         };
         let generic_type_parameter_list = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
             p.parse_generic_type_parameter_list_opt()
@@ -1046,7 +1046,7 @@ where
         // that we are in the more complex case.
         if self.is_next_xhp_class_name() {
             let mut parser1 = self.clone();
-            let class_name = parser1.require_class_name();
+            let class_name = parser1.require_maybe_xhp_class_name();
             match parser1.peek_token_kind() {
                 TokenKind::Comma | TokenKind::Semicolon => {
                     self.continue_from(parser1);
@@ -2448,7 +2448,8 @@ where
         let module_kw = self.assert_token(TokenKind::Module);
         // TODO(T108206307) This will probably change if we have a different syntax
         // for module names.
-        let name = self.require_class_name();
+
+        let name = self.require_name();
         let lb = self.require_left_brace();
         let rb = self.require_right_brace();
         S!(

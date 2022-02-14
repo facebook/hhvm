@@ -29,27 +29,27 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
         jt_gen: &mut jt::Gen,
     ) -> JumpInstructions<'a, 'arena> {
         fn get_label_id(jt_gen: &mut jt::Gen, is_break: bool, level: Level) -> label::Id {
-            use jt::ResolvedJumpTarget::*;
+            use jt::ResolvedJumpTarget;
             match jt_gen.jump_targets().get_target_for_level(is_break, level) {
-                ResolvedRegular(target_label, _)
-                | ResolvedTryFinally(jt::ResolvedTryFinally { target_label, .. }) => {
-                    jt_gen.get_id_for_label(target_label)
-                }
-                _ => panic!("impossible"),
+                ResolvedJumpTarget::ResolvedRegular(target_label, _)
+                | ResolvedJumpTarget::ResolvedTryFinally(jt::ResolvedTryFinally {
+                    target_label,
+                    ..
+                }) => jt_gen.get_id_for_label(target_label),
+                ResolvedJumpTarget::NotFound => unreachable!(),
             }
         }
         JumpInstructions(instr_seq.iter().fold(LabelMap::new(), |mut acc, instr| {
-            use hhbc_ast::Instruct::*;
             use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
             use hhbc_ast::InstructSpecialFlow::{Break, Continue};
             match *instr {
-                ISpecialFlow(Break(level)) => {
+                Instruct::SpecialFlow(Break(level)) => {
                     acc.insert(get_label_id(jt_gen, true, level as Level), instr);
                 }
-                ISpecialFlow(Continue(level)) => {
+                Instruct::SpecialFlow(Continue(level)) => {
                     acc.insert(get_label_id(jt_gen, false, level as Level), instr);
                 }
-                IContFlow(RetC | RetCSuspended | RetM(_)) => {
+                Instruct::ContFlow(RetC | RetCSuspended | RetM(_)) => {
                     acc.insert(jt_gen.get_id_for_return(), instr);
                 }
                 _ => {}
@@ -59,19 +59,14 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
     }
 }
 
-/// Delete Ret*, Break/Continue/Jmp(Named) instructions from the try body
+/// Delete Ret*, Break, and Continue instructions from the try body
 pub(super) fn cleanup_try_body<'arena>(
     alloc: &'arena bumpalo::Bump,
     is: &InstrSeq<'arena>,
 ) -> InstrSeq<'arena> {
-    use hhbc_ast::Instruct::*;
     use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
     is.filter_map(alloc, &mut |i| match *i {
-        ISpecialFlow(_) => None,
-        IContFlow(ref cont_flow) => match cont_flow {
-            RetC | RetCSuspended | RetM(_) => None,
-            _ => Some(i.clone()),
-        },
+        Instruct::SpecialFlow(_) | Instruct::ContFlow(RetC | RetCSuspended | RetM(_)) => None,
         _ => Some(i.clone()),
     })
 }
@@ -299,25 +294,24 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
         pos: &Pos,
         i: &Instruct<'arena>,
     ) -> Result<InstrSeq<'arena>> {
-        use hhbc_ast::Instruct::*;
         use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
         use hhbc_ast::InstructSpecialFlow::{Break, Continue};
         let fail = || {
             panic!("unexpected instruction: only Ret* or Break/Continue/Jmp(Named) are expected")
         };
         match *i {
-            IContFlow(ref cont_flow) => match cont_flow {
+            Instruct::ContFlow(ref cont_flow) => match cont_flow {
                 RetC | RetCSuspended | RetM(_) => emit_return(e, true, env),
                 _ => fail(),
             },
-            ISpecialFlow(Break(level)) => Ok(emit_break_or_continue(
+            Instruct::SpecialFlow(Break(level)) => Ok(emit_break_or_continue(
                 e,
                 EmitBreakOrContinueFlags::IS_BREAK | EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,
                 env,
                 pos,
                 level as Level,
             )),
-            ISpecialFlow(Continue(level)) => Ok(emit_break_or_continue(
+            Instruct::SpecialFlow(Continue(level)) => Ok(emit_break_or_continue(
                 e,
                 EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,
                 env,

@@ -1526,7 +1526,7 @@ To string conversions:
 
 8. Call & Return
 
-| BeginInlining<func, offset>, D(FramePtr), S(StkPtr) S(FramePtr), NF
+| BeginInlining<func, offset>, D(FramePtr), S(StkPtr), NF
 
   Marks the start of an inlined function whose stack resides offset cells below
   the SP.
@@ -1775,11 +1775,6 @@ To string conversions:
 
   Load the address of the storage for out parameter `index` provided by the
   callee (the address will be a location on the callee stack).
-
-| LdOutAddrInlined<index>, D(PtrToStk), S(FramePtr), NF
-
-  Load the address of the storage for out parameter `index`. For an inlined
-  frame, this is an address on the caller's stack.
 
 | RecordReifiedGenericsAndGetTSList, D(Vec), S(Vec), CRc|LA
 

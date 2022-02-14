@@ -42,18 +42,17 @@ fn fmt_name_or_prim<'arena>(
 }
 
 pub fn prim_to_string(prim: &Tprim) -> &'static str {
-    use Tprim::*;
     match prim {
-        Tnull => typehints::NULL,
-        Tvoid => typehints::VOID,
-        Tint => typehints::INT,
-        Tbool => typehints::BOOL,
-        Tfloat => typehints::FLOAT,
-        Tstring => typehints::STRING,
-        Tresource => typehints::RESOURCE,
-        Tnum => typehints::NUM,
-        Tarraykey => typehints::ARRAYKEY,
-        Tnoreturn => typehints::NORETURN,
+        Tprim::Tnull => typehints::NULL,
+        Tprim::Tvoid => typehints::VOID,
+        Tprim::Tint => typehints::INT,
+        Tprim::Tbool => typehints::BOOL,
+        Tprim::Tfloat => typehints::FLOAT,
+        Tprim::Tstring => typehints::STRING,
+        Tprim::Tresource => typehints::RESOURCE,
+        Tprim::Tnum => typehints::NUM,
+        Tprim::Tarraykey => typehints::ARRAYKEY,
+        Tprim::Tnoreturn => typehints::NORETURN,
     }
 }
 

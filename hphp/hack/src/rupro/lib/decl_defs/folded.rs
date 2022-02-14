@@ -111,7 +111,7 @@ pub struct FoldedClass<R: Reason> {
     pub constructor: Option<FoldedElement>,
     pub consts: ClassConstNameMap<ClassConst<R>>,
     pub type_consts: TypeConstNameMap<TypeConst<R>>,
-    pub tparams: Vec<Tparam<R, DeclTy<R>>>,
+    pub tparams: Box<[Tparam<R, DeclTy<R>>]>,
 }
 
 impl FoldedElement {

@@ -140,9 +140,10 @@ impl<'a> ocamlrep::FromOcamlRepIn<'a> for RelativePath<'a> {
 // as a string. This allows using it as a map key in serde_json.
 impl Serialize for RelativePath<'_> {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        let path_str = self.path().to_str().ok_or(serde::ser::Error::custom(
-            "path contains invalid UTF-8 characters",
-        ))?;
+        let path_str = self
+            .path()
+            .to_str()
+            .ok_or_else(|| serde::ser::Error::custom("path contains invalid UTF-8 characters"))?;
         serializer.serialize_str(&format!("{}|{}", self.prefix, path_str))
     }
 }

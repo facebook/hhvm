@@ -717,7 +717,7 @@ impl<'a> SlabReader<'a> {
 
 impl Debug for SlabReader<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        debug_slab("SlabReader", &Slab::from_bytes(self.0), f)
+        debug_slab("SlabReader", Slab::from_bytes(self.0), f)
     }
 }
 
@@ -828,8 +828,8 @@ mod test_integrity_check {
     #[test]
     fn bad_root_value() {
         let mut bytes = vec![0u8; TUPLE_42_A_SIZE_IN_BYTES];
-        let mut slab = Slab::from_bytes_mut(&mut bytes);
-        write_tuple_42_a(&mut slab);
+        let slab = Slab::from_bytes_mut(&mut bytes);
+        write_tuple_42_a(slab);
         let tuple_offset = slab.root_value_offset();
 
         for offset in 0..=TUPLE_42_A_SIZE_IN_WORDS {
@@ -848,8 +848,8 @@ mod test_integrity_check {
     #[test]
     fn bad_base_ptr() {
         let mut bytes = vec![0u8; TUPLE_42_A_SIZE_IN_BYTES];
-        let mut slab = Slab::from_bytes_mut(&mut bytes);
-        write_tuple_42_a(&mut slab);
+        let slab = Slab::from_bytes_mut(&mut bytes);
+        write_tuple_42_a(slab);
         assert!(slab.check_integrity().is_ok());
 
         let original_base = slab.base();

@@ -600,7 +600,10 @@ where
         }
     }
 
-    fn require_class_name(&mut self) -> S::R {
+    /// Require that the next node is either:
+    /// - A normal class name (`\w+`)
+    /// - An XHP class name (`(:(\w-)+)+`)
+    fn require_maybe_xhp_class_name(&mut self) -> S::R {
         if self.is_next_xhp_class_name() {
             let token = self.next_xhp_class_name();
             S!(make_token, self, token)

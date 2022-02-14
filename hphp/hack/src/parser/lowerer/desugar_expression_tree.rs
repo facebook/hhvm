@@ -1350,7 +1350,7 @@ fn rewrite_expr(
 
             let mut virtual_attrs = vec![];
             let mut desugar_attrs = vec![];
-            for attr in attrs.clone() {
+            for attr in attrs {
                 match attr {
                     aast::XhpAttribute::XhpSimple(xs) => {
                         let (attr_name_pos, attr_name) = xs.name.clone();

@@ -582,4 +582,8 @@ SuppressClassConversionWarning::~SuppressClassConversionWarning() {
   RID().setSuppressClassConversionWarnings(old);
 }
 
+void raise_class_to_memokey_conversion_warning() {
+  raise_warning(Strings::CLASS_TO_MEMOKEY);
+}
+
 }

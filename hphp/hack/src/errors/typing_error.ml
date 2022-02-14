@@ -9,6 +9,125 @@
 open Hh_prelude
 module Error_code = Error_codes.Typing
 
+module Eval_result : sig
+  type 'a t
+
+  val empty : 'a t
+
+  val single : 'a -> 'a t
+
+  val multiple : 'a t list -> 'a t
+
+  val union : 'a t list -> 'a t
+
+  val intersect : 'a t list -> 'a t
+
+  val of_option : 'a option -> 'a t
+
+  val map : 'a t -> f:('a -> 'b) -> 'b t
+
+  val bind : 'a t -> f:('a -> 'b t) -> 'b t
+
+  val iter : 'a t -> f:('a -> unit) -> unit
+
+  val suppress_intersection : 'a t -> is_suppressed:('a -> bool) -> 'a t
+end = struct
+  type 'a t =
+    | Empty
+    | Single of 'a
+    | Multiple of 'a t list
+    | Union of 'a t list
+    | Intersect of 'a t list
+
+  let empty = Empty
+
+  let single a = Single a
+
+  let multiple = function
+    | [] -> Empty
+    | xs -> Multiple xs
+
+  let union = function
+    | [] -> Empty
+    | xs -> Union xs
+
+  let intersect = function
+    | [] -> Empty
+    | xs -> Intersect xs
+
+  let of_option = function
+    | Some x -> Single x
+    | _ -> Empty
+
+  let map t ~f =
+    let rec aux ~k = function
+      | Empty -> k Empty
+      | Single x -> k @@ single @@ f x
+      | Multiple xs -> auxs xs ~k:(fun ys -> k @@ multiple ys)
+      | Union xs -> auxs xs ~k:(fun ys -> k @@ union ys)
+      | Intersect xs -> auxs xs ~k:(fun ys -> k @@ intersect ys)
+    and auxs ~k = function
+      | [] -> k []
+      | next :: rest ->
+        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ x :: xs))
+    in
+    aux ~k:Fn.id t
+
+  let bind t ~f =
+    let rec aux ~k = function
+      | Empty -> k Empty
+      | Single x -> k @@ f x
+      | Multiple xs -> auxs xs ~k:(fun ys -> k @@ multiple ys)
+      | Union xs -> auxs xs ~k:(fun ys -> k @@ union ys)
+      | Intersect xs -> auxs xs ~k:(fun ys -> k @@ intersect ys)
+    and auxs ~k = function
+      | [] -> k []
+      | next :: rest ->
+        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ x :: xs))
+    in
+    aux ~k:Fn.id t
+
+  let iter t ~f =
+    let rec aux = function
+      | Empty -> ()
+      | Single x -> f x
+      | Multiple xs
+      | Union xs
+      | Intersect xs ->
+        List.iter ~f:aux xs
+    in
+    aux t
+
+  let is_suppressed t p =
+    let rec f = function
+      | Intersect xs -> List.exists ~f xs
+      | Multiple xs
+      | Union xs ->
+        List.for_all ~f xs
+      | Empty -> false
+      | Single x -> p x
+    in
+    f t
+
+  let suppress_intersection t ~is_suppressed:p =
+    let p t = is_suppressed t p in
+    let rec aux t =
+      match t with
+      | Intersect xs -> auxs [] xs
+      | Multiple xs -> multiple @@ List.map ~f:aux xs
+      | Union xs -> union @@ List.map ~f:aux xs
+      | _ -> t
+    and auxs acc = function
+      | [] -> intersect @@ List.rev acc
+      | next :: rest ->
+        if p next then
+          aux next
+        else
+          auxs (next :: acc) rest
+    in
+    aux t
+end
+
 type on_error =
   ?code:int ->
   ?quickfixes:Quickfix.t list ->
@@ -5209,10 +5328,10 @@ module rec Error : sig
   val iter :
     t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
 
-  val eval : t -> current_span:Pos.t -> error option
+  val eval : t -> current_span:Pos.t -> error Eval_result.t
 
   val to_user_error :
-    t -> current_span:Pos.t -> (Pos.t, Pos_or_decl.t) User_error.t option
+    t -> current_span:Pos.t -> (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
 
   val primary : Primary.t -> t
   val coeffect : Primary.Coeffect.t -> t
@@ -5228,12 +5347,24 @@ module rec Error : sig
   val apply_reasons : Secondary.t -> on_error:Reasons_callback.t -> t
   val apply : t -> on_error:Callback.t -> t
   val assert_in_current_decl : Secondary.t -> ctx:Pos_or_decl.ctx -> t
+
+  val intersect : t list -> t
+
+  val union : t list -> t
+
+  val multiple : t list -> t
 end = struct
+  type kind =
+    | Intersection
+    | Union
+    | Multiple
+
   type t =
     | Primary of Primary.t
     | Apply of Callback.t * t
     | Apply_reasons of Reasons_callback.t * Secondary.t
     | Assert_in_current_decl of Secondary.t * Pos_or_decl.ctx
+    | Group of kind * t list
 
   let iter t ~on_prim ~on_snd =
     let rec aux = function
@@ -5246,6 +5377,7 @@ end = struct
         Reasons_callback.iter cb ~on_prim ~on_snd
       | Assert_in_current_decl (snd_err, _ctx) ->
         Secondary.iter snd_err ~on_prim ~on_snd
+      | Group (_, ts) -> List.iter ~f:aux ts
     in
     aux t
 
@@ -5253,30 +5385,40 @@ end = struct
 
   let eval t ~current_span =
     let rec aux ~k = function
-      | Primary base -> k @@ Primary.to_error base
-      | Apply_reasons (cb, err) ->
-        k
-        @@ Option.bind
-             (Secondary.eval err ~current_span)
-             ~f:(fun (code, reasons) ->
-               Reasons_callback.apply_help cb ~code ~reasons ~current_span)
+      | Primary base -> k @@ Eval_result.of_option @@ Primary.to_error base
+      | Group (Intersection, ts) ->
+        auxs ~k:(fun xs -> k @@ Eval_result.intersect xs) ts
+      | Group (Union, ts) -> auxs ~k:(fun xs -> k @@ Eval_result.union xs) ts
+      | Group (Multiple, ts) ->
+        auxs ~k:(fun xs -> k @@ Eval_result.multiple xs) ts
       | Apply (cb, err) ->
-        aux err ~k:(function
-            | Some (code, claim, reasons, quickfixes) ->
-              k @@ Callback.apply cb ~code ~claim ~reasons ~quickfixes
-            | _ -> k None)
-      | Assert_in_current_decl (snd_err, ctx) ->
-        Option.bind ~f:(Common.eval_assert ctx current_span)
+        aux err ~k:(fun t ->
+            k
+            @@ Eval_result.bind t ~f:(fun (code, claim, reasons, quickfixes) ->
+                   Eval_result.of_option
+                   @@ Callback.apply cb ~code ~claim ~reasons ~quickfixes))
+      | Apply_reasons (cb, snd_err) ->
+        k
+        @@ Eval_result.bind ~f:(fun (code, reasons) ->
+               Reasons_callback.apply_help cb ~code ~reasons ~current_span)
         @@ Secondary.eval snd_err ~current_span
+      | Assert_in_current_decl (snd_err, ctx) ->
+        k
+        @@ Eval_result.bind ~f:(fun e ->
+               Eval_result.of_option @@ Common.eval_assert ctx current_span e)
+        @@ Secondary.eval snd_err ~current_span
+    and auxs ~k = function
+      | [] -> k []
+      | next :: rest ->
+        aux next ~k:(fun x -> auxs rest ~k:(fun xs -> k @@ x :: xs))
     in
-
     aux ~k:Fn.id t
 
   let make_error (code, claim, reasons, quickfixes) =
     User_error.make (Error_code.to_enum code) claim reasons ~quickfixes
 
   let to_user_error t ~current_span =
-    Option.map ~f:make_error @@ eval t ~current_span
+    Eval_result.map ~f:make_error @@ eval t ~current_span
 
   (* -- Constructors ---------------------------------------------------------- *)
   let primary prim_err = Primary prim_err
@@ -5293,6 +5435,12 @@ end = struct
   let apply_reasons t ~on_error = Apply_reasons (on_error, t)
   let apply t ~on_error = Apply (on_error, t)
   let assert_in_current_decl snd ~ctx = Assert_in_current_decl (snd, ctx)
+
+  let intersect ts = Group (Intersection, ts)
+
+  let union ts = Group (Union, ts)
+
+  let multiple ts = Group (Multiple, ts)
 end
 
 and Secondary : sig
@@ -5558,7 +5706,7 @@ and Secondary : sig
   val eval :
     t ->
     current_span:Pos.t ->
-    (Error_code.t * Pos_or_decl.t Message.t list) option
+    (Error_code.t * Pos_or_decl.t Message.t list) Eval_result.t
 end = struct
   type t =
     | Of_error of Error.t
@@ -6390,27 +6538,28 @@ end = struct
   let eval t ~current_span =
     match t with
     | Of_error err ->
-      Option.map ~f:(fun (code, claim, reasons, _) ->
+      Eval_result.map ~f:(fun (code, claim, reasons, _) ->
           (code, Message.map ~f:Pos_or_decl.of_raw_pos claim :: reasons))
       @@ Error.eval err ~current_span
     | Fun_too_many_args { pos; decl_pos; actual; expected } ->
-      Some (fun_too_many_args pos decl_pos actual expected)
+      Eval_result.single (fun_too_many_args pos decl_pos actual expected)
     | Fun_too_few_args { pos; decl_pos; actual; expected } ->
-      Some (fun_too_few_args pos decl_pos actual expected)
+      Eval_result.single (fun_too_few_args pos decl_pos actual expected)
     | Fun_unexpected_nonvariadic { pos; decl_pos } ->
-      Some (fun_unexpected_nonvariadic pos decl_pos)
+      Eval_result.single (fun_unexpected_nonvariadic pos decl_pos)
     | Fun_variadicity_hh_vs_php56 { pos; decl_pos } ->
-      Some (fun_variadicity_hh_vs_php56 pos decl_pos)
+      Eval_result.single (fun_variadicity_hh_vs_php56 pos decl_pos)
     | Type_arity_mismatch { pos; actual; decl_pos; expected } ->
-      Some (type_arity_mismatch pos actual decl_pos expected)
+      Eval_result.single (type_arity_mismatch pos actual decl_pos expected)
     | Violated_constraint { cstrs; reasons; _ } ->
-      Some (violated_constraint cstrs reasons)
+      Eval_result.single (violated_constraint cstrs reasons)
     | Concrete_const_interface_override { pos; parent_pos; name; parent_origin }
       ->
-      Some (concrete_const_interface_override pos parent_pos name parent_origin)
+      Eval_result.single
+        (concrete_const_interface_override pos parent_pos name parent_origin)
     | Interface_or_trait_const_multiple_defs
         { pos; origin; parent_pos; parent_origin; name } ->
-      Some
+      Eval_result.single
         (interface_or_trait_const_multiple_defs
            pos
            origin
@@ -6419,7 +6568,7 @@ end = struct
            name)
     | Interface_typeconst_multiple_defs
         { pos; parent_pos; name; origin; parent_origin; is_abstract } ->
-      Some
+      Eval_result.single
         (interface_typeconst_multiple_defs
            pos
            parent_pos
@@ -6428,47 +6577,49 @@ end = struct
            parent_origin
            is_abstract)
     | Missing_field { pos; name; decl_pos } ->
-      Some (missing_field pos name decl_pos)
+      Eval_result.single (missing_field pos name decl_pos)
     | Shape_fields_unknown { pos; decl_pos } ->
-      Some (shape_fields_unknown pos decl_pos)
+      Eval_result.single (shape_fields_unknown pos decl_pos)
     | Abstract_tconst_not_allowed { pos; decl_pos; tconst_name } ->
-      Some (abstract_tconst_not_allowed pos decl_pos tconst_name)
+      Eval_result.single (abstract_tconst_not_allowed pos decl_pos tconst_name)
     | Invalid_destructure { pos; decl_pos; ty_name } ->
-      Some (invalid_destructure pos decl_pos ty_name)
+      Eval_result.single (invalid_destructure pos decl_pos ty_name)
     | Unpack_array_required_argument { pos; decl_pos } ->
-      Some (unpack_array_required_argument pos decl_pos)
+      Eval_result.single (unpack_array_required_argument pos decl_pos)
     | Unpack_array_variadic_argument { pos; decl_pos } ->
-      Some (unpack_array_variadic_argument pos decl_pos)
+      Eval_result.single (unpack_array_variadic_argument pos decl_pos)
     | Overriding_prop_const_mismatch { pos; is_const; parent_pos; _ } ->
-      Some (overriding_prop_const_mismatch pos is_const parent_pos)
+      Eval_result.single
+        (overriding_prop_const_mismatch pos is_const parent_pos)
     | Visibility_extends { pos; vis; parent_pos; parent_vis } ->
-      Some (visibility_extends pos vis parent_pos parent_vis)
+      Eval_result.single (visibility_extends pos vis parent_pos parent_vis)
     | Visibility_override_internal
         { pos; module_name; parent_module; parent_pos } ->
-      Some
+      Eval_result.single
         (visibility_override_internal pos module_name parent_module parent_pos)
-    | Missing_constructor pos -> Some (missing_constructor pos)
+    | Missing_constructor pos -> Eval_result.single (missing_constructor pos)
     | Accept_disposable_invariant { pos; decl_pos } ->
-      Some (accept_disposable_invariant pos decl_pos)
+      Eval_result.single (accept_disposable_invariant pos decl_pos)
     | Ifc_external_contravariant { pos_sub; pos_super } ->
-      Some (ifc_external_contravariant pos_sub pos_super)
+      Eval_result.single (ifc_external_contravariant pos_sub pos_super)
     | Required_field_is_optional { pos; name; decl_pos } ->
-      Some (required_field_is_optional pos name decl_pos)
+      Eval_result.single (required_field_is_optional pos name decl_pos)
     | Return_disposable_mismatch
         { pos_sub; is_marked_return_disposable; pos_super } ->
-      Some
+      Eval_result.single
         (return_disposable_mismatch
            pos_sub
            is_marked_return_disposable
            pos_super)
     | Ifc_policy_mismatch { pos; policy; pos_super; policy_super } ->
-      Some (ifc_policy_mismatch pos policy pos_super policy_super)
-    | Override_final { pos; parent_pos } -> Some (override_final pos parent_pos)
+      Eval_result.single (ifc_policy_mismatch pos policy pos_super policy_super)
+    | Override_final { pos; parent_pos } ->
+      Eval_result.single (override_final pos parent_pos)
     | Override_lsb { pos; member_name; parent_pos } ->
-      Some (override_lsb pos member_name parent_pos)
+      Eval_result.single (override_lsb pos member_name parent_pos)
     | Multiple_concrete_defs
         { pos; origin; name; parent_pos; parent_origin; class_name } ->
-      Some
+      Eval_result.single
         (multiple_concrete_defs
            pos
            origin
@@ -6476,55 +6627,62 @@ end = struct
            parent_pos
            parent_origin
            class_name)
-    | Cyclic_enum_constraint pos -> Some (cyclic_enum_constraint pos)
+    | Cyclic_enum_constraint pos ->
+      Eval_result.single (cyclic_enum_constraint pos)
     | Inoutness_mismatch { pos; decl_pos } ->
-      Some (inoutness_mismatch pos decl_pos)
-    | Decl_override_missing_hint pos -> Some (decl_override_missing_hint pos)
+      Eval_result.single (inoutness_mismatch pos decl_pos)
+    | Decl_override_missing_hint pos ->
+      Eval_result.single (decl_override_missing_hint pos)
     | Bad_lateinit_override { pos; parent_pos; parent_is_lateinit } ->
-      Some (bad_lateinit_override pos parent_pos parent_is_lateinit)
+      Eval_result.single
+        (bad_lateinit_override pos parent_pos parent_is_lateinit)
     | Bad_xhp_attr_required_override { pos; parent_pos; parent_tag; tag } ->
-      Some (bad_xhp_attr_required_override pos parent_pos parent_tag tag)
+      Eval_result.single
+        (bad_xhp_attr_required_override pos parent_pos parent_tag tag)
     | Coeffect_subtyping { pos; cap; pos_expected; cap_expected } ->
-      Some (coeffect_subtyping pos cap pos_expected cap_expected)
+      Eval_result.single (coeffect_subtyping pos cap pos_expected cap_expected)
     | Not_sub_dynamic { pos; ty_name; dynamic_part } ->
-      Some (not_sub_dynamic pos ty_name dynamic_part)
+      Eval_result.single (not_sub_dynamic pos ty_name dynamic_part)
     | Override_method_support_dynamic_type
         { pos; method_name; parent_origin; parent_pos } ->
-      Some
+      Eval_result.single
         (override_method_support_dynamic_type
            pos
            method_name
            parent_origin
            parent_pos)
     | Readonly_mismatch { pos; kind; reason_sub; reason_super } ->
-      Some (readonly_mismatch pos kind reason_sub reason_super)
+      Eval_result.single (readonly_mismatch pos kind reason_sub reason_super)
     | Typing_too_many_args { pos; decl_pos; actual; expected } ->
-      Some (typing_too_many_args pos decl_pos actual expected)
+      Eval_result.single (typing_too_many_args pos decl_pos actual expected)
     | Typing_too_few_args { pos; decl_pos; actual; expected } ->
-      Some (typing_too_few_args pos decl_pos actual expected)
+      Eval_result.single (typing_too_few_args pos decl_pos actual expected)
     | Non_object_member { pos; ctxt; ty_name; member_name; kind; decl_pos } ->
-      Some (non_object_member pos ctxt ty_name member_name kind decl_pos)
-    | Rigid_tvar_escape { pos; name } -> Some (rigid_tvar_escape pos name)
+      Eval_result.single
+        (non_object_member pos ctxt ty_name member_name kind decl_pos)
+    | Rigid_tvar_escape { pos; name } ->
+      Eval_result.single (rigid_tvar_escape pos name)
     | Smember_not_found { pos; kind; member_name; class_name; class_pos; hint }
       ->
-      Some (smember_not_found pos kind member_name class_name class_pos hint)
+      Eval_result.single
+        (smember_not_found pos kind member_name class_name class_pos hint)
     | Bad_method_override { pos; member_name } ->
-      Some (bad_method_override pos member_name)
+      Eval_result.single (bad_method_override pos member_name)
     | Bad_prop_override { pos; member_name } ->
-      Some (bad_prop_override pos member_name)
-    | Subtyping_error reasons -> Some (subtyping_error reasons)
+      Eval_result.single (bad_prop_override pos member_name)
+    | Subtyping_error reasons -> Eval_result.single (subtyping_error reasons)
     | Method_not_dynamically_callable { pos; parent_pos } ->
-      Some (method_not_dynamically_callable pos parent_pos)
+      Eval_result.single (method_not_dynamically_callable pos parent_pos)
     | This_final { pos_sub; pos_super; class_name } ->
-      Some (this_final pos_sub pos_super class_name)
+      Eval_result.single (this_final pos_sub pos_super class_name)
     | Typeconst_concrete_concrete_override { pos; parent_pos } ->
-      Some (typeconst_concrete_concrete_override pos parent_pos)
+      Eval_result.single (typeconst_concrete_concrete_override pos parent_pos)
     | Abstract_concrete_override { pos; parent_pos; kind } ->
-      Some (abstract_concrete_override pos parent_pos kind)
+      Eval_result.single (abstract_concrete_override pos parent_pos kind)
     | Should_not_be_override { pos; class_id; id } ->
-      Some (should_not_be_override pos class_id id)
+      Eval_result.single (should_not_be_override pos class_id id)
     | Override_no_default_typeconst { pos; parent_pos } ->
-      Some (override_no_default_typeconst pos parent_pos)
+      Eval_result.single (override_no_default_typeconst pos parent_pos)
 end
 
 and Callback : sig
@@ -6741,7 +6899,7 @@ and Reasons_callback : sig
     ?quickfixes:Quickfix.t list ->
     t ->
     current_span:Pos.t ->
-    error option
+    error Eval_result.t
 
   val apply :
     ?code:Error_code.t ->
@@ -6750,7 +6908,7 @@ and Reasons_callback : sig
     ?quickfixes:Quickfix.t list ->
     t ->
     current_span:Pos.t ->
-    (Pos.t, Pos_or_decl.t) User_error.t option
+    (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
 
   val unify_error_at : Pos.t -> t
   val bad_enum_decl : Pos.t -> t
@@ -6866,82 +7024,84 @@ end = struct
       { t with code_opt = Option.first_some t.code_opt code_opt }
 
     let prepend_secondary
-        ({ claim_opt; reasons_opt; quickfixes_opt; _ } as st)
-        snd_err
-        ~current_span =
-      match Secondary.eval snd_err ~current_span with
-      | Some (code, reasons) ->
-        {
-          code_opt = Some code;
-          claim_opt;
-          reasons_opt = Some (reasons @ Option.value ~default:[] reasons_opt);
-          quickfixes_opt;
-        }
-      | _ -> st
+        { claim_opt; reasons_opt; quickfixes_opt; _ } snd_err ~current_span =
+      Eval_result.map
+        (Secondary.eval snd_err ~current_span)
+        ~f:(fun (code, reasons) ->
+          {
+            code_opt = Some code;
+            claim_opt;
+            reasons_opt = Some (reasons @ Option.value ~default:[] reasons_opt);
+            quickfixes_opt;
+          })
 
     (** Replace any missing values in the error state with those of the error *)
     let with_defaults
         { code_opt; claim_opt; reasons_opt; quickfixes_opt } err ~current_span =
-      Option.(
-        map ~f:(fun (code, claim, reasons, quickfixes) ->
+      Eval_result.map ~f:(fun (code, claim, reasons, quickfixes) ->
+          Option.
             ( value code_opt ~default:code,
               value claim_opt ~default:claim,
               value reasons_opt ~default:reasons,
-              value quickfixes_opt ~default:quickfixes )))
+              value quickfixes_opt ~default:quickfixes ))
       @@ Error.eval err ~current_span
   end
 
   let eval_callback
-      cb Error_state.{ code_opt; reasons_opt; quickfixes_opt; _ } ~claim =
+      k Error_state.{ code_opt; reasons_opt; quickfixes_opt; _ } ~claim =
     Callback.apply
       ?code:code_opt
       ?reasons:reasons_opt
       ?quickfixes:quickfixes_opt
       ~claim
-      cb
+      k
 
   let eval t ~st ~current_span =
-    let rec eval t st =
+    let rec aux t st =
       match t with
       | From_on_error f ->
         let code = Option.map ~f:Error_code.to_enum st.Error_state.code_opt
         and quickfixes = st.Error_state.quickfixes_opt
         and reasons = Option.value ~default:[] st.Error_state.reasons_opt in
         f ?code ?quickfixes reasons;
-        None
-      | Ignore -> None
+        Eval_result.empty
+      | Ignore -> Eval_result.empty
       | Always err -> Error.eval err ~current_span
       | Of_error err -> Error_state.with_defaults st err ~current_span
-      | Of_callback (cb, claim) -> eval_callback cb st ~claim
+      | Of_callback (k, claim) ->
+        Eval_result.of_option @@ eval_callback k st ~claim
       | Assert_in_current_decl (default, ctx) ->
         let Error_state.{ code_opt; reasons_opt; quickfixes_opt; _ } = st in
         let crs =
           Option.(value ~default code_opt, value ~default:[] reasons_opt)
         in
         let res_opt = Common.eval_assert ctx current_span crs in
-        Option.map res_opt ~f:(function
-            | (code, claim, reasons, []) ->
-              (code, claim, reasons, Option.value ~default:[] quickfixes_opt)
-            | res -> res)
+        Eval_result.of_option
+        @@ Option.map res_opt ~f:(function
+               | (code, claim, reasons, []) ->
+                 (code, claim, reasons, Option.value ~default:[] quickfixes_opt)
+               | res -> res)
       | With_code (err, code) ->
         let st = Error_state.with_code st @@ Some code in
-        eval err st
+        aux err st
       | With_reasons (err, reasons) ->
-        eval err Error_state.{ st with reasons_opt = Some reasons }
-      | Add_reason (err, op, reason) -> eval_reason_op op err reason st
-      | Retain (t, comp) -> eval_retain t comp st
+        aux err Error_state.{ st with reasons_opt = Some reasons }
+      | Add_reason (err, op, reason) -> aux_reason_op op err reason st
+      | Retain (t, comp) -> aux_retain t comp st
       | Incoming_reasons (err, op) ->
-        Option.map ~f:(fun ((code, claim, reasons, qfxs) as err) ->
+        Eval_result.map ~f:(fun ((code, claim, reasons, qfxs) as err) ->
             match (st.Error_state.reasons_opt, op) with
             | (None, _)
             | (Some [], _) ->
               err
             | (Some rs, Append) -> (code, claim, reasons @ rs, qfxs)
             | (Some rs, Prepend) -> (code, claim, rs @ reasons, qfxs))
-        @@ eval err Error_state.{ st with reasons_opt = None }
+        @@ aux err Error_state.{ st with reasons_opt = None }
       | Prepend_on_apply (t, snd_err) ->
-        eval t (Error_state.prepend_secondary st snd_err ~current_span)
-    and eval_reason_op op err base_reason (Error_state.{ reasons_opt; _ } as st)
+        Eval_result.bind
+          ~f:(aux t)
+          (Error_state.prepend_secondary st snd_err ~current_span)
+    and aux_reason_op op err base_reason (Error_state.{ reasons_opt; _ } as st)
         =
       let reasons_opt =
         match op with
@@ -6954,14 +7114,14 @@ end = struct
             first_some (map reasons_opt ~f:(fun rs -> base_reason :: rs))
             @@ Some [base_reason])
       in
-      eval err Error_state.{ st with reasons_opt }
-    and eval_retain t comp st =
+      aux err Error_state.{ st with reasons_opt }
+    and aux_retain t comp st =
       match comp with
-      | Code -> eval t Error_state.{ st with code_opt = None }
-      | Reasons -> eval t Error_state.{ st with reasons_opt = None }
-      | Quickfixes -> eval t Error_state.{ st with quickfixes_opt = None }
+      | Code -> aux t Error_state.{ st with code_opt = None }
+      | Reasons -> aux t Error_state.{ st with reasons_opt = None }
+      | Quickfixes -> aux t Error_state.{ st with quickfixes_opt = None }
     in
-    eval t st
+    aux t st
 
   let apply_help ?code ?claim ?reasons ?quickfixes t ~current_span =
     let claim = Option.map claim ~f:(Message.map ~f:Pos_or_decl.of_raw_pos) in
@@ -6987,7 +7147,7 @@ end = struct
     let f (code, claim, reasons, quickfixes) =
       User_error.make (Error_code.to_enum code) claim reasons ~quickfixes
     in
-    Option.map ~f
+    Eval_result.map ~f
     @@ apply_help ?code ?claim ?reasons ?quickfixes t ~current_span
   (* -- Specific callbacks -------------------------------------------------- *)
 

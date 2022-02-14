@@ -27,7 +27,7 @@ const DEBUG: bool = false;
 
 fn write_bytes_macro(input: TokenStream) -> Result<TokenStream> {
     if DEBUG {
-        eprintln!("INPUT: {}", input.to_string());
+        eprintln!("INPUT: {}", input);
     }
 
     let parser = Punctuated::<Expr, Token![,]>::parse_terminated;
@@ -165,7 +165,7 @@ fn write_bytes_macro(input: TokenStream) -> Result<TokenStream> {
     );
 
     if DEBUG {
-        eprintln!("RESULT: {:?}\n{}", result, result.to_string());
+        eprintln!("RESULT: {:?}\n{}", result, result);
     }
 
     Ok(result)
@@ -306,8 +306,8 @@ mod test_helpers {
             "Mismatch!\nLeft:  {}\nRight: {}\nwhen comparing\nLeft:  {}\nRight: {}\n",
             ta.map_or("None".into(), |t| t.to_string()),
             tb.map_or("None".into(), |t| t.to_string()),
-            ax.to_string(),
-            bx.to_string()
+            ax,
+            bx
         );
     }
 
@@ -356,12 +356,10 @@ mod test_helpers {
 
     pub(crate) fn assert_error(a: Result<TokenStream, Error>, b: &str) {
         match a {
-            Ok(a) => panic!("Expected error but got:\n{}", a.to_string()),
+            Ok(a) => panic!("Expected error but got:\n{}", a),
             Err(e) => {
                 let a = format!("{}", e);
-                if a != b {
-                    panic!("Incorrect error:\nLeft:  {}\nRight: {}\n", a, b);
-                }
+                assert_eq!(a, b, "Incorrect error")
             }
         }
     }

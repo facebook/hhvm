@@ -285,7 +285,7 @@ impl<R: Reason> Inherited<R> {
         cls: &FoldedClass<R>,
         params: &[DeclTy<R>],
     ) -> TypeNameMap<DeclTy<R>> {
-        Subst::new(alloc, cls.tparams.as_slice(), params).into()
+        Subst::new(alloc, cls.tparams.as_ref(), params).into()
     }
 
     fn inherit_hack_class(

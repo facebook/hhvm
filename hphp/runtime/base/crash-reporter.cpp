@@ -264,7 +264,7 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
     case CrashReportStage::DumpTransDB:
       s_crash_report_stage = CrashReportStage::SendEmail;
 
-      if (jit::transdb::enabled()) {
+      if (jit::transdb::enabled() && RuntimeOption::EvalJit) {
         jit::tc::dump(true);
       }
       // fall through

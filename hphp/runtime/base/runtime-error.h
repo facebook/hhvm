@@ -177,6 +177,7 @@ void raise_hackarr_compat_notice(const std::string& msg);
 [[noreturn]] void raise_use_of_specialized_array();
 
 void raise_class_to_string_conversion_warning();
+void raise_class_to_memokey_conversion_warning();
 
 /*
  * RAII mechanism to temporarily suppress lazyclass-to-string conversion notices

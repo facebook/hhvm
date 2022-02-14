@@ -106,7 +106,7 @@ impl<'a> Block<'a> {
         let mut block = alloc.block_with_size_and_tag(self.size(), self.tag());
         match self.as_values() {
             Some(fields) => {
-                for (i, field) in fields.into_iter().enumerate() {
+                for (i, field) in fields.iter().enumerate() {
                     let field = field.clone_with(alloc, seen);
                     alloc.set_field(&mut block, i, field)
                 }

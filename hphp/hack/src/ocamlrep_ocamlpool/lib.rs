@@ -172,10 +172,10 @@ pub fn catch_unwind_with_handler(
 /// result.
 #[inline(always)]
 pub unsafe fn add_to_ambient_pool<T: ToOcamlRep>(value: &T) -> usize {
-    let mut fake_pool = Pool {
+    let fake_pool = Pool {
         cache: MemoizationCache::new(),
     };
-    let result = value.to_ocamlrep(&mut fake_pool).to_bits();
+    let result = value.to_ocamlrep(&fake_pool).to_bits();
     std::mem::forget(fake_pool);
     result
 }

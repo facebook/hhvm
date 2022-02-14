@@ -150,28 +150,21 @@ pub const error1056: Error =
     Cow::Borrowed("This token is not valid as part of a function declaration.");
 pub fn error1057(text: &str) -> Error {
     // TODO (kasper): T52404885: why does removing to_string() here segfaults
-    Cow::Owned(format!(
-        "Encountered unexpected token `{}`.",
-        text.to_string()
-    ))
+    Cow::Owned(format!("Encountered unexpected token `{}`.", text))
 }
 pub fn uppercase_kw(text: &str) -> Error {
-    Cow::Owned(format!(
-        "Keyword `{}` must be written in lowercase",
-        text.to_string()
-    ))
+    Cow::Owned(format!("Keyword `{}` must be written in lowercase", text))
 }
 pub fn error1058(received: &str, required: &str) -> Error {
     Cow::Owned(format!(
         "Encountered unexpected token `{}`. Did you mean `{}`?",
-        received.to_string(),
-        required.to_string()
+        received, required
     ))
 }
 pub fn error1059(terminator: TokenKind) -> Error {
     Cow::Owned(format!(
         "An `{}` is required when using alternate block syntax.",
-        terminator.to_string().to_string(),
+        terminator.to_string(),
     ))
 }
 pub fn error1060(extension: &str) -> Error {
@@ -182,8 +175,7 @@ pub fn error1060(extension: &str) -> Error {
     };
     Cow::Owned(format!(
         "Leading markup and `<?hh` are not permitted in `.{}` files, which are always `{}`.",
-        extension.to_string(),
-        kind.to_string()
+        extension, kind
     ))
 }
 pub const error1063: Error = Cow::Borrowed("Expected matching separator here.");
@@ -206,8 +198,7 @@ pub const error2008: Error = Cow::Borrowed(concat!(
 pub fn error2009(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
         "Constructor `{}::{}()` cannot be static",
-        class_name.to_string(),
-        method_name.to_string(),
+        class_name, method_name,
     ))
 }
 pub const error2010: Error = Cow::Borrowed(concat!(
@@ -220,8 +211,7 @@ pub const error2015: Error = Cow::Borrowed("A method must have a body or be mark
 pub fn error2016(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot declare abstract method `{}::{}` `private`",
-        class_name.to_string(),
-        method_name.to_string(),
+        class_name, method_name,
     ))
 }
 pub const error2018: Error =
@@ -229,8 +219,7 @@ pub const error2018: Error =
 pub fn error2019(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot declare abstract method `{}::{}` `final`",
-        class_name.to_string(),
-        method_name.to_string(),
+        class_name, method_name,
     ))
 }
 pub const error2020: Error = Cow::Borrowed(concat!(
@@ -248,11 +237,7 @@ pub const error2024: Error =
 pub const error2022: Error =
     Cow::Borrowed("A variadic parameter `...` may not be followed by a comma.");
 pub fn error2025(class_name: &str, prop_name: &str) -> Error {
-    Cow::Owned(format!(
-        "Cannot redeclare `{}::{}`",
-        class_name.to_string(),
-        prop_name.to_string(),
-    ))
+    Cow::Owned(format!("Cannot redeclare `{}::{}`", class_name, prop_name))
 }
 pub const error2029: Error = Cow::Borrowed("Only traits and interfaces may use `require extends`.");
 pub const error2030: Error = Cow::Borrowed("Only traits may use `require implements`.");
@@ -277,7 +262,7 @@ pub fn error2038(constructor_name: &str) -> Error {
             "A constructor initializing an object must be passed a (possibly empty) ",
             "list of arguments. Did you mean `new {}()`?",
         ),
-        constructor_name.to_string(),
+        constructor_name
     ))
 }
 pub const error2040: Error = Cow::Borrowed(concat!(
@@ -293,7 +278,7 @@ pub const error2042: Error = Cow::Borrowed("Only classes may be declared `abstra
 pub fn error2046(method_type: &str) -> Error {
     Cow::Owned(format!(
         "`async` cannot be used on {}. Use an `Awaitable<...>` return type instead.",
-        method_type.to_string(),
+        method_type
     ))
 }
 
@@ -393,7 +378,7 @@ pub const instanceof_missing_subscript_index: Error = Cow::Borrowed(concat!(
 pub fn new_unknown_node(msg: &str) -> Error {
     Cow::Owned(format!(
         "`new` requires a class name or local variable, but got: `{}`",
-        msg.to_string(),
+        msg
     ))
 }
 pub const invalid_async_return_hint: Error =
@@ -421,13 +406,13 @@ pub const invalid_brace_kind_in_collection_initializer: Error = Cow::Borrowed(
 pub fn invalid_value_initializer(name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot use value initializer for `{}`. It requires `key => value`.",
-        name.to_string(),
+        name
     ))
 }
 pub fn invalid_key_value_initializer(name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot use key value initializer for `{}`. It does not allow keys.",
-        name.to_string(),
+        name
     ))
 }
 pub const nested_ternary: Error = Cow::Borrowed(
@@ -453,7 +438,7 @@ pub const invalid_reified: Error =
 pub fn reified_in_invalid_classish(s: &str) -> Error {
     Cow::Owned(format!(
         "Invalid to use a reified type within {}'s type parameters",
-        s.to_string(),
+        s
     ))
 }
 pub const shadowing_reified: Error = Cow::Borrowed("You may not shadow a reified parameter");
@@ -508,10 +493,7 @@ pub const lval_as_expression: Error = Cow::Borrowed(
     "Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.",
 );
 pub fn elt_abstract_private(elt: &str) -> Error {
-    Cow::Owned(format!(
-        "Cannot declare abstract {} `private`.",
-        elt.to_string(),
-    ))
+    Cow::Owned(format!("Cannot declare abstract {} `private`.", elt))
 }
 pub const only_soft_allowed: Error = Cow::Borrowed("Only the `__Soft` attribute is allowed here.");
 pub const soft_no_arguments: Error =
@@ -541,18 +523,14 @@ pub const parent_static_prop_decl: Error =
 pub fn error2070(open_tag: &str, close_tag: &str) -> Error {
     Cow::Owned(format!(
         "XHP: mismatched tag: `{}` not the same as `{}`",
-        close_tag.to_string(),
-        open_tag.to_string(),
+        close_tag, open_tag
     ))
 }
 pub fn error2071(s: &str) -> Error {
-    Cow::Owned(format!("Decimal number is too big: `{}`", s.to_string(),))
+    Cow::Owned(format!("Decimal number is too big: `{}`", s))
 }
 pub fn error2072(s: &str) -> Error {
-    Cow::Owned(format!(
-        "Hexadecimal number is too big: `{}`",
-        s.to_string(),
-    ))
+    Cow::Owned(format!("Hexadecimal number is too big: `{}`", s))
 }
 pub const error2073: Error = Cow::Borrowed(concat!(
     "A variadic parameter `...` cannot have a modifier ",
@@ -561,15 +539,12 @@ pub const error2073: Error = Cow::Borrowed(concat!(
 pub fn error2074(call_modifier: &str) -> Error {
     Cow::Owned(format!(
         "An `{}` parameter must not have a default value.",
-        call_modifier.to_string(),
+        call_modifier
     ))
 }
 pub const error2077: Error = Cow::Borrowed("Cannot use empty list");
 pub fn not_allowed_in_write(what: &str) -> Error {
-    Cow::Owned(format!(
-        "{} is not allowed in write context",
-        what.to_string(),
-    ))
+    Cow::Owned(format!("{} is not allowed in write context", what))
 }
 pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign `$this`");
 pub const enum_elem_name_is_class: Error = Cow::Borrowed("Enum element cannot be named `class`");
@@ -586,8 +561,7 @@ pub const const_static_prop_init: Error =
 pub fn namespace_name_is_already_in_use(name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot use namespace `{}` as `{}` because the name is already in use",
-        name.to_string(),
-        short_name.to_string()
+        name, short_name
     ))
 }
 pub const strict_namespace_hh: Error = Cow::Borrowed(concat!(
@@ -598,9 +572,7 @@ pub const strict_namespace_hh: Error = Cow::Borrowed(concat!(
 pub fn name_is_already_in_use_hh(line_num: isize, name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot use `{}` as `{}` because the name was explicitly used earlier via a `use` statement on line {}",
-        name.to_string(),
-        short_name.to_string(),
-        line_num.to_string(),
+        name, short_name, line_num
     ))
 }
 pub fn name_is_already_in_use_implicit_hh(line_num: isize, name: &str, short_name: &str) -> Error {
@@ -610,38 +582,32 @@ pub fn name_is_already_in_use_implicit_hh(line_num: isize, name: &str, short_nam
             "; implicit use of names from the HH namespace can be suppressed by adding an explicit",
             " `use` statement earlier in the current namespace block",
         ),
-        name.to_string(),
-        short_name.to_string(),
-        line_num.to_string(),
+        name, short_name, line_num
     ))
 }
 pub fn name_is_already_in_use_php(name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot use `{}` as `{}` because the name is already in use",
-        name.to_string(),
-        short_name.to_string(),
+        name, short_name,
     ))
 }
 pub const original_definition: Error = Cow::Borrowed("Original definition");
 pub fn function_name_is_already_in_use(name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot use function `{}` as `{}` because the name is already in use",
-        name.to_string(),
-        short_name.to_string(),
+        name, short_name
     ))
 }
 pub fn const_name_is_already_in_use(name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot use const `{}` as `{}` because the name is already in use",
-        name.to_string(),
-        short_name.to_string(),
+        name, short_name
     ))
 }
 pub fn type_name_is_already_in_use(name: &str, short_name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot use type `{}` as `{}` because the name is already in use",
-        name.to_string(),
-        short_name.to_string(),
+        name, short_name
     ))
 }
 pub const namespace_decl_first_statement: Error = Cow::Borrowed(
@@ -658,18 +624,14 @@ pub const no_async_before_lambda_body: Error =
 pub fn invalid_number_of_args(name: &str, n: usize) -> Error {
     Cow::Owned(format!(
         "Method `{}` must take exactly {} arguments",
-        name.to_string(),
-        n.to_string(),
+        name, n,
     ))
 }
 pub fn invalid_inout_args(name: &str) -> Error {
-    Cow::Owned(format!(
-        "Method `{}` cannot take inout arguments",
-        name.to_string(),
-    ))
+    Cow::Owned(format!("Method `{}` cannot take inout arguments", name))
 }
 pub fn redeclaration_error(name: &str) -> Error {
-    Cow::Owned(format!("Cannot redeclare `{}`", name.to_string(),))
+    Cow::Owned(format!("Cannot redeclare `{}`", name))
 }
 pub fn declared_name_is_already_in_use_implicit_hh(
     line_num: usize,
@@ -682,8 +644,7 @@ pub fn declared_name_is_already_in_use_implicit_hh(
             "implicit use of names from the HH namespace can be suppressed by adding an explicit ",
             "`use` statement earlier in the current namespace block",
         ),
-        name.to_string(),
-        line_num.to_string(),
+        name, line_num
     ))
 }
 pub fn declared_name_is_already_in_use(line_num: usize, name: &str, _short_name: &str) -> Error {
@@ -692,8 +653,7 @@ pub fn declared_name_is_already_in_use(line_num: usize, name: &str, _short_name:
             "Cannot declare `{}` because the name was explicitly used earlier via a `use` ",
             "statement on line {}",
         ),
-        name.to_string(),
-        line_num.to_string(),
+        name, line_num
     ))
 }
 pub const sealed_val_not_classname: Error =
@@ -710,10 +670,7 @@ pub const using_st_function_scoped_top_level: Error = Cow::Borrowed(concat!(
 ));
 pub const double_variadic: Error = Cow::Borrowed("Parameter redundantly marked as variadic `...`.");
 pub fn conflicting_trait_require_clauses(name: &str) -> Error {
-    Cow::Owned(format!(
-        "Conflicting requirements for `{}`",
-        name.to_string(),
-    ))
+    Cow::Owned(format!("Conflicting requirements for `{}`", name))
 }
 pub const shape_type_ellipsis_without_trailing_comma: Error =
     Cow::Borrowed("A comma is required before the `...` in a shape type");
@@ -728,19 +685,16 @@ pub const this_in_static: Error =
 pub fn async_magic_method(name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot declare constructors and magic methods like `{}` as `async`",
-        name.to_string(),
+        name
     ))
 }
 pub fn unsupported_magic_method(name: &str) -> Error {
-    Cow::Owned(format!(
-        "Magic `{}` methods are no longer supported",
-        name.to_string(),
-    ))
+    Cow::Owned(format!("Magic `{}` methods are no longer supported", name))
 }
 pub fn reserved_keyword_as_class_name(class_name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot use `{}` as class name as it is reserved",
-        class_name.to_string(),
+        class_name
     ))
 }
 pub const xhp_class_multiple_category_decls: Error =
@@ -776,7 +730,7 @@ pub fn class_with_abstract_method(name: &str) -> Error {
             "Class `{}` contains an abstract method and must ",
             "therefore be declared `abstract`",
         ),
-        name.to_string(),
+        name
     ))
 }
 pub const interface_has_private_method: Error =
@@ -784,39 +738,35 @@ pub const interface_has_private_method: Error =
 pub fn redeclaration_of_function(name: &str, loc: &str) -> Error {
     Cow::Owned(format!(
         "Cannot redeclare `{}()` (previously declared in {})",
-        name.to_string(),
-        loc.to_string()
+        name, loc
     ))
 }
 pub fn redeclaration_of_method(name: &str) -> Error {
-    Cow::Owned(format!("Redeclared method `{}`", name.to_string(),))
+    Cow::Owned(format!("Redeclared method `{}`", name,))
 }
 pub fn self_or_parent_colon_colon_class_outside_of_class(name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot access `{}::class` when no class scope is active",
-        name.to_string(),
+        name,
     ))
 }
 pub fn invalid_is_as_expression_hint(n: &str, hint: &str) -> Error {
     Cow::Owned(format!(
         "`{}` typehints cannot be used with `{}` expressions",
-        hint.to_string(),
-        n.to_string(),
+        hint, n,
     ))
 }
 pub const elvis_operator_space: Error = Cow::Borrowed("An Elvis operator `?:` is expected here.");
 pub fn clone_takes_no_arguments(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
         "Method `{}::{}` cannot accept any arguments",
-        class_name.to_string(),
-        method_name.to_string(),
+        class_name, method_name
     ))
 }
 pub fn clone_cannot_be_static(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
         "Clone method `{}::{}()` cannot be static",
-        class_name.to_string(),
-        method_name.to_string(),
+        class_name, method_name
     ))
 }
 pub const namespace_not_a_classname: Error =
@@ -829,17 +779,16 @@ pub const interface_implements: Error =
 pub const memoize_on_lambda: Error =
     Cow::Borrowed("`<<__Memoize>>` attribute is not allowed on lambdas or anonymous functions.");
 pub fn declared_final(elt: &str) -> Error {
-    Cow::Owned(format!("{} cannot be declared `final`.", elt.to_string(),))
+    Cow::Owned(format!("{} cannot be declared `final`.", elt))
 }
 pub fn invalid_xhp_classish(elt: &str) -> Error {
-    Cow::Owned(format!("{} are not valid xhp classes.", elt.to_string(),))
+    Cow::Owned(format!("{} are not valid xhp classes.", elt))
 }
 pub const empty_method_name: Error = Cow::Borrowed("Expected a method name");
 pub fn lowering_parsing_error(text: &str, syntax: &str) -> Error {
     Cow::Owned(format!(
         "Encountered unexpected text `{}`, was expecting a {}.",
-        text.to_string(),
-        syntax.to_string(),
+        text, syntax
     ))
 }
 pub const xhp_class_attribute_type_constant: Error =
@@ -852,22 +801,15 @@ pub const cannot_unset_this: Error = Cow::Borrowed("`$this` cannot be unset");
 pub const invalid_await_position_pipe: Error =
     Cow::Borrowed("`await` cannot be used as an expression right of a pipe operator.");
 pub fn invalid_modifier_for_declaration(decl: &str, modifier: &str) -> Error {
-    Cow::Owned(format!(
-        "{} cannot be declared `{}`",
-        decl.to_string(),
-        modifier.to_string(),
-    ))
+    Cow::Owned(format!("{} cannot be declared `{}`", decl, modifier))
 }
 pub fn duplicate_modifiers_for_declaration(decl: &str) -> Error {
-    Cow::Owned(format!(
-        "{} cannot have duplicate modifiers",
-        decl.to_string(),
-    ))
+    Cow::Owned(format!("{} cannot have duplicate modifiers", decl))
 }
 pub fn multiple_visibility_modifiers_for_declaration(decl: &str) -> Error {
     Cow::Owned(format!(
         "{} cannot have multiple visibility modifiers",
-        decl.to_string(),
+        decl,
     ))
 }
 pub const break_continue_n_not_supported: Error =
@@ -875,8 +817,7 @@ pub const break_continue_n_not_supported: Error =
 pub fn invalid_typehint_alias(alias: &str, hint: &str) -> Error {
     Cow::Owned(format!(
         "Invalid type hint `{}`. Use `{}` instead",
-        alias.to_string(),
-        hint.to_string(),
+        alias, hint,
     ))
 }
 
@@ -899,28 +840,22 @@ pub const preceding_backslash: Error = Cow::Borrowed("Unnecessary preceding back
 pub fn multiple_entrypoints(loc: &str) -> Error {
     Cow::Owned(format!(
         "Only one `__EntryPoint` annotation is permitted per file (previous `__EntryPoint` annotation in {})",
-        loc.to_string()
+        loc
     ))
 }
 
 pub fn cannot_use_feature(feature: &str) -> Error {
-    Cow::Owned(format!(
-        "Cannot use unstable feature: `{}`",
-        feature.to_string()
-    ))
+    Cow::Owned(format!("Cannot use unstable feature: `{}`", feature))
 }
 
 pub fn cannot_enable_unstable_feature(message: &str) -> Error {
-    Cow::Owned(format!(
-        "Cannot enable unstable feature: {}",
-        message.to_string()
-    ))
+    Cow::Owned(format!("Cannot enable unstable feature: {}", message))
 }
 
 pub fn invalid_use_of_enable_unstable_feature(message: &str) -> Error {
     Cow::Owned(format!(
         "This is an invalid use of `__EnableUnstableFeatures` because {}",
-        message.to_string()
+        message
     ))
 }
 
@@ -932,10 +867,7 @@ pub const invalid_enum_class_enumerator: Error = Cow::Borrowed("Invalid enum cla
 pub fn fun_disabled(func_name: &str) -> Error {
     Cow::Owned(format!(
         "`fun()` is disabled; switch to first-class references like `{}<>`",
-        func_name
-            .trim_end_matches('\'')
-            .trim_start_matches('\'')
-            .to_string()
+        func_name.trim_end_matches('\'').trim_start_matches('\'')
     ))
 }
 
@@ -947,43 +879,42 @@ pub const class_meth_disabled: Error =
 pub fn ctx_var_invalid_parameter(param_name: &str) -> Error {
     Cow::Owned(format!(
         "Could not find parameter {} for dependent context",
-        param_name.to_string()
+        param_name
     ))
 }
 
 pub fn ctx_var_missing_type_hint(param_name: &str) -> Error {
     Cow::Owned(format!(
         "Parameter {} used for dependent context must have a type hint",
-        param_name.to_string()
+        param_name
     ))
 }
 
 pub fn ctx_var_variadic(param_name: &str) -> Error {
     Cow::Owned(format!(
         "Parameter {} used for dependent context cannot be variadic",
-        param_name.to_string()
+        param_name
     ))
 }
 
 pub fn ctx_var_invalid_type_hint(param_name: &str) -> Error {
     Cow::Owned(format!(
         "Type hint for parameter {} used for dependent context must be a class or a generic",
-        param_name.to_string()
+        param_name
     ))
 }
 
 pub fn ctx_fun_invalid_type_hint(param_name: &str) -> Error {
     Cow::Owned(format!(
         "Type hint for parameter {} used for contextful function must be a function type hint whose context is exactly `[_]`, e.g. `(function (ts)[_]: t)`",
-        param_name.to_string()
+        param_name
     ))
 }
 
 pub fn ctx_generic_invalid(tparam_name: &str, ctx: String) -> Error {
     Cow::Owned(format!(
         "Type parameter {} used for dependent context {} must be reified",
-        tparam_name.to_string(),
-        ctx
+        tparam_name, ctx
     ))
 }
 
@@ -1020,28 +951,28 @@ pub const as_mut_single_argument: Error =
 pub fn out_of_int_range(int: &str) -> Error {
     Cow::Owned(format!(
         "{} is out of the range of 64-bit float values",
-        int.to_string(),
+        int,
     ))
 }
 
 pub fn out_of_float_range(float: &str) -> Error {
     Cow::Owned(format!(
         "{} is out of the range of 64-bit float values",
-        float.to_string(),
+        float,
     ))
 }
 
 pub fn user_ctx_should_be_caps(ctx_name: &str) -> Error {
     Cow::Owned(format!(
         "Context {} should begin with an uppercase letter",
-        ctx_name.to_string()
+        ctx_name
     ))
 }
 
 pub fn user_ctx_require_as(ctx_name: &str) -> Error {
     Cow::Owned(format!(
         "Context {} must declare a context constraint e.g. `as [write_props]`",
-        ctx_name.to_string()
+        ctx_name
     ))
 }
 
@@ -1055,9 +986,7 @@ pub const assign_readonly_to_mutable_collection: Error = Cow::Borrowed(
 pub fn invalid_readonly(r1: &str, r2: &str, reason: &str) -> Error {
     Cow::Owned(format!(
         "This expression is {}, but we expected a {} value because {}",
-        r1.to_string(),
-        r2.to_string(),
-        reason.to_string()
+        r1, r2, reason
     ))
 }
 

@@ -871,7 +871,6 @@ std::string RuntimeOption::AutoloadDBGroup;
 std::string RuntimeOption::AutoloadLogging;
 std::vector<std::string> RuntimeOption::AutoloadExcludedRepos;
 bool RuntimeOption::AutoloadLoggingAllowPropagation;
-bool RuntimeOption::AutoloadEnforceOneDefinitionRule = true;
 bool RuntimeOption::AutoloadRethrowExceptions = true;
 std::string RuntimeOption::FileCache;
 std::string RuntimeOption::DefaultDocument;
@@ -2467,8 +2466,6 @@ void RuntimeOption::Load(
     Config::Bind(AutoloadExcludedRepos, ini, config, "Autoload.ExcludedRepos");
     Config::Bind(AutoloadLoggingAllowPropagation, ini, config,
                  "Autoload.AllowLoggingPropagation", false);
-    Config::Bind(AutoloadEnforceOneDefinitionRule, ini, config,
-                 "Autoload.EnforceOneDefinitionRule", true);
     Config::Bind(AutoloadRethrowExceptions, ini, config,
                  "Autoload.RethrowExceptions", true);
 

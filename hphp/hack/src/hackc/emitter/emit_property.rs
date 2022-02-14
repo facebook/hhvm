@@ -212,11 +212,11 @@ fn expr_requires_deep_init_(expr: &ast::Expr) -> bool {
     expr_requires_deep_init(expr, false)
 }
 
-fn expr_requires_deep_init(expr: &ast::Expr, force_class_init: bool) -> bool {
+fn expr_requires_deep_init(ast::Expr(_, _, expr): &ast::Expr, force_class_init: bool) -> bool {
     use ast::Expr_;
-    use ast_defs::Uop::*;
-    match &expr.2 {
-        Expr_::Unop(e) if e.0 == Uplus || e.0 == Uminus => expr_requires_deep_init_(&e.1),
+    use ast_defs::Uop;
+    match expr {
+        Expr_::Unop(e) if e.0 == Uop::Uplus || e.0 == Uop::Uminus => expr_requires_deep_init_(&e.1),
         Expr_::Binop(e) => expr_requires_deep_init_(&e.1) || expr_requires_deep_init_(&e.2),
         Expr_::Lvar(_)
         | Expr_::Null

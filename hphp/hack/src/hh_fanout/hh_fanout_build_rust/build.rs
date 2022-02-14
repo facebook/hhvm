@@ -29,7 +29,7 @@ impl EdgesDir {
             .map(|res| {
                 res.and_then(|entry| {
                     let path = entry.path();
-                    if path.extension().and_then(|x| x.to_str()) == Some(&"bin") {
+                    if path.extension().and_then(|x| x.to_str()) == Some("bin") {
                         let fh = fs::OpenOptions::new().read(true).open(&entry.path())?;
                         Ok(Some(BufReader::new(fh)))
                     } else {
@@ -145,7 +145,7 @@ impl Edges {
                     for x in dependents.iter() {
                         dependents_vec.push(*x);
                     }
-                    dependents_vec.sort();
+                    dependents_vec.sort_unstable();
                     new_map.insert(*dependency, dependents_vec);
                 }
                 new_map
@@ -158,7 +158,7 @@ impl Edges {
         for hash_set in self.hashes.iter() {
             hash_set.lock().iter().copied().for_each(|h| hashes.push(h));
         }
-        hashes.sort();
+        hashes.sort_unstable();
         hashes
     }
 

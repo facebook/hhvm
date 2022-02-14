@@ -531,11 +531,6 @@ pub enum ObjNullFlavor {
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructCall<'arena> {
-    NewObj,
-    NewObjR,
-    NewObjD(ClassId<'arena>),
-    NewObjRD(ClassId<'arena>),
-    NewObjS(SpecialClsRef),
     FCallClsMethod {
         fcall_args: FcallArgs<'arena>,
         log: IsLogAsDynamicCallOp,
@@ -571,14 +566,19 @@ pub enum InstructCall<'arena> {
     },
 }
 
+#[derive(Clone, Debug)]
+#[repr(C)]
+pub enum InstructNew<'arena> {
+    NewObj,
+    NewObjR,
+    NewObjD(ClassId<'arena>),
+    NewObjRD(ClassId<'arena>),
+    NewObjS(SpecialClsRef),
+}
+
 impl<'arena> InstructCall<'arena> {
-    pub fn fcall_args(&self) -> Option<&FcallArgs<'arena>> {
+    pub fn fcall_args(&self) -> &FcallArgs<'arena> {
         match self {
-            Self::NewObj
-            | Self::NewObjR
-            | Self::NewObjD(_)
-            | Self::NewObjRD(_)
-            | Self::NewObjS(_) => None,
             Self::FCallClsMethod { fcall_args, .. }
             | Self::FCallClsMethodD { fcall_args, .. }
             | Self::FCallClsMethodS { fcall_args, .. }
@@ -587,17 +587,12 @@ impl<'arena> InstructCall<'arena> {
             | Self::FCallFunc(fcall_args)
             | Self::FCallFuncD { fcall_args, .. }
             | Self::FCallObjMethod { fcall_args, .. }
-            | Self::FCallObjMethodD { fcall_args, .. } => Some(fcall_args),
+            | Self::FCallObjMethodD { fcall_args, .. } => fcall_args,
         }
     }
 
-    pub fn fcall_args_mut(&mut self) -> Option<&mut FcallArgs<'arena>> {
+    pub fn fcall_args_mut(&mut self) -> &mut FcallArgs<'arena> {
         match self {
-            Self::NewObj
-            | Self::NewObjR
-            | Self::NewObjD(_)
-            | Self::NewObjRD(_)
-            | Self::NewObjS(_) => None,
             Self::FCallClsMethod { fcall_args, .. }
             | Self::FCallClsMethodD { fcall_args, .. }
             | Self::FCallClsMethodS { fcall_args, .. }
@@ -606,22 +601,16 @@ impl<'arena> InstructCall<'arena> {
             | Self::FCallFunc(fcall_args)
             | Self::FCallFuncD { fcall_args, .. }
             | Self::FCallObjMethod { fcall_args, .. }
-            | Self::FCallObjMethodD { fcall_args, .. } => Some(fcall_args),
+            | Self::FCallObjMethodD { fcall_args, .. } => fcall_args,
         }
     }
 
     pub fn targets(&self) -> &[Label] {
-        match self.fcall_args() {
-            Some(fcall_args) => fcall_args.targets(),
-            None => &[],
-        }
+        self.fcall_args().targets()
     }
 
     pub fn targets_mut(&mut self) -> &mut [Label] {
-        match self.fcall_args_mut() {
-            Some(fcall_args) => fcall_args.targets_mut(),
-            None => &mut [],
-        }
+        self.fcall_args_mut().targets_mut()
     }
 }
 
@@ -936,26 +925,27 @@ pub struct SrcLoc {
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum Instruct<'arena> {
-    IBasic(InstructBasic),
-    IIterator(InstructIterator<'arena>),
-    ILitConst(InstructLitConst<'arena>),
-    IOp(InstructOperator<'arena>),
-    IContFlow(InstructControlFlow<'arena>),
-    ISpecialFlow(InstructSpecialFlow),
-    ICall(InstructCall<'arena>),
-    IMisc(InstructMisc<'arena>),
-    IGet(InstructGet<'arena>),
-    IMutator(InstructMutator<'arena>),
-    IIsset(InstructIsset<'arena>),
-    IBase(InstructBase<'arena>),
-    IFinal(InstructFinal<'arena>),
-    ILabel(Label),
-    ITry(InstructTry),
-    IComment(Str<'arena>),
-    ISrcLoc(SrcLoc),
-    IAsync(AsyncFunctions<'arena>),
-    IGenerator(GenCreationExecution),
-    IIncludeEvalDefine(InstructIncludeEvalDefine),
+    Basic(InstructBasic),
+    Iterator(InstructIterator<'arena>),
+    LitConst(InstructLitConst<'arena>),
+    Op(InstructOperator<'arena>),
+    ContFlow(InstructControlFlow<'arena>),
+    SpecialFlow(InstructSpecialFlow),
+    Call(InstructCall<'arena>),
+    New(InstructNew<'arena>),
+    Misc(InstructMisc<'arena>),
+    Get(InstructGet<'arena>),
+    Mutator(InstructMutator<'arena>),
+    Isset(InstructIsset<'arena>),
+    Base(InstructBase<'arena>),
+    Final(InstructFinal<'arena>),
+    Label(Label),
+    Try(InstructTry),
+    Comment(Str<'arena>),
+    SrcLoc(SrcLoc),
+    Async(AsyncFunctions<'arena>),
+    Generator(GenCreationExecution),
+    IncludeEvalDefine(InstructIncludeEvalDefine),
 }
 
 impl Instruct<'_> {
@@ -963,29 +953,30 @@ impl Instruct<'_> {
     /// This excludes the Label in an ILabel instruction, which is not a conditional branch.
     pub fn targets(&self) -> &[Label] {
         match self {
-            Self::ICall(x) => x.targets(),
-            Self::IContFlow(x) => x.targets(),
-            Self::IIterator(x) => x.targets(),
-            Self::IMisc(x) => x.targets(),
+            Self::Call(x) => x.targets(),
+            Self::ContFlow(x) => x.targets(),
+            Self::Iterator(x) => x.targets(),
+            Self::Misc(x) => x.targets(),
 
             // Make sure new variants with branch target Labels are handled above
             // before adding items to this catch-all.
-            Self::IBasic(_)
-            | Self::ILitConst(_)
-            | Self::IOp(_)
-            | Self::ISpecialFlow(_)
-            | Self::IGet(_)
-            | Self::IMutator(_)
-            | Self::IIsset(_)
-            | Self::IBase(_)
-            | Self::IFinal(_)
-            | Self::ILabel(_)
-            | Self::ITry(_)
-            | Self::IComment(_)
-            | Self::ISrcLoc(_)
-            | Self::IAsync(_)
-            | Self::IGenerator(_)
-            | Self::IIncludeEvalDefine(_) => &[],
+            Self::Basic(_)
+            | Self::LitConst(_)
+            | Self::Op(_)
+            | Self::SpecialFlow(_)
+            | Self::New(_)
+            | Self::Get(_)
+            | Self::Mutator(_)
+            | Self::Isset(_)
+            | Self::Base(_)
+            | Self::Final(_)
+            | Self::Label(_)
+            | Self::Try(_)
+            | Self::Comment(_)
+            | Self::SrcLoc(_)
+            | Self::Async(_)
+            | Self::Generator(_)
+            | Self::IncludeEvalDefine(_) => &[],
         }
     }
 
@@ -993,29 +984,30 @@ impl Instruct<'_> {
     /// This excludes the Label in an ILabel instruction, which is not a conditional branch.
     pub fn targets_mut(&mut self) -> &mut [Label] {
         match self {
-            Self::ICall(x) => x.targets_mut(),
-            Self::IContFlow(x) => x.targets_mut(),
-            Self::IIterator(x) => x.targets_mut(),
-            Self::IMisc(x) => x.targets_mut(),
+            Self::Call(x) => x.targets_mut(),
+            Self::ContFlow(x) => x.targets_mut(),
+            Self::Iterator(x) => x.targets_mut(),
+            Self::Misc(x) => x.targets_mut(),
 
             // Make sure new variants with branch target Labels are handled above
             // before adding items to this catch-all.
-            Self::IBasic(_)
-            | Self::ILitConst(_)
-            | Self::IOp(_)
-            | Self::ISpecialFlow(_)
-            | Self::IGet(_)
-            | Self::IMutator(_)
-            | Self::IIsset(_)
-            | Self::IBase(_)
-            | Self::IFinal(_)
-            | Self::ILabel(_)
-            | Self::ITry(_)
-            | Self::IComment(_)
-            | Self::ISrcLoc(_)
-            | Self::IAsync(_)
-            | Self::IGenerator(_)
-            | Self::IIncludeEvalDefine(_) => &mut [],
+            Self::Basic(_)
+            | Self::LitConst(_)
+            | Self::Op(_)
+            | Self::SpecialFlow(_)
+            | Self::New(_)
+            | Self::Get(_)
+            | Self::Mutator(_)
+            | Self::Isset(_)
+            | Self::Base(_)
+            | Self::Final(_)
+            | Self::Label(_)
+            | Self::Try(_)
+            | Self::Comment(_)
+            | Self::SrcLoc(_)
+            | Self::Async(_)
+            | Self::Generator(_)
+            | Self::IncludeEvalDefine(_) => &mut [],
         }
     }
 }

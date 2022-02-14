@@ -65,12 +65,10 @@ impl Env {
 
     fn elaborate_type_name(&self, id: &mut Id) {
         let name = &id.1;
-        if self.type_params.contains::<str>(name)
-            || is_special_identifier(name)
-            || name.starts_with("$")
+        if !self.type_params.contains::<str>(name)
+            && !is_special_identifier(name)
+            && !name.starts_with('$')
         {
-            return;
-        } else {
             id.1 =
                 namespaces::elaborate_id(&self.namespace, namespaces::ElaborateKind::Class, id).1;
         }
@@ -86,7 +84,7 @@ impl Env {
                     {
                         match &args[0].1 {
                             Expr(_, p, Expr_::String(fn_name)) => {
-                                let fn_name = core_utils::add_ns_bstr(&fn_name);
+                                let fn_name = core_utils::add_ns_bstr(fn_name);
                                 args[0].1 =
                                     Expr((), p.clone(), Expr_::String(fn_name.into_owned().into()));
                             }
@@ -101,7 +99,7 @@ impl Env {
                     {
                         match &args[0].1 {
                             Expr(_, p, Expr_::String(cl_name)) => {
-                                let cl_name = core_utils::add_ns_bstr(&cl_name);
+                                let cl_name = core_utils::add_ns_bstr(cl_name);
                                 args[0].1 =
                                     Expr((), p.clone(), Expr_::String(cl_name.into_owned().into()));
                             }
@@ -118,7 +116,7 @@ impl Env {
 
 fn is_reserved_type_hint(name: &str) -> bool {
     let base_name = core_utils::strip_ns(name);
-    return sn::typehints::is_reserved_type_hint(&base_name);
+    sn::typehints::is_reserved_type_hint(base_name)
 }
 
 struct ElaborateNamespacesVisitor {}
@@ -386,7 +384,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
 pub fn elaborate_program(e: ocamlrep::rc::RcOc<namespace_env::Env>, defs: &mut Program) {
     let mut env = Env::make(e);
     let mut visitor = ElaborateNamespacesVisitor {};
-    for mut def in defs.into_iter() {
-        visitor.visit_def(&mut env, &mut def).unwrap();
+    for def in defs {
+        visitor.visit_def(&mut env, def).unwrap();
     }
 }

@@ -24,8 +24,8 @@ fn rewrite_typed_value<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     instr: &mut Instruct<'arena>,
 ) -> std::result::Result<(), instruction_sequence::Error> {
-    if let Instruct::ILitConst(InstructLitConst::TypedValue(tv)) = instr {
-        *instr = Instruct::ILitConst(match &tv {
+    if let Instruct::LitConst(InstructLitConst::TypedValue(tv)) = instr {
+        *instr = Instruct::LitConst(match &tv {
             TypedValue::Uninit => {
                 return Err(Error::Unrecoverable("rewrite_typed_value: uninit".into()));
             }

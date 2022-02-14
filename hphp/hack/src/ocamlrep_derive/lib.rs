@@ -111,24 +111,24 @@ fn derive_from_ocamlrep_in(mut s: synstructure::Structure<'_>) -> TokenStream {
 
 fn to_ocamlrep_body(s: &synstructure::Structure<'_>) -> TokenStream {
     match &s.ast().data {
-        syn::Data::Struct(struct_data) => struct_to_ocamlrep(&s, struct_data),
-        syn::Data::Enum(_) => enum_to_ocamlrep(&s, collect_enum_variants(&s)),
+        syn::Data::Struct(struct_data) => struct_to_ocamlrep(s, struct_data),
+        syn::Data::Enum(_) => enum_to_ocamlrep(s, collect_enum_variants(s)),
         syn::Data::Union(_) => panic!("untagged unions not supported"),
     }
 }
 
 fn from_ocamlrep_body(s: &synstructure::Structure<'_>) -> TokenStream {
     match &s.ast().data {
-        syn::Data::Struct(struct_data) => struct_from_ocamlrep(&s, struct_data, false),
-        syn::Data::Enum(_) => enum_from_ocamlrep(collect_enum_variants(&s), false),
+        syn::Data::Struct(struct_data) => struct_from_ocamlrep(s, struct_data, false),
+        syn::Data::Enum(_) => enum_from_ocamlrep(collect_enum_variants(s), false),
         syn::Data::Union(_) => panic!("untagged unions not supported"),
     }
 }
 
 fn from_ocamlrep_in_body(s: &synstructure::Structure<'_>) -> TokenStream {
     match &s.ast().data {
-        syn::Data::Struct(struct_data) => struct_from_ocamlrep(&s, struct_data, true),
-        syn::Data::Enum(_) => enum_from_ocamlrep(collect_enum_variants(&s), true),
+        syn::Data::Struct(struct_data) => struct_from_ocamlrep(s, struct_data, true),
+        syn::Data::Enum(_) => enum_from_ocamlrep(collect_enum_variants(s), true),
         syn::Data::Union(_) => panic!("untagged unions not supported"),
     }
 }
@@ -200,7 +200,7 @@ fn collect_enum_variants<'a>(s: &'a synstructure::Structure<'_>) -> EnumVariants
     let mut nullary_variants = vec![];
     let mut block_variants = vec![];
     for variant in s.variants().iter() {
-        if variant.bindings().len() == 0 {
+        if variant.bindings().is_empty() {
             nullary_variants.push((variant, nullary_variants.len() as isize));
         } else {
             block_variants.push((variant, block_variants.len() as isize));

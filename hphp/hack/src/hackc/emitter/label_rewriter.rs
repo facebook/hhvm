@@ -15,7 +15,7 @@ fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<Id
     let (_, map) = instrseq.iter().fold(
         (0, HashMap::default()),
         |(i, mut map): (usize, HashMap<Id, usize>), instr: &Instruct<'arena>| match instr {
-            Instruct::ILabel(l) => {
+            Instruct::Label(l) => {
                 map.insert(*l.id(), i);
                 (i, map)
             }
@@ -68,7 +68,7 @@ where
     F: FnMut(&mut Label),
 {
     let labels = match instr {
-        Instruct::ILabel(label) => std::slice::from_mut(label),
+        Instruct::Label(label) => std::slice::from_mut(label),
         _ => instr.targets_mut(),
     };
     for label in labels {
@@ -86,7 +86,7 @@ fn rewrite_params_and_body<'arena>(
 ) {
     let relabel_id = |id: &Id| -> Id { refs[&defs[id]] };
     let mut rewrite_instr = |instr: &mut Instruct<'arena>| -> bool {
-        if let Instruct::ILabel(ref mut l) = instr {
+        if let Instruct::Label(ref mut l) = instr {
             if used.contains(l.id()) {
                 *l = l.map(relabel_id);
                 true
@@ -122,7 +122,7 @@ pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(
     block: &mut InstrSeq<'arena>,
 ) {
     let regular_labels = block.iter().fold(HashMap::default(), |mut acc, instr| {
-        if let Instruct::ILabel(Label::Regular(id)) = instr {
+        if let Instruct::Label(Label::Regular(id)) = instr {
             acc.insert(*id, emitter.label_gen_mut().next_regular());
         }
         acc

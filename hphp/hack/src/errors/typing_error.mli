@@ -8,6 +8,69 @@
 
 module Error_code = Error_codes.Typing
 
+module Eval_result : sig
+  (* The type representing the result of evaluating a `Typing_error.t` to
+     some atomic result type `'a` whilst retaining information about
+     intersections of errors *)
+  type 'a t
+
+  (* Given some predicate telling us whether an atomic error is suppressed,
+     filter the result to ensure that we don't report intersections of errors
+     where at least one error would not be reported (meaning that none should
+     be reported).
+
+     If there is some component of the  result which is suppressed, we will
+     get at most one atomic result back. If not, we may get back arbitrary
+     intersections of errors.
+
+     examples
+
+     1) suppress_intersection
+         (Intersect
+           [ Intersect
+               [ Intersect
+                  [ Single 2
+                  ; Single 3
+                  ]
+                ; Single 1
+                ]
+            ; Single 4
+            ]
+          ) ~is_suppressed:(fun x -> x = 2)
+          === Single 2
+
+      2) suppress_intersection (Single 2) ~is_suppressed:(fun x -> x = 2)
+         === Single 2
+
+
+      3) suppress_intersection
+          ( Intersect
+             [ Single 1
+             ; Intersect
+                [ Single 3
+                ; Intersect
+                   [ Single 4
+                   ; Single 5
+                   ]
+                ]
+             ]
+          )  ~is_suppressed:(fun x -> x = 2)
+          === Intersect
+                [ Single 1
+                ; Intersect
+                   [ Single 3
+                   ; Intersect
+                      [ Single 4
+                      ; Single 5
+                      ]
+                   ]
+                ]
+  *)
+  val suppress_intersection : 'a t -> is_suppressed:('a -> bool) -> 'a t
+
+  val iter : 'a t -> f:('a -> unit) -> unit
+end
+
 module Error : sig
   type t
 end
@@ -1644,8 +1707,7 @@ module Reasons_callback : sig
     ?quickfixes:Quickfix.t list ->
     t ->
     current_span:Pos.t ->
-    (Pos.t, Pos_or_decl.t) User_error.t option
-
+    (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
   (* -- Constructors -------------------------------------------------------- *)
 
   (** Construct a `Reasons_callback.t` from a side-effecting function. This is
@@ -1813,7 +1875,7 @@ val iter :
 (** Evaluate an error to a `User_error.t` for error reporting; we return an
    option to model ignoring errors *)
 val to_user_error :
-  t -> current_span:Pos.t -> (Pos.t, Pos_or_decl.t) User_error.t option
+  t -> current_span:Pos.t -> (Pos.t, Pos_or_decl.t) User_error.t Eval_result.t
 
 (* -- Constructors -------------------------------------------------------- *)
 
@@ -1862,3 +1924,12 @@ val apply : t -> on_error:Callback.t -> t
     position of the first reason is in the current decl and treating it as a
     claim  *)
 val assert_in_current_decl : Secondary.t -> ctx:Pos_or_decl.ctx -> t
+
+(** Report a list of errors at each type of an intersection *)
+val intersect : t list -> t
+
+(** Report a list of errors at each type of a union*)
+val union : t list -> t
+
+(** Report multiple errors at a single type *)
+val multiple : t list -> t

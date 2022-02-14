@@ -53,7 +53,7 @@ function getmyuid();
 function getopt(string $options, $longopts = null);
 <<__PHPStdLib>>
 function getopt_with_optind(
-  string $options, $longopts vec<string>, inout int $optind): dict<string, mixed>;
+  string $options, ?vec<string> $longopts, inout int $optind): dict<string, mixed>;
 <<__PHPStdLib>>
 function getrusage(int $who = 0);
 <<__PHPStdLib>>

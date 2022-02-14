@@ -180,6 +180,10 @@ class AsyncMysqlConnection {
   public function isReusable(): bool { }
   public function lastActivityTime(): float { }
   public function connectResult(): ?AsyncMysqlConnectResult { }
+  public function getSslCertCn(): string { }
+  public function getSslCertSan(): Vector<string> { }
+  public function getSslCertExtensions(): Vector<string> { }
+  public function isSslCertValidationEnforced(): bool { }
 }
 
 abstract class AsyncMysqlResult {

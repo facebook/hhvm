@@ -1185,6 +1185,46 @@ static Variant HHVM_METHOD(AsyncMysqlConnection, releaseConnection) {
                               raw_connection)));
 }
 
+static String HHVM_METHOD(AsyncMysqlConnection, getSslCertCn) {
+  auto* data = Native::data<AsyncMysqlConnection>(this_);
+  const auto* context = data->m_conn->getConnectionContext();
+  if (context && context->sslCertCn.hasValue()) {
+    return context->sslCertCn.value();
+  } else {
+    return String();
+  }
+}
+
+static Object HHVM_METHOD(AsyncMysqlConnection, getSslCertSan) {
+  auto* data = Native::data<AsyncMysqlConnection>(this_);
+  auto ret = req::make<c_Vector>();
+  const auto* context = data->m_conn->getConnectionContext();
+  if (context && context->sslCertSan.hasValue()) {
+    for (const auto& san: context->sslCertSan.value()) {
+      ret->add(Variant(san));
+    }
+  }
+  return Object(std::move(ret));
+}
+
+static Object HHVM_METHOD(AsyncMysqlConnection, getSslCertExtensions) {
+  auto* data = Native::data<AsyncMysqlConnection>(this_);
+  auto ret = req::make<c_Vector>();
+  const auto* context = data->m_conn->getConnectionContext();
+  if (context && context->sslCertIdentities.hasValue()) {
+    for (const auto& id: context->sslCertIdentities.value()) {
+      ret->add(Variant(id));
+    }
+  }
+  return Object(std::move(ret));
+}
+
+static bool HHVM_METHOD(AsyncMysqlConnection, isSslCertValidationEnforced) {
+  auto* data = Native::data<AsyncMysqlConnection>(this_);
+  const auto* context = data->m_conn->getConnectionContext();
+  return context && context->isServerCertValidated;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlResult
 
@@ -2142,6 +2182,10 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlConnection, isReusable);
     HHVM_ME(AsyncMysqlConnection, connectResult);
     HHVM_ME(AsyncMysqlConnection, lastActivityTime);
+    HHVM_ME(AsyncMysqlConnection, getSslCertCn);
+    HHVM_ME(AsyncMysqlConnection, getSslCertSan);
+    HHVM_ME(AsyncMysqlConnection, getSslCertExtensions);
+    HHVM_ME(AsyncMysqlConnection, isSslCertValidationEnforced);
 
     Native::registerNativeDataInfo<AsyncMysqlConnection>(
         AsyncMysqlConnection::s_className.get(), Native::NDIFlags::NO_COPY);

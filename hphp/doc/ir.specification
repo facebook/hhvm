@@ -1526,7 +1526,7 @@ To string conversions:
 
 8. Call & Return
 
-| BeginInlining<func, offset>, D(FramePtr), S(StkPtr) S(FramePtr), NF
+| BeginInlining<func, offset>, D(FramePtr), S(StkPtr), NF
 
   Marks the start of an inlined function whose stack resides offset cells below
   the SP.

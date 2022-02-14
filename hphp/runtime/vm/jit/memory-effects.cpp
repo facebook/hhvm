@@ -82,40 +82,41 @@ AliasClass livefp(const IRInstruction& inst) {
 // Determine an AliasClass representing any locals in the instruction's frame
 // which might be accessed via debug_backtrace().
 
-const Func* func_from_fp(SSATmp* fp) {
-  if (!fp) return nullptr;
+std::pair<const Func*, uint32_t> func_and_depth_from_fp(SSATmp* fp) {
+  if (!fp) return {nullptr, 0};
   auto fpInst = fp->inst();
-  if (fpInst->is(DefFP)) return fpInst->marker().func();
-  if (fpInst->is(DefFuncEntryFP)) return fpInst->extra<DefFuncEntryFP>()->func;
-  if (fpInst->is(BeginInlining)) return fpInst->extra<BeginInlining>()->func;
-  always_assert(false);
-}
-
-bool any_frame_has_metadata(SSATmp* fp) {
-  while (fp) {
-    auto const func = func_from_fp(fp);
-    if (!func || func->lookupVarId(s_86metadata.get()) != kInvalidId) {
-      return true;
-    }
-    fp = fp->inst()->is(BeginInlining) ? fp->inst()->src(1) : nullptr;
+  if (fpInst->is(DefFP)) return {fpInst->marker().func(), 0};
+  if (fpInst->is(DefFuncEntryFP)) {
+    return {fpInst->extra<DefFuncEntryFP>()->func, 0};
   }
-  return false;
+  if (fpInst->is(BeginInlining)) {
+    auto const extra = fpInst->extra<BeginInlining>();
+    return {extra->func, extra->depth};
+  }
+  always_assert(false);
 }
 
 AliasClass backtrace_locals(const IRInstruction& inst) {
   auto eachFunc = [&] (auto fn) {
     auto ac = AEmpty;
     for (auto fp = inst.marker().fp(); fp; ) {
-      ac |= fn(func_from_fp(fp), fp);
-      fp = fp->inst()->is(BeginInlining) ? fp->inst()->src(1) : nullptr;
+      auto const [func, depth] = func_and_depth_from_fp(fp);
+      ac |= fn(func, depth);
+      if (fp->inst()->is(BeginInlining)) {
+        // Walking the marker fp chain in this manner is suspect, but here we
+        // are careful to only materialize func, depth pair using it.
+        fp = fp->inst()->marker().fp();
+      } else {
+        fp = nullptr;
+      }
     }
     return ac;
   };
 
   auto const addInspectable =
-    [&] (const Func* func, SSATmp* fp) -> AliasClass {
+    [&] (const Func* func, uint32_t depth) -> AliasClass {
       auto const meta = func->lookupVarId(s_86metadata.get());
-      return meta != kInvalidId ? ALocal { fp, (uint32_t)meta } : AEmpty;;
+      return meta != kInvalidId ? ALocal { depth, (uint32_t)meta } : AEmpty;;
     };
 
   // Either there's no func or no frame-pointer. Either way, be conservative and
@@ -124,14 +125,14 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
 
   if (!RuntimeOption::EnableArgsInBacktraces) return eachFunc(addInspectable);
 
-  return eachFunc([&] (const Func* func, SSATmp* fp) {
+  return eachFunc([&] (const Func* func, uint32_t depth) {
     auto ac = AEmpty;
     auto const numParams = func->numParams();
 
     if (func->hasReifiedGenerics()) {
       // First non param local contains reified generics
       AliasIdSet reifiedgenerics{ AliasIdSet::IdRange{numParams, numParams + 1} };
-      ac |= ALocal { fp, reifiedgenerics };
+      ac |= ALocal { depth, reifiedgenerics };
     }
 
     if (func->cls() && func->cls()->hasReifiedGenerics()) {
@@ -140,10 +141,10 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
       ac |= APropAny;
     }
 
-    if (!numParams) return addInspectable(func, fp) | ac;
+    if (!numParams) return addInspectable(func, depth) | ac;
 
     AliasIdSet params{ AliasIdSet::IdRange{0, numParams} };
-    return addInspectable(func, fp) | ac | ALocal { fp, params };
+    return addInspectable(func, depth) | ac | ALocal { depth, params };
   });
 }
 

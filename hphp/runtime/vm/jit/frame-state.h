@@ -139,6 +139,13 @@ struct FrameState {
   std::string show() const;
 
   /*
+   * FrameState Accesors.
+   */
+  SSATmp*     fp()                const { return fpValue; }
+  SSATmp*     fixupFP()           const { return fixupFPValue; }
+  SSATmp*     sp()                const { return spValue; }
+
+  /*
    * Function, instructions are emitted on behalf of. This may be different from
    * the function of the `fpValue` frame, e.g. stublogues run in the context of
    * the caller, but the code is emitted on behalf of the callee.
@@ -335,11 +342,12 @@ struct FrameStateMgr final {
    * FrameState accessors.
    *
    * In the presence of inlining, these return state for the most-inlined
-   * frame.
+   * frame.  Shorthand for accessing the most inlined frame's data eg:
+   *   fs()[fs().inlineDepth()].fp()
    */
-  SSATmp*     fp()                const { return cur().fpValue; }
-  SSATmp*     fixupFP()           const { return cur().fixupFPValue; }
-  SSATmp*     sp()                const { return cur().spValue; }
+  SSATmp*     fp()                const { return cur().fp(); }
+  SSATmp*     fixupFP()           const { return cur().fixupFP(); }
+  SSATmp*     sp()                const { return cur().sp(); }
   SSATmp*     ctx()               const { return cur().ctx; }
   Type        ctxType()           const { return cur().ctxType; }
   SBInvOffset irSPOff()           const { return cur().irSPOff; }
@@ -433,8 +441,16 @@ struct FrameStateMgr final {
    */
   std::string show() const;
 
-  /////////////////////////////////////////////////////////////////////////////
+  FrameState& operator[](size_t depth) {
+    assertx(m_stack.size() > depth);
+    return m_stack[depth];
+  }
+  const FrameState& operator[](size_t depth) const {
+    assertx(m_stack.size() > depth);
+    return m_stack[depth];
+  }
 
+  /////////////////////////////////////////////////////////////////////////////
 private:
   FrameState& cur() {
     assertx(!m_stack.empty());

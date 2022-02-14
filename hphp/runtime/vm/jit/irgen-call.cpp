@@ -241,18 +241,18 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   if (objOrClass == nullptr) objOrClass = cns(env, TNullptr);
   assertx(objOrClass->isA(TNullptr) || objOrClass->isA(TObj|TCls));
 
-  auto curFP = fp(env);
-  auto curBcOff = bcOff(env);
-  while (curFP->inst()->is(BeginInlining)) {
-    curBcOff = curFP->inst()->marker().sk().offset();
-    curFP = curFP->inst()->src(1);
+  auto const pubFP = env.irb->fs()[0].fp();
+  auto pubBcOff = bcOff(env);
+  if (env.irb->fs().inlineDepth()) {
+    auto const firstUnpubFP = env.irb->fs()[1].fp();
+    pubBcOff = firstUnpubFP->inst()->marker().sk().offset();
   }
 
   auto const data = CallData {
     spOffBCFromIRSP(env),
     fca.numArgs,
     fca.numRets - 1,
-    curBcOff,
+    pubBcOff,
     genericsBitmap,
     fca.hasGenerics(),
     fca.hasUnpack(),
@@ -266,7 +266,7 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
     Call,
     data,
     sp(env),
-    curFP,
+    pubFP,
     callee,
     objOrClass,
     curCoeffects(env)

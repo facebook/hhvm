@@ -2283,11 +2283,14 @@ struct ProfileCallTargetData : IRExtraData {
 };
 
 struct BeginInliningData : IRExtraData {
-  BeginInliningData(IRSPRelOffset offset, const Func* func, SrcKey returnSk,
+  BeginInliningData(IRSPRelOffset offset, const Func* func, unsigned depth,
+                    SrcKey returnSk, IRSPRelOffset sbOffset,
                     SBInvOffset returnSPOff, int cost, int numArgs)
     : spOffset(offset)
     , func(func)
+    , depth(depth)
     , returnSk(returnSk)
+    , sbOffset(sbOffset)
     , returnSPOff(returnSPOff)
     , cost(cost)
     , numArgs(numArgs)
@@ -2302,7 +2305,9 @@ struct BeginInliningData : IRExtraData {
     return folly::hash::hash_combine(
       std::hash<int32_t>()(spOffset.offset),
       func->stableHash(),
+      std::hash<unsigned>()(depth),
       SrcKey::StableHasher()(returnSk),
+      std::hash<int32_t>()(sbOffset.offset),
       std::hash<int32_t>()(returnSPOff.offset),
       std::hash<int>()(cost),
       std::hash<int>()(numArgs)
@@ -2311,14 +2316,16 @@ struct BeginInliningData : IRExtraData {
 
   bool equals(const BeginInliningData& o) const {
     return
-      spOffset == o.spOffset && func == o.func &&
-      returnSk == o.returnSk && returnSPOff == o.returnSPOff &&
-      cost == o.cost && numArgs == o.numArgs;
+      spOffset == o.spOffset && func == o.func && depth == o.depth &&
+      returnSk == o.returnSk && sbOffset == o.sbOffset &&
+      returnSPOff == o.returnSPOff && cost == o.cost && numArgs == o.numArgs;
   }
 
   IRSPRelOffset spOffset;  // offset from SP to the bottom of callee's ActRec
   const Func* func;        // inlined function
+  unsigned depth;          // inlining depth
   SrcKey returnSk;         // return SrcKey
+  IRSPRelOffset sbOffset;  // offset from SP to the callee's stack base
   SBInvOffset returnSPOff; // offset from caller's stack base to return slot
   int cost;
   int numArgs;

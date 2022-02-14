@@ -246,23 +246,6 @@ void cgDbgTrashStk(IRLS& env, const IRInstruction* inst) {
   trashFullTV(vmain(env), sp[off],  kTVTrashJITStk);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
-namespace {
-
-const Func* funcFromFp(const SSATmp* fp) {
-  auto inst = fp->inst();
-  assertx(inst->is(DefFP, DefFuncEntryFP, BeginInlining));
-  if (inst->is(DefFP)) return inst->marker().func();
-  if (inst->is(DefFuncEntryFP)) return inst->extra<DefFuncEntryFP>()->func;
-  if (inst->is(BeginInlining)) return inst->extra<BeginInlining>()->func;
-  always_assert(false);
-}
-
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 void cgLdMem(IRLS& env, const IRInstruction* inst) {
   auto const ptr    = inst->src(0);
   auto const ptrLoc = tmpLoc(env, ptr);

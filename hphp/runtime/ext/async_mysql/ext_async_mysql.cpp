@@ -1218,6 +1218,80 @@ Object AsyncMysqlResult::clientStats() {
   return AsyncMysqlClientStats::newInstance(m_clientStats);
 }
 
+//
+// Depending on the scenario finding the link to connection context
+// associated with the operation can be tricky. If the operation
+// completed successfully and there is a valid connection associated
+// with the operation, then we should search for the connection context
+// linked to the connection associated with the operation. In case of
+// failed conneciton (failed ConnectOperation, failed ConnectPoolOperation)
+// there is no connection associated with the operation at the end because
+// we failed to connect. In this case checking for the connection context
+// directly linked to the operation is our best bet.
+//
+static const db::ConnectionContextBase*
+connectionContextFromOperation(const am::Operation* operation) {
+  const db::ConnectionContextBase* context = nullptr;
+  if (auto* connection = operation->connection()) {
+    context = connection->getConnectionContext();
+  }
+  if (!context) {
+    auto* connectOp = dynamic_cast<const am::ConnectOperation*>(operation);
+    if (connectOp) {
+      context = connectOp->getConnectionContext();
+    }
+  }
+  return context;
+}
+
+static String HHVM_METHOD(AsyncMysqlResult, getSslCertCn) {
+  auto* data = Native::data<AsyncMysqlResult>(this_);
+  if (auto* op = data->m_op.get()) {
+    const auto* context = connectionContextFromOperation(op);
+    if (context && context->sslCertCn.hasValue()) {
+      return context->sslCertCn.value();
+    }
+  }
+  return String();
+}
+
+static Object HHVM_METHOD(AsyncMysqlResult, getSslCertSan) {
+  auto* data = Native::data<AsyncMysqlResult>(this_);
+  auto ret = req::make<c_Vector>();
+  if (auto* op = data->m_op.get() ) {
+    const auto* context = connectionContextFromOperation(op);
+    if (context && context->sslCertSan.hasValue()) {
+      for (const auto& san: context->sslCertSan.value()) {
+        ret->add(Variant(san));
+      }
+    }
+  }
+  return Object(std::move(ret));
+}
+
+static Object HHVM_METHOD(AsyncMysqlResult, getSslCertExtensions) {
+  auto* data = Native::data<AsyncMysqlResult>(this_);
+  auto ret = req::make<c_Vector>();
+  if (auto* op = data->m_op.get()) {
+    const auto* context = connectionContextFromOperation(op);
+    if (context && context->sslCertIdentities.hasValue()) {
+      for (const auto& id: context->sslCertIdentities.value()) {
+        ret->add(Variant(id));
+      }
+    }
+  }
+  return Object(std::move(ret));
+}
+
+static bool HHVM_METHOD(AsyncMysqlResult, isSslCertValidationEnforced) {
+  auto* data = Native::data<AsyncMysqlResult>(this_);
+  if (auto* op = data->m_op.get()) {
+    const auto* context = connectionContextFromOperation(op);
+    return context && context->isServerCertValidated;
+  }
+  return false;
+}
+
 #define DEFINE_PROXY_METHOD(cls, method, type) \
   type HHVM_METHOD(cls, method) { return Native::data<cls>(this_)->method(); }
 
@@ -2071,6 +2145,11 @@ static struct AsyncMysqlExtension final : Extension {
 
     Native::registerNativeDataInfo<AsyncMysqlConnection>(
         AsyncMysqlConnection::s_className.get(), Native::NDIFlags::NO_COPY);
+
+    HHVM_ME(AsyncMysqlResult, getSslCertCn);
+    HHVM_ME(AsyncMysqlResult, getSslCertSan);
+    HHVM_ME(AsyncMysqlResult, getSslCertExtensions);
+    HHVM_ME(AsyncMysqlResult, isSslCertValidationEnforced);
 
     HHVM_ME(AsyncMysqlConnectResult, elapsedMicros);
     HHVM_ME(AsyncMysqlConnectResult, startTime);

@@ -149,6 +149,11 @@ struct AsyncMysqlResult {
 
   void sweep() { m_op.reset(); }
 
+  String getSslCertCn();
+  String getSslCertSan();
+  String getSslCertExtensions();
+  bool isSslCertValidationEnforced();
+
   std::shared_ptr<am::Operation> m_op;
   db::ClientPerfStats m_clientStats;
 };

@@ -873,6 +873,58 @@ abstract class AsyncMysqlResult {
    */
   public abstract function clientStats(): AsyncMysqlClientStats;
 
+  /**
+   * Returns Common Name attribute of the TLS certificate presented
+   * by MySQL server.
+   *
+   * This information can be used while troubleshooting TLS handshake
+   * failures happening on connect stage.
+   *
+   * @return - a string containing Common Name value from the server
+   *           certificate presented by MySQL.
+   */
+  <<__Native>>
+  public function getSslCertCn(): string;
+
+  /**
+   * Returns Server Alternative Names attribute of the TLS certificate
+   * presented by MySQL server.
+   *
+   * This information can be used while troubleshooting TLS handshake
+   * failures happening on connect stage.
+   *
+   * @return - a vector of strings containing Server Alternative Names values
+   *           from the server certificate presented by MySQL.
+   */
+  <<__Native>>
+  public function getSslCertSan(): Vector<string>;
+
+  /**
+   * Returns values from the selected cert extensions of the TLS certificate
+   * presented by MySQL server.
+   *
+   * This information can be used while troubleshooting TLS handshake
+   * failures happening on connect stage.
+   *
+   * @return - a vector of strings containing the selected cert extension
+   *           values from the server certificate presented by MySQL.
+   */
+  <<__Native>>
+  public function getSslCertExtensions(): Vector<string>;
+
+  /**
+   * Returns a boolean value indicating if server cert validation was enforced
+   * for this connection.
+   *
+   * This information can be used while troubleshooting TLS handshake
+   * failures happening on connect stage.
+   *
+   * @return - `true` if server cert validation was enforced during TLS
+   *           handshake for this connection, `false` otherwise.
+   */
+  <<__Native>>
+  public function isSslCertValidationEnforced(): bool;
+
 }
 
 /**

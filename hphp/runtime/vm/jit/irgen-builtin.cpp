@@ -1150,9 +1150,20 @@ bool skipLayoutSensitiveNativeImpl(IRGS& env, const StringData* fname) {
 }
 
 SSATmp* ldOutAddr(IRGS& env, uint32_t inOutIndex) {
+  if (isInlining(env)) {
+    auto const func = curFunc(env);
+    return gen(
+      env,
+      LdStkAddr,
+      IRSPRelOffsetData {offsetFromIRSP(env, SBInvOffset {
+        - func->numSlotsInFrame() - (int)kNumActRecCells - (int)inOutIndex
+      })},
+      sp(env)
+    );
+  }
   return gen(
     env,
-    isInlining(env) ? LdOutAddrInlined : LdOutAddr,
+    LdOutAddr,
     IndexData(inOutIndex),
     fp(env)
   );

@@ -1282,7 +1282,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AEmpty, AEmpty);
 
   case LdOutAddr:
-  case LdOutAddrInlined:
     return IrrelevantEffects{};
 
   case CheckStk:
@@ -2021,17 +2020,6 @@ AliasClass pointee(const SSATmp* tmp) {
           if (sinst->is(LdStkAddr)) {
             return AliasClass {
               AStack::at(sinst->extra<LdStkAddr>()->offset)
-            };
-          } else if (sinst->is(LdOutAddrInlined)) {
-            auto const fp = sinst->src(0)->inst();
-            assertx(fp->is(BeginInlining));
-            auto const stackOff = fp->extra<BeginInlining>()->spOffset;
-            return AliasClass {
-              AStack::at(
-                stackOff +
-                kNumActRecCells +
-                sinst->extra<LdOutAddrInlined>()->index
-              )
             };
           }
           return AStackAny;

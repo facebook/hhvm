@@ -2741,7 +2741,6 @@ X(StStkMeta,                    IRSPRelOffsetData);
 X(StStkRange,                   StackRange);
 X(StOutValue,                   IndexData);
 X(LdOutAddr,                    IndexData);
-X(LdOutAddrInlined,             IndexData);
 X(AssertStk,                    IRSPRelOffsetData);
 X(DefFP,                        DefFPData);
 X(DefFrameRelSP,                DefStackData);

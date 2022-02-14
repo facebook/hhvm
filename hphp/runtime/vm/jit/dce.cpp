@@ -316,7 +316,6 @@ bool canDCE(const IRInstruction& inst) {
   case ConvArrLikeToKeyset:
   case ConvObjToKeyset:
   case LdOutAddr:
-  case LdOutAddrInlined:
     return !opcodeMayRaise(inst.op()) &&
       (!inst.consumesReferences() || inst.producesReference());
 

@@ -232,14 +232,6 @@ void cgLdOutAddr(IRLS& env, const IRInstruction* inst) {
   vmain(env) << lea{fp[off], dstLoc(env, inst, 0).reg()};
 }
 
-void cgLdOutAddrInlined(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
-  auto const off = cellsToBytes(
-    inst->extra<LdOutAddrInlined>()->index + kNumActRecCells
-  );
-  vmain(env) << lea{fp[off], dstLoc(env, inst, 0).reg()};
-}
-
 void cgDbgTrashStk(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const off = cellsToBytes(inst->extra<DbgTrashStk>()->offset.offset);

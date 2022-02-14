@@ -16,6 +16,7 @@ const int ENT_QUOTES = 3;
 const int ENT_NOQUOTES = 0;
 const int ENT_IGNORE = 4;
 const int ENT_SUBSTITUTE = 8;
+const int ENT_HTML5 = 0;
 
 const int STR_PAD_LEFT = 0;
 const int STR_PAD_RIGHT = 1;

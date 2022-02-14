@@ -1926,3 +1926,9 @@ val assert_in_current_decl : Secondary.t -> ctx:Pos_or_decl.ctx -> t
 
 (** Report a list of errors at each type of an intersection *)
 val intersect : t list -> t
+
+(** Report a list of errors at each type of a union*)
+val union : t list -> t
+
+(** Report multiple errors at a single type *)
+val multiple : t list -> t

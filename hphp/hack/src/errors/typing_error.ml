@@ -16,6 +16,10 @@ module Eval_result : sig
 
   val single : 'a -> 'a t
 
+  val multiple : 'a t list -> 'a t
+
+  val union : 'a t list -> 'a t
+
   val intersect : 'a t list -> 'a t
 
   val of_option : 'a option -> 'a t
@@ -31,11 +35,21 @@ end = struct
   type 'a t =
     | Empty
     | Single of 'a
+    | Multiple of 'a t list
+    | Union of 'a t list
     | Intersect of 'a t list
 
   let empty = Empty
 
   let single a = Single a
+
+  let multiple = function
+    | [] -> Empty
+    | xs -> Multiple xs
+
+  let union = function
+    | [] -> Empty
+    | xs -> Union xs
 
   let intersect = function
     | [] -> Empty
@@ -49,6 +63,8 @@ end = struct
     let rec aux ~k = function
       | Empty -> k Empty
       | Single x -> k @@ single @@ f x
+      | Multiple xs -> auxs xs ~k:(fun ys -> k @@ multiple ys)
+      | Union xs -> auxs xs ~k:(fun ys -> k @@ union ys)
       | Intersect xs -> auxs xs ~k:(fun ys -> k @@ intersect ys)
     and auxs ~k = function
       | [] -> k []
@@ -61,6 +77,8 @@ end = struct
     let rec aux ~k = function
       | Empty -> k Empty
       | Single x -> k @@ f x
+      | Multiple xs -> auxs xs ~k:(fun ys -> k @@ multiple ys)
+      | Union xs -> auxs xs ~k:(fun ys -> k @@ union ys)
       | Intersect xs -> auxs xs ~k:(fun ys -> k @@ intersect ys)
     and auxs ~k = function
       | [] -> k []
@@ -73,13 +91,19 @@ end = struct
     let rec aux = function
       | Empty -> ()
       | Single x -> f x
-      | Intersect xs -> List.iter ~f:aux xs
+      | Multiple xs
+      | Union xs
+      | Intersect xs ->
+        List.iter ~f:aux xs
     in
     aux t
 
   let is_suppressed t p =
     let rec f = function
       | Intersect xs -> List.exists ~f xs
+      | Multiple xs
+      | Union xs ->
+        List.for_all ~f xs
       | Empty -> false
       | Single x -> p x
     in
@@ -90,6 +114,8 @@ end = struct
     let rec aux t =
       match t with
       | Intersect xs -> auxs [] xs
+      | Multiple xs -> multiple @@ List.map ~f:aux xs
+      | Union xs -> union @@ List.map ~f:aux xs
       | _ -> t
     and auxs acc = function
       | [] -> intersect @@ List.rev acc
@@ -5325,13 +5351,22 @@ module rec Error : sig
   val assert_in_current_decl : Secondary.t -> ctx:Pos_or_decl.ctx -> t
 
   val intersect : t list -> t
+
+  val union : t list -> t
+
+  val multiple : t list -> t
 end = struct
+  type kind =
+    | Intersection
+    | Union
+    | Multiple
+
   type t =
     | Primary of Primary.t
     | Apply of Callback.t * t
     | Apply_reasons of Reasons_callback.t * Secondary.t
     | Assert_in_current_decl of Secondary.t * Pos_or_decl.ctx
-    | Intersect of t list
+    | Group of kind * t list
 
   let iter t ~on_prim ~on_snd =
     let rec aux = function
@@ -5344,7 +5379,7 @@ end = struct
         Reasons_callback.iter cb ~on_prim ~on_snd
       | Assert_in_current_decl (snd_err, _ctx) ->
         Secondary.iter snd_err ~on_prim ~on_snd
-      | Intersect ts -> List.iter ~f:aux ts
+      | Group (_, ts) -> List.iter ~f:aux ts
     in
     aux t
 
@@ -5353,7 +5388,11 @@ end = struct
   let eval t ~current_span =
     let rec aux ~k = function
       | Primary base -> k @@ Eval_result.of_option @@ Primary.to_error base
-      | Intersect ts -> auxs ~k:(fun xs -> k @@ Eval_result.intersect xs) ts
+      | Group (Intersection, ts) ->
+        auxs ~k:(fun xs -> k @@ Eval_result.intersect xs) ts
+      | Group (Union, ts) -> auxs ~k:(fun xs -> k @@ Eval_result.union xs) ts
+      | Group (Multiple, ts) ->
+        auxs ~k:(fun xs -> k @@ Eval_result.multiple xs) ts
       | Apply (cb, err) ->
         aux err ~k:(fun t ->
             k
@@ -5412,7 +5451,11 @@ end = struct
 
   let assert_in_current_decl snd ~ctx = Assert_in_current_decl (snd, ctx)
 
-  let intersect ts = Intersect ts
+  let intersect ts = Group (Intersection, ts)
+
+  let union ts = Group (Union, ts)
+
+  let multiple ts = Group (Multiple, ts)
 end
 
 and Secondary : sig

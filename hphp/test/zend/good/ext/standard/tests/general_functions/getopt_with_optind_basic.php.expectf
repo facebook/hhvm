@@ -10,7 +10,7 @@ dict(1) {
 }
 int(4)
 dict(1) {
-  ["k"]=>
+  ["k_long"]=>
   string(11) "value_for_k"
 }
 int(6)

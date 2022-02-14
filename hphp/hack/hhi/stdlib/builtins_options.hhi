@@ -52,6 +52,9 @@ function getmyuid();
 <<__PHPStdLib>>
 function getopt(string $options, $longopts = null);
 <<__PHPStdLib>>
+function getopt_with_optind(
+  string $options, $longopts vec<string>, inout int $optind): dict<string, mixed>;
+<<__PHPStdLib>>
 function getrusage(int $who = 0);
 <<__PHPStdLib>>
 function clock_getres(int $clk_id, inout $sec, inout $nsec);

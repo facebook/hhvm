@@ -112,8 +112,8 @@ function getopt(string $options,
  */
 <<__Native>>
 function getopt_with_optind(string $options,
-                            mixed $longopts,
-                            inout int $optind): darray;
+                            ?vec<string> $longopts,
+                            inout int $optind): dict<string, mixed>;
 
 /* This is an interface to getrusage(2). It gets data returned from the system
  * call.

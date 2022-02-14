@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use iterator::IterId;
 use label::Label;
 
 type Id = usize;
@@ -11,7 +12,7 @@ type Id = usize;
 pub struct LoopLabels {
     label_break: Label,
     label_continue: Label,
-    iterator: Option<iterator::Id>,
+    iterator: Option<IterId>,
 }
 
 #[derive(Clone, Debug)]
@@ -29,14 +30,14 @@ pub struct ResolvedTryFinally {
     pub target_label: Label,
     pub finally_label: Label,
     pub adjusted_level: usize,
-    pub iterators_to_release: Vec<iterator::Id>,
+    pub iterators_to_release: Vec<IterId>,
 }
 
 #[derive(Debug)]
 pub enum ResolvedJumpTarget {
     NotFound,
     ResolvedTryFinally(ResolvedTryFinally),
-    ResolvedRegular(Label, Vec<iterator::Id>),
+    ResolvedRegular(Label, Vec<IterId>),
 }
 
 #[derive(Clone, Debug, Default)]
@@ -47,7 +48,7 @@ impl JumpTargets {
         self.0.as_slice()
     }
 
-    pub fn get_closest_enclosing_finally_label(&self) -> Option<(Label, Vec<iterator::Id>)> {
+    pub fn get_closest_enclosing_finally_label(&self) -> Option<(Label, Vec<IterId>)> {
         let mut iters = vec![];
         for r in self.0.iter().rev() {
             match r {
@@ -63,14 +64,12 @@ impl JumpTargets {
         None
     }
 
-    // NOTE(hrust) this corresponds to collect_iterators in OCaml but doesn't allocate/clone
-    pub fn iterators(&self) -> impl Iterator<Item = &iterator::Id> {
-        self.0.iter().rev().filter_map(|r| {
-            if let Region::Loop(LoopLabels { iterator, .. }) = r {
-                iterator.as_ref()
-            } else {
-                None
-            }
+    /// Return the IterIds of the enclosing iterator loops.
+    /// This corresponds to collect_iterators in OCaml but doesn't allocate/clone.
+    pub fn iterators(&self) -> impl Iterator<Item = IterId> + '_ {
+        self.0.iter().rev().filter_map(|r| match r {
+            Region::Loop(LoopLabels { iterator, .. }) => *iterator,
+            _ => None,
         })
     }
 
@@ -196,7 +195,7 @@ impl Gen {
         &mut self,
         label_break: Label,
         label_continue: Label,
-        iterator: Option<iterator::Id>,
+        iterator: Option<IterId>,
     ) {
         self.jump_targets.0.push(Region::Loop(LoopLabels {
             label_break,
@@ -266,7 +265,7 @@ impl Gen {
     }
 }
 
-fn add_iterator(it_opt: Option<iterator::Id>, iters: &mut Vec<iterator::Id>) {
+fn add_iterator(it_opt: Option<IterId>, iters: &mut Vec<IterId>) {
     if let Some(it) = it_opt {
         iters.push(it);
     }

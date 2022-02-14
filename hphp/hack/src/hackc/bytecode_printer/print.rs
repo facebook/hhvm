@@ -40,7 +40,7 @@ use hhbc_string_utils::{
 };
 use hhvm_types_ffi::ffi::*;
 use instruction_sequence::{Error::Unrecoverable, InstrSeq};
-use iterator::Id as IterId;
+use iterator::IterId;
 use itertools::Itertools;
 use label::Label;
 use lazy_static::lazy_static;

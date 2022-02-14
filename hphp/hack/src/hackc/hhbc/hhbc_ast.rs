@@ -8,6 +8,7 @@ use ffi::{
     Maybe::{self, *},
     Pair, Slice, Str,
 };
+use iterator::IterId;
 use label::Label;
 use local::Local;
 
@@ -123,7 +124,7 @@ impl<'arena> FcallArgs<'arena> {
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub struct IterArgs<'arena> {
-    pub iter_id: iterator::Id,
+    pub iter_id: IterId,
     pub key_id: Maybe<Local<'arena>>,
     pub val_id: Local<'arena>,
 }
@@ -642,7 +643,7 @@ pub enum InstructFinal<'arena> {
 pub enum InstructIterator<'arena> {
     IterInit(IterArgs<'arena>, Label),
     IterNext(IterArgs<'arena>, Label),
-    IterFree(iterator::Id),
+    IterFree(IterId),
 }
 
 impl InstructIterator<'_> {

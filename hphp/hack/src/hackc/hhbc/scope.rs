@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use env::emitter::Emitter;
 use instruction_sequence::{instr, InstrSeq, Result};
+use iterator::IterId;
 use local::{Local, LocalId};
 
 /// Run emit () in a new unnamed local scope, which produces three instruction
@@ -130,14 +131,14 @@ fn unset_unnamed_locals<'arena>(
 
 fn free_iterators<'arena>(
     alloc: &'arena bumpalo::Bump,
-    start: iterator::Id,
-    end: iterator::Id,
+    start: IterId,
+    end: IterId,
 ) -> InstrSeq<'arena> {
     InstrSeq::gather(
         alloc,
-        (start.0..end.0)
+        (start.idx..end.idx)
             .into_iter()
-            .map(|i| instr::iterfree(alloc, iterator::Id(i)))
+            .map(|idx| instr::iterfree(alloc, IterId { idx }))
             .collect(),
     )
 }

@@ -10,6 +10,7 @@ use ast_body::AstBody;
 use ast_scope::{self as ast_scope, Scope, ScopeItem};
 use bitflags::bitflags;
 use emitter::Emitter;
+use iterator::IterId;
 use label::Label;
 use local::Local;
 use ocamlrep::rc::RcOc;
@@ -87,7 +88,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
         e: &mut Emitter<'arena, 'decl>,
         label_break: Label,
         label_continue: Label,
-        iterator: Option<iterator::Id>,
+        iterator: Option<IterId>,
         b: &[ast::Stmt],
         f: F,
     ) -> R

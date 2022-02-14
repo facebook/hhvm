@@ -7,33 +7,37 @@ use std::fmt;
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
-pub struct Id(pub usize);
+pub struct IterId {
+    /// 0-based index into HHBC stack frame iterators
+    pub idx: u32,
+}
 
-impl fmt::Display for Id {
+impl fmt::Display for IterId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
+        write!(f, "{}", self.idx)
     }
 }
 
 #[derive(Default, Debug, Clone)]
 pub struct Iter {
-    pub next: Id,
-    count: usize,
+    pub next: IterId,
+    count: u32,
 }
+
 impl Iter {
     pub fn count(&self) -> usize {
-        self.count
+        self.count as usize
     }
 
-    pub fn get(&mut self) -> Id {
-        let curr = self.next.0;
-        self.next.0 = curr + 1;
-        self.count = usize::max(self.count, self.next.0);
-        Id(curr)
+    pub fn get(&mut self) -> IterId {
+        let curr = self.next;
+        self.next.idx += 1;
+        self.count = std::cmp::max(self.count, self.next.idx);
+        curr
     }
 
     pub fn free(&mut self) {
-        self.next.0 -= 1;
+        self.next.idx -= 1;
     }
 
     pub fn reset(&mut self) {

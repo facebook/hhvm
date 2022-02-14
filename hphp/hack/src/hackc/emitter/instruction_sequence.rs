@@ -9,7 +9,7 @@ use ffi::{
     Pair, Slice, Str,
 };
 use hhbc_ast::*;
-use iterator::Id as IterId;
+use iterator::IterId;
 use label::Label;
 use local::Local;
 use oxidized::ast_defs::Pos;

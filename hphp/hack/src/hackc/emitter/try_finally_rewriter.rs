@@ -11,6 +11,7 @@ use env::{emitter::Emitter, jump_targets as jt, Env};
 use hhbc_ast::{self as hhbc_ast, Instruct};
 use indexmap::IndexSet;
 use instruction_sequence::{instr, InstrSeq, Result};
+use iterator::IterId;
 use label::Label;
 use oxidized::pos::Pos;
 use std::collections::BTreeMap;
@@ -74,7 +75,7 @@ pub(super) fn cleanup_try_body<'arena>(
 pub(super) fn emit_jump_to_label<'arena>(
     alloc: &'arena bumpalo::Bump,
     l: Label,
-    iters: Vec<iterator::Id>,
+    iters: Vec<IterId>,
 ) -> InstrSeq<'arena> {
     if iters.is_empty() {
         instr::jmp(alloc, l)
@@ -119,7 +120,7 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
                 jt_gen
                     .jump_targets()
                     .iterators()
-                    .map(|i| instr::iterfree(alloc, *i))
+                    .map(|i| instr::iterfree(alloc, i))
                     .collect(),
             );
             let mut instrs = Vec::with_capacity(5);

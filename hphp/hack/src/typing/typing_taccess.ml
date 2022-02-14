@@ -116,6 +116,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
                      class_pos = Cls.pos class_;
                      member_name = id_name;
                      hint = None;
+                     quickfixes = [];
                    })) )
   | Some typeconst ->
     let name = tp_name class_name id in

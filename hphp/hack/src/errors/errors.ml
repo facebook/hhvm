@@ -740,15 +740,20 @@ let add_naming_error err = add_error @@ Naming_error.to_user_error err
 
 let add_nast_check_error err = add_error @@ Nast_check_error.to_user_error err
 
+let is_suppressed User_error.{ claim; code; _ } =
+  fixme_present Message.(get_message_pos claim) code
+
 let apply_error_from_reasons_callback ?code ?claim ?reasons ?quickfixes err =
-  Option.iter ~f:add_error
-  @@ Typing_error.Reasons_callback.apply
-       ?code
-       ?claim
-       ?reasons
-       ?quickfixes
-       err
-       ~current_span:!current_span
+  Typing_error.(
+    Eval_result.iter ~f:add_error
+    @@ Eval_result.suppress_intersection ~is_suppressed
+    @@ Reasons_callback.apply
+         ?code
+         ?claim
+         ?reasons
+         ?quickfixes
+         err
+         ~current_span:!current_span)
 
 let log_exception_occurred pos e =
   let pos_str = pos |> Pos.to_absolute |> Pos.string in
@@ -779,9 +784,11 @@ let log_primary_typing_error prim_err =
   | _ -> ()
 
 let add_typing_error err =
-  Typing_error.iter ~on_prim:log_primary_typing_error ~on_snd:(fun _ -> ()) err;
-  Option.iter ~f:add_error
-  @@ Typing_error.to_user_error err ~current_span:!current_span
+  Typing_error.(
+    iter ~on_prim:log_primary_typing_error ~on_snd:(fun _ -> ()) err;
+    Eval_result.iter ~f:add_error
+    @@ Eval_result.suppress_intersection ~is_suppressed
+    @@ to_user_error err ~current_span:!current_span)
 
 let incremental_update ~old ~new_ ~rechecked phase =
   let fold init g =
@@ -837,14 +844,16 @@ let merge_into_current errors =
 let apply_callback_to_errors : t -> Typing_error.Reasons_callback.t -> unit =
  fun (errors, _fixmes) on_error ->
   let on_error User_error.{ code; claim; reasons; quickfixes = _ } =
-    let code = Option.value_exn (Typing_error.Error_code.of_enum code) in
-    Option.iter ~f:add_error
-    @@ Typing_error.Reasons_callback.apply
-         on_error
-         ~code
-         ~claim
-         ~reasons
-         ~current_span:!current_span
+    Typing_error.(
+      let code = Option.value_exn (Error_code.of_enum code) in
+      Eval_result.iter ~f:add_error
+      @@ Eval_result.suppress_intersection ~is_suppressed
+      @@ Reasons_callback.apply
+           on_error
+           ~code
+           ~claim
+           ~reasons
+           ~current_span:!current_span)
   in
   Relative_path.Map.iter errors ~f:(fun _ ->
       PhaseMap.iter ~f:(fun _ -> List.iter ~f:on_error))

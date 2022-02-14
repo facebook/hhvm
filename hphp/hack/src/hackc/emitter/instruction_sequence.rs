@@ -1370,13 +1370,13 @@ pub mod instr {
         use Local::Unnamed;
         match unnamed_locals.split_first() {
             None => panic!("Expected at least one await"),
-            Some((hd, tl)) => {
-                if let Unnamed(hd_id) = hd {
-                    let mut prev_id = hd_id;
-                    for unnamed_local in tl.iter() {
+            Some((head, tail)) => {
+                if let Unnamed(head_id) = head {
+                    let mut prev_id = head_id;
+                    for unnamed_local in tail {
                         match unnamed_local {
                             Unnamed(id) => {
-                                assert_eq!(*prev_id + 1, *id);
+                                assert_eq!(prev_id.idx + 1, id.idx);
                                 prev_id = id;
                             }
                             _ => panic!("Expected unnamed local"),
@@ -1384,7 +1384,7 @@ pub mod instr {
                     }
                     awaitall(
                         alloc,
-                        Some((Unnamed(*hd_id), unnamed_locals.len().try_into().unwrap())),
+                        Some((Unnamed(*head_id), unnamed_locals.len().try_into().unwrap())),
                     )
                 } else {
                     panic!("Expected unnamed local")

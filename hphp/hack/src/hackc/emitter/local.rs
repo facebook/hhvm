@@ -5,7 +5,25 @@
 
 use ffi::Str;
 
-pub type Id = usize;
+/// Local variable numbers are ultimately encoded as IVA, limited to u32.
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+#[repr(C)]
+pub struct LocalId {
+    /// 0-based index into HHBC stack frame locals.
+    pub idx: u32,
+}
+
+impl std::fmt::Display for LocalId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.idx.fmt(f)
+    }
+}
+
+impl LocalId {
+    pub fn from_usize(x: usize) -> Self {
+        Self { idx: x as u32 }
+    }
+}
 
 /// Type of locals as they appear in instructions. Named variables are
 /// those appearing in the .declvars declaration. These can also be
@@ -14,7 +32,7 @@ pub type Id = usize;
 #[derive(Copy, Debug)]
 #[repr(C)]
 pub enum Local<'arena> {
-    Unnamed(Id),
+    Unnamed(LocalId),
     /// Named local, necessarily starting with `$`
     Named(Str<'arena>),
 }
@@ -35,7 +53,7 @@ pub struct Gen<'arena> {
 
 impl<'arena> Gen<'arena> {
     pub fn get_unnamed(&mut self) -> Local<'arena> {
-        Local::Unnamed(self.counter.get_unnamed_id(&self.dedicated))
+        Local::Unnamed(self.counter.next_unnamed(&self.dedicated))
     }
 
     pub fn get_unnamed_for_tempname(&self, s: &str) -> &Local<'arena> {
@@ -58,7 +76,7 @@ impl<'arena> Gen<'arena> {
     pub fn get_label(&mut self) -> &Local<'arena> {
         let mut counter = self.counter;
         let mut new_counter = self.counter;
-        let new_id = new_counter.get_unnamed_id(&self.dedicated);
+        let new_id = new_counter.next_unnamed(&self.dedicated);
         let ret = self.dedicated.label.get_or_insert_with(|| {
             counter = new_counter;
             Local::Unnamed(new_id)
@@ -73,7 +91,7 @@ impl<'arena> Gen<'arena> {
         // self.dedicated.field`.
         let mut counter = self.counter;
         let mut new_counter = self.counter;
-        let new_id = new_counter.get_unnamed_id(&self.dedicated);
+        let new_id = new_counter.next_unnamed(&self.dedicated);
         let ret = self.dedicated.retval.get_or_insert_with(|| {
             counter = new_counter;
             Local::Unnamed(new_id)
@@ -89,9 +107,11 @@ impl<'arena> Gen<'arena> {
         self.get_retval();
     }
 
-    pub fn reset(&mut self, base: Id) {
-        self.counter = Counter(base);
-        self.dedicated = Dedicated::default();
+    pub fn reset(&mut self, next: LocalId) {
+        *self = Self {
+            counter: Counter { next },
+            ..Default::default()
+        }
     }
 }
 
@@ -136,20 +156,24 @@ pub struct Dedicated<'arena> {
 }
 
 #[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
-pub struct Counter(pub Id);
+pub struct Counter {
+    pub next: LocalId,
+}
 
 impl Counter {
-    fn get_unnamed_id<'arena>(&mut self, dedicated: &Dedicated<'arena>) -> Id {
-        let curr = self.0;
-        self.0 = curr + 1;
+    fn next_unnamed(&mut self, dedicated: &Dedicated<'_>) -> LocalId {
+        loop {
+            let curr = self.next;
+            self.next.idx += 1;
 
-        // make sure that newly allocated local don't stomp on dedicated locals
-        match (*dedicated).label {
-            Some(Local::Unnamed(v)) if curr == v => self.get_unnamed_id(dedicated),
-            _ => match dedicated.retval {
-                Some(Local::Unnamed(v)) if curr == v => self.get_unnamed_id(dedicated),
-                _ => curr,
-            },
+            // make sure that newly allocated local don't stomp on dedicated locals
+            match dedicated.label {
+                Some(Local::Unnamed(id)) if curr == id => continue,
+                _ => match dedicated.retval {
+                    Some(Local::Unnamed(id)) if curr == id => continue,
+                    _ => return curr,
+                },
+            }
         }
     }
 }

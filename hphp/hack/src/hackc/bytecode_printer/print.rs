@@ -2109,7 +2109,7 @@ fn print_local(w: &mut dyn Write, local: &Local<'_>) -> Result<()> {
     }
 }
 
-fn print_int(w: &mut dyn Write, i: &usize) -> Result<()> {
+fn print_int<T: std::fmt::Display>(w: &mut dyn Write, i: T) -> Result<()> {
     write!(w, "{}", i)
 }
 

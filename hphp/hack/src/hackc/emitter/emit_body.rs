@@ -24,7 +24,7 @@ use hhbc_id::function;
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{instr, unrecoverable, Error, InstrSeq, Result};
 use label::Label;
-use local::Local;
+use local::{Local, LocalId};
 use options::CompilerFlags;
 use runtime::TypedValue;
 use statement_state::StatementState;
@@ -165,7 +165,8 @@ pub fn emit_body<'b, 'arena, 'decl>(
         None => 0,
     };
     let local_gen = emitter.local_gen_mut();
-    local_gen.reset(params.len() + decl_vars.len());
+    let num_locals = params.len() + decl_vars.len();
+    local_gen.reset(LocalId::from_usize(num_locals));
     if should_reserve_locals {
         local_gen.reserve_retval_and_label_id_locals();
     };

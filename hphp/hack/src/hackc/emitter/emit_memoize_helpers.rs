@@ -10,7 +10,7 @@ use hhbc_ast::{FcallArgs, FcallFlags};
 use hhbc_id::function;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
-use local::Local;
+use local::{Local, LocalId};
 use oxidized::{aast::FunParam, ast::Expr, pos::Pos};
 
 use ffi::Slice;
@@ -19,13 +19,18 @@ pub const MEMOIZE_SUFFIX: &str = "$memoize_impl";
 
 pub fn get_memo_key_list<'arena>(
     alloc: &'arena bumpalo::Bump,
-    local: local::Id,
-    index: usize,
+    local: LocalId,
+    index: u32,
     name: impl AsRef<str>,
 ) -> Vec<InstrSeq<'arena>> {
     vec![
         instr::getmemokeyl(alloc, Local::Named(Str::new_str(alloc, name.as_ref()))),
-        instr::setl(alloc, Local::Unnamed(local + index)),
+        instr::setl(
+            alloc,
+            Local::Unnamed(LocalId {
+                idx: local.idx + index,
+            }),
+        ),
         instr::popc(alloc),
     ]
 }
@@ -33,14 +38,21 @@ pub fn get_memo_key_list<'arena>(
 pub fn param_code_sets<'arena>(
     alloc: &'arena bumpalo::Bump,
     params: &[(HhasParam<'arena>, Option<(Label, Expr)>)],
-    local: local::Id,
+    local: LocalId,
 ) -> InstrSeq<'arena> {
     InstrSeq::gather(
         alloc,
         params
             .iter()
             .enumerate()
-            .map(|(i, (param, _))| get_memo_key_list(alloc, local, i, &param.name.unsafe_as_str()))
+            .map(|(i, (param, _))| {
+                get_memo_key_list(
+                    alloc,
+                    local,
+                    i.try_into().unwrap(),
+                    &param.name.unsafe_as_str(),
+                )
+            })
             .flatten()
             .collect(),
     )
@@ -80,7 +92,7 @@ pub fn check_memoize_possible<Ex, En>(
 
 pub fn get_implicit_context_memo_key<'arena>(
     alloc: &'arena bumpalo::Bump,
-    local: local::Id,
+    local: LocalId,
 ) -> InstrSeq<'arena> {
     InstrSeq::gather(
         alloc,

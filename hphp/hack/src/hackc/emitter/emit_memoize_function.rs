@@ -20,7 +20,7 @@ use hhbc_string_utils::reified;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
-use local::Local;
+use local::{Local, LocalId};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options, RepoFlags};
 use oxidized::{ast as T, pos::Pos};
@@ -221,8 +221,8 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
                 alloc,
                 emit_memoize_helpers::get_memo_key_list(
                     alloc,
-                    param_count,
-                    first_local_idx,
+                    LocalId::from_usize(param_count),
+                    first_local_idx.try_into().unwrap(),
                     reified::GENERICS_LOCAL_NAME,
                 ),
             ),
@@ -233,9 +233,9 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     } else {
         // Last unnamed local slot
         let local = first_local_idx + param_count + add_reified;
-        emit_memoize_helpers::get_implicit_context_memo_key(alloc, local)
+        emit_memoize_helpers::get_implicit_context_memo_key(alloc, LocalId::from_usize(local))
     };
-    let first_local = Local::Unnamed(first_local_idx);
+    let first_local = Local::Unnamed(LocalId::from_usize(first_local_idx));
     let key_count = (param_count + add_reified + add_implicit_context) as isize;
     Ok(InstrSeq::gather(
         alloc,
@@ -243,7 +243,11 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
             begin_label,
             emit_body::emit_method_prolog(e, env, pos, hhas_params, ast_params, &[])?,
             deprecation_body,
-            emit_memoize_helpers::param_code_sets(alloc, hhas_params, first_local_idx),
+            emit_memoize_helpers::param_code_sets(
+                alloc,
+                hhas_params,
+                LocalId::from_usize(first_local_idx),
+            ),
             reified_memokeym,
             ic_memokey,
             if is_async {

@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use env::emitter::Emitter;
 use instruction_sequence::{instr, InstrSeq, Result};
-use local::Local;
+use local::{Local, LocalId};
 
 /// Run emit () in a new unnamed local scope, which produces three instruction
 /// blocks -- before, inner, after. If emit () registered any unnamed locals, the
@@ -28,7 +28,8 @@ where
     if local_counter == e.local_gen().counter {
         Ok(InstrSeq::gather(e.alloc, vec![before, inner, after]))
     } else {
-        let unset_locals = unset_unnamed_locals(e.alloc, local_counter.0, e.local_gen().counter.0);
+        let unset_locals =
+            unset_unnamed_locals(e.alloc, local_counter.next, e.local_gen().counter.next);
         e.local_gen_mut().counter = local_counter;
         Ok(wrap_inner_in_try_catch(
             e.alloc,
@@ -63,7 +64,8 @@ where
     if local_counter == e.local_gen().counter && next_iterator == e.iterator().next {
         Ok(InstrSeq::gather(e.alloc, vec![before, inner, after]))
     } else {
-        let unset_locals = unset_unnamed_locals(e.alloc, local_counter.0, e.local_gen().counter.0);
+        let unset_locals =
+            unset_unnamed_locals(e.alloc, local_counter.next, e.local_gen().counter.next);
         e.local_gen_mut().counter = local_counter;
         let free_iters = free_iterators(e.alloc, next_iterator, e.iterator().next);
         e.iterator_mut().next = next_iterator;
@@ -114,14 +116,14 @@ where
 
 fn unset_unnamed_locals<'arena>(
     alloc: &'arena bumpalo::Bump,
-    start: local::Id,
-    end: local::Id,
+    start: LocalId,
+    end: LocalId,
 ) -> InstrSeq<'arena> {
     InstrSeq::gather(
         alloc,
-        (start..end)
+        (start.idx..end.idx)
             .into_iter()
-            .map(|id| instr::unsetl(alloc, Local::Unnamed(id)))
+            .map(|idx| instr::unsetl(alloc, Local::Unnamed(LocalId { idx })))
             .collect(),
     )
 }

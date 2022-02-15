@@ -74,7 +74,7 @@ where
         // We only convert the source text from OCaml in this innermost
         // closure because it contains an Rc. If we converted it
         // earlier, we'd need to pass it across an unwind boundary or
-        // send it between threads, but it has internal mutablility and
+        // send it between threads, but it has internal mutability and
         // is not Send.
         let source_text = unsafe { SourceText::from_ocaml(ocaml_source_text).unwrap() };
         let (root, errors, state) = parse_fn(arena_ref, &source_text, env, Some(stack_limit_ref));

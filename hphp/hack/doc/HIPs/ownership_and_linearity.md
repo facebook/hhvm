@@ -1060,7 +1060,7 @@ them as shared. After passing a unique value to this, one can no longer presume
 uniqueness
 
 Borrowed/Shared: May be unique or shared, but my not generate new aliases except
-to pass to other borrowedly notated states.
+to pass to other borrowed notated states.
 
 > A shared (that is, not unique) parameter may be declared borrowed
 

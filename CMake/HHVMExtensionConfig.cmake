@@ -108,7 +108,7 @@ include(Options)
 # Using more than one will result in undefined behavior.
 #
 # [PRETTY_NAME string]
-# If passed, use this name when naming the extension in mesages. If this is
+# If passed, use this name when naming the extension in messages. If this is
 # not passed, default to NAME.
 #
 # [IS_ENABLED VARNAME]

@@ -37,7 +37,7 @@ static bool is_blank(const xmlChar* str) {
   return true;
 }
 
-/* removes all empty text, comments and other insignoficant nodes */
+/* removes all empty text, comments and other insignificant nodes */
 static void cleanup_xml_node(xmlNodePtr node) {
   xmlNodePtr trav;
   xmlNodePtr del = nullptr;

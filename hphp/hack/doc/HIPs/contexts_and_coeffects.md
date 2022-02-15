@@ -831,11 +831,11 @@ If preferable, one may think of the runtime tracking of coeffects as an implicit
 
 ### Why enforce in HHVM at all?
 
-One may ask why it is necessary to enforce these guarentees at runtime. The language as a whole is generally unsound, and we're working to progress that forward. Why not just add this to the list of pieces that will get iteratively fixed with the rest of the language? Further, what terrible thing actually happens if the rules aren't enforced dynamically?
+One may ask why it is necessary to enforce these guarantees at runtime. The language as a whole is generally unsound, and we're working to progress that forward. Why not just add this to the list of pieces that will get iteratively fixed with the rest of the language? Further, what terrible thing actually happens if the rules aren't enforced dynamically?
 
 The answer to the first question is relatively simple. The planned system for a sound dynamic type requires that types implementing it make some guarantees about their properties, methods, etc, such that writing into one via a dynamic type won't result in unsoundness. If all functions have unenforced capabilities, then they would all necessarily preempt a type from implementing dynamic.
 
-There are multiple planned contexts for whom the goal is to make strong guarentees about chain of trust. Without dynamic enforcement, chain of trust is broken and those guarentees aren't successful. This would be tantamount to a constant recurring SEV.
+There are multiple planned contexts for whom the goal is to make strong guarantees about chain of trust. Without dynamic enforcement, chain of trust is broken and those guarantees aren't successful. This would be tantamount to a constant recurring SEV.
 
 ### Rules received by HHVM and how they get translated from the syntax
 

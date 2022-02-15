@@ -115,7 +115,7 @@ std::string getNativeFunctionName(void* codeAddr) {
     // we first want to extract the mangled name from it to get this:
     // _ZN4HPHP2VM6Transl17interpOneIterInitEv
     //
-    // and then pass this to abi::__cxa_demangle to get the demanged name:
+    // and then pass this to abi::__cxa_demangle to get the demangled name:
     // HPHP::jit::interpOneIterInit()
     //
     // Sometimes, though, backtrace_symbols can't find the function name

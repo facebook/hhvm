@@ -462,7 +462,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       /*
        * This prevents stack slots from the caller from being sunk into the
        * callee. Note that some of these stack slots overlap with the frame
-       * locals of the callee-- those slots are inacessible in the inlined
+       * locals of the callee-- those slots are inaccessible in the inlined
        * call as frame and stack locations may not alias.
        */
       stack_below(inlineStackOff)

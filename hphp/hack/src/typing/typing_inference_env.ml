@@ -1404,7 +1404,7 @@ let connected_components_g genvs ~additional_edges =
           vars
           IMap.empty)
   in
-  (* convert each component to a list of gobal environments *)
+  (* convert each component to a list of global environments *)
   let component_to_subgraph
       (component : (Pos.t * global_tyvar_info) list IMap.t) :
       t_global_with_pos list =

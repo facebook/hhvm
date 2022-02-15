@@ -137,7 +137,7 @@ using Color = boost::variant<None, PhysReg, SpillSlot, SpillSlotWide>;
 struct RematInfo {
   // The instruction which potentially can rematerialize it. May be a
   // reload to indicate there's no rematerialization available. The
-  // instruction may not necessarily be usuable. A context sensitive
+  // instruction may not necessarily be usable. A context sensitive
   // check is required.
   Vinstr instr;
   // The block where the instruction where the instruction came
@@ -160,7 +160,7 @@ struct RegInfo {
   // Can this Vreg be potentially rematerialized (instead of reloaded)
   // by this instruction? This field is calculated lazily and then
   // cached. Even if there's information here, we may still need to do
-  // context sensitive checks to see if it's usuable.
+  // context sensitive checks to see if it's usable.
   Optional<RematInfo> cachedRemat;
 };
 

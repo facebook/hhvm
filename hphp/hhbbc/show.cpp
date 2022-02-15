@@ -446,7 +446,7 @@ std::string show(const Type& t) {
    * ?{{Dict|Keyset}(Int:Int)|Bool|Obj}
    */
 
-  // NB: We want this function be usuable even on invalid/malformed
+  // NB: We want this function be usable even on invalid/malformed
   // types (for example if we want to print the type from within
   // checkInvariants()). Therefore we don't make any assumptions about
   // the Type being sane and don't assert anything. We also just deal

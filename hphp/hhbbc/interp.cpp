@@ -2516,7 +2516,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       break;
   }
 
-  // No type constraint, or one that isn't usuable. Use the generic memoization
+  // No type constraint, or one that isn't usable. Use the generic memoization
   // scheme which can handle any type:
 
   if (auto const val = tv(inTy)) {

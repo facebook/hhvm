@@ -63,7 +63,7 @@ namespace tv_layout {
  *
  * Member functions:
  * void init(index_t size); Establishes any invariants the container needs to
- * operatate, for a container of the given size
+ * operate, for a container of the given size
  *
  * tv_val_offset offsetOf(index_t idx) const;
  * tv_val_offset offsetOf(quick_index idx) const; (optional)

@@ -38,7 +38,7 @@ final class COrderTest extends HackTest {
       tuple(Vec\range(1000, 100, 11), false),
       // Containers with alphabetically sorted strings are sorted
       tuple(vec['aaa', 'bbb', 'c', 'ca', 'ccc'], true),
-      // Containers with lexiographically sorted strings are not sorted
+      // Containers with lexicographically sorted strings are not sorted
       tuple(vec['a', 'b', 'aa', 'bb', 'aaa', 'bbb'], false),
     ];
   }

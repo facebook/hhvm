@@ -2300,7 +2300,7 @@ void in(ISS& env, const bc::QueryM& op) {
   assertx(!env.state.unreachable);
 
   // If the QueryM produced a constant without any possible
-  // side-ffects, we can replace the entire thing with the constant.
+  // side-effects, we can replace the entire thing with the constant.
   if (env.collect.mInstrState.effectFree && is_scalar(topC(env))) {
     for (int i = 0; ; i++) {
       auto const last = last_op(env, i);

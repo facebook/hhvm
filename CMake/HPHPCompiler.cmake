@@ -393,7 +393,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
       "4201" # Non-standard extension used: nameless struct/union.
       "4232" # Non-standard extension used: 'pCurrent': address of dllimport.
       "4245" # Implicit change from signed/unsigned when initializing.
-      "4255" # Implicitly converting fucntion prototype from `()` to `(void)`.
+      "4255" # Implicitly converting function prototype from `()` to `(void)`.
       "4265" # Class has virtual functions, but destructor is not virtual.
       "4287" # Unsigned/negative constant mismatch.
       "4296" # '<' Expression is always false.

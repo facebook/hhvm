@@ -1886,7 +1886,7 @@ std::string DebuggerClient::lineRest(int index) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// comunication with DebuggerProxy
+// communication with DebuggerProxy
 
 DebuggerCommandPtr DebuggerClient::xend(DebuggerCommand *cmd,
                                         EventLoopKind loopKind) {

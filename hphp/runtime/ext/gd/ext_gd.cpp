@@ -6703,7 +6703,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
             break;
 
           case 3: ImageInfo->FocalplaneUnits = 10;   break;  /* centimeter */
-          case 4: ImageInfo->FocalplaneUnits = 1;    break;  /* milimeter  */
+          case 4: ImageInfo->FocalplaneUnits = 1;    break;  /* millimeter */
           case 5: ImageInfo->FocalplaneUnits = .001; break;  /* micrometer */
         }
         break;
@@ -6886,7 +6886,7 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo,
                            CharBuf, end, length/* -14*/, displacement,
                            SECTION_IFD0);
 
-  /* Compute the CCD width, in milimeters. */
+  /* Compute the CCD width, in millimeters. */
   if (ImageInfo->FocalplaneXRes != 0) {
     ImageInfo->CCDWidth = (float)(ImageInfo->ExifImageWidth *
       ImageInfo->FocalplaneUnits / ImageInfo->FocalplaneXRes);

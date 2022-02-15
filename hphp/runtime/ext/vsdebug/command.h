@@ -370,7 +370,7 @@ private:
     folly::dynamic* vars
   );
 
-  // Adds array indicies.
+  // Adds array indices.
   static int addArrayChildren(
     DebuggerSession* session,
     Debugger* debugger,

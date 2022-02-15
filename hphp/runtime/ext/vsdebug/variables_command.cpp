@@ -87,7 +87,7 @@ const StaticString s_core("Core");
 
 static bool isArrayObjectType(const std::string className) {
   // HH\Vector and HH\Map are special in that they are objects but their
-  // children look like array indicies.
+  // children look like array indices.
   return className == "HH\\Vector" || className == "HH\\Map";
 };
 

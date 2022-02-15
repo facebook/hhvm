@@ -240,7 +240,7 @@ private:
   // Header manipulation and lookup
   //
   // Headers come from FastCGI webservers via the FCGI_PARAMS record in mangled
-  // form and need to be transfomred into their more familiar HTTP header form
+  // form and need to be transformed into their more familiar HTTP header form
   // before passing them into the VM.
   //
   // (mangled) HTTP_IF_UNMODIFIED_SINCE <-> If-Unmodified-Since (normal)

@@ -49,7 +49,7 @@ function image2wbmp(resource $image,
                     string $filename = "",
                     int $threshold = -1): bool;
 
-/* Return an image containing the affine tramsformed src image, using
+/* Return an image containing the affine transformed src image, using
  * an optional clipping area.
  */
 <<__Native>>
@@ -62,7 +62,7 @@ function imageaffine(resource $image,
 <<__Native>>
 function imageaffinematrixconcat(varray $m1, varray $m2): mixed;
 
-/* Return an image containing the affine tramsformed src image, using
+/* Return an image containing the affine transformed src image, using
  * an optional clipping area.
  */
 <<__Native>>

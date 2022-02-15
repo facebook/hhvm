@@ -332,7 +332,7 @@ void ProxygenTransport::onBody(std::unique_ptr<folly::IOBuf> chain) noexcept {
     return;
   }
 
-  VLOG(4) << *m_clientTxn << "Recevied body len="
+  VLOG(4) << *m_clientTxn << "Received body len="
           << chain->computeChainDataLength();
   m_requestBodyLength += chain->computeChainDataLength();
 

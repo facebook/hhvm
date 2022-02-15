@@ -155,7 +155,7 @@ type t = {
   (* Perform global inference globally on the code base to infer missing type annotations. *)
   tco_global_inference: bool;
   tco_gi_reinfer_types: string list;
-      (** Types we want to remove and replace by infered types during global inference. *)
+      (** Types we want to remove and replace by inferred types during global inference. *)
   tco_ordered_solving: bool;
       (** Whether to solve typing inference constraints using ordered solving or transitive closure. *)
   (* Enable const static properties *)

@@ -1081,7 +1081,7 @@ State make_state(IRUnit& unit,
     if (!instr->block() || !reachable[instr->block()->id()]) continue;
 
     /*
-     * Instructions with multiple defs could potentialy be dealt with, but not
+     * Instructions with multiple defs could potentially be dealt with, but not
      * worth the effort now. Assume that if an instruction cannot be DCE'd, it
      * also cannot be sunk.
      */

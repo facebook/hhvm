@@ -24,7 +24,7 @@ namespace HPHP::Treadmill {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * List of potentiall users of the treadmill, useful for debugging halts
+ * List of potentially users of the treadmill, useful for debugging halts
  */
 enum class SessionKind {
   None,

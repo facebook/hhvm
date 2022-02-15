@@ -521,7 +521,7 @@ bool optimizeFarJmp(Env& env, TCA srcAddr, TCA destAddr,
  * Returns true if the source is a PC relative instruction. Relocates the
  * that instruction, adjusting the offsets in the instruction. If the new
  * offset cannot be encoded, then the instruction is changed into a multi-
- * instruction sequence, overwritting the original PC relative instruction
+ * instruction sequence, overwriting the original PC relative instruction
  * that was initially copied. The following are the PC relative instructions:
  *   ADR/ADRP
  *   LDR (literal)

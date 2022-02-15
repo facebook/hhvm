@@ -24,7 +24,7 @@ external win_setup_handle_serialization : unit -> unit
   = "win_setup_handle_serialization"
 
 let init =
-  (* Windows: register the serialize/desarialize functions
+  (* Windows: register the serialize/deserialize functions
      for the custom block of "Unix.file_descr". *)
   lazy (win_setup_handle_serialization ())
 

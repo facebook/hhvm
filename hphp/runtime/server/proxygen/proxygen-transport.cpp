@@ -687,7 +687,7 @@ void ProxygenTransport::messageAvailable(ResponseMessage&& message) noexcept {
 
       // The VM thread is done, any outstanding push txns need aborts.
       // It's possible that we could drive pushes from somewhere other
-      // than the VM thread, in which case we'll need a different saftey
+      // than the VM thread, in which case we'll need a different safety
       // mechanism
       {
         Lock lock(this);

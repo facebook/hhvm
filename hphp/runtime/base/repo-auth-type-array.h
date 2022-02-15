@@ -32,7 +32,7 @@ namespace HPHP {
  * program.  In RepoAuthoritative mode, with an optimized repo, it's
  * used for assert opcodes and RepoAuthTypes for arrays.
  *
- * This class has the same semantics for thread safey as primitive
+ * This class has the same semantics for thread safety as primitive
  * types: multiple concurrent threads may read from this table (using
  * the const member functions), but it is not safe to concurrently
  * read and write.

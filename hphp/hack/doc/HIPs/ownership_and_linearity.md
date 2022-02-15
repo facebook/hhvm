@@ -1271,7 +1271,7 @@ rep: The state invisible externally.
 free: Objects with a reference count of exactly 1 (such as recently created objects).
 
 var: "provides a loophole for auxiliary objects which provide weaker aliasing guarantees"
-Works like the default symantics of non-alias checking languages except for the
+Works like the default semantics of non-alias checking languages except for the
 assignment compatibility constraints.
 > a mutable object which may be aliased. Expressions with mode var may be changed
 > freely, may change asynchronously, and can be passed into or returned from

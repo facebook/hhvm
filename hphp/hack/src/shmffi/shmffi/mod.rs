@@ -621,10 +621,9 @@ pub extern "C" fn shmffi_move(hash1: u64, hash2: u64) {
 #[no_mangle]
 pub extern "C" fn shmffi_remove(hash: u64) -> usize {
     let size = with(|segment| {
-        segment.table.write_map(&hash, |mut shard| {
-            let heap_value = shard.map.remove(&hash).unwrap();
-            heap_value.as_slice().len()
-        })
+        segment
+            .table
+            .inspect_and_remove(&hash, |value| value.unwrap().as_slice().len())
     });
     Value::int(size as isize).to_bits()
 }

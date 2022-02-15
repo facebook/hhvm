@@ -404,6 +404,30 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
         shard.try_map(|m| m.get(key).ok_or(())).ok()
     }
 
+    /// Inspect a value, then remove it from the map.
+    ///
+    /// Ideally, we'd return the removed value directly, however, we can't
+    /// return the value, because it might contain invalid references. What
+    /// we can do is pass a reference to a closure, which limits the lifetime
+    /// of that value.
+    pub fn inspect_and_remove<R>(&self, key: &K, inspect: impl FnOnce(Option<&V>) -> R) -> R {
+        let mut shard_lock = self.shard_for_writing(key);
+        let value = shard_lock.map.remove(key);
+
+        // This is quite unsafe. We must make sure we hold the lock as long
+        // as the value is in use, because the value might point to data in
+        // the heap, which might get evicted if an other writer is active!
+        //
+        // As such, I am dropping the `value` and `shard_lock`(in that order!)
+        // manually as a coding hint.
+        let res = inspect(value.as_ref());
+        drop(value);
+        drop(shard_lock);
+
+        // DO NOT USE value HERE! The lock has been released.
+        res
+    }
+
     /// Check if the map contains a value for a key.
     pub fn contains_key(&self, key: &K) -> bool {
         let shard = self.shard_for_reading(key);

@@ -16,7 +16,7 @@ use namespace HH\Lib\C;
  *
  * All operations must have the same input type (`Tin`) and output type (`Tout`),
  * and be processed by the same function; `Tin` may be a callable invoked by the
- * funtion for maximum flexibility, however this pattern is best avoided in favor
+ * function for maximum flexibility, however this pattern is best avoided in favor
  * of creating semaphores with a more narrow process.
  *
  * Use `genWaitFor()` to retrieve a `Tout` from a `Tin`.

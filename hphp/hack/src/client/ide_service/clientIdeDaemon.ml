@@ -560,7 +560,7 @@ let make_singleton_ctx (istate : istate) (entry : Provider_context.entry) :
   let ctx = Provider_context.add_or_overwrite_entry ~ctx entry in
   ctx
 
-(** This funtion is about papering over a bug. Sometimes, rarely, we're
+(** This function is about papering over a bug. Sometimes, rarely, we're
 failing to receive DidOpen messages from clientLsp. Our model is to
 only ever answer IDE requests on open files, so we know we'll eventually
 reveive a DidClose even for them and be able to clear their TAST cache

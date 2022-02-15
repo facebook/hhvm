@@ -911,7 +911,7 @@ Additionally, there a handful of other languages actively exploring this space:
 is designed based on different constraints and purposes. Ours is mostly to unblock other features,
 while also enabling some performance gains. Their purposes are flipped.
 
-[Haskel](https://github.com/ghc-proposals/ghc-proposals/blob/master/proposals/0111-linear-types.rst#id22)
+[Haskell](https://github.com/ghc-proposals/ghc-proposals/blob/master/proposals/0111-linear-types.rst#id22)
 with [tech talk](https://www.youtube.com/watch?v=o0z-qlb5xbI&t=1s):
 Rather than discussing linearity of values, they describe linearity of functions,
 such that for a fn a -> b, if b is consumed exactly once, then a is consumed
@@ -921,7 +921,7 @@ passed function. Further, they do not have the concept of borrowing linear
 values, which is extremely important to our system.
 
 [Clean](https://clean.cs.ru.nl/download/html_report/CleanRep.2.2_11.htm):
-Clean has a similar system to haskell except that it's type-based rather than
+Clean has a similar system to Haskell except that it's type-based rather than
 function based. It has some similar properties to our system, but considers
 non-unique <: unique because of its functional nature, such that you can
 pass uniq values into a function accepting non-uniq, but what you get out is
@@ -933,7 +933,7 @@ of uniqness, but again, this requires the move in -> move out scenario.
 They use dependent typing for this and have discovered the need for a borrowed
 state but have not yet handled the polymorphic MaybeOwned state. They have a
 representation for Owned V Unowned, but specifically note that it doesn't allow
-for representation of borrowed. It's more similar to haskel's polymorphism due
+for representation of borrowed. It's more similar to Haskell's polymorphism due
 to its lack of a borrowed state.
 
 Also, from another paper or note:

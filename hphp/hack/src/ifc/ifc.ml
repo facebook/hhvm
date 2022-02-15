@@ -1940,7 +1940,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     let out_try_catch = clear_pc_deps out_try_catch in
     (* for each continuation in out_try_catch we will perform an
        analysis of the finally block; this improves precision of
-       the analysis a bit and mimicks what Hack does *)
+       the analysis a bit and mimics what Hack does *)
     KMap.fold
       (fun k cont (env, out_finally) ->
         (* analyze the finally block for the outcome k *)

@@ -3174,13 +3174,13 @@ and simplify_disj env disj =
   in
   (* Map a type variable to a list of lower bound types. For any two types
      t1 and t2 in the list, it is not the case that t1 <: t2 or t2 <: t1. *)
-  let lower_bound_map = Hashtbl.Poly.create () in
+  let lower_bound_map = ref IMap.empty in
   let process_lower_bound ~coerce ~constr ty var =
-    match Hashtbl.find lower_bound_map var with
-    | None -> Hashtbl.set lower_bound_map ~key:var ~data:[(ty, constr)]
+    match IMap.find_opt var !lower_bound_map with
+    | None -> lower_bound_map := IMap.add var [(ty, constr)] !lower_bound_map
     | Some bounds ->
       let new_bounds = add_new_lower_bound ~coerce ~constr ty bounds in
-      Hashtbl.set lower_bound_map ~key:var ~data:new_bounds
+      lower_bound_map := IMap.add var new_bounds !lower_bound_map
   in
   let rec fill_lower_bound_map disj =
     match disj with
@@ -3212,7 +3212,7 @@ and simplify_disj env disj =
       List.map ~f:(fun (_, c) -> c) bounds @ rebuild_disj remaining to_process
   in
   let remaining = fill_lower_bound_map disj in
-  let bounds = Hashtbl.to_alist lower_bound_map in
+  let bounds = IMap.elements !lower_bound_map in
   rebuild_disj remaining bounds
 
 and props_to_env pos env remain props on_error =

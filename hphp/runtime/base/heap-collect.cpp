@@ -478,7 +478,7 @@ NEVER_INLINE void Collector::sweep() {
       if (!marked(h)) {
         // Its important we invalidate the pointer stored in the weakref, and
         // not the start of the allocation.  In the case of objects with
-        // native datas, the start of allocation may not be the start of the
+        // native data, the start of allocation may not be the start of the
         // ObjectData*.
         WeakRefData::invalidateWeakRef(uintptr_t(wr_data->pointee.m_data.pobj));
         mm.reinitFree();

@@ -568,14 +568,14 @@ pub extern "C" fn shmffi_get_and_deserialize(hash: u64) -> usize {
 #[no_mangle]
 pub extern "C" fn shmffi_mem(hash: u64) -> usize {
     catch_unwind(|| {
-        let flag = with(|segment| segment.table.read_map(&hash, |map| map.contains_key(&hash)));
+        let flag = with(|segment| segment.table.contains_key(&hash));
         Value::int(flag as isize).to_bits()
     })
 }
 
 #[no_mangle]
 pub extern "C" fn shmffi_mem_status(hash: u64) -> usize {
-    let flag = with(|segment| segment.table.read_map(&hash, |map| map.contains_key(&hash)));
+    let flag = with(|segment| segment.table.contains_key(&hash));
     // From hh_shared.c: 1 = present, -1 = not present
     let result = if flag { 1 } else { -1 };
     Value::int(result).to_bits()

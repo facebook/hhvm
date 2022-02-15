@@ -404,6 +404,12 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
         shard.try_map(|m| m.get(key).ok_or(())).ok()
     }
 
+    /// Check if the map contains a value for a key.
+    pub fn contains_key(&self, key: &K) -> bool {
+        let shard = self.shard_for_reading(key);
+        shard.contains_key(key)
+    }
+
     /// Return the total number of bytes allocated.
     ///
     /// Note that this might include bytes that were later free'd, as we

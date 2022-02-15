@@ -221,7 +221,7 @@ function creates_owned(): void {
 }
 ```
 
-Ownership transferrance is done via the `move` keyword
+Ownership transference is done via the `move` keyword
 
 ```
 function creates_owned(): void {

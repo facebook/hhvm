@@ -63,6 +63,6 @@ val ndecl_file_error_if_already_bound :
   Errors.t * Relative_path.Set.t
 
 (** This function "declares" top-level names, i.e. adds them into the naming-table provider.
-This caller is expected to ensure that there are no naming-collisons and no case-insensitive naming collisions. *)
+This caller is expected to ensure that there are no naming-collisions and no case-insensitive naming collisions. *)
 val ndecl_file_skip_if_already_bound :
   Provider_context.t -> Relative_path.t -> FileInfo.t -> unit

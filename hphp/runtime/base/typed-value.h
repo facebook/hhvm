@@ -17,7 +17,6 @@
 #pragma once
 
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/lazy-class.h"
 #include "hphp/util/type-scan.h"

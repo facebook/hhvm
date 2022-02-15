@@ -5444,7 +5444,7 @@
 .text._ZN4HPHP13zend_freedtoaEPc*
 .text._ZN4HPHP9zend_dtoaEdiiPiS0_PPc*
 .text._ZN4HPHPL6BallocEi*
-.text._ZN4HPHPL6quoremEPNS_6BigintES1_*
+.text._ZN4HPHPL6quorumEPNS_6BigintES1_*
 .text._ZN4HPHPL7multaddEPNS_6BigintEii*
 .text._ZN4HPHPL3d2bEdPiS0_*
 .text._ZN4HPHPL7lo0bitsEPj*

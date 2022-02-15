@@ -72,7 +72,7 @@ struct IRInstruction;
  * primarily used for inout stack slots with CallBuiltin.
  *
  * `backtrace' represents the set of locals that may be accessed due to
- * backtracing. They are currently separated out to avoid pessimizing the loads
+ * backtracking. They are currently separated out to avoid pessimizing the loads
  * AliasClass.
  *
  * If there is an overlap between `loads' and `kills', then `kills' takes

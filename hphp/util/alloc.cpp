@@ -696,7 +696,7 @@ struct JEMallocInitializer {
     dummy += "!";         // so the definition of dummy isn't optimized out
 #endif  /* __GLIBC__ */
 
-    // Enable backtracing through PHP frames (t9814472).
+    // Enable backtracking through PHP frames (t9814472).
     setenv("UNW_RBP_ALWAYS_VALID", "1", false);
 
     init_numa();

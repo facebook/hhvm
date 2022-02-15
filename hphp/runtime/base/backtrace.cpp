@@ -284,7 +284,7 @@ BTFrame getPrevActRec(
     }
 
     // If we merged tail frames into this AsyncFunctionWaitHandle, iterate over
-    // those indices and retrieve the backtracing information.
+    // those indices and retrieve the backtracking information.
     if (wh->getKind() == c_Awaitable::Kind::AsyncFunction &&
         wh->asAsyncFunction()->hasTailFrames()) {
       auto const afwh = wh->asAsyncFunction();

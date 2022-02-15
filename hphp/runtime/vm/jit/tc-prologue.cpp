@@ -64,7 +64,7 @@ void smashFuncCallers(TCA start, ProfTransRec* rec) {
 
 void PrologueTranslator::computeKind() {
   // Update the translation kind if it is invalid, or if it may
-  // have changed (original kind was a profililng kind)
+  // have changed (original kind was a profiling kind)
   if (kind == TransKind::Invalid || kind == TransKind::ProfPrologue) {
     kind = profileFunc(func) ? TransKind::ProfPrologue
                              : TransKind::LivePrologue;

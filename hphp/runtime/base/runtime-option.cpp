@@ -2702,7 +2702,7 @@ void RuntimeOption::Load(
     if (CoreDumpReport) {
       install_crash_reporter();
     }
-    // Binding default dependenant on whether we are using an OSS build or
+    // Binding default dependent on whether we are using an OSS build or
     // not, and that is set at initialization time of CoreDumpReportDirectory.
     Config::Bind(CoreDumpReportDirectory, ini, config,
                  "Debug.CoreDumpReportDirectory", CoreDumpReportDirectory);
@@ -2827,7 +2827,7 @@ void RuntimeOption::Load(
 
   Config::Bind(CustomSettings, ini, config, "CustomSettings");
 
-  // Run initializers depedent on options, e.g., resizing atomic maps/vectors.
+  // Run initializers dependent on options, e.g., resizing atomic maps/vectors.
   refineStaticStringTableSize();
   InitFiniNode::ProcessPostRuntimeOptions();
 

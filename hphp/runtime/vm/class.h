@@ -1306,7 +1306,7 @@ public:
    * The instance bits are a bitfield cache for instanceof checks.  During
    * warmup, we profile the classes and interfaces most commonly checked
    * against in instanceof checks.  Then we cache whether or not this Class
-   * satisifes the check in the corresponding bit.
+   * satisfies the check in the corresponding bit.
    */
   void setInstanceBits();
   void setInstanceBitsAndParents();

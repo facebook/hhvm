@@ -1195,7 +1195,7 @@ let tconst_subsumption
      * parent has a constraint then the child must also have a constraint if it
      * is abstract.
      *
-     * Check that the child's assigned type satisifies parent constraint
+     * Check that the child's assigned type satisfies parent constraint
      *)
     let default =
       MakeType.generic (Reason.Rtconst_no_cstr child_typeconst.ttc_name) name

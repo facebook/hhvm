@@ -234,7 +234,7 @@ ETCH_NAME(_memcpy16):
 
 ETCH_LABEL(32_OR_0):
               //    The path for length == 16 comes through several conditional
-              //    jumps. We expect (and should make) such sitatuions rare
+              //    jumps. We expect (and should make) such situations rare
               //    when this is invoked.
               jnc   ETCH_LABEL(END16)
               movdqu 16(%rsi), %xmm1

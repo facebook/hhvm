@@ -245,7 +245,7 @@ function f(
   (()[$t::C] ==> 1)();    // Disallowed
   (()[rand] ==> 1)(); // Allowed, not a dependent context
   (()[] ==> 1)();     // Allowed
-  (() ==> 1)();       // Allowed. Note that this is logically equivalant to [rand, ctx $f, $t::C]
+  (() ==> 1)();       // Allowed. Note that this is logically equivalent to [rand, ctx $f, $t::C]
 }
 ```
 

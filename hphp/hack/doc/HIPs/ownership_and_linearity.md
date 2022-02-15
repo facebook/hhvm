@@ -106,7 +106,7 @@ Consider Rust. They have locally mutable values, which are analogous to our
 Owned values, and `mut &`s and `&`s, respectively analogous to our Borrowed and
 MaybeOwned. The key is that rust does not have an unowned state - all values are
 owned by a single reference. When a system requires linearity to enable
-mutability, passing an unowned value into the equivilant to a `mut &` is obviously
+mutability, passing an unowned value into the equivalent to a `mut &` is obviously
 unsafe, as that would result in mutations happening to nonlinear values.
 
 Under this proposal, systems that require linearity for the purpose of tracked
@@ -1490,7 +1490,7 @@ system strict _unless_ explicitly opted out.
 
 **A** This makes the system more complicated and is probably the wrong default.
 
-**Q** Do we need a __Soft equivilant?
+**Q** Do we need a __Soft equivalent?
 
 **A** Since unowned can flow into most things, a __Soft doesn't buy much.
 
@@ -1583,7 +1583,7 @@ we will likely revisit this.
 placed on parameters? Can they be inferred?
 
 **A** Ownership annotations will be required. From the perspective of this feature,
-they are equivilant to any other function declaration. Types in compilation may
+they are equivalent to any other function declaration. Types in compilation may
 allow us to avoid this requirement.
 
 **Q** How does this relate to projects like Co-Effects?

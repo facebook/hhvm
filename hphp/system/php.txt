@@ -52,7 +52,7 @@ hphp/system/php/spl/file_handling/SplFileObject.php
 hphp/system/php/spl/file_handling/SplTempFileObject.php
 
 hphp/system/php/lang/ArrayAccess.php
-hphp/system/php/lang/Serializeable.php
+hphp/system/php/lang/Serializable.php
 hphp/system/php/spl/datastructures/SplDoublyLinkedList.php
 hphp/system/php/spl/datastructures/SplQueue.php
 hphp/system/php/spl/datastructures/SplStack.php

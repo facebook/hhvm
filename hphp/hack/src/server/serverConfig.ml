@@ -216,7 +216,7 @@ let convert_auto_namespace_to_map map =
   let json = Hh_json.json_of_string ~strict:true map in
   let pairs = Hh_json.get_object_exn json in
   (* We do a fold instead of a map to filter
-   * out the incorrect entrie as we look at each item *)
+   * out the incorrect entries as we look at each item *)
   List.fold_left ~init:[] ~f:extract_auto_namespace_element pairs
 
 let prepare_auto_namespace_map config =

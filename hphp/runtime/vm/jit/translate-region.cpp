@@ -898,7 +898,7 @@ bool irGenTrySuperInlineFCall(irgen::IRGS& irgs, const Func* callee,
   }
 
   // Let's-a-go!
-  FTRACE_MOD(Trace::sib, 1, "Built ROM succesfully\n");
+  FTRACE_MOD(Trace::sib, 1, "Built ROM successfully\n");
   FTRACE_MOD(Trace::sib, 1, "!!! ROM {} interps:{} {}\n",
              cached ? "(cached)" : "",
              numOps,

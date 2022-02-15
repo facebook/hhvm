@@ -344,7 +344,7 @@ let handle
 
   if commands_needs_writes msg then
     (* IDE edits can come in quick succession and be immediately followed
-     * by time sensitivie queries (like autocomplete). There is a constant cost
+     * by time sensitive queries (like autocomplete). There is a constant cost
      * to stopping and resuming the global typechecking jobs, which leads to
      * flaky experience. To avoid this, we don't restart the global rechecking
      * after IDE edits - you need to save the file again to restart it. *)

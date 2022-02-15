@@ -1494,7 +1494,7 @@ function(_Boost_MISSING_DEPENDENCIES componentvar extravar)
 endfunction()
 
 #
-# Some boost libraries may require particular set of compler features.
+# Some boost libraries may require particular set of compiler features.
 # The very first one was `boost::fiber` introduced in Boost 1.62.
 # One can check required compiler features of it in
 # - `${Boost_ROOT}/libs/fiber/build/Jamfile.v2`;

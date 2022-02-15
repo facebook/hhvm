@@ -374,7 +374,7 @@ struct Generator {
   > m_unique_objects;
 
   // Mapping of object types to their computed actions. We could compute the
-  // action everytime we needed it, but they're stored in this table for
+  // action every time we needed it, but they're stored in this table for
   // memoization. This table is mutable as well since its a cache.
   mutable node_map<const Object*, Action> m_actions; // XXX must be node
 

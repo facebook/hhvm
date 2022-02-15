@@ -271,7 +271,7 @@ struct StringData final : MaybeCountable,
   /*
    * StringData should not generally be allocated on the stack,
    * because references to it could escape.  This function is for
-   * debugging: it asserts that the addres of this doesn't point into
+   * debugging: it asserts that the address of this doesn't point into
    * the C++ stack.
    */
   void checkStack() const;

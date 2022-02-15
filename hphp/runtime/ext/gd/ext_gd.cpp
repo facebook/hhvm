@@ -874,7 +874,7 @@ struct gfxinfo *php_handle_jpeg(const req::ptr<File>& file, Array& info) {
     case M_APP15:
       if (!info.isNull()) {
         if (!php_read_APP(file, marker, info)) {
-          /* read all the app markes... */
+          /* read all the app markers... */
           return result;
         }
       } else {

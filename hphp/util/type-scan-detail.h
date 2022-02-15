@@ -263,7 +263,7 @@ template <typename T> using UnboundedArray =
 
 // Table of type names and scanner function pointers indexed by type-index. At
 // start-up, this table will just have two fixed entries (for the two "unknown"
-// type-indices), but initializating the type scanning machinery will replace it
+// type-indices), but initializing the type scanning machinery will replace it
 // with the proper table.
 struct Metadata {
   const char* const m_name;

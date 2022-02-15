@@ -95,7 +95,7 @@
  * not. Non entry-points assume they have a lock unless explicitly stated.
  *
  * All data is worked on using STL/folly types. Arguments coming in from PHP are
- * immediately converted to their STL equivelants. All data going out are
+ * immediately converted to their STL equivalents. All data going out are
  * converted from STL types as late as possible.
  */
 

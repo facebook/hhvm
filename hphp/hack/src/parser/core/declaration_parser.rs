@@ -1616,7 +1616,7 @@ where
         //
         // variadic-parameter:
         //   ...
-        //   attribute-specification-opt visiblity-modifier-opt type-specifier \
+        //   attribute-specification-opt visibility-modifier-opt type-specifier \
         //     ...  variable-name
         //
         // This function parses the parens as well.

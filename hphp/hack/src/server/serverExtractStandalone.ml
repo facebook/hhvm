@@ -1385,7 +1385,7 @@ end = struct
 
     (* -- Type definitions -------------------------------------------------- *)
 
-    let pp_typedef_visiblity ppf = function
+    let pp_typedef_visibility ppf = function
       | Aast_defs.Transparent -> Fmt.string ppf "type"
       | Aast_defs.Tinternal -> Fmt.string ppf "type"
       | Aast_defs.Opaque -> Fmt.string ppf "newtype"
@@ -1406,7 +1406,7 @@ end = struct
           fixmes
           pp_user_attrs
           t_user_attributes
-          pp_typedef_visiblity
+          pp_typedef_visibility
           t_vis
           (strip_ns nm)
           pp_tparams

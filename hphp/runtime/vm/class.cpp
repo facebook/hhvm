@@ -1299,7 +1299,7 @@ Class::PropSlotLookup Class::getDeclPropSlot(
     // If the property could not be located on the current class, and this
     // class has a parent class, and the current evaluation is a debugger
     // eval with bypassCheck == true, search for the property as a member of
-    // the parent class. The debugger access is not subject to visibilty checks.
+    // the parent class. The debugger access is not subject to visibility checks.
     return m_parent->getDeclPropSlot(ctx, key);
   }
 

@@ -343,7 +343,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
         case mc_op_version:
           // We can only allocate memory in the memory-manager thread so stash
           // the data in a std::string until we get to unserialize(). We use a
-          // sentinal nullptr and a sentinel datatype here.
+          // sentinel nullptr and a sentinel datatype here.
           m_result.m_type = mc_op == mc_op_gets ? KindOfResource : KindOfString;
           m_result.m_data.pstr = nullptr;
           m_stringResult = carbon::valueRangeSlow(reply).str();

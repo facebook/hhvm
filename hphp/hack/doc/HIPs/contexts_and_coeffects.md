@@ -1201,7 +1201,7 @@ However, due to the above, we would need to ban passing mismatching function-typ
 
 This work would necessarily be a prerequisite for adding sound capabilities whose calling conventions aren’t guaranteed by the runtime.
 
-Further questions: Does the ability to do `$x->foo = $my_fun` where `$x` is unknown break this because `$foo` could be not marked as `__MaybeDynFun?` Do we need to hardban this? What does this mean for generics, reified generics, and higher kinded types?
+Further questions: Does the ability to do `$x->foo = $my_fun` where `$x` is unknown break this because `$foo` could be not marked as `__MaybeDynFun?` Do we need to hard ban this? What does this mean for generics, reified generics, and higher kinded types?
 
 Even with all of the above, it might not generally be possible to guarantee safety in all cases, meaning that we can’t soundly roll out unenforced contexts.
 

@@ -2661,7 +2661,7 @@ void remap_locals(const FuncAnalysis& ainfo, php::WideFunc& func,
     if (remapping[i] != i) {
       identityMapping = false;
       // We only have to check one deep because we know that all earlier locals
-      // are already cononicalized.
+      // are already canonicalized.
       auto const newId = remapping[remapping[i]];
       assertx(remapping[newId] == newId);
       remapping[i] = newId;

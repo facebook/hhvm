@@ -121,7 +121,7 @@ Passing file descriptors
   structures for n file descriptors. So the address of a variable declared
   of type ANCIL_FD_BUFFER(n) is suitable as the buffer argument for
   *_with_buffer on n file descriptors.
-  To use this macro, you need <sys/types.h> and <sys/socket.h>. Bevare: with
+  To use this macro, you need <sys/types.h> and <sys/socket.h>. Beware: with
   Solaris, the _XPG4_2 macro must be defined before sys/socket is included.
 
 

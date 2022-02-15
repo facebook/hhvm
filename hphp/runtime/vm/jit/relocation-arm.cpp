@@ -44,7 +44,7 @@ TRACE_SET_MOD(mcg);
  * relocation: for ARM, this includes the following
  *
  *   PC Relative
- *     ADR/ADRP - Builds PC relatative addresses.
+ *     ADR/ADRP - Builds PC relative addresses.
  *     B[.<cc>] (immediate) - Branch to a PC relative address.
  *     BL (immediate) - Branch with link to a PC relative address.
  *     LDR (literal) - Loads a literal from a PC relative address.

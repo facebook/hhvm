@@ -858,7 +858,7 @@ struct WatchmanExtension final : Extension {
         } catch(const std::exception& e) {
           Logger::Error("Error on Watchman client shutdown: %s", e.what());
         } catch(...) {
-          Logger::Error("Unknown errror on Watchman client shutdown");
+          Logger::Error("Unknown error on Watchman client shutdown");
         }
       }
     }

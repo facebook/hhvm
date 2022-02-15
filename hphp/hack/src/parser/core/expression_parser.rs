@@ -2305,7 +2305,7 @@ where
         // We will not attempt to determine if the names give the name of an
         // appropriate type here. That's for the type checker.
         //
-        // The argumment lists are:
+        // The argument lists are:
         //
         //  * for keyed, an optional comma-separated list of
         //    expression => expression pairs

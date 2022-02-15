@@ -21,6 +21,12 @@ type t_global
 
 type t_global_with_pos = Pos.t * t_global
 
+(** Module providing identifiers for type variables. *)
+module Identifier_provider : sig
+  (** Re-initialize identifier provider for each type inference scope. *)
+  val reinitialize : unit -> unit
+end
+
 module Log : sig
   val inference_env_as_value : t -> Typing_log_value.value
 

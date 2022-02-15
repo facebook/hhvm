@@ -585,7 +585,7 @@ bool FuncChecker::checkImmBA(PC& pc, PC const instr) {
 bool FuncChecker::checkImmVSA(PC& pc, PC const /*instr*/) {
   auto const len = decode_iva(pc);
   if (len < 1 || len > ArrayData::MaxElemsOnStack) {
-    error("invalid length of immedate VSA vector %d at offset %d\n",
+    error("invalid length of immediate VSA vector %d at offset %d\n",
           len, offset(pc));
     throw unknown_length{};
   }

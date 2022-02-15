@@ -11039,7 +11039,7 @@ void assign_colors(State& state) {
 
   BlockSet processed(state.unit.blocks.size());
 
-  // Since the block order is dominance preserving, we'll always encouter a
+  // Since the block order is dominance preserving, we'll always encounter a
   // Vreg's def before any of its usages. This means we can color in a single
   // pass over the unit.
   for (auto const b : order) {

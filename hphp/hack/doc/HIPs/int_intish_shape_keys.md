@@ -91,7 +91,7 @@ captures.
 This would remove the need for any changes to shapes and tuples, however to
 maintain the same static safety that we currently have (i.e. we know which
 named and positional captures are valid), these objects will in turn need
-to be special-cased - for example, perhaps `re"/(foo(?<bar>baz))/"` is infered
+to be special-cased - for example, perhaps `re"/(foo(?<bar>baz))/"` is inferred
 to be a `RegexpPattern<tuple(string, string), shape('bar' => string)>` - however,
 if tuples are used as part of the generic, changes will be needed to support
 subtyping.

@@ -419,7 +419,7 @@ let parse_options () =
         " Optimized solver for type variables. Experimental." );
       ( "--reinfer-types",
         Arg.String (fun s -> reinfer_types := Str.split (Str.regexp ", *") s),
-        " List of type hint to be ignored and infered again using global inference."
+        " List of type hint to be ignored and inferred again using global inference."
       );
       ( "--find-refs",
         Arg.Tuple

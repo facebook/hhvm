@@ -1536,7 +1536,7 @@ function substr_count(string $haystack,
  *   at the start'th position from the end of subject.
  * @param int $length - The length of the segment from subject to examine.  If
  *   length is given and is non-negative, then subject will be examined for
- *   length characters after the starting position.  If lengthis given and is
+ *   length characters after the starting position.  If length is given and is
  *   negative, then subject will be examined from the starting position up to
  *   length characters from the end of subject.
  *

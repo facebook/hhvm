@@ -5901,7 +5901,7 @@ std::pair<Type, bool> array_like_set(Type base,
   // Sets aren't allowed on a keyset.
   if (arr.subtypeOf(BKeyset)) return std::make_pair(std::move(rest), true);
 
-  // Otherwise split the array intoits specific array types, do the
+  // Otherwise split the array into its specific array types, do the
   // set on each one, then union the results back together.
   auto result = TBottom;
   auto mightThrow = false;

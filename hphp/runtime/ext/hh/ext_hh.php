@@ -281,7 +281,7 @@ function get_files_with_coverage(): keyset<string>;
 /**
  * Extract coverage data for the file at path $file. The returned vector
  * contains a list of line numbers that were seen at least once while coverage
- * was enablgc_enabled for the file.
+ * was enablegc_enabled for the file.
  *
  * @return a list of covered line numbers
  */

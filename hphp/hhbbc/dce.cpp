@@ -2905,7 +2905,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
   }
 
   /*
-   * The set of locals that may need to be unset by a succesor block.
+   * The set of locals that may need to be unset by a successor block.
    */
   std::vector<std::bitset<kMaxTrackedLocals>>
     locMayNeedUnsetting(func.blocks().size());

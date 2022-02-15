@@ -88,7 +88,7 @@ TODO once we get more consensus about the open questions above
 
 TODO
 
-It's a ton of work. Probably not HAM level, but definitely a major project from the HF perspectivce
+It's a ton of work. Probably not HAM level, but definitely a major project from the HF perspective
 
 ## Prior art
 

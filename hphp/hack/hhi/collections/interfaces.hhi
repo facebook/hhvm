@@ -19,7 +19,7 @@ interface ConstCollection<+Te> extends HH\Rx\Countable {
    * Is the collection empty?
    *
    * @return - Returns `true` if the collection is empty; `false`
-   *           otherswise.
+   *           otherwise.
    */
   public readonly function isEmpty()[]: bool;
   /**

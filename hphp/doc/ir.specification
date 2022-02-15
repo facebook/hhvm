@@ -2628,7 +2628,7 @@ To string conversions:
   iterId, keyId and valId.
 
   If the new iterator is at its end (i.e., has no elements to iterate over),
-  this instruction decrements the refcount of S0 and returns false; otheriwse,
+  this instruction decrements the refcount of S0 and returns false; otherwise,
   it stores a reference to S0 in the new iterator and returns true. If the
   iterator is not at its end, then this instruction stores the iterator's first
   value (and key) into the local variable with index valId (and keyId,

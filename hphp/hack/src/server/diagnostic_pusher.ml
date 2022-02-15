@@ -210,7 +210,7 @@ end = struct
    fun to_push_candidates ~errors_in_ide ~priority_files ->
     let error_count_in_ide = error_count_in_file_map errors_in_ide in
     let to_push = FileMap.empty in
-    (* First push errors in prority files, regardless of error limit. *)
+    (* First push errors in priority files, regardless of error limit. *)
     let (to_push, to_push_candidates, error_count_in_ide) =
       Relative_path.Set.fold
         (priority_files |> Option.value ~default:Relative_path.Set.empty)

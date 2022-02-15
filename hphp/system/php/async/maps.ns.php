@@ -313,7 +313,7 @@ async function mmkw<Tk, Tv, Tr>(
  *                    apply to `$inputs`.
  *
  * @return - An `Awaitable` of `Map` of key/`ResultOrExceptionWrapper` pairs
- *           after the filterin operation has been applied to the values in
+ *           after the filtering operation has been applied to the values in
  *           `$inputs`.
  */
 async function mfw<Tk,T>(

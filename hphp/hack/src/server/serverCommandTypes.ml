@@ -91,7 +91,7 @@ module Done_or_retry = struct
    * This can happen when combining prechecked files and find references.
    * We could store the client with its command somwhere, and come back to it
    * after this additional rechecking is done, but in practice this is ugly to
-   * implement in current atchitecture. What is easier to do instead, is to
+   * implement in current architecture. What is easier to do instead, is to
    * return a special "Retry" response to the client, which will cause it to
    * re-issue the same request (which will once again not be accepted until full
    * check is completed. Since command is the same, its second execution should

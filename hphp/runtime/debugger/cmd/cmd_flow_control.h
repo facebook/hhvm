@@ -52,7 +52,7 @@ struct InterruptSite;
  *    breakpoint is hit without forcing us to interpret everything.
  *
  * The cmd may get interrupted for other reasons, such as an exception, reaching
- * a breakpoint, a hard break, etc. All flow cmds are designed to tollerate this
+ * a breakpoint, a hard break, etc. All flow cmds are designed to tolerate this
  * and remember enough state to determine if they should really transition their
  * state or not.
  */

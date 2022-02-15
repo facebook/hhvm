@@ -891,7 +891,7 @@ also Haskell and others (E-lang, EffScript).
 
 * ScalaSpec: [Scala Language Specification](https://www.scala-lang.org/files/archive/spec/2.11/) (M. Odersky et al.)
 * **ScalaDays’15**: [**Scala** - where it came from, where it is going](https://www.slideshare.net/Odersky/scala-days-san-francisco-45917092) (M. Odersky), pages 44-46
-* **POPL’18**: [Simplicitly](https://dl.acm.org/doi/pdf/10.1145/3158130) (M. Odersky et al.)
+* **POPL’18**: [Simplicity](https://dl.acm.org/doi/pdf/10.1145/3158130) (M. Odersky et al.)
 * **OOPSLA’16**: [...Affordable 2nd-Class Values for Fun and **(Co-)Effect**](https://dl.acm.org/doi/pdf/10.1145/2983990.2984009) (Leo Osvald et al.)
     * https://www.dropbox.com/s/iag4gho34ewzk57/OOPSLA16-coeffects_code-changes%2Bresults_README.pdf?dl=1
     * https://github.com/losvald/scala/compare/2.11.x...losvald:esc#files_bucket

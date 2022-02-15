@@ -1046,7 +1046,7 @@ gdImagePtr Scale(const gdImagePtr src, const unsigned int src_width, const unsig
 }
 
 /*
-  BilinearFixed, BicubicFixed and nearest implementations are rewamped versions of the implementation in CBitmapEx
+  BilinearFixed, BicubicFixed and nearest implementations are revamped versions of the implementation in CBitmapEx
   http://www.codeproject.com/Articles/29121/CBitmapEx-Free-C-Bitmap-Manipulation-Class
   Integer only implementation, good to have for common usages like pre scale very large
   images before using another interpolation methods for the last step.

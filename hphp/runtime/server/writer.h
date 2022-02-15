@@ -153,7 +153,7 @@ protected:
   // extra spacing.
   bool m_prettify;
 
-  // Whether or not we have skiped a comma for this current indent level. Valid
+  // Whether or not we have skipped a comma for this current indent level. Valid
   // json may not have trailing commas such as {"a":4, "b":5,} Since we are
   // writing to a stream, we output *valid* json that has commas preceding all
   // elements except the first, which is equivalent to outputting commas after

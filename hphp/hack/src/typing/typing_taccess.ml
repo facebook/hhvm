@@ -451,8 +451,8 @@ let rec expand ctx env root =
       update_class_name env ctx.id (DependentKind.to_string dep_ty) res )
   | Tintersection tyl ->
     (* Terrible hack (compatible with previous behaviour) that first attempts to project off the
-     * non-type-variable conjunects. If this doesn't succeed, then try the type variable
-     * conjunects, which will cause type-const constraints to be added to the type variables.
+     * non-type-variable conjuncts. If this doesn't succeed, then try the type variable
+     * conjuncts, which will cause type-const constraints to be added to the type variables.
      *)
     let (tyl_vars, tyl_nonvars) =
       List.partition_tf tyl ~f:(fun t ->

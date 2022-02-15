@@ -65,7 +65,7 @@ bool heapObjIsUncounted(HeapObject* obj) {
 
 HeapObject* findHeapObjStart(HeapObject* ptr) {
   if (ptr->kind() == HeaderKind::Object) {
-    // Find memo slots when enqueueing an object.
+    // Find memo slots when enqueuing an object.
     auto const obj = reinterpret_cast<ObjectData*>(ptr);
     auto const objOff = obj->getVMClass()->memoSize();
 

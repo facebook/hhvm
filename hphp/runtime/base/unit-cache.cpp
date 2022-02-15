@@ -834,7 +834,7 @@ struct StaticStringCompare {
   }
 };
 
-// To avoid enqueueing multiple identical prefetch requests, we
+// To avoid enqueuing multiple identical prefetch requests, we
 // maintain a global table of the timestamp of the last prefetch
 // request for each path. We'll only enqueue a new prefetch request
 // for that path if more than some amount has passed since the last

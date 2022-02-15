@@ -150,7 +150,7 @@ void DebugTransport::enqueueOutgoingMessageForClient(
 
   VSDebugLogger::Log(
     VSDebugLogger::LogLevelVerbose,
-    "Enqueueing outgoing message: %s\n",
+    "Enqueuing outgoing message: %s\n",
     folly::toJson(message).c_str()
   );
 

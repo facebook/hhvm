@@ -1286,7 +1286,7 @@ void find_delayed(State& state) {
       block->forEachPred(
         [&] (Block* pred) {
           if (rworklist.push(state.block_state[pred].rpo_order)) {
-            ITRACE(3, "Enqueing block {} for re-processing\n", pred->id());
+            ITRACE(3, "Enqueuing block {} for re-processing\n", pred->id());
           }
         }
       );
@@ -1351,7 +1351,7 @@ void find_delayed(State& state) {
       block->forEachSucc(
         [&] (Block* succ) {
           if (worklist.push(state.block_state[succ].rpo_order)) {
-            ITRACE(3, "Enqueing block {} for re-processing\n", succ->id());
+            ITRACE(3, "Enqueuing block {} for re-processing\n", succ->id());
           }
         }
       );

@@ -930,7 +930,7 @@ void ProxygenServer::onRequest(std::shared_ptr<ProxygenTransport> transport) {
       (getStatus() == RunStatus::STOPPING &&
        m_shutdownState <= ShutdownState::DRAINING_READS)) {
     RequestPriority priority = getRequestPriority(transport->getUrl());
-    VLOG(4) << this << ": enqueing request with path=" << transport->getUrl() <<
+    VLOG(4) << this << ": enqueuing request with path=" << transport->getUrl() <<
       " and priority=" << priority;
     m_enqueuedCount.fetch_add(1, std::memory_order_release);
     transport->setEnqueued();

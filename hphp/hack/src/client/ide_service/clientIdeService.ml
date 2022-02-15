@@ -516,7 +516,7 @@ let rec serve (t : t) : unit Lwt.t =
      (3) keep doing this until we discover that a queue has been closed, which
      is the "cancellation" signal for us to stop our loop.
      The code looks a bit funny because the only way to tell if a queue is closed
-     is when we attemept to awaitingly-read or synchronously-write to it. *)
+     is when we attempt to awaitingly-read or synchronously-write to it. *)
   try%lwt
     (* We mutate the data in `t` which is why we don't return a new `t` here. *)
     let%lwt next_action =

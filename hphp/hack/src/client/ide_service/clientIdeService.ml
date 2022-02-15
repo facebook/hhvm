@@ -257,7 +257,7 @@ let rpc
 
       (* when might t.active_rpc_count <> 0? well, if the caller did
          Lwt.pick [rpc t message1, rpc t message2], then active_rpc_count will
-         reach a peak of 2, then when the first rpc has finished it will go dowwn
+         reach a peak of 2, then when the first rpc has finished it will go down
          to 1, then when the second rpc has finished it will go down to 0. *)
 
       (* Discussion about why the following is safe, even if multiple people call rpc:

@@ -147,6 +147,7 @@ set(HHBC_AST_SRCS
   "hhbc/hhbc_ast_ffi_cbindgen.rs"
   "hhbc/hhbc_id.rs"
   "emitter/instruction_sequence.rs"
+  "emitter/iterator.rs"
   "emitter/label.rs"
   "emitter/local.rs"
   "emitter/symbol_refs_state.rs"

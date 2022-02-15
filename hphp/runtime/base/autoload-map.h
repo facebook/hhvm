@@ -69,38 +69,27 @@ struct AutoloadMap {
   virtual bool isNative() const noexcept = 0;
 
   /**
-   * Given the name of a type and the kind of type we're looking for,
-   * return the absolute path of the file defining that type.
+   * Given a symbol and the kind we're looking for, return the absolute path
+   * of the file defining that symbol.
    *
-   * Return None if the file is defined in zero places or more than
-   * one place.
+   * Return None if the file is defined in zero or more than one place.
    */
-  Optional<String> getFile(KindOf kind,
-                                  const String& typeName) {
+  Optional<String> getFile(KindOf kind, const String& symbol) {
     switch (kind) {
-      case AutoloadMap::KindOf::Type:
-        return getTypeFile(typeName);
-      case AutoloadMap::KindOf::Function:
-        return getFunctionFile(typeName);
-      case AutoloadMap::KindOf::Constant:
-        return getConstantFile(typeName);
-      case AutoloadMap::KindOf::TypeAlias:
-        return getTypeAliasFile(typeName);
+      case AutoloadMap::KindOf::Type: return getTypeFile(symbol);
+      case AutoloadMap::KindOf::Function: return getFunctionFile(symbol);
+      case AutoloadMap::KindOf::Constant: return getConstantFile(symbol);
+      case AutoloadMap::KindOf::TypeAlias: return getTypeAliasFile(symbol);
     }
     not_reached();
   }
 
-  Array getSymbols(KindOf kind,
-                   const String& path) {
+  Array getSymbols(KindOf kind, const String& path) {
     switch (kind) {
-      case AutoloadMap::KindOf::Type:
-        return getFileTypes(path);
-      case AutoloadMap::KindOf::Function:
-        return getFileFunctions(path);
-      case AutoloadMap::KindOf::Constant:
-        return getFileConstants(path);
-      case AutoloadMap::KindOf::TypeAlias:
-        return getFileTypeAliases(path);
+      case AutoloadMap::KindOf::Type: return getFileTypes(path);
+      case AutoloadMap::KindOf::Function: return getFileFunctions(path);
+      case AutoloadMap::KindOf::Constant: return getFileConstants(path);
+      case AutoloadMap::KindOf::TypeAlias: return getFileTypeAliases(path);
     }
     not_reached();
   }
@@ -115,14 +104,10 @@ struct AutoloadMap {
   /**
    * Map symbols to files
    */
-  virtual Optional<String> getTypeFile(
-      const String& typeName) = 0;
-  virtual Optional<String> getFunctionFile(
-      const String& functionName) = 0;
-  virtual Optional<String> getConstantFile(
-      const String& constantName) = 0;
-  virtual Optional<String> getTypeAliasFile(
-      const String& typeAliasName) = 0;
+  virtual Optional<String> getTypeFile(const String& typeName) = 0;
+  virtual Optional<String> getFunctionFile(const String& functionName) = 0;
+  virtual Optional<String> getConstantFile(const String& constantName) = 0;
+  virtual Optional<String> getTypeAliasFile(const String& typeAliasName) = 0;
 
   /**
    * Map path to symbols

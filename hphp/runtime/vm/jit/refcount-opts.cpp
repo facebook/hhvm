@@ -1586,7 +1586,7 @@ bool merge_into(Env& /*env*/, RCState& dst, const RCState& src) {
     if (dst.unbalanced_decrefs.size()) {
       // Need to merge the unbalanced_decrefs. For each aset in
       // either, we want the destination to end up with max(aset in
-      // dst, aset in src) occurrances of aset (a kind of "union with
+      // dst, aset in src) occurrences of aset (a kind of "union with
       // counts").
       std::sort(tmp.begin(), tmp.end());
       std::sort(dst.unbalanced_decrefs.begin(), dst.unbalanced_decrefs.end());

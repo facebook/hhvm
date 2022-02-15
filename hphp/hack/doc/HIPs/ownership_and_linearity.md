@@ -34,7 +34,7 @@ There are four states of ownership:
 
 The main differences between each state are the operations allowed on an object
 of that state. Ownership is a property of the linearity of an object. Owned and
-Borrowed objects are enforcibly linear, Unowned objects are not, though they may
+Borrowed objects are enforceably linear, Unowned objects are not, though they may
 be natuarally, and MaybeOwned may or may not be forcibly linear.
 
 Described in terms of the operations allowed on them, the states are as follows:

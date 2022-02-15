@@ -190,7 +190,7 @@ output_mapping('mappings/CP1252.TXT', 'entity_table_cs_cp1252')
 output_mapping('mappings/KOI8-R.TXT', 'entity_table_cs_koi8r')
 #output_mapping('mappings/ROMAN.TXT', 'entity_table_cs_macroman')
 
-# table for encoding csjis is essentially empty
+# table for encoding sjis is essentially empty
 write_mapping_table('entity_table_cs_sjis', [])
 
 make('ents_html401.txt', 'entity_table_html401')

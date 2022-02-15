@@ -101,7 +101,7 @@ struct VanillaDictElm {
     if (isRefcountedType(data.m_type)) scanner.scan(data.m_data.pcnt);
   }
 
-  // Members below here are required for HashTable implemenation.
+  // Members below here are required for HashTable implementation.
   ALWAYS_INLINE const TypedValue* datatv() const {
     return &data;
   }

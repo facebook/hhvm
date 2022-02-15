@@ -37,7 +37,7 @@ let append x (length, list) =
   (length + List.length x, List.append x list)
 
 let rev_append x (length, list) =
-  (* See implementtion notes in [append] about efficiency. *)
+  (* See implementation notes in [append] about efficiency. *)
   (length + List.length x, List.rev_append x list)
 
 let rev (length, list) = (length, List.rev list)

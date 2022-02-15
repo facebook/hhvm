@@ -307,7 +307,7 @@ coro::Task<T> Client::tryWithFallback(F f, bool& didFallback) {
       // It failed. If the main implementation *is* the subprocess
       // implementation, there's no point in trying again. Just
       // rethrow the error. Likewise, if Options has determined we
-      // shouldn't use the subprocess implementaiton, rethrow the
+      // shouldn't use the subprocess implementation, rethrow the
       // error.
       if (m_impl->isSubprocess()) throw;
       if (m_options.m_useSubprocess == Options::UseSubprocess::Never) throw;

@@ -326,7 +326,7 @@ public:
   virtual bool isServerStopping() { return false;}
 
   ///////////////////////////////////////////////////////////////////////////
-  // Pre-implemented utitlity functions.
+  // Pre-implemented utility functions.
 
   /**
    * We define a "server object" as the part of URL without domain name:

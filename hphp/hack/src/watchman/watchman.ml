@@ -802,7 +802,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       else if within_backoff_time dead_env.reinit_attempts dead_env.dead_since
       then (
         let () =
-          Hh_logger.log "Attemping to reestablish watchman subscription"
+          Hh_logger.log "Attempting to reestablish watchman subscription"
         in
         re_init
           ~prior_clockspec:dead_env.prior_clockspec

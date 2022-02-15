@@ -137,7 +137,7 @@ let multi_threaded_call
   in
   let rec dispatch workers handles acc =
     (* 'worker' represents available workers. *)
-    (* 'handles' represents pendings jobs. *)
+    (* 'handles' represents pending jobs. *)
     (* 'acc' are the accumulated results. *)
     match workers with
     | None when not @@ List.exists handles ~f:is_current ->

@@ -1967,7 +1967,7 @@ std::string deserializeProfData(const std::string& filename,
     // During deserialization we didn't merge the loaded units because
     // we wanted to pick and choose the hot Funcs and Classes. But we
     // need to merge them before we start serving traffic to ensure we
-    // don't have inconsistentcies (eg a persistent memoized Func
+    // don't have inconsistencies (eg a persistent memoized Func
     // wrapper might have been merged, while its implementation was
     // not; since the implementation has an internal name, there won't
     // be an autoload entry for it, so unless something else causes

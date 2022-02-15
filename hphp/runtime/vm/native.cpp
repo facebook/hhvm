@@ -331,7 +331,7 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
         // No need to coerce when passed a null for a nullable type
         continue;
       }
-      // Arg isn't null, so treat it like the underlying type for coersion
+      // Arg isn't null, so treat it like the underlying type for coercion
       // purposes.  The ABI-passed type will still be mixed/Variant.
       targetType = tc.underlyingDataType();
     }

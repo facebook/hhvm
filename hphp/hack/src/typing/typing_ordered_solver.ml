@@ -485,7 +485,7 @@ end = struct
   (** Once a CC has been solved, the CCs it was blocking have received additional edges
       and are not blocked anymore by this CC. The said CC can be removed as a blocker
       via this function.
-      This function alse returns a set or newly unblocked CCs which will be
+      This function also returns a set or newly unblocked CCs which will be
       ready to solve next. *)
   let make_non_blocking ((cc, unblocked) : t * RepSet.t) (rep : Rep.t) :
       t * RepSet.t =

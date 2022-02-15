@@ -17,7 +17,7 @@ fn debugger_eval_should_modify(tast: &[ast::Def]) -> Result<bool> {
     etc.); we assert that the first thing is a Markup statement, and
     we only want to modify if there was exactly one user def (both 0
     user defs and > 1 user def are valid situations where we pass the
-    program through unmodififed)
+    program through unmodified)
     */
     if tast
         .first()

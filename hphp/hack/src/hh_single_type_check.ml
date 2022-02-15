@@ -2540,7 +2540,7 @@ let decl_and_run_mode
   (match mode with
   | Dump_deps ->
     (* In addition to actually recording the dependencies in shared memory,
-       we build a non-hashed respresentation of the dependency graph
+       we build a non-hashed representation of the dependency graph
        for printing. *)
     let get_debug_trace root obj =
       let root = Typing_deps.Dep.variant_to_string root in
@@ -2558,7 +2558,7 @@ let decl_and_run_mode
   (match mode with
   | Dump_glean_deps ->
     (* In addition to actually recording the dependencies in shared memory,
-       we build a non-hashed respresentation of the dependency graph
+       we build a non-hashed representation of the dependency graph
        for printing. In the callback we receive this as dep_right uses dep_left. *)
     let get_debug_trace dep_right dep_left =
       HashSet.add dbg_glean_deps (dep_left, dep_right)

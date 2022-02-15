@@ -324,7 +324,7 @@ DEBUG_ONLY std::string show(const SSATmpSet& s) {
   Data-flow state for each block. We keep track of the various sets
   using bitsets, indexed by the SSATmp id defined (we don't attempt to
   sink multi-def instructions currently). If these sets prove to be
-  sufficiently sparse, a different represention may be called for. The
+  sufficiently sparse, a different representation may be called for. The
   conflict sets aren't stored, as they are calculated on demand.
 */
 struct BlockState {

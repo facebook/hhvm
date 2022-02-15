@@ -18,7 +18,7 @@ enum WriteMode: int {
    * the file.
    *
    * If the file exits, it is not truncated (as with `TRUNCATE`), and the call
-   * suceeds (unlike `EXCLUSIVE_CREATE`).
+   * succeeds (unlike `EXCLUSIVE_CREATE`).
    */
   OPEN_OR_CREATE = OS\O_CREAT;
 

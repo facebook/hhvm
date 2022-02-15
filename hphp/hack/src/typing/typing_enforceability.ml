@@ -15,7 +15,7 @@ module MakeType = Typing_make_type
 module Env = Typing_env
 
 let wrap_like ty =
-  let r = Typing_reason.Renforceable (get_pos ty) in
+  let r = Typing_reason.Reinforceable (get_pos ty) in
   MakeType.like r ty
 
 let get_enforcement (env : env) (ty : decl_ty) : Typing_defs.enforcement =

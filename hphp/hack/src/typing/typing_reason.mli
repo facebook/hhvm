@@ -140,7 +140,7 @@ type _ t_ =
   | Rcstr_on_generics : Pos_or_decl.t * pos_id -> 'phase t_
   | Rlambda_param : Pos.t * locl_phase t_ -> locl_phase t_
   | Rshape : Pos.t * string -> locl_phase t_
-  | Renforceable : Pos_or_decl.t -> 'phase t_
+  | Reinforceable : Pos_or_decl.t -> 'phase t_
   | Rdestructure : Pos.t -> locl_phase t_
   | Rkey_value_collection_key : Pos.t -> locl_phase t_
   | Rglobal_class_prop : Pos_or_decl.t -> 'phase t_

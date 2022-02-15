@@ -656,7 +656,7 @@ let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
     let right_expected_ty =
       if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
         MakeType.locl_like
-          (Reason.Renforceable (get_pos expected_ty))
+          (Reason.Reinforceable (get_pos expected_ty))
           expected_ty
       else
         expected_ty

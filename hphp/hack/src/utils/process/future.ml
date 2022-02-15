@@ -129,7 +129,7 @@ let create_default_error_instance (error : string) =
   create_error_instance (module DefaultError) error
 
 (* Given an optional deadline, constructs a timeout time span, in seconds,
-    relative to the current time (dealine - now). If the current time is past
+    relative to the current time (deadline - now). If the current time is past
     the deadline, the timeout is 0. If the deadline is not specified,
     the max timeout value is returned. *)
 let timeout_of_deadline deadline ~max_timeout =

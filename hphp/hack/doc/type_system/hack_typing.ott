@@ -137,7 +137,7 @@ t, u {{ ocaml ty }} :: 'ty_' ::=                           {{ com syntax of type
   | ( t )  :: S :: paren {{ coq [[t]] }}    {{ com parentheses }} {{ ocaml [[t]] }}
   | ( t1 , .... , tn ) :: :: tuple          {{ com tuple }}
   | shape ( sft1 , .. , sftn ) :: :: shape  {{ com closed shape (all field names are assumed to be disjoint) }}
-  | shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfnm )   :: :: openshape  {{ com open shape (all field names are ssumed to be disjoint) }}
+  | shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfnm )   :: :: openshape  {{ com open shape (all field names are assumed to be disjoint) }}
   | function ( t1 , .. , tn ) : t           :: :: function {{ com function type }}
   | function ( t1 , .. , tn , t0 vardots ) : t :: :: variadicfunction {{ com variadic function type }}
   | vec < t > :: :: vec {{ com vector }}

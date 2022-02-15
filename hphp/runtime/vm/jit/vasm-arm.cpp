@@ -972,7 +972,7 @@ void Vgen::emit(const jcc& i) {
     recordAddressImmediate();
     poolLiteral(*env.cb, env.meta, (uint64_t)makeTarget32(a->frontier()),
                 32, false);
-    a->bind(&data);  // This will be remmaped during the handleLiterals phase.
+    a->bind(&data);  // This will be remapped during the handleLiterals phase.
     a->Ldr(rAsm_w, &data);
     a->Br(rAsm);
     a->bind(&skip);

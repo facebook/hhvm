@@ -138,7 +138,7 @@ type changed =
    temporary fresh objects will sit root-less in the minor heap and get
    collected for very cheap. If we instead used the fresh results as
    replacements of the originals we would create roots for them and may
-   eventually have to collect the original copies with a constly compaction
+   eventually have to collect the original copies with a costly compaction
    of the major heap *)
 let with_default ~default (renv, res, changed) =
   match changed with

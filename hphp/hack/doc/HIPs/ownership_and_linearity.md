@@ -926,7 +926,7 @@ function based. It has some similar properties to our system, but considers
 non-unique <: unique because of its functional nature, such that you can
 pass uniq values into a function accepting non-uniq, but what you get out is
 nonuniq. In general, these all apply to consumed inputs, thus they don't have
-the borrowed state. They do have a generic on types to specify propogation
+the borrowed state. They do have a generic on types to specify propagation
 of uniqness, but again, this requires the move in -> move out scenario.
 
 [Idris](http://docs.idris-lang.org/en/latest/reference/uniqueness-types.html):

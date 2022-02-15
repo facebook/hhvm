@@ -29,7 +29,7 @@ Capability: a permission or description of a permission. For example, one might 
 
 Context: a higher level representation of a set of capabilities. A function may be comprised of one or more contexts which represent the set union of the underlying capabilities.
 
-Example context: for the purpose for the rest of the defintions, a context created solely for the purpose of this document rather than for intended release.
+Example context: for the purpose for the rest of the definitions, a context created solely for the purpose of this document rather than for intended release.
 
 The Pure Context: A simple way of saying the context representing the empty list of capabilities `{}`.
 

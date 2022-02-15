@@ -372,7 +372,7 @@ struct SSAConverter {
   // it at this label, chase backwards until we find a definition.
   Vreg read(Vlabel label, Vreg pre) {
     while (true) {
-      // Look for a defintiion at this point
+      // Look for a definition at this point
       auto const it = defAtBlock.find({label, pre});
       if (it != defAtBlock.end()) {
         // We found a definition. If it's valid, we can use it,

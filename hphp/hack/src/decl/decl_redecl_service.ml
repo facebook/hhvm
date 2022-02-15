@@ -592,7 +592,7 @@ let redo_type_decl
     Relative_path.Map.fold defs ~init:FileInfo.empty_names ~f:(fun _ ->
         FileInfo.merge_names)
   in
-  (* Some of the defintions are already in the old heap, left there by a
+  (* Some of the definitions are already in the old heap, left there by a
    * previous lazy check *)
   let (oldified_defs, current_defs) =
     Decl_utils.split_defs all_defs previously_oldified_defs

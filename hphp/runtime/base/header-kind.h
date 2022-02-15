@@ -145,7 +145,7 @@ enum class GCBits : uint8_t {};
  * [ objoff | kind | marks |              ] MemoData
  * [        | kind | marks | tyindex:16   ] Cpp, SmallMalloc (MallocNode)
  * [ index  | kind | marks | tyindex:16   ] BigMalloc (MallocNode)
- * [ index  | kind | marks | kIndexUnkown ] BigObj (MallocNode)
+ * [ index  | kind | marks | kIndexUnknown ] BigObj (MallocNode)
  * [ size   | kind | marks |              ] Free, Hole (FreeNode)
  * [        | kind |       |              ] Slab
  */

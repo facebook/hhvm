@@ -1633,7 +1633,7 @@ functor
         Typing_deps.allow_dependency_table_reads env.deps_mode deptable_unlocked
       in
 
-      (* Checking this before starting typechecking because we want to attribtue
+      (* Checking this before starting typechecking because we want to attribute
        * big rechecks to rebases, even when restarting is disabled *)
       if
         genv.local_config.ServerLocalConfig.hg_aware_recheck_restart_threshold

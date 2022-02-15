@@ -1805,7 +1805,7 @@ function dom_element_has_attribute(DOMElement $obj, string $name): bool {
 function dom_element_has_attribute_ns(DOMElement $obj,
                                       string $namespaceuri,
                                       string $localname): bool {
-  return $obj->hasAttribtueNS($namespaceuri, $localname);
+  return $obj->hasAttributeNS($namespaceuri, $localname);
 }
 
 function dom_element_set_id_attribute(DOMElement $obj,

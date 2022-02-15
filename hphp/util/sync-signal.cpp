@@ -34,7 +34,7 @@
 namespace HPHP {
 
 /*
- * Handle some asynchronous signals in a syncrhonous way.
+ * Handle some asynchronous signals in a synchronous way.
  *
  * It is hard to write a nontrivial signal handler. A signal can arrive any
  * time, including when a signal handler is already executing; it can be

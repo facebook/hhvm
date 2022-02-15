@@ -377,7 +377,7 @@ function set_file_buffer(resource $stream, int $buffer): int;
  * @param resource $server_socket - The server socket to accept a connection
  *   from.
  * @param float $timeout - Override the default socket accept timeout. Time
- *   should be given in seconds. Negative value are interpretted as default
+ *   should be given in seconds. Negative value are interpreted as default
  *   timeout.
  * @param mixed $peername - Will be set to the name (address) of the client
  *   which connected, if included and available from the selected transport.

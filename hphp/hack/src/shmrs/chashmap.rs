@@ -302,13 +302,6 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
         self.maps[shard_index].read().unwrap()
     }
 
-    /// Access the map that belongs to the given key for reading.
-    pub fn read_map<R>(&self, key: &K, f: impl FnOnce(&Map<'shm, K, V, S>) -> R) -> R {
-        let shard_index = self.shard_index_for(key);
-        let map = self.maps[shard_index].read().unwrap();
-        f(&map)
-    }
-
     /// Empty a shard.
     fn empty_shard<'a>(shard: &mut Shard<'shm, 'a, K, V, S>) {
         // Remove all values that might point to evictable data.
@@ -553,10 +546,8 @@ mod integration_tests {
         }
 
         for (key, values) in expected {
-            cmap.read_map(&key, |map| {
-                let U64Value(value) = map[&key];
-                assert!(values.contains(&value));
-            });
+            let value = cmap.get(&key).unwrap().0;
+            assert!(values.contains(&value));
         }
 
         assert_eq!(unsafe { libc::munmap(mmap_ptr, MEM_HEAP_SIZE) }, 0);

@@ -40,7 +40,7 @@ module type Error_instance = sig
   val this : Error.t
 end
 
-(* Future error can be categorized into interanl errors and external
+(* Future error can be categorized into internal errors and external
    environment specific errors. For external errors, the environment
    specific handlers will be used to convert the error into string *)
 type error =

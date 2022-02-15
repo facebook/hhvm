@@ -434,7 +434,7 @@ type t = {
   shm_dirs: string list;
   shm_use_sharded_hashtbl: bool;
   shm_enable_eviction: bool;
-  shm_max_evictable_bytes: int;
+  shm_cache_size: int;
   max_workers: int option;
   max_bucket_size: int;
       (** max_bucket_size is the default bucket size for ALL users of MultiWorker unless they provide a specific override max_size *)
@@ -610,7 +610,7 @@ let default =
     shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir];
     shm_use_sharded_hashtbl = false;
     shm_enable_eviction = false;
-    shm_max_evictable_bytes = 3 * 1024 * 1024 * 1024;
+    shm_cache_size = 3 * 1024 * 1024 * 1024;
     max_workers = None;
     max_bucket_size = Bucket.max_size ();
     use_dummy_informant = true;
@@ -938,11 +938,8 @@ let load_ fn ~silent ~current_version overrides =
       ~current_version
       config
   in
-  let shm_max_evictable_bytes =
-    int_
-      "shm_max_evictable_bytes"
-      ~default:default.shm_max_evictable_bytes
-      config
+  let shm_cache_size =
+    int_ "shm_cache_size" ~default:default.shm_cache_size config
   in
   let max_workers = int_opt "max_workers" config in
   let max_bucket_size =
@@ -1447,7 +1444,7 @@ let load_ fn ~silent ~current_version overrides =
     shm_dirs;
     shm_use_sharded_hashtbl;
     shm_enable_eviction;
-    shm_max_evictable_bytes;
+    shm_cache_size;
     max_workers;
     max_bucket_size;
     use_dummy_informant;

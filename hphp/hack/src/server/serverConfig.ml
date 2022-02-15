@@ -83,10 +83,10 @@ let make_sharedmem_config config options local_config =
       ~default:local_config.ServerLocalConfig.shm_enable_eviction
       config
   in
-  let shm_max_evictable_bytes =
+  let shm_cache_size =
     int_
-      "shm_max_evictable_bytes"
-      ~default:local_config.ServerLocalConfig.shm_max_evictable_bytes
+      "shm_cache_size"
+      ~default:local_config.ServerLocalConfig.shm_cache_size
       config
   in
   let shm_min_avail =
@@ -102,7 +102,7 @@ let make_sharedmem_config config options local_config =
       shm_dirs;
       shm_use_sharded_hashtbl;
       shm_enable_eviction;
-      shm_max_evictable_bytes;
+      shm_cache_size;
       shm_min_avail;
       compression;
     }

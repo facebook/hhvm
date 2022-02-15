@@ -24,7 +24,7 @@ type config = {
   hash_table_pow: int;
   shm_use_sharded_hashtbl: bool;
   shm_enable_eviction: bool;
-  shm_max_evictable_bytes: int;
+  shm_cache_size: int;
   shm_dirs: string list;
   shm_min_avail: int;
   log_level: int;
@@ -44,7 +44,7 @@ let default_config =
     shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir];
     shm_use_sharded_hashtbl = false;
     shm_enable_eviction = false;
-    shm_max_evictable_bytes = 3 * 1024 * 1024 * 1024 (* 3 GiB *);
+    shm_cache_size = 3 * 1024 * 1024 * 1024 (* 3 GiB *);
     shm_min_avail = gig / 2;
     (* Half a gig by default *)
     log_level = 0;
@@ -60,7 +60,7 @@ let empty_config =
     shm_dirs = [];
     shm_use_sharded_hashtbl = false;
     shm_enable_eviction = false;
-    shm_max_evictable_bytes = 0;
+    shm_cache_size = 0;
     shm_min_avail = 0;
     log_level = 0;
     sample_rate = 0.0;
@@ -76,7 +76,7 @@ type handle = private {
   h_num_workers_val: int;
   h_shm_use_sharded_hashtbl: bool;
   h_shm_enable_eviction: bool;
-  h_shm_max_evictable_bytes: int;
+  h_shm_cache_size: int;
   h_sharded_hashtbl_fd: Unix.file_descr;
 }
 

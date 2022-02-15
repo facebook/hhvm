@@ -250,7 +250,7 @@ static size_t heap_size;
 static size_t hash_table_pow;
 static size_t shm_use_sharded_hashtbl;
 static size_t shm_enable_eviction;
-static size_t shm_max_evictable_bytes_b;
+static size_t shm_cache_size_b;
 
 /* Used for the shared hashtable */
 static uint64_t hashtbl_size;
@@ -934,7 +934,7 @@ CAMLprim value hh_shared_init(
   );
   CAMLlocal2(
     config_shm_enable_eviction,
-    config_shm_max_evictable_bytes
+    config_shm_cache_size
   );
 
   config_global_size_val = Field(config_val, 0);
@@ -942,7 +942,7 @@ CAMLprim value hh_shared_init(
   config_hash_table_pow_val = Field(config_val, 2);
   config_shm_use_sharded_hashtbl = Field(config_val, 3);
   config_shm_enable_eviction = Field(config_val, 4);
-  config_shm_max_evictable_bytes = Field(config_val, 5);
+  config_shm_cache_size = Field(config_val, 5);
 
   set_sizes(
     Long_val(config_global_size_val),
@@ -952,7 +952,7 @@ CAMLprim value hh_shared_init(
   );
   shm_use_sharded_hashtbl = Bool_val(config_shm_use_sharded_hashtbl);
   shm_enable_eviction = Bool_val(config_shm_enable_eviction);
-  shm_max_evictable_bytes_b = Long_val(config_shm_max_evictable_bytes);
+  shm_cache_size_b = Long_val(config_shm_cache_size);
 
   // None -> NULL
   // Some str -> String_val(str)
@@ -974,7 +974,7 @@ CAMLprim value hh_shared_init(
     assert(memfd_shmffi >= 0);
     assert(SHARED_MEM_INIT + shared_mem_size <= SHARDED_HASHTBL_MEM_ADDR);
     char *mem_addr = memfd_map(memfd_shmffi, SHARDED_HASHTBL_MEM_ADDR, SHARDED_HASHTBL_MEM_SIZE);
-    shmffi_init(mem_addr, SHARDED_HASHTBL_MEM_SIZE, shm_max_evictable_bytes_b);
+    shmffi_init(mem_addr, SHARDED_HASHTBL_MEM_SIZE, shm_cache_size_b);
   }
 
   // Keeping the pids around to make asserts.
@@ -1014,7 +1014,7 @@ CAMLprim value hh_shared_init(
   Store_field(connector, 4, num_workers_val);
   Store_field(connector, 5, config_shm_use_sharded_hashtbl);
   Store_field(connector, 6, config_shm_enable_eviction);
-  Store_field(connector, 7, config_shm_max_evictable_bytes);
+  Store_field(connector, 7, config_shm_cache_size);
   Store_field(connector, 8, Val_handle(memfd_shmffi));
 
   CAMLreturn(connector);
@@ -1032,7 +1032,7 @@ value hh_connect(value connector, value worker_id_val) {
   );
   shm_use_sharded_hashtbl = Bool_val(Field(connector, 5));
   shm_enable_eviction = Bool_val(Field(connector, 6));
-  shm_max_evictable_bytes_b = Long_val(Field(connector, 7));
+  shm_cache_size_b = Long_val(Field(connector, 7));
   memfd_shmffi = Handle_val(Field(connector, 8));
   worker_id = Long_val(worker_id_val);
 #ifdef _WIN32
@@ -1067,7 +1067,7 @@ value hh_get_handle(void) {
   Store_field(connector, 4, Val_long(num_workers));
   Store_field(connector, 5, Val_bool(shm_use_sharded_hashtbl));
   Store_field(connector, 6, Val_bool(shm_enable_eviction));
-  Store_field(connector, 7, Val_bool(shm_max_evictable_bytes_b));
+  Store_field(connector, 7, Val_bool(shm_cache_size_b));
   Store_field(connector, 8, Val_bool(memfd_shmffi));
 
   CAMLreturn(connector);

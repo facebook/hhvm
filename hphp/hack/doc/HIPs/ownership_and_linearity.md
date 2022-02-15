@@ -1067,7 +1067,7 @@ to pass to other borrowed notated states.
 This sentence in isolation is somewhat inscrutable. Based on context and later
 descriptions, I believe this is noting that a shared value may pass into a parameter
 declared as accepting borrowed. This seems *potentially* fine considering it's
-specificalyl stricter, but it doesn't allow making any assumptions about borrowed parameters
+specifically stricter, but it doesn't allow making any assumptions about borrowed parameters
 
 > a unique value may be passed to a procedure expecting a shared parameter, but
 > a borrowed value cannot be

@@ -238,7 +238,7 @@ enough details to discuss it further in next several sections of this doc.
 -- About Loads --
 
 On entry to a region, it is assumed that normal VM reference count invariants
-hold for all memory---specificaly, each reference count on each object in the
+hold for all memory---specifically, each reference count on each object in the
 heap is exactly the number of live pointers to that object.  And in general,
 accesses to memory must maintain this invariant when they are done outside of
 small regions that may temporarily break that invariant.  We make use of this

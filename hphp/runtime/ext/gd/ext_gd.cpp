@@ -7220,7 +7220,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo,
           CHECK_BUFFER_R(dir_entry+8, end, 4, 0);
           entry_offset =
             php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
-          /* if entry needs expading ifd cache and entry is at end of
+          /* if entry needs expanding ifd cache and entry is at end of
              current ifd cache. */
           /* otherwise there may be huge holes between two entries */
           if (entry_offset + entry_length > dir_offset + ifd_size &&

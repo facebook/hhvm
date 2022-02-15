@@ -26,7 +26,7 @@ impl LineBreakMap {
          * off-by-one issues.
          */
         let len = text.len();
-        // Vec capacity grows exponentically, but it starts from 1.
+        // Vec capacity grows exponentially, but it starts from 1.
         // Start with (len / 80) + 1, assuming 80 is average char count in a line.
         let mut result = Vec::with_capacity((len / 80) + 1);
         result.push(0);

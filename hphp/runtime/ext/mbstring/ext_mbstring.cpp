@@ -2428,7 +2428,7 @@ Variant HHVM_FUNCTION(mb_strimwidth,
   string.len = str.size();
 
   if (start < 0 || start > str.size()) {
-    raise_warning("Start position is out of reange");
+    raise_warning("Start position is out of range");
     return false;
   }
 

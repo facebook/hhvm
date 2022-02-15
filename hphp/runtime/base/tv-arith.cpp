@@ -161,7 +161,7 @@ struct Div {
       SystemLib::throwDivisionByZeroExceptionObject();
     }
 
-    // Avoid SIGFPE when dividing the miniumum respresentable integer
+    // Avoid SIGFPE when dividing the minimum respresentable integer
     // by -1.
     auto const minInt = std::numeric_limits<int64_t>::min();
     if (UNLIKELY(u == -1 && t == minInt)) {

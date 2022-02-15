@@ -803,7 +803,7 @@ void emitDiv(IRGS& env) {
           [&] {
             hint(env, Block::Hint::Unlikely);
 
-            // Avoid SIGFPE when dividing the miniumum respresentable integer
+            // Avoid SIGFPE when dividing the minimum respresentable integer
             // by -1.
             push(env, gen(env, DivDbl, toDbl(dividend), toDbl(divisor)));
             gen(env, Jmp, makeExit(env, nextSrcKey(env)));

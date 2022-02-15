@@ -1634,7 +1634,7 @@ let safely_refine_class_type
    * then $x is C should refine to $x:C<t>.
    * We take a simple approach:
    *    For a fresh type parameter T#1, if
-   *      - There is an eqality constraint T#1 = t,
+   *      - There is an equality constraint T#1 = t,
    *      - T#1 is covariant, and T#1 has upper bound t (or mixed if absent)
    *      - T#1 is contravariant, and T#1 has lower bound t (or nothing if absent)
    *    then replace T#1 with t.

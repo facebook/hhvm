@@ -1756,7 +1756,7 @@ static Variant domnode_nodename_read(const Object& obj) {
 static Variant domnode_nodevalue_read(const Object& obj) {
   CHECK_NODE(nodep);
   char *str = nullptr;
-  /* Access to Element node is implemented as a convience method */
+  /* Access to Element node is implemented as a convenience method */
   switch (nodep->type) {
   case XML_ATTRIBUTE_NODE:
   case XML_TEXT_NODE:
@@ -1784,7 +1784,7 @@ static Variant domnode_nodevalue_read(const Object& obj) {
 
 static void domnode_nodevalue_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_NODE(nodep);
-  /* Access to Element node is implemented as a convience method */
+  /* Access to Element node is implemented as a convenience method */
   switch (nodep->type) {
   case XML_ELEMENT_NODE:
   case XML_ATTRIBUTE_NODE:

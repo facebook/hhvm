@@ -1050,7 +1050,7 @@ unique properties _must_ actually be unique dynamically. We prove that via a
 combination of static and dynamic checks (because we can't trust types, therefor
 disallowing us to trust that function invocations comply).
 
-Their hiearchy of states is Unique/Owned <: Owned/Shared <: Borrowed/Shared <: undefined
+Their hierarchy of states is Unique/Owned <: Owned/Shared <: Borrowed/Shared <: undefined
 
 Unique/Owned: only allows for explicitly unique values and they must be moved in
 destructively.

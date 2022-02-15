@@ -1264,7 +1264,7 @@ arg: The state visible externally.
 > refer. There are no restrictions upon the transfer or use of arg expressions
 > around a program
 
-rep: The state inivisible externally.
+rep: The state invisible externally.
 > Can change and be changed, can be stored and retrieved from internal containers
 > but can never be exported from the object to which they belong
 

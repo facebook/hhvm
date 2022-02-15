@@ -1363,7 +1363,7 @@ struct Vinstr {
   const IRInstruction* origin{nullptr};
 
   /*
-   * A union of all possible instructions, descriminated by the op field.
+   * A union of all possible instructions, discriminated by the op field.
    */
 #define O(name, imms, uses, defs) jit::name name##_;
   union { VASM_OPCODES };

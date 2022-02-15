@@ -9,7 +9,7 @@
 
 
 % $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-% Genrating n symbols.
+% Generating n symbols.
 % =============================================================================
 % The actual symbol created in Python interface is internal_symbols/2,
 % The first arity is a string, the second arity is a number.

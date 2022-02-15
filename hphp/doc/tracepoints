@@ -28,7 +28,7 @@ hhvm_mut_concat lsize, rsize
 
   Concatenating strings, causing copy-on-write (cow), or in-place appending
   to a mutable string. Sometimes the mutable string isn't large enough to
-  append in place, but we still count it as a "mut" event. When concatinating
+  append in place, but we still count it as a "mut" event. When concatenating
   more than two strings in a single operation, lsize is the first string
   length, and rsize is the sum of the remaining string lengths.
 

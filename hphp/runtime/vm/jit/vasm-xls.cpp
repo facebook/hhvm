@@ -1175,7 +1175,7 @@ void addPhiGroupMember(const jit::vector<Variable*>& variables,
  *
  * applied to F.
  *
- * Or, taking a pictoral example:
+ * Or, taking a pictorial example:
  *     _________________________________________________________
  *    |                                                         |
  *    |                                           +---------+   |

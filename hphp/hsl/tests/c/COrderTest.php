@@ -15,7 +15,7 @@ use type HH\__Private\MiniTest\{DataProvider, HackTest};
 
 final class COrderTest extends HackTest {
 
-  const type TCubeDimentions =
+  const type TCubeDimensions =
     shape('height' => int, 'width' => int, 'depth' => int);
 
   public static function provideSortableVecs(): vec<(vec<mixed>, bool)> {
@@ -120,7 +120,7 @@ final class COrderTest extends HackTest {
   }
 
   public static function provideSortableVecsOfCubes(
-  ): vec<(vec<self::TCubeDimentions>, bool)> {
+  ): vec<(vec<self::TCubeDimensions>, bool)> {
     $make_cube = (int $h, int $w, int $d) ==>
       shape('height' => $h, 'width' => $w, 'depth' => $d);
 
@@ -138,16 +138,16 @@ final class COrderTest extends HackTest {
 
   <<DataProvider('provideSortableVecsOfCubes')>>
   public function testSortingVecsOfCubes(
-    vec<self::TCubeDimentions> $cubes,
+    vec<self::TCubeDimensions> $cubes,
     bool $expect,
   ): void {
-    $cube_to_volume = (self::TCubeDimentions $cube) ==>
+    $cube_to_volume = (self::TCubeDimensions $cube) ==>
       $cube['height'] * $cube['width'] * $cube['depth'];
     expect(C\is_sorted_by($cubes, $cube_to_volume))->toEqual($expect);
   }
 
   public static function provideSortableTraversablesOfCubes(
-  ): vec<(vec<Traversable<self::TCubeDimentions>>, bool)> {
+  ): vec<(vec<Traversable<self::TCubeDimensions>>, bool)> {
     return Vec\map(
       self::provideSortableVecsOfCubes(),
       $tuple ==> tuple(self::vecToAllTraversableTypes($tuple[0]), $tuple[1]),
@@ -156,10 +156,10 @@ final class COrderTest extends HackTest {
 
   <<DataProvider('provideSortableTraversablesOfCubes')>>
   public function testSortingTraversablesOfCubes(
-    vec<Traversable<self::TCubeDimentions>> $cubes_traversable,
+    vec<Traversable<self::TCubeDimensions>> $cubes_traversable,
     bool $expect,
   ): void {
-    $cube_to_volume = (self::TCubeDimentions $cube) ==>
+    $cube_to_volume = (self::TCubeDimensions $cube) ==>
       $cube['height'] * $cube['width'] * $cube['depth'];
     foreach ($cubes_traversable as $cubes) {
       expect(C\is_sorted_by($cubes, $cube_to_volume))->toEqual(

@@ -291,12 +291,12 @@ std::string dot_cfg(const php::WideFunc& func) {
     ret += folly::format(
       "B{} [ label = \"blk:{}\\n\"+{} ]\n",
       bid, bid, dot_instructions(*func, *b)).str();
-    bool outputed = false;
+    bool outputted = false;
     forEachNormalSuccessor(*b, [&] (BlockId target) {
       ret += folly::format("B{} -> B{};", bid, target).str();
-      outputed = true;
+      outputted = true;
     });
-    if (outputed) ret += "\n";
+    if (outputted) ret += "\n";
     if (!is_single_nop(*b) && b->throwExit != NoBlockId) {
       ret += folly::sformat("B{} -> B{} [color=red];\n", bid, b->throwExit);
     }

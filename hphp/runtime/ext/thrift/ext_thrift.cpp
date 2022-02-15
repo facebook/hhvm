@@ -137,7 +137,7 @@ void HHVM_METHOD(
     exceptionMetadata.declaredException_ref() = apache::thrift::PayloadDeclaredExceptionMetadata();
   } else if (ex_msg.isString()) {
     exceptionMetadataBase.what_utf8() = ex_msg.toString().c_str();
-    apache::thrift::PayloadAppUnknownExceptionMetdata aue;
+    apache::thrift::PayloadAppUnknownExceptionMetadata aue;
     aue.errorClassification().ensure().blame() =
         apache::thrift::ErrorBlame::CLIENT;
     exceptionMetadata.appUnknownException_ref() = std::move(aue);

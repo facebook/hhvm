@@ -270,7 +270,7 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
         // is in `man 7 unix`; relevant parts:
         // - unnamed: 0-length path. As paths are not required to be
         //   null-terminated, this needs to be undicated by the size.
-        //   These might be created by `socketpair()`, for eaxmple.
+        //   These might be created by `socketpair()`, for example.
         // - pathname (common): nothing strange. struct size technically
         //   indicates length, but null terminators are usually set. This
         //   does matter if addr.length() == size of the char array though

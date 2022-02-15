@@ -268,7 +268,7 @@ void normalizeToken(struct Token& token) {
   int32_t type = token.status;
 
   switch (type) {
-    // punctuations
+    // punctuation
     case 0: break;
     case 100: str = s_numMatcher->replaceAll(str, "X"); break;
     // words

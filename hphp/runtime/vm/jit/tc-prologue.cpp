@@ -49,7 +49,7 @@ namespace {
  */
 void smashFuncCallers(TCA start, ProfTransRec* rec) {
   assertOwnsMetadataLock();
-  assertx(rec->isProflogue());
+  assertx(rec->isPrologue());
 
   auto lock = rec->lockCallerList();
 
@@ -112,8 +112,8 @@ void PrologueTranslator::setCachedForProcessFail() {
 
 void PrologueTranslator::smashBackup() {
   if (kind == TransKind::OptPrologue) {
-    assertx(proflogueTransId != kInvalidTransID);
-    auto const rec = profData()->transRec(proflogueTransId);
+    assertx(prologueTransId != kInvalidTransID);
+    auto const rec = profData()->transRec(prologueTransId);
     smashFuncCallers(jit::tc::ustubs().fcallHelperThunk, rec);
   }
 }
@@ -200,10 +200,10 @@ void PrologueTranslator::publishCodeImpl() {
         func->fullName()->data(), nPassed, start);
   func->setPrologue(paramIndex(), start);
 
-  // If we are optimizing, smash the callers of the proflogue.
+  // If we are optimizing, smash the callers of the prologue.
   if (kind == TransKind::OptPrologue) {
-    assertx(proflogueTransId != kInvalidTransID);
-    auto const rec = profData()->transRec(proflogueTransId);
+    assertx(prologueTransId != kInvalidTransID);
+    auto const rec = profData()->transRec(prologueTransId);
     smashFuncCallers(start, rec);
   }
 }

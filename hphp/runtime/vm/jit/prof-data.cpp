@@ -83,8 +83,8 @@ ProfData::ProfData()
                      makeAHMConfig<decltype(m_profilingFuncs)>())
   , m_optimizedSKs(RuntimeOption::EvalPGOFuncCountHint,
                    makeAHMConfig<decltype(m_optimizedSKs)>())
-  , m_proflogueDB(RuntimeOption::EvalPGOFuncCountHint * 2,
-                  makeAHMConfig<decltype(m_proflogueDB)>())
+  , m_prologueDB(RuntimeOption::EvalPGOFuncCountHint * 2,
+                  makeAHMConfig<decltype(m_prologueDB)>())
   , m_dvFuncletDB(RuntimeOption::EvalPGOFuncCountHint * 2,
                   makeAHMConfig<decltype(m_dvFuncletDB)>())
   , m_jmpToTransID(RuntimeOption::EvalPGOFuncCountHint * 10,
@@ -99,12 +99,12 @@ TransID ProfData::allocTransID() {
   return m_transRecs.size() - 1;
 }
 
-TransID ProfData::proflogueTransId(const Func* func, int nArgs) const {
+TransID ProfData::prologueTransId(const Func* func, int nArgs) const {
   auto const numParams = func->numNonVariadicParams();
   if (nArgs > numParams) nArgs = numParams + 1;
 
   return folly::get_default(
-    m_proflogueDB,
+    m_prologueDB,
     PrologueID{func->getFuncId(), nArgs},
     kInvalidTransID
   );
@@ -162,7 +162,7 @@ void ProfData::addTransProfile(TransID transID,
 
 void ProfData::addTransProfPrologue(TransID transID, SrcKey sk, int nArgs,
                                     uint32_t asmSize) {
-  m_proflogueDB.emplace(PrologueID{sk.funcID(), nArgs}, transID);
+  m_prologueDB.emplace(PrologueID{sk.funcID(), nArgs}, transID);
 
   folly::SharedMutex::WriteHolder lock{m_transLock};
   m_transRecs[transID].reset(new ProfTransRec(sk, nArgs, asmSize));
@@ -180,7 +180,7 @@ void ProfData::addProfTrans(TransID transID,
     }
     m_funcProfTrans[sk.funcID()].push_back(transID);
   } else {
-    m_proflogueDB.emplace(PrologueID{sk.funcID(), ptr->prologueArgs()},
+    m_prologueDB.emplace(PrologueID{sk.funcID(), ptr->prologueArgs()},
                           transID);
   }
   m_transRecs.emplace_back(std::move(ptr));

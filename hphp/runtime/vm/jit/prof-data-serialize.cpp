@@ -652,7 +652,7 @@ void write_prof_data(ProfDataSerializer& ser, ProfData* pd) {
     [&] (const ProfTransRec* ptr) {
       auto const transID = ptr->isProfile() ?
         ptr->region()->entry()->profTransID() :
-        pd->proflogueTransId(ptr->func(), ptr->prologueArgs());
+        pd->prologueTransId(ptr->func(), ptr->prologueArgs());
       write_raw(ser, transID);
       write_prof_trans_rec(ser, ptr, pd);
       // forEachTransRec already grabs a read lock, and we're not

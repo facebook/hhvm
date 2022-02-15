@@ -68,7 +68,7 @@ namespace HPHP::jit::mcgen {
 namespace {
 
 /**
- * Given the proflogueTransId for a TransProflogue translation, regenerate the
+ * Given the prologueTransId for a TransPrologue translation, regenerate the
  * prologue (as a TransPrologue).
  *
  * Returns true iff the prologue had an associated dvInit funclet that was
@@ -96,7 +96,7 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
       func, nArgs, TransKind::OptPrologue
     );
     auto& translator = *translatorPtr;
-    translator.proflogueTransId = prologueTransId;
+    translator.prologueTransId = prologueTransId;
     translator.resetCached();
 
     // We don't acquire requisite paperwork etc. here since we are assuming that
@@ -168,7 +168,7 @@ bool regeneratePrologues(Func* func, tc::FuncMetaInfo& info) {
   VMProtect _;
 
   for (int nArgs = 0; nArgs < func->numPrologues(); nArgs++) {
-    TransID tid = profData()->proflogueTransId(func, nArgs);
+    TransID tid = profData()->prologueTransId(func, nArgs);
     if (tid != kInvalidTransID) {
       prologTransIDs.push_back(tid);
     }
@@ -187,7 +187,7 @@ bool regeneratePrologues(Func* func, tc::FuncMetaInfo& info) {
   // enables some type information to flow and thus can eliminate some stores
   // and type checks, but it can also increase the code size by duplicating the
   // whole function body.  Therefore, we only include the function body along
-  // with the DV init if both (a) the function has a single proflogue, and (b)
+  // with the DV init if both (a) the function has a single prologue, and (b)
   // the size of the function is within a certain threshold.
   //
   // The mechanism used to keep the function body separate from the DV init is

@@ -139,7 +139,7 @@ createCallGraphFromProfCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
     auto const transIds = pd->funcProfTransIDs(fid);
     uint64_t totalCalls = 0;
     for (int nargs = 0; nargs <= func->numNonVariadicParams() + 1; nargs++) {
-      auto transId = pd->proflogueTransId(func, nargs);
+      auto transId = pd->prologueTransId(func, nargs);
       if (transId == kInvalidTransID) continue;
 
       FTRACE(1, "  - processing ProfPrologue w/ transId = {}\n", transId);

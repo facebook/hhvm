@@ -1459,7 +1459,7 @@ Hack Native has specifically requested we don't close the door on the possibilit
 of utilizing this system to globally track Arrays and strings in order to avoid
 the need for refcounting them. The major blocker for this is that for that to
 work, those types would need to *never* be unowned, which would result in a huge
-usability degredation.
+usability degradation.
 
 ### Deeper Tracking
 

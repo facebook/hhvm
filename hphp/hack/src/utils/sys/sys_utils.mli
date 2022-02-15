@@ -227,7 +227,7 @@ type processor_info = {
 external processor_info : unit -> processor_info = "hh_processor_info"
 
 (** Calls Unix.select but ignores EINTR, i.e. retries select with
-    an adjusted timout upon EINTR.
+    an adjusted timeout upon EINTR.
     We implement timers using sigalarm which means selects can be
     interrupted. This is a wrapper around EINTR which continues the select if it
     gets interrupted by a signal *)

@@ -1336,7 +1336,7 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
     (*   (3) server failed to load saved-state but was required to do so.     *)
     (* Exit_with Monitor_connection_failure: raised when the lockfile is      *)
     (*   present but connection-attempt to the monitor times out - maybe it's *)
-    (*   under DDOS, or maybe it's declining to answer new connections.       *)
+    (*   under DDoS, or maybe it's declining to answer new connections.       *)
     let message =
       match Exception.unwrap exn with
       | Exit_status.Exit_with code -> Exit_status.show code

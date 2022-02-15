@@ -116,7 +116,7 @@ let handler =
                   ~data:prop_elt.ce_origin));
 
       (* if the props_seen reports multiple origins for a property,
-       * ensure that in none of the origins it is initialisedl
+       * ensure that in none of the origins it is initialised
        * with an enum or class constant *)
       Hashtbl.iteri props_seen ~f:(fun ~key ~data ->
           if more_than_one data then

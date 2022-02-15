@@ -1073,7 +1073,7 @@ fn add_reified_property(tparams: &[Tparam], vars: &mut Vec<ClassVar>) {
     if !tparams.iter().all(|t| t.reified == ReifyKind::Erased) {
         let p = Pos::make_none();
         // varray/vec that holds a list of type structures
-        // this prop will be initilized during runtime
+        // this prop will be initialized during runtime
         let hint = Hint(
             p.clone(),
             Box::new(Hint_::Happly(Id(p.clone(), "\\HH\\varray".into()), vec![])),

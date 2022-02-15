@@ -2160,7 +2160,7 @@ static mbfl_encoding* _php_mb_encoding_handler_ex
     n++;
     var = strtok_r(nullptr, info->separator, &strtok_buf);
   }
-  num = n; /* make sure to process initilized vars only */
+  num = n; /* make sure to process initialized vars only */
 
   /* initialize converter */
   if (info->num_from_encodings <= 0) {

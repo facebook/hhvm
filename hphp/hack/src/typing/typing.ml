@@ -179,7 +179,7 @@ let pack_errs pos ty subtyping_errs =
          continuation *)
       aux (([], var_opt), tys) ~k:(fun tys -> k (ty :: tys))
     (* Case 4: we have a variadic parameter but no error - we're done so
-       pass the remaining unchanged type parameters into the contination
+       pass the remaining unchanged type parameters into the continuation
        to rebuild corrected type params in the right order *)
     | ((_, None), tys) -> k tys
     (* Case 5: no more type parameters - again we're done so pass empty

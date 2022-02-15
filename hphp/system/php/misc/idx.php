@@ -88,7 +88,7 @@ namespace HH {
  * This will instruct the typechecker to validate that the keys are present.
  *
  * The following behavior is deprecated and should not be relied upon.
- * Because of backwards compatiblity, `idx` treats strings like arrays of characters.
+ * Because of backwards compatibility, `idx` treats strings like arrays of characters.
  * This is not allowed by the typechecker, since string is not a KeyedContainer.
  * Indexing into a string can be done safely like so: `$string[4] ?? null`.
  *

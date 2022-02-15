@@ -616,11 +616,11 @@ skip_search:
     if (hp == NULL)
     {
       /* If there was no matching node at this level, we need to
-       * allocate an intersitial node (or the actual node if we're
+       * allocate an interstitial node (or the actual node if we're
        * at the last part of the HDF name) */
       if (s != NULL)
       {
-	/* intersitial */
+	/* interstitial */
 	err = _alloc_hdf (&hp, n, x, NULL, 0, 0, hdf->top);
       }
       else

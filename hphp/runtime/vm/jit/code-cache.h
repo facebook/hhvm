@@ -144,7 +144,7 @@ struct CodeCache {
   const DataBlock& data() const { return m_data; }
 
   /*
-   * Return a View of this CodeCache, selecting blocks approriately depending
+   * Return a View of this CodeCache, selecting blocks appropriately depending
    * on the kind of translation to be emitted.
    */
   View view(TransKind kind = TransKind::Invalid);

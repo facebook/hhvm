@@ -120,9 +120,9 @@ let unbind_tyvar x v =
   let x = set_tyvars_in_tyvar x v ISet.empty in
   x
 
-let occurs_in x occuring_tv ~in_:containing_tv =
-  let occurs = ISet.mem containing_tv (get_tyvar_occurrences x occuring_tv) in
-  let contains = ISet.mem occuring_tv (get_tyvars_in_tyvar x containing_tv) in
+let occurs_in x occurring_tv ~in_:containing_tv =
+  let occurs = ISet.mem containing_tv (get_tyvar_occurrences x occurring_tv) in
+  let contains = ISet.mem occurring_tv (get_tyvars_in_tyvar x containing_tv) in
   assert (Bool.equal occurs contains);
   occurs
 

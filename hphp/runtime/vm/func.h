@@ -779,7 +779,7 @@ public:
   ArFunction arFuncPtr() const;
 
   /*
-   * The nativeFuncPtr is a type-punned function pointer to the unerlying
+   * The nativeFuncPtr is a type-punned function pointer to the underlying
    * function which takes the actual argument types, and does the actual work.
    *
    * These are the functions with names prefixed by f_ or t_.

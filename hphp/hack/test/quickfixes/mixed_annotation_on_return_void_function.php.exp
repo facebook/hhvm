@@ -1,2 +1,5 @@
+Change to `void`
+Change to `Awaitable<void>`
+
 function foo(): void {}
 async function bar(): Awaitable<void> {}

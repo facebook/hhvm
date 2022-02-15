@@ -1670,7 +1670,7 @@ To string conversions:
   `asyncSwitchCtrl` unique stub, which tries to resume a pending fast runnable
   ResumableWaitHandle (fast path) if possible, otherwise it will exit VM and
   return control to the asio scheduler (slow path). As with AsyncRetFast, the
-  stack must contain exactly one cell containing uninitialied garbage.
+  stack must contain exactly one cell containing uninitialized garbage.
 
 | LdRetVal<T>, DParam(InitCell), S(FramePtr), NF
 

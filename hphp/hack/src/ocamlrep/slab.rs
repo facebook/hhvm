@@ -71,7 +71,7 @@ type Slab<'a> = [OpaqueValue<'a>];
 trait SlabTrait {
     fn from_bytes(bytes: &[u8]) -> &Self;
     fn from_bytes_mut(bytes: &mut [u8]) -> &mut Self;
-    // SAFETY: the caller must guarantee that this slab will not be used to read from unitialized
+    // SAFETY: the caller must guarantee that this slab will not be used to read from uninitialized
     // memory.
     unsafe fn from_uninit_slice_mut(bytes: &mut UninitSlice) -> &mut Self;
 
@@ -116,7 +116,7 @@ impl<'a> SlabTrait for Slab<'a> {
     }
 
     unsafe fn from_uninit_slice_mut(bytes: &mut UninitSlice) -> &mut Self {
-        // SAFETY: leading_padding does not read from the pointer (this points at unitialized
+        // SAFETY: leading_padding does not read from the pointer (this points at uninitialized
         // memory and should not be read from).
         let padding = leading_padding(bytes.as_mut_ptr(), bytes.len());
         let ptr = bytes[padding..].as_mut_ptr() as *mut OpaqueValue<'a>;
@@ -500,7 +500,7 @@ pub fn copy_slab(src: &[u8], dest: &mut UninitSlice) -> Result<(), SlabIntegrity
 
     let src_slab = Slab::from_bytes(src);
 
-    // SAFETY: UninitSlice expects us to not write unitialized Bytes, or use this to read. This
+    // SAFETY: UninitSlice expects us to not write uninitialized Bytes, or use this to read. This
     // code actually does read, but only after having initialized the memory by copying into the
     // UninitSlice.
     let dest_slab = unsafe { Slab::from_uninit_slice_mut(dest) };

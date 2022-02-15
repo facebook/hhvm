@@ -1144,13 +1144,13 @@ A major issue for this proposal, as well as hack generally, is the existence of 
 Somewhat ironically, the solution for this is an additional context: `can_dyn_call`. `can_dyn_call` gives the capability to invoke functions on receivers that are not known to hack to be static function types. Common examples include `HH\dynamic_fun` and invoking off of `mixed` via a `HH_FIXME`.
 
 ```
-function call_dynamicly_bad(string $funname, mixed $fun): void {
+function call_dynamically_bad(string $funname, mixed $fun): void {
   // HH_FIXME[4009]
   $fun('foobar'); // this would be unfixmeable
   HH\dynamic_fun($funname)('foobar');
 }
 
-function call_dynamicly_safe(string $funname, mixed $fun)[can_dyn_call]: void {
+function call_dynamically_safe(string $funname, mixed $fun)[can_dyn_call]: void {
   // HH_FIXME[4009] - still needs to be fixmed
   $fun('foobar'); // but no additional unfixmeable error
   HH\dynamic_fun($funname)('foobar');

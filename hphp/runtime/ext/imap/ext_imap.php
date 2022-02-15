@@ -227,7 +227,7 @@ function imap_fetchstructure(resource $imap_stream,
  * @param resource $imap_stream - An IMAP stream returned by imap_open().
  * @param int $caches - Specifies the cache to purge. It may one or a
  * combination of the following constants: IMAP_GC_ELT (message cache
- * elements), IMAP_GC_ENV (enveloppe and bodies), IMAP_GC_TEXTS (texts).
+ * elements), IMAP_GC_ENV (envelope and bodies), IMAP_GC_TEXTS (texts).
  * @return bool - Returns TRUE.
  */
 <<__Native>>

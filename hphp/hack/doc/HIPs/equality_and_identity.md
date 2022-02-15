@@ -42,10 +42,10 @@ We'd like to simplify and correct the mistakes of the previous design
 1. To test object pointer equality, use builtin `is_same_obj($a, $b)` that does a pointer check
    1. Potentially would require a marker interface such as `IIdentityTestable` (name to be bikeshed).
    2. In that case, whether `is_same_obj` is free standing or works as `$a→isSame($b)` to be bikeshed
-      1. In the method case, this is non-overrideable
+      1. In the method case, this is non-overridable
 2. To get object structural equality require explicit opt-in via an interface such as `IEquatable`
    1. To be bikeshed: does this allow using `==` or does it do something like `$a→eq($b)`
-      1. In the method case, this is non-overrideable
+      1. In the method case, this is non-overridable
    2. Would require all properties to be either values or also `IEquatable`
    3. Note that this would probably do an identity test first as an optimization
       1. This also would require reflexivity for the optimization to be sound.

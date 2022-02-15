@@ -56,7 +56,7 @@ module Shallow_decl_cache_entry = struct
   let get_size ~key:_ ~value:_ = 1
 
   let key_to_log_string : type a. a key -> string =
-   (fun (Shallow_class_decl key) -> "ClasssShallow" ^ key)
+   (fun (Shallow_class_decl key) -> "ClassShallow" ^ key)
 end
 
 module Shallow_decl_cache = Lru_cache.Cache (Shallow_decl_cache_entry)

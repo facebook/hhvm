@@ -38,7 +38,7 @@ namespace HPHP {
  *   };
  *
  *   MyClass obj;
- *   AsyncFunc<MyClass> func(&obj, &MyClasss::doJob);
+ *   AsyncFunc<MyClass> func(&obj, &MyClass::doJob);
  *   func.start(); // this will call obj.doJob() in a separate thread
  *   // do something else
  *   func.waitForEnd();

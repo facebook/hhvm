@@ -6540,7 +6540,7 @@ PropLookupResult<> Index::lookup_static(Context ctx,
       // subclass. For every subclass (including dcls.type itself),
       // start the property lookup from there, and union together all
       // the potential results. This could potentially visit a lot of
-      // parent classes redundently, so tell it not to look into
+      // parent classes redundantly, so tell it not to look into
       // parent classes, unless we're processing dcls.type.
       Optional<PropLookupResult<>> result;
       for (auto const sub : cinfo->subclassList) {

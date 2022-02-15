@@ -74,7 +74,7 @@ struct UnitEmitter {
   void setSha1(const SHA1& sha1) { m_sha1 = sha1; }
 
   /*
-   * Instatiate a runtime Unit*.
+   * Instantiate a runtime Unit*.
    */
   std::unique_ptr<Unit> create() const;
 

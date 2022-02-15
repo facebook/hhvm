@@ -162,7 +162,7 @@ private:
  * Calls from FastCGITransport are invoked through its own worker thread. These
  * callbacks execute their logic in the event base thread and return no data
  * to the transaction. Asynchronous calls /to/ the transport occur in the
- * session event base and are synchronized appropriately within the tranport.
+ * session event base and are synchronized appropriately within the transport.
  *
  * ===== Implementation notes =====
  *

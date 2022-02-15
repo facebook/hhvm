@@ -148,7 +148,7 @@ end = struct
         "Client went away or server took too long to read command. Shutting down client socket.";
       ClientProvider.shutdown_client client;
       env
-    (* Connection dropped off. Its unforunate that we don't actually know
+    (* Connection dropped off. Its unfortunate that we don't actually know
      * which connection went bad (could be any write to any connection to
      * child processes/daemons), we just assume at this top-level that
      * since it's not caught elsewhere, it's the connection to the client.

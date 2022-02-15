@@ -478,7 +478,7 @@ function sodium_crypto_aead_xchacha20poly1305_ietf_encrypt(
   string $key,
 ): string;
 
-///// key deriviation functions (kdf)
+///// key derivation functions (kdf)
 
 function sodium_crypto_kdf_keygen(): string {
   return random_bytes(SODIUM_CRYPTO_KDF_KEYBYTES);

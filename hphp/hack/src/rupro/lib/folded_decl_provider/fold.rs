@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{inherit::Inherited, subst::Subst};
+use super::{inherit::Inherited, subst::Subst, subst::Substitution};
 use crate::alloc::Allocator;
 use crate::decl_defs::{
     CeVisibility, ClassConst, ClassConstKind, ClassEltFlags, ClassEltFlagsArgs, ConsistentKind,
@@ -270,9 +270,13 @@ impl<R: Reason> DeclFolder<R> {
                 }
                 Some(cls) => {
                     let subst = Subst::new(self.alloc, &cls.tparams, tyl);
+                    let substitution = Substitution {
+                        alloc: self.alloc,
+                        subst: &subst,
+                    };
                     // Update `ancestors`.
                     for (&anc_name, anc_ty) in &cls.ancestors {
-                        ancestors.insert(anc_name, subst.instantiate(self.alloc, anc_ty));
+                        ancestors.insert(anc_name, substitution.instantiate(anc_ty));
                     }
                     // Now add `ty`.
                     ancestors.insert(pos_id.id(), ty.clone());

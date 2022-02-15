@@ -435,7 +435,7 @@ module Initialize = struct
   and codeAction = {
     (* Whether code action supports dynamic registration. *)
     codeAction_dynamicRegistration: bool;
-    (* wire: dynamicRegistraction *)
+    (* wire: dynamicRegistration *)
     (* The client support code action literals as a valid
      * response of the `textDocument/codeAction` request. *)
     codeActionLiteralSupport: codeActionliteralSupport option;

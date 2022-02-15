@@ -1259,7 +1259,7 @@ An important quote that also applies to our own system:
 
 These modes are/work as follows:
 
-arg: The state visible externaly.
+arg: The state visible externally.
 > only provide access to the immutable interface of the objects to which they
 > refer. There are no restrictions upon the transfer or use of arg expressions
 > around a program

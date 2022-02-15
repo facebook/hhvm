@@ -779,7 +779,7 @@ struct ExtTSP {
   /*
    * Merge two chains of blocks respecting a given merge 'type' and 'offset'
    *
-   * If mergeType == 0, then the result is a concatentation of two chains.
+   * If mergeType == 0, then the result is a concatenation of two chains.
    * Otherwise, the first chain is cut into two sub-chains at the offset,
    * and merged using all possible ways of concatenating three chains.
    */

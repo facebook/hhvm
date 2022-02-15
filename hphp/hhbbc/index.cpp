@@ -5805,7 +5805,7 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
 
   // If this lookup is safe to cache. Some classes can have a huge
   // number of subclasses and unioning together all possible constants
-  // can become very expensive. We can aleviate some of this expense
+  // can become very expensive. We can alleviate some of this expense
   // by caching results. We cannot cache a result we use 86cinit
   // analysis since that can change.
   auto cachable = true;

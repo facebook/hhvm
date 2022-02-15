@@ -15,7 +15,7 @@ external is_apple_os : unit -> bool = "hh_sysinfo_is_apple_os"
 (** E.g. freopen "file.txt" "a" Unix.stdout will redirect stdout to the file. *)
 external freopen : string -> string -> Unix.file_descr -> unit = "hh_freopen"
 
-(** Option type intead of exception throwing. *)
+(** Option type instead of exception throwing. *)
 val get_env : string -> string option
 
 val getenv_user : unit -> string option

@@ -5,7 +5,7 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "../../shmffi/mod.rs"
+path = "../../shmffi.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]

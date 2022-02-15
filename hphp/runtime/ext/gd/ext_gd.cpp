@@ -842,7 +842,7 @@ struct gfxinfo *php_handle_jpeg(const req::ptr<File>& file, Array& info) {
         result->width = php_read2(file);
         result->channels = file->getc();
         if (info.isNull() || length < 8) {
-          /* if we don't want an extanded info -> return */
+          /* if we don't want an extended info -> return */
           return result;
         }
         if (!file->seek(length - 8, SEEK_CUR)) {

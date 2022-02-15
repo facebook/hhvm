@@ -1146,13 +1146,13 @@ Somewhat ironically, the solution for this is an additional context: `can_dyn_ca
 ```
 function call_dynamically_bad(string $funname, mixed $fun): void {
   // HH_FIXME[4009]
-  $fun('foobar'); // this would be unfixmeable
+  $fun('foobar'); // this would be unfixable
   HH\dynamic_fun($funname)('foobar');
 }
 
 function call_dynamically_safe(string $funname, mixed $fun)[can_dyn_call]: void {
   // HH_FIXME[4009] - still needs to be fixmed
-  $fun('foobar'); // but no additional unfixmeable error
+  $fun('foobar'); // but no additional unfixable error
   HH\dynamic_fun($funname)('foobar');
 }
 ```

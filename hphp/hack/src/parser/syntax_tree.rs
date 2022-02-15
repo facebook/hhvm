@@ -111,7 +111,7 @@ where
         }
     }
 
-    // Convert a foreign pointer to a `SyntaTree` reference, the tree is borrowed
+    // Convert a foreign pointer to a `SyntaxTree` reference, the tree is borrowed
     // from forgein caller, therefore Rust shouldn't drop the content.
     pub unsafe fn ffi_pointer_as_ref(
         ptr: usize,

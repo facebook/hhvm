@@ -193,7 +193,7 @@ interface IHasConst {
   abstract const type TC as IHasCtx;
 }
 
-// Disallowed: nested type acces
+// Disallowed: nested type access
 function type_const(IHasConst $t)[$t::TC::C]: void {}
 
 abstract class MyClass implements IHasConst {

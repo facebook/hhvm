@@ -6,7 +6,7 @@
  *
  *)
 
-(** [can_acesss env ~current ~target] returns whether a symbol defined in
+(** [can_access env ~current ~target] returns whether a symbol defined in
   * module [current] is allowed to access an internal symbol defined in
   * [target] under [env].
   *)

@@ -201,7 +201,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
     ) -> Result<tast::ClassVar<R>> {
         // TODO(hrust): missing type hint
         let decl_cty = self.decl_hint_env().hint(cv.type_.1.as_ref().unwrap());
-        // TODO(hrust): enforcability
+        // TODO(hrust): enforceability
         let cty = Phase::localize_no_subst(self.env, false, None, decl_cty)?;
         // TODO(hrust): coerce_type, user_attributes
         let typed_cv_expr = cv

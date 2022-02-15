@@ -80,11 +80,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
                 let (name, existing_args) = &**params;
                 DeclTy_::DTapply(Box::new((
                     name.clone(),
-                    existing_args
-                        .iter()
-                        .cloned()
-                        .chain(args)
-                        .collect::<Box<[_]>>(),
+                    existing_args.iter().cloned().chain(args).collect(),
                 )))
             }
             DeclTy_::DTgeneric(params) => {
@@ -92,11 +88,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
                 let (name, ref existing_args) = **params;
                 DeclTy_::DTgeneric(Box::new((
                     name,
-                    existing_args
-                        .iter()
-                        .cloned()
-                        .chain(args)
-                        .collect::<Box<[_]>>(),
+                    existing_args.iter().cloned().chain(args).collect(),
                 )))
             }
             _ => {

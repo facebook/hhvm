@@ -280,25 +280,25 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn mark_as_synthesized(&mut self) {
-        for (_, ctx) in self.substs.iter_mut() {
+        for ctx in self.substs.values_mut() {
             ctx.from_req_extends = true;
         }
         if let Some(ref mut elt) = self.constructor {
             elt.set_is_synthesized(true);
         }
-        for (_, prop) in self.props.iter_mut() {
+        for prop in self.props.values_mut() {
             prop.set_is_synthesized(true);
         }
-        for (_, static_prop) in self.static_props.iter_mut() {
+        for static_prop in self.static_props.values_mut() {
             static_prop.set_is_synthesized(true);
         }
-        for (_, method) in self.methods.iter_mut() {
+        for method in self.methods.values_mut() {
             method.set_is_synthesized(true);
         }
-        for (_, static_method) in self.static_methods.iter_mut() {
+        for static_method in self.static_methods.values_mut() {
             static_method.set_is_synthesized(true);
         }
-        for (_, classconst) in self.consts.iter_mut() {
+        for classconst in self.consts.values_mut() {
             classconst.set_is_synthesized(true);
         }
 
@@ -357,11 +357,22 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
         Inherited::default()
     }
 
+    // This logic deals with importing XHP attributes from an XHP class via the
+    // "attribute :foo" syntax.
     // c.f. Decl_inherit.from_class_xhp_attrs_only
     fn xhp_attrs_from_class(&self, ty: &DeclTy<R>) -> Inherited<R> {
         if let Some((_, pos_id, _tyl)) = ty.unwrap_class_type() {
             if let Some(class) = self.parents.get(&pos_id.id()) {
-                return Self::inherit_hack_xhp_attrs_only(class);
+                // Filter out properties that are not XHP attributes.
+                return Inherited {
+                    props: class
+                        .props
+                        .iter()
+                        .filter(|(_, prop)| prop.get_xhp_attr().is_some())
+                        .map(|(name, prop)| (name.clone(), prop.clone()))
+                        .collect(),
+                    ..Default::default()
+                };
             }
         }
         Inherited::default()
@@ -405,21 +416,6 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
             let mut inherited = self.members_from_parent(ty);
             inherited.mark_as_synthesized();
             self.members.add_inherited(inherited);
-        }
-    }
-
-    // This logic deals with importing XHP attributes from an XHP class via the
-    // "attribute :foo;" syntax.
-    fn inherit_hack_xhp_attrs_only(class: &FoldedClass<R>) -> Inherited<R> {
-        // Filter out properties that are not XHP attributes.
-        Inherited {
-            props: class
-                .props
-                .iter()
-                .filter(|(_, prop)| prop.get_xhp_attr().is_some())
-                .map(|(name, prop)| (name.clone(), prop.clone()))
-                .collect(),
-            ..Default::default()
         }
     }
 

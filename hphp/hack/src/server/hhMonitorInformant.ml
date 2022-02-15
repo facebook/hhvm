@@ -644,7 +644,7 @@ let should_start_first_server t =
         true
       | Some WEWConfig.Responses.Unknown ->
         (*
-         * Watcher doens't know what state the repo is. We don't
+         * Watcher doesn't know what state the repo is. We don't
          * know when the next "hg update" will happen, so we let the
          * first Hack Server start up to avoid wedging.
          *)

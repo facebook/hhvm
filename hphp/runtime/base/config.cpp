@@ -351,7 +351,7 @@ static HackStrictOption GetHackStrictOption(const IniSettingMap& ini,
 void Config::Bind(HackStrictOption& loc, const IniSettingMap& ini,
                   const Hdf& config, const std::string& name /* = "" */,
                   HackStrictOption def) {
-  // Currently this doens't bind to ini_get since it is hard to thread through
+  // Currently this doesn't bind to ini_get since it is hard to thread through
   // an enum
   loc = GetHackStrictOption(ini, config, name, def);
 }

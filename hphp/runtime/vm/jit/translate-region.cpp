@@ -476,7 +476,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     auto const blockId = optBlockId.value();
     auto const& block  = *region.block(blockId);
     auto sk            = block.start();
-    bool emitedSurpriseCheck = false;
+    bool emittedSurpriseCheck = false;
     auto const surprise = scheduleSurprise(block);
 
     SCOPE_ASSERT_DETAIL("IRGS") { return show(irgs); };
@@ -537,13 +537,13 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       inst.interp = irgs.retryContext->toInterp.count(psk);
 
       if (surprise && *surprise == i) {
-        emitedSurpriseCheck = true;
+        emittedSurpriseCheck = true;
         inst.forceSurpriseCheck = true;
       }
 
       // Emit IR for the body of the instruction.
       try {
-        irgs.skipSurpriseCheck = emitedSurpriseCheck;
+        irgs.skipSurpriseCheck = emittedSurpriseCheck;
         translateInstr(irgs, inst);
       } catch (const RetryIRGen& e) {
         return TranslateResult::Retry;

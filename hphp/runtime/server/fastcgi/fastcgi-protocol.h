@@ -38,7 +38,7 @@ FOLLY_PACK_POP
 }
 
 /* FastCGI sends all data over the wire in big-endian format. These helper types
- * marshal data within records for transmition.
+ * marshal data within records for transmission.
  */
 using wshort = detail::wire<uint16_t>;
 using wlong  = detail::wire<uint32_t>;

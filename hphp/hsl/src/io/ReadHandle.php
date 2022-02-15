@@ -10,7 +10,7 @@
 
 namespace HH\Lib\IO;
 
-use namespace HH\Lib\Fileystem;
+use namespace HH\Lib\Filesystem;
 use namespace HH\Lib\_Private;
 
 /** An `IO\Handle` that is readable.

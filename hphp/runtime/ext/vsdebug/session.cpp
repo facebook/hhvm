@@ -157,7 +157,7 @@ const StaticString s__SERVER("_SERVER");
 void DebuggerSession::runDummy() {
   // The debugger needs to know which background thread is processing the dummy
   // request. It should not attach to this request as it would a real request:
-  // it should not be included in operattions like async-break-all, nor should
+  // it should not be included in operations like async-break-all, nor should
   // it be listed in any user-visible thread list.
   m_debugger->setDummyThreadId((int64_t)Process::GetThreadId());
 

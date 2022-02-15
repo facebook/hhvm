@@ -61,7 +61,7 @@ and genv = {
   parent: (string * decl_ty) option;
       (** Identifier and type of the parent class if it exists *)
   self: (string * locl_ty) option;
-      (** Identifier and type (instatiated at its generic parameters) of
+      (** Identifier and type (instantiated at its generic parameters) of
           the enclosing class if there is one *)
   static: bool;
   fun_kind: Ast_defs.fun_kind;

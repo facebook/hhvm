@@ -48,7 +48,7 @@ struct PIDController {
 
     double integralTerm = kI * m_integral;
     // This stops integral windup issues in cases the controlled variable is
-    // temporarily not influenced by the contoller output.
+    // temporarily not influenced by the controller output.
     //
     // You may need to widen the max an min values slightly to have proper pid
     // behavior near those areas.

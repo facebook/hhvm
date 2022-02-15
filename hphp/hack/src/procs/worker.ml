@@ -295,7 +295,7 @@ let dummy_closure () = ()
  * running and waiting for the next incoming job before forking a new clone.
  *
  * If the clone exits with a non-zero code, the main worker process also exits
- * with the same code. Thus, the contoller process of this worker can just
+ * with the same code. Thus, the controller process of this worker can just
  * waitpid directly on the main worker process and see correct exit codes.
  *
  * NOTE: `WSIGNALED i` and `WSTOPPED i` are all coalesced into `exit 2`

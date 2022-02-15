@@ -171,7 +171,7 @@ private:
  * Create a timeseries counter named 'name'. Return an existing one if it
  * has already been created.
  *
- * Timeseries data is implemented as a number of buckets (buckted by time).
+ * Timeseries data is implemented as a number of buckets (bucketed by time).
  * As data point is added and time rolls forward, new bucket is created and
  * the earliest bucket expires.
  *

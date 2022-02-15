@@ -145,7 +145,7 @@ let handler =
             let dedup_data = List.dedup_and_sort data ~compare:String.compare in
 
             if is_initialised_with_class_constant then
-              (* HHVM will unconditinally fatal, so report a linter error *)
+              (* HHVM will unconditionally fatal, so report a linter error *)
               Lints_errors.duplicate_property_class_constant_init
                 cls_pos
                 ~class_name:cls_name

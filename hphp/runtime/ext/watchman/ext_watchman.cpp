@@ -77,7 +77,7 @@
  *   automatically locks the global mutex around all ASYNC callbacks and
  *   guarantees serial execution in FIFO order.
  *
- * - The user specified PHP-callback on subsription update is executed in a
+ * - The user specified PHP-callback on subscription update is executed in a
  *   fresh AsyncFunc thread. This avoids running this potentially slow operation
  *   in the IO/Watchamn thread.
  *

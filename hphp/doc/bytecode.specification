@@ -2118,7 +2118,7 @@ PropLD <local variable id>    [B]  ->  [B]
     1X1111 | y->__get(x)
 
 PropCU                        [C B]  ->  [B]
-PropLU <local variabld id>    [B]  ->  [B]
+PropLU <local variable id>    [B]  ->  [B]
 
   Fetch property for unset.
 

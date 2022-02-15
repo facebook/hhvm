@@ -6696,7 +6696,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
                                             ImageInfo->motorola_intel)) {
           case 1: ImageInfo->FocalplaneUnits = 25.4; break; /* inch */
           case 2:
-            /* According to the information I was using, 2 measn meters.
+            /* According to the information I was using, 2 means meters.
                But looking at the Cannon powershot's files, inches is the only
                sensible value. */
             ImageInfo->FocalplaneUnits = 25.4;

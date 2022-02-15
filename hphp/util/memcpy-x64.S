@@ -110,7 +110,7 @@ ETCH_NAME(_hhvm_memcpy):
 ETCH_LABEL(L8):
               mov   (%rsi), %r9
               //    This stores garbage if coming from _memcpy8, but it won't
-              //    cause corretness problem. The address is writable, and the
+              //    cause correctness problem. The address is writable, and the
               //    data there will be overwritten later. I don't want to move
               //    this store before L8 because that will slow down the
               //    loading of (%rsi).

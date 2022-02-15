@@ -379,14 +379,14 @@ module type CheckKindType = sig
     enable_type_check_filter_files:bool ->
     Relative_path.Set.t * Relative_path.Set.t
 
-  (* Update the global state based on resuts of parsing, naming and decl *)
+  (* Update the global state based on results of parsing, naming and decl *)
   val get_env_after_decl :
     old_env:ServerEnv.env ->
     naming_table:Naming_table.t ->
     failed_naming:Relative_path.Set.t ->
     ServerEnv.env
 
-  (* Update the global state based on resuts of typing *)
+  (* Update the global state based on results of typing *)
   val get_env_after_typing :
     old_env:ServerEnv.env ->
     errorl:Errors.t ->

@@ -316,7 +316,7 @@ inline bool Func::contains(Offset offset) const {
 }
 
 inline PC Func::at(Offset off) const {
-  // We don't use contains because we want to allow past becase it is often
+  // We don't use contains because we want to allow past because it is often
   // used in loops
   assertx(off >= 0 && off <= bclen());
   return entry() + off;

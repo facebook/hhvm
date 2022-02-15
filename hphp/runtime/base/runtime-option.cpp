@@ -2040,7 +2040,7 @@ void RuntimeOption::Load(
       if (EvalJitSerdesMode != JitSerdesMode::Off) {
         if (ServerMode) {
           Logger::Warning("Eval.JitSerdesMode reset from " + jitSerdesMode +
-                          " to off, becasue JitRetranslateAll isn't enabled.");
+                          " to off, because JitRetranslateAll isn't enabled.");
         }
         EvalJitSerdesMode = JitSerdesMode::Off;
       }

@@ -331,7 +331,7 @@ struct Edge {
   Chain* dstChain{nullptr};
 
  public:
-  // Original jumps in the binary with correspinding execution counts
+  // Original jumps in the binary with corresponding execution counts
   JumpList jumps;
   // Cached ext-tsp value for merging the pair of chains
   // Since the gain of merging (src, dst) and (dst, src) might be different,

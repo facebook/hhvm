@@ -393,7 +393,7 @@ static double filter_hermite(const double x1)
   return 0.0;
 }
 
-/* Trangle filter, default radius 1 */
+/* Triangle filter, default radius 1 */
 static double filter_triangle(const double x1)
 {
   const double x = x1 < 0.0 ? -x1 : x1;

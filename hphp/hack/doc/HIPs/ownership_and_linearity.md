@@ -538,7 +538,7 @@ exactly `$this`.
 
 ## IDE experience
 
-The new keywords will be supported in a first class manner with respect to syntax highlighing.
+The new keywords will be supported in a first class manner with respect to syntax highlighting.
 
 There will be a large number of new error types both in the typechecker and parser.
 

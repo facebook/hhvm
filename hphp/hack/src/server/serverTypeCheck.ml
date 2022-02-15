@@ -1044,7 +1044,7 @@ functor
         ~(cgroup_steps : CgroupProfiler.step_group) : type_checking_result =
       let telemetry = Telemetry.create () in
       if Relative_path.(Set.mem files_to_check default) then
-        Hh_logger.log "WARNING: rechecking defintion in a dummy file";
+        Hh_logger.log "WARNING: rechecking definition in a dummy file";
       let interrupt = get_interrupt_config genv env in
       let memory_cap =
         genv.local_config.ServerLocalConfig.max_typechecker_worker_memory_mb

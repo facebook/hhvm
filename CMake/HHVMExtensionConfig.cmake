@@ -563,7 +563,7 @@ endfunction()
 function(HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY extensionID failedDependency)
   list(FIND HHVM_EXTENSION_${extensionID}_DEPENDENCIES ${failedDependency} depIdx)
   if (depIdx EQUAL -1)
-    message(FATAL_ERROR "An issue occured while processing the '${failedDependency}' dependency of the ${HHVM_EXTENSION_${extensionID}_PRETTY_NAME} extension!")
+    message(FATAL_ERROR "An issue occurred while processing the '${failedDependency}' dependency of the ${HHVM_EXTENSION_${extensionID}_PRETTY_NAME} extension!")
   endif()
   list(GET HHVM_EXTENSION_${extensionID}_DEPENDENCIES_OPTIONAL ${depIdx} isOptional)
 

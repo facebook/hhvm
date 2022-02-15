@@ -460,7 +460,7 @@ bool HHVM_FUNCTION(pcntl_signal,
       raise_warning("Invalid value for handle argument specified");
       return false;
     }
-    // A null signal hanlder indicates SIG_IGN.
+    // A null signal handler indicates SIG_IGN.
     return HHVM_FN(pcntl_signal)(signo, init_null(), restart_syscalls);
   }
   if (!is_callable(handler) && !handler.isNull()) {

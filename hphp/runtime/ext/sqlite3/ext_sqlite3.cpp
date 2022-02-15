@@ -387,7 +387,7 @@ Variant HHVM_METHOD(SQLite3, query,
   return false;
 }
 
-Variant HHVM_METHOD(SQLite3, querysingle,
+Variant HHVM_METHOD(SQLite3, queriesingle,
                     const String& sql,
                     bool entire_row /* = false */) {
   auto *data = Native::data<SQLite3>(this_);
@@ -792,7 +792,7 @@ static struct SQLite3Extension final : Extension {
     HHVM_ME(SQLite3, changes);
     HHVM_ME(SQLite3, prepare);
     HHVM_ME(SQLite3, query);
-    HHVM_ME(SQLite3, querysingle);
+    HHVM_ME(SQLite3, queriesingle);
     HHVM_ME(SQLite3, createfunction);
     HHVM_ME(SQLite3, createaggregate);
     HHVM_ME(SQLite3, openblob);

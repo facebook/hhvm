@@ -149,7 +149,7 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
   return true;
 }
 
-void RequestURI::splitURL(String surl, String &base, String &querys) {
+void RequestURI::splitURL(String surl, String &base, String &queries) {
   const char *url = surl.c_str();
   const char *query = strchr(url, '?');
   const char *fragment = strchr(url, '#');
@@ -158,18 +158,18 @@ void RequestURI::splitURL(String surl, String &base, String &querys) {
     if (query && fragment > query) {
       base = String(url, query - url, CopyString);
       ++query; // skipping ?
-      querys = String(query, fragment - query, CopyString);
+      queries = String(query, fragment - query, CopyString);
     } else {
       base = String(url, fragment - url, CopyString);
-      querys = "";
+      queries = "";
     }
   } else if (query) {
     base = String(url, query - url, CopyString);
     ++query; // skipping ?
-    querys = String(query, CopyString);
+    queries = String(query, CopyString);
   } else {
     base = String(url, CopyString);
-    querys = "";
+    queries = "";
   }
 }
 

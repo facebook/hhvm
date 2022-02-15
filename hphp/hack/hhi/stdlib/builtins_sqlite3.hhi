@@ -35,7 +35,7 @@ class SQLite3 {
   public static function escapestring(string $sql);
   public function prepare(string $sql);
   public function query(string $sql);
-  public function querysingle(string $sql, bool $entire_row = false);
+  public function queriesingle(string $sql, bool $entire_row = false);
   public function createfunction(string $name, $callback, int $argcount = -1);
   public function createaggregate(string $name, $step, $final, int $argcount = -1);
   public function openblob(string $table, string $column, int $rowid, $dbname = null);

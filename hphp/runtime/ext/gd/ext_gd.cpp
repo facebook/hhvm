@@ -6941,7 +6941,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo) {
   for(section=0;;section++) {
     // get marker byte, swallowing possible padding
     // some software does not count the length bytes of COM section
-    // one company doing so is very much envolved in JPEG...
+    // one company doing so is very much involved in JPEG...
     // so we accept too
     if (last_marker==M_COM && comment_correction) {
       comment_correction = 2;

@@ -15,7 +15,7 @@ function rename_function($orig_name, $new_name) { }
 <<__PHPStdLib>>
 function apd_set_browser_trace() { }
 <<__PHPStdLib>>
-function apd_set_pprof_trace($dumpdir = null, $frament = null) { }
+function apd_set_pprof_trace($dumpdir = null, $fragment = null) { }
 <<__PHPStdLib>>
 function apd_set_session_trace_socket($ip_or_filename, $domain, $port, $mask) { }
 <<__PHPStdLib>>

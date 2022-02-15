@@ -14,7 +14,7 @@ arena_deserializer = { path = "../../utils/arena_deserializer" }
 bincode = "1.3.3"
 bumpalo = { version = "3.8", features = ["collections"] }
 compile = { path = "../compile/cargo/compile" }
-cxx = "1.0.54"
+cxx = "1.0.64"
 decl_provider = { path = "../decl_provider" }
 direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
 external_decl_provider = { path = "../hhvm_decl_provider" }
@@ -34,4 +34,4 @@ stack_limit = { path = "../../utils/stack_limit" }
 unified_decl_provider = { path = "../unified_decl_provider" }
 
 [build-dependencies]
-cxx-build = "1.0.54"
+cxx-build = "1.0.64"

@@ -26,3 +26,4 @@ parser_core_types = { path = "../../../parser/cargo/core_types" }
 pos = { path = "../../lib/pos" }
 rust_aast_parser_types = { path = "../../../parser/cargo/rust_aast_parser_types" }
 stack_limit = { path = "../../../utils/stack_limit" }
+static_assertions = "1.1.0"

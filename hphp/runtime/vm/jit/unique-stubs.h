@@ -373,7 +373,7 @@ struct UniqueStubs {
    *
    * The endCatchStublogueHelper passes the current vmfp() and RIP saved in
    * the stublogue header. Unwinder uses it to determine the catch trace of
-   * the return adddress belonging to the same logical vmfp().
+   * the return address belonging to the same logical vmfp().
    *
    * The endCatchStubloguePrologueHelper initializes the ActRec space pointed
    * to by the rvmsp() to uninits and continues at endCatchStublogueHelper.

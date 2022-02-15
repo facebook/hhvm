@@ -456,7 +456,7 @@ struct Object {
     // Optional string for static functions giving the symbol for this function.
     std::string linkage_name;
     // Optional address for static functions giving the address for this
-    // function. Whether this addresss is absolute or relocatable depends on the
+    // function. Whether this address is absolute or relocatable depends on the
     // file the information is being extracted from.
     HPHP::Optional<std::uintptr_t> address;
   };

@@ -864,7 +864,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
             (* This happens when watchman is tearing itself down after we
              * retrieved a sock address and connected to the sock address. That's
              * because Unix.open_connection (via Timeout.open_connection) doesn't
-             * error even when the sock adddress is no longer valid and actually -
+             * error even when the sock address is no longer valid and actually -
              * it returns a channel that will error at some later time when you
              * actually try to do anything with it (write to it, or even get the
              * file descriptor of it). I'm pretty sure we don't need to close the

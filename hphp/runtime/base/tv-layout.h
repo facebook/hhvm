@@ -169,7 +169,7 @@ struct LayoutBase {
  * 7-up packed layout
  *
  * This implements a flavor of an array layout but instead of wasting space on
- * padding for the type byte (out to a whole quardowrd), we aggregate 7 of these
+ * padding for the type byte (out to a whole quadword), we aggregate 7 of these
  * types together (and then aggregate 7 values together) resulting in a
  * repeating layout (a "chunk") of 64 bytes. The layout is like:
  *

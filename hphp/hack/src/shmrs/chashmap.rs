@@ -309,22 +309,6 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
         f(&map)
     }
 
-    /// Access the map and that belongs to the given key for writing. Also provides
-    /// access to the corresponding shard allocator.
-    ///
-    /// Warning! May deadlock (and thus panic) when you already hold a writer lock on the
-    /// queried map.
-    ///
-    /// Of course, if querying multiple maps at the same time, you should make
-    /// sure your access pattern can't deadlock. In practice (at the moment)
-    /// this means you can't try to hold multiple writer locks (or a write lock
-    /// a read lock) at the same time, because the hasher is abstract. You have
-    /// no way of knowing which map you need!
-    pub fn write_map<R>(&self, key: &K, f: impl FnOnce(Shard<'shm, '_, K, V, S>) -> R) -> R {
-        let shard = self.shard_for_writing(key);
-        f(shard)
-    }
-
     /// Empty a shard.
     fn empty_shard<'a>(shard: &mut Shard<'shm, 'a, K, V, S>) {
         // Remove all values that might point to evictable data.
@@ -543,9 +527,9 @@ mod integration_tests {
                     };
 
                     for &(key, value) in scenario.iter() {
-                        cmap.write_map(&key, |mut shard| {
-                            shard.map.insert(key, U64Value(value));
+                        cmap.insert(key, None, false, |_buffer| {
                             std::thread::sleep(OP_SLEEP);
+                            U64Value(value)
                         });
                     }
 

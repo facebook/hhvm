@@ -383,7 +383,7 @@ struct DceState {
   std::bitset<kMaxTrackedLocals> willBeUnsetLocals;
 
   /*
-   * Locals that may need to be unset in successor blocks are accumlated into
+   * Locals that may need to be unset in successor blocks are accumulated into
    * this bitset.
    *
    * A successor may need to unset a local for us if we are unable to because

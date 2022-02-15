@@ -71,26 +71,33 @@ impl<'a, R: Reason> Substitution<'a, R> {
         ty: &DeclTy<R>,
         args: impl Iterator<Item = DeclTy<R>>,
     ) -> DeclTy<R> {
-        let r: &R = ty.reason();
+        let r = ty.reason();
         let ty_: &DeclTy_<R> = ty.node();
         let res_ty_ = match ty_ {
             DeclTy_::DTapply(params) => {
                 // We could insist on `existing_args.is_empty()` here
                 // unless we want to support partial application.
                 let (name, existing_args) = &**params;
-                let mut new_args = vec![];
-                new_args.extend_from_slice(existing_args);
-                new_args.extend(args);
-                DeclTy_::DTapply(Box::new((name.clone(), new_args.into_boxed_slice())))
+                DeclTy_::DTapply(Box::new((
+                    name.clone(),
+                    existing_args
+                        .iter()
+                        .cloned()
+                        .chain(args)
+                        .collect::<Box<[_]>>(),
+                )))
             }
             DeclTy_::DTgeneric(params) => {
                 // Same here.
-                let name: TypeName = params.0;
-                let existing_args: &[DeclTy<R>] = &params.1;
-                let mut new_args = vec![];
-                new_args.extend_from_slice(existing_args);
-                new_args.extend(args);
-                DeclTy_::DTgeneric(Box::new((name, new_args.into_boxed_slice())))
+                let (name, ref existing_args) = **params;
+                DeclTy_::DTgeneric(Box::new((
+                    name,
+                    existing_args
+                        .iter()
+                        .cloned()
+                        .chain(args)
+                        .collect::<Box<[_]>>(),
+                )))
             }
             _ => {
                 // We could insist on existing_args = [] here unless we want to

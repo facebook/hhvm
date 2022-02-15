@@ -2134,7 +2134,7 @@ dce_visit(VisitContext& visit, BlockId bid, const State& stateIn,
           std::move(bcs)
         ));
 
-        // We flag that we shoud rerun DCE since this Unset might be redundant if
+        // We flag that we should rerun DCE since this Unset might be redundant if
         // a CGetL gets replaced with a PushL.
         visit_env.dceState.didAddOpts = true;
       }
@@ -3093,7 +3093,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
           std::move(bcs)
         ));
 
-        // We flag that we shoud rerun DCE since this Unset might be redundant if
+        // We flag that we should rerun DCE since this Unset might be redundant if
         // a CGetL gets replaced with a PushL.
         didAddOpts = true;
       }

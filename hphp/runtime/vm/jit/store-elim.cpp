@@ -65,7 +65,7 @@
   killed by a later store.  We represent these two criteria via alteredAnt and
   alteredAvl (see below).
 
-  This also affects local availabilty; a store may not be available in the
+  This also affects local availability; a store may not be available in the
   sense that it can be moved to the end of the block (because of a possible
   conflicting write), but it may still be available in the sense that it can be
   killed by a later store.  We split this out into AvlLoc (can be moved to the

@@ -23,7 +23,7 @@ namespace HH\Lib\_Private\Native {
  */
 
 /**
- * Generates pseudorandom integers using the Marsenne Twister algorithm. The
+ * Generates pseudorandom integers using the Mersenne Twister algorithm. The
  * result is NOT suitable for cryptographic purposes.
  *
  * @param int $min - The lowest value to be returned down to PHP_INT_MIN.

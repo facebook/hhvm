@@ -892,7 +892,7 @@ It is complicated and requires significant runtime and typechecker support.
 
 At present, there is only one major language implementing an ownership system.
 There are a handful of languages implementing Linearity systems, however that
-does not map particularly well to an imperitive language like our own.
+does not map particularly well to an imperative language like our own.
 
 Rust's ownership tracking is more robust and allows for nested ownership
 tracking (such as owned properties) and explicit lifetimes. This is made

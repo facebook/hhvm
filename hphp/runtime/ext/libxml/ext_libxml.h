@@ -53,7 +53,7 @@ bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable = true);
  * as weak-references. In particular it is possible for (1) the cached
  * DOMNode object to be free'd before the xmlNode*, in which case the DOMNode
  * is responsible for clearing the cache, and (2) for the underlying xmlNode*
- * to be free'd while there are still req::ptr holding XMLNodeData resouces.
+ * to be free'd while there are still req::ptr holding XMLNodeData resources.
  *
  * In the event of (1) the only reference to the free'd object will be the
  * object in m_cache, and as such an raw ObjectData* is used as a quasi-weak

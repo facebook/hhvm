@@ -10,7 +10,7 @@ use std::cell::Cell;
 pub struct LineBreakMap {
     lines: Box<[usize]>,
     last_offset: Cell<usize>,
-    curr_idnex: Cell<usize>,
+    curr_index: Cell<usize>,
 }
 
 impl LineBreakMap {
@@ -46,7 +46,7 @@ impl LineBreakMap {
         LineBreakMap {
             lines: result.into_boxed_slice(),
             last_offset: Cell::new(0),
-            curr_idnex: Cell::new(0),
+            curr_index: Cell::new(0),
         }
     }
 
@@ -65,7 +65,7 @@ impl LineBreakMap {
     }
 
     pub fn offset_to_file_pos_triple(&self, offset: usize) -> (usize, usize, usize) {
-        let curr_index = self.curr_idnex.get();
+        let curr_index = self.curr_index.get();
         let last_offset = self.last_offset.get();
         let mut index = 0;
         if last_offset == offset {
@@ -89,7 +89,7 @@ impl LineBreakMap {
                     i -= 1;
                 }
             }
-            self.curr_idnex.set(index);
+            self.curr_index.set(index);
             self.last_offset.set(offset);
         }
         (index + 1, self.lines[index], offset)

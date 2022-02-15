@@ -74,7 +74,7 @@ The rest of this section addresses alternatives for actual `int` shape keys.
 
 For example, `$shape['0']`. The main problem is potential future issues: while
 PCRE currently bans named capture groups that start with a number, the syntax
-for referncing them differs; it appears that it would be possible to remove
+for referencing them differs; it appears that it would be possible to remove
 this restriction without breaking compatibility, *unless* we introduce this
 syntax.
 

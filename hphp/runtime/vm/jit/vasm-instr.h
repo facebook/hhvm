@@ -901,7 +901,7 @@ struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
  *    +-----------------------+   <- native stack pointer
  *
  * i.e., the native stack pointer will be misaligned coming in (but must, of
- * course, be aliged once phplogue{} finishes executing).  Using a native call
+ * course, be aligned once phplogue{} finishes executing).  Using a native call
  * in the implementation (and likewise, using native returns for leavetc{}) is
  * recommended, in order to take advantage of return branch predictions.
  *

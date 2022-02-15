@@ -391,8 +391,8 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int64_t type,
 
         /* Stupid typo in PSDK 6.1, WinDNS.h(1258)... */
 #ifndef DnsSectionAdditional
-# ifdef DnsSectionAddtional
-#  define DnsSectionAdditional DnsSectionAddtional
+# ifdef DnsSectionAdditional
+#  define DnsSectionAdditional DnsSectionAdditional
 # else
 # define DnsSectionAdditional 3
 # endif

@@ -5808,7 +5808,7 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
   // can become very expensive. We can alleviate some of this expense
   // by caching results. We cannot cache a result we use 86cinit
   // analysis since that can change.
-  auto cachable = true;
+  auto cacheable = true;
 
   auto const process = [&] (const ClassInfo* ci) {
     ITRACE(4, "{}:\n", ci->cls->name);
@@ -5830,7 +5830,7 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
         // Constant is defined by a 86cinit. Use the result from
         // analysis and add a dependency. We cannot cache in this
         // case.
-        cachable = false;
+        cacheable = false;
         if (ctx.func) {
           auto const cinit = cns.cls->methods.back().get();
           assertx(cinit->name == s_86cinit.get());
@@ -5884,7 +5884,7 @@ ClsConstLookupResult<> Index::lookup_class_constant(Context ctx,
       if (!result) return notFound();
 
       // Save this for future lookups if we can
-      if (cachable) {
+      if (cacheable) {
         m_data->clsConstLookupCache.emplace(
           std::make_pair(cinfo->cls, sname),
           *result

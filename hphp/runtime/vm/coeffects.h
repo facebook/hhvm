@@ -46,7 +46,7 @@ struct RuntimeCoeffects {
   static RuntimeCoeffects globals_leak_safe();
 
   // This function is a placeholder to indicate that the correct coeffect needs
-  // to be indentified and passed in its place
+  // to be identified and passed in its place
   static RuntimeCoeffects fixme() {
     return RuntimeCoeffects::defaults();
   }

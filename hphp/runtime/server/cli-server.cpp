@@ -183,7 +183,7 @@ namespace {
  * ===== WARNING ===== WARNING ===== WARNING ===== WARNING ===== WARNING =====
  *
  * The CLI client and server use cli_server_api_version() to negotiate a
- * conncection, any changes to their API must include a bump of this version.
+ * connection, any changes to their API must include a bump of this version.
  * Version is not tied to HHVM compiler-id because changes rarely affect
  * communication between the server and client.
  *

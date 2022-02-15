@@ -1405,7 +1405,7 @@ Object AsyncMysqlResult::clientStats() {
 // completed successfully and there is a valid connection associated
 // with the operation, then we should search for the connection context
 // linked to the connection associated with the operation. In case of
-// failed conneciton (failed ConnectOperation, failed ConnectPoolOperation)
+// failed connection (failed ConnectOperation, failed ConnectPoolOperation)
 // there is no connection associated with the operation at the end because
 // we failed to connect. In this case checking for the connection context
 // directly linked to the operation is our best bet.

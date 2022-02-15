@@ -1199,7 +1199,7 @@ final class AsyncMysqlQueryErrorResult extends AsyncMysqlErrorResult {
  * rows).
  *
  * You get an `AsyncMysqlQueryResult` through calls to
- * `AsyncMysqlConnection::query()`, `AsyncMysqlConection::queryf()` and
+ * `AsyncMysqlConnection::query()`, `AsyncMysqlConnection::queryf()` and
  * `AsyncMysqlConnection::multiQuery()`
  *
  * @guide /hack/async/introduction

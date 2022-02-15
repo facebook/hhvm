@@ -1628,7 +1628,7 @@ char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sign, char *
           if (value(d) > 0.5 + value(eps))
             goto bump_up;
           else if (value(d) < 0.5 - value(eps)) {
-            /* cut ALL traling zeros only if the number of chars is greater than precision
+            /* cut ALL trailing zeros only if the number of chars is greater than precision
              * otherwise cut only extra zeros
              */
             if (k < ndigits) {

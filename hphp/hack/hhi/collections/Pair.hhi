@@ -188,7 +188,7 @@ final class Pair<<<__RequireDynamic>> +Tv1, <<__RequireDynamic>> +Tv2> implement
    * `mapWithKey()`, unlike `filterWithKey()` where only values that meet a
    * certain criteria are affected.
    *
-   * @param $fn - The $allback containing the operation to apply to the
+   * @param $fn - The callback containing the operation to apply to the
    *                    current `Pair` keys and values.
    *
    * @return - an `ImmVector` containing the values after a user-specified

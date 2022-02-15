@@ -274,7 +274,7 @@ final class Pair implements \ConstVector {
    * `mapWithKey()`, unlike `filterWithKey()` where only values that meet a
    * certain criteria are affected.
    *
-   * @param $callback - The $allback containing the operation to apply to the
+   * @param $callback - The callback containing the operation to apply to the
    *                    current `Pair` keys and values.
    *
    * @return - an `ImmVector` containing the values after a user-specified

@@ -46,7 +46,7 @@ function array_chunk(
  *
  * @param mixed $arr - Source array to pull column of values from
  * @param mixed $val_key - Key to pull values from in sub-arrays
- * @param mixed $idx_key - Key to pull indexs from in sub-arrays
+ * @param mixed $idx_key - Key to pull indexes from in sub-arrays
  *
  * @return mixed - Returns the array column, or FALSE on failure
  *

@@ -876,7 +876,7 @@ return $this for the purpose of chaining.
 
 An alternative to the `disown` keyword is to use `release`. Bikeshedding welcome.
 
-The __ReturnsBorrowedThis attribute is technically unecessary as the emitter
+The __ReturnsBorrowedThis attribute is technically unnecessary as the emitter
 can infer when it would be required and handle the situation appropriately. We
 think it's better to be explicit here.
 

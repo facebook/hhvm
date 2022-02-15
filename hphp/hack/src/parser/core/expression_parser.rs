@@ -1451,7 +1451,7 @@ where
         //
         // In order to preserve backward compatibility we can parse
         // variable/subscript expressions and treat them as if
-        // braced expressions to enfore PHP5 semantics
+        // braced expressions to enforce PHP5 semantics
         // $$a[1][2] => ${$a[1][2]}
         // $a=>$b[c] => $a=>{$b[c]}
         // X::$a[b]() => X::{$a[b]}()

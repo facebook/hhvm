@@ -84,7 +84,7 @@ size_t relocateImpl(RelocationInfo& rel,
         return align;
       };
       // Make macro-fusion pairs not be split by the end of a cache line.
-      // According to Intel 64 and IA-32 Architectures Optimization Refernce
+      // According to Intel 64 and IA-32 Architectures Optimization Reference
       // Manual (page 2-18):
       // "Macro fusion does not happen if the first instruction ends on byte 63
       // of a cache line, and the second instruction is a conditional branch

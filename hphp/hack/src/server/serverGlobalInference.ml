@@ -432,7 +432,7 @@ let get_patches
                   >>= fun type_str ->
                   if is_missing parameter_type then
                     (* if there is nothing in front of the parameter name,
-                     * we will use the paramter name's position, instead
+                     * we will use the parameter name's position, instead
                      * of the parameter type's position. Because, in this
                      * case, if the parameter name is the first thing on
                      * a line, we will get Pos 1:1 for the parameter's

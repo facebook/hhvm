@@ -180,7 +180,7 @@ let validator =
 
     method check_generic acc r name =
       (* No need to look at type arguments of generic var, as higher-kinded type params
-         cannot be enforcable *)
+         cannot be enforceable *)
       (* TODO(T70069116) implement enforceability check *)
       match
         ( Env.get_reified acc.Type_validator.env name,

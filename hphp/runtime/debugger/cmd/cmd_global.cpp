@@ -46,7 +46,7 @@ void CmdGlobal::help(DebuggerClient &client) {
   );
   client.helpBody(
     "This will print names and values of all global variables, if {text} is "
-    "not speified. Otherwise, it will print global variables that contain the "
+    "not specified. Otherwise, it will print global variables that contain the "
     "text in their names or values. The search is case-insensitive and "
     "string-based."
   );

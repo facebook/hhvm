@@ -3333,7 +3333,7 @@ PhysRecoverableResult physical_register_is_recoverable(
    * result from the target block, and making sure the result is the
    * same at merge points.
    *
-   * This is potentially expensive, so we imploy a number of
+   * This is potentially expensive, so we employ a number of
    * optimizations. First we utilize some pre-calculated metadata
    * about physical register definitions to avoid having to process
    * every instruction in a block, or even cut the search short

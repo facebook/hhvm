@@ -75,7 +75,7 @@ bool HHVM_FUNCTION(libxml_disable_entity_loader, bool disable = true);
  *
  * The libxml_register_node() function will "Do the right thing" (tm) when
  * given an xmlNodePtr.  Specifically, if the node already has an associated
- * XMLNodeData or XMLDocumnentData, that resource is attached- otherwise a new
+ * XMLNodeData or XMLDocumentData, that resource is attached- otherwise a new
  * resource is created. Additionally, if a new resource is created for a node
  * which itself is attached to a document with no associated resource, a
  * resource will be created for that document.

@@ -304,7 +304,7 @@ let dummy_closure () = ()
  * be aware of this.
  *
  * To regain this lost resolution, controller_fd can be optionally set. The
- * real exit status (includinng WSIGNALED and WSTOPPED) will be sent over
+ * real exit status (including WSIGNALED and WSTOPPED) will be sent over
  * this file descriptor to the controller when the clone worker exits
  * abnormally (with a non-zero exit code).
  *)

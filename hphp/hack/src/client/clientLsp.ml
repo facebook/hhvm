@@ -4838,7 +4838,7 @@ let handle_client_ide_notification
      (1) in case of Done_init, we might have to announce the failure to the user
      (2) in a few other cases, we send telemetry events so that test harnesses
      get insight into the internal state of the ide_service
-     (3) after every single event, includinng client_ide_notification events,
+     (3) after every single event, including client_ide_notification events,
      our caller queries the ide_service for what status it wants to display to
      the user, so these notifications have the goal of triggering that refresh. *)
   match notification with

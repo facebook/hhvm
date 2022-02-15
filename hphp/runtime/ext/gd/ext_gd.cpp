@@ -4235,14 +4235,14 @@ bool HHVM_FUNCTION(imagefilter, const Resource& res,
 bool HHVM_FUNCTION(imageflip, const Resource& image, int64_t mode /* = -1 */) {
   gdImagePtr im = get_valid_image_resource(image);
   if (!im) return false;
-  if (mode == -1) mode = GD_FLIP_HORINZONTAL;
+  if (mode == -1) mode = GD_FLIP_HORIZONTAL;
 
   switch (mode) {
     case GD_FLIP_VERTICAL:
       gdImageFlipVertical(im);
       break;
 
-    case GD_FLIP_HORINZONTAL:
+    case GD_FLIP_HORIZONTAL:
       gdImageFlipHorizontal(im);
       break;
 
@@ -8343,7 +8343,7 @@ struct GdExtension final : Extension {
     /* GD2 image format types */
     HHVM_RC_INT(IMG_GD2_RAW, GD2_FMT_RAW);
     HHVM_RC_INT(IMG_GD2_COMPRESSED, GD2_FMT_COMPRESSED);
-    HHVM_RC_INT(IMG_FLIP_HORIZONTAL, GD_FLIP_HORINZONTAL);
+    HHVM_RC_INT(IMG_FLIP_HORIZONTAL, GD_FLIP_HORIZONTAL);
     HHVM_RC_INT(IMG_FLIP_VERTICAL, GD_FLIP_VERTICAL);
     HHVM_RC_INT(IMG_FLIP_BOTH, GD_FLIP_BOTH);
     HHVM_RC_INT(IMG_EFFECT_REPLACE, gdEffectReplace);

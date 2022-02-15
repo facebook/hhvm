@@ -318,7 +318,7 @@ TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
     : m_dwarf{filename}
 {
   // Processing each compiliation unit is very expensive, as it involves walking
-  // a large part of the debug information. To speed things up (a lot), we buid
+  // a large part of the debug information. To speed things up (a lot), we build
   // up the state concurrently. Create a job corresponding to each compiliation
   // unit in the file and enqueue the jobs with a thread pool. We'll find the
   // offsets of the compiliation unit in the main thread, enqueuing them as we

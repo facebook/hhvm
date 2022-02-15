@@ -293,7 +293,7 @@ fn main(
 
     let all_edges = match (new_edges_dir, delta_file) {
         (None, None) => {
-            panic!("buid: at least one of --edges-dir or --delta-file flags should be passed")
+            panic!("build: at least one of --edges-dir or --delta-file flags should be passed")
         }
         (Some(_), Some(_)) => {
             panic!("build: cannot specify both --edges-dir and --delta-file")

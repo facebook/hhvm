@@ -1535,7 +1535,7 @@ void RuntimeOption::Load(
   std::vector<std::string>* messages /* = nullptr */,
   std::string cmd /* = "" */) {
 
-  // Intialize the memory manager here because various settings and
+  // Initialize the memory manager here because various settings and
   // initializations that we do here need it
   tl_heap.getCheck();
 

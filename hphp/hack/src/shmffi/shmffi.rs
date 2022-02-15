@@ -66,7 +66,7 @@ impl<'shm> ShmemSegment<'shm> {
     /// and the hash tables.
     ///
     /// Safety:
-    ///  - You must only intialize once and exactly once.
+    ///  - You must only initialize once and exactly once.
     ///  - Use `attach` to attach other processes to this memory location.
     ///  - Obviously, `file_start` and `file_size` shouldn't lie.
     ///  - Make sure the lifetime returned matches the lifetime of the shared

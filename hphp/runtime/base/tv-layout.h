@@ -42,7 +42,7 @@ namespace tv_layout {
  * - iterator, const_iterator: a (const) forward iterator over the container,
  *                             producing TypedValues with the additional
  *                             constraint that tv_lval{iter} is well-formed as
- *                             long as the iterator is derefenecable
+ *                             long as the iterator is dereferencable
  * - quick_index: some type, implicitly coercible to index_t, designed to allow
  *                faster access to the collection. This may be the same as
  *                index_t

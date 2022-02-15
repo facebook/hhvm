@@ -1028,7 +1028,7 @@ void mrinfo_step_impl(Env& env,
      * It's safe not to add it to the kill set, though, because if the IR
      * program is destroying a memory location, it is already malformed if it
      * loads the location again and then uses it in a way that relies on the
-     * pointer still being dereferenceable.  Moreover, in these situations,
+     * pointer still being dereferencable.  Moreover, in these situations,
      * even though the avail bit from mrinfo will be set on the second load, we
      * won't be able to remove support from the previous aset, and won't raise
      * the lower bound on the new loaded value.

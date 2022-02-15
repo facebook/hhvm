@@ -3963,7 +3963,7 @@ let is_type_disjoint env ty1 ty2 =
          c2<_tyl> subset Union tyl'. c1<tyl'>. If c2 is a subclass of c1, then
          whatever _tyl is, we can chase up the hierarchy to find an instantiation
          for tyl'. If c2 is not a subclass of c1, then no matter what the tyl' are
-         the subset realtionship cannot hold, since either c1 and c2 are disjoint tags,
+         the subset relationship cannot hold, since either c1 and c2 are disjoint tags,
          or c1 is a non-equal subclass of c2, and so objects that are exact c2,
          can't inhabit c1. NB, we aren't allowing abstractness of a class to cause
          types to be considered disjoint.

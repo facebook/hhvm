@@ -1387,7 +1387,7 @@ static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) {
   if (tree == nullptr || ns == nullptr || ns->type != XML_NAMESPACE_DECL) {
     return nullptr;
   }
-  /* Code taken from libxml2 (2.6.20) xmlNewReconciliedNs
+  /* Code taken from libxml2 (2.6.20) xmlNewReconciledNs
    *
    * Find a close prefix which is not already in use.
    * Let's strip namespace prefixes longer than 20 chars!

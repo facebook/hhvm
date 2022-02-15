@@ -1190,7 +1190,7 @@ but is quite analogous to our own.
 
 [Deny Capabilities for Safe, Fast Actors](https://www.ponylang.io/media/papers/fast-cheap.pdf)
 
-The overall goal of this system is to allow staticly checkable safe shared memory.
+The overall goal of this system is to allow statically checkable safe shared memory.
 Their system is interesting. It is effectively a matrix of whether
 local/global/both aliases are allow to read and/or write to a reference.
 

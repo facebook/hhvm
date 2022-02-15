@@ -585,7 +585,7 @@ final class AsyncMysqlConnection {
    * Returns whether or not the current connection is reusable.
    *
    * By default, the current connection is reusable by the pool. But if you call
-   * `setResuable(false)`, then the current connection will not be reusable by
+   * `setReusable(false)`, then the current connection will not be reusable by
    * the connection pool.
    *
    * @return - `true` if the connection is reusable; `false` otherwise.

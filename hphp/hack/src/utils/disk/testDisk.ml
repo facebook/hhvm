@@ -29,7 +29,7 @@ let sizes = Hashtbl.create 10
 (** We avoid using Unix.getcwd () in TestDisk because:
   *   1) Getting global state from this clean test environment is gross
   *   2) Because of 1, CWD should actually be tracked inside this virtual FS.
-  *   3) Javascript doesn't support Unix.getcwd anyway, so we can't transpile
+  *   3) JavaScript doesn't support Unix.getcwd anyway, so we can't transpile
   * As such, we make a fake cwd *)
 let cwd = ref "/fake/initial_cwd"
 

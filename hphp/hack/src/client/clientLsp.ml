@@ -1906,7 +1906,7 @@ let publish_hh_server_status_diagnostic
     | _ -> state
   in
   let open PublishDiagnostics in
-  (* The following match emboodies these rules:
+  (* The following match embodies these rules:
      (1) we only publish hh_server_status diagnostics in In_init and Lost_server states,
      (2) we'll remove the old PublishDiagnostic if necessary and add a new one if necessary
      (3) to avoid extra LSP messages, if the diagnostic hasn't changed then we won't send anything

@@ -3715,7 +3715,7 @@ bool fold_offset_into_instr(Vinstr& instr, int64_t offset) {
   if (offset == 0) return true;
 
   if (instr.op == Vinstr::copy) {
-    // copys can be turned into leas with the offset as the
+    // copies can be turned into leas with the offset as the
     // displacement
     if (!can_merge_disps(0, offset)) return false;
     auto const src = instr.copy_.s;
@@ -6331,7 +6331,7 @@ ProcessCopyResults process_copy_spills(State& state,
     for (auto const r : spills) always_assert(spiller.forReg(r));
   }
 
-  // We know which Vregs we want to spill. Copys can handle copying between
+  // We know which Vregs we want to spill. Copies can handle copying between
   // spilled Vregs on both sides and non-spilled Vregs on both sides (but not
   // mixing). Moving between spilled and non-spilled Vregs is the job of the
   // spill and reload instructions. So, if we need to spill one side of the copy

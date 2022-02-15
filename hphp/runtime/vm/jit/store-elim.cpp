@@ -1193,7 +1193,7 @@ TrackedStore combine_ts(Global& genv, uint32_t id,
     if (i1->op() != i2->op()) return Compat::Bad;
     if (i1->numSrcs() != i2->numSrcs()) return Compat::Bad;
     for (auto i = i1->numSrcs(); i--; ) {
-      // Ptr and Lval types are imcompatible, as one requires two register,
+      // Ptr and Lval types are incompatible, as one requires two register,
       // while the other requires only one.  This stops us from phiing the
       // two types together to eliminate a store.
       auto const& t1 = i1->src(i)->type();

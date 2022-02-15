@@ -72,7 +72,7 @@ bool KVParser::consume(std::unique_ptr<IOBuf> chain) {
   m_readBuf.append(std::move(chain));
 
   // Can only process new data if we aren't currently waiting on a call to
-  // readNext() to free up the key/value beffers
+  // readNext() to free up the key/value buffers
   if (m_phase != Phase::READY) {
     process();
   }

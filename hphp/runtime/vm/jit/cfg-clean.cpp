@@ -88,7 +88,7 @@ bool convertCondBranchToJmp(IRUnit& unit, Block* block) {
 
 // If `block' only goes to `takenBlk' and `takenBlk' can only be reached
 // directly from `block', merge them and leave `takenBlk' unreachable.
-// Returns true iff merging happend.
+// Returns true iff merging happened.
 bool absorbDstBlock(IRUnit& unit, Block* block) {
   auto& term = block->back();
   if (!term.is(Jmp)) return false;

@@ -88,7 +88,7 @@ CAMLprim value hh_get_size(value key);
 /* Adds a key/value pair to the hashtable. Returns the number of bytes
  * allocated in the heap, or a negative number if no memory was allocated. */
 value hh_add(value evictable, value key, value data);
-/* Returns true if the key is presen in the hashtable. */
+/* Returns true if the key is present in the hashtable. */
 value hh_mem(value key);
 /* The following operations are only to be performed by the master. */
 /* Moves the data associated to key1 to key2.

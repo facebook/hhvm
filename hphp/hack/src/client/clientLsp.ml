@@ -1768,7 +1768,7 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
     (* [progress] comes from ServerProgress.ml, sent to the monitor, and now we've fetched
        it from the monitor. It's a string "op X/Y units (%)" e.g. "typechecking 5/16 files (78%)",
        or "connecting", if there is no relevant progress to show.
-       [warning] comes from the same place, and if pressent is a human-readable string
+       [warning] comes from the same place, and if present is a human-readable string
        that warns about saved-state-init failure. *)
     let warning =
       if Option.is_some warning then

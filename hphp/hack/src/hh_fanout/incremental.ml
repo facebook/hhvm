@@ -43,7 +43,7 @@ type cursor_state =
           (** The files that have changed since the saved-state. This field
           is cumulative, so previous cursors need not be consulted. *)
       fanout_result: Calculate_fanout.result;
-          (** The result of calcluating
+          (** The result of calculating
           the fanout for the changed files at the given point in time. *)
     }
   | Typecheck_result of {

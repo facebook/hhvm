@@ -76,7 +76,7 @@ enum Type : uint8_t {
 
   /* FastCGI ABORT_REQUEST prematurely terminates a request, signaling that
    * the webserver is no longer interested in processing it. The contentData
-   * for such recoreds is empty. The application server must reply with
+   * for such records is empty. The application server must reply with
    * an END_REQUEST record to indicate that it has aborted.
    */
   ABORT_REQUEST = 2, // [in]

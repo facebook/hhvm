@@ -8620,7 +8620,7 @@ and call
           @@ Typing_error.Callback.always base_error
       in
       let should_forget_fakes =
-        (* If the function doesn't have write priveleges to properties, fake
+        (* If the function doesn't have write privileges to properties, fake
            members cannot be reassigned, so their refinements stand. *)
         let capability =
           Typing_coeffects.get_type ft.ft_implicit_params.capability

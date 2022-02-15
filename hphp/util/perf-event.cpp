@@ -349,7 +349,7 @@ Optional<perf_event_handle> enable_event(const char* event_name,
   auto const pe = perf_event_handle { fd, meta };
 
   // Reset the event.  This seems to be present in most examples, but it's
-  // unclear if it's necessary or just good hygeine.  (It's possible that it's
+  // unclear if it's necessary or just good hygiene.  (It's possible that it's
   // necessary on successive opens.)
   if (ioctl(fd, PERF_EVENT_IOC_RESET, 0) < 0) {
     Logger::Warning("perf_event: failed to reset perf_event: %s",

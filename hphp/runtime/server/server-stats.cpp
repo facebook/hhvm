@@ -400,7 +400,7 @@ std::string ServerStats::ReportStatus(Writer::Format format) {
       w->endObject("memory");
 
       // Only in the event that we are currently in the process of an io, will
-      // we output the iostatus, and ioInProcessDuationMicros
+      // we output the iostatus, and ioInProcessDurationMicros
       if (ts.m_ioInProcess) {
         timespec now;
         Timer::GetMonotonicTime(now);

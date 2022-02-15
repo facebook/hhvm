@@ -203,7 +203,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * We could have written AysncFunc<T> directly with those methods implemented
+ * We could have written AsyncFunc<T> directly with those methods implemented
  * inside AsyncFuncImpl class, but this way we reduce sizes of our code by
  * only templatizing a very minimal piece of code, sharing everything inside
  * AsyncFuncImpl by all AsyncFunc<T> classes.

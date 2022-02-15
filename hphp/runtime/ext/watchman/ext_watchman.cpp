@@ -680,7 +680,7 @@ Object HHVM_FUNCTION(HH_watchman_subscribe,
       .thenError(
           folly::tag_t<std::exception>{},
           [name] (std::exception const& e) -> folly::Unit {
-            // (ASNYC) delete active subscription
+            // (ASYNC) delete active subscription
             s_activeSubscriptions.erase(name);
             throw std::runtime_error(e.what());
           });

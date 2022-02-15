@@ -59,7 +59,7 @@ enum class Version : uint8_t {
  * Structured streams contain name-value pairs encoded as a length followed
  * by an ascii string. Numeric values are encoded as strings.
  *
- * Streams of the same type are to be concatentated together.
+ * Streams of the same type are to be concatenated together.
  */
 enum Type : uint8_t {
   /* FastCGI BEGIN_REQUEST intiates a new http request. The contentData for

@@ -11,7 +11,7 @@ open Ifc_types
 module Utils = Ifc_utils
 module K = Typing_cont_key
 
-(* See ifc_env.mli for the docmentation *)
+(* See ifc_env.mli for the documentation *)
 
 (* Only elementary logic about the environments should
    be in this file to avoid circular dependencies;

@@ -161,7 +161,7 @@ function sodium_crypto_secretbox_open(
   string $key,
 ): mixed /* string | false */;
 
-///// Asymetric (public-key) encryption key management
+///// Asymmetric (public-key) encryption key management
 
 <<__PHPStdLib>>
 function sodium_crypto_box_keypair(): string;
@@ -206,7 +206,7 @@ function sodium_crypto_kx_server_session_keys(
   string $client_pubkey,
 ): (string, string);
 
-///// Unauthenticated asymetric (PSK) encryption (you probably don't want this)
+///// Unauthenticated asymmetric (PSK) encryption (you probably don't want this)
 
 <<__PHPStdLib>>
 function sodium_crypto_stream(
@@ -222,7 +222,7 @@ function sodium_crypto_stream_xor(
   string $key,
 ): string;
 
-///// Asymetric (public-key) encryption
+///// Asymmetric (public-key) encryption
 
 <<__PHPStdLib>>
 function sodium_crypto_box(
@@ -250,7 +250,7 @@ function sodium_crypto_box_seal_open(
   string $keypair,
 ): mixed;
 
-///// Asymetric (public key) signature key management
+///// Asymmetric (public key) signature key management
 
 <<__PHPStdLib>>
 function sodium_crypto_sign_keypair(): string;
@@ -278,7 +278,7 @@ function sodium_crypto_sign_ed25519_pk_to_curve25519(string $eddsakey): string;
 <<__PHPStdLib>>
 function sodium_crypto_sign_ed25519_sk_to_curve25519(string $eddsakey): string;
 
-///// Asymetric (public key) signatures
+///// Asymmetric (public key) signatures
 
 <<__PHPStdLib>>
 function sodium_crypto_sign(

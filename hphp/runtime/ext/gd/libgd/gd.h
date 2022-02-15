@@ -774,7 +774,7 @@ void* gdDPExtractData(struct gdIOCtx* ctx, int *size);
 
 /* filters section
  *
- * Negate the imag src, white becomes black,
+ * Negate the image src, white becomes black,
  * The red, green, and blue intensities of an image are negated.
  * White becomes black, yellow becomes blue, etc.
  */

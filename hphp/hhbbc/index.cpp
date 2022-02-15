@@ -4624,7 +4624,7 @@ Index::~Index() {}
 void Index::mark_no_bad_redeclare_props(php::Class& cls) const {
   /*
    * Keep a list of properties which have not yet been found to redeclare
-   * anything inequivalently. Start out by putting everything on the list. Then
+   * anything unequivalently. Start out by putting everything on the list. Then
    * walk up the inheritance chain, removing collisions as we find them.
    */
   std::vector<php::Prop*> props;

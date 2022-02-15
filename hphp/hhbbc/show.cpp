@@ -550,7 +550,7 @@ std::string show(const Type& t) {
   // remaining (non-support) bits. If there's no specialization, just
   // delegate to gather().
   auto const gatherForSpec = [&] (trep bits) {
-    // Gather the supoprt and the non-support bits, then combine them
+    // Gather the support and the non-support bits, then combine them
     // into a string (with the spec in the middle).
     auto const impl = [&] (trep mask, const std::string& spec) {
       auto const [specPart, specMatches] = gather(bits & mask);

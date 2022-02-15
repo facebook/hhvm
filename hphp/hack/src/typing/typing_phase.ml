@@ -1098,14 +1098,6 @@ let localize_generic_parameters_with_bounds
   let (env, cstrss) = List.map_env env tparams ~f:localize_bound in
   (env, List.concat cstrss)
 
-let localize_and_add_where_constraints ~ety_env (env : env) where_constraints =
-  let add_constraint env (h1, ck, h2) =
-    let (env, ty1) = localize env (Decl_hint.hint env.decl_env h1) ~ety_env in
-    let (env, ty2) = localize env (Decl_hint.hint env.decl_env h2) ~ety_env in
-    TUtils.add_constraint env ck ty1 ty2 ety_env.on_error
-  in
-  List.fold_left where_constraints ~f:add_constraint ~init:env
-
 (* Helper functions *)
 
 let sub_type_decl env ty1 ty2 on_error =
@@ -1113,24 +1105,41 @@ let sub_type_decl env ty1 ty2 on_error =
   let (env, ty2) = localize_no_subst env ~ignore_errors:true ty2 in
   TUtils.sub_type env ty1 ty2 on_error
 
-let add_constraints env constraints on_error =
+let localize_and_add_generic_parameters_and_where_constraints
+    ~ety_env env tparams where_constraints =
   let add_constraint env (ty1, ck, ty2) =
-    Typing_utils.add_constraint env ck ty1 ty2 on_error
+    Typing_utils.add_constraint env ck ty1 ty2 ety_env.on_error
   in
-  List.fold_left constraints ~f:add_constraint ~init:env
-
-let localize_and_add_generic_parameters ~ety_env env tparams =
   let (env, constraints) =
     localize_generic_parameters_with_bounds env tparams ~ety_env
   in
-  let env = add_constraints env constraints ety_env.on_error in
-  env
+  let env = List.fold ~init:env ~f:add_constraint constraints in
+
+  (* Given tparam T1 as I, localizing a where constraint of the form T2 = T1::T has the side effect of
+   * adding two fake type parameters "\I::T" and "T1::T" into the tpenv with necessary constraints.
+   * Meanwhile, localize_ft is aware of this and works around it by saving and restoring the tpenv to
+   * discard the additions gained from localization. The result is that localizing a function type first
+   * and then adding the localized where constraints to the environment results in an incomplete tpenv.
+   *
+   * TODO: make this less confusing *)
+  List.fold
+    ~init:env
+    ~f:(fun env (t1, ck, t2) ->
+      let (env, ty1) = localize env t1 ~ety_env in
+      let (env, ty2) = localize env t2 ~ety_env in
+      add_constraint env (ty1, ck, ty2))
+    where_constraints
 
 let localize_and_add_ast_generic_parameters_and_where_constraints
     env ~ignore_errors tparams where_constraints =
   let tparams : decl_tparam list =
     List.map tparams ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
   in
+  let where_constraints : decl_where_constraint list =
+    List.map where_constraints ~f:(fun (h1, ck, h2) ->
+        (Decl_hint.hint env.decl_env h1, ck, Decl_hint.hint env.decl_env h2))
+  in
+
   let ety_env =
     empty_expand_env_with_on_error
       (if ignore_errors then
@@ -1138,8 +1147,13 @@ let localize_and_add_ast_generic_parameters_and_where_constraints
       else
         Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
   in
-  let env = localize_and_add_generic_parameters ~ety_env env tparams in
-  let env = localize_and_add_where_constraints ~ety_env env where_constraints in
+  let env =
+    localize_and_add_generic_parameters_and_where_constraints
+      ~ety_env
+      env
+      tparams
+      where_constraints
+  in
   env
 
 let () = TUtils.localize_no_subst_ref := localize_no_subst

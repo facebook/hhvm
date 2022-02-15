@@ -1887,7 +1887,7 @@ char _codes[26] = { 1,16,4,16,9,2,4,16,9,2,0,2,2,2,1,4,0,2,4,4,1,0,0,0,8,0};
 /*----------------------------- */
 
 /* I suppose I could have been using a character pointer instead of
- * accesssing the array directly... */
+ * accessing the array directly... */
 
 /* Look at the next letter in the word */
 #define Next_Letter ((char)toupper(word[w_idx+1]))

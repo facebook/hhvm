@@ -4246,7 +4246,7 @@ Vinstr reload_with_remat(State& state,
   // If the rematerialization instruction is a reload, we'll just
   // return it, so no further checks are needed. Otherwise we can
   // cache an instruction which may be situationally usable, so we
-  // need to do these checks everytime (if the instruction is never
+  // need to do these checks every time (if the instruction is never
   // useful, we should have a reload stored here already).
   if (remat.instr.op == Vinstr::reload) return reload{src, dst};
 

@@ -10,7 +10,7 @@
 open Hh_prelude
 
 (****************************************************************************)
-(* Moduling Making buckets.
+(* Modularizing Making buckets.
  * When we parallelize, we need to create "buckets" of tasks for the
  * workers.
  * Given a list of files, we want to split it up into buckets such that

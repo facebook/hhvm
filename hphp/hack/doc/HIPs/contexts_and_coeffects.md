@@ -465,7 +465,7 @@ function sum(Traversable<int> $nums)[]: int { // Has {}!!!
 }
 ```
 
-This code should not typecheck! The `sum` function has no capabilities, but what are the capabily requirements of the call to `next`?
+This code should not typecheck! The `sum` function has no capabilities, but what are the capability requirements of the call to `next`?
 
 ### Solution
 

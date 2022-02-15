@@ -119,7 +119,7 @@ let ty_equiv env ty1 ty2 ~are_ty_param =
   in
   (env, ty)
 
-(* Destructure a union into a list of its sub-types, decending into sub-unions,
+(* Destructure a union into a list of its sub-types, descending into sub-unions,
    and also pulling out null and dynamic.
 *)
 let dest_union_list env tyl =

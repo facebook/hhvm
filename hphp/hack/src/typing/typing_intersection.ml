@@ -97,7 +97,7 @@ let recompose_atomic env r tyl =
   Utils.make_union env r tyl nullable_r dynamic_r
 
 (* Destructure an intersection into a list of its sub-types,
-   decending into sub-intersections.
+   descending into sub-intersections.
    *)
 let destruct_inter_list env tyl =
   let orr r_opt r = Some (Option.value r_opt ~default:r) in

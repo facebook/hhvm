@@ -143,7 +143,7 @@ struct sdlContentModel {
   sdlType              *u_element;   // pointer to element
   sdlType              *u_group;     // pointer to group
   std::vector<std::shared_ptr<sdlContentModel>>
-                        u_content;   // array of sequnce,all,choice
+                        u_content;   // array of sequence,all,choice
   std::string           u_group_ref; // reference to group
 };
 

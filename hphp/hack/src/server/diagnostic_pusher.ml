@@ -115,7 +115,7 @@ end = struct
   [@@deriving eq, show]
 
   (** Limit on the number of errors we want to have in the IDE.
-      The IDE may not be very resonsive beyond this limit. *)
+      The IDE may not be very responsive beyond this limit. *)
   let default_error_limit = 1000
 
   let error_limit : int ref = ref default_error_limit

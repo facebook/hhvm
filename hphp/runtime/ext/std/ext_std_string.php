@@ -82,7 +82,7 @@ function wordwrap(string $str, int $width = 75, string $break = "\n",
  * X - the argument is treated as an integer and presented as a
  *      hexadecimal number (with uppercase letters).
  *
- * Variables will be co-erced to a suitable type for the specifier:
+ * Variables will be coerced to a suitable type for the specifier:
  */
 <<__Native, __IsFoldable>>
 function sprintf(mixed $format, mixed... $args)[]: mixed;

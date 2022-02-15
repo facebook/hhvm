@@ -307,7 +307,7 @@ struct ActiveSubscription {
       m_path,
       WatchmanThreadEventBase::Get(),
       [this] (const folly::Try<folly::dynamic>&& data) { // (ASYNC)
-        if (m_unsubcribeInProgress) {
+        if (m_unsubscribeInProgress) {
           return;
         }
         if (data.hasException()) {
@@ -331,7 +331,7 @@ struct ActiveSubscription {
 
   // (PHP / INIT)
   folly::Future<std::string> unsubscribe() {
-    if (m_unsubcribeInProgress) {
+    if (m_unsubscribeInProgress) {
       throw std::runtime_error(folly::sformat(
         "Unsubscribe operation already in progress for this subscription. "
         "Make sure to await on the unsubscribe result - query:{}, path:{}, "
@@ -346,7 +346,7 @@ struct ActiveSubscription {
     }
 
     m_unprocessedCallbackData.clear();
-    m_unsubcribeInProgress = true;
+    m_unsubscribeInProgress = true;
 
     folly::Future<bool> unsubscribe_future{false};
     // If the connection is alive we must perform an actual unsubscribe. If not,
@@ -544,7 +544,7 @@ struct ActiveSubscription {
   folly::Future<folly::Optional<folly::dynamic>> watchmanFlush(
     std::chrono::milliseconds timeout
   ) {
-    return !checkConnection() || m_unsubcribeInProgress || !m_subscriptionPtr
+    return !checkConnection() || m_unsubscribeInProgress || !m_subscriptionPtr
       ? folly::makeFuture(folly::Optional<folly::dynamic>())
       : m_watchmanClient->flushSubscription(m_subscriptionPtr, timeout)
           .via(WatchmanThreadEventBase::Get());
@@ -585,7 +585,7 @@ struct ActiveSubscription {
   bool m_alive{true};
   std::deque<folly::dynamic> m_unprocessedCallbackData;
   bool m_callbackInProgress{false};
-  bool m_unsubcribeInProgress{false};
+  bool m_unsubscribeInProgress{false};
   std::string m_unsubscribeData;
   folly::Promise<std::string> m_unsubscribePromise;
   std::vector<folly::Promise<bool>> m_syncPromises;

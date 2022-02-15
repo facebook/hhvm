@@ -1328,7 +1328,7 @@ When defining a property, the region they are within is specified. Lack of speci
 implies the `Instance` region, which lives inside the global `All` region.
 They also include the concept of static regions containing static members (and
 doesn't live inside the Instance region). Following this, methods specify which
-regions (if any) they act (read and/or write) on. The typechecker guarentees
+regions (if any) they act (read and/or write) on. The typechecker guarantees
 both that these are true statements locally and that they are transitively true.
 Overall, this is effectively another layer of privat/public/protected specifiers
 that typically exist for more fine control over encapsulation layers.
@@ -1506,12 +1506,12 @@ is fully reified regardless of the static types themselves.
 specifically the "borrowed" state? More specifically, how does this apply when
 mixing normal objects and disposables?
 
-**A** A combination of strong and weak lifetime guarentees. The important piece is
+**A** A combination of strong and weak lifetime guarantees. The important piece is
 that these objects don't get mixed. Const classes and disposables are
-perma-opted-in to stricter tracking, so they get "strong" lifetime guarentees.
-Further, anything in the `owned` state has a strong guarentee. The only weak
-guarentee comes into play with the borrowed state, since that can actually be
-nonlinear, but the guarentee there is from that point on it will stay linear.
+perma-opted-in to stricter tracking, so they get "strong" lifetime guarantees.
+Further, anything in the `owned` state has a strong guarantee. The only weak
+guarantee comes into play with the borrowed state, since that can actually be
+nonlinear, but the guarantee there is from that point on it will stay linear.
 
 **Q** can `own` be implied by `new` or is the `own` keyword just there for clarity?
 
@@ -1545,7 +1545,7 @@ look for in their code that will make them want to track ownership?
 We give most of the "worry free" parallelism rust gives by using an
 asynchronous model rather a true parallel one. There will likely be rare cases
 where users want to maintain linearity for the lifetime of an object, in which
-case this can be used to give them type-and-runtime level guarentees. The most
+case this can be used to give them type-and-runtime level guarantees. The most
 likely scenario for use will be very hot code that uses these annotations to
 tell the runtime that it may safely elide reference counts and do other
 optimizations.
@@ -1574,7 +1574,7 @@ it wouldn't make sense to write say `type OwnedC = owned C`? How about
 **A** ownership is conceptually a parallel concept to typing in most cases. Ownership
 is an attribute of an object the same way the type is, but ownership state isn't
 a type. It's possible we could implement aliases, but because we rely strongly
-on compile-time guarentees for efficiency, that has not been investigated for
+on compile-time guarantees for efficiency, that has not been investigated for
 the first iteration of this feature. `vec<owned C>` doesn't make sense because
 we only have shallow ownership tracking. If we some day allow for deep tracking,
 we will likely revisit this.

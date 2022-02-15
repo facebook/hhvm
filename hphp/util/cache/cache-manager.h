@@ -115,7 +115,7 @@ struct CacheManager {
 
   VFileType getFileType(const std::string& name) const;
 
-  // Read the contents of a direcotry
+  // Read the contents of a directory
   std::vector<std::string> readDirectory(const std::string& name) const;
   void dump() const;
 

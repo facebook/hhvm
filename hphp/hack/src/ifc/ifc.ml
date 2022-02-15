@@ -373,7 +373,7 @@ let refine renv tyori pos ltyref =
   *)
   replace_vars tyref
 
-(* Generates a fresh sub/super policy of the argument polic *)
+(* Generates a fresh sub/super policy of the argument policy *)
 let adjust_policy ?(prefix = "weak") ~pos ~adjustment renv env policy =
   match (adjustment, policy) with
   | (Astrengthen, Pbot _)

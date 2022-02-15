@@ -14,7 +14,7 @@ behaviour similar to the old versions.
 Hack has two main comparison operators `==` and `===`. They're individually
 comprised of behaviours both good and bad, and combine to a muddied, confusing,
 and overall broken experience. `==` does coercing value equality, including on
-objects, and compares arrays (sometimes unorderedly). `===` does pointer equality
+objects, and compares arrays (sometimes unorderly). `===` does pointer equality
 checks on objects (including collections), and breaks some invariants for
 reactive and pure code.
 

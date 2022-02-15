@@ -108,7 +108,7 @@ mod integration_tests {
             // Safety:
             //  - Pointer is not null
             //  - Pointer is aligned on a page
-            //  - This is the only reference to the data, and the lifteim is
+            //  - This is the only reference to the data, and the lifetime is
             //    static as we don't unmap the memory
             unsafe { &mut *inserter_ptr };
         // Safety: Initialize the memory properly

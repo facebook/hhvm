@@ -49,7 +49,7 @@ module WidthConstrainedDocComparator (C : LineSpec) : DocCompare = struct
 
   (* recursively check that the subgroup fits in the given width
    * "Fit" is checked by seeing that the document being expanded
-   * horizontally can stay in one line within the width limit, unitil
+   * horizontally can stay in one line within the width limit, until
    * a known newline is seen *)
   and fits w = function
     | _ when w < 0 -> false

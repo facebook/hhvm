@@ -285,7 +285,7 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
   // resulting chained fault object.
   std::unordered_set<uintptr_t> seen;
 
-  // Walk head's previous pointers untill we find an unset one, or determine
+  // Walk head's previous pointers until we find an unset one, or determine
   // they form a cycle.
   auto findAcyclicPrev = [&](ObjectData* head) {
     tv_lval foundLval;

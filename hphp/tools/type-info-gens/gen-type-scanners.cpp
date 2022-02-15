@@ -2775,7 +2775,7 @@ void Generator::genAllLayouts() {
         if (indexed.errors) continue;
 
         // If this indexed type's action is conservative, examine guards (if
-        // any) to see if we want to ignore or conserative scan it.
+        // any) to see if we want to ignore or conservative scan it.
         if (indexed.conservative) {
           // If ignore isn't set, the issue has already been decided
           // (conservative scan).

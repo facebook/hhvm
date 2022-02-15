@@ -1185,7 +1185,7 @@ DebuggerCommandPtr DebuggerClient::eventLoop(EventLoopKind loopKind,
 // This function is only entered when the machine being debugged is paused.
 //
 // If this function returns it means the process is running again.
-// NB: exceptions derived from DebuggerException or DebuggerClientExeption
+// NB: exceptions derived from DebuggerException or DebuggerClientException
 // indicate the machine remains paused.
 void DebuggerClient::console() {
   TRACE(2, "DebuggerClient::console\n");

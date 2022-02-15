@@ -452,7 +452,7 @@ const char* MemCommand::kArguments = "<addr> [n = 1] [format = %x]";
 const char* MemCommand::kHelp =
   "  print n memory item(s) at address addr according to the given format.\n"
   "  addr can be an immediate address, a register or the pc.\n"
-  "  format is made of a qualifer: 's', 'u', 'a' (signed, unsigned, hexa)\n"
+  "  format is made of a qualifier: 's', 'u', 'a' (signed, unsigned, hexa)\n"
   "  and a type 'x', 'w', 'h', 'b' (64- to 8-bit integer), 'c' (character),\n"
   "  's' (float) or 'd' (double). E.g 'mem sp %w' will print a 32-bit word\n"
   "  from the stack as an hexadecimal number."

@@ -521,7 +521,7 @@ endfunction()
 
 macro (cotire_make_C_identifier _identifierVar _str)
 	if (CMAKE_VERSION VERSION_LESS "2.8.12")
-		# mimic CMake SystemTools::MakeCindentifier behavior
+		# mimic CMake SystemTools::MakeCidentifier behavior
 		if ("${_str}" MATCHES "^[0-9].+$")
 			set (_str "_${str}")
 		endif()

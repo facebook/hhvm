@@ -3004,8 +3004,8 @@ void parse_enum_ty(AsmState& as) {
 }
 
 /*
- * directive-require : 'extends' '<' indentifier '>' ';'
- *                   | 'implements' '<' indentifier '>' ';'
+ * directive-require : 'extends' '<' identifier '>' ';'
+ *                   | 'implements' '<' identifier '>' ';'
  *                   ;
  *
  */

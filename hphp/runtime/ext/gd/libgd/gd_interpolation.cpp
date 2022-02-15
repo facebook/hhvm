@@ -1166,7 +1166,7 @@ static gdImagePtr gdImageScaleBilinearPalette(gdImagePtr im, const unsigned int 
           f_b1, f_b2, f_b3, f_b4,
           f_a1, f_a2, f_a3, f_a4;
 
-      /* zero for the background color, nothig gets outside anyway */
+      /* zero for the background color, nothing gets outside anyway */
       pixel1 = getPixelOverflowPalette(im, n, m, 0);
       pixel2 = getPixelOverflowPalette(im, n + 1, m, 0);
       pixel3 = getPixelOverflowPalette(im, n, m + 1, 0);

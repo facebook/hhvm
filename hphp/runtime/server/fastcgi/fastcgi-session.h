@@ -142,7 +142,7 @@ private:
  * ===== Socket ownership and life cycle =====
  *
  * Ownership of the TCP/UNIX socket is defined by the FastCGI protocol. Upon
- * reciept of a new request via a BEGIN_REQUEST record the session will read
+ * receipt of a new request via a BEGIN_REQUEST record the session will read
  * the flags field to determine whether or not it should remain open to process
  * subsequent requests following request completion.
  *

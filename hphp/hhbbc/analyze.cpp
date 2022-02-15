@@ -313,7 +313,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
    * There are potentially infinitely growing types when we're using union_of to
    * merge states, so occasionally we need to apply a widening operator.
    *
-   * Currently this is done by having a straight-forward hueristic: if you visit
+   * Currently this is done by having a straight-forward heuristic: if you visit
    * a block too many times, we'll start doing all the merges with the widening
    * operator. We must then continue iterating in case the actual fixed point is
    * higher than the result of widening. Likewise if we loop too much because of

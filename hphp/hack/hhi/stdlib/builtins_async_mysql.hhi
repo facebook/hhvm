@@ -233,7 +233,7 @@ class AsyncMysqlQueryResult extends AsyncMysqlResult {
  /* Can't put a return type for rowBlocks as it will ask that the type is
   * iterable because of the usage and then we can't have the AsyncMysqlRowBlock
   * implement the Iterable interface because mocks will complain they don't
-  * implemplement the functions in the interface.
+  * implement the functions in the interface.
   **/
   public function rowBlocks() { }
   public function noIndexUsed() : bool { }

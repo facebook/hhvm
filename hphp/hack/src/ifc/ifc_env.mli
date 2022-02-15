@@ -30,7 +30,7 @@ type ('has_locals, 'can_throw) env
 
 (* blank_env, stmt_env, and expr_env are handy aliases; a
    blank_env cannot do much, stmt_env and expr_env are used
-   to typecheck statements and expressions, respecitively *)
+   to typecheck statements and expressions, respectively *)
 type blank_env = (no, no) env
 
 type stmt_env = (yes, no) env

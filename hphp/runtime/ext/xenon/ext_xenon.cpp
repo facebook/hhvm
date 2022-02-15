@@ -269,7 +269,7 @@ XenonRequestLocalData::~XenonRequestLocalData() {
 
 
 // Creates an array to respond to the Xenon PHP extension;
-// builds the data into the format neeeded.
+// builds the data into the format needed.
 Array XenonRequestLocalData::createResponse() {
   VecInit stacks(m_stackSnapshots.size());
   for (ArrayIter it(m_stackSnapshots); it; ++it) {

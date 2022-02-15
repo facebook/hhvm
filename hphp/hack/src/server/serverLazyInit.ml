@@ -711,7 +711,7 @@ let get_files_to_undecl_and_recheck
  * saved (dirty_files), and two maps of the class / function declarations
  * -- one made when the state was saved (old_fast) and one made for the
  * current files in the repository (new_fast). We grab the declarations from
- * both, to account for both the declaratons that were deleted and those that
+ * both, to account for both the declarations that were deleted and those that
  * are newly created. Then we use the deptable to figure out the files that
  * referred to them. Finally we recheck the lot.
  *

@@ -187,7 +187,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     }
   }
 
-  // Now, each interval in blockStarts delinates a basic block.
+  // Now, each interval in blockStarts delineates a basic block.
   blockStarts.insert(fe.bcPos());
 
   if (traceBc) {

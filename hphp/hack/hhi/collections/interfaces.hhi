@@ -1254,7 +1254,7 @@ interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
    * `MutableMap`.
    *
    * @param $start - The starting key location of the current `MutableMap` for
-   *                  the feturned `MutableMap`.
+   *                  the returned `MutableMap`.
    * @param $len - The length of the returned `MutableMap`.
    *
    * @return - A `MutableMap` that is a proper subset of the current

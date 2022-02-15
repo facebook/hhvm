@@ -110,7 +110,7 @@ module Reverse_naming_table_delta : sig
         An arbitrary one of the positions is stored as 'first', and the
         rest are stored in 'rest'. This structure represents in ocaml's
         type system that the 'Pos' case has at least one element in its
-        mltiset. Also, the first position is the one returned
+        multiset. Also, the first position is the one returned
         when a caller asks what is "the" position for a given symbol --
         many callers aren't even aware that there may be multiple positions,
         and will happily do something reasonable when given an arbitrary one.

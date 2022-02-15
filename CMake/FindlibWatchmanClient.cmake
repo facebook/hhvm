@@ -1,4 +1,4 @@
-# Finds Watchamn C++ client library
+# Finds Watchman C++ client library
 #
 # This module defines:
 # WATCHMANCLIENT_INCLUDE_DIRS

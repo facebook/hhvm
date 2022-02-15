@@ -818,7 +818,7 @@ static bool StringToInt64(int64_t* value, const char* line, int base = 10) {
   int64_t parsed = strtol(line, &endptr, base);
 
   if (errno == ERANGE) {
-    // Overflow, undeflow.
+    // Overflow, underflow.
     return false;
   }
 

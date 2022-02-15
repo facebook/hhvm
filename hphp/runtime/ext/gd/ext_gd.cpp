@@ -982,7 +982,7 @@ static struct gfxinfo *php_handle_jpc(const req::ptr<File>& file) {
   }
 #endif
 
-  result->channels = php_read2(file); /* Csiz */
+  result->channels = php_read2(file); /* Csize */
   if (result->channels > 256) {
     IM_FREE(result);
     return nullptr;

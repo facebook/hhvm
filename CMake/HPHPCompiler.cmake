@@ -491,7 +491,7 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   list(APPEND MSVC_WARNINGS_AS_ERRORS
     "4099" # Mixed use of struct and class on same type names. This was absolutely everywhere, and can cause errors at link-time if not fixed.
     "4129" # Unknown escape sequence. This is usually caused by incorrect escaping.
-    "4566" # Character cannot be represented in current charset. This is remidied by prefixing string with "u8".
+    "4566" # Character cannot be represented in current charset. This is remedied by prefixing string with "u8".
   )
 
   # And the extra defines:

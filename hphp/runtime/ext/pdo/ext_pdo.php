@@ -399,7 +399,7 @@ class PDOStatement implements Iterator {
 
   /* Returns a single column from the next row of a result set or FALSE if there
    * are no more rows.
-   * @param int $column_numner - 0-indexed number of the column you wish to
+   * @param int $column_number - 0-indexed number of the column you wish to
    * retrieve from the row. If no value is supplied, PDOStatement::fetchColumn()
    * fetches the first column.
    * @return mixed - PDOStatement::fetchColumn() returns a single column in the
@@ -407,7 +407,7 @@ class PDOStatement implements Iterator {
    * from the same row if you use PDOStatement::fetchColumn() to retrieve data.
    */
   <<__Native>>
-  public function fetchColumn(int $column_numner = 0): mixed;
+  public function fetchColumn(int $column_number = 0): mixed;
 
   /* @param int $how - Controls the contents of the returned array as documented
    * in PDOStatement::fetch().  To return an array consisting of all values of a

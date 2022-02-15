@@ -122,7 +122,7 @@ class PDOStatement {
   public function execute($params = null);
   public function fetch(int $how = 0, int $orientation = PDO::FETCH_ORI_NEXT, int $offset = 0);
   public function fetchObject(string $class_name = "", $ctor_args = null);
-  public function fetchColumn(int $column_numner = 0);
+  public function fetchColumn(int $column_number = 0);
   public function fetchAll(int $how = 0, $class_name = null, $ctor_args = null);
   public function bindValue($paramno, $param, int $type = PDO::PARAM_STR);
   public function rowCount();

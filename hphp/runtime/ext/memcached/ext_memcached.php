@@ -319,7 +319,7 @@ class Memcached {
   /**
    * Invalidate all items in the cache
    *
-   * @param int $delay - Numer of seconds to wait before invalidating the
+   * @param int $delay - Number of seconds to wait before invalidating the
    *   items.
    *
    * @return bool -

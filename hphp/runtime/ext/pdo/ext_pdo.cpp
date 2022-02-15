@@ -2805,7 +2805,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchobject,
 }
 
 static Variant HHVM_METHOD(PDOStatement, fetchcolumn,
-                           int64_t column_numner /* = 0 */) {
+                           int64_t column_number /* = 0 */) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
     return false;
@@ -2817,7 +2817,7 @@ static Variant HHVM_METHOD(PDOStatement, fetchcolumn,
     return false;
   }
   Variant ret;
-  fetch_value(data->m_stmt, ret, column_numner, nullptr);
+  fetch_value(data->m_stmt, ret, column_number, nullptr);
   return ret;
 }
 

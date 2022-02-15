@@ -503,7 +503,7 @@ function stream_socket_client(string $remote_socket,
  * @param resource $session_stream Seed the stream with settings from
  *   session_stream. CURRENTLY UNSUPPORTED IN HHVM.
  *
- * @returns mixed - Returns TRUE on success, FALSE if negoation has failed, or
+ * @returns mixed - Returns TRUE on success, FALSE if negotiation has failed, or
  *   0 if there isn't enough data and you should try again (only for
  *   non-blocking sockets).
  */

@@ -187,7 +187,7 @@
  * - netpbm magic and misc other image stuff [Bryan Henderson]
  *
  * Revision 1.32  2000/08/05 18:24:18  christos
- * Correct indianness detection in elf (Charles Hannum)
+ * Correct endianness detection in elf (Charles Hannum)
  * FreeBSD elf core support (Guy Harris)
  * Use gzip in systems that don't have uncompress (Anthon van der Neut)
  * Internationalization/EBCDIC support (Eric Fisher)

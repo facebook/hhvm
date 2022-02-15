@@ -306,7 +306,7 @@ private:
     }
     for (auto slot = obj->getVMClass()->declPropInit().size(); slot-- > 0;) {
       // TODO: Handle modification of slot ordering during serde.
-      // handle class seriailization as well.
+      // handle class serialization as well.
       scan(obj->propLvalAtOffset(slot));
     }
   }

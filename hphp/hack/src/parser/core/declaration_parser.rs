@@ -1708,7 +1708,7 @@ where
     // TODO: This is wrong. The variable here is not anexpression* that has
     // an optional decoration on it.  It's a declaration. We shouldn't be using the
     // same data structure for a decorated expression as a declaration; one
-    // is ause* and the other is a *definition*.
+    // is a *use* and the other is a *definition*.
     fn parse_decorated_variable(&mut self) -> S::R {
         // ERROR RECOVERY
         // Detection of (variadic, byRef) inout params happens in post-parsing.

@@ -915,7 +915,7 @@ and check_where_constraints
  * for them and apply constraints.
  *
  * This is not used for local inference on constructors, but rather for global inference
- * for partial files where function signatures are allowed to contain types ommitting type
+ * for partial files where function signatures are allowed to contain types omitting type
  * arguments.
  *)
 and localize_missing_tparams_class_for_global_inference env r sid class_ =

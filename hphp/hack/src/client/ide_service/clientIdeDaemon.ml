@@ -563,7 +563,7 @@ let make_singleton_ctx (istate : istate) (entry : Provider_context.entry) :
 (** This function is about papering over a bug. Sometimes, rarely, we're
 failing to receive DidOpen messages from clientLsp. Our model is to
 only ever answer IDE requests on open files, so we know we'll eventually
-reveive a DidClose even for them and be able to clear their TAST cache
+receive a DidClose even for them and be able to clear their TAST cache
 at that time. But for now, to paper over the bug, we'll call this
 function to log the event and we'll assume that we just missed a DidOpen. *)
 let log_missing_open_file_BUG (path : Relative_path.t) : unit =

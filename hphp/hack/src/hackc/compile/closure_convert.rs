@@ -1148,7 +1148,7 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
 
     fn visit_def(&mut self, env: &mut Env<'a, 'arena>, def: &mut Def) -> Result<()> {
         match def {
-            // need to handle it ourselvses, because visit_fun_ is
+            // need to handle it ourselves, because visit_fun_ is
             // called both for toplevel functions and lambdas
             Def::Fun(x) => {
                 let mut env = env.clone();

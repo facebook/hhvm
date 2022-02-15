@@ -1310,6 +1310,7 @@ public:
    */
   void setInstanceBits();
   void setInstanceBitsAndParents();
+  void setInstanceBitsIndex(unsigned int bit);
   bool checkInstanceBit(unsigned int bit) const;
 
   /*
@@ -1710,6 +1711,9 @@ private:
 private:
   static constexpr uint32_t kMagic = 0xce7adb33;
 
+  static constexpr int8_t kNoInstanceBit      = -1;
+  static constexpr int8_t kProfileInstanceBit = -2;
+
   /////////////////////////////////////////////////////////////////////////////
   // Data members.
   //
@@ -1825,7 +1829,6 @@ private:
   veclen_t m_funcVecLen;
   veclen_t m_vtableVecLen{0};
 
-
   /*
    * This class, or one of its ancestors, has a property which maybe redefines
    * an existing property in an incompatible way.
@@ -1859,7 +1862,9 @@ private:
   bool m_needsInitThrowable : 1;
   bool m_hasDeepInitProps : 1;
 
-  // NB: 7 bits available here (in USE_LOWPTR builds).
+  // Set if this class is assigned an InstanceBits index; else, one of the
+  // two special values kNoInstanceBit or kProfileInstanceBit.
+  std::atomic<int8_t> m_instanceBitsIndex;
 
   ClassPtr m_parent;
 

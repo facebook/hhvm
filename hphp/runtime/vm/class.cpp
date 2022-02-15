@@ -1769,11 +1769,21 @@ void Class::setInstanceBitsImpl() {
   int numIfaces = m_interfaces.size();
   for (int i = 0; i < numIfaces; i++) setBits(m_interfaces[i]);
 
-  // XXX: this assert fails on the initFlag; oops.
-  if (unsigned bit = InstanceBits::lookup(m_preClass->name())) {
-    bits.set(bit);
-  }
+  // As soon as we store to m_instanceBitsIndex, we'll start using that index
+  // for optimized classof checks. The "setParents" case is when we're setting
+  // up bits for existing classes, post-PGO; in this case, we have to set up
+  // all the m_instanceBits fields before storing any m_instanceBitsIndex.
+  auto const bit = InstanceBits::lookup(name());
+  if (!setParents) setInstanceBitsIndex(bit);
+  if (bit) bits.set(bit);
+
   m_instanceBits = bits;
+}
+
+void Class::setInstanceBitsIndex(unsigned int bit) {
+  assertx(m_instanceBitsIndex.load() == kProfileInstanceBit);
+  auto const cast = bit ? safe_cast<int8_t>(bit) : kNoInstanceBit;
+  m_instanceBitsIndex.store(cast, std::memory_order_release);
 }
 
 namespace {
@@ -2032,6 +2042,7 @@ Class::Class(PreClass* preClass, Class* parent,
   , m_needsPropInitialCheck{false}
   , m_hasReifiedGenerics{false}
   , m_hasReifiedParent{false}
+  , m_instanceBitsIndex{kProfileInstanceBit}
   , m_parent(parent)
 #ifndef NDEBUG
   , m_magic{kMagic}

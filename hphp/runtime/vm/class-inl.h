@@ -198,6 +198,14 @@ inline bool Class::classofNonIFace(const Class* cls) const {
 }
 
 inline bool Class::classof(const Class* cls) const {
+  auto const bit = cls->m_instanceBitsIndex.load(std::memory_order_relaxed);
+  assertx(bit == kNoInstanceBit || kProfileInstanceBit || bit > 0);
+  if (bit > 0) {
+    return m_instanceBits.test(bit);
+  } else if (bit == kProfileInstanceBit) {
+    InstanceBits::profile(cls->name());
+  }
+
   // If `cls' is an interface, we can simply check to see if cls is in
   // this->m_interfaces.  Otherwise, if `this' is not an interface, the
   // classVec check will determine whether it's an instance of cls (including
@@ -208,7 +216,7 @@ inline bool Class::classof(const Class* cls) const {
   // interfaces).
   if (UNLIKELY(cls->attrs() & AttrInterface)) {
     return this == cls ||
-      m_interfaces.lookupDefault(cls->m_preClass->name(), nullptr) == cls;
+      m_interfaces.lookupDefault(cls->name(), nullptr) == cls;
   }
   return classofNonIFace(cls);
 }

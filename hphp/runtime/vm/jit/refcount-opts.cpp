@@ -2547,7 +2547,7 @@ bool sink_incs(Env& env) {
 // This pass chooses a direction - either look for Incs followed by
 // Decs or Decs followed by Incs. It then computes availability for
 // the kind that comes first, and anticipability for the kind that
-// comes second. Lets assume we're doing Incs follwed by Decs.
+// comes second. Lets assume we're doing Incs followed by Decs.
 //
 // An I is partially redundant if it's locally available, and
 // partially anticipated out, because on some of the paths from here

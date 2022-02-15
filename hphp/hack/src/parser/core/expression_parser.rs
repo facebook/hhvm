@@ -2631,7 +2631,7 @@ where
     }
 
     fn parse_optional_return(&mut self) -> (S::R, S::R, S::R) {
-        // Parse an optional "colon-folowed-by-return-type"
+        // Parse an optional "colon-followed-by-return-type"
         let colon = self.optional_token(TokenKind::Colon);
         let (readonly_opt, return_type) = if colon.is_missing() {
             let missing1 = S!(make_missing, self, self.pos());

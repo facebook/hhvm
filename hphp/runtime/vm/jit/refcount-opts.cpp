@@ -1188,7 +1188,7 @@ DEBUG_ONLY std::string show(const BitsetRef& bs) {
  * freed.
  *
  * PureStores are allowed to store the address of an object which has
- * been destroyed (this allowes store-elim to sink stores without
+ * been destroyed (this allows store-elim to sink stores without
  * worrying about moving them past DecRefs); otherwise a use of an
  * SSATmp indicates that its refcount has not yet hit zero.
  */

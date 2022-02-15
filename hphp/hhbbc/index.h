@@ -392,7 +392,7 @@ struct Class {
   bool mightCareAboutDynConstructs() const;
 
   /*
-   * Whether this class (or clases derived from it) could have const props.
+   * Whether this class (or classes derived from it) could have const props.
    */
   bool couldHaveConstProp() const;
   bool derivedCouldHaveConstProp() const;

@@ -47,9 +47,9 @@ enum X64InstrFlags {
   IF_RAX        = 0x0800, // instruction supports special rax encoding
   IF_XCHG       = 0x1000, // instruction is xchg (not xchgb)
   IF_BYTEREG    = 0x2000, // instruction is movzbq, movsbq
-  IF_66PREFIXED = 0x4000, // instruction requires a manditory 0x66 prefix
-  IF_F3PREFIXED = 0x8000, // instruction requires a manditory 0xf3 prefix
-  IF_F2PREFIXED = 0x10000, // instruction requires a manditory 0xf2 prefix
+  IF_66PREFIXED = 0x4000, // instruction requires a mandatory 0x66 prefix
+  IF_F3PREFIXED = 0x8000, // instruction requires a mandatory 0xf3 prefix
+  IF_F2PREFIXED = 0x10000, // instruction requires a mandatory 0xf2 prefix
   IF_THREEBYTEOP = 0x20000, // instruction requires a 0x0F 0x3[8A] prefix
   IF_ROUND       = 0x40000, // instruction is round(sp)d
 };
@@ -936,7 +936,7 @@ public:
 
     // The opsize prefix can be placed here, if the instruction
     // deals with words.
-    // When an instruction has a manditory prefix, it goes before the
+    // When an instruction has a mandatory prefix, it goes before the
     // REX byte if we end up needing one.
     prefixBytes(op.flags, opSz);
 

@@ -63,7 +63,7 @@ let process_member ?(is_declaration = false) recv_class id ~is_method ~is_const
       Method (recv_class, member_name)
     else
       (*
-        Per comment in symbolOcurrence.mli, XhpLiteralAttr
+        Per comment in symbolOccurrence.mli, XhpLiteralAttr
         is only used for attributes in XHP literals. Since
         process_member is not being used to handle XML attributes
         it is fine to define every symbol as Property.

@@ -2387,8 +2387,8 @@ let do_definition
           ~default_path:filename)
   in
   let has_xhp_attribute =
-    List.exists results ~f:(fun (occurence, _) ->
-        SymbolOccurrence.is_xhp_literal_attr occurence)
+    List.exists results ~f:(fun (occurrence, _) ->
+        SymbolOccurrence.is_xhp_literal_attr occurrence)
   in
   Lwt.return (locations, has_xhp_attribute)
 
@@ -2416,8 +2416,8 @@ let do_definition_local
             (document_location.ClientIdeMessage.file_path |> Path.to_string))
   in
   let has_xhp_attribute =
-    List.exists results ~f:(fun (occurence, _) ->
-        SymbolOccurrence.is_xhp_literal_attr occurence)
+    List.exists results ~f:(fun (occurrence, _) ->
+        SymbolOccurrence.is_xhp_literal_attr occurrence)
   in
   Lwt.return (locations, has_xhp_attribute)
 

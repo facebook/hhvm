@@ -523,14 +523,14 @@ function all_request_stats(): mixed; /* darray<string, EventStats>*/
 function all_process_stats(): mixed; /*darray<string, EventStats>*/
 
 /**
- * Return stats for occurences of $event during the current requests up to the
+ * Return stats for occurrences of $event during the current requests up to the
  * call of this function.
  */
 <<__Native>>
 function request_event_stats(string $event): mixed /* EventStats */;
 
 /**
- * Return stats for all occurences of $event during previously completed
+ * Return stats for all occurrences of $event during previously completed
  * requests when this function was called.
  */
 <<__Native>>

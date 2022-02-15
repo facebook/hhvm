@@ -236,7 +236,7 @@ val remove_var :
   search_in_lower_bounds_of:ISet.t ->
   t
 
-(** Remove any occurence of the tyvar from the global environment *)
+(** Remove any occurrence of the tyvar from the global environment *)
 val forget_tyvar_g : t_global -> Ident.t -> t_global
 
 (** Visit all types in the global inference environment.

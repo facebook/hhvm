@@ -23,7 +23,7 @@ interface ResultOrExceptionWrapper<T> {
 
   /**
    * Indicates whether the `Awaitable` associated with this wrapper exited
-   * abnormally via an exception of somoe sort.
+   * abnormally via an exception of some sort.
    *
    * If `isFailed()` returns `true`, `isSucceeded()` returns `false`.
    *

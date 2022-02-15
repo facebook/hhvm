@@ -168,7 +168,7 @@ class MCRouter {
   public function append(string $key, string $value): Awaitable<void>;
 
   /**
-   * Atomicly increment a numeric value
+   * Atomically increment a numeric value
    *
    * @param string $key - Name of the key to modify
    * @param int $val - Amount to increment
@@ -180,7 +180,7 @@ class MCRouter {
   public function incr(string $key, int $val): Awaitable<int>;
 
   /**
-   * Atomicly decrement a numeric value
+   * Atomically decrement a numeric value
    *
    * @param string $key - Name of the key to modify
    * @param int $val - Amount to decrement

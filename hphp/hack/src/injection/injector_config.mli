@@ -8,7 +8,7 @@
  *)
 
 (* This file provides only the interface, so injector configuration
- * can be retreived without depending on the *actual* implementation
+ * can be retrieved without depending on the *actual* implementation
  * file. This is because we want libraries to be able to refer to the config,
  * but the actual injector to be chosen by the binary being built.
  *

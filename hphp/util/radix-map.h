@@ -24,7 +24,7 @@ namespace HPHP {
 /*
  * RadixMap stores blocks of memory represented by [ptr,size), where both
  * ptr and size have at least LgAlign zeroed low-bits. It supports
- * insert, erase, get, iterate, and find. find(addr) retreives
+ * insert, erase, get, iterate, and find. find(addr) retrieves
  * the [ptr,size) block that contains addr.
  *
  * Internally, the tree consists of nodes with Radix = 2^LgRadix slots each;

@@ -212,9 +212,9 @@ class MCRouter {
   public function flushAll(int $delay = 0): Awaitable<void>;
 
   /**
-   * Retreive a value
+   * Retrieve a value
    *
-   * @param string $key - Name of the key to retreive
+   * @param string $key - Name of the key to retrieve
    *
    * @return string - The Value stored
    * @throws On failure
@@ -223,13 +223,13 @@ class MCRouter {
   public function get(string $key): Awaitable<string>;
 
   /**
-   * Retreive a record and its metadata
+   * Retrieve a record and its metadata
    *
-   * @param string $key = Name of the key to retreive
+   * @param string $key = Name of the key to retrieve
    *
-   * @return array - Value retreived and additional metadata
+   * @return array - Value retrieved and additional metadata
    *   array(
-   *     'value' => 'Value retreived',
+   *     'value' => 'Value retrieved',
    *     'cas'   => 1234567890,
    *     'flags' => 0x12345678,
    *   )

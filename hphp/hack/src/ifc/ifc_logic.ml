@@ -274,7 +274,7 @@ let rec entailment_violations lattice = function
   | Cquant _ -> failwith "Cquant"
   | Chole _ -> failwith "Chole"
 
-(* Flatten a prop into a set of flows. Note: this only works for conjuctions of
+(* Flatten a prop into a set of flows. Note: this only works for conjunctions of
  * simple flows. Quantifiers, conditions, and holes are not allowed
  *)
 let rec flatten_prop = function

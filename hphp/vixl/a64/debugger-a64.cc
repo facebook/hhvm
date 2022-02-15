@@ -393,7 +393,7 @@ class MemCommand : public DebugCommand {
   FormatToken* format_;
 };
 
-// Commands which name does not match any of the known commnand.
+// Commands which name does not match any of the known command.
 class UnknownCommand : public DebugCommand {
  public:
   explicit UnknownCommand(std::vector<Token*> args) : args_(args) {}

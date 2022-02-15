@@ -352,7 +352,7 @@ struct HhvmLogHandlerFactory::FormatterFactory final
  * async - Instead of writing calling Logger::Error within path of logging, this
  * queues the message for writing by a different thread.  Be warned that the
  * HHVM logger displays adds its own thread information in the output and that
- * logging to it asynchrounously probably means that thread information is going
+ * logging to it asynchronously probably means that thread information is going
  * to be a lie.  The logger includes valid thread information if needed.
  */
 struct HhvmLogHandlerFactory::WriterFactory final

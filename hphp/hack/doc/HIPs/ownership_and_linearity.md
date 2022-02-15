@@ -1203,7 +1203,7 @@ This seems unenforceable statically (box being disallows global writes):
 > (although not both: if the actor can write to the object, other actors cannot
 > read from it)
 
-Like us, they separate between methods that can be run asynchornously and ones that don't.
+Like us, they separate between methods that can be run asynchronously and ones that don't.
 It's not safe to give a `box` to a method that can run asynchronously, because the
 caller can retain a locally mutable instance, so the async method could read while
 the caller does some writes. We ban this via strict limits on borrowed objects

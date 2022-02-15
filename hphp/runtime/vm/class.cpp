@@ -1505,7 +1505,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName,
   auto& cns = m_constants[clsCnsInd];
   // When a child extends a parent, rather than the child having
   // distinct copies of the constants defined by their parent we prefer
-  // those constants be shared. Aside from saving memeory and avoiding
+  // those constants be shared. Aside from saving memory and avoiding
   // multiple initializations of the same logical constant, this
   // establishes the property that a constant accessed through a child
   // class will compare equal to the same constant accessed through the

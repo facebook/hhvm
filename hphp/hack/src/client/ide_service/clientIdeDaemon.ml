@@ -56,7 +56,7 @@ There are two concepts to understand.
 The key algorithms which read from these data-structures are:
 1. Ast_provider.get_ast will fetch the cached AST for an entry in ctx, or if
    the entry is present but as yet lacks an AST then it will parse and cache,
-   or if it's lookinng for the AST of a file not in ctx then it will parse
+   or if it's looking for the AST of a file not in ctx then it will parse
    off disk but decline to cache.
 2. Naming_provider.get_* will get_ast for ctx entry to see if symbol is there.
    If not it will look in reverse-delta-and-cache or read from sqlite

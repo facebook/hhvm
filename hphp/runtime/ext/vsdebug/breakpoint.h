@@ -175,7 +175,7 @@ struct BreakpointManager {
 
   const std::unordered_set<int> getFunctionBreakpoints() const;
 
-  bool isBreakConditionSatisified(
+  bool isBreakConditionSatisfied(
     DebuggerRequestInfo* ri,
     Breakpoint* bp
   );

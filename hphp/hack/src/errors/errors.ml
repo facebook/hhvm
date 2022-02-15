@@ -763,7 +763,7 @@ and incremental_update old new_ fold phase =
             (Some
                ("Default (untracked) error sources should not get into incremental "
                ^ "mode. There might be a missing call to `Errors.do_with_context`/"
-               ^ "`run_in_context` somwhere or incorrectly used `Errors.from_error_list`."
+               ^ "`run_in_context` somewhere or incorrectly used `Errors.from_error_list`."
                ^ "Phase: "
                ^ phase)));
         match new_ with

@@ -85,7 +85,7 @@ bool checkUnit(const UnitEmitter*, ErrorMode mode = kStderr);
  *    check or make the spec say what uninitialized optional params
  *    are set to (Uninit null like uninitialized locals?).
  * -- Function attributes (static, abstract, etc) must all make sense,
- *    certian attributes are mutually exclusive, others aren't, some
+ *    certain attributes are mutually exclusive, others aren't, some
  *    imply bytecode restrictions.  (access This from static? etc).
  */
 bool checkFunc(const FuncEmitter*, ErrorMode mode = kStderr);

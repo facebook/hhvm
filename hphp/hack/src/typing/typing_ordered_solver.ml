@@ -423,7 +423,7 @@ end = struct
   (** Update a CC graph using updated equivalence classes.
       The [cc_cls] argument is only valid if it has previously
       been retrieved using [to_equiv cc], then possibly updated (via
-      calls to [Equiv.merge_classes]). This garantees that for all
+      calls to [Equiv.merge_classes]). This guarantees that for all
       x and y which are in the same CC in [cc], x and y are in the same CC
       in [cc_cls].
       This is more performant than multiple calls to a function that

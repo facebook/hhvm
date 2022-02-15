@@ -5,7 +5,7 @@
 
 
 //! There are basically two kinds of types can't be made `repr(C)`:
-//!   * builtin types making no guaratees about binary layout (e.g.
+//!   * builtin types making no guarantees about binary layout (e.g.
 //!     wide pointers, tuples)
 //!   * type with definitions that are beyond our reach to annotate
 //!     with `repr(C)` (e.g. standard or vendored types).

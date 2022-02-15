@@ -2528,7 +2528,7 @@ MaybeDataType type_constraint_to_data_type(
 
 /*
  * Checks whether the current function is native by looking at the user
- * attribute map and sets the isNative flag accoringly
+ * attribute map and sets the isNative flag accordingly
  * If the give function is op code implementation, then isNative is not set
  */
 void check_native(AsmState& as, bool is_construct) {

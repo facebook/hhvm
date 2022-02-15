@@ -5794,7 +5794,7 @@ Variant HHVM_METHOD(DOMNodeIterator, next) {
       }
       curnode = libxml_register_node(curnode->nodep()->next);
     } else {
-      /* Nav the tree evey time as this is LIVE */
+      /* Nav the tree every time as this is LIVE */
       xmlNodePtr basenode =
         data->m_objmap->getBaseNodeData()->nodep();
       if (!basenode) {

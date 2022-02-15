@@ -40,7 +40,7 @@ final class MapIterator implements HH\Rx\KeyedIterator {
   public function rewind()[write_props]: void;
 }
 
-} // empty namesapce
+} // empty namespace
 namespace HH {
 
 /** An ordered dictionary-style collection.

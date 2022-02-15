@@ -566,7 +566,7 @@ struct ClassInfo {
   std::unique_ptr<PreResolveState> preResolveState;
 
   /*
-   * Flags to track if this class is mocked, or if any of its dervied classes
+   * Flags to track if this class is mocked, or if any of its derived classes
    * are mocked.
    */
   bool isMocked{false};

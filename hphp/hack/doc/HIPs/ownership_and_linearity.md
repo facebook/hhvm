@@ -118,7 +118,7 @@ conform to these restrictions, often via use of the MaybeOwned state.
 One may note that this is in fact the main reason for the existence of the
 otherwise quite similar Borrowed and MaybeOwned state. For systems that don't
 require this stricter ruleset, those states are functionally identical (although
-still not interchangable). For the most part, developers should not need to know
+still not interchangeable). For the most part, developers should not need to know
 or care about this.
 
 #### Concurrent uses of tracked objects

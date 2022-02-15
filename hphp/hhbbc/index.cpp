@@ -1249,7 +1249,7 @@ struct Index::IndexData {
    * frozen (during the final optimization pass), calls to
    * lookup_return_type with a CallContext can't look at the bytecode
    * bodies of functions other than the calling function.  So we need
-   * to know what we determined the last time we were alloewd to do
+   * to know what we determined the last time we were allowed to do
    * that so we can return it again.
    */
   ContextRetTyMap contextualReturnTypes{};

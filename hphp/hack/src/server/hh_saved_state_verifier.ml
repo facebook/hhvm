@@ -9,7 +9,7 @@ open Hh_prelude
 
 let legacy_decls_filename = "hh_mini_saved_state.decls"
 
-let shallow_decls_filename = "hh_mini_saved_state.shallowdecls"
+let shallow_decls_filename = "hh_mini_saved_state.shallowedecls"
 
 let naming_table_filename = "hh_mini_saved_state"
 

@@ -2604,7 +2604,7 @@ static Variant to_zval_map(encodeType* /*type*/, xmlNodePtr data) {
         ret.set(key, value);
       } else {
         throw SoapException( "Encoding: Can't decode map, only Strings or "
-                       "Longs are allowd as keys");
+                       "Longs are allowed as keys");
       }
     }
     ENDFOREACH(trav);

@@ -102,7 +102,7 @@ private:
 };
 
 /*
- * IntProfiler is used to collect profiled samples of an unsiged variable.
+ * IntProfiler is used to collect profiled samples of an unsigned variable.
  * A histogram of samples are collected in power-of-2 buckets up to 64.
  */
 struct IntProfiler {

@@ -247,7 +247,7 @@ void Collector::exactEnqueue(const void* p) {
   }
 }
 
-// mark ambigous pointers in the range [start,start+len). If the start or
+// mark ambiguous pointers in the range [start,start+len). If the start or
 // end is a partial word, don't scan that word.
 void FOLLY_DISABLE_ADDRESS_SANITIZER
 Collector::conservativeScan(const void* start, size_t len) {

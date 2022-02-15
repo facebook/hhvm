@@ -1455,7 +1455,7 @@ let strip_supportdyn ty =
  *
  * All refinement functions return, in addition to the updated
  * environment, a (conservative) set of all the locals that got
- * refined. This set is used to construct AssertEnv statmements in
+ * refined. This set is used to construct AssertEnv statements in
  * the typed AST.
  *)
 let refine_lvalue_type env ((ty, _, _) as te) ~refine =

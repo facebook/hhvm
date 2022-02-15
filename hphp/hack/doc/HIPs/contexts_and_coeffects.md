@@ -1285,7 +1285,7 @@ An unfortunately common mistake is one is which a developer adds a `slog`
 statement within their code for the purpose of debugging but
 then forgets to remove it before committing. We could make the capability
 to log to stderr/stdout represented via the context system, such that most
-code utilizing it would have a hack error, rendering it uncommitable.
+code utilizing it would have a hack error, rendering it uncommittable.
 A debugging or development environment could conjure this capability
 to facilitate quick development cycle (see the previous subsection).
 

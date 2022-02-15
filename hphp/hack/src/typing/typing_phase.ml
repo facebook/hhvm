@@ -828,7 +828,7 @@ and localize_ft
  * the constraints on the corresponding generic parameter.
  *
  * Note that the constraints may contain occurrences of the generic
- * parameters, but the subsitution will be applied to them. e.g. if tparams is
+ * parameters, but the substitution will be applied to them. e.g. if tparams is
  *   <Tu as MyCovariant<Tu>, Tv super Tu>
  * and ety_env.substs is
  *   Tu :-> C

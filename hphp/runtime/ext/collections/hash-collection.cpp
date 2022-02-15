@@ -72,7 +72,7 @@ void HashCollection::warnOnStrIntDup() const {
       newVal = e->ikey;
     } else {
       assertx(e->hasStrKey());
-      // isStriclyInteger() puts the int value in newVal as a side effect.
+      // isStrictlyInteger() puts the int value in newVal as a side effect.
       if (!e->skey->isStrictlyInteger(newVal)) continue;
     }
 

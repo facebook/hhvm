@@ -864,7 +864,7 @@ struct
   and check_and_run_loop_ env monitor_config (socket : Unix.file_descr) =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     (* That's because HackEventLogger for the monitor is synchronous and takes 50ms/call. *)
-    (* But the monitor's non-failure inner loop must handle hundres of clients per second *)
+    (* But the monitor's non-failure inner loop must handle hundreds of clients per second *)
     let lock_file = monitor_config.lock_file in
     if not (Lock.grab lock_file) then (
       Hh_logger.log "Lost lock; terminating.\n%!";

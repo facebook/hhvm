@@ -2819,7 +2819,7 @@ fields of that struct for holding intermediate values.
 
 | SetOpProp<op>, D(InitCell), S(Cell) S(Cell) S(Cell), PRc
 
-  Set op propery with key S1 in base S0, using S2 as the right hand side.
+  Set op property with key S1 in base S0, using S2 as the right hand side.
 
 | IncDecProp<op>, D(InitCell), S(Cell) S(Cell), PRc
 

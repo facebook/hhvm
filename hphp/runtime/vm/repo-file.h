@@ -44,7 +44,7 @@ struct FuncTable;
 
 /*
  * RepoFileBuilder is used to create a RepoFile (you can either use a
- * RepoFile, or create one, there's no simulataneous creation/use).
+ * RepoFile, or create one, there's no simultaneous creation/use).
  *
  * Usage is simple. Instantiate one, call add() with as many
  * UnitEmitters as needed, then call finish().

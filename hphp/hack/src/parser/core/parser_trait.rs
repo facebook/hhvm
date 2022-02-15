@@ -24,7 +24,7 @@ pub enum SeparatedListKind {
     ItemsOptional,
 }
 
-// This could be a set of token kinds, but it's part of parser envirnoment that is often cloned,
+// This could be a set of token kinds, but it's part of parser environment that is often cloned,
 // so trying to keep it small.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ExpectedTokens {

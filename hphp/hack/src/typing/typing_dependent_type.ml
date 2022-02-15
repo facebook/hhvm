@@ -51,7 +51,7 @@ module ExprDepTy = struct
       (* If it is a local variable then we look up the expression id associated
        * with it. If one doesn't exist we generate a new one. We are being
        * conservative here because the new expression id we create isn't
-       * added to the local enviornment.
+       * added to the local environment.
        *)
       | N.CIexpr (_, p, N.Lvar (_, x)) ->
         let (ereason, dep) =

@@ -452,7 +452,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    */
   case BeginInlining: {
     /*
-     * SP relative offset of the firstin the inlined call.
+     * SP relative offset of the first instruction in the inlined call.
      */
     auto inlineStackOff =
       inst.extra<BeginInlining>()->spOffset + kNumActRecCells;

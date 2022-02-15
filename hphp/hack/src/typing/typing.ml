@@ -6122,7 +6122,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
          in the error case, we add a `Hole` with expected type `nothing` since
          there is no type we can suggest was expected
 
-         in the ok case were the destrucutring succeeded, the fresh vars
+         in the ok case were the destructuring succeeded, the fresh vars
          now have types so we can subtype each element, accumulate the errors
          and pack back into the rhs structure as our expected type *)
       let (env, ty_err_opt) =

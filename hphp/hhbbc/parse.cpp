@@ -137,7 +137,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
    *
    *   - A jump target
    *
-   *   - Immediatelly following a control flow instruction, other than
+   *   - Immediately following a control flow instruction, other than
    *     a call.
    */
   auto offset = 0;

@@ -163,7 +163,7 @@ struct ReturnEffects  { AliasClass kills; };
  * read (unless written again) after exiting the region (`kills').  Various
  * instructions that exit regions populate these in different ways.
  *
- * ExitEffects instructions require inlined frames to be spilled immediatelly
+ * ExitEffects instructions require inlined frames to be spilled immediately
  * prior to the instruction, see spillInlinedFrames() for more details.
  */
 struct ExitEffects    { AliasClass live; AliasClass kills; };

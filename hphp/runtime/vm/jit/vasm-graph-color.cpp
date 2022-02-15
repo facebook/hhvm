@@ -11643,7 +11643,7 @@ void lower_copies(const State& state,
 
 // Return the amount an instruction will move the stack pointer. Negative is
 // moving away from the frame pointer, and positive is moving towards it. This
-// only supports the type of instructions we expect to see, and not abitrary
+// only supports the type of instructions we expect to see, and not arbitrary
 // ones.
 int sp_change(const State& state, const Vinstr& inst) {
   switch (inst.op) {

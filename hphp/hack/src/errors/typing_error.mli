@@ -1609,7 +1609,7 @@ module Callback : sig
   (** Ignore any arguments and always return the given base error *)
   val always : Primary.t -> t
 
-  (** Perform an aribrary side-effects when the error is evaluated *)
+  (** Perform an arbitrary side-effects when the error is evaluated *)
   val with_side_effect : t -> eff:(unit -> unit) -> t
     [@@ocaml.deprecated
       "This function will be removed. Please avoid adding side effects to error callbacks."]

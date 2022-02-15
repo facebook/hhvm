@@ -482,7 +482,7 @@ function stream_socket_client(string $remote_socket,
  * settings are established, cryptography can be turned on and off dynamically
  * by passing TRUE or FALSE in the enable parameter.
  *
- * @param resource $stream - The stream reszource.
+ * @param resource $stream - The stream resource.
  * @param bool $enable - Enable/disable cryptography on the stream.
  * @param int crypto_type - Setup encryption on the stream. Valid methods are:
  *   - STREAM_CRYPTO_SSLv2_CLIENT

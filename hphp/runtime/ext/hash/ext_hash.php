@@ -141,7 +141,7 @@ function hash_hmac_file(string $algo,
  *                       a shared secret key to be used with the HMAC
  *                       hashing method must be supplied in this parameter.
  *
- * @return resrouce - Returns a Hashing Context resource for use with
+ * @return resource - Returns a Hashing Context resource for use with
  *                    hash_update(), hash_update_stream(), hash_update_file(),
  *                    and hash_final().
  *                    Returns FALSE on failure.

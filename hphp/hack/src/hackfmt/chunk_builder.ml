@@ -261,7 +261,7 @@ let builder =
       this#set_next_split_rule (RuleKind (Rule.Simple cost));
       ()
 
-    method private is_at_chunk_group_boundry () =
+    method private is_at_chunk_group_boundary () =
       List.is_empty rules
       && ISet.is_empty lazy_rules
       && ISet.is_empty next_lazy_rules
@@ -275,7 +275,7 @@ let builder =
           this#split ();
           this#set_next_split_rule (RuleKind Rule.Always)
       end;
-      if this#is_at_chunk_group_boundry () && not (List.is_empty chunks) then
+      if this#is_at_chunk_group_boundary () && not (List.is_empty chunks) then
         this#push_chunk_group ()
 
     method private set_next_split_rule rule_type =
@@ -351,13 +351,13 @@ let builder =
     for end chunks and block nesting
   *)
     method private start_block_nest () =
-      if this#is_at_chunk_group_boundry () then
+      if this#is_at_chunk_group_boundary () then
         block_indent <- block_indent + 1
       else
         this#nest ()
 
     method private end_block_nest () =
-      if this#is_at_chunk_group_boundry () then
+      if this#is_at_chunk_group_boundary () then
         block_indent <- block_indent - 1
       else
         this#unnest ()

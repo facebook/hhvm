@@ -63,7 +63,7 @@ size_t smashableJmpLen();
 size_t smashableJccLen();
 
 /*
- * Boundry to align the smashables to (normally cache line size).
+ * Boundary to align the smashables to (normally cache line size).
  */
 size_t smashableAlignTo();
 

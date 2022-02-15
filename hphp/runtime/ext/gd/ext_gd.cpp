@@ -6489,7 +6489,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
         // it is faster to use a static buffer there
         // BUT it offers also the possibility to have
         // pointers read without the need to free them
-        // explicitley before returning.
+        // explicitly before returning.
         */
         memset(&cbuf, 0, sizeof(cbuf));
         value_ptr = cbuf;

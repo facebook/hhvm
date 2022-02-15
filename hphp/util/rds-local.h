@@ -264,7 +264,7 @@ struct RDSLocal : private detail::RDSLocalBase<T> {
   template<typename T1>
   using NREH_t = std::enable_if_t<!REH, T1>;
   static_assert(Init != Initialize::Explicitly || !REH,
-                "Can't explicilty initialize a subtype of RequestEventHandler");
+                "Can't explicitly initialize a subtype of RequestEventHandler");
 
   RDSLocal();
 

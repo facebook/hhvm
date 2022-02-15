@@ -410,7 +410,7 @@ static String HHVM_METHOD(UConverter, getErrorMessage) {
   return data->getErrorMessage();
 }
 
-/* Ennumerators and lookups */
+/* Enumerators and lookups */
 
 #define UCNV_REASON_CASE(v) case UCNV_ ## v : return String("REASON_" #v );
 static Variant HHVM_STATIC_METHOD(UConverter, reasonText, int64_t reason) {

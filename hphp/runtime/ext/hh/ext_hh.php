@@ -378,7 +378,7 @@ function set_implicit_context(
 )[zoned]: object /* ImplicitContextData */;
 
 /*
- * Returns the currently implicit context hash or emptry string if
+ * Returns the currently implicit context hash or empty string if
  * no implicit context is set
  */
 <<__Native>>

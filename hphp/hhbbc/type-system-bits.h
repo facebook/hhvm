@@ -54,7 +54,7 @@
 #define HHBBC_TYPE_DECL_COUNTED_OR_UNCOUNTED(X, Y)    \
   X(Str, Y)                                           \
 
-// "Array" types. These has both counted/uncounted and empti/non-empty
+// "Array" types. These has both counted/uncounted and empty/non-empty
 // base type variations, and various unions between them.
 #define HHBBC_TYPE_DECL_ARRAY(X, Y)             \
   X(Vec, Y)                                     \

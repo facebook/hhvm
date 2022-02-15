@@ -205,7 +205,7 @@ bool Process::GetMemoryInfo(MemInfo& info) {
       if (info.valid()) return true;
     }
     // If MemAvailable isn't available, which shouldn't be the case for kernel
-    // versions later than 3.14, we get a rough esitmation.
+    // versions later than 3.14, we get a rough estimation.
     if (info.availableMb < 0 && info.freeMb >= 0 &&
         info.cachedMb >= 0 && info.buffersMb >= 0) {
       info.availableMb = info.freeMb + info.cachedMb;

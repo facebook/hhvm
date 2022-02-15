@@ -46,7 +46,7 @@
  *
  * For example:
  *
- *    struct MyBlobableStuff {
+ *    struct MyBlobbableStuff {
  *      int m_foo;
  *      std::vector<const StringData*> m_strList;
  *      OtherBlobbableData m_other;

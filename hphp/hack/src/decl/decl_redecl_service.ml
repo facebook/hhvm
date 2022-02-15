@@ -9,7 +9,7 @@
 
 (*****************************************************************************)
 (* On the fly type-declaration are called when the user modified a file
- * we are not at initilalization time anymore. Therefore, we have a bit more
+ * we are not at initialization time anymore. Therefore, we have a bit more
  * work to do. We need calculate what must be re-checked.
  *)
 (*****************************************************************************)

@@ -19,7 +19,7 @@ IR function inliner
 
 Inlining functions at the IR level can be complex, particularly when dealing
 with async callees. All inlined regions are setup the same way, though later
-optimization passes may attempt to elide elements of this inititalization,
+optimization passes may attempt to elide elements of this initialization,
 particularly the DefinlineFP. Below is an annotated version of this setup.
 
   StStk ...  # Stores initiated for parameters as if this was an ordinary call.

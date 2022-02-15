@@ -307,7 +307,7 @@ async function mmkw<Tk, Tv, Tr>(
  * The `ResultOrExceptionWrapper`s in the `Map` of the returned `Awaitable`
  * are not available until you `await` or `join` the returned `Awaitable`.
  *
- * @param $inputs - The `KeyedTraversable` of values to fitler.
+ * @param $inputs - The `KeyedTraversable` of values to filter.
  *
  * @param $callable - The callable containing the `Awaitable` operation to
  *                    apply to `$inputs`.

@@ -115,7 +115,7 @@ unowned values to parameters etc marked as borrowed. Developers would get an
 error specifically about this telling them why and they will merely need to
 conform to these restrictions, often via use of the MaybeOwned state.
 
-One may note that this is in fact the main reason for the existance of the
+One may note that this is in fact the main reason for the existence of the
 otherwise quite similar Borrowed and MaybeOwned state. For systems that don't
 require this stricter ruleset, those states are functionally identical (although
 still not interchangable). For the most part, developers should not need to know
@@ -1023,7 +1023,7 @@ Their system of ownership and borrowing seems *very* similar to our own
 They recommend using `borrowed` to refer to a value that may either by a dynamic alias
 to an owned object or an unowned object.
 
-However, they further recognize that the existance of a union state of this
+However, they further recognize that the existence of a union state of this
 description results in issues with tracking mutations.
 > Weakening a uniqueness variant to admit dynamic aliases makes it easier to
 > program with unique variables than with destructive reads alone, but this

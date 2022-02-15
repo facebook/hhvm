@@ -189,7 +189,7 @@ let pack_errs pos ty subtyping_errs =
   in
   (* The only types that _can_ be upacked are tuples and pairs; match on the
      type to get the type parameters, pass them to our recursive function
-     aux to subsitute the expected type where we have a type error
+     aux to substitute the expected type where we have a type error
      then reconstruct the type in the continuation *)
   match deref ty with
   | (r, Ttuple tys) ->

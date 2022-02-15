@@ -3273,7 +3273,7 @@ DOCPROP_READ_WRITE(validateonparse,    validate_on_parse     );
 DOCPROP_READ_WRITE(resolveexternals,   resolve_externals     );
 DOCPROP_READ_WRITE(preservewhitespace, preserve_whitespace   );
 DOCPROP_READ_WRITE(recover,            recover               );
-DOCPROP_READ_WRITE(substituteentities, substitue_entities    );
+DOCPROP_READ_WRITE(substituteentities, substitute_entities    );
 
 static Variant dom_document_document_uri_read(const Object& obj) {
   CHECK_DOC(docp);
@@ -3331,8 +3331,8 @@ static DOMPropertyAccessor domdocument_properties[] = {
     dom_document_preserve_whitespace_write },
   { "recover",             dom_document_recover_read,
     dom_document_recover_write },
-  { "substituteEntities",  dom_document_substitue_entities_read,
-    dom_document_substitue_entities_write },
+  { "substituteEntities",  dom_document_substitute_entities_read,
+    dom_document_substitute_entities_write },
   { nullptr, nullptr, nullptr}
 };
 static DOMPropertyAccessorMap domdocument_properties_map

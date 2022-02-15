@@ -255,7 +255,7 @@ the developers of Hack.
 To decouple this proposal from others, this proposal uses a
 self-contained *desugared* syntax as explained above. To repeat, the
 `@{Capability}` part is *not* the user syntax and neither is the
-`__Contexful` attribute — it is just the way how typechecker sees the
+`__Contextful` attribute — it is just the way how typechecker sees the
 signatures of functions and methods.
 
 All syntax used in this proposal is for explanatory purposes and a

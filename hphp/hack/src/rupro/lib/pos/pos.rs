@@ -266,7 +266,7 @@ impl Pos for NPos {
         false // See T81321312.
         // Note(SF, 2022-03-23): Jake advises "This definition will lead to a
         // small behavior difference between `NPos` and `BPos`: when
-        // typechecking in posisition-free mode we'll register depedencies on
+        // typechecking in posisition-free mode we'll register dependencies on
         // hhi files but in positioned mode we won't. If this turns out to be
         // problematic, one solution is to make `NPos` store a `u8` rather than
         // being zero-sized and in that we can store a bit for whether the

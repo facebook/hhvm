@@ -929,7 +929,7 @@ end = struct
     let ancs = List.fold ~init ~f @@ Class.all_ancestor_names cls in
     List.fold ~f ~init:ancs @@ Class.all_ancestor_req_names cls
 
-  (** Add implementation depedencies of all class dependencies until we reach
+  (** Add implementation dependencies of all class dependencies until we reach
     a fixed point *)
   let rec add_implementation_dependencies ctx env =
     let size = HashSet.length env.dependencies in
@@ -1260,7 +1260,7 @@ end = struct
 
   let pp_fun_params ppf = Fmt.(parens @@ list ~sep:comma pp_fun_param) ppf
 
-  (* -- Single element depdencies ------------------------------------------- *)
+  (* -- Single element dependencies ----------------------------------------- *)
 
   module Single : sig
     type t
@@ -2159,7 +2159,7 @@ end = struct
   }
 
   let rec pp_ ppf { deps; children; _ } =
-    (* We guard against empty list of depedencies or nested namespaces here
+    (* We guard against empty list of dependencies or nested namespaces here
        since we should add a cut between them only when both are non-empty
     *)
     match (deps, children) with

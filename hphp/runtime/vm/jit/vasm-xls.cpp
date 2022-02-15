@@ -686,13 +686,13 @@ jit::vector<Optional<int>> analyzeSP(const Vunit& unit,
     for (unsigned j = 0; j < unit.blocks[b].code.size(); j++) {
       auto const& inst = unit.blocks[b].code[j];
       if (inst.op == Vinstr::recordbasenativesp) {
-        assert_flog(!offset, "Block B{} Instr {} initiailizes native SP, but "
+        assert_flog(!offset, "Block B{} Instr {} initializes native SP, but "
                     "already initialized.", size_t(b), j);
         offset = 0;
       } else if (inst.op == Vinstr::unrecordbasenativesp) {
-        assert_flog(offset, "Block B{} Instr {} uninitiailizes native SP, but "
+        assert_flog(offset, "Block B{} Instr {} uninitializes native SP, but "
                     "already uninitialized.", size_t(b), j);
-        assert_flog(*offset == 0, "Block B{} Instr {} uninitiailizes native SP, "
+        assert_flog(*offset == 0, "Block B{} Instr {} uninitializes native SP, "
                     "but SPOffset is nonzero.", size_t(b), j);
         offset = std::nullopt;
       } else if (offset) {
@@ -2503,13 +2503,13 @@ void insertCopies(Vunit& unit, const VxlsContext& ctx,
       }
       assertx(resolution.spills.count(pos) == 0);
       if (code[j].op == Vinstr::recordbasenativesp) {
-        assert_flog(!offset, "Block B{} Instr {} initiailizes native SP, but "
+        assert_flog(!offset, "Block B{} Instr {} initializes native SP, but "
                     "already initialized.", size_t(b), j);
         offset = 0;
       } else if (code[j].op == Vinstr::unrecordbasenativesp) {
-        assert_flog(offset, "Block B{} Instr {} uninitiailizes native SP, but "
+        assert_flog(offset, "Block B{} Instr {} uninitializes native SP, but "
                     "already uninitialized.", size_t(b), j);
-        assert_flog(*offset == 0, "Block B{} Instr {} uninitiailizes native "
+        assert_flog(*offset == 0, "Block B{} Instr {} uninitializes native "
                     "SP, but SP offset is non zero.", size_t(b), j);
         offset = std::nullopt;
       } else if (offset) {

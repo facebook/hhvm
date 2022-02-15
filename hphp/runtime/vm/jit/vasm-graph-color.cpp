@@ -992,7 +992,7 @@ void calculate_liveness(State& state, const BlockSet* changed = nullptr) {
       g |= uses;
       u |= uses;
       if (inst.op == Vinstr::recordbasenativesp) {
-        assert_flog(!spRecorded, "Block B{} {} initiailizes native SP, "
+        assert_flog(!spRecorded, "Block B{} {} initializes native SP, "
                     "but already initialized.", b, show(unit, inst));
         spRecorded = true;
       }
@@ -11710,7 +11710,7 @@ SPOffsets calculate_sp_offsets(const State& state) {
         assertx(!spOffset);
         spOffset = 0;
       } else if (inst.op == Vinstr::unrecordbasenativesp) {
-        assert_flog(spOffset, "Block B{} Instr {} uninitiailizes native SP, "
+        assert_flog(spOffset, "Block B{} Instr {} uninitializes native SP, "
                     "but already uninitialized.", b, i);
         spOffset = std::nullopt;
       } else if (spOffset) {

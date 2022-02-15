@@ -63,7 +63,7 @@ void DebuggerHook::detach(RequestInfo* ti /* = nullptr */) {
     ti->m_reqInjectionData.m_retBreakPointFilter.clear();
   }
 
-  // Disble function entry/exit events
+  // Disable function entry/exit events
   ti->m_reqInjectionData.clearFlag(DebuggerHookFlag);
 
   // If there are no more hooks attached, clear the blacklist.

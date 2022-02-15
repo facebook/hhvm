@@ -238,7 +238,7 @@ struct HashCollection : ObjectData {
       // Fast path: HashCollection contains no tombstones
       return n;
     }
-    // Slow path: AssoCollection has at least one tombstone,
+    // Slow path: HashCollection has at least one tombstone,
     // so we need to linear scan.
     if (n >= m_size) {
       return posLimit();

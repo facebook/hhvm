@@ -28,7 +28,7 @@ let check_local_capability (mk_required : env -> env * locl_ty) mk_err_opt env =
     env
 
 let enforce_local_capability
-    ?((* Run-time enforced ops must have the default as it's unfixmeable *)
+    ?((* Run-time enforced ops must have the default as it's unfixable *)
     err_code = Error_codes.Typing.OpCoeffects)
     ?suggestion
     (mk_required : env -> env * locl_ty)

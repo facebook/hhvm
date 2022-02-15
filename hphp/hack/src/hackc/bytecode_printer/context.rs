@@ -104,7 +104,7 @@ impl<'a> Context<'a> {
         f(&ctx, w)
     }
 
-    /// Printing instruction list requies manually control indentation,
+    /// Printing instruction list requires manually control indentation,
     /// where indent_inc/indent_dec are called
     pub(crate) fn indent_inc(&mut self) {
         self.indent.inc();

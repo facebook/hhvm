@@ -1245,7 +1245,7 @@ let add_newline contents =
   (* this is used for incremental mode to change all the positions, so we
      basically want a prepend; there's a few cases we need to handle:
      - empty file
-     - header line: apppend after header
+     - header line: append after header
      - shebang and header: append after header
      - shebang only, no header (e.g. .hack file): append after shebang
      - no header or shebang (e.g. .hack file): prepend

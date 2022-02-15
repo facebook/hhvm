@@ -144,7 +144,7 @@ function serialize_memoize_param(mixed $param): arraykey;
 
 /**
  * Clear memoization data
- *  - if $cls is non-null, clear memoziation cache for $cls::$func,
+ *  - if $cls is non-null, clear memoization cache for $cls::$func,
  *    or for all static memoized methods if $func is null
  *  - if $cls is null, clear memoization cache for $func
  */

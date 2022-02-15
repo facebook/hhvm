@@ -4291,7 +4291,7 @@ bool HHVM_FUNCTION(mb_send_mail,
   const String extra_cmd = convertArg(opt_extra_cmd);
 
   /* initialize */
-  /* automatic allocateable buffer for additional header */
+  /* automatic allocatable buffer for additional header */
   mbfl_memory_device device;
   mbfl_memory_device_init(&device, 0, 0);
   mbfl_string orig_str, conv_str;

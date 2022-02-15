@@ -27,7 +27,7 @@ namespace HPHP {
  * Representation of a rfunc stored in APC
  *
  * TODO: figure out something about serialized form - see comment in apc-object
- * where we would want to represent it by an APCString incstance with type KindOfRFunc
+ * where we would want to represent it by an APCString instance with type KindOfRFunc
  */
 
 struct APCRFunc {

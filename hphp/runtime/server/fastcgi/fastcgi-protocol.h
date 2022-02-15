@@ -62,7 +62,7 @@ enum class Version : uint8_t {
  * Streams of the same type are to be concatenated together.
  */
 enum Type : uint8_t {
-  /* FastCGI BEGIN_REQUEST intiates a new http request. The contentData for
+  /* FastCGI BEGIN_REQUEST initiates a new http request. The contentData for
    * such records is structured as follows-
    *
    * uint16: role

@@ -128,7 +128,7 @@ bool UrlFile::open(const String& input_url, const String& mode) {
 
   /*
    * If code == 0, Curl failed to connect; per PHP5, ignore_errors just means
-   * to not worry if we get an http resonse code that isn't between 200 and 400,
+   * to not worry if we get an http response code that isn't between 200 and 400,
    * but we shouldn't ignore other errors.
    * all status codes in the 2xx range are defined by the specification as
    * successful;

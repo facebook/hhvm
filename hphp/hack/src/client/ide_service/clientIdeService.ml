@@ -473,7 +473,7 @@ let stop
      synchronously force quit the daemon handle and close the message queue.
      The interleaving we have to worry about is: what will other code
      do while the state is still "Initialized", after we've sent the shutdown
-     message to the daemon, and we're let%lwt awaiting for a responnse?
+     message to the daemon, and we're let%lwt awaiting for a response?
      Will anything go wrong?
      Well, the daemon has responded to 'shutdown' by deleting its hhi dir
      but leaving itself in its "Initialized" state.

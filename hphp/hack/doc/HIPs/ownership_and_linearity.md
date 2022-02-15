@@ -927,7 +927,7 @@ non-unique <: unique because of its functional nature, such that you can
 pass uniq values into a function accepting non-uniq, but what you get out is
 nonuniq. In general, these all apply to consumed inputs, thus they don't have
 the borrowed state. They do have a generic on types to specify propagation
-of uniqness, but again, this requires the move in -> move out scenario.
+of uniqueness, but again, this requires the move in -> move out scenario.
 
 [Idris](http://docs.idris-lang.org/en/latest/reference/uniqueness-types.html):
 They use dependent typing for this and have discovered the need for a borrowed

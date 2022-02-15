@@ -112,7 +112,7 @@ typedef struct
 {
    double *Weights;  /* Normalized weights of neighboring pixels */
    int Left,Right;   /* Bounds of source pixels window */
-} ContributionType;  /* Contirbution information for a single pixel */
+} ContributionType;  /* Contribution information for a single pixel */
 
 typedef struct
 {

@@ -134,7 +134,7 @@ include(Options)
 #
 # [DEPENDS ...]
 # The dependencies of the extension. Extensions are prefixed
-# with "ext_", and external libaries with "lib".
+# with "ext_", and external libraries with "lib".
 # "systemlib" is a special dependency that represents the
 # systemlib header.
 #

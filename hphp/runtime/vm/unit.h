@@ -340,7 +340,7 @@ public:
   rds::Handle coverageDataHandle() const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Litstrs and NamedEntitys.                                          [const]
+  // Litstrs and NamedEntities.                                          [const]
 
   /*
    * Size of the Unit's litstr table.

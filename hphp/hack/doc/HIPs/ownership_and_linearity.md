@@ -1588,7 +1588,7 @@ allow us to avoid this requirement.
 
 **Q** How does this relate to projects like Co-Effects?
 
-**A** This is mostly orthogal to Co-effects. There will likely be some co-effects
+**A** This is mostly orthogonal to Co-effects. There will likely be some co-effects
 that add/remove capabilities based on ownership state (such as mutability in
 pure code), but otherwise one does not depend on the other. Co-effects are about
 function-level contexts and ownership tracking is object/instance/variable specific.

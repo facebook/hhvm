@@ -786,7 +786,7 @@ bool irGenTrySuperInlineFCall(irgen::IRGS& irgs, const Func* callee,
   //  - Cache ROM or failures
   //  - Log refusal reason
   if (dynamicCall) {
-    // TODO what does this bool even meean.  Pretty sure it is the same as the
+    // TODO what does this bool even mean.  Pretty sure it is the same as the
     // call context value which we set to false in inlineInterp, so for now
     // this is correct.
     return refuse("dynamic call");

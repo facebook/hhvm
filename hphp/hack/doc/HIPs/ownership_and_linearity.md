@@ -905,7 +905,7 @@ merely being utilized multiple times at once (and so must be immutable).
 In general, our requirements are flipped. They want everything owned. We want
 most things unowned with specific things being owned.
 
-Additionally, there a handful of other languages actively exporing this space:
+Additionally, there a handful of other languages actively exploring this space:
 
 [Swift's ownership manifesto](https://github.com/apple/swift/blob/master/docs/OwnershipManifesto.md)
 is designed based on different constraints and purposes. Ours is mostly to unblock other features,

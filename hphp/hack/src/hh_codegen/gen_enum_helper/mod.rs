@@ -293,7 +293,7 @@ fn unbox(ty: &Type) -> Vec<&Type> {
                             return vec![ty];
                         }
                         _ => {
-                            eprintln!("Warnning: box missing type argument");
+                            eprintln!("Warning: box missing type argument");
                             return vec![ty];
                         }
                     }

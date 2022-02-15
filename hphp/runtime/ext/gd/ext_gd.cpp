@@ -4746,7 +4746,7 @@ Variant HHVM_FUNCTION(iptcparse, const String& iptcblock) {
 #define TAG_BITS_PER_SAMPLE             0x0102
 #define TAG_COMPRESSION                 0x0103
 #define TAG_PHOTOMETRIC_INTERPRETATION  0x0106
-#define TAG_TRESHHOLDING                0x0107
+#define TAG_THRESHOLDING                0x0107
 #define TAG_CELL_WIDTH                  0x0108
 #define TAG_CELL_HEIGHT                 0x0109
 #define TAG_FILL_ORDER                  0x010A

@@ -150,7 +150,7 @@ int TakeoverAgent::setupFdServer(event_base *eventBase, int sock,
   m_callback = callback;
   ret = unlink(m_transfer_fname.c_str());
   if (ret < 0 && errno != ENOENT) {
-    Logger::Error("Unalbe to unlink '%s': %s",
+    Logger::Error("Unable to unlink '%s': %s",
                   m_transfer_fname.c_str(), folly::errnoStr(errno).c_str());
     return -1;
   }

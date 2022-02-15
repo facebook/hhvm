@@ -102,12 +102,12 @@ function stripslashes(string $str)[]: string;
 function bin2hex(string $str)[]: string;
 
 /**
- * Returns an ASCII string containing the binary representation of hexidecimal
+ * Returns an ASCII string containing the binary representation of hexadecimal
  *   str.
  *
  * @param string $str - A character.
  *
- * @return mixed - Returns the binary representation of the given hexidecimal
+ * @return mixed - Returns the binary representation of the given hexadecimal
  *   string or FALSE on failure.
  *
  */

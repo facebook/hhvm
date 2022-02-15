@@ -190,7 +190,7 @@ class IntegerToken : public ValueToken<int64_t> {
 //  * c: character
 //  * d: double
 //  * s: float
-// When no qualifier is given for integers, they are printed in hexadecinal.
+// When no qualifier is given for integers, they are printed in hexadecimal.
 class FormatToken : public Token {
  public:
   FormatToken() {}

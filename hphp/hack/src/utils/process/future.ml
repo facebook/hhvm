@@ -277,7 +277,7 @@ let rec is_ready : 'value. 'value t -> bool =
     promise := Delayed { tapped = tapped + 1; remaining = remaining - 1; value };
     false
   | Merged (a, b, _) ->
-    (* Prevent the && operator from short-cirtuiting the is-ready check for
+    (* Prevent the && operator from short-circuiting the is-ready check for
         the second future: *)
     let is_a_ready = is_ready a in
     let is_b_ready = is_ready b in

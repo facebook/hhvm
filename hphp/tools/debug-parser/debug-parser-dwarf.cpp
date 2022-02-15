@@ -317,23 +317,23 @@ void Scope::fixName(ObjectTypeName newName) {
 TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
     : m_dwarf{filename}
 {
-  // Processing each compiliation unit is very expensive, as it involves walking
+  // Processing each compilation unit is very expensive, as it involves walking
   // a large part of the debug information. To speed things up (a lot), we build
-  // up the state concurrently. Create a job corresponding to each compiliation
+  // up the state concurrently. Create a job corresponding to each compilation
   // unit in the file and enqueue the jobs with a thread pool. We'll find the
-  // offsets of the compiliation unit in the main thread, enqueuing them as we
+  // offsets of the compilation unit in the main thread, enqueuing them as we
   // find them. This lets us not only exploit concurrency between processing
-  // compiliation units, but between finding them and processing them.
+  // compilation units, but between finding them and processing them.
   //
   // Each worker maintains its own private state which it populates for all the
-  // compiliation units its assigned (each worker can process multiple
-  // compiliation units). Once done, all the different states are kept separate
+  // compilation units its assigned (each worker can process multiple
+  // compilation units). Once done, all the different states are kept separate
   // (merging them would be too expensive), but a mapping is constructed to map
   // offsets to the appropriate state block.
   //
   // This whole scheme is only viable because (right now), debug information in
   // a given compilation unit doesn't reference anything outside of that unit,
-  // so the state for any given compiliation unit can be processed
+  // so the state for any given compilation unit can be processed
   // independently.
 
   // The context serves as the link between a worker and the TypeParserImpl
@@ -359,7 +359,7 @@ TypeParserImpl::TypeParserImpl(const std::string& filename, int num_threads)
     std::vector<GlobalOff> offsets;
 
     void doJob(GlobalOff offset) override {
-      // Process a compiliation unit at the given offset.
+      // Process a compilation unit at the given offset.
       try {
         // We're going to use it so let's mark this worker active.
         if (!env.dwarf) {

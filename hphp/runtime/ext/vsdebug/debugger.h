@@ -424,7 +424,7 @@ struct Debugger final {
   }
 
   // Adjusts a breakpoints source line based on the source mapping table in
-  // the specified complilation unit in which the breakpoint is being installed.
+  // the specified compilation unit in which the breakpoint is being installed.
   std::pair<int, int> calibrateBreakpointLineInUnit(
     const Unit* unit,
     int bpLine

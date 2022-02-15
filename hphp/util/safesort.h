@@ -329,7 +329,7 @@ void sort(IterT first, IterT last, GtCompT gt) {
     // Put the pivot in between the left partition and right partition
     swap(*pivot, *(i-1));
     // We now have the left partition in [first,i-1) and we have the
-    // right parition in [i,last). Sort smaller partition with recursive
+    // right partition in [i,last). Sort smaller partition with recursive
     // call and sort the larger partition with tail recursion elimination
     if ((i-1) - first < last - i) {
       sort<GtCompT>(first, i-1, gt);

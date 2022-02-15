@@ -837,7 +837,7 @@ static bool HHVM_METHOD(Imagick, enhanceImage) {
   auto wand = getMagickWandResource(Object{this_});
   auto status = MagickEnhanceImage(wand->getWand());
   if (status == MagickFalse) {
-    IMAGICK_THROW("Unable to enchance image");
+    IMAGICK_THROW("Unable to enhance image");
   }
   return true;
 }

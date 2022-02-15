@@ -33,7 +33,7 @@ Some Facebook-employee-specific tips:
 Overall process:
 
 1. Get a working build environment (ideally one on old Ubuntu, one on MacOS)
-2. Most FB projects should be fetching release tarballs with tags like `vYYYY.MM.DD.00`; full download URLs are listed in third-party/foo/CMakeLists.txt. Update these tags to the version you're targetting.
+2. Most FB projects should be fetching release tarballs with tags like `vYYYY.MM.DD.00`; full download URLs are listed in third-party/foo/CMakeLists.txt. Update these tags to the version you're targeting.
 3. Download all of the URLs you just modified. For some projects, this will give you `vYYYY.MM.DD.00.tar.gz`, rename to `PROJECT-vYYYY.MM.DD.00.tar.gz`
 4. Update the hashes in `third-party/foo/CMakeLists.txt` to match `openssl dgst -sha256 *.tar.gz`
 5. **Requires FB employee**: update our CI caches - this can be done on your laptop, it does not need a devserver.

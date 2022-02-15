@@ -75,7 +75,7 @@ function cast_for_arithmetic(mixed $value)[]: dynamic {
  * Does the PHP style behaviour for casting when doing an exponentiation.
  * That happens under the following situations
  *   1. function pointers, and arrays get converted to 0
- *   2. see castForArithmatic
+ *   2. see castForArithmetic
  */
 function cast_for_exponent(mixed $value)[]: dynamic {
   if (\HH\is_class_meth($value)) {

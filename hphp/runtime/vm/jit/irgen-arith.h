@@ -29,7 +29,7 @@ namespace irgen {
 struct IRGS;
 
 /*
- * Return true iff we support compiling the given artihmetic operation with the
+ * Return true iff we support compiling the given arithmetic operation with the
  * given types.
  */
 bool areBinaryArithTypesSupported(Op op, Type lhs, Type rhs);

@@ -476,7 +476,7 @@ NEVER_INLINE void Collector::sweep() {
     if (type == KindOfObject) {
       auto h = find(wr_data->pointee.m_data.pobj);
       if (!marked(h)) {
-        // Its important we invalidate the pointer stored in the weakref, and
+        // It's important we invalidate the pointer stored in the weakref, and
         // not the start of the allocation.  In the case of objects with
         // native data, the start of allocation may not be the start of the
         // ObjectData*.

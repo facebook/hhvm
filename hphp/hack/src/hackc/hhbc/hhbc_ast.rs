@@ -237,7 +237,7 @@ pub enum Pseudo<'arena> {
     TryCatchBegin,
     TryCatchEnd,
     TryCatchMiddle,
-    /// Pseudo instruction that will get translated into appropraite literal
+    /// Pseudo instruction that will get translated into appropriate literal
     /// bytecode, with possible reference to .adata *)
     TypedValue(runtime::TypedValue<'arena>),
 }

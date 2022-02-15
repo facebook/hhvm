@@ -1847,7 +1847,7 @@ static int execute_program_impl(int argc, char** argv) {
   RuntimeOption::BuildId = po.buildId;
   RuntimeOption::InstanceId = po.instanceId;
 
-  // Do this as early as possible to avoid creating temp files and spawing
+  // Do this as early as possible to avoid creating temp files and spawning
   // light processes. Correct compilation still requires loading all of the
   // ini/hdf/cli options.
   if (po.mode == "dumphhas" || po.mode == "verify" ||

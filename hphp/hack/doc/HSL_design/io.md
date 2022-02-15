@@ -332,7 +332,7 @@ Java IO is similar to HSL IO for handling of read (via `InputStream`), write (vi
 
 # Unresolved questions:
 
-- `var_dump()`, `print_r()`, etc: setting `O_NONBLOCK` on stderr breaks a lot of debugging utiltities, especially with large outputs. Should they set `O_NONBLOCK off temporarily, or should they be async, or hidden `HH\Asio\join`?
+- `var_dump()`, `print_r()`, etc: setting `O_NONBLOCK` on stderr breaks a lot of debugging utilities, especially with large outputs. Should they set `O_NONBLOCK off temporarily, or should they be async, or hidden `HH\Asio\join`?
 
 - What do we ‘encourage’ in www, e.g. via namespace aliasing?
   * `IO\`: yes, especially the interfaces

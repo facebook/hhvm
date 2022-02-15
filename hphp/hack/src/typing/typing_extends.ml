@@ -1410,7 +1410,7 @@ let check_typeconst_override
     let parent_pos = fst parent_tconst.ttc_name in
     (* Temporarily skip checks on context constants
      *
-     * TODO(T89366955) elimninate this check *)
+     * TODO(T89366955) eliminate this check *)
     let is_context_constant =
       match (parent_tconst.ttc_kind, tconst.ttc_kind) with
       | ( TCAbstract { atc_default = Some hint1; _ },

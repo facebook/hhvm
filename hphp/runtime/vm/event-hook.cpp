@@ -679,7 +679,7 @@ void EventHook::onFunctionExit(const ActRec* ar, const TypedValue* retval,
   if (RequestInfo::s_requestInfo->m_pendingException == nullptr
       && (!unwind || phpException)) {
 
-    // Memory Threhsold
+    // Memory Threshold
     if (flags & MemThresholdFlag) {
       DoMemoryThresholdCallback();
     }
@@ -768,7 +768,7 @@ bool EventHook::onFunctionCall(const ActRec* ar, int funcType,
     }
   }
 
-  // Memory Threhsold
+  // Memory Threshold
   if (flags & MemThresholdFlag) {
     DoMemoryThresholdCallback();
   }
@@ -798,7 +798,7 @@ void EventHook::onFunctionResumeAwait(const ActRec* ar,
     }
   }
 
-  // Memory Threhsold
+  // Memory Threshold
   if (flags & MemThresholdFlag) {
     DoMemoryThresholdCallback();
   }
@@ -827,7 +827,7 @@ void EventHook::onFunctionResumeYield(const ActRec* ar,
     }
   }
 
-  // Memory Threhsold
+  // Memory Threshold
   if (flags & MemThresholdFlag) {
     DoMemoryThresholdCallback();
   }

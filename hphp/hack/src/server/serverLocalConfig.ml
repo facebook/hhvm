@@ -304,7 +304,7 @@ module RecheckCapture = struct
   type t = {
     (* Enables recheck environment capture *)
     enabled: bool;
-    (* If the error theshold is not met, then the recheck environment that
+    (* If the error threshold is not met, then the recheck environment that
         doesn't meet the fanout-related thresholds will not be captured. *)
     error_threshold: int;
     (* We will automatically capture the recheck environment if

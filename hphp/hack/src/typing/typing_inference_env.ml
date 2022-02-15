@@ -1197,7 +1197,7 @@ let is_alias_for_another_var env v =
 (** Some ty vars in the map will carry no additional information, e.g.
 some ty vars belong to methods declared in parent classes, even
 when these methods are not used in the subclass itself. In those cases,
-the ty var will be registered, but the accompagnying ty var info
+the ty var will be registered, but the accompanying ty var info
 will contain nothing useful. It will in essence be an identity element
 under the merge operation. *)
 let solving_info_carries_information = function

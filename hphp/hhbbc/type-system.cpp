@@ -3134,7 +3134,7 @@ Type subObj(res::Class val) {
   auto t = Type { BObj, HAMSandwich::None };
   construct(
     t.m_data.dobj,
-    val.couldBeOverriden() ? DObj::Sub : DObj::Exact,
+    val.couldBeOverridden() ? DObj::Sub : DObj::Exact,
     val
   );
   t.m_dataTag = DataTag::Obj;
@@ -3153,7 +3153,7 @@ Type objExact(res::Class val) {
 Type subCls(res::Class val) {
   auto r        = Type { BCls, HAMSandwich::None };
   construct(r.m_data.dcls,
-            val.couldBeOverriden() ? DCls::Sub : DCls::Exact,
+            val.couldBeOverridden() ? DCls::Sub : DCls::Exact,
             val);
   r.m_dataTag = DataTag::Cls;
   assertx(r.checkInvariants());

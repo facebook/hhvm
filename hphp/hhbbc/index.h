@@ -361,7 +361,7 @@ struct Class {
    * When returning false the class is guaranteed to be final.  When returning
    * true the system cannot tell though the class may still be final.
    */
-  bool couldBeOverriden() const;
+  bool couldBeOverridden() const;
 
   /*
    * Whether this class (or its subtypes) could possibly have have

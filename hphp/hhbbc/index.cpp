@@ -709,7 +709,7 @@ bool Class::mustBeInterface() const {
   );
 }
 
-bool Class::couldBeOverriden() const {
+bool Class::couldBeOverridden() const {
   return val.match(
     [] (SString) { return true; },
     [] (ClassInfo* cinfo) {
@@ -1632,7 +1632,7 @@ bool build_class_constants(const php::Program* program, ClassInfo* cinfo, ClsPre
       // (Excluding constants from interfaces a trait implements)
       // Need this check otherwise constants from traits that conflict with
       // declared interfaces will silently lose and not conflict in the runtime
-      // Type and Context constants can be overriden.
+      // Type and Context constants can be overridden.
       if (cns->kind == ConstModifiers::Kind::Value &&
           !existing->isAbstract &&
           existing->cls->attrs & AttrInterface &&

@@ -379,7 +379,7 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
         | ([], _)
         | (_, []) ->
           (* If one of the intersections is now empty, then the union is mixed,
-             and we just return the common types from the intersetion *)
+             and we just return the common types from the intersection *)
           (env, Some (MakeType.intersection r common_tyl))
         | _ ->
           let (env, union_ty) =

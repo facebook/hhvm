@@ -119,7 +119,7 @@ std::string getNativeFunctionName(void* codeAddr) {
     // HPHP::jit::interpOneIterInit()
     //
     // Sometimes, though, backtrace_symbols can't find the function name
-    // and ends up giving us a blank managled name, like this:
+    // and ends up giving us a blank mangled name, like this:
     // ../path/hhvm/hhvm() [0x17e4d01]
     // or this: [0x7fffca800130]
     //

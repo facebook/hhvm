@@ -136,7 +136,8 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
   // interface map and call it a day.
   if (isInterface(knownCls)) {
     auto const slot = knownCls->preClass()->ifaceVtableSlot();
-    if (slot != kInvalidSlot && RuntimeOption::RepoAuthoritative) {
+    if (slot != kInvalidSlot) {
+      assertx(RO::RepoAuthoritative);
       return gen(env,
                  InstanceOfIfaceVtable,
                  InstanceOfIfaceVtableData{knownCls, true},

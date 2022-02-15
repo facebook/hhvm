@@ -189,6 +189,14 @@ inline Class::veclen_t Class::classVecLen() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Ancestry.
 
+namespace {
+inline bool isConcreteNormalClass(const Class* cls) {
+  auto constexpr disallowed =
+    AttrAbstract | AttrEnum | AttrEnumClass | AttrInterface | AttrTrait;
+  return !(cls->attrs() & disallowed);
+}
+}
+
 inline bool Class::classofNonIFace(const Class* cls) const {
   assertx(!(cls->attrs() & AttrInterface));
   if (m_classVecLen >= cls->m_classVecLen) {
@@ -214,9 +222,16 @@ inline bool Class::classof(const Class* cls) const {
   // check can never return true in that case (cls's classVec contains only
   // non-interfaces, while this->classVec is either empty, or contains
   // interfaces).
-  if (UNLIKELY(cls->attrs() & AttrInterface)) {
-    return this == cls ||
-      m_interfaces.lookupDefault(cls->name(), nullptr) == cls;
+  if (UNLIKELY(isInterface(cls))) {
+    if (this == cls) return true;
+    auto const slot = cls->preClass()->ifaceVtableSlot();
+    if (slot != kInvalidSlot && isConcreteNormalClass(this)) {
+      assertx(RO::RepoAuthoritative);
+      auto const ok = slot < m_vtableVecLen && m_vtableVec[slot].iface == cls;
+      assertx(ok == (m_interfaces.lookupDefault(cls->name(), nullptr) == cls));
+      return ok;
+    }
+    return m_interfaces.lookupDefault(cls->name(), nullptr) == cls;
   }
   return classofNonIFace(cls);
 }

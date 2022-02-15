@@ -95,7 +95,7 @@ public:
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Like IsNontrivialSerializable, but checks for the presense of a
+ * Like IsNontrivialSerializable, but checks for the presence of a
  * static makeForSerde function (with a matching signature) in the
  * type T.
  */

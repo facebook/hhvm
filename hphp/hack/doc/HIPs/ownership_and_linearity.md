@@ -1365,7 +1365,7 @@ it be explicit? e.g. in a function that is marked as returning owned, do we have
 of `new Foo()` we were invoking another function that returning an owned value.
 
 For the initial rollout, should we only allow usage of this feature in the
-precense of cases that require the feature (i.e. const classes, disposables, and Pure/Rx)?
+presence of cases that require the feature (i.e. const classes, disposables, and Pure/Rx)?
 This would ensure a tighter rollout that wouldn't affect quite as many
 developers.
 

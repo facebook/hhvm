@@ -103,7 +103,7 @@ usecase for not being able to pass unowned into borrowed is enabling of mutation
 on linear objects (when they'd be banned on nonlinear ones).
 
 Consider Rust. They have locally mutable values, which are analogous to our
-Owned values, and `mut &`s and `&`s, respectively analoglous to our Borrowed and
+Owned values, and `mut &`s and `&`s, respectively analogous to our Borrowed and
 MaybeOwned. The key is that rust does not have an unowned state - all values are
 owned by a single reference. When a system requires linearity to enable
 mutability, passing an unowned value into the equivilant to a `mut &` is obviously

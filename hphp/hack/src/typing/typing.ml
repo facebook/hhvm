@@ -2644,7 +2644,7 @@ and finally env fb =
        * We don't want to record errors during this phase, because certain types
        * of errors will fire wrongly. For example, if $x is nullable in some
        * continuations but not in others, then we must use `?->` on $x, but an
-       * error will fire when typechecking the finally block againts continuations
+       * error will fire when typechecking the finally block against continuations
        * where $x is non-null. *)
     let finally_cont env _key = finally_cont fb env in
     let (env, locals_map) =

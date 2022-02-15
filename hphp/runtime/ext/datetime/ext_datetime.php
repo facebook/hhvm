@@ -45,7 +45,7 @@ class DateTime implements DateTimeInterface {
   /**
    * Find the interval between two DateTime objects
    *
-   * @param DateTimeInterface $datetime2 - DateTime object to compare agains
+   * @param DateTimeInterface $datetime2 - DateTime object to compare against
    * @param bool $absolute - Whether to return absolute difference
    *
    * @return DateInterval - Returns a DateInterval object representing the

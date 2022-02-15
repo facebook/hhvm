@@ -150,7 +150,7 @@ For example, adding a new effect domain (e.g., what exception is thrown,
 whether it is deterministic, what type of IO, etc.) would require:
 - inferring the new capability in existing code for every call site,
   essentially regressing type-checking whenever a new effect domain is added;
-- new syntax to be placed whenver we want to account for the new domain.
+- new syntax to be placed whenever we want to account for the new domain.
 
 The classic example is Java, where in order to consider a new
 domain of effects such as Exceptions, you need to add a new version of

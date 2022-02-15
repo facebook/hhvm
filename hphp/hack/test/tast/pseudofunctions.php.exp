@@ -63,14 +63,14 @@ Errors:
                  [([20:3-25],
                    (Expr
                       ((noreturn), [20:3-25],
-                       (Call ((((function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)), [20:3-12], (Id ([20:3-12], "\\HH\\invariant_violation"))), 
+                       (Call ((((function(HH\FormatString<PlainSprintf> $fmt, $fmt_args...): noreturn)), [20:3-12], (Id ([20:3-12], "\\HH\\invariant_violation"))), 
                           [], [(Pnormal, ((string), [20:19-24], (String "foo")))], None)))))
                    ],
                  [([Pos.none], Noop)])));
              ([21:3-30],
               (Expr
                  ((noreturn), [21:3-29],
-                  (Call ((((function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)), [21:3-22], (Id ([21:3-22], "\\HH\\invariant_violation"))), 
+                  (Call ((((function(HH\FormatString<PlainSprintf> $fmt, $fmt_args...): noreturn)), [21:3-22], (Id ([21:3-22], "\\HH\\invariant_violation"))), 
                      [], [(Pnormal, ((string), [21:23-28], (String "foo")))], None)))))
              ]
            };

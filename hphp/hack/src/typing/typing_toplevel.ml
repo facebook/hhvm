@@ -90,9 +90,6 @@ let merge_decl_header_with_hints ~params ~ret decl_header env =
          ~f:(fun { ft_ret = { et_type; _ }; _ } -> et_type)
          decl_header)
   in
-  let non_variadic_params =
-    List.filter params ~f:(fun p -> not p.param_is_variadic)
-  in
   let params_decl_ty =
     match decl_header with
     | None ->
@@ -102,32 +99,16 @@ let merge_decl_header_with_hints ~params ~ret decl_header env =
             env
             (hint_of_type_hint h.param_type_hint)
             None)
-        non_variadic_params
+        params
     | Some { ft_params; _ } ->
-      List.zip_exn non_variadic_params ft_params
+      List.zip_exn params ft_params
       |> List.map ~f:(fun (h, { fp_type = { et_type; _ }; _ }) ->
              merge_hint_with_decl_hint
                env
                (hint_of_type_hint h.param_type_hint)
                (Some et_type))
   in
-  let variadicity_decl_ty =
-    match (decl_header, List.find params ~f:(fun p -> p.param_is_variadic)) with
-    | (Some { ft_arity = Fvariadic { fp_type = { et_type; _ }; _ }; _ }, Some fp)
-      ->
-      [
-        merge_hint_with_decl_hint
-          env
-          (hint_of_type_hint fp.param_type_hint)
-          (Some et_type);
-      ]
-    | (_, Some fp) ->
-      [
-        merge_hint_with_decl_hint env (hint_of_type_hint fp.param_type_hint) None;
-      ]
-    | _ -> []
-  in
-  (ret_decl_ty, params_decl_ty @ variadicity_decl_ty)
+  (ret_decl_ty, params_decl_ty)
 
 let fun_def ctx fd :
     (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =

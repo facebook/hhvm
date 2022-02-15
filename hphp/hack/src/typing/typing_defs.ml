@@ -485,7 +485,11 @@ let this = Local_id.make_scoped "$this"
 let make_tany () = Tany TanySentinel.value
 
 let arity_min ft : int =
-  List.count ~f:(fun fp -> not (get_fp_has_default fp)) ft.ft_params
+  let a = List.count ~f:(fun fp -> not (get_fp_has_default fp)) ft.ft_params in
+  if get_ft_variadic ft then
+    a - 1
+  else
+    a
 
 let get_param_mode callconv =
   match callconv with
@@ -797,7 +801,6 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     let {
       ft_ret = ret1;
       ft_params = params1;
-      ft_arity = arity1;
       ft_flags = flags1;
       ft_implicit_params = implicit_params1;
       ft_ifc_decl = ifc_decl1;
@@ -809,7 +812,6 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     let {
       ft_ret = ret2;
       ft_params = params2;
-      ft_arity = arity2;
       ft_flags = flags2;
       ft_implicit_params = implicit_params2;
       ft_ifc_decl = ifc_decl2;
@@ -823,34 +825,24 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       begin
         match ft_params_compare params1 params2 with
         | 0 ->
-          (* Explicit polymorphic equality. Need to write equality on
-           * locl_ty by hand if we want to make a specialized one
-           *)
           begin
-            match ft_arity_compare arity1 arity2 with
+            match tparams_compare tparams1 tparams2 with
             | 0 ->
               begin
-                match tparams_compare tparams1 tparams2 with
+                match
+                  where_constraints_compare
+                    where_constraints1
+                    where_constraints2
+                with
                 | 0 ->
                   begin
-                    match
-                      where_constraints_compare
-                        where_constraints1
-                        where_constraints2
-                    with
+                    match Int.compare flags1 flags2 with
                     | 0 ->
+                      let { capability = capability1 } = implicit_params1 in
+                      let { capability = capability2 } = implicit_params2 in
                       begin
-                        match Int.compare flags1 flags2 with
-                        | 0 ->
-                          let { capability = capability1 } = implicit_params1 in
-                          let { capability = capability2 } = implicit_params2 in
-                          begin
-                            match
-                              capability_compare capability1 capability2
-                            with
-                            | 0 -> compare_ifc_fun_decl ifc_decl1 ifc_decl2
-                            | n -> n
-                          end
+                        match capability_compare capability1 capability2 with
+                        | 0 -> compare_ifc_fun_decl ifc_decl1 ifc_decl2
                         | n -> n
                       end
                     | n -> n
@@ -862,13 +854,6 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
         | n -> n
       end
     | n -> n
-  and ft_arity_compare : type a. a ty fun_arity -> a ty fun_arity -> int =
-   fun a1 a2 ->
-    match (a1, a2) with
-    | (Fstandard, Fstandard) -> 0
-    | (Fstandard, Fvariadic _) -> -1
-    | (Fvariadic _, Fstandard) -> 1
-    | (Fvariadic p1, Fvariadic p2) -> ft_param_compare ~normalize_lists p1 p2
   and capability_compare : type a. a ty capability -> a ty capability -> int =
    fun cap1 cap2 ->
     match (cap1, cap2) with
@@ -1052,16 +1037,6 @@ let equal_locl_ty : locl_ty -> locl_ty -> bool =
 let equal_locl_ty_ : locl_ty_ -> locl_ty_ -> bool =
  (fun ty_1 ty_2 -> Int.equal 0 (ty__compare ty_1 ty_2))
 
-let equal_locl_fun_arity ft1 ft2 =
-  match (ft1.ft_arity, ft2.ft_arity) with
-  | (Fstandard, Fstandard) ->
-    Int.equal (List.length ft1.ft_params) (List.length ft2.ft_params)
-  | (Fvariadic param1, Fvariadic param2) ->
-    Int.equal 0 (ft_params_compare [param1] [param2])
-  | (Fstandard, Fvariadic _)
-  | (Fvariadic _, Fstandard) ->
-    false
-
 let is_type_no_return : locl_ty_ -> bool = equal_locl_ty_ (Tprim Aast.Tnoreturn)
 
 let equal_decl_ty_ : decl_ty_ -> decl_ty_ -> bool =
@@ -1091,16 +1066,6 @@ let equal_decl_fun_param param1 param2 =
 let equal_decl_ft_params params1 params2 =
   List.equal equal_decl_fun_param params1 params2
 
-let equal_decl_fun_arity ft1 ft2 =
-  match (ft1.ft_arity, ft2.ft_arity) with
-  | (Fstandard, Fstandard) ->
-    Int.equal (List.length ft1.ft_params) (List.length ft2.ft_params)
-  | (Fvariadic param1, Fvariadic param2) ->
-    equal_decl_ft_params [param1] [param2]
-  | (Fstandard, Fvariadic _)
-  | (Fvariadic _, Fstandard) ->
-    false
-
 let equal_decl_ft_implicit_params :
     decl_ty fun_implicit_params -> decl_ty fun_implicit_params -> bool =
  fun { capability = cap1 } { capability = cap2 } ->
@@ -1119,7 +1084,6 @@ let equal_decl_fun_type fty1 fty2 =
   && equal_decl_ft_implicit_params
        fty1.ft_implicit_params
        fty2.ft_implicit_params
-  && equal_decl_fun_arity fty1 fty2
   && Int.equal fty1.ft_flags fty2.ft_flags
 
 let equal_abstract_typeconst at1 at2 =

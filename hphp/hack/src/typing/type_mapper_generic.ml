@@ -242,18 +242,7 @@ class ['env] deep_type_mapper =
       in
       let (env, params) = List.map_env env ft.ft_params ~f:on_param in
       let (env, ret) = this#on_possibly_enforced_ty env ft.ft_ret in
-      let (env, arity) =
-        match ft.ft_arity with
-        | Fvariadic ({ fp_type = p_ty; _ } as param) ->
-          let (env, p_ty) = this#on_possibly_enforced_ty env p_ty in
-          (env, Fvariadic { param with fp_type = p_ty })
-        | x -> (env, x)
-      in
-      ( env,
-        mk
-          ( r,
-            Tfun { ft with ft_params = params; ft_arity = arity; ft_ret = ret }
-          ) )
+      (env, mk (r, Tfun { ft with ft_params = params; ft_ret = ret }))
 
     method! on_tnewtype env r x tyl cstr =
       let (env, tyl) = List.map_env env tyl ~f:this#on_type in

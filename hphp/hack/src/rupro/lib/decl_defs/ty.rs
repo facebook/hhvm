@@ -291,10 +291,8 @@ pub struct FunImplicitParams<R: Reason, TY> {
 walkable!(impl<R: Reason, TY> for FunImplicitParams<R, TY> => [capability]);
 
 /// The type of a function AND a method.
-/// A function has a min and max arity because of optional arguments
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct FunType<R: Reason, TY> {
-    pub arity: FunArity<R, TY>,
     pub tparams: Box<[Tparam<R, TY>]>,
     pub where_constraints: Box<[WhereConstraint<TY>]>,
     pub params: FunParams<R, TY>,
@@ -306,24 +304,8 @@ pub struct FunType<R: Reason, TY> {
 }
 
 walkable!(impl<R: Reason, TY> for FunType<R, TY> => [
-    arity, tparams, where_constraints, params, implicit_params, ret
+    tparams, where_constraints, params, implicit_params, ret
 ]);
-
-/// Arity information for a fun_type; indicating the minimum number of
-/// args expected by the function and the maximum number of args for
-/// standard, non-variadic functions or the type of variadic argument taken
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub enum FunArity<R: Reason, TY> {
-    Fstandard,
-    /// PHP5.6-style ...$args finishes the func declaration.
-    /// min ; variadic param type
-    Fvariadic(Box<FunParam<R, TY>>),
-}
-
-walkable!(impl<R: Reason, TY> for FunArity<R, TY> => {
-    Self::Fstandard => [],
-    Self::Fvariadic(param) => [param],
-});
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct PossiblyEnforcedTy<TY> {

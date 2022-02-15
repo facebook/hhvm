@@ -638,25 +638,25 @@ and localize_ft
       env
     | None -> env
   in
-  let (env, arity) =
-    match ft.ft_arity with
-    | Fvariadic ({ fp_type = var_ty; _ } as param) ->
-      let (env, var_ty) = localize ~ety_env env var_ty.et_type in
-      (* HHVM does not enforce types on vararg parameters yet *)
-      ( env,
-        Fvariadic
-          {
-            param with
-            fp_type = { et_type = var_ty; et_enforced = Unenforced };
-          } )
-    | Fstandard as x -> (env, x)
+  let variadic_index =
+    if get_ft_variadic ft then
+      List.length ft.ft_params - 1
+    else
+      -1
   in
-  let (env, params) =
-    List.map_env env ft.ft_params ~f:(fun env param ->
+  let ((env, _), params) =
+    List.map_env (env, 0) ft.ft_params ~f:(fun (env, i) param ->
         let (env, ty) =
           localize_possibly_enforced_ty ~ety_env env param.fp_type
         in
-        (env, { param with fp_type = ty }))
+        (* HHVM does not enforce types on vararg parameters yet *)
+        let ty =
+          if i = variadic_index then
+            { et_type = ty.et_type; et_enforced = Unenforced }
+          else
+            ty
+        in
+        ((env, i + 1), { param with fp_type = ty }))
   in
   let (env, implicit_params) =
     let (env, capability) =
@@ -680,7 +680,6 @@ and localize_ft
   ( env,
     {
       ft with
-      ft_arity = arity;
       ft_params = params;
       ft_implicit_params = implicit_params;
       ft_ret = ret;

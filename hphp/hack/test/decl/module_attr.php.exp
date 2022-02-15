@@ -1,7 +1,7 @@
 File root|module_attr.php--here.php
 --- legacy
 +++ direct decl
-@@ -1,33 +1,33 @@
+@@ -1,32 +1,32 @@
  [("\\foo",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None;
@@ -9,8 +9,7 @@ File root|module_attr.php--here.php
         fe_type =
         (Rwitness_from_decl ([4:10-13]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [4:10-13]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -62,8 +61,7 @@ File root|module_attr.php--there.php
           sm_type =
           (Rwitness_from_decl ([5:19-22]),
            (Tfun
-              { ft_arity = (Fstandard ()); ft_tparams = [];
-                ft_where_constraints = []; ft_params = [];
+              { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [5:19-22]) };
                 ft_ret =
                 { et_enforced = Typing_defs_core.Unenforced;

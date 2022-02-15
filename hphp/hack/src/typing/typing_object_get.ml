@@ -859,7 +859,6 @@ and obj_get_concrete_class_without_member_info
     (* Create a `public function __clone()[]: void {}` for classes that don't declare __clone *)
     let ft =
       {
-        ft_arity = Fstandard;
         ft_tparams = [];
         ft_where_constraints = [];
         ft_params = [];

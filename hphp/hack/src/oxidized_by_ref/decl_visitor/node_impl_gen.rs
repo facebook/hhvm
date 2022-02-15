@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<da07fa35277d8c521e08af7a37a93793>>
+// @generated SignedSource<<393d23ec65204c2046531180c7a7f369>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -280,17 +280,6 @@ impl<'a> Node<'a> for ExprDepTypeReason<'a> {
         }
     }
 }
-impl<'a> Node<'a> for FunArity<'a> {
-    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
-        v.visit_fun_arity(self)
-    }
-    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
-        match self {
-            FunArity::Fstandard => {}
-            FunArity::Fvariadic(ref __binding_0) => __binding_0.accept(v),
-        }
-    }
-}
 impl<'a> Node<'a> for FunElt<'a> {
     fn accept(&'a self, v: &mut dyn Visitor<'a>) {
         v.visit_fun_elt(self)
@@ -387,14 +376,13 @@ impl<'a> Node<'a> for FunType<'a> {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         match self {
             FunType {
-                arity: ref __binding_0,
-                tparams: ref __binding_1,
-                where_constraints: ref __binding_2,
-                params: ref __binding_3,
-                implicit_params: ref __binding_4,
-                ret: ref __binding_5,
-                flags: ref __binding_6,
-                ifc_decl: ref __binding_7,
+                tparams: ref __binding_0,
+                where_constraints: ref __binding_1,
+                params: ref __binding_2,
+                implicit_params: ref __binding_3,
+                ret: ref __binding_4,
+                flags: ref __binding_5,
+                ifc_decl: ref __binding_6,
             } => {
                 {
                     __binding_0.accept(v)
@@ -414,10 +402,7 @@ impl<'a> Node<'a> for FunType<'a> {
                 {
                     __binding_5.accept(v)
                 }
-                {
-                    __binding_6.accept(v)
-                }
-                { __binding_7.accept(v) }
+                { __binding_6.accept(v) }
             }
         }
     }

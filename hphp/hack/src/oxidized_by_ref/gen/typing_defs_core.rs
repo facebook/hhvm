@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7e8b5c3ee2addb9aaa0e5b7cd0b91ab1>>
+// @generated SignedSource<<c301311d8d1440616c1ffd64a0c8db5c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -595,7 +595,6 @@ impl<'a> TrivialDrop for FunImplicitParams<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(FunImplicitParams<'arena>);
 
 /// The type of a function AND a method.
-/// A function has a min and max arity because of optional arguments
 #[derive(
     Clone,
     Debug,
@@ -614,8 +613,6 @@ arena_deserializer::impl_deserialize_in_arena!(FunImplicitParams<'arena>);
 #[repr(C)]
 pub struct FunType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub arity: FunArity<'a>,
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tparams: &'a [&'a Tparam<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub where_constraints: &'a [&'a WhereConstraint<'a>],
@@ -632,36 +629,6 @@ pub struct FunType<'a> {
 }
 impl<'a> TrivialDrop for FunType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(FunType<'arena>);
-
-/// Arity information for a fun_type; indicating the minimum number of
-/// args expected by the function and the maximum number of args for
-/// standard, non-variadic functions or the type of variadic argument taken
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRepIn,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C, u8)]
-pub enum FunArity<'a> {
-    Fstandard,
-    /// PHP5.6-style ...$args finishes the func declaration.
-    /// min ; variadic param type
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Fvariadic(&'a FunParam<'a>),
-}
-impl<'a> TrivialDrop for FunArity<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(FunArity<'arena>);
 
 #[derive(
     Clone,

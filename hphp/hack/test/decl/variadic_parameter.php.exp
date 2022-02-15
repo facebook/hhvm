@@ -5,8 +5,7 @@
        fe_type =
        (Rwitness_from_decl ([3:10-14]),
         (Tfun
-           { ft_arity = (Fstandard ()); ft_tparams = [];
-             ft_where_constraints = [];
+           { ft_tparams = []; ft_where_constraints = [];
              ft_params =
              [{ fp_pos = [3:42-44]; fp_name = (Some "$f");
                 fp_type =
@@ -14,22 +13,20 @@
                   et_type =
                   (Rhint ([3:15-41]),
                    (Tfun
-                      { ft_arity =
-                        (Fvariadic (
-                           { fp_pos = [3:25-30]; fp_name = None;
-                             fp_type =
-                             { et_enforced = Typing_defs_core.Unenforced;
-                               et_type = (Rhint ([3:25-30]), Tmixed) };
-                             fp_flags =
-                             (make_fp_flags ~accept_disposable:false
-                               ~has_default:false
-                               ~mode:Typing_defs_core.FPnormal
-                               ~ifc_external:false ~ifc_can_call:false
-                               ~readonly:false);
-                              }
-                           ));
-                        ft_tparams = []; ft_where_constraints = [];
-                        ft_params = [];
+                      { ft_tparams = []; ft_where_constraints = [];
+                        ft_params =
+                        [{ fp_pos = [3:25-30]; fp_name = None;
+                           fp_type =
+                           { et_enforced = Typing_defs_core.Unenforced;
+                             et_type = (Rhint ([3:25-30]), Tmixed) };
+                           fp_flags =
+                           (make_fp_flags ~accept_disposable:false
+                             ~has_default:false
+                             ~mode:Typing_defs_core.FPnormal
+                             ~ifc_external:false ~ifc_can_call:false
+                             ~readonly:false);
+                            }
+                          ];
                         ft_implicit_params =
                         { capability = (CapDefaults [3:15-41]) };
                         ft_ret =

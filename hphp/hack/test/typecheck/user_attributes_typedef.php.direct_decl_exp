@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,424 +1,393 @@
+@@ -1,415 +1,384 @@
  [("\\Foo",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -20,24 +20,20 @@
                 sm_type =
                 (Rwitness_from_decl ([12:62-73]),
                  (Tfun
-                    { ft_arity =
-                      (Fvariadic (
-                         { fp_pos = [12:81-83]; fp_name = (Some "$x");
-                           fp_type =
-                           { et_enforced = Typing_defs_core.Unenforced;
-                             et_type =
-                             (Rvar_param_from_decl ([12:81-83]), (Tprim Tint))
-                             };
-                           fp_flags =
-                           (make_fp_flags ~accept_disposable:false
-                             ~has_default:false
-                             ~mode:Typing_defs_core.FPnormal
-                             ~ifc_external:false ~ifc_can_call:false
-                             ~readonly:false);
-                            }
-                         ));
-                      ft_tparams = []; ft_where_constraints = [];
-                      ft_params = [];
+                    { ft_tparams = []; ft_where_constraints = [];
+                      ft_params =
+                      [{ fp_pos = [12:81-83]; fp_name = (Some "$x");
+                         fp_type =
+                         { et_enforced = Typing_defs_core.Unenforced;
+                           et_type =
+                           (Rvar_param_from_decl ([12:81-83]), (Tprim Tint)) };
+                         fp_flags =
+                         (make_fp_flags ~accept_disposable:false
+                           ~has_default:false ~mode:Typing_defs_core.FPnormal
+                           ~ifc_external:false ~ifc_can_call:false
+                           ~readonly:false);
+                          }
+                        ];
                       ft_implicit_params =
                       { capability = (CapDefaults [12:62-73]) };
                       ft_ret =
@@ -111,8 +107,7 @@
                  sm_type =
                  (Rwitness_from_decl ([15:86-97]),
                   (Tfun
-                     { ft_arity = (Fstandard ()); ft_tparams = [];
-                       ft_where_constraints = [];
+                     { ft_tparams = []; ft_where_constraints = [];
                        ft_params =
                        [{ fp_pos = [15:109-111]; fp_name = (Some "$x");
                           fp_type =
@@ -170,8 +165,7 @@
                  sm_type =
                  (Rwitness_from_decl ([16:87-98]),
                   (Tfun
-                     { ft_arity = (Fstandard ()); ft_tparams = [];
-                       ft_where_constraints = [];
+                     { ft_tparams = []; ft_where_constraints = [];
                        ft_params =
                        [{ fp_pos = [16:110-112]; fp_name = (Some "$x");
                           fp_type =
@@ -235,8 +229,7 @@
                  sm_type =
                  (Rwitness_from_decl ([17:67-78]),
                   (Tfun
-                     { ft_arity = (Fstandard ()); ft_tparams = [];
-                       ft_where_constraints = [];
+                     { ft_tparams = []; ft_where_constraints = [];
                        ft_params =
                        [{ fp_pos = [17:90-92]; fp_name = (Some "$x");
                           fp_type =
@@ -293,8 +286,7 @@
                  sm_type =
                  (Rwitness_from_decl ([18:69-80]),
                   (Tfun
-                     { ft_arity = (Fstandard ()); ft_tparams = [];
-                       ft_where_constraints = [];
+                     { ft_tparams = []; ft_where_constraints = [];
                        ft_params =
                        [{ fp_pos = [18:92-94]; fp_name = (Some "$x");
                           fp_type =
@@ -396,8 +388,7 @@
          td_type =
          (Rhint ([33:11-32]),
           (Tfun
-             { ft_arity = (Fstandard ()); ft_tparams = [];
-               ft_where_constraints = [];
+             { ft_tparams = []; ft_where_constraints = [];
                ft_params =
                [{ fp_pos = [33:21-24]; fp_name = None;
                   fp_type =

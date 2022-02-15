@@ -42,10 +42,9 @@ use oxidized_by_ref::{
     t_shape_map::TShapeField,
     typing_defs::{
         self, AbstractTypeconst, Capability::*, ClassConstKind, ConcreteTypeconst, ConstDecl,
-        Enforcement, EnumType, FunArity, FunElt, FunImplicitParams, FunParam, FunParams, FunType,
-        IfcFunDecl, ParamMode, PosByteString, PosId, PosString, PossiblyEnforcedTy, ShapeFieldType,
-        ShapeKind, TaccessType, Tparam, TshapeFieldName, Ty, Ty_, Typeconst, TypedefType,
-        WhereConstraint,
+        Enforcement, EnumType, FunElt, FunImplicitParams, FunParam, FunParams, FunType, IfcFunDecl,
+        ParamMode, PosByteString, PosId, PosString, PossiblyEnforcedTy, ShapeFieldType, ShapeKind,
+        TaccessType, Tparam, TshapeFieldName, Ty, Ty_, Typeconst, TypedefType, WhereConstraint,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -1591,7 +1590,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             (false, _) => self.elaborate_defined_id(header.name),
         };
         let id = id_opt.unwrap_or_else(|| Id(self.get_pos(header.name), ""));
-        let (params, properties, arity) = self.as_fun_params(header.param_list)?;
+        let (params, properties, variadic) = self.as_fun_params(header.param_list)?;
         let f_pos = self.get_pos(header.name);
         let implicit_params = self.as_fun_implicit_params(header.capability, f_pos);
 
@@ -1659,7 +1658,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         if readonly {
             flags |= FunTypeFlags::READONLY_THIS
         }
-        if let FunArity::Fvariadic(_) = arity {
+        if variadic {
             flags |= FunTypeFlags::VARIADIC
         }
 
@@ -1678,7 +1677,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             self.rewrite_effect_polymorphism(params, tparams, implicit_params, where_constraints);
 
         let ft = self.alloc(FunType {
-            arity,
             tparams,
             where_constraints,
             params,
@@ -1701,12 +1699,12 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
     fn as_fun_params(
         &self,
         list: Node<'a>,
-    ) -> Option<(&'a FunParams<'a>, &'a [ShallowProp<'a>], FunArity<'a>)> {
+    ) -> Option<(&'a FunParams<'a>, &'a [ShallowProp<'a>], bool)> {
         match list {
             Node::List(nodes) => {
                 let mut params = Vec::with_capacity_in(nodes.len(), self.arena);
                 let mut properties = Vec::new_in(self.arena);
-                let mut arity = FunArity::Fstandard;
+                let mut ft_variadic = false;
                 for node in nodes.iter() {
                     match node {
                         Node::FunParam(&FunParamDecl {
@@ -1787,6 +1785,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                             if initializer.is_present() {
                                 flags |= FunParamFlags::HAS_DEFAULT;
                             }
+                            if variadic {
+                                ft_variadic = true;
+                            }
                             let variadic = initializer.is_ignored() && variadic;
                             let type_ = if variadic {
                                 self.alloc(Ty(
@@ -1809,13 +1810,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                                 }),
                                 flags,
                             });
-                            arity = match arity {
-                                FunArity::Fstandard if variadic => FunArity::Fvariadic(param),
-                                arity => {
-                                    params.push(param);
-                                    arity
-                                }
-                            };
+                            params.push(param);
                         }
                         _ => {}
                     }
@@ -1823,10 +1818,10 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 Some((
                     params.into_bump_slice(),
                     properties.into_bump_slice(),
-                    arity,
+                    ft_variadic,
                 ))
             }
-            n if n.is_ignored() => Some((&[], &[], FunArity::Fstandard)),
+            n if n.is_ignored() => Some((&[], &[], false)),
             _ => None,
         }
     }
@@ -1980,10 +1975,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                         ..*param
                     })
                 };
-                let arity = match fun_type.arity {
-                    FunArity::Fstandard => FunArity::Fstandard,
-                    FunArity::Fvariadic(param) => FunArity::Fvariadic(convert_param(param)),
-                };
                 let params = self.slice(fun_type.params.iter().copied().map(convert_param));
                 let implicit_params = fun_type.implicit_params;
                 let ret = self.alloc(PossiblyEnforcedTy {
@@ -1991,7 +1982,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                     type_: self.convert_tapply_to_tgeneric(fun_type.ret.type_),
                 });
                 Ty_::Tfun(self.alloc(FunType {
-                    arity,
                     params,
                     implicit_params,
                     ret,
@@ -5077,7 +5067,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         return_type: Self::R,
         outer_right_paren: Self::R,
     ) -> Self::R {
-        let make_param = |fp: &'a FunParamDecl<'a>| -> &'a FunParam<'a> {
+        let mut ft_variadic = false;
+        let mut make_param = |fp: &'a FunParamDecl<'a>| -> &'a FunParam<'a> {
             let mut flags = FunParamFlags::empty();
 
             match fp.kind {
@@ -5089,6 +5080,9 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
 
             if fp.readonly {
                 flags |= FunParamFlags::READONLY;
+            }
+            if fp.variadic {
+                ft_variadic = true;
             }
 
             self.alloc(FunParam {
@@ -5102,16 +5096,8 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             })
         };
 
-        let arity = parameter_list
-            .iter()
-            .find_map(|&node| match node {
-                Node::FunParam(fp) if fp.variadic => Some(FunArity::Fvariadic(make_param(fp))),
-                _ => None,
-            })
-            .unwrap_or(FunArity::Fstandard);
-
         let params = self.slice(parameter_list.iter().filter_map(|&node| match node {
-            Node::FunParam(fp) if !fp.variadic => Some(make_param(fp)),
+            Node::FunParam(fp) => Some(make_param(fp)),
             _ => None,
         }));
 
@@ -5129,14 +5115,13 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
         if readonly_keyword.is_token(TokenKind::Readonly) {
             flags |= FunTypeFlags::READONLY_THIS;
         }
-        if let FunArity::Fvariadic(_) = arity {
+        if ft_variadic {
             flags |= FunTypeFlags::VARIADIC
         }
 
         self.hint_ty(
             pos,
             Ty_::Tfun(self.alloc(FunType {
-                arity,
                 tparams: &[],
                 where_constraints: &[],
                 params,

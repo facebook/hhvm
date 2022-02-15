@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,157 +1,157 @@
+@@ -1,151 +1,151 @@
  [("\\DeclPos",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -22,8 +22,7 @@
            sm_type =
            (Rwitness_from_decl ([4:26-28]),
             (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = []; ft_params = [];
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability =
                    (CapTy (Rhint ([4:30-32]), (Tintersection []))) };
@@ -47,8 +46,7 @@
             sm_type =
             (Rwitness_from_decl ([5:26-28]),
              (Tfun
-                { ft_arity = (Fstandard ()); ft_tparams = [];
-                  ft_where_constraints = []; ft_params = [];
+                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                   ft_implicit_params =
                   { capability = (CapDefaults [5:26-28]) };
                   ft_ret =
@@ -71,8 +69,7 @@
             sm_type =
             (Rwitness_from_decl ([6:26-28]),
              (Tfun
-                { ft_arity = (Fstandard ()); ft_tparams = [];
-                  ft_where_constraints = []; ft_params = [];
+                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                   ft_implicit_params =
                   { capability = (CapDefaults [6:26-28]) };
                   ft_ret =
@@ -95,8 +92,7 @@
             sm_type =
             (Rwitness_from_decl ([7:32-37]),
              (Tfun
-                { ft_arity = (Fstandard ()); ft_tparams = [];
-                  ft_where_constraints = []; ft_params = [];
+                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                   ft_implicit_params =
                   { capability = (CapDefaults [7:32-37]) };
                   ft_ret =
@@ -117,8 +113,7 @@
             sm_type =
             (Rwitness_from_decl ([8:26-28]),
              (Tfun
-                { ft_arity = (Fstandard ()); ft_tparams = [];
-                  ft_where_constraints = []; ft_params = [];
+                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                   ft_implicit_params =
                   { capability = (CapDefaults [8:26-28]) };
                   ft_ret =
@@ -135,8 +130,7 @@
             sm_type =
             (Rwitness_from_decl ([9:26-28]),
              (Tfun
-                { ft_arity = (Fstandard ()); ft_tparams = [];
-                  ft_where_constraints = []; ft_params = [];
+                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                   ft_implicit_params =
                   { capability =
                     (CapTy (Rhint ([9:30-42]),

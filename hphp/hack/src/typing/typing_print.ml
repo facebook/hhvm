@@ -141,29 +141,15 @@ module Full = struct
     List.fold_map fields ~f:f_field ~init:fuel
 
   let rec fun_type ~fuel ~ty to_doc st penv ft =
-    let (fuel, params_doc) =
-      List.fold_map ft.ft_params ~init:fuel ~f:(fun fuel ->
-          fun_param ~fuel ~ty to_doc st penv)
-    in
-    let (fuel, variadic_param_doc) =
-      match ft.ft_arity with
-      | Fstandard -> (fuel, None)
-      | Fvariadic p ->
-        let (fuel, fp_type_doc) = ty ~fuel to_doc st penv p.fp_type.et_type in
-        let (fuel, d) =
-          match fp_type_doc with
-          | Text ("_", 1) ->
-            (* Handle the case of missing a type by not printing it *)
-            (fuel, Nothing)
-          | _ -> fun_param ~fuel ~ty to_doc st penv p
-        in
-        let d = Concat [d; text "..."] in
-        (fuel, Some d)
-    in
-    let params =
-      match variadic_param_doc with
-      | None -> params_doc
-      | Some variadic_param_doc -> params_doc @ [variadic_param_doc]
+    let n = List.length ft.ft_params in
+    let (fuel, params) =
+      List.fold_mapi ft.ft_params ~init:fuel ~f:(fun i fuel p ->
+          let (fuel, d) = fun_param ~fuel ~ty to_doc st penv p in
+          ( fuel,
+            if get_ft_variadic ft && i + 1 = n then
+              Concat [d; text "..."]
+            else
+              d ))
     in
     let (fuel, tparams_doc) =
       (* only print tparams when they have been instantiated with targs
@@ -1521,7 +1507,6 @@ module Json = struct
                    { capability = CapDefaults Pos_or_decl.none };
                  ft_ret = { et_type = ft_ret; et_enforced = Unenforced };
                  (* Dummy values: these aren't currently serialized. *)
-                 ft_arity = Fstandard;
                  ft_tparams = [];
                  ft_where_constraints = [];
                  ft_flags = 0;

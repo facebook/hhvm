@@ -347,8 +347,6 @@ val equal_locl_ty : locl_ty -> locl_ty -> bool
 
 val equal_locl_ty_ : locl_ty_ -> locl_ty_ -> bool
 
-val equal_locl_fun_arity : 'a ty fun_type -> 'a ty fun_type -> bool
-
 val is_type_no_return : locl_ty_ -> bool
 
 val equal_decl_ty_ :
@@ -358,9 +356,6 @@ val equal_decl_ty : decl_phase ty -> decl_phase ty -> Ppx_deriving_runtime.bool
 
 val equal_shape_field_type :
   decl_phase shape_field_type -> decl_phase shape_field_type -> bool
-
-val equal_decl_fun_arity :
-  decl_phase ty fun_type -> decl_phase ty fun_type -> bool
 
 val equal_decl_fun_type :
   decl_phase ty fun_type -> decl_phase ty fun_type -> bool

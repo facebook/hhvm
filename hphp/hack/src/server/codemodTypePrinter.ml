@@ -45,9 +45,10 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
   | Tfun ft ->
     let params = List.map ft.ft_params ~f:print_fun_param_exn in
     let params =
-      match ft.ft_arity with
-      | Fstandard -> params
-      | Fvariadic p -> params @ [print_ty_exn p.fp_type.et_type ^ "..."]
+      if get_ft_variadic ft then
+        params @ ["..."]
+      else
+        params
     in
     Printf.sprintf
       "(function(%s): %s)"

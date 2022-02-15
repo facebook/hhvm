@@ -181,17 +181,12 @@ struct
       ft_params = List.map ft.ft_params ~f:fun_param;
       ft_implicit_params = fun_implicit_params ft.ft_implicit_params;
       ft_ret = possibly_enforced_ty ft.ft_ret;
-      ft_arity = fun_arity ft.ft_arity;
     }
 
   and fun_elt fe =
     { fe with fe_type = ty fe.fe_type; fe_pos = pos_or_decl fe.fe_pos }
 
   and where_constraint (ty1, c, ty2) = (ty ty1, c, ty ty2)
-
-  and fun_arity = function
-    | Fstandard as x -> x
-    | Fvariadic param -> Fvariadic (fun_param param)
 
   and fun_param param =
     {

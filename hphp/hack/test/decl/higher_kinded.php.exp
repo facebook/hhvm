@@ -50,8 +50,7 @@
         fe_type =
         (Rwitness_from_decl ([7:10-16]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([7:17-19], "TC");
                  tp_tparams =

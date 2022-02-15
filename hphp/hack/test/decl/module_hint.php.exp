@@ -16,8 +16,7 @@ File root|module_hint.php--here.php
           sm_type =
           (Rwitness_from_decl ([7:19-22]),
            (Tfun
-              { ft_arity = (Fstandard ()); ft_tparams = [];
-                ft_where_constraints = [];
+              { ft_tparams = []; ft_where_constraints = [];
                 ft_params =
                 [{ fp_pos = [7:29-31]; fp_name = (Some "$m");
                    fp_type =
@@ -137,8 +136,7 @@ File root|module_hint.php--everywhere.php
        fe_type =
        (Rwitness_from_decl ([3:10-16]),
         (Tfun
-           { ft_arity = (Fstandard ());
-             ft_tparams =
+           { ft_tparams =
              [{ Typing_defs_core.tp_variance = Invariant;
                 tp_name = ([3:17-18], "T"); tp_tparams = [];
                 tp_constraints = []; tp_reified = Erased;

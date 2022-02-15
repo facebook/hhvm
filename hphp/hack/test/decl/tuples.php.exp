@@ -15,8 +15,7 @@
         fe_type =
         (Rwitness_from_decl ([5:10-21]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = [];
+            { ft_tparams = []; ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [5:37-42]; fp_name = (Some "$arg1");
                  fp_type =
@@ -54,8 +53,7 @@
         fe_type =
         (Rwitness_from_decl ([9:10-23]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = [];
+            { ft_tparams = []; ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [9:35-40]; fp_name = (Some "$arg1");
                  fp_type =
@@ -93,8 +91,7 @@
         fe_type =
         (Rwitness_from_decl ([13:10-23]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([13:24-25], "T"); tp_tparams = [];
                  tp_constraints = []; tp_reified = Erased;

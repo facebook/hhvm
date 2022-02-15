@@ -99,13 +99,6 @@ module Locl_Inst = struct
             let ty = instantiate_possibly_enforced_ty subst param.fp_type in
             { param with fp_type = ty })
       in
-      let arity =
-        match ft.ft_arity with
-        | Fvariadic ({ fp_type = var_ty; _ } as param) ->
-          let var_ty = instantiate_possibly_enforced_ty subst var_ty in
-          Fvariadic { param with fp_type = var_ty }
-        | Fstandard as x -> x
-      in
       let ret = instantiate_possibly_enforced_ty subst ft.ft_ret in
       let tparams =
         List.map tparams ~f:(fun t ->
@@ -123,7 +116,6 @@ module Locl_Inst = struct
       Tfun
         {
           ft with
-          ft_arity = arity;
           ft_params = params;
           ft_ret = ret;
           ft_tparams = tparams;

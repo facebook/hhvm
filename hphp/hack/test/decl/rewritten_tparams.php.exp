@@ -27,8 +27,7 @@
         fe_type =
         (Rwitness_from_decl ([7:10-11]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([8:16-17], "T/[ctx $f]"); tp_tparams = [];
                  tp_constraints = []; tp_reified = Erased;
@@ -59,8 +58,8 @@
                    et_type =
                    (Rhint ([8:3-25]),
                     (Tfun
-                       { ft_arity = (Fstandard ()); ft_tparams = [];
-                         ft_where_constraints = []; ft_params = [];
+                       { ft_tparams = []; ft_where_constraints = [];
+                         ft_params = [];
                          ft_implicit_params =
                          { capability =
                            (CapTy (Rhint ([8:16-17]),
@@ -117,8 +116,7 @@
         fe_type =
         (Rwitness_from_decl ([14:10-11]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([14:14-16], "T/$v"); tp_tparams = [];
                  tp_constraints =
@@ -169,8 +167,7 @@
         fe_type =
         (Rwitness_from_decl ([18:10-11]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([19:17-18], "T/[ctx $f]"); tp_tparams = [];
                  tp_constraints = []; tp_reified = Erased;
@@ -203,8 +200,8 @@
                     (Toption
                        (Rhint ([19:4-26]),
                         (Tfun
-                           { ft_arity = (Fstandard ()); ft_tparams = [];
-                             ft_where_constraints = []; ft_params = [];
+                           { ft_tparams = []; ft_where_constraints = [];
+                             ft_params = [];
                              ft_implicit_params =
                              { capability =
                                (CapTy (Rhint ([19:17-18]),

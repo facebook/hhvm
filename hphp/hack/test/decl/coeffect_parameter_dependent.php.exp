@@ -27,8 +27,7 @@
         fe_type =
         (Rwitness_from_decl ([7:10-11]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([7:14-16], "T/$a"); tp_tparams = [];
                  tp_constraints =
@@ -79,8 +78,7 @@
         fe_type =
         (Rwitness_from_decl ([9:10-18]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([9:22-24], "T/$a"); tp_tparams = [];
                  tp_constraints =
@@ -134,8 +132,7 @@
         fe_type =
         (Rwitness_from_decl ([11:10-16]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([11:20-22], "T/$a"); tp_tparams = [];
                  tp_constraints =
@@ -189,8 +186,7 @@
         fe_type =
         (Rwitness_from_decl ([13:10-23]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([13:28-30], "T/$a"); tp_tparams = [];
                  tp_constraints =

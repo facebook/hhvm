@@ -403,7 +403,6 @@ impl<'a> TypeBuilder<'a> {
             params,
             implicit_params,
             // TODO: set the following fields correctly
-            arity: FunArity::Fstandard,
             tparams: &[],
             where_constraints: &[],
             flags: FunTypeFlags::empty(),

@@ -6,8 +6,7 @@
        fe_type =
        (Rwitness_from_decl ([4:10-16]),
         (Tfun
-           { ft_arity = (Fstandard ()); ft_tparams = [];
-             ft_where_constraints = []; ft_params = [];
+           { ft_tparams = []; ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [4:10-16]) };
              ft_ret =
              { et_enforced = Typing_defs_core.Unenforced;
@@ -27,8 +26,7 @@
         fe_type =
         (Rwitness_from_decl ([7:10-16]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [7:10-16]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;

@@ -63,7 +63,6 @@ let expand_ty ?var_hook ?pos env ty =
   and exp_tys tyl = List.map ~f:exp_ty tyl
   and exp_fun_type
       {
-        ft_arity;
         ft_tparams;
         ft_where_constraints;
         ft_ret;
@@ -73,7 +72,6 @@ let expand_ty ?var_hook ?pos env ty =
         ft_ifc_decl;
       } =
     {
-      ft_arity;
       ft_flags;
       ft_ifc_decl;
       ft_tparams = List.map ~f:exp_tparam ft_tparams;

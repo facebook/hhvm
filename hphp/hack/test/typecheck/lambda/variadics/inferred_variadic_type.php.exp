@@ -20,6 +20,10 @@ File "inferred_variadic_type.php", line 41, characters 38-40:
 You are trying to access the method `foo` but this is an int (Typing[4062])
   File "inferred_variadic_type.php", line 15, characters 42-44:
   Definition is here
+File "inferred_variadic_type.php", line 43, characters 25-29:
+Was expecting an object but type is unknown (Typing[4297])
+  File "inferred_variadic_type.php", line 43, characters 17-18:
+  It is unknown because a type could not be determined here
 File "inferred_variadic_type.php", line 47, characters 19-26:
 Invalid argument (Typing[4110])
   File "inferred_variadic_type.php", line 46, characters 20-21:

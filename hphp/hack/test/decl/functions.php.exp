@@ -5,8 +5,7 @@
        fe_type =
        (Rwitness_from_decl ([3:10-25]),
         (Tfun
-           { ft_arity = (Fstandard ()); ft_tparams = [];
-             ft_where_constraints = []; ft_params = [];
+           { ft_tparams = []; ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [3:10-25]) };
              ft_ret =
              { et_enforced = Typing_defs_core.Unenforced;
@@ -25,8 +24,7 @@
         fe_type =
         (Rwitness_from_decl ([4:10-29]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [4:10-29]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -45,8 +43,7 @@
         fe_type =
         (Rwitness_from_decl ([7:10-35]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [7:10-35]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -65,8 +62,7 @@
         fe_type =
         (Rwitness_from_decl ([11:10-28]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = [];
+            { ft_tparams = []; ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [11:33-38]; fp_name = (Some "$arg1");
                  fp_type =
@@ -111,8 +107,7 @@
         fe_type =
         (Rwitness_from_decl ([14:10-42]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = [];
+            { ft_tparams = []; ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [14:51-56]; fp_name = (Some "$arg1");
                  fp_type =
@@ -147,8 +142,7 @@
         fe_type =
         (Rwitness_from_decl ([18:10-26]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([18:27-28], "T"); tp_tparams = [];
                  tp_constraints = []; tp_reified = Erased;
@@ -184,8 +178,7 @@
         fe_type =
         (Rwitness_from_decl ([22:10-38]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([22:39-41], "T1"); tp_tparams = [];
                  tp_constraints =
@@ -236,8 +229,7 @@
         fe_type =
         (Rwitness_from_decl ([29:10-30]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [29:10-30]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -260,8 +252,7 @@
         fe_type =
         (Rwitness_from_decl ([33:10-24]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = [];
+            { ft_tparams = []; ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [33:30-32]; fp_name = (Some "$x");
                  fp_type =
@@ -294,8 +285,7 @@
         fe_type =
         (Rwitness_from_decl ([35:10-16]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = [];
+            { ft_tparams = []; ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [35:27-29]; fp_name = (Some "$x");
                  fp_type =
@@ -325,8 +315,7 @@
         fe_type =
         (Rwitness_from_decl ([37:10-37]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([37:38-40], "Tu"); tp_tparams = [];
                  tp_constraints = []; tp_reified = Erased;
@@ -349,8 +338,7 @@
                     et_type =
                     (Rhint ([39:3-23]),
                      (Tfun
-                        { ft_arity = (Fstandard ()); ft_tparams = [];
-                          ft_where_constraints = [];
+                        { ft_tparams = []; ft_where_constraints = [];
                           ft_params =
                           [{ fp_pos = [39:13-15]; fp_name = None;
                              fp_type =
@@ -389,8 +377,7 @@
                 et_type =
                 (Rhint ([40:4-42]),
                  (Tfun
-                    { ft_arity = (Fstandard ()); ft_tparams = [];
-                      ft_where_constraints = [];
+                    { ft_tparams = []; ft_where_constraints = [];
                       ft_params =
                       [{ fp_pos = [40:14-34]; fp_name = None;
                          fp_type =
@@ -398,8 +385,7 @@
                            et_type =
                            (Rhint ([40:14-34]),
                             (Tfun
-                               { ft_arity = (Fstandard ()); ft_tparams = [];
-                                 ft_where_constraints = [];
+                               { ft_tparams = []; ft_where_constraints = [];
                                  ft_params =
                                  [{ fp_pos = [40:24-26]; fp_name = None;
                                     fp_type =
@@ -465,8 +451,7 @@
         fe_type =
         (Rwitness_from_decl ([46:10-28]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = [];
+            { ft_tparams = []; ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [46:48-50]; fp_name = (Some "$m");
                  fp_type =
@@ -521,8 +506,7 @@
         fe_type =
         (Rwitness_from_decl ([52:10-24]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([52:25-26], "T"); tp_tparams = [];
                  tp_constraints =
@@ -562,8 +546,7 @@
         fe_type =
         (Rwitness_from_decl ([56:10-28]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = [];
+            { ft_tparams = []; ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [56:38-40]; fp_name = (Some "$i");
                  fp_type =
@@ -593,8 +576,7 @@
         fe_type =
         (Rwitness_from_decl ([60:10-28]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [60:10-28]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -613,19 +595,18 @@
         fe_type =
         (Rwitness_from_decl ([65:10-27]),
          (Tfun
-            { ft_arity =
-              (Fvariadic (
-                 { fp_pos = [65:37-42]; fp_name = (Some "$args");
-                   fp_type =
-                   { et_enforced = Typing_defs_core.Unenforced;
-                     et_type = (Rvar_param_from_decl ([65:37-42]), Tmixed) };
-                   fp_flags =
-                   (make_fp_flags ~accept_disposable:false ~has_default:false
-                     ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                     ~ifc_can_call:false ~readonly:false);
-                    }
-                 ));
-              ft_tparams = []; ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = [];
+              ft_params =
+              [{ fp_pos = [65:37-42]; fp_name = (Some "$args");
+                 fp_type =
+                 { et_enforced = Typing_defs_core.Unenforced;
+                   et_type = (Rvar_param_from_decl ([65:37-42]), Tmixed) };
+                 fp_flags =
+                 (make_fp_flags ~accept_disposable:false ~has_default:false
+                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
+                   ~ifc_can_call:false ~readonly:false);
+                  }
+                ];
               ft_implicit_params = { capability = (CapDefaults [65:10-27]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;

@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,101 +1,101 @@
+@@ -1,99 +1,99 @@
  [("\\foo",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;
@@ -8,8 +8,7 @@
         fe_type =
         (Rwitness_from_decl ([3:10-13]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [3:10-13]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -37,8 +36,7 @@
             sm_type =
             (Rwitness_from_decl ([6:26-30]),
              (Tfun
-                { ft_arity = (Fstandard ()); ft_tparams = [];
-                  ft_where_constraints = []; ft_params = [];
+                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                   ft_implicit_params =
                   { capability = (CapDefaults [6:26-30]) };
                   ft_ret =

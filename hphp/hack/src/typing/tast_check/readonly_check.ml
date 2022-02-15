@@ -459,20 +459,20 @@ let call
   let check_args caller_ty args unpacked_arg =
     match get_node caller_ty with
     | Tfun fty ->
-      let rec check args params variadic =
-        match (args, params, variadic) with
-        | (x1 :: args1, x2 :: params2, _) ->
+      let rec check args params =
+        match (args, params) with
+        (* Remaining args should be checked against variadic *)
+        | (x1 :: args1, [x2]) when get_ft_variadic fty ->
           check_arg x2 x1;
-          check args1 params2 variadic
-        | ([], _, _) ->
+          check args1 [x2]
+        | (x1 :: args1, x2 :: params2) ->
+          check_arg x2 x1;
+          check args1 params2
+        | ([], _) ->
           (* If args are empty, it's either a type error already or a default arg that's not filled in
              either way, no need to check readonlyness *)
           ()
-          (* Remaining args should be checked against variadic *)
-        | (x1 :: args1, [], Some v) ->
-          check_arg v x1;
-          check args1 [] variadic
-        | (_x1 :: _args1, [], None) ->
+        | (_x1 :: _args1, []) ->
           (* Too many args and no variadic: there was a type error somewhere*)
           ()
       in
@@ -482,13 +482,7 @@ let call
         |> Option.to_list
       in
       let args = args @ unpacked_rty in
-      let variadic_opt =
-        match fty.ft_arity with
-        | Fstandard -> None
-        | Fvariadic p -> Some p
-      in
-      let fun_params = fty.ft_params in
-      check args fun_params variadic_opt
+      check args fty.ft_params
     | _ -> ()
   in
   check_readonly_closure caller_ty caller_rty;

@@ -1,1 +1,16 @@
-No errors
+File "lambda_application.php", line 13, characters 26-30:
+Was expecting an object but type is unknown (Typing[4297])
+  File "lambda_application.php", line 13, characters 18-19:
+  It is unknown because a type could not be determined here
+File "lambda_application.php", line 16, characters 44-52:
+Was expecting an object but type is unknown (Typing[4297])
+  File "lambda_application.php", line 16, characters 32-37:
+  It is unknown because a type could not be determined here
+File "lambda_application.php", line 25, characters 12-16:
+Was expecting an object but type is unknown (Typing[4297])
+  File "lambda_application.php", line 24, characters 27-28:
+  It is unknown because a type could not be determined here
+File "lambda_application.php", line 30, characters 12-20:
+Was expecting an object but type is unknown (Typing[4297])
+  File "lambda_application.php", line 29, characters 41-46:
+  It is unknown because a type could not be determined here

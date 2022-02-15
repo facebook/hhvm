@@ -167,25 +167,21 @@ let get_pos_for (env : Tast_env.env) (ty : Typing_defs.phase_ty) : Pos.absolute
 (* Convert a `TFun` into a func details structure *)
 let tfun_to_func_details (env : Tast_env.t) (ft : Typing_defs.locl_fun_type) :
     func_details_result =
-  let param_to_record ?(is_variadic = false) param =
+  let n = List.length ft.ft_params in
+  let param_to_record i param =
     {
       param_name =
         (match param.fp_name with
         | Some n -> n
         | None -> "");
       param_ty = Tast_env.print_ty env param.fp_type.et_type;
-      param_variadic = is_variadic;
+      param_variadic = i + 1 = n && get_ft_variadic ft;
     }
   in
   {
     return_ty = Tast_env.print_ty env ft.ft_ret.et_type;
     min_arity = arity_min ft;
-    params =
-      (List.map ft.ft_params ~f:param_to_record
-      @
-      match ft.ft_arity with
-      | Fvariadic p -> [param_to_record ~is_variadic:true p]
-      | Fstandard -> []);
+    params = List.mapi ft.ft_params ~f:param_to_record;
   }
 
 (* Convert a `ty` into a func details structure *)

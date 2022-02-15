@@ -15,8 +15,7 @@
           sm_type =
           (Rwitness_from_decl ([5:19-22]),
            (Tfun
-              { ft_arity = (Fstandard ()); ft_tparams = [];
-                ft_where_constraints = []; ft_params = [];
+              { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [5:19-22]) };
                 ft_ret =
                 { et_enforced = Typing_defs_core.Unenforced;
@@ -34,8 +33,7 @@
            sm_type =
            (Rwitness_from_decl ([8:19-22]),
             (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = []; ft_params = [];
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [8:19-22]) };
                  ft_ret =
@@ -52,8 +50,7 @@
            sm_type =
            (Rwitness_from_decl ([11:19-22]),
             (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = []; ft_params = [];
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [11:19-22]) };
                  ft_ret =
@@ -70,8 +67,7 @@
            sm_type =
            (Rwitness_from_decl ([14:19-23]),
             (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = []; ft_params = [];
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [14:19-23]) };
                  ft_ret =
@@ -96,8 +92,7 @@
         fe_type =
         (Rwitness_from_decl ([18:10-13]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [18:10-13]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -116,8 +111,7 @@
         fe_type =
         (Rwitness_from_decl ([21:10-13]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [21:10-13]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -136,8 +130,7 @@
         fe_type =
         (Rwitness_from_decl ([24:10-13]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [24:10-13]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -157,8 +150,7 @@
         fe_type =
         (Rwitness_from_decl ([27:10-14]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [27:10-14]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;

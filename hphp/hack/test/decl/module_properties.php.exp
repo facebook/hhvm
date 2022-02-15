@@ -26,8 +26,7 @@ File root|module_properties.php--f.php
        fe_type =
        (Rwitness_from_decl ([3:10-11]),
         (Tfun
-           { ft_arity = (Fstandard ()); ft_tparams = [];
-             ft_where_constraints = [];
+           { ft_tparams = []; ft_where_constraints = [];
              ft_params =
              [{ fp_pos = [3:14-16]; fp_name = (Some "$a");
                 fp_type =

@@ -47,8 +47,7 @@ File root|module_enums.php--X.php
         fe_type =
         (Rwitness_from_decl ([12:10-12]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = [];
+            { ft_tparams = []; ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [12:15-17]; fp_name = (Some "$x");
                  fp_type =
@@ -79,8 +78,7 @@ File root|module_enums.php--X.php
         fe_type =
         (Rwitness_from_decl ([15:10-12]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = [];
+            { ft_tparams = []; ft_where_constraints = [];
               ft_params =
               [{ fp_pos = [15:15-17]; fp_name = (Some "$x");
                  fp_type =
@@ -111,8 +109,7 @@ File root|module_enums.php--X.php
         fe_type =
         (Rwitness_from_decl ([18:10-12]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [18:10-12]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -131,8 +128,7 @@ File root|module_enums.php--X.php
         fe_type =
         (Rwitness_from_decl ([23:10-12]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [23:10-12]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -154,8 +150,7 @@ File root|module_enums.php--Y.php
        fe_type =
        (Rwitness_from_decl ([5:10-12]),
         (Tfun
-           { ft_arity = (Fstandard ()); ft_tparams = [];
-             ft_where_constraints = [];
+           { ft_tparams = []; ft_where_constraints = [];
              ft_params =
              [{ fp_pos = [5:15-17]; fp_name = (Some "$x");
                 fp_type =
@@ -186,8 +181,7 @@ File root|module_enums.php--Y.php
         fe_type =
         (Rwitness_from_decl ([9:10-12]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [9:10-12]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -209,8 +203,7 @@ File root|module_enums.php--no-module.php
        fe_type =
        (Rwitness_from_decl ([3:10-12]),
         (Tfun
-           { ft_arity = (Fstandard ()); ft_tparams = [];
-             ft_where_constraints = [];
+           { ft_tparams = []; ft_where_constraints = [];
              ft_params =
              [{ fp_pos = [3:15-17]; fp_name = (Some "$x");
                 fp_type =
@@ -241,8 +234,7 @@ File root|module_enums.php--no-module.php
         fe_type =
         (Rwitness_from_decl ([5:10-12]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [5:10-12]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;

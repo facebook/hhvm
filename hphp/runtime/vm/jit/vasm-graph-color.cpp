@@ -1335,7 +1335,7 @@ size_t block_loop_depth(const State& state, Vlabel b) {
 // executed.
 int64_t block_weight(const State& state, Vlabel b) {
   // Weight cannot be zero, as that means doing anything in it is
-  // "free" (leads to nonesense decisions).
+  // "free" (leads to nonsense decisions).
   return std::max<int64_t>(state.unit.blocks[b].weight, 1);
 }
 

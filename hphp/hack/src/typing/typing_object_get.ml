@@ -98,11 +98,11 @@ let mk_mismatch_union env =
       let (env, ty) = Typing_union.union_list env Reason.none tys in
       (env, Ok ty))
     ~error:(fun (actuals, expecteds) ->
-      let (env, ty_acutal) = Typing_union.union_list env Reason.none actuals in
+      let (env, ty_actual) = Typing_union.union_list env Reason.none actuals in
       let (env, ty_expect) =
         Typing_union.union_list env Reason.none expecteds
       in
-      (env, Error (ty_acutal, ty_expect)))
+      (env, Error (ty_actual, ty_expect)))
 
 let fold_mismatches mismatches =
   List.fold_left mismatches ~init:(Ok []) ~f:(fun acc err ->

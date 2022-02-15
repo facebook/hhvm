@@ -203,7 +203,7 @@ enum COMPARISON_TYPE: int {
 
 /**
  * Do the casts PHP would do before doing <, <=, >, >=, <=>.
- * Then, do a modified form of <=> that correctl handles what gt/lt would do
+ * Then, do a modified form of <=> that correctly handles what gt/lt would do
  * in the different situations
  *
  * Note that this specifically doesn't handle coercions that would just trigger

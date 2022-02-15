@@ -3558,7 +3558,7 @@ void Class::addTraitPropInitializers(std::vector<const Func*>& thisInitVec,
     for (unsigned m = 0; m < traitInitVec.size(); m++) {
       // Clone 86[psl]init methods, and set the class to the current class.
       // This allows 86[psl]init to determine the property offset for the
-      // initializer array corectly.
+      // initializer array correctly.
       Func *f = traitInitVec[m]->clone(this);
       f->setBaseCls(this);
       f->setHasPrivateAncestor(false);

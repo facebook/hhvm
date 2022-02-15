@@ -134,7 +134,7 @@ void StringData::setColor(uint16_t color) {
 //////////////////////////////////////////////////////////////////////
 
 // Create either a static or an uncounted string.
-// Diffrence between static and uncounted is in the lifetime
+// Difference between static and uncounted is in the lifetime
 // of the string. Static are alive for the lifetime of the process.
 // Uncounted are not ref counted but will be deleted at some point.
 template <bool trueStatic> ALWAYS_INLINE

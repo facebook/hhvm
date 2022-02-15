@@ -6245,7 +6245,7 @@ exif_process_user_comment(image_info_type* /*ImageInfo*/, char** pszInfoPtr,
       ByteCount -= 8;
     } else
     if (!memcmp(szValuePtr, "JIS\0\0\0\0\0", 8)) {
-      /* JIS should be tanslated to MB or we leave it to the user */
+      /* JIS should be translated to MB or we leave it to the user */
       PHP_STRDUP(*pszEncoding, (const char*)szValuePtr);
       szValuePtr = szValuePtr+8;
       ByteCount -= 8;

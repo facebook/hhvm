@@ -214,7 +214,7 @@ namespace {
  */
 float decRefDestroyedPercent(Vout& v, IRLS& /*env*/,
                              const IRInstruction* /*inst*/,
-                             const TargetProfile<DecRefProfile>& profile) {
+                             const SharedProfile<DecRefProfile>& profile) {
   if (!profile.optimizing()) return 0.0;
 
   auto const data = profile.data();
@@ -256,25 +256,28 @@ CallSpec makeDtorCall(Vout& v, Type ty, Vloc loc, ArgGroup& args) {
 }
 
 namespace {
-static void ProfileAndDecRef(DecRefProfile* profile, TypedValue tv) {
-  profile->update(tv);
+static void UpdateProfile(DecRefProfileEntry* entry, TypedValue tv) {
+  entry->update([&](auto& profile) { profile.update(tv); });
+}
+static void UpdateProfileAndDecRef(DecRefProfileEntry* entry, TypedValue tv) {
+  UpdateProfile(entry, tv);
   tvDecRefGen(tv);
 }
 }
 
 void implDecRefProf(Vout& v, IRLS& env, const IRInstruction* inst,
-                    const TargetProfile<DecRefProfile>& profile,
+                    const SharedProfile<DecRefProfile>& profile,
                     bool profileOnly = false) {
   assertx(profile.profiling());
   auto const& type = inst->src(0)->type();
   if (!type.maybe(TCounted)) return;
 
   auto const args = argGroup(env, inst)
-    .addr(rvmtl(), safe_cast<int32_t>(profile.handle()))
+    .immPtr(profile.entry())
     .typedValue(0);
   auto const target = profileOnly
-    ? CallSpec::method(&DecRefProfile::update)
-    : CallSpec::direct(&ProfileAndDecRef);
+    ? CallSpec::direct(&UpdateProfile)
+    : CallSpec::direct(&UpdateProfileAndDecRef);
   cgCallHelper(v, env, target, kVoidDest, SyncOptions::None, args);
 }
 
@@ -366,7 +369,7 @@ void emitDecRefOptPersist(Vout& v, Vout& vcold, Vreg data,
  */
 template<class Destroy>
 void emitDecRefOpt(Vout& v, Vout& vcold, Vreg base,
-                   const TargetProfile<DecRefProfile>& profile,
+                   const SharedProfile<DecRefProfile>& profile,
                    Destroy destroy) {
   const auto data = profile.data();
   const auto persistPct = data.percent(data.persistent());
@@ -403,7 +406,7 @@ void emitDecRefOpt(Vout& v, Vout& vcold, Vreg base,
 
 void implDecRef(Vout& v, IRLS& env,
                 const IRInstruction* inst, Type ty,
-                const TargetProfile<DecRefProfile>& profile) {
+                const SharedProfile<DecRefProfile>& profile) {
   auto const base = srcLoc(env, inst, 0).reg(0);
 
   auto const destroy = [&] (Vout& v) {
@@ -653,7 +656,7 @@ void cgDecReleaseCheck(IRLS& env, const IRInstruction* inst) {
  };
 
  ifThenElseRefCountedType(
-     vmain(env), vcold(env), ty, srcLoc(env, inst, 0), 
+     vmain(env), vcold(env), ty, srcLoc(env, inst, 0),
      refcountedTypeImpl, notRefcountedTypeImpl);
 }
 

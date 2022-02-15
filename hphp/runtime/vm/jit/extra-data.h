@@ -83,6 +83,12 @@ namespace HPHP::jit {
 template<Opcode op> struct OpHasExtraData { enum { value = 0 }; };
 template<Opcode op> struct IRExtraDataType;
 
+template<typename T> struct SharedProfileEntry;
+
+struct DecRefProfile;
+
+using DecRefProfileEntry = SharedProfileEntry<DecRefProfile>;
+
 //////////////////////////////////////////////////////////////////////
 
 struct IRExtraData {};
@@ -666,35 +672,20 @@ struct RDSHandleAndType : RDSHandleData {
   Type type;
 };
 
-struct RDSHandlePairData : RDSHandleData {
-  RDSHandlePairData(rds::Handle handle, rds::Handle extra)
+struct ArrayAccessProfileData : RDSHandleData {
+  ArrayAccessProfileData(rds::Handle handle,  DecRefProfileEntry* extra)
     : RDSHandleData(handle), extra{extra} {}
 
   std::string show() const {
-    if (extra == rds::kUninitHandle) return RDSHandleData::show();
-    return folly::sformat("{},{}",handle,extra);
+    if (!extra) return RDSHandleData::show();
+    return folly::sformat("{},{}", handle, reinterpret_cast<void*>(extra));
   }
 
-  bool equals(const RDSHandlePairData& o) const {
+  bool equals(const ArrayAccessProfileData& o) const {
     return handle == o.handle && extra == o.extra;
   }
-  size_t hash() const {
-    return folly::hash::hash_combine(std::hash<uint32_t>()(handle),
-                                     std::hash<uint32_t>()(extra));
-  }
 
-  size_t stableHash() const {
-    auto const h = [&] () -> size_t {
-      if (extra == rds::kUninitHandle) return 0;
-      auto const sym = rds::reverseLink(extra);
-      if (!sym) return 0;
-      return rds::symbol_stable_hash(*sym);
-    }();
-    return folly::hash::hash_combine(RDSHandleData::stableHash(),
-                                     h);
-  }
-
-  rds::Handle extra;
+  DecRefProfileEntry* extra;
 };
 
 struct TVInRDSHandleData : RDSHandleData {
@@ -2823,8 +2814,8 @@ X(CountWHNotDone,               CountWHNotDoneData);
 X(CheckDictOffset,              IndexData);
 X(CheckKeysetOffset,            IndexData);
 X(ProfileArrayCOW,              RDSHandleData);
-X(ProfileDictAccess,            RDSHandlePairData);
-X(ProfileKeysetAccess,          RDSHandlePairData);
+X(ProfileDictAccess,            ArrayAccessProfileData);
+X(ProfileKeysetAccess,          ArrayAccessProfileData);
 X(ProfileType,                  RDSHandleData);
 X(ProfileCall,                  ProfileCallTargetData);
 X(ProfileMethod,                ProfileCallTargetData);

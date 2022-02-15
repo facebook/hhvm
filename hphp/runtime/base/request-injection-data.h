@@ -182,7 +182,7 @@ struct RequestInjectionData {
   int getAndClearNextPendingSignal();
 
   /*
-   * Flags for rquest-level OOM killer.  The `m_hostOutOfMemory` flag is set on
+   * Flags for request-level OOM killer.  The `m_hostOutOfMemory` flag is set on
    * all requests when host is low in memory, which triggers a memory check upon
    * checking surprise flags.  The `m_OOMAbort` is set when we decide to kill
    * the request.

@@ -282,7 +282,7 @@ interface TypeConstantAttribute {}
  * Begin collecting code coverage on all subsequent calls into files in $files
  * during this request.
  *
- * The requst must be executing in non-RepoAuthoritative mode and the server
+ * The request must be executing in non-RepoAuthoritative mode and the server
  * must be configured with Eval.EnablePerFileCoverage = true.
  *
  * @param $files a list of paths to collect coverage from

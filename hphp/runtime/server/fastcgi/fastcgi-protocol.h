@@ -116,7 +116,7 @@ enum Type : uint8_t {
   /* FastCGI GET_VALUES and GET_VALUES_RESULT are used to communicate the
    * capabilities of the application server to the webserver.
    *
-   * - These records should be associated with the null reqeuestId.
+   * - These records should be associated with the null requestId.
    * - The contentData of GET_VALUES contains name-value pairs with only
    *   names, while the contentData of GET_VALUES_RESULT contains name-value
    *   pairs containing the values of the requested parameters.

@@ -349,7 +349,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/stats.kvp:       show server stats in key-value pairs\n"
         "    from          optional, <timestamp>, or <-n> second ago\n"
         "    to            optional, <timestamp>, or <-n> second ago\n"
-        "    agg           optional, aggragation: *, url, code\n"
+        "    agg           optional, aggregation: *, url, code\n"
         "    keys          optional, <key>,<key/hit>,<key/sec>,<:regex:>\n"
         "    url           optional, only stats of this page or URL\n"
         "    code          optional, only stats of pages returning this code\n"

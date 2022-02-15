@@ -1319,7 +1319,7 @@ with a better theoretical background take a look at this.
 
 The overall goal of this paper is to describe a system by which two method calls
 can ensure that neither mutates state available to the other, allowing things
-like better interleaving. This is an obvious corralary with our goals in doing
+like better interleaving. This is an obvious corollary with our goals in doing
 ownership tracking to ensure sound purity enforcement.
 
 They define "regions", which can be thought of as similar to namespaces except that

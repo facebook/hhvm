@@ -866,7 +866,7 @@ Effects setOpElemHelper(ISS& env, int32_t nDiscard, const Type& key,
   );
 }
 
-// Helper function for SetOpNewElem/IncDecNewElemm final
+// Helper function for SetOpNewElem/IncDecNewElem final
 // operations. These all either throw or push null.
 Effects setOpNewElemHelper(ISS& env, int32_t nDiscard) {
   auto& base = env.collect.mInstrState.base.type;

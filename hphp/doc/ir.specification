@@ -684,7 +684,7 @@ To string conversions:
 
 | IsTypeStructCached, D(Bool), S(Dict) S(Cell), B|LA
 
-  Checks if S0 is cached in TSClassCache and if so, returns whehter S1 is a
+  Checks if S0 is cached in TSClassCache and if so, returns whether S1 is a
   subtype of S0. Otherwise, it branches.
 
 | ProfileIsTypeStruct<handle>, ND, S(Dict), LA|ND

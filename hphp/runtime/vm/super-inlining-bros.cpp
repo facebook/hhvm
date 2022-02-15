@@ -87,7 +87,7 @@ HeapObject* findHeapObjStart(HeapObject* ptr) {
 // StartHeapObject and ProcessTV can return an object that will be held as
 // an RAII guard until done with the heap object or tv processing.
 //
-// In combination with Tracer (which just visits heap obects) we can walk the
+// In combination with Tracer (which just visits heap objects) we can walk the
 // heap and perform manipulations or inspection as we go.
 //
 // Rough usage:

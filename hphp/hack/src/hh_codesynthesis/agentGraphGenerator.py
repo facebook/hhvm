@@ -368,7 +368,7 @@ def main() -> None:
         type=int,
         default=[5, 100],
         help=(
-            "A boundary for describing how many other agents can depent on one infra"
+            "A boundary for describing how many other agents can depend on one infra"
             " agent."
         ),
     )
@@ -388,7 +388,7 @@ def main() -> None:
         type=int,
         default=[0, 5],
         help=(
-            "A boundary for describing how many other agents can depent on one product"
+            "A boundary for describing how many other agents can depend on one product"
             " agent."
         ),
     )

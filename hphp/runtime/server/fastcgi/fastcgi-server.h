@@ -76,7 +76,7 @@ private:
  * which use transports to track state and share data with the VM.
  *
  * The transport is responsible for processing the parameter and POST data for
- * consumtion by the VM and preparing headers and standard output to be sent
+ * consumption by the VM and preparing headers and standard output to be sent
  * back by the session; it manages HTTP specific protocol communication.
  *
  * The session and transport borrow the server's thread-pool, however, with the

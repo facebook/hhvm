@@ -114,7 +114,7 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
   let rec tag : 'a 'b. 'a validator -> ('a -> 'b) -> 'b validator =
    (* Validating aggregate types means picking the right validator for the
     * expected/valid variants and then tagging the result with the constructor
-    * corresponding to the variant. This is a repetative pattern. Explicit
+    * corresponding to the variant. This is a repetitive pattern. Explicit
     * polymorphism saves us this trouble.
     *)
    fun validator projection node ->

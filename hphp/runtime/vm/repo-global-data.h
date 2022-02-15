@@ -46,7 +46,7 @@ struct RepoGlobalData {
   int32_t CheckPropTypeHints = 0;
 
   /*
-   * Indicates whether a repo was compiled assumming that UpperBound type-hints
+   * Indicates whether a repo was compiled assuming that UpperBound type-hints
    * will be verified by VerifyParamType and VerifyReturnType instructions
    * at runtime.
    *

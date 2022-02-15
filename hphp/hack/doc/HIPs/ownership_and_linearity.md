@@ -35,7 +35,7 @@ There are four states of ownership:
 The main differences between each state are the operations allowed on an object
 of that state. Ownership is a property of the linearity of an object. Owned and
 Borrowed objects are enforceably linear, Unowned objects are not, though they may
-be natuarally, and MaybeOwned may or may not be forcibly linear.
+be naturally, and MaybeOwned may or may not be forcibly linear.
 
 Described in terms of the operations allowed on them, the states are as follows:
 1. Unowned - The default state in hack. May already have aliases

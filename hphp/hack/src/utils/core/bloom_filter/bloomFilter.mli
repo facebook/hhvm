@@ -7,7 +7,7 @@
  *)
 
 (**
- * A Bloom Filter is a probablistic data structure representing a set.
+ * A Bloom Filter is a probabilistic data structure representing a set.
  * Elements can be added to the set and supports membership queries.
  * Membership will never produce false negative (saying an element
  * is not a member of the set when it is), but does allow false positives

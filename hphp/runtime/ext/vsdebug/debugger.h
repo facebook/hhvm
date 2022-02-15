@@ -534,7 +534,7 @@ private:
     int line
   );
 
-  // Reports faiure to process a message from the debugger client to the
+  // Reports failure to process a message from the debugger client to the
   // front-end.
   void reportClientMessageError(
     folly::dynamic& clientMsg,

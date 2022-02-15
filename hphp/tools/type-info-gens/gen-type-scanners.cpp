@@ -1113,7 +1113,7 @@ void Generator::sanityCheckTemplateParams(const Object& object) {
   }
 }
 
-// Given a Mark[Scannable]CollectiblCollectable<> marker instantiation, extract
+// Given a Mark[Scannable]CollectibleCollectable<> marker instantiation, extract
 // the object-type its marking. Actually very simple, but do a lot of sanity
 // checking on the result.
 const Object& Generator::getMarkedCollectable(const Object& mark) const {

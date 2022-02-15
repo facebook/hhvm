@@ -1403,7 +1403,7 @@ From the user perspective, it is nonobvious what restricted means here.
 Further, we can imagine that restricted is a bit too vague considering
 potential restrictions other than ownership.
 
-Suggestion: rename "UnKnowed" to '_' or '_&'.
+Suggestion: rename "UnOwned" to '_' or '_&'.
 MaybeOwned feels similar in concept to a polymorphic type/generic, and it works
 out to being roughly the same as a "top" type.
 The problem for this is similar to the above reasoning for restricted. Without

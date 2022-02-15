@@ -1120,7 +1120,7 @@ struct Index {
    * value won't be included in the mutations any more.
    *
    * Note that we can't modify the initial value here, because other
-   * threads might be reading it (via loookup_public_static), so we
+   * threads might be reading it (via lookup_public_static), so we
    * set a flag to tell us to update it during the next
    * refine_public_statics pass.
    */

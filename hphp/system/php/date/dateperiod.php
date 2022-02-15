@@ -10,7 +10,7 @@ class DatePeriod implements Iterator {
     $end = null,
     $options = null,
     $current = null,
-    $recurrances = null,
+    $recurrences = null,
     $iterKey = 0;
 
   public function __construct(mixed ...$args) {
@@ -72,10 +72,10 @@ class DatePeriod implements Iterator {
     $this->interval = clone $interval;
 
     if (is_int($end)) {
-      // $end is really $recurrances
-      $this->recurrances = $end;
+      // $end is really $recurrences
+      $this->recurrences = $end;
       $end_date = clone $start;
-      for ($i = 0; $i <= $this->recurrances; $i++) {
+      for ($i = 0; $i <= $this->recurrences; $i++) {
         // add the interval to the start date 'n' times
         $end_date->add($interval);
       }

@@ -354,7 +354,7 @@ private:
   folly::Try<T> m_try;
 };
 
-// A Task<void> has by definition alreadly executed whatever
+// A Task<void> has by definition already executed whatever
 // side-effects it has, so there's nothing to do there.
 struct AsyncScope {
   void add(TaskWithExecutor<void>&&) {}

@@ -112,7 +112,7 @@ void genText(const std::vector<std::unique_ptr<UnitEmitter>>& ues,
              const std::string& outputPath) {
   if (!ues.size()) return;
 
-  Timer timer(Timer::WallTime, "Generating text bytcode");
+  Timer timer(Timer::WallTime, "Generating text bytecode");
   if (ues.size() > Option::ParserThreadCount && Option::ParserThreadCount > 1) {
     JobQueueDispatcher<GenTextWorker> dispatcher {
       Option::ParserThreadCount,

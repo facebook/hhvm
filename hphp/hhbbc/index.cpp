@@ -6751,7 +6751,7 @@ PropMergeResult<> Index::merge_static_type(
       // itself), do the merge starting from it. To avoid redundant
       // work, only iterate into parent classes if we're dcls.type
       // (this is only a matter of efficiency. The merge is
-      // idiompotent).
+      // idempotent).
       Optional<PropMergeResult<>> result;
       for (auto const sub : cinfo->subclassList) {
         auto r = merge_static_type_impl(

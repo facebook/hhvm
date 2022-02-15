@@ -88,7 +88,7 @@ apc.write:  number of writes
 
 4. Memory Stats:
 
-These two stats are only available when Google heap profler is turned on for
+These two stats are only available when Google heap profiler is turned on for
 debugging purposes:
 
 mem.malloc.peak:   peak malloc()-ed memory

@@ -4645,7 +4645,7 @@ and expr_
         (* Typing_xhp.rewrite_xml_into_new generates an AST node for a `varray[]` literal, which is interpreted as a vec[]  *)
         children
       | _ ->
-        (* We end up in this case when the cosntructed new expression does
+        (* We end up in this case when the constructed new expression does
            not typecheck. *)
         []
     in

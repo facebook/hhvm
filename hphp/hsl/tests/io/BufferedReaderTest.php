@@ -139,7 +139,7 @@ final class BufferedReaderTest extends HackTest {
   }
 
   public static function provideLines(): vec<(string, vec<string>)> {
-    /* Some of these seem unintuive, but they match libc fgets() and Rust
+    /* Some of these seem unintuitive, but they match libc fgets() and Rust
      * `lines()`; they also seem to match what people actually expect in
      * practice
      *

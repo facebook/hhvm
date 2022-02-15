@@ -379,7 +379,7 @@ static void sortDependencies() {
   }
 
   if (UNLIKELY(!unresolved.empty())) {
-    // Alerts user to cirular dependency in extensions
+    // Alerts user to circular dependency in extensions
     // e.g. Unable to resovle dependencies for extension(s):
     //         A(depends: B) B(depends: C) C(depends: A)
 

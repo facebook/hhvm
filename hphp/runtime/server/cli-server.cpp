@@ -1632,7 +1632,7 @@ Optional<int> cli_process_command_loop(int fd) {
     // - if the unrecognized command takes no arguments, everything's fine
     // - if the unrecognized command takes a string first arg, we'll treat that
     //   string argument as a command on the next loop; recurse. Then we get
-    //   unpredicatble behavior depending on the value of the arg
+    //   unpredictable behavior depending on the value of the arg
     // - once we hit a non-string argument, we'll get an error from cli_read(cmd)
     FTRACE(2, "cli_process_command_loop({}): bad command: {}\n", fd, cmd);
     if (RuntimeOption::CheckCLIClientCommands == 1) {

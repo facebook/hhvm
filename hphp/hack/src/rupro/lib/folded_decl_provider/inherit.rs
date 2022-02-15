@@ -322,36 +322,31 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
         Subst::new(self.alloc, &cls.tparams, params).into()
     }
 
-    // c.f. Decl_inherit.inherit_hack_class
-    fn members_from_class(&self, parent: &FoldedClass<R>, argl: &[DeclTy<R>]) -> Inherited<R> {
-        let subst = self.make_substitution(parent, argl);
-        // TODO(hrust): Do we need sharing?
-        let mut substs = parent.substs.clone();
-        substs.insert(
-            parent.name,
-            SubstContext {
-                subst,
-                class_context: self.child.name.id(),
-                from_req_extends: false,
-            },
-        );
-        Inherited {
-            substs,
-            props: parent.props.clone(),
-            static_props: parent.static_props.clone(),
-            methods: parent.methods.clone(),
-            static_methods: parent.static_methods.clone(),
-            constructor: parent.constructor.clone(),
-            consts: parent.consts.clone(),
-            type_consts: parent.type_consts.clone(),
-        }
-    }
-
     // c.f. Decl_inherit.from_class
-    fn members_from_parent(&self, parent_ty: &DeclTy<R>) -> Inherited<R> {
+    fn members_from_class(&self, parent_ty: &DeclTy<R>) -> Inherited<R> {
         if let Some((_, parent_pos_id, parent_tyl)) = parent_ty.unwrap_class_type() {
             if let Some(parent_folded_decl) = self.parents.get(&parent_pos_id.id()) {
-                return self.members_from_class(parent_folded_decl, parent_tyl);
+                let subst = self.make_substitution(parent_folded_decl, parent_tyl);
+                // TODO(hrust): Do we need sharing?
+                let mut substs = parent_folded_decl.substs.clone();
+                substs.insert(
+                    parent_folded_decl.name,
+                    SubstContext {
+                        subst,
+                        class_context: self.child.name.id(),
+                        from_req_extends: false,
+                    },
+                );
+                return Inherited {
+                    substs,
+                    props: parent_folded_decl.props.clone(),
+                    static_props: parent_folded_decl.static_props.clone(),
+                    methods: parent_folded_decl.methods.clone(),
+                    static_methods: parent_folded_decl.static_methods.clone(),
+                    constructor: parent_folded_decl.constructor.clone(),
+                    consts: parent_folded_decl.consts.clone(),
+                    type_consts: parent_folded_decl.type_consts.clone(),
+                };
             }
         }
         Inherited::default()
@@ -407,13 +402,13 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
         // Interfaces implemented, classes extended and interfaces required to
         // be implemented.
         for ty in tys.iter().rev() {
-            self.members.add_inherited(self.members_from_parent(ty));
+            self.members.add_inherited(self.members_from_class(ty));
         }
     }
 
     fn add_from_requirements(&mut self) {
         for ty in self.child.req_extends.iter() {
-            let mut inherited = self.members_from_parent(ty);
+            let mut inherited = self.members_from_class(ty);
             inherited.mark_as_synthesized();
             self.members.add_inherited(inherited);
         }
@@ -421,7 +416,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
 
     fn add_from_traits(&mut self) {
         for ty in self.child.uses.iter() {
-            self.members.add_inherited(self.members_from_parent(ty));
+            self.members.add_inherited(self.members_from_class(ty));
         }
     }
 }

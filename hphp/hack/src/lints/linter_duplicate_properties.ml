@@ -25,7 +25,7 @@ let traits c : (Pos.t * string) list =
       | Happly ((_, trait_name), _) -> Some (pos, trait_name)
       | _ -> None)
 
-(* All the properites of class or trait [type name], flattened *)
+(* All the properties of class or trait [type name], flattened *)
 let properties ctx (type_name : string) : (string * Typing_defs.class_elt) list
     =
   let decl = Decl_provider.get_class ctx type_name in

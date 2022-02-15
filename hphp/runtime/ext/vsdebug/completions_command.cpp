@@ -390,7 +390,7 @@ void CompletionsCommand::addClassStaticCompletions(
   Class* cls = Class::load(classStr.get());
 
   while (cls != nullptr) {
-    // Add static propreties of this class.
+    // Add static properties of this class.
     const auto staticProperties = cls->staticProperties();
     for (Slot i = 0; i < cls->numStaticProperties(); i++) {
       const auto prop = staticProperties[i];

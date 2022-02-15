@@ -380,7 +380,7 @@ namespace HH\Lib\SQL {
     // %=[fds] - comparison
     public function format_0x3d(): ScalarFormat;
 
-    /* INTENTIONALLY NOT IMPLEMEMENTED: %U, %W, %V, %m
+    /* INTENTIONALLY NOT IMPLEMENTED: %U, %W, %V, %m
      *
      * %U %W are `dict<column, value>`, and %V is
      * `vec<n-tuple(value, value...)>`, with `mixed` values. Use `%Q` instead

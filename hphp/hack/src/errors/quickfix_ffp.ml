@@ -31,7 +31,7 @@ let namespace_name (s : Syntax.t) : string option =
       None)
   | _ -> None
 
-(* Covnert ["Foo"; "Bar"] to \Foo\Bar. *)
+(* Convert ["Foo"; "Bar"] to \Foo\Bar. *)
 let name_from_parts (parts : string list) : string =
   String.concat (List.map parts ~f:(fun p -> "\\" ^ p))
 

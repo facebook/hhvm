@@ -85,7 +85,7 @@ let make_genv options config local_config workers =
           (List.filter ~f:filter files)
       in
       (* Watchman state can change during requests (See
-       * Watchamn.Watchman_dead and Watchman_alive). We need to update
+       * Watchman.Watchman_dead and Watchman_alive). We need to update
        * a reference to the new instance. *)
       let watchman = ref (Watchman.Watchman_alive watchman_env) in
       ServerNotifierTypes.(

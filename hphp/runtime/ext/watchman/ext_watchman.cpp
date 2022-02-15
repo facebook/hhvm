@@ -77,7 +77,7 @@
  *
  * - The user specified PHP-callback on subscription update is executed in a
  *   fresh AsyncFunc thread. This avoids running this potentially slow operation
- *   in the IO/Watchamn thread.
+ *   in the IO/Watchman thread.
  *
  * Code in this module may be executed in one of 4 possible thread contexts:
  *

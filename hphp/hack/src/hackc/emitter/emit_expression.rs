@@ -678,7 +678,7 @@ fn emit_string2<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     if es.is_empty() {
         Err(Error::unrecoverable(
-            "String2 with zero araguments is impossible",
+            "String2 with zero arguments is impossible",
         ))
     } else if es.len() == 1 {
         Ok(InstrSeq::gather(vec![

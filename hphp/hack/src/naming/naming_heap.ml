@@ -479,7 +479,7 @@ let get_filename_by_hash
      The complication is that there are three separate BlockedEntries heaps, one for
      each name_kind (Types/Funs/Consts), so we'll actually query sqlite first to
      discover the name_kind and only afterwards check the BlockedEntries heap.
-     All this logic is complicated enought that we just won't bother writing
+     All this logic is complicated enough that we just won't bother writing
      our sqlite-reads into the TypePosHeap/FunPosHeap/ConstPosHeap caches,
      like the normal reads do. *)
   let pos =

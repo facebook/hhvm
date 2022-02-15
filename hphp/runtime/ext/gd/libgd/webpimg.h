@@ -164,7 +164,7 @@ void AdjustColorspaceBack(uint8* Y, uint8* U, uint8* V, int width, int height);
  *      1. data: the WebP data stream (array of bytes)
  *      2. data_size: count of bytes in the WebP data stream
  *
- * Outut:
+ * Output:
  *      width/height: width and height of the image
  *
  * Return: success/failure

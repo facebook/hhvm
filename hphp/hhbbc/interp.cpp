@@ -1321,7 +1321,7 @@ bool sameJmpImpl(ISS& env, Op sameOp, const JmpOp& jmp) {
   auto isect = intersection_of(ty0, ty1);
 
   // Unfortunately, floating point negative zero and positive zero are
-  // different, but are identical using as far as Same is concerened. We should
+  // different, but are identical using as far as Same is concerned. We should
   // avoid refining a value to 0.0 because it compares identically to 0.0
   if (isect.couldBe(dval(0.0)) || isect.couldBe(dval(-0.0))) {
     isect = union_of(isect, TDbl);

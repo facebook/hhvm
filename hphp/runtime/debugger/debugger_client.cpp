@@ -1686,7 +1686,7 @@ DebuggerCommandPtr DebuggerClient::createCommand() {
     case 'v': return match_cmd<CmdVariable>("variable");
     case 'w': return match_cmd<CmdWhere>("where");
 
-    // these single lettter commands allow "x{cmd}" and "x {cmd}"
+    // these single letter commands allow "x{cmd}" and "x {cmd}"
     case 'x': shiftCommand(); return new_cmd<CmdExtended>("extended");
     case '!': shiftCommand(); return new_cmd<CmdShell>("shell");
     case '&': shiftCommand(); return new_cmd<CmdMacro>("macro");

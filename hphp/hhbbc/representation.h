@@ -79,7 +79,7 @@ struct Block {
   ExnNodeId exnNodeId{NoExnNodeId};
 
   /*
-   * Edges coming out of blocks are repesented in three ways:
+   * Edges coming out of blocks are represented in three ways:
    *
    *  - fallthrough edges (the end of the block unconditionally jumps
    *    to the named block).  If fallthroughNS is true, this edge

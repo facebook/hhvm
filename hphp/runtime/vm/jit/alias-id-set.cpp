@@ -206,7 +206,7 @@ std::string AliasIdSet::toString() const {
 
   // Try to print the slots by grouping them, expect output like
   // '0~4,9,10,50~...'
-  auto first = true;         // whether to avoid priting the separator
+  auto first = true;         // whether to avoid printing the separator
   int32_t begin = -1;        // starting bit of the consecutive range.
 
   // Append slots [begin, end) to result string.

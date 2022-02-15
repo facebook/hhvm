@@ -1874,7 +1874,7 @@ end = struct
     let pp_class_ancestors class_or_intf ppf = function
       | [] ->
         (* because we are prefixing the list with a constant string, we
-           match on the empty list here and noop to avoid priting "extends "
+           match on the empty list here and noop to avoid printing "extends "
            ("implements ") with no class (interface) *)
         ()
       | hints ->

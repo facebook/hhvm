@@ -8,7 +8,7 @@ function gd_info(): darray;
 
 /* The getimagesize() function will determine the size of any given image file
  * and return the dimensions along with the file type and a height/width text
- * string to be used inside a normal HTML IMG tag and the correspondant HTTP
+ * string to be used inside a normal HTML IMG tag and the correspondent HTTP
  * content type.  getimagesize() can also return some more information in
  * imageinfo parameter. Note that JPC and JP2 are capable of having components
  * with different bit depths. In this case, the value for "bits" is the

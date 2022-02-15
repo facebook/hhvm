@@ -25,7 +25,6 @@ extern "C" {
     fn caml_alloc_initialized_string(size: usize, data: *const u8) -> usize;
     fn caml_output_value_to_malloc(value: usize, flags: usize, ptr: *mut usize, len: *mut usize);
 
-    // TODO(hverr): Switch to Rust buffer allocation.
     fn free(data: *const u8);
     fn malloc(size: libc::size_t) -> *mut u8;
 }
@@ -232,7 +231,9 @@ impl HeapValue {
         } else if !self.header.is_compressed() {
             caml_input_value_from_block(self.data.as_ptr(), self.header.buffer_size())
         } else {
-            // TODO(hverr): Make thus more Rust-idiomatic
+            // Ideally, we'd have this a bit more Rust-idiomatic, but
+            // unfortunately, we can't get rid of all the malloc free-ing
+            // due to our interaction with OCaml.
             let data = malloc(self.header.uncompressed_size());
             let uncompressed_size = liblz4::LZ4_decompress_safe(
                 self.data.as_ptr() as *const i8,

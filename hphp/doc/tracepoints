@@ -12,11 +12,11 @@ Example one-liners using some of the multi-purpose bcc tools:
   # do you even have the tools?
   $ ll $(which trace.py)
 
-  # stack traces of String concatinations triggering copy-on-write:
+  # stack traces of String concatenations triggering copy-on-write:
   $ sudo trace.py -U\
     'u:path/to/hhvm:hhvm_mut_concat "%d %d", arg1, arg2'
 
-  # histogram of RHS of in-place concatinations, on 5s intervals
+  # histogram of RHS of in-place concatenations, on 5s intervals
   $ sudo argdist.py -i 5 -H\
     'u:path/to/hhvm:hhvm_mut_append():u32:arg2'
 

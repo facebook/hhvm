@@ -89,7 +89,7 @@
  *
  * - In a folly event base thread managed by WatchmanThreadEventBase (ASYNC).
  *
- * - HHVM initialization (INIT) - musn't use PHP exception throwing!
+ * - HHVM initialization (INIT) - mustn't use PHP exception throwing!
  *
  * All methods, functions, and lambdas indicate which of these contexts they are
  * executed from and whether they are an entry-point from that context. If code

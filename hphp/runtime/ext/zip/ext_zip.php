@@ -349,7 +349,7 @@ class ZipArchive {
    *
    * Set the encryption method of an entry defined by its index.
    * NOTE: Zip encryption is not secure. Do not use this method unless forced
-   * to by external requirments.
+   * to by external requirements.
    *
    * @param int $index - Index of the entry.
    * @param int $encryption_method - The encryption method. Either
@@ -367,7 +367,7 @@ class ZipArchive {
    *
    * Set the encryption method of an entry defined by its name.
    * NOTE: Zip encryption is not secure. Do not use this method unless forced
-   * to by external requirments.
+   * to by external requirements.
    *
    * @param int $name - Name of the entry.
    * @param int $encryption_method - The encryption method. Either

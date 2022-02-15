@@ -1118,12 +1118,12 @@ However, even if one were determined to implement the cross-function behavior of
 
 The current design involves checking an extra argument at every function invocation in the codebase. Because the types in question are big intersections, this has the potential to considerably slow down overall typechecking.
 
-Initially, the default context will have 2-3 capabilities (permission for external mutable references, global state, and to call reactive/pure code). Reactive code would have 1 capability and pure would have 0. Multiple capabilitys are currently represented via an intersection type in the typechecker, so we need only a single subtyping check for each function/method call, albeit with a large constant factor as subtyping type intersections (and unions) could be expensive.
+Initially, the default context will have 2-3 capabilities (permission for external mutable references, global state, and to call reactive/pure code). Reactive code would have 1 capability and pure would have 0. Multiple capabilities are currently represented via an intersection type in the typechecker, so we need only a single subtyping check for each function/method call, albeit with a large constant factor as subtyping type intersections (and unions) could be expensive.
 
 Options to mitigate this (within the typechecker, not shown to users):
 
 1. Special-case the most common cases to avoid full intersection type subtyping/simplification, e.g. if both caller and callee is unannotated, both are fully pure/CIPP, etc. This is probably simplest optimization to try and introduces a fast path and makes the slow path a tiny bit slower.
-2. Ad-hoc replace intersections of common combinations of capabilites with a single interface type, so that the check is cheap. This wouldn't be too conservative (incomplete but sound) if we can prove that 2 or more capabilities in the intersection of interest cannot be introduced independently (i.e., they always appear in tandem). See subsection "Encoding multiple capabilities" in the Vision doc
+2. Ad-hoc replace intersections of common combinations of capabilities with a single interface type, so that the check is cheap. This wouldn't be too conservative (incomplete but sound) if we can prove that 2 or more capabilities in the intersection of interest cannot be introduced independently (i.e., they always appear in tandem). See subsection "Encoding multiple capabilities" in the Vision doc
 
 # Prior art:
 

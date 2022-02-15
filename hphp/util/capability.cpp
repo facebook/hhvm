@@ -141,7 +141,7 @@ bool Capability::ChangeUnixUser(uid_t uid, bool allowRoot) {
     }
 
     if (!setMinimalCapabilities()) {
-      Logger::Error("unable to set minimal server capabiltiies");
+      Logger::Error("unable to set minimal server capabilities");
       return false;
     }
     return true;

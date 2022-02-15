@@ -109,7 +109,7 @@ protected:
   std::string m_loc; // last break's source location
 
   // Represents the destination of an internal stepping operation by
-  // unit and offset. Implictly maintains the breakpoint filter.
+  // unit and offset. Implicitly maintains the breakpoint filter.
   struct StepDestination {
     StepDestination();
     StepDestination(const HPHP::Func* func, Offset offset);

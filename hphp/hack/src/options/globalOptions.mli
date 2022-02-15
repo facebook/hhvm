@@ -287,7 +287,7 @@ type t = {
   tco_strict_value_equality: bool;
   (* All member of the __Sealed whitelist should be subclasses*)
   tco_enforce_sealed_subclasses: bool;
-  (* All classes are implcitly marked <<__SupportDynamicType>> *)
+  (* All classes are implicitly marked <<__SupportDynamicType>> *)
   tco_everything_sdt: bool;
   (* All collections and Hack arrays are treated as containing ~T *)
   tco_pessimise_builtins: bool;

@@ -4,10 +4,17 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::alloc::Allocator;
-use crate::decl_defs::{DeclTy, DeclTy_, Tparam};
-use crate::reason::Reason;
-use pos::TypeNameMap;
+use crate::decl_defs::{
+    DeclTy, DeclTy_, FunParam, FunType, PossiblyEnforcedTy, ShapeFieldType, TaccessType, Tparam,
+    WhereConstraint,
+};
+use crate::reason::{Reason, ReasonImpl};
+use pos::{TypeName, TypeNameMap};
+use std::collections::BTreeMap;
 
+// note(sf, 2022-02-14): c.f. `Decl_subst`, `Decl_instantiate`
+
+#[derive(Debug, Clone)]
 pub struct Subst<R: Reason>(TypeNameMap<DeclTy<R>>);
 
 impl<R: Reason> From<TypeNameMap<DeclTy<R>>> for Subst<R> {
@@ -45,11 +52,207 @@ impl<R: Reason> Subst<R> {
         )
     }
 
-    pub fn instantiate(&self, ty: &DeclTy<R>) -> DeclTy<R> {
+    fn merge_hk_type(
+        alloc: &Allocator<R>,
+        orig_r: &R,
+        orig_var: TypeName,
+        ty: &DeclTy<R>,
+        args: impl Iterator<Item = DeclTy<R>>,
+    ) -> DeclTy<R> {
+        let r: &R = ty.reason();
+        let ty_: &DeclTy_<R> = ty.node();
+        let res_ty_ = match ty_ {
+            DeclTy_::DTapply(params) => {
+                // We could insist on `existing_args.is_empty()` here
+                // unless we want to support partial application.
+                let (name, existing_args) = &**params;
+                let mut new_args = vec![];
+                new_args.extend_from_slice(existing_args);
+                new_args.extend(args);
+                DeclTy_::DTapply(Box::new((name.clone(), new_args.into_boxed_slice())))
+            }
+            DeclTy_::DTgeneric(params) => {
+                // Same here.
+                let name: TypeName = params.0;
+                let existing_args: &[DeclTy<R>] = &params.1;
+                let mut new_args = vec![];
+                new_args.extend_from_slice(existing_args);
+                new_args.extend(args);
+                DeclTy_::DTgeneric(Box::new((name, new_args.into_boxed_slice())))
+            }
+            _ => {
+                // We could insist on existing_args = [] here unless we want to
+                // support partial application.
+                ty_.clone()
+            }
+        };
+        alloc.decl_ty(
+            R::mk(|| ReasonImpl::Rinstantiate(r.clone(), orig_var, orig_r.clone())),
+            res_ty_,
+        )
+    }
+
+    pub fn instantiate(&self, alloc: &Allocator<R>, ty: &DeclTy<R>) -> DeclTy<R> {
+        // PERF: If subst is empty then instantiation is a no-op. We can save a
+        // significant amount of CPU by avoiding recursively deconstructing the
+        // `ty` data type.
         if self.0.is_empty() {
-            ty.clone()
-        } else {
-            unimplemented!()
+            return ty.clone();
+        }
+        let r = ty.reason();
+        let ty_: &DeclTy_<R> = ty.node();
+        match ty_ {
+            DeclTy_::DTgeneric(params) => {
+                let (x, ref existing_args) = **params;
+                let args = existing_args.iter().map(|arg| self.instantiate(alloc, arg));
+                match self.0.get(&x) {
+                    Some(x_ty) => Self::merge_hk_type(alloc, r, x, x_ty, args),
+                    None => {
+                        let args = args.collect::<Box<[_]>>();
+                        alloc.decl_ty(r.clone(), DeclTy_::DTgeneric(Box::new((x, args))))
+                    }
+                }
+            }
+            _ => alloc.decl_ty(r.clone(), self.instantiate_(alloc, ty_)),
+        }
+    }
+
+    fn instantiate_(&self, alloc: &Allocator<R>, x: &DeclTy_<R>) -> DeclTy_<R> {
+        match x {
+            DeclTy_::DTgeneric(_) => panic!("subst.rs: instantiate_: impossible!"),
+            // IMPORTANT: We cannot expand `DTaccess` during instantiation
+            // because this can be called before all type consts have been
+            // declared and inherited.
+            DeclTy_::DTaccess(ta) => DeclTy_::DTaccess(Box::new(TaccessType {
+                ty: self.instantiate(alloc, &ta.ty),
+                type_const: ta.type_const.clone(),
+            })),
+            DeclTy_::DTvecOrDict(tys) => DeclTy_::DTvecOrDict(Box::new((
+                self.instantiate(alloc, &tys.0),
+                self.instantiate(alloc, &tys.1),
+            ))),
+            DeclTy_::DTthis
+            | DeclTy_::DTvar(_)
+            | DeclTy_::DTmixed
+            | DeclTy_::DTdynamic
+            | DeclTy_::DTnonnull
+            | DeclTy_::DTany
+            | DeclTy_::DTerr
+            | DeclTy_::DTprim(_) => x.clone(),
+            DeclTy_::DTtuple(tys) => DeclTy_::DTtuple(
+                tys.iter()
+                    .map(|t| self.instantiate(alloc, t))
+                    .collect::<Box<[_]>>(),
+            ),
+            DeclTy_::DTunion(tys) => DeclTy_::DTunion(
+                tys.iter()
+                    .map(|t| self.instantiate(alloc, t))
+                    .collect::<Box<[_]>>(),
+            ),
+            DeclTy_::DTintersection(tys) => DeclTy_::DTintersection(
+                tys.iter()
+                    .map(|t| self.instantiate(alloc, t))
+                    .collect::<Box<[_]>>(),
+            ),
+            DeclTy_::DToption(ty) => {
+                let ty = self.instantiate(alloc, ty);
+                // We want to avoid double option: `??T`.
+                match ty.node() as &DeclTy_<R> {
+                    ty_node @ DeclTy_::DToption(_) => ty_node.clone(),
+                    _ => DeclTy_::DToption(ty),
+                }
+            }
+            DeclTy_::DTlike(ty) => DeclTy_::DTlike(self.instantiate(alloc, ty)),
+            DeclTy_::DTfun(ft) => {
+                let tparams = &ft.tparams;
+                let outer_subst = self;
+                let mut subst = self.clone();
+                for tp in tparams.iter() {
+                    subst.0.remove(tp.name.id_ref());
+                }
+                let params = ft
+                    .params
+                    .iter()
+                    .map(|fp| FunParam {
+                        ty: subst.instantiate_possibly_enforced_ty(alloc, &fp.ty),
+                        pos: fp.pos.clone(),
+                        name: fp.name,
+                        flags: fp.flags,
+                    })
+                    .collect::<Box<[_]>>();
+                let ret = subst.instantiate_possibly_enforced_ty(alloc, &ft.ret);
+                let tparams = tparams
+                    .iter()
+                    .map(|tp| Tparam {
+                        constraints: tp
+                            .constraints
+                            .iter()
+                            .map(|(ck, ty)| (*ck, subst.instantiate(alloc, ty)))
+                            .collect::<Box<[_]>>(),
+                        variance: tp.variance,
+                        name: tp.name.clone(),
+                        tparams: tp.tparams.clone(),
+                        reified: tp.reified,
+                        user_attributes: tp.user_attributes.clone(),
+                    })
+                    .collect::<Box<[_]>>();
+                let where_constraints = ft
+                    .where_constraints
+                    .iter()
+                    .map(|WhereConstraint(ty1, ck, ty2)| {
+                        WhereConstraint(
+                            subst.instantiate(alloc, ty1),
+                            *ck,
+                            outer_subst.instantiate(alloc, ty2),
+                        )
+                    })
+                    .collect::<Box<[_]>>();
+                DeclTy_::DTfun(Box::new(FunType {
+                    params,
+                    ret,
+                    tparams,
+                    where_constraints,
+                    flags: ft.flags,
+                    implicit_params: ft.implicit_params.clone(),
+                    ifc_decl: ft.ifc_decl.clone(),
+                }))
+            }
+            DeclTy_::DTapply(params) => {
+                let (name, tys) = &**params;
+                DeclTy_::DTapply(Box::new((
+                    name.clone(),
+                    tys.iter()
+                        .map(|ty| self.instantiate(alloc, ty))
+                        .collect::<Box<[_]>>(),
+                )))
+            }
+            DeclTy_::DTshape(params) => {
+                let (shape_kind, ref fdm) = **params;
+                let fdm = fdm
+                    .iter()
+                    .map(|(f, sft)| {
+                        (
+                            *f,
+                            ShapeFieldType {
+                                ty: self.instantiate(alloc, &sft.ty),
+                                optional: sft.optional,
+                            },
+                        )
+                    })
+                    .collect::<BTreeMap<_, _>>();
+                DeclTy_::DTshape(Box::new((shape_kind, fdm)))
+            }
+        }
+    }
+
+    fn instantiate_possibly_enforced_ty(
+        &self,
+        alloc: &Allocator<R>,
+        et: &PossiblyEnforcedTy<DeclTy<R>>,
+    ) -> PossiblyEnforcedTy<DeclTy<R>> {
+        PossiblyEnforcedTy {
+            ty: self.instantiate(alloc, &et.ty),
+            enforced: et.enforced,
         }
     }
 }

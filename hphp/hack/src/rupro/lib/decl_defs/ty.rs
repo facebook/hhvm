@@ -51,7 +51,7 @@ pub enum IfcFunDecl {
 // table key, but it'd be better not to lay a trap like that. Instead, just omit
 // positions from this type. If we need the positions which OCaml stores in the
 // key, we can insert them as part of the map's value instead.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum TshapeFieldName {
     TSFlitInt(Symbol),
     TSFlitStr(BytesId),

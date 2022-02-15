@@ -272,7 +272,7 @@ impl<R: Reason> DeclFolder<R> {
                     let subst = Subst::new(self.alloc, &cls.tparams, tyl);
                     // Update `ancestors`.
                     for (&anc_name, anc_ty) in &cls.ancestors {
-                        ancestors.insert(anc_name, subst.instantiate(anc_ty));
+                        ancestors.insert(anc_name, subst.instantiate(self.alloc, anc_ty));
                     }
                     // Now add `ty`.
                     ancestors.insert(pos_id.id(), ty.clone());

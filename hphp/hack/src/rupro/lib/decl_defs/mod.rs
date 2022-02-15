@@ -12,5 +12,6 @@ pub use shallow::{FunDecl, ShallowClass, ShallowClassConst, ShallowMethod, Shall
 pub use ty::{
     AbstractTypeconst, Abstraction, CeVisibility, ClassConstFrom, ClassConstKind, ClassConstRef,
     ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConsistentKind, DeclTy, DeclTy_, FunParam,
-    FunType, Prim, Tparam, Typeconst, UserAttribute, Visibility, XhpAttribute,
+    FunType, PossiblyEnforcedTy, Prim, ShapeFieldType, TaccessType, Tparam, Typeconst,
+    UserAttribute, Visibility, WhereConstraint, XhpAttribute,
 };

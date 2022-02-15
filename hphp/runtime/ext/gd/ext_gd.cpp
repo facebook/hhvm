@@ -991,7 +991,7 @@ static struct gfxinfo *php_handle_jpc(const req::ptr<File>& file) {
   /* Collect bit depth info */
   highest_bit_depth = bit_depth = 0;
   for (i = 0; i < result->channels; i++) {
-    bit_depth = file->getc(); /* Ssiz[i] */
+    bit_depth = file->getc(); /* Ssize[i] */
     bit_depth++;
     if (bit_depth > highest_bit_depth) {
       highest_bit_depth = bit_depth;

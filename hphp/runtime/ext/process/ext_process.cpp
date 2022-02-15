@@ -382,7 +382,7 @@ static bool signalHandlersInited() {
 
 // This is called automatically in handle_request_surprise().  So if you are
 // using HHVM, you don't really need to call this.  Even if you do, chances are
-// that signal handlers are already called automatically before your invokation.
+// that signal handlers are already called automatically before your invocation.
 bool HHVM_FUNCTION(pcntl_signal_dispatch) {
   while (int signum = RID().getAndClearNextPendingSignal()) {
     if (signalHandlersInited() && g_signal_handlers->exists(signum)) {

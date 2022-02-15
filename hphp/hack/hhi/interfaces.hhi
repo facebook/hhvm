@@ -356,7 +356,7 @@ interface Iterable<+Tv> extends \IteratorAggregate<Tv> {
    * `filter()`, while all values are affected by a call to `map()`.
    *
    * @param $fn - The callback containing the condition to apply to the
-   *              `Itearble` values.
+   *              `Iterable` values.
    *
    * @return - an `Iterable` containing the values after a user-specified
    *           condition is applied.
@@ -377,7 +377,7 @@ interface Iterable<+Tv> extends \IteratorAggregate<Tv> {
    *                        elements of the current `Iterable`.
    *
    *  @return - The `Iterable` that combines the values of the current
-   *            `Itearable` with the provided `Traversable`.
+   *            `Iterable` with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable): Iterable<Pair<Tv, Tu>>;
   /**
@@ -600,7 +600,7 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    * `filter()`, while all values are affected by a call to `map()`.
    *
    * @param $fn - The callback containing the condition to apply to the
-   *              `KeyedItearble` values.
+   *              `KeyedIterable` values.
    *
    * @return - a `KeyedIterable` containing the values after a user-specified
    *           condition is applied.
@@ -640,7 +640,7 @@ interface KeyedIterable<Tk, +Tv> extends KeyedTraversable<Tk, Tv>, Iterable<Tv> 
    *                        elements of the current `KeyedIterable`.
    *
    *  @return - The `KeyedIterable` that combines the values of the current
-   *            `KeyedItearable` with the provided `Traversable`.
+   *            `KeyedIterable` with the provided `Traversable`.
    */
   public function zip<Tu>(Traversable<Tu> $traversable):
     KeyedIterable<Tk, Pair<Tv, Tu>>;

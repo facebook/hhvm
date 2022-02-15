@@ -30,7 +30,7 @@ open Hh_prelude
  *   'settled' - repo is settled (not undergoing an update)
  *
  * After sending 'settled' message, the socket is closed.
- * An 'unknown' or 'mid_updat' message is eventually followed by a
+ * An 'unknown' or 'mid_update' message is eventually followed by a
  * 'settled' message when the repo is settled.
  *
  * The Hack Monitor uses the watcher when first starting up to delay

@@ -562,7 +562,7 @@ module SaveCustomGraph = struct
     hh_save_custom_dep_graph_save_delta source dest
 end
 
-(** Registeres Rust custom types with the OCaml runtime, supporting deserialization *)
+(** Registers Rust custom types with the OCaml runtime, supporting deserialization *)
 let () = CustomGraph.hh_custom_dep_graph_register_custom_types ()
 
 let deps_of_file_info (file_info : FileInfo.t) : Dep.t list =

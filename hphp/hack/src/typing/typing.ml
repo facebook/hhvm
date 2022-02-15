@@ -187,7 +187,7 @@ let pack_errs pos ty subtyping_errs =
        order *)
     | (_, []) -> k []
   in
-  (* The only types that _can_ be upacked are tuples and pairs; match on the
+  (* The only types that _can_ be unpacked are tuples and pairs; match on the
      type to get the type parameters, pass them to our recursive function
      aux to substitute the expected type where we have a type error
      then reconstruct the type in the continuation *)

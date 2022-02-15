@@ -42,7 +42,7 @@ function helper<T as Regex\Pattern(shape(0 => string, ...))>(
 
 Currently, it can only be typed as `Regex\Match`, which is declared as
 `shape(...)` and it is impossible to refine it or redeclare it to say that
-`0` (entire string) or any specific numbered captures are presnet.
+`0` (entire string) or any specific numbered captures are present.
 
 # IDE experience:
 

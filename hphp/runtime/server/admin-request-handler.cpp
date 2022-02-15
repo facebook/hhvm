@@ -175,7 +175,7 @@ void WarnIfNotOK(Transport* transport) {
 namespace {
 /*
  * Task to trace a total of 'count' requests whose URL contain 'url', using the
- * module:level,... specificaion 'spec' (see HPHP::Trace).
+ * module:level,... specification 'spec' (see HPHP::Trace).
  *
  * To ensure an unbroken trace output stream, the task is held locally by the
  * thread currently tracing its request. If filtering on URL, threads may pass

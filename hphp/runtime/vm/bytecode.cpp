@@ -4888,7 +4888,7 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
 
   if (!func->isGenerator()) {  // Async function.
     // Create the AsyncFunctionWaitHandle object. Create takes care of
-    // copying local variables and itertors.
+    // copying local variables and iterators.
     auto waitHandle = c_AsyncFunctionWaitHandle::Create(
       fp, func->numSlotsInFrame(), nullptr, suspendOffset, child);
 

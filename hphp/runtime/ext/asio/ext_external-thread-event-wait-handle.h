@@ -71,7 +71,7 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   // owned by AsioExternalThreadEventQueue::m_received.
   c_ExternalThreadEventWaitHandle* m_nextToProcess;
 
-  // The i/o thread-lowned event object, one per ETEWH
+  // The i/o thread-owned event object, one per ETEWH
   AsioExternalThreadEvent* m_event;
 
   Object m_privData;

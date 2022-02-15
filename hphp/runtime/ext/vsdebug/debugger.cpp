@@ -1998,7 +1998,7 @@ void Debugger::onBreakpointHit(
         line <= resolvedLocation.m_endLine;
 
     if (resolvedLocation.m_path == filePath && lineInRange) {
-      if (bpMgr->isBreakConditionSatisified(ri, bp)) {
+      if (bpMgr->isBreakConditionSatisfied(ri, bp)) {
         stopReason = getStopReasonForBp(
           bp,
           filePath,

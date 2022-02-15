@@ -731,7 +731,7 @@ void BreakpointManager::onRequestShutdown(request_id_t requestId) {
   }
 }
 
-bool BreakpointManager::isBreakConditionSatisified(
+bool BreakpointManager::isBreakConditionSatisfied(
   DebuggerRequestInfo* ri,
   Breakpoint* bp
 ) {

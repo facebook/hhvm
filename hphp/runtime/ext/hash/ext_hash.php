@@ -285,7 +285,7 @@ function hash_pbkdf2(string $algo, string $password, string $salt,
   }
   $key_blocks = ceil($length / $hash_length);
   for ($i = 1; $i <= $key_blocks; $i++) {
-    // Note: $i encoded with most siginificant octet first.
+    // Note: $i encoded with most significant octet first.
     $xor = hash_hmac($algo, $salt.pack("N", $i), $password, true);
     $prev = $xor;
     for ($j = 1; $j < $iterations; $j++) {

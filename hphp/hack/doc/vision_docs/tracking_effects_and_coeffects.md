@@ -540,7 +540,7 @@ class CachedNonDetFactory {
     ): T) $continuation
   ) {
     return $continuation(()@{CanNonDet} ==> {
-      // captures the outer capability: required for mutatting $seed
+      // captures the outer capability: required for mutating $seed
       self::$seed ??=/*{CanMutateUntracked}*/ currentUnixTime();
 
       // passes the explicit as well as the captured capability

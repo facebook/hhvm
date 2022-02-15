@@ -158,7 +158,7 @@ private:
  */
 struct StackTraceNoHeap : StackTraceBase {
   /*
-   * Construct the curent stacktrace if `trace' is true, else an empty
+   * Construct the current stacktrace if `trace' is true, else an empty
    * stacktrace.
    */
   explicit StackTraceNoHeap(bool trace = true);

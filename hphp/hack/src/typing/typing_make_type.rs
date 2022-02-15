@@ -23,7 +23,7 @@ use crate::typing_reason::*;
 use typing_collections_rust::{SMap, Vec};
 
 // Struct off which we call type builder methods
-// This gives us the option to keep some state here e.g. for hash consing
+// This gives us the option to keep some state here e.g. for hash consting
 pub struct TypeBuilder<'a> {
     // Well-known identifiers
     // We could initialize the positions to their actual definition site in hhi

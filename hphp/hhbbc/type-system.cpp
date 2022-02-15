@@ -6467,7 +6467,7 @@ std::pair<Type, bool> array_like_newelem_impl(Type arr, const Type& val) {
    *   assume). This raises a notice.
    *
    * Since HHBBC does not attempt to track m_nextKI for arrays, we
-   * have to be pessimistic and assume that any append on a darry or
+   * have to be pessimistic and assume that any append on a darray or
    * dict can throw. However we can avoid it in certain situations:
    *
    * Since HHBBC pessimizes its knowledge of inner array structure

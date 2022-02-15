@@ -188,7 +188,7 @@ If you're on a platform without /proc/cpuinfo, you won't even be able to call th
 It will throw of /proc/cpuinfo is malformed. *)
 val ncores_linux_only : string -> int
 
-(** in bytes, as reported by sysinifo().totalram *)
+(** in bytes, as reported by sysinfo().totalram *)
 val total_ram : int
 
 val nbr_procs : int

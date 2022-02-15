@@ -322,7 +322,7 @@ def main() -> int:
     combined_rules = generate_logic_rules(solving_context) + extract_logic_rules(graph)
 
     logging.info("Extracted all rules.")
-    logging.info(f"Number of depedency edges extracted: {len(combined_rules)}")
+    logging.info(f"Number of dependency edges extracted: {len(combined_rules)}")
 
     do_reasoning(combined_rules, generator)
     logging.info("Finished reasoning.")

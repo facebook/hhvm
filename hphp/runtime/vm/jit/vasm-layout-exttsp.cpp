@@ -269,7 +269,7 @@ struct Chain {
 };
 
 /*
- * An edge in CFG reprsenting jumps between chains of BinaryBlocks.
+ * An edge in CFG representing jumps between chains of BinaryBlocks.
  * When blocks are merged into chains, the edges are combined too so that
  * there is always at most one edge between a pair of chains.
  */

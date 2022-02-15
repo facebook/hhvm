@@ -304,7 +304,7 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
         // in some cases ids can be non-consecutive - this might happen i.e. return statement
         //  appear in the block and it was assigned a high id before.
         //  ((3, Return), (1, Break), (0, Continue))
-        //  In thid case generate switch as
+        //  In this case generate switch as
         //  switch  (id) {
         //     L0 -> handler for continue
         //     L1 -> handler for break

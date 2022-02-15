@@ -383,7 +383,7 @@ private:
   // run until onComplete() is called. the eventCount must be incremented once
   // headers are complete to reflect this.
   //
-  // If thie socket shuts down before the entirety of the POST data arrives the
+  // If this socket shuts down before the entirety of the POST data arrives the
   // onBodyComplete callback on the transport must be invoked to notify it that
   // no further data will arrive; otherwise it will deadlock.
 

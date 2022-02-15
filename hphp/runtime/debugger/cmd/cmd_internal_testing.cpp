@@ -78,7 +78,7 @@ void CmdInternalTesting::onClient(DebuggerClient &client) {
     // proxy time to recognize the bad cmd, terminate, and wait for
     // the client to stop. This will ensure that we always exit on the
     // same path on both proxy and client threads, and remove any
-    // spurious output from ths test case.
+    // spurious output from this test case.
     while (!client.internalTestingIsClientStopped()) {
       sleep(1);
     }

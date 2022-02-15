@@ -220,7 +220,7 @@ struct Debugger final {
 
   // Sets the transport mechanism to be used to communicate with a debug client.
   // This call transfers ownership of transport from the caller to this object,
-  // which will be responsbile for cleaning it up and deleting it before the
+  // which will be responsible for cleaning it up and deleting it before the
   // debugger is destroyed.
   void setTransport(DebugTransport* transport);
 

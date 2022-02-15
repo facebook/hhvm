@@ -6676,7 +6676,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
         break;
 
       case TAG_SUBJECT_DISTANCE:
-        /* Inidcates the distacne the autofocus camera is focused to.
+        /* Inidcates the distance the autofocus camera is focused to.
            Tends to be less accurate as distance increases. */
         REQUIRE_NON_EMPTY();
         ImageInfo->Distance =

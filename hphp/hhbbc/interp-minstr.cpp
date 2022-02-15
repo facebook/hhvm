@@ -1703,7 +1703,7 @@ Effects miFinalSetElem(ISS& env,
     pushed |= rhs;
   }
   if (base.couldBe(BArrLike)) {
-    // Arrays will set the value and push the right hande side of the
+    // Arrays will set the value and push the right hand side of the
     // assignment (keysets will always fatal because you can't do a
     // set on them).
     auto const doesThrow = array_do_set(env, key, rhs);

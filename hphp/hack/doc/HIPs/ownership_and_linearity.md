@@ -172,7 +172,7 @@ public function foo(maybeowned IFoo $foo): Foo { return new Foo(); }
 
 #### Return Types
 
-Return values may be delared as either unowned or Owned
+Return values may be declared as either unowned or Owned
 
 ```
 public function foo(IFoo $foo): Foo { return new Foo(); }
@@ -184,7 +184,7 @@ alias. Returning an owned value implicitly transfers ownership to the caller.
 
 #### Method Objects
 
-The object on which a method is called may be delared as Unowned, Borrowed, or MaybeOwned
+The object on which a method is called may be declared as Unowned, Borrowed, or MaybeOwned
 
 ```
 public function foo(IFoo $foo): Foo { return new Foo(); }

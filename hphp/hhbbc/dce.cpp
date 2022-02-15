@@ -615,7 +615,7 @@ void addInterference(LocalRemappingIndex* index,
 }
 
 void addInterference(Env& env, const std::bitset<kMaxTrackedLocals>& live) {
-  // We don't track interfrence until the optimize round of the global dce.
+  // We don't track interference until the optimize round of the global dce.
   if (!env.dceState.remappingIndex) return;
   addInterference(env.dceState.remappingIndex, live);
 }

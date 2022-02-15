@@ -858,7 +858,7 @@ request_id_t Debugger::nextThreadId() {
   request_id_t threadId = m_nextThreadId++;
 
   // Unlikely: handle rollover. Id 0 is reserved for the dummy, and then
-  // in the very unlikley event that there's a very long running request
+  // in the very unlikely event that there's a very long running request
   // we need to ensure we don't reuse its id.
   if (threadId == 0) {
     threadId++;

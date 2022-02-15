@@ -886,7 +886,7 @@ size_t relocateImpl(Env& env) {
   /*
    * These sets track instruction words within the source sequence which should
    * be ignored during the analysis. Literals are copied and ignored even though
-   * they sometimes coincedently hold valid encodings of instructions. Any
+   * they sometimes coincidentally hold valid encodings of instructions. Any
    * source instructions which are transformed should also be ignored when
    * adjusting internal refs since they have correct PC relative offsets and
    * immediate already.

@@ -62,7 +62,7 @@ out_degree(X, D) :- symbols(X), D = #count{ Y : extends_to(X, Y) }.
 
 
 % If class X has no parent class, we consider it as a "stub" class, which could
-% be servered as a "cut" node to connet this agent with other agents.
+% be servered as a "cut" node to connect this agent with other agents.
 has_parent_class(X) :- extends_to(Y, X), class(Y), class(X).
 :- #count{X: class(X), not has_parent_class(X)} < number_of_stub_classes.
 

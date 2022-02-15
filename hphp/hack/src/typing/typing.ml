@@ -6690,7 +6690,8 @@ and dispatch_call
     end
   (* Special Shapes:: function *)
   | Class_const (((_, _, CI (_, shapes)) as class_id), ((_, x) as method_id))
-    when String.equal shapes SN.Shapes.cShapes ->
+    when String.equal shapes SN.Shapes.cShapes
+         || String.equal shapes SN.Shapes.cReadonlyShapes ->
     begin
       match x with
       (* Special function `Shapes::idx` *)

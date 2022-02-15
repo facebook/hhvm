@@ -740,6 +740,8 @@ end
 module Shapes = struct
   let cShapes = "\\HH\\Shapes"
 
+  let cReadonlyShapes = "\\HH\\Readonly\\Shapes"
+
   let idx = "idx"
 
   let at = "at"

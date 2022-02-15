@@ -176,7 +176,7 @@ let kill_and_cleanup_fds (pid : int) (fds : Unix.file_descr option ref list) :
  *   (1) The pipe can get filled up and the child process will pause
  *       until it's emptied out.
  *   (2) If the child process itself forks a grandchild, the
- *       granchild will unknowingly inherit the pipe's file descriptors;
+ *       grandchild will unknowingly inherit the pipe's file descriptors;
  *       in this case, the pipe will not provide an EOF as you'd expect.
  *
  * Due to (1), we can't just blockingly waitpid followed by reading the

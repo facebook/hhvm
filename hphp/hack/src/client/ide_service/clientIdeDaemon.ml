@@ -602,7 +602,7 @@ let change_file (files : open_files_state) (path : Relative_path.t) :
     open_file files path ""
 
 (** Closes a file, in response to DidClose event, by removing the
-entry in open_files. If the LSP client sents us multile DidCloses,
+entry in open_files. If the LSP client sents us multiple DidCloses,
 or DidClose for an unopen file, we won't complain. *)
 let close_file (files : open_files_state) (path : Relative_path.t) :
     open_files_state =

@@ -81,7 +81,7 @@ void CmdThread::help(DebuggerClient &client) {
     "The mode will remain even after these commands until '[t]hread [n]ormal' "
     "is issued."
     "\n"
-    "When multple threads hit breakpoints at the same time, use '[t]hread "
+    "When multiple threads hit breakpoints at the same time, use '[t]hread "
     "[l]ist' command to display their indices, which can be used to switch "
     "between them with '[t]hread {index}'."
   );

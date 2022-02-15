@@ -1215,7 +1215,7 @@ G ; K |- e1 - e2 : num
 
 {{ com \subsection{Division and Exponentiation} }}
 
-{{ com Exponentiation is ommitted, but is similar to division. }}
+{{ com Exponentiation is omitted, but is similar to division. }}
 
 G ; K , skip:G', catch:G' |- < e1 : float , e2 : num|dynamic >
 --------------------------------------------------- :: div_float_left

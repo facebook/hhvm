@@ -235,7 +235,7 @@ static entity_table_t ent_uni_8592_9002[] = {
   "ang", "angmsd", "angsph", "mid", "nmid", "par", "npar", "and",
   "or", "cap", "cup", "int", nullptr, nullptr, "conint", nullptr,
   /* 8752 (0x2230) */
-  nullptr, nullptr, nullptr, nullptr, "there4", "becaus", nullptr, nullptr,
+  nullptr, nullptr, nullptr, nullptr, "there4", "because", nullptr, nullptr,
   nullptr, nullptr, nullptr, nullptr, "sim", "bsim", nullptr, nullptr,
   /* 8768 (0x2240) */
   "wreath", "nsim", nullptr, "sime", "nsime", "cong", nullptr, "ncong",

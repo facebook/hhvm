@@ -129,7 +129,7 @@ let get_position_for_symbol
     helper Naming_provider.get_fun_pos Naming_global.GEnv.get_fun_full_pos
   | SI_GlobalConstant ->
     helper Naming_provider.get_const_pos Naming_global.GEnv.get_const_full_pos
-  (* Items below this are not global symbols and cannot be 'position'ed *)
+  (* Items below this are not global symbols and cannot be 'positioned *)
   | SI_Unknown
   | SI_Namespace
   | SI_ClassMethod

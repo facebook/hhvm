@@ -207,7 +207,7 @@ bool optimizePhis(IRUnit& unit) {
   };
 
   // We've found a candidate set of DefLabels whose jmps can simply
-  // be redirected; but if the DefLabel's output is used beyoud its block
+  // be redirected; but if the DefLabel's output is used beyond its block
   // we can't do the transformation.
   auto checkFoldable = [&](Block* b) {
     for (auto& i : *b) {

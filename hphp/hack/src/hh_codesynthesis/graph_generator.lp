@@ -22,7 +22,7 @@ symbols(X) :- internal_symbols(X, _).
 
 
 % We separated the below part to Python interface to avoid "grounding bottleneck."
-% And we are using normal distrubution to create a sequence of "extends_to" among
+% And we are using normal distribution to create a sequence of "extends_to" among
 % n nodes. For n = 100, we can use
 % extends_to(1, 11).
 % extends_to(11, 21).

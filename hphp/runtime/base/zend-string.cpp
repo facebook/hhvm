@@ -2026,7 +2026,7 @@ String string_metaphone(const char *input, int word_len, long max_phonemes,
   for (; Curr_Letter != '\0' &&
          (max_phonemes == 0 || Phone_Len < max_phonemes);
        w_idx++) {
-    /* How many letters to skip because an eariler encoding handled
+    /* How many letters to skip because an earlier encoding handled
      * multiple letters */
     unsigned short int skip_letter = 0;
 

@@ -246,7 +246,7 @@ must be a subtype of TObj, and returning a subtype of TVec. The last bit of
 that line defines the op's "flags" - in this case, it consumes a refcount on
 the input and produces one on the output. That is: this IR op takes care of the
 inc-ref and dec-ref required by the CastVec bytecode.
-[For a complete list of flags, look arlier in the file.](../ir.specification?lines=119-159)
+[For a complete list of flags, look earlier in the file.](../ir.specification?lines=119-159)
 
 The second line says that StStk takes two inputs - a stack pointer and an
 arbitrary Hack value (Cell == "mixed") - and doesn't return anything (ND == "no

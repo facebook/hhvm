@@ -26,7 +26,7 @@ set(
 )
 
 string(REPLACE ";" "," BOOST_COMPONENTS_CSV "${BOOST_COMPONENTS}")
-# We pass --with-libraires to boostrap.sh, but that does not consistently
+# We pass --with-libraires to bootstrap.sh, but that does not consistently
 # affect b2
 foreach(COMPONENT IN LISTS BOOST_COMPONENTS)
   list(APPEND B2_ARGS "--with-${COMPONENT}")

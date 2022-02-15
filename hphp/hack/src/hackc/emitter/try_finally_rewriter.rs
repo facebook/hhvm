@@ -301,7 +301,7 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
         ])
     } else {
         // mimic HHVM behavior:
-        // in some cases ids can be non-consequtive - this might happen i.e. return statement
+        // in some cases ids can be non-consecutive - this might happen i.e. return statement
         //  appear in the block and it was assigned a high id before.
         //  ((3, Return), (1, Break), (0, Continue))
         //  In thid case generate switch as
@@ -313,7 +313,7 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
         //  }
         //
         // This function builds a list of labels and jump targets for switch.
-        // It is possible that cases ids are not consequtive
+        // It is possible that cases ids are not consecutive
         // [L1,L2,L4]. Vector of labels in switch should be dense so we need to
         // fill holes with a label that points to the end of finally block
         // [End, L1, L2, End, L4]

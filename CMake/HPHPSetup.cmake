@@ -14,7 +14,7 @@ set(HHVM_WRAP_SYMS)
 # oniguruma has some of its own implementations of POSIX regex functions,
 # like regcomp() and regexec(). We use onig everywhere, for both its own
 # special functions and for the POSIX replacements. This means that the
-# linker needs to pick the implementions of the POSIX regex functions from
+# linker needs to pick the implementations of the POSIX regex functions from
 # onig, not libc.
 #
 # On Linux, that works out fine, since the linker sees onig on the link

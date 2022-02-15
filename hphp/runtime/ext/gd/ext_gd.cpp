@@ -6856,7 +6856,7 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo,
   } else if (memcmp(CharBuf, "MM", 2) == 0) {
     ImageInfo->motorola_intel = 1;
   } else {
-    raise_warning("Invalid TIFF a lignment marker");
+    raise_warning("Invalid TIFF alignment marker");
     return;
   }
 

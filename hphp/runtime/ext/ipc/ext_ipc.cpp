@@ -680,7 +680,7 @@ static int put_shm_data(sysvshm_chunk_head *ptr, long key, char *data,
   long shm_varpos;
 
   total_size = ((long) (len + sizeof(sysvshm_chunk) - 1) / 4) * 4 +
-    4; /* 4-byte alligment */
+    4; /* 4-byte alignment */
 
   if ((shm_varpos = check_shm_data(ptr, key)) > 0) {
     remove_shm_data(ptr, shm_varpos);

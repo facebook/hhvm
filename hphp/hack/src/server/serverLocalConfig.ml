@@ -433,8 +433,10 @@ type t = {
   cpu_priority: int;
   shm_dirs: string list;
   shm_use_sharded_hashtbl: bool;
-  shm_enable_eviction: bool;
   shm_cache_size: int;
+      (** Maximum shared memory cache size for evictable data.
+
+      If this is set to a negative value, eviction is disabled. *)
   max_workers: int option;
   max_bucket_size: int;
       (** max_bucket_size is the default bucket size for ALL users of MultiWorker unless they provide a specific override max_size *)
@@ -609,8 +611,7 @@ let default =
     cpu_priority = 10;
     shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir];
     shm_use_sharded_hashtbl = false;
-    shm_enable_eviction = false;
-    shm_cache_size = 3 * 1024 * 1024 * 1024;
+    shm_cache_size = -1;
     max_workers = None;
     max_bucket_size = Bucket.max_size ();
     use_dummy_informant = true;
@@ -928,13 +929,6 @@ let load_ fn ~silent ~current_version overrides =
     bool_if_min_version
       "shm_use_sharded_hashtbl"
       ~default:default.shm_use_sharded_hashtbl
-      ~current_version
-      config
-  in
-  let shm_enable_eviction =
-    bool_if_min_version
-      "shm_enable_eviction"
-      ~default:default.shm_enable_eviction
       ~current_version
       config
   in
@@ -1443,7 +1437,6 @@ let load_ fn ~silent ~current_version overrides =
     cpu_priority;
     shm_dirs;
     shm_use_sharded_hashtbl;
-    shm_enable_eviction;
     shm_cache_size;
     max_workers;
     max_bucket_size;

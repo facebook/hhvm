@@ -472,8 +472,13 @@ fn with<R>(f: impl FnOnce(&ShmemSegmentRef<'static>) -> R) -> R {
 pub extern "C" fn shmffi_init(
     mmap_address: *mut libc::c_void,
     file_size: libc::size_t,
-    max_evictable_bytes: libc::size_t,
+    max_evictable_bytes: libc::ssize_t,
 ) {
+    // max_evictable_bytes might be negative to indicate that
+    // evictability is disabled.
+    //
+    // We'll initialize the maps anyways, but with zero-capacity allocators.
+    let max_evictable_bytes = std::cmp::max(0, max_evictable_bytes) as libc::size_t;
     catch_unwind(|| {
         SEGMENT.with(move |cell| {
             assert!(cell.get().is_none());

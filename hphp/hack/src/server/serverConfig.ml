@@ -77,12 +77,6 @@ let make_sharedmem_config config options local_config =
       ~default:local_config.ServerLocalConfig.shm_use_sharded_hashtbl
       config
   in
-  let shm_enable_eviction =
-    bool_
-      "shm_enable_eviction"
-      ~default:local_config.ServerLocalConfig.shm_enable_eviction
-      config
-  in
   let shm_cache_size =
     int_
       "shm_cache_size"
@@ -101,7 +95,6 @@ let make_sharedmem_config config options local_config =
       sample_rate;
       shm_dirs;
       shm_use_sharded_hashtbl;
-      shm_enable_eviction;
       shm_cache_size;
       shm_min_avail;
       compression;

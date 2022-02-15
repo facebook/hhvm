@@ -4040,7 +4040,7 @@ bool mem_read_available_recurse(State& state,
       // conflicting writes.
       auto& block = state.unit.blocks[b];
 
-      // Check if any the aggregated writes in this block interfer
+      // Check if any the aggregated writes in this block interfere
       // with the load. If they do, do a per-instruction check. This
       // is for two reasons. The first is that unioning together the
       // locations can sometimes create larger than desired
@@ -6273,7 +6273,7 @@ ProcessCopyResults process_copy_spills(State& state,
    * The rational for #3 is as follows: If the src and dst are both
    * spilled, and the src is live across the copy, we'll *have* to
    * lower this to a memory to memory copy (we'll never be able to
-   * coalesce the two slots together as they naturally interfer). By
+   * coalesce the two slots together as they naturally interfere). By
    * initially assuming the dst is non-spilled, we have to chance to
    * load it into a register (avoiding the store), or possibly
    * rematerialize it directly into the destination spill slot
@@ -9510,7 +9510,7 @@ void calculate_penalties(State& state) {
       // vectors can't change. We only have to update the liveness
       // information.
       if (state.spilled || defs.containsPhys()) {
-        // Add acrosses to the live set, since they interfer with the
+        // Add acrosses to the live set, since they interfere with the
         // defs. The defs will be checked directly when needed rather
         // than being added to the live set.
         live |= acrosses_set_cached(state, inst);

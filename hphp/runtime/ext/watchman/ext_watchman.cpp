@@ -176,7 +176,7 @@ struct WatchmanThreadEventBase : folly::Executor {
 WatchmanThreadEventBase* WatchmanThreadEventBase::s_wmTEB{nullptr};
 
 struct ActiveSubscription {
-  // There should only be exaclty one instance of a given ActiveSubscription
+  // There should only be exactly one instance of a given ActiveSubscription
   // and this should live in s_activeSubscriptions.
   ActiveSubscription& operator=(const ActiveSubscription&) = delete;
   ActiveSubscription(const ActiveSubscription&) = delete;

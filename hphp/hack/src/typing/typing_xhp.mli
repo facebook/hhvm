@@ -34,7 +34,7 @@ val is_xhp_child : env -> Pos.t -> Typing_defs.locl_ty -> bool
  * run.
  *
  * For example,
- * `<p colur='blue'>Hi</p>z`
+ * `<p colour='blue'>Hi</p>z`
  * becomes
  * `new :p(darray['colour' => 'blue'], varray['Hi'],"",1);`
  *

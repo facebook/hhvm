@@ -105,7 +105,7 @@ type remove_map = rigid_tvar -> elim_info option
 type refresh_env = {
   env: Typing_env_types.env;  (** the underlying typing env *)
   tvars: Typing_error.Reasons_callback.t IMap.t;
-      (** an accumulator used to remember all the type variabes
+      (** an accumulator used to remember all the type variables
           that appeared when refreshing a type; the map is used as a
           set, and error callbacks are merely used for reporting *)
   remove: remove_map;

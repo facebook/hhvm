@@ -211,7 +211,7 @@ let visitor =
       | While (_, b)
       | For (_, _, _, b)
       | Foreach (_, _, b) ->
-        (* Iterate the block and update the set of global varialbes until
+        (* Iterate the block and update the set of global variables until
            no new global variable is found *)
         let ctx_cpy = { global_vars = ref !(ctx.global_vars) } in
         let ctx_len = ref (List.length !(ctx.global_vars)) in

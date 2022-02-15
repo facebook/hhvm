@@ -425,7 +425,7 @@ function nondeterministic_context()@{NonDet nondet}: void {
   eagerly_call($get_int);
 }
 
-function eagely_call(<<__Contextful>> (function(): int) $f) {
+function eagerly_call(<<__Contextful>> (function(): int) $f) {
   $f(); ...
 }
 ```

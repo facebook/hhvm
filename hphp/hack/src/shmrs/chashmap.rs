@@ -30,25 +30,10 @@ const NON_EVICTABLE_CHUNK_SIZE: usize = 1024 * 1024;
 
 /// This struct gives access to a shard, including its hashmap and its
 /// allocators.
-pub struct Shard<'shm, 'a, K, V, S> {
-    pub map: RwLockWriteGuard<'a, Map<'shm, K, V, S>>,
+struct Shard<'shm, 'a, K, V, S> {
+    map: RwLockWriteGuard<'a, Map<'shm, K, V, S>>,
     alloc_non_evictable: &'a ShardAlloc<'shm>,
     alloc_evictable: &'a ShardAlloc<'shm>,
-}
-
-impl<'shm, 'a, K, V, S> Shard<'shm, 'a, K, V, S> {
-    /// Return an allocator.
-    ///
-    /// If the argument is true, return the allocator for evictable values.
-    /// If the argument is false, return the allocator for non-evictable values.
-    #[inline(always)]
-    pub fn alloc(&self, evictable: bool) -> &'a ShardAlloc<'shm> {
-        if evictable {
-            self.alloc_evictable
-        } else {
-            self.alloc_non_evictable
-        }
-    }
 }
 
 /// Each value stored in a concurrent hashmap needs to keep track of

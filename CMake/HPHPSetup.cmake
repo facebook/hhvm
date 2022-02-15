@@ -23,7 +23,7 @@ set(HHVM_WRAP_SYMS)
 # include one of the libs here that pull in libSystem.B, the linker will
 # pick the implementations of those functions from libc, not from onig.
 # And since we've included the onig headers, which have very slightly
-# different definintions for some of the key data structures, things go
+# different definitions for some of the key data structures, things go
 # quite awry -- this manifests as infinite loops or crashes when calling
 # the PHP split() function.
 #

@@ -243,7 +243,7 @@ Object HHVM_METHOD(RpcOptions, setShardId, const String& shard_id) {
   return Object(this_);
 }
 
-// TODO (partisan): Deprecate in favor of more clear for extrnal users setHeader
+// TODO (partisan): Deprecate in favor of more clear for external users setHeader
 Object HHVM_METHOD(RpcOptions, setWriteHeader, const String& key, const String& value) {
   auto data = RpcOptions::GetDataOrThrowException(this_);
   data->rpcOptions.setWriteHeader(std::string(key.c_str(), key.size()),

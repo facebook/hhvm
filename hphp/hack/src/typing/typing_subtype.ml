@@ -3314,7 +3314,7 @@ and add_tyvar_lower_bound_and_close
   not arraykey | tvar. By only applying if B is a type variable, we avoid oscillating
   forever between this rule and the generic one that moves from t1 & arraykey <: t2.
   to t1 <: t2 | not arraykey. This is similar to our treatment of A <: ?B iff
-  A & nonnull <: B. This returns a subtyp_prop if the pattern this rule looks for matched,
+  A & nonnull <: B. This returns a subtype_prop if the pattern this rule looks for matched,
   and returns None if it did not, so that this rule does not apply. ) *)
 and simplify_subtype_arraykey_union ~this_ty ~subtype_env env ty_sub tyl_super =
   match tyl_super with

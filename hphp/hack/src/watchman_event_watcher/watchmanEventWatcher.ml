@@ -206,7 +206,7 @@ let process_changes changes env =
       Hh_logger.log "Changes: %s" files;
       env
     | Watchman_synchronous _ ->
-      Hh_logger.log "Watchman unexpectd synchronous response. Exiting";
+      Hh_logger.log "Watchman unexpected synchronous response. Exiting";
       exit 1)
 
 let check_subscription env =

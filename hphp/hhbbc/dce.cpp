@@ -580,7 +580,7 @@ bool maybePop(Env& env, const UseInfo& ui, const Args&... args) {
 
 /*
  * Determine whether its worth inserting PopCs after an instruction
- * that can't be dced in order to execute the dependent actions.
+ * that can't be DCEd in order to execute the dependent actions.
  */
 template<typename... Args>
 bool shouldPopOutputs(Env& env, const Args&... args) {

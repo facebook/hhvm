@@ -87,7 +87,7 @@ struct FuncAnalysisResult {
 
   /*
    * Flag to indicate that the function is effectFree, in the sense
-   * that calls to it can be constant folded or dced (note that calls
+   * that calls to it can be constant folded or DCEd (note that calls
    * are never truly effect free, because profilers could be enabled,
    * or other surprise flags could fire - but we ignore that for this
    * flag).

@@ -304,7 +304,7 @@ LoopBlocks findLoopBlocks(const Vunit& unit,
 //////////////////////////////////////////////////////////////////////
 
 /*
- * This SSA restoration algorithm is based on "Simple and Efficent Construction
+ * This SSA restoration algorithm is based on "Simple and Efficient Construction
  * of Static Single Assignment Form" by Matthias Braun, Sebastian Buchwald,
  * Sebastian Hack, et all (with a few tweaks).
  *

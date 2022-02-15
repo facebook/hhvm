@@ -11,7 +11,7 @@
  *  Ported to libgd by Pierre Joye. Support for multiple channels
  *  added (argb for now).
  *
- *  Initial sources code is avaibable in the Gems Source Code Packages:
+ *  Initial sources code is available in the Gems Source Code Packages:
  *  http://www.acm.org/pubs/tog/GraphicsGems/GGemsIII.tar.gz
  */
 

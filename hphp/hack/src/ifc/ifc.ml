@@ -1734,7 +1734,7 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
     let (env, out) = List.fold_left ~f:(seq ~run:discarding_expr) ~init inits in
     let env = Env.prep_stmt env (KMap.find K.Next out) in
 
-    (* Use the position of the condition if awailable; entire loop's position
+    (* Use the position of the condition if available; entire loop's position
        otherwise. *)
     let pos =
       match cond_opt with

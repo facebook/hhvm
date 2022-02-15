@@ -100,7 +100,7 @@ struct LayoutBase {
   const Impl& impl() const { return *static_cast<const Impl*>(this); }
 
   /*
-   * Produce a range over the conainer, for use in for-each loops
+   * Produce a range over the container, for use in for-each loops
    */
   folly::Range<iterator>
   range(index_t begin, index_t end) {

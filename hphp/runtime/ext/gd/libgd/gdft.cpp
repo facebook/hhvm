@@ -14,7 +14,7 @@
 
 #include <folly/portability/Unistd.h>
 
-/* number of antialised colors for indexed bitmaps */
+/* number of antialiased colors for indexed bitmaps */
 /* overwrite Windows GDI define in case of windows build */
 #ifdef NUMCOLORS
 #undef NUMCOLORS
@@ -698,7 +698,7 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
            */
           *pixel = (fg < 0) ? -fg : fg;
         } else {
-          /* find antialised color */
+          /* find antialiased color */
           tc_key.bgcolor = *pixel;
           tc_elem = (tweencolor_t *) gdCacheGet(tc_cache, &tc_key);
           *pixel = tc_elem->tweencolor;

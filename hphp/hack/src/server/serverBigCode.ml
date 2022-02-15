@@ -245,7 +245,7 @@ class visitor ~ctx ~entry ~filename ~source_text =
       extract ~cst
 
     (* Helper functions to extract candidate list
-     * These are borrowed from autcompleteService.ml
+     * These are borrowed from autocompleteService.ml
      *)
     method get_class_elt_types ~is_method env class_ cid elts =
       let is_visible (_, elt) =

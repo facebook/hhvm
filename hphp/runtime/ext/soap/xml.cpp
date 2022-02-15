@@ -219,12 +219,12 @@ xmlNodePtr get_node_ex(xmlNodePtr node, char *name, char *ns) {
   return nullptr;
 }
 
-xmlNodePtr get_node_recurisve_ex(xmlNodePtr node, char *name, char *ns) {
+xmlNodePtr get_node_recursive_ex(xmlNodePtr node, char *name, char *ns) {
   while (node != nullptr) {
     if (node_is_equal_ex(node, name, ns)) {
       return node;
     } else if (node->children != nullptr) {
-      xmlNodePtr tmp = get_node_recurisve_ex(node->children, name, ns);
+      xmlNodePtr tmp = get_node_recursive_ex(node->children, name, ns);
       if (tmp) {
         return tmp;
       }

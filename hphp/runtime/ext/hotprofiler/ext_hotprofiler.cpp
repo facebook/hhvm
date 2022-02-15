@@ -765,7 +765,7 @@ struct TraceProfiler final : Profiler {
   }
 
  private:
-  // Data measued on function entry and exit
+  // Data measured on function entry and exit
   struct TraceData {
     int64_t wall_time;
     int64_t cpu;

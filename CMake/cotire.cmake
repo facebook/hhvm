@@ -2196,7 +2196,7 @@ function (cotire_setup_unity_generation_commands _language _targetSourceDir _tar
 			set_property (SOURCE "${_unityFile}" PROPERTY OBJECT_DEPENDS ${_dependencySources})
 		endif()
 		if (WIN32 AND CMAKE_${_language}_COMPILER_ID MATCHES "MSVC|Intel")
-			# unity file compilation results in potentially huge object file, thus use /bigobj by default unter MSVC and Windows Intel
+			# unity file compilation results in potentially huge object file, thus use /bigobj by default under MSVC and Windows Intel
 			set_property (SOURCE "${_unityFile}" APPEND_STRING PROPERTY COMPILE_FLAGS "/bigobj")
 		endif()
 		cotire_set_cmd_to_prologue(_unityCmd)

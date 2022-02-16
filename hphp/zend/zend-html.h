@@ -34,7 +34,7 @@ namespace HPHP {
  *    Major reason for this is because the original get_next_char() bothers me,
  *    sacrificing performance for some character sets that people rarely used
  *    or that people shouldn't use. UTF-8 should really be the standard string
- *    format everywhere, and we ought to write coding specifilized for it to
+ *    format everywhere, and we ought to write coding specialized for it to
  *    take full advantage of it: one example would be the new html encoding
  *    function that simply do *p one a time iterating through the strings to
  *    look for special characters for entity escaping.

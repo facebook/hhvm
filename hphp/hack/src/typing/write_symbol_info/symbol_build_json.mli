@@ -37,13 +37,6 @@ val build_attributes_json_nested :
 
 val build_bytespan_json : 'a Pos.pos -> Hh_json.json
 
-val build_rel_bytespan_json : int -> int -> Hh_json.json
-
-val build_constraint_kind_json : Ast_defs.constraint_kind -> Hh_json.json
-
-val build_constraint_json :
-  Provider_context.t -> Ast_defs.constraint_kind * Aast.hint -> Hh_json.json
-
 val build_decl_target_json : Hh_json.json -> Hh_json.json
 
 val build_occ_target_json : Hh_json.json -> Hh_json.json
@@ -52,16 +45,6 @@ val build_file_lines_json : string -> int list -> bool -> bool -> Hh_json.json
 
 val build_is_async_json : Ast_defs.fun_kind -> Hh_json.json
 
-val build_parameter_json :
-  Full_fidelity_source_text.t SMap.t ->
-  string ->
-  string option ->
-  string option ->
-  bool ->
-  bool ->
-  ('a, 'b) Aast.user_attribute list ->
-  Hh_json.json
-
 val build_signature_json :
   Provider_context.t ->
   Full_fidelity_source_text.t SMap.t ->
@@ -69,11 +52,7 @@ val build_signature_json :
   'e Aast.type_hint ->
   Hh_json.json
 
-val build_reify_kind_json : Aast.reify_kind -> Hh_json.json
-
 val build_type_const_kind_json : Aast.class_typeconst -> Hh_json.json
-
-val build_variance_json : Ast_defs.variance -> Hh_json.json
 
 val build_type_param_json :
   Provider_context.t ->

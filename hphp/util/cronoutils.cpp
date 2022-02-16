@@ -648,7 +648,7 @@ check_end(const char *p)
    it to eat all white space up to (and including) a newline, and
    the function fails (!) if there is no newline.
 
-   Let's hope all strptime-s use ` ' to skipp *all* whitespace
+   Let's hope all strptime-s use ` ' to skip *all* whitespace
    instead of just one (it works that way on all the systems I've
    tested it on). */
 

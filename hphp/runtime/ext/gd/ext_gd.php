@@ -256,7 +256,7 @@ function imagecolorresolvealpha(resource $image,
                                 int $alpha): mixed;
 
 /* This sets the specified index in the palette to the specified color. This
- * is useful for creating flood-fill-like effects in palleted images without
+ * is useful for creating flood-fill-like effects in paletted images without
  * the overhead of performing the actual flood-fill.
  */
 <<__Native>>

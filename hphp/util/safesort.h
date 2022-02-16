@@ -91,7 +91,7 @@
  * Safesoft is also "exception safe", leaving the array in a consistent
  * state in the event that the comparator throws. This is important for
  * HHVM for several reasons. Some of the builtin comparators in PHP do
- * not impose a strict weak ordereding (ex. SORT_REGULAR over strings).
+ * not impose a strict weak ordering (ex. SORT_REGULAR over strings).
  * Also, user code can supply comparators that behave inconsistently or
  * throw exceptions.
  *

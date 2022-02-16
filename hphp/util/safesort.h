@@ -88,7 +88,7 @@
  * One key difference is that safesort is safe to use with a comparator
  * that does not impose a strict weak ordering on the elements (whereas
  * std::sort may crash or go into infinite loops for such comparators).
- * Safesoft is also "exception safe", leaving the array in a consistent
+ * Safesort is also "exception safe", leaving the array in a consistent
  * state in the event that the comparator throws. This is important for
  * HHVM for several reasons. Some of the builtin comparators in PHP do
  * not impose a strict weak ordering (ex. SORT_REGULAR over strings).

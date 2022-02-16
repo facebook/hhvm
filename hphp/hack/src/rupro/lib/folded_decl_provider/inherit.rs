@@ -454,6 +454,15 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
             self.members.add_inherited(self.members_from_class(ty));
         }
     }
+
+    fn add_from_included_enums_constants(&mut self) {
+        if let Some(et) = self.child.enum_type.as_ref() {
+            for ty in et.includes.iter() {
+                self.members
+                    .add_inherited(self.class_constants_from_class(ty));
+            }
+        }
+    }
 }
 
 impl<R: Reason> Inherited<R> {
@@ -473,6 +482,7 @@ impl<R: Reason> Inherited<R> {
         folder.add_from_traits(); // ... can be overridden by traits.
         folder.add_from_xhp_attr_uses();
         folder.add_from_interface_constants();
+        folder.add_from_included_enums_constants();
 
         folder.members
     }

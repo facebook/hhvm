@@ -82,7 +82,7 @@ void discardStackTemps(const ActRec* const fp, Stack& stack) {
 /**
  * Discard the current frame, assuming that a PHP exception given in
  * phpException argument, or C++ exception (phpException == nullptr)
- * is being thrown. Returns an exception to propagate, or nulltpr
+ * is being thrown. Returns an exception to propagate, or nullptr
  * if the VM execution should be resumed.
  */
 ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,

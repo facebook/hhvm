@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/packed-sort.h"
+#include "hphp/runtime/base/vanilla-sort.h"
 #include "hphp/runtime/base/sort-helpers.h"
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
@@ -262,9 +262,9 @@ void VanillaVec::Sort(ArrayData* ad, int sort_flags, bool ascending) {
     auto const data_end = data_begin + a->m_size;
     CALL_SORT(TVAccessor);
   } else {
-    auto data_begin = PackedBlockIterator { ad, 0 };
+    auto data_begin = VanillaLvalIterator { ad, 0 };
     auto data_end = data_begin + a->m_size;
-    CALL_SORT(PackedBlockAccessor);
+    CALL_SORT(VanillaLvalAccessor);
   }
 }
 
@@ -357,9 +357,9 @@ bool VanillaVec::Usort(ArrayData* ad, const Variant& cmp_function) {
     auto const data = VanillaVec::entries(ad);
     Sort::sort(data, data + ad->m_size, comp);
   } else {
-    ElmUCompare<PackedBlockAccessor> comp;
+    ElmUCompare<VanillaLvalAccessor> comp;
     comp.ctx = &ctx;
-    auto data = PackedBlockIterator { ad, 0 };
+    auto data = VanillaLvalIterator { ad, 0 };
     Sort::sort(data, data + ad->m_size, comp);
   }
   return true;

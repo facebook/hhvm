@@ -469,7 +469,7 @@ std::string show(const Type& t) {
         if (pop1 != pop2) return pop1 > pop2;
         // Special case here: The static/counted axis of array bits
         // has the same size as the empty/non-empty axis of array
-        // bits. We want to give preferencial treatment to the
+        // bits. We want to give preferential treatment to the
         // empty/non-empty bits to break this symmetric, and also
         // because it produces more natural looking unions. This is
         // purely an aesthetic choice.

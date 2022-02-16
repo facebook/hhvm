@@ -1,0 +1,11 @@
+{
+  "name": "Hack",
+  "runArgs": [
+    "--init"
+  ],
+  "image": "hhvm/hhvm:nightly",
+  "extensions": [
+    "pranayagarwal.vscode-hack"
+  ],
+  "postCreateCommand": "apt update && apt install -y watchman language-pack-en language-pack-fr language-pack-tr language-pack-da && locale-gen fr_FR"
+}

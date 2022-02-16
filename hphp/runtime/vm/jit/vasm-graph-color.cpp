@@ -4009,7 +4009,7 @@ bool mem_read_available_recurse(State& state,
         // the fixup. We can skip the fixup if the block has only one
         // successor. If it does, it cannot participate in a loop.
 
-        // fixup_mem_read_available_cache assumes any processably
+        // fixup_mem_read_available_cache assumes any processable
         // block has a TriBool::Yes entry, so temporarily change it to
         // that.
         it->second = TriBool::Yes;

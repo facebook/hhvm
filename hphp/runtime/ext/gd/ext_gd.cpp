@@ -4759,7 +4759,7 @@ Variant HHVM_FUNCTION(iptcparse, const String& iptcblock) {
 #define TAG_SAMPLES_PER_PIXEL           0x0115
 #define TAG_ROWS_PER_STRIP              0x0116
 #define TAG_STRIP_BYTE_COUNTS           0x0117
-#define TAG_MIN_SAMPPLE_VALUE           0x0118
+#define TAG_MIN_SAMPLE_VALUE           0x0118
 #define TAG_MAX_SAMPLE_VALUE            0x0119
 #define TAG_X_RESOLUTION                0x011A
 #define TAG_Y_RESOLUTION                0x011B

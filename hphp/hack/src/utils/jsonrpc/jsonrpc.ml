@@ -1,6 +1,6 @@
 (* Wrapper for handling JSON-RPC *)
 (* Spec: http://www.jsonrpc.org/specification *)
-(* Practical readbable guide: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#base-protocol-json-structures *)
+(* Practical readable guide: https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#base-protocol-json-structures *)
 
 open Hh_prelude
 

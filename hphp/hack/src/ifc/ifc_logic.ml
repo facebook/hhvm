@@ -188,7 +188,7 @@ let simplify (c : prop) =
     | ITE ((pos, p, x), t1, t2) -> ITE ((pos, shift p, x), pop t1, pop t2)
   in
   let rec elim_exists_ift = function
-    (* Same as exelim above, but for if_tree constraints *)
+    (* Same as elim_exists above, but for if_tree constraints *)
     | FLW l -> FLW (dedup (elim_exists l))
     | ITE (((_, pol, _) as c), t1, t2) ->
       assert (not (equal_policy pol (Pbound_var 0)));

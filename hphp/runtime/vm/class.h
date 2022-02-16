@@ -1518,7 +1518,7 @@ private:
     ReifiedGenericsInfo m_reifiedGenericsInfo{0, false, 0, {}};
 
     /*
-     * Cache for Closure subclass scopings.
+     * Cache for Closure subclass scopes.
      *
      * Only meaningful when `this' is the "template" for a family of Closure
      * subclasses.  When we need to create a closure in the scope of a Class C

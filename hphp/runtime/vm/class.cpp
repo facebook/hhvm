@@ -279,7 +279,7 @@ struct assert_sizeof_class {
 template struct assert_sizeof_class<sizeof_Class>;
 
 /*
- * R/W lock for caching scopings of closures.
+ * R/W lock for caching scopes of closures.
  */
 ReadWriteMutex s_scope_cache_mutex;
 
@@ -392,7 +392,7 @@ Class* Class::rescope(Class* ctx) {
     // lock held, since it's very expensive.)
     //
     // This race should be far less likely than a race between two attempted
-    // first-scopings for `template_cls', which is why we don't do an test-and-
+    // first-scopes for `template_cls', which is why we don't do an test-and-
     // set when we first check `m_scoped' before acquiring the lock.
     s_scope_cache_mutex.release();
     SCOPE_EXIT { s_scope_cache_mutex.acquireWrite(); };

@@ -292,7 +292,7 @@ private:
   int m_maxCount;                // for max recursive levels
   int m_levelDebugger{0};        // keep track of levels for DebuggerSerialize
   int m_maxLevelDebugger{0};     // for max level of DebuggerSerialize
-  size_t m_currentDepth{0};      // current depth (nasted objects/arrays)
+  size_t m_currentDepth{0};      // current depth (nested objects/arrays)
   size_t m_maxDepth{0};          // max depth limit before an error (0 -> none)
   bool m_keyPrinted{false};
 

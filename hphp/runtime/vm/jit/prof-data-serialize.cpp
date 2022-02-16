@@ -1904,7 +1904,7 @@ std::string deserializeProfData(const std::string& filename,
           "Stale profile data (check Eval.ProfDataTTLHours)");
     } else if (buildTime > currTime) {
       throw std::runtime_error(
-          folly::sformat("profile data build timestame: {}, currTime: {}",
+          folly::sformat("profile data build timestamp: {}, currTime: {}",
                          buildTime, currTime).c_str());
     }
 

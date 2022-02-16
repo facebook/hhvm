@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{
+    coeffects,
     context::Context,
     not_impl,
     write::{
@@ -371,17 +372,13 @@ fn print_ctx_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasCtxConstant<
     if c.is_abstract {
         w.write_all(b" isAbstract")?;
     }
-    if let Some(recognized) =
-        HhasCoeffects::vec_to_string(c.recognized.as_ref(), |c| c.unsafe_as_str().to_string())
-    {
-        w.write_all(b" ")?;
-        w.write_all(recognized.as_bytes())?;
+    let recognized = c.recognized.as_ref();
+    if !recognized.is_empty() {
+        write_bytes!(w, " {}", fmt_separated(" ", recognized))?;
     }
-    if let Some(unrecognized) =
-        HhasCoeffects::vec_to_string(c.unrecognized.as_ref(), |c| c.unsafe_as_str().to_string())
-    {
-        w.write_all(b" ")?;
-        w.write_all(unrecognized.as_bytes())?;
+    let unrecognized = c.unrecognized.as_ref();
+    if !unrecognized.is_empty() {
+        write_bytes!(w, " {}", fmt_separated(" ", unrecognized))?;
     }
     w.write_all(b";")?;
     Ok(())
@@ -890,10 +887,7 @@ fn print_body(
         ctx.newline(w)?;
         write!(w, ".numclosures {};", body.num_closures)?;
     }
-    for s in HhasCoeffects::coeffects_to_hhas(coeffects).iter() {
-        ctx.newline(w)?;
-        w.write_all(s.as_bytes())?;
-    }
+    coeffects::coeffects_to_hhas(ctx, w, coeffects)?;
     print_instructions(ctx, w, &body.body_instrs)
 }
 

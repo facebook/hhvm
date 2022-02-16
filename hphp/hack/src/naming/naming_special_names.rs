@@ -954,6 +954,8 @@ pub mod coeffects {
         }
     }
 
+    write_bytes::display_bytes_using_display!(Ctx);
+
     pub fn ctx_str_to_enum(s: &str) -> Option<Ctx> {
         match s {
             DEFAULTS => Some(Ctx::Defaults),

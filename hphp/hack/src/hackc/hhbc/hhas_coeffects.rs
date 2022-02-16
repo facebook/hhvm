@@ -36,65 +36,6 @@ pub struct HhasCoeffects<'arena> {
 }
 
 impl<'arena> HhasCoeffects<'arena> {
-    pub fn vec_to_string<T, F: Fn(&T) -> String>(v: &[T], f: F) -> Option<String> {
-        if v.is_empty() {
-            return None;
-        }
-        Some(v.iter().map(f).collect::<Vec<String>>().join(" "))
-    }
-
-    pub fn coeffects_to_hhas(coeffects: &Self) -> Vec<String> {
-        let mut results = vec![];
-        let static_coeffect =
-            HhasCoeffects::vec_to_string(coeffects.get_static_coeffects(), |c| c.to_string());
-        let unenforced_static_coeffects =
-            HhasCoeffects::vec_to_string(coeffects.get_unenforced_static_coeffects(), |c| {
-                c.unsafe_as_str().to_string()
-            });
-        match (static_coeffect, unenforced_static_coeffects) {
-            (None, None) => {}
-            (Some(s), None) | (None, Some(s)) => results.push(format!(".coeffects_static {};", s)),
-            (Some(s1), Some(s2)) => results.push(format!(".coeffects_static {} {};", s1, s2)),
-        };
-        if let Some(str) =
-            HhasCoeffects::vec_to_string(coeffects.get_fun_param(), |c| c.to_string())
-        {
-            results.push(format!(".coeffects_fun_param {};", str));
-        }
-        if let Some(str) = HhasCoeffects::vec_to_string(coeffects.get_cc_param(), |c| {
-            format!("{} {}", c.0, c.1.unsafe_as_str())
-        }) {
-            results.push(format!(".coeffects_cc_param {};", str));
-        }
-        for v in coeffects.get_cc_this() {
-            match HhasCoeffects::vec_to_string(v.as_ref(), |c| c.unsafe_as_str().to_string()) {
-                Some(str) => results.push(format!(".coeffects_cc_this {};", str)),
-                None => panic!("Not possible"),
-            }
-        }
-        for v in coeffects.get_cc_reified() {
-            match HhasCoeffects::vec_to_string(v.2.as_ref(), |c| c.unsafe_as_str().to_string()) {
-                Some(str) => results.push(format!(
-                    ".coeffects_cc_reified {}{} {};",
-                    if v.0 { "isClass " } else { "" },
-                    v.1,
-                    str
-                )),
-                None => panic!("Not possible"),
-            }
-        }
-        if coeffects.is_closure_parent_scope() {
-            results.push(".coeffects_closure_parent_scope;".to_string());
-        }
-        if coeffects.generator_this() {
-            results.push(".coeffects_generator_this;".to_string());
-        }
-        if coeffects.caller() {
-            results.push(".coeffects_caller;".to_string());
-        }
-        results
-    }
-
     fn from_type_static(hint: &Hint) -> Option<Ctx> {
         let Hint(_, h) = hint;
         match &**h {

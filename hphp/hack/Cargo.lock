@@ -2457,6 +2457,7 @@ version = "0.0.0"
 dependencies = [
  "hash",
  "lazy_static",
+ "write_bytes",
 ]
 
 [[package]]

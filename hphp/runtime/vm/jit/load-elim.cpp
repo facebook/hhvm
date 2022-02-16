@@ -1525,7 +1525,7 @@ void analyze(Global& genv) {
  *   One further note: some parts of the code here is structured in
  *   anticipation of allowing the pass to conditionally explore parts of the
  *   CFG, so we don't need to propagate states down unreachable paths.  But
- *   this isn't implemented yet: the above will need to be revisted at that
+ *   this isn't implemented yet: the above will need to be revisited at that
  *   point (essentially we'll have to guarantee we eliminate any jumps to
  *   blocks this pass proved were unreachable to keep the above working at that
  *   point).

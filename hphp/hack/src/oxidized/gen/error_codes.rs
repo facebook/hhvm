@@ -214,7 +214,7 @@ pub enum NastCheck {
     PartiallyAbstractTypeconstDefinition = 3093,
     EntryPointGenerics = 3094,
     InternalProtectedOrPrivate = 3095,
-    InoutInTransformedPsuedofunction = 3096,
+    InoutInTransformedPseudofunction = 3096,
     PrivateAndFinal = 3097,
     InternalOutsideModule = 3098,
     InternalMemberInsidePublicTrait = 3099,

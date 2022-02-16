@@ -234,7 +234,7 @@ module NastCheck = struct
     | PartiallyAbstractTypeconstDefinition [@value 3093]
     | EntryPointGenerics [@value 3094]
     | InternalProtectedOrPrivate [@value 3095]
-    | InoutInTransformedPsuedofunction [@value 3096]
+    | InoutInTransformedPseudofunction [@value 3096]
     | PrivateAndFinal [@value 3097]
     | InternalOutsideModule [@value 3098]
     | InternalMemberInsidePublicTrait [@value 3099]

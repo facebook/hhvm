@@ -5552,7 +5552,7 @@ static char *exif_get_sectionlist(int sectionlist) {
 /*
    This structure stores Exif header image elements in a simple manner
    Used to store camera data as extracted from the various ways that
-   it can be stored in a nexif header
+   it can be stored in an exif header
 */
 typedef struct {
   int type;

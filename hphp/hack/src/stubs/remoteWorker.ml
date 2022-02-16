@@ -9,7 +9,7 @@
 module type RemoteServerApi = sig
   type naming_table
 
-  (* Called by the worker to load the naming tabe base when first initializing *)
+  (* Called by the worker to load the naming table base when first initializing *)
   val load_naming_table_base :
     naming_table_base:Path.t option -> (naming_table, string) result
 

@@ -96,7 +96,6 @@ struct RepoOptionsFlags {
   H(bool,           ConstDefaultFuncArgs,             false)          \
   H(bool,           ConstStaticProps,                 false)          \
   H(bool,           AbstractStaticProps,              false)          \
-  H(bool,           DisableUnsetClassConst,           false)          \
   H(bool,           DisallowFuncPtrsInConstants,      false)          \
   H(bool,           AllowUnstableFeatures,            false)          \
   H(bool,           EnableXHPClassModifier,           true)           \

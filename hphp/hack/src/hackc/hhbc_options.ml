@@ -41,7 +41,6 @@ type t = {
   option_const_default_lambda_args: bool;
   option_const_static_props: bool;
   option_abstract_static_props: bool;
-  option_disable_unset_class_const: bool;
   option_disallow_func_ptrs_in_constants: bool;
   option_check_int_overflow: int;
   option_disable_xhp_element_mangling: bool;
@@ -89,7 +88,6 @@ let default =
     option_const_default_lambda_args = false;
     option_const_static_props = false;
     option_abstract_static_props = false;
-    option_disable_unset_class_const = false;
     option_disallow_func_ptrs_in_constants = false;
     option_check_int_overflow = 0;
     option_disable_xhp_element_mangling = false;
@@ -161,8 +159,6 @@ let const_default_lambda_args o = o.option_const_default_lambda_args
 let const_static_props o = o.option_const_static_props
 
 let abstract_static_props o = o.option_abstract_static_props
-
-let disable_unset_class_const o = o.option_disable_unset_class_const
 
 let disallow_func_ptrs_in_constants o = o.option_disallow_func_ptrs_in_constants
 
@@ -245,8 +241,6 @@ let to_string o =
       @@ const_default_lambda_args o;
       Printf.sprintf "const_static_props: %B" @@ const_static_props o;
       Printf.sprintf "abstract_static_props: %B" @@ abstract_static_props o;
-      Printf.sprintf "disable_unset_class_const: %B"
-      @@ disable_unset_class_const o;
       Printf.sprintf "disallow_func_ptrs_in_constants: %B"
       @@ disallow_func_ptrs_in_constants o;
       Printf.sprintf "check_int_overflow: %B" @@ check_int_overflow o;
@@ -328,8 +322,6 @@ let set_option options name value =
     { options with option_const_static_props = as_bool value }
   | "hhvm.lang.abstractstaticprops" ->
     { options with option_abstract_static_props = as_bool value }
-  | "hhvm.lang.disableunsetclassconst" ->
-    { options with option_disable_unset_class_const = as_bool value }
   | "hhvm.lang.disallow_func_ptrs_in_constants" ->
     { options with option_disallow_func_ptrs_in_constants = as_bool value }
   | "hhvm.hack.lang.enable_xhp_class_modifier" ->
@@ -507,10 +499,6 @@ let value_setters =
     @@ fun opts v -> { opts with option_const_static_props = v = 1 } );
     ( set_value "hhvm.hack.lang.abstract_static_props" get_value_from_config_int
     @@ fun opts v -> { opts with option_abstract_static_props = v = 1 } );
-    ( set_value
-        "hhvm.hack.lang.disable_unset_class_const"
-        get_value_from_config_int
-    @@ fun opts v -> { opts with option_disable_unset_class_const = v = 1 } );
     ( set_value
         "hhvm.hack.lang.disallow_func_ptrs_in_constants"
         get_value_from_config_int

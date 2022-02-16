@@ -2867,10 +2867,8 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
         UnsetStatement(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt, Error> {
                 let args = could_map(p_expr_for_normal_argument, &c.variables, e)?;
-                if e.parser_options.po_disable_unset_class_const {
-                    args.iter()
-                        .for_each(|(_, arg)| check_mutate_class_const(arg, node, e))
-                }
+                args.iter()
+                    .for_each(|(_, arg)| check_mutate_class_const(arg, node, e));
                 let unset = match &c.keyword.children {
                     QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
                         let name = pos_name(&c.keyword, e)?;

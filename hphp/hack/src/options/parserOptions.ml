@@ -77,8 +77,6 @@ let abstract_static_props = GlobalOptions.po_abstract_static_props
 let with_abstract_static_props po b =
   { po with GlobalOptions.po_abstract_static_props = b }
 
-let disable_unset_class_const = GlobalOptions.po_disable_unset_class_const
-
 let parser_errors_only = GlobalOptions.po_parser_errors_only
 
 let with_parser_errors_only po b =
@@ -157,7 +155,6 @@ let make
     ~disallow_silence
     ~const_static_props
     ~abstract_static_props
-    ~disable_unset_class_const
     ~disallow_func_ptrs_in_constants
     ~enable_xhp_class_modifier
     ~disable_xhp_element_mangling
@@ -186,7 +183,6 @@ let make
       po_disallow_silence = disallow_silence;
       tco_const_static_props = const_static_props;
       po_abstract_static_props = abstract_static_props;
-      po_disable_unset_class_const = disable_unset_class_const;
       po_disallow_func_ptrs_in_constants = disallow_func_ptrs_in_constants;
       po_enable_xhp_class_modifier = enable_xhp_class_modifier;
       po_disable_xhp_element_mangling = disable_xhp_element_mangling;

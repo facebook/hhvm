@@ -338,7 +338,6 @@ prefixed_flags!(
     DISABLE_LEGACY_ATTRIBUTE_SYNTAX,
     DISABLE_LEGACY_SOFT_TYPEHINTS,
     DISABLE_LVAL_AS_AN_EXPRESSION,
-    DISABLE_UNSET_CLASS_CONST,
     DISABLE_XHP_ELEMENT_MANGLING,
     DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,
     DISALLOW_INST_METH,
@@ -782,9 +781,6 @@ mod tests {
   "hhvm.hack.lang.disable_lval_as_an_expression": {
     "global_value": false
   },
-  "hhvm.hack.lang.disable_unset_class_const": {
-    "global_value": false
-  },
   "hhvm.hack.lang.disable_xhp_element_mangling": {
     "global_value": false
   },
@@ -1178,7 +1174,7 @@ bitflags! {
         const CONST_DEFAULT_FUNC_ARGS = 1 << 39;
         const CONST_STATIC_PROPS = 1 << 40;
         const ABSTRACT_STATIC_PROPS = 1 << 41;
-        const DISABLE_UNSET_CLASS_CONST = 1 << 42;
+        // No longer using bit 42
         const DISALLOW_FUNC_PTRS_IN_CONSTANTS = 1 << 43;
         // No longer using bit 44.
         const CONST_DEFAULT_LAMBDA_ARGS = 1 << 45;

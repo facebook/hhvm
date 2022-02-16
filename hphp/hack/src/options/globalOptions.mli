@@ -176,8 +176,6 @@ type t = {
   po_disallow_silence: bool;
   (* Static properties can be abstract *)
   po_abstract_static_props: bool;
-  (* Make unsetting a class constant a parse error *)
-  po_disable_unset_class_const: bool;
   (* Ignore all errors except those that can influence the shape of syntax tree
    * (skipping post parse error checks) *)
   po_parser_errors_only: bool;
@@ -379,7 +377,6 @@ val make :
   ?po_const_default_lambda_args:bool ->
   ?po_disallow_silence:bool ->
   ?po_abstract_static_props:bool ->
-  ?po_disable_unset_class_const:bool ->
   ?po_parser_errors_only:bool ->
   ?tco_check_attribute_locations:bool ->
   ?glean_service:string ->
@@ -603,8 +600,6 @@ val po_disallow_silence : t -> bool
 val po_abstract_static_props : t -> bool
 
 val po_allow_unstable_features : t -> bool
-
-val po_disable_unset_class_const : t -> bool
 
 val set_global_inference : t -> t
 

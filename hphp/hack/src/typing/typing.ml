@@ -6596,17 +6596,6 @@ and dispatch_call
         let env = Typing_local_ops.check_unset_target env tel in
         let env =
           match (el, unpacked_element) with
-          | ( [
-                ( Ast_defs.Pnormal,
-                  (_, _, Array_get ((_, _, Class_const _), Some _)) );
-              ],
-              None ) ->
-            Errors.add_typing_error
-              Typing_error.(
-                primary
-                @@ Primary.Const_mutation
-                     { pos = p; decl_pos = Pos_or_decl.none; ty_name = lazy "" });
-            env
           | ([(Ast_defs.Pnormal, (_, _, Array_get (ea, Some _)))], None) ->
             let (env, _te, ty) = expr env ea in
             let r = Reason.Rwitness p in

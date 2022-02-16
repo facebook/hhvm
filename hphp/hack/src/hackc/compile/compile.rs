@@ -102,7 +102,7 @@ bitflags! {
         // No longer using bit 6
         const DISABLE_ARRAY_TYPEHINT=1 << 7;
         const DISABLE_LVAL_AS_AN_EXPRESSION=1 << 8;
-        const DISABLE_UNSET_CLASS_CONST=1 << 9;
+        // No longer using bit 9
         const DISALLOW_INST_METH=1 << 10;
         const DISABLE_XHP_ELEMENT_MANGLING=1 << 11;
         const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS=1 << 12;
@@ -198,9 +198,6 @@ impl ParserFlags {
         }
         if self.contains(ParserFlags::DISABLE_LVAL_AS_AN_EXPRESSION) {
             f |= LangFlags::DISABLE_LVAL_AS_AN_EXPRESSION;
-        }
-        if self.contains(ParserFlags::DISABLE_UNSET_CLASS_CONST) {
-            f |= LangFlags::DISABLE_UNSET_CLASS_CONST;
         }
         if self.contains(ParserFlags::DISALLOW_INST_METH) {
             f |= LangFlags::DISALLOW_INST_METH;
@@ -517,7 +514,6 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
         po_const_default_lambda_args: hack_lang_flags(LangFlags::CONST_DEFAULT_LAMBDA_ARGS),
         tco_const_static_props: hack_lang_flags(LangFlags::CONST_STATIC_PROPS),
         po_abstract_static_props: hack_lang_flags(LangFlags::ABSTRACT_STATIC_PROPS),
-        po_disable_unset_class_const: hack_lang_flags(LangFlags::DISABLE_UNSET_CLASS_CONST),
         po_disallow_func_ptrs_in_constants: hack_lang_flags(
             LangFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS,
         ),

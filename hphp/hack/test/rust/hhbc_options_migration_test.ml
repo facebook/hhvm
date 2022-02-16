@@ -88,9 +88,6 @@ let assert_opts_equal caml rust =
     Hhbc_options.(abstract_static_props caml)
     Hhbc_options.(abstract_static_props rust);
   assert_equal
-    Hhbc_options.(disable_unset_class_const caml)
-    Hhbc_options.(disable_unset_class_const rust);
-  assert_equal
     Hhbc_options.(disallow_func_ptrs_in_constants caml)
     Hhbc_options.(disallow_func_ptrs_in_constants rust);
   assert_equal
@@ -308,9 +305,6 @@ let test_all_overrides_json_only _ =
   \"hhvm.hack.lang.disable_lval_as_an_expression\": {
     \"global_value\": true
   },
-  \"hhvm.hack.lang.disable_unset_class_const\": {
-    \"global_value\": true
-  },
   \"hhvm.hack.lang.disable_xhp_element_mangling\": {
     \"global_value\": true
   },
@@ -413,9 +407,6 @@ module CliArgOverrides = struct
   let hhvm'hack'lang'disable_lval_as_an_expression =
     "-vhack.lang.disable_lval_as_an_expression=true"
 
-  let hhvm'hack'lang'disable_unset_class_const =
-    "-vhhvm.lang.disableunsetclassconst=true"
-
   let hhvm'hack'lang'disable_xhp_element_mangling =
     "-vhhvm.hack.lang.disable_xhp_element_mangling=true"
 
@@ -477,7 +468,6 @@ let test_all_overrides_cli_only _ =
       hhvm'hack'lang'disable_legacy_attribute_syntax;
       hhvm'hack'lang'disable_legacy_soft_typehints;
       hhvm'hack'lang'disable_lval_as_an_expression;
-      hhvm'hack'lang'disable_unset_class_const;
       hhvm'hack'lang'disable_xhp_element_mangling;
       hhvm'hack'lang'disallow_func_ptrs_in_constants;
       hhvm'hack'lang'enable_class_level_where_clauses;

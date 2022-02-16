@@ -77,7 +77,6 @@ type t = {
   po_const_default_lambda_args: bool;
   po_disallow_silence: bool;
   po_abstract_static_props: bool;
-  po_disable_unset_class_const: bool;
   po_parser_errors_only: bool;
   tco_check_attribute_locations: bool;
   glean_service: string;
@@ -262,7 +261,6 @@ let default =
     po_const_default_lambda_args = false;
     po_disallow_silence = false;
     po_abstract_static_props = false;
-    po_disable_unset_class_const = false;
     po_parser_errors_only = false;
     tco_check_attribute_locations = true;
     glean_service = "";
@@ -399,7 +397,6 @@ let make
     ?(po_const_default_lambda_args = default.po_const_default_lambda_args)
     ?(po_disallow_silence = default.po_disallow_silence)
     ?(po_abstract_static_props = default.po_abstract_static_props)
-    ?(po_disable_unset_class_const = default.po_disable_unset_class_const)
     ?(po_parser_errors_only = default.po_parser_errors_only)
     ?(tco_check_attribute_locations = default.tco_check_attribute_locations)
     ?(glean_service = default.glean_service)
@@ -544,7 +541,6 @@ let make
     po_const_default_lambda_args;
     po_disallow_silence;
     po_abstract_static_props;
-    po_disable_unset_class_const;
     po_parser_errors_only;
     tco_check_attribute_locations;
     glean_service;
@@ -755,8 +751,6 @@ let po_const_default_lambda_args t = t.po_const_default_lambda_args
 let po_disallow_silence t = t.po_disallow_silence
 
 let po_abstract_static_props t = t.po_abstract_static_props
-
-let po_disable_unset_class_const t = t.po_disable_unset_class_const
 
 let tco_check_attribute_locations t = t.tco_check_attribute_locations
 

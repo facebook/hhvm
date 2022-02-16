@@ -234,7 +234,6 @@ let parse_options () =
   let const_default_lambda_args = ref false in
   let disallow_silence = ref false in
   let abstract_static_props = ref false in
-  let disable_unset_class_const = ref false in
   let glean_service = ref (GleanOptions.service GlobalOptions.default) in
   let glean_hostname = ref (GleanOptions.hostname GlobalOptions.default) in
   let glean_port = ref (GleanOptions.port GlobalOptions.default) in
@@ -558,9 +557,6 @@ let parse_options () =
       ( "--abstract-static-props",
         Arg.Set abstract_static_props,
         " Static properties can be abstract" );
-      ( "--disable-unset-class-const",
-        Arg.Set disable_unset_class_const,
-        " Make unsetting a class const a parse error" );
       ( "--glean-service",
         Arg.String (fun str -> glean_service := str),
         " glean service name" );
@@ -840,7 +836,6 @@ let parse_options () =
       ~po_const_default_lambda_args:!const_default_lambda_args
       ~po_disallow_silence:!disallow_silence
       ~po_abstract_static_props:!abstract_static_props
-      ~po_disable_unset_class_const:!disable_unset_class_const
       ~po_disallow_func_ptrs_in_constants:!disallow_func_ptrs_in_constants
       ~tco_check_attribute_locations:true
       ~tco_error_php_lambdas:!error_php_lambdas

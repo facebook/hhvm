@@ -406,8 +406,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_gi_reinfer_types:(string_list_opt "reinfer_types" config)
       ?tco_const_static_props:(bool_opt "const_static_props" config)
       ?po_abstract_static_props:(bool_opt "abstract_static_props" config)
-      ?po_disable_unset_class_const:
-        (bool_opt "disable_unset_class_const" config)
       ~po_parser_errors_only:(Option.is_some (ServerArgs.ai_mode options))
       ?tco_check_attribute_locations:
         (bool_opt "check_attribute_locations" config)

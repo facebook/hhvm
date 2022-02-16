@@ -164,7 +164,7 @@ function stream_get_line(resource $handle,
  *   filters that have been stacked onto this stream. Documentation on filters
  *   can be found in the Filters appendix.  mode (string) - the type of access
  *   required for this stream (see Table 1 of the fopen() reference)  seekable
- *   (bool) - whether the current stream can be seeked.  uri (string) - the
+ *   (bool) - whether the current stream can be sought.  uri (string) - the
  *   URI/filename associated with this stream.
  *
  */

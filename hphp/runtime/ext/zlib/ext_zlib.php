@@ -254,7 +254,7 @@ function gzrewind(resource $zp): bool;
  *
  * @param resource $zp - The gz-file pointer. It must be valid, and must
  *   point to a file successfully opened by gzopen().
- * @param int $offset - The seeked offset.
+ * @param int $offset - The sought offset.
  * @param int $whence - whence values are:  SEEK_SET - Set position equal
  *   to offset bytes. SEEK_CUR - Set position to current location plus
  *   offset.    If whence is not specified, it is assumed to be SEEK_SET.

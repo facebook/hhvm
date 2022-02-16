@@ -189,7 +189,7 @@ let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
      read requests parameters where it should make progress or get an EOF but just sits there
      indefinitely, sometimes stuck on a "select" call to see if there's a request on the queue
      where I know there are outstanding requests but again it doesn't see them. I have no
-     explanation for these phemona. *)
+     explanation for these phenomena. *)
   let open Connection_tracker in
   let phase = ref ServerMonitorUtils.Connect_open_socket in
   let finally_close : Timeout.in_channel option ref = ref None in

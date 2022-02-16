@@ -408,6 +408,13 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
         }
     }
 
+    fn add_from_implements_constants(&mut self) {
+        for ty in self.child.implements.iter() {
+            self.members
+                .add_inherited(self.class_constants_from_class(ty))
+        }
+    }
+
     fn add_from_xhp_attr_uses(&mut self) {
         for ty in self.child.xhp_attr_uses.iter() {
             self.members.add_inherited(self.xhp_attrs_from_class(ty))
@@ -483,6 +490,7 @@ impl<R: Reason> Inherited<R> {
         folder.add_from_xhp_attr_uses();
         folder.add_from_interface_constants();
         folder.add_from_included_enums_constants();
+        folder.add_from_implements_constants();
 
         folder.members
     }

@@ -189,7 +189,6 @@ std::vector<Sink> FunctionMetadataTracker::sinks(const Func* func) {
 void FunctionMetadataTracker::dumpFunctionCoverageTo(std::string path) {
   std::ofstream stream;
   stream.open(path);
-  stream << "[\n";
   for (FuncId::Int i = 0; i < m_seen_functions.size(); i++) {
     auto flag = m_seen_functions[i].load(std::memory_order_release);
     if (flag & kSeen) {
@@ -197,11 +196,10 @@ void FunctionMetadataTracker::dumpFunctionCoverageTo(std::string path) {
       auto func = Func::fromFuncId(id);
       if (func) {
         auto name = func->fullName()->data();
-        stream << "\"" << name << "\",\n";
+        stream << name << "\n";
       }
     }
   }
-  stream << "]\n";
   stream.close();
 }
 

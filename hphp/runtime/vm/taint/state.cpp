@@ -21,6 +21,7 @@
 
 #include <folly/Singleton.h>
 #include <folly/dynamic.h>
+#include <folly/json.h>
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/init-fini-node.h"
@@ -50,27 +51,23 @@ std::string Path::jsonLine() const {
     path = path->parent;
   }
 
-  std::stringstream stream;
-  stream << "{\"hops\": [";
+  folly::dynamic jsonHops = folly::dynamic::array;
   for (int i = hops.size() - 1; i >= 0; i--) {
     auto hop = hops[i];
 
     if (last != hop.from && hop.from != nullptr) {
-      stream << "\"" << hop.from->fullName()->data() << "\", ";
+      jsonHops.push_back(hop.from->fullName()->data());
     }
     last = hop.from;
 
     if (last != hop.to && hop.to != nullptr) {
-      stream << "\"" << hop.to->fullName()->data() << "\"";
+      jsonHops.push_back(hop.to->fullName()->data());
     }
     last = hop.to;
-
-    if (i != 0) {
-      stream << ", ";
-    }
   }
-  stream << "]}";
-  return stream.str();
+
+  folly::dynamic json = folly::dynamic::object("hops", std::move(jsonHops));
+  return folly::toJson(json);
 }
 
 Path::Path() : hop{nullptr, nullptr}, parent(nullptr) {}

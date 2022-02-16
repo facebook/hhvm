@@ -80,7 +80,6 @@ pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 
     retain_or_omit_user_attributes_for_facts: bool,
     simplify_naming_for_facts: bool,
     previous_token_kind: TokenKind,
-
     source_text_allocator: S,
     module: Option<Id<'a>>,
 }
@@ -94,6 +93,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         source_text_allocator: S,
         retain_or_omit_user_attributes_for_facts: bool,
         simplify_naming_for_facts: bool,
+        elaborate_xhp_namespaces_for_facts: bool,
     ) -> Self {
         let source_text = IndexedSourceText::new(src.clone());
         let path = source_text.source_text().file_path();
@@ -115,6 +115,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
                 opts.auto_namespace_map,
                 opts.disable_xhp_element_mangling,
                 simplify_naming_for_facts,
+                elaborate_xhp_namespaces_for_facts,
                 arena,
             )),
             classish_name_builder: ClassishNameBuilder::new(),
@@ -412,6 +413,7 @@ struct NamespaceBuilder<'a> {
     #[allow(dead_code)]
     auto_ns_map: &'a [(&'a str, &'a str)],
     simplify_naming_for_facts: bool,
+    elaborate_xhp_namespaces_for_facts: bool,
 }
 
 impl<'a> NamespaceBuilder<'a> {
@@ -419,6 +421,7 @@ impl<'a> NamespaceBuilder<'a> {
         auto_ns_map: &'a [(&'a str, &'a str)],
         disable_xhp_element_mangling: bool,
         simplify_naming_for_facts: bool,
+        elaborate_xhp_namespaces_for_facts: bool,
         arena: &'a Bump,
     ) -> Self {
         let mut ns_uses = SMap::empty();
@@ -448,6 +451,7 @@ impl<'a> NamespaceBuilder<'a> {
             }],
             auto_ns_map,
             simplify_naming_for_facts,
+            elaborate_xhp_namespaces_for_facts,
         }
     }
 
@@ -538,7 +542,14 @@ impl<'a> NamespaceBuilder<'a> {
             return name;
         }
         let env = self.stack.last().unwrap();
-        namespaces::elaborate_raw_id_in(self.arena, env, kind, name, self.simplify_naming_for_facts)
+        namespaces::elaborate_raw_id_in(
+            self.arena,
+            env,
+            kind,
+            name,
+            self.simplify_naming_for_facts,
+            self.elaborate_xhp_namespaces_for_facts,
+        )
     }
 
     fn elaborate_defined_id(&self, id: Id<'a>) -> Id<'a> {
@@ -549,7 +560,7 @@ impl<'a> NamespaceBuilder<'a> {
             let name = xhp_name_opt.map_or(name, |s| self.arena.alloc_str(&s));
             if !name.starts_with('\\') {
                 namespaces::elaborate_into_current_ns_in(self.arena, env, name)
-            } else if self.simplify_naming_for_facts {
+            } else if self.elaborate_xhp_namespaces_for_facts {
                 // allow :foo:bar to be elaborated into \currentnamespace\foo\bar
                 namespaces::elaborate_into_current_ns_in(self.arena, env, &name[1..])
             } else {

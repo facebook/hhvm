@@ -208,7 +208,7 @@ impl<'src> AastParser {
             let (parse_errors, uses_readonly) = parse_errors_with_text(
                 tree,
                 indexed_source_text.clone(),
-                // TODO(hrust) change to parser_otions to ref in ParserErrors
+                // TODO(hrust) change to parser_options to ref in ParserErrors
                 env.parser_options.clone(),
                 true, /* hhvm_compat_mode */
                 hhi_mode,

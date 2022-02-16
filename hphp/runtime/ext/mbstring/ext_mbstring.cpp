@@ -4300,9 +4300,9 @@ bool HHVM_FUNCTION(mb_send_mail,
 
   /* character-set, transfer-encoding */
   mbfl_no_encoding
-    tran_cs,  /* transfar text charset */
-    head_enc,  /* header transfar encoding */
-    body_enc;  /* body transfar encoding */
+    tran_cs,  /* transfer text charset */
+    head_enc,  /* header transfer encoding */
+    body_enc;  /* body transfer encoding */
   tran_cs = mbfl_no_encoding_utf8;
   head_enc = mbfl_no_encoding_base64;
   body_enc = mbfl_no_encoding_base64;

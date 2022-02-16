@@ -243,7 +243,7 @@
  * Elf64 fixes
  *
  * Revision 1.23  1997/11/05 16:03:37  christos
- * - correct elf prps offset for SunOS-2.5.1 [guy@netapp.com]
+ * - correct elf props offset for SunOS-2.5.1 [guy@netapp.com]
  * - handle 64 bit time_t's correctly [ewt@redhat.com]
  * - new mime style magic [clarosse@netvista.net]
  * - new TI calculator magic [rmcguire@freenet.columbus.oh.us]

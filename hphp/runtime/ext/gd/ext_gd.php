@@ -794,7 +794,7 @@ function imagesavealpha(resource $image,
  * imagescale - Scale an image using the given new width and height.
  */
 <<__Native>>
-function imagescale(resource $img, int $newwidth, int $newheigh = -1,
+function imagescale(resource $img, int $newwidth, int $newheight = -1,
                                int $method = IMG_BILINEAR_FIXED): mixed;
 
 /* imagesetbrush() sets the brush image to be used by all line drawing

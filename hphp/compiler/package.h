@@ -42,7 +42,7 @@ using AnalysisResultPtr = std::shared_ptr<AnalysisResult>;
  * and analyzed together. No files outside of a package will be considered
  * in type inferences. One single AnalysisResult will be generated and it
  * contains all classes, functions, variables, constants and their types.
- * Therefore, a package is really toppest entry point for parsing.
+ * Therefore, a package is really topmost entry point for parsing.
  */
 struct Package {
   explicit Package(const char* root);

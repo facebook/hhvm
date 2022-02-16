@@ -19,7 +19,7 @@ use namespace HH\Lib\_Private\_File;
  *
  * - If the prefix starts with `.`, it is interpreted relative to the current
  *   working directory.
- * - If the prefix statis with `/`, it is treated as an absolute path.
+ * - If the prefix starts with `/`, it is treated as an absolute path.
  * - Otherwise, it is created in the system temporary directory.
  *
  * Regardless of the kind of prefix, the parent directory must exist.

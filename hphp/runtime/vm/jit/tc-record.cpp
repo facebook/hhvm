@@ -227,7 +227,7 @@ void reportJitMaturity() {
   if (before == 100) return;
 
   // Limit jit maturity to 70 before retranslateAll finishes (if enabled). If
-  // the JIT running in jumpstart seeer mode, don't consider retranslateAll to
+  // the JIT running in jumpstart serdes mode, don't consider retranslateAll to
   // ever finish.
   constexpr uint64_t kMaxMaturityBeforeRTA = 70;
   auto const beforeRetranslateAll =

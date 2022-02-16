@@ -12,7 +12,7 @@ exception Non_denotable
 
 let strip_ns str =
   let str' = Utils.strip_ns str in
-  (* If we had more than one '\\' patternm then we must keep the first '\\'
+  (* If we had more than one '\\' pattern then we must keep the first '\\'
      otherwise it will cause an error (we are detecting types from the root
      namespace)*)
   if String.contains str' '\\' then

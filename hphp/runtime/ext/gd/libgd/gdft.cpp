@@ -78,7 +78,7 @@ gdImageStringFT (gdImage * im, int *brect, int fg, char *fontlist,
 
 /*
  * The character (space) used to separate alternate fonts in the
- * fontlist parameter to gdImageStringFT. 2.0.18: space was a oor choice for this.
+ * fontlist parameter to gdImageStringFT. 2.0.18: space was a poor choice for this.
  */
 #define LISTSEPARATOR ";"
 

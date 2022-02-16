@@ -136,7 +136,7 @@
 #endif
 
 #include <oniguruma.h>
-// Onigurama defines UChar to unsigned char, but ICU4C defines it to signed
+// Oniguruma defines UChar to unsigned char, but ICU4C defines it to signed
 // 16-bit int. This is supposed to be resolved by ONIG_ESCAPE_UCHAR_COLLISION,
 // however this isn't fully supported in 6.8.0 or 6.8.1.
 //

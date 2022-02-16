@@ -103,7 +103,7 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
   if (!callee->hasReifiedGenerics()) {
     // FIXME: leaks memory if generics were given but not expected nor pushed.
     if (pushed) {
-      popDecRef(env);
+      popDecRef(env, DecRefProfileId::Default);
       updateMarker(env);
       env.irb->exceptionStackBoundary();
     }
@@ -572,7 +572,7 @@ void emitInitClosureLocals(IRGS& env, const Func* callee) {
     gen(env, StLoc, LocalId{firstClosureUseLocal + i}, fp(env), prop);
   }
 
-  decRef(env, closure);
+  decRef(env, closure, DecRefProfileId::Default);
 }
 
 /*

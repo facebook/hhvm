@@ -1551,7 +1551,7 @@ SSATmp* builtinCall(IRGS& env,
         return {};
       }();
       if (auto const iv = builtinInValue(env, callee, i)) {
-        decRef(env, realized[i + aoff]);
+        decRef(env, realized[i + aoff], static_cast<DecRefProfileId>(i));
         realized[i + aoff] = iv;
         ty = iv->type();
         if (ty->maybe(TPersistentVec)) *ty |= TVec;
@@ -1830,9 +1830,9 @@ void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
 
   auto const finish = [&](SSATmp* elem) {
     pushIncRef(env, elem);
-    decRef(env, def);
-    decRef(env, key);
-    decRef(env, stack_base);
+    decRef(env, def, DecRefProfileId::IdxDef);
+    decRef(env, key, DecRefProfileId::IdxKey);
+    decRef(env, stack_base, DecRefProfileId::IdxBase);
   };
 
   if (key->isA(TNull | TStr)) return finish(def);
@@ -1877,9 +1877,9 @@ void implDictKeysetIdx(IRGS& env,
   auto const finish = [&](SSATmp* elem) {
     popC(env); popC(env); popC(env);
     pushIncRef(env, elem);
-    decRef(env, def);
-    decRef(env, key);
-    decRef(env, stack_base);
+    decRef(env, def, DecRefProfileId::IdxDef);
+    decRef(env, key, DecRefProfileId::IdxKey);
+    decRef(env, stack_base, DecRefProfileId::IdxBase);
   };
 
   if (key->isA(TNull)) return finish(def);
@@ -2019,8 +2019,8 @@ void emitIdx(IRGS& env) {
     popC(env, keyType <= TNull ? DataTypeSpecific : DataTypeGeneric);
     popC(env, keyType <= TNull ? DataTypeGeneric : DataTypeSpecific);
     push(env, def);
-    decRef(env, base);
-    decRef(env, key);
+    decRef(env, base, DecRefProfileId::IdxDef);
+    decRef(env, key, DecRefProfileId::IdxKey);
     return;
   }
 
@@ -2063,8 +2063,8 @@ void emitAKExists(IRGS& env) {
     // than papering over it by pushing an unused value here.
     discard(env, 2);
     push(env, cns(env, false));
-    decRef(env, arr);
-    decRef(env, key);
+    decRef(env, arr, DecRefProfileId::AKExistsArr);
+    decRef(env, key, DecRefProfileId::AKExistsKey);
     updateMarker(env);
     env.irb->exceptionStackBoundary();
     gen(env, ThrowInvalidArrayKey, arr, key);
@@ -2074,8 +2074,8 @@ void emitAKExists(IRGS& env) {
     if (key->isA(TStr)) {
       discard(env, 2);
       push(env, cns(env, false));
-      decRef(env, arr);
-      decRef(env, key);
+      decRef(env, arr, DecRefProfileId::AKExistsArr);
+      decRef(env, key, DecRefProfileId::AKExistsKey);
       return;
     }
     if (key->isA(TInt)) {
@@ -2089,7 +2089,7 @@ void emitAKExists(IRGS& env) {
       );
       discard(env, 2);
       push(env, result);
-      decRef(env, arr);
+      decRef(env, arr, DecRefProfileId::AKExistsArr);
       return;
     }
     return throwBadKey();
@@ -2103,8 +2103,8 @@ void emitAKExists(IRGS& env) {
     auto const finish = [&] (SSATmp* present) {
       discard(env, 2);
       push(env, present);
-      decRef(env, arr);
-      decRef(env, key);
+      decRef(env, arr, DecRefProfileId::AKExistsArr);
+      decRef(env, key, DecRefProfileId::AKExistsKey);
     };
 
     auto const present = profiledArrayAccess(
@@ -2130,15 +2130,15 @@ void emitAKExists(IRGS& env) {
       gen(env, CheckRange, key, gen(env, CountCollection, arr));
     discard(env, 2);
     push(env, val);
-    decRef(env, arr);
+    decRef(env, arr, DecRefProfileId::AKExistsArr);
     return;
   }
 
   auto const val = gen(env, AKExistsObj, arr, key);
   discard(env, 2);
   push(env, val);
-  decRef(env, arr);
-  decRef(env, key);
+  decRef(env, arr, DecRefProfileId::AKExistsArr);
+  decRef(env, key, DecRefProfileId::AKExistsKey);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2490,7 +2490,7 @@ void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
 
 void emitSetImplicitContextByValue(IRGS& env) {
   if (!RO::EvalEnableImplicitContext) {
-    popDecRef(env);
+    popDecRef(env, DecRefProfileId::Default);
     push(env, cns(env, make_tv<KindOfNull>()));
     return;
   }

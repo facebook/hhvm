@@ -681,7 +681,10 @@ bool endCatchFromInlined(IRGS& env) {
   }
 
   // Clear the evaluation stack and jump to the shared EndCatch handler.
-  while (spOffBCFromStackBase(env) > spOffEmpty(env)) popDecRef(env);
+  int locId = 0;
+  while (spOffBCFromStackBase(env) > spOffEmpty(env)) {
+    popDecRef(env, static_cast<DecRefProfileId>(locId++));
+  }
   gen(env, Jmp, env.inlineState.returnTarget.back().endCatchTarget);
   return true;
 }

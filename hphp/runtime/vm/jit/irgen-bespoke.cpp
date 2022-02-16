@@ -274,7 +274,7 @@ void emitSet(IRGS& env, SSATmp* arr, SSATmp* key, SSATmp* uncheckedVal,
               taken,
               gen(env, LdMem, TCell, elem)
             );
-            decRef(env, oldVal, kProfiledArraySetDecRefProfId);
+            decRef(env, oldVal, DecRefProfileId::ProfiledArraySet);
           },
           [&] { gen(env, StructDictAddNextSlot, cowed, slot); }
         );
@@ -333,7 +333,7 @@ SSATmp* emitEscalateToVanilla(
   if (layout.bespoke()) {
     auto const str = cns(env, reason.get());
     auto const result = gen(env, BespokeEscalateToVanilla, arr, str);
-    decRef(env, arr);
+    decRef(env, arr, DecRefProfileId::Default);
     return result;
   }
   return cond(
@@ -645,7 +645,7 @@ void emitBespokeSetOpM(IRGS& env, int32_t nDiscard, SetOpOp op, MemberKey mk) {
   auto const key = memberKey(env, mk);
 
   auto const finish = [&] (SSATmp* result) {
-    popDecRef(env);
+    popDecRef(env, DecRefProfileId::Default);
     mFinalImpl(env, nDiscard, result);
   };
 
@@ -749,9 +749,9 @@ void emitBespokeIdx(IRGS& env) {
   auto const finish = [&](SSATmp* elem) {
     discard(env, 3);
     pushIncRef(env, elem);
-    decRef(env, def);
-    decRef(env, key);
-    decRef(env, base);
+    decRef(env, def, DecRefProfileId::IdxDef);
+    decRef(env, key, DecRefProfileId::IdxKey);
+    decRef(env, base, DecRefProfileId::IdxBase);
   };
 
   auto const baseType = base->type();
@@ -788,8 +788,8 @@ void emitBespokeAKExists(IRGS& env) {
 
   auto const finish = [&](bool res) {
     push(env, cns(env, res));
-    decRef(env, base);
-    decRef(env, key);
+    decRef(env, base, DecRefProfileId::AKExistsArr);
+    decRef(env, key, DecRefProfileId::AKExistsKey);
   };
 
   auto const throwBadKey = [&] {
@@ -909,7 +909,7 @@ void emitBespokeAddElemC(IRGS& env) {
   auto const arrLoc = ldStkAddr(env, BCSPRelOffset{0});
   auto const arr = gen(env, LdMem, arrType, arrLoc);
 
-  auto const finish = [&] (SSATmp*) { decRef(env, key); };
+  auto const finish = [&] (SSATmp*) { decRef(env, key, DecRefProfileId::Default); };
   emitSet(env, arr, key, value, arrLoc, finish);
 }
 
@@ -990,7 +990,7 @@ void emitBespokeClassGetTS(IRGS& env) {
   );
 
   auto const cls = ldCls(env, className);
-  popDecRef(env);
+  popDecRef(env, DecRefProfileId::Default);
   push(env, cls);
   push(env, cns(env, TInitNull));
 }
@@ -1005,8 +1005,8 @@ void emitBespokeShapesAt(IRGS& env, int32_t numArgs) {
   auto const finish = [&](SSATmp* val) {
     discard(env, 2 + kNumActRecCells);
     pushIncRef(env, val);
-    decRef(env, arr);
-    decRef(env, key);
+    decRef(env, arr, DecRefProfileId::AtArr);
+    decRef(env, key, DecRefProfileId::AtKey);
   };
 
   auto const exit = makeExitSlow(env);
@@ -1024,9 +1024,9 @@ void emitBespokeShapesIdx(IRGS& env, int32_t numArgs) {
   auto const finish = [&](SSATmp* val) {
     discard(env, numArgs + kNumActRecCells);
     pushIncRef(env, val);
-    decRef(env, arr);
-    decRef(env, key);
-    decRef(env, def);
+    decRef(env, arr, DecRefProfileId::IdxBase);
+    decRef(env, key, DecRefProfileId::IdxKey);
+    decRef(env, def, DecRefProfileId::IdxDef);
   };
 
   auto const val = cond(
@@ -1054,8 +1054,8 @@ void emitBespokeShapesExists(IRGS& env, int32_t numArgs) {
 
   discard(env, 2 + kNumActRecCells);
   push(env, val);
-  decRef(env, arr);
-  decRef(env, key);
+  decRef(env, arr, DecRefProfileId::AKExistsArr);
+  decRef(env, key, DecRefProfileId::AKExistsKey);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

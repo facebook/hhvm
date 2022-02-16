@@ -475,7 +475,9 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
           gen(env, CheckRDSInitialized, taken, RDSHandleData { data });
         },
         [&] {
-          for (auto i = 0; i < fca.numInputs(); ++i) popDecRef(env);
+          for (auto i = 0; i < fca.numInputs(); ++i) {
+            popDecRef(env, static_cast<DecRefProfileId>(i));
+          }
           for (auto i = 0; i < kNumActRecCells; ++i) popU(env);
           auto const retVal = gen(env, LdTVFromRDS, data, retType);
           gen(env, IncRef, retVal);
@@ -785,7 +787,7 @@ void optimizeProfiledCallMethod(IRGS& env,
     if (!callee->isStaticInPrologue()) return ctx;
     assertx(ctx->type() <= TObj);
     auto ret = cls ? cns(env, cls) : gen(env, LdObjClass, ctx);
-    decRef(env, ctx);
+    decRef(env, ctx, DecRefProfileId::Default);
     return ret;
   };
 
@@ -1099,7 +1101,7 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
   // TODO: improve this if str->hasConstVal()
   auto const funcN = gen(env, LdFunc, str);
   auto const func = gen(env, CheckNonNull, makeExitSlow(env), funcN);
-  popDecRef(env);
+  popDecRef(env, DecRefProfileId::Default);
   updateStackOffset(env);
   prepareAndCallProfiled(env, func, fca, nullptr, true, false);
 }
@@ -1211,7 +1213,7 @@ void emitResolveRFunc(IRGS& env, const StringData* name) {
       push(env, gen(env, NewRFunc, funcTmp, tsList));
     },
     [&] {
-      decRef(env, tsList);
+      decRef(env, tsList, DecRefProfileId::Default);
       push(env, funcTmp);
     }
   );
@@ -1359,7 +1361,7 @@ void emitNewObjRD(IRGS& env, const StringData* className) {
     }
   }();
   emitNewObjDImpl(env, className, tsList);
-  decRef(env, cell);
+  decRef(env, cell, DecRefProfileId::Default);
 }
 
 void emitNewObjS(IRGS& env, SpecialClsRef ref) {
@@ -1425,12 +1427,13 @@ void fcallObjMethod(IRGS& env, const FCallArgs& fca, const StringData* clsHint,
     return;
   }
 
+  int locId = 0;
   // null?->method(...), pop extra stack input, all arguments and uninits,
   // the null "object" and all uninits for inout returns, then push null.
   if (obj->type() <= TInitNull && subop == ObjMethodOp::NullSafe) {
-    if (extraInput) popDecRef(env, DataTypeGeneric);
-    if (fca.hasGenerics()) popDecRef(env, DataTypeGeneric);
-    if (fca.hasUnpack()) popDecRef(env, DataTypeGeneric);
+    if (extraInput) popDecRef(env, static_cast<DecRefProfileId>(locId++), DataTypeGeneric);
+    if (fca.hasGenerics()) popDecRef(env, static_cast<DecRefProfileId>(locId++), DataTypeGeneric);
+    if (fca.hasUnpack()) popDecRef(env, static_cast<DecRefProfileId>(locId++), DataTypeGeneric);
 
     // Save any inout arguments, as those will be pushed unchanged as
     // the output.
@@ -1439,12 +1442,12 @@ void fcallObjMethod(IRGS& env, const FCallArgs& fca, const StringData* clsHint,
       if (fca.enforceInOut() && fca.isInOut(fca.numArgs - i - 1)) {
         inOuts.emplace_back(popC(env));
       } else {
-        popDecRef(env, DataTypeGeneric);
+        popDecRef(env, static_cast<DecRefProfileId>(locId++), DataTypeGeneric);
       }
     }
 
     for (uint32_t i = 0; i < kNumActRecCells - 1; ++i) popU(env);
-    popDecRef(env, DataTypeGeneric);
+    popDecRef(env, static_cast<DecRefProfileId>(locId), DataTypeGeneric);
     for (uint32_t i = 0; i < fca.numRets - 1; ++i) popU(env);
 
     assertx(inOuts.size() == fca.numRets - 1);
@@ -1591,7 +1594,7 @@ void checkGenericsAndResolveRClsMeth(IRGS& env, SSATmp* cls, SSATmp* func,
     },
     [&] {
       push(env, gen(env, NewClsMeth, cls, func));
-      decRef(env, tsList);
+      decRef(env, tsList, DecRefProfileId::Default);
     }
   );
 }
@@ -1752,7 +1755,7 @@ void fcallClsMethodCommon(IRGS& env,
     }
 
     auto const ctx = forward ? ldCtxCls(env) : clsVal;
-    decRef(env, methVal);
+    decRef(env, methVal, DecRefProfileId::Default);
     discard(env, numExtraInputs);
     if (noCallProfiling) {
       prepareAndCallUnknown(env, func, fca, ctx,

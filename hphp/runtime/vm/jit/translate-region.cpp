@@ -906,9 +906,10 @@ bool irGenTrySuperInlineFCall(irgen::IRGS& irgs, const Func* callee,
     auto const roots = irgenROM(irgs, *rom, ctx, ssa_args, fail);
     assertx(roots.size() == 1);
     discard(irgs, kNumActRecCells + numArgsInclUnpack);
-    if (!(ctx->isA(TNullptr))) decRef(irgs, ctx);
+    if (!(ctx->isA(TNullptr))) decRef(irgs, ctx, DecRefProfileId::Default);
+    int i = 0;
     for (auto const& arg : ssa_args) {
-      decRef(irgs, arg);
+      decRef(irgs, arg, static_cast<DecRefProfileId>(i++));
     }
     irgen::push(irgs, roots[0]);
   }, [&] {

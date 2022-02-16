@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/jit/is-type-struct-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -558,7 +559,7 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
 void emitInstanceOfD(IRGS& env, const StringData* className) {
   auto const src = popC(env);
   push(env, implInstanceOfD(env, src, className));
-  decRef(env, src);
+  decRef(env, src, DecRefProfileId::Default);
 }
 
 void emitInstanceOf(IRGS& env) {
@@ -569,8 +570,8 @@ void emitInstanceOf(IRGS& env) {
     auto const c2 = gen(env, LdObjClass, t2);
     auto const c1 = gen(env, LdObjClass, t1);
     push(env, gen(env, InstanceOf, c2, c1));
-    decRef(env, t2);
-    decRef(env, t1);
+    decRef(env, t2, DecRefProfileId::InstanceOfSrc2);
+    decRef(env, t1, DecRefProfileId::InstanceOfSrc1);
     return;
   }
 
@@ -580,8 +581,8 @@ void emitInstanceOf(IRGS& env) {
     auto const c1 = gen(env, LookupClsRDS, t1);
     auto const c2  = gen(env, LdObjClass, t2);
     push(env, gen(env, InstanceOf, c2, c1));
-    decRef(env, t2);
-    decRef(env, t1);
+    decRef(env, t2, DecRefProfileId::InstanceOfSrc2);
+    decRef(env, t1, DecRefProfileId::InstanceOfSrc1);
     return;
   }
 
@@ -613,8 +614,8 @@ void emitInstanceOf(IRGS& env) {
   if (!res) PUNT(InstanceOf-Unknown);
 
   push(env, res);
-  decRef(env, t2);
-  decRef(env, t1);
+  decRef(env, t2, DecRefProfileId::InstanceOfSrc2);
+  decRef(env, t1, DecRefProfileId::InstanceOfSrc1);
 }
 
 void emitIsLateBoundCls(IRGS& env) {
@@ -631,7 +632,7 @@ void emitIsLateBoundCls(IRGS& env) {
   } else {
     PUNT(IsLateBoundCls-MaybeObject);
   }
-  decRef(env, obj);
+  decRef(env, obj, DecRefProfileId::Default);
 }
 
 namespace {
@@ -1001,13 +1002,15 @@ void emitIsTypeStructC(IRGS& env, TypeStructResolveOp op) {
   SSATmp* tc =
     handleIsResolutionAndCommonOpts(env, op, done, shouldDecRef, checkValid);
   if (done) {
-    decRef(env, c);
-    decRef(env, a);
+    decRef(env, c, DecRefProfileId::IsTypeStructCc);
+    decRef(env, a, DecRefProfileId::IsTypeStructCa);
     return;
   }
   popC(env);
   auto block = opcodeMayRaise(IsTypeStruct) && shouldDecRef
-    ? create_catch_block(env, [&]{ decRef(env, tc); })
+    ? create_catch_block(env, [&]{
+        decRef(env, tc, DecRefProfileId::IsTypeStructCTc);
+      })
     : nullptr;
   auto const data = RDSHandleData { rds::bindTSCache(curFunc(env)).handle() };
 
@@ -1025,8 +1028,8 @@ void emitIsTypeStructC(IRGS& env, TypeStructResolveOp op) {
 
   auto const finish = [&] (SSATmp* result) {
     push(env, result);
-    decRef(env, c);
-    decRef(env, a);
+    decRef(env, c, DecRefProfileId::IsTypeStructCc);
+    decRef(env, a, DecRefProfileId::IsTypeStructCa);
   };
 
   if (profile.profiling()) {
@@ -1067,7 +1070,8 @@ void emitThrowAsTypeStructException(IRGS& env) {
         staticallyResolveTypeStructure(env, ts, partial, invalidType);
       if (!ts->same(maybe_resolved)) {
         auto const inputTS = cns(env, maybe_resolved);
-        return {inputTS, create_catch_block(env, [&]{ decRef(env, inputTS); })};
+        return {inputTS, create_catch_block(
+            env, [&]{ decRef(env, inputTS, DecRefProfileId::Default); })};
       }
     }
     auto const ts = resolveTypeStructImpl(env, true, false, 1, true);
@@ -1510,7 +1514,7 @@ void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {
   );
   discard(env, 2);
   push(env, val);
-  decRef(env, tCls);
+  decRef(env, tCls, DecRefProfileId::Default);
 }
 
 void emitIssetL(IRGS& env, int32_t id) {
@@ -1544,7 +1548,7 @@ SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
 void emitIsTypeC(IRGS& env, IsTypeOp subop) {
   auto const val = popC(env, DataTypeSpecific);
   push(env, isTypeHelper(env, subop, val));
-  decRef(env, val);
+  decRef(env, val, DecRefProfileId::Default);
 }
 
 void emitIsTypeL(IRGS& env, NamedLocal loc, IsTypeOp subop) {

@@ -705,7 +705,7 @@ class MySSLContextProvider {
   /**
    * Allows to disable TLS session resumption for the connections
    * created using this provider.
-   * The resumption is enabled by default. Disabling sesison resumption
+   * The resumption is enabled by default. Disabling session resumption
    * can be helpful in test scenarios. It allows to force full TLS
    * handshake for every newly created connection.
    *

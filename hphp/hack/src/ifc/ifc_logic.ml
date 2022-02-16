@@ -203,7 +203,7 @@ let simplify (c : prop) =
       ITE (c, cat t t1, cat t t2)
   in
   let rec elim_forall_ift max = function
-    (* Same as alelim above, but for if_tree constraints *)
+    (* Same as elim_forall above, but for if_tree constraints *)
     | FLW l -> FLW (elim_forall ~max l)
     | ITE ((pos, Pbound_var 0, x), t1, t2) ->
       let max_if =

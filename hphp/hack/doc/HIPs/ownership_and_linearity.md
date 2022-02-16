@@ -1330,7 +1330,7 @@ They also include the concept of static regions containing static members (and
 doesn't live inside the Instance region). Following this, methods specify which
 regions (if any) they act (read and/or write) on. The typechecker guarantees
 both that these are true statements locally and that they are transitively true.
-Overall, this is effectively another layer of privat/public/protected specifiers
+Overall, this is effectively another layer of private/public/protected specifiers
 that typically exist for more fine control over encapsulation layers.
 
 They additionally allow for members to be marked as `unshared`, stating that

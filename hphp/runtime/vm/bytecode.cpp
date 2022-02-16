@@ -689,7 +689,7 @@ std::string Stack::toString(const ActRec* fp, int offset,
                        const std::string prefix/* = "" */) const {
   // The only way to figure out which stack elements are activation records is
   // to follow the frame chain. However, the goal for each stack frame is to
-  // print stack fragments from deepest to shallowst -- a then b in the
+  // print stack fragments from deepest to shallowest -- a then b in the
   // following example:
   //
   //   {func:foo,callOff:51}<C:8> {func:bar} C:8 C:1 {func:biz} C:0

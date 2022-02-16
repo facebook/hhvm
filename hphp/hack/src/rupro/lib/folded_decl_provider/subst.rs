@@ -5,8 +5,8 @@
 
 use crate::alloc::Allocator;
 use crate::decl_defs::{
-    DeclTy, DeclTy_, FunParam, FunType, PossiblyEnforcedTy, ShapeFieldType, TaccessType, Tparam,
-    WhereConstraint,
+    AbstractTypeconst, ClassConst, ConcreteTypeconst, DeclTy, DeclTy_, FunParam, FunType,
+    PossiblyEnforcedTy, ShapeFieldType, TaccessType, Tparam, TypeConst, Typeconst, WhereConstraint,
 };
 use crate::reason::{Reason, ReasonImpl};
 use pos::{TypeName, TypeNameMap};
@@ -264,6 +264,43 @@ impl<'a, R: Reason> Substitution<'a, R> {
         PossiblyEnforcedTy {
             ty: self.instantiate(&et.ty),
             enforced: et.enforced,
+        }
+    }
+
+    pub fn instantiate_class_const(&self, cc: &ClassConst<R>) -> ClassConst<R> {
+        ClassConst {
+            is_synthesized: cc.is_synthesized,
+            kind: cc.kind,
+            pos: cc.pos.clone(),
+            ty: self.instantiate(&cc.ty),
+            origin: cc.origin,
+            refs: cc.refs.clone(),
+        }
+    }
+
+    fn instantiate_type_const_kind(&self, kind: &Typeconst<R>) -> Typeconst<R> {
+        match kind {
+            Typeconst::TCAbstract(k) => Typeconst::TCAbstract(AbstractTypeconst {
+                as_constraint: k.as_constraint.as_ref().map(|ty| self.instantiate(ty)),
+                super_constraint: k.super_constraint.as_ref().map(|ty| self.instantiate(ty)),
+                default: k.default.as_ref().map(|ty| self.instantiate(ty)),
+            }),
+            Typeconst::TCConcrete(k) => Typeconst::TCConcrete(ConcreteTypeconst {
+                ty: self.instantiate(&k.ty),
+            }),
+        }
+    }
+
+    pub fn instantiate_type_const(&self, tc: &TypeConst<R>) -> TypeConst<R> {
+        TypeConst {
+            is_synthesized: tc.is_synthesized,
+            name: tc.name.clone(),
+            kind: self.instantiate_type_const_kind(&tc.kind),
+            origin: tc.origin,
+            enforceable: tc.enforceable.clone(),
+            reifiable: tc.reifiable.clone(),
+            is_concreteized: tc.is_concreteized,
+            is_ctx: tc.is_ctx,
         }
     }
 }

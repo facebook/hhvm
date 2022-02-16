@@ -11,7 +11,7 @@ pub use folded::{ClassConst, FoldedClass, FoldedElement, SubstContext, TypeConst
 pub use shallow::{FunDecl, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp};
 pub use ty::{
     AbstractTypeconst, Abstraction, CeVisibility, ClassConstFrom, ClassConstKind, ClassConstRef,
-    ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConsistentKind, DeclTy, DeclTy_, FunParam,
-    FunType, PossiblyEnforcedTy, Prim, ShapeFieldType, TaccessType, Tparam, Typeconst,
-    UserAttribute, Visibility, WhereConstraint, XhpAttribute,
+    ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConcreteTypeconst, ConsistentKind, DeclTy,
+    DeclTy_, FunParam, FunType, PossiblyEnforcedTy, Prim, ShapeFieldType, TaccessType, Tparam,
+    Typeconst, UserAttribute, Visibility, WhereConstraint, XhpAttribute,
 };

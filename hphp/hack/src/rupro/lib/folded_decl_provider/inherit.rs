@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::subst::Subst;
+use super::subst::{Subst, Substitution};
 use crate::alloc::Allocator;
 use crate::decl_defs::{
     AbstractTypeconst, Abstraction, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass,
@@ -349,7 +349,35 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
                 };
             }
         }
-        Inherited::default()
+        Default::default()
+    }
+
+    fn class_constants_from_class(&self, ty: &DeclTy<R>) -> Inherited<R> {
+        if let Some((_, pos_id, tyl)) = ty.unwrap_class_type() {
+            if let Some(class) = self.parents.get(&pos_id.id()) {
+                let sig = Subst::new(self.alloc, &class.tparams, tyl);
+                let subst = Substitution {
+                    alloc: self.alloc,
+                    subst: &sig,
+                };
+                let consts: ClassConstNameMap<_> = class
+                    .consts
+                    .iter()
+                    .map(|(name, cc)| (*name, subst.instantiate_class_const(cc)))
+                    .collect();
+                let type_consts: TypeConstNameMap<_> = class
+                    .type_consts
+                    .iter()
+                    .map(|(name, tc)| (*name, subst.instantiate_type_const(tc)))
+                    .collect();
+                return Inherited {
+                    consts,
+                    type_consts,
+                    ..Default::default()
+                };
+            }
+        }
+        Default::default()
     }
 
     // This logic deals with importing XHP attributes from an XHP class via the
@@ -370,7 +398,14 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
                 };
             }
         }
-        Inherited::default()
+        Default::default()
+    }
+
+    fn add_from_interface_constants(&mut self) {
+        for ty in self.child.req_implements.iter() {
+            self.members
+                .add_inherited(self.class_constants_from_class(ty))
+        }
     }
 
     fn add_from_xhp_attr_uses(&mut self) {
@@ -437,6 +472,8 @@ impl<R: Reason> Inherited<R> {
         folder.add_from_requirements();
         folder.add_from_traits(); // ... can be overridden by traits.
         folder.add_from_xhp_attr_uses();
+        folder.add_from_interface_constants();
+
         folder.members
     }
 }

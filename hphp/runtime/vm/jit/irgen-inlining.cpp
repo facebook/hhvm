@@ -388,7 +388,7 @@ void conjureBeginInlining(IRGS& env,
   env.irb->exceptionStackBoundary();
 
   auto const flags = hasUnpack
-    ? FCallArgs::Flags::HasUnpack : FCallArgs::Flags::None;
+    ? FCallArgsFlags::HasUnpack : FCallArgsFlags::FCANone;
 
   // thisType is the context type inside the closure, but beginInlining()'s ctx
   // is a context given to the prologue.

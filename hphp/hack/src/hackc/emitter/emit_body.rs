@@ -19,9 +19,10 @@ use hash::HashSet;
 use hhas_body::{HhasBody, HhasBodyEnv};
 use hhas_param::HhasParam;
 use hhas_type::HhasTypeInfo;
-use hhbc_ast::{FcallArgs, FcallFlags, Instruct, IsTypeOp, ParamId};
+use hhbc_ast::{FcallArgs, Instruct, IsTypeOp, ParamId};
 use hhbc_id::function;
 use hhbc_string_utils as string_utils;
+use hhvm_hhbc_defs_ffi::ffi::FCallArgsFlags;
 use instruction_sequence::{instr, unrecoverable, Error, InstrSeq, Result};
 use label::Label;
 use local::{Local, LocalId};
@@ -746,7 +747,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                         instr::fcallfuncd(
                             alloc,
                             FcallArgs::new(
-                                FcallFlags::default(),
+                                FCallArgsFlags::default(),
                                 1,
                                 Slice::empty(),
                                 Slice::empty(),

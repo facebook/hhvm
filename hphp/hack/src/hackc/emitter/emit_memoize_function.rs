@@ -14,9 +14,10 @@ use hhas_function::{HhasFunction, HhasFunctionFlags};
 use hhas_param::HhasParam;
 use hhas_pos::HhasSpan;
 use hhas_type::HhasTypeInfo;
-use hhbc_ast::{FcallArgs, FcallFlags};
+use hhbc_ast::FcallArgs;
 use hhbc_id::function;
 use hhbc_string_utils::reified;
+use hhvm_hhbc_defs_ffi::ffi::FCallArgsFlags;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
@@ -197,8 +198,8 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
         // Default value setters belong in the wrapper method not in the original method
         emit_param::emit_param_default_value_setter(e, env, pos, hhas_params)?;
     let fcall_args = {
-        let mut fcall_flags = FcallFlags::default();
-        fcall_flags.set(FcallFlags::HAS_GENERICS, is_reified);
+        let mut fcall_flags = FCallArgsFlags::default();
+        fcall_flags.set(FCallArgsFlags::HasGenerics, is_reified);
         FcallArgs::new(
             fcall_flags,
             1,
@@ -313,7 +314,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
     let deprecation_body =
         emit_body::emit_deprecation_info(alloc, &env.scope, deprecation_info, e.systemlib())?;
     let fcall_args = FcallArgs::new(
-        FcallFlags::default(),
+        FCallArgsFlags::default(),
         1,
         Slice::empty(),
         Slice::empty(),

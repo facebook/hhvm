@@ -38,6 +38,7 @@ use hhbc_string_utils::{
     float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, lstrip_bslice, mangle,
     strip_global_ns, strip_ns, types,
 };
+use hhvm_hhbc_defs_ffi::ffi::fcall_flags_to_string_ffi;
 use hhvm_types_ffi::ffi::*;
 use instruction_sequence::{Error::Unrecoverable, InstrSeq};
 use iterator::IterId;
@@ -940,17 +941,10 @@ fn print_instructions(
     Ok(())
 }
 
-fn if_then<F, R>(cond: bool, f: F) -> Option<R>
-where
-    F: FnOnce() -> R,
-{
-    if cond { Some(f()) } else { None }
-}
-
 fn print_fcall_args(
     w: &mut dyn Write,
     FcallArgs {
-        flags: fls,
+        flags,
         num_args,
         num_rets,
         inouts,
@@ -959,20 +953,7 @@ fn print_fcall_args(
         context,
     }: &FcallArgs<'_>,
 ) -> Result<()> {
-    use FcallFlags as F;
-    let mut flags = vec![];
-    if_then(fls.contains(F::HAS_UNPACK), || flags.push("Unpack"));
-    if_then(fls.contains(F::HAS_GENERICS), || flags.push("Generics"));
-    if_then(fls.contains(F::LOCK_WHILE_UNWINDING), || {
-        flags.push("LockWhileUnwinding")
-    });
-    if_then(fls.contains(F::ENFORCE_MUTABLE_RETURN), || {
-        flags.push("EnforceMutableReturn")
-    });
-    if_then(fls.contains(F::ENFORCE_READONLY_THIS), || {
-        flags.push("EnforceReadonlyThis")
-    });
-    angle(w, |w| concat_str_by(w, " ", flags))?;
+    angle(w, |w| write!(w, "{}", fcall_flags_to_string_ffi(*flags)))?;
     w.write_all(b" ")?;
     print_int(w, num_args)?;
     w.write_all(b" ")?;

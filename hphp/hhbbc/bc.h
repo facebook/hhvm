@@ -299,7 +299,7 @@ struct FCallArgsLong : FCallArgsBase {
 struct FCallArgs {
   using Flags = FCallArgsBase::Flags;
   explicit FCallArgs(uint32_t numArgs)
-    : FCallArgs(Flags::None, numArgs, 1, nullptr, nullptr, NoBlockId, nullptr) {}
+    : FCallArgs(Flags::FCANone, numArgs, 1, nullptr, nullptr, NoBlockId, nullptr) {}
   FCallArgs(Flags flags, uint32_t numArgs, uint32_t numRets,
             std::unique_ptr<uint8_t[]> inoutArgs,
             std::unique_ptr<uint8_t[]> readonlyArgs,

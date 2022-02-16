@@ -356,22 +356,22 @@ class HHBC(object):
             size += iva['size']
 
             numRets = 1
-            if flags & V('HPHP::FCallArgs::HasInOut'):
+            if flags & V('HPHP::FCallArgsFlags::HasInOut'):
                 iva = HHBC.decode_iva(ptr + size)
                 numRets = int(iva['value'])
                 size += iva['size']
 
-            if flags & V('HPHP::FCallArgs::EnforceInOut'):
+            if flags & V('HPHP::FCallArgsFlags::EnforceInOut'):
                 size += (numArgs + 7) // 8
 
             asyncEagerOffset = ''
-            if flags & V('HPHP::FCallArgs::HasAsyncEagerOffset'):
+            if flags & V('HPHP::FCallArgsFlags::HasAsyncEagerOffset'):
                 off = HHBC.decode_ba(ptr + size)
                 asyncEagerOffset = ' aeo:' + str(off['value'])
                 size += off['size']
 
             context = ''
-            if flags & V('HPHP::FCallArgs::ExplicitContext'):
+            if flags & V('HPHP::FCallArgsFlags::ExplicitContext'):
                 id = (ptr + size).cast(T('uint32_t').pointer()).dereference()
                 context = ' context:' + str(HHBC.try_lookup_litstr(id))
                 size += 4

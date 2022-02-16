@@ -9,6 +9,7 @@ use env::{emitter::Emitter, Env};
 use ffi::{Maybe, Slice, Str};
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
+use hhvm_hhbc_defs_ffi::ffi::FCallArgsFlags;
 use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use label::Label;
 use lazy_static::lazy_static;
@@ -542,7 +543,7 @@ fn emit_using<'a, 'arena, 'decl>(
                         instr::fcallobjmethodd(
                             alloc,
                             FcallArgs::new(
-                                FcallFlags::empty(),
+                                FCallArgsFlags::default(),
                                 1,
                                 Slice::empty(),
                                 Slice::empty(),
@@ -1138,7 +1139,7 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
                 instr::fcallobjmethodd(
                     alloc,
                     FcallArgs::new(
-                        FcallFlags::empty(),
+                        FCallArgsFlags::default(),
                         1,
                         Slice::empty(),
                         Slice::empty(),

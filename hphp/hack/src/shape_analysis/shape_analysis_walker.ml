@@ -204,23 +204,30 @@ and expr (env : env) ((ty, pos, e) : T.expr) : env * entity =
 
 let expr (env : env) (e : T.expr) : env = expr env e |> fst
 
-let rec case_list
-    (parent_locals : lenv) (env : env) (cases : ('ex, 'en) A.case list) : env =
+let rec switch
+    (parent_locals : lenv)
+    (env : env)
+    (cases : ('ex, 'en) A.case list)
+    (dfl : ('ex, 'en) A.default_case option) : env =
   let initialize_next_cont env =
     let env = Env.restore_conts_from env ~from:parent_locals [Cont.Next] in
     let env = Env.update_next_from_conts env [Cont.Next; Cont.Fallthrough] in
     Env.drop_cont env Cont.Fallthrough
   in
-  let handle_case env = function
-    | A.Default (_, b) ->
-      let env = initialize_next_cont env in
-      block env b
-    | A.Case (e, b) ->
-      let env = initialize_next_cont env in
-      let env = expr env e in
-      block env b
+  let handle_case env (e, b) =
+    let env = initialize_next_cont env in
+    let env = expr env e in
+    block env b
   in
-  List.fold ~init:env ~f:handle_case cases
+  let handle_default_case env dfl =
+    dfl
+    |> Option.fold ~init:env ~f:(fun env (_, b) ->
+           let env = initialize_next_cont env in
+           block env b)
+  in
+  let env = List.fold ~init:env ~f:handle_case cases in
+  let env = handle_default_case env dfl in
+  env
 
 and stmt (env : env) ((pos, stmt) : T.stmt) : env =
   match stmt with
@@ -233,14 +240,14 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
     let then_env = block base_env then_bl in
     let else_env = block base_env else_bl in
     Env.union parent_env then_env else_env
-  | A.Switch (cond, cases) ->
+  | A.Switch (cond, cases, dfl) ->
     let env = expr env cond in
     (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.
      * See the note in
      * http://php.net/manual/en/control-structures.continue.php *)
     Env.stash_and_do env [Cont.Continue; Cont.Break] @@ fun env ->
     let parent_locals = env.lenv in
-    let env = case_list parent_locals env cases in
+    let env = switch parent_locals env cases dfl in
     Env.update_next_from_conts env [Cont.Continue; Cont.Break; Cont.Next]
   | A.Fallthrough -> Env.move_and_merge_next_in_cont env Cont.Fallthrough
   | A.Continue -> Env.move_and_merge_next_in_cont env Cont.Continue

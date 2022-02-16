@@ -134,7 +134,8 @@ and ('ex, 'en) stmt_ =
 
           for ($i = 0; $i < 100; $i++) { ... }
           for ($x = 0, $y = 0; ; $x++, $y++) { ... } *)
-  | Switch of ('ex, 'en) expr * ('ex, 'en) case list
+  | Switch of
+      ('ex, 'en) expr * ('ex, 'en) case list * ('ex, 'en) default_case option
       (** Switch statement.
 
           switch ($foo) {
@@ -689,9 +690,13 @@ and ('ex, 'en) class_get_expr =
   | CGstring of pstring
   | CGexpr of ('ex, 'en) expr
 
-and ('ex, 'en) case =
-  | Default of pos * ('ex, 'en) block
-  | Case of ('ex, 'en) expr * ('ex, 'en) block
+and ('ex, 'en) case = ('ex, 'en) expr * ('ex, 'en) block
+
+and ('ex, 'en) default_case = pos * ('ex, 'en) block
+
+and ('ex, 'en) gen_case =
+  | Case of ('ex, 'en) case
+  | Default of ('ex, 'en) default_case
 
 and ('ex, 'en) catch = class_name * lid * ('ex, 'en) block
 
@@ -1137,3 +1142,8 @@ let enum_includes_map ?(default = []) ~f includes =
   | Some includes -> f includes
 
 let is_enum_class c = Ast_defs.is_c_enum_class c.c_kind
+
+(* helper function to pack switch branches (standard & default) in a single list *)
+let to_gen_cases cl dfl : ('ex, 'en) gen_case list =
+  List.map (fun x -> Case x) cl
+  @ Option.to_list (Option.map (fun x -> Default x) dfl)

@@ -196,9 +196,10 @@ let visitor =
         Option.iter e2 ~f:(this#on_expr (env, disallow_due_to_cast ctx env));
         List.iter e3 ~f:(this#on_expr (env, ctx));
         this#on_block (env, ctx) b
-      | Switch (e, casel) ->
+      | Switch (e, casel, dfl) ->
         this#on_expr (env, disallow_awaitable) e;
-        List.iter casel ~f:(this#on_case (env, ctx))
+        List.iter casel ~f:(this#on_case (env, ctx));
+        Option.iter dfl ~f:(this#on_default_case (env, ctx))
       | _ -> super#on_stmt (env, allow_awaitable) stmt
 
     method! on_block (env, _) block =

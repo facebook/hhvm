@@ -16,9 +16,11 @@ aast::ClassId_
 aast::ClassTypeconst
 aast::CollectionTarg
 aast::Def
+aast::DefaultCase
 aast::Expr_
 aast::FunctionPtrId
 aast::FunVariadicity
+aast::GenCase
 aast::HoleSource
 aast::ParamKind
 aast::Program

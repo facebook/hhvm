@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<26d1399128f71dc01e1d291bf7a12753>>
+// @generated SignedSource<<5d160d804f9539d096a23384509493b8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -165,7 +165,7 @@ pub enum Stmt_<Ex, En> {
     /// baz();
     /// break;
     /// }
-    Switch(Box<(Expr<Ex, En>, Vec<Case<Ex, En>>)>),
+    Switch(Box<(Expr<Ex, En>, Vec<Case<Ex, En>>, Option<DefaultCase<Ex, En>>)>),
     /// For-each loop.
     ///
     /// foreach ($items as $item) { ... }
@@ -915,10 +915,44 @@ pub enum ClassGetExpr<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
+pub struct Case<Ex, En>(pub Expr<Ex, En>, pub Block<Ex, En>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct DefaultCase<Ex, En>(pub Pos, pub Block<Ex, En>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 #[repr(C, u8)]
-pub enum Case<Ex, En> {
-    Default(Pos, Block<Ex, En>),
-    Case(Expr<Ex, En>, Block<Ex, En>),
+pub enum GenCase<Ex, En> {
+    Case(Case<Ex, En>),
+    Default(DefaultCase<Ex, En>),
 }
 
 #[derive(

@@ -105,13 +105,19 @@ impl<'a, 'arena> Env<'a, 'arena> {
         e: &mut Emitter<'arena, 'decl>,
         end_label: Label,
         cases: &[ast::Case],
+        dfl: &Option<ast::DefaultCase>,
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl>, &[ast::Case]) -> R,
+        F: FnOnce(
+            &mut Self,
+            &mut Emitter<'arena, 'decl>,
+            &[ast::Case],
+            &Option<ast::DefaultCase>,
+        ) -> R,
     {
         self.jump_targets_gen.with_switch(end_label);
-        self.run_and_release_ids(e, |env, e| f(env, e, cases))
+        self.run_and_release_ids(e, |env, e| f(env, e, cases, dfl))
     }
 
     pub fn do_in_try_catch_body<'decl, R, F>(

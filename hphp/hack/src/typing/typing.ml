@@ -2445,21 +2445,21 @@ and stmt_ env pos st =
       assert_env_stmt ~pos ~at:`End Aast.Refinement refinement_map for_st
     in
     (env, for_st)
-  | Switch (((_, pos, _) as e), cl) ->
+  | Switch (((_, pos, _) as e), cl, dfl) ->
     let (env, te, ty) = expr env e in
     (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.
      * See the note in
      * http://php.net/manual/en/control-structures.continue.php *)
-    let (env, (te, tcl)) =
+    let (env, (te, tcl, tdfl)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
           let parent_locals = LEnv.get_all_locals env in
-          let (env, tcl) = case_list parent_locals ty env pos cl in
+          let (env, tcl, tdfl) = case_list parent_locals ty env pos cl dfl in
           let env =
             LEnv.update_next_from_conts env [C.Continue; C.Break; C.Next]
           in
-          (env, (te, tcl)))
+          (env, (te, tcl, tdfl)))
     in
-    (env, Aast.Switch (te, tcl))
+    (env, Aast.Switch (te, tcl, tdfl))
   | Foreach (e1, e2, b) ->
     (* It's safe to do foreach over a disposable, as no leaking is possible *)
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
@@ -2590,14 +2590,14 @@ and try_catch env tb cl fb =
   in
   (env, ttb, tcb, tfb)
 
-and case_list parent_locals ty env switch_pos cl =
+and case_list parent_locals ty env switch_pos cl dfl =
   let initialize_next_cont env =
     let env = LEnv.restore_conts_from env parent_locals [C.Next] in
     let env = LEnv.update_next_from_conts env [C.Next; C.Fallthrough] in
     LEnv.drop_cont env C.Fallthrough
   in
-  let check_fallthrough env switch_pos case_pos block rest_of_list ~is_default =
-    if (not (List.is_empty block)) && not (List.is_empty rest_of_list) then
+  let check_fallthrough env switch_pos case_pos block ~last ~is_default =
+    if (not (List.is_empty block)) && not last then
       match LEnv.get_cont_option env C.Next with
       | Some _ ->
         Errors.add_nast_check_error
@@ -2610,11 +2610,7 @@ and case_list parent_locals ty env switch_pos cl =
   in
   let env =
     (* below, we try to find out if the switch is exhaustive *)
-    let has_default =
-      List.exists cl ~f:(function
-          | Default _ -> true
-          | _ -> false)
-    in
+    let has_default = Option.is_some dfl in
     let (env, ty) =
       (* If it hasn't got a default clause then we need to solve type variables
        * in order to check for an enum *)
@@ -2644,23 +2640,30 @@ and case_list parent_locals ty env switch_pos cl =
     else
       might_throw env
   in
-  let rec case_list env = function
-    | [] -> (env, [])
-    | Default (pos, b) :: rl ->
-      let env = initialize_next_cont env in
-      let (env, tb) = block env b in
-      check_fallthrough env switch_pos pos b rl ~is_default:true;
-      let (env, tcl) = case_list env rl in
-      (env, Aast.Default (pos, tb) :: tcl)
-    | Case (((_, pos, _) as e), b) :: rl ->
-      let env = initialize_next_cont env in
-      let (env, te, _) = expr env e ~allow_awaitable:(*?*) false in
-      let (env, tb) = block env b in
-      check_fallthrough env switch_pos pos b rl ~is_default:false;
-      let (env, tcl) = case_list env rl in
-      (env, Aast.Case (te, tb) :: tcl)
+  let (env, tcl) =
+    let rec case_list env = function
+      | [] -> (env, [])
+      | (((_, pos, _) as e), b) :: rl ->
+        let env = initialize_next_cont env in
+        let (env, te, _) = expr env e ~allow_awaitable:(*?*) false in
+        let (env, tb) = block env b in
+        let last = List.is_empty rl && Option.is_none dfl in
+        check_fallthrough env switch_pos pos b ~last ~is_default:false;
+        let (env, tcl) = case_list env rl in
+        (env, (te, tb) :: tcl)
+    in
+    case_list env cl
   in
-  case_list env cl
+  let (env, tdfl) =
+    match dfl with
+    | None -> (env, None)
+    | Some (pos, b) ->
+      let env = initialize_next_cont env in
+      let (env, tb) = block env b in
+      check_fallthrough env switch_pos pos b ~last:true ~is_default:true;
+      (env, Some (pos, tb))
+  in
+  (env, tcl, tdfl)
 
 and catch catchctx env (sid, exn_lvar, b) =
   let env = LEnv.replace_cont env C.Next catchctx in

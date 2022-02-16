@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5de54519146f2acae4935e20172cf6ae>>
+// @generated SignedSource<<4c1eaeb4ec5ce4a947ef6f45f154d0c8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -198,18 +198,9 @@ impl<P: Params> NodeMut<P> for Case<P::Ex, P::En> {
         c: &mut P::Context,
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
-        match self {
-            Case::Default(a0, a1) => {
-                a0.accept(c, v)?;
-                a1.accept(c, v)?;
-                Ok(())
-            }
-            Case::Case(a0, a1) => {
-                a0.accept(c, v)?;
-                a1.accept(c, v)?;
-                Ok(())
-            }
-        }
+        self.0.accept(c, v)?;
+        self.1.accept(c, v)?;
+        Ok(())
     }
 }
 impl<P: Params> NodeMut<P> for Catch<P::Ex, P::En> {
@@ -681,6 +672,24 @@ impl<P: Params> NodeMut<P> for Def<P::Ex, P::En> {
                 Ok(())
             }
         }
+    }
+}
+impl<P: Params> NodeMut<P> for DefaultCase<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_default_case(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)?;
+        self.1.accept(c, v)?;
+        Ok(())
     }
 }
 impl<P: Params> NodeMut<P> for DocComment {
@@ -1883,6 +1892,7 @@ impl<P: Params> NodeMut<P> for Stmt_<P::Ex, P::En> {
             Stmt_::Switch(a) => {
                 a.0.accept(c, v)?;
                 a.1.accept(c, v)?;
+                a.2.accept(c, v)?;
                 Ok(())
             }
             Stmt_::Foreach(a) => {

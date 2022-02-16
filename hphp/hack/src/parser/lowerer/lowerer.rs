@@ -2606,14 +2606,20 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
     let new = Stmt::new;
     match &node.children {
         SwitchStatement(c) => {
-            let p_label = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Case, Error> {
+            let p_label = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::GenCase, Error> {
                 match &n.children {
-                    CaseLabel(c) => Ok(ast::Case::Case(p_expr(&c.expression, e)?, vec![])),
-                    DefaultLabel(_) => Ok(ast::Case::Default(p_pos(n, e), vec![])),
+                    CaseLabel(c) => Ok(aast::GenCase::Case(aast::Case(
+                        p_expr(&c.expression, e)?,
+                        vec![],
+                    ))),
+                    DefaultLabel(_) => Ok(aast::GenCase::Default(aast::DefaultCase(
+                        p_pos(n, e),
+                        vec![],
+                    ))),
                     _ => missing_syntax("switch label", n, e),
                 }
             };
-            let p_section = |n: S<'a>, e: &mut Env<'a>| -> Result<Vec<ast::Case>, Error> {
+            let p_section = |n: S<'a>, e: &mut Env<'a>| -> Result<Vec<ast::GenCase>, Error> {
                 match &n.children {
                     SwitchSection(c) => {
                         let mut blk = could_map(p_stmt, &c.statements, e)?;
@@ -2622,8 +2628,8 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
                         }
                         let mut labels = could_map(p_label, &c.labels, e)?;
                         match labels.last_mut() {
-                            Some(ast::Case::Default(_, b)) => *b = blk,
-                            Some(ast::Case::Case(_, b)) => *b = blk,
+                            Some(aast::GenCase::Default(aast::DefaultCase(_, b))) => *b = blk,
+                            Some(aast::GenCase::Case(aast::Case(_, b))) => *b = blk,
                             _ => raise_parsing_error(n, e, "Malformed block result"),
                         }
                         Ok(labels)
@@ -2631,13 +2637,44 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
                     _ => missing_syntax("switch section", n, e),
                 }
             };
+
             let f = |env: &mut Env<'a>| -> Result<ast::Stmt, Error> {
+                let cases = itertools::concat(could_map(p_section, &c.sections, env)?);
+
+                let last_is_default = matches!(cases.last(), Some(aast::GenCase::Default(_)));
+
+                let (cases, mut defaults): (Vec<ast::Case>, Vec<ast::DefaultCase>) =
+                    cases.into_iter().partition_map(|case| match case {
+                        aast::GenCase::Case(x @ aast::Case(..)) => Either::Left(x),
+                        aast::GenCase::Default(x @ aast::DefaultCase(..)) => Either::Right(x),
+                    });
+
+                if defaults.len() > 1 {
+                    let aast::DefaultCase(pos, _) = &defaults[1];
+                    raise_parsing_error_pos(pos, env, &syntax_error::multiple_defaults_in_switch);
+                }
+
+                let default = match defaults.pop() {
+                    Some(default @ aast::DefaultCase(..)) => {
+                        if last_is_default {
+                            Some(default)
+                        } else {
+                            let aast::DefaultCase(pos, _) = default;
+                            raise_parsing_error_pos(
+                                &pos,
+                                env,
+                                &syntax_error::default_switch_case_not_last,
+                            );
+                            None
+                        }
+                    }
+
+                    None => None,
+                };
+
                 Ok(new(
                     pos,
-                    S_::mk_switch(
-                        p_expr(&c.expression, env)?,
-                        itertools::concat(could_map(p_section, &c.sections, env)?),
-                    ),
+                    S_::mk_switch(p_expr(&c.expression, env)?, cases, default),
                 ))
             };
             lift_awaits_in_statement(f, node, env)

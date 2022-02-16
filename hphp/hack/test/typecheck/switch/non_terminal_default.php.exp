@@ -1,2 +1,2 @@
-File "non_terminal_default.php", line 9, characters 10-12:
-Default case in `switch` must be terminal (NastCheck[3081])
+File "non_terminal_default.php", line 6, characters 5-12:
+Default case in `switch` must be terminal (Parsing[1002])

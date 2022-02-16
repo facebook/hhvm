@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f29699fabffdb700386b47ff4c4fce84>>
+// @generated SignedSource<<ad126dfd48a42c390cee4b9a2b3fd94d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -72,6 +72,10 @@ pub type ClassId<'a> = aast::ClassId<'a, (), ()>;
 pub type Catch<'a> = aast::Catch<'a, (), ()>;
 
 pub type Case<'a> = aast::Case<'a, (), ()>;
+
+pub type DefaultCase<'a> = aast::DefaultCase<'a, (), ()>;
+
+pub type GenCase<'a> = aast::GenCase<'a, (), ()>;
 
 pub type Field<'a> = aast::Field<'a, (), ()>;
 

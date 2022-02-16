@@ -1049,3 +1049,9 @@ pub const read_globals_without_readonly: Error = Cow::Borrowed(
 );
 
 pub const missing_fn_def_body: Error = Cow::Borrowed("Non-native functions must have a body");
+
+pub const multiple_defaults_in_switch: Error =
+    Cow::Borrowed("There can be only one `default` case in `switch`");
+
+pub const default_switch_case_not_last: Error =
+    Cow::Borrowed("Default case in `switch` must be terminal");

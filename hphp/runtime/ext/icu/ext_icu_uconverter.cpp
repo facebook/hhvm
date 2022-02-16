@@ -65,7 +65,7 @@ static void appendToUTarget(IntlUConverter *data,
   if (val.isInteger()) {
     int64_t lval = val.toInt64();
     if (lval < 0 || lval > 0x10FFFF) {
-      data->failure(U_ILLEGAL_ARGUMENT_ERROR, "appendToUTarger");
+      data->failure(U_ILLEGAL_ARGUMENT_ERROR, "appendToUTarget");
       return;
     }
     if (lval > 0xFFFF) {

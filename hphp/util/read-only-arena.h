@@ -59,7 +59,7 @@ struct ReadOnlyChunk {
  * ReadOnlyArena is a bump allocator for process-lifetime constant data. It is
  * backed by a list of ReadOnlyChunk's. Deallocation is not supported, but an
  * instance is able to return partially allocated ReadOnlyChunks to a global
- * pool (a TaggestSlabList), if it is specified during construction.
+ * pool (a TaggedSlabList), if it is specified during construction.
  *
  * If `Local` is true, no concurrent allocation is supported for an instance
  * (but allocating new chunks, or returning chunks to the global pool can still

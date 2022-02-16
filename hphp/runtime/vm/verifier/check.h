@@ -104,7 +104,7 @@ bool checkFunc(const FuncEmitter*, ErrorMode mode = kStderr);
  * -- Return types are also correct
  * -- Functions declared as ActRec take an ActRec* as their sole argument
  * -- Functions with a variadic parameter take an Array as the final argument,
- *    and PHP 5 compatibility functions are registred appropriately.
+ *    and PHP 5 compatibility functions are registered appropriately.
  * -- Methods take an ObjectData* as their first argument
  * -- Static methods take a const Class* as their first argument
  */

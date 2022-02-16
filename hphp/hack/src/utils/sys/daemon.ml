@@ -23,7 +23,7 @@ type ('in_, 'out) handle = {
 }
 
 (* Windows: ensure that the serialize/deserialize functions
-   for the custom block of "Unix.file_descr" are registred. *)
+   for the custom block of "Unix.file_descr" are registered. *)
 let () = Lazy.force Handle.init
 
 let to_channel :

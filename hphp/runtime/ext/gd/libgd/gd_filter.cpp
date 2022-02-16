@@ -215,7 +215,7 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
     return 0;
   }
 
-  /* We need the orinal image with each safe neoghb. pixel */
+  /* We need the original image with each safe neoghb. pixel */
   srcback = gdImageCreateTrueColor (src->sx, src->sy);
   if (srcback==NULL) {
     return 0;

@@ -393,7 +393,7 @@ struct DceState {
   std::bitset<kMaxTrackedLocals> mayNeedUnsettingExn;
 
   /*
-   * The set of local names thate were ever referenced in this block.  This set
+   * The set of local names that were ever referenced in this block.  This set
    * is used by global DCE to remove local names that are completely unused
    * in the entire function.
    */

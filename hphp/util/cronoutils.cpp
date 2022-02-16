@@ -469,7 +469,7 @@ start_of_next_period(time_t time_now, PERIODICITY periodicity, int period_multip
 /* Determine the time of the start of the period containing a given time.
  * Break down the time with localtime and subtract the number of
  * seconds since the start of the period.  If the length of period is
- * equal or longer than a day then we have to check tht the
+ * equal or longer than a day then we have to check that the
  * calculation is not thrown out by the start or end of daylight
  * saving time.
  */

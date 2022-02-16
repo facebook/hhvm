@@ -1039,7 +1039,7 @@ linear values because you don't need dynamic aliases that are required to be ref
 to unique objects. They allow modifications to Borrowed objects. This seems to
 generally safe only because they mark mutating methods as `synchronized`, which
 alleviates any interleaving concerns automagically. I'm not quite clear on how
-that works, however, given tht reads can happen in nonsynchronized methods.
+that works, however, given that reads can happen in nonsynchronized methods.
 
 > When a unique field of an object is read, all aliases of the field are made undefined.
 > If we can determine statically that no alias is ‘buried alive’, no dynamic

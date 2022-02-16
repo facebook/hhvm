@@ -32,4 +32,3 @@ stack_limit = { path = "../utils/stack_limit" }
 structopt = "0.3.23"
 strum = "0.21"
 strum_macros = "0.21"
-unified_decl_provider = { path = "../hackc/unified_decl_provider" }

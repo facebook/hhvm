@@ -59,7 +59,7 @@ extern "C" fn compile_from_text_ffi(
                     &mut w,
                     source_text,
                     None,
-                    unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
+                    &NoDeclProvider,
                 ) {
                     Ok(profile) => print_output(
                         w,

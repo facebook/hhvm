@@ -24,4 +24,3 @@ oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 statement_state = { path = "../statement_state" }
 symbol_refs_state = { path = "../symbol_refs_state" }
-unified_decl_provider = { path = "../../../unified_decl_provider" }

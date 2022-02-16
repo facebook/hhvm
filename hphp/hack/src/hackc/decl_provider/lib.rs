@@ -6,21 +6,25 @@
 
 use oxidized_by_ref::file_info::NameType;
 use oxidized_by_ref::shallow_decl_defs::Decl;
+use thiserror::Error;
 
-#[derive(Debug)]
+pub type Result<T, E = Error> = std::result::Result<T, E>;
+
+#[derive(Debug, Error)]
 pub enum Error {
+    #[error("Decl not found")]
     NotFound,
 }
 
-pub trait DeclProvider<'decl> {
-    fn get_decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'decl>, Error>;
+pub trait DeclProvider<'decl>: std::fmt::Debug {
+    fn get_decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'decl>>;
 }
 
 #[derive(Debug, Default)]
 pub struct NoDeclProvider;
 
 impl<'decl> DeclProvider<'decl> for NoDeclProvider {
-    fn get_decl(&self, _: NameType, _: &str) -> Result<Decl<'decl>, Error> {
+    fn get_decl(&self, _: NameType, _: &str) -> Result<Decl<'decl>> {
         Err(Error::NotFound)
     }
 }

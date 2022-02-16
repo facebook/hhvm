@@ -6,8 +6,7 @@
  facebook
  ffi_bridge
  hhbc_by_ref
- options_ffi
- unified_decl_provider)
+ options_ffi)
 
 (library
  (name hhbc)

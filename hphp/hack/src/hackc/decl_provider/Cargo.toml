@@ -9,3 +9,4 @@ path = "lib.rs"
 
 [dependencies]
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
+thiserror = "1.0.29"

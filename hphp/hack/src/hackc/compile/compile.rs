@@ -18,7 +18,6 @@ use env::emitter::Emitter;
 use hackc_unit::HackCUnit;
 use hhbc_ast::FatalOp;
 use instruction_sequence::Error;
-use itertools::{Either, Either::*};
 use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use options::{Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, RepoFlags};
@@ -31,23 +30,24 @@ use parser_core_types::{
 };
 use rewrite_program::rewrite_program;
 use stack_limit::StackLimit;
+use thiserror::Error;
 
 /// Common input needed for compilation.  Extra care is taken
 /// so that everything is easily serializable at the FFI boundary
 /// until the migration from OCaml is fully complete
 #[derive(Debug, FromOcamlRep)]
-pub struct Env<STR: AsRef<str>> {
+pub struct Env<S> {
     pub filepath: RelativePath,
-    pub config_jsons: Vec<STR>,
-    pub config_list: Vec<STR>,
+    pub config_jsons: Vec<S>,
+    pub config_list: Vec<S>,
     pub flags: EnvFlags,
 }
 
 #[derive(Debug)]
-pub struct NativeEnv<STR: AsRef<str>> {
+pub struct NativeEnv<S> {
     pub filepath: RelativePath,
-    pub aliased_namespaces: STR,
-    pub include_roots: STR,
+    pub aliased_namespaces: S,
+    pub include_roots: S,
     pub emit_class_pointers: i32,
     pub check_int_overflow: i32,
     pub hhbc_flags: HHBCFlags,
@@ -445,11 +445,11 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
     });
 
     let (program, codegen_t) = match parse_result {
-        Either::Right(mut ast) => {
+        Ok(mut ast) => {
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
             time(move || rewrite_and_emit(emitter, env, namespace_env, &mut ast))
         }
-        Either::Left((pos, msg, is_runtime_error)) => {
+        Err(ParseError(pos, msg, is_runtime_error)) => {
             time(|| emit_fatal(emitter.alloc, is_runtime_error, &pos, msg))
         }
     };
@@ -540,6 +540,10 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
     }
 }
 
+#[derive(Error, Debug)]
+#[error("{0}: {1}")]
+pub(crate) struct ParseError(Pos, String, bool);
+
 /// parse_file returns either error(Left) or ast(Right)
 /// - Left((Position, message, is_runtime_error))
 /// - Right(ast)
@@ -550,7 +554,7 @@ fn parse_file(
     elaborate_namespaces: bool,
     namespace_env: RcOc<NamespaceEnv>,
     is_systemlib: bool,
-) -> Either<(Pos, String, bool), ast::Program> {
+) -> Result<ast::Program, ParseError> {
     let aast_env = AastEnv {
         codegen: true,
         fail_open: false,
@@ -574,12 +578,14 @@ fn parse_file(
         Some(stack_limit),
     );
     match ast_result {
-        Err(AastError::Other(msg)) => Left((Pos::make_none(), msg, false)),
-        Err(AastError::NotAHackFile()) => {
-            Left((Pos::make_none(), "Not a Hack file".to_string(), false))
-        }
+        Err(AastError::Other(msg)) => Err(ParseError(Pos::make_none(), msg, false)),
+        Err(AastError::NotAHackFile()) => Err(ParseError(
+            Pos::make_none(),
+            "Not a Hack file".to_string(),
+            false,
+        )),
         Err(AastError::ParserFatal(syntax_error, pos)) => {
-            Left((pos, syntax_error.message.to_string(), false))
+            Err(ParseError(pos, syntax_error.message.to_string(), false))
         }
         Ok(ast) => match ast {
             AastResult { syntax_errors, .. } if !syntax_errors.is_empty() => {
@@ -588,7 +594,7 @@ fn parse_file(
                     .find(|e| e.error_type == ErrorType::RuntimeError)
                     .unwrap_or(&syntax_errors[0]);
                 let pos = indexed_source_text.relative_pos(error.start_offset, error.end_offset);
-                Left((
+                Err(ParseError(
                     pos,
                     error.message.to_string(),
                     error.error_type == ErrorType::RuntimeError,
@@ -596,7 +602,7 @@ fn parse_file(
             }
             AastResult { lowpri_errors, .. } if !lowpri_errors.is_empty() => {
                 let (pos, msg) = lowpri_errors.into_iter().next().unwrap();
-                Left((pos, msg, false))
+                Err(ParseError(pos, msg, false))
             }
             AastResult {
                 errors,
@@ -614,11 +620,11 @@ fn parse_file(
                         && e.code() != 2103
                 });
                 if errors.next().is_some() {
-                    Left((Pos::make_none(), String::new(), false))
+                    Err(ParseError(Pos::make_none(), String::new(), false))
                 } else {
                     match aast {
-                        Ok(aast) => Right(aast),
-                        Err(msg) => Left((Pos::make_none(), msg, false)),
+                        Ok(aast) => Ok(aast),
+                        Err(msg) => Err(ParseError(Pos::make_none(), msg, false)),
                     }
                 }
             }

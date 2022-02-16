@@ -471,7 +471,6 @@ dependencies = [
  "hackc_unit",
  "hhbc_ast",
  "instruction_sequence",
- "itertools 0.10.3",
  "ocamlrep",
  "ocamlrep_derive",
  "options",
@@ -480,6 +479,7 @@ dependencies = [
  "profile_rust",
  "rewrite_program",
  "stack_limit",
+ "thiserror",
  "unified_decl_provider",
 ]
 

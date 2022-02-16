@@ -20,7 +20,6 @@ env = { path = "../../../emitter/cargo/env" }
 hackc_unit = { path = "../../../hhbc/cargo/hackc_unit" }
 hhbc_ast = { path = "../../../hhbc/cargo/hhbc_ast" }
 instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
-itertools = "0.10.3"
 ocamlrep = { path = "../../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../../ocamlrep_derive" }
 options = { path = "../options" }
@@ -29,4 +28,5 @@ parser_core_types = { path = "../../../../parser/cargo/core_types" }
 profile_rust = { path = "../../../../utils/perf/cargo/profile" }
 rewrite_program = { path = "../rewrite_program" }
 stack_limit = { path = "../../../../utils/stack_limit" }
+thiserror = "1.0.29"
 unified_decl_provider = { path = "../../../unified_decl_provider" }

@@ -17,10 +17,13 @@ use unified_decl_provider::DeclProvider;
 pub struct Emitter<'arena, 'decl> {
     /// Options are frozen/const after emitter is constructed
     opts: Options,
+
     /// systemlib is part of context, changed externally
     systemlib: bool,
-    // controls whether we shell out to the decl provider for testing purposes
+
+    /// controls whether we shell out to the decl provider for testing purposes
     use_decls: bool,
+
     // the rest is being mutated during emittance
     label_gen: label::Gen,
     local_gen: local::Gen<'arena>,

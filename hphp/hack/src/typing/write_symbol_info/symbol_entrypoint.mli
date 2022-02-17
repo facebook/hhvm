@@ -6,11 +6,13 @@
  *
  *)
 
+(* entry point to the hack indexer *)
+
 val go :
   MultiWorker.worker list option ->
   Provider_context.t ->
-  string ->
-  string ->
-  string ->
-  Relative_path.t list ->
+  out_dir:string ->
+  root_path:string ->
+  hhi_path:string ->
+  files:Relative_path.t list ->
   unit

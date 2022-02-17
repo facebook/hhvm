@@ -6,8 +6,8 @@
   symbol_add_fact
   symbol_build_json
   symbol_json_util
-  symbol_info_writer
   symbol_json_builder
+  symbol_entrypoint
   symbol_predicate)
  (libraries
   tast_provider

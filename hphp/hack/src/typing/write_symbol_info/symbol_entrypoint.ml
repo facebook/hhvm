@@ -83,10 +83,10 @@ let recheck_job
 let go
     (workers : MultiWorker.worker list option)
     (ctx : Provider_context.t)
-    (out_dir : string)
-    (root_path : string)
-    (hhi_path : string)
-    (filepaths : Relative_path.t list) : unit =
+    ~(out_dir : string)
+    ~(root_path : string)
+    ~(hhi_path : string)
+    ~(files : Relative_path.t list) : unit =
   let num_workers =
     match workers with
     | Some w -> List.length w
@@ -96,5 +96,5 @@ let go
     workers
     ~job:(recheck_job ctx out_dir root_path hhi_path)
     ~merge:(fun () () -> ())
-    ~next:(Bucket.make ~num_workers ~max_size:150 filepaths)
+    ~next:(Bucket.make ~num_workers ~max_size:150 files)
     ~neutral:()

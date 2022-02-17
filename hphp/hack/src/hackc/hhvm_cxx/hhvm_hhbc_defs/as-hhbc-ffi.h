@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/vm/as-base.h"
 #include "hphp/runtime/vm/fcall-args-flags.h"
+#include "hphp/runtime/vm/hhbc-shared.h"
 
 #include "rust/cxx.h"
 

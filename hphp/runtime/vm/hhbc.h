@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/vm/fcall-args-flags.h"
+#include "hphp/runtime/vm/hhbc-shared.h"
 #include "hphp/runtime/vm/member-key.h"
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/either.h"
@@ -342,51 +343,6 @@ inline bool isIncDecO(IncDecOp op) {
     op == IncDecOp::PreIncO || op == IncDecOp::PreDecO ||
     op == IncDecOp::PostIncO || op == IncDecOp::PostDecO;
 }
-
-#define ISTYPE_OPS                             \
-  ISTYPE_OP(Null)                              \
-  ISTYPE_OP(Bool)                              \
-  ISTYPE_OP(Int)                               \
-  ISTYPE_OP(Dbl)                               \
-  ISTYPE_OP(Str)                               \
-  ISTYPE_OP(Vec)                               \
-  ISTYPE_OP(Dict)                              \
-  ISTYPE_OP(Keyset)                            \
-  ISTYPE_OP(Obj)                               \
-  ISTYPE_OP(Scalar)                            \
-  ISTYPE_OP(ArrLike)                           \
-  ISTYPE_OP(LegacyArrLike)                     \
-  ISTYPE_OP(Res)                               \
-  ISTYPE_OP(ClsMeth)                           \
-  ISTYPE_OP(Func)                              \
-  ISTYPE_OP(Class)
-
-enum class IsTypeOp : uint8_t {
-#define ISTYPE_OP(op) op,
-  ISTYPE_OPS
-#undef ISTYPE_OP
-};
-
-#define INITPROP_OPS    \
-  INITPROP_OP(Static)   \
-  INITPROP_OP(NonStatic)
-
-enum class InitPropOp : uint8_t {
-#define INITPROP_OP(op) op,
-  INITPROP_OPS
-#undef INITPROP_OP
-};
-
-#define FATAL_OPS                               \
-  FATAL_OP(Runtime)                             \
-  FATAL_OP(Parse)                               \
-  FATAL_OP(RuntimeOmitFrame)
-
-enum class FatalOp : uint8_t {
-#define FATAL_OP(x) x,
-  FATAL_OPS
-#undef FATAL_OP
-};
 
 // Each of the setop ops maps to a binary bytecode op. We have reasons
 // for using distinct bitwise representations, though. This macro records

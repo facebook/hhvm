@@ -12,7 +12,7 @@ use hhbc_assertion_utils::*;
 use hhbc_ast::*;
 use hhbc_id::{class, r#const, function, method, prop};
 use hhbc_string_utils as string_utils;
-use hhvm_hhbc_defs_ffi::ffi::FCallArgsFlags;
+use hhvm_hhbc_defs_ffi::ffi::{FCallArgsFlags, IsTypeOp};
 use indexmap::IndexSet;
 use instruction_sequence::{
     instr, unrecoverable,
@@ -969,7 +969,7 @@ pub fn emit_await<'a, 'arena, 'decl>(
                     instrs,
                     emit_pos(alloc, pos),
                     instr::dup(alloc),
-                    instr::istypec(alloc, IsTypeOp::OpNull),
+                    instr::istypec(alloc, IsTypeOp::Null),
                     instr::jmpnz(alloc, after_await.clone()),
                     instr::await_(alloc),
                     instr::label(alloc, after_await),
@@ -1772,7 +1772,7 @@ fn emit_call_isset_expr<'a, 'arena, 'decl>(
                     emit_pos(alloc, outer_pos),
                     emit_local(e, env, BareThisOp::NoNotice, lid)?,
                     emit_pos(alloc, outer_pos),
-                    instr::istypec(alloc, IsTypeOp::OpNull),
+                    instr::istypec(alloc, IsTypeOp::Null),
                     instr::not(alloc),
                 ],
             )
@@ -1788,7 +1788,7 @@ fn emit_call_isset_expr<'a, 'arena, 'decl>(
         alloc,
         vec![
             emit_expr(e, env, expr)?,
-            instr::istypec(alloc, IsTypeOp::OpNull),
+            instr::istypec(alloc, IsTypeOp::Null),
             instr::not(alloc),
         ],
     ))
@@ -3505,24 +3505,24 @@ fn emit_is<'a, 'arena, 'decl>(
 
 fn istype_op(id: impl AsRef<str>) -> Option<IsTypeOp> {
     match id.as_ref() {
-        "is_int" | "is_integer" | "is_long" => Some(IsTypeOp::OpInt),
-        "is_bool" => Some(IsTypeOp::OpBool),
-        "is_float" | "is_real" | "is_double" => Some(IsTypeOp::OpDbl),
-        "is_string" => Some(IsTypeOp::OpStr),
-        "is_object" => Some(IsTypeOp::OpObj),
-        "is_null" => Some(IsTypeOp::OpNull),
-        "is_scalar" => Some(IsTypeOp::OpScalar),
-        "HH\\is_keyset" => Some(IsTypeOp::OpKeyset),
-        "HH\\is_dict" => Some(IsTypeOp::OpDict),
-        "HH\\is_vec" => Some(IsTypeOp::OpVec),
-        "HH\\is_varray" => Some(IsTypeOp::OpVec),
-        "HH\\is_darray" => Some(IsTypeOp::OpDict),
-        "HH\\is_any_array" => Some(IsTypeOp::OpArrLike),
-        "HH\\is_class_meth" => Some(IsTypeOp::OpClsMeth),
-        "HH\\is_fun" => Some(IsTypeOp::OpFunc),
-        "HH\\is_php_array" => Some(IsTypeOp::OpLegacyArrLike),
-        "HH\\is_array_marked_legacy" => Some(IsTypeOp::OpLegacyArrLike),
-        "HH\\is_class" => Some(IsTypeOp::OpClass),
+        "is_int" | "is_integer" | "is_long" => Some(IsTypeOp::Int),
+        "is_bool" => Some(IsTypeOp::Bool),
+        "is_float" | "is_real" | "is_double" => Some(IsTypeOp::Dbl),
+        "is_string" => Some(IsTypeOp::Str),
+        "is_object" => Some(IsTypeOp::Obj),
+        "is_null" => Some(IsTypeOp::Null),
+        "is_scalar" => Some(IsTypeOp::Scalar),
+        "HH\\is_keyset" => Some(IsTypeOp::Keyset),
+        "HH\\is_dict" => Some(IsTypeOp::Dict),
+        "HH\\is_vec" => Some(IsTypeOp::Vec),
+        "HH\\is_varray" => Some(IsTypeOp::Vec),
+        "HH\\is_darray" => Some(IsTypeOp::Dict),
+        "HH\\is_any_array" => Some(IsTypeOp::ArrLike),
+        "HH\\is_class_meth" => Some(IsTypeOp::ClsMeth),
+        "HH\\is_fun" => Some(IsTypeOp::Func),
+        "HH\\is_php_array" => Some(IsTypeOp::LegacyArrLike),
+        "HH\\is_array_marked_legacy" => Some(IsTypeOp::LegacyArrLike),
+        "HH\\is_class" => Some(IsTypeOp::Class),
         _ => None,
     }
 }
@@ -5159,7 +5159,7 @@ fn emit_null_coalesce_assignment<'a, 'arena, 'decl>(
         vec![
             quiet_instr,
             instr::dup(alloc),
-            instr::istypec(alloc, IsTypeOp::OpNull),
+            instr::istypec(alloc, IsTypeOp::Null),
             instr::jmpnz(alloc, do_set_label),
             instr::popl(alloc, l_nonnull),
             emit_popc_n(querym_n_unpopped),
@@ -5255,7 +5255,7 @@ fn emit_binop<'a, 'arena, 'decl>(
                 vec![
                     emit_quiet_expr(e, env, pos, e1, false)?.0,
                     instr::dup(alloc),
-                    instr::istypec(alloc, IsTypeOp::OpNull),
+                    instr::istypec(alloc, IsTypeOp::Null),
                     instr::not(alloc),
                     instr::jmpnz(alloc, end_label),
                     instr::popc(alloc),
@@ -7018,7 +7018,7 @@ pub fn emit_is_null<'a, 'arena, 'decl>(
             return Ok(instr::istypel(
                 alloc,
                 get_local(e, env, pos, local_id::get_name(id))?,
-                IsTypeOp::OpNull,
+                IsTypeOp::Null,
             ));
         }
     }
@@ -7027,7 +7027,7 @@ pub fn emit_is_null<'a, 'arena, 'decl>(
         alloc,
         vec![
             emit_expr(e, env, expr)?,
-            instr::istypec(alloc, IsTypeOp::OpNull),
+            instr::istypec(alloc, IsTypeOp::Null),
         ],
     ))
 }

@@ -10,6 +10,7 @@ use ffi::{Maybe, Slice, Str};
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
 use hhvm_hhbc_defs_ffi::ffi::FCallArgsFlags;
+use hhvm_hhbc_defs_ffi::ffi::IsTypeOp;
 use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use label::Label;
 use lazy_static::lazy_static;
@@ -388,7 +389,7 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
                     vec![
                         instr::pushl(alloc, *l),
                         instr::dup(alloc),
-                        instr::istypec(alloc, IsTypeOp::OpNull),
+                        instr::istypec(alloc, IsTypeOp::Null),
                         instr::jmpnz(alloc, label_done),
                         instr::whresult(alloc),
                         instr::label(alloc, label_done),
@@ -1128,7 +1129,7 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
                 instr::await_(alloc),
                 instr::label(alloc, async_eager_label),
                 instr::dup(alloc),
-                instr::istypec(alloc, IsTypeOp::OpNull),
+                instr::istypec(alloc, IsTypeOp::Null),
                 instr::jmpnz(alloc, pop_and_exit_label),
                 emit_foreach_await_key_value_storage(e, env, iterator)?,
                 loop_body_instr,

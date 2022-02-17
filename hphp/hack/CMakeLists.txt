@@ -179,7 +179,8 @@ set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hackc/hhbc-ast.h")
 set(FFI_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/utils/ffi.h")
 set(NAMING_SPECIAL_NAMES_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/naming/naming-special-names.h")
 set(TYPE_CONSTRAINT_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/type-constraint-flags.h")
-set(HHBC_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/fcall-args-flags.h")
+set(FCALL_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/fcall-args-flags.h")
+set(HHBC_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/hhbc-shared.h")
 set(ATTR_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/base/attr.h")
 
 add_custom_command(
@@ -194,7 +195,7 @@ add_custom_command(
       --namespaces "HPHP,hackc" &&
     ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
       --header "${HHBC_AST_HEADER}" --srcs "${HHBC_AST_SRC_ARG}" --namespaces "HPHP,hackc,hhbc"
-      --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${HHBC_HEADER}"
+      --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${FCALL_HEADER},${HHBC_HEADER}"
   DEPENDS rustc cargo
   COMMENT "Generating hhbc-ast.h"
 )

@@ -8,7 +8,7 @@ use ffi::{
     Maybe::{self, *},
     Pair, Slice, Str,
 };
-use hhvm_hhbc_defs_ffi::ffi::FCallArgsFlags;
+use hhvm_hhbc_defs_ffi::ffi::{FCallArgsFlags, FatalOp, InitPropOp, IsTypeOp};
 use iterator::IterId;
 use label::Label;
 use local::Local;
@@ -160,14 +160,6 @@ pub enum CollectionType {
     Array,
     Keyset,
     Vec,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum FatalOp {
-    Parse,
-    Runtime,
-    RuntimeOmitFrame,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -403,31 +395,6 @@ pub enum InstructGet<'arena> {
     ClassGetTS,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum IsTypeOp {
-    OpNull,
-    OpBool,
-    OpInt,
-    OpDbl,
-    OpStr,
-    OpObj,
-    OpRes,
-
-    /// Int or Dbl or Str or Bool
-    OpScalar,
-    OpKeyset,
-    OpDict,
-    OpVec,
-
-    /// Arr or Vec or Dict or Keyset
-    OpArrLike,
-    OpClsMeth,
-    OpFunc,
-    OpLegacyArrLike,
-    OpClass,
-}
-
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructIsset<'arena> {
@@ -478,13 +445,6 @@ pub enum IncDecOp {
     PostIncO,
     PreDecO,
     PostDecO,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum InitPropOp {
-    Static,
-    NonStatic,
 }
 
 #[derive(Clone, Debug)]

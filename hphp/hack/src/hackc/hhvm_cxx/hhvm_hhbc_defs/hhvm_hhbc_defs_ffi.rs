@@ -32,9 +32,50 @@ pub mod ffi {
         NumArgsStart = 0x1000,
     }
 
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum IsTypeOp {
+        Null,
+        Bool,
+        Int,
+        Dbl,
+        Str,
+        Obj,
+        Res,
+        /// Int or Dbl or Str or Bool
+        Scalar,
+        Keyset,
+        Dict,
+        Vec,
+        /// Arr or Vec or Dict or Keyset
+        ArrLike,
+        ClsMeth,
+        Func,
+        LegacyArrLike,
+        Class,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum FatalOp {
+        Runtime,
+        Parse,
+        RuntimeOmitFrame,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum InitPropOp {
+        Static,
+        NonStatic,
+    }
+
     unsafe extern "C++" {
         include!("hphp/hack/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.h");
+        type FatalOp;
         type FCallArgsFlags;
+        type InitPropOp;
+        type IsTypeOp;
         fn fcall_flags_to_string_ffi(flags: FCallArgsFlags) -> String;
     }
 }

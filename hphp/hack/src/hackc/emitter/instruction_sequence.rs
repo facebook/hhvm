@@ -9,6 +9,7 @@ use ffi::{
     Pair, Slice, Str,
 };
 use hhbc_ast::*;
+use hhvm_hhbc_defs_ffi::ffi::{FatalOp, InitPropOp, IsTypeOp};
 use iterator::IterId;
 use label::Label;
 use local::Local;

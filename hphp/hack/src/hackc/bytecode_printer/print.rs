@@ -39,7 +39,7 @@ use hhbc_string_utils::{
     float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, lstrip_bslice, mangle,
     strip_global_ns, strip_ns, types,
 };
-use hhvm_hhbc_defs_ffi::ffi::fcall_flags_to_string_ffi;
+use hhvm_hhbc_defs_ffi::ffi::{fcall_flags_to_string_ffi, FatalOp, InitPropOp, IsTypeOp};
 use hhvm_types_ffi::ffi::*;
 use instruction_sequence::{Error::Unrecoverable, InstrSeq};
 use iterator::IterId;
@@ -115,10 +115,11 @@ fn print_unit(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Res
 }
 
 fn get_fatal_op(f: &FatalOp) -> &str {
-    match f {
+    match *f {
         FatalOp::Parse => "Parse",
         FatalOp::Runtime => "Runtime",
         FatalOp::RuntimeOmitFrame => "RuntimeOmitFrame",
+        _ => panic!("Enum value does not match one of listed variants"),
     }
 }
 
@@ -1419,23 +1420,24 @@ fn print_isset(w: &mut dyn Write, isset: &InstructIsset<'_>) -> Result<()> {
 
 fn print_istype_op(w: &mut dyn Write, op: &IsTypeOp) -> Result<()> {
     use IsTypeOp as Op;
-    match op {
-        Op::OpNull => w.write_all(b"Null"),
-        Op::OpBool => w.write_all(b"Bool"),
-        Op::OpInt => w.write_all(b"Int"),
-        Op::OpDbl => w.write_all(b"Dbl"),
-        Op::OpStr => w.write_all(b"Str"),
-        Op::OpObj => w.write_all(b"Obj"),
-        Op::OpRes => w.write_all(b"Res"),
-        Op::OpScalar => w.write_all(b"Scalar"),
-        Op::OpKeyset => w.write_all(b"Keyset"),
-        Op::OpDict => w.write_all(b"Dict"),
-        Op::OpVec => w.write_all(b"Vec"),
-        Op::OpArrLike => w.write_all(b"ArrLike"),
-        Op::OpLegacyArrLike => w.write_all(b"LegacyArrLike"),
-        Op::OpClsMeth => w.write_all(b"ClsMeth"),
-        Op::OpFunc => w.write_all(b"Func"),
-        Op::OpClass => w.write_all(b"Class"),
+    match *op {
+        Op::Null => w.write_all(b"Null"),
+        Op::Bool => w.write_all(b"Bool"),
+        Op::Int => w.write_all(b"Int"),
+        Op::Dbl => w.write_all(b"Dbl"),
+        Op::Str => w.write_all(b"Str"),
+        Op::Obj => w.write_all(b"Obj"),
+        Op::Res => w.write_all(b"Res"),
+        Op::Scalar => w.write_all(b"Scalar"),
+        Op::Keyset => w.write_all(b"Keyset"),
+        Op::Dict => w.write_all(b"Dict"),
+        Op::Vec => w.write_all(b"Vec"),
+        Op::ArrLike => w.write_all(b"ArrLike"),
+        Op::LegacyArrLike => w.write_all(b"LegacyArrLike"),
+        Op::ClsMeth => w.write_all(b"ClsMeth"),
+        Op::Func => w.write_all(b"Func"),
+        Op::Class => w.write_all(b"Class"),
+        _ => panic!("Enum value does not match one of listed variants"),
     }
 }
 
@@ -1505,9 +1507,10 @@ fn print_mutator(w: &mut dyn Write, mutator: &InstructMutator<'_>) -> Result<()>
             w.write_all(b"InitProp ")?;
             print_prop_id(w, id)?;
             w.write_all(b" ")?;
-            match op {
+            match *op {
                 InitPropOp::Static => w.write_all(b"Static"),
                 InitPropOp::NonStatic => w.write_all(b"NonStatic"),
+                _ => panic!("Enum value does not match one of listed variants"),
             }?;
             w.write_all(b" ")
         }
@@ -2007,10 +2010,11 @@ fn print_op(w: &mut dyn Write, op: &InstructOperator<'_>) -> Result<()> {
 }
 
 fn print_fatal_op(w: &mut dyn Write, f: &FatalOp) -> Result<()> {
-    match f {
+    match *f {
         FatalOp::Parse => w.write_all(b"Fatal Parse"),
         FatalOp::Runtime => w.write_all(b"Fatal Runtime"),
         FatalOp::RuntimeOmitFrame => w.write_all(b"Fatal RuntimeOmitFrame"),
+        _ => panic!("Enum value does not match one of listed variants"),
     }
 }
 

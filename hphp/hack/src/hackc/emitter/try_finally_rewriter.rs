@@ -9,6 +9,7 @@ use bitflags::bitflags;
 use emit_pos::emit_pos;
 use env::{emitter::Emitter, jump_targets as jt, Env};
 use hhbc_ast::{self as hhbc_ast, Instruct};
+use hhvm_hhbc_defs_ffi::ffi::IsTypeOp;
 use indexmap::IndexSet;
 use instruction_sequence::{instr, InstrSeq, Result};
 use iterator::IterId;
@@ -152,10 +153,7 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
                         ReificationLevel::Definitely => {
                             let check = InstrSeq::gather(
                                 alloc,
-                                vec![
-                                    instr::dup(alloc),
-                                    instr::istypec(alloc, hhbc_ast::IsTypeOp::OpNull),
-                                ],
+                                vec![instr::dup(alloc), instr::istypec(alloc, IsTypeOp::Null)],
                             );
                             reified::simplify_verify_type(
                                 e,

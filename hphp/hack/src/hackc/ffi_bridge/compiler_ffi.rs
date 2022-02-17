@@ -13,7 +13,7 @@ use arena_deserializer::serde::Deserialize;
 use bincode::Options;
 use compile::EnvFlags;
 use cxx::CxxString;
-use external_decl_provider::{ExternalDeclProvider, ExternalDeclProviderResult};
+use decl_provider::external::{ExternalDeclProvider, ExternalDeclProviderResult};
 use facts_rust::facts;
 use libc::{c_char, c_int};
 use no_pos_hash::position_insensitive_hash;

@@ -3,6 +3,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+pub mod external;
 
 use oxidized_by_ref::file_info::NameType;
 use oxidized_by_ref::shallow_decl_defs::Decl;

@@ -512,7 +512,6 @@ dependencies = [
  "cxx-build",
  "decl_provider",
  "direct_decl_parser",
- "external_decl_provider",
  "facts_rust",
  "ffi",
  "hackc_unit",
@@ -789,6 +788,11 @@ dependencies = [
 name = "decl_provider"
 version = "0.0.0"
 dependencies = [
+ "arena_deserializer",
+ "bincode",
+ "bumpalo",
+ "ffi",
+ "libc",
  "oxidized_by_ref",
  "thiserror",
 ]
@@ -1489,19 +1493,6 @@ dependencies = [
  "bstr",
  "bumpalo",
  "pretty_assertions",
-]
-
-[[package]]
-name = "external_decl_provider"
-version = "0.0.0"
-dependencies = [
- "arena_deserializer",
- "bincode",
- "bumpalo",
- "decl_provider",
- "ffi",
- "libc",
- "oxidized_by_ref",
 ]
 
 [[package]]

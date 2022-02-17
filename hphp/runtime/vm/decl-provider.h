@@ -26,7 +26,8 @@
 
 namespace HPHP {
 
-// c.f. `enum ExternalDeclProviderResult` in 'hhbc/external_decl_provider/lib.rs'.
+// keep this in sync with `enum ExternalDeclProviderResult` in
+// 'hack/src/hackc/decl_provider/external.rs'.
 struct DeclProviderResult {
     enum class Tag {
       Missing,

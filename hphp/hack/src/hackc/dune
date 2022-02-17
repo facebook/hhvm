@@ -2,7 +2,6 @@
  bytecode_printer
  compile_ffi
  decl_provider
- external_decl_provider
  facebook
  ffi_bridge
  hhbc_by_ref

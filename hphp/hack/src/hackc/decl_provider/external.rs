@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::{DeclProvider, Error, Result};
 use arena_deserializer::serde::Deserialize;
-use decl_provider::{self, DeclProvider};
 use libc::{c_char, c_int};
 use oxidized_by_ref::file_info::NameType;
 use oxidized_by_ref::{direct_decl_parser, shallow_decl_defs::Decl};
@@ -75,7 +75,7 @@ pub struct ExternalDeclProvider<'decl>(
 );
 
 impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
-    fn get_decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'decl>, decl_provider::Error> {
+    fn get_decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'decl>> {
         // Need to convert NameType into HPHP::AutoloadMap::KindOf.
         let code: i32 = match kind {
             NameType::Class => 0,   // HPHP::AutoloadMap::KindOf::Type
@@ -85,14 +85,14 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
         };
         let symbol_ptr = std::ffi::CString::new(symbol).unwrap();
         match unsafe { self.0(self.1, code, symbol_ptr.as_c_str().as_ptr()) } {
-            ExternalDeclProviderResult::Missing => Err(decl_provider::Error::NotFound),
+            ExternalDeclProviderResult::Missing => Err(Error::NotFound),
             ExternalDeclProviderResult::Decls(p) => {
                 let decls: &direct_decl_parser::Decls<'decl> = unsafe { p.as_ref() }.unwrap();
                 let decl = decls
                     .iter()
                     .find_map(|(sym, decl)| if sym == symbol { Some(decl) } else { None });
                 match decl {
-                    None => Err(decl_provider::Error::NotFound),
+                    None => Err(Error::NotFound),
                     Some(decl) => Ok(decl),
                 }
             }
@@ -112,7 +112,7 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
                     .iter()
                     .find_map(|(sym, decl)| if sym == symbol { Some(decl) } else { None });
                 match decl {
-                    None => Err(decl_provider::Error::NotFound),
+                    None => Err(Error::NotFound),
                     Some(decl) => Ok(decl),
                 }
             }

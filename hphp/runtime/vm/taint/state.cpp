@@ -16,6 +16,8 @@
 
 #ifdef HHVM_TAINT
 
+#include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <sstream>
 
@@ -30,6 +32,7 @@
 #include "hphp/runtime/vm/taint/configuration.h"
 #include "hphp/runtime/vm/taint/state.h"
 
+#include "hphp/util/assertions.h"
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 
@@ -105,12 +108,38 @@ std::ostream& operator<<(std::ostream& out, const HPHP::taint::Value& value) {
   }
 }
 
+// We assume EvalVMStackElms is a power of 2, so doubling gets us
+// the power of 2 closest to n+1. Assuming things are a power of 2
+// makes a lot of the later operations faster.
+// Also have a fallback size for tests when this may not be set.
+Stack::Stack()
+    : m_stack(
+          RuntimeOption::EvalVMStackElms ? (RuntimeOption::EvalVMStackElms * 2)
+                                         : 16384,
+          nullptr),
+      m_top(0),
+      m_bottom(0) {
+  // Validate our assertions.
+  assert_flog(
+      ceil(log2(m_stack.size())) == floor(log2(m_stack.size())),
+      "Size be power of 2! Got {}",
+      m_stack.size());
+}
+
 void Stack::push(Value value) {
-  m_stack.push_back(value);
+  if (full()) {
+    return;
+  }
+  m_stack[m_top] = value;
+  m_top = (m_top + 1) & (m_stack.size() - 1);
 }
 
 void Stack::pushFront(Value value) {
-  m_stack.push_front(value);
+  if (full()) {
+    return;
+  }
+  m_bottom = (m_bottom - 1) & (m_stack.size() - 1);
+  m_stack[m_bottom] = value;
 }
 
 Value Stack::top() const {
@@ -120,64 +149,71 @@ Value Stack::top() const {
 Value Stack::peek(int offset) const {
   // TODO(T93491972): replace with assertions once we can run the integration
   // tests.
-  if (m_stack.size() <= offset) {
+  if (size() <= offset) {
     FTRACE(
         3,
         "taint: (WARNING) called `Stack::peek({})` on stack of size {}\n",
         offset,
-        m_stack.size());
+        size());
     return nullptr;
   }
-  return m_stack[m_stack.size() - 1 - offset];
+  auto index = (m_top - offset - 1) & (m_stack.size() - 1);
+  return m_stack[index];
 }
 
 void Stack::pop(int n) {
-  if (m_stack.size() < n) {
+  if (size() < n) {
     FTRACE(
         3,
         "taint: (WARNING) called `Stack::pop({})` on stack of size {}\n",
         n,
-        m_stack.size());
-    n = m_stack.size();
+        size());
+    n = size();
   }
-
-  for (int i = 0; i < n; i++) {
-    m_stack.pop_back();
-  }
+  m_top = (m_top - n) & (m_stack.size() - 1);
 }
 
 void Stack::popFront() {
-  if (m_stack.empty()) {
+  if (empty()) {
     FTRACE(3, "taint: (WARNING) called `Stack::popFront()` on empty stack\n");
     return;
   }
-
-  m_stack.pop_front();
+  m_bottom = (m_bottom + 1) & (m_stack.size() - 1);
 }
 
 void Stack::replaceTop(Value value) {
-  if (m_stack.empty()) {
+  if (empty()) {
     FTRACE(3, "taint: (WARNING) called `Stack::replaceTop()` on empty stack\n");
     return;
   }
-  m_stack.back() = value;
+  auto index = (m_top - 1) & (m_stack.size() - 1);
+  m_stack[index] = value;
 }
 
 size_t Stack::size() const {
-  return m_stack.size();
+  return (m_top - m_bottom) & (m_stack.size() - 1);
 }
 
 std::string Stack::show() const {
   std::stringstream stream;
-  for (const auto value : m_stack) {
-    stream << value << " ";
+  for (size_t i = 0; i < size(); i++) {
+    stream << m_stack[(m_bottom + i) & (m_stack.size() - 1)] << " ";
   }
   stream << "(t)";
   return stream.str();
 }
 
 void Stack::clear() {
-  m_stack.clear();
+  m_top = 0;
+  m_bottom = 0;
+}
+
+bool Stack::full() const {
+  return (m_stack.size() - size()) == 1;
+}
+
+bool Stack::empty() const {
+  return m_bottom == m_top;
 }
 
 void Heap::set(tv_lval typedValue, Value value) {

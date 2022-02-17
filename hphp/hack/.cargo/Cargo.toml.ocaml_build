@@ -108,6 +108,7 @@ members = [
     "src/hackc/hhbc/cargo/hhbc_ast",
     "src/hackc/hhbc/cargo/hhbc_id",
     "src/hackc/hhbc/cargo/scope",
+    "src/hackc/hhvm_cxx/hhvm_hhbc_defs",
     "src/hackc/utils/cargo/hhbc_string_utils",
     "src/hackc/utils/cargo/unique_id_builder",
     "src/hackc/utils/cargo/unique_list",

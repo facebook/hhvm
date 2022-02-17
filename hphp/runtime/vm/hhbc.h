@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/vm/fcall-args-flags.h"
 #include "hphp/runtime/vm/member-key.h"
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/either.h"
@@ -101,45 +102,19 @@ struct IterArgs {
 //   inoutArgs        = flags & EnforceInOut ? decode bool vec : nullptr
 //   asyncEagerOffset = flags & HasAEO ? decode_ba() : kInvalidOffset
 struct FCallArgsBase {
-  enum Flags : uint16_t {
-    None                         = 0,
-    // Unpack remaining arguments from a varray passed by ...$args.
-    HasUnpack                    = (1 << 0),
-    // Pass generics to the callee.
-    HasGenerics                  = (1 << 1),
-    // Lock newly constructed object if unwinding the constructor call.
-    LockWhileUnwinding           = (1 << 2),
-    // Arguments are known to be compatible with prologue of the callee and
-    // do not need to be repacked.
-    SkipRepack                   = (1 << 3),
-    // Coeffects are known to be correct, no need to check.
-    // If the callee has polymoprhic coeffects, pass caller's coeffects.
-    SkipCoeffectsCheck           = (1 << 4),
-    // Indicates that the caller requires the return value to be mutable
-    // (not readonly)
-    EnforceMutableReturn         = (1 << 5),
-    // Indicates that the callee should not modify its instance
-    EnforceReadonlyThis          = (1 << 6),
-    // HHBC-only: Op should be resolved using an explicit context class
-    ExplicitContext              = (1 << 7),
-    // HHBC-only: is the number of returns provided? false => 1
-    HasInOut                     = (1 << 8),
-    // HHBC-only: should this FCall enforce argument inout-ness?
-    EnforceInOut                 = (1 << 9),
-    // HHBC-only: should this FCall enforce argument readonly-ness?
-    EnforceReadonly              = (1 << 10),
-    // HHBC-only: is the async eager offset provided? false => kInvalidOffset
-    HasAsyncEagerOffset          = (1 << 11),
-    // HHBC-only: the remaining space is used for number of arguments
-    NumArgsStart                 = (1 << 12),
-  };
+  using Flags = FCallArgsFlags;
+  // The first (lowest) bit of numArgs.
+  static constexpr uint16_t kFirstNumArgsBit = 12;
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
-  static constexpr uint8_t kInternalFlags =
-    HasUnpack | HasGenerics | LockWhileUnwinding | SkipRepack |
-    SkipCoeffectsCheck | EnforceMutableReturn | EnforceReadonlyThis;
-  // The first (lowest) bit of numArgs.
-  static constexpr uint8_t kFirstNumArgsBit = 12;
+  static constexpr Flags kInternalFlags =
+    Flags::HasUnpack |
+    Flags::HasGenerics |
+    Flags::LockWhileUnwinding |
+    Flags::SkipRepack |
+    Flags::SkipCoeffectsCheck |
+    Flags::EnforceMutableReturn |
+    Flags::EnforceReadonlyThis;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
     : numArgs(numArgs)
@@ -219,7 +194,7 @@ struct FCallArgs : FCallArgsBase {
   const StringData* context;
 };
 
-static_assert(1 << FCallArgs::kFirstNumArgsBit == FCallArgs::NumArgsStart, "");
+static_assert(1 << FCallArgs::kFirstNumArgsBit == FCallArgsFlags::NumArgsStart, "");
 
 using PrintLocal = std::function<std::string(int32_t local)>;
 std::string show(const IterArgs&, PrintLocal);

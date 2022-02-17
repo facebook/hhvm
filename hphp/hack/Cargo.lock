@@ -332,6 +332,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
  "instruction_sequence",
  "iterator",
@@ -991,6 +992,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "indexmap",
  "instruction_sequence",
  "iterator",
@@ -1044,6 +1046,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
  "instruction_sequence",
  "itertools 0.10.3",
@@ -1094,6 +1097,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "indexmap",
  "instruction_sequence",
  "itertools 0.10.3",
@@ -1154,6 +1158,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
  "instruction_sequence",
  "itertools 0.10.3",
@@ -1176,6 +1181,7 @@ dependencies = [
  "hhas_param",
  "hhbc_ast",
  "hhbc_id",
+ "hhvm_hhbc_defs_ffi",
  "instruction_sequence",
  "label",
  "local",
@@ -1208,6 +1214,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "instruction_sequence",
  "label",
  "local",
@@ -2020,9 +2027,9 @@ dependencies = [
 name = "hhbc_ast"
 version = "0.0.0"
 dependencies = [
- "bitflags",
  "ffi",
  "hhbc_id",
+ "hhvm_hhbc_defs_ffi",
  "iterator",
  "label",
  "local",
@@ -2052,6 +2059,15 @@ dependencies = [
  "ocaml_helper",
  "pretty_assertions",
  "regex",
+]
+
+[[package]]
+name = "hhvm_hhbc_defs_ffi"
+version = "0.0.0"
+dependencies = [
+ "cxx",
+ "cxx-build",
+ "oxidized",
 ]
 
 [[package]]

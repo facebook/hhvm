@@ -16,9 +16,10 @@ use hhas_method::{HhasMethod, HhasMethodFlags};
 use hhas_param::HhasParam;
 use hhas_pos::HhasSpan;
 use hhas_type::HhasTypeInfo;
-use hhbc_ast::{FcallArgs, FcallFlags, SpecialClsRef, Visibility};
+use hhbc_ast::{FcallArgs, SpecialClsRef, Visibility};
 use hhbc_id::{class, method};
 use hhbc_string_utils::reified;
+use hhvm_hhbc_defs_ffi::ffi::FCallArgsFlags;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
 use local::{Local, LocalId};
@@ -280,9 +281,9 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         // Default value setters belong in the wrapper method not in the original method
         emit_param::emit_param_default_value_setter(emitter, env, pos, hhas_params)?;
     let fcall_args = {
-        let mut fcall_flags = FcallFlags::default();
+        let mut fcall_flags = FCallArgsFlags::default();
         if args.flags.contains(Flags::IS_REIFIED) {
-            fcall_flags |= FcallFlags::HAS_GENERICS;
+            fcall_flags |= FCallArgsFlags::HasGenerics;
         };
         if args.flags.contains(Flags::IS_ASYNC) {
             FcallArgs::new(
@@ -430,7 +431,7 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
     )?;
 
     let fcall_args = FcallArgs::new(
-        FcallFlags::default(),
+        FCallArgsFlags::default(),
         1,
         Slice::empty(),
         Slice::empty(),

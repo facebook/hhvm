@@ -179,6 +179,7 @@ set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hackc/hhbc-ast.h")
 set(FFI_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/utils/ffi.h")
 set(NAMING_SPECIAL_NAMES_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/naming/naming-special-names.h")
 set(TYPE_CONSTRAINT_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/type-constraint-flags.h")
+set(HHBC_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/vm/fcall-args-flags.h")
 set(ATTR_HEADER "${CMAKE_SOURCE_DIR}/hphp/runtime/base/attr.h")
 
 add_custom_command(
@@ -193,7 +194,7 @@ add_custom_command(
       --namespaces "HPHP,hackc" &&
     ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
       --header "${HHBC_AST_HEADER}" --srcs "${HHBC_AST_SRC_ARG}" --namespaces "HPHP,hackc,hhbc"
-      --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER}"
+      --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${HHBC_HEADER}"
   DEPENDS rustc cargo
   COMMENT "Generating hhbc-ast.h"
 )
@@ -249,6 +250,7 @@ endfunction()
 build_cxx_bridge(parser "src/parser/ffi_bridge")
 build_cxx_bridge(compiler "src/hackc/ffi_bridge")
 build_cxx_bridge(hhvm_types "src/hackc/hhvm_cxx/hhvm_types" "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_types/as-base-ffi.cpp")
+build_cxx_bridge(hhvm_hhbc_defs "src/hackc/hhvm_cxx/hhvm_hhbc_defs" "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.cpp")
 
 if (NOT LZ4_FOUND)
   add_dependencies(hack_dune lz4)

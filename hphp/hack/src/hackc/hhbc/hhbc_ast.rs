@@ -8,6 +8,7 @@ use ffi::{
     Maybe::{self, *},
     Pair, Slice, Str,
 };
+use hhvm_hhbc_defs_ffi::ffi::FCallArgsFlags;
 use iterator::IterId;
 use label::Label;
 use local::Local;
@@ -52,26 +53,10 @@ pub type PropId<'arena> = hhbc_id::prop::PropType<'arena>;
 pub type NumParams = usize;
 pub type ByRefs<'arena> = Slice<'arena, bool>;
 
-bitflags::bitflags! {
-    #[repr(C)]
-    pub struct FcallFlags: u8 {
-        const HAS_UNPACK                      = 1 << 0;
-        const HAS_GENERICS                    = 1 << 1;
-        const LOCK_WHILE_UNWINDING            = 1 << 2;
-        const ENFORCE_MUTABLE_RETURN          = 1 << 3;
-        const ENFORCE_READONLY_THIS           = 1 << 4;
-    }
-}
-impl Default for FcallFlags {
-    fn default() -> FcallFlags {
-        FcallFlags::empty()
-    }
-}
-
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub struct FcallArgs<'arena> {
-    pub flags: FcallFlags,
+    pub flags: FCallArgsFlags,
     pub num_args: NumParams,
     pub num_rets: NumParams,
     pub inouts: ByRefs<'arena>,
@@ -82,7 +67,7 @@ pub struct FcallArgs<'arena> {
 
 impl<'arena> FcallArgs<'arena> {
     pub fn new(
-        flags: FcallFlags,
+        flags: FCallArgsFlags,
         num_rets: usize,
         inouts: Slice<'arena, bool>,
         readonly: Slice<'arena, bool>,

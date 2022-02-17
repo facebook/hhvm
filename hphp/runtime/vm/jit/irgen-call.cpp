@@ -545,8 +545,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   if (generics) push(env, generics);
 
   doCall(FCallArgs(
-    static_cast<FCallArgs::Flags>(
-      fca.flags | FCallArgs::Flags::HasUnpack | FCallArgs::Flags::SkipRepack),
+    static_cast<FCallArgsFlags>(
+      fca.flags | FCallArgsFlags::HasUnpack | FCallArgsFlags::SkipRepack),
     callee->numNonVariadicParams(),
     fca.numRets,
     nullptr,  // inout-ness already checked

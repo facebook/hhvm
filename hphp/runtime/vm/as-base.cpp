@@ -49,4 +49,16 @@ std::string type_flags_to_string(TypeConstraintFlags flags) {
   return from(vec) | unsplit<std::string>(" ");
 }
 
+std::string fcall_flags_to_string(FCallArgsFlags flags) {
+  std::vector<std::string> vec;
+
+#define X(flag, str) \
+  if (flags & FCallArgsFlags::flag) vec.push_back(str);
+  HHAS_FCALL_FLAGS
+#undef X
+
+  using namespace folly::gen;
+  return from(vec) | unsplit<std::string>(" ");
+}
+
 }

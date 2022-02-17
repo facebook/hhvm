@@ -86,6 +86,13 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(Resolved,        "resolved")                            \
   X(DisplayNullable, "display_nullable")                    \
   X(UpperBound,      "upper_bound")
+
+  #define HHAS_FCALL_FLAGS                             \
+  X(HasUnpack,            "Unpack");                   \
+  X(HasGenerics,          "Generics");                 \
+  X(LockWhileUnwinding,   "LockWhileUnwinding");       \
+  X(EnforceMutableReturn, "EnforceMutableReturn")      \
+  X(EnforceReadonlyThis,  "EnforceReadonlyThis")
 }
 
 }

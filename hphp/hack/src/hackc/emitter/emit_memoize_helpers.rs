@@ -6,8 +6,9 @@
 use emit_fatal::raise_fatal_runtime;
 use ffi::Str;
 use hhas_param::HhasParam;
-use hhbc_ast::{FcallArgs, FcallFlags};
+use hhbc_ast::FcallArgs;
 use hhbc_id::function;
+use hhvm_hhbc_defs_ffi::ffi::FCallArgsFlags;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
 use local::{Local, LocalId};
@@ -102,7 +103,7 @@ pub fn get_implicit_context_memo_key<'arena>(
             instr::fcallfuncd(
                 alloc,
                 FcallArgs::new(
-                    FcallFlags::default(),
+                    FCallArgsFlags::default(),
                     1,
                     Slice::empty(),
                     Slice::empty(),

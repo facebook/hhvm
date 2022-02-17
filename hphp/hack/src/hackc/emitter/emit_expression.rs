@@ -12,6 +12,7 @@ use hhbc_assertion_utils::*;
 use hhbc_ast::*;
 use hhbc_id::{class, r#const, function, method, prop};
 use hhbc_string_utils as string_utils;
+use hhvm_hhbc_defs_ffi::ffi::FCallArgsFlags;
 use indexmap::IndexSet;
 use instruction_sequence::{
     instr, unrecoverable,
@@ -1006,7 +1007,7 @@ fn inline_gena_call<'a, 'arena, 'decl>(
                 instr::fcallclsmethodd(
                     alloc,
                     FcallArgs::new(
-                        FcallFlags::default(),
+                        FCallArgsFlags::default(),
                         1,
                         Slice::empty(),
                         Slice::empty(),
@@ -2138,7 +2139,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             if does_not_have_non_tparam_generics {
                 Ok(instr::empty(alloc))
             } else {
-                fcall_args.flags |= FcallFlags::HAS_GENERICS;
+                fcall_args.flags |= FCallArgsFlags::HasGenerics;
                 emit_reified_targs(
                     e,
                     env,
@@ -2252,7 +2253,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                                 None => emit_id(e, &o.as_ref().0, &id.1, null_flavor, fcall_args),
                                 Some(fid) => {
                                     let fcall_args = FcallArgs::new(
-                                        FcallFlags::default(),
+                                        FCallArgsFlags::default(),
                                         1,
                                         Slice::empty(),
                                         Slice::empty(),
@@ -2545,10 +2546,10 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                 flags, num_args, ..
             } = fcall_args;
             let fq_id = match string_utils::strip_global_ns(&id.1) {
-                "min" if num_args == 2 && !flags.contains(FcallFlags::HAS_UNPACK) => {
+                "min" if num_args == 2 && !flags.contains(FCallArgsFlags::HasUnpack) => {
                     function::FunctionType::<'arena>::from_ast_name(alloc, "__SystemLib\\min2")
                 }
-                "max" if num_args == 2 && !flags.contains(FcallFlags::HAS_UNPACK) => {
+                "max" if num_args == 2 && !flags.contains(FCallArgsFlags::HasUnpack) => {
                     function::FunctionType::<'arena>::from_ast_name(alloc, "__SystemLib\\max2")
                 }
                 _ => function::FunctionType::new(Str::new_str(
@@ -2762,11 +2763,11 @@ fn get_fcall_args_common<'arena, T>(
     readonly_predicate: fn(&T) -> bool,
     is_inout_arg: fn(&T) -> bool,
 ) -> FcallArgs<'arena> {
-    let mut flags = FcallFlags::default();
-    flags.set(FcallFlags::HAS_UNPACK, uarg.is_some());
-    flags.set(FcallFlags::LOCK_WHILE_UNWINDING, lock_while_unwinding);
-    flags.set(FcallFlags::ENFORCE_MUTABLE_RETURN, !readonly_return);
-    flags.set(FcallFlags::ENFORCE_READONLY_THIS, readonly_this);
+    let mut flags = FCallArgsFlags::default();
+    flags.set(FCallArgsFlags::HasUnpack, uarg.is_some());
+    flags.set(FCallArgsFlags::LockWhileUnwinding, lock_while_unwinding);
+    flags.set(FCallArgsFlags::EnforceMutableReturn, !readonly_return);
+    flags.set(FCallArgsFlags::EnforceReadonlyThis, readonly_this);
     let readonly_args = if args.iter().any(readonly_predicate) {
         Slice::fill_iter(alloc, args.iter().map(readonly_predicate))
     } else {

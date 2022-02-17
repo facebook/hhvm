@@ -546,7 +546,7 @@ module Visitor_DEPRECATED = struct
 
       method on_class_use : 'a -> hint -> 'a
 
-      method on_class_req : 'a -> hint * bool -> 'a
+      method on_class_req : 'a -> hint * require_kind -> 'a
 
       method on_func_body : 'a -> func_body -> 'a
 

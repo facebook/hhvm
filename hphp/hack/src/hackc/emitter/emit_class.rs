@@ -27,7 +27,7 @@ use local::Local;
 use naming_special_names_rust as special_names;
 use oxidized::{
     ast,
-    ast::{Hint, ReifyKind},
+    ast::{Hint, ReifyKind, RequireKind},
     namespace_env,
     pos::Pos,
 };
@@ -318,11 +318,10 @@ fn from_class_elt_requirements<'a, 'arena>(
     class_
         .reqs
         .iter()
-        .map(|(h, is_extends)| {
-            let kind = if *is_extends {
-                TraitReqKind::MustExtend
-            } else {
-                TraitReqKind::MustImplement
+        .map(|(h, req_kind)| {
+            let kind = match *req_kind {
+                RequireKind::RequireExtends => TraitReqKind::MustExtend,
+                RequireKind::RequireImplements => TraitReqKind::MustImplement,
             };
             (emit_type_hint::hint_to_class(alloc, h), kind)
         })

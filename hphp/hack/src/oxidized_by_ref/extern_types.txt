@@ -32,6 +32,7 @@ oxidized::aast::ParamMutability
 oxidized::aast::PropOrMethod
 oxidized::aast::ReadonlyKind
 oxidized::aast::ReifyKind
+oxidized::aast::RequireKind
 oxidized::aast::TypedefVisibility
 oxidized::aast::Uop
 oxidized::aast::UseAsVisibility

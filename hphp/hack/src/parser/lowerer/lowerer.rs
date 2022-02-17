@@ -4453,13 +4453,14 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             Ok(class.uses.append(&mut uses))
         }
         RequireClause(c) => {
+            use aast::RequireKind::*;
             let hint = p_hint(&c.name, env)?;
-            let is_extends = match token_kind(&c.kind) {
-                Some(TK::Implements) => false,
-                Some(TK::Extends) => true,
+            let require_kind = match token_kind(&c.kind) {
+                Some(TK::Implements) => RequireImplements,
+                Some(TK::Extends) => RequireExtends,
                 _ => missing_syntax("trait require kind", &c.kind, env)?,
             };
-            Ok(class.reqs.push((hint, is_extends)))
+            Ok(class.reqs.push((hint, require_kind)))
         }
         XHPClassAttributeDeclaration(c) => {
             type Ret = Result<Either<ast::XhpAttr, ast::Hint>, Error>;

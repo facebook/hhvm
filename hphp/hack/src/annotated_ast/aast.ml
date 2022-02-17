@@ -799,7 +799,9 @@ and use_as_alias = sid option * pstring * sid option * use_as_visibility list
 
 and insteadof_alias = sid * pstring * sid list
 
-and is_extends = bool
+and require_kind =
+  | RequireExtends
+  | RequireImplements
 
 and emit_id =
   (* For globally defined type, the ID used in the .main function. *)
@@ -828,7 +830,7 @@ and ('ex, 'en) class_ = {
           because we have runtime support. *)
   c_xhp_attr_uses: xhp_attr_hint list;
   c_xhp_category: (pos * pstring list) option;
-  c_reqs: (class_hint * is_extends) list;
+  c_reqs: (class_hint * require_kind) list;
   c_implements: class_hint list;
   c_where_constraints: where_constraint_hint list;
   c_consts: ('ex, 'en) class_const list;
@@ -1094,11 +1096,10 @@ let split_vars c_vars =
 let split_reqs c_reqs =
   let (extends, implements) =
     List.fold_left
-      (fun (extends, implements) (h, is_extends) ->
-        if is_extends then
-          (h :: extends, implements)
-        else
-          (extends, h :: implements))
+      (fun (extends, implements) (h, require_kind) ->
+        match require_kind with
+        | RequireExtends -> (h :: extends, implements)
+        | RequireImplements -> (extends, h :: implements))
       ([], [])
       c_reqs
   in
@@ -1147,3 +1148,14 @@ let is_enum_class c = Ast_defs.is_c_enum_class c.c_kind
 let to_gen_cases cl dfl : ('ex, 'en) gen_case list =
   List.map (fun x -> Case x) cl
   @ Option.to_list (Option.map (fun x -> Default x) dfl)
+
+let partition_map_require_kind ~f trait_reqs =
+  let rec partition req_extends req_implements c_reqs =
+    match c_reqs with
+    | [] -> (List.rev req_extends, List.rev req_implements)
+    | ((_, RequireExtends) as req) :: tl ->
+      partition (f req :: req_extends) req_implements tl
+    | ((_, RequireImplements) as req) :: tl ->
+      partition req_extends (f req :: req_implements) tl
+  in
+  partition [] [] trait_reqs

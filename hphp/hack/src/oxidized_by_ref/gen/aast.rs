@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e9495c56ecabcef02cba1917f61e251e>>
+// @generated SignedSource<<37fd5d3ffa844ecaf185ceb94d57229b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1672,7 +1672,7 @@ pub struct InsteadofAlias<'a>(
 impl<'a> TrivialDrop for InsteadofAlias<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(InsteadofAlias<'arena>);
 
-pub use oxidized::aast::IsExtends;
+pub use oxidized::aast::RequireKind;
 
 pub use oxidized::aast::EmitId;
 
@@ -1726,7 +1726,7 @@ pub struct Class_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub xhp_category: Option<&'a (&'a Pos<'a>, &'a [&'a Pstring<'a>])>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub reqs: &'a [(&'a ClassHint<'a>, &'a oxidized::aast::IsExtends)],
+    pub reqs: &'a [(&'a ClassHint<'a>, &'a oxidized::aast::RequireKind)],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub implements: &'a [&'a ClassHint<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

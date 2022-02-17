@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9aad86a697f5fd59fc48555b294ff282>>
+// @generated SignedSource<<ba03be6dc4c94cd4fe701cc1aedd981a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2660,6 +2660,26 @@ impl<Ex, En> XhpAttribute<Ex, En> {
         match self {
             XhpAttribute::XhpSpread(p0) => Some(p0),
             _ => None,
+        }
+    }
+}
+impl RequireKind {
+    pub fn mk_require_extends() -> Self {
+        RequireKind::RequireExtends
+    }
+    pub fn mk_require_implements() -> Self {
+        RequireKind::RequireImplements
+    }
+    pub fn is_require_extends(&self) -> bool {
+        match self {
+            RequireKind::RequireExtends => true,
+            _ => false,
+        }
+    }
+    pub fn is_require_implements(&self) -> bool {
+        match self {
+            RequireKind::RequireImplements => true,
+            _ => false,
         }
     }
 }

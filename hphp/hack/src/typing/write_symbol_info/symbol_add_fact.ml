@@ -349,7 +349,7 @@ let container_defn ctx source_map clss decl_id member_decls prog =
     ]
   in
   let (req_extends_hints, req_implements_hints) =
-    List.partition_tf clss.c_reqs ~f:snd
+    Aast.partition_map_require_kind ~f:(fun x -> x) clss.c_reqs
   in
   let (req_extends, prog) =
     parent_decls

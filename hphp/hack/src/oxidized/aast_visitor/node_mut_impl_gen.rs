@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4c1eaeb4ec5ce4a947ef6f45f154d0c8>>
+// @generated SignedSource<<e48dd7258ac6d6951ec94e004a63fdfd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1757,6 +1757,25 @@ impl<P: Params> NodeMut<P> for ReifyKind {
             ReifyKind::Erased => Ok(()),
             ReifyKind::SoftReified => Ok(()),
             ReifyKind::Reified => Ok(()),
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for RequireKind {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_require_kind(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            RequireKind::RequireExtends => Ok(()),
+            RequireKind::RequireImplements => Ok(()),
         }
     }
 }

@@ -847,7 +847,9 @@ let rec class_ ctx c =
         in
         Option.iter err_opt ~f:Errors.add_naming_error);
   let req_implements = List.map ~f:(hint env) c_req_implements in
-  let req_implements = List.map ~f:(fun h -> (h, false)) req_implements in
+  let req_implements =
+    List.map ~f:(fun h -> (h, N.RequireImplements)) req_implements
+  in
   if
     (not (List.is_empty c_req_extends))
     && (not (Ast_defs.is_c_trait c.Aast.c_kind))
@@ -856,7 +858,7 @@ let rec class_ ctx c =
     Errors.add_naming_error
     @@ Naming_error.Invalid_require_extends (fst (List.hd_exn c_req_extends));
   let req_extends = List.map ~f:(hint env) c_req_extends in
-  let req_extends = List.map ~f:(fun h -> (h, true)) req_extends in
+  let req_extends = List.map ~f:(fun h -> (h, N.RequireExtends)) req_extends in
   (* Setting a class type parameters constraint to the 'this' type is weird
    * so lets forbid it for now.
    *)

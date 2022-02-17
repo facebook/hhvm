@@ -24,7 +24,7 @@ aast::ParamMutability
 aast::PropOrMethod
 aast::ReadonlyKind
 aast::ReifyKind
-aast::ReifyKind
+aast::RequireKind
 aast::TypedefVisibility
 aast::Uop
 aast::UseAsVisibility

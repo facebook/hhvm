@@ -25,6 +25,7 @@ aast::HoleSource
 aast::ParamKind
 aast::Program
 aast::ReifyKind
+aast::RequireKind
 aast::Sid
 aast::Stmt_
 aast::TypeconstAbstractKind

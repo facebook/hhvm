@@ -424,7 +424,7 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
   let open SymbolOccurrence in
   List.fold tasts ~init:progress ~f:(fun prog tast ->
       let symbols = IdentifySymbolService.all_symbols ctx tast in
-      (* file_xrefs : (Hh_json.json * Relative_path.t Pos.pos list) IMap.t SMap.t *)
+      (* file_xrefs : (Hh_json.json * Relative_path.t Pos.pos list) Fact_id.Map.t SMap.t *)
       let (file_xrefs, prog) =
         List.fold symbols ~init:(SMap.empty, prog) ~f:(fun (xrefs, prog) occ ->
             if occ.is_declaration then

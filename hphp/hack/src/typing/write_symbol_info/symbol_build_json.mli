@@ -13,7 +13,9 @@
  * nested facts.
  *)
 
-val build_id_json : int -> Hh_json.json
+module Fact_id = Symbol_fact_id
+
+val build_id_json : Fact_id.t -> Hh_json.json
 
 val build_file_json_nested : string -> Hh_json.json
 
@@ -62,28 +64,28 @@ val build_type_param_json :
 
 val build_visibility_json : Aast.visibility -> Hh_json.json
 
-val build_xrefs_json : (Hh_json.json * Pos.t list) IMap.t -> Hh_json.json
+val build_xrefs_json : (Hh_json.json * Pos.t list) Fact_id.Map.t -> Hh_json.json
 
-val build_class_const_decl_json_ref : int -> Hh_json.json
+val build_class_const_decl_json_ref : Fact_id.t -> Hh_json.json
 
-val build_container_json_ref : string -> int -> Hh_json.json
+val build_container_json_ref : string -> Fact_id.t -> Hh_json.json
 
-val build_container_decl_json_ref : string -> int -> Hh_json.json
+val build_container_decl_json_ref : string -> Fact_id.t -> Hh_json.json
 
-val build_enum_decl_json_ref : int -> Hh_json.json
+val build_enum_decl_json_ref : Fact_id.t -> Hh_json.json
 
-val build_enumerator_decl_json_ref : int -> Hh_json.json
+val build_enumerator_decl_json_ref : Fact_id.t -> Hh_json.json
 
-val build_func_decl_json_ref : int -> Hh_json.json
+val build_func_decl_json_ref : Fact_id.t -> Hh_json.json
 
-val build_gconst_decl_json_ref : int -> Hh_json.json
+val build_gconst_decl_json_ref : Fact_id.t -> Hh_json.json
 
-val build_method_decl_json_ref : int -> Hh_json.json
+val build_method_decl_json_ref : Fact_id.t -> Hh_json.json
 
-val build_property_decl_json_ref : int -> Hh_json.json
+val build_property_decl_json_ref : Fact_id.t -> Hh_json.json
 
-val build_type_const_decl_json_ref : int -> Hh_json.json
+val build_type_const_decl_json_ref : Fact_id.t -> Hh_json.json
 
-val build_typedef_decl_json_ref : int -> Hh_json.json
+val build_typedef_decl_json_ref : Fact_id.t -> Hh_json.json
 
-val build_method_occ_json_ref : int -> Hh_json.json
+val build_method_occ_json_ref : Fact_id.t -> Hh_json.json

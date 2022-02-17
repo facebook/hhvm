@@ -11,9 +11,9 @@ open Ast_defs
 open Hh_json
 open Hh_prelude
 module Util = Symbol_json_util
+module Fact_id = Symbol_fact_id
 
-let build_id_json fact_id =
-  JSON_Object [("id", JSON_Number (string_of_int fact_id))]
+let build_id_json fact_id = JSON_Object [("id", Fact_id.to_json_number fact_id)]
 
 let build_file_json_nested filepath =
   JSON_Object [("key", JSON_String filepath)]
@@ -269,9 +269,9 @@ let build_visibility_json (visibility : Aast.visibility) =
   in
   JSON_Number (string_of_int num)
 
-let build_xrefs_json (xref_map : (Hh_json.json * Pos.t list) IMap.t) =
+let build_xrefs_json (xref_map : (Hh_json.json * Pos.t list) Fact_id.Map.t) =
   let xrefs =
-    IMap.fold
+    Fact_id.Map.fold
       (fun _id (target_json, pos_list) acc ->
         let sorted_pos = Caml.List.sort_uniq Pos.compare pos_list in
         let (byte_spans, _) =

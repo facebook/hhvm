@@ -12,6 +12,7 @@ open Hh_json
 module Util = Symbol_json_util
 module Build_json = Symbol_build_json
 module Predicate = Symbol_predicate
+module Fact_id = Symbol_fact_id
 
 type glean_json = {
   classConstDeclaration: Hh_json.json list;
@@ -51,7 +52,7 @@ type glean_json = {
 type t = {
   resultJson: glean_json;
   (* Maps fact JSON key to a list of predicate/fact id pairs *)
-  factIds: (Predicate.t * int) list JMap.t;
+  factIds: (Predicate.t * Fact_id.t) list JMap.t;
 }
 
 let rec find_fid fid_list pred =
@@ -62,15 +63,6 @@ let rec find_fid fid_list pred =
       Some fid
     else
       find_fid tail pred
-
-let get_next_elem_id () =
-  let x = ref 1 in
-  fun () ->
-    let r = !x in
-    x := !x + 1;
-    r
-
-let json_element_id = get_next_elem_id ()
 
 let update_json_data predicate json progress =
   let open Symbol_predicate in
@@ -265,7 +257,7 @@ let should_cache predicate =
  other facts), and the updated result. *)
 let add_fact predicate json_key progress =
   let add_id =
-    let newFactId = json_element_id () in
+    let newFactId = Fact_id.next () in
     let progress =
       {
         resultJson = progress.resultJson;
@@ -294,7 +286,7 @@ let add_fact predicate json_key progress =
       add_id
   in
   let json_fact =
-    JSON_Object [("id", JSON_Number (string_of_int id)); ("key", json_key)]
+    JSON_Object [("id", Fact_id.to_json_number id); ("key", json_key)]
   in
   let progress =
     if is_new then

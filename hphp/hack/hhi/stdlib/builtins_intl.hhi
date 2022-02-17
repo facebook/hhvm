@@ -544,30 +544,30 @@ function resourcebundle_get_error_message($bundle);
 function resourcebundle_locales(string $bundlename);
 
 class Collator {
-  const SORT_REGULAR = 0;
-  const SORT_NUMERIC = 0;
-  const SORT_STRING = 0;
-  const FRENCH_COLLATION = 0;
-  const ALTERNATE_HANDLING = 0;
-  const CASE_FIRST = 0;
-  const CASE_LEVEL = 0;
-  const NORMALIZATION_MODE = 0;
-  const STRENGTH = 0;
-  const HIRAGANA_QUATERNARY_MODE = 0;
-  const NUMERIC_COLLATION = 0;
-  const DEFAULT_VALUE = 0;
-  const PRIMARY = 0;
-  const SECONDARY = 0;
-  const TERTIARY = 0;
-  const DEFAULT_STRENGTH = 0;
-  const QUATERNARY = 0;
-  const IDENTICAL = 0;
-  const OFF = 0;
-  const ON = 0;
-  const SHIFTED = 0;
-  const NON_IGNORABLE = 0;
-  const LOWER_FIRST = 0;
-  const UPPER_FIRST = 0;
+  const int SORT_REGULAR = 0;
+  const int SORT_NUMERIC = 0;
+  const int SORT_STRING = 0;
+  const int FRENCH_COLLATION = 0;
+  const int ALTERNATE_HANDLING = 0;
+  const int CASE_FIRST = 0;
+  const int CASE_LEVEL = 0;
+  const int NORMALIZATION_MODE = 0;
+  const int STRENGTH = 0;
+  const int HIRAGANA_QUATERNARY_MODE = 0;
+  const int NUMERIC_COLLATION = 0;
+  const int DEFAULT_VALUE = 0;
+  const int PRIMARY = 0;
+  const int SECONDARY = 0;
+  const int TERTIARY = 0;
+  const int DEFAULT_STRENGTH = 0;
+  const int QUATERNARY = 0;
+  const int IDENTICAL = 0;
+  const int OFF = 0;
+  const int ON = 0;
+  const int SHIFTED = 0;
+  const int NON_IGNORABLE = 0;
+  const int LOWER_FIRST = 0;
+  const int UPPER_FIRST = 0;
 
   public function __construct(string $locale);
   public function asort(inout $arr, int $sort_flag = Collator::SORT_REGULAR);
@@ -618,15 +618,15 @@ class Locale {
 }
 
 class Normalizer {
-  const NONE = 0;
-  const FORM_D = 0;
-  const NFD = 0;
-  const FORM_KD = 0;
-  const NFKD = 0;
-  const FORM_C = 0;
-  const NFC = 0;
-  const FORM_KC = 0;
-  const NFKC = 0;
+  const int NONE = 0;
+  const int FORM_D = 0;
+  const int NFD = 0;
+  const int FORM_KD = 0;
+  const int NFKD = 0;
+  const int FORM_C = 0;
+  const int NFC = 0;
+  const int FORM_KC = 0;
+  const int NFKC = 0;
 
   static public function isNormalized(string $input, int $form = Normalizer::FORM_C);
   static public function normalize(string $input, int $form = Normalizer::FORM_C);
@@ -837,25 +837,25 @@ class IntlIterator<Tv> implements KeyedIterator<int, Tv> {
 class IntlBreakIterator implements KeyedTraversable<int, int> {
 
   // Constants
-  const DONE = -1;
-  const WORD_NONE = 0;
-  const WORD_NONE_LIMIT = 100;
-  const WORD_NUMBER = 100;
-  const WORD_LETTER = 200;
-  const WORD_KANA = 300;
-  const WORD_KANA_LIMIT = 400;
-  const WORD_IDEO = 400;
-  const WORD_IDEO_LIMIT = 500;
-  const LINE_SOFT = 0;
-  const LINE_SOFT_LIMIT = 100;
-  const LINE_HARD = 100;
-  const LINE_HARD_LIMIT = 200;
-  const SENTENCE_TERM = 0;
-  const SENTENCE_SEP = 100;
-  const WORD_NUMBER_LIMIT = 200;
-  const WORD_LETTER_LIMIT = 300;
-  const SENTENCE_TERM_LIMIT = 100;
-  const SENTENCE_SEP_LIMIT = 200;
+  const int DONE = -1;
+  const int WORD_NONE = 0;
+  const int WORD_NONE_LIMIT = 100;
+  const int WORD_NUMBER = 100;
+  const int WORD_LETTER = 200;
+  const int WORD_KANA = 300;
+  const int WORD_KANA_LIMIT = 400;
+  const int WORD_IDEO = 400;
+  const int WORD_IDEO_LIMIT = 500;
+  const int LINE_SOFT = 0;
+  const int LINE_SOFT_LIMIT = 100;
+  const int LINE_HARD = 100;
+  const int LINE_HARD_LIMIT = 200;
+  const int SENTENCE_TERM = 0;
+  const int SENTENCE_SEP = 100;
+  const int WORD_NUMBER_LIMIT = 200;
+  const int WORD_LETTER_LIMIT = 300;
+  const int SENTENCE_TERM_LIMIT = 100;
+  const int SENTENCE_SEP_LIMIT = 200;
 
   // Methods
   public static function createCharacterInstance(

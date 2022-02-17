@@ -13,17 +13,17 @@ class FilesystemIterator extends DirectoryIterator
     SeekableIterator<SplFileInfo> {
 
   // Constants
-  const CURRENT_AS_PATHNAME = 32;
-  const CURRENT_AS_FILEINFO = 0;
-  const CURRENT_AS_SELF = 16;
-  const CURRENT_MODE_MASK = 240;
-  const KEY_AS_PATHNAME = 0;
-  const KEY_AS_FILENAME = 256;
-  const FOLLOW_SYMLINKS = 512;
-  const KEY_MODE_MASK = 3840;
-  const NEW_CURRENT_AND_KEY = 256;
-  const SKIP_DOTS = 4096;
-  const UNIX_PATHS = 8192;
+  const int CURRENT_AS_PATHNAME = 32;
+  const int CURRENT_AS_FILEINFO = 0;
+  const int CURRENT_AS_SELF = 16;
+  const int CURRENT_MODE_MASK = 240;
+  const int KEY_AS_PATHNAME = 0;
+  const int KEY_AS_FILENAME = 256;
+  const int FOLLOW_SYMLINKS = 512;
+  const int KEY_MODE_MASK = 3840;
+  const int NEW_CURRENT_AND_KEY = 256;
+  const int SKIP_DOTS = 4096;
+  const int UNIX_PATHS = 8192;
 
   // Properties
   protected $flags;

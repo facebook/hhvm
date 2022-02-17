@@ -15,47 +15,47 @@ const resource STDOUT = 0;
 /* HH_FIXME[4110] */
 const resource STDERR = 0;
 
-const PATHINFO_DIRNAME = 0;
-const PATHINFO_BASENAME = 0;
-const PATHINFO_EXTENSION = 0;
-const PATHINFO_FILENAME = 0;
-const DIRECTORY_SEPARATOR = "/";
-const PATH_SEPARATOR = ":";
+const int PATHINFO_DIRNAME = 0;
+const int PATHINFO_BASENAME = 0;
+const int PATHINFO_EXTENSION = 0;
+const int PATHINFO_FILENAME = 0;
+const string DIRECTORY_SEPARATOR = "/";
+const string PATH_SEPARATOR = ":";
 
-const UPLOAD_ERR_OK = 0;
-const UPLOAD_ERR_INI_SIZE = 1;
-const UPLOAD_ERR_FORM_SIZE = 2;
-const UPLOAD_ERR_PARTIAL = 3;
-const UPLOAD_ERR_NO_FILE = 4;
-const UPLOAD_ERR_NO_TMP_DIR = 6;
-const UPLOAD_ERR_CANT_WRITE = 7;
-const UPLOAD_ERR_EXTENSION = 8;
+const int UPLOAD_ERR_OK = 0;
+const int UPLOAD_ERR_INI_SIZE = 1;
+const int UPLOAD_ERR_FORM_SIZE = 2;
+const int UPLOAD_ERR_PARTIAL = 3;
+const int UPLOAD_ERR_NO_FILE = 4;
+const int UPLOAD_ERR_NO_TMP_DIR = 6;
+const int UPLOAD_ERR_CANT_WRITE = 7;
+const int UPLOAD_ERR_EXTENSION = 8;
 
-const FILE_APPEND = 0;
-const FILE_USE_INCLUDE_PATH = 0;
-const FILE_IGNORE_NEW_LINES = 0;
-const FILE_NO_DEFAULT_CONTEXT = 0;
-const FILE_SKIP_EMPTY_LINES = 0;
+const int FILE_APPEND = 0;
+const int FILE_USE_INCLUDE_PATH = 0;
+const int FILE_IGNORE_NEW_LINES = 0;
+const int FILE_NO_DEFAULT_CONTEXT = 0;
+const int FILE_SKIP_EMPTY_LINES = 0;
 
-const LOCK_EX = 2;
-const LOCK_SH = 1;
-const LOCK_UN = 3;
-const LOCK_NB = 4;
+const int LOCK_EX = 2;
+const int LOCK_SH = 1;
+const int LOCK_UN = 3;
+const int LOCK_NB = 4;
 
-const SEEK_SET = 0;
-const SEEK_CUR = 0;
-const SEEK_END = 0;
+const int SEEK_SET = 0;
+const int SEEK_CUR = 0;
+const int SEEK_END = 0;
 
-const INI_SCANNER_NORMAL = 0;
-const INT_SCANNER_RAW = 0;
+const int INI_SCANNER_NORMAL = 0;
+const int INT_SCANNER_RAW = 0;
 
-const GLOB_ERR     = 1;
-const GLOB_MARK    = 2;
-const GLOB_NOSORT  = 4;
-const GLOB_NOCHECK = 16;
-const GLOB_ESCAPE  = 64;
-const GLOB_BRACE   = 1024;
-const GLOB_ONLYDIR = 8192;
+const int GLOB_ERR     = 1;
+const int GLOB_MARK    = 2;
+const int GLOB_NOSORT  = 4;
+const int GLOB_NOCHECK = 16;
+const int GLOB_ESCAPE  = 64;
+const int GLOB_BRACE   = 1024;
+const int GLOB_ONLYDIR = 8192;
 
 <<__PHPStdLib>>
 function fopen(string $filename, string $mode, bool $use_include_path = false, $context = null);

@@ -39,22 +39,22 @@ function newlocale_all(string $locale)[]: Locale;
 // more are defined for every platform, but the HHI is only including ones that
 // are defined on every supported platform
 
-const LC_ALL = 0xdeadbeef;
-const LC_COLLATE = 0xdeadbeef;
-const LC_CTYPE = 0xdeadbeef;
-const LC_MONETARY = 0xdeadbeef;
-const LC_NUMERIC = 0xdeadbeef;
-const LC_TIME = 0xdeadbeef;
+const int LC_ALL = 0xdeadbeef;
+const int LC_COLLATE = 0xdeadbeef;
+const int LC_CTYPE = 0xdeadbeef;
+const int LC_MONETARY = 0xdeadbeef;
+const int LC_NUMERIC = 0xdeadbeef;
+const int LC_TIME = 0xdeadbeef;
 // required by POSIX, but not by C standard. Not supported by MSVC, but we don't
 // support that (yet?).
-const LC_MESSAGES = 0xdeadbeef;
+const int LC_MESSAGES = 0xdeadbeef;
 
-const LC_ALL_MASK = 0xdeadbeef;
-const LC_COLLATE_MASK = 0xdeadbeef;
-const LC_CTYPE_MASK = 0xdeadbeef;
-const LC_MONETARY_MASK = 0xdeadbeef;
-const LC_NUMERIC_MASK = 0xdeadbeef;
-const LC_TIME_MASK = 0xdeadbeef;
-const LC_MESSAGES_MASK = 0xdeadbeef;
+const int LC_ALL_MASK = 0xdeadbeef;
+const int LC_COLLATE_MASK = 0xdeadbeef;
+const int LC_CTYPE_MASK = 0xdeadbeef;
+const int LC_MONETARY_MASK = 0xdeadbeef;
+const int LC_NUMERIC_MASK = 0xdeadbeef;
+const int LC_TIME_MASK = 0xdeadbeef;
+const int LC_MESSAGES_MASK = 0xdeadbeef;
 
 } // namespace HH\Lib\_Private\_Locale

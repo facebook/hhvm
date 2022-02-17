@@ -19,8 +19,8 @@ function array_unmark_legacy_recursive<T>(T $in)[]: T;
 function is_array_marked_legacy(mixed $in)[]: bool;
 }
 namespace {
-const INF = 0.0;
-const NAN = 0.0;
+const float INF = 0.0;
+const float NAN = 0.0;
 <<__PHPStdLib>>
 function connection_aborted();
 <<__PHPStdLib>>

@@ -8,15 +8,15 @@
  *
  */
 
-const FILEINFO_NONE = 0;
-const FILEINFO_SYMLINK = 2;
-const FILEINFO_MIME = 1040;
-const FILEINFO_MIME_TYPE = 16;
-const FILEINFO_MIME_ENCODING = 1024;
-const FILEINFO_DEVICES = 8;
-const FILEINFO_CONTINUE = 32;
-const FILEINFO_PRESERVE_ATIME = 128;
-const FILEINFO_RAW = 256;
+const int FILEINFO_NONE = 0;
+const int FILEINFO_SYMLINK = 2;
+const int FILEINFO_MIME = 1040;
+const int FILEINFO_MIME_TYPE = 16;
+const int FILEINFO_MIME_ENCODING = 1024;
+const int FILEINFO_DEVICES = 8;
+const int FILEINFO_CONTINUE = 32;
+const int FILEINFO_PRESERVE_ATIME = 128;
+const int FILEINFO_RAW = 256;
 
 <<__PHPStdLib>>
 function finfo_open(int $options = FILEINFO_NONE, $magic_file = null) {}

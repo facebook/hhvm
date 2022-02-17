@@ -30,16 +30,16 @@ class DebuggerProxyCmdUser {
   public function send($cmd);
 }
 class DebuggerClientCmdUser {
-  const AUTO_COMPLETE_FILENAMES = 0;
-  const AUTO_COMPLETE_VARIABLES = 0;
-  const AUTO_COMPLETE_CONSTANTS = 0;
-  const AUTO_COMPLETE_CLASSES = 0;
-  const AUTO_COMPLETE_FUNCTIONS = 0;
-  const AUTO_COMPLETE_CLASS_METHODS = 0;
-  const AUTO_COMPLETE_CLASS_PROPERTIES = 0;
-  const AUTO_COMPLETE_CLASS_CONSTANTS = 0;
-  const AUTO_COMPLETE_KEYWORDS = 0;
-  const AUTO_COMPLETE_CODE = 0;
+  const int AUTO_COMPLETE_FILENAMES = 0;
+  const int AUTO_COMPLETE_VARIABLES = 0;
+  const int AUTO_COMPLETE_CONSTANTS = 0;
+  const int AUTO_COMPLETE_CLASSES = 0;
+  const int AUTO_COMPLETE_FUNCTIONS = 0;
+  const int AUTO_COMPLETE_CLASS_METHODS = 0;
+  const int AUTO_COMPLETE_CLASS_PROPERTIES = 0;
+  const int AUTO_COMPLETE_CLASS_CONSTANTS = 0;
+  const int AUTO_COMPLETE_KEYWORDS = 0;
+  const int AUTO_COMPLETE_CODE = 0;
   public function __construct();
   public function quit();
   public function help($format, ...$args);
@@ -70,11 +70,11 @@ class DebuggerClientCmdUser {
   public function addCompletion($list);
 }
 class DebuggerClient {
-  const STATE_INVALID = 0;
-  const STATE_UNINIT = 0;
-  const STATE_INITIALIZING = 0;
-  const STATE_READY_FOR_COMMAND = 0;
-  const STATE_BUSY = 0;
+  const int STATE_INVALID = 0;
+  const int STATE_UNINIT = 0;
+  const int STATE_INITIALIZING = 0;
+  const int STATE_READY_FOR_COMMAND = 0;
+  const int STATE_BUSY = 0;
   public function __construct();
   public function getState();
   public function init($options);

@@ -161,12 +161,8 @@ val locl : locl_ty -> phase_ty
 
 (** Add generic parameters to the environment, with localized bounds,
     and also add any consequences of `where` constraints *)
-val localize_and_add_generic_parameters_and_where_constraints :
-  ety_env:expand_env ->
-  env ->
-  decl_tparam list ->
-  decl_where_constraint list ->
-  env
+val localize_and_add_generic_parameters :
+  ety_env:expand_env -> env -> decl_tparam list -> env
 
 (** Add generic parameters to the environment, with localized bounds,
     and also add any consequences of `where` constraints.

@@ -199,7 +199,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   public function invokeArgs($object, varray $args);
   public function getDeclaringClass()[];
   public function getPrototype()[];
-  public function setAccessible(bool $accessible);
+  public function setAccessible(bool $accessible)[write_props]: void;
   final public function getAttributeClass<T as HH\MethodAttribute>(classname<T> $c)[]: ?T;
 }
 
@@ -264,7 +264,7 @@ class ReflectionProperty implements Reflector {
   public function getModifiers()[];
   public function getDeclaringClass()[];
   public function getDocComment()[];
-  public function setAccessible($accessible);
+  public function setAccessible(bool $accessible)[write_props]: void;
   public function getTypeText()[];
   final public function getAttributes()[]: darray<string, varray<mixed>>;
   final public function hasAttribute(string $name)[]: bool;

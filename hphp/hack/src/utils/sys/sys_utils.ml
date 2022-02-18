@@ -664,6 +664,32 @@ let rec select_non_intr read write exn timeout =
         Float.(max 0.0 (timeout -. (Unix.gettimeofday () -. start_time)))
     in
     select_non_intr read write exn timeout
+  | Unix.Unix_error (Unix.EINVAL, fun_name, "") ->
+    (* There are suspicions that we are receiving this exception because we are
+     * leaking file descriptors and end up using fds beyond the allowable
+     * range of 1024, so this intends to log all of the file descriptors that
+     * we call select on to verify those suspicions.
+     *)
+    let fdl_to_str fdl =
+      (* Using `Obj.magic` to convert file descriptors to ints because there is no
+       * library function to do so. See (https://github.com/ocaml/ocaml/pull/1990)
+       *)
+      "["
+      ^ List.fold_left
+          ~f:(fun init fd -> init ^ string_of_int (Obj.magic fd) ^ ", ")
+          ~init:""
+          fdl
+      ^ "]"
+    in
+    let fun_params =
+      Printf.sprintf
+        "%s %s %s %f"
+        (fdl_to_str read)
+        (fdl_to_str write)
+        (fdl_to_str exn)
+        timeout
+    in
+    raise (Unix.Unix_error (Unix.EINVAL, fun_name, fun_params))
 
 let rec waitpid_non_intr flags pid =
   try Unix.waitpid flags pid with

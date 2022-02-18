@@ -99,8 +99,7 @@ bitflags! {
         const CONST_DEFAULT_FUNC_ARGS=1 << 3;
         const CONST_STATIC_PROPS=1 << 4;
         const DISABLE_ARRAY=1 << 5;
-        // No longer using bit 6
-        const DISABLE_ARRAY_TYPEHINT=1 << 7;
+        // No longer using bits 6-7
         const DISABLE_LVAL_AS_AN_EXPRESSION=1 << 8;
         // No longer using bit 9
         const DISALLOW_INST_METH=1 << 10;
@@ -192,9 +191,6 @@ impl ParserFlags {
         }
         if self.contains(ParserFlags::DISABLE_ARRAY) {
             f |= LangFlags::DISABLE_ARRAY;
-        }
-        if self.contains(ParserFlags::DISABLE_ARRAY_TYPEHINT) {
-            f |= LangFlags::DISABLE_ARRAY_TYPEHINT;
         }
         if self.contains(ParserFlags::DISABLE_LVAL_AS_AN_EXPRESSION) {
             f |= LangFlags::DISABLE_LVAL_AS_AN_EXPRESSION;
@@ -521,7 +517,6 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
         po_disable_xhp_element_mangling: hack_lang_flags(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
         po_enable_enum_classes: hack_lang_flags(LangFlags::ENABLE_ENUM_CLASSES),
         po_disable_array: hack_lang_flags(LangFlags::DISABLE_ARRAY),
-        po_disable_array_typehint: hack_lang_flags(LangFlags::DISABLE_ARRAY_TYPEHINT),
         po_allow_unstable_features: hack_lang_flags(LangFlags::ALLOW_UNSTABLE_FEATURES),
         po_disallow_fun_and_cls_meth_pseudo_funcs: hack_lang_flags(
             LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,

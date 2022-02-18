@@ -306,8 +306,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
   let global_opts =
     GlobalOptions.make
       ?po_deregister_php_stdlib:(bool_opt "deregister_php_stdlib" config)
-      ?po_disable_array_typehint:
-        (bool_opt "disable_parse_array_typehint" config)
       ?tco_num_local_workers:local_config.num_local_workers
       ~tco_parallel_type_checking_threshold:
         local_config.parallel_type_checking_threshold

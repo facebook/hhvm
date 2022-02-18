@@ -95,7 +95,6 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     po_enable_enum_classes: true,
     po_disable_hh_ignore_error: false,
     po_disable_array: false,
-    po_disable_array_typehint: false,
     tco_enable_systemlib_annotations: false,
     tco_higher_kinded_types: false,
     tco_method_call_inference: false,

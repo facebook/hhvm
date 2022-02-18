@@ -794,7 +794,6 @@ let parse_options () =
 
   let tcopt =
     GlobalOptions.make
-      ?po_disable_array_typehint:(Some false)
       ?po_deregister_php_stdlib:!deregister_attributes
       ?tco_log_inference_constraints:!log_inference_constraints
       ?tco_timeout:!timeout

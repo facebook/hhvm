@@ -121,8 +121,6 @@ let disable_hh_ignore_error = GlobalOptions.po_disable_hh_ignore_error
 
 let disable_array = GlobalOptions.po_disable_array
 
-let disable_array_typehint = GlobalOptions.po_disable_array_typehint
-
 let disallow_fun_and_cls_meth_pseudo_funcs =
   GlobalOptions.po_disallow_fun_and_cls_meth_pseudo_funcs
 
@@ -163,7 +161,6 @@ let make
     ~enable_enum_classes
     ~disable_hh_ignore_error
     ~disable_array
-    ~disable_array_typehint
     ~disallow_fun_and_cls_meth_pseudo_funcs
     ~interpret_soft_types_as_like_types
     ~disallow_inst_meth
@@ -191,7 +188,6 @@ let make
       po_enable_enum_classes = enable_enum_classes;
       po_disable_hh_ignore_error = disable_hh_ignore_error;
       po_disable_array = disable_array;
-      po_disable_array_typehint = disable_array_typehint;
       po_disallow_fun_and_cls_meth_pseudo_funcs =
         disallow_fun_and_cls_meth_pseudo_funcs;
       po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
@@ -202,7 +198,6 @@ let make
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
-  * bool
   * bool
   * bool
   * bool
@@ -241,7 +236,6 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     enable_enum_classes po,
     disable_array po,
     const_default_lambda_args po,
-    disable_array_typehint po,
     allow_unstable_features po,
     disallow_fun_and_cls_meth_pseudo_funcs po,
     interpret_soft_types_as_like_types po,

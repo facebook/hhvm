@@ -13,7 +13,8 @@ use hhbc_ast::*;
 use hhbc_id::{class, r#const, function, method, prop};
 use hhbc_string_utils as string_utils;
 use hhvm_hhbc_defs_ffi::ffi::{
-    FCallArgsFlags, IsTypeOp, MOpMode, QueryMOp, SpecialClsRef, TypeStructResolveOp,
+    FCallArgsFlags, IsLogAsDynamicCallOp, IsTypeOp, MOpMode, QueryMOp, ReadonlyOp, SetRangeOp,
+    SpecialClsRef, TypeStructResolveOp,
 };
 use indexmap::IndexSet;
 use instruction_sequence::{

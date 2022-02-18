@@ -9,26 +9,12 @@ use ffi::{
     Pair, Slice, Str,
 };
 use hhvm_hhbc_defs_ffi::ffi::{
-    FCallArgsFlags, FatalOp, InitPropOp, IsTypeOp, MOpMode, QueryMOp, SpecialClsRef,
-    TypeStructResolveOp,
+    ContCheckOp, FCallArgsFlags, FatalOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, MOpMode,
+    QueryMOp, ReadonlyOp, SetRangeOp, SpecialClsRef, TypeStructResolveOp,
 };
 use iterator::IterId;
 use label::Label;
 use local::Local;
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum CheckStarted {
-    IgnoreStarted,
-    CheckStarted,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum FreeIterator {
-    IgnoreIter,
-    FreeIter,
-}
 
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType<'arena> = Str<'arena>;
@@ -164,27 +150,10 @@ pub enum InstructBasic {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
-pub enum ReadonlyOp {
-    Readonly,
-    Mutable,
-    Any,
-    CheckROCOW,
-    CheckMutROCOW,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
 pub enum HasGenericsOp {
     NoGenerics,
     MaybeGenerics,
     HasGenerics,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum IsLogAsDynamicCallOp {
-    LogAsDynamicCall,
-    DontLogAsDynamicCall,
 }
 
 #[derive(Clone, Debug)]
@@ -374,13 +343,6 @@ pub enum InstructIsset<'arena> {
     IsUnsetL(Local<'arena>),
     IsTypeC(IsTypeOp),
     IsTypeL(Local<'arena>, IsTypeOp),
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum SetRangeOp {
-    Forward,
-    Reverse,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -805,7 +767,7 @@ pub enum GenCreationExecution {
     ContRaise,
     Yield,
     YieldK,
-    ContCheck(CheckStarted),
+    ContCheck(ContCheckOp),
     ContValid,
     ContKey,
     ContGetReturn,

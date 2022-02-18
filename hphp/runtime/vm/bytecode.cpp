@@ -197,7 +197,6 @@ inline const char* prettytype(TypeStructResolveOp) {
   return "TypeStructResolveOp";
 }
 inline const char* prettytype(ReadonlyOp) { return "ReadonlyOp"; }
-inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
 inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
 inline const char* prettytype(CollectionType) { return "CollectionType"; }

@@ -104,6 +104,37 @@ pub mod ffi {
         DontResolve,
     }
 
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum IsLogAsDynamicCallOp {
+        LogAsDynamicCall,
+        DontLogAsDynamicCall,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum ReadonlyOp {
+        Any,
+        Readonly,
+        Mutable,
+        CheckROCOW,
+        CheckMutROCOW,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum SetRangeOp {
+        Forward,
+        Reverse,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum ContCheckOp {
+        IgnoreStarted,
+        CheckStarted,
+    }
+
     unsafe extern "C++" {
         include!("hphp/hack/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.h");
         type FatalOp;
@@ -114,6 +145,10 @@ pub mod ffi {
         type MOpMode;
         type QueryMOp;
         type TypeStructResolveOp;
+        type IsLogAsDynamicCallOp;
+        type ReadonlyOp;
+        type SetRangeOp;
+        type ContCheckOp;
         fn fcall_flags_to_string_ffi(flags: FCallArgsFlags) -> String;
     }
 }

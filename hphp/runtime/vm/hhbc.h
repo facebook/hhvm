@@ -422,46 +422,6 @@ enum class SwitchKind : uint8_t {
 #undef KIND
 };
 
-#define SET_RANGE_OPS \
-  OP(Forward)         \
-  OP(Reverse)
-
-enum class SetRangeOp : uint8_t {
-#define OP(name) name,
-  SET_RANGE_OPS
-#undef OP
-};
-
-#define CONT_CHECK_OPS                            \
-  CONT_CHECK_OP(IgnoreStarted)                    \
-  CONT_CHECK_OP(CheckStarted)
-
-enum class ContCheckOp : uint8_t {
-#define CONT_CHECK_OP(name) name,
-  CONT_CHECK_OPS
-#undef CONT_CHECK_OP
-};
-
-#define CUD_OPS                                 \
-  CUD_OP(IgnoreIter)                            \
-  CUD_OP(FreeIter)
-
-enum class CudOp : uint8_t {
-#define CUD_OP(name) name,
-  CUD_OPS
-#undef CUD_OP
-};
-
-#define IS_LOG_AS_DYNAMIC_CALL_OPS                  \
-  IS_LOG_AS_DYNAMIC_CALL_OP(LogAsDynamicCall)       \
-  IS_LOG_AS_DYNAMIC_CALL_OP(DontLogAsDynamicCall)
-
-enum class IsLogAsDynamicCallOp : uint8_t {
-#define IS_LOG_AS_DYNAMIC_CALL_OP(name) name,
-  IS_LOG_AS_DYNAMIC_CALL_OPS
-#undef IS_LOG_AS_DYNAMIC_CALL_OP
-};
-
 constexpr uint32_t kMaxConcatN = 4;
 
 //  name             immediates        inputs           outputs     flags
@@ -881,7 +841,6 @@ const char* subopToName(QueryMOp);
 const char* subopToName(SetRangeOp);
 const char* subopToName(TypeStructResolveOp);
 const char* subopToName(ContCheckOp);
-const char* subopToName(CudOp);
 const char* subopToName(SpecialClsRef);
 const char* subopToName(IsLogAsDynamicCallOp);
 const char* subopToName(ReadonlyOp);

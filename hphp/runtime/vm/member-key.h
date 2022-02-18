@@ -17,6 +17,7 @@
 #pragma once
 
 #include "hphp/runtime/base/types.h"
+#include "hphp/runtime/vm/hhbc-shared.h"
 
 #include "hphp/util/hash.h"
 #include "hphp/util/optional.h"
@@ -56,19 +57,6 @@ enum MemberCode : uint8_t {
 };
 
 constexpr size_t NumMemberCodes = MW + 1;
-
-#define READONLY_OPS    \
-  OP(Any)               \
-  OP(Readonly)          \
-  OP(Mutable)           \
-  OP(CheckROCOW)        \
-  OP(CheckMutROCOW)
-
-enum class ReadonlyOp : uint8_t {
-#define OP(name) name,
-  READONLY_OPS
-#undef OP
-};
 
 /*
  * Returns string representation of `mc'. Pointer to internal static data, does

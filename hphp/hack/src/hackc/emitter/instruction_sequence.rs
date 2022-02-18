@@ -10,7 +10,8 @@ use ffi::{
 };
 use hhbc_ast::*;
 use hhvm_hhbc_defs_ffi::ffi::{
-    FatalOp, InitPropOp, IsTypeOp, MOpMode, QueryMOp, SpecialClsRef, TypeStructResolveOp,
+    ContCheckOp, FatalOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, MOpMode, QueryMOp,
+    ReadonlyOp, SpecialClsRef, TypeStructResolveOp,
 };
 use iterator::IterId;
 use label::Label;
@@ -1474,14 +1475,14 @@ pub mod instr {
     pub fn contcheck_check<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::Generator(GenCreationExecution::ContCheck(CheckStarted::CheckStarted)),
+            Instruct::Generator(GenCreationExecution::ContCheck(ContCheckOp::CheckStarted)),
         )
     }
 
     pub fn contcheck_ignore<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::Generator(GenCreationExecution::ContCheck(CheckStarted::IgnoreStarted)),
+            Instruct::Generator(GenCreationExecution::ContCheck(ContCheckOp::IgnoreStarted)),
         )
     }
 

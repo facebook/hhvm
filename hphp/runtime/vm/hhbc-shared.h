@@ -112,4 +112,46 @@ enum class TypeStructResolveOp : uint8_t {
 #undef OP
 };
 
+#define IS_LOG_AS_DYNAMIC_CALL_OPS                  \
+  IS_LOG_AS_DYNAMIC_CALL_OP(LogAsDynamicCall)       \
+  IS_LOG_AS_DYNAMIC_CALL_OP(DontLogAsDynamicCall)
+
+enum class IsLogAsDynamicCallOp : uint8_t {
+#define IS_LOG_AS_DYNAMIC_CALL_OP(name) name,
+  IS_LOG_AS_DYNAMIC_CALL_OPS
+#undef IS_LOG_AS_DYNAMIC_CALL_OP
+};
+
+#define READONLY_OPS    \
+  OP(Any)               \
+  OP(Readonly)          \
+  OP(Mutable)           \
+  OP(CheckROCOW)        \
+  OP(CheckMutROCOW)
+
+enum class ReadonlyOp : uint8_t {
+#define OP(name) name,
+  READONLY_OPS
+#undef OP
+};
+
+#define SET_RANGE_OPS \
+  OP(Forward)         \
+  OP(Reverse)
+
+enum class SetRangeOp : uint8_t {
+#define OP(name) name,
+  SET_RANGE_OPS
+#undef OP
+};
+
+#define CONT_CHECK_OPS                            \
+  CONT_CHECK_OP(IgnoreStarted)                    \
+  CONT_CHECK_OP(CheckStarted)
+
+enum class ContCheckOp : uint8_t {
+#define CONT_CHECK_OP(name) name,
+  CONT_CHECK_OPS
+#undef CONT_CHECK_OP
+};
 }

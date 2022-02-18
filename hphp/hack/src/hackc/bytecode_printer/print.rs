@@ -40,8 +40,8 @@ use hhbc_string_utils::{
     strip_global_ns, strip_ns, types,
 };
 use hhvm_hhbc_defs_ffi::ffi::{
-    fcall_flags_to_string_ffi, FatalOp, InitPropOp, IsTypeOp, MOpMode, QueryMOp, SpecialClsRef,
-    TypeStructResolveOp,
+    fcall_flags_to_string_ffi, ContCheckOp, FatalOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp,
+    MOpMode, QueryMOp, ReadonlyOp, SetRangeOp, SpecialClsRef, TypeStructResolveOp,
 };
 use hhvm_types_ffi::ffi::*;
 use instruction_sequence::{Error::Unrecoverable, InstrSeq};
@@ -1018,9 +1018,10 @@ fn print_call(w: &mut dyn Write, call: &InstructCall<'_>) -> Result<()> {
             w.write_all(b"FCallClsMethod ")?;
             print_fcall_args(w, fcall_args)?;
             w.write_all(br#" "" "#)?;
-            w.write_all(match log {
+            w.write_all(match *log {
                 IsLogAsDynamicCallOp::LogAsDynamicCall => b"LogAsDynamicCall",
                 IsLogAsDynamicCallOp::DontLogAsDynamicCall => b"DontLogAsDynamicCall",
+                _ => panic!("Enum value does not match one of listed variants"),
             })
         }
         InstructCall::FCallClsMethodD {
@@ -1389,9 +1390,10 @@ fn print_final(w: &mut dyn Write, f: &InstructFinal<'_>) -> Result<()> {
             w.write_all(b" ")?;
             print_int(w, &(*s as usize))?;
             w.write_all(b" ")?;
-            w.write_all(match op {
+            w.write_all(match *op {
                 SetRangeOp::Forward => b"Forward",
                 SetRangeOp::Reverse => b"Reverse",
+                _ => panic!("Enum value does not match one of listed variants"),
             })
         }
     }
@@ -1544,12 +1546,13 @@ fn print_eq_op(w: &mut dyn Write, op: &EqOp) -> Result<()> {
 }
 
 fn print_readonly_op(w: &mut dyn Write, op: &ReadonlyOp) -> Result<()> {
-    w.write_all(match op {
+    w.write_all(match *op {
         ReadonlyOp::Readonly => b"Readonly",
         ReadonlyOp::Mutable => b"Mutable",
         ReadonlyOp::Any => b"Any",
         ReadonlyOp::CheckROCOW => b"CheckROCOW",
         ReadonlyOp::CheckMutROCOW => b"CheckMutROCOW",
+        _ => panic!("Enum value does not match one of listed variants"),
     })
 }
 
@@ -1574,12 +1577,13 @@ fn print_gen_creation_execution(w: &mut dyn Write, gen: &GenCreationExecution) -
         G::ContRaise => w.write_all(b"ContRaise"),
         G::Yield => w.write_all(b"Yield"),
         G::YieldK => w.write_all(b"YieldK"),
-        G::ContCheck(CheckStarted::IgnoreStarted) => w.write_all(b"ContCheck IgnoreStarted"),
-        G::ContCheck(CheckStarted::CheckStarted) => w.write_all(b"ContCheck CheckStarted"),
+        G::ContCheck(ContCheckOp::IgnoreStarted) => w.write_all(b"ContCheck IgnoreStarted"),
+        G::ContCheck(ContCheckOp::CheckStarted) => w.write_all(b"ContCheck CheckStarted"),
         G::ContValid => w.write_all(b"ContValid"),
         G::ContKey => w.write_all(b"ContKey"),
         G::ContGetReturn => w.write_all(b"ContGetReturn"),
         G::ContCurrent => w.write_all(b"ContCurrent"),
+        _ => panic!("Enum value does not match one of listed variants"),
     }
 }
 

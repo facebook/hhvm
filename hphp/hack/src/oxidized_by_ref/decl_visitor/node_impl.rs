@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b8c1c3c46e06feee0e7f8dca73a78848>>
+// @generated SignedSource<<5f5ba2ccd7525e74b91638975cc0c8e4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -40,6 +40,11 @@ impl<'a, T: Node<'a>> Node<'a> for Option<T> {
             Some(t) => t.accept(v),
             _ => {}
         }
+    }
+}
+impl<'a, T: Node<'a>> Node<'a> for crate::lazy::Lazy<T> {
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        self.0.accept(v)
     }
 }
 impl<'a, T: Node<'a>> Node<'a> for arena_collections::List<'a, T> {

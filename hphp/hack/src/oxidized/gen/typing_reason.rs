@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<81101ffe8fc2b8fa065d29651fbbaf10>>
+// @generated SignedSource<<a42e0fb1675faa084f79fc5e05cfe794>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -190,7 +190,7 @@ pub enum T_ {
     RinoutParam(pos_or_decl::PosOrDecl),
     Rinstantiate(Box<T_>, String, Box<T_>),
     Rtypeconst(Box<T_>, (pos_or_decl::PosOrDecl, String), String, Box<T_>),
-    RtypeAccess(Box<T_>, Vec<(Box<T_>, String)>),
+    RtypeAccess(Box<T_>, Vec<(Box<T_>, lazy::Lazy<String>)>),
     RexprDepType(Box<T_>, pos_or_decl::PosOrDecl, ExprDepTypeReason),
     /// ?-> operator is used
     RnullsafeOp(pos::Pos),

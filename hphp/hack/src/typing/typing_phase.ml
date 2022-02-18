@@ -254,7 +254,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
      *)
     let elaborate_reason expand_reason =
       let taccess_string =
-        Typing_print.full_strip_ns env root_ty ^ "::" ^ snd id
+        lazy (Typing_print.full_strip_ns env root_ty ^ "::" ^ snd id)
       in
       (* If the root is an expression dependent type, change the primary
        * reason to be for the full Taccess type to preserve the position where

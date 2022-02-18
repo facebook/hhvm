@@ -86,7 +86,7 @@ impl<R: Reason> Allocator<R> {
                 OR::RtypeAccess((r, list)) => RI::RtypeAccess(
                     self.reason(r),
                     list.iter()
-                        .map(|(r, s)| (self.reason(r), self.symbol(s)))
+                        .map(|(r, s)| (self.reason(r), self.symbol(s.0)))
                         .collect(),
                 ),
                 OR::RexprDepType((r, pos, edt_reason)) => RI::RexprDepType(

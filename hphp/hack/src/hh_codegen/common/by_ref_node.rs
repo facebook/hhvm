@@ -60,6 +60,12 @@ pub fn node_impl() -> TokenStream {
             }
         }
 
+        impl<'a, T: Node<'a>> Node<'a> for crate::lazy::Lazy<T> {
+            fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+                self.0.accept(v)
+            }
+        }
+
         impl<'a, T: Node<'a>> Node<'a> for arena_collections::List<'a, T> {
             fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
                 for elt in self.iter() {

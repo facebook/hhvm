@@ -163,6 +163,32 @@ where
     }
 }
 
+impl<P: Params, T> Node<P> for crate::lazy::Lazy<T>
+where
+    T: Node<P>,
+{
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)
+    }
+}
+
+impl<P: Params, T> NodeMut<P> for crate::lazy::Lazy<T>
+where
+    T: NodeMut<P>,
+{
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)
+    }
+}
+
 impl<P: Params, K, V> Node<P> for BTreeMap<K, V>
 where
     V: Node<P>,

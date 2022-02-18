@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6c9e4c4924b177da2e71ddb0a92ceb6b>>
+// @generated SignedSource<<47aba7e123308956a2b2f8d62f24b8d1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -214,7 +214,7 @@ pub enum T_<'a> {
         ),
     ),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    RtypeAccess(&'a (T_<'a>, &'a [(&'a T_<'a>, &'a str)])),
+    RtypeAccess(&'a (T_<'a>, &'a [(&'a T_<'a>, &'a lazy::Lazy<&'a str>)])),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     RexprDepType(
         &'a (

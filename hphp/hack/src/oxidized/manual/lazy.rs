@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
     PartialOrd,
     Serialize
 )]
-pub struct Lazy<T>(T);
+pub struct Lazy<T>(pub T);
 
 impl<T: ToOcamlRep> ToOcamlRep for Lazy<T> {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {

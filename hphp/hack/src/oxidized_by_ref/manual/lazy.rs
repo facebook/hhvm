@@ -22,7 +22,7 @@ use serde::{Deserialize, Serialize};
     Serialize
 )]
 #[serde(bound(deserialize = "T: 'de + arena_deserializer::DeserializeInArena<'de>"))]
-pub struct Lazy<T>(#[serde(deserialize_with = "arena_deserializer::arena")] T);
+pub struct Lazy<T>(#[serde(deserialize_with = "arena_deserializer::arena")] pub T);
 
 arena_deserializer::impl_deserialize_in_arena!(Lazy<T>);
 

@@ -102,7 +102,7 @@ type _ t_ =
       'phase t_ * (Pos_or_decl.t * string) * string * 'phase t_
       -> 'phase t_
   | Rtype_access :
-      locl_phase t_ * (locl_phase t_ * string) list
+      locl_phase t_ * (locl_phase t_ * string Lazy.t) list
       -> locl_phase t_
   | Rexpr_dep_type :
       'phase t_ * Pos_or_decl.t * expr_dep_type_reason
@@ -449,11 +449,12 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     to_string prefix r
     @ to_string
         ("  resulting from expanding the type constant "
-        ^ Markdown_lite.md_codify tconst)
+        ^ Markdown_lite.md_codify (Lazy.force tconst))
         r_hd
     @ List.concat_map tail ~f:(fun (r, s) ->
           to_string
-            ("  then expanding the type constant " ^ Markdown_lite.md_codify s)
+            ("  then expanding the type constant "
+            ^ Markdown_lite.md_codify (Lazy.force s))
             r)
   | Rexpr_dep_type (r, p, e) ->
     to_string prefix r @ [(p, "  " ^ expr_dep_type_reason_string e)]

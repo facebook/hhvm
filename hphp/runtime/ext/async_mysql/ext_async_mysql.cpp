@@ -20,6 +20,7 @@
 #include <memory>
 #include <vector>
 
+#include <folly/ssl/OpenSSLCertUtils.h>
 #include <squangle/mysql_client/AsyncHelpers.h>
 #include <squangle/mysql_client/ClientPool.h>
 
@@ -167,6 +168,70 @@ MySSLContextProvider* getSSLContextProvider(const Object& ctx) {
 
 static std::shared_ptr<am::AsyncMysqlClient> getClient() {
   return folly::Singleton<AsyncMysqlClientPool>::try_get()->getClient();
+}
+
+static std::vector<std::string> certLoggingImpl(
+    X509* cert,
+    const std::vector<std::string>& extNames,
+    am::ConnectOperation& op,
+    bool validated) {
+  // Capture the certificare Common Name
+  std::string cn =
+    folly::ssl::OpenSSLCertUtils::getCommonName(*cert).value_or("none");
+  // Capture cert extension values for the extensions requested by the
+  // callback installer
+  std::vector<std::string> extValues;
+  std::vector<std::pair<std::string, std::string>> allExtensions =
+      folly::ssl::OpenSSLCertUtils::getAllExtensions(*cert);
+  for (const auto& extName: extNames) {
+    const auto& i =
+      std::find_if(allExtensions.begin(), allExtensions.end(),
+                   [&extName]
+                   (const std::pair<std::string, std::string>& element) {
+                     return element.first == extName;
+                   });
+    if (i != allExtensions.end() && !i->second.empty()) {
+      extValues.push_back(i->second);
+    }
+  }
+
+  // Capture the cert ASN values
+  std::vector<std::string> subjectAltNames =
+      folly::ssl::OpenSSLCertUtils::getSubjectAltNames(*cert);
+
+  // Update the operation with the cert parameters
+  op.reportServerCertContent(
+      cn,
+      subjectAltNames,
+      extValues,
+      validated);
+  return extValues;
+}
+
+static bool serverCertLoggingCallback(
+    X509* server_cert,
+    const void* context,
+    folly::StringPiece& /*errMsg*/,
+    const std::vector<std::string>& extNames) {
+  am::ConnectOperation* op = reinterpret_cast<am::ConnectOperation*>(
+          const_cast<void*>(context));
+  CHECK(op);
+
+  // Log the server cert content
+  certLoggingImpl(server_cert, extNames, *op, false);
+
+  return true;
+}
+
+static facebook::common::mysql_client::CertValidatorCallback
+generateCertValidationCallback(
+    const std::string& serverCertExtNames) {
+  std::vector<std::string> extNames;
+  folly::split(",", serverCertExtNames, extNames);
+  return [extNames = std::move(extNames)] (
+        X509* server_cert, const void* context, folly::StringPiece& errMsg) {
+    return serverCertLoggingCallback(server_cert, context, errMsg, extNames);
+  };
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -386,6 +451,21 @@ HHVM_METHOD(AsyncMysqlConnectionOptions, enableChangeUser) {
   data->m_conn_opts.enableChangeUser();
 }
 
+static void
+HHVM_METHOD(AsyncMysqlConnectionOptions,
+            setServerCertValidation,
+            const String& serverCertExtNames /* = "" */) {
+  auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
+  // #ifdef FACEBOOK until Open Source squangle pin is updated - needed as of
+  // Squangle 2020-10-21
+  #ifdef FACEBOOK
+  data->m_conn_opts.setCertValidationCallback(
+      generateCertValidationCallback(std::string(serverCertExtNames)),
+      nullptr,
+      true);
+  #endif
+}
+
 static int64_t getQueryTimeout(int64_t timeout_micros) {
   if (timeout_micros < 0) {
     return mysqlExtension::ReadTimeout * 1000;
@@ -431,6 +511,12 @@ static AsyncMysqlConnection::AttributeMap transformAttributes(
 static Object newAsyncMysqlConnectEvent(
     std::shared_ptr<am::ConnectOperation> op,
     std::shared_ptr<am::AsyncMysqlClient> clientPtr) {
+  // Set connection context to store the cert parameters
+  if (op->getCertValidationCallback() &&
+      op->getConnectionContext() == nullptr) {
+    auto context = std::make_shared<db::ConnectionContextBase>();
+    op->setConnectionContext(std::move(context));
+  }
   auto event = new AsyncMysqlConnectEvent(op);
   try {
     op->setCallback([event, clientPtr](am::ConnectOperation& /* op */) {
@@ -456,6 +542,11 @@ static Object newAsyncMysqlConnectAndQueryEvent(
     const Array& queryAttributes,
     bool connReusable) {
 
+  if (connectOp->getCertValidationCallback() &&
+      connectOp->getConnectionContext() == nullptr) {
+    auto context = std::make_shared<db::ConnectionContextBase>();
+    connectOp->setConnectionContext(std::move(context));
+  }
   auto event = new AsyncMysqlConnectAndMultiQueryEvent(connectOp);
   auto queries_as_array = queries.isArray()
     ? queries.asCArrRef()
@@ -535,7 +626,8 @@ Object HHVM_STATIC_METHOD(
     int64_t timeout_micros /* = -1 */,
     const Variant& sslContextProvider /* = null */,
     int64_t tcp_timeout_micros /* = 0 */,
-    const String& sni_server_name /* = "" */) {
+    const String& sni_server_name /* = "" */,
+    const String& serverCertExtNames /* = "" */) {
   am::ConnectionKey key(
       static_cast<std::string>(host),
       port,
@@ -562,6 +654,12 @@ Object HHVM_STATIC_METHOD(
   // If ssl sni name is not empty, set it
   if (!sni_server_name.empty()) {
     op->setSniServerName(static_cast<std::string>(sni_server_name));
+  }
+  if (!serverCertExtNames.empty()) {
+    op->setCertValidationCallback(
+        generateCertValidationCallback(std::string(serverCertExtNames)),
+        nullptr,
+        true);
   }
 
   return newAsyncMysqlConnectEvent(std::move(op), getClient());
@@ -753,7 +851,8 @@ static Object HHVM_METHOD(
     const String& extra_key,
     const Variant& sslContextProvider,
     int64_t tcp_timeout_micros,
-    const String& sni_server_name) {
+    const String& sni_server_name,
+    const String& serverCertExtNames) {
   auto* data = Native::data<AsyncMysqlConnectionPool>(this_);
   auto op = data->m_async_pool->beginConnection(
       static_cast<std::string>(host),
@@ -780,6 +879,12 @@ static Object HHVM_METHOD(
   // If ssl sni name is not empty, set it
   if (!sni_server_name.empty()) {
     op->setSniServerName(static_cast<std::string>(sni_server_name));
+  }
+  if (!serverCertExtNames.empty()) {
+    op->setCertValidationCallback(
+        generateCertValidationCallback(std::string(serverCertExtNames)),
+        nullptr,
+        true);
   }
 
   return newAsyncMysqlConnectEvent(
@@ -2095,7 +2200,7 @@ static struct AsyncMysqlExtension final : Extension {
   // bump the version number and use a version guard in www:
   //   $ext = new ReflectionExtension("async_mysql");
   //   $version = (float) $ext->getVersion();
-  AsyncMysqlExtension() : Extension("async_mysql", "5.0") {}
+  AsyncMysqlExtension() : Extension("async_mysql", "6.0") {}
   void moduleInit() override {
     // expose the mysql flags
     HHVM_RC_INT_SAME(NOT_NULL_FLAG);
@@ -2293,6 +2398,7 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_ME(AsyncMysqlConnectionOptions, enableResetConnBeforeClose);
     HHVM_ME(AsyncMysqlConnectionOptions, enableDelayedResetConn);
     HHVM_ME(AsyncMysqlConnectionOptions, enableChangeUser);
+    HHVM_ME(AsyncMysqlConnectionOptions, setServerCertValidation);
 
     Native::registerNativeDataInfo<AsyncMysqlConnectionOptions>(
         AsyncMysqlConnectionOptions::s_className.get());

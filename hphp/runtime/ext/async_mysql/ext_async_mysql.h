@@ -343,6 +343,11 @@ struct AsyncMysqlConnectAndMultiQueryEvent final : AsioExternalThreadEvent {
   explicit AsyncMysqlConnectAndMultiQueryEvent(
       std::shared_ptr<am::ConnectOperation> op) {
     m_connect_op = op;
+    if (m_connect_op->getCertValidationCallback() &&
+        m_connect_op->getConnectionContext() == nullptr) {
+      auto context = std::make_unique<db::ConnectionContextBase>();
+      m_connect_op->setConnectionContext(std::move(context));
+    }
   }
 
   void setQueryOp(std::shared_ptr<am::MultiQueryOperation> op) {

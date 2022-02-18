@@ -91,6 +91,8 @@ final class AsyncMysqlClient {
    * @param $tcp_timeout_micros - Timeout, in microseconds, for the tcp phase of
    *                          connect operation; Default: 0 for no timeout.
    * @param $sni_server_name - SNI hostname to use when connecting via SSL.
+   * @param $server_cert_extensions - collection of name of TLS cert extension
+                                      names used to validate server cert
    *
    * @return - an `Awaitable` representing an `AsyncMysqlConnection`. `await`
    * or `join` this result to obtain the actual connection.
@@ -105,6 +107,7 @@ final class AsyncMysqlClient {
                                  ?MySSLContextProvider $ssl_context = null,
                                  int $tcp_timeout_micros = 0,
                                  string $sni_server_name = "",
+                                 string $server_cert_extensions = "",
                                 ): Awaitable<AsyncMysqlConnection>;
 
   /**
@@ -300,6 +303,8 @@ class AsyncMysqlConnectionPool {
    * @param $tcp_timeout_micros - Timeout, in microseconds, for the tcp phase of
    *                          connect operation; Default: 0 for no timeout.
    * @param $sni_server_name - SNI hostname to use when connecting via SSL.
+   * @param $server_cert_extensions - collection of name of TLS cert extension
+                                      names used to validate server cert
    *
    * @return - an `Awaitable` representing an `AsyncMysqlConnection`. `await`
    * or `join` this result to obtain the actual connection.
@@ -315,6 +320,7 @@ class AsyncMysqlConnectionPool {
                           ?MySSLContextProvider $ssl_context = null,
                           int $tcp_timeout_micros = 0,
                           string $sni_server_name = "",
+                          string $server_cert_extensions = "",
                          ): Awaitable<AsyncMysqlConnection>;
 
   <<__Native>>
@@ -773,6 +779,10 @@ class AsyncMysqlConnectionOptions {
   // Enable change_user feature in connection pool
   <<__Native>>
   public function enableChangeUser(): void;
+
+  // TLS cert extension parameters to validate server cert
+  <<__Native>>
+  public function setServerCertValidation(string $extensions): void;
 }
 /**
  * Provides timing statistics about the MySQL client.

@@ -27,13 +27,14 @@ pub trait TypingDeclProvider<R: Reason>: Debug {
     fn get_class_or_typedef(&self, name: TypeName) -> Option<TypeDecl<R>>;
 }
 
+#[derive(Debug)]
 pub enum TypeDecl<R: Reason> {
     Class(Arc<dyn Class<R>>),
     Typedef(Arc<TypedefDecl<R>>),
 }
 
 /// Represents the complete folded declaration of a class.
-pub trait Class<R: Reason> {
+pub trait Class<R: Reason>: Debug {
     fn get_prop(&self, name: PropName) -> Option<Arc<ClassElt<R>>>;
     fn get_static_prop(&self, name: PropName) -> Option<Arc<ClassElt<R>>>;
     fn get_method(&self, name: MethodName) -> Option<Arc<ClassElt<R>>>;

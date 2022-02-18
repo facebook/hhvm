@@ -47,7 +47,13 @@ fn main() {
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|e| !e.file_type().is_dir() && find_utils::is_hack(&e.path()))
-            .map(|e| alloc.relative_path(Prefix::Dummy, &e.path()))
+            .map(|e| {
+                let path = e.path();
+                match path.strip_prefix(&path_ctx.root) {
+                    Ok(suffix) => alloc.relative_path(Prefix::Root, suffix),
+                    Err(..) => alloc.relative_path(Prefix::Dummy, &path),
+                }
+            })
             .collect::<Vec<RelativePath>>()
     });
     println!(

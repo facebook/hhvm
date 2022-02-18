@@ -10,12 +10,11 @@ use intern::string::BytesId;
 use oxidized::{aast, ast_defs};
 use pos::{ModuleName, Positioned, Symbol, TypeConstName, TypeName};
 use std::collections::BTreeMap;
+use std::fmt;
 
 pub use oxidized::{
-    aast_defs::Tprim as Prim,
-    ast_defs::Abstraction,
-    ast_defs::ClassishKind,
-    ast_defs::Visibility,
+    aast_defs::{ReifyKind, Tprim as Prim},
+    ast_defs::{Abstraction, ClassishKind, ConstraintKind, Visibility},
     typing_defs::ClassConstKind,
     typing_defs_core::{ConsistentKind, Enforcement, Exact, ParamMode, ShapeKind},
     typing_defs_flags::{self, ClassEltFlags, ClassEltFlagsArgs, FunParamFlags, FunTypeFlags},
@@ -76,8 +75,8 @@ pub struct Tparam<R: Reason, TY> {
     pub variance: ast_defs::Variance,
     pub name: Positioned<TypeName, R::Pos>,
     pub tparams: Box<[Tparam<R, TY>]>,
-    pub constraints: Box<[(ast_defs::ConstraintKind, TY)]>,
-    pub reified: aast::ReifyKind,
+    pub constraints: Box<[(ConstraintKind, TY)]>,
+    pub reified: ReifyKind,
     pub user_attributes: Box<[UserAttribute<R::Pos>]>,
 }
 
@@ -88,7 +87,7 @@ pub struct WhereConstraint<TY>(pub TY, pub ast_defs::ConstraintKind, pub TY);
 
 walkable!(impl<R: Reason, TY> for WhereConstraint<TY> => [0, 1, 2]);
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Eq, Hash, PartialEq)]
 pub struct DeclTy<R: Reason>(R, Hc<DeclTy_<R>>);
 
 walkable!(DeclTy<R> as visit_decl_ty => [0, 1]);
@@ -401,7 +400,7 @@ pub struct ConcreteTypeconst<R: Reason> {
 
 walkable!(ConcreteTypeconst<R> => [ty]);
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Eq, Hash, PartialEq)]
 pub enum Typeconst<R: Reason> {
     TCAbstract(AbstractTypeconst<R>),
     TCConcrete(ConcreteTypeconst<R>),
@@ -411,6 +410,15 @@ walkable!(Typeconst<R> => {
     Self::TCAbstract(x) => [x],
     Self::TCConcrete(x) => [x],
 });
+
+impl<R: Reason> fmt::Debug for Typeconst<R> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::TCAbstract(x) => x.fmt(f),
+            Self::TCConcrete(x) => x.fmt(f),
+        }
+    }
+}
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct EnumType<R: Reason> {

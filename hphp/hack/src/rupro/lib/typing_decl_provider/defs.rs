@@ -11,6 +11,7 @@ use crate::typing_defs::ClassElt;
 use dashmap::DashMap;
 use once_cell::sync::OnceCell;
 use pos::{BuildMethodNameHasher, BuildPropNameHasher, MethodName, PropName};
+use std::fmt;
 use std::sync::Arc;
 
 #[derive(Debug)]
@@ -31,11 +32,20 @@ struct EagerMembers<R: Reason> {
 /// member-cache. If not present, it looks up the type of the member using the
 /// `FoldedDeclProvider`, and populates its member-cache with a new `ClassElt`
 /// containing that type and any other metadata from the `FoldedElt`.
-#[derive(Debug)]
 pub struct ClassType<R: Reason> {
     provider: Arc<dyn FoldedDeclProvider<R>>,
     class: Arc<FoldedClass<R>>,
     members: EagerMembers<R>,
+}
+
+impl<R: Reason> fmt::Debug for ClassType<R> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.fetch_all_members();
+        f.debug_struct("ClassType")
+            .field("class", &self.class)
+            .field("members", &self.members)
+            .finish()
+    }
 }
 
 impl<R: Reason> EagerMembers<R> {
@@ -57,6 +67,22 @@ impl<R: Reason> ClassType<R> {
             class,
             members: EagerMembers::new(),
         }
+    }
+
+    fn fetch_all_members(&self) {
+        for (&prop, _) in self.class.props.iter() {
+            self.get_prop(prop);
+        }
+        for (&prop, _) in self.class.static_props.iter() {
+            self.get_static_prop(prop);
+        }
+        for (&method, _) in self.class.methods.iter() {
+            self.get_method(method);
+        }
+        for (&method, _) in self.class.static_methods.iter() {
+            self.get_static_method(method);
+        }
+        self.get_constructor();
     }
 }
 

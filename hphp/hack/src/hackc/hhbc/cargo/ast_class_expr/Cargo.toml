@@ -12,6 +12,7 @@ ast_scope = { path = "../ast_scope" }
 env = { path = "../../../emitter/cargo/env" }
 hhbc_ast = { path = "../hhbc_ast" }
 hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
+hhvm_hhbc_defs_ffi = { path = "../../../hhvm_cxx/hhvm_hhbc_defs" }
 instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }

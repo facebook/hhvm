@@ -8,7 +8,10 @@ use ffi::{
     Maybe::{self, *},
     Pair, Slice, Str,
 };
-use hhvm_hhbc_defs_ffi::ffi::{FCallArgsFlags, FatalOp, InitPropOp, IsTypeOp};
+use hhvm_hhbc_defs_ffi::ffi::{
+    FCallArgsFlags, FatalOp, InitPropOp, IsTypeOp, MOpMode, QueryMOp, SpecialClsRef,
+    TypeStructResolveOp,
+};
 use iterator::IterId;
 use label::Label;
 use local::Local;
@@ -121,33 +124,6 @@ pub type ParamLocations<'arena> = Slice<'arena, isize>;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
-pub enum SpecialClsRef {
-    Static,
-    Self_,
-    Parent,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum MemberOpMode {
-    ModeNone,
-    Warn,
-    Define,
-    Unset,
-    InOut,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum QueryOp {
-    CGet,
-    CGetQuiet,
-    Isset,
-    InOut,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
 pub enum CollectionType {
     Vector,
     Map,
@@ -184,13 +160,6 @@ pub enum InstructBasic {
     PopC,
     PopU,
     Dup,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum TypeStructResolveOp {
-    Resolve,
-    DontResolve,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -563,19 +532,19 @@ impl<'arena> InstructCall<'arena> {
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructBase<'arena> {
-    BaseGC(StackIndex, MemberOpMode),
-    BaseGL(Local<'arena>, MemberOpMode),
-    BaseSC(StackIndex, StackIndex, MemberOpMode, ReadonlyOp),
-    BaseL(Local<'arena>, MemberOpMode, ReadonlyOp),
-    BaseC(StackIndex, MemberOpMode),
+    BaseGC(StackIndex, MOpMode),
+    BaseGL(Local<'arena>, MOpMode),
+    BaseSC(StackIndex, StackIndex, MOpMode, ReadonlyOp),
+    BaseL(Local<'arena>, MOpMode, ReadonlyOp),
+    BaseC(StackIndex, MOpMode),
     BaseH,
-    Dim(MemberOpMode, MemberKey<'arena>),
+    Dim(MOpMode, MemberKey<'arena>),
 }
 
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructFinal<'arena> {
-    QueryM(NumParams, QueryOp, MemberKey<'arena>),
+    QueryM(NumParams, QueryMOp, MemberKey<'arena>),
     SetM(NumParams, MemberKey<'arena>),
     IncDecM(NumParams, IncDecOp, MemberKey<'arena>),
     SetOpM(NumParams, EqOp, MemberKey<'arena>),

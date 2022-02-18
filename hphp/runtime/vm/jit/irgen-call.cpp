@@ -1228,7 +1228,7 @@ SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
     case SpecialClsRef::Static:
       if (!curClass(env)) return nullptr;
       return ldCtxCls(env);
-    case SpecialClsRef::Self:
+    case SpecialClsRef::Self_:
       if (auto const clss = curClass(env)) return cns(env, clss);
       return nullptr;
     case SpecialClsRef::Parent:
@@ -1253,7 +1253,7 @@ Optional<int> specialClsReifiedPropSlot(IRGS& env, SpecialClsRef ref) {
     case SpecialClsRef::Static:
       // Currently we disallow new static on reified classes
       return std::nullopt;
-    case SpecialClsRef::Self:
+    case SpecialClsRef::Self_:
       return result(cls);
     case SpecialClsRef::Parent:
       if (!cls->parent()) return std::nullopt;
@@ -1837,7 +1837,7 @@ void emitFCallClsMethodS(IRGS& env, FCallArgs fca, const StringData* clsHint,
   auto const methName = topC(env);
   if (!cls || !methName->isA(TStr)) return interpOne(env);
 
-  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
+  auto const fwd = ref == SpecialClsRef::Self_ || ref == SpecialClsRef::Parent;
   fcallClsMethodCommon(env, fca, clsHint, cls, methName, fwd, true, false, 1);
 }
 
@@ -1846,7 +1846,7 @@ void emitFCallClsMethodSD(IRGS& env, FCallArgs fca, const StringData* clsHint,
   auto const cls = specialClsRefToCls(env, ref);
   if (!cls) return interpOne(env);
 
-  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
+  auto const fwd = ref == SpecialClsRef::Self_ || ref == SpecialClsRef::Parent;
   fcallClsMethodCommon(env, fca, clsHint, cls, cns(env, methName), fwd,
                        false, false, 0);
 }

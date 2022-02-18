@@ -9,8 +9,7 @@ use env::{emitter::Emitter, Env};
 use ffi::{Maybe, Slice, Str};
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
-use hhvm_hhbc_defs_ffi::ffi::FCallArgsFlags;
-use hhvm_hhbc_defs_ffi::ffi::IsTypeOp;
+use hhvm_hhbc_defs_ffi::ffi::{FCallArgsFlags, IsTypeOp, MOpMode, QueryMOp};
 use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use label::Label;
 use lazy_static::lazy_static;
@@ -1258,12 +1257,7 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl>(
             let (preamble, load_values) = emit_load_list_elements(
                 e,
                 env,
-                vec![instr::basel(
-                    alloc,
-                    local,
-                    MemberOpMode::Warn,
-                    ReadonlyOp::Any,
-                )],
+                vec![instr::basel(alloc, local, MOpMode::Warn, ReadonlyOp::Any)],
                 es,
             )?;
             let load_values = vec![
@@ -1338,7 +1332,7 @@ fn emit_load_list_element<'a, 'arena, 'decl>(
                 instr::querym(
                     alloc,
                     0,
-                    QueryOp::CGet,
+                    QueryMOp::CGet,
                     MemberKey::EI(i as i64, ReadonlyOp::Any),
                 ),
             ],
@@ -1362,7 +1356,7 @@ fn emit_load_list_element<'a, 'arena, 'decl>(
         ast::Expr_::List(es) => {
             let instr_dim = instr::dim(
                 alloc,
-                MemberOpMode::Warn,
+                MOpMode::Warn,
                 MemberKey::EI(i as i64, ReadonlyOp::Any),
             );
             path.push(instr_dim);

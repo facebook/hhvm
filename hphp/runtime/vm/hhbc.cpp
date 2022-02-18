@@ -1064,7 +1064,7 @@ X(TypeStructResolveOp,
 X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
 X(CudOp,          static_cast<int>(CudOp::IgnoreIter))
-X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
+X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self_))
 X(IsLogAsDynamicCallOp,
                   static_cast<int>(IsLogAsDynamicCallOp::LogAsDynamicCall))
 X(ReadonlyOp,     static_cast<int>(ReadonlyOp::Any))

@@ -9,7 +9,9 @@ use ffi::{
     Pair, Slice, Str,
 };
 use hhbc_ast::*;
-use hhvm_hhbc_defs_ffi::ffi::{FatalOp, InitPropOp, IsTypeOp};
+use hhvm_hhbc_defs_ffi::ffi::{
+    FatalOp, InitPropOp, IsTypeOp, MOpMode, QueryMOp, SpecialClsRef, TypeStructResolveOp,
+};
 use iterator::IterId;
 use label::Label;
 use local::Local;
@@ -868,7 +870,7 @@ pub mod instr {
     pub fn basel<'a>(
         alloc: &'a bumpalo::Bump,
         local: Local<'a>,
-        mode: MemberOpMode,
+        mode: MOpMode,
         readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
         instr(
@@ -880,7 +882,7 @@ pub mod instr {
     pub fn basec<'a>(
         alloc: &'a bumpalo::Bump,
         stack_index: StackIndex,
-        mode: MemberOpMode,
+        mode: MOpMode,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
@@ -891,7 +893,7 @@ pub mod instr {
     pub fn basegc<'a>(
         alloc: &'a bumpalo::Bump,
         stack_index: StackIndex,
-        mode: MemberOpMode,
+        mode: MOpMode,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
@@ -899,11 +901,7 @@ pub mod instr {
         )
     }
 
-    pub fn basegl<'a>(
-        alloc: &'a bumpalo::Bump,
-        local: Local<'a>,
-        mode: MemberOpMode,
-    ) -> InstrSeq<'a> {
+    pub fn basegl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>, mode: MOpMode) -> InstrSeq<'a> {
         instr(alloc, Instruct::Base(InstructBase::BaseGL(local, mode)))
     }
 
@@ -911,7 +909,7 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         y: StackIndex,
         z: StackIndex,
-        mode: MemberOpMode,
+        mode: MOpMode,
         readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
         instr(
@@ -1024,7 +1022,7 @@ pub mod instr {
         instr(alloc, Instruct::Misc(InstructMisc::VerifyParamTypeTS(i)))
     }
 
-    pub fn dim<'a>(alloc: &'a bumpalo::Bump, op: MemberOpMode, key: MemberKey<'a>) -> InstrSeq<'a> {
+    pub fn dim<'a>(alloc: &'a bumpalo::Bump, op: MOpMode, key: MemberKey<'a>) -> InstrSeq<'a> {
         instr(alloc, Instruct::Base(InstructBase::Dim(op, key)))
     }
 
@@ -1033,7 +1031,7 @@ pub mod instr {
         key: PropId<'a>,
         readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
-        dim(alloc, MemberOpMode::Warn, MemberKey::PT(key, readonly_op))
+        dim(alloc, MOpMode::Warn, MemberKey::PT(key, readonly_op))
     }
 
     pub fn dim_define_pt<'a>(
@@ -1041,7 +1039,7 @@ pub mod instr {
         key: PropId<'a>,
         readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
-        dim(alloc, MemberOpMode::Define, MemberKey::PT(key, readonly_op))
+        dim(alloc, MOpMode::Define, MemberKey::PT(key, readonly_op))
     }
 
     pub fn fcallclsmethod<'a>(
@@ -1155,7 +1153,7 @@ pub mod instr {
     pub fn querym<'a>(
         alloc: &'a bumpalo::Bump,
         num_params: NumParams,
-        op: QueryOp,
+        op: QueryMOp,
         key: MemberKey<'a>,
     ) -> InstrSeq<'a> {
         instr(
@@ -1173,7 +1171,7 @@ pub mod instr {
         querym(
             alloc,
             num_params,
-            QueryOp::CGet,
+            QueryMOp::CGet,
             MemberKey::PT(key, readonly_op),
         )
     }

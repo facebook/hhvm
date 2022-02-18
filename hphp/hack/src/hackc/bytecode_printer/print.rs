@@ -39,7 +39,10 @@ use hhbc_string_utils::{
     float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, lstrip_bslice, mangle,
     strip_global_ns, strip_ns, types,
 };
-use hhvm_hhbc_defs_ffi::ffi::{fcall_flags_to_string_ffi, FatalOp, InitPropOp, IsTypeOp};
+use hhvm_hhbc_defs_ffi::ffi::{
+    fcall_flags_to_string_ffi, FatalOp, InitPropOp, IsTypeOp, MOpMode, QueryMOp, SpecialClsRef,
+    TypeStructResolveOp,
+};
 use hhvm_types_ffi::ffi::*;
 use instruction_sequence::{Error::Unrecoverable, InstrSeq};
 use iterator::IterId;
@@ -975,10 +978,11 @@ fn print_fcall_args(
 }
 
 fn print_special_cls_ref(w: &mut dyn Write, cls_ref: &SpecialClsRef) -> Result<()> {
-    w.write_all(match cls_ref {
+    w.write_all(match *cls_ref {
         SpecialClsRef::Static => b"Static",
-        SpecialClsRef::Self_ => b"Self",
+        SpecialClsRef::Self_ => b"Self_",
         SpecialClsRef::Parent => b"Parent",
+        _ => panic!("Enum value does not match one of listed variants"),
     })
 }
 
@@ -1210,14 +1214,15 @@ fn print_stack_index(w: &mut dyn Write, si: &StackIndex) -> Result<()> {
     w.write_all(si.to_string().as_bytes())
 }
 
-fn print_member_opmode(w: &mut dyn Write, m: &MemberOpMode) -> Result<()> {
-    use MemberOpMode as M;
-    w.write_all(match m {
-        M::ModeNone => b"None",
+fn print_member_opmode(w: &mut dyn Write, m: &MOpMode) -> Result<()> {
+    use MOpMode as M;
+    w.write_all(match *m {
+        M::None => b"None",
         M::Warn => b"Warn",
         M::Define => b"Define",
         M::Unset => b"Unset",
         M::InOut => b"InOut",
+        _ => panic!("Enum value does not match one of listed variants"),
     })
 }
 
@@ -1329,12 +1334,13 @@ fn print_async(w: &mut dyn Write, a: &AsyncFunctions<'_>) -> Result<()> {
     }
 }
 
-fn print_query_op(w: &mut dyn Write, q: QueryOp) -> Result<()> {
+fn print_query_op(w: &mut dyn Write, q: QueryMOp) -> Result<()> {
     w.write_all(match q {
-        QueryOp::CGet => b"CGet",
-        QueryOp::CGetQuiet => b"CGetQuiet",
-        QueryOp::Isset => b"Isset",
-        QueryOp::InOut => b"InOut",
+        QueryMOp::CGet => b"CGet",
+        QueryMOp::CGetQuiet => b"CGetQuiet",
+        QueryMOp::Isset => b"Isset",
+        QueryMOp::InOut => b"InOut",
+        _ => panic!("Enum value does not match one of listed variants"),
     })
 }
 
@@ -1942,9 +1948,10 @@ fn print_op(w: &mut dyn Write, op: &InstructOperator<'_>) -> Result<()> {
             " ",
             [
                 "IsTypeStructC",
-                match op {
+                match *op {
                     TypeStructResolveOp::Resolve => "Resolve",
                     TypeStructResolveOp::DontResolve => "DontResolve",
+                    _ => panic!("Enum value does not match one of listed variants"),
                 },
             ],
         ),

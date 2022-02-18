@@ -422,33 +422,6 @@ enum class SwitchKind : uint8_t {
 #undef KIND
 };
 
-#define M_OP_MODES                                 \
-  MODE(None)                                       \
-  MODE(Warn)                                       \
-  MODE(Define)                                     \
-  MODE(Unset)                                      \
-  /* InOut mode restricts allowed bases to the
-     array like types. */                          \
-  MODE(InOut)
-
-enum class MOpMode : uint8_t {
-#define MODE(name) name,
-  M_OP_MODES
-#undef MODE
-};
-
-#define QUERY_M_OPS                               \
-  OP(CGet)                                        \
-  OP(CGetQuiet)                                   \
-  OP(Isset)                                       \
-  OP(InOut)
-
-enum class QueryMOp : uint8_t {
-#define OP(name) name,
-  QUERY_M_OPS
-#undef OP
-};
-
 #define SET_RANGE_OPS \
   OP(Forward)         \
   OP(Reverse)
@@ -456,16 +429,6 @@ enum class QueryMOp : uint8_t {
 enum class SetRangeOp : uint8_t {
 #define OP(name) name,
   SET_RANGE_OPS
-#undef OP
-};
-
-#define TYPE_STRUCT_RESOLVE_OPS \
-  OP(Resolve)                  \
-  OP(DontResolve)
-
-enum class TypeStructResolveOp : uint8_t {
-#define OP(name) name,
-  TYPE_STRUCT_RESOLVE_OPS
 #undef OP
 };
 
@@ -487,17 +450,6 @@ enum class CudOp : uint8_t {
 #define CUD_OP(name) name,
   CUD_OPS
 #undef CUD_OP
-};
-
-#define SPECIAL_CLS_REFS                        \
-  REF(Self)                                     \
-  REF(Static)                                   \
-  REF(Parent)
-
-enum class SpecialClsRef : uint8_t {
-#define REF(name) name,
-  SPECIAL_CLS_REFS
-#undef REF
 };
 
 #define IS_LOG_AS_DYNAMIC_CALL_OPS                  \

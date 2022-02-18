@@ -70,12 +70,50 @@ pub mod ffi {
         NonStatic,
     }
 
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum SpecialClsRef {
+        Self_,
+        Static,
+        Parent,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum MOpMode {
+        None,
+        Warn,
+        Define,
+        Unset,
+        InOut,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum QueryMOp {
+        CGet,
+        CGetQuiet,
+        Isset,
+        InOut,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum TypeStructResolveOp {
+        Resolve,
+        DontResolve,
+    }
+
     unsafe extern "C++" {
         include!("hphp/hack/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.h");
         type FatalOp;
         type FCallArgsFlags;
         type InitPropOp;
         type IsTypeOp;
+        type SpecialClsRef;
+        type MOpMode;
+        type QueryMOp;
+        type TypeStructResolveOp;
         fn fcall_flags_to_string_ffi(flags: FCallArgsFlags) -> String;
     }
 }

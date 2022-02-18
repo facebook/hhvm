@@ -135,20 +135,67 @@ pub mod ffi {
         CheckStarted,
     }
 
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum SwitchKind {
+        Unbounded,
+        Bounded,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum ObjMethodOp {
+        NullThrows,
+        NullSafe,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum SilenceOp {
+        Start,
+        End,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum BareThisOp {
+        Notice,
+        NoNotice,
+        NeverNull,
+    }
+
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum IncDecOp {
+        PreInc,
+        PostInc,
+        PreDec,
+        PostDec,
+        PreIncO,
+        PostIncO,
+        PreDecO,
+        PostDecO,
+    }
+
     unsafe extern "C++" {
         include!("hphp/hack/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.h");
+        type BareThisOp;
+        type ContCheckOp;
         type FatalOp;
         type FCallArgsFlags;
+        type IncDecOp;
         type InitPropOp;
-        type IsTypeOp;
-        type SpecialClsRef;
-        type MOpMode;
-        type QueryMOp;
-        type TypeStructResolveOp;
         type IsLogAsDynamicCallOp;
+        type IsTypeOp;
+        type MOpMode;
+        type ObjMethodOp;
+        type QueryMOp;
         type ReadonlyOp;
         type SetRangeOp;
-        type ContCheckOp;
+        type SilenceOp;
+        type SpecialClsRef;
+        type SwitchKind;
+        type TypeStructResolveOp;
         fn fcall_flags_to_string_ffi(flags: FCallArgsFlags) -> String;
     }
 }

@@ -40,8 +40,9 @@ use hhbc_string_utils::{
     strip_global_ns, strip_ns, types,
 };
 use hhvm_hhbc_defs_ffi::ffi::{
-    fcall_flags_to_string_ffi, ContCheckOp, FatalOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp,
-    MOpMode, QueryMOp, ReadonlyOp, SetRangeOp, SpecialClsRef, TypeStructResolveOp,
+    fcall_flags_to_string_ffi, BareThisOp, ContCheckOp, FatalOp, IncDecOp, InitPropOp,
+    IsLogAsDynamicCallOp, IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetRangeOp,
+    SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
 };
 use hhvm_types_ffi::ffi::*;
 use instruction_sequence::{Error::Unrecoverable, InstrSeq};
@@ -986,10 +987,11 @@ fn print_special_cls_ref(w: &mut dyn Write, cls_ref: &SpecialClsRef) -> Result<(
     })
 }
 
-fn print_null_flavor(w: &mut dyn Write, f: &ObjNullFlavor) -> Result<()> {
-    w.write_all(match f {
-        ObjNullFlavor::NullThrows => b"NullThrows",
-        ObjNullFlavor::NullSafe => b"NullSafe",
+fn print_null_flavor(w: &mut dyn Write, f: &ObjMethodOp) -> Result<()> {
+    w.write_all(match *f {
+        ObjMethodOp::NullThrows => b"NullThrows",
+        ObjMethodOp::NullSafe => b"NullSafe",
+        _ => panic!("Enum value does not match one of listed variants"),
     })
 }
 
@@ -1557,7 +1559,7 @@ fn print_readonly_op(w: &mut dyn Write, op: &ReadonlyOp) -> Result<()> {
 }
 
 fn print_incdec_op(w: &mut dyn Write, op: &IncDecOp) -> Result<()> {
-    w.write_all(match op {
+    w.write_all(match *op {
         IncDecOp::PreInc => b"PreInc",
         IncDecOp::PostInc => b"PostInc",
         IncDecOp::PreDec => b"PreDec",
@@ -1566,6 +1568,7 @@ fn print_incdec_op(w: &mut dyn Write, op: &IncDecOp) -> Result<()> {
         IncDecOp::PostIncO => b"PostIncO",
         IncDecOp::PreDecO => b"PreDecO",
         IncDecOp::PostDecO => b"PostDecO",
+        _ => panic!("Enum value does not match one of listed variants"),
     })
 }
 
@@ -1628,9 +1631,10 @@ fn print_misc(w: &mut dyn Write, misc: &InstructMisc<'_>) -> Result<()> {
             w.write_all(b"Silence ")?;
             print_local(w, local)?;
             w.write_all(b" ")?;
-            match op {
-                OpSilence::Start => w.write_all(b"Start"),
-                OpSilence::End => w.write_all(b"End"),
+            match *op {
+                SilenceOp::Start => w.write_all(b"Start"),
+                SilenceOp::End => w.write_all(b"End"),
+                _ => panic!("Enum value does not match one of listed variants"),
             }
         }
         M::VerifyOutType(id) => {
@@ -1647,10 +1651,11 @@ fn print_misc(w: &mut dyn Write, misc: &InstructMisc<'_>) -> Result<()> {
             " ",
             [
                 "BareThis",
-                match op {
+                match *op {
                     BareThisOp::Notice => "Notice",
                     BareThisOp::NoNotice => "NoNotice",
                     BareThisOp::NeverNull => "NeverNull",
+                    _ => panic!("Enum value does not match one of listed variants"),
                 },
             ],
         ),
@@ -1791,9 +1796,10 @@ fn print_switch(
     labels: &[Label],
 ) -> Result<()> {
     w.write_all(b"Switch ")?;
-    w.write_all(match kind {
+    w.write_all(match *kind {
         SwitchKind::Bounded => b"Bounded ",
         SwitchKind::Unbounded => b"Unbounded ",
+        _ => panic!("Enum value does not match one of listed variants"),
     })?;
     w.write_all(base.to_string().as_bytes())?;
     w.write_all(b" ")?;

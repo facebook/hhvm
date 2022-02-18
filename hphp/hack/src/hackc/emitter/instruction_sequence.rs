@@ -10,8 +10,9 @@ use ffi::{
 };
 use hhbc_ast::*;
 use hhvm_hhbc_defs_ffi::ffi::{
-    ContCheckOp, FatalOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, MOpMode, QueryMOp,
-    ReadonlyOp, SpecialClsRef, TypeStructResolveOp,
+    BareThisOp, ContCheckOp, FatalOp, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp,
+    MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SilenceOp, SpecialClsRef, SwitchKind,
+    TypeStructResolveOp,
 };
 use iterator::IterId;
 use label::Label;
@@ -1119,7 +1120,7 @@ pub mod instr {
     pub fn fcallobjmethod<'a>(
         alloc: &'a bumpalo::Bump,
         fcall_args: FcallArgs<'a>,
-        flavor: ObjNullFlavor,
+        flavor: ObjMethodOp,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
@@ -1131,7 +1132,7 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         fcall_args: FcallArgs<'a>,
         method: MethodId<'a>,
-        flavor: ObjNullFlavor,
+        flavor: ObjMethodOp,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
@@ -1148,7 +1149,7 @@ pub mod instr {
         fcall_args: FcallArgs<'a>,
         method: MethodId<'a>,
     ) -> InstrSeq<'a> {
-        fcallobjmethodd(alloc, fcall_args, method, ObjNullFlavor::NullThrows)
+        fcallobjmethodd(alloc, fcall_args, method, ObjMethodOp::NullThrows)
     }
 
     pub fn querym<'a>(
@@ -1461,14 +1462,14 @@ pub mod instr {
     pub fn silence_start<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::Misc(InstructMisc::Silence(local, OpSilence::Start)),
+            Instruct::Misc(InstructMisc::Silence(local, SilenceOp::Start)),
         )
     }
 
     pub fn silence_end<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::Misc(InstructMisc::Silence(local, OpSilence::End)),
+            Instruct::Misc(InstructMisc::Silence(local, SilenceOp::End)),
         )
     }
 

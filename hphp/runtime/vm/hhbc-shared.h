@@ -154,4 +154,65 @@ enum class ContCheckOp : uint8_t {
   CONT_CHECK_OPS
 #undef CONT_CHECK_OP
 };
+
+#define SWITCH_KINDS                            \
+  KIND(Unbounded)                               \
+  KIND(Bounded)
+
+enum class SwitchKind : uint8_t {
+#define KIND(x) x,
+  SWITCH_KINDS
+#undef KIND
+};
+
+#define OBJMETHOD_OPS                             \
+  OBJMETHOD_OP(NullThrows)                        \
+  OBJMETHOD_OP(NullSafe)
+
+enum class ObjMethodOp : uint8_t {
+#define OBJMETHOD_OP(x) x,
+  OBJMETHOD_OPS
+#undef OBJMETHOD_OP
+};
+
+#define SILENCE_OPS \
+  SILENCE_OP(Start) \
+  SILENCE_OP(End)
+
+enum class SilenceOp : uint8_t {
+#define SILENCE_OP(x) x,
+  SILENCE_OPS
+#undef SILENCE_OP
+};
+
+
+#define BARETHIS_OPS    \
+  BARETHIS_OP(Notice)   \
+  BARETHIS_OP(NoNotice) \
+  BARETHIS_OP(NeverNull)
+
+enum class BareThisOp : uint8_t {
+#define BARETHIS_OP(x) x,
+  BARETHIS_OPS
+#undef BARETHIS_OP
+};
+
+#define INCDEC_OPS    \
+  INCDEC_OP(PreInc)   \
+  INCDEC_OP(PostInc)  \
+  INCDEC_OP(PreDec)   \
+  INCDEC_OP(PostDec)  \
+                      \
+  INCDEC_OP(PreIncO)  \
+  INCDEC_OP(PostIncO) \
+  INCDEC_OP(PreDecO)  \
+  INCDEC_OP(PostDecO) \
+
+enum class IncDecOp : uint8_t {
+#define INCDEC_OP(incDecOp) incDecOp,
+  INCDEC_OPS
+#undef INCDEC_OP
+};
+
+
 }

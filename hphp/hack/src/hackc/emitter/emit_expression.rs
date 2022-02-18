@@ -13,8 +13,8 @@ use hhbc_ast::*;
 use hhbc_id::{class, r#const, function, method, prop};
 use hhbc_string_utils as string_utils;
 use hhvm_hhbc_defs_ffi::ffi::{
-    FCallArgsFlags, IsLogAsDynamicCallOp, IsTypeOp, MOpMode, QueryMOp, ReadonlyOp, SetRangeOp,
-    SpecialClsRef, TypeStructResolveOp,
+    BareThisOp, FCallArgsFlags, IncDecOp, IsLogAsDynamicCallOp, IsTypeOp, MOpMode, ObjMethodOp,
+    QueryMOp, ReadonlyOp, SetRangeOp, SpecialClsRef, TypeStructResolveOp,
 };
 use indexmap::IndexSet;
 use instruction_sequence::{
@@ -2113,10 +2113,10 @@ fn has_non_tparam_generics_targs(env: &Env<'_, '_>, targs: &[ast::Targ]) -> bool
     })
 }
 
-fn from_ast_null_flavor(nullflavor: ast::OgNullFlavor) -> ObjNullFlavor {
+fn from_ast_null_flavor(nullflavor: ast::OgNullFlavor) -> ObjMethodOp {
     match nullflavor {
-        ast::OgNullFlavor::OGNullsafe => ObjNullFlavor::NullSafe,
-        ast::OgNullFlavor::OGNullthrows => ObjNullFlavor::NullThrows,
+        ast::OgNullFlavor::OGNullsafe => ObjMethodOp::NullSafe,
+        ast::OgNullFlavor::OGNullthrows => ObjMethodOp::NullThrows,
     }
 }
 

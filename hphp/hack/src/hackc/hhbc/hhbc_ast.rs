@@ -9,8 +9,9 @@ use ffi::{
     Pair, Slice, Str,
 };
 use hhvm_hhbc_defs_ffi::ffi::{
-    ContCheckOp, FCallArgsFlags, FatalOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, MOpMode,
-    QueryMOp, ReadonlyOp, SetRangeOp, SpecialClsRef, TypeStructResolveOp,
+    BareThisOp, ContCheckOp, FCallArgsFlags, FatalOp, IncDecOp, InitPropOp, IsLogAsDynamicCallOp,
+    IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetRangeOp, SilenceOp, SpecialClsRef,
+    SwitchKind, TypeStructResolveOp,
 };
 use iterator::IterId;
 use label::Label;
@@ -253,13 +254,6 @@ pub enum InstructOperator<'arena> {
     ResolveClass(ClassId<'arena>),
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum SwitchKind {
-    Bounded,
-    Unbounded,
-}
-
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructControlFlow<'arena> {
@@ -365,19 +359,6 @@ pub enum EqOp {
     MulEqualO,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum IncDecOp {
-    PreInc,
-    PostInc,
-    PreDec,
-    PostDec,
-    PreIncO,
-    PostIncO,
-    PreDecO,
-    PostDecO,
-}
-
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructMutator<'arena> {
@@ -396,13 +377,6 @@ pub enum InstructMutator<'arena> {
     UnsetG,
     CheckProp(PropId<'arena>),
     InitProp(PropId<'arena>, InitPropOp),
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum ObjNullFlavor {
-    NullThrows,
-    NullSafe,
 }
 
 #[derive(Clone, Debug)]
@@ -434,11 +408,11 @@ pub enum InstructCall<'arena> {
     },
     FCallObjMethod {
         fcall_args: FcallArgs<'arena>,
-        flavor: ObjNullFlavor,
+        flavor: ObjMethodOp,
     },
     FCallObjMethodD {
         fcall_args: FcallArgs<'arena>,
-        flavor: ObjNullFlavor,
+        flavor: ObjMethodOp,
         method: MethodId<'arena>,
     },
 }
@@ -551,14 +525,6 @@ pub enum InstructIncludeEvalDefine {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
-pub enum BareThisOp {
-    Notice,
-    NoNotice,
-    NeverNull,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
 pub enum ClassishKind {
     Class, // c.f. ast_defs::ClassishKind - may need Abstraction (Concrete, Abstract)
     Interface,
@@ -609,13 +575,6 @@ impl AsRef<str> for Visibility {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum OpSilence {
-    Start,
-    End,
-}
-
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructMisc<'arena> {
@@ -647,7 +606,7 @@ pub enum InstructMisc<'arena> {
     AssertRATL(Local<'arena>, RepoAuthType<'arena>),
     AssertRATStk(StackIndex, RepoAuthType<'arena>),
     BreakTraceHint,
-    Silence(Local<'arena>, OpSilence),
+    Silence(Local<'arena>, SilenceOp),
     GetMemoKeyL(Local<'arena>),
     CGetCUNop,
     UGetCUNop,

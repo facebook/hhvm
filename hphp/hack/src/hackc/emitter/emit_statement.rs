@@ -10,7 +10,7 @@ use ffi::{Maybe, Slice, Str};
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
 use hhvm_hhbc_defs_ffi::ffi::{
-    FCallArgsFlags, IsTypeOp, MOpMode, QueryMOp, ReadonlyOp, SetRangeOp,
+    FCallArgsFlags, IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetRangeOp,
 };
 use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use label::Label;
@@ -567,7 +567,7 @@ fn emit_using<'a, 'arena, 'decl>(
                                     .map(|s| -> &str { alloc.alloc_str(s.as_ref()) }),
                             ),
                             fn_name,
-                            ObjNullFlavor::NullThrows,
+                            ObjMethodOp::NullThrows,
                         ),
                         epilogue,
                         if is_block_scoped {
@@ -1125,7 +1125,7 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
                         None,
                     ),
                     next_meth,
-                    ObjNullFlavor::NullThrows,
+                    ObjMethodOp::NullThrows,
                 ),
                 instr::await_(alloc),
                 instr::label(alloc, async_eager_label),

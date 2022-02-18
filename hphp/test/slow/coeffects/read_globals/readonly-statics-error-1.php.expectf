@@ -1,0 +1,1 @@
+Fatal error: Creating mutable references to static properties requires the capability Globals, which is not provided by the context. Enclose the static in a readonly expression. in %s on line 8

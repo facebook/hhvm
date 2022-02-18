@@ -204,12 +204,9 @@ let rec is_safe_mut_ty env (seen : SSet.t) ty =
            as_mut(null) itself is allowed by the Tprim above*)
       ]
     in
-    let null = MakeType.null Reason.none in
     (* Make sure that a primitive *could* be this type by intersecting all primitives and subtyping. *)
-    let intersection = MakeType.intersection Reason.none primitive_types in
-    let union = MakeType.union Reason.none (null :: primitive_types) in
-    Typing_utils.is_sub_type env intersection ty
-    || Typing_utils.is_sub_type env ty union
+    let union = MakeType.union Reason.none primitive_types in
+    not (Typing_subtype.is_type_disjoint env ty union)
 
 (* Check that function calls which return readonly are wrapped in readonly *)
 let check_readonly_return_call pos caller_ty is_readonly =

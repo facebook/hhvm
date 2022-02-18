@@ -142,12 +142,9 @@ let rec has_no_object_ref_ty env (seen : SSet.t) ty =
            as_mut(null) itself is allowed by the Tprim above*)
       ]
     in
-    let null = MakeType.null Reason.none in
     (* Make sure that a primitive *could* be this type by intersecting all primitives and subtyping. *)
-    let intersection = MakeType.intersection Reason.none primitive_types in
-    let union = MakeType.union Reason.none (null :: primitive_types) in
-    Typing_utils.is_sub_type env intersection ty
-    || Typing_utils.is_sub_type env ty union
+    let union = MakeType.union Reason.none primitive_types in
+    not (Typing_subtype.is_type_disjoint env ty union)
 
 let is_expr_global_and_mutable env ctx (tp, p, te) =
   is_expr_global ctx (tp, p, te) && not (has_no_object_ref_ty env SSet.empty tp)

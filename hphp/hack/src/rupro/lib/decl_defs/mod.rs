@@ -11,7 +11,9 @@ pub mod shallow;
 pub mod ty;
 
 pub use folded::{ClassConst, FoldedClass, FoldedElement, SubstContext, TypeConst};
-pub use shallow::{FunDecl, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp};
+pub use shallow::{
+    FunDecl, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst,
+};
 pub use ty::{
     AbstractTypeconst, Abstraction, CeVisibility, ClassConstFrom, ClassConstKind, ClassConstRef,
     ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConcreteTypeconst, ConsistentKind, DeclTy,

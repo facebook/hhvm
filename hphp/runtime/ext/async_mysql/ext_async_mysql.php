@@ -93,6 +93,8 @@ final class AsyncMysqlClient {
    * @param $sni_server_name - SNI hostname to use when connecting via SSL.
    * @param $server_cert_extensions - collection of name of TLS cert extension
                                       names used to validate server cert
+   * @param $server_cert_values - collection of accepted values in server cert
+   *                              for "server_cert_extension" extension
    *
    * @return - an `Awaitable` representing an `AsyncMysqlConnection`. `await`
    * or `join` this result to obtain the actual connection.
@@ -107,7 +109,8 @@ final class AsyncMysqlClient {
                                  ?MySSLContextProvider $ssl_context = null,
                                  int $tcp_timeout_micros = 0,
                                  string $sni_server_name = "",
-                                 string $server_cert_extensions = "",
+                                 string $server_cert_extension = "",
+                                 string $server_cert_values = "",
                                 ): Awaitable<AsyncMysqlConnection>;
 
   /**
@@ -305,6 +308,8 @@ class AsyncMysqlConnectionPool {
    * @param $sni_server_name - SNI hostname to use when connecting via SSL.
    * @param $server_cert_extensions - collection of name of TLS cert extension
                                       names used to validate server cert
+   * @param $server_cert_values - collection of accepted values in server cert
+   *                              for "server_cert_extension" extension
    *
    * @return - an `Awaitable` representing an `AsyncMysqlConnection`. `await`
    * or `join` this result to obtain the actual connection.
@@ -321,6 +326,7 @@ class AsyncMysqlConnectionPool {
                           int $tcp_timeout_micros = 0,
                           string $sni_server_name = "",
                           string $server_cert_extensions = "",
+                          string $server_cert_values = "",
                          ): Awaitable<AsyncMysqlConnection>;
 
   <<__Native>>
@@ -782,7 +788,8 @@ class AsyncMysqlConnectionOptions {
 
   // TLS cert extension parameters to validate server cert
   <<__Native>>
-  public function setServerCertValidation(string $extensions): void;
+  public function setServerCertValidation(string $extensions = "",
+                                          string $values = ""): void;
 }
 /**
  * Provides timing statistics about the MySQL client.

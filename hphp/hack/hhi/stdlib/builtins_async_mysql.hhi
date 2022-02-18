@@ -64,7 +64,8 @@ class AsyncMysqlClient {
       ?MySSLContextProvider $ssl_provider = null,
       int $tcp_timeout_micros = 0,
       string $sni_server_name = "",
-      string $server_cert_extensions = ""): Awaitable<AsyncMysqlConnection> { }
+      string $server_cert_extensions = "",
+      string $server_cert_values = ""): Awaitable<AsyncMysqlConnection> { }
 
     static public function connectWithOpts(
       string $host,
@@ -101,7 +102,8 @@ class AsyncMysqlConnectionPool {
     ?MySSLContextProvider $ssl_provider = null,
     int $tcp_timeout_micros = 0,
     string $sni_server_name = "",
-    string $server_cert_extensions = ""): Awaitable<AsyncMysqlConnection> { }
+    string $server_cert_extensions = "",
+    string $server_cert_values = ""): Awaitable<AsyncMysqlConnection> { }
   public function connectWithOpts(
     string $host,
     int $port,
@@ -143,7 +145,9 @@ class AsyncMysqlConnectionOptions {
   public function enableResetConnBeforeClose() : void { }
   public function enableDelayedResetConn() : void { }
   public function enableChangeUser() : void { }
-  public function setServerCertValidation(string $extensions): void {}
+  public function setServerCertValidation(
+      string $extensions = "",
+      string $values = ""): void {}
 }
 
 class AsyncMysqlClientStats {

@@ -208,6 +208,20 @@ static std::vector<std::string> certLoggingImpl(
   return extValues;
 }
 
+static bool certValidationImpl(
+    const std::vector<std::string>& expectedValues,
+    const std::vector<std::string>& certValues) {
+  // Search for the expected extension values
+  for (const auto& value: expectedValues) {
+    if (std::find(certValues.begin(), certValues.end(), value) != certValues.end()) {
+      return true;
+    }
+  }
+
+  // No expected extension values found
+  return false;
+}
+
 static bool serverCertLoggingCallback(
     X509* server_cert,
     const void* context,
@@ -223,17 +237,43 @@ static bool serverCertLoggingCallback(
   return true;
 }
 
-static facebook::common::mysql_client::CertValidatorCallback
-generateCertValidationCallback(
-    const std::string& serverCertExtNames) {
-  std::vector<std::string> extNames;
-  folly::split(",", serverCertExtNames, extNames);
-  return [extNames = std::move(extNames)] (
-        X509* server_cert, const void* context, folly::StringPiece& errMsg) {
-    return serverCertLoggingCallback(server_cert, context, errMsg, extNames);
-  };
+static bool serverCertValidationCallback(
+    X509* server_cert,
+    const void* context,
+    folly::StringPiece& /* errMsg */,
+    const std::vector<std::string>& extNames,
+    const std::vector<std::string>& extValues) {
+  facebook::common::mysql_client::ConnectOperation* op =
+      reinterpret_cast<facebook::common::mysql_client::ConnectOperation*>(
+          const_cast<void*>(context));
+  CHECK(op);
+
+  // Log the server cert content
+  auto certValues = certLoggingImpl(server_cert, extNames, *op, true);
+  return certValidationImpl(extValues, certValues);
 }
 
+static facebook::common::mysql_client::CertValidatorCallback
+generateCertValidationCallback(
+    const std::string& serverCertExtNames,
+    const std::string& extensionValues) {
+  std::vector<std::string> extNames;
+  folly::split(",", serverCertExtNames, extNames);
+  if (extensionValues.empty()) {
+    return [extNames = std::move(extNames)] (
+          X509* server_cert, const void* context, folly::StringPiece& errMsg) {
+      return serverCertLoggingCallback(server_cert, context, errMsg, extNames);
+    };
+  } else {
+    std::vector<std::string> extValues;
+    folly::split(",", extensionValues, extValues);
+    return [extNames = std::move(extNames), extValues = std::move(extValues)] (
+          X509* server_cert, const void* context, folly::StringPiece& errMsg) {
+        return serverCertValidationCallback(
+            server_cert, context, errMsg, extNames, extValues);
+    };
+  }
+}
 ///////////////////////////////////////////////////////////////////////////
 // AsyncMysqlClientStats
 
@@ -454,13 +494,15 @@ HHVM_METHOD(AsyncMysqlConnectionOptions, enableChangeUser) {
 static void
 HHVM_METHOD(AsyncMysqlConnectionOptions,
             setServerCertValidation,
-            const String& serverCertExtNames /* = "" */) {
+            const String& serverCertExtNames /* = "" */,
+            const String& extensionValues /* = "" */) {
   auto* data = Native::data<AsyncMysqlConnectionOptions>(this_);
   // #ifdef FACEBOOK until Open Source squangle pin is updated - needed as of
   // Squangle 2020-10-21
   #ifdef FACEBOOK
   data->m_conn_opts.setCertValidationCallback(
-      generateCertValidationCallback(std::string(serverCertExtNames)),
+      generateCertValidationCallback(
+          std::string(serverCertExtNames), std::string(extensionValues)),
       nullptr,
       true);
   #endif
@@ -627,7 +669,8 @@ Object HHVM_STATIC_METHOD(
     const Variant& sslContextProvider /* = null */,
     int64_t tcp_timeout_micros /* = 0 */,
     const String& sni_server_name /* = "" */,
-    const String& serverCertExtNames /* = "" */) {
+    const String& serverCertExtNames /* = "" */,
+    const String& serverCertExtValues /* = "" */) {
   am::ConnectionKey key(
       static_cast<std::string>(host),
       port,
@@ -657,7 +700,8 @@ Object HHVM_STATIC_METHOD(
   }
   if (!serverCertExtNames.empty()) {
     op->setCertValidationCallback(
-        generateCertValidationCallback(std::string(serverCertExtNames)),
+        generateCertValidationCallback(
+            std::string(serverCertExtNames), std::string(serverCertExtValues)),
         nullptr,
         true);
   }
@@ -852,7 +896,8 @@ static Object HHVM_METHOD(
     const Variant& sslContextProvider,
     int64_t tcp_timeout_micros,
     const String& sni_server_name,
-    const String& serverCertExtNames) {
+    const String& serverCertExtNames,
+    const String& serverCertExtValues) {
   auto* data = Native::data<AsyncMysqlConnectionPool>(this_);
   auto op = data->m_async_pool->beginConnection(
       static_cast<std::string>(host),
@@ -882,7 +927,8 @@ static Object HHVM_METHOD(
   }
   if (!serverCertExtNames.empty()) {
     op->setCertValidationCallback(
-        generateCertValidationCallback(std::string(serverCertExtNames)),
+        generateCertValidationCallback(
+            std::string(serverCertExtNames), std::string(serverCertExtValues)),
         nullptr,
         true);
   }

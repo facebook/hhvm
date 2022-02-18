@@ -1144,11 +1144,6 @@ let enum_includes_map ?(default = []) ~f includes =
 
 let is_enum_class c = Ast_defs.is_c_enum_class c.c_kind
 
-(* helper function to pack switch branches (standard & default) in a single list *)
-let to_gen_cases cl dfl : ('ex, 'en) gen_case list =
-  List.map (fun x -> Case x) cl
-  @ Option.to_list (Option.map (fun x -> Default x) dfl)
-
 let partition_map_require_kind ~f trait_reqs =
   let rec partition req_extends req_implements c_reqs =
     match c_reqs with
@@ -1159,3 +1154,68 @@ let partition_map_require_kind ~f trait_reqs =
       partition req_extends (f req :: req_implements) tl
   in
   partition [] [] trait_reqs
+
+(* Combinators for folding / iterating over all of a switch statement *)
+module GenCase : sig
+  val map :
+    f:(('ex, 'en) gen_case -> 'a) ->
+    ('ex, 'en) case list ->
+    ('ex, 'en) default_case option ->
+    'a list
+
+  val fold_left :
+    init:'state ->
+    f:('state -> ('ex, 'en) gen_case -> 'state) ->
+    ('ex, 'en) case list ->
+    ('ex, 'en) default_case option ->
+    'state
+
+  val fold_right :
+    init:'state ->
+    f:(('ex, 'en) gen_case -> 'state -> 'state) ->
+    ('ex, 'en) case list ->
+    ('ex, 'en) default_case option ->
+    'state
+
+  val fold_left_mem :
+    init:'state ->
+    f:('state -> ('ex, 'en) gen_case -> 'state) ->
+    ('ex, 'en) case list ->
+    ('ex, 'en) default_case option ->
+    'state list
+end = struct
+  let map ~f cases odfl =
+    let rec doit cases =
+      match cases with
+      | [] -> Option.to_list (Option.map (fun x -> f (Default x)) odfl)
+      | case :: cases -> f (Case case) :: doit cases
+    in
+    doit cases
+
+  let fold_left ~init:state ~f cases odfl =
+    let state =
+      List.fold_left (fun state case -> f state (Case case)) state cases
+    in
+    let state =
+      let some dfl = f state (Default dfl) in
+      Option.fold ~none:state ~some odfl
+    in
+    state
+
+  let fold_right ~init:state ~f cases odfl =
+    let state =
+      let some dfl = f (Default dfl) state in
+      Option.fold ~none:state ~some odfl
+    in
+    let state =
+      List.fold_right (fun case state -> f (Case case) state) cases state
+    in
+    state
+
+  let fold_left_mem ~init ~f cases odfl =
+    let f (state, acc) case =
+      let state = f state case in
+      (state, state :: acc)
+    in
+    snd (fold_left ~init:(init, []) ~f cases odfl)
+end

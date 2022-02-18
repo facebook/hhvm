@@ -772,23 +772,6 @@ Object HHVM_STATIC_METHOD(
 
 }
 
-Object HHVM_STATIC_METHOD(
-    AsyncMysqlClient,
-    adoptConnection,
-    const Variant& connection) {
-  auto conn = cast<MySQLResource>(connection)->mysql();
-  // mysql connection from ext/mysql/mysql_common.h
-  auto raw_conn = conn->eject_mysql();
-  auto adopted = getClient()->adoptConnection(
-      raw_conn,
-      conn->m_host,
-      conn->m_port,
-      conn->m_database,
-      conn->m_username,
-      conn->m_password);
-  return AsyncMysqlConnection::newInstance(std::move(adopted));
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // class AsyncMysqlConnectionPool
 
@@ -2292,7 +2275,6 @@ static struct AsyncMysqlExtension final : Extension {
     HHVM_STATIC_ME(AsyncMysqlClient, connect);
     HHVM_STATIC_ME(AsyncMysqlClient, connectWithOpts);
     HHVM_STATIC_ME(AsyncMysqlClient, connectAndQuery);
-    HHVM_STATIC_ME(AsyncMysqlClient, adoptConnection);
 
     HHVM_ME(AsyncMysqlConnectionPool, __construct);
     HHVM_ME(AsyncMysqlConnectionPool, getPoolStats);

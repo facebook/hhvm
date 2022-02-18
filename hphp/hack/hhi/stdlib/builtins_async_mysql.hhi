@@ -85,8 +85,6 @@ class AsyncMysqlClient {
       AsyncMysqlConnectionOptions $conn_opts,
       dict<string, string> $query_attributes = dict[],
     ): Awaitable<(AsyncMysqlConnectResult, Vector<AsyncMysqlQueryResult>)> { }
-
-   static public function adoptConnection($connection) { }
 }
 
 class AsyncMysqlConnectionPool {

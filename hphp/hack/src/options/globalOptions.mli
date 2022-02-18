@@ -224,8 +224,6 @@ type t = {
   (* Enable enum class syntax *)
   po_enable_enum_classes: bool;
   po_disable_hh_ignore_error: bool;
-  (* Disable array(...) *)
-  po_disable_array: bool;
   (* Enable features used to typecheck systemlib *)
   tco_enable_systemlib_annotations: bool;
   (* Controls if higher-kinded types are supported *)
@@ -397,7 +395,6 @@ val make :
   ?po_disable_xhp_children_declarations:bool ->
   ?po_enable_enum_classes:bool ->
   ?po_disable_hh_ignore_error:bool ->
-  ?po_disable_array:bool ->
   ?po_allow_unstable_features:bool ->
   ?tco_enable_systemlib_annotations:bool ->
   ?tco_higher_kinded_types:bool ->
@@ -644,8 +641,6 @@ val po_disable_xhp_children_declarations : t -> bool
 val po_enable_enum_classes : t -> bool
 
 val po_disable_hh_ignore_error : t -> bool
-
-val po_disable_array : t -> bool
 
 val tco_enable_systemlib_annotations : t -> bool
 

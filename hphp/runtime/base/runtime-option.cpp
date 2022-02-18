@@ -363,7 +363,6 @@ std::uint32_t RepoOptionsFlags::getParserFlags() const {
     SETFLAGS(AllowUnstableFeatures, 2)                         \
     SETFLAGS(ConstDefaultFuncArgs, 3)                          \
     SETFLAGS(ConstStaticProps, 4)                              \
-    SETFLAGS(DisableArray, 5)                                  \
     SETFLAGS(DisableLvalAsAnExpression, 8)                     \
     SETFLAGS(DisallowInstMeth, 10)                             \
     SETFLAGS(DisableXHPElementMangling, 11)                    \

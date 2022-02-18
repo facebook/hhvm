@@ -100,7 +100,6 @@ struct RepoOptionsFlags {
   H(bool,           AllowUnstableFeatures,            false)          \
   H(bool,           EnableXHPClassModifier,           true)           \
   H(bool,           DisableXHPElementMangling,        true)           \
-  H(bool,           DisableArray,                     true)           \
   H(bool,           EnableEnumClasses,                true)           \
   H(bool,           DisallowFunAndClsMethPseudoFuncs, false)          \
   H(bool,           DisallowInstMeth,                 false)          \

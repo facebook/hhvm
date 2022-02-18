@@ -345,7 +345,6 @@ prefixed_flags!(
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
     ENABLE_ENUM_CLASSES,
     ENABLE_XHP_CLASS_MODIFIER,
-    DISABLE_ARRAY,
     RUST_EMITTER,
 );
 impl Default for LangFlags {
@@ -765,9 +764,6 @@ mod tests {
   "hhvm.hack.lang.const_static_props": {
     "global_value": false
   },
-  "hhvm.hack.lang.disable_array": {
-    "global_value": false
-  },
   "hhvm.hack.lang.disable_legacy_attribute_syntax": {
     "global_value": false
   },
@@ -1178,7 +1174,7 @@ bitflags! {
         // No longer using bit 47.
         const ENABLE_ENUM_CLASSES = 1 << 48;
         const DISABLE_XHP_ELEMENT_MANGLING = 1 << 49;
-        const DISABLE_ARRAY = 1 << 50;
+        // No longer using bit 50.
         const RUST_EMITTER = 1 << 51;
         // No longer using bits 52-54.
         const ALLOW_UNSTABLE_FEATURES = 1 << 55;

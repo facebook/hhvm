@@ -46,7 +46,6 @@ type t = {
   option_disable_xhp_element_mangling: bool;
   option_disable_xhp_children_declarations: bool;
   option_enable_xhp_class_modifier: bool;
-  option_disable_array: bool;
   option_allow_unstable_features: bool;
   option_disallow_fun_and_cls_meth_pseudo_funcs: bool;
   option_disallow_inst_meth: bool;
@@ -92,7 +91,6 @@ let default =
     option_disable_xhp_element_mangling = false;
     option_disable_xhp_children_declarations = false;
     option_enable_xhp_class_modifier = false;
-    option_disable_array = false;
     option_allow_unstable_features = false;
     option_disallow_fun_and_cls_meth_pseudo_funcs = false;
     option_disallow_inst_meth = false;
@@ -169,8 +167,6 @@ let enable_xhp_class_modifier o = o.option_enable_xhp_class_modifier
 
 let check_int_overflow o = o.option_check_int_overflow > 0
 
-let disable_array o = o.option_disable_array
-
 let allow_unstable_features o = o.option_allow_unstable_features
 
 let disallow_fun_and_cls_meth_pseudo_funcs o =
@@ -244,7 +240,6 @@ let to_string o =
       @@ enable_xhp_class_modifier o;
       Printf.sprintf "disable_xhp_element_mangling: %B"
       @@ disable_xhp_element_mangling o;
-      Printf.sprintf "disable_array: %B" @@ disable_array o;
       Printf.sprintf "allow_unstable_features: %B" @@ allow_unstable_features o;
       Printf.sprintf "disallow_fun_and_cls_meth_pseudo_funcs: %B"
       @@ disallow_fun_and_cls_meth_pseudo_funcs o;
@@ -325,8 +320,6 @@ let set_option options name value =
     { options with option_disable_xhp_element_mangling = as_bool value }
   | "hhvm.hack.lang.check_int_overflow" ->
     { options with option_check_int_overflow = int_of_string value }
-  | "hhvm.hack.lang.disable_array" ->
-    { options with option_disable_array = as_bool value }
   | "hhvm.hack.lang.allow_unstable_features" ->
     { options with option_allow_unstable_features = as_bool value }
   | "hhvm.hack.lang.disallow_fun_and_cls_meth_pseudo_funcs" ->
@@ -499,8 +492,6 @@ let value_setters =
       { opts with option_disallow_func_ptrs_in_constants = v = 1 } );
     ( set_value "hhvm.hack.lang.check_int_overflow" get_value_from_config_int
     @@ fun opts v -> { opts with option_check_int_overflow = v } );
-    ( set_value "hhvm.hack.lang.disable_array" get_value_from_config_int
-    @@ fun opts v -> { opts with option_disable_array = v = 1 } );
     ( set_value
         "hhvm.hack.lang.allow_unstable_features"
         get_value_from_config_int

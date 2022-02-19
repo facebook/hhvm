@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use emit_property::PropAndInit;
 use env::{emitter::Emitter, Env};
 use ffi::{Maybe, Maybe::*, Slice, Str};
 use hhas_class::{HhasClass, TraitReqKind};
@@ -255,7 +256,7 @@ fn from_class_elt_classvars<'a, 'arena, 'decl>(
     class_is_const: bool,
     tparams: &[&str],
     is_closure: bool,
-) -> Result<Vec<HhasProperty<'arena>>> {
+) -> Result<Vec<PropAndInit<'arena>>> {
     // TODO: we need to emit doc comments for each property,
     // not one per all properties on the same line
     // The doc comment is only for the first name in the list.
@@ -290,7 +291,7 @@ fn from_class_elt_classvars<'a, 'arena, 'decl>(
                 },
             )
         })
-        .collect::<Result<Vec<_>>>()
+        .collect()
 }
 
 fn from_class_elt_constants<'a, 'arena, 'decl>(
@@ -541,7 +542,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
 fn make_init_method<'a, 'arena, 'decl, F>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
-    properties: &[HhasProperty<'arena>],
+    properties: &mut [PropAndInit<'arena>],
     filter: F,
     name: &'static str,
     span: HhasSpan,
@@ -551,21 +552,15 @@ where
 {
     if properties
         .iter()
-        .any(|p: &HhasProperty<'_>| p.initializer_instrs.is_just() && filter(p))
+        .any(|p| p.init.is_some() && filter(&p.prop))
     {
         let instrs = InstrSeq::gather(
             alloc,
             properties
-                .iter()
-                .filter_map(|p| {
-                    if filter(p) {
-                        // TODO(hrust) this clone can be avoided by wrapping initializer_instrs by Rc
-                        // and also support Rc in InstrSeq
-                        std::convert::Into::<Option<_>>::into(p.initializer_instrs.as_ref())
-                            .map(|i| InstrSeq::clone(alloc, i))
-                    } else {
-                        None
-                    }
+                .iter_mut()
+                .filter_map(|p| match p.init {
+                    Some(_) if filter(&p.prop) => p.init.take(),
+                    Some(_) | None => None,
                 })
                 .collect(),
         );
@@ -783,12 +778,30 @@ pub fn emit_class<'a, 'arena, 'decl>(
     let sinit_filter = |p: &HhasProperty<'_>| p.flags.is_static() && !p.flags.is_lsb();
     let linit_filter = |p: &HhasProperty<'_>| p.flags.is_static() && p.flags.is_lsb();
 
-    let pinit_method =
-        make_init_method(alloc, emitter, &properties, &pinit_filter, "86pinit", span)?;
-    let sinit_method =
-        make_init_method(alloc, emitter, &properties, &sinit_filter, "86sinit", span)?;
-    let linit_method =
-        make_init_method(alloc, emitter, &properties, &linit_filter, "86linit", span)?;
+    let pinit_method = make_init_method(
+        alloc,
+        emitter,
+        &mut properties,
+        &pinit_filter,
+        "86pinit",
+        span,
+    )?;
+    let sinit_method = make_init_method(
+        alloc,
+        emitter,
+        &mut properties,
+        &sinit_filter,
+        "86sinit",
+        span,
+    )?;
+    let linit_method = make_init_method(
+        alloc,
+        emitter,
+        &mut properties,
+        &linit_filter,
+        "86linit",
+        span,
+    )?;
 
     let initialized_constants: Vec<_> = constants
         .iter()
@@ -920,7 +933,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     let upper_bounds = emit_body::emit_generics_upper_bounds(alloc, &ast_class.tparams, &[], false);
 
     if !no_xhp_attributes {
-        properties.extend(emit_xhp::properties_for_cache(
+        properties.push(emit_xhp::properties_for_cache(
             emitter, ast_class, is_const, is_closure,
         )?);
     }
@@ -989,7 +1002,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         methods: Slice::fill_iter(alloc, methods.into_iter()),
         enum_type: Maybe::from(enum_type),
         upper_bounds: Slice::fill_iter(alloc, upper_bounds.into_iter()),
-        properties: Slice::fill_iter(alloc, properties.into_iter()),
+        properties: Slice::fill_iter(alloc, properties.into_iter().map(|p| p.prop)),
         requirements: Slice::fill_iter(alloc, requirements.into_iter().map(|r| r.into())),
         type_constants: Slice::fill_iter(alloc, type_constants.into_iter()),
         ctx_constants: Slice::fill_iter(alloc, ctx_constants.into_iter()),

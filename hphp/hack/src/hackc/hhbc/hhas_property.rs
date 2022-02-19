@@ -8,7 +8,6 @@ use hhas_attribute::HhasAttribute;
 use hhas_type::HhasTypeInfo;
 use hhbc_ast::Visibility;
 use hhvm_types_ffi::ffi::Attr;
-use instruction_sequence::InstrSeq;
 
 #[derive(Debug)]
 #[repr(C)]
@@ -18,10 +17,10 @@ pub struct HhasProperty<'arena> {
     pub attributes: Slice<'arena, HhasAttribute<'arena>>,
     pub visibility: Visibility,
     pub initial_value: Maybe<runtime::TypedValue<'arena>>,
-    pub initializer_instrs: Maybe<InstrSeq<'arena>>,
     pub type_info: HhasTypeInfo<'arena>,
     pub doc_comment: Maybe<Str<'arena>>,
 }
+
 impl<'arena> HhasProperty<'arena> {
     pub fn is_private(&self) -> bool {
         self.visibility == Visibility::Private

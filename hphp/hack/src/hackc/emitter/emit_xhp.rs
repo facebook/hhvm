@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use emit_property::PropAndInit;
 use env::emitter::Emitter;
 use hhas_method::HhasMethod;
-use hhas_property::HhasProperty;
 use hhas_xhp_attribute::HhasXhpAttribute;
 use hhbc_id::class;
 use hhbc_string_utils as string_utils;
@@ -17,9 +17,9 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
     class: &'a Class_,
     class_is_const: bool,
     class_is_closure: bool,
-) -> Result<Option<HhasProperty<'arena>>> {
+) -> Result<PropAndInit<'arena>> {
     let initial_value = Some(Expr((), Pos::make_none(), Expr_::mk_null()));
-    let property = emit_property::from_ast(
+    emit_property::from_ast(
         emitter,
         class,
         &[],
@@ -36,8 +36,7 @@ pub fn properties_for_cache<'a, 'arena, 'decl>(
             user_attributes: &[],
             id: &ast_defs::Id(Pos::make_none(), "__xhpAttributeDeclarationCache".into()),
         },
-    )?;
-    Ok(Some(property))
+    )
 }
 
 pub fn from_attribute_declaration<'a, 'arena, 'decl>(

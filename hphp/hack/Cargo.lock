@@ -1418,7 +1418,6 @@ dependencies = [
  "emit_property",
  "env",
  "hhas_method",
- "hhas_property",
  "hhas_xhp_attribute",
  "hhbc_id",
  "hhbc_string_utils",
@@ -1967,7 +1966,6 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhvm_types_ffi",
- "instruction_sequence",
  "runtime",
 ]
 

@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "hphp/runtime/base/header-kind-shared.h"
+
 namespace HPHP {
 
 #define FATAL_OPS                               \
@@ -213,6 +215,5 @@ enum class IncDecOp : uint8_t {
   INCDEC_OPS
 #undef INCDEC_OP
 };
-
 
 }

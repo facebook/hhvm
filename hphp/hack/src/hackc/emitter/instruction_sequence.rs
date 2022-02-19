@@ -10,8 +10,8 @@ use ffi::{
 };
 use hhbc_ast::*;
 use hhvm_hhbc_defs_ffi::ffi::{
-    BareThisOp, ContCheckOp, FatalOp, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp,
-    MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SilenceOp, SpecialClsRef, SwitchKind,
+    BareThisOp, CollectionType, ContCheckOp, FatalOp, IncDecOp, InitPropOp, IsLogAsDynamicCallOp,
+    IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SilenceOp, SpecialClsRef, SwitchKind,
     TypeStructResolveOp,
 };
 use iterator::IterId;

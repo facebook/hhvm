@@ -40,9 +40,9 @@ use hhbc_string_utils::{
     strip_global_ns, strip_ns, types,
 };
 use hhvm_hhbc_defs_ffi::ffi::{
-    fcall_flags_to_string_ffi, BareThisOp, ContCheckOp, FatalOp, IncDecOp, InitPropOp,
-    IsLogAsDynamicCallOp, IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetRangeOp,
-    SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
+    fcall_flags_to_string_ffi, BareThisOp, CollectionType, ContCheckOp, FatalOp, IncDecOp,
+    InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp,
+    SetRangeOp, SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
 };
 use hhvm_types_ffi::ffi::*;
 use instruction_sequence::{Error::Unrecoverable, InstrSeq};
@@ -1889,7 +1889,7 @@ fn print_lit_const(w: &mut dyn Write, lit: &InstructLitConst<'_>) -> Result<()> 
 
 fn print_collection_type(w: &mut dyn Write, ct: &CollectionType) -> Result<()> {
     use CollectionType as CT;
-    match ct {
+    match *ct {
         CT::Vector => w.write_all(b"Vector"),
         CT::Map => w.write_all(b"Map"),
         CT::Set => w.write_all(b"Set"),
@@ -1897,10 +1897,7 @@ fn print_collection_type(w: &mut dyn Write, ct: &CollectionType) -> Result<()> {
         CT::ImmVector => w.write_all(b"ImmVector"),
         CT::ImmMap => w.write_all(b"ImmMap"),
         CT::ImmSet => w.write_all(b"ImmSet"),
-        CT::Dict => w.write_all(b"dict"),
-        CT::Array => w.write_all(b"array"),
-        CT::Keyset => w.write_all(b"keyset"),
-        CT::Vec => w.write_all(b"vec"),
+        _ => panic!("Enum value does not match one of listed variants"),
     }
 }
 

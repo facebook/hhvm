@@ -177,9 +177,22 @@ pub mod ffi {
         PostDecO,
     }
 
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum CollectionType {
+        Vector = 0x11,
+        Map = 0x12,
+        Set = 0x13,
+        Pair = 0x14,
+        ImmVector = 0x15,
+        ImmMap = 0x16,
+        ImmSet = 0x17,
+    }
+
     unsafe extern "C++" {
         include!("hphp/hack/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.h");
         type BareThisOp;
+        type CollectionType;
         type ContCheckOp;
         type FatalOp;
         type FCallArgsFlags;

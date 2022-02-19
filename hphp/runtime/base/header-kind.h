@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "hphp/runtime/base/header-kind-shared.h"
 #include "hphp/util/compilation-flags.h"
 
 #include <array>
@@ -25,15 +26,6 @@
 #include <type_traits>
 
 namespace HPHP {
-
-#define COLLECTION_TYPES              \
-  COL(Vector)                         \
-  COL(Map)                            \
-  COL(Set)                            \
-  COL(Pair)                           \
-  COL(ImmVector)                      \
-  COL(ImmMap)                         \
-  COL(ImmSet)
 
 /*
  * every request-allocated object has a 1-byte kind field in its
@@ -74,6 +66,14 @@ extern const std::array<char*,NumHeaderKinds> header_names;
 inline bool haveCount(HeaderKind k) {
   return uint8_t(k) < uint8_t(HeaderKind::AsyncFuncFrame);
 }
+
+static_assert((uint8_t)CollectionType::Vector == (uint8_t)HeaderKind::Vector);
+static_assert((uint8_t)CollectionType::Map == (uint8_t)HeaderKind::Map);
+static_assert((uint8_t)CollectionType::Set == (uint8_t)HeaderKind::Set);
+static_assert((uint8_t)CollectionType::Pair == (uint8_t)HeaderKind::Pair);
+static_assert((uint8_t)CollectionType::ImmVector == (uint8_t)HeaderKind::ImmVector);
+static_assert((uint8_t)CollectionType::ImmMap == (uint8_t)HeaderKind::ImmMap);
+static_assert((uint8_t)CollectionType::ImmSet == (uint8_t)HeaderKind::ImmSet);
 
 /*
  * RefCount type for m_count field in refcounted objects.
@@ -276,38 +276,6 @@ inline constexpr bool isWaithandleKind(HeaderKind k) {
   return k >= HeaderKind::WaitHandle && k <= HeaderKind::AwaitAllWH;
   static_assert((int)HeaderKind::AwaitAllWH - (int)HeaderKind::WaitHandle == 2,
                 "isWaithandleKind requires updating");
-}
-
-enum class CollectionType : uint8_t {
-#define COL(name) name = uint8_t(HeaderKind::name),
-  COLLECTION_TYPES
-#undef COL
-};
-
-inline constexpr bool isVectorCollection(CollectionType ctype) {
-  return ctype == CollectionType::Vector || ctype == CollectionType::ImmVector;
-}
-inline constexpr bool isMapCollection(CollectionType ctype) {
-  return ctype == CollectionType::Map || ctype == CollectionType::ImmMap;
-}
-inline constexpr bool isSetCollection(CollectionType ctype) {
-  return ctype == CollectionType::Set || ctype == CollectionType::ImmSet;
-}
-inline constexpr bool isValidCollection(CollectionType ctype) {
-  return uint8_t(ctype) >= uint8_t(CollectionType::Vector) &&
-         uint8_t(ctype) <= uint8_t(CollectionType::ImmSet);
-}
-inline constexpr bool isMutableCollection(CollectionType ctype) {
-  return ctype == CollectionType::Vector ||
-         ctype == CollectionType::Map ||
-         ctype == CollectionType::Set;
-}
-inline constexpr bool isImmutableCollection(CollectionType ctype) {
-  return !isMutableCollection(ctype);
-}
-
-inline constexpr bool collectionAllowsIntStringKeys(CollectionType ctype) {
-  return isSetCollection(ctype) || isMapCollection(ctype);
 }
 
 }

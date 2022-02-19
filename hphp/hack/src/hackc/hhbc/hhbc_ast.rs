@@ -9,9 +9,9 @@ use ffi::{
     Pair, Slice, Str,
 };
 use hhvm_hhbc_defs_ffi::ffi::{
-    BareThisOp, ContCheckOp, FCallArgsFlags, FatalOp, IncDecOp, InitPropOp, IsLogAsDynamicCallOp,
-    IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetRangeOp, SilenceOp, SpecialClsRef,
-    SwitchKind, TypeStructResolveOp,
+    BareThisOp, CollectionType, ContCheckOp, FCallArgsFlags, FatalOp, IncDecOp, InitPropOp,
+    IsLogAsDynamicCallOp, IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetRangeOp,
+    SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
 };
 use iterator::IterId;
 use label::Label;
@@ -108,22 +108,6 @@ pub type ClassrefId = isize;
 /// Conventionally this is "A_" followed by an integer
 pub type AdataId<'arena> = Str<'arena>;
 pub type ParamLocations<'arena> = Slice<'arena, isize>;
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum CollectionType {
-    Vector,
-    Map,
-    Set,
-    Pair,
-    ImmVector,
-    ImmMap,
-    ImmSet,
-    Dict,
-    Array,
-    Keyset,
-    Vec,
-}
 
 #[derive(Clone, Copy, Debug)]
 #[repr(C)]

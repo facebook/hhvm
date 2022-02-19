@@ -13,8 +13,8 @@ use hhbc_ast::*;
 use hhbc_id::{class, r#const, function, method, prop};
 use hhbc_string_utils as string_utils;
 use hhvm_hhbc_defs_ffi::ffi::{
-    BareThisOp, FCallArgsFlags, IncDecOp, IsLogAsDynamicCallOp, IsTypeOp, MOpMode, ObjMethodOp,
-    QueryMOp, ReadonlyOp, SetRangeOp, SpecialClsRef, TypeStructResolveOp,
+    BareThisOp, CollectionType, FCallArgsFlags, IncDecOp, IsLogAsDynamicCallOp, IsTypeOp, MOpMode,
+    ObjMethodOp, QueryMOp, ReadonlyOp, SetRangeOp, SpecialClsRef, TypeStructResolveOp,
 };
 use indexmap::IndexSet;
 use instruction_sequence::{
@@ -1210,10 +1210,6 @@ fn emit_named_collection<'a, 'arena, 'decl>(
     };
     use CollectionType as C;
     match collection_type {
-        C::Dict | C::Vec | C::Keyset => {
-            let instr = emit_collection(e, env, expr, fields, None)?;
-            Ok(emit_pos_then(alloc, pos, instr))
-        }
         C::Vector | C::ImmVector => emit_vector_like(e, collection_type),
         C::Map | C::ImmMap | C::Set | C::ImmSet => emit_map_or_set(e, collection_type),
         C::Pair => Ok(InstrSeq::gather(
@@ -1249,9 +1245,6 @@ fn emit_named_collection_str<'a, 'arena, 'decl>(
     let name = string_utils::strip_ns(name);
     let name = string_utils::types::fix_casing(name);
     let ctype = match name {
-        "dict" => CollectionType::Dict,
-        "vec" => CollectionType::Vec,
-        "keyset" => CollectionType::Keyset,
         "Vector" => CollectionType::Vector,
         "ImmVector" => CollectionType::ImmVector,
         "Map" => CollectionType::Map,
@@ -1259,6 +1252,10 @@ fn emit_named_collection_str<'a, 'arena, 'decl>(
         "Set" => CollectionType::Set,
         "ImmSet" => CollectionType::ImmSet,
         "Pair" => CollectionType::Pair,
+        "vec" | "dict" | "keyset" => {
+            let instr = emit_collection(e, env, expr, fields, None)?;
+            return Ok(emit_pos_then(env.arena, pos, instr));
+        }
         _ => {
             return Err(unrecoverable(format!(
                 "collection: {} does not exist",
@@ -1346,25 +1343,17 @@ fn expr_and_new<'a, 'arena, 'decl>(
     }
 }
 
-fn emit_keyvalue_collection<'a, 'arena, 'decl>(
+fn emit_container<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
     fields: &[ast::Afield],
-    ctype: CollectionType,
     constructor: InstructLitConst<'arena>,
+    add_elem_instr: InstrSeq<'arena>,
+    transform_instr: InstrSeq<'arena>,
+    emitted_pos: InstrSeq<'arena>,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let (transform_instr, add_elem_instr) = match ctype {
-        CollectionType::Dict | CollectionType::Array => {
-            (instr::empty(alloc), instr::add_new_elemc(alloc))
-        }
-        _ => (
-            instr::colfromarray(alloc, ctype),
-            InstrSeq::gather(alloc, vec![instr::dup(alloc), instr::add_elemc(alloc)]),
-        ),
-    };
-    let emitted_pos = emit_pos(alloc, pos);
     Ok(InstrSeq::gather(
         alloc,
         vec![
@@ -1388,6 +1377,52 @@ fn emit_keyvalue_collection<'a, 'arena, 'decl>(
             transform_instr,
         ],
     ))
+}
+
+fn emit_keyvalue_collection<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    fields: &[ast::Afield],
+    ctype: CollectionType,
+    constructor: InstructLitConst<'arena>,
+) -> Result<InstrSeq<'arena>> {
+    let alloc = env.arena;
+    let transform_instr = instr::colfromarray(alloc, ctype);
+    let add_elem_instr = InstrSeq::gather(alloc, vec![instr::dup(alloc), instr::add_elemc(alloc)]);
+    let emitted_pos = emit_pos(alloc, pos);
+    emit_container(
+        e,
+        env,
+        pos,
+        fields,
+        constructor,
+        add_elem_instr,
+        transform_instr,
+        emitted_pos,
+    )
+}
+
+fn emit_array<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    fields: &[ast::Afield],
+    constructor: InstructLitConst<'arena>,
+) -> Result<InstrSeq<'arena>> {
+    let alloc = env.arena;
+    let add_elem_instr = instr::add_new_elemc(alloc);
+    let emitted_pos = emit_pos(alloc, pos);
+    emit_container(
+        e,
+        env,
+        pos,
+        fields,
+        constructor,
+        add_elem_instr,
+        instr::empty(alloc),
+        emitted_pos,
+    )
 }
 
 fn non_numeric(s: &str) -> bool {
@@ -1580,7 +1615,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
             })
         } else {
             let ctor = InstructLitConst::NewDictArray(count as isize);
-            emit_keyvalue_collection(e, env, pos, fields, CollectionType::Dict, ctor)
+            emit_array(e, env, pos, fields, ctor)
         }
     };
     let emit_collection_helper = |e: &mut Emitter<'arena, 'decl>, ctype| {
@@ -1656,8 +1691,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 Ok(instrs?)
             } else {
                 let constr = InstructLitConst::NewDictArray(count as isize);
-                let instrs =
-                    emit_keyvalue_collection(e, env, pos, fields, CollectionType::Array, constr);
+                let instrs = emit_array(e, env, pos, fields, constr);
                 Ok(instrs?)
             }
         }

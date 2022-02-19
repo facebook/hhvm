@@ -8,7 +8,7 @@ use env::{emitter::Emitter, Env};
 use ffi::{Maybe, Maybe::*, Slice, Str};
 use hhas_class::{HhasClass, TraitReqKind};
 use hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
-use hhas_constant::{self as hhas_constant, HhasConstant};
+use hhas_constant::HhasConstant;
 use hhas_method::{HhasMethod, HhasMethodFlags};
 use hhas_param::HhasParam;
 use hhas_pos::HhasSpan;
@@ -18,7 +18,7 @@ use hhas_type_const::HhasTypeConstant;
 use hhas_xhp_attribute::HhasXhpAttribute;
 use hhbc_ast::{FcallArgs, Visibility};
 use hhbc_id::class::ClassType;
-use hhbc_id::r#const;
+use hhbc_id::r#const::ConstType;
 use hhbc_id::{self as hhbc_id, class, method, prop};
 use hhbc_string_utils as string_utils;
 use hhvm_hhbc_defs_ffi::ffi::{FCallArgsFlags, FatalOp, ReadonlyOp, SpecialClsRef};
@@ -298,7 +298,7 @@ fn from_class_elt_constants<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     class_: &'a ast::Class_,
-) -> Result<Vec<HhasConstant<'arena>>> {
+) -> Result<Vec<(HhasConstant<'arena>, Option<InstrSeq<'arena>>)>> {
     use oxidized::aast::ClassConstKind;
     class_
         .consts
@@ -308,7 +308,7 @@ fn from_class_elt_constants<'a, 'arena, 'decl>(
                 ClassConstKind::CCAbstract(default) => (true, default.as_ref()),
                 ClassConstKind::CCConcrete(expr) => (false, Some(expr)),
             };
-            hhas_constant::from_ast(emitter, env, &x.id, is_abstract, init_opt)
+            emit_constant::from_ast(emitter, env, &x.id, is_abstract, init_opt)
         })
         .collect()
 }
@@ -770,7 +770,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     emitter.label_gen_mut().reset();
     let mut properties =
         from_class_elt_classvars(emitter, ast_class, is_const, &tparams, is_closure)?;
-    let constants = from_class_elt_constants(emitter, &env, ast_class)?;
+    let mut constants = from_class_elt_constants(emitter, &env, ast_class)?;
 
     let requirements = from_class_elt_requirements(alloc, ast_class);
 
@@ -804,21 +804,12 @@ pub fn emit_class<'a, 'arena, 'decl>(
     )?;
 
     let initialized_constants: Vec<_> = constants
-        .iter()
-        .filter_map(
-            |
-                HhasConstant {
-                    ref name,
-                    ref initializer_instrs,
-                    ..
-                },
-            | {
-                initializer_instrs
-                    .as_ref()
-                    .map(|instrs| (name, emitter.label_gen_mut().next_regular(), instrs))
-                    .into()
-            },
-        )
+        .iter_mut()
+        .filter_map(|(HhasConstant { ref name, .. }, instrs)| {
+            instrs
+                .take()
+                .map(|instrs| (name, emitter.label_gen_mut().next_regular(), instrs))
+        })
         .collect();
     let cinit_method = if initialized_constants.is_empty() {
         None
@@ -828,7 +819,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
             e: &mut Emitter<'arena, 'decl>,
             default_label: label::Label,
             pos: &Pos,
-            consts: &[(&r#const::ConstType<'arena>, label::Label, &InstrSeq<'arena>)],
+            consts: &[(&ConstType<'arena>, label::Label, InstrSeq<'arena>)],
         ) -> InstrSeq<'arena> {
             match consts {
                 [] => InstrSeq::gather(
@@ -843,11 +834,11 @@ pub fn emit_class<'a, 'arena, 'decl>(
                         instr::fatal(alloc, FatalOp::Runtime),
                     ],
                 ),
-                [(_, label, instrs), cs @ ..] => InstrSeq::gather(
+                [(_, label, ref instrs), cs @ ..] => InstrSeq::gather(
                     alloc,
                     vec![
                         instr::label(alloc, *label),
-                        InstrSeq::clone(alloc, *instrs),
+                        InstrSeq::clone(alloc, instrs),
                         emit_pos::emit_pos(alloc, pos),
                         instr::retc(alloc),
                         make_cinit_instrs(alloc, e, default_label, pos, cs),
@@ -875,7 +866,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
                         emitter,
                         default_label,
                         &ast_class.span,
-                        &initialized_constants[..],
+                        &initialized_constants,
                     ),
                 ],
             )
@@ -1006,7 +997,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         requirements: Slice::fill_iter(alloc, requirements.into_iter().map(|r| r.into())),
         type_constants: Slice::fill_iter(alloc, type_constants.into_iter()),
         ctx_constants: Slice::fill_iter(alloc, ctx_constants.into_iter()),
-        constants: Slice::fill_iter(alloc, constants.into_iter()),
+        constants: Slice::fill_iter(alloc, constants.into_iter().map(|(c, _)| c)),
     })
 }
 

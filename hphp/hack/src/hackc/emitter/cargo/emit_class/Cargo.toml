@@ -11,6 +11,7 @@ path = "../../emit_class.rs"
 bumpalo = { version = "3.8", features = ["collections"] }
 emit_attribute = { path = "../emit_attribute" }
 emit_body = { path = "../emit_body" }
+emit_constant = { path = "../emit_constant" }
 emit_expression = { path = "../emit_expression" }
 emit_fatal = { path = "../emit_fatal" }
 emit_memoize_method = { path = "../emit_memoize_method" }

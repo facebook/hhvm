@@ -634,11 +634,7 @@ void RegionTranslator::resetCached() {
 
 void RegionTranslator::gen() {
   auto const srcRec = srcDB().find(sk);
-  auto const fail = [&] {
-    if (isProfiling(kind)) return;
-
-    kind = TransKind::Interp;
-    if (!checkLimit(kind, srcRec->numTrans())) return;
+  auto const emitInterpStub = [&] {
     FTRACE(1, "emitting dispatchBB interp request for failed "
            "translation (spOff = {})\n", spOff.offset);
     vunit = std::make_unique<Vunit>();
@@ -648,6 +644,13 @@ void RegionTranslator::gen() {
     emitInterpReq(vmain, sk, spOff);
 
     irlower::optimize(*vunit, CodeKind::Helper);
+  };
+  auto const fail = [&] {
+    if (isProfiling(kind)) return;
+
+    kind = TransKind::Interp;
+    if (!checkLimit(kind, srcRec->numTrans())) return;
+    emitInterpStub();
   };
 
   // Only start profiling new functions at their entry point. This reduces the
@@ -703,6 +706,10 @@ void RegionTranslator::gen() {
   hasLoop = cfgHasLoop(*unit);
 
   vunit = irlower::lowerUnit(*unit);
+  // vasm gen can punt, and when it does it's important we don't retry
+  // translating the same thing again and again as it will potentially consume
+  // more and more RDS space.
+  if (!vunit) emitInterpStub();
 }
 
 /*

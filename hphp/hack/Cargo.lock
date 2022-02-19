@@ -315,6 +315,7 @@ dependencies = [
  "escaper",
  "ffi",
  "hackc_unit",
+ "hash",
  "hhas_adata",
  "hhas_attribute",
  "hhas_body",

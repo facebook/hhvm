@@ -18,6 +18,7 @@ use core_utils_rust::add_ns;
 use escaper::{escape, escape_bstr, escape_bstr_by, is_lit_printable};
 use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
 use hackc_unit::HackCUnit;
+use hash::HashSet;
 use hhas_adata::{HhasAdata, DICT_PREFIX, KEYSET_PREFIX, VEC_PREFIX};
 use hhas_attribute::{self as hhas_attribute, HhasAttribute};
 use hhas_body::{HhasBody, HhasBodyEnv};
@@ -319,7 +320,9 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &HhasFunction<'_
         w.write_all(b" ")
     })?;
     w.write_all(fun_def.name.as_bstr())?;
-    print_params(ctx, w, fun_def.params())?;
+    let params = fun_def.params();
+    let dv_labels = find_dv_labels(params);
+    print_params(ctx, w, fun_def.params(), &dv_labels)?;
     if fun_def.is_generator() {
         w.write_all(b" isGenerator")?;
     }
@@ -331,7 +334,9 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &HhasFunction<'_
     }
     w.write_all(b" ")?;
     braces(w, |w| {
-        ctx.block(w, |c, w| print_body(c, w, body, &fun_def.coeffects))?;
+        ctx.block(w, |c, w| {
+            print_body(c, w, body, &fun_def.coeffects, &dv_labels)
+        })?;
         newline(w)
     })?;
 
@@ -606,7 +611,8 @@ fn print_method_def(
         w.write_all(b" ")
     })?;
     w.write_all(method_def.name.as_bstr())?;
-    print_params(ctx, w, &body.params)?;
+    let dv_labels = find_dv_labels(&body.params);
+    print_params(ctx, w, &body.params, &dv_labels)?;
     if method_def.flags.contains(HhasMethodFlags::IS_GENERATOR) {
         w.write_all(b" isGenerator")?;
     }
@@ -624,7 +630,9 @@ fn print_method_def(
     }
     w.write_all(b" ")?;
     braces(w, |w| {
-        ctx.block(w, |c, w| print_body(c, w, body, &method_def.coeffects))?;
+        ctx.block(w, |c, w| {
+            print_body(c, w, body, &method_def.coeffects, &dv_labels)
+        })?;
         newline(w)?;
         w.write_all(b"  ")
     })
@@ -863,6 +871,7 @@ fn print_body(
     w: &mut dyn Write,
     body: &HhasBody<'_>,
     coeffects: &HhasCoeffects<'_>,
+    dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     print_doc_comment(ctx, w, body.doc_comment.as_ref())?;
     if body.is_memoize_wrapper {
@@ -894,13 +903,14 @@ fn print_body(
         write!(w, ".numclosures {};", body.num_closures)?;
     }
     coeffects::coeffects_to_hhas(ctx, w, coeffects)?;
-    print_instructions(ctx, w, &body.body_instrs)
+    print_instructions(ctx, w, &body.body_instrs, dv_labels)
 }
 
 fn print_instructions(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     instr_seq: &InstrSeq<'_>,
+    dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     let mut ctx = ctx.clone();
     for instr in instr_seq.compact_iter() {
@@ -911,29 +921,29 @@ fn print_instructions(
             Instruct::Comment(_) => {
                 // indentation = 0
                 newline(w)?;
-                print_instr(w, instr)?;
+                print_instr(w, instr, dv_labels)?;
             }
             Instruct::Label(_) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
-                print_instr(w, instr)
+                print_instr(w, instr, dv_labels)
             })?,
             Instruct::Try(InstructTry::TryCatchBegin) => {
                 ctx.newline(w)?;
-                print_instr(w, instr)?;
+                print_instr(w, instr, dv_labels)?;
                 ctx.indent_inc();
             }
             Instruct::Try(InstructTry::TryCatchMiddle) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
-                print_instr(w, instr)
+                print_instr(w, instr, dv_labels)
             })?,
             Instruct::Try(InstructTry::TryCatchEnd) => {
                 ctx.indent_dec();
                 ctx.newline(w)?;
-                print_instr(w, instr)?;
+                print_instr(w, instr, dv_labels)?;
             }
             _ => {
                 ctx.newline(w)?;
-                print_instr(w, instr)?;
+                print_instr(w, instr, dv_labels)?;
             }
         }
     }
@@ -951,6 +961,7 @@ fn print_fcall_args(
         async_eager_target,
         context,
     }: &FcallArgs<'_>,
+    dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     angle(w, |w| write!(w, "{}", fcall_flags_to_string_ffi(*flags)))?;
     w.write_all(b" ")?;
@@ -970,7 +981,11 @@ fn print_fcall_args(
         })
     })?;
     w.write_all(b" ")?;
-    option_or(w, async_eager_target.as_ref(), print_label, "-")?;
+    if let Just(label) = async_eager_target {
+        print_label(w, label, dv_labels)?;
+    } else {
+        w.write_all(b"-")?;
+    }
     w.write_all(b" ")?;
     match context {
         Just(s) => quotes(w, |w| w.write_all(s)),
@@ -1014,11 +1029,15 @@ fn print_new(w: &mut dyn Write, new: &InstructNew<'_>) -> Result<()> {
     }
 }
 
-fn print_call(w: &mut dyn Write, call: &InstructCall<'_>) -> Result<()> {
+fn print_call(
+    w: &mut dyn Write,
+    call: &InstructCall<'_>,
+    dv_labels: &HashSet<Label>,
+) -> Result<()> {
     match call {
         InstructCall::FCallClsMethod { fcall_args, log } => {
             w.write_all(b"FCallClsMethod ")?;
-            print_fcall_args(w, fcall_args)?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(br#" "" "#)?;
             w.write_all(match *log {
                 IsLogAsDynamicCallOp::LogAsDynamicCall => b"LogAsDynamicCall",
@@ -1032,7 +1051,7 @@ fn print_call(w: &mut dyn Write, call: &InstructCall<'_>) -> Result<()> {
             method,
         } => {
             w.write_all(b"FCallClsMethodD ")?;
-            print_fcall_args(w, fcall_args)?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(br#" "" "#)?;
             print_class_id(w, class)?;
             w.write_all(b" ")?;
@@ -1040,7 +1059,7 @@ fn print_call(w: &mut dyn Write, call: &InstructCall<'_>) -> Result<()> {
         }
         InstructCall::FCallClsMethodS { fcall_args, clsref } => {
             w.write_all(b"FCallClsMethodS ")?;
-            print_fcall_args(w, fcall_args)?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(br#" "" "#)?;
             print_special_cls_ref(w, clsref)
         }
@@ -1050,7 +1069,7 @@ fn print_call(w: &mut dyn Write, call: &InstructCall<'_>) -> Result<()> {
             method,
         } => {
             w.write_all(b"FCallClsMethodSD ")?;
-            print_fcall_args(w, fcall_args)?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(br#" "" "#)?;
             print_special_cls_ref(w, clsref)?;
             w.write_all(b" ")?;
@@ -1058,22 +1077,22 @@ fn print_call(w: &mut dyn Write, call: &InstructCall<'_>) -> Result<()> {
         }
         InstructCall::FCallCtor(fcall_args) => {
             w.write_all(b"FCallCtor ")?;
-            print_fcall_args(w, fcall_args)?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(br#" """#)
         }
         InstructCall::FCallFunc(fcall_args) => {
             w.write_all(b"FCallFunc ")?;
-            print_fcall_args(w, fcall_args)
+            print_fcall_args(w, fcall_args, dv_labels)
         }
         InstructCall::FCallFuncD { fcall_args, func } => {
             w.write_all(b"FCallFuncD ")?;
-            print_fcall_args(w, fcall_args)?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(b" ")?;
             print_function_id(w, func)
         }
         InstructCall::FCallObjMethod { fcall_args, flavor } => {
             w.write_all(b"FCallObjMethod ")?;
-            print_fcall_args(w, fcall_args)?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(br#" "" "#)?;
             print_null_flavor(w, flavor)
         }
@@ -1083,7 +1102,7 @@ fn print_call(w: &mut dyn Write, call: &InstructCall<'_>) -> Result<()> {
             method,
         } => {
             w.write_all(b"FCallObjMethodD ")?;
-            print_fcall_args(w, fcall_args)?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(br#" "" "#)?;
             print_null_flavor(w, flavor)?;
             w.write_all(b" ")?;
@@ -1125,9 +1144,9 @@ fn print_get(w: &mut dyn Write, get: &InstructGet<'_>) -> Result<()> {
     }
 }
 
-fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>) -> Result<()> {
+fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
     match instr {
-        Instruct::Iterator(i) => print_iterator(w, i),
+        Instruct::Iterator(i) => print_iterator(w, i, dv_labels),
         Instruct::Basic(b) => w.write_all(match b {
             InstructBasic::Nop => b"Nop",
             InstructBasic::EntryNop => b"EntryNop",
@@ -1137,14 +1156,14 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>) -> Result<()> {
         }),
         Instruct::LitConst(lit) => print_lit_const(w, lit),
         Instruct::Op(op) => print_op(w, op),
-        Instruct::ContFlow(cf) => print_control_flow(w, cf),
-        Instruct::Call(c) => print_call(w, c),
+        Instruct::ContFlow(cf) => print_control_flow(w, cf, dv_labels),
+        Instruct::Call(c) => print_call(w, c, dv_labels),
         Instruct::New(n) => print_new(w, n),
-        Instruct::Misc(misc) => print_misc(w, misc),
+        Instruct::Misc(misc) => print_misc(w, misc, dv_labels),
         Instruct::Get(get) => print_get(w, get),
         Instruct::Mutator(mutator) => print_mutator(w, mutator),
         Instruct::Label(l) => {
-            print_label(w, l)?;
+            print_label(w, l, dv_labels)?;
             w.write_all(b":")
         }
         Instruct::Isset(i) => print_isset(w, i),
@@ -1283,20 +1302,24 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>) -> Result<()> {
     }
 }
 
-fn print_iterator(w: &mut dyn Write, i: &InstructIterator<'_>) -> Result<()> {
+fn print_iterator(
+    w: &mut dyn Write,
+    i: &InstructIterator<'_>,
+    dv_labels: &HashSet<Label>,
+) -> Result<()> {
     use InstructIterator as I;
     match i {
         I::IterInit(iter_args, label) => {
             w.write_all(b"IterInit ")?;
             print_iter_args(w, iter_args)?;
             w.write_all(b" ")?;
-            print_label(w, label)
+            print_label(w, label, dv_labels)
         }
         I::IterNext(iter_args, label) => {
             w.write_all(b"IterNext ")?;
             print_iter_args(w, iter_args)?;
             w.write_all(b" ")?;
-            print_label(w, label)
+            print_label(w, label, dv_labels)
         }
         I::IterFree(id) => {
             w.write_all(b"IterFree ")?;
@@ -1590,7 +1613,11 @@ fn print_gen_creation_execution(w: &mut dyn Write, gen: &GenCreationExecution) -
     }
 }
 
-fn print_misc(w: &mut dyn Write, misc: &InstructMisc<'_>) -> Result<()> {
+fn print_misc(
+    w: &mut dyn Write,
+    misc: &InstructMisc<'_>,
+    dv_labels: &HashSet<Label>,
+) -> Result<()> {
     use InstructMisc as M;
     match misc {
         M::This => w.write_all(b"This"),
@@ -1662,12 +1689,12 @@ fn print_misc(w: &mut dyn Write, misc: &InstructMisc<'_>) -> Result<()> {
 
         M::MemoGet(label, Just(Pair(Local::Unnamed(first), local_count))) => {
             w.write_all(b"MemoGet ")?;
-            print_label(w, label)?;
+            print_label(w, label, dv_labels)?;
             write!(w, " L:{}+{}", first, local_count)
         }
         M::MemoGet(label, Nothing) => {
             w.write_all(b"MemoGet ")?;
-            print_label(w, label)?;
+            print_label(w, label, dv_labels)?;
             w.write_all(b" L:0+0")
         }
         M::MemoGet(_, _) => Err(Error::fail("MemoGet needs an unnamed local").into()),
@@ -1680,16 +1707,16 @@ fn print_misc(w: &mut dyn Write, misc: &InstructMisc<'_>) -> Result<()> {
 
         M::MemoGetEager([label1, label2], Just(Pair(Local::Unnamed(first), local_count))) => {
             w.write_all(b"MemoGetEager ")?;
-            print_label(w, label1)?;
+            print_label(w, label1, dv_labels)?;
             w.write_all(b" ")?;
-            print_label(w, label2)?;
+            print_label(w, label2, dv_labels)?;
             write!(w, " L:{}+{}", first, local_count)
         }
         M::MemoGetEager([label1, label2], Nothing) => {
             w.write_all(b"MemoGetEager ")?;
-            print_label(w, label1)?;
+            print_label(w, label1, dv_labels)?;
             w.write_all(b" ")?;
-            print_label(w, label2)?;
+            print_label(w, label2, dv_labels)?;
             w.write_all(b" L:0+0")
         }
         M::MemoGetEager(_, _) => Err(Error::fail("MemoGetEager needs an unnamed local").into()),
@@ -1739,24 +1766,28 @@ fn print_include_eval_define(w: &mut dyn Write, ed: &InstructIncludeEvalDefine) 
     }
 }
 
-fn print_control_flow(w: &mut dyn Write, cf: &InstructControlFlow<'_>) -> Result<()> {
+fn print_control_flow(
+    w: &mut dyn Write,
+    cf: &InstructControlFlow<'_>,
+    dv_labels: &HashSet<Label>,
+) -> Result<()> {
     use InstructControlFlow as CF;
     match cf {
         CF::Jmp(l) => {
             w.write_all(b"Jmp ")?;
-            print_label(w, l)
+            print_label(w, l, dv_labels)
         }
         CF::JmpNS(l) => {
             w.write_all(b"JmpNS ")?;
-            print_label(w, l)
+            print_label(w, l, dv_labels)
         }
         CF::JmpZ(l) => {
             w.write_all(b"JmpZ ")?;
-            print_label(w, l)
+            print_label(w, l, dv_labels)
         }
         CF::JmpNZ(l) => {
             w.write_all(b"JmpNZ ")?;
-            print_label(w, l)
+            print_label(w, l, dv_labels)
         }
         CF::RetC => w.write_all(b"RetC"),
         CF::RetCSuspended => w.write_all(b"RetCSuspended"),
@@ -1766,7 +1797,7 @@ fn print_control_flow(w: &mut dyn Write, cf: &InstructControlFlow<'_>) -> Result
             kind,
             base,
             targets,
-        } => print_switch(w, kind, base, targets.as_ref()),
+        } => print_switch(w, kind, base, targets.as_ref(), dv_labels),
         CF::SSwitch { cases, targets } => match (cases.as_ref(), targets.as_ref()) {
             ([], _) | (_, []) => Err(Error::fail("sswitch should have at least one case").into()),
             ([rest_cases @ .., _last_case], [rest_targets @ .., last_target]) => {
@@ -1779,10 +1810,10 @@ fn print_control_flow(w: &mut dyn Write, cf: &InstructControlFlow<'_>) -> Result
                 angle(w, |w| {
                     concat_by(w, " ", rest, |w, Pair(case, target)| {
                         write_bytes!(w, r#""{}":"#, escape_bstr(case.as_bstr()))?;
-                        print_label(w, target)
+                        print_label(w, target, dv_labels)
                     })?;
                     w.write_all(b" -:")?;
-                    print_label(w, last_target)
+                    print_label(w, last_target, dv_labels)
                 })
             }
         },
@@ -1794,6 +1825,7 @@ fn print_switch(
     kind: &SwitchKind,
     base: &isize,
     labels: &[Label],
+    dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     w.write_all(b"Switch ")?;
     w.write_all(match *kind {
@@ -1803,7 +1835,9 @@ fn print_switch(
     })?;
     w.write_all(base.to_string().as_bytes())?;
     w.write_all(b" ")?;
-    angle(w, |w| concat_by(w, " ", labels, print_label))
+    angle(w, |w| {
+        concat_by(w, " ", labels, |w, label| print_label(w, label, dv_labels))
+    })
 }
 
 fn print_lit_const(w: &mut dyn Write, lit: &InstructLitConst<'_>) -> Result<()> {
@@ -2032,13 +2066,26 @@ fn print_fatal_op(w: &mut dyn Write, f: &FatalOp) -> Result<()> {
     }
 }
 
+/// Build a set containing the labels for param default-value initializers
+/// so they can be formatted as `DV123` instead of `L123`.
+fn find_dv_labels(params: &[HhasParam<'_>]) -> HashSet<Label> {
+    params
+        .iter()
+        .filter_map(|param| match &param.default_value {
+            Just(Pair(label, _)) => Some(*label),
+            _ => None,
+        })
+        .collect()
+}
+
 fn print_params<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    params: impl AsRef<[HhasParam<'arena>]>,
+    params: &[HhasParam<'arena>],
+    dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     paren(w, |w| {
-        concat_by(w, ", ", params, |w, i| print_param(ctx, w, i))
+        concat_by(w, ", ", params, |w, i| print_param(ctx, w, i, dv_labels))
     })
 }
 
@@ -2046,6 +2093,7 @@ fn print_param<'arena>(
     ctx: &Context<'_>,
     w: &mut dyn Write,
     param: &HhasParam<'arena>,
+    dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     print_param_user_attributes(ctx, w, param)?;
     write_if!(param.is_inout, w, "inout ")?;
@@ -2058,8 +2106,11 @@ fn print_param<'arena>(
     w.write_all(&param.name)?;
     option(
         w,
-        param.default_value.map(|x| (x.0, x.1)).as_ref(),
-        |w, i| print_param_default_value(w, i),
+        param
+            .default_value
+            .map(|Pair(label, php_code)| (label, php_code))
+            .as_ref(),
+        |w, &(label, php_code)| print_param_default_value(w, label, php_code, dv_labels),
     )
 }
 
@@ -2072,24 +2123,18 @@ fn print_param_id(w: &mut dyn Write, param_id: &ParamId<'_>) -> Result<()> {
 
 fn print_param_default_value<'arena>(
     w: &mut dyn Write,
-    default_val: &(Label, Str<'arena>),
+    label: Label,
+    php_code: Str<'arena>,
+    dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     w.write_all(b" = ")?;
-    print_label(w, &default_val.0)?;
-    paren(w, |w| triple_quotes(w, |w| w.write_all(&default_val.1)))
+    print_label(w, &label, dv_labels)?;
+    paren(w, |w| triple_quotes(w, |w| w.write_all(&php_code)))
 }
 
-fn print_label(w: &mut dyn Write, label: &Label) -> Result<()> {
-    match label {
-        Label::Regular(id) => {
-            w.write_all(b"L")?;
-            print_int(w, id)
-        }
-        Label::DefaultArg(id) => {
-            w.write_all(b"DV")?;
-            print_int(w, id)
-        }
-    }
+fn print_label(w: &mut dyn Write, label: &Label, dv_labels: &HashSet<Label>) -> Result<()> {
+    let prefix = if dv_labels.contains(label) { "DV" } else { "L" };
+    write!(w, "{}{}", prefix, label)
 }
 
 fn print_local(w: &mut dyn Write, local: &Local<'_>) -> Result<()> {

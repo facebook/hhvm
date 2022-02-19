@@ -8,17 +8,17 @@ use hash::{HashMap, HashSet};
 use hhas_param::HhasParam;
 use hhbc_ast::Instruct;
 use instruction_sequence::InstrSeq;
-use label::{Label, LabelId};
+use label::Label;
 use oxidized::ast;
 
 /// Create a mapping Label instructions to their position in the InstrSeq without
 /// the labels. In other words, all instructions get numbered except labels.
-fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<LabelId, u32> {
+fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<Label, u32> {
     let mut index = 0;
     instrseq
         .iter()
         .filter_map(|instr| match instr {
-            Instruct::Label(label) => Some((label.id(), index)),
+            Instruct::Label(label) => Some((*label, index)),
             _ => {
                 index += 1;
                 None
@@ -28,89 +28,67 @@ fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<La
 }
 
 fn create_label_ref_map<'arena>(
-    label_to_offset: &HashMap<LabelId, u32>,
+    label_to_offset: &HashMap<Label, u32>,
     params: &[(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
     body: &InstrSeq<'arena>,
-) -> (HashSet<LabelId>, HashMap<u32, LabelId>) {
-    let process_ref = |
-        (mut next, (mut used, mut offset_to_label)): (
-            u32,
-            (HashSet<LabelId>, HashMap<u32, LabelId>),
-        ),
-        target: &Label,
-    | {
-        let old_id = target.id();
-        let offset = label_to_offset[&old_id];
+) -> (HashSet<Label>, HashMap<u32, Label>) {
+    let mut label_gen = label::Gen::default();
+    let mut used = HashSet::default();
+    let mut offset_to_label = HashMap::default();
+
+    let mut process_ref = |target: &Label| {
+        let offset = label_to_offset[target];
         offset_to_label.entry(offset).or_insert_with(|| {
-            used.insert(old_id);
-            let new_id = LabelId(next);
-            next += 1;
-            new_id
+            used.insert(*target);
+            label_gen.next_regular()
         });
-        (next, (used, offset_to_label))
     };
 
     // Process the function body.
-    let init = body.iter().fold(
-        Default::default(),
-        |acc: (u32, (HashSet<LabelId>, HashMap<u32, LabelId>)), instr: &Instruct<'arena>| {
-            instr.targets().iter().fold(acc, process_ref)
-        },
-    );
+    for instr in body.iter() {
+        for target in instr.targets().iter() {
+            process_ref(target);
+        }
+    }
 
     // Process params
-    let (_, (used, offset_to_label)) =
-        params
-            .iter()
-            .fold(init, |acc, (_param, default_value)| match &default_value {
-                None => acc,
-                Some((target, _)) => process_ref(acc, target),
-            });
-    (used, offset_to_label)
-}
-
-fn relabel_instr<'arena, F>(instr: &mut Instruct<'arena>, relabel: &mut F)
-where
-    F: FnMut(&mut Label),
-{
-    let labels = match instr {
-        Instruct::Label(label) => std::slice::from_mut(label),
-        _ => instr.targets_mut(),
-    };
-    for label in labels {
-        relabel(label)
+    for (_param, dv) in params {
+        if let Some((target, _)) = dv {
+            process_ref(target);
+        }
     }
+    (used, offset_to_label)
 }
 
 fn rewrite_params_and_body<'arena>(
     alloc: &'arena bumpalo::Bump,
-    label_to_offset: &HashMap<LabelId, u32>,
-    used: &HashSet<LabelId>,
-    offset_to_label: &HashMap<u32, LabelId>,
+    label_to_offset: &HashMap<Label, u32>,
+    used: &HashSet<Label>,
+    offset_to_label: &HashMap<u32, Label>,
     params: &mut [(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
     body: &mut InstrSeq<'arena>,
 ) {
-    let relabel_id = |id: &LabelId| offset_to_label[&label_to_offset[id]];
-    let mut rewrite_instr = |instr: &mut Instruct<'arena>| -> bool {
-        if let Instruct::Label(ref mut l) = instr {
-            if used.contains(&l.id()) {
-                *l = l.map(relabel_id);
+    let relabel = |id: Label| offset_to_label[&label_to_offset[&id]];
+    for (_, dv) in params.iter_mut() {
+        if let Some((l, _)) = dv {
+            *l = relabel(*l);
+        }
+    }
+    body.filter_map_mut(alloc, &mut |instr| {
+        if let Instruct::Label(l) = instr {
+            if used.contains(l) {
+                *l = relabel(*l);
                 true
             } else {
                 false
             }
         } else {
-            relabel_instr(instr, &mut |l| *l = l.map(relabel_id));
+            for target in instr.targets_mut() {
+                *target = relabel(*target);
+            }
             true
         }
-    };
-    let rewrite_param = |(_, default_value): &mut (HhasParam<'arena>, Option<(Label, ast::Expr)>)| {
-        if let Some((l, _)) = default_value {
-            *l = l.map(relabel_id);
-        }
-    };
-    params.iter_mut().for_each(|param| rewrite_param(param));
-    body.filter_map_mut(alloc, &mut rewrite_instr);
+    });
 }
 
 pub fn relabel_function<'arena>(
@@ -134,22 +112,24 @@ pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     block: &mut InstrSeq<'arena>,
 ) {
-    let regular_labels = block.iter().fold(HashMap::default(), |mut acc, instr| {
-        if let Instruct::Label(Label::Regular(id)) = instr {
-            acc.insert(*id, emitter.label_gen_mut().next_regular());
+    let mut old_to_new = HashMap::default();
+    for instr in block.iter() {
+        if let Instruct::Label(label) = instr {
+            old_to_new.insert(*label, emitter.label_gen_mut().next_regular());
         }
-        acc
-    });
+    }
 
-    if !regular_labels.is_empty() {
+    if !old_to_new.is_empty() {
         block.map_mut(&mut |instr| {
-            relabel_instr(instr, &mut |label| {
-                if let Label::Regular(id) = label {
-                    if let Some(new_label) = regular_labels.get(id) {
-                        *label = *new_label;
-                    }
+            let labels = match instr {
+                Instruct::Label(label) => std::slice::from_mut(label),
+                _ => instr.targets_mut(),
+            };
+            for label in labels {
+                if let Some(new_label) = old_to_new.get(label) {
+                    *label = *new_label;
                 }
-            })
+            }
         });
     }
 }

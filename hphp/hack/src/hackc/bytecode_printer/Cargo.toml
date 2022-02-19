@@ -18,6 +18,7 @@ env = { path = "../emitter/cargo/env" }
 escaper = { path = "../../utils/escaper" }
 ffi = { path = "../../utils/ffi" }
 hackc_unit = { path = "../hhbc/cargo/hackc_unit" }
+hash = { path = "../../utils/hash" }
 hhas_adata = { path = "../hhbc/cargo/hhas_adata" }
 hhas_attribute = { path = "../hhbc/cargo/hhas_attribute" }
 hhas_body = { path = "../hhbc/cargo/hhas_body" }

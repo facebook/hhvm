@@ -197,9 +197,11 @@ let fun_def ctx fd :
   in
   let sound_dynamic_check_saved_env = env in
   let (env, param_tys) =
-    List.zip_exn f.f_params params_decl_ty
-    |> List.map_env env ~f:(fun env (param, hint) ->
-           Typing_param.make_param_local_ty ~dynamic_mode:false env hint param)
+    Typing_param.make_param_local_tys
+      ~dynamic_mode:false
+      env
+      params_decl_ty
+      f.f_params
   in
   let params_need_immutable = Typing_coeffects.get_ctx_vars f.f_ctxs in
   let can_read_globals =
@@ -314,24 +316,11 @@ let method_dynamically_callable env cls m params_decl_ty ret_locl_ty =
         }
     in
     let (env, param_tys) =
-      List.zip_exn m.m_params params_decl_ty
-      |> List.map_env env ~f:(fun env (param, hint) ->
-             let dyn_ty =
-               make_dynamic @@ Pos_or_decl.of_raw_pos param.param_pos
-             in
-             let ty =
-               match hint with
-               | Some ty when Typing_enforceability.is_enforceable env ty ->
-                 Typing_make_type.intersection
-                   (Reason.Rsupport_dynamic_type Pos_or_decl.none)
-                   [ty; dyn_ty]
-               | _ -> dyn_ty
-             in
-             Typing_param.make_param_local_ty
-               ~dynamic_mode:true
-               env
-               (Some ty)
-               param)
+      Typing_param.make_param_local_tys
+        ~dynamic_mode:true
+        env
+        params_decl_ty
+        m.m_params
     in
     let params_need_immutable = Typing_coeffects.get_ctx_vars m.m_ctxs in
     let (env, _) =
@@ -512,9 +501,11 @@ let method_def ~is_disposable env cls m =
   let (env, return, return_ty) = method_return env m ret_decl_ty in
   let sound_dynamic_check_saved_env = env in
   let (env, param_tys) =
-    List.zip_exn m.m_params params_decl_ty
-    |> List.map_env env ~f:(fun env (param, hint) ->
-           Typing_param.make_param_local_ty ~dynamic_mode:false env hint param)
+    Typing_param.make_param_local_tys
+      ~dynamic_mode:false
+      env
+      params_decl_ty
+      m.m_params
   in
   Typing_memoize.check_method env m;
   let params_need_immutable = Typing_coeffects.get_ctx_vars m.m_ctxs in

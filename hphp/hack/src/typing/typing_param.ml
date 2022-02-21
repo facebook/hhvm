@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open Aast
+open Common
 open Typing_defs
 open Typing_helpers
 module Reason = Typing_reason
@@ -118,3 +119,25 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
   (* Don't check (again) for existence of hint in dynamic mode *)
   if not dynamic_mode then check_param_has_hint env param ty;
   (env, ty)
+
+let make_param_local_tys ~dynamic_mode env decl_tys params =
+  List.zip_exn params decl_tys
+  |> List.map_env env ~f:(fun env (param, hint) ->
+         let ty =
+           if dynamic_mode then
+             let dyn_ty =
+               Typing_make_type.dynamic
+                 (Reason.Rsupport_dynamic_type
+                    (Pos_or_decl.of_raw_pos param.param_pos))
+             in
+             match hint with
+             | Some ty when Typing_enforceability.is_enforceable env ty ->
+               Some
+                 (Typing_make_type.intersection
+                    (Reason.Rsupport_dynamic_type Pos_or_decl.none)
+                    [ty; dyn_ty])
+             | _ -> Some dyn_ty
+           else
+             hint
+         in
+         make_param_local_ty ~dynamic_mode env ty param)

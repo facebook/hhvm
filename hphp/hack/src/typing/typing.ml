@@ -4693,24 +4693,11 @@ and function_dynamically_callable env f params_decl_ty ret_locl_ty =
         }
     in
     let (env, param_tys) =
-      List.zip_exn f.f_params params_decl_ty
-      |> List.map_env env ~f:(fun env (param, hint) ->
-             let dyn_ty =
-               make_dynamic @@ Pos_or_decl.of_raw_pos param.param_pos
-             in
-             let ty =
-               match hint with
-               | Some ty when Typing_enforceability.is_enforceable env ty ->
-                 Typing_make_type.intersection
-                   (Reason.Rsupport_dynamic_type Pos_or_decl.none)
-                   [ty; dyn_ty]
-               | _ -> dyn_ty
-             in
-             Typing_param.make_param_local_ty
-               ~dynamic_mode:true
-               env
-               (Some ty)
-               param)
+      Typing_param.make_param_local_tys
+        ~dynamic_mode:true
+        env
+        params_decl_ty
+        f.f_params
     in
     let params_need_immutable = Typing_coeffects.get_ctx_vars f.f_ctxs in
     let (env, _) =

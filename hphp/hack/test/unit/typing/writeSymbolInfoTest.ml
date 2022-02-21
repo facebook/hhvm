@@ -43,7 +43,7 @@ let test_add_fact _test_ctxt =
       ]
   in
   let (res_id, progress) =
-    Add_fact.add_fact Predicate.ClassDeclaration json_key progress
+    Add_fact.add_fact Predicate.(Hack ClassDeclaration) json_key progress
   in
   let facts_class_declaration =
     extract_facts_exn
@@ -61,7 +61,7 @@ let test_add_fact _test_ctxt =
     fact_id
     "Id returned is JSON id of new fact";
   let (res_id2, progress) =
-    Add_fact.add_fact Predicate.ClassDeclaration json_key progress
+    Add_fact.add_fact Predicate.(Hack ClassDeclaration) json_key progress
   in
   let facts_class_declaration =
     extract_facts_exn
@@ -77,7 +77,7 @@ let test_add_fact _test_ctxt =
     (List.length facts_class_declaration)
     "Only one class decl fact in JSON after identical addition";
   let (res_id3, progress) =
-    Add_fact.add_fact Predicate.FunctionDeclaration json_key progress
+    Add_fact.add_fact Predicate.(Hack FunctionDeclaration) json_key progress
   in
   let facts_function_declaration =
     extract_facts_exn

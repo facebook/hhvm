@@ -61,8 +61,7 @@
           sm_type =
           (Rwitness_from_decl ([8:28-30]),
            (Tfun
-              { ft_arity = (Fstandard ()); ft_tparams = [];
-                ft_where_constraints = []; ft_params = [];
+              { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_implicit_params =
                 { capability =
                   (CapTy (Rhint ([8:32-34]), (Tintersection []))) };
@@ -80,8 +79,7 @@
            sm_type =
            (Rwitness_from_decl ([9:28-30]),
             (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = []; ft_params = [];
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability =
                    (CapTy (Rhint ([9:32-47]),
@@ -107,8 +105,7 @@
            sm_type =
            (Rwitness_from_decl ([10:28-30]),
             (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = []; ft_params = [];
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability =
                    (CapTy (Rhint ([10:32-59]),

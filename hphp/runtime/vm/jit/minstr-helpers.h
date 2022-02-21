@@ -320,24 +320,24 @@ ISSET_OBJ_PROP_HELPER_TABLE(X)
 
 inline void profileDictAccessHelper(const ArrayData* ad, int64_t i,
                                     ArrayAccessProfile* prof,
-                                    DecRefProfile* decRefProf) {
+                                    DecRefProfileEntry* decRefProf) {
   prof->update(ad, i, decRefProf);
 }
 inline void profileDictAccessHelper(const ArrayData* ad, const StringData* sd,
                                     ArrayAccessProfile* prof,
-                                    DecRefProfile* decRefProf) {
+                                    DecRefProfileEntry* decRefProf) {
   prof->update(ad, sd, decRefProf);
 }
 
-#define PROFILE_DICT_ACCESS_HELPER_TABLE(m)                 \
-  /* name                keyType  */                        \
-  m(profileDictAccessS,  KeyType::Str)                      \
-  m(profileDictAccessI,  KeyType::Int)                      \
+#define PROFILE_DICT_ACCESS_HELPER_TABLE(m) \
+  /* name                keyType  */        \
+  m(profileDictAccessS,  KeyType::Str)      \
+  m(profileDictAccessI,  KeyType::Int)      \
 
-#define X(nm, keyType)                                      \
-inline void nm(const ArrayData* a, key_type<keyType> k,     \
-               ArrayAccessProfile* p, DecRefProfile* d) {   \
-  profileDictAccessHelper(a, k, p, d);                      \
+#define X(nm, keyType)                                         \
+inline void nm(const ArrayData* a, key_type<keyType> k,        \
+               ArrayAccessProfile* p, DecRefProfileEntry* d) { \
+  profileDictAccessHelper(a, k, p, d);                         \
 }
 PROFILE_DICT_ACCESS_HELPER_TABLE(X)
 #undef X
@@ -346,24 +346,24 @@ PROFILE_DICT_ACCESS_HELPER_TABLE(X)
 
 inline void profileKeysetAccessHelper(const ArrayData* ad, int64_t i,
                                       ArrayAccessProfile* prof,
-                                      DecRefProfile* decRefProf) {
+                                      DecRefProfileEntry* decRefProf) {
   prof->update(ad, i, decRefProf);
 }
 inline void profileKeysetAccessHelper(const ArrayData* ad, const StringData* sd,
                                       ArrayAccessProfile* prof,
-                                      DecRefProfile* decRefProf) {
+                                      DecRefProfileEntry* decRefProf) {
   prof->update(ad, sd, decRefProf);
 }
 
-#define PROFILE_KEYSET_ACCESS_HELPER_TABLE(m)               \
-  /* name                keyType  */                        \
-  m(profileKeysetAccessS,  KeyType::Str)                    \
-  m(profileKeysetAccessI,  KeyType::Int)                    \
+#define PROFILE_KEYSET_ACCESS_HELPER_TABLE(m) \
+  /* name                keyType  */          \
+  m(profileKeysetAccessS,  KeyType::Str)      \
+  m(profileKeysetAccessI,  KeyType::Int)      \
 
-#define X(nm, keyType)                                      \
-inline void nm(const ArrayData* a, key_type<keyType> k,     \
-               ArrayAccessProfile* p, DecRefProfile* d) {   \
-  profileKeysetAccessHelper(a, k, p, d);                    \
+#define X(nm, keyType)                                         \
+inline void nm(const ArrayData* a, key_type<keyType> k,        \
+               ArrayAccessProfile* p, DecRefProfileEntry* d) { \
+  profileKeysetAccessHelper(a, k, p, d);                       \
 }
 PROFILE_KEYSET_ACCESS_HELPER_TABLE(X)
 #undef X

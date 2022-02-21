@@ -144,13 +144,7 @@ let build_dyn_fun_ty ft_ty =
       fp_flags = fp.fp_flags;
     }
   in
-  let make_dyn_arity ar =
-    match ar with
-    | Fvariadic vparam -> Fvariadic (make_dyn_fun_param vparam)
-    | Fstandard -> Fstandard
-  in
   {
-    ft_arity = make_dyn_arity ft_ty.ft_arity;
     ft_tparams = [];
     ft_where_constraints = [];
     ft_params = List.map ft_ty.ft_params ~f:make_dyn_fun_param;
@@ -185,28 +179,34 @@ let push_like_tyargs env tyl tparams =
   if List.length tyl <> List.length tparams then
     (false, tyl)
   else
-    (* Only push like onto type argument if it produces a well-formed type
-     * i.e. satisfies any as constraints
-     *)
     let make_like changed ty tp =
-      let (changed', ty') = make_like changed ty in
-      if
-        List.for_all tp.tp_constraints ~f:(fun (c, cty) ->
-            match c with
-            | Ast_defs.Constraint_as ->
-              let (_env, cty) =
-                Typing_phase.localize_no_subst env ~ignore_errors:true cty
-              in
-              Typing_utils.is_sub_type_for_union
-                ~coerce:(Some Typing_logic.CoerceToDynamic)
-                env
-                ty'
-                cty
-            | _ -> true)
-      then
-        (changed', ty')
-      else
-        (changed, ty)
+      (* Don't both pushing through a contravariant parameter, because
+       * Contra<~t> <: Contra<t> <: ~Contra<t> by variance and union
+       * subtyping rules already *)
+      match tp.tp_variance with
+      | Ast_defs.Contravariant -> (changed, ty)
+      | _ ->
+        let (changed', ty') = make_like changed ty in
+        (* Only push like onto type argument if it produces a well-formed type
+         * i.e. satisfies any as constraints
+         *)
+        if
+          List.for_all tp.tp_constraints ~f:(fun (c, cty) ->
+              match c with
+              | Ast_defs.Constraint_as ->
+                let (_env, cty) =
+                  Typing_phase.localize_no_subst env ~ignore_errors:true cty
+                in
+                Typing_utils.is_sub_type_for_union
+                  ~coerce:(Some Typing_logic.CoerceToDynamic)
+                  env
+                  ty'
+                  cty
+              | _ -> true)
+        then
+          (changed', ty')
+        else
+          (changed, ty)
     in
 
     List.map2_env false tyl tparams ~f:make_like

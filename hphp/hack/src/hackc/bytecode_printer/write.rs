@@ -276,5 +276,17 @@ fn test_fmt_separated() -> Result<()> {
         <&BStr>::from("a b")
     );
 
+    let v1: Vec<&BStr> = vec!["a".into(), "b".into()];
+    let v2: Vec<i64> = vec![1, 2];
+    let it = v1
+        .iter()
+        .map(|i: &&BStr| -> &dyn DisplayBytes { i })
+        .chain(v2.iter().map(|i: &i64| -> &dyn DisplayBytes { i }));
+
+    assert_eq!(
+        format_bytes!("{}", fmt_separated(" ", it),),
+        <&BStr>::from("a b 1 2")
+    );
+
     Ok(())
 }

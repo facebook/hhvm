@@ -79,7 +79,6 @@ mod tests {
             json!([
               {"Rhint":{"Tiny":{"file":"|f2.php","span": span1}}},
               {"Tfun": {
-                "arity": "Fstandard",
                 "flags": 0,
                 "ifc_decl": {"FDPolicied":"PUBLIC"},
                 "implicit_params": {

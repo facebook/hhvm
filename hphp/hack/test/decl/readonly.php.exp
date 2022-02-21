@@ -18,8 +18,7 @@
         fe_type =
         (Rwitness_from_decl ([5:16-32]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [5:16-32]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -44,8 +43,7 @@
         fe_type =
         (Rwitness_from_decl ([9:16-30]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [9:16-30]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -90,8 +88,7 @@
                 sm_type =
                 (Rwitness_from_decl ([16:19-30]),
                  (Tfun
-                    { ft_arity = (Fstandard ()); ft_tparams = [];
-                      ft_where_constraints = [];
+                    { ft_tparams = []; ft_where_constraints = [];
                       ft_params =
                       [{ fp_pos = [17:25-27]; fp_name = (Some "$y");
                          fp_type =
@@ -127,8 +124,7 @@
            sm_type =
            (Rwitness_from_decl ([21:28-34]),
             (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = [];
+               { ft_tparams = []; ft_where_constraints = [];
                  ft_params =
                  [{ fp_pos = [21:63-65]; fp_name = (Some "$v");
                     fp_type =
@@ -136,8 +132,8 @@
                       et_type =
                       (Rhint ([21:35-62]),
                        (Tfun
-                          { ft_arity = (Fstandard ()); ft_tparams = [];
-                            ft_where_constraints = []; ft_params = [];
+                          { ft_tparams = []; ft_where_constraints = [];
+                            ft_params = [];
                             ft_implicit_params =
                             { capability = (CapDefaults [21:35-62]) };
                             ft_ret =

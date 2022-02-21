@@ -261,18 +261,13 @@ let sequence_visitor ~require_used used_vars =
       | AFkvalue (e1, e2) -> this#check_unsequenced_exprs env e1 e2
 
     (* Handle case to disallow assigning to vars inside case labels. *)
-    method! on_case acc =
-      function
-      | Default (_, b) ->
-        let acc = this#on_block acc b in
-        acc
-      | Case (e, b) ->
-        let env = this#on_expr tracking_env e in
-        List.iter env.assigned ~f:(fun (p, _) ->
-            Errors.add_typing_error
-              Typing_error.(primary @@ Primary.Assign_during_case p));
-        let acc = this#on_block acc b in
-        acc
+    method! on_case acc (e, b) =
+      let env = this#on_expr tracking_env e in
+      List.iter env.assigned ~f:(fun (p, _) ->
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Assign_during_case p));
+      let acc = this#on_block acc b in
+      acc
   end
 
 let sequence_check_block block =

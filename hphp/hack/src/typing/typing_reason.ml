@@ -99,10 +99,10 @@ type _ t_ =
   | Rinout_param : Pos_or_decl.t -> 'phase t_
   | Rinstantiate : 'phase t_ * string * 'phase t_ -> 'phase t_
   | Rtypeconst :
-      'phase t_ * (Pos_or_decl.t * string) * string * 'phase t_
+      'phase t_ * (Pos_or_decl.t * string) * string Lazy.t * 'phase t_
       -> 'phase t_
   | Rtype_access :
-      locl_phase t_ * (locl_phase t_ * string) list
+      locl_phase t_ * (locl_phase t_ * string Lazy.t) list
       -> locl_phase t_
   | Rexpr_dep_type :
       'phase t_ * Pos_or_decl.t * expr_dep_type_reason
@@ -417,7 +417,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
     ]
   | Rsolve_fail _ ->
     [(p, prefix ^ " because a type could not be determined here")]
-  | Rtypeconst (Rnone, (pos, tconst), ty_str, r_root) ->
+  | Rtypeconst (Rnone, (pos, tconst), (lazy ty_str), r_root) ->
     let prefix =
       if String.equal prefix "" then
         ""
@@ -432,7 +432,7 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
           (Markdown_lite.md_codify tconst) );
     ]
     @ to_string ("on " ^ ty_str) r_root
-  | Rtypeconst (r_orig, (pos, tconst), ty_str, r_root) ->
+  | Rtypeconst (r_orig, (pos, tconst), (lazy ty_str), r_root) ->
     to_string prefix r_orig
     @ [
         (pos, sprintf "  resulting from accessing the type constant '%s'" tconst);
@@ -445,13 +445,13 @@ let rec to_string : type ph. string -> ph t_ -> (Pos_or_decl.t * string) list =
   | Rtype_access (Rtype_access (r, expand2), expand1) ->
     to_string prefix (Rtype_access (r, expand1 @ expand2))
   | Rtype_access (r, []) -> to_string prefix r
-  | Rtype_access (r, (r_hd, tconst) :: tail) ->
+  | Rtype_access (r, (r_hd, (lazy tconst)) :: tail) ->
     to_string prefix r
     @ to_string
         ("  resulting from expanding the type constant "
         ^ Markdown_lite.md_codify tconst)
         r_hd
-    @ List.concat_map tail ~f:(fun (r, s) ->
+    @ List.concat_map tail ~f:(fun (r, (lazy s)) ->
           to_string
             ("  then expanding the type constant " ^ Markdown_lite.md_codify s)
             r)

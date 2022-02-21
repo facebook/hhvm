@@ -13,7 +13,7 @@ class RecursiveDirectoryIterator extends FilesystemIterator
     RecursiveIterator<SplFileInfo> {
 
   // Constants
-  const FOLLOW_SYMLINKS = 512;
+  const int FOLLOW_SYMLINKS = 512;
 
   // Methods
   public function __construct($path, $flags = null);

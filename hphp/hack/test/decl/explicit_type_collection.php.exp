@@ -25,8 +25,7 @@
                sm_type =
                (Rwitness_from_decl ([4:19-30]),
                 (Tfun
-                   { ft_arity = (Fstandard ()); ft_tparams = [];
-                     ft_where_constraints = [];
+                   { ft_tparams = []; ft_where_constraints = [];
                      ft_params =
                      [{ fp_pos = [4:49-51]; fp_name = (Some "$i");
                         fp_type =

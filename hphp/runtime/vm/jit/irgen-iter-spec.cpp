@@ -523,7 +523,11 @@ void iterIfThen(IRGS& env, Branch branch, Taken taken) {
 // iterators in pseudo-mains, we can use LdLoc here without a problem.
 void iterClear(IRGS& env, uint32_t local) {
   assertx(local != kInvalidId);
-  decRef(env, gen(env, LdLoc, TCell, LocalId(local), fp(env)), local);
+  decRef(
+      env,
+      gen(env, LdLoc, TCell, LocalId(local), fp(env)),
+      static_cast<DecRefProfileId>(local)
+  );
 }
 
 // Iterator output locals should always be cells, so we can store without
@@ -619,7 +623,7 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
   ifThen(env,
     [&](Block* taken) { gen(env, JmpZero, taken, size); },
     [&]{
-      if (!local) decRef(env, arr);
+      if (!local) decRef(env, arr, DecRefProfileId::Default);
       gen(env, Jmp, done);
     }
   );
@@ -714,7 +718,7 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
         // this load in the loop, because it's dead there for pointer iters,
         auto const base = iterBase(env, accessor, data, baseLocalId);
         gen(env, KillIter, id, fp(env));
-        decRef(env, base);
+        decRef(env, base, DecRefProfileId::Default);
       }
     }
   );

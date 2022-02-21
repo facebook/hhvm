@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d9031bfa83c18a196f5cbf10ab9b66b1>>
+// @generated SignedSource<<ba03be6dc4c94cd4fe701cc1aedd981a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -56,8 +56,12 @@ impl<Ex, En> Stmt_<Ex, En> {
     ) -> Self {
         Stmt_::For(Box::new((p0, p1, p2, p3)))
     }
-    pub fn mk_switch(p0: Expr<Ex, En>, p1: Vec<Case<Ex, En>>) -> Self {
-        Stmt_::Switch(Box::new((p0, p1)))
+    pub fn mk_switch(
+        p0: Expr<Ex, En>,
+        p1: Vec<Case<Ex, En>>,
+        p2: Option<DefaultCase<Ex, En>>,
+    ) -> Self {
+        Stmt_::Switch(Box::new((p0, p1, p2)))
     }
     pub fn mk_foreach(p0: Expr<Ex, En>, p1: AsExpr<Ex, En>, p2: Block<Ex, En>) -> Self {
         Stmt_::Foreach(Box::new((p0, p1, p2)))
@@ -258,9 +262,15 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_switch(&self) -> Option<(&Expr<Ex, En>, &Vec<Case<Ex, En>>)> {
+    pub fn as_switch(
+        &self,
+    ) -> Option<(
+        &Expr<Ex, En>,
+        &Vec<Case<Ex, En>>,
+        &Option<DefaultCase<Ex, En>>,
+    )> {
         match self {
-            Stmt_::Switch(p0) => Some((&p0.0, &p0.1)),
+            Stmt_::Switch(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
@@ -359,9 +369,15 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_switch_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Vec<Case<Ex, En>>)> {
+    pub fn as_switch_mut(
+        &mut self,
+    ) -> Option<(
+        &mut Expr<Ex, En>,
+        &mut Vec<Case<Ex, En>>,
+        &mut Option<DefaultCase<Ex, En>>,
+    )> {
         match self {
-            Stmt_::Switch(p0) => Some((&mut p0.0, &mut p0.1)),
+            Stmt_::Switch(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
         }
     }
@@ -464,9 +480,11 @@ impl<Ex, En> Stmt_<Ex, En> {
             _ => None,
         }
     }
-    pub fn as_switch_into(self) -> Option<(Expr<Ex, En>, Vec<Case<Ex, En>>)> {
+    pub fn as_switch_into(
+        self,
+    ) -> Option<(Expr<Ex, En>, Vec<Case<Ex, En>>, Option<DefaultCase<Ex, En>>)> {
         match self {
-            Stmt_::Switch(p0) => Some(((*p0).0, (*p0).1)),
+            Stmt_::Switch(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }
@@ -2477,58 +2495,58 @@ impl<Ex, En> ClassGetExpr<Ex, En> {
         }
     }
 }
-impl<Ex, En> Case<Ex, En> {
-    pub fn mk_default(p0: Pos, p1: Block<Ex, En>) -> Self {
-        Case::Default(p0, p1)
+impl<Ex, En> GenCase<Ex, En> {
+    pub fn mk_case(p0: Case<Ex, En>) -> Self {
+        GenCase::Case(p0)
     }
-    pub fn mk_case(p0: Expr<Ex, En>, p1: Block<Ex, En>) -> Self {
-        Case::Case(p0, p1)
-    }
-    pub fn is_default(&self) -> bool {
-        match self {
-            Case::Default(..) => true,
-            _ => false,
-        }
+    pub fn mk_default(p0: DefaultCase<Ex, En>) -> Self {
+        GenCase::Default(p0)
     }
     pub fn is_case(&self) -> bool {
         match self {
-            Case::Case(..) => true,
+            GenCase::Case(..) => true,
             _ => false,
         }
     }
-    pub fn as_default(&self) -> Option<(&Pos, &Block<Ex, En>)> {
+    pub fn is_default(&self) -> bool {
         match self {
-            Case::Default(p0, p1) => Some((p0, p1)),
+            GenCase::Default(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_case(&self) -> Option<&Case<Ex, En>> {
+        match self {
+            GenCase::Case(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_case(&self) -> Option<(&Expr<Ex, En>, &Block<Ex, En>)> {
+    pub fn as_default(&self) -> Option<&DefaultCase<Ex, En>> {
         match self {
-            Case::Case(p0, p1) => Some((p0, p1)),
+            GenCase::Default(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_default_mut(&mut self) -> Option<(&mut Pos, &mut Block<Ex, En>)> {
+    pub fn as_case_mut(&mut self) -> Option<&mut Case<Ex, En>> {
         match self {
-            Case::Default(p0, p1) => Some((p0, p1)),
+            GenCase::Case(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_case_mut(&mut self) -> Option<(&mut Expr<Ex, En>, &mut Block<Ex, En>)> {
+    pub fn as_default_mut(&mut self) -> Option<&mut DefaultCase<Ex, En>> {
         match self {
-            Case::Case(p0, p1) => Some((p0, p1)),
+            GenCase::Default(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_default_into(self) -> Option<(Pos, Block<Ex, En>)> {
+    pub fn as_case_into(self) -> Option<Case<Ex, En>> {
         match self {
-            Case::Default(p0, p1) => Some((p0, p1)),
+            GenCase::Case(p0) => Some(p0),
             _ => None,
         }
     }
-    pub fn as_case_into(self) -> Option<(Expr<Ex, En>, Block<Ex, En>)> {
+    pub fn as_default_into(self) -> Option<DefaultCase<Ex, En>> {
         match self {
-            Case::Case(p0, p1) => Some((p0, p1)),
+            GenCase::Default(p0) => Some(p0),
             _ => None,
         }
     }
@@ -2642,6 +2660,26 @@ impl<Ex, En> XhpAttribute<Ex, En> {
         match self {
             XhpAttribute::XhpSpread(p0) => Some(p0),
             _ => None,
+        }
+    }
+}
+impl RequireKind {
+    pub fn mk_require_extends() -> Self {
+        RequireKind::RequireExtends
+    }
+    pub fn mk_require_implements() -> Self {
+        RequireKind::RequireImplements
+    }
+    pub fn is_require_extends(&self) -> bool {
+        match self {
+            RequireKind::RequireExtends => true,
+            _ => false,
+        }
+    }
+    pub fn is_require_implements(&self) -> bool {
+        match self {
+            RequireKind::RequireImplements => true,
+            _ => false,
         }
     }
 }

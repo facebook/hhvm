@@ -52,18 +52,19 @@ inspiration for several decisions in this library.
   add `OS\HErrnoException` if you want to report an error exposed via `h_errno`
 - add and use Hack classes (not type aliases) for 'handle'-like parameters and
   return values, e.g. `OS\open()` returns a `HH\Lib\FileDescriptor` instead of
-  an `int`; as well as aiding type safety, this prevents requests from interfering
-  with resources that belong to another request.
+  an `int`; as well as aiding type safety, this prevents requests from
+  interfering with resources that belong to another request.
 - Avoid `inout` parameters; return tuples instead. For example, prefer
   `function mkstemp(string $pattern): (FileDescriptor, string)` to
   `function mkstemp(inout string $in_pattern_out_path): FileDescriptor`
   - this can aid for common use by allowing string literals, rather than
     requiring otherwise-unused locals
-  - if the primary purpose of a function is to mutate its parameters, this
-    should be considered case-by-case; for example, if we were to add something
-    similar to `array_pop()`, it probably should take an `inout` container - but
-    probably shouldn't be in `OS\`
-
+  - if the primary purpose of a set of functions is to create, mutate and
+    destroy a C data structure that acts like a value instead of a reference,
+    the type, along with these utility functions, should be exposed as a `vec`
+    or `shape`. See [Appendix: reference transparent C pointer
+    encoding](#encoding-reference-transparent-c-pointers) section for more
+    detail.
 ## Implementation notes
 
 - Do as little as possible in native or other builtin code; prefer Hack code in
@@ -104,3 +105,128 @@ inspiration for several decisions in this library.
 - that said, if an operation is extremely efficient and almost always wanted,
   consider doing it natively, automatically. For example, ints in HSL
   `sockaddr` are always in host byte order, not network byte order.
+
+## Hack representation of C data types
+### Cheat sheet
+
+| C type | Hack type |
+|---|---|
+| `struct`s of primitive types or other `struct`s | `shape` |
+| Referential transparent C pointers with unordered setters | `shape` |
+| Referential transparent C pointers with ordered setters | `vec` |
+| Other C handles or pointers | `HH\Lib\OS\FileDescriptor` or other wrapper classes |
+
+### Default encoding for handles or pointers
+
+The underlying C API commonly exposes some data type as handles or pointers,
+e.g. `int filedes`, along with functions to create, manipulate, and destroy
+them. By default, handles and pointers should be wrapped in HSL as Hack
+classes.
+
+### Encoding referential transparent C pointers with setters
+
+However, as an optimization, pointers to referential transparent C `struct`s can
+be encoded as a garbage-collectable mirror in Hack, which creates and destroys
+the underlying C data type on demand, and destroys it when explicitly cleaned up
+by a dedicated function call, or at some later undetermined time which should
+not be directly observable by the same request.
+
+Technically, the terminology "referential transparent" should be interpreted as
+"referential transparent except for memory allocation" in C, while its
+corresponding Hack mirror is strictly referential transparent, which means there
+is no behavior change when the user replaces a variable of the referential
+transparent mirror with the expression creating the variable, and vice-versa.
+
+#### The definition of referential transparent C pointer
+
+- A referential transparent C pointer type should be associated with a set of
+utility functions, including a constructor (optional), a destructor (optional)
+and several setters. These utility functions must not perform any global side
+effects other than allocating memory that will be freed in the destructor.
+  - Getters for the referential transparent C pointer, if any, would not used in
+    HSL
+- All other functions accepting a referential transparent C pointer must be not
+  distinguish pointers whose addresses are different while the pointed contents
+  are the same.
+
+Referential transparent type can be used interchangeably with "value-like" type.
+
+#### Encoding for unordered setters as a `shape`
+
+Some C data types the setters are orthogonal to each other, and the order to
+invoke setters does not matter. In that case, the data type can be encoded as a
+`shape` instead of a `vec`, using the setter function name as the key in the
+`shape`. For example, given the following C data type and the related utility
+functions:
+
+``` c
+// The reference transparent C pointer
+typedef void *posix_spawnattr_t;
+
+// The constructor
+int posix_spawnattr_init(posix_spawnattr_t *attr);
+
+// The setters
+int posix_spawnattr_setpgroup(posix_spawnattr_t *attr, pid_t pgroup);
+
+int posix_spawnattr_setflags(posix_spawnattr_t *attr, short flags);
+
+// The destructor
+int posix_spawnattr_destroy(posix_spawnattr_t *attr);
+```
+
+The corresponding Hack definition should be:
+
+``` hack
+newtype pid_t = int;
+type PosixSpawnFlags = ...;
+type posix_spawnattr_t = shape(
+  'posix_spawnattr_setpgroup' => pid_t,
+  'posix_spawnattr_setflags' => PosixSpawnFlags,
+);
+```
+
+#### Encoding for unordered setters as a `vec`
+
+The general way to encode a pointer to referential transparent C `struct` is to
+consider the data type as a `vec` of a setter interface implemented by setter
+classes, each of which correspond to a setter function. For example, given the
+following referential transparent C pointer and the related utility functions:
+
+``` c
+// The referential transparent C pointer
+typedef void *posix_spawn_file_actions_t;
+
+// The constructor
+int posix_spawn_file_actions_init(posix_spawn_file_actions_t *file_actions);
+
+// The setters
+int posix_spawn_file_actions_addchdir(posix_spawn_file_actions_t *file_actions, const char *restrict path);
+int posix_spawn_file_actions_adddup2(posix_spawn_file_actions_t *file_actions, int filedes, int newfiledes);
+
+// The destructor
+int posix_spawn_file_actions_destroy(posix_spawn_file_actions_t *file_actions);
+```
+
+The corresponding Hack definition should be:
+
+``` hack
+<<__Sealed(
+  posix_spawn_file_actions_addchdir::class,
+  posix_spawn_file_actions_adddup2::class
+)>>
+interface PosixSpawnFileActionsSetter {}
+
+final class posix_spawn_file_actions_addchdir implements PosixSpawnFileActionsSetter {
+  public function __construct(public string $path) {}
+}
+
+final class posix_spawn_file_actions_adddup2 implements PosixSpawnFileActionsSetter {
+  public function __construct(
+    public FileDescriptor $filedes,
+    public int $newfiledes,
+  ) {}
+}
+
+type posix_spawn_file_actions_t = vec<PosixSpawnFileActionsSetter>;
+```

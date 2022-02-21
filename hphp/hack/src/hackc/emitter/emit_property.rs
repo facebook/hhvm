@@ -7,9 +7,9 @@ use env::{emitter::Emitter, Env};
 use ffi::Maybe::*;
 use hhas_property::HhasProperty;
 use hhas_type::{constraint, HhasTypeInfo};
-use hhbc_ast::InitPropOp;
 use hhbc_id::prop;
 use hhbc_string_utils as string_utils;
+use hhvm_hhbc_defs_ffi::ffi::InitPropOp;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq, Result};
 use naming_special_names_rust::{pseudo_consts, user_attributes as ua};
@@ -28,6 +28,13 @@ pub struct FromAstArgs<'ast> {
     pub is_readonly: bool,
 }
 
+/// A Property and its initializer instructions
+#[derive(Debug)]
+pub struct PropAndInit<'a> {
+    pub prop: HhasProperty<'a>,
+    pub init: Option<InstrSeq<'a>>,
+}
+
 pub fn from_ast<'ast, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     class: &'ast ast::Class_,
@@ -35,7 +42,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     class_is_const: bool,
     class_is_closure: bool,
     args: FromAstArgs<'_>,
-) -> Result<HhasProperty<'arena>> {
+) -> Result<PropAndInit<'arena>> {
     let alloc = emitter.alloc;
     let ast_defs::Id(pos, cv_name) = args.id;
     let pid: prop::PropType<'arena> = prop::PropType::from_ast_name(alloc, cv_name);
@@ -182,18 +189,21 @@ pub fn from_ast<'ast, 'arena, 'decl>(
     hhas_property_flags.set(Attr::AttrIsReadonly, args.is_readonly);
     hhas_property_flags.add(Attr::from(args.visibility));
 
-    Ok(HhasProperty {
+    let prop = HhasProperty {
         name: pid,
         attributes: alloc.alloc_slice_fill_iter(attributes.into_iter()).into(),
         type_info,
         initial_value: initial_value.into(),
-        initializer_instrs: initializer_instrs.into(),
         flags: hhas_property_flags,
         visibility: hhbc_ast::Visibility::from(args.visibility),
         doc_comment: args
             .doc_comment
             .map(|pstr| ffi::Str::from(alloc.alloc_str(&pstr.0.1)))
             .into(),
+    };
+    Ok(PropAndInit {
+        prop,
+        init: initializer_instrs,
     })
 }
 

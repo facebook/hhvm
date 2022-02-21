@@ -12,7 +12,7 @@ use hhas_function::HhasFunction;
 use hhas_pos::HhasPos;
 use hhas_symbol_refs::HhasSymbolRefs;
 use hhas_typedef::HhasTypedef;
-use hhbc_ast::FatalOp;
+use hhvm_hhbc_defs_ffi::ffi::FatalOp;
 
 #[derive(Default, Debug)]
 #[repr(C)]

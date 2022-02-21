@@ -1367,22 +1367,26 @@ and get_tyvars_i env (ty : internal_type) =
          (env, ISet.empty, ISet.empty)
      | Tfun ft ->
        let (env, params_positive, params_negative) =
-         match ft.ft_arity with
-         | Fstandard -> (env, ISet.empty, ISet.empty)
-         | Fvariadic fp -> get_tyvars_param (env, ISet.empty, ISet.empty) fp
-       in
-       let (env, params_positive, params_negative) =
          List.fold_left
            ft.ft_params
-           ~init:(env, params_positive, params_negative)
+           ~init:(env, ISet.empty, ISet.empty)
            ~f:get_tyvars_param
+       in
+       let (env, implicit_params_positive, implicit_params_negative) =
+         match ft.ft_implicit_params.capability with
+         | CapDefaults _ -> (env, ISet.empty, ISet.empty)
+         | CapTy ty -> get_tyvars env ty
        in
        let (env, ret_positive, ret_negative) =
          get_tyvars env ft.ft_ret.et_type
        in
        ( env,
-         ISet.union ret_positive params_positive,
-         ISet.union ret_negative params_negative )
+         ISet.union
+           implicit_params_positive
+           (ISet.union ret_positive params_positive),
+         ISet.union
+           implicit_params_negative
+           (ISet.union ret_negative params_negative) )
      | Tnewtype (name, tyl, _) ->
        if List.is_empty tyl then
          (env, ISet.empty, ISet.empty)

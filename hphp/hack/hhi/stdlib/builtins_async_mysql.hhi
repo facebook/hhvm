@@ -63,7 +63,9 @@ class AsyncMysqlClient {
       int $timeout_micros = -1,
       ?MySSLContextProvider $ssl_provider = null,
       int $tcp_timeout_micros = 0,
-      string $sni_server_name = ""): Awaitable<AsyncMysqlConnection> { }
+      string $sni_server_name = "",
+      string $server_cert_extensions = "",
+      string $server_cert_values = ""): Awaitable<AsyncMysqlConnection> { }
 
     static public function connectWithOpts(
       string $host,
@@ -83,8 +85,6 @@ class AsyncMysqlClient {
       AsyncMysqlConnectionOptions $conn_opts,
       dict<string, string> $query_attributes = dict[],
     ): Awaitable<(AsyncMysqlConnectResult, Vector<AsyncMysqlQueryResult>)> { }
-
-   static public function adoptConnection($connection) { }
 }
 
 class AsyncMysqlConnectionPool {
@@ -99,7 +99,9 @@ class AsyncMysqlConnectionPool {
     string $caller = "",
     ?MySSLContextProvider $ssl_provider = null,
     int $tcp_timeout_micros = 0,
-    string $sni_server_name = ""): Awaitable<AsyncMysqlConnection> { }
+    string $sni_server_name = "",
+    string $server_cert_extensions = "",
+    string $server_cert_values = ""): Awaitable<AsyncMysqlConnection> { }
   public function connectWithOpts(
     string $host,
     int $port,
@@ -141,6 +143,9 @@ class AsyncMysqlConnectionOptions {
   public function enableResetConnBeforeClose() : void { }
   public function enableDelayedResetConn() : void { }
   public function enableChangeUser() : void { }
+  public function setServerCertValidation(
+      string $extensions = "",
+      string $values = ""): void {}
 }
 
 class AsyncMysqlClientStats {
@@ -180,6 +185,10 @@ class AsyncMysqlConnection {
   public function isReusable(): bool { }
   public function lastActivityTime(): float { }
   public function connectResult(): ?AsyncMysqlConnectResult { }
+  public function getSslCertCn(): string { }
+  public function getSslCertSan(): Vector<string> { }
+  public function getSslCertExtensions(): Vector<string> { }
+  public function isSslCertValidationEnforced(): bool { }
 }
 
 abstract class AsyncMysqlResult {
@@ -189,6 +198,10 @@ abstract class AsyncMysqlResult {
   public function endTime(): float { }
 
   public function clientStats() : AsyncMysqlClientStats { }
+  public function getSslCertCn(): string { }
+  public function getSslCertSan(): Vector<string> { }
+  public function getSslCertExtensions(): Vector<string> { }
+  public function isSslCertValidationEnforced(): bool { }
 }
 
 class AsyncMysqlConnectResult extends AsyncMysqlResult {

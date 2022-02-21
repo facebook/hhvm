@@ -3,24 +3,26 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use adata_state::AdataState;
+use decl_provider::{DeclProvider, Result};
+use global_state::GlobalState;
 use iterator::Iter;
 use options::Options;
-
-use adata_state::AdataState;
-use global_state::GlobalState;
-use oxidized_by_ref::{file_info::NameType, shallow_decl_defs};
+use oxidized_by_ref::{file_info::NameType, shallow_decl_defs::Decl};
 use statement_state::StatementState;
 use symbol_refs_state::SymbolRefsState;
-use unified_decl_provider::DeclProvider;
 
 #[derive(Debug)]
 pub struct Emitter<'arena, 'decl> {
     /// Options are frozen/const after emitter is constructed
     opts: Options,
+
     /// systemlib is part of context, changed externally
     systemlib: bool,
-    // controls whether we shell out to the decl provider for testing purposes
+
+    /// controls whether we shell out to the decl provider for testing purposes
     use_decls: bool,
+
     // the rest is being mutated during emittance
     label_gen: label::Gen,
     local_gen: local::Gen<'arena>,
@@ -36,7 +38,7 @@ pub struct Emitter<'arena, 'decl> {
     /// State is also frozen and set after closure conversion
     pub global_state_: Option<GlobalState<'arena>>,
 
-    decl_provider: DeclProvider<'decl>,
+    decl_provider: &'decl dyn DeclProvider<'decl>,
 }
 
 impl<'arena, 'decl> Emitter<'arena, 'decl> {
@@ -46,7 +48,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         for_debugger_eval: bool,
         use_decls: bool,
         alloc: &'arena bumpalo::Bump,
-        decl_provider: unified_decl_provider::DeclProvider<'decl>,
+        decl_provider: &'decl dyn DeclProvider<'decl>,
     ) -> Emitter<'arena, 'decl> {
         Emitter {
             opts,
@@ -67,8 +69,8 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         }
     }
 
-    pub fn decl_provider(&self) -> &unified_decl_provider::DeclProvider<'decl> {
-        &self.decl_provider
+    pub fn decl_provider(&self) -> &'decl dyn DeclProvider<'decl> {
+        self.decl_provider
     }
 
     pub fn options(&self) -> &Options {
@@ -150,13 +152,10 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
     pub fn emit_global_state_mut(&mut self) -> &mut GlobalState<'arena> {
         self.global_state_.get_or_insert_with(GlobalState::init)
     }
-    pub fn get_decl(
-        &self,
-        kind: NameType,
-        sym: &str,
-    ) -> Result<shallow_decl_defs::Decl<'decl>, decl_provider::Error> {
+
+    pub fn get_decl(&self, kind: NameType, sym: &str) -> Result<Decl<'decl>> {
         if self.use_decls {
-            decl_provider::DeclProvider::get_decl(&self.decl_provider, kind, sym)
+            self.decl_provider.get_decl(kind, sym)
         } else {
             Err(decl_provider::Error::NotFound)
         }

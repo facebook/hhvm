@@ -229,14 +229,19 @@ let retype_magic_func
       | (env, Some xs) -> (env, Some (param :: xs)))
     | _ -> (env, None)
   in
-  match f env ft.ft_params el with
+  let non_variadic_param_types =
+    if get_ft_variadic ft then
+      List.drop_last_exn ft.ft_params
+    else
+      ft.ft_params
+  in
+  match f env non_variadic_param_types el with
   | (env, None) -> (env, ft)
   | (env, Some xs) ->
     ( env,
       {
         ft with
         ft_params = xs;
-        ft_arity = Fstandard;
         ft_flags =
           Typing_defs_flags.(set_bit ft_flags_variadic false ft.ft_flags);
       } )

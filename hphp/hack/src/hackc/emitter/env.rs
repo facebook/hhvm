@@ -10,6 +10,7 @@ use ast_body::AstBody;
 use ast_scope::{self as ast_scope, Scope, ScopeItem};
 use bitflags::bitflags;
 use emitter::Emitter;
+use iterator::IterId;
 use label::Label;
 use local::Local;
 use ocamlrep::rc::RcOc;
@@ -87,7 +88,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
         e: &mut Emitter<'arena, 'decl>,
         label_break: Label,
         label_continue: Label,
-        iterator: Option<iterator::Id>,
+        iterator: Option<IterId>,
         b: &[ast::Stmt],
         f: F,
     ) -> R
@@ -104,13 +105,19 @@ impl<'a, 'arena> Env<'a, 'arena> {
         e: &mut Emitter<'arena, 'decl>,
         end_label: Label,
         cases: &[ast::Case],
+        dfl: &Option<ast::DefaultCase>,
         f: F,
     ) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter<'arena, 'decl>, &[ast::Case]) -> R,
+        F: FnOnce(
+            &mut Self,
+            &mut Emitter<'arena, 'decl>,
+            &[ast::Case],
+            &Option<ast::DefaultCase>,
+        ) -> R,
     {
         self.jump_targets_gen.with_switch(end_label);
-        self.run_and_release_ids(e, |env, e| f(env, e, cases))
+        self.run_and_release_ids(e, |env, e| f(env, e, cases, dfl))
     }
 
     pub fn do_in_try_catch_body<'decl, R, F>(

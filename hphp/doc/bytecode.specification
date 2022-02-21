@@ -971,31 +971,26 @@ ConcatN <n>   [C..C]  ->  [C:Str]
 
   Concatenation (.). Pushes ((string)$n . ... . (string)$1) on the stack.
 
-Add    [C:Arr C:Arr]  ->  [C:Arr]
-       [C:<T2> C:<T1>]  ->  [C:Dbl]    (where T1 == Dbl || T2 == Dbl)
-       [C:<T2> C:<T1>]  ->  [C:Int]    (where T1 != Dbl && T2 != Dbl &&
-                                              (T1 != Arr || T2 != Arr))
+Add    [C:<T2> C:<T1>]  ->  [C:Dbl]    (where T1 == Dbl || T2 == Dbl)
+       [C:<T2> C:<T1>]  ->  [C:Int]    (where T1 != Dbl && T2 != Dbl)
 
-  Addition (+). Performs addition (or plus-merge if $1 and $2 are both arrays).
-  Pushes ($2 + $1) onto the stack. This instruction throws a fatal error if
-  is_array($1) xor is_array($2) is true.
+  Addition (+). Pushes ($2 + $1) onto the stack. This instruction throws a
+  fatal error if either $1 or $2 is not numeric.
 
 Sub    [C:<T2> C:<T1>]  ->  [C:Dbl]    (where T1 == Dbl || T2 == Dbl)
        [C:<T2> C:<T1>]  ->  [C:Int]    (where T1 != Dbl && T2 != Dbl)
 
   Subtraction (-). Pushes ($2 - $1) onto the stack. This instruction throws a
-  fatal error if is_array($1) || is_array($2) is true.
+  fatal error if either $1 or $2 is not numeric.
 
 Mul    [C:<T2> C:<T1>]  ->  [C:Dbl]    (where T1 == Dbl || T2 == Dbl)
        [C:<T2> C:<T1>]  ->  [C:Int]    (where T1 != Dbl && T2 != Dbl)
 
-  Multiplication (*). Pushes ($2 * $1) onto the stack. This instruction throws
-  a fatal error if is_array($1) || is_array($2) is true.
+  Multiplication (*). Pushes ($2 * $1) onto the stack. This instruction throws a
+  fatal error if either $1 or $2 is not numeric.
 
-AddO   [C:Arr C:Arr]  ->  [C:Arr]
-       [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
-       [C:<T2> C:<T1>]  ->  [C:Int|dbl] (where T1 != Dbl && T2 != Dbl &&
-                                               (T1 != Arr || T2 != Arr))
+AddO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
+       [C:<T2> C:<T1>]  ->  [C:Int|dbl] (where T1 != Dbl && T2 != Dbl)
 
   Same behavior as Add, except for when both inputs have type Int and the
   result would not fit in a 64-bit integer. Then this instruction will push
@@ -1021,12 +1016,12 @@ Div    [C C]  ->  [C:Bool|Int|Dbl]
        [C:Dbl C:Dbl]  ->  [C:Bool|Dbl]
 
   Division (/). Pushes ($2 / $1) onto the stack. This instruction throws a
-  fatal error if is_array($1) || is_array($2) is true.
+  fatal error if either $1 or $2 is not numeric.
 
 Mod    [C C]  ->  [C:Bool|Int]
 
-  Modulus (%). Pushes ((int)$2 % (int)$1) onto the stack. This instruction
-  never throws a fatal error.
+  Modulus (%). Pushes ((int)$2 % (int)$1) onto the stack. This instruction throws a
+  fatal error if either $1 or $2 is not numeric.
 
 Pow    [C C]  ->  [C:Int|Dbl]
 

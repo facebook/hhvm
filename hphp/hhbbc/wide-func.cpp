@@ -105,20 +105,20 @@ T decode(const Buffer& buffer, size_t& pos) {
     auto const context  = decode<LSString>(buffer, pos);
     auto const aeTarget = decode<BlockId>(buffer, pos) + NoBlockId;
     auto inout = std::unique_ptr<uint8_t[]>();
-    if (base.flags & FCallArgsBase::EnforceInOut) {
+    if (base.flags & FCallArgsFlags::EnforceInOut) {
       auto const bytes = (base.numArgs + 7) / 8;
       inout = std::make_unique<uint8_t[]>(bytes);
       memmove(inout.get(), &buffer[pos], bytes);
       pos += bytes;
     }
     auto readonly = std::unique_ptr<uint8_t[]>();
-    if (base.flags & FCallArgsBase::EnforceReadonly) {
+    if (base.flags & FCallArgsFlags::EnforceReadonly) {
       auto const bytes = (base.numArgs + 7) / 8;
       readonly = std::make_unique<uint8_t[]>(bytes);
       memmove(readonly.get(), &buffer[pos], bytes);
       pos += bytes;
     }
-    return FCallArgs(static_cast<FCA::Flags>(base.flags & FCA::kInternalFlags),
+    return FCallArgs(static_cast<FCallArgsFlags>(base.flags & FCA::kInternalFlags),
                      base.numArgs, base.numRets, std::move(inout),
                      std::move(readonly), aeTarget, context);
   }
@@ -232,12 +232,10 @@ void encode(Buffer& buffer, const T& data) {
   } else if constexpr (std::is_same<T, FCallArgs>::value) {
     auto base = data.base();
     if (data.enforceInOut()) {
-      auto const flags = base.flags | FCallArgsBase::EnforceInOut;
-      base.flags = static_cast<FCallArgsBase::Flags>(flags);
+      base.flags = base.flags | FCallArgsFlags::EnforceInOut;
     }
     if (data.enforceReadonly()) {
-      auto const flags = base.flags | FCallArgsBase::EnforceReadonly;
-      base.flags = static_cast<FCallArgsBase::Flags>(flags);
+      base.flags = base.flags | FCallArgsFlags::EnforceReadonly;
     }
     encode(buffer, base);
     encode(buffer, data.context());

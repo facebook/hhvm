@@ -14,5 +14,4 @@ hhas_type = { path = "../hhas_type" }
 hhbc_ast = { path = "../hhbc_ast" }
 hhbc_id = { path = "../hhbc_id" }
 hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
-instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 runtime = { path = "../../../emitter/cargo/runtime" }

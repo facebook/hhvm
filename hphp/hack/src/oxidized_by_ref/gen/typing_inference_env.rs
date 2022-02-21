@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ed42ffb1bcbb30eee6689faeb6ecccce>>
+// @generated SignedSource<<814d28383f0c03a6ad692474624e1a13>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -118,6 +118,8 @@ arena_deserializer::impl_deserialize_in_arena!(TyvarInfo<'arena>);
 
 pub type Tvenv<'a> = i_map::IMap<'a, &'a TyvarInfo<'a>>;
 
+pub type Identifier<'a> = isize;
+
 #[derive(
     Clone,
     Debug,
@@ -137,7 +139,7 @@ pub struct TypingInferenceEnv<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tvenv: Tvenv<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub tyvars_stack: &'a [(&'a pos::Pos<'a>, &'a [ident::Ident])],
+    pub tyvars_stack: &'a [(&'a pos::Pos<'a>, &'a [&'a Identifier<'a>])],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub subtype_prop: &'a t_l::SubtypeProp<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

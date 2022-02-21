@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,409 +1,405 @@
+@@ -1,407 +1,403 @@
  [("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -232,8 +232,7 @@
          fe_type =
          (Rwitness_from_decl ([21:10-12]),
           (Tfun
-             { ft_arity = (Fstandard ()); ft_tparams = [];
-               ft_where_constraints = [];
+             { ft_tparams = []; ft_where_constraints = [];
                ft_params =
                [{ fp_pos = [21:22-24]; fp_name = (Some "$i");
                   fp_type =
@@ -297,8 +296,7 @@
             sm_type =
             (Rwitness_from_decl ([37:20-23]),
              (Tfun
-                { ft_arity = (Fstandard ()); ft_tparams = [];
-                  ft_where_constraints = []; ft_params = [];
+                { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                   ft_implicit_params =
                   { capability = (CapDefaults [37:20-23]) };
                   ft_ret =

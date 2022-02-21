@@ -47,7 +47,6 @@ lazy_static! {
             "hhvm.lang.constdefaultfuncargs" => "hhvm.hack.lang.const_default_func_args",
             "hhvm.lang.constdefaultlambdaargs" => "hhvm.hack.lang.const_default_lambda_args",
             "hhvm.lang.abstractstaticprops" => "hhvm.hack.lang.abstract_static_props",
-            "hhvm.lang.disableunsetclassconst" => "hhvm.hack.lang.disable_unset_class_const",
         );
         // TODO(leoo) use const-concat & unsnakecase macro via proc_macro_hack
 }

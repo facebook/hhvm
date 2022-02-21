@@ -9,7 +9,12 @@ use ffi::{
     Pair, Slice, Str,
 };
 use hhbc_ast::*;
-use iterator::Id as IterId;
+use hhvm_hhbc_defs_ffi::ffi::{
+    BareThisOp, CollectionType, ContCheckOp, FatalOp, IncDecOp, InitPropOp, IsLogAsDynamicCallOp,
+    IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SilenceOp, SpecialClsRef, SwitchKind,
+    TypeStructResolveOp,
+};
+use iterator::IterId;
 use label::Label;
 use local::Local;
 use oxidized::ast_defs::Pos;
@@ -867,7 +872,7 @@ pub mod instr {
     pub fn basel<'a>(
         alloc: &'a bumpalo::Bump,
         local: Local<'a>,
-        mode: MemberOpMode,
+        mode: MOpMode,
         readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
         instr(
@@ -879,7 +884,7 @@ pub mod instr {
     pub fn basec<'a>(
         alloc: &'a bumpalo::Bump,
         stack_index: StackIndex,
-        mode: MemberOpMode,
+        mode: MOpMode,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
@@ -890,7 +895,7 @@ pub mod instr {
     pub fn basegc<'a>(
         alloc: &'a bumpalo::Bump,
         stack_index: StackIndex,
-        mode: MemberOpMode,
+        mode: MOpMode,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
@@ -898,11 +903,7 @@ pub mod instr {
         )
     }
 
-    pub fn basegl<'a>(
-        alloc: &'a bumpalo::Bump,
-        local: Local<'a>,
-        mode: MemberOpMode,
-    ) -> InstrSeq<'a> {
+    pub fn basegl<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>, mode: MOpMode) -> InstrSeq<'a> {
         instr(alloc, Instruct::Base(InstructBase::BaseGL(local, mode)))
     }
 
@@ -910,7 +911,7 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         y: StackIndex,
         z: StackIndex,
-        mode: MemberOpMode,
+        mode: MOpMode,
         readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
         instr(
@@ -1023,7 +1024,7 @@ pub mod instr {
         instr(alloc, Instruct::Misc(InstructMisc::VerifyParamTypeTS(i)))
     }
 
-    pub fn dim<'a>(alloc: &'a bumpalo::Bump, op: MemberOpMode, key: MemberKey<'a>) -> InstrSeq<'a> {
+    pub fn dim<'a>(alloc: &'a bumpalo::Bump, op: MOpMode, key: MemberKey<'a>) -> InstrSeq<'a> {
         instr(alloc, Instruct::Base(InstructBase::Dim(op, key)))
     }
 
@@ -1032,7 +1033,7 @@ pub mod instr {
         key: PropId<'a>,
         readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
-        dim(alloc, MemberOpMode::Warn, MemberKey::PT(key, readonly_op))
+        dim(alloc, MOpMode::Warn, MemberKey::PT(key, readonly_op))
     }
 
     pub fn dim_define_pt<'a>(
@@ -1040,7 +1041,7 @@ pub mod instr {
         key: PropId<'a>,
         readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
-        dim(alloc, MemberOpMode::Define, MemberKey::PT(key, readonly_op))
+        dim(alloc, MOpMode::Define, MemberKey::PT(key, readonly_op))
     }
 
     pub fn fcallclsmethod<'a>(
@@ -1119,7 +1120,7 @@ pub mod instr {
     pub fn fcallobjmethod<'a>(
         alloc: &'a bumpalo::Bump,
         fcall_args: FcallArgs<'a>,
-        flavor: ObjNullFlavor,
+        flavor: ObjMethodOp,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
@@ -1131,7 +1132,7 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         fcall_args: FcallArgs<'a>,
         method: MethodId<'a>,
-        flavor: ObjNullFlavor,
+        flavor: ObjMethodOp,
     ) -> InstrSeq<'a> {
         instr(
             alloc,
@@ -1148,13 +1149,13 @@ pub mod instr {
         fcall_args: FcallArgs<'a>,
         method: MethodId<'a>,
     ) -> InstrSeq<'a> {
-        fcallobjmethodd(alloc, fcall_args, method, ObjNullFlavor::NullThrows)
+        fcallobjmethodd(alloc, fcall_args, method, ObjMethodOp::NullThrows)
     }
 
     pub fn querym<'a>(
         alloc: &'a bumpalo::Bump,
         num_params: NumParams,
-        op: QueryOp,
+        op: QueryMOp,
         key: MemberKey<'a>,
     ) -> InstrSeq<'a> {
         instr(
@@ -1172,7 +1173,7 @@ pub mod instr {
         querym(
             alloc,
             num_params,
-            QueryOp::CGet,
+            QueryMOp::CGet,
             MemberKey::PT(key, readonly_op),
         )
     }
@@ -1370,13 +1371,13 @@ pub mod instr {
         use Local::Unnamed;
         match unnamed_locals.split_first() {
             None => panic!("Expected at least one await"),
-            Some((hd, tl)) => {
-                if let Unnamed(hd_id) = hd {
-                    let mut prev_id = hd_id;
-                    for unnamed_local in tl.iter() {
+            Some((head, tail)) => {
+                if let Unnamed(head_id) = head {
+                    let mut prev_id = head_id;
+                    for unnamed_local in tail {
                         match unnamed_local {
                             Unnamed(id) => {
-                                assert_eq!(*prev_id + 1, *id);
+                                assert_eq!(prev_id.idx + 1, id.idx);
                                 prev_id = id;
                             }
                             _ => panic!("Expected unnamed local"),
@@ -1384,7 +1385,7 @@ pub mod instr {
                     }
                     awaitall(
                         alloc,
-                        Some((Unnamed(*hd_id), unnamed_locals.len().try_into().unwrap())),
+                        Some((Unnamed(*head_id), unnamed_locals.len().try_into().unwrap())),
                     )
                 } else {
                     panic!("Expected unnamed local")
@@ -1461,28 +1462,28 @@ pub mod instr {
     pub fn silence_start<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::Misc(InstructMisc::Silence(local, OpSilence::Start)),
+            Instruct::Misc(InstructMisc::Silence(local, SilenceOp::Start)),
         )
     }
 
     pub fn silence_end<'a>(alloc: &'a bumpalo::Bump, local: Local<'a>) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::Misc(InstructMisc::Silence(local, OpSilence::End)),
+            Instruct::Misc(InstructMisc::Silence(local, SilenceOp::End)),
         )
     }
 
     pub fn contcheck_check<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::Generator(GenCreationExecution::ContCheck(CheckStarted::CheckStarted)),
+            Instruct::Generator(GenCreationExecution::ContCheck(ContCheckOp::CheckStarted)),
         )
     }
 
     pub fn contcheck_ignore<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
         instr(
             alloc,
-            Instruct::Generator(GenCreationExecution::ContCheck(CheckStarted::IgnoreStarted)),
+            Instruct::Generator(GenCreationExecution::ContCheck(ContCheckOp::IgnoreStarted)),
         )
     }
 

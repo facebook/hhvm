@@ -7,6 +7,7 @@
  *)
 
 open Hh_prelude
+module Fact_id = Symbol_fact_id
 
 let get_type_from_hint ctx h =
   let mode = FileInfo.Mhhi in
@@ -87,10 +88,10 @@ let add_xref target_json target_id ref_pos xrefs =
     (fun file_map ->
       let new_ref = (target_json, [ref_pos]) in
       match file_map with
-      | None -> Some (IMap.singleton target_id new_ref)
+      | None -> Some (Fact_id.Map.singleton target_id new_ref)
       | Some map ->
         let updated_xref_map =
-          IMap.update
+          Fact_id.Map.update
             target_id
             (fun target_tuple ->
               match target_tuple with

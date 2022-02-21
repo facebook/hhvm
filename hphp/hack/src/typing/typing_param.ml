@@ -9,6 +9,7 @@
 
 open Hh_prelude
 open Aast
+open Common
 open Typing_defs
 open Typing_helpers
 module Reason = Typing_reason
@@ -16,6 +17,33 @@ module MakeType = Typing_make_type
 module Phase = Typing_phase
 module TUtils = Typing_utils
 module Env = Typing_env
+
+let enforce_param_not_disposable env param ty =
+  if has_accept_disposable_attribute param then
+    None
+  else
+    Option.map
+      (Typing_disposable.is_disposable_type env ty)
+      ~f:(fun class_name ->
+        Typing_error.Primary.Invalid_disposable_hint
+          { pos = param.param_pos; class_name = Utils.strip_ns class_name })
+
+let check_param_has_hint env param ty =
+  let prim_err_opt =
+    if Env.is_hhi env then
+      None
+    else if Option.is_none (hint_of_type_hint param.param_type_hint) then
+      Some
+        (if param.param_is_variadic then
+          Typing_error.Primary.Expecting_type_hint_variadic param.param_pos
+        else
+          Typing_error.Primary.Expecting_type_hint param.param_pos)
+    else
+      (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
+      enforce_param_not_disposable env param ty
+  in
+  Option.iter prim_err_opt ~f:(fun err ->
+      Errors.add_typing_error @@ Typing_error.primary err)
 
 (* This function is used to determine the type of an argument.
  * When we want to type-check the body of a function, we need to
@@ -57,7 +85,7 @@ module Env = Typing_env
  *
  * A similar line of reasoning is applied for the static method create.
  *)
-let make_param_local_ty env decl_hint param =
+let make_param_local_ty ~dynamic_mode env decl_hint param =
   let r = Reason.Rwitness param.param_pos in
   let (env, ty) =
     match decl_hint with
@@ -88,33 +116,28 @@ let make_param_local_ty env decl_hint param =
       MakeType.varray r arr_values
     | _ -> ty
   in
+  (* Don't check (again) for existence of hint in dynamic mode *)
+  if not dynamic_mode then check_param_has_hint env param ty;
   (env, ty)
 
-let enforce_param_not_disposable env param ty =
-  (* Option.iter
-     ~f:Errors.add_typing_error *)
-  if has_accept_disposable_attribute param then
-    None
-  else
-    Option.map
-      (Typing_disposable.is_disposable_type env ty)
-      ~f:(fun class_name ->
-        Typing_error.Primary.Invalid_disposable_hint
-          { pos = param.param_pos; class_name = Utils.strip_ns class_name })
-
-(* In strict mode, we force you to give a type declaration on a parameter *)
-(* But the type checker is nice: it makes a suggestion :-) *)
-let check_param_has_hint env param ty =
-  let prim_err_opt =
-    match hint_of_type_hint param.param_type_hint with
-    | None when param.param_is_variadic && not (Env.is_hhi env) ->
-      Some (Typing_error.Primary.Expecting_type_hint_variadic param.param_pos)
-    | None when not @@ Env.is_hhi env ->
-      Some (Typing_error.Primary.Expecting_type_hint param.param_pos)
-    | Some _ when not @@ Env.is_hhi env ->
-      (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
-      enforce_param_not_disposable env param ty
-    | _ -> None
-  in
-  Option.iter prim_err_opt ~f:(fun err ->
-      Errors.add_typing_error @@ Typing_error.primary err)
+let make_param_local_tys ~dynamic_mode env decl_tys params =
+  List.zip_exn params decl_tys
+  |> List.map_env env ~f:(fun env (param, hint) ->
+         let ty =
+           if dynamic_mode then
+             let dyn_ty =
+               Typing_make_type.dynamic
+                 (Reason.Rsupport_dynamic_type
+                    (Pos_or_decl.of_raw_pos param.param_pos))
+             in
+             match hint with
+             | Some ty when Typing_enforceability.is_enforceable env ty ->
+               Some
+                 (Typing_make_type.intersection
+                    (Reason.Rsupport_dynamic_type Pos_or_decl.none)
+                    [ty; dyn_ty])
+             | _ -> Some dyn_ty
+           else
+             hint
+         in
+         make_param_local_ty ~dynamic_mode env ty param)

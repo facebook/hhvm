@@ -9,6 +9,6 @@ path = "../lib.rs"
 
 [dependencies]
 anyhow = "1.0.51"
-cxx = "1.0.54"
+cxx = "1.0.64"
 hdf = { path = "../../hdf" }
 log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }

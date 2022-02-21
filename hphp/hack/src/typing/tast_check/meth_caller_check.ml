@@ -40,12 +40,28 @@ let check_parameters =
       end
     | _ -> ()
 
+let check_readonly_return env pos ft =
+  match get_node ft with
+  | Tfun ftype ->
+    if Flags.get_ft_returns_readonly ftype then
+      let (_, expanded_ty) = Tast_env.expand_type env ft in
+      let r = get_reason expanded_ty in
+      let rpos = Typing_reason.to_pos r in
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Invalid_meth_caller_readonly_return
+               { pos; decl_pos = rpos })
+  | _ -> ()
+
 let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_expr _env e =
+    method! at_expr env e =
       match e with
-      | (ft, pos, Method_caller _) -> check_parameters pos ft
+      | (ft, pos, Method_caller _) ->
+        check_parameters pos ft;
+        check_readonly_return env pos ft
       | _ -> ()
   end

@@ -371,6 +371,7 @@ and stmt env acc st =
   let block = block env in
   let catch = catch env in
   let case = case env in
+  let default_case = default_case env in
   match snd st with
   | Expr (* only in top level!*)
       (_, _, Call ((_, _, Class_const ((_, _, CIparent), (_, m))), _, el, _uel))
@@ -414,12 +415,15 @@ and stmt env acc st =
     let acc = List.fold_left (snd us.us_exprs) ~f:expr ~init:acc in
     block acc us.us_block
   | For (e1, _, _, _) -> exprl env acc e1
-  | Switch (e, cl) ->
+  | Switch (e, cl, dfl) ->
     let acc = expr acc e in
     (* Filter out cases that fallthrough *)
+    (* NOTE: 'default' never fallthough *)
     let cl_body = List.filter cl ~f:case_has_body in
     let cl = List.map cl_body ~f:(case acc) in
+    let cdfl = dfl |> Option.map ~f:(default_case acc) in
     let c = S.inter_list cl in
+    let c = Option.fold ~init:c ~f:S.inter cdfl in
     S.union acc c
   | Foreach (e, _, _) ->
     let acc = expr acc e in
@@ -633,15 +637,11 @@ and expr_ env acc p e =
   | ReadonlyExpr e -> expr acc e
   | Hole (e, _, _, _) -> expr acc e
 
-and case env acc = function
-  | Default (_, b)
-  | Case (_, b) ->
-    block env acc b
+and case env acc ((_, b) : (_, _) Aast.case) = block env acc b
 
-and case_has_body = function
-  | Default _ -> true
-  | Case (_, []) -> false
-  | Case _ -> true
+and case_has_body ((_, b) : (_, _) Aast.case) = not (List.is_empty b)
+
+and default_case env acc ((_, b) : (_, _) Aast.default_case) = block env acc b
 
 and catch env acc (_, _, b) = block env acc b
 

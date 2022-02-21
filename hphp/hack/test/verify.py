@@ -322,9 +322,16 @@ def run_test_program(
         except subprocess.TimeoutExpired as e:
             output = "Timed out. " + str(e.output)
         except subprocess.CalledProcessError as e:
-            # we don't care about nonzero exit codes... for instance, type
-            # errors cause hh_single_type_check to produce them
-            output = str(e.output)
+            if e.returncode == 126:
+                # unable to execute, typically due in buck2 to "Text file is busy" because someone still has a write handle open to it.
+                # https://www.internalfb.com/intern/qa/312685/text-file-is-busy---test-is-run-before-fclose-on-e
+                # Ugly workaround for now: just skip it
+                # This should be removed once T107518211 is closed.
+                output = "Timed out. " + str(e.output)
+            else:
+                # we don't care about nonzero exit codes... for instance, type
+                # errors cause hh_single_type_check to produce them
+                output = str(e.output)
         return check_result(
             test_case,
             default_expect_regex,

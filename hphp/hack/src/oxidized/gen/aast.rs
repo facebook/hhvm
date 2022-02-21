@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<26d1399128f71dc01e1d291bf7a12753>>
+// @generated SignedSource<<79d27e1750dce9903db07cc02311cbbe>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -165,7 +165,7 @@ pub enum Stmt_<Ex, En> {
     /// baz();
     /// break;
     /// }
-    Switch(Box<(Expr<Ex, En>, Vec<Case<Ex, En>>)>),
+    Switch(Box<(Expr<Ex, En>, Vec<Case<Ex, En>>, Option<DefaultCase<Ex, En>>)>),
     /// For-each loop.
     ///
     /// foreach ($items as $item) { ... }
@@ -915,10 +915,44 @@ pub enum ClassGetExpr<Ex, En> {
     Serialize,
     ToOcamlRep
 )]
+#[repr(C)]
+pub struct Case<Ex, En>(pub Expr<Ex, En>, pub Block<Ex, En>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(C)]
+pub struct DefaultCase<Ex, En>(pub Pos, pub Block<Ex, En>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 #[repr(C, u8)]
-pub enum Case<Ex, En> {
-    Default(Pos, Block<Ex, En>),
-    Case(Expr<Ex, En>, Block<Ex, En>),
+pub enum GenCase<Ex, En> {
+    Case(Case<Ex, En>),
+    Default(DefaultCase<Ex, En>),
 }
 
 #[derive(
@@ -1252,7 +1286,29 @@ pub struct UseAsAlias(
 #[repr(C)]
 pub struct InsteadofAlias(pub Sid, pub Pstring, pub Vec<Sid>);
 
-pub type IsExtends = bool;
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[repr(u8)]
+pub enum RequireKind {
+    RequireExtends,
+    RequireImplements,
+}
+impl TrivialDrop for RequireKind {}
+arena_deserializer::impl_deserialize_in_arena!(RequireKind);
 
 #[derive(
     Clone,
@@ -1313,7 +1369,7 @@ pub struct Class_<Ex, En> {
     pub insteadof_alias: Vec<InsteadofAlias>,
     pub xhp_attr_uses: Vec<XhpAttrHint>,
     pub xhp_category: Option<(Pos, Vec<Pstring>)>,
-    pub reqs: Vec<(ClassHint, IsExtends)>,
+    pub reqs: Vec<(ClassHint, RequireKind)>,
     pub implements: Vec<ClassHint>,
     pub where_constraints: Vec<WhereConstraintHint>,
     pub consts: Vec<ClassConst<Ex, En>>,

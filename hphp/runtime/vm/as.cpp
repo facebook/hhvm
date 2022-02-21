@@ -1167,8 +1167,8 @@ IterArgs read_iter_args(AsmState& as) {
   return IterArgs(IterArgs::Flags::None, iterId, keyId, valId);
 }
 
-FCallArgs::Flags read_fcall_flags(AsmState& as, Op thisOpcode) {
-  uint8_t flags = 0;
+FCallArgsFlags read_fcall_flags(AsmState& as, Op thisOpcode) {
+  uint16_t flags = 0;
 
   as.in.skipSpaceTab();
   as.in.expect('<');
@@ -1177,25 +1177,25 @@ FCallArgs::Flags read_fcall_flags(AsmState& as, Op thisOpcode) {
   while (as.in.readword(flag)) {
     if (flag == "LockWhileUnwinding") {
       if (thisOpcode == Op::FCallCtor) {
-        flags |= FCallArgs::LockWhileUnwinding;
+        flags |= FCallArgsFlags::LockWhileUnwinding;
         continue;
       } else {
         as.error("FCall flag LockWhileUnwinding is only valid for FCallCtor");
       }
     }
-    if (flag == "Unpack") { flags |= FCallArgs::HasUnpack; continue; }
-    if (flag == "Generics") { flags |= FCallArgs::HasGenerics; continue; }
-    if (flag == "SkipRepack") { flags |= FCallArgs::SkipRepack; continue; }
+    if (flag == "Unpack") { flags |= FCallArgsFlags::HasUnpack; continue; }
+    if (flag == "Generics") { flags |= FCallArgsFlags::HasGenerics; continue; }
+    if (flag == "SkipRepack") { flags |= FCallArgsFlags::SkipRepack; continue; }
     if (flag == "SkipCoeffectsCheck") {
-      flags |= FCallArgs::SkipCoeffectsCheck;
+      flags |= FCallArgsFlags::SkipCoeffectsCheck;
       continue;
     }
     if (flag == "EnforceMutableReturn") {
-      flags |= FCallArgs::EnforceMutableReturn;
+      flags |= FCallArgsFlags::EnforceMutableReturn;
       continue;
     }
     if (flag == "EnforceReadonlyThis") {
-      flags |= FCallArgs::EnforceReadonlyThis;
+      flags |= FCallArgsFlags::EnforceReadonlyThis;
       continue;
     }
 
@@ -1203,7 +1203,7 @@ FCallArgs::Flags read_fcall_flags(AsmState& as, Op thisOpcode) {
   }
   as.in.expectWs('>');
 
-  return static_cast<FCallArgs::Flags>(flags);
+  return static_cast<FCallArgsFlags>(flags);
 }
 
 // Read a vector of booleans formatted as a quoted string of '0' and '1'.
@@ -1427,7 +1427,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 
 #define O(name, imm, pop, push, flags)                                 \
   void parse_opcode_##name(AsmState& as) {                             \
-    UNUSED auto immFCA = FCallArgsBase(FCallArgsBase::None, -1, -1);   \
+    UNUSED auto immFCA = FCallArgsBase(FCallArgsFlags::FCANone, -1, -1);   \
     UNUSED uint32_t immIVA[kMaxHhbcImms];                              \
     UNUSED auto const thisOpcode = Op::name;                           \
     UNUSED const Offset curOpcodeOff = as.fe->bcPos();                 \

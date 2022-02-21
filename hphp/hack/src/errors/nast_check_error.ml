@@ -99,8 +99,6 @@ type t =
   | List_rvalue of Pos.t
   | Inout_argument_bad_expr of Pos.t
   | Illegal_destructor of Pos.t
-  | Switch_non_terminal_default of Pos.t
-  | Switch_multiple_default of Pos.t
   | Illegal_context of {
       pos: Pos.t;
       name: string;
@@ -432,18 +430,6 @@ let illegal_destructor pos =
       ^ "`IDisposable`/`using` or `try`/`catch` instead." )
     []
 
-let switch_non_terminal_default pos =
-  User_error.make
-    Error_code.(to_enum SwitchNonTerminalDefault)
-    (pos, "Default case in `switch` must be terminal")
-    []
-
-let switch_multiple_default pos =
-  User_error.make
-    Error_code.(to_enum SwitchMultipleDefault)
-    (pos, "There can be only one `default` case in `switch`")
-    []
-
 let illegal_context pos name =
   User_error.make
     Error_code.(to_enum IllegalContext)
@@ -595,8 +581,6 @@ let to_user_error = function
   | List_rvalue pos -> list_rvalue pos
   | Inout_argument_bad_expr pos -> inout_argument_bad_expr pos
   | Illegal_destructor pos -> illegal_destructor pos
-  | Switch_non_terminal_default pos -> switch_non_terminal_default pos
-  | Switch_multiple_default pos -> switch_multiple_default pos
   | Illegal_context { pos; name } -> illegal_context pos name
   | Case_fallthrough { switch_pos; case_pos } ->
     case_fallthrough switch_pos case_pos

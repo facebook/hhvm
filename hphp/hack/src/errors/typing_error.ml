@@ -1653,6 +1653,10 @@ module Primary = struct
         decl_pos: Pos_or_decl.t;
         convention: string;
       }
+    | Invalid_meth_caller_readonly_return of {
+        pos: Pos.t;
+        decl_pos: Pos_or_decl.t;
+      }
     | Invalid_new_disposable of Pos.t
     | Invalid_return_disposable of Pos.t
     | Invalid_disposable_hint of {
@@ -2952,6 +2956,19 @@ module Primary = struct
       ]
     in
     (Error_code.InvalidMethCallerCallingConvention, claim, reason, [])
+
+  let invalid_meth_caller_readonly_return pos decl_pos =
+    let claim =
+      ( pos,
+        "`meth_caller` does not support methods that return `readonly` objects"
+      )
+    in
+    let reason =
+      [
+        (decl_pos, "This is why I think this method returns a `readonly` object");
+      ]
+    in
+    (Error_code.InvalidMethCallerReadonlyReturn, claim, reason, [])
 
   let invalid_new_disposable pos =
     let claim =
@@ -4901,6 +4918,8 @@ module Primary = struct
       inout_argument_bad_type pos reasons
     | Invalid_meth_caller_calling_convention { pos; decl_pos; convention } ->
       invalid_meth_caller_calling_convention pos decl_pos convention
+    | Invalid_meth_caller_readonly_return { pos; decl_pos } ->
+      invalid_meth_caller_readonly_return pos decl_pos
     | Invalid_new_disposable pos -> invalid_new_disposable pos
     | Invalid_return_disposable pos -> invalid_return_disposable pos
     | Invalid_disposable_hint { pos; class_name } ->

@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,56 +1,56 @@
+@@ -1,53 +1,53 @@
  [("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -18,21 +18,7 @@
            sm_type =
            (Rwitness_from_decl ([4:19-20]),
             (Tfun
-               { ft_arity =
-                 (Fvariadic (
-                    { fp_pos = [4:31-34]; fp_name = None;
-                      fp_type =
-                      { et_enforced = Typing_defs_core.Unenforced;
--                       et_type = (Rvar_param_from_decl ([4:31-34]), Tany) };
-+                       et_type = (Rwitness_from_decl ([4:31-34]), Tany) };
-                      fp_flags =
-                      (make_fp_flags ~accept_disposable:false
-                        ~has_default:false ~mode:Typing_defs_core.FPnormal
-                        ~ifc_external:false ~ifc_can_call:false
-                        ~readonly:false);
-                       }
-                    ));
-                 ft_tparams = []; ft_where_constraints = [];
+               { ft_tparams = []; ft_where_constraints = [];
                  ft_params =
                  [{ fp_pos = [4:25-29]; fp_name = (Some "$foo");
                     fp_type =
@@ -42,7 +28,18 @@
                     (make_fp_flags ~accept_disposable:false ~has_default:false
                       ~mode:Typing_defs_core.FPnormal ~ifc_external:false
                       ~ifc_can_call:false ~readonly:false);
-                     }
+                     };
+                   { fp_pos = [4:31-34]; fp_name = None;
+                     fp_type =
+                     { et_enforced = Typing_defs_core.Unenforced;
+-                      et_type = (Rvar_param_from_decl ([4:31-34]), Tany) };
++                      et_type = (Rwitness_from_decl ([4:31-34]), Tany) };
+                     fp_flags =
+                     (make_fp_flags ~accept_disposable:false
+                       ~has_default:false ~mode:Typing_defs_core.FPnormal
+                       ~ifc_external:false ~ifc_can_call:false
+                       ~readonly:false);
+                      }
                    ];
                  ft_implicit_params = { capability = (CapDefaults [4:19-20]) };
                  ft_ret =

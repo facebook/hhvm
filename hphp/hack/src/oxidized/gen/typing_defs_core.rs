@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f29cc99c9e7bf3b10068c3d0d1b40b7a>>
+// @generated SignedSource<<223e0114b3561f7efd3bda0cc7c077d8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -673,7 +673,6 @@ pub struct FunImplicitParams {
 }
 
 /// The type of a function AND a method.
-/// A function has a min and max arity because of optional arguments
 #[derive(
     Clone,
     Debug,
@@ -691,7 +690,6 @@ pub struct FunImplicitParams {
 )]
 #[repr(C)]
 pub struct FunType {
-    pub arity: FunArity,
     pub tparams: Vec<Tparam>,
     pub where_constraints: Vec<WhereConstraint>,
     pub params: FunParams,
@@ -700,32 +698,6 @@ pub struct FunType {
     pub ret: PossiblyEnforcedTy,
     pub flags: typing_defs_flags::FunTypeFlags,
     pub ifc_decl: IfcFunDecl,
-}
-
-/// Arity information for a fun_type; indicating the minimum number of
-/// args expected by the function and the maximum number of args for
-/// standard, non-variadic functions or the type of variadic argument taken
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-#[repr(C, u8)]
-pub enum FunArity {
-    Fstandard,
-    /// PHP5.6-style ...$args finishes the func declaration.
-    /// min ; variadic param type
-    Fvariadic(FunParam),
 }
 
 #[derive(

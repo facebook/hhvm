@@ -5,9 +5,9 @@
 
 use ast_scope::{self as ast_scope, Scope};
 use env::emitter::Emitter;
-use hhbc_ast::SpecialClsRef;
 use hhbc_ast::{ClassishKind, ClassishKind::*};
 use hhbc_string_utils as string_utils;
+use hhvm_hhbc_defs_ffi::ffi::SpecialClsRef;
 use instruction_sequence::InstrSeq;
 use naming_special_names_rust::classes;
 use oxidized::{aast::*, ast, ast_defs};

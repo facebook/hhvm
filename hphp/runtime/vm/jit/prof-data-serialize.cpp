@@ -1797,6 +1797,8 @@ std::string serializeProfData(const std::string& filename) {
       write_container(ser, prioritySerializeClasses(), write_class);
     }
 
+    serializeSharedProfiles(ser);
+
     write_target_profiles(ser);
 
     // We've written everything directly referenced by the profile
@@ -1927,6 +1929,8 @@ std::string deserializeProfData(const std::string& filename,
     if (RO::EnableIntrinsicsExtension) {
       read_container(ser, [&] { read_class(ser); });
     }
+
+    deserializeSharedProfiles(ser);
 
     read_target_profiles(ser);
 

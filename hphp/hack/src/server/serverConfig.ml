@@ -77,16 +77,10 @@ let make_sharedmem_config config options local_config =
       ~default:local_config.ServerLocalConfig.shm_use_sharded_hashtbl
       config
   in
-  let shm_enable_eviction =
-    bool_
-      "shm_enable_eviction"
-      ~default:local_config.ServerLocalConfig.shm_enable_eviction
-      config
-  in
-  let shm_max_evictable_bytes =
+  let shm_cache_size =
     int_
-      "shm_max_evictable_bytes"
-      ~default:local_config.ServerLocalConfig.shm_max_evictable_bytes
+      "shm_cache_size"
+      ~default:local_config.ServerLocalConfig.shm_cache_size
       config
   in
   let shm_min_avail =
@@ -101,8 +95,7 @@ let make_sharedmem_config config options local_config =
       sample_rate;
       shm_dirs;
       shm_use_sharded_hashtbl;
-      shm_enable_eviction;
-      shm_max_evictable_bytes;
+      shm_cache_size;
       shm_min_avail;
       compression;
     }
@@ -313,8 +306,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
   let global_opts =
     GlobalOptions.make
       ?po_deregister_php_stdlib:(bool_opt "deregister_php_stdlib" config)
-      ?po_disable_array_typehint:
-        (bool_opt "disable_parse_array_typehint" config)
       ?tco_num_local_workers:local_config.num_local_workers
       ~tco_parallel_type_checking_threshold:
         local_config.parallel_type_checking_threshold
@@ -413,8 +404,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_gi_reinfer_types:(string_list_opt "reinfer_types" config)
       ?tco_const_static_props:(bool_opt "const_static_props" config)
       ?po_abstract_static_props:(bool_opt "abstract_static_props" config)
-      ?po_disable_unset_class_const:
-        (bool_opt "disable_unset_class_const" config)
       ~po_parser_errors_only:(Option.is_some (ServerArgs.ai_mode options))
       ?tco_check_attribute_locations:
         (bool_opt "check_attribute_locations" config)

@@ -475,7 +475,9 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
           gen(env, CheckRDSInitialized, taken, RDSHandleData { data });
         },
         [&] {
-          for (auto i = 0; i < fca.numInputs(); ++i) popDecRef(env);
+          for (auto i = 0; i < fca.numInputs(); ++i) {
+            popDecRef(env, static_cast<DecRefProfileId>(i));
+          }
           for (auto i = 0; i < kNumActRecCells; ++i) popU(env);
           auto const retVal = gen(env, LdTVFromRDS, data, retType);
           gen(env, IncRef, retVal);
@@ -543,8 +545,8 @@ void prepareAndCallKnown(IRGS& env, const Func* callee, const FCallArgs& fca,
   if (generics) push(env, generics);
 
   doCall(FCallArgs(
-    static_cast<FCallArgs::Flags>(
-      fca.flags | FCallArgs::Flags::HasUnpack | FCallArgs::Flags::SkipRepack),
+    static_cast<FCallArgsFlags>(
+      fca.flags | FCallArgsFlags::HasUnpack | FCallArgsFlags::SkipRepack),
     callee->numNonVariadicParams(),
     fca.numRets,
     nullptr,  // inout-ness already checked
@@ -785,7 +787,7 @@ void optimizeProfiledCallMethod(IRGS& env,
     if (!callee->isStaticInPrologue()) return ctx;
     assertx(ctx->type() <= TObj);
     auto ret = cls ? cns(env, cls) : gen(env, LdObjClass, ctx);
-    decRef(env, ctx);
+    decRef(env, ctx, DecRefProfileId::Default);
     return ret;
   };
 
@@ -1099,7 +1101,7 @@ void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
   // TODO: improve this if str->hasConstVal()
   auto const funcN = gen(env, LdFunc, str);
   auto const func = gen(env, CheckNonNull, makeExitSlow(env), funcN);
-  popDecRef(env);
+  popDecRef(env, DecRefProfileId::Default);
   updateStackOffset(env);
   prepareAndCallProfiled(env, func, fca, nullptr, true, false);
 }
@@ -1211,7 +1213,7 @@ void emitResolveRFunc(IRGS& env, const StringData* name) {
       push(env, gen(env, NewRFunc, funcTmp, tsList));
     },
     [&] {
-      decRef(env, tsList);
+      decRef(env, tsList, DecRefProfileId::Default);
       push(env, funcTmp);
     }
   );
@@ -1226,7 +1228,7 @@ SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
     case SpecialClsRef::Static:
       if (!curClass(env)) return nullptr;
       return ldCtxCls(env);
-    case SpecialClsRef::Self:
+    case SpecialClsRef::Self_:
       if (auto const clss = curClass(env)) return cns(env, clss);
       return nullptr;
     case SpecialClsRef::Parent:
@@ -1251,7 +1253,7 @@ Optional<int> specialClsReifiedPropSlot(IRGS& env, SpecialClsRef ref) {
     case SpecialClsRef::Static:
       // Currently we disallow new static on reified classes
       return std::nullopt;
-    case SpecialClsRef::Self:
+    case SpecialClsRef::Self_:
       return result(cls);
     case SpecialClsRef::Parent:
       if (!cls->parent()) return std::nullopt;
@@ -1359,7 +1361,7 @@ void emitNewObjRD(IRGS& env, const StringData* className) {
     }
   }();
   emitNewObjDImpl(env, className, tsList);
-  decRef(env, cell);
+  decRef(env, cell, DecRefProfileId::Default);
 }
 
 void emitNewObjS(IRGS& env, SpecialClsRef ref) {
@@ -1425,12 +1427,13 @@ void fcallObjMethod(IRGS& env, const FCallArgs& fca, const StringData* clsHint,
     return;
   }
 
+  int locId = 0;
   // null?->method(...), pop extra stack input, all arguments and uninits,
   // the null "object" and all uninits for inout returns, then push null.
   if (obj->type() <= TInitNull && subop == ObjMethodOp::NullSafe) {
-    if (extraInput) popDecRef(env, DataTypeGeneric);
-    if (fca.hasGenerics()) popDecRef(env, DataTypeGeneric);
-    if (fca.hasUnpack()) popDecRef(env, DataTypeGeneric);
+    if (extraInput) popDecRef(env, static_cast<DecRefProfileId>(locId++), DataTypeGeneric);
+    if (fca.hasGenerics()) popDecRef(env, static_cast<DecRefProfileId>(locId++), DataTypeGeneric);
+    if (fca.hasUnpack()) popDecRef(env, static_cast<DecRefProfileId>(locId++), DataTypeGeneric);
 
     // Save any inout arguments, as those will be pushed unchanged as
     // the output.
@@ -1439,12 +1442,12 @@ void fcallObjMethod(IRGS& env, const FCallArgs& fca, const StringData* clsHint,
       if (fca.enforceInOut() && fca.isInOut(fca.numArgs - i - 1)) {
         inOuts.emplace_back(popC(env));
       } else {
-        popDecRef(env, DataTypeGeneric);
+        popDecRef(env, static_cast<DecRefProfileId>(locId++), DataTypeGeneric);
       }
     }
 
     for (uint32_t i = 0; i < kNumActRecCells - 1; ++i) popU(env);
-    popDecRef(env, DataTypeGeneric);
+    popDecRef(env, static_cast<DecRefProfileId>(locId), DataTypeGeneric);
     for (uint32_t i = 0; i < fca.numRets - 1; ++i) popU(env);
 
     assertx(inOuts.size() == fca.numRets - 1);
@@ -1591,7 +1594,7 @@ void checkGenericsAndResolveRClsMeth(IRGS& env, SSATmp* cls, SSATmp* func,
     },
     [&] {
       push(env, gen(env, NewClsMeth, cls, func));
-      decRef(env, tsList);
+      decRef(env, tsList, DecRefProfileId::Default);
     }
   );
 }
@@ -1752,7 +1755,7 @@ void fcallClsMethodCommon(IRGS& env,
     }
 
     auto const ctx = forward ? ldCtxCls(env) : clsVal;
-    decRef(env, methVal);
+    decRef(env, methVal, DecRefProfileId::Default);
     discard(env, numExtraInputs);
     if (noCallProfiling) {
       prepareAndCallUnknown(env, func, fca, ctx,
@@ -1834,7 +1837,7 @@ void emitFCallClsMethodS(IRGS& env, FCallArgs fca, const StringData* clsHint,
   auto const methName = topC(env);
   if (!cls || !methName->isA(TStr)) return interpOne(env);
 
-  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
+  auto const fwd = ref == SpecialClsRef::Self_ || ref == SpecialClsRef::Parent;
   fcallClsMethodCommon(env, fca, clsHint, cls, methName, fwd, true, false, 1);
 }
 
@@ -1843,7 +1846,7 @@ void emitFCallClsMethodSD(IRGS& env, FCallArgs fca, const StringData* clsHint,
   auto const cls = specialClsRefToCls(env, ref);
   if (!cls) return interpOne(env);
 
-  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
+  auto const fwd = ref == SpecialClsRef::Self_ || ref == SpecialClsRef::Parent;
   fcallClsMethodCommon(env, fca, clsHint, cls, cns(env, methName), fwd,
                        false, false, 0);
 }

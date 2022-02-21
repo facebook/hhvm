@@ -180,9 +180,8 @@ bool ArrayAccessProfile::update(int32_t pos, uint32_t count) {
   return false;
 }
 
-void ArrayAccessProfile::update(const ArrayData* ad,
-                                int64_t i,
-                                DecRefProfile* decRefProfile) {
+void ArrayAccessProfile::update(const ArrayData* ad, int64_t i,
+                                DecRefProfileEntry* decRefProfile) {
   auto const h = hash_int64(i);
   auto const pos =
     ad->isVanillaDict() ? VanillaDict::as(ad)->find(i, h) :
@@ -193,13 +192,13 @@ void ArrayAccessProfile::update(const ArrayData* ad,
   if (ad->size() == 0) m_empty++;
   if (!ad->cowCheck()) m_nocow++;
   if (decRefProfile && validPos(pos)) {
-    decRefProfile->update(ad->nvGetVal(pos));
+    auto const tv = ad->nvGetVal(pos);
+    decRefProfile->update([&](auto& profile) { profile.update(tv); });
   }
 }
 
-void ArrayAccessProfile::update(const ArrayData* ad,
-                                const StringData* sd,
-                                DecRefProfile* decRefProfile) {
+void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
+                                DecRefProfileEntry* decRefProfile) {
   // Only count cases where the string keys compare equal as pointers
   // (checked within findStringKey).
   auto const pos =
@@ -214,7 +213,8 @@ void ArrayAccessProfile::update(const ArrayData* ad,
   }
   if (!ad->cowCheck()) m_nocow++;
   if (decRefProfile && validPos(pos)) {
-    decRefProfile->update(ad->nvGetVal(pos));
+    auto const tv = ad->nvGetVal(pos);
+    decRefProfile->update([&](auto& profile) { profile.update(tv); });
   }
 }
 

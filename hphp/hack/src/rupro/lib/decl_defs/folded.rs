@@ -97,7 +97,7 @@ impl<R: Reason> ClassConst<R> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct FoldedClass<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_defs.decl_class_type`
     pub name: TypeName,

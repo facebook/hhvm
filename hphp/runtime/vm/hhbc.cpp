@@ -964,12 +964,6 @@ static const char* ContCheckOp_names[] = {
 #undef CONT_CHECK_OP
 };
 
-static const char* CudOp_names[] = {
-#define CUD_OP(x) #x,
-  CUD_OPS
-#undef CUD_OP
-};
-
 static const char* IsLogAsDynamicCallOp_names[] = {
 #define IS_LOG_AS_DYNAMIC_CALL_OP(x) #x,
   IS_LOG_AS_DYNAMIC_CALL_OPS
@@ -1063,8 +1057,7 @@ X(TypeStructResolveOp,
                   static_cast<int>(TypeStructResolveOp::Resolve))
 X(MOpMode,        static_cast<int>(MOpMode::None))
 X(ContCheckOp,    static_cast<int>(ContCheckOp::IgnoreStarted))
-X(CudOp,          static_cast<int>(CudOp::IgnoreIter))
-X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
+X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self_))
 X(IsLogAsDynamicCallOp,
                   static_cast<int>(IsLogAsDynamicCallOp::LogAsDynamicCall))
 X(ReadonlyOp,     static_cast<int>(ReadonlyOp::Any))

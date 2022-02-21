@@ -96,8 +96,6 @@ type t =
   | List_rvalue of Pos.t
   | Inout_argument_bad_expr of Pos.t
   | Illegal_destructor of Pos.t
-  | Switch_non_terminal_default of Pos.t
-  | Switch_multiple_default of Pos.t
   | Illegal_context of {
       pos: Pos.t;
       name: string;

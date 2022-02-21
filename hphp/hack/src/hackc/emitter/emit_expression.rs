@@ -12,6 +12,10 @@ use hhbc_assertion_utils::*;
 use hhbc_ast::*;
 use hhbc_id::{class, r#const, function, method, prop};
 use hhbc_string_utils as string_utils;
+use hhvm_hhbc_defs_ffi::ffi::{
+    BareThisOp, CollectionType, FCallArgsFlags, IncDecOp, IsLogAsDynamicCallOp, IsTypeOp, MOpMode,
+    ObjMethodOp, QueryMOp, ReadonlyOp, SetRangeOp, SpecialClsRef, TypeStructResolveOp,
+};
 use indexmap::IndexSet;
 use instruction_sequence::{
     instr, unrecoverable,
@@ -449,7 +453,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
                 env,
                 pos,
                 None,
-                QueryOp::CGet,
+                QueryMOp::CGet,
                 base_expr,
                 opt_elem_expr.as_ref(),
                 false,
@@ -461,7 +465,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
             emitter,
             env,
             pos,
-            QueryOp::CGet,
+            QueryMOp::CGet,
             &e.0,
             &e.1,
             &e.2,
@@ -533,7 +537,14 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         )),
         Expr_::ClassGet(e) => {
             // class gets without a readonly expression must be mutable
-            emit_class_get(emitter, env, QueryOp::CGet, &e.0, &e.1, ReadonlyOp::Mutable)
+            emit_class_get(
+                emitter,
+                env,
+                QueryMOp::CGet,
+                &e.0,
+                &e.1,
+                ReadonlyOp::Mutable,
+            )
         }
 
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
@@ -968,7 +979,7 @@ pub fn emit_await<'a, 'arena, 'decl>(
                     instrs,
                     emit_pos(alloc, pos),
                     instr::dup(alloc),
-                    instr::istypec(alloc, IsTypeOp::OpNull),
+                    instr::istypec(alloc, IsTypeOp::Null),
                     instr::jmpnz(alloc, after_await.clone()),
                     instr::await_(alloc),
                     instr::label(alloc, after_await),
@@ -1006,7 +1017,7 @@ fn inline_gena_call<'a, 'arena, 'decl>(
                 instr::fcallclsmethodd(
                     alloc,
                     FcallArgs::new(
-                        FcallFlags::default(),
+                        FCallArgsFlags::default(),
                         1,
                         Slice::empty(),
                         Slice::empty(),
@@ -1032,7 +1043,7 @@ fn inline_gena_call<'a, 'arena, 'decl>(
                                 instr::basel(
                                     alloc,
                                     arr_local,
-                                    MemberOpMode::Define,
+                                    MOpMode::Define,
                                     ReadonlyOp::Any, // TODO, handle await assignment statements correctly
                                 ),
                                 instr::setm(alloc, 0, MemberKey::EL(key_local, ReadonlyOp::Any)),
@@ -1199,10 +1210,6 @@ fn emit_named_collection<'a, 'arena, 'decl>(
     };
     use CollectionType as C;
     match collection_type {
-        C::Dict | C::Vec | C::Keyset => {
-            let instr = emit_collection(e, env, expr, fields, None)?;
-            Ok(emit_pos_then(alloc, pos, instr))
-        }
         C::Vector | C::ImmVector => emit_vector_like(e, collection_type),
         C::Map | C::ImmMap | C::Set | C::ImmSet => emit_map_or_set(e, collection_type),
         C::Pair => Ok(InstrSeq::gather(
@@ -1238,9 +1245,6 @@ fn emit_named_collection_str<'a, 'arena, 'decl>(
     let name = string_utils::strip_ns(name);
     let name = string_utils::types::fix_casing(name);
     let ctype = match name {
-        "dict" => CollectionType::Dict,
-        "vec" => CollectionType::Vec,
-        "keyset" => CollectionType::Keyset,
         "Vector" => CollectionType::Vector,
         "ImmVector" => CollectionType::ImmVector,
         "Map" => CollectionType::Map,
@@ -1248,6 +1252,10 @@ fn emit_named_collection_str<'a, 'arena, 'decl>(
         "Set" => CollectionType::Set,
         "ImmSet" => CollectionType::ImmSet,
         "Pair" => CollectionType::Pair,
+        "vec" | "dict" | "keyset" => {
+            let instr = emit_collection(e, env, expr, fields, None)?;
+            return Ok(emit_pos_then(env.arena, pos, instr));
+        }
         _ => {
             return Err(unrecoverable(format!(
                 "collection: {} does not exist",
@@ -1335,25 +1343,17 @@ fn expr_and_new<'a, 'arena, 'decl>(
     }
 }
 
-fn emit_keyvalue_collection<'a, 'arena, 'decl>(
+fn emit_container<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
     fields: &[ast::Afield],
-    ctype: CollectionType,
     constructor: InstructLitConst<'arena>,
+    add_elem_instr: InstrSeq<'arena>,
+    transform_instr: InstrSeq<'arena>,
+    emitted_pos: InstrSeq<'arena>,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
-    let (transform_instr, add_elem_instr) = match ctype {
-        CollectionType::Dict | CollectionType::Array => {
-            (instr::empty(alloc), instr::add_new_elemc(alloc))
-        }
-        _ => (
-            instr::colfromarray(alloc, ctype),
-            InstrSeq::gather(alloc, vec![instr::dup(alloc), instr::add_elemc(alloc)]),
-        ),
-    };
-    let emitted_pos = emit_pos(alloc, pos);
     Ok(InstrSeq::gather(
         alloc,
         vec![
@@ -1377,6 +1377,52 @@ fn emit_keyvalue_collection<'a, 'arena, 'decl>(
             transform_instr,
         ],
     ))
+}
+
+fn emit_keyvalue_collection<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    fields: &[ast::Afield],
+    ctype: CollectionType,
+    constructor: InstructLitConst<'arena>,
+) -> Result<InstrSeq<'arena>> {
+    let alloc = env.arena;
+    let transform_instr = instr::colfromarray(alloc, ctype);
+    let add_elem_instr = InstrSeq::gather(alloc, vec![instr::dup(alloc), instr::add_elemc(alloc)]);
+    let emitted_pos = emit_pos(alloc, pos);
+    emit_container(
+        e,
+        env,
+        pos,
+        fields,
+        constructor,
+        add_elem_instr,
+        transform_instr,
+        emitted_pos,
+    )
+}
+
+fn emit_array<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    fields: &[ast::Afield],
+    constructor: InstructLitConst<'arena>,
+) -> Result<InstrSeq<'arena>> {
+    let alloc = env.arena;
+    let add_elem_instr = instr::add_new_elemc(alloc);
+    let emitted_pos = emit_pos(alloc, pos);
+    emit_container(
+        e,
+        env,
+        pos,
+        fields,
+        constructor,
+        add_elem_instr,
+        instr::empty(alloc),
+        emitted_pos,
+    )
 }
 
 fn non_numeric(s: &str) -> bool {
@@ -1569,7 +1615,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
             })
         } else {
             let ctor = InstructLitConst::NewDictArray(count as isize);
-            emit_keyvalue_collection(e, env, pos, fields, CollectionType::Dict, ctor)
+            emit_array(e, env, pos, fields, ctor)
         }
     };
     let emit_collection_helper = |e: &mut Emitter<'arena, 'decl>, ctype| {
@@ -1645,8 +1691,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 Ok(instrs?)
             } else {
                 let constr = InstructLitConst::NewDictArray(count as isize);
-                let instrs =
-                    emit_keyvalue_collection(e, env, pos, fields, CollectionType::Array, constr);
+                let instrs = emit_array(e, env, pos, fields, constr);
                 Ok(instrs?)
             }
         }
@@ -1727,7 +1772,7 @@ fn emit_call_isset_expr<'a, 'arena, 'decl>(
             env,
             pos,
             None,
-            QueryOp::Isset,
+            QueryMOp::Isset,
             base_expr,
             opt_elem_expr.as_ref(),
             false,
@@ -1736,14 +1781,14 @@ fn emit_call_isset_expr<'a, 'arena, 'decl>(
         .0);
     }
     if let Some((cid, id, _)) = expr.2.as_class_get() {
-        return emit_class_get(e, env, QueryOp::Isset, cid, id, ReadonlyOp::Any);
+        return emit_class_get(e, env, QueryMOp::Isset, cid, id, ReadonlyOp::Any);
     }
     if let Some((expr_, prop, nullflavor, _)) = expr.2.as_obj_get() {
         return Ok(emit_obj_get(
             e,
             env,
             pos,
-            QueryOp::Isset,
+            QueryMOp::Isset,
             expr_,
             prop,
             nullflavor,
@@ -1771,7 +1816,7 @@ fn emit_call_isset_expr<'a, 'arena, 'decl>(
                     emit_pos(alloc, outer_pos),
                     emit_local(e, env, BareThisOp::NoNotice, lid)?,
                     emit_pos(alloc, outer_pos),
-                    instr::istypec(alloc, IsTypeOp::OpNull),
+                    instr::istypec(alloc, IsTypeOp::Null),
                     instr::not(alloc),
                 ],
             )
@@ -1787,7 +1832,7 @@ fn emit_call_isset_expr<'a, 'arena, 'decl>(
         alloc,
         vec![
             emit_expr(e, env, expr)?,
-            instr::istypec(alloc, IsTypeOp::OpNull),
+            instr::istypec(alloc, IsTypeOp::Null),
             instr::not(alloc),
         ],
     ))
@@ -2047,7 +2092,7 @@ pub fn emit_reified_targs<'a, 'arena, 'decl>(
                 instr::querym(
                     alloc,
                     0,
-                    QueryOp::CGet,
+                    QueryMOp::CGet,
                     MemberKey::PT(
                         prop::from_raw_string(alloc, string_utils::reified::PROP_NAME),
                         ReadonlyOp::Any,
@@ -2102,10 +2147,10 @@ fn has_non_tparam_generics_targs(env: &Env<'_, '_>, targs: &[ast::Targ]) -> bool
     })
 }
 
-fn from_ast_null_flavor(nullflavor: ast::OgNullFlavor) -> ObjNullFlavor {
+fn from_ast_null_flavor(nullflavor: ast::OgNullFlavor) -> ObjMethodOp {
     match nullflavor {
-        ast::OgNullFlavor::OGNullsafe => ObjNullFlavor::NullSafe,
-        ast::OgNullFlavor::OGNullthrows => ObjNullFlavor::NullThrows,
+        ast::OgNullFlavor::OGNullsafe => ObjMethodOp::NullSafe,
+        ast::OgNullFlavor::OGNullthrows => ObjMethodOp::NullThrows,
     }
 }
 
@@ -2138,7 +2183,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             if does_not_have_non_tparam_generics {
                 Ok(instr::empty(alloc))
             } else {
-                fcall_args.flags |= FcallFlags::HAS_GENERICS;
+                fcall_args.flags |= FCallArgsFlags::HasGenerics;
                 emit_reified_targs(
                     e,
                     env,
@@ -2252,7 +2297,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                                 None => emit_id(e, &o.as_ref().0, &id.1, null_flavor, fcall_args),
                                 Some(fid) => {
                                     let fcall_args = FcallArgs::new(
-                                        FcallFlags::default(),
+                                        FCallArgsFlags::default(),
                                         1,
                                         Slice::empty(),
                                         Slice::empty(),
@@ -2545,10 +2590,10 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                 flags, num_args, ..
             } = fcall_args;
             let fq_id = match string_utils::strip_global_ns(&id.1) {
-                "min" if num_args == 2 && !flags.contains(FcallFlags::HAS_UNPACK) => {
+                "min" if num_args == 2 && !flags.contains(FCallArgsFlags::HasUnpack) => {
                     function::FunctionType::<'arena>::from_ast_name(alloc, "__SystemLib\\min2")
                 }
-                "max" if num_args == 2 && !flags.contains(FcallFlags::HAS_UNPACK) => {
+                "max" if num_args == 2 && !flags.contains(FCallArgsFlags::HasUnpack) => {
                     function::FunctionType::<'arena>::from_ast_name(alloc, "__SystemLib\\max2")
                 }
                 _ => function::FunctionType::new(Str::new_str(
@@ -2598,11 +2643,11 @@ fn get_reified_var_cexpr<'a, 'arena>(
             alloc,
             vec![
                 instrs,
-                instr::basec(alloc, 0, MemberOpMode::Warn),
+                instr::basec(alloc, 0, MOpMode::Warn),
                 instr::querym(
                     alloc,
                     1,
-                    QueryOp::CGet,
+                    QueryMOp::CGet,
                     MemberKey::ET(Str::from("classname"), ReadonlyOp::Any),
                 ),
             ],
@@ -2654,7 +2699,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
                     env,
                     &arg.1,
                     None,
-                    QueryOp::InOut,
+                    QueryMOp::InOut,
                     &ag.0,
                     ag.1.as_ref(),
                     false,
@@ -2668,8 +2713,8 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
                             e,
                             env,
                             &arg.1,
-                            Some(MemberOpMode::Define),
-                            QueryOp::InOut,
+                            Some(MOpMode::Define),
+                            QueryMOp::InOut,
                             &ag.0,
                             ag.1.as_ref(),
                             true,
@@ -2762,11 +2807,11 @@ fn get_fcall_args_common<'arena, T>(
     readonly_predicate: fn(&T) -> bool,
     is_inout_arg: fn(&T) -> bool,
 ) -> FcallArgs<'arena> {
-    let mut flags = FcallFlags::default();
-    flags.set(FcallFlags::HAS_UNPACK, uarg.is_some());
-    flags.set(FcallFlags::LOCK_WHILE_UNWINDING, lock_while_unwinding);
-    flags.set(FcallFlags::ENFORCE_MUTABLE_RETURN, !readonly_return);
-    flags.set(FcallFlags::ENFORCE_READONLY_THIS, readonly_this);
+    let mut flags = FCallArgsFlags::default();
+    flags.set(FCallArgsFlags::HasUnpack, uarg.is_some());
+    flags.set(FCallArgsFlags::LockWhileUnwinding, lock_while_unwinding);
+    flags.set(FCallArgsFlags::EnforceMutableReturn, !readonly_return);
+    flags.set(FCallArgsFlags::EnforceReadonlyThis, readonly_this);
     let readonly_args = if args.iter().any(readonly_predicate) {
         Slice::fill_iter(alloc, args.iter().map(readonly_predicate))
     } else {
@@ -3504,24 +3549,24 @@ fn emit_is<'a, 'arena, 'decl>(
 
 fn istype_op(id: impl AsRef<str>) -> Option<IsTypeOp> {
     match id.as_ref() {
-        "is_int" | "is_integer" | "is_long" => Some(IsTypeOp::OpInt),
-        "is_bool" => Some(IsTypeOp::OpBool),
-        "is_float" | "is_real" | "is_double" => Some(IsTypeOp::OpDbl),
-        "is_string" => Some(IsTypeOp::OpStr),
-        "is_object" => Some(IsTypeOp::OpObj),
-        "is_null" => Some(IsTypeOp::OpNull),
-        "is_scalar" => Some(IsTypeOp::OpScalar),
-        "HH\\is_keyset" => Some(IsTypeOp::OpKeyset),
-        "HH\\is_dict" => Some(IsTypeOp::OpDict),
-        "HH\\is_vec" => Some(IsTypeOp::OpVec),
-        "HH\\is_varray" => Some(IsTypeOp::OpVec),
-        "HH\\is_darray" => Some(IsTypeOp::OpDict),
-        "HH\\is_any_array" => Some(IsTypeOp::OpArrLike),
-        "HH\\is_class_meth" => Some(IsTypeOp::OpClsMeth),
-        "HH\\is_fun" => Some(IsTypeOp::OpFunc),
-        "HH\\is_php_array" => Some(IsTypeOp::OpLegacyArrLike),
-        "HH\\is_array_marked_legacy" => Some(IsTypeOp::OpLegacyArrLike),
-        "HH\\is_class" => Some(IsTypeOp::OpClass),
+        "is_int" | "is_integer" | "is_long" => Some(IsTypeOp::Int),
+        "is_bool" => Some(IsTypeOp::Bool),
+        "is_float" | "is_real" | "is_double" => Some(IsTypeOp::Dbl),
+        "is_string" => Some(IsTypeOp::Str),
+        "is_object" => Some(IsTypeOp::Obj),
+        "is_null" => Some(IsTypeOp::Null),
+        "is_scalar" => Some(IsTypeOp::Scalar),
+        "HH\\is_keyset" => Some(IsTypeOp::Keyset),
+        "HH\\is_dict" => Some(IsTypeOp::Dict),
+        "HH\\is_vec" => Some(IsTypeOp::Vec),
+        "HH\\is_varray" => Some(IsTypeOp::Vec),
+        "HH\\is_darray" => Some(IsTypeOp::Dict),
+        "HH\\is_any_array" => Some(IsTypeOp::ArrLike),
+        "HH\\is_class_meth" => Some(IsTypeOp::ClsMeth),
+        "HH\\is_fun" => Some(IsTypeOp::Func),
+        "HH\\is_php_array" => Some(IsTypeOp::LegacyArrLike),
+        "HH\\is_array_marked_legacy" => Some(IsTypeOp::LegacyArrLike),
+        "HH\\is_class" => Some(IsTypeOp::Class),
         _ => None,
     }
 }
@@ -3695,7 +3740,7 @@ pub fn emit_reified_generic_instrs<'arena>(
                 alloc,
                 string_utils::reified::GENERICS_LOCAL_NAME,
             )),
-            MemberOpMode::Warn,
+            MOpMode::Warn,
             ReadonlyOp::Any,
         )
     } else {
@@ -3722,7 +3767,7 @@ pub fn emit_reified_generic_instrs<'arena>(
                 instr::querym(
                     alloc,
                     0,
-                    QueryOp::CGet,
+                    QueryMOp::CGet,
                     MemberKey::EI(index.try_into().unwrap(), ReadonlyOp::Any),
                 ),
             ],
@@ -3820,6 +3865,7 @@ fn emit_load_class_ref<'a, 'arena, 'decl>(
             alloc,
             vec![emit_pos(alloc, pos), instrs, instr::classgetc(alloc)],
         ),
+        _ => panic!("Enum value does not match one of listed variants"),
     };
     Ok(emit_pos_then(alloc, pos, instrs))
 }
@@ -3984,7 +4030,7 @@ fn emit_obj_get<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    query_op: QueryOp,
+    query_op: QueryMOp,
     expr: &ast::Expr,
     prop: &ast::Expr,
     nullflavor: &ast_defs::OgNullFlavor,
@@ -4013,7 +4059,7 @@ fn emit_obj_get<'a, 'arena, 'decl>(
         }
     }
     let mode = if null_coalesce_assignment {
-        MemberOpMode::Warn
+        MOpMode::Warn
     } else {
         get_querym_op_mode(&query_op)
     };
@@ -4195,8 +4241,8 @@ fn emit_array_get<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     outer_pos: &Pos,
-    mode: Option<MemberOpMode>,
-    query_op: QueryOp,
+    mode: Option<MOpMode>,
+    query_op: QueryMOp,
     base: &ast::Expr,
     elem: Option<&ast::Expr>,
     no_final: bool,
@@ -4224,8 +4270,8 @@ fn emit_array_get_<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     outer_pos: &Pos,
-    mode: Option<MemberOpMode>,
-    query_op: QueryOp,
+    mode: Option<MOpMode>,
+    query_op: QueryMOp,
     base_expr: &ast::Expr,
     elem: Option<&ast::Expr>,
     no_final: bool,
@@ -4241,7 +4287,7 @@ fn emit_array_get_<'a, 'arena, 'decl>(
         _ => {
             let local_temp_kind = get_local_temp_kind(env, false, inout_param_info, elem);
             let mode = if null_coalesce_assignment {
-                MemberOpMode::Warn
+                MOpMode::Warn
             } else {
                 mode.unwrap_or_else(|| get_querym_op_mode(&query_op))
             };
@@ -4254,7 +4300,7 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                 mode,
                 false,
                 match query_op {
-                    QueryOp::Isset => BareThisOp::NoNotice,
+                    QueryMOp::Isset => BareThisOp::NoNotice,
                     _ => BareThisOp::Notice,
                 },
                 null_coalesce_assignment,
@@ -4600,7 +4646,7 @@ fn emit_store_for_simple_base<'a, 'arena, 'decl>(
         e,
         env,
         base,
-        MemberOpMode::Define,
+        MOpMode::Define,
         false,
         BareThisOp::Notice,
         false,
@@ -4617,7 +4663,7 @@ fn emit_store_for_simple_base<'a, 'arena, 'decl>(
             emit_pos(alloc, pos),
             base_setup_instrs,
             if is_base {
-                instr::dim(alloc, MemberOpMode::Define, memberkey)
+                instr::dim(alloc, MOpMode::Define, memberkey)
             } else {
                 instr::setm(alloc, 0, memberkey)
             },
@@ -4625,18 +4671,18 @@ fn emit_store_for_simple_base<'a, 'arena, 'decl>(
     ))
 }
 
-fn get_querym_op_mode(query_op: &QueryOp) -> MemberOpMode {
-    match query_op {
-        QueryOp::InOut => MemberOpMode::InOut,
-        QueryOp::CGet => MemberOpMode::Warn,
-        _ => MemberOpMode::ModeNone,
+fn get_querym_op_mode(query_op: &QueryMOp) -> MOpMode {
+    match *query_op {
+        QueryMOp::InOut => MOpMode::InOut,
+        QueryMOp::CGet => MOpMode::Warn,
+        _ => MOpMode::None,
     }
 }
 
 fn emit_class_get<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
-    query_op: QueryOp,
+    query_op: QueryMOp,
     cid: &ast::ClassId,
     prop: &ast::ClassGetExpr,
     readonly_op: ReadonlyOp,
@@ -4648,12 +4694,13 @@ fn emit_class_get<'a, 'arena, 'decl>(
         vec![
             InstrSeq::from((alloc, emit_class_expr(e, env, cexpr, prop)?)),
             match query_op {
-                QueryOp::CGet => instr::cgets(alloc, readonly_op),
-                QueryOp::Isset => instr::issets(alloc),
-                QueryOp::CGetQuiet => {
+                QueryMOp::CGet => instr::cgets(alloc, readonly_op),
+                QueryMOp::Isset => instr::issets(alloc),
+                QueryMOp::CGetQuiet => {
                     return Err(Unrecoverable("emit_class_get: CGetQuiet".into()));
                 }
-                QueryOp::InOut => return Err(Unrecoverable("emit_class_get: InOut".into())),
+                QueryMOp::InOut => return Err(Unrecoverable("emit_class_get: InOut".into())),
+                _ => panic!("Enum value does not match one of listed variants"),
             },
         ],
     ))
@@ -5083,11 +5130,11 @@ fn emit_readonly_expr<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     match &expr.2 {
         aast::Expr_::ObjGet(x) => {
-            Ok(emit_obj_get(e, env, pos, QueryOp::CGet, &x.0, &x.1, &x.2, false, true)?.0)
+            Ok(emit_obj_get(e, env, pos, QueryMOp::CGet, &x.0, &x.1, &x.2, false, true)?.0)
         }
         aast::Expr_::Call(c) => emit_call_expr(e, env, pos, None, true, c),
         aast::Expr_::ClassGet(x) => {
-            emit_class_get(e, env, QueryOp::CGet, &x.0, &x.1, ReadonlyOp::Any)
+            emit_class_get(e, env, QueryMOp::CGet, &x.0, &x.1, ReadonlyOp::Any)
         }
         _ => emit_expr(e, env, expr),
     }
@@ -5111,7 +5158,7 @@ fn emit_quiet_expr<'a, 'arena, 'decl>(
             env,
             pos,
             None,
-            QueryOp::CGetQuiet,
+            QueryMOp::CGetQuiet,
             &x.0,
             x.1.as_ref(),
             false,
@@ -5121,7 +5168,7 @@ fn emit_quiet_expr<'a, 'arena, 'decl>(
             e,
             env,
             pos,
-            QueryOp::CGetQuiet,
+            QueryMOp::CGetQuiet,
             &x.0,
             &x.1,
             &x.2,
@@ -5158,7 +5205,7 @@ fn emit_null_coalesce_assignment<'a, 'arena, 'decl>(
         vec![
             quiet_instr,
             instr::dup(alloc),
-            instr::istypec(alloc, IsTypeOp::OpNull),
+            instr::istypec(alloc, IsTypeOp::Null),
             instr::jmpnz(alloc, do_set_label),
             instr::popl(alloc, l_nonnull),
             emit_popc_n(querym_n_unpopped),
@@ -5254,7 +5301,7 @@ fn emit_binop<'a, 'arena, 'decl>(
                 vec![
                     emit_quiet_expr(e, env, pos, e1, false)?.0,
                     instr::dup(alloc),
-                    instr::istypec(alloc, IsTypeOp::OpNull),
+                    instr::istypec(alloc, IsTypeOp::Null),
                     instr::not(alloc),
                     instr::jmpnz(alloc, end_label),
                     instr::popc(alloc),
@@ -5338,6 +5385,7 @@ fn emit_as<'a, 'arena, 'decl>(
                         TypeStructResolveOp::DontResolve => {
                             instr::is_type_structc_dontresolve(alloc)
                         }
+                        _ => panic!("Enum value does not match one of listed variants"),
                     },
                     instr::jmpnz(alloc, then_label),
                     if *is_nullable {
@@ -5472,7 +5520,7 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
         e,
         env,
         base,
-        MemberOpMode::Define,
+        MOpMode::Define,
         false, /* is_object */
         BareThisOp::Notice,
         false,           /*null_coalesce_assignment*/
@@ -5570,7 +5618,7 @@ fn emit_base<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     expr: &ast::Expr,
-    mode: MemberOpMode,
+    mode: MOpMode,
     is_object: bool,
     notice: BareThisOp,
     null_coalesce_assignment: bool,
@@ -5653,7 +5701,7 @@ fn emit_base_<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     expr: &ast::Expr,
-    mode: MemberOpMode,
+    mode: MOpMode,
     is_object: bool,
     notice: BareThisOp,
     null_coalesce_assignment: bool,
@@ -5665,8 +5713,8 @@ fn emit_base_<'a, 'arena, 'decl>(
     let alloc = env.arena;
     let pos = &expr.1;
     let expr_ = &expr.2;
-    let base_mode = if mode == MemberOpMode::InOut {
-        MemberOpMode::Warn
+    let base_mode = if mode == MOpMode::InOut {
+        MOpMode::Warn
     } else {
         mode
     };
@@ -5690,7 +5738,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                         base_stack_size,
                         cls_stack_size,
                     },
-                    store: instr::basel(alloc, local, MemberOpMode::Define, ReadonlyOp::Any),
+                    store: instr::basel(alloc, local, MOpMode::Define, ReadonlyOp::Any),
                 }
             }
             _ => ArrayGetBase::Regular(ArrayGetBaseData {
@@ -5702,7 +5750,7 @@ fn emit_base_<'a, 'arena, 'decl>(
             }),
         }
     };
-    // Called when emitting a base with MemberOpMode::Define on a Readonly expression
+    // Called when emitting a base with MOpMode::Define on a Readonly expression
     let emit_readonly_lval_base = |
         e: &mut Emitter<'arena, 'decl>,
         env: &Env<'a, 'arena>,
@@ -5722,7 +5770,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                         e,
                         base_instr,
                         instr::empty(alloc),
-                        instr::basel(alloc, v, MemberOpMode::Define, ReadonlyOp::CheckROCOW),
+                        instr::basel(alloc, v, MOpMode::Define, ReadonlyOp::CheckROCOW),
                         0,
                         0,
                     )))
@@ -5755,7 +5803,7 @@ fn emit_base_<'a, 'arena, 'decl>(
     use ast::Expr_;
     match expr_ {
         // Readonly expression in assignment
-        Expr_::ReadonlyExpr(r) if base_mode == MemberOpMode::Define => {
+        Expr_::ReadonlyExpr(r) if base_mode == MOpMode::Define => {
             if let Some(result) = emit_readonly_lval_base(e, env, r) {
                 result
             } else {
@@ -5942,7 +5990,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                             },
                             store: InstrSeq::gather(
                                 alloc,
-                                vec![store, instr::dim(alloc, MemberOpMode::Define, mk)],
+                                vec![store, instr::dim(alloc, MOpMode::Define, mk)],
                             ),
                         }
                     }
@@ -5977,7 +6025,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                                     store,
                                     instr::dim(
                                         alloc,
-                                        MemberOpMode::Define,
+                                        MOpMode::Define,
                                         MemberKey::EL(local, ReadonlyOp::Any),
                                     ),
                                 ],
@@ -6249,14 +6297,14 @@ fn emit_array_get_fixed<'arena>(
                 alloc,
                 vec![
                     instr::pushl(alloc, local),
-                    instr::basec(alloc, 0, MemberOpMode::Warn),
+                    instr::basec(alloc, 0, MOpMode::Warn),
                 ],
             ),
             1,
         )
     } else {
         (
-            instr::basel(alloc, local, MemberOpMode::Warn, ReadonlyOp::Any),
+            instr::basel(alloc, local, MOpMode::Warn, ReadonlyOp::Any),
             0,
         )
     };
@@ -6269,9 +6317,9 @@ fn emit_array_get_fixed<'arena>(
             .map(|(i, ix)| {
                 let mk = MemberKey::EI(*ix as i64, ReadonlyOp::Any);
                 if i == 0 {
-                    instr::querym(alloc, stack_count, QueryOp::CGet, mk)
+                    instr::querym(alloc, stack_count, QueryMOp::CGet, mk)
                 } else {
-                    instr::dim(alloc, MemberOpMode::Warn, mk)
+                    instr::dim(alloc, MOpMode::Warn, mk)
                 }
             })
             .collect(),
@@ -6550,8 +6598,8 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                 }
                 (_, opt_elem_expr) => {
                     let mode = match op {
-                        LValOp::Unset => MemberOpMode::Unset,
-                        _ => MemberOpMode::Define,
+                        LValOp::Unset => MOpMode::Unset,
+                        _ => MOpMode::Define,
                     };
                     let (elem_instrs, elem_stack_size) =
                         emit_elem(e, env, opt_elem_expr, None, null_coalesce_assignment)?;
@@ -6626,8 +6674,8 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                     ));
                 }
                 let mode = match op {
-                    LValOp::Unset => MemberOpMode::Unset,
-                    _ => MemberOpMode::Define,
+                    LValOp::Unset => MOpMode::Unset,
+                    _ => MOpMode::Define,
                 };
                 let readonly_op = if rhs_readonly {
                     ReadonlyOp::Readonly
@@ -7017,7 +7065,7 @@ pub fn emit_is_null<'a, 'arena, 'decl>(
             return Ok(instr::istypel(
                 alloc,
                 get_local(e, env, pos, local_id::get_name(id))?,
-                IsTypeOp::OpNull,
+                IsTypeOp::Null,
             ));
         }
     }
@@ -7026,7 +7074,7 @@ pub fn emit_is_null<'a, 'arena, 'decl>(
         alloc,
         vec![
             emit_expr(e, env, expr)?,
-            instr::istypec(alloc, IsTypeOp::OpNull),
+            instr::istypec(alloc, IsTypeOp::Null),
         ],
     ))
 }

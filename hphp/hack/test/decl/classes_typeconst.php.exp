@@ -29,8 +29,7 @@
           sm_type =
           (Rwitness_from_decl ([7:19-20]),
            (Tfun
-              { ft_arity = (Fstandard ()); ft_tparams = [];
-                ft_where_constraints = []; ft_params = [];
+              { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [7:19-20]) };
                 ft_ret =
                 { et_enforced = Typing_defs_core.Unenforced;
@@ -49,8 +48,7 @@
            sm_type =
            (Rwitness_from_decl ([11:19-20]),
             (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = []; ft_params = [];
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [11:19-20]) };
                  ft_ret =
@@ -96,8 +94,7 @@
            sm_type =
            (Rwitness_from_decl ([20:28-39]),
             (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = [];
+               { ft_tparams = []; ft_where_constraints = [];
                  ft_params =
                  [{ fp_pos = [20:60-68]; fp_name = (Some "$request");
                     fp_type =

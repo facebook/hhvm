@@ -13,7 +13,7 @@ use arena_deserializer::serde::Deserialize;
 use bincode::Options;
 use compile::EnvFlags;
 use cxx::CxxString;
-use external_decl_provider::{ExternalDeclProvider, ExternalDeclProviderResult};
+use decl_provider::external::{ExternalDeclProvider, ExternalDeclProviderResult};
 use facts_rust::facts;
 use libc::{c_char, c_int};
 use no_pos_hash::position_insensitive_hash;
@@ -285,11 +285,7 @@ fn hackc_compile_from_text_cpp_ffi(
             &mut output,
             text,
             Some(&native_env),
-            unified_decl_provider::DeclProvider::ExternalDeclProvider(ExternalDeclProvider::new(
-                c_decl_getter_fn,
-                c_hhvm_provider_ptr,
-                &decl_allocator,
-            )),
+            &ExternalDeclProvider::new(c_decl_getter_fn, c_hhvm_provider_ptr, &decl_allocator),
         )?;
         Ok(output)
     })
@@ -472,17 +468,15 @@ fn hackc_compile_unit_from_text_cpp_ffi(
             unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
 
         let decl_allocator = bumpalo::Bump::new();
+        let decl_provider =
+            ExternalDeclProvider::new(c_decl_getter_fn, c_hhvm_provider_ptr, &decl_allocator);
         let compile_result = compile::unit_from_text(
             alloc,
             &compile_env,
             stack_limit,
             text,
             Some(&native_env),
-            unified_decl_provider::DeclProvider::ExternalDeclProvider(ExternalDeclProvider::new(
-                c_decl_getter_fn,
-                c_hhvm_provider_ptr,
-                &decl_allocator,
-            )),
+            &decl_provider,
         );
 
         match compile_result {

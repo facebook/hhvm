@@ -189,6 +189,14 @@ inline Class::veclen_t Class::classVecLen() const {
 ///////////////////////////////////////////////////////////////////////////////
 // Ancestry.
 
+namespace {
+inline bool isConcreteNormalClass(const Class* cls) {
+  auto constexpr disallowed =
+    AttrAbstract | AttrEnum | AttrEnumClass | AttrInterface | AttrTrait;
+  return !(cls->attrs() & disallowed);
+}
+}
+
 inline bool Class::classofNonIFace(const Class* cls) const {
   assertx(!(cls->attrs() & AttrInterface));
   if (m_classVecLen >= cls->m_classVecLen) {
@@ -198,6 +206,14 @@ inline bool Class::classofNonIFace(const Class* cls) const {
 }
 
 inline bool Class::classof(const Class* cls) const {
+  auto const bit = cls->m_instanceBitsIndex.load(std::memory_order_relaxed);
+  assertx(bit == kNoInstanceBit || kProfileInstanceBit || bit > 0);
+  if (bit > 0) {
+    return m_instanceBits.test(bit);
+  } else if (bit == kProfileInstanceBit) {
+    InstanceBits::profile(cls->name());
+  }
+
   // If `cls' is an interface, we can simply check to see if cls is in
   // this->m_interfaces.  Otherwise, if `this' is not an interface, the
   // classVec check will determine whether it's an instance of cls (including
@@ -206,9 +222,16 @@ inline bool Class::classof(const Class* cls) const {
   // check can never return true in that case (cls's classVec contains only
   // non-interfaces, while this->classVec is either empty, or contains
   // interfaces).
-  if (UNLIKELY(cls->attrs() & AttrInterface)) {
-    return this == cls ||
-      m_interfaces.lookupDefault(cls->m_preClass->name(), nullptr) == cls;
+  if (UNLIKELY(isInterface(cls))) {
+    if (this == cls) return true;
+    auto const slot = cls->preClass()->ifaceVtableSlot();
+    if (slot != kInvalidSlot && isConcreteNormalClass(this)) {
+      assertx(RO::RepoAuthoritative);
+      auto const ok = slot < m_vtableVecLen && m_vtableVec[slot].iface == cls;
+      assertx(ok == (m_interfaces.lookupDefault(cls->name(), nullptr) == cls));
+      return ok;
+    }
+    return m_interfaces.lookupDefault(cls->name(), nullptr) == cls;
   }
   return classofNonIFace(cls);
 }

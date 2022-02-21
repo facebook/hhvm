@@ -96,13 +96,10 @@ struct RepoOptionsFlags {
   H(bool,           ConstDefaultFuncArgs,             false)          \
   H(bool,           ConstStaticProps,                 false)          \
   H(bool,           AbstractStaticProps,              false)          \
-  H(bool,           DisableUnsetClassConst,           false)          \
   H(bool,           DisallowFuncPtrsInConstants,      false)          \
   H(bool,           AllowUnstableFeatures,            false)          \
   H(bool,           EnableXHPClassModifier,           true)           \
   H(bool,           DisableXHPElementMangling,        true)           \
-  H(bool,           DisableArray,                     true)           \
-  H(bool,           DisableArrayTypehint,             true)           \
   H(bool,           EnableEnumClasses,                true)           \
   H(bool,           DisallowFunAndClsMethPseudoFuncs, false)          \
   H(bool,           DisallowInstMeth,                 false)          \
@@ -853,6 +850,7 @@ struct RuntimeOption {
   F(uint32_t, ThreadTCFrozenBufferSize,4 << 20)                         \
   F(uint32_t, ThreadTCDataBufferSize,  256 << 10)                       \
   F(uint32_t, RDSSize,                 64 << 20)                        \
+  F(uint32_t, SharedProfileSize,       128 << 20)                       \
   F(uint32_t, HHBCArenaChunkSize,      10 << 20)                        \
   F(bool, ProfileBC,                   false)                           \
   F(bool, ProfileHeapAcrossRequests,   false)                           \

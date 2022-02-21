@@ -131,7 +131,11 @@ void doTailAwaitDecRefs(IRGS& env, const std::vector<Type>& locals) {
       if (!locals[i].maybe(TCounted)) continue;
       auto const data = LocalId { safe_cast<uint32_t>(i) };
       gen(env, AssertLoc, data, locals[i], fp(env));
-      decRef(env, gen(env, LdLoc, data, locals[i], fp(env)), i);
+      decRef(
+          env,
+          gen(env, LdLoc, data, locals[i], fp(env)),
+          static_cast<DecRefProfileId>(i)
+      );
     }
   } else {
     gen(env, GenericRetDecRefs, fp(env));
@@ -283,7 +287,7 @@ SSATmp* implYieldGen(IRGS& env, SSATmp* key, SSATmp* value) {
     // Teleport yielded key.
     auto const oldKey = gen(env, LdContArKey, TInitCell, fp(env));
     gen(env, StContArKey, fp(env), key);
-    decRef(env, oldKey);
+    decRef(env, oldKey, DecRefProfileId::ResumableOldKey);
 
     if (key->type() <= TInt) {
       gen(env, ContArUpdateIdx, fp(env), key);
@@ -294,7 +298,7 @@ SSATmp* implYieldGen(IRGS& env, SSATmp* key, SSATmp* value) {
       auto const newIdx = gen(env, ContArIncIdx, fp(env));
       auto const oldKey = gen(env, LdContArKey, TInitCell, fp(env));
       gen(env, StContArKey, fp(env), newIdx);
-      decRef(env, oldKey);
+      decRef(env, oldKey, DecRefProfileId::ResumableOldKey);
     } else {
       // Fast path: if this generator has no yield k => v, it is
       // guaranteed that the key is an int.
@@ -305,7 +309,7 @@ SSATmp* implYieldGen(IRGS& env, SSATmp* key, SSATmp* value) {
   // Teleport yielded value.
   auto const oldValue = gen(env, LdContArValue, TInitCell, fp(env));
   gen(env, StContArValue, fp(env), value);
-  decRef(env, oldValue);
+  decRef(env, oldValue, DecRefProfileId::ResumableOldValue);
 
   // Return value of iteration.
   return cns(env, TInitNull);
@@ -455,7 +459,7 @@ void implAwaitSucceeded(IRGS& env, SSATmp* child) {
   auto const res = gen(env, LdWHResult, awaitedTy, child);
   popC(env);
   gen(env, IncRef, res);
-  decRef(env, child);
+  decRef(env, child, DecRefProfileId::Default);
   push(env, res);
 }
 
@@ -472,7 +476,7 @@ void implAwaitFailed(IRGS& env, SSATmp* child, Block* exit) {
   auto const exception = gen(env, LdWHResult, TObj, child);
   popC(env);
   gen(env, IncRef, exception);
-  decRef(env, child);
+  decRef(env, child, DecRefProfileId::Default);
   if (offset != kInvalidOffset) {
     push(env, exception);
     jmpImpl(env, offset);

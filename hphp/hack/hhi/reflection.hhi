@@ -156,7 +156,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 }
 
 class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector {
-  const IS_DEPRECATED = 262144;
+  const int IS_DEPRECATED = 262144;
 
   public $name = '';
 
@@ -172,12 +172,12 @@ class ReflectionFunction extends ReflectionFunctionAbstract implements Reflector
 
 class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   // Constants
-  const IS_STATIC    = 1;
-  const IS_PUBLIC    = 256;
-  const IS_PROTECTED = 512;
-  const IS_PRIVATE   = 1024;
-  const IS_ABSTRACT  = 2;
-  const IS_FINAL     = 4;
+  const int IS_STATIC    = 1;
+  const int IS_PUBLIC    = 256;
+  const int IS_PROTECTED = 512;
+  const int IS_PRIVATE   = 1024;
+  const int IS_ABSTRACT  = 2;
+  const int IS_FINAL     = 4;
 
   public $name = '';
   public $class = '';
@@ -199,7 +199,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   public function invokeArgs($object, varray $args);
   public function getDeclaringClass()[];
   public function getPrototype()[];
-  public function setAccessible(bool $accessible);
+  public function setAccessible(bool $accessible)[write_props]: void;
   final public function getAttributeClass<T as HH\MethodAttribute>(classname<T> $c)[]: ?T;
 }
 
@@ -240,10 +240,10 @@ class ReflectionParameter implements Reflector {
 }
 
 class ReflectionProperty implements Reflector {
-  const IS_STATIC = 1;
-  const IS_PUBLIC = 256;
-  const IS_PROTECTED = 512;
-  const IS_PRIVATE = 1024;
+  const int IS_STATIC = 1;
+  const int IS_PUBLIC = 256;
+  const int IS_PROTECTED = 512;
+  const int IS_PRIVATE = 1024;
 
   public $name = '';
   public $class = '';
@@ -264,7 +264,7 @@ class ReflectionProperty implements Reflector {
   public function getModifiers()[];
   public function getDeclaringClass()[];
   public function getDocComment()[];
-  public function setAccessible($accessible);
+  public function setAccessible(bool $accessible)[write_props]: void;
   public function getTypeText()[];
   final public function getAttributes()[]: darray<string, varray<mixed>>;
   final public function hasAttribute(string $name)[]: bool;

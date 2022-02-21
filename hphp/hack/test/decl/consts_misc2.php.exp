@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,225 +1,225 @@
+@@ -1,224 +1,224 @@
  [("\\TestC",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -23,8 +23,7 @@
            sm_type =
            (Rwitness_from_decl ([4:26-27]),
             (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = [];
+               { ft_tparams = []; ft_where_constraints = [];
                  ft_params =
                  [{ fp_pos = [4:32-34]; fp_name = (Some "$x");
                     fp_type =

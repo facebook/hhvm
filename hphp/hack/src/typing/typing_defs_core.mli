@@ -325,10 +325,8 @@ and 'ty capability =
  * implicit params for functions. *)
 and 'ty fun_implicit_params = { capability: 'ty capability }
 
-(* The type of a function AND a method.
- * A function has a min and max arity because of optional arguments *)
+(* The type of a function AND a method *)
 and 'ty fun_type = {
-  ft_arity: 'ty fun_arity;
   ft_tparams: 'ty tparam list;
   ft_where_constraints: 'ty where_constraint list;
   ft_params: 'ty fun_params;
@@ -338,16 +336,6 @@ and 'ty fun_type = {
   ft_flags: int;
   ft_ifc_decl: ifc_fun_decl;
 }
-
-(* Arity information for a fun_type; indicating the minimum number of
- * args expected by the function and the maximum number of args for
- * standard, non-variadic functions or the type of variadic argument taken *)
-and 'ty fun_arity =
-  (* min; max is List.length ft_params *)
-  | Fstandard
-  (* PHP5.6-style ...$args finishes the func declaration.
-     min ; variadic param type *)
-  | Fvariadic of 'ty fun_param
 
 and 'ty possibly_enforced_ty = {
   et_enforced: enforcement;
@@ -456,8 +444,6 @@ module Pp : sig
 
   val pp_fun_type : Format.formatter -> 'a ty fun_type -> unit
 
-  val pp_fun_arity : Format.formatter -> 'a ty fun_arity -> unit
-
   val pp_fun_param : Format.formatter -> 'a ty fun_param -> unit
 
   val pp_fun_params : Format.formatter -> 'a ty fun_params -> unit
@@ -486,10 +472,6 @@ type locl_where_constraint = locl_ty where_constraint
 type decl_fun_type = decl_ty fun_type
 
 type locl_fun_type = locl_ty fun_type
-
-type decl_fun_arity = decl_ty fun_arity
-
-type locl_fun_arity = locl_ty fun_arity
 
 type decl_possibly_enforced_ty = decl_ty possibly_enforced_ty
 

@@ -22,6 +22,8 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/vm/fcall-args-flags.h"
+#include "hphp/runtime/vm/hhbc-shared.h"
 #include "hphp/runtime/vm/member-key.h"
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/either.h"
@@ -101,45 +103,19 @@ struct IterArgs {
 //   inoutArgs        = flags & EnforceInOut ? decode bool vec : nullptr
 //   asyncEagerOffset = flags & HasAEO ? decode_ba() : kInvalidOffset
 struct FCallArgsBase {
-  enum Flags : uint16_t {
-    None                         = 0,
-    // Unpack remaining arguments from a varray passed by ...$args.
-    HasUnpack                    = (1 << 0),
-    // Pass generics to the callee.
-    HasGenerics                  = (1 << 1),
-    // Lock newly constructed object if unwinding the constructor call.
-    LockWhileUnwinding           = (1 << 2),
-    // Arguments are known to be compatible with prologue of the callee and
-    // do not need to be repacked.
-    SkipRepack                   = (1 << 3),
-    // Coeffects are known to be correct, no need to check.
-    // If the callee has polymoprhic coeffects, pass caller's coeffects.
-    SkipCoeffectsCheck           = (1 << 4),
-    // Indicates that the caller requires the return value to be mutable
-    // (not readonly)
-    EnforceMutableReturn         = (1 << 5),
-    // Indicates that the callee should not modify its instance
-    EnforceReadonlyThis          = (1 << 6),
-    // HHBC-only: Op should be resolved using an explicit context class
-    ExplicitContext              = (1 << 7),
-    // HHBC-only: is the number of returns provided? false => 1
-    HasInOut                     = (1 << 8),
-    // HHBC-only: should this FCall enforce argument inout-ness?
-    EnforceInOut                 = (1 << 9),
-    // HHBC-only: should this FCall enforce argument readonly-ness?
-    EnforceReadonly              = (1 << 10),
-    // HHBC-only: is the async eager offset provided? false => kInvalidOffset
-    HasAsyncEagerOffset          = (1 << 11),
-    // HHBC-only: the remaining space is used for number of arguments
-    NumArgsStart                 = (1 << 12),
-  };
+  using Flags = FCallArgsFlags;
+  // The first (lowest) bit of numArgs.
+  static constexpr uint16_t kFirstNumArgsBit = 12;
 
   // Flags that are valid on FCallArgsBase::flags struct (i.e. non-HHBC-only).
-  static constexpr uint8_t kInternalFlags =
-    HasUnpack | HasGenerics | LockWhileUnwinding | SkipRepack |
-    SkipCoeffectsCheck | EnforceMutableReturn | EnforceReadonlyThis;
-  // The first (lowest) bit of numArgs.
-  static constexpr uint8_t kFirstNumArgsBit = 12;
+  static constexpr Flags kInternalFlags =
+    Flags::HasUnpack |
+    Flags::HasGenerics |
+    Flags::LockWhileUnwinding |
+    Flags::SkipRepack |
+    Flags::SkipCoeffectsCheck |
+    Flags::EnforceMutableReturn |
+    Flags::EnforceReadonlyThis;
 
   explicit FCallArgsBase(Flags flags, uint32_t numArgs, uint32_t numRets)
     : numArgs(numArgs)
@@ -219,7 +195,7 @@ struct FCallArgs : FCallArgsBase {
   const StringData* context;
 };
 
-static_assert(1 << FCallArgs::kFirstNumArgsBit == FCallArgs::NumArgsStart, "");
+static_assert(1 << FCallArgs::kFirstNumArgsBit == FCallArgsFlags::NumArgsStart, "");
 
 using PrintLocal = std::function<std::string(int32_t local)>;
 std::string show(const IterArgs&, PrintLocal);
@@ -320,24 +296,6 @@ enum InstrFlags {
   CF_TF = (CF | TF),
 };
 
-#define INCDEC_OPS    \
-  INCDEC_OP(PreInc)   \
-  INCDEC_OP(PostInc)  \
-  INCDEC_OP(PreDec)   \
-  INCDEC_OP(PostDec)  \
-                      \
-  INCDEC_OP(PreIncO)  \
-  INCDEC_OP(PostIncO) \
-  INCDEC_OP(PreDecO)  \
-  INCDEC_OP(PostDecO) \
-
-enum class IncDecOp : uint8_t {
-#define INCDEC_OP(incDecOp) incDecOp,
-  INCDEC_OPS
-#undef INCDEC_OP
-};
-
-
 #define READONLY_VIOLATION_OPS   \
   OP(Readonly)                   \
   OP(Mutable)                    \
@@ -368,51 +326,6 @@ inline bool isIncDecO(IncDecOp op) {
     op == IncDecOp::PostIncO || op == IncDecOp::PostDecO;
 }
 
-#define ISTYPE_OPS                             \
-  ISTYPE_OP(Null)                              \
-  ISTYPE_OP(Bool)                              \
-  ISTYPE_OP(Int)                               \
-  ISTYPE_OP(Dbl)                               \
-  ISTYPE_OP(Str)                               \
-  ISTYPE_OP(Vec)                               \
-  ISTYPE_OP(Dict)                              \
-  ISTYPE_OP(Keyset)                            \
-  ISTYPE_OP(Obj)                               \
-  ISTYPE_OP(Scalar)                            \
-  ISTYPE_OP(ArrLike)                           \
-  ISTYPE_OP(LegacyArrLike)                     \
-  ISTYPE_OP(Res)                               \
-  ISTYPE_OP(ClsMeth)                           \
-  ISTYPE_OP(Func)                              \
-  ISTYPE_OP(Class)
-
-enum class IsTypeOp : uint8_t {
-#define ISTYPE_OP(op) op,
-  ISTYPE_OPS
-#undef ISTYPE_OP
-};
-
-#define INITPROP_OPS    \
-  INITPROP_OP(Static)   \
-  INITPROP_OP(NonStatic)
-
-enum class InitPropOp : uint8_t {
-#define INITPROP_OP(op) op,
-  INITPROP_OPS
-#undef INITPROP_OP
-};
-
-#define FATAL_OPS                               \
-  FATAL_OP(Runtime)                             \
-  FATAL_OP(Parse)                               \
-  FATAL_OP(RuntimeOmitFrame)
-
-enum class FatalOp : uint8_t {
-#define FATAL_OP(x) x,
-  FATAL_OPS
-#undef FATAL_OP
-};
-
 // Each of the setop ops maps to a binary bytecode op. We have reasons
 // for using distinct bitwise representations, though. This macro records
 // their correspondence for mapping either direction.
@@ -439,27 +352,6 @@ enum class SetOpOp : uint8_t {
 #undef SETOP_OP
 };
 
-#define BARETHIS_OPS    \
-  BARETHIS_OP(Notice)   \
-  BARETHIS_OP(NoNotice) \
-  BARETHIS_OP(NeverNull)
-
-enum class BareThisOp : uint8_t {
-#define BARETHIS_OP(x) x,
-  BARETHIS_OPS
-#undef BARETHIS_OP
-};
-
-#define SILENCE_OPS \
-  SILENCE_OP(Start) \
-  SILENCE_OP(End)
-
-enum class SilenceOp : uint8_t {
-#define SILENCE_OP(x) x,
-  SILENCE_OPS
-#undef SILENCE_OP
-};
-
 #define OO_DECL_EXISTS_OPS                             \
   OO_DECL_EXISTS_OP(Class)                             \
   OO_DECL_EXISTS_OP(Interface)                         \
@@ -469,114 +361,6 @@ enum class OODeclExistsOp : uint8_t {
 #define OO_DECL_EXISTS_OP(x) x,
   OO_DECL_EXISTS_OPS
 #undef OO_DECL_EXISTS_OP
-};
-
-#define OBJMETHOD_OPS                             \
-  OBJMETHOD_OP(NullThrows)                        \
-  OBJMETHOD_OP(NullSafe)
-
-enum class ObjMethodOp : uint8_t {
-#define OBJMETHOD_OP(x) x,
-  OBJMETHOD_OPS
-#undef OBJMETHOD_OP
-};
-
-#define SWITCH_KINDS                            \
-  KIND(Unbounded)                               \
-  KIND(Bounded)
-
-enum class SwitchKind : uint8_t {
-#define KIND(x) x,
-  SWITCH_KINDS
-#undef KIND
-};
-
-#define M_OP_MODES                                 \
-  MODE(None)                                       \
-  MODE(Warn)                                       \
-  MODE(Define)                                     \
-  MODE(Unset)                                      \
-  /* InOut mode restricts allowed bases to the
-     array like types. */                          \
-  MODE(InOut)
-
-enum class MOpMode : uint8_t {
-#define MODE(name) name,
-  M_OP_MODES
-#undef MODE
-};
-
-#define QUERY_M_OPS                               \
-  OP(CGet)                                        \
-  OP(CGetQuiet)                                   \
-  OP(Isset)                                       \
-  OP(InOut)
-
-enum class QueryMOp : uint8_t {
-#define OP(name) name,
-  QUERY_M_OPS
-#undef OP
-};
-
-#define SET_RANGE_OPS \
-  OP(Forward)         \
-  OP(Reverse)
-
-enum class SetRangeOp : uint8_t {
-#define OP(name) name,
-  SET_RANGE_OPS
-#undef OP
-};
-
-#define TYPE_STRUCT_RESOLVE_OPS \
-  OP(Resolve)                  \
-  OP(DontResolve)
-
-enum class TypeStructResolveOp : uint8_t {
-#define OP(name) name,
-  TYPE_STRUCT_RESOLVE_OPS
-#undef OP
-};
-
-#define CONT_CHECK_OPS                            \
-  CONT_CHECK_OP(IgnoreStarted)                    \
-  CONT_CHECK_OP(CheckStarted)
-
-enum class ContCheckOp : uint8_t {
-#define CONT_CHECK_OP(name) name,
-  CONT_CHECK_OPS
-#undef CONT_CHECK_OP
-};
-
-#define CUD_OPS                                 \
-  CUD_OP(IgnoreIter)                            \
-  CUD_OP(FreeIter)
-
-enum class CudOp : uint8_t {
-#define CUD_OP(name) name,
-  CUD_OPS
-#undef CUD_OP
-};
-
-#define SPECIAL_CLS_REFS                        \
-  REF(Self)                                     \
-  REF(Static)                                   \
-  REF(Parent)
-
-enum class SpecialClsRef : uint8_t {
-#define REF(name) name,
-  SPECIAL_CLS_REFS
-#undef REF
-};
-
-#define IS_LOG_AS_DYNAMIC_CALL_OPS                  \
-  IS_LOG_AS_DYNAMIC_CALL_OP(LogAsDynamicCall)       \
-  IS_LOG_AS_DYNAMIC_CALL_OP(DontLogAsDynamicCall)
-
-enum class IsLogAsDynamicCallOp : uint8_t {
-#define IS_LOG_AS_DYNAMIC_CALL_OP(name) name,
-  IS_LOG_AS_DYNAMIC_CALL_OPS
-#undef IS_LOG_AS_DYNAMIC_CALL_OP
 };
 
 constexpr uint32_t kMaxConcatN = 4;
@@ -998,7 +782,6 @@ const char* subopToName(QueryMOp);
 const char* subopToName(SetRangeOp);
 const char* subopToName(TypeStructResolveOp);
 const char* subopToName(ContCheckOp);
-const char* subopToName(CudOp);
 const char* subopToName(SpecialClsRef);
 const char* subopToName(IsLogAsDynamicCallOp);
 const char* subopToName(ReadonlyOp);

@@ -90,9 +90,6 @@ let merge_decl_header_with_hints ~params ~ret decl_header env =
          ~f:(fun { ft_ret = { et_type; _ }; _ } -> et_type)
          decl_header)
   in
-  let non_variadic_params =
-    List.filter params ~f:(fun p -> not p.param_is_variadic)
-  in
   let params_decl_ty =
     match decl_header with
     | None ->
@@ -102,32 +99,16 @@ let merge_decl_header_with_hints ~params ~ret decl_header env =
             env
             (hint_of_type_hint h.param_type_hint)
             None)
-        non_variadic_params
+        params
     | Some { ft_params; _ } ->
-      List.zip_exn non_variadic_params ft_params
+      List.zip_exn params ft_params
       |> List.map ~f:(fun (h, { fp_type = { et_type; _ }; _ }) ->
              merge_hint_with_decl_hint
                env
                (hint_of_type_hint h.param_type_hint)
                (Some et_type))
   in
-  let variadicity_decl_ty =
-    match (decl_header, List.find params ~f:(fun p -> p.param_is_variadic)) with
-    | (Some { ft_arity = Fvariadic { fp_type = { et_type; _ }; _ }; _ }, Some fp)
-      ->
-      [
-        merge_hint_with_decl_hint
-          env
-          (hint_of_type_hint fp.param_type_hint)
-          (Some et_type);
-      ]
-    | (_, Some fp) ->
-      [
-        merge_hint_with_decl_hint env (hint_of_type_hint fp.param_type_hint) None;
-      ]
-    | _ -> []
-  in
-  (ret_decl_ty, params_decl_ty @ variadicity_decl_ty)
+  (ret_decl_ty, params_decl_ty)
 
 let fun_def ctx fd :
     (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
@@ -216,12 +197,12 @@ let fun_def ctx fd :
   in
   let sound_dynamic_check_saved_env = env in
   let (env, param_tys) =
-    List.zip_exn f.f_params params_decl_ty
-    |> List.map_env env ~f:(fun env (param, hint) ->
-           Typing_param.make_param_local_ty env hint param)
+    Typing_param.make_param_local_tys
+      ~dynamic_mode:false
+      env
+      params_decl_ty
+      f.f_params
   in
-  let check_has_hint p t = Typing_param.check_param_has_hint env p t in
-  List.iter2_exn ~f:check_has_hint f.f_params param_tys;
   let params_need_immutable = Typing_coeffects.get_ctx_vars f.f_ctxs in
   let can_read_globals =
     Typing_subtype.is_sub_type
@@ -335,20 +316,11 @@ let method_dynamically_callable env cls m params_decl_ty ret_locl_ty =
         }
     in
     let (env, param_tys) =
-      List.zip_exn m.m_params params_decl_ty
-      |> List.map_env env ~f:(fun env (param, hint) ->
-             let dyn_ty =
-               make_dynamic @@ Pos_or_decl.of_raw_pos param.param_pos
-             in
-             let ty =
-               match hint with
-               | Some ty when Typing_enforceability.is_enforceable env ty ->
-                 Typing_make_type.intersection
-                   (Reason.Rsupport_dynamic_type Pos_or_decl.none)
-                   [ty; dyn_ty]
-               | _ -> dyn_ty
-             in
-             Typing_param.make_param_local_ty env (Some ty) param)
+      Typing_param.make_param_local_tys
+        ~dynamic_mode:true
+        env
+        params_decl_ty
+        m.m_params
     in
     let params_need_immutable = Typing_coeffects.get_ctx_vars m.m_ctxs in
     let (env, _) =
@@ -529,12 +501,12 @@ let method_def ~is_disposable env cls m =
   let (env, return, return_ty) = method_return env m ret_decl_ty in
   let sound_dynamic_check_saved_env = env in
   let (env, param_tys) =
-    List.zip_exn m.m_params params_decl_ty
-    |> List.map_env env ~f:(fun env (param, hint) ->
-           Typing_param.make_param_local_ty env hint param)
+    Typing_param.make_param_local_tys
+      ~dynamic_mode:false
+      env
+      params_decl_ty
+      m.m_params
   in
-  let param_fn p t = Typing_param.check_param_has_hint env p t in
-  List.iter2_exn ~f:param_fn m.m_params param_tys;
   Typing_memoize.check_method env m;
   let params_need_immutable = Typing_coeffects.get_ctx_vars m.m_ctxs in
   let can_read_globals =

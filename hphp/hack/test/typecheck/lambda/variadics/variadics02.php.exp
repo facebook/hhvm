@@ -1,1 +1,8 @@
-No errors
+File "variadics02.php", line 22, characters 14-22:
+Was expecting an object but type is unknown (Typing[4297])
+  File "variadics02.php", line 20, characters 31-36:
+  It is unknown because a type could not be determined here
+File "variadics02.php", line 32, characters 14-22:
+Was expecting an object but type is unknown (Typing[4297])
+  File "variadics02.php", line 30, characters 28-33:
+  It is unknown because a type could not be determined here

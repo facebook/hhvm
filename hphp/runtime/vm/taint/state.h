@@ -23,11 +23,11 @@
 #include "hphp/util/arena.h"
 
 #include <chrono>
-#include <deque>
 #include <map>
 #include <memory>
 #include <optional>
 #include <set>
+#include <vector>
 
 #include "hphp/runtime/vm/taint/configuration.h"
 
@@ -83,8 +83,13 @@ struct Path {
 
 using Value = Path*;
 
+/**
+ * Use a stack based on a dequeue with a fixed size
+ * (based on HHVM's VM stack size) to avoid allocating
+ * after creation.
+ */
 struct Stack {
-  Stack(const std::deque<Value>& stack = {}) : m_stack(stack) {}
+  Stack();
 
   void push(Value value);
   void pushFront(Value value);
@@ -102,7 +107,11 @@ struct Stack {
   void clear();
 
  private:
-  std::deque<Value> m_stack;
+  bool full() const;
+  bool empty() const;
+  std::vector<Value> m_stack;
+  size_t m_top;
+  size_t m_bottom;
 };
 
 /*

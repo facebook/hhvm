@@ -388,7 +388,7 @@ void conjureBeginInlining(IRGS& env,
   env.irb->exceptionStackBoundary();
 
   auto const flags = hasUnpack
-    ? FCallArgs::Flags::HasUnpack : FCallArgs::Flags::None;
+    ? FCallArgsFlags::HasUnpack : FCallArgsFlags::FCANone;
 
   // thisType is the context type inside the closure, but beginInlining()'s ctx
   // is a context given to the prologue.
@@ -681,7 +681,10 @@ bool endCatchFromInlined(IRGS& env) {
   }
 
   // Clear the evaluation stack and jump to the shared EndCatch handler.
-  while (spOffBCFromStackBase(env) > spOffEmpty(env)) popDecRef(env);
+  int locId = 0;
+  while (spOffBCFromStackBase(env) > spOffEmpty(env)) {
+    popDecRef(env, static_cast<DecRefProfileId>(locId++));
+  }
   gen(env, Jmp, env.inlineState.returnTarget.back().endCatchTarget);
   return true;
 }

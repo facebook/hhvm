@@ -34,20 +34,14 @@ pub fn from_ast<'arena, 'decl>(
         );
         emit_fatal::raise_fatal_parse(&attr.name.0, "Attribute arguments must be literals")
     })?;
-    let fully_qualified_id: &'arena str = if attr.name.1.starts_with("__") {
+    let fully_qualified_id = if attr.name.1.starts_with("__") {
         // don't do anything to builtin attributes
-        e.alloc.alloc_str(&attr.name.1)
+        &attr.name.1
     } else {
-        match escaper::escape(
-            hhbc_id::class::ClassType::from_ast_name_and_mangle(e.alloc, &attr.name.1)
-                .unsafe_as_str(),
-        ) {
-            std::borrow::Cow::Borrowed(s) => s,
-            std::borrow::Cow::Owned(s) => e.alloc.alloc_str(s.as_str()),
-        }
+        hhbc_id::class::ClassType::from_ast_name_and_mangle(e.alloc, &attr.name.1).unsafe_as_str()
     };
     Ok(HhasAttribute {
-        name: fully_qualified_id.into(),
+        name: e.alloc.alloc_str(fully_qualified_id).into(),
         arguments: e.alloc.alloc_slice_fill_iter(arguments.into_iter()).into(),
     })
 }

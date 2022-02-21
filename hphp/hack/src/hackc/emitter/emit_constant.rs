@@ -4,11 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use core_utils_rust as utils;
-use emit_type_hint::{self as emit_type_hint, Kind};
+use emit_type_hint::Kind;
 use env::{emitter::Emitter, Env};
-use ffi::{Slice, Str};
+use ffi::{Maybe, Slice, Str};
 use hhas_coeffects::HhasCoeffects;
-use hhas_constant::{self as hhas_constant, HhasConstant};
+use hhas_constant::HhasConstant;
 use hhas_function::{HhasFunction, HhasFunctionFlags};
 use hhas_pos::HhasSpan;
 use hhbc_id::{r#const, function};
@@ -16,12 +16,13 @@ use hhbc_string_utils::strip_global_ns;
 use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::{instr, InstrSeq, Result};
 use oxidized::ast;
+use runtime::TypedValue;
 
 fn emit_constant_cinit<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     constant: &'a ast::Gconst,
-    c: &HhasConstant<'arena>,
+    init: Option<InstrSeq<'arena>>,
 ) -> Result<Option<HhasFunction<'arena>>> {
     let alloc = env.arena;
     let const_id = r#const::ConstType::from_ast_name(alloc, &constant.name.1);
@@ -41,19 +42,12 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
             )
         })
         .transpose()?;
-    Option::from(c.initializer_instrs.as_ref().map(|instrs| {
+    init.map(|instrs| {
         let verify_instr = match return_type_info {
             None => instr::empty(alloc),
             Some(_) => instr::verify_ret_type_c(alloc),
         };
-        let instrs = InstrSeq::gather(
-            alloc,
-            vec![
-                InstrSeq::clone(alloc, instrs),
-                verify_instr,
-                instr::retc(alloc),
-            ],
-        );
+        let instrs = InstrSeq::gather(alloc, vec![instrs, verify_instr, instr::retc(alloc)]);
         let body = emit_body::make_body(
             alloc,
             e,
@@ -78,7 +72,7 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
             flags: HhasFunctionFlags::empty(),
             attrs: Attr::AttrNoInjection,
         })
-    }))
+    })
     .transpose()
 }
 
@@ -87,8 +81,8 @@ fn emit_constant<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     constant: &'a ast::Gconst,
 ) -> Result<(HhasConstant<'arena>, Option<HhasFunction<'arena>>)> {
-    let c = hhas_constant::from_ast(e, env, &constant.name, false, Some(&constant.value))?;
-    let f = emit_constant_cinit(e, env, constant, &c)?;
+    let (c, init) = from_ast(e, env, &constant.name, false, Some(&constant.value))?;
+    let f = emit_constant_cinit(e, env, constant, init)?;
     Ok((c, f))
 }
 
@@ -103,4 +97,30 @@ pub fn emit_constants_from_program<'a, 'arena, 'decl>(
         .collect::<Result<Vec<_>>>()?;
     let (contants, inits): (Vec<_>, Vec<_>) = const_tuples.into_iter().unzip();
     Ok((contants, inits.into_iter().flatten().collect()))
+}
+
+pub fn from_ast<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    id: &'a ast::Id,
+    is_abstract: bool,
+    expr: Option<&ast::Expr>,
+) -> Result<(HhasConstant<'arena>, Option<InstrSeq<'arena>>)> {
+    let alloc = env.arena;
+    let (value, initializer_instrs) = match expr {
+        None => (None, None),
+        Some(init) => match ast_constant_folder::expr_to_typed_value(emitter, init) {
+            Ok(v) => (Some(v), None),
+            Err(_) => (
+                Some(TypedValue::Uninit),
+                Some(emit_expression::emit_expr(emitter, env, init)?),
+            ),
+        },
+    };
+    let constant = HhasConstant {
+        name: hhbc_id::r#const::ConstType::from_ast_name(alloc, id.name()),
+        value: Maybe::from(value),
+        is_abstract,
+    };
+    Ok((constant, initializer_instrs))
 }

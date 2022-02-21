@@ -402,8 +402,8 @@ void implCmp(IRGS& env, Op op) {
   };
 
   auto done = [&] {
-    decRef(env, left);
-    decRef(env, right);
+    decRef(env, left, DecRefProfileId::CmpLhs);
+    decRef(env, right, DecRefProfileId::CmpRhs);
   };
 
   if (!equiv()) {
@@ -465,10 +465,12 @@ void implAdd(IRGS& env, Op op) {
   binaryArith(env, op);
 }
 
+
+
 template<class PreDecRef> void implConcat(
     IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef, bool setop) {
   auto cast =
-    [&] (SSATmp* s) {
+    [&] (SSATmp* s, DecRefProfileId locId) {
       if (s->isA(TStr)) return s;
       const ConvNoticeLevel notice_level =
         flagToConvNoticeLevel(RuntimeOption::EvalNoticeOnCoerceForStrConcat);
@@ -477,7 +479,7 @@ template<class PreDecRef> void implConcat(
         ConvTVToStr,
         ConvNoticeData{notice_level, s_ConvNoticeReasonConcat.get()},
         s);
-      decRef(env, s);
+      decRef(env, s, locId);
       return ret;
     };
 
@@ -487,8 +489,14 @@ template<class PreDecRef> void implConcat(
    */
   auto const str =
     [&] () -> SSATmp* {
-      if (c1->isA(TInt)) return gen(env, ConcatStrInt, cast(c2), c1);
-      if (c2->isA(TInt)) return gen(env, ConcatIntStr, c2, c1 = cast(c1));
+      if (c1->isA(TInt)) {
+        return gen(
+            env, ConcatStrInt, cast(c2, DecRefProfileId::ConcatSrc2), c1);
+      }
+      if (c2->isA(TInt)) {
+        return gen(
+            env, ConcatIntStr, c2, c1 = cast(c1, DecRefProfileId::ConcatSrc1));
+      }
       return nullptr;
     }();
 
@@ -496,7 +504,7 @@ template<class PreDecRef> void implConcat(
     preDecRef(str);
     // Note that the ConcatFoo opcode consumed the reference on its first
     // argument, so we only need to decref the second one.
-    decRef(env, c1);
+    decRef(env, c1, DecRefProfileId::ConcatSrc1);
     return;
   }
 
@@ -511,12 +519,12 @@ template<class PreDecRef> void implConcat(
    * behavior if refcount opts were off, since we'd COW strings that we
    * shouldn't (a ConvTVToStr of a Str will simplify into an IncRef).
    */
-  if (!setop) c2 = cast(c2);
-  c1 = cast(c1);
-  if (setop) c2 = cast(c2);
+  if (!setop) c2 = cast(c2, DecRefProfileId::ConcatSrc2);
+  c1 = cast(c1, DecRefProfileId::ConcatSrc1);
+  if (setop) c2 = cast(c2, DecRefProfileId::ConcatSrc2);
   auto const r  = gen(env, ConcatStrStr, c2, c1);  // consumes c2 reference
   preDecRef(r);
-  decRef(env, c1);
+  decRef(env, c1, DecRefProfileId::ConcatSrc1);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -551,15 +559,15 @@ void emitConcatN(IRGS& env, uint32_t n) {
     always_assert(n == 4);
 
     push(env, gen(env, ConcatStr4, s4, s3, s2, s1));
-    decRef(env, s3);
+    decRef(env, s3, DecRefProfileId::ConcatStr3);
   }
-  decRef(env, s2);
-  decRef(env, s1);
+  decRef(env, s2, DecRefProfileId::ConcatStr2);
+  decRef(env, s1, DecRefProfileId::ConcatStr1);
 
-  if (s1 != t1) decRef(env, t1);
-  if (s2 != t2) decRef(env, t2);
-  if (s3 != t3) decRef(env, t3);
-  if (s4 != t4) decRef(env, t4);
+  if (s1 != t1) decRef(env, t1, DecRefProfileId::ConcatSrc1);
+  if (s2 != t2) decRef(env, t2, DecRefProfileId::ConcatSrc2);
+  if (s3 != t3) decRef(env, t3, DecRefProfileId::ConcatSrc3);
+  if (s4 != t4) decRef(env, t4, DecRefProfileId::ConcatSrc4);
 }
 
 void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
@@ -647,8 +655,8 @@ void implShift(IRGS& env, Opcode op) {
   // - PHP7 defines negative shifts to throw an ArithmeticError.
   // - PHP5 semantics for such operations are machine-dependent.
   push(env, gen(env, op, lhs, shiftAmount));
-  decRef(env, lhs);
-  decRef(env, shiftAmount);
+  decRef(env, lhs, DecRefProfileId::ShiftBase);
+  decRef(env, shiftAmount, DecRefProfileId::ShiftAmount);
 }
 
 void emitShl(IRGS& env) {
@@ -737,7 +745,7 @@ void emitBitNot(IRGS& env) {
 void emitNot(IRGS& env) {
   auto const src = popC(env);
   push(env, negate(env, gen(env, ConvTVToBool, src)));
-  decRef(env, src);
+  decRef(env, src, DecRefProfileId::Default);
 }
 
 const StaticString s_DIVISION_BY_ZERO(Strings::DIVISION_BY_ZERO);

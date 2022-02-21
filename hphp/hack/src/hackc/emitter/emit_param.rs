@@ -150,7 +150,7 @@ fn from_ast<'a, 'arena, 'decl>(
         param
             .expr
             .as_ref()
-            .map(|expr| (emitter.label_gen_mut().next_default_arg(), expr.clone()))
+            .map(|expr| (emitter.label_gen_mut().next_regular(), expr.clone()))
     } else {
         None
     };

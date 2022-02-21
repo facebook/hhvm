@@ -30,25 +30,10 @@ const NON_EVICTABLE_CHUNK_SIZE: usize = 1024 * 1024;
 
 /// This struct gives access to a shard, including its hashmap and its
 /// allocators.
-pub struct Shard<'shm, 'a, K, V, S> {
-    pub map: RwLockWriteGuard<'a, Map<'shm, K, V, S>>,
+struct Shard<'shm, 'a, K, V, S> {
+    map: RwLockWriteGuard<'a, Map<'shm, K, V, S>>,
     alloc_non_evictable: &'a ShardAlloc<'shm>,
     alloc_evictable: &'a ShardAlloc<'shm>,
-}
-
-impl<'shm, 'a, K, V, S> Shard<'shm, 'a, K, V, S> {
-    /// Return an allocator.
-    ///
-    /// If the argument is true, return the allocator for evictable values.
-    /// If the argument is false, return the allocator for non-evictable values.
-    #[inline(always)]
-    pub fn alloc(&self, evictable: bool) -> &'a ShardAlloc<'shm> {
-        if evictable {
-            self.alloc_evictable
-        } else {
-            self.alloc_non_evictable
-        }
-    }
 }
 
 /// Each value stored in a concurrent hashmap needs to keep track of
@@ -302,29 +287,6 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
         self.maps[shard_index].read().unwrap()
     }
 
-    /// Access the map that belongs to the given key for reading.
-    pub fn read_map<R>(&self, key: &K, f: impl FnOnce(&Map<'shm, K, V, S>) -> R) -> R {
-        let shard_index = self.shard_index_for(key);
-        let map = self.maps[shard_index].read().unwrap();
-        f(&map)
-    }
-
-    /// Access the map and that belongs to the given key for writing. Also provides
-    /// access to the corresponding shard allocator.
-    ///
-    /// Warning! May deadlock (and thus panic) when you already hold a writer lock on the
-    /// queried map.
-    ///
-    /// Of course, if querying multiple maps at the same time, you should make
-    /// sure your access pattern can't deadlock. In practice (at the moment)
-    /// this means you can't try to hold multiple writer locks (or a write lock
-    /// a read lock) at the same time, because the hasher is abstract. You have
-    /// no way of knowing which map you need!
-    pub fn write_map<R>(&self, key: &K, f: impl FnOnce(Shard<'shm, '_, K, V, S>) -> R) -> R {
-        let shard = self.shard_for_writing(key);
-        f(shard)
-    }
-
     /// Empty a shard.
     fn empty_shard<'a>(shard: &mut Shard<'shm, 'a, K, V, S>) {
         // Remove all values that might point to evictable data.
@@ -402,6 +364,36 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
         // bound to this lock.
         let shard = OwningRef::new(shard);
         shard.try_map(|m| m.get(key).ok_or(())).ok()
+    }
+
+    /// Inspect a value, then remove it from the map.
+    ///
+    /// Ideally, we'd return the removed value directly, however, we can't
+    /// return the value, because it might contain invalid references. What
+    /// we can do is pass a reference to a closure, which limits the lifetime
+    /// of that value.
+    pub fn inspect_and_remove<R>(&self, key: &K, inspect: impl FnOnce(Option<&V>) -> R) -> R {
+        let mut shard_lock = self.shard_for_writing(key);
+        let value = shard_lock.map.remove(key);
+
+        // This is quite unsafe. We must make sure we hold the lock as long
+        // as the value is in use, because the value might point to data in
+        // the heap, which might get evicted if an other writer is active!
+        //
+        // As such, I am dropping the `value` and `shard_lock`(in that order!)
+        // manually as a coding hint.
+        let res = inspect(value.as_ref());
+        drop(value);
+        drop(shard_lock);
+
+        // DO NOT USE value HERE! The lock has been released.
+        res
+    }
+
+    /// Check if the map contains a value for a key.
+    pub fn contains_key(&self, key: &K) -> bool {
+        let shard = self.shard_for_reading(key);
+        shard.contains_key(key)
     }
 
     /// Return the total number of bytes allocated.
@@ -513,9 +505,9 @@ mod integration_tests {
                     };
 
                     for &(key, value) in scenario.iter() {
-                        cmap.write_map(&key, |mut shard| {
-                            shard.map.insert(key, U64Value(value));
+                        cmap.insert(key, None, false, |_buffer| {
                             std::thread::sleep(OP_SLEEP);
+                            U64Value(value)
                         });
                     }
 
@@ -539,10 +531,8 @@ mod integration_tests {
         }
 
         for (key, values) in expected {
-            cmap.read_map(&key, |map| {
-                let U64Value(value) = map[&key];
-                assert!(values.contains(&value));
-            });
+            let value = cmap.get(&key).unwrap().0;
+            assert!(values.contains(&value));
         }
 
         assert_eq!(unsafe { libc::munmap(mmap_ptr, MEM_HEAP_SIZE) }, 0);

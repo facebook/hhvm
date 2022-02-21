@@ -51,8 +51,7 @@
            sm_type =
            (Rwitness_from_decl ([7:19-22]),
             (Tfun
-               { ft_arity = (Fstandard ());
-                 ft_tparams =
+               { ft_tparams =
                  [{ Typing_defs_core.tp_variance = Invariant;
                     tp_name = ([7:23-25], "Tf"); tp_tparams = [];
                     tp_constraints =
@@ -114,8 +113,7 @@
            sm_type =
            (Rwitness_from_decl ([11:19-22]),
             (Tfun
-               { ft_arity = (Fstandard ());
-                 ft_tparams =
+               { ft_tparams =
                  [{ Typing_defs_core.tp_variance = Invariant;
                     tp_name = ([11:23-25], "Tf"); tp_tparams = [];
                     tp_constraints =

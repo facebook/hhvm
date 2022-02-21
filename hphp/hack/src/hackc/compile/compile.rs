@@ -12,13 +12,12 @@ use aast_parser::{
 use anyhow::anyhow;
 use bitflags::bitflags;
 use bytecode_printer::{print_unit, Context};
-use decl_provider::NoDeclProvider;
+use decl_provider::{DeclProvider, NoDeclProvider};
 use emit_unit::{emit_unit, FromAstFlags};
 use env::emitter::Emitter;
 use hackc_unit::HackCUnit;
-use hhbc_ast::FatalOp;
+use hhvm_hhbc_defs_ffi::ffi::FatalOp;
 use instruction_sequence::Error;
-use itertools::{Either, Either::*};
 use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use options::{Arg, HackLang, Hhvm, HhvmFlags, LangFlags, Options, Php7Flags, RepoFlags};
@@ -31,23 +30,24 @@ use parser_core_types::{
 };
 use rewrite_program::rewrite_program;
 use stack_limit::StackLimit;
+use thiserror::Error;
 
 /// Common input needed for compilation.  Extra care is taken
 /// so that everything is easily serializable at the FFI boundary
 /// until the migration from OCaml is fully complete
 #[derive(Debug, FromOcamlRep)]
-pub struct Env<STR: AsRef<str>> {
+pub struct Env<S> {
     pub filepath: RelativePath,
-    pub config_jsons: Vec<STR>,
-    pub config_list: Vec<STR>,
+    pub config_jsons: Vec<S>,
+    pub config_list: Vec<S>,
     pub flags: EnvFlags,
 }
 
 #[derive(Debug)]
-pub struct NativeEnv<STR: AsRef<str>> {
+pub struct NativeEnv<S> {
     pub filepath: RelativePath,
-    pub aliased_namespaces: STR,
-    pub include_roots: STR,
+    pub aliased_namespaces: S,
+    pub include_roots: S,
     pub emit_class_pointers: i32,
     pub check_int_overflow: i32,
     pub hhbc_flags: HHBCFlags,
@@ -98,11 +98,9 @@ bitflags! {
         const ALLOW_UNSTABLE_FEATURES=1 << 2;
         const CONST_DEFAULT_FUNC_ARGS=1 << 3;
         const CONST_STATIC_PROPS=1 << 4;
-        const DISABLE_ARRAY=1 << 5;
-        // No longer using bit 6
-        const DISABLE_ARRAY_TYPEHINT=1 << 7;
+        // No longer using bits 5-7
         const DISABLE_LVAL_AS_AN_EXPRESSION=1 << 8;
-        const DISABLE_UNSET_CLASS_CONST=1 << 9;
+        // No longer using bit 9
         const DISALLOW_INST_METH=1 << 10;
         const DISABLE_XHP_ELEMENT_MANGLING=1 << 11;
         const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS=1 << 12;
@@ -190,17 +188,8 @@ impl ParserFlags {
         if self.contains(ParserFlags::CONST_STATIC_PROPS) {
             f |= LangFlags::CONST_STATIC_PROPS;
         }
-        if self.contains(ParserFlags::DISABLE_ARRAY) {
-            f |= LangFlags::DISABLE_ARRAY;
-        }
-        if self.contains(ParserFlags::DISABLE_ARRAY_TYPEHINT) {
-            f |= LangFlags::DISABLE_ARRAY_TYPEHINT;
-        }
         if self.contains(ParserFlags::DISABLE_LVAL_AS_AN_EXPRESSION) {
             f |= LangFlags::DISABLE_LVAL_AS_AN_EXPRESSION;
-        }
-        if self.contains(ParserFlags::DISABLE_UNSET_CLASS_CONST) {
-            f |= LangFlags::DISABLE_UNSET_CLASS_CONST;
         }
         if self.contains(ParserFlags::DISALLOW_INST_METH) {
             f |= LangFlags::DISALLOW_INST_METH;
@@ -279,7 +268,7 @@ pub fn emit_fatal_unit<S: AsRef<str>>(
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
         env.flags.contains(EnvFlags::ENABLE_DECL),
         &alloc,
-        unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
+        &NoDeclProvider,
     );
 
     let prog = emit_unit::emit_fatal_unit(&alloc, FatalOp::Parse, &Pos::make_none(), err_msg);
@@ -303,7 +292,7 @@ pub fn from_text<'arena, 'decl, S: AsRef<str>>(
     writer: &mut dyn std::io::Write,
     source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
-    decl_provider: unified_decl_provider::DeclProvider<'decl>,
+    decl_provider: &'decl dyn DeclProvider<'decl>,
 ) -> anyhow::Result<Option<Profile>> {
     let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
     let (unit, profile) = emit_unit_from_text(&mut emitter, env, stack_limit, source_text)?;
@@ -361,7 +350,7 @@ pub fn unit_from_text<'arena, 'decl, S: AsRef<str>>(
     stack_limit: &StackLimit,
     source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
-    decl_provider: unified_decl_provider::DeclProvider<'decl>,
+    decl_provider: &'decl dyn DeclProvider<'decl>,
 ) -> anyhow::Result<(HackCUnit<'arena>, Option<Profile>)> {
     let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
     emit_unit_from_text(&mut emitter, env, stack_limit, source_text)
@@ -374,12 +363,7 @@ pub fn unit_to_string<W: std::io::Write, S: AsRef<str>>(
     program: &HackCUnit<'_>,
 ) -> anyhow::Result<()> {
     let alloc = bumpalo::Bump::new();
-    let emitter = create_emitter(
-        env,
-        native_env,
-        unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
-        &alloc,
-    )?;
+    let emitter = create_emitter(env, native_env, &NoDeclProvider, &alloc)?;
     let (print_result, _) = time(|| {
         print_unit(
             &Context::new(
@@ -445,11 +429,11 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
     });
 
     let (program, codegen_t) = match parse_result {
-        Either::Right(mut ast) => {
+        Ok(mut ast) => {
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
             time(move || rewrite_and_emit(emitter, env, namespace_env, &mut ast))
         }
-        Either::Left((pos, msg, is_runtime_error)) => {
+        Err(ParseError(pos, msg, is_runtime_error)) => {
             time(|| emit_fatal(emitter.alloc, is_runtime_error, &pos, msg))
         }
     };
@@ -485,7 +469,7 @@ fn emit_fatal<'arena>(
 fn create_emitter<'arena, 'decl, S: AsRef<str>>(
     env: &Env<S>,
     native_env: Option<&NativeEnv<S>>,
-    decl_provider: unified_decl_provider::DeclProvider<'decl>,
+    decl_provider: &'decl dyn DeclProvider<'decl>,
     alloc: &'arena bumpalo::Bump,
 ) -> anyhow::Result<Emitter<'arena, 'decl>> {
     let opts = match native_env {
@@ -522,15 +506,12 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
         po_const_default_lambda_args: hack_lang_flags(LangFlags::CONST_DEFAULT_LAMBDA_ARGS),
         tco_const_static_props: hack_lang_flags(LangFlags::CONST_STATIC_PROPS),
         po_abstract_static_props: hack_lang_flags(LangFlags::ABSTRACT_STATIC_PROPS),
-        po_disable_unset_class_const: hack_lang_flags(LangFlags::DISABLE_UNSET_CLASS_CONST),
         po_disallow_func_ptrs_in_constants: hack_lang_flags(
             LangFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS,
         ),
         po_enable_xhp_class_modifier: hack_lang_flags(LangFlags::ENABLE_XHP_CLASS_MODIFIER),
         po_disable_xhp_element_mangling: hack_lang_flags(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
         po_enable_enum_classes: hack_lang_flags(LangFlags::ENABLE_ENUM_CLASSES),
-        po_disable_array: hack_lang_flags(LangFlags::DISABLE_ARRAY),
-        po_disable_array_typehint: hack_lang_flags(LangFlags::DISABLE_ARRAY_TYPEHINT),
         po_allow_unstable_features: hack_lang_flags(LangFlags::ALLOW_UNSTABLE_FEATURES),
         po_disallow_fun_and_cls_meth_pseudo_funcs: hack_lang_flags(
             LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,
@@ -539,6 +520,10 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
         ..Default::default()
     }
 }
+
+#[derive(Error, Debug)]
+#[error("{0}: {1}")]
+pub(crate) struct ParseError(Pos, String, bool);
 
 /// parse_file returns either error(Left) or ast(Right)
 /// - Left((Position, message, is_runtime_error))
@@ -550,7 +535,7 @@ fn parse_file(
     elaborate_namespaces: bool,
     namespace_env: RcOc<NamespaceEnv>,
     is_systemlib: bool,
-) -> Either<(Pos, String, bool), ast::Program> {
+) -> Result<ast::Program, ParseError> {
     let aast_env = AastEnv {
         codegen: true,
         fail_open: false,
@@ -574,12 +559,14 @@ fn parse_file(
         Some(stack_limit),
     );
     match ast_result {
-        Err(AastError::Other(msg)) => Left((Pos::make_none(), msg, false)),
-        Err(AastError::NotAHackFile()) => {
-            Left((Pos::make_none(), "Not a Hack file".to_string(), false))
-        }
+        Err(AastError::Other(msg)) => Err(ParseError(Pos::make_none(), msg, false)),
+        Err(AastError::NotAHackFile()) => Err(ParseError(
+            Pos::make_none(),
+            "Not a Hack file".to_string(),
+            false,
+        )),
         Err(AastError::ParserFatal(syntax_error, pos)) => {
-            Left((pos, syntax_error.message.to_string(), false))
+            Err(ParseError(pos, syntax_error.message.to_string(), false))
         }
         Ok(ast) => match ast {
             AastResult { syntax_errors, .. } if !syntax_errors.is_empty() => {
@@ -588,7 +575,7 @@ fn parse_file(
                     .find(|e| e.error_type == ErrorType::RuntimeError)
                     .unwrap_or(&syntax_errors[0]);
                 let pos = indexed_source_text.relative_pos(error.start_offset, error.end_offset);
-                Left((
+                Err(ParseError(
                     pos,
                     error.message.to_string(),
                     error.error_type == ErrorType::RuntimeError,
@@ -596,7 +583,7 @@ fn parse_file(
             }
             AastResult { lowpri_errors, .. } if !lowpri_errors.is_empty() => {
                 let (pos, msg) = lowpri_errors.into_iter().next().unwrap();
-                Left((pos, msg, false))
+                Err(ParseError(pos, msg, false))
             }
             AastResult {
                 errors,
@@ -614,11 +601,11 @@ fn parse_file(
                         && e.code() != 2103
                 });
                 if errors.next().is_some() {
-                    Left((Pos::make_none(), String::new(), false))
+                    Err(ParseError(Pos::make_none(), String::new(), false))
                 } else {
                     match aast {
-                        Ok(aast) => Right(aast),
-                        Err(msg) => Left((Pos::make_none(), msg, false)),
+                        Ok(aast) => Ok(aast),
+                        Err(msg) => Err(ParseError(Pos::make_none(), msg, false)),
                     }
                 }
             }
@@ -642,7 +629,7 @@ pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> St
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
         env.flags.contains(EnvFlags::ENABLE_DECL),
         &alloc,
-        unified_decl_provider::DeclProvider::NoDeclProvider(NoDeclProvider),
+        &NoDeclProvider,
     );
     let ctx = Context::new(
         &emitter,

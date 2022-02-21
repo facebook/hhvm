@@ -31,9 +31,10 @@ let rec of_decl_ty (ty : decl_ty) : string =
   | Tfun f ->
     let params = List.map f.ft_params ~f:of_fun_param in
     let params =
-      match f.ft_arity with
-      | Fstandard -> params
-      | Fvariadic p -> params @ [of_enforced_ty p.fp_type ^ "..."]
+      if get_ft_variadic f then
+        params @ ["..."]
+      else
+        params
     in
     Printf.sprintf
       "(function(%s): %s)"
@@ -109,22 +110,20 @@ let is_awaitable (ty : decl_ty) : bool =
     true
   | _ -> false
 
-let params_source (arity : decl_ty fun_arity) (params : decl_ty fun_params) :
-    string =
-  let explicit_params = List.map params ~f:(param_source ~variadic:false) in
-  let varaidic_params =
-    match arity with
-    | Fstandard -> []
-    | Fvariadic ty -> [param_source ty ~variadic:true]
+let params_source ~variadic (params : decl_ty fun_params) : string =
+  let n = List.length params in
+  let explicit_params =
+    List.mapi params ~f:(fun i p ->
+        param_source ~variadic:(variadic && i + 1 = n) p)
   in
-  String.concat ~sep:", " (explicit_params @ varaidic_params)
+  String.concat ~sep:", " explicit_params
 
 let of_method (name : string) (meth : class_elt) : string =
   let (_, ty_) = deref (Lazy.force meth.ce_type) in
   let (params, return_ty, async_modifier) =
     match ty_ with
     | Tfun ft ->
-      ( params_source ft.ft_arity ft.ft_params,
+      ( params_source ~variadic:(get_ft_variadic ft) ft.ft_params,
         of_decl_ty ft.ft_ret.et_type,
         if is_awaitable ft.ft_ret.et_type then
           "async "

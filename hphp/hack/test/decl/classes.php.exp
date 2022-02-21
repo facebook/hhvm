@@ -32,8 +32,8 @@
                sm_type =
                (Rwitness_from_decl ([9:19-30]),
                 (Tfun
-                   { ft_arity = (Fstandard ()); ft_tparams = [];
-                     ft_where_constraints = []; ft_params = [];
+                   { ft_tparams = []; ft_where_constraints = [];
+                     ft_params = [];
                      ft_implicit_params =
                      { capability = (CapDefaults [9:19-30]) };
                      ft_ret =
@@ -54,8 +54,7 @@
           sm_type =
           (Rwitness_from_decl ([11:20-33]),
            (Tfun
-              { ft_arity = (Fstandard ()); ft_tparams = [];
-                ft_where_constraints = []; ft_params = [];
+              { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_implicit_params =
                 { capability = (CapDefaults [11:20-33]) };
                 ft_ret =
@@ -72,8 +71,7 @@
            sm_type =
            (Rwitness_from_decl ([12:19-31]),
             (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = []; ft_params = [];
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [12:19-31]) };
                  ft_ret =
@@ -90,8 +88,7 @@
            sm_type =
            (Rwitness_from_decl ([13:22-37]),
             (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = []; ft_params = [];
+               { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                  ft_implicit_params =
                  { capability = (CapDefaults [13:22-37]) };
                  ft_ret =
@@ -108,8 +105,7 @@
            sm_type =
            (Rwitness_from_decl ([14:25-40]),
             (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = [];
+               { ft_tparams = []; ft_where_constraints = [];
                  ft_params =
                  [{ fp_pos = [15:12-17]; fp_name = (Some "$arg1");
                     fp_type =
@@ -226,8 +222,7 @@
                 sm_type =
                 (Rwitness_from_decl ([28:19-30]),
                  (Tfun
-                    { ft_arity = (Fstandard ()); ft_tparams = [];
-                      ft_where_constraints = [];
+                    { ft_tparams = []; ft_where_constraints = [];
                       ft_params =
                       [{ fp_pos = [29:20-28]; fp_name = (Some "$private");
                          fp_type =

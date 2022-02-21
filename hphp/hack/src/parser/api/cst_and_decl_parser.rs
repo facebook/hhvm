@@ -52,6 +52,7 @@ pub fn parse_script<'a>(
             NoSourceTextAllocator,
             false, // retain_or_omit_user_attributes_for_facts
             false, // simplify_naming_for_facts
+            false, // elaborate_xhp_namespaces_for_facts
         )
     };
     let sc = PairSmartConstructors::new(sc0, sc1);

@@ -16,12 +16,13 @@ use hhas_method::{HhasMethod, HhasMethodFlags};
 use hhas_param::HhasParam;
 use hhas_pos::HhasSpan;
 use hhas_type::HhasTypeInfo;
-use hhbc_ast::{FcallArgs, FcallFlags, SpecialClsRef, Visibility};
+use hhbc_ast::{FcallArgs, Visibility};
 use hhbc_id::{class, method};
 use hhbc_string_utils::reified;
+use hhvm_hhbc_defs_ffi::ffi::{FCallArgsFlags, SpecialClsRef};
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
-use local::Local;
+use local::{Local, LocalId};
 use naming_special_names_rust::{members, user_attributes as ua};
 use options::HhvmFlags;
 use oxidized::{ast as T, pos::Pos};
@@ -280,9 +281,9 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         // Default value setters belong in the wrapper method not in the original method
         emit_param::emit_param_default_value_setter(emitter, env, pos, hhas_params)?;
     let fcall_args = {
-        let mut fcall_flags = FcallFlags::default();
+        let mut fcall_flags = FCallArgsFlags::default();
         if args.flags.contains(Flags::IS_REIFIED) {
-            fcall_flags |= FcallFlags::HAS_GENERICS;
+            fcall_flags |= FCallArgsFlags::HasGenerics;
         };
         if args.flags.contains(Flags::IS_ASYNC) {
             FcallArgs::new(
@@ -318,8 +319,8 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
                 alloc,
                 emit_memoize_helpers::get_memo_key_list(
                     alloc,
-                    param_count,
-                    first_local_idx,
+                    LocalId::from_usize(param_count),
+                    first_local_idx.try_into().unwrap(),
                     reified::GENERICS_LOCAL_NAME,
                 ),
             ),
@@ -330,9 +331,9 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
     } else {
         // Last unnamed local slot
         let local = first_local_idx + param_count + add_reified;
-        emit_memoize_helpers::get_implicit_context_memo_key(alloc, local)
+        emit_memoize_helpers::get_implicit_context_memo_key(alloc, LocalId::from_usize(local))
     };
-    let first_local = Local::Unnamed(first_local_idx);
+    let first_local = Local::Unnamed(LocalId::from_usize(first_local_idx));
     let key_count = (param_count + add_reified + add_implicit_context) as isize;
     Ok(InstrSeq::gather(
         alloc,
@@ -345,7 +346,11 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
             } else {
                 instr::checkthis(alloc)
             },
-            emit_memoize_helpers::param_code_sets(alloc, hhas_params, first_local_idx),
+            emit_memoize_helpers::param_code_sets(
+                alloc,
+                hhas_params,
+                LocalId::from_usize(first_local_idx),
+            ),
             reified_memokeym,
             ic_memokey,
             if args.flags.contains(Flags::IS_ASYNC) {
@@ -426,7 +431,7 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
     )?;
 
     let fcall_args = FcallArgs::new(
-        FcallFlags::default(),
+        FCallArgsFlags::default(),
         1,
         Slice::empty(),
         Slice::empty(),

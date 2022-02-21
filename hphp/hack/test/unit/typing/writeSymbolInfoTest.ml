@@ -10,14 +10,13 @@ open Asserter
 open Hh_json
 open Hh_json.Access
 open Hh_json_helpers
-open Symbol_build_json
-open Symbol_predicate
-open Symbol_json_util
 open OUnit2
 module Util = Symbol_json_util
 module Build_json = Symbol_build_json
 module Predicate = Symbol_predicate
 module Add_fact = Symbol_add_fact
+module Fact_id = Symbol_fact_id
+module Fact_acc = Symbol_predicate.Fact_acc
 
 let extract_facts_from_obj pred_name = function
   | JSON_Object [("predicate", JSON_String p); ("facts", JSON_Array l)]
@@ -31,7 +30,7 @@ let extract_facts_exn pred_name json_objects =
   | _ -> failwith ("There should be exactly one predicate " ^ pred_name)
 
 let test_add_fact _test_ctxt =
-  let progress = Add_fact.init_progress in
+  let progress = Fact_acc.init in
   let json_key =
     JSON_Object
       [
@@ -45,12 +44,10 @@ let test_add_fact _test_ctxt =
       ]
   in
   let (res_id, progress) =
-    Add_fact.add_fact ClassDeclaration json_key progress
+    Fact_acc.add_fact Predicate.(Hack ClassDeclaration) json_key progress
   in
   let facts_class_declaration =
-    extract_facts_exn
-      "hack.ClassDeclaration.5"
-      (Add_fact.progress_to_json progress)
+    extract_facts_exn "hack.ClassDeclaration.5" (Fact_acc.to_json progress)
   in
   Int_asserter.assert_equals
     1
@@ -58,47 +55,44 @@ let test_add_fact _test_ctxt =
     "One class decl fact added to JSON";
   let fact_json = List.nth facts_class_declaration 0 in
   let fact_id = Jget.int_d fact_json "id" ~default:(-1) in
-  Int_asserter.assert_equals res_id fact_id "Id returned is JSON id of new fact";
+  Int_asserter.assert_equals
+    (res_id :> int)
+    fact_id
+    "Id returned is JSON id of new fact";
   let (res_id2, progress) =
-    Add_fact.add_fact ClassDeclaration json_key progress
+    Fact_acc.add_fact Predicate.(Hack ClassDeclaration) json_key progress
   in
   let facts_class_declaration =
-    extract_facts_exn
-      "hack.ClassDeclaration.5"
-      (Add_fact.progress_to_json progress)
+    extract_facts_exn "hack.ClassDeclaration.5" (Fact_acc.to_json progress)
   in
   Int_asserter.assert_equals
-    res_id
-    res_id2
+    (res_id :> int)
+    (res_id2 :> int)
     "Adding identical facts results in same ids";
   Int_asserter.assert_equals
     1
     (List.length facts_class_declaration)
     "Only one class decl fact in JSON after identical addition";
   let (res_id3, progress) =
-    Add_fact.add_fact FunctionDeclaration json_key progress
+    Fact_acc.add_fact Predicate.(Hack FunctionDeclaration) json_key progress
   in
   let facts_function_declaration =
-    extract_facts_exn
-      "hack.FunctionDeclaration.5"
-      (Add_fact.progress_to_json progress)
+    extract_facts_exn "hack.FunctionDeclaration.5" (Fact_acc.to_json progress)
   in
   assert_bool
     "Identical keys for different predicates are separate facts"
-    (res_id != res_id3);
+    ((res_id :> int) != (res_id3 :> int));
   Int_asserter.assert_equals
     1
     (List.length facts_function_declaration)
     "One function decl fact added to JSON"
 
 let test_add_decl_fact _test_ctxt =
-  let progress = Add_fact.init_progress in
+  let progress = Fact_acc.init in
   let gconst_name = "TestGConst" in
   let (id, prog) = Add_fact.gconst_decl gconst_name progress in
   let facts_global_const_declaration =
-    extract_facts_exn
-      "hack.GlobalConstDeclaration.5"
-      (Add_fact.progress_to_json prog)
+    extract_facts_exn "hack.GlobalConstDeclaration.5" (Fact_acc.to_json prog)
   in
   Int_asserter.assert_equals
     1
@@ -114,7 +108,10 @@ let test_add_decl_fact _test_ctxt =
     >>= get_obj "name"
     >>= get_string "key"
   in
-  Int_asserter.assert_equals id fact_id "Id returned is JSON id of new fact";
+  Int_asserter.assert_equals
+    (id :> int)
+    fact_id
+    "Id returned is JSON id of new fact";
   match decl_name with
   | Ok (name, _) ->
     String_asserter.assert_equals gconst_name name "Nested fact contains name"
@@ -122,13 +119,14 @@ let test_add_decl_fact _test_ctxt =
 
 let test_build_xrefs _test_ctxt =
   let xrefs =
-    (SMap.empty : (Hh_json.json * Relative_path.t Pos.pos list) IMap.t SMap.t)
+    (SMap.empty
+      : (Hh_json.json * Relative_path.t Pos.pos list) Fact_id.Map.t SMap.t)
   in
   Relative_path.set_path_prefix Relative_path.Root (Path.make "www");
   let file = Relative_path.from_root ~suffix:"test.php" in
   let decl_name = "TestDecl" in
   let target_json = JSON_Object [("declaration", JSON_String decl_name)] in
-  let target_id = 1 in
+  let target_id = Fact_id.next () in
   let ref_pos =
     Pos.set_file
       file
@@ -153,13 +151,15 @@ let test_build_xrefs _test_ctxt =
          ~pos_start:(3, 25, 40)
          ~pos_end:(3, 25, 45))
   in
-  let xrefs = add_xref target_json target_id next_ref_pos xrefs in
-  let xrefs = add_xref target_json target_id ref_pos xrefs in
-  let xrefs = add_xref target_json target_id dup_ref_pos xrefs in
-  let file_map : (Hh_json.json * Pos.t list) IMap.t =
+  let xrefs = Util.add_xref target_json target_id next_ref_pos xrefs in
+  let xrefs = Util.add_xref target_json target_id ref_pos xrefs in
+  let xrefs = Util.add_xref target_json target_id dup_ref_pos xrefs in
+  let file_map : (Hh_json.json * Pos.t list) Fact_id.Map.t =
     SMap.find (Relative_path.to_absolute file) xrefs
   in
-  let result = List.nth_exn (get_array_exn (build_xrefs_json file_map)) 0 in
+  let result =
+    List.nth_exn (get_array_exn (Build_json.build_xrefs_json file_map)) 0
+  in
   let target_decl =
     return result >>= get_obj "target" >>= get_string "declaration"
   in

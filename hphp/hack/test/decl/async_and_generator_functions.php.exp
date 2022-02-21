@@ -5,8 +5,7 @@
        fe_type =
        (Rwitness_from_decl ([3:10-23]),
         (Tfun
-           { ft_arity = (Fstandard ()); ft_tparams = [];
-             ft_where_constraints = []; ft_params = [];
+           { ft_tparams = []; ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [3:10-23]) };
              ft_ret =
              { et_enforced = Typing_defs_core.Unenforced;
@@ -25,8 +24,7 @@
         fe_type =
         (Rwitness_from_decl ([5:16-30]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [5:16-30]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -49,8 +47,7 @@
         fe_type =
         (Rwitness_from_decl ([10:10-28]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [10:10-28]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -76,8 +73,7 @@
         fe_type =
         (Rwitness_from_decl ([14:10-41]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [14:10-41]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;
@@ -103,8 +99,7 @@
         fe_type =
         (Rwitness_from_decl ([18:16-31]),
          (Tfun
-            { ft_arity = (Fstandard ()); ft_tparams = [];
-              ft_where_constraints = []; ft_params = [];
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
               ft_implicit_params = { capability = (CapDefaults [18:16-31]) };
               ft_ret =
               { et_enforced = Typing_defs_core.Unenforced;

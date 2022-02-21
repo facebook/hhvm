@@ -91,7 +91,7 @@ pub struct ShallowMethod<R: Reason> {
 
 walkable!(ShallowMethod<R> => [ty]);
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Eq, Hash, PartialEq)]
 pub struct ShallowClass<R: Reason> {
     // note(sf, 2022-01-27):
     //  - c.f.

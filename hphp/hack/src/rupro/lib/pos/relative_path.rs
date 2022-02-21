@@ -5,12 +5,13 @@
 
 use intern::string::BytesId;
 use std::ffi::OsStr;
+use std::fmt;
 use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 
 pub use oxidized::relative_path::Prefix;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct RelativePath {
     prefix: Prefix,
     suffix: BytesId,
@@ -53,6 +54,17 @@ impl RelativePath {
         oxidized::relative_path::RelativePath::make(
             self.prefix,
             OsStr::from_bytes(self.suffix.as_bytes()).into(),
+        )
+    }
+}
+
+impl fmt::Debug for RelativePath {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}|{}",
+            self.prefix,
+            Path::new(OsStr::from_bytes(self.suffix.as_bytes())).display()
         )
     }
 }

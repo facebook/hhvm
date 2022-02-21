@@ -29,8 +29,8 @@ val split_name : string -> (string * string) option
 
 (* For building the map of cross-references *)
 val add_xref :
-  'a ->
-  IMap.key ->
+  Hh_json.json ->
+  Symbol_fact_id.t ->
   Relative_path.t Pos.pos ->
-  ('a * Relative_path.t Pos.pos list) IMap.t SMap.t ->
-  ('a * Relative_path.t Pos.pos list) IMap.t SMap.t
+  (Hh_json.json * Relative_path.t Pos.pos list) Symbol_fact_id.Map.t SMap.t ->
+  (Hh_json.json * Relative_path.t Pos.pos list) Symbol_fact_id.Map.t SMap.t

@@ -38,8 +38,7 @@ let () =
         (* 256 KiB *)
         shm_dirs = [];
         shm_use_sharded_hashtbl = false;
-        shm_enable_eviction = false;
-        shm_max_evictable_bytes = 0;
+        shm_cache_size = -1;
         shm_min_avail = 0;
         log_level = 0;
         sample_rate = 0.0;

@@ -338,7 +338,6 @@ prefixed_flags!(
     DISABLE_LEGACY_ATTRIBUTE_SYNTAX,
     DISABLE_LEGACY_SOFT_TYPEHINTS,
     DISABLE_LVAL_AS_AN_EXPRESSION,
-    DISABLE_UNSET_CLASS_CONST,
     DISABLE_XHP_ELEMENT_MANGLING,
     DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,
     DISALLOW_INST_METH,
@@ -346,8 +345,6 @@ prefixed_flags!(
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
     ENABLE_ENUM_CLASSES,
     ENABLE_XHP_CLASS_MODIFIER,
-    DISABLE_ARRAY_TYPEHINT,
-    DISABLE_ARRAY,
     RUST_EMITTER,
 );
 impl Default for LangFlags {
@@ -767,12 +764,6 @@ mod tests {
   "hhvm.hack.lang.const_static_props": {
     "global_value": false
   },
-  "hhvm.hack.lang.disable_array": {
-    "global_value": false
-  },
-  "hhvm.hack.lang.disable_array_typehint": {
-    "global_value": false
-  },
   "hhvm.hack.lang.disable_legacy_attribute_syntax": {
     "global_value": false
   },
@@ -780,9 +771,6 @@ mod tests {
     "global_value": true
   },
   "hhvm.hack.lang.disable_lval_as_an_expression": {
-    "global_value": false
-  },
-  "hhvm.hack.lang.disable_unset_class_const": {
     "global_value": false
   },
   "hhvm.hack.lang.disable_xhp_element_mangling": {
@@ -1178,7 +1166,7 @@ bitflags! {
         const CONST_DEFAULT_FUNC_ARGS = 1 << 39;
         const CONST_STATIC_PROPS = 1 << 40;
         const ABSTRACT_STATIC_PROPS = 1 << 41;
-        const DISABLE_UNSET_CLASS_CONST = 1 << 42;
+        // No longer using bit 42
         const DISALLOW_FUNC_PTRS_IN_CONSTANTS = 1 << 43;
         // No longer using bit 44.
         const CONST_DEFAULT_LAMBDA_ARGS = 1 << 45;
@@ -1186,11 +1174,9 @@ bitflags! {
         // No longer using bit 47.
         const ENABLE_ENUM_CLASSES = 1 << 48;
         const DISABLE_XHP_ELEMENT_MANGLING = 1 << 49;
-        const DISABLE_ARRAY = 1 << 50;
+        // No longer using bit 50.
         const RUST_EMITTER = 1 << 51;
-        // No longer using bit 52.
-        const DISABLE_ARRAY_TYPEHINT = 1 << 53;
-        // No longer using bit 54.
+        // No longer using bits 52-54.
         const ALLOW_UNSTABLE_FEATURES = 1 << 55;
         // No longer using bit 56.
         const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS = 1 << 57;

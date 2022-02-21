@@ -10,3 +10,4 @@ path = "lib.rs"
 [dependencies]
 intern = { path = "../../../../../../relay/oss/crates/intern" }
 oxidized = { path = "../../../oxidized" }
+static_assertions = "1.1.0"

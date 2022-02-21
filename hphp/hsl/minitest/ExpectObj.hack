@@ -98,10 +98,21 @@ class ExpectObj<T> {
     } catch (\Throwable $t) {
       $thrown = $t;
     }
-    self::assert($thrown !== null);
-    self::assert(\is_a($thrown, $ex));
-    if ($ex_message !== null) {
-      self::assert(\strpos($thrown?->getMessage() ?? '', $ex_message) !== false);
+    $thrown = expect($thrown)->toNotBeNull();
+    self::assert(
+      \is_a($thrown, $ex),
+      $_failure_message ??
+        'Expected to throw "'.$ex."\", but instead got:\n".$thrown->__toString()
+    );
+    if ($ex_message is nonnull) {
+      self::assert(
+        \strpos($thrown?->getMessage() ?? '', $ex_message) !== false,
+        $_failure_message ??
+          'Expected the exception message to be "'.
+          $ex_message.
+          "\", but instead got:\n".
+          $thrown->__toString()
+      );
     }
     /* HH_FIXME[4110] verified with is_a() */
     return $thrown;

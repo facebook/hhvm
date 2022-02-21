@@ -847,7 +847,9 @@ let rec class_ ctx c =
         in
         Option.iter err_opt ~f:Errors.add_naming_error);
   let req_implements = List.map ~f:(hint env) c_req_implements in
-  let req_implements = List.map ~f:(fun h -> (h, false)) req_implements in
+  let req_implements =
+    List.map ~f:(fun h -> (h, N.RequireImplements)) req_implements
+  in
   if
     (not (List.is_empty c_req_extends))
     && (not (Ast_defs.is_c_trait c.Aast.c_kind))
@@ -856,7 +858,7 @@ let rec class_ ctx c =
     Errors.add_naming_error
     @@ Naming_error.Invalid_require_extends (fst (List.hd_exn c_req_extends));
   let req_extends = List.map ~f:(hint env) c_req_extends in
-  let req_extends = List.map ~f:(fun h -> (h, true)) req_extends in
+  let req_extends = List.map ~f:(fun h -> (h, N.RequireExtends)) req_extends in
   (* Setting a class type parameters constraint to the 'this' type is weird
    * so lets forbid it for now.
    *)
@@ -1556,7 +1558,7 @@ and stmt env (pos, st) =
     | Aast.Using s ->
       using_stmt env s.Aast.us_has_await s.Aast.us_exprs s.Aast.us_block
     | Aast.For (st1, e, st2, b) -> for_stmt env st1 e st2 b
-    | Aast.Switch (e, cl) -> switch_stmt env e cl
+    | Aast.Switch (e, cl, dfl) -> switch_stmt env e cl dfl
     | Aast.Foreach (e, ae, b) -> foreach_stmt env e ae b
     | Aast.Try (b, cl, fb) -> try_stmt env b cl fb
     | Aast.Expr
@@ -1650,10 +1652,11 @@ and for_stmt env e1 e2 e3 b =
   let e3 = exprl env e3 in
   N.For (e1, e2, e3, b)
 
-and switch_stmt env e cl =
+and switch_stmt env e cl dfl =
   let e = expr env e in
   let cl = casel env cl in
-  N.Switch (e, cl)
+  let dfl = Option.map ~f:(fun (pos, b) -> (pos, branch env b)) dfl in
+  N.Switch (e, cl, dfl)
 
 and foreach_stmt env e ae b =
   let e = expr env e in
@@ -2311,15 +2314,10 @@ and make_class_id env ((p, x) as cid) =
 
 and casel env l = List.map l ~f:(case env)
 
-and case env c =
-  match c with
-  | Aast.Default (p, b) ->
-    let b = branch env b in
-    N.Default (p, b)
-  | Aast.Case (e, b) ->
-    let e = expr env e in
-    let b = branch env b in
-    N.Case (e, b)
+and case env (e, b) =
+  let e = expr env e in
+  let b = branch env b in
+  (e, b)
 
 and catchl env l = List.map l ~f:(catch env)
 

@@ -5,8 +5,7 @@
        fe_type =
        (Rwitness_from_decl ([4:10-20]),
         (Tfun
-           { ft_arity = (Fstandard ()); ft_tparams = [];
-             ft_where_constraints = [];
+           { ft_tparams = []; ft_where_constraints = [];
              ft_params =
              [{ fp_pos = [4:25-27]; fp_name = (Some "$i");
                 fp_type =
@@ -36,8 +35,7 @@
         fe_type =
         (Rwitness_from_decl ([6:10-11]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([6:12-13], "T"); tp_tparams = [];
                  tp_constraints =
@@ -98,8 +96,7 @@
            sm_type =
            (Rwitness_from_decl ([13:19-20]),
             (Tfun
-               { ft_arity = (Fstandard ()); ft_tparams = [];
-                 ft_where_constraints = [];
+               { ft_tparams = []; ft_where_constraints = [];
                  ft_params =
                  [{ fp_pos = [13:29-31]; fp_name = (Some "$t");
                     fp_type =

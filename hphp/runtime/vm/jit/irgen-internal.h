@@ -24,6 +24,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/jit/block.h"
+#include "hphp/runtime/vm/jit/decref-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
 #include "hphp/runtime/vm/jit/irgen-inlining.h"
 #include "hphp/runtime/vm/jit/punt.h"
@@ -560,17 +561,18 @@ inline void discard(IRGS& env, uint32_t n = 1) {
   env.irb->fs().decBCSPDepth(n);
 }
 
-inline void decRef(IRGS& env, SSATmp* tmp, int locId=-1) {
-  gen(env, DecRef, DecRefData(locId), tmp);
+inline void decRef(IRGS& env, SSATmp* tmp, DecRefProfileId locId) {
+  gen(env, DecRef, DecRefData(static_cast<int>(locId)), tmp);
 }
 
 inline void decRefNZ(IRGS& env, SSATmp* tmp, int locId=-1) {
   gen(env, DecRefNZ, DecRefData(locId), tmp);
 }
 
-inline void popDecRef(IRGS& env, GuardConstraint gc = DataTypeGeneric) {
+inline void popDecRef(
+    IRGS& env, DecRefProfileId locId, GuardConstraint gc = DataTypeGeneric) {
   auto const val = pop(env, gc);
-  decRef(env, val);
+  decRef(env, val, locId);
 }
 
 inline SSATmp* push(IRGS& env, SSATmp* tmp) {
@@ -822,7 +824,7 @@ inline SSATmp* stLocImpl(IRGS& env,
 
   stLocRaw(env, id, fp(env), newVal);
   if (incRefNew) gen(env, IncRef, newVal);
-  if (decRefOld) decRef(env, oldLoc);
+  if (decRefOld) decRef(env, oldLoc, static_cast<DecRefProfileId>(id));
   return newVal;
 }
 
@@ -848,7 +850,7 @@ inline void stLocMove(IRGS& env,
   auto const oldLoc = ldLoc(env, id, DataTypeGeneric);
 
   stLocRaw(env, id, fp(env), newVal);
-  decRef(env, oldLoc);
+  decRef(env, oldLoc, static_cast<DecRefProfileId>(id));
 }
 
 inline SSATmp* pushStLoc(IRGS& env,
@@ -879,14 +881,14 @@ inline SSATmp* ldStkAddr(IRGS& env, BCSPRelOffset relOffset) {
 inline void decRefLocalsInline(IRGS& env) {
   for (int id = curFunc(env)->numLocals() - 1; id >= 0; --id) {
     auto const loc = ldLoc(env, id, DataTypeGeneric);
-    decRef(env, loc, id);
+    decRef(env, loc, static_cast<DecRefProfileId>(id));
   }
 }
 
 inline void decRefThis(IRGS& env) {
   if (!curFunc(env)->hasThisInBody()) return;
   auto const ctx = ldCtx(env);
-  decRef(env, ctx);
+  decRef(env, ctx, DecRefProfileId::Default);
 }
 
 //////////////////////////////////////////////////////////////////////

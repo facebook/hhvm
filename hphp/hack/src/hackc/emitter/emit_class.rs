@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use emit_property::PropAndInit;
 use env::{emitter::Emitter, Env};
 use ffi::{Maybe, Maybe::*, Slice, Str};
 use hhas_class::{HhasClass, TraitReqKind};
 use hhas_coeffects::{HhasCoeffects, HhasCtxConstant};
-use hhas_constant::{self as hhas_constant, HhasConstant};
+use hhas_constant::HhasConstant;
 use hhas_method::{HhasMethod, HhasMethodFlags};
 use hhas_param::HhasParam;
 use hhas_pos::HhasSpan;
@@ -15,11 +16,12 @@ use hhas_property::HhasProperty;
 use hhas_type::HhasTypeInfo;
 use hhas_type_const::HhasTypeConstant;
 use hhas_xhp_attribute::HhasXhpAttribute;
-use hhbc_ast::{FatalOp, FcallArgs, FcallFlags, ReadonlyOp, SpecialClsRef, Visibility};
+use hhbc_ast::{FcallArgs, Visibility};
 use hhbc_id::class::ClassType;
-use hhbc_id::r#const;
+use hhbc_id::r#const::ConstType;
 use hhbc_id::{self as hhbc_id, class, method, prop};
 use hhbc_string_utils as string_utils;
+use hhvm_hhbc_defs_ffi::ffi::{FCallArgsFlags, FatalOp, ReadonlyOp, SpecialClsRef};
 use hhvm_types_ffi::ffi::{Attr, TypeConstraintFlags};
 use instruction_sequence::{instr, InstrSeq, Result};
 use itertools::Itertools;
@@ -27,7 +29,7 @@ use local::Local;
 use naming_special_names_rust as special_names;
 use oxidized::{
     ast,
-    ast::{Hint, ReifyKind},
+    ast::{Hint, ReifyKind, RequireKind},
     namespace_env,
     pos::Pos,
 };
@@ -254,7 +256,7 @@ fn from_class_elt_classvars<'a, 'arena, 'decl>(
     class_is_const: bool,
     tparams: &[&str],
     is_closure: bool,
-) -> Result<Vec<HhasProperty<'arena>>> {
+) -> Result<Vec<PropAndInit<'arena>>> {
     // TODO: we need to emit doc comments for each property,
     // not one per all properties on the same line
     // The doc comment is only for the first name in the list.
@@ -289,14 +291,14 @@ fn from_class_elt_classvars<'a, 'arena, 'decl>(
                 },
             )
         })
-        .collect::<Result<Vec<_>>>()
+        .collect()
 }
 
 fn from_class_elt_constants<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     class_: &'a ast::Class_,
-) -> Result<Vec<HhasConstant<'arena>>> {
+) -> Result<Vec<(HhasConstant<'arena>, Option<InstrSeq<'arena>>)>> {
     use oxidized::aast::ClassConstKind;
     class_
         .consts
@@ -306,7 +308,7 @@ fn from_class_elt_constants<'a, 'arena, 'decl>(
                 ClassConstKind::CCAbstract(default) => (true, default.as_ref()),
                 ClassConstKind::CCConcrete(expr) => (false, Some(expr)),
             };
-            hhas_constant::from_ast(emitter, env, &x.id, is_abstract, init_opt)
+            emit_constant::from_ast(emitter, env, &x.id, is_abstract, init_opt)
         })
         .collect()
 }
@@ -318,11 +320,10 @@ fn from_class_elt_requirements<'a, 'arena>(
     class_
         .reqs
         .iter()
-        .map(|(h, is_extends)| {
-            let kind = if *is_extends {
-                TraitReqKind::MustExtend
-            } else {
-                TraitReqKind::MustImplement
+        .map(|(h, req_kind)| {
+            let kind = match *req_kind {
+                RequireKind::RequireExtends => TraitReqKind::MustExtend,
+                RequireKind::RequireImplements => TraitReqKind::MustImplement,
             };
             (emit_type_hint::hint_to_class(alloc, h), kind)
         })
@@ -472,7 +473,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
                 instr::fcallclsmethodsd(
                     alloc,
                     FcallArgs::new(
-                        FcallFlags::default(),
+                        FCallArgsFlags::default(),
                         1,
                         Slice::empty(),
                         Slice::empty(),
@@ -541,7 +542,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
 fn make_init_method<'a, 'arena, 'decl, F>(
     alloc: &'arena bumpalo::Bump,
     emitter: &mut Emitter<'arena, 'decl>,
-    properties: &[HhasProperty<'arena>],
+    properties: &mut [PropAndInit<'arena>],
     filter: F,
     name: &'static str,
     span: HhasSpan,
@@ -551,21 +552,15 @@ where
 {
     if properties
         .iter()
-        .any(|p: &HhasProperty<'_>| p.initializer_instrs.is_just() && filter(p))
+        .any(|p| p.init.is_some() && filter(&p.prop))
     {
         let instrs = InstrSeq::gather(
             alloc,
             properties
-                .iter()
-                .filter_map(|p| {
-                    if filter(p) {
-                        // TODO(hrust) this clone can be avoided by wrapping initializer_instrs by Rc
-                        // and also support Rc in InstrSeq
-                        std::convert::Into::<Option<_>>::into(p.initializer_instrs.as_ref())
-                            .map(|i| InstrSeq::clone(alloc, i))
-                    } else {
-                        None
-                    }
+                .iter_mut()
+                .filter_map(|p| match p.init {
+                    Some(_) if filter(&p.prop) => p.init.take(),
+                    Some(_) | None => None,
                 })
                 .collect(),
         );
@@ -775,7 +770,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     emitter.label_gen_mut().reset();
     let mut properties =
         from_class_elt_classvars(emitter, ast_class, is_const, &tparams, is_closure)?;
-    let constants = from_class_elt_constants(emitter, &env, ast_class)?;
+    let mut constants = from_class_elt_constants(emitter, &env, ast_class)?;
 
     let requirements = from_class_elt_requirements(alloc, ast_class);
 
@@ -783,29 +778,38 @@ pub fn emit_class<'a, 'arena, 'decl>(
     let sinit_filter = |p: &HhasProperty<'_>| p.flags.is_static() && !p.flags.is_lsb();
     let linit_filter = |p: &HhasProperty<'_>| p.flags.is_static() && p.flags.is_lsb();
 
-    let pinit_method =
-        make_init_method(alloc, emitter, &properties, &pinit_filter, "86pinit", span)?;
-    let sinit_method =
-        make_init_method(alloc, emitter, &properties, &sinit_filter, "86sinit", span)?;
-    let linit_method =
-        make_init_method(alloc, emitter, &properties, &linit_filter, "86linit", span)?;
+    let pinit_method = make_init_method(
+        alloc,
+        emitter,
+        &mut properties,
+        &pinit_filter,
+        "86pinit",
+        span,
+    )?;
+    let sinit_method = make_init_method(
+        alloc,
+        emitter,
+        &mut properties,
+        &sinit_filter,
+        "86sinit",
+        span,
+    )?;
+    let linit_method = make_init_method(
+        alloc,
+        emitter,
+        &mut properties,
+        &linit_filter,
+        "86linit",
+        span,
+    )?;
 
     let initialized_constants: Vec<_> = constants
-        .iter()
-        .filter_map(
-            |
-                HhasConstant {
-                    ref name,
-                    ref initializer_instrs,
-                    ..
-                },
-            | {
-                initializer_instrs
-                    .as_ref()
-                    .map(|instrs| (name, emitter.label_gen_mut().next_regular(), instrs))
-                    .into()
-            },
-        )
+        .iter_mut()
+        .filter_map(|(HhasConstant { ref name, .. }, instrs)| {
+            instrs
+                .take()
+                .map(|instrs| (name, emitter.label_gen_mut().next_regular(), instrs))
+        })
         .collect();
     let cinit_method = if initialized_constants.is_empty() {
         None
@@ -815,7 +819,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
             e: &mut Emitter<'arena, 'decl>,
             default_label: label::Label,
             pos: &Pos,
-            consts: &[(&r#const::ConstType<'arena>, label::Label, &InstrSeq<'arena>)],
+            consts: &[(&ConstType<'arena>, label::Label, InstrSeq<'arena>)],
         ) -> InstrSeq<'arena> {
             match consts {
                 [] => InstrSeq::gather(
@@ -830,11 +834,11 @@ pub fn emit_class<'a, 'arena, 'decl>(
                         instr::fatal(alloc, FatalOp::Runtime),
                     ],
                 ),
-                [(_, label, instrs), cs @ ..] => InstrSeq::gather(
+                [(_, label, ref instrs), cs @ ..] => InstrSeq::gather(
                     alloc,
                     vec![
                         instr::label(alloc, *label),
-                        InstrSeq::clone(alloc, *instrs),
+                        InstrSeq::clone(alloc, instrs),
                         emit_pos::emit_pos(alloc, pos),
                         instr::retc(alloc),
                         make_cinit_instrs(alloc, e, default_label, pos, cs),
@@ -862,7 +866,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
                         emitter,
                         default_label,
                         &ast_class.span,
-                        &initialized_constants[..],
+                        &initialized_constants,
                     ),
                 ],
             )
@@ -920,7 +924,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
     let upper_bounds = emit_body::emit_generics_upper_bounds(alloc, &ast_class.tparams, &[], false);
 
     if !no_xhp_attributes {
-        properties.extend(emit_xhp::properties_for_cache(
+        properties.push(emit_xhp::properties_for_cache(
             emitter, ast_class, is_const, is_closure,
         )?);
     }
@@ -989,11 +993,11 @@ pub fn emit_class<'a, 'arena, 'decl>(
         methods: Slice::fill_iter(alloc, methods.into_iter()),
         enum_type: Maybe::from(enum_type),
         upper_bounds: Slice::fill_iter(alloc, upper_bounds.into_iter()),
-        properties: Slice::fill_iter(alloc, properties.into_iter()),
+        properties: Slice::fill_iter(alloc, properties.into_iter().map(|p| p.prop)),
         requirements: Slice::fill_iter(alloc, requirements.into_iter().map(|r| r.into())),
         type_constants: Slice::fill_iter(alloc, type_constants.into_iter()),
         ctx_constants: Slice::fill_iter(alloc, ctx_constants.into_iter()),
-        constants: Slice::fill_iter(alloc, constants.into_iter()),
+        constants: Slice::fill_iter(alloc, constants.into_iter().map(|(c, _)| c)),
     })
 }
 

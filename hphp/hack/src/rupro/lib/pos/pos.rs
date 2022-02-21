@@ -6,6 +6,7 @@ use crate::{Prefix, RelativePath};
 use intern::string::BytesId;
 use oxidized::file_pos_small::FilePosSmall;
 use oxidized::pos_span_tiny::PosSpanTiny;
+use std::fmt;
 use std::hash::Hash;
 
 pub use oxidized::file_pos_large::FilePosLarge;
@@ -40,7 +41,7 @@ enum PosImpl {
 
 static_assertions::assert_eq_size!(PosImpl, u128);
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct BPos(PosImpl);
 
 impl Pos for BPos {
@@ -94,7 +95,53 @@ impl BPos {
     }
 }
 
-/// A stateless sentinal Pos.
+impl fmt::Debug for BPos {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut do_fmt = |start_line, start_col, end_line, end_col| {
+            if start_line == end_line {
+                write!(
+                    f,
+                    "Pos({:?}, {}:{}-{})",
+                    &self.file(),
+                    &start_line,
+                    &start_col,
+                    &end_col,
+                )
+            } else {
+                write!(
+                    f,
+                    "Pos({:?}, {}:{}-{}:{})",
+                    &self.file(),
+                    &start_line,
+                    &start_col,
+                    &end_line,
+                    &end_col,
+                )
+            }
+        };
+        match &self.0 {
+            PosImpl::Small { span, .. } => {
+                let (start, end) = &**span;
+                do_fmt(start.line(), start.column(), end.line(), end.column())
+            }
+            PosImpl::Large { span, .. } => {
+                let (start, end) = &**span;
+                do_fmt(start.line(), start.column(), end.line(), end.column())
+            }
+            PosImpl::Tiny { span, .. } => {
+                let span = span.to_raw_span();
+                do_fmt(
+                    span.start.line(),
+                    span.start.column(),
+                    span.end.line(),
+                    span.end.column(),
+                )
+            }
+        }
+    }
+}
+
+/// A stateless sentinel Pos.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct NPos;
 
@@ -108,12 +155,22 @@ impl Pos for NPos {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct Positioned<S, P> {
     // Caution: field order will matter if we ever derive
     // `ToOcamlRep`/`FromOcamlRep` for this type.
     pos: P,
     id: S,
+}
+
+impl<S: fmt::Debug, P: fmt::Debug> fmt::Debug for Positioned<S, P> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if std::mem::size_of::<P>() == 0 {
+            write!(f, "{:?}", &self.id)
+        } else {
+            f.debug_tuple("").field(&self.pos).field(&self.id).finish()
+        }
+    }
 }
 
 impl<S, P> Positioned<S, P> {

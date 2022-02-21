@@ -12,7 +12,7 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 bumpalo = { version = "3.8", features = ["collections"] }
-cxx = "1.0.54"
+cxx = "1.0.64"
 ocamlrep = { path = "../../ocamlrep" }
 oxidized = { path = "../../oxidized" }
 parser_core_types = { path = "../cargo/core_types" }
@@ -21,4 +21,4 @@ serde_json = { version = "1.0.64", features = ["float_roundtrip", "unbounded_dep
 stack_limit = { path = "../../utils/stack_limit" }
 
 [build-dependencies]
-cxx-build = "1.0.54"
+cxx-build = "1.0.64"

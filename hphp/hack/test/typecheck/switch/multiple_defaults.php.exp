@@ -1,2 +1,2 @@
 File "multiple_defaults.php", line 9, characters 5-12:
-There can be only one `default` case in `switch` (NastCheck[3082])
+There can be only one `default` case in `switch` (Parsing[1002])

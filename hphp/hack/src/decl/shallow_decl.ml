@@ -245,12 +245,7 @@ let method_type ~support_dynamic_type env m =
     FunUtils.has_return_disposable_attribute m.m_user_attributes
   in
   let mt_is_memoized = FunUtils.has_memoize_attribute m.m_user_attributes in
-  let params =
-    FunUtils.make_params
-      env
-      ~is_lambda:false
-      (List.filter m.m_params ~f:(fun p -> not p.param_is_variadic))
-  in
+  let params = FunUtils.make_params env ~is_lambda:false m.m_params in
   let (_pos, capability) =
     Decl_hint.aast_contexts_to_decl_capability env m.m_ctxs (fst m.m_name)
   in
@@ -263,18 +258,11 @@ let method_type ~support_dynamic_type env m =
       m.m_fun_kind
       (hint_of_type_hint m.m_ret)
   in
-  let arity =
-    match List.find m.m_params ~f:(fun p -> p.param_is_variadic) with
-    | Some param ->
-      Fvariadic (FunUtils.make_param_ty env ~is_lambda:false param)
-    | None -> Fstandard
-  in
   let tparams = List.map m.m_tparams ~f:(FunUtils.type_param env) in
   let where_constraints =
     List.map m.m_where_constraints ~f:(FunUtils.where_constraint env)
   in
   {
-    ft_arity = arity;
     ft_tparams = tparams;
     ft_where_constraints = where_constraints;
     ft_params = params;
@@ -288,10 +276,7 @@ let method_type ~support_dynamic_type env m =
         ~readonly_this:m.m_readonly_this
         ~support_dynamic_type
         ~is_memoized:mt_is_memoized
-        ~variadic:
-          (match arity with
-          | Fvariadic _ -> true
-          | _ -> false);
+        ~variadic:(List.exists m.m_params ~f:(fun p -> p.param_is_variadic));
     ft_ifc_decl = ifc_decl;
   }
 

@@ -1207,9 +1207,13 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                 Ok(())
             }
             Stmt_::Switch(x) => {
-                let (e, cl) = &mut **x;
+                let (e, cl, dfl) = &mut **x;
                 self.visit_expr(env, e)?;
-                env.with_in_using(false, |env| visit_mut(self, env, cl))
+                env.with_in_using(false, |env| visit_mut(self, env, cl))?;
+                match dfl {
+                    None => Ok(()),
+                    Some(dfl) => env.with_in_using(false, |env| visit_mut(self, env, dfl)),
+                }
             }
             Stmt_::Try(x) => {
                 let (b1, cl, b2) = &mut **x;

@@ -5,8 +5,7 @@
        fe_type =
        (Rwitness_from_decl ([3:10-11]),
         (Tfun
-           { ft_arity = (Fstandard ());
-             ft_tparams =
+           { ft_tparams =
              [{ Typing_defs_core.tp_variance = Invariant;
                 tp_name = ([3:25-26], "T/[ctx $f]"); tp_tparams = [];
                 tp_constraints = []; tp_reified = Erased;
@@ -20,8 +19,8 @@
                   et_type =
                   (Rhint ([3:12-34]),
                    (Tfun
-                      { ft_arity = (Fstandard ()); ft_tparams = [];
-                        ft_where_constraints = []; ft_params = [];
+                      { ft_tparams = []; ft_where_constraints = [];
+                        ft_params = [];
                         ft_implicit_params =
                         { capability =
                           (CapTy (Rhint ([3:25-26]),
@@ -63,8 +62,7 @@
         fe_type =
         (Rwitness_from_decl ([5:10-18]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([5:33-34], "T/[ctx $f]"); tp_tparams = [];
                  tp_constraints = []; tp_reified = Erased;
@@ -80,8 +78,8 @@
                     (Toption
                        (Rhint ([5:20-42]),
                         (Tfun
-                           { ft_arity = (Fstandard ()); ft_tparams = [];
-                             ft_where_constraints = []; ft_params = [];
+                           { ft_tparams = []; ft_where_constraints = [];
+                             ft_params = [];
                              ft_implicit_params =
                              { capability =
                                (CapTy (Rhint ([5:33-34]),
@@ -124,8 +122,7 @@
         fe_type =
         (Rwitness_from_decl ([7:10-16]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([7:31-32], "T/[ctx $f]"); tp_tparams = [];
                  tp_constraints = []; tp_reified = Erased;
@@ -141,8 +138,8 @@
                     (Tlike
                        (Rhint ([7:18-40]),
                         (Tfun
-                           { ft_arity = (Fstandard ()); ft_tparams = [];
-                             ft_where_constraints = []; ft_params = [];
+                           { ft_tparams = []; ft_where_constraints = [];
+                             ft_params = [];
                              ft_implicit_params =
                              { capability =
                                (CapTy (Rhint ([7:31-32]),
@@ -185,8 +182,7 @@
         fe_type =
         (Rwitness_from_decl ([9:10-23]),
          (Tfun
-            { ft_arity = (Fstandard ());
-              ft_tparams =
+            { ft_tparams =
               [{ Typing_defs_core.tp_variance = Invariant;
                  tp_name = ([9:39-40], "T/[ctx $f]"); tp_tparams = [];
                  tp_constraints = []; tp_reified = Erased;
@@ -204,8 +200,8 @@
                         (Toption
                            (Rhint ([9:26-48]),
                             (Tfun
-                               { ft_arity = (Fstandard ()); ft_tparams = [];
-                                 ft_where_constraints = []; ft_params = [];
+                               { ft_tparams = []; ft_where_constraints = [];
+                                 ft_params = [];
                                  ft_implicit_params =
                                  { capability =
                                    (CapTy (Rhint ([9:39-40]),

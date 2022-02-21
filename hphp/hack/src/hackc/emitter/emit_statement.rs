@@ -9,6 +9,9 @@ use env::{emitter::Emitter, Env};
 use ffi::{Maybe, Slice, Str};
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
+use hhvm_hhbc_defs_ffi::ffi::{
+    FCallArgsFlags, IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetRangeOp,
+};
 use instruction_sequence::{instr, Error::Unrecoverable, InstrSeq, Result};
 use label::Label;
 use lazy_static::lazy_static;
@@ -221,7 +224,7 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
                 emit_try_catch_finally(e, env, pos, try_block, &catch_list[..], finally_block)
             }
         }
-        a::Stmt_::Switch(x) => emit_switch(e, env, pos, &x.0, &x.1),
+        a::Stmt_::Switch(x) => emit_switch(e, env, pos, &x.0, &x.1, &x.2),
         a::Stmt_::Foreach(x) => emit_foreach(e, env, pos, &x.0, &x.1, &x.2),
         a::Stmt_::Awaitall(x) => emit_awaitall(e, env, pos, &x.0, &x.1),
         a::Stmt_::Markup(x) => emit_markup(e, env, x, false),
@@ -234,22 +237,33 @@ fn emit_case<'c, 'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &mut Env<'a, 'arena>,
     case: &'c ast::Case,
-) -> Result<(
-    InstrSeq<'arena>,
-    (Option<(&'c ast::Expr, Label)>, Option<Label>),
-)> {
+    addbreak: bool,
+) -> Result<(InstrSeq<'arena>, (&'c ast::Expr, Label))> {
+    let ast::Case(case_expr, body) = case;
     let alloc = env.arena;
-    let l = e.label_gen_mut().next_regular();
-    Ok(match case {
-        ast::Case::Case(case_expr, b) => (
-            InstrSeq::gather(alloc, vec![instr::label(alloc, l), emit_block(env, e, b)?]),
-            (Some((case_expr, l)), None),
+    let label = e.label_gen_mut().next_regular();
+    let mut res = vec![instr::label(alloc, label), emit_block(env, e, body)?];
+    if addbreak {
+        res.push(emit_break(e, env, &Pos::make_none()));
+    }
+    Ok((InstrSeq::gather(alloc, res), (case_expr, label)))
+}
+
+fn emit_default_case<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    dfl: &ast::DefaultCase,
+) -> Result<(InstrSeq<'arena>, Label)> {
+    let ast::DefaultCase(_, body) = dfl;
+    let alloc = env.arena;
+    let label = e.label_gen_mut().next_regular();
+    Ok((
+        InstrSeq::gather(
+            alloc,
+            vec![instr::label(alloc, label), emit_block(env, e, body)?],
         ),
-        ast::Case::Default(_, b) => (
-            InstrSeq::gather(alloc, vec![instr::label(alloc, l), emit_block(env, e, b)?]),
-            (None, Some(l)),
-        ),
-    })
+        label,
+    ))
 }
 
 fn emit_check_case<'a, 'arena, 'decl>(
@@ -376,7 +390,7 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
                     vec![
                         instr::pushl(alloc, *l),
                         instr::dup(alloc),
-                        instr::istypec(alloc, IsTypeOp::OpNull),
+                        instr::istypec(alloc, IsTypeOp::Null),
                         instr::jmpnz(alloc, label_done),
                         instr::whresult(alloc),
                         instr::label(alloc, label_done),
@@ -542,7 +556,7 @@ fn emit_using<'a, 'arena, 'decl>(
                         instr::fcallobjmethodd(
                             alloc,
                             FcallArgs::new(
-                                FcallFlags::empty(),
+                                FCallArgsFlags::default(),
                                 1,
                                 Slice::empty(),
                                 Slice::empty(),
@@ -553,7 +567,7 @@ fn emit_using<'a, 'arena, 'decl>(
                                     .map(|s| -> &str { alloc.alloc_str(s.as_ref()) }),
                             ),
                             fn_name,
-                            ObjNullFlavor::NullThrows,
+                            ObjMethodOp::NullThrows,
                         ),
                         epilogue,
                         if is_block_scoped {
@@ -624,94 +638,57 @@ fn emit_cases<'a, 'arena, 'decl>(
     env: &mut Env<'a, 'arena>,
     e: &mut Emitter<'arena, 'decl>,
     pos: &Pos,
-    break_label: Label,
     scrutinee_expr: &ast::Expr,
     cases: &[ast::Case],
+    dfl: &Option<ast::DefaultCase>,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, Label)> {
     let alloc = env.arena;
-    let has_default = cases.iter().any(|c| c.is_default());
-    match cases.split_last() {
-        None => Err(Unrecoverable(
-            "impossible - switch statements must have at least one case".into(),
-        )),
-        Some((last, rest)) => {
-            // Emit all the cases except the last one
-            let mut res = rest
-                .iter()
-                .map(|case| emit_case(e, env, case))
-                .collect::<Result<Vec<_>>>()?;
 
-            if has_default {
-                // If there is a default, emit the last case as usual
-                res.push(emit_case(e, env, last)?)
-            } else {
-                // Otherwise, emit the last case with an added break
-                match last {
-                    ast::Case::Case(expr, block) => {
-                        let l = e.label_gen_mut().next_regular();
-                        res.push((
-                            InstrSeq::gather(
-                                alloc,
-                                vec![
-                                    instr::label(alloc, l),
-                                    emit_block(env, e, block)?,
-                                    emit_break(e, env, &Pos::make_none()),
-                                ],
-                            ),
-                            (Some((expr, l)), None),
-                        ))
-                    }
-                    ast::Case::Default(_, _) => {
-                        return Err(Unrecoverable(
-                            "impossible - there shouldn't be a default".into(),
-                        ));
-                    }
-                };
-                // ...and emit warning/exception for missing default
-                let l = e.label_gen_mut().next_regular();
-                res.push((
-                    InstrSeq::gather(
-                        alloc,
-                        vec![
-                            instr::label(alloc, l),
-                            emit_pos_then(alloc, pos, instr::throw_non_exhaustive_switch(alloc)),
-                        ],
-                    ),
-                    (None, Some(l)),
-                ))
-            };
-            let (case_body_instrs, case_exprs_and_default_labels): (Vec<InstrSeq<'arena>>, Vec<_>) =
-                res.into_iter().unzip();
-            let (case_exprs, default_labels): (Vec<Option<(&ast::Expr, Label)>>, Vec<_>) =
-                case_exprs_and_default_labels.into_iter().unzip();
+    let should_gen_break = |i: usize| -> bool { dfl.is_none() && (i + 1 == cases.len()) };
 
-            let default_label = match default_labels
-                .iter()
-                .filter_map(|lopt| lopt.as_ref())
-                .collect::<Vec<_>>()
-                .as_slice()
-            {
-                [] => break_label,
-                [l] => **l,
-                _ => {
-                    return Err(emit_fatal::raise_fatal_runtime(
-                        pos,
-                        "Switch statements may only contain one 'default' clause.",
-                    ));
-                }
-            };
-            let case_expr_instrs = case_exprs
-                .into_iter()
-                .filter_map(|x| x.map(|x| emit_check_case(e, env, scrutinee_expr, x)))
-                .collect::<Result<Vec<_>>>()?;
+    let mut instr_cases = cases
+        .iter()
+        .enumerate()
+        .map(|(i, case)| emit_case(e, env, case, should_gen_break(i)))
+        .map(|x| x.map(|(instr_body, label)| (instr_body, Some(label))))
+        .collect::<Result<Vec<_>>>()?;
 
-            Ok((
-                InstrSeq::gather(alloc, case_expr_instrs),
-                InstrSeq::gather(alloc, case_body_instrs),
-                default_label,
-            ))
+    let default_label = match dfl {
+        None => {
+            // emit warning/exception for missing default
+            let default_label = e.label_gen_mut().next_regular();
+            instr_cases.push((
+                InstrSeq::gather(
+                    alloc,
+                    vec![
+                        instr::label(alloc, default_label),
+                        emit_pos_then(alloc, pos, instr::throw_non_exhaustive_switch(alloc)),
+                    ],
+                ),
+                None,
+            ));
+            default_label
         }
-    }
+        Some(dfl) => {
+            let (dinstrs, default_label) = emit_default_case(e, env, dfl)?;
+            instr_cases.push((dinstrs, None));
+            default_label
+        }
+    };
+
+    let (case_body_instrs, case_exprs): (Vec<InstrSeq<'arena>>, Vec<_>) =
+        instr_cases.into_iter().unzip();
+
+    let case_expr_instrs = case_exprs
+        .into_iter()
+        .filter_map(|x| x.map(|x| emit_check_case(e, env, scrutinee_expr, x)))
+        .collect::<Result<Vec<_>>>()?;
+
+    Ok((
+        InstrSeq::gather(alloc, case_expr_instrs),
+        InstrSeq::gather(alloc, case_body_instrs),
+        default_label,
+    ))
 }
 
 fn emit_switch<'a, 'arena, 'decl>(
@@ -720,6 +697,7 @@ fn emit_switch<'a, 'arena, 'decl>(
     pos: &Pos,
     scrutinee_expr: &ast::Expr,
     cl: &[ast::Case],
+    dfl: &Option<ast::DefaultCase>,
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let (instr_init, instr_free) = if scrutinee_expr.2.is_lvar() {
@@ -733,8 +711,8 @@ fn emit_switch<'a, 'arena, 'decl>(
     let break_label = e.label_gen_mut().next_regular();
 
     let (case_expr_instrs, case_body_instrs, default_label) =
-        env.do_in_switch_body(e, break_label, cl, |env, e, cases| {
-            emit_cases(env, e, pos, break_label, scrutinee_expr, cases)
+        env.do_in_switch_body(e, break_label, cl, dfl, |env, e, cases, dfl| {
+            emit_cases(env, e, pos, scrutinee_expr, cases, dfl)
         })?;
     Ok(InstrSeq::gather(
         alloc,
@@ -1138,7 +1116,7 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
                 instr::fcallobjmethodd(
                     alloc,
                     FcallArgs::new(
-                        FcallFlags::empty(),
+                        FCallArgsFlags::default(),
                         1,
                         Slice::empty(),
                         Slice::empty(),
@@ -1147,12 +1125,12 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
                         None,
                     ),
                     next_meth,
-                    ObjNullFlavor::NullThrows,
+                    ObjMethodOp::NullThrows,
                 ),
                 instr::await_(alloc),
                 instr::label(alloc, async_eager_label),
                 instr::dup(alloc),
-                instr::istypec(alloc, IsTypeOp::OpNull),
+                instr::istypec(alloc, IsTypeOp::Null),
                 instr::jmpnz(alloc, pop_and_exit_label),
                 emit_foreach_await_key_value_storage(e, env, iterator)?,
                 loop_body_instr,
@@ -1281,12 +1259,7 @@ fn emit_iterator_lvalue_storage<'a, 'arena, 'decl>(
             let (preamble, load_values) = emit_load_list_elements(
                 e,
                 env,
-                vec![instr::basel(
-                    alloc,
-                    local,
-                    MemberOpMode::Warn,
-                    ReadonlyOp::Any,
-                )],
+                vec![instr::basel(alloc, local, MOpMode::Warn, ReadonlyOp::Any)],
                 es,
             )?;
             let load_values = vec![
@@ -1361,7 +1334,7 @@ fn emit_load_list_element<'a, 'arena, 'decl>(
                 instr::querym(
                     alloc,
                     0,
-                    QueryOp::CGet,
+                    QueryMOp::CGet,
                     MemberKey::EI(i as i64, ReadonlyOp::Any),
                 ),
             ],
@@ -1385,7 +1358,7 @@ fn emit_load_list_element<'a, 'arena, 'decl>(
         ast::Expr_::List(es) => {
             let instr_dim = instr::dim(
                 alloc,
-                MemberOpMode::Warn,
+                MOpMode::Warn,
                 MemberKey::EI(i as i64, ReadonlyOp::Any),
             );
             path.push(instr_dim);

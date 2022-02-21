@@ -9,13 +9,15 @@ use bitflags::bitflags;
 use emit_pos::emit_pos;
 use env::{emitter::Emitter, jump_targets as jt, Env};
 use hhbc_ast::{self as hhbc_ast, Instruct};
+use hhvm_hhbc_defs_ffi::ffi::IsTypeOp;
 use indexmap::IndexSet;
 use instruction_sequence::{instr, InstrSeq, Result};
+use iterator::IterId;
 use label::Label;
 use oxidized::pos::Pos;
 use std::collections::BTreeMap;
 
-type LabelMap<'a, 'arena> = BTreeMap<label::Id, &'a Instruct<'arena>>;
+type LabelMap<'a, 'arena> = BTreeMap<jt::StateId, &'a Instruct<'arena>>;
 
 pub(super) struct JumpInstructions<'a, 'arena>(LabelMap<'a, 'arena>);
 impl<'a, 'arena> JumpInstructions<'a, 'arena> {
@@ -28,7 +30,7 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
         instr_seq: &'a InstrSeq<'arena>,
         jt_gen: &mut jt::Gen,
     ) -> JumpInstructions<'a, 'arena> {
-        fn get_label_id(jt_gen: &mut jt::Gen, is_break: bool, level: Level) -> label::Id {
+        fn get_label_id(jt_gen: &mut jt::Gen, is_break: bool, level: Level) -> jt::StateId {
             use jt::ResolvedJumpTarget;
             match jt_gen.jump_targets().get_target_for_level(is_break, level) {
                 ResolvedJumpTarget::ResolvedRegular(target_label, _)
@@ -74,7 +76,7 @@ pub(super) fn cleanup_try_body<'arena>(
 pub(super) fn emit_jump_to_label<'arena>(
     alloc: &'arena bumpalo::Bump,
     l: Label,
-    iters: Vec<iterator::Id>,
+    iters: Vec<IterId>,
 ) -> InstrSeq<'arena> {
     if iters.is_empty() {
         instr::jmp(alloc, l)
@@ -86,12 +88,12 @@ pub(super) fn emit_jump_to_label<'arena>(
 pub(super) fn emit_save_label_id<'arena>(
     alloc: &'arena bumpalo::Bump,
     local_gen: &mut local::Gen<'arena>,
-    id: usize,
+    id: jt::StateId,
 ) -> InstrSeq<'arena> {
     InstrSeq::gather(
         alloc,
         vec![
-            instr::int(alloc, id as isize),
+            instr::int(alloc, id.0 as isize),
             instr::setl(alloc, *local_gen.get_label()),
             instr::popc(alloc),
         ],
@@ -119,7 +121,7 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
                 jt_gen
                     .jump_targets()
                     .iterators()
-                    .map(|i| instr::iterfree(alloc, *i))
+                    .map(|i| instr::iterfree(alloc, i))
                     .collect(),
             );
             let mut instrs = Vec::with_capacity(5);
@@ -151,10 +153,7 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
                         ReificationLevel::Definitely => {
                             let check = InstrSeq::gather(
                                 alloc,
-                                vec![
-                                    instr::dup(alloc),
-                                    instr::istypec(alloc, hhbc_ast::IsTypeOp::OpNull),
-                                ],
+                                vec![instr::dup(alloc), instr::istypec(alloc, IsTypeOp::Null)],
                             );
                             reified::simplify_verify_type(
                                 e,
@@ -355,15 +354,14 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
         // [End, L1, L2, End, L4]
         let (max_id, _) = jump_instrs.0.iter().next_back().unwrap();
         let (mut labels, mut bodies) = (vec![], vec![]);
-        let mut n: isize = *max_id as isize;
-        // lst is already sorted - BTreeMap/IMap bindings took care of it
+        let mut limit = max_id.0 + 1;
+        // jump_instrs is already sorted - BTreeMap/IMap bindings took care of it
         // TODO: add is_sorted assert to make sure this behavior is preserved for labels
         for (id, instr) in jump_instrs.0.into_iter().rev() {
-            let mut done = false;
-            while !done {
-                // NOTE(hrust) looping is equivalent to recursing without consuming instr
-                done = (id as isize) == n;
-                let (label, body) = if done {
+            loop {
+                limit -= 1;
+                // Looping is equivalent to recursing without consuming instr
+                if id.0 == limit {
                     let label = e.label_gen_mut().next_regular();
                     let body = InstrSeq::gather(
                         alloc,
@@ -372,19 +370,17 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
                             emit_instr(e, env, pos, instr)?,
                         ],
                     );
-                    (label, body)
+                    labels.push(label);
+                    bodies.push(body);
+                    break;
                 } else {
-                    (finally_end.clone(), instr::empty(alloc))
+                    labels.push(finally_end);
                 };
-                labels.push(label);
-                bodies.push(body);
-                n -= 1;
             }
         }
-        // NOTE(hrust): base case when empty and n >= 0
-        for _ in 0..=n {
-            labels.push(finally_end.clone());
-            bodies.push(instr::empty(alloc));
+        // Base case when empty and limit > 0
+        for _ in 0..limit {
+            labels.push(finally_end);
         }
         InstrSeq::gather(
             alloc,

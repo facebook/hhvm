@@ -27,8 +27,7 @@ type config = {
   heap_size: int;
   hash_table_pow: int;
   shm_use_sharded_hashtbl: bool;
-  shm_enable_eviction: bool;
-  shm_max_evictable_bytes: int;
+  shm_cache_size: int;
   shm_dirs: string list;
   shm_min_avail: int;
   log_level: int;
@@ -62,8 +61,7 @@ type handle = private {
   h_hash_table_pow_val: int;
   h_num_workers_val: int;
   h_shm_use_sharded_hashtbl: bool;
-  h_shm_enable_eviction: bool;
-  h_shm_max_evictable_bytes: int;
+  h_shm_cache_size: int;
   h_sharded_hashtbl_fd: Unix.file_descr;
 }
 

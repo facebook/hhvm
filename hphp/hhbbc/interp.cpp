@@ -3871,7 +3871,7 @@ Type specialClsRefToCls(ISS& env, SpecialClsRef ref) {
   auto const op = [&]()-> Optional<Type> {
     switch (ref) {
       case SpecialClsRef::Static: return ctxCls(env);
-      case SpecialClsRef::Self:   return selfClsExact(env);
+      case SpecialClsRef::Self_:  return selfClsExact(env);
       case SpecialClsRef::Parent: return parentClsExact(env);
     }
     always_assert(false);

@@ -8,25 +8,25 @@
  *
  */
 
-const DATE_ATOM    = "";
-const DATE_COOKIE  = "";
-const DATE_ISO8601 = "";
-const DATE_RFC1036 = "";
-const DATE_RFC1123 = "";
-const DATE_RFC2822 = "";
-const DATE_RFC3339 = "";
-const DATE_RFC822  = "";
-const DATE_RFC850  = "";
-const DATE_RSS     = "";
-const DATE_W3C     = "";
+const string DATE_ATOM    = "";
+const string DATE_COOKIE  = "";
+const string DATE_ISO8601 = "";
+const string DATE_RFC1036 = "";
+const string DATE_RFC1123 = "";
+const string DATE_RFC2822 = "";
+const string DATE_RFC3339 = "";
+const string DATE_RFC822  = "";
+const string DATE_RFC850  = "";
+const string DATE_RSS     = "";
+const string DATE_W3C     = "";
 
-const DAY_1 = 131079;
-const DAY_2 = 131080;
-const DAY_3 = 131081;
-const DAY_4 = 131082;
-const DAY_5 = 131083;
-const DAY_6 = 131084;
-const DAY_7 = 131085;
+const int DAY_1 = 131079;
+const int DAY_2 = 131080;
+const int DAY_3 = 131081;
+const int DAY_4 = 131082;
+const int DAY_5 = 131083;
+const int DAY_6 = 131084;
+const int DAY_7 = 131085;
 
 type DateTimeErrors = shape(
   'warning_count' => int,
@@ -143,17 +143,17 @@ interface DateTimeInterface {
 }
 
 class DateTime implements DateTimeInterface {
-  const ATOM = '';
-  const COOKIE = '';
-  const ISO8601 = '';
-  const RFC822 = '';
-  const RFC850 = '';
-  const RFC1036 = '';
-  const RFC1123 = '';
-  const RFC2822 = '';
-  const RFC3339 = '';
-  const RSS = '';
-  const W3C = '';
+  const string ATOM = '';
+  const string COOKIE = '';
+  const string ISO8601 = '';
+  const string RFC822 = '';
+  const string RFC850 = '';
+  const string RFC1036 = '';
+  const string RFC1123 = '';
+  const string RFC2822 = '';
+  const string RFC3339 = '';
+  const string RSS = '';
+  const string W3C = '';
 
   public function __construct(string $time = 'now', ?DateTimeZone $timezone = null)[leak_safe];
   public function add(DateInterval $interval);
@@ -206,20 +206,20 @@ class DateTimeImmutable implements DateTimeInterface {
 }
 
 class DateTimeZone {
-  const AFRICA = 0;
-  const AMERICA = 0;
-  const ANTARCTICA = 0;
-  const ARCTIC = 0;
-  const ASIA = 0;
-  const ATLANTIC = 0;
-  const AUSTRALIA = 0;
-  const EUROPE = 0;
-  const INDIAN = 0;
-  const PACIFIC = 0;
-  const UTC = 0;
-  const ALL = 0;
-  const ALL_WITH_BC = 0;
-  const PER_COUNTRY = 0;
+  const int AFRICA = 0;
+  const int AMERICA = 0;
+  const int ANTARCTICA = 0;
+  const int ARCTIC = 0;
+  const int ASIA = 0;
+  const int ATLANTIC = 0;
+  const int AUSTRALIA = 0;
+  const int EUROPE = 0;
+  const int INDIAN = 0;
+  const int PACIFIC = 0;
+  const int UTC = 0;
+  const int ALL = 0;
+  const int ALL_WITH_BC = 0;
+  const int PER_COUNTRY = 0;
   public function __construct(string $timezone)[];
   public function getLocation()[]: darray { }
   public function getName()[]: string { }
@@ -246,7 +246,7 @@ class DateInterval {
 }
 
 class DatePeriod implements Iterator<DateTime> {
-  const EXCLUDE_START_DATE = 1;
+  const int EXCLUDE_START_DATE = 1;
 
   public function __construct(
     /* DateTimeInterface */ $start, // date string converts

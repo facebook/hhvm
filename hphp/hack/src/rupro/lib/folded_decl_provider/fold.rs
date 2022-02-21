@@ -3,18 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{inherit::Inherited, subst::Subst};
+use super::{inherit::Inherited, subst::Subst, subst::Substitution};
 use crate::alloc::Allocator;
 use crate::decl_defs::{
-    CeVisibility, ClassConst, ClassConstKind, ClassEltFlags, ClassEltFlagsArgs, ConsistentKind,
-    DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass, ShallowClassConst, ShallowMethod,
-    ShallowProp, UserAttribute, Visibility,
+    AbstractTypeconst, CeVisibility, ClassConst, ClassConstKind, ClassEltFlags, ClassEltFlagsArgs,
+    ClassishKind, ConsistentKind, DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass,
+    ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst, TaccessType, TypeConst,
+    Typeconst, UserAttribute, Visibility,
 };
 use crate::reason::{Reason, ReasonImpl};
 use crate::special_names::SpecialNames;
 use pos::{
     ClassConstName, ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap,
-    TypeName, TypeNameMap,
+    TypeConstName, TypeConstNameMap, TypeName, TypeNameMap,
 };
 use std::sync::Arc;
 
@@ -80,6 +81,79 @@ impl<R: Reason> DeclFolder<R> {
             ClassConstName(self.special_names.members.mClass),
             class_const,
         );
+    }
+
+    /// Each concrete type constant `T = τ` implicitly defines a class
+    /// constant of the same name `T` having type `TypeStructure<τ>`.
+    fn type_const_structure(
+        &self,
+        sc: &ShallowClass<R>,
+        stc: &ShallowTypeconst<R>,
+    ) -> ClassConst<R> {
+        let pos = stc.name.pos();
+        let r = R::mk(|| ReasonImpl::RwitnessFromDecl(pos.clone()));
+        let tsid = Positioned::new(pos.clone(), TypeName(self.special_names.fb.cTypeStructure));
+        // The type `this`.
+        let tthis = self.alloc.decl_ty(r.clone(), DeclTy_::DTthis);
+        // The type `this::T`.
+        let taccess = self.alloc.decl_ty(
+            r.clone(),
+            DeclTy_::DTaccess(Box::new(TaccessType {
+                ty: tthis,
+                type_const: stc.name.clone(),
+            })),
+        );
+        // The type `TypeStructure<this::T>`.
+        let ts_ty = self
+            .alloc
+            .decl_ty(r, DeclTy_::DTapply(Box::new((tsid, Box::new([taccess])))));
+        let kind = match &stc.kind {
+            Typeconst::TCAbstract(AbstractTypeconst { default, .. }) => {
+                ClassConstKind::CCAbstract(default.is_some())
+            }
+            Typeconst::TCConcrete(_) => ClassConstKind::CCConcrete,
+        };
+        // A class constant (which will be associated with the name `T`) of type
+        // `TypeStructure<this::T>`.
+        ClassConst {
+            is_synthesized: true,
+            kind,
+            pos: pos.clone(),
+            ty: ts_ty,
+            origin: sc.name.id(),
+            refs: Default::default(),
+        }
+    }
+
+    fn decl_type_const(
+        &self,
+        type_consts: &mut TypeConstNameMap<TypeConst<R>>,
+        class_consts: &mut ClassConstNameMap<ClassConst<R>>,
+        sc: &ShallowClass<R>,
+        stc: &ShallowTypeconst<R>,
+    ) {
+        // note(sf, 2022-02-10): c.f. Decl_folded_class.typeconst_fold
+        match sc.kind {
+            ClassishKind::Cenum | ClassishKind::CenumClass(_) => {}
+            ClassishKind::Ctrait | ClassishKind::Cinterface | ClassishKind::Cclass(_) => {
+                let TypeConstName(name) = stc.name.id();
+                let ptc = type_consts.get(stc.name.id_ref());
+                let ptc_enforceable = ptc.and_then(|tc| tc.enforceable.as_ref());
+                let ptc_reifiable = ptc.and_then(|tc| tc.reifiable.as_ref());
+                let type_const = TypeConst {
+                    is_synthesized: false,
+                    name: stc.name.clone(),
+                    kind: stc.kind.clone(),
+                    origin: sc.name.id(),
+                    enforceable: stc.enforceable.as_ref().or(ptc_enforceable).cloned(),
+                    reifiable: stc.reifiable.as_ref().or(ptc_reifiable).cloned(),
+                    is_concreteized: false,
+                    is_ctx: stc.is_ctx,
+                };
+                type_consts.insert(TypeConstName(name), type_const);
+                class_consts.insert(ClassConstName(name), self.type_const_structure(sc, stc));
+            }
+        }
     }
 
     fn decl_class_const(
@@ -270,9 +344,13 @@ impl<R: Reason> DeclFolder<R> {
                 }
                 Some(cls) => {
                     let subst = Subst::new(self.alloc, &cls.tparams, tyl);
+                    let substitution = Substitution {
+                        alloc: self.alloc,
+                        subst: &subst,
+                    };
                     // Update `ancestors`.
                     for (&anc_name, anc_ty) in &cls.ancestors {
-                        ancestors.insert(anc_name, subst.instantiate(anc_ty));
+                        ancestors.insert(anc_name, substitution.instantiate(anc_ty));
                     }
                     // Now add `ty`.
                     ancestors.insert(pos_id.id(), ty.clone());
@@ -322,6 +400,11 @@ impl<R: Reason> DeclFolder<R> {
             .for_each(|c| self.decl_class_const(&mut consts, sc, c));
         self.decl_class_class(&mut consts, sc);
 
+        let mut type_consts = inh.type_consts;
+        sc.typeconsts
+            .iter()
+            .for_each(|tc| self.decl_type_const(&mut type_consts, &mut consts, sc, tc));
+
         Arc::new(FoldedClass {
             name: sc.name.id(),
             pos: sc.name.pos().clone(),
@@ -333,8 +416,8 @@ impl<R: Reason> DeclFolder<R> {
             static_methods,
             constructor,
             consts,
-            type_consts: Default::default(), //TODO
-            tparams: Default::default(),     //TODO
+            type_consts,
+            tparams: Default::default(), //TODO
         })
     }
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<046ac42b3a65bab8e3bbf2e3eb1400d5>>
+// @generated SignedSource<<02cf59a2055b5bdc465bc2218efde3b7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -110,7 +110,6 @@ pub struct GlobalOptions<'a> {
     pub po_const_default_lambda_args: bool,
     pub po_disallow_silence: bool,
     pub po_abstract_static_props: bool,
-    pub po_disable_unset_class_const: bool,
     pub po_parser_errors_only: bool,
     pub tco_check_attribute_locations: bool,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -141,8 +140,6 @@ pub struct GlobalOptions<'a> {
     pub po_disable_xhp_children_declarations: bool,
     pub po_enable_enum_classes: bool,
     pub po_disable_hh_ignore_error: bool,
-    pub po_disable_array: bool,
-    pub po_disable_array_typehint: bool,
     pub tco_enable_systemlib_annotations: bool,
     pub tco_higher_kinded_types: bool,
     pub tco_method_call_inference: bool,

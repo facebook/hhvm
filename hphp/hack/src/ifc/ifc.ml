@@ -1948,11 +1948,11 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
         (env, Env.merge_out out_finally out))
       out_try_catch
       (env, KMap.empty)
-  | A.Switch (e, cl) ->
+  | A.Switch (e, cl, dfl) ->
     let (_, pos, _) = e in
     let (env, ety, ethrow) = expr ~pos renv env e in
     let (env, out_cond) = Env.close_stmt ~merge:ethrow env K.Fallthrough in
-    let case (env, (out, deps)) c =
+    let case_gen (env, (out, deps)) c =
       let out = Env.merge_out out_cond out in
       let (out, ft_cont_opt) = Env.strip_cont out K.Fallthrough in
       (* out_cond has a Fallthrough so ft_cont_opt cannot be None *)
@@ -1960,8 +1960,8 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
       Env.with_pc_deps env deps @@ fun env ->
       let (env, out, new_deps, b) =
         match c with
-        | A.Default (_, b) -> (env, out, PSet.empty, b)
-        | A.Case (e, b) ->
+        | Aast.Default (_, b) -> (env, out, PSet.empty, b)
+        | Aast.Case (e, b) ->
           let (_, pos, _) = e in
           let (env, ety, ethrow) = expr ~pos renv env e in
           let out = Env.merge_out out ethrow in
@@ -1975,9 +1975,14 @@ and stmt renv (env : Env.stmt_env) ((pos, s) : Tast.stmt) =
          information about the scrutinee and the cases *)
       (env, (out, PSet.union deps new_deps))
     in
+    let case state c = case_gen state (Aast.Case c) in
+    let default_case state c = case_gen state (Aast.Default c) in
     let (env, (out, _final_deps)) =
       let initial_deps = object_policy ety in
-      List.fold ~f:case ~init:(env, (out_cond, initial_deps)) cl
+      let state = (env, (out_cond, initial_deps)) in
+      let state = List.fold ~f:case ~init:state cl in
+      let state = Option.fold ~f:default_case ~init:state dfl in
+      state
     in
     let out = Env.merge_in_next out K.Continue in
     let out = Env.merge_in_next out K.Break in

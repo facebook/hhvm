@@ -75,18 +75,18 @@ impl<R: Reason> Allocator<R> {
                 }
                 OR::RinoutParam(pos) => RI::RinoutParam(self.pos_from_decl(pos)),
                 OR::Rinstantiate((r1, sym, r2)) => {
-                    RI::Rinstantiate(self.reason(r1), self.symbol(sym), self.reason(r2))
+                    RI::Rinstantiate(self.reason(r1), TypeName(self.symbol(sym)), self.reason(r2))
                 }
                 OR::Rtypeconst((r1, pos_id, sym, r2)) => RI::Rtypeconst(
                     self.reason(r1),
                     self.pos_type_const_from_decl(*pos_id),
-                    self.symbol(sym),
+                    self.symbol(sym.0),
                     self.reason(r2),
                 ),
                 OR::RtypeAccess((r, list)) => RI::RtypeAccess(
                     self.reason(r),
                     list.iter()
-                        .map(|(r, s)| (self.reason(r), self.symbol(s)))
+                        .map(|(r, s)| (self.reason(r), self.symbol(s.0)))
                         .collect(),
                 ),
                 OR::RexprDepType((r, pos, edt_reason)) => RI::RexprDepType(

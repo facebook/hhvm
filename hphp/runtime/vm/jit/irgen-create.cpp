@@ -467,7 +467,7 @@ void emitAddElemC(IRGS& env) {
   auto const key = convertClassKey(env, popC(env));
   auto const arr = popC(env);
   push(env, gen(env, DictSet, arr, key, val));
-  decRef(env, key);
+  decRef(env, key, DecRefProfileId::Default);
 }
 
 void emitAddNewElemC(IRGS& env) {
@@ -480,7 +480,7 @@ void emitAddNewElemC(IRGS& env) {
   auto const arr = popC(env);
   auto const op = arr->isA(TVec) ? AddNewElemVec : AddNewElemKeyset;
   push(env, gen(env, op, arr, val));
-  decRef(env, val);
+  decRef(env, val, DecRefProfileId::Default);
 }
 
 void emitNewCol(IRGS& env, CollectionType type) {

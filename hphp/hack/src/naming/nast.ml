@@ -71,6 +71,10 @@ type catch = (unit, unit) Aast.catch
 
 type case = (unit, unit) Aast.case
 
+type default_case = (unit, unit) Aast.default_case
+
+type gen_case = (unit, unit) Aast.gen_case
+
 type field = (unit, unit) Aast.field
 
 type afield = (unit, unit) Aast.afield
@@ -383,6 +387,8 @@ module Visitor_DEPRECATED = struct
 
       method on_case : 'a -> case -> 'a
 
+      method on_default_case : 'a -> default_case -> 'a
+
       method on_catch : 'a -> catch -> 'a
 
       method on_continue : 'a -> 'a
@@ -415,7 +421,7 @@ module Visitor_DEPRECATED = struct
 
       method on_stmt_ : 'a -> (unit, unit) stmt_ -> 'a
 
-      method on_switch : 'a -> expr -> case list -> 'a
+      method on_switch : 'a -> expr -> case list -> default_case option -> 'a
 
       method on_throw : 'a -> expr -> 'a
 
@@ -540,7 +546,7 @@ module Visitor_DEPRECATED = struct
 
       method on_class_use : 'a -> hint -> 'a
 
-      method on_class_req : 'a -> hint * bool -> 'a
+      method on_class_req : 'a -> hint * require_kind -> 'a
 
       method on_func_body : 'a -> func_body -> 'a
 
@@ -653,9 +659,14 @@ module Visitor_DEPRECATED = struct
         let acc = this#on_block acc b in
         acc
 
-      method on_switch acc e cl =
+      method on_switch acc e cl dfl =
         let acc = this#on_expr acc e in
         let acc = List.fold_left cl ~f:this#on_case ~init:acc in
+        let acc =
+          match dfl with
+          | None -> acc
+          | Some dfl -> this#on_default_case acc dfl
+        in
         acc
 
       method on_foreach acc e ae b =
@@ -672,15 +683,12 @@ module Visitor_DEPRECATED = struct
 
       method on_block acc b = List.fold_left b ~f:this#on_stmt ~init:acc
 
-      method on_case acc =
-        function
-        | Default (_, b) ->
-          let acc = this#on_block acc b in
-          acc
-        | Case (e, b) ->
-          let acc = this#on_expr acc e in
-          let acc = this#on_block acc b in
-          acc
+      method on_case acc (e, b) =
+        let acc = this#on_expr acc e in
+        let acc = this#on_block acc b in
+        acc
+
+      method on_default_case acc (_, dfl) = this#on_block acc dfl
 
       method on_as_expr acc =
         function
@@ -711,7 +719,7 @@ module Visitor_DEPRECATED = struct
         | While (e, b) -> this#on_while acc e b
         | Using us -> this#on_using acc us
         | For (e1, e2, e3, b) -> this#on_for acc e1 e2 e3 b
-        | Switch (e, cl) -> this#on_switch acc e cl
+        | Switch (e, cl, dfl) -> this#on_switch acc e cl dfl
         | Foreach (e, ae, b) -> this#on_foreach acc e ae b
         | Try (b, cl, fb) -> this#on_try acc b cl fb
         | Noop -> this#on_noop acc

@@ -82,6 +82,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b26702f315f53b6071259e15dd9d64528213b44d61de1ec926eca7715d62203"
 
 [[package]]
+name = "archery"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0a8da9bc4c4053ee067669762bcaeea6e241841295a2b6c948312dad6ef4cc02"
+dependencies = [
+ "static_assertions",
+]
+
+[[package]]
 name = "arena_collections"
 version = "0.0.0"
 dependencies = [
@@ -164,6 +173,7 @@ dependencies = [
  "env",
  "hhbc_ast",
  "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "instruction_sequence",
  "naming_special_names_rust",
  "oxidized",
@@ -247,15 +257,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
-name = "bitmaps"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "031043d04099746d8db04daf1fa424b2bc8bd69d92b25962dcde24da39ab64a2"
-dependencies = [
- "typenum",
-]
-
-[[package]]
 name = "block-buffer"
 version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -314,6 +315,7 @@ dependencies = [
  "escaper",
  "ffi",
  "hackc_unit",
+ "hash",
  "hhas_adata",
  "hhas_attribute",
  "hhas_body",
@@ -332,6 +334,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
  "instruction_sequence",
  "iterator",
@@ -469,9 +472,8 @@ dependencies = [
  "emit_unit",
  "env",
  "hackc_unit",
- "hhbc_ast",
+ "hhvm_hhbc_defs_ffi",
  "instruction_sequence",
- "itertools 0.10.3",
  "ocamlrep",
  "ocamlrep_derive",
  "options",
@@ -480,7 +482,7 @@ dependencies = [
  "profile_rust",
  "rewrite_program",
  "stack_limit",
- "unified_decl_provider",
+ "thiserror",
 ]
 
 [[package]]
@@ -498,7 +500,6 @@ dependencies = [
  "parser_core_types",
  "serde_json",
  "stack_limit",
- "unified_decl_provider",
 ]
 
 [[package]]
@@ -514,7 +515,6 @@ dependencies = [
  "cxx-build",
  "decl_provider",
  "direct_decl_parser",
- "external_decl_provider",
  "facts_rust",
  "ffi",
  "hackc_unit",
@@ -528,7 +528,6 @@ dependencies = [
  "parser_core_types",
  "serde_json",
  "stack_limit",
- "unified_decl_provider",
 ]
 
 [[package]]
@@ -725,9 +724,9 @@ dependencies = [
 
 [[package]]
 name = "cxx"
-version = "1.0.56"
+version = "1.0.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8497fb19bda9be0d113b940f88acd2e9faab278a5397861f6c7e31583289f29d"
+checksum = "fcd554072878dec8c16f59839336bf712d6d1f0d8d27cf9b471c10a484a3290f"
 dependencies = [
  "cc",
  "cxxbridge-flags",
@@ -737,13 +736,13 @@ dependencies = [
 
 [[package]]
 name = "cxx-build"
-version = "1.0.56"
+version = "1.0.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a561716d81b24f50b705dce50c3f79d9294fb54d06017a56f840a00f72a9b98d"
+checksum = "bae954f28208a9c31eb37623d435bdfcdd28fe93ffb5a34dfe6af9a2f1a1ca66"
 dependencies = [
  "cc",
  "codespan-reporting",
- "lazy_static",
+ "once_cell",
  "proc-macro2",
  "quote",
  "scratch",
@@ -752,15 +751,15 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-flags"
-version = "1.0.56"
+version = "1.0.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "592c3f94d14bb92cc8867159c5a072ae61ac288ff1f08051c4b26ec664a233e3"
+checksum = "1cc629121d3f01cd7c85ba046b3bcef66d182429b495eeb1080396ba4bfb8ae4"
 
 [[package]]
 name = "cxxbridge-macro"
-version = "1.0.56"
+version = "1.0.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04f5cb3b337856fe25282ca3c8ae58ae688adb956ab96c39af159b04b190ea52"
+checksum = "93a8fa39ee5a91d04a99fc09fc3f1dd780ebfe31817721abcaecd823e00c9f3b"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -792,7 +791,13 @@ dependencies = [
 name = "decl_provider"
 version = "0.0.0"
 dependencies = [
+ "arena_deserializer",
+ "bincode",
+ "bumpalo",
+ "ffi",
+ "libc",
  "oxidized_by_ref",
+ "thiserror",
 ]
 
 [[package]]
@@ -821,9 +826,9 @@ dependencies = [
 name = "depgraph"
 version = "0.0.0"
 dependencies = [
- "im-rc",
  "memmap",
  "ocamlrep",
+ "rpds",
 ]
 
 [[package]]
@@ -842,12 +847,12 @@ name = "deps_rust"
 version = "0.0.0"
 dependencies = [
  "depgraph",
- "im-rc",
  "ocamlrep",
  "ocamlrep_custom",
  "ocamlrep_ocamlpool",
  "once_cell",
  "oxidized",
+ "rpds",
  "typing_deps_hash",
 ]
 
@@ -989,6 +994,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "indexmap",
  "instruction_sequence",
  "iterator",
@@ -1016,6 +1022,7 @@ dependencies = [
  "bumpalo",
  "emit_attribute",
  "emit_body",
+ "emit_constant",
  "emit_expression",
  "emit_fatal",
  "emit_memoize_method",
@@ -1042,6 +1049,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
  "instruction_sequence",
  "itertools 0.10.3",
@@ -1056,8 +1064,10 @@ dependencies = [
 name = "emit_constant"
 version = "0.0.0"
 dependencies = [
+ "ast_constant_folder",
  "core_utils_rust",
  "emit_body",
+ "emit_expression",
  "emit_type_hint",
  "env",
  "ffi",
@@ -1070,6 +1080,7 @@ dependencies = [
  "hhvm_types_ffi",
  "instruction_sequence",
  "oxidized",
+ "runtime",
 ]
 
 [[package]]
@@ -1092,6 +1103,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "indexmap",
  "instruction_sequence",
  "itertools 0.10.3",
@@ -1113,7 +1125,7 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "emit_pos",
- "hhbc_ast",
+ "hhvm_hhbc_defs_ffi",
  "instruction_sequence",
  "oxidized",
 ]
@@ -1152,6 +1164,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
  "instruction_sequence",
  "itertools 0.10.3",
@@ -1174,6 +1187,7 @@ dependencies = [
  "hhas_param",
  "hhbc_ast",
  "hhbc_id",
+ "hhvm_hhbc_defs_ffi",
  "instruction_sequence",
  "label",
  "local",
@@ -1206,6 +1220,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "instruction_sequence",
  "label",
  "local",
@@ -1308,6 +1323,7 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhbc_string_utils",
+ "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
  "instruction_sequence",
  "naming_special_names_rust",
@@ -1391,7 +1407,7 @@ dependencies = [
  "ffi",
  "hackc_unit",
  "hhas_symbol_refs",
- "hhbc_ast",
+ "hhvm_hhbc_defs_ffi",
  "instruction_sequence",
  "ocamlrep",
  "oxidized",
@@ -1406,7 +1422,6 @@ dependencies = [
  "emit_property",
  "env",
  "hhas_method",
- "hhas_property",
  "hhas_xhp_attribute",
  "hhbc_id",
  "hhbc_string_utils",
@@ -1441,7 +1456,6 @@ dependencies = [
  "oxidized_by_ref",
  "statement_state",
  "symbol_refs_state",
- "unified_decl_provider",
 ]
 
 [[package]]
@@ -1492,19 +1506,6 @@ dependencies = [
  "bstr",
  "bumpalo",
  "pretty_assertions",
-]
-
-[[package]]
-name = "external_decl_provider"
-version = "0.0.0"
-dependencies = [
- "arena_deserializer",
- "bincode",
- "bumpalo",
- "decl_provider",
- "ffi",
- "libc",
- "oxidized_by_ref",
 ]
 
 [[package]]
@@ -1681,7 +1682,7 @@ dependencies = [
  "hhas_pos",
  "hhas_symbol_refs",
  "hhas_typedef",
- "hhbc_ast",
+ "hhvm_hhbc_defs_ffi",
 ]
 
 [[package]]
@@ -1796,7 +1797,6 @@ dependencies = [
  "structopt",
  "strum",
  "strum_macros",
- "unified_decl_provider",
 ]
 
 [[package]]
@@ -1902,13 +1902,8 @@ dependencies = [
 name = "hhas_constant"
 version = "0.0.0"
 dependencies = [
- "ast_constant_folder",
- "emit_expression",
- "env",
  "ffi",
  "hhbc_id",
- "instruction_sequence",
- "oxidized",
  "runtime",
 ]
 
@@ -1970,7 +1965,6 @@ dependencies = [
  "hhbc_ast",
  "hhbc_id",
  "hhvm_types_ffi",
- "instruction_sequence",
  "runtime",
 ]
 
@@ -2033,9 +2027,9 @@ dependencies = [
 name = "hhbc_ast"
 version = "0.0.0"
 dependencies = [
- "bitflags",
  "ffi",
  "hhbc_id",
+ "hhvm_hhbc_defs_ffi",
  "iterator",
  "label",
  "local",
@@ -2068,6 +2062,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hhvm_hhbc_defs_ffi"
+version = "0.0.0"
+dependencies = [
+ "cxx",
+ "cxx-build",
+ "oxidized",
+]
+
+[[package]]
 name = "hhvm_types_ffi"
 version = "0.0.0"
 dependencies = [
@@ -2094,21 +2097,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df004cfca50ef23c36850aaaa59ad52cc70d0e90243c3c7737a4dd32dc7a3c4f"
 dependencies = [
  "quick-error",
-]
-
-[[package]]
-name = "im-rc"
-version = "14.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "303f7e6256d546e01979071417432425f15c1891fb309a5f2d724ee908fabd6e"
-dependencies = [
- "bitmaps",
- "rand_core 0.5.1",
- "rand_xoshiro",
- "serde",
- "sized-chunks",
- "typenum",
- "version_check",
 ]
 
 [[package]]
@@ -2152,6 +2140,7 @@ dependencies = [
  "bumpalo",
  "ffi",
  "hhbc_ast",
+ "hhvm_hhbc_defs_ffi",
  "iterator",
  "itertools 0.10.3",
  "label",
@@ -2225,7 +2214,6 @@ version = "0.0.0"
 dependencies = [
  "bumpalo",
  "env",
- "ffi",
  "hash",
  "hhas_param",
  "hhbc_ast",
@@ -2462,6 +2450,7 @@ version = "0.0.0"
 dependencies = [
  "hash",
  "lazy_static",
+ "write_bytes",
 ]
 
 [[package]]
@@ -2590,9 +2579,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.8.0"
+version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
+checksum = "da32515d9f6e6e489d7bc9d84c71b060db7247dc035bbe44eac88cf87486d8d5"
 
 [[package]]
 name = "oorandom"
@@ -2946,7 +2935,7 @@ checksum = "2e7573632e6454cf6b99d7aac4ccca54be06da05aca2ef7423d22d27d4d4bcd8"
 dependencies = [
  "libc",
  "rand_chacha",
- "rand_core 0.6.3",
+ "rand_core",
  "rand_hc",
 ]
 
@@ -2957,14 +2946,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6c10a63a0fa32252be49d21e7709d4d4baf8d231c2dbce1eaa8141b9b127d88"
 dependencies = [
  "ppv-lite86",
- "rand_core 0.6.3",
+ "rand_core",
 ]
-
-[[package]]
-name = "rand_core"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90bde5296fc891b0cef12a6d03ddccc162ce7b2aff54160af9338f8d40df6d19"
 
 [[package]]
 name = "rand_core"
@@ -2981,16 +2964,7 @@ version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d51e9f596de227fda2ea6c84607f5558e196eeaf43c986b724ba4fb8fdf497e7"
 dependencies = [
- "rand_core 0.6.3",
-]
-
-[[package]]
-name = "rand_xoshiro"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9fcdd2e881d02f1d9390ae47ad8e5696a9e4be7b547a1da2afbc61973217004"
-dependencies = [
- "rand_core 0.5.1",
+ "rand_core",
 ]
 
 [[package]]
@@ -3090,6 +3064,15 @@ dependencies = [
  "instruction_sequence",
  "naming_special_names_rust",
  "oxidized",
+]
+
+[[package]]
+name = "rpds"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4ef5140bcb576bfd6d56cd2de709a7d17851ac1f3805e67fe9d99e42a11821f"
+dependencies = [
+ "archery",
 ]
 
 [[package]]
@@ -3329,16 +3312,6 @@ dependencies = [
  "owning_ref",
  "rand",
  "static_assertions",
-]
-
-[[package]]
-name = "sized-chunks"
-version = "0.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d59044ea371ad781ff976f7b06480b9f0180e834eda94114f2afb4afc12b7718"
-dependencies = [
- "bitmaps",
- "typenum",
 ]
 
 [[package]]
@@ -3654,15 +3627,6 @@ name = "unicode-xid"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ccb82d61f80a663efe1f787a51b16b5a51e3314d6ac365b08639f52387b33f3"
-
-[[package]]
-name = "unified_decl_provider"
-version = "0.0.0"
-dependencies = [
- "decl_provider",
- "external_decl_provider",
- "oxidized_by_ref",
-]
 
 [[package]]
 name = "unique_id_builder"

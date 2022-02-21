@@ -214,7 +214,7 @@ let add_dependency_callback cb_name cb =
 (** Set of dependencies used for the custom system
 
     The type `t` is an abstract type managed by `typing_deps.rs`.
-    It is a pointer to an `OrdSet<Dep>`, a persistent Rust map *)
+    It is a pointer to an `HashTrieSet<Dep>`, a persistent Rust map *)
 module DepSet = struct
   type t (* Abstract type *)
 

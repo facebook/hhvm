@@ -1157,9 +1157,9 @@ Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
 
   // For consistency with the interpreter, decref the rhs before we decref the
   // stack inputs, and decref the ratchet storage after the stack inputs.
-  popDecRef(env, DataTypeGeneric);
+  popDecRef(env, DecRefProfileId::Default, DataTypeGeneric);
   for (int i = 0; i < nDiscard; ++i) {
-    popDecRef(env, DataTypeGeneric);
+    popDecRef(env, static_cast<DecRefProfileId>(i), DataTypeGeneric);
   }
   auto const val = gen(env, LdUnwinderValue, TCell);
   push(env, val);
@@ -1215,7 +1215,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
     auto const oldVal = gen(env, LdMem, propInfo->knownType, propPtr);
     gen(env, IncRef, newVal);
     gen(env, StMem, propPtr, newVal);
-    decRef(env, oldVal);
+    decRef(env, oldVal, DecRefProfileId::Default);
   } else {
     gen(
       env,
@@ -1243,9 +1243,9 @@ void handleStrTestResult(IRGS& env, uint32_t nDiscard, SSATmp* strTestResult) {
     [&] {
       hint(env, Block::Hint::Unlikely);
       auto const str = gen(env, AssertNonNull, strTestResult);
-      popDecRef(env, DataTypeGeneric);
+      popDecRef(env, DecRefProfileId::Default, DataTypeGeneric);
       for (int i = 0; i < nDiscard; ++i) {
-        popDecRef(env);
+        popDecRef(env, static_cast<DecRefProfileId>(i));
       }
       push(env, str);
       gen(env, FinishMemberOp);
@@ -1290,7 +1290,7 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value, Finish finish) {
         decRef(
           env,
           gen(env, LdMem, TInitCell, elem),
-          kProfiledArraySetDecRefProfId
+          DecRefProfileId::ProfiledArraySet
         );
         gen(env, StMem, elem, value);
         return cns(env, TBottom);
@@ -1309,7 +1309,11 @@ SSATmp* emitArrayLikeSet(IRGS& env, SSATmp* key, SSATmp* value, Finish finish) {
       [&] {
         auto const vec = cowArray(env, base);
         auto const elem = gen(env, LdVecElemAddr, vec, key, base);
-        decRef(env, gen(env, LdMem, TInitCell, elem));
+        decRef(
+            env,
+            gen(env, LdMem, TInitCell, elem),
+            DecRefProfileId::ProfiledArraySet
+        );
         gen(env, StMem, elem, value);
       },
       [&] {
@@ -1444,7 +1448,7 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, Finish finish) {
       } else if (t == TStaticStr) {
         // Base is a string. Stack result is a new string so we're responsible
         // for decreffing value.
-        decRef(env, value);
+        decRef(env, value, DecRefProfileId::Default);
         value = result;
       } else {
         assertx(t == (TStaticStr | TNullptr));
@@ -1504,7 +1508,9 @@ SSATmp* ptrToInitNull(IRGS& env) {
 }
 
 void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
-  for (auto i = 0; i < nDiscard; ++i) popDecRef(env);
+  for (auto i = 0; i < nDiscard; ++i) {
+    popDecRef(env, static_cast<DecRefProfileId>(i));
+  }
   if (result) push(env, result);
   gen(env, FinishMemberOp);
 }
@@ -2207,7 +2213,7 @@ void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
   auto rhs = topC(env);
 
   auto const finish = [&] (SSATmp* result) {
-    popDecRef(env);
+    popDecRef(env, DecRefProfileId::Default);
     mFinalImpl(env, nDiscard, result);
   };
   auto const result = [&] {

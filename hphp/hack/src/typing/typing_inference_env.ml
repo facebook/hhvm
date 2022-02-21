@@ -56,9 +56,28 @@ type tyvar_info = {
 
 type tvenv = tyvar_info IMap.t
 
+type identifier = int [@@deriving eq]
+
+module Identifier_provider : sig
+  val reinitialize : unit -> unit
+
+  val make_identifier : unit -> identifier
+end = struct
+  let counter : int ref = ref 0
+
+  let reinitialize () =
+    counter := 0;
+    ()
+
+  let make_identifier () =
+    let identifier = !counter in
+    counter := !counter + 1;
+    identifier
+end
+
 type t = {
   tvenv: tvenv;
-  tyvars_stack: (Pos.t * Ident.t list) list;
+  tyvars_stack: (Pos.t * identifier list) list;
   subtype_prop: TL.subtype_prop;
   tyvar_occurrences: Typing_tyvar_occurrences.t;
   allow_solve_globals: bool;
@@ -233,7 +252,7 @@ module Log = struct
       (p_locl_ty : locl_ty -> string)
       (p_internal_type : internal_type -> string)
       (env : t)
-      (v : Ident.t) =
+      (v : identifier) =
     let open Hh_json in
     match IMap.find_opt v env.tvenv with
     | None -> JSON_Null
@@ -450,7 +469,7 @@ let add_current_tyvar ?variance env p v =
   | _ -> env
 
 let fresh_type_reason ?variance env p r =
-  let v = Ident.tmp () in
+  let v = Identifier_provider.make_identifier () in
   let env = add_current_tyvar ?variance env p v in
   (env, mk (r, Tvar v))
 
@@ -485,7 +504,7 @@ let new_global_tyvar env ?i r =
   (env, mk (r, Tvar v))
 
 let wrap_ty_in_var env r ty =
-  let v = Ident.tmp () in
+  let v = Identifier_provider.make_identifier () in
   let tvinfo =
     {
       tyvar_pos = Reason.to_pos r |> Pos_or_decl.unsafe_to_raw_pos;
@@ -814,7 +833,7 @@ let is_empty_g (genv : t_global) = IMap.is_empty genv
 
 let get_vars_g (genv : t_global) = IMap.keys genv
 
-let get_unsolved_vars (env : t) : Ident.t list =
+let get_unsolved_vars (env : t) : identifier list =
   IMap.fold
     (fun v tvinfo vars ->
       match tvinfo.solving_info with
@@ -868,7 +887,7 @@ module Size = struct
         method! on_tvar acc r v =
           let (_, ty) = expand_var env r v in
           match get_node ty with
-          | Tvar v' when Ident.equal v' v -> acc
+          | Tvar v' when equal_identifier v' v -> acc
           | _ -> super#on_type acc ty
       end
     in
@@ -1056,7 +1075,7 @@ let merge_tyvar_infos tvinfo1 tvinfo2 =
   }
 
 let merge_tyvars env v1 v2 =
-  if Ident.equal v1 v2 then
+  if equal_identifier v1 v2 then
     env
   else
     let tvenv = env.tvenv in
@@ -1244,7 +1263,8 @@ let construct_undirected_tyvar_graph genvs (additional_edges : ISet.t list) :
    * the graph is a mapping from a tyvar to other tyvars (a collection of
    * directed edges).
    *)
-  let add_edge ~(from : Ident.t) ~(to_ : Ident.t) (graph : ISet.t IMap.t) =
+  let add_edge ~(from : identifier) ~(to_ : identifier) (graph : ISet.t IMap.t)
+      =
     IMap.update
       from
       (fun neighbors ->
@@ -1252,7 +1272,7 @@ let construct_undirected_tyvar_graph genvs (additional_edges : ISet.t list) :
         Some (ISet.add to_ neighbors))
       graph
   in
-  let add_edges ~(from : Ident.t) ~(to_ : ISet.t) (graph : ISet.t IMap.t) =
+  let add_edges ~(from : identifier) ~(to_ : ISet.t) (graph : ISet.t IMap.t) =
     IMap.update
       from
       (fun neighbors ->
@@ -1260,7 +1280,7 @@ let construct_undirected_tyvar_graph genvs (additional_edges : ISet.t list) :
         Some (ISet.union to_ neighbors))
       graph
   in
-  let add_vertex (vertex : Ident.t) (graph : ISet.t IMap.t) =
+  let add_vertex (vertex : identifier) (graph : ISet.t IMap.t) =
     IMap.update
       vertex
       (function
@@ -1350,7 +1370,7 @@ let split_undirected_tyvar_graph (graph : ISet.t IMap.t) : ISet.t list =
    *)
   let () =
     assert (
-      Int.equal
+      equal_identifier
         (IMap.cardinal graph)
         (List.fold components ~init:0 ~f:(fun acc c -> acc + ISet.cardinal c)))
   in
@@ -1431,7 +1451,7 @@ let remove_var_from_bounds
 
 let remove_var_from_tyvars_stack tyvars_stack var =
   List.map tyvars_stack ~f:(fun (p, vars) ->
-      (p, List.filter vars ~f:(Ident.not_equal var)))
+      (p, List.filter vars ~f:(fun v -> not (equal_identifier var v))))
 
 let replace_var_by_ty_in_prop prop v ty =
   let rec replace prop =
@@ -1526,7 +1546,7 @@ let forget_tyvar_g (genv : t_global) var_to_forget =
   let genv =
     IMap.mapi
       (fun var global_tyvar_info ->
-        if Int.equal var var_to_forget then
+        if equal_identifier var var_to_forget then
           None
         else
           let solving_info_g =
@@ -1544,7 +1564,7 @@ let forget_tyvar_g (genv : t_global) var_to_forget =
         inherit [unit] Type_mapper_generic.internal_type_mapper
 
         method! on_tvar () r var =
-          if Int.equal var var_to_forget then
+          if equal_identifier var var_to_forget then
             failwith
             @@ Printf.sprintf "encountered %d, should have been removed" var
           else

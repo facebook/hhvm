@@ -5,8 +5,7 @@
        fe_type =
        (Rwitness_from_decl ([3:10-14]),
         (Tfun
-           { ft_arity = (Fstandard ());
-             ft_tparams =
+           { ft_tparams =
              [{ Typing_defs_core.tp_variance = Invariant;
                 tp_name = ([3:32-33], "T"); tp_tparams = [];
                 tp_constraints = []; tp_reified = SoftReified;

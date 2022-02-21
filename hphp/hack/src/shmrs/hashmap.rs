@@ -13,27 +13,19 @@ use crate::filealloc::FileAlloc;
 ///
 /// This is a wrapper around hashbrown's `HashMap`. The hash map lives
 /// and allocates in shared memory.
-pub struct Map<'shm, K, V, S = DefaultHashBuilder> {
-    inner: Option<MapInner<'shm, K, V, S>>,
-}
-
-struct MapInner<'shm, K, V, S> {
-    map: HashMap<K, V, S, &'shm FileAlloc>,
-    #[allow(dead_code)]
-    alloc: &'shm FileAlloc,
-}
+pub struct Map<'shm, K, V, S = DefaultHashBuilder>(Option<HashMap<K, V, S, &'shm FileAlloc>>);
 
 impl<'shm, K, V, S> Deref for Map<'shm, K, V, S> {
     type Target = HashMap<K, V, S, &'shm FileAlloc>;
 
     fn deref(&self) -> &Self::Target {
-        &self.inner.as_ref().unwrap().map
+        self.0.as_ref().unwrap()
     }
 }
 
 impl<'shm, K, V, S> DerefMut for Map<'shm, K, V, S> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.inner.as_mut().unwrap().map
+        self.0.as_mut().unwrap()
     }
 }
 
@@ -42,8 +34,7 @@ impl<'shm, K, V> Map<'shm, K, V, DefaultHashBuilder> {
     ///
     /// See `reset_with_hasher`
     pub fn reset(&mut self, alloc: &'shm FileAlloc) {
-        let map = HashMap::new_in(alloc);
-        self.inner = Some(MapInner { map, alloc });
+        self.0 = Some(HashMap::new_in(alloc));
     }
 }
 
@@ -52,7 +43,7 @@ impl<'shm, K, V, S> Map<'shm, K, V, S> {
     ///
     /// Call `reset` to actually allocate the map.
     pub fn new() -> Self {
-        Self { inner: None }
+        Self(None)
     }
 
     /// Re-allocate the hash map.
@@ -60,7 +51,7 @@ impl<'shm, K, V, S> Map<'shm, K, V, S> {
     /// Uses the given file allocator to allocate the hashmap's table.
     pub fn reset_with_hasher(&mut self, alloc: &'shm FileAlloc, hash_builder: S) {
         let map = HashMap::with_hasher_in(hash_builder, alloc);
-        self.inner = Some(MapInner { map, alloc })
+        self.0 = Some(map);
     }
 }
 

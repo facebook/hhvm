@@ -14,8 +14,7 @@
           sm_type =
           (Rwitness_from_decl ([4:26-27]),
            (Tfun
-              { ft_arity = (Fstandard ()); ft_tparams = [];
-                ft_where_constraints = []; ft_params = [];
+              { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [4:26-27]) };
                 ft_ret =
                 { et_enforced = Typing_defs_core.Unenforced;
@@ -31,8 +30,7 @@
            sm_type =
            (Rwitness_from_decl ([11:26-31]),
             (Tfun
-               { ft_arity = (Fstandard ());
-                 ft_tparams =
+               { ft_tparams =
                  [{ Typing_defs_core.tp_variance = Invariant;
                     tp_name = ([11:32-33], "T"); tp_tparams = [];
                     tp_constraints = []; tp_reified = Erased;

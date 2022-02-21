@@ -168,14 +168,13 @@ and hint_ p env = function
       { capability }
     in
     let ret = possibly_enforced_hint env h in
-    let (arity, variadic) =
+    let (variadic, paraml) =
       match vh with
-      | Some t -> (Fvariadic (make_param t None), true)
-      | None -> (Fstandard, false)
+      | Some t -> (true, paraml @ [make_param t None])
+      | None -> (false, paraml)
     in
     Tfun
       {
-        ft_arity = arity;
         ft_tparams = [];
         ft_where_constraints = [];
         ft_params = paraml;

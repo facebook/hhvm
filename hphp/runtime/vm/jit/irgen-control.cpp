@@ -80,7 +80,7 @@ void implCondJmp(IRGS& env, Offset taken, bool negate, SSATmp* src) {
   auto const target = getBlock(env, taken);
   assertx(target != nullptr);
   auto const boolSrc = gen(env, ConvTVToBool, src);
-  decRef(env, src);
+  decRef(env, src, DecRefProfileId::Default);
   gen(env, negate ? JmpZero : JmpNZero, target, boolSrc);
 }
 
@@ -125,7 +125,7 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
   Offset defaultOff = bcOff(env) + iv.vec32()[iv.size() - 1];
 
   if (UNLIKELY(!(type <= TInt))) {
-    if (type <= TArrLike) decRef(env, switchVal);
+    if (type <= TArrLike) decRef(env, switchVal, DecRefProfileId::Default);
     gen(env, Jmp, getBlock(env, defaultOff));
     return;
   }
@@ -225,7 +225,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
 
   if (UNLIKELY(!testVal->isA(TStr))) {
     // straight to the default
-    decRef(env, testVal);
+    decRef(env, testVal, DecRefProfileId::Default);
     gen(env, Jmp, getBlock(env, defaultOff));
     return;
   }
@@ -244,7 +244,7 @@ void emitSSwitch(IRGS& env, const ImmVector& iv) {
   data.bcSPOff    = spOffBCFromStackBase(env);
 
   auto const dest = gen(env, LdSSwitchDest, data, testVal);
-  decRef(env, testVal);
+  decRef(env, testVal, DecRefProfileId::Default);
   spillInlinedFrames(env);
   gen(
     env,
@@ -273,17 +273,19 @@ void emitRaiseClassStringConversionWarning(IRGS& env) {
 void emitSelect(IRGS& env) {
   auto const condSrc = popC(env);
   auto const boolSrc = gen(env, ConvTVToBool, condSrc);
-  decRef(env, condSrc);
+  decRef(env, condSrc, DecRefProfileId::Default);
 
   ifThenElse(
     env,
     [&] (Block* taken) { gen(env, JmpZero, taken, boolSrc); },
     [&] { // True case
       auto const val = popC(env, DataTypeGeneric);
-      popDecRef(env, DataTypeGeneric);
+      popDecRef(env, DecRefProfileId::SelectIfBranch, DataTypeGeneric);
       push(env, val);
     },
-    [&] { popDecRef(env, DataTypeGeneric); } // False case
+    [&] { // False case
+      popDecRef(env, DecRefProfileId::SelectElseBranch, DataTypeGeneric);
+    }
   );
 }
 

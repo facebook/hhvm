@@ -104,10 +104,10 @@ type _ t_ =
   | Rinout_param : Pos_or_decl.t -> 'phase t_
   | Rinstantiate : 'phase t_ * string * 'phase t_ -> 'phase t_
   | Rtypeconst :
-      'phase t_ * (Pos_or_decl.t * string) * string * 'phase t_
+      'phase t_ * (Pos_or_decl.t * string) * string Lazy.t * 'phase t_
       -> 'phase t_
   | Rtype_access :
-      locl_phase t_ * (locl_phase t_ * string) list
+      locl_phase t_ * (locl_phase t_ * string Lazy.t) list
       -> locl_phase t_
   | Rexpr_dep_type :
       'phase t_ * Pos_or_decl.t * expr_dep_type_reason

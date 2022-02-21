@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<aa734a8a69c2840c1b5a33f05bca405b>>
+// @generated SignedSource<<37fd5d3ffa844ecaf185ceb94d57229b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -205,7 +205,13 @@ pub enum Stmt_<'a, Ex, En> {
     /// break;
     /// }
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Switch(&'a (&'a Expr<'a, Ex, En>, &'a [Case<'a, Ex, En>])),
+    Switch(
+        &'a (
+            &'a Expr<'a, Ex, En>,
+            &'a [Case<'a, Ex, En>],
+            Option<DefaultCase<'a, Ex, En>>,
+        ),
+    ),
     /// For-each loop.
     ///
     /// foreach ($items as $item) { ... }
@@ -1152,15 +1158,67 @@ arena_deserializer::impl_deserialize_in_arena!(ClassGetExpr<'arena, Ex, En>);
 #[serde(bound(
     deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
 ))]
-#[repr(C, u8)]
-pub enum Case<'a, Ex, En> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Default(&'a (&'a Pos<'a>, &'a Block<'a, Ex, En>)),
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Case(&'a (&'a Expr<'a, Ex, En>, &'a Block<'a, Ex, En>)),
-}
+#[repr(C)]
+pub struct Case<'a, Ex, En>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Expr<'a, Ex, En>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Block<'a, Ex, En>,
+);
 impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for Case<'a, Ex, En> {}
 arena_deserializer::impl_deserialize_in_arena!(Case<'arena, Ex, En>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+#[repr(C)]
+pub struct DefaultCase<'a, Ex, En>(
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Pos<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)] pub &'a Block<'a, Ex, En>,
+);
+impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for DefaultCase<'a, Ex, En> {}
+arena_deserializer::impl_deserialize_in_arena!(DefaultCase<'arena, Ex, En>);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[serde(bound(
+    deserialize = "Ex: 'de + arena_deserializer::DeserializeInArena<'de>, En: 'de + arena_deserializer::DeserializeInArena<'de>"
+))]
+#[repr(C, u8)]
+pub enum GenCase<'a, Ex, En> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Case(&'a Case<'a, Ex, En>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    Default(&'a DefaultCase<'a, Ex, En>),
+}
+impl<'a, Ex: TrivialDrop, En: TrivialDrop> TrivialDrop for GenCase<'a, Ex, En> {}
+arena_deserializer::impl_deserialize_in_arena!(GenCase<'arena, Ex, En>);
 
 #[derive(
     Clone,
@@ -1614,7 +1672,7 @@ pub struct InsteadofAlias<'a>(
 impl<'a> TrivialDrop for InsteadofAlias<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(InsteadofAlias<'arena>);
 
-pub use oxidized::aast::IsExtends;
+pub use oxidized::aast::RequireKind;
 
 pub use oxidized::aast::EmitId;
 
@@ -1668,7 +1726,7 @@ pub struct Class_<'a, Ex, En> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub xhp_category: Option<&'a (&'a Pos<'a>, &'a [&'a Pstring<'a>])>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub reqs: &'a [(&'a ClassHint<'a>, &'a oxidized::aast::IsExtends)],
+    pub reqs: &'a [(&'a ClassHint<'a>, &'a oxidized::aast::RequireKind)],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub implements: &'a [&'a ClassHint<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]

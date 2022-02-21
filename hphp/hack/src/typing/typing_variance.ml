@@ -340,16 +340,8 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
       in
       union acc tp
     in
-    let get_typarams_arity acc arity =
-      match arity with
-      | Fstandard -> acc
-      | Fvariadic fp -> get_typarams_param acc fp
-    in
     let params =
-      List.fold_left
-        ft.ft_params
-        ~init:(get_typarams_arity empty ft.ft_arity)
-        ~f:get_typarams_param
+      List.fold_left ft.ft_params ~init:empty ~f:get_typarams_param
     in
     let ret = get_typarams ft.ft_ret.et_type in
     let get_typarams_constraint acc (ck, ty) =

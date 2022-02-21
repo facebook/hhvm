@@ -134,7 +134,8 @@ and ('ex, 'en) stmt_ =
 
           for ($i = 0; $i < 100; $i++) { ... }
           for ($x = 0, $y = 0; ; $x++, $y++) { ... } *)
-  | Switch of ('ex, 'en) expr * ('ex, 'en) case list
+  | Switch of
+      ('ex, 'en) expr * ('ex, 'en) case list * ('ex, 'en) default_case option
       (** Switch statement.
 
           switch ($foo) {
@@ -689,9 +690,13 @@ and ('ex, 'en) class_get_expr =
   | CGstring of pstring
   | CGexpr of ('ex, 'en) expr
 
-and ('ex, 'en) case =
-  | Default of pos * ('ex, 'en) block
-  | Case of ('ex, 'en) expr * ('ex, 'en) block
+and ('ex, 'en) case = ('ex, 'en) expr * ('ex, 'en) block
+
+and ('ex, 'en) default_case = pos * ('ex, 'en) block
+
+and ('ex, 'en) gen_case =
+  | Case of ('ex, 'en) case
+  | Default of ('ex, 'en) default_case
 
 and ('ex, 'en) catch = class_name * lid * ('ex, 'en) block
 
@@ -794,7 +799,9 @@ and use_as_alias = sid option * pstring * sid option * use_as_visibility list
 
 and insteadof_alias = sid * pstring * sid list
 
-and is_extends = bool
+and require_kind =
+  | RequireExtends
+  | RequireImplements
 
 and emit_id =
   (* For globally defined type, the ID used in the .main function. *)
@@ -823,7 +830,7 @@ and ('ex, 'en) class_ = {
           because we have runtime support. *)
   c_xhp_attr_uses: xhp_attr_hint list;
   c_xhp_category: (pos * pstring list) option;
-  c_reqs: (class_hint * is_extends) list;
+  c_reqs: (class_hint * require_kind) list;
   c_implements: class_hint list;
   c_where_constraints: where_constraint_hint list;
   c_consts: ('ex, 'en) class_const list;
@@ -1089,11 +1096,10 @@ let split_vars c_vars =
 let split_reqs c_reqs =
   let (extends, implements) =
     List.fold_left
-      (fun (extends, implements) (h, is_extends) ->
-        if is_extends then
-          (h :: extends, implements)
-        else
-          (extends, h :: implements))
+      (fun (extends, implements) (h, require_kind) ->
+        match require_kind with
+        | RequireExtends -> (h :: extends, implements)
+        | RequireImplements -> (extends, h :: implements))
       ([], [])
       c_reqs
   in
@@ -1137,3 +1143,79 @@ let enum_includes_map ?(default = []) ~f includes =
   | Some includes -> f includes
 
 let is_enum_class c = Ast_defs.is_c_enum_class c.c_kind
+
+let partition_map_require_kind ~f trait_reqs =
+  let rec partition req_extends req_implements c_reqs =
+    match c_reqs with
+    | [] -> (List.rev req_extends, List.rev req_implements)
+    | ((_, RequireExtends) as req) :: tl ->
+      partition (f req :: req_extends) req_implements tl
+    | ((_, RequireImplements) as req) :: tl ->
+      partition req_extends (f req :: req_implements) tl
+  in
+  partition [] [] trait_reqs
+
+(* Combinators for folding / iterating over all of a switch statement *)
+module GenCase : sig
+  val map :
+    f:(('ex, 'en) gen_case -> 'a) ->
+    ('ex, 'en) case list ->
+    ('ex, 'en) default_case option ->
+    'a list
+
+  val fold_left :
+    init:'state ->
+    f:('state -> ('ex, 'en) gen_case -> 'state) ->
+    ('ex, 'en) case list ->
+    ('ex, 'en) default_case option ->
+    'state
+
+  val fold_right :
+    init:'state ->
+    f:(('ex, 'en) gen_case -> 'state -> 'state) ->
+    ('ex, 'en) case list ->
+    ('ex, 'en) default_case option ->
+    'state
+
+  val fold_left_mem :
+    init:'state ->
+    f:('state -> ('ex, 'en) gen_case -> 'state) ->
+    ('ex, 'en) case list ->
+    ('ex, 'en) default_case option ->
+    'state list
+end = struct
+  let map ~f cases odfl =
+    let rec doit cases =
+      match cases with
+      | [] -> Option.to_list (Option.map (fun x -> f (Default x)) odfl)
+      | case :: cases -> f (Case case) :: doit cases
+    in
+    doit cases
+
+  let fold_left ~init:state ~f cases odfl =
+    let state =
+      List.fold_left (fun state case -> f state (Case case)) state cases
+    in
+    let state =
+      let some dfl = f state (Default dfl) in
+      Option.fold ~none:state ~some odfl
+    in
+    state
+
+  let fold_right ~init:state ~f cases odfl =
+    let state =
+      let some dfl = f (Default dfl) state in
+      Option.fold ~none:state ~some odfl
+    in
+    let state =
+      List.fold_right (fun case state -> f (Case case) state) cases state
+    in
+    state
+
+  let fold_left_mem ~init ~f cases odfl =
+    let f (state, acc) case =
+      let state = f state case in
+      (state, state :: acc)
+    in
+    snd (fold_left ~init:(init, []) ~f cases odfl)
+end

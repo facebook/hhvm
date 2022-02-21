@@ -3,9 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{expr_to_string_lossy, parse_file, Env, EnvFlags};
+use crate::{Env, EnvFlags, ParseError};
 // use crate::compile_rust as compile;
-use itertools::Either::*;
 use ocamlrep::rc::RcOc;
 use options::{LangFlags, Options};
 use oxidized::namespace_env::Env as NamespaceEnv;
@@ -85,7 +84,7 @@ fn desugar_and_replace_et_literals<S: AsRef<str>>(
 
     let mut src = src.to_string();
     for (pos, literal) in literals {
-        let desugared_literal_src = expr_to_string_lossy(env, &literal.runtime_expr);
+        let desugared_literal_src = crate::expr_to_string_lossy(env, &literal.runtime_expr);
         let (pos_start, pos_end) = pos.info_raw();
         src.replace_range(pos_start..pos_end, &desugared_literal_src);
     }
@@ -113,9 +112,9 @@ pub fn desugar_and_print<S: AsRef<str>>(env: &Env<S>) {
             .flags
             .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
     ));
-    match parse_file(&opts, &limit, source_text, false, ns, is_systemlib) {
-        Left((_, msg, _)) => panic!("Parsing failed: {}", msg),
-        Right(ast) => {
+    match crate::parse_file(&opts, &limit, source_text, false, ns, is_systemlib) {
+        Err(ParseError(_, msg, _)) => panic!("Parsing failed: {}", msg),
+        Ok(ast) => {
             let old_src = String::from_utf8_lossy(&content);
             let new_src = desugar_and_replace_et_literals(env, ast, &old_src);
             print!("{}", new_src);

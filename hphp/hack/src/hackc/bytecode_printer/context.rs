@@ -3,12 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::{special_class_resolver::SpecialClassResolver, write::newline};
+use crate::special_class_resolver::SpecialClassResolver;
 use bstr::{BStr, BString, ByteSlice};
 use env::emitter::Emitter;
 use oxidized::relative_path::RelativePath;
 use std::collections::BTreeMap;
-use std::io::{Result, Write};
+use std::{
+    fmt,
+    io::{Result, Write},
+};
 
 /// Indent is an abstraction of indentation. Configurable indentation
 /// and perf tweaking will be easier.
@@ -27,10 +30,12 @@ impl Indent {
     fn dec(&mut self) {
         self.0 -= 1;
     }
+}
 
-    fn write(&self, w: &mut dyn Write) -> Result<()> {
+impl fmt::Display for Indent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for _ in 0..self.0 {
-            w.write_all(b"  ")?;
+            f.write_str("  ")?;
         }
         Ok(())
     }
@@ -82,8 +87,7 @@ impl<'a> Context<'a> {
 
     /// Insert a newline with indentation
     pub(crate) fn newline(&self, w: &mut dyn Write) -> Result<()> {
-        newline(w)?;
-        self.indent.write(w)
+        write!(w, "\n{}", self.indent)
     }
 
     /// Start a new indented block
@@ -115,3 +119,14 @@ impl<'a> Context<'a> {
         self.indent.dec();
     }
 }
+
+pub(crate) struct FmtIndent<'a>(pub(crate) &'a Context<'a>);
+
+impl fmt::Display for FmtIndent<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.indent.fmt(f)?;
+        Ok(())
+    }
+}
+
+write_bytes::display_bytes_using_display!(FmtIndent<'_>);

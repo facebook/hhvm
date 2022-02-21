@@ -1568,20 +1568,11 @@ and simplify_subtype_i
             let ty_dyn_enf = { et_enforced = Unenforced; et_type = ty_super } in
             env
             (* Contravariant subtyping on parameters *)
-            |> begin
-                 match ft_sub.ft_arity with
-                 | Fvariadic { fp_type; _ } ->
-                   simplify_dynamic_aware_subtype
-                     ~subtype_env
-                     ty_super
-                     fp_type.et_type
-                 | _ -> valid
-               end
-            &&& simplify_supertype_params_with_variadic
-                  ~subtype_env:
-                    { subtype_env with coerce = Some TL.CoerceToDynamic }
-                  ft_sub.ft_params
-                  ty_dyn_enf
+            |> simplify_supertype_params_with_variadic
+                 ~subtype_env:
+                   { subtype_env with coerce = Some TL.CoerceToDynamic }
+                 ft_sub.ft_params
+                 ty_dyn_enf
             &&& (* Finally do covariant subtryping on return type *)
             simplify_dynamic_aware_subtype
               ~subtype_env
@@ -2628,8 +2619,8 @@ and simplify_subtype_params
     ?(check_params_ifc = false)
     (subl : locl_fun_param list)
     (superl : locl_fun_param list)
-    (variadic_sub_ty : locl_possibly_enforced_ty option)
-    (variadic_super_ty : locl_possibly_enforced_ty option)
+    (variadic_sub_ty : bool)
+    (variadic_super_ty : bool)
     env =
   let simplify_subtype_possibly_enforced =
     simplify_subtype_possibly_enforced ~subtype_env
@@ -2667,14 +2658,12 @@ and simplify_subtype_params
      }
      It should also check that string is a subtype of mixed.
   *)
-  | ([], _) ->
-    (match variadic_super_ty with
-    | None -> valid env
-    | Some ty -> simplify_supertype_params_with_variadic superl ty env)
-  | (_, []) ->
-    (match variadic_sub_ty with
-    | None -> valid env
-    | Some ty -> simplify_subtype_params_with_variadic subl ty env)
+  | ([fp], _) when variadic_sub_ty ->
+    simplify_supertype_params_with_variadic superl fp.fp_type env
+  | (_, [fp]) when variadic_super_ty ->
+    simplify_subtype_params_with_variadic subl fp.fp_type env
+  | ([], _) -> valid env
+  | (_, []) -> valid env
   | (sub :: subl, super :: superl) ->
     let { fp_type = ty_sub; _ } = sub in
     let { fp_type = ty_super; _ } = super in
@@ -2968,8 +2957,21 @@ and simplify_subtype_funs_attributes
                     decl_pos = p_super;
                   }))
   |> fun res ->
-  match (ft_sub.ft_arity, ft_super.ft_arity) with
-  | (Fvariadic { fp_name = None; _ }, Fvariadic { fp_name = Some _; _ }) ->
+  let ft_sub_variadic =
+    if get_ft_variadic ft_sub then
+      List.last ft_sub.ft_params
+    else
+      None
+  in
+  let ft_super_variadic =
+    if get_ft_variadic ft_super then
+      List.last ft_super.ft_params
+    else
+      None
+  in
+
+  match (ft_sub_variadic, ft_super_variadic) with
+  | (Some { fp_name = None; _ }, Some { fp_name = Some _; _ }) ->
     (* The HHVM runtime ignores "..." entirely, but knows about
      * "...$args"; for contexts for which the runtime enforces method
      * compatibility (currently, inheritance from abstract/interface
@@ -2983,7 +2985,7 @@ and simplify_subtype_funs_attributes
              @@ Secondary.Fun_variadicity_hh_vs_php56
                   { pos = p_sub; decl_pos = p_super }))
       res
-  | (Fstandard, Fstandard) ->
+  | (None, None) ->
     let sub_max = List.length ft_sub.ft_params in
     let super_max = List.length ft_super.ft_params in
     if sub_max < super_max then
@@ -3002,7 +3004,7 @@ and simplify_subtype_funs_attributes
         res
     else
       res
-  | (Fstandard, _) ->
+  | (None, Some _) ->
     with_error
       (fun () ->
         Errors.add_typing_error
@@ -3030,20 +3032,9 @@ and simplify_subtype_funs
     (r_super : Reason.t)
     (ft_super : locl_fun_type)
     env : env * TL.subtype_prop =
-  let variadic_subtype =
-    match ft_sub.ft_arity with
-    | Fvariadic { fp_type = var_sub; _ } -> Some var_sub
-    | _ -> None
-  in
-  let variadic_supertype =
-    match ft_super.ft_arity with
-    | Fvariadic { fp_type = var_super; _ } -> Some var_super
-    | _ -> None
-  in
   let simplify_subtype_possibly_enforced =
     simplify_subtype_possibly_enforced ~subtype_env
   in
-  let simplify_subtype_params = simplify_subtype_params ~subtype_env in
   (* First apply checks on attributes and variadic arity *)
   let simplify_subtype_implicit_params =
     simplify_subtype_implicit_params ~subtype_env
@@ -3052,28 +3043,22 @@ and simplify_subtype_funs
   |> simplify_subtype_funs_attributes ~subtype_env r_sub ft_sub r_super ft_super
   &&& (* Now do contravariant subtyping on parameters *)
   begin
-    match (variadic_subtype, variadic_supertype) with
-    | (Some var_sub, Some var_super) ->
-      simplify_subtype_possibly_enforced var_super var_sub
-    | _ -> valid
+    (* If both fun policies are IFC public, there's no need to check for inheritance issues *)
+    (* There is the chance that the super function has an <<__External>> argument and the sub function does not,
+       but <<__External>> on a public policied function literally just means the argument must be governed by the public policy,
+       so should be an error in any case.
+    *)
+    let check_params_ifc =
+      non_public_ifc ft_super.ft_ifc_decl || non_public_ifc ft_sub.ft_ifc_decl
+    in
+    simplify_subtype_params
+      ~subtype_env
+      ~check_params_ifc
+      ft_super.ft_params
+      ft_sub.ft_params
+      (get_ft_variadic ft_super)
+      (get_ft_variadic ft_sub)
   end
-  &&& begin
-        (* If both fun policies are IFC public, there's no need to check for inheritance issues *)
-        (* There is the chance that the super function has an <<__External>> argument and the sub function does not,
-           but <<__External>> on a public policied function literally just means the argument must be governed by the public policy,
-           so should be an error in any case.
-        *)
-        let check_params_ifc =
-          non_public_ifc ft_super.ft_ifc_decl
-          || non_public_ifc ft_sub.ft_ifc_decl
-        in
-        simplify_subtype_params
-          ~check_params_ifc
-          ft_super.ft_params
-          ft_sub.ft_params
-          variadic_subtype
-          variadic_supertype
-      end
   &&& simplify_subtype_implicit_params
         ft_super.ft_implicit_params
         ft_sub.ft_implicit_params
@@ -3189,13 +3174,13 @@ and simplify_disj env disj =
   in
   (* Map a type variable to a list of lower bound types. For any two types
      t1 and t2 in the list, it is not the case that t1 <: t2 or t2 <: t1. *)
-  let lower_bound_map = Hashtbl.Poly.create () in
+  let lower_bound_map = ref IMap.empty in
   let process_lower_bound ~coerce ~constr ty var =
-    match Hashtbl.find lower_bound_map var with
-    | None -> Hashtbl.set lower_bound_map ~key:var ~data:[(ty, constr)]
+    match IMap.find_opt var !lower_bound_map with
+    | None -> lower_bound_map := IMap.add var [(ty, constr)] !lower_bound_map
     | Some bounds ->
       let new_bounds = add_new_lower_bound ~coerce ~constr ty bounds in
-      Hashtbl.set lower_bound_map ~key:var ~data:new_bounds
+      lower_bound_map := IMap.add var new_bounds !lower_bound_map
   in
   let rec fill_lower_bound_map disj =
     match disj with
@@ -3227,7 +3212,7 @@ and simplify_disj env disj =
       List.map ~f:(fun (_, c) -> c) bounds @ rebuild_disj remaining to_process
   in
   let remaining = fill_lower_bound_map disj in
-  let bounds = Hashtbl.to_alist lower_bound_map in
+  let bounds = IMap.elements !lower_bound_map in
   rebuild_disj remaining bounds
 
 and props_to_env pos env remain props on_error =

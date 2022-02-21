@@ -92,7 +92,7 @@ pub enum ReasonImpl<R, P> {
     /// splat pos, fun def pos, number of args before splat
     RunpackParam(P, P, isize),
     RinoutParam(P),
-    Rinstantiate(R, Symbol, R),
+    Rinstantiate(R, TypeName, R),
     Rtypeconst(R, Positioned<TypeConstName, P>, Symbol, R),
     RtypeAccess(R, Vec<(R, Symbol)>),
     RexprDepType(R, P, ExprDepTypeReason),

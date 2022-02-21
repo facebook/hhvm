@@ -1,0 +1,193 @@
+// Copyright (c) Meta Platforms, Inc. and affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
+use super::{folded::FoldedClass, shallow::ShallowClass};
+use crate::reason::Reason;
+use std::fmt;
+
+// Our Class structs have a lot of fields, but in a lot of cases, most of them
+// will have empty or default values, making Debug output very noisy. These
+// manual Debug impls omit fields with empty values, hopefully making the Debug
+// output easier to read.
+
+impl<R: Reason> fmt::Debug for ShallowClass<R> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let ShallowClass {
+            mode,
+            is_final,
+            is_abstract,
+            is_xhp,
+            has_xhp_keyword,
+            kind,
+            module,
+            name,
+            tparams,
+            where_constraints,
+            extends,
+            uses,
+            xhp_attr_uses,
+            xhp_enum_values,
+            req_extends,
+            req_implements,
+            implements,
+            support_dynamic_type,
+            consts,
+            typeconsts,
+            props,
+            static_props,
+            constructor,
+            static_methods,
+            methods,
+            user_attributes,
+            enum_type,
+        } = self;
+
+        let mut s = f.debug_struct("ShallowClass");
+
+        if *mode != oxidized::file_info::Mode::Mstrict {
+            s.field("mode", mode);
+        }
+        if *is_final {
+            s.field("is_final", is_final);
+        }
+        if *is_abstract {
+            s.field("is_abstract", is_abstract);
+        }
+        if *is_xhp {
+            s.field("is_xhp", is_xhp);
+        }
+        if *has_xhp_keyword {
+            s.field("has_xhp_keyword", has_xhp_keyword);
+        }
+
+        s.field("kind", kind);
+
+        if let Some(module) = module {
+            s.field("module", module);
+        }
+
+        s.field("name", name);
+
+        if !tparams.is_empty() {
+            s.field("tparams", tparams);
+        }
+        if !where_constraints.is_empty() {
+            s.field("where_constraints", where_constraints);
+        }
+        if !extends.is_empty() {
+            s.field("extends", extends);
+        }
+        if !uses.is_empty() {
+            s.field("uses", uses);
+        }
+        if !xhp_attr_uses.is_empty() {
+            s.field("xhp_attr_uses", xhp_attr_uses);
+        }
+        if !xhp_enum_values.is_empty() {
+            s.field("xhp_enum_values", xhp_enum_values);
+        }
+        if !req_extends.is_empty() {
+            s.field("req_extends", req_extends);
+        }
+        if !req_implements.is_empty() {
+            s.field("req_implements", req_implements);
+        }
+        if !implements.is_empty() {
+            s.field("implements", implements);
+        }
+        if *support_dynamic_type {
+            s.field("support_dynamic_type", support_dynamic_type);
+        }
+        if !consts.is_empty() {
+            s.field("consts", consts);
+        }
+        if !typeconsts.is_empty() {
+            s.field("typeconsts", typeconsts);
+        }
+        if !props.is_empty() {
+            s.field("props", props);
+        }
+        if !static_props.is_empty() {
+            s.field("static_props", static_props);
+        }
+        if let Some(constructor) = constructor {
+            s.field("constructor", constructor);
+        }
+        if !static_methods.is_empty() {
+            s.field("static_methods", static_methods);
+        }
+        if !methods.is_empty() {
+            s.field("methods", methods);
+        }
+        if !user_attributes.is_empty() {
+            s.field("user_attributes", user_attributes);
+        }
+        if let Some(enum_type) = enum_type {
+            s.field("enum_type", enum_type);
+        }
+
+        s.finish()
+    }
+}
+
+impl<R: Reason> fmt::Debug for FoldedClass<R> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let FoldedClass {
+            name,
+            pos,
+            substs,
+            ancestors,
+            props,
+            static_props,
+            methods,
+            static_methods,
+            constructor,
+            consts,
+            type_consts,
+            tparams,
+        } = self;
+
+        let mut s = f.debug_struct("FoldedClass");
+
+        s.field("name", name);
+
+        if std::mem::size_of::<R::Pos>() != 0 {
+            s.field("pos", pos);
+        }
+
+        if !substs.is_empty() {
+            s.field("substs", substs);
+        }
+        if !ancestors.is_empty() {
+            s.field("ancestors", ancestors);
+        }
+        if !props.is_empty() {
+            s.field("props", props);
+        }
+        if !static_props.is_empty() {
+            s.field("static_props", static_props);
+        }
+        if !methods.is_empty() {
+            s.field("methods", methods);
+        }
+        if !static_methods.is_empty() {
+            s.field("static_methods", static_methods);
+        }
+        if let Some(constructor) = constructor {
+            s.field("constructor", constructor);
+        }
+        if !consts.is_empty() {
+            s.field("consts", consts);
+        }
+        if !type_consts.is_empty() {
+            s.field("type_consts", type_consts);
+        }
+        if !tparams.is_empty() {
+            s.field("tparams", tparams);
+        }
+
+        s.finish()
+    }
+}

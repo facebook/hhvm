@@ -496,6 +496,11 @@ bool TypeConstraint::checkTypeAliasImpl(const Class* type) const {
   not_reached();
 }
 
+template bool TypeConstraint::checkTypeAliasImpl<false>(
+    const Class* type) const;
+template bool TypeConstraint::checkTypeAliasImpl<true>(
+    const Class* type) const;
+
 template <TypeConstraint::CheckMode Mode>
 bool TypeConstraint::checkImpl(tv_rval val,
                                const Class* context) const {

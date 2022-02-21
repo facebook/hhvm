@@ -3,15 +3,17 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use iterator::IterId;
 use label::Label;
 
-type Id = usize;
+#[derive(Clone, Debug, Default, Copy, Eq, PartialEq, Hash, Ord, PartialOrd)]
+pub struct StateId(pub u32);
 
 #[derive(Clone, Debug)]
 pub struct LoopLabels {
     label_break: Label,
     label_continue: Label,
-    iterator: Option<iterator::Id>,
+    iterator: Option<IterId>,
 }
 
 #[derive(Clone, Debug)]
@@ -29,27 +31,29 @@ pub struct ResolvedTryFinally {
     pub target_label: Label,
     pub finally_label: Label,
     pub adjusted_level: usize,
-    pub iterators_to_release: Vec<iterator::Id>,
+    pub iterators_to_release: Vec<IterId>,
 }
 
 #[derive(Debug)]
 pub enum ResolvedJumpTarget {
     NotFound,
     ResolvedTryFinally(ResolvedTryFinally),
-    ResolvedRegular(Label, Vec<iterator::Id>),
+    ResolvedRegular(Label, Vec<IterId>),
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct JumpTargets(Vec<Region>);
+pub struct JumpTargets {
+    regions: Vec<Region>,
+}
 
 impl JumpTargets {
     pub fn as_slice(&self) -> &[Region] {
-        self.0.as_slice()
+        self.regions.as_slice()
     }
 
-    pub fn get_closest_enclosing_finally_label(&self) -> Option<(Label, Vec<iterator::Id>)> {
+    pub fn get_closest_enclosing_finally_label(&self) -> Option<(Label, Vec<IterId>)> {
         let mut iters = vec![];
-        for r in self.0.iter().rev() {
+        for r in self.regions.iter().rev() {
             match r {
                 Region::Using(l) | Region::TryFinally(l) => {
                     return Some((*l, iters));
@@ -63,14 +67,12 @@ impl JumpTargets {
         None
     }
 
-    // NOTE(hrust) this corresponds to collect_iterators in OCaml but doesn't allocate/clone
-    pub fn iterators(&self) -> impl Iterator<Item = &iterator::Id> {
-        self.0.iter().rev().filter_map(|r| {
-            if let Region::Loop(LoopLabels { iterator, .. }) = r {
-                iterator.as_ref()
-            } else {
-                None
-            }
+    /// Return the IterIds of the enclosing iterator loops.
+    /// This corresponds to collect_iterators in OCaml but doesn't allocate/clone.
+    pub fn iterators(&self) -> impl Iterator<Item = IterId> + '_ {
+        self.regions.iter().rev().filter_map(|r| match r {
+            Region::Loop(LoopLabels { iterator, .. }) => *iterator,
+            _ => None,
         })
     }
 
@@ -92,7 +94,7 @@ impl JumpTargets {
         //        ...
         //     }
         //  }
-        for r in self.0.iter().rev() {
+        for r in self.regions.iter().rev() {
             match r {
                 Region::Function | Region::Finally => return ResolvedJumpTarget::NotFound,
                 Region::Using(finally_label) | Region::TryFinally(finally_label) => {
@@ -151,24 +153,24 @@ impl JumpTargets {
 
 #[derive(Clone, PartialEq, Eq, std::cmp::Ord, std::cmp::PartialOrd, Debug)]
 pub enum IdKey {
-    IdReturn,
-    IdLabel(Label),
+    Return,
+    Label(Label),
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct Gen {
-    label_id_map: std::collections::BTreeMap<IdKey, Id>,
+    label_id_map: std::collections::BTreeMap<IdKey, StateId>,
     jump_targets: JumpTargets,
 }
 
 impl Gen {
-    pub fn new_id(&mut self, key: IdKey) -> Id {
+    fn new_id(&mut self, key: IdKey) -> StateId {
         match self.label_id_map.get(&key) {
             Some(id) => *id,
             None => {
-                let mut next_id = 0;
+                let mut next_id = StateId(0);
                 while self.label_id_map.values().any(|&id| id == next_id) {
-                    next_id += 1;
+                    next_id.0 += 1;
                 }
                 self.label_id_map.insert(key, next_id);
                 next_id
@@ -184,21 +186,21 @@ impl Gen {
         self.label_id_map.clear();
     }
 
-    pub fn get_id_for_return(&mut self) -> Id {
-        self.new_id(IdKey::IdReturn)
+    pub fn get_id_for_return(&mut self) -> StateId {
+        self.new_id(IdKey::Return)
     }
 
-    pub fn get_id_for_label(&mut self, l: Label) -> Id {
-        self.new_id(IdKey::IdLabel(l))
+    pub fn get_id_for_label(&mut self, l: Label) -> StateId {
+        self.new_id(IdKey::Label(l))
     }
 
     pub fn with_loop(
         &mut self,
         label_break: Label,
         label_continue: Label,
-        iterator: Option<iterator::Id>,
+        iterator: Option<IterId>,
     ) {
-        self.jump_targets.0.push(Region::Loop(LoopLabels {
+        self.jump_targets.regions.push(Region::Loop(LoopLabels {
             label_break,
             label_continue,
             iterator,
@@ -210,37 +212,41 @@ impl Gen {
         // CONSIDER: now HHVM eagerly reserves state id for the switch end label
         // which does not seem to be necessary - do it for now for HHVM compatibility
         let _ = self.get_id_for_label(end_label);
-        self.jump_targets.0.push(Region::Switch(end_label));
+        self.jump_targets.regions.push(Region::Switch(end_label));
     }
 
     pub fn with_try_catch(&mut self, finally_label: Label) {
-        self.jump_targets.0.push(Region::TryFinally(finally_label));
+        self.jump_targets
+            .regions
+            .push(Region::TryFinally(finally_label));
     }
 
     pub fn with_try(&mut self, finally_label: Label) {
-        self.jump_targets.0.push(Region::TryFinally(finally_label));
+        self.jump_targets
+            .regions
+            .push(Region::TryFinally(finally_label));
     }
 
     pub fn with_finally(&mut self) {
-        self.jump_targets.0.push(Region::Finally);
+        self.jump_targets.regions.push(Region::Finally);
     }
 
     pub fn with_function(&mut self) {
-        self.jump_targets.0.push(Region::Function);
+        self.jump_targets.regions.push(Region::Function);
     }
 
     pub fn with_using(&mut self, finally_label: Label) {
-        self.jump_targets.0.push(Region::Using(finally_label));
+        self.jump_targets.regions.push(Region::Using(finally_label));
     }
 
     pub fn revert(&mut self) {
-        self.jump_targets.0.pop();
+        self.jump_targets.regions.pop();
     }
 
     pub fn release_ids(&mut self) {
         match self
             .jump_targets
-            .0
+            .regions
             .last_mut()
             .expect("empty region after executing run_and_release")
         {
@@ -249,11 +255,11 @@ impl Gen {
                 label_continue,
                 ..
             }) => {
-                self.label_id_map.remove(&IdKey::IdLabel(*label_break));
-                self.label_id_map.remove(&IdKey::IdLabel(*label_continue));
+                self.label_id_map.remove(&IdKey::Label(*label_break));
+                self.label_id_map.remove(&IdKey::Label(*label_continue));
             }
             Region::Switch(l) | Region::TryFinally(l) | Region::Using(l) => {
-                self.label_id_map.remove(&IdKey::IdLabel(*l));
+                self.label_id_map.remove(&IdKey::Label(*l));
             }
             Region::Finally | Region::Function => {}
         };
@@ -262,11 +268,11 @@ impl Gen {
         // Do the same for now for compatibility reasons
         // labels
         //     .iter()
-        //     .for_each(|l| self.label_id_map.remove(&IdKey::IdLabel(Label::Named(l.to_string()))));
+        //     .for_each(|l| self.label_id_map.remove(&IdKey::Label(Label::Named(l.to_string()))));
     }
 }
 
-fn add_iterator(it_opt: Option<iterator::Id>, iters: &mut Vec<iterator::Id>) {
+fn add_iterator(it_opt: Option<IterId>, iters: &mut Vec<IterId>) {
     if let Some(it) = it_opt {
         iters.push(it);
     }

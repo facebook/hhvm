@@ -23,5 +23,5 @@ Then, submit another PR against the relevant stable branch(es) cherry-picking yo
 
 ## Quick Links
 
- * IRC: [#hhvm](https://webchat.freenode.net/?channels=hhvm) and [#hhvm-dev](https://webchat.freenode.net/?channels=hhvm-dev) on Freenode.
+ * [Slack](https://hhvm.com/slack)
  * [Issue tracker](https://github.com/facebook/hhvm/issues)

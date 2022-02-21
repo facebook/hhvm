@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f5597337329d47f7328ef8bb007f8a13>>
+// @generated SignedSource<<5f04ba6912c70282c024676ffd614002>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -198,18 +198,9 @@ impl<P: Params> Node<P> for Case<P::Ex, P::En> {
         c: &mut P::Context,
         v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
-        match self {
-            Case::Default(a0, a1) => {
-                a0.accept(c, v)?;
-                a1.accept(c, v)?;
-                Ok(())
-            }
-            Case::Case(a0, a1) => {
-                a0.accept(c, v)?;
-                a1.accept(c, v)?;
-                Ok(())
-            }
-        }
+        self.0.accept(c, v)?;
+        self.1.accept(c, v)?;
+        Ok(())
     }
 }
 impl<P: Params> Node<P> for Catch<P::Ex, P::En> {
@@ -681,6 +672,24 @@ impl<P: Params> Node<P> for Def<P::Ex, P::En> {
                 Ok(())
             }
         }
+    }
+}
+impl<P: Params> Node<P> for DefaultCase<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_default_case(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)?;
+        self.1.accept(c, v)?;
+        Ok(())
     }
 }
 impl<P: Params> Node<P> for DocComment {
@@ -1751,6 +1760,25 @@ impl<P: Params> Node<P> for ReifyKind {
         }
     }
 }
+impl<P: Params> Node<P> for RequireKind {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_require_kind(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            RequireKind::RequireExtends => Ok(()),
+            RequireKind::RequireImplements => Ok(()),
+        }
+    }
+}
 impl<P: Params> Node<P> for ShapeFieldInfo {
     fn accept<'node>(
         &'node self,
@@ -1883,6 +1911,7 @@ impl<P: Params> Node<P> for Stmt_<P::Ex, P::En> {
             Stmt_::Switch(a) => {
                 a.0.accept(c, v)?;
                 a.1.accept(c, v)?;
+                a.2.accept(c, v)?;
                 Ok(())
             }
             Stmt_::Foreach(a) => {

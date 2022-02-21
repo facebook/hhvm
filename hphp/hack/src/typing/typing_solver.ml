@@ -322,8 +322,7 @@ let ty_equal_shallow env ty1 ty2 =
   | (Tprim p1, Tprim p2) -> Aast_defs.equal_tprim p1 p2
   | (Tclass (x_sub, exact_sub, _), Tclass (x_super, exact_super, _)) ->
     String.equal (snd x_sub) (snd x_super) && equal_exact exact_sub exact_super
-  | (Tfun fty1, Tfun fty2) ->
-    equal_locl_fun_arity fty1 fty2 && Int.equal fty1.ft_flags fty2.ft_flags
+  | (Tfun fty1, Tfun fty2) -> Int.equal fty1.ft_flags fty2.ft_flags
   | (Tshape (shape_kind1, fdm1), Tshape (shape_kind2, fdm2)) ->
     equal_shape_kind shape_kind1 shape_kind2
     && List.equal

@@ -17,7 +17,6 @@
 #pragma once
 
 #include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/lazy-class.h"
 #include "hphp/util/type-scan.h"
@@ -55,6 +54,9 @@ struct BlobDecoder;
  * This union may only be used in contexts that have a discriminator, e.g. in
  * TypedValue (below), or when the type is known beforehand.
  */
+#if defined(__x86_64__)
+#pragma pack(push, 1)
+#endif
 union Value {
   int64_t       num;    // KindOfInt64, KindOfBool (must be zero-extended)
   double        dbl;    // KindOfDouble
@@ -71,6 +73,16 @@ union Value {
   RClsMethData* prclsmeth; // KindOfRClsMeth
   LazyClassData plazyclass;   // KindOfLazyClass
 };
+#if defined(__x86_64__)
+#pragma pack(pop)
+#endif
+
+#if defined(__x86_64__)
+static_assert(alignof(Value) == 1);
+#else
+static_assert(alignof(Value) == 8);
+#endif
+static_assert(sizeof(Value) == 8);
 
 struct ConstModifiers {
   // Note that cgCheckSubClsCns relies on Value being 0.
@@ -141,7 +153,7 @@ union AuxUnion {
 /*
  * A TypedValue is a type-discriminated PHP Value.
  */
-struct TypedValue {
+struct alignas(8) TypedValue {
   Value m_data;
   DataType m_type;
   AuxUnion m_aux;
@@ -160,6 +172,9 @@ struct TypedValue {
     if (isRefcountedType(m_type)) scanner.scan(m_data.pcnt);
   }
 };
+
+static_assert(alignof(TypedValue) == 8);
+static_assert(sizeof(TypedValue) == 16);
 
 constexpr size_t kTypedValueAlignMask = sizeof(TypedValue) - 1;
 

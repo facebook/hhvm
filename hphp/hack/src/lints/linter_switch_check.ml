@@ -43,18 +43,17 @@ let ensure_valid_switch_case_value_types env scrutinee_ty casel =
        && (is_subtype ty1 ty2 || is_subtype ty2 ty1)
     || (is_subtype ty1 ty2 && is_subtype ty2 ty1)
   in
-  let ensure_valid_switch_case_value_type = function
-    | Default _ -> ()
-    | Case ((case_value_ty, case_value_p, _), _) ->
-      if not (compatible_types case_value_ty scrutinee_ty) then
-        Lints_errors.invalid_switch_case_value_type
-          case_value_p
-          (lazy (Env.print_ty env case_value_ty))
-          (lazy (Env.print_ty env scrutinee_ty))
+  let ensure_valid_switch_case_value_type ((case_value_ty, case_value_p, _), _)
+      =
+    if not (compatible_types case_value_ty scrutinee_ty) then
+      Lints_errors.invalid_switch_case_value_type
+        case_value_p
+        (lazy (Env.print_ty env case_value_ty))
+        (lazy (Env.print_ty env scrutinee_ty))
   in
   List.iter casel ~f:ensure_valid_switch_case_value_type
 
-let check_exhaustiveness_lint env pos ty caselist =
+let check_exhaustiveness_lint env pos ty hasdfl =
   let rec has_infinite_values ty =
     match Typing.get_node ty with
     | Typing.Tunion tyl -> List.exists tyl ~f:has_infinite_values
@@ -72,14 +71,7 @@ let check_exhaustiveness_lint env pos ty caselist =
       end
     | _ -> false
   in
-  let has_default cases =
-    List.exists
-      ~f:(function
-        | Default _ -> true
-        | _ -> false)
-      cases
-  in
-  if has_infinite_values ty && not (has_default caselist) then
+  if has_infinite_values ty && not hasdfl then
     Lints_errors.switch_nonexhaustive pos
 
 let handler =
@@ -88,8 +80,12 @@ let handler =
 
     method! at_stmt env x =
       match snd x with
-      | Switch ((scrutinee_ty, scrutinee_pos, _), casel) ->
+      | Switch ((scrutinee_ty, scrutinee_pos, _), casel, dfl) ->
         ensure_valid_switch_case_value_types env scrutinee_ty casel;
-        check_exhaustiveness_lint env scrutinee_pos scrutinee_ty casel
+        check_exhaustiveness_lint
+          env
+          scrutinee_pos
+          scrutinee_ty
+          (Option.is_some dfl)
       | _ -> ()
   end

@@ -186,7 +186,6 @@ impl<R: Reason> Allocator<R> {
 
     fn decl_fun_type(&self, ft: &obr::typing_defs::FunType<'_>) -> FunType<R, DeclTy<R>> {
         FunType {
-            arity: self.decl_fun_arity(ft.arity),
             tparams: self.slice(ft.tparams, Self::decl_tparam),
             where_constraints: self.slice(ft.where_constraints, Self::decl_where_constraint),
             params: self.slice(ft.params, Self::decl_fun_param),
@@ -194,15 +193,6 @@ impl<R: Reason> Allocator<R> {
             ret: self.decl_possibly_enforced_ty(ft.ret),
             flags: ft.flags,
             ifc_decl: self.decl_ifc_fun_decl(ft.ifc_decl),
-        }
-    }
-
-    fn decl_fun_arity(&self, x: obr::typing_defs::FunArity<'_>) -> ty::FunArity<R, DeclTy<R>> {
-        use obr::typing_defs_core::FunArity as Obr;
-        use ty::FunArity;
-        match x {
-            Obr::Fstandard => FunArity::Fstandard,
-            Obr::Fvariadic(param) => FunArity::Fvariadic(Box::new(self.decl_fun_param(param))),
         }
     }
 

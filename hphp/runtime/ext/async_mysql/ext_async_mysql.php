@@ -91,6 +91,10 @@ final class AsyncMysqlClient {
    * @param $tcp_timeout_micros - Timeout, in microseconds, for the tcp phase of
    *                          connect operation; Default: 0 for no timeout.
    * @param $sni_server_name - SNI hostname to use when connecting via SSL.
+   * @param $server_cert_extensions - collection of name of TLS cert extension
+                                      names used to validate server cert
+   * @param $server_cert_values - collection of accepted values in server cert
+   *                              for "server_cert_extension" extension
    *
    * @return - an `Awaitable` representing an `AsyncMysqlConnection`. `await`
    * or `join` this result to obtain the actual connection.
@@ -105,6 +109,8 @@ final class AsyncMysqlClient {
                                  ?MySSLContextProvider $ssl_context = null,
                                  int $tcp_timeout_micros = 0,
                                  string $sni_server_name = "",
+                                 string $server_cert_extension = "",
+                                 string $server_cert_values = "",
                                 ): Awaitable<AsyncMysqlConnection>;
 
   /**
@@ -177,30 +183,6 @@ final class AsyncMysqlClient {
                                           AsyncMysqlConnectResult,
                                           Vector<AsyncMysqlQueryResult>
                                       )>;
-
-  /**
-   * Create a new async connection from a synchronous MySQL instance.
-   *
-   * This is a synchronous function. You will block until the connection has
-   * been adopted to an `AsyncMysqlConnection`. Then you will be able to use
-   * the async `AsyncMysqlConnection` methods like `queryf()`, etc.
-   *
-   * This is a tricky function to use and we are actually thinking of
-   * deprecating it. This function *requires* a deprecated, MySQL resource.
-   * Once this resource is adopted by a call to this function, it is no longer
-   * valid in the context on which it was being used.
-   *
-   * If you are using this function, you might consider just creating a
-   * connection pool via `AsyncMysqlConnectionPool` since you presumably have
-   * all the connection details anyway.
-   *
-   * @param $connection - The synchronous MySQL connection.
-   *
-   * @return - An `AsyncMysqlConnection` instance.
-   */
-  <<__Native>>
-  public static function adoptConnection(mixed $connection
-                                        ): AsyncMysqlConnection;
 }
 
 /**
@@ -300,6 +282,10 @@ class AsyncMysqlConnectionPool {
    * @param $tcp_timeout_micros - Timeout, in microseconds, for the tcp phase of
    *                          connect operation; Default: 0 for no timeout.
    * @param $sni_server_name - SNI hostname to use when connecting via SSL.
+   * @param $server_cert_extensions - collection of name of TLS cert extension
+                                      names used to validate server cert
+   * @param $server_cert_values - collection of accepted values in server cert
+   *                              for "server_cert_extension" extension
    *
    * @return - an `Awaitable` representing an `AsyncMysqlConnection`. `await`
    * or `join` this result to obtain the actual connection.
@@ -315,6 +301,8 @@ class AsyncMysqlConnectionPool {
                           ?MySSLContextProvider $ssl_context = null,
                           int $tcp_timeout_micros = 0,
                           string $sni_server_name = "",
+                          string $server_cert_extensions = "",
+                          string $server_cert_values = "",
                          ): Awaitable<AsyncMysqlConnection>;
 
   <<__Native>>
@@ -628,6 +616,60 @@ final class AsyncMysqlConnection {
    */
   <<__Native>>
   public function connectResult(): ?AsyncMysqlConnectResult;
+
+  /**
+   * Returns Common Name attribute of the TLS certificate presented
+   * by MySQL server.
+   *
+   * This information can be used while troubleshooting TLS handshake
+   * failures happening on connect stage.
+   *
+   * @return - a string containing Common Name value from the server
+   *           certificate presented by MySQL.
+   */
+  <<__Native>>
+  public function getSslCertCn(): string;
+
+  /**
+   * Returns Server Alternative Names attribute of the TLS certificate
+   * presented by MySQL server.
+   *
+   * This information can be used while troubleshooting TLS handshake
+   * failures happening on connect stage.
+   *
+   * @return - a vector of strings containing a collection of Server
+   *           Alternative Names values from the server certificate presented
+   *           by MySQL.
+   */
+  <<__Native>>
+  public function getSslCertSan(): Vector<string>;
+
+  /**
+   * Returns values from the selected cert extensions of the TLS certificate
+   * presented by MySQL server.
+   *
+   * This information can be used while troubleshooting TLS handshake
+   * failures happening on connect stage.
+   *
+   * @return - a vector of strings containing a collection of the selected
+   *           cert extension values from the server certificate presented
+   *           by MySQL.
+   */
+  <<__Native>>
+  public function getSslCertExtensions(): Vector<string>;
+
+  /**
+   * Returns a boolean value indicating if server cert validation was enforced
+   * for this connection.
+   *
+   * This information can be used while troubleshooting TLS handshake
+   * failures happening on connect stage.
+   *
+   * @return - "true" if server cert validation was enforced during TLS
+   *           handshake for this connection, "false" otherwise.
+   */
+  <<__Native>>
+  public function isSslCertValidationEnforced(): bool;
 }
 
 /**
@@ -719,6 +761,11 @@ class AsyncMysqlConnectionOptions {
   // Enable change_user feature in connection pool
   <<__Native>>
   public function enableChangeUser(): void;
+
+  // TLS cert extension parameters to validate server cert
+  <<__Native>>
+  public function setServerCertValidation(string $extensions = "",
+                                          string $values = ""): void;
 }
 /**
  * Provides timing statistics about the MySQL client.
@@ -872,6 +919,58 @@ abstract class AsyncMysqlResult {
    *           callback timing to the MySQL client for the specific result.
    */
   public abstract function clientStats(): AsyncMysqlClientStats;
+
+  /**
+   * Returns Common Name attribute of the TLS certificate presented
+   * by MySQL server.
+   *
+   * This information can be used while troubleshooting TLS handshake
+   * failures happening on connect stage.
+   *
+   * @return - a string containing Common Name value from the server
+   *           certificate presented by MySQL.
+   */
+  <<__Native>>
+  public function getSslCertCn(): string;
+
+  /**
+   * Returns Server Alternative Names attribute of the TLS certificate
+   * presented by MySQL server.
+   *
+   * This information can be used while troubleshooting TLS handshake
+   * failures happening on connect stage.
+   *
+   * @return - a vector of strings containing Server Alternative Names values
+   *           from the server certificate presented by MySQL.
+   */
+  <<__Native>>
+  public function getSslCertSan(): Vector<string>;
+
+  /**
+   * Returns values from the selected cert extensions of the TLS certificate
+   * presented by MySQL server.
+   *
+   * This information can be used while troubleshooting TLS handshake
+   * failures happening on connect stage.
+   *
+   * @return - a vector of strings containing the selected cert extension
+   *           values from the server certificate presented by MySQL.
+   */
+  <<__Native>>
+  public function getSslCertExtensions(): Vector<string>;
+
+  /**
+   * Returns a boolean value indicating if server cert validation was enforced
+   * for this connection.
+   *
+   * This information can be used while troubleshooting TLS handshake
+   * failures happening on connect stage.
+   *
+   * @return - `true` if server cert validation was enforced during TLS
+   *           handshake for this connection, `false` otherwise.
+   */
+  <<__Native>>
+  public function isSslCertValidationEnforced(): bool;
 
 }
 

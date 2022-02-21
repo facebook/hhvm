@@ -77,8 +77,6 @@ let abstract_static_props = GlobalOptions.po_abstract_static_props
 let with_abstract_static_props po b =
   { po with GlobalOptions.po_abstract_static_props = b }
 
-let disable_unset_class_const = GlobalOptions.po_disable_unset_class_const
-
 let parser_errors_only = GlobalOptions.po_parser_errors_only
 
 let with_parser_errors_only po b =
@@ -121,10 +119,6 @@ let with_enable_enum_supertyping po b =
 
 let disable_hh_ignore_error = GlobalOptions.po_disable_hh_ignore_error
 
-let disable_array = GlobalOptions.po_disable_array
-
-let disable_array_typehint = GlobalOptions.po_disable_array_typehint
-
 let disallow_fun_and_cls_meth_pseudo_funcs =
   GlobalOptions.po_disallow_fun_and_cls_meth_pseudo_funcs
 
@@ -157,7 +151,6 @@ let make
     ~disallow_silence
     ~const_static_props
     ~abstract_static_props
-    ~disable_unset_class_const
     ~disallow_func_ptrs_in_constants
     ~enable_xhp_class_modifier
     ~disable_xhp_element_mangling
@@ -165,8 +158,6 @@ let make
     ~disable_xhp_children_declarations
     ~enable_enum_classes
     ~disable_hh_ignore_error
-    ~disable_array
-    ~disable_array_typehint
     ~disallow_fun_and_cls_meth_pseudo_funcs
     ~interpret_soft_types_as_like_types
     ~disallow_inst_meth
@@ -186,7 +177,6 @@ let make
       po_disallow_silence = disallow_silence;
       tco_const_static_props = const_static_props;
       po_abstract_static_props = abstract_static_props;
-      po_disable_unset_class_const = disable_unset_class_const;
       po_disallow_func_ptrs_in_constants = disallow_func_ptrs_in_constants;
       po_enable_xhp_class_modifier = enable_xhp_class_modifier;
       po_disable_xhp_element_mangling = disable_xhp_element_mangling;
@@ -194,8 +184,6 @@ let make
       po_disable_xhp_children_declarations = disable_xhp_children_declarations;
       po_enable_enum_classes = enable_enum_classes;
       po_disable_hh_ignore_error = disable_hh_ignore_error;
-      po_disable_array = disable_array;
-      po_disable_array_typehint = disable_array_typehint;
       po_disallow_fun_and_cls_meth_pseudo_funcs =
         disallow_fun_and_cls_meth_pseudo_funcs;
       po_interpret_soft_types_as_like_types = interpret_soft_types_as_like_types;
@@ -206,8 +194,6 @@ let make
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
 type ffi_t =
   bool
-  * bool
-  * bool
   * bool
   * bool
   * bool
@@ -243,9 +229,7 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     disable_xhp_element_mangling po,
     disable_xhp_children_declarations po,
     enable_enum_classes po,
-    disable_array po,
     const_default_lambda_args po,
-    disable_array_typehint po,
     allow_unstable_features po,
     disallow_fun_and_cls_meth_pseudo_funcs po,
     interpret_soft_types_as_like_types po,

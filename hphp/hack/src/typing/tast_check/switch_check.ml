@@ -65,7 +65,8 @@ let get_constant tc kind (seen, has_default) case =
       Typing_error.(enum @@ Primary.Enum.Enum_switch_not_const pos);
     (seen, has_default)
 
-let check_enum_exhaustiveness pos tc kind caselist coming_from_unresolved =
+let check_enum_exhaustiveness pos tc kind (caselist, dfl) coming_from_unresolved
+    =
   let str_kind =
     match kind with
     | Enum -> "Enum"
@@ -76,7 +77,20 @@ let check_enum_exhaustiveness pos tc kind caselist coming_from_unresolved =
   (* If this check comes from an enum inside a Tunion, then
      don't punish for having an extra default case *)
   let (seen, has_default) =
-    List.fold_left ~f:(get_constant tc kind) ~init:(SMap.empty, false) caselist
+    let state = (SMap.empty, false) in
+    let state =
+      List.fold_left
+        ~f:(fun state c -> get_constant tc kind state (Aast.Case c))
+        ~init:state
+        caselist
+    in
+    let state =
+      Option.fold
+        ~f:(fun state c -> get_constant tc kind state (Aast.Default c))
+        ~init:state
+        dfl
+    in
+    state
   in
   let unhandled =
     Cls.consts tc
@@ -221,7 +235,7 @@ let handler =
 
     method! at_stmt env x =
       match snd x with
-      | Switch ((scrutinee_ty, scrutinee_pos, _), casel) ->
-        check_exhaustiveness env scrutinee_pos scrutinee_ty casel
+      | Switch ((scrutinee_ty, scrutinee_pos, _), casel, dfl) ->
+        check_exhaustiveness env scrutinee_pos scrutinee_ty (casel, dfl)
       | _ -> ()
   end

@@ -132,6 +132,9 @@ void initImpl(F&& func) {
   NamedEntity::foreach_class([&](Class* cls) {
     cls->setInstanceBitsAndParents();
   });
+  NamedEntity::foreach_class([&](Class* cls) {
+    cls->setInstanceBitsIndex(lookup(cls->name()));
+  });
 
   if (debug) {
     // There isn't a canonical invalid pthread_t, but this is only used for the

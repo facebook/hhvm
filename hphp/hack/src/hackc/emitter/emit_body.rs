@@ -19,12 +19,13 @@ use hash::HashSet;
 use hhas_body::{HhasBody, HhasBodyEnv};
 use hhas_param::HhasParam;
 use hhas_type::HhasTypeInfo;
-use hhbc_ast::{FcallArgs, FcallFlags, Instruct, IsTypeOp, ParamId};
+use hhbc_ast::{FcallArgs, Instruct, ParamId};
 use hhbc_id::function;
 use hhbc_string_utils as string_utils;
+use hhvm_hhbc_defs_ffi::ffi::{FCallArgsFlags, IsTypeOp};
 use instruction_sequence::{instr, unrecoverable, Error, InstrSeq, Result};
 use label::Label;
-use local::Local;
+use local::{Local, LocalId};
 use options::CompilerFlags;
 use runtime::TypedValue;
 use statement_state::StatementState;
@@ -165,7 +166,8 @@ pub fn emit_body<'b, 'arena, 'decl>(
         None => 0,
     };
     let local_gen = emitter.local_gen_mut();
-    local_gen.reset(params.len() + decl_vars.len());
+    let num_locals = params.len() + decl_vars.len();
+    local_gen.reset(LocalId::from_usize(num_locals));
     if should_reserve_locals {
         local_gen.reserve_retval_and_label_id_locals();
     };
@@ -442,6 +444,9 @@ pub fn make_body<'a, 'arena, 'decl>(
     } else {
         None
     };
+
+    // Pretty-print the DV initializer expression as a Hack source code string,
+    // to make it available for reflection.
     params.iter_mut().for_each(|(p, default_value)| {
         p.default_value = Maybe::from(
             default_value
@@ -631,7 +636,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                                 let check = instr::istypel(
                                     alloc,
                                     Local::Named(Str::new_str(alloc, param.name.unsafe_as_str())),
-                                    IsTypeOp::OpNull,
+                                    IsTypeOp::Null,
                                 );
                                 let verify_instr = instr::verify_param_type_ts(alloc, param_name());
                                 RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
@@ -745,7 +750,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                         instr::fcallfuncd(
                             alloc,
                             FcallArgs::new(
-                                FcallFlags::default(),
+                                FCallArgsFlags::default(),
                                 1,
                                 Slice::empty(),
                                 Slice::empty(),

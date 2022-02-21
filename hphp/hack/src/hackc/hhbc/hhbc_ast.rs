@@ -8,22 +8,14 @@ use ffi::{
     Maybe::{self, *},
     Pair, Slice, Str,
 };
+use hhvm_hhbc_defs_ffi::ffi::{
+    BareThisOp, CollectionType, ContCheckOp, FCallArgsFlags, FatalOp, IncDecOp, InitPropOp,
+    IsLogAsDynamicCallOp, IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetRangeOp,
+    SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
+};
+use iterator::IterId;
 use label::Label;
 use local::Local;
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum CheckStarted {
-    IgnoreStarted,
-    CheckStarted,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum FreeIterator {
-    IgnoreIter,
-    FreeIter,
-}
 
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType<'arena> = Str<'arena>;
@@ -51,26 +43,10 @@ pub type PropId<'arena> = hhbc_id::prop::PropType<'arena>;
 pub type NumParams = usize;
 pub type ByRefs<'arena> = Slice<'arena, bool>;
 
-bitflags::bitflags! {
-    #[repr(C)]
-    pub struct FcallFlags: u8 {
-        const HAS_UNPACK                      = 1 << 0;
-        const HAS_GENERICS                    = 1 << 1;
-        const LOCK_WHILE_UNWINDING            = 1 << 2;
-        const ENFORCE_MUTABLE_RETURN          = 1 << 3;
-        const ENFORCE_READONLY_THIS           = 1 << 4;
-    }
-}
-impl Default for FcallFlags {
-    fn default() -> FcallFlags {
-        FcallFlags::empty()
-    }
-}
-
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub struct FcallArgs<'arena> {
-    pub flags: FcallFlags,
+    pub flags: FCallArgsFlags,
     pub num_args: NumParams,
     pub num_rets: NumParams,
     pub inouts: ByRefs<'arena>,
@@ -81,7 +57,7 @@ pub struct FcallArgs<'arena> {
 
 impl<'arena> FcallArgs<'arena> {
     pub fn new(
-        flags: FcallFlags,
+        flags: FCallArgsFlags,
         num_rets: usize,
         inouts: Slice<'arena, bool>,
         readonly: Slice<'arena, bool>,
@@ -123,7 +99,7 @@ impl<'arena> FcallArgs<'arena> {
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub struct IterArgs<'arena> {
-    pub iter_id: iterator::Id,
+    pub iter_id: IterId,
     pub key_id: Maybe<Local<'arena>>,
     pub val_id: Local<'arena>,
 }
@@ -132,57 +108,6 @@ pub type ClassrefId = isize;
 /// Conventionally this is "A_" followed by an integer
 pub type AdataId<'arena> = Str<'arena>;
 pub type ParamLocations<'arena> = Slice<'arena, isize>;
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum SpecialClsRef {
-    Static,
-    Self_,
-    Parent,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum MemberOpMode {
-    ModeNone,
-    Warn,
-    Define,
-    Unset,
-    InOut,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum QueryOp {
-    CGet,
-    CGetQuiet,
-    Isset,
-    InOut,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum CollectionType {
-    Vector,
-    Map,
-    Set,
-    Pair,
-    ImmVector,
-    ImmMap,
-    ImmSet,
-    Dict,
-    Array,
-    Keyset,
-    Vec,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum FatalOp {
-    Parse,
-    Runtime,
-    RuntimeOmitFrame,
-}
 
 #[derive(Clone, Copy, Debug)]
 #[repr(C)]
@@ -210,34 +135,10 @@ pub enum InstructBasic {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
-pub enum TypeStructResolveOp {
-    Resolve,
-    DontResolve,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum ReadonlyOp {
-    Readonly,
-    Mutable,
-    Any,
-    CheckROCOW,
-    CheckMutROCOW,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
 pub enum HasGenericsOp {
     NoGenerics,
     MaybeGenerics,
     HasGenerics,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum IsLogAsDynamicCallOp {
-    LogAsDynamicCall,
-    DontLogAsDynamicCall,
 }
 
 #[derive(Clone, Debug)]
@@ -337,13 +238,6 @@ pub enum InstructOperator<'arena> {
     ResolveClass(ClassId<'arena>),
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum SwitchKind {
-    Bounded,
-    Unbounded,
-}
-
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructControlFlow<'arena> {
@@ -417,31 +311,6 @@ pub enum InstructGet<'arena> {
     ClassGetTS,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum IsTypeOp {
-    OpNull,
-    OpBool,
-    OpInt,
-    OpDbl,
-    OpStr,
-    OpObj,
-    OpRes,
-
-    /// Int or Dbl or Str or Bool
-    OpScalar,
-    OpKeyset,
-    OpDict,
-    OpVec,
-
-    /// Arr or Vec or Dict or Keyset
-    OpArrLike,
-    OpClsMeth,
-    OpFunc,
-    OpLegacyArrLike,
-    OpClass,
-}
-
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructIsset<'arena> {
@@ -452,13 +321,6 @@ pub enum InstructIsset<'arena> {
     IsUnsetL(Local<'arena>),
     IsTypeC(IsTypeOp),
     IsTypeL(Local<'arena>, IsTypeOp),
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum SetRangeOp {
-    Forward,
-    Reverse,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -481,26 +343,6 @@ pub enum EqOp {
     MulEqualO,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum IncDecOp {
-    PreInc,
-    PostInc,
-    PreDec,
-    PostDec,
-    PreIncO,
-    PostIncO,
-    PreDecO,
-    PostDecO,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum InitPropOp {
-    Static,
-    NonStatic,
-}
-
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructMutator<'arena> {
@@ -519,13 +361,6 @@ pub enum InstructMutator<'arena> {
     UnsetG,
     CheckProp(PropId<'arena>),
     InitProp(PropId<'arena>, InitPropOp),
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum ObjNullFlavor {
-    NullThrows,
-    NullSafe,
 }
 
 #[derive(Clone, Debug)]
@@ -557,11 +392,11 @@ pub enum InstructCall<'arena> {
     },
     FCallObjMethod {
         fcall_args: FcallArgs<'arena>,
-        flavor: ObjNullFlavor,
+        flavor: ObjMethodOp,
     },
     FCallObjMethodD {
         fcall_args: FcallArgs<'arena>,
-        flavor: ObjNullFlavor,
+        flavor: ObjMethodOp,
         method: MethodId<'arena>,
     },
 }
@@ -617,19 +452,19 @@ impl<'arena> InstructCall<'arena> {
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructBase<'arena> {
-    BaseGC(StackIndex, MemberOpMode),
-    BaseGL(Local<'arena>, MemberOpMode),
-    BaseSC(StackIndex, StackIndex, MemberOpMode, ReadonlyOp),
-    BaseL(Local<'arena>, MemberOpMode, ReadonlyOp),
-    BaseC(StackIndex, MemberOpMode),
+    BaseGC(StackIndex, MOpMode),
+    BaseGL(Local<'arena>, MOpMode),
+    BaseSC(StackIndex, StackIndex, MOpMode, ReadonlyOp),
+    BaseL(Local<'arena>, MOpMode, ReadonlyOp),
+    BaseC(StackIndex, MOpMode),
     BaseH,
-    Dim(MemberOpMode, MemberKey<'arena>),
+    Dim(MOpMode, MemberKey<'arena>),
 }
 
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructFinal<'arena> {
-    QueryM(NumParams, QueryOp, MemberKey<'arena>),
+    QueryM(NumParams, QueryMOp, MemberKey<'arena>),
     SetM(NumParams, MemberKey<'arena>),
     IncDecM(NumParams, IncDecOp, MemberKey<'arena>),
     SetOpM(NumParams, EqOp, MemberKey<'arena>),
@@ -642,7 +477,7 @@ pub enum InstructFinal<'arena> {
 pub enum InstructIterator<'arena> {
     IterInit(IterArgs<'arena>, Label),
     IterNext(IterArgs<'arena>, Label),
-    IterFree(iterator::Id),
+    IterFree(IterId),
 }
 
 impl InstructIterator<'_> {
@@ -670,14 +505,6 @@ pub enum InstructIncludeEvalDefine {
     ReqOnce,
     ReqDoc,
     Eval,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum BareThisOp {
-    Notice,
-    NoNotice,
-    NeverNull,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -732,13 +559,6 @@ impl AsRef<str> for Visibility {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum OpSilence {
-    Start,
-    End,
-}
-
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructMisc<'arena> {
@@ -770,7 +590,7 @@ pub enum InstructMisc<'arena> {
     AssertRATL(Local<'arena>, RepoAuthType<'arena>),
     AssertRATStk(StackIndex, RepoAuthType<'arena>),
     BreakTraceHint,
-    Silence(Local<'arena>, OpSilence),
+    Silence(Local<'arena>, SilenceOp),
     GetMemoKeyL(Local<'arena>),
     CGetCUNop,
     UGetCUNop,
@@ -890,7 +710,7 @@ pub enum GenCreationExecution {
     ContRaise,
     Yield,
     YieldK,
-    ContCheck(CheckStarted),
+    ContCheck(ContCheckOp),
     ContValid,
     ContKey,
     ContGetReturn,

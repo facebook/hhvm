@@ -8,8 +8,10 @@ edition = "2021"
 path = "../../emit_constant.rs"
 
 [dependencies]
+ast_constant_folder = { path = "../../../hhbc/cargo/ast_constant_folder" }
 core_utils_rust = { path = "../../../../utils/core" }
 emit_body = { path = "../emit_body" }
+emit_expression = { path = "../emit_expression" }
 emit_type_hint = { path = "../emit_type_hint" }
 env = { path = "../env" }
 ffi = { path = "../../../../utils/ffi" }
@@ -22,3 +24,4 @@ hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
 instruction_sequence = { path = "../instruction_sequence" }
 oxidized = { path = "../../../../oxidized" }
+runtime = { path = "../runtime" }

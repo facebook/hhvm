@@ -11,13 +11,13 @@
 class RegexIterator<Tv> extends FilterIterator<Tv> {
 
   // Constants
-  const MATCH = 0;
-  const GET_MATCH = 1;
-  const ALL_MATCHES = 2;
-  const SPLIT = 3;
-  const REPLACE = 4;
-  const USE_KEY = 1;
-  const INVERT_MATCH = 2;
+  const int MATCH = 0;
+  const int GET_MATCH = 1;
+  const int ALL_MATCHES = 2;
+  const int SPLIT = 3;
+  const int REPLACE = 4;
+  const int USE_KEY = 1;
+  const int INVERT_MATCH = 2;
 
   // Methods
   public function __construct(

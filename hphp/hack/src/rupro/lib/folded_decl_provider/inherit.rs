@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::subst::Subst;
+use super::subst::{Subst, Substitution};
 use crate::alloc::Allocator;
 use crate::decl_defs::{
     AbstractTypeconst, Abstraction, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass,
@@ -11,8 +11,7 @@ use crate::decl_defs::{
 };
 use crate::reason::Reason;
 use pos::{
-    ClassConstNameMap, MethodName, MethodNameMap, PropNameMap, TypeConstNameMap, TypeName,
-    TypeNameMap,
+    ClassConstNameMap, MethodName, MethodNameMap, PropNameMap, TypeConstNameMap, TypeNameMap,
 };
 use std::collections::hash_map::Entry;
 use std::sync::Arc;
@@ -280,197 +279,219 @@ impl<R: Reason> Inherited<R> {
         self.add_type_consts(type_consts);
     }
 
+    fn mark_as_synthesized(&mut self) {
+        for ctx in self.substs.values_mut() {
+            ctx.from_req_extends = true;
+        }
+        if let Some(ref mut elt) = self.constructor {
+            elt.set_is_synthesized(true);
+        }
+        for prop in self.props.values_mut() {
+            prop.set_is_synthesized(true);
+        }
+        for static_prop in self.static_props.values_mut() {
+            static_prop.set_is_synthesized(true);
+        }
+        for method in self.methods.values_mut() {
+            method.set_is_synthesized(true);
+        }
+        for static_method in self.static_methods.values_mut() {
+            static_method.set_is_synthesized(true);
+        }
+        for classconst in self.consts.values_mut() {
+            classconst.set_is_synthesized(true);
+        }
+
+        //TODO typeconsts
+    }
+}
+
+struct MemberFolder<'a, R: Reason> {
+    alloc: &'a Allocator<R>,
+    child: &'a ShallowClass<R>,
+    parents: &'a TypeNameMap<Arc<FoldedClass<R>>>,
+    members: Inherited<R>,
+}
+
+impl<'a, R: Reason> MemberFolder<'a, R> {
     fn make_substitution(
-        alloc: &Allocator<R>,
+        &self,
         cls: &FoldedClass<R>,
         params: &[DeclTy<R>],
     ) -> TypeNameMap<DeclTy<R>> {
-        Subst::new(alloc, cls.tparams.as_ref(), params).into()
+        Subst::new(self.alloc, &cls.tparams, params).into()
     }
 
-    fn inherit_hack_class(
-        alloc: &Allocator<R>,
-        child: &ShallowClass<R>,
-        parent_name: TypeName,
-        parent: &FoldedClass<R>,
-        argl: &[DeclTy<R>],
-    ) -> Self {
-        let subst = Self::make_substitution(alloc, parent, argl);
-        // TODO(hrust): Do we need sharing?
-        let mut substs = parent.substs.clone();
-        substs.insert(
-            parent_name,
-            SubstContext {
-                subst,
-                class_context: child.name.id(),
-                from_req_extends: false,
-            },
-        );
-        Self {
-            substs,
-            props: parent.props.clone(),
-            static_props: parent.static_props.clone(),
-            methods: parent.methods.clone(),
-            static_methods: parent.static_methods.clone(),
-            constructor: parent.constructor.clone(),
-            consts: parent.consts.clone(),
-            type_consts: parent.type_consts.clone(),
-        }
-    }
-
-    fn from_class(
-        alloc: &Allocator<R>,
-        sc: &ShallowClass<R>,
-        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
-        parent_ty: &DeclTy<R>,
-    ) -> Self {
+    // c.f. Decl_inherit.from_class
+    fn members_from_class(&self, parent_ty: &DeclTy<R>) -> Inherited<R> {
         if let Some((_, parent_pos_id, parent_tyl)) = parent_ty.unwrap_class_type() {
-            if let Some(parent_folded_decl) = parents.get(&parent_pos_id.id()) {
-                return Self::inherit_hack_class(
-                    alloc,
-                    sc,
-                    parent_pos_id.id(),
-                    parent_folded_decl,
-                    parent_tyl,
+            if let Some(parent_folded_decl) = self.parents.get(&parent_pos_id.id()) {
+                let subst = self.make_substitution(parent_folded_decl, parent_tyl);
+                // TODO(hrust): Do we need sharing?
+                let mut substs = parent_folded_decl.substs.clone();
+                substs.insert(
+                    parent_folded_decl.name,
+                    SubstContext {
+                        subst,
+                        class_context: self.child.name.id(),
+                        from_req_extends: false,
+                    },
                 );
+                return Inherited {
+                    substs,
+                    props: parent_folded_decl.props.clone(),
+                    static_props: parent_folded_decl.static_props.clone(),
+                    methods: parent_folded_decl.methods.clone(),
+                    static_methods: parent_folded_decl.static_methods.clone(),
+                    constructor: parent_folded_decl.constructor.clone(),
+                    consts: parent_folded_decl.consts.clone(),
+                    type_consts: parent_folded_decl.type_consts.clone(),
+                };
             }
         }
-        Self::default()
+        Default::default()
     }
 
-    fn from_class_xhp_attrs_only(
-        _alloc: &Allocator<R>,
-        _sc: &ShallowClass<R>,
-        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
-        ty: &DeclTy<R>,
-    ) -> Self {
+    fn class_constants_from_class(&self, ty: &DeclTy<R>) -> Inherited<R> {
+        if let Some((_, pos_id, tyl)) = ty.unwrap_class_type() {
+            if let Some(class) = self.parents.get(&pos_id.id()) {
+                let sig = Subst::new(self.alloc, &class.tparams, tyl);
+                let subst = Substitution {
+                    alloc: self.alloc,
+                    subst: &sig,
+                };
+                let consts: ClassConstNameMap<_> = class
+                    .consts
+                    .iter()
+                    .map(|(name, cc)| (*name, subst.instantiate_class_const(cc)))
+                    .collect();
+                let type_consts: TypeConstNameMap<_> = class
+                    .type_consts
+                    .iter()
+                    .map(|(name, tc)| (*name, subst.instantiate_type_const(tc)))
+                    .collect();
+                return Inherited {
+                    consts,
+                    type_consts,
+                    ..Default::default()
+                };
+            }
+        }
+        Default::default()
+    }
+
+    // This logic deals with importing XHP attributes from an XHP class via the
+    // "attribute :foo" syntax.
+    // c.f. Decl_inherit.from_class_xhp_attrs_only
+    fn xhp_attrs_from_class(&self, ty: &DeclTy<R>) -> Inherited<R> {
         if let Some((_, pos_id, _tyl)) = ty.unwrap_class_type() {
-            if let Some(class) = parents.get(&pos_id.id()) {
-                return Self::inherit_hack_xhp_attrs_only(class);
+            if let Some(class) = self.parents.get(&pos_id.id()) {
+                // Filter out properties that are not XHP attributes.
+                return Inherited {
+                    props: class
+                        .props
+                        .iter()
+                        .filter(|(_, prop)| prop.get_xhp_attr().is_some())
+                        .map(|(name, prop)| (name.clone(), prop.clone()))
+                        .collect(),
+                    ..Default::default()
+                };
             }
         }
-        Self::default()
+        Default::default()
     }
 
-    fn add_from_xhp_attr_uses(
-        &mut self,
-        alloc: &Allocator<R>,
-        sc: &ShallowClass<R>,
-        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
-    ) {
-        for ty in sc.xhp_attr_uses.iter() {
-            self.add_inherited(Self::from_class_xhp_attrs_only(alloc, sc, parents, ty))
+    fn add_from_interface_constants(&mut self) {
+        for ty in self.child.req_implements.iter() {
+            self.members
+                .add_inherited(self.class_constants_from_class(ty))
         }
     }
 
-    fn add_from_parents(
-        &mut self,
-        alloc: &Allocator<R>,
-        sc: &ShallowClass<R>,
-        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
-    ) {
+    fn add_from_implements_constants(&mut self) {
+        for ty in self.child.implements.iter() {
+            self.members
+                .add_inherited(self.class_constants_from_class(ty))
+        }
+    }
+
+    fn add_from_xhp_attr_uses(&mut self) {
+        for ty in self.child.xhp_attr_uses.iter() {
+            self.members.add_inherited(self.xhp_attrs_from_class(ty))
+        }
+    }
+
+    fn add_from_parents(&mut self) {
         let mut tys: Vec<&DeclTy<R>> = Vec::new();
-        match sc.kind {
+        match self.child.kind {
             ClassishKind::Cclass(Abstraction::Abstract) => {
-                tys.extend(sc.implements.iter());
-                tys.extend(sc.extends.iter());
+                tys.extend(self.child.implements.iter());
+                tys.extend(self.child.extends.iter());
             }
             ClassishKind::Ctrait => {
-                tys.extend(sc.implements.iter());
-                tys.extend(sc.extends.iter());
-                tys.extend(sc.req_implements.iter());
+                tys.extend(self.child.implements.iter());
+                tys.extend(self.child.extends.iter());
+                tys.extend(self.child.req_implements.iter());
             }
             ClassishKind::Cclass(_)
             | ClassishKind::Cinterface
             | ClassishKind::Cenum
             | ClassishKind::CenumClass(_) => {
-                tys.extend(sc.extends.iter());
+                tys.extend(self.child.extends.iter());
             }
         };
 
         // Interfaces implemented, classes extended and interfaces required to
         // be implemented.
         for ty in tys.iter().rev() {
-            self.add_inherited(Self::from_class(alloc, sc, parents, ty));
+            self.members.add_inherited(self.members_from_class(ty));
         }
     }
 
-    fn add_from_requirements(
-        &mut self,
-        alloc: &Allocator<R>,
-        sc: &ShallowClass<R>,
-        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
-    ) {
-        for ty in sc.req_extends.iter() {
-            let mut inherited = Self::from_class(alloc, sc, parents, ty);
+    fn add_from_requirements(&mut self) {
+        for ty in self.child.req_extends.iter() {
+            let mut inherited = self.members_from_class(ty);
             inherited.mark_as_synthesized();
-            self.add_inherited(inherited);
+            self.members.add_inherited(inherited);
         }
     }
 
-    // This logic deals with importing XHP attributes from an XHP class via the
-    // "attribute :foo;" syntax.
-    fn inherit_hack_xhp_attrs_only(class: &FoldedClass<R>) -> Self {
-        // Filter out properties that are not XHP attributes.
-        Inherited {
-            props: class
-                .props
-                .iter()
-                .filter(|(_, prop)| prop.get_xhp_attr().is_some())
-                .map(|(name, prop)| (name.clone(), prop.clone()))
-                .collect(),
-            ..Default::default()
+    fn add_from_traits(&mut self) {
+        for ty in self.child.uses.iter() {
+            self.members.add_inherited(self.members_from_class(ty));
         }
     }
 
-    fn add_from_traits(
-        &mut self,
-        alloc: &Allocator<R>,
-        sc: &ShallowClass<R>,
-        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
-    ) {
-        for ty in sc.uses.iter() {
-            self.add_inherited(Self::from_class(alloc, sc, parents, ty));
+    fn add_from_included_enums_constants(&mut self) {
+        if let Some(et) = self.child.enum_type.as_ref() {
+            for ty in et.includes.iter() {
+                self.members
+                    .add_inherited(self.class_constants_from_class(ty));
+            }
         }
     }
+}
 
-    fn mark_as_synthesized(&mut self) {
-        for (_, ctx) in self.substs.iter_mut() {
-            ctx.from_req_extends = true;
-        }
-        if let Some(ref mut elt) = self.constructor {
-            elt.set_is_synthesized(true);
-        }
-        for (_, prop) in self.props.iter_mut() {
-            prop.set_is_synthesized(true);
-        }
-        for (_, static_prop) in self.static_props.iter_mut() {
-            static_prop.set_is_synthesized(true);
-        }
-        for (_, method) in self.methods.iter_mut() {
-            method.set_is_synthesized(true);
-        }
-        for (_, static_method) in self.static_methods.iter_mut() {
-            static_method.set_is_synthesized(true);
-        }
-        for (_, classconst) in self.consts.iter_mut() {
-            classconst.set_is_synthesized(true);
-        }
-
-        //TODO typeconsts
-    }
-
+impl<R: Reason> Inherited<R> {
     pub fn make(
         alloc: &Allocator<R>,
-        sc: &ShallowClass<R>,
+        child: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) -> Self {
-        let mut inh = Self::default();
-        inh.add_from_parents(alloc, sc, parents); // Members inherited from parents ...
-        inh.add_from_requirements(alloc, sc, parents);
-        inh.add_from_traits(alloc, sc, parents); // ... can be overridden by traits.
-        inh.add_from_xhp_attr_uses(alloc, sc, parents);
+        let mut folder = MemberFolder {
+            alloc,
+            child,
+            parents,
+            members: Self::default(),
+        };
+        folder.add_from_parents(); // Members inherited from parents ...
+        folder.add_from_requirements();
+        folder.add_from_traits(); // ... can be overridden by traits.
+        folder.add_from_xhp_attr_uses();
+        folder.add_from_interface_constants();
+        folder.add_from_included_enums_constants();
+        folder.add_from_implements_constants();
 
-        inh
+        folder.members
     }
 }

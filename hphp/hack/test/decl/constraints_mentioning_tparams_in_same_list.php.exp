@@ -85,8 +85,7 @@
             [(Constraint_as,
               (Rhint ([14:11-29]),
                (Tfun
-                  { ft_arity = (Fstandard ()); ft_tparams = [];
-                    ft_where_constraints = [];
+                  { ft_tparams = []; ft_where_constraints = [];
                     ft_params =
                     [{ fp_pos = [14:21-23]; fp_name = None;
                        fp_type =

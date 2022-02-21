@@ -160,12 +160,12 @@ void generatorReturn(IRGS& env, SSATmp* retval) {
     // Clear generator's key.
     auto const oldKey = gen(env, LdContArKey, TInitCell, fp(env));
     gen(env, StContArKey, fp(env), cns(env, TInitNull));
-    decRef(env, oldKey);
+    decRef(env, oldKey, DecRefProfileId::GeneratorReturnOldKey);
 
     // Populate the generator's value with retval to support `getReturn`
     auto const oldValue = gen(env, LdContArValue, TInitCell, fp(env));
     gen(env, StContArValue, fp(env), retval);
-    decRef(env, oldValue);
+    decRef(env, oldValue, DecRefProfileId::GeneratorReturnOldValue);
     retval = cns(env, TInitNull);
   } else {
     assertx(retval->isA(TInitNull));

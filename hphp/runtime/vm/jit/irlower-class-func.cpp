@@ -276,7 +276,9 @@ void cgLdClsFromClsMeth(IRLS& env, const IRInstruction* inst) {
 #ifdef USE_LOWPTR
     static_assert(ClsMethData::clsOffset() == 0, "Class offset must be 0");
 #endif
-    v << movzlq{clsMethDataRef, dst};
+    auto const tmp = v.makeReg();
+    v << movtql{clsMethDataRef, tmp};
+    v << movzlq{tmp, dst};
   } else {
     v << load{clsMethDataRef[ClsMethData::clsOffset()], dst};
   }

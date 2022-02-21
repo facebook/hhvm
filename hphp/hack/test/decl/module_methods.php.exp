@@ -16,8 +16,7 @@ File root|module_methods.php--A.php
           sm_type =
           (Rwitness_from_decl ([8:19-20]),
            (Tfun
-              { ft_arity = (Fstandard ()); ft_tparams = [];
-                ft_where_constraints = []; ft_params = [];
+              { ft_tparams = []; ft_where_constraints = []; ft_params = [];
                 ft_implicit_params = { capability = (CapDefaults [8:19-20]) };
                 ft_ret =
                 { et_enforced = Typing_defs_core.Unenforced;
@@ -41,8 +40,7 @@ File root|module_methods.php--main.php
        fe_type =
        (Rwitness_from_decl ([4:10-14]),
         (Tfun
-           { ft_arity = (Fstandard ()); ft_tparams = [];
-             ft_where_constraints = []; ft_params = [];
+           { ft_tparams = []; ft_where_constraints = []; ft_params = [];
              ft_implicit_params = { capability = (CapDefaults [4:10-14]) };
              ft_ret =
              { et_enforced = Typing_defs_core.Unenforced;

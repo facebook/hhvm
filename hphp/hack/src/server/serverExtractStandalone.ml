@@ -1913,11 +1913,7 @@ end = struct
 
     let of_class Aast.{ c_uses; c_reqs; _ } class_elts =
       let (req_extends, req_implements) =
-        List.partition_map c_reqs ~f:(fun (s, extends) ->
-            if extends then
-              First s
-            else
-              Second s)
+        Aast.partition_map_require_kind ~f:fst c_reqs
       in
       let elements =
         filter_constructor_props

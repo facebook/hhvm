@@ -136,18 +136,18 @@ void encodeFCallArgsBase(FuncEmitter& fe, const FCallArgsBase& fca,
                          bool hasAsyncEagerOffset, bool hasContext) {
   auto constexpr kFirstNumArgsBit = FCallArgsBase::kFirstNumArgsBit;
   auto constexpr kLimit =
-    std::numeric_limits<std::underlying_type_t<FCallArgs::Flags>>::max();
+    std::numeric_limits<std::underlying_type_t<FCallArgsFlags>>::max();
   bool smallNumArgs = ((fca.numArgs + 1) << kFirstNumArgsBit) <= kLimit;
   auto flags = uint16_t{fca.flags};
-  assertx(!(flags & ~FCallArgsBase::kInternalFlags));
+  assertx(!(flags & ~FCallArgs::kInternalFlags));
   if (smallNumArgs) flags |= ((fca.numArgs + 1) << kFirstNumArgsBit);
-  if (fca.numRets != 1) flags |= FCallArgsBase::HasInOut;
-  if (hasInoutArgs) flags |= FCallArgsBase::EnforceInOut;
-  if (hasReadonlyArgs) flags |= FCallArgsBase::EnforceReadonly;
-  if (hasAsyncEagerOffset) flags |= FCallArgsBase::HasAsyncEagerOffset;
-  if (hasContext) flags |= FCallArgsBase::ExplicitContext;
+  if (fca.numRets != 1) flags |= FCallArgsFlags::HasInOut;
+  if (hasInoutArgs) flags |= FCallArgsFlags::EnforceInOut;
+  if (hasReadonlyArgs) flags |= FCallArgsFlags::EnforceReadonly;
+  if (hasAsyncEagerOffset) flags |= FCallArgsFlags::HasAsyncEagerOffset;
+  if (hasContext) flags |= FCallArgsFlags::ExplicitContext;
 
-  static_assert(sizeof(std::underlying_type_t<FCallArgs::Flags>) * 8 == 16);
+  static_assert(sizeof(std::underlying_type_t<FCallArgsFlags>) * 8 == 16);
   fe.emitInt16(flags);
   if (!smallNumArgs) fe.emitIVA(fca.numArgs);
   if (fca.numRets != 1) fe.emitIVA(fca.numRets);
@@ -162,24 +162,24 @@ FCallArgs decodeFCallArgs(Op thisOpcode, PC& pc, StringDecoder u) {
   assertx(isFCall(thisOpcode));
   bool skipContext = true;
   auto const flags = [&]() {
-    auto rawFlags = decode_raw<std::underlying_type_t<FCallArgs::Flags>>(pc);
-    skipContext = !(rawFlags & FCallArgs::ExplicitContext);
-    if (u.isNull()) rawFlags &= ~FCallArgs::ExplicitContext;
+    auto rawFlags = decode_raw<std::underlying_type_t<FCallArgsFlags>>(pc);
+    skipContext = !(rawFlags & FCallArgsFlags::ExplicitContext);
+    if (u.isNull()) rawFlags &= ~FCallArgsFlags::ExplicitContext;
     return rawFlags;
   }();
 
   uint32_t numArgs = (flags >> FCallArgs::kFirstNumArgsBit)
     ? (flags >> FCallArgs::kFirstNumArgsBit) - 1 : decode_iva(pc);
-  auto const numRets = (flags & FCallArgs::HasInOut) ? decode_iva(pc) : 1;
-  auto const inoutArgs = (flags & FCallArgs::EnforceInOut) ? pc : nullptr;
+  auto const numRets = (flags & FCallArgsFlags::HasInOut) ? decode_iva(pc) : 1;
+  auto const inoutArgs = (flags & FCallArgsFlags::EnforceInOut) ? pc : nullptr;
   if (inoutArgs != nullptr) pc += (numArgs + 7) / 8;
-  auto const readonlyArgs = (flags & FCallArgs::EnforceReadonly) ? pc : nullptr;
+  auto const readonlyArgs = (flags & FCallArgsFlags::EnforceReadonly) ? pc : nullptr;
   if (readonlyArgs != nullptr) pc += (numArgs + 7) / 8;
-  auto const asyncEagerOffset = (flags & FCallArgs::HasAsyncEagerOffset)
+  auto const asyncEagerOffset = (flags & FCallArgsFlags::HasAsyncEagerOffset)
     ? decode_ba(pc) : kInvalidOffset;
   auto const context = !skipContext ? decode_string(pc, u) : nullptr;
   return FCallArgs(
-    static_cast<FCallArgs::Flags>(flags & FCallArgs::kInternalFlags),
+    static_cast<FCallArgsFlags>(flags & FCallArgs::kInternalFlags),
     numArgs, numRets, inoutArgs, readonlyArgs, asyncEagerOffset, context
   );
 }

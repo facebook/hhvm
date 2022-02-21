@@ -1150,6 +1150,7 @@ let check_arity ?(did_unpack = false) pos pos_def ft (arity : int) =
   if get_ft_variadic ft then
     ()
   else
+    (* No variadics *)
     let exp_max = List.length ft.ft_params in
     let arity =
       if did_unpack then
@@ -1165,8 +1166,8 @@ let check_arity ?(did_unpack = false) pos pos_def ft (arity : int) =
                { expected = exp_max; actual = arity; pos; decl_pos = pos_def })
 
 let check_lambda_arity lambda_pos def_pos lambda_ft expected_ft =
-  match (lambda_ft.ft_arity, expected_ft.ft_arity) with
-  | (Fstandard, Fstandard) ->
+  match (get_ft_variadic lambda_ft, get_ft_variadic expected_ft) with
+  | (false, false) ->
     let expected = Typing_defs.arity_min expected_ft in
     let actual = Typing_defs.arity_min lambda_ft in
     let prim_err_opt =
@@ -1192,9 +1193,10 @@ let check_lambda_arity lambda_pos def_pos lambda_ft expected_ft =
  * variable arguments for the purposes of the function body; callsites
  * should not unify with it *)
 let variadic_param env ft =
-  match ft.ft_arity with
-  | Fvariadic param -> (env, Some param)
-  | Fstandard -> (env, None)
+  if get_ft_variadic ft then
+    (env, List.last ft.ft_params)
+  else
+    (env, None)
 
 let param_modes
     ?(is_variadic = false) ({ fp_pos; _ } as fp) (_, pos, _) param_kind =
@@ -1230,12 +1232,17 @@ let split_remaining_params_required_optional ft remaining_params =
    * `remaining_params` will contain [string, float] and there has been 1 parameter consumed. The min_arity
    * of this function is 2, so there is 1 required parameter remaining and 1 optional parameter.
    *)
+  let original_params =
+    if get_ft_variadic ft then
+      List.drop_last_exn ft.ft_params
+    else
+      ft.ft_params
+  in
   let min_arity =
     List.count
       ~f:(fun fp -> not (Typing_defs.get_fp_has_default fp))
-      ft.ft_params
+      original_params
   in
-  let original_params = ft.ft_params in
   let consumed = List.length original_params - List.length remaining_params in
   let required_remaining = Int.max (min_arity - consumed) 0 in
   let (required_params, optional_params) =
@@ -2438,21 +2445,21 @@ and stmt_ env pos st =
       assert_env_stmt ~pos ~at:`End Aast.Refinement refinement_map for_st
     in
     (env, for_st)
-  | Switch (((_, pos, _) as e), cl) ->
+  | Switch (((_, pos, _) as e), cl, dfl) ->
     let (env, te, ty) = expr env e in
     (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.
      * See the note in
      * http://php.net/manual/en/control-structures.continue.php *)
-    let (env, (te, tcl)) =
+    let (env, (te, tcl, tdfl)) =
       LEnv.stash_and_do env [C.Continue; C.Break] (fun env ->
           let parent_locals = LEnv.get_all_locals env in
-          let (env, tcl) = case_list parent_locals ty env pos cl in
+          let (env, tcl, tdfl) = case_list parent_locals ty env pos cl dfl in
           let env =
             LEnv.update_next_from_conts env [C.Continue; C.Break; C.Next]
           in
-          (env, (te, tcl)))
+          (env, (te, tcl, tdfl)))
     in
-    (env, Aast.Switch (te, tcl))
+    (env, Aast.Switch (te, tcl, tdfl))
   | Foreach (e1, e2, b) ->
     (* It's safe to do foreach over a disposable, as no leaking is possible *)
     let (env, te1, ty1) = expr ~accept_using_var:true env e1 in
@@ -2583,14 +2590,14 @@ and try_catch env tb cl fb =
   in
   (env, ttb, tcb, tfb)
 
-and case_list parent_locals ty env switch_pos cl =
+and case_list parent_locals ty env switch_pos cl dfl =
   let initialize_next_cont env =
     let env = LEnv.restore_conts_from env parent_locals [C.Next] in
     let env = LEnv.update_next_from_conts env [C.Next; C.Fallthrough] in
     LEnv.drop_cont env C.Fallthrough
   in
-  let check_fallthrough env switch_pos case_pos block rest_of_list ~is_default =
-    if (not (List.is_empty block)) && not (List.is_empty rest_of_list) then
+  let check_fallthrough env switch_pos case_pos block ~last ~is_default =
+    if (not (List.is_empty block)) && not last then
       match LEnv.get_cont_option env C.Next with
       | Some _ ->
         Errors.add_nast_check_error
@@ -2603,11 +2610,7 @@ and case_list parent_locals ty env switch_pos cl =
   in
   let env =
     (* below, we try to find out if the switch is exhaustive *)
-    let has_default =
-      List.exists cl ~f:(function
-          | Default _ -> true
-          | _ -> false)
-    in
+    let has_default = Option.is_some dfl in
     let (env, ty) =
       (* If it hasn't got a default clause then we need to solve type variables
        * in order to check for an enum *)
@@ -2637,23 +2640,30 @@ and case_list parent_locals ty env switch_pos cl =
     else
       might_throw env
   in
-  let rec case_list env = function
-    | [] -> (env, [])
-    | Default (pos, b) :: rl ->
-      let env = initialize_next_cont env in
-      let (env, tb) = block env b in
-      check_fallthrough env switch_pos pos b rl ~is_default:true;
-      let (env, tcl) = case_list env rl in
-      (env, Aast.Default (pos, tb) :: tcl)
-    | Case (((_, pos, _) as e), b) :: rl ->
-      let env = initialize_next_cont env in
-      let (env, te, _) = expr env e ~allow_awaitable:(*?*) false in
-      let (env, tb) = block env b in
-      check_fallthrough env switch_pos pos b rl ~is_default:false;
-      let (env, tcl) = case_list env rl in
-      (env, Aast.Case (te, tb) :: tcl)
+  let (env, tcl) =
+    let rec case_list env = function
+      | [] -> (env, [])
+      | (((_, pos, _) as e), b) :: rl ->
+        let env = initialize_next_cont env in
+        let (env, te, _) = expr env e ~allow_awaitable:(*?*) false in
+        let (env, tb) = block env b in
+        let last = List.is_empty rl && Option.is_none dfl in
+        check_fallthrough env switch_pos pos b ~last ~is_default:false;
+        let (env, tcl) = case_list env rl in
+        (env, (te, tb) :: tcl)
+    in
+    case_list env cl
   in
-  case_list env cl
+  let (env, tdfl) =
+    match dfl with
+    | None -> (env, None)
+    | Some (pos, b) ->
+      let env = initialize_next_cont env in
+      let (env, tb) = block env b in
+      check_fallthrough env switch_pos pos b ~last:true ~is_default:true;
+      (env, Some (pos, tb))
+  in
+  (env, tcl, tdfl)
 
 and catch catchctx env (sid, exn_lvar, b) =
   let env = LEnv.replace_cont env C.Next catchctx in
@@ -3503,7 +3513,6 @@ and expr_
         let fty = { ftype with ft_params = local_obj_fp :: ftype.ft_params } in
         let caller =
           {
-            ft_arity = fty.ft_arity;
             ft_tparams = fty.ft_tparams;
             ft_where_constraints = fty.ft_where_constraints;
             ft_params = fty.ft_params;
@@ -4684,20 +4693,11 @@ and function_dynamically_callable env f params_decl_ty ret_locl_ty =
         }
     in
     let (env, param_tys) =
-      List.zip_exn f.f_params params_decl_ty
-      |> List.map_env env ~f:(fun env (param, hint) ->
-             let dyn_ty =
-               make_dynamic @@ Pos_or_decl.of_raw_pos param.param_pos
-             in
-             let ty =
-               match hint with
-               | Some ty when Typing_enforceability.is_enforceable env ty ->
-                 Typing_make_type.intersection
-                   (Reason.Rsupport_dynamic_type Pos_or_decl.none)
-                   [ty; dyn_ty]
-               | _ -> dyn_ty
-             in
-             Typing_param.make_param_local_ty env (Some ty) param)
+      Typing_param.make_param_local_tys
+        ~dynamic_mode:true
+        env
+        params_decl_ty
+        f.f_params
     in
     let params_need_immutable = Typing_coeffects.get_ctx_vars f.f_ctxs in
     let (env, _) =
@@ -4787,15 +4787,14 @@ and lambda ~is_anon ?expected p env f idl =
   List.iter idl ~f:(check_escaping_var env);
 
   (* Ensure that variadic parameter has a name *)
-  begin
-    match declared_ft.ft_arity with
-    | Fvariadic { fp_name = None; _ } ->
+  (if get_ft_variadic declared_ft then
+    match List.last declared_ft.ft_params with
+    | Some { fp_name = None; _ } ->
       Errors.add_typing_error
         Typing_error.(
           primary
           @@ Primary.Ellipsis_strict_mode { require = `Param_name; pos = p })
-    | _ -> ()
-  end;
+    | _ -> ());
 
   (* Is the return type declared? *)
   let is_explicit_ret = Option.is_some (hint_of_type_hint f.f_ret) in
@@ -4875,32 +4874,18 @@ and lambda ~is_anon ?expected p env f idl =
            handle it more generally here to be graceful. *)
         declared_ft_params
       | ([], _) ->
-        (* This means the expected_ft params list can have more parameters
-         * than declared parameters in the lambda. For variadics, this is OK.
-         *)
-        expected_ft_params
-    in
-    let f_variadic = List.find f.f_params ~f:(fun p -> p.param_is_variadic) in
-    let replace_non_declared_arity variadic declared_arity expected_arity =
-      match variadic with
-      | Some { param_type_hint = (_, Some _); _ } -> declared_arity
-      | Some _ ->
-        begin
-          match (declared_arity, expected_arity) with
-          | (Fvariadic declared, Fvariadic expected) ->
-            Fvariadic { declared with fp_type = expected.fp_type }
-          | (_, _) -> declared_arity
-        end
-      | _ -> declared_arity
+        if (not (get_ft_variadic declared_ft)) && get_ft_variadic expected_ft
+        then
+          []
+        else
+          (* This means the expected_ft params list can have more parameters
+           * than declared parameters in the lambda. For variadics, this is OK.
+           *)
+          expected_ft_params
     in
     let expected_ft =
       {
         expected_ft with
-        ft_arity =
-          replace_non_declared_arity
-            f_variadic
-            declared_ft.ft_arity
-            expected_ft.ft_arity;
         ft_params =
           replace_non_declared_types declared_ft.ft_params expected_ft.ft_params;
         ft_implicit_params = declared_ft.ft_implicit_params;
@@ -5261,6 +5246,12 @@ and closure_make
   in
   let ft = { ft with ft_implicit_params = { capability = CapTy capability } } in
   let env = Env.clear_params env in
+  let non_variadic_ft_params =
+    if get_ft_variadic ft then
+      List.drop_last_exn ft.ft_params
+    else
+      ft.ft_params
+  in
   let make_variadic_arg env varg tyl =
     let remaining_types =
       (* It's possible the variadic arg will capture the variadic
@@ -5279,7 +5270,7 @@ and closure_make
        * to create a union type when creating the typed variadic arg.
        *)
       let remaining_params =
-        List.drop ft.ft_params (List.length f.f_params - 1)
+        List.drop non_variadic_ft_params (List.length f.f_params - 1)
       in
       List.map ~f:(fun param -> param.fp_type.et_type) remaining_params
     in
@@ -5290,11 +5281,12 @@ and closure_make
   in
   let (env, t_variadic_params) =
     match
-      (List.find f.f_params ~f:(fun p -> p.param_is_variadic), ft.ft_arity)
+      ( List.find f.f_params ~f:(fun p -> p.param_is_variadic),
+        get_ft_variadic ft )
     with
-    | (Some arg, Fvariadic variadic) ->
-      make_variadic_arg env arg [variadic.fp_type.et_type]
-    | (Some arg, Fstandard) -> make_variadic_arg env arg []
+    | (Some arg, true) ->
+      make_variadic_arg env arg [(List.last_exn ft.ft_params).fp_type.et_type]
+    | (Some arg, false) -> make_variadic_arg env arg []
     | (_, _) -> (env, [])
   in
   let non_variadic_params =
@@ -5305,7 +5297,7 @@ and closure_make
     List.fold_left
       ~f:(closure_bind_param params)
       ~init:(env, [])
-      (List.map ft.ft_params ~f:(fun x -> x.fp_type.et_type))
+      (List.map non_variadic_ft_params ~f:(fun x -> x.fp_type.et_type))
   in
   (* Check attributes on the lambda *)
   let (env, user_attributes) =
@@ -5337,8 +5329,8 @@ and closure_make
           param_modes x1 x2 pkx_2;
           iter rl1 rl2
       in
-      iter ft.ft_params x;
-      wfold_left2 inout_write_back env ft.ft_params x
+      iter non_variadic_ft_params x;
+      wfold_left2 inout_write_back env non_variadic_ft_params x
   in
   let env = Env.set_fn_kind env f.f_fun_kind in
   let decl_ty =
@@ -5420,16 +5412,6 @@ and closure_make
         match get_node et_type with
         | Tany _ -> None
         | _ -> Some et_type)
-  in
-  let params_decl_ty =
-    match decl_ft.ft_arity with
-    | Fvariadic { fp_type = { et_type; _ }; _ } ->
-      begin
-        match get_node et_type with
-        | Tany _ -> None :: params_decl_ty
-        | _ -> Some et_type :: params_decl_ty
-      end
-    | _ -> params_decl_ty
   in
   if
     TypecheckerOptions.enable_sound_dynamic
@@ -6605,17 +6587,6 @@ and dispatch_call
         let env = Typing_local_ops.check_unset_target env tel in
         let env =
           match (el, unpacked_element) with
-          | ( [
-                ( Ast_defs.Pnormal,
-                  (_, _, Array_get ((_, _, Class_const _), Some _)) );
-              ],
-              None ) ->
-            Errors.add_typing_error
-              Typing_error.(
-                primary
-                @@ Primary.Const_mutation
-                     { pos = p; decl_pos = Pos_or_decl.none; ty_name = lazy "" });
-            env
           | ([(Ast_defs.Pnormal, (_, _, Array_get (ea, Some _)))], None) ->
             let (env, _te, ty) = expr env ea in
             let r = Reason.Rwitness p in
@@ -6690,7 +6661,8 @@ and dispatch_call
     end
   (* Special Shapes:: function *)
   | Class_const (((_, _, CI (_, shapes)) as class_id), ((_, x) as method_id))
-    when String.equal shapes SN.Shapes.cShapes ->
+    when String.equal shapes SN.Shapes.cShapes
+         || String.equal shapes SN.Shapes.cReadonlyShapes ->
     begin
       match x with
       (* Special function `Shapes::idx` *)
@@ -8405,9 +8377,15 @@ and call
       (* First check the non-lambda arguments. For generic functions, this
        * is likely to resolve type variables to concrete types *)
       let rl = List.map el ~f:(fun e -> (e, None)) in
-      let (env, rl, _) = check_args false env rl ft.ft_params in
+      let non_variadic_ft_params =
+        if get_ft_variadic ft then
+          List.drop_last_exn ft.ft_params
+        else
+          ft.ft_params
+      in
+      let (env, rl, _) = check_args false env rl non_variadic_ft_params in
       (* Now check the lambda arguments, hopefully with type variables resolved *)
-      let (env, rl, paraml) = check_args true env rl ft.ft_params in
+      let (env, rl, paraml) = check_args true env rl non_variadic_ft_params in
       (* We expect to see results for all arguments after this second pass *)
       let get_param ((pk, _), opt) =
         match opt with
@@ -8551,7 +8529,7 @@ and call
        *)
       let () = check_arity ~did_unpack pos pos_def ft arity in
       (* Variadic params cannot be inout so we can stop early *)
-      let env = wfold_left2 inout_write_back env ft.ft_params el in
+      let env = wfold_left2 inout_write_back env non_variadic_ft_params el in
       let ret =
         if in_supportdyn then
           MakeType.locl_like r2 ft.ft_ret.et_type
@@ -8600,8 +8578,8 @@ and call
           match type_of_unpacked_element with
           | Some type_of_unpacked ->
             let fun_param = mk_fun_param type_of_unpacked in
-            Fvariadic fun_param
-          | None -> Fstandard
+            [fun_param]
+          | None -> []
         in
         (* TODO: ensure `ft_params`/`ft_where_constraints` don't affect subtyping *)
         let ft_tparams = [] in
@@ -8630,18 +8608,14 @@ and call
             ~readonly_this:false
             ~support_dynamic_type:false
             ~is_memoized:false
-            ~variadic:
-              (match ft_arity with
-              | Fvariadic _ -> true
-              | _ -> false)
+            ~variadic:(not (List.is_empty ft_arity))
         in
         let ft_ifc_decl = Typing_defs_core.default_ifc_fun_decl in
         let fun_locl_type =
           {
-            ft_arity;
             ft_tparams;
             ft_where_constraints;
-            ft_params;
+            ft_params = ft_params @ ft_arity;
             ft_implicit_params;
             ft_ret;
             ft_flags;

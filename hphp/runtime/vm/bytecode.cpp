@@ -197,7 +197,6 @@ inline const char* prettytype(TypeStructResolveOp) {
   return "TypeStructResolveOp";
 }
 inline const char* prettytype(ReadonlyOp) { return "ReadonlyOp"; }
-inline const char* prettytype(CudOp) { return "CudOp"; }
 inline const char* prettytype(ContCheckOp) { return "ContCheckOp"; }
 inline const char* prettytype(SpecialClsRef) { return "SpecialClsRef"; }
 inline const char* prettytype(CollectionType) { return "CollectionType"; }
@@ -3882,7 +3881,7 @@ Class* specialClsRefToCls(SpecialClsRef ref) {
     case SpecialClsRef::Static:
       if (auto const cls = frameStaticClass(vmfp())) return cls;
       raise_error(HPHP::Strings::CANT_ACCESS_STATIC);
-    case SpecialClsRef::Self:
+    case SpecialClsRef::Self_:
       if (auto const cls = arGetContextClass(vmfp())) return cls;
       raise_error(HPHP::Strings::CANT_ACCESS_SELF);
     case SpecialClsRef::Parent:
@@ -4106,7 +4105,7 @@ iopFCallClsMethodS(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
 
   // fcallClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(1);
-  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
+  auto const fwd = ref == SpecialClsRef::Self_ || ref == SpecialClsRef::Parent;
   return fcallClsMethodImpl<true>(
     retToJit, origpc, pc, fca, cls, methName, fwd);
 }
@@ -4117,7 +4116,7 @@ iopFCallClsMethodSD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
                     const StringData* methName) {
   auto const cls = specialClsRefToCls(ref);
   auto const methNameC = const_cast<StringData*>(methName);
-  auto const fwd = ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent;
+  auto const fwd = ref == SpecialClsRef::Self_ || ref == SpecialClsRef::Parent;
   return fcallClsMethodImpl<false>(
     retToJit, origpc, pc, fca, cls, methNameC, fwd);
 }

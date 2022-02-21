@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<06d63561fe2c24e36ab021f9e77572a4>>
+// @generated SignedSource<<2151884302547401f478beb8db9de393>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -102,6 +102,8 @@ pub struct TyvarInfo {
 
 pub type Tvenv = i_map::IMap<TyvarInfo>;
 
+pub type Identifier = isize;
+
 #[derive(
     Clone,
     Debug,
@@ -119,7 +121,7 @@ pub type Tvenv = i_map::IMap<TyvarInfo>;
 #[repr(C)]
 pub struct TypingInferenceEnv {
     pub tvenv: Tvenv,
-    pub tyvars_stack: Vec<(pos::Pos, Vec<ident::Ident>)>,
+    pub tyvars_stack: Vec<(pos::Pos, Vec<Identifier>)>,
     pub subtype_prop: t_l::SubtypeProp,
     pub tyvar_occurrences: typing_tyvar_occurrences::TypingTyvarOccurrences,
     pub allow_solve_globals: bool,

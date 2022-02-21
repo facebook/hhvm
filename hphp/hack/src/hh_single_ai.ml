@@ -159,7 +159,6 @@ let parse_options () =
   let root = Path.make "/" (* if none specified, we use this dummy *) in
   let tcopt =
     GlobalOptions.make
-      ?po_disable_array_typehint:(Some false)
       ~allowed_fixme_codes_strict:
         (Option.value !allowed_fixme_codes_strict ~default:ISet.empty)
       ~tco_check_xhp_attribute:!check_xhp_attribute

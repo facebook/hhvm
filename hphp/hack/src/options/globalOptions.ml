@@ -77,7 +77,6 @@ type t = {
   po_const_default_lambda_args: bool;
   po_disallow_silence: bool;
   po_abstract_static_props: bool;
-  po_disable_unset_class_const: bool;
   po_parser_errors_only: bool;
   tco_check_attribute_locations: bool;
   glean_service: string;
@@ -99,8 +98,6 @@ type t = {
   po_disable_xhp_children_declarations: bool;
   po_enable_enum_classes: bool;
   po_disable_hh_ignore_error: bool;
-  po_disable_array: bool;
-  po_disable_array_typehint: bool;
   tco_enable_systemlib_annotations: bool;
   tco_higher_kinded_types: bool;
   tco_method_call_inference: bool;
@@ -262,7 +259,6 @@ let default =
     po_const_default_lambda_args = false;
     po_disallow_silence = false;
     po_abstract_static_props = false;
-    po_disable_unset_class_const = false;
     po_parser_errors_only = false;
     tco_check_attribute_locations = true;
     glean_service = "";
@@ -284,8 +280,6 @@ let default =
     po_disable_xhp_children_declarations = true;
     po_enable_enum_classes = true;
     po_disable_hh_ignore_error = false;
-    po_disable_array = true;
-    po_disable_array_typehint = true;
     tco_enable_systemlib_annotations = false;
     tco_higher_kinded_types = false;
     tco_method_call_inference = false;
@@ -399,7 +393,6 @@ let make
     ?(po_const_default_lambda_args = default.po_const_default_lambda_args)
     ?(po_disallow_silence = default.po_disallow_silence)
     ?(po_abstract_static_props = default.po_abstract_static_props)
-    ?(po_disable_unset_class_const = default.po_disable_unset_class_const)
     ?(po_parser_errors_only = default.po_parser_errors_only)
     ?(tco_check_attribute_locations = default.tco_check_attribute_locations)
     ?(glean_service = default.glean_service)
@@ -424,8 +417,6 @@ let make
       default.po_disable_xhp_children_declarations)
     ?(po_enable_enum_classes = default.po_enable_enum_classes)
     ?(po_disable_hh_ignore_error = default.po_disable_hh_ignore_error)
-    ?(po_disable_array = default.po_disable_array)
-    ?(po_disable_array_typehint = default.po_disable_array_typehint)
     ?(po_allow_unstable_features = default.po_allow_unstable_features)
     ?(tco_enable_systemlib_annotations =
       default.tco_enable_systemlib_annotations)
@@ -544,7 +535,6 @@ let make
     po_const_default_lambda_args;
     po_disallow_silence;
     po_abstract_static_props;
-    po_disable_unset_class_const;
     po_parser_errors_only;
     tco_check_attribute_locations;
     glean_service;
@@ -566,8 +556,6 @@ let make
     po_disable_xhp_children_declarations;
     po_enable_enum_classes;
     po_disable_hh_ignore_error;
-    po_disable_array;
-    po_disable_array_typehint;
     tco_enable_systemlib_annotations;
     tco_higher_kinded_types;
     tco_method_call_inference;
@@ -756,8 +744,6 @@ let po_disallow_silence t = t.po_disallow_silence
 
 let po_abstract_static_props t = t.po_abstract_static_props
 
-let po_disable_unset_class_const t = t.po_disable_unset_class_const
-
 let tco_check_attribute_locations t = t.tco_check_attribute_locations
 
 let glean_service t = t.glean_service
@@ -810,10 +796,6 @@ let po_disable_xhp_children_declarations t =
 let po_enable_enum_classes t = t.po_enable_enum_classes
 
 let po_disable_hh_ignore_error t = t.po_disable_hh_ignore_error
-
-let po_disable_array t = t.po_disable_array
-
-let po_disable_array_typehint t = t.po_disable_array_typehint
 
 let tco_enable_systemlib_annotations t = t.tco_enable_systemlib_annotations
 

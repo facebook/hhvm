@@ -9,6 +9,10 @@
 open Hh_prelude
 open Hh_json
 
+let log_elapsed s elapsed =
+  let { Unix.tm_min; tm_sec; _ } = Unix.gmtime elapsed in
+  Hh_logger.log "%s %dm%ds" s tm_min tm_sec
+
 let write_file file_dir num_tasts json_chunks =
   let (_out_file, channel) =
     Caml.Filename.open_temp_file
@@ -29,44 +33,44 @@ let write_json
     (ctx : Provider_context.t)
     (file_dir : string)
     (files_info : Symbol_file_info.t list)
-    (start_time : float) : unit =
-  try
-    let (small, large) =
-      List.partition_tf files_info ~f:(fun (_, tast, _) ->
-          List.length tast <= 2000)
-    in
-    if List.is_empty large then
-      let json_chunks = Symbol_json_builder.build_json ctx files_info in
-      write_file file_dir (List.length files_info) json_chunks
-    else
-      let json_chunks = Symbol_json_builder.build_json ctx small in
-      write_file file_dir (List.length small) json_chunks;
-      List.iter large ~f:(fun (fp, tast, st) ->
-          let decl_json_chunks =
-            Symbol_json_builder.build_decls_json ctx [(fp, tast, st)]
-          in
-          write_file file_dir 1 decl_json_chunks;
-          let xref_json_chunks =
-            Symbol_json_builder.build_xrefs_json ctx [tast]
-          in
-          write_file file_dir 1 xref_json_chunks);
-      let elapsed = Unix.gettimeofday () -. start_time in
-      let { Unix.tm_min; tm_sec; _ } = Unix.gmtime elapsed in
-      Hh_logger.log "Processed batch in %dm%ds" tm_min tm_sec
-  with
+    (start_time : float) : float =
+  (try
+     let (small, large) =
+       List.partition_tf files_info ~f:(fun (_, tast, _) ->
+           List.length tast <= 2000)
+     in
+     if List.is_empty large then
+       let json_chunks = Symbol_json_builder.build_json ctx files_info in
+       write_file file_dir (List.length files_info) json_chunks
+     else
+       let json_chunks = Symbol_json_builder.build_json ctx small in
+       write_file file_dir (List.length small) json_chunks;
+       List.iter large ~f:(fun (fp, tast, st) ->
+           let decl_json_chunks =
+             Symbol_json_builder.build_decls_json ctx [(fp, tast, st)]
+           in
+           write_file file_dir 1 decl_json_chunks;
+           let xref_json_chunks =
+             Symbol_json_builder.build_xrefs_json ctx [tast]
+           in
+           write_file file_dir 1 xref_json_chunks)
+   with
   | WorkerCancel.Worker_should_exit as e ->
     (* Cancellation requests must be re-raised *)
     raise e
   | e ->
-    Printf.eprintf "WARNING: symbol write failure: \n%s\n" (Exn.to_string e)
+    Printf.eprintf "WARNING: symbol write failure: \n%s\n" (Exn.to_string e));
+  let elapsed = Unix.gettimeofday () -. start_time in
+  log_elapsed "Processed batch in" elapsed;
+  elapsed
 
 let recheck_job
     (ctx : Provider_context.t)
     (out_dir : string)
     (root_path : string)
     (hhi_path : string)
-    ()
-    (progress : Relative_path.t list) : unit =
+    (_ : float)
+    (progress : Relative_path.t list) : float =
   let start_time = Unix.gettimeofday () in
   let files_info =
     List.map progress ~f:(fun path ->
@@ -92,9 +96,15 @@ let go
     | Some w -> List.length w
     | None -> 1
   in
-  MultiWorker.call
-    workers
-    ~job:(recheck_job ctx out_dir root_path hhi_path)
-    ~merge:(fun () () -> ())
-    ~next:(Bucket.make ~num_workers ~max_size:150 files)
-    ~neutral:()
+  let start_time = Unix.gettimeofday () in
+  let cumulated_elapsed =
+    MultiWorker.call
+      workers
+      ~job:(recheck_job ctx out_dir root_path hhi_path)
+      ~merge:(fun f1 f2 -> f1 +. f2)
+      ~next:(Bucket.make ~num_workers ~max_size:150 files)
+      ~neutral:0.
+  in
+  log_elapsed "Processed all batches (cumulated time) in " cumulated_elapsed;
+  let elapsed = Unix.gettimeofday () -. start_time in
+  log_elapsed "Processed all batches in " elapsed

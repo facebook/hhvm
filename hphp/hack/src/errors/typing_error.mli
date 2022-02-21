@@ -1352,7 +1352,7 @@ module Secondary : sig
   (** Specific error information which needs to be given a primary position from
        the AST being typed to be transformable into a user error.
        This can be done via applying a [Reason_callback.t] using [apply_reasons].
-   *)
+  *)
   type t =
     | Of_error of Error.t
     (* == Primary and secondary =============================================== *)
@@ -1367,6 +1367,7 @@ module Secondary : sig
         class_name: string;
         class_pos: Pos_or_decl.t;
         member_name: string;
+        closest_member_name: string option;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option;
         quickfixes: Quickfix.t list;
       }
@@ -1622,8 +1623,8 @@ module Callback : sig
 
   (** Perform an aribrary side-effects when the error is evaluated *)
   val with_side_effect : t -> eff:(unit -> unit) -> t
-    [@@ocaml.deprecated
-      "This function will be removed. Please avoid adding side effects to error callbacks."]
+  [@@ocaml.deprecated
+    "This function will be removed. Please avoid adding side effects to error callbacks."]
 
   (** Provide default code, claim, reasons and quickfixes from the supplied
       `Primary.t` error *)
@@ -1692,15 +1693,15 @@ module Reasons_callback : sig
 
   (** Evaluate the `Reasons_callback.t` to a `(Pos.t,Pos_or_decl.t) User_error.t`
       for use in error reporting.
- 
+
       The optional code, claim, reasons, and quickfixes are the 'starting' values
       of the user error and may be ignored or override the defaults specified in
       the callback.
- 
+
       We don't require any of these since a reasons callback has both a code
       and claim by construction and we can use the empty list as the default for
       both reasons and quickfixes.
-      *)
+  *)
   val apply :
     ?code:Error_code.t ->
     ?claim:Pos.t Message.t ->
@@ -1716,21 +1717,21 @@ module Reasons_callback : sig
       migrated *)
   val from_on_error :
     (?code:int ->
-    ?quickfixes:Quickfix.t list ->
-    Pos_or_decl.t Message.t list ->
-    unit) ->
+     ?quickfixes:Quickfix.t list ->
+     Pos_or_decl.t Message.t list ->
+     unit) ->
     t
-    [@@ocaml.deprecated
-      "This function will be removed. Please use the provided combinators for constructing error callbacks."]
+  [@@ocaml.deprecated
+    "This function will be removed. Please use the provided combinators for constructing error callbacks."]
 
   (** A `Reasons_callback.t` which evaluates to an empty list of `User_error.t`
- 
+
       This is equivalent to the following function:
       `(fun ?code:_ ?quickfixes:_ _ -> () )`
- 
+
       Once errors are returned from typing & subtyping, this will be removed
       in favour of actually ignoring the returned errors
-   *)
+  *)
   val ignore_error : t
 
   (** Create a constant `Reasons_callback.t` which defaults to the value of the
@@ -1742,7 +1743,7 @@ module Reasons_callback : sig
   (** Create a `Reasons_callback.t` which defaults to the value of the supplied
       `Primary.t` error when applied; this is equivalent
        to `of_error @@ primary err`
-   *)
+  *)
   val of_primary_error : Primary.t -> t
 
   (** Replace the current default claim with the claim from the supplied
@@ -1755,7 +1756,7 @@ module Reasons_callback : sig
   (** Replace the current list of reasons with those supplied. This is typically
        used in combination with `retain_reasons` to fix the `reasons` of the
       `User_error.t` that is obtained when the callback is applied
-   *)
+  *)
   val with_reasons : t -> reasons:Pos_or_decl.t Message.t list -> t
 
   (** Add the `reason` to the start of current list of reasons *)
@@ -1771,46 +1772,46 @@ module Reasons_callback : sig
   val prepend_incoming_reasons : t -> t
 
   (** Ignore the incoming error code argument when evaluating to a `User_error.t`.
- 
+
       This is equivalent to the following function, given some callback `on_error`:
       `(fun ?code:_ ?quickfixes reasons -> on_error ?quickfixes reasons)`
-   *)
+  *)
   val retain_code : t -> t
 
   (** Ignore the incoming reasons argument when evaluating to a `User_error.t`.
- 
+
       This is equivalent to the following function, given some callback `on_error`:
       `(fun ?code ?quickfixes _ -> on_error ?code ?quickfixes)`
-   *)
+  *)
   val retain_reasons : t -> t
 
   (** Ignore the incoming quickfixes component when evaluating to a `User_error.t`.
- 
+
       This is equivalent to the following function, given some callback `on_error`:
       `(fun ?code ?quickfixes:_ reasons -> on_error ?code reasons)`
-   *)
+  *)
   val retain_quickfixes : t -> t
 
   (** Create a constant `Reasons_callback.t` which always evaluates to the
       supplied `Error.t` when applied
- 
+
       This is equivalent to the following function, for some `error` of type
-     `Error.t`:
+      `Error.t`:
       `(fun ?code:_ ?quickfixes:_ _ -> error)`
- 
+
       This is also the same as:
       `retain_code @@ retain_reasons @@ reatain_quickfixes @@ of_error error`
-   *)
+  *)
   val always : Error.t -> t
 
   (** Applying the `Reasons_callback.t` `(prepend_on_apply err snd_err1) snd_err2`
        is the same as applying `err` the secondary error created by prepending
        `snd_err1` to `snd_err2`.
- 
+
        The `Secondary.t` error created by the prepending operation has the same
        code of `snd_err1` and the reasons from `snd_err1` prepended to those of
        `snd_err2`.
-   *)
+  *)
   val prepend_on_apply : t -> Secondary.t -> t
 
   (* Applying the `Reasons_callback.t` `(assert_in_current_decl code ctx) err`

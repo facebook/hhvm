@@ -34,24 +34,24 @@ val get_tracing_info : env -> Decl_counters.tracing_info option
 (** Functions related to type variable scopes *)
 
 (**
-  Open a new "type variable" scope and record this in the environment.
-  Within this scope, you can
-  - generate fresh type variables, using [fresh_type_X] functions
-  - query the currently fresh type variables, using [get_current_tyvars]
-  - close the scope
+   Open a new "type variable" scope and record this in the environment.
+   Within this scope, you can
+   - generate fresh type variables, using [fresh_type_X] functions
+   - query the currently fresh type variables, using [get_current_tyvars]
+   - close the scope
 
-  The usual usage pattern within type inference is:
+   The usual usage pattern within type inference is:
 
-  1. Open a type variable scope using [open_tyvars] before checking an AST node.
+   1. Open a type variable scope using [open_tyvars] before checking an AST node.
 
-  2. Check the AST node; generate fresh type variables as necessary; make calls
+   2. Check the AST node; generate fresh type variables as necessary; make calls
      to subtyping functions such as [Typing_ops.sub_type] that will record constraints
      on those type variables.
 
-  3. Call [set_tyvar_variance] on the type of the expression to correctly set the
+   3. Call [set_tyvar_variance] on the type of the expression to correctly set the
      variance of the type variables.
 
-  4. Call [Typing_solver.close_tyvars_and_solve] to solve type variables that can
+   4. Call [Typing_solver.close_tyvars_and_solve] to solve type variables that can
      be solved immediately, and close the type variable scope.
 *)
 val open_tyvars : env -> Pos.t -> env
@@ -136,6 +136,8 @@ val get_gconst : env -> gconst_key -> gconst_decl option
 
 (** Get static member declaration of a class from the appropriate backend and add dependency. *)
 val get_static_member : bool -> env -> class_decl -> string -> class_elt option
+
+val most_similar : string -> 'a list -> ('a -> string) -> 'a option
 
 val suggest_static_member :
   bool -> class_decl -> string -> (Pos_or_decl.t * string) option
@@ -439,7 +441,7 @@ val get_global_tyvar_reason : env -> Ident.t -> Reason.t option
 val new_global_tyvar : env -> ?i:int -> Typing_reason.t -> env * locl_ty
 
 (** At the end of typechecking a function body, extract the remaining
-inference env, which should only contain global type variables. *)
+    inference env, which should only contain global type variables. *)
 val extract_global_inference_env : env -> env * Typing_inference_env.t_global
 
 val get_tyvar_eager_solve_fail : env -> Ident.t -> bool

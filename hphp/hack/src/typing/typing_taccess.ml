@@ -65,7 +65,7 @@ and abstract = {
 }
 
 let make_reason env id root r =
-  Reason.Rtypeconst (r, id, Typing_print.error env root, get_reason root)
+  Reason.Rtypeconst (r, id, lazy (Typing_print.error env root), get_reason root)
 
 (* FIXME: It is bogus to use strings here and put them in Tgeneric; one
    possible problem is when a type parameter has a name which conflicts

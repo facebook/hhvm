@@ -80,7 +80,7 @@ impl<R: Reason> Allocator<R> {
                 OR::Rtypeconst((r1, pos_id, sym, r2)) => RI::Rtypeconst(
                     self.reason(r1),
                     self.pos_type_const_from_decl(*pos_id),
-                    self.symbol(sym),
+                    self.symbol(sym.0),
                     self.reason(r2),
                 ),
                 OR::RtypeAccess((r, list)) => RI::RtypeAccess(

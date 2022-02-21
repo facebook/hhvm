@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<47aba7e123308956a2b2f8d62f24b8d1>>
+// @generated SignedSource<<9842152ebf8ca0361b6f40bc3d7ecfa7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -209,7 +209,7 @@ pub enum T_<'a> {
         &'a (
             T_<'a>,
             (&'a pos_or_decl::PosOrDecl<'a>, &'a str),
-            &'a str,
+            &'a lazy::Lazy<&'a str>,
             T_<'a>,
         ),
     ),

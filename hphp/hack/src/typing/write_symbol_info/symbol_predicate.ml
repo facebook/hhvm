@@ -39,14 +39,14 @@ type hack =
   | TypeConstDefinition
   | TypedefDeclaration
   | TypedefDefinition
-[@@deriving eq]
+[@@deriving eq, ord]
 
-type src = FileLines [@@deriving eq]
+type src = FileLines [@@deriving eq, ord]
 
 type t =
   | Hack of hack
   | Src of src
-[@@deriving eq]
+[@@deriving eq, ord]
 
 let hack_to_string = function
   | ClassConstDeclaration -> "ClassConstDeclaration"
@@ -111,3 +111,19 @@ let get_parent_kind clss =
   | Ast_defs.Cinterface -> InterfaceContainer
   | Ast_defs.Ctrait -> TraitContainer
   | Ast_defs.Cclass _ -> ClassContainer
+
+let should_cache = function
+  | Hack ClassConstDeclaration
+  | Hack ClassDeclaration
+  | Hack EnumDeclaration
+  | Hack Enumerator
+  | Hack FunctionDeclaration
+  | Hack GlobalConstDeclaration
+  | Hack InterfaceDeclaration
+  | Hack MethodDeclaration
+  | Hack PropertyDeclaration
+  | Hack TraitDeclaration
+  | Hack TypeConstDeclaration
+  | Hack TypedefDeclaration ->
+    true
+  | _ -> false

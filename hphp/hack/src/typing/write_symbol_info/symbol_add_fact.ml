@@ -49,24 +49,20 @@ type glean_json = {
   typedefDefinition: Hh_json.json list;
 }
 
+module JsonPredicateMap = WrappedMap.Make (struct
+  let compare_json = Hh_json.JsonKey.compare
+
+  type t = json * Predicate.t [@@deriving ord]
+end)
+
 type t = {
   resultJson: glean_json;
-  (* Maps fact JSON key to a list of predicate/fact id pairs *)
-  factIds: (Predicate.t * Fact_id.t) list JMap.t;
+  factIds: Fact_id.t JsonPredicateMap.t;
 }
 
-let rec find_fid fid_list pred =
-  match fid_list with
-  | [] -> None
-  | (p, fid) :: tail ->
-    if Predicate.equal p pred then
-      Some fid
-    else
-      find_fid tail pred
-
-let update_json_data predicate json progress =
+let update_glean_json predicate json factkey_opt progress =
   let open Symbol_predicate in
-  let json =
+  let resultJson =
     match predicate with
     | Hack ClassConstDeclaration ->
       {
@@ -232,69 +228,32 @@ let update_json_data predicate json progress =
         typedefDefinition = json :: progress.resultJson.typedefDefinition;
       }
   in
-  { resultJson = json; factIds = progress.factIds }
-
-let should_cache predicate =
-  let open Symbol_predicate in
-  match predicate with
-  | Hack ClassConstDeclaration
-  | Hack ClassDeclaration
-  | Hack EnumDeclaration
-  | Hack Enumerator
-  | Hack FunctionDeclaration
-  | Hack GlobalConstDeclaration
-  | Hack InterfaceDeclaration
-  | Hack MethodDeclaration
-  | Hack PropertyDeclaration
-  | Hack TraitDeclaration
-  | Hack TypeConstDeclaration
-  | Hack TypedefDeclaration ->
-    true
-  | _ -> false
+  let factIds =
+    match factkey_opt with
+    | None -> progress.factIds
+    | Some (fact_id, json_key) ->
+      JsonPredicateMap.add (json_key, predicate) fact_id progress.factIds
+  in
+  { resultJson; factIds }
 
 (* Add a fact of the given predicate type to the running result, if an identical
  fact has not yet been added. Return the fact's id (which can be referenced in
  other facts), and the updated result. *)
 let add_fact predicate json_key progress =
-  let add_id =
-    let newFactId = Fact_id.next () in
-    let progress =
-      {
-        resultJson = progress.resultJson;
-        factIds =
-          (if should_cache predicate then
-            JMap.add
-              json_key
-              [(predicate, newFactId)]
-              progress.factIds
-              ~combine:List.append
-          else
-            progress.factIds);
-      }
-    in
-    (newFactId, true, progress)
-  in
-  let (id, is_new, progress) =
-    if should_cache predicate then
-      match JMap.find_opt json_key progress.factIds with
-      | None -> add_id
-      | Some fid_list ->
-        (match find_fid fid_list predicate with
-        | None -> add_id
-        | Some fid -> (fid, false, progress))
-    else
-      add_id
-  in
+  let fact_id = Fact_id.next () in
   let json_fact =
-    JSON_Object [("id", Fact_id.to_json_number id); ("key", json_key)]
+    JSON_Object [("id", Fact_id.to_json_number fact_id); ("key", json_key)]
   in
-  let progress =
-    if is_new then
-      update_json_data predicate json_fact progress
-    else
-      progress
-  in
-  (id, progress)
+  match
+    ( Predicate.should_cache predicate,
+      JsonPredicateMap.find_opt (json_key, predicate) progress.factIds )
+  with
+  | (false, _) -> (fact_id, update_glean_json predicate json_fact None progress)
+  | (true, None) ->
+    ( fact_id,
+      update_glean_json predicate json_fact (Some (fact_id, json_key)) progress
+    )
+  | (true, Some fid) -> (fid, progress)
 
 (* Add a namespace fact if the nsenv is non-empty; otherwise,
 return progress unchanged *)
@@ -823,7 +782,7 @@ let method_occ receiver_class name progress =
   add_fact Predicate.(Hack MethodOccurrence) (JSON_Object json) progress
 
 let init_progress =
-  let default_json =
+  let resultJson =
     {
       classConstDeclaration = [];
       classConstDefinition = [];
@@ -859,7 +818,7 @@ let init_progress =
       typedefDefinition = [];
     }
   in
-  { resultJson = default_json; factIds = JMap.empty }
+  { resultJson; factIds = JsonPredicateMap.empty }
 
 let progress_to_json progress =
   let resultJson = progress.resultJson in

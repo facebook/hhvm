@@ -10,7 +10,7 @@ class Foo {
 }
 
 function call_static_prop_lambda_via_var_with_read_globals(Foo $foo)[read_globals] : void {
-  (readonly $foo::$fn)(); // No error
+  ($foo::$fn)(); // No error
 }
 
 function call_static_prop_lambda_via_var(Foo $foo)[] : void {

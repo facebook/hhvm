@@ -7,7 +7,7 @@ class Foo {
 }
 
 function read_static_prop_via_classname_with_read_globals()[read_globals] : void {
-  $x = readonly Foo::$i; // No error
+  $x = Foo::$i; // No error
 }
 
 function read_static_prop_via_classname()[] : void {

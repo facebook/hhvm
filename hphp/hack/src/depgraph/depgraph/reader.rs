@@ -8,7 +8,7 @@ pub use crate::dep::Dep;
 
 use std::ops::Deref;
 
-use im_rc::OrdSet;
+use rpds::HashTrieSet;
 
 /// Use a `DepGraphOpener` to initialize a dependency graph from a file.
 ///
@@ -153,16 +153,16 @@ impl<'bytes> DepGraph<'bytes> {
     }
 
     /// Add the direct typing dependencies for one dependency.
-    pub fn add_typing_deps_for_dep(&self, acc: &mut OrdSet<Dep>, dep: Dep) {
+    pub fn add_typing_deps_for_dep(&self, acc: &mut HashTrieSet<Dep>, dep: Dep) {
         if let Some(dept_hash_list) = self.hash_list_for(dep) {
             for dept in self.hash_list_hashes(dept_hash_list) {
-                acc.insert(dept);
+                acc.insert_mut(dept);
             }
         }
     }
 
     /// Query the direct typing dependencies for the given set of dependencies.
-    pub fn query_typing_deps_multi(&self, deps: &OrdSet<Dep>) -> OrdSet<Dep> {
+    pub fn query_typing_deps_multi(&self, deps: &HashTrieSet<Dep>) -> HashTrieSet<Dep> {
         let mut acc = deps.clone();
         for dep in deps {
             self.add_typing_deps_for_dep(&mut acc, *dep);

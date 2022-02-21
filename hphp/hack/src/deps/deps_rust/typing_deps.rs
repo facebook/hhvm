@@ -6,12 +6,12 @@
 #![cfg_attr(use_unstable_features, feature(test))]
 
 use depgraph::reader::{Dep, DepGraph, DepGraphOpener};
-use im_rc::OrdSet;
 use ocamlrep::{FromError, FromOcamlRep, Value};
 use ocamlrep_custom::{caml_serialize_default_impls, CamlSerialize, Custom};
 use ocamlrep_ocamlpool::ocaml_ffi;
 use once_cell::sync::OnceCell;
 use oxidized::typing_deps_mode::TypingDepsMode;
+use rpds::HashTrieSet;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::ffi::OsString;
@@ -442,18 +442,18 @@ unsafe extern "C" fn hash2_ocaml(
 /// Rust set of dependencies that can be transferred from
 /// OCaml to Rust memory.
 #[derive(Debug, Eq, PartialEq)]
-pub struct DepSet(OrdSet<Dep>);
+pub struct DepSet(HashTrieSet<Dep>);
 
 impl std::ops::Deref for DepSet {
-    type Target = OrdSet<Dep>;
+    type Target = HashTrieSet<Dep>;
 
-    fn deref(&self) -> &OrdSet<Dep> {
+    fn deref(&self) -> &HashTrieSet<Dep> {
         &self.0
     }
 }
 
-impl From<OrdSet<Dep>> for DepSet {
-    fn from(x: OrdSet<Dep>) -> Self {
+impl From<HashTrieSet<Dep>> for DepSet {
+    fn from(x: HashTrieSet<Dep>) -> Self {
         Self(x)
     }
 }
@@ -462,7 +462,7 @@ impl CamlSerialize for DepSet {
     caml_serialize_default_impls!();
 
     fn serialize(&self) -> Vec<u8> {
-        let num_elems = self.len();
+        let num_elems = self.size();
         let mut buf = Vec::with_capacity(std::mem::size_of::<u64>() * num_elems);
         for &x in self.iter() {
             let x: u64 = x.into();
@@ -476,14 +476,80 @@ impl CamlSerialize for DepSet {
 
         let num_elems = data.len() / U64_SIZE;
         let max_index = num_elems * U64_SIZE;
-        let mut s: OrdSet<Dep> = OrdSet::new();
+        let mut s: HashTrieSet<Dep> = HashTrieSet::new();
         let mut index = 0;
         while index < max_index {
             let x = u64::from_le_bytes(data[index..index + U64_SIZE].try_into().unwrap());
-            s.insert(Dep::new(x));
+            s.insert_mut(Dep::new(x));
             index += U64_SIZE;
         }
         s.into()
+    }
+}
+
+impl DepSet {
+    /// Returns the union of two sets.
+    ///
+    /// The underlying data structure does not implement union. So let's
+    /// implement it here.
+    pub fn union(&self, other: &Self) -> Self {
+        // `HashTrieSet`'s insert is O(1) on average, O(n) worst-case, so let's
+        // make sure we loop over the smaller set.
+        //
+        // Note that the sizes of the arguments are expected to be
+        // very skewed.
+        let (bigger, smaller) = if self.size() > other.size() {
+            (self, other)
+        } else {
+            (other, self)
+        };
+        let mut bigger = bigger.0.clone();
+        for dep in smaller.iter() {
+            bigger.insert_mut(*dep);
+        }
+        bigger.into()
+    }
+
+    /// Returns the intersection of two sets.
+    ///
+    /// The underlying data structure does not implement intersection. So let's
+    /// implement it here.
+    pub fn intersect(&self, other: &Self) -> Self {
+        // Let's make sure we loop over the smaller set.
+        let (bigger, smaller) = if self.size() > other.size() {
+            (self, other)
+        } else {
+            (other, self)
+        };
+        let mut result = HashTrieSet::new();
+        for dep in smaller.iter() {
+            if bigger.contains(dep) {
+                result.insert_mut(*dep);
+            }
+        }
+        result.into()
+    }
+
+    /// Returns the difference of two sets, i.e. all elements in the first
+    /// set but not in the second set.
+    ///
+    /// The underlying data structure does not implement intersection. So let's
+    /// implement it here.
+    pub fn difference(&self, other: &Self) -> Self {
+        let mut result = self.0.clone();
+        // Let's make sure we loop over the smaller set.
+        if self.size() < other.size() {
+            for dep in self.iter() {
+                if other.contains(dep) {
+                    result.remove_mut(dep);
+                }
+            }
+        } else {
+            for dep in other.iter() {
+                result.remove_mut(dep);
+            }
+        }
+        result.into()
     }
 }
 
@@ -533,17 +599,21 @@ ocaml_ffi! {
     }
 
     fn hh_custom_dep_graph_get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {
-        let mut deps = OrdSet::new();
+        let mut deps = HashTrieSet::new();
         DepGraphDelta::with(|delta| {
             if let Some(delta_deps) = delta.get(dep) {
-                deps.extend(delta_deps.iter().copied());
+                for delta_dep in delta_deps {
+                    deps.insert_mut(*delta_dep)
+                }
             }
         });
         // Safety: we don't call into OCaml again, so mode will remain valid.
         unsafe {
             UnsafeDepGraph::with_default(mode, (), |g| {
                 if let Some(hash_list) = g.hash_list_for(dep) {
-                    deps.extend(g.hash_list_hashes(hash_list));
+                    for hash in g.hash_list_hashes(hash_list) {
+                        deps.insert_mut(hash);
+                    }
                 }
             });
         }
@@ -562,7 +632,9 @@ ocaml_ffi! {
         DepGraphDelta::with(|delta| {
             for dep in query.iter() {
                 if let Some(depies) = delta.get(*dep) {
-                    s.extend(depies.iter().copied());
+                    for depy in depies {
+                        s.insert_mut(*depy);
+                    }
                 }
             }
         });
@@ -713,7 +785,7 @@ unsafe fn get_extend_deps_visit(
     visited: &mut HashSet<Dep>,
     queue: &mut VecDeque<Dep>,
     source_class: Dep,
-    acc: &mut OrdSet<Dep>,
+    acc: &mut HashTrieSet<Dep>,
 ) {
     if !visited.insert(source_class) {
         return;
@@ -724,7 +796,8 @@ unsafe fn get_extend_deps_visit(
     };
     let mut handle_extends_dep = |dep: Dep| {
         if dep.is_class() {
-            if acc.insert(dep).is_none() {
+            if !acc.contains(&dep) {
+                acc.insert_mut(dep);
                 queue.push_back(dep);
             }
         }
@@ -749,50 +822,31 @@ ocaml_ffi! {
     }
 
     fn hh_dep_set_make() -> Custom<DepSet> {
-        Custom::from(OrdSet::new().into())
+        Custom::from(HashTrieSet::new().into())
     }
 
     fn hh_dep_set_singleton(dep: Dep) -> Custom<DepSet> {
-        let mut s = OrdSet::new();
-        s.insert(dep);
+        let mut s = HashTrieSet::new();
+        s.insert_mut(dep);
         Custom::from(s.into())
     }
 
     fn hh_dep_set_add(s: Custom<DepSet>, dep: Dep) -> Custom<DepSet> {
         let mut s = s.clone();
-        s.insert(dep);
+        s.insert_mut(dep);
         Custom::from(s.into())
     }
 
     fn hh_dep_set_union(s1: Custom<DepSet>, s2: Custom<DepSet>) -> Custom<DepSet> {
-        // OrdSet's implementation of union is `O(|rhs| * log |lhs| )`. This is
-        // in contrast to OCaml's `O(|lhs| + |rhs|)`, and poses a problem when
-        // both `|lhs|` and `|rhs|` are large.
-        //
-        // However, it seems that for our purposes, most often either `|s1|` or `|s2|`
-        // is very small.
-        let s1_len = s1.len();
-        let s2_len = s2.len();
-        let (left, right) = if s1_len > s2_len {
-            (s1, s2)
-        } else {
-            (s2, s1)
-        };
-        let left = left.clone();
-        let right = right.clone();
-        Custom::from(left.union(right).into())
+        Custom::from(s1.union(&s2))
     }
 
     fn hh_dep_set_inter(s1: Custom<DepSet>, s2: Custom<DepSet>) -> Custom<DepSet> {
-        let s1 = s1.clone();
-        let s2 = s2.clone();
-        Custom::from(s1.intersection(s2).into())
+        Custom::from(s1.intersect(&s2))
     }
 
     fn hh_dep_set_diff(s1: Custom<DepSet>, s2: Custom<DepSet>) -> Custom<DepSet> {
-        let s1 = s1.clone();
-        let s2 = s2.clone();
-        Custom::from(s1.difference(s2).into())
+        Custom::from(s1.difference(&s2))
     }
 
     fn hh_dep_set_mem(s: Custom<DepSet>, dep: Dep) -> bool {
@@ -804,7 +858,7 @@ ocaml_ffi! {
     }
 
      fn hh_dep_set_cardinal(s: Custom<DepSet>) -> usize {
-         s.len()
+         s.size()
      }
 
      fn hh_dep_set_is_empty(s: Custom<DepSet>) -> bool {
@@ -812,7 +866,7 @@ ocaml_ffi! {
      }
 
      fn hh_dep_set_of_list(xs: Vec<Dep>) -> Custom<DepSet> {
-         Custom::from(OrdSet::from(&xs).into())
+         Custom::from(HashTrieSet::from_iter(xs).into())
      }
 }
 
@@ -884,9 +938,9 @@ mod tests {
 
     #[test]
     fn test_dep_set_serialize() {
-        let mut x: OrdSet<Dep> = OrdSet::new();
-        x.insert(Dep::new(1));
-        x.insert(Dep::new(2));
+        let mut x: HashTrieSet<Dep> = HashTrieSet::new();
+        x.insert_mut(Dep::new(1));
+        x.insert_mut(Dep::new(2));
         let x: DepSet = x.into();
 
         let buf = x.serialize();
@@ -949,5 +1003,32 @@ mod tests {
         let mut v: Vec<_> = x.iter().collect();
         v.sort();
         assert_eq!(v, edges);
+    }
+
+    #[test]
+    fn test_dep_set_union() {
+        let s = |x: &[u64]| DepSet::from(HashTrieSet::from_iter(x.iter().copied().map(Dep::new)));
+
+        assert_eq!(s(&[4, 7]).union(&s(&[1, 4, 3])), s(&[1, 4, 3, 7]));
+        assert_eq!(s(&[1, 4, 3]).union(&s(&[4, 7])), s(&[1, 4, 3, 7]));
+    }
+
+    #[test]
+    fn test_dep_set_inter() {
+        let s = |x: &[u64]| DepSet::from(HashTrieSet::from_iter(x.iter().copied().map(Dep::new)));
+
+        assert_eq!(s(&[4, 7]).intersect(&s(&[1, 4, 3])), s(&[4]));
+        assert_eq!(s(&[1, 4, 3]).intersect(&s(&[4, 7])), s(&[4]));
+    }
+
+    #[test]
+    fn test_dep_set_diff() {
+        let s = |x: &[u64]| DepSet::from(HashTrieSet::from_iter(x.iter().copied().map(Dep::new)));
+
+        assert_eq!(s(&[4, 7]).difference(&s(&[1, 4, 3, 9, 8, 10])), s(&[7]));
+        assert_eq!(
+            s(&[1, 4, 3, 9, 8, 10]).difference(&s(&[4, 11])),
+            s(&[1, 3, 9, 8, 10])
+        );
     }
 }

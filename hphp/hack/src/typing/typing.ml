@@ -4706,7 +4706,11 @@ and function_dynamically_callable env f params_decl_ty ret_locl_ty =
                    [ty; dyn_ty]
                | _ -> dyn_ty
              in
-             Typing_param.make_param_local_ty env (Some ty) param)
+             Typing_param.make_param_local_ty
+               ~dynamic_mode:true
+               env
+               (Some ty)
+               param)
     in
     let params_need_immutable = Typing_coeffects.get_ctx_vars f.f_ctxs in
     let (env, _) =

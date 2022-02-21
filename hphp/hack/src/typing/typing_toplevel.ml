@@ -199,10 +199,8 @@ let fun_def ctx fd :
   let (env, param_tys) =
     List.zip_exn f.f_params params_decl_ty
     |> List.map_env env ~f:(fun env (param, hint) ->
-           Typing_param.make_param_local_ty env hint param)
+           Typing_param.make_param_local_ty ~dynamic_mode:false env hint param)
   in
-  let check_has_hint p t = Typing_param.check_param_has_hint env p t in
-  List.iter2_exn ~f:check_has_hint f.f_params param_tys;
   let params_need_immutable = Typing_coeffects.get_ctx_vars f.f_ctxs in
   let can_read_globals =
     Typing_subtype.is_sub_type
@@ -329,7 +327,11 @@ let method_dynamically_callable env cls m params_decl_ty ret_locl_ty =
                    [ty; dyn_ty]
                | _ -> dyn_ty
              in
-             Typing_param.make_param_local_ty env (Some ty) param)
+             Typing_param.make_param_local_ty
+               ~dynamic_mode:true
+               env
+               (Some ty)
+               param)
     in
     let params_need_immutable = Typing_coeffects.get_ctx_vars m.m_ctxs in
     let (env, _) =
@@ -512,10 +514,8 @@ let method_def ~is_disposable env cls m =
   let (env, param_tys) =
     List.zip_exn m.m_params params_decl_ty
     |> List.map_env env ~f:(fun env (param, hint) ->
-           Typing_param.make_param_local_ty env hint param)
+           Typing_param.make_param_local_ty ~dynamic_mode:false env hint param)
   in
-  let param_fn p t = Typing_param.check_param_has_hint env p t in
-  List.iter2_exn ~f:param_fn m.m_params param_tys;
   Typing_memoize.check_method env m;
   let params_need_immutable = Typing_coeffects.get_ctx_vars m.m_ctxs in
   let can_read_globals =

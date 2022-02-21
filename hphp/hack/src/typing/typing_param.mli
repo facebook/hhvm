@@ -6,10 +6,8 @@
  *
  *)
 
-val check_param_has_hint :
-  Typing_env_types.env -> Nast.fun_param -> Typing_defs.locl_ty -> unit
-
 val make_param_local_ty :
+  dynamic_mode:bool ->
   Typing_env_types.env ->
   Typing_defs.decl_ty option ->
   Nast.fun_param ->

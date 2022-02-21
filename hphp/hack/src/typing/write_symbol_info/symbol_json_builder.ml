@@ -9,6 +9,7 @@
 open Aast
 open Hh_prelude
 module Add_fact = Symbol_add_fact
+module Fact_acc = Symbol_predicate.Fact_acc
 module Util = Symbol_json_util
 module Build = Symbol_build_json
 module Predicate = Symbol_predicate
@@ -391,7 +392,7 @@ let process_decls ctx (files_info : Symbol_file_info.t list) =
   let (source_map, progress) =
     List.fold
       files_info
-      ~init:(SMap.empty, Add_fact.init_progress)
+      ~init:(SMap.empty, Fact_acc.init)
       ~f:(fun (fm, prog) (fp, _, source_text) ->
         let filepath = Relative_path.to_absolute fp in
         match source_text with
@@ -500,13 +501,13 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
 empty fact cache. *)
 let build_decls_json ctx files_info =
   let progress = process_decls ctx files_info in
-  Add_fact.progress_to_json progress
+  Fact_acc.to_json progress
 
 (* This function processes cross-references, starting with an
 empty fact cache. *)
 let build_xrefs_json ctx tasts =
-  let progress = process_xrefs ctx tasts Add_fact.init_progress in
-  Add_fact.progress_to_json progress
+  let progress = process_xrefs ctx tasts Fact_acc.init in
+  Fact_acc.to_json progress
 
 (* This function processes both declarations and cross-references,
 sharing the declaration fact cache between them. *)
@@ -518,4 +519,4 @@ let build_json ctx files_info =
       (List.map files_info ~f:(fun (_, tast, _) -> tast))
       progress
   in
-  Add_fact.progress_to_json progress
+  Fact_acc.to_json progress

@@ -15,7 +15,6 @@ use crate::{
 };
 use bstr::{BString, ByteSlice};
 use core_utils_rust::add_ns;
-use escaper::{escape, escape_bstr, escape_bstr_by, is_lit_printable};
 use ffi::{Maybe, Maybe::*, Pair, Quadruple, Slice, Str, Triple};
 use hackc_unit::HackCUnit;
 use hash::HashSet;
@@ -85,7 +84,7 @@ fn print_unit(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Res
     match ctx.path {
         Some(p) => {
             let abs = p.to_absolute();
-            let p = escape(
+            let p = escaper::escape(
                 abs.to_str()
                     .ok_or_else(|| <io::Error as From<Error>>::from(Error::InvalidUTF8))?,
             );
@@ -145,7 +144,7 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &HackCUnit<'_>) -> Re
             line_end,
             col_end,
             get_fatal_op(fop),
-            escape_bstr(msg.as_bstr()),
+            escaper::escape_bstr(msg.as_bstr()),
         )?;
     }
 
@@ -397,7 +396,7 @@ fn print_ctx_constant(ctx: &Context<'_>, w: &mut dyn Write, c: &HhasCtxConstant<
 
 fn print_property_doc_comment(w: &mut dyn Write, p: &HhasProperty<'_>) -> Result<()> {
     if let Just(s) = p.doc_comment.as_ref() {
-        write_bytes!(w, r#""""{}""""#, escape_bstr(s.as_bstr()))?;
+        write_bytes!(w, r#""""{}""""#, escaper::escape_bstr(s.as_bstr()))?;
         w.write_all(b" ")?;
     }
     Ok(())
@@ -469,7 +468,7 @@ fn print_doc_comment<'arena>(
 ) -> Result<()> {
     if let Just(cmt) = doc_comment {
         ctx.newline(w)?;
-        write_bytes!(w, r#".doc """{}""";"#, escape_bstr(cmt.as_bstr()))?;
+        write_bytes!(w, r#".doc """{}""";"#, escaper::escape_bstr(cmt.as_bstr()))?;
     }
     Ok(())
 }
@@ -715,7 +714,7 @@ fn print_pos_as_prov_tag(
                 r#"p:i:{};s:{}:\"{}\";"#,
                 line,
                 filename.len(),
-                escape(filename)
+                escaper::escape(filename)
             )
         }
         _ => Ok(()),
@@ -723,23 +722,23 @@ fn print_pos_as_prov_tag(
 }
 
 fn print_function_id(w: &mut dyn Write, id: &FunctionId<'_>) -> Result<()> {
-    write_bytes!(w, r#""{}""#, escape_bstr(id.as_bstr()))
+    write_bytes!(w, r#""{}""#, escaper::escape_bstr(id.as_bstr()))
 }
 
 fn print_class_id(w: &mut dyn Write, id: &ClassId<'_>) -> Result<()> {
-    write_bytes!(w, r#""{}""#, escape_bstr(id.as_bstr()))
+    write_bytes!(w, r#""{}""#, escaper::escape_bstr(id.as_bstr()))
 }
 
 fn print_method_id(w: &mut dyn Write, id: &MethodId<'_>) -> Result<()> {
-    write_bytes!(w, r#""{}""#, escape_bstr(id.as_bstr()))
+    write_bytes!(w, r#""{}""#, escaper::escape_bstr(id.as_bstr()))
 }
 
 fn print_const_id(w: &mut dyn Write, id: &ConstId<'_>) -> Result<()> {
-    write_bytes!(w, r#""{}""#, escape_bstr(id.as_bstr()))
+    write_bytes!(w, r#""{}""#, escaper::escape_bstr(id.as_bstr()))
 }
 
 fn print_prop_id(w: &mut dyn Write, id: &PropId<'_>) -> Result<()> {
-    write_bytes!(w, r#""{}""#, escape_bstr(id.as_bstr()))
+    write_bytes!(w, r#""{}""#, escaper::escape_bstr(id.as_bstr()))
 }
 
 fn print_adata_id(w: &mut dyn Write, id: &AdataId<'_>) -> Result<()> {
@@ -793,10 +792,20 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Res
         TypedValue::Uninit => w.write_all(b"uninit"),
         TypedValue::Null => w.write_all(b"N;"),
         TypedValue::String(s) => {
-            write_bytes!(w, r#"s:{}:\"{}\";"#, s.len(), escape_bstr(s.as_bstr()))
+            write_bytes!(
+                w,
+                r#"s:{}:\"{}\";"#,
+                s.len(),
+                escaper::escape_bstr(s.as_bstr())
+            )
         }
         TypedValue::LazyClass(s) => {
-            write_bytes!(w, r#"l:{}:\"{}\";"#, s.len(), escape_bstr(s.as_bstr()))
+            write_bytes!(
+                w,
+                r#"l:{}:\"{}\";"#,
+                s.len(),
+                escaper::escape_bstr(s.as_bstr())
+            )
         }
         TypedValue::Float(f) => write!(w, "d:{};", float::to_string(*f)),
         TypedValue::Int(i) => write!(w, "i:{};", i),
@@ -817,10 +826,16 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Res
 }
 
 fn print_attribute(ctx: &Context<'_>, w: &mut dyn Write, a: &HhasAttribute<'_>) -> Result<()> {
+    let unescaped = a.name.as_bstr();
+    let escaped = if a.name.starts_with(b"__") {
+        Cow::Borrowed(unescaped)
+    } else {
+        escaper::escape_bstr(unescaped)
+    };
     write_bytes!(
         w,
         "\"{}\"(\"\"\"{}:{}:{{",
-        a.name,
+        escaped,
         VEC_PREFIX,
         a.arguments.len()
     )?;
@@ -893,7 +908,7 @@ fn print_body(
             if var.iter().all(is_bareword_char) {
                 w.write_all(var)
             } else {
-                quotes(w, |w| w.write_all(&escape_bstr(var.as_bstr())))
+                quotes(w, |w| w.write_all(&escaper::escape_bstr(var.as_bstr())))
             }
         })?;
         w.write_all(b";")?;
@@ -1265,7 +1280,7 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>) -> Result<()> {
         }
         M::ET(s, op) => {
             w.write_all(b"ET:")?;
-            quotes(w, |w| w.write_all(&escape_bstr(s.as_bstr())))?;
+            quotes(w, |w| w.write_all(&escaper::escape_bstr(s.as_bstr())))?;
             w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
@@ -1809,7 +1824,7 @@ fn print_control_flow(
                     .collect();
                 angle(w, |w| {
                     concat_by(w, " ", rest, |w, Pair(case, target)| {
-                        write_bytes!(w, r#""{}":"#, escape_bstr(case.as_bstr()))?;
+                        write_bytes!(w, r#""{}":"#, escaper::escape_bstr(case.as_bstr()))?;
                         print_label(w, target, dv_labels)
                     })?;
                     w.write_all(b" -:")?;
@@ -1847,7 +1862,7 @@ fn print_lit_const(w: &mut dyn Write, lit: &InstructLitConst<'_>) -> Result<()> 
         LC::Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
         LC::String(s) => {
             w.write_all(b"String ")?;
-            quotes(w, |w| w.write_all(&escape_bstr(s.as_bstr())))
+            quotes(w, |w| w.write_all(&escaper::escape_bstr(s.as_bstr())))
         }
         LC::LazyClass(id) => {
             w.write_all(b"LazyClass ")?;
@@ -1937,7 +1952,7 @@ fn print_collection_type(w: &mut dyn Write, ct: &CollectionType) -> Result<()> {
 
 fn print_shape_fields(w: &mut dyn Write, sf: &[&str]) -> Result<()> {
     concat_by(w, " ", sf, |w, f| {
-        quotes(w, |w| w.write_all(escape(*f).as_bytes()))
+        quotes(w, |w| w.write_all(escaper::escape(*f).as_bytes()))
     })
 }
 
@@ -2286,7 +2301,7 @@ fn print_expr_string(w: &mut dyn Write, s: &[u8]) -> Result<()> {
             b'\\' => Some((&b"\\\\\\\\"[..]).into()),
             b'"' => Some((&b"\\\\\\\""[..]).into()),
             b'$' => Some((&b"\\\\$"[..]).into()),
-            c if is_lit_printable(c) => None,
+            c if escaper::is_lit_printable(c) => None,
             c => {
                 let mut r = vec![];
                 write!(r, "\\\\{:03o}", c).unwrap();
@@ -2295,7 +2310,7 @@ fn print_expr_string(w: &mut dyn Write, s: &[u8]) -> Result<()> {
         }
     }
     wrap_by(w, "\\\"", |w| {
-        w.write_all(&escape_bstr_by(s.as_bstr().into(), escape_char))
+        w.write_all(&escaper::escape_bstr_by(s.as_bstr().into(), escape_char))
     })
 }
 
@@ -2335,18 +2350,18 @@ fn print_expr(
             }
             _ => id.into(),
         };
-        escape(s)
+        escaper::escape(s)
     }
     fn print_expr_id<'a>(w: &mut dyn Write, env: &ExprEnv<'_, '_>, s: &'a str) -> Result<()> {
         w.write_all(adjust_id(env, s).as_bytes())
     }
     fn fmt_class_name<'a>(is_class_constant: bool, id: Cow<'a, str>) -> Cow<'a, str> {
         let cn: Cow<'a, str> = if is_xhp(strip_global_ns(&id)) {
-            escape(strip_global_ns(&mangle(id.into())))
+            escaper::escape(strip_global_ns(&mangle(id.into())))
                 .to_string()
                 .into()
         } else {
-            escape(strip_global_ns(&id)).to_string().into()
+            escaper::escape(strip_global_ns(&id)).to_string().into()
         };
         if is_class_constant {
             format!("\\\\{}", cn).into()
@@ -2411,7 +2426,7 @@ fn print_expr(
     use ast::Expr_ as E_;
     match expr {
         E_::Id(id) => print_expr_id(w, env, id.1.as_ref()),
-        E_::Lvar(lid) => w.write_all(escape(&(lid.1).1).as_bytes()),
+        E_::Lvar(lid) => w.write_all(escaper::escape(&(lid.1).1).as_bytes()),
         E_::Float(f) => {
             if f.contains('E') || f.contains('e') {
                 let s = format!(
@@ -2574,7 +2589,9 @@ fn print_expr(
             }
             w.write_all(b"::")?;
             match &cg.1 {
-                ast::ClassGetExpr::CGstring((_, litstr)) => w.write_all(escape(litstr).as_bytes()),
+                ast::ClassGetExpr::CGstring((_, litstr)) => {
+                    w.write_all(escaper::escape(litstr).as_bytes())
+                }
                 ast::ClassGetExpr::CGexpr(e) => print_expr(ctx, w, env, e),
             }
         }
@@ -2988,9 +3005,9 @@ fn print_hint(w: &mut dyn Write, ns: bool, hint: &ast::Hint) -> Result<()> {
         _ => Error::fail("Error printing hint"),
     })?;
     if ns {
-        w.write_all(escape(h).as_bytes())
+        w.write_all(escaper::escape(h).as_bytes())
     } else {
-        w.write_all(escape(strip_ns(&h)).as_bytes())
+        w.write_all(escaper::escape(strip_ns(&h)).as_bytes())
     }
 }
 
@@ -3086,7 +3103,7 @@ fn print_type_info_(w: &mut dyn Write, is_enum: bool, ti: &HhasTypeInfo<'_>) -> 
         option_or(
             w,
             opt,
-            |w, s: &str| quotes(w, |w| w.write_all(escape(s).as_bytes())),
+            |w, s: &str| quotes(w, |w| w.write_all(escaper::escape(s).as_bytes())),
             "N",
         )
     };
@@ -3106,7 +3123,7 @@ fn print_typedef_info(w: &mut dyn Write, ti: &HhasTypeInfo<'_>) -> Result<()> {
         write_bytes!(
             w,
             r#""{}""#,
-            escape_bstr(
+            escaper::escape_bstr(
                 ti.type_constraint
                     .name
                     .as_ref()

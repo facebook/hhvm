@@ -1,0 +1,6 @@
+File "test_anonymous.php", line 16, characters 7-27:
+A global variable is written. (Typing[4459])
+File "test_anonymous.php", line 17, characters 7-21:
+A global variable is written. (Typing[4459])
+File "test_anonymous.php", line 24, characters 5-16:
+A global variable is written. (Typing[4459])

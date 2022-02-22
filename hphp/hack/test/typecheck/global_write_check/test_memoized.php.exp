@@ -1,0 +1,8 @@
+File "test_memoized.php", line 18, characters 12-21:
+A global variable is passed to (or returned from) a function call. (Typing[4460])
+File "test_memoized.php", line 34, characters 5-25:
+A global variable is written. (Typing[4459])
+File "test_memoized.php", line 40, characters 5-16:
+A global variable is written. (Typing[4459])
+File "test_memoized.php", line 43, characters 5-16:
+A global variable is written. (Typing[4459])

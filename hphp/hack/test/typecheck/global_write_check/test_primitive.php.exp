@@ -1,0 +1,12 @@
+File "test_primitive.php", line 12, characters 5-26:
+A global variable is written. (Typing[4459])
+File "test_primitive.php", line 20, characters 5-29:
+A global variable is written. (Typing[4459])
+File "test_primitive.php", line 30, characters 5-24:
+A global variable is written. (Typing[4459])
+File "test_primitive.php", line 31, characters 5-31:
+A global variable is written. (Typing[4459])
+File "test_primitive.php", line 42, characters 5-38:
+A global variable is written. (Typing[4459])
+File "test_primitive.php", line 43, characters 5-44:
+A global variable is written. (Typing[4459])

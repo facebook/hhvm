@@ -64,6 +64,12 @@ let rec is_expr_global ctx (_, _, te) =
   | As (e, _, _) -> is_expr_global ctx e
   | Upcast (e, _) -> is_expr_global ctx e
   | Pair (_, e1, e2) -> is_expr_global ctx e1 || is_expr_global ctx e2
+  | Call (caller, _, _, _) ->
+    let caller_ty = Tast.get_type caller in
+    let open Typing_defs in
+    (match get_node caller_ty with
+    | Tfun fty when get_ft_is_memoized fty -> true
+    | _ -> false)
   | _ -> false
 
 (* Check if type is a collection. *)
@@ -230,11 +236,7 @@ let visitor =
           if has_global_write_access e && is_expr_global ctx e then
             Errors.global_var_write_error p
         | _ -> ())
-      | Call (caller, _, tpl, _) ->
-        (* Check if the return value has a reference to some memoized object.  *)
-        let caller_pos = Tast.get_position caller in
-        let caller_ty = Tast.get_type caller in
-        let () = check_memoize caller_pos caller_ty env in
+      | Call (_, _, tpl, _) ->
         (* Check if a global variable is used as the parameter. *)
         List.iter tpl ~f:(fun (pk, ((_, pos, _) as expr)) ->
             match pk with

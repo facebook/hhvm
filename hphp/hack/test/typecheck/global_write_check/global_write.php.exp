@@ -30,10 +30,10 @@ File "global_write.php", line 83, characters 7-21:
 A global variable is written. (Typing[4459])
 File "global_write.php", line 87, characters 5-16:
 A global variable is written. (Typing[4459])
-File "global_write.php", line 89, characters 10-26:
-A memoized function is called. (Typing[4461])
-File "global_write.php", line 92, characters 10-17:
-A memoized function is called. (Typing[4461])
+File "global_write.php", line 90, characters 5-16:
+A global variable is written. (Typing[4459])
+File "global_write.php", line 93, characters 5-16:
+A global variable is written. (Typing[4459])
 File "global_write.php", line 99, characters 5-19:
 A global variable is written. (Typing[4459])
 File "global_write.php", line 108, characters 5-16:

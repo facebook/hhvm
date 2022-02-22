@@ -364,7 +364,7 @@ let class_DEPRECATED ctx c =
         te_includes = List.map e.e_includes ~f:hint;
       }
     in
-    let sc_abstract = Ast_defs.is_c_abstract c.c_kind in
+    let sc_abstract = Ast_defs.is_classish_abstract c.c_kind in
     {
       sc_mode = c.c_mode;
       sc_final = c.c_final;

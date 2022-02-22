@@ -228,7 +228,7 @@ let summarize_class class_ ~no_children =
       []
   in
   let modifiers =
-    if Ast_defs.is_c_abstract class_.c_kind then
+    if Ast_defs.is_classish_abstract class_.c_kind then
       Abstract :: modifiers
     else
       modifiers

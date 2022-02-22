@@ -194,6 +194,23 @@ let is_c_normal = function
   | Cinterface ->
     false
 
+let is_c_abstract = function
+  | Cclass c -> is_abstract c
+  | Cinterface
+  | Cenum_class _
+  | Ctrait
+  | Cenum ->
+    false
+
+let is_classish_abstract = function
+  | Cenum_class c
+  | Cclass c ->
+    is_abstract c
+  | Cinterface
+  | Ctrait
+  | Cenum ->
+    false
+
 let is_c_enum = function
   | Cenum -> true
   | Cenum_class _
@@ -223,14 +240,6 @@ let is_c_trait = function
   | Cinterface
   | Cenum_class _
   | Cclass _
-  | Cenum ->
-    false
-
-let is_c_abstract = function
-  | Cclass c -> is_abstract c
-  | Cinterface
-  | Cenum_class _
-  | Ctrait
   | Cenum ->
     false
 

@@ -41,8 +41,8 @@ let trivial_check
       | (Some lhs_cls, Some rhs_cls)
         when let lhs_kind = Cls.kind lhs_cls in
              let rhs_kind = Cls.kind rhs_cls in
-             Ast_defs.(is_c_abstract lhs_kind || is_c_normal lhs_kind)
-             && Ast_defs.(is_c_abstract rhs_kind || is_c_normal rhs_kind)
+             Ast_defs.is_c_class lhs_kind
+             && Ast_defs.is_c_class rhs_kind
              && (not (String.equal lhs_cn rhs_cn))
              && not (Cls.has_ancestor rhs_cls lhs_cn) ->
         never_subtype pos (strip_ns lhs_cn) (strip_ns rhs_cn)

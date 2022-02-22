@@ -119,7 +119,7 @@ let container_defn ctx source_map clss decl_id member_decls prog =
       in
       (Predicate.(Hack TraitDefinition), req_fields, prog)
     | Predicate.ClassContainer ->
-      let is_abstract = Ast_defs.is_c_abstract clss.c_kind in
+      let is_abstract = Ast_defs.is_classish_abstract clss.c_kind in
       let (class_fields, prog) =
         let (impls, prog) =
           parent_decls

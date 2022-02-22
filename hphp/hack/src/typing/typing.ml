@@ -8017,7 +8017,17 @@ and call
       in
       let (env, tel) =
         List.map_env env el ~f:(fun env (pk, elt) ->
-            let (env, te, e_ty) = expr ~expected:expected_arg_ty env elt in
+            let (env, te, e_ty) =
+              match elt with
+              (* Special case for unqualified enum class label: treat as dynamic *)
+              | (_, p, EnumClassLabel (None, s)) ->
+                make_result
+                  env
+                  p
+                  (Aast.EnumClassLabel (None, s))
+                  (MakeType.dynamic (Reason.Rwitness p))
+              | _ -> expr ~expected:expected_arg_ty env elt
+            in
             let env =
               match pk with
               | Ast_defs.Pinout _ ->

@@ -18,13 +18,6 @@ open Aast
 module MakeType = Typing_make_type
 module Reason = Typing_reason
 
-(* Check if a function is memoized. *)
-let check_memoize pos caller_ty =
-  let open Typing_defs in
-  match get_node caller_ty with
-  | Tfun fty when get_ft_is_memoized fty -> Errors.memoized_fun_call_error pos
-  | _ -> ()
-
 (* The context is a list of global variables. *)
 type ctx = { global_vars: string list ref }
 
@@ -113,7 +106,8 @@ let rec has_no_object_ref_ty env (seen : SSet.t) ty =
   | Tdependent (_, upper) ->
     (* check upper bounds *)
     has_no_object_ref_ty env seen upper
-  | Tclass (_, _, tyl) when is_value_collection_ty env ty ->
+  | Tclass ((_, id), _, tyl)
+    when is_value_collection_ty env ty || String.equal id "\\HH\\Awaitable" ->
     List.for_all tyl ~f:(fun l -> has_no_object_ref_ty env seen l)
   | Tgeneric (name, tyargs) ->
     (* Avoid circular generics with a set *)
@@ -174,6 +168,16 @@ let rec has_global_write_access (_, _, te) =
   | _ ->
     false
 
+(* Check if a function is memoized and the type of its return value has a reference to some object. *)
+let check_memoize pos caller_ty env =
+  let open Typing_defs in
+  match get_node caller_ty with
+  | Tfun fty
+    when get_ft_is_memoized fty
+         && not (has_no_object_ref_ty env SSet.empty fty.ft_ret.et_type) ->
+    Errors.memoized_fun_call_error pos
+  | _ -> ()
+
 let visitor =
   object (self)
     inherit [_] Tast_visitor.iter_with_state as super
@@ -227,9 +231,11 @@ let visitor =
             Errors.global_var_write_error p
         | _ -> ())
       | Call (caller, _, tpl, _) ->
+        (* Check if the return value has a reference to some memoized object.  *)
         let caller_pos = Tast.get_position caller in
         let caller_ty = Tast.get_type caller in
-        let () = check_memoize caller_pos caller_ty in
+        let () = check_memoize caller_pos caller_ty env in
+        (* Check if a global variable is used as the parameter. *)
         List.iter tpl ~f:(fun (pk, ((_, pos, _) as expr)) ->
             match pk with
             | Ast_defs.Pinout _ ->

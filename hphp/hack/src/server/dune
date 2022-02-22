@@ -374,6 +374,7 @@
   tast_env
   tast_provider
   typing
+  typing_defs
   utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))

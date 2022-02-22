@@ -10,6 +10,18 @@
 open Hh_prelude
 open Option.Monad_infix
 
+(* Is this expression indexing into a value of type shape?
+ * E.g. $some_shope['foo'] *)
+let is_shape_indexing env (_, _, expr_) =
+  match expr_ with
+  | Aast.Array_get ((recv_ty, _, _), _) ->
+    let ty = Tast_env.fully_expand env recv_ty in
+    let (_, ty_) = Typing_defs_core.deref ty in
+    (match ty_ with
+    | Typing_defs_core.Tshape _ -> true
+    | _ -> false)
+  | _ -> false
+
 (** Return the type of the smallest expression node whose associated span
  * (the Pos.t in its Tast.ExprAnnotation.t) contains the given position.
  * "Smallest" here refers to the size of the node's associated span, in terms of
@@ -77,7 +89,15 @@ let base_visitor line char =
 
     method! on_expr env ((ty, pos, _) as expr) =
       if Pos.inside pos line char then
-        self#merge_opt (Some (pos, env, ty)) (super#on_expr env expr)
+        if is_shape_indexing env expr then
+          (* If we're looking at a shape indexing expression, we don't
+             want to show the type of the literal on hover.
+
+             For example, if we have the code $user['age'] and hover
+             over 'age', we want the hover type to be int, not string. *)
+          Some (pos, env, ty)
+        else
+          self#merge_opt (Some (pos, env, ty)) (super#on_expr env expr)
       else
         super#on_expr env expr
 

@@ -428,6 +428,7 @@ impl<'arena, T: 'arena + Clone> Clone for BumpSliceMut<'arena, T> {
     }
 }
 
+/// A ReprC view of Vec<u8>. The underlying Vec is owned by this object.
 #[repr(C)]
 pub struct Bytes {
     pub data: *mut u8,
@@ -435,7 +436,7 @@ pub struct Bytes {
     pub cap: usize,
 }
 
-impl std::convert::From<Vec<u8>> for Bytes {
+impl From<Vec<u8>> for Bytes {
     fn from(bytes: Vec<u8>) -> Self {
         let mut leaked_bytes = std::mem::ManuallyDrop::new(bytes);
         Self {
@@ -443,6 +444,12 @@ impl std::convert::From<Vec<u8>> for Bytes {
             len: leaked_bytes.len(),
             cap: leaked_bytes.capacity(),
         }
+    }
+}
+
+impl Bytes {
+    pub unsafe fn as_slice(&self) -> &[u8] {
+        std::slice::from_raw_parts(self.data, self.len)
     }
 }
 

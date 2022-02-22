@@ -13,7 +13,6 @@ bumpalo = { version = "3.8", features = ["collections"] }
 emit_expression = { path = "../emit_expression" }
 emit_fatal = { path = "../emit_fatal" }
 env = { path = "../env" }
-escaper = { path = "../../../../utils/escaper" }
 ffi = { path = "../../../../utils/ffi" }
 hhas_attribute = { path = "../../../hhbc/cargo/hhas_attribute" }
 hhbc_id = { path = "../../../hhbc/cargo/hhbc_id" }

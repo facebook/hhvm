@@ -8,11 +8,12 @@ use arena_deserializer::serde::Deserialize;
 use libc::{c_char, c_int};
 use oxidized_by_ref::file_info::NameType;
 use oxidized_by_ref::{direct_decl_parser, shallow_decl_defs::Decl};
+use std::ffi::c_void;
 
-/*
+/**
 Technically, the object layout of the values we are working with
-(produced in C++) is this (c.f. 'rust_ffi_compile.rs' and
-'hh_single_compile.cpp' (for example)):
+(produced in C++) is this:
+
 ```rust
   struct Decls<'decl>(direct_decl_parser::Decls<'decl>);
   struct Bytes(ffi::Bytes);
@@ -23,6 +24,8 @@ Technically, the object layout of the values we are working with
       Bytes(*const Bytes),
   }
 ```
+
+(c.f. 'rust_ffi_compile.rs' and 'hh_single_compile.cpp' (for example)).
 That is, when C++ returns us results, this is formally the layout we
 can expect in Rust.
 
@@ -63,16 +66,22 @@ pub enum ExternalDeclProviderResult<'decl> {
     Bytes(*const ffi::Bytes),
 }
 
+/// Function signature for external provider functions.
+pub type ProviderFunc<'decl> = unsafe extern "C" fn(
+    // Caller provided cookie
+    *const c_void,
+    // A proxy for `HPHP::AutoloadMap::KindOf`
+    c_int,
+    // The symbol
+    *const c_char,
+) -> ExternalDeclProviderResult<'decl>;
+
 #[derive(Debug)]
-pub struct ExternalDeclProvider<'decl>(
-    pub  unsafe extern "C" fn(
-        *const std::ffi::c_void, // Caller provided cookie
-        c_int,                   // A proxy for `HPHP::AutoloadMap::KindOf`
-        *const c_char,           // The symbol
-    ) -> ExternalDeclProviderResult<'decl>, // Possible payload: `*const Decl<'decl>` or, `const* Bytes`
-    pub *const std::ffi::c_void,
-    &'decl bumpalo::Bump,
-);
+pub struct ExternalDeclProvider<'decl> {
+    pub provider: ProviderFunc<'decl>,
+    pub data: *const c_void,
+    pub arena: &'decl bumpalo::Bump,
+}
 
 impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
     fn get_decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'decl>> {
@@ -84,7 +93,8 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
             NameType::Const => 2,   // HPHP::AutoloadMap::KindOf::Constant
         };
         let symbol_ptr = std::ffi::CString::new(symbol).unwrap();
-        match unsafe { self.0(self.1, code, symbol_ptr.as_c_str().as_ptr()) } {
+        let result = unsafe { (self.provider)(self.data, code, symbol_ptr.as_c_str().as_ptr()) };
+        match result {
             ExternalDeclProviderResult::Missing => Err(Error::NotFound),
             ExternalDeclProviderResult::Decls(p) => {
                 let decls: &direct_decl_parser::Decls<'decl> = unsafe { p.as_ref() }.unwrap();
@@ -97,13 +107,14 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
                 }
             }
             ExternalDeclProviderResult::Bytes(p) => {
-                let bytes: &ffi::Bytes = unsafe { p.as_ref() }.unwrap();
-                let arena = self.2;
-                let data = unsafe { std::slice::from_raw_parts(bytes.data, bytes.len) };
+                let data = unsafe {
+                    // turn raw pointer back into &Bytes, then &[u8]
+                    p.as_ref().unwrap().as_slice()
+                };
                 let op = bincode::config::Options::with_native_endian(bincode::options());
                 let mut de = bincode::de::Deserializer::from_slice(data, op);
 
-                let de = arena_deserializer::ArenaDeserializer::new(arena, &mut de);
+                let de = arena_deserializer::ArenaDeserializer::new(self.arena, &mut de);
                 let decls = direct_decl_parser::Decls::deserialize(de)
                     .map_err(|e| format!("failed to deserialize, error: {}", e))
                     .unwrap();
@@ -119,17 +130,3 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
         }
     }
 } //impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl>
-
-impl<'decl> ExternalDeclProvider<'decl> {
-    pub fn new(
-        decl_getter: unsafe extern "C" fn(
-            *const std::ffi::c_void,
-            c_int,
-            *const c_char,
-        ) -> ExternalDeclProviderResult<'decl>,
-        decl_provider: *const std::ffi::c_void,
-        decl_allocator: &'decl bumpalo::Bump,
-    ) -> Self {
-        Self(decl_getter, decl_provider, decl_allocator)
-    }
-}

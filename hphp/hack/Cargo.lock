@@ -518,15 +518,12 @@ dependencies = [
  "facts_rust",
  "ffi",
  "hackc_unit",
- "libc",
- "log",
  "no_pos_hash",
  "ocamlrep",
  "options",
  "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
- "serde_json",
  "stack_limit",
 ]
 
@@ -956,7 +953,6 @@ dependencies = [
  "emit_expression",
  "emit_fatal",
  "env",
- "escaper",
  "ffi",
  "hhas_attribute",
  "hhbc_id",

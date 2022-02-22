@@ -57,8 +57,7 @@ namespace HPHP {
 extern "C" {
   DeclProviderResult hhvm_decl_provider_get_decl(void* provider, int sort, char const* symbol) {
     try {
-      // Unsafe: if `sort` is out of range the result of this cast is
-      // UB.
+      // Unsafe: if `sort` is out of range the result of this cast is UB.
       HPHP::AutoloadMap::KindOf kind {
         static_cast<HPHP::AutoloadMap::KindOf>(sort)
       };

@@ -20,15 +20,12 @@ direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
 facts_rust = { path = "../../facts/cargo/facts_rust" }
 ffi = { path = "../../utils/ffi" }
 hackc_unit = { path = "../hhbc/cargo/hackc_unit" }
-libc = "0.2.98"
-log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
 no_pos_hash = { path = "../../utils/no_pos_hash" }
 ocamlrep = { path = "../../ocamlrep" }
 options = { path = "../compile/cargo/options" }
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 parser_core_types = { path = "../../parser/cargo/core_types" }
-serde_json = { version = "1.0.64", features = ["float_roundtrip", "unbounded_depth"] }
 stack_limit = { path = "../../utils/stack_limit" }
 
 [build-dependencies]

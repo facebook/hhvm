@@ -13,9 +13,8 @@ use arena_deserializer::serde::Deserialize;
 use bincode::Options;
 use compile::EnvFlags;
 use cxx::CxxString;
-use decl_provider::external::{ExternalDeclProvider, ExternalDeclProviderResult};
+use decl_provider::external::{ExternalDeclProvider, ProviderFunc};
 use facts_rust::facts;
-use libc::{c_char, c_int};
 use no_pos_hash::position_insensitive_hash;
 use oxidized::file_info::NameType;
 use oxidized::relative_path::{Prefix, RelativePath};
@@ -262,18 +261,11 @@ fn hackc_compile_from_text_cpp_ffi(
         );
         let mut output = Vec::new();
         let alloc = bumpalo::Bump::new();
+
         let decl_getter_ptr = env.decl_getter as *const ();
         let hhvm_provider_ptr = env.decl_provider as *const ();
-        let c_decl_getter_fn = unsafe {
-            std::mem::transmute::<
-                *const (),
-                extern "C" fn(
-                    *const std::ffi::c_void,
-                    c_int,
-                    *const c_char,
-                ) -> ExternalDeclProviderResult<'static>,
-            >(decl_getter_ptr)
-        };
+        let c_decl_getter_fn =
+            unsafe { std::mem::transmute::<*const (), ProviderFunc<'_>>(decl_getter_ptr) };
         let c_hhvm_provider_ptr =
             unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
 
@@ -285,7 +277,11 @@ fn hackc_compile_from_text_cpp_ffi(
             &mut output,
             text,
             Some(&native_env),
-            &ExternalDeclProvider::new(c_decl_getter_fn, c_hhvm_provider_ptr, &decl_allocator),
+            &ExternalDeclProvider {
+                provider: c_decl_getter_fn,
+                data: c_hhvm_provider_ptr,
+                arena: &decl_allocator,
+            },
         )?;
         Ok(output)
     })
@@ -454,29 +450,23 @@ fn hackc_compile_unit_from_text_cpp_ffi(
         );
         let decl_getter_ptr = env.decl_getter as *const ();
         let hhvm_provider_ptr = env.decl_provider as *const ();
-        let c_decl_getter_fn = unsafe {
-            std::mem::transmute::<
-                *const (),
-                extern "C" fn(
-                    *const std::ffi::c_void,
-                    c_int,
-                    *const c_char,
-                ) -> ExternalDeclProviderResult<'static>,
-            >(decl_getter_ptr)
-        };
+        let c_decl_getter_fn =
+            unsafe { std::mem::transmute::<*const (), ProviderFunc<'_>>(decl_getter_ptr) };
         let c_hhvm_provider_ptr =
             unsafe { std::mem::transmute::<*const (), *const std::ffi::c_void>(hhvm_provider_ptr) };
 
         let decl_allocator = bumpalo::Bump::new();
-        let decl_provider =
-            ExternalDeclProvider::new(c_decl_getter_fn, c_hhvm_provider_ptr, &decl_allocator);
         let compile_result = compile::unit_from_text(
             alloc,
             &compile_env,
             stack_limit,
             text,
             Some(&native_env),
-            &decl_provider,
+            &ExternalDeclProvider {
+                provider: c_decl_getter_fn,
+                data: c_hhvm_provider_ptr,
+                arena: &decl_allocator,
+            },
         );
 
         match compile_result {

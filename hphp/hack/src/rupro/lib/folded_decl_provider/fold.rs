@@ -66,7 +66,7 @@ impl<R: Reason> DeclFolder<R> {
             reason.clone(),
             DeclTy_::DTapply(Box::new((
                 Positioned::new(pos.clone(), self.special_names.classes.cClassname),
-                vec![self.alloc.decl_ty(reason, DeclTy_::DTthis)].into_boxed_slice(),
+                Box::new([self.alloc.decl_ty(reason, DeclTy_::DTthis)]),
             ))),
         );
         let class_const = ClassConst {

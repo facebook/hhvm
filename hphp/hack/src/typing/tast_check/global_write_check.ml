@@ -6,11 +6,19 @@
  *
  * This checker raises an error when:
  * - a global variable is being written (e.g. $a = Foo::$bar; $a->prop = 1;)
- * - or a memoized function is being called.
+ * - or a global variable is passed to (or returned from) a function call.
+ *
+ * Notice that the return value of a memoized function (if it is mutable)
+ * is treated as a global variable as well.
  *
  * By default, this checker is turned off.
- * To turn on this checker, use the argument --enable-global-write-check
- * to specify the prefixes of files to be checked (e.g. "/" for all files).
+ * To turn on this checker:
+ * - use the argument --enable-global-write-check
+ *   to specify the prefixes of files to be checked (e.g. "/" for all files).
+ * - use the argument --enable-global-write-check-function
+ *   to specify a JSON file of functions names to be checked.
+ *   Together with --config enable_type_check_filter_files=true, this option
+ *   checks specified functions within listed files.
  *)
 
 open Hh_prelude
@@ -192,15 +200,22 @@ let visitor =
       ctx.global_vars := ctx_cpy
 
     method! on_stmt_ (env, ctx) s =
-      (match s with
+      match s with
+      | If (_, b1, b2) ->
+        (* Union the contexts from two branches *)
+        let ctx1 = { global_vars = ref !(ctx.global_vars) } in
+        super#on_block (env, ctx1) b1;
+        super#on_block (env, ctx) b2;
+        add_vars_to_ctx ctx !(ctx1.global_vars)
       | Return r ->
         (match r with
         | Some ((_, p, _) as e) ->
           if is_expr_global_and_mutable env ctx e then
             Errors.global_var_in_fun_call_error p
-        | None -> ())
-      | _ -> ());
-      super#on_stmt_ (env, ctx) s
+        | None ->
+          ();
+          super#on_stmt_ (env, ctx) s)
+      | _ -> super#on_stmt_ (env, ctx) s
 
     method! on_expr (env, ctx) ((_, p, e) as te) =
       (match e with

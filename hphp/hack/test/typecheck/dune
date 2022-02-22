@@ -80,6 +80,7 @@ let () =
   let files_php = generate_patterns subdirs "*.php" files_hh in
   let files_tc = generate_patterns subdirs "*.php-only-typecheck" files_php in
   let files_tc = generate_patterns subdirs "*.exp" files_tc in
+  let files_tc = generate_patterns subdirs "*.json" files_tc in
   let files_dc = generate_patterns subdirs "*.decl_exp" files_php in
 
   (* typecheck *)

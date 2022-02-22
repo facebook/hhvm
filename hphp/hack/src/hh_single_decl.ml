@@ -204,6 +204,7 @@ let () =
          (they are used by hh_single_type_check, and we run hh_single_decl over all of
          the typecheck test cases). *)
       ignored_arg "--enable-global-write-check";
+      ignored_arg "--enable-global-write-check-functions";
       ignored_flag "--abstract-static-props";
       ignored_arg "--allowed-decl-fixme-codes";
       ignored_arg "--allowed-fixme-codes-strict";

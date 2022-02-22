@@ -259,15 +259,35 @@ let global_write_check_enabled_on_file tcopt file =
   List.exists enabled_paths ~f:(fun prefix ->
       String_utils.string_starts_with path prefix)
 
+let global_write_check_enabled_on_function tcopt function_name =
+  let enabled_functions =
+    TypecheckerOptions.global_write_check_functions_enabled tcopt
+  in
+  (* Function name starts with '\' or ';' which is not included in JSON *)
+  let function_name =
+    String.sub function_name ~pos:1 ~len:(String.length function_name - 1)
+  in
+  SSet.mem function_name enabled_functions
+
 let handler =
   object
     inherit Tast_visitor.handler_base
 
     method! at_method_ env m =
+      let class_name = Tast_env.get_self_id env in
+      let (_, method_name) = m.m_name in
+      let full_name =
+        match class_name with
+        | Some s -> s ^ "::" ^ method_name
+        | _ -> method_name
+      in
       if
         global_write_check_enabled_on_file
           (Tast_env.get_tcopt env)
           (Tast_env.get_file env)
+        || global_write_check_enabled_on_function
+             (Tast_env.get_tcopt env)
+             full_name
       then
         visitor#on_method_ (env, current_ctx) m
 
@@ -280,10 +300,14 @@ let handler =
         visitor#on_fun_def (env, current_ctx) f
 
     method! at_fun_ env f =
+      let (_, function_name) = f.f_name in
       if
         global_write_check_enabled_on_file
           (Tast_env.get_tcopt env)
           (Tast_env.get_file env)
+        || global_write_check_enabled_on_function
+             (Tast_env.get_tcopt env)
+             function_name
       then
         visitor#on_fun_ (env, current_ctx) f
   end

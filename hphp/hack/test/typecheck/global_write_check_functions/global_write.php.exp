@@ -1,0 +1,6 @@
+File "global_write.php", line 22, characters 5-26:
+A global variable is written. (Typing[4459])
+File "global_write.php", line 47, characters 3-14:
+A global variable is written. (Typing[4459])
+File "global_write.php", line 48, characters 10-11:
+A global variable is passed to (or returned from) a function call. (Typing[4460])

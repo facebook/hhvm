@@ -44,6 +44,10 @@ let visitor ctx =
     <> List.length
          (TypecheckerOptions.global_write_check_enabled
             (Provider_context.get_tcopt ctx))
+    || 0
+       <> SSet.cardinal
+            (TypecheckerOptions.global_write_check_functions_enabled
+               (Provider_context.get_tcopt ctx))
   in
   Tast_visitor.iter_with
     (handlers

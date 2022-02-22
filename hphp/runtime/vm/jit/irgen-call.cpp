@@ -1035,12 +1035,15 @@ void fcallFuncObj(IRGS& env, const FCallArgs& fca) {
   auto const cls = gen(env, LdObjClass, obj);
   auto const func = gen(env, LdObjInvoke, slowExit, cls);
   discard(env);
+  updateStackOffset(env);
   prepareAndCallProfiled(env, func, fca, obj, false, false);
 }
 
 void fcallFuncFunc(IRGS& env, const FCallArgs& fca) {
   auto const func = popC(env);
   assertx(func->isA(TFunc));
+  assertx(!isRefcountedType(KindOfFunc));
+  updateStackOffset(env);
 
   ifElse(
     env,
@@ -1059,13 +1062,14 @@ void fcallFuncFunc(IRGS& env, const FCallArgs& fca) {
 }
 
 void fcallFuncRFunc(IRGS& env, const FCallArgs& fca) {
-  auto const rfunc = popC(env);
+  auto const rfunc = topC(env);
   assertx(rfunc->isA(TRFunc));
 
   auto const func = gen(env, LdFuncFromRFunc, rfunc);
   auto const generics = gen(env, LdGenericsFromRFunc, rfunc);
-
   gen(env, IncRef, generics);
+
+  popDecRef(env, DecRefProfileId::Default);
   push(env, generics);
   updateStackOffset(env);
   prepareAndCallProfiled(env, func, fca.withGenerics(), nullptr, false, false);
@@ -1074,6 +1078,8 @@ void fcallFuncRFunc(IRGS& env, const FCallArgs& fca) {
 void fcallFuncClsMeth(IRGS& env, const FCallArgs& fca) {
   auto const clsMeth = popC(env);
   assertx(clsMeth->isA(TClsMeth));
+  assertx(!isRefcountedType(KindOfClsMeth));
+  updateStackOffset(env);
 
   auto const cls = gen(env, LdClsFromClsMeth, clsMeth);
   auto const func = gen(env, LdFuncFromClsMeth, clsMeth);
@@ -1081,14 +1087,15 @@ void fcallFuncClsMeth(IRGS& env, const FCallArgs& fca) {
 }
 
 void fcallFuncRClsMeth(IRGS& env, const FCallArgs& fca) {
-  auto const rclsMeth = popC(env);
+  auto const rclsMeth = topC(env);
   assertx(rclsMeth->isA(TRClsMeth));
 
   auto const cls = gen(env, LdClsFromRClsMeth, rclsMeth);
   auto const func = gen(env, LdFuncFromRClsMeth, rclsMeth);
   auto const generics = gen(env, LdGenericsFromRClsMeth, rclsMeth);
-
   gen(env, IncRef, generics);
+
+  popDecRef(env, DecRefProfileId::Default);
   push(env, generics);
   updateStackOffset(env);
   prepareAndCallProfiled(env, func, fca.withGenerics(), cls, false, false);

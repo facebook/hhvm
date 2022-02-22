@@ -287,6 +287,20 @@ let parse_options () =
   in
   let memtrace = ref None in
   let enable_global_write_check = ref [] in
+  let enable_global_write_check_functions = ref SSet.empty in
+  let set_enable_global_write_check_functions s =
+    let json_obj = Hh_json.json_of_file s in
+    let add_function f =
+      match f with
+      | Hh_json.JSON_String str ->
+        enable_global_write_check_functions :=
+          SSet.add str !enable_global_write_check_functions
+      | _ -> ()
+    in
+    match json_obj with
+    | Hh_json.JSON_Array lst -> List.iter lst ~f:add_function
+    | _ -> enable_global_write_check_functions := SSet.empty
+  in
   let options =
     [
       ( "--no-print-position",
@@ -728,6 +742,10 @@ let parse_options () =
           (fun s -> enable_global_write_check := String_utils.split ',' s),
         " Run global write checker on any file whose path is prefixed by the argument (use \"\\\" for hh_single_type_check)"
       );
+      ( "--enable-global-write-check-functions",
+        Arg.String set_enable_global_write_check_functions,
+        " Run global write checker on functions listed in the given JSON file"
+      );
     ]
   in
 
@@ -865,6 +883,8 @@ let parse_options () =
         else
           [])
       ~tco_global_write_check_enabled:!enable_global_write_check
+      ~tco_global_write_check_functions_enabled:
+        !enable_global_write_check_functions
       ~tco_use_direct_decl_parser:!use_direct_decl_parser
       ~po_enable_enum_classes:(not !disable_enum_classes)
       ~po_enable_enum_supertyping:!enable_enum_supertyping

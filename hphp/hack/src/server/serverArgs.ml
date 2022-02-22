@@ -29,6 +29,7 @@ type options = {
   ignore_hh_version: bool;
   enable_ifc: string list;
   enable_global_write_check: string list;
+  enable_global_write_check_functions: SSet.t;
   saved_state_ignore_hhconfig: bool;
   json_mode: bool;
   log_inference_constraints: bool;
@@ -79,6 +80,9 @@ module Messages = struct
 
   let enable_global_write_check =
     " run global write checker on any file whose path is prefixed by the argument (format: comma separated list of path prefixes)"
+
+  let enable_global_write_check_functions =
+    " run global write checker on functions listed in the JSON file"
 
   let from = " so we know who's invoking - e.g. nuclide, vim, emacs, vscode"
 
@@ -156,6 +160,7 @@ let parse_options () : options =
   let dump_fanout = ref false in
   let enable_ifc = ref [] in
   let enable_global_write_check = ref [] in
+  let enable_global_write_check_functions = ref SSet.empty in
   let from = ref "" in
   let from_emacs = ref false in
   let from_hhclient = ref false in
@@ -193,6 +198,19 @@ let parse_options () : options =
   let set_enable_global_write_check s =
     enable_global_write_check := String_utils.split ',' s
   in
+  let set_enable_global_write_check_functions s =
+    let json_obj = Hh_json.json_of_file s in
+    let add_function f =
+      match f with
+      | Hh_json.JSON_String str ->
+        enable_global_write_check_functions :=
+          SSet.add str !enable_global_write_check_functions
+      | _ -> ()
+    in
+    match json_obj with
+    | Hh_json.JSON_Array lst -> List.iter lst ~f:add_function
+    | _ -> enable_global_write_check_functions := SSet.empty
+  in
   let set_from s = from := s in
   let options =
     [
@@ -221,6 +239,9 @@ let parse_options () : options =
       ( "--enable-global-write-check",
         Arg.String set_enable_global_write_check,
         Messages.enable_global_write_check );
+      ( "--enable-global-write-check-functions",
+        Arg.String set_enable_global_write_check_functions,
+        Messages.enable_global_write_check_functions );
       ("--from-emacs", Arg.Set from_emacs, Messages.from_emacs);
       ("--from-hhclient", Arg.Set from_hhclient, Messages.from_hhclient);
       ("--from-vim", Arg.Set from_vim, Messages.from_vim);
@@ -335,6 +356,7 @@ let parse_options () : options =
     dump_fanout = !dump_fanout;
     enable_ifc = !enable_ifc;
     enable_global_write_check = !enable_global_write_check;
+    enable_global_write_check_functions = !enable_global_write_check_functions;
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     ignore_hh_version = !ignore_hh;
@@ -370,6 +392,7 @@ let default_options ~root =
     dump_fanout = false;
     enable_ifc = [];
     enable_global_write_check = [];
+    enable_global_write_check_functions = SSet.empty;
     from = "";
     gen_saved_ignore_type_errors = false;
     ignore_hh_version = false;
@@ -419,6 +442,9 @@ let dump_fanout options = options.dump_fanout
 let enable_ifc options = options.enable_ifc
 
 let enable_global_write_check options = options.enable_global_write_check
+
+let enable_global_write_check_functions options =
+  options.enable_global_write_check_functions
 
 let from options = options.from
 
@@ -499,6 +525,7 @@ let to_string
       dump_fanout;
       enable_ifc;
       enable_global_write_check;
+      enable_global_write_check_functions;
       from;
       gen_saved_ignore_type_errors;
       ignore_hh_version;
@@ -595,6 +622,11 @@ let to_string
   let enable_global_write_check_str =
     Printf.sprintf "[%s]" (String.concat ~sep:"," enable_global_write_check)
   in
+  let enable_global_write_check_functions_str =
+    Printf.sprintf
+      "[%i functions specified in the JSON file]"
+      (SSet.cardinal enable_global_write_check_functions)
+  in
   let custom_telemetry_data_str =
     custom_telemetry_data
     |> List.map ~f:(fun (column, value) -> Printf.sprintf "%s=%s" column value)
@@ -626,6 +658,9 @@ let to_string
     ", ";
     "enable_global_write_check: ";
     enable_global_write_check_str;
+    ", ";
+    "enable_global_write_check_functions: ";
+    enable_global_write_check_functions_str;
     ", ";
     "from: ";
     from;

@@ -447,6 +447,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ~tco_ifc_enabled:(ServerArgs.enable_ifc options)
       ~tco_global_write_check_enabled:
         (ServerArgs.enable_global_write_check options)
+      ~tco_global_write_check_functions_enabled:
+        (ServerArgs.enable_global_write_check_functions options)
       ?po_enable_enum_classes:(bool_opt "enable_enum_classes" config)
       ?po_enable_enum_supertyping:(bool_opt "enable_enum_supertyping" config)
       ?po_interpret_soft_types_as_like_types:

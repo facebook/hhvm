@@ -254,6 +254,9 @@ type t = {
      (a list containing the empty string would denote all files,
      an empty list denotes no files) *)
   tco_global_write_check_enabled: string list;
+  (* Enable global write check on the spcified set of functions
+     (Empty denotes no functions) *)
+  tco_global_write_check_functions_enabled: SSet.t;
   (* Enables the enum supertyping extension *)
   po_enable_enum_supertyping: bool;
   (* <<__Soft>> T -> ~T *)
@@ -407,6 +410,7 @@ val make :
   ?tco_use_direct_decl_parser:bool ->
   ?tco_ifc_enabled:string list ->
   ?tco_global_write_check_enabled:string list ->
+  ?tco_global_write_check_functions_enabled:SSet.t ->
   ?po_enable_enum_supertyping:bool ->
   ?po_interpret_soft_types_as_like_types:bool ->
   ?tco_enable_strict_string_concat_interp:bool ->
@@ -549,6 +553,8 @@ val enable_ifc : t -> t
 val global_write_check_enabled : t -> string list
 
 val enable_global_write_check : t -> t
+
+val global_write_check_functions_enabled : t -> SSet.t
 
 val tco_like_casts : t -> bool
 

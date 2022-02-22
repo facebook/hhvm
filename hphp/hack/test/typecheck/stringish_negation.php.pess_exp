@@ -1,0 +1,16 @@
+File "stringish_negation.php.pess", line 11, characters 8-27:
+Unbound name: `HH\Lib\Dict\flatten` (a global function) (Naming[2049])
+File "stringish_negation.php.pess", line 12, characters 8-28:
+Unbound name: `HH\Lib\Dict\map_keys` (a global function) (Naming[2049])
+File "stringish_negation.php.pess", line 13, characters 13-29:
+Unbound name: `HH\Lib\Dict\flip` (a global function) (Naming[2049])
+File "stringish_negation.php.pess", line 10, characters 10-10:
+Function  `f` is not dynamically callable. (Typing[4402])
+  File "stringish_negation.php.pess", line 11, characters 8-27:
+  Unbound name (typing): `HH\Lib\Dict\flatten`
+File "stringish_negation.php.pess", line 11, characters 8-27:
+Unbound name (typing): `HH\Lib\Dict\flatten` (Typing[4107])
+File "stringish_negation.php.pess", line 12, characters 8-28:
+Unbound name (typing): `HH\Lib\Dict\map_keys` (Typing[4107])
+File "stringish_negation.php.pess", line 13, characters 13-29:
+Unbound name (typing): `HH\Lib\Dict\flip` (Typing[4107])

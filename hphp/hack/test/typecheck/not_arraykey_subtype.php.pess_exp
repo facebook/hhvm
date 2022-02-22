@@ -1,0 +1,8 @@
+File "not_arraykey_subtype.php.pess", line 13, characters 10-24:
+Unbound name: `HH\Lib\Vec\map` (a global function) (Naming[2049])
+File "not_arraykey_subtype.php.pess", line 5, characters 10-12:
+Function  `map` is not dynamically callable. (Typing[4402])
+  File "not_arraykey_subtype.php.pess", line 13, characters 10-24:
+  Unbound name (typing): `HH\Lib\Vec\map`
+File "not_arraykey_subtype.php.pess", line 13, characters 10-24:
+Unbound name (typing): `HH\Lib\Vec\map` (Typing[4107])

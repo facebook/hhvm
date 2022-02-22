@@ -1,9 +1,9 @@
 File "instance_of_refinement.php", line 25, characters 16-17:
 Invalid argument (Typing[4110])
   File "instance_of_refinement.php", line 17, characters 21-23:
-  Expected `int`
-  File "instance_of_refinement.php", line 22, characters 13-20:
-  But got `([unresolved] & arraykey)` from this `is` expression test
+  Expected `(int | not arraykey)`
+  File "instance_of_refinement.php", line 20, characters 14-15:
+  But got `string`
 File "instance_of_refinement.php", line 43, characters 13-14:
 Invalid argument (Typing[4110])
   File "instance_of_refinement.php", line 42, characters 13-16:

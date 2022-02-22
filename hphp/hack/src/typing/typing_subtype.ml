@@ -306,19 +306,31 @@ let is_class_disjoint env c1 c2 =
       (* This is a decl error that should have already been caught *)
       false
 
+(** [negate_ak_null_type env r ty] performs type negation similar to
+  TUtils.negate_type, but restricted to arraykey and null (and their
+  negations). *)
+let negate_ak_null_type env r ty =
+  let (env, ty) = Env.expand_type env ty in
+  let neg_ty =
+    match get_node ty with
+    | Tprim Aast.Tnull -> Some (MakeType.nonnull r)
+    | Tprim Aast.Tarraykey -> Some (MakeType.neg r (Neg_prim Aast.Tarraykey))
+    | Tneg (Neg_prim Aast.Tarraykey) ->
+      Some (MakeType.prim_type r Aast.Tarraykey)
+    | Tnonnull -> Some (MakeType.null r)
+    | _ -> None
+  in
+  (env, neg_ty)
+
 let find_type_with_exact_negation env tyl =
   let rec find env tyl acc_tyl =
     match tyl with
     | [] -> (env, None, acc_tyl)
     | ty :: tyl' ->
-      let (env, non_ty) =
-        TUtils.negate_type env (get_reason ty) ty ~approx:TUtils.ApproxDown
-      in
-      let nothing = MakeType.nothing Reason.none in
-      if ty_equal non_ty nothing || is_neg ty || is_neg non_ty then
-        find env tyl' (ty :: acc_tyl)
-      else
-        (env, Some non_ty, tyl' @ acc_tyl)
+      let (env, neg_ty) = negate_ak_null_type env (get_reason ty) ty in
+      (match neg_ty with
+      | None -> find env tyl' (ty :: acc_tyl)
+      | Some neg_ty -> (env, Some neg_ty, tyl' @ acc_tyl))
   in
   find env tyl []
 
@@ -1209,67 +1221,75 @@ and simplify_subtype_i
         default_subtype env
       | ConstraintType _ -> simplify_sub_union env ty_sub tyl_super
       | LoclType lty_sub ->
-        (match deref lty_sub with
-        | (_, (Tunion _ | Terr | Tvar _)) -> default_subtype env
-        | (_, Tgeneric _) when subtype_env.ignore_generic_params ->
-          default_subtype env
-        (* Num is not atomic: it is equivalent to int|float. The rule below relies
-         * on ty_sub not being a union e.g. consider num <: arraykey | float, so
-         * we break out num first.
-         *)
-        | (r, Tprim Nast.Tnum) ->
-          let ty_float = MakeType.float r and ty_int = MakeType.int r in
-          env
-          |> simplify_subtype ~subtype_env ~this_ty ty_float ty_super
-          &&& simplify_subtype ~subtype_env ~this_ty ty_int ty_super
-        (* Likewise, reduce nullable on left to a union *)
-        | (r, Toption ty) ->
-          let ty_null = MakeType.null r in
-          if_unsat
-            invalid_env
-            (simplify_subtype_i
-               ~subtype_env
-               ~this_ty
-               (LoclType ty_null)
-               ety_super
-               env)
-          &&& simplify_subtype_i ~subtype_env ~this_ty (LoclType ty) ety_super
-        | (_, Tintersection tyl)
-          when let (_, non_ty_opt, _) = find_type_with_exact_negation env tyl in
-               Option.is_some non_ty_opt ->
-          default_subtype env
-        | (_, Tintersection tyl_sub) ->
-          let simplify_super_intersection env tyl_sub ty_super =
-            (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
-             * not complete.
-             *)
-            List.fold_left
-              tyl_sub
-              ~init:(env, TL.invalid ~fail)
-              ~f:(fun res ty_sub ->
-                let ty_sub = LoclType ty_sub in
-                res ||| simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super)
-          in
-          (* Heuristicky logic to decide whether to "break" the intersection
-             or the union first, based on observing that the following cases often occur:
-               - A & B <: (A & B) | C
-                 In which case we want to "break" the union on the right first
-                 in order to have the following recursive calls :
-                     A & B <: A & B
-                     A & B <: C
-               - A & (B | C) <: B | C
-                 In which case we want to "break" the intersection on the left first
-                 in order to have the following recursive calls:
-                     A <: B | C
-                     B | C <: B | C
-          *)
-          if List.exists tyl_super ~f:(Typing_utils.is_tintersection env) then
-            simplify_sub_union env ty_sub tyl_super
-          else if List.exists tyl_sub ~f:(Typing_utils.is_tunion env) then
-            simplify_super_intersection env tyl_sub (LoclType ty_super)
-          else
-            simplify_sub_union env ty_sub tyl_super
-        | _ -> simplify_sub_union env ty_sub tyl_super))
+        (match
+           simplify_subtype_arraykey ~this_ty ~subtype_env env lty_sub tyl_super
+         with
+        | (env, Some props) -> (env, props)
+        | (env, None) ->
+          (match deref lty_sub with
+          | (_, (Tunion _ | Terr | Tvar _)) -> default_subtype env
+          | (_, Tgeneric _) when subtype_env.ignore_generic_params ->
+            default_subtype env
+          (* Num is not atomic: it is equivalent to int|float. The rule below relies
+           * on ty_sub not being a union e.g. consider num <: arraykey | float, so
+           * we break out num first.
+           *)
+          | (r, Tprim Nast.Tnum) ->
+            let ty_float = MakeType.float r and ty_int = MakeType.int r in
+            env
+            |> simplify_subtype ~subtype_env ~this_ty ty_float ty_super
+            &&& simplify_subtype ~subtype_env ~this_ty ty_int ty_super
+          (* Likewise, reduce nullable on left to a union *)
+          | (r, Toption ty) ->
+            let ty_null = MakeType.null r in
+            if_unsat
+              invalid_env
+              (simplify_subtype_i
+                 ~subtype_env
+                 ~this_ty
+                 (LoclType ty_null)
+                 ety_super
+                 env)
+            &&& simplify_subtype_i ~subtype_env ~this_ty (LoclType ty) ety_super
+          | (_, Tintersection tyl)
+            when let (_, non_ty_opt, _) =
+                   find_type_with_exact_negation env tyl
+                 in
+                 Option.is_some non_ty_opt ->
+            default_subtype env
+          | (_, Tintersection tyl_sub) ->
+            let simplify_super_intersection env tyl_sub ty_super =
+              (* It's sound to reduce t1 & t2 <: t to (t1 <: t) || (t2 <: t), but
+               * not complete.
+               *)
+              List.fold_left
+                tyl_sub
+                ~init:(env, TL.invalid ~fail)
+                ~f:(fun res ty_sub ->
+                  let ty_sub = LoclType ty_sub in
+                  res
+                  ||| simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super)
+            in
+            (* Heuristicky logic to decide whether to "break" the intersection
+               or the union first, based on observing that the following cases often occur:
+                 - A & B <: (A & B) | C
+                   In which case we want to "break" the union on the right first
+                   in order to have the following recursive calls :
+                       A & B <: A & B
+                       A & B <: C
+                 - A & (B | C) <: B | C
+                   In which case we want to "break" the intersection on the left first
+                   in order to have the following recursive calls:
+                       A <: B | C
+                       B | C <: B | C
+            *)
+            if List.exists tyl_super ~f:(Typing_utils.is_tintersection env) then
+              simplify_sub_union env ty_sub tyl_super
+            else if List.exists tyl_sub ~f:(Typing_utils.is_tunion env) then
+              simplify_super_intersection env tyl_sub (LoclType ty_super)
+            else
+              simplify_sub_union env ty_sub tyl_super
+          | _ -> simplify_sub_union env ty_sub tyl_super)))
     | (r_super, Toption arg_ty_super) ->
       let (env, ety) = Env.expand_type env arg_ty_super in
       (* Toption(Tnonnull) encodes mixed, which is our top type.
@@ -1931,6 +1951,13 @@ and simplify_subtype_i
             valid env
           else
             invalid_env env
+        | (_, Tclass ((_, cname), ex, _))
+          when String.equal cname SN.Classes.cStringish
+               && equal_exact ex Nonexact
+               && Aast.(
+                    equal_tprim tprim_super Tstring
+                    || equal_tprim tprim_super Tarraykey) ->
+          invalid_env env
         (* All of these are definitely disjoint from primitive types *)
         | (_, (Tfun _ | Ttuple _ | Tshape _ | Tclass _)) -> valid env
         | _ -> default_subtype env))
@@ -3157,6 +3184,45 @@ and add_tyvar_lower_bound_and_close ~coerce (env, prop) var ty on_error =
   in
   (env, prop)
 
+(** [simplify_subtype_arraykey env ty_sub tyl_super] implements a special purpose typing
+  rule for t <: arraykey | tvar by checking t & arraykey <: tvar. It also works for
+  not arraykey | tvar. By only apply if B is a type variable, we to avoid oscillating
+  forever between this rule and the generic one that moves from t1 & arraykey <: t2.
+  to t1 <: t2 | not arraykey. This is similar to our treatment of A <: ?B iff
+  A & nonnull <: B *)
+and simplify_subtype_arraykey ~this_ty ~subtype_env env ty_sub tyl_super =
+  match tyl_super with
+  | [ty_super1; ty_super2] ->
+    let (env, ty_super1) = Env.expand_type env ty_super1 in
+    let (env, ty_super2) = Env.expand_type env ty_super2 in
+    (match (deref ty_super1, deref ty_super2) with
+    | ( ((_, Tvar _) as tvar_ty),
+        ((_, (Tprim Aast.Tarraykey | Tneg (Neg_prim Aast.Tarraykey))) as ak_ty)
+      )
+    | ( ((_, (Tprim Aast.Tarraykey | Tneg (Neg_prim Aast.Tarraykey))) as ak_ty),
+        ((_, Tvar _) as tvar_ty) ) ->
+      let (env, neg_ty) =
+        Inter.negate_type
+          env
+          (get_reason (mk ak_ty))
+          ~approx:Inter.Utils.ApproxDown
+          (mk ak_ty)
+      in
+      let (env, inter_ty) =
+        Inter.intersect env ~r:(get_reason ty_sub) neg_ty ty_sub
+      in
+      let (env, props) =
+        simplify_subtype_i
+          ~this_ty
+          ~subtype_env
+          (LoclType inter_ty)
+          (LoclType (mk tvar_ty))
+          env
+      in
+      (env, Some props)
+    | _ -> (env, None))
+  | _ -> (env, None)
+
 (* Traverse a list of disjuncts and remove obviously redundant ones.
    t1 <: #1 is considered redundant if t2 <: #1 is also a disjunct and
    t2 <: t1. It does not preserve the ordering. *)
@@ -3756,6 +3822,11 @@ let is_type_disjoint env ty1 ty2 =
     | (_, Tneg _) ->
       false
     | (Tprim tp1, Tprim tp2) -> is_tprim_disjoint tp1 tp2
+    | (Tclass ((_, cname), ex, _), Tprim (Aast.Tarraykey | Aast.Tstring))
+    | (Tprim (Aast.Tarraykey | Aast.Tstring), Tclass ((_, cname), ex, _))
+      when String.equal cname SN.Classes.cStringish && equal_exact ex Nonexact
+      ->
+      false
     | (Tprim _, (Tfun _ | Tclass _))
     | ((Tfun _ | Tclass _), Tprim _) ->
       true

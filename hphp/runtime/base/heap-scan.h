@@ -171,11 +171,11 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       return;
     case HeaderKind::RClsMeth: {
       auto const rclsmeth = static_cast<const RClsMethData*>(h);
-      return VanillaVec::scan(rclsmeth->m_arr, scanner);
+      return scanner.scan(rclsmeth->m_arr);
     }
     case HeaderKind::RFunc: {
       auto const rfunc = static_cast<const RFuncData*>(h);
-      return VanillaVec::scan(rfunc->m_arr, scanner);
+      return scanner.scan(rfunc->m_arr);
     }
     case HeaderKind::Cpp:
     case HeaderKind::SmallMalloc:

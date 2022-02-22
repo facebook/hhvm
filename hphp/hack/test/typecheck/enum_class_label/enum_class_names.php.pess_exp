@@ -1,0 +1,36 @@
+File "enum_class_names.php.pess", line 20, characters 21-22:
+Invalid argument (Typing[4110])
+  File "BuiltinEnum.hhi", line 123, characters 89-122:
+  Expected `~HH\EnumClass\Label<[unresolved], [unresolved]>`
+  File "enum_class_names.php.pess", line 19, characters 16-41:
+  But got `HH\EnumClass\Label<E, int>`
+File "enum_class_names.php.pess", line 25, characters 21-22:
+Invalid argument (Typing[4110])
+  File "BuiltinEnum.hhi", line 123, characters 89-122:
+  Expected `~HH\EnumClass\Label<[unresolved], [unresolved]>`
+  File "enum_class_names.php.pess", line 24, characters 16-41:
+  But got `HH\EnumClass\Label<F, int>`
+File "enum_class_names.php.pess", line 30, characters 21-22:
+Invalid argument (Typing[4110])
+  File "BuiltinEnum.hhi", line 123, characters 89-122:
+  Expected `~HH\EnumClass\Label<[unresolved], [unresolved]>`
+  File "enum_class_names.php.pess", line 29, characters 16-41:
+  But got `HH\EnumClass\Label<G, int>`
+File "enum_class_names.php.pess", line 35, characters 13-17:
+Invalid argument (Typing[4110])
+  File "enum_class_names.php.pess", line 19, characters 15-41:
+  Expected `~HH\EnumClass\Label<E, int>`
+  File "enum_class_names.php.pess", line 7, characters 8-11:
+  But got `HH\EnumClass\Label<E, ~int>`
+File "enum_class_names.php.pess", line 37, characters 13-17:
+Invalid argument (Typing[4110])
+  File "enum_class_names.php.pess", line 24, characters 15-41:
+  Expected `~HH\EnumClass\Label<F, int>`
+  File "enum_class_names.php.pess", line 11, characters 8-11:
+  But got `HH\EnumClass\Label<F, ~int>`
+File "enum_class_names.php.pess", line 39, characters 13-17:
+Invalid argument (Typing[4110])
+  File "enum_class_names.php.pess", line 29, characters 15-41:
+  Expected `~HH\EnumClass\Label<G, int>`
+  File "enum_class_names.php.pess", line 15, characters 8-11:
+  But got `HH\EnumClass\Label<G, ~int>`

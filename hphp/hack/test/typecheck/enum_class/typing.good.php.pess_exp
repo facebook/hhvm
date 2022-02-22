@@ -1,0 +1,30 @@
+File "typing.good.php.pess", line 51, characters 19-22:
+Invalid argument (Typing[4110])
+  File "typing.good.php.pess", line 42, characters 27-49:
+  Expected `~HH\MemberOf<E, Box<[unresolved]>>`
+  File "typing.good.php.pess", line 36, characters 17-17:
+  But got `HH\MemberOf<E, ~Box<string>>`
+File "typing.good.php.pess", line 52, characters 16-19:
+Invalid argument (Typing[4110])
+  File "typing.good.php.pess", line 42, characters 27-49:
+  Expected `~HH\MemberOf<E, Box<[unresolved]>>`
+  File "typing.good.php.pess", line 37, characters 10-10:
+  But got `HH\MemberOf<E, ~IBox>`
+File "typing.good.php.pess", line 70, characters 25-28:
+Invalid argument (Typing[4110])
+  File "typing.good.php.pess", line 56, characters 57-83:
+  Expected `~HH\MemberOf<[unresolved], Box<[unresolved]>>`
+  File "typing.good.php.pess", line 36, characters 17-17:
+  But got `HH\MemberOf<E, ~Box<string>>`
+File "typing.good.php.pess", line 71, characters 22-25:
+Invalid argument (Typing[4110])
+  File "typing.good.php.pess", line 56, characters 57-83:
+  Expected `~HH\MemberOf<[unresolved], Box<[unresolved]>>`
+  File "typing.good.php.pess", line 37, characters 10-10:
+  But got `HH\MemberOf<E, ~IBox>`
+File "typing.good.php.pess", line 73, characters 23-26:
+Invalid argument (Typing[4110])
+  File "typing.good.php.pess", line 62, characters 3-27:
+  Expected `~HH\MemberOf<[unresolved], [unresolved]>`
+  File "typing.good.php.pess", line 37, characters 10-10:
+  But got `HH\MemberOf<E, ~IBox>`

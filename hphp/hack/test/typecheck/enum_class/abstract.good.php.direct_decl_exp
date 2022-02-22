@@ -1,0 +1,279 @@
+--- legacy
++++ direct decl
+@@ -1,274 +1,274 @@
+ [("\\I",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+        sc_kind = Cinterface; sc_module = None; sc_name = ([5:11-12], "\\I");
+        sc_tparams = []; sc_where_constraints = []; sc_extends = [];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None }));
+   ("\\C",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cclass Concrete); sc_module = None;
+         sc_name = ([6:7-8], "\\C"); sc_tparams = [];
+         sc_where_constraints = []; sc_extends = []; sc_uses = [];
+         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+         sc_req_implements = [];
+         sc_implements =
+         [(Rhint ([6:20-21]), (Tapply (([6:20-21], "\\I"), [])))];
+         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+         sc_props = []; sc_sprops = []; sc_constructor = None;
+         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+         sc_enum_type = None }));
+   ("\\D",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cclass Concrete); sc_module = None;
+         sc_name = ([7:7-8], "\\D"); sc_tparams = [];
+         sc_where_constraints = []; sc_extends = []; sc_uses = [];
+         sc_xhp_attr_uses = []; sc_xhp_enum_values = {}; sc_req_extends = [];
+         sc_req_implements = [];
+         sc_implements =
+         [(Rhint ([7:20-21]), (Tapply (([7:20-21], "\\I"), [])))];
+         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+         sc_props = []; sc_sprops = []; sc_constructor = None;
+         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+         sc_enum_type = None }));
+   ("\\CC",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cclass Concrete); sc_module = None;
+         sc_name = ([8:7-9], "\\CC"); sc_tparams = [];
+         sc_where_constraints = [];
+         sc_extends = [(Rhint ([8:18-19]), (Tapply (([8:18-19], "\\C"), [])))];
+         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+         sc_props = []; sc_sprops = []; sc_constructor = None;
+         sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+         sc_enum_type = None }));
+   ("\\E",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+-        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
++        sc_abstract = true; sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cenum_class Abstract); sc_module = None;
+         sc_name = ([10:21-22], "\\E"); sc_tparams = [];
+         sc_where_constraints = [];
+         sc_extends =
+         [(Rhint ([10:21-22]),
+           (Tapply (([10:21-22], "\\HH\\BuiltinAbstractEnumClass"), [])))];
+         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+         sc_support_dynamic_type = false;
+         sc_consts =
+         [{ Shallow_decl_defs.scc_abstract = (Typing_defs.CCAbstract false);
+            scc_name = ([11:14-15], "X");
+            scc_type =
+            (Rhint ([11:14-15]),
+             (Tapply (([11:14-15], "\\HH\\MemberOf"),
+                [(Rhint ([11:14-15]), (Tapply (([11:14-15], "\\E"), [])));
+                  (Rhint ([11:12-13]), (Tapply (([11:12-13], "\\C"), [])))]
+                )));
+            scc_refs = [] };
+           { Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+             scc_name = ([12:5-6], "Y");
+             scc_type =
+             (Rhint ([12:5-6]),
+              (Tapply (([12:5-6], "\\HH\\MemberOf"),
+                 [(Rhint ([12:5-6]), (Tapply (([12:5-6], "\\E"), [])));
+                   (Rhint ([12:3-4]), (Tapply (([12:3-4], "\\D"), [])))]
+                 )));
+             scc_refs = [] }
+           ];
+         sc_typeconsts = []; sc_props = []; sc_sprops = [];
+         sc_constructor = None; sc_static_methods = []; sc_methods = [];
+         sc_user_attributes =
+         [{ Typing_defs_core.ua_name = ([10:21-22], "__EnumClass");
+            ua_classname_params = [] }
+           ];
+         sc_enum_type =
+         (Some { Typing_defs.te_base =
+                 (Rhint ([10:25-26]), (Tapply (([10:25-26], "\\I"), [])));
+                 te_constraint = None; te_includes = [] })
+         }));
+   ("\\F",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cenum_class Concrete); sc_module = None;
+         sc_name = ([15:12-13], "\\F"); sc_tparams = [];
+         sc_where_constraints = [];
+         sc_extends =
+         [(Rhint ([15:12-13]),
+           (Tapply (([15:12-13], "\\HH\\BuiltinEnumClass"),
+              [(Rhint ([15:12-13]),
+                (Tapply (([15:12-13], "\\HH\\MemberOf"),
+                   [(Rhint ([15:12-13]), (Tapply (([15:12-13], "\\F"), [])));
+                     (Rhint ([15:16-17]), (Tapply (([15:16-17], "\\I"), [])))]
+                   )))
+                ]
+              )));
+           (Rhint ([15:26-27]), (Tapply (([15:26-27], "\\E"), [])))];
+         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+         sc_support_dynamic_type = false;
+         sc_consts =
+         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+            scc_name = ([16:5-6], "X");
+            scc_type =
+            (Rhint ([16:5-6]),
+             (Tapply (([16:5-6], "\\HH\\MemberOf"),
+                [(Rhint ([16:5-6]), (Tapply (([16:5-6], "\\F"), [])));
+                  (Rhint ([16:3-4]), (Tapply (([16:3-4], "\\C"), [])))]
+                )));
+            scc_refs = [] }
+           ];
+         sc_typeconsts = []; sc_props = []; sc_sprops = [];
+         sc_constructor = None; sc_static_methods = []; sc_methods = [];
+         sc_user_attributes =
+         [{ Typing_defs_core.ua_name = ([15:12-13], "__EnumClass");
+            ua_classname_params = [] }
+           ];
+         sc_enum_type =
+         (Some { Typing_defs.te_base =
+                 (Rhint ([15:16-17]), (Tapply (([15:16-17], "\\I"), [])));
+                 te_constraint = None;
+                 te_includes =
+                 [(Rhint ([15:26-27]), (Tapply (([15:26-27], "\\E"), [])))] })
+         }));
+   ("\\G",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+-        sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
++        sc_abstract = true; sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cenum_class Abstract); sc_module = None;
+         sc_name = ([19:21-22], "\\G"); sc_tparams = [];
+         sc_where_constraints = [];
+         sc_extends =
+         [(Rhint ([19:21-22]),
+           (Tapply (([19:21-22], "\\HH\\BuiltinAbstractEnumClass"), [])));
+           (Rhint ([19:35-36]), (Tapply (([19:35-36], "\\F"), [])))];
+         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+         sc_support_dynamic_type = false;
+         sc_consts =
+         [{ Shallow_decl_defs.scc_abstract = (Typing_defs.CCAbstract false);
+            scc_name = ([20:14-15], "Z");
+            scc_type =
+            (Rhint ([20:14-15]),
+             (Tapply (([20:14-15], "\\HH\\MemberOf"),
+                [(Rhint ([20:14-15]), (Tapply (([20:14-15], "\\G"), [])));
+                  (Rhint ([20:12-13]), (Tapply (([20:12-13], "\\C"), [])))]
+                )));
+            scc_refs = [] }
+           ];
+         sc_typeconsts = []; sc_props = []; sc_sprops = [];
+         sc_constructor = None; sc_static_methods = []; sc_methods = [];
+         sc_user_attributes =
+         [{ Typing_defs_core.ua_name = ([19:21-22], "__EnumClass");
+            ua_classname_params = [] }
+           ];
+         sc_enum_type =
+         (Some { Typing_defs.te_base =
+                 (Rhint ([19:25-26]), (Tapply (([19:25-26], "\\I"), [])));
+                 te_constraint = None;
+                 te_includes =
+                 [(Rhint ([19:35-36]), (Tapply (([19:35-36], "\\F"), [])))] })
+         }));
+   ("\\H0",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cenum_class Concrete); sc_module = None;
+         sc_name = ([23:12-14], "\\H0"); sc_tparams = [];
+         sc_where_constraints = [];
+         sc_extends =
+         [(Rhint ([23:12-14]),
+           (Tapply (([23:12-14], "\\HH\\BuiltinEnumClass"),
+              [(Rhint ([23:12-14]),
+                (Tapply (([23:12-14], "\\HH\\MemberOf"),
+                   [(Rhint ([23:12-14]), (Tapply (([23:12-14], "\\H0"), [])));
+                     (Rhint ([23:17-18]), (Tapply (([23:17-18], "\\I"), [])))]
+                   )))
+                ]
+              )));
+           (Rhint ([23:27-28]), (Tapply (([23:27-28], "\\G"), [])))];
+         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+         sc_support_dynamic_type = false;
+         sc_consts =
+         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+            scc_name = ([24:5-6], "Z");
+            scc_type =
+            (Rhint ([24:5-6]),
+             (Tapply (([24:5-6], "\\HH\\MemberOf"),
+                [(Rhint ([24:5-6]), (Tapply (([24:5-6], "\\H0"), [])));
+                  (Rhint ([24:3-4]), (Tapply (([24:3-4], "\\C"), [])))]
+                )));
+            scc_refs = [] }
+           ];
+         sc_typeconsts = []; sc_props = []; sc_sprops = [];
+         sc_constructor = None; sc_static_methods = []; sc_methods = [];
+         sc_user_attributes =
+         [{ Typing_defs_core.ua_name = ([23:12-14], "__EnumClass");
+            ua_classname_params = [] }
+           ];
+         sc_enum_type =
+         (Some { Typing_defs.te_base =
+                 (Rhint ([23:17-18]), (Tapply (([23:17-18], "\\I"), [])));
+                 te_constraint = None;
+                 te_includes =
+                 [(Rhint ([23:27-28]), (Tapply (([23:27-28], "\\G"), [])))] })
+         }));
+   ("\\H1",
+    (Shallow_decl_defs.Class
+       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+         sc_abstract = false; sc_is_xhp = false; sc_has_xhp_keyword = false;
+         sc_kind = (Cenum_class Concrete); sc_module = None;
+         sc_name = ([27:12-14], "\\H1"); sc_tparams = [];
+         sc_where_constraints = [];
+         sc_extends =
+         [(Rhint ([27:12-14]),
+           (Tapply (([27:12-14], "\\HH\\BuiltinEnumClass"),
+              [(Rhint ([27:12-14]),
+                (Tapply (([27:12-14], "\\HH\\MemberOf"),
+                   [(Rhint ([27:12-14]), (Tapply (([27:12-14], "\\H1"), [])));
+                     (Rhint ([27:17-18]), (Tapply (([27:17-18], "\\I"), [])))]
+                   )))
+                ]
+              )));
+           (Rhint ([27:27-28]), (Tapply (([27:27-28], "\\G"), [])))];
+         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+         sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+         sc_support_dynamic_type = false;
+         sc_consts =
+         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+            scc_name = ([28:6-7], "Z");
+            scc_type =
+            (Rhint ([28:6-7]),
+             (Tapply (([28:6-7], "\\HH\\MemberOf"),
+                [(Rhint ([28:6-7]), (Tapply (([28:6-7], "\\H1"), [])));
+                  (Rhint ([28:3-5]), (Tapply (([28:3-5], "\\CC"), [])))]
+                )));
+            scc_refs = [] }
+           ];
+         sc_typeconsts = []; sc_props = []; sc_sprops = [];
+         sc_constructor = None; sc_static_methods = []; sc_methods = [];
+         sc_user_attributes =
+         [{ Typing_defs_core.ua_name = ([27:12-14], "__EnumClass");
+            ua_classname_params = [] }
+           ];
+         sc_enum_type =
+         (Some { Typing_defs.te_base =
+                 (Rhint ([27:17-18]), (Tapply (([27:17-18], "\\I"), [])));
+                 te_constraint = None;
+                 te_includes =
+                 [(Rhint ([27:27-28]), (Tapply (([27:27-28], "\\G"), [])))] })
+         }))
+   ]

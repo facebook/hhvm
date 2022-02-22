@@ -202,19 +202,18 @@ let visitor =
       ctx.global_vars := ctx_cpy
 
     method! on_stmt_ (env, ctx) s =
-      match s with
+      (match s with
       | Return r ->
         (match r with
         | Some ((_, p, _) as e) ->
           if is_expr_global_and_mutable env ctx e then
             Errors.global_var_in_fun_call_error p
         | None -> ())
-      | _ ->
-        ();
-        super#on_stmt_ (env, ctx) s
+      | _ -> ());
+      super#on_stmt_ (env, ctx) s
 
     method! on_expr (env, ctx) ((_, p, e) as te) =
-      match e with
+      (match e with
       | Binop (Ast_defs.Eq _, le, re) ->
         let () = self#on_expr (env, ctx) re in
         let is_le_global = is_expr_global ctx le in
@@ -250,9 +249,8 @@ let visitor =
         List.iter el ~f:(fun ((_, pos, _) as expr) ->
             if is_expr_global_and_mutable env ctx expr then
               Errors.global_var_in_fun_call_error pos)
-      | _ ->
-        ();
-        super#on_expr (env, ctx) te
+      | _ -> ());
+      super#on_expr (env, ctx) te
   end
 
 let global_write_check_enabled_on_file tcopt file =
@@ -294,15 +292,7 @@ let handler =
         visitor#on_method_ (env, current_ctx) m
 
     method! at_fun_def env f =
-      if
-        global_write_check_enabled_on_file
-          (Tast_env.get_tcopt env)
-          (Tast_env.get_file env)
-      then
-        visitor#on_fun_def (env, current_ctx) f
-
-    method! at_fun_ env f =
-      let (_, function_name) = f.f_name in
+      let (_, function_name) = f.fd_fun.f_name in
       if
         global_write_check_enabled_on_file
           (Tast_env.get_tcopt env)
@@ -311,5 +301,5 @@ let handler =
              (Tast_env.get_tcopt env)
              function_name
       then
-        visitor#on_fun_ (env, current_ctx) f
+        visitor#on_fun_def (env, current_ctx) f
   end

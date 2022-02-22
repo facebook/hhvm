@@ -1,0 +1,24 @@
+final class Vector
+`Vector` is a stack-like collection. HHVM provides a native implementation
+for this class. The PHP class definition below is not actually used at run
+time; it is simply provided for the typechecker and for developer reference.
+
+Like all objects in PHP, `Vector`s have reference-like semantics. When a
+caller passes a `Vector` to a callee, the callee can modify the `Vector` and
+the caller will see the changes. `Vector`s do not have "copy-on-write"
+semantics.
+
+`Vector`s only support integer keys. If a non-integer key is used, an
+exception will be thrown.
+
+`Vector`s support `$m[$k]` style syntax for getting and setting values by
+key. `Vector`s also support `isset($m[$k])` and `empty($m[$k])` syntax, and
+they provide similar semantics as arrays. Elements can be added to a
+`Vector` using `$m[] = ..` syntax.
+
+`Vector`s do not support iterating while new elements are being added or
+elements are being removed. When a new element is added or removed, all
+iterators that point to the `Vector` shall be considered invalid.
+
+@guide /hack/collections/introduction
+@guide /hack/collections/classes

@@ -1,0 +1,33 @@
+final class Map
+`Map` is an ordered dictionary-style collection. HHVM provides a native
+implementation for this class. The PHP class definition below is not
+actually used at run time; it is simply provided for the typechecker and for
+developer reference.
+
+Like all objects in PHP, `Map`s have reference-like semantics. When a caller
+passes a `Map` to a callee, the callee can modify the `Map` and the caller
+will see the changes. `Map`s do not have "copy-on-write" semantics.
+
+`Map`s preserve insertion order of key/value pairs. When iterating over a
+`Map`, the key/value pairs appear in the order they were inserted. Also,
+`Map`s do not automagically convert integer-like `string` keys (ex. `"123"`)
+into integer keys.
+
+`Map`s only support `int` keys and `string` keys. If a key of a different
+type is used, an exception will be thrown.
+
+`Map`s support `$m[$k]` style syntax for getting and setting values by key.
+`Map`s also support `isset($m[$k])` and `empty($m[$k])` syntax, and they
+provide similar semantics as arrays. Adding an element with square bracket
+syntax `[]` is supported either by providing a key between the brackets or
+a `Pair` on the right-hand side. e.g.,
+`$m[$k] = $v` is supported
+`$m[] = Pair {$k, $v}` is supported
+`$m[] = $v` is not supported.
+
+`Map`s do not support iterating while new keys are being added or elements
+are being removed. When a new key is added or an element is removed, all
+iterators that point to the `Map` shall be considered invalid.
+
+@guide /hack/collections/introduction
+@guide /hack/collections/classes

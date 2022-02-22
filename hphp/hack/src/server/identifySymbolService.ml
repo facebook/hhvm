@@ -253,6 +253,12 @@ let visitor =
               (remove_apostrophes_from_function_eval mid)
               ~is_method:true
               ~is_const:false
+        | Aast.ValCollection (kind, _, _) ->
+          let type_name = Aast.show_vc_kind kind in
+          process_class_id (pos, "\\HH\\" ^ type_name)
+        | Aast.KeyValCollection (kind, _, _) ->
+          let type_name = Aast.show_kvc_kind kind in
+          process_class_id (pos, "\\HH\\" ^ type_name)
         | Aast.EnumClassLabel (enum_name, label_name) ->
           begin
             match enum_name with

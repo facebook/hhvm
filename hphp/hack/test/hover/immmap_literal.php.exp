@@ -1,0 +1,24 @@
+final class ImmMap
+`ImmMap` is an immutable `Map`. HHVM provides a native implementation for
+this class. The PHP class definition below is not actually used at run time;
+it is simply provided for the typechecker and for developer reference.
+
+A `ImmMap` cannot be mutated. No elements can be added or removed from it,
+nor can elements be overwritten using assignment (i.e. `$c[$k] = $v` is
+not allowed).
+
+Construct it with a `Traversable`:
+
+```
+$a = dict['a' => 1, 'b' => 2];
+$fm = new ImmMap($a);
+```
+
+or use the literal syntax
+
+```
+$fm = ImmMap {'a' => 1, 'b' => 2};
+```
+
+@guide /hack/collections/introduction
+@guide /hack/collections/classes

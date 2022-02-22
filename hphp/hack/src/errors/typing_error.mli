@@ -1627,8 +1627,8 @@ module Callback : sig
 
   (** Perform an aribrary side-effects when the error is evaluated *)
   val with_side_effect : t -> eff:(unit -> unit) -> t
-  [@@ocaml.deprecated
-    "This function will be removed. Please avoid adding side effects to error callbacks."]
+    [@@ocaml.deprecated
+      "This function will be removed. Please avoid adding side effects to error callbacks."]
 
   (** Provide default code, claim, reasons and quickfixes from the supplied
       `Primary.t` error *)
@@ -1721,12 +1721,12 @@ module Reasons_callback : sig
       migrated *)
   val from_on_error :
     (?code:int ->
-     ?quickfixes:Quickfix.t list ->
-     Pos_or_decl.t Message.t list ->
-     unit) ->
+    ?quickfixes:Quickfix.t list ->
+    Pos_or_decl.t Message.t list ->
+    unit) ->
     t
-  [@@ocaml.deprecated
-    "This function will be removed. Please use the provided combinators for constructing error callbacks."]
+    [@@ocaml.deprecated
+      "This function will be removed. Please use the provided combinators for constructing error callbacks."]
 
   (** A `Reasons_callback.t` which evaluates to an empty list of `User_error.t`
 

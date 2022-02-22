@@ -27,19 +27,19 @@ type context = {
   id: pos_id;  (** The T in the type access C::T *)
   root_pos: Pos_or_decl.t;
   ety_env: expand_env;
-  (** The expand environment as passed in by Typing_phase.localize *)
+      (** The expand environment as passed in by Typing_phase.localize *)
   generics_seen: TySet.t;
-  (** A set of visited types used to avoid infinite loops during expansion. *)
+      (** A set of visited types used to avoid infinite loops during expansion. *)
   allow_abstract: bool;
-  (** Whether or not an abstract type constant is allowed as the result. In the
+      (** Whether or not an abstract type constant is allowed as the result. In the
       future, this boolean should disappear and abstract type constants should
       appear only in the class where they are defined. *)
   abstract_as_tyvar_at_pos: Pos.t option;
-  (** If set, abstract type constants will be expanded as type variables. This
+      (** If set, abstract type constants will be expanded as type variables. This
       is a hack which should naturally go away when the semantics of abstract
       type constants is cleaned up. *)
   base: locl_ty option;
-  (** The origin of the extension. For example if TC is a generic parameter
+      (** The origin of the extension. For example if TC is a generic parameter
       subject to the constraint TC as C and we would like to expand TC::T we
       will expand C::T with base set to `Some (Tgeneric "TC")` (and root set
       to C). If it is None the base is exactly the current root. *)
@@ -98,35 +98,37 @@ let abstract_or_exact env id ({ name; _ } as abstr) =
     the current root is the base (origin) of the expansion, or if it is an
     upper bound of the base. *)
 let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
-  =
+    =
   let { id = (id_pos, id_name) as id; _ } = ctx in
   match Env.get_typeconst env class_ id_name with
   | None ->
-    let typeconst_names = 
-      List.map ~f:(fun tc -> 
-          let (tc_name, _) = tc in tc_name
-        ) (Cls.typeconsts class_)
+    let typeconst_names =
+      List.map
+        ~f:(fun tc ->
+          let (tc_name, _) = tc in
+          tc_name)
+        (Cls.typeconsts class_)
     in
-    let closest_member_name = 
+    let closest_member_name =
       Env.most_similar id_name typeconst_names (fun tc_name -> tc_name)
     in
     ( env,
       Missing
         (fun () ->
-           Errors.add_typing_error
-             Typing_error.(
-               apply_reasons ~on_error:ctx.ety_env.on_error
-               @@ Secondary.Smember_not_found
-                 {
-                   pos = id_pos;
-                   kind = `class_typeconst;
-                   class_name;
-                   class_pos = Cls.pos class_;
-                   member_name = id_name;
-                   closest_member_name = closest_member_name;
-                   hint = None;
-                   quickfixes = [];
-                 })) )
+          Errors.add_typing_error
+            Typing_error.(
+              apply_reasons ~on_error:ctx.ety_env.on_error
+              @@ Secondary.Smember_not_found
+                   {
+                     pos = id_pos;
+                     kind = `class_typeconst;
+                     class_name;
+                     class_pos = Cls.pos class_;
+                     member_name = id_name;
+                     closest_member_name;
+                     hint = None;
+                     quickfixes = [];
+                   })) )
   | Some typeconst ->
     let name = tp_name class_name id in
     let (ety_env, has_cycle) =
@@ -134,75 +136,75 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
     in
     let ctx = { ctx with ety_env } in
     (match has_cycle with
-     | Some initial_taccess_pos_opt ->
-       Option.iter initial_taccess_pos_opt ~f:(fun initial_taccess_pos ->
-           let seen =
-             Typing_defs.Type_expansions.ids ctx.ety_env.type_expansions
-           in
-           Errors.add_typing_error
-             Typing_error.(
-               primary
-               @@ Primary.Cyclic_typeconst
-                 { pos = initial_taccess_pos; tyconst_names = seen }));
+    | Some initial_taccess_pos_opt ->
+      Option.iter initial_taccess_pos_opt ~f:(fun initial_taccess_pos ->
+          let seen =
+            Typing_defs.Type_expansions.ids ctx.ety_env.type_expansions
+          in
+          Errors.add_typing_error
+            Typing_error.(
+              primary
+              @@ Primary.Cyclic_typeconst
+                   { pos = initial_taccess_pos; tyconst_names = seen }));
 
-       (* This is a cycle through a type constant that we are using *)
-       (env, Missing (fun () -> ()))
-     | None ->
-       let drop_exact ty =
-         (* Legacy behavior is to preserve exactness only on `this` and not
-            through `this::T` *)
-         map_ty ty ~f:(function
-             | Tclass (cid, _, tyl) -> Tclass (cid, Nonexact, tyl)
-             | ty -> ty)
-       in
-       let ety_env =
-         {
-           ctx.ety_env with
-           this_ty = drop_exact (Option.value ctx.base ~default:root);
-         }
-       in
-       let abstract_or_exact env ~lower_bounds ~upper_bounds =
-         (if not ctx.allow_abstract then
-            let tc_pos = fst typeconst.ttc_name in
+      (* This is a cycle through a type constant that we are using *)
+      (env, Missing (fun () -> ()))
+    | None ->
+      let drop_exact ty =
+        (* Legacy behavior is to preserve exactness only on `this` and not
+           through `this::T` *)
+        map_ty ty ~f:(function
+            | Tclass (cid, _, tyl) -> Tclass (cid, Nonexact, tyl)
+            | ty -> ty)
+      in
+      let ety_env =
+        {
+          ctx.ety_env with
+          this_ty = drop_exact (Option.value ctx.base ~default:root);
+        }
+      in
+      let abstract_or_exact env ~lower_bounds ~upper_bounds =
+        (if not ctx.allow_abstract then
+          let tc_pos = fst typeconst.ttc_name in
 
-            Errors.add_typing_error
-              Typing_error.(
-                apply_reasons ~on_error:ctx.ety_env.on_error
-                @@ Secondary.Abstract_tconst_not_allowed
-                  { pos = id_pos; decl_pos = tc_pos; tconst_name = id_name }));
-         (* TODO(T59448452): this treatment of abstract type constants is unsound *)
-         abstract_or_exact
-           env
-           id
-           { name = class_name; names = []; lower_bounds; upper_bounds }
-       in
-       let to_tys env = function
-         | Some ty ->
-           let (env, ty) = Phase.localize ~ety_env env ty in
-           (env, TySet.singleton ty)
-         | None -> (env, TySet.empty)
-       in
-       (* Don't report errors in expanded definition or constraint.
-        * These will have been reported at the definition site already. *)
-       let ety_env =
-         { ety_env with on_error = Typing_error.Reasons_callback.ignore_error }
-       in
-       (match typeconst.ttc_kind with
-        (* Concrete type constants *)
-        | TCConcrete { tc_type = ty } ->
+          Errors.add_typing_error
+            Typing_error.(
+              apply_reasons ~on_error:ctx.ety_env.on_error
+              @@ Secondary.Abstract_tconst_not_allowed
+                   { pos = id_pos; decl_pos = tc_pos; tconst_name = id_name }));
+        (* TODO(T59448452): this treatment of abstract type constants is unsound *)
+        abstract_or_exact
+          env
+          id
+          { name = class_name; names = []; lower_bounds; upper_bounds }
+      in
+      let to_tys env = function
+        | Some ty ->
           let (env, ty) = Phase.localize ~ety_env env ty in
-          let ty = map_reason ty ~f:(make_reason env id root) in
-          (env, Exact ty)
-        (* Abstract type constants *)
-        | TCAbstract
-            { atc_as_constraint = upper; atc_super_constraint = lower; _ } ->
-          let (env, lower_bounds) = to_tys env lower in
-          let (env, upper_bounds) = to_tys env upper in
-          (env, abstract_or_exact env ~lower_bounds ~upper_bounds)))
+          (env, TySet.singleton ty)
+        | None -> (env, TySet.empty)
+      in
+      (* Don't report errors in expanded definition or constraint.
+       * These will have been reported at the definition site already. *)
+      let ety_env =
+        { ety_env with on_error = Typing_error.Reasons_callback.ignore_error }
+      in
+      (match typeconst.ttc_kind with
+      (* Concrete type constants *)
+      | TCConcrete { tc_type = ty } ->
+        let (env, ty) = Phase.localize ~ety_env env ty in
+        let ty = map_reason ty ~f:(make_reason env id root) in
+        (env, Exact ty)
+      (* Abstract type constants *)
+      | TCAbstract
+          { atc_as_constraint = upper; atc_super_constraint = lower; _ } ->
+        let (env, lower_bounds) = to_tys env lower in
+        let (env, upper_bounds) = to_tys env upper in
+        (env, abstract_or_exact env ~lower_bounds ~upper_bounds)))
 
 (* Cheap intersection operation. Do not call Typing_intersection.intersect
  * as this calls into subtype which in turn calls into expand_with_env below
-*)
+ *)
 let intersect ty1 ty2 =
   if equal_locl_ty ty1 ty2 then
     ty1
@@ -211,7 +213,7 @@ let intersect ty1 ty2 =
 
 (* Cheap union operation. Do not call Typing_union.union
  * as this calls into subtype which in turn calls into expand_with_env below
-*)
+ *)
 let union ty1 ty2 =
   if equal_locl_ty ty1 ty2 then
     ty1
@@ -222,7 +224,7 @@ let union ty1 ty2 =
  * determine the result of projecting a type constant from type (t1 | ... | tn).
  * If the type constant is missing from any of the disjuncts, then it's treated
  * as missing from the union.
-*)
+ *)
 let rec union_results err rl =
   match rl with
   | [] -> Missing err
@@ -232,17 +234,17 @@ let rec union_results err rl =
 
     (* Union is defined iff both are defined concretely *)
     (match (r1, r2) with
-     | (Missing err, _)
-     | (_, Missing err) ->
-       Missing err
-     (* In essence, this says (C | D)::TP = (C::TP) | (D::TP) *)
-     | (Exact ty1, Exact ty2) -> Exact (union ty1 ty2)
-     (* We don't support projecting through any other kind of union *)
-     | _ -> Missing err)
+    | (Missing err, _)
+    | (_, Missing err) ->
+      Missing err
+    (* In essence, this says (C | D)::TP = (C::TP) | (D::TP) *)
+    | (Exact ty1, Exact ty2) -> Exact (union ty1 ty2)
+    (* We don't support projecting through any other kind of union *)
+    | _ -> Missing err)
 
 (* Given the results of projecting a type constant from types t1, ..., tn,
  * determine the result of projecting a type constant from type (t1 & ... & tn).
-*)
+ *)
 let rec intersect_results err rl =
   match rl with
   (* Essentially, this is `mixed`. *)
@@ -251,26 +253,26 @@ let rec intersect_results err rl =
   | r1 :: rs ->
     let r2 = intersect_results err rs in
     (match (r1, r2) with
-     | (Missing _, r)
-     | (r, Missing _) ->
-       r
-     (* In essence, we're saying (C & D)::TP = (C::TP) & (D::TP) *)
-     | (Exact ty1, Exact ty2) -> Exact (intersect ty1 ty2)
-     (* Here, we merge the bounds on abstract type constants. Effectively this is intersection. *)
-     | ( Abstract { name; names; lower_bounds = lowerl1; upper_bounds = upperl1 },
-         Abstract { lower_bounds = lowerl2; upper_bounds = upperl2; _ } ) ->
-       Abstract
-         {
-           name;
-           names;
-           lower_bounds = TySet.union lowerl1 lowerl2;
-           upper_bounds = TySet.union upperl1 upperl2;
-         }
-     (* Exact type overrides abstract type: the bound on abstract type will be checked
-        * against the exact type at implementation site. *)
-     | (Abstract _, Exact ty)
-     | (Exact ty, Abstract _) ->
-       Exact ty)
+    | (Missing _, r)
+    | (r, Missing _) ->
+      r
+    (* In essence, we're saying (C & D)::TP = (C::TP) & (D::TP) *)
+    | (Exact ty1, Exact ty2) -> Exact (intersect ty1 ty2)
+    (* Here, we merge the bounds on abstract type constants. Effectively this is intersection. *)
+    | ( Abstract { name; names; lower_bounds = lowerl1; upper_bounds = upperl1 },
+        Abstract { lower_bounds = lowerl2; upper_bounds = upperl2; _ } ) ->
+      Abstract
+        {
+          name;
+          names;
+          lower_bounds = TySet.union lowerl1 lowerl2;
+          upper_bounds = TySet.union upperl1 upperl2;
+        }
+    (* Exact type overrides abstract type: the bound on abstract type will be checked
+       * against the exact type at implementation site. *)
+    | (Abstract _, Exact ty)
+    | (Exact ty, Abstract _) ->
+      Exact ty)
 
 let rec type_of_result ~ignore_errors ctx env root res =
   let type_with_bound env as_tyvar name ~lower_bounds ~upper_bounds =
@@ -286,16 +288,16 @@ let rec type_of_result ~ignore_errors ctx env root res =
       let env =
         TySet.fold
           (fun bnd env ->
-             (* TODO(T59317869): play well with flow sensitivity *)
-             Env.add_upper_bound_global env generic_name bnd)
+            (* TODO(T59317869): play well with flow sensitivity *)
+            Env.add_upper_bound_global env generic_name bnd)
           upper_bounds
           env
       in
       let env =
         TySet.fold
           (fun bnd env ->
-             (* TODO(T59317869): play well with flow sensitivity *)
-             Env.add_lower_bound_global env generic_name bnd)
+            (* TODO(T59317869): play well with flow sensitivity *)
+            Env.add_lower_bound_global env generic_name bnd)
           lower_bounds
           env
       in
@@ -414,7 +416,7 @@ let rec expand ctx env root : _ * result =
     (* Terrible hack (compatible with previous behaviour) that first attempts to project off the
      * non-type-variable conjunects. If this doesn't succeed, then try the type variable
      * conjunects, which will cause type-const constraints to be added to the type variables.
-    *)
+     *)
     let (tyl_vars, tyl_nonvars) =
       List.partition_tf tyl ~f:(fun t ->
           let (_env, t) = Env.expand_type env t in
@@ -487,7 +489,7 @@ let expand_with_env
 
 (* This is called with non-nested type accesses e.g. this::T1::T2 is
  * represented by (this, [T1; T2])
-*)
+ *)
 let referenced_typeconsts env ety_env (root, ids) =
   let (env, root) = Phase.localize ~ety_env env root in
   List.fold
@@ -496,34 +498,34 @@ let referenced_typeconsts env ety_env (root, ids) =
     ~f:
       begin
         fun ((env, root), acc) (pos, tconst) ->
-          let (env, tyl) =
-            Typing_utils.get_concrete_supertypes ~abstract_enum:true env root
-          in
-          let acc =
-            List.fold tyl ~init:acc ~f:(fun acc ty ->
-                let (env, ty) = Env.expand_type env ty in
-                match get_node ty with
-                | Tclass ((_, class_name), _, _) ->
-                  let ( >>= ) = Option.( >>= ) in
-                  Option.value
-                    ~default:acc
-                    ( Typing_env.get_class env class_name >>= fun class_ ->
-                      Typing_env.get_typeconst env class_ tconst
-                      >>= fun typeconst ->
-                      Some
-                        ((typeconst.Typing_defs.ttc_origin, tconst, pos) :: acc)
-                    )
-                | _ -> acc)
-          in
-          ( expand_with_env
-              ety_env
-              env
-              ~as_tyvar_with_cnstr:None
-              root
-              (Pos_or_decl.of_raw_pos pos, tconst)
-              ~root_pos:(get_pos root)
-              ~allow_abstract_tconst:true,
-            acc )
+        let (env, tyl) =
+          Typing_utils.get_concrete_supertypes ~abstract_enum:true env root
+        in
+        let acc =
+          List.fold tyl ~init:acc ~f:(fun acc ty ->
+              let (env, ty) = Env.expand_type env ty in
+              match get_node ty with
+              | Tclass ((_, class_name), _, _) ->
+                let ( >>= ) = Option.( >>= ) in
+                Option.value
+                  ~default:acc
+                  ( Typing_env.get_class env class_name >>= fun class_ ->
+                    Typing_env.get_typeconst env class_ tconst
+                    >>= fun typeconst ->
+                    Some
+                      ((typeconst.Typing_defs.ttc_origin, tconst, pos) :: acc)
+                  )
+              | _ -> acc)
+        in
+        ( expand_with_env
+            ety_env
+            env
+            ~as_tyvar_with_cnstr:None
+            root
+            (Pos_or_decl.of_raw_pos pos, tconst)
+            ~root_pos:(get_pos root)
+            ~allow_abstract_tconst:true,
+          acc )
       end
   |> snd
 

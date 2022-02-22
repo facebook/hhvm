@@ -366,7 +366,7 @@ module Primary = struct
       (Error_code.InvalidShapeFieldConst, claim, reason, [])
 
     let shape_field_class_mismatch pos class_name witness_pos witness_class_name
-      =
+        =
       let claim =
         ( pos,
           "Shape field name is class constant from "
@@ -557,9 +557,9 @@ module Primary = struct
         | Some expected_ty_msg ->
           Lazy.force expected_ty_msg
           @ [
-            ( Pos_or_decl.of_raw_pos pos,
-              Format.sprintf "But got an enum class label: `#%s`" label );
-          ]
+              ( Pos_or_decl.of_raw_pos pos,
+                Format.sprintf "But got an enum class label: `#%s`" label );
+            ]
         | None ->
           [
             ( Pos_or_decl.of_raw_pos pos,
@@ -608,7 +608,7 @@ module Primary = struct
         ( pos,
           "`switch` statement nonexhaustive; the following cases are missing: "
           ^ (List.map ~f:Markdown_lite.md_codify missing
-             |> String.concat ~sep:", ") )
+            |> String.concat ~sep:", ") )
       and reason = [(decl_pos, kind ^ " declared here")] in
       (Error_code.EnumSwitchNonexhaustive, claim, reason, [])
 
@@ -1176,7 +1176,7 @@ module Primary = struct
 
     let op_coeffect_error
         pos op_name required available_pos locally_available suggestion err_code
-      =
+        =
       let reasons =
         ( available_pos,
           "The local (enclosing) context provides "
@@ -1264,7 +1264,7 @@ module Primary = struct
       (Error_code.NoreturnUsage, (pos, msg), reason, [])
 
     let returns_with_and_without_value pos with_value_pos without_value_pos_opt
-      =
+        =
       let claim =
         (pos, "This function can exit with and without returning a value")
       and reason =
@@ -1278,7 +1278,7 @@ module Primary = struct
                 "This function does not always return a value" );
             ]
           ~f:(fun p ->
-              [(Pos_or_decl.of_raw_pos p, "Returning without a value here")])
+            [(Pos_or_decl.of_raw_pos p, "Returning without a value here")])
       in
       (Error_code.ReturnsWithAndWithoutValue, claim, reason, [])
 
@@ -1345,8 +1345,8 @@ module Primary = struct
             "Cannot access an internal element from module `%s` %s"
             target_module
             (match current_module_opt with
-             | Some m -> Printf.sprintf "in module `%s`" m
-             | None -> "outside of a module") )
+            | Some m -> Printf.sprintf "in module `%s`" m
+            | None -> "outside of a module") )
       and reason =
         [(decl_pos, Printf.sprintf "This is from module `%s`" target_module)]
       in
@@ -2475,7 +2475,7 @@ module Primary = struct
       [],
       [] )
 
-  let invalid_type_hint pos  =
+  let invalid_type_hint pos =
     (Error_code.InvalidTypeHint, (pos, "Invalid type hint"), [], [])
 
   let unsatisfied_req pos trait_pos req_name req_pos =
@@ -2532,11 +2532,11 @@ module Primary = struct
     let default =
       reason
       @ [
-        ( class_pos,
-          "Declaration of "
-          ^ (Markdown_lite.md_codify @@ Render.strip_ns class_name)
-          ^ " is here" );
-      ]
+          ( class_pos,
+            "Declaration of "
+            ^ (Markdown_lite.md_codify @@ Render.strip_ns class_name)
+            ^ " is here" );
+        ]
     in
     let reasons =
       Option.value_map hint ~default ~f:(function
@@ -2704,8 +2704,8 @@ module Primary = struct
       Printf.sprintf
         "You are trying to access the %s %s but this object can be null."
         (match kind with
-         | `method_ -> "method"
-         | `property -> "property")
+        | `method_ -> "method"
+        | `property -> "property")
         (Markdown_lite.md_codify member_name)
     in
     let error_code =
@@ -3255,9 +3255,9 @@ module Primary = struct
     let b =
       Markdown_lite.md_codify
         (if b then
-           "true"
-         else
-           "false")
+          "true"
+        else
+          "false")
     in
     let msg = sprintf "This expression is always %s" b in
     let left_trail = List.map left_trail ~f:typedef_trail_entry in
@@ -3271,9 +3271,9 @@ module Primary = struct
     let b =
       Markdown_lite.md_codify
         (if result then
-           "true"
-         else
-           "false")
+          "true"
+        else
+          "false")
     in
     let msg = sprintf "This expression is always %s" b in
     (Error_code.NotNullableCompareNullTrivial, (p, msg), type_reason, [])
@@ -3592,7 +3592,7 @@ module Primary = struct
           ^ prev_class
           ^ " as "
           ^ (Render.highlight_differences name name_prev
-             |> Markdown_lite.md_codify)
+            |> Markdown_lite.md_codify)
           ^ ". If you meant to override it, please use the same casing as the inherited "
           ^ member_type
           ^ "."
@@ -3669,9 +3669,9 @@ module Primary = struct
         String.capitalize child_kind_s
         ^ child_name
         ^ (if child_support_dynamic_type then
-             " cannot "
-           else
-             " must ")
+            " cannot "
+          else
+            " must ")
         ^ "declare <<__SupportDynamicType>> because it "
         ^ kinds_to_use child_kind parent_kind
         ^ parent_kind_s
@@ -3686,7 +3686,7 @@ module Primary = struct
       [] )
 
   let property_is_not_enforceable pos prop_name class_name (prop_pos, prop_type)
-    =
+      =
     let class_name = Markdown_lite.md_codify (Render.strip_ns class_name) in
     let prop_name = Markdown_lite.md_codify prop_name in
     let prop_type = Markdown_lite.md_codify prop_type in
@@ -4225,9 +4225,9 @@ module Primary = struct
     ( code,
       (pos1, "This is not an object of type `KeyedContainer`, this is " ^ ty),
       (if not Pos_or_decl.(equal pos2 none) then
-         [(pos2, "Definition is here")]
-       else
-         []),
+        [(pos2, "Definition is here")]
+      else
+        []),
       [] )
 
   let array_access_read = array_access Error_code.ArrayAccessRead
@@ -4238,27 +4238,27 @@ module Primary = struct
     ( Error_code.KeysetSet,
       (pos1, "Elements in a keyset cannot be assigned, use append instead."),
       (if not Pos_or_decl.(equal pos2 none) then
-         [(pos2, "Definition is here")]
-       else
-         []),
+        [(pos2, "Definition is here")]
+      else
+        []),
       [] )
 
   let array_append pos1 pos2 ty =
     ( Error_code.ArrayAppend,
       (pos1, ty ^ " does not allow array append"),
       (if not Pos_or_decl.(equal pos2 none) then
-         [(pos2, "Definition is here")]
-       else
-         []),
+        [(pos2, "Definition is here")]
+      else
+        []),
       [] )
 
   let const_mutation pos1 pos2 ty =
     ( Error_code.ConstMutation,
       (pos1, "You cannot mutate this"),
       (if not Pos_or_decl.(equal pos2 none) then
-         [(pos2, "This is " ^ ty)]
-       else
-         []),
+        [(pos2, "This is " ^ ty)]
+      else
+        []),
       [] )
 
   let expected_class pos suffix =
@@ -4340,7 +4340,7 @@ module Primary = struct
       [] )
 
   let sealed_not_subtype parent_pos parent_name child_name child_kind child_pos
-    =
+      =
     let parent_name = Render.strip_ns parent_name
     and child_name = Render.strip_ns child_name
     and (child_kind, verb) =
@@ -4485,7 +4485,7 @@ module Primary = struct
       [] )
 
   let invalid_reified_argument_reifiable arg_pos def_name def_pos ty_pos ty_msg
-    =
+      =
     ( Error_code.InvalidReifiedArgument,
       (arg_pos, "PHP arrays cannot be used as a reified type argument"),
       [
@@ -5421,22 +5421,22 @@ end = struct
         aux err ~k:(fun t ->
             k
             @@ Eval_result.bind t ~f:(fun (code, claim, reasons, quickfixes) ->
-                Eval_result.of_option
-                @@ Callback.apply cb ~code ~claim ~reasons ~quickfixes))
+                   Eval_result.of_option
+                   @@ Callback.apply cb ~code ~claim ~reasons ~quickfixes))
       | Apply_reasons (cb, snd_err) ->
         k
         @@ Eval_result.bind ~f:(fun (code, reasons, quickfixes) ->
-            Reasons_callback.apply_help
-              cb
-              ~code
-              ~reasons
-              ~quickfixes
-              ~current_span)
+               Reasons_callback.apply_help
+                 cb
+                 ~code
+                 ~reasons
+                 ~quickfixes
+                 ~current_span)
         @@ Secondary.eval snd_err ~current_span
       | Assert_in_current_decl (snd_err, ctx) ->
         k
         @@ Eval_result.bind ~f:(fun e ->
-            Eval_result.of_option @@ Common.eval_assert ctx current_span e)
+               Eval_result.of_option @@ Common.eval_assert ctx current_span e)
         @@ Secondary.eval snd_err ~current_span
     and auxs ~k = function
       | [] -> k []
@@ -5753,7 +5753,7 @@ and Secondary : sig
     t ->
     current_span:Pos.t ->
     (Error_code.t * Pos_or_decl.t Message.t list * Quickfix.t list)
-      Eval_result.t
+    Eval_result.t
 end = struct
   type t =
     | Of_error of Error.t
@@ -6347,7 +6347,7 @@ end = struct
     (Error_code.OverrideLSB, reasons, [])
 
   let multiple_concrete_defs pos origin name parent_pos parent_origin class_name
-    =
+      =
     let child_origin = Markdown_lite.md_codify @@ Render.strip_ns origin
     and parent_origin = Markdown_lite.md_codify @@ Render.strip_ns parent_origin
     and class_ = Markdown_lite.md_codify @@ Render.strip_ns class_name
@@ -6501,18 +6501,26 @@ end = struct
       [] )
 
   let smember_not_found
-      pos kind member_name closest_member_name class_name class_pos hint quickfixes =
+      pos
+      kind
+      member_name
+      closest_member_name
+      class_name
+      class_pos
+      hint
+      quickfixes =
     let (code, claim, reasons) =
       Common.smember_not_found pos kind member_name class_name class_pos hint
     in
     let quickfixes =
       match closest_member_name with
       | None -> quickfixes
-      | Some type_name -> 
-        (Quickfix.make 
-           ~title: ("Change type to " ^ Markdown_lite.md_codify(type_name)) 
-           ~new_text:type_name
-           (Pos_or_decl.unsafe_to_raw_pos pos)) :: quickfixes
+      | Some type_name ->
+        Quickfix.make
+          ~title:("Change type to " ^ Markdown_lite.md_codify type_name)
+          ~new_text:type_name
+          (Pos_or_decl.unsafe_to_raw_pos pos)
+        :: quickfixes
     in
     (code, claim :: reasons, quickfixes)
 
@@ -6727,7 +6735,16 @@ end = struct
     | Rigid_tvar_escape { pos; name } ->
       Eval_result.single (rigid_tvar_escape pos name)
     | Smember_not_found
-        { pos; kind; member_name; closest_member_name; class_name; class_pos; hint; quickfixes } ->
+        {
+          pos;
+          kind;
+          member_name;
+          closest_member_name;
+          class_name;
+          class_pos;
+          hint;
+          quickfixes;
+        } ->
       Eval_result.single
         (smember_not_found
            pos
@@ -6773,8 +6790,8 @@ and Callback : sig
   val always : Primary.t -> t
 
   val with_side_effect : t -> eff:(unit -> unit) -> t
-  [@@ocaml.deprecated
-    "This function will be removed. Please avoid adding side effects to error callbacks."]
+    [@@ocaml.deprecated
+      "This function will be removed. Please avoid adding side effects to error callbacks."]
 
   val of_primary_error : Primary.t -> t
 
@@ -6873,7 +6890,7 @@ end = struct
         Option.value_map
           ~default:st.reasons
           ~f:(fun claim ->
-              Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos claim :: st.reasons)
+            Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos claim :: st.reasons)
           st.claim_opt
       in
       let claim_opt =
@@ -6975,8 +6992,8 @@ and Reasons_callback : sig
     t -> on_prim:(Primary.t -> unit) -> on_snd:(Secondary.t -> unit) -> unit
 
   val from_on_error : on_error -> t
-  [@@ocaml.deprecated
-    "This function will be removed. Please use the provided combinators for constructing error callbacks."]
+    [@@ocaml.deprecated
+      "This function will be removed. Please use the provided combinators for constructing error callbacks."]
 
   val ignore_error : t
 
@@ -7169,13 +7186,13 @@ end = struct
       Eval_result.map
         (Secondary.eval snd_err ~current_span)
         ~f:(fun (code, reasons, quickfixes) ->
-            {
-              code_opt = Some code;
-              claim_opt;
-              reasons_opt = Some (reasons @ Option.value ~default:[] reasons_opt);
-              quickfixes_opt =
-                Some (quickfixes @ Option.value ~default:[] quickfixes_opt);
-            })
+          {
+            code_opt = Some code;
+            claim_opt;
+            reasons_opt = Some (reasons @ Option.value ~default:[] reasons_opt);
+            quickfixes_opt =
+              Some (quickfixes @ Option.value ~default:[] quickfixes_opt);
+          })
 
     (** Replace any missing values in the error state with those of the error *)
     let with_defaults
@@ -7243,7 +7260,7 @@ end = struct
           ~f:(aux t)
           (Error_state.prepend_secondary st snd_err ~current_span)
     and aux_reason_op op err base_reason (Error_state.{ reasons_opt; _ } as st)
-      =
+        =
       let reasons_opt =
         match op with
         | Append ->
@@ -7305,12 +7322,12 @@ end = struct
     @@ Primary.Bad_enum_decl pos
 
   let bad_conditional_support_dynamic pos ~child ~parent ~ty_name ~self_ty_name
-    =
+      =
     retain_code
     @@ retain_quickfixes
     @@ of_primary_error
     @@ Primary.Bad_conditional_support_dynamic
-      { pos; child; parent; ty_name; self_ty_name }
+         { pos; child; parent; ty_name; self_ty_name }
 
   let bad_decl_override pos ~name ~parent_pos ~parent_name =
     append_incoming_reasons
@@ -7355,12 +7372,12 @@ end = struct
   let index_type_mismatch_at pos =
     of_primary_error
     @@ Primary.Index_type_mismatch
-      {
-        pos;
-        msg_opt = None;
-        reasons_opt = None;
-        is_covariant_container = false;
-      }
+         {
+           pos;
+           msg_opt = None;
+           reasons_opt = None;
+           is_covariant_container = false;
+         }
 
   let unify_error_assert_primary_pos_in_current_decl ctx =
     assert_in_current_decl Error_code.UnifyError ~ctx

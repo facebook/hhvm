@@ -1360,6 +1360,13 @@ let rec make_a_local_of ~include_this env e =
   | (_, _, Hole (e, _, _, _)) -> make_a_local_of ~include_this env e
   | _ -> (env, None)
 
+let strip_supportdyn ty =
+  (* Currently we don't check for support dynamic at runtime, so we
+   * must simply treat supportdyn<t> as t when refining *)
+  match get_node ty with
+  | Tnewtype (name, [ty], _) when String.equal name SN.Classes.cSupportDyn -> ty
+  | _ -> ty
+
 (* This function captures the common bits of logic behind refinement
  * of the type of a local variable or a class member variable as a
  * result of a dynamic check (e.g., nullity check, simple type check
@@ -1653,6 +1660,7 @@ let refine_for_is ~hint_first env tparamet ivar reason hint =
     let (env, hint_ty) =
       Phase.localize_hint_no_subst env ~ignore_errors:false hint
     in
+    let hint_ty = strip_supportdyn hint_ty in
     let (env, hint_ty) =
       if not tparamet then
         Inter.negate_type env reason hint_ty ~approx:TUtils.ApproxUp
@@ -4417,6 +4425,7 @@ and expr_
     let (env, hint_ty) =
       Phase.localize_hint_no_subst env ~ignore_errors:false hint
     in
+    let hint_ty = strip_supportdyn hint_ty in
     let enable_sound_dynamic =
       TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
     in

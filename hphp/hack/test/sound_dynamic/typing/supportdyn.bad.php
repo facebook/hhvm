@@ -1,5 +1,8 @@
 <?hh
 
+class C {
+  const type T = supportdyn<nonnull>;
+}
 function expr(supportdyn<nonnull> $sd): void {
   $sd[0];
   $sd[] = 0;
@@ -33,4 +36,15 @@ function test1(supportdyn<mixed> $sd):void {
 function voidfun():void { }
 function void_to_supportdynamic():supportdynamic {
   return voidfun();
+}
+
+function ignore_supportdyn(mixed $m):supportdyn<nonnull> {
+  return $m as C::T;
+}
+
+function expectSupportDynNonNull(supportdyn<nonnull> $_):bool {
+  return false;
+}
+function ignore_supportdyn_2(mixed $m):bool {
+  return $m is C::T && expectSupportDynNonNull($m);
 }

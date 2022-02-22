@@ -660,7 +660,6 @@ module Typing = struct
     | ExactClassFinal [@value 4458]
     | GlobalVariableWrite [@value 4459]
     | GlobalVariableInFunctionCall [@value 4460]
-    | MemoizedFunctionCall [@value 4461]
     | DiamondTraitProperty [@value 4462]
     | ConstructNotInstanceMethod [@value 4463]
     | InvalidMethCallerReadonlyReturn [@value 4464]

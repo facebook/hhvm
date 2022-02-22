@@ -174,16 +174,6 @@ let rec has_global_write_access (_, _, te) =
   | _ ->
     false
 
-(* Check if a function is memoized and the type of its return value has a reference to some object. *)
-let check_memoize pos caller_ty env =
-  let open Typing_defs in
-  match get_node caller_ty with
-  | Tfun fty
-    when get_ft_is_memoized fty
-         && not (has_no_object_ref_ty env SSet.empty fty.ft_ret.et_type) ->
-    Errors.memoized_fun_call_error pos
-  | _ -> ()
-
 let visitor =
   object (self)
     inherit [_] Tast_visitor.iter_with_state as super

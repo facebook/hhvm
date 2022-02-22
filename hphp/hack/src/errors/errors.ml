@@ -1059,12 +1059,6 @@ let global_var_in_fun_call_error pos =
     pos
     "A global variable is passed to (or returned from) a function call."
 
-let memoized_fun_call_error pos =
-  add
-    (Typing.err_code Typing.MemoizedFunctionCall)
-    pos
-    "A memoized function is called."
-
 (*****************************************************************************)
 (* Printing *)
 (*****************************************************************************)

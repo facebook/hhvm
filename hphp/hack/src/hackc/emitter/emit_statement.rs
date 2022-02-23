@@ -136,25 +136,22 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
                             if has_elements {
                                 scope::with_unnamed_local(e, |e, temp| {
                                     let alloc = e.alloc;
+                                    let (init, assign) = emit_expr::emit_lval_op_list(
+                                        e,
+                                        env,
+                                        pos,
+                                        Some(&temp),
+                                        &[],
+                                        e_lhs,
+                                        false,
+                                        is_readonly_expr(e_rhs),
+                                    )?;
                                     Ok((
                                         InstrSeq::gather(
                                             alloc,
                                             vec![awaited_instrs, instr::popl(alloc, temp)],
                                         ),
-                                        (
-                                            alloc,
-                                            emit_expr::emit_lval_op_list(
-                                                e,
-                                                env,
-                                                pos,
-                                                Some(&temp),
-                                                &[],
-                                                e_lhs,
-                                                false,
-                                                is_readonly_expr(e_rhs),
-                                            )?,
-                                        )
-                                            .into(),
+                                        InstrSeq::gather(alloc, vec![init, assign]),
                                         instr::unsetl(alloc, temp),
                                     ))
                                 })
@@ -1421,22 +1418,19 @@ fn emit_foreach_await_lvalue_storage<'a, 'arena, 'decl>(
     keep_on_stack: bool,
 ) -> Result<InstrSeq<'arena>> {
     scope::with_unnamed_local(e, |e, local| {
+        let (init, assign) = emit_expr::emit_lval_op_list(
+            e,
+            env,
+            &lvalue.1,
+            Some(&local),
+            indices,
+            lvalue,
+            false,
+            false,
+        )?;
         Ok((
             instr::popl(e.alloc, local),
-            (
-                e.alloc,
-                emit_expr::emit_lval_op_list(
-                    e,
-                    env,
-                    &lvalue.1,
-                    Some(&local),
-                    indices,
-                    lvalue,
-                    false,
-                    false,
-                )?,
-            )
-                .into(),
+            InstrSeq::gather(e.alloc, vec![init, assign]),
             if keep_on_stack {
                 instr::pushl(e.alloc, local)
             } else {

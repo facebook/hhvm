@@ -4689,10 +4689,12 @@ fn emit_class_get<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
+    let (cexpr_seq1, cexpr_seq2) = emit_class_expr(e, env, cexpr, prop)?;
     Ok(InstrSeq::gather(
         alloc,
         vec![
-            InstrSeq::from((alloc, emit_class_expr(e, env, cexpr, prop)?)),
+            cexpr_seq1,
+            cexpr_seq2,
             match query_op {
                 QueryMOp::CGet => instr::cgets(alloc, readonly_op),
                 QueryMOp::Isset => instr::issets(alloc),
@@ -6327,17 +6329,17 @@ fn emit_array_get_fixed<'arena>(
     InstrSeq::gather(alloc, vec![base, indices])
 }
 
-// Generate code for each lvalue assignment in a list destructuring expression.
-// Lvalues are assigned right-to-left, regardless of the nesting structure. So
-//      list($a, list($b, $c)) = $d
-//  and list(list($a, $b), $c) = $d
-//  will both assign to $c, $b and $a in that order.
-//  Returns a pair of instructions:
-//  1. initialization part of the left hand side
-//  2. assignment
-//  this is necessary to handle cases like:
-//  list($a[$f()]) = b();
-//  here f() should be invoked before b()
+/// Generate code for each lvalue assignment in a list destructuring expression.
+/// Lvalues are assigned right-to-left, regardless of the nesting structure. So
+///      list($a, list($b, $c)) = $d
+///  and list(list($a, $b), $c) = $d
+///  will both assign to $c, $b and $a in that order.
+///  Returns a pair of instructions:
+///  1. initialization part of the left hand side
+///  2. assignment
+///  this is necessary to handle cases like:
+///  list($a[$f()]) = b();
+///  here f() should be invoked before b()
 pub fn emit_lval_op_list<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
@@ -6747,8 +6749,9 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                 let cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
                 let final_instr_ = emit_final_static_op(alloc, cid, prop, op)?;
                 let final_instr = emit_pos_then(alloc, pos, final_instr_);
+                let (cexpr_seq1, cexpr_seq2) = emit_class_expr(e, env, cexpr, prop)?;
                 (
-                    InstrSeq::from((alloc, emit_class_expr(e, env, cexpr, prop)?)),
+                    InstrSeq::gather(alloc, vec![cexpr_seq1, cexpr_seq2]),
                     rhs_instrs,
                     final_instr,
                 )

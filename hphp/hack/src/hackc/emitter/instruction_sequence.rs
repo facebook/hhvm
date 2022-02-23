@@ -53,12 +53,8 @@ pub enum InstrSeq<'a> {
 // references referring to the same resource). It is possible to implement
 // deep copy functionality though: see `InstrSeq::clone()` below.
 
-impl<'a> std::convert::From<(&'a bumpalo::Bump, (InstrSeq<'a>, InstrSeq<'a>))> for InstrSeq<'a> {
-    fn from((alloc, (i1, i2)): (&'a bumpalo::Bump, (InstrSeq<'a>, InstrSeq<'a>))) -> InstrSeq<'a> {
-        InstrSeq::gather(alloc, vec![i1, i2])
-    }
-}
-
+/// An iterator that compacts sequences of consecutive SrcLoc instructions
+/// to the last one in the sequence, passing other instructions through.
 #[derive(Debug)]
 pub struct CompactIter<'i, 'a, I>
 where
@@ -1696,30 +1692,6 @@ impl<'a> InstrSeq<'a> {
             InstrSeq::List(s) if s.len() == 1 => InstrSeq::is_srcloc(&s[0]),
             InstrSeq::List(s) => s.is_empty() || s.iter().all(InstrSeq::is_srcloc),
             InstrSeq::Concat(s) => s.iter().all(InstrSeq::is_empty),
-        }
-    }
-
-    pub fn flat_map_seq<F>(&self, alloc: &'a bumpalo::Bump, f: &mut F) -> Self
-    where
-        F: FnMut(&Instruct<'a>) -> Self,
-    {
-        // self: &InstrSeq<'a>
-        match self {
-            InstrSeq::List(s) if s.is_empty() => InstrSeq::new_empty(alloc),
-            InstrSeq::List(s) if s.len() == 1 => f(&s[0]),
-            InstrSeq::List(s) => InstrSeq::Concat(BumpSliceMut::new(
-                alloc,
-                bumpalo::collections::vec::Vec::from_iter_in(s.iter().map(f), alloc)
-                    .into_bump_slice_mut(),
-            )),
-            InstrSeq::Concat(s) => InstrSeq::Concat(BumpSliceMut::new(
-                alloc,
-                bumpalo::collections::vec::Vec::from_iter_in(
-                    s.iter().map(|x| x.flat_map_seq(alloc, f)),
-                    alloc,
-                )
-                .into_bump_slice_mut(),
-            )),
         }
     }
 

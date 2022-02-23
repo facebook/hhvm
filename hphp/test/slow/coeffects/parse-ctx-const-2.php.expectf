@@ -1,1 +1,1 @@
-Fatal error: Polymorphic contexts on ctx constants are not allowed in %s on line 4
+Fatal error: Context constants cannot alias polymorphic contexts in %s on line 4

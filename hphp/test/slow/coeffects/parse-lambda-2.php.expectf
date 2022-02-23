@@ -1,1 +1,1 @@
-Fatal error: A lambda cannot have polymorphic context in %s on line 4
+Fatal error: A lambda cannot have a polymorphic context in %s on line 4

@@ -939,8 +939,9 @@ pub fn policy_sharded_memoized_without_policied(kind: &str) -> Error {
     ))
 }
 
-pub const lambda_effect_polymorphic: Error =
-    Cow::Borrowed("A lambda cannot have polymorphic context");
+pub fn lambda_effect_polymorphic(kind: &str) -> Error {
+    Cow::Owned(format!("{} cannot have a polymorphic context", kind))
+}
 
 pub const inst_meth_disabled: Error =
     Cow::Borrowed("`inst_meth()` is disabled; use a lambda `(...) ==> {...}` instead");

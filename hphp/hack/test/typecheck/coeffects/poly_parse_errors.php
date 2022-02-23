@@ -46,4 +46,23 @@ class C {
 function lambdas(): void {
   $x = ($f)[ctx $f] ==> {};
   $y = ($a)[$a::C] ==> {};
+
+  $y = function($x)[ctx $x] {};
+}
+
+abstract class A {
+  const ctx C = [];
+  const ctx C2 = [this::C];
+  abstract const ctx C3 super [this::C];
+}
+
+class R<reify T as V> {
+  public function m(
+    (function ()[_]: void) $f,
+    (function ()[ctx $f]: void) $g,
+  )[ctx $f]: void {}
+
+  public function n(
+    (function ()[T::C]: void) $f
+  ): void {}
 }

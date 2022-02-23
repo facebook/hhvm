@@ -892,7 +892,14 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_, Error> {
                     variadic_hints.len()
                 ));
             }
-            let ctxs = p_contexts(&c.contexts, env)?;
+            let ctxs = p_contexts(
+                &c.contexts,
+                env,
+                Some((
+                    "A closure type hint cannot have a polymorphic context",
+                    true,
+                )),
+            )?;
             Ok(Hfun(ast::HintFun {
                 is_readonly: mp_optional(p_readonly, &c.readonly_keyword, env)?,
                 param_tys: type_hints,
@@ -1514,15 +1521,13 @@ fn p_expr_impl__<'a>(
                 LambdaSignature(c) => {
                     let params = could_map(p_fun_param, &c.parameters, env)?;
                     let readonly_ret = mp_optional(p_readonly, &c.readonly_return, env)?;
-                    let ctxs = p_contexts(&c.contexts, env)?;
+                    let ctxs = p_contexts(
+                        &c.contexts,
+                        env,
+                        // TODO(coeffects) Lambdas may be able to support this:: contexts
+                        Some((&syntax_error::lambda_effect_polymorphic("A lambda"), false)),
+                    )?;
                     let unsafe_ctxs = ctxs.clone();
-                    if has_polymorphic_context(env, ctxs.as_ref()) {
-                        raise_parsing_error(
-                            &c.contexts,
-                            env,
-                            &syntax_error::lambda_effect_polymorphic,
-                        );
-                    }
                     let ret = mp_optional(p_hint, &c.type_, env)?;
                     (params, (ctxs, unsafe_ctxs), readonly_ret, ret)
                 }
@@ -2039,7 +2044,15 @@ fn p_expr_impl__<'a>(
                 Token(_) => mk_name_lid(n, e),
                 _ => missing_syntax("use variable", n, e),
             };
-            let ctxs = p_contexts(&c.ctx_list, env)?;
+            let ctxs = p_contexts(
+                &c.ctx_list,
+                env,
+                // TODO(coeffects) Anonymous functions may be able to support this:: contexts
+                Some((
+                    &syntax_error::lambda_effect_polymorphic("An anonymous function"),
+                    false,
+                )),
+            )?;
             let unsafe_ctxs = ctxs.clone();
             let p_use = |n: S<'a>, e: &mut Env<'a>| match &n.children {
                 AnonymousFunctionUseClause(c) => could_map(p_arg, &c.variables, e),
@@ -3085,7 +3098,9 @@ fn strip_ns(name: &str) -> &str {
     }
 }
 
-fn has_polymorphic_context_single<'a>(env: &mut Env<'a>, hint: &ast::Hint) -> bool {
+// The contexts `ctx $f`, `$a::C`, and `T::C` all depend on the ability to generate a backing tparam
+// on the function or method. The `this::C` context does not, so it may appear in more places.
+fn is_polymorphic_context<'a>(env: &mut Env<'a>, hint: &ast::Hint, ignore_this: bool) -> bool {
     use ast::Hint_::{Haccess, Happly, HfunContext, Hvar};
     match *hint.1 {
         HfunContext(_) => true,
@@ -3095,7 +3110,7 @@ fn has_polymorphic_context_single<'a>(env: &mut Env<'a>, hint: &ast::Hint) -> bo
                 /* TODO(coeffects) There is an opportunity to represent this structurally
                  * in the AST if we refactor so generic hints lower as Habstr instead of
                  * Happly, like we do in the direct decl parser. */
-                strip_ns(s) == naming_special_names_rust::typehints::THIS
+                (strip_ns(s) == naming_special_names_rust::typehints::THIS && !ignore_this)
                     || env.fn_generics_mut().contains_key(s)
                     || env.cls_generics_mut().contains_key(s)
             }
@@ -3110,7 +3125,7 @@ fn has_polymorphic_context<'a>(env: &mut Env<'a>, contexts: Option<&ast::Context
     if let Some(ast::Contexts(_, ref context_hints)) = contexts {
         return context_hints
             .iter()
-            .any(|c| has_polymorphic_context_single(env, c));
+            .any(|c| is_polymorphic_context(env, c, false));
     } else {
         false
     }
@@ -3577,7 +3592,11 @@ fn p_ctx_constraints<'a>(
     let constraints = could_map(
         |node, env| {
             if let ContextConstraint(c) = &node.children {
-                if let Some(hint) = p_context_list_to_intersection(&c.ctx_list, env)? {
+                if let Some(hint) = p_context_list_to_intersection(
+                    &c.ctx_list,
+                    env,
+                    "Contexts cannot be bounded by polymorphic contexts",
+                )? {
                     Ok(match token_kind(&c.keyword) {
                         Some(TK::Super) => Either::Left(hint),
                         Some(TK::As) => Either::Right(hint),
@@ -3610,11 +3629,27 @@ fn p_ctx_constraints<'a>(
     ))
 }
 
-fn p_contexts<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Option<ast::Contexts>, Error> {
+fn p_contexts<'a>(
+    node: S<'a>,
+    env: &mut Env<'a>,
+    error_on_polymorphic: Option<(&str, bool)>,
+) -> Result<Option<ast::Contexts>, Error> {
     match &node.children {
         Missing => Ok(None),
         Contexts(c) => {
-            let hints = could_map(&p_hint, &c.types, env)?;
+            let hints = could_map(
+                |node, env| {
+                    let h = p_hint(node, env)?;
+                    if let Some((e, ignore_this)) = error_on_polymorphic {
+                        if is_polymorphic_context(env, &h, ignore_this) {
+                            raise_parsing_error(node, env, e);
+                        }
+                    }
+                    Ok(h)
+                },
+                &c.types,
+                env,
+            )?;
             let pos = p_pos(node, env);
             let ctxs = ast::Contexts(pos, hints);
             Ok(Some(ctxs))
@@ -3626,8 +3661,10 @@ fn p_contexts<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Option<ast::Contexts
 fn p_context_list_to_intersection<'a>(
     ctx_list: S<'a>,
     env: &mut Env<'a>,
+    polymorphic_error: &str,
 ) -> Result<Option<ast::Hint>, Error> {
-    Ok(p_contexts(ctx_list, env)?.map(|t| ast::Hint::new(t.0, ast::Hint_::Hintersection(t.1))))
+    Ok(p_contexts(ctx_list, env, Some((polymorphic_error, false)))?
+        .map(|t| ast::Hint::new(t.0, ast::Hint_::Hintersection(t.1))))
 }
 
 fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr, Error> {
@@ -3656,7 +3693,7 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr, Error> {
             let readonly_ret = mp_optional(p_readonly, readonly_return, env)?;
             let mut type_parameters = p_tparam_l(false, type_parameter_list, env)?;
             let mut parameters = could_map(p_fun_param, parameter_list, env)?;
-            let contexts = p_contexts(contexts, env)?;
+            let contexts = p_contexts(contexts, env, None)?;
             let mut constrs = p_where_constraint(false, node, where_clause, env)?;
             rewrite_effect_polymorphism(
                 env,
@@ -3682,6 +3719,7 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr, Error> {
                 return_type,
             })
         }
+        // TODO: this code seems to be dead, as the only callers of p_fun_hdr come from MethodishDeclaration and FunctionDeclaration
         LambdaSignature(LambdaSignatureChildren {
             parameters,
             contexts,
@@ -3692,7 +3730,7 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr, Error> {
             let readonly_ret = mp_optional(p_readonly, readonly_return, env)?;
             let mut header = FunHdr::make_empty(env);
             header.parameters = could_map(p_fun_param, parameters, env)?;
-            let contexts = p_contexts(contexts, env)?;
+            let contexts = p_contexts(contexts, env, None)?;
             let unsafe_contexts = contexts.clone();
             header.contexts = contexts;
             header.unsafe_contexts = unsafe_contexts;
@@ -4167,19 +4205,16 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 raise_parsing_error(node, env, &syntax_error::tparams_in_tconst);
             }
             let name = pos_name(&c.name, env)?;
-            let context = p_context_list_to_intersection(&c.ctx_list, env)?;
+            let context = p_context_list_to_intersection(
+                &c.ctx_list,
+                env,
+                "Context constants cannot alias polymorphic contexts",
+            )?;
             if let Some(ref hint) = context {
                 use ast::Hint_::{Happly, Hintersection};
                 let ast::Hint(_, ref h) = hint;
                 if let Hintersection(hl) = &**h {
                     for h in hl {
-                        if has_polymorphic_context_single(env, h) {
-                            raise_parsing_error(
-                                &c.constraint,
-                                env,
-                                "Polymorphic contexts on ctx constants are not allowed",
-                            );
-                        }
                         let ast::Hint(_, ref h) = h;
                         if let Happly(oxidized::ast::Id(_, id), _) = &**h {
                             if id.as_str().ends_with("_local") {
@@ -4993,7 +5028,11 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>, Error> {
                     &syntax_error::user_ctx_require_as(&pos_name.1),
                 )
             }
-            let kind = match p_context_list_to_intersection(&c.context, env)? {
+            let kind = match p_context_list_to_intersection(
+                &c.context,
+                env,
+                "Context aliases cannot alias polymorphic contexts",
+            )? {
                 Some(h) => h,
                 None => {
                     let pos = pos_name.0.clone();

@@ -1,0 +1,4 @@
+File "bad_constraint_nonsense.php", line 5, characters 14-18:
+Contexts cannot be bounded by polymorphic contexts (Parsing[1002])
+File "bad_constraint_nonsense.php", line 5, characters 14-18:
+Internal error: Unexpected context hint (Other[0000])

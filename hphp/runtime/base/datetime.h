@@ -341,7 +341,7 @@ private:
   private:
     timelib_error_container *m_errors;
   };
-  DECLARE_STATIC_REQUEST_LOCAL(LastErrors, s_lastErrors);
+  static RDS_LOCAL(LastErrors, s_lastErrors);
 
 public:
   static void setLastErrors(timelib_error_container *ec)

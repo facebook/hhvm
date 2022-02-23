@@ -37,7 +37,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
+RDS_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
 
 static FactsFactory* s_mapFactory = nullptr;
 

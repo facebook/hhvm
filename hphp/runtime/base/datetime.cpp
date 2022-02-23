@@ -26,7 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-IMPLEMENT_REQUEST_LOCAL(DateTime::LastErrors, DateTime::s_lastErrors);
+RDS_LOCAL(DateTime::LastErrors, DateTime::s_lastErrors);
 
 const char *DateTime::DateFormatRFC822     = "D, d M y H:i:s O";
 const char *DateTime::DateFormatRFC850     = "l, d-M-y H:i:s T";

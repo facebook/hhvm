@@ -66,7 +66,7 @@ struct AutoloadHandler final : RequestEventHandler {
   bool autoloadFunc(StringData* name);
   bool autoloadConstant(StringData* name);
   bool autoloadType(const String& name);
-  DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);
+  static RDS_LOCAL(AutoloadHandler, s_instance);
 
   /**
    * Initialize the AutoloadHandler with a given root directory and map of

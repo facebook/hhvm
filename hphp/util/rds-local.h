@@ -509,12 +509,6 @@ struct AliasedRDSLocal : RDSLocal<T, Init, detail::AliasStorage<ptr>> {
 #define IMPLEMENT_REQUEST_LOCAL(T,f)     \
   ::HPHP::rds::local::RDSLocal<T, ::HPHP::rds::local::Initialize::FirstUse> f
 
-#define DECLARE_STATIC_REQUEST_LOCAL(T,f)    \
-  static ::HPHP::rds::local::RDSLocal< \
-    T, \
-    ::HPHP::rds::local::Initialize::FirstUse \
-  > f
-
 #define IMPLEMENT_STATIC_REQUEST_LOCAL(T,f)     \
   static ::HPHP::rds::local::RDSLocal< \
     T, \

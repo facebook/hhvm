@@ -298,7 +298,7 @@ void runUserProfilerOnFunctionEnter(const ActRec* ar, bool isResume) {
 
   const auto params = make_vec_array(
     (isResume && isResumeAware()) ? s_resume : s_enter,
-    StrNR{ar->func()->fullName()},
+    StrNR{ar->func()->fullNameWithClosureName()},
     frameinfo
   );
 
@@ -333,7 +333,7 @@ void runUserProfilerOnFunctionExit(const ActRec* ar, const TypedValue* retval,
 
   const auto params = make_vec_array(
     (isSuspend && isResumeAware()) ? s_suspend : s_exit,
-    StrNR{ar->func()->fullName()},
+    StrNR{ar->func()->fullNameWithClosureName()},
     frameinfo
   );
 

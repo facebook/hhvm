@@ -1,0 +1,18 @@
+** enter globalFunc
+In globalFunc
+** enter Closure$globalFunc
+In lambda1
+** exit Closure$globalFunc
+** enter Closure$globalFunc#2
+In lambda2
+** exit Closure$globalFunc#2
+** exit globalFunc
+** enter SomeClass::someFunc
+In someFunc
+** enter Closure$SomeClass::someFunc
+In lambda1
+** exit Closure$SomeClass::someFunc
+** enter Closure$SomeClass::someFunc#2
+In lambda2
+** exit Closure$SomeClass::someFunc#2
+** exit SomeClass::someFunc

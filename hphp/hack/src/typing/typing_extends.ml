@@ -136,16 +136,22 @@ let check_visibility parent_vis c_vis parent_pos pos on_error =
     ()
   | (Vpublic, Vpublic)
   | (Vprotected _, Vprotected _)
-  | (Vprotected _, Vpublic) ->
+  | (Vprotected _, Vpublic)
+  | (Vinternal _, Vpublic) ->
     ()
-  | (Vinternal parent_m, m) ->
-    let current =
-      match m with
-      | Vinternal m' -> Some m'
-      | _ -> None
+  | (Vinternal parent_module, (Vprotected _ | Vprivate _)) ->
+    let err =
+      Typing_error.Secondary.Visibility_override_internal
+        { pos; module_name = None; parent_pos; parent_module }
     in
+    Errors.add_typing_error @@ Typing_error.(apply_reasons ~on_error err)
+  | (Vinternal parent_m, Vinternal child_m) ->
     let err_opt =
-      match Typing_modules.can_access ~current ~target:(Some parent_m) with
+      match
+        Typing_modules.can_access
+          ~current:(Some child_m)
+          ~target:(Some parent_m)
+      with
       | `Yes -> None
       | `Disjoint (current, target) ->
         Some

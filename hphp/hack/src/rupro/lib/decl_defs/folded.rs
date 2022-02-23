@@ -117,6 +117,18 @@ pub struct FoldedClass<R: Reason> {
     pub tparams: Box<[Tparam<R, DeclTy<R>>]>,
 }
 
+impl<R: Reason> FoldedClass<R> {
+    // c.f. `Decl_folded_class.class_is_abstract`
+    pub fn is_abstract(&self) -> bool {
+        match self.kind {
+            ClassishKind::Cclass(abstraction) | ClassishKind::CenumClass(abstraction) => {
+                abstraction.is_abstract()
+            }
+            ClassishKind::Cinterface | ClassishKind::Ctrait | ClassishKind::Cenum => true,
+        }
+    }
+}
+
 impl FoldedElement {
     pub fn is_abstract(&self) -> bool {
         self.flags.contains(ClassEltFlags::ABSTRACT)

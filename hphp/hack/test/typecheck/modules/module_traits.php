@@ -9,6 +9,8 @@ trait T1 {}
 trait T2 {
   <<__Internal>>
   public int $x = 0;
+  <<__Internal>>
+  public function lol(): void {}
 }
 
 // Using an internal trait
@@ -40,4 +42,15 @@ class B {
 
 class C {
   use T1; // error
+}
+
+//// E.php
+<?hh
+
+class E {
+  use T2;
+  public function checkMembers(): void {
+    $this->x; // ERROR: `$this->x` is internal to `A`
+    $this->lol(); // ERROR: `$this->lol` is internal to `A`
+  }
 }

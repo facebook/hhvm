@@ -130,11 +130,9 @@ type finalized_error = (Pos.absolute, Pos.absolute) User_error.t
 
 type error = (Pos.t, Pos_or_decl.t) User_error.t [@@deriving eq, ord, show]
 
-type applied_fixme = Pos.t * int [@@deriving eq]
-
 type per_file_errors = error file_t
 
-type t = error files_t * (applied_fixme files_t[@opaque]) [@@deriving eq, show]
+type t = error files_t [@@deriving eq, show]
 
 module Error = struct
   type t = error [@@deriving ord]
@@ -148,7 +146,38 @@ end
 
 module FinalizedErrorSet = Caml.Set.Make (FinalizedError)
 
-let applied_fixmes : applied_fixme files_t ref = ref Relative_path.Map.empty
+let drop_fixmed_errors (errs : ('a, 'b) User_error.t list) :
+    ('a, 'b) User_error.t list =
+  List.filter errs ~f:(fun e -> not e.User_error.is_fixmed)
+
+let drop_fixmed_errors_in_file (ef : ('a, 'b) User_error.t file_t) :
+    ('a, 'b) User_error.t file_t =
+  PhaseMap.fold ef ~init:PhaseMap.empty ~f:(fun phase errs acc ->
+      match drop_fixmed_errors errs with
+      | [] -> acc
+      | errs -> PhaseMap.add acc ~key:phase ~data:errs)
+
+let drop_fixmed_errors_in_files efs =
+  Relative_path.Map.fold
+    efs
+    ~init:Relative_path.Map.empty
+    ~f:(fun file errs acc ->
+      let errs_without_fixmes = drop_fixmed_errors_in_file errs in
+      if PhaseMap.is_empty errs_without_fixmes then
+        acc
+      else
+        Relative_path.Map.add acc ~key:file ~data:errs_without_fixmes)
+
+let drop_fixmes_if (err : t) (drop : bool) : t =
+  if drop then
+    drop_fixmed_errors_in_files err
+  else
+    err
+
+(** Get all errors emitted. Drops errors with valid HH_FIXME comments
+    unless ~drop_fixmed:false is set. *)
+let get_error_list ?(drop_fixmed = true) err =
+  files_t_to_list (drop_fixmes_if err drop_fixmed)
 
 let (error_map : error files_t ref) = ref Relative_path.Map.empty
 
@@ -194,7 +223,7 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
   in
   match get_last errors with
   | None -> result
-  | Some User_error.{ code; claim; reasons; quickfixes } ->
+  | Some User_error.{ code; claim; reasons; quickfixes; is_fixmed = _ } ->
     (* Remove bad position sentinel if present: we might be about to add a new primary
      * error position. *)
     let (claim, reasons) =
@@ -211,31 +240,28 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
 
 (* Reset errors before running [f] so that we can return the errors
  * caused by f. These errors are not added in the global list of errors. *)
-let do_ f =
+let do_ ?(drop_fixmed = true) f =
   let error_map_copy = !error_map in
-  let applied_fixmes_copy = !applied_fixmes in
   let accumulate_errors_copy = !accumulate_errors in
   error_map := Relative_path.Map.empty;
-  applied_fixmes := Relative_path.Map.empty;
   accumulate_errors := true;
-  let (result, out_errors, out_applied_fixmes) =
+  let (result, out_errors) =
     Utils.try_finally
       ~f:
         begin
           fun () ->
           let result = f () in
-          (result, !error_map, !applied_fixmes)
+          (result, !error_map)
         end
       ~finally:
         begin
           fun () ->
           error_map := error_map_copy;
-          applied_fixmes := applied_fixmes_copy;
           accumulate_errors := accumulate_errors_copy
         end
   in
   let out_errors = files_t_map ~f:List.rev out_errors in
-  ((out_errors, out_applied_fixmes), result)
+  (drop_fixmes_if out_errors drop_fixmed, result)
 
 let run_in_context path phase f =
   let context_copy = !current_context in
@@ -292,10 +318,21 @@ let sort : error list -> error list =
   let compare_reasons = List.compare (Message.compare Pos_or_decl.compare) in
   let compare
       User_error.
-        { code = x_code; claim = x_claim; reasons = x_messages; quickfixes = _ }
+        {
+          code = x_code;
+          claim = x_claim;
+          reasons = x_messages;
+          quickfixes = _;
+          is_fixmed = _;
+        }
       User_error.
-        { code = y_code; claim = y_claim; reasons = y_messages; quickfixes = _ }
-      =
+        {
+          code = y_code;
+          claim = y_claim;
+          reasons = y_messages;
+          quickfixes = _;
+          is_fixmed = _;
+        } =
     (* The primary sort order is by file *)
     let comparison =
       Relative_path.compare
@@ -335,8 +372,8 @@ let sort : error list -> error list =
   List.sort ~compare:(fun x y -> compare x y) err
   |> List.remove_consecutive_duplicates ~equal:(fun x y -> equal x y)
 
-let get_sorted_error_list : t -> error list =
- (fun (err, _) -> sort (files_t_to_list err))
+let get_sorted_error_list ?(drop_fixmed = true) err =
+  sort (files_t_to_list (drop_fixmes_if err drop_fixmed))
 
 (* Getters and setter for passed-in map, based on current context *)
 let get_current_file_t file_t_map =
@@ -361,7 +398,8 @@ let set_current_list file_t_map new_list =
            ~key:current_phase
            ~data:new_list)
 
-let do_with_context path phase f = run_in_context path phase (fun () -> do_ f)
+let do_with_context ?(drop_fixmed = true) path phase f =
+  run_in_context path phase (fun () -> do_ ~drop_fixmed f)
 
 (** Turn on lazy decl mode for the duration of the closure.
     This runs without returning the original state,
@@ -455,7 +493,11 @@ let add_error_impl error =
     match !in_lazy_decl with
     | Some _ ->
       lazy_decl_error_logging msg error_map User_error.to_absolute to_string
-    | None -> Utils.assert_false_log_backtrace (Some msg)
+    | None ->
+      if error.User_error.is_fixmed then
+        ()
+      else
+        Utils.assert_false_log_backtrace (Some msg)
 
 (* Whether we've found at least one error *)
 let currently_has_errors () = not (List.is_empty (get_current_list !error_map))
@@ -568,20 +610,19 @@ let check_pos_msg :
       reasons
 
 let add_error_with_fixme_error error explanation =
-  let User_error.{ code; claim; reasons = _; quickfixes } = error in
+  let User_error.{ code; claim; reasons = _; quickfixes; is_fixmed = _ } =
+    error
+  in
   let (pos, _) = claim in
   let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
   add_error_impl error;
   add_error_impl @@ User_error.make code (pos, explanation) [] ~quickfixes
 
-let rec add_applied_fixme code (pos : Pos.t) =
-  if ServerLoadFlag.get_no_load () then
-    let applied_fixmes_list = get_current_list !applied_fixmes in
-    set_current_list applied_fixmes ((pos, code) :: applied_fixmes_list)
-  else
-    ()
+let add_applied_fixme error =
+  let error = { error with User_error.is_fixmed = true } in
+  add_error_impl error
 
-and add code pos msg = add_list code (pos, msg) []
+let rec add code pos msg = add_list code (pos, msg) []
 
 and fixme_present (pos : Pos.t) code =
   !is_hh_fixme pos code || !is_hh_fixme_disallowed pos code
@@ -590,7 +631,7 @@ and add_list code ?quickfixes (claim : _ Message.t) reasons =
   add_error @@ User_error.make code claim reasons ?quickfixes
 
 and add_error (error : error) =
-  let User_error.{ code; claim; reasons; quickfixes } = error in
+  let User_error.{ code; claim; reasons; quickfixes; is_fixmed = _ } = error in
   let (claim, reasons) = check_pos_msg (claim, reasons) in
   let error = User_error.make code claim reasons ~quickfixes in
 
@@ -617,7 +658,7 @@ and add_error (error : error) =
      * a fixme is present *)
     add_error_impl error
   else if Relative_path.(is_hhi (prefix (Pos.filename pos))) then
-    add_applied_fixme code pos
+    add_applied_fixme error
   else if !report_pos_from_reason && Pos.get_from_reason pos then
     let explanation =
       "You cannot use `HH_FIXME` or `HH_IGNORE_ERROR` comments to suppress an error whose position was derived from reason information"
@@ -641,7 +682,7 @@ and add_error (error : error) =
         is_allowed_code_strict
     in
     if whitelist code then
-      add_applied_fixme code pos
+      add_applied_fixme error
     else
       let explanation =
         Printf.sprintf
@@ -650,27 +691,15 @@ and add_error (error : error) =
       in
       add_error_with_fixme_error error explanation
 
-and merge (err', fixmes') (err, fixmes) =
+and merge err' err =
   let append _ _ x y =
     let x = Option.value x ~default:[] in
     let y = Option.value y ~default:[] in
     Some (List.rev_append x y)
   in
-  (files_t_merge ~f:append err' err, files_t_merge ~f:append fixmes' fixmes)
+  files_t_merge ~f:append err' err
 
-and incremental_update :
-    type (* Need to write out the entire ugly type to convince OCaml it's polymorphic
-          * and can update both error_map as well as applied_fixmes map *)
-    a.
-    a files_t ->
-    a files_t ->
-    ((* function folding over paths of rechecked files *)
-     a files_t ->
-    (Relative_path.t -> a files_t -> a files_t) ->
-    a files_t) ->
-    phase ->
-    a files_t =
- fun old new_ fold phase ->
+and incremental_update old new_ fold phase =
   (* Helper to remove acc[path][phase]. If acc[path] becomes empty afterwards,
    * remove it too (i.e do not store empty maps or lists ever). *)
   let remove path phase acc =
@@ -723,16 +752,16 @@ and incremental_update :
       else
         remove path phase acc)
 
-and is_empty (err, _fixmes) = Relative_path.Map.is_empty err
+and from_error_list err = list_to_files_t err
 
-and count (err, _fixmes) =
-  files_t_fold err ~f:(fun _ _ x acc -> acc + List.length x) ~init:0
+let count ?(drop_fixmed = true) err =
+  files_t_fold
+    (drop_fixmes_if err drop_fixmed)
+    ~f:(fun _ _ x acc -> acc + List.length x)
+    ~init:0
 
-and get_error_list (err, _fixmes) = files_t_to_list err
-
-and get_applied_fixmes (_err, fixmes) = files_t_to_list fixmes
-
-and from_error_list err = (list_to_files_t err, Relative_path.Map.empty)
+let is_empty ?(drop_fixmed = true) err =
+  Relative_path.Map.is_empty (drop_fixmes_if err drop_fixmed)
 
 let add_parsing_error err = add_error @@ Parsing_error.to_user_error err
 
@@ -801,49 +830,40 @@ let incremental_update ~old ~new_ ~rechecked phase =
       ~init
       rechecked
   in
-  ( incremental_update (fst old) (fst new_) fold phase,
-    incremental_update (snd old) (snd new_) fold phase )
+  incremental_update old new_ fold phase
 
-and empty = (Relative_path.Map.empty, Relative_path.Map.empty)
+and empty = Relative_path.Map.empty
 
 let from_file_error_list : ?phase:phase -> (Relative_path.t * error) list -> t =
  fun ?(phase = Typing) errors ->
-  let errors =
-    List.fold
-      errors
-      ~init:Relative_path.Map.empty
-      ~f:(fun errors (file, error) ->
-        let errors_for_file =
-          Relative_path.Map.find_opt errors file
-          |> Option.value ~default:PhaseMap.empty
-        in
-        let errors_for_phase =
-          PhaseMap.find_opt errors_for_file phase |> Option.value ~default:[]
-        in
-        let errors_for_phase = error :: errors_for_phase in
-        let errors_for_file =
-          PhaseMap.add errors_for_file ~key:phase ~data:errors_for_phase
-        in
-        Relative_path.Map.add errors ~key:file ~data:errors_for_file)
-  in
-  (errors, Relative_path.Map.empty)
+  List.fold errors ~init:Relative_path.Map.empty ~f:(fun errors (file, error) ->
+      let errors_for_file =
+        Relative_path.Map.find_opt errors file
+        |> Option.value ~default:PhaseMap.empty
+      in
+      let errors_for_phase =
+        PhaseMap.find_opt errors_for_file phase |> Option.value ~default:[]
+      in
+      let errors_for_phase = error :: errors_for_phase in
+      let errors_for_file =
+        PhaseMap.add errors_for_file ~key:phase ~data:errors_for_phase
+      in
+      Relative_path.Map.add errors ~key:file ~data:errors_for_file)
 
 let as_map : t -> error list Relative_path.Map.t =
- fun (errors, _fixmes) ->
+ fun errors ->
   Relative_path.Map.map
     errors
     ~f:(PhaseMap.fold ~init:[] ~f:(fun _ -> List.append))
 
-let merge_into_current errors =
-  let merged = merge errors (!error_map, !applied_fixmes) in
-  error_map := fst merged;
-  applied_fixmes := snd merged
+let merge_into_current errors = error_map := merge errors !error_map
 
 (* Until we return a list of errors from typing, we have to apply
    'client errors' to a callback for using in subtyping *)
 let apply_callback_to_errors : t -> Typing_error.Reasons_callback.t -> unit =
- fun (errors, _fixmes) on_error ->
-  let on_error User_error.{ code; claim; reasons; quickfixes = _ } =
+ fun errors on_error ->
+  let on_error
+      User_error.{ code; claim; reasons; quickfixes = _; is_fixmed = _ } =
     Typing_error.(
       let code = Option.value_exn (Error_code.of_enum code) in
       Eval_result.iter ~f:add_error
@@ -862,51 +882,66 @@ let apply_callback_to_errors : t -> Typing_error.Reasons_callback.t -> unit =
 (* Accessors. (All methods delegated to the parameterized module.) *)
 (*****************************************************************************)
 
-let per_file_error_count : per_file_errors -> int =
+let per_file_error_count : ?drop_fixmed:bool -> per_file_errors -> int =
+ fun ?(drop_fixmed = true) ->
   PhaseMap.fold ~init:0 ~f:(fun _phase errors count ->
+      let errors =
+        if drop_fixmed then
+          drop_fixmed_errors errors
+        else
+          errors
+      in
       List.length errors + count)
 
-let get_file_errors : t -> Relative_path.t -> per_file_errors =
- fun (errors, _) file ->
-  Relative_path.Map.find_opt errors file |> Option.value ~default:PhaseMap.empty
+let get_file_errors :
+    ?drop_fixmed:bool -> t -> Relative_path.t -> per_file_errors =
+ fun ?(drop_fixmed = true) errors file ->
+  Relative_path.Map.find_opt (drop_fixmes_if errors drop_fixmed) file
+  |> Option.value ~default:PhaseMap.empty
 
-let iter_error_list f err = List.iter ~f (get_sorted_error_list err)
+let iter_error_list ?(drop_fixmed = true) f err =
+  List.iter ~f (get_sorted_error_list ~drop_fixmed err)
 
-let fold_errors ?phase err ~init ~f =
+let fold_errors ?(drop_fixmed = true) ?phase err ~init ~f =
+  let err = drop_fixmes_if err drop_fixmed in
   match phase with
   | None ->
-    files_t_fold (fst err) ~init ~f:(fun source _ errors acc ->
+    files_t_fold err ~init ~f:(fun source _ errors acc ->
         List.fold_right errors ~init:acc ~f:(f source))
   | Some phase ->
-    Relative_path.Map.fold (fst err) ~init ~f:(fun source phases acc ->
+    Relative_path.Map.fold err ~init ~f:(fun source phases acc ->
         match PhaseMap.find_opt phases phase with
         | None -> acc
         | Some errors -> List.fold_right errors ~init:acc ~f:(f source))
 
-let fold_errors_in ?phase err ~file ~init ~f =
-  Relative_path.Map.find_opt (fst err) file
+let fold_errors_in ?(drop_fixmed = true) ?phase err ~file ~init ~f =
+  let err = drop_fixmes_if err drop_fixmed in
+  Relative_path.Map.find_opt err file
   |> Option.value ~default:PhaseMap.empty
   |> PhaseMap.fold ~init ~f:(fun p errors acc ->
          match phase with
          | Some x when not (equal_phase x p) -> acc
          | _ -> List.fold_right errors ~init:acc ~f)
 
-let get_failed_files err phase =
-  files_t_fold (fst err) ~init:Relative_path.Set.empty ~f:(fun source p _ acc ->
+(* Get paths that have errors which haven't been HH_FIXME'd. *)
+let get_failed_files (err : t) phase =
+  let err = drop_fixmed_errors_in_files err in
+  files_t_fold err ~init:Relative_path.Set.empty ~f:(fun source p _ acc ->
       if not (equal_phase phase p) then
         acc
       else
         Relative_path.Set.add acc source)
 
+(* Count errors which haven't been HH_FIXME'd. *)
 let error_count : t -> int =
- fun (errors, _fixmes) ->
+ fun errors ->
   Relative_path.Map.fold errors ~init:0 ~f:(fun _path errors count ->
-      count + per_file_error_count errors)
+      count + per_file_error_count ~drop_fixmed:true errors)
 
 exception Done of ISet.t
 
 let first_n_distinct_error_codes : n:int -> t -> error_code list =
- fun ~n ((errors : _ files_t), _fixmes) ->
+ fun ~n (errors : _ files_t) ->
   let codes =
     try
       Relative_path.Map.fold
@@ -928,8 +963,11 @@ let first_n_distinct_error_codes : n:int -> t -> error_code list =
   in
   ISet.elements codes
 
+(* Get the error code of the first error which hasn't been HH_FIXME'd. *)
 let choose_code_opt (errors : t) : int option =
-  errors |> first_n_distinct_error_codes ~n:1 |> List.hd
+  drop_fixmed_errors_in_files errors
+  |> first_n_distinct_error_codes ~n:1
+  |> List.hd
 
 let as_telemetry : t -> Telemetry.t =
  fun errors ->
@@ -937,7 +975,10 @@ let as_telemetry : t -> Telemetry.t =
   |> Telemetry.int_ ~key:"count" ~value:(error_count errors)
   |> Telemetry.int_list
        ~key:"first_5_distinct_error_codes"
-       ~value:(first_n_distinct_error_codes ~n:5 errors)
+       ~value:
+         (first_n_distinct_error_codes
+            ~n:5
+            (drop_fixmed_errors_in_files errors))
 
 (*****************************************************************************)
 (* Error code printing. *)
@@ -962,7 +1003,9 @@ let experimental_feature pos msg =
     callback application *)
 let ambiguous_inheritance
     pos class_ origin error (on_error : Typing_error.Reasons_callback.t) =
-  let User_error.{ code; claim; reasons; quickfixes = _ } = error in
+  let User_error.{ code; claim; reasons; quickfixes = _; is_fixmed = _ } =
+    error
+  in
   let origin = Render.strip_ns origin in
   let class_ = Render.strip_ns class_ in
   let message =
@@ -1068,7 +1111,10 @@ let convert_errors_to_string ?(include_filename = false) (errors : error list) :
   List.fold_right
     ~init:[]
     ~f:(fun err acc_out ->
-      let User_error.{ code = _; claim; reasons; quickfixes = _ } = err in
+      let User_error.{ code = _; claim; reasons; quickfixes = _; is_fixmed = _ }
+          =
+        err
+      in
       List.fold_right
         ~init:acc_out
         ~f:(fun (pos, msg) acc_in ->

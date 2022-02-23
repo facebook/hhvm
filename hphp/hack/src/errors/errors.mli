@@ -12,8 +12,6 @@ type error = (Pos.t, Pos_or_decl.t) User_error.t [@@deriving eq, show]
 type finalized_error = (Pos.absolute, Pos.absolute) User_error.t
 [@@deriving eq, show]
 
-type applied_fixme = Pos.t * int
-
 (* The analysis phase that the error is coming from. *)
 type phase =
   | Init
@@ -124,12 +122,13 @@ val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
 
 (** Return the list of errors caused by the function passed as parameter
     along with its result. *)
-val do_ : (unit -> 'a) -> t * 'a
+val do_ : ?drop_fixmed:bool -> (unit -> 'a) -> t * 'a
 
 (** Return the list of errors caused by the function passed as parameter
     along with its result.
     The phase parameter determine the phase of the returned errors. *)
-val do_with_context : Relative_path.t -> phase -> (unit -> 'a) -> t * 'a
+val do_with_context :
+  ?drop_fixmed:bool -> Relative_path.t -> phase -> (unit -> 'a) -> t * 'a
 
 val run_in_context : Relative_path.t -> phase -> (unit -> 'a) -> 'a
 
@@ -165,31 +164,43 @@ val incremental_update :
 
 val empty : t
 
-val is_empty : t -> bool
+val is_empty : ?drop_fixmed:bool -> t -> bool
 
-val count : t -> int
+val count : ?drop_fixmed:bool -> t -> int
 
-val get_error_list : t -> error list
+val get_error_list : ?drop_fixmed:bool -> t -> error list
 
-val get_sorted_error_list : t -> error list
+val get_sorted_error_list : ?drop_fixmed:bool -> t -> error list
 
 val as_map : t -> error list Relative_path.Map.t
 
 val from_error_list : error list -> t
 
+val drop_fixmed_errors :
+  ('a, 'b) User_error.t list -> ('a, 'b) User_error.t list
+
+val drop_fixmed_errors_in_files : t -> t
+
 (** Default applied phase is Typing. *)
 val from_file_error_list : ?phase:phase -> (Relative_path.t * error) list -> t
 
-val per_file_error_count : per_file_errors -> int
+val per_file_error_count : ?drop_fixmed:bool -> per_file_errors -> int
 
-val get_file_errors : t -> Relative_path.t -> per_file_errors
+val get_file_errors :
+  ?drop_fixmed:bool -> t -> Relative_path.t -> per_file_errors
 
-val iter_error_list : (error -> unit) -> t -> unit
+val iter_error_list : ?drop_fixmed:bool -> (error -> unit) -> t -> unit
 
 val fold_errors :
-  ?phase:phase -> t -> init:'a -> f:(Relative_path.t -> error -> 'a -> 'a) -> 'a
+  ?drop_fixmed:bool ->
+  ?phase:phase ->
+  t ->
+  init:'a ->
+  f:(Relative_path.t -> error -> 'a -> 'a) ->
+  'a
 
 val fold_errors_in :
+  ?drop_fixmed:bool ->
   ?phase:phase ->
   t ->
   file:Relative_path.t ->
@@ -204,8 +215,6 @@ val as_telemetry : t -> Telemetry.t
 val choose_code_opt : t -> int option
 
 val sort : error list -> error list
-
-val get_applied_fixmes : t -> applied_fixme list
 
 (***************************************
  *                                     *

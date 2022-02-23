@@ -24,6 +24,7 @@ impl<PP, P> UserError<PP, P> {
             claim,
             reasons,
             quickfixes,
+            is_fixmed: false,
         }
     }
 
@@ -55,12 +56,14 @@ impl<PP: Ord + FileOrd, P: Ord + FileOrd> Ord for UserError<PP, P> {
             claim: self_claim,
             reasons: self_reasons,
             quickfixes: _,
+            is_fixmed: _,
         } = self;
         let Self {
             code: other_code,
             claim: other_claim,
             reasons: other_reasons,
             quickfixes: _,
+            is_fixmed: _,
         } = other;
         let Message(self_pos, self_msg) = self_claim;
         let Message(other_pos, other_msg) = other_claim;
@@ -103,6 +106,7 @@ impl<'a> std::fmt::Display for DisplayRaw<'a> {
             claim,
             reasons,
             quickfixes: _,
+            is_fixmed: _,
         } = self.0;
         let Message(pos, msg) = claim;
         let code = DisplayErrorCode(*code);
@@ -131,36 +135,6 @@ struct DisplayErrorCode(ErrorCode);
 impl std::fmt::Display for DisplayErrorCode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}[{:04}]", error_kind(self.0), self.0)
-    }
-}
-
-impl Errors {
-    pub fn empty() -> Self {
-        Errors(FilesT::new(), FilesT::new())
-    }
-
-    pub fn is_empty(&self) -> bool {
-        let Errors(errors, _fixmes) = self;
-        errors.is_empty()
-    }
-
-    pub fn into_vec(self) -> Vec<Error> {
-        let Errors(errors, _fixmes) = self;
-        errors
-            .into_iter()
-            .flat_map(|(_filename, errs_by_phase)| {
-                errs_by_phase
-                    .into_iter()
-                    .flat_map(|(_phase, errs)| errs.into_iter())
-            })
-            .collect()
-    }
-
-    pub fn into_sorted_vec(self) -> Vec<Error> {
-        let mut errors = self.into_vec();
-        errors.sort_unstable();
-        errors.dedup();
-        errors
     }
 }
 

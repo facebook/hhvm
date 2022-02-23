@@ -12,6 +12,7 @@ type ('prim_pos, 'pos) t = {
   claim: 'prim_pos Message.t;
   reasons: 'pos Message.t list;
   quickfixes: Quickfix.t list;
+  is_fixmed: bool;
 }
 [@@deriving eq, ord, show]
 
@@ -19,8 +20,8 @@ type severity =
   | Warning
   | Error
 
-let make code ?(quickfixes = []) claim reasons =
-  { code; claim; reasons; quickfixes }
+let make code ?(is_fixmed = false) ?(quickfixes = []) claim reasons =
+  { code; claim; reasons; quickfixes; is_fixmed }
 
 let get_code { code; _ } = code
 
@@ -46,20 +47,21 @@ let to_list_ { claim = (pos, claim); reasons; _ } =
 
 let get_messages = to_list
 
-let to_absolute { code; claim; reasons; quickfixes } =
+let to_absolute { code; claim; reasons; quickfixes; is_fixmed } =
   let claim = (fst claim |> Pos.to_absolute, snd claim) in
   let reasons =
     List.map reasons ~f:(fun (p, s) ->
         (p |> Pos_or_decl.unsafe_to_raw_pos |> Pos.to_absolute, s))
   in
-  { code; claim; reasons; quickfixes }
+  { code; claim; reasons; quickfixes; is_fixmed }
 
 let make_absolute code = function
   | [] -> failwith "an error must have at least one message"
-  | claim :: reasons -> { code; claim; reasons; quickfixes = [] }
+  | claim :: reasons ->
+    { code; claim; reasons; quickfixes = []; is_fixmed = false }
 
 let to_absolute_for_test
-    { code; claim = (claim_pos, claim_msg); reasons; quickfixes } =
+    { code; claim = (claim_pos, claim_msg); reasons; quickfixes; is_fixmed } =
   let f (p, s) =
     let p = Pos_or_decl.unsafe_to_raw_pos p in
     let path = Pos.filename p in
@@ -73,7 +75,7 @@ let to_absolute_for_test
   in
   let claim = f (Pos_or_decl.of_raw_pos claim_pos, claim_msg) in
   let reasons = List.map ~f reasons in
-  { code; claim; reasons; quickfixes }
+  { code; claim; reasons; quickfixes; is_fixmed }
 
 let error_kind error_code =
   match error_code / 1000 with
@@ -90,7 +92,9 @@ let error_code_to_string error_code =
   let error_number = Printf.sprintf "%04d" error_code in
   error_kind ^ "[" ^ error_number ^ "]"
 
-let to_string report_pos_from_reason { code; claim; reasons; quickfixes = _ } =
+let to_string
+    report_pos_from_reason
+    { code; claim; reasons; quickfixes = _; is_fixmed = _ } =
   let buf = Buffer.create 50 in
   let (pos1, msg1) = claim in
   Buffer.add_string

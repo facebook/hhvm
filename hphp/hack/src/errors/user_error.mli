@@ -10,6 +10,7 @@ type ('prim_pos, 'pos) t = {
   claim: 'prim_pos Message.t;
   reasons: 'pos Message.t list;
   quickfixes: Quickfix.t list;
+  is_fixmed: bool;
 }
 [@@deriving eq, ord, show]
 
@@ -19,6 +20,7 @@ type severity =
 
 val make :
   int ->
+  ?is_fixmed:bool ->
   ?quickfixes:Quickfix.t list ->
   'a Message.t ->
   'b Message.t list ->

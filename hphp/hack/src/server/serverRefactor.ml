@@ -18,7 +18,11 @@ let maybe_add_dollar s =
     s
 
 let get_fixme_patches codes (env : env) =
-  let fixmelist = Errors.get_applied_fixmes env.errorl in
+  let fixmelist =
+    Errors.get_error_list ~drop_fixmed:false env.errorl
+    |> List.filter ~f:(fun e -> e.User_error.is_fixmed)
+    |> List.map ~f:(fun e -> (User_error.get_pos e, User_error.get_code e))
+  in
   let poslist =
     Fixme_provider.get_unused_fixmes
       ~codes

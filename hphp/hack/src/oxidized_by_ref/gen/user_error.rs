@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e9841c01773d055bfb2f32131cca5162>>
+// @generated SignedSource<<8c971c2c55db6b9e050c6cc2e349ec7d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -44,6 +44,7 @@ pub struct UserError<'a, PrimPos, Pos> {
     pub reasons: &'a [&'a message::Message<'a, Pos>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub quickfixes: &'a [&'a quickfix::Quickfix<'a>],
+    pub is_fixmed: bool,
 }
 impl<'a, PrimPos: TrivialDrop, Pos: TrivialDrop> TrivialDrop for UserError<'a, PrimPos, Pos> {}
 arena_deserializer::impl_deserialize_in_arena!(UserError<'arena, PrimPos, Pos>);

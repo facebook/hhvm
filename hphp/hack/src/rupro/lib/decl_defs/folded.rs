@@ -12,6 +12,8 @@ use pos::{
     TypeName, TypeNameMap,
 };
 
+pub use oxidized::ast_defs::{Abstraction, ClassishKind};
+
 #[derive(Debug, Clone)]
 pub struct FoldedElement {
     // note(sf, 2022-01-28): c.f. `Decl_defs.element`
@@ -102,6 +104,7 @@ pub struct FoldedClass<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_defs.decl_class_type`
     pub name: TypeName,
     pub pos: R::Pos,
+    pub kind: ClassishKind,
     pub substs: TypeNameMap<SubstContext<R>>,
     pub ancestors: TypeNameMap<DeclTy<R>>,
     pub props: PropNameMap<FoldedElement>,

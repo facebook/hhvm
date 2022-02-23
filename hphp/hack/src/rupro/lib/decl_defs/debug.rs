@@ -137,6 +137,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         let FoldedClass {
             name,
             pos,
+            kind,
             substs,
             ancestors,
             props,
@@ -156,6 +157,8 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         if std::mem::size_of::<R::Pos>() != 0 {
             s.field("pos", pos);
         }
+
+        s.field("kind", kind);
 
         if !substs.is_empty() {
             s.field("substs", substs);

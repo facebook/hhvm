@@ -408,6 +408,7 @@ impl<R: Reason> DeclFolder<R> {
         Arc::new(FoldedClass {
             name: sc.name.id(),
             pos: sc.name.pos().clone(),
+            kind: sc.kind,
             substs: inh.substs,
             ancestors,
             props,

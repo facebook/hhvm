@@ -35,7 +35,7 @@ namespace {
    * @param bool $condition - If true, break, otherwise, continue.
    */
   <<__Native("NoFCallBuiltin")>>
-  function hphpd_break(bool $condition = true): void;
+  function hphpd_break(bool $condition = true)[]: void;
 
 
   /**
@@ -56,7 +56,7 @@ namespace {
    *   resumed), FALSE if no debugger was attached.
    */
   <<__Native("NoFCallBuiltin")>>
-  function hphp_debug_break(bool $condition = true): bool;
+  function hphp_debug_break(bool $condition = true)[]: bool;
 
   /**
    * Customizes the behavior of the debugger by setting an option flag on or off

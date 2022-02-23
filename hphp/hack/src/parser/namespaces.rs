@@ -403,6 +403,7 @@ pub mod toplevel_elaborator {
         p.iter_mut().for_each(|x| match x {
             Def::Class(c) => c.file_attributes = file_attrs.clone(),
             Def::Fun(f) => f.file_attributes = file_attrs.clone(),
+            Def::Typedef(t) => t.file_attributes = file_attrs.clone(),
             _ => {}
         });
     }

@@ -463,7 +463,21 @@
             (KeyValCollection (Dict, None, [(((string), [35:15-18], (String "a")), ((int), [35:22-23], (Int "1"))); (((string), [35:25-28], (String "b")), ((int), [35:32-33], (Int "2")))])))]
           }
          ];
-       t_file_attributes = []; t_mode = Mstrict; t_vis = Transparent;
+       t_file_attributes =
+       [{ fa_user_attributes =
+          [{ ua_name = ([3:9-11], "\\Fi");
+             ua_params =
+             [((dict<string, int>), [3:12-36],
+               (KeyValCollection (Dict, None, [(((string), [3:17-20], (String "a")), ((int), [3:24-25], (Int "1"))); (((string), [3:27-30], (String "b")), ((int), [3:34-35], (Int "2")))])))]
+             }
+            ];
+          fa_namespace =
+          { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+            ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+            ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false }
+          }
+         ];
+       t_mode = Mstrict; t_vis = Transparent;
        t_namespace =
        { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
          ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 

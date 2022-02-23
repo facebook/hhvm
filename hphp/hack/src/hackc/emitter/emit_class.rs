@@ -25,7 +25,7 @@ use hhvm_hhbc_defs_ffi::ffi::{FCallArgsFlags, FatalOp, ReadonlyOp, SpecialClsRef
 use hhvm_types_ffi::ffi::{Attr, TypeConstraintFlags};
 use instruction_sequence::{instr, InstrSeq, Result};
 use itertools::Itertools;
-use local::Local;
+use local::{Local, LocalId};
 use naming_special_names_rust as special_names;
 use oxidized::{
     ast,
@@ -304,6 +304,8 @@ fn from_class_elt_constants<'a, 'arena, 'decl>(
         .consts
         .iter()
         .map(|x| {
+            // start unnamed local numbers at 1 for constants to not clobber $constVars
+            emitter.local_gen_mut().reset(LocalId { idx: 1 });
             let (is_abstract, init_opt) = match &x.kind {
                 ClassConstKind::CCAbstract(default) => (true, default.as_ref()),
                 ClassConstKind::CCConcrete(expr) => (false, Some(expr)),

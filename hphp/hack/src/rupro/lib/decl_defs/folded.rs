@@ -3,14 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::decl_defs::{
-    CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, Tparam, Typeconst,
-    XhpAttribute,
+    ty::XhpEnumValue, CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, Tparam,
+    Typeconst, WhereConstraint, XhpAttribute,
 };
 use crate::reason::Reason;
 use pos::{
-    ClassConstNameMap, MethodNameMap, Positioned, PropNameMap, TypeConstName, TypeConstNameMap,
-    TypeName, TypeNameMap,
+    ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap, Symbol, TypeConstName,
+    TypeConstNameMap, TypeName, TypeNameMap,
 };
+use std::collections::BTreeMap;
 
 pub use oxidized::ast_defs::{Abstraction, ClassishKind};
 
@@ -105,6 +106,15 @@ pub struct FoldedClass<R: Reason> {
     pub name: TypeName,
     pub pos: R::Pos,
     pub kind: ClassishKind,
+    pub is_final: bool,
+    pub is_const: bool,
+    pub is_internal: bool,
+    pub is_xhp: bool,
+    pub has_xhp_keyword: bool,
+    pub support_dynamic_type: bool,
+    pub module: Option<Positioned<ModuleName, R::Pos>>,
+    pub tparams: Box<[Tparam<R, DeclTy<R>>]>,
+    pub where_constraints: Box<[WhereConstraint<DeclTy<R>>]>,
     pub substs: TypeNameMap<SubstContext<R>>,
     pub ancestors: TypeNameMap<DeclTy<R>>,
     pub props: PropNameMap<FoldedElement>,
@@ -114,7 +124,7 @@ pub struct FoldedClass<R: Reason> {
     pub constructor: Option<FoldedElement>,
     pub consts: ClassConstNameMap<ClassConst<R>>,
     pub type_consts: TypeConstNameMap<TypeConst<R>>,
-    pub tparams: Box<[Tparam<R, DeclTy<R>>]>,
+    pub xhp_enum_values: BTreeMap<Symbol, Box<[XhpEnumValue]>>,
 }
 
 impl<R: Reason> FoldedClass<R> {

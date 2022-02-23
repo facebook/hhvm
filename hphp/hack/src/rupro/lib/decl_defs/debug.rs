@@ -138,6 +138,15 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             name,
             pos,
             kind,
+            is_final,
+            is_const,
+            is_internal,
+            is_xhp,
+            has_xhp_keyword,
+            support_dynamic_type,
+            module,
+            tparams,
+            where_constraints,
             substs,
             ancestors,
             props,
@@ -147,7 +156,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             constructor,
             consts,
             type_consts,
-            tparams,
+            xhp_enum_values,
         } = self;
 
         let mut s = f.debug_struct("FoldedClass");
@@ -159,6 +168,34 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
 
         s.field("kind", kind);
+
+        if *is_final {
+            s.field("is_final", is_final);
+        }
+        if *is_const {
+            s.field("is_const", is_const);
+        }
+        if *is_internal {
+            s.field("is_internal", is_internal);
+        }
+        if *is_xhp {
+            s.field("is_xhp", is_xhp);
+        }
+        if *has_xhp_keyword {
+            s.field("has_xhp_keyword", has_xhp_keyword);
+        }
+        if *support_dynamic_type {
+            s.field("support_dynamic_type", support_dynamic_type);
+        }
+        if let Some(module) = module {
+            s.field("module", module);
+        }
+        if !tparams.is_empty() {
+            s.field("tparams", tparams);
+        }
+        if !where_constraints.is_empty() {
+            s.field("where_constraints", where_constraints);
+        }
 
         if !substs.is_empty() {
             s.field("substs", substs);
@@ -187,8 +224,8 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         if !type_consts.is_empty() {
             s.field("type_consts", type_consts);
         }
-        if !tparams.is_empty() {
-            s.field("tparams", tparams);
+        if !xhp_enum_values.is_empty() {
+            s.field("xhp_enum_values", xhp_enum_values);
         }
 
         s.finish()

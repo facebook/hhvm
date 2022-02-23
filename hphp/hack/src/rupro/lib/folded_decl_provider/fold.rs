@@ -409,6 +409,21 @@ impl<R: Reason> DeclFolder<R> {
             name: sc.name.id(),
             pos: sc.name.pos().clone(),
             kind: sc.kind,
+            is_final: sc.is_final,
+            is_const: sc
+                .user_attributes
+                .iter()
+                .any(|ua| ua.name.id() == self.special_names.user_attributes.uaConst),
+            is_internal: sc
+                .user_attributes
+                .iter()
+                .any(|ua| ua.name.id() == self.special_names.user_attributes.uaInternal),
+            is_xhp: sc.is_xhp,
+            support_dynamic_type: sc.support_dynamic_type,
+            has_xhp_keyword: sc.has_xhp_keyword,
+            module: sc.module.clone(),
+            tparams: sc.tparams.clone(),
+            where_constraints: sc.where_constraints.clone(),
             substs: inh.substs,
             ancestors,
             props,
@@ -418,7 +433,7 @@ impl<R: Reason> DeclFolder<R> {
             constructor,
             consts,
             type_consts,
-            tparams: Default::default(), //TODO
+            xhp_enum_values: sc.xhp_enum_values.clone(),
         })
     }
 }

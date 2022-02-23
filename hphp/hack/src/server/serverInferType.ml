@@ -22,6 +22,21 @@ let is_shape_indexing env (_, _, expr_) =
     | _ -> false)
   | _ -> false
 
+let class_const_ty env (cc : Tast.class_const) : Tast.ty option =
+  let open Aast in
+  match cc.cc_type with
+  | Some hint ->
+    let decl_ty = Tast_env.hint_to_ty env hint in
+    let (_, ty) = Tast_env.localize_no_subst env ~ignore_errors:true decl_ty in
+    Some ty
+  | None ->
+    let init_expr =
+      match cc.cc_kind with
+      | CCConcrete e -> Some e
+      | CCAbstract e_opt -> e_opt
+    in
+    init_expr >>| fun (ty, _, _) -> ty
+
 (** Return the type of the smallest expression node whose associated span
  * (the Pos.t in its Tast.ExprAnnotation.t) contains the given position.
  * "Smallest" here refers to the size of the node's associated span, in terms of
@@ -128,6 +143,17 @@ let base_visitor line char =
           self#merge_opt (Some (pos, env, ty)) (super#on_class_id env cid)
         else
           super#on_class_id env cid
+
+    method! on_class_const env cc =
+      let acc = super#on_class_const env cc in
+
+      let (pos, _) = cc.Aast.cc_id in
+      if Pos.inside pos line char then
+        match class_const_ty env cc with
+        | Some ty -> self#merge_opt (Some (pos, env, ty)) acc
+        | None -> acc
+      else
+        acc
   end
 
 (** Return the type of the node associated with exactly the given range.

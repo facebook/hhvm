@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/hash-table.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/unaligned-typed-value.h"
 
 #include "hphp/util/type-scan.h"
 
@@ -29,10 +30,10 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 // This method does the actual logic for computing a size given a layout,
-// using `stores_typed_values` to select between layout types.
+// using `stores_unaligned_typed_values` to select between layout types.
 constexpr size_t bytes2VanillaVecCapacity(size_t bytes) {
-  if (VanillaVec::stores_typed_values) {
-    return bytes / sizeof(TypedValue);
+  if (VanillaVec::stores_unaligned_typed_values) {
+    return bytes / sizeof(UnalignedTypedValue);
   } else {
     static_assert(sizeof(Value) == 8);
     static_assert(sizeof(DataType) == 1);
@@ -78,9 +79,9 @@ static_assert(
 
 //////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE TypedValue* VanillaVec::entries(ArrayData* arr) {
-  assertx(stores_typed_values);
-  return reinterpret_cast<TypedValue*>(arr + 1);
+ALWAYS_INLINE UnalignedTypedValue* VanillaVec::entries(ArrayData* arr) {
+  assertx(stores_unaligned_typed_values);
+  return reinterpret_cast<UnalignedTypedValue*>(arr + 1);
 }
 
 ALWAYS_INLINE ptrdiff_t VanillaVec::entriesOffset() {
@@ -90,15 +91,14 @@ ALWAYS_INLINE ptrdiff_t VanillaVec::entriesOffset() {
 ALWAYS_INLINE
 size_t VanillaVec::capacityToSizeBytes(size_t capacity) {
   const auto base = sizeof(ArrayData);
-  if constexpr (stores_typed_values) {
-    return base + capacity * sizeof(TypedValue);
-  }
   // When we use the PackedBlock layout, we can store each entry in 9 bytes
   // (1 byte for the type and 8 bytes for the value), but we must round up to
   // a multiple of 8 to handle the leftover types.
   //
   // We round to up to a multiple of 16 since our allocations are aligned.
-  auto const size = base + capacity * (sizeof(DataType) + sizeof(Value));
+  auto const size = stores_unaligned_typed_values ?
+                    base + capacity * sizeof(UnalignedTypedValue) :
+                    base + capacity * (sizeof(DataType) + sizeof(Value));
   return (size + 15) & size_t(-16);
 }
 
@@ -124,14 +124,9 @@ uint16_t VanillaVec::packSizeIndexAndAuxBits(uint8_t idx, uint8_t aux) {
 
 inline void VanillaVec::scan(const ArrayData* a, type_scan::Scanner& scanner) {
   assertx(checkInvariants(a));
-  if constexpr (stores_typed_values) {
-    const auto* data = VanillaVec::entries(const_cast<ArrayData*>(a));
-    scanner.scan(*data, a->size() * sizeof(*data));
-  } else {
-    for (uint32_t i = 0; i < a->size(); ++i) {
-      const auto lval = LvalUncheckedInt(const_cast<ArrayData*>(a), i);
-      if (isRefcountedType(type(lval))) scanner.scan(val(lval).pcnt);
-    }
+  for (uint32_t i = 0; i < a->size(); ++i) {
+    const auto lval = LvalUncheckedInt(const_cast<ArrayData*>(a), i);
+    if (isRefcountedType(type(lval))) scanner.scan(val(lval).pcnt);
   }
 }
 

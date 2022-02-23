@@ -57,9 +57,6 @@ bool loadsCell(const IRInstruction& inst) {
   case LdMem:
     return arch_allows && inst.src(0)->isA(TPtr);
 
-  case LdVecElem:
-    return arch_allows && VanillaVec::stores_typed_values;
-
   case LdStk:
   case LdLoc:
   case LdContField:
@@ -114,8 +111,6 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
     return srcIdx == 1;
   case StClsInitElem:
     return srcIdx == 1;
-  case InitVecElem:
-    return srcIdx == 1 && VanillaVec::stores_typed_values;
   case StMem:
   case StMemMeta:
     return srcIdx == 1 && inst.src(0)->isA(TPtr);

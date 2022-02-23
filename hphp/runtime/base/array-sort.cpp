@@ -257,15 +257,9 @@ void VanillaVec::Sort(ArrayData* ad, int sort_flags, bool ascending) {
   assertx(!ad->hasMultipleRefs());
   auto a = ad;
   SortFlavor flav = preSort(ad);
-  if constexpr (stores_typed_values) {
-    auto const data_begin = VanillaVec::entries(ad);
-    auto const data_end = data_begin + a->m_size;
-    CALL_SORT(TVAccessor);
-  } else {
-    auto data_begin = VanillaLvalIterator { ad, 0 };
-    auto data_end = data_begin + a->m_size;
-    CALL_SORT(VanillaLvalAccessor);
-  }
+  auto data_begin = VanillaLvalIterator { ad, 0 };
+  auto data_end = data_begin + a->m_size;
+  CALL_SORT(VanillaLvalAccessor);
 }
 
 #undef SORT_CASE
@@ -351,17 +345,10 @@ bool VanillaVec::Usort(ArrayData* ad, const Variant& cmp_function) {
   if (!ctx.func) {
     return false;
   }
-  if constexpr (stores_typed_values) {
-    ElmUCompare<TVAccessor> comp;
-    comp.ctx = &ctx;
-    auto const data = VanillaVec::entries(ad);
-    Sort::sort(data, data + ad->m_size, comp);
-  } else {
-    ElmUCompare<VanillaLvalAccessor> comp;
-    comp.ctx = &ctx;
-    auto data = VanillaLvalIterator { ad, 0 };
-    Sort::sort(data, data + ad->m_size, comp);
-  }
+  ElmUCompare<VanillaLvalAccessor> comp;
+  comp.ctx = &ctx;
+  auto data = VanillaLvalIterator { ad, 0 };
+  Sort::sort(data, data + ad->m_size, comp);
   return true;
 }
 

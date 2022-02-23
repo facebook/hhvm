@@ -37,7 +37,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * If VanillaVec::stores_typed_values is false, the entries of a VanillaVec
+ * If VanillaVec::stores_unaligned_typed_values is false, the entries of a VanillaVec
  * will be stored in a PackedBlock format. Each block consists of 8 DataTypes
  * followed by 8 Values, for a total size of 72 bytes.
  *
@@ -147,7 +147,7 @@ ALWAYS_INLINE bool PackedBlock::AllTypesAreUncounted(size_t n) {
 }
 
 ALWAYS_INLINE PackedBlock PackedBlock::BlockAt(ArrayData* ad, size_t b) {
-  assertx(!VanillaVec::stores_typed_values);
+  assertx(!VanillaVec::stores_unaligned_typed_values);
   return PackedBlock { reinterpret_cast<Value*>(ad + 1) } + b;
 }
 
@@ -178,7 +178,7 @@ ALWAYS_INLINE tv_lval PackedBlock::LvalAt(ArrayData* ad, size_t k) {
   // This method implements the optimization above and checks it against the
   // simpler computation using the PackedBlock API.
   //
-  assertx(!VanillaVec::stores_typed_values);
+  assertx(!VanillaVec::stores_unaligned_typed_values);
   auto const x = k & size_t(-8);
   auto const a = reinterpret_cast<char*>(ad + 1) + 8 * x;
   auto const b = reinterpret_cast<char*>(ad + 1) + 8 * k;
@@ -191,7 +191,7 @@ ALWAYS_INLINE tv_lval PackedBlock::LvalAt(ArrayData* ad, size_t k) {
 }
 
 VanillaVec::EntryOffset PackedBlock::EntryOffset(size_t i) {
-  assertx(!VanillaVec::stores_typed_values);
+  assertx(!VanillaVec::stores_unaligned_typed_values);
   auto const div = i / kNumItems;
   auto const mod = i % kNumItems;
   auto const base = sizeof(ArrayData) + kByteSize * div;
@@ -204,7 +204,7 @@ int64_t PackedBlock::PointerToIndex(const ArrayData* ad, const void* ptr) {
   //  1. ptr is before the first array entry.
   //  2. ptr points into some block's 8-byte DataType prefix.
   //  2. ptr points into some block's 64-byte Value suffix.
-  assertx(!VanillaVec::stores_typed_values);
+  assertx(!VanillaVec::stores_unaligned_typed_values);
   auto const base = reinterpret_cast<const char*>(ad + 1);
   auto const diff = reinterpret_cast<const char*>(ptr) - base;
   auto const div = diff / kByteSize;

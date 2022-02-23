@@ -793,24 +793,14 @@ irlower::LvalPtrs implVecElemLval(IRLS& env, Vreg rarr,
     }
   }
 
-  if constexpr (VanillaVec::stores_typed_values) {
-    // Compute `rarr + ridx * sizeof(TypedValue) + VanillaVec::entriesOffset().
-    //
-    // The logic of `scaledIdx * 16` is split in the following two instructions,
-    // in order to save a byte in the shl instruction.
-    //
-    // TODO(#7728856): We should really move this into vasm-x64.cpp...
-    auto idxl = v.makeReg();
-    auto scaled_idxl = v.makeReg();
-    auto scaled_idx = v.makeReg();
-    v << movtql{ridx, idxl};
-    v << shlli{1, idxl, scaled_idxl, v.makeReg()};
-    v << movzlq{scaled_idxl, scaled_idx};
-
-    auto const valPtr = rarr[
-      scaled_idx * int(sizeof(TypedValue) / 2) + VanillaVec::entriesOffset()
-    ];
-    return {valPtr + TVOFF(m_type), valPtr};
+  if constexpr (VanillaVec::stores_unaligned_typed_values) {
+    // Compute `rarr + ridx * sizeof(UnalignedTypedValue) + VanillaVec::entriesOffset().
+    static_assert(IMPLIES(VanillaVec::stores_unaligned_typed_values, sizeof(UnalignedTypedValue) == 9));
+    auto ridx_times_9 = v.makeReg();
+    v << lea{ridx[ridx * 8], ridx_times_9};
+    auto const type_offset = VanillaVec::entriesOffset() + offsetof(UnalignedTypedValue, m_type);
+    auto const data_offset = VanillaVec::entriesOffset() + offsetof(UnalignedTypedValue, m_data);
+    return {rarr[ridx_times_9] + type_offset, rarr[ridx_times_9] + data_offset};
   } else {
     // See PackedBlock::LvalAt for an explanation of this math.
     auto const x = v.makeReg();

@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/unaligned-typed-value.h"
 
 #include "hphp/util/compact-tagged-ptrs.h"
 #include "hphp/util/compilation-flags.h"
@@ -136,6 +137,10 @@ public:
   TYPE_SCAN_CUSTOM() {
     if (isRefcountedType(type())) scanner.scan(val().pcnt);
   }
+
+  /* implicit */ tv_val(UnalignedTypedValue* utv)
+      : tv_val{&utv->m_type, &utv->m_data}
+  {}
 
 private:
   template<bool, typename> friend struct tv_val;

@@ -375,13 +375,8 @@ ArrayData* VanillaVec::MakePackedImpl(uint32_t size,
         assertx(tvIsPlausible(*(values + i)));
       }
     }
-    if constexpr (stores_typed_values) {
-      auto const data = VanillaVec::entries(ad);
-      memcpy16_inline(data, values, sizeof(TypedValue) * size);
-    } else {
-      for (uint32_t i = 0; i < size; ++values, ++i) {
-        tvCopy(*values, LvalUncheckedInt(ad, i));
-      }
+    for (uint32_t i = 0; i < size; ++values, ++i) {
+      tvCopy(*values, LvalUncheckedInt(ad, i));
     }
   }
 
@@ -426,7 +421,7 @@ void VanillaVec::Release(ArrayData* ad) {
   assertx(ad->isRefCounted());
   assertx(ad->hasExactlyOneRef());
 
-  if constexpr (stores_typed_values) {
+  if constexpr (stores_unaligned_typed_values) {
     for (uint32_t i = 0; i < ad->m_size; ++i) {
       tvDecRefGen(LvalUncheckedInt(ad, i));
     }
@@ -535,8 +530,8 @@ arr_lval VanillaVec::LvalInt(ArrayData* adIn, int64_t k) {
 
 tv_lval VanillaVec::LvalUncheckedInt(ArrayData* ad, int64_t k) {
   assertx(size_t(k) < VanillaVec::capacity(ad));
-  return stores_typed_values ? &VanillaVec::entries(ad)[k]
-                             : PackedBlock::LvalAt(ad, k);
+  return stores_unaligned_typed_values ? &VanillaVec::entries(ad)[k]
+                                       : PackedBlock::LvalAt(ad, k);
 }
 
 arr_lval VanillaVec::LvalStr(ArrayData* adIn, StringData* key) {
@@ -691,7 +686,7 @@ ArrayData* VanillaVec::Prepend(ArrayData* adIn, TypedValue v) {
 
   auto const ad = PrepareForInsert(adIn, adIn->cowCheck());
   auto const size = ad->m_size;
-  if constexpr (stores_typed_values) {
+  if constexpr (stores_unaligned_typed_values) {
     auto const data = VanillaVec::entries(ad);
     std::memmove(data + 1, data, sizeof *data * size);
   } else {
@@ -816,18 +811,18 @@ bool VanillaVec::VecNotSame(const ArrayData* ad1, const ArrayData* ad2) {
 //////////////////////////////////////////////////////////////////////
 
 VanillaVec::EntryOffset VanillaVec::entryOffset(size_t i) {
-  if constexpr (stores_typed_values) {
-    auto const base = sizeof(ArrayData) + i * sizeof(TypedValue);
-    return {ptrdiff_t(base + offsetof(TypedValue, m_type)),
-            ptrdiff_t(base + offsetof(TypedValue, m_data))};
+  if constexpr (stores_unaligned_typed_values) {
+    auto const base = sizeof(ArrayData) + i * sizeof(UnalignedTypedValue);
+    return {ptrdiff_t(base + offsetof(UnalignedTypedValue, m_type)),
+            ptrdiff_t(base + offsetof(UnalignedTypedValue, m_data))};
   }
   return PackedBlock::EntryOffset(i);
 }
 
 int64_t VanillaVec::pointerToIndex(const ArrayData* ad, const void* ptr) {
   const auto index = [&]() {
-    if constexpr (stores_typed_values) {
-      const auto tv = reinterpret_cast<const TypedValue*>(ptr);
+    if constexpr (stores_unaligned_typed_values) {
+      const auto tv = reinterpret_cast<const UnalignedTypedValue*>(ptr);
       return tv - VanillaVec::entries(const_cast<ArrayData*>(ad));
     } else {
       return PackedBlock::PointerToIndex(ad, ptr);

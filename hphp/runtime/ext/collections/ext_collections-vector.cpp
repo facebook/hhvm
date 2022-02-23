@@ -181,9 +181,9 @@ TypedValue BaseVector::removeKeyImpl(int64_t k) {
   mutate();
   const auto result = *lvalAt(k);
   if (k+1 < m_size) {
-    if constexpr (VanillaVec::stores_typed_values) {
+    if constexpr (VanillaVec::stores_unaligned_typed_values) {
       auto* data = VanillaVec::entries(arrayData());
-      size_t bytes = (m_size-(k+1)) * sizeof(TypedValue);
+      size_t bytes = (m_size-(k+1)) * sizeof(UnalignedTypedValue);
       std::memmove(&data[k], &data[k+1], bytes);
     } else {
       uint32_t i = k, end = m_size - 1;

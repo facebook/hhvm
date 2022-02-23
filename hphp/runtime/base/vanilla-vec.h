@@ -26,7 +26,9 @@
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/unaligned-typed-value.h"
 
+#include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {
@@ -46,8 +48,10 @@ struct APCHandle;
  * VanillaVec is the main array layout for vecs, backing a vector-like
  * array with arbitrary values. We support two layouts for VanillaVec:
  *
- *  - If "stores_typed_values" is true, it's an array of TypedValue.
- *    Each TypedValue takes up 16 bytes, due to alignment.
+ *  - If "stores_unaligned_typed_values" is true, it's an array of UnalignedTypedValue.
+ *    Each UnalignedTypedValue takes up 9 bytes, with the 8 byte value immediately
+ *    followed by the associated 1 byte type; the next UnalignedTypedValue starts
+ *    at the next byte, etc.
  *
  *  - Otherwise, it's stored as an array of PackedBlock "8-up" blocks.
  *    Each block stores 8 types, then 8 values, in a total of 72 bytes.
@@ -57,10 +61,11 @@ struct APCHandle;
  * the element with the block. Layout choice is a compile-time switch.
  */
 struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
-  // Use the "8 type bytes / 8 value words" chunked layout.
-  static constexpr bool stores_typed_values = false;
+  // If false, use the "8 type bytes / 8 value words" chunked layout.
+  // If true, stored 9 byte unaligned typed values.
+  static constexpr bool stores_unaligned_typed_values = arch() == Arch::X64;
 
-  // The default capacity of PackedLayout, used if capacity = 0.
+  // The default capacity of PackedLayout and unaligned type values, used if capacity = 0.
   static constexpr uint32_t SmallSize = 5;
 
   // The smallest and largest MM size classes we use for PackedLayouts.
@@ -128,8 +133,8 @@ struct VanillaVec final : type_scan::MarkCollectable<VanillaVec> {
 
   static bool checkInvariants(const ArrayData*);
 
-  // This method can only be called if `stores_typed_values` is true.
-  static TypedValue* entries(ArrayData*);
+  // This method can only be called if `stores_unaligned_typed_values` is true.
+  static UnalignedTypedValue* entries(ArrayData*);
 
   // This method can be called for any layout, to get a layout start offset.
   static ptrdiff_t entriesOffset();

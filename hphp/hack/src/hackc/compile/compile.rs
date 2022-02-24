@@ -251,6 +251,32 @@ pub struct Profile {
     pub parsing_t: f64,
     pub codegen_t: f64,
     pub printing_t: f64,
+
+    /// Emitter arena allocation volume in bytes from codegen phase.
+    pub codegen_bytes: i64,
+}
+
+impl std::ops::AddAssign for Profile {
+    fn add_assign(&mut self, p: Self) {
+        self.parsing_t += p.parsing_t;
+        self.codegen_t += p.codegen_t;
+        self.printing_t += p.printing_t;
+        self.codegen_bytes += p.codegen_bytes;
+    }
+}
+
+impl std::ops::Add for Profile {
+    type Output = Self;
+    fn add(mut self, p2: Self) -> Self {
+        self += p2;
+        self
+    }
+}
+
+impl Profile {
+    pub fn total_sec(&self) -> f64 {
+        self.parsing_t + self.codegen_t + self.printing_t
+    }
 }
 
 pub fn emit_fatal_unit<S: AsRef<str>>(
@@ -285,6 +311,7 @@ pub fn emit_fatal_unit<S: AsRef<str>>(
     Ok(())
 }
 
+/// Compile Hack source code and write HHAS text to `writer`.
 pub fn from_text<'arena, 'decl, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
@@ -312,6 +339,7 @@ pub fn from_text<'arena, 'decl, S: AsRef<str>>(
 
     Ok(profile.map(|mut prof| {
         prof.printing_t = printing_t;
+        prof.codegen_bytes = alloc.allocated_bytes() as i64;
         prof
     }))
 }

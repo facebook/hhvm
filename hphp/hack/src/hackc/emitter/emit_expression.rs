@@ -3107,7 +3107,8 @@ fn emit_function_pointer<'a, 'arena, 'decl>(
         ast::FunctionPtrId::FPId(id) => emit_hh_fun(e, env, pos, targs, id.name())?,
         // class_meth
         ast::FunctionPtrId::FPClassConst(cid, method_id) => {
-            // TODO(hrust) should accept `let method_id = method::MethodType::from_ast_name(&(cc.1).1);`
+            // TODO(hrust) should accept
+            //   `let method_id = method::MethodType::from_ast_name(&(cc.1).1);`
             let method_id = method::MethodType::new(Str::new_str(
                 alloc,
                 string_utils::strip_global_ns(&method_id.1),
@@ -4373,7 +4374,7 @@ fn emit_class_const<'a, 'arena, 'decl>(
                     instr::classname()
                 }
             } else {
-                // TODO(hrust) enabel `let const_id = r#const::ConstType::from_ast_name(&id.1);`,
+                // TODO(hrust) enable `let const_id = r#const::ConstType::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
                 let const_id = r#const::ConstType::new(Str::new_str(
                     alloc,

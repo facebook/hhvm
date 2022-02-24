@@ -13,7 +13,7 @@ use options::Options;
 use oxidized::relative_path::{self, RelativePath};
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
-use stack_limit::{StackLimit, MI};
+use stack_limit::StackLimit;
 use structopt::StructOpt;
 
 use std::{
@@ -144,7 +144,8 @@ fn process_single_file_impl(
     filepath: &Path,
     content: &[u8],
     stack_limit: &StackLimit,
-) -> anyhow::Result<(Vec<u8>, Option<Profile>)> {
+) -> anyhow::Result<(Vec<u8>, Profile)> {
+    use compile::{Env, EnvFlags, HHBCFlags, NativeEnv, ParserFlags};
     if opts.verbosity > 1 {
         eprintln!("processing file: {}", filepath.display());
     }
@@ -152,62 +153,65 @@ fn process_single_file_impl(
     let rel_path = RelativePath::make(relative_path::Prefix::Dummy, filepath.to_owned());
     let source_text = SourceText::make(RcOc::new(rel_path.clone()), content);
     let mut output = Vec::new();
-    let mut flags = compile::EnvFlags::empty();
+    let mut flags = EnvFlags::empty();
     flags.set(
-        compile::EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
+        EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
         opts.disable_toplevel_elaboration,
     );
-    flags.set(compile::EnvFlags::DUMP_SYMBOL_REFS, opts.dump_symbol_refs);
-    let env: compile::Env<String> = compile::Env {
+    flags.set(EnvFlags::DUMP_SYMBOL_REFS, opts.dump_symbol_refs);
+    let hhbc_flags = HHBCFlags::EMIT_CLS_METH_POINTERS
+        | HHBCFlags::EMIT_METH_CALLER_FUNC_POINTERS
+        | HHBCFlags::FOLD_LAZY_CLASS_KEYS
+        | HHBCFlags::LOG_EXTERN_COMPILER_PERF;
+    let parser_flags = ParserFlags::ENABLE_ENUM_CLASSES;
+    let native_env = NativeEnv {
         filepath: rel_path,
-        config_jsons: vec![],
-        config_list: vec![],
+        aliased_namespaces: "",
+        include_roots: "",
+        emit_class_pointers: 0,
+        check_int_overflow: 0,
+        hhbc_flags,
+        parser_flags,
         flags,
     };
+    let env = Env {
+        filepath: native_env.filepath.clone(),
+        config_jsons: Default::default(),
+        config_list: Default::default(),
+        flags: native_env.flags,
+    };
     let alloc = bumpalo::Bump::new();
-    compile::from_text(
+    let profile = compile::from_text(
         &alloc,
         &env,
         stack_limit,
         &mut output,
         source_text,
-        None,
+        Some(&native_env),
         &NoDeclProvider,
-    )?;
-    Ok((output, None))
+    )?
+    .expect("LOG_EXTERN_COMPILE_PERF was set");
+    Ok((output, profile))
 }
 
 fn process_single_file_with_retry(
     opts: &SingleFileOpts,
     filepath: PathBuf,
     content: Vec<u8>,
-) -> anyhow::Result<(Vec<u8>, Option<Profile>)> {
+) -> anyhow::Result<(Vec<u8>, Profile)> {
     let ctx = &Arc::new((opts.clone(), filepath, content));
-    let retryable = |stack_limit: &StackLimit, _nonmain_stack_size: Option<usize>| {
+    stack_limit::with_elastic_stack(|stack_limit| {
         let new_ctx = Arc::clone(ctx);
         let (opts, filepath, content) = new_ctx.as_ref();
         process_single_file_impl(opts, filepath, content.as_slice(), stack_limit)
-    };
-
-    // Assume peak is 2.5x of stack.
-    // This is initial estimation, need to be improved later.
-    let stack_slack = |stack_size| stack_size * 6 / 10;
-
-    let on_retry = &mut |_| ();
-
-    let job = stack_limit::retry::Job {
-        nonmain_stack_min: 13 * MI,
-        nonmain_stack_max: None,
-        ..Default::default()
-    };
-    job.with_elastic_stack(retryable, on_retry, stack_slack)?
+    })?
 }
 
 pub(crate) fn process_single_file(
     opts: &SingleFileOpts,
     filepath: PathBuf,
     content: Vec<u8>,
-) -> anyhow::Result<(Vec<u8>, Option<Profile>)> {
+) -> anyhow::Result<(Vec<u8>, Profile)> {
     match std::panic::catch_unwind(|| process_single_file_with_retry(opts, filepath, content)) {
         Ok(r) => r,
         Err(panic) => match panic.downcast::<String>() {

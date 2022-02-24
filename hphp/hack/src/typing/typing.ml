@@ -530,13 +530,32 @@ let as_expr env ty1 pe e =
         tk,
         tv )
   in
-  let rec distribute_union env ty =
+  let is_nonnull ty =
+    let (_env, ty) = Env.expand_type env ty in
+    match get_node ty with
+    | Tnonnull -> true
+    | _ -> false
+  in
+  let rec distribute_union ~expected_ty env ty =
     let (env, ty) = Env.expand_type env ty in
     match get_node ty with
+    (* Special case for nonnull & tyl <: expected_ty which
+     * is equivalent to tyl <: ?expected_ty. We need this in the
+     * case that tyl is a type variable
+     *)
+    | Tintersection tyl when List.exists tyl ~f:is_nonnull ->
+      let tyl = List.filter tyl ~f:(fun t -> not (is_nonnull t)) in
+      let expected_ty =
+        MakeType.nullable_locl (get_reason expected_ty) expected_ty
+      in
+      distribute_union
+        ~expected_ty
+        env
+        (MakeType.intersection (get_reason ty) tyl)
     | Tunion tyl ->
       let (env, errs) =
         List.fold tyl ~init:(env, []) ~f:(fun (env, errs) ty ->
-            let (env, err) = distribute_union env ty in
+            let (env, err) = distribute_union ~expected_ty env ty in
             (env, err :: errs))
       in
       (env, union_coercion_errs errs)
@@ -575,7 +594,7 @@ let as_expr env ty1 pe e =
         (env, err)
   in
 
-  let (env, err_res) = distribute_union env ty1 in
+  let (env, err_res) = distribute_union ~expected_ty env ty1 in
   let err_opt =
     match err_res with
     | Ok _ -> None

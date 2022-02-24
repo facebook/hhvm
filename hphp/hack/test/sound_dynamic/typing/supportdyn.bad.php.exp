@@ -26,20 +26,16 @@ File "supportdyn.bad.php", line 13, characters 3-5:
 Typing error (Typing[4110])
   File "supportdyn.bad.php", line 13, characters 3-9:
   Expected `null` or an object with property `p` (use of `?->` operator)
-  File "supportdyn.bad.php", line 6, characters 26-32:
-  But got `nonnull`
-  File "supportdynamic.hhi", line 6, characters 29-29:
-    via this generic `T`
+  File "supportdyn.bad.php", line 6, characters 15-33:
+  But got `supportdyn<nonnull>`
 File "supportdyn.bad.php", line 14, characters 9-11:
-Expected an object convertible to string but got a nonnull value (Typing[4318])
+Expected an object convertible to string but got a value of type supportdyn<nonnull> (Typing[4318])
 File "supportdyn.bad.php", line 15, characters 3-5:
 Typing error (Typing[4110])
   File "supportdyn.bad.php", line 15, characters 3-9:
   Expected `num` because this is used in an arithmetic operation
-  File "supportdyn.bad.php", line 6, characters 26-32:
-  But got `nonnull`
-  File "supportdynamic.hhi", line 6, characters 29-29:
-    via this generic `T`
+  File "supportdyn.bad.php", line 6, characters 15-33:
+  But got `supportdyn<nonnull>`
 File "supportdyn.bad.php", line 19, characters 12-14:
 Invalid `foreach` (Typing[4110])
   File "supportdyn.bad.php", line 19, characters 12-14:

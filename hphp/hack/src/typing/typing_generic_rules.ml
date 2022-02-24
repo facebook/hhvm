@@ -126,6 +126,13 @@ let apply_rules_with_array_index_value_errs
       let (env, val_err_res) = intersect_errs env val_errs in
       let (env, ty) = Typing_intersection.intersect_list env r tys in
       (env, ty, arr_err_res, key_err_res, val_err_res)
+    (* Preserve supportdyn<_> across operation *)
+    | (r, Tnewtype (cid, _, bound)) when String.equal cid SN.Classes.cSupportDyn
+      ->
+      let (env, ty, arr_errs, key_errs, val_errs) =
+        iter ~is_nonnull env bound
+      in
+      (env, Typing_make_type.supportdyn r ty, arr_errs, key_errs, val_errs)
     (* For unions, just apply rule of components and compute union of result *)
     | (r, Tunion tyl) ->
       let (env, tys, arr_errs, key_errs, val_errs) =

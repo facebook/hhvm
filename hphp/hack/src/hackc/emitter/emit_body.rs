@@ -466,7 +466,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     });
 
     Ok(HhasBody {
-        body_instrs: Slice::from_vec(alloc, body_instrs.compact_iter().cloned().collect()),
+        body_instrs: body_instrs.compact(alloc),
         decl_vars: Slice::fill_iter(
             alloc,
             decl_vars.into_iter().map(|s| Str::new_str(alloc, &s)),

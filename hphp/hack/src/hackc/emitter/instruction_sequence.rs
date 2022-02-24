@@ -44,58 +44,42 @@ pub fn unrecoverable(msg: impl std::convert::Into<std::string::String>) -> Error
 /// flattened when complete.
 #[derive(Debug)]
 pub enum InstrSeq<'a> {
-    List(BumpSliceMut<'a, Instruct<'a>>),
-    Concat(BumpSliceMut<'a, InstrSeq<'a>>),
+    List(Vec<Instruct<'a>>),
+    Concat(Vec<InstrSeq<'a>>),
 }
 
-// The slices are mutable because of `rewrite_user_labels`. This means
-// we can't derive `Clone` (because you can't have multiple mutable
-// references referring to the same resource). It is possible to implement
-// deep copy functionality though: see `InstrSeq::clone()` below.
-
-/// An iterator that compacts sequences of consecutive SrcLoc instructions
-/// to the last one in the sequence, passing other instructions through.
 #[derive(Debug)]
-pub struct CompactIter<'i, 'a, I>
-where
-    I: Iterator<Item = &'i Instruct<'a>>,
-{
-    iter: I,
-    next: Option<&'i Instruct<'a>>,
+struct IntoListIter<'a> {
+    iter: std::vec::IntoIter<InstrSeq<'a>>,
+    stack: Vec<std::vec::IntoIter<InstrSeq<'a>>>,
 }
 
-impl<'i, 'a, I> CompactIter<'i, 'a, I>
-where
-    I: Iterator<Item = &'i Instruct<'a>>,
-{
-    pub fn new(i: I) -> Self {
+impl<'a> IntoListIter<'a> {
+    pub fn new(iseq: InstrSeq<'a>) -> Self {
         Self {
-            iter: i,
-            next: None,
+            iter: match iseq {
+                InstrSeq::List(_) => vec![iseq].into_iter(),
+                InstrSeq::Concat(s) => s.into_iter(),
+            },
+            stack: Vec::new(),
         }
     }
 }
 
-impl<'i, 'a, I> Iterator for CompactIter<'i, 'a, I>
-where
-    I: Iterator<Item = &'i Instruct<'a>>,
-{
-    type Item = &'i Instruct<'a>;
+impl<'a> Iterator for IntoListIter<'a> {
+    type Item = Vec<Instruct<'a>>;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.next.is_some() {
-            std::mem::replace(&mut self.next, None)
-        } else {
-            let mut cur = self.iter.next();
-            match cur {
-                Some(i) if InstrSeq::is_srcloc(i) => {
-                    self.next = self.iter.next();
-                    while self.next.map_or(false, InstrSeq::is_srcloc) {
-                        cur = self.next;
-                        self.next = self.iter.next();
-                    }
-                    cur
-                }
-                _ => cur,
+        loop {
+            match self.iter.next() {
+                Some(InstrSeq::List(s)) if s.is_empty() => {}
+                Some(InstrSeq::List(s)) => break Some(s),
+                Some(InstrSeq::Concat(s)) => self
+                    .stack
+                    .push(std::mem::replace(&mut self.iter, s.into_iter())),
+                None => match self.stack.pop() {
+                    Some(iter) => self.iter = iter,
+                    None => break None,
+                },
             }
         }
     }
@@ -105,12 +89,7 @@ where
 pub struct InstrIter<'i, 'a> {
     instr_seq: &'i InstrSeq<'a>,
     index: usize,
-    concat_stack: std::vec::Vec<
-        itertools::Either<
-            (&'i BumpSliceMut<'a, Instruct<'a>>, usize),
-            (&'i BumpSliceMut<'a, InstrSeq<'a>>, usize),
-        >,
-    >,
+    concat_stack: Vec<itertools::Either<(&'i [Instruct<'a>], usize), (&'i [InstrSeq<'a>], usize)>>,
 }
 
 impl<'i, 'a> InstrIter<'i, 'a> {
@@ -118,7 +97,7 @@ impl<'i, 'a> InstrIter<'i, 'a> {
         Self {
             instr_seq,
             index: 0,
-            concat_stack: std::vec::Vec::new(),
+            concat_stack: Vec::new(),
         }
     }
 }
@@ -200,8 +179,8 @@ pub mod instr {
         InstrSeq::new_singleton(alloc, i)
     }
 
-    pub fn instrs<'a>(alloc: &'a bumpalo::Bump, is: &'a mut [Instruct<'a>]) -> InstrSeq<'a> {
-        InstrSeq::new_list(alloc, is)
+    pub(crate) fn instrs<'a>(is: Vec<Instruct<'a>>) -> InstrSeq<'a> {
+        InstrSeq::List(is)
     }
 
     pub fn lit_const<'a>(alloc: &'a bumpalo::Bump, l: InstructLitConst<'a>) -> InstrSeq<'a> {
@@ -286,18 +265,13 @@ pub mod instr {
         )
     }
 
-    pub fn iter_break<'a>(
-        alloc: &'a bumpalo::Bump,
-        label: Label,
-        itrs: std::vec::Vec<IterId>,
-    ) -> InstrSeq<'a> {
-        let mut vec = bumpalo::collections::Vec::from_iter_in(
-            itrs.into_iter()
-                .map(|id| Instruct::Iterator(InstructIterator::IterFree(id))),
-            alloc,
-        );
+    pub fn iter_break<'a>(_: &'a bumpalo::Bump, label: Label, iters: Vec<IterId>) -> InstrSeq<'a> {
+        let mut vec: Vec<Instruct<'a>> = iters
+            .into_iter()
+            .map(|id| Instruct::Iterator(InstructIterator::IterFree(id)))
+            .collect();
         vec.push(Instruct::ContFlow(InstructControlFlow::Jmp(label)));
-        instrs(alloc, vec.into_bump_slice_mut())
+        instrs(vec)
     }
 
     pub fn false_<'a>(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
@@ -1362,7 +1336,7 @@ pub mod instr {
 
     pub fn awaitall_list<'a>(
         alloc: &'a bumpalo::Bump,
-        unnamed_locals: std::vec::Vec<Local<'a>>,
+        unnamed_locals: Vec<Local<'a>>,
     ) -> InstrSeq<'a> {
         use Local::Unnamed;
         match unnamed_locals.split_first() {
@@ -1557,63 +1531,30 @@ pub mod instr {
 impl<'a> InstrSeq<'a> {
     /// We can't implement `std::Clone`` because of the need for an
     /// allocator. Instead, use this associated function.
-    pub fn clone(alloc: &'a bumpalo::Bump, s: &InstrSeq<'a>) -> InstrSeq<'a> {
-        InstrSeq::from_iter_in(alloc, InstrIter::new(s).cloned())
+    pub fn clone(_: &'a bumpalo::Bump, s: &InstrSeq<'a>) -> Self {
+        InstrSeq::List(s.iter().cloned().collect())
     }
 
-    /// We can't implement `std::Default` because of the need
-    /// for an allocator. Instead, use this associated function
-    /// to produce an empty instruction sequence.
-    pub fn new_empty(alloc: &'a bumpalo::Bump) -> InstrSeq<'a> {
-        InstrSeq::List(BumpSliceMut::new(
-            alloc,
-            bumpalo::vec![in alloc; ].into_bump_slice_mut(),
-        ))
+    /// Produce an empty instruction sequence.
+    pub fn new_empty(_: &'a bumpalo::Bump) -> Self {
+        InstrSeq::List(Vec::new())
     }
 
     /// An instruction sequence of a single instruction.
-    pub fn new_singleton(alloc: &'a bumpalo::Bump, i: Instruct<'a>) -> InstrSeq<'a> {
-        InstrSeq::List(BumpSliceMut::new(
-            alloc,
-            bumpalo::vec![in alloc; i].into_bump_slice_mut(),
-        ))
-    }
-
-    /// An instruction sequence of a sequence of instructions.
-    pub fn new_list(alloc: &'a bumpalo::Bump, is: &'a mut [Instruct<'a>]) -> InstrSeq<'a> {
-        InstrSeq::List(BumpSliceMut::new(alloc, is))
-    }
-
-    /// An instruction sequence of a concatenation of instruction sequences.
-    pub fn new_concat(alloc: &'a bumpalo::Bump, iss: &'a mut [InstrSeq<'a>]) -> InstrSeq<'a> {
-        InstrSeq::Concat(BumpSliceMut::new(alloc, iss))
-    }
-
-    /// Move instructions out of a container.
-    pub fn from_iter_in<T: IntoIterator<Item = Instruct<'a>>>(
-        alloc: &'a bumpalo::Bump,
-        it: T,
-    ) -> InstrSeq<'a> {
-        InstrSeq::new_list(
-            alloc,
-            bumpalo::collections::Vec::from_iter_in(it, alloc).into_bump_slice_mut(),
-        )
+    pub fn new_singleton(_: &'a bumpalo::Bump, i: Instruct<'a>) -> Self {
+        InstrSeq::List(vec![i])
     }
 
     /// Transitional version. We mean to write a `gather!` in the future.
-    pub fn gather(alloc: &'a bumpalo::Bump, iss: std::vec::Vec<InstrSeq<'a>>) -> InstrSeq<'a> {
-        fn prd<'a>(is: &InstrSeq<'a>) -> bool {
-            match is {
-                InstrSeq::List(s) if s.is_empty() => false,
-                _ => true,
-            }
-        }
-
-        let non_empty = bumpalo::collections::Vec::from_iter_in(iss.into_iter().filter(prd), alloc);
-        if non_empty.is_empty() {
+    pub fn gather(alloc: &'a bumpalo::Bump, mut iss: Vec<InstrSeq<'a>>) -> Self {
+        iss.retain(|iseq| match iseq {
+            InstrSeq::List(s) if s.is_empty() => false,
+            _ => true,
+        });
+        if iss.is_empty() {
             InstrSeq::new_empty(alloc)
         } else {
-            InstrSeq::new_concat(alloc, non_empty.into_bump_slice_mut())
+            InstrSeq::Concat(iss)
         }
     }
 
@@ -1621,8 +1562,39 @@ impl<'a> InstrSeq<'a> {
         InstrIter::new(self)
     }
 
-    pub fn compact_iter<'i>(&'i self) -> impl Iterator<Item = &Instruct<'a>> {
-        CompactIter::new(self.iter())
+    fn full_len(&self) -> usize {
+        match self {
+            Self::List(s) => s.len(),
+            Self::Concat(s) => s.iter().map(Self::full_len).sum(),
+        }
+    }
+
+    pub fn compact(self, alloc: &'a bumpalo::Bump) -> Slice<'a, Instruct<'a>> {
+        let mut v = bumpalo::collections::Vec::with_capacity_in(self.full_len(), alloc);
+        for list in IntoListIter::new(self) {
+            let len = v.len();
+            let start = if len > 0 && Self::is_srcloc(&v[len - 1]) {
+                // v ends with a SrcLoc; back up so we can compact it if eligible.
+                len - 1
+            } else {
+                len
+            };
+            v.extend(list);
+            let mut i = start;
+            let len = v.len();
+            for j in start..len {
+                if Self::is_srcloc(&v[j]) && j + 1 < len && Self::is_srcloc(&v[j + 1]) {
+                    // skip v[j]
+                } else {
+                    if i < j {
+                        v[i] = v[j].clone();
+                    }
+                    i += 1;
+                }
+            }
+            v.truncate(i);
+        }
+        Slice::new(v.into_bump_slice())
     }
 
     pub fn create_try_catch(
@@ -1667,19 +1639,7 @@ impl<'a> InstrSeq<'a> {
     pub fn first(&self) -> Option<&Instruct<'a>> {
         // self: &InstrSeq<'a>
         match self {
-            InstrSeq::List(s) if s.is_empty() => None,
-            InstrSeq::List(s) if s.len() == 1 => {
-                let i = &s[0];
-                if InstrSeq::is_srcloc(i) {
-                    None
-                } else {
-                    Some(i)
-                }
-            }
-            InstrSeq::List(s) => match s.iter().find(|&i| !InstrSeq::is_srcloc(i)) {
-                Some(i) => Some(i),
-                None => None,
-            },
+            InstrSeq::List(s) => s.iter().find(|&i| !InstrSeq::is_srcloc(i)),
             InstrSeq::Concat(s) => s.iter().find_map(InstrSeq::first),
         }
     }
@@ -1688,8 +1648,6 @@ impl<'a> InstrSeq<'a> {
     pub fn is_empty(&self) -> bool {
         // self:&InstrSeq<'a>
         match self {
-            InstrSeq::List(s) if s.is_empty() => true,
-            InstrSeq::List(s) if s.len() == 1 => InstrSeq::is_srcloc(&s[0]),
             InstrSeq::List(s) => s.is_empty() || s.iter().all(InstrSeq::is_srcloc),
             InstrSeq::Concat(s) => s.iter().all(InstrSeq::is_empty),
         }
@@ -1701,80 +1659,51 @@ impl<'a> InstrSeq<'a> {
     {
         //self: &InstrSeq<'a>
         match self {
-            InstrSeq::List(s) if s.is_empty() => InstrSeq::new_empty(alloc),
-            InstrSeq::List(s) if s.len() == 1 => {
-                let x: &Instruct<'a> = &s[0];
-                match f(x) {
-                    Some(x) => instr::instr(alloc, x),
-                    None => InstrSeq::new_empty(alloc),
-                }
+            InstrSeq::List(s) => InstrSeq::List(s.iter().filter_map(f).collect()),
+            InstrSeq::Concat(s) => {
+                InstrSeq::Concat(s.iter().map(|x| x.filter_map(alloc, f)).collect())
             }
-            InstrSeq::List(s) => InstrSeq::List(BumpSliceMut::new(
-                alloc,
-                bumpalo::collections::vec::Vec::from_iter_in(s.iter().filter_map(f), alloc)
-                    .into_bump_slice_mut(),
-            )),
-            InstrSeq::Concat(s) => InstrSeq::Concat(BumpSliceMut::new(
-                alloc,
-                bumpalo::collections::vec::Vec::from_iter_in(
-                    s.iter().map(|x| x.filter_map(alloc, f)),
-                    alloc,
-                )
-                .into_bump_slice_mut(),
-            )),
         }
     }
 
-    pub fn filter_map_mut<F>(&mut self, alloc: &'a bumpalo::Bump, f: &mut F)
+    pub fn retain_mut<F>(&mut self, alloc: &'a bumpalo::Bump, f: &mut F)
     where
         F: FnMut(&mut Instruct<'a>) -> bool,
     {
         //self: &mut InstrSeq<'a>
         match self {
-            InstrSeq::List(s) if s.is_empty() => {}
-            InstrSeq::List(s) if s.len() == 1 => {
-                let x: &mut Instruct<'a> = &mut s[0];
-                if !f(x) {
-                    *self = instr::empty(alloc)
-                }
-            }
             InstrSeq::List(s) => {
-                let mut new_lst = bumpalo::vec![in alloc;];
-                for i in s.iter_mut() {
-                    if f(i) {
-                        new_lst.push(i.clone())
-                    }
-                }
-                *self = instr::instrs(alloc, new_lst.into_bump_slice_mut())
+                *s = std::mem::take(s)
+                    .into_iter()
+                    .filter_map(|mut instr| match f(&mut instr) {
+                        true => Some(instr),
+                        false => None,
+                    })
+                    .collect()
             }
-            InstrSeq::Concat(s) => s.iter_mut().for_each(|x| x.filter_map_mut(alloc, f)),
+            InstrSeq::Concat(s) => s.iter_mut().for_each(|x| x.retain_mut(alloc, f)),
         }
     }
 
-    pub fn map_mut<F>(&mut self, f: &mut F)
+    pub fn for_each_mut<F>(&mut self, f: &mut F)
     where
         F: FnMut(&mut Instruct<'a>),
     {
         //self: &mut InstrSeq<'a>
         match self {
-            InstrSeq::List(s) if s.is_empty() => {}
-            InstrSeq::List(s) if s.len() == 1 => f(&mut s[0]),
             InstrSeq::List(s) => s.iter_mut().for_each(f),
-            InstrSeq::Concat(s) => s.iter_mut().for_each(|x| x.map_mut(f)),
+            InstrSeq::Concat(s) => s.iter_mut().for_each(|x| x.for_each_mut(f)),
         }
     }
 
-    #[allow(clippy::result_unit_err)]
-    pub fn map_result_mut<F>(&mut self, f: &mut F) -> Result<()>
+    pub fn try_for_each_mut<F>(&mut self, f: &mut F) -> Result<()>
     where
         F: FnMut(&mut Instruct<'a>) -> Result<()>,
     {
         //self: &mut InstrSeq<'a>
         match self {
-            InstrSeq::List(s) if s.is_empty() => Ok(()),
-            InstrSeq::List(s) if s.len() == 1 => f(&mut s[0]),
             InstrSeq::List(s) => s.iter_mut().try_for_each(f),
-            InstrSeq::Concat(s) => s.iter_mut().try_for_each(|x| x.map_result_mut(f)),
+            InstrSeq::Concat(s) => s.iter_mut().try_for_each(|x| x.try_for_each_mut(f)),
         }
     }
 }
@@ -1782,7 +1711,7 @@ impl<'a> InstrSeq<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::instr::{instr, instrs};
+    use instr::{instr, instrs};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -1793,26 +1722,11 @@ mod tests {
         let empty = || InstrSeq::new_empty(alloc);
 
         let one = || instr(alloc, mk_i());
-        let list0 = || instrs(alloc, bumpalo::vec![in alloc;].into_bump_slice_mut());
-        let list1 = || instrs(alloc, bumpalo::vec![in alloc; mk_i()].into_bump_slice_mut());
-        let list2 = || {
-            instrs(
-                alloc,
-                bumpalo::vec![in alloc; mk_i(), mk_i()].into_bump_slice_mut(),
-            )
-        };
-        let concat0 = || {
-            InstrSeq::Concat(BumpSliceMut::new(
-                alloc,
-                bumpalo::vec![in alloc;].into_bump_slice_mut(),
-            ))
-        };
-        let concat1 = || {
-            InstrSeq::Concat(BumpSliceMut::new(
-                alloc,
-                bumpalo::vec![in alloc; one()].into_bump_slice_mut(),
-            ))
-        };
+        let list0 = || instrs(vec![]);
+        let list1 = || instrs(vec![mk_i()]);
+        let list2 = || instrs(vec![mk_i(), mk_i()]);
+        let concat0 = || InstrSeq::Concat(vec![]);
+        let concat1 = || InstrSeq::Concat(vec![one()]);
 
         assert_eq!(empty().iter().count(), 0);
         assert_eq!(one().iter().count(), 1);
@@ -1822,76 +1736,40 @@ mod tests {
         assert_eq!(concat0().iter().count(), 0);
         assert_eq!(concat1().iter().count(), 1);
 
-        let concat = InstrSeq::Concat(BumpSliceMut::new(
-            alloc,
-            bumpalo::vec![in alloc; empty()].into_bump_slice_mut(),
-        ));
+        let concat = InstrSeq::Concat(vec![empty()]);
         assert_eq!(concat.iter().count(), 0);
 
-        let concat = InstrSeq::Concat(BumpSliceMut::new(
-            alloc,
-            bumpalo::vec![in alloc; empty(), one()].into_bump_slice_mut(),
-        ));
+        let concat = InstrSeq::Concat(vec![empty(), one()]);
         assert_eq!(concat.iter().count(), 1);
 
-        let concat = InstrSeq::Concat(BumpSliceMut::new(
-            alloc,
-            bumpalo::vec![in alloc; one(), empty()].into_bump_slice_mut(),
-        ));
+        let concat = InstrSeq::Concat(vec![one(), empty()]);
         assert_eq!(concat.iter().count(), 1);
 
-        let concat = InstrSeq::Concat(BumpSliceMut::new(
-            alloc,
-            bumpalo::vec![in alloc; one(), list1()].into_bump_slice_mut(),
-        ));
+        let concat = InstrSeq::Concat(vec![one(), list1()]);
         assert_eq!(concat.iter().count(), 2);
 
-        let concat = InstrSeq::Concat(BumpSliceMut::new(
-            alloc,
-            bumpalo::vec![in alloc; list2(), list1()].into_bump_slice_mut(),
-        ));
+        let concat = InstrSeq::Concat(vec![list2(), list1()]);
         assert_eq!(concat.iter().count(), 3);
 
-        let concat = InstrSeq::Concat(BumpSliceMut::new(
-            alloc,
-            bumpalo::vec![in alloc; concat0(), list2(), list1()].into_bump_slice_mut(),
-        ));
+        let concat = InstrSeq::Concat(vec![concat0(), list2(), list1()]);
         assert_eq!(concat.iter().count(), 3);
 
-        let concat = InstrSeq::Concat(BumpSliceMut::new(
-            alloc,
-            bumpalo::vec![in alloc; concat1(), concat1()].into_bump_slice_mut(),
-        ));
+        let concat = InstrSeq::Concat(vec![concat1(), concat1()]);
         assert_eq!(concat.iter().count(), 2);
 
-        let concat = InstrSeq::Concat(BumpSliceMut::new(
-            alloc,
-            bumpalo::vec![in alloc; concat0(), concat1()].into_bump_slice_mut(),
-        ));
+        let concat = InstrSeq::Concat(vec![concat0(), concat1()]);
         assert_eq!(concat.iter().count(), 1);
 
-        let concat = InstrSeq::Concat(BumpSliceMut::new(
-            alloc,
-            bumpalo::vec![in alloc; list2(), concat1()].into_bump_slice_mut(),
-        ));
+        let concat = InstrSeq::Concat(vec![list2(), concat1()]);
         assert_eq!(concat.iter().count(), 3);
 
-        let concat = InstrSeq::Concat(BumpSliceMut::new(
-            alloc,
-            bumpalo::vec![in alloc; list2(), concat0()].into_bump_slice_mut(),
-        ));
+        let concat = InstrSeq::Concat(vec![list2(), concat0()]);
         assert_eq!(concat.iter().count(), 2);
 
-        let concat = InstrSeq::Concat(BumpSliceMut::new(
-            alloc,
-            bumpalo::vec![in alloc; one(), concat0()].into_bump_slice_mut(),
-        ));
+        let concat = InstrSeq::Concat(vec![one(), concat0()]);
         assert_eq!(concat.iter().count(), 1);
 
-        let concat = InstrSeq::Concat(BumpSliceMut::new(
-            alloc,
-            bumpalo::vec![in alloc; empty(), concat0()].into_bump_slice_mut(),
-        ));
+        let concat = InstrSeq::Concat(vec![empty(), concat0()]);
         assert_eq!(concat.iter().count(), 0);
     }
 }

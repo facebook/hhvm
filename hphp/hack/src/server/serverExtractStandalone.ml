@@ -2041,7 +2041,7 @@ end = struct
       | GConst nm
       | GConstName nm ->
         PartSingle (Single.mk_gconst ctx @@ Nast_helper.get_gconst_exn ctx nm)
-      (* -- Type defs, Enums, Classes, RecordDefs -- *)
+      (* -- Type defs, Enums, Classes -- *)
       | Type nm when Nast_helper.is_tydef ctx nm ->
         PartSingle (Single.mk_tydef @@ Nast_helper.get_typedef_exn ctx nm)
       | Type nm when Nast_helper.is_enum_or_enum_class ctx nm ->

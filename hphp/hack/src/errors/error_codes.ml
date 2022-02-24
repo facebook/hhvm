@@ -552,10 +552,10 @@ module Typing = struct
     (* | PocketUniversesTypingDEPRECATED [@value 4350] *)
     | RecordInitValueDoesNotMatchHint [@value 4351]
     | AbstractTconstNotAllowed [@value 4352]
-    | NewAbstractRecord [@value 4353]
-    | RecordMissingRequiredField [@value 4354]
-    | RecordUnknownField [@value 4355]
-    | CyclicRecordDef [@value 4356]
+    (* | NewAbstractRecord [@value 4353] *)
+    (* | RecordMissingRequiredField [@value 4354] *)
+    (* | RecordUnknownField [@value 4355] *)
+    (* | CyclicRecordDef [@value 4356] *)
     | InvalidDestructure [@value 4357]
     | StaticMethWithClassReifiedGeneric [@value 4358]
     | SplatArrayRequired [@value 4359]
@@ -563,7 +563,7 @@ module Typing = struct
     | ExceptionOccurred [@value 4361]
     | InvalidReifiedFunctionPointer [@value 4362]
     | BadFunctionPointerConstruction [@value 4363]
-    | NotARecord [@value 4364]
+    (* | NotARecord [@value 4364] *)
     | TraitReuseInsideClass [@value 4365]
     | RedundantGeneric [@value 4366]
     (* | PocketUniversesInvalidUpperBoundsDEPRECATED [@value 4367] *)

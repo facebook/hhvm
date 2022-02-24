@@ -23,7 +23,6 @@ type kind =
   | Typeconst
   | Param
   | Typedef
-  | RecordDef
 
 and modifier =
   | Final
@@ -84,7 +83,6 @@ let string_of_kind = function
   | TypeVar -> "type_var"
   | Param -> "param"
   | Typedef -> "typedef"
-  | RecordDef -> "record"
 
 let string_of_modifier = function
   | Final -> "final"
@@ -114,8 +112,7 @@ let get_symbol_id kind parent_class name =
     | Typedef
     | Enum
     | Interface
-    | Trait
-    | RecordDef ->
+    | Trait ->
       Some type_id_kind_name
     | Method -> Some method_kind_name
     | Property -> Some property_kind_name

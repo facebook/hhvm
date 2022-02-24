@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1019d28e2bbf05e62a90ef96c1f84d67>>
+// @generated SignedSource<<93cf91f38a0c0a34e5ab2caa7eb4881b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -470,10 +470,6 @@ pub enum Typing {
     ClassConstantTypeMismatch = 4348,
     RecordInitValueDoesNotMatchHint = 4351,
     AbstractTconstNotAllowed = 4352,
-    NewAbstractRecord = 4353,
-    RecordMissingRequiredField = 4354,
-    RecordUnknownField = 4355,
-    CyclicRecordDef = 4356,
     InvalidDestructure = 4357,
     StaticMethWithClassReifiedGeneric = 4358,
     SplatArrayRequired = 4359,
@@ -481,7 +477,6 @@ pub enum Typing {
     ExceptionOccurred = 4361,
     InvalidReifiedFunctionPointer = 4362,
     BadFunctionPointerConstruction = 4363,
-    NotARecord = 4364,
     TraitReuseInsideClass = 4365,
     RedundantGeneric = 4366,
     ArrayAccessWrite = 4370,

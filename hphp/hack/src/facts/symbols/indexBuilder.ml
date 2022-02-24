@@ -32,7 +32,7 @@ let get_details_from_info (info_opt : Facts.type_facts option) :
         | TKEnum -> SI_Enum
         | TKTrait -> SI_Trait
         | TKMixed -> SI_Mixed
-        | TKRecord -> SI_RecordDef
+        | TKRecord -> SI_Unknown
         | _ -> SI_Unknown
       in
       let is_abstract = info.flags land flags_abstract > 0 in

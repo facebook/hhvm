@@ -123,8 +123,7 @@ let get_position_for_symbol
   | SI_Enum
   | SI_Typedef
   | SI_Class
-  | SI_Constructor
-  | SI_RecordDef ->
+  | SI_Constructor ->
     helper Naming_provider.get_type_pos Naming_global.GEnv.get_type_full_pos
   | SI_Function ->
     helper Naming_provider.get_fun_pos Naming_global.GEnv.get_fun_full_pos

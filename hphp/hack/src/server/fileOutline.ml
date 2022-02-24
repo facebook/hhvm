@@ -413,8 +413,7 @@ let should_add_docblock = function
   | Interface
   | Trait
   | Typeconst
-  | Typedef
-  | RecordDef ->
+  | Typedef ->
     true
   | LocalVar
   | TypeVar

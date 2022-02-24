@@ -27,7 +27,6 @@ type kind =
   | Typeconst
   | Param
   | Typedef
-  | RecordDef
 
 and modifier =
   | Final

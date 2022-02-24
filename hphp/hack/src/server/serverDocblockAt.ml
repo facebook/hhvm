@@ -216,7 +216,6 @@ let symboldefinition_kind_from_si_kind (kind : SearchUtils.si_kind) :
   | SearchUtils.SI_Mixed -> SymbolDefinition.LocalVar
   | SearchUtils.SI_Function -> SymbolDefinition.Function
   | SearchUtils.SI_Typedef -> SymbolDefinition.Typedef
-  | SearchUtils.SI_RecordDef -> SymbolDefinition.RecordDef
   | SearchUtils.SI_GlobalConstant -> SymbolDefinition.Const
   | SearchUtils.SI_XHP -> SymbolDefinition.Class
   | SearchUtils.SI_ClassMethod -> SymbolDefinition.Method

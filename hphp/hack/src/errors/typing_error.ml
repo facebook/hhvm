@@ -1067,77 +1067,6 @@ module Primary = struct
           sink
   end
 
-  module Record = struct
-    type t =
-      | Unexpected_record_field_name of {
-          pos: Pos.t;
-          field_name: string;
-          record_name: string;
-          decl_pos: Pos_or_decl.t;
-        }
-      | Missing_record_field_name of {
-          pos: Pos.t;
-          field_name: string;
-          record_name: string;
-          decl_pos: Pos_or_decl.t;
-        }
-      | Type_not_record of {
-          pos: Pos.t;
-          ty_name: string;
-        }
-      | New_abstract_record of {
-          pos: Pos.t;
-          name: string;
-        }
-
-    let unexpected_record_field_name pos field_name record_name decl_pos =
-      let claim =
-        ( pos,
-          Printf.sprintf
-            "Record %s has no field %s"
-            (Render.strip_ns record_name |> Markdown_lite.md_codify)
-            (Markdown_lite.md_codify field_name) )
-      and reasons = [(decl_pos, "Definition is here")] in
-      (Error_code.RecordUnknownField, claim, reasons, [])
-
-    let missing_record_field_name pos field_name record_name decl_pos =
-      let claim =
-        ( pos,
-          Printf.sprintf
-            "Mising required field %s in %s"
-            (Markdown_lite.md_codify field_name)
-            (Render.strip_ns record_name |> Markdown_lite.md_codify) )
-      and reasons = [(decl_pos, "Field definition is here")] in
-      (Error_code.RecordMissingRequiredField, claim, reasons, [])
-
-    let type_not_record pos ty_name =
-      let claim =
-        ( pos,
-          Printf.sprintf
-            "Expected a record type, but got %s."
-            (Render.strip_ns ty_name |> Markdown_lite.md_codify) )
-      in
-      (Error_code.NotARecord, claim, [], [])
-
-    let new_abstract_record pos name =
-      let name = Render.strip_ns name in
-      let msg =
-        Printf.sprintf
-          "Cannot create instance of abstract record %s"
-          (Markdown_lite.md_codify name)
-      in
-      (Error_code.NewAbstractRecord, (pos, msg), [], [])
-
-    let to_error = function
-      | Unexpected_record_field_name { pos; field_name; record_name; decl_pos }
-        ->
-        unexpected_record_field_name pos field_name record_name decl_pos
-      | Missing_record_field_name { pos; field_name; record_name; decl_pos } ->
-        missing_record_field_name pos field_name record_name decl_pos
-      | Type_not_record { pos; ty_name } -> type_not_record pos ty_name
-      | New_abstract_record { pos; name } -> new_abstract_record pos name
-  end
-
   module Coeffect = struct
     type t =
       | Call_coeffect of {
@@ -1426,7 +1355,6 @@ module Primary = struct
     | Ifc of Ifc.t
     | Modules of Modules.t
     | Readonly of Readonly.t
-    | Record of Record.t
     | Shape of Shape.t
     | Wellformedness of Wellformedness.t
     | Xhp of Xhp.t
@@ -1700,10 +1628,6 @@ module Primary = struct
         pos: Pos.t;
         stack: SSet.t;
       }
-    | Cyclic_record_def of {
-        pos: Pos.t;
-        names: string list;
-      }
     | Trait_reuse_with_final_method of {
         pos: Pos.t;
         trait_name: string;
@@ -1802,7 +1726,6 @@ module Primary = struct
       }
     | Cannot_declare_constant of {
         pos: Pos.t;
-        kind: [ `enum | `record ];
         class_pos: Pos.t;
         class_name: string;
       }
@@ -2172,11 +2095,6 @@ module Primary = struct
         ty_name: string Lazy.t;
       }
     | Extend_final of {
-        pos: Pos.t;
-        name: string;
-        decl_pos: Pos_or_decl.t;
-      }
-    | Extend_non_abstract_record of {
         pos: Pos.t;
         name: string;
         decl_pos: Pos_or_decl.t;
@@ -3106,18 +3024,6 @@ module Primary = struct
       [],
       [] )
 
-  let cyclic_record_def pos names =
-    let names =
-      List.map ~f:(fun n -> Render.strip_ns n |> Markdown_lite.md_codify) names
-    in
-    ( Error_code.CyclicRecordDef,
-      ( pos,
-        Printf.sprintf
-          "Record inheritance cycle: %s"
-          (String.concat ~sep:" " names) ),
-      [],
-      [] )
-
   let trait_reuse_with_final_method use_pos trait_name parent_cls_name trace =
     let msg =
       Printf.sprintf
@@ -3325,20 +3231,13 @@ module Primary = struct
     in
     (Error_code.DeprecatedUse, (pos, msg), def_message, [])
 
-  let cannot_declare_constant kind pos (class_pos, class_name) =
-    let kind_str =
-      match kind with
-      | `enum -> "an enum"
-      | `record -> "a record"
-    in
+  let cannot_declare_constant pos (class_pos, class_name) =
     ( Error_code.CannotDeclareConstant,
-      (pos, "Cannot declare a constant in " ^ kind_str),
+      (pos, "Cannot declare a constant in an enum"),
       [
         ( Pos_or_decl.of_raw_pos class_pos,
           (Render.strip_ns class_name |> Markdown_lite.md_codify)
-          ^ " was defined as "
-          ^ kind_str
-          ^ " here" );
+          ^ " was defined as an enum here" );
       ],
       [] )
 
@@ -4319,18 +4218,6 @@ module Primary = struct
       [(decl_pos, "Declaration is here")],
       [] )
 
-  let extend_non_abstract_record extend_pos name decl_pos =
-    let name = Render.strip_ns name in
-    let msg =
-      Printf.sprintf
-        "Cannot extend record %s because it isn't abstract"
-        (Markdown_lite.md_codify name)
-    in
-    ( Error_code.ExtendFinal,
-      (extend_pos, msg),
-      [(decl_pos, "Declaration is here")],
-      [] )
-
   let extend_sealed child_pos parent_pos parent_name parent_kind verb =
     let parent_kind =
       match parent_kind with
@@ -4792,7 +4679,6 @@ module Primary = struct
     | Ifc err -> Ifc.to_error err
     | Modules err -> Modules.to_error err
     | Readonly err -> Readonly.to_error err
-    | Record err -> Record.to_error err
     | Shape err -> Shape.to_error err
     | Wellformedness err -> Wellformedness.to_error err
     | Xhp err -> Xhp.to_error err
@@ -4958,7 +4844,6 @@ module Primary = struct
         hint
         quickfixes
     | Cyclic_class_def { pos; stack } -> cyclic_class_def pos stack
-    | Cyclic_record_def { pos; names } -> cyclic_record_def pos names
     | Trait_reuse_with_final_method { pos; trait_name; parent_cls_name; trace }
       ->
       trait_reuse_with_final_method pos trait_name parent_cls_name trace
@@ -5003,8 +4888,8 @@ module Primary = struct
     | Attribute_param_type { pos; x } -> attribute_param_type pos x
     | Deprecated_use { pos; decl_pos_opt; msg } ->
       deprecated_use pos ~pos_def:decl_pos_opt msg
-    | Cannot_declare_constant { pos; kind; class_pos; class_name } ->
-      cannot_declare_constant kind pos (class_pos, class_name)
+    | Cannot_declare_constant { pos; class_pos; class_name } ->
+      cannot_declare_constant pos (class_pos, class_name)
     | Local_variable_modified_and_used { pos; pos_useds } ->
       local_variable_modified_and_used pos pos_useds
     | Local_variable_modified_twice { pos; pos_modifieds } ->
@@ -5270,8 +5155,6 @@ module Primary = struct
       visibility pos msg decl_pos reason_msg
     | Bad_call { pos; ty_name } -> bad_call pos @@ Lazy.force ty_name
     | Extend_final { pos; name; decl_pos } -> extend_final pos decl_pos name
-    | Extend_non_abstract_record { pos; name; decl_pos } ->
-      extend_non_abstract_record pos name decl_pos
     | Extend_sealed { pos; parent_pos; parent_name; parent_kind; verb } ->
       extend_sealed pos parent_pos parent_name parent_kind verb
     | Sealed_not_subtype { pos; name; child_kind; child_pos; child_name } ->
@@ -5377,8 +5260,6 @@ module rec Error : sig
 
   val readonly : Primary.Readonly.t -> t
 
-  val record : Primary.Record.t -> t
-
   val shape : Primary.Shape.t -> t
 
   val wellformedness : Primary.Wellformedness.t -> t
@@ -5482,8 +5363,6 @@ end = struct
   let modules err = primary @@ Primary.Modules err
 
   let readonly err = primary @@ Primary.Readonly err
-
-  let record err = primary @@ Primary.Record err
 
   let shape err = primary @@ Primary.Shape err
 
@@ -6848,8 +6727,6 @@ and Callback : sig
 
   val xhp_attribute_does_not_match_hint : t
 
-  val record_init_value_does_not_match_hint : t
-
   val strict_str_concat_type_mismatch : t
 
   val strict_str_interp_type_mismatch : t
@@ -6979,9 +6856,6 @@ end = struct
 
   let xhp_attribute_does_not_match_hint =
     with_code ~code:Error_code.XhpAttributeValueDoesNotMatchHint
-
-  let record_init_value_does_not_match_hint =
-    with_code ~code:Error_code.RecordInitValueDoesNotMatchHint
 
   let strict_str_concat_type_mismatch =
     with_code ~code:Error_code.StrictStrConcatTypeMismatch

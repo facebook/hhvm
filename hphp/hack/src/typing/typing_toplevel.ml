@@ -1172,8 +1172,7 @@ let typeconst_def
     Errors.add_typing_error
       Typing_error.(
         primary
-        @@ Primary.Cannot_declare_constant
-             { kind = `enum; pos; class_pos; class_name }));
+        @@ Primary.Cannot_declare_constant { pos; class_pos; class_name }));
 
   let name = snd cls.c_name ^ "::" ^ snd id in
   (* Check constraints and report cycles through the definition *)

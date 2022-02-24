@@ -277,30 +277,6 @@ module Primary : sig
         }
   end
 
-  module Record : sig
-    type t =
-      | Unexpected_record_field_name of {
-          pos: Pos.t;
-          field_name: string;
-          record_name: string;
-          decl_pos: Pos_or_decl.t;
-        }
-      | Missing_record_field_name of {
-          pos: Pos.t;
-          field_name: string;
-          record_name: string;
-          decl_pos: Pos_or_decl.t;
-        }
-      | Type_not_record of {
-          pos: Pos.t;
-          ty_name: string;
-        }
-      | New_abstract_record of {
-          pos: Pos.t;
-          name: string;
-        }
-  end
-
   module Coeffect : sig
     type t =
       | Call_coeffect of {
@@ -388,7 +364,6 @@ module Primary : sig
     | Ifc of Ifc.t
     | Modules of Modules.t
     | Readonly of Readonly.t
-    | Record of Record.t
     | Shape of Shape.t
     | Wellformedness of Wellformedness.t
     | Xhp of Xhp.t
@@ -667,10 +642,6 @@ module Primary : sig
         pos: Pos.t;
         stack: SSet.t;
       }
-    | Cyclic_record_def of {
-        pos: Pos.t;
-        names: string list;
-      }
     | Trait_reuse_with_final_method of {
         pos: Pos.t;
         trait_name: string;
@@ -769,7 +740,6 @@ module Primary : sig
       }
     | Cannot_declare_constant of {
         pos: Pos.t;
-        kind: [ `enum | `record ];
         class_pos: Pos.t;
         class_name: string;
       }
@@ -1139,11 +1109,6 @@ module Primary : sig
         ty_name: string Lazy.t;
       }
     | Extend_final of {
-        pos: Pos.t;
-        name: string;
-        decl_pos: Pos_or_decl.t;
-      }
-    | Extend_non_abstract_record of {
         pos: Pos.t;
         name: string;
         decl_pos: Pos_or_decl.t;
@@ -1677,8 +1642,6 @@ module Callback : sig
 
   val xhp_attribute_does_not_match_hint : t
 
-  val record_init_value_does_not_match_hint : t
-
   val strict_str_concat_type_mismatch : t
 
   val strict_str_interp_type_mismatch : t
@@ -1906,9 +1869,6 @@ val modules : Primary.Modules.t -> t
 
 (** Lift a `Primary.Readonly.t` error to a `Typing_error.t` *)
 val readonly : Primary.Readonly.t -> t
-
-(** Lift a `Primary.Record.t` error to a `Typing_error.t` *)
-val record : Primary.Record.t -> t
 
 (** Lift a `Primary.Shape.t` error to a `Typing_error.t` *)
 val shape : Primary.Shape.t -> t

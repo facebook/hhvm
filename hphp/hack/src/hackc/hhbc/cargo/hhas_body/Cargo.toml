@@ -12,4 +12,3 @@ ffi = { path = "../../../../utils/ffi" }
 hhas_param = { path = "../hhas_param" }
 hhas_type = { path = "../hhas_type" }
 hhbc_ast = { path = "../hhbc_ast" }
-instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }

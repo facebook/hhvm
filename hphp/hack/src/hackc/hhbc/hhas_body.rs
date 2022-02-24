@@ -5,8 +5,7 @@
 use ffi::{Maybe, Pair, Slice, Str};
 use hhas_param::HhasParam;
 use hhas_type::HhasTypeInfo;
-use hhbc_ast::ClassishKind;
-use instruction_sequence::InstrSeq;
+use hhbc_ast::{ClassishKind, Instruct};
 
 #[derive(Default, Debug, Clone)]
 #[repr(C)]
@@ -16,10 +15,11 @@ pub struct HhasBodyEnv<'arena> {
     pub parent_name: Maybe<Str<'arena>>,
 }
 
-#[derive(Debug)] //Cannot derive `Default`...
+#[derive(Debug, Default)]
 #[repr(C)]
 pub struct HhasBody<'arena> {
-    pub body_instrs: InstrSeq<'arena>, //... because no `Default` instance for `InstrSeq`.
+    /// Must have been compacted with InstrSeq::compact_iter().
+    pub body_instrs: Slice<'arena, Instruct<'arena>>,
     pub decl_vars: Slice<'arena, Str<'arena>>,
     pub num_iters: usize,
     pub num_closures: u32,
@@ -31,22 +31,4 @@ pub struct HhasBody<'arena> {
     pub return_type_info: Maybe<HhasTypeInfo<'arena>>,
     pub doc_comment: Maybe<Str<'arena>>,
     pub env: Maybe<HhasBodyEnv<'arena>>,
-}
-
-pub fn default_with_body_instrs<'arena>(body_instrs: InstrSeq<'arena>) -> HhasBody<'arena> {
-    HhasBody {
-        body_instrs,
-        decl_vars: Slice::<'arena, Str<'arena>>::default(),
-        num_iters: usize::default(),
-        num_closures: u32::default(),
-        is_memoize_wrapper: bool::default(),
-        is_memoize_wrapper_lsb: bool::default(),
-        upper_bounds:
-            Slice::<'arena, Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>>::default(),
-        shadowed_tparams: Slice::<'arena, Str<'arena>>::default(),
-        params: Slice::<'arena, HhasParam<'arena>>::default(),
-        return_type_info: Maybe::<HhasTypeInfo<'arena>>::default(),
-        doc_comment: Maybe::<Str<'arena>>::default(),
-        env: Maybe::<HhasBodyEnv<'arena>>::default(),
-    }
 }

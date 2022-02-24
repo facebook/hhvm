@@ -45,7 +45,7 @@ use hhvm_hhbc_defs_ffi::ffi::{
     SetRangeOp, SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
 };
 use hhvm_types_ffi::ffi::*;
-use instruction_sequence::{Error::Unrecoverable, InstrSeq};
+use instruction_sequence::Error::Unrecoverable;
 use iterator::IterId;
 use itertools::Itertools;
 use label::Label;
@@ -924,11 +924,11 @@ fn print_body(
 fn print_instructions(
     ctx: &Context<'_>,
     w: &mut dyn Write,
-    instr_seq: &InstrSeq<'_>,
+    instrs: &[Instruct<'_>],
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     let mut ctx = ctx.clone();
-    for instr in instr_seq.compact_iter() {
+    for instr in instrs {
         match instr {
             Instruct::SpecialFlow(_) => {
                 return Err(Error::fail("Cannot break/continue 1 level").into());

@@ -31,11 +31,11 @@ pub fn emit_body<'a, 'arena, 'decl>(
 
     body_instrs.and_then(|body_instrs| {
         params.and_then(|params| {
-            return_type_info.map(|rti| {
-                let mut body = hhas_body::default_with_body_instrs(body_instrs);
-                body.params = Slice::fill_iter(emitter.alloc, params.into_iter().map(|p| p.0));
-                body.return_type_info = Just(rti);
-                body
+            return_type_info.map(|rti| HhasBody {
+                body_instrs: Slice::from_vec(emitter.alloc, body_instrs.iter().cloned().collect()),
+                params: Slice::fill_iter(emitter.alloc, params.into_iter().map(|p| p.0)),
+                return_type_info: Just(rti),
+                ..Default::default()
             })
         })
     })

@@ -43,11 +43,11 @@ pub fn unrecoverable(msg: impl std::convert::Into<std::string::String>) -> Error
 /// appending. So, we build a tree of instructions which can be
 /// flattened when complete.
 #[derive(Debug)]
-#[repr(C)]
 pub enum InstrSeq<'a> {
     List(BumpSliceMut<'a, Instruct<'a>>),
     Concat(BumpSliceMut<'a, InstrSeq<'a>>),
 }
+
 // The slices are mutable because of `rewrite_user_labels`. This means
 // we can't derive `Clone` (because you can't have multiple mutable
 // references referring to the same resource). It is possible to implement
@@ -1894,11 +1894,4 @@ mod tests {
         ));
         assert_eq!(concat.iter().count(), 0);
     }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn no_call_compile_only_USED_TYPES_instruction_sequence<'arena>(
-    _: InstrSeq<'arena>,
-) {
-    unimplemented!()
 }

@@ -1872,7 +1872,6 @@ dependencies = [
  "hhas_param",
  "hhas_type",
  "hhbc_ast",
- "instruction_sequence",
 ]
 
 [[package]]

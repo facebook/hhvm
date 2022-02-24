@@ -5,4 +5,3 @@ async function bar(ExampleContext $_): Awaitable<
     (function(ExampleString): ExampleInt)
   >
 >
-Return type: `Awaitable<ExprTree<ExampleDsl, mixed, (function(ExampleString): ExampleInt)>>`

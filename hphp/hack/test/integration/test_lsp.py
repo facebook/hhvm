@@ -4301,7 +4301,6 @@ class TestLsp(TestCase[LspTestDriver]):
                         'During testing, we\'ll remove the "public" tag from this '
                         "method\n"
                         "to ensure that we can still get IDE services",
-                        "Return type: `void`",
                         "Full name: `HoverWithErrorsClass::staticMethod`",
                     ],
                     "range": {
@@ -4344,7 +4343,6 @@ class TestLsp(TestCase[LspTestDriver]):
                         'During testing, we\'ll remove the "public" tag from this '
                         "method\n"
                         "to ensure that we can still get IDE services",
-                        "Return type: `void`",
                         "Full name: `HoverWithErrorsClass::staticMethod`",
                     ],
                     "range": {
@@ -5431,7 +5429,6 @@ function __hh_loop_forever_foo(): int {
                 result={
                     "contents": [
                         {"language": "hack", "value": "public function foo(): int"},
-                        "Return type: `int`",
                         "Full name: `BaseClassIncremental::foo`",
                     ],
                     "range": {
@@ -5462,7 +5459,6 @@ class BaseClassIncremental {
                 result={
                     "contents": [
                         {"language": "hack", "value": "public function foo(): string"},
-                        "Return type: `string`",
                         "Full name: `BaseClassIncremental::foo`",
                     ],
                     "range": {
@@ -5616,7 +5612,6 @@ function unsaved_bar(): bool { return true; }
                 result={
                     "contents": [
                         {"language": "hack", "value": "function unsaved_bar(): int"},
-                        "Return type: `int`",
                     ],
                     "range": {
                         "start": {"line": 1, "character": 34},
@@ -5662,7 +5657,6 @@ function unsaved_bar(): string { return "hello"; }
                 result={
                     "contents": [
                         {"language": "hack", "value": "function unsaved_bar(): int"},
-                        "Return type: `int`",
                     ],
                     "range": {
                         "start": {"line": 1, "character": 34},
@@ -5691,7 +5685,6 @@ function unsaved_bar(): string { return "hello"; }
                 result={
                     "contents": [
                         {"language": "hack", "value": "function unsaved_bar(): string"},
-                        "Return type: `string`",
                     ],
                     "range": {
                         "start": {"line": 1, "character": 34},
@@ -6905,7 +6898,6 @@ function aaa(): int {
                 result={
                     "contents": [
                         {"language": "hack", "value": "function aaa(): int"},
-                        "Return type: `int`",
                     ],
                     "range": {
                         "start": {"line": 2, "character": 11},
@@ -6936,7 +6928,6 @@ function aaa(): string {
                 result={
                     "contents": [
                         {"language": "hack", "value": "function aaa(): int"},
-                        "Return type: `int`",
                     ],
                     "range": {
                         "start": {"line": 2, "character": 11},
@@ -6959,7 +6950,6 @@ function aaa(): string {
                 result={
                     "contents": [
                         {"language": "hack", "value": "function aaa(): string"},
-                        "Return type: `string`",
                     ],
                     "range": {
                         "start": {"line": 2, "character": 11},
@@ -7022,7 +7012,6 @@ function aaa(): string {
                             "language": "hack",
                             "value": "function naming_error_declaration(): void",
                         },
-                        "Return type: `void`",
                     ],
                     "range": {
                         "start": {"line": 3, "character": 2},
@@ -7085,7 +7074,6 @@ function aaa(): string {
                             "language": "hack",
                             "value": "function naming_error_declaration(): void",
                         },
-                        "Return type: `void`",
                     ],
                     "range": {
                         "start": {"line": 3, "character": 2},

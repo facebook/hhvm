@@ -81,7 +81,7 @@ let identify_tests =
         [
           {
             HoverService.snippet = "function foo(string $s): string";
-            addendum = ["foo_docblock"; "Return type: `string`"];
+            addendum = ["foo_docblock"];
             pos = pos_at (17, 8) (17, 10);
           };
         ] );
@@ -120,12 +120,7 @@ let identify_tests =
           {
             HoverService.snippet =
               "public static function bar<T>(string $x): string";
-            addendum =
-              [
-                "bar_docblock";
-                "Return type: `string`";
-                "Full name: `Cardoor::bar`";
-              ];
+            addendum = ["bar_docblock"; "Full name: `Cardoor::bar`"];
             pos = pos_at (20, 17) (20, 19);
           };
         ] );

@@ -48,23 +48,6 @@ let make_hover_const_definition entry def_opt =
     ]
   | _ -> []
 
-let make_hover_return_type env_and_ty occurrence =
-  SymbolOccurrence.(
-    Typing_defs.(
-      match (occurrence, env_and_ty) with
-      | ({ type_ = Function | Method _; _ }, Some (env, ty)) ->
-        begin
-          match get_node ty with
-          | Tfun ft ->
-            [
-              Printf.sprintf
-                "Return type: `%s`"
-                (Tast_env.print_ty env ft.ft_ret.et_type);
-            ]
-          | _ -> []
-        end
-      | _ -> []))
-
 let make_hover_full_name env_and_ty occurrence def_opt =
   SymbolOccurrence.(
     let found_it () =
@@ -362,7 +345,6 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
           List.concat
             [
               make_hover_doc_block ctx entry occurrence def_opt;
-              make_hover_return_type env_and_ty occurrence;
               make_hover_full_name env_and_ty occurrence def_opt;
             ]
       in

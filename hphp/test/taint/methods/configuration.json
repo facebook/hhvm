@@ -3,6 +3,9 @@
     {"name": "__source"}
   ],
   "sinks": [
-    {"name": "__sink", "index": 0 }
+    {"name": "__sink", "index": 0 },
+    {"name": "MyClass::class_sink", "index": 0},
+    {"name": "MyClass::class_sink2", "index": 0},
+    {"name": "MySubClass::class_sink2", "index": 0}
   ]
 }

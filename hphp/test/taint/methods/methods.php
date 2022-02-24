@@ -18,6 +18,10 @@ class MyClass {
   public function stop_flow(int $input): int {
     return 1;
   }
+
+  public function class_sink(int $input): void {}
+
+  public function class_sink2(int $input): void {}
 }
 
 class MySubClass extends MyClass {
@@ -25,6 +29,12 @@ class MySubClass extends MyClass {
   public function identity(int $input): int {
     return $input;
   }
+
+  <<__Override>>
+  public function class_sink(int $input): void {}
+
+  <<__Override>>
+  public function class_sink2(int $input): void {}
 }
 
 class MyBrokenSubClass extends MyClass {
@@ -74,6 +84,23 @@ function source_through_static_identity_method_into_sink() {
   __sink($result);
 }
 
+function source_to_class_sink() {
+  // Verify that Parent::bar being a sink does not mean
+  // Child::bar is a sink if the child reimplements it
+  $data = __source();
+  $object = new MyClass();
+  $child = new MySubClass();
+  $object->class_sink($data);
+  $child->class_sink($data);
+  // Verify that specifying a sink on the parent class is sufficient
+  // Also verify that the resulting name in the trace is from the parent
+  // unless the child reimplements it
+  $child2 = new MyBrokenSubClass();
+  $object->class_sink2($data);
+  $child->class_sink2($data);
+  $child2->class_sink2($data);
+}
+
 <<__EntryPoint>> function main(): void {
   source_bypassing_identity_method_into_sink();
   source_through_identity_method_into_sink();
@@ -81,4 +108,5 @@ function source_through_static_identity_method_into_sink() {
   source_through_virtual_identity_method_into_sink(new MySubClass());
   source_stopped_in_broken_virtual_identity_method(new MyBrokenSubClass());
   source_through_static_identity_method_into_sink();
+  source_to_class_sink();
 }

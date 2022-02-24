@@ -218,9 +218,8 @@ fn make_body_instrs<'a, 'arena, 'decl>(
     ast_params: &[ast::FunParam],
     flags: Flags,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let stmt_instrs = if flags.contains(Flags::NATIVE) {
-        instr::nativeimpl(alloc)
+        instr::nativeimpl()
     } else {
         env.do_function(emitter, &body, emit_ast_body)?
     };
@@ -245,12 +244,12 @@ fn make_body_instrs<'a, 'arena, 'decl>(
         _ => false,
     };
     let header = if first_instr_is_label && InstrSeq::is_empty(&header_content) {
-        InstrSeq::gather(alloc, vec![begin_label, instr::entrynop(alloc)])
+        InstrSeq::gather(vec![begin_label, instr::entrynop()])
     } else {
-        InstrSeq::gather(alloc, vec![begin_label, header_content])
+        InstrSeq::gather(vec![begin_label, header_content])
     };
 
-    let mut body_instrs = InstrSeq::gather(alloc, vec![header, stmt_instrs, default_value_setters]);
+    let mut body_instrs = InstrSeq::gather(vec![header, stmt_instrs, default_value_setters]);
     if flags.contains(Flags::DEBUGGER_MODIFY_PROGRAM) {
         modify_prog_for_debugger_eval(&mut body_instrs);
     };
@@ -271,7 +270,7 @@ fn make_header_content<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let method_prolog = if flags.contains(Flags::NATIVE) {
-        instr::empty(alloc)
+        instr::empty()
     } else {
         emit_method_prolog(emitter, env, pos, params, ast_params, tparams)?
     };
@@ -280,15 +279,16 @@ fn make_header_content<'a, 'arena, 'decl>(
         emit_deprecation_info(alloc, &env.scope, deprecation_info, emitter.systemlib())?;
 
     let generator_info = if is_generator {
-        InstrSeq::gather(alloc, vec![instr::createcont(alloc), instr::popc(alloc)])
+        InstrSeq::gather(vec![instr::createcont(), instr::popc()])
     } else {
-        instr::empty(alloc)
+        instr::empty()
     };
 
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![method_prolog, deprecation_warning, generator_info],
-    ))
+    Ok(InstrSeq::gather(vec![
+        method_prolog,
+        deprecation_warning,
+        generator_info,
+    ]))
 }
 
 fn make_decl_vars<'a, 'arena, 'decl>(
@@ -414,7 +414,7 @@ pub fn make_body<'a, 'arena, 'decl>(
         .hack_compiler_flags
         .contains(CompilerFlags::RELABEL)
     {
-        label_rewriter::relabel_function(alloc, &mut params, &mut body_instrs);
+        label_rewriter::relabel_function(&mut params, &mut body_instrs);
     }
     let num_iters = if is_memoize_wrapper {
         0
@@ -511,11 +511,10 @@ fn emit_defs<'a, 'arena, 'decl>(
         emitter: &mut Emitter<'arena, 'decl>,
         def: &ast::Def,
     ) -> Result<InstrSeq<'arena>> {
-        let alloc = env.arena;
         match def {
             Def::Stmt(s) => emit_statement::emit_stmt(emitter, env, s),
             Def::Namespace(ns) => emit_defs(env, emitter, &ns.1),
-            _ => Ok(instr::empty(alloc)),
+            _ => Ok(instr::empty()),
         }
     }
     fn aux<'a, 'arena, 'decl>(
@@ -523,7 +522,6 @@ fn emit_defs<'a, 'arena, 'decl>(
         emitter: &mut Emitter<'arena, 'decl>,
         defs: &[ast::Def],
     ) -> Result<InstrSeq<'arena>> {
-        let alloc = env.arena;
         match defs {
             [Def::SetNamespaceEnv(ns), ..] => {
                 env.namespace = RcOc::clone(ns);
@@ -536,39 +534,30 @@ fn emit_defs<'a, 'arena, 'decl>(
             }
             [Def::Stmt(s1), Def::Stmt(s2)] => match s2.1.as_markup() {
                 Some(id) if id.1.is_empty() => emit_statement::emit_final_stmt(emitter, env, s1),
-                _ => Ok(InstrSeq::gather(
-                    alloc,
-                    vec![
-                        emit_statement::emit_stmt(emitter, env, s1)?,
-                        emit_statement::emit_final_stmt(emitter, env, s2)?,
-                    ],
-                )),
+                _ => Ok(InstrSeq::gather(vec![
+                    emit_statement::emit_stmt(emitter, env, s1)?,
+                    emit_statement::emit_final_stmt(emitter, env, s2)?,
+                ])),
             },
-            [def, ..] => Ok(InstrSeq::gather(
-                alloc,
-                vec![emit_def(env, emitter, def)?, aux(env, emitter, &defs[1..])?],
-            )),
+            [def, ..] => Ok(InstrSeq::gather(vec![
+                emit_def(env, emitter, def)?,
+                aux(env, emitter, &defs[1..])?,
+            ])),
         }
     }
-    let alloc = env.arena;
+
     match prog {
-        [Def::Stmt(s), ..] if s.1.is_markup() => Ok(InstrSeq::gather(
-            alloc,
-            vec![
-                emit_statement::emit_markup(emitter, env, s.1.as_markup().unwrap(), true)?,
-                aux(env, emitter, &prog[1..])?,
-            ],
-        )),
+        [Def::Stmt(s), ..] if s.1.is_markup() => Ok(InstrSeq::gather(vec![
+            emit_statement::emit_markup(emitter, env, s.1.as_markup().unwrap(), true)?,
+            aux(env, emitter, &prog[1..])?,
+        ])),
         [] | [_] => aux(env, emitter, prog),
         [def, ..] => {
             let i1 = emit_def(env, emitter, def)?;
             if i1.is_empty() {
                 emit_defs(env, emitter, &prog[1..])
             } else {
-                Ok(InstrSeq::gather(
-                    alloc,
-                    vec![i1, aux(env, emitter, &prog[1..])?],
-                ))
+                Ok(InstrSeq::gather(vec![i1, aux(env, emitter, &prog[1..])?]))
             }
         }
     }
@@ -609,12 +598,12 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                 let param_checks =
                     match has_type_constraint(env, Option::from(param.type_info.as_ref()), ast_param) {
                         (L::Unconstrained, _) => Ok(None),
-                        (L::Not, _) => Ok(Some(instr::verify_param_type(alloc, param_name()))),
+                        (L::Not, _) => Ok(Some(instr::verify_param_type( param_name()))),
                         (L::Maybe, Some(h)) => {
                             if RGH::happly_decl_has_no_reified_generics(emitter, &h) {
-                                Ok(Some(instr::verify_param_type(alloc, param_name())))
+                                Ok(Some(instr::verify_param_type( param_name())))
                             } else {
-                                Ok(Some(InstrSeq::gather(alloc, vec![
+                                Ok(Some(InstrSeq::gather( vec![
                                     emit_expression::get_type_structure_for_hint(
                                         emitter,
                                         tparams
@@ -625,20 +614,19 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                                         &IndexSet::new(),
                                         &h,
                                     )?,
-                                    instr::verify_param_type_ts(alloc, param_name()),
+                                    instr::verify_param_type_ts( param_name()),
                                 ])))
                             }
                         }
                         (L::Definitely, Some(h)) => {
                             if RGH::happly_decl_has_no_reified_generics(emitter, &h) {
-                                Ok(Some(instr::verify_param_type(alloc, param_name())))
+                                Ok(Some(instr::verify_param_type( param_name())))
                             } else {
                                 let check = instr::istypel(
-                                    alloc,
                                     Local::Named(Str::new_str(alloc, param.name.unsafe_as_str())),
                                     IsTypeOp::Null,
                                 );
-                                let verify_instr = instr::verify_param_type_ts(alloc, param_name());
+                                let verify_instr = instr::verify_param_type_ts(param_name());
                                 RGH::simplify_verify_type(emitter, env, pos, check, &h, verify_instr)
                                     .map(Some)
                             }
@@ -662,11 +650,11 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
         .zip(ast_params.into_iter())
         .filter_map(|((param, _), ast_param)| make_param_instr((param, ast_param)).transpose())
         .collect::<Result<Vec<_>>>()?;
-    let mut instrs = vec![emit_pos(alloc, pos)];
+    let mut instrs = vec![emit_pos(pos)];
     for i in param_instrs.iter() {
-        instrs.push(InstrSeq::clone(alloc, i));
+        instrs.push(InstrSeq::clone(i));
     }
-    Ok(InstrSeq::gather(alloc, instrs))
+    Ok(InstrSeq::gather(instrs))
 }
 
 pub fn emit_deprecation_info<'a, 'arena>(
@@ -676,23 +664,23 @@ pub fn emit_deprecation_info<'a, 'arena>(
     is_systemlib: bool,
 ) -> Result<InstrSeq<'arena>> {
     Ok(match deprecation_info {
-        None => instr::empty(alloc),
+        None => instr::empty(),
         Some(args) => {
             fn strip_id<'a>(id: &'a ast::Id) -> &'a str {
                 string_utils::strip_global_ns(id.1.as_str())
             }
             let (class_name, trait_instrs, concat_instruction): (String, _, _) =
                 match scope.get_class() {
-                    None => ("".into(), instr::empty(alloc), instr::empty(alloc)),
+                    None => ("".into(), instr::empty(), instr::empty()),
                     Some(c) if c.get_kind() == ast::ClassishKind::Ctrait => (
                         "::".into(),
-                        InstrSeq::gather(alloc, vec![instr::self_(alloc), instr::classname(alloc)]),
-                        instr::concat(alloc),
+                        InstrSeq::gather(vec![instr::self_(), instr::classname()]),
+                        instr::concat(),
                     ),
                     Some(c) => (
                         strip_id(c.get_name()).to_string() + "::",
-                        instr::empty(alloc),
-                        instr::empty(alloc),
+                        instr::empty(),
+                        instr::empty(),
                     ),
                 };
 
@@ -735,34 +723,30 @@ pub fn emit_deprecation_info<'a, 'arena>(
             };
 
             if sampling_rate <= 0 {
-                instr::empty(alloc)
+                instr::empty()
             } else {
-                InstrSeq::gather(
-                    alloc,
-                    vec![
-                        instr::nulluninit(alloc),
-                        instr::nulluninit(alloc),
-                        trait_instrs,
-                        instr::string(alloc, deprecation_string),
-                        concat_instruction,
-                        instr::int64(alloc, sampling_rate),
-                        instr::int(alloc, error_code),
-                        instr::fcallfuncd(
-                            alloc,
-                            FcallArgs::new(
-                                FCallArgsFlags::default(),
-                                1,
-                                Slice::empty(),
-                                Slice::empty(),
-                                None,
-                                3,
-                                None,
-                            ),
-                            function::from_raw_string(alloc, "trigger_sampled_error"),
+                InstrSeq::gather(vec![
+                    instr::nulluninit(),
+                    instr::nulluninit(),
+                    trait_instrs,
+                    instr::string(alloc, deprecation_string),
+                    concat_instruction,
+                    instr::int64(sampling_rate),
+                    instr::int(error_code),
+                    instr::fcallfuncd(
+                        FcallArgs::new(
+                            FCallArgsFlags::default(),
+                            1,
+                            Slice::empty(),
+                            Slice::empty(),
+                            None,
+                            3,
+                            None,
                         ),
-                        instr::popc(alloc),
-                    ],
-                )
+                        function::from_raw_string(alloc, "trigger_sampled_error"),
+                    ),
+                    instr::popc(),
+                ])
             }
         }
     })
@@ -788,21 +772,17 @@ fn set_emit_statement_state<'arena, 'decl>(
     let default_dropthrough = if default_dropthrough.is_some() {
         default_dropthrough
     } else if flags.contains(Flags::ASYNC) && verify_return.is_some() {
-        Some(InstrSeq::gather(
-            alloc,
-            vec![
-                instr::null(alloc),
-                instr::verify_ret_type_c(alloc),
-                instr::retc(alloc),
-            ],
-        ))
+        Some(InstrSeq::gather(vec![
+            instr::null(),
+            instr::verify_ret_type_c(),
+            instr::retc(),
+        ]))
     } else {
         None
     };
     let (num_out, verify_out) = emit_verify_out(alloc, params);
 
     emit_statement::set_state(
-        alloc,
         emitter,
         StatementState {
             verify_return,
@@ -824,26 +804,20 @@ fn emit_verify_out<'arena>(
         .enumerate()
         .filter_map(|(i, (p, _))| {
             if p.is_inout {
-                Some(InstrSeq::gather(
-                    alloc,
-                    vec![
-                        instr::cgetl(
-                            alloc,
-                            Local::Named(Str::new_str(alloc, p.name.unsafe_as_str())),
-                        ),
-                        match p.type_info.as_ref() {
-                            Just(HhasTypeInfo { user_type, .. })
-                                if user_type.as_ref().map_or(true, |t| {
-                                    !(t.unsafe_as_str().ends_with("HH\\mixed")
-                                        || t.unsafe_as_str().ends_with("HH\\dynamic"))
-                                }) =>
-                            {
-                                instr::verify_out_type(alloc, ParamId::ParamUnnamed(i as isize))
-                            }
-                            _ => instr::empty(alloc),
-                        },
-                    ],
-                ))
+                Some(InstrSeq::gather(vec![
+                    instr::cgetl(Local::Named(Str::new_str(alloc, p.name.unsafe_as_str()))),
+                    match p.type_info.as_ref() {
+                        Just(HhasTypeInfo { user_type, .. })
+                            if user_type.as_ref().map_or(true, |t| {
+                                !(t.unsafe_as_str().ends_with("HH\\mixed")
+                                    || t.unsafe_as_str().ends_with("HH\\dynamic"))
+                            }) =>
+                        {
+                            instr::verify_out_type(ParamId::ParamUnnamed(i as isize))
+                        }
+                        _ => instr::empty(),
+                    },
+                ]))
             } else {
                 None
             }
@@ -851,7 +825,7 @@ fn emit_verify_out<'arena>(
         .collect();
     (
         param_instrs.len(),
-        InstrSeq::gather(alloc, param_instrs.into_iter().rev().collect()),
+        InstrSeq::gather(param_instrs.into_iter().rev().collect()),
     )
 }
 

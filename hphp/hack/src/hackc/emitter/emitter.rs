@@ -128,12 +128,9 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
             .as_ref()
             .expect("uninit'd statement_state")
     }
-    pub fn emit_statement_state_mut(
-        &mut self,
-        alloc: &'arena bumpalo::Bump,
-    ) -> &mut StatementState<'arena> {
+    pub fn emit_statement_state_mut(&mut self) -> &mut StatementState<'arena> {
         self.statement_state_
-            .get_or_insert_with(|| StatementState::init(alloc))
+            .get_or_insert_with(StatementState::init)
     }
 
     pub fn emit_symbol_refs_state(&self) -> &SymbolRefsState<'arena> {

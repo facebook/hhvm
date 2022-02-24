@@ -17,12 +17,12 @@ pub struct StatementState<'arena> {
 }
 
 impl<'arena> StatementState<'arena> {
-    pub fn init(alloc: &'arena bumpalo::Bump) -> Self {
+    pub fn init() -> Self {
         StatementState {
             verify_return: None,
-            default_return_value: instr::null(alloc),
+            default_return_value: instr::null(),
             default_dropthrough: None,
-            verify_out: instr::empty(alloc),
+            verify_out: instr::empty(),
             num_out: 0,
             function_pos: Pos::make_none(),
         }

@@ -152,27 +152,20 @@ pub(crate) fn simplify_verify_type<'a, 'arena, 'decl>(
     hint: &aast::Hint,
     verify_instr: InstrSeq<'arena>,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let get_ts = |e, hint| Ok(emit_reified_arg(e, env, pos, false, hint)?.0);
     let aast::Hint(_, hint_) = hint;
     if let aast::Hint_::Hoption(ref hint) = **hint_ {
         let label_gen = e.label_gen_mut();
         let done_label = label_gen.next_regular();
-        Ok(InstrSeq::gather(
-            alloc,
-            vec![
-                check,
-                instr::jmpnz(alloc, done_label),
-                get_ts(e, hint)?,
-                verify_instr,
-                instr::label(alloc, done_label),
-            ],
-        ))
+        Ok(InstrSeq::gather(vec![
+            check,
+            instr::jmpnz(done_label),
+            get_ts(e, hint)?,
+            verify_instr,
+            instr::label(done_label),
+        ]))
     } else {
-        Ok(InstrSeq::gather(
-            alloc,
-            vec![get_ts(e, hint)?, verify_instr],
-        ))
+        Ok(InstrSeq::gather(vec![get_ts(e, hint)?, verify_instr]))
     }
 }
 

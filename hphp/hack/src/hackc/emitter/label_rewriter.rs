@@ -61,7 +61,6 @@ fn create_label_ref_map<'arena>(
 }
 
 fn rewrite_params_and_body<'arena>(
-    alloc: &'arena bumpalo::Bump,
     label_to_offset: &HashMap<Label, u32>,
     used: &HashSet<Label>,
     offset_to_label: &HashMap<u32, Label>,
@@ -74,7 +73,7 @@ fn rewrite_params_and_body<'arena>(
             *l = relabel(*l);
         }
     }
-    body.retain_mut(alloc, &mut |instr| {
+    body.retain_mut(&mut |instr| {
         if let Instruct::Label(l) = instr {
             if used.contains(l) {
                 *l = relabel(*l);
@@ -92,20 +91,12 @@ fn rewrite_params_and_body<'arena>(
 }
 
 pub fn relabel_function<'arena>(
-    alloc: &'arena bumpalo::Bump,
     params: &mut Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>,
     body: &mut InstrSeq<'arena>,
 ) {
     let label_to_offset = create_label_to_offset_map(body);
     let (used, offset_to_label) = create_label_ref_map(&label_to_offset, params, body);
-    rewrite_params_and_body(
-        alloc,
-        &label_to_offset,
-        &used,
-        &offset_to_label,
-        params,
-        body,
-    )
+    rewrite_params_and_body(&label_to_offset, &used, &offset_to_label, params, body)
 }
 
 pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(

@@ -128,7 +128,7 @@ pub fn emit_function<'a, 'arena, 'decl>(
             e,
             RcOc::clone(&fd.namespace),
             Either::Right(ast_body),
-            instr::null(alloc),
+            instr::null(),
             scope,
             EmitBodyArgs {
                 flags: body_flags,

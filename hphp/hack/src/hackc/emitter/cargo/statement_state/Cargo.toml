@@ -8,6 +8,5 @@ edition = "2021"
 path = "../../statement_state.rs"
 
 [dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
 instruction_sequence = { path = "../instruction_sequence" }
 oxidized = { path = "../../../../oxidized" }

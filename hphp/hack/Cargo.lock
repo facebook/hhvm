@@ -1297,7 +1297,6 @@ dependencies = [
 name = "emit_pos"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
  "instruction_sequence",
  "oxidized",
 ]
@@ -2216,7 +2215,6 @@ version = "0.0.0"
 name = "label_rewriter"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
  "env",
  "hash",
  "hhas_param",
@@ -3207,7 +3205,6 @@ dependencies = [
 name = "scope"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
  "env",
  "instruction_sequence",
  "iterator",
@@ -3335,7 +3332,6 @@ dependencies = [
 name = "statement_state"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
  "instruction_sequence",
  "oxidized",
 ]

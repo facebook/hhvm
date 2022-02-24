@@ -8,7 +8,6 @@ edition = "2021"
 path = "../../scope.rs"
 
 [dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
 env = { path = "../../../emitter/cargo/env" }
 instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 iterator = { path = "../../../emitter/cargo/iterator" }

@@ -44,10 +44,10 @@ fn emit_constant_cinit<'a, 'arena, 'decl>(
         .transpose()?;
     init.map(|instrs| {
         let verify_instr = match return_type_info {
-            None => instr::empty(alloc),
-            Some(_) => instr::verify_ret_type_c(alloc),
+            None => instr::empty(),
+            Some(_) => instr::verify_ret_type_c(),
         };
-        let instrs = InstrSeq::gather(alloc, vec![instrs, verify_instr, instr::retc(alloc)]);
+        let instrs = InstrSeq::gather(vec![instrs, verify_instr, instr::retc()]);
         let body = emit_body::make_body(
             alloc,
             e,

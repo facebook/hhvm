@@ -394,29 +394,25 @@ fn emit_reified_extends_params<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     ast_class: &'a ast::Class_,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     match &ast_class.extends[..] {
         [h, ..] => match h.1.as_happly() {
             Some((_, l)) if !l.is_empty() => {
-                return Ok(InstrSeq::gather(
-                    alloc,
-                    vec![
-                        emit_expression::emit_reified_targs(
-                            e,
-                            env,
-                            &ast_class.span,
-                            &l.iter().collect::<Vec<_>>(),
-                        )?,
-                        instr::record_reified_generic(alloc),
-                    ],
-                ));
+                return Ok(InstrSeq::gather(vec![
+                    emit_expression::emit_reified_targs(
+                        e,
+                        env,
+                        &ast_class.span,
+                        &l.iter().collect::<Vec<_>>(),
+                    )?,
+                    instr::record_reified_generic(),
+                ]));
             }
             _ => {}
         },
         _ => {}
     }
     let tv = TypedValue::Vec(Slice::empty());
-    Ok(instr::typedvalue(alloc, tv))
+    Ok(instr::typedvalue(tv))
 }
 
 fn emit_reified_init_body<'a, 'arena, 'decl>(
@@ -428,68 +424,47 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
     use string_utils::reified::{INIT_METH_NAME, INIT_METH_PARAM_NAME, PROP_NAME};
 
     let alloc = env.arena;
-    let check_length = InstrSeq::gather(
-        alloc,
-        vec![
-            instr::cgetl(
-                alloc,
-                Local::Named(Slice::new(INIT_METH_PARAM_NAME.as_bytes())),
-            ),
-            instr::check_reified_generic_mismatch(alloc),
-        ],
-    );
+    let check_length = InstrSeq::gather(vec![
+        instr::cgetl(Local::Named(Slice::new(INIT_METH_PARAM_NAME.as_bytes()))),
+        instr::check_reified_generic_mismatch(),
+    ]);
     let set_prop = if num_reified == 0 {
-        instr::empty(alloc)
+        instr::empty()
     } else {
-        InstrSeq::gather(
-            alloc,
-            vec![
-                check_length,
-                instr::checkthis(alloc),
-                instr::cgetl(
-                    alloc,
-                    Local::Named(Slice::new(INIT_METH_PARAM_NAME.as_bytes())),
-                ),
-                instr::baseh(alloc),
-                instr::setm_pt(
-                    alloc,
-                    0,
-                    prop::from_raw_string(alloc, PROP_NAME),
-                    ReadonlyOp::Any,
-                ),
-                instr::popc(alloc),
-            ],
-        )
+        InstrSeq::gather(vec![
+            check_length,
+            instr::checkthis(),
+            instr::cgetl(Local::Named(Slice::new(INIT_METH_PARAM_NAME.as_bytes()))),
+            instr::baseh(),
+            instr::setm_pt(0, prop::from_raw_string(alloc, PROP_NAME), ReadonlyOp::Any),
+            instr::popc(),
+        ])
     };
-    let return_instr = InstrSeq::gather(alloc, vec![instr::null(alloc), instr::retc(alloc)]);
+    let return_instr = InstrSeq::gather(vec![instr::null(), instr::retc()]);
     Ok(if ast_class.extends.is_empty() {
-        InstrSeq::gather(alloc, vec![set_prop, return_instr])
+        InstrSeq::gather(vec![set_prop, return_instr])
     } else {
         let generic_arr = emit_reified_extends_params(e, env, ast_class)?;
-        let call_parent = InstrSeq::gather(
-            alloc,
-            vec![
-                instr::nulluninit(alloc),
-                instr::nulluninit(alloc),
-                generic_arr,
-                instr::fcallclsmethodsd(
-                    alloc,
-                    FcallArgs::new(
-                        FCallArgsFlags::default(),
-                        1,
-                        Slice::empty(),
-                        Slice::empty(),
-                        None,
-                        1,
-                        None,
-                    ),
-                    SpecialClsRef::Parent,
-                    method::from_raw_string(alloc, INIT_METH_NAME),
+        let call_parent = InstrSeq::gather(vec![
+            instr::nulluninit(),
+            instr::nulluninit(),
+            generic_arr,
+            instr::fcallclsmethodsd(
+                FcallArgs::new(
+                    FCallArgsFlags::default(),
+                    1,
+                    Slice::empty(),
+                    Slice::empty(),
+                    None,
+                    1,
+                    None,
                 ),
-                instr::popc(alloc),
-            ],
-        );
-        InstrSeq::gather(alloc, vec![set_prop, call_parent, return_instr])
+                SpecialClsRef::Parent,
+                method::from_raw_string(alloc, INIT_METH_NAME),
+            ),
+            instr::popc(),
+        ]);
+        InstrSeq::gather(vec![set_prop, call_parent, return_instr])
     })
 }
 
@@ -525,7 +500,7 @@ fn emit_reified_init_method<'a, 'arena, 'decl>(
         }];
 
         let body_instrs = emit_reified_init_body(emitter, env, num_reified, ast_class)?;
-        let instrs = emit_pos::emit_pos_then(alloc, &ast_class.span, body_instrs);
+        let instrs = emit_pos::emit_pos_then(&ast_class.span, body_instrs);
         Ok(Some(make_86method(
             alloc,
             emitter,
@@ -557,7 +532,6 @@ where
         .any(|p| p.init.is_some() && filter(&p.prop))
     {
         let instrs = InstrSeq::gather(
-            alloc,
             properties
                 .iter_mut()
                 .filter_map(|p| match p.init {
@@ -566,7 +540,7 @@ where
                 })
                 .collect(),
         );
-        let instrs = InstrSeq::gather(alloc, vec![instrs, instr::null(alloc), instr::retc(alloc)]);
+        let instrs = InstrSeq::gather(vec![instrs, instr::null(), instr::retc()]);
         Ok(Some(make_86method(
             alloc,
             emitter,
@@ -824,28 +798,22 @@ pub fn emit_class<'a, 'arena, 'decl>(
             consts: &[(&ConstType<'arena>, label::Label, InstrSeq<'arena>)],
         ) -> InstrSeq<'arena> {
             match consts {
-                [] => InstrSeq::gather(
-                    alloc,
-                    vec![
-                        instr::label(alloc, default_label),
-                        emit_pos::emit_pos(alloc, pos),
-                        instr::string(alloc, "Could not find initializer for "),
-                        instr::cgetl(alloc, Local::Named(Slice::new("$constName".as_bytes()))),
-                        instr::string(alloc, " in 86cinit"),
-                        instr::concatn(alloc, 3),
-                        instr::fatal(alloc, FatalOp::Runtime),
-                    ],
-                ),
-                [(_, label, ref instrs), cs @ ..] => InstrSeq::gather(
-                    alloc,
-                    vec![
-                        instr::label(alloc, *label),
-                        InstrSeq::clone(alloc, instrs),
-                        emit_pos::emit_pos(alloc, pos),
-                        instr::retc(alloc),
-                        make_cinit_instrs(alloc, e, default_label, pos, cs),
-                    ],
-                ),
+                [] => InstrSeq::gather(vec![
+                    instr::label(default_label),
+                    emit_pos::emit_pos(pos),
+                    instr::string(alloc, "Could not find initializer for "),
+                    instr::cgetl(Local::Named(Slice::new("$constName".as_bytes()))),
+                    instr::string(alloc, " in 86cinit"),
+                    instr::concatn(3),
+                    instr::fatal(FatalOp::Runtime),
+                ]),
+                [(_, label, ref instrs), cs @ ..] => InstrSeq::gather(vec![
+                    instr::label(*label),
+                    InstrSeq::clone(instrs),
+                    emit_pos::emit_pos(pos),
+                    instr::retc(),
+                    make_cinit_instrs(alloc, e, default_label, pos, cs),
+                ]),
             }
         }
         let default_label = emitter.label_gen_mut().next_regular();
@@ -858,22 +826,19 @@ pub fn emit_class<'a, 'arena, 'decl>(
                 cases.push((n, *label))
             }
             cases.push((alloc.alloc_str("default"), default_label));
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    instr::cgetl(alloc, Local::Named(Slice::new("$constName".as_bytes()))),
-                    instr::sswitch(alloc, cases),
-                    make_cinit_instrs(
-                        alloc,
-                        emitter,
-                        default_label,
-                        &ast_class.span,
-                        &initialized_constants,
-                    ),
-                ],
-            )
+            InstrSeq::gather(vec![
+                instr::cgetl(Local::Named(Slice::new("$constName".as_bytes()))),
+                instr::sswitch(alloc, cases),
+                make_cinit_instrs(
+                    alloc,
+                    emitter,
+                    default_label,
+                    &ast_class.span,
+                    &initialized_constants,
+                ),
+            ])
         };
-        let instrs = emit_pos::emit_pos_then(alloc, &ast_class.span, body_instrs);
+        let instrs = emit_pos::emit_pos_then(&ast_class.span, body_instrs);
         let params = vec![HhasParam {
             name: Str::new_str(alloc, "$constName"),
             is_variadic: false,

@@ -22,14 +22,11 @@ pub fn emit_fatal<'arena>(
     pos: &Pos,
     msg: impl AsRef<str>,
 ) -> InstrSeq<'arena> {
-    InstrSeq::gather(
-        alloc,
-        vec![
-            emit_pos(alloc, pos),
-            instr::string(alloc, msg.as_ref()),
-            instr::fatal(alloc, op),
-        ],
-    )
+    InstrSeq::gather(vec![
+        emit_pos(pos),
+        instr::string(alloc, msg.as_ref()),
+        instr::fatal(op),
+    ])
 }
 
 pub fn emit_fatal_runtime<'arena>(

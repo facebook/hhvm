@@ -185,22 +185,16 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
     let alloc = env.arena; // Hmm, should this be emitter.alloc?
     let mut to_setter = |(param, default_value): &(HhasParam<'arena>, Option<(Label, a::Expr)>)| {
         default_value.as_ref().map(|(lbl, expr)| {
-            let instrs = InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_expression::emit_expr(emitter, env, expr)?,
-                    emit_pos::emit_pos(alloc, pos),
-                    instr::setl(
-                        alloc,
-                        Local::Named(Str::new_str(alloc, param.name.unsafe_as_str())),
-                    ),
-                    instr::popc(alloc),
-                ],
-            );
-            Ok(InstrSeq::gather(
-                alloc,
-                vec![instr::label(alloc, lbl.to_owned()), instrs],
-            ))
+            let instrs = InstrSeq::gather(vec![
+                emit_expression::emit_expr(emitter, env, expr)?,
+                emit_pos::emit_pos(pos),
+                instr::setl(Local::Named(Str::new_str(
+                    alloc,
+                    param.name.unsafe_as_str(),
+                ))),
+                instr::popc(),
+            ]);
+            Ok(InstrSeq::gather(vec![instr::label(lbl.to_owned()), instrs]))
         })
     };
     let setters = params
@@ -208,15 +202,12 @@ pub fn emit_param_default_value_setter<'a, 'arena, 'decl>(
         .filter_map(|p| to_setter(p))
         .collect::<Result<Vec<_>>>()?;
     if setters.is_empty() {
-        Ok((instr::empty(alloc), instr::empty(alloc)))
+        Ok((instr::empty(), instr::empty()))
     } else {
         let l = emitter.label_gen_mut().next_regular();
         Ok((
-            instr::label(alloc, l),
-            InstrSeq::gather(
-                alloc,
-                vec![InstrSeq::gather(alloc, setters), instr::jmpns(alloc, l)],
-            ),
+            instr::label(l),
+            InstrSeq::gather(vec![InstrSeq::gather(setters), instr::jmpns(l)]),
         ))
     }
 }

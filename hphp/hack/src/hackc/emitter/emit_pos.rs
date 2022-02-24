@@ -6,25 +6,20 @@
 use instruction_sequence::{instr, InstrSeq};
 use oxidized::pos::Pos;
 
-pub fn emit_pos<'a>(alloc: &'a bumpalo::Bump, pos: &Pos) -> InstrSeq<'a> {
+pub fn emit_pos<'a>(pos: &Pos) -> InstrSeq<'a> {
     if !pos.is_none() {
         let (line_begin, line_end, col_begin, col_end) = pos.info_pos_extended();
         instr::srcloc(
-            alloc,
             line_begin.try_into().unwrap(),
             line_end.try_into().unwrap(),
             col_begin.try_into().unwrap(),
             col_end.try_into().unwrap(),
         )
     } else {
-        instr::empty(alloc)
+        instr::empty()
     }
 }
 
-pub fn emit_pos_then<'a>(
-    alloc: &'a bumpalo::Bump,
-    pos: &Pos,
-    instrs: InstrSeq<'a>,
-) -> InstrSeq<'a> {
-    InstrSeq::gather(alloc, vec![emit_pos(alloc, pos), instrs])
+pub fn emit_pos_then<'a>(pos: &Pos, instrs: InstrSeq<'a>) -> InstrSeq<'a> {
+    InstrSeq::gather(vec![emit_pos(pos), instrs])
 }

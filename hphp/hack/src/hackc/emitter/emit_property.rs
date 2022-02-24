@@ -126,54 +126,43 @@ pub fn from_ast<'ast, 'arena, 'decl>(
                     let label = emitter.label_gen_mut().next_regular();
                     let (prolog, epilog) = if args.is_static {
                         (
-                            instr::empty(alloc),
+                            instr::empty(),
                             emit_pos::emit_pos_then(
-                                alloc,
                                 &class.span,
-                                instr::initprop(alloc, pid, InitPropOp::Static),
+                                instr::initprop(pid, InitPropOp::Static),
                             ),
                         )
                     } else if args.visibility.is_private() {
                         (
-                            instr::empty(alloc),
+                            instr::empty(),
                             emit_pos::emit_pos_then(
-                                alloc,
                                 &class.span,
-                                instr::initprop(alloc, pid, InitPropOp::NonStatic),
+                                instr::initprop(pid, InitPropOp::NonStatic),
                             ),
                         )
                     } else {
                         (
-                            InstrSeq::gather(
-                                alloc,
-                                vec![
-                                    emit_pos::emit_pos(alloc, &class.span),
-                                    instr::checkprop(alloc, pid),
-                                    instr::jmpnz(alloc, label.clone()),
-                                ],
-                            ),
-                            InstrSeq::gather(
-                                alloc,
-                                vec![
-                                    emit_pos::emit_pos(alloc, &class.span),
-                                    instr::initprop(alloc, pid, InitPropOp::NonStatic),
-                                    instr::label(alloc, label),
-                                ],
-                            ),
+                            InstrSeq::gather(vec![
+                                emit_pos::emit_pos(&class.span),
+                                instr::checkprop(pid),
+                                instr::jmpnz(label),
+                            ]),
+                            InstrSeq::gather(vec![
+                                emit_pos::emit_pos(&class.span),
+                                instr::initprop(pid, InitPropOp::NonStatic),
+                                instr::label(label),
+                            ]),
                         )
                     };
                     let mut flags = Attr::AttrNone;
                     flags.set(Attr::AttrDeepInit, deep_init);
                     (
                         Some(TypedValue::Uninit),
-                        Some(InstrSeq::gather(
-                            alloc,
-                            vec![
-                                prolog,
-                                emit_expression::emit_expr(emitter, &env, e)?,
-                                epilog,
-                            ],
-                        )),
+                        Some(InstrSeq::gather(vec![
+                            prolog,
+                            emit_expression::emit_expr(emitter, &env, e)?,
+                            epilog,
+                        ])),
                         flags,
                     )
                 }

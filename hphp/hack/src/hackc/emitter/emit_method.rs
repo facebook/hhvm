@@ -259,7 +259,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
             emitter,
             namespace,
             Either::Right(ast_body_block),
-            instr::null(emitter.alloc),
+            instr::null(),
             scope,
             emit_body::Args {
                 immediate_tparams: &method.tparams,

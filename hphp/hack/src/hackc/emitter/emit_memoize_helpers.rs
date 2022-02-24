@@ -25,14 +25,11 @@ pub fn get_memo_key_list<'arena>(
     name: impl AsRef<str>,
 ) -> Vec<InstrSeq<'arena>> {
     vec![
-        instr::getmemokeyl(alloc, Local::Named(Str::new_str(alloc, name.as_ref()))),
-        instr::setl(
-            alloc,
-            Local::Unnamed(LocalId {
-                idx: local.idx + index,
-            }),
-        ),
-        instr::popc(alloc),
+        instr::getmemokeyl(Local::Named(Str::new_str(alloc, name.as_ref()))),
+        instr::setl(Local::Unnamed(LocalId {
+            idx: local.idx + index,
+        })),
+        instr::popc(),
     ]
 }
 
@@ -42,7 +39,6 @@ pub fn param_code_sets<'arena>(
     local: LocalId,
 ) -> InstrSeq<'arena> {
     InstrSeq::gather(
-        alloc,
         params
             .iter()
             .enumerate()
@@ -64,14 +60,13 @@ pub fn param_code_gets<'arena>(
     params: &[(HhasParam<'arena>, Option<(Label, Expr)>)],
 ) -> InstrSeq<'arena> {
     InstrSeq::gather(
-        alloc,
         params
             .iter()
             .map(|(param, _)| {
-                instr::cgetl(
+                instr::cgetl(Local::Named(Str::new_str(
                     alloc,
-                    Local::Named(Str::new_str(alloc, param.name.unsafe_as_str())),
-                )
+                    param.name.unsafe_as_str(),
+                )))
             })
             .collect(),
     )
@@ -95,29 +90,25 @@ pub fn get_implicit_context_memo_key<'arena>(
     alloc: &'arena bumpalo::Bump,
     local: LocalId,
 ) -> InstrSeq<'arena> {
-    InstrSeq::gather(
-        alloc,
-        vec![
-            instr::nulluninit(alloc),
-            instr::nulluninit(alloc),
-            instr::fcallfuncd(
-                alloc,
-                FcallArgs::new(
-                    FCallArgsFlags::default(),
-                    1,
-                    Slice::empty(),
-                    Slice::empty(),
-                    None,
-                    0,
-                    None,
-                ),
-                function::from_raw_string(
-                    alloc,
-                    "HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",
-                ),
+    InstrSeq::gather(vec![
+        instr::nulluninit(),
+        instr::nulluninit(),
+        instr::fcallfuncd(
+            FcallArgs::new(
+                FCallArgsFlags::default(),
+                1,
+                Slice::empty(),
+                Slice::empty(),
+                None,
+                0,
+                None,
             ),
-            instr::setl(alloc, Local::Unnamed(local)),
-            instr::popc(alloc),
-        ],
-    )
+            function::from_raw_string(
+                alloc,
+                "HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",
+            ),
+        ),
+        instr::setl(Local::Unnamed(local)),
+        instr::popc(),
+    ])
 }

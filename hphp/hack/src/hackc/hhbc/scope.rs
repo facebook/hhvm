@@ -27,13 +27,11 @@ where
 
     e.local_gen_mut().dedicated.temp_map.pop();
     if local_counter == e.local_gen().counter {
-        Ok(InstrSeq::gather(e.alloc, vec![before, inner, after]))
+        Ok(InstrSeq::gather(vec![before, inner, after]))
     } else {
-        let unset_locals =
-            unset_unnamed_locals(e.alloc, local_counter.next, e.local_gen().counter.next);
+        let unset_locals = unset_unnamed_locals(local_counter.next, e.local_gen().counter.next);
         e.local_gen_mut().counter = local_counter;
         Ok(wrap_inner_in_try_catch(
-            e.alloc,
             e.label_gen_mut(),
             (before, inner, after),
             unset_locals,
@@ -63,19 +61,16 @@ where
     e.local_gen_mut().dedicated.temp_map.pop();
 
     if local_counter == e.local_gen().counter && next_iterator == e.iterator().next {
-        Ok(InstrSeq::gather(e.alloc, vec![before, inner, after]))
+        Ok(InstrSeq::gather(vec![before, inner, after]))
     } else {
-        let unset_locals =
-            unset_unnamed_locals(e.alloc, local_counter.next, e.local_gen().counter.next);
+        let unset_locals = unset_unnamed_locals(local_counter.next, e.local_gen().counter.next);
         e.local_gen_mut().counter = local_counter;
-        let free_iters = free_iterators(e.alloc, next_iterator, e.iterator().next);
+        let free_iters = free_iterators(next_iterator, e.iterator().next);
         e.iterator_mut().next = next_iterator;
-        let alloc = e.alloc;
         Ok(wrap_inner_in_try_catch(
-            e.alloc,
             e.label_gen_mut(),
             (before, inner, after),
-            InstrSeq::gather(alloc, vec![unset_locals, free_iters]),
+            InstrSeq::gather(vec![unset_locals, free_iters]),
         ))
     }
 }
@@ -107,54 +102,36 @@ where
 {
     with_unnamed_locals(e, |e| {
         let tmp = e.local_gen_mut().get_unnamed();
-        Ok((
-            instr::popl(e.alloc, tmp.clone()),
-            emit(e)?,
-            instr::pushl(e.alloc, tmp),
-        ))
+        Ok((instr::popl(tmp.clone()), emit(e)?, instr::pushl(tmp)))
     })
 }
 
-fn unset_unnamed_locals<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    start: LocalId,
-    end: LocalId,
-) -> InstrSeq<'arena> {
+fn unset_unnamed_locals<'arena>(start: LocalId, end: LocalId) -> InstrSeq<'arena> {
     InstrSeq::gather(
-        alloc,
         (start.idx..end.idx)
             .into_iter()
-            .map(|idx| instr::unsetl(alloc, Local::Unnamed(LocalId { idx })))
+            .map(|idx| instr::unsetl(Local::Unnamed(LocalId { idx })))
             .collect(),
     )
 }
 
-fn free_iterators<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    start: IterId,
-    end: IterId,
-) -> InstrSeq<'arena> {
+fn free_iterators<'arena>(start: IterId, end: IterId) -> InstrSeq<'arena> {
     InstrSeq::gather(
-        alloc,
         (start.idx..end.idx)
             .into_iter()
-            .map(|idx| instr::iterfree(alloc, IterId { idx }))
+            .map(|idx| instr::iterfree(IterId { idx }))
             .collect(),
     )
 }
 
 fn wrap_inner_in_try_catch<'arena>(
-    alloc: &'arena bumpalo::Bump,
     label_gen: &mut label::Gen,
     (before, inner, after): (InstrSeq<'arena>, InstrSeq<'arena>, InstrSeq<'arena>),
     catch_instrs: InstrSeq<'arena>,
 ) -> InstrSeq<'arena> {
-    InstrSeq::gather(
-        alloc,
-        vec![
-            before,
-            InstrSeq::create_try_catch(alloc, label_gen, None, false, inner, catch_instrs),
-            after,
-        ],
-    )
+    InstrSeq::gather(vec![
+        before,
+        InstrSeq::create_try_catch(label_gen, None, false, inner, catch_instrs),
+        after,
+    ])
 }

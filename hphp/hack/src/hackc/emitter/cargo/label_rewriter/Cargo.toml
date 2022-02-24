@@ -8,7 +8,6 @@ edition = "2021"
 path = "../../label_rewriter.rs"
 
 [dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
 env = { path = "../env" }
 hash = { path = "../../../../utils/hash" }
 hhas_param = { path = "../../../hhbc/cargo/hhas_param" }

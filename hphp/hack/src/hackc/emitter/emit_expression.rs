@@ -309,7 +309,7 @@ pub fn get_type_structure_for_hint<'arena, 'decl>(
         false,
     )?;
     let i = Str::from(emit_adata::get_array_identifier(e, &tv));
-    Ok(instr::lit_const(e.alloc, InstructLitConst::Dict(i)))
+    Ok(instr::lit_const(InstructLitConst::Dict(i)))
 }
 
 pub struct SetRange {
@@ -382,7 +382,6 @@ pub fn emit_expr<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     use aast_defs::Lid;
     use ast::Expr_;
-    let alloc = env.arena; // Should this be emitter.alloc?
     let ast::Expr(_, pos, expr) = expression;
     match expr {
         Expr_::Float(_)
@@ -393,7 +392,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         | Expr_::True => {
             let v = ast_constant_folder::expr_to_typed_value(emitter, expression)
                 .map_err(|_| unrecoverable("expr_to_typed_value failed"))?;
-            Ok(emit_pos_then(alloc, pos, instr::typedvalue(alloc, v)))
+            Ok(emit_pos_then(pos, instr::typedvalue(v)))
         }
         Expr_::EnumClassLabel(label) => {
             // emitting E#A as __Systemlib\create_opaque_value(OpaqueValue::EnumClassLabel, "A")
@@ -422,13 +421,10 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::PrefixedString(e) => emit_expr(emitter, env, &e.1),
         Expr_::Lvar(e) => {
             let Lid(pos, _) = &**e;
-            Ok(InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_pos(alloc, pos),
-                    emit_local(emitter, env, BareThisOp::Notice, e)?,
-                ],
-            ))
+            Ok(InstrSeq::gather(vec![
+                emit_pos(pos),
+                emit_local(emitter, env, BareThisOp::Notice, e)?,
+            ]))
         }
         Expr_::ClassConst(e) => emit_class_const(emitter, env, pos, &e.0, &e.1),
         Expr_::Unop(e) => emit_unop(emitter, env, pos, e),
@@ -437,10 +433,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::Is(is_expr) => {
             let (e, h) = &**is_expr;
             let is = emit_is(emitter, env, pos, h)?;
-            Ok(InstrSeq::gather(
-                alloc,
-                vec![emit_expr(emitter, env, e)?, is],
-            ))
+            Ok(InstrSeq::gather(vec![emit_expr(emitter, env, e)?, is]))
         }
         Expr_::As(e) => emit_as(emitter, env, pos, e),
         Expr_::Upcast(e) => emit_expr(emitter, env, &e.0),
@@ -477,12 +470,10 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::New(e) => emit_new(emitter, env, pos, e, false),
         Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, pos, &fp.0, &fp.1),
         Expr_::Darray(e) => Ok(emit_pos_then(
-            alloc,
             pos,
             emit_collection(emitter, env, expression, &mk_afkvalues(&e.1), None)?,
         )),
         Expr_::Varray(e) => Ok(emit_pos_then(
-            alloc,
             pos,
             emit_collection(emitter, env, expression, &mk_afvalues(&e.1), None)?,
         )),
@@ -521,20 +512,12 @@ pub fn emit_expr<'a, 'arena, 'decl>(
             };
             emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
         }
-        Expr_::Clone(e) => Ok(emit_pos_then(alloc, pos, emit_clone(emitter, env, e)?)),
-        Expr_::Shape(e) => Ok(emit_pos_then(
-            alloc,
-            pos,
-            emit_shape(emitter, env, expression, e)?,
-        )),
+        Expr_::Clone(e) => Ok(emit_pos_then(pos, emit_clone(emitter, env, e)?)),
+        Expr_::Shape(e) => Ok(emit_pos_then(pos, emit_shape(emitter, env, expression, e)?)),
         Expr_::Await(e) => emit_await(emitter, env, pos, e),
         Expr_::ReadonlyExpr(e) => emit_readonly_expr(emitter, env, pos, e),
         Expr_::Yield(e) => emit_yield(emitter, env, pos, e),
-        Expr_::Efun(e) => Ok(emit_pos_then(
-            alloc,
-            pos,
-            emit_lambda(emitter, env, &e.0, &e.1)?,
-        )),
+        Expr_::Efun(e) => Ok(emit_pos_then(pos, emit_lambda(emitter, env, &e.0, &e.1)?)),
         Expr_::ClassGet(e) => {
             // class gets without a readonly expression must be mutable
             emit_class_get(
@@ -548,12 +531,12 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         }
 
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
-        Expr_::Id(e) => Ok(emit_pos_then(alloc, pos, emit_id(emitter, env, e)?)),
+        Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
         Expr_::Xml(_) => Err(unrecoverable(
             "emit_xhp: syntax should have been converted during rewriting",
         )),
         Expr_::Import(e) => emit_import(emitter, env, pos, &e.0, &e.1),
-        Expr_::Omitted => Ok(instr::empty(alloc)),
+        Expr_::Omitted => Ok(instr::empty()),
         Expr_::Lfun(_) => Err(unrecoverable(
             "expected Lfun to be converted to Efun during closure conversion emit_expr",
         )),
@@ -562,7 +545,6 @@ pub fn emit_expr<'a, 'arena, 'decl>(
             "list() can only be used as an lvar. Did you mean to use tuple()?",
         )),
         Expr_::Tuple(e) => Ok(emit_pos_then(
-            alloc,
             pos,
             emit_collection(emitter, env, expression, &mk_afvalues(e), None)?,
         )),
@@ -590,12 +572,10 @@ fn emit_exprs_and_error_on_inout<'a, 'arena, 'decl>(
     exprs: &[(ParamKind, ast::Expr)],
     fn_name: &str,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena; // Should this be emitter.alloc?
     if exprs.is_empty() {
-        Ok(instr::empty(alloc))
+        Ok(instr::empty())
     } else {
         Ok(InstrSeq::gather(
-            alloc,
             exprs
                 .iter()
                 .map(|(pk, expr)| match pk {
@@ -618,12 +598,10 @@ fn emit_exprs<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     exprs: &[ast::Expr],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena; // Should this be emitter.alloc?
     if exprs.is_empty() {
-        Ok(instr::empty(alloc))
+        Ok(instr::empty())
     } else {
         Ok(InstrSeq::gather(
-            alloc,
             exprs
                 .iter()
                 .map(|expr| emit_expr(e, env, expr))
@@ -640,23 +618,17 @@ fn emit_id<'a, 'arena, 'decl>(
     let alloc = env.arena; // Should this be emitter.alloc?
     let ast_defs::Id(p, s) = id;
     match s.as_str() {
-        pseudo_consts::G__FILE__ => Ok(instr::lit_const(alloc, InstructLitConst::File)),
-        pseudo_consts::G__DIR__ => Ok(instr::lit_const(alloc, InstructLitConst::Dir)),
-        pseudo_consts::G__METHOD__ => Ok(instr::lit_const(alloc, InstructLitConst::Method)),
-        pseudo_consts::G__FUNCTION_CREDENTIAL__ => {
-            Ok(instr::lit_const(alloc, InstructLitConst::FuncCred))
-        }
-        pseudo_consts::G__CLASS__ => Ok(InstrSeq::gather(
-            alloc,
-            vec![instr::self_(alloc), instr::classname(alloc)],
-        )),
+        pseudo_consts::G__FILE__ => Ok(instr::lit_const(InstructLitConst::File)),
+        pseudo_consts::G__DIR__ => Ok(instr::lit_const(InstructLitConst::Dir)),
+        pseudo_consts::G__METHOD__ => Ok(instr::lit_const(InstructLitConst::Method)),
+        pseudo_consts::G__FUNCTION_CREDENTIAL__ => Ok(instr::lit_const(InstructLitConst::FuncCred)),
+        pseudo_consts::G__CLASS__ => Ok(InstrSeq::gather(vec![instr::self_(), instr::classname()])),
         pseudo_consts::G__COMPILER_FRONTEND__ => Ok(instr::string(alloc, "hackc")),
-        pseudo_consts::G__LINE__ => Ok(instr::int(
-            alloc,
-            p.info_pos_extended().1.try_into().map_err(|_| {
+        pseudo_consts::G__LINE__ => Ok(instr::int(p.info_pos_extended().1.try_into().map_err(
+            |_| {
                 emit_fatal::raise_fatal_parse(p, "error converting end of line from usize to isize")
-            })?,
-        )),
+            },
+        )?)),
         pseudo_consts::G__NAMESPACE__ => Ok(instr::string(
             alloc,
             env.namespace.name.as_ref().map_or("", |s| &s[..]),
@@ -669,9 +641,8 @@ fn emit_id<'a, 'arena, 'decl>(
                 r#const::ConstType::new(Str::new_str(alloc, string_utils::strip_global_ns(s)));
             emit_symbol_refs::add_constant(emitter, cid.clone());
             Ok(emit_pos_then(
-                alloc,
                 p,
-                instr::lit_const(alloc, InstructLitConst::CnsE(cid)),
+                instr::lit_const(InstructLitConst::CnsE(cid)),
             ))
         }
     }
@@ -682,14 +653,10 @@ fn emit_exit<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     expr_opt: Option<&ast::Expr>,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena; // Should this be emitter.alloc?
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            expr_opt.map_or_else(|| Ok(instr::int(alloc, 0)), |e| emit_expr(emitter, env, e))?,
-            instr::exit(alloc),
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        expr_opt.map_or_else(|| Ok(instr::int(0)), |e| emit_expr(emitter, env, e))?,
+        instr::exit(),
+    ]))
 }
 
 fn emit_yield<'a, 'arena, 'decl>(
@@ -698,25 +665,16 @@ fn emit_yield<'a, 'arena, 'decl>(
     pos: &Pos,
     af: &ast::Afield,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena; // Should this be emitter.alloc?
     Ok(match af {
-        ast::Afield::AFvalue(v) => InstrSeq::gather(
-            alloc,
-            vec![
-                emit_expr(e, env, v)?,
-                emit_pos(alloc, pos),
-                instr::yield_(alloc),
-            ],
-        ),
-        ast::Afield::AFkvalue(k, v) => InstrSeq::gather(
-            alloc,
-            vec![
-                emit_expr(e, env, k)?,
-                emit_expr(e, env, v)?,
-                emit_pos(alloc, pos),
-                instr::yieldk(alloc),
-            ],
-        ),
+        ast::Afield::AFvalue(v) => {
+            InstrSeq::gather(vec![emit_expr(e, env, v)?, emit_pos(pos), instr::yield_()])
+        }
+        ast::Afield::AFkvalue(k, v) => InstrSeq::gather(vec![
+            emit_expr(e, env, k)?,
+            emit_expr(e, env, v)?,
+            emit_pos(pos),
+            instr::yieldk(),
+        ]),
     })
 }
 
@@ -802,9 +760,9 @@ fn emit_import<'a, 'arena, 'decl>(
     let inc = parse_include(alloc, expr);
     emit_symbol_refs::add_include(e, inc.clone());
     let (expr_instrs, import_op_instr) = match flavor {
-        ImportFlavor::Include => (emit_expr(e, env, expr)?, instr::incl(alloc)),
-        ImportFlavor::Require => (emit_expr(e, env, expr)?, instr::req(alloc)),
-        ImportFlavor::IncludeOnce => (emit_expr(e, env, expr)?, instr::inclonce(alloc)),
+        ImportFlavor::Include => (emit_expr(e, env, expr)?, instr::incl()),
+        ImportFlavor::Require => (emit_expr(e, env, expr)?, instr::req()),
+        ImportFlavor::IncludeOnce => (emit_expr(e, env, expr)?, instr::inclonce()),
         ImportFlavor::RequireOnce => {
             match inc.into_doc_root_relative(alloc, e.options().hhvm.include_roots.get()) {
                 IncludePath::DocRootRelative(path) => {
@@ -813,16 +771,17 @@ fn emit_import<'a, 'arena, 'decl>(
                         pos.clone(),
                         ast::Expr_::String(path.unsafe_as_str().into()),
                     );
-                    (emit_expr(e, env, &expr)?, instr::reqdoc(alloc))
+                    (emit_expr(e, env, &expr)?, instr::reqdoc())
                 }
-                _ => (emit_expr(e, env, expr)?, instr::reqonce(alloc)),
+                _ => (emit_expr(e, env, expr)?, instr::reqonce()),
             }
         }
     };
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![expr_instrs, emit_pos(alloc, pos), import_op_instr],
-    ))
+    Ok(InstrSeq::gather(vec![
+        expr_instrs,
+        emit_pos(pos),
+        import_op_instr,
+    ]))
 }
 
 fn emit_string2<'a, 'arena, 'decl>(
@@ -831,43 +790,32 @@ fn emit_string2<'a, 'arena, 'decl>(
     pos: &Pos,
     es: &[ast::Expr],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena; // Should this be emitter.alloc?
     if es.is_empty() {
         Err(unrecoverable("String2 with zero araguments is impossible"))
     } else if es.len() == 1 {
-        Ok(InstrSeq::gather(
-            alloc,
-            vec![
-                emit_expr(e, env, &es[0])?,
-                emit_pos(alloc, pos),
-                instr::cast_string(alloc),
-            ],
-        ))
+        Ok(InstrSeq::gather(vec![
+            emit_expr(e, env, &es[0])?,
+            emit_pos(pos),
+            instr::cast_string(),
+        ]))
     } else {
-        Ok(InstrSeq::gather(
-            alloc,
-            vec![
-                emit_two_exprs(e, env, &es[0].1, &es[0], &es[1])?,
-                emit_pos(alloc, pos),
-                instr::concat(alloc),
-                InstrSeq::gather(
-                    alloc,
-                    (&es[2..])
-                        .iter()
-                        .map(|expr| {
-                            Ok(InstrSeq::gather(
-                                alloc,
-                                vec![
-                                    emit_expr(e, env, expr)?,
-                                    emit_pos(alloc, pos),
-                                    instr::concat(alloc),
-                                ],
-                            ))
-                        })
-                        .collect::<Result<_>>()?,
-                ),
-            ],
-        ))
+        Ok(InstrSeq::gather(vec![
+            emit_two_exprs(e, env, &es[0].1, &es[0], &es[1])?,
+            emit_pos(pos),
+            instr::concat(),
+            InstrSeq::gather(
+                (&es[2..])
+                    .iter()
+                    .map(|expr| {
+                        Ok(InstrSeq::gather(vec![
+                            emit_expr(e, env, expr)?,
+                            emit_pos(pos),
+                            instr::concat(),
+                        ]))
+                    })
+                    .collect::<Result<_>>()?,
+            ),
+        ]))
     }
 }
 
@@ -876,11 +824,10 @@ fn emit_clone<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena; // Should this be emitter.alloc?
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![emit_expr(e, env, expr)?, instr::clone(alloc)],
-    ))
+    Ok(InstrSeq::gather(vec![
+        emit_expr(e, env, expr)?,
+        instr::clone(),
+    ]))
 }
 
 fn emit_lambda<'a, 'arena, 'decl>(
@@ -898,50 +845,43 @@ fn emit_lambda<'a, 'arena, 'decl>(
         .map_err(|err| Unrecoverable(err.to_string()))?;
     let explicit_use = e.emit_global_state().explicit_use_set.contains(fndef_name);
     let is_in_lambda = env.scope.is_in_lambda();
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            InstrSeq::gather(
-                alloc,
-                ids.iter()
-                    .map(|ast::Lid(pos, id)| {
-                        match string_utils::reified::is_captured_generic(local_id::get_name(id)) {
-                            Some((is_fun, i)) => {
-                                if is_in_lambda {
-                                    Ok(instr::cgetl(
-                                        alloc,
-                                        Local::Named(Str::new_str(
-                                            alloc,
-                                            string_utils::reified::reified_generic_captured_name(
-                                                is_fun, i as usize,
-                                            )
-                                            .as_str(),
-                                        )),
-                                    ))
-                                } else {
-                                    emit_reified_generic_instrs(
-                                        alloc,
-                                        &Pos::make_none(),
-                                        is_fun,
-                                        i as usize,
+    Ok(InstrSeq::gather(vec![
+        InstrSeq::gather(
+            ids.iter()
+                .map(|ast::Lid(pos, id)| {
+                    match string_utils::reified::is_captured_generic(local_id::get_name(id)) {
+                        Some((is_fun, i)) => {
+                            if is_in_lambda {
+                                Ok(instr::cgetl(Local::Named(Str::new_str(
+                                    alloc,
+                                    string_utils::reified::reified_generic_captured_name(
+                                        is_fun, i as usize,
                                     )
-                                }
+                                    .as_str(),
+                                ))))
+                            } else {
+                                emit_reified_generic_instrs(
+                                    alloc,
+                                    &Pos::make_none(),
+                                    is_fun,
+                                    i as usize,
+                                )
                             }
-                            None => Ok({
-                                let lid = get_local(e, env, pos, local_id::get_name(id))?;
-                                if explicit_use {
-                                    instr::cgetl(alloc, lid)
-                                } else {
-                                    instr::cugetl(alloc, lid)
-                                }
-                            }),
                         }
-                    })
-                    .collect::<Result<Vec<_>>>()?,
-            ),
-            instr::createcl(alloc, ids.len(), cls_num),
-        ],
-    ))
+                        None => Ok({
+                            let lid = get_local(e, env, pos, local_id::get_name(id))?;
+                            if explicit_use {
+                                instr::cgetl(lid)
+                            } else {
+                                instr::cugetl(lid)
+                            }
+                        }),
+                    }
+                })
+                .collect::<Result<Vec<_>>>()?,
+        ),
+        instr::createcl(ids.len(), cls_num),
+    ]))
 }
 
 pub fn emit_await<'a, 'arena, 'decl>(
@@ -951,7 +891,7 @@ pub fn emit_await<'a, 'arena, 'decl>(
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     let ast::Expr(_, _, e) = expr;
-    let alloc = env.arena;
+
     let cant_inline_gen_functions = !emitter
         .options()
         .hhvm
@@ -973,18 +913,15 @@ pub fn emit_await<'a, 'arena, 'decl>(
                 }
                 _ => emit_expr(emitter, env, expr)?,
             };
-            Ok(InstrSeq::gather(
-                alloc,
-                vec![
-                    instrs,
-                    emit_pos(alloc, pos),
-                    instr::dup(alloc),
-                    instr::istypec(alloc, IsTypeOp::Null),
-                    instr::jmpnz(alloc, after_await.clone()),
-                    instr::await_(alloc),
-                    instr::label(alloc, after_await),
-                ],
-            ))
+            Ok(InstrSeq::gather(vec![
+                instrs,
+                emit_pos(pos),
+                instr::dup(),
+                instr::istypec(IsTypeOp::Null),
+                instr::jmpnz(after_await.clone()),
+                instr::await_(),
+                instr::label(after_await),
+            ]))
         }
     }
 }
@@ -999,79 +936,55 @@ fn inline_gena_call<'a, 'arena, 'decl>(
 
     scope::with_unnamed_local(emitter, |e, arr_local| {
         let alloc = e.alloc;
-        let before = InstrSeq::gather(
-            alloc,
-            vec![
-                load_arr,
-                instr::cast_dict(alloc),
-                instr::popl(alloc, arr_local),
-            ],
-        );
+        let before = InstrSeq::gather(vec![load_arr, instr::cast_dict(), instr::popl(arr_local)]);
 
-        let inner = InstrSeq::gather(
-            alloc,
-            vec![
-                instr::nulluninit(alloc),
-                instr::nulluninit(alloc),
-                instr::cgetl(alloc, arr_local),
-                instr::fcallclsmethodd(
-                    alloc,
-                    FcallArgs::new(
-                        FCallArgsFlags::default(),
-                        1,
-                        Slice::empty(),
-                        Slice::empty(),
-                        Some(async_eager_label),
-                        1,
-                        None,
-                    ),
-                    method::from_raw_string(alloc, "fromDict"),
-                    class::from_raw_string(alloc, "HH\\AwaitAllWaitHandle"),
+        let inner = InstrSeq::gather(vec![
+            instr::nulluninit(),
+            instr::nulluninit(),
+            instr::cgetl(arr_local),
+            instr::fcallclsmethodd(
+                FcallArgs::new(
+                    FCallArgsFlags::default(),
+                    1,
+                    Slice::empty(),
+                    Slice::empty(),
+                    Some(async_eager_label),
+                    1,
+                    None,
                 ),
-                instr::await_(alloc),
-                instr::label(alloc, async_eager_label),
-                instr::popc(alloc),
-                emit_iter(
-                    e,
-                    instr::cgetl(alloc, arr_local),
-                    |alloc, val_local, key_local| {
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                instr::cgetl(alloc, val_local),
-                                instr::whresult(alloc),
-                                instr::basel(
-                                    alloc,
-                                    arr_local,
-                                    MOpMode::Define,
-                                    ReadonlyOp::Any, // TODO, handle await assignment statements correctly
-                                ),
-                                instr::setm(alloc, 0, MemberKey::EL(key_local, ReadonlyOp::Any)),
-                                instr::popc(alloc),
-                            ],
-                        )
-                    },
-                )?,
-            ],
-        );
+                method::from_raw_string(alloc, "fromDict"),
+                class::from_raw_string(alloc, "HH\\AwaitAllWaitHandle"),
+            ),
+            instr::await_(),
+            instr::label(async_eager_label),
+            instr::popc(),
+            emit_iter(e, instr::cgetl(arr_local), |val_local, key_local| {
+                InstrSeq::gather(vec![
+                    instr::cgetl(val_local),
+                    instr::whresult(),
+                    instr::basel(
+                        arr_local,
+                        MOpMode::Define,
+                        ReadonlyOp::Any, // TODO, handle await assignment statements correctly
+                    ),
+                    instr::setm(0, MemberKey::EL(key_local, ReadonlyOp::Any)),
+                    instr::popc(),
+                ])
+            })?,
+        ]);
 
-        let after = instr::pushl(alloc, arr_local);
+        let after = instr::pushl(arr_local);
 
         Ok((before, inner, after))
     })
 }
 
-fn emit_iter<
-    'arena,
-    'decl,
-    F: FnOnce(&'arena bumpalo::Bump, Local<'arena>, Local<'arena>) -> InstrSeq<'arena>,
->(
+fn emit_iter<'arena, 'decl, F: FnOnce(Local<'arena>, Local<'arena>) -> InstrSeq<'arena>>(
     e: &mut Emitter<'arena, 'decl>,
     collection: InstrSeq<'arena>,
     f: F,
 ) -> Result<InstrSeq<'arena>> {
     scope::with_unnamed_locals_and_iterators(e, |e| {
-        let alloc = e.alloc;
         let iter_id = e.iterator_mut().get();
         let val_id = e.local_gen_mut().get_unnamed();
         let key_id = e.local_gen_mut().get_unnamed();
@@ -1082,29 +995,20 @@ fn emit_iter<
             key_id: Just(key_id),
             val_id,
         };
-        let iter_init = InstrSeq::gather(
-            alloc,
-            vec![
-                collection,
-                instr::iterinit(alloc, iter_args.clone(), loop_end),
-            ],
-        );
-        let iterate = InstrSeq::gather(
-            alloc,
-            vec![
-                instr::label(alloc, loop_next),
-                f(alloc, val_id, key_id),
-                instr::iternext(alloc, iter_args, loop_next),
-            ],
-        );
-        let iter_done = InstrSeq::gather(
-            alloc,
-            vec![
-                instr::unsetl(alloc, val_id),
-                instr::unsetl(alloc, key_id),
-                instr::label(alloc, loop_end),
-            ],
-        );
+        let iter_init = InstrSeq::gather(vec![
+            collection,
+            instr::iterinit(iter_args.clone(), loop_end),
+        ]);
+        let iterate = InstrSeq::gather(vec![
+            instr::label(loop_next),
+            f(val_id, key_id),
+            instr::iternext(iter_args, loop_next),
+        ]);
+        let iter_done = InstrSeq::gather(vec![
+            instr::unsetl(val_id),
+            instr::unsetl(key_id),
+            instr::label(loop_end),
+        ]);
         Ok((iter_init, iterate, iter_done))
     })
 }
@@ -1183,27 +1087,19 @@ fn emit_named_collection<'a, 'arena, 'decl>(
     fields: &[ast::Afield],
     collection_type: CollectionType,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let emit_vector_like = |e: &mut Emitter<'arena, 'decl>, collection_type| {
         Ok(if fields.is_empty() {
-            emit_pos_then(alloc, pos, instr::newcol(alloc, collection_type))
+            emit_pos_then(pos, instr::newcol(collection_type))
         } else {
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_vec_collection(e, env, pos, fields)?,
-                    instr::colfromarray(alloc, collection_type),
-                ],
-            )
+            InstrSeq::gather(vec![
+                emit_vec_collection(e, env, pos, fields)?,
+                instr::colfromarray(collection_type),
+            ])
         })
     };
     let emit_map_or_set = |e: &mut Emitter<'arena, 'decl>, collection_type| {
         if fields.is_empty() {
-            Ok(emit_pos_then(
-                alloc,
-                pos,
-                instr::newcol(alloc, collection_type),
-            ))
+            Ok(emit_pos_then(pos, instr::newcol(collection_type)))
         } else {
             emit_collection(e, env, expr, fields, Some(collection_type))
         }
@@ -1212,22 +1108,18 @@ fn emit_named_collection<'a, 'arena, 'decl>(
     match collection_type {
         C::Vector | C::ImmVector => emit_vector_like(e, collection_type),
         C::Map | C::ImmMap | C::Set | C::ImmSet => emit_map_or_set(e, collection_type),
-        C::Pair => Ok(InstrSeq::gather(
-            alloc,
-            vec![
-                InstrSeq::gather(
-                    alloc,
-                    fields
-                        .iter()
-                        .map(|f| match f {
-                            ast::Afield::AFvalue(v) => emit_expr(e, env, v),
-                            _ => Err(unrecoverable("impossible Pair argument")),
-                        })
-                        .collect::<Result<_>>()?,
-                ),
-                instr::new_pair(alloc),
-            ],
-        )),
+        C::Pair => Ok(InstrSeq::gather(vec![
+            InstrSeq::gather(
+                fields
+                    .iter()
+                    .map(|f| match f {
+                        ast::Afield::AFvalue(v) => emit_expr(e, env, v),
+                        _ => Err(unrecoverable("impossible Pair argument")),
+                    })
+                    .collect::<Result<_>>()?,
+            ),
+            instr::new_pair(),
+        ])),
         _ => Err(unrecoverable("Unexpected named collection type")),
     }
 }
@@ -1254,7 +1146,7 @@ fn emit_named_collection_str<'a, 'arena, 'decl>(
         "Pair" => CollectionType::Pair,
         "vec" | "dict" | "keyset" => {
             let instr = emit_collection(e, env, expr, fields, None)?;
-            return Ok(emit_pos_then(env.arena, pos, instr));
+            return Ok(emit_pos_then(pos, instr));
         }
         _ => {
             return Err(unrecoverable(format!(
@@ -1298,24 +1190,20 @@ fn emit_collection<'a, 'arena, 'decl>(
 }
 
 fn emit_static_collection<'a, 'arena>(
-    env: &Env<'a, 'arena>,
+    _env: &Env<'a, 'arena>,
     transform_to_collection: Option<CollectionType>,
     pos: &Pos,
     tv: TypedValue<'arena>,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let transform_instr = match transform_to_collection {
-        Some(collection_type) => instr::colfromarray(alloc, collection_type),
-        _ => instr::empty(alloc),
+        Some(collection_type) => instr::colfromarray(collection_type),
+        _ => instr::empty(),
     };
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            emit_pos(alloc, pos),
-            instr::typedvalue(alloc, tv),
-            transform_instr,
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        emit_pos(pos),
+        instr::typedvalue(tv),
+        transform_instr,
+    ]))
 }
 
 fn expr_and_new<'a, 'arena, 'decl>(
@@ -1326,20 +1214,16 @@ fn expr_and_new<'a, 'arena, 'decl>(
     instr_to_add: InstrSeq<'arena>,
     field: &ast::Afield,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     match field {
-        ast::Afield::AFvalue(v) => Ok(InstrSeq::gather(
-            alloc,
-            vec![
-                emit_expr(e, env, v)?,
-                emit_pos(alloc, pos),
-                instr_to_add_new,
-            ],
-        )),
-        ast::Afield::AFkvalue(k, v) => Ok(InstrSeq::gather(
-            alloc,
-            vec![emit_two_exprs(e, env, &k.1, k, v)?, instr_to_add],
-        )),
+        ast::Afield::AFvalue(v) => Ok(InstrSeq::gather(vec![
+            emit_expr(e, env, v)?,
+            emit_pos(pos),
+            instr_to_add_new,
+        ])),
+        ast::Afield::AFkvalue(k, v) => Ok(InstrSeq::gather(vec![
+            emit_two_exprs(e, env, &k.1, k, v)?,
+            instr_to_add,
+        ])),
     }
 }
 
@@ -1353,30 +1237,26 @@ fn emit_container<'a, 'arena, 'decl>(
     transform_instr: InstrSeq<'arena>,
     emitted_pos: InstrSeq<'arena>,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            InstrSeq::<'arena>::clone(alloc, &emitted_pos),
-            instr::lit_const(alloc, constructor),
-            fields
-                .iter()
-                .map(|f| {
-                    expr_and_new(
-                        e,
-                        env,
-                        pos,
-                        InstrSeq::<'arena>::clone(alloc, &add_elem_instr),
-                        instr::add_elemc(alloc),
-                        f,
-                    )
-                })
-                .collect::<Result<_>>()
-                .map(|s| InstrSeq::gather(alloc, s))?,
-            emitted_pos,
-            transform_instr,
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        InstrSeq::<'arena>::clone(&emitted_pos),
+        instr::lit_const(constructor),
+        fields
+            .iter()
+            .map(|f| {
+                expr_and_new(
+                    e,
+                    env,
+                    pos,
+                    InstrSeq::<'arena>::clone(&add_elem_instr),
+                    instr::add_elemc(),
+                    f,
+                )
+            })
+            .collect::<Result<_>>()
+            .map(InstrSeq::gather)?,
+        emitted_pos,
+        transform_instr,
+    ]))
 }
 
 fn emit_keyvalue_collection<'a, 'arena, 'decl>(
@@ -1387,10 +1267,9 @@ fn emit_keyvalue_collection<'a, 'arena, 'decl>(
     ctype: CollectionType,
     constructor: InstructLitConst<'arena>,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
-    let transform_instr = instr::colfromarray(alloc, ctype);
-    let add_elem_instr = InstrSeq::gather(alloc, vec![instr::dup(alloc), instr::add_elemc(alloc)]);
-    let emitted_pos = emit_pos(alloc, pos);
+    let transform_instr = instr::colfromarray(ctype);
+    let add_elem_instr = InstrSeq::gather(vec![instr::dup(), instr::add_elemc()]);
+    let emitted_pos = emit_pos(pos);
     emit_container(
         e,
         env,
@@ -1410,9 +1289,8 @@ fn emit_array<'a, 'arena, 'decl>(
     fields: &[ast::Afield],
     constructor: InstructLitConst<'arena>,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
-    let add_elem_instr = instr::add_new_elemc(alloc);
-    let emitted_pos = emit_pos(alloc, pos);
+    let add_elem_instr = instr::add_new_elemc();
+    let emitted_pos = emit_pos(pos);
     emit_container(
         e,
         env,
@@ -1420,7 +1298,7 @@ fn emit_array<'a, 'arena, 'decl>(
         fields,
         constructor,
         add_elem_instr,
-        instr::empty(alloc),
+        instr::empty(),
         emitted_pos,
     )
 }
@@ -1589,14 +1467,11 @@ fn emit_struct_array<
         alloc,
     )
     .into_bump_slice();
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            InstrSeq::gather(alloc, value_instrs),
-            emit_pos(alloc, pos),
-            ctor(alloc, e, keys_)?,
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        InstrSeq::gather(value_instrs),
+        emit_pos(pos),
+        ctor(alloc, e, keys_)?,
+    ]))
 }
 
 fn emit_dynamic_collection<'a, 'arena, 'decl>(
@@ -1605,7 +1480,6 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     expr: &ast::Expr,
     fields: &[ast::Afield],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let pos = &expr.1;
     let count = fields.len();
     let emit_dict = |e: &mut Emitter<'arena, 'decl>| {
@@ -1620,16 +1494,13 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     };
     let emit_collection_helper = |e: &mut Emitter<'arena, 'decl>, ctype| {
         if is_struct_init(e, fields, true)? {
-            Ok(InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_struct_array(e, env, pos, fields, |alloc, _, x| {
-                        Ok(instr::newstructdict(alloc, x))
-                    })?,
-                    emit_pos(alloc, pos),
-                    instr::colfromarray(alloc, ctype),
-                ],
-            ))
+            Ok(InstrSeq::gather(vec![
+                emit_struct_array(e, env, pos, fields, |alloc, _, x| {
+                    Ok(instr::newstructdict(alloc, x))
+                })?,
+                emit_pos(pos),
+                instr::colfromarray(ctype),
+            ]))
         } else {
             let ctor = InstructLitConst::NewDictArray(count as isize);
             emit_keyvalue_collection(e, env, pos, fields, ctype, ctor)
@@ -1686,7 +1557,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
             if is_struct_init(e, fields, false /* allow_numerics */)? {
                 let instrs = emit_struct_array(e, env, pos, fields, |alloc, _, arg| {
                     let instr = instr::newstructdict(alloc, arg);
-                    Ok(emit_pos_then(alloc, pos, instr))
+                    Ok(emit_pos_then(pos, instr))
                 });
                 Ok(instrs?)
             } else {
@@ -1706,47 +1577,37 @@ fn emit_value_only_collection<'a, 'arena, 'decl, F: FnOnce(isize) -> InstructLit
     fields: &[ast::Afield],
     constructor: F,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let limit = *(e.options().max_array_elem_size_on_the_stack.get()) as usize;
-    let inline = |
-        alloc: &'arena bumpalo::Bump,
-        e: &mut Emitter<'arena, 'decl>,
-        exprs: &[ast::Afield],
-    | -> Result<InstrSeq<'arena>> {
-        let mut instrs = vec![];
-        for expr in exprs.iter() {
-            instrs.push(emit_expr(e, env, expr.value())?)
-        }
+    let inline =
+        |e: &mut Emitter<'arena, 'decl>, exprs: &[ast::Afield]| -> Result<InstrSeq<'arena>> {
+            let mut instrs = vec![];
+            for expr in exprs.iter() {
+                instrs.push(emit_expr(e, env, expr.value())?)
+            }
 
-        Ok(InstrSeq::gather(
-            alloc,
-            vec![
-                InstrSeq::gather(alloc, instrs),
-                emit_pos(alloc, pos),
-                instr::lit_const(alloc, constructor(exprs.len() as isize)),
-            ],
-        ))
-    };
-    let outofline = |
-        alloc: &'arena bumpalo::Bump,
-        e: &mut Emitter<'arena, 'decl>,
-        exprs: &[ast::Afield],
-    | -> Result<InstrSeq<'arena>> {
-        let mut instrs = vec![];
-        for expr in exprs.iter() {
-            instrs.push(emit_expr(e, env, expr.value())?);
-            instrs.push(instr::add_new_elemc(alloc));
-        }
-        Ok(InstrSeq::gather(alloc, instrs))
-    };
+            Ok(InstrSeq::gather(vec![
+                InstrSeq::gather(instrs),
+                emit_pos(pos),
+                instr::lit_const(constructor(exprs.len() as isize)),
+            ]))
+        };
+    let outofline =
+        |e: &mut Emitter<'arena, 'decl>, exprs: &[ast::Afield]| -> Result<InstrSeq<'arena>> {
+            let mut instrs = vec![];
+            for expr in exprs.iter() {
+                instrs.push(emit_expr(e, env, expr.value())?);
+                instrs.push(instr::add_new_elemc());
+            }
+            Ok(InstrSeq::gather(instrs))
+        };
     let (x1, x2) = fields.split_at(std::cmp::min(fields.len(), limit));
     Ok(match (x1, x2) {
-        ([], []) => instr::empty(alloc),
-        (_, []) => inline(alloc, e, x1)?,
+        ([], []) => instr::empty(),
+        (_, []) => inline(e, x1)?,
         _ => {
-            let outofline_instrs = outofline(alloc, e, x2)?;
-            let inline_instrs = inline(alloc, e, x1)?;
-            InstrSeq::gather(alloc, vec![inline_instrs, outofline_instrs])
+            let outofline_instrs = outofline(e, x2)?;
+            let inline_instrs = inline(e, x1)?;
+            InstrSeq::gather(vec![inline_instrs, outofline_instrs])
         }
     })
 }
@@ -1800,42 +1661,29 @@ fn emit_call_isset_expr<'a, 'arena, 'decl>(
     if let Some(lid) = expr.2.as_lvar() {
         let name = local_id::get_name(&lid.1);
         return Ok(if superglobals::is_any_global(name) {
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_pos(alloc, outer_pos),
-                    instr::string(alloc, string_utils::locals::strip_dollar(name)),
-                    emit_pos(alloc, outer_pos),
-                    instr::issetg(alloc),
-                ],
-            )
+            InstrSeq::gather(vec![
+                emit_pos(outer_pos),
+                instr::string(alloc, string_utils::locals::strip_dollar(name)),
+                emit_pos(outer_pos),
+                instr::issetg(),
+            ])
         } else if is_local_this(env, &lid.1) && !env.flags.contains(env::Flags::NEEDS_LOCAL_THIS) {
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_pos(alloc, outer_pos),
-                    emit_local(e, env, BareThisOp::NoNotice, lid)?,
-                    emit_pos(alloc, outer_pos),
-                    instr::istypec(alloc, IsTypeOp::Null),
-                    instr::not(alloc),
-                ],
-            )
+            InstrSeq::gather(vec![
+                emit_pos(outer_pos),
+                emit_local(e, env, BareThisOp::NoNotice, lid)?,
+                emit_pos(outer_pos),
+                instr::istypec(IsTypeOp::Null),
+                instr::not(),
+            ])
         } else {
-            emit_pos_then(
-                alloc,
-                outer_pos,
-                instr::issetl(alloc, get_local(e, env, &lid.0, name)?),
-            )
+            emit_pos_then(outer_pos, instr::issetl(get_local(e, env, &lid.0, name)?))
         });
     }
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            emit_expr(e, env, expr)?,
-            instr::istypec(alloc, IsTypeOp::Null),
-            instr::not(alloc),
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        emit_expr(e, env, expr)?,
+        instr::istypec(IsTypeOp::Null),
+        instr::not(),
+    ]))
 }
 
 fn emit_call_isset_exprs<'a, 'arena, 'decl>(
@@ -1844,7 +1692,6 @@ fn emit_call_isset_exprs<'a, 'arena, 'decl>(
     pos: &Pos,
     exprs: &[(ParamKind, ast::Expr)],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     match exprs {
         [] => Err(emit_fatal::raise_fatal_parse(
             pos,
@@ -1853,39 +1700,29 @@ fn emit_call_isset_exprs<'a, 'arena, 'decl>(
         [(pk, expr)] => emit_call_isset_expr(e, env, pos, pk, expr),
         _ => {
             let its_done = e.label_gen_mut().next_regular();
-            Ok(InstrSeq::gather(
-                alloc,
-                vec![
-                    InstrSeq::gather(
-                        alloc,
-                        exprs
-                            .iter()
-                            .enumerate()
-                            .map(|(i, (pk, expr))| {
-                                Ok(InstrSeq::gather(
-                                    alloc,
-                                    vec![
-                                        emit_call_isset_expr(e, env, pos, pk, expr)?,
-                                        if i < exprs.len() - 1 {
-                                            InstrSeq::gather(
-                                                alloc,
-                                                vec![
-                                                    instr::dup(alloc),
-                                                    instr::jmpz(alloc, its_done),
-                                                    instr::popc(alloc),
-                                                ],
-                                            )
-                                        } else {
-                                            instr::empty(alloc)
-                                        },
-                                    ],
-                                ))
-                            })
-                            .collect::<Result<Vec<_>>>()?,
-                    ),
-                    instr::label(alloc, its_done),
-                ],
-            ))
+            Ok(InstrSeq::gather(vec![
+                InstrSeq::gather(
+                    exprs
+                        .iter()
+                        .enumerate()
+                        .map(|(i, (pk, expr))| {
+                            Ok(InstrSeq::gather(vec![
+                                emit_call_isset_expr(e, env, pos, pk, expr)?,
+                                if i < exprs.len() - 1 {
+                                    InstrSeq::gather(vec![
+                                        instr::dup(),
+                                        instr::jmpz(its_done),
+                                        instr::popc(),
+                                    ])
+                                } else {
+                                    instr::empty()
+                                },
+                            ]))
+                        })
+                        .collect::<Result<Vec<_>>>()?,
+                ),
+                instr::label(its_done),
+            ]))
         }
     }
 }
@@ -1896,20 +1733,16 @@ fn emit_tag_provenance_here<'a, 'arena, 'decl>(
     pos: &Pos,
     es: &[(ParamKind, ast::Expr)],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let pop = if es.len() == 1 {
-        instr::empty(alloc)
+        instr::empty()
     } else {
-        instr::popc(alloc)
+        instr::popc()
     };
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            emit_exprs_and_error_on_inout(e, env, es, "HH\\tag_provenance_here")?,
-            emit_pos(alloc, pos),
-            pop,
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        emit_exprs_and_error_on_inout(e, env, es, "HH\\tag_provenance_here")?,
+        emit_pos(pos),
+        pop,
+    ]))
 }
 
 fn emit_array_mark_legacy<'a, 'arena, 'decl>(
@@ -1919,26 +1752,22 @@ fn emit_array_mark_legacy<'a, 'arena, 'decl>(
     es: &[(ParamKind, ast::Expr)],
     legacy: bool,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let default = if es.len() == 1 {
-        instr::false_(alloc)
+        instr::false_()
     } else {
-        instr::empty(alloc)
+        instr::empty()
     };
     let mark = if legacy {
-        instr::instr(alloc, Instruct::Misc(InstructMisc::ArrayMarkLegacy))
+        instr::instr(Instruct::Misc(InstructMisc::ArrayMarkLegacy))
     } else {
-        instr::instr(alloc, Instruct::Misc(InstructMisc::ArrayUnmarkLegacy))
+        instr::instr(Instruct::Misc(InstructMisc::ArrayUnmarkLegacy))
     };
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            emit_exprs_and_error_on_inout(e, env, es, "HH\\array_mark_legacy")?,
-            emit_pos(alloc, pos),
-            default,
-            mark,
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        emit_exprs_and_error_on_inout(e, env, es, "HH\\array_mark_legacy")?,
+        emit_pos(pos),
+        default,
+        mark,
+    ]))
 }
 
 fn emit_idx<'a, 'arena, 'decl>(
@@ -1947,21 +1776,17 @@ fn emit_idx<'a, 'arena, 'decl>(
     pos: &Pos,
     es: &[(ParamKind, ast::Expr)],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let default = if es.len() == 2 {
-        instr::null(alloc)
+        instr::null()
     } else {
-        instr::empty(alloc)
+        instr::empty()
     };
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            emit_exprs_and_error_on_inout(e, env, es, "idx")?,
-            emit_pos(alloc, pos),
-            default,
-            instr::idx(alloc),
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        emit_exprs_and_error_on_inout(e, env, es, "idx")?,
+        emit_pos(pos),
+        default,
+        instr::idx(),
+    ]))
 }
 
 fn emit_call<'a, 'arena, 'decl>(
@@ -2018,7 +1843,6 @@ fn emit_call_default<'a, 'arena, 'decl>(
     uarg: Option<&ast::Expr>,
     fcall_args: FcallArgs<'arena>,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     scope::with_unnamed_locals(e, |em| {
         let FcallArgs { num_rets, .. } = &fcall_args;
         let num_uninit = num_rets - 1;
@@ -2026,28 +1850,24 @@ fn emit_call_default<'a, 'arena, 'decl>(
         let (args, inout_setters) = emit_args_inout_setters(em, env, args)?;
         let uargs = match uarg {
             Some(uarg) => emit_expr(em, env, uarg)?,
-            None => instr::empty(alloc),
+            None => instr::empty(),
         };
         Ok((
-            instr::empty(alloc),
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    InstrSeq::gather(
-                        alloc,
-                        iter::repeat_with(|| instr::nulluninit(alloc))
-                            .take(num_uninit)
-                            .collect::<Vec<_>>(),
-                    ),
-                    lhs,
-                    args,
-                    uargs,
-                    emit_pos(alloc, pos),
-                    fcall,
-                    inout_setters,
-                ],
-            ),
-            instr::empty(alloc),
+            instr::empty(),
+            InstrSeq::gather(vec![
+                InstrSeq::gather(
+                    iter::repeat_with(instr::nulluninit)
+                        .take(num_uninit)
+                        .collect::<Vec<_>>(),
+                ),
+                lhs,
+                args,
+                uargs,
+                emit_pos(pos),
+                fcall,
+                inout_setters,
+            ]),
+            instr::empty(),
         ))
     })
 }
@@ -2076,44 +1896,33 @@ pub fn emit_reified_targs<'a, 'arena, 'decl>(
             })
     };
     Ok(if !is_in_lambda && same_as_targs(current_fun_tparams) {
-        instr::cgetl(
+        instr::cgetl(Local::Named(Str::new_str(
             alloc,
-            Local::Named(Str::new_str(
-                alloc,
-                string_utils::reified::GENERICS_LOCAL_NAME,
-            )),
-        )
+            string_utils::reified::GENERICS_LOCAL_NAME,
+        )))
     } else if !is_in_lambda && same_as_targs(current_cls_tparams) {
-        InstrSeq::gather(
-            alloc,
-            vec![
-                instr::checkthis(alloc),
-                instr::baseh(alloc),
-                instr::querym(
-                    alloc,
-                    0,
-                    QueryMOp::CGet,
-                    MemberKey::PT(
-                        prop::from_raw_string(alloc, string_utils::reified::PROP_NAME),
-                        ReadonlyOp::Any,
-                    ),
+        InstrSeq::gather(vec![
+            instr::checkthis(),
+            instr::baseh(),
+            instr::querym(
+                0,
+                QueryMOp::CGet,
+                MemberKey::PT(
+                    prop::from_raw_string(alloc, string_utils::reified::PROP_NAME),
+                    ReadonlyOp::Any,
                 ),
-            ],
-        )
+            ),
+        ])
     } else {
-        InstrSeq::gather(
-            alloc,
-            vec![
-                InstrSeq::gather(
-                    alloc,
-                    targs
-                        .iter()
-                        .map(|h| Ok(emit_reified_arg(e, env, pos, false, h)?.0))
-                        .collect::<Result<Vec<_>>>()?,
-                ),
-                instr::new_vec_array(alloc, targs.len() as isize),
-            ],
-        )
+        InstrSeq::gather(vec![
+            InstrSeq::gather(
+                targs
+                    .iter()
+                    .map(|h| Ok(emit_reified_arg(e, env, pos, false, h)?.0))
+                    .collect::<Result<Vec<_>>>()?,
+            ),
+            instr::new_vec_array(targs.len() as isize),
+        ])
     })
 }
 
@@ -2159,9 +1968,8 @@ fn emit_object_expr<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     match &expr.2 {
-        ast::Expr_::Lvar(x) if is_local_this(env, &x.1) => Ok(instr::this(alloc)),
+        ast::Expr_::Lvar(x) if is_local_this(env, &x.1) => Ok(instr::this()),
         _ => emit_expr(e, env, expr),
     }
 }
@@ -2181,7 +1989,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
         |e: &mut Emitter<'arena, 'decl>, env, fcall_args: &mut FcallArgs<'arena>| {
             let does_not_have_non_tparam_generics = !has_non_tparam_generics_targs(env, targs);
             if does_not_have_non_tparam_generics {
-                Ok(instr::empty(alloc))
+                Ok(instr::empty())
             } else {
                 fcall_args.flags |= FCallArgsFlags::HasGenerics;
                 emit_reified_targs(
@@ -2212,22 +2020,13 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             emit_expr(e, env, expr)?
         };
         Ok((
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    instr::nulluninit(alloc),
-                    instr::nulluninit(alloc),
-                    res,
-                    instr::popl(alloc, tmp),
-                ],
-            ),
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    instr::pushl(alloc, tmp),
-                    instr::fcallfunc(alloc, fcall_args),
-                ],
-            ),
+            InstrSeq::gather(vec![
+                instr::nulluninit(),
+                instr::nulluninit(),
+                res,
+                instr::popl(tmp),
+            ]),
+            InstrSeq::gather(vec![instr::pushl(tmp), instr::fcallfunc(fcall_args)]),
         ))
     };
 
@@ -2255,14 +2054,11 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                 let generics = emit_generics(e, env, &mut fcall_args)?;
                 let null_flavor = from_ast_null_flavor(*null_flavor);
                 Ok((
-                    InstrSeq::gather(alloc, vec![obj, instr::nulluninit(alloc)]),
-                    InstrSeq::gather(
-                        alloc,
-                        vec![
-                            generics,
-                            instr::fcallobjmethodd(alloc, fcall_args, name, null_flavor),
-                        ],
-                    ),
+                    InstrSeq::gather(vec![obj, instr::nulluninit()]),
+                    InstrSeq::gather(vec![
+                        generics,
+                        instr::fcallobjmethodd(fcall_args, name, null_flavor),
+                    ]),
                 ))
             };
             match o.as_ref() {
@@ -2307,24 +2103,17 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                                     );
                                     let newobj_instrs = emit_new(e, env, pos, new_exp, true);
                                     Ok((
-                                        InstrSeq::gather(
-                                            alloc,
-                                            vec![
-                                                instr::nulluninit(alloc),
-                                                instr::nulluninit(alloc),
-                                                newobj_instrs?,
-                                            ],
-                                        ),
-                                        InstrSeq::gather(
-                                            alloc,
-                                            vec![instr::fcallfuncd(
-                                                alloc,
-                                                fcall_args,
-                                                function::FunctionType::<'arena>::from_ast_name(
-                                                    alloc, fid,
-                                                ),
-                                            )],
-                                        ),
+                                        InstrSeq::gather(vec![
+                                            instr::nulluninit(),
+                                            instr::nulluninit(),
+                                            newobj_instrs?,
+                                        ]),
+                                        InstrSeq::gather(vec![instr::fcallfuncd(
+                                            fcall_args,
+                                            function::FunctionType::<'arena>::from_ast_name(
+                                                alloc, fid,
+                                            ),
+                                        )]),
                                     ))
                                 }
                             }
@@ -2340,22 +2129,16 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                     let tmp = e.local_gen_mut().get_unnamed();
                     let null_flavor = from_ast_null_flavor(*null_flavor);
                     Ok((
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                obj,
-                                instr::nulluninit(alloc),
-                                emit_expr(e, env, method_expr)?,
-                                instr::popl(alloc, tmp),
-                            ],
-                        ),
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                instr::pushl(alloc, tmp),
-                                instr::fcallobjmethod(alloc, fcall_args, null_flavor),
-                            ],
-                        ),
+                        InstrSeq::gather(vec![
+                            obj,
+                            instr::nulluninit(),
+                            emit_expr(e, env, method_expr)?,
+                            instr::popl(tmp),
+                        ]),
+                        InstrSeq::gather(vec![
+                            instr::pushl(tmp),
+                            instr::fcallobjmethod(fcall_args, null_flavor),
+                        ]),
                     ))
                 }
             }
@@ -2377,83 +2160,57 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                     emit_symbol_refs::add_class(e, cid.clone());
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
-                        InstrSeq::gather(
-                            alloc,
-                            vec![instr::nulluninit(alloc), instr::nulluninit(alloc)],
-                        ),
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                generics,
-                                instr::fcallclsmethodd(alloc, fcall_args, method_id, cid),
-                            ],
-                        ),
+                        InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
+                        InstrSeq::gather(vec![
+                            generics,
+                            instr::fcallclsmethodd(fcall_args, method_id, cid),
+                        ]),
                     )
                 }
                 ClassExpr::Special(clsref) => {
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
-                        InstrSeq::gather(
-                            alloc,
-                            vec![instr::nulluninit(alloc), instr::nulluninit(alloc)],
-                        ),
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                generics,
-                                instr::fcallclsmethodsd(alloc, fcall_args, clsref, method_id),
-                            ],
-                        ),
+                        InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
+                        InstrSeq::gather(vec![
+                            generics,
+                            instr::fcallclsmethodsd(fcall_args, clsref, method_id),
+                        ]),
                     )
                 }
                 ClassExpr::Expr(expr) => {
                     let generics = emit_generics(e, env, &mut fcall_args)?;
                     (
-                        InstrSeq::gather(
-                            alloc,
-                            vec![instr::nulluninit(alloc), instr::nulluninit(alloc)],
-                        ),
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                generics,
-                                instr::string(alloc, method_id.unsafe_as_str()),
-                                emit_expr(e, env, &expr)?,
-                                instr::classgetc(alloc),
-                                instr::fcallclsmethod(
-                                    alloc,
-                                    IsLogAsDynamicCallOp::DontLogAsDynamicCall,
-                                    fcall_args,
-                                ),
-                            ],
-                        ),
+                        InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
+                        InstrSeq::gather(vec![
+                            generics,
+                            instr::string(alloc, method_id.unsafe_as_str()),
+                            emit_expr(e, env, &expr)?,
+                            instr::classgetc(),
+                            instr::fcallclsmethod(
+                                IsLogAsDynamicCallOp::DontLogAsDynamicCall,
+                                fcall_args,
+                            ),
+                        ]),
                     )
                 }
                 ClassExpr::Reified(instrs) => {
                     let tmp = e.local_gen_mut().get_unnamed();
                     (
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                instr::nulluninit(alloc),
-                                instr::nulluninit(alloc),
-                                instrs,
-                                instr::popl(alloc, tmp),
-                            ],
-                        ),
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                instr::string(alloc, method_id.unsafe_as_str()),
-                                instr::pushl(alloc, tmp),
-                                instr::classgetc(alloc),
-                                instr::fcallclsmethod(
-                                    alloc,
-                                    IsLogAsDynamicCallOp::DontLogAsDynamicCall,
-                                    fcall_args,
-                                ),
-                            ],
-                        ),
+                        InstrSeq::gather(vec![
+                            instr::nulluninit(),
+                            instr::nulluninit(),
+                            instrs,
+                            instr::popl(tmp),
+                        ]),
+                        InstrSeq::gather(vec![
+                            instr::string(alloc, method_id.unsafe_as_str()),
+                            instr::pushl(tmp),
+                            instr::classgetc(),
+                            instr::fcallclsmethod(
+                                IsLogAsDynamicCallOp::DontLogAsDynamicCall,
+                                fcall_args,
+                            ),
+                        ]),
                     )
                 }
             })
@@ -2469,9 +2226,8 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             }
             let emit_meth_name = |e: &mut Emitter<'arena, 'decl>| match &cls_get_expr {
                 ast::ClassGetExpr::CGstring((pos, id)) => Ok(emit_pos_then(
-                    alloc,
                     pos,
-                    instr::cgetl(alloc, Local::Named(Str::new_str(alloc, id.as_str()))),
+                    instr::cgetl(Local::Named(Str::new_str(alloc, id.as_str()))),
                 )),
                 ast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
             };
@@ -2479,108 +2235,81 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                 ClassExpr::Id(cid) => {
                     let tmp = e.local_gen_mut().get_unnamed();
                     (
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                instr::nulluninit(alloc),
-                                instr::nulluninit(alloc),
-                                emit_meth_name(e)?,
-                                instr::popl(alloc, tmp),
-                            ],
-                        ),
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                instr::pushl(alloc, tmp),
-                                emit_known_class_id(alloc, e, &cid),
-                                instr::fcallclsmethod(
-                                    alloc,
-                                    IsLogAsDynamicCallOp::LogAsDynamicCall,
-                                    fcall_args,
-                                ),
-                            ],
-                        ),
+                        InstrSeq::gather(vec![
+                            instr::nulluninit(),
+                            instr::nulluninit(),
+                            emit_meth_name(e)?,
+                            instr::popl(tmp),
+                        ]),
+                        InstrSeq::gather(vec![
+                            instr::pushl(tmp),
+                            emit_known_class_id(alloc, e, &cid),
+                            instr::fcallclsmethod(
+                                IsLogAsDynamicCallOp::LogAsDynamicCall,
+                                fcall_args,
+                            ),
+                        ]),
                     )
                 }
                 ClassExpr::Special(clsref) => {
                     let tmp = e.local_gen_mut().get_unnamed();
                     (
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                instr::nulluninit(alloc),
-                                instr::nulluninit(alloc),
-                                emit_meth_name(e)?,
-                                instr::popl(alloc, tmp),
-                            ],
-                        ),
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                instr::pushl(alloc, tmp),
-                                instr::fcallclsmethods(alloc, fcall_args, clsref),
-                            ],
-                        ),
+                        InstrSeq::gather(vec![
+                            instr::nulluninit(),
+                            instr::nulluninit(),
+                            emit_meth_name(e)?,
+                            instr::popl(tmp),
+                        ]),
+                        InstrSeq::gather(vec![
+                            instr::pushl(tmp),
+                            instr::fcallclsmethods(fcall_args, clsref),
+                        ]),
                     )
                 }
                 ClassExpr::Expr(expr) => {
                     let cls = e.local_gen_mut().get_unnamed();
                     let meth = e.local_gen_mut().get_unnamed();
                     (
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                instr::nulluninit(alloc),
-                                instr::nulluninit(alloc),
-                                emit_expr(e, env, &expr)?,
-                                instr::popl(alloc, cls),
-                                emit_meth_name(e)?,
-                                instr::popl(alloc, meth),
-                            ],
-                        ),
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                instr::pushl(alloc, meth),
-                                instr::pushl(alloc, cls),
-                                instr::classgetc(alloc),
-                                instr::fcallclsmethod(
-                                    alloc,
-                                    IsLogAsDynamicCallOp::LogAsDynamicCall,
-                                    fcall_args,
-                                ),
-                            ],
-                        ),
+                        InstrSeq::gather(vec![
+                            instr::nulluninit(),
+                            instr::nulluninit(),
+                            emit_expr(e, env, &expr)?,
+                            instr::popl(cls),
+                            emit_meth_name(e)?,
+                            instr::popl(meth),
+                        ]),
+                        InstrSeq::gather(vec![
+                            instr::pushl(meth),
+                            instr::pushl(cls),
+                            instr::classgetc(),
+                            instr::fcallclsmethod(
+                                IsLogAsDynamicCallOp::LogAsDynamicCall,
+                                fcall_args,
+                            ),
+                        ]),
                     )
                 }
                 ClassExpr::Reified(instrs) => {
                     let cls = e.local_gen_mut().get_unnamed();
                     let meth = e.local_gen_mut().get_unnamed();
                     (
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                instr::nulluninit(alloc),
-                                instr::nulluninit(alloc),
-                                instrs,
-                                instr::popl(alloc, cls),
-                                emit_meth_name(e)?,
-                                instr::popl(alloc, meth),
-                            ],
-                        ),
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                instr::pushl(alloc, meth),
-                                instr::pushl(alloc, cls),
-                                instr::classgetc(alloc),
-                                instr::fcallclsmethod(
-                                    alloc,
-                                    IsLogAsDynamicCallOp::LogAsDynamicCall,
-                                    fcall_args,
-                                ),
-                            ],
-                        ),
+                        InstrSeq::gather(vec![
+                            instr::nulluninit(),
+                            instr::nulluninit(),
+                            instrs,
+                            instr::popl(cls),
+                            emit_meth_name(e)?,
+                            instr::popl(meth),
+                        ]),
+                        InstrSeq::gather(vec![
+                            instr::pushl(meth),
+                            instr::pushl(cls),
+                            instr::classgetc(),
+                            instr::fcallclsmethod(
+                                IsLogAsDynamicCallOp::LogAsDynamicCall,
+                                fcall_args,
+                            ),
+                        ]),
                     )
                 }
             })
@@ -2603,14 +2332,8 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             };
             let generics = emit_generics(e, env, &mut fcall_args)?;
             Ok((
-                InstrSeq::gather(
-                    alloc,
-                    vec![instr::nulluninit(alloc), instr::nulluninit(alloc)],
-                ),
-                InstrSeq::gather(
-                    alloc,
-                    vec![generics, instr::fcallfuncd(alloc, fcall_args, fq_id)],
-                ),
+                InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
+                InstrSeq::gather(vec![generics, instr::fcallfuncd(fcall_args, fq_id)]),
             ))
         }
         Expr_::String(s) => {
@@ -2618,14 +2341,8 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             let fq_id = function::FunctionType::new(Str::new_str(alloc, s.to_string().as_str()));
             let generics = emit_generics(e, env, &mut fcall_args)?;
             Ok((
-                InstrSeq::gather(
-                    alloc,
-                    vec![instr::nulluninit(alloc), instr::nulluninit(alloc)],
-                ),
-                InstrSeq::gather(
-                    alloc,
-                    vec![generics, instr::fcallfuncd(alloc, fcall_args, fq_id)],
-                ),
+                InstrSeq::gather(vec![instr::nulluninit(), instr::nulluninit()]),
+                InstrSeq::gather(vec![generics, instr::fcallfuncd(fcall_args, fq_id)]),
             ))
         }
         _ => emit_fcall_func(e, env, expr, fcall_args, caller_readonly_opt),
@@ -2637,21 +2354,16 @@ fn get_reified_var_cexpr<'a, 'arena>(
     pos: &Pos,
     name: &str,
 ) -> Result<Option<ClassExpr<'arena>>> {
-    let alloc = env.arena;
     Ok(emit_reified_type_opt(env, pos, name)?.map(|instrs| {
-        ClassExpr::Reified(InstrSeq::gather(
-            alloc,
-            vec![
-                instrs,
-                instr::basec(alloc, 0, MOpMode::Warn),
-                instr::querym(
-                    alloc,
-                    1,
-                    QueryMOp::CGet,
-                    MemberKey::ET(Str::from("classname"), ReadonlyOp::Any),
-                ),
-            ],
-        ))
+        ClassExpr::Reified(InstrSeq::gather(vec![
+            instrs,
+            instr::basec(0, MOpMode::Warn),
+            instr::querym(
+                1,
+                QueryMOp::CGet,
+                MemberKey::ET(Str::from("classname"), ReadonlyOp::Any),
+            ),
+        ]))
     }))
 }
 
@@ -2660,7 +2372,6 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     args: &[(ParamKind, ast::Expr)],
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
-    let alloc = env.arena;
     let aliases = if has_inout_arg(args) {
         inout_locals::collect_written_variables(env, args)
     } else {
@@ -2675,7 +2386,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
         aliases: &inout_locals::AliasInfoMap<'_>,
     ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
         use ast::Expr_;
-        let alloc = env.arena;
+
         match (pk, &arg.2) {
             // inout $var
             (ParamKind::Pinout(_), Expr_::Lvar(l)) => {
@@ -2683,13 +2394,13 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
                 let move_instrs = if !env.flags.contains(env::Flags::IN_TRY)
                     && inout_locals::should_move_local_value(&local, aliases)
                 {
-                    InstrSeq::gather(alloc, vec![instr::null(alloc), instr::popl(alloc, local)])
+                    InstrSeq::gather(vec![instr::null(), instr::popl(local)])
                 } else {
-                    instr::empty(alloc)
+                    instr::empty()
                 };
                 Ok((
-                    InstrSeq::gather(alloc, vec![instr::cgetl(alloc, local), move_instrs]),
-                    instr::popl(alloc, local),
+                    InstrSeq::gather(vec![instr::cgetl(local), move_instrs]),
+                    instr::popl(local),
                 ))
             }
             // inout $arr[...][...]
@@ -2722,15 +2433,12 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
                         )?
                         .0;
                         let (mk, warninstr) = get_elem_member_key(e, env, 0, ag.1.as_ref(), false)?;
-                        let setter = InstrSeq::gather(
-                            alloc,
-                            vec![
-                                warninstr,
-                                setter_base,
-                                instr::setm(alloc, 0, mk),
-                                instr::popc(alloc),
-                            ],
-                        );
+                        let setter = InstrSeq::gather(vec![
+                            warninstr,
+                            setter_base,
+                            instr::setm(0, mk),
+                            instr::popc(),
+                        ]);
                         (instrs, setter)
                     }
                     ArrayGetInstr::Inout { load, store } => {
@@ -2739,10 +2447,10 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
                             match local_kind_opt {
                                 None => ld.push(instr),
                                 Some((l, kind)) => {
-                                    let unset = instr::unsetl(alloc, l);
+                                    let unset = instr::unsetl(l);
                                     let set = match kind {
-                                        StoredValueKind::Expr => instr::setl(alloc, l),
-                                        _ => instr::popl(alloc, l),
+                                        StoredValueKind::Expr => instr::setl(l),
+                                        _ => instr::popl(l),
                                     };
                                     ld.push(instr);
                                     ld.push(set);
@@ -2750,14 +2458,14 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
                                 }
                             }
                         }
-                        (InstrSeq::gather(alloc, ld), InstrSeq::gather(alloc, st))
+                        (InstrSeq::gather(ld), InstrSeq::gather(st))
                     }
                 })
             }
             (ParamKind::Pinout(_), _) => Err(unrecoverable(
                 "emit_arg_and_inout_setter: Unexpected inout expression type",
             )),
-            _ => Ok((emit_expr(e, env, arg)?, instr::empty(alloc))),
+            _ => Ok((emit_expr(e, env, arg)?, instr::empty())),
         }
     }
     let (instr_args, instr_setters): (Vec<InstrSeq<'_>>, Vec<InstrSeq<'_>>) = args
@@ -2767,23 +2475,20 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
         .collect::<Result<Vec<_>>>()?
         .into_iter()
         .unzip();
-    let instr_args = InstrSeq::gather(alloc, instr_args);
-    let instr_setters = InstrSeq::gather(alloc, instr_setters);
+    let instr_args = InstrSeq::gather(instr_args);
+    let instr_setters = InstrSeq::gather(instr_setters);
     if has_inout_arg(args) {
         let retval = e.local_gen_mut().get_unnamed();
         Ok((
             instr_args,
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    instr::popl(alloc, retval),
-                    instr_setters,
-                    instr::pushl(alloc, retval),
-                ],
-            ),
+            InstrSeq::gather(vec![
+                instr::popl(retval),
+                instr_setters,
+                instr::pushl(retval),
+            ]),
         ))
     } else {
-        Ok((instr_args, instr::empty(alloc)))
+        Ok((instr_args, instr::empty()))
     }
 }
 
@@ -2907,23 +2612,19 @@ fn emit_special_function<'a, 'arena, 'decl>(
         .contains(LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS);
     match (lower_fq_name, args) {
         (id, _) if id == special_functions::ECHO => Ok(Some(InstrSeq::gather(
-            alloc,
             args.iter()
                 .enumerate()
                 .map(|(i, arg)| {
-                    Ok(InstrSeq::gather(
-                        alloc,
-                        vec![
-                            emit_expr(e, env, expect_normal_paramkind(arg)?)?,
-                            emit_pos(alloc, pos),
-                            instr::print(alloc),
-                            if i == nargs - 1 {
-                                instr::empty(alloc)
-                            } else {
-                                instr::popc(alloc)
-                            },
-                        ],
-                    ))
+                    Ok(InstrSeq::gather(vec![
+                        emit_expr(e, env, expect_normal_paramkind(arg)?)?,
+                        emit_pos(pos),
+                        instr::print(),
+                        if i == nargs - 1 {
+                            instr::empty()
+                        } else {
+                            instr::popc()
+                        },
+                    ]))
                 })
                 .collect::<Result<_>>()?,
         ))),
@@ -2943,17 +2644,14 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 ast::Expr_::mk_call(expr_id, vec![], args[1..].to_owned(), uarg.cloned()),
             );
             let ignored_expr = emit_ignored_expr(e, env, &Pos::make_none(), &call)?;
-            Ok(Some(InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_expr(e, env, expect_normal_paramkind(&args[0])?)?,
-                    instr::jmpnz(alloc, l),
-                    ignored_expr,
-                    emit_fatal::emit_fatal_runtime(alloc, pos, "invariant_violation"),
-                    instr::label(alloc, l),
-                    instr::null(alloc),
-                ],
-            )))
+            Ok(Some(InstrSeq::gather(vec![
+                emit_expr(e, env, expect_normal_paramkind(&args[0])?)?,
+                instr::jmpnz(l),
+                ignored_expr,
+                emit_fatal::emit_fatal_runtime(alloc, pos, "invariant_violation"),
+                instr::label(l),
+                instr::null(),
+            ])))
         }
         ("class_exists", &[ref arg1, ..])
         | ("trait_exists", &[ref arg1, ..])
@@ -2966,25 +2664,19 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 "trait_exists" => ClassishKind::Trait,
                 _ => return Err(unrecoverable("emit_special_function: class_kind")),
             };
-            Ok(Some(InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_expr(e, env, expect_normal_paramkind(arg1)?)?,
-                    instr::cast_string(alloc),
-                    if nargs == 1 {
-                        instr::true_(alloc)
-                    } else {
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                emit_expr(e, env, expect_normal_paramkind(&args[1])?)?,
-                                instr::cast_bool(alloc),
-                            ],
-                        )
-                    },
-                    instr::oodeclexists(alloc, class_kind),
-                ],
-            )))
+            Ok(Some(InstrSeq::gather(vec![
+                emit_expr(e, env, expect_normal_paramkind(arg1)?)?,
+                instr::cast_string(),
+                if nargs == 1 {
+                    instr::true_()
+                } else {
+                    InstrSeq::gather(vec![
+                        emit_expr(e, env, expect_normal_paramkind(&args[1])?)?,
+                        instr::cast_bool(),
+                    ])
+                },
+                instr::oodeclexists(class_kind),
+            ])))
         }
         ("exit", _) | ("die", _) if nargs == 0 || nargs == 1 => Ok(Some(emit_exit(
             e,
@@ -3048,7 +2740,6 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 // like: `foo(inout "literal")`
                 [(_, Expr(_, _, Expr_::String(ref func_name)))] => {
                     Ok(Some(instr::resolve_meth_caller(
-                        alloc,
                         function::FunctionType::new(Str::new_str(
                             alloc,
                             string_utils::strip_global_ns(
@@ -3078,10 +2769,9 @@ fn emit_special_function<'a, 'arena, 'decl>(
                 match args {
                     // Calling convention is dropped here, but given this is meant for the debugger
                     // I don't think it particularly matters.
-                    [(_, Expr(_, _, Expr_::Lvar(id)))] => Ok(Some(instr::isunsetl(
-                        alloc,
-                        get_local(e, env, pos, id.name())?,
-                    ))),
+                    [(_, Expr(_, _, Expr_::Lvar(id)))] => {
+                        Ok(Some(instr::isunsetl(get_local(e, env, pos, id.name())?)))
+                    }
                     _ => Err(emit_fatal::raise_fatal_runtime(
                         pos,
                         "Local variable expected in __debugger_is_uninit()",
@@ -3100,10 +2790,10 @@ fn emit_special_function<'a, 'arena, 'decl>(
                     "Argument must be the label argument",
                 )),
             }?;
-            Ok(Some(InstrSeq::gather(
-                alloc,
-                vec![instr::lateboundcls(alloc), instr::clscnsl(alloc, local)],
-            )))
+            Ok(Some(InstrSeq::gather(vec![
+                instr::lateboundcls(),
+                instr::clscnsl(local),
+            ])))
         }
         ("HH\\inst_meth", _) => match args {
             [obj_expr, method_name] => Ok(Some(emit_inst_meth(
@@ -3152,32 +2842,26 @@ fn emit_special_function<'a, 'arena, 'decl>(
             format!("class_meth() expects exactly 2 parameters, {} given", nargs),
         )),
         ("HH\\global_set", _) => match *args {
-            [ref gkey, ref gvalue] => Ok(Some(InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_expr(e, env, expect_normal_paramkind(gkey)?)?,
-                    emit_expr(e, env, expect_normal_paramkind(gvalue)?)?,
-                    emit_pos(alloc, pos),
-                    instr::setg(alloc),
-                    instr::popc(alloc),
-                    instr::null(alloc),
-                ],
-            ))),
+            [ref gkey, ref gvalue] => Ok(Some(InstrSeq::gather(vec![
+                emit_expr(e, env, expect_normal_paramkind(gkey)?)?,
+                emit_expr(e, env, expect_normal_paramkind(gvalue)?)?,
+                emit_pos(pos),
+                instr::setg(),
+                instr::popc(),
+                instr::null(),
+            ]))),
             _ => Err(emit_fatal::raise_fatal_runtime(
                 pos,
                 format!("global_set() expects exactly 2 parameters, {} given", nargs),
             )),
         },
         ("HH\\global_unset", _) => match *args {
-            [ref gkey] => Ok(Some(InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_expr(e, env, expect_normal_paramkind(gkey)?)?,
-                    emit_pos(alloc, pos),
-                    instr::unsetg(alloc),
-                    instr::null(alloc),
-                ],
-            ))),
+            [ref gkey] => Ok(Some(InstrSeq::gather(vec![
+                emit_expr(e, env, expect_normal_paramkind(gkey)?)?,
+                emit_pos(pos),
+                instr::unsetg(),
+                instr::null(),
+            ]))),
             _ => Err(emit_fatal::raise_fatal_runtime(
                 pos,
                 format!(
@@ -3190,16 +2874,13 @@ fn emit_special_function<'a, 'arena, 'decl>(
             if e.systemlib() =>
         {
             ensure_normal_paramkind(pk)?;
-            Ok(Some(InstrSeq::gather(
-                alloc,
-                vec![
-                    instr::cgetl(
-                        alloc,
-                        Local::Named(Str::new_str(alloc, local_id::get_name(&param.1))),
-                    ),
-                    instr::whresult(alloc),
-                ],
-            )))
+            Ok(Some(InstrSeq::gather(vec![
+                instr::cgetl(Local::Named(Str::new_str(
+                    alloc,
+                    local_id::get_name(&param.1),
+                ))),
+                instr::whresult(),
+            ])))
         }
         ("HH\\array_mark_legacy", _) if args.len() == 1 || args.len() == 2 => {
             Ok(Some(emit_array_mark_legacy(e, env, pos, args, true)?))
@@ -3214,57 +2895,44 @@ fn emit_special_function<'a, 'arena, 'decl>(
             match (args, istype_op(lower_fq_name), is_isexp_op(lower_fq_name)) {
                 (&[ref arg_expr], _, Some(ref h)) => {
                     let is_expr = emit_is(e, env, pos, h)?;
-                    Some(InstrSeq::gather(
-                        alloc,
-                        vec![
-                            emit_expr(e, env, expect_normal_paramkind(arg_expr)?)?,
-                            is_expr,
-                        ],
-                    ))
+                    Some(InstrSeq::gather(vec![
+                        emit_expr(e, env, expect_normal_paramkind(arg_expr)?)?,
+                        is_expr,
+                    ]))
                 }
                 (&[(ref pk, Expr(_, _, Expr_::Lvar(ref arg_id)))], Some(i), _)
                     if superglobals::is_any_global(arg_id.name()) =>
                 {
                     ensure_normal_paramkind(pk)?;
-                    Some(InstrSeq::gather(
-                        alloc,
-                        vec![
-                            emit_local(e, env, BareThisOp::NoNotice, arg_id)?,
-                            emit_pos(alloc, pos),
-                            instr::istypec(alloc, i),
-                        ],
-                    ))
+                    Some(InstrSeq::gather(vec![
+                        emit_local(e, env, BareThisOp::NoNotice, arg_id)?,
+                        emit_pos(pos),
+                        instr::istypec(i),
+                    ]))
                 }
                 (&[(ref pk, Expr(_, _, Expr_::Lvar(ref arg_id)))], Some(i), _)
                     if !is_local_this(env, &arg_id.1) =>
                 {
                     ensure_normal_paramkind(pk)?;
                     Some(instr::istypel(
-                        alloc,
                         get_local(e, env, &arg_id.0, &(arg_id.1).1)?,
                         i,
                     ))
                 }
                 (&[(ref pk, ref arg_expr)], Some(i), _) => {
                     ensure_normal_paramkind(pk)?;
-                    Some(InstrSeq::gather(
-                        alloc,
-                        vec![
-                            emit_expr(e, env, arg_expr)?,
-                            emit_pos(alloc, pos),
-                            instr::istypec(alloc, i),
-                        ],
-                    ))
+                    Some(InstrSeq::gather(vec![
+                        emit_expr(e, env, arg_expr)?,
+                        emit_pos(pos),
+                        instr::istypec(i),
+                    ]))
                 }
                 _ => match get_call_builtin_func_info(e, lower_fq_name) {
-                    Some((nargs, i)) if nargs == args.len() => Some(InstrSeq::gather(
-                        alloc,
-                        vec![
-                            emit_exprs_and_error_on_inout(e, env, args, lower_fq_name)?,
-                            emit_pos(alloc, pos),
-                            instr::instr(alloc, i),
-                        ],
-                    )),
+                    Some((nargs, i)) if nargs == args.len() => Some(InstrSeq::gather(vec![
+                        emit_exprs_and_error_on_inout(e, env, args, lower_fq_name)?,
+                        emit_pos(pos),
+                        instr::instr(i),
+                    ])),
                     _ => None,
                 },
             },
@@ -3278,15 +2946,11 @@ fn emit_inst_meth<'a, 'arena, 'decl>(
     obj_expr: &ast::Expr,
     method_name: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
-    let instrs = InstrSeq::gather(
-        alloc,
-        vec![
-            emit_expr(e, env, obj_expr)?,
-            emit_expr(e, env, method_name)?,
-            instr::new_vec_array(alloc, 2),
-        ],
-    );
+    let instrs = InstrSeq::gather(vec![
+        emit_expr(e, env, obj_expr)?,
+        emit_expr(e, env, method_name)?,
+        instr::new_vec_array(2),
+    ]);
     Ok(instrs)
 }
 
@@ -3316,16 +2980,11 @@ fn emit_class_meth<'a, 'arena, 'decl>(
         }
         if let Some(ast_defs::Id(_, s)) = cls.2.as_id() {
             if s == pseudo_consts::G__CLASS__ {
-                return Ok(instr::resolveclsmethods(
-                    alloc,
-                    SpecialClsRef::Self_,
-                    method_id,
-                ));
+                return Ok(instr::resolveclsmethods(SpecialClsRef::Self_, method_id));
             }
         }
         if let Some(class_name) = cls.2.as_string() {
             return Ok(instr::resolveclsmethodd(
-                alloc,
                 class::ClassType::new(Str::new_str(
                     alloc,
                     string_utils::strip_global_ns(
@@ -3339,14 +2998,11 @@ fn emit_class_meth<'a, 'arena, 'decl>(
         }
         Err(unrecoverable("emit_class_meth: unhandled method"))
     } else {
-        let instrs = InstrSeq::gather(
-            alloc,
-            vec![
-                emit_expr(e, env, cls)?,
-                emit_expr(e, env, meth)?,
-                instr::new_vec_array(alloc, 2),
-            ],
-        );
+        let instrs = InstrSeq::gather(vec![
+            emit_expr(e, env, cls)?,
+            emit_expr(e, env, meth)?,
+            instr::new_vec_array(2),
+        ]);
         Ok(instrs)
     }
 }
@@ -3377,48 +3033,32 @@ fn emit_class_meth_native<'a, 'arena, 'decl>(
     };
     Ok(match cexpr {
         ClassExpr::Id(ast_defs::Id(_, name)) if !has_generics => instr::resolveclsmethodd(
-            alloc,
             class::ClassType::<'arena>::from_ast_name_and_mangle(alloc, &name),
             method_id,
         ),
-        ClassExpr::Id(ast_defs::Id(_, name)) => InstrSeq::gather(
-            alloc,
-            vec![
-                emit_generics()?,
-                instr::resolverclsmethodd(
-                    alloc,
-                    class::ClassType::<'arena>::from_ast_name_and_mangle(alloc, &name),
-                    method_id,
-                ),
-            ],
-        ),
-        ClassExpr::Special(clsref) if !has_generics => {
-            instr::resolveclsmethods(alloc, clsref, method_id)
-        }
-        ClassExpr::Special(clsref) => InstrSeq::gather(
-            alloc,
-            vec![
-                emit_generics()?,
-                instr::resolverclsmethods(alloc, clsref, method_id),
-            ],
-        ),
-        ClassExpr::Reified(instrs) if !has_generics => InstrSeq::gather(
-            alloc,
-            vec![
-                instrs,
-                instr::classgetc(alloc),
-                instr::resolveclsmethod(alloc, method_id),
-            ],
-        ),
-        ClassExpr::Reified(instrs) => InstrSeq::gather(
-            alloc,
-            vec![
-                instrs,
-                instr::classgetc(alloc),
-                emit_generics()?,
-                instr::resolverclsmethod(alloc, method_id),
-            ],
-        ),
+        ClassExpr::Id(ast_defs::Id(_, name)) => InstrSeq::gather(vec![
+            emit_generics()?,
+            instr::resolverclsmethodd(
+                class::ClassType::<'arena>::from_ast_name_and_mangle(alloc, &name),
+                method_id,
+            ),
+        ]),
+        ClassExpr::Special(clsref) if !has_generics => instr::resolveclsmethods(clsref, method_id),
+        ClassExpr::Special(clsref) => InstrSeq::gather(vec![
+            emit_generics()?,
+            instr::resolverclsmethods(clsref, method_id),
+        ]),
+        ClassExpr::Reified(instrs) if !has_generics => InstrSeq::gather(vec![
+            instrs,
+            instr::classgetc(),
+            instr::resolveclsmethod(method_id),
+        ]),
+        ClassExpr::Reified(instrs) => InstrSeq::gather(vec![
+            instrs,
+            instr::classgetc(),
+            emit_generics()?,
+            instr::resolverclsmethod(method_id),
+        ]),
         ClassExpr::Expr(_) => {
             return Err(unrecoverable(
                 "emit_class_meth_native: ClassExpr::Expr should be impossible",
@@ -3475,7 +3115,7 @@ fn emit_function_pointer<'a, 'arena, 'decl>(
             emit_class_meth_native(e, env, pos, cid, method_id, targs)?
         }
     };
-    Ok(emit_pos_then(alloc, pos, instrs))
+    Ok(emit_pos_then(pos, instrs))
 }
 
 fn emit_hh_fun<'a, 'arena, 'decl>(
@@ -3498,21 +3138,14 @@ fn emit_hh_fun<'a, 'arena, 'decl>(
                 .collect::<Vec<_>>()
                 .as_slice(),
         )?;
-        Ok(InstrSeq::gather(
-            alloc,
-            vec![
-                generics,
-                instr::resolve_rfunc(
-                    alloc,
-                    function::FunctionType::new(Str::new_str(alloc, fname)),
-                ),
-            ],
-        ))
+        Ok(InstrSeq::gather(vec![
+            generics,
+            instr::resolve_rfunc(function::FunctionType::new(Str::new_str(alloc, fname))),
+        ]))
     } else {
-        Ok(instr::resolve_func(
-            alloc,
-            function::FunctionType::new(Str::new_str(alloc, fname)),
-        ))
+        Ok(instr::resolve_func(function::FunctionType::new(
+            Str::new_str(alloc, fname),
+        )))
     }
 }
 
@@ -3522,28 +3155,21 @@ fn emit_is<'a, 'arena, 'decl>(
     pos: &Pos,
     h: &ast::Hint,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let (ts_instrs, is_static) = emit_reified_arg(e, env, pos, true, h)?;
     Ok(if is_static {
         match &*h.1 {
             aast_defs::Hint_::Happly(ast_defs::Id(_, id), hs)
                 if hs.is_empty() && string_utils::strip_hh_ns(id) == typehints::THIS =>
             {
-                instr::islateboundcls(alloc)
+                instr::islateboundcls()
             }
-            _ => InstrSeq::gather(
-                alloc,
-                vec![
-                    get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
-                    instr::is_type_structc_resolve(alloc),
-                ],
-            ),
+            _ => InstrSeq::gather(vec![
+                get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
+                instr::is_type_structc_resolve(),
+            ]),
         }
     } else {
-        InstrSeq::gather(
-            alloc,
-            vec![ts_instrs, instr::is_type_structc_dontresolve(alloc)],
-        )
+        InstrSeq::gather(vec![ts_instrs, instr::is_type_structc_dontresolve()])
     })
 }
 
@@ -3597,15 +3223,11 @@ fn emit_eval<'a, 'arena, 'decl>(
     pos: &Pos,
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            emit_expr(e, env, expr)?,
-            emit_pos(alloc, pos),
-            instr::eval(alloc),
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        emit_expr(e, env, expr)?,
+        emit_pos(pos),
+        instr::eval(),
+    ]))
 }
 
 fn has_reified_types<'a, 'arena>(env: &Env<'a, 'arena>) -> bool {
@@ -3650,7 +3272,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
             let v = TypedValue::mk_hhas_adata(
                 alloc.alloc_str(unsafe { std::str::from_utf8_unchecked(data.as_ref()) }),
             );
-            Ok(emit_pos_then(alloc, pos, instr::typedvalue(alloc, v)))
+            Ok(emit_pos_then(pos, instr::typedvalue(v)))
         }
         (Expr_::Id(id), _, None) if id.1 == pseudo_functions::ISSET => {
             emit_call_isset_exprs(e, env, pos, args)
@@ -3670,28 +3292,25 @@ fn emit_call_expr<'a, 'arena, 'decl>(
             if id.1 == emitter_special_functions::SET_FRAME_METADATA =>
         {
             ensure_normal_paramkind(pk)?;
-            Ok(InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_expr(e, env, arg1)?,
-                    emit_pos(alloc, pos),
-                    instr::popl(alloc, Local::Named(Slice::new("$86metadata".as_bytes()))),
-                    instr::null(alloc),
-                ],
-            ))
+            Ok(InstrSeq::gather(vec![
+                emit_expr(e, env, arg1)?,
+                emit_pos(pos),
+                instr::popl(Local::Named(Slice::new("$86metadata".as_bytes()))),
+                instr::null(),
+            ]))
         }
         (Expr_::Id(id), [], None)
             if id.1 == pseudo_functions::EXIT || id.1 == pseudo_functions::DIE =>
         {
             let exit = emit_exit(e, env, None)?;
-            Ok(emit_pos_then(alloc, pos, exit))
+            Ok(emit_pos_then(pos, exit))
         }
         (Expr_::Id(id), [(pk, arg1)], None)
             if id.1 == pseudo_functions::EXIT || id.1 == pseudo_functions::DIE =>
         {
             ensure_normal_paramkind(pk)?;
             let exit = emit_exit(e, env, Some(arg1))?;
-            Ok(emit_pos_then(alloc, pos, exit))
+            Ok(emit_pos_then(pos, exit))
         }
         (Expr_::Id(id), [], _)
             if id.1 == emitter_special_functions::SYSTEMLIB_REIFIED_GENERICS
@@ -3722,7 +3341,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
                 async_eager_label,
                 readonly_return,
             )?;
-            Ok(emit_pos_then(alloc, pos, instrs))
+            Ok(emit_pos_then(pos, instrs))
         }
     }
 }
@@ -3735,7 +3354,6 @@ pub fn emit_reified_generic_instrs<'arena>(
 ) -> Result<InstrSeq<'arena>> {
     let base = if is_fun {
         instr::basel(
-            alloc,
             Local::Named(Str::new_str(
                 alloc,
                 string_utils::reified::GENERICS_LOCAL_NAME,
@@ -3744,34 +3362,25 @@ pub fn emit_reified_generic_instrs<'arena>(
             ReadonlyOp::Any,
         )
     } else {
-        InstrSeq::gather(
-            alloc,
-            vec![
-                instr::checkthis(alloc),
-                instr::baseh(alloc),
-                instr::dim_warn_pt(
-                    alloc,
-                    prop::from_raw_string(alloc, string_utils::reified::PROP_NAME),
-                    ReadonlyOp::Any,
-                ),
-            ],
-        )
+        InstrSeq::gather(vec![
+            instr::checkthis(),
+            instr::baseh(),
+            instr::dim_warn_pt(
+                prop::from_raw_string(alloc, string_utils::reified::PROP_NAME),
+                ReadonlyOp::Any,
+            ),
+        ])
     };
     Ok(emit_pos_then(
-        alloc,
         pos,
-        InstrSeq::gather(
-            alloc,
-            vec![
-                base,
-                instr::querym(
-                    alloc,
-                    0,
-                    QueryMOp::CGet,
-                    MemberKey::EI(index.try_into().unwrap(), ReadonlyOp::Any),
-                ),
-            ],
-        ),
+        InstrSeq::gather(vec![
+            base,
+            instr::querym(
+                0,
+                QueryMOp::CGet,
+                MemberKey::EI(index.try_into().unwrap(), ReadonlyOp::Any),
+            ),
+        ]),
     ))
 }
 
@@ -3792,13 +3401,10 @@ fn emit_reified_type_opt<'a, 'arena>(
     let alloc = env.arena;
     let is_in_lambda = env.scope.is_in_lambda();
     let cget_instr = |is_fun, i| {
-        instr::cgetl(
-            env.arena,
-            Local::Named(Str::new_str(
-                alloc,
-                string_utils::reified::reified_generic_captured_name(is_fun, i).as_str(),
-            )),
-        )
+        instr::cgetl(Local::Named(Str::new_str(
+            alloc,
+            string_utils::reified::reified_generic_captured_name(is_fun, i).as_str(),
+        )))
     };
     let check = |is_soft| -> Result<()> {
         if is_soft {
@@ -3838,7 +3444,7 @@ fn emit_known_class_id<'arena, 'decl>(
     let cid = class::ClassType::from_ast_name_and_mangle(alloc, &id.1);
     let cid_string = instr::string(alloc, cid.unsafe_as_str());
     emit_symbol_refs::add_class(e, cid);
-    InstrSeq::gather(alloc, vec![cid_string, instr::classgetc(alloc)])
+    InstrSeq::gather(vec![cid_string, instr::classgetc()])
 }
 
 fn emit_load_class_ref<'a, 'arena, 'decl>(
@@ -3849,25 +3455,21 @@ fn emit_load_class_ref<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let instrs = match cexpr {
-        ClassExpr::Special(SpecialClsRef::Self_) => instr::self_(alloc),
-        ClassExpr::Special(SpecialClsRef::Static) => instr::lateboundcls(alloc),
-        ClassExpr::Special(SpecialClsRef::Parent) => instr::parent(alloc),
+        ClassExpr::Special(SpecialClsRef::Self_) => instr::self_(),
+        ClassExpr::Special(SpecialClsRef::Static) => instr::lateboundcls(),
+        ClassExpr::Special(SpecialClsRef::Parent) => instr::parent(),
         ClassExpr::Id(id) => emit_known_class_id(alloc, e, &id),
-        ClassExpr::Expr(expr) => InstrSeq::gather(
-            alloc,
-            vec![
-                emit_pos(alloc, pos),
-                emit_expr(e, env, &expr)?,
-                instr::classgetc(alloc),
-            ],
-        ),
-        ClassExpr::Reified(instrs) => InstrSeq::gather(
-            alloc,
-            vec![emit_pos(alloc, pos), instrs, instr::classgetc(alloc)],
-        ),
+        ClassExpr::Expr(expr) => InstrSeq::gather(vec![
+            emit_pos(pos),
+            emit_expr(e, env, &expr)?,
+            instr::classgetc(),
+        ]),
+        ClassExpr::Reified(instrs) => {
+            InstrSeq::gather(vec![emit_pos(pos), instrs, instr::classgetc()])
+        }
         _ => panic!("Enum value does not match one of listed variants"),
     };
-    Ok(emit_pos_then(alloc, pos, instrs))
+    Ok(emit_pos_then(pos, instrs))
 }
 
 fn emit_new<'a, 'arena, 'decl>(
@@ -3927,16 +3529,15 @@ fn emit_new<'a, 'arena, 'decl>(
     };
     if is_reflection_class_builtin {
         scope::with_unnamed_locals(e, |e| {
-            let alloc = e.alloc;
             let instr_args = emit_exprs(e, env, args)?;
             let instr_uargs = match uarg {
-                None => instr::empty(alloc),
+                None => instr::empty(),
                 Some(uarg) => emit_expr(e, env, uarg)?,
             };
             Ok((
-                instr::empty(alloc),
-                InstrSeq::gather(alloc, vec![instr_args, instr_uargs]),
-                instr::empty(alloc),
+                instr::empty(),
+                InstrSeq::gather(vec![instr_args, instr_uargs]),
+                instr::empty(),
             ))
         })
     } else {
@@ -3945,23 +3546,17 @@ fn emit_new<'a, 'arena, 'decl>(
                 let id = class::ClassType::<'arena>::from_ast_name_and_mangle(alloc, &cname);
                 emit_symbol_refs::add_class(e, id);
                 match has_generics {
-                    H::NoGenerics => InstrSeq::gather(
-                        alloc,
-                        vec![emit_pos(alloc, pos), instr::newobjd(alloc, id)],
-                    ),
-                    H::HasGenerics => InstrSeq::gather(
-                        alloc,
-                        vec![
-                            emit_pos(alloc, pos),
-                            emit_reified_targs(
-                                e,
-                                env,
-                                pos,
-                                &targs.iter().map(|t| &t.1).collect::<Vec<_>>(),
-                            )?,
-                            instr::newobjrd(alloc, id),
-                        ],
-                    ),
+                    H::NoGenerics => InstrSeq::gather(vec![emit_pos(pos), instr::newobjd(id)]),
+                    H::HasGenerics => InstrSeq::gather(vec![
+                        emit_pos(pos),
+                        emit_reified_targs(
+                            e,
+                            env,
+                            pos,
+                            &targs.iter().map(|t| &t.1).collect::<Vec<_>>(),
+                        )?,
+                        instr::newobjrd(id),
+                    ]),
                     H::MaybeGenerics => {
                         return Err(unrecoverable(
                             "Internal error: This case should have been transformed",
@@ -3969,58 +3564,47 @@ fn emit_new<'a, 'arena, 'decl>(
                     }
                 }
             }
-            ClassExpr::Special(cls_ref) => InstrSeq::gather(
-                alloc,
-                vec![emit_pos(alloc, pos), instr::newobjs(alloc, cls_ref)],
-            ),
-            ClassExpr::Reified(instrs) if has_generics == H::MaybeGenerics => InstrSeq::gather(
-                alloc,
-                vec![instrs, instr::classgetts(alloc), instr::newobjr(alloc)],
-            ),
-            _ => InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_load_class_ref(e, env, pos, cexpr)?,
-                    instr::newobj(alloc),
-                ],
-            ),
+            ClassExpr::Special(cls_ref) => {
+                InstrSeq::gather(vec![emit_pos(pos), instr::newobjs(cls_ref)])
+            }
+            ClassExpr::Reified(instrs) if has_generics == H::MaybeGenerics => {
+                InstrSeq::gather(vec![instrs, instr::classgetts(), instr::newobjr()])
+            }
+            _ => InstrSeq::gather(vec![
+                emit_load_class_ref(e, env, pos, cexpr)?,
+                instr::newobj(),
+            ]),
         };
         scope::with_unnamed_locals(e, |e| {
             let alloc = e.alloc;
             let instr_args = emit_exprs(e, env, args)?;
             let instr_uargs = match uarg {
-                None => instr::empty(alloc),
+                None => instr::empty(),
                 Some(uarg) => emit_expr(e, env, uarg)?,
             };
             Ok((
-                instr::empty(alloc),
-                InstrSeq::gather(
-                    alloc,
-                    vec![
-                        newobj_instrs,
-                        instr::dup(alloc),
-                        instr::nulluninit(alloc),
-                        instr_args,
-                        instr_uargs,
-                        emit_pos(alloc, pos),
-                        instr::fcallctor(
-                            alloc,
-                            get_fcall_args_no_inout(
-                                alloc,
-                                args,
-                                uarg.as_ref(),
-                                None,
-                                env.call_context.clone(),
-                                true,
-                                true, // we do not need to enforce readonly return for constructors
-                                false, // we do not need to enforce readonly this for constructors
-                            ),
-                        ),
-                        instr::popc(alloc),
-                        instr::lockobj(alloc),
-                    ],
-                ),
-                instr::empty(alloc),
+                instr::empty(),
+                InstrSeq::gather(vec![
+                    newobj_instrs,
+                    instr::dup(),
+                    instr::nulluninit(),
+                    instr_args,
+                    instr_uargs,
+                    emit_pos(pos),
+                    instr::fcallctor(get_fcall_args_no_inout(
+                        alloc,
+                        args,
+                        uarg.as_ref(),
+                        None,
+                        env.call_context.clone(),
+                        true,
+                        true,  // we do not need to enforce readonly return for constructors
+                        false, // we do not need to enforce readonly this for constructors
+                    )),
+                    instr::popc(),
+                    instr::lockobj(),
+                ]),
+                instr::empty(),
             ))
         })
     }
@@ -4042,7 +3626,7 @@ fn emit_obj_get<'a, 'arena, 'decl>(
     } else {
         ReadonlyOp::Mutable
     };
-    let alloc = env.arena;
+
     if let Some(ast::Lid(pos, id)) = expr.2.as_lvar() {
         if local_id::get_name(id) == special_idents::THIS
             && nullflavor.eq(&ast_defs::OgNullFlavor::OGNullsafe)
@@ -4106,7 +3690,7 @@ fn emit_obj_get<'a, 'arena, 'decl>(
     } else {
         total_stack_size
     };
-    let final_instr = instr::querym(alloc, num_params, query_op, mk);
+    let final_instr = instr::querym(num_params, query_op, mk);
     // Don't pop elems/props from the stack during the lookup for null
     // coalesce assignment in case we do a write later.
     let querym_n_unpopped = if null_coalesce_assignment {
@@ -4114,17 +3698,14 @@ fn emit_obj_get<'a, 'arena, 'decl>(
     } else {
         None
     };
-    let instr = InstrSeq::gather(
-        alloc,
-        vec![
-            base_expr_instrs_begin,
-            prop_instrs,
-            base_expr_instrs_end,
-            emit_pos(alloc, pos),
-            base_setup_instrs,
-            final_instr,
-        ],
-    );
+    let instr = InstrSeq::gather(vec![
+        base_expr_instrs_begin,
+        prop_instrs,
+        base_expr_instrs_end,
+        emit_pos(pos),
+        base_setup_instrs,
+        final_instr,
+    ]);
     Ok((instr, querym_n_unpopped))
 }
 
@@ -4196,10 +3777,10 @@ fn emit_prop_expr<'a, 'arena, 'decl>(
         MemberKey::PC(_, _) => (mk, emit_expr(e, env, prop)?, 1),
         MemberKey::PL(local, readonly_op) if null_coalesce_assignment => (
             MemberKey::PC(stack_index, readonly_op),
-            instr::cgetl(alloc, local),
+            instr::cgetl(local),
             1,
         ),
-        _ => (mk, instr::empty(alloc), 0),
+        _ => (mk, instr::empty(), 0),
     })
 }
 
@@ -4279,7 +3860,7 @@ fn emit_array_get_<'a, 'arena, 'decl>(
     inout_param_info: Option<(usize, &inout_locals::AliasInfoMap<'_>)>,
 ) -> Result<(ArrayGetInstr<'arena>, Option<usize>)> {
     use ast::Expr;
-    let alloc = env.arena;
+
     match (base_expr, elem) {
         (Expr(_, pos, _), None) if !env.flags.contains(env::Flags::ALLOWS_ARRAY_APPEND) => Err(
             emit_fatal::raise_fatal_runtime(pos, "Can't use [] for reading"),
@@ -4319,33 +3900,30 @@ fn emit_array_get_<'a, 'arena, 'decl>(
             let mut make_final =
                 |total_stack_size: StackIndex, memberkey: MemberKey<'arena>| -> InstrSeq<'_> {
                     if no_final {
-                        instr::empty(alloc)
+                        instr::empty()
                     } else if null_coalesce_assignment {
                         querym_n_unpopped = Some(total_stack_size as usize);
-                        instr::querym(alloc, 0, query_op, memberkey)
+                        instr::querym(0, query_op, memberkey)
                     } else {
-                        instr::querym(alloc, total_stack_size as usize, query_op, memberkey)
+                        instr::querym(total_stack_size as usize, query_op, memberkey)
                     }
                 };
             let instr = match (base_result, local_temp_kind) {
                 (ArrayGetBase::Regular(base), None) =>
                 // neither base nor expression needs to store anything
                 {
-                    ArrayGetInstr::Regular(InstrSeq::gather(
-                        alloc,
-                        vec![
-                            warninstr,
-                            base.base_instrs,
-                            elem_instrs,
-                            base.cls_instrs,
-                            emit_pos(alloc, outer_pos),
-                            base.setup_instrs,
-                            make_final(
-                                base.base_stack_size + base.cls_stack_size + elem_stack_size,
-                                memberkey,
-                            ),
-                        ],
-                    ))
+                    ArrayGetInstr::Regular(InstrSeq::gather(vec![
+                        warninstr,
+                        base.base_instrs,
+                        elem_instrs,
+                        base.cls_instrs,
+                        emit_pos(outer_pos),
+                        base.setup_instrs,
+                        make_final(
+                            base.base_stack_size + base.cls_stack_size + elem_stack_size,
+                            memberkey,
+                        ),
+                    ]))
                 }
                 (ArrayGetBase::Regular(base), Some(local_kind)) => {
                     // base does not need temp locals but index expression does
@@ -4353,48 +3931,37 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                     let load = vec![
                         // load base and indexer, value of indexer will be saved in local
                         (
-                            InstrSeq::gather(
-                                alloc,
-                                vec![InstrSeq::clone(alloc, &base.base_instrs), elem_instrs],
-                            ),
+                            InstrSeq::gather(vec![InstrSeq::clone(&base.base_instrs), elem_instrs]),
                             Some((local, local_kind)),
                         ),
                         // finish loading the value
                         (
-                            InstrSeq::gather(
-                                alloc,
-                                vec![
-                                    warninstr,
-                                    base.base_instrs,
-                                    emit_pos(alloc, outer_pos),
-                                    base.setup_instrs,
-                                    make_final(
-                                        base.base_stack_size
-                                            + base.cls_stack_size
-                                            + elem_stack_size,
-                                        memberkey,
-                                    ),
-                                ],
-                            ),
+                            InstrSeq::gather(vec![
+                                warninstr,
+                                base.base_instrs,
+                                emit_pos(outer_pos),
+                                base.setup_instrs,
+                                make_final(
+                                    base.base_stack_size + base.cls_stack_size + elem_stack_size,
+                                    memberkey,
+                                ),
+                            ]),
                             None,
                         ),
                     ];
-                    let store = InstrSeq::gather(
-                        alloc,
-                        vec![
-                            emit_store_for_simple_base(
-                                e,
-                                env,
-                                outer_pos,
-                                elem_stack_size,
-                                base_expr,
-                                local,
-                                false,
-                                ReadonlyOp::Any,
-                            )?,
-                            instr::popc(alloc),
-                        ],
-                    );
+                    let store = InstrSeq::gather(vec![
+                        emit_store_for_simple_base(
+                            e,
+                            env,
+                            outer_pos,
+                            elem_stack_size,
+                            base_expr,
+                            local,
+                            false,
+                            ReadonlyOp::Any,
+                        )?,
+                        instr::popc(),
+                    ]);
                     ArrayGetInstr::Inout { load, store }
                 }
                 (
@@ -4414,26 +3981,21 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                     // base needs temp locals, indexer - does not,
                     // simply concat two instruction sequences
                     base_instrs.push((
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                warninstr,
-                                elem_instrs,
-                                cls_instrs,
-                                emit_pos(alloc, outer_pos),
-                                setup_instrs,
-                                make_final(
-                                    base_stack_size + cls_stack_size + elem_stack_size,
-                                    memberkey.clone(),
-                                ),
-                            ],
-                        ),
+                        InstrSeq::gather(vec![
+                            warninstr,
+                            elem_instrs,
+                            cls_instrs,
+                            emit_pos(outer_pos),
+                            setup_instrs,
+                            make_final(
+                                base_stack_size + cls_stack_size + elem_stack_size,
+                                memberkey.clone(),
+                            ),
+                        ]),
                         None,
                     ));
-                    let store = InstrSeq::gather(
-                        alloc,
-                        vec![store, instr::setm(alloc, 0, memberkey), instr::popc(alloc)],
-                    );
+                    let store =
+                        InstrSeq::gather(vec![store, instr::setm(0, memberkey), instr::popc()]);
                     ArrayGetInstr::Inout {
                         load: base_instrs,
                         store,
@@ -4458,29 +4020,23 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                     let local = e.local_gen_mut().get_unnamed();
                     base_instrs.push((elem_instrs, Some((local, local_kind))));
                     base_instrs.push((
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                warninstr,
-                                cls_instrs,
-                                emit_pos(alloc, outer_pos),
-                                setup_instrs,
-                                make_final(
-                                    base_stack_size + cls_stack_size + elem_stack_size,
-                                    memberkey,
-                                ),
-                            ],
-                        ),
+                        InstrSeq::gather(vec![
+                            warninstr,
+                            cls_instrs,
+                            emit_pos(outer_pos),
+                            setup_instrs,
+                            make_final(
+                                base_stack_size + cls_stack_size + elem_stack_size,
+                                memberkey,
+                            ),
+                        ]),
                         None,
                     ));
-                    let store = InstrSeq::gather(
-                        alloc,
-                        vec![
-                            store,
-                            instr::setm(alloc, 0, MemberKey::EL(local, ReadonlyOp::Any)),
-                            instr::popc(alloc),
-                        ],
-                    );
+                    let store = InstrSeq::gather(vec![
+                        store,
+                        instr::setm(0, MemberKey::EL(local, ReadonlyOp::Any)),
+                        instr::popc(),
+                    ]);
                     ArrayGetInstr::Inout {
                         load: base_instrs,
                         store,
@@ -4511,33 +4067,29 @@ fn emit_elem<'a, 'arena, 'decl>(
     local_temp_kind: Option<StoredValueKind>,
     null_coalesce_assignment: bool,
 ) -> Result<(InstrSeq<'arena>, StackIndex)> {
-    let alloc = env.arena;
     Ok(match elem {
-        None => (instr::empty(alloc), 0),
-        Some(expr) if expr.2.is_int() || expr.2.is_string() => (instr::empty(alloc), 0),
+        None => (instr::empty(), 0),
+        Some(expr) if expr.2.is_int() || expr.2.is_string() => (instr::empty(), 0),
         Some(expr) => match &expr.2 {
             ast::Expr_::Lvar(x) if !is_local_this(env, &x.1) => {
                 if local_temp_kind.is_some() {
                     (
-                        instr::cgetquietl(
-                            alloc,
-                            get_local(e, env, &x.0, local_id::get_name(&x.1))?,
-                        ),
+                        instr::cgetquietl(get_local(e, env, &x.0, local_id::get_name(&x.1))?),
                         0,
                     )
                 } else if null_coalesce_assignment {
                     (
-                        instr::cgetl(alloc, get_local(e, env, &x.0, local_id::get_name(&x.1))?),
+                        instr::cgetl(get_local(e, env, &x.0, local_id::get_name(&x.1))?),
                         1,
                     )
                 } else {
-                    (instr::empty(alloc), 0)
+                    (instr::empty(), 0)
                 }
             }
             ast::Expr_::ClassConst(x)
                 if is_special_class_constant_accessed_with_class_id(&(x.0).2, &(x.1).1) =>
             {
-                (instr::empty(alloc), 0)
+                (instr::empty(), 0)
             }
             _ => (emit_expr(e, env, expr)?, 1),
         },
@@ -4555,7 +4107,7 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
     let alloc = env.arena;
     match elem {
         // ELement missing (so it's array append)
-        None => Ok((MemberKey::W, instr::empty(alloc))),
+        None => Ok((MemberKey::W, instr::empty())),
         Some(elem_expr) => match &elem_expr.2 {
             // Special case for local
             Expr_::Lvar(x) if !is_local_this(env, &x.1) => Ok((
@@ -4569,13 +4121,11 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                         )
                     }
                 },
-                instr::empty(alloc),
+                instr::empty(),
             )),
             // Special case for literal integer
             Expr_::Int(s) => match ast_constant_folder::expr_to_typed_value(e, elem_expr) {
-                Ok(TypedValue::Int(i)) => {
-                    Ok((MemberKey::EI(i, ReadonlyOp::Any), instr::empty(alloc)))
-                }
+                Ok(TypedValue::Int(i)) => Ok((MemberKey::EI(i, ReadonlyOp::Any), instr::empty())),
                 _ => Err(Unrecoverable(format!("{} is not a valid integer index", s))),
             },
             // Special case for literal string
@@ -4584,10 +4134,7 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                 // There's no guarantee that they're valid UTF-8.
                 let s = unsafe { std::str::from_utf8_unchecked(s.as_slice()) };
                 let s = bumpalo::collections::String::from_str_in(s, alloc).into_bump_str();
-                Ok((
-                    MemberKey::ET(Str::from(s), ReadonlyOp::Any),
-                    instr::empty(alloc),
-                ))
+                Ok((MemberKey::ET(Str::from(s), ReadonlyOp::Any), instr::empty()))
             }
             // Special case for class name
             Expr_::ClassConst(x)
@@ -4611,21 +4158,18 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                 if e.options().emit_class_pointers() > 0 {
                     Ok((
                         MemberKey::ET(Str::from(fq_id), ReadonlyOp::Any),
-                        instr::raise_class_string_conversion_warning(alloc),
+                        instr::raise_class_string_conversion_warning(),
                     ))
                 } else {
                     Ok((
                         MemberKey::ET(Str::from(fq_id), ReadonlyOp::Any),
-                        instr::empty(alloc),
+                        instr::empty(),
                     ))
                 }
             }
             _ => {
                 // General case
-                Ok((
-                    MemberKey::EC(stack_index, ReadonlyOp::Any),
-                    instr::empty(alloc),
-                ))
+                Ok((MemberKey::EC(stack_index, ReadonlyOp::Any), instr::empty()))
             }
         },
     }
@@ -4641,7 +4185,6 @@ fn emit_store_for_simple_base<'a, 'arena, 'decl>(
     is_base: bool,
     readonly_op: ReadonlyOp,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let (base_expr_instrs_begin, base_expr_instrs_end, base_setup_instrs, _, _) = emit_base(
         e,
         env,
@@ -4655,20 +4198,17 @@ fn emit_store_for_simple_base<'a, 'arena, 'decl>(
         readonly_op,
     )?;
     let memberkey = MemberKey::EL(local, ReadonlyOp::Any);
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            base_expr_instrs_begin,
-            base_expr_instrs_end,
-            emit_pos(alloc, pos),
-            base_setup_instrs,
-            if is_base {
-                instr::dim(alloc, MOpMode::Define, memberkey)
-            } else {
-                instr::setm(alloc, 0, memberkey)
-            },
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        base_expr_instrs_begin,
+        base_expr_instrs_end,
+        emit_pos(pos),
+        base_setup_instrs,
+        if is_base {
+            instr::dim(MOpMode::Define, memberkey)
+        } else {
+            instr::setm(0, memberkey)
+        },
+    ]))
 }
 
 fn get_querym_op_mode(query_op: &QueryMOp) -> MOpMode {
@@ -4687,25 +4227,21 @@ fn emit_class_get<'a, 'arena, 'decl>(
     prop: &ast::ClassGetExpr,
     readonly_op: ReadonlyOp,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
     let (cexpr_seq1, cexpr_seq2) = emit_class_expr(e, env, cexpr, prop)?;
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            cexpr_seq1,
-            cexpr_seq2,
-            match query_op {
-                QueryMOp::CGet => instr::cgets(alloc, readonly_op),
-                QueryMOp::Isset => instr::issets(alloc),
-                QueryMOp::CGetQuiet => {
-                    return Err(Unrecoverable("emit_class_get: CGetQuiet".into()));
-                }
-                QueryMOp::InOut => return Err(Unrecoverable("emit_class_get: InOut".into())),
-                _ => panic!("Enum value does not match one of listed variants"),
-            },
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        cexpr_seq1,
+        cexpr_seq2,
+        match query_op {
+            QueryMOp::CGet => instr::cgets(readonly_op),
+            QueryMOp::Isset => instr::issets(),
+            QueryMOp::CGetQuiet => {
+                return Err(Unrecoverable("emit_class_get: CGetQuiet".into()));
+            }
+            QueryMOp::InOut => return Err(Unrecoverable("emit_class_get: InOut".into())),
+            _ => panic!("Enum value does not match one of listed variants"),
+        },
+    ]))
 }
 
 fn emit_conditional_expr<'a, 'arena, 'decl>(
@@ -4716,7 +4252,6 @@ fn emit_conditional_expr<'a, 'arena, 'decl>(
     etrue: Option<&ast::Expr>,
     efalse: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     Ok(match etrue.as_ref() {
         Some(etrue) => {
             let false_label = e.label_gen_mut().next_regular();
@@ -4724,56 +4259,44 @@ fn emit_conditional_expr<'a, 'arena, 'decl>(
             let r = emit_jmpz(e, env, etest, false_label)?;
             // only emit false branch if false_label is used
             let false_branch = if r.is_label_used {
-                InstrSeq::gather(
-                    alloc,
-                    vec![instr::label(alloc, false_label), emit_expr(e, env, efalse)?],
-                )
+                InstrSeq::gather(vec![instr::label(false_label), emit_expr(e, env, efalse)?])
             } else {
-                instr::empty(alloc)
+                instr::empty()
             };
             // only emit true branch if there is fallthrough from condition
             let true_branch = if r.is_fallthrough {
-                InstrSeq::gather(
-                    alloc,
-                    vec![
-                        emit_expr(e, env, etrue)?,
-                        emit_pos(alloc, pos),
-                        instr::jmp(alloc, end_label),
-                    ],
-                )
+                InstrSeq::gather(vec![
+                    emit_expr(e, env, etrue)?,
+                    emit_pos(pos),
+                    instr::jmp(end_label),
+                ])
             } else {
-                instr::empty(alloc)
+                instr::empty()
             };
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    r.instrs,
-                    true_branch,
-                    false_branch,
-                    // end_label is used to jump out of true branch so they should be emitted together
-                    if r.is_fallthrough {
-                        instr::label(alloc, end_label)
-                    } else {
-                        instr::empty(alloc)
-                    },
-                ],
-            )
+            InstrSeq::gather(vec![
+                r.instrs,
+                true_branch,
+                false_branch,
+                // end_label is used to jump out of true branch so they should be emitted together
+                if r.is_fallthrough {
+                    instr::label(end_label)
+                } else {
+                    instr::empty()
+                },
+            ])
         }
         None => {
             let end_label = e.label_gen_mut().next_regular();
             let efalse_instr = emit_expr(e, env, efalse)?;
             let etest_instr = emit_expr(e, env, etest)?;
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    etest_instr,
-                    instr::dup(alloc),
-                    instr::jmpnz(alloc, end_label),
-                    instr::popc(alloc),
-                    efalse_instr,
-                    instr::label(alloc, end_label),
-                ],
-            )
+            InstrSeq::gather(vec![
+                etest_instr,
+                instr::dup(),
+                instr::jmpnz(end_label),
+                instr::popc(),
+                efalse_instr,
+                instr::label(end_label),
+            ])
         }
     })
 }
@@ -4788,21 +4311,18 @@ fn emit_local<'a, 'arena, 'decl>(
     let ast::Lid(pos, id) = lid;
     let id_name = local_id::get_name(id);
     if superglobals::is_superglobal(id_name) {
-        Ok(InstrSeq::gather(
-            alloc,
-            vec![
-                instr::string(alloc, string_utils::locals::strip_dollar(id_name)),
-                emit_pos(alloc, pos),
-                instr::cgetg(alloc),
-            ],
-        ))
+        Ok(InstrSeq::gather(vec![
+            instr::string(alloc, string_utils::locals::strip_dollar(id_name)),
+            emit_pos(pos),
+            instr::cgetg(),
+        ]))
     } else {
         let local = get_local(e, env, pos, id_name)?;
         Ok(
             if is_local_this(env, id) && !env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS) {
-                emit_pos_then(alloc, pos, instr::barethis(alloc, notice))
+                emit_pos_then(pos, instr::barethis(notice))
             } else {
-                instr::cgetl(alloc, local)
+                instr::cgetl(local)
             },
         )
     }
@@ -4828,11 +4348,11 @@ fn emit_class_const<'a, 'arena, 'decl>(
             let cname = cid.unsafe_as_str();
             Ok(if string_utils::is_class(&id.1) {
                 if e.options().emit_class_pointers() == 1 {
-                    emit_pos_then(alloc, &pos, instr::resolveclass(alloc, cid))
+                    emit_pos_then(&pos, instr::resolveclass(cid))
                 } else if e.options().emit_class_pointers() == 2 {
-                    emit_pos_then(alloc, &pos, instr::lazyclass(alloc, cid))
+                    emit_pos_then(&pos, instr::lazyclass(cid))
                 } else {
-                    emit_pos_then(alloc, &pos, instr::string(alloc, cname))
+                    emit_pos_then(&pos, instr::string(alloc, cname))
                 }
             } else {
                 emit_symbol_refs::add_class(e, cid.clone());
@@ -4842,15 +4362,15 @@ fn emit_class_const<'a, 'arena, 'decl>(
                     alloc,
                     string_utils::strip_global_ns(&id.1),
                 ));
-                emit_pos_then(alloc, &pos, instr::clscnsd(alloc, const_id, cid))
+                emit_pos_then(&pos, instr::clscnsd(const_id, cid))
             })
         }
         _ => {
             let load_const = if string_utils::is_class(&id.1) {
                 if e.options().emit_class_pointers() == 2 {
-                    instr::lazyclassfromclass(alloc)
+                    instr::lazyclassfromclass()
                 } else {
-                    instr::classname(alloc)
+                    instr::classname()
                 }
             } else {
                 // TODO(hrust) enabel `let const_id = r#const::ConstType::from_ast_name(&id.1);`,
@@ -4859,15 +4379,15 @@ fn emit_class_const<'a, 'arena, 'decl>(
                     alloc,
                     string_utils::strip_global_ns(&id.1),
                 ));
-                instr::clscns(alloc, const_id)
+                instr::clscns(const_id)
             };
             if string_utils::is_class(&id.1) && e.options().emit_class_pointers() == 1 {
                 emit_load_class_ref(e, env, pos, cexpr)
             } else {
-                Ok(InstrSeq::gather(
-                    alloc,
-                    vec![emit_load_class_ref(e, env, pos, cexpr)?, load_const],
-                ))
+                Ok(InstrSeq::gather(vec![
+                    emit_load_class_ref(e, env, pos, cexpr)?,
+                    load_const,
+                ]))
             }
         }
     }
@@ -4880,24 +4400,18 @@ fn emit_unop<'a, 'arena, 'decl>(
     (uop, expr): &(ast_defs::Uop, ast::Expr),
 ) -> Result<InstrSeq<'arena>> {
     use ast_defs::Uop;
-    let alloc = env.arena;
+
     match uop {
-        Uop::Utild | Uop::Unot => Ok(InstrSeq::gather(
-            alloc,
-            vec![
-                emit_expr(e, env, expr)?,
-                emit_pos_then(alloc, pos, from_unop(alloc, e.options(), uop)?),
-            ],
-        )),
-        Uop::Uplus | Uop::Uminus => Ok(InstrSeq::gather(
-            alloc,
-            vec![
-                emit_pos(alloc, pos),
-                instr::int(alloc, 0),
-                emit_expr(e, env, expr)?,
-                emit_pos_then(alloc, pos, from_unop(alloc, e.options(), uop)?),
-            ],
-        )),
+        Uop::Utild | Uop::Unot => Ok(InstrSeq::gather(vec![
+            emit_expr(e, env, expr)?,
+            emit_pos_then(pos, from_unop(e.options(), uop)?),
+        ])),
+        Uop::Uplus | Uop::Uminus => Ok(InstrSeq::gather(vec![
+            emit_pos(pos),
+            instr::int(0),
+            emit_expr(e, env, expr)?,
+            emit_pos_then(pos, from_unop(e.options(), uop)?),
+        ])),
         Uop::Uincr | Uop::Udecr | Uop::Upincr | Uop::Updecr => emit_lval_op(
             e,
             env,
@@ -4909,30 +4423,24 @@ fn emit_unop<'a, 'arena, 'decl>(
         ),
         Uop::Usilence => e.local_scope(|e| {
             let temp_local = e.local_gen_mut().get_unnamed();
-            Ok(InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_pos(alloc, pos),
-                    instr::silence_start(alloc, temp_local),
-                    {
-                        let try_instrs = emit_expr(e, env, expr)?;
-                        let catch_instrs = InstrSeq::gather(
-                            alloc,
-                            vec![emit_pos(alloc, pos), instr::silence_end(alloc, temp_local)],
-                        );
-                        InstrSeq::create_try_catch(
-                            alloc,
-                            e.label_gen_mut(),
-                            None,
-                            false, /* skip_throw */
-                            try_instrs,
-                            catch_instrs,
-                        )
-                    },
-                    emit_pos(alloc, pos),
-                    instr::silence_end(alloc, temp_local),
-                ],
-            ))
+            Ok(InstrSeq::gather(vec![
+                emit_pos(pos),
+                instr::silence_start(temp_local),
+                {
+                    let try_instrs = emit_expr(e, env, expr)?;
+                    let catch_instrs =
+                        InstrSeq::gather(vec![emit_pos(pos), instr::silence_end(temp_local)]);
+                    InstrSeq::create_try_catch(
+                        e.label_gen_mut(),
+                        None,
+                        false, /* skip_throw */
+                        try_instrs,
+                        catch_instrs,
+                    )
+                },
+                emit_pos(pos),
+                instr::silence_end(temp_local),
+            ]))
         }),
     }
 }
@@ -4949,27 +4457,23 @@ fn unop_to_incdec_op(opts: &Options, op: &ast_defs::Uop) -> Result<IncDecOp> {
     }
 }
 
-fn from_unop<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    opts: &Options,
-    op: &ast_defs::Uop,
-) -> Result<InstrSeq<'arena>> {
+fn from_unop<'arena>(opts: &Options, op: &ast_defs::Uop) -> Result<InstrSeq<'arena>> {
     use ast_defs::Uop;
     Ok(match op {
-        Uop::Utild => instr::bitnot(alloc),
-        Uop::Unot => instr::not(alloc),
+        Uop::Utild => instr::bitnot(),
+        Uop::Unot => instr::not(),
         Uop::Uplus => {
             if opts.check_int_overflow() {
-                instr::addo(alloc)
+                instr::addo()
             } else {
-                instr::add(alloc)
+                instr::add()
             }
         }
         Uop::Uminus => {
             if opts.check_int_overflow() {
-                instr::subo(alloc)
+                instr::subo()
             } else {
-                instr::sub(alloc)
+                instr::sub()
             }
         }
         _ => {
@@ -5017,52 +4521,48 @@ fn optimize_null_checks<'arena, 'decl>(e: &Emitter<'arena, 'decl>) -> bool {
         .contains(CompilerFlags::OPTIMIZE_NULL_CHECKS)
 }
 
-fn from_binop<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    opts: &Options,
-    op: &ast_defs::Bop,
-) -> Result<InstrSeq<'arena>> {
+fn from_binop<'arena>(opts: &Options, op: &ast_defs::Bop) -> Result<InstrSeq<'arena>> {
     use ast_defs::Bop as B;
     Ok(match op {
         B::Plus => {
             if opts.check_int_overflow() {
-                instr::addo(alloc)
+                instr::addo()
             } else {
-                instr::add(alloc)
+                instr::add()
             }
         }
         B::Minus => {
             if opts.check_int_overflow() {
-                instr::subo(alloc)
+                instr::subo()
             } else {
-                instr::sub(alloc)
+                instr::sub()
             }
         }
         B::Star => {
             if opts.check_int_overflow() {
-                instr::mulo(alloc)
+                instr::mulo()
             } else {
-                instr::mul(alloc)
+                instr::mul()
             }
         }
-        B::Slash => instr::div(alloc),
-        B::Eqeq => instr::eq(alloc),
-        B::Eqeqeq => instr::same(alloc),
-        B::Starstar => instr::pow(alloc),
-        B::Diff => instr::neq(alloc),
-        B::Diff2 => instr::nsame(alloc),
-        B::Lt => instr::lt(alloc),
-        B::Lte => instr::lte(alloc),
-        B::Gt => instr::gt(alloc),
-        B::Gte => instr::gte(alloc),
-        B::Dot => instr::concat(alloc),
-        B::Amp => instr::bitand(alloc),
-        B::Bar => instr::bitor(alloc),
-        B::Ltlt => instr::shl(alloc),
-        B::Gtgt => instr::shr(alloc),
-        B::Cmp => instr::cmp(alloc),
-        B::Percent => instr::mod_(alloc),
-        B::Xor => instr::bitxor(alloc),
+        B::Slash => instr::div(),
+        B::Eqeq => instr::eq(),
+        B::Eqeqeq => instr::same(),
+        B::Starstar => instr::pow(),
+        B::Diff => instr::neq(),
+        B::Diff2 => instr::nsame(),
+        B::Lt => instr::lt(),
+        B::Lte => instr::lte(),
+        B::Gt => instr::gt(),
+        B::Gte => instr::gte(),
+        B::Dot => instr::concat(),
+        B::Amp => instr::bitand(),
+        B::Bar => instr::bitor(),
+        B::Ltlt => instr::shl(),
+        B::Gtgt => instr::shr(),
+        B::Cmp => instr::cmp(),
+        B::Percent => instr::mod_(),
+        B::Xor => instr::bitxor(),
         B::Eq(_) => return Err(Unrecoverable("assignment is emitted differently".into())),
         B::QuestionQuestion => {
             return Err(Unrecoverable(
@@ -5082,14 +4582,13 @@ fn emit_first_expr<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     expr: &ast::Expr,
 ) -> Result<(InstrSeq<'arena>, bool)> {
-    let alloc = env.arena;
     Ok(match &expr.2 {
         ast::Expr_::Lvar(l)
             if !((is_local_this(env, &l.1) && !env.flags.contains(EnvFlags::NEEDS_LOCAL_THIS))
                 || superglobals::is_any_global(local_id::get_name(&l.1))) =>
         {
             (
-                instr::cgetl2(alloc, get_local(e, env, &l.0, local_id::get_name(&l.1))?),
+                instr::cgetl2(get_local(e, env, &l.0, local_id::get_name(&l.1))?),
                 true,
             )
         }
@@ -5104,24 +4603,20 @@ pub fn emit_two_exprs<'a, 'arena, 'decl>(
     e1: &ast::Expr,
     e2: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let (instrs1, is_under_top) = emit_first_expr(e, env, e1)?;
     let instrs2 = emit_expr(e, env, e2)?;
     let instrs2_is_var = e2.2.is_lvar();
-    Ok(InstrSeq::gather(
-        alloc,
-        if is_under_top {
-            if instrs2_is_var {
-                vec![emit_pos(alloc, outer_pos), instrs2, instrs1]
-            } else {
-                vec![instrs2, emit_pos(alloc, outer_pos), instrs1]
-            }
-        } else if instrs2_is_var {
-            vec![instrs1, emit_pos(alloc, outer_pos), instrs2]
+    Ok(InstrSeq::gather(if is_under_top {
+        if instrs2_is_var {
+            vec![emit_pos(outer_pos), instrs2, instrs1]
         } else {
-            vec![instrs1, instrs2, emit_pos(alloc, outer_pos)]
-        },
-    ))
+            vec![instrs2, emit_pos(outer_pos), instrs1]
+        }
+    } else if instrs2_is_var {
+        vec![instrs1, emit_pos(outer_pos), instrs2]
+    } else {
+        vec![instrs1, instrs2, emit_pos(outer_pos)]
+    }))
 }
 
 fn emit_readonly_expr<'a, 'arena, 'decl>(
@@ -5149,10 +4644,9 @@ fn emit_quiet_expr<'a, 'arena, 'decl>(
     expr: &ast::Expr,
     null_coalesce_assignment: bool,
 ) -> Result<(InstrSeq<'arena>, Option<NumParams>)> {
-    let alloc = env.arena;
     match &expr.2 {
         ast::Expr_::Lvar(lid) if !is_local_this(env, &lid.1) => Ok((
-            instr::cgetquietl(alloc, get_local(e, env, pos, local_id::get_name(&lid.1))?),
+            instr::cgetquietl(get_local(e, env, pos, local_id::get_name(&lid.1))?),
             None,
         )),
         ast::Expr_::ArrayGet(x) => emit_array_get(
@@ -5188,37 +4682,28 @@ fn emit_null_coalesce_assignment<'a, 'arena, 'decl>(
     e1: &ast::Expr,
     e2: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let end_label = e.label_gen_mut().next_regular();
     let do_set_label = e.label_gen_mut().next_regular();
     let l_nonnull = e.local_gen_mut().get_unnamed();
     let (quiet_instr, querym_n_unpopped) = emit_quiet_expr(e, env, pos, e1, true)?;
     let emit_popc_n = |n_unpopped| match n_unpopped {
-        Some(n) => InstrSeq::gather(
-            alloc,
-            iter::repeat_with(|| instr::popc(alloc))
-                .take(n)
-                .collect::<Vec<_>>(),
-        ),
-        None => instr::empty(alloc),
+        Some(n) => InstrSeq::gather(iter::repeat_with(instr::popc).take(n).collect::<Vec<_>>()),
+        None => instr::empty(),
     };
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            quiet_instr,
-            instr::dup(alloc),
-            instr::istypec(alloc, IsTypeOp::Null),
-            instr::jmpnz(alloc, do_set_label),
-            instr::popl(alloc, l_nonnull),
-            emit_popc_n(querym_n_unpopped),
-            instr::pushl(alloc, l_nonnull),
-            instr::jmp(alloc, end_label),
-            instr::label(alloc, do_set_label),
-            instr::popc(alloc),
-            emit_lval_op(e, env, pos, LValOp::Set, e1, Some(e2), true)?,
-            instr::label(alloc, end_label),
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        quiet_instr,
+        instr::dup(),
+        instr::istypec(IsTypeOp::Null),
+        instr::jmpnz(do_set_label),
+        instr::popl(l_nonnull),
+        emit_popc_n(querym_n_unpopped),
+        instr::pushl(l_nonnull),
+        instr::jmp(end_label),
+        instr::label(do_set_label),
+        instr::popc(),
+        emit_lval_op(e, env, pos, LValOp::Set, e1, Some(e2), true)?,
+        instr::label(end_label),
+    ]))
 }
 
 fn emit_short_circuit_op<'a, 'arena, 'decl>(
@@ -5227,52 +4712,31 @@ fn emit_short_circuit_op<'a, 'arena, 'decl>(
     pos: &Pos,
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let its_true = e.label_gen_mut().next_regular();
     let its_done = e.label_gen_mut().next_regular();
     let jmp_instrs = emit_jmpnz(e, env, expr, its_true)?;
     Ok(if jmp_instrs.is_fallthrough {
-        InstrSeq::gather(
-            alloc,
-            vec![
-                jmp_instrs.instrs,
-                emit_pos(alloc, pos),
-                instr::false_(alloc),
-                instr::jmp(alloc, its_done),
-                if jmp_instrs.is_label_used {
-                    InstrSeq::gather(
-                        alloc,
-                        vec![
-                            instr::label(alloc, its_true),
-                            emit_pos(alloc, pos),
-                            instr::true_(alloc),
-                        ],
-                    )
-                } else {
-                    instr::empty(alloc)
-                },
-                instr::label(alloc, its_done),
-            ],
-        )
+        InstrSeq::gather(vec![
+            jmp_instrs.instrs,
+            emit_pos(pos),
+            instr::false_(),
+            instr::jmp(its_done),
+            if jmp_instrs.is_label_used {
+                InstrSeq::gather(vec![instr::label(its_true), emit_pos(pos), instr::true_()])
+            } else {
+                instr::empty()
+            },
+            instr::label(its_done),
+        ])
     } else {
-        InstrSeq::gather(
-            alloc,
-            vec![
-                jmp_instrs.instrs,
-                if jmp_instrs.is_label_used {
-                    InstrSeq::gather(
-                        alloc,
-                        vec![
-                            instr::label(alloc, its_true),
-                            emit_pos(alloc, pos),
-                            instr::true_(alloc),
-                        ],
-                    )
-                } else {
-                    instr::empty(alloc)
-                },
-            ],
-        )
+        InstrSeq::gather(vec![
+            jmp_instrs.instrs,
+            if jmp_instrs.is_label_used {
+                InstrSeq::gather(vec![instr::label(its_true), emit_pos(pos), instr::true_()])
+            } else {
+                instr::empty()
+            },
+        ])
     })
 }
 
@@ -5282,7 +4746,6 @@ fn emit_binop<'a, 'arena, 'decl>(
     pos: &Pos,
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let (op, e1, e2) = expr.2.as_binop().unwrap();
     use ast_defs::Bop as B;
     match op {
@@ -5298,42 +4761,36 @@ fn emit_binop<'a, 'arena, 'decl>(
         B::QuestionQuestion => {
             let end_label = e.label_gen_mut().next_regular();
             let rhs = emit_expr(e, env, e2)?;
-            Ok(InstrSeq::gather(
-                alloc,
-                vec![
-                    emit_quiet_expr(e, env, pos, e1, false)?.0,
-                    instr::dup(alloc),
-                    instr::istypec(alloc, IsTypeOp::Null),
-                    instr::not(alloc),
-                    instr::jmpnz(alloc, end_label),
-                    instr::popc(alloc),
-                    rhs,
-                    instr::label(alloc, end_label),
-                ],
-            ))
+            Ok(InstrSeq::gather(vec![
+                emit_quiet_expr(e, env, pos, e1, false)?.0,
+                instr::dup(),
+                instr::istypec(IsTypeOp::Null),
+                instr::not(),
+                instr::jmpnz(end_label),
+                instr::popc(),
+                rhs,
+                instr::label(end_label),
+            ]))
         }
         _ => {
             let default = |e: &mut Emitter<'arena, 'decl>| {
-                Ok(InstrSeq::gather(
-                    alloc,
-                    vec![
-                        emit_two_exprs(e, env, pos, e1, e2)?,
-                        from_binop(alloc, e.options(), op)?,
-                    ],
-                ))
+                Ok(InstrSeq::gather(vec![
+                    emit_two_exprs(e, env, pos, e1, e2)?,
+                    from_binop(e.options(), op)?,
+                ]))
             };
             if optimize_null_checks(e) {
                 match op {
                     B::Eqeqeq if e2.2.is_null() => emit_is_null(e, env, e1),
                     B::Eqeqeq if e1.2.is_null() => emit_is_null(e, env, e2),
-                    B::Diff2 if e2.2.is_null() => Ok(InstrSeq::gather(
-                        alloc,
-                        vec![emit_is_null(e, env, e1)?, instr::not(alloc)],
-                    )),
-                    B::Diff2 if e1.2.is_null() => Ok(InstrSeq::gather(
-                        alloc,
-                        vec![emit_is_null(e, env, e2)?, instr::not(alloc)],
-                    )),
+                    B::Diff2 if e2.2.is_null() => Ok(InstrSeq::gather(vec![
+                        emit_is_null(e, env, e1)?,
+                        instr::not(),
+                    ])),
+                    B::Diff2 if e1.2.is_null() => Ok(InstrSeq::gather(vec![
+                        emit_is_null(e, env, e2)?,
+                        instr::not(),
+                    ])),
                     _ => default(e),
                 }
             } else {
@@ -5351,14 +4808,14 @@ fn emit_pipe<'a, 'arena, 'decl>(
     let lhs_instrs = emit_expr(e, env, e1)?;
     scope::with_unnamed_local(e, |e, local| {
         // TODO(hrust) avoid cloning env
-        let alloc = e.alloc;
+
         let mut pipe_env = env.clone();
         pipe_env.with_pipe_var(local);
         let rhs_instrs = emit_expr(e, &pipe_env, e2)?;
         Ok((
-            InstrSeq::gather(alloc, vec![lhs_instrs, instr::popl(alloc, local)]),
+            InstrSeq::gather(vec![lhs_instrs, instr::popl(local)]),
             rhs_instrs,
-            instr::unsetl(alloc, local),
+            instr::unsetl(local),
         ))
     })
 }
@@ -5369,7 +4826,6 @@ fn emit_as<'a, 'arena, 'decl>(
     pos: &Pos,
     (expr, h, is_nullable): &(ast::Expr, aast_defs::Hint, bool),
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     e.local_scope(|e| {
         let arg_local = e.local_gen_mut().get_unnamed();
         let type_struct_local = e.local_gen_mut().get_unnamed();
@@ -5377,36 +4833,25 @@ fn emit_as<'a, 'arena, 'decl>(
         let then_label = e.label_gen_mut().next_regular();
         let done_label = e.label_gen_mut().next_regular();
         let main_block = |ts_instrs, resolve| {
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    ts_instrs,
-                    instr::setl(alloc, type_struct_local),
-                    match resolve {
-                        TypeStructResolveOp::Resolve => instr::is_type_structc_resolve(alloc),
-                        TypeStructResolveOp::DontResolve => {
-                            instr::is_type_structc_dontresolve(alloc)
-                        }
-                        _ => panic!("Enum value does not match one of listed variants"),
-                    },
-                    instr::jmpnz(alloc, then_label),
-                    if *is_nullable {
-                        InstrSeq::gather(
-                            alloc,
-                            vec![instr::null(alloc), instr::jmp(alloc, done_label)],
-                        )
-                    } else {
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                instr::pushl(alloc, arg_local),
-                                instr::pushl(alloc, type_struct_local),
-                                instr::throwastypestructexception(alloc),
-                            ],
-                        )
-                    },
-                ],
-            )
+            InstrSeq::gather(vec![
+                ts_instrs,
+                instr::setl(type_struct_local),
+                match resolve {
+                    TypeStructResolveOp::Resolve => instr::is_type_structc_resolve(),
+                    TypeStructResolveOp::DontResolve => instr::is_type_structc_dontresolve(),
+                    _ => panic!("Enum value does not match one of listed variants"),
+                },
+                instr::jmpnz(then_label),
+                if *is_nullable {
+                    InstrSeq::gather(vec![instr::null(), instr::jmp(done_label)])
+                } else {
+                    InstrSeq::gather(vec![
+                        instr::pushl(arg_local),
+                        instr::pushl(type_struct_local),
+                        instr::throwastypestructexception(),
+                    ])
+                },
+            ])
         };
         let i2 = if is_static {
             main_block(
@@ -5417,18 +4862,15 @@ fn emit_as<'a, 'arena, 'decl>(
             main_block(ts_instrs, TypeStructResolveOp::DontResolve)
         };
         let i1 = emit_expr(e, env, expr)?;
-        Ok(InstrSeq::gather(
-            alloc,
-            vec![
-                i1,
-                instr::setl(alloc, arg_local),
-                i2,
-                instr::label(alloc, then_label),
-                instr::pushl(alloc, arg_local),
-                instr::unsetl(alloc, type_struct_local),
-                instr::label(alloc, done_label),
-            ],
-        ))
+        Ok(InstrSeq::gather(vec![
+            i1,
+            instr::setl(arg_local),
+            i2,
+            instr::label(then_label),
+            instr::pushl(arg_local),
+            instr::unsetl(type_struct_local),
+            instr::label(done_label),
+        ]))
     })
 }
 
@@ -5439,16 +4881,15 @@ fn emit_cast<'a, 'arena, 'decl>(
     hint: &aast_defs::Hint_,
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     use aast_defs::Hint_ as H_;
     let op = match hint {
         H_::Happly(ast_defs::Id(_, id), hints) if hints.is_empty() => {
             let id = string_utils::strip_ns(id);
             match string_utils::strip_hh_ns(id).as_ref() {
-                typehints::INT => instr::cast_int(alloc),
-                typehints::BOOL => instr::cast_bool(alloc),
-                typehints::STRING => instr::cast_string(alloc),
-                typehints::FLOAT => instr::cast_double(alloc),
+                typehints::INT => instr::cast_int(),
+                typehints::BOOL => instr::cast_bool(),
+                typehints::STRING => instr::cast_string(),
+                typehints::FLOAT => instr::cast_double(),
                 _ => {
                     return Err(emit_fatal::raise_fatal_parse(
                         pos,
@@ -5459,10 +4900,11 @@ fn emit_cast<'a, 'arena, 'decl>(
         }
         _ => return Err(emit_fatal::raise_fatal_parse(pos, "Invalid cast type")),
     };
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![emit_expr(e, env, expr)?, emit_pos(alloc, pos), op],
-    ))
+    Ok(InstrSeq::gather(vec![
+        emit_expr(e, env, expr)?,
+        emit_pos(pos),
+        op,
+    ]))
 }
 
 pub fn emit_unset_expr<'a, 'arena, 'decl>(
@@ -5470,14 +4912,13 @@ pub fn emit_unset_expr<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     emit_lval_op_nonlist(
         e,
         env,
         &expr.1,
         LValOp::Unset,
         expr,
-        instr::empty(alloc),
+        instr::empty(),
         0,
         false,
         false,
@@ -5492,7 +4933,6 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
     kind: SetRange,
     args: &[(ParamKind, ast::Expr)],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     let raise_fatal = |msg: &str| {
         Err(emit_fatal::raise_fatal_parse(
             pos,
@@ -5513,7 +4953,7 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
 
     let count_instrs = match (args, kind.vec) {
         ([c], true) => emit_expr(e, env, expect_normal_paramkind(c)?)?,
-        ([], _) => instr::int(alloc, -1),
+        ([], _) => instr::int(-1),
         (_, false) => return raise_fatal("expects no more than 3 arguments"),
         (_, true) => return raise_fatal("expects no more than 4 arguments"),
     };
@@ -5530,27 +4970,21 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
         3,               /* rhs_stack_size */
         ReadonlyOp::Any, /* readonly_op */
     )?;
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            base_expr,
-            cls_expr,
-            emit_expr(e, env, offset)?,
-            emit_expr(e, env, src)?,
-            count_instrs,
-            base_setup,
-            instr::instr(
-                alloc,
-                Instruct::Final(InstructFinal::SetRangeM(
-                    (base_stack + cls_stack)
-                        .try_into()
-                        .expect("StackIndex overflow"),
-                    kind.size.try_into().expect("SetRange size overflow"),
-                    kind.op,
-                )),
-            ),
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        base_expr,
+        cls_expr,
+        emit_expr(e, env, offset)?,
+        emit_expr(e, env, src)?,
+        count_instrs,
+        base_setup,
+        instr::instr(Instruct::Final(InstructFinal::SetRangeM(
+            (base_stack + cls_stack)
+                .try_into()
+                .expect("StackIndex overflow"),
+            kind.size.try_into().expect("SetRange size overflow"),
+            kind.op,
+        ))),
+    ]))
 }
 
 pub fn is_reified_tparam<'a, 'arena>(
@@ -5740,7 +5174,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                         base_stack_size,
                         cls_stack_size,
                     },
-                    store: instr::basel(alloc, local, MOpMode::Define, ReadonlyOp::Any),
+                    store: instr::basel(local, MOpMode::Define, ReadonlyOp::Any),
                 }
             }
             _ => ArrayGetBase::Regular(ArrayGetBaseData {
@@ -5764,15 +5198,15 @@ fn emit_base_<'a, 'arena, 'decl>(
                 match get_local(e, env, &x.0, &(x.1).1) {
                     Ok(v) => {
                     let base_instr = if local_temp_kind.is_some() {
-                        instr::cgetquietl(alloc, v)
+                        instr::cgetquietl(v)
                     } else {
-                        instr::empty(alloc)
+                        instr::empty()
                     };
                     Some(Ok(emit_default(
                         e,
                         base_instr,
-                        instr::empty(alloc),
-                        instr::basel(alloc, v, MOpMode::Define, ReadonlyOp::CheckROCOW),
+                        instr::empty(),
+                        instr::basel( v, MOpMode::Define, ReadonlyOp::CheckROCOW),
                         0,
                         0,
                     )))
@@ -5795,8 +5229,8 @@ fn emit_base_<'a, 'arena, 'decl>(
             Ok(emit_default(
                 e,
                 base_expr_instrs,
-                instr::empty(alloc),
-                emit_pos_then(alloc, pos, instr::basec(alloc, base_offset, base_mode)),
+                instr::empty(),
+                emit_pos_then(pos, instr::basec(base_offset, base_mode)),
                 1,
                 0,
             ))
@@ -5828,7 +5262,6 @@ fn emit_base_<'a, 'arena, 'decl>(
         }
         Expr_::Lvar(x) if superglobals::is_superglobal(&(x.1).1) => {
             let base_instrs = emit_pos_then(
-                alloc,
                 &x.0,
                 instr::string(alloc, string_utils::locals::strip_dollar(&(x.1).1)),
             );
@@ -5836,19 +5269,19 @@ fn emit_base_<'a, 'arena, 'decl>(
             Ok(emit_default(
                 e,
                 base_instrs,
-                instr::empty(alloc),
-                instr::basegc(alloc, base_offset, base_mode),
+                instr::empty(),
+                instr::basegc(base_offset, base_mode),
                 1,
                 0,
             ))
         }
         Expr_::Lvar(x) if is_object && (x.1).1 == special_idents::THIS => {
-            let base_instrs = emit_pos_then(alloc, &x.0, instr::checkthis(alloc));
+            let base_instrs = emit_pos_then(&x.0, instr::checkthis());
             Ok(emit_default(
                 e,
                 base_instrs,
-                instr::empty(alloc),
-                instr::baseh(alloc),
+                instr::empty(),
+                instr::baseh(),
                 0,
                 0,
             ))
@@ -5858,15 +5291,15 @@ fn emit_base_<'a, 'arena, 'decl>(
         {
             let v = get_local(e, env, &x.0, &(x.1).1)?;
             let base_instr = if local_temp_kind.is_some() {
-                instr::cgetquietl(alloc, v)
+                instr::cgetquietl(v)
             } else {
-                instr::empty(alloc)
+                instr::empty()
             };
             Ok(emit_default(
                 e,
                 base_instr,
-                instr::empty(alloc),
-                instr::basel(alloc, v, base_mode, ReadonlyOp::Any),
+                instr::empty(),
+                instr::basel(v, base_mode, ReadonlyOp::Any),
                 0,
                 0,
             ))
@@ -5876,8 +5309,8 @@ fn emit_base_<'a, 'arena, 'decl>(
             Ok(emit_default(
                 e,
                 local,
-                instr::empty(alloc),
-                instr::basec(alloc, base_offset, base_mode),
+                instr::empty(),
+                instr::basec(base_offset, base_mode),
                 1,
                 0,
             ))
@@ -5925,16 +5358,13 @@ fn emit_base_<'a, 'arena, 'decl>(
                     null_coalesce_assignment,
                 )?;
                 let make_setup_instrs = |base_setup_instrs: InstrSeq<'arena>| {
-                    InstrSeq::gather(
-                        alloc,
-                        vec![warninstr, base_setup_instrs, instr::dim(alloc, mode, mk)],
-                    )
+                    InstrSeq::gather(vec![warninstr, base_setup_instrs, instr::dim(mode, mk)])
                 };
                 Ok(match (base_result, local_temp_kind) {
                     // both base and index don't use temps - fallback to default handler
                     (ArrayGetBase::Regular(base), None) => emit_default(
                         e,
-                        InstrSeq::gather(alloc, vec![base.base_instrs, elem_instrs]),
+                        InstrSeq::gather(vec![base.base_instrs, elem_instrs]),
                         base.cls_instrs,
                         make_setup_instrs(base.setup_instrs),
                         base.base_stack_size + elem_stack_size,
@@ -5943,8 +5373,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                     // base does not need temps but index does
                     (ArrayGetBase::Regular(base), Some(local_temp)) => {
                         let local = e.local_gen_mut().get_unnamed();
-                        let base_instrs =
-                            InstrSeq::gather(alloc, vec![base.base_instrs, elem_instrs]);
+                        let base_instrs = InstrSeq::gather(vec![base.base_instrs, elem_instrs]);
                         ArrayGetBase::Inout {
                             load: ArrayGetBaseData {
                                 // store result of instr_begin to temp
@@ -5990,10 +5419,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                                 base_stack_size: base_stack_size + elem_stack_size,
                                 cls_stack_size,
                             },
-                            store: InstrSeq::gather(
-                                alloc,
-                                vec![store, instr::dim(alloc, MOpMode::Define, mk)],
-                            ),
+                            store: InstrSeq::gather(vec![store, instr::dim(MOpMode::Define, mk)]),
                         }
                     }
                     // both base and index needs locals
@@ -6021,17 +5447,10 @@ fn emit_base_<'a, 'arena, 'decl>(
                                 base_stack_size: base_stack_size + elem_stack_size,
                                 cls_stack_size,
                             },
-                            store: InstrSeq::gather(
-                                alloc,
-                                vec![
-                                    store,
-                                    instr::dim(
-                                        alloc,
-                                        MOpMode::Define,
-                                        MemberKey::EL(local, ReadonlyOp::Any),
-                                    ),
-                                ],
-                            ),
+                            store: InstrSeq::gather(vec![
+                                store,
+                                instr::dim(MOpMode::Define, MemberKey::EL(local, ReadonlyOp::Any)),
+                            ]),
                         }
                     }
                 })
@@ -6045,8 +5464,8 @@ fn emit_base_<'a, 'arena, 'decl>(
                     emit_default(
                         e,
                         base_instrs,
-                        instr::empty(alloc),
-                        instr::basec(alloc, base_offset, base_mode),
+                        instr::empty(),
+                        instr::basec(base_offset, base_mode),
                         1,
                         0,
                     )
@@ -6090,12 +5509,12 @@ fn emit_base_<'a, 'arena, 'decl>(
                         readonly_op, // use the current enforcement
                     )?;
                     let total_stack_size = prop_stack_size + base_stack_size;
-                    let final_instr = instr::dim(alloc, mode, mk);
+                    let final_instr = instr::dim(mode, mk);
                     emit_default(
                         e,
-                        InstrSeq::gather(alloc, vec![base_expr_instrs_begin, prop_instrs]),
+                        InstrSeq::gather(vec![base_expr_instrs_begin, prop_instrs]),
                         base_expr_instrs_end,
-                        InstrSeq::gather(alloc, vec![base_setup_instrs, final_instr]),
+                        InstrSeq::gather(vec![base_setup_instrs, final_instr]),
                         total_stack_size,
                         cls_stack_size,
                     )
@@ -6110,13 +5529,7 @@ fn emit_base_<'a, 'arena, 'decl>(
                 e,
                 cexpr_begin,
                 cexpr_end,
-                instr::basesc(
-                    alloc,
-                    base_offset + 1,
-                    rhs_stack_size,
-                    base_mode,
-                    readonly_op,
-                ),
+                instr::basesc(base_offset + 1, rhs_stack_size, base_mode, readonly_op),
                 1,
                 1,
             ))
@@ -6131,12 +5544,11 @@ pub fn emit_ignored_exprs<'a, 'arena, 'decl>(
     pos: &Pos,
     exprs: &[ast::Expr],
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     exprs
         .iter()
         .map(|e| emit_ignored_expr(emitter, env, pos, e))
         .collect::<Result<Vec<_>>>()
-        .map(|x| InstrSeq::gather(alloc, x))
+        .map(InstrSeq::gather)
 }
 
 // TODO(hrust): change pos from &Pos to Option<&Pos>, since Pos::make_none() still allocate mem.
@@ -6146,14 +5558,10 @@ pub fn emit_ignored_expr<'a, 'arena, 'decl>(
     pos: &Pos,
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            emit_expr(emitter, env, expr)?,
-            emit_pos_then(alloc, pos, instr::popc(alloc)),
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        emit_expr(emitter, env, expr)?,
+        emit_pos_then(pos, instr::popc()),
+    ]))
 }
 
 fn emit_lval_op<'a, 'arena, 'decl>(
@@ -6165,7 +5573,6 @@ fn emit_lval_op<'a, 'arena, 'decl>(
     expr2: Option<&ast::Expr>,
     null_coalesce_assignment: bool,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     match (op, &expr1.2, expr2) {
         (LValOp::Set, ast::Expr_::List(l), Some(expr2)) => {
             let instr_rhs = emit_expr(e, env, expr2)?;
@@ -6174,7 +5581,6 @@ fn emit_lval_op<'a, 'arena, 'decl>(
                 Ok(instr_rhs)
             } else {
                 scope::with_unnamed_local(e, |e, local| {
-                    let alloc = e.alloc;
                     let loc = if can_use_as_rhs_in_list_assignment(&expr2.2)? {
                         Some(&local)
                     } else {
@@ -6191,31 +5597,25 @@ fn emit_lval_op<'a, 'arena, 'decl>(
                         is_readonly_expr(expr2),
                     )?;
                     Ok((
-                        InstrSeq::gather(
-                            alloc,
-                            vec![instr_lhs, instr_rhs, instr::popl(alloc, local)],
-                        ),
+                        InstrSeq::gather(vec![instr_lhs, instr_rhs, instr::popl(local)]),
                         instr_assign,
-                        instr::pushl(alloc, local),
+                        instr::pushl(local),
                     ))
                 })
             }
         }
         _ => e.local_scope(|e| {
             let (rhs_instrs, rhs_stack_size, rhs_readonly) = match expr2 {
-                None => (instr::empty(alloc), 0, false),
+                None => (instr::empty(), 0, false),
                 Some(aast::Expr(_, _, aast::Expr_::Yield(af))) => {
                     let temp = e.local_gen_mut().get_unnamed();
                     (
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                emit_yield(e, env, pos, af)?,
-                                instr::setl(alloc, temp),
-                                instr::popc(alloc),
-                                instr::pushl(alloc, temp),
-                            ],
-                        ),
+                        InstrSeq::gather(vec![
+                            emit_yield(e, env, pos, af)?,
+                            instr::setl(temp),
+                            instr::popc(),
+                            instr::pushl(temp),
+                        ]),
                         1,
                         false,
                     )
@@ -6288,30 +5688,19 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
 //   Dim Warn EI:i_2
 //   QueryM 0 CGet EI:i_1
 fn emit_array_get_fixed<'arena>(
-    alloc: &'arena bumpalo::Bump,
     last_usage: bool,
     local: Local<'arena>,
     indices: &[isize],
 ) -> InstrSeq<'arena> {
     let (base, stack_count) = if last_usage {
         (
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    instr::pushl(alloc, local),
-                    instr::basec(alloc, 0, MOpMode::Warn),
-                ],
-            ),
+            InstrSeq::gather(vec![instr::pushl(local), instr::basec(0, MOpMode::Warn)]),
             1,
         )
     } else {
-        (
-            instr::basel(alloc, local, MOpMode::Warn, ReadonlyOp::Any),
-            0,
-        )
+        (instr::basel(local, MOpMode::Warn, ReadonlyOp::Any), 0)
     };
     let indices = InstrSeq::gather(
-        alloc,
         indices
             .iter()
             .enumerate()
@@ -6319,14 +5708,14 @@ fn emit_array_get_fixed<'arena>(
             .map(|(i, ix)| {
                 let mk = MemberKey::EI(*ix as i64, ReadonlyOp::Any);
                 if i == 0 {
-                    instr::querym(alloc, stack_count, QueryMOp::CGet, mk)
+                    instr::querym(stack_count, QueryMOp::CGet, mk)
                 } else {
-                    instr::dim(alloc, MOpMode::Warn, mk)
+                    instr::dim(MOpMode::Warn, mk)
                 }
             })
             .collect(),
     );
-    InstrSeq::gather(alloc, vec![base, indices])
+    InstrSeq::gather(vec![base, indices])
 }
 
 /// Generate code for each lvalue assignment in a list destructuring expression.
@@ -6352,7 +5741,7 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl>(
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     use ast::Expr_;
     use options::Php7Flags;
-    let alloc = env.arena;
+
     let is_ltr = e.options().php7_flags.contains(Php7Flags::LTR_ASSIGN);
     match &expr.2 {
         Expr_::List(exprs) => {
@@ -6390,32 +5779,27 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl>(
                 .into_iter()
                 .unzip();
             Ok((
-                InstrSeq::gather(alloc, lhs_instrs),
-                InstrSeq::gather(
-                    alloc,
-                    if !is_ltr {
-                        set_instrs.into_iter().rev().collect()
-                    } else {
-                        set_instrs
-                    },
-                ),
+                InstrSeq::gather(lhs_instrs),
+                InstrSeq::gather(if !is_ltr {
+                    set_instrs.into_iter().rev().collect()
+                } else {
+                    set_instrs
+                }),
             ))
         }
-        Expr_::Omitted => Ok((instr::empty(alloc), instr::empty(alloc))),
+        Expr_::Omitted => Ok((instr::empty(), instr::empty())),
         _ => {
             // Generate code to access the element from the array
             let access_instrs = match (local, indices) {
-                (Some(loc), [_, ..]) => {
-                    emit_array_get_fixed(alloc, last_usage, loc.to_owned(), indices)
-                }
+                (Some(loc), [_, ..]) => emit_array_get_fixed(last_usage, loc.to_owned(), indices),
                 (Some(loc), []) => {
                     if last_usage {
-                        instr::pushl(alloc, loc.to_owned())
+                        instr::pushl(loc.to_owned())
                     } else {
-                        instr::cgetl(alloc, loc.to_owned())
+                        instr::cgetl(loc.to_owned())
                     }
                 }
-                (None, _) => instr::null(alloc),
+                (None, _) => instr::null(),
             };
             // Generate code to assign to the lvalue *)
             // Return pair: side effects to initialize lhs + assignment
@@ -6432,19 +5816,13 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl>(
             )?;
             Ok(if is_ltr {
                 (
-                    instr::empty(alloc),
-                    InstrSeq::gather(
-                        alloc,
-                        vec![lhs_instrs, rhs_instrs, set_op, instr::popc(alloc)],
-                    ),
+                    instr::empty(),
+                    InstrSeq::gather(vec![lhs_instrs, rhs_instrs, set_op, instr::popc()]),
                 )
             } else {
                 (
                     lhs_instrs,
-                    InstrSeq::gather(
-                        alloc,
-                        vec![instr::empty(alloc), rhs_instrs, set_op, instr::popc(alloc)],
-                    ),
+                    InstrSeq::gather(vec![instr::empty(), rhs_instrs, set_op, instr::popc()]),
                 )
             })
         }
@@ -6462,7 +5840,6 @@ pub fn emit_lval_op_nonlist<'a, 'arena, 'decl>(
     rhs_readonly: bool,
     null_coalesce_assignment: bool,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     emit_lval_op_nonlist_steps(
         e,
         env,
@@ -6474,54 +5851,43 @@ pub fn emit_lval_op_nonlist<'a, 'arena, 'decl>(
         rhs_readonly,
         null_coalesce_assignment,
     )
-    .map(|(lhs, rhs, setop)| InstrSeq::gather(alloc, vec![lhs, rhs, setop]))
+    .map(|(lhs, rhs, setop)| InstrSeq::gather(vec![lhs, rhs, setop]))
 }
 
-pub fn emit_final_global_op<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    pos: &Pos,
-    op: LValOp,
-) -> InstrSeq<'arena> {
+pub fn emit_final_global_op<'arena>(pos: &Pos, op: LValOp) -> InstrSeq<'arena> {
     use LValOp as L;
     match op {
-        L::Set => emit_pos_then(alloc, pos, instr::setg(alloc)),
-        L::SetOp(op) => instr::setopg(alloc, op),
-        L::IncDec(op) => instr::incdecg(alloc, op),
-        L::Unset => emit_pos_then(alloc, pos, instr::unsetg(alloc)),
+        L::Set => emit_pos_then(pos, instr::setg()),
+        L::SetOp(op) => instr::setopg(op),
+        L::IncDec(op) => instr::incdecg(op),
+        L::Unset => emit_pos_then(pos, instr::unsetg()),
     }
 }
 
-pub fn emit_final_local_op<'arena>(
-    alloc: &'arena bumpalo::Bump,
-    pos: &Pos,
-    op: LValOp,
-    lid: Local<'arena>,
-) -> InstrSeq<'arena> {
+pub fn emit_final_local_op<'arena>(pos: &Pos, op: LValOp, lid: Local<'arena>) -> InstrSeq<'arena> {
     use LValOp as L;
     emit_pos_then(
-        alloc,
         pos,
         match op {
-            L::Set => instr::setl(alloc, lid),
-            L::SetOp(op) => instr::setopl(alloc, lid, op),
-            L::IncDec(op) => instr::incdecl(alloc, lid, op),
-            L::Unset => instr::unsetl(alloc, lid),
+            L::Set => instr::setl(lid),
+            L::SetOp(op) => instr::setopl(lid, op),
+            L::IncDec(op) => instr::incdecl(lid, op),
+            L::Unset => instr::unsetl(lid),
         },
     )
 }
 
 fn emit_final_member_op<'arena>(
-    alloc: &'arena bumpalo::Bump,
     stack_size: usize,
     op: LValOp,
     mk: MemberKey<'arena>,
 ) -> InstrSeq<'arena> {
     use LValOp as L;
     match op {
-        L::Set => instr::setm(alloc, stack_size, mk),
-        L::SetOp(op) => instr::setopm(alloc, stack_size, op, mk),
-        L::IncDec(op) => instr::incdecm(alloc, stack_size, op, mk),
-        L::Unset => instr::unsetm(alloc, stack_size, mk),
+        L::Set => instr::setm(stack_size, mk),
+        L::SetOp(op) => instr::setopm(stack_size, op, mk),
+        L::IncDec(op) => instr::incdecm(stack_size, op, mk),
+        L::Unset => instr::unsetm(stack_size, mk),
     }
 }
 
@@ -6533,9 +5899,9 @@ fn emit_final_static_op<'arena>(
 ) -> Result<InstrSeq<'arena>> {
     use LValOp as L;
     Ok(match op {
-        L::Set => instr::sets(alloc, ReadonlyOp::Any),
-        L::SetOp(op) => instr::setops(alloc, op),
-        L::IncDec(op) => instr::incdecs(alloc, op),
+        L::Set => instr::sets(ReadonlyOp::Any),
+        L::SetOp(op) => instr::setops(op),
+        L::IncDec(op) => instr::incdecs(op),
         L::Unset => {
             let pos = match prop {
                 ast::ClassGetExpr::CGstring((pos, _))
@@ -6573,22 +5939,21 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
         Ok(match &expr.2 {
             Expr_::Lvar(v) if superglobals::is_any_global(local_id::get_name(&v.1)) => (
                 emit_pos_then(
-                    alloc,
                     &v.0,
                     instr::string(alloc, string_utils::lstrip(local_id::get_name(&v.1), "$")),
                 ),
                 rhs_instrs,
-                emit_final_global_op(alloc, outer_pos, op),
+                emit_final_global_op(outer_pos, op),
             ),
             Expr_::Lvar(v) if is_local_this(env, &v.1) && op.is_incdec() => (
                 emit_local(e, env, BareThisOp::Notice, v)?,
                 rhs_instrs,
-                instr::empty(alloc),
+                instr::empty(),
             ),
             Expr_::Lvar(v) if !is_local_this(env, &v.1) || op == LValOp::Unset => {
-                (instr::empty(alloc), rhs_instrs, {
+                (instr::empty(), rhs_instrs, {
                     let lid = get_local(e, env, &v.0, &(v.1).1)?;
-                    emit_final_local_op(alloc, outer_pos, op, lid)
+                    emit_final_local_op(outer_pos, op, lid)
                 })
             }
             Expr_::ArrayGet(x) => match (&(x.0).1, x.1.as_ref()) {
@@ -6637,33 +6002,28 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                         null_coalesce_assignment,
                     )?;
                     let total_stack_size = elem_stack_size + base_stack_size + cls_stack_size;
-                    let final_instr = emit_pos_then(
-                        alloc,
-                        pos,
-                        emit_final_member_op(alloc, total_stack_size as usize, op, mk),
-                    );
+                    let final_instr =
+                        emit_pos_then(pos, emit_final_member_op(total_stack_size as usize, op, mk));
                     (
                         // Don't emit instructions for elems as these were not popped from
                         // the stack by the final member op during the lookup of a null
                         // coalesce assignment.
                         if null_coalesce_assignment {
-                            instr::empty(alloc)
+                            instr::empty()
                         } else {
-                            InstrSeq::gather(
-                                alloc,
-                                vec![base_expr_instrs_begin, elem_instrs, base_expr_instrs_end],
-                            )
+                            InstrSeq::gather(vec![
+                                base_expr_instrs_begin,
+                                elem_instrs,
+                                base_expr_instrs_end,
+                            ])
                         },
                         rhs_instrs,
-                        InstrSeq::gather(
-                            alloc,
-                            vec![
-                                emit_pos(alloc, pos),
-                                warninstr,
-                                base_setup_instrs,
-                                final_instr,
-                            ],
-                        ),
+                        InstrSeq::gather(vec![
+                            emit_pos(pos),
+                            warninstr,
+                            base_setup_instrs,
+                            final_instr,
+                        ]),
                     )
                 }
             },
@@ -6723,59 +6083,54 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                     readonly_op,
                 )?;
                 let total_stack_size = prop_stack_size + base_stack_size + cls_stack_size;
-                let final_instr = emit_pos_then(
-                    alloc,
-                    pos,
-                    emit_final_member_op(alloc, total_stack_size as usize, op, mk),
-                );
+                let final_instr =
+                    emit_pos_then(pos, emit_final_member_op(total_stack_size as usize, op, mk));
                 (
                     // Don't emit instructions for props as these were not popped from
                     // the stack by the final member op during the lookup of a null
                     // coalesce assignment.
                     if null_coalesce_assignment {
-                        instr::empty(alloc)
+                        instr::empty()
                     } else {
-                        InstrSeq::gather(
-                            alloc,
-                            vec![base_expr_instrs_begin, prop_instrs, base_expr_instrs_end],
-                        )
+                        InstrSeq::gather(vec![
+                            base_expr_instrs_begin,
+                            prop_instrs,
+                            base_expr_instrs_end,
+                        ])
                     },
                     rhs_instrs,
-                    InstrSeq::gather(alloc, vec![base_setup_instrs, final_instr]),
+                    InstrSeq::gather(vec![base_setup_instrs, final_instr]),
                 )
             }
             Expr_::ClassGet(x) if x.as_ref().2 == ast::PropOrMethod::IsProp => {
                 let (cid, prop, _) = &**x;
                 let cexpr = ClassExpr::class_id_to_class_expr(e, false, false, &env.scope, cid);
                 let final_instr_ = emit_final_static_op(alloc, cid, prop, op)?;
-                let final_instr = emit_pos_then(alloc, pos, final_instr_);
+                let final_instr = emit_pos_then(pos, final_instr_);
                 let (cexpr_seq1, cexpr_seq2) = emit_class_expr(e, env, cexpr, prop)?;
                 (
-                    InstrSeq::gather(alloc, vec![cexpr_seq1, cexpr_seq2]),
+                    InstrSeq::gather(vec![cexpr_seq1, cexpr_seq2]),
                     rhs_instrs,
                     final_instr,
                 )
             }
             Expr_::Unop(uop) => (
-                instr::empty(alloc),
+                instr::empty(),
                 rhs_instrs,
-                InstrSeq::gather(
-                    alloc,
-                    vec![
-                        emit_lval_op_nonlist(
-                            e,
-                            env,
-                            pos,
-                            op,
-                            &uop.1,
-                            instr::empty(alloc),
-                            rhs_stack_size,
-                            false,
-                            false, // all unary operations (++, --, etc) are on primitives, so no HHVM readonly checks
-                        )?,
-                        from_unop(alloc, e.options(), &uop.0)?,
-                    ],
-                ),
+                InstrSeq::gather(vec![
+                    emit_lval_op_nonlist(
+                        e,
+                        env,
+                        pos,
+                        op,
+                        &uop.1,
+                        instr::empty(),
+                        rhs_stack_size,
+                        false,
+                        false, // all unary operations (++, --, etc) are on primitives, so no HHVM readonly checks
+                    )?,
+                    from_unop(e.options(), &uop.0)?,
+                ]),
             ),
             _ => {
                 return Err(emit_fatal::raise_fatal_parse(
@@ -6804,13 +6159,12 @@ fn emit_class_expr<'a, 'arena, 'decl>(
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     let load_prop = |e: &mut Emitter<'arena, 'decl>| match prop {
         ast::ClassGetExpr::CGstring((pos, id)) => Ok(emit_pos_then(
-            e.alloc,
             pos,
             instr::string(e.alloc, string_utils::locals::strip_dollar(id)),
         )),
         ast::ClassGetExpr::CGexpr(expr) => emit_expr(e, env, expr),
     };
-    let alloc = env.arena;
+
     Ok(match &cexpr {
         ClassExpr::Expr(expr)
             if expr.2.is_call()
@@ -6823,15 +6177,12 @@ fn emit_class_expr<'a, 'arena, 'decl>(
         {
             let cexpr_local = emit_expr(e, env, expr)?;
             (
-                instr::empty(alloc),
-                InstrSeq::gather(
-                    alloc,
-                    vec![
-                        cexpr_local,
-                        scope::stash_top_in_unnamed_local(e, load_prop)?,
-                        instr::classgetc(alloc),
-                    ],
-                ),
+                instr::empty(),
+                InstrSeq::gather(vec![
+                    cexpr_local,
+                    scope::stash_top_in_unnamed_local(e, load_prop)?,
+                    instr::classgetc(),
+                ]),
             )
         }
         _ => {
@@ -7006,7 +6357,6 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
             Ok((emit_reified_type(env, pos, name)?, false))
         }
         _ => {
-            let alloc = env.arena;
             let ts = get_type_structure_for_hint(e, &[], &collector.acc, hint)?;
             let ts_list = if collector.acc.is_empty() {
                 ts
@@ -7016,19 +6366,13 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
                     .iter()
                     .map(|v| emit_reified_type(env, pos, v))
                     .collect::<Result<Vec<_>>>()?;
-                InstrSeq::gather(alloc, vec![InstrSeq::gather(alloc, values), ts])
+                InstrSeq::gather(vec![InstrSeq::gather(values), ts])
             };
             Ok((
-                InstrSeq::gather(
-                    alloc,
-                    vec![
-                        ts_list,
-                        instr::combine_and_resolve_type_struct(
-                            alloc,
-                            (collector.acc.len() + 1) as isize,
-                        ),
-                    ],
-                ),
+                InstrSeq::gather(vec![
+                    ts_list,
+                    instr::combine_and_resolve_type_struct((collector.acc.len() + 1) as isize),
+                ]),
                 collector.acc.is_empty(),
             ))
         }
@@ -7062,24 +6406,19 @@ pub fn emit_is_null<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     expr: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let alloc = env.arena;
     if let Some(ast::Lid(pos, id)) = expr.2.as_lvar() {
         if !is_local_this(env, id) {
             return Ok(instr::istypel(
-                alloc,
                 get_local(e, env, pos, local_id::get_name(id))?,
                 IsTypeOp::Null,
             ));
         }
     }
 
-    Ok(InstrSeq::gather(
-        alloc,
-        vec![
-            emit_expr(e, env, expr)?,
-            instr::istypec(alloc, IsTypeOp::Null),
-        ],
-    ))
+    Ok(InstrSeq::gather(vec![
+        emit_expr(e, env, expr)?,
+        instr::istypec(IsTypeOp::Null),
+    ]))
 }
 
 pub fn emit_jmpnz<'a, 'arena, 'decl>(
@@ -7088,20 +6427,19 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
     expr: &ast::Expr,
     label: Label,
 ) -> Result<EmitJmpResult<'arena>> {
-    let alloc: &'arena bumpalo::Bump = env.arena;
     let ast::Expr(_, pos, expr_) = expr;
     let opt = optimize_null_checks(e);
     Ok(match ast_constant_folder::expr_to_typed_value(e, expr) {
         Ok(tv) => {
             if Into::<bool>::into(tv) {
                 EmitJmpResult {
-                    instrs: emit_pos_then(alloc, pos, instr::jmp(alloc, label)),
+                    instrs: emit_pos_then(pos, instr::jmp(label)),
                     is_fallthrough: false,
                     is_label_used: true,
                 }
             } else {
                 EmitJmpResult {
-                    instrs: emit_pos_then(alloc, pos, instr::empty(alloc)),
+                    instrs: emit_pos_then(pos, instr::empty()),
                     is_fallthrough: true,
                     is_label_used: false,
                 }
@@ -7117,9 +6455,8 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
                         let r2 = emit_jmpnz(e, env, &bo.2, label)?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
-                                alloc,
                                 pos,
-                                InstrSeq::gather(alloc, vec![r1.instrs, r2.instrs]),
+                                InstrSeq::gather(vec![r1.instrs, r2.instrs]),
                             ),
                             is_fallthrough: r2.is_fallthrough,
                             is_label_used: r1.is_label_used || r2.is_label_used,
@@ -7134,16 +6471,12 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
                     if !r1.is_fallthrough {
                         EmitJmpResult {
                             instrs: emit_pos_then(
-                                alloc,
                                 pos,
-                                InstrSeq::gather(
-                                    alloc,
-                                    if r1.is_label_used {
-                                        vec![r1.instrs, instr::label(alloc, skip_label)]
-                                    } else {
-                                        vec![r1.instrs]
-                                    },
-                                ),
+                                InstrSeq::gather(if r1.is_label_used {
+                                    vec![r1.instrs, instr::label(skip_label)]
+                                } else {
+                                    vec![r1.instrs]
+                                }),
                             ),
                             is_fallthrough: r1.is_label_used,
                             is_label_used: false,
@@ -7152,16 +6485,12 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
                         let r2 = emit_jmpnz(e, env, &bo.2, label)?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
-                                alloc,
                                 pos,
-                                InstrSeq::gather(
-                                    alloc,
-                                    if r1.is_label_used {
-                                        vec![r1.instrs, r2.instrs, instr::label(alloc, skip_label)]
-                                    } else {
-                                        vec![r1.instrs, r2.instrs]
-                                    },
-                                ),
+                                InstrSeq::gather(if r1.is_label_used {
+                                    vec![r1.instrs, r2.instrs, instr::label(skip_label)]
+                                } else {
+                                    vec![r1.instrs, r2.instrs]
+                                }),
                             ),
                             is_fallthrough: r2.is_fallthrough || r1.is_label_used,
                             is_label_used: r2.is_label_used,
@@ -7175,9 +6504,8 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
                         emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
                     EmitJmpResult {
                         instrs: emit_pos_then(
-                            alloc,
                             pos,
-                            InstrSeq::gather(alloc, vec![is_null, instr::jmpnz(alloc, label)]),
+                            InstrSeq::gather(vec![is_null, instr::jmpnz(label)]),
                         ),
                         is_fallthrough: true,
                         is_label_used: true,
@@ -7190,9 +6518,8 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
                         emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
                     EmitJmpResult {
                         instrs: emit_pos_then(
-                            alloc,
                             pos,
-                            InstrSeq::gather(alloc, vec![is_null, instr::jmpz(alloc, label)]),
+                            InstrSeq::gather(vec![is_null, instr::jmpz(label)]),
                         ),
                         is_fallthrough: true,
                         is_label_used: true,
@@ -7202,9 +6529,8 @@ pub fn emit_jmpnz<'a, 'arena, 'decl>(
                     let instr = emit_expr(e, env, expr)?;
                     EmitJmpResult {
                         instrs: emit_pos_then(
-                            alloc,
                             pos,
-                            InstrSeq::gather(alloc, vec![instr, instr::jmpnz(alloc, label)]),
+                            InstrSeq::gather(vec![instr, instr::jmpnz(label)]),
                         ),
                         is_fallthrough: true,
                         is_label_used: true,
@@ -7221,7 +6547,6 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
     expr: &ast::Expr,
     label: Label,
 ) -> std::result::Result<EmitJmpResult<'arena>, instruction_sequence::Error> {
-    let alloc: &'arena bumpalo::Bump = env.arena;
     let ast::Expr(_, pos, expr_) = expr;
     let opt = optimize_null_checks(e);
     Ok(match ast_constant_folder::expr_to_typed_value(e, expr) {
@@ -7229,13 +6554,13 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
             let b: bool = v.into();
             if b {
                 EmitJmpResult {
-                    instrs: emit_pos_then(alloc, pos, instr::empty(alloc)),
+                    instrs: emit_pos_then(pos, instr::empty()),
                     is_fallthrough: true,
                     is_label_used: false,
                 }
             } else {
                 EmitJmpResult {
-                    instrs: emit_pos_then(alloc, pos, instr::jmp(alloc, label)),
+                    instrs: emit_pos_then(pos, instr::jmp(label)),
                     is_fallthrough: false,
                     is_label_used: true,
                 }
@@ -7251,16 +6576,12 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
                     if !r1.is_fallthrough {
                         EmitJmpResult {
                             instrs: emit_pos_then(
-                                alloc,
                                 pos,
-                                InstrSeq::gather(
-                                    alloc,
-                                    if r1.is_label_used {
-                                        vec![r1.instrs, instr::label(alloc, skip_label)]
-                                    } else {
-                                        vec![r1.instrs]
-                                    },
-                                ),
+                                InstrSeq::gather(if r1.is_label_used {
+                                    vec![r1.instrs, instr::label(skip_label)]
+                                } else {
+                                    vec![r1.instrs]
+                                }),
                             ),
                             is_fallthrough: r1.is_label_used,
                             is_label_used: false,
@@ -7269,16 +6590,12 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
                         let r2 = emit_jmpz(e, env, &bo.2, label)?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
-                                alloc,
                                 pos,
-                                InstrSeq::gather(
-                                    alloc,
-                                    if r1.is_label_used {
-                                        vec![r1.instrs, r2.instrs, instr::label(alloc, skip_label)]
-                                    } else {
-                                        vec![r1.instrs, r2.instrs]
-                                    },
-                                ),
+                                InstrSeq::gather(if r1.is_label_used {
+                                    vec![r1.instrs, r2.instrs, instr::label(skip_label)]
+                                } else {
+                                    vec![r1.instrs, r2.instrs]
+                                }),
                             ),
                             is_fallthrough: r2.is_fallthrough || r1.is_label_used,
                             is_label_used: r2.is_label_used,
@@ -7291,16 +6608,15 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
                         let r2 = emit_jmpz(e, env, &bo.2, label)?;
                         EmitJmpResult {
                             instrs: emit_pos_then(
-                                alloc,
                                 pos,
-                                InstrSeq::gather(alloc, vec![r1.instrs, r2.instrs]),
+                                InstrSeq::gather(vec![r1.instrs, r2.instrs]),
                             ),
                             is_fallthrough: r2.is_fallthrough,
                             is_label_used: r1.is_label_used || r2.is_label_used,
                         }
                     } else {
                         EmitJmpResult {
-                            instrs: emit_pos_then(alloc, pos, r1.instrs),
+                            instrs: emit_pos_then(pos, r1.instrs),
                             is_fallthrough: false,
                             is_label_used: r1.is_label_used,
                         }
@@ -7313,9 +6629,8 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
                         emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
                     EmitJmpResult {
                         instrs: emit_pos_then(
-                            alloc,
                             pos,
-                            InstrSeq::gather(alloc, vec![is_null, instr::jmpz(alloc, label)]),
+                            InstrSeq::gather(vec![is_null, instr::jmpz(label)]),
                         ),
                         is_fallthrough: true,
                         is_label_used: true,
@@ -7328,9 +6643,8 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
                         emit_is_null(e, env, if (bo.1).2.is_null() { &bo.2 } else { &bo.1 })?;
                     EmitJmpResult {
                         instrs: emit_pos_then(
-                            alloc,
                             pos,
-                            InstrSeq::gather(alloc, vec![is_null, instr::jmpnz(alloc, label)]),
+                            InstrSeq::gather(vec![is_null, instr::jmpnz(label)]),
                         ),
                         is_fallthrough: true,
                         is_label_used: true,
@@ -7340,9 +6654,8 @@ pub fn emit_jmpz<'a, 'arena, 'decl>(
                     let instr = emit_expr(e, env, expr)?;
                     EmitJmpResult {
                         instrs: emit_pos_then(
-                            alloc,
                             pos,
-                            InstrSeq::gather(alloc, vec![instr, instr::jmpz(alloc, label)]),
+                            InstrSeq::gather(vec![instr, instr::jmpz(label)]),
                         ),
                         is_fallthrough: true,
                         is_label_used: true,

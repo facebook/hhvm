@@ -73,38 +73,29 @@ fn emit_generator_method<'arena>(
     let instrs = match name {
         "send" => {
             let local = Local::Named(Str::new_str(alloc, get_first_param_name(params)?));
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    instr::contcheck_check(alloc),
-                    instr::pushl(alloc, local),
-                    instr::contenter(alloc),
-                ],
-            )
+            InstrSeq::gather(vec![
+                instr::contcheck_check(),
+                instr::pushl(local),
+                instr::contenter(),
+            ])
         }
         "raise" | "throw" => {
             let local = Local::Named(Str::new_str(alloc, get_first_param_name(params)?));
-            InstrSeq::gather(
-                alloc,
-                vec![
-                    instr::contcheck_check(alloc),
-                    instr::pushl(alloc, local),
-                    instr::contraise(alloc),
-                ],
-            )
+            InstrSeq::gather(vec![
+                instr::contcheck_check(),
+                instr::pushl(local),
+                instr::contraise(),
+            ])
         }
-        "next" | "rewind" => InstrSeq::gather(
-            alloc,
-            vec![
-                instr::contcheck_ignore(alloc),
-                instr::null(alloc),
-                instr::contenter(alloc),
-            ],
-        ),
-        "valid" => instr::contvalid(alloc),
-        "current" => instr::contcurrent(alloc),
-        "key" => instr::contkey(alloc),
-        "getReturn" => instr::contgetreturn(alloc),
+        "next" | "rewind" => InstrSeq::gather(vec![
+            instr::contcheck_ignore(),
+            instr::null(),
+            instr::contenter(),
+        ]),
+        "valid" => instr::contvalid(),
+        "current" => instr::contcurrent(),
+        "key" => instr::contkey(),
+        "getReturn" => instr::contgetreturn(),
         _ => {
             return Err(raise_fatal_runtime(
                 &Pos::make_none(),
@@ -112,7 +103,7 @@ fn emit_generator_method<'arena>(
             ));
         }
     };
-    Ok(InstrSeq::gather(alloc, vec![instrs, instr::retc(alloc)]))
+    Ok(InstrSeq::gather(vec![instrs, instr::retc()]))
 }
 
 fn get_first_param_name(params: &[ast::FunParam]) -> Result<&str> {

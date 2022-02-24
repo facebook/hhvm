@@ -2354,6 +2354,7 @@ module Primary = struct
         class_pos: Pos_or_decl.t;
         member_name: string;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option;
+        quickfixes: Quickfix.t list;
       }
     | Type_arity_mismatch of {
         pos: Pos.t;
@@ -3039,13 +3040,10 @@ module Primary = struct
     in
     (Error_code.AmbiguousLambda, claim, reason, [])
 
-  let smember_not_found pos kind member_name class_name class_pos hint =
+  let smember_not_found
+      pos kind member_name class_name class_pos hint quickfixes =
     let (code, claim, reasons) =
       Common.smember_not_found pos kind member_name class_name class_pos hint
-    in
-    let quickfixes =
-      Option.value_map hint ~default:[] ~f:(fun (_, _, new_text) ->
-          Quickfix.[make ~title:("Change to ::" ^ new_text) ~new_text pos])
     in
     (code, claim, reasons, quickfixes)
 
@@ -4949,9 +4947,16 @@ module Primary = struct
     | Wrong_extend_kind
         { pos; kind; name; parent_pos; parent_kind; parent_name } ->
       wrong_extend_kind pos kind name parent_pos parent_kind parent_name
-    | Smember_not_found { pos; kind; member_name; class_name; class_pos; hint }
-      ->
-      smember_not_found pos kind member_name class_name class_pos hint
+    | Smember_not_found
+        { pos; kind; member_name; class_name; class_pos; hint; quickfixes } ->
+      smember_not_found
+        pos
+        kind
+        member_name
+        class_name
+        class_pos
+        hint
+        quickfixes
     | Cyclic_class_def { pos; stack } -> cyclic_class_def pos stack
     | Cyclic_record_def { pos; names } -> cyclic_record_def pos names
     | Trait_reuse_with_final_method { pos; trait_name; parent_cls_name; trace }
@@ -5514,7 +5519,9 @@ and Secondary : sig
         class_name: string;
         class_pos: Pos_or_decl.t;
         member_name: string;
+        closest_member_name: string option;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option;
+        quickfixes: Quickfix.t list;
       }
     | Type_arity_mismatch of {
         pos: Pos_or_decl.t;
@@ -5779,7 +5786,9 @@ end = struct
         class_name: string;
         class_pos: Pos_or_decl.t;
         member_name: string;
+        closest_member_name: string option;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option;
+        quickfixes: Quickfix.t list;
       }
     | Type_arity_mismatch of {
         pos: Pos_or_decl.t;
@@ -6508,11 +6517,29 @@ end = struct
       [(pos, "Rigid type variable " ^ name ^ " is escaping")],
       [] )
 
-  let smember_not_found pos kind member_name class_name class_pos hint =
+  let smember_not_found
+      pos
+      kind
+      member_name
+      closest_member_name
+      class_name
+      class_pos
+      hint
+      quickfixes =
     let (code, claim, reasons) =
       Common.smember_not_found pos kind member_name class_name class_pos hint
     in
-    (code, claim :: reasons, [])
+    let quickfixes =
+      match closest_member_name with
+      | None -> quickfixes
+      | Some type_name ->
+        Quickfix.make
+          ~title:("Change type to " ^ Markdown_lite.md_codify type_name)
+          ~new_text:type_name
+          (Pos_or_decl.unsafe_to_raw_pos pos)
+        :: quickfixes
+    in
+    (code, claim :: reasons, quickfixes)
 
   let bad_method_override pos member_name =
     let reasons =
@@ -6724,10 +6751,27 @@ end = struct
         (non_object_member pos ctxt ty_name member_name kind decl_pos)
     | Rigid_tvar_escape { pos; name } ->
       Eval_result.single (rigid_tvar_escape pos name)
-    | Smember_not_found { pos; kind; member_name; class_name; class_pos; hint }
-      ->
+    | Smember_not_found
+        {
+          pos;
+          kind;
+          member_name;
+          closest_member_name;
+          class_name;
+          class_pos;
+          hint;
+          quickfixes;
+        } ->
       Eval_result.single
-        (smember_not_found pos kind member_name class_name class_pos hint)
+        (smember_not_found
+           pos
+           kind
+           member_name
+           closest_member_name
+           class_name
+           class_pos
+           hint
+           quickfixes)
     | Bad_method_override { pos; member_name } ->
       Eval_result.single (bad_method_override pos member_name)
     | Bad_prop_override { pos; member_name } ->

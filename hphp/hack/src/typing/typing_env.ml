@@ -1657,14 +1657,14 @@ let add_tyvar_upper_bound_and_update_variances
     env
 
 (* Remove type variable `upper_var` from the upper bounds on `var`, if it exists
- *)
+*)
 let remove_tyvar_upper_bound env var upper_var =
   log_env_change "remove_tyvar_upper_bound" env
   @@ wrap_inference_env_call_env env (fun env ->
          Inf.remove_tyvar_upper_bound env var upper_var)
 
 (* Remove type variable `lower_var` from the lower bounds on `var`, if it exists
- *)
+*)
 let remove_tyvar_lower_bound env var lower_var =
   log_env_change "remove_tyvar_lower_bound var" env
   @@ wrap_inference_env_call_env env (fun env ->

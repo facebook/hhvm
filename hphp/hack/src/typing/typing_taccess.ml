@@ -32,26 +32,26 @@ type context = {
       (** A set of visited types used to avoid infinite loops during expansion. *)
   allow_abstract: bool;
       (** Whether or not an abstract type constant is allowed as the result. In the
-          future, this boolean should disappear and abstract type constants should
-          appear only in the class where they are defined. *)
+      future, this boolean should disappear and abstract type constants should
+      appear only in the class where they are defined. *)
   abstract_as_tyvar_at_pos: Pos.t option;
       (** If set, abstract type constants will be expanded as type variables. This
-          is a hack which should naturally go away when the semantics of abstract
-          type constants is cleaned up. *)
+      is a hack which should naturally go away when the semantics of abstract
+      type constants is cleaned up. *)
   base: locl_ty option;
       (** The origin of the extension. For example if TC is a generic parameter
-          subject to the constraint TC as C and we would like to expand TC::T we
-          will expand C::T with base set to `Some (Tgeneric "TC")` (and root set
-          to C). If it is None the base is exactly the current root. *)
+      subject to the constraint TC as C and we would like to expand TC::T we
+      will expand C::T with base set to `Some (Tgeneric "TC")` (and root set
+      to C). If it is None the base is exactly the current root. *)
 }
 
 (** The result of an expansion
-   - Missing err means that the type constant is not present, with error function
-     to be called if we need to report this
-   - Exact ty means that the expansion results precisely in 'ty'
-   - Abstract (n0, [n1, n2, n3], lower_bound, upper_bound) means that the result is a
-     generic with name n0::T such that:
-     n0::T as n1::T as n2::T as n3::T as upper_bound super lower_bound *)
+    - Missing err means that the type constant is not present, with error function
+      to be called if we need to report this
+    - Exact ty means that the expansion results precisely in 'ty'
+    - Abstract (n0, [n1, n2, n3], lower_bound, upper_bound) means that the result is a
+      generic with name n0::T such that:
+      n0::T as n1::T as n2::T as n3::T as upper_bound super lower_bound *)
 type result =
   | Missing of (unit -> unit)
   | Exact of locl_ty
@@ -102,6 +102,16 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
   let { id = (id_pos, id_name) as id; _ } = ctx in
   match Env.get_typeconst env class_ id_name with
   | None ->
+    let typeconst_names =
+      List.map
+        ~f:(fun tc ->
+          let (tc_name, _) = tc in
+          tc_name)
+        (Cls.typeconsts class_)
+    in
+    let closest_member_name =
+      Env.most_similar id_name typeconst_names (fun tc_name -> tc_name)
+    in
     ( env,
       Missing
         (fun () ->
@@ -115,7 +125,9 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
                      class_name;
                      class_pos = Cls.pos class_;
                      member_name = id_name;
+                     closest_member_name;
                      hint = None;
+                     quickfixes = [];
                    })) )
   | Some typeconst ->
     let name = tp_name class_name id in

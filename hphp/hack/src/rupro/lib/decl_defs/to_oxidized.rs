@@ -5,7 +5,7 @@
 
 use super::{folded, ty::*};
 use crate::reason::Reason;
-use oxidized_by_ref::{s_map::SMap, s_set::SSet};
+use oxidized_by_ref::{ast::Id, s_set::SSet};
 use pos::{Pos, ToOxidized};
 
 use oxidized_by_ref as obr;
@@ -235,6 +235,18 @@ impl<'a, R: Reason> ToOxidized<'a> for FunParam<R, DeclTy<R>> {
     }
 }
 
+impl<'a> ToOxidized<'a> for XhpEnumValue {
+    type Output = obr::ast_defs::XhpEnumValue<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use obr::ast_defs::XhpEnumValue as Obr;
+        match self {
+            Self::XEVInt(i) => Obr::XEVInt(*i),
+            Self::XEVString(s) => Obr::XEVString(s.to_oxidized(arena)),
+        }
+    }
+}
+
 impl<'a> ToOxidized<'a> for ClassConstFrom {
     type Output = obr::typing_defs::ClassConstFrom<'a>;
 
@@ -343,6 +355,20 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
         obr::decl_defs::DeclClassType {
             name: self.name.to_oxidized(arena),
             pos: self.pos.to_oxidized(arena),
+            kind: self.kind,
+            abstract_: self.is_abstract(),
+            final_: self.is_final,
+            const_: self.is_const,
+            internal: self.is_internal,
+            is_xhp: self.is_xhp,
+            has_xhp_keyword: self.has_xhp_keyword,
+            support_dynamic_type: self.support_dynamic_type,
+            module: self.module.as_ref().map(|m| {
+                let (pos, id) = m.to_oxidized(arena);
+                Id(pos, id)
+            }),
+            tparams: self.tparams.to_oxidized(arena),
+            where_constraints: self.where_constraints.to_oxidized(arena),
             substs: self.substs.to_oxidized(arena),
             ancestors: self.ancestors.to_oxidized(arena),
             props: self.props.to_oxidized(arena),
@@ -351,30 +377,19 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             smethods: self.static_methods.to_oxidized(arena),
             consts: self.consts.to_oxidized(arena),
             typeconsts: self.type_consts.to_oxidized(arena),
-            tparams: self.tparams.to_oxidized(arena),
+            xhp_enum_values: self.xhp_enum_values.to_oxidized(arena),
             // TODO(milliechen): implement the rest
             construct: (None, obr::typing_defs::ConsistentKind::Inconsistent),
             need_init: false,
-            abstract_: false,
-            final_: false,
-            const_: false,
-            internal: false,
             deferred_init_members: SSet::empty(),
-            is_xhp: false,
-            has_xhp_keyword: false,
-            module: None,
-            where_constraints: &[],
-            support_dynamic_type: false,
             req_ancestors: &[],
             req_ancestors_extends: SSet::empty(),
             extends: SSet::empty(),
             sealed_whitelist: None,
             xhp_attr_deps: SSet::empty(),
-            xhp_enum_values: SMap::empty(),
             enum_type: None,
             decl_errors: None,
             condition_types: SSet::empty(),
-            kind: oxidized::ast_defs::ClassishKind::Cenum,
         }
     }
 }

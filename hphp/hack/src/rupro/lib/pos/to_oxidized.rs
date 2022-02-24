@@ -5,6 +5,8 @@
 
 use arena_trait::TrivialDrop;
 use ocamlrep::ToOcamlRep;
+use oxidized_by_ref::s_map::SMap;
+use std::collections::BTreeMap;
 
 pub trait ToOxidized<'a> {
     type Output: TrivialDrop + Clone + ToOcamlRep + 'a;
@@ -33,5 +35,17 @@ impl<'a, V: ToOxidized<'a>> ToOxidized<'a> for Option<V> {
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         self.as_ref().map(|x| x.to_oxidized(arena))
+    }
+}
+
+impl<'a, K: std::convert::AsRef<str>, V: ToOxidized<'a>> ToOxidized<'a> for BTreeMap<K, V> {
+    type Output = SMap<'a, V::Output>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        SMap::from(
+            arena,
+            self.iter()
+                .map(|(k, v)| (&*arena.alloc_str(k.as_ref()), v.to_oxidized(arena))),
+        )
     }
 }

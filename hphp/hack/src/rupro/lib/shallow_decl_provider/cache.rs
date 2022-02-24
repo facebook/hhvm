@@ -3,18 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use super::TypeDecl;
 use crate::cache::Cache;
-use crate::decl_defs::shallow::{self, ConstDecl, Decl, FunDecl, ShallowClass, TypedefDecl};
-use crate::decl_defs::DeclTy;
+use crate::decl_defs::{shallow::Decl, ConstDecl, DeclTy, FunDecl, ShallowClass, TypedefDecl};
 use crate::reason::Reason;
 use pos::{ConstName, FunName, MethodName, PropName, TypeName};
 use std::sync::Arc;
-
-#[derive(Clone, Debug)]
-pub enum TypeDecl<R: Reason> {
-    Class(Arc<ShallowClass<R>>),
-    Typedef(Arc<TypedefDecl<R>>),
-}
 
 /// A cache for shallow declarations (i.e., the information we get from
 /// decl-parsing a file). The backing caches are permitted to evict their
@@ -108,7 +102,7 @@ impl<R: Reason> ShallowDeclCache<R> {
         }
     }
 
-    pub fn add_decls(&self, decls: Vec<shallow::Decl<R>>) {
+    pub fn add_decls(&self, decls: Vec<Decl<R>>) {
         for decl in decls {
             match decl {
                 Decl::Class(name, decl) => self.add_class(name, Arc::new(decl)),

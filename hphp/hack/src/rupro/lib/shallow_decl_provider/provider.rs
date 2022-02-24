@@ -3,12 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::ShallowDeclCache;
-use crate::decl_defs::{DeclTy, ShallowClass};
+use super::{ShallowDeclCache, TypeDecl};
+use crate::decl_defs::{ConstDecl, DeclTy, FunDecl};
 use crate::decl_parser::DeclParser;
 use crate::naming_provider::NamingProvider;
 use crate::reason::Reason;
-use pos::{MethodName, PropName, RelativePath, TypeName};
+use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
 use std::io;
 use std::sync::Arc;
 
@@ -43,13 +43,35 @@ impl<R: Reason> LazyShallowDeclProvider<R> {
 }
 
 impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
-    fn get_class(&self, name: TypeName) -> Option<Arc<ShallowClass<R>>> {
-        if let res @ Some(..) = self.cache.get_class(name) {
+    fn get_fun(&self, name: FunName) -> Option<Arc<FunDecl<R>>> {
+        if let res @ Some(..) = self.cache.get_fun(name) {
+            return res;
+        }
+        if let Some(path) = self.naming_provider.get_fun_path(name) {
+            self.parse_and_cache_decls_in(path).unwrap();
+            return self.cache.get_fun(name);
+        }
+        None
+    }
+
+    fn get_const(&self, name: ConstName) -> Option<Arc<ConstDecl<R>>> {
+        if let res @ Some(..) = self.cache.get_const(name) {
+            return res;
+        }
+        if let Some(path) = self.naming_provider.get_const_path(name) {
+            self.parse_and_cache_decls_in(path).unwrap();
+            return self.cache.get_const(name);
+        }
+        None
+    }
+
+    fn get_type(&self, name: TypeName) -> Option<TypeDecl<R>> {
+        if let res @ Some(..) = self.cache.get_type(name) {
             return res;
         }
         if let Some(path) = self.naming_provider.get_type_path(name) {
             self.parse_and_cache_decls_in(path).unwrap();
-            return self.cache.get_class(name);
+            return self.cache.get_type(name);
         }
         None
     }
@@ -142,8 +164,16 @@ impl<R: Reason> EagerShallowDeclProvider<R> {
 }
 
 impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
-    fn get_class(&self, name: TypeName) -> Option<Arc<ShallowClass<R>>> {
-        self.cache.get_class(name)
+    fn get_fun(&self, name: FunName) -> Option<Arc<FunDecl<R>>> {
+        self.cache.get_fun(name)
+    }
+
+    fn get_const(&self, name: ConstName) -> Option<Arc<ConstDecl<R>>> {
+        self.cache.get_const(name)
+    }
+
+    fn get_type(&self, name: TypeName) -> Option<TypeDecl<R>> {
+        self.cache.get_type(name)
     }
 
     fn get_property_type(

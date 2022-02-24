@@ -14,12 +14,12 @@ function entrypoint_get_defined_constants_basic(): void {
 
   $arr1 = get_defined_constants(false);
   $arr2 = get_defined_constants();
-  var_dump(array_diff($arr1, $arr2));
+  var_dump(array_udiff($arr1, $arr2, ($left, $right) ==> $left === $right));
 
   $n1 = count(get_defined_constants());
-  
+
   require_once(__DIR__.'/get_defined_constants_basic.inc');
-  
+
   $arr2 = get_defined_constants();
   $n2 = count($arr2);
 

@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use crate::{Prefix, RelativePath};
+use crate::{Prefix, RelativePath, ToOxidized};
 use intern::string::BytesId;
 use oxidized::file_pos_small::FilePosSmall;
 use oxidized::pos_span_tiny::PosSpanTiny;
@@ -16,7 +16,7 @@ pub trait Pos: Eq + Hash + Clone + std::fmt::Debug {
     /// it will call cons() to obtain interned values to construct the instance.
     fn mk(cons: impl FnOnce() -> (RelativePath, FilePosLarge, FilePosLarge)) -> Self;
 
-    fn to_oxidized_pos(&self) -> oxidized::pos::Pos;
+    fn to_oxidized<'a>(&self, arena: &'a bumpalo::Bump) -> &'a oxidized_by_ref::pos::Pos<'a>;
 }
 
 /// Represents a closed-ended range [start, end] in a file.
@@ -50,7 +50,10 @@ impl Pos for BPos {
         Self::new(file, start, end)
     }
 
-    fn to_oxidized_pos(&self) -> oxidized::pos::Pos {
+    fn to_oxidized<'a>(
+        &self,
+        _arena: &'a bumpalo::Bump,
+    ) -> &'a oxidized_by_ref::pos_or_decl::PosOrDecl<'a> {
         unimplemented!()
     }
 }
@@ -150,8 +153,8 @@ impl Pos for NPos {
         NPos
     }
 
-    fn to_oxidized_pos(&self) -> oxidized::pos::Pos {
-        oxidized::pos::Pos::make_none()
+    fn to_oxidized<'a>(&self, _arena: &'a bumpalo::Bump) -> &'a oxidized_by_ref::pos::Pos<'a> {
+        oxidized_by_ref::pos::Pos::none()
     }
 }
 
@@ -193,8 +196,13 @@ impl<S: Copy, P> Positioned<S, P> {
     }
 }
 
-impl<S: ToString, P: Pos> Positioned<S, P> {
-    pub fn to_oxidized(&self) -> oxidized::typing_reason::PosId {
-        (self.pos.to_oxidized_pos(), self.id.to_string())
+impl<'a, S: std::convert::AsRef<str>, P: Pos> ToOxidized<'a> for Positioned<S, P> {
+    type Output = oxidized_by_ref::typing_reason::PosId<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        (
+            self.pos().to_oxidized(arena),
+            arena.alloc_str(self.id.as_ref()),
+        )
     }
 }

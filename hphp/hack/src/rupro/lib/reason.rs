@@ -25,7 +25,10 @@ pub trait Reason:
 
     fn pos(&self) -> &Self::Pos;
 
-    fn to_oxidized(&self) -> oxidized::typing_reason::Reason;
+    fn to_oxidized<'a>(
+        &self,
+        arena: &'a bumpalo::Bump,
+    ) -> &'a oxidized_by_ref::typing_reason::Reason<'a>;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -164,7 +167,10 @@ impl Reason for BReason {
         }
     }
 
-    fn to_oxidized(&self) -> oxidized::typing_reason::Reason {
+    fn to_oxidized<'a>(
+        &self,
+        _arena: &'a bumpalo::Bump,
+    ) -> &'a oxidized_by_ref::typing_reason::Reason<'a> {
         unimplemented!()
     }
 }
@@ -196,8 +202,11 @@ impl Reason for NReason {
         &NPos
     }
 
-    fn to_oxidized(&self) -> oxidized::typing_reason::Reason {
-        oxidized::typing_reason::Reason::Rnone
+    fn to_oxidized<'a>(
+        &self,
+        _arena: &'a bumpalo::Bump,
+    ) -> &'a oxidized_by_ref::typing_reason::Reason<'a> {
+        &oxidized_by_ref::typing_reason::Reason::Rnone
     }
 }
 
@@ -205,6 +214,7 @@ impl Walkable<NReason> for NReason {}
 
 impl ToOcamlRep for NReason {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
-        self.to_oxidized().to_ocamlrep(alloc)
+        let arena = &bumpalo::Bump::new();
+        self.to_oxidized(arena).to_ocamlrep(alloc)
     }
 }

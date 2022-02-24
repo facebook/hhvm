@@ -5,6 +5,7 @@
 
 mod debug;
 mod printer;
+mod to_oxidized;
 
 pub mod folded;
 pub mod shallow;

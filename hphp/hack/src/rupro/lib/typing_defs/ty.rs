@@ -6,9 +6,9 @@
 use crate::reason::Reason;
 use hcons::Hc;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
-use pos::{Positioned, Symbol, TypeName};
+use pos::{Positioned, Symbol, ToOxidized, TypeName};
 
-pub type Prim = crate::decl_defs::Prim;
+pub use crate::decl_defs::ty::{Exact, Prim};
 
 // TODO: Share the representation from decl_defs
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -40,21 +40,6 @@ impl From<&oxidized::ast_defs::ParamKind> for ParamMode {
         match pk {
             oxidized::ast::ParamKind::Pinout(_) => Self::FPinout,
             oxidized::ast::ParamKind::Pnormal => Self::FPnormal,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Exact {
-    Exact,
-    Nonexact,
-}
-
-impl Exact {
-    pub fn to_oxidized(&self) -> oxidized::typing_defs::Exact {
-        match &self {
-            Self::Exact => oxidized::typing_defs::Exact::Exact,
-            Self::Nonexact => oxidized::typing_defs::Exact::Nonexact,
         }
     }
 }
@@ -109,27 +94,34 @@ impl<R: Reason> Ty<R> {
     pub fn node(&self) -> &Hc<Ty_<R, Ty<R>>> {
         &self.1
     }
+}
 
-    pub fn to_oxidized(&self) -> oxidized::typing_defs::Ty {
-        use oxidized::typing_defs::Ty_ as OTy_;
-        let r = self.reason().to_oxidized();
+impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
+    type Output = oxidized_by_ref::typing_defs::Ty<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use oxidized_by_ref::typing_defs::Ty_ as OTy_;
+        let r = self.reason().to_oxidized(arena);
         let ty = match &**self.node() {
-            Ty_::Tprim(x) => OTy_::Tprim(*x),
+            Ty_::Tprim(x) => OTy_::Tprim(arena.alloc(*x)),
             Ty_::Tfun(_) => todo!(),
             Ty_::Tany => todo!(),
             Ty_::Tgeneric(_, _) => todo!(),
-            Ty_::Tclass(pos_id, exact, tys) => OTy_::Tclass(
-                pos_id.to_oxidized(),
-                exact.to_oxidized(),
-                tys.iter().map(|ty| ty.to_oxidized()).collect(),
-            ),
+            Ty_::Tclass(pos_id, exact, tys) => OTy_::Tclass(&*arena.alloc((
+                pos_id.to_oxidized(arena),
+                *exact,
+                &*arena.alloc_slice_fill_iter(
+                    tys.iter().map(|ty| &*arena.alloc(ty.to_oxidized(arena))),
+                ),
+            ))),
         };
-        oxidized::typing_defs::Ty(r, Box::new(ty))
+        oxidized_by_ref::typing_defs::Ty(r, ty)
     }
 }
 
 impl<R: Reason> ToOcamlRep for Ty<R> {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
-        self.to_oxidized().to_ocamlrep(alloc)
+        let arena = &bumpalo::Bump::new();
+        self.to_oxidized(arena).to_ocamlrep(alloc)
     }
 }

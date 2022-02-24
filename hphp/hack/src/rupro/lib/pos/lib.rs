@@ -5,7 +5,9 @@
 mod pos;
 mod relative_path;
 mod symbol;
+mod to_oxidized;
 
 pub use pos::*;
 pub use relative_path::*;
 pub use symbol::*;
+pub use to_oxidized::ToOxidized;

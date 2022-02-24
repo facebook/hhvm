@@ -3,14 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::fold::DeclFolder;
+use super::{fold::DeclFolder, TypeDecl};
 use crate::alloc::Allocator;
 use crate::cache::Cache;
-use crate::decl_defs::{DeclTy, DeclTy_, FoldedClass, ShallowClass};
+use crate::decl_defs::{ConstDecl, DeclTy, DeclTy_, FoldedClass, FunDecl, ShallowClass};
 use crate::reason::Reason;
-use crate::shallow_decl_provider::ShallowDeclProvider;
+use crate::shallow_decl_provider::{self, ShallowDeclProvider};
 use crate::special_names::SpecialNames;
-use pos::{MethodName, Positioned, PropName, TypeName, TypeNameMap, TypeNameSet};
+use pos::{
+    ConstName, FunName, MethodName, Positioned, PropName, TypeName, TypeNameMap, TypeNameSet,
+};
 use std::sync::Arc;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_folded_class.ml
@@ -44,9 +46,23 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
 }
 
 impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
-    fn get_class(&self, name: TypeName) -> Option<Arc<FoldedClass<R>>> {
-        let mut stack = Default::default();
-        self.get_folded_class_impl(&mut stack, name)
+    fn get_fun(&self, name: FunName) -> Option<Arc<FunDecl<R>>> {
+        self.shallow_decl_provider.get_fun(name)
+    }
+
+    fn get_const(&self, name: ConstName) -> Option<Arc<ConstDecl<R>>> {
+        self.shallow_decl_provider.get_const(name)
+    }
+
+    fn get_type(&self, name: TypeName) -> Option<TypeDecl<R>> {
+        match self.shallow_decl_provider.get_type(name)? {
+            shallow_decl_provider::TypeDecl::Typedef(decl) => Some(TypeDecl::Typedef(decl)),
+            shallow_decl_provider::TypeDecl::Class(..) => {
+                let mut stack = Default::default();
+                self.get_folded_class_impl(&mut stack, name)
+                    .map(TypeDecl::Class)
+            }
+        }
     }
 
     fn get_shallow_property_type(

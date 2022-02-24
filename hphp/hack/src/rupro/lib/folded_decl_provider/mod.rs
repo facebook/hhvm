@@ -3,9 +3,9 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{DeclTy, FoldedClass};
+use crate::decl_defs::{ConstDecl, DeclTy, FoldedClass, FunDecl, TypedefDecl};
 use crate::reason::Reason;
-use pos::{MethodName, PropName, TypeName};
+use pos::{ConstName, FunName, MethodName, PropName, TypeName};
 use std::fmt::Debug;
 use std::sync::Arc;
 
@@ -15,6 +15,12 @@ mod provider;
 mod subst;
 
 pub use provider::LazyFoldedDeclProvider;
+
+#[derive(Clone, Debug)]
+pub enum TypeDecl<R: Reason> {
+    Class(Arc<FoldedClass<R>>),
+    Typedef(Arc<TypedefDecl<R>>),
+}
 
 /// A get-or-compute interface for folded declarations. A folded class
 /// declaration represents the near-complete type signature of that class; it
@@ -36,9 +42,32 @@ pub use provider::LazyFoldedDeclProvider;
 /// descendant `FoldedClass` to instantiate that method type for the type
 /// parameterization of the descendant class.
 pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
-    /// Fetch the folded declaration of the class with the given name. If the
-    /// given name is bound to a typedef rather than a class, return `None`.
-    fn get_class(&self, name: TypeName) -> Option<Arc<FoldedClass<R>>>;
+    /// Fetch the declaration of the toplevel function with the given name.
+    fn get_fun(&self, name: FunName) -> Option<Arc<FunDecl<R>>>;
+
+    /// Fetch the declaration of the global constant with the given name.
+    fn get_const(&self, name: ConstName) -> Option<Arc<ConstDecl<R>>>;
+
+    /// Fetch the declaration of the class or typedef with the given name.
+    fn get_type(&self, name: TypeName) -> Option<TypeDecl<R>>;
+
+    /// Fetch the declaration of the typedef with the given name. If the given
+    /// name is bound to a class rather than a typedef, return `None`.
+    fn get_typedef(&self, name: TypeName) -> Option<Arc<TypedefDecl<R>>> {
+        self.get_type(name).and_then(|decl| match decl {
+            TypeDecl::Typedef(td) => Some(td),
+            TypeDecl::Class(..) => None,
+        })
+    }
+
+    /// Fetch the declaration of the class with the given name. If the given
+    /// name is bound to a typedef rather than a class, return `None`.
+    fn get_class(&self, name: TypeName) -> Option<Arc<FoldedClass<R>>> {
+        self.get_type(name).and_then(|decl| match decl {
+            TypeDecl::Class(cls) => Some(cls),
+            TypeDecl::Typedef(..) => None,
+        })
+    }
 
     /// Fetch the type of the given property, as it was syntactically declared
     /// in the given class (i.e., returns `None` for inherited properties).

@@ -836,23 +836,17 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key,
     return propGenericImpl(env, mode, base, key, nullsafe, op);
   }
 
-  if (RO::EvalEnableReadonlyPropertyEnforcement) {
-    auto data = ClassData { propInfo->propClass };
-    if (propInfo->readOnly && op == ReadonlyOp::Mutable) {
-      if ( mode == MOpMode::Unset || mode == MOpMode::Define) {
-        gen(env, ThrowOrWarnMustBeMutableException, data, key);
-      } else {
-        gen(env, ThrowOrWarnMustBeEnclosedInReadonly, data, key);
-      }
-      if (RO::EvalEnableReadonlyPropertyEnforcement == 2) {
-        return cns(env, TBottom);
-      }
-    } else if (!propInfo->readOnly && op == ReadonlyOp::CheckROCOW) {
-      gen(env, ThrowOrWarnMustBeReadonlyException, data, key);
-      if (RO::EvalEnableReadonlyPropertyEnforcement == 2) {
-        return cns(env, TBottom);
-      }
+  auto data = ClassData { propInfo->propClass };
+  if (propInfo->readOnly && op == ReadonlyOp::Mutable) {
+    if ( mode == MOpMode::Unset || mode == MOpMode::Define) {
+      gen(env, ThrowMustBeMutableException, data, key);
+    } else {
+      gen(env, ThrowMustBeEnclosedInReadonly, data, key);
     }
+    return cns(env, TBottom);
+  } else if (!propInfo->readOnly && op == ReadonlyOp::CheckROCOW) {
+    gen(env, ThrowMustBeReadonlyException, data, key);
+    return cns(env, TBottom);
   }
 
   auto const propPtr = emitPropSpecialized(
@@ -1099,13 +1093,10 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
   if (propInfo) {
-    if (RO::EvalEnableReadonlyPropertyEnforcement && propInfo->readOnly &&
-      op == ReadonlyOp::Mutable) {
+    if (propInfo->readOnly && op == ReadonlyOp::Mutable) {
       auto data = ClassData { propInfo->propClass };
-      gen(env, ThrowOrWarnMustBeEnclosedInReadonly, data, key);
-      if (RO::EvalEnableReadonlyPropertyEnforcement == 2) {
-        return cns(env, TBottom);
-      }
+      gen(env, ThrowMustBeEnclosedInReadonly, data, key);
+      return cns(env, TBottom);
     }
     auto const propAddr =
       emitPropSpecialized(env, base, key, mode, *propInfo);
@@ -1182,13 +1173,10 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key, ReadonlyOp op) {
     getCurrentPropertyOffset(env, base, key->type(), true);
 
   if (propInfo && !propInfo->isConst) {
-    if (RO::EvalEnableReadonlyPropertyEnforcement && !propInfo->readOnly &&
-      op == ReadonlyOp::Readonly) {
+    if (!propInfo->readOnly && op == ReadonlyOp::Readonly) {
       auto data = ClassData { propInfo->propClass };
-      gen(env, ThrowOrWarnMustBeReadonlyException, data, key);
-      if (RO::EvalEnableReadonlyPropertyEnforcement == 2) {
-        return cns(env, TBottom);
-      }
+      gen(env, ThrowMustBeReadonlyException, data, key);
+      return cns(env, TBottom);
     }
 
     auto const propPtr = emitPropSpecialized(
@@ -1912,12 +1900,11 @@ void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode, ReadonlyOp op) {
     gen(env, ThrowUninitLoc, cns(env, baseName));
   }
 
-  if (RO::EvalEnableReadonlyPropertyEnforcement &&
-    (op == ReadonlyOp::CheckROCOW || op == ReadonlyOp::CheckMutROCOW)) {
+  if (op == ReadonlyOp::CheckROCOW || op == ReadonlyOp::CheckMutROCOW) {
     gen(env, StMROProp, cns(env, true));
     if (base->isA(TObj)) {
       auto const baseName = curFunc(env)->localVarName(loc.name);
-      gen(env, ThrowOrWarnLocalMustBeValueTypeException, cns(env, baseName));
+      gen(env, ThrowLocalMustBeValueTypeException, cns(env, baseName));
     }
   } else {
     gen(env, StMROProp, cns(env, false));
@@ -2311,7 +2298,6 @@ void annotArrayAccessProfile(IRGS& env,
 //////////////////////////////////////////////////////////////////////
 
 void checkElemDimForReadonly(IRGS& env) {
-  if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
   ifElse(
     env,
     [&] (Block* taken) {
@@ -2322,14 +2308,13 @@ void checkElemDimForReadonly(IRGS& env) {
     [&] {
       env.irb->exceptionStackBoundary();
       hint(env, Block::Hint::Unlikely);
-      gen(env, ThrowOrWarnCannotModifyReadonlyCollection);
+      gen(env, ThrowCannotModifyReadonlyCollection);
     }
   );
 }
 
 void checkPropDimForReadonly(IRGS& env, SSATmp* propPtr, const Class* cls,
                              SSATmp* propName) {
-  if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
   gen(env, StMROProp, cns(env, true));
 
   ifThen(
@@ -2341,7 +2326,7 @@ void checkPropDimForReadonly(IRGS& env, SSATmp* propPtr, const Class* cls,
       env.irb->exceptionStackBoundary();
       hint(env, Block::Hint::Unlikely);
       auto const data = ClassData { cls };
-      gen(env, ThrowOrWarnMustBeValueTypeException, data, propName);
+      gen(env, ThrowMustBeValueTypeException, data, propName);
     }
   );
 }

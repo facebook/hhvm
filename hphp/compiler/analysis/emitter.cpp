@@ -180,7 +180,6 @@ RepoGlobalData getGlobalData() {
     RuntimeOption::EvalTraitConstantInterfaceBehavior;
   gd.BuildMayNoticeOnMethCallerHelperIsObject =
     RO::EvalBuildMayNoticeOnMethCallerHelperIsObject;
-  gd.EnableReadonlyPropertyEnforcement = RuntimeOption::EvalEnableReadonlyPropertyEnforcement;
   gd.DiamondTraitMethods = RuntimeOption::EvalDiamondTraitMethods;
   gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
   gd.EnableImplicitContext = RO::EvalEnableImplicitContext;

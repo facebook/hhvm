@@ -956,7 +956,7 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadonlyOp op) {
     if (name) {
       auto const [ty, effects] = [&] () -> std::pair<Type, Effects> {
         if (update) {
-          if (checkReadonlyOpThrows(ReadonlyOp::Mutable, op) &&
+          if (ReadonlyOp::Mutable == op &&
             isDefinitelyThisPropAttr(env, name, AttrIsReadonly)) {
             return { TBottom, Effects::AlwaysThrows };
           }
@@ -1368,13 +1368,13 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
           push(env, TBottom);
           return Effects::AlwaysThrows;
         }
-        if (checkReadonlyOpThrows(ReadonlyOp::Mutable, op) &&
+        if (ReadonlyOp::Mutable == op &&
           isDefinitelyThisPropAttr(env, name, AttrIsReadonly)) {
           push(env, TBottom);
           return Effects::AlwaysThrows;
         }
         push(env, std::move(*t));
-        if (checkReadonlyOpMaybeThrows(ReadonlyOp::Mutable, op) &&
+        if (ReadonlyOp::Mutable == op &&
           isMaybeThisPropAttr(env, name, AttrIsReadonly)) {
           return Effects::Throws;
         }
@@ -1425,7 +1425,7 @@ Effects miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key, ReadonlyOp o
     return Effects::AlwaysThrows;
   };
 
-  if (checkReadonlyOpThrows(ReadonlyOp::Readonly, op) &&
+  if (ReadonlyOp::Readonly == op &&
     !isMaybeThisPropAttr(env, name, AttrIsReadonly)) {
     return alwaysThrows();
   }
@@ -2003,12 +2003,10 @@ void in(ISS& env, const bc::BaseSC& op) {
   }
 
   // Whether we might potentially throw because of AttrIsReadonly
-  if (checkReadonlyOpThrows(ReadonlyOp::Mutable, op.subop4) &&
-    lookup.readOnly == TriBool::Yes) {
+  if (ReadonlyOp::Mutable == op.subop4 && lookup.readOnly == TriBool::Yes) {
     return unreachable(env);
   }
-  if (checkReadonlyOpThrows(ReadonlyOp::CheckROCOW, op.subop4) &&
-    lookup.readOnly == TriBool::No) {
+  if (ReadonlyOp::CheckROCOW == op.subop4 && lookup.readOnly == TriBool::No) {
     return unreachable(env);
   }
 
@@ -2019,8 +2017,8 @@ void in(ISS& env, const bc::BaseSC& op) {
   auto const mightMutROCOWThrow = op.subop4 == ReadonlyOp::CheckMutROCOW &&
     (lookup.readOnly == TriBool::Maybe || lookup.readOnly == TriBool::Yes) && mightBeObj;
 
-  auto const mightReadOnlyThrow = checkReadonlyOpMaybeThrows() &&
-    (mightMutableThrow || mightROCOWThrow || mightMutROCOWThrow);
+  auto const mightReadOnlyThrow =
+    mightMutableThrow || mightROCOWThrow || mightMutROCOWThrow;
 
   // Loading the base from a static property can be considered
   // effect_free if there's no possibility of throwing. This requires
@@ -2064,9 +2062,7 @@ void in(ISS& env, const bc::BaseL& op) {
   auto ty = peekLocRaw(env, op.nloc1.id);
   auto throws = false;
 
-  if (checkReadonlyOpMaybeThrows(ReadonlyOp::CheckROCOW, op.subop3)) {
-    if (ty.couldBe(BObj)) throws = true;
-  }
+  if (ReadonlyOp::CheckROCOW == op.subop3 && ty.couldBe(BObj)) throws = true;
 
   // An Uninit local base can raise a notice.
   if (!ty.couldBe(BUninit)) {

@@ -332,7 +332,6 @@ RepoGlobalData get_global_data() {
     RuntimeOption::EvalTraitConstantInterfaceBehavior;
   gd.BuildMayNoticeOnMethCallerHelperIsObject =
     RuntimeOption::EvalBuildMayNoticeOnMethCallerHelperIsObject;
-  gd.EnableReadonlyPropertyEnforcement = RuntimeOption::EvalEnableReadonlyPropertyEnforcement;
   gd.DiamondTraitMethods = RuntimeOption::EvalDiamondTraitMethods;
   gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
   gd.EnableImplicitContext = RO::EvalEnableImplicitContext;
@@ -467,9 +466,6 @@ int main(int argc, char** argv) try {
   RepoFile::init(input_repo);
 
   auto const& gd = RepoFile::globalData();
-  // T103431933 Place here to skip warning while these two values are temporarily
-  // not always the same.
-  RO::EvalEnableReadonlyPropertyEnforcement = gd.EnableReadonlyPropertyEnforcement;
   gd.load(false);
   if (gd.InitialNamedEntityTableSize) {
     RO::EvalInitialNamedEntityTableSize  = gd.InitialNamedEntityTableSize;
@@ -491,7 +487,6 @@ int main(int argc, char** argv) try {
 
   RO::Load(ini, config);
   // T103431933 RO::Load() loads default runtime option which might not be correct.
-  RO::EvalEnableReadonlyPropertyEnforcement = gd.EnableReadonlyPropertyEnforcement;
   RO::RepoAuthoritative                     = true;
   RO::EvalJit                               = false;
   RO::EvalLowStaticArrays                   = false;

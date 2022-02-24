@@ -1786,12 +1786,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowParameterWrongType:
   case ArrayMarkLegacyShallow:
   case ArrayMarkLegacyRecursive:
-  case ThrowOrWarnCannotModifyReadonlyCollection:
-  case ThrowOrWarnLocalMustBeValueTypeException:
-  case ThrowOrWarnMustBeEnclosedInReadonly:
-  case ThrowOrWarnMustBeMutableException:
-  case ThrowOrWarnMustBeReadonlyException:
-  case ThrowOrWarnMustBeValueTypeException:
+  case ThrowCannotModifyReadonlyCollection:
+  case ThrowLocalMustBeValueTypeException:
+  case ThrowMustBeEnclosedInReadonly:
+  case ThrowMustBeMutableException:
+  case ThrowMustBeReadonlyException:
+  case ThrowMustBeValueTypeException:
   case ArrayUnmarkLegacyShallow:
   case ArrayUnmarkLegacyRecursive:
   case SetOpTV:

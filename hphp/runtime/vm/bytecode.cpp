@@ -2309,9 +2309,8 @@ OPTBLD_INLINE void iopCGetS(ReadonlyOp op) {
                 ss.cls->name()->data(),
                 ss.name->data());
   }
-  if (RO::EvalEnableReadonlyPropertyEnforcement &&
-    ss.readonly && op == ReadonlyOp::Mutable) {
-    throw_or_warn_must_be_enclosed_in_readonly(
+  if (ss.readonly && op == ReadonlyOp::Mutable) {
+    throw_must_be_enclosed_in_readonly(
       ss.cls->name()->data(), ss.name->data()
     );
   }
@@ -2397,7 +2396,7 @@ OPTBLD_INLINE void baseLImpl(named_local_var loc, MOpMode mode, ReadonlyOp op) {
     assertx(loc.name < vmfp()->func()->numNamedLocals());
     assertx(vmfp()->func()->localVarName(loc.name));
     auto const name = vmfp()->func()->localVarName(loc.name);
-    throw_or_warn_local_must_be_value_type(name->data());
+    throw_local_must_be_value_type(name->data());
   }
   mstate.base = local;
 }
@@ -2468,9 +2467,8 @@ void elemDispatch(MOpMode mode, TypedValue key) {
   };
 
   auto const checkDimForReadonly = [&](DataType dt) {
-    if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
     if (mstate.roProp && dt == KindOfObject) {
-      throw_or_warn_cannot_modify_readonly_collection();
+      throw_cannot_modify_readonly_collection();
     }
   };
 
@@ -3200,9 +3198,8 @@ OPTBLD_INLINE void iopSetS(ReadonlyOp op) {
 
   SCOPE_EXIT { decRefStr(name); };
 
-  if (RO::EvalEnableReadonlyPropertyEnforcement && !readonly &&
-    op == ReadonlyOp::Readonly) {
-    throw_or_warn_must_be_readonly(cls->name()->data(), name->data());
+  if (!readonly && op == ReadonlyOp::Readonly) {
+    throw_must_be_readonly(cls->name()->data(), name->data());
   }
 
   if (!(visible && accessible)) {

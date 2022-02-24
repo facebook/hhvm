@@ -55,12 +55,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
     RO::EvalNoticeOnMethCallerHelperIsObject = false;
   }
 
-  if (EnableReadonlyPropertyEnforcement != 1 &&
-    RO::EvalEnableReadonlyPropertyEnforcement != EnableReadonlyPropertyEnforcement) {
-    Logger::Warning("Readonly Property Enforcement levels incompatible\n");
-    RO::EvalEnableReadonlyPropertyEnforcement = EnableReadonlyPropertyEnforcement;
-  }
-
   if (loadConstantFuncs) {
     RO::ConstantFunctions.clear();
     for (auto const& elm : ConstantFunctions) {
@@ -109,7 +103,6 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(ClassIsStringNotices);
   SHOW(StrictArrayFillKeys);
   SHOW(TraitConstantInterfaceBehavior);
-  SHOW(EnableReadonlyPropertyEnforcement);
   SHOW(BuildMayNoticeOnMethCallerHelperIsObject);
   SHOW(DiamondTraitMethods);
   SHOW(EnableImplicitContext);

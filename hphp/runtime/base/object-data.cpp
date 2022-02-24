@@ -1103,7 +1103,6 @@ Object ObjectData::FromArray(ArrayData* properties) {
   return retval;
 }
 
-NEVER_INLINE
 void ObjectData::throwMutateConstProp(Slot prop) const {
   throw_cannot_modify_const_prop(
     getClassName().data(),
@@ -1111,33 +1110,29 @@ void ObjectData::throwMutateConstProp(Slot prop) const {
   );
 }
 
-NEVER_INLINE
-void ObjectData::throwOrWarnMustBeMutable(Slot prop) const {
-  throw_or_warn_must_be_mutable(
+void ObjectData::throwMustBeMutable(Slot prop) const {
+  throw_must_be_mutable(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );
 }
 
-NEVER_INLINE
-void ObjectData::throwOrWarnMustBeEnclosedInReadonly(Slot prop) const {
-  throw_or_warn_must_be_enclosed_in_readonly(
+void ObjectData::throwMustBeEnclosedInReadonly(Slot prop) const {
+  throw_must_be_enclosed_in_readonly(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );
 }
 
-NEVER_INLINE
-void ObjectData::throwOrWarnMustBeReadonly(Slot prop) const {
-  throw_or_warn_must_be_readonly(
+void ObjectData::throwMustBeReadonly(Slot prop) const {
+  throw_must_be_readonly(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );
 }
 
-NEVER_INLINE
-void ObjectData::throwOrWarnMustBeValueType(Slot prop) const {
-  throw_or_warn_must_be_value_type(
+void ObjectData::throwMustBeValueType(Slot prop) const {
+  throw_must_be_value_type(
     getClassName().data(),
     m_cls->declProperties()[prop].name->data()
   );
@@ -1145,7 +1140,6 @@ void ObjectData::throwOrWarnMustBeValueType(Slot prop) const {
 
 void ObjectData::checkReadonly(const PropLookup& lookup, ReadonlyOp op,
                                bool writeMode) const {
-  if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
   if ((op == ReadonlyOp::CheckMutROCOW && lookup.readonly) ||
     op == ReadonlyOp::CheckROCOW) {
     vmMInstrState().roProp = true;
@@ -1153,17 +1147,17 @@ void ObjectData::checkReadonly(const PropLookup& lookup, ReadonlyOp op,
   if (lookup.readonly) {
     if (op == ReadonlyOp::CheckMutROCOW || op == ReadonlyOp::CheckROCOW) {
       if (type(lookup.val) == KindOfObject) {
-        throwOrWarnMustBeValueType(lookup.slot);
+        throwMustBeValueType(lookup.slot);
       }
     } else if (op == ReadonlyOp::Mutable) {
       if (writeMode) {
-        throwOrWarnMustBeMutable(lookup.slot);
+        throwMustBeMutable(lookup.slot);
       } else {
-        throwOrWarnMustBeEnclosedInReadonly(lookup.slot);
+        throwMustBeEnclosedInReadonly(lookup.slot);
       }
     }
   } else if (op == ReadonlyOp::Readonly || op == ReadonlyOp::CheckROCOW) {
-    throwOrWarnMustBeReadonly(lookup.slot);
+    throwMustBeReadonly(lookup.slot);
   }
 }
 

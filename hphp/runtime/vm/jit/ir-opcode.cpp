@@ -419,12 +419,12 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowLateInitPropError:
   case ThrowMissingArg:
   case ThrowMissingThis:
-  case ThrowOrWarnCannotModifyReadonlyCollection:
-  case ThrowOrWarnLocalMustBeValueTypeException:
-  case ThrowOrWarnMustBeEnclosedInReadonly:
-  case ThrowOrWarnMustBeMutableException:
-  case ThrowOrWarnMustBeReadonlyException:
-  case ThrowOrWarnMustBeValueTypeException:
+  case ThrowCannotModifyReadonlyCollection:
+  case ThrowLocalMustBeValueTypeException:
+  case ThrowMustBeEnclosedInReadonly:
+  case ThrowMustBeMutableException:
+  case ThrowMustBeReadonlyException:
+  case ThrowMustBeValueTypeException:
   case ThrowOutOfBounds:
   case ThrowParameterWrongType:
   case UnsetElem:

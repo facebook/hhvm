@@ -876,61 +876,45 @@ void throw_cannot_modify_static_const_prop(const char* className,
   SystemLib::throwInvalidOperationExceptionObject(msg);
 }
 
-void throw_or_warn_local_must_be_value_type(const char* locName)
+void throw_local_must_be_value_type(const char* locName)
 {
-  if (RO::EvalEnableReadonlyPropertyEnforcement == 0) return;
   auto const msg = folly::sformat("Local {} must be a value type.", locName);
-  if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
-    raise_warning(msg);
-  } else if (RO::EvalEnableReadonlyPropertyEnforcement > 1) {
-    SystemLib::throwReadonlyViolationExceptionObject(msg);
-  }
+  SystemLib::throwReadonlyViolationExceptionObject(msg);
 }
 
 namespace {
-void throw_or_warn_readonly_violation(const char* className, const char* propName,
+[[noreturn]]
+void throw_readonly_violation(const char* className, const char* propName,
                               const char* msg) {
-  if (RO::EvalEnableReadonlyPropertyEnforcement == 0) return;
-  if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
-    raise_warning(msg, propName, className);
-  } else {
-    assertx(RO::EvalEnableReadonlyPropertyEnforcement == 2);
-    std::string fmtMsg;
-    string_printf(fmtMsg, msg, propName, className);
-    SystemLib::throwReadonlyViolationExceptionObject(fmtMsg);
-  }
+  std::string fmtMsg;
+  string_printf(fmtMsg, msg, propName, className);
+  SystemLib::throwReadonlyViolationExceptionObject(fmtMsg);
 }
 }
 
-void throw_or_warn_must_be_readonly(const char* className, const char* propName) {
-  throw_or_warn_readonly_violation(className, propName, Strings::MUST_BE_READONLY);
+void throw_must_be_readonly(const char* className, const char* propName) {
+  throw_readonly_violation(className, propName, Strings::MUST_BE_READONLY);
 }
 
-void throw_or_warn_must_be_mutable(const char* className, const char* propName) {
-  throw_or_warn_readonly_violation(className, propName, Strings::MUST_BE_MUTABLE);
+void throw_must_be_mutable(const char* className, const char* propName) {
+  throw_readonly_violation(className, propName, Strings::MUST_BE_MUTABLE);
 }
 
-void throw_or_warn_must_be_enclosed_in_readonly(const char* className, const char* propName) {
-  throw_or_warn_readonly_violation(className, propName, Strings::MUST_BE_ENCLOSED_IN_READONLY);
+void throw_must_be_enclosed_in_readonly(const char* className, const char* propName) {
+  throw_readonly_violation(className, propName, Strings::MUST_BE_ENCLOSED_IN_READONLY);
 }
 
-void throw_or_warn_must_be_value_type(const char* className, const char* propName) {
-  throw_or_warn_readonly_violation(className, propName, Strings::MUST_BE_VALUE_TYPE);
+void throw_must_be_value_type(const char* className, const char* propName) {
+  throw_readonly_violation(className, propName, Strings::MUST_BE_VALUE_TYPE);
 }
 
-void throw_or_warn_cannot_modify_readonly_collection() {
-  if (RO::EvalEnableReadonlyPropertyEnforcement == 0) return;
-  if (RO::EvalEnableReadonlyPropertyEnforcement == 1) {
-    raise_warning(Strings::READONLY_COLLECTIONS_CANNOT_BE_MODIFIED);
-  } else {
-    SystemLib::throwReadonlyViolationExceptionObject(
-      Strings::READONLY_COLLECTIONS_CANNOT_BE_MODIFIED
-    );
-  }
+void throw_cannot_modify_readonly_collection() {
+  SystemLib::throwReadonlyViolationExceptionObject(
+    Strings::READONLY_COLLECTIONS_CANNOT_BE_MODIFIED
+  );
 }
 
 bool readonlyLocalShouldThrow(TypedValue tv, ReadonlyOp op) {
-  if (!RO::EvalEnableReadonlyPropertyEnforcement) return false;
   if (op == ReadonlyOp::CheckROCOW || op == ReadonlyOp::CheckMutROCOW) {
     vmMInstrState().roProp = true;
     if (type(tv) == KindOfObject) return true;
@@ -944,24 +928,23 @@ void checkReadonly(const TypedValue* tv,
                    bool readonly,
                    ReadonlyOp op,
                    bool writeMode) {
-  if (!RO::EvalEnableReadonlyPropertyEnforcement) return;
   if ((op == ReadonlyOp::CheckMutROCOW && readonly) || op == ReadonlyOp::CheckROCOW) {
     vmMInstrState().roProp = true;
   }
   if (readonly) {
     if (op == ReadonlyOp::CheckMutROCOW || op == ReadonlyOp::CheckROCOW) {
       if (type(tv) == KindOfObject) {
-        throw_or_warn_must_be_value_type(cls->name()->data(), name->data());
+        throw_must_be_value_type(cls->name()->data(), name->data());
       }
     } else if (op == ReadonlyOp::Mutable) {
       if (writeMode) {
-        throw_or_warn_must_be_mutable(cls->name()->data(), name->data());
+        throw_must_be_mutable(cls->name()->data(), name->data());
       } else {
-        throw_or_warn_must_be_enclosed_in_readonly(cls->name()->data(), name->data());
+        throw_must_be_enclosed_in_readonly(cls->name()->data(), name->data());
       }
     }
   } else if (op == ReadonlyOp::Readonly || op == ReadonlyOp::CheckROCOW) {
-    throw_or_warn_must_be_readonly(cls->name()->data(), name->data());
+    throw_must_be_readonly(cls->name()->data(), name->data());
   }
 }
 

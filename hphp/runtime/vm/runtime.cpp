@@ -191,24 +191,24 @@ void throwArrayKeyException(const ArrayData* ad, const StringData* key) {
   throwOOBArrayKeyException(key, ad);
 }
 
-void throwOrWarnMustBeEnclosedInReadonlyException(const Class* cls, const StringData* propName) {
-  throw_or_warn_must_be_enclosed_in_readonly(cls->name()->data(), propName->data());
+void throwMustBeEnclosedInReadonlyException(const Class* cls, const StringData* propName) {
+  throw_must_be_enclosed_in_readonly(cls->name()->data(), propName->data());
 }
 
-void throwOrWarnMustBeReadonlyException(const Class* cls, const StringData* propName) {
-  throw_or_warn_must_be_readonly(cls->name()->data(), propName->data());
+void throwMustBeReadonlyException(const Class* cls, const StringData* propName) {
+  throw_must_be_readonly(cls->name()->data(), propName->data());
 }
 
-void throwOrWarnMustBeMutableException(const Class* cls, const StringData* propName) {
-  throw_or_warn_must_be_mutable(cls->name()->data(), propName->data());
+void throwMustBeMutableException(const Class* cls, const StringData* propName) {
+  throw_must_be_mutable(cls->name()->data(), propName->data());
 }
 
 void throwOrWarnLocalMustBeValueTypeException(const StringData* locName) {
-  throw_or_warn_local_must_be_value_type(locName->data());
+  throw_local_must_be_value_type(locName->data());
 }
 
-void throwOrWarnMustBeValueTypeException(const Class* cls, const StringData* propName) {
-  throw_or_warn_must_be_value_type(cls->name()->data(), propName->data());
+void throwMustBeValueTypeException(const Class* cls, const StringData* propName) {
+  throw_must_be_value_type(cls->name()->data(), propName->data());
 }
 
 std::string formatParamInOutMismatch(const char* fname, uint32_t index,

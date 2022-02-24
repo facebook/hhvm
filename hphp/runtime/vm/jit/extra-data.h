@@ -2908,14 +2908,10 @@ X(RecordFuncCall,               FuncData);
 X(LdClsPropAddrOrNull,          ReadonlyData);
 X(LdClsPropAddrOrRaise,         ReadonlyData);
 X(LdMBase,                      AliasClassData);
-X(ThrowOrWarnMustBeEnclosedInReadonly,
-                                ClassData);
-X(ThrowOrWarnMustBeMutableException,
-                                ClassData);
-X(ThrowOrWarnMustBeReadonlyException,
-                                ClassData);
-X(ThrowOrWarnMustBeValueTypeException,
-                                ClassData);
+X(ThrowMustBeEnclosedInReadonly,ClassData);
+X(ThrowMustBeMutableException,  ClassData);
+X(ThrowMustBeReadonlyException, ClassData);
+X(ThrowMustBeValueTypeException,ClassData);
 
 #undef X
 

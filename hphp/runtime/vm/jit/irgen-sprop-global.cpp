@@ -88,11 +88,6 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
   auto const readonly = prop.attrs & AttrIsReadonly;
 
   auto const checkReadonly = [&](SSATmp* addr) {
-    if (!RO::EvalEnableReadonlyPropertyEnforcement) return addr;
-    auto const finish = [&]() {
-      return (RO::EvalEnableReadonlyPropertyEnforcement == 1) ?
-              addr : cns(env, TBottom);
-    };
     auto const copyOnWriteCheck = [&]() {
       gen(env, StMROProp, cns(env, true));
       ifElse(
@@ -101,8 +96,8 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
             gen(env, CheckTypeMem, TObj, taken, addr);
           },
           [&] {
-            gen(env, ThrowOrWarnMustBeValueTypeException, data, cns(env, name));
-            return finish();
+            gen(env, ThrowMustBeValueTypeException, data, cns(env, name));
+            return cns(env, TBottom);
           }
         );
       return addr;
@@ -110,18 +105,17 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
 
     if (readonly && readonlyOp == ReadonlyOp::Mutable) {
       if (writeMode) {
-        gen(env, ThrowOrWarnMustBeMutableException, data, cns(env, name));
-        return finish();
+        gen(env, ThrowMustBeMutableException, data, cns(env, name));
       } else {
-        gen(env, ThrowOrWarnMustBeEnclosedInReadonly, data, cns(env, name));
-        return finish();
+        gen(env, ThrowMustBeEnclosedInReadonly, data, cns(env, name));
       }
+      return cns(env, TBottom);
     } else if (readonly && readonlyOp == ReadonlyOp::CheckMutROCOW) {
       return copyOnWriteCheck();
     } else if (readonlyOp == ReadonlyOp::CheckROCOW) {
       if (!readonly) {
-        gen(env, ThrowOrWarnMustBeReadonlyException, data, cns(env, name));
-        return finish();
+        gen(env, ThrowMustBeReadonlyException, data, cns(env, name));
+        return cns(env, TBottom);
       }
       return copyOnWriteCheck();
     }

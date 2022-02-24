@@ -72,14 +72,7 @@ inline bool IRInstruction::mayRaiseErrorWithSources() const {
 }
 
 inline bool IRInstruction::isTerminal() const {
-  return opcodeHasFlags(op(), Terminal) ||
-    /* These ops are only conditionally terminal */
-    (is(ThrowOrWarnCannotModifyReadonlyCollection,
-        ThrowOrWarnMustBeEnclosedInReadonly,
-        ThrowOrWarnMustBeMutableException,
-        ThrowOrWarnMustBeValueTypeException,
-        ThrowOrWarnLocalMustBeValueTypeException) &&
-     RO::EvalEnableReadonlyPropertyEnforcement == 2);
+  return opcodeHasFlags(op(), Terminal);
 }
 
 inline bool IRInstruction::hasEdges() const {

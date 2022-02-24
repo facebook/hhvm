@@ -3261,45 +3261,39 @@ fields of that struct for holding intermediate values.
   Throws a RuntimeException if calling a function with an argument that has the
   wrong type
 
-| ThrowOrWarnMustBeMutableException<cls>, ND, S(Str), NF
+| ThrowMustBeMutableException<cls>, ND, S(Str), T
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the property was required to be mutable. cls is the class the property
-  was declared on. S0 is the property name. Raises a warning if
-  EnableReadonlyPropertyEnforcement=1.
+  was declared on. S0 is the property name.
 
-| ThrowOrWarnMustBeReadonlyException<cls>, ND, S(Str), NF
+| ThrowMustBeReadonlyException<cls>, ND, S(Str), T
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the property was required to be readonly. cls is the class the property
-  was declared on. S0 is the property name. Raises a warning if
-  EnableReadonlyPropertyEnforcement=1.
+  was declared on. S0 is the property name.
 
-| ThrowOrWarnLocalMustBeValueTypeException, ND, S(Str), NF
+| ThrowLocalMustBeValueTypeException, ND, S(Str), T
 
   Throws an InvalidOperationException indicating a readonly semantics violation
-  where the local was required to be a value type. S0 is the local name. Raises
-  a warning if EnableReadonlyPropertyEnforcement=1.
+  where the local was required to be a value type. S0 is the local name.
 
-| ThrowOrWarnMustBeValueTypeException<cls>, ND, S(Str), NF
+| ThrowMustBeValueTypeException<cls>, ND, S(Str), T
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the property was required to be a value type. S0 is the property
-  name. cls is the class the property was declared on. Raises a warning if
-  EnableReadonlyPropertyEnforcement=1.
+  name. cls is the class the property was declared on.
 
-| ThrowOrWarnMustBeEnclosedInReadonly<cls>, ND, S(Str), NF
+| ThrowMustBeEnclosedInReadonly<cls>, ND, S(Str), T
 
   Throws an InvalidOperationException indicating a readonly semantics violation
   where the property was required to be enclosed in a readonly expression. cls
-  is the class the property was declared on. S0 is the property name. Raises a
-  warning if EnableReadonlyPropertyEnforcement=1.
+  is the class the property was declared on. S0 is the property name.
 
-| ThrowOrWarnCannotModifyReadonlyCollection, ND, NA, NF
+| ThrowCannotModifyReadonlyCollection, ND, NA, T
 
   Throws an InvalidOperationException indicating a readonly semantics violation
-  where a collection is modified. Raises a warning if
-  EnableReadonlyPropertyEnforcement=1.
+  where a collection is modified.
 
 | ProfileType, ND, S(Cell), NF
 

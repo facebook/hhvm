@@ -158,8 +158,6 @@ struct RepoGlobalData {
 
   bool BuildMayNoticeOnMethCallerHelperIsObject = false;
 
-  uint32_t EnableReadonlyPropertyEnforcement = 0;
-
   std::unordered_map<std::string, int> EvalCoeffectEnforcementLevels = {};
 
   /* Enable a method defined in a trait to be imported multiple times
@@ -211,7 +209,6 @@ struct RepoGlobalData {
       (TraitConstantInterfaceBehavior)
       (ConstantFunctions)
       (BuildMayNoticeOnMethCallerHelperIsObject)
-      (EnableReadonlyPropertyEnforcement)
       (DiamondTraitMethods)
       (EvalCoeffectEnforcementLevels)
       (EnableImplicitContext)

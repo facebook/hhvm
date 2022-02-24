@@ -657,12 +657,12 @@ bool canDCE(const IRInstruction& inst) {
   case ThrowParameterWrongType:
   case ThrowInOutMismatch:
   case ThrowReadonlyMismatch:
-  case ThrowOrWarnCannotModifyReadonlyCollection:
-  case ThrowOrWarnLocalMustBeValueTypeException:
-  case ThrowOrWarnMustBeEnclosedInReadonly:
-  case ThrowOrWarnMustBeMutableException:
-  case ThrowOrWarnMustBeReadonlyException:
-  case ThrowOrWarnMustBeValueTypeException:
+  case ThrowCannotModifyReadonlyCollection:
+  case ThrowLocalMustBeValueTypeException:
+  case ThrowMustBeEnclosedInReadonly:
+  case ThrowMustBeMutableException:
+  case ThrowMustBeReadonlyException:
+  case ThrowMustBeValueTypeException:
   case StMBase:
   case StMROProp:
   case CheckMROProp:

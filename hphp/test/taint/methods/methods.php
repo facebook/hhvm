@@ -101,6 +101,22 @@ function source_to_class_sink() {
   $child2->class_sink2($data);
 }
 
+trait MyTrait {
+  function trait_sink(int $first): void {}
+}
+
+class MyTraitImplementer {
+  use MyTrait;
+}
+
+function source_to_sink_in_trait() {
+  // Show that a sink must be specified using the name of the implementing
+  // class, not the trait
+  $data = __source();
+  $object = new MyTraitImplementer();
+  $object->trait_sink($data);
+}
+
 <<__EntryPoint>> function main(): void {
   source_bypassing_identity_method_into_sink();
   source_through_identity_method_into_sink();
@@ -109,4 +125,5 @@ function source_to_class_sink() {
   source_stopped_in_broken_virtual_identity_method(new MyBrokenSubClass());
   source_through_static_identity_method_into_sink();
   source_to_class_sink();
+  source_to_sink_in_trait();
 }

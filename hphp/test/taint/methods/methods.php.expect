@@ -6,3 +6,4 @@
 {"hops":["__source","source_to_class_sink","MyClass::class_sink2"]}
 {"hops":["__source","source_to_class_sink","MySubClass::class_sink2"]}
 {"hops":["__source","source_to_class_sink","MyClass::class_sink2"]}
+{"hops":["__source","source_to_sink_in_trait","MyTraitImplementer::trait_sink"]}

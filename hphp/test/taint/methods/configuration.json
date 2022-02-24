@@ -6,6 +6,8 @@
     {"name": "__sink", "index": 0 },
     {"name": "MyClass::class_sink", "index": 0},
     {"name": "MyClass::class_sink2", "index": 0},
-    {"name": "MySubClass::class_sink2", "index": 0}
+    {"name": "MySubClass::class_sink2", "index": 0},
+    {"name": "MyTrait::trait_sink", "index": 0},
+    {"name": "MyTraitImplementer::trait_sink", "index": 0}
   ]
 }

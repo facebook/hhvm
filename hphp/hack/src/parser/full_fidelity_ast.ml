@@ -213,33 +213,6 @@ let from_file (env : env) : aast_result =
   let source_text = SourceText.from_file env.file in
   from_text env source_text
 
-type aast_to_nast_env = { mutable last_pos: Pos.t }
-
-let aast_to_nast aast : Nast.program =
-  let i _ x = x in
-  let endo =
-    object (self)
-      inherit [_] Aast.map
-
-      method check_pos env pos =
-        if Pos.equal pos Pos.none then
-          Pos.none
-        else if Pos.equal pos env.last_pos then
-          env.last_pos
-        else (
-          env.last_pos <- pos;
-          pos
-        )
-
-      method! on_pos = self#check_pos
-
-      method on_'ex = i
-
-      method on_'en = i
-    end
-  in
-  endo#on_program { last_pos = Pos.none } aast
-
 (*****************************************************************************(
  * Backward compatibility matter (should be short-lived)
 )*****************************************************************************)
@@ -248,7 +221,7 @@ let legacy (x : aast_result) : Parser_return.t =
   {
     Parser_return.file_mode = Some x.fi_mode;
     Parser_return.comments = x.comments.sc_comments;
-    Parser_return.ast = aast_to_nast x.ast;
+    Parser_return.ast = x.ast;
     Parser_return.content = x.content;
   }
 

@@ -44,12 +44,18 @@ pub enum IfcFunDecl {
 
 // The OCaml type `tshape_field_name` includes positions, but ignores those
 // positions in its `ord` implementation. We can't do the same, though: Rust
-// hash tables require impls of Hash and Ord to agree, and our Hash impl must
+// hash tables require impls of Hash and Eq to agree, and our Hash impl must
 // take positions into account (else hash-consing will produce bad results). We
-// could write impls which disagree, and try to avoid using this type as a hash
-// table key, but it'd be better not to lay a trap like that. Instead, just omit
-// positions from this type. If we need the positions which OCaml stores in the
-// key, we can insert them as part of the map's value instead.
+// could write a custom Ord impl which disagrees with the Eq impl, but it would
+// violate the [PartialOrd requirement][] that `a == b` if and only if
+// `partial_cmp(a, b) == Some(Equal)`, and the [Ord requirement][] for a strict
+// total order.
+//
+// [PartialOrd requirement]: https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html
+// [Ord requirement]: https://doc.rust-lang.org/std/cmp/trait.Ord.html#corollaries
+//
+// Instead, we omit the positions from these keys, and store the field name's
+// position as part of the map's value (in a `ShapeFieldNamePos`).
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum TshapeFieldName {
     TSFlitInt(Symbol),
@@ -58,6 +64,15 @@ pub enum TshapeFieldName {
 }
 
 walkable!(TshapeFieldName);
+
+/// The position of a shape field name; e.g., the position of `'a'` in
+/// `shape('a' => int)`, or the positions of `Foo` and `X` in
+/// `shape(Foo::X => int)`.
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub enum ShapeFieldNamePos<P> {
+    Simple(P),
+    ClassConst(P, P),
+}
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum DependentType {
@@ -133,6 +148,7 @@ impl<R: Reason> DeclTy<R> {
 /// case, the field 'a' would have sf_optional set to true.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ShapeFieldType<R: Reason> {
+    pub field_name_pos: ShapeFieldNamePos<R::Pos>,
     pub optional: bool,
     pub ty: DeclTy<R>,
 }

@@ -41,15 +41,25 @@ impl<R: Reason> Allocator<R> {
     fn tshape_field_name_from_decl(
         &self,
         x: obr::typing_defs::TshapeFieldName<'_>,
-    ) -> ty::TshapeFieldName {
+    ) -> (ty::ShapeFieldNamePos<R::Pos>, ty::TshapeFieldName) {
         use obr::typing_defs_core::TshapeFieldName as Obr;
+        use ty::ShapeFieldNamePos as SfnPos;
         use ty::TshapeFieldName;
         match x {
-            Obr::TSFlitInt(&pos_id) => TshapeFieldName::TSFlitInt(self.symbol(pos_id.1)),
-            Obr::TSFlitStr(&pos_bytes) => TshapeFieldName::TSFlitStr(self.bytes(pos_bytes.1)),
-            Obr::TSFclassConst(&(pos_id1, pos_id2)) => TshapeFieldName::TSFclassConst(
-                TypeName(self.symbol(pos_id1.1)),
-                self.symbol(pos_id2.1),
+            Obr::TSFlitInt(&pos_id) => (
+                SfnPos::Simple(self.pos_from_decl(pos_id.0)),
+                TshapeFieldName::TSFlitInt(self.symbol(pos_id.1)),
+            ),
+            Obr::TSFlitStr(&pos_bytes) => (
+                SfnPos::Simple(self.pos_from_decl(pos_bytes.0)),
+                TshapeFieldName::TSFlitStr(self.bytes(pos_bytes.1)),
+            ),
+            Obr::TSFclassConst(&(pos_id1, pos_id2)) => (
+                SfnPos::ClassConst(self.pos_from_decl(pos_id1.0), self.pos_from_decl(pos_id2.0)),
+                TshapeFieldName::TSFclassConst(
+                    TypeName(self.symbol(pos_id1.1)),
+                    self.symbol(pos_id2.1),
+                ),
             ),
         }
     }
@@ -90,11 +100,13 @@ impl<R: Reason> Allocator<R> {
 
     fn decl_shape_field_type(
         &self,
-        x: &obr::typing_defs::ShapeFieldType<'_>,
+        field_name_pos: ty::ShapeFieldNamePos<R::Pos>,
+        sft: &obr::typing_defs::ShapeFieldType<'_>,
     ) -> ty::ShapeFieldType<R> {
         ty::ShapeFieldType {
-            optional: x.optional,
-            ty: self.ty_from_decl(x.ty),
+            field_name_pos,
+            optional: sft.optional,
+            ty: self.ty_from_decl(sft.ty),
         }
     }
 
@@ -128,10 +140,8 @@ impl<R: Reason> Allocator<R> {
                 fields
                     .iter()
                     .map(|(name, ty)| {
-                        (
-                            self.tshape_field_name_from_decl(name.0),
-                            self.decl_shape_field_type(ty),
-                        )
+                        let (field_name_pos, name) = self.tshape_field_name_from_decl(name.0);
+                        (name, self.decl_shape_field_type(field_name_pos, ty))
                     })
                     .collect(),
             ))),

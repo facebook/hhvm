@@ -246,6 +246,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
                         (
                             *f,
                             ShapeFieldType {
+                                field_name_pos: sft.field_name_pos.clone(),
                                 ty: self.instantiate(&sft.ty),
                                 optional: sft.optional,
                             },

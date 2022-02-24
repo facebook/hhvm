@@ -36,26 +36,6 @@ impl<'a> ToOxidized<'a> for IfcFunDecl {
     }
 }
 
-impl<'a> ToOxidized<'a> for TshapeFieldName {
-    type Output = obr::typing_defs::TshapeFieldName<'a>;
-
-    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        use obr::typing_defs::TshapeFieldName as Obr;
-        match &self {
-            TshapeFieldName::TSFlitInt(x) => Obr::TSFlitInt(arena.alloc(
-                obr::typing_defs::PosString(obr::pos::Pos::none(), x.to_oxidized(arena)),
-            )),
-            TshapeFieldName::TSFlitStr(x) => Obr::TSFlitStr(arena.alloc(
-                obr::typing_defs::PosByteString(obr::pos::Pos::none(), x.as_bytes().into()),
-            )),
-            TshapeFieldName::TSFclassConst(cls, name) => Obr::TSFclassConst(arena.alloc((
-                (obr::pos::Pos::none(), cls.to_oxidized(arena)),
-                obr::typing_defs::PosString(obr::pos::Pos::none(), name.to_oxidized(arena)),
-            ))),
-        }
-    }
-}
-
 impl<'a, P: Pos> ToOxidized<'a> for UserAttribute<P> {
     type Output = &'a obr::typing_defs::UserAttribute<'a>;
 
@@ -120,6 +100,38 @@ impl<'a, R: Reason> ToOxidized<'a> for ShapeFieldType<R> {
     }
 }
 
+fn oxidize_shape_field_name<'a, P: Pos>(
+    arena: &'a bumpalo::Bump,
+    name: TshapeFieldName,
+    field_name_pos: &ShapeFieldNamePos<P>,
+) -> obr::typing_defs::TshapeFieldName<'a> {
+    use obr::typing_defs::TshapeFieldName as Obr;
+    use ShapeFieldNamePos as SfnPos;
+    let simple_pos = || match field_name_pos {
+        SfnPos::Simple(p) => p.to_oxidized(arena),
+        SfnPos::ClassConst(..) => panic!("expected ShapeFieldNamePos::Simple"),
+    };
+    match name {
+        TshapeFieldName::TSFlitInt(x) => Obr::TSFlitInt(arena.alloc(obr::typing_defs::PosString(
+            simple_pos(),
+            x.to_oxidized(arena),
+        ))),
+        TshapeFieldName::TSFlitStr(x) => Obr::TSFlitStr(arena.alloc(
+            obr::typing_defs::PosByteString(simple_pos(), x.as_bytes().into()),
+        )),
+        TshapeFieldName::TSFclassConst(cls, name) => {
+            let (pos1, pos2) = match field_name_pos {
+                SfnPos::ClassConst(p1, p2) => (p1.to_oxidized(arena), p2.to_oxidized(arena)),
+                SfnPos::Simple(..) => panic!("expected ShapeFieldNamePos::ClassConst"),
+            };
+            Obr::TSFclassConst(arena.alloc((
+                (pos1, cls.to_oxidized(arena)),
+                obr::typing_defs::PosString(pos2, name.to_oxidized(arena)),
+            )))
+        }
+    }
+}
+
 impl<'a, R: Reason> ToOxidized<'a> for DeclTy_<R> {
     type Output = obr::typing_defs::Ty_<'a>;
 
@@ -142,8 +154,8 @@ impl<'a, R: Reason> ToOxidized<'a> for DeclTy_<R> {
             DeclTy_::DTshape(shape) => {
                 let mut shape_fields = arena_collections::AssocListMut::new_in(arena);
                 for (k, v) in shape.1.iter() {
-                    shape_fields
-                        .insert_or_replace(TShapeField(k.to_oxidized(arena)), v.to_oxidized(arena));
+                    let k = oxidize_shape_field_name(arena, *k, &v.field_name_pos);
+                    shape_fields.insert_or_replace(TShapeField(k), v.to_oxidized(arena));
                 }
                 Ty_::Tshape(arena.alloc((shape.0, TShapeMap::from(shape_fields))))
             }

@@ -44,7 +44,6 @@ pub fn parse_decls<'a>(
         stack_limit,
         NoSourceTextAllocator,
         false, // retain_or_omit_user_attributes_for_facts
-        false, // simplify_naming_for_facts
         false, // elaborate_xhp_namespaces_for_facts
     );
     ParsedFile {
@@ -77,9 +76,8 @@ pub fn parse_decls_without_reference_text<'a, 'text>(
         arena,
         stack_limit,
         ArenaSourceTextAllocator(arena),
-        true,  // retain_or_omit_user_attributes_for_facts
-        false, // simplify_naming_for_facts
-        true,  // elaborate_xhp_namespaces_for_facts
+        true, // retain_or_omit_user_attributes_for_facts
+        true, // elaborate_xhp_namespaces_for_facts
     );
     ParsedFile {
         mode,
@@ -113,7 +111,6 @@ fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>
     stack_limit: Option<&StackLimit>,
     source_text_allocator: S,
     retain_or_omit_user_attributes_for_facts: bool,
-    simplify_naming_for_facts: bool,
     elaborate_xhp_namespaces_for_facts: bool,
 ) -> (
     Node<'a>,
@@ -131,7 +128,6 @@ fn parse_script_with_text_allocator<'a, 'text, S: SourceTextAllocator<'text, 'a>
         arena,
         source_text_allocator,
         retain_or_omit_user_attributes_for_facts,
-        simplify_naming_for_facts,
         elaborate_xhp_namespaces_for_facts,
     );
     let mut parser = Parser::new(source, env, sc);

@@ -78,7 +78,6 @@ pub struct DirectDeclSmartConstructors<'a, 'text, S: SourceTextAllocator<'text, 
     classish_name_builder: ClassishNameBuilder<'a>,
     type_parameters: Rc<Vec<'a, SSet<'a>>>,
     retain_or_omit_user_attributes_for_facts: bool,
-    simplify_naming_for_facts: bool,
     previous_token_kind: TokenKind,
     source_text_allocator: S,
     module: Option<Id<'a>>,
@@ -92,7 +91,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
         arena: &'a Bump,
         source_text_allocator: S,
         retain_or_omit_user_attributes_for_facts: bool,
-        simplify_naming_for_facts: bool,
         elaborate_xhp_namespaces_for_facts: bool,
     ) -> Self {
         let source_text = IndexedSourceText::new(src.clone());
@@ -114,7 +112,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             namespace_builder: Rc::new(NamespaceBuilder::new_in(
                 opts.auto_namespace_map,
                 opts.disable_xhp_element_mangling,
-                simplify_naming_for_facts,
                 elaborate_xhp_namespaces_for_facts,
                 arena,
             )),
@@ -127,7 +124,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>> DirectDeclSmartConstructors<'
             previous_token_kind: TokenKind::EndOfFile,
             source_text_allocator,
             retain_or_omit_user_attributes_for_facts,
-            simplify_naming_for_facts,
             module: None,
         }
     }
@@ -412,7 +408,6 @@ struct NamespaceBuilder<'a> {
     stack: Vec<'a, NamespaceEnv<'a>>,
     #[allow(dead_code)]
     auto_ns_map: &'a [(&'a str, &'a str)],
-    simplify_naming_for_facts: bool,
     elaborate_xhp_namespaces_for_facts: bool,
 }
 
@@ -420,7 +415,6 @@ impl<'a> NamespaceBuilder<'a> {
     fn new_in(
         auto_ns_map: &'a [(&'a str, &'a str)],
         disable_xhp_element_mangling: bool,
-        simplify_naming_for_facts: bool,
         elaborate_xhp_namespaces_for_facts: bool,
         arena: &'a Bump,
     ) -> Self {
@@ -450,7 +444,6 @@ impl<'a> NamespaceBuilder<'a> {
                 disable_xhp_element_mangling,
             }],
             auto_ns_map,
-            simplify_naming_for_facts,
             elaborate_xhp_namespaces_for_facts,
         }
     }
@@ -547,7 +540,6 @@ impl<'a> NamespaceBuilder<'a> {
             env,
             kind,
             name,
-            self.simplify_naming_for_facts,
             self.elaborate_xhp_namespaces_for_facts,
         )
     }
@@ -3003,11 +2995,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                                 .iter()
                                 .filter_map(|&node| self.node_to_ty(node)),
                         );
-                        let ty_ = if self.simplify_naming_for_facts {
-                            Ty_::Tgeneric(self.alloc((class_type, type_arguments)))
-                        } else {
-                            Ty_::Tgeneric(self.alloc((name, type_arguments)))
-                        };
+                        let ty_ = Ty_::Tgeneric(self.alloc((name, type_arguments)));
                         self.hint_ty(pos, ty_)
                     }
                     _ => {
@@ -4926,14 +4914,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             None => return Node::Ignored(SK::ConstructorCall),
         };
         let name = if unqualified_name.1.starts_with("__") {
-            if self.simplify_naming_for_facts
-                && !naming_special_names::user_attributes::AS_SET.contains(unqualified_name.1)
-            {
-                // only elaborate non-builtins
-                self.elaborate_id(unqualified_name)
-            } else {
-                unqualified_name
-            }
+            unqualified_name
         } else {
             match self.expect_name(name) {
                 Some(name) => self.elaborate_id(name),

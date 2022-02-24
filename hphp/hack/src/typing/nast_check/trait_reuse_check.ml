@@ -396,39 +396,42 @@ let check_reuse_method_without_override tgenv (c : Nast.class_) : unit =
             && (not (get_ce_abstract m))
             && not (get_ce_final m)
           then
+            (* If we've seen a path to this before, we're reusing that trait. *)
             if
               SMap.mem m.ce_origin !seen_method_origins
-              && (not (SSet.mem m.ce_origin !local_method_origins))
-              && not (SSet.mem m_name local_method_names)
-            then
-              let (cls_pos, cls_name) = c.c_name in
-              let trace1 =
-                class_to_trait_via_trait
-                  tgenv
-                  cls_name
-                  used_trait_name
-                  m.ce_origin
-              in
-              let trace2 =
-                class_to_trait_via_trait
-                  tgenv
-                  cls_name
-                  (SMap.find m.ce_origin !seen_method_origins)
-                  m.ce_origin
-              in
-              Errors.add_typing_error
-                Typing_error.(
-                  primary
-                  @@ Primary.Method_import_via_diamond
-                       {
-                         pos = cls_pos;
-                         class_name = cls_name;
-                         method_pos = force m.ce_pos;
-                         method_name = m_name;
-                         trace1;
-                         trace2;
-                       })
-            else begin
+              && not (SSet.mem m.ce_origin !local_method_origins)
+            then (
+              if not (SSet.mem m_name local_method_names) then
+                (* The reused trait has a method that we haven't overridden in this trait/class. *)
+                let (cls_pos, cls_name) = c.c_name in
+                let trace1 =
+                  class_to_trait_via_trait
+                    tgenv
+                    cls_name
+                    used_trait_name
+                    m.ce_origin
+                in
+                let trace2 =
+                  class_to_trait_via_trait
+                    tgenv
+                    cls_name
+                    (SMap.find m.ce_origin !seen_method_origins)
+                    m.ce_origin
+                in
+                Errors.add_typing_error
+                  Typing_error.(
+                    primary
+                    @@ Primary.Method_import_via_diamond
+                         {
+                           pos = cls_pos;
+                           class_name = cls_name;
+                           method_pos = force m.ce_pos;
+                           method_name = m_name;
+                           trace1;
+                           trace2;
+                         })
+            ) else begin
+              (* We haven't seen a path to this trait before, record it. *)
               seen_method_origins :=
                 SMap.add m.ce_origin used_trait_name !seen_method_origins;
               local_method_origins := SSet.add m.ce_origin !local_method_origins

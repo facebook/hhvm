@@ -1,0 +1,9 @@
+readonly fun
+readonly fun
+mutable fun
+
+Fatal error: Uncaught exception 'ReadonlyViolationException' with message '__invoke() modifies the instance, but the caller has a readonly instance' in %s:12
+Stack trace:
+#0 %s(27): takes_readonly()
+#1 (): test()
+#2 {main}

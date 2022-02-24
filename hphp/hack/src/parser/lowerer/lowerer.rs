@@ -991,19 +991,33 @@ fn p_afield<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Afield, Error> {
         _ => Ok(ast::Afield::AFvalue(p_expr(node, env)?)),
     }
 }
+
 // We lower readonly lambda declarations as making the inner lambda have readonly_this.
-fn process_readonly_expr(mut e: ast::Expr) -> ast::Expr_ {
+fn process_readonly_expr<'a>(env: &mut Env<'a>, mut e: ast::Expr) -> ast::Expr_ {
     use aast::Expr_::*;
     match &mut e {
-        ast::Expr(_, _, Efun(ref mut e)) => {
-            e.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
+        ast::Expr(_, _, Efun(ref mut efun)) if efun.0.readonly_this.is_none() => {
+            efun.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
+            // The first readonly expression simply makes the closure readonly
+            if env.is_typechecker() {
+                // remove once HHVM is released
+                E_::mk_readonly_expr(e)
+            } else {
+                e.2
+            }
         }
-        ast::Expr(_, _, Lfun(ref mut l)) => {
+        ast::Expr(_, _, Lfun(ref mut l)) if l.0.readonly_this.is_none() => {
             l.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
+            // The first readonly expression simply makes the closure readonly
+            if env.is_typechecker() {
+                // remove once HHVM is released
+                E_::mk_readonly_expr(e)
+            } else {
+                e.2
+            }
         }
-        _ => {}
+        _ => E_::mk_readonly_expr(e),
     }
-    E_::mk_readonly_expr(e)
 }
 
 fn check_intrinsic_type_arg_varity<'a>(
@@ -1799,7 +1813,7 @@ fn p_expr_impl__<'a>(
                     Some(TK::Plus) => mk_unop(Uplus, expr),
                     Some(TK::Minus) => mk_unop(Uminus, expr),
                     Some(TK::Await) => lift_await(pos, expr, env, location),
-                    Some(TK::Readonly) => Ok(process_readonly_expr(expr)),
+                    Some(TK::Readonly) => Ok(process_readonly_expr(env, expr)),
                     Some(TK::Clone) => Ok(E_::mk_clone(expr)),
                     Some(TK::Print) => Ok(E_::mk_call(
                         E::new(

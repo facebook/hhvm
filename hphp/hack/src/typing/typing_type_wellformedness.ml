@@ -197,7 +197,10 @@ let fun_ tenv f =
       f.f_where_constraints
   in
   let env = { env with tenv } in
-  type_hint env f.f_ret @ tparams env f.f_tparams @ fun_params env f.f_params
+  type_hint env f.f_ret
+  @ tparams env f.f_tparams
+  @ fun_params env f.f_params
+  @ where_constrs env f.f_where_constraints
 
 let enum_opt env =
   let f { e_base; e_constraint; _ } =

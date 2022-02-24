@@ -1,0 +1,10 @@
+File "well_formed_where_constraints_on_functions.php", line 5, characters 40-46:
+Some type arguments violate their constraints (Typing[4323])
+  File "well_formed_where_constraints_on_functions.php", line 3, characters 9-9:
+  `T` is a constrained type parameter
+  File "well_formed_where_constraints_on_functions.php", line 3, characters 14-21:
+  This type constraint is violated
+  File "well_formed_where_constraints_on_functions.php", line 3, characters 14-21:
+  Expected `arraykey`
+  File "well_formed_where_constraints_on_functions.php", line 5, characters 42-45:
+  But got `null`

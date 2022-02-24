@@ -1,0 +1,20 @@
+File "module_weird_type_locations.php--also-A.php", line 5, characters 42-44:
+You cannot use this type in a public declaration. (Typing[4446])
+  File "module_weird_type_locations.php--A.php", line 6, characters 6-8:
+  It is declared as `internal` here
+File "module_weird_type_locations.php--not-A.php", line 5, characters 39-41:
+Cannot access an internal element from module `A` in module `B` (Typing[4444])
+  File "module_weird_type_locations.php--A.php", line 6, characters 6-8:
+  This is from module `A`
+File "module_weird_type_locations.php--not-A.php", line 6, characters 9-11:
+Cannot access an internal element from module `A` in module `B` (Typing[4444])
+  File "module_weird_type_locations.php--A.php", line 6, characters 6-8:
+  This is from module `A`
+File "module_weird_type_locations.php--not-A.php", line 10, characters 20-22:
+Cannot access an internal element from module `A` in module `B` (Typing[4444])
+  File "module_weird_type_locations.php--A.php", line 6, characters 6-8:
+  This is from module `A`
+File "module_weird_type_locations.php--not-A.php", line 12, characters 39-44:
+Cannot access an internal element from module `A` in module `B` (Typing[4444])
+  File "module_weird_type_locations.php--A.php", line 9, characters 7-12:
+  This is from module `A`

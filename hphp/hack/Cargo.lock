@@ -1709,6 +1709,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hashlink"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7249a3129cbc1ffccd74857f81464a323a152173cdb134e0fd81bc803b29facf"
+dependencies = [
+ "hashbrown",
+]
+
+[[package]]
 name = "heapless"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2232,9 +2241,9 @@ checksum = "a60553f9a9e039a333b4e9b20573b9e9b9c0bb3a11e201ccc48ef4283456d673"
 
 [[package]]
 name = "libsqlite3-sys"
-version = "0.18.0"
+version = "0.23.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e704a02bcaecd4a08b93a23f6be59d0bd79cd161e0963e9499165a0a35df7bd"
+checksum = "d2cafc7c74096c336d9d27145f7ebd4f4b6f95ba16aa5a282387267e6925cb58"
 dependencies = [
  "pkg-config",
  "vcpkg",
@@ -2260,12 +2269,6 @@ checksum = "8f1becd27d473556dc610b8afa1636ef90747b574a84553bc11e82371d5ef2d1"
 dependencies = [
  "cc",
 ]
-
-[[package]]
-name = "linked-hash-map"
-version = "0.5.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7fb9b38af92608140b86b693604b9ffcc5824240a484d1ecd4795bacb2fe88f3"
 
 [[package]]
 name = "lint_rust"
@@ -2333,15 +2336,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6c748cfe47cb8da225c37595b3108bea1c198c84aaae8ea0ba76d01dda9fc803"
 dependencies = [
  "hashbrown",
-]
-
-[[package]]
-name = "lru-cache"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "31e24f1ad8321ca0e8a1e0ac13f23cb668e6f5466c2c57319f6a5cf1cc8e3b1c"
-dependencies = [
- "linked-hash-map",
 ]
 
 [[package]]
@@ -3081,18 +3075,17 @@ dependencies = [
 
 [[package]]
 name = "rusqlite"
-version = "0.23.1"
+version = "0.26.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45d0fd62e1df63d254714e6cb40d0a0e82e7a1623e7a27f679d851af092ae58b"
+checksum = "4ba4d3462c8b2e4d7f4fcfcf2b296dc6b65404fbbc7b63daa37fd485c149daf7"
 dependencies = [
  "bitflags",
  "fallible-iterator",
  "fallible-streaming-iterator",
+ "hashlink",
  "libsqlite3-sys",
- "lru-cache",
  "memchr",
  "smallvec",
- "time",
 ]
 
 [[package]]
@@ -3520,16 +3513,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "time"
-version = "0.1.43"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca8a50ef2360fbd1eeb0ecd46795a87a19024eb4b53c5dc916ca1fd95fe62438"
-dependencies = [
- "libc",
- "winapi",
 ]
 
 [[package]]

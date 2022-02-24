@@ -136,6 +136,12 @@ void iopUnhandled(folly::StringPiece name) {
   FTRACE(1, "taint: (WARNING) unhandled opcode\n");
 }
 
+// Marker for opcodes that do not affect taint. For example
+// they may pop one element and push one back that keeps the same taint.
+void iopDoesNotAffectTaint(folly::StringPiece name) {
+  iopPreamble(name);
+}
+
 const Func* callee() {
   auto sfp = vmfp()->sfp();
   if (sfp != nullptr) {
@@ -168,7 +174,10 @@ const Func* callee() {
  * ~some basic opcodes are implemented, enough to trace values through some
  * function calls
  *
- * All the opcodes in section 1 (Basic instructions) are implemented.
+ * The following sections are completely implemented:
+ *
+ * 1) Basic instructions
+ * 2) Literal and constant instructions
  */
 
 void iopNop() {
@@ -247,7 +256,8 @@ void iopFalse() {
 }
 
 void iopFuncCred() {
-  iopUnhandled("FuncCred");
+  iopPreamble("FuncCred");
+  State::instance->stack.push(nullptr);
 }
 
 void iopInt(int64_t /* imm */) {
@@ -263,45 +273,23 @@ void iopString(const StringData* /* s */) {
 }
 
 void iopDict(const ArrayData* /* a */) {
-  iopUnhandled("Dict");
+  iopConstant("Dict");
 }
 
 void iopKeyset(const ArrayData* /* a */) {
-  iopUnhandled("Keyset");
+  iopConstant("Keyset");
 }
 
 void iopVec(const ArrayData* /* a */) {
-  iopUnhandled("Vec");
+  iopConstant("Vec");
 }
 
 void iopNewDictArray(uint32_t /* capacity */) {
-  iopUnhandled("NewDictArray");
+  iopConstant("NewDictArray");
 }
 
-void iopNewStructDict(imm_array<int32_t> ids) {
-  iopPreamble("NewStructDict");
-
-  auto& stack = State::instance->stack;
-  Value structValue = nullptr;
-
-  // We taint the whole struct if one value is tainted. This could eventually
-  // be a join operation.
-  for (uint32_t i = 0; i < ids.size; i++) {
-    auto value = stack.top();
-    if (value) {
-      structValue = value;
-    }
-    stack.pop();
-  }
-
-  FTRACE(2, "taint: new struct is `{}`\n", structValue);
-
-  stack.push(structValue);
-}
-
-void iopNewVec(uint32_t n) {
-  iopPreamble("NewVec");
-
+namespace {
+void newCollectionSizeN(uint32_t n) {
   auto& stack = State::instance->stack;
 
   // Check all arguments to see if they're tainted.
@@ -318,53 +306,92 @@ void iopNewVec(uint32_t n) {
   stack.pop(n);
   stack.push(value);
 }
+}
 
-void iopNewKeysetArray(uint32_t /* n */) {
-  iopUnhandled("NewKeysetArray");
+void iopNewStructDict(imm_array<int32_t> ids) {
+  iopPreamble("NewStructDict");
+
+  // We taint the whole struct if one value is tainted. This could eventually
+  // be a join operation.
+  newCollectionSizeN(ids.size);
+
+  FTRACE(2, "taint: new struct is `{}`\n", State::instance->stack.top());
+}
+
+void iopNewVec(uint32_t n) {
+  iopPreamble("NewVec");
+  newCollectionSizeN(n);
+}
+
+void iopNewKeysetArray(uint32_t n) {
+  iopPreamble("NewKeysetArray");
+  newCollectionSizeN(n);
 }
 
 void iopAddElemC() {
-  iopUnhandled("AddElemC");
+  iopPreamble("AddElemC");
+
+  // Update the taint on the collection to be that of the new value
+  // if it's tainted. This should eventually be a join.
+  auto& stack = State::instance->stack;
+  auto value = stack.top();
+  stack.pop(2);
+  if (value == nullptr) {
+    value = stack.top();
+  }
+  stack.replaceTop(value);
 }
 
 void iopAddNewElemC() {
-  iopUnhandled("AddNewElemC");
+  iopPreamble("AddNewElemC");
+  // Update the taint on the collection to be that of the new value
+  // if it's tainted. This should eventually be a join.
+  auto& stack = State::instance->stack;
+  auto value = stack.top();
+  stack.pop();
+  if (value == nullptr) {
+    value = stack.top();
+  }
+  stack.replaceTop(value);
 }
 
 void iopNewCol(CollectionType /* cType */) {
-  iopUnhandled("NewCol");
+  iopPreamble("NewCol");
+  State::instance->stack.push(nullptr);
 }
 
 void iopNewPair() {
-  iopUnhandled("NewPair");
+  iopPreamble("NewPair");
+  newCollectionSizeN(2);
 }
 
 void iopColFromArray(CollectionType /* cType */) {
-  iopUnhandled("ColFromArray");
+  iopDoesNotAffectTaint("ColFromArray");
 }
 
 void iopCnsE(const StringData* /* s */) {
-  iopUnhandled("CnsE");
+  iopConstant("CnsE");
 }
 
 void iopClsCns(const StringData* /* clsCnsName */) {
-  iopUnhandled("ClsCns");
+  iopDoesNotAffectTaint("ClsCns");
 }
 
 void iopClsCnsD(const StringData* /* clsCnsName */, Id /* classId */) {
-  iopUnhandled("ClsCnsD");
+  iopConstant("ClsCnsD");
 }
 
 void iopClsCnsL(tv_lval /* local */) {
-  iopUnhandled("ClsCnsL");
+  iopDoesNotAffectTaint("ClsCnsL");
 }
 
 void iopClassName() {
-  iopUnhandled("ClassName");
+  iopPreamble("ClassName");
+  State::instance->stack.push(nullptr);
 }
 
 void iopLazyClassFromClass() {
-  iopUnhandled("LazyClassFromClass");
+  iopDoesNotAffectTaint("LazyClassFromClass");
 }
 
 void iopFile() {
@@ -372,11 +399,11 @@ void iopFile() {
 }
 
 void iopDir() {
-  iopUnhandled("Dir");
+  iopConstant("Dir");
 }
 
 void iopMethod() {
-  iopUnhandled("Method");
+  iopConstant("Method");
 }
 
 void iopConcat() {
@@ -817,7 +844,7 @@ void iopResolveClass(Id /* id */) {
 }
 
 void iopLazyClass(Id /* id */) {
-  iopUnhandled("LazyClass");
+  iopConstant("LazyClass");
 }
 
 void iopNewObj() {

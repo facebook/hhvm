@@ -61,6 +61,14 @@ async function source_to_xhp_sink(): Awaitable<:div> {
   return <div>{$data}</div>;
 }
 
+function any_argument_is_sink(int $first, int $second): void {}
+
+function source_to_any_argument_sink(): void {
+  $data = __source_returned_from_function();
+  any_argument_is_sink(1, $data);
+  any_argument_is_sink($data, 1);
+}
+
 <<__EntryPoint>> async function main(): Awaitable<void> {
   source_returned_from_function();
   source_returned_from_method();
@@ -70,4 +78,5 @@ async function source_to_xhp_sink(): Awaitable<:div> {
   await source_to_regex_sink();
   parameter_as_source_to_sink(1);
   await source_to_xhp_sink();
+  source_to_any_argument_sink();
 }

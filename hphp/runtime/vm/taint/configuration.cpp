@@ -268,7 +268,11 @@ void Configuration::reset(const std::string& contents) {
 
     std::vector<std::pair<std::string, Sink>> sinks;
     for (const auto sink : parsed["sinks"]) {
-      Sink value{.index = sink["index"].asInt()};
+      Sink value{.index = std::nullopt};
+      auto indexElement = sink.getDefault("index");
+      if (indexElement.isInt()) {
+        value.index = indexElement.asInt();
+      }
       auto name = sink["name"].asString();
       sinks.push_back(std::make_pair(sink["name"].asString(), value));
     }

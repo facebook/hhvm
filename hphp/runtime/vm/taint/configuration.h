@@ -42,7 +42,7 @@ struct Source {
 };
 
 struct Sink {
-  int64_t index;
+  Optional<int> index; // If set indicates a parameter source.
 };
 
 /**

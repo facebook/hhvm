@@ -888,9 +888,24 @@ void iopFCall(const Func* func, const FCallArgs& fca) {
   FTRACE(3, "taint: {} sinks\n", sinks.size());
 
   for (const auto& sink : sinks) {
-    auto value = state->stack.peek(fca.numArgs - 1 - sink.index);
-    if (!value) {
-      continue;
+    Value value = nullptr;
+    if (sink.index) {
+      value = state->stack.peek(fca.numArgs - 1 - *sink.index);
+      if (!value) {
+        continue;
+      }
+    } else {
+      // Pick the first tainted argument.
+      // This should eventually be a join.
+      for (int i = 0; i < fca.numArgs; i++) {
+        value = state->stack.peek(fca.numArgs - 1 - i);
+        if (value) {
+          break;
+        }
+      }
+      if (!value) {
+        continue;
+      }
     }
 
     FTRACE(1, "taint: tainted value flows into sink\n");

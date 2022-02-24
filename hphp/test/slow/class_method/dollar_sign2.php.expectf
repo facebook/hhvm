@@ -1,0 +1,1 @@
+Fatal error: `meth_caller` cannot be called on strings that contain `$` in %s on line %d

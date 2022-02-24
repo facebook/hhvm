@@ -1056,3 +1056,6 @@ pub const multiple_defaults_in_switch: Error =
 
 pub const default_switch_case_not_last: Error =
     Cow::Borrowed("Default case in `switch` must be terminal");
+
+pub const dollar_sign_in_meth_caller_argument: Error =
+    Cow::Borrowed("`meth_caller` cannot be called on strings that contain `$`");

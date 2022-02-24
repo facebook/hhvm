@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::shallow::TypedefDecl;
+use crate::decl_defs::{ConstDecl, FunDecl, TypedefDecl};
 use crate::reason::Reason;
 use defs::ClassType;
-use pos::{MethodName, PropName, TypeName};
+use pos::{ConstName, FunName, MethodName, PropName, TypeName};
 use std::fmt::Debug;
 use std::sync::Arc;
 
@@ -23,8 +23,32 @@ pub use provider::FoldingTypingDeclProvider;
 /// types of all inherited methods and properties, etc.) is available through
 /// the `Class` interface.
 pub trait TypingDeclProvider<R: Reason>: Debug {
-    fn get_class(&self, name: TypeName) -> Option<Arc<dyn Class<R>>>;
-    fn get_class_or_typedef(&self, name: TypeName) -> Option<TypeDecl<R>>;
+    /// Fetch the declaration of the toplevel function with the given name.
+    fn get_fun(&self, name: FunName) -> Option<Arc<FunDecl<R>>>;
+
+    /// Fetch the declaration of the global constant with the given name.
+    fn get_const(&self, name: ConstName) -> Option<Arc<ConstDecl<R>>>;
+
+    /// Fetch the declaration of the class or typedef with the given name.
+    fn get_type(&self, name: TypeName) -> Option<TypeDecl<R>>;
+
+    /// Fetch the declaration of the typedef with the given name. If the given
+    /// name is bound to a class rather than a typedef, return `None`.
+    fn get_typedef(&self, name: TypeName) -> Option<Arc<TypedefDecl<R>>> {
+        self.get_type(name).and_then(|decl| match decl {
+            TypeDecl::Typedef(td) => Some(td),
+            TypeDecl::Class(..) => None,
+        })
+    }
+
+    /// Fetch the declaration of the class with the given name. If the given
+    /// name is bound to a typedef rather than a class, return `None`.
+    fn get_class(&self, name: TypeName) -> Option<Arc<dyn Class<R>>> {
+        self.get_type(name).and_then(|decl| match decl {
+            TypeDecl::Class(cls) => Some(cls),
+            TypeDecl::Typedef(..) => None,
+        })
+    }
 }
 
 #[derive(Debug)]

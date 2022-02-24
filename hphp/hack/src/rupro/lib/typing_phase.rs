@@ -25,11 +25,7 @@ impl Phase {
             DTprim(p) => alloc.ty(r, Tprim(p.clone())),
             DTapply(id_and_args) => {
                 let (pos_id, tyl) = &**id_and_args;
-                match env
-                    .ctx
-                    .typing_decl_provider
-                    .get_class_or_typedef(pos_id.id())
-                {
+                match env.ctx.typing_decl_provider.get_type(pos_id.id()) {
                     Some(TypeDecl::Class(cls)) => Self::localize_class_instantiation(
                         env,
                         ety_env,

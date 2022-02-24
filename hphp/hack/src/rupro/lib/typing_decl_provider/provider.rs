@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{Class, ClassType, TypeDecl, TypingDeclProvider};
+use super::{ClassType, TypeDecl, TypingDeclProvider};
 use crate::cache::Cache;
-use crate::folded_decl_provider::FoldedDeclProvider;
+use crate::decl_defs::{ConstDecl, FunDecl};
+use crate::folded_decl_provider::{self, FoldedDeclProvider};
 use crate::reason::Reason;
-use pos::TypeName;
+use pos::{ConstName, FunName, TypeName};
 use std::sync::Arc;
 
 /// An implementation of TypingDeclProvider designed after the hh_server
@@ -37,22 +38,28 @@ impl<R: Reason> FoldingTypingDeclProvider<R> {
 }
 
 impl<R: Reason> TypingDeclProvider<R> for FoldingTypingDeclProvider<R> {
-    fn get_class(&self, name: TypeName) -> Option<Arc<dyn Class<R>>> {
-        match self.cache.get(name) {
-            Some(rc) => Some(rc),
-            None => {
-                let folded_decl = self.folded_decl_provider.get_class(name)?;
-                let cls = Arc::new(ClassType::new(
-                    Arc::clone(&self.folded_decl_provider),
-                    folded_decl,
-                ));
-                self.cache.insert(name, Arc::clone(&cls));
-                Some(cls)
-            }
-        }
+    fn get_fun(&self, name: FunName) -> Option<Arc<FunDecl<R>>> {
+        self.folded_decl_provider.get_fun(name)
     }
 
-    fn get_class_or_typedef(&self, name: TypeName) -> Option<TypeDecl<R>> {
-        self.get_class(name).map(TypeDecl::Class)
+    fn get_const(&self, name: ConstName) -> Option<Arc<ConstDecl<R>>> {
+        self.folded_decl_provider.get_const(name)
+    }
+
+    fn get_type(&self, name: TypeName) -> Option<TypeDecl<R>> {
+        match self.cache.get(name) {
+            Some(arc) => Some(TypeDecl::Class(arc)),
+            None => match self.folded_decl_provider.get_type(name)? {
+                folded_decl_provider::TypeDecl::Typedef(decl) => Some(TypeDecl::Typedef(decl)),
+                folded_decl_provider::TypeDecl::Class(folded_decl) => {
+                    let cls = Arc::new(ClassType::new(
+                        Arc::clone(&self.folded_decl_provider),
+                        folded_decl,
+                    ));
+                    self.cache.insert(name, Arc::clone(&cls));
+                    Some(TypeDecl::Class(cls))
+                }
+            },
+        }
     }
 }

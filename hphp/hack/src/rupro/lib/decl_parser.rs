@@ -9,7 +9,7 @@ use crate::reason::Reason;
 use pos::{RelativePath, RelativePathCtx};
 use std::sync::Arc;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DeclParser<R: Reason> {
     alloc: &'static Allocator<R>,
     relative_path_ctx: Arc<RelativePathCtx>,
@@ -42,6 +42,11 @@ impl<R: Reason> DeclParser<R> {
                 failure.max_stack_size_tried / stack_limit::KI
             );
         });
-        Ok(self.alloc.decls(parsed_file.decls.iter()))
+        let mut decls = parsed_file.decls;
+        // TODO: The direct decl parser should return decls in the same order as
+        // they are declared in the file. At the moment it reverses them.
+        // Reverse them again to match the syntactic order.
+        decls.rev(&arena);
+        Ok(self.alloc.decls(decls.iter()))
     }
 }

@@ -15,6 +15,7 @@ pub mod decl_parser;
 pub mod errors;
 pub mod folded_decl_provider;
 pub mod naming;
+pub mod naming_provider;
 pub mod parsing_error;
 pub mod reason;
 pub mod shallow_decl_provider;

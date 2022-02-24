@@ -9,7 +9,7 @@ use intern::string::BytesId;
 use pos::{Prefix, RelativePath, Symbol};
 
 impl GlobalAllocator {
-    fn bytes(&self, bytes: impl AsRef<[u8]>) -> BytesId {
+    pub fn bytes(&self, bytes: impl AsRef<[u8]>) -> BytesId {
         intern::string::intern_bytes(bytes.as_ref())
     }
 
@@ -23,7 +23,7 @@ impl GlobalAllocator {
         self.symbol(&format!("{}{}", s1, s2))
     }
 
-    fn relative_path(&self, prefix: Prefix, suffix: &std::path::Path) -> RelativePath {
+    pub fn relative_path(&self, prefix: Prefix, suffix: &std::path::Path) -> RelativePath {
         RelativePath::intern(prefix, suffix)
     }
 }

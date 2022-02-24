@@ -27,7 +27,7 @@ impl Symbol {
 macro_rules! common_impls {
     ($name:ident) => {
         impl $name {
-            fn as_str(&self) -> &str {
+            pub fn as_str(&self) -> &str {
                 self.0.as_str()
             }
         }

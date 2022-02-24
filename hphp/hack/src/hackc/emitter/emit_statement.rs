@@ -447,7 +447,7 @@ fn emit_using<'a, 'arena, 'decl>(
             let try_instrs = if jump_instrs_is_empty {
                 body
             } else {
-                tfr::cleanup_try_body(&body)
+                tfr::cleanup_try_body(body)
             };
 
             let emit_finally = |
@@ -761,7 +761,7 @@ fn emit_try_finally_<
     let try_instrs = if jump_instrs_is_empty {
         try_body
     } else {
-        tfr::cleanup_try_body(&try_body)
+        tfr::cleanup_try_body(try_body)
     };
     let catch_instrs = InstrSeq::gather(vec![
         emit_pos(&enclosing_span),

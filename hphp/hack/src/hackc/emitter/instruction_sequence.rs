@@ -48,16 +48,37 @@ pub enum InstrSeq<'a> {
     Concat(Vec<InstrSeq<'a>>),
 }
 
+// The following iterator implementations produce streams of instruction lists
+// (vecs or slices) and use an internal stack to flatten InstrSeq. The
+// instruction lists can be manipulated directly, doing bulk opertaions like
+// extend() or retain(), or flatten()'d once more into streams of instructions.
+//
+// Some tricks that were done for speed:
+// * keep the top-of-stack iterator in a dedicated field
+// * filter out empty lists - consumers of the iterator only see nonempty lists.
+//
+// Some other tricks didn't seem to help and were abandoned:
+// * on Concat, if the current `top` iterator is empty, can just overwrite
+// with a new iterator instead of pushing it and later having to pop it.
+// * Skipping empty Concat sequences.
+// * Special cases for 1-entry Lists.
+//
+// Future ideas to try:
+// * use SmallVec for the stack. Can it eliminate the need for `top`?
+
+/// An iterator that owns an InstrSeq and produces a stream of owned lists
+/// of instructions: `Vec<Instruct>`.
 #[derive(Debug)]
 struct IntoListIter<'a> {
-    iter: std::vec::IntoIter<InstrSeq<'a>>,
+    // Keeping top-of-stack in its own field for speed.
+    top: std::vec::IntoIter<InstrSeq<'a>>,
     stack: Vec<std::vec::IntoIter<InstrSeq<'a>>>,
 }
 
 impl<'a> IntoListIter<'a> {
     pub fn new(iseq: InstrSeq<'a>) -> Self {
         Self {
-            iter: match iseq {
+            top: match iseq {
                 InstrSeq::List(_) => vec![iseq].into_iter(),
                 InstrSeq::Concat(s) => s.into_iter(),
             },
@@ -70,14 +91,15 @@ impl<'a> Iterator for IntoListIter<'a> {
     type Item = Vec<Instruct<'a>>;
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            match self.iter.next() {
+            match self.top.next() {
+                // Short-circuit the empty list case for speed
                 Some(InstrSeq::List(s)) if s.is_empty() => {}
                 Some(InstrSeq::List(s)) => break Some(s),
                 Some(InstrSeq::Concat(s)) => self
                     .stack
-                    .push(std::mem::replace(&mut self.iter, s.into_iter())),
+                    .push(std::mem::replace(&mut self.top, s.into_iter())),
                 None => match self.stack.pop() {
-                    Some(iter) => self.iter = iter,
+                    Some(top) => self.top = top,
                     None => break None,
                 },
             }
@@ -85,84 +107,84 @@ impl<'a> Iterator for IntoListIter<'a> {
     }
 }
 
+/// An iterator that borrows an InstrSeq and produces a stream of borrowed
+/// slices of instructions: `&[Instruct]`.
 #[derive(Debug)]
-pub struct InstrIter<'i, 'a> {
-    instr_seq: &'i InstrSeq<'a>,
-    index: usize,
-    concat_stack: Vec<itertools::Either<(&'i [Instruct<'a>], usize), (&'i [InstrSeq<'a>], usize)>>,
+struct ListIter<'i, 'a> {
+    // Keeping top-of-stack in its own field for speed.
+    top: std::slice::Iter<'i, InstrSeq<'a>>,
+    stack: Vec<std::slice::Iter<'i, InstrSeq<'a>>>,
 }
 
-impl<'i, 'a> InstrIter<'i, 'a> {
-    pub fn new(instr_seq: &'i InstrSeq<'a>) -> Self {
+impl<'i, 'a> ListIter<'i, 'a> {
+    fn new(iseq: &'i InstrSeq<'a>) -> Self {
         Self {
-            instr_seq,
-            index: 0,
-            concat_stack: Vec::new(),
+            top: match iseq {
+                InstrSeq::List(_) => std::slice::from_ref(iseq).iter(),
+                InstrSeq::Concat(s) => s.iter(),
+            },
+            stack: Vec::new(),
         }
     }
 }
 
-impl<'i, 'a> Iterator for InstrIter<'i, 'a> {
-    type Item = &'i Instruct<'a>;
+impl<'i, 'a> Iterator for ListIter<'i, 'a> {
+    type Item = &'i [Instruct<'a>];
     fn next(&mut self) -> Option<Self::Item> {
-        //self: & mut InstrIter<'i, 'a>
-        //self.instr_seq: &'i InstrSeq<'a>
-        match self.instr_seq {
-            InstrSeq::List(s) if s.is_empty() => None,
-            InstrSeq::List(s) if s.len() == 1 && self.index > 0 => None,
-            InstrSeq::List(s) if s.len() == 1 => {
-                self.index += 1;
-                s.get(0)
-            }
-            InstrSeq::List(s) if s.len() > 1 && self.index >= s.len() => None,
-            InstrSeq::List(s) => {
-                let r = s.get(self.index);
-                self.index += 1;
-                r
-            }
-            InstrSeq::Concat(s) => {
-                if self.concat_stack.is_empty() {
-                    if self.index == 0 {
-                        self.index += 1;
-                        self.concat_stack.push(itertools::Either::Right((s, 0)));
-                    } else {
-                        return None;
-                    }
+        loop {
+            match self.top.next() {
+                // Short-circuit the empty list case for speed
+                Some(InstrSeq::List(s)) if s.is_empty() => {}
+                Some(InstrSeq::List(s)) => break Some(s),
+                Some(InstrSeq::Concat(s)) => {
+                    self.stack.push(std::mem::replace(&mut self.top, s.iter()))
                 }
+                None => match self.stack.pop() {
+                    Some(top) => self.top = top,
+                    None => break None,
+                },
+            }
+        }
+    }
+}
 
-                while !self.concat_stack.is_empty() {
-                    let top: &mut itertools::Either<_, _> = self.concat_stack.last_mut().unwrap();
-                    match top {
-                        itertools::Either::Left((list, size)) if *size >= list.len() => {
-                            self.concat_stack.pop();
-                        }
-                        itertools::Either::Left((list, size)) => {
-                            let r: Option<&'i Instruct<'a>> = list.get(*size);
-                            *size += 1;
-                            return r;
-                        }
-                        itertools::Either::Right((concat, size)) if *size >= concat.len() => {
-                            self.concat_stack.pop();
-                        }
-                        itertools::Either::Right((concat, size)) => {
-                            let i: &'i InstrSeq<'a> = &(concat[*size]);
-                            *size += 1;
-                            match i {
-                                InstrSeq::List(s) if s.is_empty() => {}
-                                InstrSeq::List(s) if s.len() == 1 => {
-                                    return s.get(0);
-                                }
-                                InstrSeq::List(s) => {
-                                    self.concat_stack.push(itertools::Either::Left((s, 0)));
-                                }
-                                InstrSeq::Concat(s) => {
-                                    self.concat_stack.push(itertools::Either::Right((s, 0)));
-                                }
-                            }
-                        }
-                    }
-                }
-                None
+/// An iterator that borrows a mutable InstrSeq and produces a stream of
+/// borrowed lists of instructions: `&mut Vec<Instruct>`. This is a borrowed
+/// Vec instead of a borrowed slice so sub-sequences of instructions can
+/// grow or shrink independently, for example by retain().
+#[derive(Debug)]
+struct ListIterMut<'i, 'a> {
+    top: std::slice::IterMut<'i, InstrSeq<'a>>,
+    stack: Vec<std::slice::IterMut<'i, InstrSeq<'a>>>,
+}
+
+impl<'i, 'a> ListIterMut<'i, 'a> {
+    fn new(iseq: &'i mut InstrSeq<'a>) -> Self {
+        Self {
+            top: match iseq {
+                InstrSeq::List(_) => std::slice::from_mut(iseq).iter_mut(),
+                InstrSeq::Concat(s) => s.iter_mut(),
+            },
+            stack: Vec::new(),
+        }
+    }
+}
+
+impl<'i, 'a> Iterator for ListIterMut<'i, 'a> {
+    type Item = &'i mut Vec<Instruct<'a>>;
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.top.next() {
+                // Short-circuit the empty list case for speed
+                Some(InstrSeq::List(s)) if s.is_empty() => {}
+                Some(InstrSeq::List(s)) => break Some(s),
+                Some(InstrSeq::Concat(s)) => self
+                    .stack
+                    .push(std::mem::replace(&mut self.top, s.iter_mut())),
+                None => match self.stack.pop() {
+                    Some(top) => self.top = top,
+                    None => break None,
+                },
             }
         }
     }
@@ -1262,15 +1284,16 @@ impl<'a> InstrSeq<'a> {
         }
     }
 
-    pub fn iter<'i>(&'i self) -> InstrIter<'i, 'a> {
-        InstrIter::new(self)
+    pub fn iter<'i>(&'i self) -> impl Iterator<Item = &'i Instruct<'a>> {
+        ListIter::new(self).flatten()
+    }
+
+    pub fn iter_mut<'i>(&'i mut self) -> impl Iterator<Item = &'i mut Instruct<'a>> {
+        ListIterMut::new(self).flatten()
     }
 
     fn full_len(&self) -> usize {
-        match self {
-            Self::List(s) => s.len(),
-            Self::Concat(s) => s.iter().map(Self::full_len).sum(),
-        }
+        ListIter::new(self).map(|s| s.len()).sum()
     }
 
     pub fn compact(self, alloc: &'a bumpalo::Bump) -> Slice<'a, Instruct<'a>> {
@@ -1330,78 +1353,37 @@ impl<'a> InstrSeq<'a> {
 
     /// Test whether `i` is of case `Instruct::SrcLoc`.
     fn is_srcloc(instruction: &Instruct<'a>) -> bool {
-        match instruction {
-            Instruct::SrcLoc(_) => true,
-            _ => false,
-        }
+        matches!(instruction, Instruct::SrcLoc(_))
     }
 
+    /// Return the first non-SrcLoc instruction.
     pub fn first(&self) -> Option<&Instruct<'a>> {
-        // self: &InstrSeq<'a>
-        match self {
-            InstrSeq::List(s) => s.iter().find(|&i| !InstrSeq::is_srcloc(i)),
-            InstrSeq::Concat(s) => s.iter().find_map(InstrSeq::first),
-        }
+        self.iter().find(|&i| !Self::is_srcloc(i))
     }
 
-    /// Test for the empty instruction sequence.
+    /// Test for the empty instruction sequence, ignoring SrcLocs
     pub fn is_empty(&self) -> bool {
-        // self:&InstrSeq<'a>
-        match self {
-            InstrSeq::List(s) => s.is_empty() || s.iter().all(InstrSeq::is_srcloc),
-            InstrSeq::Concat(s) => s.iter().all(InstrSeq::is_empty),
+        self.iter().all(Self::is_srcloc)
+    }
+
+    pub fn retain(&mut self, mut f: impl FnMut(&Instruct<'a>) -> bool) {
+        for s in ListIterMut::new(self) {
+            s.retain(&mut f)
         }
     }
 
-    pub fn filter_map<F>(&self, f: &mut F) -> Self
-    where
-        F: FnMut(&Instruct<'a>) -> Option<Instruct<'a>>,
-    {
-        //self: &InstrSeq<'a>
-        match self {
-            InstrSeq::List(s) => InstrSeq::List(s.iter().filter_map(f).collect()),
-            InstrSeq::Concat(s) => InstrSeq::Concat(s.iter().map(|x| x.filter_map(f)).collect()),
-        }
-    }
-
-    pub fn retain_mut<F>(&mut self, f: &mut F)
+    pub fn retain_mut<F>(&mut self, mut f: F)
     where
         F: FnMut(&mut Instruct<'a>) -> bool,
     {
-        //self: &mut InstrSeq<'a>
-        match self {
-            InstrSeq::List(s) => {
-                *s = std::mem::take(s)
-                    .into_iter()
-                    .filter_map(|mut instr| match f(&mut instr) {
-                        true => Some(instr),
-                        false => None,
-                    })
-                    .collect()
-            }
-            InstrSeq::Concat(s) => s.iter_mut().for_each(|x| x.retain_mut(f)),
-        }
-    }
-
-    pub fn for_each_mut<F>(&mut self, f: &mut F)
-    where
-        F: FnMut(&mut Instruct<'a>),
-    {
-        //self: &mut InstrSeq<'a>
-        match self {
-            InstrSeq::List(s) => s.iter_mut().for_each(f),
-            InstrSeq::Concat(s) => s.iter_mut().for_each(|x| x.for_each_mut(f)),
-        }
-    }
-
-    pub fn try_for_each_mut<F>(&mut self, f: &mut F) -> Result<()>
-    where
-        F: FnMut(&mut Instruct<'a>) -> Result<()>,
-    {
-        //self: &mut InstrSeq<'a>
-        match self {
-            InstrSeq::List(s) => s.iter_mut().try_for_each(f),
-            InstrSeq::Concat(s) => s.iter_mut().try_for_each(|x| x.try_for_each_mut(f)),
+        for s in ListIterMut::new(self) {
+            *s = std::mem::take(s)
+                .into_iter()
+                .filter_map(|mut instr| match f(&mut instr) {
+                    true => Some(instr),
+                    false => None,
+                })
+                .collect()
         }
     }
 }

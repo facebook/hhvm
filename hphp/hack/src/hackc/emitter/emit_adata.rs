@@ -17,7 +17,10 @@ pub fn rewrite_typed_values<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     instrseq: &mut InstrSeq<'arena>,
 ) -> std::result::Result<(), instruction_sequence::Error> {
-    instrseq.try_for_each_mut(&mut |instr| rewrite_typed_value(emitter, instr))
+    for instr in instrseq.iter_mut() {
+        rewrite_typed_value(emitter, instr)?;
+    }
+    Ok(())
 }
 
 fn rewrite_typed_value<'arena, 'decl>(

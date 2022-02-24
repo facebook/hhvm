@@ -62,12 +62,15 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
 }
 
 /// Delete Ret*, Break, and Continue instructions from the try body
-pub(super) fn cleanup_try_body<'arena>(is: &InstrSeq<'arena>) -> InstrSeq<'arena> {
+pub(super) fn cleanup_try_body<'arena>(mut is: InstrSeq<'arena>) -> InstrSeq<'arena> {
     use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
-    is.filter_map(&mut |i| match *i {
-        Instruct::SpecialFlow(_) | Instruct::ContFlow(RetC | RetCSuspended | RetM(_)) => None,
-        _ => Some(i.clone()),
-    })
+    is.retain(|instr| {
+        !matches!(
+            instr,
+            Instruct::SpecialFlow(_) | Instruct::ContFlow(RetC | RetCSuspended | RetM(_))
+        )
+    });
+    is
 }
 
 pub(super) fn emit_jump_to_label<'arena>(l: Label, iters: Vec<IterId>) -> InstrSeq<'arena> {

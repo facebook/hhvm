@@ -73,7 +73,7 @@ fn rewrite_params_and_body<'arena>(
             *l = relabel(*l);
         }
     }
-    body.retain_mut(&mut |instr| {
+    body.retain_mut(|instr| {
         if let Instruct::Label(l) = instr {
             if used.contains(l) {
                 *l = relabel(*l);
@@ -111,7 +111,7 @@ pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(
     }
 
     if !old_to_new.is_empty() {
-        block.for_each_mut(&mut |instr| {
+        for instr in block.iter_mut() {
             let labels = match instr {
                 Instruct::Label(label) => std::slice::from_mut(label),
                 _ => instr.targets_mut(),
@@ -121,6 +121,6 @@ pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(
                     *label = *new_label;
                 }
             }
-        });
+        }
     }
 }

@@ -146,12 +146,37 @@ const Func* callee() {
 
 } // namespace
 
+/**
+ * Opcode implementations are below.
+ *
+ * This attempts to model the spec at
+ * https://github.com/facebook/hhvm/blob/master/hphp/doc/bytecode.specification
+ *
+ * Most opcodes are still unhandled for now and marked as such using
+ * a call to `iopUnhandled`.
+ *
+ * We are currently going through all the opcodes and implementing them,
+ * following the following convention:
+ *
+ * 1) If an iop needs special handling to track taint, it will be implemented as such.
+ * 2) If an iop does not need any handling, it will just have a call
+ *    to `iopPreamble` and (hopefully) comment explaining why it's OK to ignore.
+ * 3) If hasn't been looked at yet, it will be marked with `iopUnhandled`.
+ *
+ * Rough indications of current status:
+ *
+ * ~some basic opcodes are implemented, enough to trace values through some
+ * function calls
+ *
+ * All the opcodes in section 1 (Basic instructions) are implemented.
+ */
+
 void iopNop() {
-  iopUnhandled("Nop");
+  iopPreamble("Nop");
 }
 
 void iopEntryNop() {
-  iopUnhandled("EntryNop");
+  iopPreamble("EntryNop");
 }
 
 void iopBreakTraceHint() {
@@ -164,15 +189,29 @@ void iopPopC() {
 }
 
 void iopPopU() {
-  iopUnhandled("PopU");
+  iopPreamble("PopU");
+  State::instance->stack.pop();
 }
 
 void iopPopU2() {
-  iopUnhandled("PopU2");
+  iopPreamble("PopU2");
+  auto& stack = State::instance->stack;
+  auto saved = stack.top();
+  stack.pop();
+  stack.push(saved);
 }
 
-void iopPopL(tv_lval /* to */) {
-  iopUnhandled("PopL");
+void iopPopL(tv_lval to) {
+  iopPreamble("PopL");
+
+  // PopL behaves like a SetL PopC pair
+  auto state = State::instance;
+  auto value = state->stack.top();
+
+  FTRACE(2, "taint: setting {} to `{}`\n", to, value);
+
+  state->heap.set(std::move(to), value);
+  state->stack.pop();
 }
 
 void iopDup() {
@@ -182,11 +221,13 @@ void iopDup() {
 }
 
 void iopCGetCUNop() {
-  iopUnhandled("CGetCUNop");
+  iopPreamble("CGetCUNop");
+  // This is a no op
 }
 
 void iopUGetCUNop() {
-  iopUnhandled("UGetCUNop");
+  iopPreamble("UGetCUNop");
+  // This is a no op
 }
 
 void iopNull() {

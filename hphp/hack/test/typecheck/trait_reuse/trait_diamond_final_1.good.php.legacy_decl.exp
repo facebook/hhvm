@@ -4,9 +4,9 @@ Traits with final methods cannot be reused, and `T` is already used by `C`. (Typ
   `T2` uses `T`
   File "trait_diamond_final_1.good.php", line 14, characters 7-7:
   `C` is defined here
-  File "trait_diamond_final_1.good.php", line 15, characters 7-8:
-  `C` uses `T1`
-  File "trait_diamond_final_1.good.php", line 10, characters 16-16:
-  `T1` uses `T`
+  File "trait_diamond_final_1.good.php", line 15, characters 11-12:
+  `C` uses `T2`
+  File "trait_diamond_final_1.good.php", line 11, characters 16-16:
+  `T2` uses `T`
   File "trait_diamond_final_1.good.php", line 7, characters 25-25:
   `T` has a final method `f`

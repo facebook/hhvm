@@ -12,7 +12,6 @@ open Hh_prelude
 open Aast
 open Typing_defs
 module Cls = Decl_provider.Class
-module SN = Naming_special_names
 
 type tgenv = {
   ctx: Provider_context.t;
@@ -346,7 +345,7 @@ let check_reuse_final_method tgenv (c : Nast.class_) : unit =
   ()
 
 (* Check reuse of trait with a final method ignoring diamond inclusion via use chains *)
-let check_reuse_final_method_allow_diamond tgenv (c : Nast.class_) : unit =
+let _check_reuse_final_method_allow_diamond tgenv (c : Nast.class_) : unit =
   match parent_class c with
   | Some (_, pstring) ->
     let traits_with_final_methods_via_parent =
@@ -531,14 +530,6 @@ let handler =
       in
 
       check_diamond_import_property tgenv c;
-      if
-        Naming_attributes.mem
-          SN.UserAttributes.uaEnableMethodTraitDiamond
-          c.c_user_attributes
-      then
-        check_reuse_final_method_allow_diamond tgenv c
-      else begin
-        check_reuse_final_method tgenv c;
-        check_reuse_method_without_override tgenv c
-      end
+      check_reuse_final_method tgenv c;
+      check_reuse_method_without_override tgenv c
   end

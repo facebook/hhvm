@@ -16,6 +16,14 @@ mod subst;
 
 pub use provider::LazyFoldedDeclProvider;
 
+pub type Result<T, E = Error> = std::result::Result<T, E>;
+
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("{0}")]
+    Shallow(#[from] crate::shallow_decl_provider::Error),
+}
+
 #[derive(Clone, Debug)]
 pub enum TypeDecl<R: Reason> {
     Class(Arc<FoldedClass<R>>),
@@ -43,30 +51,30 @@ pub enum TypeDecl<R: Reason> {
 /// parameterization of the descendant class.
 pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
     /// Fetch the declaration of the toplevel function with the given name.
-    fn get_fun(&self, name: FunName) -> Option<Arc<FunDecl<R>>>;
+    fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>>;
 
     /// Fetch the declaration of the global constant with the given name.
-    fn get_const(&self, name: ConstName) -> Option<Arc<ConstDecl<R>>>;
+    fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>>;
 
     /// Fetch the declaration of the class or typedef with the given name.
-    fn get_type(&self, name: TypeName) -> Option<TypeDecl<R>>;
+    fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>>;
 
     /// Fetch the declaration of the typedef with the given name. If the given
     /// name is bound to a class rather than a typedef, return `None`.
-    fn get_typedef(&self, name: TypeName) -> Option<Arc<TypedefDecl<R>>> {
-        self.get_type(name).and_then(|decl| match decl {
+    fn get_typedef(&self, name: TypeName) -> Result<Option<Arc<TypedefDecl<R>>>> {
+        Ok(self.get_type(name)?.and_then(|decl| match decl {
             TypeDecl::Typedef(td) => Some(td),
             TypeDecl::Class(..) => None,
-        })
+        }))
     }
 
     /// Fetch the declaration of the class with the given name. If the given
     /// name is bound to a typedef rather than a class, return `None`.
-    fn get_class(&self, name: TypeName) -> Option<Arc<FoldedClass<R>>> {
-        self.get_type(name).and_then(|decl| match decl {
+    fn get_class(&self, name: TypeName) -> Result<Option<Arc<FoldedClass<R>>>> {
+        Ok(self.get_type(name)?.and_then(|decl| match decl {
             TypeDecl::Class(cls) => Some(cls),
             TypeDecl::Typedef(..) => None,
-        })
+        }))
     }
 
     /// Fetch the type of the given property, as it was syntactically declared
@@ -81,7 +89,7 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Option<DeclTy<R>>;
+    ) -> Result<Option<DeclTy<R>>>;
 
     /// Fetch the type of the given property, as it was syntactically declared
     /// in the given class (i.e., returns `None` for inherited properties).
@@ -95,7 +103,7 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Option<DeclTy<R>>;
+    ) -> Result<Option<DeclTy<R>>>;
 
     /// Fetch the type of the given method, as it was syntactically declared in
     /// the given class (i.e., returns `None` for inherited methods).
@@ -109,7 +117,7 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Option<DeclTy<R>>;
+    ) -> Result<Option<DeclTy<R>>>;
 
     /// Fetch the type of the given method, as it was syntactically declared in
     /// the given class (i.e., returns `None` for inherited methods).
@@ -123,7 +131,7 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Option<DeclTy<R>>;
+    ) -> Result<Option<DeclTy<R>>>;
 
     /// Fetch the type of the given constructor, as it was syntactically
     /// declared in the given class (i.e., returns `None` for inherited
@@ -134,5 +142,5 @@ pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
     /// stores data in a serialized format, implementations of this method
     /// should only deserialize the one constructor type, not the entire
     /// containing `ShallowClass`.
-    fn get_shallow_constructor_type(&self, class_name: TypeName) -> Option<DeclTy<R>>;
+    fn get_shallow_constructor_type(&self, class_name: TypeName) -> Result<Option<DeclTy<R>>>;
 }

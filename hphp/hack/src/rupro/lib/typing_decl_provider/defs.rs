@@ -98,6 +98,7 @@ impl<R: Reason> Class<R> for ClassType<R> {
         let ty = self
             .provider
             .get_shallow_property_type(folded_elt.origin, name)
+            .unwrap()
             .expect("prop found in self.class.props, but not in folded decl provider");
         // TODO: perform substitutions on ty
         let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
@@ -116,6 +117,7 @@ impl<R: Reason> Class<R> for ClassType<R> {
         let ty = self
             .provider
             .get_shallow_static_property_type(folded_elt.origin, name)
+            .unwrap()
             .expect("prop found in self.class.static_props, but not in folded decl provider");
         // TODO: perform substitutions on ty
         let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
@@ -136,6 +138,7 @@ impl<R: Reason> Class<R> for ClassType<R> {
         let ty = self
             .provider
             .get_shallow_method_type(folded_elt.origin, name)
+            .unwrap()
             .expect("method found in self.class.methods, but not in folded decl provider");
         // TODO: perform substitutions on ty
         let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
@@ -154,6 +157,7 @@ impl<R: Reason> Class<R> for ClassType<R> {
         let ty = self
             .provider
             .get_shallow_static_method_type(folded_elt.origin, name)
+            .unwrap()
             .expect("method found in self.class.static_methods, but not in folded decl provider");
         // TODO: perform substitutions on ty
         let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
@@ -174,6 +178,7 @@ impl<R: Reason> Class<R> for ClassType<R> {
                 let ty = self
                     .provider
                     .get_shallow_constructor_type(folded_elt.origin)
+                    .unwrap()
                     .expect("constructor found in self.class, but not in folded decl provider");
                 // TODO: perform substitutions on ty
                 Some(Arc::new(ClassElt::new(folded_elt, ty)))

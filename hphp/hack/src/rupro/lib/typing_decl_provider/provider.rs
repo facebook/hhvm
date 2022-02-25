@@ -39,17 +39,17 @@ impl<R: Reason> FoldingTypingDeclProvider<R> {
 
 impl<R: Reason> TypingDeclProvider<R> for FoldingTypingDeclProvider<R> {
     fn get_fun(&self, name: FunName) -> Option<Arc<FunDecl<R>>> {
-        self.folded_decl_provider.get_fun(name)
+        self.folded_decl_provider.get_fun(name).unwrap()
     }
 
     fn get_const(&self, name: ConstName) -> Option<Arc<ConstDecl<R>>> {
-        self.folded_decl_provider.get_const(name)
+        self.folded_decl_provider.get_const(name).unwrap()
     }
 
     fn get_type(&self, name: TypeName) -> Option<TypeDecl<R>> {
         match self.cache.get(name) {
             Some(arc) => Some(TypeDecl::Class(arc)),
-            None => match self.folded_decl_provider.get_type(name)? {
+            None => match self.folded_decl_provider.get_type(name).unwrap()? {
                 folded_decl_provider::TypeDecl::Typedef(decl) => Some(TypeDecl::Typedef(decl)),
                 folded_decl_provider::TypeDecl::Class(folded_decl) => {
                     let cls = Arc::new(ClassType::new(

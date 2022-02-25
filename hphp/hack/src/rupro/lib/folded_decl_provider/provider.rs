@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{fold::DeclFolder, TypeDecl};
+use super::{fold::DeclFolder, Result, TypeDecl};
 use crate::alloc::Allocator;
 use crate::cache::Cache;
 use crate::decl_defs::{ConstDecl, DeclTy, DeclTy_, FoldedClass, FunDecl, ShallowClass};
@@ -46,21 +46,25 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
 }
 
 impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
-    fn get_fun(&self, name: FunName) -> Option<Arc<FunDecl<R>>> {
-        self.shallow_decl_provider.get_fun(name).unwrap()
+    fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
+        Ok(self.shallow_decl_provider.get_fun(name)?)
     }
 
-    fn get_const(&self, name: ConstName) -> Option<Arc<ConstDecl<R>>> {
-        self.shallow_decl_provider.get_const(name).unwrap()
+    fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
+        Ok(self.shallow_decl_provider.get_const(name)?)
     }
 
-    fn get_type(&self, name: TypeName) -> Option<TypeDecl<R>> {
-        match self.shallow_decl_provider.get_type(name).unwrap()? {
-            shallow_decl_provider::TypeDecl::Typedef(decl) => Some(TypeDecl::Typedef(decl)),
-            shallow_decl_provider::TypeDecl::Class(..) => {
+    fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
+        match self.shallow_decl_provider.get_type(name)? {
+            None => Ok(None),
+            Some(shallow_decl_provider::TypeDecl::Typedef(decl)) => {
+                Ok(Some(TypeDecl::Typedef(decl)))
+            }
+            Some(shallow_decl_provider::TypeDecl::Class(..)) => {
                 let mut stack = Default::default();
-                self.get_folded_class_impl(&mut stack, name)
-                    .map(TypeDecl::Class)
+                Ok(self
+                    .get_folded_class_impl(&mut stack, name)?
+                    .map(TypeDecl::Class))
             }
         }
     }
@@ -69,46 +73,46 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Option<DeclTy<R>> {
-        self.shallow_decl_provider
-            .get_property_type(class_name, property_name)
-            .unwrap()
+    ) -> Result<Option<DeclTy<R>>> {
+        Ok(self
+            .shallow_decl_provider
+            .get_property_type(class_name, property_name)?)
     }
 
     fn get_shallow_static_property_type(
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Option<DeclTy<R>> {
-        self.shallow_decl_provider
-            .get_static_property_type(class_name, property_name)
-            .unwrap()
+    ) -> Result<Option<DeclTy<R>>> {
+        Ok(self
+            .shallow_decl_provider
+            .get_static_property_type(class_name, property_name)?)
     }
 
     fn get_shallow_method_type(
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Option<DeclTy<R>> {
-        self.shallow_decl_provider
-            .get_method_type(class_name, method_name)
-            .unwrap()
+    ) -> Result<Option<DeclTy<R>>> {
+        Ok(self
+            .shallow_decl_provider
+            .get_method_type(class_name, method_name)?)
     }
 
     fn get_shallow_static_method_type(
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Option<DeclTy<R>> {
-        self.shallow_decl_provider
-            .get_static_method_type(class_name, method_name)
-            .unwrap()
+    ) -> Result<Option<DeclTy<R>>> {
+        Ok(self
+            .shallow_decl_provider
+            .get_static_method_type(class_name, method_name)?)
     }
 
-    fn get_shallow_constructor_type(&self, class_name: TypeName) -> Option<DeclTy<R>> {
-        self.shallow_decl_provider
-            .get_constructor_type(class_name)
-            .unwrap()
+    fn get_shallow_constructor_type(&self, class_name: TypeName) -> Result<Option<DeclTy<R>>> {
+        Ok(self
+            .shallow_decl_provider
+            .get_constructor_type(class_name)?)
     }
 }
 
@@ -125,52 +129,60 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         stack: &mut TypeNameSet,
         acc: &mut TypeNameMap<Arc<FoldedClass<R>>>,
         ty: &DeclTy<R>,
-    ) {
+    ) -> Result<()> {
         match &**ty.node() {
             DeclTy_::DTapply(id_and_args) => {
                 let pos_id = &id_and_args.0;
                 if !self.detect_cycle(stack, pos_id) {
-                    if let Some(folded_decl) = self.get_folded_class_impl(stack, pos_id.id()) {
+                    if let Some(folded_decl) = self.get_folded_class_impl(stack, pos_id.id())? {
                         acc.insert(pos_id.id(), folded_decl);
                     }
                 }
             }
             _ => {}
         }
+        Ok(())
     }
 
     fn decl_class_parents(
         &self,
         stack: &mut TypeNameSet,
         sc: &ShallowClass<R>,
-    ) -> TypeNameMap<Arc<FoldedClass<R>>> {
+    ) -> Result<TypeNameMap<Arc<FoldedClass<R>>>> {
         let mut acc = Default::default();
-        sc.extends
-            .iter()
-            .for_each(|ty| self.decl_class_type(stack, &mut acc, ty));
-        acc
+        for ty in sc.extends.iter() {
+            self.decl_class_type(stack, &mut acc, ty)?;
+        }
+        Ok(acc)
     }
 
-    fn decl_class(&self, stack: &mut TypeNameSet, name: TypeName) -> Option<Arc<FoldedClass<R>>> {
-        let shallow_class = self.shallow_decl_provider.get_class(name).unwrap()?;
+    fn decl_class(
+        &self,
+        stack: &mut TypeNameSet,
+        name: TypeName,
+    ) -> Result<Option<Arc<FoldedClass<R>>>> {
+        let shallow_class = match self.shallow_decl_provider.get_class(name)? {
+            None => return Ok(None),
+            Some(c) => c,
+        };
         stack.insert(name);
-        let parents = self.decl_class_parents(stack, &shallow_class);
+        let parents = self.decl_class_parents(stack, &shallow_class)?;
         let folder = DeclFolder::new(self.alloc, self.special_names);
-        Some(folder.decl_class(&shallow_class, &parents))
+        Ok(Some(folder.decl_class(&shallow_class, &parents)))
     }
 
     fn get_folded_class_impl(
         &self,
         stack: &mut TypeNameSet,
         name: TypeName,
-    ) -> Option<Arc<FoldedClass<R>>> {
+    ) -> Result<Option<Arc<FoldedClass<R>>>> {
         match self.cache.get(name) {
-            Some(rc) => Some(rc),
-            None => match self.decl_class(stack, name) {
-                None => None,
+            Some(rc) => Ok(Some(rc)),
+            None => match self.decl_class(stack, name)? {
+                None => Ok(None),
                 Some(rc) => {
                     self.cache.insert(name, Arc::clone(&rc));
-                    Some(rc)
+                    Ok(Some(rc))
                 }
             },
         }

@@ -3,14 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::Class;
+use super::{Class, Error, Result};
 use crate::decl_defs::FoldedClass;
 use crate::folded_decl_provider::FoldedDeclProvider;
 use crate::reason::Reason;
 use crate::typing_defs::ClassElt;
 use dashmap::DashMap;
 use once_cell::sync::OnceCell;
-use pos::{BuildMethodNameHasher, BuildPropNameHasher, MethodName, PropName};
+use pos::{BuildMethodNameHasher, BuildPropNameHasher, MethodName, PropName, TypeName};
 use std::fmt;
 use std::sync::Arc;
 
@@ -40,7 +40,7 @@ pub struct ClassType<R: Reason> {
 
 impl<R: Reason> fmt::Debug for ClassType<R> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.fetch_all_members();
+        self.fetch_all_members().unwrap();
         f.debug_struct("ClassType")
             .field("class", &self.class)
             .field("members", &self.members)
@@ -69,121 +69,136 @@ impl<R: Reason> ClassType<R> {
         }
     }
 
-    fn fetch_all_members(&self) {
+    fn fetch_all_members(&self) -> Result<()> {
         for (&prop, _) in self.class.props.iter() {
-            self.get_prop(prop);
+            self.get_prop(prop)?;
         }
         for (&prop, _) in self.class.static_props.iter() {
-            self.get_static_prop(prop);
+            self.get_static_prop(prop)?;
         }
         for (&method, _) in self.class.methods.iter() {
-            self.get_method(method);
+            self.get_method(method)?;
         }
         for (&method, _) in self.class.static_methods.iter() {
-            self.get_static_method(method);
+            self.get_static_method(method)?;
         }
-        self.get_constructor();
+        self.get_constructor()?;
+        Ok(())
+    }
+
+    // Invariant violation: we expect our provider to provide member types for any
+    // member from a FoldedClass it returned. See docs for `FoldedDeclProvider`.
+    // c.f. OCaml exception `Decl_heap_elems_bug`
+    fn member_type_missing<T>(&self, kind: &str, origin: TypeName, name: impl AsRef<str>) -> T {
+        panic!(
+            "Could not find {kind} {origin}::{} (inherited by {})",
+            name.as_ref(),
+            self.class.name
+        );
     }
 }
 
 impl<R: Reason> Class<R> for ClassType<R> {
-    fn get_prop(&self, name: PropName) -> Option<Arc<ClassElt<R>>> {
+    fn get_prop(&self, name: PropName) -> Result<Option<Arc<ClassElt<R>>>> {
         if let Some(class_elt) = self.members.props.get(&name) {
-            return Some(Arc::clone(&class_elt));
+            return Ok(Some(Arc::clone(&class_elt)));
         }
         let folded_elt = match self.class.props.get(&name) {
             Some(fe) => fe,
-            None => return None,
+            None => return Ok(None),
         };
+        let origin = folded_elt.origin;
         let ty = self
             .provider
-            .get_shallow_property_type(folded_elt.origin, name)
-            .unwrap()
-            .expect("prop found in self.class.props, but not in folded decl provider");
+            .get_shallow_property_type(origin, name)?
+            .unwrap_or_else(|| self.member_type_missing("property", origin, name));
         // TODO: perform substitutions on ty
         let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
         self.members.props.insert(name, Arc::clone(&class_elt));
-        Some(class_elt)
+        Ok(Some(class_elt))
     }
 
-    fn get_static_prop(&self, name: PropName) -> Option<Arc<ClassElt<R>>> {
+    fn get_static_prop(&self, name: PropName) -> Result<Option<Arc<ClassElt<R>>>> {
         if let Some(class_elt) = self.members.static_props.get(&name) {
-            return Some(Arc::clone(&class_elt));
+            return Ok(Some(Arc::clone(&class_elt)));
         }
         let folded_elt = match self.class.static_props.get(&name) {
             Some(fe) => fe,
-            None => return None,
+            None => return Ok(None),
         };
+        let origin = folded_elt.origin;
         let ty = self
             .provider
-            .get_shallow_static_property_type(folded_elt.origin, name)
-            .unwrap()
-            .expect("prop found in self.class.static_props, but not in folded decl provider");
+            .get_shallow_static_property_type(origin, name)?
+            .unwrap_or_else(|| self.member_type_missing("static property", origin, name));
         // TODO: perform substitutions on ty
         let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
         self.members
             .static_props
             .insert(name, Arc::clone(&class_elt));
-        Some(class_elt)
+        Ok(Some(class_elt))
     }
 
-    fn get_method(&self, name: MethodName) -> Option<Arc<ClassElt<R>>> {
+    fn get_method(&self, name: MethodName) -> Result<Option<Arc<ClassElt<R>>>> {
         if let Some(class_elt) = self.members.methods.get(&name) {
-            return Some(Arc::clone(&class_elt));
+            return Ok(Some(Arc::clone(&class_elt)));
         }
         let folded_elt = match self.class.methods.get(&name) {
             Some(fe) => fe,
-            None => return None,
+            None => return Ok(None),
         };
+        let origin = folded_elt.origin;
         let ty = self
             .provider
-            .get_shallow_method_type(folded_elt.origin, name)
-            .unwrap()
-            .expect("method found in self.class.methods, but not in folded decl provider");
+            .get_shallow_method_type(origin, name)?
+            .unwrap_or_else(|| self.member_type_missing("method", origin, name));
         // TODO: perform substitutions on ty
         let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
         self.members.methods.insert(name, Arc::clone(&class_elt));
-        Some(class_elt)
+        Ok(Some(class_elt))
     }
 
-    fn get_static_method(&self, name: MethodName) -> Option<Arc<ClassElt<R>>> {
+    fn get_static_method(&self, name: MethodName) -> Result<Option<Arc<ClassElt<R>>>> {
         if let Some(class_elt) = self.members.static_methods.get(&name) {
-            return Some(Arc::clone(&class_elt));
+            return Ok(Some(Arc::clone(&class_elt)));
         }
         let folded_elt = match self.class.static_methods.get(&name) {
             Some(fe) => fe,
-            None => return None,
+            None => return Ok(None),
         };
+        let origin = folded_elt.origin;
         let ty = self
             .provider
-            .get_shallow_static_method_type(folded_elt.origin, name)
-            .unwrap()
-            .expect("method found in self.class.static_methods, but not in folded decl provider");
+            .get_shallow_static_method_type(origin, name)?
+            .unwrap_or_else(|| self.member_type_missing("static method", origin, name));
         // TODO: perform substitutions on ty
         let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
         self.members
             .static_methods
             .insert(name, Arc::clone(&class_elt));
-        Some(class_elt)
+        Ok(Some(class_elt))
     }
 
-    fn get_constructor(&self) -> Option<Arc<ClassElt<R>>> {
-        self.members
+    fn get_constructor(&self) -> Result<Option<Arc<ClassElt<R>>>> {
+        Ok(self
+            .members
             .constructor
-            .get_or_init(|| {
+            .get_or_try_init::<_, Error>(|| {
                 let folded_elt = match &self.class.constructor {
                     Some(fe) => fe,
-                    None => return None,
+                    None => return Ok(None),
                 };
+                let origin = folded_elt.origin;
                 let ty = self
                     .provider
-                    .get_shallow_constructor_type(folded_elt.origin)
-                    .unwrap()
-                    .expect("constructor found in self.class, but not in folded decl provider");
+                    .get_shallow_constructor_type(origin)?
+                    .unwrap_or_else(|| {
+                        self.member_type_missing("constructor", origin, "__construct")
+                    });
                 // TODO: perform substitutions on ty
-                Some(Arc::new(ClassElt::new(folded_elt, ty)))
-            })
+                Ok(Some(Arc::new(ClassElt::new(folded_elt, ty))))
+            })?
             .as_ref()
-            .map(Arc::clone)
+            .map(Arc::clone))
     }
 }

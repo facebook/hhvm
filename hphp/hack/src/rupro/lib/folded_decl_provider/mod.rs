@@ -49,6 +49,18 @@ pub enum TypeDecl<R: Reason> {
 /// as declared in that origin class, then use the `SubstContext` from the
 /// descendant `FoldedClass` to instantiate that method type for the type
 /// parameterization of the descendant class.
+///
+/// Implementations of member type accessors are expected to be consistent with
+/// any `FoldedClass` values returned. For example, if a provider ever returns a
+/// `FoldedClass` with a method "x" having origin "\\C", then that provider is
+/// expected to return `Ok(Some(..))` or `Err` on _any_ subsequent invocation of
+/// `get_shallow_method_type("\\C", "x")`. If a member cannot be found because
+/// it was evicted from cache, and cannot be re-parsed from disk because the
+/// source file was changed or deleted, folded decl providers are expected to
+/// return `Err` rather than `None`. Simple implementations of
+/// `FoldedDeclProvider` which return `None` in this scenario are not forbidden,
+/// but they may violate invariants of users of `FoldedDeclProvider` (like
+/// `TypingDeclProvider` implementations) in the event of disk changes.
 pub trait FoldedDeclProvider<R: Reason>: Debug + Send + Sync {
     /// Fetch the declaration of the toplevel function with the given name.
     fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>>;

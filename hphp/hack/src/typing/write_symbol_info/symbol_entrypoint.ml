@@ -8,6 +8,7 @@
 
 open Hh_prelude
 open Hh_json
+module File_info = Symbol_file_info
 
 let log_elapsed s elapsed =
   let { Unix.tm_min; tm_sec; _ } = Unix.gmtime elapsed in
@@ -32,11 +33,11 @@ let write_file file_dir num_tasts json_chunks =
 let write_json
     (ctx : Provider_context.t)
     (file_dir : string)
-    (files_info : Symbol_file_info.t list)
+    (files_info : File_info.t list)
     (start_time : float) : float =
   (try
      let (small, large) =
-       List.partition_tf files_info ~f:(fun (_, tast, _) ->
+       List.partition_tf files_info ~f:(fun File_info.{ tast; _ } ->
            List.length tast <= 2000)
      in
      if List.is_empty large then
@@ -45,9 +46,9 @@ let write_json
      else
        let json_chunks = Symbol_json_builder.build_json ctx small in
        write_file file_dir (List.length small) json_chunks;
-       List.iter large ~f:(fun (fp, tast, st) ->
+       List.iter large ~f:(fun (File_info.{ tast; _ } as file_info) ->
            let decl_json_chunks =
-             Symbol_json_builder.build_decls_json ctx [(fp, tast, st)]
+             Symbol_json_builder.build_decls_json ctx [file_info]
            in
            write_file file_dir 1 decl_json_chunks;
            let xref_json_chunks =
@@ -72,14 +73,7 @@ let recheck_job
     (_ : float)
     (progress : Relative_path.t list) : float =
   let start_time = Unix.gettimeofday () in
-  let files_info =
-    List.map progress ~f:(fun path ->
-        let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
-        let { Tast_provider.Compute_tast.tast; _ } =
-          Tast_provider.compute_tast_unquarantined ~ctx ~entry
-        in
-        (path, tast, entry.Provider_context.source_text))
-  in
+  let files_info = List.map progress ~f:(File_info.create ctx) in
   Relative_path.set_path_prefix Relative_path.Root (Path.make root_path);
   Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi_path);
   write_json ctx out_dir files_info start_time

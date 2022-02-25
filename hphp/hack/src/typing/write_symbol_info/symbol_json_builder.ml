@@ -13,6 +13,7 @@ module Fact_acc = Symbol_predicate.Fact_acc
 module Util = Symbol_json_util
 module Build = Symbol_build_json
 module Predicate = Symbol_predicate
+module File_info = Symbol_file_info
 
 let is_enum_or_enum_class = function
   | Ast_defs.Cenum
@@ -388,13 +389,13 @@ let process_typedef_xref symbol_name pos (xrefs, prog) =
     pos
     (xrefs, prog)
 
-let process_decls ctx (files_info : Symbol_file_info.t list) =
+let process_decls ctx (files_info : File_info.t list) =
   let (source_map, progress) =
     List.fold
       files_info
       ~init:(SMap.empty, Fact_acc.init)
-      ~f:(fun (fm, prog) (fp, _, source_text) ->
-        let filepath = Relative_path.to_absolute fp in
+      ~f:(fun (fm, prog) File_info.{ path; source_text; _ } ->
+        let filepath = Relative_path.to_absolute path in
         match source_text with
         | None ->
           Hh_logger.log "WARNING: no source text for %s" filepath;
@@ -404,7 +405,10 @@ let process_decls ctx (files_info : Symbol_file_info.t list) =
           let (_, prog) = Add_fact.file_lines filepath st prog in
           (fm, prog))
   in
-  List.fold files_info ~init:progress ~f:(fun prog (fp, tast, _) ->
+  List.fold
+    files_info
+    ~init:progress
+    ~f:(fun prog File_info.{ path; tast; _ } ->
       let (file_decls, prog) =
         List.fold tast ~init:([], prog) ~f:(fun acc def ->
             match def with
@@ -416,7 +420,7 @@ let process_decls ctx (files_info : Symbol_file_info.t list) =
             | Typedef td -> process_typedef_decl ctx source_map td acc
             | _ -> acc)
       in
-      let filepath = Relative_path.to_absolute fp in
+      let filepath = Relative_path.to_absolute path in
       let (_, prog) = Add_fact.file_decls filepath file_decls prog in
       prog)
 
@@ -491,8 +495,8 @@ let process_xrefs ctx (tasts : Tast.program list) progress =
                   | _ -> (xrefs, prog))))
       in
       SMap.fold
-        (fun fp target_map acc ->
-          let (_, res) = Add_fact.file_xrefs fp target_map acc in
+        (fun path target_map acc ->
+          let (_, res) = Add_fact.file_xrefs path target_map acc in
           res)
         file_xrefs
         prog)
@@ -516,7 +520,7 @@ let build_json ctx files_info =
   let progress =
     process_xrefs
       ctx
-      (List.map files_info ~f:(fun (_, tast, _) -> tast))
+      (List.map files_info ~f:(fun File_info.{ tast; _ } -> tast))
       progress
   in
   Fact_acc.to_json progress

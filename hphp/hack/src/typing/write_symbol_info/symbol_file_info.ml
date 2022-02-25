@@ -6,4 +6,16 @@
  *
  *)
 
-type t = Relative_path.t * Tast.program * Full_fidelity_source_text.t option
+type t = {
+  path: Relative_path.t;
+  tast: Tast.program;
+  source_text: Full_fidelity_source_text.t option;
+}
+
+let create ctx path =
+  let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+  let { Tast_provider.Compute_tast.tast; _ } =
+    Tast_provider.compute_tast_unquarantined ~ctx ~entry
+  in
+  let source_text = entry.Provider_context.source_text in
+  { path; tast; source_text }

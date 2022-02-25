@@ -18,7 +18,6 @@ use hhas_type_const::HhasTypeConstant;
 use hhas_xhp_attribute::HhasXhpAttribute;
 use hhbc_ast::{FcallArgs, Visibility};
 use hhbc_id::class::ClassType;
-use hhbc_id::r#const::ConstType;
 use hhbc_id::{self as hhbc_id, class, method, prop};
 use hhbc_string_utils as string_utils;
 use hhvm_hhbc_defs_ffi::ffi::{FCallArgsFlags, FatalOp, ReadonlyOp, SpecialClsRef};
@@ -31,7 +30,6 @@ use oxidized::{
     ast,
     ast::{Hint, ReifyKind, RequireKind},
     namespace_env,
-    pos::Pos,
 };
 use runtime::TypedValue;
 
@@ -790,64 +788,53 @@ pub fn emit_class<'a, 'arena, 'decl>(
     let cinit_method = if initialized_constants.is_empty() {
         None
     } else {
-        fn make_cinit_instrs<'arena, 'decl>(
-            alloc: &'arena bumpalo::Bump,
-            e: &mut Emitter<'arena, 'decl>,
-            default_label: label::Label,
-            pos: &Pos,
-            consts: &[(&ConstType<'arena>, label::Label, InstrSeq<'arena>)],
-        ) -> InstrSeq<'arena> {
-            match consts {
-                [] => InstrSeq::gather(vec![
-                    instr::label(default_label),
-                    emit_pos::emit_pos(pos),
-                    instr::string(alloc, "Could not find initializer for "),
-                    instr::cgetl(Local::Named(Slice::new("$constName".as_bytes()))),
-                    instr::string(alloc, " in 86cinit"),
-                    instr::concatn(3),
-                    instr::fatal(FatalOp::Runtime),
-                ]),
-                [(_, label, ref instrs), cs @ ..] => InstrSeq::gather(vec![
-                    instr::label(*label),
-                    InstrSeq::clone(instrs),
-                    emit_pos::emit_pos(pos),
-                    instr::retc(),
-                    make_cinit_instrs(alloc, e, default_label, pos, cs),
-                ]),
-            }
-        }
-        let default_label = emitter.label_gen_mut().next_regular();
-
-        let body_instrs = {
-            let mut cases =
-                bumpalo::collections::Vec::with_capacity_in(initialized_constants.len() + 1, alloc);
-            for (name, label, _) in &initialized_constants {
-                let n: &str = alloc.alloc_str((*name).unsafe_as_str());
-                cases.push((n, *label))
-            }
-            cases.push((alloc.alloc_str("default"), default_label));
-            InstrSeq::gather(vec![
-                instr::cgetl(Local::Named(Slice::new("$constName".as_bytes()))),
-                instr::sswitch(alloc, cases),
-                make_cinit_instrs(
-                    alloc,
-                    emitter,
-                    default_label,
-                    &ast_class.span,
-                    &initialized_constants,
-                ),
-            ])
-        };
-        let instrs = emit_pos::emit_pos_then(&ast_class.span, body_instrs);
+        let param_name = Str::new_str(alloc, "$constName");
+        let param_local = Local::Named(param_name);
         let params = vec![HhasParam {
-            name: Str::new_str(alloc, "$constName"),
+            name: param_name,
             is_variadic: false,
             is_inout: false,
             is_readonly: false,
             user_attributes: Slice::empty(),
-            type_info: Nothing,
+            type_info: Nothing, // string?
             default_value: Nothing,
         }];
+        let default_label = emitter.label_gen_mut().next_regular();
+        let mut cases =
+            bumpalo::collections::Vec::with_capacity_in(initialized_constants.len() + 1, alloc);
+        for (name, label, _) in &initialized_constants {
+            let n: &str = alloc.alloc_str((*name).unsafe_as_str());
+            cases.push((n, *label))
+        }
+        cases.push((alloc.alloc_str("default"), default_label));
+        let pos = &ast_class.span;
+        let instrs = InstrSeq::gather(vec![
+            emit_pos::emit_pos(pos),
+            instr::cgetl(param_local),
+            instr::sswitch(alloc, cases),
+            InstrSeq::gather(
+                initialized_constants
+                    .into_iter()
+                    .map(|(_, label, init_instrs)| {
+                        // one case for each constant
+                        InstrSeq::gather(vec![
+                            instr::label(label),
+                            init_instrs,
+                            emit_pos::emit_pos(pos),
+                            instr::retc(),
+                        ])
+                    })
+                    .collect(),
+            ),
+            // default case for constant-not-found
+            instr::label(default_label),
+            emit_pos::emit_pos(pos),
+            instr::string(alloc, "Could not find initializer for "),
+            instr::cgetl(param_local),
+            instr::string(alloc, " in 86cinit"),
+            instr::concatn(3),
+            instr::fatal(FatalOp::Runtime),
+        ]);
 
         Some(make_86method(
             alloc,

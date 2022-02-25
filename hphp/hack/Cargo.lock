@@ -1048,7 +1048,6 @@ dependencies = [
  "hhvm_types_ffi",
  "instruction_sequence",
  "itertools 0.10.3",
- "label",
  "local",
  "naming_special_names_rust",
  "oxidized",

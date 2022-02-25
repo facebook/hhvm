@@ -3,13 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{ShallowDeclCache, TypeDecl};
+use super::{Error, Result, ShallowDeclCache, TypeDecl};
 use crate::decl_defs::{ConstDecl, DeclTy, FunDecl};
 use crate::decl_parser::DeclParser;
 use crate::naming_provider::NamingProvider;
 use crate::reason::Reason;
 use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
-use std::io;
 use std::sync::Arc;
 
 /// A `ShallowDeclProvider` which, if the requested name is not present in its
@@ -36,116 +35,122 @@ impl<R: Reason> LazyShallowDeclProvider<R> {
         }
     }
 
-    fn parse_and_cache_decls_in(&self, path: RelativePath) -> io::Result<()> {
-        self.cache.add_decls(self.parser.parse(path)?);
+    fn parse_and_cache_decls_in(&self, path: RelativePath) -> Result<()> {
+        let decls_result = self.parser.parse(path);
+        let decls = decls_result.map_err(|io_error| Error::DeclParse { path, io_error })?;
+        self.cache.add_decls(decls);
         Ok(())
     }
 }
 
 impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
-    fn get_fun(&self, name: FunName) -> Option<Arc<FunDecl<R>>> {
+    fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
         if let res @ Some(..) = self.cache.get_fun(name) {
-            return res;
+            return Ok(res);
         }
-        if let Some(path) = self.naming_provider.get_fun_path(name).unwrap() {
-            self.parse_and_cache_decls_in(path).unwrap();
-            return self.cache.get_fun(name);
+        if let Some(path) = self.naming_provider.get_fun_path(name)? {
+            self.parse_and_cache_decls_in(path)?;
+            return Ok(self.cache.get_fun(name));
         }
-        None
+        Ok(None)
     }
 
-    fn get_const(&self, name: ConstName) -> Option<Arc<ConstDecl<R>>> {
+    fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
         if let res @ Some(..) = self.cache.get_const(name) {
-            return res;
+            return Ok(res);
         }
-        if let Some(path) = self.naming_provider.get_const_path(name).unwrap() {
-            self.parse_and_cache_decls_in(path).unwrap();
-            return self.cache.get_const(name);
+        if let Some(path) = self.naming_provider.get_const_path(name)? {
+            self.parse_and_cache_decls_in(path)?;
+            return Ok(self.cache.get_const(name));
         }
-        None
+        Ok(None)
     }
 
-    fn get_type(&self, name: TypeName) -> Option<TypeDecl<R>> {
+    fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
         if let res @ Some(..) = self.cache.get_type(name) {
-            return res;
+            return Ok(res);
         }
-        if let Some(path) = self.naming_provider.get_type_path(name).unwrap() {
-            self.parse_and_cache_decls_in(path).unwrap();
-            return self.cache.get_type(name);
+        if let Some(path) = self.naming_provider.get_type_path(name)? {
+            self.parse_and_cache_decls_in(path)?;
+            return Ok(self.cache.get_type(name));
         }
-        None
+        Ok(None)
     }
 
     fn get_property_type(
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Option<DeclTy<R>> {
+    ) -> Result<Option<DeclTy<R>>> {
         if let res @ Some(..) = self.cache.get_property_type(class_name, property_name) {
-            return res;
+            return Ok(res);
         }
-        if let Some(path) = self.naming_provider.get_type_path(class_name).unwrap() {
-            self.parse_and_cache_decls_in(path).unwrap();
-            return self.cache.get_property_type(class_name, property_name);
+        if let Some(path) = self.naming_provider.get_type_path(class_name)? {
+            self.parse_and_cache_decls_in(path)?;
+            return Ok(self.cache.get_property_type(class_name, property_name));
         }
-        None
+        Ok(None)
     }
 
     fn get_static_property_type(
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Option<DeclTy<R>> {
+    ) -> Result<Option<DeclTy<R>>> {
         if let res @ Some(..) = self
             .cache
             .get_static_property_type(class_name, property_name)
         {
-            return res;
+            return Ok(res);
         }
-        if let Some(path) = self.naming_provider.get_type_path(class_name).unwrap() {
-            self.parse_and_cache_decls_in(path).unwrap();
-            return self
+        if let Some(path) = self.naming_provider.get_type_path(class_name)? {
+            self.parse_and_cache_decls_in(path)?;
+            return Ok(self
                 .cache
-                .get_static_property_type(class_name, property_name);
+                .get_static_property_type(class_name, property_name));
         }
-        None
+        Ok(None)
     }
 
-    fn get_method_type(&self, class_name: TypeName, method_name: MethodName) -> Option<DeclTy<R>> {
+    fn get_method_type(
+        &self,
+        class_name: TypeName,
+        method_name: MethodName,
+    ) -> Result<Option<DeclTy<R>>> {
         if let res @ Some(..) = self.cache.get_method_type(class_name, method_name) {
-            return res;
+            return Ok(res);
         }
-        if let Some(path) = self.naming_provider.get_type_path(class_name).unwrap() {
-            self.parse_and_cache_decls_in(path).unwrap();
-            return self.cache.get_method_type(class_name, method_name);
+        if let Some(path) = self.naming_provider.get_type_path(class_name)? {
+            self.parse_and_cache_decls_in(path)?;
+            return Ok(self.cache.get_method_type(class_name, method_name));
         }
-        None
+        Ok(None)
     }
 
     fn get_static_method_type(
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Option<DeclTy<R>> {
+    ) -> Result<Option<DeclTy<R>>> {
         if let res @ Some(..) = self.cache.get_static_method_type(class_name, method_name) {
-            return res;
+            return Ok(res);
         }
-        if let Some(path) = self.naming_provider.get_type_path(class_name).unwrap() {
-            self.parse_and_cache_decls_in(path).unwrap();
-            return self.cache.get_static_method_type(class_name, method_name);
+        if let Some(path) = self.naming_provider.get_type_path(class_name)? {
+            self.parse_and_cache_decls_in(path)?;
+            return Ok(self.cache.get_static_method_type(class_name, method_name));
         }
-        None
+        Ok(None)
     }
 
-    fn get_constructor_type(&self, class_name: TypeName) -> Option<DeclTy<R>> {
+    fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<DeclTy<R>>> {
         if let res @ Some(..) = self.cache.get_constructor_type(class_name) {
-            return res;
+            return Ok(res);
         }
-        if let Some(path) = self.naming_provider.get_type_path(class_name).unwrap() {
-            self.parse_and_cache_decls_in(path).unwrap();
-            return self.cache.get_constructor_type(class_name);
+        if let Some(path) = self.naming_provider.get_type_path(class_name)? {
+            self.parse_and_cache_decls_in(path)?;
+            return Ok(self.cache.get_constructor_type(class_name));
         }
-        None
+        Ok(None)
     }
 }
 
@@ -164,48 +169,53 @@ impl<R: Reason> EagerShallowDeclProvider<R> {
 }
 
 impl<R: Reason> super::ShallowDeclProvider<R> for EagerShallowDeclProvider<R> {
-    fn get_fun(&self, name: FunName) -> Option<Arc<FunDecl<R>>> {
-        self.cache.get_fun(name)
+    fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
+        Ok(self.cache.get_fun(name))
     }
 
-    fn get_const(&self, name: ConstName) -> Option<Arc<ConstDecl<R>>> {
-        self.cache.get_const(name)
+    fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
+        Ok(self.cache.get_const(name))
     }
 
-    fn get_type(&self, name: TypeName) -> Option<TypeDecl<R>> {
-        self.cache.get_type(name)
+    fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
+        Ok(self.cache.get_type(name))
     }
 
     fn get_property_type(
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Option<DeclTy<R>> {
-        self.cache.get_property_type(class_name, property_name)
+    ) -> Result<Option<DeclTy<R>>> {
+        Ok(self.cache.get_property_type(class_name, property_name))
     }
 
     fn get_static_property_type(
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Option<DeclTy<R>> {
-        self.cache
-            .get_static_property_type(class_name, property_name)
+    ) -> Result<Option<DeclTy<R>>> {
+        Ok(self
+            .cache
+            .get_static_property_type(class_name, property_name))
     }
 
-    fn get_method_type(&self, class_name: TypeName, method_name: MethodName) -> Option<DeclTy<R>> {
-        self.cache.get_method_type(class_name, method_name)
+    fn get_method_type(
+        &self,
+        class_name: TypeName,
+        method_name: MethodName,
+    ) -> Result<Option<DeclTy<R>>> {
+        Ok(self.cache.get_method_type(class_name, method_name))
     }
 
     fn get_static_method_type(
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Option<DeclTy<R>> {
-        self.cache.get_static_method_type(class_name, method_name)
+    ) -> Result<Option<DeclTy<R>>> {
+        Ok(self.cache.get_static_method_type(class_name, method_name))
     }
 
-    fn get_constructor_type(&self, class_name: TypeName) -> Option<DeclTy<R>> {
-        self.cache.get_constructor_type(class_name)
+    fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<DeclTy<R>>> {
+        Ok(self.cache.get_constructor_type(class_name))
     }
 }

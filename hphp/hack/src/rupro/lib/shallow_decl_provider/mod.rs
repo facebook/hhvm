@@ -8,7 +8,7 @@ use crate::decl_defs::{
     DeclTy, ShallowClass,
 };
 use crate::reason::Reason;
-use pos::{ConstName, FunName, MethodName, PropName, TypeName};
+use pos::{ConstName, FunName, MethodName, PropName, RelativePath, TypeName};
 use std::fmt::Debug;
 use std::sync::Arc;
 
@@ -17,6 +17,20 @@ mod provider;
 
 pub use cache::ShallowDeclCache;
 pub use provider::{EagerShallowDeclProvider, LazyShallowDeclProvider};
+
+pub type Result<T, E = Error> = std::result::Result<T, E>;
+
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("{0}")]
+    Naming(#[from] crate::naming_provider::Error),
+    #[error("Failed to parse decls in {path:?}: {io_error}")]
+    DeclParse {
+        path: RelativePath,
+        #[source]
+        io_error: std::io::Error,
+    },
+}
 
 #[derive(Clone, Debug)]
 pub enum TypeDecl<R: Reason> {
@@ -45,30 +59,30 @@ pub enum TypeDecl<R: Reason> {
 /// using the name of the "origin" class which defined it.
 pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
     /// Fetch the declaration of the toplevel function with the given name.
-    fn get_fun(&self, name: FunName) -> Option<Arc<FunDecl<R>>>;
+    fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>>;
 
     /// Fetch the declaration of the global constant with the given name.
-    fn get_const(&self, name: ConstName) -> Option<Arc<ConstDecl<R>>>;
+    fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>>;
 
     /// Fetch the declaration of the class or typedef with the given name.
-    fn get_type(&self, name: TypeName) -> Option<TypeDecl<R>>;
+    fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>>;
 
     /// Fetch the declaration of the typedef with the given name. If the given
     /// name is bound to a class rather than a typedef, return `None`.
-    fn get_typedef(&self, name: TypeName) -> Option<Arc<TypedefDecl<R>>> {
-        self.get_type(name).and_then(|decl| match decl {
+    fn get_typedef(&self, name: TypeName) -> Result<Option<Arc<TypedefDecl<R>>>> {
+        Ok(self.get_type(name)?.and_then(|decl| match decl {
             TypeDecl::Typedef(td) => Some(td),
             TypeDecl::Class(..) => None,
-        })
+        }))
     }
 
     /// Fetch the declaration of the class with the given name. If the given
     /// name is bound to a typedef rather than a class, return `None`.
-    fn get_class(&self, name: TypeName) -> Option<Arc<ShallowClass<R>>> {
-        self.get_type(name).and_then(|decl| match decl {
+    fn get_class(&self, name: TypeName) -> Result<Option<Arc<ShallowClass<R>>>> {
+        Ok(self.get_type(name)?.and_then(|decl| match decl {
             TypeDecl::Class(cls) => Some(cls),
             TypeDecl::Typedef(..) => None,
-        })
+        }))
     }
 
     /// Fetch the type of the property with the given name from the given
@@ -80,8 +94,11 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
     /// stores data in a serialized format, implementations of this method
     /// should only deserialize the one property type, not the entire containing
     /// `ShallowClass`.
-    fn get_property_type(&self, class_name: TypeName, property_name: PropName)
-        -> Option<DeclTy<R>>;
+    fn get_property_type(
+        &self,
+        class_name: TypeName,
+        property_name: PropName,
+    ) -> Result<Option<DeclTy<R>>>;
 
     /// Fetch the type of the property with the given name from the given
     /// shallow class. When multiple properties are declared with the same name,
@@ -96,7 +113,7 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
         &self,
         class_name: TypeName,
         property_name: PropName,
-    ) -> Option<DeclTy<R>>;
+    ) -> Result<Option<DeclTy<R>>>;
 
     /// Fetch the type of the method with the given name from the given shallow
     /// class. When multiple methods are declared with the same name, return the
@@ -107,7 +124,11 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
     /// stores data in a serialized format, implementations of this method
     /// should only deserialize the one method type, not the entire containing
     /// `ShallowClass`.
-    fn get_method_type(&self, class_name: TypeName, method_name: MethodName) -> Option<DeclTy<R>>;
+    fn get_method_type(
+        &self,
+        class_name: TypeName,
+        method_name: MethodName,
+    ) -> Result<Option<DeclTy<R>>>;
 
     /// Fetch the type of the method with the given name from the given shallow
     /// class. When multiple methods are declared with the same name, return the
@@ -122,7 +143,7 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
         &self,
         class_name: TypeName,
         method_name: MethodName,
-    ) -> Option<DeclTy<R>>;
+    ) -> Result<Option<DeclTy<R>>>;
 
     /// Fetch the type of the constructor declared in the given shallow class.
     ///
@@ -131,5 +152,5 @@ pub trait ShallowDeclProvider<R: Reason>: Debug + Send + Sync {
     /// stores data in a serialized format, implementations of this method
     /// should only deserialize the one constructor type, not the entire
     /// containing `ShallowClass`.
-    fn get_constructor_type(&self, class_name: TypeName) -> Option<DeclTy<R>>;
+    fn get_constructor_type(&self, class_name: TypeName) -> Result<Option<DeclTy<R>>>;
 }

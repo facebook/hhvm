@@ -137,9 +137,13 @@ let shapes_idx_not_null env shape_ty (ty, p, field) =
         p
         shape_ty
     in
-    let refine_type env shape_ty =
+    let rec refine_type env shape_ty =
       let (env, shape_ty) = Env.expand_type env shape_ty in
       match deref shape_ty with
+      | (r, Tnewtype (n, _, ty))
+        when String.equal n Naming_special_names.Classes.cSupportDyn ->
+        let (env, ty) = refine_type env ty in
+        (env, MakeType.supportdyn r ty)
       | (r, Tshape (shape_kind, ftm)) ->
         let (env, field_type) =
           match TShapeMap.find_opt field ftm with
@@ -163,11 +167,10 @@ let shapes_idx_not_null env shape_ty (ty, p, field) =
         (env, shape_ty)
     in
     (match deref shape_ty with
-    | (_, Tshape _) -> refine_type env shape_ty
     | (r, Tunion tyl) ->
       let (env, tyl) = List.map_env env tyl ~f:refine_type in
       Typing_union.union_list env r tyl
-    | _ -> (env, shape_ty))
+    | _ -> refine_type env shape_ty)
 
 let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
   mk

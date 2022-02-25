@@ -28,6 +28,8 @@ oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 pos = { path = "../../lib/pos" }
+rusqlite = { version = "0.26.3", features = ["backup", "blob", "column_decltype"] }
 rust_aast_parser_types = { path = "../../../parser/cargo/rust_aast_parser_types" }
 stack_limit = { path = "../../../utils/stack_limit" }
 static_assertions = "1.1.0"
+thiserror = "1.0.29"

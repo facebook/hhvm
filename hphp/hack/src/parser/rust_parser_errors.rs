@@ -5384,7 +5384,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 }
             }
             UpcastExpression(_) => {
-                self.check_can_use_feature(node, &UnstableFeatures::UpcastExpression)
+                if !self.env.parser_options.tco_enable_sound_dynamic {
+                    self.check_can_use_feature(node, &UnstableFeatures::UpcastExpression)
+                }
             }
             OldAttributeSpecification(x) => {
                 let attributes = self.text(&x.attributes).split(',');

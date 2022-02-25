@@ -1,8 +1,8 @@
-File "generic_params_2.bad.php", line 11, characters 16-29:
+File "generic_params_2.bad.php", line 11, characters 16-33:
 Invalid argument (Typing[4110])
   File "generic_params_2.bad.php", line 6, characters 32-32:
   Expected `T`
   File "generic_params_2.bad.php", line 9, characters 23-23:
     via this generic `T`
-  File "generic_params_2.bad.php", line 11, characters 23-29:
+  File "generic_params_2.bad.php", line 11, characters 27-33:
   But got `dynamic`

@@ -1062,9 +1062,8 @@ let fun_type_of_id env x tal el =
             ft)
       in
       let fty =
-        Typing_dynamic.relax_method_type
-          env
-          fe_support_dynamic_type
+        Typing_dynamic.maybe_wrap_with_supportdyn
+          ~should_wrap:fe_support_dynamic_type
           (get_reason fe_type)
           ft
       in
@@ -1299,6 +1298,19 @@ let call_param
     param_kind
     (((_, pos, expr_) as e : Nast.expr), arg_ty)
     ~is_variadic : env * (locl_ty * locl_ty) option =
+  Typing_log.(
+    log_with_level env "typing" ~level:2 (fun () ->
+        log_types
+          (Pos_or_decl.of_raw_pos pos)
+          env
+          [
+            Log_head
+              ( "Typing.call_param ",
+                [
+                  Log_type ("param_ty", param.fp_type.et_type);
+                  Log_type ("arg_ty", arg_ty);
+                ] );
+          ]));
   param_modes ~is_variadic param e param_kind;
   (* When checking params, the type 'x' may be expression dependent. Since
    * we store the expression id in the local env for Lvar, we want to apply

@@ -175,6 +175,15 @@ let make_like changed ty =
     let r = get_reason ty in
     (true, Typing_make_type.locl_like r ty)
 
+let maybe_wrap_with_supportdyn ~should_wrap r ty =
+  let locl_r = Typing_reason.localize r in
+  let ty = Tfun ty in
+  if should_wrap then
+    let r = Typing_reason.Rsupport_dynamic_type (Typing_reason.to_pos r) in
+    Typing_make_type.supportdyn r (mk (locl_r, ty))
+  else
+    mk (locl_r, ty)
+
 let push_like_tyargs env tyl tparams =
   if List.length tyl <> List.length tparams then
     (false, tyl)

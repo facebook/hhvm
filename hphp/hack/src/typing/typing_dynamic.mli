@@ -51,6 +51,12 @@ val relax_method_type :
   Typing_defs.locl_ty Typing_defs_core.fun_type ->
   Typing_defs.locl_ty
 
+val maybe_wrap_with_supportdyn :
+  should_wrap:bool ->
+  Typing_reason.decl_t ->
+  Typing_defs.locl_ty Typing_defs_core.fun_type ->
+  Typing_defs.locl_ty
+
 (* Make parameters of SDT types (tuples, shapes, and classes) into like types,
  * if that results in a well-formed type, otherwise leave them alone.
  * Return None if no change was made.

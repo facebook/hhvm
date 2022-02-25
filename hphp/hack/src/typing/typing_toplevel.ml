@@ -996,7 +996,7 @@ let check_static_class_element get_dyn_elt element_name static_pos ~elt_type =
 
 (** Error if there are abstract methods that this class is supposed to provide
     an implementation for. *)
-let check_extend_abstract_meth ~is_final c_name seq =
+let check_extend_abstract_meth ~is_final ~is_static c_name seq =
   List.iter seq ~f:(fun (meth_name, ce) ->
       match ce.ce_type with
       | (lazy ty) when get_ce_abstract ce && is_fun ty ->
@@ -1006,7 +1006,7 @@ let check_extend_abstract_meth ~is_final c_name seq =
             (Markdown_lite.md_codify
                (Utils.strip_ns ce.ce_origin ^ "::" ^ meth_name))
         in
-        let new_text = Typing_skeleton.of_method meth_name ce in
+        let new_text = Typing_skeleton.of_method meth_name ce ~is_static in
         let quickfixes =
           [Quickfix.make_classish ~title ~new_text ~classish_name:(snd c_name)]
         in
@@ -1101,12 +1101,21 @@ let check_extend_abstract c_name tc =
       >>| (fun cstr -> (SN.Members.__construct, cstr))
       |> Option.to_list
     in
-    check_extend_abstract_meth ~is_final c_name (Cls.methods tc);
     check_extend_abstract_meth
       ~is_final
+      ~is_static:false
+      c_name
+      (Cls.methods tc);
+    check_extend_abstract_meth
+      ~is_final
+      ~is_static:false
       c_name
       (Cls.construct tc |> constructor_as_list);
-    check_extend_abstract_meth ~is_final c_name (Cls.smethods tc);
+    check_extend_abstract_meth
+      ~is_final
+      ~is_static:true
+      c_name
+      (Cls.smethods tc);
     check_extend_abstract_prop ~is_final (fst c_name) (Cls.sprops tc);
     check_extend_abstract_const ~is_final (fst c_name) (Cls.consts tc);
     check_extend_abstract_typeconst ~is_final (fst c_name) (Cls.typeconsts tc)

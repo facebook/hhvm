@@ -185,17 +185,29 @@ let check_class_elt_visibility parent_class_elt class_elt on_error =
   let (lazy pos) = class_elt.ce_pos in
   check_visibility parent_vis c_vis parent_pos pos on_error
 
+let is_static = function
+  | MemberKind.Property
+  | MemberKind.Method
+  | MemberKind.Constructor _ ->
+    false
+  | MemberKind.Static_property
+  | MemberKind.Static_method ->
+    true
+
 let stub_meth_quickfix
     (class_name : string)
     (parent_name : string)
     (meth_name : string)
-    (meth : class_elt) : Quickfix.t =
+    (meth : class_elt)
+    (member_kind : MemberKind.t) : Quickfix.t =
   let title =
     Printf.sprintf
       "Add stub method %s"
       (Markdown_lite.md_codify (Utils.strip_ns parent_name ^ "::" ^ meth_name))
   in
-  let new_text = Typing_skeleton.of_method meth_name meth in
+  let new_text =
+    Typing_skeleton.of_method meth_name meth ~is_static:(is_static member_kind)
+  in
   Quickfix.make_classish ~title ~new_text ~classish_name:class_name
 
 let get_member member_kind class_ =
@@ -207,10 +219,12 @@ let get_member member_kind class_ =
   | MemberKind.Constructor _ -> (fun _ -> fst (Cls.construct class_))
 
 let member_not_implemented_error
-    class_name parent_name member_name class_elt pos parent_pos =
+    class_name parent_name member_name class_elt pos parent_pos member_kind =
   let (lazy defn_pos) = class_elt.ce_pos in
   let quickfixes =
-    [stub_meth_quickfix class_name parent_name member_name class_elt]
+    [
+      stub_meth_quickfix class_name parent_name member_name class_elt member_kind;
+    ]
   in
   let err =
     Typing_error.(
@@ -905,7 +919,8 @@ let check_class_against_parent_class_elt
       member_name
       parent_class_elt
       class_pos
-      parent_name_pos;
+      parent_name_pos
+      member_kind;
     env
 
 let check_members_from_all_parents

@@ -6,5 +6,6 @@
  *
  *)
 
-(** [of_method name meth] generates source code for a method skeleton that matches [meth]. *)
-val of_method : string -> Typing_defs.class_elt -> string
+(** [of_method name meth ~is_static] generates source code for a method skeleton
+    that matches [meth], with the appropriate static-ness w.r.t. [~is_static] *)
+val of_method : string -> Typing_defs.class_elt -> is_static:bool -> string

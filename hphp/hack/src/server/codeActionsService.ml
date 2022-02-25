@@ -17,14 +17,17 @@ let to_range (pos : Pos.t) : Lsp.range =
     end_ = { Lsp.line = last_line - 1; character = last_col };
   }
 
-let stub_meth_source (name : string) (meth : Typing_defs.class_elt) : string =
-  "\n  <<__Override>>" ^ Typing_skeleton.of_method name meth
+let stub_meth_source
+    ~(is_static : bool) (name : string) (meth : Typing_defs.class_elt) : string
+    =
+  "\n  <<__Override>>" ^ Typing_skeleton.of_method name meth ~is_static
 
 let stub_method_action
+    ~(is_static : bool)
     (class_name : string)
     (parent_name : string)
     ((meth_name, meth) : string * Typing_defs.class_elt) : Quickfix.t =
-  let new_text = stub_meth_source meth_name meth in
+  let new_text = stub_meth_source ~is_static meth_name meth in
   let title =
     Printf.sprintf
       "Add override for %s::%s"
@@ -45,12 +48,13 @@ let override_method_quickfixes
 
   match Decl_provider.get_class (Tast_env.get_ctx env) parent_name with
   | Some decl ->
-    let inherited_methods =
-      List.filter
-        (Cls.methods decl @ Cls.smethods decl)
-        ~f:(fun (name, _) -> not (SSet.mem name existing_methods))
+    let actions_for_methods ~is_static methods =
+      methods
+      |> List.filter ~f:(fun (name, _) -> not (SSet.mem name existing_methods))
+      |> List.map ~f:(stub_method_action ~is_static class_name parent_name)
     in
-    List.map inherited_methods ~f:(stub_method_action class_name parent_name)
+    actions_for_methods ~is_static:false (Cls.methods decl)
+    @ actions_for_methods ~is_static:true (Cls.smethods decl)
   | None -> []
 
 (* Quickfixes available at cursor position [start_line] and

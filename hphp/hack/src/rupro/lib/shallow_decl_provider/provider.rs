@@ -47,7 +47,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         if let res @ Some(..) = self.cache.get_fun(name) {
             return res;
         }
-        if let Some(path) = self.naming_provider.get_fun_path(name) {
+        if let Some(path) = self.naming_provider.get_fun_path(name).unwrap() {
             self.parse_and_cache_decls_in(path).unwrap();
             return self.cache.get_fun(name);
         }
@@ -58,7 +58,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         if let res @ Some(..) = self.cache.get_const(name) {
             return res;
         }
-        if let Some(path) = self.naming_provider.get_const_path(name) {
+        if let Some(path) = self.naming_provider.get_const_path(name).unwrap() {
             self.parse_and_cache_decls_in(path).unwrap();
             return self.cache.get_const(name);
         }
@@ -69,7 +69,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         if let res @ Some(..) = self.cache.get_type(name) {
             return res;
         }
-        if let Some(path) = self.naming_provider.get_type_path(name) {
+        if let Some(path) = self.naming_provider.get_type_path(name).unwrap() {
             self.parse_and_cache_decls_in(path).unwrap();
             return self.cache.get_type(name);
         }
@@ -84,7 +84,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         if let res @ Some(..) = self.cache.get_property_type(class_name, property_name) {
             return res;
         }
-        if let Some(path) = self.naming_provider.get_type_path(class_name) {
+        if let Some(path) = self.naming_provider.get_type_path(class_name).unwrap() {
             self.parse_and_cache_decls_in(path).unwrap();
             return self.cache.get_property_type(class_name, property_name);
         }
@@ -102,7 +102,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         {
             return res;
         }
-        if let Some(path) = self.naming_provider.get_type_path(class_name) {
+        if let Some(path) = self.naming_provider.get_type_path(class_name).unwrap() {
             self.parse_and_cache_decls_in(path).unwrap();
             return self
                 .cache
@@ -115,7 +115,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         if let res @ Some(..) = self.cache.get_method_type(class_name, method_name) {
             return res;
         }
-        if let Some(path) = self.naming_provider.get_type_path(class_name) {
+        if let Some(path) = self.naming_provider.get_type_path(class_name).unwrap() {
             self.parse_and_cache_decls_in(path).unwrap();
             return self.cache.get_method_type(class_name, method_name);
         }
@@ -130,7 +130,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         if let res @ Some(..) = self.cache.get_static_method_type(class_name, method_name) {
             return res;
         }
-        if let Some(path) = self.naming_provider.get_type_path(class_name) {
+        if let Some(path) = self.naming_provider.get_type_path(class_name).unwrap() {
             self.parse_and_cache_decls_in(path).unwrap();
             return self.cache.get_static_method_type(class_name, method_name);
         }
@@ -141,7 +141,7 @@ impl<R: Reason> super::ShallowDeclProvider<R> for LazyShallowDeclProvider<R> {
         if let res @ Some(..) = self.cache.get_constructor_type(class_name) {
             return res;
         }
-        if let Some(path) = self.naming_provider.get_type_path(class_name) {
+        if let Some(path) = self.naming_provider.get_type_path(class_name).unwrap() {
             self.parse_and_cache_decls_in(path).unwrap();
             return self.cache.get_constructor_type(class_name);
         }

@@ -147,7 +147,7 @@ fn make_shallow_decl_provider<R: Reason>(
     if let Some(naming_table_path) = &opts.naming_table {
         Arc::new(LazyShallowDeclProvider::new(
             cache,
-            Arc::new(SqliteNamingTable::new(global_alloc, naming_table_path)),
+            Arc::new(SqliteNamingTable::new(global_alloc, naming_table_path).unwrap()),
             decl_parser.clone(),
         ))
     } else {

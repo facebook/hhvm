@@ -14,9 +14,17 @@ use std::path::Path;
 /// `LazyShallowDeclProvider` only, since folding and typechecking logic should
 /// have no need for a `NamingProvider`.
 pub trait NamingProvider: Debug + Send + Sync {
-    fn get_type_path(&self, name: TypeName) -> Option<RelativePath>;
-    fn get_fun_path(&self, name: FunName) -> Option<RelativePath>;
-    fn get_const_path(&self, name: ConstName) -> Option<RelativePath>;
+    fn get_type_path(&self, name: TypeName) -> Result<Option<RelativePath>>;
+    fn get_fun_path(&self, name: FunName) -> Result<Option<RelativePath>>;
+    fn get_const_path(&self, name: ConstName) -> Result<Option<RelativePath>>;
+}
+
+pub type Result<T, E = Error> = std::result::Result<T, E>;
+
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    #[error("Failed to read SQLite naming table: {0}")]
+    Sqlite(#[from] rusqlite::Error),
 }
 
 /// A naming table in a SQLite database (with the same database schema as
@@ -27,35 +35,35 @@ pub struct SqliteNamingTable {
 }
 
 impl SqliteNamingTable {
-    pub fn new(alloc: &'static GlobalAllocator, path: impl AsRef<Path>) -> Self {
-        Self {
+    pub fn new(alloc: &'static GlobalAllocator, path: impl AsRef<Path>) -> rusqlite::Result<Self> {
+        Ok(Self {
             alloc,
-            names: Mutex::new(names::Names::from_file(path).unwrap()),
-        }
+            names: Mutex::new(names::Names::from_file(path)?),
+        })
     }
 }
 
 impl NamingProvider for SqliteNamingTable {
-    fn get_type_path(&self, name: TypeName) -> Option<RelativePath> {
-        self.names
+    fn get_type_path(&self, name: TypeName) -> Result<Option<RelativePath>> {
+        let path_opt = self
+            .names
             .lock()
-            .get_path_by_symbol_hash(ToplevelSymbolHash::from_type(name.as_str()))
-            .unwrap()
-            .map(|path| self.alloc.relative_path(path.prefix(), path.path()))
+            .get_path_by_symbol_hash(ToplevelSymbolHash::from_type(name.as_str()))?;
+        Ok(path_opt.map(|path| self.alloc.relative_path(path.prefix(), path.path())))
     }
-    fn get_fun_path(&self, name: FunName) -> Option<RelativePath> {
-        self.names
+    fn get_fun_path(&self, name: FunName) -> Result<Option<RelativePath>> {
+        let path_opt = self
+            .names
             .lock()
-            .get_path_by_symbol_hash(ToplevelSymbolHash::from_fun(name.as_str()))
-            .unwrap()
-            .map(|path| self.alloc.relative_path(path.prefix(), path.path()))
+            .get_path_by_symbol_hash(ToplevelSymbolHash::from_fun(name.as_str()))?;
+        Ok(path_opt.map(|path| self.alloc.relative_path(path.prefix(), path.path())))
     }
-    fn get_const_path(&self, name: ConstName) -> Option<RelativePath> {
-        self.names
+    fn get_const_path(&self, name: ConstName) -> Result<Option<RelativePath>> {
+        let path_opt = self
+            .names
             .lock()
-            .get_path_by_symbol_hash(ToplevelSymbolHash::from_const(name.as_str()))
-            .unwrap()
-            .map(|path| self.alloc.relative_path(path.prefix(), path.path()))
+            .get_path_by_symbol_hash(ToplevelSymbolHash::from_const(name.as_str()))?;
+        Ok(path_opt.map(|path| self.alloc.relative_path(path.prefix(), path.path())))
     }
 }
 

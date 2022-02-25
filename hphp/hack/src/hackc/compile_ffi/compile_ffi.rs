@@ -4,7 +4,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use decl_provider::NoDeclProvider;
 use ocamlrep::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_ocamlpool::to_ocaml;
@@ -52,15 +51,8 @@ extern "C" fn compile_from_text_ffi(
                 let env = unsafe { compile::Env::<OcamlStr<'_>>::from_ocaml(env).unwrap() };
                 let mut w = Vec::new();
                 let alloc = bumpalo::Bump::new();
-                match compile::from_text(
-                    &alloc,
-                    &env,
-                    stack_limit,
-                    &mut w,
-                    source_text,
-                    None,
-                    &NoDeclProvider,
-                ) {
+                match compile::from_text(&alloc, &env, stack_limit, &mut w, source_text, None, None)
+                {
                     Ok(profile) => print_output(
                         w,
                         output_config,

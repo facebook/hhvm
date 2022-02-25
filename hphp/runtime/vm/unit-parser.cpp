@@ -164,23 +164,26 @@ CompilerResult hackc_compile(
   CompileAbortMode mode
 ) {
   std::string aliased_namespaces = options.getAliasedNamespacesConfig();
-  int32_t decl_flags = options.getDeclFlags();
 
-  // (Semi-)Mock HhvmDeclProvider. TODO: Hook up with bytecode cache logic.
-  HhvmDeclProvider decl_provider{decl_flags, aliased_namespaces};
+  std::unique_ptr<HhvmDeclProvider> provider{nullptr};
+  if (RuntimeOption::EvalEnableDecl) {
+    // Decls In Compilation mode is enabled. Create the DeclProvider.
+    // (Semi-)Mock HhvmDeclProvider. TODO: Hook up with bytecode cache logic.
+    int32_t decl_flags = options.getDeclFlags();
+    provider = std::make_unique<HhvmDeclProvider>(decl_flags, aliased_namespaces);
+  }
 
   std::uint8_t flags = make_env_flags(
     !SystemLib::s_inited,           // is_systemlib
     false,                          // is_evaled
     forDebuggerEval,                // for_debugger_eval
     true,                           // dump_symbol_refs
-    false,                          // disable_toplevel_elaboration
-    RuntimeOption::EvalEnableDecl   // enable_decl
+    false                           // disable_toplevel_elaboration
   );
 
   NativeEnv const native_env{
-    reinterpret_cast<std::uint64_t>(&decl_provider),
-    reinterpret_cast<std::uint64_t>(&hhvm_decl_provider_get_decl),
+    reinterpret_cast<std::uint64_t>(provider.get()),
+    reinterpret_cast<std::uint64_t>(provider ? &hhvm_decl_provider_get_decl : nullptr),
     filename,
     aliased_namespaces,
     s_misc_config,

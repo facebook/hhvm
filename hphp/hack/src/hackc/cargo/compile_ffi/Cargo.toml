@@ -14,7 +14,6 @@ crate-type = ["lib", "staticlib"]
 anyhow = "1.0.51"
 bumpalo = { version = "3.8", features = ["collections"] }
 compile = { path = "../../compile/cargo/compile" }
-decl_provider = { path = "../../decl_provider" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }

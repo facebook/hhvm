@@ -6,7 +6,6 @@
 use crate::utils;
 use ::anyhow::anyhow;
 use compile::Profile;
-use decl_provider::NoDeclProvider;
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
 use options::Options;
@@ -188,7 +187,7 @@ fn process_single_file_impl(
         &mut output,
         source_text,
         Some(&native_env),
-        &NoDeclProvider,
+        None,
     )?
     .expect("LOG_EXTERN_COMPILE_PERF was set");
     Ok((output, profile))

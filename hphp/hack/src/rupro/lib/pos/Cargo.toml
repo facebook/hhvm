@@ -8,6 +8,10 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
+arena_trait = { path = "../../../arena_trait" }
+bumpalo = { version = "3.8", features = ["collections"] }
 intern = { path = "../../../../../../relay/oss/crates/intern" }
+ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }
+oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 static_assertions = "1.1.0"

@@ -13,7 +13,6 @@ aast_parser = { path = "../parser/cargo/aast_parser" }
 anyhow = "1.0.51"
 bumpalo = { version = "3.8", features = ["collections"] }
 compile = { path = "../hackc/compile/cargo/compile" }
-decl_provider = { path = "../hackc/decl_provider" }
 direct_decl_parser = { path = "../parser/api/cargo/direct_decl_parser" }
 env_logger = "0.7"
 jwalk = "0.6"

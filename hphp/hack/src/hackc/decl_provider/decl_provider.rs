@@ -20,12 +20,3 @@ pub enum Error {
 pub trait DeclProvider<'decl>: std::fmt::Debug {
     fn get_decl(&self, kind: NameType, symbol: &str) -> Result<Decl<'decl>>;
 }
-
-#[derive(Debug, Default)]
-pub struct NoDeclProvider;
-
-impl<'decl> DeclProvider<'decl> for NoDeclProvider {
-    fn get_decl(&self, _: NameType, _: &str) -> Result<Decl<'decl>> {
-        Err(Error::NotFound)
-    }
-}

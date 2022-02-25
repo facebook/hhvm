@@ -9,19 +9,23 @@ path = "../../lib/mod.rs"
 
 [dependencies]
 aast_parser = { path = "../../../parser/cargo/aast_parser" }
+arena_collections = { path = "../../../arena_collections" }
 bumpalo = { version = "3.8", features = ["collections"] }
 dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }
 hcons = { path = "../../../hcons" }
+hh24_types = { path = "../../../facebook/utils/hh24_types" }
 im = { version = "14.2", features = ["rayon", "serde"] }
 intern = { path = "../../../../../../relay/oss/crates/intern" }
 lazy_static = "1.0"
 lint_rust = { path = "../../../utils/lint" }
+names = { path = "../../../facebook/hh_decl/cargo/names" }
 naming_special_names_rust = { path = "../../../naming" }
 ocamlrep = { path = "../../../ocamlrep" }
 once_cell = "1.8"
 oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
+parking_lot = { version = "0.11.2", features = ["send_guard"] }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 pos = { path = "../../lib/pos" }
 rust_aast_parser_types = { path = "../../../parser/cargo/rust_aast_parser_types" }

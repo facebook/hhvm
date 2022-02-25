@@ -20,9 +20,6 @@ pub struct Emitter<'arena, 'decl> {
     /// systemlib is part of context, changed externally
     systemlib: bool,
 
-    /// controls whether we shell out to the decl provider for testing purposes
-    use_decls: bool,
-
     // the rest is being mutated during emittance
     label_gen: label::Gen,
     local_gen: local::Gen<'arena>,
@@ -38,7 +35,12 @@ pub struct Emitter<'arena, 'decl> {
     /// State is also frozen and set after closure conversion
     pub global_state_: Option<GlobalState<'arena>>,
 
-    decl_provider: &'decl dyn DeclProvider<'decl>,
+    /// Controls whether we call the decl provider for testing purposes.
+    /// Some(provider) => use the given DeclProvider, which may return NotFound.
+    /// None => do not look up any decls. For now this is the same as as a
+    /// DeclProvider that always returns NotFound, but this behavior may later
+    /// diverge from None provider behavior.
+    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
 }
 
 impl<'arena, 'decl> Emitter<'arena, 'decl> {
@@ -46,16 +48,14 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         opts: Options,
         systemlib: bool,
         for_debugger_eval: bool,
-        use_decls: bool,
         alloc: &'arena bumpalo::Bump,
-        decl_provider: &'decl dyn DeclProvider<'decl>,
+        decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     ) -> Emitter<'arena, 'decl> {
         Emitter {
             opts,
             systemlib,
             for_debugger_eval,
             decl_provider,
-            use_decls,
             alloc,
 
             label_gen: Default::default(),
@@ -69,7 +69,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         }
     }
 
-    pub fn decl_provider(&self) -> &'decl dyn DeclProvider<'decl> {
+    pub fn decl_provider(&self) -> Option<&'decl dyn DeclProvider<'decl>> {
         self.decl_provider
     }
 
@@ -151,10 +151,9 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
     }
 
     pub fn get_decl(&self, kind: NameType, sym: &str) -> Result<Decl<'decl>> {
-        if self.use_decls {
-            self.decl_provider.get_decl(kind, sym)
-        } else {
-            Err(decl_provider::Error::NotFound)
+        match self.decl_provider {
+            Some(provider) => provider.get_decl(kind, sym),
+            None => Err(decl_provider::Error::NotFound),
         }
     }
 }

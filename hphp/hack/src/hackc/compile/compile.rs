@@ -12,7 +12,7 @@ use aast_parser::{
 use anyhow::anyhow;
 use bitflags::bitflags;
 use bytecode_printer::{print_unit, Context};
-use decl_provider::{DeclProvider, NoDeclProvider};
+use decl_provider::DeclProvider;
 use emit_unit::{emit_unit, FromAstFlags};
 use env::emitter::Emitter;
 use hackc_unit::HackCUnit;
@@ -64,7 +64,6 @@ bitflags! {
         const FOR_DEBUGGER_EVAL = 1 << 2;
         const DUMP_SYMBOL_REFS = 1 << 3;
         const DISABLE_TOPLEVEL_ELABORATION = 1 << 4;
-        const ENABLE_DECL = 1 << 5;
     }
 }
 
@@ -292,9 +291,8 @@ pub fn emit_fatal_unit<S: AsRef<str>>(
         opts,
         is_systemlib,
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
-        env.flags.contains(EnvFlags::ENABLE_DECL),
         &alloc,
-        &NoDeclProvider,
+        None,
     );
 
     let prog = emit_unit::emit_fatal_unit(&alloc, FatalOp::Parse, &Pos::make_none(), err_msg);
@@ -319,7 +317,7 @@ pub fn from_text<'arena, 'decl, S: AsRef<str>>(
     writer: &mut dyn std::io::Write,
     source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
-    decl_provider: &'decl dyn DeclProvider<'decl>,
+    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
 ) -> anyhow::Result<Option<Profile>> {
     let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
     let (unit, profile) = emit_unit_from_text(&mut emitter, env, stack_limit, source_text)?;
@@ -378,7 +376,7 @@ pub fn unit_from_text<'arena, 'decl, S: AsRef<str>>(
     stack_limit: &StackLimit,
     source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
-    decl_provider: &'decl dyn DeclProvider<'decl>,
+    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
 ) -> anyhow::Result<(HackCUnit<'arena>, Option<Profile>)> {
     let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
     emit_unit_from_text(&mut emitter, env, stack_limit, source_text)
@@ -391,7 +389,7 @@ pub fn unit_to_string<W: std::io::Write, S: AsRef<str>>(
     program: &HackCUnit<'_>,
 ) -> anyhow::Result<()> {
     let alloc = bumpalo::Bump::new();
-    let emitter = create_emitter(env, native_env, &NoDeclProvider, &alloc)?;
+    let emitter = create_emitter(env, native_env, None, &alloc)?;
     let (print_result, _) = time(|| {
         print_unit(
             &Context::new(
@@ -497,7 +495,7 @@ fn emit_fatal<'arena>(
 fn create_emitter<'arena, 'decl, S: AsRef<str>>(
     env: &Env<S>,
     native_env: Option<&NativeEnv<S>>,
-    decl_provider: &'decl dyn DeclProvider<'decl>,
+    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     alloc: &'arena bumpalo::Bump,
 ) -> anyhow::Result<Emitter<'arena, 'decl>> {
     let opts = match native_env {
@@ -509,7 +507,6 @@ fn create_emitter<'arena, 'decl, S: AsRef<str>>(
         opts,
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
-        env.flags.contains(EnvFlags::ENABLE_DECL),
         alloc,
         decl_provider,
     ))
@@ -655,9 +652,8 @@ pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> St
         opts,
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
-        env.flags.contains(EnvFlags::ENABLE_DECL),
         &alloc,
-        &NoDeclProvider,
+        None,
     );
     let ctx = Context::new(
         &emitter,

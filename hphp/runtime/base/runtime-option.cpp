@@ -2916,6 +2916,11 @@ void RuntimeOption::Load(
                      [](const std::string& /*value*/) { return false; },
                      []() { return compilerId().begin(); }));
   IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
+                   "hphp.compiler_timestamp",
+                   IniSetting::SetAndGet<int64_t>(
+                     [](const int64_t& /*value*/) { return false; },
+                     []() { return compilerTimestamp(); }));
+  IniSetting::Bind(IniSetting::CORE, IniSetting::PHP_INI_NONE,
                    "hphp.compiler_version",
                    IniSetting::SetAndGet<std::string>(
                      [](const std::string& /*value*/) { return false; },

@@ -39,6 +39,7 @@ std::string repoSchema;
 std::string compiler;
 std::string buildid;
 std::string hhjsbabeltransform;
+int64_t timestamp;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -77,6 +78,12 @@ void readBuildInfo() {
   buildid = get("build_id");
   hhjsbabeltransform = get("hhjs_babel_transform");
 
+  try {
+    timestamp = std::stoll(get("compiler_ts"));
+  } catch(std::exception& e) {
+    timestamp = 0;
+  }
+
   inited.store(true, std::memory_order_release);
 }
 
@@ -101,6 +108,11 @@ folly::StringPiece repoSchemaId() {
 folly::StringPiece compilerId() {
   readBuildInfo();
   return compiler;
+}
+
+int64_t compilerTimestamp() {
+  readBuildInfo();
+  return timestamp;
 }
 
 folly::StringPiece buildId() {

@@ -133,6 +133,7 @@ endfunction(append_systemlib)
 function(embed_sections TARGET DEST)
   add_custom_command(TARGET ${TARGET} PRE_BUILD
     # OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/generated-compiler-id.txt"
+    #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-compiler-timestamp.txt"
     #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-repo-schema-id.txt"
     #        "${CMAKE_CURRENT_SOURCE_DIR}/generated-build-id.txt"
     COMMAND
@@ -145,9 +146,10 @@ function(embed_sections TARGET DEST)
 
   if (APPLE)
     set(COMPILER_ID -Wl,-sectcreate,__text,"compiler_id","${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-id.txt")
+    set(COMPILER_TIMESTAMP -Wl,-sectcreate,__text,"compiler_ts","${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-timestamp.txt")
     set(REPO_SCHEMA -Wl,-sectcreate,__text,"repo_schema_id","${CMAKE_BINARY_DIR}/hphp/util/generated-repo-schema-id.txt")
     set(BUILD_ID -Wl,-sectcreate,__text,"build_id","${CMAKE_BINARY_DIR}/hphp/util/generated-build-id.txt")
-    target_link_libraries(${TARGET} ${${TARGET}_SLIBS} ${COMPILER_ID} ${REPO_SCHEMA} ${BUILD_ID})
+    target_link_libraries(${TARGET} ${${TARGET}_SLIBS} ${COMPILER_ID} ${COMPILER_TIMESTAMP} ${REPO_SCHEMA} ${BUILD_ID})
   elseif(MSVC)
     set(RESOURCE_FILE "#pragma code_page(1252)\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}LANGUAGE 0, 0\n")
@@ -155,6 +157,7 @@ function(embed_sections TARGET DEST)
     set(RESOURCE_FILE "${RESOURCE_FILE}#include \"${CMAKE_BINARY_DIR}/hphp/runtime/version.h\"\n")
     file(READ "${CMAKE_BINARY_DIR}/hphp/hhvm/hhvm.rc" VERSION_INFO)
     set(RESOURCE_FILE "${RESOURCE_FILE}compiler_id RCDATA \"${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-id.txt\"\n")
+    set(RESOURCE_FILE "${RESOURCE_FILE}compiler_ts RCDATA \"${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-timestamp.txt\"\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}repo_schema_id RCDATA \"${CMAKE_BINARY_DIR}/hphp/util/generated-repo-schema-id.txt\"\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}build_id RCDATA \"${CMAKE_BINARY_DIR}/hphp/util/generated-build-id.txt\"\n")
     set(RESOURCE_FILE "${RESOURCE_FILE}${VERSION_INFO}\n")
@@ -169,11 +172,13 @@ function(embed_sections TARGET DEST)
     add_custom_command(TARGET ${TARGET} POST_BUILD
       COMMAND "objcopy"
       ARGS "--add-section" "compiler_id=${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-id.txt"
+           "--add-section" "compiler_ts=${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-timestamp.txt"
            "--add-section" "repo_schema_id=${CMAKE_BINARY_DIR}/hphp/util/generated-repo-schema-id.txt"
            "--add-section" "build_id=${CMAKE_BINARY_DIR}/hphp/util/generated-build-id.txt"
            ${${TARGET}_SLIBS}
            ${DEST}
       DEPENDS "${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-id.txt"
+              "${CMAKE_BINARY_DIR}/hphp/util/generated-compiler-timestamp.txt"
               "${CMAKE_BINARY_DIR}/hphp/util/generated-repo-schema-id.txt"
               "${CMAKE_BINARY_DIR}/hphp/util/generated-build-id.txt"
       COMMENT "Embedding php in ${TARGET}")

@@ -15,6 +15,7 @@ xargs_args=(bash -c "${SHA1SUM[*]} \"\$@\" | perl -ne 'print if s/^(.{40}).*/\$1
 if git rev-parse --show-toplevel >& /dev/null; then
   root=$(git rev-parse --show-toplevel)
   compiler=(git describe --all --long "--abbrev=40" --always)
+  timestamp=(git log -1 --format=%ct)
   find_files=(git ls-files -- hphp)
 elif hg root >& /dev/null; then
   root=$(hg root)
@@ -22,6 +23,7 @@ elif hg root >& /dev/null; then
     root="$root/fbcode"
   fi
   compiler=(hg log -r. -T'default-0-g{node}\n')
+  timestamp=(hg log -r . -T'{word(0, date|hgdate)}')
   find_files=(hg files -I hphp/)
   if [[ -d "$root/.eden/root" ]]; then
       xargs_args=(getfattr --only-values -hn user.sha1)
@@ -29,10 +31,13 @@ elif hg root >& /dev/null; then
 else
   root=$(dirname "$(readlink -e "${BASH_SOURCE[0]}/../..")")
   compiler=(date +%s_%N)
+  timestamp=(date +%s)
   find_files=(find "${SOURCE_ROOT}/hphp" -type f '!' -iregex '.*\(~\|#.*\|\.swp\|/tags\|/.bash_history\|/out\)')
 fi
 
 ################################################################################
+
+COMPILER_TIMESTAMP=$("${timestamp[@]}")
 
 if [ -z "${COMPILER_ID}" ]; then
   COMPILER_ID=$("${compiler[@]}")
@@ -85,10 +90,12 @@ if [ -z "${INSTALL_DIR}" ]; then
 fi
 
 COMPILER_FILE="${INSTALL_DIR}/generated-compiler-id.txt"
+TIMESTAMP_FILE="${INSTALL_DIR}/generated-compiler-timestamp.txt"
 REPO_SCHEMA_FILE="${INSTALL_DIR}/generated-repo-schema-id.txt"
 BUILD_ID_FILE="${INSTALL_DIR}/generated-build-id.txt"
 
 echo -n "${COMPILER_ID}" > "${COMPILER_FILE}"
+echo -n "${COMPILER_TIMESTAMP}" > "${TIMESTAMP_FILE}"
 echo -n "${HHVM_REPO_SCHEMA}" > "${REPO_SCHEMA_FILE}"
 echo -n "${BUILD_ID}" > "${BUILD_ID_FILE}"
 

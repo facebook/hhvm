@@ -70,10 +70,11 @@ impl<'a, R: Reason> ToOxidized<'a> for WhereConstraint<DeclTy<R>> {
     type Output = &'a obr::typing_defs::WhereConstraint<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        let WhereConstraint(tvar_ty, kind, as_ty) = self;
         arena.alloc(obr::typing_defs::WhereConstraint(
-            self.0.to_oxidized(arena),
-            self.1,
-            self.2.to_oxidized(arena),
+            tvar_ty.to_oxidized(arena),
+            *kind,
+            as_ty.to_oxidized(arena),
         ))
     }
 }
@@ -153,11 +154,12 @@ impl<'a, R: Reason> ToOxidized<'a> for DeclTy_<R> {
             DeclTy_::DTtuple(x) => Ty_::Ttuple(x.to_oxidized(arena)),
             DeclTy_::DTshape(shape) => {
                 let mut shape_fields = arena_collections::AssocListMut::new_in(arena);
-                for (k, v) in shape.1.iter() {
+                let (shape_kind, shape_field_type_map): &(_, _) = shape;
+                for (k, v) in shape_field_type_map.iter() {
                     let k = oxidize_shape_field_name(arena, *k, &v.field_name_pos);
                     shape_fields.insert_or_replace(TShapeField(k), v.to_oxidized(arena));
                 }
-                Ty_::Tshape(arena.alloc((shape.0, TShapeMap::from(shape_fields))))
+                Ty_::Tshape(arena.alloc((*shape_kind, TShapeMap::from(shape_fields))))
             }
             DeclTy_::DTvar(ident) => Ty_::Tvar((*ident).into()),
             DeclTy_::DTgeneric(x) => Ty_::Tgeneric(x.to_oxidized(arena)),
@@ -263,7 +265,8 @@ impl<'a> ToOxidized<'a> for ClassConstRef {
     type Output = obr::typing_defs::ClassConstRef<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        obr::typing_defs::ClassConstRef(self.0.to_oxidized(arena), self.1.to_oxidized(arena))
+        let ClassConstRef(class, symbol) = self;
+        obr::typing_defs::ClassConstRef(class.to_oxidized(arena), symbol.to_oxidized(arena))
     }
 }
 

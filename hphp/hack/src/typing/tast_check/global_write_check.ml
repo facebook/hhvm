@@ -207,6 +207,24 @@ let visitor =
         super#on_block (env, ctx1) b1;
         super#on_block (env, ctx) b2;
         add_vars_to_ctx ctx !(ctx1.global_vars)
+      | Do (b, _)
+      | While (_, b)
+      | For (_, _, _, b)
+      | Foreach (_, _, b) ->
+        (* Iterate the block and update the set of global varialbes until
+           no new global variable is found *)
+        let ctx_cpy = { global_vars = ref !(ctx.global_vars) } in
+        let ctx_len = ref (List.length !(ctx.global_vars)) in
+        let has_context_change = ref true in
+        while !has_context_change do
+          super#on_block (env, ctx_cpy) b;
+          add_vars_to_ctx ctx !(ctx_cpy.global_vars);
+          if List.length !(ctx.global_vars) <> !ctx_len then
+            ctx_len := List.length !(ctx.global_vars)
+          else
+            has_context_change := false
+        done
+        (* super#on_block (env, ctx) b *)
       | Return r ->
         (match r with
         | Some ((_, p, _) as e) ->

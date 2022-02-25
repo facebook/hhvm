@@ -12,7 +12,7 @@ function test_dyn_index(
 
   $dt1[$d] = 1;
   $dt1[$d] = "s";
-  hh_expect_equivalent<dict<arraykey, (int|string)>>($dt1);
+  hh_expect_equivalent<dict<((arraykey&dynamic)|int), (int|string)>>($dt1);
   $dt2[$d] = $d;
   $dt2[$d] = 1;
   $dt2[$d] = "s";

@@ -1222,7 +1222,12 @@ and simplify_subtype_i
       | ConstraintType _ -> simplify_sub_union env ty_sub tyl_super
       | LoclType lty_sub ->
         (match
-           simplify_subtype_arraykey ~this_ty ~subtype_env env lty_sub tyl_super
+           simplify_subtype_arraykey_union
+             ~this_ty
+             ~subtype_env
+             env
+             lty_sub
+             tyl_super
          with
         | (env, Some props) -> (env, props)
         | (env, None) ->
@@ -3184,13 +3189,14 @@ and add_tyvar_lower_bound_and_close ~coerce (env, prop) var ty on_error =
   in
   (env, prop)
 
-(** [simplify_subtype_arraykey env ty_sub tyl_super] implements a special purpose typing
-  rule for t <: arraykey | tvar by checking t & arraykey <: tvar. It also works for
-  not arraykey | tvar. By only apply if B is a type variable, we to avoid oscillating
+(** [simplify_subtype_arraykey_union env ty_sub tyl_super] implements a special purpose typing
+  rule for t <: arraykey | tvar by checking t & not arraykey <: tvar. It also works for
+  not arraykey | tvar. By only applying if B is a type variable, we avoid oscillating
   forever between this rule and the generic one that moves from t1 & arraykey <: t2.
   to t1 <: t2 | not arraykey. This is similar to our treatment of A <: ?B iff
-  A & nonnull <: B *)
-and simplify_subtype_arraykey ~this_ty ~subtype_env env ty_sub tyl_super =
+  A & nonnull <: B. This returns a subtyp_prop if the pattern this rule looks for matched,
+  and returns None if it did not, so that this rule does not apply. ) *)
+and simplify_subtype_arraykey_union ~this_ty ~subtype_env env ty_sub tyl_super =
   match tyl_super with
   | [ty_super1; ty_super2] ->
     let (env, ty_super1) = Env.expand_type env ty_super1 in

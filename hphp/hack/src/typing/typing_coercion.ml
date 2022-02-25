@@ -124,7 +124,7 @@ let coerce_type_res
 
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)
-let try_coerce env ty_have ty_expect =
+let try_coerce ?(coerce = None) env ty_have ty_expect =
   let f = !Errors.is_hh_fixme in
   (Errors.is_hh_fixme := (fun _ _ -> false));
   let result =
@@ -138,7 +138,7 @@ let try_coerce env ty_have ty_expect =
         Some
           (result ~on_ok:Fn.id ~on_err:Fn.id
           @@ coerce_type_impl
-               ~coerce:None
+               ~coerce
                ~coerce_for_op:false
                env
                ty_have

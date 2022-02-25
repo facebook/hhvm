@@ -9,4 +9,3 @@ function f(dict<string, dict<arraykey, string>> $d) : void {
     |> \HH\Lib\Dict\map_keys($$, ($key) ==> $key as string);
   expect_kc(\HH\Lib\Dict\flip($x));
 }
-

@@ -1144,28 +1144,20 @@ let assign_array_get_with_err
         let (env, tk') =
           let (_, p, _) = key in
           let ak_t = MakeType.arraykey (Reason.Ridx_dict p) in
-          if
-            (* TODO: Remove the test for sound dynamic. It is never ok to put
-               dynamic as the key to a dict since the key must be a
-               subtype of arraykey. *)
-            Typing_env_types.(
-              TypecheckerOptions.enable_sound_dynamic env.genv.tcopt)
-            &&
-            match idx_err with
-            | Ok _ -> not (Typing_utils.is_sub_type_for_union env tkey ak_t)
-            | _ -> false
-          then
-            (* if there weren't any errors with the key then either it is dynamic
-               or a subtype of arraykey. If it's also a supertype of dynamic, then
-               set the keytype to arraykey, since that the only thing that hhvm won't
-               error on.
-            *)
+          match idx_err with
+          | Ok _ ->
             if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
               pessimised_vec_dict_assign expr_pos env tk tkey
             else
-              (env, ak_t)
-          else
-            Typing_union.union env tk tkey
+              let (env, tkey_new) =
+                Typing_intersection.intersect
+                  env
+                  ~r:(Reason.Ridx_dict p)
+                  tkey
+                  ak_t
+              in
+              Typing_union.union env tk tkey_new
+          | _ -> Typing_union.union env tk tkey
         in
         let (env, tv') =
           if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then

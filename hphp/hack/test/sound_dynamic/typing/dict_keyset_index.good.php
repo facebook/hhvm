@@ -6,5 +6,5 @@ function test(dynamic $y):void {
   $x[] = $y;
   $d[$y] = 3;
   hh_expect_equivalent<keyset<arraykey>>($x);
-  hh_expect_equivalent<dict<arraykey, int>>($d);
+  hh_expect_equivalent<dict<(arraykey & dynamic), int>>($d);
 }

@@ -18,6 +18,16 @@ open String.Replace_polymorphic_compare
 
 let should_enforce env = TCO.disallow_invalid_arraykey (Env.get_tcopt env)
 
+let equiv_ak_inter_dyn env t_env ty_expect =
+  let r = get_reason ty_expect in
+  let ak_dyn =
+    MakeType.intersection r [MakeType.arraykey r; MakeType.dynamic r]
+  in
+  (not
+     Typing_env_types.(TypecheckerOptions.enable_sound_dynamic t_env.genv.tcopt))
+  && Env.can_subtype env ty_expect ak_dyn
+  && Env.can_subtype env ak_dyn ty_expect
+
 (* For new-inference, types of keys in collection types may not be resolved
  * until TAST check time. For this reason, we replicate some of the checks that
  * are applied in Typing_array_access.array_get here. Specifically, those
@@ -30,7 +40,11 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   let type_index ?(is_covariant_index = false) env ty_have ty_expect reason =
     let t_env = Env.tast_env_as_typing_env env in
     match
-      Typing_coercion.try_coerce t_env ty_have (MakeType.unenforced ty_expect)
+      Typing_coercion.try_coerce
+        ~coerce:(Some Typing_logic.CoerceToDynamic)
+        t_env
+        ty_have
+        (MakeType.unenforced ty_expect)
     with
     | Some _ -> Ok ()
     | None ->
@@ -45,6 +59,9 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
         (* If the key is not even an arraykey, we've already produced an error *)
         || (not (Env.can_subtype env ty_have (MakeType.arraykey Reason.Rnone)))
            && should_enforce env
+        (* Keytype of arraykey&dynamic happens when you assign a dynamic into a dict,
+           but without sound dynamic, the try_coercion above doesn't work. *)
+        || equiv_ak_inter_dyn env t_env ty_expect
       then
         Ok ()
       else

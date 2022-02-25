@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures('abstract_enum_class')>>
+// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 abstract enum class E : mixed {
   abstract int X;

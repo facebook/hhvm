@@ -1,24 +1,24 @@
-File "abstract.bad.php", line 17, characters 12-12:
+File "abstract.bad.php", line 16, characters 12-12:
 Class `F` does not correctly implement all required members  (Typing[4348])
-  File "abstract.bad.php", line 17, characters 26-26:
+  File "abstract.bad.php", line 16, characters 26-26:
   Some members are incompatible with those declared in type `E`
-  File "abstract.bad.php", line 12, characters 12-12:
+  File "abstract.bad.php", line 11, characters 12-12:
   Expected `C`
-  File "abstract.bad.php", line 18, characters 3-3:
+  File "abstract.bad.php", line 17, characters 3-3:
   But got `D`
-File "abstract.bad.php", line 22, characters 12-12:
+File "abstract.bad.php", line 21, characters 12-12:
 This class must be declared `abstract`, or provide an implementation for the abstract constant `Y` (Typing[4047])
-  File "abstract.bad.php", line 24, characters 19-19:
+  File "abstract.bad.php", line 23, characters 19-19:
+  Declaration is here
+File "abstract.bad.php", line 30, characters 10-10:
+Cannot reference abstract constant `E::X` directly (Typing[4129])
+  File "abstract.bad.php", line 11, characters 14-14:
   Declaration is here
 File "abstract.bad.php", line 31, characters 10-10:
-Cannot reference abstract constant `E::X` directly (Typing[4129])
-  File "abstract.bad.php", line 12, characters 14-14:
-  Declaration is here
-File "abstract.bad.php", line 32, characters 10-10:
 Cannot reference abstract constant `G::Y` directly (Typing[4129])
-  File "abstract.bad.php", line 24, characters 19-19:
+  File "abstract.bad.php", line 23, characters 19-19:
   Declaration is here
-File "abstract.bad.php", line 36, characters 12-12:
+File "abstract.bad.php", line 35, characters 12-12:
 This class must be declared `abstract`, or provide an implementation for the abstract constant `X` (Typing[4047])
-  File "abstract.bad.php", line 12, characters 14-14:
+  File "abstract.bad.php", line 11, characters 14-14:
   Declaration is here

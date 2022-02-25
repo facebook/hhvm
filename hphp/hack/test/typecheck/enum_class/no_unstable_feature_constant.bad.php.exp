@@ -1,6 +1,0 @@
-File "no_unstable_feature_constant.bad.php", line 5, characters 3-17:
-Cannot use unstable feature: `abstract_enum_class` (Parsing[1002])
-File "no_unstable_feature_constant.bad.php", line 4, characters 12-12:
-This class must be declared `abstract`, or provide an implementation for the abstract constant `X` (Typing[4047])
-  File "no_unstable_feature_constant.bad.php", line 5, characters 16-16:
-  Declaration is here

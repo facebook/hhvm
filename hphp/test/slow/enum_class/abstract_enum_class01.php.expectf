@@ -1,1 +1,1 @@
-Fatal error: Class H contains abstract constant (X) and must therefore be declared abstract or define the remaining constants in %s/abstract_enum_class01.php on line 9
+Fatal error: Class H contains abstract constant (X) and must therefore be declared abstract or define the remaining constants in %s/abstract_enum_class01.php on line 8

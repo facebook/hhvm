@@ -3732,17 +3732,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn enum_class_errors(&mut self, node: S<'a>) {
-        if let EnumClassDeclaration(e) = &node.children {
+        if let EnumClassDeclaration(_) = &node.children {
             // only allow abstract as modifier + detect modifier duplication
             self.invalid_modifier_errors("Enum classes", node, |kind| kind == TokenKind::Abstract);
-
-            if let SyntaxList(lst) = &e.modifiers.children {
-                for m in lst.iter() {
-                    if m.is_abstract() {
-                        self.check_can_use_feature(node, &UnstableFeatures::AbstractEnumClass)
-                    }
-                }
-            }
         }
     }
 
@@ -3754,9 +3746,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             });
 
             let is_abstract = has_modifier_abstract(node);
-            if is_abstract {
-                self.check_can_use_feature(node, &UnstableFeatures::AbstractEnumClass)
-            }
             let has_initializer = !e.initializer.is_missing();
             if is_abstract && has_initializer {
                 self.errors.push(make_error_from_node(

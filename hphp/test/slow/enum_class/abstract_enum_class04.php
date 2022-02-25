@@ -1,5 +1,4 @@
 <?hh
-<<file:__EnableUnstableFeatures('abstract_enum_class')>>
 
 enum class E : mixed {
   int X = 0;

@@ -10,6 +10,7 @@ open Aast
 open Hh_prelude
 module Add_fact = Symbol_add_fact
 module Fact_acc = Symbol_predicate.Fact_acc
+module Fact_id = Symbol_fact_id
 module Util = Symbol_json_util
 module Build = Symbol_build_json
 module Predicate = Symbol_predicate
@@ -24,25 +25,38 @@ let is_enum_or_enum_class = function
 (* These functions define the process to go through when
 encountering symbols of a given type. *)
 
-let process_doc_comment comment decl_ref_json prog =
+let process_doc_comment
+    (comment : Aast.doc_comment option)
+    (decl_ref_json : Hh_json.json)
+    (prog : Fact_acc.t) : Fact_acc.t =
   match comment with
   | None -> prog
-  | Some (pos, _doc) ->
-    let (_, prog) = Add_fact.decl_comment pos decl_ref_json prog in
-    prog
+  | Some (pos, _doc) -> snd (Add_fact.decl_comment pos decl_ref_json prog)
+
+let process_span
+    (span : Relative_path.t Pos.pos option)
+    (ref_json : Hh_json.json)
+    (prog : Fact_acc.t) : Fact_acc.t =
+  match span with
+  | None -> prog
+  | Some span_pos -> snd (Add_fact.decl_span span_pos ref_json prog)
 
 let process_decl_loc
-    decl_fun defn_fun decl_ref_fun pos span id elem doc progress =
+    (decl_fun : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t)
+    (defn_fun : 'elem -> Fact_id.t -> Fact_acc.t -> Fact_id.t * Fact_acc.t)
+    (decl_ref_fun : Fact_id.t -> Hh_json.json)
+    (pos : Relative_path.t Pos.pos)
+    (span : Relative_path.t Pos.pos option)
+    (id : Ast_defs.id_)
+    (elem : 'elem)
+    (doc : Aast.doc_comment option)
+    (progress : Fact_acc.t) : Fact_id.t * Fact_acc.t =
   let (decl_id, prog) = decl_fun id progress in
   let (_, prog) = defn_fun elem decl_id prog in
   let ref_json = decl_ref_fun decl_id in
   let (_, prog) = Add_fact.decl_loc pos ref_json prog in
   let prog = process_doc_comment doc ref_json prog in
-  let prog =
-    match span with
-    | None -> prog
-    | Some span_pos -> snd (Add_fact.decl_span span_pos ref_json prog)
-  in
+  let prog = process_span span ref_json prog in
   (decl_id, prog)
 
 let process_container_decl ctx source_map con (all_decls, progress) =

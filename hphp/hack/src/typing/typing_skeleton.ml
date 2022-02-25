@@ -118,7 +118,8 @@ let params_source ~variadic (params : decl_ty fun_params) : string =
   in
   String.concat ~sep:", " explicit_params
 
-let of_method (name : string) (meth : class_elt) ~is_static : string =
+let of_method (name : string) (meth : class_elt) ~is_static ~is_override :
+    string =
   let (_, ty_) = deref (Lazy.force meth.ce_type) in
   let (params, return_ty, async_modifier) =
     match ty_ with
@@ -133,7 +134,11 @@ let of_method (name : string) (meth : class_elt) ~is_static : string =
   in
 
   Printf.sprintf
-    "\n  %s %s%sfunction %s(%s): %s {}\n\n"
+    "\n%s  %s %s%sfunction %s(%s): %s {}\n\n"
+    (if is_override then
+      "  <<__Override>>\n"
+    else
+      "")
     (Typing_defs.string_of_visibility meth.ce_visibility)
     async_modifier
     (if is_static then

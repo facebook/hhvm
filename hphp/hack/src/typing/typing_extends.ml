@@ -206,7 +206,11 @@ let stub_meth_quickfix
       (Markdown_lite.md_codify (Utils.strip_ns parent_name ^ "::" ^ meth_name))
   in
   let new_text =
-    Typing_skeleton.of_method meth_name meth ~is_static:(is_static member_kind)
+    Typing_skeleton.of_method
+      meth_name
+      meth
+      ~is_static:(is_static member_kind)
+      ~is_override:false
   in
   Quickfix.make_classish ~title ~new_text ~classish_name:class_name
 

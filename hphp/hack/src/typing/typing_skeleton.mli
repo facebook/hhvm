@@ -6,6 +6,11 @@
  *
  *)
 
-(** [of_method name meth ~is_static] generates source code for a method skeleton
-    that matches [meth], with the appropriate static-ness w.r.t. [~is_static] *)
-val of_method : string -> Typing_defs.class_elt -> is_static:bool -> string
+(** Generates source code for a method skeleton that matches [meth],
+    with the appropriate static modifier and override attribute.*)
+val of_method :
+  string ->
+  Typing_defs.class_elt ->
+  is_static:bool ->
+  is_override:bool ->
+  string

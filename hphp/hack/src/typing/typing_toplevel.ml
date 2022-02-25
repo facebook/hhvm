@@ -1006,7 +1006,9 @@ let check_extend_abstract_meth ~is_final ~is_static c_name seq =
             (Markdown_lite.md_codify
                (Utils.strip_ns ce.ce_origin ^ "::" ^ meth_name))
         in
-        let new_text = Typing_skeleton.of_method meth_name ce ~is_static in
+        let new_text =
+          Typing_skeleton.of_method meth_name ce ~is_static ~is_override:true
+        in
         let quickfixes =
           [Quickfix.make_classish ~title ~new_text ~classish_name:(snd c_name)]
         in

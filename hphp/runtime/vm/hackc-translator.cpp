@@ -13,12 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/vm/hackc-translator.h"
 
 #include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/disas.h"
-#include "hphp/runtime/vm/hackc-translator.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/unit-gen-helpers.h"
@@ -97,22 +97,23 @@ using kind = hhbc::TypedValue::Tag;
 
 // TODO make arrays static
 HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
-  switch (tv.tag) {
-    case kind::Uninit:
-      return make_tv<KindOfUninit>();
-    case kind::Int:
-      return make_tv<KindOfInt64>(tv.int_._0);
-    case kind::Bool:
-      return make_tv<KindOfBoolean>(tv.bool_._0);
-    case kind::Float: {
-      uint8_t buf[8];
-      for (int i = 0; i < 8; i++) {
-        buf[i] = tv.float_._0._0[7-i];
+  auto hphp_tv = [&]() {
+    switch(tv.tag) {
+      case kind::Uninit:
+        return make_tv<KindOfUninit>();
+      case kind::Int:
+        return make_tv<KindOfInt64>(tv.int_._0);
+      case kind::Bool:
+        return make_tv<KindOfBoolean>(tv.bool_._0);
+      case kind::Float: {
+        uint8_t buf[8];
+        for (int i = 0; i < 8; i++) {
+          buf[i] = tv.float_._0._0[7-i];
+        }
+        double d;
+        memcpy(&d, buf, sizeof(buf));
+        return make_tv<KindOfDouble>(d);
       }
-      double d;
-      memcpy(&d, buf, sizeof(buf));
-      return make_tv<KindOfDouble>(d);
-    }
     case kind::String: {
       auto const s = toStaticString(tv.string._0);
       return make_tv<KindOfPersistentString>(s);
@@ -131,18 +132,18 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
       DictInit d(tv.dict._0.len);
       auto set = range(tv.dict._0);
       for (auto const& elt : set) {
-          switch (elt._0.tag) {
-            case kind::Int:
-              d.set(elt._0.int_._0, toTypedValue(elt._1));
-              break;
-            case kind::String: {
-              auto const s = toStaticString(elt._0.string._0);
-              d.set(s, toTypedValue(elt._1));
-              break;
-            }
-            default:
-              always_assert(false);
+        switch (elt._0.tag) {
+          case kind::Int:
+            d.set(elt._0.int_._0, toTypedValue(elt._1));
+            break;
+          case kind::String: {
+            auto const s = toStaticString(elt._0.string._0);
+            d.set(s, toTypedValue(elt._1));
+            break;
           }
+          default:
+            always_assert(false);
+        }
       }
       return make_tv<KindOfDict>(d.create());
     }
@@ -160,8 +161,11 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
     }
     case kind::HhasAdata:
       error("toTypedValue unimplemented for HhasAdata");
-  }
-  not_reached();
+    }
+    not_reached();
+  }();
+  checkSize(hphp_tv, RuntimeOption::EvalAssemblerMaxScalarSize);
+  return hphp_tv;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -296,10 +300,33 @@ void translateClass(TranslationState& ts, const HhasClass& c) {
   translateClassBody(ts, c, ubs);
 }
 
+void translateConstant(TranslationState& ts, const HhasConstant& c) {
+  Constant constant;
+  constant.name = toStaticString(c.name._0);
+  constant.attrs = SystemLib::s_inited ? AttrNone : AttrPersistent;
+
+  constant.val = maybeOrElse(c.value,
+    [&](hhbc::TypedValue& tv) {return toTypedValue(tv);},
+    [&]() {return make_tv<KindOfNull>();});
+
+  // An uninit constant means its actually a "dynamic" constant whose value
+  // is evaluated at runtime. We store the callback in m_data.pcnt and invoke
+  // on lookup. (see constant.cpp) It's used for things like STDERR.
+  if (type(constant.val) == KindOfUninit) {
+    constant.val.m_data.pcnt = reinterpret_cast<MaybeCountable*>(Constant::get);
+  }
+  ts.ue->addConstant(constant);
+}
+
 void translate(TranslationState& ts, const HackCUnit& unit) {
   auto classes = range(unit.classes);
   for (auto const& c : classes) {
     translateClass(ts, c);
+  }
+
+  auto constants = range(unit.constants);
+  for (auto const& c : constants) {
+    translateConstant(ts, c);
   }
 }
 }

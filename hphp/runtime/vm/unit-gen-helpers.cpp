@@ -15,7 +15,35 @@
 */
 #include "hphp/runtime/vm/unit-gen-helpers.h"
 
+#include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/memory-manager-defs.h"
+
 namespace HPHP {
+
+void checkSize(TypedValue tv, uint64_t& available) {
+  auto const update = [&] (uint64_t sz) {
+    if (sz > available) {
+      throw TranslationFatal("Maximum allowable size of scalar exceeded");
+    }
+    available -= sz;
+  };
+
+  if (isArrayLikeType(type(tv))) {
+    update(allocSize(val(tv).parr));
+
+    IterateKV(val(tv).parr, [&] (TypedValue k, TypedValue v) {
+      if (isStringType(type(k))) {
+        update(val(k).pstr->heapSize());
+      }
+      checkSize(v, available);
+    });
+  }
+
+  if (isStringType(type(tv))) {
+    update(val(tv).pstr->heapSize());
+  }
+}
+
 UpperBoundVec getRelevantUpperBounds(const TypeConstraint& tc,
                                      const UpperBoundMap& ubs,
                                      const UpperBoundMap& class_ubs,

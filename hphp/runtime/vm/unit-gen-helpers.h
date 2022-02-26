@@ -22,6 +22,12 @@
 namespace HPHP {
 struct StringData;
 
+struct TranslationFatal : std::runtime_error {
+  explicit TranslationFatal(const std::string& msg) : std::runtime_error(msg) {}
+};
+
+void checkSize(TypedValue tv, uint64_t& available);
+
 using TParamNameVec = CompactVector<const StringData*>;
 using UpperBoundVec = CompactVector<TypeConstraint>;
 using UpperBoundMap = std::unordered_map<const StringData*, UpperBoundVec>;

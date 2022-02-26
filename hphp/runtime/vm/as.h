@@ -51,10 +51,6 @@ std::unique_ptr<UnitEmitter> assemble_string(
   bool swallowErrors = true
 );
 
-struct AssemblerFatal : std::runtime_error {
-  explicit AssemblerFatal(const std::string& msg) : std::runtime_error(msg) {}
-};
-
 struct AssemblerError : std::runtime_error {
   explicit AssemblerError(const std::string& msg) : std::runtime_error(msg) {}
   AssemblerError(int where, const std::string& what);
@@ -70,4 +66,3 @@ void ParseRepoAuthType(folly::StringPiece input, RepoAuthType& output);
 //////////////////////////////////////////////////////////////////////
 
 }
-

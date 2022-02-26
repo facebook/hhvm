@@ -85,7 +85,6 @@
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/coeffects-config.h"
-#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -1610,32 +1609,8 @@ String parse_maybe_long_string(AsmState& as) {
   return String(&buffer[0], buffer.size() - 1, CopyString);
 }
 
-void checkSize(TypedValue tv, size_t& available) {
-  auto const update = [&] (size_t sz) {
-    if (sz > available) {
-      throw AssemblerFatal("Maximum allowable size of scalar exceeded");
-    }
-    available -= sz;
-  };
-
-  if (isArrayLikeType(type(tv))) {
-    update(allocSize(val(tv).parr));
-
-    IterateKV(val(tv).parr, [&] (TypedValue k, TypedValue v) {
-      if (isStringType(type(k))) {
-        update(val(k).pstr->heapSize());
-      }
-      checkSize(v, available);
-    });
-  }
-
-  if (isStringType(type(tv))) {
-    update(val(tv).pstr->heapSize());
-  }
-}
-
 Variant checkSize(Variant val) {
-  size_t avail = RuntimeOption::EvalAssemblerMaxScalarSize;
+  auto avail = RuntimeOption::EvalAssemblerMaxScalarSize;
   checkSize(*val.asTypedValue(), avail);
   return val;
 }
@@ -1662,7 +1637,7 @@ Variant parse_php_serialized(folly::StringPiece str) {
     return checkSize(vu.unserialize());
   } catch (const FatalErrorException&) {
     throw;
-  } catch (const AssemblerFatal&) {
+  } catch (const TranslationFatal&) {
     throw;
   } catch (const std::exception& e) {
     auto const msg =
@@ -1687,7 +1662,7 @@ Variant parse_maybe_php_serialized(AsmState& as) {
       return unserialize_from_string(s, VariableUnserializer::Type::Internal);
     } catch (const FatalErrorException&) {
       throw;
-    } catch (const AssemblerFatal&) {
+    } catch (const TranslationFatal&) {
       throw;
     } catch (const std::exception& e) {
       auto const msg =
@@ -3309,10 +3284,7 @@ void parse_constant(AsmState& as) {
   as.in.skipWhitespace();
 
   Constant constant;
-  Attr attrs = parse_attribute_list(as, AttrContext::Constant);
-  if (!SystemLib::s_inited) {
-    attrs |= AttrPersistent;
-  }
+  Attr attrs = SystemLib::s_inited ? AttrNone : AttrPersistent;
 
   std::string name;
   if (!as.in.readword(name)) {
@@ -3533,7 +3505,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   } catch (AssemblerError& e) {
     if (!swallowErrors) throw;
     ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
-  } catch (const AssemblerFatal& e) {
+  } catch (const TranslationFatal& e) {
     if (!swallowErrors) throw;
     ue = createFatalUnit(sd, sha1, FatalOp::Runtime, e.what());
   } catch (const std::exception& e) {

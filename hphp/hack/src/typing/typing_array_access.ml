@@ -890,7 +890,10 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
                set the keytype to arraykey, since that the only thing that hhvm won't
                error on.
             *)
-            (env, ak_t)
+            if TypecheckerOptions.pessimise_builtins (Env.get_tcopt env) then
+              pessimised_vec_dict_assign expr_pos env tv ty2
+            else
+              (env, ak_t)
           else
             Typing_union.union env tv ty2
         in

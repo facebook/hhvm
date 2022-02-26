@@ -7,6 +7,7 @@ use ast_scope::{Lambda, LongLambda, Scope as AstScope, ScopeItem as AstScopeItem
 use env::emitter::Emitter;
 use global_state::{ClosureEnclosingClassInfo, GlobalState};
 use hash::HashSet;
+use hash::IndexSet;
 use hhas_coeffects::HhasCoeffects;
 use hhbc_assertion_utils::*;
 use hhbc_id::class;
@@ -30,7 +31,6 @@ use oxidized::{
 };
 use std::path::PathBuf;
 use unique_id_builder::*;
-use unique_list::UniqueList;
 
 type Scope<'a, 'arena> = AstScope<'a, 'arena>;
 type ScopeItem<'a, 'arena> = AstScopeItem<'a, 'arena>;
@@ -234,9 +234,9 @@ struct State<'arena> {
     // Number of closures created in the current function
     closure_cnt_per_fun: u32,
     // Free variables computed so far
-    captured_vars: UniqueList<String>,
+    captured_vars: IndexSet<String>,
     captured_this: bool,
-    captured_generics: UniqueList<String>,
+    captured_generics: IndexSet<String>,
     // Closure classes
     closures: Vec<Class_>,
     /// Hoisted meth_caller functions
@@ -257,9 +257,9 @@ impl<'arena> State<'arena> {
             namespace: RcOc::clone(&empty_namespace),
             empty_namespace,
             closure_cnt_per_fun: 0,
-            captured_vars: UniqueList::new(),
+            captured_vars: Default::default(),
             captured_this: false,
-            captured_generics: UniqueList::new(),
+            captured_generics: Default::default(),
             closures: vec![],
             named_hoisted_functions: SMap::new(),
             current_function_state: PerFunctionState::default(),
@@ -294,9 +294,9 @@ impl<'arena> State<'arena> {
 
     // Clear the variables, upon entering a lambda
     pub fn enter_lambda(&mut self) {
-        self.captured_vars = UniqueList::new();
+        self.captured_vars = Default::default();
         self.captured_this = false;
-        self.captured_generics = UniqueList::new();
+        self.captured_generics = Default::default();
     }
 
     pub fn set_namespace(&mut self, namespace: RcOc<namespace_env::Env>) {
@@ -353,7 +353,7 @@ fn add_var(env: &Env<'_, '_>, st: &mut State<'_>, var: &str) {
     (should_capture_var(env, var))
         && !(var == special_idents::DOLLAR_DOLLAR || superglobals::is_superglobal(var))
     {
-        st.captured_vars.add(var.to_string())
+        st.captured_vars.insert(var.to_string());
     }
 }
 
@@ -373,10 +373,10 @@ fn add_generic(env: &mut Env<'_, '_>, st: &mut State<'_>, var: &str) {
 
     if let Some(i) = reified_var_position(true) {
         let var = string_utils::reified::captured_name(true, i);
-        st.captured_generics.add(var)
+        st.captured_generics.insert(var);
     } else if let Some(i) = reified_var_position(false) {
         let var = string_utils::reified::captured_name(false, i);
-        st.captured_generics.add(var)
+        st.captured_generics.insert(var);
     }
 }
 
@@ -781,7 +781,7 @@ fn convert_lambda<'a, 'arena>(
         add_var(env, st, var)
     }
     for x in current_generics.iter() {
-        st.captured_generics.add(x.to_string());
+        st.captured_generics.insert(x.to_string());
     }
 
     st.closures.push(cd);

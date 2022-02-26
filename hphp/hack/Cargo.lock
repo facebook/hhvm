@@ -445,7 +445,6 @@ dependencies = [
  "options",
  "oxidized",
  "unique_id_builder",
- "unique_list",
 ]
 
 [[package]]
@@ -815,7 +814,6 @@ dependencies = [
  "naming_special_names_rust",
  "oxidized",
  "unique_id_builder",
- "unique_list",
 ]
 
 [[package]]
@@ -3603,20 +3601,6 @@ name = "unique_id_builder"
 version = "0.0.0"
 dependencies = [
  "ast_scope",
-]
-
-[[package]]
-name = "unique_list"
-version = "0.0.0"
-dependencies = [
- "indexmap",
-]
-
-[[package]]
-name = "unique_list_bench"
-version = "0.0.0"
-dependencies = [
- "unique_list",
 ]
 
 [[package]]

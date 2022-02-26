@@ -16,4 +16,3 @@ label = { path = "../../../emitter/cargo/label" }
 naming_special_names_rust = { path = "../../../../naming" }
 oxidized = { path = "../../../../oxidized" }
 unique_id_builder = { path = "../../../utils/cargo/unique_id_builder" }
-unique_list = { path = "../../../utils/cargo/unique_list" }

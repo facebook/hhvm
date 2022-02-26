@@ -5,7 +5,7 @@
 
 use ast_body::AstBody;
 use ffi::{Just, Maybe};
-use hash::HashSet;
+use hash::{HashSet, IndexSet};
 use hhas_param::HhasParam;
 use label::Label;
 use naming_special_names_rust::{emitter_special_functions, special_idents};
@@ -16,22 +16,20 @@ use oxidized::{
 };
 use unique_id_builder::SSet;
 
-use unique_list::UniqueList;
-
 struct DeclvarVisitorContext<'a> {
     explicit_use_set_opt: Option<&'a SSet>,
 }
 
 struct DeclvarVisitor<'a> {
     // set of locals used inside the functions
-    locals: UniqueList<String>,
+    locals: IndexSet<String>,
     context: DeclvarVisitorContext<'a>,
 }
 
 impl<'a> DeclvarVisitor<'a> {
     fn new(explicit_use_set_opt: Option<&'a SSet>) -> Self {
         Self {
-            locals: UniqueList::new(),
+            locals: Default::default(),
             context: DeclvarVisitorContext {
                 explicit_use_set_opt,
             },
@@ -45,7 +43,7 @@ impl<'a> DeclvarVisitor<'a> {
             || name_ref == special_idents::THIS
         {
         } else {
-            self.locals.add(name.into())
+            self.locals.insert(name.into());
         }
     }
 
@@ -241,7 +239,7 @@ where
     }
     visit(&mut visitor, &mut (), b)?;
     for param in params {
-        visitor.locals.remove(get_param_name(param))
+        visitor.locals.shift_remove(get_param_name(param));
     }
     Ok(visitor.locals.into_iter())
 }

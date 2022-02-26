@@ -28,4 +28,3 @@ ocamlrep = { path = "../../../../ocamlrep" }
 options = { path = "../options" }
 oxidized = { path = "../../../../oxidized" }
 unique_id_builder = { path = "../../../utils/cargo/unique_id_builder" }
-unique_list = { path = "../../../utils/cargo/unique_list" }

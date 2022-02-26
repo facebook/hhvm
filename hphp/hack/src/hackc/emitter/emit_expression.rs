@@ -3932,7 +3932,7 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                     let load = vec![
                         // load base and indexer, value of indexer will be saved in local
                         (
-                            InstrSeq::gather(vec![InstrSeq::clone(&base.base_instrs), elem_instrs]),
+                            InstrSeq::gather(vec![base.base_instrs.clone(), elem_instrs]),
                             Some((local, local_kind)),
                         ),
                         // finish loading the value

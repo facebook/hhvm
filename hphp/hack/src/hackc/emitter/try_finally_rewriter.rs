@@ -105,7 +105,7 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
             // released before exit - do it
             let ctx = e.emit_statement_state();
             let num_out = ctx.num_out;
-            let verify_out = InstrSeq::clone(&ctx.verify_out);
+            let verify_out = ctx.verify_out.clone();
             let verify_return = ctx.verify_return.clone();
             let release_iterators_instr = InstrSeq::gather(
                 jt_gen

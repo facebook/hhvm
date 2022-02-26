@@ -739,7 +739,7 @@ fn emit_try_finally_<
     // TODO: If we make this illegal at parse time then we can remove this pass.
     let exn_local = e.local_gen_mut().get_unnamed();
     let finally_body = env.do_in_finally_body(e, finally_block, emit_block)?;
-    let mut finally_body_for_catch = InstrSeq::clone(&finally_body);
+    let mut finally_body_for_catch = finally_body.clone();
     label_rewriter::rewrite_with_fresh_regular_labels(e, &mut finally_body_for_catch);
 
     //  (3) Finally epilogue
@@ -1414,10 +1414,11 @@ pub fn emit_dropthrough_return<'a, 'arena, 'decl>(
         None => {
             let ret = emit_return(e, env)?;
             let state = e.emit_statement_state();
-            Ok(emit_pos_then(
-                &(state.function_pos.last_char()),
-                InstrSeq::gather(vec![InstrSeq::clone(&state.default_return_value), ret]),
-            ))
+            Ok(InstrSeq::gather(vec![
+                emit_pos(&(state.function_pos.last_char())),
+                state.default_return_value.clone(),
+                ret,
+            ]))
         }
     }
 }

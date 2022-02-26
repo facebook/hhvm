@@ -30,21 +30,14 @@ let get_and_cache
     ~(check_block_func : 'key -> blocked_entry option)
     ~(fallback_get_func_opt : ('key -> 'fallback_value option) option)
     ~(cache_func : 'key -> 'value -> unit)
-    ~(measure_name : string)
-    ~(key : 'key) : 'value option =
+    ~(key : 'key) : _ option =
   match (get_func key, fallback_get_func_opt) with
-  | (Some v, _) ->
-    Measure.sample measure_name 1.0;
-    Some v
+  | (Some v, _) -> Some v
   | (None, None) -> None
   | (None, Some fallback_get_func) ->
     (match check_block_func key with
-    | Some Blocked ->
-      (* We sample 1.0 here even though we're returning None because we didn't go to SQLite. *)
-      Measure.sample measure_name 1.0;
-      None
+    | Some Blocked -> None
     | None ->
-      Measure.sample measure_name 0.0;
       begin
         match fallback_get_func key with
         | Some res ->
@@ -158,7 +151,6 @@ module Types = struct
       ~check_block_func:BlockedEntries.get
       ~fallback_get_func_opt
       ~cache_func:TypePosHeap.write_around
-      ~measure_name:"Reverse naming table (types) cache hit rate"
       ~key:(hash id)
 
   let get_canon_name ctx id =
@@ -201,7 +193,6 @@ module Types = struct
       ~check_block_func:BlockedEntries.get
       ~fallback_get_func_opt
       ~cache_func:TypeCanonHeap.add
-      ~measure_name:"Canon naming table (types) cache hit rate"
       ~key:(canon_hash id)
 
   let remove_batch db_path_opt types =
@@ -280,7 +271,6 @@ module Funs = struct
       ~check_block_func:BlockedEntries.get
       ~fallback_get_func_opt
       ~cache_func:FunPosHeap.add
-      ~measure_name:"Reverse naming table (functions) cache hit rate"
       ~key:(hash id)
 
   let get_canon_name ctx name =
@@ -308,7 +298,6 @@ module Funs = struct
       ~check_block_func:BlockedEntries.get
       ~fallback_get_func_opt
       ~cache_func:FunCanonHeap.add
-      ~measure_name:"Canon naming table (functions) cache hit rate"
       ~key:(canon_hash name)
 
   let remove_batch db_path_opt funs =
@@ -379,7 +368,6 @@ module Consts = struct
       ~check_block_func:BlockedEntries.get
       ~fallback_get_func_opt
       ~cache_func:ConstPosHeap.add
-      ~measure_name:"Reverse naming table (consts) cache hit rate"
       ~key:(hash id)
 
   (* This function isn't even used, because the only callers who wish to obtain canonical

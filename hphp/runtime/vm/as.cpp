@@ -100,6 +100,7 @@
 #include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-emitter.h"
+#include "hphp/runtime/vm/unit-gen-helpers.h"
 #include "hphp/runtime/vm/unit-parser.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/zend/zend-string.h"
@@ -2290,8 +2291,6 @@ TypeConstraint parse_type_constraint(AsmState& as) {
   return parse_type_info(as, true).second;
 }
 
-using TParamNameVec = CompactVector<const StringData*>;
-
 TParamNameVec parse_shadowed_tparams(AsmState& as) {
   TParamNameVec ret;
   as.in.skipWhitespace();
@@ -2307,9 +2306,6 @@ TParamNameVec parse_shadowed_tparams(AsmState& as) {
   as.in.expectWs('}');
   return ret;
 }
-
-using UpperBoundVec = CompactVector<TypeConstraint>;
-using UpperBoundMap = std::unordered_map<const StringData*, UpperBoundVec>;
 
 void parse_ub(AsmState& as, UpperBoundMap& ubs) {
   as.in.skipWhitespace();
@@ -2356,23 +2352,6 @@ UpperBoundMap parse_ubs(AsmState& as) {
   }
   as.in.expect('}');
   return ret;
-}
-
-UpperBoundVec getRelevantUpperBounds(const TypeConstraint& tc,
-                                     const UpperBoundMap& ubs,
-                                     const UpperBoundMap& class_ubs,
-                                     const TParamNameVec& shadowed_tparams) {
-  UpperBoundVec ret;
-  if (!tc.isTypeVar()) return ret;
-  auto const typeName = tc.typeName();
-  auto it = ubs.find(typeName);
-  if (it != ubs.end()) return it->second;
-  if (std::find(shadowed_tparams.begin(), shadowed_tparams.end(), typeName) ==
-                shadowed_tparams.end()) {
-    it = class_ubs.find(typeName);
-    if (it != class_ubs.end()) return it->second;
-  }
-  return UpperBoundVec{};
 }
 
 /*

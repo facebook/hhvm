@@ -109,12 +109,12 @@ namespace Trace {
       TM(dispatchBB)    \
       TM(ehframe)       \
       TM(emitter)       \
-      TM(extern_compiler) \
       TM(facts)         \
       TM(fixup)         \
       TM(fr)            \
       TM(funcorder)     \
       TM(gc)            \
+      TM(hackc_translate) \
       TM(heapgraph)     \
       TM(heapreport)    \
       TM(hfsort)        \
@@ -200,6 +200,7 @@ namespace Trace {
       TM(txdeps)        \
       TM(txlease)       \
       TM(typeProfile)   \
+      TM(unit_parse)    \
       TM(unwind)        \
       TM(ustubs)        \
       TM(vasm)          \

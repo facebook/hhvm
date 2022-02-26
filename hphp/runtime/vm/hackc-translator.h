@@ -13,22 +13,26 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+
 #pragma once
 
-#include <string>
+#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs"
+#include "hphp/hack/src/hackc/hhbc-ast.h"
+#include "hphp/runtime/vm/native-func-table.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 namespace HPHP {
 
-struct Unit;
-struct Func;
-struct Class;
-struct UserAttributeMap;
+inline const hackc::hhbc::HackCUnit* hackCUnitRaw(const ::rust::Box<HackCUnitWrapper>& unit) {
+  return (const hackc::hhbc::HackCUnit*)(&(*unit));
+}
 
-//////////////////////////////////////////////////////////////////////
-
-std::string disassemble(const Unit* unit, bool isTest=false);
-std::string user_attrs(const UserAttributeMap*);
-
-//////////////////////////////////////////////////////////////////////
+std::unique_ptr<UnitEmitter> unitEmitterFromHackCUnit(
+  const hackc::hhbc::HackCUnit& unit,
+  const char* filename,
+	const SHA1& sha1,
+  const Native::FuncTable& nativeFuncs,
+  const std::string& hhasString
+);
 
 }

@@ -16,13 +16,19 @@
 
 #pragma once
 
-#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs"
-#include "hphp/hack/src/hackc/hhbc-ast.h"
+#include "hphp/runtime/vm/type-constraint.h"
+#include "hphp/util/compact-vector.h"
 
-namespace HPHP::hackc::hhbc {
+namespace HPHP {
+struct StringData;
 
-inline const HackCUnit* hackCUnitRaw(const ::rust::Box<HackCUnitWrapper>& unit) {
-  return (const HackCUnit*)(&(*unit));
-}
+using TParamNameVec = CompactVector<const StringData*>;
+using UpperBoundVec = CompactVector<TypeConstraint>;
+using UpperBoundMap = std::unordered_map<const StringData*, UpperBoundVec>;
+
+UpperBoundVec getRelevantUpperBounds(const TypeConstraint& tc,
+                                     const UpperBoundMap& ubs,
+                                     const UpperBoundMap& class_ubs,
+                                     const TParamNameVec& shadowed_tparams);
 
 }

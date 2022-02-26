@@ -701,8 +701,12 @@ void print_class_constant(Output& out, const PreClass::Const* cns) {
   }
 }
 
+const StaticString s_coeffectsProp("86coeffects");
+
+// TODO: T112774575 remove isTest flag when HackC Translator is complete
 template<class T>
-void print_prop_or_field_impl(Output& out, const T& f) {
+void print_prop_or_field_impl(Output& out, const T& f, bool isTest) {
+  if (isTest && f.name() == s_coeffectsProp.get()) return;
   out.fmtln(".property{}{} {}{} =",
     opt_attrs(AttrContext::Prop, f.attrs(), &f.userAttributes()),
     RuntimeOption::EvalDisassemblerDocComments &&
@@ -716,8 +720,9 @@ void print_prop_or_field_impl(Output& out, const T& f) {
   });
 }
 
+template<bool isTest = false>
 void print_property(Output& out, const PreClass::Prop* prop) {
-  print_prop_or_field_impl(out, *prop);
+  print_prop_or_field_impl(out, *prop, isTest);
 }
 
 void print_method(Output& out, const Func* func) {
@@ -838,6 +843,11 @@ void print_cls_directives(Output& out, const PreClass* cls) {
   for (auto* m : cls->allMethods())    print_method(out, m);
 }
 
+void print_cls_directives_test(Output& out, const PreClass* cls) {
+  for (auto& p : cls->allProperties()) print_property<true>(out, &p);
+}
+
+template<bool isTest = false>
 void print_cls(Output& out, const PreClass* cls) {
   out.indent();
   auto name = cls->name()->toCppString();
@@ -865,7 +875,11 @@ void print_cls(Output& out, const PreClass* cls) {
   print_enum_includes(out, cls);
   out.fmt(" {{");
   out.nl();
-  indented(out, [&] { print_cls_directives(out, cls); });
+  if (isTest) {
+    indented(out, [&] { print_cls_directives_test(out, cls); });
+  } else {
+    indented(out, [&] { print_cls_directives(out, cls); });
+  }
   out.fmtln("}}");
   out.nl();
 }
@@ -945,6 +959,13 @@ void print_unit(Output& out, const Unit* unit) {
   out.fmtln("# {} ends here", unit->origFilepath());
 }
 
+void print_unit_test(Output& out, const Unit* unit) {
+  out.fmtln("# {} starts here", unit->origFilepath());
+  out.nl();
+  for (auto& cls : unit->preclasses()) print_cls<true>(out, cls.get());
+  out.fmtln("# {} ends here", unit->origFilepath());
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -954,12 +975,18 @@ void print_unit(Output& out, const Unit* unit) {
  * conjunction with as.cpp):
  *
  * - .line/.srcpos directives
+ *
+ * TODO: T112774575 remove isTest flag when HackC Translator is complete
+ *
  */
-
-std::string disassemble(const Unit* unit) {
+std::string disassemble(const Unit* unit, bool isTest) {
   std::ostringstream os;
   Output out { os };
-  print_unit(out, unit);
+  if (isTest) {
+    print_unit_test(out, unit);
+  } else {
+    print_unit(out, unit);
+  }
   return os.str();
 }
 

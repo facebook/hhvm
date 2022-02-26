@@ -13,22 +13,24 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#pragma once
-
-#include <string>
+#include "hphp/runtime/vm/unit-gen-helpers.h"
 
 namespace HPHP {
-
-struct Unit;
-struct Func;
-struct Class;
-struct UserAttributeMap;
-
-//////////////////////////////////////////////////////////////////////
-
-std::string disassemble(const Unit* unit, bool isTest=false);
-std::string user_attrs(const UserAttributeMap*);
-
-//////////////////////////////////////////////////////////////////////
+UpperBoundVec getRelevantUpperBounds(const TypeConstraint& tc,
+                                     const UpperBoundMap& ubs,
+                                     const UpperBoundMap& class_ubs,
+                                     const TParamNameVec& shadowed_tparams) {
+  UpperBoundVec ret;
+  if (!tc.isTypeVar()) return ret;
+  auto const typeName = tc.typeName();
+  auto it = ubs.find(typeName);
+  if (it != ubs.end()) return it->second;
+  if (std::find(shadowed_tparams.begin(), shadowed_tparams.end(), typeName) ==
+                shadowed_tparams.end()) {
+    it = class_ubs.find(typeName);
+    if (it != class_ubs.end()) return it->second;
+  }
+  return UpperBoundVec{};
+}
 
 }

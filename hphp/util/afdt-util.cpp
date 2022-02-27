@@ -39,22 +39,38 @@ void append(std::vector<iovec>& iov, const void* addr, size_t size) {
 }
 }
 
-void sappend(int afdt_fd,
-             std::vector<iovec>& iov, const void* addr, size_t size) {
-  if (iov.size() == IOV_MAX) {
-    send(afdt_fd, iov);
-    iov.clear();
-  }
+void sappend(std::vector<iovec>& iov, const void* addr, size_t size) {
   append(iov, addr, size);
 }
 
-void rappend(int afdt_fd,
-             std::vector<iovec>& iov, void* addr, size_t size) {
-  if (iov.size() == IOV_MAX) {
-    recv(afdt_fd, iov);
-    iov.clear();
-  }
+void rappend(std::vector<iovec>& iov, void* addr, size_t size) {
   append(iov, addr, size);
+}
+
+namespace {
+// Skip all fully read iovecs. This includes initially empty iovecs.
+bool skip_processed(struct msghdr& msg, ssize_t nprocessed,
+                    ssize_t& npending_iovs) {
+  while (msg.msg_iovlen > 0 && msg.msg_iov[0].iov_len <= nprocessed) {
+    nprocessed -= msg.msg_iov[0].iov_len;
+    msg.msg_iov++;
+    if (npending_iovs > 0) {
+      npending_iovs--;
+    } else {
+      msg.msg_iovlen--;
+    }
+  }
+
+  if (msg.msg_iovlen == 0) {
+    // Nothing more to recv or send.
+    always_assert(nprocessed == 0);
+    return true;
+  }
+
+  reinterpret_cast<char*&>(msg.msg_iov[0].iov_base) += nprocessed;
+  msg.msg_iov[0].iov_len -= nprocessed;
+  return false;
+}
 }
 
 void send(int afdt_fd, std::vector<iovec>& iov) {
@@ -63,15 +79,24 @@ void send(int afdt_fd, std::vector<iovec>& iov) {
   struct msghdr msg;
   memset(&msg, 0, sizeof(msg));
   msg.msg_iov = &iov[0];
-  msg.msg_iovlen = iov.size();
-  ssize_t nwritten = sendmsg(afdt_fd, &msg, MSG_WAITALL);
-  if (nwritten < 0) {
-    throw std::system_error(errno, std::generic_category(), "send failed");
+  msg.msg_iovlen = std::min(iov.size(), size_t{IOV_MAX});
+
+  ssize_t npending_iovs = iov.size() - msg.msg_iovlen;
+  ssize_t nwritten = 0;
+
+  while (true) {
+    if (skip_processed(msg, nwritten, npending_iovs)) return;
+
+    nwritten = sendmsg(afdt_fd, &msg, MSG_WAITALL);
+    if (nwritten < 0) {
+      if (errno == EINTR) {
+        nwritten = 0;
+        continue;
+      }
+
+      throw std::system_error(errno, std::generic_category(), "send failed");
+    }
   }
-  for (auto& io : iov) {
-    nwritten -= io.iov_len;
-  }
-  if (nwritten) throw std::runtime_error("sent wrong number of bytes");
 }
 
 void recv(int afdt_fd, std::vector<iovec>& iov) {
@@ -80,15 +105,24 @@ void recv(int afdt_fd, std::vector<iovec>& iov) {
   struct msghdr msg;
   memset(&msg, 0, sizeof(msg));
   msg.msg_iov = &iov[0];
-  msg.msg_iovlen = iov.size();
-  ssize_t nread = recvmsg(afdt_fd, &msg, MSG_WAITALL);
-  if (nread <= 0) {
-    throw std::system_error(errno, std::generic_category(), "recv failed");
+  msg.msg_iovlen = std::min(iov.size(), size_t{IOV_MAX});
+
+  ssize_t npending_iovs = iov.size() - msg.msg_iovlen;
+  ssize_t nread = 0;
+
+  while (true) {
+    if (skip_processed(msg, nread, npending_iovs)) return;
+
+    nread = recvmsg(afdt_fd, &msg, MSG_WAITALL);
+    if (nread < 0) {
+      if (errno == EINTR) {
+        nread = 0;
+        continue;
+      }
+
+      throw std::system_error(errno, std::generic_category(), "recv failed");
+    }
   }
-  for (auto& io : iov) {
-    nread -= io.iov_len;
-  }
-  if (nread) throw std::runtime_error("recv received wrong number of bytes");
 }
 
 }

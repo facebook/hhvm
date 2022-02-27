@@ -88,17 +88,19 @@ void close_fds(const std::vector<int> &fds) {
 
 template<class Head, class... Tail>
 void lwp_write(int afdt_fd, const Head& h, Tail&&... args) {
-  if (afdt::sendRaw(afdt_fd, h, std::forward<Tail>(args)...)) {
-    throw Exception("Failed in afdt::sendRaw: %s",
-                    folly::errnoStr(errno).c_str());
+  try {
+    afdt::sendx(afdt_fd, h, std::forward<Tail>(args)...);
+  } catch (const std::runtime_error& ex) {
+    throw Exception("Failed in afdt::sendx: %s", ex.what());
   }
 }
 
 template<class Head, class... Tail>
 void lwp_read(int afdt_fd, Head& h, Tail&... args) {
-  if (afdt::recvRaw(afdt_fd, h, args...)) {
-    throw Exception("Failed in afdt::recvRaw: %s",
-                    folly::errnoStr(errno).c_str());
+  try {
+    afdt::recvx(afdt_fd, h, args...);
+  } catch (const std::runtime_error& ex) {
+    throw Exception("Failed in afdt::recvx: %s", ex.what());
   }
 }
 

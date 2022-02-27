@@ -32,7 +32,7 @@ void cli_write(int afdt_fd, Args&&... args) {
   try {
     afdt::sendx(afdt_fd, std::forward<Args>(args)...);
   } catch (const std::runtime_error& ex) {
-    throw Exception("Failed in afdt::sendRaw: %s", ex.what());
+    throw Exception("Failed in afdt::sendx: %s", ex.what());
   }
 }
 
@@ -43,7 +43,7 @@ void cli_read(int afdt_fd, Args&&... args) {
   try {
     afdt::recvx(afdt_fd, std::forward<Args>(args)...);
   } catch (const std::runtime_error& ex) {
-    throw Exception("Failed in afdt::recvRaw: %s", ex.what());
+    throw Exception("Failed in afdt::recvx: %s", ex.what());
   }
 }
 

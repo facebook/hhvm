@@ -8,7 +8,7 @@
 // Also interestingly, abstract constants are not emitted at all.
 
 use ffi::Maybe;
-use hhbc_id::r#const::ConstType;
+use hhbc_id::constant::ConstType;
 use runtime::TypedValue;
 
 #[derive(Debug)]

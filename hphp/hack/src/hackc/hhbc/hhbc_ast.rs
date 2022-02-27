@@ -37,7 +37,7 @@ pub type ConstNum = isize;
 pub type ClassId<'arena> = hhbc_id::class::ClassType<'arena>;
 pub type FunctionId<'arena> = hhbc_id::function::FunctionType<'arena>;
 pub type MethodId<'arena> = hhbc_id::method::MethodType<'arena>;
-pub type ConstId<'arena> = hhbc_id::r#const::ConstType<'arena>;
+pub type ConstId<'arena> = hhbc_id::constant::ConstType<'arena>;
 pub type PropId<'arena> = hhbc_id::prop::PropType<'arena>;
 
 pub type NumParams = usize;

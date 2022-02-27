@@ -10,7 +10,7 @@ use ffi::{Maybe::Just, Slice, Str};
 use hash::HashSet;
 use hhbc_assertion_utils::*;
 use hhbc_ast::*;
-use hhbc_id::{class, r#const, function, method, prop};
+use hhbc_id::{class, constant, function, method, prop};
 use hhbc_string_utils as string_utils;
 use hhvm_hhbc_defs_ffi::ffi::{
     BareThisOp, CollectionType, FCallArgsFlags, IncDecOp, IsLogAsDynamicCallOp, IsTypeOp, MOpMode,
@@ -636,9 +636,9 @@ fn emit_id<'a, 'arena, 'decl>(
         pseudo_consts::EXIT | pseudo_consts::DIE => emit_exit(emitter, env, None),
         _ => {
             // panic!("TODO: uncomment after D19350786 lands")
-            // let cid: ConstId = r#const::ConstType::from_ast_name(&s);
+            // let cid: ConstId = constant::ConstType::from_ast_name(&s);
             let cid =
-                r#const::ConstType::new(Str::new_str(alloc, string_utils::strip_global_ns(s)));
+                constant::ConstType::new(Str::new_str(alloc, string_utils::strip_global_ns(s)));
             emit_symbol_refs::add_constant(emitter, cid.clone());
             Ok(emit_pos_then(
                 p,
@@ -4357,9 +4357,9 @@ fn emit_class_const<'a, 'arena, 'decl>(
                 }
             } else {
                 emit_symbol_refs::add_class(e, cid.clone());
-                // TODO(hrust) enabel `let const_id = r#const::ConstType::from_ast_name(&id.1);`,
+                // TODO(hrust) enabel `let const_id = constant::ConstType::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
-                let const_id = r#const::ConstType::new(Str::new_str(
+                let const_id = constant::ConstType::new(Str::new_str(
                     alloc,
                     string_utils::strip_global_ns(&id.1),
                 ));
@@ -4374,9 +4374,9 @@ fn emit_class_const<'a, 'arena, 'decl>(
                     instr::classname()
                 }
             } else {
-                // TODO(hrust) enable `let const_id = r#const::ConstType::from_ast_name(&id.1);`,
+                // TODO(hrust) enable `let const_id = constant::ConstType::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
-                let const_id = r#const::ConstType::new(Str::new_str(
+                let const_id = constant::ConstType::new(Str::new_str(
                     alloc,
                     string_utils::strip_global_ns(&id.1),
                 ));

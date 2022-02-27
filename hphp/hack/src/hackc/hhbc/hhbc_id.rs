@@ -167,8 +167,7 @@ pub mod function {
     }
 }
 
-// escape reserved keyword via r#
-pub mod r#const {
+pub mod constant {
     use super::*;
 
     #[derive(Copy, Clone, PartialEq, Eq, Hash)]

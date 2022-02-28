@@ -411,6 +411,7 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?glean_hostname:(string_opt "glean_hostname" config)
       ?glean_port:(int_opt "glean_port" config)
       ?glean_reponame:(string_opt "glean_reponame" config)
+      ?symbol_write_ownership:(bool_opt "symbol_write_ownership" config)
       ?symbol_write_root_path:(string_opt "symbol_write_root_path" config)
       ?symbol_write_hhi_path:(string_opt "symbol_write_hhi_path" config)
       ?symbol_write_ignore_paths:

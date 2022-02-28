@@ -83,6 +83,7 @@ type t = {
   glean_hostname: string;
   glean_port: int;
   glean_reponame: string;
+  symbol_write_ownership: bool;
   symbol_write_root_path: string;
   symbol_write_hhi_path: string;
   symbol_write_ignore_paths: string list;
@@ -266,6 +267,7 @@ let default =
     glean_hostname = "";
     glean_port = 0;
     glean_reponame = "www.autocomplete";
+    symbol_write_ownership = false;
     symbol_write_root_path = "www";
     symbol_write_hhi_path = "hhi";
     symbol_write_ignore_paths = [];
@@ -401,6 +403,7 @@ let make
     ?(glean_hostname = default.glean_hostname)
     ?(glean_port = default.glean_port)
     ?(glean_reponame = default.glean_reponame)
+    ?(symbol_write_ownership = default.symbol_write_ownership)
     ?(symbol_write_root_path = default.symbol_write_root_path)
     ?(symbol_write_hhi_path = default.symbol_write_hhi_path)
     ?(symbol_write_ignore_paths = default.symbol_write_ignore_paths)
@@ -545,6 +548,7 @@ let make
     glean_hostname;
     glean_port;
     glean_reponame;
+    symbol_write_ownership;
     symbol_write_root_path;
     symbol_write_hhi_path;
     symbol_write_ignore_paths;
@@ -761,6 +765,8 @@ let glean_hostname t = t.glean_hostname
 let glean_port t = t.glean_port
 
 let glean_reponame t = t.glean_reponame
+
+let symbol_write_ownership t = t.symbol_write_ownership
 
 let symbol_write_root_path t = t.symbol_write_root_path
 

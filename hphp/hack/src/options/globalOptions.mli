@@ -189,6 +189,8 @@ type t = {
   (* Reponame used for glean connection, default to "www.autocomplete" *)
   glean_reponame: string;
   (* Path prefix to use for files relative to the repository root when writing symbol info to JSON *)
+  symbol_write_ownership: bool;
+  (* include fact ownership information, for creating incremental databases. *)
   symbol_write_root_path: string;
   (* Path prefix to use for hhi files when writing symbol info to JSON *)
   symbol_write_hhi_path: string;
@@ -383,6 +385,7 @@ val make :
   ?glean_hostname:string ->
   ?glean_port:int ->
   ?glean_reponame:string ->
+  ?symbol_write_ownership:bool ->
   ?symbol_write_root_path:string ->
   ?symbol_write_hhi_path:string ->
   ?symbol_write_ignore_paths:string list ->
@@ -617,6 +620,8 @@ val glean_hostname : t -> string
 val glean_port : t -> int
 
 val glean_reponame : t -> string
+
+val symbol_write_ownership : t -> bool
 
 val symbol_write_root_path : t -> string
 

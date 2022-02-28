@@ -1099,7 +1099,16 @@ let write_symbol_info_init
     let ctx = Provider_utils.ctx_from_server_env env in
     let root_path = env.swriteopt.symbol_write_root_path in
     let hhi_path = env.swriteopt.symbol_write_hhi_path in
-    Symbol_entrypoint.go genv.workers ctx ~out_dir ~root_path ~hhi_path ~files;
+    let ownership = env.swriteopt.symbol_write_ownership in
+    Hh_logger.log "Ownership mode: %b" ownership;
+    Symbol_entrypoint.go
+      genv.workers
+      ctx
+      ~ownership
+      ~out_dir
+      ~root_path
+      ~hhi_path
+      ~files;
 
     (env, t)
 

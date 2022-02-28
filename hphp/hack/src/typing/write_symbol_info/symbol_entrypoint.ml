@@ -81,10 +81,12 @@ let recheck_job
 let go
     (workers : MultiWorker.worker list option)
     (ctx : Provider_context.t)
+    ~(ownership : bool)
     ~(out_dir : string)
     ~(root_path : string)
     ~(hhi_path : string)
     ~(files : Relative_path.t list) : unit =
+  ignore ownership;
   let num_workers =
     match workers with
     | Some w -> List.length w

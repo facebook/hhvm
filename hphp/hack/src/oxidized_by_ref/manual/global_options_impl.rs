@@ -85,6 +85,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     glean_hostname: "",
     glean_port: 0,
     glean_reponame: "",
+    symbol_write_ownership: false,
     symbol_write_root_path: "",
     symbol_write_hhi_path: "",
     symbol_write_ignore_paths: &[],

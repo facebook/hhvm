@@ -64,7 +64,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
         on_error =
           (* Don't report errors in expanded definition.
            * These will have been reported at the definition site already. *)
-          Typing_error.Reasons_callback.ignore_error;
+          None;
       }
     in
     let (env, expanded_ty) =

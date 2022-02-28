@@ -115,20 +115,21 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
     ( env,
       Missing
         (fun () ->
-          Errors.add_typing_error
-            Typing_error.(
-              apply_reasons ~on_error:ctx.ety_env.on_error
-              @@ Secondary.Smember_not_found
-                   {
-                     pos = id_pos;
-                     kind = `class_typeconst;
-                     class_name;
-                     class_pos = Cls.pos class_;
-                     member_name = id_name;
-                     closest_member_name;
-                     hint = None;
-                     quickfixes = [];
-                   })) )
+          Option.iter ctx.ety_env.on_error ~f:(fun on_error ->
+              Errors.add_typing_error
+                Typing_error.(
+                  apply_reasons ~on_error
+                  @@ Secondary.Smember_not_found
+                       {
+                         pos = id_pos;
+                         kind = `class_typeconst;
+                         class_name;
+                         class_pos = Cls.pos class_;
+                         member_name = id_name;
+                         closest_member_name;
+                         hint = None;
+                         quickfixes = [];
+                       }))) )
   | Some typeconst ->
     let name = tp_name class_name id in
     let (ety_env, has_cycle) =
@@ -167,11 +168,16 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
         (if not ctx.allow_abstract then
           let tc_pos = fst typeconst.ttc_name in
 
-          Errors.add_typing_error
-            Typing_error.(
-              apply_reasons ~on_error:ctx.ety_env.on_error
-              @@ Secondary.Abstract_tconst_not_allowed
-                   { pos = id_pos; decl_pos = tc_pos; tconst_name = id_name }));
+          Option.iter ctx.ety_env.on_error ~f:(fun on_error ->
+              Errors.add_typing_error
+                Typing_error.(
+                  apply_reasons ~on_error
+                  @@ Secondary.Abstract_tconst_not_allowed
+                       {
+                         pos = id_pos;
+                         decl_pos = tc_pos;
+                         tconst_name = id_name;
+                       })));
         (* TODO(T59448452): this treatment of abstract type constants is unsound *)
         abstract_or_exact
           env
@@ -186,9 +192,7 @@ let create_root_from_type_constant ctx env root (_class_pos, class_name) class_
       in
       (* Don't report errors in expanded definition or constraint.
        * These will have been reported at the definition site already. *)
-      let ety_env =
-        { ety_env with on_error = Typing_error.Reasons_callback.ignore_error }
-      in
+      let ety_env = { ety_env with on_error = None } in
       (match typeconst.ttc_kind with
       (* Concrete type constants *)
       | TCConcrete { tc_type = ty } ->
@@ -352,8 +356,8 @@ let rec expand ctx env root : _ * result =
           decl_pos = get_pos root;
         }
     in
-    Errors.add_typing_error
-    @@ Typing_error.apply_reasons ~on_error:ctx.ety_env.on_error reason
+    Option.iter ctx.ety_env.on_error ~f:(fun on_error ->
+        Errors.add_typing_error @@ Typing_error.apply_reasons ~on_error reason)
   in
 
   match get_node root with

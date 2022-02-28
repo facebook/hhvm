@@ -407,11 +407,12 @@ let refresh_tvar tv (on_error : Typing_error.Reasons_callback.t) renv =
   let tv_ity = LoclType (mk (Reason.none, Tvar tv)) in
   let elim_on_error pos name =
     let name = Markdown_lite.md_codify name in
-    Typing_error.Reasons_callback.(
-      with_reasons
-        ~reasons:[(pos, "Could not remove rigid type variable " ^ name)]
-      @@ retain_code
-      @@ retain_quickfixes on_error)
+    Some
+      Typing_error.Reasons_callback.(
+        with_reasons
+          ~reasons:[(pos, "Could not remove rigid type variable " ^ name)]
+        @@ retain_code
+        @@ retain_quickfixes on_error)
   in
   let renv =
     let ubs = Env.get_tyvar_upper_bounds renv.env tv in

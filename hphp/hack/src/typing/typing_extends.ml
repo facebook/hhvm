@@ -618,7 +618,7 @@ let check_override
         on_error)
   | _ ->
     if get_ce_const class_elt then
-      Typing_phase.sub_type_decl env fty_child fty_parent on_error
+      Typing_phase.sub_type_decl env fty_child fty_parent @@ Some on_error
     else
       Typing_ops.unify_decl
         pos
@@ -820,11 +820,9 @@ let check_const_override
     in
     Option.iter err_opt ~f:Errors.add_typing_error;
 
-    Phase.sub_type_decl
-      env
-      class_const_type
-      parent_class_const_type
-      (Typing_error.Reasons_callback.class_constant_type_mismatch on_error)
+    Phase.sub_type_decl env class_const_type parent_class_const_type
+    @@ Some
+         (Typing_error.Reasons_callback.class_constant_type_mismatch on_error)
 
 let check_inherited_member_is_dynamically_callable
     env

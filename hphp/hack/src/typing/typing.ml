@@ -563,18 +563,12 @@ let as_expr env ty1 pe e =
       if SubType.is_sub_type_for_union env ty (MakeType.dynamic Reason.Rnone)
       then
         let env =
-          SubType.sub_type
-            env
-            ty
-            tk
-            (Typing_error.Reasons_callback.unify_error_at pe)
+          SubType.sub_type env ty tk
+          @@ Some (Typing_error.Reasons_callback.unify_error_at pe)
         in
         let env =
-          SubType.sub_type
-            env
-            ty
-            tv
-            (Typing_error.Reasons_callback.unify_error_at pe)
+          SubType.sub_type env ty tv
+          @@ Some (Typing_error.Reasons_callback.unify_error_at pe)
         in
         (env, Ok ty)
       else
@@ -637,24 +631,20 @@ let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
     (match tys with
     | [expr_ty] ->
       let res =
-        SubType.sub_type_res
-          env
-          expr_ty
-          right_expected_ty
-          Typing_error.(
-            Reasons_callback.of_primary_error
-            @@ Primary.Hh_expect { pos = p; equivalent })
+        SubType.sub_type_res env expr_ty right_expected_ty
+        @@ Some
+             Typing_error.(
+               Reasons_callback.of_primary_error
+               @@ Primary.Hh_expect { pos = p; equivalent })
       in
       (match res with
       | Ok env ->
         if equivalent then
-          SubType.sub_type
-            env
-            expected_ty
-            expr_ty
-            Typing_error.(
-              Reasons_callback.of_primary_error
-              @@ Primary.Hh_expect { pos = p; equivalent })
+          SubType.sub_type env expected_ty expr_ty
+          @@ Some
+               Typing_error.(
+                 Reasons_callback.of_primary_error
+                 @@ Primary.Hh_expect { pos = p; equivalent })
         else
           env
       | Error env -> env)
@@ -1341,7 +1331,7 @@ let call_param
           ~coerce:(Some Typing_logic.CoerceToDynamic)
           dep_ty
           dyn_ty
-          (Typing_error.Reasons_callback.unify_error_at pos)
+        @@ Some (Typing_error.Reasons_callback.unify_error_at pos)
       in
       (env, strip_dynamic env dep_ty)
     else
@@ -1540,12 +1530,8 @@ let safely_refine_class_type
         (* Substitute fresh type parameters for
          * original formals in constraint *)
         let (env, ty) = Phase.localize ~ety_env env ty in
-        SubType.add_constraint
-          env
-          ck
-          ty_fresh
-          ty
-          (Typing_error.Reasons_callback.unify_error_at p))
+        SubType.add_constraint env ck ty_fresh ty
+        @@ Some (Typing_error.Reasons_callback.unify_error_at p))
   in
   let env =
     List.fold_left (List.zip_exn tparams tyl_fresh) ~f:add_bounds ~init:env
@@ -1580,12 +1566,8 @@ let safely_refine_class_type
   let env =
     List.fold_left supertypes ~init:env ~f:(fun env ty ->
         if might_be_supertype ty then
-          SubType.add_constraint
-            env
-            Ast_defs.Constraint_as
-            obj_ty
-            ty
-            (Typing_error.Reasons_callback.unify_error_at p)
+          SubType.add_constraint env Ast_defs.Constraint_as obj_ty ty
+          @@ Some (Typing_error.Reasons_callback.unify_error_at p)
         else
           env)
   in
@@ -1741,7 +1723,7 @@ let safely_refine_is_array env ty p pred_name arg_expr =
           Ast_defs.Constraint_as
           tarrkey
           (MakeType.arraykey r)
-          (Typing_error.Reasons_callback.unify_error_at p)
+        @@ Some (Typing_error.Reasons_callback.unify_error_at p)
       in
       let (env, tfresh_name) =
         Env.add_fresh_generic_parameter
@@ -1787,12 +1769,8 @@ let safely_refine_is_array env ty p pred_name arg_expr =
       in
       let env =
         List.fold_left supertypes ~init:env ~f:(fun env ty ->
-            SubType.add_constraint
-              env
-              Ast_defs.Constraint_as
-              hint_ty
-              ty
-              (Typing_error.Reasons_callback.unify_error_at p))
+            SubType.add_constraint env Ast_defs.Constraint_as hint_ty ty
+            @@ Some (Typing_error.Reasons_callback.unify_error_at p))
       in
       Inter.intersect ~r env refined_ty arg_ty)
 
@@ -2976,7 +2954,7 @@ and expr_
           | Some ty ->
             (* There can't be an error because the type is fresh *)
             SubType.sub_type env supertype ty
-            @@ Typing_error.Reasons_callback.always error
+            @@ Some (Typing_error.Reasons_callback.always error)
         in
         (env, supertype)
       | Some ExpectedTy.{ ty = { et_type = ty; _ }; _ } -> (env, ty)
@@ -3539,7 +3517,8 @@ and expr_
         let ety_env =
           {
             ety_env with
-            on_error = Env.unify_error_assert_primary_pos_in_current_decl env;
+            on_error =
+              Some (Env.unify_error_assert_primary_pos_in_current_decl env);
           }
         in
         let env =
@@ -3954,11 +3933,8 @@ and expr_
     let (env, te2, ty2) = expr ?expected env e2 ~allow_awaitable:true in
     let (env, ty1') = Env.fresh_type env e1_pos in
     let env =
-      SubType.sub_type
-        env
-        ty1
-        (MakeType.nullable_locl Reason.Rnone ty1')
-        (Typing_error.Reasons_callback.unify_error_at e1_pos)
+      SubType.sub_type env ty1 (MakeType.nullable_locl Reason.Rnone ty1')
+      @@ Some (Typing_error.Reasons_callback.unify_error_at e1_pos)
     in
     (* Essentially mimic a call to
      *   function coalesce<Tr, Ta as Tr, Tb as Tr>(?Ta, Tb): Tr
@@ -3966,18 +3942,12 @@ and expr_
      *)
     let (env, ty_result) = Env.fresh_type env e2_pos in
     let env =
-      SubType.sub_type
-        env
-        ty1'
-        ty_result
-        (Typing_error.Reasons_callback.unify_error_at p)
+      SubType.sub_type env ty1' ty_result
+      @@ Some (Typing_error.Reasons_callback.unify_error_at p)
     in
     let env =
-      SubType.sub_type
-        env
-        ty2
-        ty_result
-        (Typing_error.Reasons_callback.unify_error_at p)
+      SubType.sub_type env ty2 ty_result
+      @@ Some (Typing_error.Reasons_callback.unify_error_at p)
     in
     make_result
       env
@@ -4470,7 +4440,7 @@ and expr_
               env
               expr_ty
               hint_ty
-              (Typing_error.Reasons_callback.unify_error_at p)
+            @@ Some (Typing_error.Reasons_callback.unify_error_at p)
           else
             env
         in
@@ -4508,7 +4478,7 @@ and expr_
         env
         expr_ty
         hint_ty
-        (Typing_error.Reasons_callback.unify_error_at p)
+      @@ Some (Typing_error.Reasons_callback.unify_error_at p)
     in
     make_result env p (Aast.Upcast (te, hint)) hint_ty
   | Efun (f, idl) -> lambda ~is_anon:true ?expected p env f idl
@@ -5610,11 +5580,8 @@ and et_splice env p e =
     MakeType.spliceable (Reason.Rsplice p) ty_visitor ty_res ty_infer
   in
   let env =
-    SubType.sub_type
-      env
-      ty
-      spliceable_type
-      (Typing_error.Reasons_callback.unify_error_at p)
+    SubType.sub_type env ty spliceable_type
+    @@ Some (Typing_error.Reasons_callback.unify_error_at p)
   in
   make_result env p (Aast.ET_Splice te) ty_infer
 
@@ -6550,10 +6517,8 @@ and dispatch_call
                 Result.fold
                   ~ok:(fun env -> (env, None))
                   ~error:(fun env -> (env, Some (ty, arraykey_ty)))
-                @@ SubType.sub_type_res
-                     env
-                     ty
-                     like_ak_ty
+                @@ SubType.sub_type_res env ty like_ak_ty
+                @@ Some
                      (Typing_error.Reasons_callback.invalid_echo_argument_at
                         pos)
               in
@@ -7892,7 +7857,7 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
       empty_expand_env with
       this_ty = cid_ty;
       substs = TUtils.make_locl_subst_for_class_tparams class_ params;
-      on_error = Typing_error.Reasons_callback.unify_error_at p;
+      on_error = Some (Typing_error.Reasons_callback.unify_error_at p);
     }
   in
   let env =
@@ -8088,7 +8053,7 @@ and call
                    env
                    e_ty
                    ty
-                   (Typing_error.Reasons_callback.unify_error_at pos)
+              @@ Some (Typing_error.Reasons_callback.unify_error_at pos)
             in
             (env, (pk, hole_on_err ~err_opt te)))
       in

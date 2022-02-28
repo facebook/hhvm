@@ -137,7 +137,7 @@ val localize_targ :
   check_well_kinded:bool -> env -> Aast.hint -> env * Tast.targ
 
 val sub_type_decl :
-  env -> decl_ty -> decl_ty -> Typing_error.Reasons_callback.t -> env
+  env -> decl_ty -> decl_ty -> Typing_error.Reasons_callback.t option -> env
 
 (** Add some [as] or [super] constraint to the environment.
     Raise an error if any inconsistency is detected. *)

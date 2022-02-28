@@ -28,7 +28,14 @@ let subtype_method
     (on_error : Typing_error.Reasons_callback.t) : env =
   (* This is (1) and (2) below *)
   let env =
-    subtype_funs ~on_error ~check_return r_sub ft_sub r_super ft_super env
+    subtype_funs
+      ~on_error:(Some on_error)
+      ~check_return
+      r_sub
+      ft_sub
+      r_super
+      ft_super
+      env
   in
   (* This is (3) below *)
   let check_tparams_constraints env tparams =
@@ -39,23 +46,15 @@ let subtype_method
              For now it's safe to produce a Tgeneric with empty args here, because
              if [name] were higher-kinded, then the constraints must be empty. *)
           let tgeneric = MakeType.generic (Reason.Rwitness_from_decl p) name in
-          Typing_generic_constraint.check_constraint
-            env
-            ck
-            tgeneric
-            ~cstr_ty
-            on_error)
+          Typing_generic_constraint.check_constraint env ck tgeneric ~cstr_ty
+          @@ Some on_error)
     in
     List.fold_left tparams ~init:env ~f:check_tparam_constraints
   in
   let check_where_constraints env cstrl =
     List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-        Typing_generic_constraint.check_constraint
-          env
-          ck
-          ty1
-          ~cstr_ty:ty2
-          on_error)
+        Typing_generic_constraint.check_constraint env ck ty1 ~cstr_ty:ty2
+        @@ Some on_error)
   in
   (* We only do this if the ft_tparam lengths match. Currently we don't even
    * report this as an error, indeed different names for type parameters.
@@ -154,7 +153,7 @@ let subtype_method_decl
   in
   let add_where_constraints env (cstrl : locl_where_constraint list) =
     List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-        Typing_subtype.add_constraint env ck ty1 ty2 on_error)
+        Typing_subtype.add_constraint env ck ty1 ty2 (Some on_error))
   in
   (* Now extend the environment with `where` constraints from the supertype *)
   let env = add_where_constraints env locl_ft_super.ft_where_constraints in

@@ -690,11 +690,7 @@ and obj_get_concrete_class_with_member_info
           localize_ft
             ~instantiation:
               { use_name = strip_ns id_str; use_pos = id_pos; explicit_targs }
-            ~ety_env:
-              {
-                ety_env with
-                on_error = Typing_error.Reasons_callback.ignore_error;
-              }
+            ~ety_env:{ ety_env with on_error = None }
             ~def_pos:mem_pos
             env
             ft)
@@ -718,11 +714,7 @@ and obj_get_concrete_class_with_member_info
                     use_pos = id_pos;
                     explicit_targs;
                   }
-                ~ety_env:
-                  {
-                    ety_env with
-                    on_error = Typing_error.Reasons_callback.ignore_error;
-                  }
+                ~ety_env:{ ety_env with on_error = None }
                 ~def_pos:mem_pos
                 env
                 ft)

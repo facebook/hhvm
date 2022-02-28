@@ -1692,16 +1692,6 @@ module Reasons_callback : sig
     [@@ocaml.deprecated
       "This function will be removed. Please use the provided combinators for constructing error callbacks."]
 
-  (** A `Reasons_callback.t` which evaluates to an empty list of `User_error.t`
-
-      This is equivalent to the following function:
-      `(fun ?code:_ ?quickfixes:_ _ -> () )`
-
-      Once errors are returned from typing & subtyping, this will be removed
-      in favour of actually ignoring the returned errors
-  *)
-  val ignore_error : t
-
   (** Create a constant `Reasons_callback.t` which defaults to the value of the
       supplied `Error.t` when applied. Each component of that error may be
       subsequently overridden if a value for that component is supplied during

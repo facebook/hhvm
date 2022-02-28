@@ -48,7 +48,7 @@ let coerce_type_impl
     env
     ty_have
     ty_expect
-    (on_error : Typing_error.Reasons_callback.t) =
+    (on_error : Typing_error.Reasons_callback.t option) =
   let is_expected_enforced = equal_enforcement ty_expect.et_enforced Enforced in
   if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
     if coerce_for_op && is_expected_enforced then
@@ -104,9 +104,10 @@ let coerce_type
     (on_error : Typing_error.Callback.t) =
   result ~on_ok:Fn.id ~on_err:Fn.id
   @@ coerce_type_impl ~coerce_for_op ~coerce env ty_have ty_expect
-  @@ Typing_error.Reasons_callback.with_claim
-       on_error
-       ~claim:(p, Reason.string_of_ureason ur)
+  @@ Some
+       (Typing_error.Reasons_callback.with_claim
+          on_error
+          ~claim:(p, Reason.string_of_ureason ur))
 
 let coerce_type_res
     ?(coerce_for_op = false)
@@ -118,9 +119,10 @@ let coerce_type_res
     ty_expect
     (on_error : Typing_error.Callback.t) =
   coerce_type_impl ~coerce_for_op ~coerce env ty_have ty_expect
-  @@ Typing_error.Reasons_callback.with_claim
-       on_error
-       ~claim:(p, Reason.string_of_ureason ur)
+  @@ Some
+       (Typing_error.Reasons_callback.with_claim
+          on_error
+          ~claim:(p, Reason.string_of_ureason ur))
 
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)
@@ -137,13 +139,8 @@ let try_coerce ?(coerce = None) env ty_have ty_expect =
       (fun () ->
         Some
           (result ~on_ok:Fn.id ~on_err:Fn.id
-          @@ coerce_type_impl
-               ~coerce
-               ~coerce_for_op:false
-               env
-               ty_have
-               ty_expect
-               (Typing_error.Reasons_callback.unify_error_at pos)))
+          @@ coerce_type_impl ~coerce ~coerce_for_op:false env ty_have ty_expect
+          @@ Some (Typing_error.Reasons_callback.unify_error_at pos)))
       (fun _ -> None)
   in
   Errors.is_hh_fixme := f;

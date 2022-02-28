@@ -1621,7 +1621,7 @@ let check_generic_class_with_SupportDynamicType env c parents =
                     Ast_defs.Constraint_as
                     lty
                     dynamic_ty
-                    (Typing_error.Reasons_callback.unify_error_at pc)
+                  @@ Some (Typing_error.Reasons_callback.unify_error_at pc)
                 in
                 begin
                   match Env.get_self_ty env with
@@ -1631,15 +1631,16 @@ let check_generic_class_with_SupportDynamicType env c parents =
                       env_with_assumptions
                       self_ty
                       dynamic_ty
-                    @@ Typing_error.Reasons_callback
-                       .bad_conditional_support_dynamic
-                         pc
-                         ~child:c_name
-                         ~parent:name
-                         ~ty_name:
-                           (lazy (Typing_print.full_strip_ns_decl env ty))
-                         ~self_ty_name:
-                           (lazy (Typing_print.full_strip_ns env self_ty))
+                    @@ Some
+                         (Typing_error.Reasons_callback
+                          .bad_conditional_support_dynamic
+                            pc
+                            ~child:c_name
+                            ~parent:name
+                            ~ty_name:
+                              (lazy (Typing_print.full_strip_ns_decl env ty))
+                            ~self_ty_name:
+                              (lazy (Typing_print.full_strip_ns env self_ty)))
                   | _ -> env
                 end
               | _ -> env

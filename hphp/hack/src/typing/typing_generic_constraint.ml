@@ -14,7 +14,7 @@ open Typing_defs
 open Typing_env_types
 
 let check_constraint
-    env ck ty ~cstr_ty (on_error : Typing_error.Reasons_callback.t) =
+    env ck ty ~cstr_ty (on_error : Typing_error.Reasons_callback.t option) =
   Typing_log.(
     log_with_level env "sub" ~level:1 (fun () ->
         log_types
@@ -67,17 +67,14 @@ let check_constraint
         on_error
 
 let check_tparams_constraint (env : env) ~use_pos ck ~cstr_ty ty =
-  check_constraint
-    env
-    ck
-    ty
-    ~cstr_ty
-    (Typing_error.Reasons_callback.explain_constraint use_pos)
+  check_constraint env ck ty ~cstr_ty
+  @@ Some (Typing_error.Reasons_callback.explain_constraint use_pos)
 
 let check_where_constraint
     ~in_class (env : env) ~use_pos ~definition_pos ck ~cstr_ty ty =
   check_constraint env ck ty ~cstr_ty
-  @@ Typing_error.Reasons_callback.explain_where_constraint
-       use_pos
-       ~in_class
-       ~decl_pos:definition_pos
+  @@ Some
+       (Typing_error.Reasons_callback.explain_where_constraint
+          use_pos
+          ~in_class
+          ~decl_pos:definition_pos)

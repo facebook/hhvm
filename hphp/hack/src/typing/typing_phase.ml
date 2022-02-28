@@ -373,10 +373,10 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
       in
       match has_cycle with
       | Some _ ->
-        Errors.add_typing_error
-          Typing_error.(
-            apply_reasons ~on_error:ety_env.on_error
-            @@ Secondary.Cyclic_enum_constraint pos);
+        Option.iter ety_env.on_error ~f:(fun on_error ->
+            Errors.add_typing_error
+              Typing_error.(
+                apply_reasons ~on_error @@ Secondary.Cyclic_enum_constraint pos));
 
         (env, mk (r, Typing_utils.tany env))
       | None ->
@@ -769,7 +769,7 @@ and localize_missing_tparams_class_for_global_inference env r sid class_ =
       empty_expand_env with
       this_ty = c_ty;
       substs = Subst.make_locl tparams tyl;
-      on_error = Typing_error.Reasons_callback.unify_error_at Pos.none;
+      on_error = Some (Typing_error.Reasons_callback.unify_error_at Pos.none);
     }
   in
   let env = check_tparams_constraints ~use_pos:Pos.none ~ety_env env tparams in
@@ -1017,11 +1017,10 @@ let localize_hint_no_subst env ~ignore_errors ?report_cycle h =
   localize_no_subst_
     env
     ~on_error:
-      Typing_error.Reasons_callback.(
-        if ignore_errors then
-          ignore_error
-        else
-          invalid_type_hint pos)
+      (if ignore_errors then
+        None
+      else
+        Some (Typing_error.Reasons_callback.invalid_type_hint pos))
     ?report_cycle
     h
 
@@ -1029,11 +1028,12 @@ let localize_no_subst env ~ignore_errors ty =
   localize_no_subst_
     env
     ~on_error:
-      Typing_error.Reasons_callback.(
-        if ignore_errors then
-          ignore_error
-        else
-          invalid_type_hint (Pos_or_decl.unsafe_to_raw_pos @@ get_pos ty))
+      (if ignore_errors then
+        None
+      else
+        Some
+          (Typing_error.Reasons_callback.invalid_type_hint
+             (Pos_or_decl.unsafe_to_raw_pos @@ get_pos ty)))
     ty
 
 let localize_possibly_enforced_no_subst env ~ignore_errors ety =
@@ -1073,7 +1073,7 @@ let localize_targs_and_check_constraints
       empty_expand_env with
       this_ty;
       substs = Subst.make_locl tparaml targs_tys;
-      on_error = Typing_error.Reasons_callback.unify_error_at use_pos;
+      on_error = Some (Typing_error.Reasons_callback.unify_error_at use_pos);
     }
   in
   let env = check_tparams_constraints ~use_pos ~ety_env env tparaml in
@@ -1132,11 +1132,11 @@ let localize_and_add_ast_generic_parameters_and_where_constraints
     List.map tparams ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
   in
   let ety_env =
-    empty_expand_env_with_on_error
-      (if ignore_errors then
-        Typing_error.Reasons_callback.ignore_error
-      else
-        Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
+    if ignore_errors then
+      empty_expand_env
+    else
+      empty_expand_env_with_on_error
+        (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
   in
   let env = localize_and_add_generic_parameters ~ety_env env tparams in
   let env = localize_and_add_where_constraints ~ety_env env where_constraints in

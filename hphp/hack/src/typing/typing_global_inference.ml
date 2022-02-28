@@ -47,7 +47,7 @@ let catch_exc
   try
     let (other_errors, v) =
       Errors.do_with_context (Pos.filename pos) Errors.Typing (fun () ->
-          f @@ convert_on_error on_error pos)
+          f @@ Some (convert_on_error on_error pos))
     in
     List.iter (Errors.get_error_list other_errors) ~f:on_error;
     v

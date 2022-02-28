@@ -170,26 +170,27 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
     if SSet.is_empty intersection then
       (* Just violated constraints inside the typedef that do not involve
          the type parameters of the typedef we are looking at. Nothing to report at this point *)
-      Typing_error.Reasons_callback.ignore_error
+      None
     else
       (* We choose an arbitrary element. If a constraint violation were to contain multiple
          tparams of the typedef, we can live with only showing the user one of them. *)
       let typedef_tparam_name = SSet.min_elt intersection in
       let (used_class_in_def_pos, used_class_in_def_name) = used_class in
       let typedef_pos = typedef_info.td_pos in
-      Typing_error.(
-        Reasons_callback.always
-        @@ primary
-        @@ Primary.HKT_alias_with_implicit_constraints
-             {
-               pos = use_pos;
-               typedef_pos;
-               used_class_in_def_pos;
-               typedef_name;
-               typedef_tparam_name;
-               used_class_in_def_name;
-               used_class_tparam_name;
-             })
+      Some
+        Typing_error.(
+          Reasons_callback.always
+          @@ primary
+          @@ Primary.HKT_alias_with_implicit_constraints
+               {
+                 pos = use_pos;
+                 typedef_pos;
+                 used_class_in_def_pos;
+                 typedef_name;
+                 typedef_tparam_name;
+                 used_class_in_def_name;
+                 used_class_tparam_name;
+               })
   in
   let check_tapply r class_sid type_args =
     let decl_ty = Typing_make_type.apply r class_sid type_args in

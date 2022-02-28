@@ -165,7 +165,7 @@ type expand_env = {
           True by default. *)
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
-  on_error: Typing_error.Reasons_callback.t;
+  on_error: Typing_error.Reasons_callback.t option;
 }
 
 val empty_expand_env : expand_env

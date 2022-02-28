@@ -11,7 +11,7 @@ let make_type_const_equal
     tconstty
     (ty : internal_type)
     tconstid
-    ~(on_error : Typing_error.Reasons_callback.t)
+    ~(on_error : Typing_error.Reasons_callback.t option)
     ~as_tyvar_with_cnstr =
   let rec make_equal env ty =
     match ty with
@@ -29,7 +29,7 @@ let make_type_const_equal
           ~ignore_errors:(Option.is_some as_tyvar_with_cnstr)
       in
       let error =
-        Typing_error.Reasons_callback.type_constant_mismatch on_error
+        Option.map Typing_error.Reasons_callback.type_constant_mismatch on_error
       in
       let env = Utils.sub_type env tytconst tconstty error in
       let env = Utils.sub_type env tconstty tytconst error in

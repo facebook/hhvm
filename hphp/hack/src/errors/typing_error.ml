@@ -6906,8 +6906,6 @@ and Reasons_callback : sig
     [@@ocaml.deprecated
       "This function will be removed. Please use the provided combinators for constructing error callbacks."]
 
-  val ignore_error : t
-
   val always : Error.t -> t
 
   val of_error : Error.t -> t
@@ -7010,7 +7008,6 @@ end = struct
     | Quickfixes
 
   type t =
-    | Ignore
     | Always of Error.t
     | Of_error of Error.t
     | Of_callback of Callback.t * Pos.t Message.t
@@ -7037,7 +7034,6 @@ end = struct
       | Prepend_on_apply (t, _) ->
         aux t
       | From_on_error _
-      | Ignore
       | Assert_in_current_decl _ ->
         ()
     in
@@ -7046,8 +7042,6 @@ end = struct
   (* -- Constructors -------------------------------------------------------- *)
 
   let from_on_error f = From_on_error f
-
-  let ignore_error = Ignore
 
   let of_error err = Of_error err
 
@@ -7135,7 +7129,6 @@ end = struct
         and reasons = Option.value ~default:[] st.Error_state.reasons_opt in
         f ?code ?quickfixes reasons;
         Eval_result.empty
-      | Ignore -> Eval_result.empty
       | Always err -> Error.eval err ~current_span
       | Of_error err -> Error_state.with_defaults st err ~current_span
       | Of_callback (k, claim) ->

@@ -168,7 +168,7 @@ let implicit_return env pos ~expected ~actual =
       ~coerce:(Some Typing_logic.CoerceToDynamic)
       actual
       expected
-    @@ Typing_error.Reasons_callback.of_primary_error error
+    @@ Some (Typing_error.Reasons_callback.of_primary_error error)
   else
     Typing_ops.sub_type pos reason env actual expected
     @@ Typing_error.Callback.of_primary_error error

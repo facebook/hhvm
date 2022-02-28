@@ -877,7 +877,7 @@ let build_ccs (env : env) ~make_on_error : env * CC.t =
         let env = Env.unsolve env v in
         Debug.print_build_cc_start env v;
         let tvar = LoclType (mk (Reason.none, Tvar v)) in
-        let on_error = make_on_error v in
+        let on_error = Some (make_on_error v) in
         let bounds = Env.get_tyvar_lower_bounds env v in
         (* Remove the bounds, they'll be readded cleanly in prop_to_env_cc, thus also making
          * sure that the constraint graph is consistent, i.e. if v1 is a lower bound of v2,
@@ -1087,7 +1087,11 @@ let rec solve_down v (env, cc, deps) ~make_on_error =
              this needs to be done, there is CC dependencies between this cc and
              the cc of vars in type constants of this var. *)
           let (env, prop) =
-            subtype env (LoclType ty) ty_super ~on_error:(make_on_error v)
+            subtype
+              env
+              (LoclType ty)
+              ty_super
+              ~on_error:(Some (make_on_error v))
           in
           let (env, cc, deps) = prop_to_env_cc (env, cc, deps) prop in
           (env, cc, deps))
@@ -1132,7 +1136,7 @@ let rec solve_up v (env, cc, deps) ~make_on_error =
       ITySet.fold
         (fun ty_sub (env, cc, deps) ->
           let (env, prop) =
-            subtype env ty_sub (LoclType ty) ~on_error:(make_on_error v)
+            subtype env ty_sub (LoclType ty) ~on_error:(Some (make_on_error v))
           in
           let (env, cc, deps) = prop_to_env_cc (env, cc, deps) prop in
           (env, cc, deps))

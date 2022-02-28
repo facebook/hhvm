@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::reason::Reason;
+use crate::typing_defs::tyvar::Tyvar;
 use hcons::Hc;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 use pos::{Positioned, Symbol, ToOxidized, TypeName};
@@ -54,6 +55,10 @@ pub enum Ty_<R: Reason, TY> {
     Tfun(FunType<R>),
 
     /// Any type
+    /// TODO: any and err are a bit weird in that they are not actually types
+    /// but rather they represent a set of inconsistent bounds on a tyvar
+    /// we might want to rethink them prefering a sum type _or_
+    /// distinguishing types with `Tany` from those without
     Tany,
 
     /// The type of a generic parameter. The constraints on a generic parameter
@@ -67,6 +72,8 @@ pub enum Ty_<R: Reason, TY> {
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
     Tclass(Positioned<TypeName, R::Pos>, Exact, Vec<TY>),
+
+    Tvar(Tyvar),
 }
 
 walkable!(impl<R: Reason, TY> for Ty_<R, TY> =>  {
@@ -75,6 +82,7 @@ walkable!(impl<R: Reason, TY> for Ty_<R, TY> =>  {
     Ty_::Tany => [],
     Ty_::Tgeneric(_, args) => [args],
     Ty_::Tclass(_, _, args) => [args],
+    Ty_::Tvar(_) => [],
 });
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -103,6 +111,7 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
         use oxidized_by_ref::typing_defs::Ty_ as OTy_;
         let r = self.reason().to_oxidized(arena);
         let ty = match &**self.node() {
+            Ty_::Tvar(tv) => OTy_::Tvar((*tv).into()),
             Ty_::Tprim(x) => OTy_::Tprim(arena.alloc(*x)),
             Ty_::Tfun(_) => todo!(),
             Ty_::Tany => todo!(),

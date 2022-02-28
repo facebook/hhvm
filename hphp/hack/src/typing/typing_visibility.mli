@@ -43,6 +43,7 @@ val check_meth_caller_access :
 val check_deprecated :
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
+  env ->
   string option ->
   Typing_error.t option
 

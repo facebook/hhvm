@@ -624,7 +624,7 @@ and obj_get_concrete_class_with_member_info
         ~def_pos:mem_pos
         env
         vis;
-      TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos ce_deprecated;
+      TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos env ce_deprecated;
       TVis.check_expression_tree_vis ~use_pos:id_pos ~def_pos:mem_pos env vis;
       (if args.inst_meth then
         TVis.check_inst_meth_access ~use_pos:id_pos ~def_pos:mem_pos vis

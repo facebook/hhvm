@@ -1069,7 +1069,7 @@ let fun_type_of_id env x tal el =
       in
       Option.iter
         ~f:Errors.add_typing_error
-        (TVis.check_deprecated ~use_pos ~def_pos fe_deprecated);
+        (TVis.check_deprecated ~use_pos ~def_pos env fe_deprecated);
       let err_opt =
         let open Typing_error.Primary.Modules in
         if fe_internal then
@@ -3705,7 +3705,7 @@ and expr_
           let use_pos = fst meth in
           Option.iter
             ~f:Errors.add_typing_error
-            (TVis.check_deprecated ~use_pos ~def_pos ce_deprecated);
+            (TVis.check_deprecated ~use_pos ~def_pos env ce_deprecated);
           (match ce_visibility with
           | Vpublic
           | Vinternal _ ->
@@ -7442,7 +7442,7 @@ and class_get_inner
                class_);
           Option.iter
             ~f:Errors.add_typing_error
-            (TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated);
+            (TVis.check_deprecated ~use_pos:p ~def_pos env ce_deprecated);
           check_class_get env p def_pos c mid ce cid is_function_pointer;
           let (env, member_ty, et_enforced, tal) =
             match deref member_decl_ty with
@@ -7922,7 +7922,7 @@ and call_construct p env class_ params el unpacked_element cid cid_ty =
       (TVis.check_obj_access ~is_method:true ~use_pos:p ~def_pos env vis);
     Option.iter
       ~f:Errors.add_typing_error
-      (TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated);
+      (TVis.check_deprecated ~use_pos:p ~def_pos env ce_deprecated);
     (* Obtain the type of the constructor *)
     let (env, m) =
       let r = get_reason m |> Typing_reason.localize in

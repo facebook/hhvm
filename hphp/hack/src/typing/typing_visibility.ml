@@ -296,9 +296,12 @@ let check_class_access ~is_method ~use_pos ~def_pos env (vis, lsb) cid class_ =
     (is_visible_for_class ~is_method env (vis, lsb) cid class_)
     ~f:(fun msg -> visibility_error use_pos msg (def_pos, vis))
 
-let check_deprecated ~use_pos ~def_pos deprecated =
-  Option.map deprecated ~f:(fun s ->
-      Typing_error.(
-        primary
-        @@ Primary.Deprecated_use
-             { pos = use_pos; decl_pos_opt = Some def_pos; msg = s }))
+let check_deprecated ~use_pos ~def_pos env deprecated =
+  if Typing_env_types.(env.in_support_dynamic_type_method_check) then
+    None
+  else
+    Option.map deprecated ~f:(fun s ->
+        Typing_error.(
+          primary
+          @@ Primary.Deprecated_use
+               { pos = use_pos; decl_pos_opt = Some def_pos; msg = s }))

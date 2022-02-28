@@ -23,6 +23,15 @@ module Phase = Typing_phase
 module MakeType = Typing_make_type
 module Cls = Decl_provider.Class
 
+type ty_mismatch = (locl_ty, locl_ty * locl_ty) result
+
+type internal_result =
+  Typing_env_types.env
+  * Typing_error.t option
+  * (locl_ty * targ list)
+  * ty_mismatch
+  * ty_mismatch option
+
 (** Common arguments to internal `obj_get_...` functions *)
 type obj_get_args = {
   inst_meth: bool;
@@ -198,49 +207,46 @@ let member_not_found
            })
 
 let sound_dynamic_err_opt args env ((_, id_str) as id) read_context =
-  if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
-    (* Any access to a *private* member through dynamic might potentially
-     * be unsound, if the receiver is an instance of a class that implements dynamic,
-     * as we do no checks on enforceability or subtype-dynamic at the definition site
-     * of private members.
-     *)
-    match Env.get_self_class env with
-    | Some self_class
-      when Cls.get_support_dynamic_type self_class || not (Cls.final self_class)
-      ->
-      (match Env.get_member args.is_method env self_class id_str with
-      | Some { ce_visibility = Vprivate _; ce_type = (lazy ty); _ }
-        when not args.is_method ->
-        if read_context then
-          let (env, locl_ty) =
-            Phase.localize_no_subst ~ignore_errors:true env ty
-          in
-          Typing_dynamic.check_property_sound_for_dynamic_read
-            ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
-              Typing_error.(
-                primary
-                @@ Primary.Private_property_is_not_dynamic
-                     { pos; prop_name; class_name; prop_pos; prop_type }))
-            env
-            (Cls.name self_class)
-            id
-            locl_ty
-        else
-          Typing_dynamic.check_property_sound_for_dynamic_write
-            ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
-              Typing_error.(
-                primary
-                @@ Primary.Private_property_is_not_enforceable
-                     { pos; prop_name; class_name; prop_pos; prop_type }))
-            env
-            (Cls.name self_class)
-            id
-            ty
-            None
-      | _ -> None)
-    | _ -> None
-  else
-    None
+  (* Any access to a *private* member through dynamic might potentially
+   * be unsound, if the receiver is an instance of a class that implements dynamic,
+   * as we do no checks on enforceability or subtype-dynamic at the definition site
+   * of private members.
+   *)
+  match Env.get_self_class env with
+  | Some self_class
+    when Cls.get_support_dynamic_type self_class || not (Cls.final self_class)
+    ->
+    (match Env.get_member args.is_method env self_class id_str with
+    | Some { ce_visibility = Vprivate _; ce_type = (lazy ty); _ }
+      when not args.is_method ->
+      if read_context then
+        let (env, locl_ty) =
+          Phase.localize_no_subst ~ignore_errors:true env ty
+        in
+        Typing_dynamic.check_property_sound_for_dynamic_read
+          ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
+            Typing_error.(
+              primary
+              @@ Primary.Private_property_is_not_dynamic
+                   { pos; prop_name; class_name; prop_pos; prop_type }))
+          env
+          (Cls.name self_class)
+          id
+          locl_ty
+      else
+        Typing_dynamic.check_property_sound_for_dynamic_write
+          ~on_error:(fun pos prop_name class_name (prop_pos, prop_type) ->
+            Typing_error.(
+              primary
+              @@ Primary.Private_property_is_not_enforceable
+                   { pos; prop_name; class_name; prop_pos; prop_type }))
+          env
+          (Cls.name self_class)
+          id
+          ty
+          None
+    | _ -> None)
+  | _ -> None
 
 let widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
   match deref ty with
@@ -390,14 +396,15 @@ let rec this_appears_covariantly ~contra env ty =
 (** We know that the receiver is a concrete class, not a generic with
     bounds, or a Tunion. *)
 let rec obj_get_concrete_ty
-    args env concrete_ty ((id_pos, id_str) as id) on_error =
+    args env concrete_ty ((id_pos, id_str) as id) on_error : internal_result =
   log_obj_get env `concrete id_pos concrete_ty args.this_ty;
   let dflt_rval_err =
     Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
   and dflt_lval_err = Ok concrete_ty in
 
-  let default ?(lval_err = dflt_lval_err) ?(rval_err = dflt_rval_err) () =
-    (env, (Typing_utils.mk_tany env id_pos, []), lval_err, rval_err)
+  let default ?(lval_err = dflt_lval_err) ?(rval_err = dflt_rval_err) ty_err_opt
+      =
+    (env, ty_err_opt, (Typing_utils.mk_tany env id_pos, []), lval_err, rval_err)
   in
   let read_context = Option.is_none args.coerce_from_ty in
   let (env, concrete_ty) = Env.expand_type env concrete_ty in
@@ -413,13 +420,17 @@ let rec obj_get_concrete_ty
       paraml
       on_error
   | (_, Tdynamic) ->
-    let err_opt = sound_dynamic_err_opt args env id read_context in
-    Option.iter ~f:Errors.add_typing_error err_opt;
+    let err_opt =
+      if TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env) then
+        sound_dynamic_err_opt args env id read_context
+      else
+        None
+    in
     let ty = MakeType.dynamic (Reason.Rdynamic_prop id_pos) in
-    (env, (ty, []), dflt_lval_err, dflt_rval_err)
+    (env, err_opt, (ty, []), dflt_lval_err, dflt_rval_err)
   | (_, Tany _)
   | (_, Terr) ->
-    default ()
+    default None
   | (_, Tnonnull) ->
     let err =
       Typing_error.(
@@ -443,14 +454,14 @@ let rec obj_get_concrete_ty
                ty_name = lazy (Typing_print.error env concrete_ty);
              })
     in
-    Errors.add_typing_error err;
     let ty_nothing = MakeType.nothing Reason.none in
     let lval_err = Error (concrete_ty, ty_nothing) in
-    default ~lval_err ()
+    default ~lval_err (Some err)
   | _ ->
     let err =
       Typing_error.(
-        primary
+        apply ~on_error
+        @@ primary
         @@ Primary.Non_object_member
              {
                pos = id_pos;
@@ -469,13 +480,13 @@ let rec obj_get_concrete_ty
                decl_pos = get_pos concrete_ty;
              })
     in
-    Errors.add_typing_error @@ Typing_error.apply ~on_error err;
     let ty_nothing = MakeType.nothing Reason.none in
     let lval_err = Error (concrete_ty, ty_nothing) in
-    default ~lval_err ()
+    default ~lval_err (Some err)
 
 and get_member_from_constraints
-    args env class_info ((id_pos, _) as id) reason params on_error =
+    args env class_info ((id_pos, _) as id) reason params on_error :
+    internal_result =
   let ety_env = mk_ety_env class_info params args.this_ty in
   let upper_bounds = Cls.upper_bounds_on_this class_info in
   let (env, upper_bounds) =
@@ -505,10 +516,11 @@ and obj_get_concrete_class
     reason
     class_name
     params
-    on_error =
+    on_error : internal_result =
   match Env.get_class env class_name with
   | None ->
     ( env,
+      None,
       (Typing_utils.mk_tany env id_pos, []),
       Ok concrete_ty,
       Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty )
@@ -581,7 +593,7 @@ and obj_get_concrete_class_with_member_info
     params
     old_member_info
     member_info
-    on_error =
+    on_error : internal_result =
   let dflt_rval_err =
     Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
   and dflt_lval_err = Ok concrete_ty in
@@ -590,75 +602,66 @@ and obj_get_concrete_class_with_member_info
   in
   let mem_pos = get_pos member_ in
 
-  let shadow_err_opt =
-    Option.bind old_member_info ~f:(fun old_member_info ->
-        if
-          shadowed
-          && not (String.equal member_info.ce_origin old_member_info.ce_origin)
-        then
-          let (lazy old_member) = old_member_info.ce_type in
+  let ty_errs =
+    List.filter_map
+      ~f:Fn.id
+      [
+        Option.bind old_member_info ~f:(fun old_member_info ->
+            if
+              shadowed
+              && not
+                   (String.equal
+                      member_info.ce_origin
+                      old_member_info.ce_origin)
+            then
+              let (lazy old_member) = old_member_info.ce_type in
+              Some
+                Typing_error.(
+                  primary
+                  @@ Primary.Ambiguous_object_access
+                       {
+                         pos = id_pos;
+                         name = id_str;
+                         self_pos = get_pos member_;
+                         vis =
+                           Typing_defs.string_of_visibility
+                             old_member_info.ce_visibility;
+                         subclass_pos = get_pos old_member;
+                         class_self = self_id;
+                         class_subclass = class_name;
+                       })
+            else
+              None);
+        TVis.check_obj_access
+          ~is_method:args.is_method
+          ~use_pos:id_pos
+          ~def_pos:mem_pos
+          env
+          vis;
+        TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos env ce_deprecated;
+        (if args.is_parent_call && get_ce_abstract member_info then
           Some
             Typing_error.(
               primary
-              @@ Primary.Ambiguous_object_access
-                   {
-                     pos = id_pos;
-                     name = id_str;
-                     self_pos = get_pos member_;
-                     vis =
-                       Typing_defs.string_of_visibility
-                         old_member_info.ce_visibility;
-                     subclass_pos = get_pos old_member;
-                     class_self = self_id;
-                     class_subclass = class_name;
-                   })
+              @@ Primary.Parent_abstract_call
+                   { meth_name = id_str; pos = id_pos; decl_pos = mem_pos })
         else
-          None)
+          None);
+        TVis.check_expression_tree_vis ~use_pos:id_pos ~def_pos:mem_pos env vis;
+        (if args.inst_meth then
+          TVis.check_inst_meth_access ~use_pos:id_pos ~def_pos:mem_pos vis
+        else
+          None);
+        (if
+         args.meth_caller
+         && TypecheckerOptions.meth_caller_only_public_visibility
+              (Env.get_tcopt env)
+        then
+          TVis.check_meth_caller_access ~use_pos:id_pos ~def_pos:mem_pos vis
+        else
+          None);
+      ]
   in
-
-  let vis_err_opts =
-    [
-      TVis.check_obj_access
-        ~is_method:args.is_method
-        ~use_pos:id_pos
-        ~def_pos:mem_pos
-        env
-        vis;
-      TVis.check_deprecated ~use_pos:id_pos ~def_pos:mem_pos env ce_deprecated;
-      TVis.check_expression_tree_vis ~use_pos:id_pos ~def_pos:mem_pos env vis;
-      (if args.inst_meth then
-        TVis.check_inst_meth_access ~use_pos:id_pos ~def_pos:mem_pos vis
-      else
-        None);
-      (if
-       args.meth_caller
-       && TypecheckerOptions.meth_caller_only_public_visibility
-            (Env.get_tcopt env)
-      then
-        TVis.check_meth_caller_access ~use_pos:id_pos ~def_pos:mem_pos vis
-      else
-        None);
-    ]
-  in
-
-  let parent_abstract_call_err_opt =
-    if args.is_parent_call && get_ce_abstract member_info then
-      Some
-        Typing_error.(
-          primary
-          @@ Primary.Parent_abstract_call
-               { meth_name = id_str; pos = id_pos; decl_pos = mem_pos })
-    else
-      None
-  in
-
-  let typing_errs =
-    List.filter_map
-      ~f:Fn.id
-      (shadow_err_opt :: parent_abstract_call_err_opt :: vis_err_opts)
-  in
-
-  List.iter ~f:Errors.add_typing_error typing_errs;
 
   let member_decl_ty = Typing_enum.member_type env member_info in
   let widen_this = this_appears_covariantly ~contra:true env member_decl_ty in
@@ -745,8 +748,11 @@ and obj_get_concrete_class_with_member_info
 
   let (env, (member_ty, tal)) =
     if Cls.has_upper_bounds_on_this_from_constraints class_info then
-      let ((env, (ty, tal), _, _), succeed) =
-        Errors.try_
+      let ((env, _, (ty, tal), _, _), succeed) =
+        Errors.try_pred
+          ~fail:(function
+            | ((_, None, _, _, _), _) -> false
+            | _ -> true)
           (fun () ->
             ( get_member_from_constraints
                 args
@@ -757,9 +763,10 @@ and obj_get_concrete_class_with_member_info
                 params
                 on_error,
               true ))
-          (fun _ ->
+          (fun () ->
             (* No eligible functions found in constraints *)
             ( ( env,
+                None,
                 (MakeType.mixed Reason.Rnone, []),
                 dflt_lval_err,
                 dflt_rval_err ),
@@ -797,7 +804,12 @@ and obj_get_concrete_class_with_member_info
              Typing_error.Callback.(
                (with_side_effect ~eff unify_error [@alert "-deprecated"])))
   in
-  (env, (member_ty, tal), dflt_lval_err, rval_err)
+  let ty_err_opt =
+    match ty_errs with
+    | [] -> None
+    | _ -> Some (Typing_error.multiple ty_errs)
+  in
+  (env, ty_err_opt, (member_ty, tal), dflt_lval_err, rval_err)
 
 and obj_get_concrete_class_without_member_info
     args
@@ -807,15 +819,19 @@ and obj_get_concrete_class_without_member_info
     reason
     class_info
     params
-    on_error =
+    on_error : internal_result =
   let dflt_rval_err =
     Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
   and dflt_lval_err = Ok concrete_ty in
-  let default ?(lval_err = dflt_lval_err) ?(rval_err = dflt_rval_err) () =
-    (env, (Typing_utils.mk_tany env id_pos, []), lval_err, rval_err)
+  let default ?(lval_err = dflt_lval_err) ?(rval_err = dflt_rval_err) ty_err_opt
+      =
+    (env, ty_err_opt, (Typing_utils.mk_tany env id_pos, []), lval_err, rval_err)
   in
   if Cls.has_upper_bounds_on_this_from_constraints class_info then
-    Errors.try_
+    Errors.try_pred
+      ~fail:(function
+        | (_, None, _, _, _) -> false
+        | _ -> true)
       (fun () ->
         get_member_from_constraints
           args
@@ -825,7 +841,7 @@ and obj_get_concrete_class_without_member_info
           reason
           params
           on_error)
-      (fun (_ : Errors.error) ->
+      (fun () ->
         let err =
           member_not_found
             env
@@ -836,12 +852,11 @@ and obj_get_concrete_class_without_member_info
             reason
             on_error
         in
-        Errors.add_typing_error err;
         let ty_nothing = MakeType.nothing Reason.none in
-        default ~lval_err:(Error (concrete_ty, ty_nothing)) ())
+        default ~lval_err:(Error (concrete_ty, ty_nothing)) (Some err))
   else if not args.is_method then
-    let lval_err =
-      if not (SN.Members.is_special_xhp_attribute id_str) then (
+    let (lval_err, ty_err_opt) =
+      if not (SN.Members.is_special_xhp_attribute id_str) then
         let err =
           member_not_found
             env
@@ -852,13 +867,12 @@ and obj_get_concrete_class_without_member_info
             reason
             on_error
         in
-        Errors.add_typing_error err;
         let ty_nothing = MakeType.nothing Reason.none in
-        Error (concrete_ty, ty_nothing)
-      ) else
-        dflt_lval_err
+        (Error (concrete_ty, ty_nothing), Some err)
+      else
+        (dflt_lval_err, None)
     in
-    default ~lval_err ()
+    default ~lval_err ty_err_opt
   else if String.equal id_str SN.Members.__clone then
     (* Create a `public function __clone()[]: void {}` for classes that don't declare __clone *)
     let ft =
@@ -874,8 +888,8 @@ and obj_get_concrete_class_without_member_info
         ft_ifc_decl = default_ifc_fun_decl;
       }
     in
-    (env, (mk (Reason.Rnone, Tfun ft), []), dflt_lval_err, dflt_rval_err)
-  else if String.equal id_str SN.Members.__construct then (
+    (env, None, (mk (Reason.Rnone, Tfun ft), []), dflt_lval_err, dflt_rval_err)
+  else if String.equal id_str SN.Members.__construct then
     (* __construct is not an instance method and shouldn't be invoked directly
        Note that we already raise a NAST check error in `illegal_name_check` but
        we raise a related typing error here to properly keep track of failure.
@@ -885,9 +899,8 @@ and obj_get_concrete_class_without_member_info
     let err =
       Typing_error.(primary @@ Primary.Construct_not_instance_method id_pos)
     in
-    Errors.add_typing_error err;
-    default ()
-  ) else
+    default (Some err)
+  else
     let err =
       member_not_found
         env
@@ -898,18 +911,18 @@ and obj_get_concrete_class_without_member_info
         reason
         on_error
     in
-    Errors.add_typing_error err;
     let ty_nothing = MakeType.nothing Reason.none in
-    default ~lval_err:(Error (concrete_ty, ty_nothing)) ()
+    default ~lval_err:(Error (concrete_ty, ty_nothing)) (Some err)
 
 and nullable_obj_get
-    args env ety1 ((id_pos, id_str) as id) on_error ~read_context ty =
+    args env ety1 ((id_pos, id_str) as id) on_error ~read_context ty :
+    internal_result =
   let dflt_rval_err =
     Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
   in
   match args.nullsafe with
   | Some r_null ->
-    let (env, (method_, tal), lval_err, rval_err) =
+    let (env, ty_errs, (method_, tal), lval_err, rval_err) =
       obj_get_inner args env ty id on_error
     in
     let (env, ty) =
@@ -923,7 +936,7 @@ and nullable_obj_get
           method_
       | _ -> (env, method_)
     in
-    (env, (ty, tal), lval_err, rval_err)
+    (env, ty_errs, (ty, tal), lval_err, rval_err)
   | None ->
     let (ty_expect, err) =
       match deref ety1 with
@@ -1001,8 +1014,8 @@ and nullable_obj_get
         in
         (MakeType.nothing Reason.none, err)
     in
-    Errors.add_typing_error err;
     ( env,
+      Some err,
       (TUtils.terr env (get_reason ety1), []),
       Error (ety1, ty_expect),
       dflt_rval_err )
@@ -1020,7 +1033,8 @@ and nullable_obj_get
  * through to this_ty, as the member access must be valid for each disjunct
  * separately. Likewise for nullables (special case of union).
  *)
-and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error =
+and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
+    internal_result =
   log_obj_get env `inner id_pos receiver_ty args.this_ty;
   let (env, ety1') = Env.expand_type env receiver_ty in
   let was_var = is_tyvar ety1' in
@@ -1096,9 +1110,10 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error =
         else
           `property
       in
-      let prim_err =
+      let ty_err =
         Typing_error.(
-          primary
+          apply ~on_error
+          @@ primary
           @@ Primary.Non_object_member
                {
                  pos = id_pos;
@@ -1109,8 +1124,11 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error =
                  decl_pos = Reason.to_pos r;
                })
       in
-      Errors.add_typing_error @@ Typing_error.apply ~on_error prim_err;
-      (env, (err_witness env id_pos, []), dflt_lval_err, dflt_rval_err)
+      ( env,
+        Some ty_err,
+        (err_witness env id_pos, []),
+        dflt_lval_err,
+        dflt_rval_err )
     | (env, tyl) ->
       let (env, ty) = Typing_intersection.intersect_list env r tyl in
       let (env, ty) =
@@ -1126,7 +1144,7 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error =
     nullable_obj_get ~read_context ty
   (* We are trying to access a member through a value of unknown type *)
   | (r, Tvar _) ->
-    Errors.add_typing_error
+    let ty_err =
       Typing_error.(
         primary
         @@ Primary.Unknown_object_member
@@ -1139,21 +1157,23 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error =
                member_name = id_str;
                pos = id_pos;
                reason = Reason.to_string "It is unknown" r;
-             });
+             })
+    in
     let ty_nothing = MakeType.nothing Reason.none in
     ( env,
+      Some ty_err,
       (TUtils.terr env r, []),
       Error (receiver_ty, ty_nothing),
       dflt_rval_err )
   | (_, _) -> obj_get_concrete_ty args env ety1 id on_error
 
-and obj_get_inner_union args env on_error id reason tys =
-  let (env, resultl, lval_errs, rval_err_opts) =
+and obj_get_inner_union args env on_error id reason tys : internal_result =
+  let (env, ty_errs, resultl, lval_errs, rval_err_opts) =
     List.fold_left
       tys
-      ~init:(env, [], [], [])
-      ~f:(fun (env, tys, lval_errs, rval_err_opts) ty ->
-        let (env, ty, lval_err, rval_err_opt) =
+      ~init:(env, [], [], [], [])
+      ~f:(fun (env, ty_errs, tys, lval_errs, rval_err_opts) ty ->
+        let (env, ty_err, ty, lval_err, rval_err_opt) =
           obj_get_inner
             { args with this_ty = ty; this_ty_conjunct = ty }
             env
@@ -1161,7 +1181,16 @@ and obj_get_inner_union args env on_error id reason tys =
             id
             on_error
         in
-        (env, ty :: tys, lval_err :: lval_errs, rval_err_opt :: rval_err_opts))
+        ( env,
+          ty_err :: ty_errs,
+          ty :: tys,
+          lval_err :: lval_errs,
+          rval_err_opt :: rval_err_opts ))
+  in
+  let ty_err_opt =
+    match List.filter_map ~f:Fn.id ty_errs with
+    | [] -> None
+    | ty_errs -> Some (Typing_error.union ty_errs)
   in
   let (env, lval_err) = mk_union_err env @@ fold_errs lval_errs in
   let (env, rval_err) =
@@ -1180,12 +1209,11 @@ and obj_get_inner_union args env on_error id reason tys =
   in
   let tyl = List.map ~f:fst resultl in
   let (env, ty) = Union.union_list env reason tyl in
-  (env, (ty, tal), lval_err, rval_err)
+  (env, ty_err_opt, (ty, tal), lval_err, rval_err)
 
 and obj_get_inner_intersection args env on_error id reason tys =
-  let (env, resultl, lval_errs, rval_err_opts) =
-    TUtils.run_on_intersection_key_value_res env tys ~f:(fun env ty ->
-        obj_get_inner { args with this_ty_conjunct = ty } env ty id on_error)
+  let (env, ty_errs, resultl, lval_errs, rval_err_opts) =
+    run_on_intersection args env id tys on_error
   in
   let (env, lval_err) = mk_intersection_err env @@ fold_errs lval_errs in
   let (env, rval_err) =
@@ -1201,9 +1229,44 @@ and obj_get_inner_intersection args env on_error id reason tys =
     | [] -> []
     | (_, tal) :: _ -> tal
   in
+  let ty_err_opt =
+    match List.filter_map ~f:Fn.id ty_errs with
+    | [] -> None
+    | ty_errs -> Some (Typing_error.intersect ty_errs)
+  in
   let tyl = List.map ~f:fst resultl in
   let (env, ty) = Inter.intersect_list env reason tyl in
-  (env, (ty, tal), lval_err, rval_err)
+  (env, ty_err_opt, (ty, tal), lval_err, rval_err)
+
+(* Until we have completely pure errors, we define locally a version of
+   `run_on_intersection` which consider both pure and side-effecting errors
+   when determining the validity over intersections *)
+and run_on_intersection args env id tys on_error =
+  let (env, resl_errors) =
+    List.map_env env tys ~f:(fun env ty ->
+        let args = { args with this_ty_conjunct = ty } in
+        let ( errors,
+              (env, ty_err_opt, ty, lval_ty_mismatch, rval_ty_mismatch_opt) ) =
+          Errors.do_ @@ fun () -> obj_get_inner args env ty id on_error
+        in
+        (env, ((ty_err_opt, ty, lval_ty_mismatch, rval_ty_mismatch_opt), errors)))
+  in
+  let valid_resl =
+    List.filter resl_errors ~f:(fun ((ty_err_opt, _, _, _), err) ->
+        Option.is_none ty_err_opt && Errors.is_empty err)
+    |> List.map ~f:fst
+  in
+  let (ty_err_opts, tyss, lval_ty_mismatches, rval_ty_mismatches) =
+    List.unzip4
+    @@
+    if not (List.is_empty valid_resl) then
+      valid_resl
+    else (
+      List.iter resl_errors ~f:(fun (_, err) -> Errors.merge_into_current err);
+      List.map ~f:fst resl_errors
+    )
+  in
+  (env, ty_err_opts, tyss, lval_ty_mismatches, rval_ty_mismatches)
 
 (* Look up the type of the property or method id in the type receiver_ty of the
  * receiver and use the function k to postprocess the result.
@@ -1292,9 +1355,10 @@ let obj_get_with_err
       this_ty_conjunct = receiver_ty;
     }
   in
-  let (env, ty, lval_err, rval_err_opt) =
+  let (env, ty_err_opt, ty, lval_err, rval_err_opt) =
     obj_get_inner args env receiver_or_parent_ty member_id on_error
   in
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
   let from_res = Result.fold ~ok:(fun _ -> None) ~error:(fun tys -> Some tys) in
   let lval_err_opt = from_res lval_err
   and rval_err_opt = Option.bind ~f:from_res rval_err_opt in

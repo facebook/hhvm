@@ -238,6 +238,33 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
     in
     f2 result @@ User_error.make code claim reasons ~quickfixes
 
+let try_with_result_pure ~fail f g =
+  let error_map_copy = !error_map in
+  let accumulate_errors_copy = !accumulate_errors in
+  let is_hh_fixme_copy = !is_hh_fixme in
+  (is_hh_fixme := (fun _ _ -> false));
+  error_map := Relative_path.Map.empty;
+  accumulate_errors := true;
+  let (result, errors) =
+    Utils.try_finally
+      ~f:
+        begin
+          fun () ->
+          let result = f () in
+          (result, !error_map)
+        end
+      ~finally:
+        begin
+          fun () ->
+          error_map := error_map_copy;
+          accumulate_errors := accumulate_errors_copy;
+          is_hh_fixme := is_hh_fixme_copy
+        end
+  in
+  match get_last errors with
+  | None when not @@ fail result -> result
+  | _ -> g result
+
 (* Reset errors before running [f] so that we can return the errors
  * caused by f. These errors are not added in the global list of errors. *)
 let do_ ?(apply_fixmes = true) ?(drop_fixmed = true) f =
@@ -1143,6 +1170,8 @@ let convert_errors_to_string ?(include_filename = false) (errors : error list) :
 (*****************************************************************************)
 
 let try_ f1 f2 = try_with_result f1 (fun _ err -> f2 err)
+
+let try_pred ~fail f g = try_with_result_pure ~fail f (fun _ -> g ())
 
 let try_with_error f1 f2 =
   try_ f1 (fun error ->

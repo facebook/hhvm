@@ -118,6 +118,8 @@ val format_summary :
 
 val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 
+val try_pred : fail:('a -> bool) -> (unit -> 'a) -> (unit -> 'a) -> 'a
+
 val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
 
 (** Return the list of errors caused by the function passed as parameter

@@ -40,6 +40,13 @@ module type S = sig
 
   val map_env : ('c -> key -> 'a -> 'c * 'b) -> 'c -> 'a t -> 'c * 'b t
 
+  val map_env_ty_err_opt :
+    ('a -> key -> 'b -> ('a * 'c option) * 'd) ->
+    'a ->
+    'b t ->
+    combine_ty_errs:('c list -> 'e) ->
+    ('a * 'e) * 'd t
+
   val filter_map : ('a -> 'b option) -> 'a t -> 'b t
 
   val filter_opt : 'a option t -> 'a t

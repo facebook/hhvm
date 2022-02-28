@@ -270,6 +270,13 @@ module ShapeFieldMap : sig
     'b shape_field_type TShapeMap.t ->
     'a * 'c shape_field_type TShapeMap.t
 
+  val map_env_ty_err_opt :
+    ('a -> 'b ty -> ('a * 'e option) * 'c ty) ->
+    'a ->
+    'b shape_field_type TShapeMap.t ->
+    combine_ty_errs:('e list -> 'f) ->
+    ('a * 'f) * 'c shape_field_type TShapeMap.t
+
   val map :
     ('a ty -> 'b ty) ->
     'a shape_field_type TShapeMap.t ->

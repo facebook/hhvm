@@ -523,6 +523,17 @@ module ShapeFieldMap = struct
     in
     TShapeMap.map_env f_over_shape_field_type env shape_map
 
+  let map_env_ty_err_opt f env shape_map ~combine_ty_errs =
+    let f_over_shape_field_type env _key ({ sft_ty; _ } as shape_field_type) =
+      let (env, sft_ty) = f env sft_ty in
+      (env, { shape_field_type with sft_ty })
+    in
+    TShapeMap.map_env_ty_err_opt
+      f_over_shape_field_type
+      env
+      shape_map
+      ~combine_ty_errs
+
   let map f shape_map = map_and_rekey shape_map (fun x -> x) f
 
   let iter f shape_map =

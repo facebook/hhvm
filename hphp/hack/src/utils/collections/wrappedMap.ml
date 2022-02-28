@@ -73,6 +73,15 @@ module Make (Ord : Map.OrderedType) : S with type key = Ord.t = struct
   let fold_env env f m init =
     fold (fun key v (env, acc) -> f env key v acc) m (env, init)
 
+  let fold_env_ty_err_opt env f m init =
+    fold
+      (fun key v ((env, errs), acc) ->
+        match f env key v acc with
+        | ((env, Some err), acc) -> ((env, err :: errs), acc)
+        | ((env, _), acc) -> ((env, errs), acc))
+      m
+      ((env, []), init)
+
   let elements m = fold (fun k v acc -> (k, v) :: acc) m []
 
   let map_env f env m =
@@ -83,6 +92,18 @@ module Make (Ord : Map.OrderedType) : S with type key = Ord.t = struct
         (env, add key v map))
       m
       empty
+
+  let map_env_ty_err_opt f env m ~combine_ty_errs =
+    let ((env, errs), res) =
+      fold_env_ty_err_opt
+        env
+        (fun env key v map ->
+          let (env, v) = f env key v in
+          (env, add key v map))
+        m
+        empty
+    in
+    ((env, combine_ty_errs errs), res)
 
   let filter_map (f : 'a -> 'b option) m =
     m

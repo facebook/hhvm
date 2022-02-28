@@ -32,6 +32,7 @@ pub mod typing_error;
 pub mod typing_local_types;
 pub mod typing_param;
 pub mod typing_phase;
+pub mod typing_prop;
 pub mod typing_return;
 pub mod typing_toplevel;
 pub mod utils;

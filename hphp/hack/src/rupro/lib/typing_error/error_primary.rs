@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::reason::Reason;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Primary<R: Reason> {
     InvalidTypeHint(R::Pos),
     ExpectingTypeHint(R::Pos),

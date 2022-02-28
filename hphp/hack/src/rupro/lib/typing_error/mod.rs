@@ -15,7 +15,7 @@ use crate::reason::Reason;
 #[derive(Clone, Debug)]
 pub struct ErrorMessage<P>(P, String);
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum TypingError<R: Reason> {
     Primary(Primary<R>),
 }

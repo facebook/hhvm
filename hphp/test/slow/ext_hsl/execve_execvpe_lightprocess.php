@@ -70,4 +70,18 @@ function main(): void {
   _OS\close($ro);
   _OS\close($re);
 
+  print "--- Check the pid is not a zombie after the pcntl_waitpid call\n";
+  list($ro, $wo) = _OS\pipe();
+  $ps_pid = _OS\fork_and_execve(
+    'ps',
+    vec['ps', (string)$pid],
+    vec[],
+    dict[_OS\STDOUT_FILENO => $wo],
+    shape('execvpe' => true),
+  );
+  _OS\close($wo);
+  pcntl_waitpid($ps_pid, inout $status);
+  printf("STDOUT: %s", _OS\read($ro, 1024));
+  _OS\close($ro);
+
 }

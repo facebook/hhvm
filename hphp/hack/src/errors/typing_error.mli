@@ -1895,8 +1895,21 @@ val assert_in_current_decl : Secondary.t -> ctx:Pos_or_decl.ctx -> t
 (** Report a list of errors at each type of an intersection *)
 val intersect : t list -> t
 
+(** Calling `intersect_opt xs` returns `None` if the list is empty and `intersect xs` otherwise *)
+val intersect_opt : t list -> t option
+
 (** Report a list of errors at each type of a union*)
 val union : t list -> t
 
+(** Calling `union_opt xs` returns `None` if the list is empty and `union xs` otherwise *)
+val union_opt : t list -> t option
+
 (** Report multiple errors at a single type *)
 val multiple : t list -> t
+
+(** Calling `multiple_opt xs` returns `None` if the list is empty and `multiple xs` otherwise *)
+val multiple_opt : t list -> t option
+
+(** Report two errors at a single type; `both t1 t2` is the same as
+    `multiple [t1;t2]`*)
+val both : t -> t -> t

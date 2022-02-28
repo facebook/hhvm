@@ -5274,9 +5274,17 @@ module rec Error : sig
 
   val intersect : t list -> t
 
+  val intersect_opt : t list -> t option
+
   val union : t list -> t
 
+  val union_opt : t list -> t option
+
   val multiple : t list -> t
+
+  val multiple_opt : t list -> t option
+
+  val both : t -> t -> t
 end = struct
   type kind =
     | Intersection
@@ -5376,11 +5384,23 @@ end = struct
 
   let assert_in_current_decl snd ~ctx = Assert_in_current_decl (snd, ctx)
 
+  let group_opt f = function
+    | [] -> None
+    | ts -> Some (f ts)
+
   let intersect ts = Group (Intersection, ts)
+
+  let intersect_opt = group_opt intersect
 
   let union ts = Group (Union, ts)
 
+  let union_opt = group_opt union
+
   let multiple ts = Group (Multiple, ts)
+
+  let multiple_opt = group_opt multiple
+
+  let both t1 t2 = multiple [t1; t2]
 end
 
 and Secondary : sig

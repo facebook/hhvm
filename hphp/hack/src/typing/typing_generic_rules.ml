@@ -132,6 +132,7 @@ let apply_rules_with_array_index_value_errs
       let (env, ty, arr_errs, key_errs, val_errs) =
         iter ~is_nonnull env bound
       in
+      let (env, ty) = Env.expand_type env ty in
       (env, Typing_make_type.supportdyn r ty, arr_errs, key_errs, val_errs)
     (* For unions, just apply rule of components and compute union of result *)
     | (r, Tunion tyl) ->

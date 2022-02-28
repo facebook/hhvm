@@ -92,60 +92,44 @@ let log_env_change name ?(level = 1) old_env new_env =
   let (env, ()) = log_env_change_ name ~level old_env (new_env, ()) in
   env
 
-let wrap_inference_env_call :
-    type res. env -> (Inf.t -> Inf.t * res) -> env * res =
- fun env f ->
-  let (inference_env, res) = f env.inference_env in
-  ({ env with inference_env }, res)
-
-let wrap_inference_env_call_res : type res. env -> (Inf.t -> res) -> res =
- fun env f ->
-  let (_env, res) =
-    wrap_inference_env_call env (fun env ->
-        let res = f env in
-        (env, res))
-  in
-  res
-
-let wrap_inference_env_call_env : env -> (Inf.t -> Inf.t) -> env =
- fun env f ->
-  let (env, ()) =
-    wrap_inference_env_call env (fun env ->
-        let env = f env in
-        (env, ()))
-  in
-  env
-
 let expand_var env r v =
-  wrap_inference_env_call env (fun env -> Inf.expand_var env r v)
+  let (inference_env, ty) = Inf.expand_var env.inference_env r v in
+  ({ env with inference_env }, ty)
 
 let fresh_type_reason ?variance env p r =
   log_env_change_ "fresh_type_reason" env
-  @@ wrap_inference_env_call env (fun env ->
-         Inf.fresh_type_reason ?variance env p r)
+  @@
+  let (inference_env, res) =
+    Inf.fresh_type_reason ?variance env.inference_env p r
+  in
+  ({ env with inference_env }, res)
 
 let fresh_type env p =
   log_env_change_ "fresh_type" env
-  @@ wrap_inference_env_call env (fun env -> Inf.fresh_type env p)
+  @@
+  let (inference_env, res) = Inf.fresh_type env.inference_env p in
+  ({ env with inference_env }, res)
 
 let fresh_type_invariant env p =
   log_env_change_ "fresh_type_invariant" env
-  @@ wrap_inference_env_call env (fun env -> Inf.fresh_type_invariant env p)
+  @@
+  let (inference_env, res) = Inf.fresh_type_invariant env.inference_env p in
+  ({ env with inference_env }, res)
 
 let new_global_tyvar env ?i r =
   log_env_change_ "new_global_tyvar" env
-  @@ wrap_inference_env_call env (fun env -> Inf.new_global_tyvar env ?i r)
+  @@
+  let (inference_env, res) = Inf.new_global_tyvar env.inference_env ?i r in
+  ({ env with inference_env }, res)
 
 let add_subtype_prop env prop =
   log_env_change "add_subtype_prop" env
-  @@ wrap_inference_env_call_env env (fun env -> Inf.add_subtype_prop env prop)
+  @@ { env with inference_env = Inf.add_subtype_prop env.inference_env prop }
 
-let is_global_tyvar env var =
-  wrap_inference_env_call_res env (fun env -> Inf.is_global_tyvar env var)
+let is_global_tyvar env var = Inf.is_global_tyvar env.inference_env var
 
 let get_global_tyvar_reason env var =
-  wrap_inference_env_call_res env (fun env ->
-      Inf.get_global_tyvar_reason env var)
+  Inf.get_global_tyvar_reason env.inference_env var
 
 let empty_bounds = TySet.empty
 
@@ -153,8 +137,11 @@ let tyvar_is_solved_or_skip_global env var =
   Inf.tyvar_is_solved_or_skip_global env.inference_env var
 
 let make_tyvar_no_more_occur_in_tyvar env v ~no_more_in:v' =
-  wrap_inference_env_call_env env (fun env ->
-      Inf.make_tyvar_no_more_occur_in_tyvar env v ~no_more_in:v')
+  {
+    env with
+    inference_env =
+      Inf.make_tyvar_no_more_occur_in_tyvar env.inference_env v ~no_more_in:v';
+  }
 
 let not_implemented s _ =
   failwith (Printf.sprintf "Function %s not implemented" s)
@@ -166,8 +153,7 @@ let (simplify_unions_ref : simplify_unions ref) =
 
 let simplify_unions x = !simplify_unions_ref x
 
-let bind env v ty =
-  wrap_inference_env_call_env env (fun env -> Inf.bind env v ty)
+let bind env v ty = { env with inference_env = Inf.bind env.inference_env v ty }
 
 (** Unions and intersections containing unsolved type variables may remain
     in an unsimplified form once those type variables get solved.
@@ -236,91 +222,102 @@ let simplify_occurrences env v =
 
 let add env ?(tyvar_pos = Pos.none) v ty =
   let env =
-    wrap_inference_env_call_env env (fun env -> Inf.add env ~tyvar_pos v ty)
+    { env with inference_env = Inf.add env.inference_env ~tyvar_pos v ty }
   in
   let env = simplify_occurrences env v in
   env
 
 let get_type env r var =
-  wrap_inference_env_call env (fun env -> Inf.get_type env r var)
+  let (inference_env, res) = Inf.get_type env.inference_env r var in
+  ({ env with inference_env }, res)
 
 let expand_type env ty =
-  wrap_inference_env_call env (fun env -> Inf.expand_type env ty)
+  let (inference_env, res) = Inf.expand_type env.inference_env ty in
+  ({ env with inference_env }, res)
 
 let expand_internal_type env ty =
-  wrap_inference_env_call env (fun env -> Inf.expand_internal_type env ty)
+  let (inference_env, res) = Inf.expand_internal_type env.inference_env ty in
+  ({ env with inference_env }, res)
 
-let get_tyvar_pos env var =
-  wrap_inference_env_call_res env (fun env -> Inf.get_tyvar_pos env var)
+let get_tyvar_pos env var = Inf.get_tyvar_pos env.inference_env var
 
 let get_tyvar_lower_bounds env var =
-  wrap_inference_env_call_res env (fun env ->
-      Inf.get_tyvar_lower_bounds env var)
+  Inf.get_tyvar_lower_bounds env.inference_env var
 
 let set_tyvar_lower_bounds env var tys =
-  wrap_inference_env_call_env env (fun env ->
-      Inf.set_tyvar_lower_bounds env var tys)
+  {
+    env with
+    inference_env = Inf.set_tyvar_lower_bounds env.inference_env var tys;
+  }
 
 let get_tyvar_upper_bounds env var =
-  wrap_inference_env_call_res env (fun env ->
-      Inf.get_tyvar_upper_bounds env var)
+  Inf.get_tyvar_upper_bounds env.inference_env var
 
 let set_tyvar_upper_bounds env var tys =
-  wrap_inference_env_call_env env (fun env ->
-      Inf.set_tyvar_upper_bounds env var tys)
+  {
+    env with
+    inference_env = Inf.set_tyvar_upper_bounds env.inference_env var tys;
+  }
 
 let get_tyvar_appears_covariantly env var =
-  wrap_inference_env_call_res env (fun env ->
-      Inf.get_tyvar_appears_covariantly env var)
+  Inf.get_tyvar_appears_covariantly env.inference_env var
 
 let set_tyvar_appears_covariantly env var =
-  wrap_inference_env_call_env env (fun env ->
-      Inf.set_tyvar_appears_covariantly env var)
+  {
+    env with
+    inference_env = Inf.set_tyvar_appears_covariantly env.inference_env var;
+  }
 
 let get_tyvar_appears_contravariantly env var =
-  wrap_inference_env_call_res env (fun env ->
-      Inf.get_tyvar_appears_contravariantly env var)
+  Inf.get_tyvar_appears_contravariantly env.inference_env var
 
 let set_tyvar_appears_contravariantly env var =
-  wrap_inference_env_call_env env (fun env ->
-      Inf.set_tyvar_appears_contravariantly env var)
+  {
+    env with
+    inference_env = Inf.set_tyvar_appears_contravariantly env.inference_env var;
+  }
 
 let get_tyvar_appears_invariantly env var =
-  wrap_inference_env_call_res env (fun env ->
-      Inf.get_tyvar_appears_invariantly env var)
+  Inf.get_tyvar_appears_invariantly env.inference_env var
 
 let get_tyvar_eager_solve_fail env var =
-  wrap_inference_env_call_res env (fun env ->
-      Inf.get_tyvar_eager_solve_fail env var)
+  Inf.get_tyvar_eager_solve_fail env.inference_env var
 
 let set_tyvar_eager_solve_fail env var =
-  wrap_inference_env_call_env env (fun env ->
-      Inf.set_tyvar_eager_solve_fail env var)
+  {
+    env with
+    inference_env = Inf.set_tyvar_eager_solve_fail env.inference_env var;
+  }
 
 let get_tyvar_type_consts env var =
-  wrap_inference_env_call_res env (fun env -> Inf.get_tyvar_type_consts env var)
+  Inf.get_tyvar_type_consts env.inference_env var
 
 let get_tyvar_type_const env var tid =
-  wrap_inference_env_call_res env (fun env ->
-      Inf.get_tyvar_type_const env var tid)
+  Inf.get_tyvar_type_const env.inference_env var tid
 
 let set_tyvar_type_const env var tconstid ty =
-  wrap_inference_env_call_env env (fun env ->
-      Inf.set_tyvar_type_const env var tconstid ty)
+  {
+    env with
+    inference_env = Inf.set_tyvar_type_const env.inference_env var tconstid ty;
+  }
 
-let get_current_tyvars env =
-  wrap_inference_env_call_res env Inf.get_current_tyvars
+let get_current_tyvars env = Inf.get_current_tyvars env.inference_env
 
 let open_tyvars env p =
-  wrap_inference_env_call_env env (fun env -> Inf.open_tyvars env p)
+  { env with inference_env = Inf.open_tyvars env.inference_env p }
 
-let close_tyvars env = wrap_inference_env_call_env env Inf.close_tyvars
+let close_tyvars env =
+  { env with inference_env = Inf.close_tyvars env.inference_env }
 
 let extract_global_inference_env env =
-  wrap_inference_env_call env (fun env -> Inf.extract_global_inference_env env)
+  let (inference_env, res) =
+    Inf.extract_global_inference_env env.inference_env
+  in
+  ({ env with inference_env }, res)
 
 let wrap_ty_in_var env r ty =
-  wrap_inference_env_call env (fun env -> Inf.wrap_ty_in_var env r ty)
+  let (inference_env, res) = Inf.wrap_ty_in_var env.inference_env r ty in
+  ({ env with inference_env }, res)
 
 let next_cont_opt = Typing_env_types.next_cont_opt
 
@@ -978,12 +975,13 @@ let is_strict env = FileInfo.is_strict (get_mode env)
 
 let is_hhi env = FileInfo.is_hhi (get_mode env)
 
-let get_allow_solve_globals env =
-  wrap_inference_env_call_res env Inf.get_allow_solve_globals
+let get_allow_solve_globals env = Inf.get_allow_solve_globals env.inference_env
 
 let set_allow_solve_globals env flag =
-  wrap_inference_env_call_env env (fun env ->
-      Inf.set_allow_solve_globals env flag)
+  {
+    env with
+    inference_env = Inf.set_allow_solve_globals env.inference_env flag;
+  }
 
 (*****************************************************************************)
 (* Locals *)
@@ -1635,8 +1633,11 @@ let set_tyvar_variance env ?(flip = false) ?(for_all_vars = false) ty =
 
 let add_tyvar_upper_bound ?intersect env var (ty : internal_type) =
   log_env_change "add_tyvar_upper_bound" env
-  @@ wrap_inference_env_call_env env (fun env ->
-         Inf.add_tyvar_upper_bound ?intersect env var ty)
+  @@ {
+       env with
+       inference_env =
+         Inf.add_tyvar_upper_bound ?intersect env.inference_env var ty;
+     }
 
 (* Add a single new upper bound [ty] to type variable [var] in [env.inference_env].
  * If the optional [intersect] operation is supplied, then use this to avoid
@@ -1660,20 +1661,28 @@ let add_tyvar_upper_bound_and_update_variances
 *)
 let remove_tyvar_upper_bound env var upper_var =
   log_env_change "remove_tyvar_upper_bound" env
-  @@ wrap_inference_env_call_env env (fun env ->
-         Inf.remove_tyvar_upper_bound env var upper_var)
+  @@ {
+       env with
+       inference_env =
+         Inf.remove_tyvar_upper_bound env.inference_env var upper_var;
+     }
 
 (* Remove type variable `lower_var` from the lower bounds on `var`, if it exists
 *)
 let remove_tyvar_lower_bound env var lower_var =
   log_env_change "remove_tyvar_lower_bound var" env
-  @@ wrap_inference_env_call_env env (fun env ->
-         Inf.remove_tyvar_lower_bound env var lower_var)
+  @@ {
+       env with
+       inference_env =
+         Inf.remove_tyvar_lower_bound env.inference_env var lower_var;
+     }
 
 let add_tyvar_lower_bound ?union env var ty =
   log_env_change "add_tyvar_lower_bound" env
-  @@ wrap_inference_env_call_env env (fun env ->
-         Inf.add_tyvar_lower_bound ?union env var ty)
+  @@ {
+       env with
+       inference_env = Inf.add_tyvar_lower_bound ?union env.inference_env var ty;
+     }
 
 (* Add a single new lower bound [ty] to type variable [var] in [env.tvenv].
  * If the optional [union] operation is supplied, then use this to avoid
@@ -1694,28 +1703,35 @@ let add_tyvar_lower_bound_and_update_variances ?union env var ty =
 
 let initialize_tyvar_as_in ~as_in:genv env v =
   log_env_change "initialize_tyvar_as_in" env
-  @@ wrap_inference_env_call_env env (fun env ->
-         Inf.initialize_tyvar_as_in ~as_in:genv env v)
+  @@ {
+       env with
+       inference_env =
+         Inf.initialize_tyvar_as_in ~as_in:genv env.inference_env v;
+     }
 
 let copy_tyvar_from_genv_to_env var ~to_:env ~from:genv =
   log_env_change_ "copy_tyvar_from_genv_to_env" env
-  @@ wrap_inference_env_call env (fun env ->
-         Inf.copy_tyvar_from_genv_to_env var ~to_:env ~from:genv)
+  @@
+  let (inference_env, res) =
+    Inf.copy_tyvar_from_genv_to_env var ~to_:env.inference_env ~from:genv
+  in
+  ({ env with inference_env }, res)
 
-let get_all_tyvars env =
-  wrap_inference_env_call_res env (fun env -> Inf.get_vars env)
+let get_all_tyvars env = Inf.get_vars env.inference_env
 
 let remove_var env var ~search_in_upper_bounds_of ~search_in_lower_bounds_of =
   log_env_change "remove_var" env
-  @@ wrap_inference_env_call_env env (fun env ->
+  @@ {
+       env with
+       inference_env =
          Inf.remove_var
-           env
+           env.inference_env
            var
            ~search_in_upper_bounds_of
-           ~search_in_lower_bounds_of)
+           ~search_in_lower_bounds_of;
+     }
 
-let unsolve env v =
-  wrap_inference_env_call_env env (fun env -> Inf.unsolve env v)
+let unsolve env v = { env with inference_env = Inf.unsolve env.inference_env v }
 
 module Log = struct
   (** Convert a type variable from an environment into json *)
@@ -1724,6 +1740,5 @@ module Log = struct
       (p_internal_type : internal_type -> string)
       (env : env)
       (v : Ident.t) =
-    wrap_inference_env_call_res env (fun env ->
-        Inf.Log.tyvar_to_json p_locl_ty p_internal_type env v)
+    Inf.Log.tyvar_to_json p_locl_ty p_internal_type env.inference_env v
 end

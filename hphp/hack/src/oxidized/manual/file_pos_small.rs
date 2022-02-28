@@ -95,7 +95,7 @@ impl FilePosSmall {
 
     #[inline]
     const fn bol_line_col_unchecked(bol: usize, line: usize, col: usize) -> Self {
-        FilePosSmall((((bol as u64) << (COLUMN_BITS + LINE_BITS)) + ((line as u64) << COLUMN_BITS) + (col as u64)))
+        FilePosSmall(((bol as u64) << (COLUMN_BITS + LINE_BITS)) + ((line as u64) << COLUMN_BITS) + (col as u64))
     }
 
     #[inline]

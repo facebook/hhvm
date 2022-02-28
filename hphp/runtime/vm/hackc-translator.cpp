@@ -365,6 +365,12 @@ void translateUbs(const TypeInfoPair& ub, UpperBoundMap& ubs) {
   }
 }
 
+void translateRequirements(TranslationState& ts, Pair<ClassType, TraitReqKind> requirement) {
+  auto const name = toStaticString(requirement._0._0);
+  auto const isExtends = requirement._1 == TraitReqKind::MustExtend;
+  ts.pce->addClassRequirement(PreClass::ClassRequirement(name, isExtends));
+}
+
 void translateClass(TranslationState& ts, const HhasClass& c) {
   UpperBoundMap ubs;
   auto upper_bounds = range(c.upper_bounds);
@@ -401,6 +407,12 @@ void translateClass(TranslationState& ts, const HhasClass& c) {
     ts.pce->addEnumInclude(toStaticString(in._0));
   }
   ts.pce->setUserAttributes(userAttrs);
+
+  auto requirements = range(c.requirements);
+  for (auto const& r : requirements) {
+    translateRequirements(ts, r);
+  }
+
   translateClassBody(ts, c, ubs);
 }
 

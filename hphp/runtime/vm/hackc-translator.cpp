@@ -188,14 +188,17 @@ void translateUserAttributes(Slice<HhasAttribute> attributes, UserAttributeMap& 
   };
 }
 
+template<bool isEnum=false>
 std::pair<const StringData*, TypeConstraint> translateTypeInfo(const HhasTypeInfo& t) {
   auto const user_type = maybeOrElse(t.user_type,
     [&](Str& s) {return toStaticString(s);},
     [&]() {return staticEmptyString();});
 
-  auto const type_name = maybeOrElse(t.type_constraint.name,
-    [&](Str& s) {return toStaticString(s);},
-    [&]() {return nullptr;});
+  auto const type_name = isEnum
+    ? user_type
+    : maybeOrElse(t.type_constraint.name,
+        [&](Str& s) {return toStaticString(s);},
+        [&]() {return nullptr;});
 
   auto flags = t.type_constraint.flags;
   return std::make_pair(user_type, TypeConstraint{type_name, flags});
@@ -365,10 +368,51 @@ void translateUbs(const TypeInfoPair& ub, UpperBoundMap& ubs) {
   }
 }
 
+void translateEnumType(TranslationState& ts, const Maybe<HhasTypeInfo>& t) {
+  auto const tOpt = maybe(t);
+  if (tOpt) {
+    ts.pce->setEnumBaseTy(translateTypeInfo<true>(tOpt.value()).second);
+  }
+}
+
 void translateRequirements(TranslationState& ts, Pair<ClassType, TraitReqKind> requirement) {
   auto const name = toStaticString(requirement._0._0);
   auto const isExtends = requirement._1 == TraitReqKind::MustExtend;
   ts.pce->addClassRequirement(PreClass::ClassRequirement(name, isExtends));
+}
+
+using UseAlias = Quadruple<
+  Maybe<ClassType>,
+  ClassType,
+  Maybe<ClassType>,
+  Attr
+>;
+void translateUseAlias(TranslationState& ts, UseAlias useAlias) {
+  auto const identifier = toStaticString(useAlias._1._0);
+  auto const traitName = maybeOrElse(useAlias._0,
+    [&](ClassType& c) {return toStaticString(c._0);},
+    [&]() {return staticEmptyString();});
+
+  auto const alias = maybeOrElse(useAlias._2,
+    [&](ClassType& c) { return toStaticString(c._0);},
+    [&]() {return identifier;});
+
+  ts.pce->addTraitAliasRule(
+    PreClass::TraitAliasRule(traitName, identifier, alias, useAlias._3)
+  );
+}
+
+using UsePrecedence = Triple<ClassType, ClassType, Slice<ClassType>>;
+void translateUsePrecedence(TranslationState& ts, UsePrecedence usePrecedence) {
+  auto const traitName = toStaticString(usePrecedence._0._0);
+  auto const identifier = toStaticString(usePrecedence._1._0);
+
+  PreClass::TraitPrecRule precRule(traitName, identifier);
+  auto otherTraits = range(usePrecedence._2);
+  for (auto const& t : otherTraits) {
+    precRule.addOtherTraitName(toStaticString(t._0));
+  }
+  ts.pce->addTraitPrecRule(precRule);
 }
 
 void translateClass(TranslationState& ts, const HhasClass& c) {
@@ -398,6 +442,10 @@ void translateClass(TranslationState& ts, const HhasClass& c) {
                parentName,
                staticEmptyString());
 
+  auto const dc = maybe(c.doc_comment);
+  if (dc) ts.pce->setDocComment(makeDocComment(dc.value()));
+  ts.pce->setUserAttributes(userAttrs);
+
   auto impls = range(c.implements);
   for (auto const& i : impls) {
     ts.pce->addInterface(toStaticString(i._0));
@@ -406,13 +454,28 @@ void translateClass(TranslationState& ts, const HhasClass& c) {
   for (auto const& in : incl) {
     ts.pce->addEnumInclude(toStaticString(in._0));
   }
-  ts.pce->setUserAttributes(userAttrs);
 
   auto requirements = range(c.requirements);
   for (auto const& r : requirements) {
     translateRequirements(ts, r);
   }
 
+  auto uses = range(c.uses);
+  for (auto const& u : uses) {
+    ts.pce->addUsedTrait(toStaticString(u));
+  }
+
+  auto useAliases = range(c.use_aliases);
+  for (auto const& ua : useAliases) {
+    translateUseAlias(ts, ua);
+  }
+
+  auto usePrecedences = range(c.use_precedences);
+  for (auto const& up : usePrecedences) {
+    translateUsePrecedence(ts, up);
+  }
+
+  translateEnumType(ts, c.enum_type);
   translateClassBody(ts, c, ubs);
 }
 

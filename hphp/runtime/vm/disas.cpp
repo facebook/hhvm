@@ -844,6 +844,13 @@ void print_cls_directives(Output& out, const PreClass* cls) {
 }
 
 void print_cls_directives_test(Output& out, const PreClass* cls) {
+  if (RuntimeOption::EvalDisassemblerDocComments) {
+    if (cls->docComment() && !cls->docComment()->empty()) {
+      out.fmtln(".doc {};", escaped_long(cls->docComment()));
+    }
+  }
+  print_cls_enum_ty(out, cls);
+  print_cls_used_traits(out, cls);
   for (auto& r : cls->requirements())  print_requirement(out, r);
   for (auto& c : cls->allConstants())  print_class_constant(out, &c);
   for (auto& p : cls->allProperties()) print_property<true>(out, &p);

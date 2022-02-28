@@ -12,9 +12,9 @@ pub struct HhasPos {
     pub col_end: usize,
 }
 impl Default for HhasPos {
-    fn default() -> HhasPos {
+    fn default() -> Self {
         let (line_begin, line_end, col_begin, col_end) = (1, 1, 0, 0);
-        HhasPos {
+        Self {
             line_begin,
             line_end,
             col_begin,
@@ -23,13 +23,13 @@ impl Default for HhasPos {
     }
 }
 impl std::convert::From<oxidized::pos::Pos> for HhasPos {
-    fn from(p: oxidized::pos::Pos) -> HhasPos {
+    fn from(p: oxidized::pos::Pos) -> Self {
         let (line_begin, line_end, col_begin, col_end) = if p.is_none() || !p.is_valid() {
             (1, 1, 0, 0)
         } else {
             p.info_pos_extended()
         };
-        HhasPos {
+        Self {
             line_begin,
             line_end,
             col_begin,
@@ -41,11 +41,17 @@ impl std::convert::From<oxidized::pos::Pos> for HhasPos {
 /// Span, emitted as prefix to classes and functions
 #[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
-pub struct HhasSpan(pub usize, pub usize);
+pub struct HhasSpan {
+    pub line_begin: usize,
+    pub line_end: usize,
+}
 
 impl HhasSpan {
-    pub fn from_pos(pos: &oxidized::pos::Pos) -> HhasSpan {
+    pub fn from_pos(pos: &oxidized::pos::Pos) -> Self {
         let (line_begin, line_end, _, _) = pos.info_pos_extended();
-        HhasSpan(line_begin, line_end)
+        Self {
+            line_begin,
+            line_end,
+        }
     }
 }

@@ -282,8 +282,8 @@ void translateClass(TranslationState& ts, const HhasClass& c) {
     [&](ClassType& s) { return toStaticString(s._0); },
     [&]() { return staticEmptyString(); });
 
-  ts.pce->init(c.span._0,
-               c.span._1,
+  ts.pce->init(c.span.line_begin,
+               c.span.line_end,
                attrs,
                parentName,
                staticEmptyString());

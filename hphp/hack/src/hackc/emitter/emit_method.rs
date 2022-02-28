@@ -287,7 +287,7 @@ pub fn from_ast<'a, 'arena, 'decl>(
         }
     };
     let span = if is_native_opcode_impl {
-        HhasSpan(0, 0)
+        HhasSpan::default()
     } else {
         HhasSpan::from_pos(&method.span)
     };

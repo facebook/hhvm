@@ -3032,7 +3032,13 @@ fn print_param_user_attributes(
     }
 }
 
-fn print_span(w: &mut dyn Write, &HhasSpan(line_begin, line_end): &HhasSpan) -> Result<()> {
+fn print_span(
+    w: &mut dyn Write,
+    &HhasSpan {
+        line_begin,
+        line_end,
+    }: &HhasSpan,
+) -> Result<()> {
     write!(w, "({},{})", line_begin, line_end)
 }
 

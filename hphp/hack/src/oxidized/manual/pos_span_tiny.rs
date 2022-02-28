@@ -23,30 +23,30 @@ use crate::pos_span_raw::PosSpanRaw;
 
 /// A compressed representation of a position span, i.e. a start and an end position.
 #[derive(Copy, Clone, Eq, PartialEq, Deserialize, Hash, Serialize)]
-pub struct PosSpanTiny(usize);
+pub struct PosSpanTiny(u64);
 
 arena_deserializer::impl_deserialize_in_arena!(PosSpanTiny);
 
 /// These numbers were obtained by gathering statistics on the positions in
 /// the decl heap for a large code base run as of December 2020. They should
 /// allow us to encode about 99% of positions.
-const START_BEGINNING_OF_LINE_BITS: usize = 21;
-const START_LINE_NUMBER_BITS: usize = 16;
-const START_COLUMN_NUMBER_BITS: usize = 20;
-const BEGINNING_OF_LINE_INCREMENT_BITS: usize = 0;
-const LINE_NUMBER_INCREMENT_BITS: usize = 0;
-const WIDTH_BITS: usize = 6;
+const START_BEGINNING_OF_LINE_BITS: u64 = 21;
+const START_LINE_NUMBER_BITS: u64 = 16;
+const START_COLUMN_NUMBER_BITS: u64 = 20;
+const BEGINNING_OF_LINE_INCREMENT_BITS: u64 = 0;
+const LINE_NUMBER_INCREMENT_BITS: u64 = 0;
+const WIDTH_BITS: u64 = 6;
 
 // The offset of each field (i.e., the number of bits to the right of it) is
 // the offset of the field to the right plus that field's bit width.
-const WIDTH_OFFSET: usize = 0;
-const LINE_NUMBER_INCREMENT_OFFSET: usize = WIDTH_OFFSET + WIDTH_BITS;
-const BEGINNING_OF_LINE_INCREMENT_OFFSET: usize =
+const WIDTH_OFFSET: u64 = 0;
+const LINE_NUMBER_INCREMENT_OFFSET: u64 = WIDTH_OFFSET + WIDTH_BITS;
+const BEGINNING_OF_LINE_INCREMENT_OFFSET: u64 =
     LINE_NUMBER_INCREMENT_OFFSET + LINE_NUMBER_INCREMENT_BITS;
-const START_COLUMN_NUMBER_OFFSET: usize =
+const START_COLUMN_NUMBER_OFFSET: u64 =
     BEGINNING_OF_LINE_INCREMENT_OFFSET + BEGINNING_OF_LINE_INCREMENT_BITS;
-const START_LINE_NUMBER_OFFSET: usize = START_COLUMN_NUMBER_OFFSET + START_COLUMN_NUMBER_BITS;
-const START_BEGINNING_OF_LINE_OFFSET: usize = START_LINE_NUMBER_OFFSET + START_LINE_NUMBER_BITS;
+const START_LINE_NUMBER_OFFSET: u64 = START_COLUMN_NUMBER_OFFSET + START_COLUMN_NUMBER_BITS;
+const START_BEGINNING_OF_LINE_OFFSET: u64 = START_LINE_NUMBER_OFFSET + START_LINE_NUMBER_BITS;
 
 // The total number of bits used must be 63 (OCaml reserves one bit).
 const_assert_eq!(
@@ -55,23 +55,23 @@ const_assert_eq!(
 );
 
 #[inline]
-const fn mask(bits: usize) -> usize {
+const fn mask(bits: u64) -> u64 {
     (1 << bits) - 1
 }
 
 #[inline]
-const fn mask_by(bits: usize, x: usize) -> usize {
+const fn mask_by(bits: u64, x: u64) -> u64 {
     x & mask(bits)
 }
 
-const MAX_START_BEGINNING_OF_LINE: usize = mask(START_BEGINNING_OF_LINE_BITS);
-const MAX_START_LINE_NUMBER: usize = mask(START_LINE_NUMBER_BITS);
-const MAX_START_COLUMN_NUMBER: usize = mask(START_COLUMN_NUMBER_BITS);
-const MAX_BEGINNING_OF_LINE_INCREMENT: usize = mask(BEGINNING_OF_LINE_INCREMENT_BITS);
-const MAX_LINE_NUMBER_INCREMENT: usize = mask(LINE_NUMBER_INCREMENT_BITS);
-const MAX_WIDTH: usize = mask(WIDTH_BITS);
+const MAX_START_BEGINNING_OF_LINE: u64 = mask(START_BEGINNING_OF_LINE_BITS);
+const MAX_START_LINE_NUMBER: u64 = mask(START_LINE_NUMBER_BITS);
+const MAX_START_COLUMN_NUMBER: u64 = mask(START_COLUMN_NUMBER_BITS);
+const MAX_BEGINNING_OF_LINE_INCREMENT: u64 = mask(BEGINNING_OF_LINE_INCREMENT_BITS);
+const MAX_LINE_NUMBER_INCREMENT: u64 = mask(LINE_NUMBER_INCREMENT_BITS);
+const MAX_WIDTH: u64 = mask(WIDTH_BITS);
 
-const DUMMY: usize = usize::max_value();
+const DUMMY: u64 = u64::max_value();
 
 impl PosSpanTiny {
     #[inline]
@@ -88,16 +88,16 @@ impl PosSpanTiny {
         if start.is_dummy() || end.is_dummy() {
             return Some(Self::make_dummy());
         }
-        let start_bol = start.beg_of_line();
-        let start_line = start.line();
-        let start_col = start.column();
-        let start_offset = start.offset();
-        let end_bol = end.beg_of_line();
-        let end_line = end.line();
-        let end_offset = end.offset();
-        let bol_increment = end_bol.checked_sub(start_bol)?;
-        let line_increment = end_line.checked_sub(start_line)?;
-        let width = end_offset.checked_sub(start_offset)?;
+        let start_bol = start.beg_of_line() as u64;
+        let start_line = start.line() as u64;
+        let start_col = start.column() as u64;
+        let start_offset = start.offset() as u64;
+        let end_bol = end.beg_of_line() as u64;
+        let end_line = end.line() as u64;
+        let end_offset = end.offset() as u64;
+        let bol_increment = end_bol.checked_sub(start_bol)? as u64;
+        let line_increment = end_line.checked_sub(start_line)? as u64;
+        let width = end_offset.checked_sub(start_offset)? as u64;
         if start_bol > MAX_START_BEGINNING_OF_LINE
             || start_line > MAX_START_LINE_NUMBER
             || start_col > MAX_START_COLUMN_NUMBER
@@ -124,7 +124,7 @@ impl PosSpanTiny {
             mask_by(
                 START_BEGINNING_OF_LINE_BITS,
                 self.0 >> START_BEGINNING_OF_LINE_OFFSET,
-            )
+            ) as usize
         }
     }
 
@@ -132,18 +132,18 @@ impl PosSpanTiny {
         if self.is_dummy() {
             0
         } else {
-            mask_by(START_LINE_NUMBER_BITS, self.0 >> START_LINE_NUMBER_OFFSET)
+            mask_by(START_LINE_NUMBER_BITS, self.0 >> START_LINE_NUMBER_OFFSET) as usize
         }
     }
 
     pub fn start_column(self) -> usize {
         if self.is_dummy() {
-            DUMMY
+            DUMMY as usize
         } else {
             mask_by(
                 START_COLUMN_NUMBER_BITS,
                 self.0 >> START_COLUMN_NUMBER_OFFSET,
-            )
+            ) as usize
         }
     }
 
@@ -154,7 +154,7 @@ impl PosSpanTiny {
             mask_by(
                 BEGINNING_OF_LINE_INCREMENT_BITS,
                 self.0 >> BEGINNING_OF_LINE_INCREMENT_OFFSET,
-            )
+            ) as usize
         }
     }
 
@@ -165,7 +165,7 @@ impl PosSpanTiny {
             mask_by(
                 LINE_NUMBER_INCREMENT_BITS,
                 self.0 >> LINE_NUMBER_INCREMENT_OFFSET,
-            )
+            ) as usize
         }
     }
 
@@ -173,7 +173,7 @@ impl PosSpanTiny {
         if self.is_dummy() {
             0
         } else {
-            mask_by(WIDTH_BITS, self.0 >> WIDTH_OFFSET)
+            mask_by(WIDTH_BITS, self.0 >> WIDTH_OFFSET) as usize
         }
     }
 
@@ -241,7 +241,7 @@ impl ToOcamlRep for PosSpanTiny {
 
 impl FromOcamlRep for PosSpanTiny {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        Ok(Self(ocamlrep::from::expect_int(value)? as usize))
+        Ok(Self(ocamlrep::from::expect_int(value)? as u64))
     }
 }
 
@@ -354,8 +354,8 @@ mod test {
     fn test_tiny_dummy() {
         let line = 0;
         let bol = 0;
-        let start_offset = usize::max_value();
-        let end_offset = usize::max_value();
+        let start_offset = u64::max_value();
+        let end_offset = u64::max_value();
         let start = FilePosLarge::from_lnum_bol_offset(line, bol, start_offset);
         let end = FilePosLarge::from_lnum_bol_offset(line, bol, end_offset);
         let span = PosSpanTiny::make_dummy();
@@ -377,7 +377,7 @@ mod test {
 
     #[test]
     fn test_tiny_large() {
-        let max_int = usize::max_value();
+        let max_int = u64::max_value();
         let line = max_int;
         let bol = max_int;
         let start_offset = max_int;

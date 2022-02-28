@@ -1090,17 +1090,19 @@ let method_is_not_dynamically_callable
       ^ " is not dynamically callable." )
     (parent_class_reason @ attribute_reason @ nested_error_reason)
 
-let global_var_write_error pos =
+let global_var_write_error pos fun_name =
   add
     (Typing.err_code Typing.GlobalVariableWrite)
     pos
-    "A global variable is written."
+    ("[" ^ fun_name ^ "] A global variable is written.")
 
-let global_var_in_fun_call_error pos =
+let global_var_in_fun_call_error pos fun_name =
   add
     (Typing.err_code Typing.GlobalVariableInFunctionCall)
     pos
-    "A global variable is passed to (or returned from) a function call."
+    ("["
+    ^ fun_name
+    ^ "] A global variable is passed to (or returned from) a function call.")
 
 (*****************************************************************************)
 (* Printing *)

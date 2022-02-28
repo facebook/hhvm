@@ -1,16 +1,16 @@
 File "test_object.php", line 26, characters 5-25:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_object.php", line 27, characters 5-25:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_object.php", line 30, characters 5-16:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_object.php", line 44, characters 5-22:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_object.php", line 45, characters 5-22:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_object.php", line 47, characters 5-24:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_object.php", line 48, characters 5-22:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_object.php", line 49, characters 5-22:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])

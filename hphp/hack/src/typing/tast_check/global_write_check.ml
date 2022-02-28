@@ -186,26 +186,26 @@ let visitor =
   object (self)
     inherit [_] Tast_visitor.iter_with_state as super
 
-    method! on_method_ (env, ctx) m =
+    method! on_method_ (env, (ctx, fun_name)) m =
       ctx.global_vars := [];
-      super#on_method_ (env, ctx) m
+      super#on_method_ (env, (ctx, fun_name)) m
 
-    method! on_fun_def (env, ctx) f =
+    method! on_fun_def (env, (ctx, fun_name)) f =
       ctx.global_vars := [];
-      super#on_fun_def (env, ctx) f
+      super#on_fun_def (env, (ctx, fun_name)) f
 
-    method! on_fun_ (env, ctx) f =
+    method! on_fun_ (env, (ctx, fun_name)) f =
       let ctx_cpy = !(ctx.global_vars) in
-      super#on_fun_ (env, ctx) f;
+      super#on_fun_ (env, (ctx, fun_name)) f;
       ctx.global_vars := ctx_cpy
 
-    method! on_stmt_ (env, ctx) s =
+    method! on_stmt_ (env, (ctx, fun_name)) s =
       match s with
       | If (_, b1, b2) ->
         (* Union the contexts from two branches *)
         let ctx1 = { global_vars = ref !(ctx.global_vars) } in
-        super#on_block (env, ctx1) b1;
-        super#on_block (env, ctx) b2;
+        super#on_block (env, (ctx1, fun_name)) b1;
+        super#on_block (env, (ctx, fun_name)) b2;
         add_vars_to_ctx ctx !(ctx1.global_vars)
       | Do (b, _)
       | While (_, b)
@@ -217,34 +217,32 @@ let visitor =
         let ctx_len = ref (List.length !(ctx.global_vars)) in
         let has_context_change = ref true in
         while !has_context_change do
-          super#on_block (env, ctx_cpy) b;
+          super#on_block (env, (ctx_cpy, fun_name)) b;
           add_vars_to_ctx ctx !(ctx_cpy.global_vars);
           if List.length !(ctx.global_vars) <> !ctx_len then
             ctx_len := List.length !(ctx.global_vars)
           else
             has_context_change := false
         done
-        (* super#on_block (env, ctx) b *)
       | Return r ->
         (match r with
         | Some ((_, p, _) as e) ->
           if is_expr_global_and_mutable env ctx e then
-            Errors.global_var_in_fun_call_error p
-        | None ->
-          ();
-          super#on_stmt_ (env, ctx) s)
-      | _ -> super#on_stmt_ (env, ctx) s
+            Errors.global_var_in_fun_call_error p fun_name
+        | None -> ());
+        super#on_stmt_ (env, (ctx, fun_name)) s
+      | _ -> super#on_stmt_ (env, (ctx, fun_name)) s
 
-    method! on_expr (env, ctx) ((_, p, e) as te) =
+    method! on_expr (env, (ctx, fun_name)) ((_, p, e) as te) =
       (match e with
       | Binop (Ast_defs.Eq _, le, re) ->
-        let () = self#on_expr (env, ctx) re in
+        let () = self#on_expr (env, (ctx, fun_name)) re in
         let is_le_global = is_expr_global ctx le in
         let is_re_global_and_mutable = is_expr_global_and_mutable env ctx re in
         let vars_in_le = ref [] in
         let () = get_vars_in_expr vars_in_le le in
         (match has_global_write_access le with
-        | true -> if is_le_global then Errors.global_var_write_error p
+        | true -> if is_le_global then Errors.global_var_write_error p fun_name
         | false ->
           if is_le_global && not is_re_global_and_mutable then
             remove_vars_to_ctx ctx !vars_in_le);
@@ -256,7 +254,7 @@ let visitor =
         | Ast_defs.Upincr
         | Ast_defs.Updecr ->
           if has_global_write_access e && is_expr_global ctx e then
-            Errors.global_var_write_error p
+            Errors.global_var_write_error p fun_name
         | _ -> ())
       | Call (_, _, tpl, _) ->
         (* Check if a global variable is used as the parameter. *)
@@ -264,16 +262,16 @@ let visitor =
             match pk with
             | Ast_defs.Pinout _ ->
               if is_expr_global ctx expr then
-                Errors.global_var_in_fun_call_error pos
+                Errors.global_var_in_fun_call_error pos fun_name
             | Ast_defs.Pnormal ->
               if is_expr_global_and_mutable env ctx expr then
-                Errors.global_var_in_fun_call_error pos)
+                Errors.global_var_in_fun_call_error pos fun_name)
       | New (_, _, el, _, _) ->
         List.iter el ~f:(fun ((_, pos, _) as expr) ->
             if is_expr_global_and_mutable env ctx expr then
-              Errors.global_var_in_fun_call_error pos)
+              Errors.global_var_in_fun_call_error pos fun_name)
       | _ -> ());
-      super#on_expr (env, ctx) te
+      super#on_expr (env, (ctx, fun_name)) te
   end
 
 let global_write_check_enabled_on_file tcopt file =
@@ -285,10 +283,6 @@ let global_write_check_enabled_on_file tcopt file =
 let global_write_check_enabled_on_function tcopt function_name =
   let enabled_functions =
     TypecheckerOptions.global_write_check_functions_enabled tcopt
-  in
-  (* Function name starts with '\' or ';' which is not included in JSON *)
-  let function_name =
-    String.sub function_name ~pos:1 ~len:(String.length function_name - 1)
   in
   SSet.mem function_name enabled_functions
 
@@ -304,6 +298,10 @@ let handler =
         | Some s -> s ^ "::" ^ method_name
         | _ -> method_name
       in
+      (* Class name starts with '\' or ';' *)
+      let full_name =
+        String.sub full_name ~pos:1 ~len:(String.length full_name - 1)
+      in
       if
         global_write_check_enabled_on_file
           (Tast_env.get_tcopt env)
@@ -312,10 +310,14 @@ let handler =
              (Tast_env.get_tcopt env)
              full_name
       then
-        visitor#on_method_ (env, current_ctx) m
+        visitor#on_method_ (env, (current_ctx, full_name)) m
 
     method! at_fun_def env f =
       let (_, function_name) = f.fd_fun.f_name in
+      (* Function name starts with '\'*)
+      let function_name =
+        String.sub function_name ~pos:1 ~len:(String.length function_name - 1)
+      in
       if
         global_write_check_enabled_on_file
           (Tast_env.get_tcopt env)
@@ -324,5 +326,5 @@ let handler =
              (Tast_env.get_tcopt env)
              function_name
       then
-        visitor#on_fun_def (env, current_ctx) f
+        visitor#on_fun_def (env, (current_ctx, function_name)) f
   end

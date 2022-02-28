@@ -1,26 +1,26 @@
 File "test_control_flow.php", line 13, characters 5-25:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_control_flow.php", line 17, characters 5-16:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_control_flow.php", line 21, characters 5-16:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_control_flow.php", line 26, characters 7-18:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_control_flow.php", line 31, characters 5-16:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_control_flow.php", line 37, characters 7-19:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_control_flow.php", line 38, characters 7-19:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_control_flow.php", line 39, characters 7-19:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_control_flow.php", line 43, characters 5-16:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_control_flow.php", line 44, characters 5-16:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_control_flow.php", line 45, characters 5-16:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_control_flow.php", line 58, characters 5-16:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])
 File "test_control_flow.php", line 59, characters 5-16:
-A global variable is written. (Typing[4459])
+[Test::test_method_call] A global variable is written. (Typing[4459])

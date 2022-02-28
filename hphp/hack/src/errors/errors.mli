@@ -247,6 +247,6 @@ val method_is_not_dynamically_callable :
 
 val function_is_not_dynamically_callable : Pos.t -> string -> error -> unit
 
-val global_var_write_error : Pos.t -> unit
+val global_var_write_error : Pos.t -> string -> unit
 
-val global_var_in_fun_call_error : Pos.t -> unit
+val global_var_in_fun_call_error : Pos.t -> string -> unit

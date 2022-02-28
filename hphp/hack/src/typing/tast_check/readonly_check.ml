@@ -648,7 +648,7 @@ let handler =
         The following error checks are ones that need to run even if
         readonly analysis is not enabled by the file attribute.
       *)
-    method! at_Call _env caller _tal _el _unpacked_element =
+    method! at_Call env caller _tal _el _unpacked_element =
       (* this check is already handled by the readonly analysis,
          which handles cases when there's a readonly keyword *)
       if !fun_has_readonly then
@@ -656,6 +656,7 @@ let handler =
       else
         let caller_pos = Tast.get_position caller in
         let caller_ty = Tast.get_type caller in
+        let (_, caller_ty) = Tast_env.expand_type env caller_ty in
         check_readonly_return_call caller_pos caller_ty false
 
     method! at_expr env e =

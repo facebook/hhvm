@@ -101,3 +101,8 @@ let add_xref target_json target_id ref_pos xrefs =
         in
         Some updated_xref_map)
     xrefs
+
+let ast_expr_to_json source_text (_, pos, _) =
+  Hh_json.JSON_String (strip_nested_quotes (source_at_span source_text pos))
+
+let ast_expr_to_string source_text (_, pos, _) = source_at_span source_text pos

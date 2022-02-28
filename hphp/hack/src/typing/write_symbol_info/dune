@@ -11,6 +11,7 @@
   symbol_entrypoint
   symbol_predicate)
  (libraries
+  ast_provider
   tast_provider
   typing
   typing_ast

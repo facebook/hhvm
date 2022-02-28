@@ -9,7 +9,7 @@
 type t = {
   path: Relative_path.t;
   tast: Tast.program;
-  source_text: Full_fidelity_source_text.t option;
+  source_text: Full_fidelity_source_text.t;
 }
 
 let create ctx path =
@@ -17,5 +17,5 @@ let create ctx path =
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_unquarantined ~ctx ~entry
   in
-  let source_text = entry.Provider_context.source_text in
+  let source_text = Ast_provider.compute_source_text ~entry in
   { path; tast; source_text }

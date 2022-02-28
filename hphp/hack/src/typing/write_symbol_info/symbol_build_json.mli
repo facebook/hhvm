@@ -33,7 +33,7 @@ val build_signature_json_nested :
   Hh_json.json list -> string option -> Hh_json.json
 
 val build_attributes_json_nested :
-  Full_fidelity_source_text.t SMap.t ->
+  Full_fidelity_source_text.t ->
   ('a, 'b) Aast.user_attribute list ->
   Hh_json.json
 
@@ -49,7 +49,7 @@ val build_is_async_json : Ast_defs.fun_kind -> Hh_json.json
 
 val build_signature_json :
   Provider_context.t ->
-  Full_fidelity_source_text.t SMap.t ->
+  Full_fidelity_source_text.t ->
   ('a, 'b) Aast.fun_param list ->
   'e Aast.type_hint ->
   Hh_json.json
@@ -58,7 +58,7 @@ val build_type_const_kind_json : Aast.class_typeconst -> Hh_json.json
 
 val build_type_param_json :
   Provider_context.t ->
-  Full_fidelity_source_text.t SMap.t ->
+  Full_fidelity_source_text.t ->
   ('a, 'b) Aast.tparam ->
   Hh_json.json
 

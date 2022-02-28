@@ -9,7 +9,7 @@
 type t = private {
   path: Relative_path.t;
   tast: Tast.program;
-  source_text: Full_fidelity_source_text.t option;
+  source_text: Full_fidelity_source_text.t;
 }
 
 val create : Provider_context.t -> Relative_path.t -> t

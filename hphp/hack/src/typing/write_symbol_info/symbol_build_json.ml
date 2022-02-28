@@ -77,19 +77,13 @@ let build_signature_json_nested parameters return_type_name =
   in
   JSON_Object [("key", JSON_Object fields)]
 
-let build_attributes_json_nested source_map attrs =
+let build_attributes_json_nested source_text attrs =
   let attributes =
     List.map attrs ~f:(fun attr ->
         let (_, name) = attr.ua_name in
         let params =
-          List.fold_right attr.ua_params ~init:[] ~f:(fun (_, pos, _) acc ->
-              let fp = Relative_path.to_absolute (Pos.filename pos) in
-              match SMap.find_opt fp source_map with
-              | Some st ->
-                JSON_String
-                  (Util.strip_nested_quotes (Util.source_at_span st pos))
-                :: acc
-              | None -> acc)
+          List.fold_right attr.ua_params ~init:[] ~f:(fun expr acc ->
+              Util.ast_expr_to_json source_text expr :: acc)
         in
         let fields =
           [
@@ -160,13 +154,13 @@ let build_is_async_json fun_kind =
   JSON_Bool is_async
 
 let build_parameter_json
-    source_map param_name param_type_name def_val is_inout is_variadic attrs =
+    source_text param_name param_type_name def_val is_inout is_variadic attrs =
   let fields =
     [
       ("name", build_name_json_nested param_name);
       ("isInout", JSON_Bool is_inout);
       ("isVariadic", JSON_Bool is_variadic);
-      ("attributes", build_attributes_json_nested source_map attrs);
+      ("attributes", build_attributes_json_nested source_text attrs);
     ]
   in
   let fields =
@@ -182,7 +176,7 @@ let build_parameter_json
   in
   JSON_Object fields
 
-let build_signature_json ctx source_map params ret_ty =
+let build_signature_json ctx source_text params ret_ty =
   let build_param p =
     let ty =
       match hint_of_type_hint p.param_type_hint with
@@ -195,16 +189,11 @@ let build_signature_json ctx source_map params ret_ty =
       | Pnormal -> false
     in
     let def_value =
-      match p.param_expr with
-      | None -> None
-      | Some (_, expr_pos, _) ->
-        let fp = Relative_path.to_absolute (Pos.filename expr_pos) in
-        (match SMap.find_opt fp source_map with
-        | Some st -> Some (Util.source_at_span st expr_pos)
-        | None -> None)
+      Option.map p.param_expr ~f:(fun expr ->
+          Util.ast_expr_to_string source_text expr)
     in
     build_parameter_json
-      source_map
+      source_text
       p.param_name
       ty
       def_value
@@ -246,7 +235,7 @@ let build_variance_json variance =
   in
   JSON_Number (string_of_int num)
 
-let build_type_param_json ctx source_map tp =
+let build_type_param_json ctx source_text tp =
   let (_, name) = tp.tp_name in
   let constraints = List.map tp.tp_constraints ~f:(build_constraint_json ctx) in
   JSON_Object
@@ -256,7 +245,7 @@ let build_type_param_json ctx source_map tp =
       ("reifyKind", build_reify_kind_json tp.tp_reified);
       ("constraints", JSON_Array constraints);
       ( "attributes",
-        build_attributes_json_nested source_map tp.tp_user_attributes );
+        build_attributes_json_nested source_text tp.tp_user_attributes );
     ]
 
 let build_visibility_json (visibility : Aast.visibility) =

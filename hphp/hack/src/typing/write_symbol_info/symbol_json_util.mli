@@ -6,8 +6,6 @@
  *
  *)
 
-val source_at_span : Full_fidelity_source_text.t -> 'a Pos.pos -> string
-
 (* True if source text ends in a newline *)
 val ends_in_newline : Full_fidelity_source_text.t -> bool
 
@@ -34,3 +32,13 @@ val add_xref :
   Relative_path.t Pos.pos ->
   (Hh_json.json * Relative_path.t Pos.pos list) Symbol_fact_id.Map.t SMap.t ->
   (Hh_json.json * Relative_path.t Pos.pos list) Symbol_fact_id.Map.t SMap.t
+
+(* hack to pretty-print an expression. Get the representation from
+  the source file, in lack of a better solution. This assumes that the
+   expr comes from the the source text parameter. Should be replaced
+   by proper pretty-printing functions. *)
+val ast_expr_to_json :
+  Full_fidelity_source_text.t -> ('a, 'b) Aast.expr -> Hh_json.json
+
+val ast_expr_to_string :
+  Full_fidelity_source_text.t -> ('a, 'b) Aast.expr -> string

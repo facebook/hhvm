@@ -29,7 +29,7 @@ val parent_decls :
 
 val container_defn :
   Provider_context.t ->
-  Full_fidelity_source_text.t SMap.t ->
+  Full_fidelity_source_text.t ->
   ('a, 'b) Aast.class_ ->
   Fact_id.t ->
   Hh_json.json list ->
@@ -50,7 +50,7 @@ val method_decl :
 
 val method_defn :
   Provider_context.t ->
-  Full_fidelity_source_text.t SMap.t ->
+  Full_fidelity_source_text.t ->
   ('a, 'b) Aast.method_ ->
   Fact_id.t ->
   Fact_acc.t ->
@@ -67,7 +67,7 @@ val method_overrides :
 
 val property_defn :
   Provider_context.t ->
-  Full_fidelity_source_text.t SMap.t ->
+  Full_fidelity_source_text.t ->
   ('a, 'b) Aast.class_var ->
   Fact_id.t ->
   Fact_acc.t ->
@@ -75,7 +75,7 @@ val property_defn :
 
 val class_const_defn :
   Provider_context.t ->
-  Full_fidelity_source_text.t SMap.t ->
+  Full_fidelity_source_text.t ->
   ('a, 'b) Aast.class_const ->
   Fact_id.t ->
   Fact_acc.t ->
@@ -83,7 +83,7 @@ val class_const_defn :
 
 val type_const_defn :
   Provider_context.t ->
-  Full_fidelity_source_text.t SMap.t ->
+  Full_fidelity_source_text.t ->
   ('a, 'b) Aast.class_typeconst_def ->
   Fact_id.t ->
   Fact_acc.t ->
@@ -93,7 +93,7 @@ val enum_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val enum_defn :
   Provider_context.t ->
-  Full_fidelity_source_text.t SMap.t ->
+  Full_fidelity_source_text.t ->
   ('a, 'b) Aast.class_ ->
   Fact_id.t ->
   Aast.enum_ ->
@@ -107,7 +107,7 @@ val func_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val func_defn :
   Provider_context.t ->
-  Full_fidelity_source_text.t SMap.t ->
+  Full_fidelity_source_text.t ->
   ('a, 'b) Aast.fun_def ->
   Fact_id.t ->
   Fact_acc.t ->
@@ -117,7 +117,7 @@ val typedef_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val typedef_defn :
   Provider_context.t ->
-  Full_fidelity_source_text.t SMap.t ->
+  Full_fidelity_source_text.t ->
   ('a, 'b) Aast.typedef ->
   Fact_id.t ->
   Fact_acc.t ->
@@ -127,7 +127,7 @@ val gconst_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val gconst_defn :
   Provider_context.t ->
-  Full_fidelity_source_text.t SMap.t ->
+  Full_fidelity_source_text.t ->
   ('a, 'b) Aast.gconst ->
   Fact_id.t ->
   Fact_acc.t ->

@@ -59,7 +59,7 @@ let process_decl_loc
   let prog = process_span span ref_json prog in
   (decl_id, prog)
 
-let process_container_decl ctx source_map con (all_decls, progress) =
+let process_container_decl ctx source_text con (all_decls, progress) =
   let (con_pos, con_name) = con.c_name in
   let (con_type, decl_pred) =
     Predicate.parent_decl_predicate (Predicate.get_parent_kind con)
@@ -73,7 +73,7 @@ let process_container_decl ctx source_map con (all_decls, progress) =
         let (decl_id, prog) =
           process_decl_loc
             (Add_fact.property_decl con_type con_decl_id)
-            (Add_fact.property_defn ctx source_map)
+            (Add_fact.property_defn ctx source_text)
             Build.build_property_decl_json_ref
             pos
             (Some prop.cv_span)
@@ -90,7 +90,7 @@ let process_container_decl ctx source_map con (all_decls, progress) =
         let (decl_id, prog) =
           process_decl_loc
             (Add_fact.class_const_decl con_type con_decl_id)
-            (Add_fact.class_const_defn ctx source_map)
+            (Add_fact.class_const_defn ctx source_text)
             Build.build_class_const_decl_json_ref
             pos
             None
@@ -110,7 +110,7 @@ let process_container_decl ctx source_map con (all_decls, progress) =
         let (decl_id, prog) =
           process_decl_loc
             (Add_fact.type_const_decl con_type con_decl_id)
-            (Add_fact.type_const_defn ctx source_map)
+            (Add_fact.type_const_defn ctx source_text)
             Build.build_type_const_decl_json_ref
             pos
             (Some tc.c_tconst_span)
@@ -127,7 +127,7 @@ let process_container_decl ctx source_map con (all_decls, progress) =
         let (decl_id, prog) =
           process_decl_loc
             (Add_fact.method_decl con_type con_decl_id)
-            (Add_fact.method_defn ctx source_map)
+            (Add_fact.method_defn ctx source_text)
             Build.build_method_decl_json_ref
             pos
             (Some meth.m_span)
@@ -142,7 +142,7 @@ let process_container_decl ctx source_map con (all_decls, progress) =
     type_const_decls @ class_const_decls @ prop_decls @ method_decls
   in
   let (_, prog) =
-    Add_fact.container_defn ctx source_map con con_decl_id members prog
+    Add_fact.container_defn ctx source_text con con_decl_id members prog
   in
   let ref_json = Build.build_container_decl_json_ref con_type con_decl_id in
   let (_, prog) = Add_fact.decl_loc con_pos ref_json prog in
@@ -167,7 +167,7 @@ let process_container_xref
     symbol_pos
     (xrefs, prog)
 
-let process_enum_decl ctx source_map enm (all_decls, progress) =
+let process_enum_decl ctx source_text enm (all_decls, progress) =
   let (pos, id) = enm.c_name in
   match enm.c_enum with
   | None ->
@@ -193,7 +193,7 @@ let process_enum_decl ctx source_map enm (all_decls, progress) =
           (Build.build_id_json decl_id :: decls, ref_json :: refs, prog))
     in
     let (_, prog) =
-      Add_fact.enum_defn ctx source_map enm enum_id enum_data enumerators prog
+      Add_fact.enum_defn ctx source_text enm enum_id enum_data enumerators prog
     in
     let prog = process_doc_comment enm.c_doc_comment enum_decl_ref prog in
     (all_decls @ enum_decl_ref :: decl_refs, prog)
@@ -206,13 +206,13 @@ let process_enum_xref symbol_name pos (xrefs, prog) =
     pos
     (xrefs, prog)
 
-let process_func_decl ctx source_map fd (all_decls, progress) =
+let process_func_decl ctx source_text fd (all_decls, progress) =
   let elem = fd.fd_fun in
   let (pos, id) = elem.f_name in
   let (decl_id, prog) =
     process_decl_loc
       Add_fact.func_decl
-      (Add_fact.func_defn ctx source_map)
+      (Add_fact.func_defn ctx source_text)
       Build.build_func_decl_json_ref
       pos
       (Some elem.f_span)
@@ -231,12 +231,12 @@ let process_function_xref symbol_name pos (xrefs, prog) =
     pos
     (xrefs, prog)
 
-let process_gconst_decl ctx source_map elem (all_decls, progress) =
+let process_gconst_decl ctx source_text elem (all_decls, progress) =
   let (pos, id) = elem.cst_name in
   let (decl_id, prog) =
     process_decl_loc
       Add_fact.gconst_decl
-      (Add_fact.gconst_defn ctx source_map)
+      (Add_fact.gconst_defn ctx source_text)
       Build.build_gconst_decl_json_ref
       pos
       (Some elem.cst_span)
@@ -379,12 +379,12 @@ let process_attribute_xref ctx attr opt_info (xrefs, prog) =
         (Exn.to_string e);
       (xrefs, prog)
 
-let process_typedef_decl ctx source_map elem (all_decls, progress) =
+let process_typedef_decl ctx source_text elem (all_decls, progress) =
   let (pos, id) = elem.t_name in
   let (decl_id, prog) =
     process_decl_loc
       Add_fact.typedef_decl
-      (Add_fact.typedef_defn ctx source_map)
+      (Add_fact.typedef_defn ctx source_text)
       Build.build_typedef_decl_json_ref
       pos
       (Some elem.t_span)
@@ -404,37 +404,23 @@ let process_typedef_xref symbol_name pos (xrefs, prog) =
     (xrefs, prog)
 
 let process_decls ctx (files_info : File_info.t list) =
-  let (source_map, progress) =
-    List.fold
-      files_info
-      ~init:(SMap.empty, Fact_acc.init)
-      ~f:(fun (fm, prog) File_info.{ path; source_text; _ } ->
-        let filepath = Relative_path.to_absolute path in
-        match source_text with
-        | None ->
-          Hh_logger.log "WARNING: no source text for %s" filepath;
-          (fm, prog)
-        | Some st ->
-          let fm = SMap.add filepath st fm in
-          let (_, prog) = Add_fact.file_lines filepath st prog in
-          (fm, prog))
-  in
   List.fold
     files_info
-    ~init:progress
-    ~f:(fun prog File_info.{ path; tast; _ } ->
+    ~init:Fact_acc.init
+    ~f:(fun prog File_info.{ path; tast; source_text } ->
+      let filepath = Relative_path.to_absolute path in
       let (file_decls, prog) =
+        let (_, prog) = Add_fact.file_lines filepath source_text prog in
         List.fold tast ~init:([], prog) ~f:(fun acc def ->
             match def with
             | Class en when is_enum_or_enum_class en.c_kind ->
-              process_enum_decl ctx source_map en acc
-            | Class cd -> process_container_decl ctx source_map cd acc
-            | Constant gd -> process_gconst_decl ctx source_map gd acc
-            | Fun fd -> process_func_decl ctx source_map fd acc
-            | Typedef td -> process_typedef_decl ctx source_map td acc
+              process_enum_decl ctx source_text en acc
+            | Class cd -> process_container_decl ctx source_text cd acc
+            | Constant gd -> process_gconst_decl ctx source_text gd acc
+            | Fun fd -> process_func_decl ctx source_text fd acc
+            | Typedef td -> process_typedef_decl ctx source_text td acc
             | _ -> acc)
       in
-      let filepath = Relative_path.to_absolute path in
       let (_, prog) = Add_fact.file_decls filepath file_decls prog in
       prog)
 

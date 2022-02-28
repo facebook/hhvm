@@ -90,8 +90,10 @@ class Exception implements Throwable {
     protected ?Exception $previous = null,
   )[];
 
-  // TODO(coeffects) How do we fix this?
-  public function getMessage(): string;
+  /**
+   * This method isn't pure. Consider using IExceptionWithPureGetMessage
+   */
+  public function getMessage()[defaults]: string;
   final public function getPrevious()[]: ?Exception;
   public final function setPrevious(Exception $previous)[write_props]: void;
   public function getCode()[]: int;

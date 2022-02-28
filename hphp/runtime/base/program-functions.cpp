@@ -2464,7 +2464,7 @@ void init_current_pthread_stack_limits() {
   }
 }
 
-void hphp_process_init() {
+void hphp_process_init(bool skipModules) {
   init_current_pthread_stack_limits();
   BootStats::mark("pthread_init");
 
@@ -2545,17 +2545,21 @@ void hphp_process_init() {
   BootStats::mark("XboxServer::Restart");
   Stream::RegisterCoreWrappers();
   BootStats::mark("Stream::RegisterCoreWrappers");
-  ExtensionRegistry::moduleInit();
-  BootStats::mark("ExtensionRegistry::moduleInit");
+  if (!skipModules) {
+    ExtensionRegistry::moduleInit();
+    BootStats::mark("ExtensionRegistry::moduleInit");
+  }
 
   if (!RuntimeOption::DeploymentId.empty()) {
     StackTraceNoHeap::AddExtraLogging(
       "DeploymentId", RuntimeOption::DeploymentId);
   }
 
-  // Now that constants have been bound we can update options using constants
-  // in ini files (e.g., E_ALL) and sync some other options
-  update_constants_and_options();
+  if (!skipModules) {
+    // Now that constants have been bound we can update options using constants
+    // in ini files (e.g., E_ALL) and sync some other options
+    update_constants_and_options();
+  }
 
   InitFiniNode::ProcessInit();
   BootStats::mark("extra_process_init");

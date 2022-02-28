@@ -28,12 +28,13 @@ namespace HPHP {
 
 extern void (*g_vmProcessInit)();
 void ProcessInit();
+void ProcessInitNoSystemLib();
 
 /*
  * This must be called before execute_program_impl in an hhvm build.
  */
-inline void register_process_init() {
-  g_vmProcessInit = &ProcessInit;
+inline void register_process_init(bool noSystemLib = false) {
+  g_vmProcessInit = noSystemLib ? &ProcessInitNoSystemLib : &ProcessInit;
   g_hphp_compiler_parse = &HPHP::Compiler::hphp_compiler_parse;
 }
 

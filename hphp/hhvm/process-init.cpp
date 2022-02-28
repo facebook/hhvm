@@ -73,6 +73,12 @@ const StaticString s_MethCallerHelper("\\__SystemLib\\MethCallerHelper");
 const StaticString s_DynMethCallerHelper("\\__SystemLib\\DynMethCallerHelper");
 }
 
+void ProcessInitNoSystemLib() {
+  assertx(!RuntimeOption::RepoAuthoritative);
+  StringData::markSymbolsLoaded();
+  Stack::ValidateStackSize();
+}
+
 void ProcessInit() {
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the

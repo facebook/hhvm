@@ -644,6 +644,8 @@ fn time<T>(f: impl FnOnce() -> T) -> (T, f64) {
 }
 
 pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> String {
+    use print_expr::Context;
+
     let opts =
         Options::from_configs(&env.config_jsons, &env.config_list).expect("Malformed options");
 
@@ -655,11 +657,7 @@ pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> St
         &alloc,
         None,
     );
-    let ctx = Context::new(
-        &emitter,
-        Some(&env.filepath),
-        env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
-    );
+    let ctx = Context::new(&emitter);
 
-    bytecode_printer::expr_to_string_lossy(ctx, expr)
+    print_expr::expr_to_string_lossy(ctx, expr)
 }

@@ -306,11 +306,8 @@ name = "bytecode_printer"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "ast_class_expr",
  "bstr",
  "bumpalo",
- "core_utils_rust",
- "emit_type_hint",
  "env",
  "escaper",
  "ffi",
@@ -336,16 +333,12 @@ dependencies = [
  "hhbc_string_utils",
  "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
- "instruction_sequence",
  "iterator",
  "itertools 0.10.3",
  "label",
- "lazy_static",
  "local",
- "naming_special_names_rust",
  "ocaml_helper",
  "oxidized",
- "regex",
  "runtime",
  "thiserror",
  "write_bytes",
@@ -478,6 +471,7 @@ dependencies = [
  "options",
  "oxidized",
  "parser_core_types",
+ "print_expr",
  "profile_rust",
  "rewrite_program",
  "stack_limit",
@@ -968,7 +962,6 @@ dependencies = [
  "ast_scope",
  "bitflags",
  "bumpalo",
- "bytecode_printer",
  "decl_vars",
  "emit_adata",
  "emit_expression",
@@ -1001,6 +994,7 @@ dependencies = [
  "options",
  "oxidized",
  "oxidized_by_ref",
+ "print_expr",
  "regex",
  "runtime",
  "scope",
@@ -2840,6 +2834,31 @@ dependencies = [
  "ctor",
  "difference",
  "output_vt100",
+]
+
+[[package]]
+name = "print_expr"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "ast_class_expr",
+ "bstr",
+ "bumpalo",
+ "core_utils_rust",
+ "emit_type_hint",
+ "env",
+ "escaper",
+ "ffi",
+ "hhas_body",
+ "hhbc_id",
+ "hhbc_string_utils",
+ "instruction_sequence",
+ "lazy_static",
+ "naming_special_names_rust",
+ "oxidized",
+ "regex",
+ "thiserror",
+ "write_bytes",
 ]
 
 [[package]]

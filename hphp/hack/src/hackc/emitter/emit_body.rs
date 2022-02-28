@@ -12,7 +12,6 @@ use reified_generics_helpers as RGH;
 use ast_body::AstBody;
 use ast_class_expr::ClassExpr;
 use ast_scope::{Scope, ScopeItem};
-use bytecode_printer::{print_expr, Context, ExprEnv};
 use emit_pos::emit_pos;
 use env::{emitter::Emitter, Env};
 use hash::HashSet;
@@ -442,12 +441,13 @@ pub fn make_body<'a, 'arena, 'decl>(
             default_value
                 .as_ref()
                 .map(|(l, expr)| {
-                    let ctx = Context::new(emitter, None, false);
+                    use print_expr::{Context, ExprEnv};
+                    let ctx = Context::new(emitter);
                     let expr_env = ExprEnv {
                         codegen_env: body_env.as_ref(),
                     };
                     let mut buf = Vec::new();
-                    print_expr(&ctx, &mut buf, &expr_env, expr)
+                    print_expr::print_expr(&ctx, &mut buf, &expr_env, expr)
                         .map(|_| Pair(l.clone(), Str::from_vec(alloc, buf)))
                         .ok()
                 })

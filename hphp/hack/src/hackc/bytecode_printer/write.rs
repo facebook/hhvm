@@ -10,13 +10,6 @@ use std::{
 use thiserror::Error;
 use write_bytes::{BytesFormatter, DisplayBytes};
 
-#[macro_export]
-macro_rules! not_impl {
-    () => {
-        Err(Error::NotImpl(format!("{}:{}", file!(), line!())).into())
-    };
-}
-
 #[derive(Error, Debug)]
 pub enum Error {
     #[error("write error: {0:?}")]

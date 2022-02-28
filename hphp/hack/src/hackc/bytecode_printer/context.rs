@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::special_class_resolver::SpecialClassResolver;
 use bstr::{BStr, BString, ByteSlice};
 use env::emitter::Emitter;
 use oxidized::relative_path::RelativePath;
@@ -43,11 +42,9 @@ impl fmt::Display for Indent {
 
 #[derive(Clone)]
 pub struct Context<'a> {
-    pub(crate) special_class_resolver: &'a dyn SpecialClassResolver,
     pub(crate) path: Option<&'a RelativePath>,
 
     dump_symbol_refs: bool,
-    pub(crate) dump_lambdas: bool,
     indent: Indent,
 
     pub(crate) include_roots: &'a BTreeMap<BString, BString>,
@@ -68,10 +65,8 @@ impl<'a> Context<'a> {
         let array_provenance = emitter.options().array_provenance();
 
         Self {
-            special_class_resolver: emitter,
             path,
             dump_symbol_refs,
-            dump_lambdas: false,
             indent: Indent::new(),
 
             include_roots,

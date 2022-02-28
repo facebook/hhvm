@@ -70,6 +70,13 @@ enum class CompileAbortMode {
   Never, OnlyICE, VerifyErrors, AllErrors, AllErrorsNull
 };
 
+// Thrown if CompilerAbortMode is anything other than None or
+// AllErrorsNull and we obtain an ICE unit.
+struct CompilerAbort : public std::runtime_error {
+  CompilerAbort(const std::string& filename,
+                const std::string& error);
+};
+
 struct UnitCompiler {
   UnitCompiler(LazyUnitContentsLoader& loader,
                const char* filename,

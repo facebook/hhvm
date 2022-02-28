@@ -513,8 +513,13 @@ Unit* hphp_compiler_parse(LazyUnitContentsLoader& loader,
         tracing::updateName("unit-compiler-run-load");
       }
     };
-    bool ignore;
-    ue = uc->compile(ignore);
+    try {
+      bool ignore;
+      ue = uc->compile(ignore);
+    } catch (const CompilerAbort& exn) {
+      fprintf(stderr, "%s", exn.what());
+      _Exit(1);
+    }
   }
 
   unit = ue->create();

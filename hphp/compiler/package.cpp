@@ -490,7 +490,15 @@ bool Package::parseImpl(const std::string* fileName) {
     assertx(uc);
     ++m_totalParses;
     auto cacheHit = false;
-    auto ue = uc->compile(cacheHit, mode);
+    std::unique_ptr<UnitEmitter> ue;
+
+    try {
+      ue = uc->compile(cacheHit, mode);
+    } catch (const CompilerAbort& exn) {
+      fprintf(stderr, "%s", exn.what());
+      _Exit(1);
+    }
+
     if (cacheHit) ++m_parseCacheHits;
     if (loader.didLoad()) ++m_parseFileLoads;
     if (ue && !ue->m_ICE) {

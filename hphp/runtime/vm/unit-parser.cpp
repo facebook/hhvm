@@ -268,6 +268,18 @@ CompilerResult hackc_compile(
 ////////////////////////////////////////////////////////////////////////////////
 }
 
+CompilerAbort::CompilerAbort(const std::string& filename,
+                             const std::string& error)
+  : std::runtime_error{
+      folly::sformat(
+        "Encountered an internal error while processing HHAS for {}, "
+        "bailing because Eval.AbortBuildOnCompilerError is set\n\n{}",
+        filename, error
+      )
+    }
+{
+}
+
 void compilers_start() {
   // Some configs, like IncludeRoots, can't easily be Config::Bind(ed), so here
   // we create a place to dump miscellaneous config values HackC might want.
@@ -389,15 +401,7 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
       case CompileAbortMode::VerifyErrors:
       case CompileAbortMode::AllErrors:
         // run_compiler will promote errors to ICE as appropriate based on mode
-        if (ice) {
-          fprintf(
-            stderr,
-            "Encountered an internal error while processing HHAS for %s, "
-            "bailing because Eval.AbortBuildOnCompilerError is set\n\n%s",
-            m_filename, err.data()
-          );
-          _Exit(1);
-        }
+        if (ice) throw CompilerAbort{m_filename, err};
       }
       return createFatalUnit(
         makeStaticString(m_filename),

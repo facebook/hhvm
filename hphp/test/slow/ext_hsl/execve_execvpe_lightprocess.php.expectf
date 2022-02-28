@@ -1,0 +1,8 @@
+--- Full path, execve
+--- Full path, execvpe
+--- Depend on $PATH, execve (expected failure)
+  Exception: execve() failed (%d - %s)
+--- Depend on $PATH, execvpe
+--- Check environment variables are preserved with execvpe
+STDOUT: HERP
+STDERR: DERP

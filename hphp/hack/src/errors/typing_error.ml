@@ -5286,17 +5286,14 @@ module rec Error : sig
 
   val both : t -> t -> t
 end = struct
-  type kind =
-    | Intersection
-    | Union
-    | Multiple
-
   type t =
     | Primary of Primary.t
     | Apply of Callback.t * t
     | Apply_reasons of Reasons_callback.t * Secondary.t
     | Assert_in_current_decl of Secondary.t * Pos_or_decl.ctx
-    | Group of kind * t list
+    | Multiple of t list
+    | Union of t list
+    | Intersection of t list
 
   let iter t ~on_prim ~on_snd =
     let rec aux = function
@@ -5309,7 +5306,10 @@ end = struct
         Reasons_callback.iter cb ~on_prim ~on_snd
       | Assert_in_current_decl (snd_err, _ctx) ->
         Secondary.iter snd_err ~on_prim ~on_snd
-      | Group (_, ts) -> List.iter ~f:aux ts
+      | Multiple ts
+      | Union ts
+      | Intersection ts ->
+        List.iter ~f:aux ts
     in
     aux t
 
@@ -5318,11 +5318,9 @@ end = struct
   let eval t ~current_span =
     let rec aux ~k = function
       | Primary base -> k @@ Eval_result.of_option @@ Primary.to_error base
-      | Group (Intersection, ts) ->
-        auxs ~k:(fun xs -> k @@ Eval_result.intersect xs) ts
-      | Group (Union, ts) -> auxs ~k:(fun xs -> k @@ Eval_result.union xs) ts
-      | Group (Multiple, ts) ->
-        auxs ~k:(fun xs -> k @@ Eval_result.multiple xs) ts
+      | Intersection ts -> auxs ~k:(fun xs -> k @@ Eval_result.intersect xs) ts
+      | Union ts -> auxs ~k:(fun xs -> k @@ Eval_result.union xs) ts
+      | Multiple ts -> auxs ~k:(fun xs -> k @@ Eval_result.multiple xs) ts
       | Apply (cb, err) ->
         aux err ~k:(fun t ->
             k
@@ -5388,19 +5386,31 @@ end = struct
     | [] -> None
     | ts -> Some (f ts)
 
-  let intersect ts = Group (Intersection, ts)
+  let intersect ts =
+    match ts with
+    | [] -> failwith "called on empty list"
+    | [t] -> t
+    | _ -> Intersection ts
 
   let intersect_opt = group_opt intersect
 
-  let union ts = Group (Union, ts)
+  let union ts =
+    match ts with
+    | [] -> failwith "called on empty list"
+    | [t] -> t
+    | _ -> Union ts
 
   let union_opt = group_opt union
 
-  let multiple ts = Group (Multiple, ts)
+  let multiple ts =
+    match ts with
+    | [] -> failwith "called on empty list"
+    | [t] -> t
+    | _ -> Union ts
 
   let multiple_opt = group_opt multiple
 
-  let both t1 t2 = multiple [t1; t2]
+  let both t1 t2 = Multiple [t1; t2]
 end
 
 and Secondary : sig

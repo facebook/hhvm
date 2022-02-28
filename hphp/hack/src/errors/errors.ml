@@ -240,11 +240,13 @@ let try_with_result (f1 : unit -> 'res) (f2 : 'res -> error -> 'res) : 'res =
 
 (* Reset errors before running [f] so that we can return the errors
  * caused by f. These errors are not added in the global list of errors. *)
-let do_ ?(drop_fixmed = true) f =
+let do_ ?(apply_fixmes = true) ?(drop_fixmed = true) f =
   let error_map_copy = !error_map in
   let accumulate_errors_copy = !accumulate_errors in
   error_map := Relative_path.Map.empty;
   accumulate_errors := true;
+  let is_hh_fixme_copy = !is_hh_fixme in
+  (if not apply_fixmes then is_hh_fixme := (fun _ _ -> false));
   let (result, out_errors) =
     Utils.try_finally
       ~f:
@@ -257,7 +259,8 @@ let do_ ?(drop_fixmed = true) f =
         begin
           fun () ->
           error_map := error_map_copy;
-          accumulate_errors := accumulate_errors_copy
+          accumulate_errors := accumulate_errors_copy;
+          is_hh_fixme := is_hh_fixme_copy
         end
   in
   let out_errors = files_t_map ~f:List.rev out_errors in

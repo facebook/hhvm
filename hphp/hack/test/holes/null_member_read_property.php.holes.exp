@@ -16,7 +16,14 @@
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
-        f_body = { fb_ast = [([5:3-10], (Expr ((nothing), [5:3-9], (Obj_get (((null), [5:3-6], (Lvar ([5:3-6], $xs))), ((nothing), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, Is_prop)))))] };
+        f_body =
+        { fb_ast =
+          [([5:3-10],
+            (Expr
+               ((nothing), [5:3-9],
+                (Obj_get (((null), [5:3-6], (Hole (((null), [5:3-6], (Lvar ([5:3-6], $xs))), (null), (nothing), Typing))), ((nothing), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, Is_prop)))))
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       });
@@ -39,7 +46,14 @@
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
-         { fb_ast = [([10:3-10], (Expr ((nothing), [10:3-9], (Obj_get (((?string), [10:3-6], (Lvar ([10:3-6], $xs))), ((nothing), [10:8-9], (Id ([10:8-9], "c"))), OG_nullthrows, Is_prop)))))] };
+         { fb_ast =
+           [([10:3-10],
+             (Expr
+                ((nothing), [10:3-9],
+                 (Obj_get (((?string), [10:3-6], (Hole (((?string), [10:3-6], (Lvar ([10:3-6], $xs))), (?string), (nothing), Typing))), (
+                    (nothing), [10:8-9], (Id ([10:8-9], "c"))), OG_nullthrows, Is_prop)))))
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });
@@ -62,7 +76,13 @@
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
-         { fb_ast = [([15:3-10], (Expr ((nothing), [15:3-9], (Obj_get (((mixed), [15:3-6], (Lvar ([15:3-6], $xs))), ((nothing), [15:8-9], (Id ([15:8-9], "c"))), OG_nullthrows, Is_prop)))))] };
+         { fb_ast =
+           [([15:3-10],
+             (Expr
+                ((nothing), [15:3-9],
+                 (Obj_get (((mixed), [15:3-6], (Hole (((mixed), [15:3-6], (Lvar ([15:3-6], $xs))), (mixed), (nothing), Typing))), ((nothing), [15:8-9], (Id ([15:8-9], "c"))), OG_nullthrows, Is_prop)))))
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        })

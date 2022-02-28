@@ -35,7 +35,14 @@ Errors:
             param_user_attributes = []; param_visibility = None }
            ];
          f_ctxs = None; f_unsafe_ctxs = None;
-         f_body = { fb_ast = [([7:3-22], (Expr ((_), [7:3-21], (Obj_get (((C), [7:3-5], (Lvar ([7:3-5], $c))), ((_), [7:7-21], (Id ([7:7-21], "does_not_exist"))), OG_nullthrows, Is_prop)))))] };
+         f_body =
+         { fb_ast =
+           [([7:3-22],
+             (Expr
+                ((nothing), [7:3-21],
+                 (Obj_get (((C), [7:3-5], (Hole (((C), [7:3-5], (Lvar ([7:3-5], $c))), (C), (nothing), Typing))), ((nothing), [7:7-21], (Id ([7:7-21], "does_not_exist"))), OG_nullthrows, Is_prop)))))
+             ]
+           };
          f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
          f_doc_comment = None }
        });

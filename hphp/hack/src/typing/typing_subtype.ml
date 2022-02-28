@@ -2557,7 +2557,7 @@ and simplify_subtype_has_member
         | Some targs -> targs
       in
       let (errors, (env, (obj_get_ty, _tal))) =
-        Errors.do_ (fun () ->
+        Errors.do_ ~apply_fixmes:false (fun () ->
             Typing_object_get.obj_get
               ~obj_pos:name_pos
               ~is_method

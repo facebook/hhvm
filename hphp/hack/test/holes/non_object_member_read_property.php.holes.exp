@@ -16,7 +16,14 @@
            param_user_attributes = []; param_visibility = None }
           ];
         f_ctxs = None; f_unsafe_ctxs = None;
-        f_body = { fb_ast = [([5:3-10], (Expr ((_), [5:3-9], (Obj_get (((nonnull), [5:3-6], (Lvar ([5:3-6], $xs))), ((_), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, Is_prop)))))] };
+        f_body =
+        { fb_ast =
+          [([5:3-10],
+            (Expr
+               ((nothing), [5:3-9],
+                (Obj_get (((nonnull), [5:3-6], (Hole (((nonnull), [5:3-6], (Lvar ([5:3-6], $xs))), (nonnull), (nothing), Typing))), ((nothing), [5:8-9], (Id ([5:8-9], "c"))), OG_nullthrows, Is_prop)))))
+            ]
+          };
         f_fun_kind = FSync; f_user_attributes = []; f_external = false; 
         f_doc_comment = None }
       })

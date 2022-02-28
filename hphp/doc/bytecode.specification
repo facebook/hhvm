@@ -3035,6 +3035,18 @@ ArrayIdx    [C C C] -> [C]
   if found. Otherwise, $1 is pushed onto the stack. A fatal error will be
   thrown if $3 is not an array.
 
+ArrayMarkLegacy   [C C] -> [C]
+
+  Marks the array in $2 as a legacy array and pushes it onto the stack. If $1
+  is true then the it is done recursively. If $1 isn't a bool then an exception
+  is thrown.
+
+ArrayUnmarkLegacy   [C C] -> [C]
+
+  Marks the array in $2 as a non-legacy array and pushes it onto the stack. If
+  $1 is true then the it is done recursively. If $1 isn't a bool then an
+  exception is thrown.
+
 AssertRATL    <local id>     <repo auth type>    []  ->  []
 AssertRATStk  <stack offset> <repo auth type>    []  ->  []
 

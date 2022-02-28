@@ -16,7 +16,6 @@ type decl_kind =
   | Class
   | Fun
   | GConst
-  | Record_def
   | Typedef
 
 (** The idea of [origin] is so that callsites have a way of characterizing

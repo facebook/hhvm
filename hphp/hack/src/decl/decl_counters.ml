@@ -14,7 +14,6 @@ type decl_kind =
   | Class
   | Fun
   | GConst
-  | Record_def
   | Typedef
 [@@deriving show { with_path = false }]
 

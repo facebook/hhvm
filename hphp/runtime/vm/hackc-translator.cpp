@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/preclass.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/vm/type-alias-emitter.h"
 #include "hphp/runtime/vm/unit-gen-helpers.h"
 #include "hphp/zend/zend-string.h"
 
@@ -200,6 +201,36 @@ std::pair<const StringData*, TypeConstraint> translateTypeInfo(const HhasTypeInf
   return std::make_pair(user_type, TypeConstraint{type_name, flags});
 }
 
+void translateTypedef(TranslationState& ts, const HhasTypedef& t) {
+  UserAttributeMap userAttrs;
+  translateUserAttributes(t.attributes, userAttrs);
+  auto attrs = t.attrs;
+  if (!SystemLib::s_inited) attrs |= AttrPersistent;
+  auto const name = toStaticString(t.name._0);
+
+  auto const ty = translateTypeInfo(t.type_info).second;
+  auto tname = ty.typeName();
+  if (!tname) tname = staticEmptyString();
+
+  auto tys = toTypedValue(t.type_structure);
+  assertx(isArrayLikeType(tys.m_type));
+  tvAsVariant(&tys).setEvalScalar();
+
+  auto te = ts.ue->newTypeAliasEmitter(name->toCppString());
+  te->init(
+    t.span.line_begin,
+    t.span.line_end,
+    attrs,
+    tname,
+    tname->empty() ? AnnotType::Mixed : ty.type(),
+    (ty.flags() & TypeConstraintFlags::Nullable) != 0,
+    ArrNR{tys.m_data.parr},
+    Array{}
+  );
+
+  te->setUserAttributes(userAttrs);
+}
+
 void translateProperty(TranslationState& ts, const HhasProperty& p, const UpperBoundMap& class_ubs) {
   UserAttributeMap userAttributes;
   translateUserAttributes(p.attributes, userAttributes);
@@ -327,6 +358,11 @@ void translate(TranslationState& ts, const HackCUnit& unit) {
   auto constants = range(unit.constants);
   for (auto const& c : constants) {
     translateConstant(ts, c);
+  }
+
+  auto typedefs = range(unit.typedefs);
+  for (auto const& t : typedefs) {
+    translateTypedef(ts, t);
   }
 }
 }

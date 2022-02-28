@@ -962,8 +962,9 @@ void print_unit(Output& out, const Unit* unit) {
 void print_unit_test(Output& out, const Unit* unit) {
   out.fmtln("# {} starts here", unit->origFilepath());
   out.nl();
-  for (auto& cls : unit->preclasses()) print_cls<true>(out, cls.get());
-  for (auto& c : unit->constants())    print_constant(out, c);
+  for (auto& cls : unit->preclasses())    print_cls<true>(out, cls.get());
+  for (auto& alias : unit->typeAliases()) print_alias(out, alias);
+  for (auto& c : unit->constants())       print_constant(out, c);
   out.fmtln("# {} ends here", unit->origFilepath());
 }
 

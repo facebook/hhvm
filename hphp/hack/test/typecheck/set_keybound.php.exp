@@ -1,0 +1,6 @@
+File "set_keybound.php", line 6, characters 11-14:
+Invalid argument (Typing[4110])
+  File "set_keybound.php", line 5, characters 8-13:
+  Expected `arraykey` because type parameter `Tk` of `HH\Set` could not be determined. Please add explicit type parameters to the invocation of `HH\Set`
+  File "set_keybound.php", line 6, characters 11-14:
+  But got `null`

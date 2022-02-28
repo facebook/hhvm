@@ -3163,36 +3163,48 @@ and expr_
     make_result env p Aast.Omitted ty
   | Varray (th, el)
   | ValCollection (_, th, el) ->
-    let (get_expected_kind, name, subtype_val, coerce_for_op, make_expr, make_ty)
-        =
+    let ( get_expected_kind,
+          name,
+          subtype_val,
+          coerce_for_op,
+          make_expr,
+          make_ty,
+          key_bound ) =
       match e with
       | ValCollection (kind, _, _) ->
         let class_name = Nast.vc_kind_to_name kind in
-        let (subtype_val, coerce_for_op) =
+        let (subtype_val, coerce_for_op, key_bound) =
           match kind with
           | Set
           | ImmSet
           | Keyset ->
-            (arraykey_value ~add_hole:true p class_name true, true)
+            ( arraykey_value ~add_hole:true p class_name true,
+              true,
+              Some
+                (MakeType.arraykey
+                   (Reason.Rtype_variable_generics (p, "Tk", strip_ns class_name)))
+            )
           | Vector
           | ImmVector
           | Vec ->
-            (array_value, false)
+            (array_value, false, None)
         in
         ( get_vc_inst env kind,
           class_name,
           subtype_val,
           coerce_for_op,
           (fun th elements -> Aast.ValCollection (kind, th, elements)),
-          fun value_ty ->
-            MakeType.class_type (Reason.Rwitness p) class_name [value_ty] )
+          (fun value_ty ->
+            MakeType.class_type (Reason.Rwitness p) class_name [value_ty]),
+          key_bound )
       | Varray _ ->
         ( get_vc_inst env Vec,
           "varray",
           array_value,
           false,
           (fun th elements -> Aast.ValCollection (Vec, th, elements)),
-          (fun value_ty -> MakeType.varray (Reason.Rwitness p) value_ty) )
+          (fun value_ty -> MakeType.varray (Reason.Rwitness p) value_ty),
+          None )
       | _ ->
         (* The parent match makes this case impossible *)
         failwith "impossible match case"
@@ -3204,7 +3216,7 @@ and expr_
         let (env, tv, tv_expected) = localize_targ env tv in
         let env = check_collection_tparams env name [fst tv] in
         (env, Some tv_expected, Some tv)
-      | _ ->
+      | None ->
         begin
           match expand_expected_and_get_node env expected with
           | (env, Some (pos, ur, _, ety, _)) ->
@@ -3216,17 +3228,6 @@ and expr_
           | _ -> (env, None, None)
         end
     in
-    let bound =
-      (* TODO We ought to apply the bound even when not in sound dynamic mode,
-         to avoid getting Set<dynamic> etc which are unsafe "nothing" factories. *)
-      if coerce_for_op && TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
-      then
-        Some
-          (MakeType.arraykey
-             (Reason.Rtype_variable_generics (p, "Tk", strip_ns name)))
-      else
-        None
-    in
     let (env, tel, elem_ty) =
       compute_exprs_and_supertype
         ~expected:elem_expected
@@ -3234,7 +3235,7 @@ and expr_
         ~reason:Reason.URvector
         ~can_pessimise:true
         ~coerce_for_op
-        ~bound
+        ~bound:key_bound
         (Reason.Rtype_variable_generics (p, "T", strip_ns name))
         env
         el

@@ -231,6 +231,65 @@ void translateTypedef(TranslationState& ts, const HhasTypedef& t) {
   te->setUserAttributes(userAttrs);
 }
 
+template<bool isType>
+void addConstant(TranslationState& ts,
+                 const StringData* name,
+                 Optional<hhbc::TypedValue> tv,
+                 bool isAbstract) {
+  auto const kind = isType
+    ? ConstModifiers::Kind::Type
+    : ConstModifiers::Kind::Value;
+
+  if (!tv) {
+    assertx(isAbstract);
+    ts.pce->addAbstractConstant(name, kind, false);
+    return;
+  }
+
+  auto tvInit = toTypedValue(tv.value());
+  ts.pce->addConstant(name,
+                      nullptr,
+                      &tvInit,
+                      Array{},
+                      kind,
+                      PreClassEmitter::Const::Invariance::None,
+                      false,
+                      isAbstract);
+}
+
+void translateClassConstant(TranslationState& ts, const HhasConstant& c) {
+  auto const name = toStaticString(c.name._0);
+  auto const tv = maybe(c.value);
+  addConstant<false>(ts, name, tv, c.is_abstract);
+}
+
+void translateTypeConstant(TranslationState& ts, const HhasTypeConstant& c) {
+  auto const name = toStaticString(c.name);
+  auto const tv = maybe(c.initializer);
+  addConstant<true>(ts, name, tv, c.is_abstract);
+}
+
+void translateCtxConstant(TranslationState& ts, const HhasCtxConstant& c) {
+  auto const name = toStaticString(c.name);
+  bool isAbstract = c.is_abstract;
+  auto coeffects = PreClassEmitter::Const::CoeffectsVec{};
+
+  auto recognized = range(c.recognized);
+  for (auto const& r : recognized) {
+    coeffects.push_back(toStaticString(r));
+  }
+  auto unrecognized = range(c.unrecognized);
+  for (auto const& u : unrecognized) {
+    coeffects.push_back(toStaticString(u));
+  }
+
+  // T112974443: temporarily drop the abstract ones until runtime is fixed
+  if (isAbstract && !RuntimeOption::EvalEnableAbstractContextConstants) return;
+  DEBUG_ONLY auto added =
+    ts.pce->addContextConstant(name, std::move(coeffects), isAbstract);
+  assertx(added);
+}
+
 void translateProperty(TranslationState& ts, const HhasProperty& p, const UpperBoundMap& class_ubs) {
   UserAttributeMap userAttributes;
   translateUserAttributes(p.attributes, userAttributes);
@@ -273,10 +332,24 @@ void translateProperty(TranslationState& ts, const HhasProperty& p, const UpperB
                       userAttributes);
 }
 
-void translateClassBody(TranslationState& ts, const HhasClass& c, const UpperBoundMap& class_ubs) {
+void translateClassBody(TranslationState& ts,
+                        const HhasClass& c,
+                        const UpperBoundMap& class_ubs) {
   auto props = range(c.properties);
   for (auto const& p : props) {
     translateProperty(ts, p, class_ubs);
+  }
+  auto constants = range(c.constants);
+  for (auto const& cns : constants) {
+    translateClassConstant(ts, cns);
+  }
+  auto tconstants = range(c.type_constants);
+  for (auto const& t : tconstants) {
+    translateTypeConstant(ts, t);
+  }
+  auto cconstants = range(c.ctx_constants);
+  for (auto const& ctx : cconstants) {
+    translateCtxConstant(ts, ctx);
   }
 }
 

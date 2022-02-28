@@ -2885,7 +2885,7 @@ void parse_context_constant(AsmState& as) {
 
   as.in.expectWs(';');
 
-  // temporarily drop the abstract ones until runtime is fixed
+  // T112974443: temporarily drop the abstract ones until runtime is fixed
   if (isAbstract && !RuntimeOption::EvalEnableAbstractContextConstants) return;
 
   DEBUG_ONLY auto added =

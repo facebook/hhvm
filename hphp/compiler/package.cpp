@@ -484,6 +484,7 @@ bool Package::parseImpl(const std::string* fileName) {
       loader,
       fileName->c_str(),
       Native::s_noNativeFuncs,
+      false,
       false
     );
     assertx(uc);

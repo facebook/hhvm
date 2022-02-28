@@ -41,6 +41,7 @@ extern "C" {
                             const char* filename,
                             const Native::FuncTable& nativeFuncs,
                             Unit** releaseUnit,
+                            bool isSystemLib,
                             bool forDebuggerEval);
 }
 

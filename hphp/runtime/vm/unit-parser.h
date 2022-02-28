@@ -74,10 +74,12 @@ struct UnitCompiler {
   UnitCompiler(LazyUnitContentsLoader& loader,
                const char* filename,
                const Native::FuncTable& nativeFuncs,
+               bool isSystemLib,
                bool forDebuggerEval)
     : m_loader{loader}
     , m_filename{filename}
     , m_nativeFuncs{nativeFuncs}
+    , m_isSystemLib{isSystemLib}
     , m_forDebuggerEval{forDebuggerEval}
   {}
   virtual ~UnitCompiler() = default;
@@ -86,6 +88,7 @@ struct UnitCompiler {
     LazyUnitContentsLoader& loader,
     const char* filename,
     const Native::FuncTable& nativeFuncs,
+    bool isSystemLib,
     bool forDebuggerEval
   );
 
@@ -99,6 +102,7 @@ struct UnitCompiler {
   LazyUnitContentsLoader& m_loader;
   const char* m_filename;
   const Native::FuncTable& m_nativeFuncs;
+  bool m_isSystemLib;
   bool m_forDebuggerEval;
 };
 
@@ -121,9 +125,10 @@ struct CacheUnitCompiler : public UnitCompiler {
   CacheUnitCompiler(LazyUnitContentsLoader& loader,
                     const char* filename,
                     const Native::FuncTable& nativeFuncs,
+                    bool isSystemLib,
                     bool forDebuggerEval,
                     std::function<std::unique_ptr<UnitCompiler>()> makeFallback)
-    : UnitCompiler{loader, filename, nativeFuncs, forDebuggerEval}
+    : UnitCompiler{loader, filename, nativeFuncs, isSystemLib, forDebuggerEval}
     , m_makeFallback{std::move(makeFallback)} {}
 
   virtual std::unique_ptr<UnitEmitter> compile(

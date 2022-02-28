@@ -43,6 +43,7 @@ Unit* compile_file(LazyUnitContentsLoader& loader,
 // if any.
 Unit* compile_string(const char* s, size_t sz, const char* fname,
                      const Native::FuncTable& nativeFuncs, const RepoOptions&,
+                     bool isSystemLib = false,
                      bool forDebuggerEval = false);
 
 Unit* compile_debugger_string(const char* s, size_t sz, const RepoOptions&);
@@ -62,6 +63,7 @@ using CompileStringFn = Unit* (*)(LazyUnitContentsLoader&,
                                   const char*,
                                   const Native::FuncTable&,
                                   Unit**,
+                                  bool,
                                   bool);
 
 extern CompileStringFn g_hphp_compiler_parse;

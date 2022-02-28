@@ -160,6 +160,7 @@ CompilerResult hackc_compile(
   const char* filename,
   const SHA1& sha1,
   const Native::FuncTable& nativeFuncs,
+  bool isSystemLib,
   bool forDebuggerEval,
   bool& internal_error,
   const RepoOptionsFlags& options,
@@ -176,7 +177,7 @@ CompilerResult hackc_compile(
   }
 
   std::uint8_t flags = make_env_flags(
-    !SystemLib::s_inited,           // is_systemlib
+    isSystemLib,                    // is_systemlib
     false,                          // is_evaled
     forDebuggerEval,                // for_debugger_eval
     true,                           // dump_symbol_refs
@@ -328,12 +329,14 @@ std::unique_ptr<UnitCompiler>
 UnitCompiler::create(LazyUnitContentsLoader& loader,
                      const char* filename,
                      const Native::FuncTable& nativeFuncs,
+                     bool isSystemLib,
                      bool forDebuggerEval) {
-  auto make = [&loader, &nativeFuncs, filename, forDebuggerEval] {
+  auto make = [&loader, &nativeFuncs, filename, isSystemLib, forDebuggerEval] {
     return std::make_unique<HackcUnitCompiler>(
       loader,
       filename,
       nativeFuncs,
+      isSystemLib,
       forDebuggerEval
     );
   };
@@ -343,6 +346,7 @@ UnitCompiler::create(LazyUnitContentsLoader& loader,
       loader,
       filename,
       nativeFuncs,
+      isSystemLib,
       false,
       std::move(make)
     );
@@ -361,6 +365,7 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
                            m_filename,
                            m_loader.sha1(),
                            m_nativeFuncs,
+                           m_isSystemLib,
                            m_forDebuggerEval,
                            ice,
                            m_loader.options(),

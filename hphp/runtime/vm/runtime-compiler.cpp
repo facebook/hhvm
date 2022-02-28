@@ -38,6 +38,7 @@ Unit* compile_file(LazyUnitContentsLoader& loader,
     filename,
     nativeFuncs,
     releaseUnit,
+    false,
     false
   );
 }
@@ -47,6 +48,7 @@ Unit* compile_string(const char* s,
                      const char* fname,
                      const Native::FuncTable& nativeFuncs,
                      const RepoOptions& options,
+                     bool isSystemLib,
                      bool forDebuggerEval) {
   // If the file is too large it may OOM the request
   MemoryManager::SuppressOOM so(*tl_heap);
@@ -64,6 +66,7 @@ Unit* compile_string(const char* s,
     fname,
     nativeFuncs,
     nullptr,
+    isSystemLib,
     forDebuggerEval
   );
 }
@@ -77,7 +80,7 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
     }
   }
   auto const u =
-    compile_string(s, sz, fname, nativeFuncs, RepoOptions::defaults());
+    compile_string(s, sz, fname, nativeFuncs, RepoOptions::defaults(), true);
   always_assert(u);
   return u;
 }
@@ -91,6 +94,7 @@ Unit* compile_debugger_string(
     nullptr,
     Native::s_noNativeFuncs,
     options,
+    false,
     true
   );
 }

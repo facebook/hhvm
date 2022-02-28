@@ -444,6 +444,7 @@ Unit* hphp_compiler_parse(LazyUnitContentsLoader& loader,
                           const char* filename,
                           const Native::FuncTable& nativeFuncs,
                           Unit** releaseUnit,
+                          bool isSystemLib,
                           bool forDebuggerEval) {
   if (!filename) filename = "";
 
@@ -502,6 +503,7 @@ Unit* hphp_compiler_parse(LazyUnitContentsLoader& loader,
       loader,
       filename,
       nativeFuncs,
+      isSystemLib,
       forDebuggerEval
     );
     assertx(uc);

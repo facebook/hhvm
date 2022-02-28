@@ -22,7 +22,6 @@ pub struct HhasBody<'arena> {
     pub body_instrs: Slice<'arena, Instruct<'arena>>,
     pub decl_vars: Slice<'arena, Str<'arena>>,
     pub num_iters: usize,
-    pub num_closures: u32,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
     pub upper_bounds: Slice<'arena, Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>>,

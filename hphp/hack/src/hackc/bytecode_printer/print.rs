@@ -913,10 +913,6 @@ fn print_body(
         })?;
         w.write_all(b";")?;
     }
-    if body.num_closures > 0 {
-        ctx.newline(w)?;
-        write!(w, ".numclosures {};", body.num_closures)?;
-    }
     coeffects::coeffects_to_hhas(ctx, w, coeffects)?;
     print_instructions(ctx, w, &body.body_instrs, dv_labels)
 }

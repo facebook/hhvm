@@ -146,15 +146,6 @@ inline void FuncEmitter::setNumIterators(Id numIterators) {
   m_numIterators = numIterators;
 }
 
-inline Id FuncEmitter::numClosures() const {
-  return m_numClosures;
-}
-
-inline void FuncEmitter::setNumClosures(Id numClosures) {
-  assertx(m_numClosures == 0);
-  m_numClosures = numClosures;
-}
-
 inline void FuncEmitter::setNumLiveIterators(Id id) {
   m_nextFreeIterator = id;
 }

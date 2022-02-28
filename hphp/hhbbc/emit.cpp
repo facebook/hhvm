@@ -1004,7 +1004,6 @@ void emit_finish_func(EmitUnitState& state, FuncEmitter& fe,
   fe.isNative = func.nativeInfo != nullptr;
   fe.isMemoizeWrapper = func.isMemoizeWrapper;
   fe.isMemoizeWrapperLSB = func.isMemoizeWrapperLSB;
-  fe.setNumClosures(func.numClosures);
   fe.hasParamsWithMultiUBs = func.hasParamsWithMultiUBs;
   fe.hasReturnWithMultiUBs = func.hasReturnWithMultiUBs;
 

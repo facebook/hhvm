@@ -157,14 +157,6 @@ pub fn emit_body<'b, 'arena, 'decl>(
     env.jump_targets_gen.reset();
 
     let should_reserve_locals = set_function_jmp_targets(emitter, &mut env);
-    let num_closures = match emitter
-        .emit_global_state()
-        .num_closures
-        .get(&get_unique_id_for_scope(&env.scope))
-    {
-        Some(num) => *num,
-        None => 0,
-    };
     let local_gen = emitter.local_gen_mut();
     let num_locals = params.len() + decl_vars.len();
     local_gen.reset(LocalId::from_usize(num_locals));
@@ -192,7 +184,6 @@ pub fn emit_body<'b, 'arena, 'decl>(
             decl_vars,
             false, // is_memoize_wrapper
             false, // is_memoize_wrapper_lsb
-            num_closures,
             upper_bounds,
             shadowed_tparams,
             params,
@@ -400,7 +391,6 @@ pub fn make_body<'a, 'arena, 'decl>(
     decl_vars: Vec<String>,
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
-    num_closures: u32,
     upper_bounds: Vec<Pair<Str<'arena>, Slice<'arena, HhasTypeInfo<'arena>>>>,
     shadowed_tparams: Vec<String>,
     mut params: Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>,
@@ -474,7 +464,6 @@ pub fn make_body<'a, 'arena, 'decl>(
         num_iters,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
-        num_closures,
         upper_bounds: Slice::fill_iter(alloc, upper_bounds.into_iter()),
         shadowed_tparams: Slice::fill_iter(
             alloc,

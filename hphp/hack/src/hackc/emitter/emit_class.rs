@@ -96,7 +96,6 @@ fn make_86method<'arena, 'decl>(
         method_decl_vars,
         method_is_memoize_wrapper,
         method_is_memoize_wrapper_lsb,
-        0,
         vec![],
         vec![],
         params.into_iter().map(|p| (p, None)).collect::<Vec<_>>(),

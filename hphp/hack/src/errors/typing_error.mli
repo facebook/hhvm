@@ -989,6 +989,7 @@ module Primary : sig
     | Unbound_name of {
         pos: Pos.t;
         name: string;
+        class_exists: bool;
       }
     | Previous_default of Pos.t
     | Return_in_void of {

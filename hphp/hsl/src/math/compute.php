@@ -35,7 +35,7 @@ function abs<T as num>(T $number)[]: T {
  * - To convert a string in some base to an int, see `Math\from_base()`.
  * - To convert an int to a string in some base, see `Math\to_base()`.
  */
-function base_convert(string $value, int $from_base, int $to_base)[rx_local]: string {
+function base_convert(string $value, int $from_base, int $to_base): string {
   invariant(
     $value !== '',
     'Unexpected empty string, expected number in base %d',
@@ -254,7 +254,7 @@ function tan(num $arg)[]: float {
  *
  * To base convert a string to an int, see `Math\from_base()`.
  */
-function to_base(int $number, int $to_base)[rx_shallow]: string {
+function to_base(int $number, int $to_base): string {
   invariant(
     $to_base >= 2 && $to_base <= 36,
     'Expected $to_base to be between 2 and 36, got %d',

@@ -182,7 +182,7 @@ function replace_ci(
   string $haystack,
   string $needle,
   string $replacement,
-)[rx]: string {
+): string {
   return _Str\replace_ci_l($haystack, $needle, $replacement);
 }
 
@@ -230,7 +230,7 @@ function replace_every(
 function replace_every_ci(
   string $haystack,
   KeyedContainer<string, string> $replacements,
-)[rx]: string {
+): string {
   return _Str\replace_every_ci_l($haystack, dict($replacements));
 }
 
@@ -249,7 +249,7 @@ function replace_every_ci(
 function replace_every_nonrecursive(
   string $haystack,
   KeyedContainer<string, string> $replacements,
-)[rx]: string {
+): string {
   return _Str\replace_every_nonrecursive_l($haystack, dict($replacements));
 }
 
@@ -275,7 +275,7 @@ function replace_every_nonrecursive(
 function replace_every_nonrecursive_ci(
   string $haystack,
   KeyedContainer<string, string> $replacements,
-)[rx]: string {
+): string {
   return _Str\replace_every_nonrecursive_ci_l($haystack, dict($replacements));
 }
 

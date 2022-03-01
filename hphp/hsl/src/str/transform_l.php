@@ -143,7 +143,7 @@ function replace_ci_l(
   string $haystack,
   string $needle,
   string $replacement,
-)[rx]: string {
+): string {
   return _Str\replace_ci_l($haystack, $needle, $replacement, $locale);
 }
 
@@ -201,7 +201,7 @@ function replace_every_ci_l(
   Locale\Locale $locale,
   string $haystack,
   KeyedContainer<string, string> $replacements,
-)[rx]: string {
+): string {
   return _Str\replace_every_ci_l($haystack, dict($replacements), $locale);
 }
 
@@ -224,7 +224,7 @@ function replace_every_nonrecursive_l(
   Locale\Locale $locale,
   string $haystack,
   KeyedContainer<string, string> $replacements,
-)[rx]: string {
+): string {
   return _Str\replace_every_nonrecursive_l($haystack, dict($replacements), $locale);
 }
 
@@ -256,7 +256,7 @@ function replace_every_nonrecursive_ci_l(
   Locale\Locale $locale,
   string $haystack,
   KeyedContainer<string, string> $replacements,
-)[rx]: string {
+): string {
   return _Str\replace_every_nonrecursive_ci_l($haystack, dict($replacements), $locale);
 }
 

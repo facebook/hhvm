@@ -912,7 +912,7 @@ fn print_instructions(
     let mut ctx = ctx.clone();
     for instr in instrs {
         match instr {
-            Instruct::SpecialFlow(_) => {
+            Instruct::Continue(_) | Instruct::Break(_) => {
                 return Err(Error::fail("Cannot break/continue 1 level").into());
             }
             Instruct::Comment(_) => {
@@ -924,16 +924,16 @@ fn print_instructions(
                 c.newline(w)?;
                 print_instr(w, instr, dv_labels)
             })?,
-            Instruct::Try(InstructTry::TryCatchBegin) => {
+            Instruct::TryCatchBegin => {
                 ctx.newline(w)?;
                 print_instr(w, instr, dv_labels)?;
                 ctx.indent_inc();
             }
-            Instruct::Try(InstructTry::TryCatchMiddle) => ctx.unblock(w, |c, w| {
+            Instruct::TryCatchMiddle => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
                 print_instr(w, instr, dv_labels)
             })?,
-            Instruct::Try(InstructTry::TryCatchEnd) => {
+            Instruct::TryCatchEnd => {
                 ctx.indent_dec();
                 ctx.newline(w)?;
                 print_instr(w, instr, dv_labels)?;
@@ -1179,7 +1179,9 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
         Instruct::Isset(i) => print_isset(w, i),
         Instruct::Base(i) => print_base(w, i),
         Instruct::Final(i) => print_final(w, i),
-        Instruct::Try(itry) => print_try(w, itry),
+        Instruct::TryCatchBegin => w.write_all(b".try {"),
+        Instruct::TryCatchMiddle => w.write_all(b"} .catch {"),
+        Instruct::TryCatchEnd => w.write_all(b"}"),
         Instruct::Comment(s) => write_bytes!(w, "# {}", s),
         Instruct::SrcLoc(p) => write!(
             w,
@@ -1188,7 +1190,12 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
         ),
         Instruct::Async(a) => print_async(w, a),
         Instruct::Generator(gen) => print_gen_creation_execution(w, gen),
-        Instruct::IncludeEvalDefine(ed) => print_include_eval_define(w, ed),
+        Instruct::Incl => w.write_all(b"Incl"),
+        Instruct::InclOnce => w.write_all(b"InclOnce"),
+        Instruct::Req => w.write_all(b"Req"),
+        Instruct::ReqOnce => w.write_all(b"ReqOnce"),
+        Instruct::ReqDoc => w.write_all(b"ReqDoc"),
+        Instruct::Eval => w.write_all(b"Eval"),
         _ => Err(Error::fail("invalid instruction").into()),
     }
 }
@@ -1455,15 +1462,6 @@ fn print_istype_op(w: &mut dyn Write, op: &IsTypeOp) -> Result<()> {
         Op::Func => w.write_all(b"Func"),
         Op::Class => w.write_all(b"Class"),
         _ => panic!("Enum value does not match one of listed variants"),
-    }
-}
-
-fn print_try(w: &mut dyn Write, itry: &InstructTry) -> Result<()> {
-    use InstructTry as T;
-    match itry {
-        T::TryCatchBegin => w.write_all(b".try {"),
-        T::TryCatchMiddle => w.write_all(b"} .catch {"),
-        T::TryCatchEnd => w.write_all(b"}"),
     }
 }
 
@@ -1737,17 +1735,6 @@ fn print_misc(
             w.write_all(b"GetMemoKeyL ")?;
             print_local(w, local)
         }
-    }
-}
-
-fn print_include_eval_define(w: &mut dyn Write, ed: &InstructIncludeEvalDefine) -> Result<()> {
-    match ed {
-        InstructIncludeEvalDefine::Incl => w.write_all(b"Incl"),
-        InstructIncludeEvalDefine::InclOnce => w.write_all(b"InclOnce"),
-        InstructIncludeEvalDefine::Req => w.write_all(b"Req"),
-        InstructIncludeEvalDefine::ReqOnce => w.write_all(b"ReqOnce"),
-        InstructIncludeEvalDefine::ReqDoc => w.write_all(b"ReqDoc"),
-        InstructIncludeEvalDefine::Eval => w.write_all(b"Eval"),
     }
 }
 

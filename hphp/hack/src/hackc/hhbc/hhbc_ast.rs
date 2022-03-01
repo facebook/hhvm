@@ -282,13 +282,6 @@ impl InstructControlFlow<'_> {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum InstructSpecialFlow {
-    Continue(isize),
-    Break(isize),
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
 pub enum InstructGet<'arena> {
     CGetL(Local<'arena>),
     CGetQuietL(Local<'arena>),
@@ -440,17 +433,6 @@ pub enum InstructFinal<'arena> {
     SetOpM(NumParams, SetOpOp, MemberKey<'arena>),
     UnsetM(NumParams, MemberKey<'arena>),
     SetRangeM(NumParams, isize, SetRangeOp),
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
-pub enum InstructIncludeEvalDefine {
-    Incl,
-    InclOnce,
-    Req,
-    ReqOnce,
-    ReqDoc,
-    Eval,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -671,14 +653,6 @@ pub enum AsyncFunctions<'arena> {
     AwaitAll(Maybe<Pair<Local<'arena>, isize>>),
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum InstructTry {
-    TryCatchBegin,
-    TryCatchMiddle,
-    TryCatchEnd,
-}
-
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub struct SrcLoc {
@@ -696,13 +670,17 @@ pub enum Instruct<'arena> {
     PopC,
     PopU,
     Dup,
+    TryCatchBegin,
+    TryCatchMiddle,
+    TryCatchEnd,
     IterInit(IterArgs<'arena>, Label),
     IterNext(IterArgs<'arena>, Label),
     IterFree(IterId),
     LitConst(InstructLitConst<'arena>),
     Op(InstructOperator<'arena>),
     ContFlow(InstructControlFlow<'arena>),
-    SpecialFlow(InstructSpecialFlow),
+    Continue(isize),
+    Break(isize),
     Call(InstructCall<'arena>),
     New(InstructNew<'arena>),
     Misc(InstructMisc<'arena>),
@@ -712,12 +690,16 @@ pub enum Instruct<'arena> {
     Base(InstructBase<'arena>),
     Final(InstructFinal<'arena>),
     Label(Label),
-    Try(InstructTry),
     Comment(Str<'arena>),
     SrcLoc(SrcLoc),
     Async(AsyncFunctions<'arena>),
     Generator(GenCreationExecution),
-    IncludeEvalDefine(InstructIncludeEvalDefine),
+    Incl,
+    InclOnce,
+    Req,
+    ReqOnce,
+    ReqDoc,
+    Eval,
 }
 
 impl Instruct<'_> {
@@ -740,7 +722,8 @@ impl Instruct<'_> {
             | Self::IterFree(_)
             | Self::LitConst(_)
             | Self::Op(_)
-            | Self::SpecialFlow(_)
+            | Self::Continue(_)
+            | Self::Break(_)
             | Self::New(_)
             | Self::Get(_)
             | Self::Mutator(_)
@@ -748,12 +731,19 @@ impl Instruct<'_> {
             | Self::Base(_)
             | Self::Final(_)
             | Self::Label(_)
-            | Self::Try(_)
+            | Self::TryCatchBegin
+            | Self::TryCatchMiddle
+            | Self::TryCatchEnd
             | Self::Comment(_)
             | Self::SrcLoc(_)
             | Self::Async(_)
             | Self::Generator(_)
-            | Self::IncludeEvalDefine(_) => &[],
+            | Self::Incl
+            | Self::InclOnce
+            | Self::Req
+            | Self::ReqOnce
+            | Self::ReqDoc
+            | Self::Eval => &[],
         }
     }
 
@@ -776,7 +766,8 @@ impl Instruct<'_> {
             | Self::IterFree(_)
             | Self::LitConst(_)
             | Self::Op(_)
-            | Self::SpecialFlow(_)
+            | Self::Continue(_)
+            | Self::Break(_)
             | Self::New(_)
             | Self::Get(_)
             | Self::Mutator(_)
@@ -784,12 +775,19 @@ impl Instruct<'_> {
             | Self::Base(_)
             | Self::Final(_)
             | Self::Label(_)
-            | Self::Try(_)
+            | Self::TryCatchBegin
+            | Self::TryCatchMiddle
+            | Self::TryCatchEnd
             | Self::Comment(_)
             | Self::SrcLoc(_)
             | Self::Async(_)
             | Self::Generator(_)
-            | Self::IncludeEvalDefine(_) => &mut [],
+            | Self::Incl
+            | Self::InclOnce
+            | Self::Req
+            | Self::ReqOnce
+            | Self::ReqDoc
+            | Self::Eval => &mut [],
         }
     }
 }

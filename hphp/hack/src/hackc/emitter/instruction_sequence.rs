@@ -256,11 +256,11 @@ pub mod instr {
     }
 
     pub fn continue_<'a>(level: isize) -> InstrSeq<'a> {
-        instr(Instruct::SpecialFlow(InstructSpecialFlow::Continue(level)))
+        instr(Instruct::Continue(level))
     }
 
     pub fn break_<'a>(level: isize) -> InstrSeq<'a> {
-        instr(Instruct::SpecialFlow(InstructSpecialFlow::Break(level)))
+        instr(Instruct::Break(level))
     }
 
     pub fn iter_break<'a>(label: Label, iters: Vec<IterId>) -> InstrSeq<'a> {
@@ -1155,33 +1155,27 @@ pub mod instr {
     }
 
     pub fn eval<'a>() -> InstrSeq<'a> {
-        instr(Instruct::IncludeEvalDefine(InstructIncludeEvalDefine::Eval))
+        instr(Instruct::Eval)
     }
 
     pub fn incl<'a>() -> InstrSeq<'a> {
-        instr(Instruct::IncludeEvalDefine(InstructIncludeEvalDefine::Incl))
+        instr(Instruct::Incl)
     }
 
     pub fn inclonce<'a>() -> InstrSeq<'a> {
-        instr(Instruct::IncludeEvalDefine(
-            InstructIncludeEvalDefine::InclOnce,
-        ))
+        instr(Instruct::InclOnce)
     }
 
     pub fn req<'a>() -> InstrSeq<'a> {
-        instr(Instruct::IncludeEvalDefine(InstructIncludeEvalDefine::Req))
+        instr(Instruct::Req)
     }
 
     pub fn reqdoc<'a>() -> InstrSeq<'a> {
-        instr(Instruct::IncludeEvalDefine(
-            InstructIncludeEvalDefine::ReqDoc,
-        ))
+        instr(Instruct::ReqDoc)
     }
 
     pub fn reqonce<'a>() -> InstrSeq<'a> {
-        instr(Instruct::IncludeEvalDefine(
-            InstructIncludeEvalDefine::ReqOnce,
-        ))
+        instr(Instruct::ReqOnce)
     }
 
     pub fn silence_start<'a>(local: Local<'a>) -> InstrSeq<'a> {
@@ -1333,17 +1327,17 @@ impl<'a> InstrSeq<'a> {
             None => label_gen.next_regular(),
         };
         InstrSeq::gather(vec![
-            instr::instr(Instruct::Try(InstructTry::TryCatchBegin)),
+            instr::instr(Instruct::TryCatchBegin),
             try_instrs,
             instr::jmp(done_label),
-            instr::instr(Instruct::Try(InstructTry::TryCatchMiddle)),
+            instr::instr(Instruct::TryCatchMiddle),
             catch_instrs,
             if skip_throw {
                 instr::empty()
             } else {
                 instr::instr(Instruct::ContFlow(InstructControlFlow::Throw))
             },
-            instr::instr(Instruct::Try(InstructTry::TryCatchEnd)),
+            instr::instr(Instruct::TryCatchEnd),
             instr::label(done_label),
         ])
     }

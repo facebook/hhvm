@@ -43,12 +43,11 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
         }
         JumpInstructions(instr_seq.iter().fold(LabelMap::new(), |mut acc, instr| {
             use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
-            use hhbc_ast::InstructSpecialFlow::{Break, Continue};
             match *instr {
-                Instruct::SpecialFlow(Break(level)) => {
+                Instruct::Break(level) => {
                     acc.insert(get_label_id(jt_gen, true, level as Level), instr);
                 }
-                Instruct::SpecialFlow(Continue(level)) => {
+                Instruct::Continue(level) => {
                     acc.insert(get_label_id(jt_gen, false, level as Level), instr);
                 }
                 Instruct::ContFlow(RetC | RetCSuspended | RetM(_)) => {
@@ -67,7 +66,9 @@ pub(super) fn cleanup_try_body<'arena>(mut is: InstrSeq<'arena>) -> InstrSeq<'ar
     is.retain(|instr| {
         !matches!(
             instr,
-            Instruct::SpecialFlow(_) | Instruct::ContFlow(RetC | RetCSuspended | RetM(_))
+            Instruct::Continue(_)
+                | Instruct::Break(_)
+                | Instruct::ContFlow(RetC | RetCSuspended | RetM(_))
         )
     });
     is
@@ -268,7 +269,6 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
         i: &Instruct<'arena>,
     ) -> Result<InstrSeq<'arena>> {
         use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
-        use hhbc_ast::InstructSpecialFlow::{Break, Continue};
         let fail = || {
             panic!("unexpected instruction: only Ret* or Break/Continue/Jmp(Named) are expected")
         };
@@ -277,14 +277,14 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
                 RetC | RetCSuspended | RetM(_) => emit_return(e, true, env),
                 _ => fail(),
             },
-            Instruct::SpecialFlow(Break(level)) => Ok(emit_break_or_continue(
+            Instruct::Break(level) => Ok(emit_break_or_continue(
                 e,
                 EmitBreakOrContinueFlags::IS_BREAK | EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,
                 env,
                 pos,
                 level as Level,
             )),
-            Instruct::SpecialFlow(Continue(level)) => Ok(emit_break_or_continue(
+            Instruct::Continue(level) => Ok(emit_break_or_continue(
                 e,
                 EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,
                 env,

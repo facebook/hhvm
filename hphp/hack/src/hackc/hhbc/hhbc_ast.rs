@@ -444,30 +444,6 @@ pub enum InstructFinal<'arena> {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum InstructIterator<'arena> {
-    IterInit(IterArgs<'arena>, Label),
-    IterNext(IterArgs<'arena>, Label),
-    IterFree(IterId),
-}
-
-impl InstructIterator<'_> {
-    pub fn targets(&self) -> &[Label] {
-        match self {
-            Self::IterInit(_, target) | Self::IterNext(_, target) => std::slice::from_ref(target),
-            Self::IterFree(_) => &[],
-        }
-    }
-
-    pub fn targets_mut(&mut self) -> &mut [Label] {
-        match self {
-            Self::IterInit(_, target) | Self::IterNext(_, target) => std::slice::from_mut(target),
-            Self::IterFree(_) => &mut [],
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
 pub enum InstructIncludeEvalDefine {
     Incl,
     InclOnce,
@@ -720,7 +696,9 @@ pub enum Instruct<'arena> {
     PopC,
     PopU,
     Dup,
-    Iterator(InstructIterator<'arena>),
+    IterInit(IterArgs<'arena>, Label),
+    IterNext(IterArgs<'arena>, Label),
+    IterFree(IterId),
     LitConst(InstructLitConst<'arena>),
     Op(InstructOperator<'arena>),
     ContFlow(InstructControlFlow<'arena>),
@@ -749,7 +727,7 @@ impl Instruct<'_> {
         match self {
             Self::Call(x) => x.targets(),
             Self::ContFlow(x) => x.targets(),
-            Self::Iterator(x) => x.targets(),
+            Self::IterInit(_, target) | Self::IterNext(_, target) => std::slice::from_ref(target),
             Self::Misc(x) => x.targets(),
 
             // Make sure new variants with branch target Labels are handled above
@@ -759,6 +737,7 @@ impl Instruct<'_> {
             | Self::PopC
             | Self::PopU
             | Self::Dup
+            | Self::IterFree(_)
             | Self::LitConst(_)
             | Self::Op(_)
             | Self::SpecialFlow(_)
@@ -784,7 +763,7 @@ impl Instruct<'_> {
         match self {
             Self::Call(x) => x.targets_mut(),
             Self::ContFlow(x) => x.targets_mut(),
-            Self::Iterator(x) => x.targets_mut(),
+            Self::IterInit(_, target) | Self::IterNext(_, target) => std::slice::from_mut(target),
             Self::Misc(x) => x.targets_mut(),
 
             // Make sure new variants with branch target Labels are handled above
@@ -794,6 +773,7 @@ impl Instruct<'_> {
             | Self::PopC
             | Self::PopU
             | Self::Dup
+            | Self::IterFree(_)
             | Self::LitConst(_)
             | Self::Op(_)
             | Self::SpecialFlow(_)

@@ -1143,7 +1143,22 @@ fn print_get(w: &mut dyn Write, get: &InstructGet<'_>) -> Result<()> {
 
 fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
     match instr {
-        Instruct::Iterator(i) => print_iterator(w, i, dv_labels),
+        Instruct::IterInit(iter_args, label) => {
+            w.write_all(b"IterInit ")?;
+            print_iter_args(w, iter_args)?;
+            w.write_all(b" ")?;
+            print_label(w, label, dv_labels)
+        }
+        Instruct::IterNext(iter_args, label) => {
+            w.write_all(b"IterNext ")?;
+            print_iter_args(w, iter_args)?;
+            w.write_all(b" ")?;
+            print_label(w, label, dv_labels)
+        }
+        Instruct::IterFree(id) => {
+            w.write_all(b"IterFree ")?;
+            print_iterator_id(w, id)
+        }
         Instruct::Nop => w.write_all(b"Nop"),
         Instruct::EntryNop => w.write_all(b"EntryNop"),
         Instruct::PopC => w.write_all(b"PopC"),
@@ -1294,32 +1309,6 @@ fn print_member_key(w: &mut dyn Write, mk: &MemberKey<'_>) -> Result<()> {
             print_readonly_op(w, op)
         }
         M::W => w.write_all(b"W"),
-    }
-}
-
-fn print_iterator(
-    w: &mut dyn Write,
-    i: &InstructIterator<'_>,
-    dv_labels: &HashSet<Label>,
-) -> Result<()> {
-    use InstructIterator as I;
-    match i {
-        I::IterInit(iter_args, label) => {
-            w.write_all(b"IterInit ")?;
-            print_iter_args(w, iter_args)?;
-            w.write_all(b" ")?;
-            print_label(w, label, dv_labels)
-        }
-        I::IterNext(iter_args, label) => {
-            w.write_all(b"IterNext ")?;
-            print_iter_args(w, iter_args)?;
-            w.write_all(b" ")?;
-            print_label(w, label, dv_labels)
-        }
-        I::IterFree(id) => {
-            w.write_all(b"IterFree ")?;
-            print_iterator_id(w, id)
-        }
     }
 }
 

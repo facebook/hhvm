@@ -210,11 +210,11 @@ pub mod instr {
     }
 
     pub fn iterinit<'a>(args: IterArgs<'a>, label: Label) -> InstrSeq<'a> {
-        instr(Instruct::Iterator(InstructIterator::IterInit(args, label)))
+        instr(Instruct::IterInit(args, label))
     }
 
     pub fn iternext<'a>(args: IterArgs<'a>, label: Label) -> InstrSeq<'a> {
-        instr(Instruct::Iterator(InstructIterator::IterNext(args, label)))
+        instr(Instruct::IterNext(args, label))
     }
 
     pub fn iternextk<'a>(
@@ -228,11 +228,11 @@ pub mod instr {
             key_id: Just(key),
             val_id: value,
         };
-        instr(Instruct::Iterator(InstructIterator::IterNext(args, label)))
+        instr(Instruct::IterNext(args, label))
     }
 
     pub fn iterfree<'a>(id: IterId) -> InstrSeq<'a> {
-        instr(Instruct::Iterator(InstructIterator::IterFree(id)))
+        instr(Instruct::IterFree(id))
     }
 
     pub fn whresult<'a>() -> InstrSeq<'a> {
@@ -264,10 +264,7 @@ pub mod instr {
     }
 
     pub fn iter_break<'a>(label: Label, iters: Vec<IterId>) -> InstrSeq<'a> {
-        let mut vec: Vec<Instruct<'a>> = iters
-            .into_iter()
-            .map(|id| Instruct::Iterator(InstructIterator::IterFree(id)))
-            .collect();
+        let mut vec: Vec<Instruct<'a>> = iters.into_iter().map(Instruct::IterFree).collect();
         vec.push(Instruct::ContFlow(InstructControlFlow::Jmp(label)));
         instrs(vec)
     }

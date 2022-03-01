@@ -1,0 +1,14 @@
+Simple testcase for getopt() function
+dict(1) {
+  ["f"]=>
+  bool(false)
+}
+dict(1) {
+  ["g"]=>
+  string(11) "value_for_g"
+}
+dict(0) {
+}
+dict(0) {
+}
+Done

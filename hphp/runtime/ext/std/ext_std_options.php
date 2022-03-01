@@ -106,6 +106,15 @@ function getmyuid(): mixed;
 function getopt(string $options,
                 mixed $longopts = null): darray;
 
+/* Similar to getopt but accepts an inout optind which controls the argument
+ * at which parsing begins. Sets the optind to the index of the first unparsed
+ * option.
+ */
+<<__Native>>
+function getopt_with_optind(string $options,
+                            ?vec<string> $longopts,
+                            inout int $optind): dict<string, mixed>;
+
 /* This is an interface to getrusage(2). It gets data returned from the system
  * call.
  */

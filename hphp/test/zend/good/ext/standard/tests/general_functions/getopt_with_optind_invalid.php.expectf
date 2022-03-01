@@ -1,0 +1,14 @@
+Testcase for getopt_with_optind() function with invalid optind
+Parameter optind must be a positive integer
+int(-1)
+Parameter optind must be a positive integer
+int(-1)
+Parameter optind must be a positive integer
+int(0)
+dict(0) {
+}
+int(10000)
+dict(0) {
+}
+int(1000000000000000)
+Done

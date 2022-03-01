@@ -209,10 +209,10 @@ struct opt_struct {
   char* opt_name{nullptr};
 };
 
-static int php_opt_error(const req::vector<char*>& argv, int oint, int optchr,
+static int php_opt_error(const req::vector<char*>& argv, int64_t oint, int optchr,
                          int err, int show_err) {
   if (show_err) {
-    fprintf(stderr, "Error in argument %d, char %d: ", oint, optchr+1);
+    fprintf(stderr, "Error in argument %" PRId64 ", char %d: ", oint, optchr+1);
     switch (err) {
     case OPTERRCOLON:
       fprintf(stderr, ": in flags\n");
@@ -233,7 +233,7 @@ static int php_opt_error(const req::vector<char*>& argv, int oint, int optchr,
 
 static int php_getopt(int argc, req::vector<char*>& argv,
                       req::vector<opt_struct>& opts,
-                      char **optarg, int *optind, int show_err,
+                      char **optarg, int64_t *optind, int show_err,
                       int arg_start, int &optchr, int &dash, int &php_optidx) {
   php_optidx = -1;
 
@@ -306,7 +306,7 @@ static int php_getopt(int argc, req::vector<char*>& argv,
     while (1) {
       php_optidx++;
       if (opts[php_optidx].opt_char == '-') {
-        int errind = *optind;
+        int64_t errind = *optind;
         int errchr = optchr;
 
         if (!argv[*optind][optchr+1]) {
@@ -409,8 +409,16 @@ static req::vector<opt_struct> parse_opts(const char *opts, int opts_len) {
 
 const StaticString s_argv("argv");
 
-static Array HHVM_FUNCTION(getopt, const String& options,
-                                   const Variant& longopts /*=null */) {
+static Array HHVM_FUNCTION(getopt_with_optind,
+                           const String& options,
+                           const Variant& longopts,
+                           int64_t& optind) {
+  if (optind <= 0) {
+    SystemLib::throwInvalidArgumentExceptionObject(
+      "Parameter optind must be a positive integer"
+    );
+  }
+
   auto opt_vec = parse_opts(options.data(), options.size());
 
   if (!longopts.isNull()) {
@@ -465,7 +473,7 @@ static Array HHVM_FUNCTION(getopt, const String& options,
 
   int o;
   char *php_optarg = nullptr;
-  int php_optind = 1;
+  int64_t php_optind = optind;
 
   SCOPE_EXIT {
     free_longopts(opt_vec);
@@ -539,9 +547,16 @@ static Array HHVM_FUNCTION(getopt, const String& options,
     }
 
     php_optarg = nullptr;
+    optind = php_optind;
   }
 
   return ret;
+}
+
+static Array HHVM_FUNCTION(getopt, const String& options,
+                                   const Variant& longopts /*=null */) {
+  int64_t optind = 1;
+  return HHVM_FN(getopt_with_optind)(options, longopts, optind);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1122,6 +1137,7 @@ void StandardExtension::initOptions() {
   HHVM_FE(getmypid);
   HHVM_FE(getmyuid);
   HHVM_FE(getopt);
+  HHVM_FE(getopt_with_optind);
   HHVM_FE(getrusage);
   HHVM_FE(clock_getres);
   HHVM_FE(clock_gettime);

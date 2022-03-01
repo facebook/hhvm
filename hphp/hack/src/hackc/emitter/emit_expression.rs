@@ -309,7 +309,7 @@ pub fn get_type_structure_for_hint<'arena, 'decl>(
         false,
     )?;
     let i = Str::from(emit_adata::get_array_identifier(e, &tv));
-    Ok(instr::lit_const(InstructLitConst::Dict(i)))
+    Ok(instr::instr(Instruct::Dict(i)))
 }
 
 pub struct SetRange {
@@ -618,10 +618,10 @@ fn emit_id<'a, 'arena, 'decl>(
     let alloc = env.arena; // Should this be emitter.alloc?
     let ast_defs::Id(p, s) = id;
     match s.as_str() {
-        pseudo_consts::G__FILE__ => Ok(instr::lit_const(InstructLitConst::File)),
-        pseudo_consts::G__DIR__ => Ok(instr::lit_const(InstructLitConst::Dir)),
-        pseudo_consts::G__METHOD__ => Ok(instr::lit_const(InstructLitConst::Method)),
-        pseudo_consts::G__FUNCTION_CREDENTIAL__ => Ok(instr::lit_const(InstructLitConst::FuncCred)),
+        pseudo_consts::G__FILE__ => Ok(instr::instr(Instruct::File)),
+        pseudo_consts::G__DIR__ => Ok(instr::instr(Instruct::Dir)),
+        pseudo_consts::G__METHOD__ => Ok(instr::instr(Instruct::Method)),
+        pseudo_consts::G__FUNCTION_CREDENTIAL__ => Ok(instr::instr(Instruct::FuncCred)),
         pseudo_consts::G__CLASS__ => Ok(InstrSeq::gather(vec![instr::self_(), instr::classname()])),
         pseudo_consts::G__COMPILER_FRONTEND__ => Ok(instr::string(alloc, "hackc")),
         pseudo_consts::G__LINE__ => Ok(instr::int(p.info_pos_extended().1.try_into().map_err(
@@ -640,10 +640,7 @@ fn emit_id<'a, 'arena, 'decl>(
             let cid =
                 constant::ConstType::new(Str::new_str(alloc, string_utils::strip_global_ns(s)));
             emit_symbol_refs::add_constant(emitter, cid.clone());
-            Ok(emit_pos_then(
-                p,
-                instr::lit_const(InstructLitConst::CnsE(cid)),
-            ))
+            Ok(emit_pos_then(p, instr::instr(Instruct::CnsE(cid))))
         }
     }
 }
@@ -1075,7 +1072,7 @@ fn emit_vec_collection<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     match ast_constant_folder::vec_to_typed_value(e, fields) {
         Ok(tv) => emit_static_collection(env, None, pos, tv),
-        Err(_) => emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec),
+        Err(_) => emit_value_only_collection(e, env, pos, fields, Instruct::NewVec),
     }
 }
 
@@ -1232,14 +1229,14 @@ fn emit_container<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     fields: &[ast::Afield],
-    constructor: InstructLitConst<'arena>,
+    constructor: Instruct<'arena>,
     add_elem_instr: InstrSeq<'arena>,
     transform_instr: InstrSeq<'arena>,
     emitted_pos: InstrSeq<'arena>,
 ) -> Result<InstrSeq<'arena>> {
     Ok(InstrSeq::gather(vec![
         InstrSeq::<'arena>::clone(&emitted_pos),
-        instr::lit_const(constructor),
+        instr::instr(constructor),
         fields
             .iter()
             .map(|f| {
@@ -1265,7 +1262,7 @@ fn emit_keyvalue_collection<'a, 'arena, 'decl>(
     pos: &Pos,
     fields: &[ast::Afield],
     ctype: CollectionType,
-    constructor: InstructLitConst<'arena>,
+    constructor: Instruct<'arena>,
 ) -> Result<InstrSeq<'arena>> {
     let transform_instr = instr::colfromarray(ctype);
     let add_elem_instr = InstrSeq::gather(vec![instr::dup(), instr::add_elemc()]);
@@ -1287,7 +1284,7 @@ fn emit_array<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     pos: &Pos,
     fields: &[ast::Afield],
-    constructor: InstructLitConst<'arena>,
+    constructor: Instruct<'arena>,
 ) -> Result<InstrSeq<'arena>> {
     let add_elem_instr = instr::add_new_elemc();
     let emitted_pos = emit_pos(pos);
@@ -1488,7 +1485,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 Ok(instr::newstructdict(alloc, x))
             })
         } else {
-            let ctor = InstructLitConst::NewDictArray(count as isize);
+            let ctor = Instruct::NewDictArray(count as isize);
             emit_array(e, env, pos, fields, ctor)
         }
     };
@@ -1502,26 +1499,24 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 instr::colfromarray(ctype),
             ]))
         } else {
-            let ctor = InstructLitConst::NewDictArray(count as isize);
+            let ctor = Instruct::NewDictArray(count as isize);
             emit_keyvalue_collection(e, env, pos, fields, ctype, ctor)
         }
     };
     use ast::Expr_;
     match &expr.2 {
         Expr_::ValCollection(v) if v.0 == ast::VcKind::Vec => {
-            emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec)
+            emit_value_only_collection(e, env, pos, fields, Instruct::NewVec)
         }
         Expr_::Collection(v) if (v.0).1 == "vec" => {
-            emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec)
+            emit_value_only_collection(e, env, pos, fields, Instruct::NewVec)
         }
-        Expr_::Tuple(_) => {
-            emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec)
-        }
+        Expr_::Tuple(_) => emit_value_only_collection(e, env, pos, fields, Instruct::NewVec),
         Expr_::ValCollection(v) if v.0 == ast::VcKind::Keyset => {
-            emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewKeysetArray)
+            emit_value_only_collection(e, env, pos, fields, Instruct::NewKeysetArray)
         }
         Expr_::Collection(v) if (v.0).1 == "keyset" => {
-            emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewKeysetArray)
+            emit_value_only_collection(e, env, pos, fields, Instruct::NewKeysetArray)
         }
         Expr_::Collection(v) if (v.0).1 == "dict" => emit_dict(e),
         Expr_::KeyValCollection(v) if v.0 == ast::KvcKind::Dict => emit_dict(e),
@@ -1550,7 +1545,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
             emit_collection_helper(e, CollectionType::ImmMap)
         }
         Expr_::Varray(_) => {
-            let instrs = emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec);
+            let instrs = emit_value_only_collection(e, env, pos, fields, Instruct::NewVec);
             Ok(instrs?)
         }
         Expr_::Darray(_) => {
@@ -1561,7 +1556,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 });
                 Ok(instrs?)
             } else {
-                let constr = InstructLitConst::NewDictArray(count as isize);
+                let constr = Instruct::NewDictArray(count as isize);
                 let instrs = emit_array(e, env, pos, fields, constr);
                 Ok(instrs?)
             }
@@ -1570,7 +1565,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     }
 }
 
-fn emit_value_only_collection<'a, 'arena, 'decl, F: FnOnce(isize) -> InstructLitConst<'arena>>(
+fn emit_value_only_collection<'a, 'arena, 'decl, F: FnOnce(isize) -> Instruct<'arena>>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
@@ -1588,7 +1583,7 @@ fn emit_value_only_collection<'a, 'arena, 'decl, F: FnOnce(isize) -> InstructLit
             Ok(InstrSeq::gather(vec![
                 InstrSeq::gather(instrs),
                 emit_pos(pos),
-                instr::lit_const(constructor(exprs.len() as isize)),
+                instr::instr(constructor(exprs.len() as isize)),
             ]))
         };
     let outofline =

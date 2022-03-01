@@ -133,44 +133,6 @@ pub enum HasGenericsOp {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum InstructLitConst<'arena> {
-    Null,
-    True,
-    False,
-    NullUninit,
-    Int(i64),
-    Double(Str<'arena>),
-    String(Str<'arena>),
-    LazyClass(ClassId<'arena>),
-    /// Pseudo instruction that will get translated into appropraite literal
-    /// bytecode, with possible reference to .adata *)
-    TypedValue(runtime::TypedValue<'arena>),
-    Vec(AdataId<'arena>),
-    Dict(AdataId<'arena>),
-    Keyset(AdataId<'arena>),
-    /// capacity hint
-    NewDictArray(isize),
-    NewStructDict(Slice<'arena, Str<'arena>>),
-    NewVec(isize),
-    NewKeysetArray(isize),
-    NewPair,
-    NewRecord(ClassId<'arena>, Slice<'arena, Str<'arena>>),
-    AddElemC,
-    AddNewElemC,
-    NewCol(CollectionType),
-    ColFromArray(CollectionType),
-    CnsE(ConstId<'arena>),
-    ClsCns(ConstId<'arena>),
-    ClsCnsD(ConstId<'arena>, ClassId<'arena>),
-    ClsCnsL(Local<'arena>),
-    File,
-    Dir,
-    Method,
-    FuncCred,
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
 pub enum InstructMutator<'arena> {
     SetL(Local<'arena>),
     /// PopL is put in mutators since it behaves as SetL + PopC
@@ -539,7 +501,39 @@ pub enum Instruct<'arena> {
     IterInit(IterArgs<'arena>, Label),
     IterNext(IterArgs<'arena>, Label),
     IterFree(IterId),
-    LitConst(InstructLitConst<'arena>),
+    Null,
+    True,
+    False,
+    NullUninit,
+    Int(i64),
+    Double(Str<'arena>),
+    String(Str<'arena>),
+    LazyClass(ClassId<'arena>),
+    /// Pseudo instruction that will get translated into appropraite literal
+    /// bytecode, with possible reference to .adata *)
+    TypedValue(runtime::TypedValue<'arena>),
+    Vec(AdataId<'arena>),
+    Dict(AdataId<'arena>),
+    Keyset(AdataId<'arena>),
+    /// capacity hint
+    NewDictArray(isize),
+    NewStructDict(Slice<'arena, Str<'arena>>),
+    NewVec(isize),
+    NewKeysetArray(isize),
+    NewPair,
+    NewRecord(ClassId<'arena>, Slice<'arena, Str<'arena>>),
+    AddElemC,
+    AddNewElemC,
+    NewCol(CollectionType),
+    ColFromArray(CollectionType),
+    CnsE(ConstId<'arena>),
+    ClsCns(ConstId<'arena>),
+    ClsCnsD(ConstId<'arena>, ClassId<'arena>),
+    ClsCnsL(Local<'arena>),
+    File,
+    Dir,
+    Method,
+    FuncCred,
     Concat,
     ConcatN(isize),
     Add,
@@ -680,7 +674,36 @@ impl Instruct<'_> {
             | Self::PopU
             | Self::Dup
             | Self::IterFree(_)
-            | Self::LitConst(_)
+            | Self::Null
+            | Self::True
+            | Self::False
+            | Self::NullUninit
+            | Self::Int(_)
+            | Self::Double(_)
+            | Self::String(_)
+            | Self::LazyClass(_)
+            | Self::TypedValue(_)
+            | Self::Vec(_)
+            | Self::Dict(_)
+            | Self::Keyset(_)
+            | Self::NewDictArray(_)
+            | Self::NewStructDict(_)
+            | Self::NewVec(_)
+            | Self::NewKeysetArray(_)
+            | Self::NewPair
+            | Self::NewRecord(_, _)
+            | Self::AddElemC
+            | Self::AddNewElemC
+            | Self::NewCol(_)
+            | Self::ColFromArray(_)
+            | Self::CnsE(_)
+            | Self::ClsCns(_)
+            | Self::ClsCnsD(_, _)
+            | Self::ClsCnsL(_)
+            | Self::File
+            | Self::Dir
+            | Self::Method
+            | Self::FuncCred
             | Self::Concat
             | Self::ConcatN(_)
             | Self::Add
@@ -798,7 +821,36 @@ impl Instruct<'_> {
             | Self::PopU
             | Self::Dup
             | Self::IterFree(_)
-            | Self::LitConst(_)
+            | Self::Null
+            | Self::True
+            | Self::False
+            | Self::NullUninit
+            | Self::Int(_)
+            | Self::Double(_)
+            | Self::String(_)
+            | Self::LazyClass(_)
+            | Self::TypedValue(_)
+            | Self::Vec(_)
+            | Self::Dict(_)
+            | Self::Keyset(_)
+            | Self::NewDictArray(_)
+            | Self::NewStructDict(_)
+            | Self::NewVec(_)
+            | Self::NewKeysetArray(_)
+            | Self::NewPair
+            | Self::NewRecord(_, _)
+            | Self::AddElemC
+            | Self::AddNewElemC
+            | Self::NewCol(_)
+            | Self::ColFromArray(_)
+            | Self::CnsE(_)
+            | Self::ClsCns(_)
+            | Self::ClsCnsD(_, _)
+            | Self::ClsCnsL(_)
+            | Self::File
+            | Self::Dir
+            | Self::Method
+            | Self::FuncCred
             | Self::Concat
             | Self::ConcatN(_)
             | Self::Add

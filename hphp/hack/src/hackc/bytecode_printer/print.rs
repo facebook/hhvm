@@ -1131,7 +1131,85 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
         Instruct::PopC => w.write_all(b"PopC"),
         Instruct::PopU => w.write_all(b"PopU"),
         Instruct::Dup => w.write_all(b"Dup"),
-        Instruct::LitConst(lit) => print_lit_const(w, lit),
+        Instruct::Null => w.write_all(b"Null"),
+        Instruct::Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
+        Instruct::String(s) => {
+            w.write_all(b"String ")?;
+            quotes(w, |w| w.write_all(&escaper::escape_bstr(s.as_bstr())))
+        }
+        Instruct::LazyClass(id) => {
+            w.write_all(b"LazyClass ")?;
+            print_class_id(w, id)
+        }
+        Instruct::True => w.write_all(b"True"),
+        Instruct::False => w.write_all(b"False"),
+        Instruct::Double(d) => write_bytes!(w, "Double {}", d),
+        Instruct::AddElemC => w.write_all(b"AddElemC"),
+        Instruct::AddNewElemC => w.write_all(b"AddNewElemC"),
+        Instruct::NewPair => w.write_all(b"NewPair"),
+        Instruct::File => w.write_all(b"File"),
+        Instruct::Dir => w.write_all(b"Dir"),
+        Instruct::Method => w.write_all(b"Method"),
+        Instruct::FuncCred => w.write_all(b"FuncCred"),
+        Instruct::Dict(id) => {
+            w.write_all(b"Dict ")?;
+            print_adata_id(w, id)
+        }
+        Instruct::Keyset(id) => {
+            w.write_all(b"Keyset ")?;
+            print_adata_id(w, id)
+        }
+        Instruct::Vec(id) => {
+            w.write_all(b"Vec ")?;
+            print_adata_id(w, id)
+        }
+        Instruct::NewDictArray(i) => {
+            concat_str_by(w, " ", ["NewDictArray", i.to_string().as_str()])
+        }
+        Instruct::NewVec(i) => concat_str_by(w, " ", ["NewVec", i.to_string().as_str()]),
+        Instruct::NewKeysetArray(i) => {
+            concat_str_by(w, " ", ["NewKeysetArray", i.to_string().as_str()])
+        }
+        Instruct::NewStructDict(l) => {
+            let ls: Vec<&str> = l.as_ref().iter().map(|s| s.unsafe_as_str()).collect();
+            w.write_all(b"NewStructDict ")?;
+            angle(w, |w| print_shape_fields(w, &ls[0..]))
+        }
+        Instruct::NewRecord(cid, l) => {
+            let ls: Vec<&str> = l.as_ref().iter().map(|s| s.unsafe_as_str()).collect();
+            w.write_all(b"NewRecord ")?;
+            print_class_id(w, cid)?;
+            w.write_all(b" ")?;
+            angle(w, |w| print_shape_fields(w, &ls[0..]))
+        }
+        Instruct::CnsE(id) => {
+            w.write_all(b"CnsE ")?;
+            print_const_id(w, id)
+        }
+        Instruct::ClsCns(id) => {
+            w.write_all(b"ClsCns ")?;
+            print_const_id(w, id)
+        }
+        Instruct::ClsCnsD(const_id, cid) => {
+            w.write_all(b"ClsCnsD ")?;
+            print_const_id(w, const_id)?;
+            w.write_all(b" ")?;
+            print_class_id(w, cid)
+        }
+        Instruct::ClsCnsL(id) => {
+            w.write_all(b"ClsCnsL ")?;
+            print_local(w, id)
+        }
+        Instruct::NewCol(ct) => {
+            w.write_all(b"NewCol ")?;
+            print_collection_type(w, ct)
+        }
+        Instruct::ColFromArray(ct) => {
+            w.write_all(b"ColFromArray ")?;
+            print_collection_type(w, ct)
+        }
+        Instruct::NullUninit => w.write_all(b"NullUninit"),
+        Instruct::TypedValue(_) => Err(Error::fail("print_lit_const: TypedValue").into()),
         Instruct::Concat => w.write_all(b"Concat"),
         Instruct::ConcatN(n) => concat_str_by(w, " ", ["ConcatN", n.to_string().as_str()]),
         Instruct::Add => w.write_all(b"Add"),
@@ -1905,87 +1983,6 @@ fn print_switch(
     angle(w, |w| {
         concat_by(w, " ", labels, |w, label| print_label(w, label, dv_labels))
     })
-}
-
-fn print_lit_const(w: &mut dyn Write, lit: &InstructLitConst<'_>) -> Result<()> {
-    use InstructLitConst as LC;
-    match lit {
-        LC::Null => w.write_all(b"Null"),
-        LC::Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
-        LC::String(s) => {
-            w.write_all(b"String ")?;
-            quotes(w, |w| w.write_all(&escaper::escape_bstr(s.as_bstr())))
-        }
-        LC::LazyClass(id) => {
-            w.write_all(b"LazyClass ")?;
-            print_class_id(w, id)
-        }
-        LC::True => w.write_all(b"True"),
-        LC::False => w.write_all(b"False"),
-        LC::Double(d) => write_bytes!(w, "Double {}", d),
-        LC::AddElemC => w.write_all(b"AddElemC"),
-        LC::AddNewElemC => w.write_all(b"AddNewElemC"),
-        LC::NewPair => w.write_all(b"NewPair"),
-        LC::File => w.write_all(b"File"),
-        LC::Dir => w.write_all(b"Dir"),
-        LC::Method => w.write_all(b"Method"),
-        LC::FuncCred => w.write_all(b"FuncCred"),
-        LC::Dict(id) => {
-            w.write_all(b"Dict ")?;
-            print_adata_id(w, id)
-        }
-        LC::Keyset(id) => {
-            w.write_all(b"Keyset ")?;
-            print_adata_id(w, id)
-        }
-        LC::Vec(id) => {
-            w.write_all(b"Vec ")?;
-            print_adata_id(w, id)
-        }
-        LC::NewDictArray(i) => concat_str_by(w, " ", ["NewDictArray", i.to_string().as_str()]),
-        LC::NewVec(i) => concat_str_by(w, " ", ["NewVec", i.to_string().as_str()]),
-        LC::NewKeysetArray(i) => concat_str_by(w, " ", ["NewKeysetArray", i.to_string().as_str()]),
-        LC::NewStructDict(l) => {
-            let ls: Vec<&str> = l.as_ref().iter().map(|s| s.unsafe_as_str()).collect();
-            w.write_all(b"NewStructDict ")?;
-            angle(w, |w| print_shape_fields(w, &ls[0..]))
-        }
-        LC::NewRecord(cid, l) => {
-            let ls: Vec<&str> = l.as_ref().iter().map(|s| s.unsafe_as_str()).collect();
-            w.write_all(b"NewRecord ")?;
-            print_class_id(w, cid)?;
-            w.write_all(b" ")?;
-            angle(w, |w| print_shape_fields(w, &ls[0..]))
-        }
-        LC::CnsE(id) => {
-            w.write_all(b"CnsE ")?;
-            print_const_id(w, id)
-        }
-        LC::ClsCns(id) => {
-            w.write_all(b"ClsCns ")?;
-            print_const_id(w, id)
-        }
-        LC::ClsCnsD(const_id, cid) => {
-            w.write_all(b"ClsCnsD ")?;
-            print_const_id(w, const_id)?;
-            w.write_all(b" ")?;
-            print_class_id(w, cid)
-        }
-        LC::ClsCnsL(id) => {
-            w.write_all(b"ClsCnsL ")?;
-            print_local(w, id)
-        }
-        LC::NewCol(ct) => {
-            w.write_all(b"NewCol ")?;
-            print_collection_type(w, ct)
-        }
-        LC::ColFromArray(ct) => {
-            w.write_all(b"ColFromArray ")?;
-            print_collection_type(w, ct)
-        }
-        LC::NullUninit => w.write_all(b"NullUninit"),
-        LC::TypedValue(_) => Err(Error::fail("print_lit_const: TypedValue").into()),
-    }
 }
 
 fn print_collection_type(w: &mut dyn Write, ct: &CollectionType) -> Result<()> {

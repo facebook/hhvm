@@ -27,20 +27,20 @@ fn rewrite_typed_value<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     instr: &mut Instruct<'arena>,
 ) -> std::result::Result<(), instruction_sequence::Error> {
-    if let Instruct::LitConst(InstructLitConst::TypedValue(tv)) = instr {
-        *instr = Instruct::LitConst(match &tv {
+    if let Instruct::TypedValue(tv) = instr {
+        *instr = match &tv {
             TypedValue::Uninit => {
                 return Err(Error::Unrecoverable("rewrite_typed_value: uninit".into()));
             }
-            TypedValue::Null => InstructLitConst::Null,
-            TypedValue::Bool(true) => InstructLitConst::True,
-            TypedValue::Bool(false) => InstructLitConst::False,
-            TypedValue::Int(i) => InstructLitConst::Int(*i),
-            TypedValue::String(s) => InstructLitConst::String(*s),
+            TypedValue::Null => Instruct::Null,
+            TypedValue::Bool(true) => Instruct::True,
+            TypedValue::Bool(false) => Instruct::False,
+            TypedValue::Int(i) => Instruct::Int(*i),
+            TypedValue::String(s) => Instruct::String(*s),
             TypedValue::LazyClass(s) => {
                 let classid: hhbc_ast::ClassId<'arena> =
                     hhbc_id::class::ClassType::from_ast_name_and_mangle(e.alloc, s.unsafe_as_str());
-                InstructLitConst::LazyClass(classid)
+                Instruct::LazyClass(classid)
             }
             TypedValue::Float(f) => {
                 let fstr = bumpalo::collections::String::from_str_in(
@@ -48,19 +48,19 @@ fn rewrite_typed_value<'arena, 'decl>(
                     e.alloc,
                 )
                 .into_bump_str();
-                InstructLitConst::Double(Str::from(fstr))
+                Instruct::Double(Str::from(fstr))
             }
             TypedValue::Keyset(_) => {
                 let arrayid = Str::from(get_array_identifier(e, tv));
-                InstructLitConst::Keyset(arrayid)
+                Instruct::Keyset(arrayid)
             }
             TypedValue::Vec(_) => {
                 let arrayid = Str::from(get_array_identifier(e, tv));
-                InstructLitConst::Vec(arrayid)
+                Instruct::Vec(arrayid)
             }
             TypedValue::Dict(_) => {
                 let arrayid = Str::from(get_array_identifier(e, tv));
-                InstructLitConst::Dict(arrayid)
+                Instruct::Dict(arrayid)
             }
             TypedValue::HhasAdata(d) if d.is_empty() => {
                 return Err(Error::Unrecoverable("HhasAdata may not be empty".into()));
@@ -69,9 +69,9 @@ fn rewrite_typed_value<'arena, 'decl>(
                 let arrayid = Str::from(get_array_identifier(e, tv));
                 let d = d.unsafe_as_str();
                 match &d[..1] {
-                    VARRAY_PREFIX | VEC_PREFIX => InstructLitConst::Vec(arrayid),
-                    DARRAY_PREFIX | DICT_PREFIX => InstructLitConst::Dict(arrayid),
-                    KEYSET_PREFIX => InstructLitConst::Keyset(arrayid),
+                    VARRAY_PREFIX | VEC_PREFIX => Instruct::Vec(arrayid),
+                    DARRAY_PREFIX | DICT_PREFIX => Instruct::Dict(arrayid),
+                    KEYSET_PREFIX => Instruct::Keyset(arrayid),
                     _ => {
                         return Err(Error::Unrecoverable(format!(
                             "Unknown HhasAdata data: {}",
@@ -80,7 +80,7 @@ fn rewrite_typed_value<'arena, 'decl>(
                     }
                 }
             }
-        })
+        }
     };
     Ok(())
 }

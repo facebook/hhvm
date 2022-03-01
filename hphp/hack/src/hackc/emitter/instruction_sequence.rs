@@ -205,10 +205,6 @@ pub mod instr {
         InstrSeq::List(is)
     }
 
-    pub fn lit_const<'a>(l: InstructLitConst<'a>) -> InstrSeq<'a> {
-        instr(Instruct::LitConst(l))
-    }
-
     pub fn iterinit<'a>(args: IterArgs<'a>, label: Label) -> InstrSeq<'a> {
         instr(Instruct::IterInit(args, label))
     }
@@ -270,23 +266,23 @@ pub mod instr {
     }
 
     pub fn false_<'a>() -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::False))
+        instr(Instruct::False)
     }
 
     pub fn true_<'a>() -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::True))
+        instr(Instruct::True)
     }
 
     pub fn clscnsd<'a>(const_id: ConstId<'a>, cid: ClassId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::ClsCnsD(const_id, cid)))
+        instr(Instruct::ClsCnsD(const_id, cid))
     }
 
     pub fn clscns<'a>(const_id: ConstId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::ClsCns(const_id)))
+        instr(Instruct::ClsCns(const_id))
     }
 
     pub fn clscnsl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::ClsCnsL(local)))
+        instr(Instruct::ClsCnsL(local))
     }
 
     pub fn eq<'a>() -> InstrSeq<'a> {
@@ -358,11 +354,11 @@ pub mod instr {
     }
 
     pub fn null<'a>() -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::Null))
+        instr(Instruct::Null)
     }
 
     pub fn nulluninit<'a>() -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::NullUninit))
+        instr(Instruct::NullUninit)
     }
 
     pub fn chain_faults<'a>() -> InstrSeq<'a> {
@@ -420,32 +416,28 @@ pub mod instr {
     }
 
     pub fn int<'a>(i: isize) -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::Int(
-            i.try_into().unwrap(),
-        )))
+        instr(Instruct::Int(i.try_into().unwrap()))
     }
 
     pub fn int64<'a>(i: i64) -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::Int(i)))
+        instr(Instruct::Int(i))
     }
 
     pub fn int_of_string<'a>(litstr: &str) -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::Int(
-            litstr.parse::<i64>().unwrap(),
-        )))
+        instr(Instruct::Int(litstr.parse::<i64>().unwrap()))
     }
 
     pub fn double<'a>(alloc: &'a bumpalo::Bump, litstr: &str) -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::Double(Str::from(
+        instr(Instruct::Double(Str::from(
             bumpalo::collections::String::from_str_in(litstr, alloc).into_bump_str(),
-        ))))
+        )))
     }
 
     pub fn string<'a>(alloc: &'a bumpalo::Bump, litstr: impl Into<String>) -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::String(Str::from(
+        instr(Instruct::String(Str::from(
             bumpalo::collections::String::from_str_in(litstr.into().as_str(), alloc)
                 .into_bump_str(),
-        ))))
+        )))
     }
 
     pub fn this<'a>() -> InstrSeq<'a> {
@@ -677,19 +669,19 @@ pub mod instr {
     }
 
     pub fn new_vec_array<'a>(i: isize) -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::NewVec(i)))
+        instr(Instruct::NewVec(i))
     }
 
     pub fn new_pair<'a>() -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::NewPair))
+        instr(Instruct::NewPair)
     }
 
     pub fn add_elemc<'a>() -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::AddElemC))
+        instr(Instruct::AddElemC)
     }
 
     pub fn add_new_elemc<'a>() -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::AddNewElemC))
+        instr(Instruct::AddNewElemC)
     }
 
     pub fn switch<'a>(
@@ -748,19 +740,15 @@ pub mod instr {
 
     pub fn newstructdict<'a>(alloc: &'a bumpalo::Bump, keys: &'a [&'a str]) -> InstrSeq<'a> {
         let keys = Slice::new(alloc.alloc_slice_fill_iter(keys.iter().map(|s| Str::from(*s))));
-        instr(Instruct::LitConst(InstructLitConst::NewStructDict(keys)))
+        instr(Instruct::NewStructDict(keys))
     }
 
     pub fn newcol<'a>(collection_type: CollectionType) -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::NewCol(
-            collection_type,
-        )))
+        instr(Instruct::NewCol(collection_type))
     }
 
     pub fn colfromarray<'a>(collection_type: CollectionType) -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::ColFromArray(
-            collection_type,
-        )))
+        instr(Instruct::ColFromArray(collection_type))
     }
 
     pub fn entrynop<'a>() -> InstrSeq<'a> {
@@ -768,7 +756,7 @@ pub mod instr {
     }
 
     pub fn typedvalue<'a>(xs: TypedValue<'a>) -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::TypedValue(xs)))
+        instr(Instruct::TypedValue(xs))
     }
 
     pub fn basel<'a>(local: Local<'a>, mode: MOpMode, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
@@ -1061,7 +1049,7 @@ pub mod instr {
     }
 
     pub fn lazyclass<'a>(class_id: ClassId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::LitConst(InstructLitConst::LazyClass(class_id)))
+        instr(Instruct::LazyClass(class_id))
     }
 
     pub fn oodeclexists<'a>(class_kind: ClassishKind) -> InstrSeq<'a> {

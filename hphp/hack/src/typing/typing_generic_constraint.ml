@@ -13,7 +13,7 @@ module Env = Typing_env
 open Typing_defs
 open Typing_env_types
 
-let check_constraint
+let check_constraint_with_ty_err
     env ck ty ~cstr_ty (on_error : Typing_error.Reasons_callback.t option) =
   Typing_log.(
     log_with_level env "sub" ~level:1 (fun () ->
@@ -26,13 +26,13 @@ let check_constraint
                 [Log_type ("ty", ty); Log_type ("cstr_ty", cstr_ty)] );
           ]));
   if not (Env.is_consistent env) then
-    env
+    (env, None)
   else
     let (env, ety) = Env.expand_type env ty in
     let (env, ecstr_ty) = Env.expand_type env cstr_ty in
     match ck with
     | Ast_defs.Constraint_as ->
-      TUtils.sub_type
+      TUtils.sub_type_with_ty_err
         ~coerce:(Some Typing_logic.CoerceToDynamic)
         env
         ety
@@ -44,37 +44,65 @@ let check_constraint
        * add both expansions to the environment. We don't expand
        * both sides of the equation simultaniously, to preserve an
        * easier convergence indication. *)
-      let env =
-        TUtils.sub_type
+      let (env, e1) =
+        TUtils.sub_type_with_ty_err
           ~coerce:(Some Typing_logic.CoerceToDynamic)
           env
           ecstr_ty
           ty
           on_error
       in
-      TUtils.sub_type
-        ~coerce:(Some Typing_logic.CoerceToDynamic)
-        env
-        ety
-        cstr_ty
-        on_error
+      let (env, e2) =
+        TUtils.sub_type_with_ty_err
+          ~coerce:(Some Typing_logic.CoerceToDynamic)
+          env
+          ety
+          cstr_ty
+          on_error
+      in
+      (env, Option.merge e1 e2 ~f:Typing_error.both)
     | Ast_defs.Constraint_super ->
-      TUtils.sub_type
+      TUtils.sub_type_with_ty_err
         ~coerce:(Some Typing_logic.CoerceToDynamic)
         env
         ecstr_ty
         ty
         on_error
 
-let check_tparams_constraint (env : env) ~use_pos ck ~cstr_ty ty =
-  check_constraint env ck ty ~cstr_ty
+let check_tparams_constraint_with_ty_err (env : env) ~use_pos ck ~cstr_ty ty =
+  check_constraint_with_ty_err env ck ty ~cstr_ty
   @@ Some (Typing_error.Reasons_callback.explain_constraint use_pos)
 
-let check_where_constraint
+let check_where_constraint_with_ty_err
     ~in_class (env : env) ~use_pos ~definition_pos ck ~cstr_ty ty =
-  check_constraint env ck ty ~cstr_ty
+  check_constraint_with_ty_err env ck ty ~cstr_ty
   @@ Some
        (Typing_error.Reasons_callback.explain_where_constraint
           use_pos
           ~in_class
           ~decl_pos:definition_pos)
+
+(* == Side effecting variants =============================================== *)
+
+let discharge_ty_err (env, ty_err_opt) =
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  env
+
+let check_constraint env ck ty ~cstr_ty on_error =
+  discharge_ty_err @@ check_constraint_with_ty_err env ck ty ~cstr_ty on_error
+
+let check_tparams_constraint (env : env) ~use_pos ck ~cstr_ty ty =
+  discharge_ty_err
+  @@ check_tparams_constraint_with_ty_err (env : env) ~use_pos ck ~cstr_ty ty
+
+let check_where_constraint
+    ~in_class (env : env) ~use_pos ~definition_pos ck ~cstr_ty ty =
+  discharge_ty_err
+  @@ check_where_constraint_with_ty_err
+       ~in_class
+       (env : env)
+       ~use_pos
+       ~definition_pos
+       ck
+       ~cstr_ty
+       ty

@@ -24,6 +24,24 @@ val expand_typedef :
   Typing_defs.locl_ty list ->
   Typing_env_types.env * Typing_defs.locl_ty
 
+type expand_typedef_with_ty_err =
+  Typing_defs.expand_env ->
+  Typing_env_types.env ->
+  Typing_reason.t ->
+  string ->
+  Typing_defs.locl_ty list ->
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
+
+val expand_typedef_with_ty_err_ref : expand_typedef_with_ty_err ref
+
+val expand_typedef_with_ty_err :
+  Typing_defs.expand_env ->
+  Typing_env_types.env ->
+  Typing_reason.t ->
+  string ->
+  Typing_defs.locl_ty list ->
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
+
 type sub_type =
   Typing_env_types.env ->
   ?coerce:Typing_logic.coercion_direction option ->
@@ -35,14 +53,20 @@ type sub_type =
 
 val sub_type_ref : sub_type ref
 
-val sub_type :
+val sub_type : sub_type
+
+type sub_type_with_ty_err =
   Typing_env_types.env ->
   ?coerce:Typing_logic.coercion_direction option ->
   ?is_coeffect:bool ->
   Typing_defs.locl_ty ->
   Typing_defs.locl_ty ->
   Typing_error.Reasons_callback.t option ->
-  Typing_env_types.env
+  Typing_env_types.env * Typing_error.t option
+
+val sub_type_with_ty_err_ref : sub_type_with_ty_err ref
+
+val sub_type_with_ty_err : sub_type_with_ty_err
 
 type sub_type_res =
   Typing_env_types.env ->
@@ -54,13 +78,7 @@ type sub_type_res =
 
 val sub_type_res_ref : sub_type_res ref
 
-val sub_type_res :
-  Typing_env_types.env ->
-  ?coerce:Typing_logic.coercion_direction option ->
-  Typing_defs.locl_ty ->
-  Typing_defs.locl_ty ->
-  Typing_error.Reasons_callback.t option ->
-  (Typing_env_types.env, Typing_env_types.env) result
+val sub_type_res : sub_type_res
 
 type sub_type_i =
   Typing_env_types.env ->
@@ -72,13 +90,7 @@ type sub_type_i =
 
 val sub_type_i_ref : sub_type_i ref
 
-val sub_type_i :
-  ?is_coeffect:bool ->
-  Typing_env_types.env ->
-  Typing_defs.internal_type ->
-  Typing_defs.internal_type ->
-  Typing_error.Reasons_callback.t option ->
-  Typing_env_types.env
+val sub_type_i : sub_type_i
 
 type sub_type_i_res =
   Typing_env_types.env ->
@@ -89,12 +101,7 @@ type sub_type_i_res =
 
 val sub_type_i_res_ref : sub_type_i_res ref
 
-val sub_type_i_res :
-  Typing_env_types.env ->
-  Typing_defs.internal_type ->
-  Typing_defs.internal_type ->
-  Typing_error.Reasons_callback.t option ->
-  (Typing_env_types.env, Typing_env_types.env) result
+val sub_type_i_res : sub_type_i_res
 
 type sub_type_with_dynamic_as_bottom =
   Typing_env_types.env ->
@@ -105,12 +112,20 @@ type sub_type_with_dynamic_as_bottom =
 
 val sub_type_with_dynamic_as_bottom_ref : sub_type_with_dynamic_as_bottom ref
 
-val sub_type_with_dynamic_as_bottom :
+val sub_type_with_dynamic_as_bottom : sub_type_with_dynamic_as_bottom
+
+type sub_type_with_dynamic_as_bottom_with_ty_err =
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   Typing_defs.locl_ty ->
   Typing_error.Reasons_callback.t option ->
-  Typing_env_types.env
+  Typing_env_types.env * Typing_error.t option
+
+val sub_type_with_dynamic_as_bottom_with_ty_err_ref :
+  sub_type_with_dynamic_as_bottom_with_ty_err ref
+
+val sub_type_with_dynamic_as_bottom_with_ty_err :
+  sub_type_with_dynamic_as_bottom_with_ty_err
 
 type sub_type_with_dynamic_as_bottom_res =
   Typing_env_types.env ->
@@ -122,12 +137,7 @@ type sub_type_with_dynamic_as_bottom_res =
 val sub_type_with_dynamic_as_bottom_res_ref :
   sub_type_with_dynamic_as_bottom_res ref
 
-val sub_type_with_dynamic_as_bottom_res :
-  Typing_env_types.env ->
-  Typing_defs.locl_ty ->
-  Typing_defs.locl_ty ->
-  Typing_error.Reasons_callback.t option ->
-  (Typing_env_types.env, Typing_env_types.env) result
+val sub_type_with_dynamic_as_bottom_res : sub_type_with_dynamic_as_bottom_res
 
 type is_sub_type_type =
   Typing_env_types.env -> Typing_defs.locl_ty -> Typing_defs.locl_ty -> bool
@@ -237,6 +247,12 @@ val run_on_intersection :
   Typing_defs.locl_ty list ->
   'env * 'a list
 
+val run_on_intersection_with_ty_err :
+  'env ->
+  f:('env -> Typing_defs.locl_ty -> ('env * Typing_error.t option) * 'a) ->
+  Typing_defs.locl_ty list ->
+  ('env * Typing_error.t option) * 'a list
+
 val run_on_intersection_res :
   'a ->
   f:('a -> Typing_defs.locl_ty -> 'a * 'b * 'c) ->
@@ -293,13 +309,7 @@ type add_constraint =
 
 val add_constraint_ref : add_constraint ref
 
-val add_constraint :
-  Typing_env_types.env ->
-  Ast_defs.constraint_kind ->
-  Typing_defs.locl_ty ->
-  Typing_defs.locl_ty ->
-  Typing_error.Reasons_callback.t option ->
-  Typing_env_types.env
+val add_constraint : add_constraint
 
 type expand_typeconst =
   Typing_defs.expand_env ->
@@ -324,6 +334,30 @@ val expand_typeconst :
   root_pos:Pos_or_decl.t ->
   allow_abstract_tconst:bool ->
   Typing_env_types.env * Typing_defs.locl_ty
+
+type expand_typeconst_with_ty_err =
+  Typing_defs.expand_env ->
+  Typing_env_types.env ->
+  ?ignore_errors:bool ->
+  ?as_tyvar_with_cnstr:Pos.t option ->
+  Typing_defs.locl_ty ->
+  Typing_defs.pos_id ->
+  root_pos:Pos_or_decl.t ->
+  allow_abstract_tconst:bool ->
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
+
+val expand_typeconst_with_ty_err_ref : expand_typeconst_with_ty_err ref
+
+val expand_typeconst_with_ty_err :
+  Typing_defs.expand_env ->
+  Typing_env_types.env ->
+  ?ignore_errors:bool ->
+  ?as_tyvar_with_cnstr:Pos.t option ->
+  Typing_defs.locl_ty ->
+  Typing_defs.pos_id ->
+  root_pos:Pos_or_decl.t ->
+  allow_abstract_tconst:bool ->
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
 type union =
   Typing_env_types.env ->

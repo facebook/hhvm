@@ -45,6 +45,14 @@ type method_instantiation = {
  during localization, set this to [Errors.ignore_error]. *)
 val localize : ety_env:expand_env -> env -> decl_ty -> env * locl_ty
 
+(** A pure variant of [localize] returning an optional `Typing_error.t` rather
+   than side-effecting *)
+val localize_with_ty_err :
+  ety_env:expand_env ->
+  env ->
+  decl_ty ->
+  (env * Typing_error.t option) * locl_ty
+
 (**
  Transform a declaration phase type into a localized type, with no substitution
  for generic parameters and [this].
@@ -52,6 +60,14 @@ val localize : ety_env:expand_env -> env -> decl_ty -> env * locl_ty
  [ignore_errors] silences errors because those errors have already fired
  and/or are not appropriate at the time we call localize. *)
 val localize_no_subst : env -> ignore_errors:bool -> decl_ty -> env * locl_ty
+
+(** A pure variant of [localize_no_subst] returning an optional `Typing_error.t`
+    rather than side effecting *)
+val localize_no_subst_with_ty_err :
+  env ->
+  ignore_errors:bool ->
+  decl_ty ->
+  (env * Typing_error.t option) * locl_ty
 
 (**
  Transform a declaration phase type with enforcement flag
@@ -86,6 +102,14 @@ val localize_ft :
   decl_fun_type ->
   env * locl_fun_type
 
+val localize_ft_with_ty_err :
+  ?instantiation:method_instantiation ->
+  ety_env:expand_env ->
+  def_pos:Pos_or_decl.t ->
+  env ->
+  decl_fun_type ->
+  (env * Typing_error.t option) * locl_fun_type
+
 (** Declare and localize the type arguments to a constructor or function, given
     information about the declared type parameters in `decl_tparam list`. If no
     explicit type arguments are given, generate fresh type variables in their
@@ -103,6 +127,20 @@ val localize_targs :
   decl_tparam list ->
   Aast.hint list ->
   env * Tast.targ list
+
+(** Like [localize_targs] but returns an optional `Typing_error.t` rather
+    than side-effecting *)
+val localize_targs_with_ty_err :
+  check_well_kinded:bool ->
+  is_method:bool ->
+  def_pos:Pos_or_decl.t ->
+  use_pos:Pos.t ->
+  use_name:string ->
+  ?check_explicit_targs:bool ->
+  env ->
+  decl_tparam list ->
+  Aast.hint list ->
+  (env * Typing_error.t option) * Tast.targ list
 
 (** Like [localize_targs], but acts on kinds. *)
 val localize_targs_with_kinds :

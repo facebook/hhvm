@@ -25,3 +25,6 @@ val remove_tyvar_from_upper_bounds :
 val remove_tyvar_from_bounds : env -> Ident.t -> env
 
 val err_if_var_in_ty : env -> Ident.t -> locl_ty -> locl_ty
+
+val err_if_var_in_ty_pure :
+  env -> Ident.t -> locl_ty -> locl_ty * Typing_error.t option

@@ -14,6 +14,8 @@ module Eval_result : sig
      intersections of errors *)
   type 'a t
 
+  val to_string : 'a t -> ('a -> string) -> string
+
   (* Given some predicate telling us whether an atomic error is suppressed,
      filter the result to ensure that we don't report intersections of errors
      where at least one error would not be reported (meaning that none should
@@ -503,6 +505,12 @@ module Primary : sig
         typedef_tparam_name: string;
         used_class_in_def_name: string;
         used_class_tparam_name: string;
+      }
+    | HKT_wildcard of Pos.t
+    | HKT_implicit_argument of {
+        pos: Pos.t;
+        decl_pos: Pos_or_decl.t;
+        param_name: string;
       }
     | Invalid_substring of {
         pos: Pos.t;
@@ -1374,7 +1382,7 @@ module Secondary : sig
     (* == Secondary only ====================================================== *)
     | Violated_constraint of {
         cstrs: (Pos_or_decl.t * Pos_or_decl.t Message.t) list;
-        reasons: Pos_or_decl.t Message.t list;
+        reasons: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Concrete_const_interface_override of {
         pos: Pos_or_decl.t;
@@ -1550,9 +1558,9 @@ module Secondary : sig
     | Not_sub_dynamic of {
         pos: Pos_or_decl.t;
         ty_name: string Lazy.t;
-        dynamic_part: Pos_or_decl.t Message.t list;
+        dynamic_part: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Subtyping_error of Pos_or_decl.t Message.t list
+    | Subtyping_error of Pos_or_decl.t Message.t list Lazy.t
     | Method_not_dynamically_callable of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;

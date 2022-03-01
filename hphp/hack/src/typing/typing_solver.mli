@@ -17,6 +17,9 @@ open Typing_env_types
 *)
 val is_sub_type : env -> locl_ty -> locl_ty -> bool
 
+val is_sub_type_with_ty_err :
+  env -> locl_ty -> locl_ty -> bool * Typing_error.t option
+
 val non_null : env -> Pos_or_decl.t -> locl_ty -> env * locl_ty
 
 (* Force solve all remaining unsolved type variables *)
@@ -30,6 +33,14 @@ val expand_type_and_solve :
   locl_ty ->
   env * locl_ty
 
+val expand_type_and_solve_with_ty_err :
+  env ->
+  ?freshen:bool ->
+  description_of_expected:string ->
+  Pos.t ->
+  locl_ty ->
+  (env * Typing_error.t option) * locl_ty
+
 val expand_type_and_solve_eq : env -> locl_ty -> env * locl_ty
 
 val expand_type_and_narrow :
@@ -41,7 +52,19 @@ val expand_type_and_narrow :
   locl_ty ->
   env * locl_ty
 
+val expand_type_and_narrow_with_ty_err :
+  env ->
+  ?default:locl_ty ->
+  description_of_expected:string ->
+  (env -> locl_ty -> (env * Typing_error.t option) * locl_ty option) ->
+  Pos.t ->
+  locl_ty ->
+  (env * Typing_error.t option) * locl_ty
+
 val solve_to_equal_bound_or_wrt_variance : env -> Reason.t -> int -> env
+
+val solve_to_equal_bound_or_wrt_variance_with_ty_err :
+  env -> Reason.t -> int -> env * Typing_error.t option
 
 val close_tyvars_and_solve : env -> env
 

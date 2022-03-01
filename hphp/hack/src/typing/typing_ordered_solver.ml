@@ -725,10 +725,11 @@ let rec prop_to_env_cc (acc : prop_to_env_acc) (prop : TL.subtype_prop) :
 
 and conj_prop_to_env_cc acc props = List.fold props ~init:acc ~f:prop_to_env_cc
 
-and disj_prop_to_env_cc acc err_f props =
+and disj_prop_to_env_cc acc fail props =
   match props with
   | [] ->
-    err_f ();
+    (* Add error as a side effect *)
+    Option.iter ~f:Errors.add_typing_error fail;
     acc
   | prop :: _props ->
     (* Stupidly take the first proposition for now. *)

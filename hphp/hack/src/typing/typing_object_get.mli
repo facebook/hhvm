@@ -34,10 +34,28 @@ val obj_get :
   Typing_defs.locl_ty ->
   Typing_env_types.env * (Typing_defs.locl_ty * Tast.targ list)
 
+val obj_get_with_ty_err :
+  obj_pos:Ast_defs.pos ->
+  is_method:bool ->
+  inst_meth:bool ->
+  meth_caller:bool ->
+  nullsafe:Typing_reason.t option ->
+  coerce_from_ty:
+    (Ast_defs.pos * Typing_reason.ureason * Typing_defs.locl_ty) option ->
+  explicit_targs:Nast.targ list ->
+  class_id:Nast.class_id_ ->
+  member_id:Nast.sid ->
+  on_error:Typing_error.Callback.t ->
+  ?parent_ty:Typing_defs.locl_ty ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  (Typing_env_types.env * Typing_error.t option)
+  * (Typing_defs.locl_ty * Tast.targ list)
+
 (** As above but also return the types at which
     - we encountered an error based on the receiver's type, if at all
     - coercion of `coerce_from_ty` to the object type failed, if at all *)
-val obj_get_with_err :
+val obj_get_with_mismatches :
   obj_pos:Ast_defs.pos ->
   is_method:bool ->
   inst_meth:bool ->
@@ -53,6 +71,26 @@ val obj_get_with_err :
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   Typing_env_types.env
+  * (Typing_defs.locl_ty * Tast.targ list)
+  * (Typing_defs.locl_ty * Typing_defs.locl_ty) option
+  * (Typing_defs.locl_ty * Typing_defs.locl_ty) option
+
+val obj_get_with_mismatches_with_ty_err :
+  obj_pos:Ast_defs.pos ->
+  is_method:bool ->
+  inst_meth:bool ->
+  meth_caller:bool ->
+  nullsafe:Typing_reason.t option ->
+  coerce_from_ty:
+    (Ast_defs.pos * Typing_reason.ureason * Typing_defs.locl_ty) option ->
+  explicit_targs:Nast.targ list ->
+  class_id:Nast.class_id_ ->
+  member_id:Nast.sid ->
+  on_error:Typing_error.Callback.t ->
+  ?parent_ty:Typing_defs.locl_ty ->
+  Typing_env_types.env ->
+  Typing_defs.locl_ty ->
+  (Typing_env_types.env * Typing_error.t option)
   * (Typing_defs.locl_ty * Tast.targ list)
   * (Typing_defs.locl_ty * Typing_defs.locl_ty) option
   * (Typing_defs.locl_ty * Typing_defs.locl_ty) option

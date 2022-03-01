@@ -11,9 +11,8 @@ open Hh_prelude
 open Typing_env_types
 module TL = Typing_logic
 
-let with_error (f : unit -> unit) ((env, p) : env * TL.subtype_prop) :
-    env * TL.subtype_prop =
-  (env, TL.conj p (TL.invalid ~fail:f))
+let with_error fail ((env, p) : env * TL.subtype_prop) : env * TL.subtype_prop =
+  (env, TL.conj p (TL.invalid ~fail))
 
 (* If `b` is false then fail with error function `f` *)
 let check_with b f r =

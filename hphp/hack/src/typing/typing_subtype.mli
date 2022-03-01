@@ -52,6 +52,15 @@ val sub_type :
   Typing_error.Reasons_callback.t option ->
   env
 
+val sub_type_with_ty_err :
+  env ->
+  ?coerce:Typing_logic.coercion_direction option ->
+  ?is_coeffect:bool ->
+  locl_ty ->
+  locl_ty ->
+  Typing_error.Reasons_callback.t option ->
+  env * Typing_error.t option
+
 (**
  * As above, but with a simpler error handler that doesn't make use of the
  * code and message list provided by subtyping.
@@ -77,6 +86,13 @@ val sub_type_res :
 
 val sub_type_with_dynamic_as_bottom :
   env -> locl_ty -> locl_ty -> Typing_error.Reasons_callback.t option -> env
+
+val sub_type_with_dynamic_as_bottom_with_ty_err :
+  env ->
+  locl_ty ->
+  locl_ty ->
+  Typing_error.Reasons_callback.t option ->
+  env * Typing_error.t option
 
 val sub_type_with_dynamic_as_bottom_res :
   env ->

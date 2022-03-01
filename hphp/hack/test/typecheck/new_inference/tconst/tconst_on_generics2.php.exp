@@ -1,28 +1,34 @@
+File "tconst_on_generics2.php", line 50, characters 9-12:
+Can't access a type constant T from an unresolved type (Typing[4436])
+  File "tconst_on_generics2.php", line 40, characters 88-88:
+  Access happens here
+  File "tconst_on_generics2.php", line 50, characters 9-12:
+  Disambiguate the types using explicit type annotations here.
 File "tconst_on_generics2.php", line 50, characters 18-19:
 Invalid argument (Typing[4326])
-File "tconst_on_generics2.php", line 10, characters 18-20:
-Expected `int`
-File "tconst_on_generics2.php", line 40, characters 88-88:
-  resulting from accessing the type constant 'T'
-File "tconst_on_generics2.php", line 49, characters 12-17:
-  on an object of exactly the class IntBox
-File "tconst_on_generics2.php", line 19, characters 18-23:
-But got `string`
-File "tconst_on_generics2.php", line 40, characters 82-82:
-  resulting from accessing the type constant 'T'
-File "tconst_on_generics2.php", line 48, characters 12-20:
-  on an object of exactly the class StringBox
+  File "tconst_on_generics2.php", line 10, characters 18-20:
+  Expected `int`
+  File "tconst_on_generics2.php", line 40, characters 88-88:
+    resulting from accessing the type constant 'T'
+  File "tconst_on_generics2.php", line 49, characters 12-17:
+    on an object of exactly the class IntBox
+  File "tconst_on_generics2.php", line 19, characters 18-23:
+  But got `string`
+  File "tconst_on_generics2.php", line 40, characters 82-82:
+    resulting from accessing the type constant 'T'
+  File "tconst_on_generics2.php", line 48, characters 12-20:
+    on an object of exactly the class StringBox
 File "tconst_on_generics2.php", line 50, characters 18-19:
 Invalid argument (Typing[4326])
-File "tconst_on_generics2.php", line 19, characters 18-23:
-Expected `string`
-File "tconst_on_generics2.php", line 40, characters 82-82:
-  resulting from accessing the type constant 'T'
-File "tconst_on_generics2.php", line 48, characters 12-20:
-  on an object of exactly the class StringBox
-File "tconst_on_generics2.php", line 10, characters 18-20:
-But got `int`
-File "tconst_on_generics2.php", line 40, characters 88-88:
-  resulting from accessing the type constant 'T'
-File "tconst_on_generics2.php", line 49, characters 12-17:
-  on an object of exactly the class IntBox
+  File "tconst_on_generics2.php", line 19, characters 18-23:
+  Expected `string`
+  File "tconst_on_generics2.php", line 40, characters 82-82:
+    resulting from accessing the type constant 'T'
+  File "tconst_on_generics2.php", line 48, characters 12-20:
+    on an object of exactly the class StringBox
+  File "tconst_on_generics2.php", line 10, characters 18-20:
+  But got `int`
+  File "tconst_on_generics2.php", line 40, characters 88-88:
+    resulting from accessing the type constant 'T'
+  File "tconst_on_generics2.php", line 49, characters 12-17:
+    on an object of exactly the class IntBox

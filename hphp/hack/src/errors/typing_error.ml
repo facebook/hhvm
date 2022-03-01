@@ -12,6 +12,8 @@ module Error_code = Error_codes.Typing
 module Eval_result : sig
   type 'a t
 
+  val to_string : 'a t -> ('a -> string) -> string
+
   val empty : 'a t
 
   val single : 'a -> 'a t
@@ -124,6 +126,32 @@ end = struct
           aux next
         else
           auxs (next :: acc) rest
+    in
+    aux t
+
+  let to_string t err_to_string =
+    let rec aux t =
+      match t with
+      | Empty -> "-"
+      | Single err -> err_to_string err
+      | Multiple errs ->
+        let init = "all of:" in
+        List.fold
+          ~init
+          ~f:(fun acc err -> sprintf "%s\n\t%s" acc @@ aux err)
+          errs
+      | Union errs ->
+        let init = "union of:" in
+        List.fold
+          ~init
+          ~f:(fun acc err -> sprintf "%s\n\t%s" acc @@ aux err)
+          errs
+      | Intersect errs ->
+        let init = "intersection of:" in
+        List.fold
+          ~init
+          ~f:(fun acc err -> sprintf "%s\n\t%s" acc @@ aux err)
+          errs
     in
     aux t
 end
@@ -1490,6 +1518,12 @@ module Primary = struct
         used_class_in_def_name: string;
         used_class_tparam_name: string;
       }
+    | HKT_wildcard of Pos.t
+    | HKT_implicit_argument of {
+        pos: Pos.t;
+        decl_pos: Pos_or_decl.t;
+        param_name: string;
+      }
     | Invalid_substring of {
         pos: Pos.t;
         ty_name: string Lazy.t;
@@ -2606,6 +2640,41 @@ module Primary = struct
         Format.sprintf
           "The type %s implicitly imposes constraints on its type parameters. Therefore, it cannot be used as a higher-kinded type at this time."
         @@ Render.strip_ns typedef_name )
+    in
+    (Error_code.HigherKindedTypesUnsupportedFeature, claim, reasons, [])
+
+  let hkt_wildcard pos =
+    let claim =
+      ( pos,
+        "You are supplying _ where a higher-kinded type is expected."
+        ^ " We cannot infer higher-kinded type arguments at this time, please state the actual type."
+      )
+    in
+    (Error_code.HigherKindedTypesUnsupportedFeature, claim, [], [])
+
+  let hkt_implicit_argument pos decl_pos param_name =
+    let param_desc =
+      (* This should be Naming_special_names.Typehints.wildcard, but its not available in this
+         module *)
+      if String.equal param_name "_" then
+        "the anonymous generic parameter"
+      else
+        "the generic parameter " ^ param_name
+    in
+    let claim =
+      ( pos,
+        "You left out the type arguments here such that they may be inferred."
+        ^ " However, a higher-kinded type is expected in place of "
+        ^ param_desc
+        ^ ", meaning that the type arguments cannot be inferred."
+        ^ " Please provide the type arguments explicitly." )
+    and reasons =
+      [
+        ( decl_pos,
+          Format.sprintf
+            {|%s was declared to be higher-kinded here.|}
+            param_desc );
+      ]
     in
     (Error_code.HigherKindedTypesUnsupportedFeature, claim, reasons, [])
 
@@ -4771,6 +4840,9 @@ module Primary = struct
         used_class_in_def_name
         used_class_tparam_name
         typedef_tparam_name
+    | HKT_wildcard pos -> hkt_wildcard pos
+    | HKT_implicit_argument { pos; decl_pos; param_name } ->
+      hkt_implicit_argument pos decl_pos param_name
     | Object_string_deprecated pos -> object_string_deprecated pos
     | Invalid_substring { pos; ty_name } -> invalid_substring pos ty_name
     | Unset_nonidx_in_strict { pos; reason } ->
@@ -5465,7 +5537,7 @@ and Secondary : sig
     (* == Secondary only ====================================================== *)
     | Violated_constraint of {
         cstrs: (Pos_or_decl.t * Pos_or_decl.t Message.t) list;
-        reasons: Pos_or_decl.t Message.t list;
+        reasons: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Concrete_const_interface_override of {
         pos: Pos_or_decl.t;
@@ -5641,9 +5713,9 @@ and Secondary : sig
     | Not_sub_dynamic of {
         pos: Pos_or_decl.t;
         ty_name: string Lazy.t;
-        dynamic_part: Pos_or_decl.t Message.t list;
+        dynamic_part: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Subtyping_error of Pos_or_decl.t Message.t list
+    | Subtyping_error of Pos_or_decl.t Message.t list Lazy.t
     | Method_not_dynamically_callable of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
@@ -5732,7 +5804,7 @@ end = struct
     (* == Secondary only ====================================================== *)
     | Violated_constraint of {
         cstrs: (Pos_or_decl.t * Pos_or_decl.t Message.t) list;
-        reasons: Pos_or_decl.t Message.t list;
+        reasons: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Concrete_const_interface_override of {
         pos: Pos_or_decl.t;
@@ -5908,9 +5980,9 @@ end = struct
     | Not_sub_dynamic of {
         pos: Pos_or_decl.t;
         ty_name: string Lazy.t;
-        dynamic_part: Pos_or_decl.t Message.t list;
+        dynamic_part: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Subtyping_error of Pos_or_decl.t Message.t list
+    | Subtyping_error of Pos_or_decl.t Message.t list Lazy.t
     | Method_not_dynamically_callable of {
         pos: Pos_or_decl.t;
         parent_pos: Pos_or_decl.t;
@@ -6011,7 +6083,7 @@ end = struct
       ]
     in
     let msgs = List.concat_map ~f cstrs in
-    (Error_code.TypeConstraintViolation, msgs @ reasons, [])
+    (Error_code.TypeConstraintViolation, msgs @ Lazy.force reasons, [])
 
   let concrete_const_interface_override pos parent_pos name parent_origin =
     let reasons =
@@ -6368,7 +6440,7 @@ end = struct
           ^ " is not a subtype of `dynamic` under dynamic-aware subtyping" );
       ]
     in
-    (Error_code.UnifyError, dynamic_part @ reasons, [])
+    (Error_code.UnifyError, Lazy.force dynamic_part @ reasons, [])
 
   let override_method_support_dynamic_type
       pos method_name parent_origin parent_pos =
@@ -6472,7 +6544,7 @@ end = struct
     in
     (Error_code.BadMethodOverride, reasons, [])
 
-  let subtyping_error reasons = (Error_code.UnifyError, reasons, [])
+  let subtyping_error reasons = (Error_code.UnifyError, Lazy.force reasons, [])
 
   let method_not_dynamically_callable pos parent_pos =
     let reasons =

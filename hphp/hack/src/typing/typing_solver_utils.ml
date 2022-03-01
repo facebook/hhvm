@@ -182,10 +182,10 @@ let var_occurs_in_ty env var ty =
   in
   finder#on_type (env, false) ty
 
-let err_if_var_in_ty env var ty =
+let err_if_var_in_ty_pure env var ty =
   let (env, var_occurs_in_ty) = var_occurs_in_ty env var ty in
-  if var_occurs_in_ty then begin
-    Errors.add_typing_error
+  if var_occurs_in_ty then
+    let ty_err =
       Typing_error.(
         primary
         @@ Primary.Unification_cycle
@@ -195,7 +195,15 @@ let err_if_var_in_ty env var ty =
                  lazy
                    Typing_print.(
                      with_blank_tyvars (fun () -> full_rec env var ty));
-             });
-    MakeType.err (get_reason ty)
-  end else
+             })
+    in
+    (MakeType.err (get_reason ty), Some ty_err)
+  else
+    (ty, None)
+
+let err_if_var_in_ty env var ty =
+  match err_if_var_in_ty_pure env var ty with
+  | (ty, Some err) ->
+    Errors.add_typing_error err;
     ty
+  | (ty, _) -> ty

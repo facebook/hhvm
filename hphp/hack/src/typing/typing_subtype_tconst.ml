@@ -1,3 +1,4 @@
+open Hh_prelude
 open Typing_defs
 module Env = Typing_env
 module ITySet = Internal_type_set
@@ -6,7 +7,7 @@ module Utils = Typing_utils
 (** Make tconstty (usually a type variable representing the type constant of
 another type variable v) equal to ty::tconstid (where ty is usually a bound
 of v) *)
-let make_type_const_equal
+let make_type_const_equal_with_ty_err
     env
     tconstty
     (ty : internal_type)
@@ -17,8 +18,8 @@ let make_type_const_equal
     match ty with
     | LoclType ty ->
       let ety_env = empty_expand_env in
-      let (env, tytconst) =
-        Utils.expand_typeconst
+      let ((env, e1), tytconst) =
+        Utils.expand_typeconst_with_ty_err
           ety_env
           env
           ~as_tyvar_with_cnstr
@@ -29,24 +30,31 @@ let make_type_const_equal
           ~ignore_errors:(Option.is_some as_tyvar_with_cnstr)
       in
       let error =
-        Option.map Typing_error.Reasons_callback.type_constant_mismatch on_error
+        Option.map
+          ~f:Typing_error.Reasons_callback.type_constant_mismatch
+          on_error
       in
-      let env = Utils.sub_type env tytconst tconstty error in
-      let env = Utils.sub_type env tconstty tytconst error in
-      env
+      let (env, e2) = Utils.sub_type_with_ty_err env tytconst tconstty error in
+      let (env, e3) = Utils.sub_type_with_ty_err env tconstty tytconst error in
+      (env, Typing_error.multiple_opt @@ List.filter_map ~f:Fn.id [e1; e2; e3])
     | ConstraintType ty ->
       (match deref_constraint_type ty with
       | (_, Thas_member _)
       | (_, Tdestructure _) ->
-        env
-      | (_, TCunion (lty, cty))
-      | (_, TCintersection (lty, cty)) ->
+        (env, None)
         (* This not quite correct but works for now since no constraint type has any
            type constant. The proper way to do it would be to have Utils.expand_typeconst
            work on constraint types directly. *)
-        let env = make_equal env (LoclType lty) in
-        let env = make_equal env (ConstraintType cty) in
-        env)
+      | (_, TCunion (lty, cty)) ->
+        let (env, e1) = make_equal env (LoclType lty) in
+        let (env, e2) = make_equal env (ConstraintType cty) in
+        (env, Option.merge e1 e2 ~f:(fun e1 e2 -> Typing_error.union [e1; e2]))
+      | (_, TCintersection (lty, cty)) ->
+        let (env, e1) = make_equal env (LoclType lty) in
+        let (env, e2) = make_equal env (ConstraintType cty) in
+        (* TODO: should we be taking the intersection of the errors? *)
+        ( env,
+          Option.merge e1 e2 ~f:(fun e1 e2 -> Typing_error.multiple [e1; e2]) ))
   in
   make_equal env ty
 
@@ -57,34 +65,45 @@ let add_tyvar_type_const env var tconstid ty ~on_error =
   let env = Env.set_tyvar_type_const env var tconstid ty in
   let var_pos = Env.get_tyvar_pos env var in
   let upper_bounds = Env.get_tyvar_upper_bounds env var in
-  let env =
+  let (env, upper_ty_errs) =
     ITySet.fold
-      (fun bound env ->
-        make_type_const_equal
-          env
-          ty
-          bound
-          tconstid
-          ~on_error
-          ~as_tyvar_with_cnstr:(Some var_pos))
+      (fun bound (env, ty_errs) ->
+        match
+          make_type_const_equal_with_ty_err
+            env
+            ty
+            bound
+            tconstid
+            ~on_error
+            ~as_tyvar_with_cnstr:(Some var_pos)
+        with
+        | (env, Some ty_err) -> (env, ty_err :: ty_errs)
+        | (env, _) -> (env, ty_errs))
       upper_bounds
-      env
+      (env, [])
   in
   let lower_bounds = Env.get_tyvar_lower_bounds env var in
-  ITySet.fold
-    (fun bound env ->
-      make_type_const_equal
-        env
-        ty
-        bound
-        tconstid
-        ~on_error
-        ~as_tyvar_with_cnstr:None)
-    lower_bounds
-    env
+  let (env, ty_errs) =
+    ITySet.fold
+      (fun bound (env, ty_errs) ->
+        match
+          make_type_const_equal_with_ty_err
+            env
+            ty
+            bound
+            tconstid
+            ~on_error
+            ~as_tyvar_with_cnstr:None
+        with
+        | (env, Some ty_err) -> (env, ty_err :: ty_errs)
+        | (env, _) -> (env, ty_errs))
+      lower_bounds
+      (env, upper_ty_errs)
+  in
+  (env, Typing_error.multiple_opt ty_errs)
 
 (** For all type constants T of var, make its type equal to ty::T *)
-let make_all_type_consts_equal
+let make_all_type_consts_equal_with_ty_err
     env var (ty : internal_type) ~on_error ~as_tyvar_with_cnstr =
   let var_pos = Env.get_tyvar_pos env var in
   let as_tyvar_with_cnstr =
@@ -93,25 +112,51 @@ let make_all_type_consts_equal
     else
       None
   in
-  SMap.fold
-    (fun _ (tconstid, tconstty) env ->
-      make_type_const_equal
-        env
-        tconstty
-        ty
-        tconstid
-        ~on_error
-        ~as_tyvar_with_cnstr)
-    (Env.get_tyvar_type_consts env var)
-    env
+  let (env, ty_errs) =
+    SMap.fold
+      (fun _ (tconstid, tconstty) (env, ty_errs) ->
+        match
+          make_type_const_equal_with_ty_err
+            env
+            tconstty
+            ty
+            tconstid
+            ~on_error
+            ~as_tyvar_with_cnstr
+        with
+        | (env, Some ty_err) -> (env, ty_err :: ty_errs)
+        | (env, _) -> (env, ty_errs))
+      (Env.get_tyvar_type_consts env var)
+      (env, [])
+  in
+  (env, Typing_error.multiple_opt ty_errs)
 
 (** `p` is the position where var::tconstid was encountered. *)
-let get_tyvar_type_const env var tconstid ~on_error =
+let get_tyvar_type_const_with_ty_err env var tconstid ~on_error =
   match Env.get_tyvar_type_const env var tconstid with
-  | Some (_pos, ty) -> (env, ty)
+  | Some (_pos, ty) -> ((env, None), ty)
   | None ->
     let var_pos = Env.get_tyvar_pos env var in
     let (env, tvar) = Env.fresh_type_invariant env var_pos in
     Typing_log.log_new_tvar_for_tconst env (var_pos, var) tconstid tvar;
     let env = add_tyvar_type_const env var tconstid tvar ~on_error in
     (env, tvar)
+
+(* == Side effecting variants =============================================== *)
+
+let discharge_ty_err (env, ty_err_opt) =
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  env
+
+let make_all_type_consts_equal env id ity ~on_error ~as_tyvar_with_cnstr =
+  discharge_ty_err
+  @@ make_all_type_consts_equal_with_ty_err
+       env
+       id
+       ity
+       ~on_error
+       ~as_tyvar_with_cnstr
+
+let get_tyvar_type_const env id pos_id ~on_error =
+  Tuple2.map_fst ~f:discharge_ty_err
+  @@ get_tyvar_type_const_with_ty_err env id pos_id ~on_error

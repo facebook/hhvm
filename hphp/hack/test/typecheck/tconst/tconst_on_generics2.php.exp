@@ -6,6 +6,12 @@ Invalid return type (Typing[4336])
     resulting from expanding the type constant `this::T`
   File "tconst_on_generics2.php", line 11, characters 19-22:
   But got `void` because this function does not always return a value
+File "tconst_on_generics2.php", line 50, characters 9-12:
+Can't access a type constant T from an unresolved type (Typing[4436])
+  File "tconst_on_generics2.php", line 40, characters 88-88:
+  Access happens here
+  File "tconst_on_generics2.php", line 50, characters 9-12:
+  Disambiguate the types using explicit type annotations here.
 File "tconst_on_generics2.php", line 50, characters 18-19:
 Invalid argument (Typing[4326])
   File "tconst_on_generics2.php", line 10, characters 18-20:

@@ -8,20 +8,6 @@ Invalid argument (Typing[4326])
     resulting from accessing the type constant 'T'
   File "tconst_on_generics7.php", line 56, characters 12-20:
     on an object of type StringBox
-File "tconst_on_generics7.php", line 60, characters 11-12:
-Invalid argument (Typing[4326])
-  File "tconst_on_generics7.php", line 30, characters 18-23:
-  Expected `string`
-  File "tconst_on_generics7.php", line 50, characters 43-43:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics7.php", line 56, characters 12-20:
-    on an object of type StringBox
-  File "tconst_on_generics7.php", line 22, characters 18-20:
-  But got `int`
-  File "tconst_on_generics7.php", line 50, characters 43-43:
-    resulting from accessing the type constant 'T'
-  File "tconst_on_generics7.php", line 56, characters 26-31:
-    on an object of type IntBox
 File "tconst_on_generics7.php", line 64, characters 12-15:
 Can't access a type constant T from an unresolved type (Typing[4436])
   File "tconst_on_generics7.php", line 50, characters 43-43:

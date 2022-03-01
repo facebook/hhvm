@@ -20,7 +20,7 @@ type subtype_prop =
   | Coerce of coercion_direction * locl_ty * locl_ty
   | IsSubtype of internal_type * internal_type
   | Conj of subtype_prop list
-  | Disj of (unit -> unit) * subtype_prop list
+  | Disj of Typing_error.t option * subtype_prop list
 
 let rec equal_subtype_prop p1 p2 =
   match (p1, p2) with

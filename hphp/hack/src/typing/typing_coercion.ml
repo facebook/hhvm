@@ -59,9 +59,14 @@ let coerce_type_impl
           (Reason.Rdynamic_coercion (get_reason ty_expect.et_type))
           ty_expect.et_type
       in
-      Typing_utils.sub_type_res ~coerce:None env ty_have tunion on_error
+      Typing_utils.sub_type_with_ty_err ~coerce:None env ty_have tunion on_error
     else
-      Typing_utils.sub_type_res ~coerce env ty_have ty_expect.et_type on_error
+      Typing_utils.sub_type_with_ty_err
+        ~coerce
+        env
+        ty_have
+        ty_expect.et_type
+        on_error
   else
     let complex_coercion =
       TypecheckerOptions.complex_coercion (Typing_env.get_tcopt env)
@@ -69,10 +74,10 @@ let coerce_type_impl
     let (env, ety_expect) = Typing_env.expand_type env ty_expect.et_type in
     let (env, ety_have) = Typing_env.expand_type env ty_have in
     match (get_node ety_have, get_node ety_expect) with
-    | (_, Tdynamic) -> Ok env
-    | (Tdynamic, _) when is_expected_enforced -> Ok env
+    | (_, Tdynamic) -> (env, None)
+    | (Tdynamic, _) when is_expected_enforced -> (env, None)
     | _ when is_expected_enforced ->
-      Typing_utils.sub_type_with_dynamic_as_bottom_res
+      Typing_utils.sub_type_with_dynamic_as_bottom_with_ty_err
         env
         ty_have
         ty_expect.et_type
@@ -81,35 +86,15 @@ let coerce_type_impl
       when (((not is_expected_enforced) && env.Typing_env_types.pessimize)
            || Typing_utils.is_dynamic env ety_expect)
            && complex_coercion ->
-      Typing_utils.sub_type_with_dynamic_as_bottom_res
+      Typing_utils.sub_type_with_dynamic_as_bottom_with_ty_err
         env
         ty_have
         ty_expect.et_type
         on_error
-    | _ -> Typing_utils.sub_type_res env ty_have ty_expect.et_type on_error
+    | _ ->
+      Typing_utils.sub_type_with_ty_err env ty_have ty_expect.et_type on_error
 
-let result t ~on_ok ~on_err =
-  match t with
-  | Ok x -> on_ok x
-  | Error y -> on_err y
-
-let coerce_type
-    ?(coerce_for_op = false)
-    ?(coerce = None)
-    p
-    ur
-    env
-    ty_have
-    ty_expect
-    (on_error : Typing_error.Callback.t) =
-  result ~on_ok:Fn.id ~on_err:Fn.id
-  @@ coerce_type_impl ~coerce_for_op ~coerce env ty_have ty_expect
-  @@ Some
-       (Typing_error.Reasons_callback.with_claim
-          on_error
-          ~claim:(p, Reason.string_of_ureason ur))
-
-let coerce_type_res
+let coerce_type_with_ty_err
     ?(coerce_for_op = false)
     ?(coerce = None)
     p
@@ -124,24 +109,68 @@ let coerce_type_res
           on_error
           ~claim:(p, Reason.string_of_ureason ur))
 
+let coerce_type
+    ?coerce_for_op
+    ?coerce
+    p
+    ur
+    env
+    ty_have
+    ty_expect
+    (on_error : Typing_error.Callback.t) =
+  let (env, ty_err_opt) =
+    coerce_type_with_ty_err
+      ?coerce_for_op
+      ?coerce
+      p
+      ur
+      env
+      ty_have
+      ty_expect
+      on_error
+  in
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
+  env
+
+let coerce_type_res
+    ?coerce_for_op
+    ?coerce
+    p
+    ur
+    env
+    ty_have
+    ty_expect
+    (on_error : Typing_error.Callback.t) =
+  let (env, ty_err_opt) =
+    coerce_type_with_ty_err
+      ?coerce_for_op
+      ?coerce
+      p
+      ur
+      env
+      ty_have
+      ty_expect
+      on_error
+  in
+
+  match ty_err_opt with
+  | None -> Ok env
+  | Some ty_err ->
+    Errors.add_typing_error ty_err;
+    Error env
+
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)
 let try_coerce ?(coerce = None) env ty_have ty_expect =
-  let f = !Errors.is_hh_fixme in
-  (Errors.is_hh_fixme := (fun _ _ -> false));
-  let result =
-    let pos =
-      get_pos ty_have
-      |> Typing_env.fill_in_pos_filename_if_in_current_decl env
-      |> Option.value ~default:Pos.none
-    in
-    Errors.try_
-      (fun () ->
-        Some
-          (result ~on_ok:Fn.id ~on_err:Fn.id
-          @@ coerce_type_impl ~coerce ~coerce_for_op:false env ty_have ty_expect
-          @@ Some (Typing_error.Reasons_callback.unify_error_at pos)))
-      (fun _ -> None)
+  let pos =
+    get_pos ty_have
+    |> Typing_env.fill_in_pos_filename_if_in_current_decl env
+    |> Option.value ~default:Pos.none
   in
-  Errors.is_hh_fixme := f;
-  result
+  let res =
+    coerce_type_impl ~coerce ~coerce_for_op:false env ty_have ty_expect
+    @@ Some (Typing_error.Reasons_callback.unify_error_at pos)
+  in
+  match res with
+  | (env, None) -> Some env
+  | _ -> None

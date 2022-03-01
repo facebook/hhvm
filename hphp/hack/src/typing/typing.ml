@@ -6004,7 +6004,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       let env = might_throw env in
       let (_, p1, _) = obj in
       let (env, (declared_ty, _tal), lval_err_opt, rval_err_opt) =
-        TOG.obj_get_with_err
+        TOG.obj_get_with_mismatches
           ~obj_pos:p1
           ~is_method:false
           ~nullsafe
@@ -6877,7 +6877,7 @@ and dispatch_call
     in
     let (_, p1, _) = e1 in
     let (env, (tfty, tal), lval_err_opt, _rval_err_opt) =
-      TOG.obj_get_with_err
+      TOG.obj_get_with_mismatches
         ~obj_pos:p1
         ~is_method:true
         ~inst_meth:false

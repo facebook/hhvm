@@ -22,7 +22,7 @@ type subtype_prop =
   | IsSubtype of internal_type * internal_type
       (** IsSubtype(ty1,ty2) if ty1 is a subtype of ty2, written ty1 <: ty2 *)
   | Conj of subtype_prop list  (** Conjunction. Conj [] means "true" *)
-  | Disj of (unit -> unit) * subtype_prop list
+  | Disj of Typing_error.t option * subtype_prop list
       (** Disjunction. Disj f [] means "false".  The error message function f
    * wraps the error that should be produced in this case. *)
 
@@ -38,7 +38,7 @@ val n_conj : subtype_prop -> int
 
 val valid : subtype_prop
 
-val invalid : fail:(unit -> unit) -> subtype_prop
+val invalid : fail:Typing_error.t option -> subtype_prop
 
 val is_valid : subtype_prop -> bool
 
@@ -48,4 +48,5 @@ val conj : subtype_prop -> subtype_prop -> subtype_prop
 
 val conj_list : subtype_prop list -> subtype_prop
 
-val disj : fail:(unit -> unit) -> subtype_prop -> subtype_prop -> subtype_prop
+val disj :
+  fail:Typing_error.t option -> subtype_prop -> subtype_prop -> subtype_prop

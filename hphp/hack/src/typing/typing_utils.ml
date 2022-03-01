@@ -32,6 +32,19 @@ let (expand_typedef_ref : expand_typedef ref) =
 
 let expand_typedef x = !expand_typedef_ref x
 
+type expand_typedef_with_ty_err =
+  expand_env ->
+  env ->
+  Reason.t ->
+  string ->
+  locl_ty list ->
+  (env * Typing_error.t option) * locl_ty
+
+let (expand_typedef_with_ty_err_ref : expand_typedef_with_ty_err ref) =
+  ref (not_implemented "expand_typedef_with_ty_err")
+
+let expand_typedef_with_ty_err x = !expand_typedef_with_ty_err_ref x
+
 type sub_type =
   env ->
   ?coerce:Typing_logic.coercion_direction option ->
@@ -44,6 +57,20 @@ type sub_type =
 let (sub_type_ref : sub_type ref) = ref (not_implemented "sub_type")
 
 let sub_type x = !sub_type_ref x
+
+type sub_type_with_ty_err =
+  env ->
+  ?coerce:Typing_logic.coercion_direction option ->
+  ?is_coeffect:bool ->
+  locl_ty ->
+  locl_ty ->
+  Typing_error.Reasons_callback.t option ->
+  env * Typing_error.t option
+
+let (sub_type_with_ty_err_ref : sub_type_with_ty_err ref) =
+  ref (not_implemented "sub_type_with_errors")
+
+let sub_type_with_ty_err x = !sub_type_with_ty_err_ref x
 
 type sub_type_res =
   env ->
@@ -67,7 +94,7 @@ type sub_type_i =
 
 let (sub_type_i_ref : sub_type_i ref) = ref (not_implemented "sub_type_i")
 
-let sub_type_i ?(is_coeffect = false) x = !sub_type_i_ref ~is_coeffect x
+let sub_type_i env ?(is_coeffect = false) x = !sub_type_i_ref env ~is_coeffect x
 
 type sub_type_i_res =
   env ->
@@ -89,6 +116,20 @@ let (sub_type_with_dynamic_as_bottom_ref : sub_type_with_dynamic_as_bottom ref)
   ref (not_implemented "sub_type_with_dynamic_as_bottom")
 
 let sub_type_with_dynamic_as_bottom x = !sub_type_with_dynamic_as_bottom_ref x
+
+type sub_type_with_dynamic_as_bottom_with_ty_err =
+  env ->
+  locl_ty ->
+  locl_ty ->
+  Typing_error.Reasons_callback.t option ->
+  env * Typing_error.t option
+
+let (sub_type_with_dynamic_as_bottom_with_ty_err_ref :
+      sub_type_with_dynamic_as_bottom_with_ty_err ref) =
+  ref (not_implemented "sub_type_with_dynamic_as_bottom_with_errors")
+
+let sub_type_with_dynamic_as_bottom_with_ty_err x =
+  !sub_type_with_dynamic_as_bottom_with_ty_err_ref x
 
 type sub_type_with_dynamic_as_bottom_res =
   env ->
@@ -175,6 +216,22 @@ let (expand_typeconst_ref : expand_typeconst ref) =
   ref (not_implemented "expand_typeconst")
 
 let expand_typeconst x = !expand_typeconst_ref x
+
+type expand_typeconst_with_ty_err =
+  expand_env ->
+  env ->
+  ?ignore_errors:bool ->
+  ?as_tyvar_with_cnstr:Pos.t option ->
+  locl_ty ->
+  pos_id ->
+  root_pos:Pos_or_decl.t ->
+  allow_abstract_tconst:bool ->
+  (env * Typing_error.t option) * locl_ty
+
+let (expand_typeconst_with_ty_err_ref : expand_typeconst_with_ty_err ref) =
+  ref (not_implemented "expand_typeconst_with_ty_err")
+
+let expand_typeconst_with_ty_err x = !expand_typeconst_with_ty_err_ref x
 
 type union =
   env -> ?approx_cancel_neg:bool -> locl_ty -> locl_ty -> env * locl_ty
@@ -467,6 +524,31 @@ let run_on_intersection :
     )
   in
   (env, resl)
+
+let run_on_intersection_with_ty_err env ~f tys =
+  let (env, resl) =
+    List.map_env env tys ~f:(fun env ty ->
+        let ((env, ty_err_opt), res) = f env ty in
+        (env, (res, ty_err_opt)))
+  in
+  (* Partition the results into those with and without errors *)
+  let res =
+    List.partition_map resl ~f:(function
+        | (res, None) -> Either.first res
+        | (res, Some err) -> Either.second (res, err))
+  in
+  match res with
+  | ([], with_err) ->
+    (* We have no element of the intersection without error
+       Take the intersection of the errors so we remember where they came from
+       when applying error suppression
+    *)
+    let (res, errs) = List.unzip with_err in
+    ((env, Typing_error.intersect_opt errs), res)
+  | (without_err, _) ->
+    (* We have at least one that is without error so return the elements without
+       error and indicate there is no error for the intersection *)
+    ((env, None), without_err)
 
 (** As above but allow functions which also return subtyping/coercion error
     information *)

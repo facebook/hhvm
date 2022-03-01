@@ -59,6 +59,7 @@ module MemberKind = struct
 end
 
 module MemberKindMap = WrappedMap.Make (MemberKind)
+module MemberNameMap = SMap
 
 (* This is used to merge members from all parents of a class.
  * Certain class hierarchies are heavy in diamond patterns so merging members avoids doing the
@@ -929,7 +930,7 @@ let check_members_from_all_parents
     env
     (class_pos, class_)
     (on_error : Pos_or_decl.t * string -> Typing_error.Reasons_callback.t)
-    (parent_members : ClassEltWParentSet.t SMap.t MemberKindMap.t) =
+    (parent_members : ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t) =
   let check member_kind member_map env =
     let check member_name class_elts_w_parents env =
       let check =
@@ -941,7 +942,7 @@ let check_members_from_all_parents
       in
       ClassEltWParentSet.fold check class_elts_w_parents env
     in
-    SMap.fold check member_map env
+    MemberNameMap.fold check member_map env
   in
   MemberKindMap.fold check parent_members env
 
@@ -1412,7 +1413,7 @@ let check_consts env implements parent_class (name_pos, class_) psubst on_error
  *   "Class ... does not correctly implement all required members"
  * message pointing at the class being checked.
  *)
-let check_class_extends_parent
+let check_class_extends_parent_consts
     env
     implements
     (parent_class : pos_id * decl_ty list * Cls.t)
@@ -1443,7 +1444,7 @@ let filter_privates_and_synthethized
 
 let make_parent_member_map
     ((parent_name_pos, _parent_name), parent_tparaml, parent_class) :
-    ClassEltWParentSet.t SMap.t MemberKindMap.t =
+    ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t =
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
   make_all_members ~parent_class
   |> MemberKindMap.of_list
@@ -1465,7 +1466,7 @@ let merge_member_maps acc_map map =
         | None -> members
         | Some prev_members ->
           let new_members =
-            SMap.merge
+            MemberNameMap.merge
               (fun _member_name -> Option.merge ~f:ClassEltWParentSet.union)
               prev_members
               members
@@ -1476,18 +1477,19 @@ let merge_member_maps acc_map map =
     map
     acc_map
 
-let fold_parent_members parents : ClassEltWParentSet.t SMap.t MemberKindMap.t =
+let union_parent_members parents :
+    ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t =
   parents
   |> List.map ~f:make_parent_member_map
   |> List.fold ~init:MemberKindMap.empty ~f:merge_member_maps
 
-let check_class_extends_parents
+let check_class_extends_parents_members
     env
     (class_name_pos, class_)
     (parents : (pos_id * decl_ty list * Cls.t) list)
     (on_error : Pos_or_decl.t * string -> Typing_error.Reasons_callback.t) =
-  let members : ClassEltWParentSet.t SMap.t MemberKindMap.t =
-    fold_parent_members parents
+  let members : ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t =
+    union_parent_members parents
   in
   check_members_from_all_parents env (class_name_pos, class_) on_error members
 
@@ -1543,7 +1545,7 @@ let check_implements_extends_uses env ~implements ~parents (name_pos, class_) =
   in
   let env =
     List.fold ~init:env parents ~f:(fun env ((parent_name, _, _) as parent) ->
-        check_class_extends_parent
+        check_class_extends_parent_consts
           env
           implements
           parent
@@ -1551,6 +1553,6 @@ let check_implements_extends_uses env ~implements ~parents (name_pos, class_) =
           (on_error parent_name))
   in
   let env =
-    check_class_extends_parents env (name_pos, class_) parents on_error
+    check_class_extends_parents_members env (name_pos, class_) parents on_error
   in
   env

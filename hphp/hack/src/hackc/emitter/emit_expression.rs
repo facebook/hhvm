@@ -4973,13 +4973,13 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
         emit_expr(e, env, src)?,
         count_instrs,
         base_setup,
-        instr::instr(Instruct::Final(InstructFinal::SetRangeM(
+        instr::instr(Instruct::SetRangeM(
             (base_stack + cls_stack)
                 .try_into()
                 .expect("StackIndex overflow"),
             kind.size.try_into().expect("SetRange size overflow"),
             kind.op,
-        ))),
+        )),
     ]))
 }
 

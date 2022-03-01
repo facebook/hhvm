@@ -946,7 +946,7 @@ pub mod instr {
     }
 
     pub fn querym<'a>(num_params: NumParams, op: QueryMOp, key: MemberKey<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Final(InstructFinal::QueryM(num_params, op, key)))
+        instr(Instruct::QueryM(num_params, op, key))
     }
 
     pub fn querym_cget_pt<'a>(
@@ -958,19 +958,19 @@ pub mod instr {
     }
 
     pub fn setm<'a>(num_params: NumParams, key: MemberKey<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Final(InstructFinal::SetM(num_params, key)))
+        instr(Instruct::SetM(num_params, key))
     }
 
     pub fn unsetm<'a>(num_params: NumParams, key: MemberKey<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Final(InstructFinal::UnsetM(num_params, key)))
+        instr(Instruct::UnsetM(num_params, key))
     }
 
     pub fn setopm<'a>(num_params: NumParams, op: SetOpOp, key: MemberKey<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Final(InstructFinal::SetOpM(num_params, op, key)))
+        instr(Instruct::SetOpM(num_params, op, key))
     }
 
     pub fn incdecm<'a>(num_params: NumParams, op: IncDecOp, key: MemberKey<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Final(InstructFinal::IncDecM(num_params, op, key)))
+        instr(Instruct::IncDecM(num_params, op, key))
     }
 
     pub fn setm_pt<'a>(

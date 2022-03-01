@@ -1629,7 +1629,54 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
-        Instruct::Final(i) => print_final(w, i),
+        Instruct::QueryM(n, op, mk) => {
+            w.write_all(b"QueryM ")?;
+            print_int(w, n)?;
+            w.write_all(b" ")?;
+            print_query_op(w, *op)?;
+            w.write_all(b" ")?;
+            print_member_key(w, mk)
+        }
+        Instruct::UnsetM(n, mk) => {
+            w.write_all(b"UnsetM ")?;
+            print_int(w, n)?;
+            w.write_all(b" ")?;
+            print_member_key(w, mk)
+        }
+        Instruct::SetM(i, mk) => {
+            w.write_all(b"SetM ")?;
+            print_int(w, i)?;
+            w.write_all(b" ")?;
+            print_member_key(w, mk)
+        }
+        Instruct::SetOpM(i, op, mk) => {
+            w.write_all(b"SetOpM ")?;
+            print_int(w, i)?;
+            w.write_all(b" ")?;
+            print_eq_op(w, op)?;
+            w.write_all(b" ")?;
+            print_member_key(w, mk)
+        }
+        Instruct::IncDecM(i, op, mk) => {
+            w.write_all(b"IncDecM ")?;
+            print_int(w, i)?;
+            w.write_all(b" ")?;
+            print_incdec_op(w, op)?;
+            w.write_all(b" ")?;
+            print_member_key(w, mk)
+        }
+        Instruct::SetRangeM(i, s, op) => {
+            w.write_all(b"SetRangeM ")?;
+            print_int(w, i)?;
+            w.write_all(b" ")?;
+            print_int(w, &(*s as usize))?;
+            w.write_all(b" ")?;
+            w.write_all(match *op {
+                SetRangeOp::Forward => b"Forward",
+                SetRangeOp::Reverse => b"Reverse",
+                _ => panic!("Enum value does not match one of listed variants"),
+            })
+        }
         Instruct::TryCatchBegin => w.write_all(b".try {"),
         Instruct::TryCatchMiddle => w.write_all(b"} .catch {"),
         Instruct::TryCatchEnd => w.write_all(b"}"),
@@ -1761,60 +1808,6 @@ fn print_query_op(w: &mut dyn Write, q: QueryMOp) -> Result<()> {
         QueryMOp::InOut => b"InOut",
         _ => panic!("Enum value does not match one of listed variants"),
     })
-}
-
-fn print_final(w: &mut dyn Write, f: &InstructFinal<'_>) -> Result<()> {
-    use InstructFinal as F;
-    match f {
-        F::QueryM(n, op, mk) => {
-            w.write_all(b"QueryM ")?;
-            print_int(w, n)?;
-            w.write_all(b" ")?;
-            print_query_op(w, *op)?;
-            w.write_all(b" ")?;
-            print_member_key(w, mk)
-        }
-        F::UnsetM(n, mk) => {
-            w.write_all(b"UnsetM ")?;
-            print_int(w, n)?;
-            w.write_all(b" ")?;
-            print_member_key(w, mk)
-        }
-        F::SetM(i, mk) => {
-            w.write_all(b"SetM ")?;
-            print_int(w, i)?;
-            w.write_all(b" ")?;
-            print_member_key(w, mk)
-        }
-        F::SetOpM(i, op, mk) => {
-            w.write_all(b"SetOpM ")?;
-            print_int(w, i)?;
-            w.write_all(b" ")?;
-            print_eq_op(w, op)?;
-            w.write_all(b" ")?;
-            print_member_key(w, mk)
-        }
-        F::IncDecM(i, op, mk) => {
-            w.write_all(b"IncDecM ")?;
-            print_int(w, i)?;
-            w.write_all(b" ")?;
-            print_incdec_op(w, op)?;
-            w.write_all(b" ")?;
-            print_member_key(w, mk)
-        }
-        F::SetRangeM(i, s, op) => {
-            w.write_all(b"SetRangeM ")?;
-            print_int(w, i)?;
-            w.write_all(b" ")?;
-            print_int(w, &(*s as usize))?;
-            w.write_all(b" ")?;
-            w.write_all(match *op {
-                SetRangeOp::Forward => b"Forward",
-                SetRangeOp::Reverse => b"Reverse",
-                _ => panic!("Enum value does not match one of listed variants"),
-            })
-        }
-    }
 }
 
 fn print_istype_op(w: &mut dyn Write, op: &IsTypeOp) -> Result<()> {

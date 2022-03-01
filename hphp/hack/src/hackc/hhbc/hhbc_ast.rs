@@ -131,17 +131,6 @@ pub enum HasGenericsOp {
     HasGenerics,
 }
 
-#[derive(Clone, Debug)]
-#[repr(C)]
-pub enum InstructFinal<'arena> {
-    QueryM(NumParams, QueryMOp, MemberKey<'arena>),
-    SetM(NumParams, MemberKey<'arena>),
-    IncDecM(NumParams, IncDecOp, MemberKey<'arena>),
-    SetOpM(NumParams, SetOpOp, MemberKey<'arena>),
-    UnsetM(NumParams, MemberKey<'arena>),
-    SetRangeM(NumParams, isize, SetRangeOp),
-}
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
 pub enum ClassishKind {
@@ -468,7 +457,12 @@ pub enum Instruct<'arena> {
     BaseC(StackIndex, MOpMode),
     BaseH,
     Dim(MOpMode, MemberKey<'arena>),
-    Final(InstructFinal<'arena>),
+    QueryM(NumParams, QueryMOp, MemberKey<'arena>),
+    SetM(NumParams, MemberKey<'arena>),
+    IncDecM(NumParams, IncDecOp, MemberKey<'arena>),
+    SetOpM(NumParams, SetOpOp, MemberKey<'arena>),
+    UnsetM(NumParams, MemberKey<'arena>),
+    SetRangeM(NumParams, isize, SetRangeOp),
     Label(Label),
     Comment(Str<'arena>),
     SrcLoc(SrcLoc),
@@ -682,7 +676,12 @@ impl Instruct<'_> {
             | Self::BaseC(_, _)
             | Self::BaseH
             | Self::Dim(_, _)
-            | Self::Final(_)
+            | Self::QueryM(_, _, _)
+            | Self::SetM(_, _)
+            | Self::IncDecM(_, _, _)
+            | Self::SetOpM(_, _, _)
+            | Self::UnsetM(_, _)
+            | Self::SetRangeM(_, _, _)
             | Self::Label(_)
             | Self::TryCatchBegin
             | Self::TryCatchMiddle
@@ -899,7 +898,12 @@ impl Instruct<'_> {
             | Self::BaseC(_, _)
             | Self::BaseH
             | Self::Dim(_, _)
-            | Self::Final(_)
+            | Self::QueryM(_, _, _)
+            | Self::SetM(_, _)
+            | Self::IncDecM(_, _, _)
+            | Self::SetOpM(_, _, _)
+            | Self::UnsetM(_, _)
+            | Self::SetRangeM(_, _, _)
             | Self::Label(_)
             | Self::TryCatchBegin
             | Self::TryCatchMiddle

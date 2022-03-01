@@ -1,0 +1,10 @@
+Parsing[1002] Encountered unexpected text class, was expecting a extends/implements trait attribute.  The experimental feature require class is not supported yet. [1]
+
+requireclass_01.good.php:7:11
+    5 | 
+    6 | trait T {
+[1] 7 |   require class C;
+    8 | }
+    9 | 
+
+1 error found.

@@ -91,6 +91,7 @@ enum UnstableFeatures {
     ContextAliasDeclarationShort,
     MethodTraitDiamond,
     UpcastExpression,
+    RequireClass,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -111,6 +112,7 @@ impl UnstableFeatures {
             UnstableFeatures::ContextAliasDeclarationShort => Preview,
             UnstableFeatures::MethodTraitDiamond => Preview,
             UnstableFeatures::UpcastExpression => Unstable,
+            UnstableFeatures::RequireClass => Unstable,
         }
     }
 }
@@ -5396,6 +5398,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     }
                     _ => {}
                 });
+            }
+            RequireClause(c) => {
+                if c.kind.is_class() {
+                    self.check_can_use_feature(node, &UnstableFeatures::RequireClass)
+                }
             }
             _ => {}
         }

@@ -161,6 +161,10 @@ impl<'a, T: LexableToken, V> Syntax<'a, T, V> {
         self.is_specific_token(TokenKind::Name)
     }
 
+    pub fn is_class(&self) -> bool {
+        self.is_specific_token(TokenKind::Class)
+    }
+
     pub fn is_as_expression(&self) -> bool {
         self.kind() == SyntaxKind::AsExpression
     }

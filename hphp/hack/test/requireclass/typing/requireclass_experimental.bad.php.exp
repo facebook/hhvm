@@ -1,0 +1,4 @@
+File "requireclass_experimental.bad.php", line 5, characters 3-18:
+Cannot use unstable feature: `require_class` (Parsing[1002])
+File "requireclass_experimental.bad.php", line 5, characters 11-15:
+Encountered unexpected text `class`, was expecting a extends/implements trait attribute.  The experimental feature `require class` is not supported yet. (Parsing[1002])

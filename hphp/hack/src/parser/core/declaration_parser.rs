@@ -1117,6 +1117,9 @@ where
         // require-implements-clause:
         //   require  implements  qualified-name  ;
         //
+        // require-class-clause:
+        //   require  class  qualified-name  ;
+        //
         // We must also parse "require extends :foo;"
         // TODO: What about "require extends :foo<int>;" ?
         // TODO: The spec is incomplete; we need to be able to parse
@@ -1126,12 +1129,12 @@ where
         // require extends foo::bar
         // and so on.
         //
-        // ERROR RECOVERY: Detect if the implements/extends, name and semi are
-        // missing.
+        // ERROR RECOVERY: Detect if the implements/extends/class, name and semi
+        // are missing.
         let req = self.assert_token(TokenKind::Require);
         let token_kind = self.peek_token_kind();
         let req_kind = match token_kind {
-            TokenKind::Implements | TokenKind::Extends => {
+            TokenKind::Implements | TokenKind::Extends | TokenKind::Class => {
                 let req_kind_token = self.next_token();
                 S!(make_token, self, req_kind_token)
             }

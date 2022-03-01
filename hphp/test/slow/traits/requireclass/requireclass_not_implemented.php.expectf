@@ -1,0 +1,5 @@
+Fatal error: missing case in "extends/implements trait attribute.  The experimental feature `require class` is not supported yet".
+ %s
+ - unexpected: '"class"'
+ - kind: Token(Class)
+ in %s/requireclass_not_implemented.php on line 1

@@ -200,14 +200,6 @@ pub enum GenCreationExecution {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum AsyncFunctions<'arena> {
-    WHResult,
-    Await,
-    AwaitAll(Maybe<Pair<Local<'arena>, isize>>),
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
 pub struct SrcLoc {
     pub line_begin: isize,
     pub col_begin: isize,
@@ -466,7 +458,9 @@ pub enum Instruct<'arena> {
     Label(Label),
     Comment(Str<'arena>),
     SrcLoc(SrcLoc),
-    Async(AsyncFunctions<'arena>),
+    WHResult,
+    Await,
+    AwaitAll(Maybe<Pair<Local<'arena>, isize>>),
     Generator(GenCreationExecution),
     Incl,
     InclOnce,
@@ -688,7 +682,9 @@ impl Instruct<'_> {
             | Self::TryCatchEnd
             | Self::Comment(_)
             | Self::SrcLoc(_)
-            | Self::Async(_)
+            | Self::WHResult
+            | Self::Await
+            | Self::AwaitAll(_)
             | Self::Generator(_)
             | Self::Incl
             | Self::InclOnce
@@ -910,7 +906,9 @@ impl Instruct<'_> {
             | Self::TryCatchEnd
             | Self::Comment(_)
             | Self::SrcLoc(_)
-            | Self::Async(_)
+            | Self::WHResult
+            | Self::Await
+            | Self::AwaitAll(_)
             | Self::Generator(_)
             | Self::Incl
             | Self::InclOnce

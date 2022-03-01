@@ -232,7 +232,7 @@ pub mod instr {
     }
 
     pub fn whresult<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Async(AsyncFunctions::WHResult))
+        instr(Instruct::WHResult)
     }
 
     pub fn jmp<'a>(label: Label) -> InstrSeq<'a> {
@@ -1034,7 +1034,7 @@ pub mod instr {
     }
 
     pub fn await_<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Async(AsyncFunctions::Await))
+        instr(Instruct::Await)
     }
 
     pub fn yield_<'a>() -> InstrSeq<'a> {
@@ -1050,9 +1050,7 @@ pub mod instr {
     }
 
     pub fn awaitall<'a>(range: Option<(Local<'a>, isize)>) -> InstrSeq<'a> {
-        instr(Instruct::Async(AsyncFunctions::AwaitAll(
-            range_opt_to_maybe(range),
-        )))
+        instr(Instruct::AwaitAll(range_opt_to_maybe(range)))
     }
 
     pub fn label<'a>(label: Label) -> InstrSeq<'a> {

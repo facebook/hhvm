@@ -1686,7 +1686,12 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             ".srcloc {}:{},{}:{};",
             p.line_begin, p.col_begin, p.line_end, p.col_end
         ),
-        Instruct::Async(a) => print_async(w, a),
+        Instruct::WHResult => w.write_all(b"WHResult"),
+        Instruct::Await => w.write_all(b"Await"),
+        Instruct::AwaitAll(Just(Pair(Local::Unnamed(id), count))) => {
+            write!(w, "AwaitAll L:{}+{}", id, count)
+        }
+        Instruct::AwaitAll(Nothing) => w.write_all(b"AwaitAll L:0+0"),
         Instruct::Generator(gen) => print_gen_creation_execution(w, gen),
         Instruct::Incl => w.write_all(b"Incl"),
         Instruct::InclOnce => w.write_all(b"InclOnce"),
@@ -1785,19 +1790,6 @@ fn print_iter_args(w: &mut dyn Write, iter_args: &IterArgs<'_>) -> Result<()> {
 
 fn print_iterator_id(w: &mut dyn Write, i: &IterId) -> Result<()> {
     write!(w, "{}", i)
-}
-
-fn print_async(w: &mut dyn Write, a: &AsyncFunctions<'_>) -> Result<()> {
-    use AsyncFunctions as A;
-    match a {
-        A::WHResult => w.write_all(b"WHResult"),
-        A::Await => w.write_all(b"Await"),
-        A::AwaitAll(Just(Pair(Local::Unnamed(id), count))) => {
-            write!(w, "AwaitAll L:{}+{}", id, count)
-        }
-        A::AwaitAll(Nothing) => w.write_all(b"AwaitAll L:0+0"),
-        _ => Err(Error::fail("AwaitAll needs an unnamed local").into()),
-    }
 }
 
 fn print_query_op(w: &mut dyn Write, q: QueryMOp) -> Result<()> {

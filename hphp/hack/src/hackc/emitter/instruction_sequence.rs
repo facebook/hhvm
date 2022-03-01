@@ -290,59 +290,59 @@ pub mod instr {
     }
 
     pub fn eq<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Eq))
+        instr(Instruct::Eq)
     }
 
     pub fn neq<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Neq))
+        instr(Instruct::Neq)
     }
 
     pub fn gt<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Gt))
+        instr(Instruct::Gt)
     }
 
     pub fn gte<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Gte))
+        instr(Instruct::Gte)
     }
 
     pub fn lt<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Lt))
+        instr(Instruct::Lt)
     }
 
     pub fn lte<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Lte))
+        instr(Instruct::Lte)
     }
 
     pub fn concat<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Concat))
+        instr(Instruct::Concat)
     }
 
     pub fn concatn<'a>(n: isize) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::ConcatN(n)))
+        instr(Instruct::ConcatN(n))
     }
 
     pub fn print<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Print))
+        instr(Instruct::Print)
     }
 
     pub fn cast_dict<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::CastDict))
+        instr(Instruct::CastDict)
     }
 
     pub fn cast_string<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::CastString))
+        instr(Instruct::CastString)
     }
 
     pub fn cast_int<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::CastInt))
+        instr(Instruct::CastInt)
     }
 
     pub fn cast_bool<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::CastBool))
+        instr(Instruct::CastBool)
     }
 
     pub fn cast_double<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::CastDouble))
+        instr(Instruct::CastDouble)
     }
 
     pub fn retc<'a>() -> InstrSeq<'a> {
@@ -378,23 +378,23 @@ pub mod instr {
     }
 
     pub fn instanceofd<'a>(s: ClassId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::InstanceOfD(s)))
+        instr(Instruct::InstanceOfD(s))
     }
 
     pub fn instanceof<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::InstanceOf))
+        instr(Instruct::InstanceOf)
     }
 
     pub fn islateboundcls<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::IsLateBoundCls))
+        instr(Instruct::IsLateBoundCls)
     }
 
     pub fn istypestructc<'a>(mode: TypeStructResolveOp) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::IsTypeStructC(mode)))
+        instr(Instruct::IsTypeStructC(mode))
     }
 
     pub fn throwastypestructexception<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::ThrowAsTypeStructException))
+        instr(Instruct::ThrowAsTypeStructException)
     }
 
     pub fn throw_non_exhaustive_switch<'a>() -> InstrSeq<'a> {
@@ -408,9 +408,7 @@ pub mod instr {
     }
 
     pub fn combine_and_resolve_type_struct<'a>(i: isize) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::CombineAndResolveTypeStruct(
-            i,
-        )))
+        instr(Instruct::CombineAndResolveTypeStruct(i))
     }
 
     pub fn record_reified_generic<'a>() -> InstrSeq<'a> {
@@ -463,79 +461,79 @@ pub mod instr {
     }
 
     pub fn add<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Add))
+        instr(Instruct::Add)
     }
 
     pub fn addo<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::AddO))
+        instr(Instruct::AddO)
     }
 
     pub fn sub<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Sub))
+        instr(Instruct::Sub)
     }
 
     pub fn subo<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::SubO))
+        instr(Instruct::SubO)
     }
 
     pub fn mul<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Mul))
+        instr(Instruct::Mul)
     }
 
     pub fn mulo<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::MulO))
+        instr(Instruct::MulO)
     }
 
     pub fn shl<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Shl))
+        instr(Instruct::Shl)
     }
 
     pub fn shr<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Shr))
+        instr(Instruct::Shr)
     }
 
     pub fn cmp<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Cmp))
+        instr(Instruct::Cmp)
     }
 
     pub fn mod_<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Mod))
+        instr(Instruct::Mod)
     }
 
     pub fn div<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Div))
+        instr(Instruct::Div)
     }
 
     pub fn same<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Same))
+        instr(Instruct::Same)
     }
 
     pub fn pow<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Pow))
+        instr(Instruct::Pow)
     }
 
     pub fn nsame<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::NSame))
+        instr(Instruct::NSame)
     }
 
     pub fn not<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Not))
+        instr(Instruct::Not)
     }
 
     pub fn bitnot<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::BitNot))
+        instr(Instruct::BitNot)
     }
 
     pub fn bitand<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::BitAnd))
+        instr(Instruct::BitAnd)
     }
 
     pub fn bitor<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::BitOr))
+        instr(Instruct::BitOr)
     }
 
     pub fn bitxor<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::BitXor))
+        instr(Instruct::BitXor)
     }
 
     pub fn sets<'a>(readonly_op: ReadonlyOp) -> InstrSeq<'a> {
@@ -745,7 +743,7 @@ pub mod instr {
     }
 
     pub fn clone<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Clone))
+        instr(Instruct::Clone)
     }
 
     pub fn newstructdict<'a>(alloc: &'a bumpalo::Bump, keys: &'a [&'a str]) -> InstrSeq<'a> {
@@ -1023,51 +1021,43 @@ pub mod instr {
     }
 
     pub fn resolve_func<'a>(func_id: FunctionId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::ResolveFunc(func_id)))
+        instr(Instruct::ResolveFunc(func_id))
     }
 
     pub fn resolve_rfunc<'a>(func_id: FunctionId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::ResolveRFunc(func_id)))
+        instr(Instruct::ResolveRFunc(func_id))
     }
 
     pub fn resolveclsmethod<'a>(method_id: MethodId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::ResolveClsMethod(method_id)))
+        instr(Instruct::ResolveClsMethod(method_id))
     }
 
     pub fn resolveclsmethodd<'a>(class_id: ClassId<'a>, method_id: MethodId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::ResolveClsMethodD(
-            class_id, method_id,
-        )))
+        instr(Instruct::ResolveClsMethodD(class_id, method_id))
     }
 
     pub fn resolveclsmethods<'a>(scref: SpecialClsRef, method_id: MethodId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::ResolveClsMethodS(
-            scref, method_id,
-        )))
+        instr(Instruct::ResolveClsMethodS(scref, method_id))
     }
 
     pub fn resolverclsmethod<'a>(method_id: MethodId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::ResolveRClsMethod(method_id)))
+        instr(Instruct::ResolveRClsMethod(method_id))
     }
 
     pub fn resolverclsmethodd<'a>(class_id: ClassId<'a>, method_id: MethodId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::ResolveRClsMethodD(
-            class_id, method_id,
-        )))
+        instr(Instruct::ResolveRClsMethodD(class_id, method_id))
     }
 
     pub fn resolverclsmethods<'a>(scref: SpecialClsRef, method_id: MethodId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::ResolveRClsMethodS(
-            scref, method_id,
-        )))
+        instr(Instruct::ResolveRClsMethodS(scref, method_id))
     }
 
     pub fn resolve_meth_caller<'a>(fun_id: FunctionId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::ResolveMethCaller(fun_id)))
+        instr(Instruct::ResolveMethCaller(fun_id))
     }
 
     pub fn resolveclass<'a>(class_id: ClassId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::ResolveClass(class_id)))
+        instr(Instruct::ResolveClass(class_id))
     }
 
     pub fn lazyclass<'a>(class_id: ClassId<'a>) -> InstrSeq<'a> {
@@ -1079,7 +1069,7 @@ pub mod instr {
     }
 
     pub fn fatal<'a>(op: FatalOp) -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Fatal(op)))
+        instr(Instruct::Fatal(op))
     }
 
     pub fn await_<'a>() -> InstrSeq<'a> {
@@ -1136,7 +1126,7 @@ pub mod instr {
     }
 
     pub fn exit<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::Exit))
+        instr(Instruct::Exit)
     }
 
     pub fn idx<'a>() -> InstrSeq<'a> {
@@ -1241,15 +1231,11 @@ pub mod instr {
     }
 
     pub fn is_type_structc_resolve<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::IsTypeStructC(
-            TypeStructResolveOp::Resolve,
-        )))
+        instr(Instruct::IsTypeStructC(TypeStructResolveOp::Resolve))
     }
 
     pub fn is_type_structc_dontresolve<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Op(InstructOperator::IsTypeStructC(
-            TypeStructResolveOp::DontResolve,
-        )))
+        instr(Instruct::IsTypeStructC(TypeStructResolveOp::DontResolve))
     }
 }
 

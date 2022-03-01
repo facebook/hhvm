@@ -3074,15 +3074,15 @@ fn get_call_builtin_func_info<'arena, 'decl>(
     match id.as_ref() {
         "array_key_exists" => Some((2, Instruct::Misc(InstructMisc::AKExists))),
         "hphp_array_idx" => Some((3, Instruct::Misc(InstructMisc::ArrayIdx))),
-        "intval" => Some((1, Instruct::Op(InstructOperator::CastInt))),
-        "boolval" => Some((1, Instruct::Op(InstructOperator::CastBool))),
-        "strval" => Some((1, Instruct::Op(InstructOperator::CastString))),
-        "floatval" | "doubleval" => Some((1, Instruct::Op(InstructOperator::CastDouble))),
-        "HH\\vec" => Some((1, Instruct::Op(InstructOperator::CastVec))),
-        "HH\\keyset" => Some((1, Instruct::Op(InstructOperator::CastKeyset))),
-        "HH\\dict" => Some((1, Instruct::Op(InstructOperator::CastDict))),
-        "HH\\varray" => Some((1, Instruct::Op(InstructOperator::CastVec))),
-        "HH\\darray" => Some((1, Instruct::Op(InstructOperator::CastDict))),
+        "intval" => Some((1, Instruct::CastInt)),
+        "boolval" => Some((1, Instruct::CastBool)),
+        "strval" => Some((1, Instruct::CastString)),
+        "floatval" | "doubleval" => Some((1, Instruct::CastDouble)),
+        "HH\\vec" => Some((1, Instruct::CastVec)),
+        "HH\\keyset" => Some((1, Instruct::CastKeyset)),
+        "HH\\dict" => Some((1, Instruct::CastDict)),
+        "HH\\varray" => Some((1, Instruct::CastVec)),
+        "HH\\darray" => Some((1, Instruct::CastDict)),
         "HH\\ImplicitContext\\_Private\\set_implicit_context_by_value" if e.systemlib() => {
             Some((1, Instruct::Misc(InstructMisc::SetImplicitContextByValue)))
         }

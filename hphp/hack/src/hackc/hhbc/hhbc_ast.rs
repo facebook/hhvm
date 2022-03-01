@@ -171,65 +171,6 @@ pub enum InstructLitConst<'arena> {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum InstructOperator<'arena> {
-    Concat,
-    ConcatN(isize),
-    Add,
-    Sub,
-    Mul,
-    AddO,
-    SubO,
-    MulO,
-    Div,
-    Mod,
-    Pow,
-    Not,
-    Same,
-    NSame,
-    Eq,
-    Neq,
-    Lt,
-    Lte,
-    Gt,
-    Gte,
-    Cmp,
-    BitAnd,
-    BitOr,
-    BitXor,
-    BitNot,
-    Shl,
-    Shr,
-    CastBool,
-    CastInt,
-    CastDouble,
-    CastString,
-    CastVec,
-    CastDict,
-    CastKeyset,
-    InstanceOf,
-    InstanceOfD(ClassId<'arena>),
-    IsLateBoundCls,
-    IsTypeStructC(TypeStructResolveOp),
-    ThrowAsTypeStructException,
-    CombineAndResolveTypeStruct(isize),
-    Print,
-    Clone,
-    Exit,
-    Fatal(FatalOp),
-    ResolveFunc(FunctionId<'arena>),
-    ResolveRFunc(FunctionId<'arena>),
-    ResolveMethCaller(FunctionId<'arena>),
-    ResolveClsMethod(MethodId<'arena>),
-    ResolveClsMethodD(ClassId<'arena>, MethodId<'arena>),
-    ResolveClsMethodS(SpecialClsRef, MethodId<'arena>),
-    ResolveRClsMethod(MethodId<'arena>),
-    ResolveRClsMethodD(ClassId<'arena>, MethodId<'arena>),
-    ResolveRClsMethodS(SpecialClsRef, MethodId<'arena>),
-    ResolveClass(ClassId<'arena>),
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
 pub enum InstructGet<'arena> {
     CGetL(Local<'arena>),
     CGetQuietL(Local<'arena>),
@@ -625,7 +566,60 @@ pub enum Instruct<'arena> {
     IterNext(IterArgs<'arena>, Label),
     IterFree(IterId),
     LitConst(InstructLitConst<'arena>),
-    Op(InstructOperator<'arena>),
+    Concat,
+    ConcatN(isize),
+    Add,
+    Sub,
+    Mul,
+    AddO,
+    SubO,
+    MulO,
+    Div,
+    Mod,
+    Pow,
+    Not,
+    Same,
+    NSame,
+    Eq,
+    Neq,
+    Lt,
+    Lte,
+    Gt,
+    Gte,
+    Cmp,
+    BitAnd,
+    BitOr,
+    BitXor,
+    BitNot,
+    Shl,
+    Shr,
+    CastBool,
+    CastInt,
+    CastDouble,
+    CastString,
+    CastVec,
+    CastDict,
+    CastKeyset,
+    InstanceOf,
+    InstanceOfD(ClassId<'arena>),
+    IsLateBoundCls,
+    IsTypeStructC(TypeStructResolveOp),
+    ThrowAsTypeStructException,
+    CombineAndResolveTypeStruct(isize),
+    Print,
+    Clone,
+    Exit,
+    Fatal(FatalOp),
+    ResolveFunc(FunctionId<'arena>),
+    ResolveRFunc(FunctionId<'arena>),
+    ResolveMethCaller(FunctionId<'arena>),
+    ResolveClsMethod(MethodId<'arena>),
+    ResolveClsMethodD(ClassId<'arena>, MethodId<'arena>),
+    ResolveClsMethodS(SpecialClsRef, MethodId<'arena>),
+    ResolveRClsMethod(MethodId<'arena>),
+    ResolveRClsMethodD(ClassId<'arena>, MethodId<'arena>),
+    ResolveRClsMethodS(SpecialClsRef, MethodId<'arena>),
+    ResolveClass(ClassId<'arena>),
     Jmp(Label),
     JmpNS(Label),
     JmpZ(Label),
@@ -699,7 +693,60 @@ impl Instruct<'_> {
             | Self::Dup
             | Self::IterFree(_)
             | Self::LitConst(_)
-            | Self::Op(_)
+            | Self::Concat
+            | Self::ConcatN(_)
+            | Self::Add
+            | Self::Sub
+            | Self::Mul
+            | Self::AddO
+            | Self::SubO
+            | Self::MulO
+            | Self::Div
+            | Self::Mod
+            | Self::Pow
+            | Self::Not
+            | Self::Same
+            | Self::NSame
+            | Self::Eq
+            | Self::Neq
+            | Self::Lt
+            | Self::Lte
+            | Self::Gt
+            | Self::Gte
+            | Self::Cmp
+            | Self::BitAnd
+            | Self::BitOr
+            | Self::BitXor
+            | Self::BitNot
+            | Self::Shl
+            | Self::Shr
+            | Self::CastBool
+            | Self::CastInt
+            | Self::CastDouble
+            | Self::CastString
+            | Self::CastVec
+            | Self::CastDict
+            | Self::CastKeyset
+            | Self::InstanceOf
+            | Self::InstanceOfD(_)
+            | Self::IsLateBoundCls
+            | Self::IsTypeStructC(_)
+            | Self::ThrowAsTypeStructException
+            | Self::CombineAndResolveTypeStruct(_)
+            | Self::Print
+            | Self::Clone
+            | Self::Exit
+            | Self::Fatal(_)
+            | Self::ResolveFunc(_)
+            | Self::ResolveRFunc(_)
+            | Self::ResolveMethCaller(_)
+            | Self::ResolveClsMethod(_)
+            | Self::ResolveClsMethodD(_, _)
+            | Self::ResolveClsMethodS(_, _)
+            | Self::ResolveRClsMethod(_)
+            | Self::ResolveRClsMethodD(_, _)
+            | Self::ResolveRClsMethodS(_, _)
+            | Self::ResolveClass(_)
             | Self::Continue(_)
             | Self::Break(_)
             | Self::New(_)
@@ -750,7 +797,60 @@ impl Instruct<'_> {
             | Self::Dup
             | Self::IterFree(_)
             | Self::LitConst(_)
-            | Self::Op(_)
+            | Self::Concat
+            | Self::ConcatN(_)
+            | Self::Add
+            | Self::Sub
+            | Self::Mul
+            | Self::AddO
+            | Self::SubO
+            | Self::MulO
+            | Self::Div
+            | Self::Mod
+            | Self::Pow
+            | Self::Not
+            | Self::Same
+            | Self::NSame
+            | Self::Eq
+            | Self::Neq
+            | Self::Lt
+            | Self::Lte
+            | Self::Gt
+            | Self::Gte
+            | Self::Cmp
+            | Self::BitAnd
+            | Self::BitOr
+            | Self::BitXor
+            | Self::BitNot
+            | Self::Shl
+            | Self::Shr
+            | Self::CastBool
+            | Self::CastInt
+            | Self::CastDouble
+            | Self::CastString
+            | Self::CastVec
+            | Self::CastDict
+            | Self::CastKeyset
+            | Self::InstanceOf
+            | Self::InstanceOfD(_)
+            | Self::IsLateBoundCls
+            | Self::IsTypeStructC(_)
+            | Self::ThrowAsTypeStructException
+            | Self::CombineAndResolveTypeStruct(_)
+            | Self::Print
+            | Self::Clone
+            | Self::Exit
+            | Self::Fatal(_)
+            | Self::ResolveFunc(_)
+            | Self::ResolveRFunc(_)
+            | Self::ResolveMethCaller(_)
+            | Self::ResolveClsMethod(_)
+            | Self::ResolveClsMethodD(_, _)
+            | Self::ResolveClsMethodS(_, _)
+            | Self::ResolveRClsMethod(_)
+            | Self::ResolveRClsMethodD(_, _)
+            | Self::ResolveRClsMethodS(_, _)
+            | Self::ResolveClass(_)
             | Self::Continue(_)
             | Self::Break(_)
             | Self::New(_)

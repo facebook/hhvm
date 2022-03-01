@@ -1165,7 +1165,116 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
         Instruct::PopU => w.write_all(b"PopU"),
         Instruct::Dup => w.write_all(b"Dup"),
         Instruct::LitConst(lit) => print_lit_const(w, lit),
-        Instruct::Op(op) => print_op(w, op),
+        Instruct::Concat => w.write_all(b"Concat"),
+        Instruct::ConcatN(n) => concat_str_by(w, " ", ["ConcatN", n.to_string().as_str()]),
+        Instruct::Add => w.write_all(b"Add"),
+        Instruct::Sub => w.write_all(b"Sub"),
+        Instruct::Mul => w.write_all(b"Mul"),
+        Instruct::AddO => w.write_all(b"AddO"),
+        Instruct::SubO => w.write_all(b"SubO"),
+        Instruct::MulO => w.write_all(b"MulO"),
+        Instruct::Div => w.write_all(b"Div"),
+        Instruct::Mod => w.write_all(b"Mod"),
+        Instruct::Pow => w.write_all(b"Pow"),
+        Instruct::Not => w.write_all(b"Not"),
+        Instruct::Same => w.write_all(b"Same"),
+        Instruct::NSame => w.write_all(b"NSame"),
+        Instruct::Eq => w.write_all(b"Eq"),
+        Instruct::Neq => w.write_all(b"Neq"),
+        Instruct::Lt => w.write_all(b"Lt"),
+        Instruct::Lte => w.write_all(b"Lte"),
+        Instruct::Gt => w.write_all(b"Gt"),
+        Instruct::Gte => w.write_all(b"Gte"),
+        Instruct::Cmp => w.write_all(b"Cmp"),
+        Instruct::BitAnd => w.write_all(b"BitAnd"),
+        Instruct::BitOr => w.write_all(b"BitOr"),
+        Instruct::BitXor => w.write_all(b"BitXor"),
+        Instruct::BitNot => w.write_all(b"BitNot"),
+        Instruct::Shl => w.write_all(b"Shl"),
+        Instruct::Shr => w.write_all(b"Shr"),
+        Instruct::CastBool => w.write_all(b"CastBool"),
+        Instruct::CastInt => w.write_all(b"CastInt"),
+        Instruct::CastDouble => w.write_all(b"CastDouble"),
+        Instruct::CastString => w.write_all(b"CastString"),
+        Instruct::CastVec => w.write_all(b"CastVec"),
+        Instruct::CastDict => w.write_all(b"CastDict"),
+        Instruct::CastKeyset => w.write_all(b"CastKeyset"),
+        Instruct::InstanceOf => w.write_all(b"InstanceOf"),
+        Instruct::Print => w.write_all(b"Print"),
+        Instruct::Clone => w.write_all(b"Clone"),
+        Instruct::Exit => w.write_all(b"Exit"),
+        Instruct::InstanceOfD(id) => {
+            w.write_all(b"InstanceOfD ")?;
+            print_class_id(w, id)
+        }
+        Instruct::IsLateBoundCls => w.write_all(b"IsLateBoundCls"),
+        Instruct::IsTypeStructC(op) => concat_str_by(
+            w,
+            " ",
+            [
+                "IsTypeStructC",
+                match *op {
+                    TypeStructResolveOp::Resolve => "Resolve",
+                    TypeStructResolveOp::DontResolve => "DontResolve",
+                    _ => panic!("Enum value does not match one of listed variants"),
+                },
+            ],
+        ),
+        Instruct::ThrowAsTypeStructException => w.write_all(b"ThrowAsTypeStructException"),
+        Instruct::CombineAndResolveTypeStruct(n) => concat_str_by(
+            w,
+            " ",
+            ["CombineAndResolveTypeStruct", n.to_string().as_str()],
+        ),
+        Instruct::ResolveFunc(id) => {
+            w.write_all(b"ResolveFunc ")?;
+            print_function_id(w, id)
+        }
+        Instruct::ResolveRFunc(id) => {
+            w.write_all(b"ResolveRFunc ")?;
+            print_function_id(w, id)
+        }
+        Instruct::ResolveMethCaller(id) => {
+            w.write_all(b"ResolveMethCaller ")?;
+            print_function_id(w, id)
+        }
+        Instruct::ResolveClsMethod(mid) => {
+            w.write_all(b"ResolveClsMethod ")?;
+            print_method_id(w, mid)
+        }
+        Instruct::ResolveClsMethodD(cid, mid) => {
+            w.write_all(b"ResolveClsMethodD ")?;
+            print_class_id(w, cid)?;
+            w.write_all(b" ")?;
+            print_method_id(w, mid)
+        }
+        Instruct::ResolveClsMethodS(r, mid) => {
+            w.write_all(b"ResolveClsMethodS ")?;
+            print_special_cls_ref(w, r)?;
+            w.write_all(b" ")?;
+            print_method_id(w, mid)
+        }
+        Instruct::ResolveRClsMethod(mid) => {
+            w.write_all(b"ResolveRClsMethod ")?;
+            print_method_id(w, mid)
+        }
+        Instruct::ResolveRClsMethodD(cid, mid) => {
+            w.write_all(b"ResolveRClsMethodD ")?;
+            print_class_id(w, cid)?;
+            w.write_all(b" ")?;
+            print_method_id(w, mid)
+        }
+        Instruct::ResolveRClsMethodS(r, mid) => {
+            w.write_all(b"ResolveRClsMethodS ")?;
+            print_special_cls_ref(w, r)?;
+            w.write_all(b" ")?;
+            print_method_id(w, mid)
+        }
+        Instruct::ResolveClass(id) => {
+            w.write_all(b"ResolveClass ")?;
+            print_class_id(w, id)
+        }
+        Instruct::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
         Instruct::RetC => w.write_all(b"RetC"),
         Instruct::RetCSuspended => w.write_all(b"RetCSuspended"),
         Instruct::Throw => w.write_all(b"Throw"),
@@ -1911,122 +2020,6 @@ fn print_shape_fields(w: &mut dyn Write, sf: &[&str]) -> Result<()> {
     concat_by(w, " ", sf, |w, f| {
         quotes(w, |w| w.write_all(escaper::escape(*f).as_bytes()))
     })
-}
-
-fn print_op(w: &mut dyn Write, op: &InstructOperator<'_>) -> Result<()> {
-    use InstructOperator as I;
-    match op {
-        I::Concat => w.write_all(b"Concat"),
-        I::ConcatN(n) => concat_str_by(w, " ", ["ConcatN", n.to_string().as_str()]),
-        I::Add => w.write_all(b"Add"),
-        I::Sub => w.write_all(b"Sub"),
-        I::Mul => w.write_all(b"Mul"),
-        I::AddO => w.write_all(b"AddO"),
-        I::SubO => w.write_all(b"SubO"),
-        I::MulO => w.write_all(b"MulO"),
-        I::Div => w.write_all(b"Div"),
-        I::Mod => w.write_all(b"Mod"),
-        I::Pow => w.write_all(b"Pow"),
-        I::Not => w.write_all(b"Not"),
-        I::Same => w.write_all(b"Same"),
-        I::NSame => w.write_all(b"NSame"),
-        I::Eq => w.write_all(b"Eq"),
-        I::Neq => w.write_all(b"Neq"),
-        I::Lt => w.write_all(b"Lt"),
-        I::Lte => w.write_all(b"Lte"),
-        I::Gt => w.write_all(b"Gt"),
-        I::Gte => w.write_all(b"Gte"),
-        I::Cmp => w.write_all(b"Cmp"),
-        I::BitAnd => w.write_all(b"BitAnd"),
-        I::BitOr => w.write_all(b"BitOr"),
-        I::BitXor => w.write_all(b"BitXor"),
-        I::BitNot => w.write_all(b"BitNot"),
-        I::Shl => w.write_all(b"Shl"),
-        I::Shr => w.write_all(b"Shr"),
-        I::CastBool => w.write_all(b"CastBool"),
-        I::CastInt => w.write_all(b"CastInt"),
-        I::CastDouble => w.write_all(b"CastDouble"),
-        I::CastString => w.write_all(b"CastString"),
-        I::CastVec => w.write_all(b"CastVec"),
-        I::CastDict => w.write_all(b"CastDict"),
-        I::CastKeyset => w.write_all(b"CastKeyset"),
-        I::InstanceOf => w.write_all(b"InstanceOf"),
-        I::InstanceOfD(id) => {
-            w.write_all(b"InstanceOfD ")?;
-            print_class_id(w, id)
-        }
-        I::IsLateBoundCls => w.write_all(b"IsLateBoundCls"),
-        I::IsTypeStructC(op) => concat_str_by(
-            w,
-            " ",
-            [
-                "IsTypeStructC",
-                match *op {
-                    TypeStructResolveOp::Resolve => "Resolve",
-                    TypeStructResolveOp::DontResolve => "DontResolve",
-                    _ => panic!("Enum value does not match one of listed variants"),
-                },
-            ],
-        ),
-        I::ThrowAsTypeStructException => w.write_all(b"ThrowAsTypeStructException"),
-        I::CombineAndResolveTypeStruct(n) => concat_str_by(
-            w,
-            " ",
-            ["CombineAndResolveTypeStruct", n.to_string().as_str()],
-        ),
-        I::Print => w.write_all(b"Print"),
-        I::Clone => w.write_all(b"Clone"),
-        I::Exit => w.write_all(b"Exit"),
-        I::ResolveFunc(id) => {
-            w.write_all(b"ResolveFunc ")?;
-            print_function_id(w, id)
-        }
-        I::ResolveRFunc(id) => {
-            w.write_all(b"ResolveRFunc ")?;
-            print_function_id(w, id)
-        }
-        I::ResolveMethCaller(id) => {
-            w.write_all(b"ResolveMethCaller ")?;
-            print_function_id(w, id)
-        }
-        I::ResolveClsMethod(mid) => {
-            w.write_all(b"ResolveClsMethod ")?;
-            print_method_id(w, mid)
-        }
-        I::ResolveClsMethodD(cid, mid) => {
-            w.write_all(b"ResolveClsMethodD ")?;
-            print_class_id(w, cid)?;
-            w.write_all(b" ")?;
-            print_method_id(w, mid)
-        }
-        I::ResolveClsMethodS(r, mid) => {
-            w.write_all(b"ResolveClsMethodS ")?;
-            print_special_cls_ref(w, r)?;
-            w.write_all(b" ")?;
-            print_method_id(w, mid)
-        }
-        I::ResolveRClsMethod(mid) => {
-            w.write_all(b"ResolveRClsMethod ")?;
-            print_method_id(w, mid)
-        }
-        I::ResolveRClsMethodD(cid, mid) => {
-            w.write_all(b"ResolveRClsMethodD ")?;
-            print_class_id(w, cid)?;
-            w.write_all(b" ")?;
-            print_method_id(w, mid)
-        }
-        I::ResolveRClsMethodS(r, mid) => {
-            w.write_all(b"ResolveRClsMethodS ")?;
-            print_special_cls_ref(w, r)?;
-            w.write_all(b" ")?;
-            print_method_id(w, mid)
-        }
-        I::ResolveClass(id) => {
-            w.write_all(b"ResolveClass ")?;
-            print_class_id(w, id)
-        }
-        I::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
-    }
 }
 
 fn print_fatal_op(w: &mut dyn Write, f: &FatalOp) -> Result<()> {

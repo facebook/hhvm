@@ -10,8 +10,8 @@ use ffi::{
 };
 use hhvm_hhbc_defs_ffi::ffi::{
     BareThisOp, CollectionType, ContCheckOp, FCallArgsFlags, FatalOp, IncDecOp, InitPropOp,
-    IsLogAsDynamicCallOp, IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetRangeOp,
-    SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
+    IsLogAsDynamicCallOp, IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetOpOp,
+    SetRangeOp, SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
 };
 use iterator::IterId;
 use label::Label;
@@ -323,26 +323,6 @@ pub enum InstructIsset<'arena> {
     IsTypeL(Local<'arena>, IsTypeOp),
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
-pub enum EqOp {
-    PlusEqual,
-    MinusEqual,
-    MulEqual,
-    ConcatEqual,
-    DivEqual,
-    PowEqual,
-    ModEqual,
-    AndEqual,
-    OrEqual,
-    XorEqual,
-    SlEqual,
-    SrEqual,
-    PlusEqualO,
-    MinusEqualO,
-    MulEqualO,
-}
-
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum InstructMutator<'arena> {
@@ -351,9 +331,9 @@ pub enum InstructMutator<'arena> {
     PopL(Local<'arena>),
     SetG,
     SetS(ReadonlyOp),
-    SetOpL(Local<'arena>, EqOp),
-    SetOpG(EqOp),
-    SetOpS(EqOp),
+    SetOpL(Local<'arena>, SetOpOp),
+    SetOpG(SetOpOp),
+    SetOpS(SetOpOp),
     IncDecL(Local<'arena>, IncDecOp),
     IncDecG(IncDecOp),
     IncDecS(IncDecOp),
@@ -467,7 +447,7 @@ pub enum InstructFinal<'arena> {
     QueryM(NumParams, QueryMOp, MemberKey<'arena>),
     SetM(NumParams, MemberKey<'arena>),
     IncDecM(NumParams, IncDecOp, MemberKey<'arena>),
-    SetOpM(NumParams, EqOp, MemberKey<'arena>),
+    SetOpM(NumParams, SetOpOp, MemberKey<'arena>),
     UnsetM(NumParams, MemberKey<'arena>),
     SetRangeM(NumParams, isize, SetRangeOp),
 }

@@ -189,6 +189,26 @@ pub mod ffi {
         ImmSet = 0x17,
     }
 
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum SetOpOp {
+        PlusEqual,
+        MinusEqual,
+        MulEqual,
+        ConcatEqual,
+        DivEqual,
+        PowEqual,
+        ModEqual,
+        AndEqual,
+        OrEqual,
+        XorEqual,
+        SlEqual,
+        SrEqual,
+        PlusEqualO,
+        MinusEqualO,
+        MulEqualO,
+    }
+
     unsafe extern "C++" {
         include!("hphp/hack/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.h");
         type BareThisOp;
@@ -204,6 +224,7 @@ pub mod ffi {
         type ObjMethodOp;
         type QueryMOp;
         type ReadonlyOp;
+        type SetOpOp;
         type SetRangeOp;
         type SilenceOp;
         type SpecialClsRef;

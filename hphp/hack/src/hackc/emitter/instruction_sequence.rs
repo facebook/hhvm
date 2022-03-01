@@ -11,8 +11,8 @@ use ffi::{
 use hhbc_ast::*;
 use hhvm_hhbc_defs_ffi::ffi::{
     BareThisOp, CollectionType, ContCheckOp, FatalOp, IncDecOp, InitPropOp, IsLogAsDynamicCallOp,
-    IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SilenceOp, SpecialClsRef, SwitchKind,
-    TypeStructResolveOp,
+    IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetOpOp, SilenceOp, SpecialClsRef,
+    SwitchKind, TypeStructResolveOp,
 };
 use iterator::IterId;
 use label::Label;
@@ -573,15 +573,15 @@ pub mod instr {
         instr(Instruct::Mutator(InstructMutator::IncDecS(op)))
     }
 
-    pub fn setopg<'a>(op: EqOp) -> InstrSeq<'a> {
+    pub fn setopg<'a>(op: SetOpOp) -> InstrSeq<'a> {
         instr(Instruct::Mutator(InstructMutator::SetOpG(op)))
     }
 
-    pub fn setopl<'a>(local: Local<'a>, op: EqOp) -> InstrSeq<'a> {
+    pub fn setopl<'a>(local: Local<'a>, op: SetOpOp) -> InstrSeq<'a> {
         instr(Instruct::Mutator(InstructMutator::SetOpL(local, op)))
     }
 
-    pub fn setops<'a>(op: EqOp) -> InstrSeq<'a> {
+    pub fn setops<'a>(op: SetOpOp) -> InstrSeq<'a> {
         instr(Instruct::Mutator(InstructMutator::SetOpS(op)))
     }
 
@@ -1012,7 +1012,7 @@ pub mod instr {
         instr(Instruct::Final(InstructFinal::UnsetM(num_params, key)))
     }
 
-    pub fn setopm<'a>(num_params: NumParams, op: EqOp, key: MemberKey<'a>) -> InstrSeq<'a> {
+    pub fn setopm<'a>(num_params: NumParams, op: SetOpOp, key: MemberKey<'a>) -> InstrSeq<'a> {
         instr(Instruct::Final(InstructFinal::SetOpM(num_params, op, key)))
     }
 

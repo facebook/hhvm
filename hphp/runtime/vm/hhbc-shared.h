@@ -216,4 +216,31 @@ enum class IncDecOp : uint8_t {
 #undef INCDEC_OP
 };
 
+// Each of the setop ops maps to a binary bytecode op. We have reasons
+// for using distinct bitwise representations, though. This macro records
+// their correspondence for mapping either direction.
+#define SETOP_OPS \
+  SETOP_OP(PlusEqual,   OpAdd) \
+  SETOP_OP(MinusEqual,  OpSub) \
+  SETOP_OP(MulEqual,    OpMul) \
+  SETOP_OP(ConcatEqual, OpConcat) \
+  SETOP_OP(DivEqual,    OpDiv) \
+  SETOP_OP(PowEqual,    OpPow) \
+  SETOP_OP(ModEqual,    OpMod) \
+  SETOP_OP(AndEqual,    OpBitAnd) \
+  SETOP_OP(OrEqual,     OpBitOr) \
+  SETOP_OP(XorEqual,    OpBitXor) \
+  SETOP_OP(SlEqual,     OpShl) \
+  SETOP_OP(SrEqual,     OpShr)  \
+  SETOP_OP(PlusEqualO,  OpAddO) \
+  SETOP_OP(MinusEqualO, OpSubO) \
+  SETOP_OP(MulEqualO,   OpMulO) \
+
+enum class SetOpOp : uint8_t {
+#define SETOP_OP(setOpOp, bcOp) setOpOp,
+  SETOP_OPS
+#undef SETOP_OP
+};
+
+
 }

@@ -14,7 +14,7 @@ use hhbc_id::{class, constant, function, method, prop};
 use hhbc_string_utils as string_utils;
 use hhvm_hhbc_defs_ffi::ffi::{
     BareThisOp, CollectionType, FCallArgsFlags, IncDecOp, IsLogAsDynamicCallOp, IsTypeOp, MOpMode,
-    ObjMethodOp, QueryMOp, ReadonlyOp, SetRangeOp, SpecialClsRef, TypeStructResolveOp,
+    ObjMethodOp, QueryMOp, ReadonlyOp, SetOpOp, SetRangeOp, SpecialClsRef, TypeStructResolveOp,
 };
 use indexmap::IndexSet;
 use instruction_sequence::{
@@ -57,7 +57,7 @@ pub struct EmitJmpResult<'arena> {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LValOp {
     Set,
-    SetOp(EqOp),
+    SetOp(SetOpOp),
     IncDec(IncDecOp),
     Unset,
 }
@@ -4485,33 +4485,33 @@ fn from_unop<'arena>(opts: &Options, op: &ast_defs::Uop) -> Result<InstrSeq<'are
     })
 }
 
-fn binop_to_eqop(opts: &Options, op: &ast_defs::Bop) -> Option<EqOp> {
+fn binop_to_setopop(opts: &Options, op: &ast_defs::Bop) -> Option<SetOpOp> {
     use ast_defs::Bop;
     match op {
         Bop::Plus => Some(if opts.check_int_overflow() {
-            EqOp::PlusEqualO
+            SetOpOp::PlusEqualO
         } else {
-            EqOp::PlusEqual
+            SetOpOp::PlusEqual
         }),
         Bop::Minus => Some(if opts.check_int_overflow() {
-            EqOp::MinusEqualO
+            SetOpOp::MinusEqualO
         } else {
-            EqOp::MinusEqual
+            SetOpOp::MinusEqual
         }),
         Bop::Star => Some(if opts.check_int_overflow() {
-            EqOp::MulEqualO
+            SetOpOp::MulEqualO
         } else {
-            EqOp::MulEqual
+            SetOpOp::MulEqual
         }),
-        Bop::Slash => Some(EqOp::DivEqual),
-        Bop::Starstar => Some(EqOp::PowEqual),
-        Bop::Amp => Some(EqOp::AndEqual),
-        Bop::Bar => Some(EqOp::OrEqual),
-        Bop::Xor => Some(EqOp::XorEqual),
-        Bop::Ltlt => Some(EqOp::SlEqual),
-        Bop::Gtgt => Some(EqOp::SrEqual),
-        Bop::Percent => Some(EqOp::ModEqual),
-        Bop::Dot => Some(EqOp::ConcatEqual),
+        Bop::Slash => Some(SetOpOp::DivEqual),
+        Bop::Starstar => Some(SetOpOp::PowEqual),
+        Bop::Amp => Some(SetOpOp::AndEqual),
+        Bop::Bar => Some(SetOpOp::OrEqual),
+        Bop::Xor => Some(SetOpOp::XorEqual),
+        Bop::Ltlt => Some(SetOpOp::SlEqual),
+        Bop::Gtgt => Some(SetOpOp::SrEqual),
+        Bop::Percent => Some(SetOpOp::ModEqual),
+        Bop::Dot => Some(SetOpOp::ConcatEqual),
         _ => None,
     }
 }
@@ -4755,7 +4755,7 @@ fn emit_binop<'a, 'arena, 'decl>(
         B::Eq(Some(eop)) if eop.is_question_question() => {
             emit_null_coalesce_assignment(e, env, pos, e1, e2)
         }
-        B::Eq(Some(eop)) => match binop_to_eqop(e.options(), eop) {
+        B::Eq(Some(eop)) => match binop_to_setopop(e.options(), eop) {
             None => Err(Unrecoverable("illegal eq op".into())),
             Some(op) => emit_lval_op(e, env, pos, LValOp::SetOp(op), e1, Some(e2), false),
         },

@@ -36,7 +36,7 @@ use hhbc_string_utils::float;
 use hhvm_hhbc_defs_ffi::ffi::{
     fcall_flags_to_string_ffi, BareThisOp, CollectionType, ContCheckOp, FatalOp, IncDecOp,
     InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp,
-    SetRangeOp, SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
+    SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
 };
 use hhvm_types_ffi::ffi::*;
 use iterator::IterId;
@@ -1547,23 +1547,24 @@ fn print_mutator(w: &mut dyn Write, mutator: &InstructMutator<'_>) -> Result<()>
     }
 }
 
-fn print_eq_op(w: &mut dyn Write, op: &EqOp) -> Result<()> {
-    w.write_all(match op {
-        EqOp::PlusEqual => b"PlusEqual",
-        EqOp::MinusEqual => b"MinusEqual",
-        EqOp::MulEqual => b"MulEqual",
-        EqOp::ConcatEqual => b"ConcatEqual",
-        EqOp::DivEqual => b"DivEqual",
-        EqOp::PowEqual => b"PowEqual",
-        EqOp::ModEqual => b"ModEqual",
-        EqOp::AndEqual => b"AndEqual",
-        EqOp::OrEqual => b"OrEqual",
-        EqOp::XorEqual => b"XorEqual",
-        EqOp::SlEqual => b"SlEqual",
-        EqOp::SrEqual => b"SrEqual",
-        EqOp::PlusEqualO => b"PlusEqualO",
-        EqOp::MinusEqualO => b"MinusEqualO",
-        EqOp::MulEqualO => b"MulEqualO",
+fn print_eq_op(w: &mut dyn Write, op: &SetOpOp) -> Result<()> {
+    w.write_all(match *op {
+        SetOpOp::PlusEqual => b"PlusEqual",
+        SetOpOp::MinusEqual => b"MinusEqual",
+        SetOpOp::MulEqual => b"MulEqual",
+        SetOpOp::ConcatEqual => b"ConcatEqual",
+        SetOpOp::DivEqual => b"DivEqual",
+        SetOpOp::PowEqual => b"PowEqual",
+        SetOpOp::ModEqual => b"ModEqual",
+        SetOpOp::AndEqual => b"AndEqual",
+        SetOpOp::OrEqual => b"OrEqual",
+        SetOpOp::XorEqual => b"XorEqual",
+        SetOpOp::SlEqual => b"SlEqual",
+        SetOpOp::SrEqual => b"SrEqual",
+        SetOpOp::PlusEqualO => b"PlusEqualO",
+        SetOpOp::MinusEqualO => b"MinusEqualO",
+        SetOpOp::MulEqualO => b"MulEqualO",
+        _ => panic!("Enum value does not match one of listed variants"),
     })
 }
 

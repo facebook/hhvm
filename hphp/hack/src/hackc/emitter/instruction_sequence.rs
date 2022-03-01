@@ -453,11 +453,11 @@ pub mod instr {
     }
 
     pub fn istypec<'a>(op: IsTypeOp) -> InstrSeq<'a> {
-        instr(Instruct::Isset(InstructIsset::IsTypeC(op)))
+        instr(Instruct::IsTypeC(op))
     }
 
     pub fn istypel<'a>(id: Local<'a>, op: IsTypeOp) -> InstrSeq<'a> {
-        instr(Instruct::Isset(InstructIsset::IsTypeL(id, op)))
+        instr(Instruct::IsTypeL(id, op))
     }
 
     pub fn add<'a>() -> InstrSeq<'a> {
@@ -581,51 +581,51 @@ pub mod instr {
     }
 
     pub fn issetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Isset(InstructIsset::IssetL(local)))
+        instr(Instruct::IssetL(local))
     }
 
     pub fn issetg<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Isset(InstructIsset::IssetG))
+        instr(Instruct::IssetG)
     }
 
     pub fn issets<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Isset(InstructIsset::IssetS))
+        instr(Instruct::IssetS)
     }
 
     pub fn isunsetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Isset(InstructIsset::IsUnsetL(local)))
+        instr(Instruct::IsUnsetL(local))
     }
 
     pub fn cgets<'a>(readonly_op: ReadonlyOp) -> InstrSeq<'a> {
-        instr(Instruct::Get(InstructGet::CGetS(readonly_op)))
+        instr(Instruct::CGetS(readonly_op))
     }
 
     pub fn cgetg<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Get(InstructGet::CGetG))
+        instr(Instruct::CGetG)
     }
 
     pub fn cgetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Get(InstructGet::CGetL(local)))
+        instr(Instruct::CGetL(local))
     }
 
     pub fn cugetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Get(InstructGet::CUGetL(local)))
+        instr(Instruct::CUGetL(local))
     }
 
     pub fn cgetl2<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Get(InstructGet::CGetL2(local)))
+        instr(Instruct::CGetL2(local))
     }
 
     pub fn cgetquietl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Get(InstructGet::CGetQuietL(local)))
+        instr(Instruct::CGetQuietL(local))
     }
 
     pub fn classgetc<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Get(InstructGet::ClassGetC))
+        instr(Instruct::ClassGetC)
     }
 
     pub fn classgetts<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Get(InstructGet::ClassGetTS))
+        instr(Instruct::ClassGetTS)
     }
 
     pub fn classname<'a>() -> InstrSeq<'a> {
@@ -669,7 +669,7 @@ pub mod instr {
     }
 
     pub fn pushl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Get(InstructGet::PushL(local)))
+        instr(Instruct::PushL(local))
     }
 
     pub fn throw<'a>() -> InstrSeq<'a> {

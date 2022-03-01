@@ -3087,9 +3087,9 @@ fn get_call_builtin_func_info<'arena, 'decl>(
             Some((1, Instruct::Misc(InstructMisc::SetImplicitContextByValue)))
         }
         // TODO: enforce that this returns readonly
-        "HH\\global_readonly_get" => Some((1, Instruct::Get(InstructGet::CGetG))),
-        "HH\\global_get" => Some((1, Instruct::Get(InstructGet::CGetG))),
-        "HH\\global_isset" => Some((1, Instruct::Isset(InstructIsset::IssetG))),
+        "HH\\global_readonly_get" => Some((1, Instruct::CGetG)),
+        "HH\\global_get" => Some((1, Instruct::CGetG)),
+        "HH\\global_isset" => Some((1, Instruct::IssetG)),
         _ => None,
     }
 }

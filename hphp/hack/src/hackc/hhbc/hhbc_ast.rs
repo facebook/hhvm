@@ -171,32 +171,6 @@ pub enum InstructLitConst<'arena> {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum InstructGet<'arena> {
-    CGetL(Local<'arena>),
-    CGetQuietL(Local<'arena>),
-    CGetL2(Local<'arena>),
-    CUGetL(Local<'arena>),
-    PushL(Local<'arena>),
-    CGetG,
-    CGetS(ReadonlyOp),
-    ClassGetC,
-    ClassGetTS,
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
-pub enum InstructIsset<'arena> {
-    IssetC,
-    IssetL(Local<'arena>),
-    IssetG,
-    IssetS,
-    IsUnsetL(Local<'arena>),
-    IsTypeC(IsTypeOp),
-    IsTypeL(Local<'arena>, IsTypeOp),
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
 pub enum InstructMutator<'arena> {
     SetL(Local<'arena>),
     /// PopL is put in mutators since it behaves as SetL + PopC
@@ -649,9 +623,23 @@ pub enum Instruct<'arena> {
     Call(InstructCall<'arena>),
     New(InstructNew<'arena>),
     Misc(InstructMisc<'arena>),
-    Get(InstructGet<'arena>),
+    CGetL(Local<'arena>),
+    CGetQuietL(Local<'arena>),
+    CGetL2(Local<'arena>),
+    CUGetL(Local<'arena>),
+    PushL(Local<'arena>),
+    CGetG,
+    CGetS(ReadonlyOp),
+    ClassGetC,
+    ClassGetTS,
     Mutator(InstructMutator<'arena>),
-    Isset(InstructIsset<'arena>),
+    IssetC,
+    IssetL(Local<'arena>),
+    IssetG,
+    IssetS,
+    IsUnsetL(Local<'arena>),
+    IsTypeC(IsTypeOp),
+    IsTypeL(Local<'arena>, IsTypeOp),
     Base(InstructBase<'arena>),
     Final(InstructFinal<'arena>),
     Label(Label),
@@ -750,9 +738,23 @@ impl Instruct<'_> {
             | Self::Continue(_)
             | Self::Break(_)
             | Self::New(_)
-            | Self::Get(_)
+            | Self::CGetL(_)
+            | Self::CGetQuietL(_)
+            | Self::CGetL2(_)
+            | Self::CUGetL(_)
+            | Self::PushL(_)
+            | Self::CGetG
+            | Self::CGetS(_)
+            | Self::ClassGetC
+            | Self::ClassGetTS
             | Self::Mutator(_)
-            | Self::Isset(_)
+            | Self::IssetC
+            | Self::IssetL(_)
+            | Self::IssetG
+            | Self::IssetS
+            | Self::IsUnsetL(_)
+            | Self::IsTypeC(_)
+            | Self::IsTypeL(_, _)
             | Self::Base(_)
             | Self::Final(_)
             | Self::Label(_)
@@ -854,9 +856,23 @@ impl Instruct<'_> {
             | Self::Continue(_)
             | Self::Break(_)
             | Self::New(_)
-            | Self::Get(_)
+            | Self::CGetL(_)
+            | Self::CGetQuietL(_)
+            | Self::CGetL2(_)
+            | Self::CUGetL(_)
+            | Self::PushL(_)
+            | Self::CGetG
+            | Self::CGetS(_)
+            | Self::ClassGetC
+            | Self::ClassGetTS
             | Self::Mutator(_)
-            | Self::Isset(_)
+            | Self::IssetC
+            | Self::IssetL(_)
+            | Self::IssetG
+            | Self::IssetS
+            | Self::IsUnsetL(_)
+            | Self::IsTypeC(_)
+            | Self::IsTypeL(_, _)
             | Self::Base(_)
             | Self::Final(_)
             | Self::Label(_)

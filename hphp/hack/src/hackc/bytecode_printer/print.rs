@@ -1108,39 +1108,6 @@ fn print_call(
     }
 }
 
-fn print_get(w: &mut dyn Write, get: &InstructGet<'_>) -> Result<()> {
-    use InstructGet as IG;
-    match get {
-        IG::CGetL(id) => {
-            w.write_all(b"CGetL ")?;
-            print_local(w, id)
-        }
-        IG::CGetQuietL(id) => {
-            w.write_all(b"CGetQuietL ")?;
-            print_local(w, id)
-        }
-        IG::CGetL2(id) => {
-            w.write_all(b"CGetL2 ")?;
-            print_local(w, id)
-        }
-        IG::CUGetL(id) => {
-            w.write_all(b"CUGetL ")?;
-            print_local(w, id)
-        }
-        IG::PushL(id) => {
-            w.write_all(b"PushL ")?;
-            print_local(w, id)
-        }
-        IG::CGetG => w.write_all(b"CGetG"),
-        IG::CGetS(op) => {
-            w.write_all(b"CGetS ")?;
-            print_readonly_op(w, op)
-        }
-        IG::ClassGetC => w.write_all(b"ClassGetC"),
-        IG::ClassGetTS => w.write_all(b"ClassGetTS"),
-    }
-}
-
 fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
     match instr {
         Instruct::IterInit(iter_args, label) => {
@@ -1306,13 +1273,59 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
         Instruct::Call(c) => print_call(w, c, dv_labels),
         Instruct::New(n) => print_new(w, n),
         Instruct::Misc(misc) => print_misc(w, misc, dv_labels),
-        Instruct::Get(get) => print_get(w, get),
+        Instruct::CGetL(id) => {
+            w.write_all(b"CGetL ")?;
+            print_local(w, id)
+        }
+        Instruct::CGetQuietL(id) => {
+            w.write_all(b"CGetQuietL ")?;
+            print_local(w, id)
+        }
+        Instruct::CGetL2(id) => {
+            w.write_all(b"CGetL2 ")?;
+            print_local(w, id)
+        }
+        Instruct::CUGetL(id) => {
+            w.write_all(b"CUGetL ")?;
+            print_local(w, id)
+        }
+        Instruct::PushL(id) => {
+            w.write_all(b"PushL ")?;
+            print_local(w, id)
+        }
+        Instruct::CGetG => w.write_all(b"CGetG"),
+        Instruct::CGetS(op) => {
+            w.write_all(b"CGetS ")?;
+            print_readonly_op(w, op)
+        }
+        Instruct::ClassGetC => w.write_all(b"ClassGetC"),
+        Instruct::ClassGetTS => w.write_all(b"ClassGetTS"),
         Instruct::Mutator(mutator) => print_mutator(w, mutator),
         Instruct::Label(l) => {
             print_label(w, l, dv_labels)?;
             w.write_all(b":")
         }
-        Instruct::Isset(i) => print_isset(w, i),
+        Instruct::IssetC => w.write_all(b"IssetC"),
+        Instruct::IssetL(local) => {
+            w.write_all(b"IssetL ")?;
+            print_local(w, local)
+        }
+        Instruct::IsUnsetL(local) => {
+            w.write_all(b"IsUnsetL ")?;
+            print_local(w, local)
+        }
+        Instruct::IssetG => w.write_all(b"IssetG"),
+        Instruct::IssetS => w.write_all(b"IssetS"),
+        Instruct::IsTypeC(op) => {
+            w.write_all(b"IsTypeC ")?;
+            print_istype_op(w, op)
+        }
+        Instruct::IsTypeL(local, op) => {
+            w.write_all(b"IsTypeL ")?;
+            print_local(w, local)?;
+            w.write_all(b" ")?;
+            print_istype_op(w, op)
+        }
         Instruct::Base(i) => print_base(w, i),
         Instruct::Final(i) => print_final(w, i),
         Instruct::TryCatchBegin => w.write_all(b".try {"),
@@ -1547,33 +1560,6 @@ fn print_final(w: &mut dyn Write, f: &InstructFinal<'_>) -> Result<()> {
                 SetRangeOp::Reverse => b"Reverse",
                 _ => panic!("Enum value does not match one of listed variants"),
             })
-        }
-    }
-}
-
-fn print_isset(w: &mut dyn Write, isset: &InstructIsset<'_>) -> Result<()> {
-    use InstructIsset as I;
-    match isset {
-        I::IssetC => w.write_all(b"IssetC"),
-        I::IssetL(local) => {
-            w.write_all(b"IssetL ")?;
-            print_local(w, local)
-        }
-        I::IsUnsetL(local) => {
-            w.write_all(b"IsUnsetL ")?;
-            print_local(w, local)
-        }
-        I::IssetG => w.write_all(b"IssetG"),
-        I::IssetS => w.write_all(b"IssetS"),
-        I::IsTypeC(op) => {
-            w.write_all(b"IsTypeC ")?;
-            print_istype_op(w, op)
-        }
-        I::IsTypeL(local, op) => {
-            w.write_all(b"IsTypeL ")?;
-            print_local(w, local)?;
-            w.write_all(b" ")?;
-            print_istype_op(w, op)
         }
     }
 }

@@ -54,6 +54,8 @@ type t =
 
 type predicate = t
 
+let compare_predicate = compare
+
 let hack_to_string = function
   | ClassConstDeclaration -> "ClassConstDeclaration"
   | ClassConstDefinition -> "ClassConstDefinition"
@@ -86,6 +88,44 @@ let hack_to_string = function
   | TypeConstDefinition -> "TypeConstDefinition"
   | TypedefDeclaration -> "TypedefDeclaration"
   | TypedefDefinition -> "TypedefDefinition"
+
+(* List of all predicates, in the order in which they should appear in the JSON.
+   This guarantee that facts are introduced before they are referenced. *)
+let ordered_all =
+  [
+    Hack MethodOccurrence;
+    Hack NamespaceDeclaration;
+    Hack GlobalConstDeclaration;
+    Hack TypedefDeclaration;
+    Hack InterfaceDeclaration;
+    Hack TraitDeclaration;
+    Hack ClassDeclaration;
+    Hack EnumDeclaration;
+    Hack Enumerator;
+    Hack FunctionDeclaration;
+    Hack TypeConstDeclaration;
+    Hack PropertyDeclaration;
+    Hack ClassConstDeclaration;
+    Hack MethodDeclaration;
+    Hack DeclarationSpan;
+    Hack DeclarationLocation;
+    Hack DeclarationComment;
+    Hack GlobalConstDefinition;
+    Hack TypedefDefinition;
+    Hack InterfaceDefinition;
+    Hack TraitDefinition;
+    Hack ClassDefinition;
+    Hack TypeConstDefinition;
+    Hack PropertyDefinition;
+    Hack ClassConstDefinition;
+    Hack EnumDefinition;
+    Hack FunctionDefinition;
+    Hack MethodDefinition;
+    Hack MethodOverrides;
+    Hack FileXRefs;
+    Hack FileDeclarations;
+    Src FileLines;
+  ]
 
 let src_to_string = function
   | FileLines -> "FileLines"
@@ -134,46 +174,16 @@ let should_cache = function
     true
   | _ -> false
 
+module Map = WrappedMap.Make (struct
+  type t = predicate
+
+  let compare = compare_predicate
+end)
+
 module Fact_acc = struct
   type ownership_unit = string option [@@deriving eq, ord]
 
   type owned_facts = (ownership_unit * json list) list
-
-  (* TODO replace this with a predicate-indexed map *)
-  type glean_json = {
-    classConstDeclaration: owned_facts;
-    classConstDefinition: owned_facts;
-    classDeclaration: owned_facts;
-    classDefinition: owned_facts;
-    declarationComment: owned_facts;
-    declarationLocation: owned_facts;
-    declarationSpan: owned_facts;
-    enumDeclaration: owned_facts;
-    enumDefinition: owned_facts;
-    enumerator: owned_facts;
-    fileDeclarations: owned_facts;
-    fileLines: owned_facts;
-    fileXRefs: owned_facts;
-    functionDeclaration: owned_facts;
-    functionDefinition: owned_facts;
-    globalConstDeclaration: owned_facts;
-    globalConstDefinition: owned_facts;
-    interfaceDeclaration: owned_facts;
-    interfaceDefinition: owned_facts;
-    methodDeclaration: owned_facts;
-    methodDefinition: owned_facts;
-    methodOccurrence: owned_facts;
-    methodOverrides: owned_facts;
-    namespaceDeclaration: owned_facts;
-    propertyDeclaration: owned_facts;
-    propertyDefinition: owned_facts;
-    traitDeclaration: owned_facts;
-    traitDefinition: owned_facts;
-    typeConstDeclaration: owned_facts;
-    typeConstDefinition: owned_facts;
-    typedefDeclaration: owned_facts;
-    typedefDefinition: owned_facts;
-  }
 
   module JsonPredicateMap = WrappedMap.Make (struct
     let compare_json = JsonKey.compare
@@ -184,7 +194,7 @@ module Fact_acc = struct
   end)
 
   type t = {
-    resultJson: glean_json;
+    resultJson: owned_facts Map.t;
     factIds: Fact_id.t JsonPredicateMap.t;
     mutable ownership_unit: ownership_unit;
     ownership: bool;
@@ -206,177 +216,12 @@ module Fact_acc = struct
   let update_glean_json
       predicate json factkey_opt ({ ownership; ownership_unit; _ } as progress)
       =
-    let add = add_to_owned_facts ownership_unit in
-    let resultJson =
-      match predicate with
-      | Hack ClassConstDeclaration ->
-        {
-          progress.resultJson with
-          classConstDeclaration =
-            add json progress.resultJson.classConstDeclaration;
-        }
-      | Hack ClassConstDefinition ->
-        {
-          progress.resultJson with
-          classConstDefinition =
-            add json progress.resultJson.classConstDefinition;
-        }
-      | Hack ClassDeclaration ->
-        {
-          progress.resultJson with
-          classDeclaration = add json progress.resultJson.classDeclaration;
-        }
-      | Hack ClassDefinition ->
-        {
-          progress.resultJson with
-          classDefinition = add json progress.resultJson.classDefinition;
-        }
-      | Hack DeclarationComment ->
-        {
-          progress.resultJson with
-          declarationComment = add json progress.resultJson.declarationComment;
-        }
-      | Hack DeclarationLocation ->
-        {
-          progress.resultJson with
-          declarationLocation = add json progress.resultJson.declarationLocation;
-        }
-      | Hack DeclarationSpan ->
-        {
-          progress.resultJson with
-          declarationSpan = add json progress.resultJson.declarationSpan;
-        }
-      | Hack EnumDeclaration ->
-        {
-          progress.resultJson with
-          enumDeclaration = add json progress.resultJson.enumDeclaration;
-        }
-      | Hack EnumDefinition ->
-        {
-          progress.resultJson with
-          enumDefinition = add json progress.resultJson.enumDefinition;
-        }
-      | Hack Enumerator ->
-        {
-          progress.resultJson with
-          enumerator = add json progress.resultJson.enumerator;
-        }
-      | Hack FileDeclarations ->
-        {
-          progress.resultJson with
-          fileDeclarations = add json progress.resultJson.fileDeclarations;
-        }
-      | Src FileLines ->
-        {
-          progress.resultJson with
-          fileLines = add json progress.resultJson.fileLines;
-        }
-      | Hack FileXRefs ->
-        {
-          progress.resultJson with
-          fileXRefs = add json progress.resultJson.fileXRefs;
-        }
-      | Hack FunctionDeclaration ->
-        {
-          progress.resultJson with
-          functionDeclaration = add json progress.resultJson.functionDeclaration;
-        }
-      | Hack FunctionDefinition ->
-        {
-          progress.resultJson with
-          functionDefinition = add json progress.resultJson.functionDefinition;
-        }
-      | Hack GlobalConstDeclaration ->
-        {
-          progress.resultJson with
-          globalConstDeclaration =
-            add json progress.resultJson.globalConstDeclaration;
-        }
-      | Hack GlobalConstDefinition ->
-        {
-          progress.resultJson with
-          globalConstDefinition =
-            add json progress.resultJson.globalConstDefinition;
-        }
-      | Hack InterfaceDeclaration ->
-        {
-          progress.resultJson with
-          interfaceDeclaration =
-            add json progress.resultJson.interfaceDeclaration;
-        }
-      | Hack InterfaceDefinition ->
-        {
-          progress.resultJson with
-          interfaceDefinition = add json progress.resultJson.interfaceDefinition;
-        }
-      | Hack MethodDeclaration ->
-        {
-          progress.resultJson with
-          methodDeclaration = add json progress.resultJson.methodDeclaration;
-        }
-      | Hack MethodDefinition ->
-        {
-          progress.resultJson with
-          methodDefinition = add json progress.resultJson.methodDefinition;
-        }
-      | Hack MethodOccurrence ->
-        {
-          progress.resultJson with
-          methodOccurrence = add json progress.resultJson.methodOccurrence;
-        }
-      | Hack MethodOverrides ->
-        {
-          progress.resultJson with
-          methodOverrides = add json progress.resultJson.methodOverrides;
-        }
-      | Hack NamespaceDeclaration ->
-        {
-          progress.resultJson with
-          namespaceDeclaration =
-            add json progress.resultJson.namespaceDeclaration;
-        }
-      | Hack PropertyDeclaration ->
-        {
-          progress.resultJson with
-          propertyDeclaration = add json progress.resultJson.propertyDeclaration;
-        }
-      | Hack PropertyDefinition ->
-        {
-          progress.resultJson with
-          propertyDefinition = add json progress.resultJson.propertyDefinition;
-        }
-      | Hack TraitDeclaration ->
-        {
-          progress.resultJson with
-          traitDeclaration = add json progress.resultJson.traitDeclaration;
-        }
-      | Hack TraitDefinition ->
-        {
-          progress.resultJson with
-          traitDefinition = add json progress.resultJson.traitDefinition;
-        }
-      | Hack TypeConstDeclaration ->
-        {
-          progress.resultJson with
-          typeConstDeclaration =
-            add json progress.resultJson.typeConstDeclaration;
-        }
-      | Hack TypeConstDefinition ->
-        {
-          progress.resultJson with
-          typeConstDefinition = add json progress.resultJson.typeConstDefinition;
-        }
-      | Hack TypedefDeclaration ->
-        {
-          progress.resultJson with
-          typedefDeclaration = add json progress.resultJson.typedefDeclaration;
-        }
-      | Hack TypedefDefinition ->
-        {
-          progress.resultJson with
-          typedefDefinition = add json progress.resultJson.typedefDefinition;
-        }
+    let update (opt_key : owned_facts option) : owned_facts option =
+      match opt_key with
+      | Some facts -> Some (add_to_owned_facts ownership_unit json facts)
+      | None -> failwith "All predicate keys should be in the map"
     in
+    let resultJson = Map.update predicate update progress.resultJson in
     let factIds =
       match factkey_opt with
       | None -> progress.factIds
@@ -412,40 +257,7 @@ module Fact_acc = struct
 
   let init ~ownership =
     let resultJson =
-      {
-        classConstDeclaration = [];
-        classConstDefinition = [];
-        classDeclaration = [];
-        classDefinition = [];
-        declarationComment = [];
-        declarationLocation = [];
-        declarationSpan = [];
-        enumDeclaration = [];
-        enumDefinition = [];
-        enumerator = [];
-        fileDeclarations = [];
-        fileLines = [];
-        fileXRefs = [];
-        functionDeclaration = [];
-        functionDefinition = [];
-        globalConstDeclaration = [];
-        globalConstDefinition = [];
-        interfaceDeclaration = [];
-        interfaceDefinition = [];
-        methodDeclaration = [];
-        methodDefinition = [];
-        methodOccurrence = [];
-        methodOverrides = [];
-        namespaceDeclaration = [];
-        propertyDeclaration = [];
-        propertyDefinition = [];
-        traitDeclaration = [];
-        traitDefinition = [];
-        typeConstDeclaration = [];
-        typeConstDefinition = [];
-        typedefDeclaration = [];
-        typedefDefinition = [];
-      }
+      List.fold ordered_all ~init:Map.empty ~f:(fun acc k -> Map.add k [] acc)
     in
     {
       resultJson;
@@ -471,47 +283,10 @@ module Fact_acc = struct
     | false -> [fact_object ~ou:None (List.concat_map owned_facts ~f:snd)]
 
   let to_json ({ ownership; _ } as progress) =
-    let resultJson = progress.resultJson in
     let preds =
-      (* This is the order in which these items appear in the JSON,
-         which is significant because later entries can refer to earlier ones
-         by id only *)
       List.map
-        ~f:(fun (pred, res) -> (to_string pred, res))
-        [
-          (Hack MethodOccurrence, resultJson.methodOccurrence);
-          (Hack NamespaceDeclaration, resultJson.namespaceDeclaration);
-          (Hack GlobalConstDeclaration, resultJson.globalConstDeclaration);
-          (Hack TypedefDeclaration, resultJson.typedefDeclaration);
-          (Hack InterfaceDeclaration, resultJson.interfaceDeclaration);
-          (Hack TraitDeclaration, resultJson.traitDeclaration);
-          (Hack ClassDeclaration, resultJson.classDeclaration);
-          (Hack EnumDeclaration, resultJson.enumDeclaration);
-          (Hack Enumerator, resultJson.enumerator);
-          (Hack FunctionDeclaration, resultJson.functionDeclaration);
-          (Hack TypeConstDeclaration, resultJson.typeConstDeclaration);
-          (Hack PropertyDeclaration, resultJson.propertyDeclaration);
-          (Hack ClassConstDeclaration, resultJson.classConstDeclaration);
-          (Hack MethodDeclaration, resultJson.methodDeclaration);
-          (Hack DeclarationSpan, resultJson.declarationSpan);
-          (Hack DeclarationLocation, resultJson.declarationLocation);
-          (Hack DeclarationComment, resultJson.declarationComment);
-          (Hack GlobalConstDefinition, resultJson.globalConstDefinition);
-          (Hack TypedefDefinition, resultJson.typedefDefinition);
-          (Hack InterfaceDefinition, resultJson.interfaceDefinition);
-          (Hack TraitDefinition, resultJson.traitDefinition);
-          (Hack ClassDefinition, resultJson.classDefinition);
-          (Hack TypeConstDefinition, resultJson.typeConstDefinition);
-          (Hack PropertyDefinition, resultJson.propertyDefinition);
-          (Hack ClassConstDefinition, resultJson.classConstDefinition);
-          (Hack EnumDefinition, resultJson.enumDefinition);
-          (Hack FunctionDefinition, resultJson.functionDefinition);
-          (Hack MethodDefinition, resultJson.methodDefinition);
-          (Hack MethodOverrides, resultJson.methodOverrides);
-          (Hack FileXRefs, resultJson.fileXRefs);
-          (Hack FileDeclarations, resultJson.fileDeclarations);
-          (Src FileLines, resultJson.fileLines);
-        ]
+        ~f:(fun pred -> (to_string pred, Map.find pred progress.resultJson))
+        ordered_all
     in
     List.concat_map preds ~f:(owned_facts_to_json ~ownership)
 end

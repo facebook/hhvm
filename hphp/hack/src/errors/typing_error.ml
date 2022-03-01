@@ -7939,8 +7939,7 @@ end = struct
     @@ of_primary_error
     @@ Primary.Rigid_tvar_escape { pos; what }
 
-  let invalid_type_hint pos =
-    retain_quickfixes @@ of_primary_error @@ Primary.Invalid_type_hint pos
+  let invalid_type_hint pos = of_primary_error @@ Primary.Invalid_type_hint pos
 
   let type_constant_mismatch t =
     retain_quickfixes @@ with_code ~code:Error_code.TypeConstantMismatch t

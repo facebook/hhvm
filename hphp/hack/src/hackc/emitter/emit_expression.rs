@@ -1753,9 +1753,9 @@ fn emit_array_mark_legacy<'a, 'arena, 'decl>(
         instr::empty()
     };
     let mark = if legacy {
-        instr::instr(Instruct::Misc(InstructMisc::ArrayMarkLegacy))
+        instr::instr(Instruct::ArrayMarkLegacy)
     } else {
-        instr::instr(Instruct::Misc(InstructMisc::ArrayUnmarkLegacy))
+        instr::instr(Instruct::ArrayUnmarkLegacy)
     };
     Ok(InstrSeq::gather(vec![
         emit_exprs_and_error_on_inout(e, env, es, "HH\\array_mark_legacy")?,
@@ -3067,8 +3067,8 @@ fn get_call_builtin_func_info<'arena, 'decl>(
     id: impl AsRef<str>,
 ) -> Option<(usize, Instruct<'arena>)> {
     match id.as_ref() {
-        "array_key_exists" => Some((2, Instruct::Misc(InstructMisc::AKExists))),
-        "hphp_array_idx" => Some((3, Instruct::Misc(InstructMisc::ArrayIdx))),
+        "array_key_exists" => Some((2, Instruct::AKExists)),
+        "hphp_array_idx" => Some((3, Instruct::ArrayIdx)),
         "intval" => Some((1, Instruct::CastInt)),
         "boolval" => Some((1, Instruct::CastBool)),
         "strval" => Some((1, Instruct::CastString)),
@@ -3079,7 +3079,7 @@ fn get_call_builtin_func_info<'arena, 'decl>(
         "HH\\varray" => Some((1, Instruct::CastVec)),
         "HH\\darray" => Some((1, Instruct::CastDict)),
         "HH\\ImplicitContext\\_Private\\set_implicit_context_by_value" if e.systemlib() => {
-            Some((1, Instruct::Misc(InstructMisc::SetImplicitContextByValue)))
+            Some((1, Instruct::SetImplicitContextByValue))
         }
         // TODO: enforce that this returns readonly
         "HH\\global_readonly_get" => Some((1, Instruct::CGetG)),

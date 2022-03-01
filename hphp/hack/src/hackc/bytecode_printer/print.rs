@@ -1334,7 +1334,145 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             w.write_all(b"NewObjS ")?;
             print_special_cls_ref(w, r)
         }
-        Instruct::Misc(misc) => print_misc(w, misc, dv_labels),
+        Instruct::This => w.write_all(b"This"),
+        Instruct::CheckThis => w.write_all(b"CheckThis"),
+        Instruct::FuncNumArgs => w.write_all(b"FuncNumArgs"),
+        Instruct::ChainFaults => w.write_all(b"ChainFaults"),
+        Instruct::SetImplicitContextByValue => w.write_all(b"SetImplicitContextByValue"),
+        Instruct::VerifyRetTypeC => w.write_all(b"VerifyRetTypeC"),
+        Instruct::VerifyRetTypeTS => w.write_all(b"VerifyRetTypeTS"),
+        Instruct::Self_ => w.write_all(b"Self"),
+        Instruct::Parent => w.write_all(b"Parent"),
+        Instruct::LateBoundCls => w.write_all(b"LateBoundCls"),
+        Instruct::ClassName => w.write_all(b"ClassName"),
+        Instruct::LazyClassFromClass => w.write_all(b"LazyClassFromClass"),
+        Instruct::RecordReifiedGeneric => w.write_all(b"RecordReifiedGeneric"),
+        Instruct::CheckReifiedGenericMismatch => w.write_all(b"CheckReifiedGenericMismatch"),
+        Instruct::NativeImpl => w.write_all(b"NativeImpl"),
+        Instruct::AKExists => w.write_all(b"AKExists"),
+        Instruct::Idx => w.write_all(b"Idx"),
+        Instruct::ArrayIdx => w.write_all(b"ArrayIdx"),
+        Instruct::ArrayMarkLegacy => w.write_all(b"ArrayMarkLegacy"),
+        Instruct::ArrayUnmarkLegacy => w.write_all(b"ArrayUnmarkLegacy"),
+        Instruct::BreakTraceHint => w.write_all(b"BreakTraceHint"),
+        Instruct::CGetCUNop => w.write_all(b"CGetCUNop"),
+        Instruct::UGetCUNop => w.write_all(b"UGetCUNop"),
+        Instruct::LockObj => w.write_all(b"LockObj"),
+        Instruct::ThrowNonExhaustiveSwitch => w.write_all(b"ThrowNonExhaustiveSwitch"),
+        Instruct::RaiseClassStringConversionWarning => {
+            w.write_all(b"RaiseClassStringConversionWarning")
+        }
+        Instruct::VerifyParamType(id) => {
+            w.write_all(b"VerifyParamType ")?;
+            print_param_id(w, id)
+        }
+        Instruct::VerifyParamTypeTS(id) => {
+            w.write_all(b"VerifyParamTypeTS ")?;
+            print_param_id(w, id)
+        }
+        Instruct::Silence(local, op) => {
+            w.write_all(b"Silence ")?;
+            print_local(w, local)?;
+            w.write_all(b" ")?;
+            match *op {
+                SilenceOp::Start => w.write_all(b"Start"),
+                SilenceOp::End => w.write_all(b"End"),
+                _ => panic!("Enum value does not match one of listed variants"),
+            }
+        }
+        Instruct::VerifyOutType(id) => {
+            w.write_all(b"VerifyOutType ")?;
+            print_param_id(w, id)
+        }
+        Instruct::CreateCl(n, cid) => concat_str_by(
+            w,
+            " ",
+            ["CreateCl", n.to_string().as_str(), cid.to_string().as_str()],
+        ),
+        Instruct::BareThis(op) => concat_str_by(
+            w,
+            " ",
+            [
+                "BareThis",
+                match *op {
+                    BareThisOp::Notice => "Notice",
+                    BareThisOp::NoNotice => "NoNotice",
+                    BareThisOp::NeverNull => "NeverNull",
+                    _ => panic!("Enum value does not match one of listed variants"),
+                },
+            ],
+        ),
+
+        Instruct::MemoGet(label, Just(Pair(Local::Unnamed(first), local_count))) => {
+            w.write_all(b"MemoGet ")?;
+            print_label(w, label, dv_labels)?;
+            write!(w, " L:{}+{}", first, local_count)
+        }
+        Instruct::MemoGet(label, Nothing) => {
+            w.write_all(b"MemoGet ")?;
+            print_label(w, label, dv_labels)?;
+            w.write_all(b" L:0+0")
+        }
+        Instruct::MemoGet(_, _) => Err(Error::fail("MemoGet needs an unnamed local").into()),
+
+        Instruct::MemoSet(Just(Pair(Local::Unnamed(first), local_count))) => {
+            write!(w, "MemoSet L:{}+{}", first, local_count)
+        }
+        Instruct::MemoSet(Nothing) => w.write_all(b"MemoSet L:0+0"),
+        Instruct::MemoSet(_) => Err(Error::fail("MemoSet needs an unnamed local").into()),
+
+        Instruct::MemoGetEager(
+            [label1, label2],
+            Just(Pair(Local::Unnamed(first), local_count)),
+        ) => {
+            w.write_all(b"MemoGetEager ")?;
+            print_label(w, label1, dv_labels)?;
+            w.write_all(b" ")?;
+            print_label(w, label2, dv_labels)?;
+            write!(w, " L:{}+{}", first, local_count)
+        }
+        Instruct::MemoGetEager([label1, label2], Nothing) => {
+            w.write_all(b"MemoGetEager ")?;
+            print_label(w, label1, dv_labels)?;
+            w.write_all(b" ")?;
+            print_label(w, label2, dv_labels)?;
+            w.write_all(b" L:0+0")
+        }
+        Instruct::MemoGetEager(_, _) => {
+            Err(Error::fail("MemoGetEager needs an unnamed local").into())
+        }
+
+        Instruct::MemoSetEager(Just(Pair(Local::Unnamed(first), local_count))) => {
+            write!(w, "MemoSetEager L:{}+{}", first, local_count)
+        }
+        Instruct::MemoSetEager(Nothing) => w.write_all(b"MemoSetEager L:0+0"),
+        Instruct::MemoSetEager(_) => Err(Error::fail("MemoSetEager needs an unnamed local").into()),
+
+        Instruct::OODeclExists(k) => concat_str_by(
+            w,
+            " ",
+            [
+                "OODeclExists",
+                match k {
+                    ClassishKind::Class => "Class",
+                    ClassishKind::Interface => "Interface",
+                    ClassishKind::Trait => "Trait",
+                    ClassishKind::Enum => "Enum",
+                    ClassishKind::EnumClass => "EnumClass",
+                },
+            ],
+        ),
+        Instruct::AssertRATL(local, s) => {
+            w.write_all(b"AssertRATL ")?;
+            print_local(w, local)?;
+            w.write_all(b" ")?;
+            w.write_all(s)
+        }
+        Instruct::AssertRATStk(n, s) => write_bytes!(w, "AssertRATStk {} {}", n, s,),
+        Instruct::GetMemoKeyL(local) => {
+            w.write_all(b"GetMemoKeyL ")?;
+            print_local(w, local)
+        }
         Instruct::CGetL(id) => {
             w.write_all(b"CGetL ")?;
             print_local(w, id)
@@ -1777,148 +1915,6 @@ fn print_gen_creation_execution(w: &mut dyn Write, gen: &GenCreationExecution) -
         G::ContGetReturn => w.write_all(b"ContGetReturn"),
         G::ContCurrent => w.write_all(b"ContCurrent"),
         _ => panic!("Enum value does not match one of listed variants"),
-    }
-}
-
-fn print_misc(
-    w: &mut dyn Write,
-    misc: &InstructMisc<'_>,
-    dv_labels: &HashSet<Label>,
-) -> Result<()> {
-    use InstructMisc as M;
-    match misc {
-        M::This => w.write_all(b"This"),
-        M::CheckThis => w.write_all(b"CheckThis"),
-        M::FuncNumArgs => w.write_all(b"FuncNumArgs"),
-        M::ChainFaults => w.write_all(b"ChainFaults"),
-        M::SetImplicitContextByValue => w.write_all(b"SetImplicitContextByValue"),
-        M::VerifyRetTypeC => w.write_all(b"VerifyRetTypeC"),
-        M::VerifyRetTypeTS => w.write_all(b"VerifyRetTypeTS"),
-        M::Self_ => w.write_all(b"Self"),
-        M::Parent => w.write_all(b"Parent"),
-        M::LateBoundCls => w.write_all(b"LateBoundCls"),
-        M::ClassName => w.write_all(b"ClassName"),
-        M::LazyClassFromClass => w.write_all(b"LazyClassFromClass"),
-        M::RecordReifiedGeneric => w.write_all(b"RecordReifiedGeneric"),
-        M::CheckReifiedGenericMismatch => w.write_all(b"CheckReifiedGenericMismatch"),
-        M::NativeImpl => w.write_all(b"NativeImpl"),
-        M::AKExists => w.write_all(b"AKExists"),
-        M::Idx => w.write_all(b"Idx"),
-        M::ArrayIdx => w.write_all(b"ArrayIdx"),
-        M::ArrayMarkLegacy => w.write_all(b"ArrayMarkLegacy"),
-        M::ArrayUnmarkLegacy => w.write_all(b"ArrayUnmarkLegacy"),
-        M::BreakTraceHint => w.write_all(b"BreakTraceHint"),
-        M::CGetCUNop => w.write_all(b"CGetCUNop"),
-        M::UGetCUNop => w.write_all(b"UGetCUNop"),
-        M::LockObj => w.write_all(b"LockObj"),
-        M::ThrowNonExhaustiveSwitch => w.write_all(b"ThrowNonExhaustiveSwitch"),
-        M::RaiseClassStringConversionWarning => w.write_all(b"RaiseClassStringConversionWarning"),
-        M::VerifyParamType(id) => {
-            w.write_all(b"VerifyParamType ")?;
-            print_param_id(w, id)
-        }
-        M::VerifyParamTypeTS(id) => {
-            w.write_all(b"VerifyParamTypeTS ")?;
-            print_param_id(w, id)
-        }
-        M::Silence(local, op) => {
-            w.write_all(b"Silence ")?;
-            print_local(w, local)?;
-            w.write_all(b" ")?;
-            match *op {
-                SilenceOp::Start => w.write_all(b"Start"),
-                SilenceOp::End => w.write_all(b"End"),
-                _ => panic!("Enum value does not match one of listed variants"),
-            }
-        }
-        M::VerifyOutType(id) => {
-            w.write_all(b"VerifyOutType ")?;
-            print_param_id(w, id)
-        }
-        M::CreateCl(n, cid) => concat_str_by(
-            w,
-            " ",
-            ["CreateCl", n.to_string().as_str(), cid.to_string().as_str()],
-        ),
-        M::BareThis(op) => concat_str_by(
-            w,
-            " ",
-            [
-                "BareThis",
-                match *op {
-                    BareThisOp::Notice => "Notice",
-                    BareThisOp::NoNotice => "NoNotice",
-                    BareThisOp::NeverNull => "NeverNull",
-                    _ => panic!("Enum value does not match one of listed variants"),
-                },
-            ],
-        ),
-
-        M::MemoGet(label, Just(Pair(Local::Unnamed(first), local_count))) => {
-            w.write_all(b"MemoGet ")?;
-            print_label(w, label, dv_labels)?;
-            write!(w, " L:{}+{}", first, local_count)
-        }
-        M::MemoGet(label, Nothing) => {
-            w.write_all(b"MemoGet ")?;
-            print_label(w, label, dv_labels)?;
-            w.write_all(b" L:0+0")
-        }
-        M::MemoGet(_, _) => Err(Error::fail("MemoGet needs an unnamed local").into()),
-
-        M::MemoSet(Just(Pair(Local::Unnamed(first), local_count))) => {
-            write!(w, "MemoSet L:{}+{}", first, local_count)
-        }
-        M::MemoSet(Nothing) => w.write_all(b"MemoSet L:0+0"),
-        M::MemoSet(_) => Err(Error::fail("MemoSet needs an unnamed local").into()),
-
-        M::MemoGetEager([label1, label2], Just(Pair(Local::Unnamed(first), local_count))) => {
-            w.write_all(b"MemoGetEager ")?;
-            print_label(w, label1, dv_labels)?;
-            w.write_all(b" ")?;
-            print_label(w, label2, dv_labels)?;
-            write!(w, " L:{}+{}", first, local_count)
-        }
-        M::MemoGetEager([label1, label2], Nothing) => {
-            w.write_all(b"MemoGetEager ")?;
-            print_label(w, label1, dv_labels)?;
-            w.write_all(b" ")?;
-            print_label(w, label2, dv_labels)?;
-            w.write_all(b" L:0+0")
-        }
-        M::MemoGetEager(_, _) => Err(Error::fail("MemoGetEager needs an unnamed local").into()),
-
-        M::MemoSetEager(Just(Pair(Local::Unnamed(first), local_count))) => {
-            write!(w, "MemoSetEager L:{}+{}", first, local_count)
-        }
-        M::MemoSetEager(Nothing) => w.write_all(b"MemoSetEager L:0+0"),
-        M::MemoSetEager(_) => Err(Error::fail("MemoSetEager needs an unnamed local").into()),
-
-        M::OODeclExists(k) => concat_str_by(
-            w,
-            " ",
-            [
-                "OODeclExists",
-                match k {
-                    ClassishKind::Class => "Class",
-                    ClassishKind::Interface => "Interface",
-                    ClassishKind::Trait => "Trait",
-                    ClassishKind::Enum => "Enum",
-                    ClassishKind::EnumClass => "EnumClass",
-                },
-            ],
-        ),
-        M::AssertRATL(local, s) => {
-            w.write_all(b"AssertRATL ")?;
-            print_local(w, local)?;
-            w.write_all(b" ")?;
-            w.write_all(s)
-        }
-        M::AssertRATStk(n, s) => write_bytes!(w, "AssertRATStk {} {}", n, s,),
-        M::GetMemoKeyL(local) => {
-            w.write_all(b"GetMemoKeyL ")?;
-            print_local(w, local)
-        }
     }
 }
 

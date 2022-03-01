@@ -362,7 +362,7 @@ pub mod instr {
     }
 
     pub fn chain_faults<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::ChainFaults))
+        instr(Instruct::ChainFaults)
     }
 
     pub fn dup<'a>() -> InstrSeq<'a> {
@@ -394,13 +394,11 @@ pub mod instr {
     }
 
     pub fn throw_non_exhaustive_switch<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::ThrowNonExhaustiveSwitch))
+        instr(Instruct::ThrowNonExhaustiveSwitch)
     }
 
     pub fn raise_class_string_conversion_warning<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(
-            InstructMisc::RaiseClassStringConversionWarning,
-        ))
+        instr(Instruct::RaiseClassStringConversionWarning)
     }
 
     pub fn combine_and_resolve_type_struct<'a>(i: isize) -> InstrSeq<'a> {
@@ -408,11 +406,11 @@ pub mod instr {
     }
 
     pub fn record_reified_generic<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::RecordReifiedGeneric))
+        instr(Instruct::RecordReifiedGeneric)
     }
 
     pub fn check_reified_generic_mismatch<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::CheckReifiedGenericMismatch))
+        instr(Instruct::CheckReifiedGenericMismatch)
     }
 
     pub fn int<'a>(i: isize) -> InstrSeq<'a> {
@@ -441,7 +439,7 @@ pub mod instr {
     }
 
     pub fn this<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::This))
+        instr(Instruct::This)
     }
 
     pub fn istypec<'a>(op: IsTypeOp) -> InstrSeq<'a> {
@@ -621,23 +619,23 @@ pub mod instr {
     }
 
     pub fn classname<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::ClassName))
+        instr(Instruct::ClassName)
     }
 
     pub fn lazyclassfromclass<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::LazyClassFromClass))
+        instr(Instruct::LazyClassFromClass)
     }
 
     pub fn self_<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::Self_))
+        instr(Instruct::Self_)
     }
 
     pub fn lateboundcls<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::LateBoundCls))
+        instr(Instruct::LateBoundCls)
     }
 
     pub fn parent<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::Parent))
+        instr(Instruct::Parent)
     }
 
     pub fn popu<'a>() -> InstrSeq<'a> {
@@ -731,7 +729,7 @@ pub mod instr {
     }
 
     pub fn lockobj<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::LockObj))
+        instr(Instruct::LockObj)
     }
 
     pub fn clone<'a>() -> InstrSeq<'a> {
@@ -798,21 +796,21 @@ pub mod instr {
     }
 
     pub fn cgetcunop<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::CGetCUNop))
+        instr(Instruct::CGetCUNop)
     }
 
     pub fn ugetcunop<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::UGetCUNop))
+        instr(Instruct::UGetCUNop)
     }
 
     pub fn memoget<'a>(label: Label, range: Option<(Local<'a>, isize)>) -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::MemoGet(
+        instr(Instruct::MemoGet(
             label,
             match range {
                 Some((fst, snd)) => Just(Pair(fst, snd)),
                 None => Nothing,
             },
-        )))
+        ))
     }
 
     // Factored out to reduce verbosity.
@@ -828,54 +826,50 @@ pub mod instr {
         label2: Label,
         range: Option<(Local<'a>, isize)>,
     ) -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::MemoGetEager(
+        instr(Instruct::MemoGetEager(
             [label1, label2],
             range_opt_to_maybe(range),
-        )))
+        ))
     }
 
     pub fn memoset<'a>(range: Option<(Local<'a>, isize)>) -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::MemoSet(range_opt_to_maybe(
-            range,
-        ))))
+        instr(Instruct::MemoSet(range_opt_to_maybe(range)))
     }
 
     pub fn memoset_eager<'a>(range: Option<(Local<'a>, isize)>) -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::MemoSetEager(
-            range_opt_to_maybe(range),
-        )))
+        instr(Instruct::MemoSetEager(range_opt_to_maybe(range)))
     }
 
     pub fn getmemokeyl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::GetMemoKeyL(local)))
+        instr(Instruct::GetMemoKeyL(local))
     }
 
     pub fn barethis<'a>(notice: BareThisOp) -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::BareThis(notice)))
+        instr(Instruct::BareThis(notice))
     }
 
     pub fn checkthis<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::CheckThis))
+        instr(Instruct::CheckThis)
     }
 
     pub fn verify_ret_type_c<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::VerifyRetTypeC))
+        instr(Instruct::VerifyRetTypeC)
     }
 
     pub fn verify_ret_type_ts<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::VerifyRetTypeTS))
+        instr(Instruct::VerifyRetTypeTS)
     }
 
     pub fn verify_out_type<'a>(i: ParamId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::VerifyOutType(i)))
+        instr(Instruct::VerifyOutType(i))
     }
 
     pub fn verify_param_type<'a>(i: ParamId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::VerifyParamType(i)))
+        instr(Instruct::VerifyParamType(i))
     }
 
     pub fn verify_param_type_ts<'a>(i: ParamId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::VerifyParamTypeTS(i)))
+        instr(Instruct::VerifyParamTypeTS(i))
     }
 
     pub fn dim<'a>(op: MOpMode, key: MemberKey<'a>) -> InstrSeq<'a> {
@@ -1041,7 +1035,7 @@ pub mod instr {
     }
 
     pub fn oodeclexists<'a>(class_kind: ClassishKind) -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::OODeclExists(class_kind)))
+        instr(Instruct::OODeclExists(class_kind))
     }
 
     pub fn fatal<'a>(op: FatalOp) -> InstrSeq<'a> {
@@ -1106,15 +1100,15 @@ pub mod instr {
     }
 
     pub fn idx<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::Idx))
+        instr(Instruct::Idx)
     }
 
     pub fn array_idx<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::ArrayIdx))
+        instr(Instruct::ArrayIdx)
     }
 
     pub fn createcl<'a>(param_num: NumParams, cls_num: ClassNum) -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::CreateCl(param_num, cls_num)))
+        instr(Instruct::CreateCl(param_num, cls_num))
     }
 
     pub fn eval<'a>() -> InstrSeq<'a> {
@@ -1142,14 +1136,11 @@ pub mod instr {
     }
 
     pub fn silence_start<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::Silence(
-            local,
-            SilenceOp::Start,
-        )))
+        instr(Instruct::Silence(local, SilenceOp::Start))
     }
 
     pub fn silence_end<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::Silence(local, SilenceOp::End)))
+        instr(Instruct::Silence(local, SilenceOp::End))
     }
 
     pub fn contcheck_check<'a>() -> InstrSeq<'a> {
@@ -1189,7 +1180,7 @@ pub mod instr {
     }
 
     pub fn nativeimpl<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Misc(InstructMisc::NativeImpl))
+        instr(Instruct::NativeImpl)
     }
 
     pub fn srcloc<'a>(

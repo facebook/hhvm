@@ -228,149 +228,6 @@ impl AsRef<str> for Visibility {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum InstructMisc<'arena> {
-    This,
-    BareThis(BareThisOp),
-    CheckThis,
-    FuncNumArgs,
-    ChainFaults,
-    OODeclExists(ClassishKind),
-    VerifyParamType(ParamId<'arena>),
-    VerifyParamTypeTS(ParamId<'arena>),
-    VerifyOutType(ParamId<'arena>),
-    VerifyRetTypeC,
-    VerifyRetTypeTS,
-    Self_,
-    Parent,
-    LateBoundCls,
-    ClassName,
-    LazyClassFromClass,
-    RecordReifiedGeneric,
-    CheckReifiedGenericMismatch,
-    NativeImpl,
-    AKExists,
-    CreateCl(NumParams, ClassNum),
-    Idx,
-    ArrayIdx,
-    ArrayMarkLegacy,
-    ArrayUnmarkLegacy,
-    AssertRATL(Local<'arena>, RepoAuthType<'arena>),
-    AssertRATStk(StackIndex, RepoAuthType<'arena>),
-    BreakTraceHint,
-    Silence(Local<'arena>, SilenceOp),
-    GetMemoKeyL(Local<'arena>),
-    CGetCUNop,
-    UGetCUNop,
-    MemoGet(Label, Maybe<Pair<Local<'arena>, isize>>),
-    MemoGetEager([Label; 2], Maybe<Pair<Local<'arena>, isize>>),
-    MemoSet(Maybe<Pair<Local<'arena>, isize>>),
-    MemoSetEager(Maybe<Pair<Local<'arena>, isize>>),
-    LockObj,
-    ThrowNonExhaustiveSwitch,
-    RaiseClassStringConversionWarning,
-    SetImplicitContextByValue,
-}
-
-impl InstructMisc<'_> {
-    pub fn targets(&self) -> &[Label] {
-        match self {
-            Self::MemoGet(target, _) => std::slice::from_ref(target),
-            Self::MemoGetEager(targets, _) => targets,
-
-            // Make sure new variants with branch target Labels are handled above
-            // before adding items to this catch-all.
-            Self::This
-            | Self::BareThis(_)
-            | Self::CheckThis
-            | Self::FuncNumArgs
-            | Self::ChainFaults
-            | Self::OODeclExists(_)
-            | Self::VerifyParamType(_)
-            | Self::VerifyParamTypeTS(_)
-            | Self::VerifyOutType(_)
-            | Self::VerifyRetTypeC
-            | Self::VerifyRetTypeTS
-            | Self::Self_
-            | Self::Parent
-            | Self::LateBoundCls
-            | Self::ClassName
-            | Self::LazyClassFromClass
-            | Self::RecordReifiedGeneric
-            | Self::CheckReifiedGenericMismatch
-            | Self::NativeImpl
-            | Self::AKExists
-            | Self::CreateCl(_, _)
-            | Self::Idx
-            | Self::ArrayIdx
-            | Self::ArrayMarkLegacy
-            | Self::ArrayUnmarkLegacy
-            | Self::AssertRATL(_, _)
-            | Self::AssertRATStk(_, _)
-            | Self::BreakTraceHint
-            | Self::Silence(_, _)
-            | Self::GetMemoKeyL(_)
-            | Self::CGetCUNop
-            | Self::UGetCUNop
-            | Self::MemoSet(_)
-            | Self::MemoSetEager(_)
-            | Self::LockObj
-            | Self::ThrowNonExhaustiveSwitch
-            | Self::RaiseClassStringConversionWarning
-            | Self::SetImplicitContextByValue => &[],
-        }
-    }
-
-    pub fn targets_mut(&mut self) -> &mut [Label] {
-        match self {
-            Self::MemoGet(target, _) => std::slice::from_mut(target),
-            Self::MemoGetEager(targets, _) => targets,
-
-            // Make sure new variants with branch target Labels are handled above
-            // before adding items to this catch-all.
-            Self::This
-            | Self::BareThis(_)
-            | Self::CheckThis
-            | Self::FuncNumArgs
-            | Self::ChainFaults
-            | Self::OODeclExists(_)
-            | Self::VerifyParamType(_)
-            | Self::VerifyParamTypeTS(_)
-            | Self::VerifyOutType(_)
-            | Self::VerifyRetTypeC
-            | Self::VerifyRetTypeTS
-            | Self::Self_
-            | Self::Parent
-            | Self::LateBoundCls
-            | Self::ClassName
-            | Self::LazyClassFromClass
-            | Self::RecordReifiedGeneric
-            | Self::CheckReifiedGenericMismatch
-            | Self::NativeImpl
-            | Self::AKExists
-            | Self::CreateCl(_, _)
-            | Self::Idx
-            | Self::ArrayIdx
-            | Self::ArrayMarkLegacy
-            | Self::ArrayUnmarkLegacy
-            | Self::AssertRATL(_, _)
-            | Self::AssertRATStk(_, _)
-            | Self::BreakTraceHint
-            | Self::Silence(_, _)
-            | Self::GetMemoKeyL(_)
-            | Self::CGetCUNop
-            | Self::UGetCUNop
-            | Self::MemoSet(_)
-            | Self::MemoSetEager(_)
-            | Self::LockObj
-            | Self::ThrowNonExhaustiveSwitch
-            | Self::RaiseClassStringConversionWarning
-            | Self::SetImplicitContextByValue => &mut [],
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
 pub enum GenCreationExecution {
     CreateCont,
     ContEnter,
@@ -566,7 +423,46 @@ pub enum Instruct<'arena> {
     NewObjD(ClassId<'arena>),
     NewObjRD(ClassId<'arena>),
     NewObjS(SpecialClsRef),
-    Misc(InstructMisc<'arena>),
+    This,
+    BareThis(BareThisOp),
+    CheckThis,
+    FuncNumArgs,
+    ChainFaults,
+    OODeclExists(ClassishKind),
+    VerifyParamType(ParamId<'arena>),
+    VerifyParamTypeTS(ParamId<'arena>),
+    VerifyOutType(ParamId<'arena>),
+    VerifyRetTypeC,
+    VerifyRetTypeTS,
+    Self_,
+    Parent,
+    LateBoundCls,
+    ClassName,
+    LazyClassFromClass,
+    RecordReifiedGeneric,
+    CheckReifiedGenericMismatch,
+    NativeImpl,
+    AKExists,
+    CreateCl(NumParams, ClassNum),
+    Idx,
+    ArrayIdx,
+    ArrayMarkLegacy,
+    ArrayUnmarkLegacy,
+    AssertRATL(Local<'arena>, RepoAuthType<'arena>),
+    AssertRATStk(StackIndex, RepoAuthType<'arena>),
+    BreakTraceHint,
+    Silence(Local<'arena>, SilenceOp),
+    GetMemoKeyL(Local<'arena>),
+    CGetCUNop,
+    UGetCUNop,
+    MemoGet(Label, Maybe<Pair<Local<'arena>, isize>>),
+    MemoGetEager([Label; 2], Maybe<Pair<Local<'arena>, isize>>),
+    MemoSet(Maybe<Pair<Local<'arena>, isize>>),
+    MemoSetEager(Maybe<Pair<Local<'arena>, isize>>),
+    LockObj,
+    ThrowNonExhaustiveSwitch,
+    RaiseClassStringConversionWarning,
+    SetImplicitContextByValue,
     CGetL(Local<'arena>),
     CGetQuietL(Local<'arena>),
     CGetL2(Local<'arena>),
@@ -618,11 +514,50 @@ impl Instruct<'_> {
             }
             Self::Switch { targets, .. } | Self::SSwitch { targets, .. } => targets.as_ref(),
             Self::IterInit(_, target) | Self::IterNext(_, target) => std::slice::from_ref(target),
-            Self::Misc(x) => x.targets(),
+            Self::MemoGet(target, _) => std::slice::from_ref(target),
+            Self::MemoGetEager(targets, _) => targets,
 
             // Make sure new variants with branch target Labels are handled above
             // before adding items to this catch-all.
             Self::RetC
+            | Self::This
+            | Self::BareThis(_)
+            | Self::CheckThis
+            | Self::FuncNumArgs
+            | Self::ChainFaults
+            | Self::OODeclExists(_)
+            | Self::VerifyParamType(_)
+            | Self::VerifyParamTypeTS(_)
+            | Self::VerifyOutType(_)
+            | Self::VerifyRetTypeC
+            | Self::VerifyRetTypeTS
+            | Self::Self_
+            | Self::Parent
+            | Self::LateBoundCls
+            | Self::ClassName
+            | Self::LazyClassFromClass
+            | Self::RecordReifiedGeneric
+            | Self::CheckReifiedGenericMismatch
+            | Self::NativeImpl
+            | Self::AKExists
+            | Self::CreateCl(_, _)
+            | Self::Idx
+            | Self::ArrayIdx
+            | Self::ArrayMarkLegacy
+            | Self::ArrayUnmarkLegacy
+            | Self::AssertRATL(_, _)
+            | Self::AssertRATStk(_, _)
+            | Self::BreakTraceHint
+            | Self::Silence(_, _)
+            | Self::GetMemoKeyL(_)
+            | Self::CGetCUNop
+            | Self::UGetCUNop
+            | Self::MemoSet(_)
+            | Self::MemoSetEager(_)
+            | Self::LockObj
+            | Self::ThrowNonExhaustiveSwitch
+            | Self::RaiseClassStringConversionWarning
+            | Self::SetImplicitContextByValue
             | Self::RetCSuspended
             | Self::RetM(_)
             | Self::Throw
@@ -777,11 +712,50 @@ impl Instruct<'_> {
             }
             Self::Switch { targets, .. } | Self::SSwitch { targets, .. } => targets.as_mut(),
             Self::IterInit(_, target) | Self::IterNext(_, target) => std::slice::from_mut(target),
-            Self::Misc(x) => x.targets_mut(),
+            Self::MemoGet(target, _) => std::slice::from_mut(target),
+            Self::MemoGetEager(targets, _) => targets,
 
             // Make sure new variants with branch target Labels are handled above
             // before adding items to this catch-all.
             Self::RetC
+            | Self::This
+            | Self::BareThis(_)
+            | Self::CheckThis
+            | Self::FuncNumArgs
+            | Self::ChainFaults
+            | Self::OODeclExists(_)
+            | Self::VerifyParamType(_)
+            | Self::VerifyParamTypeTS(_)
+            | Self::VerifyOutType(_)
+            | Self::VerifyRetTypeC
+            | Self::VerifyRetTypeTS
+            | Self::Self_
+            | Self::Parent
+            | Self::LateBoundCls
+            | Self::ClassName
+            | Self::LazyClassFromClass
+            | Self::RecordReifiedGeneric
+            | Self::CheckReifiedGenericMismatch
+            | Self::NativeImpl
+            | Self::AKExists
+            | Self::CreateCl(_, _)
+            | Self::Idx
+            | Self::ArrayIdx
+            | Self::ArrayMarkLegacy
+            | Self::ArrayUnmarkLegacy
+            | Self::AssertRATL(_, _)
+            | Self::AssertRATStk(_, _)
+            | Self::BreakTraceHint
+            | Self::Silence(_, _)
+            | Self::GetMemoKeyL(_)
+            | Self::CGetCUNop
+            | Self::UGetCUNop
+            | Self::MemoSet(_)
+            | Self::MemoSetEager(_)
+            | Self::LockObj
+            | Self::ThrowNonExhaustiveSwitch
+            | Self::RaiseClassStringConversionWarning
+            | Self::SetImplicitContextByValue
             | Self::RetCSuspended
             | Self::RetM(_)
             | Self::Throw

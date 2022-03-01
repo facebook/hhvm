@@ -42,7 +42,6 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
             }
         }
         JumpInstructions(instr_seq.iter().fold(LabelMap::new(), |mut acc, instr| {
-            use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
             match *instr {
                 Instruct::Break(level) => {
                     acc.insert(get_label_id(jt_gen, true, level as Level), instr);
@@ -50,7 +49,7 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
                 Instruct::Continue(level) => {
                     acc.insert(get_label_id(jt_gen, false, level as Level), instr);
                 }
-                Instruct::ContFlow(RetC | RetCSuspended | RetM(_)) => {
+                Instruct::RetC | Instruct::RetCSuspended | Instruct::RetM(_) => {
                     acc.insert(jt_gen.get_id_for_return(), instr);
                 }
                 _ => {}
@@ -62,13 +61,14 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
 
 /// Delete Ret*, Break, and Continue instructions from the try body
 pub(super) fn cleanup_try_body<'arena>(mut is: InstrSeq<'arena>) -> InstrSeq<'arena> {
-    use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
     is.retain(|instr| {
         !matches!(
             instr,
             Instruct::Continue(_)
                 | Instruct::Break(_)
-                | Instruct::ContFlow(RetC | RetCSuspended | RetM(_))
+                | Instruct::RetC
+                | Instruct::RetCSuspended
+                | Instruct::RetM(_)
         )
     });
     is
@@ -268,15 +268,13 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
         pos: &Pos,
         i: &Instruct<'arena>,
     ) -> Result<InstrSeq<'arena>> {
-        use hhbc_ast::InstructControlFlow::{RetC, RetCSuspended, RetM};
         let fail = || {
             panic!("unexpected instruction: only Ret* or Break/Continue/Jmp(Named) are expected")
         };
         match *i {
-            Instruct::ContFlow(ref cont_flow) => match cont_flow {
-                RetC | RetCSuspended | RetM(_) => emit_return(e, true, env),
-                _ => fail(),
-            },
+            Instruct::RetC | Instruct::RetCSuspended | Instruct::RetM(_) => {
+                emit_return(e, true, env)
+            }
             Instruct::Break(level) => Ok(emit_break_or_continue(
                 e,
                 EmitBreakOrContinueFlags::IS_BREAK | EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,

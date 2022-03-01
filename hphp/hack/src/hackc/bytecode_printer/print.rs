@@ -1166,7 +1166,34 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
         Instruct::Dup => w.write_all(b"Dup"),
         Instruct::LitConst(lit) => print_lit_const(w, lit),
         Instruct::Op(op) => print_op(w, op),
-        Instruct::ContFlow(cf) => print_control_flow(w, cf, dv_labels),
+        Instruct::RetC => w.write_all(b"RetC"),
+        Instruct::RetCSuspended => w.write_all(b"RetCSuspended"),
+        Instruct::Throw => w.write_all(b"Throw"),
+        Instruct::Switch {
+            kind,
+            base,
+            targets,
+        } => print_switch(w, kind, base, targets.as_ref(), dv_labels),
+        Instruct::Jmp(l) => {
+            w.write_all(b"Jmp ")?;
+            print_label(w, l, dv_labels)
+        }
+        Instruct::JmpNS(l) => {
+            w.write_all(b"JmpNS ")?;
+            print_label(w, l, dv_labels)
+        }
+        Instruct::JmpZ(l) => {
+            w.write_all(b"JmpZ ")?;
+            print_label(w, l, dv_labels)
+        }
+        Instruct::JmpNZ(l) => {
+            w.write_all(b"JmpNZ ")?;
+            print_label(w, l, dv_labels)
+        }
+        Instruct::SSwitch { cases, targets } => {
+            print_sswitch(w, cases.as_ref(), targets.as_ref(), dv_labels)
+        }
+        Instruct::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
         Instruct::Call(c) => print_call(w, c, dv_labels),
         Instruct::New(n) => print_new(w, n),
         Instruct::Misc(misc) => print_misc(w, misc, dv_labels),
@@ -1738,57 +1765,30 @@ fn print_misc(
     }
 }
 
-fn print_control_flow(
+fn print_sswitch(
     w: &mut dyn Write,
-    cf: &InstructControlFlow<'_>,
+    cases: &[Str<'_>],
+    targets: &[Label],
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
-    use InstructControlFlow as CF;
-    match cf {
-        CF::Jmp(l) => {
-            w.write_all(b"Jmp ")?;
-            print_label(w, l, dv_labels)
+    match (cases, targets) {
+        ([], _) | (_, []) => Err(Error::fail("sswitch should have at least one case").into()),
+        ([rest_cases @ .., _last_case], [rest_targets @ .., last_target]) => {
+            w.write_all(b"SSwitch ")?;
+            let rest: Vec<_> = rest_cases
+                .iter()
+                .zip(rest_targets)
+                .map(|(case, target)| Pair(case, target))
+                .collect();
+            angle(w, |w| {
+                concat_by(w, " ", rest, |w, Pair(case, target)| {
+                    write_bytes!(w, r#""{}":"#, escaper::escape_bstr(case.as_bstr()))?;
+                    print_label(w, target, dv_labels)
+                })?;
+                w.write_all(b" -:")?;
+                print_label(w, last_target, dv_labels)
+            })
         }
-        CF::JmpNS(l) => {
-            w.write_all(b"JmpNS ")?;
-            print_label(w, l, dv_labels)
-        }
-        CF::JmpZ(l) => {
-            w.write_all(b"JmpZ ")?;
-            print_label(w, l, dv_labels)
-        }
-        CF::JmpNZ(l) => {
-            w.write_all(b"JmpNZ ")?;
-            print_label(w, l, dv_labels)
-        }
-        CF::RetC => w.write_all(b"RetC"),
-        CF::RetCSuspended => w.write_all(b"RetCSuspended"),
-        CF::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
-        CF::Throw => w.write_all(b"Throw"),
-        CF::Switch {
-            kind,
-            base,
-            targets,
-        } => print_switch(w, kind, base, targets.as_ref(), dv_labels),
-        CF::SSwitch { cases, targets } => match (cases.as_ref(), targets.as_ref()) {
-            ([], _) | (_, []) => Err(Error::fail("sswitch should have at least one case").into()),
-            ([rest_cases @ .., _last_case], [rest_targets @ .., last_target]) => {
-                w.write_all(b"SSwitch ")?;
-                let rest: Vec<_> = rest_cases
-                    .iter()
-                    .zip(rest_targets)
-                    .map(|(case, target)| Pair(case, target))
-                    .collect();
-                angle(w, |w| {
-                    concat_by(w, " ", rest, |w, Pair(case, target)| {
-                        write_bytes!(w, r#""{}":"#, escaper::escape_bstr(case.as_bstr()))?;
-                        print_label(w, target, dv_labels)
-                    })?;
-                    w.write_all(b" -:")?;
-                    print_label(w, last_target, dv_labels)
-                })
-            }
-        },
     }
 }
 

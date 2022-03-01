@@ -230,58 +230,6 @@ pub enum InstructOperator<'arena> {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum InstructControlFlow<'arena> {
-    Jmp(Label),
-    JmpNS(Label),
-    JmpZ(Label),
-    JmpNZ(Label),
-
-    /// Integer switch
-    Switch {
-        kind: SwitchKind,
-        base: isize,
-        targets: BumpSliceMut<'arena, Label>,
-    },
-
-    /// String switch
-    SSwitch {
-        /// One string for each case.
-        cases: BumpSliceMut<'arena, Str<'arena>>,
-
-        /// One Label for each case, congruent to cases.
-        targets: BumpSliceMut<'arena, Label>,
-    },
-
-    RetC,
-    RetCSuspended,
-    RetM(NumParams),
-    Throw,
-}
-
-impl InstructControlFlow<'_> {
-    pub fn targets(&self) -> &[Label] {
-        match self {
-            Self::Jmp(x) | Self::JmpNS(x) | Self::JmpZ(x) | Self::JmpNZ(x) => {
-                std::slice::from_ref(x)
-            }
-            Self::Switch { targets, .. } | Self::SSwitch { targets, .. } => targets.as_ref(),
-            Self::RetC | Self::RetCSuspended | Self::RetM(_) | Self::Throw => &[],
-        }
-    }
-
-    pub fn targets_mut(&mut self) -> &mut [Label] {
-        match self {
-            Self::Jmp(x) | Self::JmpNS(x) | Self::JmpZ(x) | Self::JmpNZ(x) => {
-                std::slice::from_mut(x)
-            }
-            Self::Switch { targets, .. } | Self::SSwitch { targets, .. } => targets.as_mut(),
-            Self::RetC | Self::RetCSuspended | Self::RetM(_) | Self::Throw => &mut [],
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
 pub enum InstructGet<'arena> {
     CGetL(Local<'arena>),
     CGetQuietL(Local<'arena>),
@@ -678,7 +626,30 @@ pub enum Instruct<'arena> {
     IterFree(IterId),
     LitConst(InstructLitConst<'arena>),
     Op(InstructOperator<'arena>),
-    ContFlow(InstructControlFlow<'arena>),
+    Jmp(Label),
+    JmpNS(Label),
+    JmpZ(Label),
+    JmpNZ(Label),
+
+    /// Integer switch
+    Switch {
+        kind: SwitchKind,
+        base: isize,
+        targets: BumpSliceMut<'arena, Label>,
+    },
+
+    /// String switch
+    SSwitch {
+        /// One string for each case.
+        cases: BumpSliceMut<'arena, Str<'arena>>,
+
+        /// One Label for each case, congruent to cases.
+        targets: BumpSliceMut<'arena, Label>,
+    },
+    RetC,
+    RetCSuspended,
+    RetM(NumParams),
+    Throw,
     Continue(isize),
     Break(isize),
     Call(InstructCall<'arena>),
@@ -708,13 +679,20 @@ impl Instruct<'_> {
     pub fn targets(&self) -> &[Label] {
         match self {
             Self::Call(x) => x.targets(),
-            Self::ContFlow(x) => x.targets(),
+            Self::Jmp(x) | Self::JmpNS(x) | Self::JmpZ(x) | Self::JmpNZ(x) => {
+                std::slice::from_ref(x)
+            }
+            Self::Switch { targets, .. } | Self::SSwitch { targets, .. } => targets.as_ref(),
             Self::IterInit(_, target) | Self::IterNext(_, target) => std::slice::from_ref(target),
             Self::Misc(x) => x.targets(),
 
             // Make sure new variants with branch target Labels are handled above
             // before adding items to this catch-all.
-            Self::Nop
+            Self::RetC
+            | Self::RetCSuspended
+            | Self::RetM(_)
+            | Self::Throw
+            | Self::Nop
             | Self::EntryNop
             | Self::PopC
             | Self::PopU
@@ -752,13 +730,20 @@ impl Instruct<'_> {
     pub fn targets_mut(&mut self) -> &mut [Label] {
         match self {
             Self::Call(x) => x.targets_mut(),
-            Self::ContFlow(x) => x.targets_mut(),
+            Self::Jmp(x) | Self::JmpNS(x) | Self::JmpZ(x) | Self::JmpNZ(x) => {
+                std::slice::from_mut(x)
+            }
+            Self::Switch { targets, .. } | Self::SSwitch { targets, .. } => targets.as_mut(),
             Self::IterInit(_, target) | Self::IterNext(_, target) => std::slice::from_mut(target),
             Self::Misc(x) => x.targets_mut(),
 
             // Make sure new variants with branch target Labels are handled above
             // before adding items to this catch-all.
-            Self::Nop
+            Self::RetC
+            | Self::RetCSuspended
+            | Self::RetM(_)
+            | Self::Throw
+            | Self::Nop
             | Self::EntryNop
             | Self::PopC
             | Self::PopU

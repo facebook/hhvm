@@ -240,19 +240,19 @@ pub mod instr {
     }
 
     pub fn jmp<'a>(label: Label) -> InstrSeq<'a> {
-        instr(Instruct::ContFlow(InstructControlFlow::Jmp(label)))
+        instr(Instruct::Jmp(label))
     }
 
     pub fn jmpz<'a>(label: Label) -> InstrSeq<'a> {
-        instr(Instruct::ContFlow(InstructControlFlow::JmpZ(label)))
+        instr(Instruct::JmpZ(label))
     }
 
     pub fn jmpnz<'a>(label: Label) -> InstrSeq<'a> {
-        instr(Instruct::ContFlow(InstructControlFlow::JmpNZ(label)))
+        instr(Instruct::JmpNZ(label))
     }
 
     pub fn jmpns<'a>(label: Label) -> InstrSeq<'a> {
-        instr(Instruct::ContFlow(InstructControlFlow::JmpNS(label)))
+        instr(Instruct::JmpNS(label))
     }
 
     pub fn continue_<'a>(level: isize) -> InstrSeq<'a> {
@@ -265,7 +265,7 @@ pub mod instr {
 
     pub fn iter_break<'a>(label: Label, iters: Vec<IterId>) -> InstrSeq<'a> {
         let mut vec: Vec<Instruct<'a>> = iters.into_iter().map(Instruct::IterFree).collect();
-        vec.push(Instruct::ContFlow(InstructControlFlow::Jmp(label)));
+        vec.push(Instruct::Jmp(label));
         instrs(vec)
     }
 
@@ -346,15 +346,15 @@ pub mod instr {
     }
 
     pub fn retc<'a>() -> InstrSeq<'a> {
-        instr(Instruct::ContFlow(InstructControlFlow::RetC))
+        instr(Instruct::RetC)
     }
 
     pub fn retc_suspended<'a>() -> InstrSeq<'a> {
-        instr(Instruct::ContFlow(InstructControlFlow::RetCSuspended))
+        instr(Instruct::RetCSuspended)
     }
 
     pub fn retm<'a>(p: NumParams) -> InstrSeq<'a> {
-        instr(Instruct::ContFlow(InstructControlFlow::RetM(p)))
+        instr(Instruct::RetM(p))
     }
 
     pub fn null<'a>() -> InstrSeq<'a> {
@@ -675,7 +675,7 @@ pub mod instr {
     }
 
     pub fn throw<'a>() -> InstrSeq<'a> {
-        instr(Instruct::ContFlow(InstructControlFlow::Throw))
+        instr(Instruct::Throw)
     }
 
     pub fn new_vec_array<'a>(i: isize) -> InstrSeq<'a> {
@@ -698,11 +698,11 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         targets: bumpalo::collections::Vec<'a, Label>,
     ) -> InstrSeq<'a> {
-        instr(Instruct::ContFlow(InstructControlFlow::Switch {
+        instr(Instruct::Switch {
             kind: SwitchKind::Unbounded,
             base: 0,
             targets: BumpSliceMut::new(alloc, targets.into_bump_slice_mut()),
-        }))
+        })
     }
 
     pub fn newobj<'a>() -> InstrSeq<'a> {
@@ -721,10 +721,7 @@ pub mod instr {
             alloc,
             alloc.alloc_slice_fill_iter(cases.into_iter().map(|(s, _)| Str::from(s))),
         );
-        instr(Instruct::ContFlow(InstructControlFlow::SSwitch {
-            cases,
-            targets,
-        }))
+        instr(Instruct::SSwitch { cases, targets })
     }
 
     pub fn newobjr<'a>() -> InstrSeq<'a> {
@@ -1335,7 +1332,7 @@ impl<'a> InstrSeq<'a> {
             if skip_throw {
                 instr::empty()
             } else {
-                instr::instr(Instruct::ContFlow(InstructControlFlow::Throw))
+                instr::instr(Instruct::Throw)
             },
             instr::instr(Instruct::TryCatchEnd),
             instr::label(done_label),

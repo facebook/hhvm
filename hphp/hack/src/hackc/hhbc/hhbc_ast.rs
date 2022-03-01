@@ -133,26 +133,6 @@ pub enum HasGenericsOp {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum InstructMutator<'arena> {
-    SetL(Local<'arena>),
-    /// PopL is put in mutators since it behaves as SetL + PopC
-    PopL(Local<'arena>),
-    SetG,
-    SetS(ReadonlyOp),
-    SetOpL(Local<'arena>, SetOpOp),
-    SetOpG(SetOpOp),
-    SetOpS(SetOpOp),
-    IncDecL(Local<'arena>, IncDecOp),
-    IncDecG(IncDecOp),
-    IncDecS(IncDecOp),
-    UnsetL(Local<'arena>),
-    UnsetG,
-    CheckProp(PropId<'arena>),
-    InitProp(PropId<'arena>, InitPropOp),
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
 pub enum InstructBase<'arena> {
     BaseGC(StackIndex, MOpMode),
     BaseGL(Local<'arena>, MOpMode),
@@ -472,7 +452,20 @@ pub enum Instruct<'arena> {
     CGetS(ReadonlyOp),
     ClassGetC,
     ClassGetTS,
-    Mutator(InstructMutator<'arena>),
+    SetL(Local<'arena>),
+    PopL(Local<'arena>),
+    SetG,
+    SetS(ReadonlyOp),
+    SetOpL(Local<'arena>, SetOpOp),
+    SetOpG(SetOpOp),
+    SetOpS(SetOpOp),
+    IncDecL(Local<'arena>, IncDecOp),
+    IncDecG(IncDecOp),
+    IncDecS(IncDecOp),
+    UnsetL(Local<'arena>),
+    UnsetG,
+    CheckProp(PropId<'arena>),
+    InitProp(PropId<'arena>, InitPropOp),
     IssetC,
     IssetL(Local<'arena>),
     IssetG,
@@ -667,7 +660,20 @@ impl Instruct<'_> {
             | Self::CGetS(_)
             | Self::ClassGetC
             | Self::ClassGetTS
-            | Self::Mutator(_)
+            | Self::SetL(_)
+            | Self::PopL(_)
+            | Self::SetG
+            | Self::SetS(_)
+            | Self::SetOpL(_, _)
+            | Self::SetOpG(_)
+            | Self::SetOpS(_)
+            | Self::IncDecL(_, _)
+            | Self::IncDecG(_)
+            | Self::IncDecS(_)
+            | Self::UnsetL(_)
+            | Self::UnsetG
+            | Self::CheckProp(_)
+            | Self::InitProp(_, _)
             | Self::IssetC
             | Self::IssetL(_)
             | Self::IssetG
@@ -865,7 +871,20 @@ impl Instruct<'_> {
             | Self::CGetS(_)
             | Self::ClassGetC
             | Self::ClassGetTS
-            | Self::Mutator(_)
+            | Self::SetL(_)
+            | Self::PopL(_)
+            | Self::SetG
+            | Self::SetS(_)
+            | Self::SetOpL(_, _)
+            | Self::SetOpG(_)
+            | Self::SetOpS(_)
+            | Self::IncDecL(_, _)
+            | Self::IncDecG(_)
+            | Self::IncDecS(_)
+            | Self::UnsetL(_)
+            | Self::UnsetG
+            | Self::CheckProp(_)
+            | Self::InitProp(_, _)
             | Self::IssetC
             | Self::IssetL(_)
             | Self::IssetG

@@ -527,47 +527,47 @@ pub mod instr {
     }
 
     pub fn sets<'a>(readonly_op: ReadonlyOp) -> InstrSeq<'a> {
-        instr(Instruct::Mutator(InstructMutator::SetS(readonly_op)))
+        instr(Instruct::SetS(readonly_op))
     }
 
     pub fn setl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Mutator(InstructMutator::SetL(local)))
+        instr(Instruct::SetL(local))
     }
 
     pub fn setg<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Mutator(InstructMutator::SetG))
+        instr(Instruct::SetG)
     }
 
     pub fn unsetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Mutator(InstructMutator::UnsetL(local)))
+        instr(Instruct::UnsetL(local))
     }
 
     pub fn unsetg<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Mutator(InstructMutator::UnsetG))
+        instr(Instruct::UnsetG)
     }
 
     pub fn incdecl<'a>(local: Local<'a>, op: IncDecOp) -> InstrSeq<'a> {
-        instr(Instruct::Mutator(InstructMutator::IncDecL(local, op)))
+        instr(Instruct::IncDecL(local, op))
     }
 
     pub fn incdecg<'a>(op: IncDecOp) -> InstrSeq<'a> {
-        instr(Instruct::Mutator(InstructMutator::IncDecG(op)))
+        instr(Instruct::IncDecG(op))
     }
 
     pub fn incdecs<'a>(op: IncDecOp) -> InstrSeq<'a> {
-        instr(Instruct::Mutator(InstructMutator::IncDecS(op)))
+        instr(Instruct::IncDecS(op))
     }
 
     pub fn setopg<'a>(op: SetOpOp) -> InstrSeq<'a> {
-        instr(Instruct::Mutator(InstructMutator::SetOpG(op)))
+        instr(Instruct::SetOpG(op))
     }
 
     pub fn setopl<'a>(local: Local<'a>, op: SetOpOp) -> InstrSeq<'a> {
-        instr(Instruct::Mutator(InstructMutator::SetOpL(local, op)))
+        instr(Instruct::SetOpL(local, op))
     }
 
     pub fn setops<'a>(op: SetOpOp) -> InstrSeq<'a> {
-        instr(Instruct::Mutator(InstructMutator::SetOpS(op)))
+        instr(Instruct::SetOpS(op))
     }
 
     pub fn issetl<'a>(local: Local<'a>) -> InstrSeq<'a> {
@@ -647,15 +647,15 @@ pub mod instr {
     }
 
     pub fn popl<'a>(l: Local<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Mutator(InstructMutator::PopL(l)))
+        instr(Instruct::PopL(l))
     }
 
     pub fn initprop<'a>(pid: PropId<'a>, op: InitPropOp) -> InstrSeq<'a> {
-        instr(Instruct::Mutator(InstructMutator::InitProp(pid, op)))
+        instr(Instruct::InitProp(pid, op))
     }
 
     pub fn checkprop<'a>(pid: PropId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Mutator(InstructMutator::CheckProp(pid)))
+        instr(Instruct::CheckProp(pid))
     }
 
     pub fn pushl<'a>(local: Local<'a>) -> InstrSeq<'a> {

@@ -1500,7 +1500,67 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
         }
         Instruct::ClassGetC => w.write_all(b"ClassGetC"),
         Instruct::ClassGetTS => w.write_all(b"ClassGetTS"),
-        Instruct::Mutator(mutator) => print_mutator(w, mutator),
+        Instruct::SetL(local) => {
+            w.write_all(b"SetL ")?;
+            print_local(w, local)
+        }
+        Instruct::PopL(id) => {
+            w.write_all(b"PopL ")?;
+            print_local(w, id)
+        }
+        Instruct::SetG => w.write_all(b"SetG"),
+        Instruct::SetS(op) => {
+            w.write_all(b"SetS ")?;
+            print_readonly_op(w, op)
+        }
+        Instruct::SetOpL(id, op) => {
+            w.write_all(b"SetOpL ")?;
+            print_local(w, id)?;
+            w.write_all(b" ")?;
+            print_eq_op(w, op)
+        }
+        Instruct::SetOpG(op) => {
+            w.write_all(b"SetOpG ")?;
+            print_eq_op(w, op)
+        }
+        Instruct::SetOpS(op) => {
+            w.write_all(b"SetOpS ")?;
+            print_eq_op(w, op)
+        }
+        Instruct::IncDecL(id, op) => {
+            w.write_all(b"IncDecL ")?;
+            print_local(w, id)?;
+            w.write_all(b" ")?;
+            print_incdec_op(w, op)
+        }
+        Instruct::IncDecG(op) => {
+            w.write_all(b"IncDecG ")?;
+            print_incdec_op(w, op)
+        }
+        Instruct::IncDecS(op) => {
+            w.write_all(b"IncDecS ")?;
+            print_incdec_op(w, op)
+        }
+        Instruct::UnsetL(id) => {
+            w.write_all(b"UnsetL ")?;
+            print_local(w, id)
+        }
+        Instruct::UnsetG => w.write_all(b"UnsetG"),
+        Instruct::CheckProp(id) => {
+            w.write_all(b"CheckProp ")?;
+            print_prop_id(w, id)
+        }
+        Instruct::InitProp(id, op) => {
+            w.write_all(b"InitProp ")?;
+            print_prop_id(w, id)?;
+            w.write_all(b" ")?;
+            match *op {
+                InitPropOp::Static => w.write_all(b"Static"),
+                InitPropOp::NonStatic => w.write_all(b"NonStatic"),
+                _ => panic!("Enum value does not match one of listed variants"),
+            }?;
+            w.write_all(b" ")
+        }
         Instruct::Label(l) => {
             print_label(w, l, dv_labels)?;
             w.write_all(b":")
@@ -1784,73 +1844,6 @@ fn print_istype_op(w: &mut dyn Write, op: &IsTypeOp) -> Result<()> {
         Op::Func => w.write_all(b"Func"),
         Op::Class => w.write_all(b"Class"),
         _ => panic!("Enum value does not match one of listed variants"),
-    }
-}
-
-fn print_mutator(w: &mut dyn Write, mutator: &InstructMutator<'_>) -> Result<()> {
-    use InstructMutator as M;
-    match mutator {
-        M::SetL(local) => {
-            w.write_all(b"SetL ")?;
-            print_local(w, local)
-        }
-        M::PopL(id) => {
-            w.write_all(b"PopL ")?;
-            print_local(w, id)
-        }
-        M::SetG => w.write_all(b"SetG"),
-        M::SetS(op) => {
-            w.write_all(b"SetS ")?;
-            print_readonly_op(w, op)
-        }
-        M::SetOpL(id, op) => {
-            w.write_all(b"SetOpL ")?;
-            print_local(w, id)?;
-            w.write_all(b" ")?;
-            print_eq_op(w, op)
-        }
-        M::SetOpG(op) => {
-            w.write_all(b"SetOpG ")?;
-            print_eq_op(w, op)
-        }
-        M::SetOpS(op) => {
-            w.write_all(b"SetOpS ")?;
-            print_eq_op(w, op)
-        }
-        M::IncDecL(id, op) => {
-            w.write_all(b"IncDecL ")?;
-            print_local(w, id)?;
-            w.write_all(b" ")?;
-            print_incdec_op(w, op)
-        }
-        M::IncDecG(op) => {
-            w.write_all(b"IncDecG ")?;
-            print_incdec_op(w, op)
-        }
-        M::IncDecS(op) => {
-            w.write_all(b"IncDecS ")?;
-            print_incdec_op(w, op)
-        }
-        M::UnsetL(id) => {
-            w.write_all(b"UnsetL ")?;
-            print_local(w, id)
-        }
-        M::UnsetG => w.write_all(b"UnsetG"),
-        M::CheckProp(id) => {
-            w.write_all(b"CheckProp ")?;
-            print_prop_id(w, id)
-        }
-        M::InitProp(id, op) => {
-            w.write_all(b"InitProp ")?;
-            print_prop_id(w, id)?;
-            w.write_all(b" ")?;
-            match *op {
-                InitPropOp::Static => w.write_all(b"Static"),
-                InitPropOp::NonStatic => w.write_all(b"NonStatic"),
-                _ => panic!("Enum value does not match one of listed variants"),
-            }?;
-            w.write_all(b" ")
-        }
     }
 }
 

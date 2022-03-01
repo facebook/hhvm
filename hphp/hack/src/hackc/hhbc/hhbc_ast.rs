@@ -153,88 +153,12 @@ pub enum InstructMutator<'arena> {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum InstructCall<'arena> {
-    FCallClsMethod {
-        fcall_args: FcallArgs<'arena>,
-        log: IsLogAsDynamicCallOp,
-    },
-    FCallClsMethodD {
-        fcall_args: FcallArgs<'arena>,
-        class: ClassId<'arena>,
-        method: MethodId<'arena>,
-    },
-    FCallClsMethodS {
-        fcall_args: FcallArgs<'arena>,
-        clsref: SpecialClsRef,
-    },
-    FCallClsMethodSD {
-        fcall_args: FcallArgs<'arena>,
-        clsref: SpecialClsRef,
-        method: MethodId<'arena>,
-    },
-    FCallCtor(FcallArgs<'arena>),
-    FCallFunc(FcallArgs<'arena>),
-    FCallFuncD {
-        fcall_args: FcallArgs<'arena>,
-        func: FunctionId<'arena>,
-    },
-    FCallObjMethod {
-        fcall_args: FcallArgs<'arena>,
-        flavor: ObjMethodOp,
-    },
-    FCallObjMethodD {
-        fcall_args: FcallArgs<'arena>,
-        flavor: ObjMethodOp,
-        method: MethodId<'arena>,
-    },
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
 pub enum InstructNew<'arena> {
     NewObj,
     NewObjR,
     NewObjD(ClassId<'arena>),
     NewObjRD(ClassId<'arena>),
     NewObjS(SpecialClsRef),
-}
-
-impl<'arena> InstructCall<'arena> {
-    pub fn fcall_args(&self) -> &FcallArgs<'arena> {
-        match self {
-            Self::FCallClsMethod { fcall_args, .. }
-            | Self::FCallClsMethodD { fcall_args, .. }
-            | Self::FCallClsMethodS { fcall_args, .. }
-            | Self::FCallClsMethodSD { fcall_args, .. }
-            | Self::FCallCtor(fcall_args)
-            | Self::FCallFunc(fcall_args)
-            | Self::FCallFuncD { fcall_args, .. }
-            | Self::FCallObjMethod { fcall_args, .. }
-            | Self::FCallObjMethodD { fcall_args, .. } => fcall_args,
-        }
-    }
-
-    pub fn fcall_args_mut(&mut self) -> &mut FcallArgs<'arena> {
-        match self {
-            Self::FCallClsMethod { fcall_args, .. }
-            | Self::FCallClsMethodD { fcall_args, .. }
-            | Self::FCallClsMethodS { fcall_args, .. }
-            | Self::FCallClsMethodSD { fcall_args, .. }
-            | Self::FCallCtor(fcall_args)
-            | Self::FCallFunc(fcall_args)
-            | Self::FCallFuncD { fcall_args, .. }
-            | Self::FCallObjMethod { fcall_args, .. }
-            | Self::FCallObjMethodD { fcall_args, .. } => fcall_args,
-        }
-    }
-
-    pub fn targets(&self) -> &[Label] {
-        self.fcall_args().targets()
-    }
-
-    pub fn targets_mut(&mut self) -> &mut [Label] {
-        self.fcall_args_mut().targets_mut()
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -614,7 +538,39 @@ pub enum Instruct<'arena> {
     Throw,
     Continue(isize),
     Break(isize),
-    Call(InstructCall<'arena>),
+    FCallClsMethod {
+        fcall_args: FcallArgs<'arena>,
+        log: IsLogAsDynamicCallOp,
+    },
+    FCallClsMethodD {
+        fcall_args: FcallArgs<'arena>,
+        class: ClassId<'arena>,
+        method: MethodId<'arena>,
+    },
+    FCallClsMethodS {
+        fcall_args: FcallArgs<'arena>,
+        clsref: SpecialClsRef,
+    },
+    FCallClsMethodSD {
+        fcall_args: FcallArgs<'arena>,
+        clsref: SpecialClsRef,
+        method: MethodId<'arena>,
+    },
+    FCallCtor(FcallArgs<'arena>),
+    FCallFunc(FcallArgs<'arena>),
+    FCallFuncD {
+        fcall_args: FcallArgs<'arena>,
+        func: FunctionId<'arena>,
+    },
+    FCallObjMethod {
+        fcall_args: FcallArgs<'arena>,
+        flavor: ObjMethodOp,
+    },
+    FCallObjMethodD {
+        fcall_args: FcallArgs<'arena>,
+        flavor: ObjMethodOp,
+        method: MethodId<'arena>,
+    },
     New(InstructNew<'arena>),
     Misc(InstructMisc<'arena>),
     CGetL(Local<'arena>),
@@ -654,7 +610,15 @@ impl Instruct<'_> {
     /// This excludes the Label in an ILabel instruction, which is not a conditional branch.
     pub fn targets(&self) -> &[Label] {
         match self {
-            Self::Call(x) => x.targets(),
+            Self::FCallClsMethod { fcall_args, .. }
+            | Self::FCallClsMethodD { fcall_args, .. }
+            | Self::FCallClsMethodS { fcall_args, .. }
+            | Self::FCallClsMethodSD { fcall_args, .. }
+            | Self::FCallCtor(fcall_args)
+            | Self::FCallFunc(fcall_args)
+            | Self::FCallFuncD { fcall_args, .. }
+            | Self::FCallObjMethod { fcall_args, .. }
+            | Self::FCallObjMethodD { fcall_args, .. } => fcall_args.targets(),
             Self::Jmp(x) | Self::JmpNS(x) | Self::JmpZ(x) | Self::JmpNZ(x) => {
                 std::slice::from_ref(x)
             }
@@ -801,7 +765,15 @@ impl Instruct<'_> {
     /// This excludes the Label in an ILabel instruction, which is not a conditional branch.
     pub fn targets_mut(&mut self) -> &mut [Label] {
         match self {
-            Self::Call(x) => x.targets_mut(),
+            Self::FCallClsMethod { fcall_args, .. }
+            | Self::FCallClsMethodD { fcall_args, .. }
+            | Self::FCallClsMethodS { fcall_args, .. }
+            | Self::FCallClsMethodSD { fcall_args, .. }
+            | Self::FCallCtor(fcall_args)
+            | Self::FCallFunc(fcall_args)
+            | Self::FCallFuncD { fcall_args, .. }
+            | Self::FCallObjMethod { fcall_args, .. }
+            | Self::FCallObjMethodD { fcall_args, .. } => fcall_args.targets_mut(),
             Self::Jmp(x) | Self::JmpNS(x) | Self::JmpZ(x) | Self::JmpNZ(x) => {
                 std::slice::from_mut(x)
             }

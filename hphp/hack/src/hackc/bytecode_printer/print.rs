@@ -1026,88 +1026,6 @@ fn print_new(w: &mut dyn Write, new: &InstructNew<'_>) -> Result<()> {
     }
 }
 
-fn print_call(
-    w: &mut dyn Write,
-    call: &InstructCall<'_>,
-    dv_labels: &HashSet<Label>,
-) -> Result<()> {
-    match call {
-        InstructCall::FCallClsMethod { fcall_args, log } => {
-            w.write_all(b"FCallClsMethod ")?;
-            print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(br#" "" "#)?;
-            w.write_all(match *log {
-                IsLogAsDynamicCallOp::LogAsDynamicCall => b"LogAsDynamicCall",
-                IsLogAsDynamicCallOp::DontLogAsDynamicCall => b"DontLogAsDynamicCall",
-                _ => panic!("Enum value does not match one of listed variants"),
-            })
-        }
-        InstructCall::FCallClsMethodD {
-            fcall_args,
-            class,
-            method,
-        } => {
-            w.write_all(b"FCallClsMethodD ")?;
-            print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(br#" "" "#)?;
-            print_class_id(w, class)?;
-            w.write_all(b" ")?;
-            print_method_id(w, method)
-        }
-        InstructCall::FCallClsMethodS { fcall_args, clsref } => {
-            w.write_all(b"FCallClsMethodS ")?;
-            print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(br#" "" "#)?;
-            print_special_cls_ref(w, clsref)
-        }
-        InstructCall::FCallClsMethodSD {
-            fcall_args,
-            clsref,
-            method,
-        } => {
-            w.write_all(b"FCallClsMethodSD ")?;
-            print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(br#" "" "#)?;
-            print_special_cls_ref(w, clsref)?;
-            w.write_all(b" ")?;
-            print_method_id(w, method)
-        }
-        InstructCall::FCallCtor(fcall_args) => {
-            w.write_all(b"FCallCtor ")?;
-            print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(br#" """#)
-        }
-        InstructCall::FCallFunc(fcall_args) => {
-            w.write_all(b"FCallFunc ")?;
-            print_fcall_args(w, fcall_args, dv_labels)
-        }
-        InstructCall::FCallFuncD { fcall_args, func } => {
-            w.write_all(b"FCallFuncD ")?;
-            print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(b" ")?;
-            print_function_id(w, func)
-        }
-        InstructCall::FCallObjMethod { fcall_args, flavor } => {
-            w.write_all(b"FCallObjMethod ")?;
-            print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(br#" "" "#)?;
-            print_null_flavor(w, flavor)
-        }
-        InstructCall::FCallObjMethodD {
-            fcall_args,
-            flavor,
-            method,
-        } => {
-            w.write_all(b"FCallObjMethodD ")?;
-            print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(br#" "" "#)?;
-            print_null_flavor(w, flavor)?;
-            w.write_all(b" ")?;
-            print_method_id(w, method)
-        }
-    }
-}
-
 fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
     match instr {
         Instruct::IterInit(iter_args, label) => {
@@ -1348,7 +1266,79 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             print_sswitch(w, cases.as_ref(), targets.as_ref(), dv_labels)
         }
         Instruct::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
-        Instruct::Call(c) => print_call(w, c, dv_labels),
+        Instruct::FCallClsMethod { fcall_args, log } => {
+            w.write_all(b"FCallClsMethod ")?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
+            w.write_all(br#" "" "#)?;
+            w.write_all(match *log {
+                IsLogAsDynamicCallOp::LogAsDynamicCall => b"LogAsDynamicCall",
+                IsLogAsDynamicCallOp::DontLogAsDynamicCall => b"DontLogAsDynamicCall",
+                _ => panic!("Enum value does not match one of listed variants"),
+            })
+        }
+        Instruct::FCallClsMethodD {
+            fcall_args,
+            class,
+            method,
+        } => {
+            w.write_all(b"FCallClsMethodD ")?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
+            w.write_all(br#" "" "#)?;
+            print_class_id(w, class)?;
+            w.write_all(b" ")?;
+            print_method_id(w, method)
+        }
+        Instruct::FCallClsMethodS { fcall_args, clsref } => {
+            w.write_all(b"FCallClsMethodS ")?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
+            w.write_all(br#" "" "#)?;
+            print_special_cls_ref(w, clsref)
+        }
+        Instruct::FCallClsMethodSD {
+            fcall_args,
+            clsref,
+            method,
+        } => {
+            w.write_all(b"FCallClsMethodSD ")?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
+            w.write_all(br#" "" "#)?;
+            print_special_cls_ref(w, clsref)?;
+            w.write_all(b" ")?;
+            print_method_id(w, method)
+        }
+        Instruct::FCallCtor(fcall_args) => {
+            w.write_all(b"FCallCtor ")?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
+            w.write_all(br#" """#)
+        }
+        Instruct::FCallFunc(fcall_args) => {
+            w.write_all(b"FCallFunc ")?;
+            print_fcall_args(w, fcall_args, dv_labels)
+        }
+        Instruct::FCallFuncD { fcall_args, func } => {
+            w.write_all(b"FCallFuncD ")?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
+            w.write_all(b" ")?;
+            print_function_id(w, func)
+        }
+        Instruct::FCallObjMethod { fcall_args, flavor } => {
+            w.write_all(b"FCallObjMethod ")?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
+            w.write_all(br#" "" "#)?;
+            print_null_flavor(w, flavor)
+        }
+        Instruct::FCallObjMethodD {
+            fcall_args,
+            flavor,
+            method,
+        } => {
+            w.write_all(b"FCallObjMethodD ")?;
+            print_fcall_args(w, fcall_args, dv_labels)?;
+            w.write_all(br#" "" "#)?;
+            print_null_flavor(w, flavor)?;
+            w.write_all(b" ")?;
+            print_method_id(w, method)
+        }
         Instruct::New(n) => print_new(w, n),
         Instruct::Misc(misc) => print_misc(w, misc, dv_labels),
         Instruct::CGetL(id) => {

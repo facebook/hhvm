@@ -894,10 +894,7 @@ pub mod instr {
         log: IsLogAsDynamicCallOp,
         fcall_args: FcallArgs<'a>,
     ) -> InstrSeq<'a> {
-        instr(Instruct::Call(InstructCall::FCallClsMethod {
-            fcall_args,
-            log,
-        }))
+        instr(Instruct::FCallClsMethod { fcall_args, log })
     }
 
     pub fn fcallclsmethodd<'a>(
@@ -905,18 +902,15 @@ pub mod instr {
         method: MethodId<'a>,
         class: ClassId<'a>,
     ) -> InstrSeq<'a> {
-        instr(Instruct::Call(InstructCall::FCallClsMethodD {
+        instr(Instruct::FCallClsMethodD {
             fcall_args,
             class,
             method,
-        }))
+        })
     }
 
     pub fn fcallclsmethods<'a>(fcall_args: FcallArgs<'a>, clsref: SpecialClsRef) -> InstrSeq<'a> {
-        instr(Instruct::Call(InstructCall::FCallClsMethodS {
-            fcall_args,
-            clsref,
-        }))
+        instr(Instruct::FCallClsMethodS { fcall_args, clsref })
     }
 
     pub fn fcallclsmethodsd<'a>(
@@ -924,33 +918,27 @@ pub mod instr {
         clsref: SpecialClsRef,
         method: MethodId<'a>,
     ) -> InstrSeq<'a> {
-        instr(Instruct::Call(InstructCall::FCallClsMethodSD {
+        instr(Instruct::FCallClsMethodSD {
             fcall_args,
             clsref,
             method,
-        }))
+        })
     }
 
     pub fn fcallctor<'a>(fcall_args: FcallArgs<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Call(InstructCall::FCallCtor(fcall_args)))
+        instr(Instruct::FCallCtor(fcall_args))
     }
 
     pub fn fcallfunc<'a>(fcall_args: FcallArgs<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Call(InstructCall::FCallFunc(fcall_args)))
+        instr(Instruct::FCallFunc(fcall_args))
     }
 
     pub fn fcallfuncd<'a>(fcall_args: FcallArgs<'a>, func: FunctionId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Call(InstructCall::FCallFuncD {
-            fcall_args,
-            func,
-        }))
+        instr(Instruct::FCallFuncD { fcall_args, func })
     }
 
     pub fn fcallobjmethod<'a>(fcall_args: FcallArgs<'a>, flavor: ObjMethodOp) -> InstrSeq<'a> {
-        instr(Instruct::Call(InstructCall::FCallObjMethod {
-            fcall_args,
-            flavor,
-        }))
+        instr(Instruct::FCallObjMethod { fcall_args, flavor })
     }
 
     pub fn fcallobjmethodd<'a>(
@@ -958,11 +946,11 @@ pub mod instr {
         method: MethodId<'a>,
         flavor: ObjMethodOp,
     ) -> InstrSeq<'a> {
-        instr(Instruct::Call(InstructCall::FCallObjMethodD {
+        instr(Instruct::FCallObjMethodD {
             fcall_args,
             flavor,
             method,
-        }))
+        })
     }
 
     pub fn fcallobjmethodd_nullthrows<'a>(

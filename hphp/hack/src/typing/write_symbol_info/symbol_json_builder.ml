@@ -403,124 +403,121 @@ let process_typedef_xref symbol_name pos (xrefs, prog) =
     pos
     (xrefs, prog)
 
-let process_decls ctx (files_info : File_info.t list) =
-  List.fold
-    files_info
-    ~init:Fact_acc.init
-    ~f:(fun prog File_info.{ path; tast; source_text } ->
-      let filepath = Relative_path.to_absolute path in
-      let (file_decls, prog) =
-        let (_, prog) = Add_fact.file_lines filepath source_text prog in
-        List.fold tast ~init:([], prog) ~f:(fun acc def ->
-            match def with
-            | Class en when is_enum_or_enum_class en.c_kind ->
-              process_enum_decl ctx source_text en acc
-            | Class cd -> process_container_decl ctx source_text cd acc
-            | Constant gd -> process_gconst_decl ctx source_text gd acc
-            | Fun fd -> process_func_decl ctx source_text fd acc
-            | Typedef td -> process_typedef_decl ctx source_text td acc
-            | _ -> acc)
-      in
-      let (_, prog) = Add_fact.file_decls filepath file_decls prog in
-      prog)
+let process_decls ctx prog File_info.{ path; tast; source_text } =
+  let filepath = Relative_path.to_absolute path in
+  Fact_acc.set_ownership_unit prog (Some filepath);
+  let (file_decls, prog) =
+    let (_, prog) = Add_fact.file_lines filepath source_text prog in
+    List.fold tast ~init:([], prog) ~f:(fun acc def ->
+        match def with
+        | Class en when is_enum_or_enum_class en.c_kind ->
+          process_enum_decl ctx source_text en acc
+        | Class cd -> process_container_decl ctx source_text cd acc
+        | Constant gd -> process_gconst_decl ctx source_text gd acc
+        | Fun fd -> process_func_decl ctx source_text fd acc
+        | Typedef td -> process_typedef_decl ctx source_text td acc
+        | _ -> acc)
+  in
+  Add_fact.file_decls filepath file_decls prog |> snd
 
-let process_xrefs ctx (tasts : Tast.program list) progress =
+let process_xrefs ctx prog File_info.{ path; tast; _ } =
   let open SymbolDefinition in
   let open SymbolOccurrence in
-  List.fold tasts ~init:progress ~f:(fun prog tast ->
-      let symbols = IdentifySymbolService.all_symbols ctx tast in
-      (* file_xrefs : (Hh_json.json * Relative_path.t Pos.pos list) Fact_id.Map.t SMap.t *)
-      let (file_xrefs, prog) =
-        List.fold symbols ~init:(SMap.empty, prog) ~f:(fun (xrefs, prog) occ ->
-            if occ.is_declaration then
-              (xrefs, prog)
-            else
-              let pos = occ.pos in
-              match occ.type_ with
-              | Attribute info ->
-                process_attribute_xref ctx occ info (xrefs, prog)
-              | _ ->
-                let symbol_def_res = ServerSymbolDefinition.go ctx None occ in
-                (match symbol_def_res with
-                | None ->
-                  (* no symbol info - likely dynamic *)
-                  (match occ.type_ with
-                  | Method (receiver_class, name) ->
-                    let (target_id, prog) =
-                      Add_fact.method_occ receiver_class name prog
-                    in
-                    let xref_json = Build.build_method_occ_json_ref target_id in
-                    let _target_json = Build.build_occ_target_json xref_json in
-                    (xrefs, prog)
-                  | _ -> (xrefs, prog))
-                | Some sym_def ->
-                  let proc_mem = process_member_xref ctx sym_def occ.pos in
-                  let name = sym_def.name in
-                  (match sym_def.kind with
-                  | Class ->
-                    let con_kind =
-                      Predicate.parent_decl_predicate Predicate.ClassContainer
-                    in
-                    process_container_xref con_kind name pos (xrefs, prog)
-                  | Const ->
-                    (match occ.type_ with
-                    | ClassConst _ ->
-                      let ref_fun = Build.build_class_const_decl_json_ref in
-                      proc_mem Add_fact.class_const_decl ref_fun (xrefs, prog)
-                    | GConst -> process_gconst_xref name pos (xrefs, prog)
-                    | _ -> (xrefs, prog))
-                  | Enum -> process_enum_xref name pos (xrefs, prog)
-                  | Function -> process_function_xref name pos (xrefs, prog)
-                  | Interface ->
-                    let con_kind =
-                      Predicate.parent_decl_predicate
-                        Predicate.InterfaceContainer
-                    in
-                    process_container_xref con_kind name pos (xrefs, prog)
-                  | Method ->
-                    let ref_fun = Build.build_method_decl_json_ref in
-                    proc_mem Add_fact.method_decl ref_fun (xrefs, prog)
-                  | Property ->
-                    let ref_fun = Build.build_property_decl_json_ref in
-                    proc_mem Add_fact.property_decl ref_fun (xrefs, prog)
-                  | Typeconst ->
-                    let ref_fun = Build.build_type_const_decl_json_ref in
-                    proc_mem Add_fact.type_const_decl ref_fun (xrefs, prog)
-                  | Typedef -> process_typedef_xref name pos (xrefs, prog)
-                  | Trait ->
-                    let con_kind =
-                      Predicate.parent_decl_predicate Predicate.TraitContainer
-                    in
-                    process_container_xref con_kind name pos (xrefs, prog)
-                  | _ -> (xrefs, prog))))
-      in
-      SMap.fold
-        (fun path target_map acc ->
-          let (_, res) = Add_fact.file_xrefs path target_map acc in
-          res)
-        file_xrefs
-        prog)
+  let symbols = IdentifySymbolService.all_symbols ctx tast in
+  let filepath = Relative_path.to_absolute path in
+  Fact_acc.set_ownership_unit prog (Some filepath);
+  (* file_xrefs : (Hh_json.json * Relative_path.t Pos.pos list) Fact_id.Map.t SMap.t *)
+  let (file_xrefs, prog) =
+    List.fold symbols ~init:(SMap.empty, prog) ~f:(fun (xrefs, prog) occ ->
+        if occ.is_declaration then
+          (xrefs, prog)
+        else
+          let pos = occ.pos in
+          match occ.type_ with
+          | Attribute info -> process_attribute_xref ctx occ info (xrefs, prog)
+          | _ ->
+            let symbol_def_res = ServerSymbolDefinition.go ctx None occ in
+            (match symbol_def_res with
+            | None ->
+              (* no symbol info - likely dynamic *)
+              (match occ.type_ with
+              | Method (receiver_class, name) ->
+                let (target_id, prog) =
+                  Add_fact.method_occ receiver_class name prog
+                in
+                let xref_json = Build.build_method_occ_json_ref target_id in
+                let _target_json = Build.build_occ_target_json xref_json in
+                (xrefs, prog)
+              | _ -> (xrefs, prog))
+            | Some sym_def ->
+              let proc_mem = process_member_xref ctx sym_def occ.pos in
+              let name = sym_def.name in
+              (match sym_def.kind with
+              | Class ->
+                let con_kind =
+                  Predicate.parent_decl_predicate Predicate.ClassContainer
+                in
+                process_container_xref con_kind name pos (xrefs, prog)
+              | Const ->
+                (match occ.type_ with
+                | ClassConst _ ->
+                  let ref_fun = Build.build_class_const_decl_json_ref in
+                  proc_mem Add_fact.class_const_decl ref_fun (xrefs, prog)
+                | GConst -> process_gconst_xref name pos (xrefs, prog)
+                | _ -> (xrefs, prog))
+              | Enum -> process_enum_xref name pos (xrefs, prog)
+              | Function -> process_function_xref name pos (xrefs, prog)
+              | Interface ->
+                let con_kind =
+                  Predicate.parent_decl_predicate Predicate.InterfaceContainer
+                in
+                process_container_xref con_kind name pos (xrefs, prog)
+              | Method ->
+                let ref_fun = Build.build_method_decl_json_ref in
+                proc_mem Add_fact.method_decl ref_fun (xrefs, prog)
+              | Property ->
+                let ref_fun = Build.build_property_decl_json_ref in
+                proc_mem Add_fact.property_decl ref_fun (xrefs, prog)
+              | Typeconst ->
+                let ref_fun = Build.build_type_const_decl_json_ref in
+                proc_mem Add_fact.type_const_decl ref_fun (xrefs, prog)
+              | Typedef -> process_typedef_xref name pos (xrefs, prog)
+              | Trait ->
+                let con_kind =
+                  Predicate.parent_decl_predicate Predicate.TraitContainer
+                in
+                process_container_xref con_kind name pos (xrefs, prog)
+              | _ -> (xrefs, prog))))
+  in
+  SMap.fold
+    (fun path target_map acc -> Add_fact.file_xrefs path target_map acc |> snd)
+    file_xrefs
+    prog
+
+let process_xrefs_all_files ctx files_info progress =
+  List.fold files_info ~init:progress ~f:(process_xrefs ctx)
+
+let process_decls_all_files ctx files_info progress =
+  List.fold files_info ~init:progress ~f:(process_decls ctx)
 
 (* This function processes declarations, starting with an
 empty fact cache. *)
-let build_decls_json ctx files_info =
-  let progress = process_decls ctx files_info in
-  Fact_acc.to_json progress
+let build_decls_json ctx files_info ~ownership =
+  Fact_acc.init ~ownership
+  |> process_decls_all_files ctx files_info
+  |> Fact_acc.to_json
 
 (* This function processes cross-references, starting with an
 empty fact cache. *)
-let build_xrefs_json ctx tasts =
-  let progress = process_xrefs ctx tasts Fact_acc.init in
-  Fact_acc.to_json progress
+let build_xrefs_json ctx files_info ~ownership =
+  Fact_acc.init ~ownership
+  |> process_xrefs_all_files ctx files_info
+  |> Fact_acc.to_json
 
 (* This function processes both declarations and cross-references,
 sharing the declaration fact cache between them. *)
-let build_json ctx files_info =
-  let progress = process_decls ctx files_info in
-  let progress =
-    process_xrefs
-      ctx
-      (List.map files_info ~f:(fun File_info.{ tast; _ } -> tast))
-      progress
-  in
-  Fact_acc.to_json progress
+let build_json ctx files_info ~ownership =
+  Fact_acc.init ~ownership
+  |> process_decls_all_files ctx files_info
+  |> process_xrefs_all_files ctx files_info
+  |> Fact_acc.to_json

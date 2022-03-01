@@ -30,7 +30,7 @@ let extract_facts_exn pred_name json_objects =
   | _ -> failwith ("There should be exactly one predicate " ^ pred_name)
 
 let test_add_fact _test_ctxt =
-  let progress = Fact_acc.init in
+  let progress = Fact_acc.init ~ownership:false in
   let json_key =
     JSON_Object
       [
@@ -88,7 +88,7 @@ let test_add_fact _test_ctxt =
     "One function decl fact added to JSON"
 
 let test_add_decl_fact _test_ctxt =
-  let progress = Fact_acc.init in
+  let progress = Fact_acc.init ~ownership:false in
   let gconst_name = "TestGConst" in
   let (id, prog) = Add_fact.gconst_decl gconst_name progress in
   let facts_global_const_declaration =

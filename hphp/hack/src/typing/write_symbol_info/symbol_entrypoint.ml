@@ -32,6 +32,7 @@ let write_file file_dir num_tasts json_chunks =
 
 let write_json
     (ctx : Provider_context.t)
+    (ownership : bool)
     (file_dir : string)
     (files_info : File_info.t list)
     (start_time : float) : float =
@@ -41,18 +42,20 @@ let write_json
            List.length tast <= 2000)
      in
      if List.is_empty large then
-       let json_chunks = Symbol_json_builder.build_json ctx files_info in
+       let json_chunks =
+         Symbol_json_builder.build_json ctx files_info ~ownership
+       in
        write_file file_dir (List.length files_info) json_chunks
      else
-       let json_chunks = Symbol_json_builder.build_json ctx small in
+       let json_chunks = Symbol_json_builder.build_json ctx small ~ownership in
        write_file file_dir (List.length small) json_chunks;
-       List.iter large ~f:(fun (File_info.{ tast; _ } as file_info) ->
+       List.iter large ~f:(fun file_info ->
            let decl_json_chunks =
-             Symbol_json_builder.build_decls_json ctx [file_info]
+             Symbol_json_builder.build_decls_json ctx [file_info] ~ownership
            in
            write_file file_dir 1 decl_json_chunks;
            let xref_json_chunks =
-             Symbol_json_builder.build_xrefs_json ctx [tast]
+             Symbol_json_builder.build_xrefs_json ctx [file_info] ~ownership
            in
            write_file file_dir 1 xref_json_chunks)
    with
@@ -70,13 +73,14 @@ let recheck_job
     (out_dir : string)
     (root_path : string)
     (hhi_path : string)
+    (ownership : bool)
     (_ : float)
     (progress : Relative_path.t list) : float =
   let start_time = Unix.gettimeofday () in
   let files_info = List.map progress ~f:(File_info.create ctx) in
   Relative_path.set_path_prefix Relative_path.Root (Path.make root_path);
   Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi_path);
-  write_json ctx out_dir files_info start_time
+  write_json ctx ownership out_dir files_info start_time
 
 let go
     (workers : MultiWorker.worker list option)
@@ -96,7 +100,7 @@ let go
   let cumulated_elapsed =
     MultiWorker.call
       workers
-      ~job:(recheck_job ctx out_dir root_path hhi_path)
+      ~job:(recheck_job ctx out_dir root_path hhi_path ownership)
       ~merge:(fun f1 f2 -> f1 +. f2)
       ~next:(Bucket.make ~num_workers ~max_size:150 files)
       ~neutral:0.

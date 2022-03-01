@@ -60,15 +60,30 @@ val parent_decl_predicate : parent_container_type -> string * t
 val get_parent_kind : ('a, 'b) Aast.class_ -> parent_container_type
 
 module Fact_acc : sig
-  (* fact accumulator *)
+  (* fact accumulator. This is used to store facts generated from
+     a batch of files. *)
   type t
 
-  val init : t
+  val init : ownership:bool -> t
 
+  (** Returns a list of json objects. If [ownership] is false, objects
+      are of the form {'predicate': PREDICATE, 'facts': FACTS'} and all
+      predicates are different. If [ownership] is set, objects are of the form
+     {'unit: UNIT, 'predicate': PREDICATE, 'facts': FACTS}. *)
   val to_json : t -> Hh_json.json list
 
-  (* Add a fact of the given predicate type to the running result, if an identical
-     fact has not yet been added. Return the fact's id (which can be referenced in
-     other facts), and the updated accumulator. *)
+  (** set the current ownership unit. All facts added after the unit is set
+     will be marked with this owner. Initially, ownership_unit is set to None
+     which corresponds to fact with no owners. If [ownership] is false,
+     the ownership_unit is ignored. *)
+  val set_ownership_unit : t -> string option -> unit
+
+  (** [add_fact pred fact t] returns an [id] and a new accumulator [t'].
+     If a fact already exists in [t] for this [pred], returns [t] unchanged
+     together with its id. Otherwise, [id] is a new fact id, and a fact
+     of the form { 'id': id, 'key': fact } is added to the accumulator.
+
+     If [ownership] is set, we distinguish between identical facts with different
+     owners *)
   val add_fact : predicate -> Hh_json.json -> t -> Symbol_fact_id.t * t
 end

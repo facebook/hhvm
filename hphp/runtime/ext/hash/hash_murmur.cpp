@@ -24,6 +24,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 #include "hphp/runtime/ext/hash/hash_murmur.h"
 
 namespace HPHP {
@@ -43,11 +44,15 @@ uint64_t murmur_hash_64A(const void* const key, const size_t len,
 
     uint64_t h = seed ^ (len * m);
 
-    const uint64_t * data = (const uint64_t *)key;
-    const uint64_t * end = data + (len/8);
+    const uint8_t * data = (const uint8_t*)key;
+    const uint8_t * end = data + ((len / 8) * 8);
 
     while(data != end) {
-        uint64_t k = *data++;
+        uint64_t k;
+        // Read 64 bits without breaking aliasing rules; compilers will optimize
+        // the `memcpy` away.
+        memcpy(&k, data, sizeof(k));
+        data += sizeof(k);
 
         k *= m;
         k ^= k >> r;
@@ -57,16 +62,14 @@ uint64_t murmur_hash_64A(const void* const key, const size_t len,
         h *= m;
     }
 
-    const uint8_t * data2 = (const uint8_t*)data;
-
     switch(len & 7) {
-        case 7: h ^= (uint64_t)data2[6] << 48;
-        case 6: h ^= (uint64_t)data2[5] << 40;
-        case 5: h ^= (uint64_t)data2[4] << 32;
-        case 4: h ^= (uint64_t)data2[3] << 24;
-        case 3: h ^= (uint64_t)data2[2] << 16;
-        case 2: h ^= (uint64_t)data2[1] << 8;
-        case 1: h ^= (uint64_t)data2[0];
+        case 7: h ^= (uint64_t)data[6] << 48;
+        case 6: h ^= (uint64_t)data[5] << 40;
+        case 5: h ^= (uint64_t)data[4] << 32;
+        case 4: h ^= (uint64_t)data[3] << 24;
+        case 3: h ^= (uint64_t)data[2] << 16;
+        case 2: h ^= (uint64_t)data[1] << 8;
+        case 1: h ^= (uint64_t)data[0];
                 h *= m;
     };
 

@@ -117,8 +117,11 @@ ALWAYS_INLINE uint64_t rotl64(uint64_t x, int8_t r) {
 }
 
 template <bool caseSensitive>
-ALWAYS_INLINE uint64_t getblock64(const uint64_t *p, int i) {
-  uint64_t block = p[i];
+ALWAYS_INLINE uint64_t getblock64(const uint8_t *p) {
+  uint64_t block;
+  // Read 64 bits without violating alias rules. Compiler will optimize the
+  // `memcpy` away.
+  std::memcpy(&block, p, sizeof(block));
   if (!caseSensitive) {
     block &= 0xdfdfdfdfdfdfdfdfLLU; // a-z => A-Z
   }
@@ -159,11 +162,12 @@ ALWAYS_INLINE void hash128(const void *key, size_t len, uint64_t seed,
 
   //----------
   // body
-  const uint64_t *blocks = (const uint64_t *)(data);
-  for(size_t i = 0; i < nblocks; i++)
+  const uint8_t * head = data;
+  const uint8_t * tail = data + nblocks*16;
+  for(const uint8_t *b = head; b < tail; b += 16)
   {
-    uint64_t k1 = getblock64<caseSensitive>(blocks,i*2+0);
-    uint64_t k2 = getblock64<caseSensitive>(blocks,i*2+1);
+    uint64_t k1 = getblock64<caseSensitive>(b);
+    uint64_t k2 = getblock64<caseSensitive>(b + 8);
     k1 *= c1; k1  = ROTL64(k1,31); k1 *= c2; h1 ^= k1;
     h1 = ROTL64(h1,27); h1 += h2; h1 = h1*5+0x52dce729;
     k2 *= c2; k2  = ROTL64(k2,33); k2 *= c1; h2 ^= k2;
@@ -172,7 +176,6 @@ ALWAYS_INLINE void hash128(const void *key, size_t len, uint64_t seed,
 
   //----------
   // tail
-  const uint8_t *tail = (const uint8_t*)(data + nblocks*16);
   uint64_t k1 = 0;
   uint64_t k2 = 0;
   switch(len & 15)

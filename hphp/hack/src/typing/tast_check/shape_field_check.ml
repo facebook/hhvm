@@ -32,7 +32,8 @@ let shapes_key_exists env shape field_name =
         if Tast_env.is_sub_type env sft_ty nothing then
           `DoesNotExist
             ( get_pos shape,
-              `Nothing (Reason.to_string "It is nothing" (get_reason sft_ty)) )
+              `Nothing
+                (lazy (Reason.to_string "It is nothing" (get_reason sft_ty))) )
         else
           `Unknown
   in

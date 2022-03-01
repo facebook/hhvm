@@ -330,7 +330,9 @@ let check_reuse_final_method tgenv (c : Nast.class_) : unit =
           let cls_name = snd c.c_name in
           let dupe = lowermost_classish tgenv dupes in
           let using_class = find_using_class tgenv cls_name dupe in
-          let trace = relevant_positions tgenv using_class type_name dupe in
+          let trace =
+            lazy (relevant_positions tgenv using_class type_name dupe)
+          in
           Errors.add_typing_error
             Typing_error.(
               primary
@@ -368,7 +370,9 @@ let check_reuse_final_method_allow_diamond tgenv (c : Nast.class_) : unit =
           let cls_name = snd c.c_name in
           let dupe = lowermost_classish tgenv (SSet.elements dupes) in
           let using_class = find_using_class tgenv cls_name dupe in
-          let trace = relevant_positions tgenv using_class type_name dupe in
+          let trace =
+            lazy (relevant_positions tgenv using_class type_name dupe)
+          in
           Errors.add_typing_error
             Typing_error.(
               primary
@@ -405,18 +409,20 @@ let check_reuse_method_without_override tgenv (c : Nast.class_) : unit =
                 (* The reused trait has a method that we haven't overridden in this trait/class. *)
                 let (cls_pos, cls_name) = c.c_name in
                 let trace1 =
-                  class_to_trait_via_trait
-                    tgenv
-                    cls_name
-                    used_trait_name
-                    m.ce_origin
+                  lazy
+                    (class_to_trait_via_trait
+                       tgenv
+                       cls_name
+                       used_trait_name
+                       m.ce_origin)
                 in
                 let trace2 =
-                  class_to_trait_via_trait
-                    tgenv
-                    cls_name
-                    (SMap.find m.ce_origin !seen_method_origins)
-                    m.ce_origin
+                  lazy
+                    (class_to_trait_via_trait
+                       tgenv
+                       cls_name
+                       (SMap.find m.ce_origin !seen_method_origins)
+                       m.ce_origin)
                 in
                 Errors.add_typing_error
                   Typing_error.(
@@ -483,14 +489,20 @@ let check_diamond_import_property tgenv (c : Nast.class_) : unit =
                     (* A property with a generic type is defined in a trait that *)
                     let (cls_pos, cls_name) = c.c_name in
                     let trace1 =
-                      class_to_trait_via_trait
-                        tgenv
-                        cls_name
-                        used_trait_name
-                        p.ce_origin
+                      lazy
+                        (class_to_trait_via_trait
+                           tgenv
+                           cls_name
+                           used_trait_name
+                           p.ce_origin)
                     in
                     let trace2 =
-                      class_to_trait_via_trait tgenv cls_name trait p.ce_origin
+                      lazy
+                        (class_to_trait_via_trait
+                           tgenv
+                           cls_name
+                           trait
+                           p.ce_origin)
                     in
                     let p_pos = Lazy.force p.ce_type |> get_pos in
                     Errors.add_typing_error

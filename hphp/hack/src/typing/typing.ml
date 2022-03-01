@@ -6609,9 +6609,10 @@ and dispatch_call
                     ] )
             in
             let reason =
-              Reason.to_string
-                ("This is " ^ Typing_print.error ~ignore_dynamic:true env ty)
-                (get_reason ty)
+              lazy
+                (Reason.to_string
+                   ("This is " ^ Typing_print.error ~ignore_dynamic:true env ty)
+                   (get_reason ty))
             in
             SubType.sub_type_or_fail env ty super
             @@ Some
@@ -6621,7 +6622,8 @@ and dispatch_call
             (Errors.add_typing_error
             @@ Typing_error.(
                  primary
-                 @@ Primary.Unset_nonidx_in_strict { pos = p; reason = [] }));
+                 @@ Primary.Unset_nonidx_in_strict { pos = p; reason = lazy [] })
+            );
             env
         in
         let should_forget_fakes = false in
@@ -7811,7 +7813,7 @@ and class_expr
                  {
                    expected = "an object";
                    pos = p;
-                   reason = Reason.to_string "It is unknown" r;
+                   reason = lazy (Reason.to_string "It is unknown" r);
                  });
         let ty = err_witness env p in
         (env, ty, Ok ty)

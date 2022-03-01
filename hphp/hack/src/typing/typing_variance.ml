@@ -514,7 +514,7 @@ let generic_ : Env.type_parameter_env -> variance -> string -> _ -> unit =
   | (Vcovariant stack1, (Vcontravariant stack2 | Vinvariant (_, stack2))) ->
     let (pos1, _, _) = List.hd_exn stack1 in
     let (pos2, _, _) = List.hd_exn stack2 in
-    let emsg = detailed_message "contravariant (-)" pos2 stack2 in
+    let emsg = lazy (detailed_message "contravariant (-)" pos2 stack2) in
     Errors.add_typing_error
       Typing_error.(
         primary
@@ -523,7 +523,7 @@ let generic_ : Env.type_parameter_env -> variance -> string -> _ -> unit =
   | (Vcontravariant stack1, (Vcovariant stack2 | Vinvariant (stack2, _))) ->
     let (pos1, _, _) = List.hd_exn stack1 in
     let (pos2, _, _) = List.hd_exn stack2 in
-    let emsg = detailed_message "covariant (+)" pos2 stack2 in
+    let emsg = lazy (detailed_message "covariant (+)" pos2 stack2) in
     Errors.add_typing_error
       Typing_error.(
         primary

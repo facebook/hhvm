@@ -30,7 +30,7 @@ type validation_state = {
   expanded_typedefs: SSet.t;
 }
 
-type error_emitter = Pos.t -> (Pos_or_decl.t * string) list -> unit
+type error_emitter = Pos.t -> (Pos_or_decl.t * string) list Lazy.t -> unit
 
 class virtual type_validator =
   object (this)
@@ -141,9 +141,8 @@ class virtual type_validator =
       in
       match state.validity with
       | Invalid reasons ->
-        emit_error
-          use_pos
-          (List.map reasons ~f:(fun (r, msg) -> (Reason.to_pos r, msg)))
+        emit_error use_pos
+        @@ lazy (List.map reasons ~f:(fun (r, msg) -> (Reason.to_pos r, msg)))
       | Valid -> ()
 
     method validate_hint

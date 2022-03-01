@@ -37,7 +37,9 @@ let unnecessary_lsb c cv =
   | Some pos ->
     let (pos_class, name_class) = c.c_name in
     let name_class = Utils.strip_ns name_class in
-    let reason = (pos_class, sprintf "the class `%s` is final" name_class) in
+    let reason =
+      lazy (pos_class, sprintf "the class `%s` is final" name_class)
+    in
     let suggestion = None in
     Errors.add_typing_error
       Typing_error.(

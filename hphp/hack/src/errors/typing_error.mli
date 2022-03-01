@@ -120,20 +120,23 @@ module Primary : sig
           pos: Pos.t;
           field_name: string;
           decl_pos: Pos_or_decl.t;
-          reason: [ `Nothing of Pos_or_decl.t Message.t list | `Undefined ];
+          reason:
+            [ `Nothing of Pos_or_decl.t Message.t list Lazy.t | `Undefined ];
         }
       | Shapes_method_access_with_non_existent_field of {
           pos: Pos.t;
           field_name: string;
           decl_pos: Pos_or_decl.t;
           method_name: string;
-          reason: [ `Nothing of Pos_or_decl.t Message.t list | `Undefined ];
+          reason:
+            [ `Nothing of Pos_or_decl.t Message.t list Lazy.t | `Undefined ];
         }
       | Shapes_access_with_non_existent_field of {
           pos: Pos.t;
           field_name: string;
           decl_pos: Pos_or_decl.t;
-          reason: [ `Nothing of Pos_or_decl.t Message.t list | `Undefined ];
+          reason:
+            [ `Nothing of Pos_or_decl.t Message.t list Lazy.t | `Undefined ];
         }
   end
 
@@ -225,7 +228,7 @@ module Primary : sig
     type t =
       | Readonly_modified of {
           pos: Pos.t;
-          reason_opt: Pos_or_decl.t Message.t option;
+          reason_opt: Pos_or_decl.t Message.t Lazy.t option;
         }
       | Readonly_mismatch of {
           pos: Pos.t;
@@ -295,7 +298,7 @@ module Primary : sig
           available_pos: Pos_or_decl.t;
           err_code: Error_code.t;
           required: string Lazy.t;
-          suggestion: Pos_or_decl.t Message.t list option;
+          suggestion: Pos_or_decl.t Message.t list Lazy.t option;
         }
   end
 
@@ -305,11 +308,11 @@ module Primary : sig
       | Dollardollar_lvalue of Pos.t
       | Void_usage of {
           pos: Pos.t;
-          reason: Pos_or_decl.t Message.t list;
+          reason: Pos_or_decl.t Message.t list Lazy.t;
         }
       | Noreturn_usage of {
           pos: Pos.t;
-          reason: Pos_or_decl.t Message.t list;
+          reason: Pos_or_decl.t Message.t list Lazy.t;
         }
       | Returns_with_and_without_value of {
           pos: Pos.t;
@@ -453,7 +456,7 @@ module Primary : sig
         class_pos: Pos_or_decl.t;
         member_name: string;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option Lazy.t;
-        reason: Pos_or_decl.t Message.t list;
+        reason: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Construct_not_instance_method of Pos.t
     | Ambiguous_inheritance of {
@@ -518,7 +521,7 @@ module Primary : sig
       }
     | Unset_nonidx_in_strict of {
         pos: Pos.t;
-        reason: Pos_or_decl.t Message.t list;
+        reason: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Nullable_cast of {
         pos: Pos.t;
@@ -534,7 +537,7 @@ module Primary : sig
         ctxt: [ `read | `write ];
         kind: [ `method_ | `property ];
         member_name: string;
-        reason: Pos_or_decl.t Message.t list;
+        reason: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Nullsafe_property_write_context of Pos.t
     | Uninstantiable_class of {
@@ -636,7 +639,7 @@ module Primary : sig
       }
     | Ambiguous_lambda of {
         pos: Pos.t;
-        uses: Pos_or_decl.t Message.t list;
+        uses: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Wrong_extend_kind of {
         pos: Pos.t;
@@ -654,7 +657,7 @@ module Primary : sig
         pos: Pos.t;
         trait_name: string;
         parent_cls_name: string;
-        trace: Pos_or_decl.t Message.t list;
+        trace: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Trait_reuse of {
         pos: Pos.t;
@@ -672,18 +675,18 @@ module Primary : sig
     | Invalid_is_as_expression_hint of {
         pos: Pos.t;
         op: [ `is | `as_ ];
-        reasons: Pos_or_decl.t Message.t list;
+        reasons: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Invalid_enforceable_type of {
         pos: Pos.t;
-        ty_info: Pos_or_decl.t Message.t list;
+        ty_info: Pos_or_decl.t Message.t list Lazy.t;
         tp_pos: Pos_or_decl.t;
         tp_name: string;
         kind: [ `constant | `param ];
       }
     | Reifiable_attr of {
         pos: Pos.t;
-        ty_info: Pos_or_decl.t Message.t list;
+        ty_info: Pos_or_decl.t Message.t list Lazy.t;
         attr_pos: Pos_or_decl.t;
         kind: [ `ty | `cnstr | `super_cnstr ];
       }
@@ -843,7 +846,7 @@ module Primary : sig
     | Unnecessary_attribute of {
         pos: Pos.t;
         attr: string;
-        reason: Pos.t Message.t;
+        reason: Pos.t Message.t Lazy.t;
         suggestion: string option;
       }
     | Inherited_class_member_with_different_case of {
@@ -917,16 +920,16 @@ module Primary : sig
         class_name: string;
         method_pos: Pos_or_decl.t;
         method_name: string;
-        trace1: Pos_or_decl.t Message.t list;
-        trace2: Pos_or_decl.t Message.t list;
+        trace1: Pos_or_decl.t Message.t list Lazy.t;
+        trace2: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Generic_property_import_via_diamond of {
         pos: Pos.t;
         class_name: string;
         property_pos: Pos_or_decl.t;
         property_name: string;
-        trace1: Pos_or_decl.t Message.t list;
-        trace2: Pos_or_decl.t Message.t list;
+        trace1: Pos_or_decl.t Message.t list Lazy.t;
+        trace2: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Unification_cycle of {
         pos: Pos.t;
@@ -936,7 +939,7 @@ module Primary : sig
     | Explain_tconst_where_constraint of {
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
-        msgs: Pos_or_decl.t Message.t list;
+        msgs: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Format_string of {
         pos: Pos.t;
@@ -1101,7 +1104,7 @@ module Primary : sig
     | Unknown_type of {
         pos: Pos.t;
         expected: string;
-        reason: Pos_or_decl.t Message.t list;
+        reason: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Parent_in_trait of Pos.t
     | Parent_undefined of Pos.t
@@ -1182,7 +1185,7 @@ module Primary : sig
         pos: Pos.t;
         param_name: string;
         decl_pos: Pos_or_decl.t;
-        arg_info: Pos_or_decl.t Message.t list;
+        arg_info: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Invalid_reified_arg_reifiable of {
         pos: Pos.t;
@@ -1228,7 +1231,7 @@ module Primary : sig
         pos: Pos.t;
         member_name: string;
         elt: [ `meth | `prop ];
-        reason: Pos_or_decl.t Message.t list;
+        reason: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Non_class_member of {
         pos: Pos.t;
@@ -1239,19 +1242,19 @@ module Primary : sig
       }
     | Null_container of {
         pos: Pos.t;
-        null_witness: Pos_or_decl.t Message.t list;
+        null_witness: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Option_mixed of Pos.t
     | Option_null of Pos.t
     | Declared_covariant of {
         pos: Pos.t;
         param_pos: Pos.t;
-        msgs: Pos.t Message.t list;
+        msgs: Pos.t Message.t list Lazy.t;
       }
     | Declared_contravariant of {
         pos: Pos.t;
         param_pos: Pos.t;
-        msgs: Pos.t Message.t list;
+        msgs: Pos.t Message.t list Lazy.t;
       }
     | Static_prop_type_generic_param of {
         pos: Pos.t;
@@ -1552,8 +1555,8 @@ module Secondary : sig
     | Readonly_mismatch of {
         pos: Pos_or_decl.t;
         kind: [ `fn | `fn_return | `param ];
-        reason_sub: Pos_or_decl.t Message.t list;
-        reason_super: Pos_or_decl.t Message.t list;
+        reason_sub: Pos_or_decl.t Message.t list Lazy.t;
+        reason_super: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Not_sub_dynamic of {
         pos: Pos_or_decl.t;
@@ -1680,8 +1683,8 @@ module Reasons_callback : sig
   *)
   val apply :
     ?code:Error_code.t ->
-    ?claim:Pos.t Message.t ->
-    ?reasons:Pos_or_decl.t Message.t list ->
+    ?claim:Pos.t Message.t Lazy.t ->
+    ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
     ?quickfixes:Quickfix.t list ->
     t ->
     current_span:Pos.t ->
@@ -1714,7 +1717,7 @@ module Reasons_callback : sig
 
   (** Replace the current default claim with the claim from the supplied
       `Pos.t Message.t` *)
-  val with_claim : Callback.t -> claim:Pos.t Message.t -> t
+  val with_claim : Callback.t -> claim:Pos.t Message.t Lazy.t -> t
 
   (** Replace the current default error code with the supplied one *)
   val with_code : t -> code:Error_code.t -> t
@@ -1723,13 +1726,13 @@ module Reasons_callback : sig
        used in combination with `retain_reasons` to fix the `reasons` of the
       `User_error.t` that is obtained when the callback is applied
   *)
-  val with_reasons : t -> reasons:Pos_or_decl.t Message.t list -> t
+  val with_reasons : t -> reasons:Pos_or_decl.t Message.t list Lazy.t -> t
 
   (** Add the `reason` to the start of current list of reasons *)
-  val prepend_reason : t -> reason:Pos_or_decl.t Message.t -> t
+  val prepend_reason : t -> reason:Pos_or_decl.t Message.t Lazy.t -> t
 
   (** Add the `reason` to the end of current list of reasons *)
-  val append_reason : t -> reason:Pos_or_decl.t Message.t -> t
+  val append_reason : t -> reason:Pos_or_decl.t Message.t Lazy.t -> t
 
   (** When applied, append the supplied reasons to the current list of reasons *)
   val append_incoming_reasons : t -> t

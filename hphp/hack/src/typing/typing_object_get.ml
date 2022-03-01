@@ -175,9 +175,10 @@ let member_not_found
   else
     let (class_pos, class_name) = (Cls.pos class_, Cls.name class_) in
     let reason =
-      Reason.to_string
-        ("This is why I think it is an object of type " ^ cls_name)
-        r
+      lazy
+        (Reason.to_string
+           ("This is why I think it is an object of type " ^ cls_name)
+           r)
     in
     let hint =
       lazy
@@ -996,7 +997,7 @@ and nullable_obj_get
                      {
                        pos = id_pos;
                        member_name = id_str;
-                       reason = Reason.to_string "This can be null" r;
+                       reason = lazy (Reason.to_string "This can be null" r);
                        kind =
                          (if args.is_method then
                            `method_
@@ -1020,7 +1021,7 @@ and nullable_obj_get
                  {
                    pos = id_pos;
                    member_name = id_str;
-                   reason = Reason.to_string "This can be null" r;
+                   reason = lazy (Reason.to_string "This can be null" r);
                    kind =
                      (if args.is_method then
                        `method_
@@ -1190,7 +1191,7 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
                    `prop);
                member_name = id_str;
                pos = id_pos;
-               reason = Reason.to_string "It is unknown" r;
+               reason = lazy (Reason.to_string "It is unknown" r);
              })
     in
     let ty_err_opt =

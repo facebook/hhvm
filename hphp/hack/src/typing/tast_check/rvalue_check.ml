@@ -28,9 +28,10 @@ let check_valid_rvalue pos env ty =
                  {
                    pos;
                    reason =
-                     Reason.to_string
-                       "A `noreturn` function always throws or exits."
-                       r;
+                     lazy
+                       (Reason.to_string
+                          "A `noreturn` function always throws or exits."
+                          r);
                  });
         env
       | (r, Tprim Tvoid) ->
@@ -41,9 +42,10 @@ let check_valid_rvalue pos env ty =
                  {
                    pos;
                    reason =
-                     Reason.to_string
-                       "A `void` function doesn't return a value."
-                       r;
+                     lazy
+                       (Reason.to_string
+                          "A `void` function doesn't return a value."
+                          r);
                  });
         env
       | (_, Tunion tyl2) -> iter_over_types env (tyl2 @ tyl)

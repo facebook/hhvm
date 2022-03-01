@@ -901,8 +901,8 @@ let apply_callback_to_errors : t -> Typing_error.Reasons_callback.t -> unit =
       @@ Reasons_callback.apply
            on_error
            ~code
-           ~claim
-           ~reasons
+           ~claim:(lazy claim)
+           ~reasons:(lazy reasons)
            ~current_span:!current_span)
   in
   Relative_path.Map.iter errors ~f:(fun _ ->
@@ -1049,7 +1049,7 @@ let ambiguous_inheritance
   apply_error_from_reasons_callback
     on_error
     ~code
-    ~reasons:(claim_as_reason claim :: reasons @ [(pos, message)])
+    ~reasons:(lazy (claim_as_reason claim :: reasons @ [(pos, message)]))
 
 (** TODO: Remove use of `User_error.t` representation for nested error  *)
 let function_is_not_dynamically_callable pos function_name error =

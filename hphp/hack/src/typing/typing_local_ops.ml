@@ -67,8 +67,8 @@ let enforce_static_property_access =
 let enforce_mutable_static_variable ?msg (op_pos : Pos.t) env =
   let suggestion =
     match msg with
-    | Some msg -> [(Pos_or_decl.of_raw_pos op_pos, msg)]
-    | None -> []
+    | Some msg -> lazy [(Pos_or_decl.of_raw_pos op_pos, msg)]
+    | None -> lazy []
   in
   enforce_local_capability
     Capabilities.(mk accessGlobals)

@@ -677,7 +677,7 @@ let expand_type_and_solve_with_ty_err
                    {
                      expected = description_of_expected;
                      pos = p;
-                     reason = Reason.to_string "It is unknown" r;
+                     reason = lazy (Reason.to_string "It is unknown" r);
                    })
           in
           ty_errs := ty_err :: !ty_errs;

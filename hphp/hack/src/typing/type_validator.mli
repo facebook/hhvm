@@ -21,7 +21,7 @@ type validation_state = {
   expanded_typedefs: SSet.t;
 }
 
-type error_emitter = Pos.t -> (Pos_or_decl.t * string) list -> unit
+type error_emitter = Pos.t -> (Pos_or_decl.t * string) list Lazy.t -> unit
 
 class virtual type_validator :
   object

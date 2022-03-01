@@ -360,9 +360,10 @@ let rec array_get
                    {
                      pos = expr_pos;
                      null_witness =
-                       Reason.to_string
-                         "This is what makes me believe it can be `null`."
-                         r;
+                       lazy
+                         (Reason.to_string
+                            "This is what makes me believe it can be `null`."
+                            r);
                    });
           (env, err_witness env expr_pos, Some (ty_actual, ty_expected), None)
       in

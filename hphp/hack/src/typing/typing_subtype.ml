@@ -2453,7 +2453,8 @@ and simplify_subtype_has_member
                       {
                         pos = name_pos;
                         member_name = name_;
-                        reason = Reason.to_string "This can be null" r_null;
+                        reason =
+                          lazy (Reason.to_string "This can be null" r_null);
                         kind =
                           (if is_method then
                             `method_
@@ -2506,7 +2507,8 @@ and simplify_subtype_has_member
                         {
                           pos = name_pos;
                           member_name = name_;
-                          reason = Reason.to_string "This can be null" r_option;
+                          reason =
+                            lazy (Reason.to_string "This can be null" r_option);
                           kind =
                             (if is_method then
                               `method_
@@ -2946,9 +2948,9 @@ and simplify_param_readonly ~subtype_env sub super env =
                       {
                         pos = pos1;
                         kind = `param;
-                        reason_sub = [(pos1, "This parameter is mutable")];
+                        reason_sub = lazy [(pos1, "This parameter is mutable")];
                         reason_super =
-                          [(pos2, "But this parameter is readonly")];
+                          lazy [(pos2, "But this parameter is readonly")];
                       }))
       env
   else
@@ -3021,9 +3023,9 @@ and simplify_subtype_funs_attributes
                        pos = p_sub;
                        kind = `fn;
                        reason_sub =
-                         [(p_sub, "This function is not marked readonly")];
+                         lazy [(p_sub, "This function is not marked readonly")];
                        reason_super =
-                         [(p_super, "This function is marked readonly")];
+                         lazy [(p_super, "This function is marked readonly")];
                      }))
   |> check_with
        (readonly_subtype
@@ -3041,12 +3043,15 @@ and simplify_subtype_funs_attributes
                        pos = p_sub;
                        kind = `fn_return;
                        reason_sub =
-                         [(p_sub, "This function returns a readonly value")];
+                         lazy
+                           [(p_sub, "This function returns a readonly value")];
                        reason_super =
-                         [
-                           ( p_super,
-                             "This function does not return a readonly value" );
-                         ];
+                         lazy
+                           [
+                             ( p_super,
+                               "This function does not return a readonly value"
+                             );
+                           ];
                      }))
   |> check_with
        (Bool.equal

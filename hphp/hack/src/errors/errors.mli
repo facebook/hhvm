@@ -70,8 +70,8 @@ val add_nast_check_error : Nast_check_error.t -> unit
 
 val apply_error_from_reasons_callback :
   ?code:Typing.t ->
-  ?claim:Pos.t Message.t ->
-  ?reasons:Pos_or_decl.t Message.t list ->
+  ?claim:Pos.t Message.t Lazy.t ->
+  ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
   ?quickfixes:Quickfix.t list ->
   Typing_error.Reasons_callback.t ->
   unit

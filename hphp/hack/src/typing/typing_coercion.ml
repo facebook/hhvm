@@ -107,7 +107,7 @@ let coerce_type_with_ty_err
   @@ Some
        (Typing_error.Reasons_callback.with_claim
           on_error
-          ~claim:(p, Reason.string_of_ureason ur))
+          ~claim:(lazy (p, Reason.string_of_ureason ur)))
 
 let coerce_type
     ?coerce_for_op

@@ -116,7 +116,8 @@ let rec assert_nontrivial p bop env ty1 ty2 =
           @@ Primary.Wellformedness.Noreturn_usage
                {
                  pos = p;
-                 reason = Reason.to_string "This always throws or exits" r;
+                 reason =
+                   lazy (Reason.to_string "This always throws or exits" r);
                })
     | ((r, Tprim N.Tvoid), _)
     | (_, (r, Tprim N.Tvoid)) ->
@@ -125,7 +126,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
         Typing_error.(
           wellformedness
           @@ Primary.Wellformedness.Void_usage
-               { pos = p; reason = Reason.to_string "This is `void`" r })
+               { pos = p; reason = lazy (Reason.to_string "This is `void`" r) })
     | ((_, Tprim a), (_, Tnewtype (e, _, bound)))
       when Env.is_enum env e && bad_compare_prim_to_enum a bound ->
       trivial_comparison_error env p bop ty1 bound trail1 trail2

@@ -164,32 +164,36 @@ type on_error =
 
 type error =
   Error_code.t
-  * Pos.t Message.t
-  * Pos_or_decl.t Message.t list
+  * Pos.t Message.t Lazy.t
+  * Pos_or_decl.t Message.t list Lazy.t
   * Quickfix.t list
 
 module Common = struct
+  let map2 ~f x y = Lazy.(x >>= fun x -> map ~f:(fun y -> f x y) y)
+
   let reasons_of_trail trail =
     List.map trail ~f:(fun pos -> (pos, "Typedef definition comes from here"))
 
   let typing_too_many_args pos decl_pos actual expected =
     let claim =
-      ( pos,
-        Printf.sprintf
-          "Too many arguments (expected %d but got %d)"
-          expected
-          actual )
-    and reasons = [(decl_pos, "Definition is here")] in
+      lazy
+        ( pos,
+          Printf.sprintf
+            "Too many arguments (expected %d but got %d)"
+            expected
+            actual )
+    and reasons = lazy [(decl_pos, "Definition is here")] in
     (Error_code.TypingTooManyArgs, claim, reasons)
 
   let typing_too_few_args pos decl_pos actual expected =
     let claim =
-      ( pos,
-        Printf.sprintf
-          "Too few arguments (required %d but got %d)"
-          expected
-          actual )
-    and reasons = [(decl_pos, "Definition is here")] in
+      lazy
+        ( pos,
+          Printf.sprintf
+            "Too few arguments (required %d but got %d)"
+            expected
+            actual )
+    and reasons = lazy [(decl_pos, "Definition is here")] in
     (Error_code.TypingTooFewArgs, claim, reasons)
 
   let snot_found_suggestion orig similar kind =
@@ -208,27 +212,30 @@ module Common = struct
     | (`static, pos, v) -> Render.suggestion_message orig v pos
 
   let smember_not_found pos kind member_name class_name class_pos hint =
-    let msg =
-      Printf.sprintf
-        "No %s %s in %s"
-        (Render.string_of_class_member_kind kind)
-        (Markdown_lite.md_codify member_name)
-        (Markdown_lite.md_codify @@ Render.strip_ns class_name)
-    in
-    let default =
-      [
-        ( class_pos,
-          "Declaration of "
-          ^ (Markdown_lite.md_codify @@ Render.strip_ns class_name)
-          ^ " is here" );
-      ]
+    let claim =
+      lazy
+        ( pos,
+          Printf.sprintf
+            "No %s %s in %s"
+            (Render.string_of_class_member_kind kind)
+            (Markdown_lite.md_codify member_name)
+            (Markdown_lite.md_codify @@ Render.strip_ns class_name) )
     in
     let reasons =
-      Option.value_map hint ~default ~f:(fun similar ->
-          snot_found_suggestion member_name similar kind :: default)
+      lazy
+        (let default =
+           [
+             ( class_pos,
+               "Declaration of "
+               ^ (Markdown_lite.md_codify @@ Render.strip_ns class_name)
+               ^ " is here" );
+           ]
+         in
+         Option.value_map hint ~default ~f:(fun similar ->
+             snot_found_suggestion member_name similar kind :: default))
     in
 
-    (Error_code.SmemberNotFound, (pos, msg), reasons)
+    (Error_code.SmemberNotFound, claim, reasons)
 
   let non_object_member pos ctxt ty_name member_name kind decl_pos =
     let code =
@@ -236,20 +243,23 @@ module Common = struct
       | `read -> Error_code.NonObjectMemberRead
       | `write -> Error_code.NonObjectMemberWrite
     in
-    let msg_start =
-      Printf.sprintf
-        "You are trying to access the %s %s but this is %s"
-        (Render.string_of_class_member_kind kind)
-        (Markdown_lite.md_codify member_name)
-        ty_name
-    in
-    let msg =
-      if String.equal ty_name "a shape" then
-        msg_start ^ ". Did you mean `$foo['" ^ member_name ^ "']` instead?"
-      else
-        msg_start
-    in
-    let claim = (pos, msg) and reasons = [(decl_pos, "Definition is here")] in
+    let claim =
+      lazy
+        (let msg_start =
+           Printf.sprintf
+             "You are trying to access the %s %s but this is %s"
+             (Render.string_of_class_member_kind kind)
+             (Markdown_lite.md_codify member_name)
+             ty_name
+         in
+         let msg =
+           if String.equal ty_name "a shape" then
+             msg_start ^ ". Did you mean `$foo['" ^ member_name ^ "']` instead?"
+           else
+             msg_start
+         in
+         (pos, msg))
+    and reasons = lazy [(decl_pos, "Definition is here")] in
     (code, claim, reasons)
 
   let badpos_message =
@@ -263,43 +273,45 @@ module Common = struct
       Error_message_sentinel.please_file_a_bug_message
 
   let wrap_error_in_different_file ~current_file ~current_span reasons =
-    let message =
-      List.map reasons ~f:(fun (pos, msg) ->
-          Pos.print_verbose_relative (Pos_or_decl.unsafe_to_raw_pos pos)
-          ^ ": "
-          ^ msg)
-    in
-    let stack =
-      Exception.get_current_callstack_string 99 |> Exception.clean_stack
-    in
-    HackEventLogger.type_check_primary_position_bug
-      ~current_file
-      ~message
-      ~stack;
     let claim =
-      if Pos.equal current_span Pos.none then
-        (Pos.make_from current_file, badpos_message)
-      else
-        (current_span, badpos_message_2)
+      lazy
+        (let message =
+           List.map reasons ~f:(fun (pos, msg) ->
+               Pos.print_verbose_relative (Pos_or_decl.unsafe_to_raw_pos pos)
+               ^ ": "
+               ^ msg)
+         in
+         let stack =
+           Exception.get_current_callstack_string 99 |> Exception.clean_stack
+         in
+         HackEventLogger.type_check_primary_position_bug
+           ~current_file
+           ~message
+           ~stack;
+         if Pos.equal current_span Pos.none then
+           (Pos.make_from current_file, badpos_message)
+         else
+           (current_span, badpos_message_2))
     in
     (claim, reasons)
 
-  let eval_assert ctx current_span = function
-    | (code, ((pos, msg) :: rest as reasons), quickfixes) ->
+  let eval_assert ctx current_span (code, reasons, quickfixes) : error option =
+    match Lazy.force reasons with
+    | (pos, msg) :: rest as reasons ->
       let (claim, reasons) =
         match
           Pos_or_decl.fill_in_filename_if_in_current_decl
             ~current_decl_and_file:ctx
             pos
         with
-        | Some pos -> ((pos, msg), rest)
+        | Some pos -> (lazy (pos, msg), rest)
         | _ ->
           wrap_error_in_different_file
             ~current_file:ctx.Pos_or_decl.file
             ~current_span
             reasons
       in
-      Some (code, claim, reasons, quickfixes)
+      Some (code, claim, lazy reasons, quickfixes)
     | _ -> None
 end
 
@@ -346,112 +358,137 @@ module Primary = struct
           pos: Pos.t;
           field_name: string;
           decl_pos: Pos_or_decl.t;
-          reason: [ `Nothing of Pos_or_decl.t Message.t list | `Undefined ];
+          reason:
+            [ `Nothing of Pos_or_decl.t Message.t list Lazy.t | `Undefined ];
         }
       | Shapes_method_access_with_non_existent_field of {
           pos: Pos.t;
           field_name: string;
           decl_pos: Pos_or_decl.t;
           method_name: string;
-          reason: [ `Nothing of Pos_or_decl.t Message.t list | `Undefined ];
+          reason:
+            [ `Nothing of Pos_or_decl.t Message.t list Lazy.t | `Undefined ];
         }
       | Shapes_access_with_non_existent_field of {
           pos: Pos.t;
           field_name: string;
           decl_pos: Pos_or_decl.t;
-          reason: [ `Nothing of Pos_or_decl.t Message.t list | `Undefined ];
+          reason:
+            [ `Nothing of Pos_or_decl.t Message.t list Lazy.t | `Undefined ];
         }
 
-    let invalid_shape_field_type pos ty_pos ty_name trail =
+    let invalid_shape_field_type pos ty_pos ty_name trail : error =
       let reasons =
-        (ty_pos, "Not " ^ Lazy.force ty_name) :: Common.reasons_of_trail trail
-      and claim = (pos, "A shape field name must be an `int` or `string`") in
+        lazy
+          ((ty_pos, "Not " ^ Lazy.force ty_name)
+           :: Common.reasons_of_trail trail)
+      and claim =
+        lazy (pos, "A shape field name must be an `int` or `string`")
+      in
       (Error_code.InvalidShapeFieldType, claim, reasons, [])
 
     let invalid_shape_field_name pos =
-      let msg =
-        "Was expecting a constant string, class constant, or int (for shape access)"
+      let claim =
+        lazy
+          ( pos,
+            "Was expecting a constant string, class constant, or int (for shape access)"
+          )
       in
-      (Error_code.InvalidShapeFieldName, (pos, msg), [], [])
+      (Error_code.InvalidShapeFieldName, claim, lazy [], [])
 
     let invalid_shape_field_name_empty pos =
-      let msg = "A shape field name cannot be an empty string" in
+      let claim = lazy (pos, "A shape field name cannot be an empty string") in
 
-      (Error_code.InvalidShapeFieldNameEmpty, (pos, msg), [], [])
+      (Error_code.InvalidShapeFieldNameEmpty, claim, lazy [], [])
 
     let invalid_shape_field_literal pos witness_pos =
-      let claim = (pos, "Shape uses literal string as field name")
+      let claim = lazy (pos, "Shape uses literal string as field name")
       and reason =
-        [(Pos_or_decl.of_raw_pos witness_pos, "But expected a class constant")]
+        lazy
+          [
+            (Pos_or_decl.of_raw_pos witness_pos, "But expected a class constant");
+          ]
       in
       (Error_code.InvalidShapeFieldLiteral, claim, reason, [])
 
     let invalid_shape_field_const pos witness_pos =
-      let claim = (pos, "Shape uses class constant as field name")
+      let claim = lazy (pos, "Shape uses class constant as field name")
       and reason =
-        [(Pos_or_decl.of_raw_pos witness_pos, "But expected a literal string")]
+        lazy
+          [
+            (Pos_or_decl.of_raw_pos witness_pos, "But expected a literal string");
+          ]
       in
       (Error_code.InvalidShapeFieldConst, claim, reason, [])
 
     let shape_field_class_mismatch pos class_name witness_pos witness_class_name
         =
       let claim =
-        ( pos,
-          "Shape field name is class constant from "
-          ^ Markdown_lite.md_codify class_name )
+        lazy
+          ( pos,
+            "Shape field name is class constant from "
+            ^ Markdown_lite.md_codify class_name )
       and reason =
-        [
-          ( Pos_or_decl.of_raw_pos witness_pos,
-            "But expected constant from "
-            ^ Markdown_lite.md_codify witness_class_name );
-        ]
+        lazy
+          [
+            ( Pos_or_decl.of_raw_pos witness_pos,
+              "But expected constant from "
+              ^ Markdown_lite.md_codify witness_class_name );
+          ]
       in
       (Error_code.ShapeFieldClassMismatch, claim, reason, [])
 
     let shape_field_type_mismatch pos ty_name witness_pos witness_ty_name =
       let claim =
-        (pos, "Shape field name is " ^ Lazy.force ty_name ^ " class constant")
+        lazy
+          (pos, "Shape field name is " ^ Lazy.force ty_name ^ " class constant")
       and reason =
-        [
-          ( Pos_or_decl.of_raw_pos witness_pos,
-            "But expected " ^ Lazy.force witness_ty_name );
-        ]
+        lazy
+          [
+            ( Pos_or_decl.of_raw_pos witness_pos,
+              "But expected " ^ Lazy.force witness_ty_name );
+          ]
       in
       (Error_code.ShapeFieldTypeMismatch, claim, reason, [])
 
     let invalid_shape_remove_key pos =
-      let msg = "You can only unset fields of **local** variables" in
-      (Error_code.InvalidShapeRemoveKey, (pos, msg), [], [])
+      let claim =
+        lazy (pos, "You can only unset fields of **local** variables")
+      in
+      (Error_code.InvalidShapeRemoveKey, claim, lazy [], [])
 
     let shapes_key_exists_always_true pos field_name decl_pos =
-      let claim = (pos, "This `Shapes::keyExists()` check is always true")
+      let claim = lazy (pos, "This `Shapes::keyExists()` check is always true")
       and reason =
-        [
-          ( decl_pos,
-            "The field "
-            ^ Markdown_lite.md_codify field_name
-            ^ " exists because of this definition" );
-        ]
+        lazy
+          [
+            ( decl_pos,
+              "The field "
+              ^ Markdown_lite.md_codify field_name
+              ^ " exists because of this definition" );
+          ]
       in
       (Error_code.ShapesKeyExistsAlwaysTrue, claim, reason, [])
 
     let shape_field_non_existence_reason pos name = function
       | `Undefined ->
-        [
-          ( pos,
-            "The field "
-            ^ Markdown_lite.md_codify name
-            ^ " is not defined in this shape" );
-        ]
+        lazy
+          [
+            ( pos,
+              "The field "
+              ^ Markdown_lite.md_codify name
+              ^ " is not defined in this shape" );
+          ]
       | `Nothing reason ->
-        ( pos,
-          "The type of the field "
-          ^ Markdown_lite.md_codify name
-          ^ " in this shape doesn't allow any values" )
-        :: reason
+        Lazy.map reason ~f:(fun reason ->
+            ( pos,
+              "The type of the field "
+              ^ Markdown_lite.md_codify name
+              ^ " in this shape doesn't allow any values" )
+            :: reason)
 
     let shapes_key_exists_always_false pos field_name decl_pos reason =
-      let claim = (pos, "This `Shapes::keyExists()` check is always false")
+      let claim = lazy (pos, "This `Shapes::keyExists()` check is always false")
       and reason =
         shape_field_non_existence_reason decl_pos field_name reason
       in
@@ -460,17 +497,18 @@ module Primary = struct
     let shapes_method_access_with_non_existent_field
         pos field_name method_name decl_pos reason =
       let claim =
-        ( pos,
-          "You are calling "
-          ^ Markdown_lite.md_codify ("Shapes::" ^ method_name ^ "()")
-          ^ " on a field known to not exist" )
+        lazy
+          ( pos,
+            "You are calling "
+            ^ Markdown_lite.md_codify ("Shapes::" ^ method_name ^ "()")
+            ^ " on a field known to not exist" )
       and reason =
         shape_field_non_existence_reason decl_pos field_name reason
       in
       (Error_code.ShapesMethodAccessWithNonExistentField, claim, reason, [])
 
     let shapes_access_with_non_existent_field pos field_name decl_pos reason =
-      let claim = (pos, "You are accessing a field known to not exist")
+      let claim = lazy (pos, "You are accessing a field known to not exist")
       and reason =
         shape_field_non_existence_reason decl_pos field_name reason
       in
@@ -579,155 +617,175 @@ module Primary = struct
       | Enum_supertyping_reserved_syntax of Pos.t
 
     let enum_class_label_member_mismatch pos label expected_ty_msg_opt =
-      let claim = (pos, "Enum class label/member mismatch")
+      let claim = lazy (pos, "Enum class label/member mismatch")
       and reasons =
         match expected_ty_msg_opt with
         | Some expected_ty_msg ->
-          Lazy.force expected_ty_msg
-          @ [
-              ( Pos_or_decl.of_raw_pos pos,
-                Format.sprintf "But got an enum class label: `#%s`" label );
-            ]
+          Lazy.map expected_ty_msg ~f:(fun expected_ty_msg ->
+              expected_ty_msg
+              @ [
+                  ( Pos_or_decl.of_raw_pos pos,
+                    Format.sprintf "But got an enum class label: `#%s`" label );
+                ])
         | None ->
-          [
-            ( Pos_or_decl.of_raw_pos pos,
-              Format.sprintf "Unexpected enum class label: `#%s`" label );
-          ]
+          lazy
+            [
+              ( Pos_or_decl.of_raw_pos pos,
+                Format.sprintf "Unexpected enum class label: `#%s`" label );
+            ]
       in
       (Error_code.UnifyError, claim, reasons, [])
 
     let enum_type_bad pos is_enum_class ty_name trail =
-      let ty = Markdown_lite.md_codify @@ Lazy.force ty_name in
-      let msg =
-        if is_enum_class then
-          "Invalid base type for an enum class: "
-        else
-          "Enums must be `int` or `string` or `arraykey`, not "
-      in
-      let claim = (pos, msg ^ ty) and reasons = Common.reasons_of_trail trail in
+      let claim =
+        Lazy.map ty_name ~f:(fun ty_name ->
+            let ty = Markdown_lite.md_codify ty_name in
+            let msg =
+              if is_enum_class then
+                "Invalid base type for an enum class: "
+              else
+                "Enums must be `int` or `string` or `arraykey`, not "
+            in
+            (pos, msg ^ ty))
+      and reasons = lazy (Common.reasons_of_trail trail) in
       (Error_code.EnumTypeBad, claim, reasons, [])
 
     let enum_constant_type_bad pos ty_pos ty_name trail =
-      let claim = (pos, "Enum constants must be an `int` or `string`")
+      let claim = lazy (pos, "Enum constants must be an `int` or `string`")
       and reasons =
-        (ty_pos, "Not " ^ Markdown_lite.md_codify @@ Lazy.force ty_name)
-        :: Common.reasons_of_trail trail
+        Lazy.map ty_name ~f:(fun ty_name ->
+            (ty_pos, "Not " ^ Markdown_lite.md_codify ty_name)
+            :: Common.reasons_of_trail trail)
       in
       (Error_code.EnumConstantTypeBad, claim, reasons, [])
 
     let enum_type_typedef_nonnull pos =
       let claim =
-        (pos, "Can't use `typedef` that resolves to nonnull in enum")
+        lazy (pos, "Can't use `typedef` that resolves to nonnull in enum")
       in
-      (Error_code.EnumTypeTypedefNonnull, claim, [], [])
+      (Error_code.EnumTypeTypedefNonnull, claim, lazy [], [])
 
     let enum_switch_redundant pos first_pos const_name =
-      let claim = (pos, "Redundant `case` statement")
+      let claim = lazy (pos, "Redundant `case` statement")
       and reason =
-        [
-          ( Pos_or_decl.of_raw_pos first_pos,
-            Markdown_lite.md_codify const_name ^ " already handled here" );
-        ]
+        lazy
+          [
+            ( Pos_or_decl.of_raw_pos first_pos,
+              Markdown_lite.md_codify const_name ^ " already handled here" );
+          ]
       in
       (Error_code.EnumSwitchRedundant, claim, reason, [])
 
     let enum_switch_nonexhaustive pos kind decl_pos missing =
       let claim =
-        ( pos,
-          "`switch` statement nonexhaustive; the following cases are missing: "
-          ^ (List.map ~f:Markdown_lite.md_codify missing
-            |> String.concat ~sep:", ") )
-      and reason = [(decl_pos, kind ^ " declared here")] in
+        lazy
+          ( pos,
+            "`switch` statement nonexhaustive; the following cases are missing: "
+            ^ (List.map ~f:Markdown_lite.md_codify missing
+              |> String.concat ~sep:", ") )
+      and reason = lazy [(decl_pos, kind ^ " declared here")] in
       (Error_code.EnumSwitchNonexhaustive, claim, reason, [])
 
     let enum_switch_redundant_default pos kind decl_pos =
       let claim =
-        ( pos,
-          "All cases already covered; a redundant `default` case prevents "
-          ^ "detecting future errors. If your goal is to guard against "
-          ^ "invalid values for this type, do an `is` check before the switch."
-        )
-      and reason = [(decl_pos, kind ^ " declared here")] in
+        lazy
+          ( pos,
+            "All cases already covered; a redundant `default` case prevents "
+            ^ "detecting future errors. If your goal is to guard against "
+            ^ "invalid values for this type, do an `is` check before the switch."
+          )
+      and reason = lazy [(decl_pos, kind ^ " declared here")] in
       (Error_code.EnumSwitchRedundantDefault, claim, reason, [])
 
     let enum_switch_not_const pos =
-      let claim = (pos, "Case in `switch` on enum is not an enum constant") in
-      (Error_code.EnumSwitchNotConst, claim, [], [])
+      let claim =
+        lazy (pos, "Case in `switch` on enum is not an enum constant")
+      in
+      (Error_code.EnumSwitchNotConst, claim, lazy [], [])
 
     let enum_switch_wrong_class pos kind expected actual =
       let claim =
-        ( pos,
-          "Switching on "
-          ^ kind
-          ^ Markdown_lite.md_codify expected
-          ^ " but using constant from "
-          ^ Markdown_lite.md_codify actual )
+        lazy
+          ( pos,
+            "Switching on "
+            ^ kind
+            ^ Markdown_lite.md_codify expected
+            ^ " but using constant from "
+            ^ Markdown_lite.md_codify actual )
       in
-      (Error_code.EnumSwitchWrongClass, claim, [], [])
+      (Error_code.EnumSwitchWrongClass, claim, lazy [], [])
 
     let enum_class_label_unknown pos label_name class_name =
-      let class_name = Render.strip_ns class_name in
       let claim =
-        (pos, "Unknown constant " ^ label_name ^ " in " ^ class_name)
+        lazy
+          (let class_name = Render.strip_ns class_name in
+           (pos, "Unknown constant " ^ label_name ^ " in " ^ class_name))
       in
-      (Error_code.EnumClassLabelUnknown, claim, [], [])
+      (Error_code.EnumClassLabelUnknown, claim, lazy [], [])
 
     let enum_class_label_as_expr pos =
       let claim =
-        ( pos,
-          "Not enough type information to infer the type of this enum class label."
-        )
+        lazy
+          ( pos,
+            "Not enough type information to infer the type of this enum class label."
+          )
       in
-      (Error_code.EnumClassLabelAsExpression, claim, [], [])
+      (Error_code.EnumClassLabelAsExpression, claim, lazy [], [])
 
     let incompatible_enum_inclusion_base pos classish_name src_classish_name =
       let claim =
-        ( pos,
-          "Enum "
-          ^ Render.strip_ns classish_name
-          ^ " includes enum "
-          ^ Render.strip_ns src_classish_name
-          ^ " but their base types are incompatible" )
+        lazy
+          ( pos,
+            "Enum "
+            ^ Render.strip_ns classish_name
+            ^ " includes enum "
+            ^ Render.strip_ns src_classish_name
+            ^ " but their base types are incompatible" )
       in
-      (Error_code.IncompatibleEnumInclusion, claim, [], [])
+      (Error_code.IncompatibleEnumInclusion, claim, lazy [], [])
 
     let incompatible_enum_inclusion_constraint
         pos classish_name src_classish_name =
       let claim =
-        ( pos,
-          "Enum "
-          ^ Render.strip_ns classish_name
-          ^ " includes enum "
-          ^ Render.strip_ns src_classish_name
-          ^ " but their constraints are incompatible" )
+        lazy
+          ( pos,
+            "Enum "
+            ^ Render.strip_ns classish_name
+            ^ " includes enum "
+            ^ Render.strip_ns src_classish_name
+            ^ " but their constraints are incompatible" )
       in
-      (Error_code.IncompatibleEnumInclusion, claim, [], [])
+      (Error_code.IncompatibleEnumInclusion, claim, lazy [], [])
 
     let enum_inclusion_not_enum pos classish_name src_classish_name =
       let claim =
-        ( pos,
-          "Enum "
-          ^ Render.strip_ns classish_name
-          ^ " includes "
-          ^ Render.strip_ns src_classish_name
-          ^ " which is not an enum" )
+        lazy
+          ( pos,
+            "Enum "
+            ^ Render.strip_ns classish_name
+            ^ " includes "
+            ^ Render.strip_ns src_classish_name
+            ^ " which is not an enum" )
       in
-      (Error_code.IncompatibleEnumInclusion, claim, [], [])
+      (Error_code.IncompatibleEnumInclusion, claim, lazy [], [])
 
     let enum_classes_reserved_syntax pos =
       ( Error_code.EnumClassesReservedSyntax,
-        ( pos,
-          "This syntax is reserved for the Enum Classes feature.\n"
-          ^ "Enable it with the enable_enum_classes option in .hhconfig" ),
-        [],
+        lazy
+          ( pos,
+            "This syntax is reserved for the Enum Classes feature.\n"
+            ^ "Enable it with the enable_enum_classes option in .hhconfig" ),
+        lazy [],
         [] )
 
     let enum_supertyping_reserved_syntax pos =
       ( Error_code.EnumSupertypingReservedSyntax,
-        ( pos,
-          "This Enum uses syntax reserved for the Enum Supertyping feature.\n"
-          ^ "Enable it with the enable_enum_supertyping option in .hhconfig" ),
-        [],
+        lazy
+          ( pos,
+            "This Enum uses syntax reserved for the Enum Supertyping feature.\n"
+            ^ "Enable it with the enable_enum_supertyping option in .hhconfig"
+          ),
+        lazy [],
         [] )
 
     let to_error = function
@@ -783,54 +841,58 @@ module Primary = struct
 
     let expression_tree_non_public_member pos decl_pos =
       let claim =
-        (pos, "Cannot access non-public members within expression trees.")
-      and reason = [(decl_pos, "Member defined here")] in
+        lazy (pos, "Cannot access non-public members within expression trees.")
+      and reason = lazy [(decl_pos, "Member defined here")] in
       (Error_code.ExpressionTreeNonPublicProperty, claim, reason, [])
 
     let reified_static_method_in_expr_tree pos =
       let claim =
-        ( pos,
-          "Static method calls on reified generics are not permitted in Expression Trees."
-        )
+        lazy
+          ( pos,
+            "Static method calls on reified generics are not permitted in Expression Trees."
+          )
       in
-      (Error_code.ReifiedStaticMethodInExprTree, claim, [], [])
+      (Error_code.ReifiedStaticMethodInExprTree, claim, lazy [], [])
 
     let this_var_in_expr_tree pos =
-      let claim = (pos, "`$this` is not bound inside expression trees") in
-      (Error_code.ThisVarOutsideClass, claim, [], [])
+      let claim = lazy (pos, "`$this` is not bound inside expression trees") in
+      (Error_code.ThisVarOutsideClass, claim, lazy [], [])
 
     let experimental_expression_trees pos =
       let claim =
-        ( pos,
-          "This type is not permitted as an expression tree visitor. It is not included in "
-          ^ "`allowed_expression_tree_visitors` in `.hhconfig`, and this file does not "
-          ^ "contain `<<file:__EnableUnstableFeatures('expression_trees')>>`."
-        )
+        lazy
+          ( pos,
+            "This type is not permitted as an expression tree visitor. It is not included in "
+            ^ "`allowed_expression_tree_visitors` in `.hhconfig`, and this file does not "
+            ^ "contain `<<file:__EnableUnstableFeatures('expression_trees')>>`."
+          )
       in
-      (Error_code.ExperimentalExpressionTrees, claim, [], [])
+      (Error_code.ExperimentalExpressionTrees, claim, lazy [], [])
 
     let expression_tree_unsupported_operator pos member_name class_name =
-      let msg =
-        match member_name with
-        | "__bool" ->
-          (* If the user writes `if ($not_bool)`, provide a more specific
-             error rather than a generic missing method error for
-             `$not_bool->__bool()`. *)
-          Printf.sprintf
-            "`%s` cannot be used as a boolean (it has no instance method named `__bool`)"
-            class_name
-        | _ ->
-          (* If the user writes `$not_int + ...`, provide a more specific
-             error rather than a generic missing method error for
-             `$not_int->__plus(...)`. *)
-          Printf.sprintf
-            "`%s` does not support this operator (it has no instance method named `%s`)"
-            class_name
-            member_name
+      let claim =
+        lazy
+          ( pos,
+            match member_name with
+            | "__bool" ->
+              (* If the user writes `if ($not_bool)`, provide a more specific
+                 error rather than a generic missing method error for
+                 `$not_bool->__bool()`. *)
+              Printf.sprintf
+                "`%s` cannot be used as a boolean (it has no instance method named `__bool`)"
+                class_name
+            | _ ->
+              (* If the user writes `$not_int + ...`, provide a more specific
+                 error rather than a generic missing method error for
+                 `$not_int->__plus(...)`. *)
+              Printf.sprintf
+                "`%s` does not support this operator (it has no instance method named `%s`)"
+                class_name
+                member_name )
       in
-      (Error_code.MemberNotFound, (pos, msg), [], [])
+      (Error_code.MemberNotFound, claim, lazy [], [])
 
-    let to_error = function
+    let to_error : t -> error = function
       | Expression_tree_non_public_member { pos; decl_pos } ->
         expression_tree_non_public_member pos decl_pos
       | Reified_static_method_in_expr_tree pos ->
@@ -845,7 +907,7 @@ module Primary = struct
     type t =
       | Readonly_modified of {
           pos: Pos.t;
-          reason_opt: Pos_or_decl.t Message.t option;
+          reason_opt: Pos_or_decl.t Message.t Lazy.t option;
         }
       | Readonly_mismatch of {
           pos: Pos.t;
@@ -870,10 +932,15 @@ module Primary = struct
           suggestion: string;
         }
 
-    let readonly_modified pos reason_opt =
+    let readonly_modified pos reason_opt : error =
       let claim =
-        (pos, "This value is readonly, its properties cannot be modified")
-      and reason = Option.value_map reason_opt ~default:[] ~f:List.return in
+        lazy (pos, "This value is readonly, its properties cannot be modified")
+      and reason =
+        Option.value_map
+          reason_opt
+          ~default:(lazy [])
+          ~f:(Lazy.map ~f:List.return)
+      in
       (Error_code.ReadonlyValueModified, claim, reason, [])
 
     let readonly_mismatch pos what pos_sub pos_super =
@@ -894,30 +961,33 @@ module Primary = struct
             "mutable",
             "It is incompatible with this parameter, which is readonly" )
       in
-      let claim = (pos, Format.sprintf "Invalid %s" msg)
+      let claim = lazy (pos, Format.sprintf "Invalid %s" msg)
       and reason =
-        [
-          (pos_sub, Format.sprintf "This expression is %s" msg_sub);
-          (pos_super, msg_super);
-        ]
+        lazy
+          [
+            (pos_sub, Format.sprintf "This expression is %s" msg_sub);
+            (pos_super, msg_super);
+          ]
       in
       (Error_code.ReadonlyMismatch, claim, reason, [])
 
     let readonly_invalid_as_mut pos =
       let claim =
-        ( pos,
-          "Only value types and arrays can be converted to mutable. This value can never be a primitive."
-        )
+        lazy
+          ( pos,
+            "Only value types and arrays can be converted to mutable. This value can never be a primitive."
+          )
       in
-      (Error_code.ReadonlyInvalidAsMut, claim, [], [])
+      (Error_code.ReadonlyInvalidAsMut, claim, lazy [], [])
 
     let readonly_exception pos =
       let claim =
-        ( pos,
-          "This exception is readonly; throwing readonly exceptions is not currently supported."
-        )
+        lazy
+          ( pos,
+            "This exception is readonly; throwing readonly exceptions is not currently supported."
+          )
       in
-      (Error_code.ReadonlyException, claim, [], [])
+      (Error_code.ReadonlyException, claim, lazy [], [])
 
     let explicit_readonly_cast pos decl_pos kind =
       let (start_line, start_column) = Pos.line_column pos in
@@ -936,30 +1006,34 @@ module Primary = struct
         | `static_property -> "static property"
       in
       let claim =
-        ( pos,
-          "This "
-          ^ kind_str
-          ^ " returns a readonly value. It must be explicitly wrapped in a readonly expression."
-        )
-      and reason = [(decl_pos, "The " ^ kind_str ^ " is defined here.")] in
+        lazy
+          ( pos,
+            "This "
+            ^ kind_str
+            ^ " returns a readonly value. It must be explicitly wrapped in a readonly expression."
+          )
+      and reason = lazy [(decl_pos, "The " ^ kind_str ^ " is defined here.")] in
       (Error_code.ExplicitReadonlyCast, claim, reason, quickfixes)
 
     let readonly_method_call pos decl_pos =
       let claim =
-        ( pos,
-          "This expression is readonly, so it can only call readonly methods" )
-      and reason = [(decl_pos, "This method is not readonly")] in
+        lazy
+          ( pos,
+            "This expression is readonly, so it can only call readonly methods"
+          )
+      and reason = lazy [(decl_pos, "This method is not readonly")] in
       (Error_code.ReadonlyMethodCall, claim, reason, [])
 
     let readonly_closure_call pos decl_pos suggestion =
       let claim =
-        ( pos,
-          "This function is readonly, so it must be marked readonly at declaration time to be called."
-        )
-      and reason = [(decl_pos, "Did you mean to " ^ suggestion ^ "?")] in
+        lazy
+          ( pos,
+            "This function is readonly, so it must be marked readonly at declaration time to be called."
+          )
+      and reason = lazy [(decl_pos, "Did you mean to " ^ suggestion ^ "?")] in
       (Error_code.ReadonlyClosureCall, claim, reason, [])
 
-    let to_error = function
+    let to_error : t -> error = function
       | Readonly_modified { pos; reason_opt } ->
         readonly_modified pos reason_opt
       | Readonly_mismatch { pos; what; pos_sub; pos_super } ->
@@ -1010,68 +1084,75 @@ module Primary = struct
       let source = Markdown_lite.md_codify source in
       let sink = Markdown_lite.md_codify sink in
       let sprintf_main = sprintf "Data with policy %s appears in context %s." in
-      let claim = (pos, sprintf_main source sink) in
+      let claim = lazy (pos, sprintf_main source sink) in
       let reasons =
-        let sprintf = Printf.sprintf in
-        let sprintf_source =
-          sprintf "This may be the data source with policy %s"
-        in
-        let sprintf_sink = sprintf "This may be the data sink with policy %s" in
-        let other_occurrences =
-          let f p =
-            (p, "Another program point contributing to the illegal flow")
-          in
-          List.map ~f secondaries
-        in
-        []
-        |> explain source_poss source sprintf_source
-        |> explain sink_poss sink sprintf_sink
-        |> List.append other_occurrences
-        |> List.rev
+        lazy
+          (let sprintf = Printf.sprintf in
+           let sprintf_source =
+             sprintf "This may be the data source with policy %s"
+           in
+           let sprintf_sink =
+             sprintf "This may be the data sink with policy %s"
+           in
+           let other_occurrences =
+             let f p =
+               (p, "Another program point contributing to the illegal flow")
+             in
+             List.map ~f secondaries
+           in
+           []
+           |> explain source_poss source sprintf_source
+           |> explain sink_poss sink sprintf_sink
+           |> List.append other_occurrences
+           |> List.rev)
       in
       (Error_code.IllegalInformationFlow, claim, reasons, [])
 
     let ifc_internal_error pos msg =
       let claim =
-        ( pos,
-          "IFC Internal Error: "
-          ^ msg
-          ^ ". If you see this error and aren't expecting it, please `hh rage` and let the Hack team know."
-        )
+        lazy
+          ( pos,
+            "IFC Internal Error: "
+            ^ msg
+            ^ ". If you see this error and aren't expecting it, please `hh rage` and let the Hack team know."
+          )
       in
-      (Error_code.IFCInternalError, claim, [], [])
+      (Error_code.IFCInternalError, claim, lazy [], [])
 
     let unknown_information_flow pos what =
       let claim =
-        ( pos,
-          "Unable to analyze information flow for "
-          ^ what
-          ^ ". This might be unsafe." )
+        lazy
+          ( pos,
+            "Unable to analyze information flow for "
+            ^ what
+            ^ ". This might be unsafe." )
       in
-      (Error_code.UnknownInformationFlow, claim, [], [])
+      (Error_code.UnknownInformationFlow, claim, lazy [], [])
 
     let context_implicit_policy_leakage
         pos secondaries source_poss source sink_poss sink =
-      let program_point p =
-        (p, "Another program point contributing to the leakage")
-      in
-      let explain_source p = (p, "Leakage source") in
-      let explain_sink p = (p, "Leakage sink") in
       let claim =
-        ( pos,
-          Printf.sprintf
-            "Context-implicit policy leaks into %s via %s."
-            (Markdown_lite.md_codify sink)
-            (Markdown_lite.md_codify source) )
-      in
-      let reasons =
-        List.map ~f:program_point secondaries
-        @ List.map ~f:explain_source source_poss
-        @ List.map ~f:explain_sink sink_poss
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Context-implicit policy leaks into %s via %s."
+              (Markdown_lite.md_codify sink)
+              (Markdown_lite.md_codify source) )
+      and reasons =
+        lazy
+          (let program_point p =
+             (p, "Another program point contributing to the leakage")
+           in
+           let explain_source p = (p, "Leakage source") in
+           let explain_sink p = (p, "Leakage sink") in
+
+           List.map ~f:program_point secondaries
+           @ List.map ~f:explain_source source_poss
+           @ List.map ~f:explain_sink sink_poss)
       in
       (Error_code.ContextImplicitPolicyLeakage, claim, reasons, [])
 
-    let to_error = function
+    let to_error : t -> error = function
       | Illegal_information_flow
           { pos; secondaries; source_poss; source; sink_poss; sink } ->
         illegal_information_flow
@@ -1111,44 +1192,55 @@ module Primary = struct
           available_pos: Pos_or_decl.t;
           err_code: Error_code.t;
           required: string Lazy.t;
-          suggestion: Pos_or_decl.t Message.t list option;
+          suggestion: Pos_or_decl.t Message.t list Lazy.t option;
         }
 
     let call_coeffect
-        pos available_pos available_incl_unsafe required_pos required =
+        pos available_pos available_incl_unsafe required_pos required : error =
       let reasons =
-        [
-          ( available_pos,
-            "From this declaration, the context of this function body provides "
-            ^ Lazy.force available_incl_unsafe );
-          ( required_pos,
-            "But the function being called requires " ^ Lazy.force required );
-        ]
+        Common.map2
+          available_incl_unsafe
+          required
+          ~f:(fun available_incl_unsafe required ->
+            [
+              ( available_pos,
+                "From this declaration, the context of this function body provides "
+                ^ available_incl_unsafe );
+              ( required_pos,
+                "But the function being called requires " ^ required );
+            ])
       and claim =
-        ( pos,
-          "This call is not allowed because its coeffects are incompatible with the context"
-        )
+        lazy
+          ( pos,
+            "This call is not allowed because its coeffects are incompatible with the context"
+          )
       in
       (Error_code.CallCoeffects, claim, reasons, [])
 
     let op_coeffect_error
         pos op_name required available_pos locally_available suggestion err_code
-        =
+        : error =
       let reasons =
-        ( available_pos,
-          "The local (enclosing) context provides "
-          ^ Lazy.force locally_available )
-        :: Option.value ~default:[] suggestion
+        Common.map2
+          (Option.value ~default:(lazy []) suggestion)
+          locally_available
+          ~f:(fun suggestion locally_available ->
+            let x =
+              ( available_pos,
+                "The local (enclosing) context provides " ^ locally_available )
+            in
+            x :: suggestion)
       and claim =
-        ( pos,
-          op_name
-          ^ " requires "
-          ^ Lazy.force required
-          ^ ", which is not provided by the context." )
+        Lazy.map required ~f:(fun required ->
+            ( pos,
+              op_name
+              ^ " requires "
+              ^ required
+              ^ ", which is not provided by the context." ))
       in
       (err_code, claim, reasons, [])
 
-    let to_error = function
+    let to_error : t -> error = function
       | Op_coeffect_error
           {
             pos;
@@ -1184,11 +1276,11 @@ module Primary = struct
       | Dollardollar_lvalue of Pos.t
       | Void_usage of {
           pos: Pos.t;
-          reason: Pos_or_decl.t Message.t list;
+          reason: Pos_or_decl.t Message.t list Lazy.t;
         }
       | Noreturn_usage of {
           pos: Pos.t;
-          reason: Pos_or_decl.t Message.t list;
+          reason: Pos_or_decl.t Message.t list Lazy.t;
         }
       | Returns_with_and_without_value of {
           pos: Pos.t;
@@ -1204,44 +1296,52 @@ module Primary = struct
       | Tuple_syntax of Pos.t
 
     let missing_return pos =
-      let claim = (pos, "Invalid return type") in
-      (Error_code.MissingReturnInNonVoidFunction, claim, [], [])
+      let claim = lazy (pos, "Invalid return type") in
+      (Error_code.MissingReturnInNonVoidFunction, claim, lazy [], [])
 
     let dollardollar_lvalue pos =
       let claim =
-        (pos, "Cannot assign a value to the special pipe variable `$$`")
+        lazy (pos, "Cannot assign a value to the special pipe variable `$$`")
       in
-      (Error_code.DollardollarLvalue, claim, [], [])
+      (Error_code.DollardollarLvalue, claim, lazy [], [])
 
-    let void_usage pos reason =
-      let msg = "You are using the return value of a `void` function" in
-      (Error_code.VoidUsage, (pos, msg), reason, [])
+    let void_usage pos reason : error =
+      let claim =
+        lazy (pos, "You are using the return value of a `void` function")
+      in
+      (Error_code.VoidUsage, claim, reason, [])
 
     let noreturn_usage pos reason =
-      let msg = "You are using the return value of a `noreturn` function" in
-      (Error_code.NoreturnUsage, (pos, msg), reason, [])
+      let claim =
+        lazy (pos, "You are using the return value of a `noreturn` function")
+      in
+      (Error_code.NoreturnUsage, claim, reason, [])
 
     let returns_with_and_without_value pos with_value_pos without_value_pos_opt
         =
       let claim =
-        (pos, "This function can exit with and without returning a value")
+        lazy (pos, "This function can exit with and without returning a value")
       and reason =
-        (Pos_or_decl.of_raw_pos with_value_pos, "Returning a value here.")
-        ::
-        Option.value_map
-          without_value_pos_opt
-          ~default:
-            [
-              ( Pos_or_decl.of_raw_pos pos,
-                "This function does not always return a value" );
-            ]
-          ~f:(fun p ->
-            [(Pos_or_decl.of_raw_pos p, "Returning without a value here")])
+        lazy
+          ((Pos_or_decl.of_raw_pos with_value_pos, "Returning a value here.")
+           ::
+           Option.value_map
+             without_value_pos_opt
+             ~default:
+               [
+                 ( Pos_or_decl.of_raw_pos pos,
+                   "This function does not always return a value" );
+               ]
+             ~f:(fun p ->
+               [(Pos_or_decl.of_raw_pos p, "Returning without a value here")]))
       in
       (Error_code.ReturnsWithAndWithoutValue, claim, reason, [])
 
     let missing_assign pos =
-      (Error_code.MissingAssign, (pos, "Please assign a value"), [], [])
+      ( Error_code.MissingAssign,
+        lazy (pos, "Please assign a value"),
+        lazy [],
+        [] )
 
     let non_void_annotation_on_return_void_function is_async pos hint_pos =
       let (async_indicator, return_type) =
@@ -1250,11 +1350,13 @@ module Primary = struct
         else
           ("F", "void")
       in
-      let message =
-        Printf.sprintf
-          "%sunctions that do not return a value must have a type of %s"
-          async_indicator
-          return_type
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "%sunctions that do not return a value must have a type of %s"
+              async_indicator
+              return_type )
       in
       let quickfixes =
         match hint_pos with
@@ -1268,18 +1370,15 @@ module Primary = struct
           ]
       in
 
-      ( Error_code.NonVoidAnnotationOnReturnVoidFun,
-        (pos, message),
-        [],
-        quickfixes )
+      (Error_code.NonVoidAnnotationOnReturnVoidFun, claim, lazy [], quickfixes)
 
     let tuple_syntax p =
       ( Error_code.TupleSyntax,
-        (p, "Did you want a *tuple*? Try `(X,Y)`, not `tuple<X,Y>`"),
-        [],
+        lazy (p, "Did you want a *tuple*? Try `(X,Y)`, not `tuple<X,Y>`"),
+        lazy [],
         [] )
 
-    let to_error = function
+    let to_error : t -> error = function
       | Missing_return pos -> missing_return pos
       | Dollardollar_lvalue pos -> dollardollar_lvalue pos
       | Void_usage { pos; reason } -> void_usage pos reason
@@ -1308,25 +1407,27 @@ module Primary = struct
         }
 
     let module_hint pos decl_pos =
-      let claim = (pos, "You cannot use this type in a public declaration.")
-      and reason = [(decl_pos, "It is declared as `internal` here")] in
+      let claim = lazy (pos, "You cannot use this type in a public declaration.")
+      and reason = lazy [(decl_pos, "It is declared as `internal` here")] in
       (Error_code.ModuleHintError, claim, reason, [])
 
     let module_mismatch pos current_module_opt decl_pos target_module =
       let claim =
-        ( pos,
-          Printf.sprintf
-            "Cannot access an internal element from module `%s` %s"
-            target_module
-            (match current_module_opt with
-            | Some m -> Printf.sprintf "in module `%s`" m
-            | None -> "outside of a module") )
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Cannot access an internal element from module `%s` %s"
+              target_module
+              (match current_module_opt with
+              | Some m -> Printf.sprintf "in module `%s`" m
+              | None -> "outside of a module") )
       and reason =
-        [(decl_pos, Printf.sprintf "This is from module `%s`" target_module)]
+        lazy
+          [(decl_pos, Printf.sprintf "This is from module `%s`" target_module)]
       in
       (Error_code.ModuleError, claim, reason, [])
 
-    let to_error = function
+    let to_error : t -> error = function
       | Module_hint { pos; decl_pos } -> module_hint pos decl_pos
       | Module_mismatch { pos; current_module_opt; decl_pos; target_module } ->
         module_mismatch pos current_module_opt decl_pos target_module
@@ -1350,33 +1451,38 @@ module Primary = struct
         }
 
     let xhp_required pos why_xhp ty_reason_msg =
-      let msg = "An XHP instance was expected" in
+      let claim = lazy (pos, "An XHP instance was expected") in
       ( Error_code.XhpRequired,
-        (pos, msg),
-        (Pos_or_decl.of_raw_pos pos, why_xhp) :: ty_reason_msg,
+        claim,
+        Lazy.map ty_reason_msg ~f:(fun ty_reason_msg ->
+            (Pos_or_decl.of_raw_pos pos, why_xhp) :: ty_reason_msg),
         [] )
 
     let illegal_xhp_child pos ty_reason_msg =
-      let msg = "XHP children must be compatible with XHPChild" in
-      (Error_code.IllegalXhpChild, (pos, msg), ty_reason_msg, [])
+      let claim = lazy (pos, "XHP children must be compatible with XHPChild") in
+      (Error_code.IllegalXhpChild, claim, ty_reason_msg, [])
 
     let missing_xhp_required_attr pos attr ty_reason_msg =
-      let msg =
-        "Required attribute " ^ Markdown_lite.md_codify attr ^ " is missing."
+      let claim =
+        lazy
+          ( pos,
+            "Required attribute "
+            ^ Markdown_lite.md_codify attr
+            ^ " is missing." )
       in
-      (Error_code.MissingXhpRequiredAttr, (pos, msg), ty_reason_msg, [])
+      (Error_code.MissingXhpRequiredAttr, claim, ty_reason_msg, [])
 
-    let to_error = function
+    let to_error : t -> error = function
       | Xhp_required { pos; why_xhp; ty_reason_msg } ->
-        xhp_required pos why_xhp @@ Lazy.force ty_reason_msg
+        xhp_required pos why_xhp ty_reason_msg
       | Illegal_xhp_child { pos; ty_reason_msg } ->
-        illegal_xhp_child pos @@ Lazy.force ty_reason_msg
+        illegal_xhp_child pos ty_reason_msg
       | Missing_xhp_required_attr { pos; attr; ty_reason_msg } ->
-        missing_xhp_required_attr pos attr @@ Lazy.force ty_reason_msg
+        missing_xhp_required_attr pos attr ty_reason_msg
   end
 
   type t =
-    (* == Factorised errors ================================================= *)
+    (* Factorised errors *)
     | Coeffect of Coeffect.t
     | Enum of Enum.t
     | Expr_tree of Expr_tree.t
@@ -1386,7 +1492,7 @@ module Primary = struct
     | Shape of Shape.t
     | Wellformedness of Wellformedness.t
     | Xhp of Xhp.t
-    (* == Primary only ====================================================== *)
+    (* Primary only *)
     | Exception_occurred of {
         pos: Pos.t;
         exn: Exception.t;
@@ -1465,7 +1571,7 @@ module Primary = struct
         class_pos: Pos_or_decl.t;
         member_name: string;
         hint: ([ `instance | `static ] * Pos_or_decl.t * string) option Lazy.t;
-        reason: Pos_or_decl.t Message.t list;
+        reason: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Construct_not_instance_method of Pos.t
     | Ambiguous_inheritance of {
@@ -1530,7 +1636,7 @@ module Primary = struct
       }
     | Unset_nonidx_in_strict of {
         pos: Pos.t;
-        reason: Pos_or_decl.t Message.t list;
+        reason: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Nullable_cast of {
         pos: Pos.t;
@@ -1546,7 +1652,7 @@ module Primary = struct
         ctxt: [ `read | `write ];
         kind: [ `method_ | `property ];
         member_name: string;
-        reason: Pos_or_decl.t Message.t list;
+        reason: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Nullsafe_property_write_context of Pos.t
     | Uninstantiable_class of {
@@ -1648,7 +1754,7 @@ module Primary = struct
       }
     | Ambiguous_lambda of {
         pos: Pos.t;
-        uses: Pos_or_decl.t Message.t list;
+        uses: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Wrong_extend_kind of {
         pos: Pos.t;
@@ -1666,7 +1772,7 @@ module Primary = struct
         pos: Pos.t;
         trait_name: string;
         parent_cls_name: string;
-        trace: Pos_or_decl.t Message.t list;
+        trace: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Trait_reuse of {
         pos: Pos.t;
@@ -1684,18 +1790,18 @@ module Primary = struct
     | Invalid_is_as_expression_hint of {
         pos: Pos.t;
         op: [ `is | `as_ ];
-        reasons: Pos_or_decl.t Message.t list;
+        reasons: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Invalid_enforceable_type of {
         pos: Pos.t;
-        ty_info: Pos_or_decl.t Message.t list;
+        ty_info: Pos_or_decl.t Message.t list Lazy.t;
         tp_pos: Pos_or_decl.t;
         tp_name: string;
         kind: [ `constant | `param ];
       }
     | Reifiable_attr of {
         pos: Pos.t;
-        ty_info: Pos_or_decl.t Message.t list;
+        ty_info: Pos_or_decl.t Message.t list Lazy.t;
         attr_pos: Pos_or_decl.t;
         kind: [ `ty | `cnstr | `super_cnstr ];
       }
@@ -1855,7 +1961,7 @@ module Primary = struct
     | Unnecessary_attribute of {
         pos: Pos.t;
         attr: string;
-        reason: Pos.t Message.t;
+        reason: Pos.t Message.t Lazy.t;
         suggestion: string option;
       }
     | Inherited_class_member_with_different_case of {
@@ -1929,16 +2035,16 @@ module Primary = struct
         class_name: string;
         method_pos: Pos_or_decl.t;
         method_name: string;
-        trace1: Pos_or_decl.t Message.t list;
-        trace2: Pos_or_decl.t Message.t list;
+        trace1: Pos_or_decl.t Message.t list Lazy.t;
+        trace2: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Generic_property_import_via_diamond of {
         pos: Pos.t;
         class_name: string;
         property_pos: Pos_or_decl.t;
         property_name: string;
-        trace1: Pos_or_decl.t Message.t list;
-        trace2: Pos_or_decl.t Message.t list;
+        trace1: Pos_or_decl.t Message.t list Lazy.t;
+        trace2: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Unification_cycle of {
         pos: Pos.t;
@@ -1948,7 +2054,7 @@ module Primary = struct
     | Explain_tconst_where_constraint of {
         pos: Pos.t;
         decl_pos: Pos_or_decl.t;
-        msgs: Pos_or_decl.t Message.t list;
+        msgs: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Format_string of {
         pos: Pos.t;
@@ -2113,7 +2219,7 @@ module Primary = struct
     | Unknown_type of {
         pos: Pos.t;
         expected: string;
-        reason: Pos_or_decl.t Message.t list;
+        reason: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Parent_in_trait of Pos.t
     | Parent_undefined of Pos.t
@@ -2194,7 +2300,7 @@ module Primary = struct
         pos: Pos.t;
         param_name: string;
         decl_pos: Pos_or_decl.t;
-        arg_info: Pos_or_decl.t Message.t list;
+        arg_info: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Invalid_reified_arg_reifiable of {
         pos: Pos.t;
@@ -2240,7 +2346,7 @@ module Primary = struct
         pos: Pos.t;
         member_name: string;
         elt: [ `meth | `prop ];
-        reason: Pos_or_decl.t Message.t list;
+        reason: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Non_class_member of {
         pos: Pos.t;
@@ -2251,19 +2357,19 @@ module Primary = struct
       }
     | Null_container of {
         pos: Pos.t;
-        null_witness: Pos_or_decl.t Message.t list;
+        null_witness: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Option_mixed of Pos.t
     | Option_null of Pos.t
     | Declared_covariant of {
         pos: Pos.t;
         param_pos: Pos.t;
-        msgs: Pos.t Message.t list;
+        msgs: Pos.t Message.t list Lazy.t;
       }
     | Declared_contravariant of {
         pos: Pos.t;
         param_pos: Pos.t;
-        msgs: Pos.t Message.t list;
+        msgs: Pos.t Message.t list Lazy.t;
       }
     | Static_prop_type_generic_param of {
         pos: Pos.t;
@@ -2293,7 +2399,7 @@ module Primary = struct
       }
     | Call_lvalue of Pos.t
     | Unsafe_cast_await of Pos.t
-    (* == Primary and secondary =============================================== *)
+    (* Primary and secondary *)
     | Smember_not_found of {
         pos: Pos.t;
         kind:
@@ -2335,145 +2441,159 @@ module Primary = struct
         kind: [ `class_typeconst | `method_ | `property ];
       }
 
-  (* == User error helpers ================================================== *)
+  (* User error helpers *)
 
-  let unify_error pos msg_opt reasons_opt =
-    let claim = (pos, Option.value ~default:"Typing error" msg_opt)
-    and reasons = Option.value_map ~default:[] ~f:Lazy.force reasons_opt in
+  let unify_error pos msg_opt reasons_opt : error =
+    let claim = lazy (pos, Option.value ~default:"Typing error" msg_opt)
+    and reasons = Option.value ~default:(lazy []) reasons_opt in
     (Error_code.UnifyError, claim, reasons, [])
 
-  let generic_unify pos msg =
-    let claim = (pos, msg) in
-    (Error_code.GenericUnify, claim, [], [])
+  let generic_unify pos msg : error =
+    let claim = lazy (pos, msg) in
+    (Error_code.GenericUnify, claim, lazy [], [])
 
-  let internal_error pos msg =
-    (Error_code.InternalError, (pos, "Internal error: " ^ msg), [], [])
+  let internal_error pos msg : error =
+    (Error_code.InternalError, lazy (pos, "Internal error: " ^ msg), lazy [], [])
 
   let typechecker_timeout pos fn_name seconds =
     let claim =
-      ( pos,
-        Printf.sprintf
-          "Type checker timed out after %d seconds whilst checking function %s"
-          seconds
-          fn_name )
+      lazy
+        ( pos,
+          Printf.sprintf
+            "Type checker timed out after %d seconds whilst checking function %s"
+            seconds
+            fn_name )
     in
-    (Error_code.TypecheckerTimeout, claim, [], [])
+    (Error_code.TypecheckerTimeout, claim, lazy [], [])
 
   let unresolved_tyvar pos =
     let claim =
-      (pos, "The type of this expression contains an unresolved type variable")
+      lazy
+        (pos, "The type of this expression contains an unresolved type variable")
     in
-    (Error_code.UnresolvedTypeVariable, claim, [], [])
+    (Error_code.UnresolvedTypeVariable, claim, lazy [], [])
 
   let using_error pos has_await =
-    let (note, cls) =
-      if has_await then
-        (" with await", Naming_special_names.Classes.cIAsyncDisposable)
-      else
-        ("", Naming_special_names.Classes.cIDisposable)
-    in
     let claim =
-      ( pos,
-        Printf.sprintf
-          "This expression is used in a `using` clause%s so it must have type `%s`"
-          note
-          cls )
+      lazy
+        (let (note, cls) =
+           if has_await then
+             (" with await", Naming_special_names.Classes.cIAsyncDisposable)
+           else
+             ("", Naming_special_names.Classes.cIDisposable)
+         in
+         ( pos,
+           Printf.sprintf
+             "This expression is used in a `using` clause%s so it must have type `%s`"
+             note
+             cls ))
     in
-    (Error_code.UnifyError, claim, [], [])
+    (Error_code.UnifyError, claim, lazy [], [])
 
   let bad_enum_decl pos =
     ( Error_code.BadEnumExtends,
-      (pos, "This enum declaration is invalid."),
-      [],
+      lazy (pos, "This enum declaration is invalid."),
+      lazy [],
       [] )
 
   let bad_conditional_support_dynamic pos child parent ty_name self_ty_name =
-    let statement =
-      Lazy.force ty_name
-      ^ " is subtype of dynamic implies "
-      ^ Lazy.force self_ty_name
-      ^ " is subtype of dynamic"
+    let claim =
+      Lazy.(
+        ty_name >>= fun ty_name ->
+        self_ty_name >>= fun self_ty_name ->
+        let statement =
+          ty_name
+          ^ " is subtype of dynamic implies "
+          ^ self_ty_name
+          ^ " is subtype of dynamic"
+        in
+        return
+          ( pos,
+            "Class "
+            ^ Render.strip_ns child
+            ^ " must support dynamic at least as often as "
+            ^ Render.strip_ns parent
+            ^ ":\n"
+            ^ statement ))
     in
-    ( Error_code.BadConditionalSupportDynamic,
-      ( pos,
-        "Class "
-        ^ Render.strip_ns child
-        ^ " must support dynamic at least as often as "
-        ^ Render.strip_ns parent
-        ^ ":\n"
-        ^ statement ),
-      [],
-      [] )
+    (Error_code.BadConditionalSupportDynamic, claim, lazy [], [])
 
   let bad_decl_override pos name parent_pos parent_name =
     ( Error_code.BadDeclOverride,
-      ( pos,
-        "Class "
-        ^ (Render.strip_ns name |> Markdown_lite.md_codify)
-        ^ " does not correctly implement all required members " ),
-      [
-        ( parent_pos,
-          "Some members are incompatible with those declared in type "
-          ^ (Render.strip_ns parent_name |> Markdown_lite.md_codify) );
-      ],
+      lazy
+        ( pos,
+          "Class "
+          ^ (Render.strip_ns name |> Markdown_lite.md_codify)
+          ^ " does not correctly implement all required members " ),
+      lazy
+        [
+          ( parent_pos,
+            "Some members are incompatible with those declared in type "
+            ^ (Render.strip_ns parent_name |> Markdown_lite.md_codify) );
+        ],
       [] )
 
   let explain_where_constraint pos decl_pos in_class =
     ( Error_code.TypeConstraintViolation,
-      (pos, "A `where` type constraint is violated here"),
-      [
-        ( decl_pos,
-          Printf.sprintf "This is the %s with `where` type constraints"
-          @@
-          if in_class then
-            "class"
-          else
-            "method" );
-      ],
+      lazy (pos, "A `where` type constraint is violated here"),
+      lazy
+        [
+          ( decl_pos,
+            Printf.sprintf "This is the %s with `where` type constraints"
+            @@
+            if in_class then
+              "class"
+            else
+              "method" );
+        ],
       [] )
 
   let explain_constraint pos =
     ( Error_code.TypeConstraintViolation,
-      (pos, "Some type arguments violate their constraints"),
-      [],
+      lazy (pos, "Some type arguments violate their constraints"),
+      lazy [],
       [] )
 
   let rigid_tvar_escape pos what =
     ( Error_code.RigidTVarEscape,
-      (pos, "Rigid type variable escapes its " ^ what),
-      [],
+      lazy (pos, "Rigid type variable escapes its " ^ what),
+      lazy [],
       [] )
 
   let invalid_type_hint pos =
-    (Error_code.InvalidTypeHint, (pos, "Invalid type hint"), [], [])
+    (Error_code.InvalidTypeHint, lazy (pos, "Invalid type hint"), lazy [], [])
 
   let unsatisfied_req pos trait_pos req_name req_pos =
     let reasons =
-      let r =
-        ( trait_pos,
-          "This requires to extend or implement " ^ Render.strip_ns req_name )
-      in
-      if Pos_or_decl.equal trait_pos req_pos then
-        [r]
-      else
-        [r; (req_pos, "Required here")]
+      lazy
+        (let r =
+           ( trait_pos,
+             "This requires to extend or implement " ^ Render.strip_ns req_name
+           )
+         in
+         if Pos_or_decl.equal trait_pos req_pos then
+           [r]
+         else
+           [r; (req_pos, "Required here")])
     and claim =
-      ( pos,
-        "This class does not satisfy all the requirements of its traits or interfaces."
-      )
+      lazy
+        ( pos,
+          "This class does not satisfy all the requirements of its traits or interfaces."
+        )
     in
     (Error_code.UnsatisfiedReq, claim, reasons, [])
 
   let invalid_echo_argument pos =
     let claim =
-      ( pos,
-        "Invalid "
-        ^ Markdown_lite.md_codify "echo"
-        ^ "/"
-        ^ Markdown_lite.md_codify "print"
-        ^ " argument" )
+      lazy
+        ( pos,
+          "Invalid "
+          ^ Markdown_lite.md_codify "echo"
+          ^ "/"
+          ^ Markdown_lite.md_codify "print"
+          ^ " argument" )
     in
-    (Error_code.InvalidEchoArgument, claim, [], [])
+    (Error_code.InvalidEchoArgument, claim, lazy [], [])
 
   let index_type_mismatch pos is_covariant_container msg_opt reasons_opt =
     let code =
@@ -2481,8 +2601,9 @@ module Primary = struct
         Error_code.CovariantIndexTypeMismatch
       else
         Error_code.IndexTypeMismatch
-    and claim = (pos, Option.value ~default:"Invalid index expression" msg_opt)
-    and reasons = Option.value_map reasons_opt ~default:[] ~f:Lazy.force in
+    and claim =
+      lazy (pos, Option.value ~default:"Invalid index expression" msg_opt)
+    and reasons = Option.value reasons_opt ~default:(lazy []) in
     (code, claim, reasons, [])
 
   let member_not_found pos kind member_name class_name class_pos hint reason =
@@ -2491,95 +2612,106 @@ module Primary = struct
       | `method_ -> "instance method"
       | `property -> "property"
     in
-    let msg =
-      Printf.sprintf
-        "No %s %s in %s"
-        kind_str
-        (Markdown_lite.md_codify member_name)
-        (Markdown_lite.md_codify @@ Render.strip_ns class_name)
+    let claim =
+      lazy
+        ( pos,
+          Printf.sprintf
+            "No %s %s in %s"
+            kind_str
+            (Markdown_lite.md_codify member_name)
+            (Markdown_lite.md_codify @@ Render.strip_ns class_name) )
     in
     let default =
-      reason
-      @ [
-          ( class_pos,
-            "Declaration of "
-            ^ (Markdown_lite.md_codify @@ Render.strip_ns class_name)
-            ^ " is here" );
-        ]
+      Lazy.map reason ~f:(fun reason ->
+          reason
+          @ [
+              ( class_pos,
+                "Declaration of "
+                ^ (Markdown_lite.md_codify @@ Render.strip_ns class_name)
+                ^ " is here" );
+            ])
     in
     let reasons =
       Option.value_map hint ~default ~f:(function
           | (`instance, pos, v) ->
-            Render.suggestion_message member_name v pos :: default
+            Lazy.map default ~f:(fun default ->
+                Render.suggestion_message member_name v pos :: default)
           | (`static, pos, v) ->
             let modifier =
               match kind with
               | `method_ -> "static method "
               | `property -> "static property "
             in
-            Render.suggestion_message member_name ~modifier v pos :: default)
+            Lazy.map default ~f:(fun default ->
+                Render.suggestion_message member_name ~modifier v pos :: default))
     in
     let quickfixes =
       Option.value_map hint ~default:[] ~f:(fun (_, _, new_text) ->
           [Quickfix.make ~title:("Change to ->" ^ new_text) ~new_text pos])
     in
-    (Error_code.MemberNotFound, (pos, msg), reasons, quickfixes)
+    (Error_code.MemberNotFound, claim, reasons, quickfixes)
 
   let construct_not_instance_method pos =
     let claim =
-      ( pos,
-        "`__construct` is not an instance method and shouldn't be invoked directly"
-      )
+      lazy
+        ( pos,
+          "`__construct` is not an instance method and shouldn't be invoked directly"
+        )
     in
-    (Error_code.ConstructNotInstanceMethod, claim, [], [])
+    (Error_code.ConstructNotInstanceMethod, claim, lazy [], [])
 
   let ambiguous_inheritance pos origin class_name =
     let claim =
-      ( pos,
-        "This declaration was inherited from an object of type "
-        ^ Markdown_lite.md_codify origin
-        ^ ". Redeclare this member in "
-        ^ Markdown_lite.md_codify class_name
-        ^ " with a compatible signature." )
+      lazy
+        ( pos,
+          "This declaration was inherited from an object of type "
+          ^ Markdown_lite.md_codify origin
+          ^ ". Redeclare this member in "
+          ^ Markdown_lite.md_codify class_name
+          ^ " with a compatible signature." )
     in
-    (Error_code.UnifyError, claim, [], [])
+    (Error_code.UnifyError, claim, lazy [], [])
 
   let expected_tparam pos n decl_pos =
     let claim =
-      ( pos,
-        "Expected "
-        ^
-        match n with
-        | 0 -> "no type parameters"
-        | 1 -> "exactly one type parameter"
-        | n -> string_of_int n ^ " type parameters" )
-    and reasons = [(decl_pos, "Definition is here")] in
+      lazy
+        ( pos,
+          "Expected "
+          ^
+          match n with
+          | 0 -> "no type parameters"
+          | 1 -> "exactly one type parameter"
+          | n -> string_of_int n ^ " type parameters" )
+    and reasons = lazy [(decl_pos, "Definition is here")] in
     (Error_code.ExpectedTparam, claim, reasons, [])
 
   let typeconst_concrete_concrete_override pos decl_pos =
-    let reasons = [(decl_pos, "Previously defined here")]
-    and claim = (pos, "Cannot re-declare this type constant") in
+    let reasons = lazy [(decl_pos, "Previously defined here")]
+    and claim = lazy (pos, "Cannot re-declare this type constant") in
     (Error_code.TypeconstConcreteConcreteOverride, claim, reasons, [])
 
-  let invalid_memoized_param pos reason =
+  let invalid_memoized_param pos reason : error =
     let claim =
-      ( pos,
-        "Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize"
-      )
+      lazy
+        ( pos,
+          "Parameters to memoized function must be null, bool, int, float, string, an object deriving IMemoizeParam, or a Container thereof. See also http://docs.hhvm.com/hack/attributes/special#__memoize"
+        )
     in
-    (Error_code.InvalidMemoizedParam, claim, Lazy.force reason, [])
+    (Error_code.InvalidMemoizedParam, claim, reason, [])
 
   let invalid_arraykey
       pos container_pos container_ty_name key_pos key_ty_name ctxt =
     let reasons =
-      [
-        (container_pos, "This container is " ^ container_ty_name);
-        ( key_pos,
-          String.capitalize key_ty_name
-          ^ " cannot be used as a key for "
-          ^ container_ty_name );
-      ]
-    and claim = (pos, "This value is not a valid key type for this container")
+      lazy
+        [
+          (container_pos, "This container is " ^ container_ty_name);
+          ( key_pos,
+            String.capitalize key_ty_name
+            ^ " cannot be used as a key for "
+            ^ container_ty_name );
+        ]
+    and claim =
+      lazy (pos, "This value is not a valid key type for this container")
     and code =
       Error_code.(
         match ctxt with
@@ -2591,21 +2723,23 @@ module Primary = struct
   let invalid_keyset_value
       pos container_pos container_ty_name value_pos value_ty_name =
     let reasons =
-      [
-        (container_pos, "This container is " ^ container_ty_name);
-        (value_pos, String.capitalize value_ty_name ^ " is not an arraykey");
-      ]
-    and claim = (pos, "Keyset values must be arraykeys") in
+      lazy
+        [
+          (container_pos, "This container is " ^ container_ty_name);
+          (value_pos, String.capitalize value_ty_name ^ " is not an arraykey");
+        ]
+    and claim = lazy (pos, "Keyset values must be arraykeys") in
     (Error_code.InvalidKeysetValue, claim, reasons, [])
 
   let invalid_set_value
       pos container_pos container_ty_name value_pos value_ty_name =
     let reasons =
-      [
-        (container_pos, "This container is " ^ container_ty_name);
-        (value_pos, String.capitalize value_ty_name ^ " is not an arraykey");
-      ]
-    and claim = (pos, "Set values must be arraykeys") in
+      lazy
+        [
+          (container_pos, "This container is " ^ container_ty_name);
+          (value_pos, String.capitalize value_ty_name ^ " is not an arraykey");
+        ]
+    and claim = lazy (pos, "Set values must be arraykeys") in
     (Error_code.InvalidKeysetValue, claim, reasons, [])
 
   let hkt_alias_with_implicit_constraints
@@ -2617,40 +2751,43 @@ module Primary = struct
       used_class_tparam_name
       typedef_tparam_name =
     let reasons =
-      [
-        ( typedef_pos,
-          "The definition of " ^ Render.strip_ns typedef_name ^ " is here." );
-        ( used_class_in_def_pos,
-          "The definition of "
-          ^ Render.strip_ns typedef_name
-          ^ " relies on "
-          ^ Render.strip_ns used_class_in_def_name
-          ^ " and the constraints that "
-          ^ Render.strip_ns used_class_in_def_name
-          ^ " imposes on its type parameter "
-          ^ Render.strip_ns used_class_tparam_name
-          ^ " then become implicit constraints on the type parameter "
-          ^ typedef_tparam_name
-          ^ " of "
-          ^ Render.strip_ns typedef_name
-          ^ "." );
-      ]
+      lazy
+        [
+          ( typedef_pos,
+            "The definition of " ^ Render.strip_ns typedef_name ^ " is here." );
+          ( used_class_in_def_pos,
+            "The definition of "
+            ^ Render.strip_ns typedef_name
+            ^ " relies on "
+            ^ Render.strip_ns used_class_in_def_name
+            ^ " and the constraints that "
+            ^ Render.strip_ns used_class_in_def_name
+            ^ " imposes on its type parameter "
+            ^ Render.strip_ns used_class_tparam_name
+            ^ " then become implicit constraints on the type parameter "
+            ^ typedef_tparam_name
+            ^ " of "
+            ^ Render.strip_ns typedef_name
+            ^ "." );
+        ]
     and claim =
-      ( pos,
-        Format.sprintf
-          "The type %s implicitly imposes constraints on its type parameters. Therefore, it cannot be used as a higher-kinded type at this time."
-        @@ Render.strip_ns typedef_name )
+      lazy
+        ( pos,
+          Format.sprintf
+            "The type %s implicitly imposes constraints on its type parameters. Therefore, it cannot be used as a higher-kinded type at this time."
+          @@ Render.strip_ns typedef_name )
     in
     (Error_code.HigherKindedTypesUnsupportedFeature, claim, reasons, [])
 
   let hkt_wildcard pos =
     let claim =
-      ( pos,
-        "You are supplying _ where a higher-kinded type is expected."
-        ^ " We cannot infer higher-kinded type arguments at this time, please state the actual type."
-      )
+      lazy
+        ( pos,
+          "You are supplying _ where a higher-kinded type is expected."
+          ^ " We cannot infer higher-kinded type arguments at this time, please state the actual type."
+        )
     in
-    (Error_code.HigherKindedTypesUnsupportedFeature, claim, [], [])
+    (Error_code.HigherKindedTypesUnsupportedFeature, claim, lazy [], [])
 
   let hkt_implicit_argument pos decl_pos param_name =
     let param_desc =
@@ -2662,64 +2799,70 @@ module Primary = struct
         "the generic parameter " ^ param_name
     in
     let claim =
-      ( pos,
-        "You left out the type arguments here such that they may be inferred."
-        ^ " However, a higher-kinded type is expected in place of "
-        ^ param_desc
-        ^ ", meaning that the type arguments cannot be inferred."
-        ^ " Please provide the type arguments explicitly." )
+      lazy
+        ( pos,
+          "You left out the type arguments here such that they may be inferred."
+          ^ " However, a higher-kinded type is expected in place of "
+          ^ param_desc
+          ^ ", meaning that the type arguments cannot be inferred."
+          ^ " Please provide the type arguments explicitly." )
     and reasons =
-      [
-        ( decl_pos,
-          Format.sprintf
-            {|%s was declared to be higher-kinded here.|}
-            param_desc );
-      ]
+      lazy
+        [
+          ( decl_pos,
+            Format.sprintf
+              {|%s was declared to be higher-kinded here.|}
+              param_desc );
+        ]
     in
     (Error_code.HigherKindedTypesUnsupportedFeature, claim, reasons, [])
 
   let invalid_substring pos ty_name =
     let claim =
-      ( pos,
-        "Expected an object convertible to string but got " ^ Lazy.force ty_name
-      )
+      lazy
+        ( pos,
+          "Expected an object convertible to string but got "
+          ^ Lazy.force ty_name )
     in
-    (Error_code.InvalidSubString, claim, [], [])
+    (Error_code.InvalidSubString, claim, lazy [], [])
 
   let nullable_cast pos ty_pos ty_name =
     let reasons =
-      [(ty_pos, "This is " ^ Markdown_lite.md_codify (Lazy.force ty_name))]
-    and claim = (pos, "Casting from a nullable type is forbidden") in
+      Lazy.map ty_name ~f:(fun ty_name ->
+          [(ty_pos, "This is " ^ Markdown_lite.md_codify ty_name)])
+    and claim = lazy (pos, "Casting from a nullable type is forbidden") in
     (Error_code.NullableCast, claim, reasons, [])
 
   let hh_expect pos equivalent =
-    let (msg, error_code) =
+    let (claim, error_code) =
       if equivalent then
-        ( "hh_expect_equivalent type mismatch",
+        ( lazy (pos, "hh_expect_equivalent type mismatch"),
           Error_code.HHExpectEquivalentFailure )
       else
-        ("hh_expect type mismatch", Error_code.HHExpectFailure)
+        (lazy (pos, "hh_expect type mismatch"), Error_code.HHExpectFailure)
     in
 
-    (error_code, (pos, msg), [], [])
+    (error_code, claim, lazy [], [])
 
-  let null_member pos ctxt kind member_name reason =
-    let msg =
-      Printf.sprintf
-        "You are trying to access the %s %s but this object can be null."
-        (match kind with
-        | `method_ -> "method"
-        | `property -> "property")
-        (Markdown_lite.md_codify member_name)
+  let null_member pos ctxt kind member_name reason : error =
+    let claim =
+      lazy
+        ( pos,
+          Printf.sprintf
+            "You are trying to access the %s %s but this object can be null."
+            (match kind with
+            | `method_ -> "method"
+            | `property -> "property")
+            (Markdown_lite.md_codify member_name) )
     in
     let error_code =
       match ctxt with
       | `read -> Error_code.NullMemberRead
       | `write -> Error_code.NullMemberWrite
     in
-    (error_code, (pos, msg), reason, [])
+    (error_code, claim, reason, [])
 
-  let typing_too_many_args pos decl_pos actual expected =
+  let typing_too_many_args pos decl_pos actual expected : error =
     let (code, claim, reasons) =
       Common.typing_too_many_args pos decl_pos actual expected
     in
@@ -2744,80 +2887,96 @@ module Primary = struct
     (code, claim, reasons, [])
 
   let nullsafe_property_write_context pos =
-    let msg =
-      "`?->` syntax not supported here, this function effectively does a write"
+    let claim =
+      lazy
+        ( pos,
+          "`?->` syntax not supported here, this function effectively does a write"
+        )
     in
-    (Error_code.NullsafePropertyWriteContext, (pos, msg), [], [])
+    (Error_code.NullsafePropertyWriteContext, claim, lazy [], [])
 
-  let uninstantiable_class pos class_name reason_ty_opt decl_pos =
-    let name = Render.strip_ns class_name in
-    let default =
-      ( (pos, Markdown_lite.md_codify name ^ " is uninstantiable"),
-        [(decl_pos, "Declaration is here")] )
-    in
+  let uninstantiable_class pos class_name reason_ty_opt decl_pos : error =
+    let default_claim =
+      lazy
+        ( pos,
+          Markdown_lite.md_codify (Render.strip_ns class_name)
+          ^ " is uninstantiable" )
+    and default_reasons = lazy [(decl_pos, "Declaration is here")] in
     let (claim, reasons) =
-      Option.value_map reason_ty_opt ~default ~f:(fun (reason_pos, ty_name) ->
-          let msg =
-            "This would be "
-            ^ Lazy.force ty_name
-            ^ " which must be instantiable"
-          in
-          let reasons =
-            Message.map ~f:Pos_or_decl.of_raw_pos (fst default) :: snd default
-          in
-          let claim = (reason_pos, msg) in
-          (claim, reasons))
+      match reason_ty_opt with
+      | Some (reason_pos, ty_name) ->
+        let claim =
+          Lazy.map ty_name ~f:(fun ty_name ->
+              ( reason_pos,
+                "This would be " ^ ty_name ^ " which must be instantiable" ))
+        and reasons =
+          Lazy.(
+            default_claim >>= fun claim ->
+            default_reasons >>= fun reasons ->
+            return (Message.map ~f:Pos_or_decl.of_raw_pos claim :: reasons))
+        in
+        (claim, reasons)
+      | _ -> (default_claim, default_reasons)
     in
     (Error_code.UninstantiableClass, claim, reasons, [])
 
   let abstract_const_usage pos name decl_pos =
-    let name = Render.strip_ns name in
-    let msg =
-      "Cannot reference abstract constant "
-      ^ Markdown_lite.md_codify name
-      ^ " directly"
-    and reason = [(decl_pos, "Declaration is here")] in
-    (Error_code.AbstractConstUsage, (pos, msg), reason, [])
+    let claim =
+      lazy
+        ( pos,
+          "Cannot reference abstract constant "
+          ^ Markdown_lite.md_codify (Render.strip_ns name)
+          ^ " directly" )
+    and reason = lazy [(decl_pos, "Declaration is here")] in
+    (Error_code.AbstractConstUsage, claim, reason, [])
 
   let type_arity_mismatch pos decl_pos actual expected =
-    let msg =
-      Printf.sprintf
-        "Wrong number of type arguments (expected %d, got %d)"
-        expected
-        actual
-    and reasons = [(decl_pos, "Definition is here")] in
-    (Error_code.TypeArityMismatch, (pos, msg), reasons, [])
+    let claim =
+      lazy
+        ( pos,
+          Printf.sprintf
+            "Wrong number of type arguments (expected %d, got %d)"
+            expected
+            actual )
+    and reasons = lazy [(decl_pos, "Definition is here")] in
+    (Error_code.TypeArityMismatch, claim, reasons, [])
 
   let member_not_implemented pos parent_pos member_name decl_pos quickfixes =
     let claim =
-      ( pos,
-        "This type doesn't implement the method "
-        ^ Markdown_lite.md_codify member_name )
+      lazy
+        ( pos,
+          "This type doesn't implement the method "
+          ^ Markdown_lite.md_codify member_name )
     and reasons =
-      [
-        (parent_pos, "Which is required by this interface");
-        (decl_pos, "As defined here");
-      ]
+      lazy
+        [
+          (parent_pos, "Which is required by this interface");
+          (decl_pos, "As defined here");
+        ]
     in
     (Error_code.MemberNotImplemented, claim, reasons, quickfixes)
 
   let attribute_too_many_arguments pos name expected =
-    let msg =
-      "The attribute "
-      ^ Markdown_lite.md_codify name
-      ^ " expects at most "
-      ^ Render.pluralize_arguments expected
+    let claim =
+      lazy
+        ( pos,
+          "The attribute "
+          ^ Markdown_lite.md_codify name
+          ^ " expects at most "
+          ^ Render.pluralize_arguments expected )
     in
-    (Error_code.AttributeTooManyArguments, (pos, msg), [], [])
+    (Error_code.AttributeTooManyArguments, claim, lazy [], [])
 
   let attribute_too_few_arguments pos name expected =
-    let msg =
-      "The attribute "
-      ^ Markdown_lite.md_codify name
-      ^ " expects at least "
-      ^ Render.pluralize_arguments expected
+    let claim =
+      lazy
+        ( pos,
+          "The attribute "
+          ^ Markdown_lite.md_codify name
+          ^ " expects at least "
+          ^ Render.pluralize_arguments expected )
     in
-    (Error_code.AttributeTooFewArguments, (pos, msg), [], [])
+    (Error_code.AttributeTooFewArguments, claim, lazy [], [])
 
   let attribute_not_exact_number_of_args pos name actual expected =
     let code =
@@ -2825,57 +2984,66 @@ module Primary = struct
         Error_code.AttributeTooManyArguments
       else
         Error_code.AttributeTooFewArguments
-    and msg =
-      "The attribute "
-      ^ Markdown_lite.md_codify name
-      ^ " expects "
-      ^
-      match expected with
-      | 0 -> "no arguments"
-      | 1 -> "exactly 1 argument"
-      | _ -> "exactly " ^ string_of_int expected ^ " arguments"
+    and claim =
+      lazy
+        ( pos,
+          "The attribute "
+          ^ Markdown_lite.md_codify name
+          ^ " expects "
+          ^
+          match expected with
+          | 0 -> "no arguments"
+          | 1 -> "exactly 1 argument"
+          | _ -> "exactly " ^ string_of_int expected ^ " arguments" )
     in
-    (code, (pos, msg), [], [])
+    (code, claim, lazy [], [])
 
   let kind_mismatch pos decl_pos tparam_name expected_kind actual_kind =
-    let msg =
-      "This is "
-      ^ actual_kind
-      ^ ", but "
-      ^ expected_kind
-      ^ " was expected here."
-    and reason =
-      [
-        ( decl_pos,
-          "We are expecting "
+    let claim =
+      lazy
+        ( pos,
+          "This is "
+          ^ actual_kind
+          ^ ", but "
           ^ expected_kind
-          ^ " due to the definition of "
-          ^ tparam_name
-          ^ " here." );
-      ]
+          ^ " was expected here." )
+    and reason =
+      lazy
+        [
+          ( decl_pos,
+            "We are expecting "
+            ^ expected_kind
+            ^ " due to the definition of "
+            ^ tparam_name
+            ^ " here." );
+        ]
     in
-    (Error_code.KindMismatch, (pos, msg), reason, [])
+    (Error_code.KindMismatch, claim, reason, [])
 
   let trait_parent_construct_inconsistent pos decl_pos =
-    let msg =
-      "This use of `parent::__construct` requires that the parent class be marked <<__ConsistentConstruct>>"
-    and reason = [(decl_pos, "Parent definition is here")] in
-    (Error_code.TraitParentConstructInconsistent, (pos, msg), reason, [])
+    let claim =
+      lazy
+        ( pos,
+          "This use of `parent::__construct` requires that the parent class be marked <<__ConsistentConstruct>>"
+        )
+    and reason = lazy [(decl_pos, "Parent definition is here")] in
+    (Error_code.TraitParentConstructInconsistent, claim, reason, [])
 
   let top_member pos ctxt ty_name decl_pos kind name is_nullable =
-    let kind_str =
-      match kind with
-      | `method_ -> "method"
-      | `property -> "property"
-    in
     let claim =
-      ( pos,
-        Printf.sprintf
-          "You are trying to access the %s %s but this is %s. Use a **specific** class or interface name."
-          kind_str
-          (Markdown_lite.md_codify name)
-          (Lazy.force ty_name) )
-    and reason = [(decl_pos, "Definition is here")]
+      Lazy.map ty_name ~f:(fun ty_name ->
+          let kind_str =
+            match kind with
+            | `method_ -> "method"
+            | `property -> "property"
+          in
+          ( pos,
+            Printf.sprintf
+              "You are trying to access the %s %s but this is %s. Use a **specific** class or interface name."
+              kind_str
+              (Markdown_lite.md_codify name)
+              ty_name ))
+    and reason = lazy [(decl_pos, "Definition is here")]
     and code =
       Error_code.(
         match ctxt with
@@ -2888,142 +3056,160 @@ module Primary = struct
 
   let unresolved_tyvar_projection pos proj_pos tconst_name =
     let claim =
-      ( pos,
-        "Can't access a type constant "
-        ^ tconst_name
-        ^ " from an unresolved type" )
+      lazy
+        ( pos,
+          "Can't access a type constant "
+          ^ tconst_name
+          ^ " from an unresolved type" )
     and reason =
-      [
-        (proj_pos, "Access happens here");
-        ( Pos_or_decl.of_raw_pos pos,
-          "Disambiguate the types using explicit type annotations here." );
-      ]
+      lazy
+        [
+          (proj_pos, "Access happens here");
+          ( Pos_or_decl.of_raw_pos pos,
+            "Disambiguate the types using explicit type annotations here." );
+        ]
     in
     (Error_code.UnresolvedTypeVariableProjection, claim, reason, [])
 
   let cyclic_class_constant pos class_name const_name =
     let claim =
-      ( pos,
-        "Cannot declare self-referencing constant "
-        ^ const_name
-        ^ " in "
-        ^ Render.strip_ns class_name )
+      lazy
+        ( pos,
+          "Cannot declare self-referencing constant "
+          ^ const_name
+          ^ " in "
+          ^ Render.strip_ns class_name )
     in
-    (Error_code.CyclicClassConstant, claim, [], [])
+    (Error_code.CyclicClassConstant, claim, lazy [], [])
 
   let inout_annotation_missing pos1 pos2 =
-    let msg1 = (pos1, "This argument should be annotated with `inout`") in
-    let msg2 = (pos2, "Because this is an `inout` parameter") in
+    let claim = lazy (pos1, "This argument should be annotated with `inout`") in
+    let reason = lazy [(pos2, "Because this is an `inout` parameter")] in
     let (_, start_column) = Pos.line_column pos1 in
     let pos = Pos.set_col_end start_column pos1 in
 
     ( Error_code.InoutAnnotationMissing,
-      msg1,
-      [msg2],
+      claim,
+      reason,
       [Quickfix.make ~title:"Insert `inout` annotation" ~new_text:"inout " pos]
     )
 
-  let inout_annotation_unexpected pos1 pos2 pos2_is_variadic pos3 =
-    let msg1 = (pos1, "Unexpected `inout` annotation for argument") in
-    let msg2 =
-      ( pos2,
-        if pos2_is_variadic then
-          "A variadic parameter can never be `inout`"
-        else
-          "This is a normal parameter (does not have `inout`)" )
+  let inout_annotation_unexpected pos1 pos2 pos2_is_variadic pos3 : error =
+    let claim = lazy (pos1, "Unexpected `inout` annotation for argument") in
+    let reason =
+      lazy
+        [
+          ( pos2,
+            if pos2_is_variadic then
+              "A variadic parameter can never be `inout`"
+            else
+              "This is a normal parameter (does not have `inout`)" );
+        ]
     in
     ( Error_code.InoutAnnotationUnexpected,
-      msg1,
-      [msg2],
+      claim,
+      reason,
       [Quickfix.make ~title:"Remove `inout` annotation" ~new_text:"" pos3] )
 
   let inout_argument_bad_type pos reasons =
     let claim =
-      ( pos,
-        "Expected argument marked `inout` to be contained in a local or "
-        ^ "a value-typed container (e.g. vec, dict, keyset, array). "
-        ^ "To use `inout` here, assign to/from a temporary local variable." )
+      lazy
+        ( pos,
+          "Expected argument marked `inout` to be contained in a local or "
+          ^ "a value-typed container (e.g. vec, dict, keyset, array). "
+          ^ "To use `inout` here, assign to/from a temporary local variable." )
     in
-    (Error_code.InoutArgumentBadType, claim, Lazy.force reasons, [])
+    (Error_code.InoutArgumentBadType, claim, reasons, [])
 
   let invalid_meth_caller_calling_convention pos decl_pos convention =
     let claim =
-      ( pos,
-        "`meth_caller` does not support methods with the "
-        ^ convention
-        ^ " calling convention" )
+      lazy
+        ( pos,
+          "`meth_caller` does not support methods with the "
+          ^ convention
+          ^ " calling convention" )
     and reason =
-      [
-        ( decl_pos,
-          "This is why I think this method uses the `inout` calling convention"
-        );
-      ]
+      lazy
+        [
+          ( decl_pos,
+            "This is why I think this method uses the `inout` calling convention"
+          );
+        ]
     in
     (Error_code.InvalidMethCallerCallingConvention, claim, reason, [])
 
   let invalid_meth_caller_readonly_return pos decl_pos =
     let claim =
-      ( pos,
-        "`meth_caller` does not support methods that return `readonly` objects"
-      )
+      lazy
+        ( pos,
+          "`meth_caller` does not support methods that return `readonly` objects"
+        )
     in
     let reason =
-      [
-        (decl_pos, "This is why I think this method returns a `readonly` object");
-      ]
+      lazy
+        [
+          ( decl_pos,
+            "This is why I think this method returns a `readonly` object" );
+        ]
     in
     (Error_code.InvalidMethCallerReadonlyReturn, claim, reason, [])
 
   let invalid_new_disposable pos =
     let claim =
-      ( pos,
-        "Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>`"
-      )
+      lazy
+        ( pos,
+          "Disposable objects may only be created in a `using` statement or `return` from function marked `<<__ReturnDisposable>>`"
+        )
     in
-    (Error_code.InvalidNewDisposable, claim, [], [])
+    (Error_code.InvalidNewDisposable, claim, lazy [], [])
 
   let invalid_return_disposable pos =
     let claim =
-      ( pos,
-        "Return expression must be new disposable in function marked `<<__ReturnDisposable>>`"
-      )
+      lazy
+        ( pos,
+          "Return expression must be new disposable in function marked `<<__ReturnDisposable>>`"
+        )
     in
-    (Error_code.InvalidReturnDisposable, claim, [], [])
+    (Error_code.InvalidReturnDisposable, claim, lazy [], [])
 
   let invalid_disposable_hint pos class_name =
     let claim =
-      ( pos,
-        "Parameter with type "
-        ^ Markdown_lite.md_codify class_name
-        ^ " must not implement `IDisposable` or `IAsyncDisposable`. "
-        ^ "Please use `<<__AcceptDisposable>>` attribute or create disposable object with `using` statement instead."
-      )
+      lazy
+        ( pos,
+          "Parameter with type "
+          ^ Markdown_lite.md_codify class_name
+          ^ " must not implement `IDisposable` or `IAsyncDisposable`. "
+          ^ "Please use `<<__AcceptDisposable>>` attribute or create disposable object with `using` statement instead."
+        )
     in
-    (Error_code.InvalidDisposableHint, claim, [], [])
+    (Error_code.InvalidDisposableHint, claim, lazy [], [])
 
   let invalid_disposable_return_hint pos class_name =
     let claim =
-      ( pos,
-        "Return type "
-        ^ Markdown_lite.md_codify class_name
-        ^ " must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute."
-      )
+      lazy
+        ( pos,
+          "Return type "
+          ^ Markdown_lite.md_codify class_name
+          ^ " must not implement `IDisposable` or `IAsyncDisposable`. Please add `<<__ReturnDisposable>>` attribute."
+        )
     in
-    (Error_code.InvalidDisposableReturnHint, claim, [], [])
+    (Error_code.InvalidDisposableReturnHint, claim, lazy [], [])
 
   let ambiguous_lambda pos uses =
     let claim =
-      ( pos,
-        "Lambda has parameter types that could not be determined at definition site."
-      )
+      lazy
+        ( pos,
+          "Lambda has parameter types that could not be determined at definition site."
+        )
     and reason =
-      ( Pos_or_decl.of_raw_pos pos,
-        Printf.sprintf
-          "%d distinct use types were determined: please add type hints to lambda parameters."
-          (List.length uses) )
-      ::
-      List.map uses ~f:(fun (pos, ty) ->
-          (pos, "This use has type " ^ Markdown_lite.md_codify ty))
+      Lazy.map uses ~f:(fun uses ->
+          ( Pos_or_decl.of_raw_pos pos,
+            Printf.sprintf
+              "%d distinct use types were determined: please add type hints to lambda parameters."
+              (List.length uses) )
+          ::
+          List.map uses ~f:(fun (pos, ty) ->
+              (pos, "This use has type " ^ Markdown_lite.md_codify ty)))
     in
     (Error_code.AmbiguousLambda, claim, reason, [])
 
@@ -3035,92 +3221,117 @@ module Primary = struct
     (code, claim, reasons, quickfixes)
 
   let wrong_extend_kind pos kind name parent_pos parent_kind parent_name =
-    let parent_kind_str = Ast_defs.string_of_classish_kind parent_kind in
-    let parent_name = Render.strip_ns parent_name in
-    let child_name = Render.strip_ns name in
-    let use_msg =
-      Printf.sprintf
-        " Did you mean to add `use %s;` within the body of %s?"
-        parent_name
-        (Markdown_lite.md_codify child_name)
+    let reason =
+      lazy
+        (let parent_kind_str = Ast_defs.string_of_classish_kind parent_kind in
+         [(parent_pos, "This is " ^ parent_kind_str ^ ".")])
     in
-    let child_msg =
-      match kind with
-      | Ast_defs.Cclass _ ->
-        let extends_msg = "Classes can only extend other classes." in
-        let suggestion =
-          if Ast_defs.is_c_interface parent_kind then
-            " Did you mean `implements " ^ parent_name ^ "`?"
-          else if Ast_defs.is_c_trait parent_kind then
-            use_msg
-          else
-            ""
-        in
-        extends_msg ^ suggestion
-      | Ast_defs.Cinterface ->
-        let extends_msg = "Interfaces can only extend other interfaces." in
-        let suggestion =
-          if Ast_defs.is_c_trait parent_kind then
-            use_msg
-          else
-            ""
-        in
-        extends_msg ^ suggestion
-      | Ast_defs.Cenum_class _ ->
-        "Enum classes can only extend other enum classes."
-      | Ast_defs.Cenum ->
-        (* This case should never happen, as the type checker will have already caught
-           it with EnumTypeBad. But just in case, report this error here too. *)
-        "Enums can only extend int, string, or arraykey."
-      | Ast_defs.Ctrait ->
-        (* This case should never happen, as the parser will have caught it before
-            we get here. *)
-        "A trait cannot use `extends`. This is a parser error."
+    let claim =
+      lazy
+        (let parent_name = Render.strip_ns parent_name in
+         let child_name = Render.strip_ns name in
+         let use_msg =
+           Printf.sprintf
+             " Did you mean to add `use %s;` within the body of %s?"
+             parent_name
+             (Markdown_lite.md_codify child_name)
+         in
+         let child_msg =
+           match kind with
+           | Ast_defs.Cclass _ ->
+             let extends_msg = "Classes can only extend other classes." in
+             let suggestion =
+               if Ast_defs.is_c_interface parent_kind then
+                 " Did you mean `implements " ^ parent_name ^ "`?"
+               else if Ast_defs.is_c_trait parent_kind then
+                 use_msg
+               else
+                 ""
+             in
+             extends_msg ^ suggestion
+           | Ast_defs.Cinterface ->
+             let extends_msg = "Interfaces can only extend other interfaces." in
+             let suggestion =
+               if Ast_defs.is_c_trait parent_kind then
+                 use_msg
+               else
+                 ""
+             in
+             extends_msg ^ suggestion
+           | Ast_defs.Cenum_class _ ->
+             "Enum classes can only extend other enum classes."
+           | Ast_defs.Cenum ->
+             (* This case should never happen, as the type checker will have already caught
+                it with EnumTypeBad. But just in case, report this error here too. *)
+             "Enums can only extend int, string, or arraykey."
+           | Ast_defs.Ctrait ->
+             (* This case should never happen, as the parser will have caught it before
+                 we get here. *)
+             "A trait cannot use `extends`. This is a parser error."
+         in
+         (pos, child_msg))
     in
-    let msg1 = (pos, child_msg) in
-    let msg2 = (parent_pos, "This is " ^ parent_kind_str ^ ".") in
-    (Error_code.WrongExtendKind, msg1, [msg2], [])
+    (Error_code.WrongExtendKind, claim, reason, [])
 
   let cyclic_class_def pos stack =
-    let stack =
-      SSet.fold
-        (fun x y -> (Render.strip_ns x |> Markdown_lite.md_codify) ^ " " ^ y)
-        stack
-        ""
+    let claim =
+      lazy
+        (let stack =
+           SSet.fold
+             (fun x y ->
+               (Render.strip_ns x |> Markdown_lite.md_codify) ^ " " ^ y)
+             stack
+             ""
+         in
+
+         (pos, "Cyclic class definition : " ^ stack))
     in
-    ( Error_code.CyclicClassDef,
-      (pos, "Cyclic class definition : " ^ stack),
-      [],
-      [] )
+    (Error_code.CyclicClassDef, claim, lazy [], [])
 
   let trait_reuse_with_final_method use_pos trait_name parent_cls_name trace =
-    let msg =
-      Printf.sprintf
-        "Traits with final methods cannot be reused, and `%s` is already used by `%s`."
-        (Render.strip_ns trait_name)
-        (Render.strip_ns parent_cls_name)
+    let claim =
+      lazy
+        ( use_pos,
+          Printf.sprintf
+            "Traits with final methods cannot be reused, and `%s` is already used by `%s`."
+            (Render.strip_ns trait_name)
+            (Render.strip_ns parent_cls_name) )
     in
-    (Error_code.TraitReuse, (use_pos, msg), trace, [])
+    (Error_code.TraitReuse, claim, trace, [])
 
   let trait_reuse pos c_name trait_name parent_pos parent_name =
-    let c_name = Render.strip_ns c_name |> Markdown_lite.md_codify in
-    let trait = Render.strip_ns trait_name |> Markdown_lite.md_codify in
-    let err =
-      "Class " ^ c_name ^ " reuses trait " ^ trait ^ " in its hierarchy"
+    let claim =
+      lazy
+        (let c_name = Render.strip_ns c_name |> Markdown_lite.md_codify in
+         let trait = Render.strip_ns trait_name |> Markdown_lite.md_codify in
+         let err =
+           "Class " ^ c_name ^ " reuses trait " ^ trait ^ " in its hierarchy"
+         in
+         (pos, err))
     in
-    let err' =
-      "It is already used through "
-      ^ (Render.strip_ns parent_name |> Markdown_lite.md_codify)
+    let reason =
+      lazy
+        (let err' =
+           "It is already used through "
+           ^ (Render.strip_ns parent_name |> Markdown_lite.md_codify)
+         in
+         [(parent_pos, err')])
     in
-    (Error_code.TraitReuse, (pos, err), [(parent_pos, err')], [])
+    (Error_code.TraitReuse, claim, reason, [])
 
   let trait_reuse_inside_class c_pos c_name trait occurrences =
-    let c_name = Render.strip_ns c_name |> Markdown_lite.md_codify in
-    let trait = Render.strip_ns trait |> Markdown_lite.md_codify in
-    let err = "Class " ^ c_name ^ " uses trait " ^ trait ^ " multiple times" in
+    let claim =
+      lazy
+        (let c_name = Render.strip_ns c_name |> Markdown_lite.md_codify in
+         let trait = Render.strip_ns trait |> Markdown_lite.md_codify in
+         let err =
+           "Class " ^ c_name ^ " uses trait " ^ trait ^ " multiple times"
+         in
+         (c_pos, err))
+    in
     ( Error_code.TraitReuseInsideClass,
-      (c_pos, err),
-      List.map ~f:(fun p -> (p, "used here")) occurrences,
+      claim,
+      lazy (List.map ~f:(fun p -> (p, "used here")) occurrences),
       [] )
 
   let invalid_is_as_expression_hint hint_pos op reasons =
@@ -3129,362 +3340,440 @@ module Primary = struct
       | `is -> "is"
       | `as_ -> "as"
     in
-    ( Error_code.InvalidIsAsExpressionHint,
-      (hint_pos, "Invalid " ^ Markdown_lite.md_codify op ^ " expression hint"),
-      List.map reasons ~f:(fun (ty_pos, ty_str) ->
-          ( ty_pos,
-            "The "
-            ^ Markdown_lite.md_codify op
-            ^ " operator cannot be used with "
-            ^ ty_str )),
-      [] )
+    let claim =
+      lazy
+        (hint_pos, "Invalid " ^ Markdown_lite.md_codify op ^ " expression hint")
+    and reasons =
+      Lazy.map reasons ~f:(fun reasons ->
+          List.map reasons ~f:(fun (ty_pos, ty_str) ->
+              ( ty_pos,
+                "The "
+                ^ Markdown_lite.md_codify op
+                ^ " operator cannot be used with "
+                ^ ty_str )))
+    in
+    (Error_code.InvalidIsAsExpressionHint, claim, reasons, [])
 
   let invalid_enforceable_type targ_pos ty_info kind tp_pos tp_name =
-    let kind_str =
-      match kind with
-      | `constant -> "constant"
-      | `param -> "parameter"
+    let reason =
+      Lazy.map ty_info ~f:(fun ty_info ->
+          let kind_str =
+            match kind with
+            | `constant -> "constant"
+            | `param -> "parameter"
+          in
+          let (ty_pos, ty_str) = List.hd_exn ty_info in
+          [
+            ( tp_pos,
+              "Type "
+              ^ kind_str
+              ^ " "
+              ^ Markdown_lite.md_codify tp_name
+              ^ " was declared `__Enforceable` here" );
+            (ty_pos, "This type is not enforceable because it has " ^ ty_str);
+          ])
     in
-    let (ty_pos, ty_str) = List.hd_exn ty_info in
     ( Error_code.InvalidEnforceableTypeArgument,
-      (targ_pos, "Invalid type"),
-      [
-        ( tp_pos,
-          "Type "
-          ^ kind_str
-          ^ " "
-          ^ Markdown_lite.md_codify tp_name
-          ^ " was declared `__Enforceable` here" );
-        (ty_pos, "This type is not enforceable because it has " ^ ty_str);
-      ],
+      lazy (targ_pos, "Invalid type"),
+      reason,
       [] )
 
   let reifiable_attr attr_pos kind decl_pos ty_info =
-    let decl_kind =
-      match kind with
-      | `ty -> "type"
-      | `cnstr -> "constraint"
-      | `super_cnstr -> "super_constraint"
+    let claim =
+      lazy
+        (let decl_kind =
+           match kind with
+           | `ty -> "type"
+           | `cnstr -> "constraint"
+           | `super_cnstr -> "super_constraint"
+         in
+         (decl_pos, "Invalid " ^ decl_kind))
     in
-    let (ty_pos, ty_msg) = List.hd_exn ty_info in
-    ( Error_code.DisallowPHPArraysAttr,
-      (decl_pos, "Invalid " ^ decl_kind),
-      [
-        (attr_pos, "This type constant has the `__Reifiable` attribute");
-        (ty_pos, "It cannot contain " ^ ty_msg);
-      ],
-      [] )
+    let reason =
+      Lazy.map ty_info ~f:(fun ty_info ->
+          let (ty_pos, ty_msg) = List.hd_exn ty_info in
+          [
+            (attr_pos, "This type constant has the `__Reifiable` attribute");
+            (ty_pos, "It cannot contain " ^ ty_msg);
+          ])
+    in
+    (Error_code.DisallowPHPArraysAttr, claim, reason, [])
 
   let invalid_newable_type_argument pos tp_pos tp_name =
     ( Error_code.InvalidNewableTypeArgument,
-      ( pos,
-        "A newable type argument must be a concrete class or a newable type parameter."
-      ),
-      [
-        ( tp_pos,
-          "Type parameter "
-          ^ Markdown_lite.md_codify tp_name
-          ^ " was declared `__Newable` here" );
-      ],
+      lazy
+        ( pos,
+          "A newable type argument must be a concrete class or a newable type parameter."
+        ),
+      lazy
+        [
+          ( tp_pos,
+            "Type parameter "
+            ^ Markdown_lite.md_codify tp_name
+            ^ " was declared `__Newable` here" );
+        ],
       [] )
 
   let invalid_newable_type_param_constraints
       (tparam_pos, tparam_name) constraint_list =
-    let partial =
-      if List.is_empty constraint_list then
-        "No constraints"
-      else
-        "The constraints "
-        ^ String.concat ~sep:", " (List.map ~f:Render.strip_ns constraint_list)
+    let claim =
+      lazy
+        (let partial =
+           if List.is_empty constraint_list then
+             "No constraints"
+           else
+             "The constraints "
+             ^ String.concat
+                 ~sep:", "
+                 (List.map ~f:Render.strip_ns constraint_list)
+         in
+         let msg =
+           "The type parameter "
+           ^ Markdown_lite.md_codify tparam_name
+           ^ " has the `<<__Newable>>` attribute. "
+           ^ "Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. "
+           ^ "The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. "
+           ^ partial
+           ^ " are valid newable classes"
+         in
+         (tparam_pos, msg))
     in
-    let msg =
-      "The type parameter "
-      ^ Markdown_lite.md_codify tparam_name
-      ^ " has the `<<__Newable>>` attribute. "
-      ^ "Newable type parameters must be constrained with `as`, and exactly one of those constraints must be a valid newable class. "
-      ^ "The class must either be final, or it must have the `<<__ConsistentConstruct>>` attribute or extend a class that has it. "
-      ^ partial
-      ^ " are valid newable classes"
-    in
-    (Error_code.InvalidNewableTypeParamConstraints, (tparam_pos, msg), [], [])
+    (Error_code.InvalidNewableTypeParamConstraints, claim, lazy [], [])
 
   let override_per_trait class_name meth_name trait_name m_pos =
-    let (c_pos, c_name) = class_name in
-    let err_msg =
-      Printf.sprintf
-        "`%s::%s` is marked `__Override` but `%s` does not define or inherit a `%s` method."
-        (Render.strip_ns trait_name)
-        meth_name
-        (Render.strip_ns c_name)
-        meth_name
+    let claim =
+      lazy
+        (let (c_pos, c_name) = class_name in
+         let err_msg =
+           Printf.sprintf
+             "`%s::%s` is marked `__Override` but `%s` does not define or inherit a `%s` method."
+             (Render.strip_ns trait_name)
+             meth_name
+             (Render.strip_ns c_name)
+             meth_name
+         in
+         (c_pos, err_msg))
     in
     ( Error_code.OverridePerTrait,
-      (c_pos, err_msg),
-      [
-        ( m_pos,
-          "Declaration of " ^ Markdown_lite.md_codify meth_name ^ " is here" );
-      ],
+      claim,
+      lazy
+        [
+          ( m_pos,
+            "Declaration of " ^ Markdown_lite.md_codify meth_name ^ " is here"
+          );
+        ],
       [] )
 
   let generic_at_runtime p prefix =
     ( Error_code.ErasedGenericAtRuntime,
-      ( p,
-        prefix
-        ^ " generics can only be used in type hints because they do not exist at runtime."
-      ),
-      [],
+      lazy
+        ( p,
+          prefix
+          ^ " generics can only be used in type hints because they do not exist at runtime."
+        ),
+      lazy [],
       [] )
 
   let generics_not_allowed p =
     ( Error_code.GenericsNotAllowed,
-      (p, "Generics are not allowed in this position."),
-      [],
+      lazy (p, "Generics are not allowed in this position."),
+      lazy [],
       [] )
 
   let typedef_trail_entry pos = (pos, "Typedef definition comes from here")
 
   let trivial_strict_eq p b left right left_trail right_trail =
-    let b =
-      Markdown_lite.md_codify
-        (if b then
-          "true"
-        else
-          "false")
+    let claim =
+      lazy
+        (let b =
+           Markdown_lite.md_codify
+             (if b then
+               "true"
+             else
+               "false")
+         in
+         let msg = sprintf "This expression is always %s" b in
+         (p, msg))
+    and reason =
+      Lazy.(
+        left >>= fun left ->
+        right >>= fun right ->
+        let left_trail = List.map left_trail ~f:typedef_trail_entry in
+        let right_trail = List.map right_trail ~f:typedef_trail_entry in
+        return (left @ left_trail @ right @ right_trail))
     in
-    let msg = sprintf "This expression is always %s" b in
-    let left_trail = List.map left_trail ~f:typedef_trail_entry in
-    let right_trail = List.map right_trail ~f:typedef_trail_entry in
-    ( Error_code.TrivialStrictEq,
-      (p, msg),
-      left @ left_trail @ right @ right_trail,
-      [] )
+    (Error_code.TrivialStrictEq, claim, reason, [])
 
   let trivial_strict_not_nullable_compare_null p result type_reason =
-    let b =
-      Markdown_lite.md_codify
-        (if result then
-          "true"
-        else
-          "false")
+    let claim =
+      lazy
+        (let b =
+           Markdown_lite.md_codify
+             (if result then
+               "true"
+             else
+               "false")
+         in
+         let msg = sprintf "This expression is always %s" b in
+         (p, msg))
     in
-    let msg = sprintf "This expression is always %s" b in
-    (Error_code.NotNullableCompareNullTrivial, (p, msg), type_reason, [])
+    (Error_code.NotNullableCompareNullTrivial, claim, type_reason, [])
 
   let eq_incompatible_types p left right =
-    let msg = "This equality test has incompatible types" in
-    (Error_code.EqIncompatibleTypes, (p, msg), left @ right, [])
+    let claim = lazy (p, "This equality test has incompatible types")
+    and reason = lazy (left @ right) in
+    (Error_code.EqIncompatibleTypes, claim, reason, [])
 
   let comparison_invalid_types p left right =
-    let msg =
-      "This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed"
-    in
-    (Error_code.ComparisonInvalidTypes, (p, msg), left @ right, [])
+    let claim =
+      lazy
+        ( p,
+          "This comparison has invalid types.  Only comparisons in which both arguments are strings, nums, DateTime, or DateTimeImmutable are allowed"
+        )
+    and reason = lazy (left @ right) in
+    (Error_code.ComparisonInvalidTypes, claim, reason, [])
 
   let strict_eq_value_incompatible_types p left right =
-    let msg =
-      "The arguments to this value equality test are not the same types or are not the allowed types (int, bool, float, string, vec, keyset, dict). The behavior for this test is changing and will soon either be universally false or throw an exception."
-    in
-    (Error_code.StrictEqValueIncompatibleTypes, (p, msg), left @ right, [])
+    let claim =
+      lazy
+        ( p,
+          "The arguments to this value equality test are not the same types or are not the allowed types (int, bool, float, string, vec, keyset, dict). The behavior for this test is changing and will soon either be universally false or throw an exception."
+        )
+    and reason = lazy (left @ right) in
+    (Error_code.StrictEqValueIncompatibleTypes, claim, reason, [])
 
   let attribute_param_type pos x =
     ( Error_code.AttributeParamType,
-      (pos, "This attribute parameter should be " ^ x),
-      [],
+      lazy (pos, "This attribute parameter should be " ^ x),
+      lazy [],
       [] )
 
   let deprecated_use pos ?(pos_def = None) msg =
-    let def_message =
-      match pos_def with
-      | Some pos_def -> [(pos_def, "Definition is here")]
-      | None -> []
+    let reason =
+      lazy
+        (match pos_def with
+        | Some pos_def -> [(pos_def, "Definition is here")]
+        | None -> [])
     in
-    (Error_code.DeprecatedUse, (pos, msg), def_message, [])
+    (Error_code.DeprecatedUse, lazy (pos, msg), reason, [])
 
   let cannot_declare_constant pos (class_pos, class_name) =
     ( Error_code.CannotDeclareConstant,
-      (pos, "Cannot declare a constant in an enum"),
-      [
-        ( Pos_or_decl.of_raw_pos class_pos,
-          (Render.strip_ns class_name |> Markdown_lite.md_codify)
-          ^ " was defined as an enum here" );
-      ],
+      lazy (pos, "Cannot declare a constant in an enum"),
+      lazy
+        [
+          ( Pos_or_decl.of_raw_pos class_pos,
+            (Render.strip_ns class_name |> Markdown_lite.md_codify)
+            ^ " was defined as an enum here" );
+        ],
       [] )
 
   let local_variable_modified_and_used pos_modified pos_used_l =
     let used_msg p = (Pos_or_decl.of_raw_pos p, "And accessed here") in
     ( Error_code.LocalVariableModifedAndUsed,
-      ( pos_modified,
-        "Unsequenced modification and access to local variable. Modified here"
-      ),
-      List.map pos_used_l ~f:used_msg,
+      lazy
+        ( pos_modified,
+          "Unsequenced modification and access to local variable. Modified here"
+        ),
+      lazy (List.map pos_used_l ~f:used_msg),
       [] )
 
   let local_variable_modified_twice pos_modified pos_modified_l =
     let modified_msg p = (Pos_or_decl.of_raw_pos p, "And also modified here") in
     ( Error_code.LocalVariableModifedTwice,
-      ( pos_modified,
-        "Unsequenced modifications to local variable. Modified here" ),
-      List.map pos_modified_l ~f:modified_msg,
+      lazy
+        ( pos_modified,
+          "Unsequenced modifications to local variable. Modified here" ),
+      lazy (List.map pos_modified_l ~f:modified_msg),
       [] )
 
   let assign_during_case p =
     ( Error_code.AssignDuringCase,
-      (p, "Don't assign to variables inside of case labels"),
-      [],
+      lazy (p, "Don't assign to variables inside of case labels"),
+      lazy [],
       [] )
 
   let invalid_classname p =
-    (Error_code.InvalidClassname, (p, "Not a valid class name"), [], [])
+    ( Error_code.InvalidClassname,
+      lazy (p, "Not a valid class name"),
+      lazy [],
+      [] )
 
   let illegal_type_structure pos =
-    let errmsg = "second argument is not a string" in
-    let msg =
-      "The two arguments to `type_structure()` must be:"
-      ^ "\n - first: `ValidClassname::class` or an object of that class"
-      ^ "\n - second: a single-quoted string literal containing the name"
-      ^ " of a type constant of that class"
-      ^ "\n"
-      ^ errmsg
+    let claim =
+      lazy
+        (let errmsg = "second argument is not a string" in
+         let msg =
+           "The two arguments to `type_structure()` must be:"
+           ^ "\n - first: `ValidClassname::class` or an object of that class"
+           ^ "\n - second: a single-quoted string literal containing the name"
+           ^ " of a type constant of that class"
+           ^ "\n"
+           ^ errmsg
+         in
+         (pos, msg))
     in
-    (Error_code.IllegalTypeStructure, (pos, msg), [], [])
+    (Error_code.IllegalTypeStructure, claim, lazy [], [])
 
   let illegal_typeconst_direct_access pos =
-    let msg =
-      "Type constants cannot be directly accessed. "
-      ^ "Use `type_structure(ValidClassname::class, 'TypeConstName')` instead"
+    let claim =
+      lazy
+        (let msg =
+           "Type constants cannot be directly accessed. "
+           ^ "Use `type_structure(ValidClassname::class, 'TypeConstName')` instead"
+         in
+         (pos, msg))
     in
-    (Error_code.IllegalTypeStructure, (pos, msg), [], [])
+    (Error_code.IllegalTypeStructure, claim, lazy [], [])
 
   let wrong_expression_kind_attribute
       expr_kind pos attr attr_class_pos attr_class_name intf_name =
-    let msg1 =
-      Printf.sprintf
-        "The %s attribute cannot be used on %s."
-        (Render.strip_ns attr |> Markdown_lite.md_codify)
-        expr_kind
+    let claim =
+      lazy
+        ( pos,
+          Printf.sprintf
+            "The %s attribute cannot be used on %s."
+            (Render.strip_ns attr |> Markdown_lite.md_codify)
+            expr_kind )
     in
-    let msg2 =
-      Printf.sprintf
-        "The attribute's class is defined here. To be available for use on %s, the %s class must implement %s."
-        expr_kind
-        (Render.strip_ns attr_class_name |> Markdown_lite.md_codify)
-        (Render.strip_ns intf_name |> Markdown_lite.md_codify)
+    let reason =
+      lazy
+        [
+          ( attr_class_pos,
+            Printf.sprintf
+              "The attribute's class is defined here. To be available for use on %s, the %s class must implement %s."
+              expr_kind
+              (Render.strip_ns attr_class_name |> Markdown_lite.md_codify)
+              (Render.strip_ns intf_name |> Markdown_lite.md_codify) );
+        ]
     in
-    ( Error_code.WrongExpressionKindAttribute,
-      (pos, msg1),
-      [(attr_class_pos, msg2)],
-      [] )
+    (Error_code.WrongExpressionKindAttribute, claim, reason, [])
 
   let wrong_expression_kind_builtin_attribute expr_kind pos attr =
-    let msg1 =
-      Printf.sprintf
-        "The %s attribute cannot be used on %s."
-        (Render.strip_ns attr |> Markdown_lite.md_codify)
-        expr_kind
+    let claim =
+      lazy
+        ( pos,
+          Printf.sprintf
+            "The %s attribute cannot be used on %s."
+            (Render.strip_ns attr |> Markdown_lite.md_codify)
+            expr_kind )
     in
-    (Error_code.WrongExpressionKindAttribute, (pos, msg1), [], [])
+    (Error_code.WrongExpressionKindAttribute, claim, lazy [], [])
 
   let ambiguous_object_access
       pos name self_pos vis subclass_pos class_self class_subclass =
-    let class_self = Render.strip_ns class_self in
-    let class_subclass = Render.strip_ns class_subclass in
+    let reason =
+      lazy
+        (let class_self = Render.strip_ns class_self in
+         let class_subclass = Render.strip_ns class_subclass in
+         [
+           ( self_pos,
+             "You will access the private instance declared in "
+             ^ Markdown_lite.md_codify class_self );
+           ( subclass_pos,
+             "Instead of the "
+             ^ vis
+             ^ " instance declared in "
+             ^ Markdown_lite.md_codify class_subclass );
+         ])
+    in
     ( Error_code.AmbiguousObjectAccess,
-      ( pos,
-        "This object access to "
-        ^ Markdown_lite.md_codify name
-        ^ " is ambiguous" ),
-      [
-        ( self_pos,
-          "You will access the private instance declared in "
-          ^ Markdown_lite.md_codify class_self );
-        ( subclass_pos,
-          "Instead of the "
-          ^ vis
-          ^ " instance declared in "
-          ^ Markdown_lite.md_codify class_subclass );
-      ],
+      lazy
+        ( pos,
+          "This object access to "
+          ^ Markdown_lite.md_codify name
+          ^ " is ambiguous" ),
+      reason,
       [] )
 
   let lateinit_with_default pos =
     ( Error_code.LateInitWithDefault,
-      (pos, "A late-initialized property cannot have a default value"),
-      [],
+      lazy (pos, "A late-initialized property cannot have a default value"),
+      lazy [],
       [] )
 
   let unserializable_type pos message =
     ( Error_code.UnserializableType,
-      ( pos,
-        "Unserializable type (could not be converted to JSON and back again): "
-        ^ message ),
-      [],
+      lazy
+        ( pos,
+          "Unserializable type (could not be converted to JSON and back again): "
+          ^ message ),
+      lazy [],
       [] )
 
   let invalid_arraykey_constraint pos t =
     ( Error_code.InvalidArrayKeyConstraint,
-      ( pos,
-        "This type is "
-        ^ t
-        ^ ", which cannot be used as an arraykey (string | int)" ),
-      [],
+      lazy
+        ( pos,
+          "This type is "
+          ^ t
+          ^ ", which cannot be used as an arraykey (string | int)" ),
+      lazy [],
       [] )
 
   let redundant_covariant pos msg suggest =
     ( Error_code.RedundantGeneric,
-      ( pos,
-        "This generic parameter is redundant because it only appears in a covariant (output) position"
-        ^ msg
-        ^ ". Consider replacing uses of generic parameter with "
-        ^ Markdown_lite.md_codify suggest
-        ^ " or specifying `<<__Explicit>>` on the generic parameter" ),
-      [],
+      lazy
+        ( pos,
+          "This generic parameter is redundant because it only appears in a covariant (output) position"
+          ^ msg
+          ^ ". Consider replacing uses of generic parameter with "
+          ^ Markdown_lite.md_codify suggest
+          ^ " or specifying `<<__Explicit>>` on the generic parameter" ),
+      lazy [],
       [] )
 
   let meth_caller_trait pos trait_name =
     ( Error_code.MethCallerTrait,
-      ( pos,
-        (Render.strip_ns trait_name |> Markdown_lite.md_codify)
-        ^ " is a trait which cannot be used with `meth_caller`. Use a class instead."
-      ),
-      [],
+      lazy
+        ( pos,
+          (Render.strip_ns trait_name |> Markdown_lite.md_codify)
+          ^ " is a trait which cannot be used with `meth_caller`. Use a class instead."
+        ),
+      lazy [],
       [] )
 
   let duplicate_interface pos name others =
     ( Error_code.DuplicateInterface,
-      ( pos,
-        Printf.sprintf
-          "Interface %s is used more than once in this declaration."
-          (Render.strip_ns name |> Markdown_lite.md_codify) ),
-      List.map others ~f:(fun pos -> (pos, "Here is another occurrence")),
+      lazy
+        ( pos,
+          Printf.sprintf
+            "Interface %s is used more than once in this declaration."
+            (Render.strip_ns name |> Markdown_lite.md_codify) ),
+      lazy (List.map others ~f:(fun pos -> (pos, "Here is another occurrence"))),
       [] )
 
   let tparam_non_shadowing_reuse pos var_name =
     ( Error_code.TypeParameterNameAlreadyUsedNonShadow,
-      ( pos,
-        "The name "
-        ^ Markdown_lite.md_codify var_name
-        ^ " was already used for another generic parameter. Please use a different name to avoid confusion."
-      ),
-      [],
+      lazy
+        ( pos,
+          "The name "
+          ^ Markdown_lite.md_codify var_name
+          ^ " was already used for another generic parameter. Please use a different name to avoid confusion."
+        ),
+      lazy [],
       [] )
 
   let reified_function_reference call_pos =
     ( Error_code.ReifiedFunctionReference,
-      ( call_pos,
-        "Invalid function reference. This function requires reified generics. Prefer using a lambda instead."
-      ),
-      [],
+      lazy
+        ( call_pos,
+          "Invalid function reference. This function requires reified generics. Prefer using a lambda instead."
+        ),
+      lazy [],
       [] )
 
   let class_meth_abstract_call cname meth_name call_pos decl_pos =
     let cname = Render.strip_ns cname in
     ( Error_code.ClassMethAbstractCall,
-      ( call_pos,
-        "Cannot create a class_meth of "
-        ^ cname
-        ^ "::"
-        ^ meth_name
-        ^ "; it is abstract." ),
-      [(decl_pos, "Declaration is here")],
+      lazy
+        ( call_pos,
+          "Cannot create a class_meth of "
+          ^ cname
+          ^ "::"
+          ^ meth_name
+          ^ "; it is abstract." ),
+      lazy [(decl_pos, "Declaration is here")],
       [] )
 
   let reinheriting_classish_const
@@ -3495,17 +3784,19 @@ module Primary = struct
       existing_const_origin
       const_name =
     ( Error_code.RedeclaringClassishConstant,
-      ( src_classish_pos,
-        Render.strip_ns dest_classish_name
-        ^ " cannot re-inherit constant "
-        ^ const_name
-        ^ " from "
-        ^ Render.strip_ns src_classish_name ),
-      [
-        ( Pos_or_decl.of_raw_pos dest_classish_pos,
-          "because it already inherited it via "
-          ^ Render.strip_ns existing_const_origin );
-      ],
+      lazy
+        ( src_classish_pos,
+          Render.strip_ns dest_classish_name
+          ^ " cannot re-inherit constant "
+          ^ const_name
+          ^ " from "
+          ^ Render.strip_ns src_classish_name ),
+      lazy
+        [
+          ( Pos_or_decl.of_raw_pos dest_classish_pos,
+            "because it already inherited it via "
+            ^ Render.strip_ns existing_const_origin );
+        ],
       [] )
 
   let redeclaring_classish_const
@@ -3515,75 +3806,83 @@ module Primary = struct
       existing_const_origin
       const_name =
     ( Error_code.RedeclaringClassishConstant,
-      ( redeclaration_pos,
-        Render.strip_ns classish_name
-        ^ " cannot re-declare constant "
-        ^ const_name ),
-      [
-        ( Pos_or_decl.of_raw_pos classish_pos,
-          "because it already inherited it via "
-          ^ Render.strip_ns existing_const_origin );
-      ],
+      lazy
+        ( redeclaration_pos,
+          Render.strip_ns classish_name
+          ^ " cannot re-declare constant "
+          ^ const_name ),
+      lazy
+        [
+          ( Pos_or_decl.of_raw_pos classish_pos,
+            "because it already inherited it via "
+            ^ Render.strip_ns existing_const_origin );
+        ],
       [] )
 
   let abstract_function_pointer cname meth_name call_pos decl_pos =
-    let cname = Render.strip_ns cname in
     ( Error_code.AbstractFunctionPointer,
-      ( call_pos,
-        "Cannot create a function pointer to "
-        ^ Markdown_lite.md_codify (cname ^ "::" ^ meth_name)
-        ^ "; it is abstract" ),
-      [(decl_pos, "Declaration is here")],
+      lazy
+        ( call_pos,
+          "Cannot create a function pointer to "
+          ^ Markdown_lite.md_codify (Render.strip_ns cname ^ "::" ^ meth_name)
+          ^ "; it is abstract" ),
+      lazy [(decl_pos, "Declaration is here")],
       [] )
 
   let unnecessary_attribute pos ~attr ~reason ~suggestion =
-    let attr = Render.strip_ns attr in
-    let (reason_pos, reason_msg) = reason in
-    let suggestion =
-      match suggestion with
-      | None -> "Try deleting this attribute"
-      | Some s -> s
+    let reason =
+      Lazy.map reason ~f:(fun (reason_pos, reason_msg) ->
+          let suggestion =
+            match suggestion with
+            | None -> "Try deleting this attribute"
+            | Some s -> s
+          in
+          [
+            ( Pos_or_decl.of_raw_pos reason_pos,
+              "It is unnecessary because " ^ reason_msg );
+            (Pos_or_decl.of_raw_pos pos, suggestion);
+          ])
     in
     ( Error_code.UnnecessaryAttribute,
-      (pos, sprintf "The attribute `%s` is unnecessary" attr),
-      [
-        ( Pos_or_decl.of_raw_pos reason_pos,
-          "It is unnecessary because " ^ reason_msg );
-        (Pos_or_decl.of_raw_pos pos, suggestion);
-      ],
+      lazy
+        ( pos,
+          sprintf "The attribute `%s` is unnecessary" @@ Render.strip_ns attr ),
+      reason,
       [] )
 
   let inherited_class_member_with_different_case
       member_type name name_prev p child_class prev_class prev_class_pos =
     let name = Render.strip_ns name in
     let name_prev = Render.strip_ns name_prev in
-    let child_class = Render.strip_ns child_class in
-    let prev_class = Render.strip_ns prev_class in
     let claim =
-      ( p,
-        child_class
-        ^ " inherits a "
-        ^ member_type
-        ^ " named "
-        ^ Markdown_lite.md_codify name_prev
-        ^ " whose name differs from this one ("
-        ^ Markdown_lite.md_codify name
-        ^ ") only by case." )
+      lazy
+        (let child_class = Render.strip_ns child_class in
+         ( p,
+           child_class
+           ^ " inherits a "
+           ^ member_type
+           ^ " named "
+           ^ Markdown_lite.md_codify name_prev
+           ^ " whose name differs from this one ("
+           ^ Markdown_lite.md_codify name
+           ^ ") only by case." ))
     in
     let reasons =
-      [
-        ( prev_class_pos,
-          "It was inherited from "
-          ^ prev_class
-          ^ " as "
-          ^ (Render.highlight_differences name name_prev
-            |> Markdown_lite.md_codify)
-          ^ ". If you meant to override it, please use the same casing as the inherited "
-          ^ member_type
-          ^ "."
-          ^ " Otherwise, please choose a different name for the new "
-          ^ member_type );
-      ]
+      lazy
+        (let prev_class = Render.strip_ns prev_class in
+         [
+           ( prev_class_pos,
+             "It was inherited from "
+             ^ prev_class
+             ^ " as "
+             ^ (Render.highlight_differences name name_prev
+               |> Markdown_lite.md_codify)
+             ^ ". If you meant to override it, please use the same casing as the inherited "
+             ^ member_type
+             ^ "."
+             ^ " Otherwise, please choose a different name for the new "
+             ^ member_type );
+         ])
     in
     (Error_code.InheritedMethodCaseDiffers, claim, reasons, [])
 
@@ -3593,33 +3892,35 @@ module Primary = struct
     let name2 = Render.strip_ns name2 in
     let class1 = Render.strip_ns class1 in
     let class2 = Render.strip_ns class2 in
-    let child_class = Render.strip_ns child_class in
     let claim =
-      ( child_p,
-        Markdown_lite.md_codify child_class
-        ^ " inherited two versions of the "
-        ^ member_type
-        ^ " "
-        ^ Markdown_lite.md_codify name1
-        ^ " whose names differ only by case." )
+      lazy
+        (let child_class = Render.strip_ns child_class in
+         ( child_p,
+           Markdown_lite.md_codify child_class
+           ^ " inherited two versions of the "
+           ^ member_type
+           ^ " "
+           ^ Markdown_lite.md_codify name1
+           ^ " whose names differ only by case." ))
     in
     let reasons =
-      [
-        ( p1,
-          "It inherited "
-          ^ Markdown_lite.md_codify name1
-          ^ " from "
-          ^ class1
-          ^ " here." );
-        ( p2,
-          "And "
-          ^ Markdown_lite.md_codify name2
-          ^ " from "
-          ^ class2
-          ^ " here. Please rename these "
-          ^ member_type
-          ^ "s to the same casing." );
-      ]
+      lazy
+        [
+          ( p1,
+            "It inherited "
+            ^ Markdown_lite.md_codify name1
+            ^ " from "
+            ^ class1
+            ^ " here." );
+          ( p2,
+            "And "
+            ^ Markdown_lite.md_codify name2
+            ^ " from "
+            ^ class2
+            ^ " here. Please rename these "
+            ^ member_type
+            ^ "s to the same casing." );
+        ]
     in
     (Error_code.InheritedMethodCaseDiffers, claim, reasons, [])
 
@@ -3635,489 +3936,581 @@ module Primary = struct
       (child_name, child_kind)
       (parent_name, parent_kind)
       child_support_dynamic_type =
-    let kinds_to_use child_kind parent_kind =
-      match (child_kind, parent_kind) with
-      | (_, Ast_defs.Cclass _) -> "extends "
-      | (_, Ast_defs.Ctrait) -> "uses "
-      | (Ast_defs.Cinterface, Ast_defs.Cinterface) -> "extends "
-      | (_, Ast_defs.Cinterface) -> "implements "
-      | (_, Ast_defs.Cenum_class _)
-      | (_, Ast_defs.Cenum) ->
-        ""
+    let claim =
+      lazy
+        (let kinds_to_use child_kind parent_kind =
+           match (child_kind, parent_kind) with
+           | (_, Ast_defs.Cclass _) -> "extends "
+           | (_, Ast_defs.Ctrait) -> "uses "
+           | (Ast_defs.Cinterface, Ast_defs.Cinterface) -> "extends "
+           | (_, Ast_defs.Cinterface) -> "implements "
+           | (_, Ast_defs.Cenum_class _)
+           | (_, Ast_defs.Cenum) ->
+             ""
+         in
+         let child_name =
+           Markdown_lite.md_codify (Render.strip_ns child_name)
+         in
+         let child_kind_s = classish_kind_to_string child_kind in
+         let parent_name =
+           Markdown_lite.md_codify (Render.strip_ns parent_name)
+         in
+         let parent_kind_s = classish_kind_to_string parent_kind in
+         ( pos,
+           String.capitalize child_kind_s
+           ^ child_name
+           ^ (if child_support_dynamic_type then
+               " cannot "
+             else
+               " must ")
+           ^ "declare <<__SupportDynamicType>> because it "
+           ^ kinds_to_use child_kind parent_kind
+           ^ parent_kind_s
+           ^ parent_name
+           ^ " which does"
+           ^
+           if child_support_dynamic_type then
+             " not"
+           else
+             "" ))
     in
-    let child_name = Markdown_lite.md_codify (Render.strip_ns child_name) in
-    let child_kind_s = classish_kind_to_string child_kind in
-    let parent_name = Markdown_lite.md_codify (Render.strip_ns parent_name) in
-    let parent_kind_s = classish_kind_to_string parent_kind in
-    ( Error_code.ImplementsDynamic,
-      ( pos,
-        String.capitalize child_kind_s
-        ^ child_name
-        ^ (if child_support_dynamic_type then
-            " cannot "
-          else
-            " must ")
-        ^ "declare <<__SupportDynamicType>> because it "
-        ^ kinds_to_use child_kind parent_kind
-        ^ parent_kind_s
-        ^ parent_name
-        ^ " which does"
-        ^
-        if child_support_dynamic_type then
-          " not"
-        else
-          "" ),
-      [],
-      [] )
+    (Error_code.ImplementsDynamic, claim, lazy [], [])
 
   let property_is_not_enforceable pos prop_name class_name (prop_pos, prop_type)
       =
-    let class_name = Markdown_lite.md_codify (Render.strip_ns class_name) in
     let prop_name = Markdown_lite.md_codify prop_name in
-    let prop_type = Markdown_lite.md_codify prop_type in
-    ( Error_code.ImplementsDynamic,
-      ( pos,
-        "Class "
-        ^ class_name
-        ^ " cannot support dynamic because property "
-        ^ prop_name
-        ^ " does not have an enforceable type" ),
-      [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)],
-      [] )
+    let claim =
+      lazy
+        (let class_name =
+           Markdown_lite.md_codify (Render.strip_ns class_name)
+         in
+         ( pos,
+           "Class "
+           ^ class_name
+           ^ " cannot support dynamic because property "
+           ^ prop_name
+           ^ " does not have an enforceable type" ))
+    and reason =
+      lazy
+        (let prop_type = Markdown_lite.md_codify prop_type in
+         [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)])
+    in
+    (Error_code.ImplementsDynamic, claim, reason, [])
 
   let property_is_not_dynamic pos prop_name class_name (prop_pos, prop_type) =
-    let class_name = Markdown_lite.md_codify (Render.strip_ns class_name) in
     let prop_name = Markdown_lite.md_codify prop_name in
-    let prop_type = Markdown_lite.md_codify prop_type in
-    ( Error_code.ImplementsDynamic,
-      ( pos,
-        "Class "
-        ^ class_name
-        ^ " cannot support dynamic because property "
-        ^ prop_name
-        ^ " cannot be assigned to dynamic" ),
-      [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)],
-      [] )
+    let claim =
+      lazy
+        (let class_name =
+           Markdown_lite.md_codify (Render.strip_ns class_name)
+         in
+         ( pos,
+           "Class "
+           ^ class_name
+           ^ " cannot support dynamic because property "
+           ^ prop_name
+           ^ " cannot be assigned to dynamic" ))
+    and reason =
+      lazy
+        (let prop_type = Markdown_lite.md_codify prop_type in
+         [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)])
+    in
+    (Error_code.ImplementsDynamic, claim, reason, [])
 
   let private_property_is_not_enforceable
       pos prop_name class_name (prop_pos, prop_type) =
-    let class_name = Markdown_lite.md_codify (Render.strip_ns class_name) in
     let prop_name = Markdown_lite.md_codify prop_name in
-    let prop_type = Markdown_lite.md_codify prop_type in
-    ( Error_code.PrivateDynamicWrite,
-      ( pos,
-        "Cannot write to property "
-        ^ prop_name
-        ^ " through dynamic type because private property in "
-        ^ class_name
-        ^ " does not have an enforceable type" ),
-      [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)],
-      [] )
+    let claim =
+      lazy
+        (let class_name =
+           Markdown_lite.md_codify (Render.strip_ns class_name)
+         in
+
+         ( pos,
+           "Cannot write to property "
+           ^ prop_name
+           ^ " through dynamic type because private property in "
+           ^ class_name
+           ^ " does not have an enforceable type" ))
+    and reason =
+      lazy
+        (let prop_type = Markdown_lite.md_codify prop_type in
+
+         [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)])
+    in
+    (Error_code.PrivateDynamicWrite, claim, reason, [])
 
   let private_property_is_not_dynamic
       pos prop_name class_name (prop_pos, prop_type) =
-    let class_name = Markdown_lite.md_codify (Render.strip_ns class_name) in
     let prop_name = Markdown_lite.md_codify prop_name in
-    let prop_type = Markdown_lite.md_codify prop_type in
-    ( Error_code.PrivateDynamicRead,
-      ( pos,
-        "Cannot read from property "
-        ^ prop_name
-        ^ " through dynamic type because private property in "
-        ^ class_name
-        ^ " cannot be assigned to dynamic" ),
-      [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)],
-      [] )
+    let claim =
+      lazy
+        (let class_name =
+           Markdown_lite.md_codify (Render.strip_ns class_name)
+         in
+
+         ( pos,
+           "Cannot read from property "
+           ^ prop_name
+           ^ " through dynamic type because private property in "
+           ^ class_name
+           ^ " cannot be assigned to dynamic" ))
+    and reason =
+      lazy
+        (let prop_type = Markdown_lite.md_codify prop_type in
+
+         [(prop_pos, "Property " ^ prop_name ^ " has type " ^ prop_type)])
+    in
+    (Error_code.PrivateDynamicRead, claim, reason, [])
 
   let immutable_local pos =
     ( Error_code.ImmutableLocal,
-      ( pos,
-        (* TODO: generalize this error message in the future for arbitrary immutable locals *)
-        "This variable cannot be reassigned because it is used for a dependent context"
-      ),
-      [],
+      lazy
+        ( pos,
+          (* TODO: generalize this error message in the future for arbitrary immutable locals *)
+          "This variable cannot be reassigned because it is used for a dependent context"
+        ),
+      lazy [],
       [] )
 
   let nonsense_member_selection pos kind =
     ( Error_code.NonsenseMemberSelection,
-      ( pos,
-        "Dynamic member access requires a local variable, not `" ^ kind ^ "`."
-      ),
-      [],
+      lazy
+        ( pos,
+          "Dynamic member access requires a local variable, not `" ^ kind ^ "`."
+        ),
+      lazy [],
       [] )
 
   let consider_meth_caller pos class_name meth_name =
     ( Error_code.ConsiderMethCaller,
-      ( pos,
-        "Function pointer syntax requires a static method. "
-        ^ "Use `meth_caller("
-        ^ Render.strip_ns class_name
-        ^ "::class, '"
-        ^ meth_name
-        ^ "')` to create a function pointer to the instance method" ),
-      [],
+      lazy
+        ( pos,
+          "Function pointer syntax requires a static method. "
+          ^ "Use `meth_caller("
+          ^ Render.strip_ns class_name
+          ^ "::class, '"
+          ^ meth_name
+          ^ "')` to create a function pointer to the instance method" ),
+      lazy [],
       [] )
 
   let method_import_via_diamond
       pos class_name method_pos method_name trace1 trace2 =
-    let class_name = Markdown_lite.md_codify (Render.strip_ns class_name) in
-    let method_name = Markdown_lite.md_codify (Render.strip_ns method_name) in
-    let msg1 =
-      ( pos,
-        "Class "
-        ^ class_name
-        ^ " inherits trait method "
-        ^ method_name
-        ^ " via multiple traits.  Remove the multiple paths or override the method"
-      )
+    let claim =
+      lazy
+        (let class_name =
+           Markdown_lite.md_codify (Render.strip_ns class_name)
+         in
+         let method_name =
+           Markdown_lite.md_codify (Render.strip_ns method_name)
+         in
+         ( pos,
+           "Class "
+           ^ class_name
+           ^ " inherits trait method "
+           ^ method_name
+           ^ " via multiple traits.  Remove the multiple paths or override the method"
+         ))
     in
-    let msg2 = (method_pos, "Trait method is defined here") in
-    (Error_code.DiamondTraitMethod, msg1, msg2 :: trace1 @ trace2, [])
+    let reason =
+      Lazy.(
+        trace1 >>= fun trace1 ->
+        trace2 >>= fun trace2 ->
+        return ((method_pos, "Trait method is defined here") :: trace1 @ trace2))
+    in
+    (Error_code.DiamondTraitMethod, claim, reason, [])
 
   let generic_property_import_via_diamond
       pos class_name property_pos property_name trace1 trace2 =
-    let class_name = Markdown_lite.md_codify (Render.strip_ns class_name) in
-    let property_name =
-      Markdown_lite.md_codify (Render.strip_ns property_name)
+    let claim =
+      lazy
+        (let class_name =
+           Markdown_lite.md_codify (Render.strip_ns class_name)
+         in
+         let property_name =
+           Markdown_lite.md_codify (Render.strip_ns property_name)
+         in
+         ( pos,
+           "Class "
+           ^ class_name
+           ^ " inherits generic trait property "
+           ^ property_name
+           ^ " via multiple traits.  Remove the multiple paths" ))
     in
-    let msg1 =
-      ( pos,
-        "Class "
-        ^ class_name
-        ^ " inherits generic trait property "
-        ^ property_name
-        ^ " via multiple traits.  Remove the multiple paths" )
+    let reason =
+      Lazy.(
+        trace1 >>= fun trace1 ->
+        trace2 >>= fun trace2 ->
+        return
+          ((property_pos, "Trait property is defined here") :: trace1 @ trace2))
     in
-    let msg2 = (property_pos, "Trait property is defined here") in
-    (Error_code.DiamondTraitProperty, msg1, msg2 :: trace1 @ trace2, [])
+    (Error_code.DiamondTraitProperty, claim, reason, [])
 
   let unification_cycle pos ty =
     ( Error_code.UnificationCycle,
-      ( pos,
-        "Type circularity: in order to type-check this expression it "
-        ^ "is necessary for a type [rec] to be equal to type "
-        ^ Markdown_lite.md_codify ty ),
-      [],
+      lazy
+        ( pos,
+          "Type circularity: in order to type-check this expression it "
+          ^ "is necessary for a type [rec] to be equal to type "
+          ^ Markdown_lite.md_codify ty ),
+      lazy [],
       [] )
 
   let method_variance pos =
     ( Error_code.MethodVariance,
-      ( pos,
-        "Covariance or contravariance is not allowed in type parameters of methods or functions."
-      ),
-      [],
+      lazy
+        ( pos,
+          "Covariance or contravariance is not allowed in type parameters of methods or functions."
+        ),
+      lazy [],
       [] )
 
-  let explain_tconst_where_constraint use_pos definition_pos msgl =
-    let inst_msg = "A `where` type constraint is violated here" in
-
-    ( Error_code.TypeConstraintViolation,
-      (use_pos, inst_msg),
-      [
-        ( definition_pos,
-          "This method's `where` constraints contain a generic type access" );
-      ]
-      @ msgl,
-      [] )
+  let explain_tconst_where_constraint use_pos definition_pos msgl : error =
+    let claim = lazy (use_pos, "A `where` type constraint is violated here")
+    and reason =
+      Lazy.map msgl ~f:(fun msgl ->
+          ( definition_pos,
+            "This method's `where` constraints contain a generic type access" )
+          :: msgl)
+    in
+    (Error_code.TypeConstraintViolation, claim, reason, [])
 
   let format_string pos snippet s class_pos fname class_suggest =
     ( Error_code.FormatString,
-      ( pos,
-        "Invalid format string "
-        ^ Markdown_lite.md_codify snippet
-        ^ " in "
-        ^ Markdown_lite.md_codify ("\"" ^ s ^ "\"") ),
-      [
-        ( class_pos,
-          "You can add a new format specifier by adding "
-          ^ Markdown_lite.md_codify (fname ^ "()")
-          ^ " to "
-          ^ Markdown_lite.md_codify class_suggest );
-      ],
+      lazy
+        ( pos,
+          "Invalid format string "
+          ^ Markdown_lite.md_codify snippet
+          ^ " in "
+          ^ Markdown_lite.md_codify ("\"" ^ s ^ "\"") ),
+      lazy
+        [
+          ( class_pos,
+            "You can add a new format specifier by adding "
+            ^ Markdown_lite.md_codify (fname ^ "()")
+            ^ " to "
+            ^ Markdown_lite.md_codify class_suggest );
+        ],
       [] )
 
   let expected_literal_format_string pos =
     ( Error_code.ExpectedLiteralFormatString,
-      (pos, "This argument must be a literal format string"),
-      [],
+      lazy (pos, "This argument must be a literal format string"),
+      lazy [],
       [] )
 
   let re_prefixed_non_string pos reason =
-    let non_strings =
-      match reason with
-      | `embedded_expr -> "Strings with embedded expressions"
-      | `non_string -> "Non-strings"
+    let claim =
+      lazy
+        (let non_strings =
+           match reason with
+           | `embedded_expr -> "Strings with embedded expressions"
+           | `non_string -> "Non-strings"
+         in
+         (pos, non_strings ^ " are not allowed to be to be `re`-prefixed"))
     in
-    ( Error_code.RePrefixedNonString,
-      (pos, non_strings ^ " are not allowed to be to be `re`-prefixed"),
-      [],
-      [] )
+    (Error_code.RePrefixedNonString, claim, lazy [], [])
 
   let bad_regex_pattern pos reason =
-    let s =
-      match reason with
-      | `bad_patt s -> s
-      | `empty_patt -> "This pattern is empty"
-      | `missing_delim -> "Missing delimiter(s)"
-      | `invalid_option -> "Invalid global option(s)"
+    let claim =
+      lazy
+        (let s =
+           match reason with
+           | `bad_patt s -> s
+           | `empty_patt -> "This pattern is empty"
+           | `missing_delim -> "Missing delimiter(s)"
+           | `invalid_option -> "Invalid global option(s)"
+         in
+         (pos, "Bad regex pattern; " ^ s ^ "."))
     in
-    (Error_code.BadRegexPattern, (pos, "Bad regex pattern; " ^ s ^ "."), [], [])
+    (Error_code.BadRegexPattern, claim, lazy [], [])
 
   let generic_array_strict p =
     ( Error_code.GenericArrayStrict,
-      (p, "You cannot have an array without generics in strict mode"),
-      [],
+      lazy (p, "You cannot have an array without generics in strict mode"),
+      lazy [],
       [] )
 
   let option_return_only_typehint p kind =
-    let (typehint, reason) =
-      match kind with
-      | `void -> ("?void", "only return implicitly")
-      | `noreturn -> ("?noreturn", "never return")
+    let claim =
+      lazy
+        (let (typehint, reason) =
+           match kind with
+           | `void -> ("?void", "only return implicitly")
+           | `noreturn -> ("?noreturn", "never return")
+         in
+         ( p,
+           Markdown_lite.md_codify typehint
+           ^ " is a nonsensical typehint; a function cannot both "
+           ^ reason
+           ^ " and return null." ))
     in
-    ( Error_code.OptionReturnOnlyTypehint,
-      ( p,
-        Markdown_lite.md_codify typehint
-        ^ " is a nonsensical typehint; a function cannot both "
-        ^ reason
-        ^ " and return null." ),
-      [],
-      [] )
+    (Error_code.OptionReturnOnlyTypehint, claim, lazy [], [])
 
   let redeclaring_missing_method p trait_method =
     ( Error_code.RedeclaringMissingMethod,
-      ( p,
-        "Attempting to redeclare a trait method "
-        ^ Markdown_lite.md_codify trait_method
-        ^ " which was never inherited. "
-        ^ "You might be trying to redeclare a non-static method as `static` or vice-versa."
-      ),
-      [],
+      lazy
+        ( p,
+          "Attempting to redeclare a trait method "
+          ^ Markdown_lite.md_codify trait_method
+          ^ " which was never inherited. "
+          ^ "You might be trying to redeclare a non-static method as `static` or vice-versa."
+        ),
+      lazy [],
       [] )
 
   let expecting_type_hint p =
-    (Error_code.ExpectingTypeHint, (p, "Was expecting a type hint"), [], [])
+    ( Error_code.ExpectingTypeHint,
+      lazy (p, "Was expecting a type hint"),
+      lazy [],
+      [] )
 
   let expecting_type_hint_variadic p =
     ( Error_code.ExpectingTypeHintVariadic,
-      (p, "Was expecting a type hint on this variadic parameter"),
-      [],
+      lazy (p, "Was expecting a type hint on this variadic parameter"),
+      lazy [],
       [] )
 
   let expecting_return_type_hint p =
     ( Error_code.ExpectingReturnTypeHint,
-      (p, "Was expecting a return type hint"),
-      [],
+      lazy (p, "Was expecting a return type hint"),
+      lazy [],
       [] )
 
   let duplicate_using_var pos =
     ( Error_code.DuplicateUsingVar,
-      (pos, "Local variable already used in `using` statement"),
-      [],
+      lazy (pos, "Local variable already used in `using` statement"),
+      lazy [],
       [] )
 
   let illegal_disposable pos verb =
-    let verb =
-      match verb with
-      | `assigned -> "assigned"
+    let claim =
+      lazy
+        (let verb =
+           match verb with
+           | `assigned -> "assigned"
+         in
+         ( pos,
+           "Disposable objects must only be " ^ verb ^ " in a `using` statement"
+         ))
     in
-    ( Error_code.IllegalDisposable,
-      ( pos,
-        "Disposable objects must only be " ^ verb ^ " in a `using` statement" ),
-      [],
-      [] )
+    (Error_code.IllegalDisposable, claim, lazy [], [])
 
   let escaping_disposable pos =
     ( Error_code.EscapingDisposable,
-      ( pos,
-        "Variable from `using` clause may only be used as receiver in method invocation "
-        ^ "or passed to function with `<<__AcceptDisposable>>` parameter attribute"
-      ),
-      [],
+      lazy
+        ( pos,
+          "Variable from `using` clause may only be used as receiver in method invocation "
+          ^ "or passed to function with `<<__AcceptDisposable>>` parameter attribute"
+        ),
+      lazy [],
       [] )
 
   let escaping_disposable_parameter pos =
     ( Error_code.EscapingDisposableParameter,
-      ( pos,
-        "Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation "
-        ^ "or passed to another function with `<<__AcceptDisposable>>` parameter attribute"
-      ),
-      [],
+      lazy
+        ( pos,
+          "Parameter with `<<__AcceptDisposable>>` attribute may only be used as receiver in method invocation "
+          ^ "or passed to another function with `<<__AcceptDisposable>>` parameter attribute"
+        ),
+      lazy [],
       [] )
 
   let escaping_this pos =
     ( Error_code.EscapingThis,
-      ( pos,
-        "`$this` implementing `IDisposable` or `IAsyncDisposable` may only be used as receiver in method invocation "
-        ^ "or passed to another function with `<<__AcceptDisposable>>` parameter attribute"
-      ),
-      [],
+      lazy
+        ( pos,
+          "`$this` implementing `IDisposable` or `IAsyncDisposable` may only be used as receiver in method invocation "
+          ^ "or passed to another function with `<<__AcceptDisposable>>` parameter attribute"
+        ),
+      lazy [],
       [] )
 
   let must_extend_disposable pos =
     ( Error_code.MustExtendDisposable,
-      ( pos,
-        "A disposable type may not extend a class or use a trait that is not disposable"
-      ),
-      [],
+      lazy
+        ( pos,
+          "A disposable type may not extend a class or use a trait that is not disposable"
+        ),
+      lazy [],
       [] )
 
   let field_kinds pos1 pos2 =
     ( Error_code.FieldKinds,
-      (pos1, "You cannot use this kind of field (value)"),
-      [(pos2, "Mixed with this kind of field (key => value)")],
+      lazy (pos1, "You cannot use this kind of field (value)"),
+      lazy [(pos2, "Mixed with this kind of field (key => value)")],
       [] )
 
   let unbound_name_typing pos name =
     ( Error_code.UnboundNameTyping,
-      ( pos,
-        "Unbound name (typing): "
-        ^ Markdown_lite.md_codify (Render.strip_ns name) ),
-      [],
+      lazy
+        ( pos,
+          "Unbound name (typing): "
+          ^ Markdown_lite.md_codify (Render.strip_ns name) ),
+      lazy [],
       [] )
 
   let previous_default p =
     ( Error_code.PreviousDefault,
-      ( p,
-        "A previous parameter has a default value.\n"
-        ^ "Remove all the default values for the preceding parameters,\n"
-        ^ "or add a default value to this one." ),
-      [],
+      lazy
+        ( p,
+          "A previous parameter has a default value.\n"
+          ^ "Remove all the default values for the preceding parameters,\n"
+          ^ "or add a default value to this one." ),
+      lazy [],
       [] )
 
   let return_in_void pos1 pos2 =
     ( Error_code.ReturnInVoid,
-      (pos1, "You cannot return a value"),
-      [(Pos_or_decl.of_raw_pos pos2, "This is a `void` function")],
+      lazy (pos1, "You cannot return a value"),
+      lazy [(Pos_or_decl.of_raw_pos pos2, "This is a `void` function")],
       [] )
 
   let this_var_outside_class p =
     ( Error_code.ThisVarOutsideClass,
-      (p, "Can't use `$this` outside of a class"),
-      [],
+      lazy (p, "Can't use `$this` outside of a class"),
+      lazy [],
       [] )
 
   let unbound_global cst_pos =
     ( Error_code.UnboundGlobal,
-      (cst_pos, "Unbound global constant (Typing)"),
-      [],
+      lazy (cst_pos, "Unbound global constant (Typing)"),
+      lazy [],
       [] )
 
   let private_inst_meth use_pos def_pos =
     ( Error_code.PrivateInstMeth,
-      ( use_pos,
-        "You cannot use this method with `inst_meth` (whether you are in the same class or not)."
-      ),
-      [(def_pos, "It is declared as `private` here")],
+      lazy
+        ( use_pos,
+          "You cannot use this method with `inst_meth` (whether you are in the same class or not)."
+        ),
+      lazy [(def_pos, "It is declared as `private` here")],
       [] )
 
   let protected_inst_meth use_pos def_pos =
     ( Error_code.ProtectedInstMeth,
-      ( use_pos,
-        "You cannot use this method with `inst_meth` (whether you are in the same class hierarchy or not)."
-      ),
-      [(def_pos, "It is declared as `protected` here")],
+      lazy
+        ( use_pos,
+          "You cannot use this method with `inst_meth` (whether you are in the same class hierarchy or not)."
+        ),
+      lazy [(def_pos, "It is declared as `protected` here")],
       [] )
 
   let private_meth_caller use_pos def_pos =
     ( Error_code.PrivateMethCaller,
-      ( use_pos,
-        "You cannot access this method with `meth_caller` (even from the same class hierarchy)"
-      ),
-      [(def_pos, "It is declared as `private` here")],
+      lazy
+        ( use_pos,
+          "You cannot access this method with `meth_caller` (even from the same class hierarchy)"
+        ),
+      lazy [(def_pos, "It is declared as `private` here")],
       [] )
 
   let protected_meth_caller use_pos def_pos =
     ( Error_code.ProtectedMethCaller,
-      ( use_pos,
-        "You cannot access this method with `meth_caller` (even from the same class hierarchy)"
-      ),
-      [(def_pos, "It is declared as `protected` here")],
+      lazy
+        ( use_pos,
+          "You cannot access this method with `meth_caller` (even from the same class hierarchy)"
+        ),
+      lazy [(def_pos, "It is declared as `protected` here")],
       [] )
 
   let private_class_meth use_pos def_pos =
     ( Error_code.PrivateClassMeth,
-      ( use_pos,
-        "You cannot use this method with `class_meth` (whether you are in the same class or not)."
-      ),
-      [(def_pos, "It is declared as `private` here")],
+      lazy
+        ( use_pos,
+          "You cannot use this method with `class_meth` (whether you are in the same class or not)."
+        ),
+      lazy [(def_pos, "It is declared as `private` here")],
       [] )
 
   let protected_class_meth use_pos def_pos =
     ( Error_code.ProtectedClassMeth,
-      ( use_pos,
-        "You cannot use this method with `class_meth` (whether you are in the same class hierarchy or not)."
-      ),
-      [(def_pos, "It is declared as `protected` here")],
+      lazy
+        ( use_pos,
+          "You cannot use this method with `class_meth` (whether you are in the same class hierarchy or not)."
+        ),
+      lazy [(def_pos, "It is declared as `protected` here")],
       [] )
 
   let array_cast pos =
     ( Error_code.ArrayCast,
-      ( pos,
-        "(array) cast forbidden; arrays with unspecified key and value types are not allowed"
-      ),
-      [],
+      lazy
+        ( pos,
+          "(array) cast forbidden; arrays with unspecified key and value types are not allowed"
+        ),
+      lazy [],
       [] )
 
   let string_cast pos ty =
     ( Error_code.StringCast,
-      ( pos,
-        Printf.sprintf
-          "Cannot cast a value of type %s to string. Only primitives may be used in a `(string)` cast."
-          (Markdown_lite.md_codify ty) ),
-      [],
+      lazy
+        ( pos,
+          Printf.sprintf
+            "Cannot cast a value of type %s to string. Only primitives may be used in a `(string)` cast."
+            (Markdown_lite.md_codify ty) ),
+      lazy [],
       [] )
 
   let static_outside_class pos =
     ( Error_code.StaticOutsideClass,
-      (pos, "`static` is undefined outside of a class"),
-      [],
+      lazy (pos, "`static` is undefined outside of a class"),
+      lazy [],
       [] )
 
   let self_outside_class pos =
     ( Error_code.SelfOutsideClass,
-      (pos, "`self` is undefined outside of a class"),
-      [],
+      lazy (pos, "`self` is undefined outside of a class"),
+      lazy [],
       [] )
 
   let new_inconsistent_construct new_pos (cpos, cname) kind =
-    let name = Render.strip_ns cname in
-    let preamble =
-      match kind with
-      | `static ->
-        "Can't use `new static()` for " ^ Markdown_lite.md_codify name
-      | `classname ->
-        "Can't use `new` on "
-        ^ Markdown_lite.md_codify ("classname<" ^ name ^ ">")
+    let claim =
+      lazy
+        (let name = Render.strip_ns cname in
+         let preamble =
+           match kind with
+           | `static ->
+             "Can't use `new static()` for " ^ Markdown_lite.md_codify name
+           | `classname ->
+             "Can't use `new` on "
+             ^ Markdown_lite.md_codify ("classname<" ^ name ^ ">")
+         in
+         ( new_pos,
+           preamble
+           ^ "; `__construct` arguments are not guaranteed to be consistent in child classes"
+         ))
     in
     ( Error_code.NewStaticInconsistent,
-      ( new_pos,
-        preamble
-        ^ "; `__construct` arguments are not guaranteed to be consistent in child classes"
-      ),
-      [
-        ( cpos,
-          "This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute"
-        );
-      ],
+      claim,
+      lazy
+        [
+          ( cpos,
+            "This declaration is neither `final` nor uses the `<<__ConsistentConstruct>>` attribute"
+          );
+        ],
       [] )
 
   let undefined_parent pos =
-    (Error_code.UndefinedParent, (pos, "The parent class is undefined"), [], [])
+    ( Error_code.UndefinedParent,
+      lazy (pos, "The parent class is undefined"),
+      lazy [],
+      [] )
 
   let parent_outside_class pos =
     ( Error_code.ParentOutsideClass,
-      (pos, "`parent` is undefined outside of a class"),
-      [],
+      lazy (pos, "`parent` is undefined outside of a class"),
+      lazy [],
       [] )
 
   let parent_abstract_call call_pos meth_name decl_pos =
     ( Error_code.AbstractCall,
-      ( call_pos,
-        "Cannot call "
-        ^ Markdown_lite.md_codify ("parent::" ^ meth_name ^ "()")
-        ^ "; it is abstract" ),
-      [(decl_pos, "Declaration is here")],
+      lazy
+        ( call_pos,
+          "Cannot call "
+          ^ Markdown_lite.md_codify ("parent::" ^ meth_name ^ "()")
+          ^ "; it is abstract" ),
+      lazy [(decl_pos, "Declaration is here")],
       [] )
 
   let self_abstract_call call_pos meth_name self_pos decl_pos =
@@ -4131,88 +4524,99 @@ module Primary = struct
       ]
     in
     ( Error_code.AbstractCall,
-      ( call_pos,
-        "Cannot call "
-        ^ Markdown_lite.md_codify ("self::" ^ meth_name ^ "()")
-        ^ "; it is abstract. Did you mean "
-        ^ Markdown_lite.md_codify ("static::" ^ meth_name ^ "()")
-        ^ "?" ),
-      [(decl_pos, "Declaration is here")],
+      lazy
+        ( call_pos,
+          "Cannot call "
+          ^ Markdown_lite.md_codify ("self::" ^ meth_name ^ "()")
+          ^ "; it is abstract. Did you mean "
+          ^ Markdown_lite.md_codify ("static::" ^ meth_name ^ "()")
+          ^ "?" ),
+      lazy [(decl_pos, "Declaration is here")],
       quickfixes )
 
   let classname_abstract_call call_pos meth_name cname decl_pos =
-    let cname = Render.strip_ns cname in
     ( Error_code.AbstractCall,
-      ( call_pos,
-        "Cannot call "
-        ^ Markdown_lite.md_codify (cname ^ "::" ^ meth_name ^ "()")
-        ^ "; it is abstract" ),
-      [(decl_pos, "Declaration is here")],
+      lazy
+        ( call_pos,
+          "Cannot call "
+          ^ Markdown_lite.md_codify
+              (Render.strip_ns cname ^ "::" ^ meth_name ^ "()")
+          ^ "; it is abstract" ),
+      lazy [(decl_pos, "Declaration is here")],
       [] )
 
   let static_synthetic_method call_pos meth_name cname decl_pos =
     let cname = Render.strip_ns cname in
     ( Error_code.StaticSyntheticMethod,
-      ( call_pos,
-        "Cannot call "
-        ^ Markdown_lite.md_codify (cname ^ "::" ^ meth_name ^ "()")
-        ^ "; "
-        ^ Markdown_lite.md_codify meth_name
-        ^ " is not defined in "
-        ^ Markdown_lite.md_codify cname ),
-      [(decl_pos, "Declaration is here")],
+      lazy
+        ( call_pos,
+          "Cannot call "
+          ^ Markdown_lite.md_codify (cname ^ "::" ^ meth_name ^ "()")
+          ^ "; "
+          ^ Markdown_lite.md_codify meth_name
+          ^ " is not defined in "
+          ^ Markdown_lite.md_codify cname ),
+      lazy [(decl_pos, "Declaration is here")],
       [] )
 
   let isset_in_strict pos =
     ( Error_code.IssetEmptyInStrict,
-      ( pos,
-        "`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in "
-        ^ "`strict` mode" ),
-      [],
+      lazy
+        ( pos,
+          "`isset` tends to hide errors due to variable typos and so is limited to dynamic checks in "
+          ^ "`strict` mode" ),
+      lazy [],
       [] )
 
   let isset_inout_arg pos =
     ( Error_code.InoutInPseudofunction,
-      (pos, "`isset` does not allow arguments to be passed by `inout`"),
-      [],
+      lazy (pos, "`isset` does not allow arguments to be passed by `inout`"),
+      lazy [],
       [] )
 
   let unset_nonidx_in_strict pos msgs =
     ( Error_code.UnsetNonidxInStrict,
-      ( pos,
-        "In `strict` mode, `unset` is banned except on dynamic, "
-        ^ "darray, keyset, or dict indexing" ),
+      lazy
+        ( pos,
+          "In `strict` mode, `unset` is banned except on dynamic, "
+          ^ "darray, keyset, or dict indexing" ),
       msgs,
       [] )
 
   let unpacking_disallowed_builtin_function pos name =
-    let name = Render.strip_ns name in
     ( Error_code.UnpackingDisallowed,
-      (pos, "Arg unpacking is disallowed for " ^ Markdown_lite.md_codify name),
-      [],
+      lazy
+        ( pos,
+          "Arg unpacking is disallowed for "
+          ^ Markdown_lite.md_codify (Render.strip_ns name) ),
+      lazy [],
       [] )
 
   let array_get_arity pos1 name pos2 =
     ( Error_code.ArrayGetArity,
-      ( pos1,
-        "You cannot use this "
-        ^ (Render.strip_ns name |> Markdown_lite.md_codify) ),
-      [(pos2, "It is missing its type parameters")],
+      lazy
+        ( pos1,
+          "You cannot use this "
+          ^ (Render.strip_ns name |> Markdown_lite.md_codify) ),
+      lazy [(pos2, "It is missing its type parameters")],
       [] )
 
   let undefined_field use_pos name shape_type_pos =
     ( Error_code.UndefinedField,
-      (use_pos, "The field " ^ Markdown_lite.md_codify name ^ " is undefined"),
-      [(shape_type_pos, "Definition is here")],
+      lazy
+        (use_pos, "The field " ^ Markdown_lite.md_codify name ^ " is undefined"),
+      lazy [(shape_type_pos, "Definition is here")],
       [] )
 
   let array_access code pos1 pos2 ty =
     ( code,
-      (pos1, "This is not an object of type `KeyedContainer`, this is " ^ ty),
-      (if not Pos_or_decl.(equal pos2 none) then
-        [(pos2, "Definition is here")]
-      else
-        []),
+      lazy
+        (pos1, "This is not an object of type `KeyedContainer`, this is " ^ ty),
+      lazy
+        (if not Pos_or_decl.(equal pos2 none) then
+          [(pos2, "Definition is here")]
+        else
+          []),
       [] )
 
   let array_access_read = array_access Error_code.ArrayAccessRead
@@ -4221,324 +4625,370 @@ module Primary = struct
 
   let keyset_set pos1 pos2 =
     ( Error_code.KeysetSet,
-      (pos1, "Elements in a keyset cannot be assigned, use append instead."),
-      (if not Pos_or_decl.(equal pos2 none) then
-        [(pos2, "Definition is here")]
-      else
-        []),
+      lazy (pos1, "Elements in a keyset cannot be assigned, use append instead."),
+      lazy
+        (if not Pos_or_decl.(equal pos2 none) then
+          [(pos2, "Definition is here")]
+        else
+          []),
       [] )
 
   let array_append pos1 pos2 ty =
     ( Error_code.ArrayAppend,
-      (pos1, ty ^ " does not allow array append"),
-      (if not Pos_or_decl.(equal pos2 none) then
-        [(pos2, "Definition is here")]
-      else
-        []),
+      lazy (pos1, ty ^ " does not allow array append"),
+      lazy
+        (if not Pos_or_decl.(equal pos2 none) then
+          [(pos2, "Definition is here")]
+        else
+          []),
       [] )
 
   let const_mutation pos1 pos2 ty =
     ( Error_code.ConstMutation,
-      (pos1, "You cannot mutate this"),
-      (if not Pos_or_decl.(equal pos2 none) then
-        [(pos2, "This is " ^ ty)]
-      else
-        []),
+      lazy (pos1, "You cannot mutate this"),
+      lazy
+        (if not Pos_or_decl.(equal pos2 none) then
+          [(pos2, "This is " ^ ty)]
+        else
+          []),
       [] )
 
   let expected_class pos suffix =
-    (Error_code.ExpectedClass, (pos, "Was expecting a class" ^ suffix), [], [])
+    ( Error_code.ExpectedClass,
+      lazy (pos, "Was expecting a class" ^ suffix),
+      lazy [],
+      [] )
 
   let unknown_type pos description r =
-    let msg = "Was expecting " ^ description ^ " but type is unknown" in
-    (Error_code.UnknownType, (pos, msg), r, [])
+    let claim =
+      lazy (pos, "Was expecting " ^ description ^ " but type is unknown")
+    in
+    (Error_code.UnknownType, claim, r, [])
 
   let parent_in_trait pos =
     ( Error_code.ParentInTrait,
-      ( pos,
-        "You can only use `parent::` in traits that specify `require extends SomeClass`"
-      ),
-      [],
+      lazy
+        ( pos,
+          "You can only use `parent::` in traits that specify `require extends SomeClass`"
+        ),
+      lazy [],
       [] )
 
   let parent_undefined pos =
-    (Error_code.ParentUndefined, (pos, "parent is undefined"), [], [])
+    (Error_code.ParentUndefined, lazy (pos, "parent is undefined"), lazy [], [])
 
   let constructor_no_args pos =
     ( Error_code.ConstructorNoArgs,
-      (pos, "This constructor expects no argument"),
-      [],
+      lazy (pos, "This constructor expects no argument"),
+      lazy [],
       [] )
 
   let visibility p msg1 p_vis msg2 =
-    (Error_code.Visibility, (p, msg1), [(p_vis, msg2)], [])
+    (Error_code.Visibility, lazy (p, msg1), lazy [(p_vis, msg2)], [])
 
   let bad_call pos ty =
     ( Error_code.BadCall,
-      (pos, "This call is invalid, this is not a function, it is " ^ ty),
-      [],
+      lazy (pos, "This call is invalid, this is not a function, it is " ^ ty),
+      lazy [],
       [] )
 
   let extend_final extend_pos decl_pos name =
-    let name = Render.strip_ns name in
     ( Error_code.ExtendFinal,
-      ( extend_pos,
-        "You cannot extend final class " ^ Markdown_lite.md_codify name ),
-      [(decl_pos, "Declaration is here")],
+      lazy
+        ( extend_pos,
+          "You cannot extend final class "
+          ^ Markdown_lite.md_codify (Render.strip_ns name) ),
+      lazy [(decl_pos, "Declaration is here")],
       [] )
 
   let extend_sealed child_pos parent_pos parent_name parent_kind verb =
-    let parent_kind =
-      match parent_kind with
-      | `intf -> "interface"
-      | `trait -> "trait"
-      | `class_ -> "class"
-      | `enum -> "enum"
-      | `enum_class -> "enum class"
-    and verb =
-      match verb with
-      | `extend -> "extend"
-      | `implement -> "implement"
-      | `use -> "use"
-    and name = Render.strip_ns parent_name in
+    let claim =
+      lazy
+        (let parent_kind =
+           match parent_kind with
+           | `intf -> "interface"
+           | `trait -> "trait"
+           | `class_ -> "class"
+           | `enum -> "enum"
+           | `enum_class -> "enum class"
+         and verb =
+           match verb with
+           | `extend -> "extend"
+           | `implement -> "implement"
+           | `use -> "use"
+         and name = Render.strip_ns parent_name in
+         ( child_pos,
+           "You cannot "
+           ^ verb
+           ^ " sealed "
+           ^ parent_kind
+           ^ " "
+           ^ Markdown_lite.md_codify name ))
+    in
     ( Error_code.ExtendSealed,
-      ( child_pos,
-        "You cannot "
-        ^ verb
-        ^ " sealed "
-        ^ parent_kind
-        ^ " "
-        ^ Markdown_lite.md_codify name ),
-      [(parent_pos, "Declaration is here")],
+      claim,
+      lazy [(parent_pos, "Declaration is here")],
       [] )
 
   let sealed_not_subtype parent_pos parent_name child_name child_kind child_pos
       =
-    let parent_name = Render.strip_ns parent_name
-    and child_name = Render.strip_ns child_name
-    and (child_kind, verb) =
-      match child_kind with
-      | Ast_defs.Cclass _ -> ("Class", "extend")
-      | Ast_defs.Cinterface -> ("Interface", "implement")
-      | Ast_defs.Ctrait -> ("Trait", "use")
-      | Ast_defs.Cenum -> ("Enum", "use")
-      | Ast_defs.Cenum_class _ -> ("Enum Class", "extend")
+    let claim =
+      lazy
+        (let parent_name = Render.strip_ns parent_name
+         and child_name = Render.strip_ns child_name
+         and (child_kind, verb) =
+           match child_kind with
+           | Ast_defs.Cclass _ -> ("Class", "extend")
+           | Ast_defs.Cinterface -> ("Interface", "implement")
+           | Ast_defs.Ctrait -> ("Trait", "use")
+           | Ast_defs.Cenum -> ("Enum", "use")
+           | Ast_defs.Cenum_class _ -> ("Enum Class", "extend")
+         in
+         ( parent_pos,
+           child_kind
+           ^ " "
+           ^ Markdown_lite.md_codify child_name
+           ^ " in sealed whitelist for "
+           ^ Markdown_lite.md_codify parent_name
+           ^ ", but does not "
+           ^ verb
+           ^ " "
+           ^ Markdown_lite.md_codify parent_name ))
     in
 
     ( Error_code.SealedNotSubtype,
-      ( parent_pos,
-        child_kind
-        ^ " "
-        ^ Markdown_lite.md_codify child_name
-        ^ " in sealed whitelist for "
-        ^ Markdown_lite.md_codify parent_name
-        ^ ", but does not "
-        ^ verb
-        ^ " "
-        ^ Markdown_lite.md_codify parent_name ),
-      [(child_pos, "Definition is here")],
+      claim,
+      lazy [(child_pos, "Definition is here")],
       [] )
 
   let trait_prop_const_class pos x =
     ( Error_code.TraitPropConstClass,
-      ( pos,
-        "Trait declaration of non-const property "
-        ^ Markdown_lite.md_codify x
-        ^ " is incompatible with a const class" ),
-      [],
+      lazy
+        ( pos,
+          "Trait declaration of non-const property "
+          ^ Markdown_lite.md_codify x
+          ^ " is incompatible with a const class" ),
+      lazy [],
       [] )
 
   let read_before_write (pos, v) =
     ( Error_code.ReadBeforeWrite,
-      ( pos,
-        Utils.sl
-          [
-            "Read access to ";
-            Markdown_lite.md_codify ("$this->" ^ v);
-            " before initialization";
-          ] ),
-      [],
+      lazy
+        ( pos,
+          Utils.sl
+            [
+              "Read access to ";
+              Markdown_lite.md_codify ("$this->" ^ v);
+              " before initialization";
+            ] ),
+      lazy [],
       [] )
 
   let implement_abstract pos1 is_final pos2 x kind qfxs =
-    let kind =
-      match kind with
-      | `meth -> "method"
-      | `prop -> "property"
-      | `const -> "constant"
-      | `ty_const -> "type constant"
-    in
-    let name = "abstract " ^ kind ^ " " ^ Markdown_lite.md_codify x in
-    let msg1 =
-      if is_final then
-        "This class was declared as `final`. It must provide an implementation for the "
-        ^ name
-      else
-        "This class must be declared `abstract`, or provide an implementation for the "
-        ^ name
+    let claim =
+      lazy
+        (let kind =
+           match kind with
+           | `meth -> "method"
+           | `prop -> "property"
+           | `const -> "constant"
+           | `ty_const -> "type constant"
+         in
+         let name = "abstract " ^ kind ^ " " ^ Markdown_lite.md_codify x in
+         let msg1 =
+           if is_final then
+             "This class was declared as `final`. It must provide an implementation for the "
+             ^ name
+           else
+             "This class must be declared `abstract`, or provide an implementation for the "
+             ^ name
+         in
+         (pos1, msg1))
     in
     ( Error_code.ImplementAbstract,
-      (pos1, msg1),
-      [(pos2, "Declaration is here")],
+      claim,
+      lazy [(pos2, "Declaration is here")],
       qfxs )
 
   let generic_static pos x =
     ( Error_code.GenericStatic,
-      ( pos,
-        "This static variable cannot use the type parameter "
-        ^ Markdown_lite.md_codify x
-        ^ "." ),
-      [],
+      lazy
+        ( pos,
+          "This static variable cannot use the type parameter "
+          ^ Markdown_lite.md_codify x
+          ^ "." ),
+      lazy [],
       [] )
 
   let ellipsis_strict_mode pos require =
-    let msg =
-      match require with
-      | `Param_name ->
-        "Variadic function arguments require a name in strict mode, e.g. `...$args`."
-      | `Type_and_param_name ->
-        "Variadic function arguments require a name and type in strict mode, e.g. `int ...$args`."
+    let claim =
+      lazy
+        ( pos,
+          match require with
+          | `Param_name ->
+            "Variadic function arguments require a name in strict mode, e.g. `...$args`."
+          | `Type_and_param_name ->
+            "Variadic function arguments require a name and type in strict mode, e.g. `int ...$args`."
+        )
     in
-    (Error_code.EllipsisStrictMode, (pos, msg), [], [])
+    (Error_code.EllipsisStrictMode, claim, lazy [], [])
 
   let untyped_lambda_strict_mode pos =
-    let msg =
-      "Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters."
+    let claim =
+      lazy
+        ( pos,
+          "Cannot determine types of lambda parameters in strict mode. Please add type hints on parameters."
+        )
     in
-    (Error_code.UntypedLambdaStrictMode, (pos, msg), [], [])
+    (Error_code.UntypedLambdaStrictMode, claim, lazy [], [])
 
   let object_string pos1 pos2 =
     ( Error_code.ObjectString,
-      (pos1, "You cannot use this object as a string"),
-      [(pos2, "This object doesn't implement `__toString`")],
+      lazy (pos1, "You cannot use this object as a string"),
+      lazy [(pos2, "This object doesn't implement `__toString`")],
       [] )
 
   let object_string_deprecated pos =
     ( Error_code.ObjectString,
-      ( pos,
-        "You cannot use this object as a string\nImplicit conversions of Stringish objects to string are deprecated."
-      ),
-      [],
+      lazy
+        ( pos,
+          "You cannot use this object as a string\nImplicit conversions of Stringish objects to string are deprecated."
+        ),
+      lazy [],
       [] )
 
   let cyclic_typedef def_pos use_pos =
     ( Error_code.CyclicTypedef,
-      (def_pos, "Cyclic type definition"),
-      [(use_pos, "Cyclic use is here")],
+      lazy (def_pos, "Cyclic type definition"),
+      lazy [(use_pos, "Cyclic use is here")],
       [] )
 
   let require_args_reify arg_pos def_pos =
     ( Error_code.RequireArgsReify,
-      ( arg_pos,
-        "All type arguments must be specified because a type parameter is reified"
-      ),
-      [(def_pos, "Definition is here")],
+      lazy
+        ( arg_pos,
+          "All type arguments must be specified because a type parameter is reified"
+        ),
+      lazy [(def_pos, "Definition is here")],
       [] )
 
   let require_generic_explicit arg_pos def_pos def_name =
     ( Error_code.RequireGenericExplicit,
-      ( arg_pos,
-        "Generic type parameter "
-        ^ Markdown_lite.md_codify def_name
-        ^ " must be specified explicitly" ),
-      [(def_pos, "Definition is here")],
+      lazy
+        ( arg_pos,
+          "Generic type parameter "
+          ^ Markdown_lite.md_codify def_name
+          ^ " must be specified explicitly" ),
+      lazy [(def_pos, "Definition is here")],
       [] )
 
   let invalid_reified_argument hint_pos def_name def_pos arg_info =
-    let (arg_pos, arg_kind) = List.hd_exn arg_info in
+    let reason =
+      Lazy.map arg_info ~f:(fun arg_info ->
+          let (arg_pos, arg_kind) = List.hd_exn arg_info in
+          [
+            ( arg_pos,
+              "This is "
+              ^ arg_kind
+              ^ ", it cannot be used as a reified type argument" );
+            (def_pos, Markdown_lite.md_codify def_name ^ " is reified");
+          ])
+    in
     ( Error_code.InvalidReifiedArgument,
-      (hint_pos, "Invalid reified hint"),
-      [
-        ( arg_pos,
-          "This is "
-          ^ arg_kind
-          ^ ", it cannot be used as a reified type argument" );
-        (def_pos, Markdown_lite.md_codify def_name ^ " is reified");
-      ],
+      lazy (hint_pos, "Invalid reified hint"),
+      reason,
       [] )
 
   let invalid_reified_argument_reifiable arg_pos def_name def_pos ty_pos ty_msg
       =
     ( Error_code.InvalidReifiedArgument,
-      (arg_pos, "PHP arrays cannot be used as a reified type argument"),
-      [
-        (ty_pos, String.capitalize ty_msg);
-        (def_pos, Markdown_lite.md_codify def_name ^ " is reified");
-      ],
+      lazy (arg_pos, "PHP arrays cannot be used as a reified type argument"),
+      lazy
+        [
+          (ty_pos, String.capitalize ty_msg);
+          (def_pos, Markdown_lite.md_codify def_name ^ " is reified");
+        ],
       [] )
 
   let new_class_reified pos class_type suggested_class =
-    let suggestion =
-      match suggested_class with
-      | Some s ->
-        let s = Render.strip_ns s in
-        sprintf ". Try `new %s` instead." s
-      | None -> ""
+    let claim =
+      lazy
+        (let suggestion =
+           match suggested_class with
+           | Some s ->
+             let s = Render.strip_ns s in
+             sprintf ". Try `new %s` instead." s
+           | None -> ""
+         in
+         ( pos,
+           sprintf
+             "Cannot call `new %s` because the current class has reified generics%s"
+             class_type
+             suggestion ))
     in
-    ( Error_code.NewClassReified,
-      ( pos,
-        sprintf
-          "Cannot call `new %s` because the current class has reified generics%s"
-          class_type
-          suggestion ),
-      [],
-      [] )
+    (Error_code.NewClassReified, claim, lazy [], [])
 
   let class_get_reified pos =
     ( Error_code.ClassGetReified,
-      (pos, "Cannot access static properties on reified generics"),
-      [],
+      lazy (pos, "Cannot access static properties on reified generics"),
+      lazy [],
       [] )
 
   let static_meth_with_class_reified_generic meth_pos generic_pos =
     ( Error_code.StaticMethWithClassReifiedGeneric,
-      ( meth_pos,
-        "Static methods cannot use generics reified at the class level. Try reifying them at the static method itself."
-      ),
-      [
-        ( Pos_or_decl.of_raw_pos generic_pos,
-          "Class-level reified generic used here." );
-      ],
+      lazy
+        ( meth_pos,
+          "Static methods cannot use generics reified at the class level. Try reifying them at the static method itself."
+        ),
+      lazy
+        [
+          ( Pos_or_decl.of_raw_pos generic_pos,
+            "Class-level reified generic used here." );
+        ],
       [] )
 
   let consistent_construct_reified pos =
     ( Error_code.ConsistentConstructReified,
-      ( pos,
-        "This class or one of its ancestors is annotated with `<<__ConsistentConstruct>>`. It cannot have reified generics."
-      ),
-      [],
+      lazy
+        ( pos,
+          "This class or one of its ancestors is annotated with `<<__ConsistentConstruct>>`. It cannot have reified generics."
+        ),
+      lazy [],
       [] )
 
   let bad_function_pointer_construction pos =
     ( Error_code.BadFunctionPointerConstruction,
-      (pos, "Function pointers must be explicitly named"),
-      [],
+      lazy (pos, "Function pointers must be explicitly named"),
+      lazy [],
       [] )
 
   let reified_generics_not_allowed pos =
     ( Error_code.InvalidReifiedFunctionPointer,
-      ( pos,
-        "Creating function pointers with reified generics is not currently allowed"
-      ),
-      [],
+      lazy
+        ( pos,
+          "Creating function pointers with reified generics is not currently allowed"
+        ),
+      lazy [],
       [] )
 
   let new_without_newable pos name =
     ( Error_code.NewWithoutNewable,
-      ( pos,
-        Markdown_lite.md_codify name
-        ^ " cannot be used with `new` because it does not have the `<<__Newable>>` attribute"
-      ),
-      [],
+      lazy
+        ( pos,
+          Markdown_lite.md_codify name
+          ^ " cannot be used with `new` because it does not have the `<<__Newable>>` attribute"
+        ),
+      lazy [],
       [] )
 
   let discarded_awaitable pos1 pos2 =
     ( Error_code.DiscardedAwaitable,
-      ( pos1,
-        "This expression is of type `Awaitable`, but it's "
-        ^ "either being discarded or used in a dangerous way before "
-        ^ "being awaited" ),
-      [(pos2, "This is why I think it is `Awaitable`")],
+      lazy
+        ( pos1,
+          "This expression is of type `Awaitable`, but it's "
+          ^ "either being discarded or used in a dangerous way before "
+          ^ "being awaited" ),
+      lazy [(pos2, "This is why I think it is `Awaitable`")],
       [] )
 
   let elt_type_to_string = function
@@ -4547,186 +4997,215 @@ module Primary = struct
 
   let static_redeclared_as_dynamic
       dyn_position static_position member_name elt_type =
-    let dollar =
-      match elt_type with
-      | `prop -> "$"
-      | _ -> ""
-    in
-    let elt_type = elt_type_to_string elt_type in
-    let msg_dynamic =
-      "The "
-      ^ elt_type
-      ^ " "
-      ^ Markdown_lite.md_codify (dollar ^ member_name)
-      ^ " is declared here as non-static"
+    let claim =
+      lazy
+        (let dollar =
+           match elt_type with
+           | `prop -> "$"
+           | _ -> ""
+         in
+         let elt_type = elt_type_to_string elt_type in
+         let msg_dynamic =
+           "The "
+           ^ elt_type
+           ^ " "
+           ^ Markdown_lite.md_codify (dollar ^ member_name)
+           ^ " is declared here as non-static"
+         in
+         (dyn_position, msg_dynamic))
     in
     let msg_static =
       "But it conflicts with an inherited static declaration here"
     in
-    ( Error_code.StaticDynamic,
-      (dyn_position, msg_dynamic),
-      [(static_position, msg_static)],
-      [] )
+    (Error_code.StaticDynamic, claim, lazy [(static_position, msg_static)], [])
 
   let dynamic_redeclared_as_static
       static_position dyn_position member_name elt_type =
-    let dollar =
-      match elt_type with
-      | `prop -> "$"
-      | _ -> ""
-    in
-    let elt_type = elt_type_to_string elt_type in
-    let msg_static =
-      "The "
-      ^ elt_type
-      ^ " "
-      ^ Markdown_lite.md_codify (dollar ^ member_name)
-      ^ " is declared here as static"
+    let claim =
+      lazy
+        (let dollar =
+           match elt_type with
+           | `prop -> "$"
+           | _ -> ""
+         in
+         let elt_type = elt_type_to_string elt_type in
+         let msg_static =
+           "The "
+           ^ elt_type
+           ^ " "
+           ^ Markdown_lite.md_codify (dollar ^ member_name)
+           ^ " is declared here as static"
+         in
+         (static_position, msg_static))
     in
     let msg_dynamic =
       "But it conflicts with an inherited non-static declaration here"
     in
-    ( Error_code.StaticDynamic,
-      (static_position, msg_static),
-      [(dyn_position, msg_dynamic)],
-      [] )
+    (Error_code.StaticDynamic, claim, lazy [(dyn_position, msg_dynamic)], [])
 
   let unknown_object_member pos s elt r =
-    let elt = elt_type_to_string elt in
-    let msg =
-      Printf.sprintf
-        "You are trying to access the %s %s on a value whose class is unknown."
-        elt
-        (Markdown_lite.md_codify s)
+    let claim =
+      lazy
+        (let elt = elt_type_to_string elt in
+         let msg =
+           Printf.sprintf
+             "You are trying to access the %s %s on a value whose class is unknown."
+             elt
+             (Markdown_lite.md_codify s)
+         in
+         (pos, msg))
     in
-    (Error_code.UnknownObjectMember, (pos, msg), r, [])
+    (Error_code.UnknownObjectMember, claim, r, [])
 
   let non_class_member pos1 s elt ty pos2 =
-    let elt = elt_type_to_string elt in
-    let msg =
-      Printf.sprintf
-        "You are trying to access the static %s %s but this is %s"
-        elt
-        (Markdown_lite.md_codify s)
-        ty
+    let claim =
+      lazy
+        (let elt = elt_type_to_string elt in
+         let msg =
+           Printf.sprintf
+             "You are trying to access the static %s %s but this is %s"
+             elt
+             (Markdown_lite.md_codify s)
+             ty
+         in
+         (pos1, msg))
     in
-    (Error_code.NonClassMember, (pos1, msg), [(pos2, "Definition is here")], [])
+    (Error_code.NonClassMember, claim, lazy [(pos2, "Definition is here")], [])
 
   let null_container p null_witness =
     ( Error_code.NullContainer,
-      ( p,
-        "You are trying to access an element of this container"
-        ^ " but the container could be `null`. " ),
+      lazy
+        ( p,
+          "You are trying to access an element of this container"
+          ^ " but the container could be `null`. " ),
       null_witness,
       [] )
 
   let option_mixed pos =
     ( Error_code.OptionMixed,
-      (pos, "`?mixed` is a redundant typehint - just use `mixed`"),
-      [],
+      lazy (pos, "`?mixed` is a redundant typehint - just use `mixed`"),
+      lazy [],
       [] )
 
   let option_null pos =
     ( Error_code.OptionNull,
-      (pos, "`?null` is a redundant typehint - just use `null`"),
-      [],
+      lazy (pos, "`?null` is a redundant typehint - just use `null`"),
+      lazy [],
       [] )
 
   let declared_covariant pos1 pos2 emsg =
+    let reason =
+      Lazy.map emsg ~f:(fun emsg ->
+          [
+            ( Pos_or_decl.of_raw_pos pos1,
+              "This is where the parameter was declared as covariant `+`" );
+          ]
+          @ List.map emsg ~f:(Message.map ~f:Pos_or_decl.of_raw_pos))
+    in
     ( Error_code.DeclaredCovariant,
-      (pos2, "Illegal usage of a covariant type parameter"),
-      [
-        ( Pos_or_decl.of_raw_pos pos1,
-          "This is where the parameter was declared as covariant `+`" );
-      ]
-      @ List.map emsg ~f:(Message.map ~f:Pos_or_decl.of_raw_pos),
+      lazy (pos2, "Illegal usage of a covariant type parameter"),
+      reason,
       [] )
 
   let declared_contravariant pos1 pos2 emsg =
+    let reason =
+      Lazy.map emsg ~f:(fun emsg ->
+          [
+            ( Pos_or_decl.of_raw_pos pos1,
+              "This is where the parameter was declared as contravariant `-`" );
+          ]
+          @ List.map emsg ~f:(Message.map ~f:Pos_or_decl.of_raw_pos))
+    in
     ( Error_code.DeclaredContravariant,
-      (pos2, "Illegal usage of a contravariant type parameter"),
-      [
-        ( Pos_or_decl.of_raw_pos pos1,
-          "This is where the parameter was declared as contravariant `-`" );
-      ]
-      @ List.map emsg ~f:(Message.map ~f:Pos_or_decl.of_raw_pos),
+      lazy (pos2, "Illegal usage of a contravariant type parameter"),
+      reason,
       [] )
 
   let static_property_type_generic_param generic_pos class_pos var_type_pos =
     ( Error_code.ClassVarTypeGenericParam,
-      ( generic_pos,
-        "A generic parameter cannot be used in the type of a static property" ),
-      [
-        ( var_type_pos,
-          "This is where the type of the static property was declared" );
-        (class_pos, "This is the class containing the static property");
-      ],
+      lazy
+        ( generic_pos,
+          "A generic parameter cannot be used in the type of a static property"
+        ),
+      lazy
+        [
+          ( var_type_pos,
+            "This is where the type of the static property was declared" );
+          (class_pos, "This is the class containing the static property");
+        ],
       [] )
 
   let contravariant_this pos class_name tp =
     ( Error_code.ContravariantThis,
-      ( pos,
-        "The `this` type cannot be used in this "
-        ^ "contravariant position because its enclosing class "
-        ^ Markdown_lite.md_codify class_name
-        ^ " "
-        ^ "is final and has a variant type parameter "
-        ^ Markdown_lite.md_codify tp ),
-      [],
+      lazy
+        ( pos,
+          "The `this` type cannot be used in this "
+          ^ "contravariant position because its enclosing class "
+          ^ Markdown_lite.md_codify class_name
+          ^ " "
+          ^ "is final and has a variant type parameter "
+          ^ Markdown_lite.md_codify tp ),
+      lazy [],
       [] )
 
   let cyclic_typeconst pos sl =
-    let sl =
-      List.map sl ~f:(fun s -> Render.strip_ns s |> Markdown_lite.md_codify)
+    let claim =
+      lazy
+        (let sl =
+           List.map sl ~f:(fun s ->
+               Render.strip_ns s |> Markdown_lite.md_codify)
+         in
+         (pos, "Cyclic type constant:\n  " ^ String.concat ~sep:" -> " sl))
     in
-    ( Error_code.CyclicTypeconst,
-      (pos, "Cyclic type constant:\n  " ^ String.concat ~sep:" -> " sl),
-      [],
-      [] )
+    (Error_code.CyclicTypeconst, claim, lazy [], [])
 
   let array_get_with_optional_field pos1 name pos2 =
     ( Error_code.ArrayGetWithOptionalField,
-      ( pos1,
-        Printf.sprintf
-          "The field %s may not be present in this shape. Use `Shapes::idx()` instead."
-          (Markdown_lite.md_codify name) ),
-      [(pos2, "This is where the field was declared as optional.")],
+      lazy
+        ( pos1,
+          Printf.sprintf
+            "The field %s may not be present in this shape. Use `Shapes::idx()` instead."
+            (Markdown_lite.md_codify name) ),
+      lazy [(pos2, "This is where the field was declared as optional.")],
       [] )
 
   let mutating_const_property pos =
     ( Error_code.AssigningToConst,
-      (pos, "Cannot mutate a `__Const` property"),
-      [],
+      lazy (pos, "Cannot mutate a `__Const` property"),
+      lazy [],
       [] )
 
   let self_const_parent_not pos =
     ( Error_code.SelfConstParentNot,
-      (pos, "A `__Const` class may only extend other `__Const` classes"),
-      [],
+      lazy (pos, "A `__Const` class may only extend other `__Const` classes"),
+      lazy [],
       [] )
 
   let unexpected_ty_in_tast pos ~actual_ty ~expected_ty =
     ( Error_code.UnexpectedTy,
-      ( pos,
-        "Unexpected type in TAST: expected "
-        ^ Markdown_lite.md_codify expected_ty
-        ^ ", got "
-        ^ Markdown_lite.md_codify actual_ty ),
-      [],
+      lazy
+        ( pos,
+          "Unexpected type in TAST: expected "
+          ^ Markdown_lite.md_codify expected_ty
+          ^ ", got "
+          ^ Markdown_lite.md_codify actual_ty ),
+      lazy [],
       [] )
 
   let call_lvalue pos =
     ( Error_code.CallLvalue,
-      ( pos,
-        "Array updates cannot be applied to function results. Use a local variable instead."
-      ),
-      [],
+      lazy
+        ( pos,
+          "Array updates cannot be applied to function results. Use a local variable instead."
+        ),
+      lazy [],
       [] )
 
   let unsafe_cast_await pos =
     ( Error_code.UnsafeCastAwait,
-      (pos, "UNSAFE_CAST cannot be used as the operand of an await operation"),
-      [],
+      lazy
+        (pos, "UNSAFE_CAST cannot be used as the operand of an await operation"),
+      lazy [],
       [] )
 
   let internal_compiler_error_msg =
@@ -4736,12 +5215,18 @@ module Primary = struct
       Error_message_sentinel.please_file_a_bug_message
 
   let invariant_violation pos =
-    (Error_code.InvariantViolated, (pos, internal_compiler_error_msg), [], [])
+    ( Error_code.InvariantViolated,
+      lazy (pos, internal_compiler_error_msg),
+      lazy [],
+      [] )
 
   let exception_occurred pos =
-    (Error_code.ExceptionOccurred, (pos, internal_compiler_error_msg), [], [])
+    ( Error_code.ExceptionOccurred,
+      lazy (pos, internal_compiler_error_msg),
+      lazy [],
+      [] )
 
-  let to_error_ = function
+  let to_error_ : t -> error = function
     | Coeffect err -> Coeffect.to_error err
     | Enum err -> Enum.to_error err
     | Expr_tree err -> Expr_tree.to_error err
@@ -4938,16 +5423,9 @@ module Primary = struct
     | Generic_at_runtime { pos; prefix } -> generic_at_runtime pos prefix
     | Generics_not_allowed pos -> generics_not_allowed pos
     | Trivial_strict_eq { pos; result; left; right; left_trail; right_trail } ->
-      trivial_strict_eq
-        pos
-        result
-        (Lazy.force left)
-        (Lazy.force right)
-        left_trail
-        right_trail
+      trivial_strict_eq pos result left right left_trail right_trail
     | Trivial_strict_not_nullable_compare_null { pos; result; ty_reason_msg } ->
-      trivial_strict_not_nullable_compare_null pos result
-      @@ Lazy.force ty_reason_msg
+      trivial_strict_not_nullable_compare_null pos result ty_reason_msg
     | Eq_incompatible_types { pos; left; right } ->
       eq_incompatible_types pos (Lazy.force left) (Lazy.force right)
     | Comparison_invalid_types { pos; left; right } ->
@@ -5303,7 +5781,11 @@ module Primary = struct
 
   let to_user_error t =
     Option.map ~f:(fun (code, claim, reasons, quickfixes) ->
-        User_error.make (Error_code.to_enum code) claim reasons ~quickfixes)
+        User_error.make
+          (Error_code.to_enum code)
+          (Lazy.force claim)
+          (Lazy.force reasons)
+          ~quickfixes)
     @@ to_error t
 end
 
@@ -5422,7 +5904,11 @@ end = struct
     aux ~k:Fn.id t
 
   let make_error (code, claim, reasons, quickfixes) =
-    User_error.make (Error_code.to_enum code) claim reasons ~quickfixes
+    User_error.make
+      (Error_code.to_enum code)
+      (Lazy.force claim)
+      (Lazy.force reasons)
+      ~quickfixes
 
   let to_user_error t ~current_span =
     Eval_result.map ~f:make_error @@ eval t ~current_span
@@ -5488,7 +5974,7 @@ end
 and Secondary : sig
   type t =
     | Of_error of Error.t
-    (* == Primary and secondary =============================================== *)
+    (* Primary and secondary *)
     | Smember_not_found of {
         pos: Pos_or_decl.t;
         kind:
@@ -5534,7 +6020,7 @@ and Secondary : sig
         pos: Pos_or_decl.t;
         name: string;
       }
-    (* == Secondary only ====================================================== *)
+    (* Secondary only *)
     | Violated_constraint of {
         cstrs: (Pos_or_decl.t * Pos_or_decl.t Message.t) list;
         reasons: Pos_or_decl.t Message.t list Lazy.t;
@@ -5707,8 +6193,8 @@ and Secondary : sig
     | Readonly_mismatch of {
         pos: Pos_or_decl.t;
         kind: [ `fn | `fn_return | `param ];
-        reason_sub: Pos_or_decl.t Message.t list;
-        reason_super: Pos_or_decl.t Message.t list;
+        reason_sub: Pos_or_decl.t Message.t list Lazy.t;
+        reason_super: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Not_sub_dynamic of {
         pos: Pos_or_decl.t;
@@ -5750,12 +6236,12 @@ and Secondary : sig
   val eval :
     t ->
     current_span:Pos.t ->
-    (Error_code.t * Pos_or_decl.t Message.t list * Quickfix.t list)
+    (Error_code.t * Pos_or_decl.t Message.t list Lazy.t * Quickfix.t list)
     Eval_result.t
 end = struct
   type t =
     | Of_error of Error.t
-    (* == Primary and secondary =============================================== *)
+    (* Primary and secondary *)
     | Smember_not_found of {
         pos: Pos_or_decl.t;
         kind:
@@ -5801,7 +6287,7 @@ end = struct
         pos: Pos_or_decl.t;
         name: string;
       }
-    (* == Secondary only ====================================================== *)
+    (* Secondary only *)
     | Violated_constraint of {
         cstrs: (Pos_or_decl.t * Pos_or_decl.t Message.t) list;
         reasons: Pos_or_decl.t Message.t list Lazy.t;
@@ -5974,8 +6460,8 @@ end = struct
     | Readonly_mismatch of {
         pos: Pos_or_decl.t;
         kind: [ `fn | `fn_return | `param ];
-        reason_sub: Pos_or_decl.t Message.t list;
-        reason_super: Pos_or_decl.t Message.t list;
+        reason_sub: Pos_or_decl.t Message.t list Lazy.t;
+        reason_super: Pos_or_decl.t Message.t list Lazy.t;
       }
     | Not_sub_dynamic of {
         pos: Pos_or_decl.t;
@@ -6020,452 +6506,502 @@ end = struct
 
   let fun_too_many_args pos decl_pos actual expected =
     let reasons =
-      [
-        ( pos,
-          Printf.sprintf
-            "Too many mandatory arguments (expected %d but got %d)"
-            expected
-            actual );
-        (decl_pos, "Because of this definition");
-      ]
+      lazy
+        [
+          ( pos,
+            Printf.sprintf
+              "Too many mandatory arguments (expected %d but got %d)"
+              expected
+              actual );
+          (decl_pos, "Because of this definition");
+        ]
     in
     (Error_code.FunTooManyArgs, reasons, [])
 
   let fun_too_few_args pos decl_pos actual expected =
     let reasons =
-      [
-        ( pos,
-          Printf.sprintf
-            "Too few arguments (required %d but got %d)"
-            expected
-            actual );
-        (decl_pos, "Because of this definition");
-      ]
+      lazy
+        [
+          ( pos,
+            Printf.sprintf
+              "Too few arguments (required %d but got %d)"
+              expected
+              actual );
+          (decl_pos, "Because of this definition");
+        ]
     in
     (Error_code.FunTooFewArgs, reasons, [])
 
   let fun_unexpected_nonvariadic pos decl_pos =
     let reasons =
-      [
-        (pos, "Should have a variadic argument");
-        (decl_pos, "Because of this definition");
-      ]
+      lazy
+        [
+          (pos, "Should have a variadic argument");
+          (decl_pos, "Because of this definition");
+        ]
     in
     (Error_code.FunUnexpectedNonvariadic, reasons, [])
 
   let fun_variadicity_hh_vs_php56 pos decl_pos =
     let reasons =
-      [
-        (pos, "Variadic arguments: `...`-style is not a subtype of `...$args`");
-        (decl_pos, "Because of this definition");
-      ]
+      lazy
+        [
+          (pos, "Variadic arguments: `...`-style is not a subtype of `...$args`");
+          (decl_pos, "Because of this definition");
+        ]
     in
     (Error_code.FunVariadicityHhVsPhp56, reasons, [])
 
   let type_arity_mismatch pos actual decl_pos expected =
     let reasons =
-      [
-        (pos, "This type has " ^ string_of_int actual ^ " arguments");
-        (decl_pos, "This one has " ^ string_of_int expected);
-      ]
+      lazy
+        [
+          (pos, "This type has " ^ string_of_int actual ^ " arguments");
+          (decl_pos, "This one has " ^ string_of_int expected);
+        ]
     in
     (Error_code.TypeArityMismatch, reasons, [])
 
   let violated_constraint cstrs reasons =
-    let pos_msg = "This type constraint is violated" in
-    let f (p_cstr, (p_tparam, tparam)) =
-      [
-        ( p_tparam,
-          Printf.sprintf
-            "%s is a constrained type parameter"
-            (Markdown_lite.md_codify tparam) );
-        (p_cstr, pos_msg);
-      ]
+    let reason =
+      Lazy.map reasons ~f:(fun reasons ->
+          let pos_msg = "This type constraint is violated" in
+          let f (p_cstr, (p_tparam, tparam)) =
+            [
+              ( p_tparam,
+                Printf.sprintf
+                  "%s is a constrained type parameter"
+                  (Markdown_lite.md_codify tparam) );
+              (p_cstr, pos_msg);
+            ]
+          in
+          let msgs = List.concat_map ~f cstrs in
+          msgs @ reasons)
     in
-    let msgs = List.concat_map ~f cstrs in
-    (Error_code.TypeConstraintViolation, msgs @ Lazy.force reasons, [])
+    (Error_code.TypeConstraintViolation, reason, [])
 
   let concrete_const_interface_override pos parent_pos name parent_origin =
     let reasons =
-      [
-        ( parent_pos,
-          "You could make "
-          ^ Markdown_lite.md_codify name
-          ^ " abstract in "
-          ^ (Markdown_lite.md_codify @@ Render.strip_ns parent_origin)
-          ^ "." );
-      ]
-    and claim =
-      ( pos,
-        "Non-abstract constants defined in an interface cannot be overridden when implementing or extending that interface."
-      )
+      lazy
+        [
+          ( pos,
+            "Non-abstract constants defined in an interface cannot be overridden when implementing or extending that interface."
+          );
+          ( parent_pos,
+            "You could make "
+            ^ Markdown_lite.md_codify name
+            ^ " abstract in "
+            ^ (Markdown_lite.md_codify @@ Render.strip_ns parent_origin)
+            ^ "." );
+        ]
     in
-    (Error_code.ConcreteConstInterfaceOverride, claim :: reasons, [])
+    (Error_code.ConcreteConstInterfaceOverride, reasons, [])
 
   let interface_or_trait_const_multiple_defs
       pos origin parent_pos parent_origin name =
-    let parent_origin = Render.strip_ns parent_origin
-    and child_origin = Render.strip_ns origin in
     let reasons =
-      [
-        ( pos,
-          "Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants."
-        );
-        ( parent_pos,
-          Markdown_lite.md_codify name
-          ^ " inherited from "
-          ^ Markdown_lite.md_codify parent_origin );
-        ( pos,
-          "conflicts with constant "
-          ^ Markdown_lite.md_codify name
-          ^ " inherited from "
-          ^ Markdown_lite.md_codify child_origin
-          ^ "." );
-      ]
+      lazy
+        (let parent_origin = Render.strip_ns parent_origin
+         and child_origin = Render.strip_ns origin in
+         [
+           ( pos,
+             "Non-abstract constants defined in an interface or trait cannot conflict with other inherited constants."
+           );
+           ( parent_pos,
+             Markdown_lite.md_codify name
+             ^ " inherited from "
+             ^ Markdown_lite.md_codify parent_origin );
+           ( pos,
+             "conflicts with constant "
+             ^ Markdown_lite.md_codify name
+             ^ " inherited from "
+             ^ Markdown_lite.md_codify child_origin
+             ^ "." );
+         ])
     in
     (Error_code.ConcreteConstInterfaceOverride, reasons, [])
 
   let interface_typeconst_multiple_defs
       pos parent_pos name origin parent_origin is_abstract =
-    let parent_origin = Render.strip_ns parent_origin
-    and child_origin = Render.strip_ns origin
-    and child_pos = pos
-    and child =
-      if is_abstract then
-        "abstract type constant with default value"
-      else
-        "concrete type constant"
-    in
     let reasons =
-      [
-        ( pos,
-          "Concrete and abstract type constants with default values in an interface cannot conflict with inherited"
-          ^ " concrete or abstract type constants with default values." );
-        ( parent_pos,
-          Markdown_lite.md_codify name
-          ^ " inherited from "
-          ^ Markdown_lite.md_codify parent_origin );
-        ( child_pos,
-          "conflicts with "
-          ^ Markdown_lite.md_codify child
-          ^ " "
-          ^ Markdown_lite.md_codify name
-          ^ " inherited from "
-          ^ Markdown_lite.md_codify child_origin
-          ^ "." );
-      ]
+      lazy
+        (let parent_origin = Render.strip_ns parent_origin
+         and child_origin = Render.strip_ns origin
+         and child_pos = pos
+         and child =
+           if is_abstract then
+             "abstract type constant with default value"
+           else
+             "concrete type constant"
+         in
+         [
+           ( pos,
+             "Concrete and abstract type constants with default values in an interface cannot conflict with inherited"
+             ^ " concrete or abstract type constants with default values." );
+           ( parent_pos,
+             Markdown_lite.md_codify name
+             ^ " inherited from "
+             ^ Markdown_lite.md_codify parent_origin );
+           ( child_pos,
+             "conflicts with "
+             ^ Markdown_lite.md_codify child
+             ^ " "
+             ^ Markdown_lite.md_codify name
+             ^ " inherited from "
+             ^ Markdown_lite.md_codify child_origin
+             ^ "." );
+         ])
     in
     (Error_code.ConcreteConstInterfaceOverride, reasons, [])
 
   let missing_field pos name decl_pos =
     let reasons =
-      [
-        (pos, "The field " ^ Markdown_lite.md_codify name ^ " is missing");
-        (decl_pos, "The field " ^ Markdown_lite.md_codify name ^ " is defined");
-      ]
+      lazy
+        [
+          (pos, "The field " ^ Markdown_lite.md_codify name ^ " is missing");
+          (decl_pos, "The field " ^ Markdown_lite.md_codify name ^ " is defined");
+        ]
     in
     (Error_code.MissingField, reasons, [])
 
   let shape_fields_unknown pos decl_pos =
     let reasons =
-      [
-        ( pos,
-          "This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration."
-        );
-        ( decl_pos,
-          "It is incompatible with a shape that does not allow unknown fields."
-        );
-      ]
+      lazy
+        [
+          ( pos,
+            "This shape type allows unknown fields, and so it may contain fields other than those explicitly declared in its declaration."
+          );
+          ( decl_pos,
+            "It is incompatible with a shape that does not allow unknown fields."
+          );
+        ]
     in
     (Error_code.ShapeFieldsUnknown, reasons, [])
 
   let abstract_tconst_not_allowed pos decl_pos tconst_name =
     let reasons =
-      [
-        (pos, "An abstract type constant is not allowed in this position.");
-        ( decl_pos,
-          Printf.sprintf
-            "%s is abstract here."
-            (Markdown_lite.md_codify tconst_name) );
-      ]
+      lazy
+        [
+          (pos, "An abstract type constant is not allowed in this position.");
+          ( decl_pos,
+            Printf.sprintf
+              "%s is abstract here."
+              (Markdown_lite.md_codify tconst_name) );
+        ]
     in
     (Error_code.AbstractTconstNotAllowed, reasons, [])
 
   let invalid_destructure pos decl_pos ty_name =
     let reasons =
-      [
-        ( pos,
-          "This expression cannot be destructured with a `list(...)` expression"
-        );
-        (decl_pos, "This is " ^ Markdown_lite.md_codify @@ Lazy.force ty_name);
-      ]
+      lazy
+        [
+          ( pos,
+            "This expression cannot be destructured with a `list(...)` expression"
+          );
+          (decl_pos, "This is " ^ Markdown_lite.md_codify @@ Lazy.force ty_name);
+        ]
     in
     (Error_code.InvalidDestructure, reasons, [])
 
   let unpack_array_required_argument pos decl_pos =
     let reasons =
-      [
-        ( pos,
-          "An array cannot be unpacked into the required arguments of a function"
-        );
-        (decl_pos, "Definition is here");
-      ]
+      lazy
+        [
+          ( pos,
+            "An array cannot be unpacked into the required arguments of a function"
+          );
+          (decl_pos, "Definition is here");
+        ]
     in
     (Error_code.SplatArrayRequired, reasons, [])
 
   let unpack_array_variadic_argument pos decl_pos =
     let reasons =
-      [
-        ( pos,
-          "A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array"
-        );
-        (decl_pos, "Definition is here");
-      ]
+      lazy
+        [
+          ( pos,
+            "A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array"
+          );
+          (decl_pos, "Definition is here");
+        ]
     in
     (Error_code.SplatArrayRequired, reasons, [])
 
   let overriding_prop_const_mismatch pos is_const parent_pos =
-    let (msg, reason_msg) =
-      if is_const then
-        ("This property is `__Const`", "This property is not `__Const`")
-      else
-        ("This property is not `__Const`", "This property is `__Const`")
+    let reasons =
+      lazy
+        (let (msg, reason_msg) =
+           if is_const then
+             ("This property is `__Const`", "This property is not `__Const`")
+           else
+             ("This property is not `__Const`", "This property is `__Const`")
+         in
+         [(pos, msg); (parent_pos, reason_msg)])
     in
-    let reasons = [(pos, msg); (parent_pos, reason_msg)] in
     (Error_code.OverridingPropConstMismatch, reasons, [])
 
   let visibility_extends pos vis parent_pos parent_vis =
     let reasons =
-      [
-        (pos, "This member visibility is: " ^ Markdown_lite.md_codify vis);
-        (parent_pos, Markdown_lite.md_codify parent_vis ^ " was expected");
-      ]
+      lazy
+        [
+          (pos, "This member visibility is: " ^ Markdown_lite.md_codify vis);
+          (parent_pos, Markdown_lite.md_codify parent_vis ^ " was expected");
+        ]
     in
     (Error_code.VisibilityExtends, reasons, [])
 
   let visibility_override_internal pos module_name parent_module parent_pos =
-    let msg =
-      match module_name with
-      | None ->
-        Printf.sprintf
-          "Cannot override this member outside module `%s`"
-          parent_module
-      | Some m -> Printf.sprintf "Cannot override this member in module `%s`" m
-    in
     let reasons =
-      [
-        (pos, msg);
-        ( parent_pos,
-          Printf.sprintf "This member is internal to module `%s`" parent_module
-        );
-      ]
+      lazy
+        (let msg =
+           match module_name with
+           | None ->
+             Printf.sprintf
+               "Cannot override this member outside module `%s`"
+               parent_module
+           | Some m ->
+             Printf.sprintf "Cannot override this member in module `%s`" m
+         in
+         [
+           (pos, msg);
+           ( parent_pos,
+             Printf.sprintf
+               "This member is internal to module `%s`"
+               parent_module );
+         ])
     in
     (Error_code.ModuleError, reasons, [])
 
   let missing_constructor pos =
-    let reasons = [(pos, "The constructor is not implemented")] in
+    let reasons = lazy [(pos, "The constructor is not implemented")] in
     (Error_code.MissingConstructor, reasons, [])
 
   let accept_disposable_invariant pos decl_pos =
     let reasons =
-      [
-        (pos, "This parameter is marked `<<__AcceptDisposable>>`");
-        (decl_pos, "This parameter is not marked `<<__AcceptDisposable>>`");
-      ]
+      lazy
+        [
+          (pos, "This parameter is marked `<<__AcceptDisposable>>`");
+          (decl_pos, "This parameter is not marked `<<__AcceptDisposable>>`");
+        ]
     in
     (Error_code.AcceptDisposableInvariant, reasons, [])
 
   let ifc_external_contravariant pos_sub pos_super =
     let reasons =
-      [
-        ( pos_super,
-          "Parameters with `<<__External>>` must be overridden by other parameters with <<__External>>. This parameter is marked `<<__External>>`"
-        );
-        (pos_sub, "But this parameter is not marked `<<__External>>`");
-      ]
+      lazy
+        [
+          ( pos_super,
+            "Parameters with `<<__External>>` must be overridden by other parameters with <<__External>>. This parameter is marked `<<__External>>`"
+          );
+          (pos_sub, "But this parameter is not marked `<<__External>>`");
+        ]
     in
     (Error_code.IFCExternalContravariant, reasons, [])
 
   let required_field_is_optional pos name decl_pos =
     let reasons =
-      [
-        (pos, "The field " ^ Markdown_lite.md_codify name ^ " is **optional**");
-        ( decl_pos,
-          "The field "
-          ^ Markdown_lite.md_codify name
-          ^ " is defined as **required**" );
-      ]
+      lazy
+        [
+          (pos, "The field " ^ Markdown_lite.md_codify name ^ " is **optional**");
+          ( decl_pos,
+            "The field "
+            ^ Markdown_lite.md_codify name
+            ^ " is defined as **required**" );
+        ]
     in
     (Error_code.RequiredFieldIsOptional, reasons, [])
 
   let return_disposable_mismatch pos_sub is_marked_return_disposable pos_super =
-    let (msg, reason_msg) =
-      if is_marked_return_disposable then
-        ( "This is marked `<<__ReturnDisposable>>`.",
-          "This is not marked `<<__ReturnDisposable>>`." )
-      else
-        ( "This is not marked `<<__ReturnDisposable>>`.",
-          "This is marked `<<__ReturnDisposable>>`." )
+    let reasons =
+      lazy
+        (let (msg, reason_msg) =
+           if is_marked_return_disposable then
+             ( "This is marked `<<__ReturnDisposable>>`.",
+               "This is not marked `<<__ReturnDisposable>>`." )
+           else
+             ( "This is not marked `<<__ReturnDisposable>>`.",
+               "This is marked `<<__ReturnDisposable>>`." )
+         in
+         [(pos_super, msg); (pos_sub, reason_msg)])
     in
-    let reasons = [(pos_super, msg); (pos_sub, reason_msg)] in
     (Error_code.ReturnDisposableMismatch, reasons, [])
 
   let ifc_policy_mismatch pos policy pos_super policy_super =
     let reasons =
-      [
-        ( pos,
-          "IFC policies must be invariant with respect to inheritance. This method is policied with "
-          ^ policy );
-        ( pos_super,
-          "This is incompatible with its inherited policy, which is "
-          ^ policy_super );
-      ]
+      lazy
+        [
+          ( pos,
+            "IFC policies must be invariant with respect to inheritance. This method is policied with "
+            ^ policy );
+          ( pos_super,
+            "This is incompatible with its inherited policy, which is "
+            ^ policy_super );
+        ]
     in
     (Error_code.IFCPolicyMismatch, reasons, [])
 
   let override_final pos parent_pos =
     let reasons =
-      [
-        (pos, "You cannot override this method");
-        (parent_pos, "It was declared as final");
-      ]
+      lazy
+        [
+          (pos, "You cannot override this method");
+          (parent_pos, "It was declared as final");
+        ]
     in
     (Error_code.OverrideFinal, reasons, [])
 
   let override_lsb pos member_name parent_pos =
     let reasons =
-      [
-        ( pos,
-          "Member "
-          ^ Markdown_lite.md_codify member_name
-          ^ " may not override `__LSB` member of parent" );
-        (parent_pos, "This is being overridden");
-      ]
+      lazy
+        [
+          ( pos,
+            "Member "
+            ^ Markdown_lite.md_codify member_name
+            ^ " may not override `__LSB` member of parent" );
+          (parent_pos, "This is being overridden");
+        ]
     in
     (Error_code.OverrideLSB, reasons, [])
 
   let multiple_concrete_defs pos origin name parent_pos parent_origin class_name
       =
-    let child_origin = Markdown_lite.md_codify @@ Render.strip_ns origin
-    and parent_origin = Markdown_lite.md_codify @@ Render.strip_ns parent_origin
-    and class_ = Markdown_lite.md_codify @@ Render.strip_ns class_name
-    and name = Markdown_lite.md_codify name in
     let reasons =
-      [
-        ( pos,
-          child_origin
-          ^ " and "
-          ^ parent_origin
-          ^ " both declare ambiguous implementations of "
-          ^ name
-          ^ "." );
-        (pos, child_origin ^ "'s definition is here.");
-        (parent_pos, parent_origin ^ "'s definition is here.");
-        ( pos,
-          "Redeclare "
-          ^ name
-          ^ " in "
-          ^ class_
-          ^ " with a compatible signature." );
-      ]
+      lazy
+        (let child_origin = Markdown_lite.md_codify @@ Render.strip_ns origin
+         and parent_origin =
+           Markdown_lite.md_codify @@ Render.strip_ns parent_origin
+         and class_ = Markdown_lite.md_codify @@ Render.strip_ns class_name
+         and name = Markdown_lite.md_codify name in
+         [
+           ( pos,
+             child_origin
+             ^ " and "
+             ^ parent_origin
+             ^ " both declare ambiguous implementations of "
+             ^ name
+             ^ "." );
+           (pos, child_origin ^ "'s definition is here.");
+           (parent_pos, parent_origin ^ "'s definition is here.");
+           ( pos,
+             "Redeclare "
+             ^ name
+             ^ " in "
+             ^ class_
+             ^ " with a compatible signature." );
+         ])
     in
     (Error_code.MultipleConcreteDefs, reasons, [])
 
   let cyclic_enum_constraint pos =
-    let reasons = [(pos, "Cyclic enum constraint")] in
+    let reasons = lazy [(pos, "Cyclic enum constraint")] in
     (Error_code.CyclicEnumConstraint, reasons, [])
 
   let inoutness_mismatch pos decl_pos =
     let reasons =
-      [
-        (pos, "This is an `inout` parameter");
-        (decl_pos, "It is incompatible with a normal parameter");
-      ]
+      lazy
+        [
+          (pos, "This is an `inout` parameter");
+          (decl_pos, "It is incompatible with a normal parameter");
+        ]
     in
     (Error_code.InoutnessMismatch, reasons, [])
 
   let decl_override_missing_hint pos =
     let reasons =
-      [
-        ( pos,
-          "When redeclaring class members, both declarations must have a typehint"
-        );
-      ]
+      lazy
+        [
+          ( pos,
+            "When redeclaring class members, both declarations must have a typehint"
+          );
+        ]
     in
     (Error_code.DeclOverrideMissingHint, reasons, [])
 
   let bad_lateinit_override pos parent_pos parent_is_lateinit =
-    let verb =
-      if parent_is_lateinit then
-        "is"
-      else
-        "is not"
-    in
     let reasons =
-      [
-        (pos, "Redeclared properties must be consistently declared `__LateInit`");
-        (parent_pos, "The property " ^ verb ^ " declared `__LateInit` here");
-      ]
+      lazy
+        (let verb =
+           if parent_is_lateinit then
+             "is"
+           else
+             "is not"
+         in
+         [
+           ( pos,
+             "Redeclared properties must be consistently declared `__LateInit`"
+           );
+           (parent_pos, "The property " ^ verb ^ " declared `__LateInit` here");
+         ])
     in
 
     (Error_code.BadLateInitOverride, reasons, [])
 
   let bad_xhp_attr_required_override pos parent_pos parent_tag tag =
     let reasons =
-      [
-        (pos, "Redeclared attribute must not be less strict");
-        ( parent_pos,
-          "The attribute is " ^ parent_tag ^ ", which is stricter than " ^ tag
-        );
-      ]
+      lazy
+        [
+          (pos, "Redeclared attribute must not be less strict");
+          ( parent_pos,
+            "The attribute is " ^ parent_tag ^ ", which is stricter than " ^ tag
+          );
+        ]
     in
     (Error_code.BadXhpAttrRequiredOverride, reasons, [])
 
   let coeffect_subtyping pos cap pos_expected cap_expected =
     let reasons =
-      [
-        ( pos_expected,
-          "Expected a function that requires " ^ Lazy.force cap_expected );
-        (pos, "But got a function that requires " ^ Lazy.force cap);
-      ]
+      lazy
+        [
+          ( pos_expected,
+            "Expected a function that requires " ^ Lazy.force cap_expected );
+          (pos, "But got a function that requires " ^ Lazy.force cap);
+        ]
     in
     (Error_code.SubtypeCoeffects, reasons, [])
 
   let not_sub_dynamic pos ty_name dynamic_part =
     let reasons =
-      [
-        ( pos,
-          "Type "
-          ^ (Markdown_lite.md_codify @@ Lazy.force ty_name)
-          ^ " is not a subtype of `dynamic` under dynamic-aware subtyping" );
-      ]
+      Lazy.map dynamic_part ~f:(fun xs ->
+          xs
+          @ [
+              ( pos,
+                "Type "
+                ^ (Markdown_lite.md_codify @@ Lazy.force ty_name)
+                ^ " is not a subtype of `dynamic` under dynamic-aware subtyping"
+              );
+            ])
     in
-    (Error_code.UnifyError, Lazy.force dynamic_part @ reasons, [])
+    (Error_code.UnifyError, reasons, [])
 
   let override_method_support_dynamic_type
       pos method_name parent_origin parent_pos =
     let reasons =
-      [
-        ( pos,
-          "Method "
-          ^ method_name
-          ^ " must be declared <<__SupportDynamicType>> because it overrides method in class "
-          ^ Render.strip_ns parent_origin
-          ^ " which does." );
-        (parent_pos, "Overridden method is defined here.");
-      ]
+      lazy
+        [
+          ( pos,
+            "Method "
+            ^ method_name
+            ^ " must be declared <<__SupportDynamicType>> because it overrides method in class "
+            ^ Render.strip_ns parent_origin
+            ^ " which does." );
+          (parent_pos, "Overridden method is defined here.");
+        ]
     in
     (Error_code.ImplementsDynamic, reasons, [])
 
   let readonly_mismatch pos kind reason_sub reason_super =
     let reasons =
-      ( pos,
-        match kind with
-        | `fn -> "Function readonly mismatch"
-        | `fn_return -> "Function readonly return mismatch"
-        | `param -> "Mismatched parameter readonlyness" )
-      :: reason_sub
-      @ reason_super
+      Lazy.(
+        reason_sub >>= fun reason_sub ->
+        reason_super >>= fun reason_super ->
+        return
+          (( pos,
+             match kind with
+             | `fn -> "Function readonly mismatch"
+             | `fn_return -> "Function readonly return mismatch"
+             | `param -> "Mismatched parameter readonlyness" )
+           :: reason_sub
+          @ reason_super))
     in
     (Error_code.ReadonlyMismatch, reasons, [])
 
@@ -6473,13 +7009,23 @@ end = struct
     let (code, claim, reasons) =
       Common.typing_too_many_args pos decl_pos actual expected
     in
-    (code, claim :: reasons, [])
+    let reasons =
+      Lazy.(
+        claim >>= fun x ->
+        reasons >>= fun xs -> return (x :: xs))
+    in
+    (code, reasons, [])
 
   let typing_too_few_args pos decl_pos actual expected =
     let (code, claim, reasons) =
       Common.typing_too_few_args pos decl_pos actual expected
     in
-    (code, claim :: reasons, [])
+    let reasons =
+      Lazy.(
+        claim >>= fun x ->
+        reasons >>= fun xs -> return (x :: xs))
+    in
+    (code, reasons, [])
 
   let non_object_member pos ctxt ty_name member_name kind decl_pos =
     let (code, claim, reasons) =
@@ -6491,11 +7037,16 @@ end = struct
         kind
         decl_pos
     in
-    (code, claim :: reasons, [])
+    let reasons =
+      Lazy.(
+        claim >>= fun x ->
+        reasons >>= fun xs -> return (x :: xs))
+    in
+    (code, reasons, [])
 
   let rigid_tvar_escape pos name =
     ( Error_code.RigidTVarEscape,
-      [(pos, "Rigid type variable " ^ name ^ " is escaping")],
+      lazy [(pos, "Rigid type variable " ^ name ^ " is escaping")],
       [] )
 
   let smember_not_found
@@ -6520,96 +7071,121 @@ end = struct
           (Pos_or_decl.unsafe_to_raw_pos pos)
         :: quickfixes
     in
-    (code, claim :: reasons, quickfixes)
+    let reasons =
+      Lazy.(
+        claim >>= fun x ->
+        reasons >>= fun xs -> return (x :: xs))
+    in
+    (code, reasons, quickfixes)
 
   let bad_method_override pos member_name =
     let reasons =
-      [
-        ( pos,
-          "The method "
-          ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
-          ^ " is not compatible with the overridden method" );
-      ]
+      lazy
+        [
+          ( pos,
+            "The method "
+            ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
+            ^ " is not compatible with the overridden method" );
+        ]
     in
     (Error_code.BadMethodOverride, reasons, [])
 
   let bad_prop_override pos member_name =
     let reasons =
-      [
-        ( pos,
-          "The property "
-          ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
-          ^ " has the wrong type" );
-      ]
+      lazy
+        [
+          ( pos,
+            "The property "
+            ^ (Render.strip_ns member_name |> Markdown_lite.md_codify)
+            ^ " has the wrong type" );
+        ]
     in
     (Error_code.BadMethodOverride, reasons, [])
 
-  let subtyping_error reasons = (Error_code.UnifyError, Lazy.force reasons, [])
+  let subtyping_error reasons = (Error_code.UnifyError, reasons, [])
 
   let method_not_dynamically_callable pos parent_pos =
     let reasons =
-      [
-        (parent_pos, "This method is `__DynamicallyCallable`.");
-        (pos, "This method is **not**.");
-      ]
+      lazy
+        [
+          (parent_pos, "This method is `__DynamicallyCallable`.");
+          (pos, "This method is **not**.");
+        ]
     in
     (Error_code.BadMethodOverride, reasons, [])
 
   let this_final pos_sub pos_super class_name =
-    let n = Render.strip_ns class_name |> Markdown_lite.md_codify in
-    let message1 = "Since " ^ n ^ " is not final" in
-    let message2 = "this might not be a " ^ n in
-    (Error_code.ThisFinal, [(pos_super, message1); (pos_sub, message2)], [])
+    let reasons =
+      lazy
+        (let n = Render.strip_ns class_name |> Markdown_lite.md_codify in
+         let message1 = "Since " ^ n ^ " is not final" in
+         let message2 = "this might not be a " ^ n in
+         [(pos_super, message1); (pos_sub, message2)])
+    in
+    (Error_code.ThisFinal, reasons, [])
 
   let typeconst_concrete_concrete_override pos parent_pos =
     ( Error_code.TypeconstConcreteConcreteOverride,
-      [
-        (pos, "Cannot re-declare this type constant");
-        (parent_pos, "Previously defined here");
-      ],
+      lazy
+        [
+          (pos, "Cannot re-declare this type constant");
+          (parent_pos, "Previously defined here");
+        ],
       [] )
 
   let abstract_concrete_override pos parent_pos kind =
-    let kind_str =
-      match kind with
-      | `method_ -> "method"
-      | `typeconst -> "type constant"
-      | `constant -> "constant"
-      | `property -> "property"
+    let reasons =
+      lazy
+        (let kind_str =
+           match kind with
+           | `method_ -> "method"
+           | `typeconst -> "type constant"
+           | `constant -> "constant"
+           | `property -> "property"
+         in
+         [
+           (pos, "Cannot re-declare this " ^ kind_str ^ " as abstract");
+           (parent_pos, "Previously defined here");
+         ])
     in
-    ( Error_code.AbstractConcreteOverride,
-      [
-        (pos, "Cannot re-declare this " ^ kind_str ^ " as abstract");
-        (parent_pos, "Previously defined here");
-      ],
-      [] )
+    (Error_code.AbstractConcreteOverride, reasons, [])
 
   let should_not_be_override pos class_id id =
     ( Error_code.ShouldNotBeOverride,
-      [
-        ( pos,
-          Printf.sprintf
-            "%s has no parent class with a method %s to override"
-            (Render.strip_ns class_id |> Markdown_lite.md_codify)
-            (Markdown_lite.md_codify id) );
-      ],
+      lazy
+        [
+          ( pos,
+            Printf.sprintf
+              "%s has no parent class with a method %s to override"
+              (Render.strip_ns class_id |> Markdown_lite.md_codify)
+              (Markdown_lite.md_codify id) );
+        ],
       [] )
 
   let override_no_default_typeconst pos parent_pos =
     ( Error_code.OverrideNoDefaultTypeconst,
-      [
-        (pos, "This abstract type constant does not have a default type");
-        ( parent_pos,
-          "It cannot override an abstract type constant that has a default type"
-        );
-      ],
+      lazy
+        [
+          (pos, "This abstract type constant does not have a default type");
+          ( parent_pos,
+            "It cannot override an abstract type constant that has a default type"
+          );
+        ],
       [] )
 
-  let eval t ~current_span =
+  let eval t ~current_span :
+      (Error_code.t * Pos_or_decl.t Message.t list Lazy.t * Quickfix.t list)
+      Eval_result.t =
     match t with
     | Of_error err ->
       Eval_result.map ~f:(fun (code, claim, reasons, _) ->
-          (code, Message.map ~f:Pos_or_decl.of_raw_pos claim :: reasons, []))
+          let reasons =
+            Lazy.(
+              claim >>= fun x ->
+              reasons >>= fun xs ->
+              return (Message.map ~f:Pos_or_decl.of_raw_pos x :: xs))
+          in
+          (code, reasons, []))
       @@ Error.eval err ~current_span
     | Fun_too_many_args { pos; decl_pos; actual; expected } ->
       Eval_result.single (fun_too_many_args pos decl_pos actual expected)
@@ -6779,10 +7355,10 @@ and Callback : sig
 
   val apply :
     ?code:Error_code.t ->
-    ?reasons:Pos_or_decl.t Message.t list ->
+    ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
     ?quickfixes:Quickfix.t list ->
     t ->
-    claim:Pos.t Message.t ->
+    claim:Pos.t Message.t Lazy.t ->
     error option
 
   val always : Primary.t -> t
@@ -6864,8 +7440,8 @@ end = struct
   (* -- Evaluation ---------------------------------------------------------- *)
   type error_state = {
     code_opt: Error_code.t option;
-    claim_opt: Pos.t Message.t option;
-    reasons: Pos_or_decl.t Message.t list;
+    claim_opt: Pos.t Message.t Lazy.t option;
+    reasons: Pos_or_decl.t Message.t list Lazy.t;
     quickfixes: Quickfix.t list;
   }
 
@@ -6886,7 +7462,10 @@ end = struct
         Option.value_map
           ~default:st.reasons
           ~f:(fun claim ->
-            Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos claim :: st.reasons)
+            Lazy.(
+              claim >>= fun claim ->
+              st.reasons >>= fun reasons ->
+              return (Tuple2.map_fst ~f:Pos_or_decl.of_raw_pos claim :: reasons)))
           st.claim_opt
       in
       let claim_opt =
@@ -6897,7 +7476,7 @@ end = struct
     | Retain_code t -> eval t { st with code_opt = None }
     | With_code default -> with_code (Option.value ~default st.code_opt) st
 
-  let apply ?code ?(reasons = []) ?(quickfixes = []) t ~claim =
+  let apply ?code ?(reasons = lazy []) ?(quickfixes = []) t ~claim =
     let st = { code_opt = code; claim_opt = Some claim; reasons; quickfixes } in
     Option.map ~f:(fun (code, claim_opt, reasons, quickfixes) ->
         (code, Option.value ~default:claim claim_opt, reasons, quickfixes))
@@ -6994,15 +7573,15 @@ and Reasons_callback : sig
 
   val of_primary_error : Primary.t -> t
 
-  val with_claim : Callback.t -> claim:Pos.t Message.t -> t
+  val with_claim : Callback.t -> claim:Pos.t Message.t Lazy.t -> t
 
   val with_code : t -> code:Error_code.t -> t
 
-  val with_reasons : t -> reasons:Pos_or_decl.t Message.t list -> t
+  val with_reasons : t -> reasons:Pos_or_decl.t Message.t list Lazy.t -> t
 
-  val prepend_reason : t -> reason:Pos_or_decl.t Message.t -> t
+  val prepend_reason : t -> reason:Pos_or_decl.t Message.t Lazy.t -> t
 
-  val append_reason : t -> reason:Pos_or_decl.t Message.t -> t
+  val append_reason : t -> reason:Pos_or_decl.t Message.t Lazy.t -> t
 
   val append_incoming_reasons : t -> t
 
@@ -7020,8 +7599,8 @@ and Reasons_callback : sig
 
   val apply_help :
     ?code:Error_code.t ->
-    ?claim:Pos.t Message.t ->
-    ?reasons:Pos_or_decl.t Message.t list ->
+    ?claim:Pos.t Message.t Lazy.t ->
+    ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
     ?quickfixes:Quickfix.t list ->
     t ->
     current_span:Pos.t ->
@@ -7029,8 +7608,8 @@ and Reasons_callback : sig
 
   val apply :
     ?code:Error_code.t ->
-    ?claim:Pos.t Message.t ->
-    ?reasons:Pos_or_decl.t Message.t list ->
+    ?claim:Pos.t Message.t Lazy.t ->
+    ?reasons:Pos_or_decl.t Message.t list Lazy.t ->
     ?quickfixes:Quickfix.t list ->
     t ->
     current_span:Pos.t ->
@@ -7092,12 +7671,12 @@ end = struct
   type t =
     | Always of Error.t
     | Of_error of Error.t
-    | Of_callback of Callback.t * Pos.t Message.t
+    | Of_callback of Callback.t * Pos.t Message.t Lazy.t
     | Retain of t * component
     | Incoming_reasons of t * op
     | With_code of t * Error_code.t
-    | With_reasons of t * Pos_or_decl.t Message.t list
-    | Add_reason of t * op * Pos_or_decl.t Message.t
+    | With_reasons of t * Pos_or_decl.t Message.t list Lazy.t
+    | Add_reason of t * op * Pos_or_decl.t Message.t Lazy.t
     | From_on_error of on_error
     | Prepend_on_apply of t * Secondary.t
     | Assert_in_current_decl of Error_code.t * Pos_or_decl.ctx
@@ -7160,8 +7739,8 @@ end = struct
   module Error_state = struct
     type t = {
       code_opt: Error_code.t option;
-      claim_opt: Pos.t Message.t option;
-      reasons_opt: Pos_or_decl.t Message.t list option;
+      claim_opt: Pos.t Message.t Lazy.t option;
+      reasons_opt: Pos_or_decl.t Message.t list Lazy.t option;
       quickfixes_opt: Quickfix.t list option;
     }
 
@@ -7173,10 +7752,19 @@ end = struct
       Eval_result.map
         (Secondary.eval snd_err ~current_span)
         ~f:(fun (code, reasons, quickfixes) ->
+          let reasons_opt =
+            Some
+              (match reasons_opt with
+              | None -> lazy []
+              | Some rlz ->
+                Lazy.(
+                  rlz >>= fun rlz ->
+                  reasons >>= fun reasons -> return (reasons @ rlz)))
+          in
           {
             code_opt = Some code;
             claim_opt;
-            reasons_opt = Some (reasons @ Option.value ~default:[] reasons_opt);
+            reasons_opt;
             quickfixes_opt =
               Some (quickfixes @ Option.value ~default:[] quickfixes_opt);
           })
@@ -7208,7 +7796,9 @@ end = struct
       | From_on_error f ->
         let code = Option.map ~f:Error_code.to_enum st.Error_state.code_opt
         and quickfixes = st.Error_state.quickfixes_opt
-        and reasons = Option.value ~default:[] st.Error_state.reasons_opt in
+        and reasons =
+          Option.value_map ~default:[] ~f:Lazy.force st.Error_state.reasons_opt
+        in
         f ?code ?quickfixes reasons;
         Eval_result.empty
       | Always err -> Error.eval err ~current_span
@@ -7220,7 +7810,7 @@ end = struct
         let crs =
           Option.
             ( value ~default code_opt,
-              value ~default:[] reasons_opt,
+              value ~default:(lazy []) reasons_opt,
               value ~default:[] quickfixes_opt )
         in
         let res_opt = Common.eval_assert ctx current_span crs in
@@ -7235,11 +7825,11 @@ end = struct
       | Incoming_reasons (err, op) ->
         Eval_result.map ~f:(fun ((code, claim, reasons, qfxs) as err) ->
             match (st.Error_state.reasons_opt, op) with
-            | (None, _)
-            | (Some [], _) ->
-              err
-            | (Some rs, Append) -> (code, claim, reasons @ rs, qfxs)
-            | (Some rs, Prepend) -> (code, claim, rs @ reasons, qfxs))
+            | (None, _) -> err
+            | (Some rs, Append) ->
+              (code, claim, Common.map2 ~f:(fun x y -> x @ y) reasons rs, qfxs)
+            | (Some rs, Prepend) ->
+              (code, claim, Common.map2 ~f:(fun x y -> x @ y) rs reasons, qfxs))
         @@ aux err Error_state.{ st with reasons_opt = None }
       | Prepend_on_apply (t, snd_err) ->
         Eval_result.bind
@@ -7248,16 +7838,21 @@ end = struct
     and aux_reason_op op err base_reason (Error_state.{ reasons_opt; _ } as st)
         =
       let reasons_opt =
-        match op with
-        | Append ->
-          Option.(
-            first_some (map reasons_opt ~f:(fun rs -> rs @ [base_reason]))
-            @@ Some [base_reason])
-        | Prepend ->
-          Option.(
-            first_some (map reasons_opt ~f:(fun rs -> base_reason :: rs))
-            @@ Some [base_reason])
+        Some
+          (match reasons_opt with
+          | None -> Lazy.map base_reason ~f:(fun x -> [x])
+          | Some reasons_lz ->
+            (match op with
+            | Append ->
+              Lazy.(
+                reasons_lz >>= fun rs ->
+                base_reason >>= fun r -> return (rs @ [r]))
+            | Prepend ->
+              Lazy.(
+                reasons_lz >>= fun rs ->
+                base_reason >>= fun r -> return (r :: rs))))
       in
+
       aux err Error_state.{ st with reasons_opt }
     and aux_retain t comp st =
       match comp with
@@ -7268,11 +7863,14 @@ end = struct
     aux t st
 
   let apply_help ?code ?claim ?reasons ?quickfixes t ~current_span =
-    let claim = Option.map claim ~f:(Message.map ~f:Pos_or_decl.of_raw_pos) in
+    let claim =
+      Option.map claim ~f:(Lazy.map ~f:(Message.map ~f:Pos_or_decl.of_raw_pos))
+    in
     let reasons_opt =
       match (claim, reasons) with
-      | (Some claim, Some reasons) -> Some (claim :: reasons)
-      | (Some claim, _) -> Some [claim]
+      | (Some claim, Some reasons) ->
+        Some (Common.map2 claim reasons ~f:(fun x xs -> x :: xs))
+      | (Some claim, _) -> Some (Lazy.map ~f:(fun claim -> [claim]) claim)
       | _ -> reasons
     in
     eval
@@ -7289,7 +7887,11 @@ end = struct
 
   let apply ?code ?claim ?reasons ?quickfixes t ~current_span =
     let f (code, claim, reasons, quickfixes) =
-      User_error.make (Error_code.to_enum code) claim reasons ~quickfixes
+      User_error.make
+        (Error_code.to_enum code)
+        (Lazy.force claim)
+        (Lazy.force reasons)
+        ~quickfixes
     in
     Eval_result.map ~f
     @@ apply_help ?code ?claim ?reasons ?quickfixes t ~current_span

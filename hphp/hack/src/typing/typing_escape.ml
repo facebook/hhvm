@@ -410,7 +410,8 @@ let refresh_tvar tv (on_error : Typing_error.Reasons_callback.t) renv =
     Some
       Typing_error.Reasons_callback.(
         with_reasons
-          ~reasons:[(pos, "Could not remove rigid type variable " ^ name)]
+          ~reasons:
+            (lazy [(pos, "Could not remove rigid type variable " ^ name)])
         @@ retain_code
         @@ retain_quickfixes on_error)
   in
@@ -474,7 +475,7 @@ let refresh_locals renv =
       let on_error =
         let pos = Pos_or_decl.of_raw_pos pos in
         let name = Markdown_lite.md_codify (Local_id.to_string local) in
-        let reason = (pos, "in the type of local " ^ name) in
+        let reason = lazy (pos, "in the type of local " ^ name) in
         Typing_error.Reasons_callback.append_reason on_error ~reason
       in
       let renv = { renv with on_error } in
@@ -514,7 +515,7 @@ let refresh_env_and_type ~remove:(types, remove) ~pos env ty =
       let pos = Pos_or_decl.of_raw_pos pos in
       Typing_error.Reasons_callback.append_reason
         on_error
-        ~reason:(pos, "in the return type of this lambda")
+        ~reason:(lazy (pos, "in the return type of this lambda"))
     in
     let renv = { renv with on_error } in
     let (renv, ty, _) = refresh_type renv Ast_defs.Covariant ty in

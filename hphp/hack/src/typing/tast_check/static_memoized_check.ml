@@ -26,7 +26,9 @@ let unnecessary_memoize_lsb c m =
   | Some pos ->
     let (pos_class, name_class) = c.c_name in
     let name_class = Utils.strip_ns name_class in
-    let reason = (pos_class, sprintf "the class `%s` is final" name_class) in
+    let reason =
+      lazy (pos_class, sprintf "the class `%s` is final" name_class)
+    in
     let suggestion =
       Some
         (sprintf

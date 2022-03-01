@@ -160,10 +160,24 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
                 // doing that e.g. because the file the parent is said to
                 // reside in couldn't be found on disk).
                 match ty.unwrap_class_type() {
-                    Some((_, ptn, _)) => Error::Parent {
-                        class: sc.name.id(),
-                        parent: ptn.id(),
-                        error: Box::new(err),
+                    Some((_, ptn, _)) => match err {
+                        Error::Parent {
+                            class: _,
+                            mut parents,
+                            error,
+                        } => {
+                            parents.push(ptn.id());
+                            Error::Parent {
+                                class: sc.name.id(),
+                                parents,
+                                error,
+                            }
+                        }
+                        _ => Error::Parent {
+                            class: sc.name.id(),
+                            parents: vec![ptn.id()],
+                            error: Box::new(err),
+                        },
                     },
                     None => err,
                 }

@@ -111,6 +111,8 @@ fn decl_files<R: Reason>(
         Arc::clone(&folded_decl_provider) as Arc<dyn FoldedDeclProvider<R>>,
     ));
 
+    let mut saw_err = false;
+
     for &path in filenames {
         for decl in decl_parser.parse(path).unwrap() {
             match decl {
@@ -121,11 +123,20 @@ fn decl_files<R: Reason>(
                     if opts.folded {
                         match folded_decl_provider.get_class(name) {
                             Ok(decl) => println!("{:#?}", decl),
-                            Err(e) => println!("Error: {}", e),
+                            Err(e) => {
+                                saw_err = true;
+                                eprintln!("Error: {}", e);
+                            }
                         }
                     }
                     if opts.typing {
-                        println!("{:#?}", typing_decl_provider.get_class(name).unwrap())
+                        match typing_decl_provider.get_class(name) {
+                            Ok(decl) => println!("{:#?}", decl),
+                            Err(e) => {
+                                saw_err = true;
+                                eprintln!("Error: {}", e);
+                            }
+                        }
                     }
                 }
                 shallow::Decl::Fun(_, decl) => println!("{:#?}", decl),
@@ -133,6 +144,10 @@ fn decl_files<R: Reason>(
                 shallow::Decl::Const(_, decl) => println!("{:#?}", decl),
             }
         }
+    }
+
+    if saw_err {
+        std::process::exit(1);
     }
 }
 

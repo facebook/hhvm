@@ -5,6 +5,7 @@
 
 use crate::decl_defs::{ConstDecl, DeclTy, FoldedClass, FunDecl, TypedefDecl};
 use crate::reason::Reason;
+use itertools::Itertools;
 use pos::{ConstName, FunName, MethodName, PropName, TypeName};
 use std::fmt::Debug;
 use std::sync::Arc;
@@ -23,10 +24,14 @@ pub enum Error {
     #[error("{0}")]
     Shallow(#[from] crate::shallow_decl_provider::Error),
 
-    #[error("Failed to declare {class} because of error in {parent}: {error}")]
+    #[error(
+        "Failed to declare {class} because of error in ancestor {} (via {}): {error}",
+        .parents.first().unwrap(),
+        .parents.iter().rev().join(", "),
+    )]
     Parent {
         class: TypeName,
-        parent: TypeName,
+        parents: Vec<TypeName>,
         #[source]
         error: Box<Error>,
     },

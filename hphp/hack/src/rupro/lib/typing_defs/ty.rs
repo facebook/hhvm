@@ -74,6 +74,8 @@ pub enum Ty_<R: Reason, TY> {
     Tclass(Positioned<TypeName, R::Pos>, Exact, Vec<TY>),
 
     Tvar(Tyvar),
+
+    Tunion(Vec<TY>),
 }
 
 walkable!(impl<R: Reason, TY> for Ty_<R, TY> =>  {
@@ -82,6 +84,7 @@ walkable!(impl<R: Reason, TY> for Ty_<R, TY> =>  {
     Ty_::Tany => [],
     Ty_::Tgeneric(_, args) => [args],
     Ty_::Tclass(_, _, args) => [args],
+    Ty_::Tunion(args) => [args],
     Ty_::Tvar(_) => [],
 });
 
@@ -113,6 +116,7 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
         let ty = match &**self.node() {
             Ty_::Tvar(tv) => OTy_::Tvar((*tv).into()),
             Ty_::Tprim(x) => OTy_::Tprim(arena.alloc(*x)),
+            Ty_::Tunion(_) => todo!(),
             Ty_::Tfun(_) => todo!(),
             Ty_::Tany => todo!(),
             Ty_::Tgeneric(_, _) => todo!(),

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{fold::DeclFolder, Result, TypeDecl};
+use super::{fold::DeclFolder, Error, Result, TypeDecl};
 use crate::alloc::Allocator;
 use crate::cache::Cache;
 use crate::decl_defs::{ConstDecl, DeclTy, DeclTy_, FoldedClass, FunDecl, ShallowClass};
@@ -151,7 +151,23 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
     ) -> Result<TypeNameMap<Arc<FoldedClass<R>>>> {
         let mut acc = Default::default();
         for ty in sc.extends.iter() {
-            self.decl_class_type(stack, &mut acc, ty)?;
+            self.decl_class_type(stack, &mut acc, ty).map_err(|err| {
+                // We tried to produce a decl of the parent of the given
+                // class but failed. We capture this chain of events as a
+                // `Parent` error. The has the effect of explaining that "we
+                // couldn't decl 'class' because we couldn't decl 'parent'"
+                // (along with the underlying error that prevented us from
+                // doing that e.g. because the file the parent is said to
+                // reside in couldn't be found on disk).
+                match ty.unwrap_class_type() {
+                    Some((_, ptn, _)) => Error::Parent {
+                        class: sc.name.id(),
+                        parent: ptn.id(),
+                        error: Box::new(err),
+                    },
+                    None => err,
+                }
+            })?;
         }
         Ok(acc)
     }

@@ -119,7 +119,10 @@ fn decl_files<R: Reason>(
                         println!("{:#?}", decl);
                     }
                     if opts.folded {
-                        println!("{:#?}", folded_decl_provider.get_class(name).unwrap())
+                        match folded_decl_provider.get_class(name) {
+                            Ok(decl) => println!("{:#?}", decl),
+                            Err(e) => println!("Error: {}", e),
+                        }
                     }
                     if opts.typing {
                         println!("{:#?}", typing_decl_provider.get_class(name).unwrap())

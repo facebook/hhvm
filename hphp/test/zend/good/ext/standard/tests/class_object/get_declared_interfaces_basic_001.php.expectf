@@ -1,7 +1,7 @@
 *** Testing get_declared_interfaces() : basic functionality ***
 
 -- Testing get_declared_interfaces() function with Zero arguments --
-vec(126) {
+vec(127) {
   string(23) "HH\Rx\IteratorAggregate"
   string(19) "HH\Rx\KeyedIterator"
   string(26) "HH\Lib\IO\SeekableFDHandle"
@@ -26,6 +26,7 @@ vec(126) {
   string(11) "HH\Iterable"
   string(28) "IExceptionWithPureGetMessage"
   string(10) "SplSubject"
+  string(37) "HH\Lib\OS\PosixSpawnFileActionsSetter"
   string(36) "HH\Lib\IO\CloseableReadWriteFDHandle"
   string(34) "HH\Lib\IO\CloseableReadWriteHandle"
   string(23) "HH\Lib\IO\WriteFDHandle"

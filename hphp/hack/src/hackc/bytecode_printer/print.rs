@@ -1586,7 +1586,49 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_istype_op(w, op)
         }
-        Instruct::Base(i) => print_base(w, i),
+        Instruct::BaseGC(si, m) => {
+            w.write_all(b"BaseGC ")?;
+            print_stack_index(w, si)?;
+            w.write_all(b" ")?;
+            print_member_opmode(w, m)
+        }
+        Instruct::BaseGL(id, m) => {
+            w.write_all(b"BaseGL ")?;
+            print_local(w, id)?;
+            w.write_all(b" ")?;
+            print_member_opmode(w, m)
+        }
+        Instruct::BaseSC(si1, si2, m, op) => {
+            w.write_all(b"BaseSC ")?;
+            print_stack_index(w, si1)?;
+            w.write_all(b" ")?;
+            print_stack_index(w, si2)?;
+            w.write_all(b" ")?;
+            print_member_opmode(w, m)?;
+            w.write_all(b" ")?;
+            print_readonly_op(w, op)
+        }
+        Instruct::BaseL(id, m, op) => {
+            w.write_all(b"BaseL ")?;
+            print_local(w, id)?;
+            w.write_all(b" ")?;
+            print_member_opmode(w, m)?;
+            w.write_all(b" ")?;
+            print_readonly_op(w, op)
+        }
+        Instruct::BaseC(si, m) => {
+            w.write_all(b"BaseC ")?;
+            print_stack_index(w, si)?;
+            w.write_all(b" ")?;
+            print_member_opmode(w, m)
+        }
+        Instruct::BaseH => w.write_all(b"BaseH"),
+        Instruct::Dim(m, mk) => {
+            w.write_all(b"Dim ")?;
+            print_member_opmode(w, m)?;
+            w.write_all(b" ")?;
+            print_member_key(w, mk)
+        }
         Instruct::Final(i) => print_final(w, i),
         Instruct::TryCatchBegin => w.write_all(b".try {"),
         Instruct::TryCatchMiddle => w.write_all(b"} .catch {"),
@@ -1606,55 +1648,6 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
         Instruct::ReqDoc => w.write_all(b"ReqDoc"),
         Instruct::Eval => w.write_all(b"Eval"),
         _ => Err(Error::fail("invalid instruction").into()),
-    }
-}
-
-fn print_base(w: &mut dyn Write, i: &InstructBase<'_>) -> Result<()> {
-    use InstructBase as I;
-    match i {
-        I::BaseGC(si, m) => {
-            w.write_all(b"BaseGC ")?;
-            print_stack_index(w, si)?;
-            w.write_all(b" ")?;
-            print_member_opmode(w, m)
-        }
-        I::BaseGL(id, m) => {
-            w.write_all(b"BaseGL ")?;
-            print_local(w, id)?;
-            w.write_all(b" ")?;
-            print_member_opmode(w, m)
-        }
-        I::BaseSC(si1, si2, m, op) => {
-            w.write_all(b"BaseSC ")?;
-            print_stack_index(w, si1)?;
-            w.write_all(b" ")?;
-            print_stack_index(w, si2)?;
-            w.write_all(b" ")?;
-            print_member_opmode(w, m)?;
-            w.write_all(b" ")?;
-            print_readonly_op(w, op)
-        }
-        I::BaseL(id, m, op) => {
-            w.write_all(b"BaseL ")?;
-            print_local(w, id)?;
-            w.write_all(b" ")?;
-            print_member_opmode(w, m)?;
-            w.write_all(b" ")?;
-            print_readonly_op(w, op)
-        }
-        I::BaseC(si, m) => {
-            w.write_all(b"BaseC ")?;
-            print_stack_index(w, si)?;
-            w.write_all(b" ")?;
-            print_member_opmode(w, m)
-        }
-        I::BaseH => w.write_all(b"BaseH"),
-        I::Dim(m, mk) => {
-            w.write_all(b"Dim ")?;
-            print_member_opmode(w, m)?;
-            w.write_all(b" ")?;
-            print_member_key(w, mk)
-        }
     }
 }
 

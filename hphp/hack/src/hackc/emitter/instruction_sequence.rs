@@ -758,23 +758,19 @@ pub mod instr {
     }
 
     pub fn basel<'a>(local: Local<'a>, mode: MOpMode, readonly_op: ReadonlyOp) -> InstrSeq<'a> {
-        instr(Instruct::Base(InstructBase::BaseL(
-            local,
-            mode,
-            readonly_op,
-        )))
+        instr(Instruct::BaseL(local, mode, readonly_op))
     }
 
     pub fn basec<'a>(stack_index: StackIndex, mode: MOpMode) -> InstrSeq<'a> {
-        instr(Instruct::Base(InstructBase::BaseC(stack_index, mode)))
+        instr(Instruct::BaseC(stack_index, mode))
     }
 
     pub fn basegc<'a>(stack_index: StackIndex, mode: MOpMode) -> InstrSeq<'a> {
-        instr(Instruct::Base(InstructBase::BaseGC(stack_index, mode)))
+        instr(Instruct::BaseGC(stack_index, mode))
     }
 
     pub fn basegl<'a>(local: Local<'a>, mode: MOpMode) -> InstrSeq<'a> {
-        instr(Instruct::Base(InstructBase::BaseGL(local, mode)))
+        instr(Instruct::BaseGL(local, mode))
     }
 
     pub fn basesc<'a>(
@@ -783,16 +779,11 @@ pub mod instr {
         mode: MOpMode,
         readonly_op: ReadonlyOp,
     ) -> InstrSeq<'a> {
-        instr(Instruct::Base(InstructBase::BaseSC(
-            y,
-            z,
-            mode,
-            readonly_op,
-        )))
+        instr(Instruct::BaseSC(y, z, mode, readonly_op))
     }
 
     pub fn baseh<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Base(InstructBase::BaseH))
+        instr(Instruct::BaseH)
     }
 
     pub fn cgetcunop<'a>() -> InstrSeq<'a> {
@@ -873,7 +864,7 @@ pub mod instr {
     }
 
     pub fn dim<'a>(op: MOpMode, key: MemberKey<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Base(InstructBase::Dim(op, key)))
+        instr(Instruct::Dim(op, key))
     }
 
     pub fn dim_warn_pt<'a>(key: PropId<'a>, readonly_op: ReadonlyOp) -> InstrSeq<'a> {

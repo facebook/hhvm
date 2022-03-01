@@ -133,18 +133,6 @@ pub enum HasGenericsOp {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum InstructBase<'arena> {
-    BaseGC(StackIndex, MOpMode),
-    BaseGL(Local<'arena>, MOpMode),
-    BaseSC(StackIndex, StackIndex, MOpMode, ReadonlyOp),
-    BaseL(Local<'arena>, MOpMode, ReadonlyOp),
-    BaseC(StackIndex, MOpMode),
-    BaseH,
-    Dim(MOpMode, MemberKey<'arena>),
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
 pub enum InstructFinal<'arena> {
     QueryM(NumParams, QueryMOp, MemberKey<'arena>),
     SetM(NumParams, MemberKey<'arena>),
@@ -473,7 +461,13 @@ pub enum Instruct<'arena> {
     IsUnsetL(Local<'arena>),
     IsTypeC(IsTypeOp),
     IsTypeL(Local<'arena>, IsTypeOp),
-    Base(InstructBase<'arena>),
+    BaseGC(StackIndex, MOpMode),
+    BaseGL(Local<'arena>, MOpMode),
+    BaseSC(StackIndex, StackIndex, MOpMode, ReadonlyOp),
+    BaseL(Local<'arena>, MOpMode, ReadonlyOp),
+    BaseC(StackIndex, MOpMode),
+    BaseH,
+    Dim(MOpMode, MemberKey<'arena>),
     Final(InstructFinal<'arena>),
     Label(Label),
     Comment(Str<'arena>),
@@ -681,7 +675,13 @@ impl Instruct<'_> {
             | Self::IsUnsetL(_)
             | Self::IsTypeC(_)
             | Self::IsTypeL(_, _)
-            | Self::Base(_)
+            | Self::BaseGC(_, _)
+            | Self::BaseGL(_, _)
+            | Self::BaseSC(_, _, _, _)
+            | Self::BaseL(_, _, _)
+            | Self::BaseC(_, _)
+            | Self::BaseH
+            | Self::Dim(_, _)
             | Self::Final(_)
             | Self::Label(_)
             | Self::TryCatchBegin
@@ -892,7 +892,13 @@ impl Instruct<'_> {
             | Self::IsUnsetL(_)
             | Self::IsTypeC(_)
             | Self::IsTypeL(_, _)
-            | Self::Base(_)
+            | Self::BaseGC(_, _)
+            | Self::BaseGL(_, _)
+            | Self::BaseSC(_, _, _, _)
+            | Self::BaseL(_, _, _)
+            | Self::BaseC(_, _)
+            | Self::BaseH
+            | Self::Dim(_, _)
             | Self::Final(_)
             | Self::Label(_)
             | Self::TryCatchBegin

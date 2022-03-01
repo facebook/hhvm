@@ -153,16 +153,6 @@ pub enum InstructMutator<'arena> {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum InstructNew<'arena> {
-    NewObj,
-    NewObjR,
-    NewObjD(ClassId<'arena>),
-    NewObjRD(ClassId<'arena>),
-    NewObjS(SpecialClsRef),
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
 pub enum InstructBase<'arena> {
     BaseGC(StackIndex, MOpMode),
     BaseGL(Local<'arena>, MOpMode),
@@ -571,7 +561,11 @@ pub enum Instruct<'arena> {
         flavor: ObjMethodOp,
         method: MethodId<'arena>,
     },
-    New(InstructNew<'arena>),
+    NewObj,
+    NewObjR,
+    NewObjD(ClassId<'arena>),
+    NewObjRD(ClassId<'arena>),
+    NewObjS(SpecialClsRef),
     Misc(InstructMisc<'arena>),
     CGetL(Local<'arena>),
     CGetQuietL(Local<'arena>),
@@ -724,7 +718,11 @@ impl Instruct<'_> {
             | Self::ResolveClass(_)
             | Self::Continue(_)
             | Self::Break(_)
-            | Self::New(_)
+            | Self::NewObj
+            | Self::NewObjR
+            | Self::NewObjD(_)
+            | Self::NewObjRD(_)
+            | Self::NewObjS(_)
             | Self::CGetL(_)
             | Self::CGetQuietL(_)
             | Self::CGetL2(_)
@@ -879,7 +877,11 @@ impl Instruct<'_> {
             | Self::ResolveClass(_)
             | Self::Continue(_)
             | Self::Break(_)
-            | Self::New(_)
+            | Self::NewObj
+            | Self::NewObjR
+            | Self::NewObjD(_)
+            | Self::NewObjRD(_)
+            | Self::NewObjS(_)
             | Self::CGetL(_)
             | Self::CGetQuietL(_)
             | Self::CGetL2(_)

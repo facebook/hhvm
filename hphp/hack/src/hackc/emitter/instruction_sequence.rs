@@ -696,7 +696,7 @@ pub mod instr {
     }
 
     pub fn newobj<'a>() -> InstrSeq<'a> {
-        instr(Instruct::New(InstructNew::NewObj))
+        instr(Instruct::NewObj)
     }
 
     pub fn sswitch<'a>(
@@ -715,19 +715,19 @@ pub mod instr {
     }
 
     pub fn newobjr<'a>() -> InstrSeq<'a> {
-        instr(Instruct::New(InstructNew::NewObjR))
+        instr(Instruct::NewObjR)
     }
 
     pub fn newobjd<'a>(id: ClassId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::New(InstructNew::NewObjD(id)))
+        instr(Instruct::NewObjD(id))
     }
 
     pub fn newobjrd<'a>(id: ClassId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::New(InstructNew::NewObjRD(id)))
+        instr(Instruct::NewObjRD(id))
     }
 
     pub fn newobjs<'a>(scref: SpecialClsRef) -> InstrSeq<'a> {
-        instr(Instruct::New(InstructNew::NewObjS(scref)))
+        instr(Instruct::NewObjS(scref))
     }
 
     pub fn lockobj<'a>() -> InstrSeq<'a> {

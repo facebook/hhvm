@@ -1007,25 +1007,6 @@ fn print_null_flavor(w: &mut dyn Write, f: &ObjMethodOp) -> Result<()> {
     })
 }
 
-fn print_new(w: &mut dyn Write, new: &InstructNew<'_>) -> Result<()> {
-    match new {
-        InstructNew::NewObj => w.write_all(b"NewObj"),
-        InstructNew::NewObjR => w.write_all(b"NewObjR"),
-        InstructNew::NewObjD(cid) => {
-            w.write_all(b"NewObjD ")?;
-            print_class_id(w, cid)
-        }
-        InstructNew::NewObjRD(cid) => {
-            w.write_all(b"NewObjRD ")?;
-            print_class_id(w, cid)
-        }
-        InstructNew::NewObjS(r) => {
-            w.write_all(b"NewObjS ")?;
-            print_special_cls_ref(w, r)
-        }
-    }
-}
-
 fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
     match instr {
         Instruct::IterInit(iter_args, label) => {
@@ -1339,7 +1320,20 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_method_id(w, method)
         }
-        Instruct::New(n) => print_new(w, n),
+        Instruct::NewObj => w.write_all(b"NewObj"),
+        Instruct::NewObjR => w.write_all(b"NewObjR"),
+        Instruct::NewObjD(cid) => {
+            w.write_all(b"NewObjD ")?;
+            print_class_id(w, cid)
+        }
+        Instruct::NewObjRD(cid) => {
+            w.write_all(b"NewObjRD ")?;
+            print_class_id(w, cid)
+        }
+        Instruct::NewObjS(r) => {
+            w.write_all(b"NewObjS ")?;
+            print_special_cls_ref(w, r)
+        }
         Instruct::Misc(misc) => print_misc(w, misc, dv_labels),
         Instruct::CGetL(id) => {
             w.write_all(b"CGetL ")?;

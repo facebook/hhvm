@@ -6,4 +6,6 @@
  *
  *)
 
+(** Ban reuse of traits that have final methods. *)
+
 val handler : Nast_visitor.handler_base

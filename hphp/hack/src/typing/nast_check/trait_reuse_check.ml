@@ -6,7 +6,7 @@
  *
  *)
 
-(* Ban reuse of traits that have final methods. *)
+(** Ban reuse of traits that have final methods. *)
 
 open Hh_prelude
 open Aast
@@ -41,8 +41,8 @@ let is_class_name tgenv (type_name : string) : bool =
   | Some decl -> is_class_kind (Cls.kind decl)
   | None -> false
 
-(* All the parent classes, used traits, and implemented interfaces of
-   [type_name]. This is the flattened inheritance tree. *)
+(** All the parent classes, used traits, and implemented interfaces of
+  [type_name]. This is the flattened inheritance tree. *)
 let all_ancestor_names tgenv (type_name : string) : string list =
   let decl =
     Decl_provider.get_class ~tracing_info:tgenv.tracing_info tgenv.ctx type_name
@@ -51,8 +51,7 @@ let all_ancestor_names tgenv (type_name : string) : string list =
   | Some decl -> Decl_provider.Class.all_ancestor_names decl
   | None -> []
 
-(* Does trait/class [type_name] use [trait_name]? Includes indirect
-   usage. *)
+(** Does trait/class [type_name] use [trait_name]? Includes indirect usage. *)
 let type_uses_trait tgenv (type_name : string) (trait_name : string) : bool =
   let decl =
     Decl_provider.get_class ~tracing_info:tgenv.tracing_info tgenv.ctx type_name
@@ -61,7 +60,7 @@ let type_uses_trait tgenv (type_name : string) (trait_name : string) : bool =
   | Some decl -> Cls.has_ancestor decl trait_name
   | None -> false
 
-(* Return the position where class/trait [type_name] is defined. *)
+(** Return the position where class/trait [type_name] is defined. *)
 let classish_def_pos tgenv type_name : Pos_or_decl.t =
   let decl =
     Decl_provider.get_class ~tracing_info:tgenv.tracing_info tgenv.ctx type_name
@@ -70,15 +69,15 @@ let classish_def_pos tgenv type_name : Pos_or_decl.t =
   | Some decl -> Cls.pos decl
   | None -> Pos_or_decl.none
 
-(* Return all the ancestors of class/trait [type_name] that use
-   [trait_name]. *)
+(** Return all the ancestors of class/trait [type_name] that use
+  [trait_name]. *)
 let find_ancestors_using tgenv (type_name : string) (trait_name : string) :
     string list =
   let ancestors = all_ancestor_names tgenv type_name in
   List.filter ancestors ~f:(fun name -> type_uses_trait tgenv name trait_name)
 
-(* Sort a list of class/trait names according to how many ancestors
-   they have, in ascending order. *)
+(** Sort a list of class/trait names according to how many ancestors
+  they have, in ascending order. *)
 let sort_by_num_ancestors tgenv (type_names : string list) : string list =
   let num_ancestors cls_name =
     List.length (all_ancestor_names tgenv cls_name)
@@ -88,16 +87,16 @@ let sort_by_num_ancestors tgenv (type_names : string list) : string list =
   in
   List.sort type_names ~compare
 
-(* Given a non-empty list of class/trait names, return the name with
-   the fewest parents. *)
+(** Given a non-empty list of class/trait names, return the name with
+  the fewest parents. *)
 let uppermost_classish tgenv (names : string list) : string =
   List.hd_exn (sort_by_num_ancestors tgenv names)
 
 let lowermost_classish tgenv (names : string list) : string =
   List.hd_exn (List.rev (sort_by_num_ancestors tgenv names))
 
-(* Find the uppermost class in the hierarchy that is using [trait_name],
-   directly or via another trait. *)
+(** Find the uppermost class in the hierarchy that is using [trait_name],
+  directly or via another trait. *)
 let find_using_class tgenv cls_name (trait_name : string) : string =
   let using_ancestors = find_ancestors_using tgenv cls_name trait_name in
   let class_ancestors =
@@ -105,8 +104,8 @@ let find_using_class tgenv cls_name (trait_name : string) : string =
   in
   uppermost_classish tgenv class_ancestors
 
-(* Find the first use site in class/trait [type_name] of
-   [trait_name], directly or via another trait. *)
+(** Find the first use site in class/trait [type_name] of
+  [trait_name], directly or via another trait. *)
 let trait_use_pos tgenv (type_name : string) (trait_name : string) :
     Pos_or_decl.t =
   let decl =
@@ -120,8 +119,7 @@ let trait_use_pos tgenv (type_name : string) (trait_name : string) :
     | None -> Pos_or_decl.none)
   | None -> Pos_or_decl.none
 
-(* all the inherited properties of [type_name], including static properties
- *)
+(** All the inherited properties of [type_name], including static properties. *)
 let properties tgenv (type_name : string) :
     (string * Typing_defs.class_elt) list =
   let decl =
@@ -131,7 +129,7 @@ let properties tgenv (type_name : string) :
   | Some decl -> Cls.props decl @ Cls.sprops decl
   | None -> []
 
-(* all the inherited methods of [type_name], both instance and static methods *)
+(** all the inherited methods of [type_name], both instance and static methods *)
 let methods tgenv (type_name : string) : (string * Typing_defs.class_elt) list =
   let decl =
     Decl_provider.get_class ~tracing_info:tgenv.tracing_info tgenv.ctx type_name
@@ -140,8 +138,8 @@ let methods tgenv (type_name : string) : (string * Typing_defs.class_elt) list =
   | Some decl -> Cls.methods decl @ Cls.smethods decl
   | None -> []
 
-(* The final methods in [type_name] (excluding inherited methods),
-   both instance and static methods. *)
+(** The final methods in [type_name] (excluding inherited methods),
+  both instance and static methods. *)
 let final_methods tgenv (type_name : string) :
     (string * Typing_defs.class_elt) list =
   let decl =
@@ -162,15 +160,14 @@ let has_final_method tgenv (type_name : string) : bool =
   | _ :: _ -> true
   | [] -> false
 
-(* Return a list showing a route from [type_name] to [trait_name]. If
- * multiple routes exist, it prefers the longest one.
- *
- * trait One {}
- * trait Two { use One; }
- * class Three { use Two; }
- *
- * The route from Three to One in this example is ["Three"; "Two"; "One"].
- *)
+(** Return a list showing a route from [type_name] to [trait_name]. If
+  multiple routes exist, it prefers the longest one.
+
+    trait One {}
+    trait Two { use One; }
+    class Three { use Two; }
+
+  The route from Three to One in this example is ["Three"; "Two"; "One"]. *)
 let trait_use_route tgenv type_name trait_name : string list =
   let rec traits_between type_name trait_name seen : string list =
     if SSet.mem type_name seen then
@@ -191,18 +188,17 @@ let trait_use_route tgenv type_name trait_name : string list =
   in
   [type_name] @ traits_between type_name trait_name SSet.empty @ [trait_name]
 
-(* Given a list of [items], apply the function [f] to every two
- * adjacent items.
- *
- * E.g. for [1; 2; 3] we return [(f 1 2); (f 2 3)].
- *)
+(** Given a list of [items], apply the function [f] to every two
+  adjacent items.
+
+  E.g. for [1; 2; 3] we return [(f 1 2); (f 2 3)]. *)
 let rec pairwise_map (items : 'a list) (f : 'a -> 'a -> 'b) : 'b list =
   match items with
   | [] -> []
   | [_] -> []
   | x :: y :: rest -> f x y :: pairwise_map (y :: rest) f
 
-(* Return a list of positions from one class/trait to another. *)
+(** Return a list of positions from one class/trait to another. *)
 let describe_route tgenv (type_name : string) (trait_name : string) :
     (Pos_or_decl.t * string) list =
   let route = trait_use_route tgenv type_name trait_name in
@@ -213,8 +209,8 @@ let describe_route tgenv (type_name : string) (trait_name : string) :
           (strip_ns type_name)
           (strip_ns trait_name) ))
 
-(* Return a list of positions that show how a class ends up using a
-   trait via another trait. *)
+(** Return a list of positions that show how a class ends up using a
+  trait via another trait. *)
 let class_to_trait_via_trait
     tgenv (base_class : string) (first_trait : string) (reused_trait : string) :
     (Pos_or_decl.t * string) list =
@@ -229,7 +225,7 @@ let class_to_trait_via_trait
   )
   :: result
 
-(* Return a list of positions explaining why a final method is reused. *)
+(** Return a list of positions explaining why a final method is reused. *)
 let relevant_positions tgenv using_cls_name used_trait reused_trait :
     (Pos_or_decl.t * string) list =
   let result =
@@ -263,7 +259,7 @@ let relevant_positions tgenv using_cls_name used_trait reused_trait :
           meth_name );
     ]
 
-(* All the traits that occur as `use Foo; in this class *)
+(** All the traits that occur as [use Foo;] directly in this class *)
 let traits (c : Nast.class_) : (Pos.t * string) list =
   List.filter_map c.c_uses ~f:(fun (pos, trait_hint) ->
       match trait_hint with
@@ -275,7 +271,7 @@ let parent_class (c : Nast.class_) : (Pos.t * string) option =
   | [(_, Happly (pstring, _))] when is_class_kind c.c_kind -> Some pstring
   | _ -> None
 
-(* All the traits that occur as `use Foo;` in this class, plus the
+(** All the traits that occur as `use Foo;` in this class, plus the
    parent class name (if we have one). *)
 let traits_and_parent (c : Nast.class_) : (Pos.t * string) list =
   let traits_used = traits c in
@@ -283,21 +279,20 @@ let traits_and_parent (c : Nast.class_) : (Pos.t * string) list =
   | Some pstring -> pstring :: traits_used
   | None -> traits_used
 
-(* Given a trait name, return the full list of traits it uses.
- *
- * trait One {}
- * trait Two { use One; }
- * trait Three { use Two; }
- *
- * For "Three", we return ["Three"; "Two"; "One"] in some order.
- *)
+(** Given a trait name, return the full list of traits it uses.
+
+    trait One {}
+    trait Two { use One; }
+    trait Three { use Two; }
+
+  For "Three", we return ["Three"; "Two"; "One"] in some order. *)
 let all_trait_ancestors ctx (trait_name : string) : string list =
   let ancestors = all_ancestor_names ctx trait_name in
   (* Trait ancestors can be other traits or interfaces. *)
   let ancestor_traits = List.filter ancestors ~f:(is_trait_name ctx) in
   trait_name :: ancestor_traits
 
-(* Return the union of the two sets given, plus a list of values in common. *)
+(** Return the union of the two sets given, plus a list of values in common. *)
 let union_report_overlaps (s1 : SSet.t) (s2 : SSet.t) : SSet.t * string list =
   SSet.fold
     (fun elt (acc, dupes) ->
@@ -308,11 +303,11 @@ let union_report_overlaps (s1 : SSet.t) (s2 : SSet.t) : SSet.t * string list =
     s2
     (s1, [])
 
-(* Return the names of the methods defined locally in class c *)
+(** Return the names of the methods defined locally in class c *)
 let local_method_names (c : Nast.class_) : string list =
   List.map c.c_methods ~f:(fun m -> snd m.m_name)
 
-(* Check reuse of trait with a final method *)
+(** Check reuse of trait with a final method *)
 let check_reuse_final_method tgenv (c : Nast.class_) : unit =
   let (_ : SSet.t) =
     List.fold
@@ -347,7 +342,7 @@ let check_reuse_final_method tgenv (c : Nast.class_) : unit =
   in
   ()
 
-(* Check reuse of trait with a final method ignoring diamond inclusion via use chains *)
+(** Check reuse of trait with a final method ignoring diamond inclusion via use chains *)
 let check_reuse_final_method_allow_diamond tgenv (c : Nast.class_) : unit =
   match parent_class c with
   | Some (_, pstring) ->
@@ -385,12 +380,15 @@ let check_reuse_final_method_allow_diamond tgenv (c : Nast.class_) : unit =
                    }))
   | None -> ()
 
-(* check reuse of a trait with a non-overridden non-abstract method *)
+(** Check reuse of a trait with a non-overridden non-abstract method *)
 let check_reuse_method_without_override tgenv (c : Nast.class_) : unit =
   let local_method_names = SSet.of_list (local_method_names c) in
+  (* [seen_method_origins] maps origins of methods from traits to the trait
+   * the method comes from. E.g. for T a trait used directly in C, m a method from
+   * T and O the origin of m, [seen_method_origins] will map O to T. *)
   let seen_method_origins = ref SMap.empty in
   List.iter (traits c) ~f:(fun (_, used_trait_name) ->
-      let local_method_origins = ref SSet.empty in
+      let used_trait_methods_origins = ref SSet.empty in
       let all_trait_ancestors =
         SSet.of_list (all_trait_ancestors tgenv used_trait_name)
       in
@@ -402,8 +400,10 @@ let check_reuse_method_without_override tgenv (c : Nast.class_) : unit =
           then
             (* If we've seen a path to this before, we're reusing that trait. *)
             if
+              (* if we haven't complained about this already *)
+              (not (SSet.mem m.ce_origin !used_trait_methods_origins))
+              && (* and we've seen the origin before via a different path *)
               SMap.mem m.ce_origin !seen_method_origins
-              && not (SSet.mem m.ce_origin !local_method_origins)
             then (
               if not (SSet.mem m_name local_method_names) then
                 (* The reused trait has a method that we haven't overridden in this trait/class. *)
@@ -440,21 +440,21 @@ let check_reuse_method_without_override tgenv (c : Nast.class_) : unit =
               (* We haven't seen a path to this trait before, record it. *)
               seen_method_origins :=
                 SMap.add m.ce_origin used_trait_name !seen_method_origins;
-              local_method_origins := SSet.add m.ce_origin !local_method_origins
+              used_trait_methods_origins :=
+                SSet.add m.ce_origin !used_trait_methods_origins
             end))
 
 (** With diamond inclusion of traits, it is possible to write
 
-     trait Tr<T> { .. }
-     trait T1 { use Tr<int>; ..}
-     trait T2 { use Tr<string>; .. }
-     class C { use T1, T2; .. }
+    trait Tr<T> { .. }
+    trait T1 { use Tr<int>; ..}
+    trait T2 { use Tr<string>; .. }
+    class C { use T1, T2; .. }
 
-     This is sound only if trait Tr has no mutable state of type T.
+  This is sound only if trait Tr has no mutable state of type T.
 
-     The check_diamond_import_property function below ensures that all properties
-     of reused traits do not define parametric properties.
-  *)
+  The check_diamond_import_property function below ensures that all properties
+  of reused traits do not define parametric properties. *)
 let require_value_restriction t =
   Option.is_some (Typing_utils.contains_generic_decl t)
 

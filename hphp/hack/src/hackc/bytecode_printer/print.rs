@@ -1692,7 +1692,17 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             write!(w, "AwaitAll L:{}+{}", id, count)
         }
         Instruct::AwaitAll(Nothing) => w.write_all(b"AwaitAll L:0+0"),
-        Instruct::Generator(gen) => print_gen_creation_execution(w, gen),
+        Instruct::CreateCont => w.write_all(b"CreateCont"),
+        Instruct::ContEnter => w.write_all(b"ContEnter"),
+        Instruct::ContRaise => w.write_all(b"ContRaise"),
+        Instruct::Yield => w.write_all(b"Yield"),
+        Instruct::YieldK => w.write_all(b"YieldK"),
+        Instruct::ContCheck(ContCheckOp::IgnoreStarted) => w.write_all(b"ContCheck IgnoreStarted"),
+        Instruct::ContCheck(ContCheckOp::CheckStarted) => w.write_all(b"ContCheck CheckStarted"),
+        Instruct::ContValid => w.write_all(b"ContValid"),
+        Instruct::ContKey => w.write_all(b"ContKey"),
+        Instruct::ContGetReturn => w.write_all(b"ContGetReturn"),
+        Instruct::ContCurrent => w.write_all(b"ContCurrent"),
         Instruct::Incl => w.write_all(b"Incl"),
         Instruct::InclOnce => w.write_all(b"InclOnce"),
         Instruct::Req => w.write_all(b"Req"),
@@ -1869,24 +1879,6 @@ fn print_incdec_op(w: &mut dyn Write, op: &IncDecOp) -> Result<()> {
         IncDecOp::PostDecO => b"PostDecO",
         _ => panic!("Enum value does not match one of listed variants"),
     })
-}
-
-fn print_gen_creation_execution(w: &mut dyn Write, gen: &GenCreationExecution) -> Result<()> {
-    use GenCreationExecution as G;
-    match gen {
-        G::CreateCont => w.write_all(b"CreateCont"),
-        G::ContEnter => w.write_all(b"ContEnter"),
-        G::ContRaise => w.write_all(b"ContRaise"),
-        G::Yield => w.write_all(b"Yield"),
-        G::YieldK => w.write_all(b"YieldK"),
-        G::ContCheck(ContCheckOp::IgnoreStarted) => w.write_all(b"ContCheck IgnoreStarted"),
-        G::ContCheck(ContCheckOp::CheckStarted) => w.write_all(b"ContCheck CheckStarted"),
-        G::ContValid => w.write_all(b"ContValid"),
-        G::ContKey => w.write_all(b"ContKey"),
-        G::ContGetReturn => w.write_all(b"ContGetReturn"),
-        G::ContCurrent => w.write_all(b"ContCurrent"),
-        _ => panic!("Enum value does not match one of listed variants"),
-    }
 }
 
 fn print_sswitch(

@@ -1038,15 +1038,15 @@ pub mod instr {
     }
 
     pub fn yield_<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Generator(GenCreationExecution::Yield))
+        instr(Instruct::Yield)
     }
 
     pub fn yieldk<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Generator(GenCreationExecution::YieldK))
+        instr(Instruct::YieldK)
     }
 
     pub fn createcont<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Generator(GenCreationExecution::CreateCont))
+        instr(Instruct::CreateCont)
     }
 
     pub fn awaitall<'a>(range: Option<(Local<'a>, isize)>) -> InstrSeq<'a> {
@@ -1133,39 +1133,35 @@ pub mod instr {
     }
 
     pub fn contcheck_check<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Generator(GenCreationExecution::ContCheck(
-            ContCheckOp::CheckStarted,
-        )))
+        instr(Instruct::ContCheck(ContCheckOp::CheckStarted))
     }
 
     pub fn contcheck_ignore<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Generator(GenCreationExecution::ContCheck(
-            ContCheckOp::IgnoreStarted,
-        )))
+        instr(Instruct::ContCheck(ContCheckOp::IgnoreStarted))
     }
 
     pub fn contenter<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Generator(GenCreationExecution::ContEnter))
+        instr(Instruct::ContEnter)
     }
 
     pub fn contraise<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Generator(GenCreationExecution::ContRaise))
+        instr(Instruct::ContRaise)
     }
 
     pub fn contvalid<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Generator(GenCreationExecution::ContValid))
+        instr(Instruct::ContValid)
     }
 
     pub fn contcurrent<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Generator(GenCreationExecution::ContCurrent))
+        instr(Instruct::ContCurrent)
     }
 
     pub fn contkey<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Generator(GenCreationExecution::ContKey))
+        instr(Instruct::ContKey)
     }
 
     pub fn contgetreturn<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Generator(GenCreationExecution::ContGetReturn))
+        instr(Instruct::ContGetReturn)
     }
 
     pub fn nativeimpl<'a>() -> InstrSeq<'a> {

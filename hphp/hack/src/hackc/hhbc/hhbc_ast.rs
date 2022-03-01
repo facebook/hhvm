@@ -461,7 +461,16 @@ pub enum Instruct<'arena> {
     WHResult,
     Await,
     AwaitAll(Maybe<Pair<Local<'arena>, isize>>),
-    Generator(GenCreationExecution),
+    CreateCont,
+    ContEnter,
+    ContRaise,
+    Yield,
+    YieldK,
+    ContCheck(ContCheckOp),
+    ContValid,
+    ContKey,
+    ContGetReturn,
+    ContCurrent,
     Incl,
     InclOnce,
     Req,
@@ -685,7 +694,16 @@ impl Instruct<'_> {
             | Self::WHResult
             | Self::Await
             | Self::AwaitAll(_)
-            | Self::Generator(_)
+            | Self::CreateCont
+            | Self::ContEnter
+            | Self::ContRaise
+            | Self::Yield
+            | Self::YieldK
+            | Self::ContCheck(_)
+            | Self::ContValid
+            | Self::ContKey
+            | Self::ContGetReturn
+            | Self::ContCurrent
             | Self::Incl
             | Self::InclOnce
             | Self::Req
@@ -909,7 +927,16 @@ impl Instruct<'_> {
             | Self::WHResult
             | Self::Await
             | Self::AwaitAll(_)
-            | Self::Generator(_)
+            | Self::CreateCont
+            | Self::ContEnter
+            | Self::ContRaise
+            | Self::Yield
+            | Self::YieldK
+            | Self::ContCheck(_)
+            | Self::ContValid
+            | Self::ContKey
+            | Self::ContGetReturn
+            | Self::ContCurrent
             | Self::Incl
             | Self::InclOnce
             | Self::Req

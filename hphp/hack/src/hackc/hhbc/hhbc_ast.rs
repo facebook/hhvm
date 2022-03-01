@@ -125,16 +125,6 @@ pub enum MemberKey<'arena> {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(C)]
-pub enum InstructBasic {
-    Nop,
-    EntryNop,
-    PopC,
-    PopU,
-    Dup,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(C)]
 pub enum HasGenericsOp {
     NoGenerics,
     MaybeGenerics,
@@ -725,7 +715,11 @@ pub struct SrcLoc {
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum Instruct<'arena> {
-    Basic(InstructBasic),
+    Nop,
+    EntryNop,
+    PopC,
+    PopU,
+    Dup,
     Iterator(InstructIterator<'arena>),
     LitConst(InstructLitConst<'arena>),
     Op(InstructOperator<'arena>),
@@ -760,7 +754,11 @@ impl Instruct<'_> {
 
             // Make sure new variants with branch target Labels are handled above
             // before adding items to this catch-all.
-            Self::Basic(_)
+            Self::Nop
+            | Self::EntryNop
+            | Self::PopC
+            | Self::PopU
+            | Self::Dup
             | Self::LitConst(_)
             | Self::Op(_)
             | Self::SpecialFlow(_)
@@ -791,7 +789,11 @@ impl Instruct<'_> {
 
             // Make sure new variants with branch target Labels are handled above
             // before adding items to this catch-all.
-            Self::Basic(_)
+            Self::Nop
+            | Self::EntryNop
+            | Self::PopC
+            | Self::PopU
+            | Self::Dup
             | Self::LitConst(_)
             | Self::Op(_)
             | Self::SpecialFlow(_)

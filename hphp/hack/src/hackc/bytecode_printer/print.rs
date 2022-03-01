@@ -1144,13 +1144,11 @@ fn print_get(w: &mut dyn Write, get: &InstructGet<'_>) -> Result<()> {
 fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
     match instr {
         Instruct::Iterator(i) => print_iterator(w, i, dv_labels),
-        Instruct::Basic(b) => w.write_all(match b {
-            InstructBasic::Nop => b"Nop",
-            InstructBasic::EntryNop => b"EntryNop",
-            InstructBasic::PopC => b"PopC",
-            InstructBasic::PopU => b"PopU",
-            InstructBasic::Dup => b"Dup",
-        }),
+        Instruct::Nop => w.write_all(b"Nop"),
+        Instruct::EntryNop => w.write_all(b"EntryNop"),
+        Instruct::PopC => w.write_all(b"PopC"),
+        Instruct::PopU => w.write_all(b"PopU"),
+        Instruct::Dup => w.write_all(b"Dup"),
         Instruct::LitConst(lit) => print_lit_const(w, lit),
         Instruct::Op(op) => print_op(w, op),
         Instruct::ContFlow(cf) => print_control_flow(w, cf, dv_labels),

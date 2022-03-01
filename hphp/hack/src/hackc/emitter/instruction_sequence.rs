@@ -373,11 +373,11 @@ pub mod instr {
     }
 
     pub fn dup<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Basic(InstructBasic::Dup))
+        instr(Instruct::Dup)
     }
 
     pub fn nop<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Basic(InstructBasic::Nop))
+        instr(Instruct::Nop)
     }
 
     pub fn instanceofd<'a>(s: ClassId<'a>) -> InstrSeq<'a> {
@@ -654,11 +654,11 @@ pub mod instr {
     }
 
     pub fn popu<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Basic(InstructBasic::PopU))
+        instr(Instruct::PopU)
     }
 
     pub fn popc<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Basic(InstructBasic::PopC))
+        instr(Instruct::PopC)
     }
 
     pub fn popl<'a>(l: Local<'a>) -> InstrSeq<'a> {
@@ -772,7 +772,7 @@ pub mod instr {
     }
 
     pub fn entrynop<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Basic(InstructBasic::EntryNop))
+        instr(Instruct::EntryNop)
     }
 
     pub fn typedvalue<'a>(xs: TypedValue<'a>) -> InstrSeq<'a> {

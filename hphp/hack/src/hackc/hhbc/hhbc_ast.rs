@@ -383,8 +383,8 @@ pub enum Instruct<'arena> {
     VerifyOutType(ParamId<'arena>),
     VerifyRetTypeC,
     VerifyRetTypeTS,
-    Self_,
-    Parent,
+    SelfCls,
+    ParentCls,
     LateBoundCls,
     ClassName,
     LazyClassFromClass,
@@ -515,8 +515,8 @@ impl Instruct<'_> {
             | Self::VerifyOutType(_)
             | Self::VerifyRetTypeC
             | Self::VerifyRetTypeTS
-            | Self::Self_
-            | Self::Parent
+            | Self::SelfCls
+            | Self::ParentCls
             | Self::LateBoundCls
             | Self::ClassName
             | Self::LazyClassFromClass
@@ -748,8 +748,8 @@ impl Instruct<'_> {
             | Self::VerifyOutType(_)
             | Self::VerifyRetTypeC
             | Self::VerifyRetTypeTS
-            | Self::Self_
-            | Self::Parent
+            | Self::SelfCls
+            | Self::ParentCls
             | Self::LateBoundCls
             | Self::ClassName
             | Self::LazyClassFromClass

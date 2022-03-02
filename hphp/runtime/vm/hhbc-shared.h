@@ -66,9 +66,9 @@ enum class IsTypeOp : uint8_t {
 };
 
 #define SPECIAL_CLS_REFS                        \
-  REF(Self_)                                    \
-  REF(Static)                                   \
-  REF(Parent)
+  REF(SelfCls)                                  \
+  REF(LateBoundCls)                             \
+  REF(ParentCls)
 
 enum class SpecialClsRef : uint8_t {
 #define REF(name) name,

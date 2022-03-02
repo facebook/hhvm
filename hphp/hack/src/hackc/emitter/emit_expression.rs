@@ -622,7 +622,9 @@ fn emit_id<'a, 'arena, 'decl>(
         pseudo_consts::G__DIR__ => Ok(instr::instr(Instruct::Dir)),
         pseudo_consts::G__METHOD__ => Ok(instr::instr(Instruct::Method)),
         pseudo_consts::G__FUNCTION_CREDENTIAL__ => Ok(instr::instr(Instruct::FuncCred)),
-        pseudo_consts::G__CLASS__ => Ok(InstrSeq::gather(vec![instr::self_(), instr::classname()])),
+        pseudo_consts::G__CLASS__ => {
+            Ok(InstrSeq::gather(vec![instr::selfcls(), instr::classname()]))
+        }
         pseudo_consts::G__COMPILER_FRONTEND__ => Ok(instr::string(alloc, "hackc")),
         pseudo_consts::G__LINE__ => Ok(instr::int(p.info_pos_extended().1.try_into().map_err(
             |_| {
@@ -2975,7 +2977,7 @@ fn emit_class_meth<'a, 'arena, 'decl>(
         }
         if let Some(ast_defs::Id(_, s)) = cls.2.as_id() {
             if s == pseudo_consts::G__CLASS__ {
-                return Ok(instr::resolveclsmethods(SpecialClsRef::Self_, method_id));
+                return Ok(instr::resolveclsmethods(SpecialClsRef::SelfCls, method_id));
             }
         }
         if let Some(class_name) = cls.2.as_string() {
@@ -3451,9 +3453,9 @@ fn emit_load_class_ref<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let alloc = env.arena;
     let instrs = match cexpr {
-        ClassExpr::Special(SpecialClsRef::Self_) => instr::self_(),
-        ClassExpr::Special(SpecialClsRef::Static) => instr::lateboundcls(),
-        ClassExpr::Special(SpecialClsRef::Parent) => instr::parent(),
+        ClassExpr::Special(SpecialClsRef::SelfCls) => instr::selfcls(),
+        ClassExpr::Special(SpecialClsRef::LateBoundCls) => instr::lateboundcls(),
+        ClassExpr::Special(SpecialClsRef::ParentCls) => instr::parentcls(),
         ClassExpr::Id(id) => emit_known_class_id(alloc, e, &id),
         ClassExpr::Expr(expr) => InstrSeq::gather(vec![
             emit_pos(pos),

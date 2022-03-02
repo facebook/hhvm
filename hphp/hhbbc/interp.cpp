@@ -3869,9 +3869,9 @@ Type specialClsRefToCls(ISS& env, SpecialClsRef ref) {
   if (!env.ctx.cls) return TCls;
   auto const op = [&]()-> Optional<Type> {
     switch (ref) {
-      case SpecialClsRef::Static: return ctxCls(env);
-      case SpecialClsRef::Self_:  return selfClsExact(env);
-      case SpecialClsRef::Parent: return parentClsExact(env);
+      case SpecialClsRef::LateBoundCls: return ctxCls(env);
+      case SpecialClsRef::SelfCls:      return selfClsExact(env);
+      case SpecialClsRef::ParentCls:    return parentClsExact(env);
     }
     always_assert(false);
   }();
@@ -4269,7 +4269,7 @@ void fcallClsMethodSImpl(ISS& env, const Op& op, SString methName, bool dynamic,
                          bool extraInput, UpdateBC updateBC) {
   auto const clsTy = specialClsRefToCls(env, op.subop3);
   if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
-      !dynamic && op.subop3 == SpecialClsRef::Static) {
+      !dynamic && op.subop3 == SpecialClsRef::LateBoundCls) {
     auto const clsName = dcls_of(clsTy).cls.name();
     reduce(env, bc::FCallClsMethodD { op.fca, op.str2, clsName, methName });
     return;
@@ -5058,7 +5058,7 @@ void in(ISS& env, const bc::VerifyRetNonNullC& /*op*/) {
   push(env, stackT, equiv);
 }
 
-void in(ISS& env, const bc::Self& op) {
+void in(ISS& env, const bc::SelfCls&) {
   auto const self = selfClsExact(env);
   if (self) {
     effect_free(env);
@@ -5068,7 +5068,7 @@ void in(ISS& env, const bc::Self& op) {
   }
 }
 
-void in(ISS& env, const bc::Parent& op) {
+void in(ISS& env, const bc::ParentCls&) {
   auto const parent = parentClsExact(env);
   if (parent) {
     effect_free(env);

@@ -343,8 +343,8 @@ bool isLiteral(Op op) {
 bool isThisSelfOrParent(Op op) {
   switch (op) {
     case OpThis:
-    case OpSelf:
-    case OpParent:
+    case OpSelfCls:
+    case OpParentCls:
       return true;
 
     default:

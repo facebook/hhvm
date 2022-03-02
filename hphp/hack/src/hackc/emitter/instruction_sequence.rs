@@ -626,16 +626,16 @@ pub mod instr {
         instr(Instruct::LazyClassFromClass)
     }
 
-    pub fn self_<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Self_)
+    pub fn selfcls<'a>() -> InstrSeq<'a> {
+        instr(Instruct::SelfCls)
     }
 
     pub fn lateboundcls<'a>() -> InstrSeq<'a> {
         instr(Instruct::LateBoundCls)
     }
 
-    pub fn parent<'a>() -> InstrSeq<'a> {
-        instr(Instruct::Parent)
+    pub fn parentcls<'a>() -> InstrSeq<'a> {
+        instr(Instruct::ParentCls)
     }
 
     pub fn popu<'a>() -> InstrSeq<'a> {

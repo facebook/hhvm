@@ -992,9 +992,9 @@ fn print_fcall_args(
 
 fn print_special_cls_ref(w: &mut dyn Write, cls_ref: &SpecialClsRef) -> Result<()> {
     w.write_all(match *cls_ref {
-        SpecialClsRef::Static => b"Static",
-        SpecialClsRef::Self_ => b"Self_",
-        SpecialClsRef::Parent => b"Parent",
+        SpecialClsRef::LateBoundCls => b"LateBoundCls",
+        SpecialClsRef::SelfCls => b"SelfCls",
+        SpecialClsRef::ParentCls => b"ParentCls",
         _ => panic!("Enum value does not match one of listed variants"),
     })
 }
@@ -1341,8 +1341,8 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
         Instruct::SetImplicitContextByValue => w.write_all(b"SetImplicitContextByValue"),
         Instruct::VerifyRetTypeC => w.write_all(b"VerifyRetTypeC"),
         Instruct::VerifyRetTypeTS => w.write_all(b"VerifyRetTypeTS"),
-        Instruct::Self_ => w.write_all(b"Self"),
-        Instruct::Parent => w.write_all(b"Parent"),
+        Instruct::SelfCls => w.write_all(b"SelfCls"),
+        Instruct::ParentCls => w.write_all(b"ParentCls"),
         Instruct::LateBoundCls => w.write_all(b"LateBoundCls"),
         Instruct::ClassName => w.write_all(b"ClassName"),
         Instruct::LazyClassFromClass => w.write_all(b"LazyClassFromClass"),

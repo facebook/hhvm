@@ -247,7 +247,7 @@ void emitLateBoundCls(IRGS& env) {
   push(env, ldCtxCls(env));
 }
 
-void emitSelf(IRGS& env) {
+void emitSelfCls(IRGS& env) {
   auto const clss = curClass(env);
   if (clss == nullptr) {
     interpOne(env);
@@ -256,7 +256,7 @@ void emitSelf(IRGS& env) {
   }
 }
 
-void emitParent(IRGS& env) {
+void emitParentCls(IRGS& env) {
   auto const clss = curClass(env);
   if (clss == nullptr || clss->parent() == nullptr) {
     interpOne(env);

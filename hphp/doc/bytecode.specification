@@ -1642,8 +1642,8 @@ NewObjS   <mode>                            []                     ->  [C:Obj]
 
   When loading %1 into x, NewObjD and NewObjRD will perform the work performed
   by the ClassGetC instruction to convert the name given by %1 into a class.
-  NewObjS will perform the same work as LateBoundCls/Self/Parent depending on
-  the specified mode.
+  NewObjS will perform the same work as LateBoundCls/SelfCls/ParentCls depending
+  on the specified mode.
 
   This instruction pushes a default-initialized object onto the stack. The
   initialization will complete by running a constructor with FCallCtor, and
@@ -1787,8 +1787,8 @@ FCallClsMethodSD <fca> <class hint> <mode> <litstr id>
   a class.
 
   When loading mode %3 into x, FCallClsMethodS and FCallClsMethodSD will
-  perform the work performed by LateBoundCls/Self/Parent depending on the
-  specified mode.
+  perform the work performed by LateBoundCls/SelfCls/ParentCls depending
+  on the specified mode.
 
   If y is not a string, this instruction throws a fatal error. Next, this
   instruction checks if class x has an accessible method named y. If it does,
@@ -2957,13 +2957,13 @@ VerifyRetTypeTS [C C]  ->  [C]
   an error is raised. This instruction also verifies the reified generic type
   parameters of $2.
 
-Self                     []  ->  [C:Class]
+SelfCls                  []  ->  [C:Class]
 
   Push a class that refers to the class in which the current function is
   defined. This instruction throws a fatal error if the current method is
   defined outside of a class.
 
-Parent                   []  ->  [C:Class]
+ParentCls                []  ->  [C:Class]
 
   Push a class that refers to the parent of the class in which the
   current method is defined. This instruction throws a fatal error if the
@@ -3180,7 +3180,7 @@ ResolveClsMethodS <mode>      <litstr id>   []        -> [C]
   class.
 
   When loading mode %1 into x, ResolveClsMethodS will perform the same work
-  as LateBoundCls/Self/Parent depending on the specified mode.
+  as LateBoundCls/SelfCls/ParentCls depending on the specified mode.
 
   This instruction checks if class x has an accessible static method named y.
   If not, it raises a fatal error. Otherwise, it creates a value that can be

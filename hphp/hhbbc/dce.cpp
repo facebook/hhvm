@@ -1536,8 +1536,8 @@ void dce(Env& env, const bc::Shr&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Sub&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::SubO&)             { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::LateBoundCls&)     { pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::Self&)             { pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::Parent&)           { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::SelfCls&)          { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::ParentCls&)        { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::ClassName&)        { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::LazyClassFromClass&) {
   pushRemovableIfNoThrow(env);

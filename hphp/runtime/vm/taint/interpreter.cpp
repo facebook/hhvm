@@ -1203,12 +1203,12 @@ void iopVerifyRetNonNullC() {
   iopUnhandled("VerifyRetNonNullC");
 }
 
-void iopSelf() {
-  iopUnhandled("Self");
+void iopSelfCls() {
+  iopUnhandled("SelfCls");
 }
 
-void iopParent() {
-  iopUnhandled("Parent");
+void iopParentCls() {
+  iopUnhandled("ParentCls");
 }
 
 void iopLateBoundCls() {

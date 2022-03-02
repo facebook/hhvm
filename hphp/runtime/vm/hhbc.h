@@ -531,8 +531,8 @@ constexpr uint32_t kMaxConcatN = 4;
   O(VerifyRetTypeC,  NA,               ONE(CV),         ONE(CV),    NF) \
   O(VerifyRetTypeTS, NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(VerifyRetNonNullC, NA,             ONE(CV),         ONE(CV),    NF) \
-  O(Self,            NA,               NOV,             ONE(CV),    NF) \
-  O(Parent,          NA,               NOV,             ONE(CV),    NF) \
+  O(SelfCls,         NA,               NOV,             ONE(CV),    NF) \
+  O(ParentCls,       NA,               NOV,             ONE(CV),    NF) \
   O(LateBoundCls,    NA,               NOV,             ONE(CV),    NF) \
   O(RecordReifiedGeneric, NA,          ONE(CV),         ONE(CV),    NF) \
   O(CheckReifiedGenericMismatch, NA,   ONE(CV),         NOV,        NF) \

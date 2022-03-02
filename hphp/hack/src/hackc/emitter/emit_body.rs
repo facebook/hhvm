@@ -657,7 +657,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                     None => ("".into(), instr::empty(), instr::empty()),
                     Some(c) if c.get_kind() == ast::ClassishKind::Ctrait => (
                         "::".into(),
-                        InstrSeq::gather(vec![instr::self_(), instr::classname()]),
+                        InstrSeq::gather(vec![instr::selfcls(), instr::classname()]),
                         instr::concat(),
                     ),
                     Some(c) => (

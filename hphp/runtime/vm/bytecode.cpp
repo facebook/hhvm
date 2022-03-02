@@ -3875,13 +3875,13 @@ iopFCallObjMethodD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
 
 Class* specialClsRefToCls(SpecialClsRef ref) {
   switch (ref) {
-    case SpecialClsRef::Static:
+    case SpecialClsRef::LateBoundCls:
       if (auto const cls = frameStaticClass(vmfp())) return cls;
       raise_error(HPHP::Strings::CANT_ACCESS_STATIC);
-    case SpecialClsRef::Self_:
+    case SpecialClsRef::SelfCls:
       if (auto const cls = arGetContextClass(vmfp())) return cls;
       raise_error(HPHP::Strings::CANT_ACCESS_SELF);
-    case SpecialClsRef::Parent:
+    case SpecialClsRef::ParentCls:
       if (auto const cls = arGetContextClass(vmfp())) {
         if (auto const parent = cls->parent()) return parent;
         raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_PARENT);
@@ -4102,7 +4102,8 @@ iopFCallClsMethodS(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
 
   // fcallClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(1);
-  auto const fwd = ref == SpecialClsRef::Self_ || ref == SpecialClsRef::Parent;
+  auto const fwd = ref == SpecialClsRef::SelfCls ||
+                   ref == SpecialClsRef::ParentCls;
   return fcallClsMethodImpl<true>(
     retToJit, origpc, pc, fca, cls, methName, fwd);
 }
@@ -4113,7 +4114,8 @@ iopFCallClsMethodSD(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
                     const StringData* methName) {
   auto const cls = specialClsRefToCls(ref);
   auto const methNameC = const_cast<StringData*>(methName);
-  auto const fwd = ref == SpecialClsRef::Self_ || ref == SpecialClsRef::Parent;
+  auto const fwd = ref == SpecialClsRef::SelfCls ||
+                   ref == SpecialClsRef::ParentCls;
   return fcallClsMethodImpl<false>(
     retToJit, origpc, pc, fca, cls, methNameC, fwd);
 }
@@ -4202,7 +4204,7 @@ OPTBLD_INLINE void iopNewObjRD(Id id) {
 
 OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
   auto const cls = specialClsRefToCls(ref);
-  if (ref == SpecialClsRef::Static && cls->hasReifiedGenerics()) {
+  if (ref == SpecialClsRef::LateBoundCls && cls->hasReifiedGenerics()) {
     raise_error(Strings::NEW_STATIC_ON_REIFIED_CLASS, cls->name()->data());
   }
   auto const reified_generics = cls->hasReifiedGenerics()
@@ -4653,13 +4655,13 @@ OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE void iopSelf() {
+OPTBLD_INLINE void iopSelfCls() {
   auto const clss = arGetContextClass(vmfp());
   if (!clss) raise_error(HPHP::Strings::CANT_ACCESS_SELF);
   vmStack().pushClass(clss);
 }
 
-OPTBLD_INLINE void iopParent() {
+OPTBLD_INLINE void iopParentCls() {
   auto const clss = arGetContextClass(vmfp());
   if (!clss) raise_error(HPHP::Strings::CANT_ACCESS_PARENT_WHEN_NO_CLASS);
   auto const parent = clss->parent();

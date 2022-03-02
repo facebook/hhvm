@@ -507,7 +507,7 @@ fn call_cls_method<'a, 'arena>(
     let method_id =
         method::MethodType::add_suffix(alloc, args.method_id, emit_memoize_helpers::MEMOIZE_SUFFIX);
     if args.info.is_trait || args.flags.contains(Flags::WITH_LSB) {
-        instr::fcallclsmethodsd(fcall_args, SpecialClsRef::Self_, method_id)
+        instr::fcallclsmethodsd(fcall_args, SpecialClsRef::SelfCls, method_id)
     } else {
         instr::fcallclsmethodd(fcall_args, method_id, args.info.class_id)
     }

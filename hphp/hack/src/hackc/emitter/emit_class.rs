@@ -456,7 +456,7 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
                     1,
                     None,
                 ),
-                SpecialClsRef::Parent,
+                SpecialClsRef::ParentCls,
                 method::from_raw_string(alloc, INIT_METH_NAME),
             ),
             instr::popc(),

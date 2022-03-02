@@ -318,8 +318,8 @@ static const struct {
                    {Stack1,           Stack1,       OutUnknown      }},
   { OpOODeclExists,
                    {StackTop2,        Stack1,       OutBoolean      }},
-  { OpSelf,        {None,             Stack1,       OutClass        }},
-  { OpParent,      {None,             Stack1,       OutClass        }},
+  { OpSelfCls,     {None,             Stack1,       OutClass        }},
+  { OpParentCls,   {None,             Stack1,       OutClass        }},
   { OpLateBoundCls,{None,             Stack1,       OutClass        }},
   { OpRecordReifiedGeneric,
                    {Stack1,           Stack1,       OutVec          }},
@@ -1008,7 +1008,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Null:
   case Op::NullUninit:
   case Op::OODeclExists:
-  case Op::Parent:
+  case Op::ParentCls:
   case Op::PopC:
   case Op::PopU:
   case Op::PopU2:
@@ -1017,7 +1017,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::PushL:
   case Op::RetC:
   case Op::RetCSuspended:
-  case Op::Self:
+  case Op::SelfCls:
   case Op::SetG:
   case Op::SetS:
   case Op::Shl:

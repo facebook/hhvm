@@ -73,9 +73,9 @@ pub mod ffi {
     #[repr(u8)]
     #[derive(Debug, Copy, Clone)]
     enum SpecialClsRef {
-        Self_,
-        Static,
-        Parent,
+        SelfCls,
+        LateBoundCls,
+        ParentCls,
     }
 
     #[repr(u8)]

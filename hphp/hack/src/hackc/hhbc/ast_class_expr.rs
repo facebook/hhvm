@@ -114,7 +114,7 @@ impl<'arena> ClassExpr<'arena> {
             Expr_::Id(x) => {
                 let ast_defs::Id(pos, id) = *x;
                 if string_utils::is_static(&id) {
-                    Self::Special(SpecialClsRef::Static)
+                    Self::Special(SpecialClsRef::LateBoundCls)
                 } else if string_utils::is_parent(&id) {
                     match Self::get_original_parent_class_name(
                         emitter,
@@ -124,7 +124,7 @@ impl<'arena> ClassExpr<'arena> {
                         opt_parent_name,
                     ) {
                         Some(name) => Self::Id(ast_defs::Id(pos, name)),
-                        None => Self::Special(SpecialClsRef::Parent),
+                        None => Self::Special(SpecialClsRef::ParentCls),
                     }
                 } else if string_utils::is_self(&id) {
                     match Self::get_original_class_name(
@@ -134,7 +134,7 @@ impl<'arena> ClassExpr<'arena> {
                         opt_class_info,
                     ) {
                         Some(name) => Self::Id(ast_defs::Id(pos, name)),
-                        None => Self::Special(SpecialClsRef::Self_),
+                        None => Self::Special(SpecialClsRef::SelfCls),
                     }
                 } else {
                     Self::Id(ast_defs::Id(pos, id))
@@ -155,9 +155,9 @@ impl<'arena> ClassExpr<'arena> {
         let expr = match cid_ {
             ClassId_::CIexpr(e) => e.clone(),
             ClassId_::CI(sid) => Expr((), annot.clone(), Expr_::mk_id(sid.clone())),
-            ClassId_::CIparent => return Self::Special(SpecialClsRef::Parent),
-            ClassId_::CIstatic => return Self::Special(SpecialClsRef::Static),
-            ClassId_::CIself => return Self::Special(SpecialClsRef::Self_),
+            ClassId_::CIparent => return Self::Special(SpecialClsRef::ParentCls),
+            ClassId_::CIstatic => return Self::Special(SpecialClsRef::LateBoundCls),
+            ClassId_::CIself => return Self::Special(SpecialClsRef::SelfCls),
         };
         Self::expr_to_class_expr(emitter, check_traits, resolve_self, scope, expr)
     }

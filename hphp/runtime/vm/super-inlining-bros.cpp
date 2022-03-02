@@ -1344,8 +1344,8 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::VerifyRetTypeC:
     case Op::VerifyRetTypeTS:
     case Op::VerifyRetNonNullC:
-    case Op::Self:
-    case Op::Parent:
+    case Op::SelfCls:
+    case Op::ParentCls:
     case Op::LateBoundCls:
     case Op::RecordReifiedGeneric:
     case Op::CheckReifiedGenericMismatch:
@@ -1470,7 +1470,7 @@ ThisPointerEffect getThisPointerEffect(SrcKey sk) {
       auto const idx = isFCall(op) ? 2 : 0;
       auto const raw = getImm(sk.pc(), idx, sk.unit()).u_OA;
       auto const ref = static_cast<SpecialClsRef>(raw);
-      return ref == SpecialClsRef::Static ? TPE::READ_CLASS : TPE::NONE;
+      return ref == SpecialClsRef::LateBoundCls ? TPE::READ_CLASS : TPE::NONE;
     }
 
     case Op::LateBoundCls:
@@ -1865,7 +1865,7 @@ Optional<InlineInterpHookResult> tryCustomInlineInterpStep(SrcKey sk) {
       auto const tv = unboxThisPointer();
       if (!tv) return std::nullopt;
       auto const ref = static_cast<SpecialClsRef>(getImm(vmpc(), 0).u_OA);
-      if (ref == SpecialClsRef::Static && !ensureThisPointerHasPreciseClass()) {
+      if (ref == SpecialClsRef::LateBoundCls && !ensureThisPointerHasPreciseClass()) {
         return IIHR::STOP;
       }
       auto const cls = specialClsRefToCls(ref);

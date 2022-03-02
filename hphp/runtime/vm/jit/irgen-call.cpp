@@ -1232,13 +1232,13 @@ namespace {
 
 SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
   switch (ref) {
-    case SpecialClsRef::Static:
+    case SpecialClsRef::LateBoundCls:
       if (!curClass(env)) return nullptr;
       return ldCtxCls(env);
-    case SpecialClsRef::Self_:
+    case SpecialClsRef::SelfCls:
       if (auto const clss = curClass(env)) return cns(env, clss);
       return nullptr;
-    case SpecialClsRef::Parent:
+    case SpecialClsRef::ParentCls:
       if (auto const clss = curClass(env)) {
         if (auto const parent = clss->parent()) return cns(env, parent);
       }
@@ -1257,12 +1257,12 @@ Optional<int> specialClsReifiedPropSlot(IRGS& env, SpecialClsRef ref) {
     return slot;
   };
   switch (ref) {
-    case SpecialClsRef::Static:
+    case SpecialClsRef::LateBoundCls:
       // Currently we disallow new static on reified classes
       return std::nullopt;
-    case SpecialClsRef::Self_:
+    case SpecialClsRef::SelfCls:
       return result(cls);
-    case SpecialClsRef::Parent:
+    case SpecialClsRef::ParentCls:
       if (!cls->parent()) return std::nullopt;
       return result(cls->parent());
   }
@@ -1844,7 +1844,8 @@ void emitFCallClsMethodS(IRGS& env, FCallArgs fca, const StringData* clsHint,
   auto const methName = topC(env);
   if (!cls || !methName->isA(TStr)) return interpOne(env);
 
-  auto const fwd = ref == SpecialClsRef::Self_ || ref == SpecialClsRef::Parent;
+  auto const fwd = ref == SpecialClsRef::SelfCls ||
+                   ref == SpecialClsRef::ParentCls;
   fcallClsMethodCommon(env, fca, clsHint, cls, methName, fwd, true, false, 1);
 }
 
@@ -1853,7 +1854,8 @@ void emitFCallClsMethodSD(IRGS& env, FCallArgs fca, const StringData* clsHint,
   auto const cls = specialClsRefToCls(env, ref);
   if (!cls) return interpOne(env);
 
-  auto const fwd = ref == SpecialClsRef::Self_ || ref == SpecialClsRef::Parent;
+  auto const fwd = ref == SpecialClsRef::SelfCls ||
+                   ref == SpecialClsRef::ParentCls;
   fcallClsMethodCommon(env, fca, clsHint, cls, cns(env, methName), fwd,
                        false, false, 0);
 }

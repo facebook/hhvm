@@ -104,6 +104,20 @@ const StaticString
   s_HH_Coeffects_Backdoor("HH\\Coeffects\\backdoor"),
   s_HH_Coeffects_Backdoor_Async("HH\\Coeffects\\backdoor_async");
 
+#define COEFFECTS_BACKDOOR_WRAPPERS \
+  X(pure)                           \
+  X(write_props)                    \
+  X(read_globals)                   \
+  X(zoned)                          \
+  X(leak_safe)
+
+#define X(x)                                             \
+  const StaticString                                     \
+  s_HH_Coeffects_FB_Backdoor_from_##x                    \
+  ("HH\\Coeffects\\fb\\backdoor_from_"#x"__DO_NOT_USE");
+COEFFECTS_BACKDOOR_WRAPPERS
+#undef X
+
 /*
  * Check if the `callee' has any characteristics which prevent inlining,
  * without peeking into its bytecode or regions.
@@ -471,6 +485,24 @@ int costOfInlining(SrcKey callerSk,
     computeTranslationCost(callerSk, region, annotationData);
 }
 
+bool isCoeffectsBackdoor(SrcKey callerSk, const Func* callee) {
+  #define X(x)                                                                \
+    if (callee->fullName()->isame(s_HH_Coeffects_FB_Backdoor_from_##x.get())) \
+    return true;
+  COEFFECTS_BACKDOOR_WRAPPERS
+  #undef X
+
+  if (callee->fullName()->isame(s_HH_Coeffects_Backdoor.get()) ||
+      callee->fullName()->isame(s_HH_Coeffects_Backdoor_Async.get()) ||
+      (callee->isClosureBody() &&
+       (callerSk.func()->fullName()->isame(s_HH_Coeffects_Backdoor.get()) ||
+        callerSk.func()->fullName()->isame(s_HH_Coeffects_Backdoor_Async.get())))) {
+    return true;
+  }
+
+  return false;
+}
+
 bool shouldInline(const irgen::IRGS& irgs,
                   SrcKey callerSk,
                   const Func* callee,
@@ -582,11 +614,7 @@ bool shouldInline(const irgen::IRGS& irgs,
                      region.instrSize(), show(region)));
   }
 
-  if (callee->fullName()->isame(s_HH_Coeffects_Backdoor.get()) ||
-      callee->fullName()->isame(s_HH_Coeffects_Backdoor_Async.get()) ||
-      (callee->isClosureBody() &&
-       (callerSk.func()->fullName()->isame(s_HH_Coeffects_Backdoor.get()) ||
-        callerSk.func()->fullName()->isame(s_HH_Coeffects_Backdoor_Async.get())))) {
+  if (isCoeffectsBackdoor(callerSk, callee)) {
     return accept("coeffect backdoor is always inlined");
   }
 

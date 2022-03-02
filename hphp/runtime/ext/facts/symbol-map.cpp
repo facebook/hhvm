@@ -79,6 +79,31 @@ getPathSymMap(typename SymbolMap::Data& data) {
   return data.m_constantPath;
 }
 
+/**
+ * Get all symbols of a given kind from the DB.
+ */
+template <SymKind k>
+typename std::enable_if<
+    k == SymKind::Type,
+    AutoloadDB::MultiResult<AutoloadDB::SymbolPath>>::type
+getAllSymbolsFromDB(AutoloadDB& db) {
+  return db.getAllTypePaths();
+}
+template <SymKind k>
+typename std::enable_if<
+    k == SymKind::Function,
+    AutoloadDB::MultiResult<AutoloadDB::SymbolPath>>::type
+getAllSymbolsFromDB(AutoloadDB& db) {
+  return db.getAllFunctionPaths();
+}
+template <SymKind k>
+typename std::enable_if<
+    k == SymKind::Constant,
+    AutoloadDB::MultiResult<AutoloadDB::SymbolPath>>::type
+getAllSymbolsFromDB(AutoloadDB& db) {
+  return db.getAllConstantPaths();
+}
+
 } // namespace
 
 SymbolMap::SymbolMap(
@@ -221,53 +246,45 @@ SymbolMap::getFileTypeAliases(const folly::fs::path& path) {
 }
 
 std::vector<std::pair<Symbol<SymKind::Type>, Path>> SymbolMap::getAllTypes() {
-  waitForDBUpdate();
-  auto& db = getDB();
-  std::vector<std::pair<Symbol<SymKind::Type>, Path>> results;
-  for (auto&& [symbol, path] : db.getAllTypePaths()) {
-    auto typeName = Symbol<SymKind::Type>{symbol};
-    auto [kind, _] = getKindAndFlags(typeName, Path{path});
-    if (kind != TypeKind::TypeAlias) {
-      results.emplace_back(typeName, Path{path});
-    }
-  }
+  auto results = getAllSymbols<SymKind::Type>();
+  // Filter type aliases out
+  results.erase(
+      std::remove_if(
+          results.begin(),
+          results.end(),
+          [this](auto const& symbolPath) -> bool {
+            auto const& [symbol, path] = symbolPath;
+            auto [kind, _] = getKindAndFlags(symbol, path);
+            return kind == TypeKind::TypeAlias;
+          }),
+      results.end());
   return results;
 }
 
 std::vector<std::pair<Symbol<SymKind::Function>, Path>>
 SymbolMap::getAllFunctions() {
-  waitForDBUpdate();
-  auto& db = getDB();
-  std::vector<std::pair<Symbol<SymKind::Function>, Path>> results;
-  for (auto&& [symbol, path] : db.getAllFunctionPaths()) {
-    results.emplace_back(Symbol<SymKind::Function>{symbol}, Path{path});
-  }
-  return results;
+  return getAllSymbols<SymKind::Function>();
 }
 
 std::vector<std::pair<Symbol<SymKind::Constant>, Path>>
 SymbolMap::getAllConstants() {
-  waitForDBUpdate();
-  auto& db = getDB();
-  std::vector<std::pair<Symbol<SymKind::Constant>, Path>> results;
-  for (auto&& [symbol, path] : db.getAllConstantPaths()) {
-    results.emplace_back(Symbol<SymKind::Constant>{symbol}, Path{path});
-  }
-  return results;
+  return getAllSymbols<SymKind::Constant>();
 }
 
 std::vector<std::pair<Symbol<SymKind::Type>, Path>>
 SymbolMap::getAllTypeAliases() {
-  waitForDBUpdate();
-  auto& db = getDB();
-  std::vector<std::pair<Symbol<SymKind::Type>, Path>> results;
-  for (auto&& [symbol, path] : db.getAllTypePaths()) {
-    auto typeName = Symbol<SymKind::Type>{symbol};
-    auto [kind, _] = getKindAndFlags(typeName, Path{path});
-    if (kind == TypeKind::TypeAlias) {
-      results.emplace_back(typeName, Path{path});
-    }
-  }
+  auto results = getAllSymbols<SymKind::Type>();
+  // Filter down to type aliases
+  results.erase(
+      std::remove_if(
+          results.begin(),
+          results.end(),
+          [this](auto const& symbolPath) -> bool {
+            auto const& [symbol, path] = symbolPath;
+            auto [kind, _] = getKindAndFlags(symbol, path);
+            return kind != TypeKind::TypeAlias;
+          }),
+      results.end());
   return results;
 }
 
@@ -1269,6 +1286,37 @@ bool SymbolMap::isPathDeleted(Path path) const noexcept {
   auto const& fileExistsMap = rlock->m_fileExistsMap;
   auto const it = fileExistsMap.find(path);
   return it != fileExistsMap.end() && !it->second;
+}
+
+template <SymKind k>
+std::vector<std::pair<Symbol<k>, Path>> SymbolMap::getAllSymbols() {
+  hphp_hash_map<Path, std::vector<Symbol<k>>> pathToSymbols;
+
+  for (auto&& [symbol, path] : getAllSymbolsFromDB<k>(getDB())) {
+    pathToSymbols[Path{path}].push_back(Symbol<k>{symbol});
+  }
+
+  m_syncedData.withRLock([&pathToSymbols](const Data& data) {
+    for (auto const& [path, _] : data.m_versions->m_versionMap) {
+      auto symbols = getPathSymMap<k>(data).getPathSymbols(path);
+      if (!symbols) {
+        continue;
+      }
+      pathToSymbols.erase(path);
+      for (auto symbol : *symbols) {
+        pathToSymbols[path].push_back(symbol);
+      }
+    }
+  });
+
+  std::vector<std::pair<Symbol<k>, Path>> results;
+  results.reserve(pathToSymbols.size());
+  for (auto const& [path, symbols] : pathToSymbols) {
+    for (auto const& symbol : symbols) {
+      results.push_back({symbol, path});
+    }
+  }
+  return results;
 }
 
 template <typename Ret, typename ReadFn, typename GetFromDBFn, typename WriteFn>

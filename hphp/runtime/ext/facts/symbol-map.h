@@ -564,6 +564,11 @@ private:
       AutoloadDB& db, Path path, Symbol<SymKind::Type> derivedType);
 
   /**
+   * Get all symbols of kind k
+   */
+  template <SymKind k> std::vector<std::pair<Symbol<k>, Path>> getAllSymbols();
+
+  /**
    * Helper function to read from and write to m_synchronizedData.
    *
    * readFn: ((const Data&) -> Optional<Ret>)

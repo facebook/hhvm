@@ -86,6 +86,7 @@ pub extern "C" fn stc_main() {
     let typing_decl_cache = Arc::new(NonEvictingCache::new());
     let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
         typing_decl_cache,
+        alloc,
         folded_decl_provider,
     ));
     let ctx = Arc::new(TypingCtx::new(alloc, typing_decl_provider, special_names));

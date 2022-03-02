@@ -108,6 +108,7 @@ fn decl_files<R: Reason>(
     ));
     let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
         Arc::new(NonEvictingCache::new()),
+        alloc,
         Arc::clone(&folded_decl_provider) as Arc<dyn FoldedDeclProvider<R>>,
     ));
 

@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{folded, ty::*};
+use crate::folded_decl_provider::Subst;
 use crate::reason::Reason;
 use oxidized_by_ref::{ast::Id, s_set::SSet};
 use pos::{Pos, ToOxidized};
@@ -308,8 +309,9 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::SubstContext<R> {
     type Output = &'a obr::decl_defs::SubstContext<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        let Subst(subst) = &self.subst;
         arena.alloc(obr::decl_defs::SubstContext {
-            subst: self.subst.to_oxidized(arena),
+            subst: subst.to_oxidized(arena),
             class_context: self.class_context.to_oxidized(arena),
             from_req_extends: self.from_req_extends,
         })

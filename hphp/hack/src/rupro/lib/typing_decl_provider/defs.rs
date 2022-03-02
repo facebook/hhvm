@@ -4,8 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{Class, Error, Result};
-use crate::decl_defs::FoldedClass;
-use crate::folded_decl_provider::FoldedDeclProvider;
+use crate::alloc::Allocator;
+use crate::decl_defs::{DeclTy, FoldedClass};
+use crate::folded_decl_provider::{FoldedDeclProvider, Substitution};
 use crate::reason::Reason;
 use crate::typing_defs::ClassElt;
 use dashmap::DashMap;
@@ -33,6 +34,7 @@ struct EagerMembers<R: Reason> {
 /// `FoldedDeclProvider`, and populates its member-cache with a new `ClassElt`
 /// containing that type and any other metadata from the `FoldedElt`.
 pub struct ClassType<R: Reason> {
+    alloc: &'static Allocator<R>,
     provider: Arc<dyn FoldedDeclProvider<R>>,
     class: Arc<FoldedClass<R>>,
     members: EagerMembers<R>,
@@ -61,8 +63,13 @@ impl<R: Reason> EagerMembers<R> {
 }
 
 impl<R: Reason> ClassType<R> {
-    pub fn new(provider: Arc<dyn FoldedDeclProvider<R>>, class: Arc<FoldedClass<R>>) -> Self {
+    pub fn new(
+        alloc: &'static Allocator<R>,
+        provider: Arc<dyn FoldedDeclProvider<R>>,
+        class: Arc<FoldedClass<R>>,
+    ) -> Self {
         Self {
+            alloc,
             provider,
             class,
             members: EagerMembers::new(),
@@ -96,6 +103,19 @@ impl<R: Reason> ClassType<R> {
             self.class.name
         );
     }
+
+    // If `self.class` has a substitution context for `origin`, apply the
+    // associated substitution to `ty`.
+    fn instantiate(&self, ty: DeclTy<R>, origin: TypeName) -> DeclTy<R> {
+        match self.class.substs.get(&origin) {
+            Some(ctx) => Substitution {
+                alloc: self.alloc,
+                subst: &ctx.subst,
+            }
+            .instantiate(&ty),
+            None => ty,
+        }
+    }
 }
 
 impl<R: Reason> Class<R> for ClassType<R> {
@@ -108,11 +128,12 @@ impl<R: Reason> Class<R> for ClassType<R> {
             None => return Ok(None),
         };
         let origin = folded_elt.origin;
-        let ty = self
-            .provider
-            .get_shallow_property_type(origin, name)?
-            .unwrap_or_else(|| self.member_type_missing("property", origin, name));
-        // TODO: perform substitutions on ty
+        let ty = self.instantiate(
+            self.provider
+                .get_shallow_property_type(origin, name)?
+                .unwrap_or_else(|| self.member_type_missing("property", origin, name)),
+            origin,
+        );
         let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
         self.members.props.insert(name, Arc::clone(&class_elt));
         Ok(Some(class_elt))
@@ -127,11 +148,12 @@ impl<R: Reason> Class<R> for ClassType<R> {
             None => return Ok(None),
         };
         let origin = folded_elt.origin;
-        let ty = self
-            .provider
-            .get_shallow_static_property_type(origin, name)?
-            .unwrap_or_else(|| self.member_type_missing("static property", origin, name));
-        // TODO: perform substitutions on ty
+        let ty = self.instantiate(
+            self.provider
+                .get_shallow_static_property_type(origin, name)?
+                .unwrap_or_else(|| self.member_type_missing("static property", origin, name)),
+            origin,
+        );
         let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
         self.members
             .static_props
@@ -148,11 +170,12 @@ impl<R: Reason> Class<R> for ClassType<R> {
             None => return Ok(None),
         };
         let origin = folded_elt.origin;
-        let ty = self
-            .provider
-            .get_shallow_method_type(origin, name)?
-            .unwrap_or_else(|| self.member_type_missing("method", origin, name));
-        // TODO: perform substitutions on ty
+        let ty = self.instantiate(
+            self.provider
+                .get_shallow_method_type(origin, name)?
+                .unwrap_or_else(|| self.member_type_missing("method", origin, name)),
+            origin,
+        );
         let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
         self.members.methods.insert(name, Arc::clone(&class_elt));
         Ok(Some(class_elt))
@@ -167,11 +190,12 @@ impl<R: Reason> Class<R> for ClassType<R> {
             None => return Ok(None),
         };
         let origin = folded_elt.origin;
-        let ty = self
-            .provider
-            .get_shallow_static_method_type(origin, name)?
-            .unwrap_or_else(|| self.member_type_missing("static method", origin, name));
-        // TODO: perform substitutions on ty
+        let ty = self.instantiate(
+            self.provider
+                .get_shallow_static_method_type(origin, name)?
+                .unwrap_or_else(|| self.member_type_missing("static method", origin, name)),
+            origin,
+        );
         let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
         self.members
             .static_methods
@@ -189,13 +213,14 @@ impl<R: Reason> Class<R> for ClassType<R> {
                     None => return Ok(None),
                 };
                 let origin = folded_elt.origin;
-                let ty = self
-                    .provider
-                    .get_shallow_constructor_type(origin)?
-                    .unwrap_or_else(|| {
-                        self.member_type_missing("constructor", origin, "__construct")
-                    });
-                // TODO: perform substitutions on ty
+                let ty = self.instantiate(
+                    self.provider
+                        .get_shallow_constructor_type(origin)?
+                        .unwrap_or_else(|| {
+                            self.member_type_missing("constructor", origin, "__construct")
+                        }),
+                    origin,
+                );
                 Ok(Some(Arc::new(ClassElt::new(folded_elt, ty))))
             })?
             .as_ref()

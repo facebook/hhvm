@@ -16,7 +16,7 @@ use std::collections::BTreeMap;
 
 /// Maps type names to types with which to replace them.
 #[derive(Debug, Clone)]
-pub struct Subst<R: Reason>(TypeNameMap<DeclTy<R>>);
+pub struct Subst<R: Reason>(pub TypeNameMap<DeclTy<R>>);
 
 impl<R: Reason> From<TypeNameMap<DeclTy<R>>> for Subst<R> {
     fn from(map: TypeNameMap<DeclTy<R>>) -> Self {

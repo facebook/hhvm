@@ -15,6 +15,9 @@ mod inherit;
 mod provider;
 mod subst;
 
+pub use subst::Subst;
+pub use subst::Substitution;
+
 pub use provider::LazyFoldedDeclProvider;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;

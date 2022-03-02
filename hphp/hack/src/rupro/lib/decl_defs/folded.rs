@@ -6,6 +6,7 @@ use crate::decl_defs::{
     ty::XhpEnumValue, CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, Tparam,
     Typeconst, WhereConstraint, XhpAttribute,
 };
+use crate::folded_decl_provider::Subst;
 use crate::reason::Reason;
 use pos::{
     ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap, Symbol, TypeConstName,
@@ -56,7 +57,7 @@ pub struct FoldedElement {
 #[derive(Debug, Clone)]
 pub struct SubstContext<R: Reason> {
     // note(sf, 2022-01-28): c.f. `Decl_defs.subst_context`
-    pub subst: TypeNameMap<DeclTy<R>>,
+    pub subst: Subst<R>,
     pub class_context: TypeName,
     pub from_req_extends: bool,
 }

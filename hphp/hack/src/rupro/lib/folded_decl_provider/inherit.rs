@@ -314,19 +314,11 @@ struct MemberFolder<'a, R: Reason> {
 }
 
 impl<'a, R: Reason> MemberFolder<'a, R> {
-    fn make_substitution(
-        &self,
-        cls: &FoldedClass<R>,
-        params: &[DeclTy<R>],
-    ) -> TypeNameMap<DeclTy<R>> {
-        Subst::new(self.alloc, &cls.tparams, params).into()
-    }
-
     // c.f. Decl_inherit.from_class
     fn members_from_class(&self, parent_ty: &DeclTy<R>) -> Inherited<R> {
         if let Some((_, parent_pos_id, parent_tyl)) = parent_ty.unwrap_class_type() {
             if let Some(parent_folded_decl) = self.parents.get(&parent_pos_id.id()) {
-                let subst = self.make_substitution(parent_folded_decl, parent_tyl);
+                let subst = Subst::new(self.alloc, &parent_folded_decl.tparams, parent_tyl);
                 // TODO(hrust): Do we need sharing?
                 let mut substs = parent_folded_decl.substs.clone();
                 substs.insert(

@@ -56,21 +56,6 @@ let check_extend_kind
     when Ast_defs.is_abstract k ->
     ()
   | (Ast_defs.Cenum_class _, Ast_defs.Cenum_class _) -> ()
-  | ( (Ast_defs.Cenum | Ast_defs.Cenum_class _),
-      (Ast_defs.Cenum | Ast_defs.Cenum_class _) ) ->
-    Errors.add_typing_error
-      Typing_error.(
-        primary
-        @@ Primary.Wrong_extend_kind
-             {
-               parent_pos;
-               parent_kind;
-               parent_name;
-               pos =
-                 Pos_or_decl.unsafe_to_raw_pos child_pos (* TODO: T87242856 *);
-               kind = child_kind;
-               name = child_name;
-             })
   | _ ->
     (* What is disallowed *)
     Errors.add_typing_error

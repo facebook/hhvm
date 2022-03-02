@@ -17,6 +17,7 @@ hcons = { path = "../../../hcons" }
 hh24_types = { path = "../../../facebook/utils/hh24_types" }
 im = { version = "14.2", features = ["rayon", "serde"] }
 intern = { path = "../../../../../../relay/oss/crates/intern" }
+itertools = "0.10.3"
 lazy_static = "1.0"
 lint_rust = { path = "../../../utils/lint" }
 names = { path = "../../../facebook/hh_decl/cargo/names" }

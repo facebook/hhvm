@@ -1,0 +1,11 @@
+{"hops":["__source","source_through_vec_to_sink","__sink"]}
+{"hops":["__source","source_through_vec_stopped","__sink"]}
+{"hops":["__source","source_through_vec_at_index_to_sink","__sink"]}
+{"hops":["__source","source_through_vec_at_index_stopped","__sink"]}
+{"hops":["__source","source_through_vec_copies_to_sink","__sink"]}
+{"hops":["__source","source_through_vec_copies_to_sink","__sink"]}
+{"hops":["__source","source_through_dict_tainted_key_to_sink","__sink"]}
+{"hops":["__source","source_through_dict_tainted_value_to_sink","__sink"]}
+{"hops":["__source","source_through_vector_to_sink","__sink"]}
+{"hops":["__source","source_through_map_to_sink","__sink"]}
+{"hops":["__source","source_through_pair_to_sink","__sink"]}

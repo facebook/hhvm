@@ -257,6 +257,24 @@ void ObjectsHeap::clear() {
   m_heap.clear();
 }
 
+void CollectionsHeap::set(tv_lval typedValue, Value value) {
+  // TODO: Investigate if we can save memory here by not storing default values
+  m_heap[std::move(typedValue)] = value;
+}
+
+Value CollectionsHeap::get(const tv_lval& typedValue) const {
+  auto value = m_heap.find(typedValue);
+  if (value != m_heap.end()) {
+    return value->second;
+  }
+
+  return nullptr;
+}
+
+void CollectionsHeap::clear() {
+  m_heap.clear();
+}
+
 namespace {
 
 struct SingletonTag {};
@@ -282,6 +300,7 @@ void State::initialize() {
   stack.clear();
   heap_locals.clear();
   heap_objects.clear();
+  heap_collections.clear();
   paths.clear();
   arena = std::make_unique<PathArena>();
   m_function_metadata = Configuration::get()->functionMetadata();

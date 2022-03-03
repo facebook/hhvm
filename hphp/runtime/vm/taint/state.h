@@ -145,6 +145,19 @@ struct ObjectsHeap {
   hphp_fast_map<ObjectData*, folly::F14FastMap<std::string, Value>> m_heap;
 };
 
+// Model collections, which are identified by `tv_lval`s.
+// We just store whether the whole collection is tainted or not right now,
+// and do not support un-tainting on removal.
+struct CollectionsHeap {
+  void set(tv_lval typedValue, Value value);
+  Value get(const tv_lval& typedValue) const;
+
+  void clear();
+
+ private:
+  hphp_fast_map<tv_lval, Value> m_heap;
+};
+
 struct State {
   static rds::local::RDSLocal<State, rds::local::Initialize::FirstUse> instance;
 
@@ -159,6 +172,7 @@ struct State {
   Stack stack;
   LocalsHeap heap_locals;
   ObjectsHeap heap_objects;
+  CollectionsHeap heap_collections;
 
   // Arena to hold all the paths
   std::unique_ptr<PathArena> arena;

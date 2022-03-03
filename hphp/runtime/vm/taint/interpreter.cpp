@@ -272,25 +272,17 @@ void iopString(const StringData* /* s */) {
   iopConstant("String");
 }
 
-void iopDict(const ArrayData* /* a */) {
-  iopConstant("Dict");
-}
-
-void iopKeyset(const ArrayData* /* a */) {
-  iopConstant("Keyset");
-}
-
-void iopVec(const ArrayData* /* a */) {
-  iopConstant("Vec");
-}
-
-void iopNewDictArray(uint32_t /* capacity */) {
-  iopConstant("NewDictArray");
-}
-
 namespace {
+void iopNewEmptyCollection(folly::StringPiece name) {
+  iopPreamble(name);
+  auto& mstate = vmMInstrState();
+  auto to = mstate.base;
+  State::instance->heap_collections.set(to, nullptr);
+}
+
 void newCollectionSizeN(uint32_t n) {
-  auto& stack = State::instance->stack;
+  auto state = State::instance;
+  auto& stack = state->stack;
 
   // Check all arguments to see if they're tainted.
   // One tainted element taints result.
@@ -305,8 +297,28 @@ void newCollectionSizeN(uint32_t n) {
 
   stack.pop(n);
   stack.push(value);
+
+  auto& mstate = vmMInstrState();
+  auto to = mstate.base;
+  state->heap_collections.set(to, value);
 }
 } // namespace
+
+void iopDict(const ArrayData* /* a */) {
+  iopNewEmptyCollection("Dict");
+}
+
+void iopKeyset(const ArrayData* /* a */) {
+  iopNewEmptyCollection("Keyset");
+}
+
+void iopVec(const ArrayData* /* a */) {
+  iopNewEmptyCollection("Vec");
+}
+
+void iopNewDictArray(uint32_t /* capacity */) {
+  iopNewEmptyCollection("NewDictArray");
+}
 
 void iopNewStructDict(imm_array<int32_t> ids) {
   iopPreamble("NewStructDict");
@@ -1360,7 +1372,9 @@ void iopDim(MOpMode /* mode */, MemberKey /* mk */) {
 
 namespace {
 
-TypedValue typedValue(MemberKey memberKey) {
+// Resolves a member key to the actual value being read as a TypedValue
+// to resolve the property access
+TypedValue memberKeyToObjectKey(MemberKey memberKey) {
   switch (memberKey.mcode) {
     case MW:
       return TypedValue{};
@@ -1385,15 +1399,53 @@ TypedValue typedValue(MemberKey memberKey) {
   not_reached();
 }
 
-tv_lval resolveMemberKey(const MemberKey& memberKey) {
-  auto& instructionState = vmMInstrState();
-  auto key = typedValue(memberKey);
-  return Prop<MOpMode::None>(
-      instructionState.tvTempBase,
-      arGetContextClass(vmfp()),
-      *instructionState.base,
-      key,
-      ReadonlyOp::Readonly);
+// Similar to the above but just returns whether either the key or the
+// value in this operation is tainted or not. Ignores joins,
+// just propagates the first taint it finds for now.
+Value memberKeyToElementTaint(MemberKey memberKey) {
+  auto state = State::instance;
+  switch (memberKey.mcode) {
+    case MW:
+      // New elements add the value on the top of the stack
+      return state->stack.top();
+    case MEL:
+    case MPL: {
+      // Check if the value is tainted
+      auto taint = state->stack.top();
+      // If not tainted, fall back to the taint for the key.
+      if (taint == nullptr) {
+        auto const local = frame_local(vmfp(), memberKey.local.id);
+        taint = state->heap_locals.get(local);
+      }
+      return taint;
+    }
+    case MEC:
+    case MPC: {
+      // Check if the value is tainted
+      auto taint = state->stack.top();
+      // Pull from the referenced stack element (which is the key)
+      if (taint == nullptr) {
+        taint = state->stack.peek(memberKey.iva);
+      }
+      return taint;
+    }
+    case MEI: {
+      // Check if the value is tainted
+      auto taint = state->stack.top();
+      // Pull from the referenced stack element (which is the key)
+      if (taint == nullptr) {
+        taint = state->stack.peek(memberKey.int64);
+      }
+      return taint;
+    }
+    case MET:
+    case MPT:
+    case MQT:
+      // Accesses using, so fall back to the taint on the value
+      // We assume immediates are not tainted.
+      return state->stack.top();
+  }
+  not_reached();
 }
 
 } // namespace
@@ -1411,7 +1463,7 @@ void iopQueryM(uint32_t nDiscard, QueryMOp op, MemberKey memberKey) {
         // Handle objects as just a map from property to taint.
         // Ignore custom getters and any exceptions thrown if the
         // base is not an object (silently return null)
-        auto key = typedValue(memberKey);
+        auto key = memberKeyToObjectKey(memberKey);
         if (isStringType(key.m_type)) {
           StringData* str = key.m_data.pstr;
           auto property = str->slice();
@@ -1429,7 +1481,15 @@ void iopQueryM(uint32_t nDiscard, QueryMOp op, MemberKey memberKey) {
           // This should never happen... just swallow.
         }
       } else if (mcodeIsElem(memberKey.mcode)) {
-        // TODO: Handle element access
+        auto& mstate = vmMInstrState();
+        auto from = mstate.base;
+        value = state->heap_collections.get(from);
+        FTRACE(
+            2,
+            "taint: getting member {} (from: {}), value: `{}`\n",
+            memberKey,
+            from,
+            value);
       } else {
         // The interpreter swallows this, and would warn on this too.
         FTRACE(2, "taint: Cannot use [] for reading");
@@ -1458,7 +1518,7 @@ void iopSetM(uint32_t nDiscard, MemberKey memberKey) {
     // Ignore custom setters and any exceptions thrown if the
     // base is not an object (silently return null) or if
     // the SetM fails. The stack might get out of sync in that case
-    auto key = typedValue(memberKey);
+    auto key = memberKeyToObjectKey(memberKey);
     if (isStringType(key.m_type)) {
       StringData* str = key.m_data.pstr;
       auto property = str->slice();
@@ -1475,10 +1535,28 @@ void iopSetM(uint32_t nDiscard, MemberKey memberKey) {
     } else {
       // This should never happen... just swallow.
     }
-  } else if (mcodeIsElem(memberKey.mcode)) {
-    // TODO: Handle element access
+  } else if (mcodeIsElem(memberKey.mcode) || memberKey.mcode == MW) {
+    // We're either modifying a collection or adding an element to something which we
+    // assume is a collection. Find the right base, which should be set already.
+    auto& mstate = vmMInstrState();
+    auto to = mstate.base;
+    // TODO: Should we overwrite the taint on the value that gets pushed
+    //       back on the stack? We ignore it for now
+    auto taint = memberKeyToElementTaint(memberKey);
+    if (taint == nullptr) {
+      // See if the collection is already tainted, if the value is not
+      // This should eventually be a join (or we should track taints precisely).
+      taint = state->heap_collections.get(to);
+    }
+    state->heap_collections.set(to, taint);
+    FTRACE(
+        2,
+        "taint: setting member {} (to: {}), value: `{}`\n",
+        memberKey,
+        to,
+        taint);
   } else {
-    // TODO: Handle MW opcode for inserting new elements
+    // This should never happen...
   }
 
   for (size_t i = 0; i < nDiscard + 1; i++) {

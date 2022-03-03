@@ -5,16 +5,39 @@
 use crate::{Prefix, RelativePath, ToOxidized};
 use intern::string::BytesId;
 use oxidized::file_pos_small::FilePosSmall;
+use oxidized::pos_span_raw::PosSpanRaw;
 use oxidized::pos_span_tiny::PosSpanTiny;
 use std::fmt;
 use std::hash::Hash;
 
 pub use oxidized::file_pos_large::FilePosLarge;
 
-pub trait Pos: Eq + Hash + Clone + std::fmt::Debug {
+pub trait Pos:
+    Eq
+    + Hash
+    + Clone
+    + std::fmt::Debug
+    + for<'a> From<&'a oxidized::pos::Pos>
+    + for<'a> From<&'a oxidized_by_ref::pos::Pos<'a>>
+    + 'static
+{
     /// Make a new instance. If the implementing Pos is stateful,
     /// it will call cons() to obtain interned values to construct the instance.
     fn mk(cons: impl FnOnce() -> (RelativePath, FilePosLarge, FilePosLarge)) -> Self;
+
+    fn from_ast(pos: &oxidized::pos::Pos) -> Self {
+        Self::mk(|| {
+            let PosSpanRaw { start, end } = pos.to_raw_span();
+            (pos.filename().into(), start, end)
+        })
+    }
+
+    fn from_decl(pos: &oxidized_by_ref::pos::Pos<'_>) -> Self {
+        Self::mk(|| {
+            let PosSpanRaw { start, end } = pos.to_raw_span();
+            (pos.filename().into(), start, end)
+        })
+    }
 
     fn to_oxidized<'a>(&self, arena: &'a bumpalo::Bump) -> &'a oxidized_by_ref::pos::Pos<'a>;
 }
@@ -144,6 +167,18 @@ impl fmt::Debug for BPos {
     }
 }
 
+impl<'a> From<&'a oxidized::pos::Pos> for BPos {
+    fn from(pos: &'a oxidized::pos::Pos) -> Self {
+        Self::from_ast(pos)
+    }
+}
+
+impl<'a> From<&'a oxidized_by_ref::pos::Pos<'a>> for BPos {
+    fn from(pos: &'a oxidized_by_ref::pos::Pos<'a>) -> Self {
+        Self::from_decl(pos)
+    }
+}
+
 /// A stateless sentinel Pos.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct NPos;
@@ -155,6 +190,18 @@ impl Pos for NPos {
 
     fn to_oxidized<'a>(&self, _arena: &'a bumpalo::Bump) -> &'a oxidized_by_ref::pos::Pos<'a> {
         oxidized_by_ref::pos::Pos::none()
+    }
+}
+
+impl<'a> From<&'a oxidized::pos::Pos> for NPos {
+    fn from(pos: &'a oxidized::pos::Pos) -> Self {
+        Self::from_ast(pos)
+    }
+}
+
+impl<'a> From<&'a oxidized_by_ref::pos::Pos<'a>> for NPos {
+    fn from(pos: &'a oxidized_by_ref::pos::Pos<'a>) -> Self {
+        Self::from_decl(pos)
     }
 }
 
@@ -193,6 +240,29 @@ impl<S, P> Positioned<S, P> {
 impl<S: Copy, P> Positioned<S, P> {
     pub fn id(&self) -> S {
         self.id
+    }
+}
+
+impl<'a, S: From<&'a str>, P: Pos> From<&'a oxidized::ast_defs::Id> for Positioned<S, P> {
+    fn from(pos_id: &'a oxidized::ast_defs::Id) -> Self {
+        let oxidized::ast_defs::Id(pos, id) = pos_id;
+        Self::new(Pos::from_ast(pos), S::from(id))
+    }
+}
+
+impl<'a, S: From<&'a str>, P: Pos> From<oxidized_by_ref::ast_defs::Id<'a>> for Positioned<S, P> {
+    fn from(pos_id: oxidized_by_ref::ast_defs::Id<'a>) -> Self {
+        let oxidized_by_ref::ast_defs::Id(pos, id) = pos_id;
+        Self::new(Pos::from_decl(pos), S::from(id))
+    }
+}
+
+impl<'a, S: From<&'a str>, P: Pos> From<oxidized_by_ref::typing_defs::PosId<'a>>
+    for Positioned<S, P>
+{
+    fn from(pos_id: oxidized_by_ref::typing_defs::PosId<'a>) -> Self {
+        let (pos, id) = pos_id;
+        Self::new(Pos::from_decl(pos), S::from(id))
     }
 }
 

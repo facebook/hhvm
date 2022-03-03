@@ -58,7 +58,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
     fn fun_def_impl(&mut self, fd: &oxidized::aast::FunDef<(), ()>) -> tast::FunDef<R> {
         let f = &fd.fun;
         let fname = Symbol::new(&f.name.1);
-        let fpos = self.ctx.alloc.pos_from_ast(&f.name.0);
+        let fpos = R::Pos::from(&f.name.0);
 
         let (return_decl_ty, params_decl_ty) = self.hint_fun_header(&f.params, &f.ret);
         let return_ty = match return_decl_ty.clone() {
@@ -70,8 +70,8 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             ),
         };
         let ret_pos = match &f.ret.1 {
-            Some(h) => self.ctx.alloc.pos_from_ast(&h.0),
-            None => self.ctx.alloc.pos_from_ast(f.name.pos()),
+            Some(h) => R::Pos::from(&h.0),
+            None => R::Pos::from(f.name.pos()),
         };
         let return_ = TypingReturn::make_info(
             self.env,

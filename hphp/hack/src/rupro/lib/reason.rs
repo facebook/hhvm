@@ -16,7 +16,16 @@ use crate::visitor::Walkable;
 pub use oxidized::typing_reason::{ArgPosition, BlameSource};
 
 pub trait Reason:
-    Eq + Hash + Clone + ToOcamlRep + Walkable<Self> + std::fmt::Debug + Send + Sync + 'static
+    Eq
+    + Hash
+    + Clone
+    + ToOcamlRep
+    + Walkable<Self>
+    + std::fmt::Debug
+    + Send
+    + Sync
+    + for<'a> From<oxidized_by_ref::typing_reason::T_<'a>>
+    + 'static
 {
     /// Position type.
     type Pos: Pos + Send + Sync + 'static;
@@ -57,6 +66,137 @@ pub trait Reason:
     fn cons_decl_ty(ty: DeclTy_<Self>) -> Hc<DeclTy_<Self>>;
 
     fn cons_ty(ty: Ty_<Self, Ty<Self>>) -> Hc<Ty_<Self, Ty<Self>>>;
+
+    fn from_oxidized(reason: oxidized_by_ref::typing_reason::T_<'_>) -> Self {
+        Self::mk(|| {
+            use crate::reason::ReasonImpl as RI;
+            use oxidized_by_ref::typing_reason::Blame as OBlame;
+            use oxidized_by_ref::typing_reason::T_ as OR;
+            match reason {
+                OR::Rnone => RI::Rnone,
+                OR::Rwitness(pos) => RI::Rwitness(pos.into()),
+                OR::RwitnessFromDecl(pos) => RI::RwitnessFromDecl(pos.into()),
+                OR::Ridx(&(pos, r)) => RI::Ridx(pos.into(), r.into()),
+                OR::RidxVector(pos) => RI::RidxVector(pos.into()),
+                OR::RidxVectorFromDecl(pos) => RI::RidxVectorFromDecl(pos.into()),
+                OR::Rforeach(pos) => RI::Rforeach(pos.into()),
+                OR::Rasyncforeach(pos) => RI::Rasyncforeach(pos.into()),
+                OR::Rarith(pos) => RI::Rarith(pos.into()),
+                OR::RarithRet(pos) => RI::RarithRet(pos.into()),
+                OR::RarithRetFloat(&(pos, r, arg_position)) => {
+                    RI::RarithRetFloat(pos.into(), r.into(), arg_position)
+                }
+                OR::RarithRetNum(&(pos, r, arg_position)) => {
+                    RI::RarithRetNum(pos.into(), r.into(), arg_position)
+                }
+                OR::RarithRetInt(pos) => RI::RarithRetInt(pos.into()),
+                OR::RarithDynamic(pos) => RI::RarithDynamic(pos.into()),
+                OR::RbitwiseDynamic(pos) => RI::RbitwiseDynamic(pos.into()),
+                OR::RincdecDynamic(pos) => RI::RincdecDynamic(pos.into()),
+                OR::Rcomp(pos) => RI::Rcomp(pos.into()),
+                OR::RconcatRet(pos) => RI::RconcatRet(pos.into()),
+                OR::RlogicRet(pos) => RI::RlogicRet(pos.into()),
+                OR::Rbitwise(pos) => RI::Rbitwise(pos.into()),
+                OR::RbitwiseRet(pos) => RI::RbitwiseRet(pos.into()),
+                OR::RnoReturn(pos) => RI::RnoReturn(pos.into()),
+                OR::RnoReturnAsync(pos) => RI::RnoReturnAsync(pos.into()),
+                OR::RretFunKind(&(pos, fun_kind)) => RI::RretFunKind(pos.into(), fun_kind),
+                OR::RretFunKindFromDecl(&(pos, fun_kind)) => {
+                    RI::RretFunKindFromDecl(pos.into(), fun_kind)
+                }
+                OR::Rhint(pos) => RI::Rhint(pos.into()),
+                OR::Rthrow(pos) => RI::Rthrow(pos.into()),
+                OR::Rplaceholder(pos) => RI::Rplaceholder(pos.into()),
+                OR::RretDiv(pos) => RI::RretDiv(pos.into()),
+                OR::RyieldGen(pos) => RI::RyieldGen(pos.into()),
+                OR::RyieldAsyncgen(pos) => RI::RyieldAsyncgen(pos.into()),
+                OR::RyieldAsyncnull(pos) => RI::RyieldAsyncnull(pos.into()),
+                OR::RyieldSend(pos) => RI::RyieldSend(pos.into()),
+                OR::RlostInfo(&(sym, r, OBlame::Blame(&(pos, blame_source)))) => {
+                    RI::RlostInfo(Symbol::new(sym), r.into(), Blame(pos.into(), blame_source))
+                }
+                OR::Rformat(&(pos, sym, r)) => RI::Rformat(pos.into(), Symbol::new(sym), r.into()),
+                OR::RclassClass(&(pos, s)) => RI::RclassClass(pos.into(), TypeName(Symbol::new(s))),
+                OR::RunknownClass(pos) => RI::RunknownClass(pos.into()),
+                OR::RvarParam(pos) => RI::RvarParam(pos.into()),
+                OR::RvarParamFromDecl(pos) => RI::RvarParamFromDecl(pos.into()),
+                OR::RunpackParam(&(pos1, pos2, i)) => RI::RunpackParam(pos1.into(), pos2.into(), i),
+                OR::RinoutParam(pos) => RI::RinoutParam(pos.into()),
+                OR::Rinstantiate(&(r1, sym, r2)) => {
+                    RI::Rinstantiate(r1.into(), TypeName(Symbol::new(sym)), r2.into())
+                }
+                OR::Rtypeconst(&(r1, pos_id, sym, r2)) => {
+                    RI::Rtypeconst(r1.into(), pos_id.into(), Symbol::new(sym.0), r2.into())
+                }
+                OR::RtypeAccess(&(r, list)) => RI::RtypeAccess(
+                    r.into(),
+                    list.iter()
+                        .map(|(&r, s)| (r.into(), Symbol::new(s.0)))
+                        .collect(),
+                ),
+                OR::RexprDepType(&(r, pos, edt_reason)) => {
+                    RI::RexprDepType(r.into(), pos.into(), edt_reason.into())
+                }
+                OR::RnullsafeOp(pos) => RI::RnullsafeOp(pos.into()),
+                OR::RtconstNoCstr(&pos_id) => RI::RtconstNoCstr(pos_id.into()),
+                OR::Rpredicated(&(pos, s)) => RI::Rpredicated(pos.into(), Symbol::new(s)),
+                OR::Ris(pos) => RI::Ris(pos.into()),
+                OR::Ras(pos) => RI::Ras(pos.into()),
+                OR::RvarrayOrDarrayKey(pos) => RI::RvarrayOrDarrayKey(pos.into()),
+                OR::RvecOrDictKey(pos) => RI::RvecOrDictKey(pos.into()),
+                OR::Rusing(pos) => RI::Rusing(pos.into()),
+                OR::RdynamicProp(pos) => RI::RdynamicProp(pos.into()),
+                OR::RdynamicCall(pos) => RI::RdynamicCall(pos.into()),
+                OR::RdynamicConstruct(pos) => RI::RdynamicConstruct(pos.into()),
+                OR::RidxDict(pos) => RI::RidxDict(pos.into()),
+                OR::RsetElement(pos) => RI::RsetElement(pos.into()),
+                OR::RmissingOptionalField(&(pos, s)) => {
+                    RI::RmissingOptionalField(pos.into(), Symbol::new(s))
+                }
+                OR::RunsetField(&(pos, s)) => RI::RunsetField(pos.into(), Symbol::new(s)),
+                OR::RcontravariantGeneric(&(r, s)) => {
+                    RI::RcontravariantGeneric(r.into(), Symbol::new(s))
+                }
+                OR::RinvariantGeneric(&(r, s)) => RI::RinvariantGeneric(r.into(), Symbol::new(s)),
+                OR::Rregex(pos) => RI::Rregex(pos.into()),
+                OR::RimplicitUpperBound(&(pos, s)) => {
+                    RI::RimplicitUpperBound(pos.into(), Symbol::new(s))
+                }
+                OR::RtypeVariable(pos) => RI::RtypeVariable(pos.into()),
+                OR::RtypeVariableGenerics(&(pos, s1, s2)) => {
+                    RI::RtypeVariableGenerics(pos.into(), Symbol::new(s1), Symbol::new(s2))
+                }
+                OR::RglobalTypeVariableGenerics(&(pos, s1, s2)) => {
+                    RI::RglobalTypeVariableGenerics(pos.into(), Symbol::new(s1), Symbol::new(s2))
+                }
+                OR::RsolveFail(pos) => RI::RsolveFail(pos.into()),
+                OR::RcstrOnGenerics(&(pos, pos_id)) => {
+                    RI::RcstrOnGenerics(pos.into(), pos_id.into())
+                }
+                OR::RlambdaParam(&(pos, r)) => RI::RlambdaParam(pos.into(), r.into()),
+                OR::Rshape(&(pos, s)) => RI::Rshape(pos.into(), Symbol::new(s)),
+                OR::Renforceable(pos) => RI::Renforceable(pos.into()),
+                OR::Rdestructure(pos) => RI::Rdestructure(pos.into()),
+                OR::RkeyValueCollectionKey(pos) => RI::RkeyValueCollectionKey(pos.into()),
+                OR::RglobalClassProp(pos) => RI::RglobalClassProp(pos.into()),
+                OR::RglobalFunParam(pos) => RI::RglobalFunParam(pos.into()),
+                OR::RglobalFunRet(pos) => RI::RglobalFunRet(pos.into()),
+                OR::Rsplice(pos) => RI::Rsplice(pos.into()),
+                OR::RetBoolean(pos) => RI::RetBoolean(pos.into()),
+                OR::RdefaultCapability(pos) => RI::RdefaultCapability(pos.into()),
+                OR::RconcatOperand(pos) => RI::RconcatOperand(pos.into()),
+                OR::RinterpOperand(pos) => RI::RinterpOperand(pos.into()),
+                OR::RdynamicCoercion(&r) => RI::RdynamicCoercion(r.into()),
+                OR::RsupportDynamicType(pos) => RI::RsupportDynamicType(pos.into()),
+                OR::RdynamicPartialEnforcement(&(pos, s, r)) => {
+                    RI::RdynamicPartialEnforcement(pos.into(), Symbol::new(s), r.into())
+                }
+                OR::RrigidTvarEscape(&(pos, s1, s2, r)) => {
+                    RI::RrigidTvarEscape(pos.into(), Symbol::new(s1), Symbol::new(s2), r.into())
+                }
+            }
+        })
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -70,6 +210,20 @@ pub enum ExprDepTypeReason {
     ERparent(Symbol),
     ERself(Symbol),
     ERpu(Symbol),
+}
+
+impl<'a> From<oxidized_by_ref::typing_reason::ExprDepTypeReason<'a>> for ExprDepTypeReason {
+    fn from(edtr: oxidized_by_ref::typing_reason::ExprDepTypeReason<'a>) -> Self {
+        use oxidized_by_ref::typing_reason::ExprDepTypeReason as Obr;
+        match edtr {
+            Obr::ERexpr(i) => ExprDepTypeReason::ERexpr(i),
+            Obr::ERstatic => ExprDepTypeReason::ERstatic,
+            Obr::ERclass(s) => ExprDepTypeReason::ERclass(Symbol::new(s)),
+            Obr::ERparent(s) => ExprDepTypeReason::ERparent(Symbol::new(s)),
+            Obr::ERself(s) => ExprDepTypeReason::ERself(Symbol::new(s)),
+            Obr::ERpu(s) => ExprDepTypeReason::ERpu(Symbol::new(s)),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -217,6 +371,12 @@ impl Reason for BReason {
 
 impl Walkable<BReason> for BReason {}
 
+impl<'a> From<oxidized_by_ref::typing_reason::T_<'a>> for BReason {
+    fn from(reason: oxidized_by_ref::typing_reason::T_<'a>) -> Self {
+        Self::from_oxidized(reason)
+    }
+}
+
 impl ToOcamlRep for BReason {
     fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
         unimplemented!()
@@ -263,6 +423,12 @@ impl Reason for NReason {
 }
 
 impl Walkable<NReason> for NReason {}
+
+impl<'a> From<oxidized_by_ref::typing_reason::T_<'a>> for NReason {
+    fn from(reason: oxidized_by_ref::typing_reason::T_<'a>) -> Self {
+        Self::from_oxidized(reason)
+    }
+}
 
 impl ToOcamlRep for NReason {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {

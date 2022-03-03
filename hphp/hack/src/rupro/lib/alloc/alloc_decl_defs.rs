@@ -47,15 +47,15 @@ impl<R: Reason> Allocator<R> {
         use ty::TshapeFieldName;
         match x {
             Obr::TSFlitInt(&pos_id) => (
-                SfnPos::Simple(self.pos_from_decl(pos_id.0)),
+                SfnPos::Simple(pos_id.0.into()),
                 TshapeFieldName::TSFlitInt(Symbol::new(pos_id.1)),
             ),
             Obr::TSFlitStr(&pos_bytes) => (
-                SfnPos::Simple(self.pos_from_decl(pos_bytes.0)),
+                SfnPos::Simple(pos_bytes.0.into()),
                 TshapeFieldName::TSFlitStr(intern::string::intern_bytes(pos_bytes.1.as_ref())),
             ),
             Obr::TSFclassConst(&(pos_id1, pos_id2)) => (
-                SfnPos::ClassConst(self.pos_from_decl(pos_id1.0), self.pos_from_decl(pos_id2.0)),
+                SfnPos::ClassConst(pos_id1.0.into(), pos_id2.0.into()),
                 TshapeFieldName::TSFclassConst(
                     TypeName(Symbol::new(pos_id1.1)),
                     Symbol::new(pos_id2.1),
@@ -69,7 +69,7 @@ impl<R: Reason> Allocator<R> {
         attr: &obr::typing_defs::UserAttribute<'_>,
     ) -> UserAttribute<R::Pos> {
         UserAttribute {
-            name: self.pos_type_from_decl(attr.name),
+            name: attr.name.into(),
             classname_params: attr
                 .classname_params
                 .iter()
@@ -82,7 +82,7 @@ impl<R: Reason> Allocator<R> {
     fn decl_tparam(&self, tparam: &obr::typing_defs::Tparam<'_>) -> ty::Tparam<R, DeclTy<R>> {
         ty::Tparam {
             variance: tparam.variance,
-            name: self.pos_type_from_decl(tparam.name),
+            name: tparam.name.into(),
             tparams: self.slice(tparam.tparams, Self::decl_tparam),
             constraints: self.slice(tparam.constraints, |alloc, (kind, ty)| {
                 (kind, alloc.ty_from_decl(ty))
@@ -114,11 +114,11 @@ impl<R: Reason> Allocator<R> {
     fn ty_from_decl(&self, ty: &obr::typing_defs::Ty<'_>) -> DeclTy<R> {
         use obr::typing_defs_core::Ty_::*;
         use DeclTy_::*;
-        let reason = self.reason(*ty.0);
+        let reason = R::from(*ty.0);
         let ty_ = match ty.1 {
             Tthis => DTthis,
             Tapply(&(pos_id, tys)) => DTapply(Box::new((
-                self.pos_type_from_decl(pos_id),
+                pos_id.into(),
                 self.slice(tys, Self::ty_from_decl),
             ))),
             Tmixed => DTmixed,
@@ -165,7 +165,7 @@ impl<R: Reason> Allocator<R> {
     ) -> ty::TaccessType<R, DeclTy<R>> {
         ty::TaccessType {
             ty: self.ty_from_decl(taccess_type.0),
-            type_const: self.pos_type_const_from_decl(taccess_type.1),
+            type_const: taccess_type.1.into(),
         }
     }
 
@@ -176,7 +176,7 @@ impl<R: Reason> Allocator<R> {
         use obr::typing_defs_core::Capability as Obr;
         use ty::Capability;
         match cap {
-            Obr::CapDefaults(pos) => Capability::CapDefaults(self.pos_from_decl(pos)),
+            Obr::CapDefaults(pos) => Capability::CapDefaults(pos.into()),
             Obr::CapTy(ty) => Capability::CapTy(self.ty_from_decl(ty)),
         }
     }
@@ -214,7 +214,7 @@ impl<R: Reason> Allocator<R> {
 
     fn decl_fun_param(&self, fp: &obr::typing_defs_core::FunParam<'_>) -> FunParam<R, DeclTy<R>> {
         FunParam {
-            pos: self.pos_from_decl(fp.pos),
+            pos: fp.pos.into(),
             name: fp.name.map(Symbol::new),
             ty: self.decl_possibly_enforced_ty(fp.type_),
             flags: fp.flags,
@@ -277,7 +277,7 @@ impl<R: Reason> Allocator<R> {
     ) -> shallow::ShallowClassConst<R> {
         shallow::ShallowClassConst {
             kind: scc.abstract_,
-            name: self.pos_class_const_from_decl(scc.name),
+            name: scc.name.into(),
             ty: self.ty_from_decl(scc.type_),
             refs: self.slice(scc.refs, Self::class_const_ref),
         }
@@ -288,14 +288,14 @@ impl<R: Reason> Allocator<R> {
         stc: &obr::shallow_decl_defs::ShallowTypeconst<'_>,
     ) -> shallow::ShallowTypeconst<R> {
         shallow::ShallowTypeconst {
-            name: self.pos_type_const_from_decl(stc.name),
+            name: stc.name.into(),
             kind: self.typeconst(stc.kind),
             enforceable: if stc.enforceable.1 {
-                Some(self.pos_from_decl(stc.enforceable.0))
+                Some(stc.enforceable.0.into())
             } else {
                 None
             },
-            reifiable: stc.reifiable.map(|pos| self.pos_from_decl(pos)),
+            reifiable: stc.reifiable.map(Into::into),
             is_ctx: stc.is_ctx,
         }
     }
@@ -305,7 +305,7 @@ impl<R: Reason> Allocator<R> {
         sm: &obr::shallow_decl_defs::ShallowMethod<'_>,
     ) -> shallow::ShallowMethod<R> {
         shallow::ShallowMethod {
-            name: self.pos_method_from_decl(sm.name),
+            name: sm.name.into(),
             ty: self.ty_from_decl(sm.type_),
             visibility: sm.visibility,
             deprecated: sm
@@ -321,7 +321,7 @@ impl<R: Reason> Allocator<R> {
         sp: &obr::shallow_decl_defs::ShallowProp<'_>,
     ) -> shallow::ShallowProp<R> {
         shallow::ShallowProp {
-            name: self.pos_prop_from_decl(sp.name),
+            name: sp.name.into(),
             xhp_attr: sp.xhp_attr,
             ty: sp.type_.as_ref().map(|ty| self.ty_from_decl(ty)),
             visibility: sp.visibility,
@@ -340,11 +340,8 @@ impl<R: Reason> Allocator<R> {
             is_xhp: sc.is_xhp,
             has_xhp_keyword: sc.has_xhp_keyword,
             kind: sc.kind,
-            module: sc
-                .module
-                .as_ref()
-                .map(|id| self.pos_module_from_ast_ref(id)),
-            name: self.pos_type_from_decl(sc.name),
+            module: sc.module.map(Into::into),
+            name: sc.name.into(),
             tparams: self.slice(sc.tparams, Self::decl_tparam),
             where_constraints: self.slice(sc.where_constraints, Self::decl_where_constraint),
             extends: self.slice(sc.extends, Self::ty_from_decl),
@@ -373,14 +370,12 @@ impl<R: Reason> Allocator<R> {
 
     fn fun_decl(&self, sf: &obr::shallow_decl_defs::FunDecl<'_>) -> shallow::FunDecl<R> {
         shallow::FunDecl {
-            pos: self.pos_from_decl(sf.pos),
+            pos: sf.pos.into(),
             ty: self.ty_from_decl(sf.type_),
             deprecated: sf
                 .deprecated
                 .map(|s| intern::string::intern_bytes(s.as_ref())),
-            module: sf
-                .module
-                .map(|pos_id| self.pos_module_from_ast_ref(&pos_id)),
+            module: sf.module.map(Into::into),
             internal: sf.internal,
             php_std_lib: sf.php_std_lib,
             support_dynamic_type: sf.support_dynamic_type,
@@ -389,8 +384,8 @@ impl<R: Reason> Allocator<R> {
 
     fn typedef_decl(&self, x: &obr::shallow_decl_defs::TypedefDecl<'_>) -> shallow::TypedefDecl<R> {
         ty::TypedefType {
-            module: x.module.map(|pos_id| self.pos_module_from_ast_ref(&pos_id)),
-            pos: self.pos_from_decl(x.pos),
+            module: x.module.map(Into::into),
+            pos: x.pos.into(),
             vis: x.vis,
             tparams: self.slice(x.tparams, Self::decl_tparam),
             constraint: x.constraint.map(|ty| self.ty_from_decl(ty)),
@@ -402,7 +397,7 @@ impl<R: Reason> Allocator<R> {
 
     fn const_decl(&self, x: &obr::shallow_decl_defs::ConstDecl<'_>) -> shallow::ConstDecl<R> {
         ty::ConstDecl {
-            pos: self.pos_from_decl(x.pos),
+            pos: x.pos.into(),
             ty: self.ty_from_decl(x.type_),
         }
     }

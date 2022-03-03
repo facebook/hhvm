@@ -58,6 +58,12 @@ impl std::fmt::Display for Symbol {
     }
 }
 
+impl From<&str> for Symbol {
+    fn from(s: &str) -> Self {
+        Self::new(s)
+    }
+}
+
 impl<'a> ToOxidized<'a> for Symbol {
     type Output = &'a str;
 
@@ -117,6 +123,12 @@ macro_rules! common_impls {
         impl std::fmt::Display for $name {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 write!(f, "{}", self.as_str())
+            }
+        }
+
+        impl From<&str> for $name {
+            fn from(s: &str) -> Self {
+                Self::new(s)
             }
         }
 

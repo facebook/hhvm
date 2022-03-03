@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 use crate::decl_defs::DeclTy;
 use crate::reason::Reason;
 use crate::typing_defs::Ty;
@@ -17,7 +18,7 @@ impl TypingParam {
         decl_hint: Option<DeclTy<R>>,
         param: &oxidized::aast::FunParam<(), ()>,
     ) -> Ty<R> {
-        let r = R::witness(env.ctx.alloc.pos_from_ast(&param.pos));
+        let r = R::witness(R::Pos::from(&param.pos));
         match decl_hint {
             None => Ty::any(r),
             Some(ty) => {
@@ -35,9 +36,7 @@ impl TypingParam {
     ) {
         // TODO(hrust): variadic+hhi
         let prim_err = match param.type_hint.1 {
-            None => Some(Primary::<R>::ExpectingTypeHint(
-                env.ctx.alloc.pos_from_ast(&param.pos),
-            )),
+            None => Some(Primary::<R>::ExpectingTypeHint(R::Pos::from(&param.pos))),
             Some(_) => None,
         };
         match prim_err {

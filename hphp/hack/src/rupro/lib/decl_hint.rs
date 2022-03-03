@@ -8,6 +8,7 @@ use crate::decl_defs::{DeclTy, DeclTy_};
 use crate::reason::Reason;
 
 pub struct DeclHintEnv<R: Reason> {
+    #[allow(dead_code)]
     alloc: &'static Allocator<R>,
 }
 
@@ -17,17 +18,15 @@ impl<R: Reason> DeclHintEnv<R> {
     }
 
     fn mk_hint_decl_ty(&self, pos: &oxidized::pos::Pos, ty: DeclTy_<R>) -> DeclTy<R> {
-        let reason = R::hint(self.alloc.pos_from_ast(pos));
-        DeclTy::new(reason, ty)
+        DeclTy::new(R::hint(pos.into()), ty)
     }
 
     fn hint_(&self, _pos: &oxidized::pos::Pos, hint: &oxidized::aast_defs::Hint_) -> DeclTy_<R> {
         use oxidized::aast_defs::Hint_ as OH;
         match hint {
             OH::Happly(id, argl) => {
-                let id = self.alloc.pos_type_from_ast(id);
                 let argl = argl.iter().map(|arg| self.hint(arg)).collect();
-                DeclTy_::DTapply(Box::new((id, argl)))
+                DeclTy_::DTapply(Box::new((id.into(), argl)))
             }
             OH::Hprim(p) => DeclTy_::DTprim(*p),
             h => unimplemented!("hint_: {:?}", h),

@@ -4,8 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 mod alloc_decl_defs;
-mod alloc_pos;
-mod alloc_reason;
 
 use std::marker::PhantomData;
 

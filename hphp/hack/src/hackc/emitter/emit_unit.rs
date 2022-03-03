@@ -13,7 +13,7 @@ use env::{self, emitter::Emitter, Env};
 use ffi::{Maybe::*, Slice, Str};
 use hackc_unit::HackCUnit;
 use hhas_symbol_refs::HhasSymbolRefs;
-use hhvm_hhbc_defs_ffi::ffi::FatalOp;
+use hhbc_ast::FatalOp;
 use instruction_sequence::{Error, Result};
 use ocamlrep::rc::RcOc;
 use oxidized::{ast, namespace_env, pos::Pos};

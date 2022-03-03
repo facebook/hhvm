@@ -8,17 +8,20 @@ use ffi::{
     Maybe::{self, *},
     Pair, Slice, Str,
 };
-use hhvm_hhbc_defs_ffi::ffi::{
-    BareThisOp, CollectionType, ContCheckOp, FCallArgsFlags, FatalOp, IncDecOp, InitPropOp,
-    IsLogAsDynamicCallOp, IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetOpOp,
-    SetRangeOp, SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
-};
 use iterator::IterId;
 use label::Label;
 use local::Local;
 
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType<'arena> = Str<'arena>;
+
+/// Export these publicly so consumers of hhbc_ast don't have to know the
+/// internal details about the ffi.
+pub use hhvm_hhbc_defs_ffi::ffi::{
+    BareThisOp, CollectionType, ContCheckOp, FCallArgsFlags, FatalOp, IncDecOp, InitPropOp,
+    IsLogAsDynamicCallOp, IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetOpOp,
+    SetRangeOp, SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
+};
 
 #[derive(Clone, Debug)]
 #[repr(C)]

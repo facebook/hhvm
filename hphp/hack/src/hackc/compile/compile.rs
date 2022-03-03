@@ -16,7 +16,7 @@ use decl_provider::DeclProvider;
 use emit_unit::{emit_unit, FromAstFlags};
 use env::emitter::Emitter;
 use hackc_unit::HackCUnit;
-use hhvm_hhbc_defs_ffi::ffi::FatalOp;
+use hhbc_ast::FatalOp;
 use instruction_sequence::Error;
 use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};

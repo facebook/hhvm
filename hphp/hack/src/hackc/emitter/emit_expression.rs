@@ -12,10 +12,6 @@ use hhbc_assertion_utils::*;
 use hhbc_ast::*;
 use hhbc_id::{class, constant, function, method, prop};
 use hhbc_string_utils as string_utils;
-use hhvm_hhbc_defs_ffi::ffi::{
-    BareThisOp, CollectionType, FCallArgsFlags, IncDecOp, IsLogAsDynamicCallOp, IsTypeOp, MOpMode,
-    ObjMethodOp, QueryMOp, ReadonlyOp, SetOpOp, SetRangeOp, SpecialClsRef, TypeStructResolveOp,
-};
 use indexmap::IndexSet;
 use instruction_sequence::{
     instr, unrecoverable,

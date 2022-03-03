@@ -33,11 +33,6 @@ use hhas_typedef::HhasTypedef;
 use hhbc_ast::*;
 use hhbc_id::class::ClassType;
 use hhbc_string_utils::float;
-use hhvm_hhbc_defs_ffi::ffi::{
-    fcall_flags_to_string_ffi, BareThisOp, CollectionType, ContCheckOp, FatalOp, IncDecOp,
-    InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp,
-    SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
-};
 use hhvm_types_ffi::ffi::*;
 use iterator::IterId;
 use itertools::Itertools;
@@ -960,7 +955,10 @@ fn print_fcall_args(
     }: &FcallArgs<'_>,
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
-    angle(w, |w| write!(w, "{}", fcall_flags_to_string_ffi(*flags)))?;
+    angle(w, |w| {
+        let flags = hhvm_hhbc_defs_ffi::ffi::fcall_flags_to_string_ffi(*flags);
+        write!(w, "{}", flags)
+    })?;
     w.write_all(b" ")?;
     print_int(w, num_args)?;
     w.write_all(b" ")?;

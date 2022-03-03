@@ -9,11 +9,6 @@ use ffi::{
     Pair, Slice, Str,
 };
 use hhbc_ast::*;
-use hhvm_hhbc_defs_ffi::ffi::{
-    BareThisOp, CollectionType, ContCheckOp, FatalOp, IncDecOp, InitPropOp, IsLogAsDynamicCallOp,
-    IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetOpOp, SilenceOp, SpecialClsRef,
-    SwitchKind, TypeStructResolveOp,
-};
 use iterator::IterId;
 use label::Label;
 use local::Local;

@@ -17,4 +17,4 @@ hhas_function = { path = "../hhas_function" }
 hhas_pos = { path = "../hhas_pos" }
 hhas_symbol_refs = { path = "../hhas_symbol_refs" }
 hhas_typedef = { path = "../hhas_typedef" }
-hhvm_hhbc_defs_ffi = { path = "../../../hhvm_cxx/hhvm_hhbc_defs" }
+hhbc_ast = { path = "../hhbc_ast" }

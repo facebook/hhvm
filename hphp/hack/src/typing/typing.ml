@@ -4855,7 +4855,7 @@ and lambda ~is_anon ?expected p env f idl =
     check_body_under_known_params
       env
       ~ret_ty:tdyn
-      ~supportdyn:false
+      ~supportdyn:true
       { declared_ft with ft_params }
   | Some (_pos, _ur, supportdyn, ty, Tfun expected_ft) ->
     (* First check that arities match up *)
@@ -4927,34 +4927,49 @@ and lambda ~is_anon ?expected p env f idl =
           FL.Lambda.explicit_params);
       check_body_under_known_params ~supportdyn:false env declared_ft
     ) else (
-      match expected with
-      | Some ExpectedTy.{ ty = { et_type; _ }; _ } when is_any et_type ->
+      match eexpected with
+      | Some (_pos, _ur, _supportdyn, ty, _) when is_any ty ->
         (* If the expected type is Tany env then we're passing a lambda to
          * an untyped function and we just assume every parameter has type
          * Tany.
          * Note: we should be using 'nothing' to type the arguments. *)
         Typing_log.increment_feature_count env FL.Lambda.untyped_context;
         check_body_under_known_params ~supportdyn:false env declared_ft
-      | Some ExpectedTy.{ ty = { et_type; _ }; _ }
-        when TUtils.is_mixed env et_type || is_dynamic et_type ->
-        (* If the expected type of a lambda is mixed or dynamic, we
-         * decompose the expected type into a function type where the
-         * undeclared parameters and the return type are set to the expected
-         * type of lambda, i.e., mixed or dynamic.
+      | Some (_pos, _ur, supportdyn, expected_ty, _)
+        when TUtils.is_mixed env expected_ty
+             || is_nonnull expected_ty
+             || is_dynamic expected_ty ->
+        (* If the expected type of a lambda is mixed, nonnull or dynamic,
+         * or supportdyn of these, we construct a function type where the
+         * undeclared parameters and the return type are set to
+         * mixed (when expected type of lambda is mixed or nonnull), or dynamic
+         * (when expected type of lambda is dynamic). Wrap mixed or nonnull
+         * in supportdyn if the expected type is supportdyn.
          *
-         * For an expected mixed type, one could argue that the lambda
+         * For an expected mixed/nonnull type, one could argue that the lambda
          * doesn't even need to be checked as it can't be called (there is
          * no downcast to function type). Thus, we should be using nothing
          * to type the arguments. But generally users are very confused by
          * the use of nothing and would expect the lambda body to be
          * checked as though it could be called.
          *)
+        let r = Reason.Rwitness p in
+        let param_and_ret_type =
+          if is_dynamic expected_ty then
+            MakeType.dynamic r
+          else if supportdyn then
+            MakeType.supportdyn r (MakeType.mixed r)
+          else
+            MakeType.mixed r
+        in
         let replace_non_declared_type declared_ft_param =
           let is_undeclared =
             TUtils.is_any env declared_ft_param.fp_type.et_type
           in
           if is_undeclared then
-            let enforced_ty = { et_enforced = Unenforced; et_type } in
+            let enforced_ty =
+              { et_enforced = Unenforced; et_type = param_and_ret_type }
+            in
             { declared_ft_param with fp_type = enforced_ty }
           else
             declared_ft_param
@@ -4965,8 +4980,11 @@ and lambda ~is_anon ?expected p env f idl =
           in
           { declared_ft with ft_params }
         in
-        let ret_ty = et_type in
-        check_body_under_known_params ~supportdyn:false env ~ret_ty expected_ft
+        check_body_under_known_params
+          ~supportdyn
+          env
+          ~ret_ty:param_and_ret_type
+          expected_ft
       | Some _ ->
         (* If the expected type is something concrete but not a function
          * then we should reject in strict mode. Check body anyway.
@@ -5455,6 +5473,12 @@ and closure_make
     }
   in
   let ty = mk (Reason.Rwitness lambda_pos, Tfun ft) in
+  let ty =
+    if support_dynamic_type then
+      MakeType.supportdyn (Reason.Rwitness lambda_pos) ty
+    else
+      ty
+  in
   let te =
     Tast.make_typed_expr
       lambda_pos

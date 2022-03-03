@@ -102,7 +102,8 @@ pub extern "C" fn stc_main() {
 
     for fln in filenames {
         let (ast, errs) = ast_provider.get_ast(fln).unwrap();
-        let (tast, errs) = TypingCheckUtils::type_file::<NReason>(Arc::clone(&ctx), &ast, errs);
+        let (tast, errs) =
+            TypingCheckUtils::type_file::<NReason>(Arc::clone(&ctx), &ast, errs).unwrap();
         if !errs.is_empty() {
             unimplemented!()
         }

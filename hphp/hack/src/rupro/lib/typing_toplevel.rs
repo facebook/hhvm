@@ -11,7 +11,7 @@ use pos::Symbol;
 use crate::decl_defs::DeclTy;
 use crate::decl_hint::DeclHintEnv;
 use crate::reason::Reason;
-use crate::typing::{BindParamFlags, Typing};
+use crate::typing::{BindParamFlags, Result, Typing};
 use crate::typing_ctx::TypingCtx;
 use crate::typing_env::TEnv;
 use crate::typing_error::{Primary, TypingError};
@@ -55,7 +55,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         (ret, params)
     }
 
-    fn fun_def_impl(&mut self, fd: &oxidized::aast::FunDef<(), ()>) -> tast::FunDef<R> {
+    fn fun_def_impl(&mut self, fd: &oxidized::aast::FunDef<(), ()>) -> Result<tast::FunDef<R>> {
         let f = &fd.fun;
         let fname = Symbol::new(&f.name.1);
         let fpos = R::Pos::from(&f.name.0);
@@ -65,9 +65,9 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             None => TypingReturn::make_default_return(self.env, false, &fpos, fname),
             Some(ty) => TypingReturn::make_return_type(
                 self.env,
-                &|env, ty| Phase::localize_no_subst(env, false, None, ty),
+                |env, ty| Phase::localize_no_subst(env, false, None, ty),
                 ty,
-            ),
+            )?,
         };
         let ret_pos = match &f.ret.1 {
             Some(h) => R::Pos::from(&h.0),
@@ -85,12 +85,12 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
         let param_tys: Vec<_> = params_decl_ty
             .iter()
             .map(|(param, hint)| {
-                (
+                Ok((
                     param,
-                    TypingParam::make_param_local_ty(self.env, hint.clone(), param),
-                )
+                    TypingParam::make_param_local_ty(self.env, hint.clone(), param)?,
+                ))
             })
-            .collect();
+            .collect::<Result<Vec<_>>>()?;
         param_tys
             .iter()
             .for_each(|(param, ty)| TypingParam::check_param_has_hint(self.env, param, ty));
@@ -143,20 +143,20 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
             external: f.external.clone(),
             doc_comment: f.doc_comment.clone(),
         };
-        oxidized::aast::FunDef {
+        Ok(oxidized::aast::FunDef {
             namespace: fd.namespace.clone(),
             file_attributes: vec![],
             mode: fd.mode,
             fun,
-        }
+        })
     }
 
     pub fn fun_def(
         ctx: Arc<TypingCtx<R>>,
         fd: &oxidized::aast::FunDef<(), ()>,
-    ) -> (tast::FunDef<R>, Vec<TypingError<R>>) {
+    ) -> Result<(tast::FunDef<R>, Vec<TypingError<R>>)> {
         let env = TEnv::fun_env(Arc::clone(&ctx), fd);
-        let def = TypingToplevel { ctx, env: &env }.fun_def_impl(fd);
-        (def, env.destruct())
+        let def = TypingToplevel { ctx, env: &env }.fun_def_impl(fd)?;
+        Ok((def, env.destruct()))
     }
 }

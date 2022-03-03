@@ -5,6 +5,7 @@
 
 use crate::decl_defs::DeclTy;
 use crate::reason::Reason;
+use crate::typing::Result;
 use crate::typing_defs::Ty;
 use crate::typing_env::TEnv;
 use crate::typing_error::{Primary, TypingError};
@@ -17,16 +18,16 @@ impl TypingParam {
         env: &TEnv<R>,
         decl_hint: Option<DeclTy<R>>,
         param: &oxidized::aast::FunParam<(), ()>,
-    ) -> Ty<R> {
+    ) -> Result<Ty<R>> {
         let r = R::witness(R::Pos::from(&param.pos));
-        match decl_hint {
+        Ok(match decl_hint {
             None => Ty::any(r),
             Some(ty) => {
                 // TODO(hrust): enforceability
                 // TODO(hrust): variadic
-                Phase::localize_no_subst(env, false, None, ty)
+                Phase::localize_no_subst(env, false, None, ty)?
             }
-        }
+        })
     }
 
     pub fn check_param_has_hint<R: Reason>(

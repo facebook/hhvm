@@ -10,6 +10,7 @@ use oxidized::{aast, nast};
 use crate::errors::HackError;
 use crate::parsing_error::ParsingError;
 use crate::reason::Reason;
+use crate::typing::Result;
 use crate::typing_check_job::TypingCheckJob;
 use crate::typing_ctx::TypingCtx;
 
@@ -22,7 +23,7 @@ impl TypingCheckUtils {
         ctx: Arc<TypingCtx<R>>,
         ast: &nast::Program,
         parsing_errors: Vec<ParsingError>,
-    ) -> (tast::Program<R>, Vec<HackError<R>>) {
+    ) -> Result<(tast::Program<R>, Vec<HackError<R>>)> {
         use aast::Def;
         let mut tast = vec![];
         let mut errs = vec![];
@@ -36,10 +37,10 @@ impl TypingCheckUtils {
         for def in ast.defs() {
             let ctx = Arc::clone(&ctx);
             match def {
-                Def::Fun(f) => accumulate(TypingCheckJob::type_fun(ctx, &*f)),
-                Def::Class(c) => accumulate(TypingCheckJob::type_class(ctx, &*c)),
-                Def::Typedef(t) => accumulate(TypingCheckJob::type_typedef(ctx, &*t)),
-                Def::Constant(cst) => accumulate(TypingCheckJob::type_const(ctx, &*cst)),
+                Def::Fun(f) => accumulate(TypingCheckJob::type_fun(ctx, &*f)?),
+                Def::Class(c) => accumulate(TypingCheckJob::type_class(ctx, &*c)?),
+                Def::Typedef(t) => accumulate(TypingCheckJob::type_typedef(ctx, &*t)?),
+                Def::Constant(cst) => accumulate(TypingCheckJob::type_const(ctx, &*cst)?),
                 Def::Namespace(_)
                 | Def::Stmt(_)
                 | Def::Module(_)
@@ -48,6 +49,6 @@ impl TypingCheckUtils {
                 | Def::FileAttributes(_) => unreachable!("Program::defs won't emit these"),
             }
         }
-        (aast::Program(tast), errs)
+        Ok((aast::Program(tast), errs))
     }
 }

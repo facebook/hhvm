@@ -6,6 +6,7 @@
 #![allow(dead_code)]
 use crate::decl_defs::DeclTy;
 use crate::reason::Reason;
+use crate::typing::Result;
 use crate::typing_defs::Ty;
 use crate::typing_env::TEnv;
 use pos::Symbol;
@@ -34,9 +35,9 @@ impl TypingReturn {
 
     pub fn make_return_type<R: Reason>(
         env: &TEnv<R>,
-        localize: &dyn Fn(&TEnv<R>, DeclTy<R>) -> Ty<R>,
+        localize: impl FnOnce(&TEnv<R>, DeclTy<R>) -> Result<Ty<R>>,
         ty: DeclTy<R>,
-    ) -> Ty<R> {
+    ) -> Result<Ty<R>> {
         // TODO(hrust): async
         localize(env, ty)
     }

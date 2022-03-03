@@ -5,6 +5,7 @@
 
 use crate::decl_defs::{self, DeclTy, DeclTy_};
 use crate::reason::Reason;
+use crate::typing::Result;
 use crate::typing_decl_provider::{Class, TypeDecl};
 use crate::typing_defs::{
     Exact, ExpandEnv, FunParam, FunType, Ty, Ty_, TypeExpansion, TypeExpansions,
@@ -16,15 +17,19 @@ use pos::{Positioned, TypeName};
 pub struct Phase;
 
 impl Phase {
-    fn localize<R: Reason>(env: &TEnv<R>, ety_env: &mut ExpandEnv<'_, R>, ty: DeclTy<R>) -> Ty<R> {
+    fn localize<R: Reason>(
+        env: &TEnv<R>,
+        ety_env: &mut ExpandEnv<'_, R>,
+        ty: DeclTy<R>,
+    ) -> Result<Ty<R>> {
         use DeclTy_::*;
         use Ty_::*;
         let r = ty.reason().clone();
-        match &**ty.node() {
+        Ok(match &**ty.node() {
             DTprim(p) => Ty::prim(r, *p),
             DTapply(id_and_args) => {
                 let (pos_id, tyl) = &**id_and_args;
-                match env.ctx.typing_decl_provider.get_type(pos_id.id()).unwrap() {
+                match env.ctx.typing_decl_provider.get_type(pos_id.id())? {
                     Some(TypeDecl::Class(cls)) => Self::localize_class_instantiation(
                         env,
                         ety_env,
@@ -32,7 +37,7 @@ impl Phase {
                         pos_id.clone(),
                         tyl,
                         Some(&*cls),
-                    ),
+                    )?,
                     _ => Self::localize_class_instantiation(
                         env,
                         ety_env,
@@ -40,16 +45,16 @@ impl Phase {
                         pos_id.clone(),
                         tyl,
                         None,
-                    ),
+                    )?,
                 }
             }
             DTfun(ft) => {
                 let pos = r.pos().clone();
-                let ft = Self::localize_ft(env, ety_env, pos, ft);
+                let ft = Self::localize_ft(env, ety_env, pos, ft)?;
                 Ty::new(r, Tfun(ft))
             }
             _ => todo!(),
-        }
+        })
     }
 
     fn localize_class_instantiation<R: Reason>(
@@ -59,9 +64,9 @@ impl Phase {
         sid: Positioned<TypeName, R::Pos>,
         ty_args: &[DeclTy<R>],
         class_info: Option<&dyn Class<R>>,
-    ) -> Ty<R> {
+    ) -> Result<Ty<R>> {
         use Ty_::*;
-        match class_info {
+        Ok(match class_info {
             None => {
                 // Without class info, we don't know the kinds of the arguments.
                 // We assume they are non-HK types.
@@ -72,8 +77,8 @@ impl Phase {
                     ty_args
                         .iter()
                         .map(|ty| Self::localize(env, ety_env, ty.clone()))
-                        .collect()
-                });
+                        .collect::<Result<Vec<_>>>()
+                })?;
                 Ty::new(r, Tclass(sid, Exact::Nonexact, tyl))
             }
             Some(_class_info) => {
@@ -82,7 +87,7 @@ impl Phase {
                 assert!(ty_args.is_empty());
                 Ty::new(r, Tclass(sid, Exact::Nonexact, vec![]))
             }
-        }
+        })
     }
 
     fn localize_ft<R: Reason>(
@@ -90,30 +95,29 @@ impl Phase {
         ety_env: &mut ExpandEnv<'_, R>,
         _def_pos: R::Pos,
         ft: &decl_defs::ty::FunType<R, DeclTy<R>>,
-    ) -> FunType<R> {
+    ) -> Result<FunType<R>> {
         // TODO(hrust): tparams
         assert!(ft.params.is_empty());
         let params = ft
             .params
             .iter()
             .map(|fp| {
-                let ty = Self::localize_possibly_enforced_ty(env, ety_env, fp.ty.ty.clone());
-                FunParam {
+                Ok(FunParam {
                     pos: fp.pos.clone(),
                     name: fp.name,
-                    ty,
-                }
+                    ty: Self::localize_possibly_enforced_ty(env, ety_env, fp.ty.ty.clone())?,
+                })
             })
-            .collect();
-        let ret = Self::localize_possibly_enforced_ty(env, ety_env, ft.ret.ty.clone());
-        FunType { params, ret }
+            .collect::<Result<Vec<_>>>()?;
+        let ret = Self::localize_possibly_enforced_ty(env, ety_env, ft.ret.ty.clone())?;
+        Ok(FunType { params, ret })
     }
 
     fn localize_possibly_enforced_ty<R: Reason>(
         env: &TEnv<R>,
         ety_env: &mut ExpandEnv<'_, R>,
         ty: DeclTy<R>,
-    ) -> Ty<R> {
+    ) -> Result<Ty<R>> {
         Self::localize(env, ety_env, ty)
     }
 
@@ -122,7 +126,7 @@ impl Phase {
         ignore_errors: bool,
         report_cycle: Option<TypeExpansion<R>>,
         ty: DeclTy<R>,
-    ) -> Ty<R> {
+    ) -> Result<Ty<R>> {
         let ty_clone = ty.clone();
         let on_error = || {
             if ignore_errors {

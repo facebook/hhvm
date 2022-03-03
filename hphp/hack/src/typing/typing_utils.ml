@@ -617,44 +617,41 @@ let rec get_base_type env ty =
 
 let get_printable_shape_field_name = Typing_defs.TShapeField.name
 
-let shape_field_name_ this field =
-  Aast.(
-    match field with
-    | (p, Int name) -> Ok (Ast_defs.SFlit_int (p, name))
-    | (p, String name) -> Ok (Ast_defs.SFlit_str (p, name))
-    | (_, Class_const ((_, _, CI x), y)) -> Ok (Ast_defs.SFclass_const (x, y))
-    | (_, Class_const ((_, _, CIself), y)) ->
-      (match force this with
-      | Some sid -> Ok (Ast_defs.SFclass_const (sid, y))
-      | None -> Error `Expected_class)
-    | _ -> Error `Invalid_shape_field_name)
-
-let shape_field_name :
-    env -> ('a, 'b) Aast.expr -> Ast_defs.shape_field_name option =
- fun env (_, p, field) ->
-  let this =
-    lazy
-      (match Env.get_self_ty env with
+let shape_field_name_with_ty_err env (_, p, field) =
+  match field with
+  | Aast.Int name -> (Some (Ast_defs.SFlit_int (p, name)), None)
+  | Aast.String name -> (Some (Ast_defs.SFlit_str (p, name)), None)
+  | Aast.Class_const ((_, _, Aast.CI x), y) ->
+    (Some (Ast_defs.SFclass_const (x, y)), None)
+  | Aast.Class_const ((_, _, Aast.CIself), y) ->
+    let this =
+      match Env.get_self_ty env with
       | None -> None
       | Some c_ty ->
         (match get_node c_ty with
         | Tclass (sid, _, _) -> Some (Positioned.unsafe_to_raw_positioned sid)
-        | _ -> None))
-  in
-  match shape_field_name_ this (p, field) with
-  | Ok x -> Some x
-  | Error `Expected_class ->
-    Errors.add_typing_error
-      Typing_error.(
-        primary @@ Primary.Expected_class { pos = p; suffix = None });
-    None
-  | Error `Invalid_shape_field_name ->
+        | _ -> None)
+    in
+    (match this with
+    | Some sid -> (Some (Ast_defs.SFclass_const (sid, y)), None)
+    | None ->
+      ( None,
+        Some
+          Typing_error.(
+            primary @@ Primary.Expected_class { pos = p; suffix = None }) ))
+  | _ ->
     let err =
       Typing_error.Primary.Shape.(
         Invalid_shape_field_name { pos = p; is_empty = false })
     in
-    Errors.add_typing_error (Typing_error.shape err);
-    None
+    (None, Some (Typing_error.shape err))
+
+let shape_field_name env field =
+  let (res, error) = shape_field_name_with_ty_err env field in
+  (match error with
+  | Some error -> Errors.add_typing_error error
+  | None -> ());
+  res
 
 (*****************************************************************************)
 (* Class types *)

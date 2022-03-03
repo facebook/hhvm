@@ -597,6 +597,18 @@ let may_throw ~pos renv env pc_deps exn_ty =
   let env = Env.acc env (add_dependencies deps renv.re_exn ~pos) in
   env
 
+let shape_field_name_ this field =
+  Aast.(
+    match field with
+    | (p, Int name) -> Ok (Ast_defs.SFlit_int (p, name))
+    | (p, String name) -> Ok (Ast_defs.SFlit_str (p, name))
+    | (_, Class_const ((_, _, CI x), y)) -> Ok (Ast_defs.SFclass_const (x, y))
+    | (_, Class_const ((_, _, CIself), y)) ->
+      (match force this with
+      | Some sid -> Ok (Ast_defs.SFclass_const (sid, y))
+      | None -> Error `Expected_class)
+    | _ -> Error `Invalid_shape_field_name)
+
 let shape_field_name : ptype renv_ -> _ -> Typing_defs.tshape_field_name option
     =
  fun renv ix ->
@@ -612,7 +624,7 @@ let shape_field_name : ptype renv_ -> _ -> Typing_defs.tshape_field_name option
       | Some (Tclass cls) -> Some (fst ix, cls.c_name)
       | _ -> None)
   in
-  match Typing_utils.shape_field_name_ this ix with
+  match shape_field_name_ this ix with
   | Ok fld -> Some (Typing_defs.TShapeField.of_ast Pos_or_decl.of_raw_pos fld)
   | Error _ -> None
 

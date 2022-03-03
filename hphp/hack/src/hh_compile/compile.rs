@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::utils;
-use ::anyhow::anyhow;
+use anyhow::{anyhow, Result};
 use compile::Profile;
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
@@ -78,7 +78,7 @@ pub(crate) struct SingleFileOpts {
     pub(crate) verbosity: isize,
 }
 
-pub fn run(opts: Opts) -> anyhow::Result<()> {
+pub fn run(opts: Opts) -> Result<()> {
     type SyncWrite = Mutex<Box<dyn Write + Sync + Send>>;
 
     if opts.single_file_opts.verbosity > 1 {
@@ -106,35 +106,59 @@ pub fn run(opts: Opts) -> anyhow::Result<()> {
             ],
         };
 
-        let process_one_file = |f: &PathBuf| {
+        // Process a single physical file by breaking it into multiple logical
+        // files (using multifile) and then processing each of those with
+        // process_single_file().
+        //
+        // If an error occurs then continue to process as much as possible,
+        // returning the first error that occured.
+        let process_one_file = |f: &PathBuf| -> Result<()> {
             let content = utils::read_file(f)?;
             let files = multifile::to_files(f, content)?;
-            for (f, content) in files {
-                let f = f.as_ref();
-                match process_single_file(&opts.single_file_opts, f.into(), content) {
-                    Err(e) => write!(
-                        writer.lock().unwrap(),
-                        "Error in file {}: {}",
-                        f.display(),
-                        e
-                    )?,
-                    Ok((output, _profile)) => writer.lock().unwrap().write_all(&output)?,
-                }
-            }
-            Ok(())
+
+            // Collect a Vec so we process all files - not just up to the first
+            // failure.
+            let results: Vec<Result<()>> = files
+                .into_iter()
+                .map(|(f, content)| {
+                    let f = f.as_ref();
+                    match process_single_file(&opts.single_file_opts, f.into(), content) {
+                        Err(e) => {
+                            writeln!(
+                                writer.lock().unwrap(),
+                                "Error in file {}: {}",
+                                f.display(),
+                                e
+                            )?;
+                            Err(e)
+                        }
+                        Ok((output, _profile)) => {
+                            writer.lock().unwrap().write_all(&output)?;
+                            Ok(())
+                        }
+                    }
+                })
+                .collect();
+
+            results.into_iter().collect()
         };
 
-        if opts.thread_num.map_or(false, |n| n <= 1) {
-            files.iter().try_for_each(process_one_file)
-        } else {
-            opts.thread_num.map_or((), |thread_num| {
-                rayon::ThreadPoolBuilder::new()
-                    .num_threads(thread_num)
-                    .build_global()
-                    .unwrap();
-            });
-            files.par_iter().try_for_each(process_one_file)
-        }
+        // Collect a Vec so we process all files - not just up to the first
+        // failure.
+        let results: Vec<Result<()>> =
+            if files.len() <= 1 || opts.thread_num.map_or(false, |n| n <= 1) {
+                files.iter().map(process_one_file).collect()
+            } else {
+                opts.thread_num.map_or((), |thread_num| {
+                    rayon::ThreadPoolBuilder::new()
+                        .num_threads(thread_num)
+                        .build_global()
+                        .unwrap();
+                });
+                files.par_iter().map(process_one_file).collect()
+            };
+
+        results.into_iter().collect()
     }
 }
 
@@ -143,7 +167,7 @@ fn process_single_file_impl(
     filepath: &Path,
     content: &[u8],
     stack_limit: &StackLimit,
-) -> anyhow::Result<(Vec<u8>, Profile)> {
+) -> Result<(Vec<u8>, Profile)> {
     use compile::{Env, EnvFlags, HHBCFlags, NativeEnv, ParserFlags};
     if opts.verbosity > 1 {
         eprintln!("processing file: {}", filepath.display());
@@ -197,7 +221,7 @@ fn process_single_file_with_retry(
     opts: &SingleFileOpts,
     filepath: PathBuf,
     content: Vec<u8>,
-) -> anyhow::Result<(Vec<u8>, Profile)> {
+) -> Result<(Vec<u8>, Profile)> {
     let ctx = &Arc::new((opts.clone(), filepath, content));
     stack_limit::with_elastic_stack(|stack_limit| {
         let new_ctx = Arc::clone(ctx);
@@ -210,7 +234,7 @@ pub(crate) fn process_single_file(
     opts: &SingleFileOpts,
     filepath: PathBuf,
     content: Vec<u8>,
-) -> anyhow::Result<(Vec<u8>, Profile)> {
+) -> Result<(Vec<u8>, Profile)> {
     match std::panic::catch_unwind(|| process_single_file_with_retry(opts, filepath, content)) {
         Ok(r) => r,
         Err(panic) => match panic.downcast::<String>() {

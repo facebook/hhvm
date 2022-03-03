@@ -3,10 +3,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hcons::{Conser, Hc};
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
+use once_cell::sync::OnceCell;
 use pos::{BPos, NPos, Pos, Positioned, Symbol, TypeConstName, TypeName};
 use std::hash::Hash;
 
+use crate::decl_defs::DeclTy_;
+use crate::typing_defs::{Ty, Ty_};
 use crate::visitor::Walkable;
 
 pub use oxidized::typing_reason::{ArgPosition, BlameSource};
@@ -29,6 +33,10 @@ pub trait Reason:
         &self,
         arena: &'a bumpalo::Bump,
     ) -> &'a oxidized_by_ref::typing_reason::Reason<'a>;
+
+    fn cons_decl_ty(ty: DeclTy_<Self>) -> Hc<DeclTy_<Self>>;
+
+    fn cons_ty(ty: Ty_<Self, Ty<Self>>) -> Hc<Ty_<Self, Ty<Self>>>;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -173,6 +181,18 @@ impl Reason for BReason {
     ) -> &'a oxidized_by_ref::typing_reason::Reason<'a> {
         unimplemented!()
     }
+
+    #[inline]
+    fn cons_decl_ty(ty: DeclTy_<BReason>) -> Hc<DeclTy_<BReason>> {
+        static CONSER: OnceCell<Conser<DeclTy_<BReason>>> = OnceCell::new();
+        CONSER.get_or_init(Conser::new).mk(ty)
+    }
+
+    #[inline]
+    fn cons_ty(ty: Ty_<BReason, Ty<BReason>>) -> Hc<Ty_<BReason, Ty<BReason>>> {
+        static CONSER: OnceCell<Conser<Ty_<BReason, Ty<BReason>>>> = OnceCell::new();
+        CONSER.get_or_init(Conser::new).mk(ty)
+    }
 }
 
 impl Walkable<BReason> for BReason {}
@@ -207,6 +227,18 @@ impl Reason for NReason {
         _arena: &'a bumpalo::Bump,
     ) -> &'a oxidized_by_ref::typing_reason::Reason<'a> {
         &oxidized_by_ref::typing_reason::Reason::Rnone
+    }
+
+    #[inline]
+    fn cons_decl_ty(ty: DeclTy_<NReason>) -> Hc<DeclTy_<NReason>> {
+        static CONSER: OnceCell<Conser<DeclTy_<NReason>>> = OnceCell::new();
+        CONSER.get_or_init(Conser::new).mk(ty)
+    }
+
+    #[inline]
+    fn cons_ty(ty: Ty_<NReason, Ty<NReason>>) -> Hc<Ty_<NReason, Ty<NReason>>> {
+        static CONSER: OnceCell<Conser<Ty_<NReason, Ty<NReason>>>> = OnceCell::new();
+        CONSER.get_or_init(Conser::new).mk(ty)
     }
 }
 

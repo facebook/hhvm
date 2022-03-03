@@ -10,7 +10,7 @@ use super::Allocator;
 
 impl<R: Reason> Allocator<R> {
     pub fn ty(&self, reason: R, ty: Ty_<R, Ty<R>>) -> Ty<R> {
-        Ty::new(reason, self.typing_tys.mk(ty))
+        Ty::new(reason, R::cons_ty(ty))
     }
 
     pub fn ty_prim(&self, r: R, prim: Prim) -> Ty<R> {

@@ -30,32 +30,32 @@ impl GlobalAllocator {
 
 impl<R: Reason> Allocator<R> {
     pub fn bytes(&self, bytes: impl AsRef<[u8]>) -> BytesId {
-        self.global.bytes(bytes)
+        GlobalAllocator.bytes(bytes)
     }
 
     pub fn symbol(&self, symbol: &str) -> Symbol {
-        self.global.symbol(symbol)
+        GlobalAllocator.symbol(symbol)
     }
 
     pub fn concat<S1: AsRef<str>, S2: AsRef<str>>(&self, s1: S1, s2: S2) -> Symbol {
-        self.global.concat(s1, s2)
+        GlobalAllocator.concat(s1, s2)
     }
 
     pub fn relative_path(&self, prefix: Prefix, suffix: &std::path::Path) -> RelativePath {
-        self.global.relative_path(prefix, suffix)
+        GlobalAllocator.relative_path(prefix, suffix)
     }
 
     pub fn relative_path_from_ast(
         &self,
         path: &oxidized::relative_path::RelativePath,
     ) -> RelativePath {
-        self.global.relative_path(path.prefix(), path.path())
+        GlobalAllocator.relative_path(path.prefix(), path.path())
     }
 
     pub fn relative_path_from_decl(
         &self,
         path: &oxidized_by_ref::relative_path::RelativePath<'_>,
     ) -> RelativePath {
-        self.global.relative_path(path.prefix(), path.path())
+        GlobalAllocator.relative_path(path.prefix(), path.path())
     }
 }

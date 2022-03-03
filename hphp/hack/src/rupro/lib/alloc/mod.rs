@@ -9,24 +9,18 @@ mod alloc_pos;
 mod alloc_reason;
 mod alloc_typing_defs;
 
+use std::marker::PhantomData;
+
 use lazy_static::lazy_static;
 
-use hcons::Conser;
-
-use crate::decl_defs::DeclTy_;
 use crate::reason::{BReason, NReason, Reason};
-use crate::typing_defs::{Ty, Ty_};
 
 /// For types which are not parameterized over Reason. Currently does not
 /// allocate anything (bytes, strings, and paths are handled by the `intern`
 /// crate, and allocated in its static tables for bytes and paths).
-pub struct GlobalAllocator {}
+pub struct GlobalAllocator;
 
-pub struct Allocator<R: Reason> {
-    global: &'static GlobalAllocator,
-    decl_tys: Conser<DeclTy_<R>>,
-    typing_tys: Conser<Ty_<R, Ty<R>>>,
-}
+pub struct Allocator<R: Reason>(PhantomData<R>);
 
 /// Get references to the allocator singletons. Please use this in the main
 /// function only.
@@ -54,17 +48,13 @@ lazy_static! {
 
 impl GlobalAllocator {
     fn new() -> Self {
-        Self {}
+        Self
     }
 }
 
 impl<R: Reason> Allocator<R> {
-    fn new(global: &'static GlobalAllocator) -> Self {
-        Self {
-            global,
-            decl_tys: Conser::new(),
-            typing_tys: Conser::new(),
-        }
+    fn new(_global: &'static GlobalAllocator) -> Self {
+        Self(PhantomData)
     }
 }
 

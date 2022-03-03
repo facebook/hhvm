@@ -112,7 +112,7 @@ impl<R: Reason> Allocator<R> {
 
     #[inline]
     pub fn decl_ty(&self, reason: R, ty: DeclTy_<R>) -> DeclTy<R> {
-        DeclTy::new(reason, self.decl_tys.mk(ty))
+        DeclTy::new(reason, R::cons_decl_ty(ty))
     }
 
     fn ty_from_decl(&self, ty: &obr::typing_defs::Ty<'_>) -> DeclTy<R> {

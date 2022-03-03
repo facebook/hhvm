@@ -179,6 +179,7 @@ const Func* callee() {
  * 1) Basic instructions
  * 2) Literal and constant instructions
  * 5) Get instructions (except CGetG for globals and CGetS for class properties)
+ * 6) Isset and type querying instructions
  */
 
 void iopNop() {
@@ -768,27 +769,42 @@ void iopAKExists() {
 }
 
 void iopIssetL(tv_lval /* val */) {
-  iopUnhandled("IssetL");
+  iopPreamble("IssetL");
+  State::instance->stack.push(nullptr);
 }
 
 void iopIssetG() {
-  iopUnhandled("IssetG");
+  iopPreamble("IssetG");
+  State::instance->stack.push(nullptr);
 }
 
 void iopIssetS() {
-  iopUnhandled("IssetS");
+  iopPreamble("IssetS");
+
+  auto state = State::instance;
+  auto& stack = state->stack;
+  stack.pop(2);
+  stack.push(nullptr);
 }
 
 void iopIsUnsetL(tv_lval /* val */) {
-  iopUnhandled("IsUnsetL");
+  iopPreamble("IsUnsetL");
+  State::instance->stack.push(nullptr);
 }
 
 void iopIsTypeC(IsTypeOp /* op */) {
-  iopUnhandled("IsTypeC");
+  iopPreamble("IsTypeC");
+
+  auto state = State::instance;
+  auto& stack = state->stack;
+  stack.pop();
+  stack.push(nullptr);
 }
 
 void iopIsTypeL(named_local_var /* loc */, IsTypeOp /* op */) {
-  iopUnhandled("IsTypeL");
+  iopPreamble("IsTypeL");
+
+  State::instance->stack.push(nullptr);
 }
 
 void iopAssertRATL(local_var /* loc */, RepoAuthType /* rat */) {

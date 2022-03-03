@@ -2,7 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 use crate::{Prefix, RelativePath, ToOxidized};
+use eq_modulo_pos::EqModuloPos;
 use intern::string::BytesId;
 use oxidized::file_pos_small::FilePosSmall;
 use oxidized::pos_span_raw::PosSpanRaw;
@@ -19,6 +21,7 @@ pub trait Pos:
     + std::fmt::Debug
     + for<'a> From<&'a oxidized::pos::Pos>
     + for<'a> From<&'a oxidized_by_ref::pos::Pos<'a>>
+    + EqModuloPos
     + 'static
 {
     /// Make a new instance. If the implementing Pos is stateful,
@@ -167,6 +170,12 @@ impl fmt::Debug for BPos {
     }
 }
 
+impl EqModuloPos for BPos {
+    fn eq_modulo_pos(&self, _rhs: &Self) -> bool {
+        true
+    }
+}
+
 impl<'a> From<&'a oxidized::pos::Pos> for BPos {
     fn from(pos: &'a oxidized::pos::Pos) -> Self {
         Self::from_ast(pos)
@@ -190,6 +199,12 @@ impl Pos for NPos {
 
     fn to_oxidized<'a>(&self, _arena: &'a bumpalo::Bump) -> &'a oxidized_by_ref::pos::Pos<'a> {
         oxidized_by_ref::pos::Pos::none()
+    }
+}
+
+impl EqModuloPos for NPos {
+    fn eq_modulo_pos(&self, _rhs: &Self) -> bool {
+        true
     }
 }
 

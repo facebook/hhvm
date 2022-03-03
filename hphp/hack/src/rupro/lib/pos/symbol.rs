@@ -8,6 +8,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::ToOxidized;
+use eq_modulo_pos::EqModuloPos;
 use intern::{
     string::{BytesId, StringId},
     BuildIdHasher,
@@ -64,6 +65,12 @@ impl std::fmt::Display for Symbol {
 impl From<&str> for Symbol {
     fn from(s: &str) -> Self {
         Self::new(s)
+    }
+}
+
+impl EqModuloPos for Symbol {
+    fn eq_modulo_pos(&self, rhs: &Self) -> bool {
+        self == rhs
     }
 }
 
@@ -149,6 +156,12 @@ impl From<&bstr::BStr> for Bytes {
 impl From<&str> for Bytes {
     fn from(s: &str) -> Self {
         Self::new(s)
+    }
+}
+
+impl EqModuloPos for Bytes {
+    fn eq_modulo_pos(&self, rhs: &Self) -> bool {
+        self == rhs
     }
 }
 
@@ -246,51 +259,51 @@ pub type TypeNameSet = HashSet<TypeName>;
 
 /// A TypeName is the name of a class, interface, trait, type parameter,
 /// type alias, newtype, or primitive type names like int, arraykey, etc.
-#[derive(Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct TypeName(pub Symbol);
 common_impls!(TypeName, TypeNameMap);
 
 /// ModuleName is introduced by the experimental Modules feature and `internal`
 /// visibility. ModuleNames are not bindable names and are not indended
 /// to be interchangeable with any other kind of name.
-#[derive(Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct ModuleName(pub Symbol);
 common_impls!(ModuleName);
 
 /// Name of a top level constant.
-#[derive(Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct ConstName(pub Symbol);
 common_impls!(ConstName);
 
 /// Name of a top level function.
-#[derive(Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct FunName(pub Symbol);
 common_impls!(FunName);
 
 /// ClassConstName is the name of a class const, which are disjoint from
 /// global constants, type constants, and other class members.
-#[derive(Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct ClassConstName(pub Symbol);
 pub type BuildClassConstNameHasher = BuildSymbolHasher;
 pub type ClassConstNameMap<V> = HashMap<ClassConstName, V>;
 pub type ClassConstNameSet = HashSet<ClassConstName>;
 common_impls!(ClassConstName, ClassConstNameMap);
 
-#[derive(Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct TypeConstName(pub Symbol);
 pub type BuildTypeConstNameHasher = BuildSymbolHasher;
 pub type TypeConstNameMap<V> = HashMap<TypeConstName, V>;
 pub type TypeConstNameSet = HashSet<TypeConstName>;
 common_impls!(TypeConstName, TypeConstNameMap);
 
-#[derive(Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct MethodName(pub Symbol);
 pub type BuildMethodNameHasher = BuildSymbolHasher;
 pub type MethodNameMap<V> = HashMap<MethodName, V>;
 pub type MethodNameSet = HashSet<MethodName>;
 common_impls!(MethodName, MethodNameMap);
 
-#[derive(Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct PropName(pub Symbol);
 pub type BuildPropNameHasher = BuildSymbolHasher;
 pub type PropNameMap<V> = HashMap<PropName, V>;

@@ -8,6 +8,7 @@ use crate::decl_defs::ty::{
     UserAttribute, WhereConstraint, XhpAttribute, XhpEnumValue,
 };
 use crate::reason::Reason;
+use eq_modulo_pos::EqModuloPos;
 use pos::{
     Bytes, ClassConstName, ConstName, FunName, MethodName, ModuleName, Positioned, PropName,
     Symbol, TypeConstName, TypeName,
@@ -18,7 +19,7 @@ pub use crate::decl_defs::ty::ConstDecl;
 pub use oxidized::ast_defs::Visibility;
 pub use oxidized_by_ref::{method_flags::MethodFlags, prop_flags::PropFlags};
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
 pub struct ShallowClassConst<R: Reason> {
     pub kind: ClassConstKind,
     pub name: Positioned<ClassConstName, R::Pos>,
@@ -44,7 +45,7 @@ pub struct ShallowClassConst<R: Reason> {
 
 walkable!(ShallowClassConst<R> => [ty]);
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
 pub struct ShallowTypeconst<R: Reason> {
     pub name: Positioned<TypeConstName, R::Pos>,
     pub kind: Typeconst<R>,
@@ -64,7 +65,7 @@ impl<R: Reason> ShallowTypeconst<R> {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
 pub struct ShallowProp<R: Reason> {
     pub name: Positioned<PropName, R::Pos>,
     pub xhp_attr: Option<XhpAttribute>,
@@ -75,7 +76,7 @@ pub struct ShallowProp<R: Reason> {
 
 walkable!(ShallowProp<R> => [ty]);
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
 pub struct ShallowMethod<R: Reason> {
     // note(sf, 2022-01-27):
     //   - c.f.
@@ -91,7 +92,7 @@ pub struct ShallowMethod<R: Reason> {
 
 walkable!(ShallowMethod<R> => [ty]);
 
-#[derive(Clone, Eq, Hash, PartialEq)]
+#[derive(Clone, Eq, EqModuloPos, Hash, PartialEq)]
 pub struct ShallowClass<R: Reason> {
     // note(sf, 2022-01-27):
     //  - c.f.
@@ -138,7 +139,7 @@ pub type ClassDecl<R> = ShallowClass<R>;
 
 pub type TypedefDecl<R> = TypedefType<R>;
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
 pub enum Decl<R: Reason> {
     Class(TypeName, ClassDecl<R>),
     Fun(FunName, FunDecl<R>),

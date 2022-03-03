@@ -8,13 +8,14 @@ use crate::decl_defs::{
     PossiblyEnforcedTy, ShapeFieldType, TaccessType, Tparam, TypeConst, Typeconst, WhereConstraint,
 };
 use crate::reason::Reason;
+use eq_modulo_pos::EqModuloPos;
 use pos::{TypeName, TypeNameMap};
 use std::collections::BTreeMap;
 
 // note(sf, 2022-02-14): c.f. `Decl_subst`, `Decl_instantiate`
 
 /// Maps type names to types with which to replace them.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, EqModuloPos, PartialEq)]
 pub struct Subst<R: Reason>(pub TypeNameMap<DeclTy<R>>);
 
 impl<R: Reason> From<TypeNameMap<DeclTy<R>>> for Subst<R> {

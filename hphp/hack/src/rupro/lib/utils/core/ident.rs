@@ -2,10 +2,11 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use eq_modulo_pos::EqModuloPos;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, EqModuloPos, PartialOrd, Ord)]
 pub struct Ident(u64);
 
 impl From<u64> for Ident {

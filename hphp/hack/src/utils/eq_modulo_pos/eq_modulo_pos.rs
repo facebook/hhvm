@@ -69,25 +69,11 @@ impl_with_equal! {
     bstr::BString,
 }
 
-macro_rules! impl_deref_str {
-    ($ty:ty) => {
-        impl EqModuloPos for $ty {
-            fn eq_modulo_pos(&self, rhs: &Self) -> bool {
-                (**self).eq_modulo_pos(*rhs)
-            }
-        }
-    };
-}
-
-impl_deref_str! { &str }
-impl_deref_str! { &bstr::BStr }
-impl_deref_str! { &std::path::Path }
-
 macro_rules! impl_deref {
     ($ty:ty) => {
-        impl<T: EqModuloPos> EqModuloPos for $ty {
+        impl<T: EqModuloPos + ?Sized> EqModuloPos for $ty {
             fn eq_modulo_pos(&self, rhs: &Self) -> bool {
-                (**self).eq_modulo_pos(*rhs)
+                (**self).eq_modulo_pos(&**rhs)
             }
         }
     };
@@ -95,18 +81,8 @@ macro_rules! impl_deref {
 
 impl_deref! { &T }
 impl_deref! { &mut T }
-
-macro_rules! impl_deref2 {
-    ($ty:ty) => {
-        impl<T: EqModuloPos> EqModuloPos for $ty {
-            fn eq_modulo_pos(&self, rhs: &Self) -> bool {
-                self.as_ref().eq_modulo_pos(rhs.as_ref())
-            }
-        }
-    };
-}
-impl_deref2! { Box<T> }
-impl_deref2! { Rc<T> }
+impl_deref! { Box<T> }
+impl_deref! { Rc<T> }
 
 macro_rules! impl_tuple {
     () => (
@@ -168,5 +144,8 @@ impl_with_iter! {
     <K, V> std::collections::BTreeMap<K, V>, len
 }
 impl_with_iter! {
-    <T> &[T], len
+    <T> std::collections::HashSet<T>, len
+}
+impl_with_iter! {
+    <K, V> std::collections::HashMap<K, V>, len
 }

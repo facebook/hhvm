@@ -9,6 +9,7 @@ use crate::decl_defs::{
 };
 use crate::folded_decl_provider::Subst;
 use crate::reason::Reason;
+use eq_modulo_pos::EqModuloPos;
 use pos::{
     Bytes, ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap, Symbol,
     TypeConstName, TypeConstNameMap, TypeName, TypeNameMap,
@@ -17,7 +18,7 @@ use std::collections::BTreeMap;
 
 pub use oxidized::ast_defs::{Abstraction, ClassishKind};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, EqModuloPos, PartialEq)]
 pub struct FoldedElement {
     // note(sf, 2022-01-28): c.f. `Decl_defs.element`
     pub flags: ClassEltFlags,
@@ -55,7 +56,7 @@ pub struct FoldedElement {
 /// The `from_req_extends` field is set to` true` if the context was inherited
 /// via a require extends type. This information is relevant when folding
 /// `substs` during inheritance. See the `inherit` module.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, EqModuloPos, PartialEq)]
 pub struct SubstContext<R: Reason> {
     // note(sf, 2022-01-28): c.f. `Decl_defs.subst_context`
     pub subst: Subst<R>,
@@ -63,7 +64,7 @@ pub struct SubstContext<R: Reason> {
     pub from_req_extends: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, EqModuloPos, PartialEq)]
 pub struct TypeConst<R: Reason> {
     // note(sf, 2022-02-08): c.f. `Typing_defs.typeconst_type`
     pub is_synthesized: bool,
@@ -85,7 +86,7 @@ impl<R: Reason> TypeConst<R> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, EqModuloPos, PartialEq)]
 pub struct ClassConst<R: Reason> {
     // note(sf, 2022-02-08): c.f. `Typing_defs.class_const`
     pub is_synthesized: bool,
@@ -102,7 +103,7 @@ impl<R: Reason> ClassConst<R> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Eq, EqModuloPos, PartialEq)]
 pub struct FoldedClass<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_defs.decl_class_type`
     pub name: TypeName,

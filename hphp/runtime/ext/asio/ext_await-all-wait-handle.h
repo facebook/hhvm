@@ -52,7 +52,9 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
     , m_unfinished(cap - 1)
   {}
   ~c_AwaitAllWaitHandle() {
+    assertx(isFinished());
     for (int32_t i = 0; i < m_cap; i++) {
+      assertx(isFailed() || m_children[i].m_child->isFinished());
       decRefObj(m_children[i].m_child);
     }
   }

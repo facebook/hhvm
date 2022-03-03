@@ -21,32 +21,32 @@ impl TypingCheckJob {
     pub fn type_fun<R: Reason>(
         ctx: Arc<TypingCtx<R>>,
         ast: &nast::FunDef,
-    ) -> Result<(Option<tast::Def<R>>, Vec<HackError<R>>)> {
+    ) -> Result<(tast::Def<R>, Vec<HackError<R>>)> {
         let mut errors = Vec::new();
         let (def, typing_errors) = TypingToplevel::fun_def(ctx, ast)?;
         errors.extend(typing_errors.into_iter().map(|e| e.into()));
-        let def = Some(oxidized::aast::Def::Fun(Box::new(def)));
+        let def = oxidized::aast::Def::Fun(Box::new(def));
         Ok((def, errors))
     }
 
     pub fn type_class<R: Reason>(
         _ctx: Arc<TypingCtx<R>>,
         _ast: &nast::Class_,
-    ) -> Result<(Option<tast::Def<R>>, Vec<HackError<R>>)> {
+    ) -> Result<(tast::Def<R>, Vec<HackError<R>>)> {
         todo!()
     }
 
     pub fn type_typedef<R: Reason>(
         _ctx: Arc<TypingCtx<R>>,
         _ast: &nast::Typedef,
-    ) -> Result<(Option<tast::Def<R>>, Vec<HackError<R>>)> {
+    ) -> Result<(tast::Def<R>, Vec<HackError<R>>)> {
         todo!()
     }
 
     pub fn type_const<R: Reason>(
         _ctx: Arc<TypingCtx<R>>,
         _ast: &nast::Gconst,
-    ) -> Result<(Option<tast::Def<R>>, Vec<HackError<R>>)> {
+    ) -> Result<(tast::Def<R>, Vec<HackError<R>>)> {
         todo!()
     }
 }

@@ -29,9 +29,7 @@ impl TypingCheckUtils {
         let mut errs = vec![];
         errs.extend(parsing_errors.into_iter().map(Into::into));
         let mut accumulate = |(new_def, new_errs)| {
-            if let Some(new_def) = new_def {
-                tast.push(new_def);
-            }
+            tast.push(new_def);
             errs.extend(new_errs);
         };
         for def in ast.defs() {

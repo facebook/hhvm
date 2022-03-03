@@ -9,8 +9,8 @@ use crate::decl_defs::ty::{
 };
 use crate::reason::Reason;
 use pos::{
-    ClassConstName, ConstName, FunName, MethodName, ModuleName, Positioned, PropName, Symbol,
-    TypeConstName, TypeName,
+    Bytes, ClassConstName, ConstName, FunName, MethodName, ModuleName, Positioned, PropName,
+    Symbol, TypeConstName, TypeName,
 };
 use std::collections::BTreeMap;
 
@@ -84,7 +84,7 @@ pub struct ShallowMethod<R: Reason> {
     pub name: Positioned<MethodName, R::Pos>,
     pub ty: DeclTy<R>,
     pub visibility: Visibility,
-    pub deprecated: Option<intern::string::BytesId>, // e.g. "The method foo is deprecated: ..."
+    pub deprecated: Option<Bytes>, // e.g. "The method foo is deprecated: ..."
     pub flags: MethodFlags,
     pub attributes: Box<[UserAttribute<R::Pos>]>,
 }

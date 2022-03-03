@@ -8,7 +8,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::ToOxidized;
-use intern::{string::StringId, BuildIdHasher};
+use intern::{
+    string::{BytesId, StringId},
+    BuildIdHasher,
+};
 use std::collections::{HashMap, HashSet};
 
 pub type BuildSymbolHasher = BuildIdHasher<u32>;
@@ -67,8 +70,8 @@ impl From<&str> for Symbol {
 impl<'a> ToOxidized<'a> for Symbol {
     type Output = &'a str;
 
-    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> &'a str {
-        arena.alloc_str(self.0.as_str())
+    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> &'a str {
+        self.0.as_str()
     }
 }
 
@@ -81,6 +84,79 @@ impl<'a, V: ToOxidized<'a>> ToOxidized<'a> for SymbolMap<V> {
             self.iter()
                 .map(|(k, v)| (k.to_oxidized(arena), v.to_oxidized(arena))),
         )
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
+pub struct Bytes(pub BytesId);
+// nb: BytesId implements Hash & Eq using the u32 id, and Ord
+// using the underlying bytestring after a fast check for equal ids.
+
+impl Bytes {
+    pub fn new<S: AsRef<[u8]>>(s: S) -> Self {
+        Self(intern::string::intern_bytes(s.as_ref()))
+    }
+}
+
+impl Bytes {
+    pub fn as_bytes(&self) -> &[u8] {
+        self.0.as_bytes()
+    }
+
+    pub fn as_bstr(&self) -> &bstr::BStr {
+        self.0.as_bytes().into()
+    }
+}
+
+impl std::ops::Deref for Bytes {
+    type Target = [u8];
+
+    fn deref(&self) -> &[u8] {
+        self.as_bytes()
+    }
+}
+
+impl std::convert::AsRef<[u8]> for Bytes {
+    fn as_ref(&self) -> &[u8] {
+        self.as_bytes()
+    }
+}
+
+impl std::fmt::Debug for Bytes {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.as_bstr())
+    }
+}
+
+impl std::fmt::Display for Bytes {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_bstr())
+    }
+}
+
+impl From<&[u8]> for Bytes {
+    fn from(s: &[u8]) -> Self {
+        Self::new(s)
+    }
+}
+
+impl From<&bstr::BStr> for Bytes {
+    fn from(s: &bstr::BStr) -> Self {
+        Self::new(s.as_ref())
+    }
+}
+
+impl From<&str> for Bytes {
+    fn from(s: &str) -> Self {
+        Self::new(s)
+    }
+}
+
+impl<'a> ToOxidized<'a> for Bytes {
+    type Output = &'a [u8];
+
+    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> &'a [u8] {
+        self.0.as_bytes()
     }
 }
 
@@ -135,8 +211,8 @@ macro_rules! common_impls {
         impl<'a> ToOxidized<'a> for $name {
             type Output = &'a str;
 
-            fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> &'a str {
-                arena.alloc_str(self.0.as_str())
+            fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> &'a str {
+                self.as_symbol().0.as_str()
             }
         }
     };

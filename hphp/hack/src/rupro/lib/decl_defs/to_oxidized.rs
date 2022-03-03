@@ -119,7 +119,7 @@ fn oxidize_shape_field_name<'a, P: Pos>(
             x.to_oxidized(arena),
         ))),
         TshapeFieldName::TSFlitStr(x) => Obr::TSFlitStr(arena.alloc(
-            obr::typing_defs::PosByteString(simple_pos(), x.as_bytes().into()),
+            obr::typing_defs::PosByteString(simple_pos(), x.to_oxidized(arena).into()),
         )),
         TshapeFieldName::TSFclassConst(cls, name) => {
             let (pos1, pos2) = match field_name_pos {

@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 use crate::decl_defs::{
     ty::XhpEnumValue, CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, Tparam,
     Typeconst, WhereConstraint, XhpAttribute,
@@ -9,8 +10,8 @@ use crate::decl_defs::{
 use crate::folded_decl_provider::Subst;
 use crate::reason::Reason;
 use pos::{
-    ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap, Symbol, TypeConstName,
-    TypeConstNameMap, TypeName, TypeNameMap,
+    Bytes, ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap, Symbol,
+    TypeConstName, TypeConstNameMap, TypeName, TypeNameMap,
 };
 use std::collections::BTreeMap;
 
@@ -24,7 +25,7 @@ pub struct FoldedElement {
     pub visibility: CeVisibility,
 
     /// If the element is deprecated, this holds the deprecation message.
-    pub deprecated: Option<intern::string::BytesId>,
+    pub deprecated: Option<Bytes>,
 }
 
 /// A substitution context contains all the information necessary for changing

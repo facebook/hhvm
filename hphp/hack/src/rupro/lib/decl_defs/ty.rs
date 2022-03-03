@@ -6,9 +6,8 @@
 use crate::reason::{self, Reason};
 use crate::utils::core::Ident;
 use hcons::Hc;
-use intern::string::BytesId;
 use oxidized::{aast, ast_defs};
-use pos::{ModuleName, Positioned, Symbol, TypeConstName, TypeName};
+use pos::{Bytes, ModuleName, Positioned, Symbol, TypeConstName, TypeName};
 use std::collections::BTreeMap;
 use std::fmt;
 
@@ -59,7 +58,7 @@ pub enum IfcFunDecl {
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum TshapeFieldName {
     TSFlitInt(Symbol),
-    TSFlitStr(BytesId),
+    TSFlitStr(Bytes),
     TSFclassConst(TypeName, Symbol),
 }
 
@@ -422,7 +421,7 @@ walkable!(ConstDecl<R> => [ty]);
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct FunElt<R: Reason> {
-    pub deprecated: Option<BytesId>,
+    pub deprecated: Option<Bytes>,
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     /// Top-level functions have limited visibilities
     pub internal: bool,

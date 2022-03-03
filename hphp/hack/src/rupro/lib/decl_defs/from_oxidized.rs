@@ -5,8 +5,9 @@
 
 use crate::decl_defs::{self, shallow, ty, DeclTy, DeclTy_, FunParam, FunType, UserAttribute};
 use crate::reason::Reason;
-use oxidized_by_ref as obr;
 use pos::{ConstName, FunName, Pos, Symbol, TypeName};
+
+use oxidized_by_ref as obr;
 
 #[inline]
 fn slice<T: Copy, U>(items: &[T], f: impl Fn(T) -> U) -> Box<[U]> {
@@ -49,7 +50,7 @@ fn tshape_field_name_from_decl<P: Pos>(
         ),
         Obr::TSFlitStr(&pos_bytes) => (
             SfnPos::Simple(pos_bytes.0.into()),
-            TshapeFieldName::TSFlitStr(intern::string::intern_bytes(pos_bytes.1.as_ref())),
+            TshapeFieldName::TSFlitStr(pos_bytes.1.into()),
         ),
         Obr::TSFclassConst(&(pos_id1, pos_id2)) => (
             SfnPos::ClassConst(pos_id1.0.into(), pos_id2.0.into()),
@@ -285,9 +286,7 @@ fn shallow_method<R: Reason>(
         name: sm.name.into(),
         ty: ty_from_decl(sm.type_),
         visibility: sm.visibility,
-        deprecated: sm
-            .deprecated
-            .map(|s| intern::string::intern_bytes(s.as_ref())),
+        deprecated: sm.deprecated.map(Into::into),
         attributes: slice(sm.attributes, user_attribute_from_decl),
         flags: shallow::MethodFlags::empty(),
     }
@@ -347,9 +346,7 @@ fn fun_decl<R: Reason>(sf: &obr::shallow_decl_defs::FunDecl<'_>) -> shallow::Fun
     shallow::FunDecl {
         pos: sf.pos.into(),
         ty: ty_from_decl(sf.type_),
-        deprecated: sf
-            .deprecated
-            .map(|s| intern::string::intern_bytes(s.as_ref())),
+        deprecated: sf.deprecated.map(Into::into),
         module: sf.module.map(Into::into),
         internal: sf.internal,
         php_std_lib: sf.php_std_lib,

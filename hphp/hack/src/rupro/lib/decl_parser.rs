@@ -11,6 +11,7 @@ use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct DeclParser<R: Reason> {
+    #[allow(dead_code)]
     alloc: &'static Allocator<R>,
     relative_path_ctx: Arc<RelativePathCtx>,
 }
@@ -47,6 +48,6 @@ impl<R: Reason> DeclParser<R> {
         // they are declared in the file. At the moment it reverses them.
         // Reverse them again to match the syntactic order.
         decls.rev(&arena);
-        Ok(self.alloc.decls(decls.iter()))
+        Ok(decls.iter().map(Into::into).collect())
     }
 }

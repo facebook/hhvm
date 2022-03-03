@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 mod debug;
+mod from_oxidized;
 mod printer;
 mod to_oxidized;
 

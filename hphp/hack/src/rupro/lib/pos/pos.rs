@@ -93,7 +93,7 @@ impl BPos {
         match self.0 {
             PosImpl::Small { prefix, suffix, .. }
             | PosImpl::Large { prefix, suffix, .. }
-            | PosImpl::Tiny { prefix, suffix, .. } => RelativePath::new(prefix, suffix),
+            | PosImpl::Tiny { prefix, suffix, .. } => RelativePath::from_bytes_id(prefix, suffix),
         }
     }
 }

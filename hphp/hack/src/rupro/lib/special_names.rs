@@ -6,7 +6,6 @@
 // These use the same casing as naming_special_names.ml for now.
 #![allow(non_snake_case)]
 
-use crate::alloc::GlobalAllocator;
 use naming_special_names_rust as sn;
 use pos::{Symbol, TypeName};
 
@@ -39,34 +38,34 @@ pub struct SpecialNames {
 }
 
 impl SpecialNames {
-    pub fn new(alloc: &GlobalAllocator) -> &'static Self {
-        let coeffects = Coeffects::new(alloc);
-        let capabilities = Capabilities::new(alloc, &coeffects);
+    pub fn new() -> &'static Self {
+        let coeffects = Coeffects::new();
+        let capabilities = Capabilities::new(&coeffects);
         Box::leak(Box::new(Self {
-            classes: Classes::new(alloc),
-            collections: Collections::new(alloc),
-            members: Members::new(alloc),
-            attribute_kinds: AttributeKinds::new(alloc),
-            user_attributes: UserAttributes::new(alloc),
-            special_functions: SpecialFunctions::new(alloc),
-            autoimported_functions: AutoimportedFunctions::new(alloc),
-            special_idents: SpecialIdents::new(alloc),
-            pseudo_functions: PseudoFunctions::new(alloc),
-            stdlib_functions: StdlibFunctions::new(alloc),
-            typehints: Typehints::new(alloc),
-            pseudo_consts: PseudoConsts::new(alloc),
-            fb: Fb::new(alloc),
-            hh: Hh::new(alloc),
-            shapes: Shapes::new(alloc),
-            superglobals: Superglobals::new(alloc),
-            regex: Regex::new(alloc),
-            emitter_special_functions: EmitterSpecialFunctions::new(alloc),
-            xhp: Xhp::new(alloc),
-            unstable_features: UnstableFeatures::new(alloc),
+            classes: Classes::new(),
+            collections: Collections::new(),
+            members: Members::new(),
+            attribute_kinds: AttributeKinds::new(),
+            user_attributes: UserAttributes::new(),
+            special_functions: SpecialFunctions::new(),
+            autoimported_functions: AutoimportedFunctions::new(),
+            special_idents: SpecialIdents::new(),
+            pseudo_functions: PseudoFunctions::new(),
+            stdlib_functions: StdlibFunctions::new(),
+            typehints: Typehints::new(),
+            pseudo_consts: PseudoConsts::new(),
+            fb: Fb::new(),
+            hh: Hh::new(),
+            shapes: Shapes::new(),
+            superglobals: Superglobals::new(),
+            regex: Regex::new(),
+            emitter_special_functions: EmitterSpecialFunctions::new(),
+            xhp: Xhp::new(),
+            unstable_features: UnstableFeatures::new(),
             coeffects,
-            readonly: Readonly::new(alloc),
+            readonly: Readonly::new(),
             capabilities,
-            expression_trees: ExpressionTrees::new(alloc),
+            expression_trees: ExpressionTrees::new(),
         }))
     }
 }
@@ -472,444 +471,447 @@ pub struct ExpressionTrees {
 }
 
 impl Classes {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            cParent: alloc.symbol(sn::classes::PARENT),
-            cStatic: alloc.symbol(sn::classes::STATIC),
-            cSelf: alloc.symbol(sn::classes::SELF),
-            cUnknown: alloc.symbol(sn::classes::UNKNOWN),
-            cAwaitable: alloc.symbol(sn::classes::AWAITABLE),
-            cGenerator: alloc.symbol(sn::classes::GENERATOR),
-            cAsyncGenerator: alloc.symbol(sn::classes::ASYNC_GENERATOR),
-            cHHFormatString: alloc.symbol(sn::classes::HH_FORMAT_STRING),
-            cHH_BuiltinEnum: alloc.symbol(sn::classes::HH_BUILTIN_ENUM),
-            cHH_BuiltinEnumClass: alloc.symbol(sn::classes::HH_BUILTIN_ENUM_CLASS),
-            cHH_BuiltinAbstractEnumClass: alloc.symbol(sn::classes::HH_BUILTIN_ABSTRACT_ENUM_CLASS),
-            cThrowable: alloc.symbol(sn::classes::THROWABLE),
-            cStdClass: alloc.symbol(sn::classes::STD_CLASS),
-            cDateTime: alloc.symbol(sn::classes::DATE_TIME),
-            cDateTimeImmutable: alloc.symbol(sn::classes::DATE_TIME_IMMUTABLE),
-            cAsyncIterator: alloc.symbol(sn::classes::ASYNC_ITERATOR),
-            cAsyncKeyedIterator: alloc.symbol(sn::classes::ASYNC_KEYED_ITERATOR),
-            cStringish: alloc.symbol(sn::classes::STRINGISH),
-            cStringishObject: alloc.symbol(sn::classes::STRINGISH_OBJECT),
-            cXHPChild: alloc.symbol(sn::classes::XHP_CHILD),
-            cIMemoizeParam: alloc.symbol(sn::classes::IMEMOIZE_PARAM),
-            cUNSAFESingletonMemoizeParam: alloc.symbol(sn::classes::UNSAFE_SINGLETON_MEMOIZE_PARAM),
-            cClassname: TypeName(alloc.symbol(sn::classes::CLASS_NAME)),
-            cTypename: alloc.symbol(sn::classes::TYPE_NAME),
-            cIDisposable: alloc.symbol(sn::classes::IDISPOSABLE),
-            cIAsyncDisposable: alloc.symbol(sn::classes::IASYNC_DISPOSABLE),
-            cMemberOf: alloc.symbol(sn::classes::MEMBER_OF),
-            cEnumClassLabel: alloc.symbol(sn::classes::ENUM_CLASS_LABEL),
-            cSpliceable: alloc.symbol(sn::classes::SPLICEABLE),
-            cSupportDyn: alloc.symbol(sn::classes::SUPPORT_DYN),
+            cParent: Symbol::new(sn::classes::PARENT),
+            cStatic: Symbol::new(sn::classes::STATIC),
+            cSelf: Symbol::new(sn::classes::SELF),
+            cUnknown: Symbol::new(sn::classes::UNKNOWN),
+            cAwaitable: Symbol::new(sn::classes::AWAITABLE),
+            cGenerator: Symbol::new(sn::classes::GENERATOR),
+            cAsyncGenerator: Symbol::new(sn::classes::ASYNC_GENERATOR),
+            cHHFormatString: Symbol::new(sn::classes::HH_FORMAT_STRING),
+            cHH_BuiltinEnum: Symbol::new(sn::classes::HH_BUILTIN_ENUM),
+            cHH_BuiltinEnumClass: Symbol::new(sn::classes::HH_BUILTIN_ENUM_CLASS),
+            cHH_BuiltinAbstractEnumClass: Symbol::new(sn::classes::HH_BUILTIN_ABSTRACT_ENUM_CLASS),
+            cThrowable: Symbol::new(sn::classes::THROWABLE),
+            cStdClass: Symbol::new(sn::classes::STD_CLASS),
+            cDateTime: Symbol::new(sn::classes::DATE_TIME),
+            cDateTimeImmutable: Symbol::new(sn::classes::DATE_TIME_IMMUTABLE),
+            cAsyncIterator: Symbol::new(sn::classes::ASYNC_ITERATOR),
+            cAsyncKeyedIterator: Symbol::new(sn::classes::ASYNC_KEYED_ITERATOR),
+            cStringish: Symbol::new(sn::classes::STRINGISH),
+            cStringishObject: Symbol::new(sn::classes::STRINGISH_OBJECT),
+            cXHPChild: Symbol::new(sn::classes::XHP_CHILD),
+            cIMemoizeParam: Symbol::new(sn::classes::IMEMOIZE_PARAM),
+            cUNSAFESingletonMemoizeParam: Symbol::new(sn::classes::UNSAFE_SINGLETON_MEMOIZE_PARAM),
+            cClassname: TypeName(Symbol::new(sn::classes::CLASS_NAME)),
+            cTypename: Symbol::new(sn::classes::TYPE_NAME),
+            cIDisposable: Symbol::new(sn::classes::IDISPOSABLE),
+            cIAsyncDisposable: Symbol::new(sn::classes::IASYNC_DISPOSABLE),
+            cMemberOf: Symbol::new(sn::classes::MEMBER_OF),
+            cEnumClassLabel: Symbol::new(sn::classes::ENUM_CLASS_LABEL),
+            cSpliceable: Symbol::new(sn::classes::SPLICEABLE),
+            cSupportDyn: Symbol::new(sn::classes::SUPPORT_DYN),
         }
     }
 }
 
 impl Collections {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
             // concrete classes
-            cVector: alloc.symbol(sn::collections::VECTOR),
-            cMutableVector: alloc.symbol(sn::collections::MUTABLE_VECTOR),
-            cImmVector: alloc.symbol(sn::collections::IMM_VECTOR),
-            cSet: alloc.symbol(sn::collections::SET),
-            cConstSet: alloc.symbol(sn::collections::CONST_SET),
-            cMutableSet: alloc.symbol(sn::collections::MUTABLE_SET),
-            cImmSet: alloc.symbol(sn::collections::IMM_SET),
-            cMap: alloc.symbol(sn::collections::MAP),
-            cMutableMap: alloc.symbol(sn::collections::MUTABLE_MAP),
-            cImmMap: alloc.symbol(sn::collections::IMM_MAP),
-            cPair: alloc.symbol(sn::collections::PAIR),
+            cVector: Symbol::new(sn::collections::VECTOR),
+            cMutableVector: Symbol::new(sn::collections::MUTABLE_VECTOR),
+            cImmVector: Symbol::new(sn::collections::IMM_VECTOR),
+            cSet: Symbol::new(sn::collections::SET),
+            cConstSet: Symbol::new(sn::collections::CONST_SET),
+            cMutableSet: Symbol::new(sn::collections::MUTABLE_SET),
+            cImmSet: Symbol::new(sn::collections::IMM_SET),
+            cMap: Symbol::new(sn::collections::MAP),
+            cMutableMap: Symbol::new(sn::collections::MUTABLE_MAP),
+            cImmMap: Symbol::new(sn::collections::IMM_MAP),
+            cPair: Symbol::new(sn::collections::PAIR),
 
             // interfaces
-            cContainer: alloc.symbol(sn::collections::CONTAINER),
-            cKeyedContainer: alloc.symbol(sn::collections::KEYED_CONTAINER),
-            cTraversable: alloc.symbol(sn::collections::TRAVERSABLE),
-            cKeyedTraversable: alloc.symbol(sn::collections::KEYED_TRAVERSABLE),
-            cCollection: alloc.symbol(sn::collections::COLLECTION),
-            cConstVector: alloc.symbol(sn::collections::CONST_VECTOR),
-            cConstMap: alloc.symbol(sn::collections::CONST_MAP),
-            cConstCollection: alloc.symbol(sn::collections::CONST_COLLECTION),
-            cAnyArray: alloc.symbol(sn::collections::ANY_ARRAY),
-            cDict: alloc.symbol(sn::collections::DICT),
-            cVec: alloc.symbol(sn::collections::VEC),
-            cKeyset: alloc.symbol(sn::collections::KEYSET),
+            cContainer: Symbol::new(sn::collections::CONTAINER),
+            cKeyedContainer: Symbol::new(sn::collections::KEYED_CONTAINER),
+            cTraversable: Symbol::new(sn::collections::TRAVERSABLE),
+            cKeyedTraversable: Symbol::new(sn::collections::KEYED_TRAVERSABLE),
+            cCollection: Symbol::new(sn::collections::COLLECTION),
+            cConstVector: Symbol::new(sn::collections::CONST_VECTOR),
+            cConstMap: Symbol::new(sn::collections::CONST_MAP),
+            cConstCollection: Symbol::new(sn::collections::CONST_COLLECTION),
+            cAnyArray: Symbol::new(sn::collections::ANY_ARRAY),
+            cDict: Symbol::new(sn::collections::DICT),
+            cVec: Symbol::new(sn::collections::VEC),
+            cKeyset: Symbol::new(sn::collections::KEYSET),
         }
     }
 }
 
 impl Members {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            mGetInstanceKey: alloc.symbol(sn::members::M_GET_INSTANCE_KEY),
-            mClass: alloc.symbol(sn::members::M_CLASS),
-            __construct: alloc.symbol(sn::members::__CONSTRUCT),
-            __destruct: alloc.symbol(sn::members::__DESTRUCT),
-            __call: alloc.symbol(sn::members::__CALL),
-            __callStatic: alloc.symbol(sn::members::__CALL_STATIC),
-            __clone: alloc.symbol(sn::members::__CLONE),
-            __debugInfo: alloc.symbol(sn::members::__DEBUG_INFO),
-            __dispose: alloc.symbol(sn::members::__DISPOSE),
-            __disposeAsync: alloc.symbol(sn::members::__DISPOSE_ASYNC),
-            __get: alloc.symbol(sn::members::__GET),
-            __invoke: alloc.symbol(sn::members::__INVOKE),
-            __isset: alloc.symbol(sn::members::__ISSET),
-            __set: alloc.symbol(sn::members::__SET),
-            __set_state: alloc.symbol(sn::members::__SET_STATE),
-            __sleep: alloc.symbol(sn::members::__SLEEP),
-            __toString: alloc.symbol(sn::members::__TO_STRING),
-            __unset: alloc.symbol(sn::members::__UNSET),
-            __wakeup: alloc.symbol(sn::members::__WAKEUP),
+            mGetInstanceKey: Symbol::new(sn::members::M_GET_INSTANCE_KEY),
+            mClass: Symbol::new(sn::members::M_CLASS),
+            __construct: Symbol::new(sn::members::__CONSTRUCT),
+            __destruct: Symbol::new(sn::members::__DESTRUCT),
+            __call: Symbol::new(sn::members::__CALL),
+            __callStatic: Symbol::new(sn::members::__CALL_STATIC),
+            __clone: Symbol::new(sn::members::__CLONE),
+            __debugInfo: Symbol::new(sn::members::__DEBUG_INFO),
+            __dispose: Symbol::new(sn::members::__DISPOSE),
+            __disposeAsync: Symbol::new(sn::members::__DISPOSE_ASYNC),
+            __get: Symbol::new(sn::members::__GET),
+            __invoke: Symbol::new(sn::members::__INVOKE),
+            __isset: Symbol::new(sn::members::__ISSET),
+            __set: Symbol::new(sn::members::__SET),
+            __set_state: Symbol::new(sn::members::__SET_STATE),
+            __sleep: Symbol::new(sn::members::__SLEEP),
+            __toString: Symbol::new(sn::members::__TO_STRING),
+            __unset: Symbol::new(sn::members::__UNSET),
+            __wakeup: Symbol::new(sn::members::__WAKEUP),
         }
     }
 }
 
 impl AttributeKinds {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            cls: alloc.symbol(sn::attribute_kinds::CLS),
-            clscst: alloc.symbol(sn::attribute_kinds::CLS_CST),
-            enum_: alloc.symbol(sn::attribute_kinds::ENUM),
-            typealias: alloc.symbol(sn::attribute_kinds::TYPE_ALIAS),
-            fn_: alloc.symbol(sn::attribute_kinds::FN),
-            mthd: alloc.symbol(sn::attribute_kinds::MTHD),
-            instProperty: alloc.symbol(sn::attribute_kinds::INST_PROPERTY),
-            staticProperty: alloc.symbol(sn::attribute_kinds::STATIC_PROPERTY),
-            parameter: alloc.symbol(sn::attribute_kinds::PARAMETER),
-            typeparam: alloc.symbol(sn::attribute_kinds::TYPE_PARAM),
-            file: alloc.symbol(sn::attribute_kinds::FILE),
-            typeconst: alloc.symbol(sn::attribute_kinds::TYPE_CONST),
-            lambda: alloc.symbol(sn::attribute_kinds::LAMBDA),
-            enumcls: alloc.symbol(sn::attribute_kinds::ENUM_CLS),
+            cls: Symbol::new(sn::attribute_kinds::CLS),
+            clscst: Symbol::new(sn::attribute_kinds::CLS_CST),
+            enum_: Symbol::new(sn::attribute_kinds::ENUM),
+            typealias: Symbol::new(sn::attribute_kinds::TYPE_ALIAS),
+            fn_: Symbol::new(sn::attribute_kinds::FN),
+            mthd: Symbol::new(sn::attribute_kinds::MTHD),
+            instProperty: Symbol::new(sn::attribute_kinds::INST_PROPERTY),
+            staticProperty: Symbol::new(sn::attribute_kinds::STATIC_PROPERTY),
+            parameter: Symbol::new(sn::attribute_kinds::PARAMETER),
+            typeparam: Symbol::new(sn::attribute_kinds::TYPE_PARAM),
+            file: Symbol::new(sn::attribute_kinds::FILE),
+            typeconst: Symbol::new(sn::attribute_kinds::TYPE_CONST),
+            lambda: Symbol::new(sn::attribute_kinds::LAMBDA),
+            enumcls: Symbol::new(sn::attribute_kinds::ENUM_CLS),
         }
     }
 }
 
 impl UserAttributes {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            uaOverride: TypeName(alloc.symbol(sn::user_attributes::OVERRIDE)),
-            uaConsistentConstruct: TypeName(
-                alloc.symbol(sn::user_attributes::CONSISTENT_CONSTRUCT),
-            ),
-            uaConst: TypeName(alloc.symbol(sn::user_attributes::CONST)),
-            uaDeprecated: TypeName(alloc.symbol(sn::user_attributes::DEPRECATED)),
-            uaEntryPoint: TypeName(alloc.symbol(sn::user_attributes::ENTRY_POINT)),
-            uaMemoize: TypeName(alloc.symbol(sn::user_attributes::MEMOIZE)),
-            uaMemoizeLSB: TypeName(alloc.symbol(sn::user_attributes::MEMOIZE_LSB)),
-            uaPolicyShardedMemoize: TypeName(
-                alloc.symbol(sn::user_attributes::POLICY_SHARDED_MEMOIZE),
-            ),
-            uaPolicyShardedMemoizeLSB: TypeName(
-                alloc.symbol(sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB),
-            ),
-            uaPHPStdLib: TypeName(alloc.symbol(sn::user_attributes::PHP_STD_LIB)),
-            uaAcceptDisposable: TypeName(alloc.symbol(sn::user_attributes::ACCEPT_DISPOSABLE)),
-            uaReturnDisposable: TypeName(alloc.symbol(sn::user_attributes::RETURN_DISPOSABLE)),
-            uaLSB: TypeName(alloc.symbol(sn::user_attributes::LSB)),
-            uaSealed: TypeName(alloc.symbol(sn::user_attributes::SEALED)),
-            uaLateInit: TypeName(alloc.symbol(sn::user_attributes::LATE_INIT)),
-            uaNewable: TypeName(alloc.symbol(sn::user_attributes::NEWABLE)),
-            uaEnforceable: TypeName(alloc.symbol(sn::user_attributes::ENFORCEABLE)),
-            uaExplicit: TypeName(alloc.symbol(sn::user_attributes::EXPLICIT)),
-            uaNonDisjoint: TypeName(alloc.symbol(sn::user_attributes::NON_DISJOINT)),
-            uaSoft: TypeName(alloc.symbol(sn::user_attributes::SOFT)),
-            uaWarn: TypeName(alloc.symbol(sn::user_attributes::WARN)),
-            uaMockClass: TypeName(alloc.symbol(sn::user_attributes::MOCK_CLASS)),
-            uaProvenanceSkipFrame: TypeName(
-                alloc.symbol(sn::user_attributes::PROVENANCE_SKIP_FRAME),
-            ),
-            uaDynamicallyCallable: TypeName(
-                alloc.symbol(sn::user_attributes::DYNAMICALLY_CALLABLE),
-            ),
-            uaDynamicallyConstructible: TypeName(
-                alloc.symbol(sn::user_attributes::DYNAMICALLY_CONSTRUCTIBLE),
-            ),
-            uaReifiable: TypeName(alloc.symbol(sn::user_attributes::REIFIABLE)),
-            uaNeverInline: TypeName(alloc.symbol(sn::user_attributes::NEVER_INLINE)),
-            uaDisableTypecheckerInternal: TypeName(
-                alloc.symbol(sn::user_attributes::DISABLE_TYPECHECKER_INTERNAL),
-            ),
-            uaHasTopLevelCode: TypeName(alloc.symbol(sn::user_attributes::HAS_TOP_LEVEL_CODE)),
-            uaIsFoldable: TypeName(alloc.symbol(sn::user_attributes::IS_FOLDABLE)),
-            uaNative: TypeName(alloc.symbol(sn::user_attributes::NATIVE)),
-            uaOutOnly: TypeName(alloc.symbol(sn::user_attributes::OUT_ONLY)),
-            uaAlwaysInline: TypeName(alloc.symbol(sn::user_attributes::ALWAYS_INLINE)),
-            uaEnableUnstableFeatures: TypeName(
-                alloc.symbol(sn::user_attributes::ENABLE_UNSTABLE_FEATURES),
-            ),
-            uaEnumClass: TypeName(alloc.symbol(sn::user_attributes::ENUM_CLASS)),
-            uaPolicied: TypeName(alloc.symbol(sn::user_attributes::POLICIED)),
-            uaInferFlows: TypeName(alloc.symbol(sn::user_attributes::INFERFLOWS)),
-            uaExternal: TypeName(alloc.symbol(sn::user_attributes::EXTERNAL)),
-            uaCanCall: TypeName(alloc.symbol(sn::user_attributes::CAN_CALL)),
-            uaSupportDynamicType: TypeName(alloc.symbol(sn::user_attributes::SUPPORT_DYNAMIC_TYPE)),
-            uaRequireDynamic: TypeName(alloc.symbol(sn::user_attributes::REQUIRE_DYNAMIC)),
-            uaModule: TypeName(alloc.symbol(sn::user_attributes::MODULE)),
-            uaInternal: TypeName(alloc.symbol(sn::user_attributes::INTERNAL)),
-            uaEnableMethodTraitDiamond: TypeName(
-                alloc.symbol(sn::user_attributes::ENABLE_METHOD_TRAIT_DIAMOND),
-            ),
-            uaIgnoreReadonlyLocalErrors: TypeName(
-                alloc.symbol(sn::user_attributes::IGNORE_READONLY_LOCAL_ERRORS),
-            ),
-            uaIgnoreCoeffectLocalErrors: TypeName(
-                alloc.symbol(sn::user_attributes::IGNORE_COEFFECT_LOCAL_ERRORS),
-            ),
+            uaOverride: TypeName(Symbol::new(sn::user_attributes::OVERRIDE)),
+            uaConsistentConstruct: TypeName(Symbol::new(sn::user_attributes::CONSISTENT_CONSTRUCT)),
+            uaConst: TypeName(Symbol::new(sn::user_attributes::CONST)),
+            uaDeprecated: TypeName(Symbol::new(sn::user_attributes::DEPRECATED)),
+            uaEntryPoint: TypeName(Symbol::new(sn::user_attributes::ENTRY_POINT)),
+            uaMemoize: TypeName(Symbol::new(sn::user_attributes::MEMOIZE)),
+            uaMemoizeLSB: TypeName(Symbol::new(sn::user_attributes::MEMOIZE_LSB)),
+            uaPolicyShardedMemoize: TypeName(Symbol::new(
+                sn::user_attributes::POLICY_SHARDED_MEMOIZE,
+            )),
+            uaPolicyShardedMemoizeLSB: TypeName(Symbol::new(
+                sn::user_attributes::POLICY_SHARDED_MEMOIZE_LSB,
+            )),
+            uaPHPStdLib: TypeName(Symbol::new(sn::user_attributes::PHP_STD_LIB)),
+            uaAcceptDisposable: TypeName(Symbol::new(sn::user_attributes::ACCEPT_DISPOSABLE)),
+            uaReturnDisposable: TypeName(Symbol::new(sn::user_attributes::RETURN_DISPOSABLE)),
+            uaLSB: TypeName(Symbol::new(sn::user_attributes::LSB)),
+            uaSealed: TypeName(Symbol::new(sn::user_attributes::SEALED)),
+            uaLateInit: TypeName(Symbol::new(sn::user_attributes::LATE_INIT)),
+            uaNewable: TypeName(Symbol::new(sn::user_attributes::NEWABLE)),
+            uaEnforceable: TypeName(Symbol::new(sn::user_attributes::ENFORCEABLE)),
+            uaExplicit: TypeName(Symbol::new(sn::user_attributes::EXPLICIT)),
+            uaNonDisjoint: TypeName(Symbol::new(sn::user_attributes::NON_DISJOINT)),
+            uaSoft: TypeName(Symbol::new(sn::user_attributes::SOFT)),
+            uaWarn: TypeName(Symbol::new(sn::user_attributes::WARN)),
+            uaMockClass: TypeName(Symbol::new(sn::user_attributes::MOCK_CLASS)),
+            uaProvenanceSkipFrame: TypeName(Symbol::new(
+                sn::user_attributes::PROVENANCE_SKIP_FRAME,
+            )),
+            uaDynamicallyCallable: TypeName(Symbol::new(sn::user_attributes::DYNAMICALLY_CALLABLE)),
+            uaDynamicallyConstructible: TypeName(Symbol::new(
+                sn::user_attributes::DYNAMICALLY_CONSTRUCTIBLE,
+            )),
+            uaReifiable: TypeName(Symbol::new(sn::user_attributes::REIFIABLE)),
+            uaNeverInline: TypeName(Symbol::new(sn::user_attributes::NEVER_INLINE)),
+            uaDisableTypecheckerInternal: TypeName(Symbol::new(
+                sn::user_attributes::DISABLE_TYPECHECKER_INTERNAL,
+            )),
+            uaHasTopLevelCode: TypeName(Symbol::new(sn::user_attributes::HAS_TOP_LEVEL_CODE)),
+            uaIsFoldable: TypeName(Symbol::new(sn::user_attributes::IS_FOLDABLE)),
+            uaNative: TypeName(Symbol::new(sn::user_attributes::NATIVE)),
+            uaOutOnly: TypeName(Symbol::new(sn::user_attributes::OUT_ONLY)),
+            uaAlwaysInline: TypeName(Symbol::new(sn::user_attributes::ALWAYS_INLINE)),
+            uaEnableUnstableFeatures: TypeName(Symbol::new(
+                sn::user_attributes::ENABLE_UNSTABLE_FEATURES,
+            )),
+            uaEnumClass: TypeName(Symbol::new(sn::user_attributes::ENUM_CLASS)),
+            uaPolicied: TypeName(Symbol::new(sn::user_attributes::POLICIED)),
+            uaInferFlows: TypeName(Symbol::new(sn::user_attributes::INFERFLOWS)),
+            uaExternal: TypeName(Symbol::new(sn::user_attributes::EXTERNAL)),
+            uaCanCall: TypeName(Symbol::new(sn::user_attributes::CAN_CALL)),
+            uaSupportDynamicType: TypeName(Symbol::new(sn::user_attributes::SUPPORT_DYNAMIC_TYPE)),
+            uaRequireDynamic: TypeName(Symbol::new(sn::user_attributes::REQUIRE_DYNAMIC)),
+            uaModule: TypeName(Symbol::new(sn::user_attributes::MODULE)),
+            uaInternal: TypeName(Symbol::new(sn::user_attributes::INTERNAL)),
+            uaEnableMethodTraitDiamond: TypeName(Symbol::new(
+                sn::user_attributes::ENABLE_METHOD_TRAIT_DIAMOND,
+            )),
+            uaIgnoreReadonlyLocalErrors: TypeName(Symbol::new(
+                sn::user_attributes::IGNORE_READONLY_LOCAL_ERRORS,
+            )),
+            uaIgnoreCoeffectLocalErrors: TypeName(Symbol::new(
+                sn::user_attributes::IGNORE_COEFFECT_LOCAL_ERRORS,
+            )),
         }
     }
 }
 
 impl SpecialFunctions {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            echo: alloc.symbol(sn::special_functions::ECHO),
-            hhas_adata: alloc.symbol(sn::special_functions::HHAS_ADATA),
+            echo: Symbol::new(sn::special_functions::ECHO),
+            hhas_adata: Symbol::new(sn::special_functions::HHAS_ADATA),
         }
     }
 }
 
 impl AutoimportedFunctions {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            invariant_violation: alloc.symbol(sn::autoimported_functions::INVARIANT_VIOLATION),
-            invariant: alloc.symbol(sn::autoimported_functions::INVARIANT),
-            fun_: alloc.symbol(sn::autoimported_functions::FUN_),
-            inst_meth: alloc.symbol(sn::autoimported_functions::INST_METH),
-            class_meth: alloc.symbol(sn::autoimported_functions::CLASS_METH),
-            meth_caller: alloc.symbol(sn::autoimported_functions::METH_CALLER),
+            invariant_violation: Symbol::new(sn::autoimported_functions::INVARIANT_VIOLATION),
+            invariant: Symbol::new(sn::autoimported_functions::INVARIANT),
+            fun_: Symbol::new(sn::autoimported_functions::FUN_),
+            inst_meth: Symbol::new(sn::autoimported_functions::INST_METH),
+            class_meth: Symbol::new(sn::autoimported_functions::CLASS_METH),
+            meth_caller: Symbol::new(sn::autoimported_functions::METH_CALLER),
         }
     }
 }
 
 impl SpecialIdents {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            this: alloc.symbol(sn::special_idents::THIS),
-            placeholder: alloc.symbol(sn::special_idents::PLACEHOLDER),
-            dollardollar: alloc.symbol(sn::special_idents::DOLLAR_DOLLAR),
-            tmp_var_prefix: alloc.symbol(sn::special_idents::TMP_VAR_PREFIX),
+            this: Symbol::new(sn::special_idents::THIS),
+            placeholder: Symbol::new(sn::special_idents::PLACEHOLDER),
+            dollardollar: Symbol::new(sn::special_idents::DOLLAR_DOLLAR),
+            tmp_var_prefix: Symbol::new(sn::special_idents::TMP_VAR_PREFIX),
         }
     }
 }
 
 impl PseudoFunctions {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            isset: alloc.symbol(sn::pseudo_functions::ISSET),
-            unset: alloc.symbol(sn::pseudo_functions::UNSET),
-            hh_show: alloc.symbol(sn::pseudo_functions::HH_SHOW),
-            hh_expect: alloc.symbol(sn::pseudo_functions::HH_EXPECT),
-            hh_expect_equivalent: alloc.symbol(sn::pseudo_functions::HH_EXPECT_EQUIVALENT),
-            hh_show_env: alloc.symbol(sn::pseudo_functions::HH_SHOW_ENV),
-            hh_log_level: alloc.symbol(sn::pseudo_functions::HH_LOG_LEVEL),
-            hh_force_solve: alloc.symbol(sn::pseudo_functions::HH_FORCE_SOLVE),
-            hh_loop_forever: alloc.symbol(sn::pseudo_functions::HH_LOOP_FOREVER),
-            echo: alloc.symbol(sn::pseudo_functions::ECHO),
-            empty: alloc.symbol(sn::pseudo_functions::EMPTY),
-            exit: alloc.symbol(sn::pseudo_functions::EXIT),
-            die: alloc.symbol(sn::pseudo_functions::DIE),
-            unsafe_cast: alloc.symbol(sn::pseudo_functions::UNSAFE_CAST),
-            enforced_cast: alloc.symbol(sn::pseudo_functions::ENFORCED_CAST),
+            isset: Symbol::new(sn::pseudo_functions::ISSET),
+            unset: Symbol::new(sn::pseudo_functions::UNSET),
+            hh_show: Symbol::new(sn::pseudo_functions::HH_SHOW),
+            hh_expect: Symbol::new(sn::pseudo_functions::HH_EXPECT),
+            hh_expect_equivalent: Symbol::new(sn::pseudo_functions::HH_EXPECT_EQUIVALENT),
+            hh_show_env: Symbol::new(sn::pseudo_functions::HH_SHOW_ENV),
+            hh_log_level: Symbol::new(sn::pseudo_functions::HH_LOG_LEVEL),
+            hh_force_solve: Symbol::new(sn::pseudo_functions::HH_FORCE_SOLVE),
+            hh_loop_forever: Symbol::new(sn::pseudo_functions::HH_LOOP_FOREVER),
+            echo: Symbol::new(sn::pseudo_functions::ECHO),
+            empty: Symbol::new(sn::pseudo_functions::EMPTY),
+            exit: Symbol::new(sn::pseudo_functions::EXIT),
+            die: Symbol::new(sn::pseudo_functions::DIE),
+            unsafe_cast: Symbol::new(sn::pseudo_functions::UNSAFE_CAST),
+            enforced_cast: Symbol::new(sn::pseudo_functions::ENFORCED_CAST),
         }
     }
 }
 
 impl StdlibFunctions {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            is_array: alloc.symbol(sn::std_lib_functions::IS_ARRAY),
-            is_null: alloc.symbol(sn::std_lib_functions::IS_NULL),
-            get_class: alloc.symbol(sn::std_lib_functions::GET_CLASS),
-            array_filter: alloc.symbol(sn::std_lib_functions::ARRAY_FILTER),
-            call_user_func: alloc.symbol(sn::std_lib_functions::CALL_USER_FUNC),
-            type_structure: alloc.symbol(sn::std_lib_functions::TYPE_STRUCTURE),
-            array_mark_legacy: alloc.symbol(sn::std_lib_functions::ARRAY_MARK_LEGACY),
-            array_unmark_legacy: alloc.symbol(sn::std_lib_functions::ARRAY_UNMARK_LEGACY),
-            is_php_array: alloc.symbol(sn::std_lib_functions::IS_PHP_ARRAY),
-            is_any_array: alloc.symbol(sn::std_lib_functions::IS_ANY_ARRAY),
-            is_dict_or_darray: alloc.symbol(sn::std_lib_functions::IS_DICT_OR_DARRAY),
-            is_vec_or_varray: alloc.symbol(sn::std_lib_functions::IS_VEC_OR_VARRAY),
+            is_array: Symbol::new(sn::std_lib_functions::IS_ARRAY),
+            is_null: Symbol::new(sn::std_lib_functions::IS_NULL),
+            get_class: Symbol::new(sn::std_lib_functions::GET_CLASS),
+            array_filter: Symbol::new(sn::std_lib_functions::ARRAY_FILTER),
+            call_user_func: Symbol::new(sn::std_lib_functions::CALL_USER_FUNC),
+            type_structure: Symbol::new(sn::std_lib_functions::TYPE_STRUCTURE),
+            array_mark_legacy: Symbol::new(sn::std_lib_functions::ARRAY_MARK_LEGACY),
+            array_unmark_legacy: Symbol::new(sn::std_lib_functions::ARRAY_UNMARK_LEGACY),
+            is_php_array: Symbol::new(sn::std_lib_functions::IS_PHP_ARRAY),
+            is_any_array: Symbol::new(sn::std_lib_functions::IS_ANY_ARRAY),
+            is_dict_or_darray: Symbol::new(sn::std_lib_functions::IS_DICT_OR_DARRAY),
+            is_vec_or_varray: Symbol::new(sn::std_lib_functions::IS_VEC_OR_VARRAY),
         }
     }
 }
 
 impl Typehints {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            null: alloc.symbol(sn::typehints::NULL),
-            void: alloc.symbol(sn::typehints::VOID),
-            resource: alloc.symbol(sn::typehints::RESOURCE),
-            num: alloc.symbol(sn::typehints::NUM),
-            arraykey: alloc.symbol(sn::typehints::ARRAYKEY),
-            noreturn: alloc.symbol(sn::typehints::NORETURN),
-            mixed: alloc.symbol(sn::typehints::MIXED),
-            nonnull: alloc.symbol(sn::typehints::NONNULL),
-            this: alloc.symbol(sn::typehints::THIS),
-            dynamic: alloc.symbol(sn::typehints::DYNAMIC),
-            supportdynamic: alloc.symbol(sn::typehints::SUPPORTDYNAMIC),
-            nothing: alloc.symbol(sn::typehints::NOTHING),
-            int: alloc.symbol(sn::typehints::INT),
-            bool: alloc.symbol(sn::typehints::BOOL),
-            float: alloc.symbol(sn::typehints::FLOAT),
-            string: alloc.symbol(sn::typehints::STRING),
-            darray: alloc.symbol(sn::typehints::DARRAY),
-            varray: alloc.symbol(sn::typehints::VARRAY),
-            varray_or_darray: alloc.symbol(sn::typehints::VARRAY_OR_DARRAY),
-            vec_or_dict: alloc.symbol(sn::typehints::VEC_OR_DICT),
-            callable: alloc.symbol(sn::typehints::CALLABLE),
-            object_cast: alloc.symbol(sn::typehints::OBJECT_CAST),
-            supportdyn: alloc.symbol(sn::typehints::SUPPORTDYN),
-            hh_sypportdyn: alloc.symbol(sn::typehints::HH_SUPPORTDYN),
-            wildcard: alloc.symbol(sn::typehints::WILDCARD),
+            null: Symbol::new(sn::typehints::NULL),
+            void: Symbol::new(sn::typehints::VOID),
+            resource: Symbol::new(sn::typehints::RESOURCE),
+            num: Symbol::new(sn::typehints::NUM),
+            arraykey: Symbol::new(sn::typehints::ARRAYKEY),
+            noreturn: Symbol::new(sn::typehints::NORETURN),
+            mixed: Symbol::new(sn::typehints::MIXED),
+            nonnull: Symbol::new(sn::typehints::NONNULL),
+            this: Symbol::new(sn::typehints::THIS),
+            dynamic: Symbol::new(sn::typehints::DYNAMIC),
+            supportdynamic: Symbol::new(sn::typehints::SUPPORTDYNAMIC),
+            nothing: Symbol::new(sn::typehints::NOTHING),
+            int: Symbol::new(sn::typehints::INT),
+            bool: Symbol::new(sn::typehints::BOOL),
+            float: Symbol::new(sn::typehints::FLOAT),
+            string: Symbol::new(sn::typehints::STRING),
+            darray: Symbol::new(sn::typehints::DARRAY),
+            varray: Symbol::new(sn::typehints::VARRAY),
+            varray_or_darray: Symbol::new(sn::typehints::VARRAY_OR_DARRAY),
+            vec_or_dict: Symbol::new(sn::typehints::VEC_OR_DICT),
+            callable: Symbol::new(sn::typehints::CALLABLE),
+            object_cast: Symbol::new(sn::typehints::OBJECT_CAST),
+            supportdyn: Symbol::new(sn::typehints::SUPPORTDYN),
+            hh_sypportdyn: Symbol::new(sn::typehints::HH_SUPPORTDYN),
+            wildcard: Symbol::new(sn::typehints::WILDCARD),
         }
     }
 }
 
 impl PseudoConsts {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            g__LINE__: alloc.symbol(sn::pseudo_consts::G__LINE__),
-            g__CLASS__: alloc.symbol(sn::pseudo_consts::G__CLASS__),
-            g__TRAIT__: alloc.symbol(sn::pseudo_consts::G__TRAIT__),
-            g__FILE__: alloc.symbol(sn::pseudo_consts::G__FILE__),
-            g__DIR__: alloc.symbol(sn::pseudo_consts::G__DIR__),
-            g__FUNCTION__: alloc.symbol(sn::pseudo_consts::G__FUNCTION__),
-            g__METHOD__: alloc.symbol(sn::pseudo_consts::G__METHOD__),
-            g__NAMESPACE__: alloc.symbol(sn::pseudo_consts::G__NAMESPACE__),
-            g__COMPILER_FRONTEND__: alloc.symbol(sn::pseudo_consts::G__COMPILER_FRONTEND__),
-            g__FUNCTION_CREDENTIAL__: alloc.symbol(sn::pseudo_consts::G__FUNCTION_CREDENTIAL__),
-            exit: alloc.symbol(sn::pseudo_consts::EXIT),
-            die: alloc.symbol(sn::pseudo_consts::DIE),
+            g__LINE__: Symbol::new(sn::pseudo_consts::G__LINE__),
+            g__CLASS__: Symbol::new(sn::pseudo_consts::G__CLASS__),
+            g__TRAIT__: Symbol::new(sn::pseudo_consts::G__TRAIT__),
+            g__FILE__: Symbol::new(sn::pseudo_consts::G__FILE__),
+            g__DIR__: Symbol::new(sn::pseudo_consts::G__DIR__),
+            g__FUNCTION__: Symbol::new(sn::pseudo_consts::G__FUNCTION__),
+            g__METHOD__: Symbol::new(sn::pseudo_consts::G__METHOD__),
+            g__NAMESPACE__: Symbol::new(sn::pseudo_consts::G__NAMESPACE__),
+            g__COMPILER_FRONTEND__: Symbol::new(sn::pseudo_consts::G__COMPILER_FRONTEND__),
+            g__FUNCTION_CREDENTIAL__: Symbol::new(sn::pseudo_consts::G__FUNCTION_CREDENTIAL__),
+            exit: Symbol::new(sn::pseudo_consts::EXIT),
+            die: Symbol::new(sn::pseudo_consts::DIE),
         }
     }
 }
 
 impl Fb {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            cEnum: alloc.symbol(sn::fb::ENUM),
-            tInner: alloc.symbol(sn::fb::INNER),
-            idx: alloc.symbol(sn::fb::IDX),
-            cTypeStructure: alloc.symbol(sn::fb::TYPE_STRUCTURE),
-            cIncorrectType: alloc.symbol(sn::fb::INCORRECT_TYPE),
+            cEnum: Symbol::new(sn::fb::ENUM),
+            tInner: Symbol::new(sn::fb::INNER),
+            idx: Symbol::new(sn::fb::IDX),
+            cTypeStructure: Symbol::new(sn::fb::TYPE_STRUCTURE),
+            cIncorrectType: Symbol::new(sn::fb::INCORRECT_TYPE),
         }
     }
 }
 
 impl Hh {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            contains: alloc.symbol(sn::hh::CONTAINS),
-            contains_key: alloc.symbol(sn::hh::CONTAINS_KEY),
+            contains: Symbol::new(sn::hh::CONTAINS),
+            contains_key: Symbol::new(sn::hh::CONTAINS_KEY),
         }
     }
 }
 
 impl Shapes {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            cShapes: alloc.symbol(sn::shapes::SHAPES),
-            idx: alloc.symbol(sn::shapes::IDX),
-            at: alloc.symbol(sn::shapes::AT),
-            keyExists: alloc.symbol(sn::shapes::KEY_EXISTS),
-            removeKey: alloc.symbol(sn::shapes::REMOVE_KEY),
-            toArray: alloc.symbol(sn::shapes::TO_ARRAY),
-            toDict: alloc.symbol(sn::shapes::TO_DICT),
+            cShapes: Symbol::new(sn::shapes::SHAPES),
+            idx: Symbol::new(sn::shapes::IDX),
+            at: Symbol::new(sn::shapes::AT),
+            keyExists: Symbol::new(sn::shapes::KEY_EXISTS),
+            removeKey: Symbol::new(sn::shapes::REMOVE_KEY),
+            toArray: Symbol::new(sn::shapes::TO_ARRAY),
+            toDict: Symbol::new(sn::shapes::TO_DICT),
         }
     }
 }
 
 impl Superglobals {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            globals: alloc.symbol(sn::superglobals::GLOBALS),
+            globals: Symbol::new(sn::superglobals::GLOBALS),
         }
     }
 }
 
 impl Regex {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            tPattern: alloc.symbol(sn::regex::T_PATTERN),
+            tPattern: Symbol::new(sn::regex::T_PATTERN),
         }
     }
 }
 
 impl EmitterSpecialFunctions {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            eval: alloc.symbol(sn::emitter_special_functions::EVAL),
-            set_frame_metadata: alloc.symbol(sn::emitter_special_functions::SET_FRAME_METADATA),
-            systemlib_reified_generics: alloc
-                .symbol(sn::emitter_special_functions::SYSTEMLIB_REIFIED_GENERICS),
+            eval: Symbol::new(sn::emitter_special_functions::EVAL),
+            set_frame_metadata: Symbol::new(sn::emitter_special_functions::SET_FRAME_METADATA),
+            systemlib_reified_generics: Symbol::new(
+                sn::emitter_special_functions::SYSTEMLIB_REIFIED_GENERICS,
+            ),
         }
     }
 }
 
 impl Xhp {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            pcdata: alloc.symbol(sn::xhp::PCDATA),
-            any: alloc.symbol(sn::xhp::ANY),
-            empty: alloc.symbol(sn::xhp::EMPTY),
+            pcdata: Symbol::new(sn::xhp::PCDATA),
+            any: Symbol::new(sn::xhp::ANY),
+            empty: Symbol::new(sn::xhp::EMPTY),
         }
     }
 }
 
 impl UnstableFeatures {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            coeffects_provisional: alloc.symbol(sn::unstable_features::COEFFECTS_PROVISIONAL),
-            ifc: alloc.symbol(sn::unstable_features::IFC),
-            readonly: alloc.symbol(sn::unstable_features::READONLY),
-            expression_trees: alloc.symbol(sn::unstable_features::EXPRESSION_TREES),
-            modules: alloc.symbol(sn::unstable_features::MODULES),
+            coeffects_provisional: Symbol::new(sn::unstable_features::COEFFECTS_PROVISIONAL),
+            ifc: Symbol::new(sn::unstable_features::IFC),
+            readonly: Symbol::new(sn::unstable_features::READONLY),
+            expression_trees: Symbol::new(sn::unstable_features::EXPRESSION_TREES),
+            modules: Symbol::new(sn::unstable_features::MODULES),
         }
     }
 }
 
+fn concat<S1: AsRef<str>, S2: AsRef<str>>(s1: S1, s2: S2) -> Symbol {
+    let s1 = s1.as_ref();
+    let s2 = s2.as_ref();
+    Symbol::new(format!("{}{}", s1, s2))
+}
+
 impl Coeffects {
-    fn new(alloc: &GlobalAllocator) -> Self {
-        let contexts = alloc.symbol("\\HH\\Contexts");
-        let unsafe_contexts = alloc.concat(&contexts, "\\Unsafe");
+    fn new() -> Self {
+        let contexts = Symbol::new("\\HH\\Contexts");
+        let unsafe_contexts = concat(&contexts, "\\Unsafe");
         Self {
-            capability: alloc.symbol("$#capability"),
-            local_capability: alloc.symbol("$#local_capability"),
+            capability: Symbol::new("$#capability"),
+            local_capability: Symbol::new("$#local_capability"),
             contexts,
             unsafe_contexts,
-            generated_generic_prefix: alloc.symbol("T/"),
+            generated_generic_prefix: Symbol::new("T/"),
         }
     }
 }
 
 impl Readonly {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            idx: alloc.symbol(sn::readonly::IDX),
-            as_mut: alloc.symbol(sn::readonly::AS_MUT),
+            idx: Symbol::new(sn::readonly::IDX),
+            as_mut: Symbol::new(sn::readonly::AS_MUT),
         }
     }
 }
 
 impl Capabilities {
-    fn new(alloc: &GlobalAllocator, coeffects: &Coeffects) -> Self {
-        let defaults = alloc.concat(&coeffects.contexts, "\\defaults");
-        let write_props = alloc.concat(&coeffects.contexts, "\\write_props");
+    fn new(coeffects: &Coeffects) -> Self {
+        let defaults = concat(&coeffects.contexts, "\\defaults");
+        let write_props = concat(&coeffects.contexts, "\\write_props");
 
-        let prefix = alloc.symbol("\\HH\\Capabilities\\");
-        let writeProperty = alloc.concat(&prefix, "WriteProperty");
-        let accessGlobals = alloc.concat(&prefix, "AccessGlobals");
-        let readGlobals = alloc.concat(&prefix, "ReadGlobals");
-        let system = alloc.concat(&prefix, "System");
-        let implicitPolicy = alloc.concat(&prefix, "ImplicitPolicy");
-        let implicitPolicyLocal = alloc.concat(&prefix, "ImplicitPolicyLocal");
-        let io = alloc.concat(&prefix, "IO");
-        let rx = alloc.concat(&prefix, "Rx");
-        let rxLocal = alloc.concat(&rx, "Local");
+        let prefix = Symbol::new("\\HH\\Capabilities\\");
+        let writeProperty = concat(&prefix, "WriteProperty");
+        let accessGlobals = concat(&prefix, "AccessGlobals");
+        let readGlobals = concat(&prefix, "ReadGlobals");
+        let system = concat(&prefix, "System");
+        let implicitPolicy = concat(&prefix, "ImplicitPolicy");
+        let implicitPolicyLocal = concat(&prefix, "ImplicitPolicyLocal");
+        let io = concat(&prefix, "IO");
+        let rx = concat(&prefix, "Rx");
+        let rxLocal = concat(&rx, "Local");
 
         Self {
             defaults,
@@ -928,38 +930,38 @@ impl Capabilities {
 }
 
 impl ExpressionTrees {
-    fn new(alloc: &GlobalAllocator) -> Self {
+    fn new() -> Self {
         Self {
-            makeTree: alloc.symbol(sn::expression_trees::MAKE_TREE),
-            intType: alloc.symbol(sn::expression_trees::INT_TYPE),
-            floatType: alloc.symbol(sn::expression_trees::FLOAT_TYPE),
-            boolType: alloc.symbol(sn::expression_trees::BOOL_TYPE),
-            stringType: alloc.symbol(sn::expression_trees::STRING_TYPE),
-            nullType: alloc.symbol(sn::expression_trees::NULL_TYPE),
-            voidType: alloc.symbol(sn::expression_trees::VOID_TYPE),
-            symbolType: alloc.symbol(sn::expression_trees::SYMBOL_TYPE),
-            visitInt: alloc.symbol(sn::expression_trees::VISIT_INT),
-            visitFloat: alloc.symbol(sn::expression_trees::VISIT_FLOAT),
-            visitBool: alloc.symbol(sn::expression_trees::VISIT_BOOL),
-            visitString: alloc.symbol(sn::expression_trees::VISIT_STRING),
-            visitNull: alloc.symbol(sn::expression_trees::VISIT_NULL),
-            visitBinop: alloc.symbol(sn::expression_trees::VISIT_BINOP),
-            visitUnop: alloc.symbol(sn::expression_trees::VISIT_UNOP),
-            visitLocal: alloc.symbol(sn::expression_trees::VISIT_LOCAL),
-            visitLambda: alloc.symbol(sn::expression_trees::VISIT_LAMBDA),
-            visitGlobalFunction: alloc.symbol(sn::expression_trees::VISIT_GLOBAL_FUNCTION),
-            visitStaticMethod: alloc.symbol(sn::expression_trees::VISIT_STATIC_METHOD),
-            visitCall: alloc.symbol(sn::expression_trees::VISIT_CALL),
-            visitAssign: alloc.symbol(sn::expression_trees::VISIT_ASSIGN),
-            visitTernary: alloc.symbol(sn::expression_trees::VISIT_TERNARY),
-            visitIf: alloc.symbol(sn::expression_trees::VISIT_IF),
-            visitWhile: alloc.symbol(sn::expression_trees::VISIT_WHILE),
-            visitReturn: alloc.symbol(sn::expression_trees::VISIT_RETURN),
-            visitFor: alloc.symbol(sn::expression_trees::VISIT_FOR),
-            visitBreak: alloc.symbol(sn::expression_trees::VISIT_BREAK),
-            visitContinue: alloc.symbol(sn::expression_trees::VISIT_CONTINUE),
-            splice: alloc.symbol(sn::expression_trees::SPLICE),
-            dollardollarTmpVar: alloc.symbol(sn::expression_trees::DOLLARDOLLAR_TMP_VAR),
+            makeTree: Symbol::new(sn::expression_trees::MAKE_TREE),
+            intType: Symbol::new(sn::expression_trees::INT_TYPE),
+            floatType: Symbol::new(sn::expression_trees::FLOAT_TYPE),
+            boolType: Symbol::new(sn::expression_trees::BOOL_TYPE),
+            stringType: Symbol::new(sn::expression_trees::STRING_TYPE),
+            nullType: Symbol::new(sn::expression_trees::NULL_TYPE),
+            voidType: Symbol::new(sn::expression_trees::VOID_TYPE),
+            symbolType: Symbol::new(sn::expression_trees::SYMBOL_TYPE),
+            visitInt: Symbol::new(sn::expression_trees::VISIT_INT),
+            visitFloat: Symbol::new(sn::expression_trees::VISIT_FLOAT),
+            visitBool: Symbol::new(sn::expression_trees::VISIT_BOOL),
+            visitString: Symbol::new(sn::expression_trees::VISIT_STRING),
+            visitNull: Symbol::new(sn::expression_trees::VISIT_NULL),
+            visitBinop: Symbol::new(sn::expression_trees::VISIT_BINOP),
+            visitUnop: Symbol::new(sn::expression_trees::VISIT_UNOP),
+            visitLocal: Symbol::new(sn::expression_trees::VISIT_LOCAL),
+            visitLambda: Symbol::new(sn::expression_trees::VISIT_LAMBDA),
+            visitGlobalFunction: Symbol::new(sn::expression_trees::VISIT_GLOBAL_FUNCTION),
+            visitStaticMethod: Symbol::new(sn::expression_trees::VISIT_STATIC_METHOD),
+            visitCall: Symbol::new(sn::expression_trees::VISIT_CALL),
+            visitAssign: Symbol::new(sn::expression_trees::VISIT_ASSIGN),
+            visitTernary: Symbol::new(sn::expression_trees::VISIT_TERNARY),
+            visitIf: Symbol::new(sn::expression_trees::VISIT_IF),
+            visitWhile: Symbol::new(sn::expression_trees::VISIT_WHILE),
+            visitReturn: Symbol::new(sn::expression_trees::VISIT_RETURN),
+            visitFor: Symbol::new(sn::expression_trees::VISIT_FOR),
+            visitBreak: Symbol::new(sn::expression_trees::VISIT_BREAK),
+            visitContinue: Symbol::new(sn::expression_trees::VISIT_CONTINUE),
+            splice: Symbol::new(sn::expression_trees::SPLICE),
+            dollardollarTmpVar: Symbol::new(sn::expression_trees::DOLLARDOLLAR_TMP_VAR),
         }
     }
 }

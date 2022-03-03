@@ -2,6 +2,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
+use pos::Symbol;
+
 use crate::reason::Reason;
 use crate::tast;
 use crate::typing_defs::{ParamMode, Ty};
@@ -36,7 +39,7 @@ impl Typing {
         if !param.user_attributes.is_empty() {
             unimplemented!()
         }
-        let name = env.ctx.alloc.symbol(&param.name);
+        let name = Symbol::new(&param.name);
         let pos = env.ctx.alloc.pos_from_ast(&param.pos);
         let id = LocalId::new_unscoped(name);
         let param_mode = ParamMode::from(&param.callconv);

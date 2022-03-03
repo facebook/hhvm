@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::alloc::GlobalAllocator;
 use hh24_types::ToplevelSymbolHash;
 use parking_lot::Mutex;
 use pos::{ConstName, FunName, RelativePath, TypeName};
@@ -30,14 +29,12 @@ pub enum Error {
 /// A naming table in a SQLite database (with the same database schema as
 /// hh_server's SQLite saved states).
 pub struct SqliteNamingTable {
-    alloc: &'static GlobalAllocator,
     names: Mutex<names::Names>,
 }
 
 impl SqliteNamingTable {
-    pub fn new(alloc: &'static GlobalAllocator, path: impl AsRef<Path>) -> rusqlite::Result<Self> {
+    pub fn new(path: impl AsRef<Path>) -> rusqlite::Result<Self> {
         Ok(Self {
-            alloc,
             names: Mutex::new(names::Names::from_file(path)?),
         })
     }
@@ -49,21 +46,21 @@ impl NamingProvider for SqliteNamingTable {
             .names
             .lock()
             .get_path_by_symbol_hash(ToplevelSymbolHash::from_type(name.as_str()))?;
-        Ok(path_opt.map(|path| self.alloc.relative_path(path.prefix(), path.path())))
+        Ok(path_opt.map(|path| RelativePath::new(path.prefix(), path.path())))
     }
     fn get_fun_path(&self, name: FunName) -> Result<Option<RelativePath>> {
         let path_opt = self
             .names
             .lock()
             .get_path_by_symbol_hash(ToplevelSymbolHash::from_fun(name.as_str()))?;
-        Ok(path_opt.map(|path| self.alloc.relative_path(path.prefix(), path.path())))
+        Ok(path_opt.map(|path| RelativePath::new(path.prefix(), path.path())))
     }
     fn get_const_path(&self, name: ConstName) -> Result<Option<RelativePath>> {
         let path_opt = self
             .names
             .lock()
             .get_path_by_symbol_hash(ToplevelSymbolHash::from_const(name.as_str()))?;
-        Ok(path_opt.map(|path| self.alloc.relative_path(path.prefix(), path.path())))
+        Ok(path_opt.map(|path| RelativePath::new(path.prefix(), path.path())))
     }
 }
 

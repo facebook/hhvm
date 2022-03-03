@@ -63,7 +63,7 @@ fn main() {
         tmp: PathBuf::new(),
     });
 
-    let (global_alloc, alloc, pos_alloc) = alloc::get_allocators_for_main();
+    let (alloc, pos_alloc) = alloc::get_allocators_for_main();
 
     let filenames: Vec<RelativePath> = opts
         .filenames
@@ -71,10 +71,10 @@ fn main() {
         .map(|path| {
             if let Some(root) = opts.root.as_ref() {
                 if let Ok(suffix) = path.strip_prefix(root) {
-                    return alloc.relative_path(Prefix::Root, suffix);
+                    return RelativePath::new(Prefix::Root, suffix);
                 }
             }
-            alloc.relative_path(Prefix::Dummy, path)
+            RelativePath::new(Prefix::Dummy, path)
         })
         .collect();
 
@@ -84,26 +84,24 @@ fn main() {
     }
 
     if opts.with_pos {
-        decl_files(&opts, global_alloc, pos_alloc, path_ctx, &filenames);
+        decl_files(&opts, pos_alloc, path_ctx, &filenames);
     } else {
-        decl_files(&opts, global_alloc, alloc, path_ctx, &filenames);
+        decl_files(&opts, alloc, path_ctx, &filenames);
     }
 }
 
 fn decl_files<R: Reason>(
     opts: &CliOptions,
-    global_alloc: &'static alloc::GlobalAllocator,
     alloc: &'static alloc::Allocator<R>,
     ctx: Arc<RelativePathCtx>,
     filenames: &[RelativePath],
 ) {
     let decl_parser = DeclParser::new(alloc, ctx);
-    let shallow_decl_provider =
-        make_shallow_decl_provider(opts, global_alloc, &decl_parser, filenames);
+    let shallow_decl_provider = make_shallow_decl_provider(opts, &decl_parser, filenames);
     let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
         Arc::new(NonEvictingCache::new()),
         alloc,
-        SpecialNames::new(global_alloc),
+        SpecialNames::new(),
         shallow_decl_provider,
     ));
     let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
@@ -154,7 +152,6 @@ fn decl_files<R: Reason>(
 
 fn make_shallow_decl_provider<R: Reason>(
     opts: &CliOptions,
-    global_alloc: &'static alloc::GlobalAllocator,
     decl_parser: &DeclParser<R>,
     filenames: &[RelativePath],
 ) -> Arc<dyn ShallowDeclProvider<R>> {
@@ -166,7 +163,7 @@ fn make_shallow_decl_provider<R: Reason>(
     if let Some(naming_table_path) = &opts.naming_table {
         Arc::new(LazyShallowDeclProvider::new(
             cache,
-            Arc::new(SqliteNamingTable::new(global_alloc, naming_table_path).unwrap()),
+            Arc::new(SqliteNamingTable::new(naming_table_path).unwrap()),
             decl_parser.clone(),
         ))
     } else {

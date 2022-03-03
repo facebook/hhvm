@@ -7,7 +7,7 @@ use super::Allocator;
 use crate::decl_defs::{self, shallow, ty, DeclTy, DeclTy_, FunParam, FunType, UserAttribute};
 use crate::reason::Reason;
 use oxidized_by_ref as obr;
-use pos::{ConstName, FunName, TypeName};
+use pos::{ConstName, FunName, Symbol, TypeName};
 
 impl<R: Reason> Allocator<R> {
     #[inline]
@@ -25,7 +25,7 @@ impl<R: Reason> Allocator<R> {
         use ty::XhpEnumValue;
         match x {
             Obr::XEVInt(i) => XhpEnumValue::XEVInt(i),
-            Obr::XEVString(s) => XhpEnumValue::XEVString(self.symbol(s)),
+            Obr::XEVString(s) => XhpEnumValue::XEVString(Symbol::new(s)),
         }
     }
 
@@ -33,7 +33,7 @@ impl<R: Reason> Allocator<R> {
         use obr::typing_defs_core::IfcFunDecl as Obr;
         use ty::IfcFunDecl;
         match x {
-            Obr::FDPolicied(s) => IfcFunDecl::FDPolicied(s.map(|s| self.symbol(s))),
+            Obr::FDPolicied(s) => IfcFunDecl::FDPolicied(s.map(Symbol::new)),
             Obr::FDInferFlows => IfcFunDecl::FDInferFlows,
         }
     }
@@ -48,17 +48,17 @@ impl<R: Reason> Allocator<R> {
         match x {
             Obr::TSFlitInt(&pos_id) => (
                 SfnPos::Simple(self.pos_from_decl(pos_id.0)),
-                TshapeFieldName::TSFlitInt(self.symbol(pos_id.1)),
+                TshapeFieldName::TSFlitInt(Symbol::new(pos_id.1)),
             ),
             Obr::TSFlitStr(&pos_bytes) => (
                 SfnPos::Simple(self.pos_from_decl(pos_bytes.0)),
-                TshapeFieldName::TSFlitStr(self.bytes(pos_bytes.1)),
+                TshapeFieldName::TSFlitStr(intern::string::intern_bytes(pos_bytes.1.as_ref())),
             ),
             Obr::TSFclassConst(&(pos_id1, pos_id2)) => (
                 SfnPos::ClassConst(self.pos_from_decl(pos_id1.0), self.pos_from_decl(pos_id2.0)),
                 TshapeFieldName::TSFclassConst(
-                    TypeName(self.symbol(pos_id1.1)),
-                    self.symbol(pos_id2.1),
+                    TypeName(Symbol::new(pos_id1.1)),
+                    Symbol::new(pos_id2.1),
                 ),
             ),
         }
@@ -73,7 +73,8 @@ impl<R: Reason> Allocator<R> {
             classname_params: attr
                 .classname_params
                 .iter()
-                .map(|param| TypeName(self.symbol(param)))
+                .copied()
+                .map(TypeName::new)
                 .collect(),
         }
     }
@@ -113,7 +114,7 @@ impl<R: Reason> Allocator<R> {
     fn ty_from_decl(&self, ty: &obr::typing_defs::Ty<'_>) -> DeclTy<R> {
         use obr::typing_defs_core::Ty_::*;
         use DeclTy_::*;
-        let reason = self.reason(ty.0);
+        let reason = self.reason(*ty.0);
         let ty_ = match ty.1 {
             Tthis => DTthis,
             Tapply(&(pos_id, tys)) => DTapply(Box::new((
@@ -142,7 +143,7 @@ impl<R: Reason> Allocator<R> {
             ))),
             Tvar(ident) => DTvar(ident.into()),
             Tgeneric(&(pos_id, tys)) => DTgeneric(Box::new((
-                TypeName(self.symbol(pos_id)),
+                TypeName::new(pos_id),
                 self.slice(tys, Self::ty_from_decl),
             ))),
             Tunion(tys) => DTunion(self.slice(tys, Self::ty_from_decl)),
@@ -214,7 +215,7 @@ impl<R: Reason> Allocator<R> {
     fn decl_fun_param(&self, fp: &obr::typing_defs_core::FunParam<'_>) -> FunParam<R, DeclTy<R>> {
         FunParam {
             pos: self.pos_from_decl(fp.pos),
-            name: fp.name.map(|name| self.symbol(name)),
+            name: fp.name.map(Symbol::new),
             ty: self.decl_possibly_enforced_ty(fp.type_),
             flags: fp.flags,
         }
@@ -225,12 +226,12 @@ impl<R: Reason> Allocator<R> {
         use ty::ClassConstFrom;
         match x {
             Obr::Self_ => ClassConstFrom::Self_,
-            Obr::From(s) => ClassConstFrom::From(TypeName(self.symbol(s))),
+            Obr::From(s) => ClassConstFrom::From(TypeName::new(s)),
         }
     }
 
     fn class_const_ref(&self, x: obr::typing_defs::ClassConstRef<'_>) -> ty::ClassConstRef {
-        ty::ClassConstRef(self.class_const_from(x.0), self.symbol(x.1))
+        ty::ClassConstRef(self.class_const_from(x.0), Symbol::new(x.1))
     }
 
     fn abstract_typeconst(
@@ -307,7 +308,9 @@ impl<R: Reason> Allocator<R> {
             name: self.pos_method_from_decl(sm.name),
             ty: self.ty_from_decl(sm.type_),
             visibility: sm.visibility,
-            deprecated: sm.deprecated.map(|s| self.bytes(s)),
+            deprecated: sm
+                .deprecated
+                .map(|s| intern::string::intern_bytes(s.as_ref())),
             attributes: self.slice(sm.attributes, Self::user_attribute_from_decl),
             flags: shallow::MethodFlags::empty(),
         }
@@ -350,7 +353,7 @@ impl<R: Reason> Allocator<R> {
             xhp_enum_values: sc
                 .xhp_enum_values
                 .iter()
-                .map(|(k, v)| (self.symbol(k), self.slice(v, Self::xhp_enum_value)))
+                .map(|(&k, v)| (Symbol::new(k), self.slice(v, Self::xhp_enum_value)))
                 .collect(),
             req_extends: self.slice(sc.req_extends, Self::ty_from_decl),
             req_implements: self.slice(sc.req_implements, Self::ty_from_decl),
@@ -372,7 +375,9 @@ impl<R: Reason> Allocator<R> {
         shallow::FunDecl {
             pos: self.pos_from_decl(sf.pos),
             ty: self.ty_from_decl(sf.type_),
-            deprecated: sf.deprecated.map(|s| self.bytes(s)),
+            deprecated: sf
+                .deprecated
+                .map(|s| intern::string::intern_bytes(s.as_ref())),
             module: sf
                 .module
                 .map(|pos_id| self.pos_module_from_ast_ref(&pos_id)),
@@ -406,14 +411,12 @@ impl<R: Reason> Allocator<R> {
         use obr::shallow_decl_defs::Decl as Obr;
         use shallow::Decl;
         match decl {
-            (name, Obr::Class(x)) => {
-                Decl::Class(TypeName(self.symbol(name)), self.shallow_class(x))
-            }
-            (name, Obr::Fun(x)) => Decl::Fun(FunName(self.symbol(name)), self.fun_decl(x)),
+            (name, Obr::Class(x)) => Decl::Class(TypeName::new(name), self.shallow_class(x)),
+            (name, Obr::Fun(x)) => Decl::Fun(FunName::new(name), self.fun_decl(x)),
             (name, Obr::Typedef(x)) => {
-                Decl::Typedef(TypeName(self.symbol(name)), self.typedef_decl(x))
+                Decl::Typedef(TypeName(Symbol::new(name)), self.typedef_decl(x))
             }
-            (name, Obr::Const(x)) => Decl::Const(ConstName(self.symbol(name)), self.const_decl(x)),
+            (name, Obr::Const(x)) => Decl::Const(ConstName(Symbol::new(name)), self.const_decl(x)),
         }
     }
 

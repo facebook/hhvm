@@ -7,23 +7,22 @@ use super::Allocator;
 use crate::reason::Reason;
 use oxidized::pos_span_raw::PosSpanRaw;
 use pos::{
-    ClassConstName, MethodName, ModuleName, Pos, Positioned, PropName, TypeConstName, TypeName,
+    ClassConstName, MethodName, ModuleName, Pos, Positioned, PropName, RelativePath, Symbol,
+    TypeConstName, TypeName,
 };
 
 impl<R: Reason> Allocator<R> {
     pub fn pos_from_ast(&self, pos: &oxidized::pos::Pos) -> R::Pos {
         R::Pos::mk(|| {
-            let file = self.relative_path_from_ast(pos.filename());
             let PosSpanRaw { start, end } = pos.to_raw_span();
-            (file, start, end)
+            (RelativePath::from(pos.filename()), start, end)
         })
     }
 
     pub fn pos_from_decl(&self, pos: &oxidized_by_ref::pos::Pos<'_>) -> R::Pos {
         R::Pos::mk(|| {
-            let file = self.relative_path_from_decl(pos.filename());
             let PosSpanRaw { start, end } = pos.to_raw_span();
-            (file, start, end)
+            (RelativePath::from(pos.filename()), start, end)
         })
     }
 
@@ -33,7 +32,7 @@ impl<R: Reason> Allocator<R> {
     ) -> Positioned<TypeName, R::Pos> {
         Positioned::new(
             self.pos_from_ast(&pos_id.0),
-            TypeName(self.symbol(&pos_id.1)),
+            TypeName(Symbol::new(&pos_id.1)),
         )
     }
 
@@ -43,7 +42,7 @@ impl<R: Reason> Allocator<R> {
     ) -> Positioned<TypeName, R::Pos> {
         Positioned::new(
             self.pos_from_decl(pos_id.0),
-            TypeName(self.symbol(pos_id.1)),
+            TypeName(Symbol::new(pos_id.1)),
         )
     }
 
@@ -51,34 +50,34 @@ impl<R: Reason> Allocator<R> {
         &self,
         oxidized_by_ref::ast_defs::Id(pos, id): &oxidized_by_ref::ast_defs::Id<'_>,
     ) -> Positioned<ModuleName, R::Pos> {
-        Positioned::new(self.pos_from_decl(pos), ModuleName(self.symbol(id)))
+        Positioned::new(self.pos_from_decl(pos), ModuleName(Symbol::new(*id)))
     }
 
     pub fn pos_class_const_from_decl(
         &self,
         (pos, id): oxidized_by_ref::typing_defs::PosId<'_>,
     ) -> Positioned<ClassConstName, R::Pos> {
-        Positioned::new(self.pos_from_decl(pos), ClassConstName(self.symbol(id)))
+        Positioned::new(self.pos_from_decl(pos), ClassConstName(Symbol::new(id)))
     }
 
     pub fn pos_type_const_from_decl(
         &self,
         (pos, id): oxidized_by_ref::typing_defs::PosId<'_>,
     ) -> Positioned<TypeConstName, R::Pos> {
-        Positioned::new(self.pos_from_decl(pos), TypeConstName(self.symbol(id)))
+        Positioned::new(self.pos_from_decl(pos), TypeConstName(Symbol::new(id)))
     }
 
     pub fn pos_method_from_decl(
         &self,
         (pos, id): oxidized_by_ref::typing_defs::PosId<'_>,
     ) -> Positioned<MethodName, R::Pos> {
-        Positioned::new(self.pos_from_decl(pos), MethodName(self.symbol(id)))
+        Positioned::new(self.pos_from_decl(pos), MethodName(Symbol::new(id)))
     }
 
     pub fn pos_prop_from_decl(
         &self,
         (pos, id): oxidized_by_ref::typing_defs::PosId<'_>,
     ) -> Positioned<PropName, R::Pos> {
-        Positioned::new(self.pos_from_decl(pos), PropName(self.symbol(id)))
+        Positioned::new(self.pos_from_decl(pos), PropName(Symbol::new(id)))
     }
 }

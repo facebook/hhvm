@@ -21,16 +21,76 @@ pub struct Symbol(pub StringId);
 // using the underlying string after a fast check for equal ids.
 
 impl Symbol {
-    pub fn intern(s: &str) -> Self {
+    pub fn new<S: intern::string::IntoUtf8Bytes>(s: S) -> Self {
         Self(intern::string::intern(s))
+    }
+}
+
+impl Symbol {
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+}
+
+impl std::ops::Deref for Symbol {
+    type Target = str;
+
+    fn deref(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl std::convert::AsRef<str> for Symbol {
+    fn as_ref(&self) -> &str {
+        self.as_str()
+    }
+}
+
+impl std::fmt::Debug for Symbol {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.as_str())
+    }
+}
+
+impl std::fmt::Display for Symbol {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+impl<'a> ToOxidized<'a> for Symbol {
+    type Output = &'a str;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> &'a str {
+        arena.alloc_str(self.0.as_str())
+    }
+}
+
+impl<'a, V: ToOxidized<'a>> ToOxidized<'a> for SymbolMap<V> {
+    type Output = oxidized_by_ref::s_map::SMap<'a, V::Output>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        oxidized_by_ref::s_map::SMap::from(
+            arena,
+            self.iter()
+                .map(|(k, v)| (k.to_oxidized(arena), v.to_oxidized(arena))),
+        )
     }
 }
 
 macro_rules! common_impls {
     ($name:ident) => {
         impl $name {
+            pub fn new<S: intern::string::IntoUtf8Bytes>(s: S) -> Self {
+                Self(Symbol::new(s))
+            }
+
             pub fn as_str(&self) -> &str {
                 self.0.as_str()
+            }
+
+            pub fn as_symbol(self) -> Symbol {
+                self.0
             }
         }
 
@@ -83,8 +143,6 @@ macro_rules! common_impls {
         }
     };
 }
-
-common_impls!(Symbol, SymbolMap);
 
 // The following newtype wrappers are all for name categories that are
 // disjoint from each other.

@@ -64,8 +64,8 @@ pub extern "C" fn stc_main() {
     });
 
     let options = Arc::new(oxidized::global_options::GlobalOptions::default());
-    let (global_alloc, alloc, _pos_alloc) = alloc::get_allocators_for_main();
-    let special_names = SpecialNames::new(global_alloc);
+    let (alloc, _pos_alloc) = alloc::get_allocators_for_main();
+    let special_names = SpecialNames::new();
     let ast_provider = AstProvider::new(
         Arc::clone(&relative_path_ctx),
         special_names,
@@ -94,7 +94,7 @@ pub extern "C" fn stc_main() {
     let filenames: Vec<RelativePath> = cli_options
         .filenames
         .into_iter()
-        .map(|fln| alloc.relative_path(Prefix::Root, &fln))
+        .map(|fln| RelativePath::new(Prefix::Root, &fln))
         .collect();
 
     for &filename in &filenames {

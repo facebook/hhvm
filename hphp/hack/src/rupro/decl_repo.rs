@@ -33,7 +33,7 @@ struct CliOptions {
 fn main() {
     let cli_options = CliOptions::from_args();
 
-    let (_, alloc, pos_alloc) = alloc::get_allocators_for_main();
+    let (alloc, pos_alloc) = alloc::get_allocators_for_main();
 
     let path_ctx = Arc::new(RelativePathCtx {
         root: cli_options.root.clone(),
@@ -50,8 +50,8 @@ fn main() {
             .map(|e| {
                 let path = e.path();
                 match path.strip_prefix(&path_ctx.root) {
-                    Ok(suffix) => alloc.relative_path(Prefix::Root, suffix),
-                    Err(..) => alloc.relative_path(Prefix::Dummy, &path),
+                    Ok(suffix) => RelativePath::new(Prefix::Root, suffix),
+                    Err(..) => RelativePath::new(Prefix::Dummy, &path),
                 }
             })
             .collect::<Vec<RelativePath>>()

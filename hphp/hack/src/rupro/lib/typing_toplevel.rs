@@ -6,6 +6,8 @@
 #![allow(dead_code)]
 use std::sync::Arc;
 
+use pos::Symbol;
+
 use crate::decl_defs::DeclTy;
 use crate::decl_hint::DeclHintEnv;
 use crate::reason::Reason;
@@ -55,7 +57,7 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
 
     fn fun_def_impl(&mut self, fd: &oxidized::aast::FunDef<(), ()>) -> tast::FunDef<R> {
         let f = &fd.fun;
-        let fname = self.ctx.alloc.symbol(&f.name.1);
+        let fname = Symbol::new(&f.name.1);
         let fpos = self.ctx.alloc.pos_from_ast(&f.name.0);
 
         let (return_decl_ty, params_decl_ty) = self.hint_fun_header(&f.params, &f.ret);

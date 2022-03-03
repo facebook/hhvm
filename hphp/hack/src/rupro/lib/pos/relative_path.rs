@@ -18,14 +18,13 @@ pub struct RelativePath {
 }
 
 impl RelativePath {
-    #[inline]
-    pub fn new(prefix: Prefix, suffix: BytesId) -> Self {
-        Self { prefix, suffix }
+    pub fn new<P: AsRef<Path>>(prefix: Prefix, suffix: P) -> Self {
+        let suffix = intern::string::intern_bytes(suffix.as_ref().as_os_str().as_bytes());
+        Self::from_bytes_id(prefix, suffix)
     }
 
-    pub fn intern<P: AsRef<Path>>(prefix: Prefix, suffix: P) -> Self {
-        let suffix = intern::string::intern_bytes(suffix.as_ref().as_os_str().as_bytes());
-        Self::new(prefix, suffix)
+    pub fn from_bytes_id(prefix: Prefix, suffix: BytesId) -> Self {
+        Self { prefix, suffix }
     }
 
     #[inline]
@@ -55,6 +54,18 @@ impl RelativePath {
             self.prefix,
             OsStr::from_bytes(self.suffix.as_bytes()).into(),
         )
+    }
+}
+
+impl From<&oxidized::relative_path::RelativePath> for RelativePath {
+    fn from(path: &oxidized::relative_path::RelativePath) -> Self {
+        Self::new(path.prefix(), path.path())
+    }
+}
+
+impl From<&oxidized_by_ref::relative_path::RelativePath<'_>> for RelativePath {
+    fn from(path: &oxidized_by_ref::relative_path::RelativePath<'_>) -> Self {
+        Self::new(path.prefix(), path.path())
     }
 }
 

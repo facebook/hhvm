@@ -24,104 +24,124 @@ const char* fix_self(const char* name) {
   return (strcmp(name, "Self") == 0) ? "Self_" : name;
 }
 
-#define IMM_IVA "IVA"
-#define IMM_LA "LA"
-#define IMM_I64A "I64A"
-#define IMM_NLA "NLA"
-#define IMM_ILA "ILA"
-#define IMM_IA "IA"
-#define IMM_DA "DA"
-#define IMM_SA "SA"
-#define IMM_AA "AA"
-#define IMM_RATA "RATA"
-#define IMM_BA "BA"
-#define IMM_OA(ty) "OA<" #ty ">"
-#define IMM_KA "KA"
-#define IMM_LAR "LAR"
-#define IMM_ITA "ITA"
-#define IMM_FCA "FCA"
-#define IMM_BLA "BLA"
-#define IMM_SLA "SLA"
-#define IMM_VSA "VSA"
+#define IMM_TY_BLA      "ImmType::BLA"
+#define IMM_TY_SLA      "ImmType::SLA"
+#define IMM_TY_IVA      "ImmType::IVA"
+#define IMM_TY_I64A     "ImmType::I64A"
+#define IMM_TY_LA       "ImmType::LA"
+#define IMM_TY_NLA      "ImmType::NLA"
+#define IMM_TY_ILA      "ImmType::ILA"
+#define IMM_TY_IA       "ImmType::IA"
+#define IMM_TY_DA       "ImmType::DA"
+#define IMM_TY_SA       "ImmType::SA"
+#define IMM_TY_RATA     "ImmType::RATA"
+#define IMM_TY_AA       "ImmType::AA"
+#define IMM_TY_BA       "ImmType::BA"
+#define IMM_TY_OA(type) "ImmType::OA(\"" #type "\")"
+#define IMM_TY_VSA      "ImmType::VSA"
+#define IMM_TY_KA       "ImmType::KA"
+#define IMM_TY_LAR      "ImmType::LAR"
+#define IMM_TY_ITA      "ImmType::ITA"
+#define IMM_TY_FCA      "ImmType::FCA"
 
-#define IMM_NA ""
-#define IMM_ONE(a) IMM_##a ", "
-#define IMM_TWO(a,b) IMM_ONE(a) IMM_##b ", "
-#define IMM_THREE(a,b,c) IMM_TWO(a,b) IMM_##c ", "
-#define IMM_FOUR(a,b,c,d) IMM_THREE(a,b,c) IMM_##d ", "
+#define IMM_NAME_BLA(n)     "targets"
+#define IMM_NAME_SLA(n)     "targets"
+#define IMM_NAME_IVA(n)     "arg" #n
+#define IMM_NAME_I64A(n)    "arg" #n
+#define IMM_NAME_LA(n)      "loc" #n
+#define IMM_NAME_NLA(n)     "nloc" #n
+#define IMM_NAME_ILA(n)     "loc" #n
+#define IMM_NAME_IA(n)      "iter" #n
+#define IMM_NAME_DA(n)      "dbl" #n
+#define IMM_NAME_SA(n)      "str" #n
+#define IMM_NAME_RATA(n)    "rat"
+#define IMM_NAME_AA(n)      "arr" #n
+#define IMM_NAME_BA(n)      "target" #n
+#define IMM_NAME_OA_IMPL(n) "subop" #n
+#define IMM_NAME_OA(type)   IMM_NAME_OA_IMPL
+#define IMM_NAME_VSA(n)     "keys"
+#define IMM_NAME_KA(n)      "mkey"
+#define IMM_NAME_LAR(n)     "locrange"
+#define IMM_NAME_ITA(n)     "ita"
+#define IMM_NAME_FCA(n)     "fca"
 
-#define IN_NOV "fn()"
-#define IN_ONE(a) "fn(" #a ")"
-#define IN_TWO(a,b) "fn(" #a ", " #b ")"
-#define IN_THREE(a,b,c) "fn(" #a ", " #b ", " #c ")"
-#define IN_SMANY "fn(SMANY)"
-#define IN_CMANY "fn(CMANY)"
-#define IN_CUMANY "fn(CUMANY)"
-#define IN_MFINAL "fn(MFINAL)"
-#define IN_C_MFINAL(n) "fn(C_MFINAL<" #n ">)"
-#define IN_FCALL(nin,nobj) "fn(FCIN<" #nin ", " #nobj ">)"
+#define IMM_MEM(which, n)          printf("(\"%s\", %s), ", IMM_NAME_##which(n), IMM_TY_##which);
+#define IMM_MEM_NA
+#define IMM_MEM_ONE(x)                IMM_MEM(x, 1);
+#define IMM_MEM_TWO(x, y)             IMM_MEM(x, 1); IMM_MEM(y, 2);
+#define IMM_MEM_THREE(x, y, z)        IMM_MEM(x, 1); IMM_MEM(y, 2); \
+                                      IMM_MEM(z, 3);
+#define IMM_MEM_FOUR(x, y, z, l)      IMM_MEM(x, 1); IMM_MEM(y, 2); \
+                                      IMM_MEM(z, 3); IMM_MEM(l, 4);
+#define IMM_MEM_FIVE(x, y, z, l, m)   IMM_MEM(x, 1); IMM_MEM(y, 2); \
+                                      IMM_MEM(z, 3); IMM_MEM(l, 4); \
+                                      IMM_MEM(m, 5);
+#define IMM_MEM_SIX(x, y, z, l, m, n) IMM_MEM(x, 1); IMM_MEM(y, 2); \
+                                      IMM_MEM(z, 3); IMM_MEM(l, 4); \
+                                      IMM_MEM(m, 5); IMM_MEM(n, 6);
 
-#define OUT_NOV ""
-#define OUT_ONE(a) " -> " #a
-#define OUT_TWO(a,b) " -> (" #a ", " #b ")"
-#define OUT_THREE(a,b,c) " -> (" #a ", " #b ", " #c ")"
-#define OUT_FCALL "-> FCOUT"
+#define IN_NOV "Inputs::NOV"
+#define IN_ONE(a) "Inputs::Fixed([FlavorDesc::" #a "].into())"
+#define IN_TWO(a,b) "Inputs::Fixed([FlavorDesc::" #a ", FlavorDesc::" #b "].into())"
+#define IN_THREE(a,b,c) "Inputs::Fixed([FlavorDesc::" #a ", FlavorDesc::" #b ", FlavorDesc::" #c "].into())"
+#define IN_SMANY "Inputs::SMany"
+#define IN_CMANY "Inputs::CMany"
+#define IN_CUMANY "Inputs::CUMany"
+#define IN_MFINAL "Inputs::MFinal"
+#define IN_C_MFINAL(n) "Inputs::CMFinal(" #n ")"
+#define IN_FCALL(nin,nobj) "Inputs::FCall{inp: " #nin ", obj: " #nobj "}"
 
-#define FLAGS_NF ""
-#define FLAGS_CF ", CF"
-#define FLAGS_TF ", TF"
-#define FLAGS_CF_TF ", CF_TF"
+#define OUT_NOV "Outputs::NOV"
+#define OUT_ONE(a) "Outputs::Fixed([FlavorDesc::" #a "].into())"
+#define OUT_TWO(a,b) "Outputs::Fixed([FlavorDesc::" #a ", FlavorDesc::" #b "].into())"
+#define OUT_THREE(a,b,c) "Outputs::Fixed([FlavorDesc::" #a ", " #b  ", FlavorDesc::" #c "].into())"
+#define OUT_FCALL "Outputs::FCall"
 
-#define O(name, imm, in, out, flags)\
-  printf(\
-    "    %s(%s[%s%s; 0]%s),\n",\
-    fix_self(#name),\
-    IMM_##imm,\
-    IN_##in,\
-    OUT_##out,\
-    FLAGS_##flags);
+#define FLAGS_NF "InstrFlags::NF"
+#define FLAGS_CF "InstrFlags::CF"
+#define FLAGS_TF "InstrFlags::TF"
+#define FLAGS_CF_TF "InstrFlags::CF_TF"
+
+#define O(name, imms, in, out, flags)                    \
+  printf("            OpcodeData{");                     \
+  printf("name: \"%s\", ", fix_self(#name));             \
+                                                         \
+  printf("immediates: vec![");                           \
+  IMM_MEM_##imms                                         \
+  printf("], ");                                         \
+                                                         \
+  printf("inputs: %s, ", IN_##in);                       \
+  printf("outputs: %s, ", OUT_##out);                    \
+  printf("flags: %s, ", FLAGS_##flags);                  \
+  printf("},\n");
 
 // hhbc-gen/gen-rust.cpp:
 //
-// Print a Rust enum definition with one tuple variant for each opcode.
-// The resulting enum definition contains all the information present
-// in the C++ OPCODES macro, with the intention that downstream Rust
-// code of various kinds can be generated by proc-macros from the single
-// OPCODES-derived Rust enum.
+// Print a Rust description of the opcodes with one OpcodeData for each opcode.
+// The resulting definition contains all the information present in the C++
+// OPCODES macro, with the intention that downstream Rust code of various kinds
+// can be generated by proc-macros from the single OPCODES-derived Rust data.
 //
-// * Immediates translate to tuple fields whose types (ITA, LA, etc)
-// are defined in rust as type aliases for the real shared type (IterArgs,
-// LocalId, etc).
-//
-// * Input/output stack effects are expressed as a plain function pointer
-// type, e.g. fn(CV,CV)->CV. To make this field zero-sized, we wrap it
-// as a zero-length array: [fn(CV,CV)->CV; 0]. This field has no use
-// for carrying data, but it preserves information present in the OPCODES
-// macro. All stack effect types, like CV, SMANY, etc, are expressed
-// as zero-sized types.
-//
-// * Flags are translated to zero-sized fields (one type per flag).
-//
-// Sample input:
-//  O(IsTypeStructC,  ONE(OA(TypeStructResolveOp)),                     \
-//                                     TWO(CV,CV),      ONE(CV),    NF) \
-//  O(Switch,         THREE(OA(SwitchKind),I64A,BLA),                   \
-//                                     ONE(CV),         NOV,     CF_TF) \
-//
-// Sample output:
-//  IsTypeStructC(OA<TypeStructResolveOp>, [fn(CV, CV) -> CV; 0]),
-//  Switch(OA<SwitchKind>, I64A, BLA, [fn(CV); 0], CF_TF),
+// See test_util::test_opcodes() for sample output.
 //
 int main(int, char**) {
   printf("// Copyright (c) Facebook, Inc. and its affiliates.\n");
   printf("//\n");
   printf("// This source code is licensed under the MIT license found in the\n");
   printf("// LICENSE file in the \"hack\" directory of this source tree.\n");
-  printf("// %sgenerated by hhbc-dump.cpp\n", "@");
-  printf("// buck2 run :gen-rust > hhbc.rs\n");
-  printf("use crate::shared::*;\n");
-  printf("pub enum Op {\n");
+  printf("// %sgenerated by gen-rust.cpp\n", "@");
+  printf("// buck2 run :gen-rust > opcodes.rs\n");
+  printf("\n");
+  printf("pub use crate::{InstrFlags, Inputs, OpcodeData, Outputs, FlavorDesc, ImmType};\n");
+  printf("use once_cell::sync::OnceCell;\n");
+  printf("\n");
+  printf("pub fn opcode_data() -> &'static [OpcodeData] {\n");
+  printf("    static INSTANCE: OnceCell<Box<[OpcodeData]>> = OnceCell::new();\n");
+  printf("    INSTANCE.get_or_init(|| {\n");
+  printf("        vec![\n");
   OPCODES
+  printf("        ].into()\n");
+  printf("    })\n");
   printf("}\n");
   return 0;
 }

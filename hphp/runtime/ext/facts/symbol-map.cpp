@@ -395,20 +395,40 @@ SymbolMap::getTransitiveDerivedTypes(
     Symbol<SymKind::Type> baseType,
     TypeKindMask kinds,
     DeriveKindMask deriveKinds) {
-  // Wait for the DB to fully update, then make a single query to the now
-  // up-to-date DB.
-  waitForDBUpdate();
-  auto& db = getDB();
-  std::vector<DerivedTypeInfo> derivedTypes;
-  for (auto const& derivedInfo :
-       db.getTransitiveDerivedTypes(baseType.slice(), kinds, deriveKinds)) {
-    derivedTypes.emplace_back(
-        Symbol<SymKind::Type>{derivedInfo.m_type},
-        Path{derivedInfo.m_path},
-        derivedInfo.m_kind,
-        derivedInfo.m_flags);
+  std::vector<typename SymbolMap::DerivedTypeInfo> results;
+
+  hphp_hash_set<Symbol<SymKind::Type>> seen;
+  std::vector<Symbol<SymKind::Type>> stack;
+  stack.push_back(baseType);
+  while (!stack.empty()) {
+    auto type = stack.back();
+    stack.pop_back();
+
+    for (auto deriveKind :
+         {DeriveKind::Extends,
+          DeriveKind::RequireExtends,
+          DeriveKind::RequireImplements}) {
+      if (deriveKinds & static_cast<int>(deriveKind)) {
+        for (auto subtype : getDerivedTypes(type, deriveKind)) {
+          if (seen.count(subtype) > 0) {
+            continue;
+          }
+          seen.insert(subtype);
+
+          auto subtypePath = getSymbolPath(subtype);
+          auto [subtypeKind, subtypeFlags] =
+              getKindAndFlags(subtype, subtypePath);
+          if (kinds & static_cast<int>(subtypeKind)) {
+            stack.push_back(subtype);
+            results.push_back(
+                {subtype, subtypePath, subtypeKind, subtypeFlags});
+          }
+        }
+      }
+    }
   }
-  return derivedTypes;
+
+  return results;
 }
 
 std::vector<typename SymbolMap::DerivedTypeInfo>

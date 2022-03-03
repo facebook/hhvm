@@ -246,75 +246,6 @@ TypeKind toTypeKind(const std::string_view kind) {
   }
 }
 
-std::string getTransitiveDerivedTypesQueryStr(
-    TypeKindMask kinds, DeriveKindMask deriveKinds) {
-  auto typeKindWhereClause = [&]() -> std::string {
-    if (kinds == kTypeKindAll || kinds == 0) {
-      return "";
-    }
-    std::string clause = "AND (name=@base OR kind_of IN (";
-    auto needsDelim = false;
-    for (auto kind :
-         {TypeKind::Class,
-          TypeKind::Interface,
-          TypeKind::Enum,
-          TypeKind::Trait,
-          TypeKind::TypeAlias}) {
-      if (kinds & static_cast<int>(kind)) {
-        if (needsDelim) {
-          clause += ", ";
-        } else {
-          needsDelim = true;
-        }
-        clause += "\"";
-        clause += toString(kind);
-        clause += "\"";
-      }
-    }
-    clause += "))";
-    return clause;
-  }();
-  auto deriveKindWhereClause = [&]() -> std::string {
-    if (deriveKinds == kDeriveKindAll || deriveKinds == 0) {
-      return "";
-    }
-    bool needsDelim = false;
-    std::string clause = "AND derived_types.kind IN (";
-    for (auto deriveKind :
-         {DeriveKind::Extends,
-          DeriveKind::RequireExtends,
-          DeriveKind::RequireImplements}) {
-      if (deriveKinds & static_cast<int>(deriveKind)) {
-        if (needsDelim) {
-          clause += ", ";
-        } else {
-          needsDelim = true;
-        }
-        clause += folly::sformat("{}", toDBEnum(deriveKind));
-      }
-    }
-    clause += ")";
-    return clause;
-  }();
-  return folly::sformat(
-      "WITH RECURSIVE subtypes(id) AS ("
-      " SELECT typeid FROM type_details WHERE name=@base"
-      " UNION SELECT derived_id FROM derived_types, type_details, subtypes"
-      " WHERE derived_types.base_name=type_details.name"
-      " AND type_details.typeid=subtypes.id"
-      " {}"
-      " {}"
-      ")"
-      " SELECT name, path, kind_of, flags FROM type_details"
-      "  JOIN all_paths USING (pathid)"
-      "  WHERE type_details.typeid IN (SELECT id FROM subtypes)"
-      "  AND name <> @base"
-      "  {}",
-      typeKindWhereClause,
-      deriveKindWhereClause,
-      typeKindWhereClause);
-}
-
 struct PathStmts {
   explicit PathStmts(SQLite& db)
       : m_insert{db.prepare(
@@ -826,41 +757,6 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
     return derivedTypes;
   }
 
-  SQLiteStmt& getTransitiveDerivedTypesStmt(
-      TypeKindMask kinds, DeriveKindMask deriveKinds) {
-    auto it = m_derivedTypeStmts.find({kinds, deriveKinds});
-    if (it == m_derivedTypeStmts.end()) {
-      return m_derivedTypeStmts
-          .insert(
-              {std::make_tuple(kinds, deriveKinds),
-               m_db.prepare(
-                   getTransitiveDerivedTypesQueryStr(kinds, deriveKinds))})
-          .first->second;
-    }
-    return it->second;
-  }
-
-  MultiResult<DerivedTypeInfo> getTransitiveDerivedTypes(
-      const std::string_view baseType,
-      TypeKindMask kinds = kTypeKindAll,
-      DeriveKindMask deriveKinds = kDeriveKindAll) override {
-    auto query = m_txn.query(getTransitiveDerivedTypesStmt(kinds, deriveKinds));
-    query.bindString("@base", baseType);
-    XLOGF(DBG9, "Running {}", query.sql());
-    return MultiResult<DerivedTypeInfo>{
-        [q = std::move(query)]() mutable -> Optional<DerivedTypeInfo> {
-          q.step();
-          if (!q.row()) {
-            return {};
-          }
-          return DerivedTypeInfo{
-              .m_type = std::string{q.getString(0)},
-              .m_path = std::string{q.getString(1)},
-              .m_kind = toTypeKind(q.getString(2)),
-              .m_flags = q.getInt(3)};
-        }};
-  }
-
   void insertTypeAttribute(
       const folly::fs::path& path,
       const std::string_view type,
@@ -1317,8 +1213,6 @@ private:
   Sha1HexStmts m_sha1HexStmts;
   TypeStmts m_typeStmts;
   FileStmts m_fileStmts;
-  hphp_hash_map<std::tuple<TypeKindMask, DeriveKindMask>, SQLiteStmt>
-      m_derivedTypeStmts;
   FunctionStmts m_functionStmts;
   ConstantStmts m_constantStmts;
   ClockStmts m_clockStmts;

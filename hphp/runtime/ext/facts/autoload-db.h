@@ -66,13 +66,6 @@ public:
     folly::fs::path m_path;
   };
 
-  struct DerivedTypeInfo {
-    std::string m_type;
-    folly::fs::path m_path;
-    TypeKind m_kind;
-    TypeFlagMask m_flags;
-  };
-
   struct MethodPath {
     std::string m_type;
     std::string m_method;
@@ -142,11 +135,6 @@ public:
    */
   virtual std::vector<SymbolPath>
   getDerivedTypes(std::string_view baseType, DeriveKind kind) = 0;
-
-  virtual MultiResult<DerivedTypeInfo> getTransitiveDerivedTypes(
-      std::string_view baseType,
-      TypeKindMask kinds = kTypeKindAll,
-      DeriveKindMask deriveKinds = kDeriveKindAll) = 0;
 
   // Attributes
 

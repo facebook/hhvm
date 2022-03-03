@@ -40,6 +40,7 @@ pub struct Substitution<'a, R: Reason> {
 }
 
 impl<R: Reason> Subst<R> {
+    #[allow(unused_variables)]
     pub fn new(
         alloc: &Allocator<R>,
         tparams: &[Tparam<R, DeclTy<R>>],
@@ -52,7 +53,7 @@ impl<R: Reason> Subst<R> {
         let targs = targs
             .iter()
             .cloned()
-            .chain(std::iter::repeat(alloc.decl_ty(R::none(), DeclTy_::DTany)));
+            .chain(std::iter::repeat(DeclTy::any(R::none())));
         Self(
             tparams
                 .iter()
@@ -66,12 +67,11 @@ impl<R: Reason> Subst<R> {
 impl<'a, R: Reason> Substitution<'a, R> {
     fn merge_hk_type(
         &self,
-        orig_r: &R,
+        orig_r: R,
         orig_var: TypeName,
         ty: &DeclTy<R>,
         args: impl Iterator<Item = DeclTy<R>>,
     ) -> DeclTy<R> {
-        let r = ty.reason();
         let ty_: &DeclTy_<R> = ty.node();
         let res_ty_ = match ty_ {
             DeclTy_::DTapply(params) => {
@@ -91,14 +91,13 @@ impl<'a, R: Reason> Substitution<'a, R> {
                     existing_args.iter().cloned().chain(args).collect(),
                 )))
             }
-            _ => {
-                // We could insist on existing_args = [] here unless we want to
-                // support partial application.
-                ty_.clone()
-            }
+            // We could insist on existing_args = [] here unless we want to
+            // support partial application.
+            _ => ty_.clone(),
         };
-        self.alloc.decl_ty(
-            R::mk(|| ReasonImpl::Rinstantiate(r.clone(), orig_var, orig_r.clone())),
+        let r = ty.reason().clone();
+        DeclTy::new(
+            R::mk(|| ReasonImpl::Rinstantiate(r, orig_var, orig_r)),
             res_ty_,
         )
     }
@@ -110,7 +109,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
         if self.subst.0.is_empty() {
             return ty.clone();
         }
-        let r = ty.reason();
+        let r = ty.reason().clone();
         let ty_: &DeclTy_<R> = ty.node();
         match ty_ {
             DeclTy_::DTgeneric(params) => {
@@ -118,14 +117,10 @@ impl<'a, R: Reason> Substitution<'a, R> {
                 let args = existing_args.iter().map(|arg| self.instantiate(arg));
                 match self.subst.0.get(&x) {
                     Some(x_ty) => self.merge_hk_type(r, x, x_ty, args),
-                    None => {
-                        let args = args.collect::<Box<[_]>>();
-                        self.alloc
-                            .decl_ty(r.clone(), DeclTy_::DTgeneric(Box::new((x, args))))
-                    }
+                    None => DeclTy::generic(r, x, args.collect()),
                 }
             }
-            _ => self.alloc.decl_ty(r.clone(), self.instantiate_(ty_)),
+            _ => DeclTy::new(r, self.instantiate_(ty_)),
         }
     }
 

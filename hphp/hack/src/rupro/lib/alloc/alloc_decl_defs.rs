@@ -110,11 +110,6 @@ impl<R: Reason> Allocator<R> {
         }
     }
 
-    #[inline]
-    pub fn decl_ty(&self, reason: R, ty: DeclTy_<R>) -> DeclTy<R> {
-        DeclTy::new(reason, R::cons_decl_ty(ty))
-    }
-
     fn ty_from_decl(&self, ty: &obr::typing_defs::Ty<'_>) -> DeclTy<R> {
         use obr::typing_defs_core::Ty_::*;
         use DeclTy_::*;
@@ -160,7 +155,7 @@ impl<R: Reason> Allocator<R> {
                 unreachable!("Not used in decl tys")
             }
         };
-        self.decl_ty(reason, ty_)
+        DeclTy::new(reason, ty_)
     }
 
     fn decl_taccess_type(

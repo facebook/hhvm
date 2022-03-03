@@ -19,7 +19,7 @@ impl TypingParam {
     ) -> Ty<R> {
         let r = R::mk(|| ReasonImpl::Rwitness(env.ctx.alloc.pos_from_ast(&param.pos)));
         match decl_hint {
-            None => env.ctx.alloc.tany(r),
+            None => Ty::any(r),
             Some(ty) => {
                 // TODO(hrust): enforceability
                 // TODO(hrust): variadic

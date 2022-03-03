@@ -7,7 +7,6 @@ mod alloc_bytes;
 mod alloc_decl_defs;
 mod alloc_pos;
 mod alloc_reason;
-mod alloc_typing_defs;
 
 use std::marker::PhantomData;
 

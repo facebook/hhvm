@@ -18,7 +18,7 @@ impl<R: Reason> DeclHintEnv<R> {
 
     fn mk_hint_decl_ty(&self, pos: &oxidized::pos::Pos, ty: DeclTy_<R>) -> DeclTy<R> {
         let reason = R::mk(|| ReasonImpl::Rhint(self.alloc.pos_from_ast(pos)));
-        self.alloc.decl_ty(reason, ty)
+        DeclTy::new(reason, ty)
     }
 
     fn hint_(&self, _pos: &oxidized::pos::Pos, hint: &oxidized::aast_defs::Hint_) -> DeclTy_<R> {

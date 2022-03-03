@@ -7,7 +7,7 @@ use super::{inherit::Inherited, subst::Subst, subst::Substitution};
 use crate::alloc::Allocator;
 use crate::decl_defs::{
     AbstractTypeconst, CeVisibility, ClassConst, ClassConstKind, ClassEltFlags, ClassEltFlagsArgs,
-    ClassishKind, ConsistentKind, DeclTy, DeclTy_, FoldedClass, FoldedElement, ShallowClass,
+    ClassishKind, ConsistentKind, DeclTy, FoldedClass, FoldedElement, ShallowClass,
     ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst, TaccessType, TypeConst,
     Typeconst, UserAttribute, Visibility,
 };
@@ -62,12 +62,10 @@ impl<R: Reason> DeclFolder<R> {
         let pos = sc.name.pos();
         let name = sc.name.id();
         let reason = R::mk(|| ReasonImpl::RclassClass(pos.clone(), name));
-        let classname_ty = self.alloc.decl_ty(
+        let classname_ty = DeclTy::apply(
             reason.clone(),
-            DeclTy_::DTapply(Box::new((
-                Positioned::new(pos.clone(), self.special_names.classes.cClassname),
-                Box::new([self.alloc.decl_ty(reason, DeclTy_::DTthis)]),
-            ))),
+            Positioned::new(pos.clone(), self.special_names.classes.cClassname),
+            [DeclTy::this(reason)].into(),
         );
         let class_const = ClassConst {
             is_synthesized: true,
@@ -94,19 +92,17 @@ impl<R: Reason> DeclFolder<R> {
         let r = R::mk(|| ReasonImpl::RwitnessFromDecl(pos.clone()));
         let tsid = Positioned::new(pos.clone(), TypeName(self.special_names.fb.cTypeStructure));
         // The type `this`.
-        let tthis = self.alloc.decl_ty(r.clone(), DeclTy_::DTthis);
+        let tthis = DeclTy::this(r.clone());
         // The type `this::T`.
-        let taccess = self.alloc.decl_ty(
+        let taccess = DeclTy::access(
             r.clone(),
-            DeclTy_::DTaccess(Box::new(TaccessType {
+            TaccessType {
                 ty: tthis,
                 type_const: stc.name.clone(),
-            })),
+            },
         );
         // The type `TypeStructure<this::T>`.
-        let ts_ty = self
-            .alloc
-            .decl_ty(r, DeclTy_::DTapply(Box::new((tsid, Box::new([taccess])))));
+        let ts_ty = DeclTy::apply(r, tsid, [taccess].into());
         let kind = match &stc.kind {
             Typeconst::TCAbstract(AbstractTypeconst { default, .. }) => {
                 ClassConstKind::CCAbstract(default.is_some())

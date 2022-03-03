@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 #![allow(dead_code)]
-use crate::reason::{Reason, ReasonImpl};
+use crate::reason::Reason;
 use crate::typing_ctx::TypingCtx;
 use crate::typing_defs::{Ty, Ty_};
 use crate::typing_error::ReasonsCallback;
@@ -48,8 +48,8 @@ impl<'a, R: Reason> ExpandEnv<'a, R> {
             type_expansions: TypeExpansions::new(),
             expand_visible_newtype: true,
             substs: Default::default(),
-            this_ty: ctx.alloc.ty(
-                R::mk(|| ReasonImpl::Rnone),
+            this_ty: Ty::new(
+                R::none(),
                 Ty_::Tgeneric(TypeName(ctx.special_names.special_idents.this), vec![]),
             ),
             on_error: ReasonsCallback::new(&|| ReasonsCallback::ignore()),

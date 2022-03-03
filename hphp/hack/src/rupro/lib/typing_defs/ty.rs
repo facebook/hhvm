@@ -94,8 +94,21 @@ pub struct Ty<R: Reason>(R, Hc<Ty_<R, Ty<R>>>);
 walkable!(Ty<R> as visit_ty => [0, 1]);
 
 impl<R: Reason> Ty<R> {
-    pub fn new(reason: R, ty: Hc<Ty_<R, Ty<R>>>) -> Self {
-        Self(reason, ty)
+    #[inline]
+    pub fn new(reason: R, ty: Ty_<R, Ty<R>>) -> Self {
+        Self(reason, R::cons_ty(ty))
+    }
+
+    pub fn prim(r: R, prim: Prim) -> Ty<R> {
+        Self::new(r, Ty_::Tprim(prim))
+    }
+
+    pub fn void(r: R) -> Ty<R> {
+        Self::prim(r, Prim::Tvoid)
+    }
+
+    pub fn any(r: R) -> Ty<R> {
+        Self::new(r, Ty_::Tany)
     }
 
     pub fn reason(&self) -> &R {

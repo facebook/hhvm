@@ -108,8 +108,42 @@ pub struct DeclTy<R: Reason>(R, Hc<DeclTy_<R>>);
 walkable!(DeclTy<R> as visit_decl_ty => [0, 1]);
 
 impl<R: Reason> DeclTy<R> {
-    pub fn new(reason: R, ty: Hc<DeclTy_<R>>) -> Self {
-        Self(reason, ty)
+    #[inline]
+    pub fn new(reason: R, ty: DeclTy_<R>) -> Self {
+        Self(reason, R::cons_decl_ty(ty))
+    }
+
+    pub fn prim(r: R, prim: Prim) -> Self {
+        Self::new(r, DeclTy_::DTprim(prim))
+    }
+
+    pub fn void(r: R) -> Self {
+        Self::prim(r, Prim::Tvoid)
+    }
+
+    pub fn any(r: R) -> Self {
+        Self::new(r, DeclTy_::DTany)
+    }
+
+    pub fn this(r: R) -> Self {
+        Self::new(r, DeclTy_::DTthis)
+    }
+
+    pub fn apply(
+        reason: R,
+        type_name: Positioned<TypeName, R::Pos>,
+        tparams: Box<[DeclTy<R>]>,
+    ) -> Self {
+        Self::new(reason, DeclTy_::DTapply(Box::new((type_name, tparams))))
+    }
+
+    pub fn generic(reason: R, name: TypeName, tparams: Box<[DeclTy<R>]>) -> Self {
+        Self::new(reason, DeclTy_::DTgeneric(Box::new((name, tparams))))
+    }
+
+    #[inline]
+    pub fn access(reason: R, taccess: TaccessType<R, DeclTy<R>>) -> Self {
+        Self::new(reason, DeclTy_::DTaccess(Box::new(taccess)))
     }
 
     pub fn pos(&self) -> &R::Pos {

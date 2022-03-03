@@ -27,9 +27,9 @@ impl TypingReturn {
     ) -> Ty<R> {
         let reason = R::mk(|| ReasonImpl::Rwitness(fpos.clone()));
         if is_method && fname == env.ctx.special_names.members.__construct {
-            env.ctx.alloc.ty_void(reason)
+            Ty::void(reason)
         } else {
-            env.ctx.alloc.tany(reason)
+            Ty::any(reason)
         }
     }
 
@@ -59,10 +59,11 @@ impl TypingReturn {
 }
 
 impl<R: Reason> TypingReturnInfo<R> {
+    #[allow(unused_variables)]
     pub fn placeholder(alloc: &Allocator<R>) -> Self {
         // TODO(hrust): Tunion []
         Self {
-            return_type: alloc.tany(R::mk(|| ReasonImpl::Rnone)),
+            return_type: Ty::any(R::none()),
         }
     }
 }

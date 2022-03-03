@@ -164,10 +164,10 @@ const Func* callee() {
  * We are currently going through all the opcodes and implementing them,
  * following the following convention:
  *
- * 1) If an iop needs special handling to track taint, it will be implemented as such.
- * 2) If an iop does not need any handling, it will just have a call
- *    to `iopPreamble` and (hopefully) comment explaining why it's OK to ignore.
- * 3) If hasn't been looked at yet, it will be marked with `iopUnhandled`.
+ * 1) If an iop needs special handling to track taint, it will be implemented as
+ * such. 2) If an iop does not need any handling, it will just have a call to
+ * `iopPreamble` and (hopefully) comment explaining why it's OK to ignore. 3) If
+ * hasn't been looked at yet, it will be marked with `iopUnhandled`.
  *
  * Rough indications of current status:
  *
@@ -306,7 +306,7 @@ void newCollectionSizeN(uint32_t n) {
   stack.pop(n);
   stack.push(value);
 }
-}
+} // namespace
 
 void iopNewStructDict(imm_array<int32_t> ids) {
   iopPreamble("NewStructDict");
@@ -1398,48 +1398,93 @@ tv_lval resolveMemberKey(const MemberKey& memberKey) {
 
 } // namespace
 
-void iopQueryM(uint32_t /* nDiscard */, QueryMOp op, MemberKey memberKey) {
+void iopQueryM(uint32_t nDiscard, QueryMOp op, MemberKey memberKey) {
   iopPreamble("QueryM");
 
-  // TODO(T93491296): re-enable
-  if (true) {
-    return;
-  }
-
+  auto state = State::instance;
+  Value value = nullptr;
   switch (op) {
-    case QueryMOp::CGet: {
-      auto state = State::instance;
-      auto from = resolveMemberKey(memberKey);
-      auto value = state->heap_locals.get(from);
-      FTRACE(2, "taint: getting member {}, value: `{}`\n", memberKey, value);
-      state->stack.push(value);
+    case QueryMOp::InOut:
+    case QueryMOp::CGet:
+    case QueryMOp::CGetQuiet: {
+      if (mcodeIsProp(memberKey.mcode)) {
+        // Handle objects as just a map from property to taint.
+        // Ignore custom getters and any exceptions thrown if the
+        // base is not an object (silently return null)
+        auto key = typedValue(memberKey);
+        if (isStringType(key.m_type)) {
+          StringData* str = key.m_data.pstr;
+          auto property = str->slice();
+          auto& mstate = vmMInstrState();
+          ObjectData* from = val(*mstate.base).pobj;
+          value = state->heap_objects.get(from, property);
+          FTRACE(
+              2,
+              "taint: getting member {} (from: {}, name: {}), value: `{}`\n",
+              memberKey,
+              from,
+              property,
+              value);
+        } else {
+          // This should never happen... just swallow.
+        }
+      } else if (mcodeIsElem(memberKey.mcode)) {
+        // TODO: Handle element access
+      } else {
+        // The interpreter swallows this, and would warn on this too.
+        FTRACE(2, "taint: Cannot use [] for reading");
+      }
       break;
     }
-    default:
-      FTRACE(1, "taint: (WARNING) unsuppoted query operation\n");
-      return;
+    case QueryMOp::Isset: {
+      // Don't care about taint here, fall through
+      break;
+    }
   }
+
+  for (size_t i = 0; i < nDiscard; i++) {
+    state->stack.pop();
+  }
+  state->stack.push(value);
 }
 
-void iopSetM(uint32_t /* nDiscard */, MemberKey memberKey) {
+void iopSetM(uint32_t nDiscard, MemberKey memberKey) {
   iopPreamble("SetM");
-
-  // TODO(T93491296): re-enable
-  if (true) {
-    return;
-  }
 
   auto state = State::instance;
   auto value = state->stack.top();
-  auto to = resolveMemberKey(memberKey);
+  if (mcodeIsProp(memberKey.mcode)) {
+    // Handle objects as just a map from property to taint.
+    // Ignore custom setters and any exceptions thrown if the
+    // base is not an object (silently return null) or if
+    // the SetM fails. The stack might get out of sync in that case
+    auto key = typedValue(memberKey);
+    if (isStringType(key.m_type)) {
+      StringData* str = key.m_data.pstr;
+      auto property = str->slice();
+      auto& mstate = vmMInstrState();
+      ObjectData* to = val(*mstate.base).pobj;
+      state->heap_objects.set(to, property, value);
+      FTRACE(
+          2,
+          "taint: setting member {} (to: {}, name: {}), value: `{}`\n",
+          memberKey,
+          to,
+          property,
+          value);
+    } else {
+      // This should never happen... just swallow.
+    }
+  } else if (mcodeIsElem(memberKey.mcode)) {
+    // TODO: Handle element access
+  } else {
+    // TODO: Handle MW opcode for inserting new elements
+  }
 
-  FTRACE(
-      2,
-      "taint: setting member {} (resolved: {}) to `{}`\n",
-      memberKey,
-      to,
-      value);
-  state->heap_locals.set(std::move(to), value);
+  for (size_t i = 0; i < nDiscard + 1; i++) {
+    state->stack.pop();
+  }
+  state->stack.push(value);
 }
 
 void iopSetRangeM(

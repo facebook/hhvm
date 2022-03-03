@@ -1,1 +1,8 @@
+{"hops":["__source","source_through_attribute_into_sink","__sink"]}
+{"hops":["__source","source_through_attribute_dereferenced_in_callee","into_sink","__sink"]}
 {"hops":["__source","source_through_shape_into_sink","__sink_with_shape"]}
+{"hops":["__source","objects_of_same_class_are_not_mixed_up","__sink"]}
+{"hops":["__source","objects_of_same_class_are_not_mixed_up","__sink"]}
+{"hops":["__source","object_reassignment_propagates_taint","__sink"]}
+{"hops":["__source","objects_are_properly_tracked_as_shallow_copies","__sink"]}
+{"hops":["__source","objects_are_properly_tracked_as_shallow_copies","__sink"]}

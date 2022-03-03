@@ -26,6 +26,7 @@
 #endif
 
 #if defined(__x86_64__) && !defined(_MSC_VER)
+#  include <nmmintrin.h>
 #  if (!defined USE_HWCRC)
 #    define USE_HWCRC
 #  endif
@@ -67,9 +68,7 @@ inline size_t hash_int64_fallback(uint64_t key) {
 
 ALWAYS_INLINE size_t hash_int64(uint64_t k) {
 #if defined(USE_HWCRC) && defined(__SSE4_2__)
-  size_t h = 0;
-  __asm("crc32q %1, %0\n" : "+r"(h) : "rm"(k));
-  return h;
+  return _mm_crc32_u64(0, k);
 #elif defined(USE_HWCRC) && defined(ENABLE_AARCH64_CRC)
   size_t res;
   __asm("crc32cx %w0, wzr, %x1\n" : "=r"(res) : "r"(k));
@@ -85,8 +84,7 @@ inline size_t hash_int64_pair(uint64_t k1, uint64_t k2) {
   // crc32 is commutative, so we need to perturb k1 so that (k1, k2) hashes
   // differently from (k2, k1).
   k1 += k1;
-  __asm("crc32q %1, %0\n" : "+r" (k1) : "rm"(k2));
-  return k1;
+  return _mm_crc32_u64(k1, k2);
 #elif defined(USE_HWCRC) && defined(ENABLE_AARCH64_CRC)
   size_t res;
   k1 += k1;

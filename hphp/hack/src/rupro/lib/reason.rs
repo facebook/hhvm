@@ -27,6 +27,26 @@ pub trait Reason:
 
     fn none() -> Self;
 
+    fn witness(pos: Self::Pos) -> Self {
+        Self::mk(|| ReasonImpl::Rwitness(pos))
+    }
+
+    fn witness_from_decl(pos: Self::Pos) -> Self {
+        Self::mk(|| ReasonImpl::RwitnessFromDecl(pos))
+    }
+
+    fn hint(pos: Self::Pos) -> Self {
+        Self::mk(|| ReasonImpl::Rhint(pos))
+    }
+
+    fn instantiate(r1: Self, ty_name: TypeName, r2: Self) -> Self {
+        Self::mk(|| ReasonImpl::Rinstantiate(r1, ty_name, r2))
+    }
+
+    fn class_class(pos: Self::Pos, ty_name: TypeName) -> Self {
+        Self::mk(|| ReasonImpl::RclassClass(pos, ty_name))
+    }
+
     fn pos(&self) -> &Self::Pos;
 
     fn to_oxidized<'a>(

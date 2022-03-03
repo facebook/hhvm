@@ -5,7 +5,7 @@
 
 use crate::alloc::Allocator;
 use crate::decl_defs::{DeclTy, DeclTy_};
-use crate::reason::{Reason, ReasonImpl};
+use crate::reason::Reason;
 
 pub struct DeclHintEnv<R: Reason> {
     alloc: &'static Allocator<R>,
@@ -17,7 +17,7 @@ impl<R: Reason> DeclHintEnv<R> {
     }
 
     fn mk_hint_decl_ty(&self, pos: &oxidized::pos::Pos, ty: DeclTy_<R>) -> DeclTy<R> {
-        let reason = R::mk(|| ReasonImpl::Rhint(self.alloc.pos_from_ast(pos)));
+        let reason = R::hint(self.alloc.pos_from_ast(pos));
         DeclTy::new(reason, ty)
     }
 

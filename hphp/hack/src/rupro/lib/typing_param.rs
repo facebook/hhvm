@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::decl_defs::DeclTy;
-use crate::reason::{Reason, ReasonImpl};
+use crate::reason::Reason;
 use crate::typing_defs::Ty;
 use crate::typing_env::TEnv;
 use crate::typing_error::{Primary, TypingError};
@@ -17,7 +17,7 @@ impl TypingParam {
         decl_hint: Option<DeclTy<R>>,
         param: &oxidized::aast::FunParam<(), ()>,
     ) -> Ty<R> {
-        let r = R::mk(|| ReasonImpl::Rwitness(env.ctx.alloc.pos_from_ast(&param.pos)));
+        let r = R::witness(env.ctx.alloc.pos_from_ast(&param.pos));
         match decl_hint {
             None => Ty::any(r),
             Some(ty) => {

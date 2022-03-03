@@ -11,7 +11,7 @@ use crate::decl_defs::{
     ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst, TaccessType, TypeConst,
     Typeconst, UserAttribute, Visibility,
 };
-use crate::reason::{Reason, ReasonImpl};
+use crate::reason::Reason;
 use crate::special_names::SpecialNames;
 use pos::{
     ClassConstName, ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap,
@@ -61,7 +61,7 @@ impl<R: Reason> DeclFolder<R> {
         // note(sf, 2022-02-08): c.f. Decl_folded_class.class_class_decl
         let pos = sc.name.pos();
         let name = sc.name.id();
-        let reason = R::mk(|| ReasonImpl::RclassClass(pos.clone(), name));
+        let reason = R::class_class(pos.clone(), name);
         let classname_ty = DeclTy::apply(
             reason.clone(),
             Positioned::new(pos.clone(), self.special_names.classes.cClassname),
@@ -89,7 +89,7 @@ impl<R: Reason> DeclFolder<R> {
         stc: &ShallowTypeconst<R>,
     ) -> ClassConst<R> {
         let pos = stc.name.pos();
-        let r = R::mk(|| ReasonImpl::RwitnessFromDecl(pos.clone()));
+        let r = R::witness_from_decl(pos.clone());
         let tsid = Positioned::new(pos.clone(), TypeName(self.special_names.fb.cTypeStructure));
         // The type `this`.
         let tthis = DeclTy::this(r.clone());

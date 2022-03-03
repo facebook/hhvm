@@ -6,7 +6,7 @@
 #![allow(dead_code)]
 use crate::alloc::Allocator;
 use crate::decl_defs::DeclTy;
-use crate::reason::{Reason, ReasonImpl};
+use crate::reason::Reason;
 use crate::typing_defs::Ty;
 use crate::typing_env::TEnv;
 use pos::Symbol;
@@ -25,7 +25,7 @@ impl TypingReturn {
         fpos: &R::Pos,
         fname: Symbol,
     ) -> Ty<R> {
-        let reason = R::mk(|| ReasonImpl::Rwitness(fpos.clone()));
+        let reason = R::witness(fpos.clone());
         if is_method && fname == env.ctx.special_names.members.__construct {
             Ty::void(reason)
         } else {

@@ -8,7 +8,7 @@ use crate::decl_defs::{
     AbstractTypeconst, ClassConst, ConcreteTypeconst, DeclTy, DeclTy_, FunParam, FunType,
     PossiblyEnforcedTy, ShapeFieldType, TaccessType, Tparam, TypeConst, Typeconst, WhereConstraint,
 };
-use crate::reason::{Reason, ReasonImpl};
+use crate::reason::Reason;
 use pos::{TypeName, TypeNameMap};
 use std::collections::BTreeMap;
 
@@ -96,10 +96,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
             _ => ty_.clone(),
         };
         let r = ty.reason().clone();
-        DeclTy::new(
-            R::mk(|| ReasonImpl::Rinstantiate(r, orig_var, orig_r)),
-            res_ty_,
-        )
+        DeclTy::new(R::instantiate(r, orig_var, orig_r), res_ty_)
     }
 
     pub fn instantiate(&self, ty: &DeclTy<R>) -> DeclTy<R> {

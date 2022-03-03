@@ -219,7 +219,7 @@ void iopPopL(tv_lval to) {
 
   FTRACE(2, "taint: setting {} to `{}`\n", to, value);
 
-  state->heap.set(std::move(to), value);
+  state->heap_locals.set(std::move(to), value);
   state->stack.pop();
 }
 
@@ -668,7 +668,7 @@ void iopCGetL(named_local_var fr) {
   iopPreamble("CGetL");
 
   auto state = State::instance;
-  auto value = state->heap.get(fr.lval);
+  auto value = state->heap_locals.get(fr.lval);
 
   FTRACE(
       2, "taint: getting {} (name: {}, value: {})\n", fr.lval, fr.name, value);
@@ -756,7 +756,7 @@ void iopSetL(tv_lval to) {
 
   FTRACE(2, "taint: setting {} to `{}`\n", to, value);
 
-  state->heap.set(std::move(to), value);
+  state->heap_locals.set(std::move(to), value);
 }
 
 void iopSetG() {
@@ -1167,7 +1167,7 @@ void iopVerifyParamType(local_var param) {
         param.index,
         value);
     auto path = value->to(state->arena.get(), Hop{callee(), func});
-    state->heap.set(param.lval, path);
+    state->heap_locals.set(param.lval, path);
   }
 
   // Taint generation.
@@ -1181,7 +1181,7 @@ void iopVerifyParamType(local_var param) {
           param.index);
       // TODO: What hop should we put here?
       auto path = Path::origin(state->arena.get(), Hop());
-      state->heap.set(param.lval, path);
+      state->heap_locals.set(param.lval, path);
       break;
     }
   }
@@ -1410,7 +1410,7 @@ void iopQueryM(uint32_t /* nDiscard */, QueryMOp op, MemberKey memberKey) {
     case QueryMOp::CGet: {
       auto state = State::instance;
       auto from = resolveMemberKey(memberKey);
-      auto value = state->heap.get(from);
+      auto value = state->heap_locals.get(from);
       FTRACE(2, "taint: getting member {}, value: `{}`\n", memberKey, value);
       state->stack.push(value);
       break;
@@ -1439,7 +1439,7 @@ void iopSetM(uint32_t /* nDiscard */, MemberKey memberKey) {
       memberKey,
       to,
       value);
-  state->heap.set(std::move(to), value);
+  state->heap_locals.set(std::move(to), value);
 }
 
 void iopSetRangeM(

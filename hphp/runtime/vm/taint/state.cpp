@@ -216,11 +216,11 @@ bool Stack::empty() const {
   return m_bottom == m_top;
 }
 
-void Heap::set(tv_lval typedValue, Value value) {
+void LocalsHeap::set(tv_lval typedValue, Value value) {
   m_heap[std::move(typedValue)] = value;
 }
 
-Value Heap::get(const tv_lval& typedValue) const {
+Value LocalsHeap::get(const tv_lval& typedValue) const {
   auto value = m_heap.find(typedValue);
   if (value != m_heap.end()) {
     return value->second;
@@ -229,7 +229,7 @@ Value Heap::get(const tv_lval& typedValue) const {
   return nullptr;
 }
 
-void Heap::clear() {
+void LocalsHeap::clear() {
   m_heap.clear();
 }
 
@@ -256,7 +256,7 @@ void State::initialize() {
   FTRACE(1, "taint: initializing state\n");
 
   stack.clear();
-  heap.clear();
+  heap_locals.clear();
   paths.clear();
   arena = std::make_unique<PathArena>();
   m_function_metadata = Configuration::get()->functionMetadata();

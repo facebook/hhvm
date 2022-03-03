@@ -117,8 +117,13 @@ struct Stack {
 /*
  * Our shadow heap is not replicating the full VM heap but keeps track
  * of tainted values (cells) on the heap.
+ *
+ * We keep a few different heaps around, for modeling different types
+ * of things on the heap.
  */
-struct Heap {
+
+// Model locals, which are identified by `tv_lval`s
+struct LocalsHeap {
   void set(tv_lval typedValue, Value value);
   Value get(const tv_lval& typedValue) const;
 
@@ -140,7 +145,7 @@ struct State {
   std::vector<Sink> sinks(const Func* func);
 
   Stack stack;
-  Heap heap;
+  LocalsHeap heap_locals;
 
   // Arena to hold all the paths
   std::unique_ptr<PathArena> arena;

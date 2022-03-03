@@ -57,8 +57,7 @@ struct AutoloadMap {
    *
    * May throw an exception if updating failed.
    */
-  virtual void ensureUpdated() {
-  }
+  virtual void ensureUpdated() = 0;
 
   /**
    * True iff this AutoloadMap knows which files contain which symbols without
@@ -133,7 +132,7 @@ struct FactsStore : public AutoloadMap {
   FactsStore(FactsStore&&) = default;
   FactsStore& operator=(const FactsStore&) = default;
   FactsStore& operator=(FactsStore&&) noexcept = default;
-  ~FactsStore() override = default;
+  virtual ~FactsStore() override = default;
 
   /**
    * Return the correctly-capitalized name of `type`.

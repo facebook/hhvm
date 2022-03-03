@@ -50,33 +50,30 @@ struct RepoAutoloadMap final : AutoloadMap {
       CaseSensitiveMap constants,
       CaseInsensitiveMap typeAliases);
 
-  virtual Optional<String> getTypeFile(
-      const String& typeName) override;
-  virtual Optional<String> getFunctionFile(
-      const String& functionName) override;
-  virtual Optional<String> getConstantFile(
-      const String& constantName) override;
-  virtual Optional<String> getTypeAliasFile(
-      const String& typeAliasName) override;
+  Optional<String> getTypeFile(const String& typeName) override;
+  Optional<String> getFunctionFile(const String& functionName) override;
+  Optional<String> getConstantFile(const String& constantName) override;
+  Optional<String> getTypeAliasFile(const String& typeAliasName) override;
 
-  virtual Array getFileTypes(const String& path) override;
-  virtual Array getFileFunctions(const String& path) override;
-  virtual Array getFileConstants(const String& path) override;
-  virtual Array getFileTypeAliases(const String& path) override;
+  Array getFileTypes(const String& path) override;
+  Array getFileFunctions(const String& path) override;
+  Array getFileConstants(const String& path) override;
+  Array getFileTypeAliases(const String& path) override;
 
-  virtual bool canHandleFailure() const override {
+  bool canHandleFailure() const override {
     return false;
   }
 
-  virtual bool isNative() const noexcept override {
+  void ensureUpdated() override {}
+
+  bool isNative() const noexcept override {
     return true;
   }
 
-  virtual AutoloadMap::Result handleFailure(KindOf kind,
-                                            const String& className,
-                                            const Variant& err) const override;
+  AutoloadMap::Result handleFailure(KindOf kind, const String& className,
+      const Variant& err) const override;
 
-  virtual Array getAllFiles() const override;
+  Array getAllFiles() const override;
 
 private:
   CaseInsensitiveMap m_types;

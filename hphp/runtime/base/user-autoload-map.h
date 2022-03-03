@@ -30,7 +30,7 @@ namespace HPHP {
 /**
  * AutoloadMap mostly implemented in userspace Hack code.
  */
-struct UserAutoloadMap : AutoloadMap {
+struct UserAutoloadMap final : AutoloadMap {
 
   String m_root;
   Array m_typeFile;
@@ -68,9 +68,11 @@ struct UserAutoloadMap : AutoloadMap {
   static UserAutoloadMap fromFullMap(const Array& fullMap,
                                      String root);
 
+  void ensureUpdated() override {}
+
   /**
-   * This map is not native because it gets data when userspace calls the
-   * builtin function `autoload_set_paths()`.
+   * This map is not native because it calls into userspace hack.
+   * It gets data via userspace calls to the builtin `autoload_set_paths()`.
    */
   bool isNative() const noexcept override {
     return false;
@@ -96,8 +98,7 @@ struct UserAutoloadMap : AutoloadMap {
                                     const Variant& err) const override;
 
  private:
-  Optional<String> getFileFromMap(const Array& map,
-                                       const String& key) const;
+  Optional<String> getFileFromMap(const Array& map, const String& key) const;
 };
 
 //////////////////////////////////////////////////////////////////////

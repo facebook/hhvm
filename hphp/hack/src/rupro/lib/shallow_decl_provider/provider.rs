@@ -19,14 +19,14 @@ use std::sync::Arc;
 pub struct LazyShallowDeclProvider<R: Reason> {
     cache: Arc<ShallowDeclCache<R>>,
     naming_provider: Arc<dyn NamingProvider>,
-    parser: DeclParser<R>,
+    parser: DeclParser,
 }
 
 impl<R: Reason> LazyShallowDeclProvider<R> {
     pub fn new(
         cache: Arc<ShallowDeclCache<R>>,
         naming_provider: Arc<dyn NamingProvider>,
-        parser: DeclParser<R>,
+        parser: DeclParser,
     ) -> Self {
         Self {
             cache,

@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{Class, Error, Result};
-use crate::alloc::Allocator;
 use crate::decl_defs::{DeclTy, FoldedClass};
 use crate::folded_decl_provider::{FoldedDeclProvider, Substitution};
 use crate::reason::Reason;
@@ -34,7 +33,6 @@ struct EagerMembers<R: Reason> {
 /// `FoldedDeclProvider`, and populates its member-cache with a new `ClassElt`
 /// containing that type and any other metadata from the `FoldedElt`.
 pub struct ClassType<R: Reason> {
-    alloc: &'static Allocator<R>,
     provider: Arc<dyn FoldedDeclProvider<R>>,
     class: Arc<FoldedClass<R>>,
     members: EagerMembers<R>,
@@ -63,13 +61,8 @@ impl<R: Reason> EagerMembers<R> {
 }
 
 impl<R: Reason> ClassType<R> {
-    pub fn new(
-        alloc: &'static Allocator<R>,
-        provider: Arc<dyn FoldedDeclProvider<R>>,
-        class: Arc<FoldedClass<R>>,
-    ) -> Self {
+    pub fn new(provider: Arc<dyn FoldedDeclProvider<R>>, class: Arc<FoldedClass<R>>) -> Self {
         Self {
-            alloc,
             provider,
             class,
             members: EagerMembers::new(),
@@ -108,11 +101,7 @@ impl<R: Reason> ClassType<R> {
     // associated substitution to `ty`.
     fn instantiate(&self, ty: DeclTy<R>, origin: TypeName) -> DeclTy<R> {
         match self.class.substs.get(&origin) {
-            Some(ctx) => Substitution {
-                alloc: self.alloc,
-                subst: &ctx.subst,
-            }
-            .instantiate(&ty),
+            Some(ctx) => Substitution { subst: &ctx.subst }.instantiate(&ty),
             None => ty,
         }
     }

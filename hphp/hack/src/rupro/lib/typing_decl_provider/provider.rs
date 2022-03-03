@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{ClassType, Result, TypeDecl, TypingDeclProvider};
-use crate::alloc::Allocator;
 use crate::cache::Cache;
 use crate::decl_defs::{ConstDecl, FunDecl};
 use crate::folded_decl_provider::{self, FoldedDeclProvider};
@@ -23,19 +22,16 @@ use std::sync::Arc;
 #[derive(Debug)]
 pub struct FoldingTypingDeclProvider<R: Reason> {
     cache: Arc<dyn Cache<TypeName, Arc<ClassType<R>>>>,
-    alloc: &'static Allocator<R>,
     folded_decl_provider: Arc<dyn FoldedDeclProvider<R>>,
 }
 
 impl<R: Reason> FoldingTypingDeclProvider<R> {
     pub fn new(
         cache: Arc<dyn Cache<TypeName, Arc<ClassType<R>>>>,
-        alloc: &'static Allocator<R>,
         folded_decl_provider: Arc<dyn FoldedDeclProvider<R>>,
     ) -> Self {
         Self {
             cache,
-            alloc,
             folded_decl_provider,
         }
     }
@@ -60,7 +56,6 @@ impl<R: Reason> TypingDeclProvider<R> for FoldingTypingDeclProvider<R> {
                 }
                 Some(folded_decl_provider::TypeDecl::Class(folded_decl)) => {
                     let cls = Arc::new(ClassType::new(
-                        self.alloc,
                         Arc::clone(&self.folded_decl_provider),
                         folded_decl,
                     ));

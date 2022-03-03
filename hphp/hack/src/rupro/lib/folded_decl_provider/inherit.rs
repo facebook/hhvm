@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::subst::{Subst, Substitution};
-use crate::alloc::Allocator;
 use crate::decl_defs::{
     AbstractTypeconst, Abstraction, ClassConst, ClassConstKind, ClassishKind, DeclTy, FoldedClass,
     FoldedElement, ShallowClass, SubstContext, TypeConst, Typeconst,
@@ -307,7 +306,6 @@ impl<R: Reason> Inherited<R> {
 }
 
 struct MemberFolder<'a, R: Reason> {
-    alloc: &'a Allocator<R>,
     child: &'a ShallowClass<R>,
     parents: &'a TypeNameMap<Arc<FoldedClass<R>>>,
     members: Inherited<R>,
@@ -318,7 +316,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
     fn members_from_class(&self, parent_ty: &DeclTy<R>) -> Inherited<R> {
         if let Some((_, parent_pos_id, parent_tyl)) = parent_ty.unwrap_class_type() {
             if let Some(parent_folded_decl) = self.parents.get(&parent_pos_id.id()) {
-                let subst = Subst::new(self.alloc, &parent_folded_decl.tparams, parent_tyl);
+                let subst = Subst::new(&parent_folded_decl.tparams, parent_tyl);
                 // TODO(hrust): Do we need sharing?
                 let mut substs = parent_folded_decl.substs.clone();
                 substs.insert(
@@ -347,11 +345,8 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
     fn class_constants_from_class(&self, ty: &DeclTy<R>) -> Inherited<R> {
         if let Some((_, pos_id, tyl)) = ty.unwrap_class_type() {
             if let Some(class) = self.parents.get(&pos_id.id()) {
-                let sig = Subst::new(self.alloc, &class.tparams, tyl);
-                let subst = Substitution {
-                    alloc: self.alloc,
-                    subst: &sig,
-                };
+                let sig = Subst::new(&class.tparams, tyl);
+                let subst = Substitution { subst: &sig };
                 let consts: ClassConstNameMap<_> = class
                     .consts
                     .iter()
@@ -465,13 +460,8 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
 }
 
 impl<R: Reason> Inherited<R> {
-    pub fn make(
-        alloc: &Allocator<R>,
-        child: &ShallowClass<R>,
-        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
-    ) -> Self {
+    pub fn make(child: &ShallowClass<R>, parents: &TypeNameMap<Arc<FoldedClass<R>>>) -> Self {
         let mut folder = MemberFolder {
-            alloc,
             child,
             parents,
             members: Self::default(),

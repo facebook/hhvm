@@ -59,9 +59,9 @@ struct PerContEntry<R: Reason> {
 }
 
 impl<R: Reason> TGEnv<R> {
-    fn new(ctx: &TypingCtx<R>) -> Self {
+    fn new() -> Self {
         Self {
-            return_: RefCell::new(TypingReturnInfo::placeholder(ctx.alloc)),
+            return_: RefCell::new(TypingReturnInfo::placeholder()),
             params: RefCell::new(HashMap::new()),
         }
     }
@@ -101,7 +101,7 @@ impl<R: Reason> PerContEnv<R> {
 
 impl<R: Reason> TEnv<R> {
     pub fn new(ctx: Arc<TypingCtx<R>>) -> Self {
-        let genv = Rc::new(TGEnv::new(&ctx));
+        let genv = Rc::new(TGEnv::new());
         Self {
             ctx,
 

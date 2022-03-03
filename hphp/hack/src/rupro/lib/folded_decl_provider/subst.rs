@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::alloc::Allocator;
 use crate::decl_defs::{
     AbstractTypeconst, ClassConst, ConcreteTypeconst, DeclTy, DeclTy_, FunParam, FunType,
     PossiblyEnforcedTy, ShapeFieldType, TaccessType, Tparam, TypeConst, Typeconst, WhereConstraint,
@@ -30,22 +29,13 @@ impl<R: Reason> From<Subst<R>> for TypeNameMap<DeclTy<R>> {
     }
 }
 
-/// Any meaningful substitution operation requires an allocator in addition to
-/// the substitution map itself so it's convenient to make that accessible
-/// through `Self`.
 #[derive(Debug, Clone)]
 pub struct Substitution<'a, R: Reason> {
-    pub alloc: &'a Allocator<R>,
     pub subst: &'a Subst<R>,
 }
 
 impl<R: Reason> Subst<R> {
-    #[allow(unused_variables)]
-    pub fn new(
-        alloc: &Allocator<R>,
-        tparams: &[Tparam<R, DeclTy<R>>],
-        targs: &[DeclTy<R>],
-    ) -> Self {
+    pub fn new(tparams: &[Tparam<R, DeclTy<R>>], targs: &[DeclTy<R>]) -> Self {
         // If there are fewer type arguments than type parameters, we'll have
         // emitted an error elsewhere. We bind missing types to `Tany` (rather
         // than `Terr`) here to keep parity with the OCaml implementation, which
@@ -174,10 +164,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
                 for tp in tparams.iter() {
                     subst.0.remove(tp.name.id_ref());
                 }
-                let subst = Substitution {
-                    alloc: self.alloc,
-                    subst: &subst,
-                };
+                let subst = Substitution { subst: &subst };
                 let params = ft
                     .params
                     .iter()

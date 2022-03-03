@@ -6,7 +6,6 @@
 #[macro_use]
 pub mod visitor;
 
-pub mod alloc;
 pub mod ast_provider;
 pub mod cache;
 pub mod decl_defs;

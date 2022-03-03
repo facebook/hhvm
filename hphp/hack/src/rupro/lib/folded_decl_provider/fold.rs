@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{inherit::Inherited, subst::Subst, subst::Substitution};
-use crate::alloc::Allocator;
 use crate::decl_defs::{
     AbstractTypeconst, CeVisibility, ClassConst, ClassConstKind, ClassEltFlags, ClassEltFlagsArgs,
     ClassishKind, ConsistentKind, DeclTy, FoldedClass, FoldedElement, ShallowClass,
@@ -17,21 +16,22 @@ use pos::{
     ClassConstName, ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap,
     TypeConstName, TypeConstNameMap, TypeName, TypeNameMap,
 };
+use std::marker::PhantomData;
 use std::sync::Arc;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_folded_class.ml
 
 #[derive(Debug)]
 pub struct DeclFolder<R: Reason> {
-    alloc: &'static Allocator<R>,
     special_names: &'static SpecialNames,
+    _phantom: PhantomData<R>,
 }
 
 impl<R: Reason> DeclFolder<R> {
-    pub fn new(alloc: &'static Allocator<R>, special_names: &'static SpecialNames) -> Self {
+    pub fn new(special_names: &'static SpecialNames) -> Self {
         Self {
-            alloc,
             special_names,
+            _phantom: PhantomData,
         }
     }
 
@@ -339,11 +339,8 @@ impl<R: Reason> DeclFolder<R> {
                     ancestors.insert(pos_id.id(), ty.clone());
                 }
                 Some(cls) => {
-                    let subst = Subst::new(self.alloc, &cls.tparams, tyl);
-                    let substitution = Substitution {
-                        alloc: self.alloc,
-                        subst: &subst,
-                    };
+                    let subst = Subst::new(&cls.tparams, tyl);
+                    let substitution = Substitution { subst: &subst };
                     // Update `ancestors`.
                     for (&anc_name, anc_ty) in &cls.ancestors {
                         ancestors.insert(anc_name, substitution.instantiate(anc_ty));
@@ -360,7 +357,7 @@ impl<R: Reason> DeclFolder<R> {
         sc: &ShallowClass<R>,
         parents: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) -> Arc<FoldedClass<R>> {
-        let inh = Inherited::make(self.alloc, sc, parents);
+        let inh = Inherited::make(sc, parents);
 
         let mut props = inh.props;
         sc.props

@@ -7,7 +7,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hackrs::alloc;
 use hackrs::ast_provider::AstProvider;
 use hackrs::cache::NonEvictingCache;
 use hackrs::decl_parser::DeclParser;
@@ -64,14 +63,13 @@ pub extern "C" fn stc_main() {
     });
 
     let options = Arc::new(oxidized::global_options::GlobalOptions::default());
-    let (alloc, _pos_alloc) = alloc::get_allocators_for_main();
     let special_names = SpecialNames::new();
     let ast_provider = AstProvider::new(
         Arc::clone(&relative_path_ctx),
         special_names,
         Arc::clone(&options),
     );
-    let decl_parser = DeclParser::new(alloc, relative_path_ctx);
+    let decl_parser = DeclParser::new(relative_path_ctx);
     let shallow_decl_cache = Arc::new(ShallowDeclCache::with_no_eviction());
     let shallow_decl_provider = Arc::new(EagerShallowDeclProvider::new(Arc::clone(
         &shallow_decl_cache,
@@ -79,17 +77,15 @@ pub extern "C" fn stc_main() {
     let folded_decl_cache = Arc::new(NonEvictingCache::new());
     let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
         folded_decl_cache,
-        alloc,
         special_names,
         shallow_decl_provider,
     ));
     let typing_decl_cache = Arc::new(NonEvictingCache::new());
     let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
         typing_decl_cache,
-        alloc,
         folded_decl_provider,
     ));
-    let ctx = Arc::new(TypingCtx::new(alloc, typing_decl_provider, special_names));
+    let ctx = Arc::new(TypingCtx::new(typing_decl_provider, special_names));
 
     let filenames: Vec<RelativePath> = cli_options
         .filenames

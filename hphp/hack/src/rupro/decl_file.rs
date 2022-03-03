@@ -4,13 +4,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hackrs::{
-    alloc,
     cache::NonEvictingCache,
     decl_defs::shallow,
     decl_parser::DeclParser,
     folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
     naming_provider::SqliteNamingTable,
-    reason::Reason,
+    reason::{BReason, NReason, Reason},
     shallow_decl_provider::{
         EagerShallowDeclProvider, LazyShallowDeclProvider, ShallowDeclCache, ShallowDeclProvider,
     },
@@ -63,8 +62,6 @@ fn main() {
         tmp: PathBuf::new(),
     });
 
-    let (alloc, pos_alloc) = alloc::get_allocators_for_main();
-
     let filenames: Vec<RelativePath> = opts
         .filenames
         .iter()
@@ -84,36 +81,29 @@ fn main() {
     }
 
     if opts.with_pos {
-        decl_files(&opts, pos_alloc, path_ctx, &filenames);
+        decl_files::<BReason>(&opts, path_ctx, &filenames);
     } else {
-        decl_files(&opts, alloc, path_ctx, &filenames);
+        decl_files::<NReason>(&opts, path_ctx, &filenames);
     }
 }
 
-fn decl_files<R: Reason>(
-    opts: &CliOptions,
-    alloc: &'static alloc::Allocator<R>,
-    ctx: Arc<RelativePathCtx>,
-    filenames: &[RelativePath],
-) {
-    let decl_parser = DeclParser::new(alloc, ctx);
+fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames: &[RelativePath]) {
+    let decl_parser = DeclParser::new(ctx);
     let shallow_decl_provider = make_shallow_decl_provider(opts, &decl_parser, filenames);
     let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
         Arc::new(NonEvictingCache::new()),
-        alloc,
         SpecialNames::new(),
         shallow_decl_provider,
     ));
     let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
         Arc::new(NonEvictingCache::new()),
-        alloc,
         Arc::clone(&folded_decl_provider) as Arc<dyn FoldedDeclProvider<R>>,
     ));
 
     let mut saw_err = false;
 
     for &path in filenames {
-        for decl in decl_parser.parse(path).unwrap() {
+        for decl in decl_parser.parse::<R>(path).unwrap() {
             match decl {
                 shallow::Decl::Class(name, decl) => {
                     if opts.shallow {
@@ -152,7 +142,7 @@ fn decl_files<R: Reason>(
 
 fn make_shallow_decl_provider<R: Reason>(
     opts: &CliOptions,
-    decl_parser: &DeclParser<R>,
+    decl_parser: &DeclParser,
     filenames: &[RelativePath],
 ) -> Arc<dyn ShallowDeclProvider<R>> {
     let cache = Arc::new(ShallowDeclCache::with_no_eviction());

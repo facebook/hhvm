@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{fold::DeclFolder, Error, Result, TypeDecl};
-use crate::alloc::Allocator;
 use crate::cache::Cache;
 use crate::decl_defs::{ConstDecl, DeclTy, DeclTy_, FoldedClass, FunDecl, ShallowClass};
 use crate::reason::Reason;
@@ -24,7 +23,6 @@ use std::sync::Arc;
 #[derive(Debug)]
 pub struct LazyFoldedDeclProvider<R: Reason> {
     cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
-    alloc: &'static Allocator<R>,
     special_names: &'static SpecialNames,
     shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
 }
@@ -32,13 +30,11 @@ pub struct LazyFoldedDeclProvider<R: Reason> {
 impl<R: Reason> LazyFoldedDeclProvider<R> {
     pub fn new(
         cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
-        alloc: &'static Allocator<R>,
         special_names: &'static SpecialNames,
         shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
     ) -> Self {
         Self {
             cache,
-            alloc,
             special_names,
             shallow_decl_provider,
         }
@@ -220,7 +216,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         };
         stack.insert(name);
         let parents = self.decl_class_parents(stack, &shallow_class)?;
-        let folder = DeclFolder::new(self.alloc, self.special_names);
+        let folder = DeclFolder::new(self.special_names);
         Ok(Some(folder.decl_class(&shallow_class, &parents)))
     }
 

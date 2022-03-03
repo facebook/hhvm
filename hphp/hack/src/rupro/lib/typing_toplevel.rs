@@ -28,7 +28,7 @@ pub struct TypingToplevel<'a, R: Reason> {
 
 impl<'a, R: Reason> TypingToplevel<'a, R> {
     fn decl_hint_env(&self) -> DeclHintEnv<R> {
-        DeclHintEnv::new(self.ctx.alloc)
+        DeclHintEnv::new()
     }
 
     fn hint_fun_header<'ast>(

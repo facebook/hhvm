@@ -3,18 +3,19 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::alloc::Allocator;
 use crate::decl_defs::{DeclTy, DeclTy_};
 use crate::reason::Reason;
+use std::marker::PhantomData;
 
 pub struct DeclHintEnv<R: Reason> {
-    #[allow(dead_code)]
-    alloc: &'static Allocator<R>,
+    _phantom: PhantomData<R>,
 }
 
 impl<R: Reason> DeclHintEnv<R> {
-    pub fn new(alloc: &'static Allocator<R>) -> Self {
-        Self { alloc }
+    pub fn new() -> Self {
+        Self {
+            _phantom: PhantomData,
+        }
     }
 
     fn mk_hint_decl_ty(&self, pos: &oxidized::pos::Pos, ty: DeclTy_<R>) -> DeclTy<R> {

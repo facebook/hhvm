@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 #![allow(dead_code)]
-use crate::alloc::Allocator;
 use crate::decl_defs::DeclTy;
 use crate::reason::Reason;
 use crate::typing_defs::Ty;
@@ -60,7 +59,7 @@ impl TypingReturn {
 
 impl<R: Reason> TypingReturnInfo<R> {
     #[allow(unused_variables)]
-    pub fn placeholder(alloc: &Allocator<R>) -> Self {
+    pub fn placeholder() -> Self {
         // TODO(hrust): Tunion []
         Self {
             return_type: Ty::any(R::none()),

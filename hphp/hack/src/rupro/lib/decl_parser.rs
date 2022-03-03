@@ -3,28 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::alloc::Allocator;
 use crate::decl_defs::shallow;
 use crate::reason::Reason;
 use pos::{RelativePath, RelativePathCtx};
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
-pub struct DeclParser<R: Reason> {
-    #[allow(dead_code)]
-    alloc: &'static Allocator<R>,
+pub struct DeclParser {
     relative_path_ctx: Arc<RelativePathCtx>,
 }
 
-impl<R: Reason> DeclParser<R> {
-    pub fn new(alloc: &'static Allocator<R>, relative_path_ctx: Arc<RelativePathCtx>) -> Self {
-        Self {
-            alloc,
-            relative_path_ctx,
-        }
+impl DeclParser {
+    pub fn new(relative_path_ctx: Arc<RelativePathCtx>) -> Self {
+        Self { relative_path_ctx }
     }
 
-    pub fn parse(&self, path: RelativePath) -> std::io::Result<Vec<shallow::Decl<R>>> {
+    pub fn parse<R: Reason>(&self, path: RelativePath) -> std::io::Result<Vec<shallow::Decl<R>>> {
         let arena = bumpalo::Bump::new();
         let absolute_path = path.to_absolute(&self.relative_path_ctx);
         let text = std::fs::read(&absolute_path)?;

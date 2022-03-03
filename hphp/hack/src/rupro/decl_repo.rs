@@ -16,8 +16,8 @@ use rayon::prelude::*;
 use structopt::StructOpt;
 
 use hackrs::decl_parser::DeclParser;
+use hackrs::reason::{BReason, NReason, Reason};
 use hackrs::shallow_decl_provider::ShallowDeclCache;
-use hackrs::{alloc, reason::Reason};
 use pos::{Prefix, RelativePath, RelativePathCtx};
 
 #[derive(StructOpt, Debug)]
@@ -32,8 +32,6 @@ struct CliOptions {
 
 fn main() {
     let cli_options = CliOptions::from_args();
-
-    let (alloc, pos_alloc) = alloc::get_allocators_for_main();
 
     let path_ctx = Arc::new(RelativePathCtx {
         root: cli_options.root.clone(),
@@ -63,19 +61,15 @@ fn main() {
     );
 
     if cli_options.with_pos {
-        parse_repo(pos_alloc, path_ctx, &filenames);
+        parse_repo::<BReason>(path_ctx, &filenames);
     } else {
-        parse_repo(alloc, path_ctx, &filenames);
+        parse_repo::<NReason>(path_ctx, &filenames);
     }
 }
 
-fn parse_repo<R: Reason>(
-    alloc: &'static alloc::Allocator<R>,
-    ctx: Arc<RelativePathCtx>,
-    filenames: &[RelativePath],
-) {
-    let decl_parser = DeclParser::new(alloc, ctx);
-    let shallow_decl_cache = ShallowDeclCache::with_no_eviction();
+fn parse_repo<R: Reason>(ctx: Arc<RelativePathCtx>, filenames: &[RelativePath]) {
+    let decl_parser = DeclParser::new(ctx);
+    let shallow_decl_cache = ShallowDeclCache::<R>::with_no_eviction();
     let ((), time_taken) = time(|| {
         filenames
             .par_iter()

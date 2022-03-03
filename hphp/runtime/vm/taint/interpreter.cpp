@@ -178,6 +178,7 @@ const Func* callee() {
  *
  * 1) Basic instructions
  * 2) Literal and constant instructions
+ * 5) Get instructions (except CGetG for globals and CGetS for class properties)
  */
 
 void iopNop() {
@@ -688,20 +689,57 @@ void iopCGetL(named_local_var fr) {
   state->stack.push(value);
 }
 
-void iopCGetQuietL(tv_lval /* fr */) {
-  iopUnhandled("CGetQuietL");
+void iopCGetQuietL(tv_lval fr) {
+  iopPreamble("CGetQuietL");
+
+  auto state = State::instance;
+  auto value = state->heap_locals.get(fr);
+
+  FTRACE(
+      2, "taint: getting {} (value: {})\n", fr, value);
+
+  state->stack.push(value);
 }
 
-void iopCUGetL(tv_lval /* fr */) {
-  iopUnhandled("CUGetL");
+void iopCUGetL(tv_lval fr) {
+  iopPreamble("CUGetL");
+
+  auto state = State::instance;
+  auto value = state->heap_locals.get(fr);
+
+  FTRACE(
+      2, "taint: getting {} (value: {})\n", fr, value);
+
+  state->stack.push(value);
 }
 
-void iopCGetL2(named_local_var /* fr */) {
-  iopUnhandled("CGetL2");
+void iopCGetL2(named_local_var fr) {
+  iopPreamble("CGetL2");
+
+  auto state = State::instance;
+
+  auto top = state->stack.top();
+  state->stack.pop();
+  auto value = state->heap_locals.get(fr.lval);
+
+  FTRACE(
+      2, "taint: getting {} (name: {}, value: {})\n", fr.lval, fr.name, value);
+
+  state->stack.push(value);
+  state->stack.push(top);
 }
 
-void iopPushL(tv_lval /* locVal */) {
-  iopUnhandled("PushL");
+void iopPushL(tv_lval locVal) {
+  iopPreamble("PushL");
+
+  auto state = State::instance;
+  auto value = state->heap_locals.get(locVal);
+
+  FTRACE(
+      2, "taint: getting {} (value: {})\n", locVal, value);
+
+  state->stack.push(value);
+  state->heap_locals.set(locVal, nullptr);
 }
 
 void iopCGetG() {
@@ -713,11 +751,12 @@ void iopCGetS(ReadonlyOp /* op */) {
 }
 
 void iopClassGetC() {
-  iopUnhandled("ClassGetC");
+  iopDoesNotAffectTaint("ClassGetC");
 }
 
 void iopClassGetTS() {
-  iopUnhandled("ClassGetTS");
+  iopPreamble("ClassGetTS");
+  State::instance->stack.push(nullptr);
 }
 
 void iopGetMemoKeyL(named_local_var /* loc */) {

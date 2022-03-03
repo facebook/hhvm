@@ -144,6 +144,37 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         Ok(())
     }
 
+    fn parent_error(sc: &ShallowClass<R>, parent: &DeclTy<R>, err: Error) -> Error {
+        // We tried to produce a decl of the parent of the given class but
+        // failed. We capture this chain of events as a `Parent` error. The has
+        // the effect of explaining that "we couldn't decl 'class' because we
+        // couldn't decl 'parent' because ... x" ( where 'x' is the underlying
+        // error like, the parent's php file is missing).
+        match parent.unwrap_class_type() {
+            Some((_, parent_name, _)) => match err {
+                Error::Parent {
+                    class: _,
+                    mut parents,
+                    error,
+                } => {
+                    parents.push(parent_name.id());
+                    Error::Parent {
+                        class: sc.name.id(),
+                        parents,
+                        error,
+                    }
+                }
+                _ => Error::Parent {
+                    class: sc.name.id(),
+                    parents: vec![parent_name.id()],
+                    error: Box::new(err),
+                },
+            },
+            None => err,
+        }
+    }
+
+    // note(sf, 2022-03-02): c.f. Decl_folded_class.class_parents_decl
     fn decl_class_parents(
         &self,
         stack: &mut TypeNameSet,
@@ -151,38 +182,30 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
     ) -> Result<TypeNameMap<Arc<FoldedClass<R>>>> {
         let mut acc = Default::default();
         for ty in sc.extends.iter() {
-            self.decl_class_type(stack, &mut acc, ty).map_err(|err| {
-                // We tried to produce a decl of the parent of the given
-                // class but failed. We capture this chain of events as a
-                // `Parent` error. The has the effect of explaining that "we
-                // couldn't decl 'class' because we couldn't decl 'parent'"
-                // (along with the underlying error that prevented us from
-                // doing that e.g. because the file the parent is said to
-                // reside in couldn't be found on disk).
-                match ty.unwrap_class_type() {
-                    Some((_, ptn, _)) => match err {
-                        Error::Parent {
-                            class: _,
-                            mut parents,
-                            error,
-                        } => {
-                            parents.push(ptn.id());
-                            Error::Parent {
-                                class: sc.name.id(),
-                                parents,
-                                error,
-                            }
-                        }
-                        _ => Error::Parent {
-                            class: sc.name.id(),
-                            parents: vec![ptn.id()],
-                            error: Box::new(err),
-                        },
-                    },
-                    None => err,
-                }
-            })?;
+            self.decl_class_type(stack, &mut acc, ty)
+                .map_err(|err| Self::parent_error(sc, ty, err))?;
         }
+        for ty in sc.implements.iter() {
+            self.decl_class_type(stack, &mut acc, ty)
+                .map_err(|err| Self::parent_error(sc, ty, err))?;
+        }
+        for ty in sc.uses.iter() {
+            self.decl_class_type(stack, &mut acc, ty)
+                .map_err(|err| Self::parent_error(sc, ty, err))?;
+        }
+        for ty in sc.xhp_attr_uses.iter() {
+            self.decl_class_type(stack, &mut acc, ty)
+                .map_err(|err| Self::parent_error(sc, ty, err))?;
+        }
+        for ty in sc.req_extends.iter() {
+            self.decl_class_type(stack, &mut acc, ty)
+                .map_err(|err| Self::parent_error(sc, ty, err))?;
+        }
+        for ty in sc.req_implements.iter() {
+            self.decl_class_type(stack, &mut acc, ty)
+                .map_err(|err| Self::parent_error(sc, ty, err))?;
+        }
+        //TODO: enum_includes
         Ok(acc)
     }
 

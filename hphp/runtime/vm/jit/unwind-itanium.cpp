@@ -39,6 +39,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/dwarf-reg.h"
 #include "hphp/util/eh-frame.h"
+#include "hphp/util/exception.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/unwind-itanium.h"
@@ -116,7 +117,7 @@ TCA lookup_catch_trace(TCA rip) {
       false, "Translated call to {} threw '{}' without catch block; "
              "return address: {}\n",
       getNativeFunctionName(target),
-      __cxxabiv1::__cxa_current_exception_type()->name(),
+      current_exception_name(),
       rip
     );
   }

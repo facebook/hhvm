@@ -176,7 +176,8 @@ int compiler_main(int argc, char **argv) {
   } catch (std::exception& e) {
     Logger::Error("std::exception: %s", e.what());
   } catch (...) {
-    Logger::Error("(unknown exception was thrown)");
+    Logger::Error("(non-standard exception \"%s\" was thrown)",
+                  current_exception_name().c_str());
   }
   return -1;
 }

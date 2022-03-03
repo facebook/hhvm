@@ -92,6 +92,7 @@
 #include "hphp/util/capability.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/embedded-data.h"
+#include "hphp/util/exception.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/kernel-version.h"
 #ifndef _MSC_VER
@@ -572,7 +573,9 @@ static void handle_exception_helper(bool& ret,
   } catch (...) {
     ret = false;
     error = true;
-    errorMsg = "(unknown exception was thrown)";
+    errorMsg = "(non-standard exception \"";
+    errorMsg += current_exception_name();
+    errorMsg += "\" was thrown)";
     Logger::Error(errorMsg);
   }
 }

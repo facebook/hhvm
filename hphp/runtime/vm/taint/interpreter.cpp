@@ -189,7 +189,7 @@ void iopEntryNop() {
 }
 
 void iopBreakTraceHint() {
-  iopUnhandled("BreakTraceHint");
+  iopDoesNotAffectTaint("BreakTraceHint");
 }
 
 void iopPopC() {
@@ -599,7 +599,7 @@ void iopExit() {
 }
 
 void iopFatal(FatalOp /* kind_char */) {
-  iopUnhandled("Fatal");
+  iopDoesNotAffectTaint("Fatal");
 }
 
 void iopJmp(PC& /* pc */, PC /* targetpc */) {
@@ -753,11 +753,11 @@ void iopIsTypeL(named_local_var /* loc */, IsTypeOp /* op */) {
 }
 
 void iopAssertRATL(local_var /* loc */, RepoAuthType /* rat */) {
-  iopUnhandled("AssertRATL");
+  iopDoesNotAffectTaint("AssertRATL");
 }
 
 void iopAssertRATStk(uint32_t /* stkSlot */, RepoAuthType /* rat */) {
-  iopUnhandled("AssertRATStk");
+  iopDoesNotAffectTaint("AssertRATStk");
 }
 
 void iopSetL(tv_lval to) {
@@ -1139,15 +1139,19 @@ void iopEval() {
 }
 
 void iopThis() {
-  iopUnhandled("This");
+  iopPreamble("This");
+  // We don't care about tainting `this` (for now) since we taint properties directly
+  State::instance->stack.push(nullptr);
 }
 
 void iopBareThis(BareThisOp /* bto */) {
-  iopUnhandled("BareThis");
+  iopPreamble("BareThis");
+  // We don't care about tainting `this` (for now) since we taint properties directly
+  State::instance->stack.push(nullptr);
 }
 
 void iopCheckThis() {
-  iopUnhandled("CheckThis");
+  iopDoesNotAffectTaint("CheckThis");
 }
 
 void iopChainFaults() {

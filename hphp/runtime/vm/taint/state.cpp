@@ -237,8 +237,18 @@ void ObjectsHeap::set(
     ObjectData* object,
     folly::StringPiece property,
     Value value) {
-  // TODO: Investigate if we can save memory here by not storing default values
-  m_heap[object][property.str()] = value;
+  if (value == nullptr) {
+    // Only update existing values, never add a new entry
+    auto maybe_object = m_heap.find(object);
+    if (maybe_object != m_heap.end()) {
+      auto existing = maybe_object->second.find(property);
+      if (existing != maybe_object->second.end()) {
+        existing->second = value;
+      }
+    }
+  } else {
+    m_heap[object][property.str()] = value;
+  }
 }
 
 Value ObjectsHeap::get(ObjectData* object, folly::StringPiece property) const {
@@ -258,8 +268,9 @@ void ObjectsHeap::clear() {
 }
 
 void CollectionsHeap::set(tv_lval typedValue, Value value) {
-  // TODO: Investigate if we can save memory here by not storing default values
-  m_heap[std::move(typedValue)] = value;
+  if (value) {
+    m_heap[std::move(typedValue)] = value;
+  }
 }
 
 Value CollectionsHeap::get(const tv_lval& typedValue) const {

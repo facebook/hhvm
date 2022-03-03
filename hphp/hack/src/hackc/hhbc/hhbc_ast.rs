@@ -185,21 +185,6 @@ impl AsRef<str> for Visibility {
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum GenCreationExecution {
-    CreateCont,
-    ContEnter,
-    ContRaise,
-    Yield,
-    YieldK,
-    ContCheck(ContCheckOp),
-    ContValid,
-    ContKey,
-    ContGetReturn,
-    ContCurrent,
-}
-
-#[derive(Clone, Debug)]
-#[repr(C)]
 pub struct SrcLoc {
     pub line_begin: isize,
     pub col_begin: isize,

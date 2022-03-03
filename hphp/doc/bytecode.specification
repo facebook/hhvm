@@ -1388,11 +1388,6 @@ ClassGetTS                         [C:Dict]  ->  [C:Class, C:StaticVec|Null]
 6. Isset and type querying instructions
 -----------------------------------------------
 
-IssetC    [C]  ->  [C:Bool]
-
-  Isset. If $1 is null this instruction pushes false onto the stack, otherwise
-  it pushes true.
-
 IssetL <local variable id>    []  ->  [C:Bool]
 
   Isset local. This instruction reads the local variable given by %1. If the

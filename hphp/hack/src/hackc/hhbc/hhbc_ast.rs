@@ -423,7 +423,6 @@ pub enum Instruct<'arena> {
     UnsetG,
     CheckProp(PropId<'arena>),
     InitProp(PropId<'arena>, InitPropOp),
-    IssetC,
     IssetL(Local<'arena>),
     IssetG,
     IssetS,
@@ -653,7 +652,6 @@ impl Instruct<'_> {
             | Self::UnsetG
             | Self::CheckProp(_)
             | Self::InitProp(_, _)
-            | Self::IssetC
             | Self::IssetL(_)
             | Self::IssetG
             | Self::IssetS
@@ -886,7 +884,6 @@ impl Instruct<'_> {
             | Self::UnsetG
             | Self::CheckProp(_)
             | Self::InitProp(_, _)
-            | Self::IssetC
             | Self::IssetL(_)
             | Self::IssetG
             | Self::IssetS

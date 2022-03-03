@@ -1563,7 +1563,6 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             print_label(w, l, dv_labels)?;
             w.write_all(b":")
         }
-        Instruct::IssetC => w.write_all(b"IssetC"),
         Instruct::IssetL(local) => {
             w.write_all(b"IssetL ")?;
             print_local(w, local)

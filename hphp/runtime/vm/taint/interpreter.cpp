@@ -834,8 +834,18 @@ void iopSetS(ReadonlyOp /* op */) {
   iopUnhandled("SetS");
 }
 
-void iopSetOpL(tv_lval /* to */, SetOpOp /* op */) {
-  iopUnhandled("SetOpL");
+void iopSetOpL(tv_lval to, SetOpOp /* op */) {
+  iopPreamble("SetOpL");
+
+  // Pick whichever value is tainted.
+  // This should eventually be a join.
+  auto state = State::instance;
+  auto value = state->heap_locals.get(to);
+  if (value == nullptr) {
+    value = state->stack.top();
+  }
+  state->stack.pop();
+  state->stack.push(value);
 }
 
 void iopSetOpG(SetOpOp /* op */) {
@@ -846,8 +856,12 @@ void iopSetOpS(SetOpOp /* op */) {
   iopUnhandled("SetOpS");
 }
 
-void iopIncDecL(named_local_var /* fr */, IncDecOp /* op */) {
-  iopUnhandled("IncDecL");
+void iopIncDecL(named_local_var fr, IncDecOp /* op */) {
+  iopPreamble("IncDecL");
+
+  auto state = State::instance;
+  auto value = state->heap_locals.get(fr.lval);
+  state->stack.push(value);
 }
 
 void iopIncDecG(IncDecOp /* op */) {
@@ -858,8 +872,9 @@ void iopIncDecS(IncDecOp /* op */) {
   iopUnhandled("IncDecS");
 }
 
-void iopUnsetL(tv_lval /* loc */) {
-  iopUnhandled("UnsetL");
+void iopUnsetL(tv_lval loc) {
+  iopPreamble("UnsetL");
+  State::instance->heap_locals.set(loc, nullptr);
 }
 
 void iopUnsetG() {
@@ -1371,7 +1386,8 @@ void iopArrayUnmarkLegacy() {
 }
 
 void iopCheckProp(const StringData* /* propName */) {
-  iopUnhandled("CheckProp");
+  iopPreamble("CheckProp");
+  State::instance->stack.push(nullptr);
 }
 
 void iopSetImplicitContextByValue() {
@@ -1379,7 +1395,8 @@ void iopSetImplicitContextByValue() {
 }
 
 void iopInitProp(const StringData* /* propName */, InitPropOp /* propOp */) {
-  iopUnhandled("InitProp");
+  iopPreamble("InitProp");
+  State::instance->stack.pop();
 }
 
 void iopSilence(tv_lval /* loc */, SilenceOp /* subop */) {

@@ -45,9 +45,24 @@ function source_through_indirection_to_sink(): void {
   into_sink($data);
 }
 
+function source_through_mutations_into_sink(): void {
+  $v = __source();
+  $v += 1;
+  // Tainted
+  __sink($v);
+  unset($v);
+  $v = 1;
+  // Not tainted
+  __sink($v);
+  $v = __source();
+  // Tainted
+  __sink($v++);
+}
+
 <<__EntryPoint>> function main(): void {
   source_through_assignment_to_sink();
   source_through_function_to_sink();
   source_stopped();
   source_through_indirection_to_sink();
+  source_through_mutations_into_sink();
 }

@@ -716,7 +716,7 @@ let set_readonly_this ty =
 let xhp_attribute_decl_ty env sid obj attr =
   let (namepstr, valpty) = attr in
   let (valp, valty) = valpty in
-  let (env, (declty, _tal)) =
+  let ((env, ty_err_opt), (declty, _tal)) =
     TOG.obj_get
       ~obj_pos:(fst sid)
       ~is_method:false
@@ -731,6 +731,7 @@ let xhp_attribute_decl_ty env sid obj attr =
       env
       obj
   in
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
   let ureason = Reason.URxhp (snd sid, snd namepstr) in
   let (env, err_opt) =
     Result.fold
@@ -2093,7 +2094,7 @@ and has_dispose_method env has_await p e ty =
       SN.Members.__dispose
   in
   let (_, obj_pos, _) = e in
-  let (env, (tfty, _tal)) =
+  let ((env, ty_err_opt), (tfty, _tal)) =
     TOG.obj_get
       ~obj_pos
       ~is_method:true
@@ -2108,6 +2109,7 @@ and has_dispose_method env has_await p e ty =
       env
       ty
   in
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
   let (env, (_tel, _typed_unpack_element, _ty, _should_forget_fakes)) =
     call ~expected:None p env tfty [] None
   in
@@ -3300,7 +3302,7 @@ and expr_
      * Constructing a call `e`->__clone() checks that `e` is an object and
      * checks coeffects on __clone *)
     let (_, pe, _) = e in
-    let (env, (tfty, _tal)) =
+    let ((env, ty_err_opt), (tfty, _tal)) =
       TOG.obj_get
         ~obj_pos:pe
         ~is_method:true
@@ -3315,6 +3317,7 @@ and expr_
         env
         ty
     in
+    Option.iter ty_err_opt ~f:Errors.add_typing_error;
     let (env, (_tel, _typed_unpack_element, _ty, _should_forget_fakes)) =
       call ~expected:None p env tfty [] None
     in
@@ -3431,7 +3434,7 @@ and expr_
      * is public+not static and then return its type.
      *)
     let (env, te, ty1) = expr env instance in
-    let (env, (result, _tal)) =
+    let ((env, ty_err_opt), (result, _tal)) =
       TOG.obj_get
         ~inst_meth:true
         ~meth_caller:false
@@ -3446,6 +3449,7 @@ and expr_
         env
         ty1
     in
+    Option.iter ty_err_opt ~f:Errors.add_typing_error;
     let (env, result) =
       Env.FakeMembers.check_instance_invalid env instance (snd meth) result
     in
@@ -3492,7 +3496,7 @@ and expr_
         }
       in
       let (env, local_obj_ty) = Phase.localize ~ety_env env obj_type in
-      let (env, (fty, _tal)) =
+      let ((env, ty_err_opt), (fty, _tal)) =
         TOG.obj_get
           ~obj_pos:pos
           ~is_method:true
@@ -3507,6 +3511,7 @@ and expr_
           env
           local_obj_ty
       in
+      Option.iter ty_err_opt ~f:Errors.add_typing_error;
       let (env, fty) = Env.expand_type env fty in
       (match deref fty with
       | (reason, Tfun ftype) ->
@@ -6027,7 +6032,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       in
       let env = might_throw env in
       let (_, p1, _) = obj in
-      let (env, (declared_ty, _tal), lval_err_opt, rval_err_opt) =
+      let ((env, ty_err_opt), (declared_ty, _tal), lval_err_opt, rval_err_opt) =
         TOG.obj_get_with_mismatches
           ~obj_pos:p1
           ~is_method:false
@@ -6042,6 +6047,7 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
           env
           obj_ty
       in
+      Option.iter ty_err_opt ~f:Errors.add_typing_error;
       let te1 =
         Tast.make_typed_expr
           pobj
@@ -6466,7 +6472,7 @@ and dispatch_call
       || Env.is_static env
       || class_contains_smethod env ty1 m
     in
-    let (env, (fty, tal)) =
+    let ((env, ty_err_opt), (fty, tal)) =
       if not is_static then
         (* parent::nonStaticFunc() is really weird. It's calling a method
          * defined on the parent class, but $this is still the child class.
@@ -6486,16 +6492,20 @@ and dispatch_call
           env
           this_ty
       else
-        class_get
-          ~coerce_from_ty:None
-          ~is_method:true
-          ~is_const:false
-          ~explicit_targs
-          env
-          ty1
-          m
-          e1
+        let (env, res) =
+          class_get
+            ~coerce_from_ty:None
+            ~is_method:true
+            ~is_const:false
+            ~explicit_targs
+            env
+            ty1
+            m
+            e1
+        in
+        ((env, None), res)
     in
+    Option.iter ty_err_opt ~f:Errors.add_typing_error;
     check_disposable_in_return env fty;
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
       call ~expected p env fty el unpacked_element
@@ -6902,7 +6912,7 @@ and dispatch_call
       | OG_nullsafe -> Some p
     in
     let (_, p1, _) = e1 in
-    let (env, (tfty, tal), lval_err_opt, _rval_err_opt) =
+    let ((env, ty_err_opt), (tfty, tal), lval_err_opt, _rval_err_opt) =
       TOG.obj_get_with_mismatches
         ~obj_pos:p1
         ~is_method:true
@@ -6917,6 +6927,7 @@ and dispatch_call
         env
         ty1
     in
+    Option.iter ty_err_opt ~f:Errors.add_typing_error;
     check_disposable_in_return env tfty;
     let (env, (tel, typed_unpack_element, ty, should_forget_fakes)) =
       call ~nullsafe ~expected p env tfty el unpacked_element

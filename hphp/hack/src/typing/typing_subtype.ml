@@ -2612,7 +2612,7 @@ and simplify_subtype_has_member
         | Some targs -> targs
       in
       let (res, (obj_get_ty, _tal)) =
-        Typing_object_get.obj_get_with_ty_err
+        Typing_object_get.obj_get
           ~obj_pos:name_pos
           ~is_method
           ~inst_meth:false

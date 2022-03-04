@@ -1290,7 +1290,7 @@ and obj_get_inner_intersection args env on_error id reason tys =
  * unresolved type.
  *
  *)
-let obj_get_with_mismatches_with_ty_err
+let obj_get_with_mismatches
     ~obj_pos
     ~is_method
     ~inst_meth
@@ -1388,7 +1388,7 @@ let obj_get_with_mismatches_with_ty_err
  * unresolved type.
  *
  *)
-let obj_get_with_ty_err
+let obj_get
     ~obj_pos
     ~is_method
     ~inst_meth
@@ -1403,7 +1403,7 @@ let obj_get_with_ty_err
     env
     receiver_ty =
   let (env, ty, _lval_err_opt, _rval_err_opt) =
-    obj_get_with_mismatches_with_ty_err
+    obj_get_with_mismatches
       ~obj_pos
       ~is_method
       ~inst_meth
@@ -1419,70 +1419,3 @@ let obj_get_with_ty_err
       receiver_ty
   in
   (env, ty)
-
-(* Side effecting variants *)
-let discharge_ty_err (env, ty_err_opt) =
-  Option.iter ty_err_opt ~f:Errors.add_typing_error;
-  env
-
-let obj_get
-    ~obj_pos
-    ~is_method
-    ~inst_meth
-    ~meth_caller
-    ~nullsafe
-    ~coerce_from_ty
-    ~explicit_targs
-    ~class_id
-    ~member_id
-    ~on_error
-    ?parent_ty
-    env
-    receiver_ty =
-  Tuple2.map_fst ~f:discharge_ty_err
-  @@ obj_get_with_ty_err
-       ~obj_pos
-       ~is_method
-       ~inst_meth
-       ~meth_caller
-       ~nullsafe
-       ~coerce_from_ty
-       ~explicit_targs
-       ~class_id
-       ~member_id
-       ~on_error
-       ?parent_ty
-       env
-       receiver_ty
-
-let obj_get_with_mismatches
-    ~obj_pos
-    ~is_method
-    ~inst_meth
-    ~meth_caller
-    ~nullsafe
-    ~coerce_from_ty
-    ~explicit_targs
-    ~class_id
-    ~member_id
-    ~on_error
-    ?parent_ty
-    env
-    receiver_ty =
-  let (env, res, l_mismatch, r_mismatch) =
-    obj_get_with_mismatches_with_ty_err
-      ~obj_pos
-      ~is_method
-      ~inst_meth
-      ~meth_caller
-      ~nullsafe
-      ~coerce_from_ty
-      ~explicit_targs
-      ~class_id
-      ~member_id
-      ~on_error
-      ?parent_ty
-      env
-      receiver_ty
-  in
-  (discharge_ty_err env, res, l_mismatch, r_mismatch)

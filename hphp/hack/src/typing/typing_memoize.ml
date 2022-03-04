@@ -116,7 +116,7 @@ let check_param : env -> Nast.fun_param -> unit =
           check_memoizable env type_param
         else
           let base_error = error ty in
-          let (env, (tfty, _tal)) =
+          let ((env, ty_err_opt), (tfty, _tal)) =
             Typing_object_get.obj_get
               ~obj_pos:param_pos
               ~is_method:true
@@ -135,6 +135,7 @@ let check_param : env -> Nast.fun_param -> unit =
               env
               ty
           in
+          Option.iter ty_err_opt ~f:Errors.add_typing_error;
           ignore (Typing.call ~expected:None pos env tfty [] None)
       | Tunapplied_alias _ ->
         Typing_defs.error_Tunapplied_alias_in_illegal_context ()

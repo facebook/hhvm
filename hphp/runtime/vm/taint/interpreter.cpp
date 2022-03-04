@@ -181,6 +181,8 @@ const Func* callee() {
  * 5) Get instructions
  * 6) Isset and type querying instructions
  * 7) Mutator instructions
+ * 9.1) Member base operations
+ * 10.1) Base operations
  * 11) Iterator instructions
  */
 
@@ -1606,12 +1608,17 @@ void iopRaiseClassStringConversionWarning() {
   iopUnhandled("RaiseClassStringConversionWarning");
 }
 
+/**
+ * The base operations just set mstate.base and the heavy lifting
+ * is done in the prop/final opcodes. So we ignore taint here
+ */
+
 void iopBaseGC(uint32_t /* idx */, MOpMode /* mode */) {
-  iopUnhandled("BaseGC");
+  iopDoesNotAffectTaint("BaseGC");
 }
 
 void iopBaseGL(tv_lval /* loc */, MOpMode /* mode */) {
-  iopUnhandled("BaseGL");
+  iopDoesNotAffectTaint("BaseGL");
 }
 
 void iopBaseSC(
@@ -1619,26 +1626,26 @@ void iopBaseSC(
     uint32_t /* clsIdx */,
     MOpMode /* mode */,
     ReadonlyOp /* op */) {
-  iopUnhandled("BaseSC");
+  iopDoesNotAffectTaint("BaseSC");
 }
 
 void iopBaseL(
     named_local_var /* loc */,
     MOpMode /* mode */,
     ReadonlyOp /* op */) {
-  iopPreamble("BaseL");
+  iopDoesNotAffectTaint("BaseL");
 }
 
 void iopBaseC(uint32_t /* idx */, MOpMode) {
-  iopUnhandled("BaseC");
+  iopDoesNotAffectTaint("BaseC");
 }
 
 void iopBaseH() {
-  iopUnhandled("BaseH");
+  iopDoesNotAffectTaint("BaseH");
 }
 
 void iopDim(MOpMode /* mode */, MemberKey /* mk */) {
-  iopUnhandled("Dim");
+  iopDoesNotAffectTaint("Dim");
 }
 
 namespace {

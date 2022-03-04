@@ -123,7 +123,6 @@ abstract class BasePoll<Tk, Tv> {
     $this->notifiers = AwaitAllWaitHandle::fromVec($notifiers);
   }
 
-  <<__ProvenanceSkipFrame>>
   private async function waitForThenNotify(
     Tk $key,
     Awaitable<Tv> $awaitable,
@@ -140,7 +139,6 @@ abstract class BasePoll<Tk, Tv> {
     }
   }
 
-  <<__ProvenanceSkipFrame>>
   final public async function next(): Awaitable<?(Tk, Tv)> {
     invariant(
       $this->lastAwaited !== null,

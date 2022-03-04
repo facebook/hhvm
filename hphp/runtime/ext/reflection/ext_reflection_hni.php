@@ -301,7 +301,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
    *
    * @return     array  The parameters, as a ReflectionParameter object.
    */
-  <<__ProvenanceSkipFrame, __Memoize>>
+  <<__Memoize>>
   public function getParameters()[]: varray<ReflectionParameter> {
     // FIXME: ReflectionParameter sh/could have native data pointing to the
     // relevant Func::ParamInfo data structure
@@ -779,7 +779,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
    *
    * @return     mixed   Returns the method result.
    */
-  <<__ProvenanceSkipFrame>>
   public function invoke($obj, ...$args): mixed {
     $this->validateInvokeParameters($obj, $args);
     if ($this->isStaticInPrologue()) {
@@ -1389,7 +1388,6 @@ class ReflectionClass implements Reflector {
    * @return     mixed   An array of ReflectionMethod objects reflecting each
    *                     method.
    */
-  <<__ProvenanceSkipFrame>>
   public function getMethods(?int $filter = null)[]: varray<ReflectionMethod> {
     $ret = varray[];
     $clsname = $this->getName();
@@ -1487,7 +1485,6 @@ class ReflectionClass implements Reflector {
     return array_key_exists($name, $this->getTypeConstantNamesWithCaching());
   }
 
-  <<__ProvenanceSkipFrame>>
   public function getTypeConstants()[]: varray<ReflectionTypeConstant> {
     $ret = varray[];
     $class = $this->getName();
@@ -1843,7 +1840,6 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   An array of ReflectionProperty objects.
    */
-  <<__ProvenanceSkipFrame>>
   public function getProperties($filter = 0xFFFF)[]: varray<ReflectionProperty> {
     $ret = varray[];
     foreach ($this->getOrderedPropertyInfos() as $name => $prop_info) {
@@ -1871,7 +1867,6 @@ class ReflectionClass implements Reflector {
    *
    * @return     mixed   The static properties, as an array.
    */
-  <<__ProvenanceSkipFrame>>
   public function getStaticProperties(): darray<string, mixed> {
     $ret = darray[];
     foreach ($this->getProperties(ReflectionProperty::IS_STATIC) as $prop) {
@@ -1944,7 +1939,6 @@ class ReflectionClass implements Reflector {
    *                     properties and does not take visibility modifiers
    *                     into account.
    */
-  <<__ProvenanceSkipFrame>>
   public function getDefaultProperties()[]: darray<string, mixed> {
     $ret = darray[];
     foreach ($this->getProperties() as $prop) {

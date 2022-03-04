@@ -270,7 +270,6 @@ function mysql_fetch_array(resource $result,
  *   by using mysql_fetch_row() or add alias names. See the example at the
  *   mysql_fetch_array() description about aliases.
  */
-<<__ProvenanceSkipFrame>>
 function mysql_fetch_assoc(resource $result): mixed {
   return mysql_fetch_array($result, MYSQL_ASSOC);
 }
@@ -355,7 +354,6 @@ function mysql_fetch_result(?resource $link_identifier = NULL): mixed;
  *   with the specified result identifier. The row is returned as an array.
  *   Each result column is stored in an array offset, starting at offset 0.
  */
-<<__ProvenanceSkipFrame>>
 function mysql_fetch_row(resource $result): mixed {
   return mysql_fetch_array($result, MYSQL_NUM);
 }

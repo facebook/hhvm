@@ -230,7 +230,6 @@ function group_by<Tk as arraykey, Tv>(
  * Time complexity: O(n * f), where f is the complexity of `$value_func`
  * Space complexity: O(n)
  */
-<<__ProvenanceSkipFrame>>
 function map<Tk as arraykey, Tv1, Tv2>(
   KeyedTraversable<Tk, Tv1> $traversable,
   (function(Tv1)[_]: Tv2) $value_func,

@@ -262,7 +262,6 @@ final class Pair implements \ConstVector {
    *
    * @guide /hack/collections/examples
    */
-  <<__ProvenanceSkipFrame>>
   public function map<Tu>((function(mixed)[_]: Tu) $callback)[ctx $callback]: ImmVector<Tu> {
     return ImmVector { $callback($this[0]), $callback($this[1]) };
   }
@@ -281,7 +280,6 @@ final class Pair implements \ConstVector {
    * @return - an `ImmVector` containing the values after a user-specified
    *           operation on the current `Pair`'s keys and values is applied.
    */
-  <<__ProvenanceSkipFrame>>
   public function mapWithKey<Tu>((function(int, mixed)[_]: Tu) $callback)[ctx $callback]:
     ImmVector<Tu> {
     return ImmVector { $callback(0, $this[0]), $callback(1, $this[1]) };

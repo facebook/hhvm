@@ -92,7 +92,6 @@ function flatten<Tv>(
  * Time complexity: O(n)
  * Space complexity: O(n)
  */
-<<__ProvenanceSkipFrame>>
 function map<Tv1, Tv2>(
   Traversable<Tv1> $traversable,
   (function(Tv1)[_]: Tv2) $value_func,

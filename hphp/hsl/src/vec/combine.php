@@ -49,7 +49,6 @@ function concat<Tv>(
  * Space complexity: O(min(m, n)), where m is the size of `$first` and n is the
  * size of `$second`
  */
-<<__ProvenanceSkipFrame>>
 function zip<Tv, Tu>(
   Traversable<Tv> $first,
   Traversable<Tu> $second,

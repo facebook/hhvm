@@ -26,7 +26,6 @@ interface Reflector {
 }
 
 trait ReflectionLegacyAttribute {
-  <<__ProvenanceSkipFrame>>
   final public function getAttributes()[]: darray<arraykey, varray<mixed>> {
     $denamespaced = darray[];
     foreach ($this->getAttributesNamespaced() as $name => $args) {
@@ -47,7 +46,6 @@ trait ReflectionLegacyAttribute {
 }
 
 trait ReflectionTypedAttribute {
-  <<__ProvenanceSkipFrame>>
   final public function getAttributeClass(classname $c)[] {
     $attrs = $this->getAttributesNamespaced();
     $args = hphp_array_idx($attrs, $c, null);

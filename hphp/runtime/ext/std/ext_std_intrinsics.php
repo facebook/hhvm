@@ -23,7 +23,7 @@ function trigger_crash(): void;
  * Return the given value. This function is purposefully not optimized. It can
  * be used to hide information about values from the optimizer for unit testing.
  */
-<<__Native, __ProvenanceSkipFrame>>
+<<__Native>>
 function launder_value(mixed $value): mixed;
 
 /*

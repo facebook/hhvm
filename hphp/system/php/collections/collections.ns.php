@@ -109,7 +109,6 @@ interface MutableSet extends ConstSet,
 }
 
 trait StrictIterable<+Tv> implements \HH\Iterable<Tv> {
-  <<__ProvenanceSkipFrame>>
   public function toArray() {
     $arr = varray[];
     foreach ($this as $v) {
@@ -117,7 +116,6 @@ trait StrictIterable<+Tv> implements \HH\Iterable<Tv> {
     }
     return $arr;
   }
-  <<__ProvenanceSkipFrame>>
   public function toValuesArray() {
     return $this->toArray();
   }
@@ -248,7 +246,6 @@ trait StrictIterable<+Tv> implements \HH\Iterable<Tv> {
 }
 
 trait StrictKeyedIterable<Tk, +Tv> implements \HH\KeyedIterable<Tk, Tv> {
-  <<__ProvenanceSkipFrame>>
   public function toArray() {
     $arr = darray[];
     foreach ($this as $k => $v) {
@@ -256,7 +253,6 @@ trait StrictKeyedIterable<Tk, +Tv> implements \HH\KeyedIterable<Tk, Tv> {
     }
     return $arr;
   }
-  <<__ProvenanceSkipFrame>>
   public function toValuesArray() {
     $arr = varray[];
     foreach ($this as $v) {
@@ -264,7 +260,6 @@ trait StrictKeyedIterable<Tk, +Tv> implements \HH\KeyedIterable<Tk, Tv> {
     }
     return $arr;
   }
-  <<__ProvenanceSkipFrame>>
   public function toKeysArray() {
     $arr = varray[];
     foreach ($this as $k => $_) {
@@ -1827,7 +1822,6 @@ class LazyIterableView<+Tv> implements \HH\Iterable<Tv> {
 
   public function __construct($iterable)[] { $this->iterable = $iterable; }
   public function getIterator()[] { return $this->iterable->getIterator(); }
-  <<__ProvenanceSkipFrame>>
   public function toArray() {
     $arr = varray[];
     foreach ($this->iterable as $v) {
@@ -1835,7 +1829,6 @@ class LazyIterableView<+Tv> implements \HH\Iterable<Tv> {
     }
     return $arr;
   }
-  <<__ProvenanceSkipFrame>>
   public function toValuesArray() {
     return $this->toArray();
   }

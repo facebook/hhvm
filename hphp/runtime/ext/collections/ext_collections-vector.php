@@ -260,12 +260,10 @@ final class Vector implements \MutableVector {
   /** Returns a varray built from the values from this Vector.
    * @return varray
    */
-  <<__ProvenanceSkipFrame>>
   public function toVArray()[]: varray {
     return varray($this);
   }
 
-  <<__ProvenanceSkipFrame>>
   public function toDArray()[]: darray {
     return darray($this);
   }
@@ -322,7 +320,6 @@ final class Vector implements \MutableVector {
   /** Returns a varray built from the keys from this Vector.
    * @return varray
    */
-  <<__ProvenanceSkipFrame>>
   public readonly function toKeysArray()[]: varray {
     $count = $this->count();
     return $count ? varray(\range(0, $count - 1)) : varray[];
@@ -331,7 +328,6 @@ final class Vector implements \MutableVector {
   /** Returns a varray built from the values from this Vector.
    * @return varray
    */
-  <<__ProvenanceSkipFrame>>
   public function toValuesArray()[]: varray {
     return $this->toVArray();
   }
@@ -952,7 +948,6 @@ final class ImmVector implements \ConstVector {
   /** Returns an Iterable that produces the keys from this ImmVector.
    * @return object
    */
-  <<__ProvenanceSkipFrame>>
   public function keys()[]: this {
     return new self($this->toKeysArray());
   }
@@ -1027,12 +1022,10 @@ final class ImmVector implements \ConstVector {
   /** Returns a varray built from the values from this ImmVector.
    * @return varray
    */
-  <<__ProvenanceSkipFrame>>
   public function toVArray()[]: varray {
     return varray($this);
   }
 
-  <<__ProvenanceSkipFrame>>
   public function toDArray()[]: darray {
     return darray($this);
   }
@@ -1040,7 +1033,6 @@ final class ImmVector implements \ConstVector {
   /** Returns a varray built from the keys from this ImmVector.
    * @return varray
    */
-  <<__ProvenanceSkipFrame>>
   public readonly function toKeysArray()[]: varray {
     $count = $this->count();
     return $count ? varray(\range(0, $count - 1)) : varray[];
@@ -1049,7 +1041,6 @@ final class ImmVector implements \ConstVector {
   /** Returns a varray built from the values from this ImmVector.
    * @return varray
    */
-  <<__ProvenanceSkipFrame>>
   public function toValuesArray()[]: varray {
     return $this->toVArray();
   }

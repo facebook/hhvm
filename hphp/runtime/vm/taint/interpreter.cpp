@@ -345,11 +345,18 @@ void iopNewKeysetArray(uint32_t n) {
 void iopAddElemC() {
   iopPreamble("AddElemC");
 
-  // Update the taint on the collection to be that of the new value
+  // Update the taint on the collection to be that of the new key or value
   // if it's tainted. This should eventually be a join.
   auto& stack = State::instance->stack;
+  // Look at the taint on the value
   auto value = stack.top();
-  stack.pop(2);
+  stack.pop();
+  // Then on the key
+  if (value == nullptr) {
+    value = stack.top();
+  }
+  stack.pop();
+  // Lastly, on the collection itself
   if (value == nullptr) {
     value = stack.top();
   }

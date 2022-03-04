@@ -83,6 +83,13 @@ function source_through_dict_iteration_to_sink(): void {
   }
 }
 
+function source_through_dict_with_initializer_to_sink(): void {
+  $dict = dict[__source() => 1];
+  foreach ($dict as $k => $v) {
+    __sink($v);
+  }
+}
+
 function source_through_vector_to_sink(): void {
   $vector = Vector {};
   $vector[] = __source();
@@ -150,6 +157,7 @@ function iterators_do_not_collide_across_calls() {
   source_through_dict_tainted_key_to_sink();
   source_through_dict_tainted_value_to_sink();
   source_through_dict_iteration_to_sink();
+  source_through_dict_with_initializer_to_sink();
   // Tests for older collections below. These are not as comprehensive
   // as the implementations are similar to the above - we just test
   // basic behavior and try to ensure things don't crash.

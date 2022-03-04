@@ -59,10 +59,25 @@ function source_through_mutations_into_sink(): void {
   __sink($v++);
 }
 
+function source_through_global_into_sink(): void {
+  $foo = HH\global_get("foo");
+  // Not tainted
+  __sink($foo);
+  HH\global_set("foo", __source());
+  $foo = HH\global_get("foo");
+  // Tainted
+  __sink($foo);
+  HH\global_unset("foo");
+  $foo = HH\global_get("foo");
+  // Not tainted
+  __sink($foo);
+}
+
 <<__EntryPoint>> function main(): void {
   source_through_assignment_to_sink();
   source_through_function_to_sink();
   source_stopped();
   source_through_indirection_to_sink();
   source_through_mutations_into_sink();
+  source_through_global_into_sink();
 }

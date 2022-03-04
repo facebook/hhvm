@@ -320,6 +320,23 @@ void ClassesHeap::clear() {
   m_heap.clear();
 }
 
+void GlobalsHeap::set(folly::StringPiece key, Value value) {
+  m_heap[key.str()] = value;
+}
+
+Value GlobalsHeap::get(folly::StringPiece key) const {
+  auto value = m_heap.find(key);
+  if (value != m_heap.end()) {
+    return value->second;
+  }
+
+  return nullptr;
+}
+
+void GlobalsHeap::clear() {
+  m_heap.clear();
+}
+
 namespace {
 
 struct SingletonTag {};
@@ -347,6 +364,7 @@ void State::initialize() {
   heap_objects.clear();
   heap_collections.clear();
   heap_classes.clear();
+  heap_globals.clear();
   paths.clear();
   arena = std::make_unique<PathArena>();
   m_function_metadata = Configuration::get()->functionMetadata();

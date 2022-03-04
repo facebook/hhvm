@@ -178,8 +178,9 @@ const Func* callee() {
  *
  * 1) Basic instructions
  * 2) Literal and constant instructions
- * 5) Get instructions (except CGetG for globals)
+ * 5) Get instructions
  * 6) Isset and type querying instructions
+ * 7) Mutator instructions
  */
 
 void iopNop() {
@@ -743,11 +744,25 @@ void iopPushL(tv_lval locVal) {
   state->heap_locals.set(locVal, nullptr);
 }
 
-void iopCGetG() {
-  iopUnhandled("CGetG");
+namespace {
+void GetGCommon() {
+  auto state = State::instance;
+  TypedValue* property_tv = vmStack().topTV();
+
+  if (!isStringType(property_tv->m_type)) {
+    // Should never happen
+    return;
+  }
+
+  const StringData* str = property_tv->m_data.pstr;
+  auto property = str->slice();
+
+  auto value = state->heap_globals.get(property);
+
+  state->stack.pop();
+  state->stack.push(value);
 }
 
-namespace {
 void GetSCommon() {
   auto state = State::instance;
   TypedValue* klass_tv = vmStack().topC();
@@ -771,6 +786,11 @@ void GetSCommon() {
   state->stack.pop(2);
   state->stack.push(value);
 }
+}
+
+void iopCGetG() {
+  iopPreamble("CGetG");
+  GetGCommon();
 }
 
 void iopCGetS(ReadonlyOp /* op */) {
@@ -853,11 +873,33 @@ void iopSetL(tv_lval to) {
   state->heap_locals.set(std::move(to), value);
 }
 
-void iopSetG() {
-  iopUnhandled("SetG");
+namespace {
+void setGCommon(bool maybe_join) {
+  auto state = State::instance;
+
+  auto value = state->stack.top();
+  state->stack.pop(2);
+
+  TypedValue* property_tv = vmStack().indTV(1);
+
+  if (!isStringType(property_tv->m_type)) {
+    // Should never happen
+    return;
+  }
+
+  const StringData* str = property_tv->m_data.pstr;
+  auto property = str->slice();
+
+  // Prefer preserving taint where possible. This should eventually
+  // be a join operation.
+  if (maybe_join && value == nullptr) {
+    value = state->heap_globals.get(property);
+  }
+
+  state->heap_globals.set(property, value);
+  state->stack.push(value);
 }
 
-namespace {
 void setSCommon(bool maybe_join) {
   auto state = State::instance;
 
@@ -891,6 +933,12 @@ void setSCommon(bool maybe_join) {
 }
 }
 
+void iopSetG() {
+  iopPreamble("SetG");
+  // We're overwriting, so copy taint rather than join
+  setGCommon(false);
+}
+
 void iopSetS(ReadonlyOp /* op */) {
   iopPreamble("SetS");
   // We're overwriting, so copy taint rather than join
@@ -912,7 +960,9 @@ void iopSetOpL(tv_lval to, SetOpOp /* op */) {
 }
 
 void iopSetOpG(SetOpOp /* op */) {
-  iopUnhandled("SetOpG");
+  iopPreamble("SetOpG");
+  // New taint should combine the existing ones
+  setGCommon(true);
 }
 
 void iopSetOpS(SetOpOp op) {
@@ -930,7 +980,10 @@ void iopIncDecL(named_local_var fr, IncDecOp /* op */) {
 }
 
 void iopIncDecG(IncDecOp /* op */) {
-  iopUnhandled("IncDecG");
+  iopPreamble("IncDecG");
+  // We don't care about the modifications to the value
+  // so this reduces to a CGetG
+  GetGCommon();
 }
 
 void iopIncDecS(IncDecOp /* op */) {
@@ -946,7 +999,19 @@ void iopUnsetL(tv_lval loc) {
 }
 
 void iopUnsetG() {
-  iopUnhandled("UnsetG");
+  iopPreamble("UnsetG");
+
+  TypedValue* property_tv = vmStack().topTV();
+
+  if (!isStringType(property_tv->m_type)) {
+    // Should never happen
+    return;
+  }
+
+  const StringData* str = property_tv->m_data.pstr;
+  auto property = str->slice();
+
+  State::instance->heap_globals.set(property, nullptr);
 }
 
 void iopResolveFunc(Id /* id */) {

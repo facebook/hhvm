@@ -170,6 +170,17 @@ struct ClassesHeap {
   hphp_fast_map<Class*, folly::F14FastMap<std::string, Value>> m_heap;
 };
 
+// Model globals, which are just a map of string -> value
+struct GlobalsHeap {
+  void set(folly::StringPiece key, Value value);
+  Value get(folly::StringPiece key) const;
+
+  void clear();
+
+ private:
+  folly::F14FastMap<std::string, Value> m_heap;
+};
+
 struct State {
   static rds::local::RDSLocal<State, rds::local::Initialize::FirstUse> instance;
 
@@ -186,6 +197,7 @@ struct State {
   ObjectsHeap heap_objects;
   CollectionsHeap heap_collections;
   ClassesHeap heap_classes;
+  GlobalsHeap heap_globals;
 
   // Arena to hold all the paths
   std::unique_ptr<PathArena> arena;

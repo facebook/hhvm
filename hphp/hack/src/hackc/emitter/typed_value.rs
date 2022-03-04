@@ -5,31 +5,40 @@
 
 use ffi::{Pair, Slice, Str};
 
-mod float {
-    #[derive(Clone, Copy, Debug, Hash, PartialOrd, Ord, PartialEq, Eq)]
-    #[repr(C)]
-    pub struct F64([u8; 8]);
+/// Raw IEEE floating point bits. We use this rather than f64 so that the default
+/// hash/equality have the right interning behavior: -0.0 != 0.0, NaN == NaN.
+/// If we ever implement Ord/PartialOrd, we'd need to base it on the raw bits
+/// (u64), not floating point partial order.
+#[derive(Copy, Clone, Debug)]
+#[repr(transparent)]
+pub struct FloatBits(pub f64);
 
-    impl F64 {
-        pub fn to_f64(&self) -> f64 {
-            (*self).into()
-        }
-
-        pub fn classify(&self) -> std::num::FpCategory {
-            self.to_f64().classify()
-        }
+impl FloatBits {
+    pub fn to_f64(self) -> f64 {
+        self.0
     }
 
-    impl std::convert::From<f64> for F64 {
-        fn from(f: f64) -> F64 {
-            F64(f.to_be_bytes())
-        }
+    pub fn to_bits(self) -> u64 {
+        self.0.to_bits()
     }
+}
 
-    impl std::convert::From<F64> for f64 {
-        fn from(f: F64) -> f64 {
-            f64::from_be_bytes(f.0)
-        }
+impl Eq for FloatBits {}
+impl PartialEq for FloatBits {
+    fn eq(&self, other: &FloatBits) -> bool {
+        self.to_bits() == other.to_bits()
+    }
+}
+
+impl std::hash::Hash for FloatBits {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.to_bits().hash(state);
+    }
+}
+
+impl From<f64> for FloatBits {
+    fn from(x: f64) -> Self {
+        Self(x)
     }
 }
 
@@ -39,7 +48,7 @@ mod float {
 /// can be used for optimization on ASTs, or on bytecode, or (in
 /// future) on a compiler intermediate language. HHVM takes a similar
 /// approach: see runtime/base/typed-value.h
-#[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 #[repr(C)]
 pub enum TypedValue<'arena> {
     /// Used for fields that are initialized in the 86pinit method
@@ -47,12 +56,12 @@ pub enum TypedValue<'arena> {
     /// Hack/PHP integers are 64-bit
     Int(i64),
     Bool(bool),
-    /// Both Hack/PHP and Caml floats are IEEE754 64-bit
-    Float(float::F64),
+    /// Hack, C++, PHP, and Caml floats are IEEE754 64-bit
+    Double(FloatBits),
     String(Str<'arena>),
     LazyClass(Str<'arena>),
     Null,
-    // Classic PHP arrays with explicit (key,value) entries
+    /// An array literal represented as __hhas_adata("serialized-data").
     HhasAdata(Str<'arena>),
     // Hack arrays: vectors, keysets, and dictionaries
     Vec(Slice<'arena, TypedValue<'arena>>),
@@ -70,7 +79,7 @@ impl<'arena> std::convert::From<TypedValue<'arena>> for bool {
             TypedValue::String(s) => !s.is_empty() && s.unsafe_as_str() != "0",
             TypedValue::LazyClass(_) => true,
             TypedValue::Int(i) => i != 0,
-            TypedValue::Float(f) => f.to_f64() != 0.0,
+            TypedValue::Double(f) => f.to_f64() != 0.0,
             // Empty collections cast to false if empty, otherwise true
             TypedValue::Vec(v) => !v.is_empty(),
             TypedValue::Keyset(v) => !v.is_empty(),
@@ -95,7 +104,7 @@ impl<'arena> TryFrom<TypedValue<'arena>> for i64 {
             TypedValue::String(_) => Err(()),    // not worth it
             TypedValue::LazyClass(_) => Err(()), // not worth it
             TypedValue::Int(i) => Ok(i),
-            TypedValue::Float(f) => match f.classify() {
+            TypedValue::Double(f) => match f.to_f64().classify() {
                 std::num::FpCategory::Nan | std::num::FpCategory::Infinite => {
                     if f.to_f64() == std::f64::INFINITY {
                         Ok(0)
@@ -120,7 +129,7 @@ impl<'arena> TryFrom<TypedValue<'arena>> for f64 {
             TypedValue::String(_) => Err(()),    // not worth it
             TypedValue::LazyClass(_) => Err(()), // not worth it
             TypedValue::Int(i) => Ok(i as f64),
-            TypedValue::Float(f) => Ok(f.into()),
+            TypedValue::Double(f) => Ok(f.to_f64()),
             _ => Ok(if v.into() { 1.0 } else { 0.0 }),
         }
     }
@@ -199,7 +208,7 @@ impl<'arena> TypedValue<'arena> {
     pub fn neg(&self) -> Option<Self> {
         match self {
             Self::Int(i) => Some(Self::Int((-std::num::Wrapping(*i)).0)),
-            Self::Float(i) => Some(Self::float(0.0 - i.to_f64())),
+            Self::Double(i) => Some(Self::double(0.0 - i.to_f64())),
             _ => None,
         }
     }
@@ -214,7 +223,7 @@ impl<'arena> TypedValue<'arena> {
     pub fn sub(&self, v2: &Self) -> Option<Self> {
         match (self, v2) {
             (Self::Int(i1), Self::Int(i2)) => Self::sub_int(*i1, *i2),
-            (Self::Float(f1), Self::Float(f2)) => Some(Self::float(f1.to_f64() - f2.to_f64())),
+            (Self::Double(f1), Self::Double(f2)) => Some(Self::double(f1.to_f64() - f2.to_f64())),
             _ => None,
         }
     }
@@ -229,9 +238,9 @@ impl<'arena> TypedValue<'arena> {
     pub fn mul(&self, other: &Self) -> Option<Self> {
         match (self, other) {
             (Self::Int(i1), Self::Int(i2)) => Self::mul_int(*i1, *i2),
-            (Self::Float(i1), Self::Float(i2)) => Some(Self::float(i1.to_f64() * i2.to_f64())),
-            (Self::Int(i1), Self::Float(i2)) => Some(Self::float(*i1 as f64 * i2.to_f64())),
-            (Self::Float(i1), Self::Int(i2)) => Some(Self::float(i1.to_f64() * *i2 as f64)),
+            (Self::Double(i1), Self::Double(i2)) => Some(Self::double(i1.to_f64() * i2.to_f64())),
+            (Self::Int(i1), Self::Double(i2)) => Some(Self::double(*i1 as f64 * i2.to_f64())),
+            (Self::Double(i1), Self::Int(i2)) => Some(Self::double(i1.to_f64() * *i2 as f64)),
             _ => None,
         }
     }
@@ -243,17 +252,17 @@ impl<'arena> TypedValue<'arena> {
                 if i1 % i2 == 0 {
                     Some(Self::Int(i1 / i2))
                 } else {
-                    Some(Self::float(*i1 as f64 / *i2 as f64))
+                    Some(Self::double(*i1 as f64 / *i2 as f64))
                 }
             }
-            (Self::Float(f1), Self::Float(f2)) if f2.to_f64() != 0.0 => {
-                Some(Self::float(f1.to_f64() / f2.to_f64()))
+            (Self::Double(f1), Self::Double(f2)) if f2.to_f64() != 0.0 => {
+                Some(Self::double(f1.to_f64() / f2.to_f64()))
             }
-            (Self::Int(i1), Self::Float(f2)) if f2.to_f64() != 0.0 => {
-                Some(Self::float(*i1 as f64 / f2.to_f64()))
+            (Self::Int(i1), Self::Double(f2)) if f2.to_f64() != 0.0 => {
+                Some(Self::double(*i1 as f64 / f2.to_f64()))
             }
-            (Self::Float(f1), Self::Int(i2)) if *i2 != 0 => {
-                Some(Self::float(f1.to_f64() / *i2 as f64))
+            (Self::Double(f1), Self::Int(i2)) if *i2 != 0 => {
+                Some(Self::double(f1.to_f64() / *i2 as f64))
             }
             _ => None,
         }
@@ -262,10 +271,10 @@ impl<'arena> TypedValue<'arena> {
     // Arithmetic. For now, only on pure integer or float operands
     pub fn add(&self, other: &Self) -> Option<Self> {
         match (self, other) {
-            (Self::Float(i1), Self::Float(i2)) => Some(Self::float(i1.to_f64() + i2.to_f64())),
+            (Self::Double(i1), Self::Double(i2)) => Some(Self::double(i1.to_f64() + i2.to_f64())),
             (Self::Int(i1), Self::Int(i2)) => Self::add_int(*i1, *i2),
-            (Self::Int(i1), Self::Float(i2)) => Some(Self::float(*i1 as f64 + i2.to_f64())),
-            (Self::Float(i1), Self::Int(i2)) => Some(Self::float(i1.to_f64() + *i2 as f64)),
+            (Self::Int(i1), Self::Double(i2)) => Some(Self::double(*i1 as f64 + i2.to_f64())),
+            (Self::Double(i1), Self::Int(i2)) => Some(Self::double(i1.to_f64() + *i2 as f64)),
             _ => None,
         }
     }
@@ -339,16 +348,16 @@ impl<'arena> TypedValue<'arena> {
         Some(Self::Bool(self.into()))
     }
 
-    pub fn cast_to_float(self) -> Option<Self> {
-        self.try_into().ok().map(Self::float)
+    pub fn cast_to_double(self) -> Option<Self> {
+        self.try_into().ok().map(Self::double)
     }
 
     pub fn string(s: impl AsRef<str>, alloc: &'arena bumpalo::Bump) -> Self {
         Self::String((alloc.alloc_str(s.as_ref()) as &str).into())
     }
 
-    pub fn float(f: f64) -> Self {
-        Self::Float(f.into())
+    pub fn double(f: f64) -> Self {
+        Self::Double(f.into())
     }
 }
 
@@ -367,7 +376,7 @@ mod typed_value_tests {
 
     #[test]
     fn nan_to_int() {
-        let res: i64 = TypedValue::float(std::f64::NAN).try_into().unwrap();
+        let res: i64 = TypedValue::double(std::f64::NAN).try_into().unwrap();
         assert_eq!(res, std::i64::MIN);
     }
 }

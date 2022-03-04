@@ -8,7 +8,6 @@ use env::emitter::Emitter;
 use ffi::Str;
 use hhas_adata::{HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX};
 use hhbc_ast::*;
-use hhbc_string_utils as string_utils;
 use instruction_sequence::{Error, InstrSeq};
 use options::HhvmFlags;
 use runtime::TypedValue;
@@ -42,14 +41,7 @@ fn rewrite_typed_value<'arena, 'decl>(
                     hhbc_id::class::ClassType::from_ast_name_and_mangle(e.alloc, s.unsafe_as_str());
                 Instruct::LazyClass(classid)
             }
-            TypedValue::Float(f) => {
-                let fstr = bumpalo::collections::String::from_str_in(
-                    string_utils::float::to_string(*f).as_str(),
-                    e.alloc,
-                )
-                .into_bump_str();
-                Instruct::Double(Str::from(fstr))
-            }
+            TypedValue::Double(f) => Instruct::Double(f.to_f64()),
             TypedValue::Keyset(_) => {
                 let arrayid = Str::from(get_array_identifier(e, tv));
                 Instruct::Keyset(arrayid)

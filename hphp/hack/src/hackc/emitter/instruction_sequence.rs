@@ -408,22 +408,12 @@ pub mod instr {
         instr(Instruct::CheckReifiedGenericMismatch)
     }
 
-    pub fn int<'a>(i: isize) -> InstrSeq<'a> {
-        instr(Instruct::Int(i.try_into().unwrap()))
-    }
-
-    pub fn int64<'a>(i: i64) -> InstrSeq<'a> {
+    pub fn int<'a>(i: i64) -> InstrSeq<'a> {
         instr(Instruct::Int(i))
     }
 
-    pub fn int_of_string<'a>(litstr: &str) -> InstrSeq<'a> {
-        instr(Instruct::Int(litstr.parse::<i64>().unwrap()))
-    }
-
-    pub fn double<'a>(alloc: &'a bumpalo::Bump, litstr: &str) -> InstrSeq<'a> {
-        instr(Instruct::Double(Str::from(
-            bumpalo::collections::String::from_str_in(litstr, alloc).into_bump_str(),
-        )))
+    pub fn double<'a>(f: f64) -> InstrSeq<'a> {
+        instr(Instruct::Double(f))
     }
 
     pub fn string<'a>(alloc: &'a bumpalo::Bump, litstr: impl Into<String>) -> InstrSeq<'a> {

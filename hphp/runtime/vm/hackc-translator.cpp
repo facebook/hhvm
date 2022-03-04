@@ -106,14 +106,8 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
         return make_tv<KindOfInt64>(tv.int_._0);
       case kind::Bool:
         return make_tv<KindOfBoolean>(tv.bool_._0);
-      case kind::Float: {
-        uint8_t buf[8];
-        for (int i = 0; i < 8; i++) {
-          buf[i] = tv.float_._0._0[7-i];
-        }
-        double d;
-        memcpy(&d, buf, sizeof(buf));
-        return make_tv<KindOfDouble>(d);
+      case kind::Double: {
+        return make_tv<KindOfDouble>(tv.double_._0);
       }
     case kind::String: {
       auto const s = toStaticString(tv.string._0);

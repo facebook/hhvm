@@ -335,14 +335,14 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
         }
         Expr_::Float(s) => {
             if s == math::INF {
-                Ok(TypedValue::float(std::f64::INFINITY))
+                Ok(TypedValue::double(std::f64::INFINITY))
             } else if s == math::NEG_INF {
-                Ok(TypedValue::float(std::f64::NEG_INFINITY))
+                Ok(TypedValue::double(std::f64::NEG_INFINITY))
             } else if s == math::NAN {
-                Ok(TypedValue::float(std::f64::NAN))
+                Ok(TypedValue::double(std::f64::NAN))
             } else {
                 s.parse()
-                    .map(TypedValue::float)
+                    .map(TypedValue::double)
                     .map_err(|_| Error::NotLiteral)
             }
         }
@@ -369,8 +369,8 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
         Expr_::Varray(fields) => varray_to_typed_value(emitter, &fields.1),
         Expr_::Darray(fields) => darray_to_typed_value(emitter, &fields.1),
 
-        Expr_::Id(id) if id.1 == math::NAN => Ok(TypedValue::float(std::f64::NAN)),
-        Expr_::Id(id) if id.1 == math::INF => Ok(TypedValue::float(std::f64::INFINITY)),
+        Expr_::Id(id) if id.1 == math::NAN => Ok(TypedValue::double(std::f64::NAN)),
+        Expr_::Id(id) if id.1 == math::INF => Ok(TypedValue::double(std::f64::INFINITY)),
         Expr_::Id(_) => Err(Error::UserDefinedConstant),
 
         Expr_::Collection(x) if x.0.name().eq("vec") => vec_to_typed_value(emitter, &x.2),
@@ -526,7 +526,7 @@ fn cast_value<'arena>(
             } else if id == typehints::STRING {
                 v.cast_to_string(alloc)
             } else if id == typehints::FLOAT {
-                v.cast_to_float()
+                v.cast_to_double()
             } else {
                 None
             }
@@ -576,7 +576,9 @@ fn value_to_expr_<'arena>(v: TypedValue<'arena>) -> Result<ast::Expr_, Error> {
     use ast::Expr_;
     match v {
         TypedValue::Int(i) => Ok(Expr_::Int(i.to_string())),
-        TypedValue::Float(i) => Ok(Expr_::Float(hhbc_string_utils::float::to_string(i))),
+        TypedValue::Double(f) => Ok(Expr_::Float(hhbc_string_utils::float::to_string(
+            f.to_f64(),
+        ))),
         TypedValue::Bool(false) => Ok(Expr_::False),
         TypedValue::Bool(true) => Ok(Expr_::True),
         TypedValue::String(s) => Ok(Expr_::String(s.unsafe_as_str().into())),

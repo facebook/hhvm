@@ -214,7 +214,7 @@ pub enum Instruct<'arena> {
     False,
     NullUninit,
     Int(i64),
-    Double(Str<'arena>),
+    Double(f64),
     String(Str<'arena>),
     LazyClass(ClassId<'arena>),
     /// Pseudo instruction that will get translated into appropraite literal

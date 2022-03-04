@@ -713,7 +713,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                     trait_instrs,
                     instr::string(alloc, deprecation_string),
                     concat_instruction,
-                    instr::int64(sampling_rate),
+                    instr::int(sampling_rate),
                     instr::int(error_code),
                     instr::fcallfuncd(
                         FcallArgs::new(

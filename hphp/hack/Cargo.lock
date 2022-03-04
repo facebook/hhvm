@@ -41,7 +41,7 @@ dependencies = [
 name = "adata_state"
 version = "0.0.0"
 dependencies = [
- "bumpalo",
+ "hash",
  "hhas_adata",
  "runtime",
 ]
@@ -922,13 +922,11 @@ name = "emit_adata"
 version = "0.0.0"
 dependencies = [
  "adata_state",
- "bumpalo",
  "env",
  "ffi",
  "hhas_adata",
  "hhbc_ast",
  "hhbc_id",
- "hhbc_string_utils",
  "instruction_sequence",
  "options",
  "runtime",

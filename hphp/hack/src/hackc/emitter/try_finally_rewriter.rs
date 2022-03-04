@@ -86,7 +86,7 @@ pub(super) fn emit_save_label_id<'arena>(
     id: jt::StateId,
 ) -> InstrSeq<'arena> {
     InstrSeq::gather(vec![
-        instr::int(id.0 as isize),
+        instr::int(id.0.into()),
         instr::setl(*local_gen.get_label()),
         instr::popc(),
     ])

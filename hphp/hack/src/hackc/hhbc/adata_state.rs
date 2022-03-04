@@ -2,20 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use hash::HashMap;
+use hhas_adata::HhasAdata;
+use runtime::TypedValue;
 
 #[derive(Debug, Default)]
 pub struct AdataState<'arena> {
     pub array_identifier_counter: usize,
-    pub array_identifier_map: std::collections::BTreeMap<runtime::TypedValue<'arena>, &'arena str>,
-    pub adata: Vec<hhas_adata::HhasAdata<'arena>>,
-}
-
-impl<'arena> AdataState<'arena> {
-    pub fn init(_alloc: &'arena bumpalo::Bump) -> Self {
-        AdataState {
-            array_identifier_counter: 0,
-            array_identifier_map: std::collections::BTreeMap::new(),
-            adata: vec![],
-        }
-    }
+    pub array_identifier_map: HashMap<TypedValue<'arena>, &'arena str>,
+    pub adata: Vec<HhasAdata<'arena>>,
 }

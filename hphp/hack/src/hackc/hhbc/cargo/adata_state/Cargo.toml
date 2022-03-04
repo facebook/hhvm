@@ -8,6 +8,6 @@ edition = "2021"
 path = "../../adata_state.rs"
 
 [dependencies]
-bumpalo = { version = "3.8", features = ["collections"] }
+hash = { path = "../../../../utils/hash" }
 hhas_adata = { path = "../hhas_adata" }
 runtime = { path = "../../../emitter/cargo/runtime" }

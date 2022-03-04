@@ -788,7 +788,9 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Res
                 escaper::escape_bstr(s.as_bstr())
             )
         }
-        TypedValue::Float(f) => write!(w, "d:{};", float::to_string(*f)),
+        TypedValue::Double(f) => {
+            write!(w, "d:{};", float::to_string(f.to_f64()))
+        }
         TypedValue::Int(i) => write!(w, "i:{};", i),
         // TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why?
         TypedValue::Bool(false) => w.write_all(b"b:0;"),
@@ -1040,7 +1042,7 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
         }
         Instruct::True => w.write_all(b"True"),
         Instruct::False => w.write_all(b"False"),
-        Instruct::Double(d) => write_bytes!(w, "Double {}", d),
+        Instruct::Double(d) => write!(w, "Double {}", float::to_string(*d)),
         Instruct::AddElemC => w.write_all(b"AddElemC"),
         Instruct::AddNewElemC => w.write_all(b"AddNewElemC"),
         Instruct::NewPair => w.write_all(b"NewPair"),

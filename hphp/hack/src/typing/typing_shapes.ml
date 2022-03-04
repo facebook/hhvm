@@ -210,9 +210,9 @@ let idx
     default =
   let (env, shape_ty) = Env.expand_type env shape_ty in
   let (env, res) = Env.fresh_type env expr_pos in
-  let (env, res) =
+  let ((env, ty_err_opt), res) =
     match TUtils.shape_field_name env field with
-    | None -> (env, TUtils.mk_tany env field_p)
+    | None -> ((env, None), TUtils.mk_tany env field_p)
     | Some field_name ->
       let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
       let fake_super_shape_ty =
@@ -236,7 +236,7 @@ let idx
       in
       (match default with
       | None ->
-        let env =
+        let (env, ty_err_opt) =
           Typing_coercion.coerce_type
             shape_pos
             Reason.URparam
@@ -245,9 +245,10 @@ let idx
             { et_type = super_shape; et_enforced = Unenforced }
             Typing_error.Callback.unify_error
         in
-        TUtils.union env res (MakeType.null fun_pos)
+        let (env, res) = TUtils.union env res (MakeType.null fun_pos) in
+        ((env, ty_err_opt), res)
       | Some (default_pos, default_ty) ->
-        let env =
+        let (env, ty_err_opt) =
           Typing_coercion.coerce_type
             shape_pos
             Reason.URparam
@@ -265,8 +266,9 @@ let idx
             res
             Typing_error.Callback.unify_error
         in
-        (env, res))
+        ((env, ty_err_opt), res))
   in
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
   make_locl_like_type env res
 
 let at env ~expr_pos ~shape_pos shape_ty ((_, field_p, _) as field) =
@@ -293,7 +295,7 @@ let at env ~expr_pos ~shape_pos shape_ty ((_, field_p, _) as field) =
         else
           fake_super_shape_ty
       in
-      let env =
+      let (env, e1) =
         Typing_coercion.coerce_type
           shape_pos
           Reason.URparam
@@ -302,6 +304,7 @@ let at env ~expr_pos ~shape_pos shape_ty ((_, field_p, _) as field) =
           { et_type = super_shape_ty; et_enforced = Unenforced }
           Typing_error.Callback.unify_error
       in
+      Option.iter e1 ~f:Errors.add_typing_error;
       (env, res)
   in
   make_locl_like_type env res

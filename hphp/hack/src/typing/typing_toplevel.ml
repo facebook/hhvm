@@ -1349,7 +1349,7 @@ let class_const_def ~in_enum_class c env cc =
     let env = check env ty' in
     (env, te, ty')
   in
-  let (env, kind, ty) =
+  let ((env, ty_err_opt), kind, ty) =
     match k with
     | CCConcrete ((_, e_pos, _) as e) when in_enum_class ->
       let (env, cap, unsafe_cap) =
@@ -1384,7 +1384,7 @@ let class_const_def ~in_enum_class c env cc =
     | CCAbstract (Some default) ->
       let (env, tdefault, ty') = type_and_check env default in
       (env, CCAbstract (Some tdefault), ty')
-    | CCAbstract None -> (env, CCAbstract None, hint_ty.et_type)
+    | CCAbstract None -> ((env, None), CCAbstract None, hint_ty.et_type)
   in
   let (env, user_attributes) =
     if Ast_defs.is_c_class c.Aast.c_kind || Ast_defs.is_c_trait c.Aast.c_kind
@@ -1398,6 +1398,7 @@ let class_const_def ~in_enum_class c env cc =
       (env, [])
     end
   in
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
   ( env,
     ( {
         Aast.cc_type = cc.cc_type;
@@ -1440,9 +1441,9 @@ let class_var_def ~is_static cls env cv =
       (env, expected)
   in
   (* Next check the expression, passing in expected type if present *)
-  let (env, typed_cv_expr) =
+  let ((env, ty_err_opt), typed_cv_expr) =
     match cv.cv_expr with
-    | None -> (env, None)
+    | None -> ((env, None), None)
     | Some e ->
       let (env, te, ty) = Typing.expr_with_pure_coeffects env ?expected e in
       (* Check that the inferred type is a subtype of the expected type.
@@ -1450,7 +1451,7 @@ let class_var_def ~is_static cls env cv =
        *)
       let env =
         match expected with
-        | None -> env
+        | None -> (env, None)
         | Some ExpectedTy.{ pos = p; reason = ur; ty = cty; coerce } ->
           Typing_coercion.coerce_type
             ~coerce
@@ -1464,6 +1465,7 @@ let class_var_def ~is_static cls env cv =
       in
       (env, Some te)
   in
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
 
   let (env, user_attributes) =
     Typing.attributes_check_def
@@ -2148,7 +2150,7 @@ let gconst_def ctx cst =
   let env = Env.set_env_pessimize env in
   List.iter ~f:Errors.add_typing_error
   @@ Typing_type_wellformedness.global_constant env cst;
-  let (typed_cst_value, env) =
+  let (typed_cst_value, (env, ty_err_opt)) =
     let value = cst.cst_value in
     match cst.cst_type with
     | Some hint ->
@@ -2178,8 +2180,9 @@ let gconst_def ctx cst =
         Errors.add_naming_error
         @@ Naming_error.Missing_typehint (fst cst.cst_name);
       let (env, te, _value_type) = Typing.expr_with_pure_coeffects env value in
-      (te, env)
+      (te, (env, None))
   in
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
   {
     Aast.cst_annotation = Env.save (Env.get_tpenv env) env;
     Aast.cst_mode = cst.cst_mode;

@@ -94,7 +94,7 @@ let coerce_type_impl
     | _ ->
       Typing_utils.sub_type_with_ty_err env ty_have ty_expect.et_type on_error
 
-let coerce_type_with_ty_err
+let coerce_type
     ?(coerce_for_op = false)
     ?(coerce = None)
     p
@@ -108,56 +108,6 @@ let coerce_type_with_ty_err
        (Typing_error.Reasons_callback.with_claim
           on_error
           ~claim:(lazy (p, Reason.string_of_ureason ur)))
-
-let coerce_type
-    ?coerce_for_op
-    ?coerce
-    p
-    ur
-    env
-    ty_have
-    ty_expect
-    (on_error : Typing_error.Callback.t) =
-  let (env, ty_err_opt) =
-    coerce_type_with_ty_err
-      ?coerce_for_op
-      ?coerce
-      p
-      ur
-      env
-      ty_have
-      ty_expect
-      on_error
-  in
-  Option.iter ty_err_opt ~f:Errors.add_typing_error;
-  env
-
-let coerce_type_res
-    ?coerce_for_op
-    ?coerce
-    p
-    ur
-    env
-    ty_have
-    ty_expect
-    (on_error : Typing_error.Callback.t) =
-  let (env, ty_err_opt) =
-    coerce_type_with_ty_err
-      ?coerce_for_op
-      ?coerce
-      p
-      ur
-      env
-      ty_have
-      ty_expect
-      on_error
-  in
-
-  match ty_err_opt with
-  | None -> Ok env
-  | Some ty_err ->
-    Errors.add_typing_error ty_err;
-    Error env
 
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)

@@ -811,7 +811,7 @@ and obj_get_concrete_class_with_member_info
             (with_side_effect ~eff unify_error [@alert "-deprecated"]))
         in
         let (env, coerce_ty_err_opt) =
-          Typing_coercion.coerce_type_with_ty_err
+          Typing_coercion.coerce_type
             p
             ur
             env

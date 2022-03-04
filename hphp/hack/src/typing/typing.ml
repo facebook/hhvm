@@ -73,6 +73,14 @@ let debug_print_last_pos _ =
 (* Helpers *)
 (*****************************************************************************)
 
+let mk_ty_mismatch_opt ty_have ty_expect = function
+  | Some _ -> Some (ty_have, ty_expect)
+  | _ -> None
+
+let mk_ty_mismatch_res ty_have ty_expect = function
+  | Some _ -> Error (ty_have, ty_expect)
+  | _ -> Ok ty_have
+
 let mk_hole ?(source = Aast.Typing) ((_, pos, _) as expr) ~ty_have ~ty_expect =
   if equal_locl_ty ty_have ty_expect then
     expr
@@ -436,15 +444,19 @@ let check_expected_ty_res
                     Log_type ("expected_ty", ty.et_type);
                   ] );
             ]));
-    Typing_coercion.coerce_type_res
-      ~coerce_for_op
-      ~coerce
-      p
-      ur
-      env
-      inferred_ty
-      ty
-      Typing_error.Callback.unify_error
+    let (env, ty_err_opt) =
+      Typing_coercion.coerce_type
+        ~coerce_for_op
+        ~coerce
+        p
+        ur
+        env
+        inferred_ty
+        ty
+        Typing_error.Callback.unify_error
+    in
+    Option.iter ty_err_opt ~f:Errors.add_typing_error;
+    Option.value_map ~default:(Ok env) ~f:(fun _ -> Error env) ty_err_opt
 
 let check_expected_ty message env inferred_ty expected =
   Result.fold ~ok:Fn.id ~error:Fn.id
@@ -716,7 +728,7 @@ let set_readonly_this ty =
 let xhp_attribute_decl_ty env sid obj attr =
   let (namepstr, valpty) = attr in
   let (valp, valty) = valpty in
-  let ((env, ty_err_opt), (declty, _tal)) =
+  let ((env, e1), (declty, _tal)) =
     TOG.obj_get
       ~obj_pos:(fst sid)
       ~is_method:false
@@ -731,21 +743,19 @@ let xhp_attribute_decl_ty env sid obj attr =
       env
       obj
   in
-  Option.iter ty_err_opt ~f:Errors.add_typing_error;
   let ureason = Reason.URxhp (snd sid, snd namepstr) in
-  let (env, err_opt) =
-    Result.fold
-      ~ok:(fun env -> (env, None))
-      ~error:(fun env -> (env, Some (valty, declty)))
-    @@ Typing_coercion.coerce_type_res
-         valp
-         ureason
-         env
-         valty
-         (MakeType.unenforced declty)
-         Typing_error.Callback.xhp_attribute_does_not_match_hint
+  let (env, e2) =
+    Typing_coercion.coerce_type
+      valp
+      ureason
+      env
+      valty
+      (MakeType.unenforced declty)
+      Typing_error.Callback.xhp_attribute_does_not_match_hint
   in
-  (env, declty, err_opt)
+  let ty_mismatch_opt = mk_ty_mismatch_opt valty declty e2 in
+  Option.(iter ~f:Errors.add_typing_error @@ merge e1 e2 ~f:Typing_error.both);
+  (env, declty, ty_mismatch_opt)
 
 let closure_check_param env param =
   match hint_of_type_hint param.param_type_hint with
@@ -756,7 +766,7 @@ let closure_check_param env param =
       Phase.localize_hint_no_subst env ~ignore_errors:false hty
     in
     let paramty = Env.get_local env (Local_id.make_unscoped param.param_name) in
-    let env =
+    let (env, ty_err_opt) =
       Typing_coercion.coerce_type
         hint_pos
         Reason.URhint
@@ -765,6 +775,7 @@ let closure_check_param env param =
         (MakeType.unenforced hty)
         Typing_error.Callback.unify_error
     in
+    Option.iter ty_err_opt ~f:Errors.add_typing_error;
     env
 
 let stash_conts_for_closure env p is_anon captured f =
@@ -1338,21 +1349,27 @@ let call_param
     else
       (env, dep_ty)
   in
+  (* TODO: iterate over thee returned error rather than side effecting in
+     the callback *)
   let eff () =
     if env.in_support_dynamic_type_method_check then
       Typing_log.log_pessimise_param env param.fp_pos param.fp_name
   in
-  Result.fold
-    ~ok:(fun env -> (env, None))
-    ~error:(fun env -> (env, Some (dep_ty, param.fp_type.et_type)))
-  @@ Typing_coercion.coerce_type_res
-       pos
-       Reason.URparam
-       env
-       dep_ty
-       param.fp_type
-       Typing_error.Callback.(
-         (with_side_effect ~eff unify_error [@alert "-deprecated"]))
+  let (env, ty_err_opt) =
+    Typing_coercion.coerce_type
+      pos
+      Reason.URparam
+      env
+      dep_ty
+      param.fp_type
+      Typing_error.Callback.(
+        (with_side_effect ~eff unify_error [@alert "-deprecated"]))
+  in
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
+  let ty_mismatch_opt =
+    mk_ty_mismatch_opt dep_ty param.fp_type.et_type ty_err_opt
+  in
+  (env, ty_mismatch_opt)
 
 let bad_call env p ty =
   Errors.add_typing_error
@@ -1979,7 +1996,7 @@ let rec bind_param
         (* Otherwise we have an explicit type, and the default expression type
          * must be a subtype *)
         else
-          let env =
+          let (env, ty_err_opt) =
             Typing_coercion.coerce_type
               param.param_pos
               Reason.URhint
@@ -1988,6 +2005,7 @@ let rec bind_param
               ty1_enforced
               Typing_error.Callback.parameter_default_value_wrong_type
           in
+          Option.iter ty_err_opt ~f:Errors.add_typing_error;
           (env, ty1)
       in
       (env, Some te, ty1)
@@ -2310,20 +2328,21 @@ and stmt_ env pos st =
     in
     (* This is a unify_error rather than a return_type_mismatch because the return
      * statement is the problem, not the return type itself. *)
-    let (env, err_opt) =
-      Result.fold
-        ~ok:(fun env -> (env, None))
-        ~error:(fun env -> (env, Some (rty, return_type.et_type)))
-      @@ Typing_coercion.coerce_type_res
-           expr_pos
-           Reason.URreturn
-           env
-           rty
-           return_type
-           Typing_error.Callback.unify_error
+    let (env, ty_err_opt) =
+      Typing_coercion.coerce_type
+        expr_pos
+        Reason.URreturn
+        env
+        rty
+        return_type
+        Typing_error.Callback.unify_error
+    in
+    Option.iter ty_err_opt ~f:Errors.add_typing_error;
+    let ty_mismatch_opt =
+      mk_ty_mismatch_opt rty return_type.et_type ty_err_opt
     in
     let env = LEnv.move_and_merge_next_in_cont env C.Exit in
-    (env, Aast.Return (Some (hole_on_err ~err_opt te)))
+    (env, Aast.Return (Some (hole_on_err ~err_opt:ty_mismatch_opt te)))
   | Do (b, e) ->
     (* NOTE: leaks scope as currently implemented; this matches
        the behavior in naming (cf. `do_stmt` in naming/naming.ml).
@@ -2531,7 +2550,8 @@ and stmt_ env pos st =
   | Throw e ->
     let (_, p, _) = e in
     let (env, te, ty) = expr env e in
-    let env = coerce_to_throwable p env ty in
+    let (env, ty_err_opt) = coerce_to_throwable p env ty in
+    Option.iter ty_err_opt ~f:Errors.add_typing_error;
     let env = move_and_merge_next_in_catch env in
     (env, Aast.Throw te)
   | Continue ->
@@ -2690,7 +2710,8 @@ and catch catchctx env (sid, exn_lvar, b) =
   let ety_p = fst sid in
   let (env, _, _, _) = instantiable_cid ety_p env cid [] in
   let (env, _tal, _te, ety) = class_expr env [] ((), ety_p, cid) in
-  let env = coerce_to_throwable ety_p env ety in
+  let (env, ty_err_opt) = coerce_to_throwable ety_p env ety in
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
   let (p, x) = exn_lvar in
   let env = set_valid_rvalue p env x ety in
   let (env, tb) = block env b in
@@ -4309,7 +4330,7 @@ and expr_
     let Typing_env_return_info.{ return_type = expected_return; _ } =
       Env.get_return env
     in
-    let env =
+    let (env, ty_err_opt) =
       Typing_coercion.coerce_type
         p
         Reason.URyield
@@ -4318,6 +4339,7 @@ and expr_
         expected_return
         Typing_error.Callback.unify_error
     in
+    Option.iter ty_err_opt ~f:Errors.add_typing_error;
     let env = Env.forget_members env Reason.(Blame (p, BScall)) in
     let env = LEnv.save_and_merge_next_in_cont env C.Exit in
     make_result
@@ -5139,7 +5161,7 @@ and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
        * late bound type of the current enclosing class
        *)
       let (env, h) = Phase.localize_hint_no_subst env ~ignore_errors:false h in
-      let env =
+      let (env, ty_err_opt) =
         Typing_coercion.coerce_type
           pos
           Reason.URparam
@@ -5158,6 +5180,7 @@ and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
        * type-check. If $x is a string instead of ?string, null is not
        * subtype of string ...
        *)
+      Option.iter ty_err_opt ~f:Errors.add_typing_error;
       let (env, t_param) = bind_param env (h, param) in
       (env, t_params @ [t_param])
     | None ->
@@ -5168,11 +5191,11 @@ and closure_bind_param params (env, t_params) ty : env * Tast.fun_param list =
       (env, t_params @ [t_param]))
 
 and closure_bind_variadic env vparam variadic_ty =
-  let (env, ty, pos) =
+  let ((env, ty_err_opt), ty, pos) =
     match hint_of_type_hint vparam.param_type_hint with
     | None ->
       (* if the hint is missing, use the type we expect *)
-      (env, variadic_ty, get_pos variadic_ty)
+      ((env, None), variadic_ty, get_pos variadic_ty)
     | Some hint ->
       let pos = fst hint in
       let (env, h) =
@@ -5189,6 +5212,7 @@ and closure_bind_variadic env vparam variadic_ty =
       in
       (env, h, Pos_or_decl.of_raw_pos vparam.param_pos)
   in
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
   let r = Reason.Rvar_param_from_decl pos in
   let arr_values = mk (r, get_node ty) in
   let ty = MakeType.varray r arr_values in
@@ -6077,19 +6101,18 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       let (env, te1, real_type) = lvalue no_fakes e1 in
       let (env, exp_real_type) = Env.expand_type env real_type in
       let env = { env with lenv } in
-      let (env, err_opt) =
-        Result.fold
-          ~ok:(fun env -> (env, None))
-          ~error:(fun env -> (env, Some (ty2, exp_real_type)))
-        @@ Typing_coercion.coerce_type_res
-             p
-             ur
-             env
-             ty2
-             (MakeType.unenforced exp_real_type)
-             Typing_error.Callback.unify_error
+      let (env, ty_err_opt) =
+        Typing_coercion.coerce_type
+          p
+          ur
+          env
+          ty2
+          (MakeType.unenforced exp_real_type)
+          Typing_error.Callback.unify_error
       in
-      (env, te1, ty2, err_opt)
+      Option.iter ty_err_opt ~f:Errors.add_typing_error;
+      let ty_mismatch = mk_ty_mismatch_opt ty2 exp_real_type ty_err_opt in
+      (env, te1, ty2, ty_mismatch)
     | (_, _, Class_get (_, CGexpr _, _)) ->
       failwith "AST should not have any CGexprs after naming"
     | (_, _, Class_get (((_, _, x) as cid), CGstring (pos_member, y), _)) ->
@@ -6185,19 +6208,18 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
 
 and assign_simple pos ur env e1 ty2 =
   let (env, te1, ty1) = lvalue env e1 in
-  let (env, err_opt) =
-    Result.fold
-      ~ok:(fun env -> (env, None))
-      ~error:(fun env -> (env, Some (ty2, ty1)))
-    @@ Typing_coercion.coerce_type_res
-         pos
-         ur
-         env
-         ty2
-         (MakeType.unenforced ty1)
-         Typing_error.Callback.unify_error
+  let (env, ty_err_opt) =
+    Typing_coercion.coerce_type
+      pos
+      ur
+      env
+      ty2
+      (MakeType.unenforced ty1)
+      Typing_error.Callback.unify_error
   in
-  (env, te1, ty2, err_opt)
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
+  let ty_mismatch = mk_ty_mismatch_opt ty2 ty1 ty_err_opt in
+  (env, te1, ty2, ty_mismatch)
 
 and array_field env ~allow_awaitable = function
   | AFvalue ve ->
@@ -6229,7 +6251,7 @@ and arraykey_value
       (MakeType.arraykey (Reason.Ridx_dict pos), Reason.index_class class_name)
   in
   let ty_expected = { et_type = ty_arraykey; et_enforced = Enforced } in
-  let (env, te) =
+  let ((env, ty_err_opt), te) =
     if add_hole then
       (* If we have an error in coercion here, we will add a `Hole` indicating the
            actual and expected type. The `Hole` may then be used in a codemod to
@@ -6242,46 +6264,49 @@ and arraykey_value
            To try and prevent this, if this is an optional type where the nonnull
            part can be coerced to arraykey, we prefer that type as our expected type.
       *)
-      let (ok, ty_actual) =
+      let (ty_actual, is_option) =
         match deref ty with
-        | (_, Toption ty_inner) ->
-          ( (fun env ->
-              let ty_str = lazy (Typing_print.full_strip_ns env ty_inner) in
-              let reasons_opt =
-                Some
-                  (Lazy.map ty_str ~f:(fun ty_str ->
-                       Reason.to_string
-                         "Expected `arraykey`"
-                         (Reason.Ridx_dict pos)
-                       @ [(get_pos ty, Format.sprintf "But got `?%s`" ty_str)]))
-              in
-              (* We actually failed so generate the error we should
-                 have seen *)
-              Errors.add_typing_error
-                Typing_error.(
-                  primary
-                  @@ Primary.Unify_error
-                       {
-                         pos;
-                         msg_opt = Some (Reason.string_of_ureason reason);
-                         reasons_opt;
-                       });
-              (env, Some (ty, ty_inner))),
-            ty_inner )
-        | _ -> ((fun env -> (env, None)), ty)
+        | (_, Toption ty_inner) -> (ty_inner, true)
+        | _ -> (ty, false)
       in
-      let (env, err_opt) =
-        Result.fold ~ok ~error:(fun env -> (env, Some (ty_actual, ty_arraykey)))
-        @@ Typing_coercion.coerce_type_res
-             ~coerce_for_op:true
-             p
-             reason
-             env
-             ty_actual
-             ty_expected
-             Typing_error.Callback.unify_error
+      let (env, e1) =
+        Typing_coercion.coerce_type
+          ~coerce_for_op:true
+          p
+          reason
+          env
+          ty_actual
+          ty_expected
+          Typing_error.Callback.unify_error
       in
-      (env, hole_on_err ~err_opt te)
+      let (ty_mismatch, e2) =
+        match e1 with
+        | None when is_option ->
+          let ty_str = lazy (Typing_print.full_strip_ns env ty_actual) in
+          let reasons_opt =
+            Some
+              (Lazy.map ty_str ~f:(fun ty_str ->
+                   Reason.to_string "Expected `arraykey`" (Reason.Ridx_dict pos)
+                   @ [(get_pos ty, Format.sprintf "But got `?%s`" ty_str)]))
+          in
+          (* We actually failed so generate the error we should
+             have seen *)
+          let ty_err =
+            Typing_error.(
+              primary
+              @@ Primary.Unify_error
+                   {
+                     pos;
+                     msg_opt = Some (Reason.string_of_ureason reason);
+                     reasons_opt;
+                   })
+          in
+          (Some (ty, ty_actual), Some ty_err)
+        | None -> (None, None)
+        | Some _ -> (Some (ty_actual, ty_arraykey), None)
+      in
+      let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+      ((env, ty_err_opt), hole_on_err ~err_opt:ty_mismatch te)
     else
       let env =
         Typing_coercion.coerce_type
@@ -6295,6 +6320,7 @@ and arraykey_value
       in
       (env, te)
   in
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
 
   (env, (te, ty))
 
@@ -7517,16 +7543,18 @@ and class_get_inner
             match coerce_from_ty with
             | None -> (env, None)
             | Some (p, ur, ty) ->
-              Result.fold
-                ~ok:(fun env -> (env, Some (Ok ty)))
-                ~error:(fun env -> (env, Some (Error (ty, member_ty))))
-              @@ Typing_coercion.coerce_type_res
-                   p
-                   ur
-                   env
-                   ty
-                   { et_type = member_ty; et_enforced }
-                   Typing_error.Callback.unify_error
+              let (env, ty_err_opt) =
+                Typing_coercion.coerce_type
+                  p
+                  ur
+                  env
+                  ty
+                  { et_type = member_ty; et_enforced }
+                  Typing_error.Callback.unify_error
+              in
+              Option.iter ty_err_opt ~f:Errors.add_typing_error;
+              let ty_mismatch = mk_ty_mismatch_res ty member_ty ty_err_opt in
+              (env, Some ty_mismatch)
           in
           (env, (member_ty, tal), rval_err)))
   | (_, Tunapplied_alias _) ->
@@ -8120,16 +8148,18 @@ and call
                 | Terr
                 | Tany _
                 | Tdynamic ->
-                  Result.fold
-                    ~ok:(fun env -> (env, None))
-                    ~error:(fun env -> (env, Some (ty, efty)))
-                  @@ Typing_coercion.coerce_type_res
-                       pos
-                       Reason.URparam
-                       env
-                       ty
-                       (MakeType.unenforced efty)
-                       Typing_error.Callback.unify_error
+                  let (env, ty_err_opt) =
+                    Typing_coercion.coerce_type
+                      pos
+                      Reason.URparam
+                      env
+                      ty
+                      (MakeType.unenforced efty)
+                      Typing_error.Callback.unify_error
+                  in
+                  Option.iter ty_err_opt ~f:Errors.add_typing_error;
+                  let ty_mismatch = mk_ty_mismatch_opt ty efty ty_err_opt in
+                  (env, ty_mismatch)
                 | _ -> (env, None)
               else
                 (env, None)

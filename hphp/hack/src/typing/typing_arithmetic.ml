@@ -62,19 +62,18 @@ let is_super_num env t =
  *)
 let check_dynamic_or_enforce_num env p t r err =
   let et_type = MakeType.num r in
-  let (env, err_opt) =
-    Common.Result.fold
-      ~ok:(fun env -> (env, None))
-      ~error:(fun env -> (env, Some (t, et_type)))
-    @@ Typing_coercion.coerce_type_res
-         ~coerce_for_op:true
-         p
-         Reason.URnone
-         env
-         t
-         { et_type; et_enforced = Enforced }
-         err
+  let (env, ty_err_opt) =
+    Typing_coercion.coerce_type
+      ~coerce_for_op:true
+      p
+      Reason.URnone
+      env
+      t
+      { et_type; et_enforced = Enforced }
+      err
   in
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
+  let ty_mismatch = Option.map ty_err_opt ~f:Fn.(const (t, et_type)) in
   let widen_for_arithmetic env ty =
     match get_node ty with
     | Tprim Tast.Tfloat -> (env, Some ty)
@@ -90,7 +89,7 @@ let check_dynamic_or_enforce_num env p t r err =
       p
       t
   in
-  (env, Typing_utils.is_dynamic env t, err_opt)
+  (env, Typing_utils.is_dynamic env t, ty_mismatch)
 
 (* Checking of numeric operands for arithmetic operators that work only
  * on integers:
@@ -99,20 +98,19 @@ let check_dynamic_or_enforce_num env p t r err =
  *)
 let check_dynamic_or_enforce_int env p t r err =
   let et_type = MakeType.int r in
-  let (env, err_opt) =
-    Common.Result.fold
-      ~ok:(fun env -> (env, None))
-      ~error:(fun env -> (env, Some (t, et_type)))
-    @@ Typing_coercion.coerce_type_res
-         ~coerce_for_op:true
-         p
-         Reason.URnone
-         env
-         t
-         { et_type; et_enforced = Enforced }
-         err
+  let (env, ty_err_opt) =
+    Typing_coercion.coerce_type
+      ~coerce_for_op:true
+      p
+      Reason.URnone
+      env
+      t
+      { et_type; et_enforced = Enforced }
+      err
   in
-  (env, Typing_utils.is_dynamic env t, err_opt)
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
+  let ty_mismatch = Option.map ty_err_opt ~f:Fn.(const (t, et_type)) in
+  (env, Typing_utils.is_dynamic env t, ty_mismatch)
 
 (* Secondary check of numeric operand for arithmetic operators. We've
  * already enforced num and tried to infer a float. Now let's

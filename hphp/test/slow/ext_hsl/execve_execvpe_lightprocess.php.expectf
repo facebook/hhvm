@@ -6,3 +6,5 @@
 --- Check environment variables are preserved with execvpe
 STDOUT: HERP
 STDERR: DERP
+--- Check the pid is not a zombie after the pcntl_waitpid call
+STDOUT:     PID TTY      STAT   TIME COMMAND

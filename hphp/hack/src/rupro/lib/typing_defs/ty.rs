@@ -125,7 +125,7 @@ impl<'a, R: Reason> ToOxidized<'a> for Ty<R> {
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         use oxidized_by_ref::typing_defs::Ty_ as OTy_;
-        let r = self.reason().to_oxidized(arena);
+        let r = arena.alloc(self.reason().to_oxidized(arena));
         let ty = match &**self.node() {
             Ty_::Tvar(tv) => OTy_::Tvar((*tv).into()),
             Ty_::Tprim(x) => OTy_::Tprim(arena.alloc(*x)),

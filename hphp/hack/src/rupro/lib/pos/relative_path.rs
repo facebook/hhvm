@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::ToOxidized;
 use intern::string::BytesId;
 use std::ffi::OsStr;
 use std::fmt;
@@ -48,11 +49,24 @@ impl RelativePath {
         buf.push(&OsStr::from_bytes(self.suffix.as_bytes()));
         buf
     }
+}
 
-    pub fn to_oxidized(&self) -> oxidized::relative_path::RelativePath {
-        oxidized::relative_path::RelativePath::make(
+impl<'a> ToOxidized<'a> for RelativePath {
+    type Output = &'a oxidized_by_ref::relative_path::RelativePath<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        arena.alloc(oxidized_by_ref::relative_path::RelativePath::new(
             self.prefix,
-            OsStr::from_bytes(self.suffix.as_bytes()).into(),
+            Path::new(OsStr::from_bytes(self.suffix.as_bytes())),
+        ))
+    }
+}
+
+impl From<RelativePath> for oxidized::relative_path::RelativePath {
+    fn from(path: RelativePath) -> Self {
+        Self::make(
+            path.prefix,
+            OsStr::from_bytes(path.suffix.as_bytes()).into(),
         )
     }
 }

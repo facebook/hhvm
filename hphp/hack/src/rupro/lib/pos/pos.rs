@@ -21,6 +21,7 @@ pub trait Pos:
     + std::fmt::Debug
     + for<'a> From<&'a oxidized::pos::Pos>
     + for<'a> From<&'a oxidized_by_ref::pos::Pos<'a>>
+    + for<'a> ToOxidized<'a, Output = &'a oxidized_by_ref::pos::Pos<'a>>
     + EqModuloPos
     + 'static
 {
@@ -41,8 +42,6 @@ pub trait Pos:
             (pos.filename().into(), start, end)
         })
     }
-
-    fn to_oxidized<'a>(&self, arena: &'a bumpalo::Bump) -> &'a oxidized_by_ref::pos::Pos<'a>;
 }
 
 /// Represents a closed-ended range [start, end] in a file.
@@ -74,13 +73,6 @@ impl Pos for BPos {
     fn mk(cons: impl FnOnce() -> (RelativePath, FilePosLarge, FilePosLarge)) -> Self {
         let (file, start, end) = cons();
         Self::new(file, start, end)
-    }
-
-    fn to_oxidized<'a>(
-        &self,
-        _arena: &'a bumpalo::Bump,
-    ) -> &'a oxidized_by_ref::pos_or_decl::PosOrDecl<'a> {
-        unimplemented!()
     }
 }
 
@@ -188,6 +180,35 @@ impl<'a> From<&'a oxidized_by_ref::pos::Pos<'a>> for BPos {
     }
 }
 
+impl<'a> ToOxidized<'a> for BPos {
+    type Output = &'a oxidized_by_ref::pos::Pos<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        let file = self.file().to_oxidized(arena);
+        arena.alloc(match &self.0 {
+            PosImpl::Small { span, .. } => {
+                let (start, end) = **span;
+                oxidized_by_ref::pos::Pos::from_raw_span(
+                    arena,
+                    file,
+                    PosSpanRaw {
+                        start: start.into(),
+                        end: end.into(),
+                    },
+                )
+            }
+            PosImpl::Large { span, .. } => {
+                let (start, end) = **span;
+                oxidized_by_ref::pos::Pos::from_raw_span(arena, file, PosSpanRaw { start, end })
+            }
+            PosImpl::Tiny { span, .. } => {
+                let span = span.to_raw_span();
+                oxidized_by_ref::pos::Pos::from_raw_span(arena, file, span)
+            }
+        })
+    }
+}
+
 /// A stateless sentinel Pos.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct NPos;
@@ -195,10 +216,6 @@ pub struct NPos;
 impl Pos for NPos {
     fn mk(_cons: impl FnOnce() -> (RelativePath, FilePosLarge, FilePosLarge)) -> Self {
         NPos
-    }
-
-    fn to_oxidized<'a>(&self, _arena: &'a bumpalo::Bump) -> &'a oxidized_by_ref::pos::Pos<'a> {
-        oxidized_by_ref::pos::Pos::none()
     }
 }
 
@@ -217,6 +234,14 @@ impl<'a> From<&'a oxidized::pos::Pos> for NPos {
 impl<'a> From<&'a oxidized_by_ref::pos::Pos<'a>> for NPos {
     fn from(pos: &'a oxidized_by_ref::pos::Pos<'a>) -> Self {
         Self::from_decl(pos)
+    }
+}
+
+impl<'a> ToOxidized<'a> for NPos {
+    type Output = &'a oxidized_by_ref::pos::Pos<'a>;
+
+    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
+        oxidized_by_ref::pos::Pos::none()
     }
 }
 
@@ -281,13 +306,10 @@ impl<'a, S: From<&'a str>, P: Pos> From<oxidized_by_ref::typing_defs::PosId<'a>>
     }
 }
 
-impl<'a, S: std::convert::AsRef<str>, P: Pos> ToOxidized<'a> for Positioned<S, P> {
+impl<'a, S: ToOxidized<'a, Output = &'a str>, P: Pos> ToOxidized<'a> for Positioned<S, P> {
     type Output = oxidized_by_ref::typing_reason::PosId<'a>;
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        (
-            self.pos().to_oxidized(arena),
-            arena.alloc_str(self.id.as_ref()),
-        )
+        (self.pos.to_oxidized(arena), self.id.to_oxidized(arena))
     }
 }

@@ -25,7 +25,7 @@ impl DeclParser {
         let parsed_file = stack_limit::with_elastic_stack(|stack_limit| {
             direct_decl_parser::parse_decls(
                 Default::default(),
-                path.to_oxidized(),
+                path.into(),
                 &text,
                 &arena,
                 Some(stack_limit),

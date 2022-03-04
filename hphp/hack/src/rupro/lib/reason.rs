@@ -6,7 +6,7 @@
 use hcons::{Conser, Hc};
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 use once_cell::sync::OnceCell;
-use pos::{BPos, NPos, Pos, Positioned, Symbol, TypeConstName, TypeName};
+use pos::{BPos, NPos, Pos, Positioned, Symbol, ToOxidized, TypeConstName, TypeName};
 use std::hash::Hash;
 
 use crate::decl_defs::DeclTy_;
@@ -25,6 +25,7 @@ pub trait Reason:
     + Send
     + Sync
     + for<'a> From<oxidized_by_ref::typing_reason::T_<'a>>
+    + for<'a> ToOxidized<'a, Output = oxidized_by_ref::typing_reason::T_<'a>>
     + 'static
 {
     /// Position type.
@@ -58,20 +59,15 @@ pub trait Reason:
 
     fn pos(&self) -> &Self::Pos;
 
-    fn to_oxidized<'a>(
-        &self,
-        arena: &'a bumpalo::Bump,
-    ) -> &'a oxidized_by_ref::typing_reason::Reason<'a>;
-
     fn cons_decl_ty(ty: DeclTy_<Self>) -> Hc<DeclTy_<Self>>;
 
     fn cons_ty(ty: Ty_<Self, Ty<Self>>) -> Hc<Ty_<Self, Ty<Self>>>;
 
     fn from_oxidized(reason: oxidized_by_ref::typing_reason::T_<'_>) -> Self {
         Self::mk(|| {
-            use crate::reason::ReasonImpl as RI;
             use oxidized_by_ref::typing_reason::Blame as OBlame;
             use oxidized_by_ref::typing_reason::T_ as OR;
+            use ReasonImpl as RI;
             match reason {
                 OR::Rnone => RI::Rnone,
                 OR::Rwitness(pos) => RI::Rwitness(pos.into()),
@@ -226,6 +222,22 @@ impl<'a> From<oxidized_by_ref::typing_reason::ExprDepTypeReason<'a>> for ExprDep
     }
 }
 
+impl<'a> ToOxidized<'a> for ExprDepTypeReason {
+    type Output = oxidized_by_ref::typing_reason::ExprDepTypeReason<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use oxidized_by_ref::typing_reason::ExprDepTypeReason as Obr;
+        match self {
+            ExprDepTypeReason::ERexpr(i) => Obr::ERexpr(*i),
+            ExprDepTypeReason::ERstatic => Obr::ERstatic,
+            ExprDepTypeReason::ERclass(s) => Obr::ERclass(s.to_oxidized(arena)),
+            ExprDepTypeReason::ERparent(s) => Obr::ERparent(s.to_oxidized(arena)),
+            ExprDepTypeReason::ERself(s) => Obr::ERself(s.to_oxidized(arena)),
+            ExprDepTypeReason::ERpu(s) => Obr::ERpu(s.to_oxidized(arena)),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ReasonImpl<R, P> {
     Rnone,
@@ -349,13 +361,6 @@ impl Reason for BReason {
         }
     }
 
-    fn to_oxidized<'a>(
-        &self,
-        _arena: &'a bumpalo::Bump,
-    ) -> &'a oxidized_by_ref::typing_reason::Reason<'a> {
-        unimplemented!()
-    }
-
     #[inline]
     fn cons_decl_ty(ty: DeclTy_<BReason>) -> Hc<DeclTy_<BReason>> {
         static CONSER: OnceCell<Conser<DeclTy_<BReason>>> = OnceCell::new();
@@ -371,15 +376,202 @@ impl Reason for BReason {
 
 impl Walkable<BReason> for BReason {}
 
-impl<'a> From<oxidized_by_ref::typing_reason::T_<'a>> for BReason {
-    fn from(reason: oxidized_by_ref::typing_reason::T_<'a>) -> Self {
+impl<'a> From<oxidized_by_ref::typing_reason::Reason<'a>> for BReason {
+    fn from(reason: oxidized_by_ref::typing_reason::Reason<'a>) -> Self {
         Self::from_oxidized(reason)
     }
 }
 
+impl<'a> ToOxidized<'a> for BReason {
+    type Output = oxidized_by_ref::typing_reason::Reason<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        use oxidized_by_ref::typing_reason::Blame as OBlame;
+        use oxidized_by_ref::typing_reason::Reason as OR;
+        use ReasonImpl as RI;
+        match &*self.0 {
+            RI::Rnone => OR::Rnone,
+            RI::Rwitness(pos) => OR::Rwitness(pos.to_oxidized(arena)),
+            RI::RwitnessFromDecl(pos) => OR::RwitnessFromDecl(pos.to_oxidized(arena)),
+            RI::Ridx(pos, r) => {
+                OR::Ridx(arena.alloc((pos.to_oxidized(arena), r.to_oxidized(arena))))
+            }
+            RI::RidxVector(pos) => OR::RidxVector(pos.to_oxidized(arena)),
+            RI::RidxVectorFromDecl(pos) => OR::RidxVectorFromDecl(pos.to_oxidized(arena)),
+            RI::Rforeach(pos) => OR::Rforeach(pos.to_oxidized(arena)),
+            RI::Rasyncforeach(pos) => OR::Rasyncforeach(pos.to_oxidized(arena)),
+            RI::Rarith(pos) => OR::Rarith(pos.to_oxidized(arena)),
+            RI::RarithRet(pos) => OR::RarithRet(pos.to_oxidized(arena)),
+            RI::RarithRetFloat(pos, r, arg_position) => OR::RarithRetFloat(arena.alloc((
+                pos.to_oxidized(arena),
+                r.to_oxidized(arena),
+                *arg_position,
+            ))),
+            RI::RarithRetNum(pos, r, arg_position) => OR::RarithRetNum(arena.alloc((
+                pos.to_oxidized(arena),
+                r.to_oxidized(arena),
+                *arg_position,
+            ))),
+            RI::RarithRetInt(pos) => OR::RarithRetInt(pos.to_oxidized(arena)),
+            RI::RarithDynamic(pos) => OR::RarithDynamic(pos.to_oxidized(arena)),
+            RI::RbitwiseDynamic(pos) => OR::RbitwiseDynamic(pos.to_oxidized(arena)),
+            RI::RincdecDynamic(pos) => OR::RincdecDynamic(pos.to_oxidized(arena)),
+            RI::Rcomp(pos) => OR::Rcomp(pos.to_oxidized(arena)),
+            RI::RconcatRet(pos) => OR::RconcatRet(pos.to_oxidized(arena)),
+            RI::RlogicRet(pos) => OR::RlogicRet(pos.to_oxidized(arena)),
+            RI::Rbitwise(pos) => OR::Rbitwise(pos.to_oxidized(arena)),
+            RI::RbitwiseRet(pos) => OR::RbitwiseRet(pos.to_oxidized(arena)),
+            RI::RnoReturn(pos) => OR::RnoReturn(pos.to_oxidized(arena)),
+            RI::RnoReturnAsync(pos) => OR::RnoReturnAsync(pos.to_oxidized(arena)),
+            RI::RretFunKind(pos, fun_kind) => {
+                OR::RretFunKind(arena.alloc((pos.to_oxidized(arena), *fun_kind)))
+            }
+            RI::RretFunKindFromDecl(pos, fun_kind) => {
+                OR::RretFunKindFromDecl(arena.alloc((pos.to_oxidized(arena), *fun_kind)))
+            }
+            RI::Rhint(pos) => OR::Rhint(pos.to_oxidized(arena)),
+            RI::Rthrow(pos) => OR::Rthrow(pos.to_oxidized(arena)),
+            RI::Rplaceholder(pos) => OR::Rplaceholder(pos.to_oxidized(arena)),
+            RI::RretDiv(pos) => OR::RretDiv(pos.to_oxidized(arena)),
+            RI::RyieldGen(pos) => OR::RyieldGen(pos.to_oxidized(arena)),
+            RI::RyieldAsyncgen(pos) => OR::RyieldAsyncgen(pos.to_oxidized(arena)),
+            RI::RyieldAsyncnull(pos) => OR::RyieldAsyncnull(pos.to_oxidized(arena)),
+            RI::RyieldSend(pos) => OR::RyieldSend(pos.to_oxidized(arena)),
+            RI::RlostInfo(sym, r, Blame(pos, blame_source)) => OR::RlostInfo(arena.alloc((
+                sym.to_oxidized(arena),
+                r.to_oxidized(arena),
+                OBlame::Blame(arena.alloc((pos.to_oxidized(arena), *blame_source))),
+            ))),
+            RI::Rformat(pos, sym, r) => OR::Rformat(arena.alloc((
+                pos.to_oxidized(arena),
+                sym.to_oxidized(arena),
+                r.to_oxidized(arena),
+            ))),
+            RI::RclassClass(pos, s) => {
+                OR::RclassClass(arena.alloc((pos.to_oxidized(arena), s.to_oxidized(arena))))
+            }
+            RI::RunknownClass(pos) => OR::RunknownClass(pos.to_oxidized(arena)),
+            RI::RvarParam(pos) => OR::RvarParam(pos.to_oxidized(arena)),
+            RI::RvarParamFromDecl(pos) => OR::RvarParamFromDecl(pos.to_oxidized(arena)),
+            RI::RunpackParam(pos1, pos2, i) => OR::RunpackParam(arena.alloc((
+                pos1.to_oxidized(arena),
+                pos2.to_oxidized(arena),
+                *i,
+            ))),
+            RI::RinoutParam(pos) => OR::RinoutParam(pos.to_oxidized(arena)),
+            RI::Rinstantiate(r1, type_name, r2) => OR::Rinstantiate(arena.alloc((
+                r1.to_oxidized(arena),
+                type_name.to_oxidized(arena),
+                r2.to_oxidized(arena),
+            ))),
+            RI::Rtypeconst(r1, pos_id, sym, r2) => OR::Rtypeconst(arena.alloc((
+                r1.to_oxidized(arena),
+                pos_id.to_oxidized(arena),
+                &*arena.alloc(oxidized_by_ref::lazy::Lazy(sym.to_oxidized(arena))),
+                r2.to_oxidized(arena),
+            ))),
+            RI::RtypeAccess(r, list) => OR::RtypeAccess(arena.alloc((
+                r.to_oxidized(arena),
+                &*arena.alloc_slice_fill_iter(list.iter().map(|(r, s)| {
+                    (
+                        &*arena.alloc(r.to_oxidized(arena)),
+                        &*arena.alloc(oxidized_by_ref::lazy::Lazy(s.to_oxidized(arena))),
+                    )
+                })),
+            ))),
+            RI::RexprDepType(r, pos, edt_reason) => OR::RexprDepType(arena.alloc((
+                r.to_oxidized(arena),
+                pos.to_oxidized(arena),
+                edt_reason.to_oxidized(arena),
+            ))),
+            RI::RnullsafeOp(pos) => OR::RnullsafeOp(pos.to_oxidized(arena)),
+            RI::RtconstNoCstr(pos_id) => OR::RtconstNoCstr(arena.alloc(pos_id.to_oxidized(arena))),
+            RI::Rpredicated(pos, s) => {
+                OR::Rpredicated(arena.alloc((pos.to_oxidized(arena), s.to_oxidized(arena))))
+            }
+            RI::Ris(pos) => OR::Ris(pos.to_oxidized(arena)),
+            RI::Ras(pos) => OR::Ras(pos.to_oxidized(arena)),
+            RI::RvarrayOrDarrayKey(pos) => OR::RvarrayOrDarrayKey(pos.to_oxidized(arena)),
+            RI::RvecOrDictKey(pos) => OR::RvecOrDictKey(pos.to_oxidized(arena)),
+            RI::Rusing(pos) => OR::Rusing(pos.to_oxidized(arena)),
+            RI::RdynamicProp(pos) => OR::RdynamicProp(pos.to_oxidized(arena)),
+            RI::RdynamicCall(pos) => OR::RdynamicCall(pos.to_oxidized(arena)),
+            RI::RdynamicConstruct(pos) => OR::RdynamicConstruct(pos.to_oxidized(arena)),
+            RI::RidxDict(pos) => OR::RidxDict(pos.to_oxidized(arena)),
+            RI::RsetElement(pos) => OR::RsetElement(pos.to_oxidized(arena)),
+            RI::RmissingOptionalField(pos, s) => OR::RmissingOptionalField(
+                arena.alloc((pos.to_oxidized(arena), s.to_oxidized(arena))),
+            ),
+            RI::RunsetField(pos, s) => {
+                OR::RunsetField(arena.alloc((pos.to_oxidized(arena), s.to_oxidized(arena))))
+            }
+            RI::RcontravariantGeneric(r, s) => {
+                OR::RcontravariantGeneric(arena.alloc((r.to_oxidized(arena), s.to_oxidized(arena))))
+            }
+            RI::RinvariantGeneric(r, s) => {
+                OR::RinvariantGeneric(arena.alloc((r.to_oxidized(arena), s.to_oxidized(arena))))
+            }
+            RI::Rregex(pos) => OR::Rregex(pos.to_oxidized(arena)),
+            RI::RimplicitUpperBound(pos, s) => {
+                OR::RimplicitUpperBound(arena.alloc((pos.to_oxidized(arena), s.to_oxidized(arena))))
+            }
+            RI::RtypeVariable(pos) => OR::RtypeVariable(pos.to_oxidized(arena)),
+            RI::RtypeVariableGenerics(pos, s1, s2) => OR::RtypeVariableGenerics(arena.alloc((
+                pos.to_oxidized(arena),
+                s1.to_oxidized(arena),
+                s2.to_oxidized(arena),
+            ))),
+            RI::RglobalTypeVariableGenerics(pos, s1, s2) => {
+                OR::RglobalTypeVariableGenerics(arena.alloc((
+                    pos.to_oxidized(arena),
+                    s1.to_oxidized(arena),
+                    s2.to_oxidized(arena),
+                )))
+            }
+            RI::RsolveFail(pos) => OR::RsolveFail(pos.to_oxidized(arena)),
+            RI::RcstrOnGenerics(pos, pos_id) => OR::RcstrOnGenerics(
+                arena.alloc((pos.to_oxidized(arena), pos_id.to_oxidized(arena))),
+            ),
+            RI::RlambdaParam(pos, r) => {
+                OR::RlambdaParam(arena.alloc((pos.to_oxidized(arena), r.to_oxidized(arena))))
+            }
+            RI::Rshape(pos, s) => {
+                OR::Rshape(arena.alloc((pos.to_oxidized(arena), s.to_oxidized(arena))))
+            }
+            RI::Renforceable(pos) => OR::Renforceable(pos.to_oxidized(arena)),
+            RI::Rdestructure(pos) => OR::Rdestructure(pos.to_oxidized(arena)),
+            RI::RkeyValueCollectionKey(pos) => OR::RkeyValueCollectionKey(pos.to_oxidized(arena)),
+            RI::RglobalClassProp(pos) => OR::RglobalClassProp(pos.to_oxidized(arena)),
+            RI::RglobalFunParam(pos) => OR::RglobalFunParam(pos.to_oxidized(arena)),
+            RI::RglobalFunRet(pos) => OR::RglobalFunRet(pos.to_oxidized(arena)),
+            RI::Rsplice(pos) => OR::Rsplice(pos.to_oxidized(arena)),
+            RI::RetBoolean(pos) => OR::RetBoolean(pos.to_oxidized(arena)),
+            RI::RdefaultCapability(pos) => OR::RdefaultCapability(pos.to_oxidized(arena)),
+            RI::RconcatOperand(pos) => OR::RconcatOperand(pos.to_oxidized(arena)),
+            RI::RinterpOperand(pos) => OR::RinterpOperand(pos.to_oxidized(arena)),
+            RI::RdynamicCoercion(r) => OR::RdynamicCoercion(arena.alloc(r.to_oxidized(arena))),
+            RI::RsupportDynamicType(pos) => OR::RsupportDynamicType(pos.to_oxidized(arena)),
+            RI::RdynamicPartialEnforcement(pos, s, r) => {
+                OR::RdynamicPartialEnforcement(arena.alloc((
+                    pos.to_oxidized(arena),
+                    s.to_oxidized(arena),
+                    r.to_oxidized(arena),
+                )))
+            }
+            RI::RrigidTvarEscape(pos, s1, s2, r) => OR::RrigidTvarEscape(arena.alloc((
+                pos.to_oxidized(arena),
+                s1.to_oxidized(arena),
+                s2.to_oxidized(arena),
+                r.to_oxidized(arena),
+            ))),
+        }
+    }
+}
+
 impl ToOcamlRep for BReason {
-    fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> OpaqueValue<'a> {
-        unimplemented!()
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+        let arena = &bumpalo::Bump::new();
+        self.to_oxidized(arena).to_ocamlrep(alloc)
     }
 }
 
@@ -402,13 +594,6 @@ impl Reason for NReason {
         &NPos
     }
 
-    fn to_oxidized<'a>(
-        &self,
-        _arena: &'a bumpalo::Bump,
-    ) -> &'a oxidized_by_ref::typing_reason::Reason<'a> {
-        &oxidized_by_ref::typing_reason::Reason::Rnone
-    }
-
     #[inline]
     fn cons_decl_ty(ty: DeclTy_<NReason>) -> Hc<DeclTy_<NReason>> {
         static CONSER: OnceCell<Conser<DeclTy_<NReason>>> = OnceCell::new();
@@ -427,6 +612,14 @@ impl Walkable<NReason> for NReason {}
 impl<'a> From<oxidized_by_ref::typing_reason::T_<'a>> for NReason {
     fn from(reason: oxidized_by_ref::typing_reason::T_<'a>) -> Self {
         Self::from_oxidized(reason)
+    }
+}
+
+impl<'a> ToOxidized<'a> for NReason {
+    type Output = oxidized_by_ref::typing_reason::Reason<'a>;
+
+    fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
+        oxidized_by_ref::typing_reason::Reason::Rnone
     }
 }
 

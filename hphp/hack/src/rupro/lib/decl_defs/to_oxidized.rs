@@ -85,7 +85,7 @@ impl<'a, R: Reason> ToOxidized<'a> for DeclTy<R> {
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         arena.alloc(obr::typing_defs::Ty(
-            self.reason().to_oxidized(arena),
+            arena.alloc(self.reason().to_oxidized(arena)),
             self.node().to_oxidized(arena),
         ))
     }

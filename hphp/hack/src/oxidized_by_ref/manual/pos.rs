@@ -69,7 +69,7 @@ impl<'a> Pos<'a> {
         }
     }
 
-    fn from_raw_span(b: &'a Bump, file: &'a RelativePath<'a>, span: PosSpanRaw) -> &'a Self {
+    pub fn from_raw_span(b: &'a Bump, file: &'a RelativePath<'a>, span: PosSpanRaw) -> &'a Self {
         if let Some(span) = PosSpanTiny::make(&span.start, &span.end) {
             return b.alloc(Pos(Tiny { file, span }));
         }

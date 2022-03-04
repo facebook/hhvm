@@ -18,7 +18,7 @@ mod subst;
 pub use subst::Subst;
 pub use subst::Substitution;
 
-pub use provider::LazyFoldedDeclProvider;
+pub use provider::{make_folded_decl_provider, LazyFoldedDeclProvider};
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 

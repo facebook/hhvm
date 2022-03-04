@@ -7,13 +7,8 @@ use hackrs::{
     cache::NonEvictingCache,
     decl_defs::shallow,
     decl_parser::DeclParser,
-    folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
-    naming_provider::SqliteNamingTable,
+    folded_decl_provider::{self, FoldedDeclProvider},
     reason::{BReason, NReason, Reason},
-    shallow_decl_provider::{
-        EagerShallowDeclProvider, LazyShallowDeclProvider, ShallowDeclCache, ShallowDeclProvider,
-    },
-    special_names::SpecialNames,
     typing_decl_provider::{FoldingTypingDeclProvider, TypingDeclProvider},
 };
 use pos::{Prefix, RelativePath, RelativePathCtx};
@@ -89,12 +84,11 @@ fn main() {
 
 fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames: &[RelativePath]) {
     let decl_parser = DeclParser::new(ctx);
-    let shallow_decl_provider = make_shallow_decl_provider(opts, &decl_parser, filenames);
-    let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
-        Arc::new(NonEvictingCache::new()),
-        SpecialNames::new(),
-        shallow_decl_provider,
-    ));
+    let folded_decl_provider = folded_decl_provider::make_folded_decl_provider(
+        opts.naming_table.as_ref(),
+        &decl_parser,
+        filenames,
+    );
     let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
         Arc::new(NonEvictingCache::new()),
         Arc::clone(&folded_decl_provider) as Arc<dyn FoldedDeclProvider<R>>,
@@ -137,26 +131,5 @@ fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames
 
     if saw_err {
         std::process::exit(1);
-    }
-}
-
-fn make_shallow_decl_provider<R: Reason>(
-    opts: &CliOptions,
-    decl_parser: &DeclParser,
-    filenames: &[RelativePath],
-) -> Arc<dyn ShallowDeclProvider<R>> {
-    let cache = Arc::new(ShallowDeclCache::with_no_eviction());
-    for &path in filenames {
-        let decls = decl_parser.parse(path).unwrap();
-        cache.add_decls(decls);
-    }
-    if let Some(naming_table_path) = &opts.naming_table {
-        Arc::new(LazyShallowDeclProvider::new(
-            cache,
-            Arc::new(SqliteNamingTable::new(naming_table_path).unwrap()),
-            decl_parser.clone(),
-        ))
-    } else {
-        Arc::new(EagerShallowDeclProvider::new(cache))
     }
 }

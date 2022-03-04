@@ -80,7 +80,7 @@ impl fmt::Debug for RelativePath {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct RelativePathCtx {
     pub root: PathBuf,
     pub hhi: PathBuf,

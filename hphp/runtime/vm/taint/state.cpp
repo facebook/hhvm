@@ -286,6 +286,40 @@ void CollectionsHeap::clear() {
   m_heap.clear();
 }
 
+void ClassesHeap::set(
+    Class* klass,
+    folly::StringPiece property,
+    Value value) {
+  if (value == nullptr) {
+    // Only update existing values, never add a new entry
+    auto maybe_klass = m_heap.find(klass);
+    if (maybe_klass != m_heap.end()) {
+      auto existing = maybe_klass->second.find(property);
+      if (existing != maybe_klass->second.end()) {
+        existing->second = value;
+      }
+    }
+  } else {
+    m_heap[klass][property.str()] = value;
+  }
+}
+
+Value ClassesHeap::get(Class* klass, folly::StringPiece property) const {
+  auto maybe_klass = m_heap.find(klass);
+  if (maybe_klass != m_heap.end()) {
+    auto value = maybe_klass->second.find(property);
+    if (value != maybe_klass->second.end()) {
+      return value->second;
+    }
+  }
+
+  return nullptr;
+}
+
+void ClassesHeap::clear() {
+  m_heap.clear();
+}
+
 namespace {
 
 struct SingletonTag {};
@@ -312,6 +346,7 @@ void State::initialize() {
   heap_locals.clear();
   heap_objects.clear();
   heap_collections.clear();
+  heap_classes.clear();
   paths.clear();
   arena = std::make_unique<PathArena>();
   m_function_metadata = Configuration::get()->functionMetadata();

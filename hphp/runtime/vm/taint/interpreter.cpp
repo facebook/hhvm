@@ -178,7 +178,7 @@ const Func* callee() {
  *
  * 1) Basic instructions
  * 2) Literal and constant instructions
- * 5) Get instructions (except CGetG for globals and CGetS for class properties)
+ * 5) Get instructions (except CGetG for globals)
  * 6) Isset and type querying instructions
  */
 
@@ -747,8 +747,35 @@ void iopCGetG() {
   iopUnhandled("CGetG");
 }
 
+namespace {
+void GetSCommon() {
+  auto state = State::instance;
+  TypedValue* klass_tv = vmStack().topC();
+  TypedValue* property_tv = vmStack().indTV(1);
+
+  if (!isClassType(klass_tv->m_type)) {
+    // interpreter will fail the request for us
+    return;
+  }
+  if (!isStringType(property_tv->m_type)) {
+    // Should never happen
+    return;
+  }
+
+  Class* klass = klass_tv->m_data.pclass;
+  const StringData* str = property_tv->m_data.pstr;
+  auto property = str->slice();
+
+  auto value = state->heap_classes.get(klass, property);
+
+  state->stack.pop(2);
+  state->stack.push(value);
+}
+}
+
 void iopCGetS(ReadonlyOp /* op */) {
-  iopUnhandled("CGetS");
+  iopPreamble("CGetS");
+  GetSCommon();
 }
 
 void iopClassGetC() {
@@ -830,8 +857,44 @@ void iopSetG() {
   iopUnhandled("SetG");
 }
 
+namespace {
+void setSCommon(bool maybe_join) {
+  auto state = State::instance;
+
+  auto value = state->stack.top();
+  state->stack.pop(3);
+
+  TypedValue* klass_tv = vmStack().indC(1);
+  TypedValue* property_tv = vmStack().indTV(2);
+
+  if (!isClassType(klass_tv->m_type)) {
+    // interpreter will fail the request for us
+    return;
+  }
+  if (!isStringType(property_tv->m_type)) {
+    // Should never happen
+    return;
+  }
+
+  Class* klass = klass_tv->m_data.pclass;
+  const StringData* str = property_tv->m_data.pstr;
+  auto property = str->slice();
+
+  // Prefer preserving taint where possible. This should eventually
+  // be a join operation.
+  if (maybe_join && value == nullptr) {
+    value = state->heap_classes.get(klass, property);
+  }
+
+  state->heap_classes.set(klass, property, value);
+  state->stack.push(value);
+}
+}
+
 void iopSetS(ReadonlyOp /* op */) {
-  iopUnhandled("SetS");
+  iopPreamble("SetS");
+  // We're overwriting, so copy taint rather than join
+  setSCommon(false);
 }
 
 void iopSetOpL(tv_lval to, SetOpOp /* op */) {
@@ -852,8 +915,10 @@ void iopSetOpG(SetOpOp /* op */) {
   iopUnhandled("SetOpG");
 }
 
-void iopSetOpS(SetOpOp /* op */) {
-  iopUnhandled("SetOpS");
+void iopSetOpS(SetOpOp op) {
+  iopPreamble("SetOpS");
+  // New taint should combine the existing ones
+  setSCommon(true);
 }
 
 void iopIncDecL(named_local_var fr, IncDecOp /* op */) {
@@ -869,7 +934,10 @@ void iopIncDecG(IncDecOp /* op */) {
 }
 
 void iopIncDecS(IncDecOp /* op */) {
-  iopUnhandled("IncDecS");
+  iopPreamble("IncDecS");
+  // We don't care about the modifications to the value
+  // so this reduces to a CGetS
+  GetSCommon();
 }
 
 void iopUnsetL(tv_lval loc) {

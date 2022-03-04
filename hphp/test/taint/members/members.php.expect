@@ -6,3 +6,5 @@
 {"hops":["__source","object_reassignment_propagates_taint","__sink"]}
 {"hops":["__source","objects_are_properly_tracked_as_shallow_copies","__sink"]}
 {"hops":["__source","objects_are_properly_tracked_as_shallow_copies","__sink"]}
+{"hops":["__source","source_through_static_into_sink","__sink"]}
+{"hops":["__source","source_through_static_into_sink","__sink"]}

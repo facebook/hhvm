@@ -5,6 +5,7 @@ function __sink(int $input): void {}
 
 class MyClass {
   public int $attribute;
+  public static int $static;
 }
 
 function source_through_attribute_into_sink(): void {
@@ -70,6 +71,18 @@ function objects_are_properly_tracked_as_shallow_copies(): void {
   __sink($bar->attribute);
 }
 
+function source_through_static_into_sink(): void {
+  MyClass::$static = __source();
+  // This is a valid flow
+  __sink(MyClass::$static);
+  MyClass::$static = 1;
+  // This is not
+  __sink(MyClass::$static);
+  MyClass::$static += __source();
+  // This is
+  __sink(MyClass::$static);
+}
+
 <<__EntryPoint>> function main(): void {
   source_through_attribute_into_sink();
   source_through_attribute_dereferenced_in_callee();
@@ -77,4 +90,5 @@ function objects_are_properly_tracked_as_shallow_copies(): void {
   objects_of_same_class_are_not_mixed_up();
   object_reassignment_propagates_taint();
   objects_are_properly_tracked_as_shallow_copies();
+  source_through_static_into_sink();
 }

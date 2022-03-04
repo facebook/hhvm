@@ -158,6 +158,18 @@ struct CollectionsHeap {
   hphp_fast_map<tv_lval, Value> m_heap;
 };
 
+// Model classes, which are identified by `Class*`s
+// and have their static properties identified by strings.
+struct ClassesHeap {
+  void set(Class* klass, folly::StringPiece property, Value value);
+  Value get(Class* klass, folly::StringPiece property) const;
+
+  void clear();
+
+ private:
+  hphp_fast_map<Class*, folly::F14FastMap<std::string, Value>> m_heap;
+};
+
 struct State {
   static rds::local::RDSLocal<State, rds::local::Initialize::FirstUse> instance;
 
@@ -173,6 +185,7 @@ struct State {
   LocalsHeap heap_locals;
   ObjectsHeap heap_objects;
   CollectionsHeap heap_collections;
+  ClassesHeap heap_classes;
 
   // Arena to hold all the paths
   std::unique_ptr<PathArena> arena;

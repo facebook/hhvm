@@ -65,7 +65,7 @@ module MemberNameMap = SMap
  * Certain class hierarchies are heavy in diamond patterns so merging members avoids doing the
  * same member subtyping multiple times. *)
 module ClassEltWParent = struct
-  type parent = Pos_or_decl.t * Cls.t
+  type parent = Pos.t * Cls.t
 
   type t = class_elt * parent
 
@@ -235,7 +235,13 @@ let member_not_implemented_error
     Typing_error.(
       primary
       @@ Primary.Member_not_implemented
-           { member_name; parent_pos; pos; decl_pos = defn_pos; quickfixes })
+           {
+             member_name;
+             parent_pos = Pos_or_decl.of_raw_pos parent_pos;
+             pos;
+             decl_pos = defn_pos;
+             quickfixes;
+           })
   in
   Errors.add_typing_error err
 
@@ -877,7 +883,7 @@ let check_inherited_member_is_dynamically_callable
       ()
 
 let check_class_against_parent_class_elt
-    on_error
+    (on_error : Pos.t * string -> Typing_error.Reasons_callback.t)
     (class_pos, class_)
     member_kind
     member_name
@@ -928,8 +934,8 @@ let check_class_against_parent_class_elt
 
 let check_members_from_all_parents
     env
-    (class_pos, class_)
-    (on_error : Pos_or_decl.t * string -> Typing_error.Reasons_callback.t)
+    ((class_pos : Pos.t), class_)
+    (on_error : Pos.t * string -> Typing_error.Reasons_callback.t)
     (parent_members : ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t) =
   let check member_kind member_map env =
     let check member_name class_elts_w_parents env =
@@ -1335,7 +1341,7 @@ let check_typeconst_override
 let check_typeconsts
     env
     implements
-    (parent_class : pos_id * decl_ty list * Cls.t)
+    (parent_class : (Pos.t * string) * decl_ty list * Cls.t)
     class_
     on_error =
   let ((parent_pos, _), _, parent_class) = parent_class in
@@ -1361,7 +1367,7 @@ let check_typeconsts
             @@ Primary.Member_not_implemented
                  {
                    member_name = tconst_name;
-                   parent_pos;
+                   parent_pos = Pos_or_decl.of_raw_pos parent_pos;
                    pos;
                    decl_pos = fst parent_tconst.ttc_name;
                    quickfixes = [];
@@ -1416,7 +1422,7 @@ let check_consts env implements parent_class (name_pos, class_) psubst on_error
 let check_class_extends_parent_consts
     env
     implements
-    (parent_class : pos_id * decl_ty list * Cls.t)
+    (parent_class : (Pos.t * string) * decl_ty list * Cls.t)
     (name_pos, class_)
     on_error =
   let env =
@@ -1485,9 +1491,9 @@ let union_parent_members parents :
 
 let check_class_extends_parents_members
     env
-    (class_name_pos, class_)
-    (parents : (pos_id * decl_ty list * Cls.t) list)
-    (on_error : Pos_or_decl.t * string -> Typing_error.Reasons_callback.t) =
+    ((class_name_pos : Pos.t), class_)
+    (parents : ((Pos.t * string) * decl_ty list * Cls.t) list)
+    (on_error : Pos.t * string -> Typing_error.Reasons_callback.t) =
   let members : ClassEltWParentSet.t MemberNameMap.t MemberKindMap.t =
     union_parent_members parents
   in
@@ -1515,7 +1521,11 @@ let check_class_extends_parents_members
     Overriding foo this way is unsound due to bar using foo,
     so A::foo needs to be a subtype of T::foo.
   *)
-let check_implements_extends_uses env ~implements ~parents (name_pos, class_) =
+let check_implements_extends_uses
+    env
+    ~implements
+    ~(parents : (Aast.hint * Typing_defs.decl_ty) list)
+    (name_pos, class_) =
   let implements =
     let decl_ty_to_cls x =
       let (_, (pos, name), _) = TUtils.unwrap_class_type x in
@@ -1537,9 +1547,9 @@ let check_implements_extends_uses env ~implements ~parents (name_pos, class_) =
         ~parent_name
   in
   let parents =
-    let destructure_type ty =
-      let (_, name, tparaml) = TUtils.unwrap_class_type ty in
-      Env.get_class env (snd name) >>| fun class_ -> (name, tparaml, class_)
+    let destructure_type ((p, _h), ty) =
+      let (_, (_, name), tparaml) = TUtils.unwrap_class_type ty in
+      Env.get_class env name >>| fun class_ -> ((p, name), tparaml, class_)
     in
     List.filter_map parents ~f:destructure_type
   in

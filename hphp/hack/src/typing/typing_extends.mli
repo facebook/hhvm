@@ -16,7 +16,7 @@ val check_implements_extends_uses :
   (* All directly implemented interfaces *)
   implements:Typing_defs.decl_ty list ->
   (* All direct parents (interfaces, base type, traits) *)
-  parents:Typing_defs.decl_ty list ->
+  parents:(Aast.hint * Typing_defs.decl_ty) list ->
   (* The type to be checked *)
   Pos.t * Decl_provider.Class.t ->
   Typing_env_types.env

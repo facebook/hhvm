@@ -1537,7 +1537,7 @@ module Primary = struct
     | Bad_decl_override of {
         pos: Pos.t;
         name: string;
-        parent_pos: Pos_or_decl.t;
+        parent_pos: Pos.t;
         parent_name: string;
       }
     | Explain_where_constraint of {
@@ -2527,7 +2527,7 @@ module Primary = struct
           ^ " does not correctly implement all required members " ),
       lazy
         [
-          ( parent_pos,
+          ( Pos_or_decl.of_raw_pos parent_pos,
             "Some members are incompatible with those declared in type "
             ^ (Render.strip_ns parent_name |> Markdown_lite.md_codify) );
         ],
@@ -7628,7 +7628,7 @@ and Reasons_callback : sig
     t
 
   val bad_decl_override :
-    Pos.t -> name:string -> parent_pos:Pos_or_decl.t -> parent_name:string -> t
+    Pos.t -> name:string -> parent_pos:Pos.t -> parent_name:string -> t
 
   val explain_where_constraint :
     Pos.t -> in_class:bool -> decl_pos:Pos_or_decl.t -> t

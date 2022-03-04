@@ -1972,7 +1972,7 @@ let class_hierarchy_checks env c tc (parents : class_parents) =
       Typing_extends.check_implements_extends_uses
         env
         ~implements:(List.map implements ~f:snd)
-        ~parents:(List.map impl ~f:snd)
+        ~parents:impl
         (pc, tc)
     in
     if Typing_disposable.is_disposable_class env tc then

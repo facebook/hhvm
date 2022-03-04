@@ -14,8 +14,9 @@ use pos::{BuildMethodNameHasher, BuildPropNameHasher, MethodName, PropName, Type
 use std::fmt;
 use std::sync::Arc;
 
+/// c.f. OCaml type `Typing_classes_heap.eager_members`
 #[derive(Debug)]
-struct EagerMembers<R: Reason> {
+struct Members<R: Reason> {
     props: DashMap<PropName, Arc<ClassElt<R>>, BuildPropNameHasher>,
     static_props: DashMap<PropName, Arc<ClassElt<R>>, BuildPropNameHasher>,
     methods: DashMap<MethodName, Arc<ClassElt<R>>, BuildMethodNameHasher>,
@@ -35,7 +36,7 @@ struct EagerMembers<R: Reason> {
 pub struct ClassType<R: Reason> {
     provider: Arc<dyn FoldedDeclProvider<R>>,
     class: Arc<FoldedClass<R>>,
-    members: EagerMembers<R>,
+    members: Members<R>,
 }
 
 impl<R: Reason> fmt::Debug for ClassType<R> {
@@ -48,7 +49,7 @@ impl<R: Reason> fmt::Debug for ClassType<R> {
     }
 }
 
-impl<R: Reason> EagerMembers<R> {
+impl<R: Reason> Members<R> {
     fn new() -> Self {
         Self {
             props: DashMap::default(),
@@ -65,7 +66,7 @@ impl<R: Reason> ClassType<R> {
         Self {
             provider,
             class,
-            members: EagerMembers::new(),
+            members: Members::new(),
         }
     }
 

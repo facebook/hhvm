@@ -219,6 +219,7 @@ let method_defn ctx source_text meth decl_id progress =
             ctx
             source_text
             meth.m_params
+            meth.m_ctxs
             meth.m_ret );
         ("visibility", Build_json.build_visibility_json meth.m_visibility);
         ("isAbstract", JSON_Bool meth.m_abstract);
@@ -391,8 +392,12 @@ let func_defn ctx source_text fd decl_id progress =
     [
       ("declaration", Build_json.build_id_json decl_id);
       ( "signature",
-        Build_json.build_signature_json ctx source_text elem.f_params elem.f_ret
-      );
+        Build_json.build_signature_json
+          ctx
+          source_text
+          elem.f_params
+          elem.f_ctxs
+          elem.f_ret );
       ("isAsync", Build_json.build_is_async_json elem.f_fun_kind);
       ( "attributes",
         Build_json.build_attributes_json_nested

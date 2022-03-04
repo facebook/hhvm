@@ -47,7 +47,7 @@ let test_add_fact _test_ctxt =
     Fact_acc.add_fact Predicate.(Hack ClassDeclaration) json_key progress
   in
   let facts_class_declaration =
-    extract_facts_exn "hack.ClassDeclaration.5" (Fact_acc.to_json progress)
+    extract_facts_exn "hack.ClassDeclaration.6" (Fact_acc.to_json progress)
   in
   Int_asserter.assert_equals
     1
@@ -63,7 +63,7 @@ let test_add_fact _test_ctxt =
     Fact_acc.add_fact Predicate.(Hack ClassDeclaration) json_key progress
   in
   let facts_class_declaration =
-    extract_facts_exn "hack.ClassDeclaration.5" (Fact_acc.to_json progress)
+    extract_facts_exn "hack.ClassDeclaration.6" (Fact_acc.to_json progress)
   in
   Int_asserter.assert_equals
     (res_id :> int)
@@ -77,7 +77,7 @@ let test_add_fact _test_ctxt =
     Fact_acc.add_fact Predicate.(Hack FunctionDeclaration) json_key progress
   in
   let facts_function_declaration =
-    extract_facts_exn "hack.FunctionDeclaration.5" (Fact_acc.to_json progress)
+    extract_facts_exn "hack.FunctionDeclaration.6" (Fact_acc.to_json progress)
   in
   assert_bool
     "Identical keys for different predicates are separate facts"
@@ -92,7 +92,7 @@ let test_add_decl_fact _test_ctxt =
   let gconst_name = "TestGConst" in
   let (id, prog) = Add_fact.gconst_decl gconst_name progress in
   let facts_global_const_declaration =
-    extract_facts_exn "hack.GlobalConstDeclaration.5" (Fact_acc.to_json prog)
+    extract_facts_exn "hack.GlobalConstDeclaration.6" (Fact_acc.to_json prog)
   in
   Int_asserter.assert_equals
     1

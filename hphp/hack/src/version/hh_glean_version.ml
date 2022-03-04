@@ -12,7 +12,7 @@ let schema_version = 7
 
 (** This is the version of the Glean "hack" schema to be used for
     code indexation *)
-let hack_version = "5"
+let hack_version = "6"
 
 let version : string = string_of_int schema_version
 

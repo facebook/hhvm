@@ -13,6 +13,8 @@ val has_tabs_or_multibyte_codepoints : Full_fidelity_source_text.t -> bool
 
 val get_type_from_hint : Provider_context.t -> Aast.hint -> string
 
+val get_context_from_hint : Provider_context.t -> Aast.hint -> string
+
 (* Values pulled from source code may have quotation marks;
 strip these when present, eg: "\"FOO\"" => "FOO" *)
 val strip_nested_quotes : string -> string

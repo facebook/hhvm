@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/vanilla-dict.h"
+#include "hphp/runtime/base/unaligned-typed-value.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/util/type-scan.h"
 
@@ -45,9 +46,10 @@ enum class IterNextIndex : uint8_t {
   //
   // We only use this mode if all the following conditions are met:
   //  - The array is guaranteed to be unchanged during iteration
-  //  - The array is a VanillaDict (a dict or a darray)
-  //  - The array is free of tombstones
+  //  - The array is a VanillaDict (a dict or a darray) or VanillaVec storing unaligned tvs
+  //  - (For dicts) The array is free of tombstones
   ArrayMixedPointer,
+  VanillaVecPointer,
 
   // Helpers specific to bespoke array-likes.
   StructDict,
@@ -345,6 +347,7 @@ private:
     assertx(!m_specialization.specialized);
   }
 
+public:
   // The iterator base. Will be null for local iterators. We set the lowest
   // bit for object iterators to distinguish them from array iterators.
   union {
@@ -364,22 +367,22 @@ private:
   // For the pointer iteration types, we use the appropriate pointers instead.
   union {
     size_t m_pos;
-    TypedValue* m_packed_elm;
+    UnalignedTypedValue* m_unaligned_elm;
     VanillaDictElm* m_mixed_elm;
   };
   union {
     size_t m_end;
-    TypedValue* m_packed_end;
+    UnalignedTypedValue* m_unaligned_end;
     VanillaDictElm* m_mixed_end;
   };
 
   // These elements are always referenced elsewhere, either in the m_data field
   // of this iterator or in a local. (If we weren't using pointer iteration, we
   // would track elements by index, not by pointer, but GC would still work.)
-  TYPE_SCAN_IGNORE_FIELD(m_packed_end);
   TYPE_SCAN_IGNORE_FIELD(m_mixed_end);
-  TYPE_SCAN_IGNORE_FIELD(m_packed_elm);
+  TYPE_SCAN_IGNORE_FIELD(m_unaligned_end);
   TYPE_SCAN_IGNORE_FIELD(m_mixed_elm);
+  TYPE_SCAN_IGNORE_FIELD(m_unaligned_elm);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

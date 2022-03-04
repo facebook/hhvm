@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/base/bespoke/layout-selection.h"
 
 #include "hphp/runtime/vm/jit/array-iter-profile.h"
@@ -340,13 +341,16 @@ struct Accessor {
   virtual SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const = 0;
 };
 
-struct PackedAccessor : public Accessor {
-  explicit PackedAccessor(IterSpecialization specialization) {
+struct VecAccessor : public Accessor {
+  explicit VecAccessor(IterSpecialization specialization) {
+    is_ptr_iter = specialization.base_const
+               && !specialization.output_key
+               && VanillaVec::stores_unaligned_typed_values;
     arr_type = getArrType(specialization);
     if (allowBespokeArrayLikes()) {
       arr_type = arr_type.narrowToVanilla();
     }
-    pos_type = TInt;
+    pos_type = is_ptr_iter ? TPtrToElem : TInt;
     layout = ArrayLayout::Vanilla();
     iter_type = specialization;
   }
@@ -356,7 +360,7 @@ struct PackedAccessor : public Accessor {
   }
 
   SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const override {
-    return idx;
+    return is_ptr_iter ? gen(env, GetVecPtrIter, arr, idx) : idx;
   }
 
   SSATmp* getElm(IRGS& env, SSATmp* arr, SSATmp* pos) const override {
@@ -364,16 +368,32 @@ struct PackedAccessor : public Accessor {
   }
 
   SSATmp* getKey(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
+    // is_ptr_iter is only true when the iterator doesn't output a key,
+    // and this method is only called when the iterator *does* output a key.
+    always_assert(!is_ptr_iter);
     return elm;
   }
 
   SSATmp* getVal(IRGS& env, SSATmp* arr, SSATmp* elm) const override {
+    if (is_ptr_iter) {
+      auto const valType = arrLikeElemType(
+        arr_type,
+        TInt,
+        curClass(env)
+      ).first;
+      return gen(env, LdPtrIterVal, valType, elm);
+    }
     return gen(env, LdVecElem, arr, elm);
   }
 
   SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
-    return gen(env, AddInt, cns(env, offset), pos);
+    return is_ptr_iter
+      ? gen(env, AdvanceVecPtrIter, IterOffsetData{offset}, pos)
+      : gen(env, AddInt, cns(env, offset), pos);
   }
+
+  private:
+    bool is_ptr_iter = false;
 };
 
 struct MixedAccessor : public Accessor {
@@ -475,7 +495,7 @@ std::unique_ptr<Accessor> getAccessor(
   }
   switch (type.base_type) {
     case IterSpecialization::Vec: {
-      return std::make_unique<PackedAccessor>(type);
+      return std::make_unique<VecAccessor>(type);
     }
     case IterSpecialization::Dict: {
       return std::make_unique<MixedAccessor>(type);

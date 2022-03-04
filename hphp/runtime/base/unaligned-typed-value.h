@@ -17,7 +17,6 @@
 
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/tv-val.h"
 
 namespace HPHP {
 

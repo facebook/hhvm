@@ -456,6 +456,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AddNewElemVec:
   case AddOffset:
   case AdvanceDictPtrIter:
+  case AdvanceVecPtrIter:
   case AFWHBlockOn:
   case AFWHPushTailFrame:
   case AKExistsDict:
@@ -619,6 +620,7 @@ bool opcodeMayRaise(Opcode opc) {
   case GetMemoKeyScalar:
   case GetTime:
   case GetTimeNs:
+  case GetVecPtrIter:
   case GtBool:
   case GtDbl:
   case GteBool:

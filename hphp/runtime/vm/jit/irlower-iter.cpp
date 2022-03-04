@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/tv-mutate.h"
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/vanilla-vec.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/iter.h"
 
@@ -207,7 +208,12 @@ int32_t iteratorType(const IterTypeData& data) {
     }
     switch (data.type.base_type) {
       case S::Vec: {
-        return IterNextIndex::VanillaVec;
+        auto is_ptr_iter = data.type.base_const
+                        && !data.type.output_key
+                        && VanillaVec::stores_unaligned_typed_values;
+        return is_ptr_iter
+          ? IterNextIndex::VanillaVecPointer
+          : IterNextIndex::VanillaVec;
       }
       case S::Dict: {
         return data.type.base_const

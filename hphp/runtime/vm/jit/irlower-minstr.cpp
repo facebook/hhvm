@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/str-key-table.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/base/unaligned-typed-value.h"
 #include "hphp/runtime/base/vanilla-dict.h"
 #include "hphp/runtime/base/vanilla-vec-defs.h"
 #include "hphp/runtime/base/vanilla-vec.h"
@@ -694,6 +695,40 @@ void cgAdvanceDictPtrIter(IRLS& env, const IRInstruction* inst) {
   v << addqi{delta, src, dst, v.makeReg()};
 }
 
+void cgGetVecPtrIter(IRLS& env, const IRInstruction* inst) {
+  assertx(VanillaVec::stores_unaligned_typed_values);
+
+  auto const pos_tmp = inst->src(1);
+  auto const arr = srcLoc(env, inst, 0).reg();
+  auto const pos = srcLoc(env, inst, 1).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  if (pos_tmp->hasConstVal(TInt)) {
+    auto const offset = VanillaVec::entryOffset(pos_tmp->intVal());
+    if (deltaFits(offset.data_offset, sz::dword)) {
+      v << addqi{safe_cast<int32_t>(offset.data_offset), arr, dst, v.makeReg()};
+      return;
+    }
+  }
+
+  auto const px9 = v.makeReg();
+  v << lea{pos[pos * 8], px9};
+  v << lea{arr[px9 + VanillaVec::entriesOffset()], dst};
+}
+
+void cgAdvanceVecPtrIter(IRLS& env, const IRInstruction* inst) {
+  assertx(VanillaVec::stores_unaligned_typed_values);
+
+  auto const src = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const extra = inst->extra<AdvanceVecPtrIter>();
+  auto const delta = extra->offset * int32_t(sizeof(UnalignedTypedValue));
+  v << addqi{delta, src, dst, v.makeReg()};
+}
+
 void cgLdPtrIterKey(IRLS& env, const IRInstruction* inst) {
   static_assert(sizeof(VanillaDictElm::hash_t) == 4, "");
   auto const elm = srcLoc(env, inst, 0).reg();
@@ -711,6 +746,7 @@ void cgLdPtrIterKey(IRLS& env, const IRInstruction* inst) {
 
 void cgLdPtrIterVal(IRLS& env, const IRInstruction* inst) {
   static_assert(VanillaDictElm::dataOff() == 0, "");
+  static_assert(TVOFF(m_data) == 0, "");
   auto const elm = srcLoc(env, inst, 0).reg();
   loadTV(vmain(env), inst->dst(0), dstLoc(env, inst, 0), elm[0]);
 }

@@ -137,6 +137,8 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   // Check that array's vtable index is compatible with the array's layout.
   if (m_nextHelperIdx == IterNextIndex::VanillaVec) {
     assertx(arr->isVanillaVec());
+  } else if (m_nextHelperIdx == IterNextIndex::VanillaVecPointer) {
+    assertx(arr->isVanillaVec());
   } else if (m_nextHelperIdx == IterNextIndex::ArrayMixed) {
     assertx(arr->isVanillaDict());
   } else if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
@@ -162,6 +164,9 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
   if (m_nextHelperIdx == IterNextIndex::ArrayMixedPointer) {
     assertx(m_mixed_elm < m_mixed_end);
     assertx(m_mixed_end == VanillaDict::as(arr)->data() + arr->size());
+  } else if (m_nextHelperIdx == IterNextIndex::VanillaVecPointer) {
+    assertx(m_unaligned_elm < m_unaligned_end);
+    assertx(m_unaligned_end == VanillaVec::entries(const_cast<ArrayData*>(arr)) + arr->size());
   } else {
     assertx(m_pos < m_end);
     assertx(m_end == arr->iter_end());
@@ -436,7 +441,7 @@ NEVER_INLINE void clearOutputLocal(TypedValue* local) {
 //
 // These methods all return false (= 0) to signify that iteration is over.
 
-NEVER_INLINE int64_t iter_next_free_packed(Iter* iter, ArrayData* arr) {
+NEVER_INLINE int64_t iter_next_free_vec(Iter* iter, ArrayData* arr) {
   VanillaVec::Release(arr);
   iter->kill();
   return 0;
@@ -527,6 +532,15 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
   }
 
   if (LIKELY(ad->isVanillaVec())) {
+    if (BaseConst && VanillaVec::stores_unaligned_typed_values) {
+      // We can use a pointer iterator for vanilla vecs storing unaligned
+      // tvs because there is no associated key we need to track.
+      aiter.m_unaligned_elm = VanillaVec::entries(ad);
+      aiter.m_unaligned_end = aiter.m_unaligned_elm + size;
+      aiter.setArrayNext(IterNextIndex::VanillaVecPointer);
+      tvDup(VanillaVec::GetPosVal(ad, 0), *valOut);
+      return 1;
+    }
     aiter.m_pos = 0;
     aiter.m_end = size;
     aiter.setArrayNext(IterNextIndex::VanillaVec);
@@ -853,6 +867,36 @@ int64_t iter_next_mixed_pointer(Iter* it, TypedValue* valOut,
   return 1;
 }
 
+// "virtual" method implementation of *IterNext* for VanillaVec iterators
+// over unaligned typed values. Since these values are stored one after the other,
+// we can just increment the element pointer and compare it to the end pointer.
+//
+// HasKey is true for key-value iters. HasKey is true iff keyOut != nullptr.
+// See iter.h for the meaning of a "local" iterator. At this point,
+// we have the base, but we only dec-ref it when non-local iters hit the end.
+//
+// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
+template<bool HasKey, bool Local>
+int64_t iter_next_unaligned_pointer(Iter* it, TypedValue* valOut,
+                                    TypedValue* keyOut, ArrayData* ad) {
+  always_assert(!HasKey);
+  assertx(VanillaVec::checkInvariants(ad));
+
+  auto& iter = *unwrap(it);
+  auto const elm = iter.m_unaligned_elm + 1;
+  if (elm == iter.m_unaligned_end) {
+    if (!Local && ad->decReleaseCheck()) {
+      return iter_next_free_vec(it, ad);
+    }
+    iter.kill();
+    return 0;
+  }
+
+  iter.m_unaligned_elm = elm;
+  setOutputLocal(*elm, valOut);
+  return 1;
+}
+
 namespace {
 
 // "virtual" method implementation of *IterNext* for VanillaVec iterators.
@@ -873,7 +917,7 @@ int64_t iter_next_packed_impl(Iter* it, TypedValue* valOut,
   ssize_t pos = iter.getPos() + 1;
   if (UNLIKELY(pos == iter.getEnd())) {
     if (!Local && ad->decReleaseCheck()) {
-      return iter_next_free_packed(it, ad);
+      return iter_next_free_vec(it, ad);
     }
     iter.kill();
     return 0;
@@ -1011,6 +1055,7 @@ int64_t literNextKObject(Iter*, TypedValue*, TypedValue*, ArrayData*) {
   }                                                                      \
 
 VTABLE_METHODS(VanillaVec,         iter_next_packed_impl);
+VTABLE_METHODS(VanillaVecPointer,  iter_next_unaligned_pointer);
 VTABLE_METHODS(ArrayMixed,         iter_next_mixed_impl);
 VTABLE_METHODS(ArrayMixedPointer,  iter_next_mixed_pointer);
 VTABLE_METHODS(StructDict,         iter_next_struct_dict);
@@ -1022,12 +1067,15 @@ using IterNextKHelper = int64_t (*)(Iter*, TypedValue*, TypedValue*);
 using LIterNextHelper  = int64_t (*)(Iter*, TypedValue*, ArrayData*);
 using LIterNextKHelper = int64_t (*)(Iter*, TypedValue*, TypedValue*, ArrayData*);
 
+// The order of these function pointers must match the order that their
+// corresponding IterNextIndex enum members were declared in.
 const IterNextHelper g_iterNextHelpers[] = {
   &iterNextVanillaVec,
   &iterNextArrayMixed,
   &iterNextArray,
   &iterNextObject,
   &iterNextArrayMixedPointer,
+  &iterNextVanillaVecPointer,
   &iterNextStructDict,
 };
 
@@ -1037,6 +1085,7 @@ const IterNextKHelper g_iterNextKHelpers[] = {
   &iterNextKArray,
   &iter_next_cold, // iterNextKObject
   &iterNextKArrayMixedPointer,
+  &iterNextKVanillaVecPointer,
   &iterNextKStructDict,
 };
 
@@ -1046,6 +1095,7 @@ const LIterNextHelper g_literNextHelpers[] = {
   &literNextArray,
   &literNextObject,
   &literNextArrayMixedPointer,
+  &literNextVanillaVecPointer,
   &literNextStructDict,
 };
 
@@ -1055,6 +1105,7 @@ const LIterNextKHelper g_literNextKHelpers[] = {
   &literNextKArray,
   &literNextKObject,
   &literNextKArrayMixedPointer,
+  &literNextKVanillaVecPointer,
   &literNextKStructDict,
 };
 

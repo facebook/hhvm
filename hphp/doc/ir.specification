@@ -2685,11 +2685,15 @@ To string conversions:
 
 | GetDictPtrIter, D(PtrToElem), S(Dict) S(Int), NF
 
-  Returns a pointer to the elm S1 of a mixed-layout array S0. S1 does not need
+| GetVecPtrIter, D(PtrToElem), S(Vec) S(Int), NF
+
+  Returns a pointer to the elm S1 of a vanilla dict or vec S0. S1 does not need
   to be a valid array position; for example, it may equal the size of the array
   (so that the "elm" returned is the pointer-iteration end for S0).
 
 | AdvanceDictPtrIter<offset>, D(PtrToElem), S(PtrToElem), NF
+
+| AdvanceVecPtrIter<offset>, D(PtrToElem), S(PtrToElem), NF
 
   Increments the pointer S0 to the array element with the given layout `offset`
   positions forward. `offset` is allowed to be negative.

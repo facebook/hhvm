@@ -267,25 +267,6 @@ void ObjectsHeap::clear() {
   m_heap.clear();
 }
 
-void CollectionsHeap::set(tv_lval typedValue, Value value) {
-  if (value) {
-    m_heap[std::move(typedValue)] = value;
-  }
-}
-
-Value CollectionsHeap::get(const tv_lval& typedValue) const {
-  auto value = m_heap.find(typedValue);
-  if (value != m_heap.end()) {
-    return value->second;
-  }
-
-  return nullptr;
-}
-
-void CollectionsHeap::clear() {
-  m_heap.clear();
-}
-
 void ClassesHeap::set(
     Class* klass,
     folly::StringPiece property,
@@ -362,7 +343,6 @@ void State::initialize() {
   stack.clear();
   heap_locals.clear();
   heap_objects.clear();
-  heap_collections.clear();
   heap_classes.clear();
   heap_globals.clear();
   paths.clear();

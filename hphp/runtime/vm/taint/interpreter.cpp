@@ -278,9 +278,7 @@ void iopString(const StringData* /* s */) {
 namespace {
 void iopNewEmptyCollection(folly::StringPiece name) {
   iopPreamble(name);
-  auto& mstate = vmMInstrState();
-  auto to = mstate.base;
-  State::instance->heap_collections.set(to, nullptr);
+  State::instance->stack.push(nullptr);
 }
 
 void newCollectionSizeN(uint32_t n) {
@@ -303,7 +301,7 @@ void newCollectionSizeN(uint32_t n) {
 
   auto& mstate = vmMInstrState();
   auto to = mstate.base;
-  state->heap_collections.set(to, value);
+  state->heap_locals.set(to, value);
 }
 } // namespace
 
@@ -1692,7 +1690,7 @@ void iopQueryM(uint32_t nDiscard, QueryMOp op, MemberKey memberKey) {
       } else if (mcodeIsElem(memberKey.mcode)) {
         auto& mstate = vmMInstrState();
         auto from = mstate.base;
-        value = state->heap_collections.get(from);
+        value = state->heap_locals.get(from);
         FTRACE(
             2,
             "taint: getting member {} (from: {}), value: `{}`\n",
@@ -1755,9 +1753,9 @@ void iopSetM(uint32_t nDiscard, MemberKey memberKey) {
     if (taint == nullptr) {
       // See if the collection is already tainted, if the value is not
       // This should eventually be a join (or we should track taints precisely).
-      taint = state->heap_collections.get(to);
+      taint = state->heap_locals.get(to);
     }
-    state->heap_collections.set(to, taint);
+    state->heap_locals.set(to, taint);
     FTRACE(
         2,
         "taint: setting member {} (to: {}), value: `{}`\n",

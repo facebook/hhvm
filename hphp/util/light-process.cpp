@@ -999,15 +999,6 @@ pid_t LightProcess::waitpid(pid_t pid, int *stat_loc, int options,
     }, static_cast<pid_t>(-1));
 }
 
-pid_t LightProcess::pcntl_waitpid(pid_t pid, int *stat_loc, int options) {
-  rusage ru;
-  const auto ret = wait4(pid, stat_loc, options, &ru);
-  if (ret > 0 && s_trackProcessTimes) {
-    s_extra_request_nanoseconds += ru2microseconds(ru) * 1000;
-  }
-  return ret;
-}
-
 void LightProcess::ChangeUser(int afdt, const std::string& username) {
   if (!username.empty()) lwp_write(afdt, "change_user", username);
 }

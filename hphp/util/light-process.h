@@ -93,8 +93,6 @@ struct LightProcess {
    */
   static pid_t waitpid(pid_t pid, int *stat_loc, int options, int timeout = 0);
 
-  static pid_t pcntl_waitpid(pid_t pid, int *stat_loc, int options);
-
   /**
    * When running a CLI server, the requests executed on behalf of local
    * processes will delegate to a light process pool run by the client.

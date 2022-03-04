@@ -216,6 +216,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         };
         stack.insert(name);
         let parents = self.decl_class_parents(stack, &shallow_class)?;
+        stack.remove(&name);
         let folder = DeclFolder::new(self.special_names);
         Ok(Some(folder.decl_class(&shallow_class, &parents)))
     }

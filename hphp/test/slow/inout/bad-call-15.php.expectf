@@ -1,1 +1,1 @@
-Fatal error: Cannot re-assign `$this` in %s on line 7
+Fatal error: Invalid use of `$this`: it cannot be set via `inout` in %s/test/slow/inout/bad-call-15.php on line 7

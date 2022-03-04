@@ -24,7 +24,7 @@ use parser_core_types::{
         syntax::Syntax,
         syntax_variant_generated::{ListItemChildren, SyntaxVariant, SyntaxVariant::*},
     },
-    syntax_error::{self as errors, Error, ErrorType, SyntaxError},
+    syntax_error::{self as errors, Error, ErrorType, LvalRoot, SyntaxError},
     syntax_trait::SyntaxTrait,
     syntax_tree::SyntaxTree,
     token_kind::TokenKind,
@@ -2560,26 +2560,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn unset_errors(&mut self, node: S<'a>) {
-        match &node.children {
-            UnsetStatement(x) => {
-                for expr in syntax_to_list_no_separators(&x.variables) {
-                    match &expr.children {
-                        VariableExpression(x)
-                            if self.text(&x.expression) == sn::special_idents::THIS =>
-                        {
-                            self.errors
-                                .push(make_error_from_node(node, errors::cannot_unset_this))
-                        }
-                        _ => {}
-                    }
-                }
-                {}
-            }
-            _ => {}
-        }
-    }
-
     fn function_call_argument_errors(&mut self, in_constructor_call: bool, node: S<'a>) {
         if let Some(e) = match &node.children {
             DecoratedExpression(x) => {
@@ -4811,7 +4791,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         }
     }
 
-    fn check_lvalue(&mut self, loperand: S<'a>) {
+    fn check_lvalue(&mut self, loperand: S<'a>, lval_root: LvalRoot) {
         let append_errors =
             |self_: &mut Self, node, error| self_.errors.push(make_error_from_node(node, error));
 
@@ -4824,14 +4804,13 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
         let check_variable = |self_: &mut Self, text| {
             if text == sn::special_idents::THIS {
-                err(self_, errors::reassign_this)
+                err(self_, errors::this_as_lval(lval_root))
             }
         };
 
         match &loperand.children {
-            ListExpression(x) => {
-                syntax_to_list_no_separators(&x.members).for_each(|n| self.check_lvalue(n))
-            }
+            ListExpression(x) => syntax_to_list_no_separators(&x.members)
+                .for_each(|n| self.check_lvalue(n, lval_root)),
             SafeMemberSelectionExpression(_) => {
                 err(self, errors::not_allowed_in_write("`?->` operator"))
             }
@@ -4854,8 +4833,8 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 Some(TokenKind::Inout) => err(self, errors::not_allowed_in_write("`inout`")),
                 _ => {}
             },
-            ParenthesizedExpression(x) => self.check_lvalue(&x.expression),
-            SubscriptExpression(x) => self.check_lvalue(&x.receiver),
+            ParenthesizedExpression(x) => self.check_lvalue(&x.expression, lval_root),
+            SubscriptExpression(x) => self.check_lvalue(&x.receiver, lval_root),
             LambdaExpression(_)
             | AnonymousFunction(_)
             | AwaitableCreationExpression(_)
@@ -4882,7 +4861,6 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             ),
             PrefixUnaryExpression(x) => check_unary_expression(self, &x.operator),
             PostfixUnaryExpression(x) => check_unary_expression(self, &x.operator),
-
             // FIXME: Array_get ((_, Class_const _), _) is not a valid lvalue. *)
             _ => {} // Ideally we should put all the rest of the syntax here so everytime
             // a new syntax is added people need to consider whether the syntax
@@ -4893,7 +4871,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn assignment_errors(&mut self, node: S<'a>) {
         let check_unary_expression = |self_: &mut Self, op, loperand: S<'a>| {
             if does_unop_create_write(token_kind(op)) {
-                self_.check_lvalue(loperand)
+                self_.check_lvalue(loperand, LvalRoot::IncrementOrDecrement);
             }
         };
         match &node.children {
@@ -4902,21 +4880,21 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             DecoratedExpression(x) => {
                 let loperand = &x.expression;
                 if does_decorator_create_write(token_kind(&x.decorator)) {
-                    self.check_lvalue(loperand)
+                    self.check_lvalue(loperand, LvalRoot::Inout)
                 }
             }
             BinaryExpression(x) => {
                 let loperand = &x.left_operand;
                 if does_binop_create_write_on_left(token_kind(&x.operator)) {
-                    self.check_lvalue(loperand);
+                    self.check_lvalue(loperand, LvalRoot::Assignment);
                 }
             }
             ForeachStatement(x) => {
-                self.check_lvalue(&x.value);
-                self.check_lvalue(&x.key);
+                self.check_lvalue(&x.value, LvalRoot::Foreach);
+                self.check_lvalue(&x.key, LvalRoot::Foreach);
             }
             CatchClause(_) => {
-                self.check_lvalue(node);
+                self.check_lvalue(node, LvalRoot::CatchClause);
             }
             _ => {}
         }
@@ -5279,7 +5257,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             OldAttributeSpecification(_) => self.disabled_legacy_attribute_syntax_errors(node),
             SoftTypeSpecifier(_) => self.disabled_legacy_soft_typehint_errors(node),
             QualifiedName(_) => self.check_qualified_name(node),
-            UnsetStatement(_) => self.unset_errors(node),
+            UnsetStatement(x) => {
+                for expr in syntax_to_list_no_separators(&x.variables) {
+                    self.check_lvalue(expr, LvalRoot::Unset);
+                }
+            }
             _ => {}
         }
         self.lval_errors(node);

@@ -1,2 +1,1 @@
-
-Fatal error: Cannot re-assign `$this` in %s/test/slow/reassign_this/1490.php on line 6
+Fatal error: Invalid use of `$this`: it cannot be re-assigned in %s/test/slow/reassign_this/1490.php on line 6

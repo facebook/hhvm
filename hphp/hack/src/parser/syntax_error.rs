@@ -19,6 +19,16 @@ pub enum ErrorType {
     RuntimeError,
 }
 
+#[derive(Clone, Copy)]
+pub enum LvalRoot {
+    Unset,
+    Assignment,
+    Inout,
+    IncrementOrDecrement,
+    CatchClause,
+    Foreach,
+}
+
 #[derive(Debug, Clone, FromOcamlRep, ToOcamlRep, PartialEq, Eq)]
 pub struct SyntaxError {
     pub child: Option<Box<SyntaxError>>,
@@ -547,6 +557,20 @@ pub fn not_allowed_in_write(what: &str) -> Error {
     Cow::Owned(format!("{} is not allowed in write context", what))
 }
 pub const reassign_this: Error = Cow::Borrowed("Cannot re-assign `$this`");
+
+pub fn this_as_lval(root: LvalRoot) -> Error {
+    Cow::Owned(format!(
+        "Invalid use of `$this`: {}",
+        match root {
+            LvalRoot::Unset => "it cannot be `unset`",
+            LvalRoot::Assignment => "it cannot be re-assigned",
+            LvalRoot::Inout => "it cannot be set via `inout`",
+            LvalRoot::IncrementOrDecrement => "it cannot be incremented or decremented",
+            LvalRoot::CatchClause => "it cannot be re-assigned via a `catch` clause",
+            LvalRoot::Foreach => "it cannot be re-assigned via a `foreach` loop",
+        }
+    ))
+}
 pub const enum_elem_name_is_class: Error = Cow::Borrowed("Enum element cannot be named `class`");
 pub const enum_class_elem_name_is_class: Error =
     Cow::Borrowed("Enum class members cannot be named `class`");

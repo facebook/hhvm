@@ -1,1 +1,1 @@
-Fatal error: Cannot re-assign `$this` in %s/test/slow/list_assignment/assignment-to-this.php on line 4
+Fatal error: Invalid use of `$this`: it cannot be re-assigned in %s/test/slow/list_assignment/assignment-to-this.php on line 4

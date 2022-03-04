@@ -1,1 +1,1 @@
-Fatal error: `$this` cannot be unset in %s on line 5
+Fatal error: Invalid use of `$this`: it cannot be `unset` in %s/test/slow/unset/1120.php on line 5

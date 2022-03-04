@@ -1,1 +1,1 @@
-(14,14)-(14,19) Cannot re-assign `$this`
+(14,14)-(14,19) Invalid use of `$this`: it cannot be re-assigned

@@ -1,1 +1,1 @@
-Fatal error: Cannot re-assign `$this` in %s on line 7
+Fatal error: Invalid use of `$this`: it cannot be re-assigned via a `catch` clause in %s/test/slow/exceptions/assign-this-in-catch.php on line 7

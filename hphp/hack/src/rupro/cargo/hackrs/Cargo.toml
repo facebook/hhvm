@@ -13,10 +13,10 @@ arena_collections = { path = "../../../arena_collections" }
 bumpalo = { version = "3.8", features = ["collections"] }
 dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }
+eq_modulo_pos = { path = "../../../utils/eq_modulo_pos" }
 hcons = { path = "../../../hcons" }
 hh24_types = { path = "../../../facebook/utils/hh24_types" }
 im = { version = "14.2", features = ["rayon", "serde"] }
-intern = { path = "../../../../../../relay/oss/crates/intern" }
 itertools = "0.10.3"
 lint_rust = { path = "../../../utils/lint" }
 names = { path = "../../../facebook/hh_decl/cargo/names" }

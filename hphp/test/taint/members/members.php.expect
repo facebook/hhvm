@@ -8,3 +8,5 @@
 {"hops":["__source","objects_are_properly_tracked_as_shallow_copies","__sink"]}
 {"hops":["__source","source_through_static_into_sink","__sink"]}
 {"hops":["__source","source_through_static_into_sink","__sink"]}
+{"hops":["__source","source_through_implemented_constructor_into_sink","MySecondClass::__construct","source_through_implemented_constructor_into_sink","__sink"]}
+{"hops":["__source","source_through_promoted_constructor_into_sink","MyThirdClass::__construct","source_through_promoted_constructor_into_sink","__sink"]}

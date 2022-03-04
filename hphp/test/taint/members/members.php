@@ -83,6 +83,32 @@ function source_through_static_into_sink(): void {
   __sink(MyClass::$static);
 }
 
+class MySecondClass {
+  public int $i;
+
+  public function __construct(
+    int $i
+  ) {
+    $this->i = $i;
+  }
+}
+
+function source_through_implemented_constructor_into_sink(): void {
+  $foo = new MySecondClass(__source());
+  __sink($foo->i);
+}
+
+class MyThirdClass {
+  public function __construct(
+    public int $i
+  ) {}
+}
+
+function source_through_promoted_constructor_into_sink(): void {
+  $foo = new MyThirdClass(__source());
+  __sink($foo->i);
+}
+
 <<__EntryPoint>> function main(): void {
   source_through_attribute_into_sink();
   source_through_attribute_dereferenced_in_callee();
@@ -91,4 +117,6 @@ function source_through_static_into_sink(): void {
   object_reassignment_propagates_taint();
   objects_are_properly_tracked_as_shallow_copies();
   source_through_static_into_sink();
+  source_through_implemented_constructor_into_sink();
+  source_through_promoted_constructor_into_sink();
 }

@@ -37,6 +37,18 @@ impl<P> BinaryExpressionPrefixKind<P> {
     }
 }
 
+/// The result of parse_remaining_expression.
+enum ParseContinuation<NT, P> {
+    // All done.
+    Done(NT),
+
+    // Need to run parse_remaining_binary_expression.
+    Binary(NT, BinaryExpressionPrefixKind<(NT, P)>),
+
+    // Rerun parse_remaining_expression with the result.
+    Reparse(NT),
+}
+
 pub struct ExpressionParser<'a, S>
 where
     S: SmartConstructors,
@@ -1235,9 +1247,27 @@ where
             || term.is_scope_resolution_expression()
     }
 
-    fn parse_remaining_expression(&mut self, term: S::R) -> S::R {
+    fn parse_remaining_expression(&mut self, mut term: S::R) -> S::R {
+        // This method is intentionally kept small and simple so that any recursion it does
+        // only uses a small amount of stack space for this frame.
+        loop {
+            match self.parse_remaining_expression_helper(term) {
+                ParseContinuation::Done(result) => return result,
+                ParseContinuation::Binary(result, assignment_prefix_kind) => {
+                    // Special-case binary exprs here to recurse using a much smaller stack frame,
+                    // then iterate on the result.
+                    term = self.parse_remaining_binary_expression(result, assignment_prefix_kind);
+                }
+                ParseContinuation::Reparse(result) => term = result,
+            }
+        }
+    }
+
+    // Avoid inlining to keep down the stack frame size of recursing functions.
+    #[inline(never)]
+    fn parse_remaining_expression_helper(&mut self, term: S::R) -> ParseContinuation<S::R, Self> {
         match self.peek_next_kind_if_operator() {
-            None => term,
+            None => ParseContinuation::Done(term),
             Some(token) => {
                 let assignment_prefix_kind =
                     self.check_if_should_override_normal_precedence(&term, token, self.precedence);
@@ -1251,12 +1281,13 @@ where
                 match assignment_prefix_kind {
                     BinaryExpressionPrefixKind::PrefixLessThan((type_args, parser1)) => {
                         self.continue_from(parser1);
-                        self.do_parse_specified_function_call(term, type_args)
+                        let result = self.do_parse_specified_function_call(term, type_args);
+                        ParseContinuation::Done(result)
                     }
                     BinaryExpressionPrefixKind::PrefixNone
                         if self.operator_has_lower_precedence(token) =>
                     {
-                        term
+                        ParseContinuation::Done(term)
                     }
                     _ => match token {
                         // Binary operators
@@ -1301,44 +1332,61 @@ where
                         | TokenKind::QuestionColon
                         | TokenKind::QuestionQuestion
                         | TokenKind::QuestionQuestionEqual => {
-                            self.parse_remaining_binary_expression(term, assignment_prefix_kind)
+                            ParseContinuation::Binary(term, assignment_prefix_kind)
                         }
                         TokenKind::Instanceof => {
                             self.with_error(Errors::instanceof_disabled);
                             let _ = self.assert_token(TokenKind::Instanceof);
-                            term
+                            ParseContinuation::Done(term)
                         }
-                        TokenKind::Is => self.parse_is_expression(term),
+                        TokenKind::Is => {
+                            let result = self.parse_is_expression(term);
+                            ParseContinuation::Done(result)
+                        }
                         TokenKind::As if self.allow_as_expressions() => {
-                            self.parse_as_expression(term)
+                            let result = self.parse_as_expression(term);
+                            ParseContinuation::Done(result)
                         }
-                        TokenKind::QuestionAs => self.parse_nullable_as_expression(term),
-                        TokenKind::Upcast => self.parse_upcast_expression(term),
+                        TokenKind::QuestionAs => {
+                            let result = self.parse_nullable_as_expression(term);
+                            ParseContinuation::Done(result)
+                        }
+                        TokenKind::Upcast => {
+                            let result = self.parse_upcast_expression(term);
+                            ParseContinuation::Done(result)
+                        }
                         TokenKind::QuestionMinusGreaterThan | TokenKind::MinusGreaterThan => {
                             let result = self.parse_member_selection_expression(term);
-                            self.parse_remaining_expression(result)
+                            ParseContinuation::Reparse(result)
                         }
                         TokenKind::ColonColon => {
                             let result = self.parse_scope_resolution_expression(term);
-                            self.parse_remaining_expression(result)
+                            ParseContinuation::Reparse(result)
                         }
                         TokenKind::PlusPlus | TokenKind::MinusMinus => {
-                            self.parse_postfix_unary(term)
+                            let result = self.parse_postfix_unary(term);
+                            ParseContinuation::Done(result)
                         }
                         TokenKind::Hash => {
-                            self.parse_function_call_or_enum_class_label_expression(term)
+                            let result =
+                                self.parse_function_call_or_enum_class_label_expression(term);
+                            ParseContinuation::Done(result)
                         }
                         TokenKind::LeftParen => {
                             let missing = S!(make_missing, self, self.pos());
-                            self.parse_function_call(missing, term)
+                            let result = self.parse_function_call(missing, term);
+                            ParseContinuation::Done(result)
                         }
-                        TokenKind::LeftBracket | TokenKind::LeftBrace => self.parse_subscript(term),
+                        TokenKind::LeftBracket | TokenKind::LeftBrace => {
+                            let result = self.parse_subscript(term);
+                            ParseContinuation::Done(result)
+                        }
                         TokenKind::Question => {
                             let token = self.assert_token(TokenKind::Question);
                             let result = self.parse_conditional_expression(term, token);
-                            self.parse_remaining_expression(result)
+                            ParseContinuation::Reparse(result)
                         }
-                        _ => term,
+                        _ => ParseContinuation::Done(term),
                     },
                 }
             }
@@ -2007,6 +2055,8 @@ where
         )
     }
 
+    // Avoid inlining to keep down the stack frame size of recursing functions.
+    #[inline(never)]
     fn parse_remaining_binary_expression(
         &mut self,
         left_term: S::R,
@@ -2064,8 +2114,7 @@ where
             self.parse_term()
         };
         let right_term = self.parse_remaining_binary_expression_helper(right_term, precedence);
-        let term = S!(make_binary_expression, self, left_term, token, right_term);
-        self.parse_remaining_expression(term)
+        S!(make_binary_expression, self, left_term, token, right_term)
     }
 
     fn parse_remaining_binary_expression_helper(

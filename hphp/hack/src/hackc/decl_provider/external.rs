@@ -72,8 +72,9 @@ pub type ProviderFunc<'decl> = unsafe extern "C" fn(
     *const c_void,
     // A proxy for `HPHP::AutoloadMap::KindOf`
     c_int,
-    // The symbol
+    // The symbol & len
     *const c_char,
+    usize,
 ) -> ExternalDeclProviderResult<'decl>;
 
 #[derive(Debug)]
@@ -92,8 +93,8 @@ impl<'decl> DeclProvider<'decl> for ExternalDeclProvider<'decl> {
             NameType::Fun => 1,     // HPHP::AutoloadMap::KindOf::Function
             NameType::Const => 2,   // HPHP::AutoloadMap::KindOf::Constant
         };
-        let symbol_ptr = std::ffi::CString::new(symbol).unwrap();
-        let result = unsafe { (self.provider)(self.data, code, symbol_ptr.as_c_str().as_ptr()) };
+        let result =
+            unsafe { (self.provider)(self.data, code, symbol.as_ptr() as _, symbol.len()) };
         match result {
             ExternalDeclProviderResult::Missing => Err(Error::NotFound),
             ExternalDeclProviderResult::Decls(p) => {

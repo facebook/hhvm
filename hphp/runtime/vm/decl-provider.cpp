@@ -19,7 +19,8 @@
 
 namespace HPHP {
 
-  DeclProviderResult HhvmDeclProvider::getDecl(AutoloadMap::KindOf /*kind*/, char const* /*symbol*/) {
+DeclProviderResult
+HhvmDeclProvider::getDecl(AutoloadMap::KindOf /*kind*/, std::string_view /*symbol*/) {
   // The prototypical, indicative stub code sketched out below doesn't
   // take into account the RDS nature of the AutoloadHandler data
   // structures and at this time, we can't rely on calls to `getDecl`
@@ -27,7 +28,7 @@ namespace HPHP {
   // called on the wrong thread for example). See D31842297 for some
   // discussion.
 
-    return DeclProviderResult{DeclProviderResult::Tag::Missing, {}};
+  return DeclProviderResult{DeclProviderResult::Tag::Missing, {}};
 
   /*
   String sym = String(symbol, CopyStringMode::CopyString);
@@ -55,20 +56,25 @@ namespace HPHP {
 }
 
 extern "C" {
-  DeclProviderResult hhvm_decl_provider_get_decl(void* provider, int sort, char const* symbol) {
-    try {
-      // Unsafe: if `sort` is out of range the result of this cast is UB.
-      HPHP::AutoloadMap::KindOf kind {
-        static_cast<HPHP::AutoloadMap::KindOf>(sort)
-      };
 
-      return ((HhvmDeclProvider*)provider)->getDecl(kind, symbol);
-    }
-    catch(...) {
-    }
+DeclProviderResult hhvm_decl_provider_get_decl(
+    void* provider, int symbol_kind, char const* symbol, size_t len
+) {
+  try {
+    // Unsafe: if `symbol_kind` is out of range the result of this cast is UB.
+    HPHP::AutoloadMap::KindOf kind {
+      static_cast<HPHP::AutoloadMap::KindOf>(symbol_kind)
+    };
 
-    return DeclProviderResult{DeclProviderResult::Tag::Missing, {}};
+    return ((HhvmDeclProvider*)provider)->getDecl(
+        kind, std::string_view(symbol, len)
+    );
   }
+  catch(...) {
+  }
+
+  return DeclProviderResult{DeclProviderResult::Tag::Missing, {}};
+}
 
 } //extern "C"
 }//namespace HPHP

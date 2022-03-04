@@ -22,6 +22,7 @@
 
 #include <map>
 #include <memory>
+#include <string_view>
 #include <utility>
 
 namespace HPHP {
@@ -54,7 +55,7 @@ struct HhvmDeclProvider {
   HhvmDeclProvider(HhvmDeclProvider const&) = delete;
   HhvmDeclProvider& operator=(HhvmDeclProvider const&) = delete;
 
-  DeclProviderResult getDecl(HPHP::AutoloadMap::KindOf kind, char const* symbol);
+  DeclProviderResult getDecl(HPHP::AutoloadMap::KindOf kind, std::string_view symbol);
 
  private:
   ::rust::Box<DeclParserOptions> opts;
@@ -62,6 +63,8 @@ struct HhvmDeclProvider {
 };
 
 extern "C" {
-  DeclProviderResult hhvm_decl_provider_get_decl(void* provider, int kind, char const* symbol);
+  DeclProviderResult hhvm_decl_provider_get_decl(
+      void* provider, int kind, char const* symbol, size_t len
+  );
 }
 }

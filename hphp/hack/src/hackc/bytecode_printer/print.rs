@@ -1403,50 +1403,27 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             ],
         ),
 
-        Instruct::MemoGet(label, Just(Pair(Local::Unnamed(first), local_count))) => {
+        Instruct::MemoGet(label, range) => {
             w.write_all(b"MemoGet ")?;
             print_label(w, label, dv_labels)?;
-            write!(w, " L:{}+{}", first, local_count)
+            write!(w, " L:{}+{}", range.start, range.len)
         }
-        Instruct::MemoGet(label, Nothing) => {
-            w.write_all(b"MemoGet ")?;
-            print_label(w, label, dv_labels)?;
-            w.write_all(b" L:0+0")
-        }
-        Instruct::MemoGet(_, _) => Err(Error::fail("MemoGet needs an unnamed local").into()),
 
-        Instruct::MemoSet(Just(Pair(Local::Unnamed(first), local_count))) => {
-            write!(w, "MemoSet L:{}+{}", first, local_count)
+        Instruct::MemoSet(range) => {
+            write!(w, "MemoSet L:{}+{}", range.start, range.len)
         }
-        Instruct::MemoSet(Nothing) => w.write_all(b"MemoSet L:0+0"),
-        Instruct::MemoSet(_) => Err(Error::fail("MemoSet needs an unnamed local").into()),
 
-        Instruct::MemoGetEager(
-            [label1, label2],
-            Just(Pair(Local::Unnamed(first), local_count)),
-        ) => {
+        Instruct::MemoGetEager([label1, label2], range) => {
             w.write_all(b"MemoGetEager ")?;
             print_label(w, label1, dv_labels)?;
             w.write_all(b" ")?;
             print_label(w, label2, dv_labels)?;
-            write!(w, " L:{}+{}", first, local_count)
-        }
-        Instruct::MemoGetEager([label1, label2], Nothing) => {
-            w.write_all(b"MemoGetEager ")?;
-            print_label(w, label1, dv_labels)?;
-            w.write_all(b" ")?;
-            print_label(w, label2, dv_labels)?;
-            w.write_all(b" L:0+0")
-        }
-        Instruct::MemoGetEager(_, _) => {
-            Err(Error::fail("MemoGetEager needs an unnamed local").into())
+            write!(w, " L:{}+{}", range.start, range.len)
         }
 
-        Instruct::MemoSetEager(Just(Pair(Local::Unnamed(first), local_count))) => {
-            write!(w, "MemoSetEager L:{}+{}", first, local_count)
+        Instruct::MemoSetEager(range) => {
+            write!(w, "MemoSetEager L:{}+{}", range.start, range.len)
         }
-        Instruct::MemoSetEager(Nothing) => w.write_all(b"MemoSetEager L:0+0"),
-        Instruct::MemoSetEager(_) => Err(Error::fail("MemoSetEager needs an unnamed local").into()),
 
         Instruct::OODeclExists(k) => concat_str_by(
             w,
@@ -1687,10 +1664,9 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
         ),
         Instruct::WHResult => w.write_all(b"WHResult"),
         Instruct::Await => w.write_all(b"Await"),
-        Instruct::AwaitAll(Just(Pair(Local::Unnamed(id), count))) => {
-            write!(w, "AwaitAll L:{}+{}", id, count)
+        Instruct::AwaitAll(range) => {
+            write!(w, "AwaitAll L:{}+{}", range.start, range.len)
         }
-        Instruct::AwaitAll(Nothing) => w.write_all(b"AwaitAll L:0+0"),
         Instruct::CreateCont => w.write_all(b"CreateCont"),
         Instruct::ContEnter => w.write_all(b"ContEnter"),
         Instruct::ContRaise => w.write_all(b"ContRaise"),

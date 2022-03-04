@@ -6,11 +6,11 @@
 use ffi::{
     BumpSliceMut,
     Maybe::{self, *},
-    Pair, Slice, Str,
+    Slice, Str,
 };
 use iterator::IterId;
 use label::Label;
-use local::Local;
+use local::{Local, LocalId};
 
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType<'arena> = Str<'arena>;
@@ -184,6 +184,15 @@ impl AsRef<str> for Visibility {
             Self::Internal => "internal",
         }
     }
+}
+
+/// A Contiguous range of unnamed locals. The canonical (default) empty
+/// range is {0, 0}. Ranges of named locals cannot be represented.
+#[derive(Clone, Copy, Debug, Default)]
+#[repr(C)]
+pub struct LocalRange {
+    pub start: LocalId,
+    pub len: u32,
 }
 
 #[derive(Clone, Debug)]
@@ -392,10 +401,10 @@ pub enum Instruct<'arena> {
     GetMemoKeyL(Local<'arena>),
     CGetCUNop,
     UGetCUNop,
-    MemoGet(Label, Maybe<Pair<Local<'arena>, isize>>),
-    MemoGetEager([Label; 2], Maybe<Pair<Local<'arena>, isize>>),
-    MemoSet(Maybe<Pair<Local<'arena>, isize>>),
-    MemoSetEager(Maybe<Pair<Local<'arena>, isize>>),
+    MemoGet(Label, LocalRange),
+    MemoGetEager([Label; 2], LocalRange),
+    MemoSet(LocalRange),
+    MemoSetEager(LocalRange),
     LockObj,
     ThrowNonExhaustiveSwitch,
     RaiseClassStringConversionWarning,
@@ -447,7 +456,7 @@ pub enum Instruct<'arena> {
     SrcLoc(SrcLoc),
     WHResult,
     Await,
-    AwaitAll(Maybe<Pair<Local<'arena>, isize>>),
+    AwaitAll(LocalRange),
     CreateCont,
     ContEnter,
     ContRaise,

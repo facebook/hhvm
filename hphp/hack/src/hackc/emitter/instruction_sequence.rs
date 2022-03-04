@@ -3,15 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::{
-    BumpSliceMut,
-    Maybe::{self, Just, Nothing},
-    Pair, Slice, Str,
-};
+use ffi::{BumpSliceMut, Maybe::*, Slice, Str};
 use hhbc_ast::*;
 use iterator::IterId;
 use label::Label;
-use local::Local;
+use local::{Local, LocalId};
 use oxidized::ast_defs::Pos;
 use runtime::TypedValue;
 use thiserror::Error;
@@ -779,41 +775,20 @@ pub mod instr {
         instr(Instruct::UGetCUNop)
     }
 
-    pub fn memoget<'a>(label: Label, range: Option<(Local<'a>, isize)>) -> InstrSeq<'a> {
-        instr(Instruct::MemoGet(
-            label,
-            match range {
-                Some((fst, snd)) => Just(Pair(fst, snd)),
-                None => Nothing,
-            },
-        ))
+    pub fn memoget<'a>(label: Label, range: LocalRange) -> InstrSeq<'a> {
+        instr(Instruct::MemoGet(label, range))
     }
 
-    // Factored out to reduce verbosity.
-    fn range_opt_to_maybe<'a>(range: Option<(Local<'a>, isize)>) -> Maybe<Pair<Local<'a>, isize>> {
-        match range {
-            Some((fst, snd)) => Just(Pair(fst, snd)),
-            None => Nothing,
-        }
+    pub fn memoget_eager<'a>(label1: Label, label2: Label, range: LocalRange) -> InstrSeq<'a> {
+        instr(Instruct::MemoGetEager([label1, label2], range))
     }
 
-    pub fn memoget_eager<'a>(
-        label1: Label,
-        label2: Label,
-        range: Option<(Local<'a>, isize)>,
-    ) -> InstrSeq<'a> {
-        instr(Instruct::MemoGetEager(
-            [label1, label2],
-            range_opt_to_maybe(range),
-        ))
+    pub fn memoset<'a>(range: LocalRange) -> InstrSeq<'a> {
+        instr(Instruct::MemoSet(range))
     }
 
-    pub fn memoset<'a>(range: Option<(Local<'a>, isize)>) -> InstrSeq<'a> {
-        instr(Instruct::MemoSet(range_opt_to_maybe(range)))
-    }
-
-    pub fn memoset_eager<'a>(range: Option<(Local<'a>, isize)>) -> InstrSeq<'a> {
-        instr(Instruct::MemoSetEager(range_opt_to_maybe(range)))
+    pub fn memoset_eager<'a>(range: LocalRange) -> InstrSeq<'a> {
+        instr(Instruct::MemoSetEager(range))
     }
 
     pub fn getmemokeyl<'a>(local: Local<'a>) -> InstrSeq<'a> {
@@ -1034,37 +1009,28 @@ pub mod instr {
         instr(Instruct::CreateCont)
     }
 
-    pub fn awaitall<'a>(range: Option<(Local<'a>, isize)>) -> InstrSeq<'a> {
-        instr(Instruct::AwaitAll(range_opt_to_maybe(range)))
+    pub fn awaitall<'a>(range: LocalRange) -> InstrSeq<'a> {
+        instr(Instruct::AwaitAll(range))
     }
 
     pub fn label<'a>(label: Label) -> InstrSeq<'a> {
         instr(Instruct::Label(label))
     }
 
-    pub fn awaitall_list<'a>(unnamed_locals: Vec<Local<'a>>) -> InstrSeq<'a> {
-        use Local::Unnamed;
+    pub fn awaitall_list<'a>(unnamed_locals: Vec<LocalId>) -> InstrSeq<'a> {
         match unnamed_locals.split_first() {
             None => panic!("Expected at least one await"),
             Some((head, tail)) => {
-                if let Unnamed(head_id) = head {
-                    let mut prev_id = head_id;
-                    for unnamed_local in tail {
-                        match unnamed_local {
-                            Unnamed(id) => {
-                                assert_eq!(prev_id.idx + 1, id.idx);
-                                prev_id = id;
-                            }
-                            _ => panic!("Expected unnamed local"),
-                        }
-                    }
-                    awaitall(Some((
-                        Unnamed(*head_id),
-                        unnamed_locals.len().try_into().unwrap(),
-                    )))
-                } else {
-                    panic!("Expected unnamed local")
+                // Assert that the LocalIds are sequentially numbered.
+                let mut prev_id = head;
+                for id in tail {
+                    assert_eq!(prev_id.idx + 1, id.idx);
+                    prev_id = id;
                 }
+                awaitall(LocalRange {
+                    start: *head,
+                    len: unnamed_locals.len().try_into().unwrap(),
+                })
             }
         }
     }

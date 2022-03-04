@@ -29,18 +29,19 @@ impl LocalId {
 /// those appearing in the .declvars declaration. These can also be
 /// referenced by number (0 to n-1), but we use Unnamed only for
 /// variables n and above not appearing in .declvars
-#[derive(Copy, Debug)]
+#[derive(Clone, Copy, Debug)]
 #[repr(C)]
 pub enum Local<'arena> {
     Unnamed(LocalId),
     /// Named local, necessarily starting with `$`
     Named(Str<'arena>),
 }
-impl<'arena> Clone for Local<'arena> {
-    fn clone(&self) -> Local<'arena> {
+
+impl Local<'_> {
+    pub fn expect_unnamed(&self) -> LocalId {
         match self {
-            Local::Unnamed(u) => Local::Unnamed(u.clone()),
-            Local::Named(r) => Local::Named(r.clone()),
+            Local::Unnamed(id) => *id,
+            Local::Named(_) => panic!("Expected unnamed local"),
         }
     }
 }

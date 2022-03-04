@@ -348,6 +348,10 @@ fn emit_awaitall_multi<'a, 'arena, 'decl>(
         }
 
         let unpack = InstrSeq::gather(instrs);
+        let locals = locals
+            .into_iter()
+            .map(|local| local.expect_unnamed())
+            .collect();
         let await_all = InstrSeq::gather(vec![instr::awaitall_list(locals), instr::popc()]);
         let block_instrs = emit_stmts(e, env, block)?;
         Ok((

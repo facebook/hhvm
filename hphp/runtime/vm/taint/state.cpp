@@ -318,6 +318,23 @@ void GlobalsHeap::clear() {
   m_heap.clear();
 }
 
+void IteratorsHeap::set(Iter* iterator, Value value) {
+  m_heap[iterator] = value;
+}
+
+Value IteratorsHeap::get(Iter* iterator) const {
+  auto value = m_heap.find(iterator);
+  if (value != m_heap.end()) {
+    return value->second;
+  }
+
+  return nullptr;
+}
+
+void IteratorsHeap::clear() {
+  m_heap.clear();
+}
+
 namespace {
 
 struct SingletonTag {};
@@ -345,6 +362,7 @@ void State::initialize() {
   heap_objects.clear();
   heap_classes.clear();
   heap_globals.clear();
+  heap_iterators.clear();
   paths.clear();
   arena = std::make_unique<PathArena>();
   m_function_metadata = Configuration::get()->functionMetadata();

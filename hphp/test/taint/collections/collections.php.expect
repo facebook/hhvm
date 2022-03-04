@@ -4,8 +4,12 @@
 {"hops":["__source","source_through_vec_at_index_stopped","__sink"]}
 {"hops":["__source","source_through_vec_copies_to_sink","__sink"]}
 {"hops":["__source","source_through_vec_copies_to_sink","__sink"]}
+{"hops":["__source","source_through_keyset_to_sink","__sink"]}
 {"hops":["__source","source_through_dict_tainted_key_to_sink","__sink"]}
 {"hops":["__source","source_through_dict_tainted_value_to_sink","__sink"]}
+{"hops":["__source","source_through_dict_iteration_to_sink","__sink"]}
 {"hops":["__source","source_through_vector_to_sink","__sink"]}
 {"hops":["__source","source_through_map_to_sink","__sink"]}
 {"hops":["__source","source_through_pair_to_sink","__sink"]}
+{"hops":["__source","iterators_do_not_collide_within_function","__sink"]}
+{"hops":["__source","iterators_do_not_collide_across_calls","__sink"]}

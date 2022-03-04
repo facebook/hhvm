@@ -51,7 +51,6 @@ function source_through_vec_copies_to_sink(): void {
   __sink($baz[1]);
 }
 
-// This does not work right now as we don't support iteration
 function source_through_keyset_to_sink(): void {
   $keyset = keyset[];
   $keyset[] = __source();
@@ -74,6 +73,14 @@ function source_through_dict_tainted_value_to_sink(): void {
   $k = 1;
   $dict[$k] = $v;
   __sink($dict[1]);
+}
+
+function source_through_dict_iteration_to_sink(): void {
+  $dict = dict[];
+  $dict[__source()] = 1;
+  foreach ($dict as $k => $v) {
+    __sink($v);
+  }
 }
 
 function source_through_vector_to_sink(): void {
@@ -102,6 +109,36 @@ function source_through_pair_to_sink(): void {
   __sink($pair[1]);
 }
 
+function iterators_do_not_collide_within_function(): void {
+  $keyset1 = keyset[];
+  $keyset1[] = __source();
+  $keyset2 = keyset[];
+  $keyset2[] = 1;
+  foreach ($keyset1 as $key) {
+    __sink($key);
+  }
+  foreach ($keyset2 as $key) {
+    __sink($key);
+  }
+}
+
+function inner(): void {
+  $untainted = keyset[];
+  $untainted[] = 1;
+  foreach ($untainted as $key) {
+    __sink($key);
+  }
+}
+
+function iterators_do_not_collide_across_calls() {
+  $tainted = keyset[];
+  $tainted[] = __source();
+  foreach ($tainted as $key) {
+    inner();
+    __sink($key);
+  }
+}
+
 <<__EntryPoint>> function main(): void {
   no_flow_to_sink();
   source_through_vec_to_sink();
@@ -112,6 +149,7 @@ function source_through_pair_to_sink(): void {
   source_through_keyset_to_sink();
   source_through_dict_tainted_key_to_sink();
   source_through_dict_tainted_value_to_sink();
+  source_through_dict_iteration_to_sink();
   // Tests for older collections below. These are not as comprehensive
   // as the implementations are similar to the above - we just test
   // basic behavior and try to ensure things don't crash.
@@ -119,4 +157,6 @@ function source_through_pair_to_sink(): void {
   source_through_map_to_sink();
   source_through_set_to_sink();
   source_through_pair_to_sink();
+  iterators_do_not_collide_within_function();
+  iterators_do_not_collide_across_calls();
 }

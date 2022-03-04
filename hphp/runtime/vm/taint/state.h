@@ -168,6 +168,19 @@ struct GlobalsHeap {
   folly::F14FastMap<std::string, Value> m_heap;
 };
 
+// Model iterators, which are identified by their location on the stack frame
+// We model these based on the collection that backs them.
+// Custom iterator implementations are not supported for now
+struct IteratorsHeap {
+  void set(Iter* iterator, Value value);
+  Value get(Iter* iterator) const;
+
+  void clear();
+
+ private:
+  hphp_fast_map<Iter*, Value> m_heap;
+};
+
 struct State {
   static rds::local::RDSLocal<State, rds::local::Initialize::FirstUse> instance;
 
@@ -184,6 +197,7 @@ struct State {
   ObjectsHeap heap_objects;
   ClassesHeap heap_classes;
   GlobalsHeap heap_globals;
+  IteratorsHeap heap_iterators;
 
   // Arena to hold all the paths
   std::unique_ptr<PathArena> arena;

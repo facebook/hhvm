@@ -181,6 +181,7 @@ const Func* callee() {
  * 5) Get instructions
  * 6) Isset and type querying instructions
  * 7) Mutator instructions
+ * 11) Iterator instructions
  */
 
 void iopNop() {
@@ -1283,36 +1284,92 @@ TCA iopFCallObjMethodD(
   return nullptr;
 }
 
-void iopIterInit(PC& /* pc */, const IterArgs& /* ita */, PC /* targetpc */) {
-  iopUnhandled("IterInit");
+namespace {
+/**
+ * Common handling for iterators.
+ * We only model array-like (builtin) iterators for now, and don't support custom
+ * iterators.
+ * So we consider an iterator as producing tainted values/keys if the collection
+ * it points to is tainted
+ */
+void iterNextCommon(const IterArgs& ita) {
+  // Just overwrite the key and the value with the taint we know they have.
+  // This will over-taint on the last element in addition to the other
+  // correctness concerns, but is fine for now.
+  auto state = State::instance;
+  auto iter = frame_iter(vmfp(), ita.iterId);
+
+  auto value = state->heap_iterators.get(iter);
+  auto value_tv = frame_local(vmfp(), ita.valId);
+  state->heap_locals.set(value_tv, value);
+
+  FTRACE(
+    2,
+    "taint: Advancing iterator {} to propagate taint {} to value {} and key {}\n",
+    ita.iterId,
+    value,
+    value_tv,
+    ita.hasKey()? frame_local(vmfp(), ita.keyId) : nullptr);
+  if (ita.hasKey()) {
+    state->heap_locals.set(frame_local(vmfp(), ita.keyId), value);
+  }
+}
+
+void iterInitCommon(const IterArgs& ita, Value value) {
+  auto state = State::instance;
+  auto iter = frame_iter(vmfp(), ita.iterId);
+  state->heap_iterators.set(iter, value);
+
+  FTRACE(
+    2,
+    "taint: Initializing iterator {} to value {}\n",
+    ita.iterId,
+    value);
+
+  iterNextCommon(ita);
+}
+}
+
+void iopIterInit(PC& /* pc */, const IterArgs& ita, PC /* targetpc */) {
+  iopPreamble("IterInit");
+
+  auto state = State::instance;
+  auto value = state->stack.top();
+  state->stack.pop();
+  iterInitCommon(ita, value);
 }
 
 void iopLIterInit(
     PC& /* pc */,
-    const IterArgs& /* ita */,
-    TypedValue* /* base */,
+    const IterArgs& ita,
+    TypedValue* base,
     PC /* targetpc */) {
-  iopUnhandled("LIterInit");
+  iopPreamble("LIterInit");
+
+  auto value = State::instance->heap_locals.get(base);
+  iterInitCommon(ita, value);
 }
 
-void iopIterNext(PC& /* pc */, const IterArgs& /* ita */, PC /* targetpc */) {
-  iopUnhandled("IterNext");
+void iopIterNext(PC& /* pc */, const IterArgs& ita, PC /* targetpc */) {
+  iopPreamble("IterNext");
+  iterNextCommon(ita);
 }
 
 void iopLIterNext(
     PC& /* pc */,
-    const IterArgs& /* ita */,
+    const IterArgs& ita,
     TypedValue* /* base */,
     PC /* targetpc */) {
-  iopUnhandled("LIterNext");
+  iopPreamble("LIterNext");
+  iterNextCommon(ita);
 }
 
 void iopIterFree(Iter* /* it */) {
-  iopUnhandled("IterFree");
+  iopDoesNotAffectTaint("IterFree");
 }
 
 void iopLIterFree(Iter* /* it */, tv_lval) {
-  iopUnhandled("LIterFree");
+  iopDoesNotAffectTaint("LIterFree");
 }
 
 void iopIncl() {

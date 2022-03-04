@@ -533,7 +533,7 @@ int64_t HHVM_FUNCTION(pcntl_wait,
                       int64_t& status,
                       int options /* = 0 */) {
   int nstatus = -1;
-  auto const child_id = LightProcess::pcntl_waitpid(-1, &nstatus, options);
+  auto const child_id = LightProcess::waitpid(-1, &nstatus, options);
 /*  if (options) {
     child_id = wait3(&nstatus, options, NULL);
   } else {
@@ -548,7 +548,7 @@ int64_t HHVM_FUNCTION(pcntl_waitpid,
                       int64_t& status,
                       int options /* = 0 */) {
   int nstatus = -1;
-  auto const child_id = LightProcess::pcntl_waitpid(
+  auto const child_id = LightProcess::waitpid(
     (pid_t)pid,
     &nstatus,
     options

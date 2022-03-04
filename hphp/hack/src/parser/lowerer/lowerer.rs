@@ -162,7 +162,7 @@ pub struct State {
     pub exp_recursion_depth: usize,
 }
 
-const EXP_RECUSION_LIMIT: usize = 30_000;
+const EXP_RECURSION_LIMIT: usize = 30_000;
 
 #[derive(Clone)]
 pub struct Env<'a> {
@@ -1441,7 +1441,7 @@ fn p_expr_impl_<'a>(
     env: &mut Env<'a>,
     parent_pos: Option<Pos>,
 ) -> Result<ast::Expr_, Error> {
-    if *env.exp_recursion_depth() >= EXP_RECUSION_LIMIT {
+    if *env.exp_recursion_depth() >= EXP_RECURSION_LIMIT {
         Err(Error::Failwith("Expression recursion limit reached".into()))
     } else {
         *env.exp_recursion_depth() += 1;
@@ -1812,7 +1812,7 @@ fn p_expr_impl__<'a>(
                     Some(TK::Tilde) => mk_unop(Utild, expr),
                     Some(TK::Plus) => mk_unop(Uplus, expr),
                     Some(TK::Minus) => mk_unop(Uminus, expr),
-                    Some(TK::Await) => lift_await(pos, expr, env, location),
+                    Some(TK::Await) => Ok(lift_await(pos, expr, env, location)),
                     Some(TK::Readonly) => Ok(process_readonly_expr(env, expr)),
                     Some(TK::Clone) => Ok(E_::mk_clone(expr)),
                     Some(TK::Print) => Ok(E_::mk_call(
@@ -2588,11 +2588,11 @@ fn lift_await<'a>(
     expr: ast::Expr,
     env: &mut Env<'a>,
     location: ExprLocation,
-) -> Result<ast::Expr_, Error> {
-    use ExprLocation::*;
+) -> ast::Expr_ {
+    use ExprLocation::{AsStatement, RightOfAssignmentInUsingStatement, UsingStatement};
     match (&env.lifted_awaits, location) {
         (_, UsingStatement) | (_, RightOfAssignmentInUsingStatement) | (None, _) => {
-            Ok(E_::mk_await(expr))
+            E_::mk_await(expr)
         }
         (Some(_), _) => {
             if location != AsStatement {
@@ -2603,12 +2603,12 @@ fn lift_await<'a>(
                 if let Some(aw) = env.lifted_awaits.as_mut() {
                     aw.awaits.push(await_)
                 }
-                Ok(E_::mk_lvar(lid))
+                E_::mk_lvar(lid)
             } else {
                 if let Some(aw) = env.lifted_awaits.as_mut() {
                     aw.awaits.push((None, expr))
                 }
-                Ok(E_::Null)
+                E_::Null
             }
         }
     }

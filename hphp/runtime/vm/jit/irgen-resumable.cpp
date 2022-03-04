@@ -654,11 +654,24 @@ void emitAwaitAll(IRGS& env, LocalRange locals) {
         cnt
       );
 
-      if (resumeMode(env) == ResumeMode::Async) {
-        implAwaitR(env, wh, suspendOffset, resumeOffset);
-      } else {
-        implAwaitE(env, wh, suspendOffset, resumeOffset);
-      }
+      auto const state = gen(env, LdWHState, wh);
+      ifThenElse(
+        env,
+        [&] (Block* taken) {
+          gen(env, JmpNZero, taken, state);
+        },
+        [&] { // Extremely unlikely: profiling hook finished the AAWH.
+          hint(env, Block::Hint::Unused);
+          push(env, cns(env, TInitNull));
+        },
+        [&] {
+          if (resumeMode(env) == ResumeMode::Async) {
+            implAwaitR(env, wh, suspendOffset, resumeOffset);
+          } else {
+            implAwaitE(env, wh, suspendOffset, resumeOffset);
+          }
+        }
+      );
     }
   );
 }

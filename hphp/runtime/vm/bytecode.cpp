@@ -5037,7 +5037,11 @@ OPTBLD_INLINE TCA iopAwaitAll(PC origpc, PC& pc, LocalRange locals) {
                                            locals.first + locals.count, cnt)
   );
   assertx(obj->isWaitHandle());
-  assertx(!static_cast<c_Awaitable*>(obj.get())->isFinished());
+  if (UNLIKELY(static_cast<c_Awaitable*>(obj.get())->isFinished())) {
+    // A profiler hook may have finished the AAWH.
+    vmStack().pushNull();
+    return nullptr;
+  }
 
   vmStack().pushObjectNoRc(obj.detach());
   return suspendStack(origpc, pc);

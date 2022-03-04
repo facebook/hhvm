@@ -274,6 +274,9 @@ void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {
   setState(STATE_BLOCKED);
   setContextIdx(ctx_idx);
 
+  // For AAWH not being finished, accounts for edges from all children.
+  incRefCount();
+
   if (UNLIKELY(AsioSession::Get()->hasOnAwaitAllCreate())) {
     auto vector = req::make<c_Vector>();
     for (int32_t idx = m_cap - 1; idx >= 0; --idx) {
@@ -282,8 +285,6 @@ void c_AwaitAllWaitHandle::initialize(context_idx_t ctx_idx) {
     }
     AsioSession::Get()->onAwaitAllCreate(this, Variant(std::move(vector)));
   }
-
-  incRefCount();
 }
 
 void c_AwaitAllWaitHandle::onUnblocked(uint32_t idx) {

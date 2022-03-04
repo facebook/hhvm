@@ -1,6 +1,4 @@
-File "interface_mismatch.php", line 16, characters 7-9:
-This type doesn't implement the method `whatever` (Typing[4054])
 File "interface_mismatch.php", line 16, characters 22-25:
-Which is required by this interface
-File "interface_mismatch.php", line 13, characters 19-26:
-As defined here
+This interface is not properly implemented (Typing[4054])
+  File "interface_mismatch.php", line 13, characters 19-26:
+  Method `whatever` does not have an implementation

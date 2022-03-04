@@ -224,7 +224,7 @@ let get_member member_kind class_ =
   | MemberKind.Constructor _ -> (fun _ -> fst (Cls.construct class_))
 
 let member_not_implemented_error
-    class_name parent_name member_name class_elt pos parent_pos member_kind =
+    class_name parent_name member_name class_elt parent_pos member_kind =
   let (lazy defn_pos) = class_elt.ce_pos in
   let quickfixes =
     [
@@ -235,13 +235,7 @@ let member_not_implemented_error
     Typing_error.(
       primary
       @@ Primary.Member_not_implemented
-           {
-             member_name;
-             parent_pos = Pos_or_decl.of_raw_pos parent_pos;
-             pos;
-             decl_pos = defn_pos;
-             quickfixes;
-           })
+           { pos = parent_pos; member_name; decl_pos = defn_pos; quickfixes })
   in
   Errors.add_typing_error err
 
@@ -927,7 +921,6 @@ let check_class_against_parent_class_elt
       (Cls.name parent_class)
       member_name
       parent_class_elt
-      class_pos
       parent_name_pos
       member_kind;
     env
@@ -1345,7 +1338,7 @@ let check_typeconsts
     class_
     on_error =
   let ((parent_pos, _), _, parent_class) = parent_class in
-  let (pos, class_) = class_ in
+  let (_pos, class_) = class_ in
   let ptypeconsts = Cls.typeconsts parent_class in
   List.fold ptypeconsts ~init:env ~f:(fun env (tconst_name, parent_tconst) ->
       match Cls.get_typeconst class_ tconst_name with
@@ -1366,9 +1359,8 @@ let check_typeconsts
             primary
             @@ Primary.Member_not_implemented
                  {
+                   pos = parent_pos;
                    member_name = tconst_name;
-                   parent_pos = Pos_or_decl.of_raw_pos parent_pos;
-                   pos;
                    decl_pos = fst parent_tconst.ttc_name;
                    quickfixes = [];
                  })
@@ -1376,8 +1368,8 @@ let check_typeconsts
         Errors.add_typing_error err;
         env)
 
-let check_consts env implements parent_class (name_pos, class_) psubst on_error
-    =
+let check_consts
+    env implements (parent_pos, parent_class) class_ psubst on_error =
   let pconsts = Cls.consts parent_class in
   List.fold pconsts ~init:env ~f:(fun env (const_name, parent_const) ->
       if String.( <> ) const_name SN.Members.mClass then (
@@ -1403,10 +1395,9 @@ let check_consts env implements parent_class (name_pos, class_) psubst on_error
               primary
               @@ Primary.Member_not_implemented
                    {
+                     pos = parent_pos;
                      member_name = const_name;
-                     parent_pos = parent_const.cc_pos;
-                     pos = name_pos;
-                     decl_pos = Cls.pos parent_class;
+                     decl_pos = parent_const.cc_pos;
                      quickfixes = [];
                    })
           in
@@ -1428,10 +1419,16 @@ let check_class_extends_parent_consts
   let env =
     check_typeconsts env implements parent_class (name_pos, class_) on_error
   in
-  let (_, parent_tparaml, parent_class) = parent_class in
+  let ((parent_pos, _), parent_tparaml, parent_class) = parent_class in
   let psubst = Inst.make_subst (Cls.tparams parent_class) parent_tparaml in
   let env =
-    check_consts env implements parent_class (name_pos, class_) psubst on_error
+    check_consts
+      env
+      implements
+      (parent_pos, parent_class)
+      class_
+      psubst
+      on_error
   in
   let env = check_constructors env parent_class class_ psubst on_error in
   env

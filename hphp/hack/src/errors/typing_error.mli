@@ -554,7 +554,6 @@ module Primary : sig
     | Member_not_implemented of {
         pos: Pos.t;
         member_name: string;
-        parent_pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
         quickfixes: Quickfix.t list;
       }

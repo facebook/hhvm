@@ -1669,7 +1669,6 @@ module Primary = struct
     | Member_not_implemented of {
         pos: Pos.t;
         member_name: string;
-        parent_pos: Pos_or_decl.t;
         decl_pos: Pos_or_decl.t;
         quickfixes: Quickfix.t list;
       }
@@ -2941,17 +2940,15 @@ module Primary = struct
     and reasons = lazy [(decl_pos, "Definition is here")] in
     (Error_code.TypeArityMismatch, claim, reasons, [])
 
-  let member_not_implemented pos parent_pos member_name decl_pos quickfixes =
-    let claim =
-      lazy
-        ( pos,
-          "This type doesn't implement the method "
-          ^ Markdown_lite.md_codify member_name )
+  let member_not_implemented parent_pos member_name decl_pos quickfixes =
+    let claim = lazy (parent_pos, "This interface is not properly implemented")
     and reasons =
       lazy
         [
-          (parent_pos, "Which is required by this interface");
-          (decl_pos, "As defined here");
+          ( decl_pos,
+            Printf.sprintf
+              "Method %s does not have an implementation"
+              (Markdown_lite.md_codify member_name) );
         ]
     in
     (Error_code.MemberNotImplemented, claim, reasons, quickfixes)
@@ -5349,9 +5346,8 @@ module Primary = struct
       abstract_const_usage pos name decl_pos
     | Type_arity_mismatch { pos; decl_pos; actual; expected } ->
       type_arity_mismatch pos decl_pos actual expected
-    | Member_not_implemented
-        { pos; parent_pos; member_name; decl_pos; quickfixes } ->
-      member_not_implemented pos parent_pos member_name decl_pos quickfixes
+    | Member_not_implemented { pos; member_name; decl_pos; quickfixes } ->
+      member_not_implemented pos member_name decl_pos quickfixes
     | Attribute_too_many_arguments { pos; name; expected } ->
       attribute_too_many_arguments pos name expected
     | Attribute_too_few_arguments { pos; name; expected } ->

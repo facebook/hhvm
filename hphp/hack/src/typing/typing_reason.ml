@@ -9,7 +9,8 @@
 
 open Hh_prelude
 
-let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
+let strip_ns id =
+  id |> Utils.strip_ns |> Hh_autoimport.strip_HH_namespace_if_autoimport
 
 type pos_id = Pos_or_decl.t * Ast_defs.id_ [@@deriving eq, ord, show]
 

@@ -50,7 +50,8 @@ type penv =
   | Loclenv of env
   | Declenv
 
-let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
+let strip_ns id =
+  id |> Utils.strip_ns |> Hh_autoimport.strip_HH_namespace_if_autoimport
 
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)

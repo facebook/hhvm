@@ -7,7 +7,8 @@
  *)
 open Hh_prelude
 
-let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
+let strip_ns id =
+  id |> Utils.strip_ns |> Hh_autoimport.strip_HH_namespace_if_autoimport
 
 let vis_to_string = function
   | `public -> "public"

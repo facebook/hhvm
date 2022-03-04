@@ -9,6 +9,7 @@
 
 open Hh_prelude
 
+(** The names of autoimport types. *)
 let types =
   [
     "AnyArray";
@@ -65,6 +66,7 @@ let types =
     "XenonSample";
   ]
 
+(** The names of autoimport functions. *)
 let funcs =
   [
     "asio_get_current_context_idx";
@@ -110,15 +112,20 @@ let funcs =
     "xenon_get_data";
   ]
 
+(** The names of autoimport constants. *)
 let consts = []
 
+(** The names of autoimport namespaces. *)
 let namespaces = ["Rx"]
 
+(** Whether the given string is the name of an autoimport type. *)
 let is_hh_autoimport =
   let h = HashSet.of_list types in
   (fun x -> HashSet.mem h x)
 
-let reverse_type id =
+(** Strip any `HH\\` prefix from the provided string if the string
+  is the name of a autoimport type. *)
+let strip_HH_namespace_if_autoimport id =
   match String.chop_prefix ~prefix:"HH\\" id with
   | Some stripped_id when is_hh_autoimport stripped_id -> stripped_id
   | _ -> id

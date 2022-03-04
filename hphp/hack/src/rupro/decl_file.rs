@@ -4,10 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hackrs::{
-    cache::NonEvictingCache,
     decl_defs::shallow,
     decl_parser::DeclParser,
-    folded_decl_provider::{self, FoldedDeclProvider},
+    folded_decl_provider::FoldedDeclProvider,
     reason::{BReason, NReason, Reason},
     typing_decl_provider::{FoldingTypingDeclProvider, TypingDeclProvider},
 };
@@ -15,6 +14,7 @@ use pos::{Prefix, RelativePath, RelativePathCtx};
 use std::path::PathBuf;
 use std::sync::Arc;
 use structopt::StructOpt;
+use test_utils::cache::NonEvictingCache;
 
 #[derive(StructOpt, Debug)]
 struct CliOptions {
@@ -84,7 +84,7 @@ fn main() {
 
 fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames: &[RelativePath]) {
     let decl_parser = DeclParser::new(ctx);
-    let folded_decl_provider = folded_decl_provider::make_folded_decl_provider(
+    let folded_decl_provider = test_utils::decl_provider::make_folded_decl_provider(
         opts.naming_table.as_ref(),
         &decl_parser,
         filenames,

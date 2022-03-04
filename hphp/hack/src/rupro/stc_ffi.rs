@@ -8,11 +8,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hackrs::ast_provider::AstProvider;
-use hackrs::cache::NonEvictingCache;
 use hackrs::decl_parser::DeclParser;
 use hackrs::folded_decl_provider::LazyFoldedDeclProvider;
 use hackrs::reason::{NReason, Reason};
-use hackrs::shallow_decl_provider::{EagerShallowDeclProvider, ShallowDeclCache};
+use hackrs::shallow_decl_provider::EagerShallowDeclProvider;
 use hackrs::special_names::SpecialNames;
 use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
@@ -24,6 +23,7 @@ use pos::{Prefix, RelativePath, RelativePathCtx};
 use std::path::PathBuf;
 use std::sync::Arc;
 use structopt::StructOpt;
+use test_utils::cache::{make_non_eviction_shallow_decl_cache, NonEvictingCache};
 
 // fn create_nast(path: PathBuf) -> oxidized::aast::Program<(), ()> {}
 
@@ -70,7 +70,7 @@ pub extern "C" fn stc_main() {
         Arc::clone(&options),
     );
     let decl_parser = DeclParser::new(relative_path_ctx);
-    let shallow_decl_cache = Arc::new(ShallowDeclCache::with_no_eviction());
+    let shallow_decl_cache = Arc::new(make_non_eviction_shallow_decl_cache());
     let shallow_decl_provider = Arc::new(EagerShallowDeclProvider::new(Arc::clone(
         &shallow_decl_cache,
     )));

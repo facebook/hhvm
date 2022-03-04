@@ -17,7 +17,6 @@ use structopt::StructOpt;
 
 use hackrs::decl_parser::DeclParser;
 use hackrs::reason::{BReason, NReason, Reason};
-use hackrs::shallow_decl_provider::ShallowDeclCache;
 use pos::{Prefix, RelativePath, RelativePathCtx};
 
 #[derive(StructOpt, Debug)]
@@ -69,7 +68,7 @@ fn main() {
 
 fn parse_repo<R: Reason>(ctx: Arc<RelativePathCtx>, filenames: &[RelativePath]) {
     let decl_parser = DeclParser::new(ctx);
-    let shallow_decl_cache = ShallowDeclCache::<R>::with_no_eviction();
+    let shallow_decl_cache = test_utils::cache::make_non_eviction_shallow_decl_cache::<R>();
     let ((), time_taken) = time(|| {
         filenames
             .par_iter()

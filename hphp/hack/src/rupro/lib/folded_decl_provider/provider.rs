@@ -3,21 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{fold::DeclFolder, Error, FoldedDeclProvider, Result, TypeDecl};
-use crate::cache::{Cache, NonEvictingCache};
+use super::{fold::DeclFolder, Error, Result, TypeDecl};
+use crate::cache::Cache;
 use crate::decl_defs::{ConstDecl, DeclTy, DeclTy_, FoldedClass, FunDecl, ShallowClass};
-use crate::decl_parser::DeclParser;
-use crate::naming_provider::SqliteNamingTable;
 use crate::reason::Reason;
-use crate::shallow_decl_provider::{
-    self, EagerShallowDeclProvider, LazyShallowDeclProvider, ShallowDeclCache, ShallowDeclProvider,
-};
+use crate::shallow_decl_provider::{self, ShallowDeclProvider};
 use crate::special_names::SpecialNames;
 use pos::{
-    ConstName, FunName, MethodName, Positioned, PropName, RelativePath, TypeName, TypeNameMap,
-    TypeNameSet,
+    ConstName, FunName, MethodName, Positioned, PropName, TypeName, TypeNameMap, TypeNameSet,
 };
-use std::path::PathBuf;
 use std::sync::Arc;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_folded_class.ml
@@ -242,39 +236,4 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
             },
         }
     }
-}
-
-fn make_shallow_decl_provider<R: Reason>(
-    naming_table_path_opt: Option<&PathBuf>,
-    decl_parser: &DeclParser,
-    filenames: &[RelativePath],
-) -> Arc<dyn ShallowDeclProvider<R>> {
-    let cache = Arc::new(ShallowDeclCache::with_no_eviction());
-    for &path in filenames {
-        let decls = decl_parser.parse(path).unwrap();
-        cache.add_decls(decls);
-    }
-    if let Some(naming_table_path) = naming_table_path_opt {
-        Arc::new(LazyShallowDeclProvider::new(
-            cache,
-            Arc::new(SqliteNamingTable::new(naming_table_path).unwrap()),
-            decl_parser.clone(),
-        ))
-    } else {
-        Arc::new(EagerShallowDeclProvider::new(cache))
-    }
-}
-
-pub fn make_folded_decl_provider<R: Reason>(
-    naming_table_path_opt: Option<&PathBuf>,
-    decl_parser: &DeclParser,
-    filenames: &[RelativePath],
-) -> Arc<dyn FoldedDeclProvider<R>> {
-    let shallow_decl_provider =
-        make_shallow_decl_provider(naming_table_path_opt, decl_parser, filenames);
-    Arc::new(LazyFoldedDeclProvider::new(
-        Arc::new(NonEvictingCache::new()),
-        SpecialNames::new(),
-        shallow_decl_provider,
-    ))
 }

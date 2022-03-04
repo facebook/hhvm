@@ -59,15 +59,6 @@ impl<R: Reason> ShallowDeclCache<R> {
         }
     }
 
-    pub fn with_no_eviction() -> Self {
-        use crate::cache::NonEvictingCache;
-        Self::with_no_member_caches(
-            Arc::new(NonEvictingCache::default()),
-            Box::new(NonEvictingCache::default()),
-            Box::new(NonEvictingCache::default()),
-        )
-    }
-
     /// Construct a `ShallowDeclCache` which looks up class members from the
     /// given `types` table rather than maintaining separate member caches.
     /// Intended to be used with `Cache` implementations which hold on to

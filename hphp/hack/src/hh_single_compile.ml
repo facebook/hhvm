@@ -68,10 +68,22 @@ type debug_time = {
   parsing_t: float ref;
   codegen_t: float ref;
   printing_t: float ref;
+  parsing_bytes: int ref;
+  codegen_bytes: int ref;
+  parse_peak: int ref;
+  lower_peak: int ref;
 }
 
 let new_debug_time () =
-  { parsing_t = ref 0.0; codegen_t = ref 0.0; printing_t = ref 0.0 }
+  {
+    parsing_t = ref 0.0;
+    codegen_t = ref 0.0;
+    printing_t = ref 0.0;
+    parsing_bytes = ref 0;
+    codegen_bytes = ref 0;
+    parse_peak = ref 0;
+    lower_peak = ref 0;
+  }
 
 let prev_vm_hwm = ref 0
 

@@ -247,12 +247,26 @@ impl<S: AsRef<str>> NativeEnv<S> {
 /// they should _not_ be passed back as JSON to HHVM process)
 #[derive(Debug, Default, ToOcamlRep)]
 pub struct Profile {
+    /// Time in seconds spent in parsing and lowering.
     pub parsing_t: f64,
+
+    /// Time in seconds spent in emitter.
     pub codegen_t: f64,
+
+    /// Time in seconds spent in bytecode_printer.
     pub printing_t: f64,
 
-    /// Emitter arena allocation volume in bytes from codegen phase.
+    /// Parser arena allocation volume in bytes.
+    pub parsing_bytes: i64,
+
+    /// Emitter arena allocation volume in bytes.
     pub codegen_bytes: i64,
+
+    /// Peak stack size during parsing, before lowering.
+    pub parse_peak: i64,
+
+    /// Peak stack size during parsing and lowering.
+    pub lower_peak: i64,
 }
 
 impl std::ops::AddAssign for Profile {
@@ -261,6 +275,8 @@ impl std::ops::AddAssign for Profile {
         self.codegen_t += p.codegen_t;
         self.printing_t += p.printing_t;
         self.codegen_bytes += p.codegen_bytes;
+        self.parse_peak += p.parse_peak;
+        self.lower_peak += p.lower_peak;
     }
 }
 
@@ -454,28 +470,37 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
         )
     });
 
-    let (program, codegen_t) = match parse_result {
-        Ok(mut ast) => {
+    let (unit, profile) = match parse_result {
+        Ok((mut ast, mut profile)) => {
+            profile.parsing_t = parsing_t;
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
-            time(move || rewrite_and_emit(emitter, env, namespace_env, &mut ast))
+            match time(move || rewrite_and_emit(emitter, env, namespace_env, &mut ast)) {
+                (Ok(unit), codegen_t) => {
+                    profile.codegen_t = codegen_t;
+                    (unit, profile)
+                }
+                (Err(e), _) => return Err(anyhow!("Unhandled Emitter error: {}", e)),
+            }
         }
         Err(ParseError(pos, msg, is_runtime_error)) => {
-            time(|| emit_fatal(emitter.alloc, is_runtime_error, &pos, msg))
+            let mut profile = Profile {
+                parsing_t,
+                ..Default::default()
+            };
+            match time(|| emit_fatal(emitter.alloc, is_runtime_error, &pos, msg)) {
+                (Ok(unit), codegen_t) => {
+                    profile.codegen_t = codegen_t;
+                    (unit, profile)
+                }
+                (Err(e), _) => return Err(anyhow!("Unhandled Emitter error: {}", e)),
+            }
         }
     };
-    let profile = if log_extern_compiler_perf {
-        Some(Profile {
-            parsing_t,
-            codegen_t,
-            ..Default::default()
-        })
-    } else {
-        None
+    let profile = match log_extern_compiler_perf {
+        true => Some(profile),
+        false => None,
     };
-    match program {
-        Ok(prog) => Ok((prog, profile)),
-        Err(e) => Err(anyhow!("Unhandled Emitter error: {}", e)),
-    }
+    Ok((unit, profile))
 }
 
 fn emit_fatal<'arena>(
@@ -550,9 +575,6 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
 #[error("{0}: {1}")]
 pub(crate) struct ParseError(Pos, String, bool);
 
-/// parse_file returns either error(Left) or ast(Right)
-/// - Left((Position, message, is_runtime_error))
-/// - Right(ast)
 fn parse_file(
     opts: &Options,
     stack_limit: &StackLimit,
@@ -560,7 +582,7 @@ fn parse_file(
     elaborate_namespaces: bool,
     namespace_env: RcOc<NamespaceEnv>,
     is_systemlib: bool,
-) -> Result<ast::Program, ParseError> {
+) -> Result<(ast::Program, Profile), ParseError> {
     let aast_env = AastEnv {
         codegen: true,
         fail_open: false,
@@ -614,6 +636,9 @@ fn parse_file(
                 errors,
                 aast,
                 scoured_comments,
+                parse_peak,
+                lower_peak,
+                arena_bytes,
                 ..
             } => {
                 let mut errors = errors.iter().filter(|e| {
@@ -629,7 +654,15 @@ fn parse_file(
                     Err(ParseError(Pos::make_none(), String::new(), false))
                 } else {
                     match aast {
-                        Ok(aast) => Ok(aast),
+                        Ok(aast) => Ok((
+                            aast,
+                            Profile {
+                                parse_peak,
+                                lower_peak,
+                                parsing_bytes: arena_bytes,
+                                ..Default::default()
+                            },
+                        )),
                         Err(msg) => Err(ParseError(Pos::make_none(), msg, false)),
                     }
                 }

@@ -93,6 +93,10 @@ impl StackLimit {
     pub fn reset(&self) {
         StackGuard::reset();
     }
+
+    pub fn peak(&self) -> usize {
+        StackGuard::peak()
+    }
 }
 
 pub const STACK_SLACK_1K: retry::StackSlackFunction = |_| KI;
@@ -168,6 +172,10 @@ mod detail {
 
         pub fn exceeds_size(bytes: usize) -> bool {
             STK_GUARD.with(|stk| stk.borrow_mut().update() > bytes)
+        }
+
+        pub(crate) fn peak() -> usize {
+            STK_GUARD.with(|stk| stk.borrow().size())
         }
 
         #[inline(never)] // ensure that local variable gets address on stack

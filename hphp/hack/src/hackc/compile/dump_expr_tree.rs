@@ -114,7 +114,7 @@ pub fn desugar_and_print<S: AsRef<str>>(env: &Env<S>) {
     ));
     match crate::parse_file(&opts, &limit, source_text, false, ns, is_systemlib) {
         Err(ParseError(_, msg, _)) => panic!("Parsing failed: {}", msg),
-        Ok(ast) => {
+        Ok((ast, _profile)) => {
             let old_src = String::from_utf8_lossy(&content);
             let new_src = desugar_and_replace_et_literals(env, ast, &old_src);
             print!("{}", new_src);

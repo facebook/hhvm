@@ -214,6 +214,10 @@ fn process_single_file_impl(
         None,
     )?
     .expect("LOG_EXTERN_COMPILE_PERF was set");
+    if opts.verbosity >= 1 {
+        eprintln!("{}: {:#?}", filepath.display(), profile);
+    }
+
     Ok((output, profile))
 }
 

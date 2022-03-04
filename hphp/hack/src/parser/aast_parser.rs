@@ -77,6 +77,7 @@ impl<'src> AastParser {
         let arena = Bump::new();
         let (language, mode, tree) =
             Self::parse_text(&arena, env, indexed_source_text, stack_limit)?;
+        let parse_peak = stack_limit.map_or(0, |sl| sl.peak());
         Self::from_tree_with_namespace_env(
             env,
             ns,
@@ -87,6 +88,10 @@ impl<'src> AastParser {
             mode,
             tree,
         )
+        .map(|mut pr| {
+            pr.parse_peak = parse_peak as i64;
+            pr
+        })
     }
 
     pub fn from_tree<'arena>(
@@ -147,6 +152,7 @@ impl<'src> AastParser {
             arena,
         );
         let ret = lower(&mut lowerer_env, tree.root());
+        let lower_peak = stack_limit.map_or(0, |sl| sl.peak());
         let mut ret = if env.elaborate_namespaces {
             ret.map(|ast| namespaces::toplevel_elaborator::elaborate_toplevel_defs(ns, ast))
         } else {
@@ -168,6 +174,9 @@ impl<'src> AastParser {
             syntax_errors,
             errors,
             lint_errors,
+            parse_peak: 0,
+            lower_peak: lower_peak as i64,
+            arena_bytes: arena.allocated_bytes() as i64,
         })
     }
 

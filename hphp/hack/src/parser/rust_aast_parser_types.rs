@@ -32,4 +32,7 @@ pub struct Result {
     pub syntax_errors: Vec<SyntaxError>,
     pub errors: Vec<HHError>,
     pub lint_errors: Vec<LintError>,
+    pub parse_peak: i64,
+    pub lower_peak: i64,
+    pub arena_bytes: i64,
 }

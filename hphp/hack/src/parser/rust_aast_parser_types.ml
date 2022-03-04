@@ -31,6 +31,9 @@ type 'aast result_ = {
   syntax_errors: Full_fidelity_syntax_error.t list;
   errors: Errors.error list;
   lint_errors: Pos.t Lints_core.t list;
+  parse_peak: int;
+  lower_peak: int;
+  arena_bytes: int;
 }
 
 type result = (unit, unit) Aast.program result_

@@ -140,102 +140,89 @@ bool reorderCheckTypes(IRUnit& unit) {
  *
  * B1:
  *   .....
- *   Jmp t1:Str -> B3
- *
+ *   Jmp t1:Str, t123:Cell -> B3
+ *1
  * B2:
  *   .....
- *   Jmp t2:Int -> B3
+ *   Jmp t2:Int, t124:Cell -> B3
  *
  * B3:
- *   t3:Str|Int = DefLabel B1,B2
+ *   t3:Str|Int, t125:Cell = DefLabel B1,B2
  *   t5:Cell = Conjure
- *   t6:Cell = Conjure
+ *   t4:Str|Int = Passthrough t3:Str|Int
  *   .....
- *   t7:Int = CheckType<Int> t3:Str|Int -> B5
+ *   t7:Int = CheckType<Int> t4:Str|Int -> B5
  *     -> B4
  *
  * Into:
  *
  * B1:
  *   .....
- *   Jmp t1:Str -> B6
+ *   t11:Bottom = CheckType<Int> t1:Str -> B6
+ *     -> B7
  *
  * B2:
  *   .....
- *   Jmp t2:Int -> B7
- *
- * B6:
- *   t8:Str = DefLabel B1
- *   t9:Cell = Conjure
- *   t10:Cell = Conjure
- *   t11:Int = CheckType<Int> t8:Str -> B8
+ *   t15:Int = CheckType<Int> t2:Int -> B8
  *     -> B9
  *
+ * B6:
+ *   Jmp t1:Str, t123:Cell -> B10
+ *
  * B7:
- *   t12:Int = DefLabel B2
- *   t13:Cell = Conjure
- *   t14:Cell = Conjure
- *   t15:Int = CheckType<Int> t12:Int -> B10
- *     -> B11
+ *   Jmp t11:Bottom, t123:Cell -> B11
  *
  * B8:
- *   Jmp t8:Str,t9:Cell,t10:Cell -> B12
+ *   Jmp t2:Int, t124:Cell -> B10
  *
  * B9:
- *   Jmp t8:Str,t9:Cell,t10:Cell,t11:Int -> B13
+ *   Jmp t15:Int, t124:Cell -> B11
  *
  * B10:
- *   Jmp t12:Int,t13:Cell,t14:Cell -> B12
- *
- * B11:
- *   Jmp t12:Int,t13:Cell,t14:Cell,t15:Int -> B13
- *
- * B12:
- *   t16:Str|Int,t17:Cell,t18:Cell = DefLabel B8, B10
+ *   t16:Str|Int, t126:Cell = DefLabel B6, B8
+ *   t17:Cell = Conjure
+ *   t18:Str|Int = Passthrough t16:Str|Int
+ *   .....
  *   Jmp B5
  *
- * B13:
- *   t19:Str|Int,t20:Cell,t21:Cell,t22:Int = DefLabel B9, B11
+ * B11:
+ *   t22:Int, t127:Cell = DefLabel B7, B9
+ *   t20:Cell = Conjure
+ *   t21:Int = Passthrough t22:Int
+ *   .....
  *   Jmp B4
  *
- * Then rewrite t3 -> t16, t5 -> t17 ->, t6 -> t18 starting at B5, and
- * rewrite t3 -> t19, t5 -> t20, t6 -> t21, t7 -> t22 starting at B4.
+ * Then rewrite:
+ *   Starting at B5 t3 -> t16, t4 -> t18, t5 -> t17 ->, t125 -> t126
+ *   Starting at B4 t3 -> t22, t4 -> t21, t5 -> t20, t7 -> t21, t125 -> t127
  *
- * Note that the CheckTypes in B6 and B7 can now be optimized away
+ * Note that the CheckTypes in B1 and B2 can now be optimized away
  * (and the entire CFG simplified).
  */
 
-// Clone the given block (and all instructions within). The block is
-// assumed to end in a branch (usually CheckType). The new block's
-// next and taken edges are set to two newly created blocks, each of
-// which jumps to nextJoin/takenJoin blocks, forwarding the SSATmps
-// defined in the new block.
+// Clone the given block (and all instructions within). The block is assumed to
+// end with a CheckType. The new block's CheckType will be replaced with a Jmp
+// to dest.  Refuse to clone a block defing a FramePtr as that may lead to a
+// frame pointer phi, which vasm does not handle well.
 Block* cloneBlock(IRUnit& unit,
                   Block& block,
-                  Block& pred,
-                  Block& nextJoin,
-                  Block& takenJoin) {
-  auto const newBlock = unit.defBlock(pred.profCount(), pred.hint());
-
-  jit::fast_map<SSATmp*, SSATmp*> rewrites;
-  jit::vector<SSATmp*> newDsts;
+                  Block& dest,
+                  jit::fast_map<SSATmp*, SSATmp*>& rewrites) {
+  assertx(block.back().is(CheckType));
+  auto const newBlock = unit.defBlock(dest.profCount(), dest.hint());
 
   // Walk over the block, cloning each instruction and recording the
   // new SSATmps defined.
   for (auto const& inst : block) {
     auto const newInst = [&] {
       if (inst.is(DefLabel)) {
-        auto defLabel = unit.defLabel(inst.numDsts(), newBlock, inst.bcctx());
-
-        auto const& predJmp = pred.back();
-        assertx(predJmp.is(Jmp));
-        assertx(predJmp.numSrcs() == inst.numDsts());
-
-        for (uint32_t i = 0; i < defLabel->numDsts(); ++i) {
-          auto const dst = defLabel->dst(i);
-          dst->setType(predJmp.src(i)->type());
-        }
-        return defLabel;
+        // We don't setup the types for the DefLabel dests here.  Instead we
+        // retype them after hooking up the predecessor Jmps to this block.
+        return unit.defLabel(inst.numDsts(), newBlock, inst.bcctx());
+      } else if (inst.is(CheckType)) {
+        auto const jmp = unit.gen(Jmp, inst.bcctx(), &dest);
+        newBlock->append(jmp);
+        return jmp;
       }
       auto const cloned = unit.clone(&inst);
       newBlock->append(cloned);
@@ -244,40 +231,20 @@ Block* cloneBlock(IRUnit& unit,
 
     // Rewrite any uses of the old SSATmps with the new SSATmps within
     // the same block.
-    for (uint32_t i = 0; i < inst.numSrcs(); ++i) {
-      auto const src = inst.src(i);
+    for (uint32_t i = 0; i < newInst->numSrcs(); ++i) {
+      auto const src = newInst->src(i);
       auto const it = rewrites.find(src);
       if (it == rewrites.end()) continue;
       newInst->setSrc(i, it->second);
     }
 
+    if (inst.is(CheckType)) continue;
     assertx(inst.numDsts() == newInst->numDsts());
     for (uint32_t i = 0; i < inst.numDsts(); ++i) {
+      if (inst.dst(i)->isA(TFramePtr)) return nullptr;
       rewrites.emplace(inst.dst(i), newInst->dst(i));
-      newDsts.emplace_back(newInst->dst(i));
     }
   }
-
-  // Define the next/taken blocks, and add placeholder Jmps to them.
-  auto const next = unit.defBlock(pred.profCount(), pred.hint());
-  auto const taken = unit.defBlock(pred.profCount(), pred.hint());
-  next->append(unit.gen(Jmp, newBlock->front().bcctx(), &nextJoin));
-  taken->append(unit.gen(Jmp, newBlock->front().bcctx(), &takenJoin));
-
-  // Expand the placeholder Jmps with newly defined SSATmps. There
-  // should always be at least one, because the block ends in a
-  // CheckType which defines a SSATmp.
-  assertx(newDsts.size() > 1);
-  for (size_t i = 0; i < newDsts.size(); ++i) {
-    unit.expandJmp(&next->back(), newDsts[i]);
-    if (i != newDsts.size() - 1) {
-      unit.expandJmp(&taken->back(), newDsts[i]);
-    }
-  }
-
-  retypeDests(&newBlock->back(), &unit);
-  newBlock->back().setNext(next);
-  newBlock->back().setTaken(taken);
   return newBlock;
 }
 
@@ -382,11 +349,14 @@ void rewriteUses(IRUnit& unit,
     // This block is dominated by the start block. This means the
     // rewrite targets are available, so just perform the rewrites.
     for (auto& inst : *block) {
+      bool changed = false;
       for (uint32_t i = 0; i < inst.numSrcs(); ++i) {
         auto const it = rewrites.find(inst.src(i));
         if (it == rewrites.end()) continue;
         inst.setSrc(i, it->second);
+        changed = true;
       }
+      if (changed) retypeDests(&inst, &unit);
     }
 
     // Schedule each successor for processing, unless it's already been
@@ -507,84 +477,83 @@ bool hoistCheckTypes(IRUnit& unit) {
     );
     if (!worthwhile) continue;
 
-    // Record all SSATmps defined within this block (this will include
-    // the SSATmps defined by the DefLabel and CheckType).
-    jit::vector<SSATmp*> origDefs;
-    auto haveFramePtr = false;
-    for (auto const& inst : *block) {
-      for (uint32_t i = 0; i < inst.numDsts(); ++i) {
-        auto const dst = inst.dst(i);
-        // vasm doesn't like it if you phi a FramePtr, so avoid that
-        if (dst->isA(TFramePtr)) {
-          haveFramePtr = true;
-          break;
-        }
-        origDefs.emplace_back(dst);
-      }
-      if (haveFramePtr) break;
-    }
-    if (haveFramePtr) continue;
-    // We know we have a DefLabel and CheckType, so we need at least
-    // two defs.
-    assertx(origDefs.size() > 1);
+    // Record information to rewrite the uses of the old SSATmps
+    // defined in the block with their new ones in rewrite.
+    Rewrite rewrite;
+    auto const ctNext = checkType.next();
+    auto const ctTaken = checkType.taken();
 
+    auto const nextJoin = cloneBlock(unit, *block, *ctNext, rewrite.next);
+    if (!nextJoin) continue;
+    auto const takenJoin = cloneBlock(unit, *block, *ctTaken, rewrite.taken);
+    if (!takenJoin) continue;
+
+    // At this point we know we have a block we're going to hoist:
     FTRACE(4, "Hoisting check-type {} in block B{}\n",
            checkType.toString(), block->id());
 
-    // At this point we know we have a block we're going to hoist:
-
-    // Define "join" blocks, for both the next and taken edge. The
-    // CheckType will be hoisted above the DefLabel and this we'll
-    // have multiple. They'll all (ultimately) branch to these join
-    // points, forwarding the SSATmps defined with the block. The join
-    // blocks just serve to be a location for the DefLabel, and then
-    // jump to the original CheckType's next and taken blocks.
-    auto const nextJoin = unit.defBlock(block->profCount(), block->hint());
-    auto const takenJoin = unit.defBlock(block->profCount(), block->hint());
-
-    // Set up the DefLabel state in the join blocks. cloneBlock()
-    // below will fill them out.
-    unit.defLabel(origDefs.size(), nextJoin, checkType.bcctx());
-    unit.defLabel(origDefs.size()-1, takenJoin, checkType.bcctx());
-    nextJoin->append(unit.gen(Jmp, checkType.bcctx(), checkType.next()));
-    takenJoin->append(unit.gen(Jmp, checkType.bcctx(), checkType.taken()));
-
-    // For each predecessor, clone this block, and set that
-    // predecessor (and only that predecessor) to jump to the cloned
-    // block. Therefore each predecessor then has its own successor,
-    // each with its own CheckType.
-    block->forEachPred(
-      [&] (Block* pred) {
-        auto const cloned =
-          cloneBlock(unit, *block, *pred, *nextJoin, *takenJoin);
-        pred->back().setTaken(cloned);
-      }
-    );
-
-    // Update the now fully formed DefLabel's dst types
-    retypeDests(&nextJoin->front(), &unit);
-    retypeDests(&takenJoin->front(), &unit);
-
-    // Record information to rewrite the uses of the old SSATmps
-    // defined in the block with their new ones.
-    Rewrite rewrite;
-    rewrite.nextStart = checkType.next();
-    rewrite.takenStart = checkType.taken();
+    rewrite.nextStart = ctNext;
+    rewrite.takenStart = ctTaken;
     rewrite.nextJoin = nextJoin;
     rewrite.takenJoin = takenJoin;
-    for (uint32_t i = 0; i < origDefs.size(); ++i) {
-      rewrite.next.emplace(origDefs[i], nextJoin->front().dst(i));
+
+    // For each predecessor replace its terminal phijmp with a copy of the
+    // CheckType we are hoisting, and generate stub blocks for its next and
+    // taken edges.  The phijmp we replaced is copied into the stub blocks and
+    // retargeted to jump to the join blocks we defined earlier.  In the copied
+    // phijumps we modify the src corresponding the the CheckType tmp to the
+    // appropriate value (for the next block the checked tmp; for the taken
+    // block then unchecked tmp).
+    block->forEachPred([&] (Block* pred) {
+      auto const next = unit.defBlock(pred->profCount(), pred->hint());
+      auto const taken = unit.defBlock(pred->profCount(), pred->hint());
+
+      auto& jmp = pred->back();
+      next->append(unit.clone(&jmp));
+      taken->append(unit.clone(&jmp));
+
+      next->back().setTaken(nextJoin);
+      taken->back().setTaken(takenJoin);
+
+      auto const uncheckedTmp = jmp.src(defIdx);
+      jmp.convertToNop();
+      auto const newCheckType = unit.clone(&checkType);
+      newCheckType->setSrc(0, uncheckedTmp);
+      pred->append(newCheckType);
+      retypeDests(newCheckType, &unit);
+
+      next->back().setSrc(defIdx, newCheckType->dst());
+      taken->back().setSrc(defIdx, uncheckedTmp);
+
+      newCheckType->setNext(next);
+      newCheckType->setTaken(taken);
+    });
+
+    // While walking the next join block we track any passthrough operations on
+    // the result of the CheckType.
+    auto checkTypeTmp = nextJoin->front().dst(defIdx);
+
+    // Update the now fully formed DefLabel's dst types and any operations that
+    // might depend on them
+    for (auto& inst : *nextJoin) {
+      retypeDests(&inst, &unit);
+      if (inst.isPassthrough() && inst.getPassthroughValue() == checkTypeTmp) {
+        assertx(!inst.isControlFlow());
+        checkTypeTmp = inst.dst();
+      }
     }
-    // The -1 is because we want to skip the last CheckType for the
-    // taken branch
-    for (uint32_t i = 0; i < origDefs.size()-1; ++i) {
-      rewrite.taken.emplace(origDefs[i], takenJoin->front().dst(i));
+    for (auto& inst : *takenJoin) {
+      retypeDests(&inst, &unit);
     }
-    rewrites.emplace_back(std::move(rewrite));
+
+    // Add an extra rewrite for the next block to rewrite the CheckType result.
+    rewrite.next.emplace(checkType.dst(), checkTypeTmp);
 
     // The old block is now unreachable, so unlink it from the CFG.
     checkType.setNext(nullptr);
     checkType.setTaken(nullptr);
+
+    rewrites.emplace_back(std::move(rewrite));
   }
 
   // Nothing to rewrite, which means we didn't do anything

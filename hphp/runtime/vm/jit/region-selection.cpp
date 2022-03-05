@@ -855,6 +855,9 @@ RegionDescPtr selectRegion(const RegionContext& context,
     } catch (const FailedIRGen& e) {
       FTRACE(1, "region selector threw: {}\n", e.what());
       return RegionDescPtr{nullptr};
+    } catch (const ResourceExceededException& e) {
+      FTRACE(1, "region selector fataled: {}\n", e.what());
+      return RegionDescPtr{nullptr};
     } catch (const std::exception& e) {
       always_assert_flog(
         false, "region selector threw unexpected: {}\n", e.what()

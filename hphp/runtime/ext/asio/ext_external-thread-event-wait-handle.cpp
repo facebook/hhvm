@@ -65,16 +65,6 @@ void c_ExternalThreadEventWaitHandle::sweep() {
   }
 }
 
-req::ptr<c_ExternalThreadEventWaitHandle>
-c_ExternalThreadEventWaitHandle::Create(
-  AsioExternalThreadEvent* event,
-  ObjectData* priv_data
-) {
-  auto const wh = req::make<c_ExternalThreadEventWaitHandle>();
-  wh->initialize(event, priv_data);
-  return wh;
-}
-
 void c_ExternalThreadEventWaitHandle::initialize(
   AsioExternalThreadEvent* event,
   ObjectData* priv_data
@@ -90,7 +80,35 @@ void c_ExternalThreadEventWaitHandle::initialize(
   }
 
   if (UNLIKELY(session->hasOnExternalThreadEventCreate())) {
-    session->onExternalThreadEventCreate(this);
+    try {
+      session->onExternalThreadEventCreate(this);
+    } catch (...) {
+      // Fatal in the profiler hook.
+      //
+      // The extension did not yet have a chance to schedule the external thread
+      // event, as we are still in the AsioExternalThreadEvent constructor.
+      // However, the profiler may have grabbed the Awaitable and a userland
+      // code may try to await it later. Undo all the registration and mark
+      // the Awaitable as failed. The m_event will be freed while unwinding its
+      // constructor.
+
+      assertx(getState() == STATE_WAITING);
+
+      if (isInContext()) {
+        unregisterFromContext();
+      }
+
+      auto parentChain = getParentChain();
+      setState(STATE_FAILED);
+      tvWriteObject(AsioSession::Get()->getAbruptInterruptException(),
+                    &m_resultOrException);
+      parentChain.unblock();
+
+      m_sweepable.unregister();
+      m_privData.reset();
+      decRefObj(this);
+      throw;
+    }
   }
 }
 

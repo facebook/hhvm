@@ -26,8 +26,8 @@ namespace HPHP {
 AsioExternalThreadEvent::AsioExternalThreadEvent(ObjectData* priv_data)
     : m_queue(AsioSession::Get()->getExternalThreadEventQueue()),
       m_state(Waiting) {
-  m_waitHandle =
-    c_ExternalThreadEventWaitHandle::Create(this, priv_data).detach();
+  m_waitHandle = req::make<c_ExternalThreadEventWaitHandle>().detach();
+  m_waitHandle->initialize(this, priv_data);
 }
 
 void AsioExternalThreadEvent::abandon() {

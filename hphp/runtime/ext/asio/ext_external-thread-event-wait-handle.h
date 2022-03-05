@@ -42,8 +42,7 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
   ~c_ExternalThreadEventWaitHandle() {}
 
  public:
-  static req::ptr<c_ExternalThreadEventWaitHandle>
-    Create(AsioExternalThreadEvent* event, ObjectData* priv_data);
+  void initialize(AsioExternalThreadEvent* event, ObjectData* priv_data);
 
   c_ExternalThreadEventWaitHandle* getNextToProcess() {
     assertx(getState() == STATE_WAITING);
@@ -65,7 +64,6 @@ struct c_ExternalThreadEventWaitHandle final : c_WaitableWaitHandle {
 
  private:
   void setState(uint8_t s) { setKindState(Kind::ExternalThreadEvent, s); }
-  void initialize(AsioExternalThreadEvent* event, ObjectData* priv_data);
   void destroyEvent(bool sweeping = false);
 
  private:

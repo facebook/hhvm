@@ -6,7 +6,7 @@
 use env::emitter::Emitter;
 use hash::{HashMap, HashSet};
 use hhas_param::HhasParam;
-use hhbc_ast::Instruct;
+use hhbc_ast::{Instruct, Pseudo};
 use instruction_sequence::InstrSeq;
 use label::Label;
 use oxidized::ast;
@@ -18,7 +18,7 @@ fn create_label_to_offset_map<'arena>(instrseq: &InstrSeq<'arena>) -> HashMap<La
     instrseq
         .iter()
         .filter_map(|instr| match instr {
-            Instruct::Label(label) => Some((*label, index)),
+            Instruct::Pseudo(Pseudo::Label(label)) => Some((*label, index)),
             _ => {
                 index += 1;
                 None
@@ -74,7 +74,7 @@ fn rewrite_params_and_body<'arena>(
         }
     }
     body.retain_mut(|instr| {
-        if let Instruct::Label(l) = instr {
+        if let Instruct::Pseudo(Pseudo::Label(l)) = instr {
             if used.contains(l) {
                 *l = relabel(*l);
                 true
@@ -105,7 +105,7 @@ pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(
 ) {
     let mut old_to_new = HashMap::default();
     for instr in block.iter() {
-        if let Instruct::Label(label) = instr {
+        if let Instruct::Pseudo(Pseudo::Label(label)) = instr {
             old_to_new.insert(*label, emitter.label_gen_mut().next_regular());
         }
     }
@@ -113,7 +113,7 @@ pub fn rewrite_with_fresh_regular_labels<'arena, 'decl>(
     if !old_to_new.is_empty() {
         for instr in block.iter_mut() {
             let labels = match instr {
-                Instruct::Label(label) => std::slice::from_mut(label),
+                Instruct::Pseudo(Pseudo::Label(label)) => std::slice::from_mut(label),
                 _ => instr.targets_mut(),
             };
             for label in labels {

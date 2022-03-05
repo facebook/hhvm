@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+mod opcodes;
+
 use ffi::{
     BumpSliceMut,
     Maybe::{self, *},
@@ -11,6 +13,8 @@ use ffi::{
 use iterator::IterId;
 use label::Label;
 use local::{Local, LocalId};
+
+pub use opcodes::Opcodes;
 
 /// see runtime/base/repo-auth-type.h
 pub type RepoAuthType<'arena> = Str<'arena>;
@@ -204,275 +208,31 @@ pub struct SrcLoc {
     pub col_end: isize,
 }
 
+/// These are pseudo instructions that HHVM doesn't know about.
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub enum Instruct<'arena> {
-    Nop,
-    EntryNop,
-    PopC,
-    PopU,
-    Dup,
+pub enum Pseudo<'arena> {
+    Break(isize),
+    Comment(Str<'arena>),
+    Continue(isize),
+    FuncNumArgs,
+    Label(Label),
+    SrcLoc(SrcLoc),
     TryCatchBegin,
-    TryCatchMiddle,
     TryCatchEnd,
-    IterInit(IterArgs<'arena>, Label),
-    IterNext(IterArgs<'arena>, Label),
-    IterFree(IterId),
-    Null,
-    True,
-    False,
-    NullUninit,
-    Int(i64),
-    Double(f64),
-    String(Str<'arena>),
-    LazyClass(ClassId<'arena>),
+    TryCatchMiddle,
     /// Pseudo instruction that will get translated into appropraite literal
     /// bytecode, with possible reference to .adata *)
     TypedValue(runtime::TypedValue<'arena>),
-    Vec(AdataId<'arena>),
-    Dict(AdataId<'arena>),
-    Keyset(AdataId<'arena>),
-    /// capacity hint
-    NewDictArray(isize),
-    NewStructDict(Slice<'arena, Str<'arena>>),
-    NewVec(isize),
-    NewKeysetArray(isize),
-    NewPair,
-    NewRecord(ClassId<'arena>, Slice<'arena, Str<'arena>>),
-    AddElemC,
-    AddNewElemC,
-    NewCol(CollectionType),
-    ColFromArray(CollectionType),
-    CnsE(ConstId<'arena>),
-    ClsCns(ConstId<'arena>),
-    ClsCnsD(ConstId<'arena>, ClassId<'arena>),
-    ClsCnsL(Local<'arena>),
-    File,
-    Dir,
-    Method,
-    FuncCred,
-    Concat,
-    ConcatN(isize),
-    Add,
-    Sub,
-    Mul,
-    AddO,
-    SubO,
-    MulO,
-    Div,
-    Mod,
-    Pow,
-    Not,
-    Same,
-    NSame,
-    Eq,
-    Neq,
-    Lt,
-    Lte,
-    Gt,
-    Gte,
-    Cmp,
-    BitAnd,
-    BitOr,
-    BitXor,
-    BitNot,
-    Shl,
-    Shr,
-    CastBool,
-    CastInt,
-    CastDouble,
-    CastString,
-    CastVec,
-    CastDict,
-    CastKeyset,
-    InstanceOf,
-    InstanceOfD(ClassId<'arena>),
-    IsLateBoundCls,
-    IsTypeStructC(TypeStructResolveOp),
-    ThrowAsTypeStructException,
-    CombineAndResolveTypeStruct(isize),
-    Print,
-    Clone,
-    Exit,
-    Fatal(FatalOp),
-    ResolveFunc(FunctionId<'arena>),
-    ResolveRFunc(FunctionId<'arena>),
-    ResolveMethCaller(FunctionId<'arena>),
-    ResolveClsMethod(MethodId<'arena>),
-    ResolveClsMethodD(ClassId<'arena>, MethodId<'arena>),
-    ResolveClsMethodS(SpecialClsRef, MethodId<'arena>),
-    ResolveRClsMethod(MethodId<'arena>),
-    ResolveRClsMethodD(ClassId<'arena>, MethodId<'arena>),
-    ResolveRClsMethodS(SpecialClsRef, MethodId<'arena>),
-    ResolveClass(ClassId<'arena>),
-    Jmp(Label),
-    JmpNS(Label),
-    JmpZ(Label),
-    JmpNZ(Label),
+}
 
-    /// Integer switch
-    Switch {
-        kind: SwitchKind,
-        base: isize,
-        targets: BumpSliceMut<'arena, Label>,
-    },
-
-    /// String switch
-    SSwitch {
-        /// One string for each case.
-        cases: BumpSliceMut<'arena, Str<'arena>>,
-
-        /// One Label for each case, congruent to cases.
-        targets: BumpSliceMut<'arena, Label>,
-    },
-    RetC,
-    RetCSuspended,
-    RetM(NumParams),
-    Throw,
-    Continue(isize),
-    Break(isize),
-    FCallClsMethod {
-        fcall_args: FcallArgs<'arena>,
-        log: IsLogAsDynamicCallOp,
-    },
-    FCallClsMethodD {
-        fcall_args: FcallArgs<'arena>,
-        class: ClassId<'arena>,
-        method: MethodId<'arena>,
-    },
-    FCallClsMethodS {
-        fcall_args: FcallArgs<'arena>,
-        clsref: SpecialClsRef,
-    },
-    FCallClsMethodSD {
-        fcall_args: FcallArgs<'arena>,
-        clsref: SpecialClsRef,
-        method: MethodId<'arena>,
-    },
-    FCallCtor(FcallArgs<'arena>),
-    FCallFunc(FcallArgs<'arena>),
-    FCallFuncD {
-        fcall_args: FcallArgs<'arena>,
-        func: FunctionId<'arena>,
-    },
-    FCallObjMethod {
-        fcall_args: FcallArgs<'arena>,
-        flavor: ObjMethodOp,
-    },
-    FCallObjMethodD {
-        fcall_args: FcallArgs<'arena>,
-        flavor: ObjMethodOp,
-        method: MethodId<'arena>,
-    },
-    NewObj,
-    NewObjR,
-    NewObjD(ClassId<'arena>),
-    NewObjRD(ClassId<'arena>),
-    NewObjS(SpecialClsRef),
-    This,
-    BareThis(BareThisOp),
-    CheckThis,
-    FuncNumArgs,
-    ChainFaults,
-    OODeclExists(ClassishKind),
-    VerifyParamType(ParamId<'arena>),
-    VerifyParamTypeTS(ParamId<'arena>),
-    VerifyOutType(ParamId<'arena>),
-    VerifyRetTypeC,
-    VerifyRetTypeTS,
-    SelfCls,
-    ParentCls,
-    LateBoundCls,
-    ClassName,
-    LazyClassFromClass,
-    RecordReifiedGeneric,
-    CheckReifiedGenericMismatch,
-    NativeImpl,
-    AKExists,
-    CreateCl(NumParams, ClassNum),
-    Idx,
-    ArrayIdx,
-    ArrayMarkLegacy,
-    ArrayUnmarkLegacy,
-    AssertRATL(Local<'arena>, RepoAuthType<'arena>),
-    AssertRATStk(StackIndex, RepoAuthType<'arena>),
-    BreakTraceHint,
-    Silence(Local<'arena>, SilenceOp),
-    GetMemoKeyL(Local<'arena>),
-    CGetCUNop,
-    UGetCUNop,
-    MemoGet(Label, LocalRange),
-    MemoGetEager([Label; 2], LocalRange),
-    MemoSet(LocalRange),
-    MemoSetEager(LocalRange),
-    LockObj,
-    ThrowNonExhaustiveSwitch,
-    RaiseClassStringConversionWarning,
-    SetImplicitContextByValue,
-    CGetL(Local<'arena>),
-    CGetQuietL(Local<'arena>),
-    CGetL2(Local<'arena>),
-    CUGetL(Local<'arena>),
-    PushL(Local<'arena>),
-    CGetG,
-    CGetS(ReadonlyOp),
-    ClassGetC,
-    ClassGetTS,
-    SetL(Local<'arena>),
-    PopL(Local<'arena>),
-    SetG,
-    SetS(ReadonlyOp),
-    SetOpL(Local<'arena>, SetOpOp),
-    SetOpG(SetOpOp),
-    SetOpS(SetOpOp),
-    IncDecL(Local<'arena>, IncDecOp),
-    IncDecG(IncDecOp),
-    IncDecS(IncDecOp),
-    UnsetL(Local<'arena>),
-    UnsetG,
-    CheckProp(PropId<'arena>),
-    InitProp(PropId<'arena>, InitPropOp),
-    IssetL(Local<'arena>),
-    IssetG,
-    IssetS,
-    IsUnsetL(Local<'arena>),
-    IsTypeC(IsTypeOp),
-    IsTypeL(Local<'arena>, IsTypeOp),
-    BaseGC(StackIndex, MOpMode),
-    BaseGL(Local<'arena>, MOpMode),
-    BaseSC(StackIndex, StackIndex, MOpMode, ReadonlyOp),
-    BaseL(Local<'arena>, MOpMode, ReadonlyOp),
-    BaseC(StackIndex, MOpMode),
-    BaseH,
-    Dim(MOpMode, MemberKey<'arena>),
-    QueryM(NumParams, QueryMOp, MemberKey<'arena>),
-    SetM(NumParams, MemberKey<'arena>),
-    IncDecM(NumParams, IncDecOp, MemberKey<'arena>),
-    SetOpM(NumParams, SetOpOp, MemberKey<'arena>),
-    UnsetM(NumParams, MemberKey<'arena>),
-    SetRangeM(NumParams, isize, SetRangeOp),
-    Label(Label),
-    Comment(Str<'arena>),
-    SrcLoc(SrcLoc),
-    WHResult,
-    Await,
-    AwaitAll(LocalRange),
-    CreateCont,
-    ContEnter,
-    ContRaise,
-    Yield,
-    YieldK,
-    ContCheck(ContCheckOp),
-    ContValid,
-    ContKey,
-    ContGetReturn,
-    ContCurrent,
-    Incl,
-    InclOnce,
-    Req,
-    ReqOnce,
-    ReqDoc,
-    Eval,
+#[derive(Clone, Debug)]
+#[repr(C)]
+pub enum Instruct<'arena> {
+    // HHVM opcodes.
+    Opcode(Opcodes<'arena>),
+    // HackC pseudo-instructions.
+    Pseudo(Pseudo<'arena>),
 }
 
 impl Instruct<'_> {
@@ -480,231 +240,233 @@ impl Instruct<'_> {
     /// This excludes the Label in an ILabel instruction, which is not a conditional branch.
     pub fn targets(&self) -> &[Label] {
         match self {
-            Self::FCallClsMethod { fcall_args, .. }
-            | Self::FCallClsMethodD { fcall_args, .. }
-            | Self::FCallClsMethodS { fcall_args, .. }
-            | Self::FCallClsMethodSD { fcall_args, .. }
-            | Self::FCallCtor(fcall_args)
-            | Self::FCallFunc(fcall_args)
-            | Self::FCallFuncD { fcall_args, .. }
-            | Self::FCallObjMethod { fcall_args, .. }
-            | Self::FCallObjMethodD { fcall_args, .. } => fcall_args.targets(),
-            Self::Jmp(x) | Self::JmpNS(x) | Self::JmpZ(x) | Self::JmpNZ(x) => {
-                std::slice::from_ref(x)
-            }
-            Self::Switch { targets, .. } | Self::SSwitch { targets, .. } => targets.as_ref(),
-            Self::IterInit(_, target) | Self::IterNext(_, target) => std::slice::from_ref(target),
-            Self::MemoGet(target, _) => std::slice::from_ref(target),
-            Self::MemoGetEager(targets, _) => targets,
+            Self::Opcode(Opcodes::FCallClsMethod { fcall_args, .. })
+            | Self::Opcode(Opcodes::FCallClsMethodD { fcall_args, .. })
+            | Self::Opcode(Opcodes::FCallClsMethodS { fcall_args, .. })
+            | Self::Opcode(Opcodes::FCallClsMethodSD { fcall_args, .. })
+            | Self::Opcode(Opcodes::FCallCtor(fcall_args))
+            | Self::Opcode(Opcodes::FCallFunc(fcall_args))
+            | Self::Opcode(Opcodes::FCallFuncD { fcall_args, .. })
+            | Self::Opcode(Opcodes::FCallObjMethod { fcall_args, .. })
+            | Self::Opcode(Opcodes::FCallObjMethodD { fcall_args, .. }) => fcall_args.targets(),
+            Self::Opcode(Opcodes::Jmp(x))
+            | Self::Opcode(Opcodes::JmpNS(x))
+            | Self::Opcode(Opcodes::JmpZ(x))
+            | Self::Opcode(Opcodes::JmpNZ(x)) => std::slice::from_ref(x),
+            Self::Opcode(Opcodes::Switch { targets, .. })
+            | Self::Opcode(Opcodes::SSwitch { targets, .. }) => targets.as_ref(),
+            Self::Opcode(Opcodes::IterInit(_, target))
+            | Self::Opcode(Opcodes::IterNext(_, target)) => std::slice::from_ref(target),
+            Self::Opcode(Opcodes::MemoGet(target, _)) => std::slice::from_ref(target),
+            Self::Opcode(Opcodes::MemoGetEager(targets, _)) => targets,
 
             // Make sure new variants with branch target Labels are handled above
             // before adding items to this catch-all.
-            Self::RetC
-            | Self::This
-            | Self::BareThis(_)
-            | Self::CheckThis
-            | Self::FuncNumArgs
-            | Self::ChainFaults
-            | Self::OODeclExists(_)
-            | Self::VerifyParamType(_)
-            | Self::VerifyParamTypeTS(_)
-            | Self::VerifyOutType(_)
-            | Self::VerifyRetTypeC
-            | Self::VerifyRetTypeTS
-            | Self::SelfCls
-            | Self::ParentCls
-            | Self::LateBoundCls
-            | Self::ClassName
-            | Self::LazyClassFromClass
-            | Self::RecordReifiedGeneric
-            | Self::CheckReifiedGenericMismatch
-            | Self::NativeImpl
-            | Self::AKExists
-            | Self::CreateCl(_, _)
-            | Self::Idx
-            | Self::ArrayIdx
-            | Self::ArrayMarkLegacy
-            | Self::ArrayUnmarkLegacy
-            | Self::AssertRATL(_, _)
-            | Self::AssertRATStk(_, _)
-            | Self::BreakTraceHint
-            | Self::Silence(_, _)
-            | Self::GetMemoKeyL(_)
-            | Self::CGetCUNop
-            | Self::UGetCUNop
-            | Self::MemoSet(_)
-            | Self::MemoSetEager(_)
-            | Self::LockObj
-            | Self::ThrowNonExhaustiveSwitch
-            | Self::RaiseClassStringConversionWarning
-            | Self::SetImplicitContextByValue
-            | Self::RetCSuspended
-            | Self::RetM(_)
-            | Self::Throw
-            | Self::Nop
-            | Self::EntryNop
-            | Self::PopC
-            | Self::PopU
-            | Self::Dup
-            | Self::IterFree(_)
-            | Self::Null
-            | Self::True
-            | Self::False
-            | Self::NullUninit
-            | Self::Int(_)
-            | Self::Double(_)
-            | Self::String(_)
-            | Self::LazyClass(_)
-            | Self::TypedValue(_)
-            | Self::Vec(_)
-            | Self::Dict(_)
-            | Self::Keyset(_)
-            | Self::NewDictArray(_)
-            | Self::NewStructDict(_)
-            | Self::NewVec(_)
-            | Self::NewKeysetArray(_)
-            | Self::NewPair
-            | Self::NewRecord(_, _)
-            | Self::AddElemC
-            | Self::AddNewElemC
-            | Self::NewCol(_)
-            | Self::ColFromArray(_)
-            | Self::CnsE(_)
-            | Self::ClsCns(_)
-            | Self::ClsCnsD(_, _)
-            | Self::ClsCnsL(_)
-            | Self::File
-            | Self::Dir
-            | Self::Method
-            | Self::FuncCred
-            | Self::Concat
-            | Self::ConcatN(_)
-            | Self::Add
-            | Self::Sub
-            | Self::Mul
-            | Self::AddO
-            | Self::SubO
-            | Self::MulO
-            | Self::Div
-            | Self::Mod
-            | Self::Pow
-            | Self::Not
-            | Self::Same
-            | Self::NSame
-            | Self::Eq
-            | Self::Neq
-            | Self::Lt
-            | Self::Lte
-            | Self::Gt
-            | Self::Gte
-            | Self::Cmp
-            | Self::BitAnd
-            | Self::BitOr
-            | Self::BitXor
-            | Self::BitNot
-            | Self::Shl
-            | Self::Shr
-            | Self::CastBool
-            | Self::CastInt
-            | Self::CastDouble
-            | Self::CastString
-            | Self::CastVec
-            | Self::CastDict
-            | Self::CastKeyset
-            | Self::InstanceOf
-            | Self::InstanceOfD(_)
-            | Self::IsLateBoundCls
-            | Self::IsTypeStructC(_)
-            | Self::ThrowAsTypeStructException
-            | Self::CombineAndResolveTypeStruct(_)
-            | Self::Print
-            | Self::Clone
-            | Self::Exit
-            | Self::Fatal(_)
-            | Self::ResolveFunc(_)
-            | Self::ResolveRFunc(_)
-            | Self::ResolveMethCaller(_)
-            | Self::ResolveClsMethod(_)
-            | Self::ResolveClsMethodD(_, _)
-            | Self::ResolveClsMethodS(_, _)
-            | Self::ResolveRClsMethod(_)
-            | Self::ResolveRClsMethodD(_, _)
-            | Self::ResolveRClsMethodS(_, _)
-            | Self::ResolveClass(_)
-            | Self::Continue(_)
-            | Self::Break(_)
-            | Self::NewObj
-            | Self::NewObjR
-            | Self::NewObjD(_)
-            | Self::NewObjRD(_)
-            | Self::NewObjS(_)
-            | Self::CGetL(_)
-            | Self::CGetQuietL(_)
-            | Self::CGetL2(_)
-            | Self::CUGetL(_)
-            | Self::PushL(_)
-            | Self::CGetG
-            | Self::CGetS(_)
-            | Self::ClassGetC
-            | Self::ClassGetTS
-            | Self::SetL(_)
-            | Self::PopL(_)
-            | Self::SetG
-            | Self::SetS(_)
-            | Self::SetOpL(_, _)
-            | Self::SetOpG(_)
-            | Self::SetOpS(_)
-            | Self::IncDecL(_, _)
-            | Self::IncDecG(_)
-            | Self::IncDecS(_)
-            | Self::UnsetL(_)
-            | Self::UnsetG
-            | Self::CheckProp(_)
-            | Self::InitProp(_, _)
-            | Self::IssetL(_)
-            | Self::IssetG
-            | Self::IssetS
-            | Self::IsUnsetL(_)
-            | Self::IsTypeC(_)
-            | Self::IsTypeL(_, _)
-            | Self::BaseGC(_, _)
-            | Self::BaseGL(_, _)
-            | Self::BaseSC(_, _, _, _)
-            | Self::BaseL(_, _, _)
-            | Self::BaseC(_, _)
-            | Self::BaseH
-            | Self::Dim(_, _)
-            | Self::QueryM(_, _, _)
-            | Self::SetM(_, _)
-            | Self::IncDecM(_, _, _)
-            | Self::SetOpM(_, _, _)
-            | Self::UnsetM(_, _)
-            | Self::SetRangeM(_, _, _)
-            | Self::Label(_)
-            | Self::TryCatchBegin
-            | Self::TryCatchMiddle
-            | Self::TryCatchEnd
-            | Self::Comment(_)
-            | Self::SrcLoc(_)
-            | Self::WHResult
-            | Self::Await
-            | Self::AwaitAll(_)
-            | Self::CreateCont
-            | Self::ContEnter
-            | Self::ContRaise
-            | Self::Yield
-            | Self::YieldK
-            | Self::ContCheck(_)
-            | Self::ContValid
-            | Self::ContKey
-            | Self::ContGetReturn
-            | Self::ContCurrent
-            | Self::Incl
-            | Self::InclOnce
-            | Self::Req
-            | Self::ReqOnce
-            | Self::ReqDoc
-            | Self::Eval => &[],
+            Self::Opcode(Opcodes::RetC)
+            | Self::Opcode(Opcodes::This)
+            | Self::Opcode(Opcodes::BareThis(_))
+            | Self::Opcode(Opcodes::CheckThis)
+            | Self::Pseudo(Pseudo::FuncNumArgs)
+            | Self::Opcode(Opcodes::ChainFaults)
+            | Self::Opcode(Opcodes::OODeclExists(_))
+            | Self::Opcode(Opcodes::VerifyParamType(_))
+            | Self::Opcode(Opcodes::VerifyParamTypeTS(_))
+            | Self::Opcode(Opcodes::VerifyOutType(_))
+            | Self::Opcode(Opcodes::VerifyRetTypeC)
+            | Self::Opcode(Opcodes::VerifyRetTypeTS)
+            | Self::Opcode(Opcodes::SelfCls)
+            | Self::Opcode(Opcodes::ParentCls)
+            | Self::Opcode(Opcodes::LateBoundCls)
+            | Self::Opcode(Opcodes::ClassName)
+            | Self::Opcode(Opcodes::LazyClassFromClass)
+            | Self::Opcode(Opcodes::RecordReifiedGeneric)
+            | Self::Opcode(Opcodes::CheckReifiedGenericMismatch)
+            | Self::Opcode(Opcodes::NativeImpl)
+            | Self::Opcode(Opcodes::AKExists)
+            | Self::Opcode(Opcodes::CreateCl(_, _))
+            | Self::Opcode(Opcodes::Idx)
+            | Self::Opcode(Opcodes::ArrayIdx)
+            | Self::Opcode(Opcodes::ArrayMarkLegacy)
+            | Self::Opcode(Opcodes::ArrayUnmarkLegacy)
+            | Self::Opcode(Opcodes::AssertRATL(_, _))
+            | Self::Opcode(Opcodes::AssertRATStk(_, _))
+            | Self::Opcode(Opcodes::BreakTraceHint)
+            | Self::Opcode(Opcodes::Silence(_, _))
+            | Self::Opcode(Opcodes::GetMemoKeyL(_))
+            | Self::Opcode(Opcodes::CGetCUNop)
+            | Self::Opcode(Opcodes::UGetCUNop)
+            | Self::Opcode(Opcodes::MemoSet(_))
+            | Self::Opcode(Opcodes::MemoSetEager(_))
+            | Self::Opcode(Opcodes::LockObj)
+            | Self::Opcode(Opcodes::ThrowNonExhaustiveSwitch)
+            | Self::Opcode(Opcodes::RaiseClassStringConversionWarning)
+            | Self::Opcode(Opcodes::SetImplicitContextByValue)
+            | Self::Opcode(Opcodes::RetCSuspended)
+            | Self::Opcode(Opcodes::RetM(_))
+            | Self::Opcode(Opcodes::Throw)
+            | Self::Opcode(Opcodes::Nop)
+            | Self::Opcode(Opcodes::EntryNop)
+            | Self::Opcode(Opcodes::PopC)
+            | Self::Opcode(Opcodes::PopU)
+            | Self::Opcode(Opcodes::Dup)
+            | Self::Opcode(Opcodes::IterFree(_))
+            | Self::Opcode(Opcodes::Null)
+            | Self::Opcode(Opcodes::True)
+            | Self::Opcode(Opcodes::False)
+            | Self::Opcode(Opcodes::NullUninit)
+            | Self::Opcode(Opcodes::Int(_))
+            | Self::Opcode(Opcodes::Double(_))
+            | Self::Opcode(Opcodes::String(_))
+            | Self::Opcode(Opcodes::LazyClass(_))
+            | Self::Pseudo(Pseudo::TypedValue(_))
+            | Self::Opcode(Opcodes::Vec(_))
+            | Self::Opcode(Opcodes::Dict(_))
+            | Self::Opcode(Opcodes::Keyset(_))
+            | Self::Opcode(Opcodes::NewDictArray(_))
+            | Self::Opcode(Opcodes::NewStructDict(_))
+            | Self::Opcode(Opcodes::NewVec(_))
+            | Self::Opcode(Opcodes::NewKeysetArray(_))
+            | Self::Opcode(Opcodes::NewPair)
+            | Self::Opcode(Opcodes::AddElemC)
+            | Self::Opcode(Opcodes::AddNewElemC)
+            | Self::Opcode(Opcodes::NewCol(_))
+            | Self::Opcode(Opcodes::ColFromArray(_))
+            | Self::Opcode(Opcodes::CnsE(_))
+            | Self::Opcode(Opcodes::ClsCns(_))
+            | Self::Opcode(Opcodes::ClsCnsD(_, _))
+            | Self::Opcode(Opcodes::ClsCnsL(_))
+            | Self::Opcode(Opcodes::File)
+            | Self::Opcode(Opcodes::Dir)
+            | Self::Opcode(Opcodes::Method)
+            | Self::Opcode(Opcodes::FuncCred)
+            | Self::Opcode(Opcodes::Concat)
+            | Self::Opcode(Opcodes::ConcatN(_))
+            | Self::Opcode(Opcodes::Add)
+            | Self::Opcode(Opcodes::Sub)
+            | Self::Opcode(Opcodes::Mul)
+            | Self::Opcode(Opcodes::AddO)
+            | Self::Opcode(Opcodes::SubO)
+            | Self::Opcode(Opcodes::MulO)
+            | Self::Opcode(Opcodes::Div)
+            | Self::Opcode(Opcodes::Mod)
+            | Self::Opcode(Opcodes::Pow)
+            | Self::Opcode(Opcodes::Not)
+            | Self::Opcode(Opcodes::Same)
+            | Self::Opcode(Opcodes::NSame)
+            | Self::Opcode(Opcodes::Eq)
+            | Self::Opcode(Opcodes::Neq)
+            | Self::Opcode(Opcodes::Lt)
+            | Self::Opcode(Opcodes::Lte)
+            | Self::Opcode(Opcodes::Gt)
+            | Self::Opcode(Opcodes::Gte)
+            | Self::Opcode(Opcodes::Cmp)
+            | Self::Opcode(Opcodes::BitAnd)
+            | Self::Opcode(Opcodes::BitOr)
+            | Self::Opcode(Opcodes::BitXor)
+            | Self::Opcode(Opcodes::BitNot)
+            | Self::Opcode(Opcodes::Shl)
+            | Self::Opcode(Opcodes::Shr)
+            | Self::Opcode(Opcodes::CastBool)
+            | Self::Opcode(Opcodes::CastInt)
+            | Self::Opcode(Opcodes::CastDouble)
+            | Self::Opcode(Opcodes::CastString)
+            | Self::Opcode(Opcodes::CastVec)
+            | Self::Opcode(Opcodes::CastDict)
+            | Self::Opcode(Opcodes::CastKeyset)
+            | Self::Opcode(Opcodes::InstanceOf)
+            | Self::Opcode(Opcodes::InstanceOfD(_))
+            | Self::Opcode(Opcodes::IsLateBoundCls)
+            | Self::Opcode(Opcodes::IsTypeStructC(_))
+            | Self::Opcode(Opcodes::ThrowAsTypeStructException)
+            | Self::Opcode(Opcodes::CombineAndResolveTypeStruct(_))
+            | Self::Opcode(Opcodes::Print)
+            | Self::Opcode(Opcodes::Clone)
+            | Self::Opcode(Opcodes::Exit)
+            | Self::Opcode(Opcodes::Fatal(_))
+            | Self::Opcode(Opcodes::ResolveFunc(_))
+            | Self::Opcode(Opcodes::ResolveRFunc(_))
+            | Self::Opcode(Opcodes::ResolveMethCaller(_))
+            | Self::Opcode(Opcodes::ResolveClsMethod(_))
+            | Self::Opcode(Opcodes::ResolveClsMethodD(_, _))
+            | Self::Opcode(Opcodes::ResolveClsMethodS(_, _))
+            | Self::Opcode(Opcodes::ResolveRClsMethod(_))
+            | Self::Opcode(Opcodes::ResolveRClsMethodD(_, _))
+            | Self::Opcode(Opcodes::ResolveRClsMethodS(_, _))
+            | Self::Opcode(Opcodes::ResolveClass(_))
+            | Self::Pseudo(Pseudo::Continue(_))
+            | Self::Pseudo(Pseudo::Break(_))
+            | Self::Opcode(Opcodes::NewObj)
+            | Self::Opcode(Opcodes::NewObjR)
+            | Self::Opcode(Opcodes::NewObjD(_))
+            | Self::Opcode(Opcodes::NewObjRD(_))
+            | Self::Opcode(Opcodes::NewObjS(_))
+            | Self::Opcode(Opcodes::CGetL(_))
+            | Self::Opcode(Opcodes::CGetQuietL(_))
+            | Self::Opcode(Opcodes::CGetL2(_))
+            | Self::Opcode(Opcodes::CUGetL(_))
+            | Self::Opcode(Opcodes::PushL(_))
+            | Self::Opcode(Opcodes::CGetG)
+            | Self::Opcode(Opcodes::CGetS(_))
+            | Self::Opcode(Opcodes::ClassGetC)
+            | Self::Opcode(Opcodes::ClassGetTS)
+            | Self::Opcode(Opcodes::SetL(_))
+            | Self::Opcode(Opcodes::PopL(_))
+            | Self::Opcode(Opcodes::SetG)
+            | Self::Opcode(Opcodes::SetS(_))
+            | Self::Opcode(Opcodes::SetOpL(_, _))
+            | Self::Opcode(Opcodes::SetOpG(_))
+            | Self::Opcode(Opcodes::SetOpS(_))
+            | Self::Opcode(Opcodes::IncDecL(_, _))
+            | Self::Opcode(Opcodes::IncDecG(_))
+            | Self::Opcode(Opcodes::IncDecS(_))
+            | Self::Opcode(Opcodes::UnsetL(_))
+            | Self::Opcode(Opcodes::UnsetG)
+            | Self::Opcode(Opcodes::CheckProp(_))
+            | Self::Opcode(Opcodes::InitProp(_, _))
+            | Self::Opcode(Opcodes::IssetL(_))
+            | Self::Opcode(Opcodes::IssetG)
+            | Self::Opcode(Opcodes::IssetS)
+            | Self::Opcode(Opcodes::IsUnsetL(_))
+            | Self::Opcode(Opcodes::IsTypeC(_))
+            | Self::Opcode(Opcodes::IsTypeL(_, _))
+            | Self::Opcode(Opcodes::BaseGC(_, _))
+            | Self::Opcode(Opcodes::BaseGL(_, _))
+            | Self::Opcode(Opcodes::BaseSC(_, _, _, _))
+            | Self::Opcode(Opcodes::BaseL(_, _, _))
+            | Self::Opcode(Opcodes::BaseC(_, _))
+            | Self::Opcode(Opcodes::BaseH)
+            | Self::Opcode(Opcodes::Dim(_, _))
+            | Self::Opcode(Opcodes::QueryM(_, _, _))
+            | Self::Opcode(Opcodes::SetM(_, _))
+            | Self::Opcode(Opcodes::IncDecM(_, _, _))
+            | Self::Opcode(Opcodes::SetOpM(_, _, _))
+            | Self::Opcode(Opcodes::UnsetM(_, _))
+            | Self::Opcode(Opcodes::SetRangeM(_, _, _))
+            | Self::Pseudo(Pseudo::Label(_))
+            | Self::Pseudo(Pseudo::TryCatchBegin)
+            | Self::Pseudo(Pseudo::TryCatchMiddle)
+            | Self::Pseudo(Pseudo::TryCatchEnd)
+            | Self::Pseudo(Pseudo::Comment(_))
+            | Self::Pseudo(Pseudo::SrcLoc(_))
+            | Self::Opcode(Opcodes::WHResult)
+            | Self::Opcode(Opcodes::Await)
+            | Self::Opcode(Opcodes::AwaitAll(_))
+            | Self::Opcode(Opcodes::CreateCont)
+            | Self::Opcode(Opcodes::ContEnter)
+            | Self::Opcode(Opcodes::ContRaise)
+            | Self::Opcode(Opcodes::Yield)
+            | Self::Opcode(Opcodes::YieldK)
+            | Self::Opcode(Opcodes::ContCheck(_))
+            | Self::Opcode(Opcodes::ContValid)
+            | Self::Opcode(Opcodes::ContKey)
+            | Self::Opcode(Opcodes::ContGetReturn)
+            | Self::Opcode(Opcodes::ContCurrent)
+            | Self::Opcode(Opcodes::Incl)
+            | Self::Opcode(Opcodes::InclOnce)
+            | Self::Opcode(Opcodes::Req)
+            | Self::Opcode(Opcodes::ReqOnce)
+            | Self::Opcode(Opcodes::ReqDoc)
+            | Self::Opcode(Opcodes::Eval) => &[],
         }
     }
 
@@ -712,231 +474,233 @@ impl Instruct<'_> {
     /// This excludes the Label in an ILabel instruction, which is not a conditional branch.
     pub fn targets_mut(&mut self) -> &mut [Label] {
         match self {
-            Self::FCallClsMethod { fcall_args, .. }
-            | Self::FCallClsMethodD { fcall_args, .. }
-            | Self::FCallClsMethodS { fcall_args, .. }
-            | Self::FCallClsMethodSD { fcall_args, .. }
-            | Self::FCallCtor(fcall_args)
-            | Self::FCallFunc(fcall_args)
-            | Self::FCallFuncD { fcall_args, .. }
-            | Self::FCallObjMethod { fcall_args, .. }
-            | Self::FCallObjMethodD { fcall_args, .. } => fcall_args.targets_mut(),
-            Self::Jmp(x) | Self::JmpNS(x) | Self::JmpZ(x) | Self::JmpNZ(x) => {
-                std::slice::from_mut(x)
-            }
-            Self::Switch { targets, .. } | Self::SSwitch { targets, .. } => targets.as_mut(),
-            Self::IterInit(_, target) | Self::IterNext(_, target) => std::slice::from_mut(target),
-            Self::MemoGet(target, _) => std::slice::from_mut(target),
-            Self::MemoGetEager(targets, _) => targets,
+            Self::Opcode(Opcodes::FCallClsMethod { fcall_args, .. })
+            | Self::Opcode(Opcodes::FCallClsMethodD { fcall_args, .. })
+            | Self::Opcode(Opcodes::FCallClsMethodS { fcall_args, .. })
+            | Self::Opcode(Opcodes::FCallClsMethodSD { fcall_args, .. })
+            | Self::Opcode(Opcodes::FCallCtor(fcall_args))
+            | Self::Opcode(Opcodes::FCallFunc(fcall_args))
+            | Self::Opcode(Opcodes::FCallFuncD { fcall_args, .. })
+            | Self::Opcode(Opcodes::FCallObjMethod { fcall_args, .. })
+            | Self::Opcode(Opcodes::FCallObjMethodD { fcall_args, .. }) => fcall_args.targets_mut(),
+            Self::Opcode(Opcodes::Jmp(x))
+            | Self::Opcode(Opcodes::JmpNS(x))
+            | Self::Opcode(Opcodes::JmpZ(x))
+            | Self::Opcode(Opcodes::JmpNZ(x)) => std::slice::from_mut(x),
+            Self::Opcode(Opcodes::Switch { targets, .. })
+            | Self::Opcode(Opcodes::SSwitch { targets, .. }) => targets.as_mut(),
+            Self::Opcode(Opcodes::IterInit(_, target))
+            | Self::Opcode(Opcodes::IterNext(_, target)) => std::slice::from_mut(target),
+            Self::Opcode(Opcodes::MemoGet(target, _)) => std::slice::from_mut(target),
+            Self::Opcode(Opcodes::MemoGetEager(targets, _)) => targets,
 
             // Make sure new variants with branch target Labels are handled above
             // before adding items to this catch-all.
-            Self::RetC
-            | Self::This
-            | Self::BareThis(_)
-            | Self::CheckThis
-            | Self::FuncNumArgs
-            | Self::ChainFaults
-            | Self::OODeclExists(_)
-            | Self::VerifyParamType(_)
-            | Self::VerifyParamTypeTS(_)
-            | Self::VerifyOutType(_)
-            | Self::VerifyRetTypeC
-            | Self::VerifyRetTypeTS
-            | Self::SelfCls
-            | Self::ParentCls
-            | Self::LateBoundCls
-            | Self::ClassName
-            | Self::LazyClassFromClass
-            | Self::RecordReifiedGeneric
-            | Self::CheckReifiedGenericMismatch
-            | Self::NativeImpl
-            | Self::AKExists
-            | Self::CreateCl(_, _)
-            | Self::Idx
-            | Self::ArrayIdx
-            | Self::ArrayMarkLegacy
-            | Self::ArrayUnmarkLegacy
-            | Self::AssertRATL(_, _)
-            | Self::AssertRATStk(_, _)
-            | Self::BreakTraceHint
-            | Self::Silence(_, _)
-            | Self::GetMemoKeyL(_)
-            | Self::CGetCUNop
-            | Self::UGetCUNop
-            | Self::MemoSet(_)
-            | Self::MemoSetEager(_)
-            | Self::LockObj
-            | Self::ThrowNonExhaustiveSwitch
-            | Self::RaiseClassStringConversionWarning
-            | Self::SetImplicitContextByValue
-            | Self::RetCSuspended
-            | Self::RetM(_)
-            | Self::Throw
-            | Self::Nop
-            | Self::EntryNop
-            | Self::PopC
-            | Self::PopU
-            | Self::Dup
-            | Self::IterFree(_)
-            | Self::Null
-            | Self::True
-            | Self::False
-            | Self::NullUninit
-            | Self::Int(_)
-            | Self::Double(_)
-            | Self::String(_)
-            | Self::LazyClass(_)
-            | Self::TypedValue(_)
-            | Self::Vec(_)
-            | Self::Dict(_)
-            | Self::Keyset(_)
-            | Self::NewDictArray(_)
-            | Self::NewStructDict(_)
-            | Self::NewVec(_)
-            | Self::NewKeysetArray(_)
-            | Self::NewPair
-            | Self::NewRecord(_, _)
-            | Self::AddElemC
-            | Self::AddNewElemC
-            | Self::NewCol(_)
-            | Self::ColFromArray(_)
-            | Self::CnsE(_)
-            | Self::ClsCns(_)
-            | Self::ClsCnsD(_, _)
-            | Self::ClsCnsL(_)
-            | Self::File
-            | Self::Dir
-            | Self::Method
-            | Self::FuncCred
-            | Self::Concat
-            | Self::ConcatN(_)
-            | Self::Add
-            | Self::Sub
-            | Self::Mul
-            | Self::AddO
-            | Self::SubO
-            | Self::MulO
-            | Self::Div
-            | Self::Mod
-            | Self::Pow
-            | Self::Not
-            | Self::Same
-            | Self::NSame
-            | Self::Eq
-            | Self::Neq
-            | Self::Lt
-            | Self::Lte
-            | Self::Gt
-            | Self::Gte
-            | Self::Cmp
-            | Self::BitAnd
-            | Self::BitOr
-            | Self::BitXor
-            | Self::BitNot
-            | Self::Shl
-            | Self::Shr
-            | Self::CastBool
-            | Self::CastInt
-            | Self::CastDouble
-            | Self::CastString
-            | Self::CastVec
-            | Self::CastDict
-            | Self::CastKeyset
-            | Self::InstanceOf
-            | Self::InstanceOfD(_)
-            | Self::IsLateBoundCls
-            | Self::IsTypeStructC(_)
-            | Self::ThrowAsTypeStructException
-            | Self::CombineAndResolveTypeStruct(_)
-            | Self::Print
-            | Self::Clone
-            | Self::Exit
-            | Self::Fatal(_)
-            | Self::ResolveFunc(_)
-            | Self::ResolveRFunc(_)
-            | Self::ResolveMethCaller(_)
-            | Self::ResolveClsMethod(_)
-            | Self::ResolveClsMethodD(_, _)
-            | Self::ResolveClsMethodS(_, _)
-            | Self::ResolveRClsMethod(_)
-            | Self::ResolveRClsMethodD(_, _)
-            | Self::ResolveRClsMethodS(_, _)
-            | Self::ResolveClass(_)
-            | Self::Continue(_)
-            | Self::Break(_)
-            | Self::NewObj
-            | Self::NewObjR
-            | Self::NewObjD(_)
-            | Self::NewObjRD(_)
-            | Self::NewObjS(_)
-            | Self::CGetL(_)
-            | Self::CGetQuietL(_)
-            | Self::CGetL2(_)
-            | Self::CUGetL(_)
-            | Self::PushL(_)
-            | Self::CGetG
-            | Self::CGetS(_)
-            | Self::ClassGetC
-            | Self::ClassGetTS
-            | Self::SetL(_)
-            | Self::PopL(_)
-            | Self::SetG
-            | Self::SetS(_)
-            | Self::SetOpL(_, _)
-            | Self::SetOpG(_)
-            | Self::SetOpS(_)
-            | Self::IncDecL(_, _)
-            | Self::IncDecG(_)
-            | Self::IncDecS(_)
-            | Self::UnsetL(_)
-            | Self::UnsetG
-            | Self::CheckProp(_)
-            | Self::InitProp(_, _)
-            | Self::IssetL(_)
-            | Self::IssetG
-            | Self::IssetS
-            | Self::IsUnsetL(_)
-            | Self::IsTypeC(_)
-            | Self::IsTypeL(_, _)
-            | Self::BaseGC(_, _)
-            | Self::BaseGL(_, _)
-            | Self::BaseSC(_, _, _, _)
-            | Self::BaseL(_, _, _)
-            | Self::BaseC(_, _)
-            | Self::BaseH
-            | Self::Dim(_, _)
-            | Self::QueryM(_, _, _)
-            | Self::SetM(_, _)
-            | Self::IncDecM(_, _, _)
-            | Self::SetOpM(_, _, _)
-            | Self::UnsetM(_, _)
-            | Self::SetRangeM(_, _, _)
-            | Self::Label(_)
-            | Self::TryCatchBegin
-            | Self::TryCatchMiddle
-            | Self::TryCatchEnd
-            | Self::Comment(_)
-            | Self::SrcLoc(_)
-            | Self::WHResult
-            | Self::Await
-            | Self::AwaitAll(_)
-            | Self::CreateCont
-            | Self::ContEnter
-            | Self::ContRaise
-            | Self::Yield
-            | Self::YieldK
-            | Self::ContCheck(_)
-            | Self::ContValid
-            | Self::ContKey
-            | Self::ContGetReturn
-            | Self::ContCurrent
-            | Self::Incl
-            | Self::InclOnce
-            | Self::Req
-            | Self::ReqOnce
-            | Self::ReqDoc
-            | Self::Eval => &mut [],
+            Self::Opcode(Opcodes::RetC)
+            | Self::Opcode(Opcodes::This)
+            | Self::Opcode(Opcodes::BareThis(_))
+            | Self::Opcode(Opcodes::CheckThis)
+            | Self::Pseudo(Pseudo::FuncNumArgs)
+            | Self::Opcode(Opcodes::ChainFaults)
+            | Self::Opcode(Opcodes::OODeclExists(_))
+            | Self::Opcode(Opcodes::VerifyParamType(_))
+            | Self::Opcode(Opcodes::VerifyParamTypeTS(_))
+            | Self::Opcode(Opcodes::VerifyOutType(_))
+            | Self::Opcode(Opcodes::VerifyRetTypeC)
+            | Self::Opcode(Opcodes::VerifyRetTypeTS)
+            | Self::Opcode(Opcodes::SelfCls)
+            | Self::Opcode(Opcodes::ParentCls)
+            | Self::Opcode(Opcodes::LateBoundCls)
+            | Self::Opcode(Opcodes::ClassName)
+            | Self::Opcode(Opcodes::LazyClassFromClass)
+            | Self::Opcode(Opcodes::RecordReifiedGeneric)
+            | Self::Opcode(Opcodes::CheckReifiedGenericMismatch)
+            | Self::Opcode(Opcodes::NativeImpl)
+            | Self::Opcode(Opcodes::AKExists)
+            | Self::Opcode(Opcodes::CreateCl(_, _))
+            | Self::Opcode(Opcodes::Idx)
+            | Self::Opcode(Opcodes::ArrayIdx)
+            | Self::Opcode(Opcodes::ArrayMarkLegacy)
+            | Self::Opcode(Opcodes::ArrayUnmarkLegacy)
+            | Self::Opcode(Opcodes::AssertRATL(_, _))
+            | Self::Opcode(Opcodes::AssertRATStk(_, _))
+            | Self::Opcode(Opcodes::BreakTraceHint)
+            | Self::Opcode(Opcodes::Silence(_, _))
+            | Self::Opcode(Opcodes::GetMemoKeyL(_))
+            | Self::Opcode(Opcodes::CGetCUNop)
+            | Self::Opcode(Opcodes::UGetCUNop)
+            | Self::Opcode(Opcodes::MemoSet(_))
+            | Self::Opcode(Opcodes::MemoSetEager(_))
+            | Self::Opcode(Opcodes::LockObj)
+            | Self::Opcode(Opcodes::ThrowNonExhaustiveSwitch)
+            | Self::Opcode(Opcodes::RaiseClassStringConversionWarning)
+            | Self::Opcode(Opcodes::SetImplicitContextByValue)
+            | Self::Opcode(Opcodes::RetCSuspended)
+            | Self::Opcode(Opcodes::RetM(_))
+            | Self::Opcode(Opcodes::Throw)
+            | Self::Opcode(Opcodes::Nop)
+            | Self::Opcode(Opcodes::EntryNop)
+            | Self::Opcode(Opcodes::PopC)
+            | Self::Opcode(Opcodes::PopU)
+            | Self::Opcode(Opcodes::Dup)
+            | Self::Opcode(Opcodes::IterFree(_))
+            | Self::Opcode(Opcodes::Null)
+            | Self::Opcode(Opcodes::True)
+            | Self::Opcode(Opcodes::False)
+            | Self::Opcode(Opcodes::NullUninit)
+            | Self::Opcode(Opcodes::Int(_))
+            | Self::Opcode(Opcodes::Double(_))
+            | Self::Opcode(Opcodes::String(_))
+            | Self::Opcode(Opcodes::LazyClass(_))
+            | Self::Pseudo(Pseudo::TypedValue(_))
+            | Self::Opcode(Opcodes::Vec(_))
+            | Self::Opcode(Opcodes::Dict(_))
+            | Self::Opcode(Opcodes::Keyset(_))
+            | Self::Opcode(Opcodes::NewDictArray(_))
+            | Self::Opcode(Opcodes::NewStructDict(_))
+            | Self::Opcode(Opcodes::NewVec(_))
+            | Self::Opcode(Opcodes::NewKeysetArray(_))
+            | Self::Opcode(Opcodes::NewPair)
+            | Self::Opcode(Opcodes::AddElemC)
+            | Self::Opcode(Opcodes::AddNewElemC)
+            | Self::Opcode(Opcodes::NewCol(_))
+            | Self::Opcode(Opcodes::ColFromArray(_))
+            | Self::Opcode(Opcodes::CnsE(_))
+            | Self::Opcode(Opcodes::ClsCns(_))
+            | Self::Opcode(Opcodes::ClsCnsD(_, _))
+            | Self::Opcode(Opcodes::ClsCnsL(_))
+            | Self::Opcode(Opcodes::File)
+            | Self::Opcode(Opcodes::Dir)
+            | Self::Opcode(Opcodes::Method)
+            | Self::Opcode(Opcodes::FuncCred)
+            | Self::Opcode(Opcodes::Concat)
+            | Self::Opcode(Opcodes::ConcatN(_))
+            | Self::Opcode(Opcodes::Add)
+            | Self::Opcode(Opcodes::Sub)
+            | Self::Opcode(Opcodes::Mul)
+            | Self::Opcode(Opcodes::AddO)
+            | Self::Opcode(Opcodes::SubO)
+            | Self::Opcode(Opcodes::MulO)
+            | Self::Opcode(Opcodes::Div)
+            | Self::Opcode(Opcodes::Mod)
+            | Self::Opcode(Opcodes::Pow)
+            | Self::Opcode(Opcodes::Not)
+            | Self::Opcode(Opcodes::Same)
+            | Self::Opcode(Opcodes::NSame)
+            | Self::Opcode(Opcodes::Eq)
+            | Self::Opcode(Opcodes::Neq)
+            | Self::Opcode(Opcodes::Lt)
+            | Self::Opcode(Opcodes::Lte)
+            | Self::Opcode(Opcodes::Gt)
+            | Self::Opcode(Opcodes::Gte)
+            | Self::Opcode(Opcodes::Cmp)
+            | Self::Opcode(Opcodes::BitAnd)
+            | Self::Opcode(Opcodes::BitOr)
+            | Self::Opcode(Opcodes::BitXor)
+            | Self::Opcode(Opcodes::BitNot)
+            | Self::Opcode(Opcodes::Shl)
+            | Self::Opcode(Opcodes::Shr)
+            | Self::Opcode(Opcodes::CastBool)
+            | Self::Opcode(Opcodes::CastInt)
+            | Self::Opcode(Opcodes::CastDouble)
+            | Self::Opcode(Opcodes::CastString)
+            | Self::Opcode(Opcodes::CastVec)
+            | Self::Opcode(Opcodes::CastDict)
+            | Self::Opcode(Opcodes::CastKeyset)
+            | Self::Opcode(Opcodes::InstanceOf)
+            | Self::Opcode(Opcodes::InstanceOfD(_))
+            | Self::Opcode(Opcodes::IsLateBoundCls)
+            | Self::Opcode(Opcodes::IsTypeStructC(_))
+            | Self::Opcode(Opcodes::ThrowAsTypeStructException)
+            | Self::Opcode(Opcodes::CombineAndResolveTypeStruct(_))
+            | Self::Opcode(Opcodes::Print)
+            | Self::Opcode(Opcodes::Clone)
+            | Self::Opcode(Opcodes::Exit)
+            | Self::Opcode(Opcodes::Fatal(_))
+            | Self::Opcode(Opcodes::ResolveFunc(_))
+            | Self::Opcode(Opcodes::ResolveRFunc(_))
+            | Self::Opcode(Opcodes::ResolveMethCaller(_))
+            | Self::Opcode(Opcodes::ResolveClsMethod(_))
+            | Self::Opcode(Opcodes::ResolveClsMethodD(_, _))
+            | Self::Opcode(Opcodes::ResolveClsMethodS(_, _))
+            | Self::Opcode(Opcodes::ResolveRClsMethod(_))
+            | Self::Opcode(Opcodes::ResolveRClsMethodD(_, _))
+            | Self::Opcode(Opcodes::ResolveRClsMethodS(_, _))
+            | Self::Opcode(Opcodes::ResolveClass(_))
+            | Self::Pseudo(Pseudo::Continue(_))
+            | Self::Pseudo(Pseudo::Break(_))
+            | Self::Opcode(Opcodes::NewObj)
+            | Self::Opcode(Opcodes::NewObjR)
+            | Self::Opcode(Opcodes::NewObjD(_))
+            | Self::Opcode(Opcodes::NewObjRD(_))
+            | Self::Opcode(Opcodes::NewObjS(_))
+            | Self::Opcode(Opcodes::CGetL(_))
+            | Self::Opcode(Opcodes::CGetQuietL(_))
+            | Self::Opcode(Opcodes::CGetL2(_))
+            | Self::Opcode(Opcodes::CUGetL(_))
+            | Self::Opcode(Opcodes::PushL(_))
+            | Self::Opcode(Opcodes::CGetG)
+            | Self::Opcode(Opcodes::CGetS(_))
+            | Self::Opcode(Opcodes::ClassGetC)
+            | Self::Opcode(Opcodes::ClassGetTS)
+            | Self::Opcode(Opcodes::SetL(_))
+            | Self::Opcode(Opcodes::PopL(_))
+            | Self::Opcode(Opcodes::SetG)
+            | Self::Opcode(Opcodes::SetS(_))
+            | Self::Opcode(Opcodes::SetOpL(_, _))
+            | Self::Opcode(Opcodes::SetOpG(_))
+            | Self::Opcode(Opcodes::SetOpS(_))
+            | Self::Opcode(Opcodes::IncDecL(_, _))
+            | Self::Opcode(Opcodes::IncDecG(_))
+            | Self::Opcode(Opcodes::IncDecS(_))
+            | Self::Opcode(Opcodes::UnsetL(_))
+            | Self::Opcode(Opcodes::UnsetG)
+            | Self::Opcode(Opcodes::CheckProp(_))
+            | Self::Opcode(Opcodes::InitProp(_, _))
+            | Self::Opcode(Opcodes::IssetL(_))
+            | Self::Opcode(Opcodes::IssetG)
+            | Self::Opcode(Opcodes::IssetS)
+            | Self::Opcode(Opcodes::IsUnsetL(_))
+            | Self::Opcode(Opcodes::IsTypeC(_))
+            | Self::Opcode(Opcodes::IsTypeL(_, _))
+            | Self::Opcode(Opcodes::BaseGC(_, _))
+            | Self::Opcode(Opcodes::BaseGL(_, _))
+            | Self::Opcode(Opcodes::BaseSC(_, _, _, _))
+            | Self::Opcode(Opcodes::BaseL(_, _, _))
+            | Self::Opcode(Opcodes::BaseC(_, _))
+            | Self::Opcode(Opcodes::BaseH)
+            | Self::Opcode(Opcodes::Dim(_, _))
+            | Self::Opcode(Opcodes::QueryM(_, _, _))
+            | Self::Opcode(Opcodes::SetM(_, _))
+            | Self::Opcode(Opcodes::IncDecM(_, _, _))
+            | Self::Opcode(Opcodes::SetOpM(_, _, _))
+            | Self::Opcode(Opcodes::UnsetM(_, _))
+            | Self::Opcode(Opcodes::SetRangeM(_, _, _))
+            | Self::Pseudo(Pseudo::Label(_))
+            | Self::Pseudo(Pseudo::TryCatchBegin)
+            | Self::Pseudo(Pseudo::TryCatchMiddle)
+            | Self::Pseudo(Pseudo::TryCatchEnd)
+            | Self::Pseudo(Pseudo::Comment(_))
+            | Self::Pseudo(Pseudo::SrcLoc(_))
+            | Self::Opcode(Opcodes::WHResult)
+            | Self::Opcode(Opcodes::Await)
+            | Self::Opcode(Opcodes::AwaitAll(_))
+            | Self::Opcode(Opcodes::CreateCont)
+            | Self::Opcode(Opcodes::ContEnter)
+            | Self::Opcode(Opcodes::ContRaise)
+            | Self::Opcode(Opcodes::Yield)
+            | Self::Opcode(Opcodes::YieldK)
+            | Self::Opcode(Opcodes::ContCheck(_))
+            | Self::Opcode(Opcodes::ContValid)
+            | Self::Opcode(Opcodes::ContKey)
+            | Self::Opcode(Opcodes::ContGetReturn)
+            | Self::Opcode(Opcodes::ContCurrent)
+            | Self::Opcode(Opcodes::Incl)
+            | Self::Opcode(Opcodes::InclOnce)
+            | Self::Opcode(Opcodes::Req)
+            | Self::Opcode(Opcodes::ReqOnce)
+            | Self::Opcode(Opcodes::ReqDoc)
+            | Self::Opcode(Opcodes::Eval) => &mut [],
         }
     }
 }

@@ -18,7 +18,7 @@ use hash::HashSet;
 use hhas_body::{HhasBody, HhasBodyEnv};
 use hhas_param::HhasParam;
 use hhas_type::HhasTypeInfo;
-use hhbc_ast::{FCallArgsFlags, FcallArgs, Instruct, IsTypeOp, ParamId};
+use hhbc_ast::{FCallArgsFlags, FcallArgs, Instruct, IsTypeOp, ParamId, Pseudo};
 use hhbc_id::function;
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{instr, unrecoverable, Error, InstrSeq, Result};
@@ -229,7 +229,7 @@ fn make_body_instrs<'a, 'arena, 'decl>(
         flags,
     )?;
     let first_instr_is_label = match InstrSeq::first(&stmt_instrs) {
-        Some(Instruct::Label(_)) => true,
+        Some(Instruct::Pseudo(Pseudo::Label(_))) => true,
         _ => false,
     };
     let header = if first_instr_is_label && InstrSeq::is_empty(&header_content) {

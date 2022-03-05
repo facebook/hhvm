@@ -909,28 +909,28 @@ fn print_instructions(
     let mut ctx = ctx.clone();
     for instr in instrs {
         match instr {
-            Instruct::Continue(_) | Instruct::Break(_) => {
+            Instruct::Pseudo(Pseudo::Continue(_) | Pseudo::Break(_)) => {
                 return Err(Error::fail("Cannot break/continue 1 level").into());
             }
-            Instruct::Comment(_) => {
+            Instruct::Pseudo(Pseudo::Comment(_)) => {
                 // indentation = 0
                 newline(w)?;
                 print_instr(w, instr, dv_labels)?;
             }
-            Instruct::Label(_) => ctx.unblock(w, |c, w| {
+            Instruct::Pseudo(Pseudo::Label(_)) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
                 print_instr(w, instr, dv_labels)
             })?,
-            Instruct::TryCatchBegin => {
+            Instruct::Pseudo(Pseudo::TryCatchBegin) => {
                 ctx.newline(w)?;
                 print_instr(w, instr, dv_labels)?;
                 ctx.indent_inc();
             }
-            Instruct::TryCatchMiddle => ctx.unblock(w, |c, w| {
+            Instruct::Pseudo(Pseudo::TryCatchMiddle) => ctx.unblock(w, |c, w| {
                 c.newline(w)?;
                 print_instr(w, instr, dv_labels)
             })?,
-            Instruct::TryCatchEnd => {
+            Instruct::Pseudo(Pseudo::TryCatchEnd) => {
                 ctx.indent_dec();
                 ctx.newline(w)?;
                 print_instr(w, instr, dv_labels)?;
@@ -1007,152 +1007,142 @@ fn print_null_flavor(w: &mut dyn Write, f: &ObjMethodOp) -> Result<()> {
     })
 }
 
-fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
+fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
     match instr {
-        Instruct::IterInit(iter_args, label) => {
+        Opcodes::IterInit(iter_args, label) => {
             w.write_all(b"IterInit ")?;
             print_iter_args(w, iter_args)?;
             w.write_all(b" ")?;
             print_label(w, label, dv_labels)
         }
-        Instruct::IterNext(iter_args, label) => {
+        Opcodes::IterNext(iter_args, label) => {
             w.write_all(b"IterNext ")?;
             print_iter_args(w, iter_args)?;
             w.write_all(b" ")?;
             print_label(w, label, dv_labels)
         }
-        Instruct::IterFree(id) => {
+        Opcodes::IterFree(id) => {
             w.write_all(b"IterFree ")?;
             print_iterator_id(w, id)
         }
-        Instruct::Nop => w.write_all(b"Nop"),
-        Instruct::EntryNop => w.write_all(b"EntryNop"),
-        Instruct::PopC => w.write_all(b"PopC"),
-        Instruct::PopU => w.write_all(b"PopU"),
-        Instruct::Dup => w.write_all(b"Dup"),
-        Instruct::Null => w.write_all(b"Null"),
-        Instruct::Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
-        Instruct::String(s) => {
+        Opcodes::Nop => w.write_all(b"Nop"),
+        Opcodes::EntryNop => w.write_all(b"EntryNop"),
+        Opcodes::PopC => w.write_all(b"PopC"),
+        Opcodes::PopU => w.write_all(b"PopU"),
+        Opcodes::Dup => w.write_all(b"Dup"),
+        Opcodes::Null => w.write_all(b"Null"),
+        Opcodes::Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
+        Opcodes::String(s) => {
             w.write_all(b"String ")?;
             quotes(w, |w| w.write_all(&escaper::escape_bstr(s.as_bstr())))
         }
-        Instruct::LazyClass(id) => {
+        Opcodes::LazyClass(id) => {
             w.write_all(b"LazyClass ")?;
             print_class_id(w, id)
         }
-        Instruct::True => w.write_all(b"True"),
-        Instruct::False => w.write_all(b"False"),
-        Instruct::Double(d) => write!(w, "Double {}", float::to_string(*d)),
-        Instruct::AddElemC => w.write_all(b"AddElemC"),
-        Instruct::AddNewElemC => w.write_all(b"AddNewElemC"),
-        Instruct::NewPair => w.write_all(b"NewPair"),
-        Instruct::File => w.write_all(b"File"),
-        Instruct::Dir => w.write_all(b"Dir"),
-        Instruct::Method => w.write_all(b"Method"),
-        Instruct::FuncCred => w.write_all(b"FuncCred"),
-        Instruct::Dict(id) => {
+        Opcodes::True => w.write_all(b"True"),
+        Opcodes::False => w.write_all(b"False"),
+        Opcodes::Double(d) => write!(w, "Double {}", float::to_string(*d)),
+        Opcodes::AddElemC => w.write_all(b"AddElemC"),
+        Opcodes::AddNewElemC => w.write_all(b"AddNewElemC"),
+        Opcodes::NewPair => w.write_all(b"NewPair"),
+        Opcodes::File => w.write_all(b"File"),
+        Opcodes::Dir => w.write_all(b"Dir"),
+        Opcodes::Method => w.write_all(b"Method"),
+        Opcodes::FuncCred => w.write_all(b"FuncCred"),
+        Opcodes::Dict(id) => {
             w.write_all(b"Dict ")?;
             print_adata_id(w, id)
         }
-        Instruct::Keyset(id) => {
+        Opcodes::Keyset(id) => {
             w.write_all(b"Keyset ")?;
             print_adata_id(w, id)
         }
-        Instruct::Vec(id) => {
+        Opcodes::Vec(id) => {
             w.write_all(b"Vec ")?;
             print_adata_id(w, id)
         }
-        Instruct::NewDictArray(i) => {
-            concat_str_by(w, " ", ["NewDictArray", i.to_string().as_str()])
-        }
-        Instruct::NewVec(i) => concat_str_by(w, " ", ["NewVec", i.to_string().as_str()]),
-        Instruct::NewKeysetArray(i) => {
+        Opcodes::NewDictArray(i) => concat_str_by(w, " ", ["NewDictArray", i.to_string().as_str()]),
+        Opcodes::NewVec(i) => concat_str_by(w, " ", ["NewVec", i.to_string().as_str()]),
+        Opcodes::NewKeysetArray(i) => {
             concat_str_by(w, " ", ["NewKeysetArray", i.to_string().as_str()])
         }
-        Instruct::NewStructDict(l) => {
+        Opcodes::NewStructDict(l) => {
             let ls: Vec<&str> = l.as_ref().iter().map(|s| s.unsafe_as_str()).collect();
             w.write_all(b"NewStructDict ")?;
             angle(w, |w| print_shape_fields(w, &ls[0..]))
         }
-        Instruct::NewRecord(cid, l) => {
-            let ls: Vec<&str> = l.as_ref().iter().map(|s| s.unsafe_as_str()).collect();
-            w.write_all(b"NewRecord ")?;
-            print_class_id(w, cid)?;
-            w.write_all(b" ")?;
-            angle(w, |w| print_shape_fields(w, &ls[0..]))
-        }
-        Instruct::CnsE(id) => {
+        Opcodes::CnsE(id) => {
             w.write_all(b"CnsE ")?;
             print_const_id(w, id)
         }
-        Instruct::ClsCns(id) => {
+        Opcodes::ClsCns(id) => {
             w.write_all(b"ClsCns ")?;
             print_const_id(w, id)
         }
-        Instruct::ClsCnsD(const_id, cid) => {
+        Opcodes::ClsCnsD(const_id, cid) => {
             w.write_all(b"ClsCnsD ")?;
             print_const_id(w, const_id)?;
             w.write_all(b" ")?;
             print_class_id(w, cid)
         }
-        Instruct::ClsCnsL(id) => {
+        Opcodes::ClsCnsL(id) => {
             w.write_all(b"ClsCnsL ")?;
             print_local(w, id)
         }
-        Instruct::NewCol(ct) => {
+        Opcodes::NewCol(ct) => {
             w.write_all(b"NewCol ")?;
             print_collection_type(w, ct)
         }
-        Instruct::ColFromArray(ct) => {
+        Opcodes::ColFromArray(ct) => {
             w.write_all(b"ColFromArray ")?;
             print_collection_type(w, ct)
         }
-        Instruct::NullUninit => w.write_all(b"NullUninit"),
-        Instruct::TypedValue(_) => Err(Error::fail("print_lit_const: TypedValue").into()),
-        Instruct::Concat => w.write_all(b"Concat"),
-        Instruct::ConcatN(n) => concat_str_by(w, " ", ["ConcatN", n.to_string().as_str()]),
-        Instruct::Add => w.write_all(b"Add"),
-        Instruct::Sub => w.write_all(b"Sub"),
-        Instruct::Mul => w.write_all(b"Mul"),
-        Instruct::AddO => w.write_all(b"AddO"),
-        Instruct::SubO => w.write_all(b"SubO"),
-        Instruct::MulO => w.write_all(b"MulO"),
-        Instruct::Div => w.write_all(b"Div"),
-        Instruct::Mod => w.write_all(b"Mod"),
-        Instruct::Pow => w.write_all(b"Pow"),
-        Instruct::Not => w.write_all(b"Not"),
-        Instruct::Same => w.write_all(b"Same"),
-        Instruct::NSame => w.write_all(b"NSame"),
-        Instruct::Eq => w.write_all(b"Eq"),
-        Instruct::Neq => w.write_all(b"Neq"),
-        Instruct::Lt => w.write_all(b"Lt"),
-        Instruct::Lte => w.write_all(b"Lte"),
-        Instruct::Gt => w.write_all(b"Gt"),
-        Instruct::Gte => w.write_all(b"Gte"),
-        Instruct::Cmp => w.write_all(b"Cmp"),
-        Instruct::BitAnd => w.write_all(b"BitAnd"),
-        Instruct::BitOr => w.write_all(b"BitOr"),
-        Instruct::BitXor => w.write_all(b"BitXor"),
-        Instruct::BitNot => w.write_all(b"BitNot"),
-        Instruct::Shl => w.write_all(b"Shl"),
-        Instruct::Shr => w.write_all(b"Shr"),
-        Instruct::CastBool => w.write_all(b"CastBool"),
-        Instruct::CastInt => w.write_all(b"CastInt"),
-        Instruct::CastDouble => w.write_all(b"CastDouble"),
-        Instruct::CastString => w.write_all(b"CastString"),
-        Instruct::CastVec => w.write_all(b"CastVec"),
-        Instruct::CastDict => w.write_all(b"CastDict"),
-        Instruct::CastKeyset => w.write_all(b"CastKeyset"),
-        Instruct::InstanceOf => w.write_all(b"InstanceOf"),
-        Instruct::Print => w.write_all(b"Print"),
-        Instruct::Clone => w.write_all(b"Clone"),
-        Instruct::Exit => w.write_all(b"Exit"),
-        Instruct::InstanceOfD(id) => {
+        Opcodes::NullUninit => w.write_all(b"NullUninit"),
+        Opcodes::Concat => w.write_all(b"Concat"),
+        Opcodes::ConcatN(n) => concat_str_by(w, " ", ["ConcatN", n.to_string().as_str()]),
+        Opcodes::Add => w.write_all(b"Add"),
+        Opcodes::Sub => w.write_all(b"Sub"),
+        Opcodes::Mul => w.write_all(b"Mul"),
+        Opcodes::AddO => w.write_all(b"AddO"),
+        Opcodes::SubO => w.write_all(b"SubO"),
+        Opcodes::MulO => w.write_all(b"MulO"),
+        Opcodes::Div => w.write_all(b"Div"),
+        Opcodes::Mod => w.write_all(b"Mod"),
+        Opcodes::Pow => w.write_all(b"Pow"),
+        Opcodes::Not => w.write_all(b"Not"),
+        Opcodes::Same => w.write_all(b"Same"),
+        Opcodes::NSame => w.write_all(b"NSame"),
+        Opcodes::Eq => w.write_all(b"Eq"),
+        Opcodes::Neq => w.write_all(b"Neq"),
+        Opcodes::Lt => w.write_all(b"Lt"),
+        Opcodes::Lte => w.write_all(b"Lte"),
+        Opcodes::Gt => w.write_all(b"Gt"),
+        Opcodes::Gte => w.write_all(b"Gte"),
+        Opcodes::Cmp => w.write_all(b"Cmp"),
+        Opcodes::BitAnd => w.write_all(b"BitAnd"),
+        Opcodes::BitOr => w.write_all(b"BitOr"),
+        Opcodes::BitXor => w.write_all(b"BitXor"),
+        Opcodes::BitNot => w.write_all(b"BitNot"),
+        Opcodes::Shl => w.write_all(b"Shl"),
+        Opcodes::Shr => w.write_all(b"Shr"),
+        Opcodes::CastBool => w.write_all(b"CastBool"),
+        Opcodes::CastInt => w.write_all(b"CastInt"),
+        Opcodes::CastDouble => w.write_all(b"CastDouble"),
+        Opcodes::CastString => w.write_all(b"CastString"),
+        Opcodes::CastVec => w.write_all(b"CastVec"),
+        Opcodes::CastDict => w.write_all(b"CastDict"),
+        Opcodes::CastKeyset => w.write_all(b"CastKeyset"),
+        Opcodes::InstanceOf => w.write_all(b"InstanceOf"),
+        Opcodes::Print => w.write_all(b"Print"),
+        Opcodes::Clone => w.write_all(b"Clone"),
+        Opcodes::Exit => w.write_all(b"Exit"),
+        Opcodes::InstanceOfD(id) => {
             w.write_all(b"InstanceOfD ")?;
             print_class_id(w, id)
         }
-        Instruct::IsLateBoundCls => w.write_all(b"IsLateBoundCls"),
-        Instruct::IsTypeStructC(op) => concat_str_by(
+        Opcodes::IsLateBoundCls => w.write_all(b"IsLateBoundCls"),
+        Opcodes::IsTypeStructC(op) => concat_str_by(
             w,
             " ",
             [
@@ -1164,90 +1154,90 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
                 },
             ],
         ),
-        Instruct::ThrowAsTypeStructException => w.write_all(b"ThrowAsTypeStructException"),
-        Instruct::CombineAndResolveTypeStruct(n) => concat_str_by(
+        Opcodes::ThrowAsTypeStructException => w.write_all(b"ThrowAsTypeStructException"),
+        Opcodes::CombineAndResolveTypeStruct(n) => concat_str_by(
             w,
             " ",
             ["CombineAndResolveTypeStruct", n.to_string().as_str()],
         ),
-        Instruct::ResolveFunc(id) => {
+        Opcodes::ResolveFunc(id) => {
             w.write_all(b"ResolveFunc ")?;
             print_function_id(w, id)
         }
-        Instruct::ResolveRFunc(id) => {
+        Opcodes::ResolveRFunc(id) => {
             w.write_all(b"ResolveRFunc ")?;
             print_function_id(w, id)
         }
-        Instruct::ResolveMethCaller(id) => {
+        Opcodes::ResolveMethCaller(id) => {
             w.write_all(b"ResolveMethCaller ")?;
             print_function_id(w, id)
         }
-        Instruct::ResolveClsMethod(mid) => {
+        Opcodes::ResolveClsMethod(mid) => {
             w.write_all(b"ResolveClsMethod ")?;
             print_method_id(w, mid)
         }
-        Instruct::ResolveClsMethodD(cid, mid) => {
+        Opcodes::ResolveClsMethodD(cid, mid) => {
             w.write_all(b"ResolveClsMethodD ")?;
             print_class_id(w, cid)?;
             w.write_all(b" ")?;
             print_method_id(w, mid)
         }
-        Instruct::ResolveClsMethodS(r, mid) => {
+        Opcodes::ResolveClsMethodS(r, mid) => {
             w.write_all(b"ResolveClsMethodS ")?;
             print_special_cls_ref(w, r)?;
             w.write_all(b" ")?;
             print_method_id(w, mid)
         }
-        Instruct::ResolveRClsMethod(mid) => {
+        Opcodes::ResolveRClsMethod(mid) => {
             w.write_all(b"ResolveRClsMethod ")?;
             print_method_id(w, mid)
         }
-        Instruct::ResolveRClsMethodD(cid, mid) => {
+        Opcodes::ResolveRClsMethodD(cid, mid) => {
             w.write_all(b"ResolveRClsMethodD ")?;
             print_class_id(w, cid)?;
             w.write_all(b" ")?;
             print_method_id(w, mid)
         }
-        Instruct::ResolveRClsMethodS(r, mid) => {
+        Opcodes::ResolveRClsMethodS(r, mid) => {
             w.write_all(b"ResolveRClsMethodS ")?;
             print_special_cls_ref(w, r)?;
             w.write_all(b" ")?;
             print_method_id(w, mid)
         }
-        Instruct::ResolveClass(id) => {
+        Opcodes::ResolveClass(id) => {
             w.write_all(b"ResolveClass ")?;
             print_class_id(w, id)
         }
-        Instruct::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
-        Instruct::RetC => w.write_all(b"RetC"),
-        Instruct::RetCSuspended => w.write_all(b"RetCSuspended"),
-        Instruct::Throw => w.write_all(b"Throw"),
-        Instruct::Switch {
+        Opcodes::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
+        Opcodes::RetC => w.write_all(b"RetC"),
+        Opcodes::RetCSuspended => w.write_all(b"RetCSuspended"),
+        Opcodes::Throw => w.write_all(b"Throw"),
+        Opcodes::Switch {
             kind,
             base,
             targets,
         } => print_switch(w, kind, base, targets.as_ref(), dv_labels),
-        Instruct::Jmp(l) => {
+        Opcodes::Jmp(l) => {
             w.write_all(b"Jmp ")?;
             print_label(w, l, dv_labels)
         }
-        Instruct::JmpNS(l) => {
+        Opcodes::JmpNS(l) => {
             w.write_all(b"JmpNS ")?;
             print_label(w, l, dv_labels)
         }
-        Instruct::JmpZ(l) => {
+        Opcodes::JmpZ(l) => {
             w.write_all(b"JmpZ ")?;
             print_label(w, l, dv_labels)
         }
-        Instruct::JmpNZ(l) => {
+        Opcodes::JmpNZ(l) => {
             w.write_all(b"JmpNZ ")?;
             print_label(w, l, dv_labels)
         }
-        Instruct::SSwitch { cases, targets } => {
+        Opcodes::SSwitch { cases, targets } => {
             print_sswitch(w, cases.as_ref(), targets.as_ref(), dv_labels)
         }
-        Instruct::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
-        Instruct::FCallClsMethod { fcall_args, log } => {
+        Opcodes::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
+        Opcodes::FCallClsMethod { fcall_args, log } => {
             w.write_all(b"FCallClsMethod ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(br#" "" "#)?;
@@ -1257,7 +1247,7 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
                 _ => panic!("Enum value does not match one of listed variants"),
             })
         }
-        Instruct::FCallClsMethodD {
+        Opcodes::FCallClsMethodD {
             fcall_args,
             class,
             method,
@@ -1269,13 +1259,13 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_method_id(w, method)
         }
-        Instruct::FCallClsMethodS { fcall_args, clsref } => {
+        Opcodes::FCallClsMethodS { fcall_args, clsref } => {
             w.write_all(b"FCallClsMethodS ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(br#" "" "#)?;
             print_special_cls_ref(w, clsref)
         }
-        Instruct::FCallClsMethodSD {
+        Opcodes::FCallClsMethodSD {
             fcall_args,
             clsref,
             method,
@@ -1287,28 +1277,28 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_method_id(w, method)
         }
-        Instruct::FCallCtor(fcall_args) => {
+        Opcodes::FCallCtor(fcall_args) => {
             w.write_all(b"FCallCtor ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(br#" """#)
         }
-        Instruct::FCallFunc(fcall_args) => {
+        Opcodes::FCallFunc(fcall_args) => {
             w.write_all(b"FCallFunc ")?;
             print_fcall_args(w, fcall_args, dv_labels)
         }
-        Instruct::FCallFuncD { fcall_args, func } => {
+        Opcodes::FCallFuncD { fcall_args, func } => {
             w.write_all(b"FCallFuncD ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(b" ")?;
             print_function_id(w, func)
         }
-        Instruct::FCallObjMethod { fcall_args, flavor } => {
+        Opcodes::FCallObjMethod { fcall_args, flavor } => {
             w.write_all(b"FCallObjMethod ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(br#" "" "#)?;
             print_null_flavor(w, flavor)
         }
-        Instruct::FCallObjMethodD {
+        Opcodes::FCallObjMethodD {
             fcall_args,
             flavor,
             method,
@@ -1320,57 +1310,56 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_method_id(w, method)
         }
-        Instruct::NewObj => w.write_all(b"NewObj"),
-        Instruct::NewObjR => w.write_all(b"NewObjR"),
-        Instruct::NewObjD(cid) => {
+        Opcodes::NewObj => w.write_all(b"NewObj"),
+        Opcodes::NewObjR => w.write_all(b"NewObjR"),
+        Opcodes::NewObjD(cid) => {
             w.write_all(b"NewObjD ")?;
             print_class_id(w, cid)
         }
-        Instruct::NewObjRD(cid) => {
+        Opcodes::NewObjRD(cid) => {
             w.write_all(b"NewObjRD ")?;
             print_class_id(w, cid)
         }
-        Instruct::NewObjS(r) => {
+        Opcodes::NewObjS(r) => {
             w.write_all(b"NewObjS ")?;
             print_special_cls_ref(w, r)
         }
-        Instruct::This => w.write_all(b"This"),
-        Instruct::CheckThis => w.write_all(b"CheckThis"),
-        Instruct::FuncNumArgs => w.write_all(b"FuncNumArgs"),
-        Instruct::ChainFaults => w.write_all(b"ChainFaults"),
-        Instruct::SetImplicitContextByValue => w.write_all(b"SetImplicitContextByValue"),
-        Instruct::VerifyRetTypeC => w.write_all(b"VerifyRetTypeC"),
-        Instruct::VerifyRetTypeTS => w.write_all(b"VerifyRetTypeTS"),
-        Instruct::SelfCls => w.write_all(b"SelfCls"),
-        Instruct::ParentCls => w.write_all(b"ParentCls"),
-        Instruct::LateBoundCls => w.write_all(b"LateBoundCls"),
-        Instruct::ClassName => w.write_all(b"ClassName"),
-        Instruct::LazyClassFromClass => w.write_all(b"LazyClassFromClass"),
-        Instruct::RecordReifiedGeneric => w.write_all(b"RecordReifiedGeneric"),
-        Instruct::CheckReifiedGenericMismatch => w.write_all(b"CheckReifiedGenericMismatch"),
-        Instruct::NativeImpl => w.write_all(b"NativeImpl"),
-        Instruct::AKExists => w.write_all(b"AKExists"),
-        Instruct::Idx => w.write_all(b"Idx"),
-        Instruct::ArrayIdx => w.write_all(b"ArrayIdx"),
-        Instruct::ArrayMarkLegacy => w.write_all(b"ArrayMarkLegacy"),
-        Instruct::ArrayUnmarkLegacy => w.write_all(b"ArrayUnmarkLegacy"),
-        Instruct::BreakTraceHint => w.write_all(b"BreakTraceHint"),
-        Instruct::CGetCUNop => w.write_all(b"CGetCUNop"),
-        Instruct::UGetCUNop => w.write_all(b"UGetCUNop"),
-        Instruct::LockObj => w.write_all(b"LockObj"),
-        Instruct::ThrowNonExhaustiveSwitch => w.write_all(b"ThrowNonExhaustiveSwitch"),
-        Instruct::RaiseClassStringConversionWarning => {
+        Opcodes::This => w.write_all(b"This"),
+        Opcodes::CheckThis => w.write_all(b"CheckThis"),
+        Opcodes::ChainFaults => w.write_all(b"ChainFaults"),
+        Opcodes::SetImplicitContextByValue => w.write_all(b"SetImplicitContextByValue"),
+        Opcodes::VerifyRetTypeC => w.write_all(b"VerifyRetTypeC"),
+        Opcodes::VerifyRetTypeTS => w.write_all(b"VerifyRetTypeTS"),
+        Opcodes::SelfCls => w.write_all(b"SelfCls"),
+        Opcodes::ParentCls => w.write_all(b"ParentCls"),
+        Opcodes::LateBoundCls => w.write_all(b"LateBoundCls"),
+        Opcodes::ClassName => w.write_all(b"ClassName"),
+        Opcodes::LazyClassFromClass => w.write_all(b"LazyClassFromClass"),
+        Opcodes::RecordReifiedGeneric => w.write_all(b"RecordReifiedGeneric"),
+        Opcodes::CheckReifiedGenericMismatch => w.write_all(b"CheckReifiedGenericMismatch"),
+        Opcodes::NativeImpl => w.write_all(b"NativeImpl"),
+        Opcodes::AKExists => w.write_all(b"AKExists"),
+        Opcodes::Idx => w.write_all(b"Idx"),
+        Opcodes::ArrayIdx => w.write_all(b"ArrayIdx"),
+        Opcodes::ArrayMarkLegacy => w.write_all(b"ArrayMarkLegacy"),
+        Opcodes::ArrayUnmarkLegacy => w.write_all(b"ArrayUnmarkLegacy"),
+        Opcodes::BreakTraceHint => w.write_all(b"BreakTraceHint"),
+        Opcodes::CGetCUNop => w.write_all(b"CGetCUNop"),
+        Opcodes::UGetCUNop => w.write_all(b"UGetCUNop"),
+        Opcodes::LockObj => w.write_all(b"LockObj"),
+        Opcodes::ThrowNonExhaustiveSwitch => w.write_all(b"ThrowNonExhaustiveSwitch"),
+        Opcodes::RaiseClassStringConversionWarning => {
             w.write_all(b"RaiseClassStringConversionWarning")
         }
-        Instruct::VerifyParamType(id) => {
+        Opcodes::VerifyParamType(id) => {
             w.write_all(b"VerifyParamType ")?;
             print_param_id(w, id)
         }
-        Instruct::VerifyParamTypeTS(id) => {
+        Opcodes::VerifyParamTypeTS(id) => {
             w.write_all(b"VerifyParamTypeTS ")?;
             print_param_id(w, id)
         }
-        Instruct::Silence(local, op) => {
+        Opcodes::Silence(local, op) => {
             w.write_all(b"Silence ")?;
             print_local(w, local)?;
             w.write_all(b" ")?;
@@ -1380,16 +1369,16 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
                 _ => panic!("Enum value does not match one of listed variants"),
             }
         }
-        Instruct::VerifyOutType(id) => {
+        Opcodes::VerifyOutType(id) => {
             w.write_all(b"VerifyOutType ")?;
             print_param_id(w, id)
         }
-        Instruct::CreateCl(n, cid) => concat_str_by(
+        Opcodes::CreateCl(n, cid) => concat_str_by(
             w,
             " ",
             ["CreateCl", n.to_string().as_str(), cid.to_string().as_str()],
         ),
-        Instruct::BareThis(op) => concat_str_by(
+        Opcodes::BareThis(op) => concat_str_by(
             w,
             " ",
             [
@@ -1403,17 +1392,17 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             ],
         ),
 
-        Instruct::MemoGet(label, range) => {
+        Opcodes::MemoGet(label, range) => {
             w.write_all(b"MemoGet ")?;
             print_label(w, label, dv_labels)?;
             write!(w, " L:{}+{}", range.start, range.len)
         }
 
-        Instruct::MemoSet(range) => {
+        Opcodes::MemoSet(range) => {
             write!(w, "MemoSet L:{}+{}", range.start, range.len)
         }
 
-        Instruct::MemoGetEager([label1, label2], range) => {
+        Opcodes::MemoGetEager([label1, label2], range) => {
             w.write_all(b"MemoGetEager ")?;
             print_label(w, label1, dv_labels)?;
             w.write_all(b" ")?;
@@ -1421,11 +1410,11 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             write!(w, " L:{}+{}", range.start, range.len)
         }
 
-        Instruct::MemoSetEager(range) => {
+        Opcodes::MemoSetEager(range) => {
             write!(w, "MemoSetEager L:{}+{}", range.start, range.len)
         }
 
-        Instruct::OODeclExists(k) => concat_str_by(
+        Opcodes::OODeclExists(k) => concat_str_by(
             w,
             " ",
             [
@@ -1439,95 +1428,97 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
                 },
             ],
         ),
-        Instruct::AssertRATL(local, s) => {
+        Opcodes::AssertRATL(local, s) => {
             w.write_all(b"AssertRATL ")?;
             print_local(w, local)?;
             w.write_all(b" ")?;
             w.write_all(s)
         }
-        Instruct::AssertRATStk(n, s) => write_bytes!(w, "AssertRATStk {} {}", n, s,),
-        Instruct::GetMemoKeyL(local) => {
+        Opcodes::AssertRATStk(n, s) => {
+            write_bytes!(w, "AssertRATStk {} {}", n, s,)
+        }
+        Opcodes::GetMemoKeyL(local) => {
             w.write_all(b"GetMemoKeyL ")?;
             print_local(w, local)
         }
-        Instruct::CGetL(id) => {
+        Opcodes::CGetL(id) => {
             w.write_all(b"CGetL ")?;
             print_local(w, id)
         }
-        Instruct::CGetQuietL(id) => {
+        Opcodes::CGetQuietL(id) => {
             w.write_all(b"CGetQuietL ")?;
             print_local(w, id)
         }
-        Instruct::CGetL2(id) => {
+        Opcodes::CGetL2(id) => {
             w.write_all(b"CGetL2 ")?;
             print_local(w, id)
         }
-        Instruct::CUGetL(id) => {
+        Opcodes::CUGetL(id) => {
             w.write_all(b"CUGetL ")?;
             print_local(w, id)
         }
-        Instruct::PushL(id) => {
+        Opcodes::PushL(id) => {
             w.write_all(b"PushL ")?;
             print_local(w, id)
         }
-        Instruct::CGetG => w.write_all(b"CGetG"),
-        Instruct::CGetS(op) => {
+        Opcodes::CGetG => w.write_all(b"CGetG"),
+        Opcodes::CGetS(op) => {
             w.write_all(b"CGetS ")?;
             print_readonly_op(w, op)
         }
-        Instruct::ClassGetC => w.write_all(b"ClassGetC"),
-        Instruct::ClassGetTS => w.write_all(b"ClassGetTS"),
-        Instruct::SetL(local) => {
+        Opcodes::ClassGetC => w.write_all(b"ClassGetC"),
+        Opcodes::ClassGetTS => w.write_all(b"ClassGetTS"),
+        Opcodes::SetL(local) => {
             w.write_all(b"SetL ")?;
             print_local(w, local)
         }
-        Instruct::PopL(id) => {
+        Opcodes::PopL(id) => {
             w.write_all(b"PopL ")?;
             print_local(w, id)
         }
-        Instruct::SetG => w.write_all(b"SetG"),
-        Instruct::SetS(op) => {
+        Opcodes::SetG => w.write_all(b"SetG"),
+        Opcodes::SetS(op) => {
             w.write_all(b"SetS ")?;
             print_readonly_op(w, op)
         }
-        Instruct::SetOpL(id, op) => {
+        Opcodes::SetOpL(id, op) => {
             w.write_all(b"SetOpL ")?;
             print_local(w, id)?;
             w.write_all(b" ")?;
             print_eq_op(w, op)
         }
-        Instruct::SetOpG(op) => {
+        Opcodes::SetOpG(op) => {
             w.write_all(b"SetOpG ")?;
             print_eq_op(w, op)
         }
-        Instruct::SetOpS(op) => {
+        Opcodes::SetOpS(op) => {
             w.write_all(b"SetOpS ")?;
             print_eq_op(w, op)
         }
-        Instruct::IncDecL(id, op) => {
+        Opcodes::IncDecL(id, op) => {
             w.write_all(b"IncDecL ")?;
             print_local(w, id)?;
             w.write_all(b" ")?;
             print_incdec_op(w, op)
         }
-        Instruct::IncDecG(op) => {
+        Opcodes::IncDecG(op) => {
             w.write_all(b"IncDecG ")?;
             print_incdec_op(w, op)
         }
-        Instruct::IncDecS(op) => {
+        Opcodes::IncDecS(op) => {
             w.write_all(b"IncDecS ")?;
             print_incdec_op(w, op)
         }
-        Instruct::UnsetL(id) => {
+        Opcodes::UnsetL(id) => {
             w.write_all(b"UnsetL ")?;
             print_local(w, id)
         }
-        Instruct::UnsetG => w.write_all(b"UnsetG"),
-        Instruct::CheckProp(id) => {
+        Opcodes::UnsetG => w.write_all(b"UnsetG"),
+        Opcodes::CheckProp(id) => {
             w.write_all(b"CheckProp ")?;
             print_prop_id(w, id)
         }
-        Instruct::InitProp(id, op) => {
+        Opcodes::InitProp(id, op) => {
             w.write_all(b"InitProp ")?;
             print_prop_id(w, id)?;
             w.write_all(b" ")?;
@@ -1538,43 +1529,39 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             }?;
             w.write_all(b" ")
         }
-        Instruct::Label(l) => {
-            print_label(w, l, dv_labels)?;
-            w.write_all(b":")
-        }
-        Instruct::IssetL(local) => {
+        Opcodes::IssetL(local) => {
             w.write_all(b"IssetL ")?;
             print_local(w, local)
         }
-        Instruct::IsUnsetL(local) => {
+        Opcodes::IsUnsetL(local) => {
             w.write_all(b"IsUnsetL ")?;
             print_local(w, local)
         }
-        Instruct::IssetG => w.write_all(b"IssetG"),
-        Instruct::IssetS => w.write_all(b"IssetS"),
-        Instruct::IsTypeC(op) => {
+        Opcodes::IssetG => w.write_all(b"IssetG"),
+        Opcodes::IssetS => w.write_all(b"IssetS"),
+        Opcodes::IsTypeC(op) => {
             w.write_all(b"IsTypeC ")?;
             print_istype_op(w, op)
         }
-        Instruct::IsTypeL(local, op) => {
+        Opcodes::IsTypeL(local, op) => {
             w.write_all(b"IsTypeL ")?;
             print_local(w, local)?;
             w.write_all(b" ")?;
             print_istype_op(w, op)
         }
-        Instruct::BaseGC(si, m) => {
+        Opcodes::BaseGC(si, m) => {
             w.write_all(b"BaseGC ")?;
             print_stack_index(w, si)?;
             w.write_all(b" ")?;
             print_member_opmode(w, m)
         }
-        Instruct::BaseGL(id, m) => {
+        Opcodes::BaseGL(id, m) => {
             w.write_all(b"BaseGL ")?;
             print_local(w, id)?;
             w.write_all(b" ")?;
             print_member_opmode(w, m)
         }
-        Instruct::BaseSC(si1, si2, m, op) => {
+        Opcodes::BaseSC(si1, si2, m, op) => {
             w.write_all(b"BaseSC ")?;
             print_stack_index(w, si1)?;
             w.write_all(b" ")?;
@@ -1584,7 +1571,7 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
-        Instruct::BaseL(id, m, op) => {
+        Opcodes::BaseL(id, m, op) => {
             w.write_all(b"BaseL ")?;
             print_local(w, id)?;
             w.write_all(b" ")?;
@@ -1592,20 +1579,20 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
-        Instruct::BaseC(si, m) => {
+        Opcodes::BaseC(si, m) => {
             w.write_all(b"BaseC ")?;
             print_stack_index(w, si)?;
             w.write_all(b" ")?;
             print_member_opmode(w, m)
         }
-        Instruct::BaseH => w.write_all(b"BaseH"),
-        Instruct::Dim(m, mk) => {
+        Opcodes::BaseH => w.write_all(b"BaseH"),
+        Opcodes::Dim(m, mk) => {
             w.write_all(b"Dim ")?;
             print_member_opmode(w, m)?;
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
-        Instruct::QueryM(n, op, mk) => {
+        Opcodes::QueryM(n, op, mk) => {
             w.write_all(b"QueryM ")?;
             print_int(w, n)?;
             w.write_all(b" ")?;
@@ -1613,19 +1600,19 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
-        Instruct::UnsetM(n, mk) => {
+        Opcodes::UnsetM(n, mk) => {
             w.write_all(b"UnsetM ")?;
             print_int(w, n)?;
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
-        Instruct::SetM(i, mk) => {
+        Opcodes::SetM(i, mk) => {
             w.write_all(b"SetM ")?;
             print_int(w, i)?;
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
-        Instruct::SetOpM(i, op, mk) => {
+        Opcodes::SetOpM(i, op, mk) => {
             w.write_all(b"SetOpM ")?;
             print_int(w, i)?;
             w.write_all(b" ")?;
@@ -1633,7 +1620,7 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
-        Instruct::IncDecM(i, op, mk) => {
+        Opcodes::IncDecM(i, op, mk) => {
             w.write_all(b"IncDecM ")?;
             print_int(w, i)?;
             w.write_all(b" ")?;
@@ -1641,7 +1628,7 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
-        Instruct::SetRangeM(i, s, op) => {
+        Opcodes::SetRangeM(i, s, op) => {
             w.write_all(b"SetRangeM ")?;
             print_int(w, i)?;
             w.write_all(b" ")?;
@@ -1653,38 +1640,57 @@ fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Labe
                 _ => panic!("Enum value does not match one of listed variants"),
             })
         }
-        Instruct::TryCatchBegin => w.write_all(b".try {"),
-        Instruct::TryCatchMiddle => w.write_all(b"} .catch {"),
-        Instruct::TryCatchEnd => w.write_all(b"}"),
-        Instruct::Comment(s) => write_bytes!(w, "# {}", s),
-        Instruct::SrcLoc(p) => write!(
+        Opcodes::WHResult => w.write_all(b"WHResult"),
+        Opcodes::Await => w.write_all(b"Await"),
+        Opcodes::AwaitAll(range) => {
+            write!(w, "AwaitAll L:{}+{}", range.start, range.len)
+        }
+        Opcodes::CreateCont => w.write_all(b"CreateCont"),
+        Opcodes::ContEnter => w.write_all(b"ContEnter"),
+        Opcodes::ContRaise => w.write_all(b"ContRaise"),
+        Opcodes::Yield => w.write_all(b"Yield"),
+        Opcodes::YieldK => w.write_all(b"YieldK"),
+        Opcodes::ContCheck(ContCheckOp::IgnoreStarted) => w.write_all(b"ContCheck IgnoreStarted"),
+        Opcodes::ContCheck(ContCheckOp::CheckStarted) => w.write_all(b"ContCheck CheckStarted"),
+        Opcodes::ContCheck(_) => panic!("invalid ContCheck value"),
+        Opcodes::ContValid => w.write_all(b"ContValid"),
+        Opcodes::ContKey => w.write_all(b"ContKey"),
+        Opcodes::ContGetReturn => w.write_all(b"ContGetReturn"),
+        Opcodes::ContCurrent => w.write_all(b"ContCurrent"),
+        Opcodes::Incl => w.write_all(b"Incl"),
+        Opcodes::InclOnce => w.write_all(b"InclOnce"),
+        Opcodes::Req => w.write_all(b"Req"),
+        Opcodes::ReqOnce => w.write_all(b"ReqOnce"),
+        Opcodes::ReqDoc => w.write_all(b"ReqDoc"),
+        Opcodes::Eval => w.write_all(b"Eval"),
+    }
+}
+
+fn print_pseudo(w: &mut dyn Write, instr: &Pseudo<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
+    match instr {
+        Pseudo::TypedValue(_) => Err(Error::fail("print_lit_const: TypedValue").into()),
+        Pseudo::FuncNumArgs => w.write_all(b"FuncNumArgs"),
+        Pseudo::Label(l) => {
+            print_label(w, l, dv_labels)?;
+            w.write_all(b":")
+        }
+        Pseudo::TryCatchBegin => w.write_all(b".try {"),
+        Pseudo::TryCatchMiddle => w.write_all(b"} .catch {"),
+        Pseudo::TryCatchEnd => w.write_all(b"}"),
+        Pseudo::Comment(s) => write_bytes!(w, "# {}", s),
+        Pseudo::SrcLoc(p) => write!(
             w,
             ".srcloc {}:{},{}:{};",
             p.line_begin, p.col_begin, p.line_end, p.col_end
         ),
-        Instruct::WHResult => w.write_all(b"WHResult"),
-        Instruct::Await => w.write_all(b"Await"),
-        Instruct::AwaitAll(range) => {
-            write!(w, "AwaitAll L:{}+{}", range.start, range.len)
-        }
-        Instruct::CreateCont => w.write_all(b"CreateCont"),
-        Instruct::ContEnter => w.write_all(b"ContEnter"),
-        Instruct::ContRaise => w.write_all(b"ContRaise"),
-        Instruct::Yield => w.write_all(b"Yield"),
-        Instruct::YieldK => w.write_all(b"YieldK"),
-        Instruct::ContCheck(ContCheckOp::IgnoreStarted) => w.write_all(b"ContCheck IgnoreStarted"),
-        Instruct::ContCheck(ContCheckOp::CheckStarted) => w.write_all(b"ContCheck CheckStarted"),
-        Instruct::ContValid => w.write_all(b"ContValid"),
-        Instruct::ContKey => w.write_all(b"ContKey"),
-        Instruct::ContGetReturn => w.write_all(b"ContGetReturn"),
-        Instruct::ContCurrent => w.write_all(b"ContCurrent"),
-        Instruct::Incl => w.write_all(b"Incl"),
-        Instruct::InclOnce => w.write_all(b"InclOnce"),
-        Instruct::Req => w.write_all(b"Req"),
-        Instruct::ReqOnce => w.write_all(b"ReqOnce"),
-        Instruct::ReqDoc => w.write_all(b"ReqDoc"),
-        Instruct::Eval => w.write_all(b"Eval"),
-        _ => Err(Error::fail("invalid instruction").into()),
+        Pseudo::Break(_) | Pseudo::Continue(_) => Err(Error::fail("invalid instruction").into()),
+    }
+}
+
+fn print_instr(w: &mut dyn Write, instr: &Instruct<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
+    match instr {
+        Instruct::Opcode(opcode) => print_opcode(w, opcode, dv_labels),
+        Instruct::Pseudo(pseudo) => print_pseudo(w, pseudo, dv_labels),
     }
 }
 

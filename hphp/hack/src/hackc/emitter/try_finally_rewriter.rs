@@ -8,7 +8,7 @@ use crate::reified_generics_helpers as reified;
 use bitflags::bitflags;
 use emit_pos::emit_pos;
 use env::{emitter::Emitter, jump_targets as jt, Env};
-use hhbc_ast::{self as hhbc_ast, Instruct, IsTypeOp};
+use hhbc_ast::{self as hhbc_ast, Instruct, IsTypeOp, Opcodes, Pseudo};
 use indexmap::IndexSet;
 use instruction_sequence::{instr, InstrSeq, Result};
 use iterator::IterId;
@@ -42,13 +42,13 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
         }
         JumpInstructions(instr_seq.iter().fold(LabelMap::new(), |mut acc, instr| {
             match *instr {
-                Instruct::Break(level) => {
+                Instruct::Pseudo(Pseudo::Break(level)) => {
                     acc.insert(get_label_id(jt_gen, true, level as Level), instr);
                 }
-                Instruct::Continue(level) => {
+                Instruct::Pseudo(Pseudo::Continue(level)) => {
                     acc.insert(get_label_id(jt_gen, false, level as Level), instr);
                 }
-                Instruct::RetC | Instruct::RetCSuspended | Instruct::RetM(_) => {
+                Instruct::Opcode(Opcodes::RetC | Opcodes::RetCSuspended | Opcodes::RetM(_)) => {
                     acc.insert(jt_gen.get_id_for_return(), instr);
                 }
                 _ => {}
@@ -63,11 +63,8 @@ pub(super) fn cleanup_try_body<'arena>(mut is: InstrSeq<'arena>) -> InstrSeq<'ar
     is.retain(|instr| {
         !matches!(
             instr,
-            Instruct::Continue(_)
-                | Instruct::Break(_)
-                | Instruct::RetC
-                | Instruct::RetCSuspended
-                | Instruct::RetM(_)
+            Instruct::Pseudo(Pseudo::Continue(_) | Pseudo::Break(_))
+                | Instruct::Opcode(Opcodes::RetC | Opcodes::RetCSuspended | Opcodes::RetM(_))
         )
     });
     is
@@ -271,17 +268,17 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
             panic!("unexpected instruction: only Ret* or Break/Continue/Jmp(Named) are expected")
         };
         match *i {
-            Instruct::RetC | Instruct::RetCSuspended | Instruct::RetM(_) => {
+            Instruct::Opcode(Opcodes::RetC | Opcodes::RetCSuspended | Opcodes::RetM(_)) => {
                 emit_return(e, true, env)
             }
-            Instruct::Break(level) => Ok(emit_break_or_continue(
+            Instruct::Pseudo(Pseudo::Break(level)) => Ok(emit_break_or_continue(
                 e,
                 EmitBreakOrContinueFlags::IS_BREAK | EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,
                 env,
                 pos,
                 level as Level,
             )),
-            Instruct::Continue(level) => Ok(emit_break_or_continue(
+            Instruct::Pseudo(Pseudo::Continue(level)) => Ok(emit_break_or_continue(
                 e,
                 EmitBreakOrContinueFlags::IN_FINALLY_EPILOGUE,
                 env,

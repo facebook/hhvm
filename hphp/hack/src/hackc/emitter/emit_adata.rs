@@ -26,33 +26,33 @@ fn rewrite_typed_value<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     instr: &mut Instruct<'arena>,
 ) -> std::result::Result<(), instruction_sequence::Error> {
-    if let Instruct::TypedValue(tv) = instr {
+    if let Instruct::Pseudo(Pseudo::TypedValue(tv)) = instr {
         *instr = match &tv {
             TypedValue::Uninit => {
                 return Err(Error::Unrecoverable("rewrite_typed_value: uninit".into()));
             }
-            TypedValue::Null => Instruct::Null,
-            TypedValue::Bool(true) => Instruct::True,
-            TypedValue::Bool(false) => Instruct::False,
-            TypedValue::Int(i) => Instruct::Int(*i),
-            TypedValue::String(s) => Instruct::String(*s),
+            TypedValue::Null => Instruct::Opcode(Opcodes::Null),
+            TypedValue::Bool(true) => Instruct::Opcode(Opcodes::True),
+            TypedValue::Bool(false) => Instruct::Opcode(Opcodes::False),
+            TypedValue::Int(i) => Instruct::Opcode(Opcodes::Int(*i)),
+            TypedValue::String(s) => Instruct::Opcode(Opcodes::String(*s)),
             TypedValue::LazyClass(s) => {
                 let classid: hhbc_ast::ClassId<'arena> =
                     hhbc_id::class::ClassType::from_ast_name_and_mangle(e.alloc, s.unsafe_as_str());
-                Instruct::LazyClass(classid)
+                Instruct::Opcode(Opcodes::LazyClass(classid))
             }
-            TypedValue::Double(f) => Instruct::Double(f.to_f64()),
+            TypedValue::Double(f) => Instruct::Opcode(Opcodes::Double(f.to_f64())),
             TypedValue::Keyset(_) => {
                 let arrayid = Str::from(get_array_identifier(e, tv));
-                Instruct::Keyset(arrayid)
+                Instruct::Opcode(Opcodes::Keyset(arrayid))
             }
             TypedValue::Vec(_) => {
                 let arrayid = Str::from(get_array_identifier(e, tv));
-                Instruct::Vec(arrayid)
+                Instruct::Opcode(Opcodes::Vec(arrayid))
             }
             TypedValue::Dict(_) => {
                 let arrayid = Str::from(get_array_identifier(e, tv));
-                Instruct::Dict(arrayid)
+                Instruct::Opcode(Opcodes::Dict(arrayid))
             }
             TypedValue::HhasAdata(d) if d.is_empty() => {
                 return Err(Error::Unrecoverable("HhasAdata may not be empty".into()));
@@ -61,9 +61,9 @@ fn rewrite_typed_value<'arena, 'decl>(
                 let arrayid = Str::from(get_array_identifier(e, tv));
                 let d = d.unsafe_as_str();
                 match &d[..1] {
-                    VARRAY_PREFIX | VEC_PREFIX => Instruct::Vec(arrayid),
-                    DARRAY_PREFIX | DICT_PREFIX => Instruct::Dict(arrayid),
-                    KEYSET_PREFIX => Instruct::Keyset(arrayid),
+                    VARRAY_PREFIX | VEC_PREFIX => Instruct::Opcode(Opcodes::Vec(arrayid)),
+                    DARRAY_PREFIX | DICT_PREFIX => Instruct::Opcode(Opcodes::Dict(arrayid)),
+                    KEYSET_PREFIX => Instruct::Opcode(Opcodes::Keyset(arrayid)),
                     _ => {
                         return Err(Error::Unrecoverable(format!(
                             "Unknown HhasAdata data: {}",

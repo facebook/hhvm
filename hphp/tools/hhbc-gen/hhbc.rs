@@ -10,14 +10,14 @@ mod opcodes;
 
 pub use opcodes::opcode_data;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum FlavorDesc {
     CUV,
     CV,
     UV,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum ImmType {
     AA,
     BA,
@@ -41,7 +41,7 @@ pub enum ImmType {
     VSA,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Inputs {
     NOV,
     Fixed(Box<[FlavorDesc]>),
@@ -53,7 +53,7 @@ pub enum Inputs {
     FCall { inp: i64, obj: i64 },
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Outputs {
     NOV,
     Fixed(Box<[FlavorDesc]>),
@@ -61,7 +61,7 @@ pub enum Outputs {
 }
 
 #[allow(non_camel_case_types)]
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum InstrFlags {
     NF,
     TF,
@@ -69,7 +69,7 @@ pub enum InstrFlags {
     CF_TF,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct OpcodeData {
     pub name: &'static str,
     pub immediates: Vec<(&'static str, ImmType)>,

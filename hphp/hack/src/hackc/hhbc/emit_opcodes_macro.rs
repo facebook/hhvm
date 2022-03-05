@@ -1,0 +1,34 @@
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
+/// Emit the opcodes enum. Given input that looks like this:
+///
+/// ```
+/// #[macros::emit_opcodes]
+/// enum MyCrazyOpcodes<'lifetime> { }
+/// ```
+///
+/// The result will look something like this:
+///
+/// ```
+/// enum MyCrazyOpcodes<'lifetime> {
+///     Jmp(Label),
+///     Nop,
+///     PopL(Local<'lifetime>),
+/// }
+/// ```
+///
+/// See emit_opcodes::tests::test_basic() for a more detailed example output.
+///
+#[proc_macro_attribute]
+pub fn emit_opcodes(
+    _attrs: proc_macro::TokenStream,
+    input: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    match emit_opcodes::emit_opcodes(input.into(), hhbc::opcode_data()) {
+        Ok(res) => res.into(),
+        Err(err) => err.into_compile_error().into(),
+    }
+}

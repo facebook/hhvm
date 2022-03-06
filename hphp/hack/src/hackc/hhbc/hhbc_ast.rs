@@ -34,12 +34,8 @@ pub enum ParamId<'arena> {
     ParamNamed(Str<'arena>),
 }
 
-pub type ParamNum = isize;
-pub type StackIndex = isize;
-pub type RecordNum = isize;
-pub type TypedefNum = isize;
-pub type ClassNum = isize;
-pub type ConstNum = isize;
+pub type StackIndex = u32;
+pub type ClassNum = u32;
 
 pub type ClassId<'arena> = hhbc_id::class::ClassType<'arena>;
 pub type FunctionId<'arena> = hhbc_id::function::FunctionType<'arena>;
@@ -47,7 +43,7 @@ pub type MethodId<'arena> = hhbc_id::method::MethodType<'arena>;
 pub type ConstId<'arena> = hhbc_id::constant::ConstType<'arena>;
 pub type PropId<'arena> = hhbc_id::prop::PropType<'arena>;
 
-pub type NumParams = usize;
+pub type NumParams = u32;
 pub type ByRefs<'arena> = Slice<'arena, bool>;
 
 #[derive(Clone, Debug)]
@@ -65,16 +61,16 @@ pub struct FcallArgs<'arena> {
 impl<'arena> FcallArgs<'arena> {
     pub fn new(
         flags: FCallArgsFlags,
-        num_rets: usize,
+        num_rets: NumParams,
+        num_args: NumParams,
         inouts: Slice<'arena, bool>,
         readonly: Slice<'arena, bool>,
         async_eager_target: Option<Label>,
-        num_args: usize,
         context: Option<&'arena str>,
     ) -> FcallArgs<'arena> {
         assert!(
-            (inouts.is_empty() || inouts.len() == num_args)
-                && (readonly.is_empty() || readonly.len() == num_args),
+            (inouts.is_empty() || inouts.len() == num_args as usize)
+                && (readonly.is_empty() || readonly.len() == num_args as usize),
             "length of by_refs must be either zero or num_args"
         );
         FcallArgs {

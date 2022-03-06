@@ -287,20 +287,20 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
             FcallArgs::new(
                 fcall_flags,
                 1,
+                param_count as u32,
                 Slice::empty(),
                 Slice::empty(),
                 Some(eager_set),
-                param_count,
                 None,
             )
         } else {
             FcallArgs::new(
                 fcall_flags,
                 1,
+                param_count as u32,
                 Slice::empty(),
                 Slice::empty(),
                 None,
-                param_count,
                 None,
             )
         }
@@ -411,6 +411,7 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
     let fcall_args = FcallArgs::new(
         FCallArgsFlags::default(),
         1,
+        0,
         Slice::empty(),
         Slice::empty(),
         if args.flags.contains(Flags::IS_ASYNC) {
@@ -418,7 +419,6 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
         } else {
             None
         },
-        0,
         None,
     );
     Ok(InstrSeq::gather(vec![

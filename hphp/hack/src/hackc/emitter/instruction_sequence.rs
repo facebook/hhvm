@@ -307,7 +307,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcodes::Concat))
     }
 
-    pub fn concatn<'a>(n: isize) -> InstrSeq<'a> {
+    pub fn concatn<'a>(n: u32) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcodes::ConcatN(n)))
     }
 
@@ -395,7 +395,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcodes::RaiseClassStringConversionWarning))
     }
 
-    pub fn combine_and_resolve_type_struct<'a>(i: isize) -> InstrSeq<'a> {
+    pub fn combine_and_resolve_type_struct<'a>(i: u32) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcodes::CombineAndResolveTypeStruct(i)))
     }
 
@@ -650,7 +650,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcodes::Throw))
     }
 
-    pub fn new_vec_array<'a>(i: isize) -> InstrSeq<'a> {
+    pub fn new_vec_array<'a>(i: u32) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcodes::NewVec(i)))
     }
 

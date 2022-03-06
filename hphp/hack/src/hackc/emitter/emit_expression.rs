@@ -880,7 +880,7 @@ fn emit_lambda<'a, 'arena, 'decl>(
                 })
                 .collect::<Result<Vec<_>>>()?,
         ),
-        instr::createcl(ids.len(), cls_num),
+        instr::createcl(ids.len() as u32, cls_num as u32),
     ]))
 }
 
@@ -946,10 +946,10 @@ fn inline_gena_call<'a, 'arena, 'decl>(
                 FcallArgs::new(
                     FCallArgsFlags::default(),
                     1,
+                    1,
                     Slice::empty(),
                     Slice::empty(),
                     Some(async_eager_label),
-                    1,
                     None,
                 ),
                 method::from_raw_string(alloc, "fromDict"),
@@ -1483,14 +1483,14 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     fields: &[ast::Afield],
 ) -> Result<InstrSeq<'arena>> {
     let pos = &expr.1;
-    let count = fields.len();
+    let count = fields.len() as u32;
     let emit_dict = |e: &mut Emitter<'arena, 'decl>| {
         if is_struct_init(e, fields, true)? {
             emit_struct_array(e, env, pos, fields, |alloc, _, x| {
                 Ok(instr::newstructdict(alloc, x))
             })
         } else {
-            let ctor = Instruct::Opcode(Opcodes::NewDictArray(count as isize));
+            let ctor = Instruct::Opcode(Opcodes::NewDictArray(count));
             emit_array(e, env, pos, fields, ctor)
         }
     };
@@ -1504,7 +1504,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 instr::colfromarray(ctype),
             ]))
         } else {
-            let ctor = Instruct::Opcode(Opcodes::NewDictArray(count as isize));
+            let ctor = Instruct::Opcode(Opcodes::NewDictArray(count));
             emit_keyvalue_collection(e, env, pos, fields, ctype, ctor)
         }
     };
@@ -1573,7 +1573,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 });
                 Ok(instrs?)
             } else {
-                let constr = Instruct::Opcode(Opcodes::NewDictArray(count as isize));
+                let constr = Instruct::Opcode(Opcodes::NewDictArray(count));
                 let instrs = emit_array(e, env, pos, fields, constr);
                 Ok(instrs?)
             }
@@ -1582,7 +1582,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
     }
 }
 
-fn emit_value_only_collection<'a, 'arena, 'decl, F: FnOnce(isize) -> Instruct<'arena>>(
+fn emit_value_only_collection<'a, 'arena, 'decl, F: FnOnce(u32) -> Instruct<'arena>>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
@@ -1600,7 +1600,7 @@ fn emit_value_only_collection<'a, 'arena, 'decl, F: FnOnce(isize) -> Instruct<'a
             Ok(InstrSeq::gather(vec![
                 InstrSeq::gather(instrs),
                 emit_pos(pos),
-                instr::instr(constructor(exprs.len() as isize)),
+                instr::instr(constructor(exprs.len() as u32)),
             ]))
         };
     let outofline =
@@ -1869,7 +1869,7 @@ fn emit_call_default<'a, 'arena, 'decl>(
             InstrSeq::gather(vec![
                 InstrSeq::gather(
                     iter::repeat_with(instr::nulluninit)
-                        .take(num_uninit)
+                        .take(num_uninit as usize)
                         .collect::<Vec<_>>(),
                 ),
                 lhs,
@@ -1933,7 +1933,7 @@ pub fn emit_reified_targs<'a, 'arena, 'decl>(
                     .map(|h| Ok(emit_reified_arg(e, env, pos, false, h)?.0))
                     .collect::<Result<Vec<_>>>()?,
             ),
-            instr::new_vec_array(targs.len() as isize),
+            instr::new_vec_array(targs.len() as u32),
         ])
     })
 }
@@ -2107,10 +2107,10 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                                     let fcall_args = FcallArgs::new(
                                         FCallArgsFlags::default(),
                                         1,
+                                        1,
                                         Slice::empty(),
                                         Slice::empty(),
                                         None,
-                                        1,
                                         None,
                                     );
                                     let newobj_instrs = emit_new(e, env, pos, new_exp, true);
@@ -2536,11 +2536,11 @@ fn get_fcall_args_common<'arena, T>(
     };
     FcallArgs::new(
         flags,
-        1 + args.iter().filter(|e| is_inout_arg(e)).count(),
+        1 + args.iter().filter(|e| is_inout_arg(e)).count() as u32,
+        args.len() as u32,
         Slice::fill_iter(alloc, args.iter().map(is_inout_arg)),
         readonly_args,
         async_eager_label,
-        args.len(),
         context
             .map(|s| bumpalo::collections::String::from_str_in(s.as_str(), alloc).into_bump_str()),
     )
@@ -3633,7 +3633,7 @@ fn emit_obj_get<'a, 'arena, 'decl>(
     nullflavor: &ast_defs::OgNullFlavor,
     null_coalesce_assignment: bool,
     readonly_get: bool, // obj_get enclosed in readonly expression
-) -> Result<(InstrSeq<'arena>, Option<NumParams>)> {
+) -> Result<(InstrSeq<'arena>, Option<StackIndex>)> {
     let readonly_op = if readonly_get {
         ReadonlyOp::Any
     } else {
@@ -3703,11 +3703,11 @@ fn emit_obj_get<'a, 'arena, 'decl>(
     } else {
         total_stack_size
     };
-    let final_instr = instr::querym(num_params, query_op, mk);
+    let final_instr = instr::querym(num_params as u32, query_op, mk);
     // Don't pop elems/props from the stack during the lookup for null
     // coalesce assignment in case we do a write later.
     let querym_n_unpopped = if null_coalesce_assignment {
-        Some(total_stack_size)
+        Some(total_stack_size as u32)
     } else {
         None
     };
@@ -3841,7 +3841,7 @@ fn emit_array_get<'a, 'arena, 'decl>(
     elem: Option<&ast::Expr>,
     no_final: bool,
     null_coalesce_assignment: bool,
-) -> Result<(InstrSeq<'arena>, Option<usize>)> {
+) -> Result<(InstrSeq<'arena>, Option<StackIndex>)> {
     let result = emit_array_get_(
         e,
         env,
@@ -3871,7 +3871,7 @@ fn emit_array_get_<'a, 'arena, 'decl>(
     no_final: bool,
     null_coalesce_assignment: bool,
     inout_param_info: Option<(usize, &inout_locals::AliasInfoMap<'_>)>,
-) -> Result<(ArrayGetInstr<'arena>, Option<usize>)> {
+) -> Result<(ArrayGetInstr<'arena>, Option<StackIndex>)> {
     use ast::Expr;
 
     match (base_expr, elem) {
@@ -3915,10 +3915,10 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                     if no_final {
                         instr::empty()
                     } else if null_coalesce_assignment {
-                        querym_n_unpopped = Some(total_stack_size as usize);
+                        querym_n_unpopped = Some(total_stack_size as u32);
                         instr::querym(0, query_op, memberkey)
                     } else {
-                        instr::querym(total_stack_size as usize, query_op, memberkey)
+                        instr::querym(total_stack_size as u32, query_op, memberkey)
                     }
                 };
             let instr = match (base_result, local_temp_kind) {
@@ -3933,7 +3933,7 @@ fn emit_array_get_<'a, 'arena, 'decl>(
                         emit_pos(outer_pos),
                         base.setup_instrs,
                         make_final(
-                            base.base_stack_size + base.cls_stack_size + elem_stack_size,
+                            base.base_stack_size + base.cls_stack_size + elem_stack_size as u32,
                             memberkey,
                         ),
                     ]))
@@ -4192,7 +4192,7 @@ fn emit_store_for_simple_base<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    elem_stack_size: isize,
+    elem_stack_size: StackIndex,
     base: &ast::Expr,
     local: Local<'arena>,
     is_base: bool,
@@ -4656,7 +4656,7 @@ fn emit_quiet_expr<'a, 'arena, 'decl>(
     pos: &Pos,
     expr: &ast::Expr,
     null_coalesce_assignment: bool,
-) -> Result<(InstrSeq<'arena>, Option<NumParams>)> {
+) -> Result<(InstrSeq<'arena>, Option<StackIndex>)> {
     match &expr.2 {
         ast::Expr_::Lvar(lid) if !is_local_this(env, &lid.1) => Ok((
             instr::cgetquietl(get_local(e, env, pos, local_id::get_name(&lid.1))?),
@@ -4700,7 +4700,11 @@ fn emit_null_coalesce_assignment<'a, 'arena, 'decl>(
     let l_nonnull = e.local_gen_mut().get_unnamed();
     let (quiet_instr, querym_n_unpopped) = emit_quiet_expr(e, env, pos, e1, true)?;
     let emit_popc_n = |n_unpopped| match n_unpopped {
-        Some(n) => InstrSeq::gather(iter::repeat_with(instr::popc).take(n).collect::<Vec<_>>()),
+        Some(n) => InstrSeq::gather(
+            iter::repeat_with(instr::popc)
+                .take(n as usize)
+                .collect::<Vec<_>>(),
+        ),
         None => instr::empty(),
     };
     Ok(InstrSeq::gather(vec![
@@ -5099,8 +5103,8 @@ fn emit_base<'a, 'arena, 'decl>(
             i.base_instrs,
             i.cls_instrs,
             i.setup_instrs,
-            i.base_stack_size as isize,
-            i.cls_stack_size as isize,
+            i.base_stack_size as u32,
+            i.cls_stack_size as u32,
         )),
         ArrayGetBase::Inout { .. } => Err(unrecoverable("unexpected input")),
     }
@@ -5849,7 +5853,7 @@ pub fn emit_lval_op_nonlist<'a, 'arena, 'decl>(
     op: LValOp,
     expr: &ast::Expr,
     rhs_instrs: InstrSeq<'arena>,
-    rhs_stack_size: isize,
+    rhs_stack_size: u32,
     rhs_readonly: bool,
     null_coalesce_assignment: bool,
 ) -> Result<InstrSeq<'arena>> {
@@ -5891,7 +5895,7 @@ pub fn emit_final_local_op<'arena>(pos: &Pos, op: LValOp, lid: Local<'arena>) ->
 }
 
 fn emit_final_member_op<'arena>(
-    stack_size: usize,
+    stack_size: StackIndex,
     op: LValOp,
     mk: MemberKey<'arena>,
 ) -> InstrSeq<'arena> {
@@ -5942,7 +5946,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
     op: LValOp,
     expr: &ast::Expr,
     rhs_instrs: InstrSeq<'arena>,
-    rhs_stack_size: isize,
+    rhs_stack_size: StackIndex,
     rhs_readonly: bool,
     null_coalesce_assignment: bool,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>, InstrSeq<'arena>)> {
@@ -6016,7 +6020,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                     )?;
                     let total_stack_size = elem_stack_size + base_stack_size + cls_stack_size;
                     let final_instr =
-                        emit_pos_then(pos, emit_final_member_op(total_stack_size as usize, op, mk));
+                        emit_pos_then(pos, emit_final_member_op(total_stack_size as u32, op, mk));
                     (
                         // Don't emit instructions for elems as these were not popped from
                         // the stack by the final member op during the lookup of a null
@@ -6097,7 +6101,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                 )?;
                 let total_stack_size = prop_stack_size + base_stack_size + cls_stack_size;
                 let final_instr =
-                    emit_pos_then(pos, emit_final_member_op(total_stack_size as usize, op, mk));
+                    emit_pos_then(pos, emit_final_member_op(total_stack_size as u32, op, mk));
                 (
                     // Don't emit instructions for props as these were not popped from
                     // the stack by the final member op during the lookup of a null
@@ -6384,7 +6388,7 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
             Ok((
                 InstrSeq::gather(vec![
                     ts_list,
-                    instr::combine_and_resolve_type_struct((collector.acc.len() + 1) as isize),
+                    instr::combine_and_resolve_type_struct(collector.acc.len() as u32 + 1),
                 ]),
                 collector.acc.is_empty(),
             ))

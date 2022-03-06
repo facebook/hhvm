@@ -96,10 +96,10 @@ pub fn get_implicit_context_memo_key<'arena>(
             FcallArgs::new(
                 FCallArgsFlags::default(),
                 1,
+                0,
                 Slice::empty(),
                 Slice::empty(),
                 None,
-                0,
                 None,
             ),
             function::from_raw_string(

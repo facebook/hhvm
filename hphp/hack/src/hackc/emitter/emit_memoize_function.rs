@@ -202,10 +202,10 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
         FcallArgs::new(
             fcall_flags,
             1,
+            param_count as u32,
             Slice::empty(),
             Slice::empty(),
             if is_async { Some(eager_set) } else { None },
-            param_count,
             None,
         )
     };
@@ -295,10 +295,10 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
     let fcall_args = FcallArgs::new(
         FCallArgsFlags::default(),
         1,
+        0,
         Slice::empty(),
         Slice::empty(),
         if is_async { Some(eager_set) } else { None },
-        0,
         None,
     );
     Ok(InstrSeq::gather(vec![

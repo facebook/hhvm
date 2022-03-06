@@ -156,7 +156,7 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
                 verify_out,
                 release_iterators_instr,
                 if num_out != 0 {
-                    instr::retm(num_out + 1)
+                    instr::retm(num_out as u32 + 1)
                 } else {
                     instr::retc()
                 },

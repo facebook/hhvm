@@ -1892,7 +1892,7 @@ fn print_sswitch(
 fn print_switch(
     w: &mut dyn Write,
     kind: &SwitchKind,
-    base: &isize,
+    base: &i64,
     labels: &[Label],
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {

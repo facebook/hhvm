@@ -449,10 +449,10 @@ fn emit_reified_init_body<'a, 'arena, 'decl>(
                 FcallArgs::new(
                     FCallArgsFlags::default(),
                     1,
+                    1,
                     Slice::empty(),
                     Slice::empty(),
                     None,
-                    1,
                     None,
                 ),
                 SpecialClsRef::ParentCls,

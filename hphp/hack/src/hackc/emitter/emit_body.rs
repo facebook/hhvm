@@ -719,10 +719,10 @@ pub fn emit_deprecation_info<'a, 'arena>(
                         FcallArgs::new(
                             FCallArgsFlags::default(),
                             1,
+                            3,
                             Slice::empty(),
                             Slice::empty(),
                             None,
-                            3,
                             None,
                         ),
                         function::from_raw_string(alloc, "trigger_sampled_error"),

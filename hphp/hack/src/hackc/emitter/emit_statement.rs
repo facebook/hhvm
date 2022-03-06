@@ -485,10 +485,10 @@ fn emit_using<'a, 'arena, 'decl>(
                         FcallArgs::new(
                             FCallArgsFlags::default(),
                             1,
+                            0,
                             Slice::empty(),
                             Slice::empty(),
                             async_eager_label,
-                            0,
                             env.call_context
                                 .as_ref()
                                 .map(|s| -> &str { alloc.alloc_str(s.as_ref()) }),
@@ -976,10 +976,10 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
                 FcallArgs::new(
                     FCallArgsFlags::default(),
                     1,
+                    0,
                     Slice::empty(),
                     Slice::empty(),
                     Some(async_eager_label),
-                    0,
                     None,
                 ),
                 next_meth,

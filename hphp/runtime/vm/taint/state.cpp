@@ -353,7 +353,7 @@ rds::local::RDSLocal<State, rds::local::Initialize::FirstUse> State::instance;
 
 State::State() :
   last_fcall(FCallArgsFlags::FCANone, 0, 0, nullptr, nullptr, 0, nullptr),
-  last_fcall_is_object_method(false),
+  last_this(nullptr),
   arena(std::make_unique<PathArena>()) {}
 
 void State::initialize() {

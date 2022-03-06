@@ -11,6 +11,7 @@
 {"hops":["__source","source_through_dict_with_initializer_to_sink","__sink"]}
 {"hops":["__source","source_through_vector_to_sink","__sink"]}
 {"hops":["__source","source_through_map_to_sink","__sink"]}
+{"hops":["__source","source_through_set_to_sink","HH\\Set::firstKey","HH\\Set::firstValue","HH\\Set::firstKey","source_through_set_to_sink","__sink"]}
 {"hops":["__source","source_through_pair_to_sink","__sink"]}
 {"hops":["__source","iterators_do_not_collide_within_function","__sink"]}
 {"hops":["__source","iterators_do_not_collide_across_calls","__sink"]}

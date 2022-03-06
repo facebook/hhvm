@@ -199,7 +199,8 @@ struct State {
   GlobalsHeap heap_globals;
   IteratorsHeap heap_iterators;
   FCallArgs last_fcall;
-  bool last_fcall_is_object_method;
+  // Taint on the last 'this' from a method call
+  Value last_this;
 
   // Arena to hold all the paths
   std::unique_ptr<PathArena> arena;

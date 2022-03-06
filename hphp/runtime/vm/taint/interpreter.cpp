@@ -1095,20 +1095,21 @@ void iopLockObj() {
   iopPreamble("LockObj");
 }
 
-void iopFCall(const Func* func, const FCallArgs& fca, bool is_object_method) {
+void iopFCall(const Func* func, const FCallArgs& fca, Value last_this) {
   if (func == nullptr) {
     return;
   }
 
   FTRACE(
       1,
-      "taint: entering {} ({} arguments)\n",
+      "taint: entering {} ({} arguments) with last_this {}\n",
       yellow(func->fullName()->data()),
-      fca.numArgs);
+      fca.numArgs,
+      last_this);
 
   auto state = State::instance;
   state->last_fcall = fca;
-  state->last_fcall_is_object_method = is_object_method;
+  state->last_this = last_this;
   const auto sinks = state->sinks(func);
   FTRACE(3, "taint: {} sinks\n", sinks.size());
 
@@ -1178,7 +1179,7 @@ TCA iopFCallClsMethodD(
     return nullptr;
   }
 
-  iopFCall(func, fca, false);
+  iopFCall(func, fca, /* last_this */ nullptr);
 
   return nullptr;
 }
@@ -1214,8 +1215,8 @@ TCA iopFCallCtor(
     const StringData*) {
   iopPreamble("FCallCtor");
 
-  auto const obj =
-      vmStack().indC(fca.numInputs() + (kNumActRecCells - 1))->m_data.pobj;
+  auto const index = fca.numInputs() + (kNumActRecCells - 1);
+  auto const obj = vmStack().indC(index)->m_data.pobj;
 
   const Func* func;
   auto ar = vmfp();
@@ -1223,7 +1224,7 @@ TCA iopFCallCtor(
   lookupCtorMethod(
       func, obj->getVMClass(), ctx, MethodLookupErrorOptions::RaiseOnNotFound);
 
-  iopFCall(func, fca, true);
+  iopFCall(func, fca, State::instance->stack.peek(index));
 
   return nullptr;
 }
@@ -1248,7 +1249,7 @@ TCA iopFCallFuncD(
   auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
   auto const func = Func::load(nep.second, nep.first);
 
-  iopFCall(func, fca, false);
+  iopFCall(func, fca, /* last_this */ nullptr);
 
   return nullptr;
 }
@@ -1274,7 +1275,8 @@ TCA iopFCallObjMethodD(
     const StringData* name) {
   iopPreamble("FCallObjMethodD");
 
-  auto const obj = vmStack().indC(fca.numInputs() + (kNumActRecCells - 1));
+  auto const index = fca.numInputs() + (kNumActRecCells - 1);
+  auto const obj = vmStack().indC(index);
   if (!isObjectType(obj->m_type)) {
     return nullptr;
   }
@@ -1290,7 +1292,7 @@ TCA iopFCallObjMethodD(
       ctx,
       MethodLookupErrorOptions::RaiseOnNotFound);
 
-  iopFCall(func, fca, true);
+  iopFCall(func, fca, State::instance->stack.peek(index));
 
   return nullptr;
 }
@@ -1409,14 +1411,14 @@ void iopEval() {
 
 void iopThis() {
   iopPreamble("This");
-  // We don't care about tainting `this` (for now) since we taint properties directly
-  State::instance->stack.push(nullptr);
+  auto state = State::instance;
+  state->stack.push(state->last_this);
 }
 
 void iopBareThis(BareThisOp /* bto */) {
   iopPreamble("BareThis");
-  // We don't care about tainting `this` (for now) since we taint properties directly
-  State::instance->stack.push(nullptr);
+  auto state = State::instance;
+  state->stack.push(state->last_this);
 }
 
 void iopCheckThis() {
@@ -1528,9 +1530,8 @@ void iopNativeImpl(PC& /* pc */) {
     }
   }
   // Check the `this` pointer if it's tainted
-  // TODO: This isn't quite right and needs fixing.
-  if (value == nullptr && state->last_fcall_is_object_method) {
-    value = state->stack.peek(fca.numInputs() + (kNumActRecCells - 1));
+  if (value == nullptr && state->last_this) {
+    value = state->last_this;
   }
 
   // We don't need to check whether a this function or its arguments

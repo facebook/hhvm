@@ -211,7 +211,6 @@ pub enum Pseudo<'arena> {
     Break(isize),
     Comment(Str<'arena>),
     Continue(isize),
-    FuncNumArgs,
     Label(Label),
     SrcLoc(SrcLoc),
     TryCatchBegin,
@@ -262,7 +261,6 @@ impl Instruct<'_> {
             | Self::Opcode(Opcodes::This)
             | Self::Opcode(Opcodes::BareThis(_))
             | Self::Opcode(Opcodes::CheckThis)
-            | Self::Pseudo(Pseudo::FuncNumArgs)
             | Self::Opcode(Opcodes::ChainFaults)
             | Self::Opcode(Opcodes::OODeclExists(_))
             | Self::Opcode(Opcodes::VerifyParamType(_))
@@ -496,7 +494,6 @@ impl Instruct<'_> {
             | Self::Opcode(Opcodes::This)
             | Self::Opcode(Opcodes::BareThis(_))
             | Self::Opcode(Opcodes::CheckThis)
-            | Self::Pseudo(Pseudo::FuncNumArgs)
             | Self::Opcode(Opcodes::ChainFaults)
             | Self::Opcode(Opcodes::OODeclExists(_))
             | Self::Opcode(Opcodes::VerifyParamType(_))

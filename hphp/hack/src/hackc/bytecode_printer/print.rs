@@ -1669,7 +1669,6 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
 fn print_pseudo(w: &mut dyn Write, instr: &Pseudo<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
     match instr {
         Pseudo::TypedValue(_) => Err(Error::fail("print_lit_const: TypedValue").into()),
-        Pseudo::FuncNumArgs => w.write_all(b"FuncNumArgs"),
         Pseudo::Label(l) => {
             print_label(w, l, dv_labels)?;
             w.write_all(b":")

@@ -104,7 +104,9 @@ function source_through_map_to_sink(): void {
   __sink($map[1]);
 }
 
-// This does not work right now as we don't support builtins
+// We do support builtins,
+// but this does not yet work as we don't track the
+// 'this' pointer properly.
 function source_through_set_to_sink(): void {
   $set = Set {};
   $set[] = __source();

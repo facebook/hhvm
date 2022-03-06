@@ -1,0 +1,1 @@
+-vEval.TaintConfigurationPath=hphp/test/taint/builtins/configuration.json

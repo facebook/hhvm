@@ -198,6 +198,8 @@ struct State {
   ClassesHeap heap_classes;
   GlobalsHeap heap_globals;
   IteratorsHeap heap_iterators;
+  FCallArgs last_fcall;
+  bool last_fcall_is_object_method;
 
   // Arena to hold all the paths
   std::unique_ptr<PathArena> arena;

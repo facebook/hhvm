@@ -1,0 +1,4 @@
+{"hops":["__string_source","source_through_builtin_into_sink","lz4_compress","source_through_builtin_into_sink","__string_sink"]}
+{"hops":["__source","source_to_builtin_as_sink","fb_serialize"]}
+{"hops":["fb_compact_unserialize","builtin_as_source","__sink"]}
+{"hops":["__source","builtins_as_tito","fb_compact_serialize","builtins_as_tito","fb_compact_unserialize","builtins_as_tito","__sink"]}

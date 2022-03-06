@@ -1095,7 +1095,7 @@ void iopLockObj() {
   iopPreamble("LockObj");
 }
 
-void iopFCall(const Func* func, const FCallArgs& fca) {
+void iopFCall(const Func* func, const FCallArgs& fca, bool is_object_method) {
   if (func == nullptr) {
     return;
   }
@@ -1107,6 +1107,8 @@ void iopFCall(const Func* func, const FCallArgs& fca) {
       fca.numArgs);
 
   auto state = State::instance;
+  state->last_fcall = fca;
+  state->last_fcall_is_object_method = is_object_method;
   const auto sinks = state->sinks(func);
   FTRACE(3, "taint: {} sinks\n", sinks.size());
 
@@ -1176,7 +1178,7 @@ TCA iopFCallClsMethodD(
     return nullptr;
   }
 
-  iopFCall(func, fca);
+  iopFCall(func, fca, false);
 
   return nullptr;
 }
@@ -1221,7 +1223,7 @@ TCA iopFCallCtor(
   lookupCtorMethod(
       func, obj->getVMClass(), ctx, MethodLookupErrorOptions::RaiseOnNotFound);
 
-  iopFCall(func, fca);
+  iopFCall(func, fca, true);
 
   return nullptr;
 }
@@ -1246,7 +1248,7 @@ TCA iopFCallFuncD(
   auto const nep = vmfp()->unit()->lookupNamedEntityPairId(id);
   auto const func = Func::load(nep.second, nep.first);
 
-  iopFCall(func, fca);
+  iopFCall(func, fca, false);
 
   return nullptr;
 }
@@ -1288,7 +1290,7 @@ TCA iopFCallObjMethodD(
       ctx,
       MethodLookupErrorOptions::RaiseOnNotFound);
 
-  iopFCall(func, fca);
+  iopFCall(func, fca, true);
 
   return nullptr;
 }
@@ -1507,7 +1509,67 @@ void iopCheckReifiedGenericMismatch() {
 }
 
 void iopNativeImpl(PC& /* pc */) {
-  iopUnhandled("NativeImpl");
+  iopPreamble("NativeImpl");
+
+  auto state = State::instance;
+
+  const auto& fca = state->last_fcall;
+  const auto func = vmfp()->func();
+  const auto inputs = fca.numInputs();
+
+  // Determine the taint going into this function, picking
+  // the first tainted thing
+  // This should eventually be a join.
+  Value value = nullptr;
+  for (int i = 0; i < fca.numArgs; i++) {
+    value = state->stack.peek(fca.numArgs - 1 - i);
+    if (value) {
+      break;
+    }
+  }
+  // Check the `this` pointer if it's tainted
+  // TODO: This isn't quite right and needs fixing.
+  if (value == nullptr && state->last_fcall_is_object_method) {
+    value = state->stack.peek(fca.numInputs() + (kNumActRecCells - 1));
+  }
+
+  // We don't need to check whether a this function or its arguments
+  // are a sink. iopFCall already does this for us.
+
+  // We currently don't support:
+  // 1) Setting the return value as a sink
+  // 2) tainting inouts
+
+  FTRACE(
+    2,
+    "taint: Invoking builtin {} as tito with {} arguments and {} inputs - argument taint is {}.\n",
+    yellow(quote(func->fullName()->data())),
+    fca.numArgs,
+    inputs,
+    value
+  );
+
+  // Clean up the stack by popping arguments
+  // and the function's activation record
+  state->stack.pop(inputs + kNumActRecCells);
+
+  // This whole thing should also be a join eventually
+  if (value == nullptr) {
+    // Check if this is the origin of a source.
+    const auto sources = state->sources(func);
+    FTRACE(3, "taint: {} sources\n", sources.size());
+    if (!sources.empty()) {
+      FTRACE(1, "taint: function returns source\n");
+      auto path = Path::origin(state->arena.get(), Hop{func, callee()});
+      state->stack.push(path);
+      return;
+    }
+  } else {
+    // otherwise: tito
+    value = value->to(state->arena.get(), Hop{callee(), func})
+                 ->to(state->arena.get(), Hop{func, callee()});
+    state->stack.push(value);
+  }
 }
 
 void iopCreateCl(uint32_t /* numArgs */, uint32_t /* clsIx */) {

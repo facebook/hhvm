@@ -351,7 +351,10 @@ InitFiniNode s_stateTeardown(
 
 rds::local::RDSLocal<State, rds::local::Initialize::FirstUse> State::instance;
 
-State::State() : arena(std::make_unique<PathArena>()) {}
+State::State() :
+  last_fcall(FCallArgsFlags::FCANone, 0, 0, nullptr, nullptr, 0, nullptr),
+  last_fcall_is_object_method(false),
+  arena(std::make_unique<PathArena>()) {}
 
 void State::initialize() {
   m_request_start = std::chrono::system_clock::now();

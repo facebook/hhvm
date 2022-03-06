@@ -1,0 +1,13 @@
+{
+  "sources": [
+    {"name": "__source"},
+    {"name": "__string_source"},
+    {"name": "fb_compact_unserialize"}
+  ],
+  "sinks": [
+    {"name": "__sink", "index": 0 },
+    {"name": "__string_sink", "index": 0 },
+    {"name": "__bool_sink", "index": 0},
+    {"name": "fb_serialize", "index": 0}
+  ]
+}

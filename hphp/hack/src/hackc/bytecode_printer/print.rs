@@ -1419,12 +1419,11 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
             " ",
             [
                 "OODeclExists",
-                match k {
-                    ClassishKind::Class => "Class",
-                    ClassishKind::Interface => "Interface",
-                    ClassishKind::Trait => "Trait",
-                    ClassishKind::Enum => "Enum",
-                    ClassishKind::EnumClass => "EnumClass",
+                match *k {
+                    OODeclExistsOp::Class => "Class",
+                    OODeclExistsOp::Interface => "Interface",
+                    OODeclExistsOp::Trait => "Trait",
+                    _ => panic!("Enum value does not match one of listed variants"),
                 },
             ],
         ),

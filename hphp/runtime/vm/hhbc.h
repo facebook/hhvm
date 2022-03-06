@@ -314,17 +314,6 @@ inline bool isIncDecO(IncDecOp op) {
     op == IncDecOp::PostIncO || op == IncDecOp::PostDecO;
 }
 
-#define OO_DECL_EXISTS_OPS                             \
-  OO_DECL_EXISTS_OP(Class)                             \
-  OO_DECL_EXISTS_OP(Interface)                         \
-  OO_DECL_EXISTS_OP(Trait)
-
-enum class OODeclExistsOp : uint8_t {
-#define OO_DECL_EXISTS_OP(x) x,
-  OO_DECL_EXISTS_OPS
-#undef OO_DECL_EXISTS_OP
-};
-
 constexpr uint32_t kMaxConcatN = 4;
 
 //  name             immediates        inputs           outputs     flags

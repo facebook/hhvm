@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{
-    AdataId, BareThisOp, BumpSliceMut, ClassId, ClassNum, ClassishKind, CollectionType, ConstId,
-    ContCheckOp, FatalOp, FcallArgs, FunctionId, IncDecOp, InitPropOp, IsLogAsDynamicCallOp,
-    IsTypeOp, IterArgs, IterId, Label, Local, LocalRange, MOpMode, MemberKey, MethodId, NumParams,
+    AdataId, BareThisOp, BumpSliceMut, ClassId, ClassNum, CollectionType, ConstId, ContCheckOp,
+    FatalOp, FcallArgs, FunctionId, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs,
+    IterId, Label, Local, LocalRange, MOpMode, MemberKey, MethodId, NumParams, OODeclExistsOp,
     ObjMethodOp, ParamId, PropId, QueryMOp, ReadonlyOp, RepoAuthType, SetOpOp, SetRangeOp,
     SilenceOp, Slice, SpecialClsRef, StackIndex, Str, SwitchKind, TypeStructResolveOp,
 };
@@ -128,7 +128,6 @@ pub enum Opcodes<'arena> {
     Fatal(FatalOp),
     File,
     FuncCred,
-    // FuncNumArgs,
     GetMemoKeyL(Local<'arena>),
     Gt,
     Gte,
@@ -193,7 +192,7 @@ pub enum Opcodes<'arena> {
     Not,
     Null,
     NullUninit,
-    OODeclExists(ClassishKind),
+    OODeclExists(OODeclExistsOp),
     ParentCls,
     PopC,
     PopL(Local<'arena>),

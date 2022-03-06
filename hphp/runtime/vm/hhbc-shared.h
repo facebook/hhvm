@@ -242,5 +242,16 @@ enum class SetOpOp : uint8_t {
 #undef SETOP_OP
 };
 
+#define OO_DECL_EXISTS_OPS                             \
+  OO_DECL_EXISTS_OP(Class)                             \
+  OO_DECL_EXISTS_OP(Interface)                         \
+  OO_DECL_EXISTS_OP(Trait)
+
+enum class OODeclExistsOp : uint8_t {
+#define OO_DECL_EXISTS_OP(x) x,
+  OO_DECL_EXISTS_OPS
+#undef OO_DECL_EXISTS_OP
+};
+
 
 }

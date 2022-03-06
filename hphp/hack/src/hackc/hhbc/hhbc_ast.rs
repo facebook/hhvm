@@ -23,8 +23,8 @@ pub type RepoAuthType<'arena> = Str<'arena>;
 /// internal details about the ffi.
 pub use hhvm_hhbc_defs_ffi::ffi::{
     BareThisOp, CollectionType, ContCheckOp, FCallArgsFlags, FatalOp, IncDecOp, InitPropOp,
-    IsLogAsDynamicCallOp, IsTypeOp, MOpMode, ObjMethodOp, QueryMOp, ReadonlyOp, SetOpOp,
-    SetRangeOp, SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
+    IsLogAsDynamicCallOp, IsTypeOp, MOpMode, OODeclExistsOp, ObjMethodOp, QueryMOp, ReadonlyOp,
+    SetOpOp, SetRangeOp, SilenceOp, SpecialClsRef, SwitchKind, TypeStructResolveOp,
 };
 
 #[derive(Clone, Debug)]

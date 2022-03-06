@@ -2679,9 +2679,9 @@ fn emit_special_function<'a, 'arena, 'decl>(
             if nargs == 1 || nargs == 2 =>
         {
             let class_kind = match lower_fq_name {
-                "class_exists" => ClassishKind::Class,
-                "interface_exists" => ClassishKind::Interface,
-                "trait_exists" => ClassishKind::Trait,
+                "class_exists" => OODeclExistsOp::Class,
+                "interface_exists" => OODeclExistsOp::Interface,
+                "trait_exists" => OODeclExistsOp::Trait,
                 _ => return Err(unrecoverable("emit_special_function: class_kind")),
             };
             Ok(Some(InstrSeq::gather(vec![

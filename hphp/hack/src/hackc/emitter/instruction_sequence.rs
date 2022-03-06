@@ -1015,7 +1015,7 @@ pub mod instr {
         instr(Instruct::Opcode(Opcodes::LazyClass(class_id)))
     }
 
-    pub fn oodeclexists<'a>(class_kind: ClassishKind) -> InstrSeq<'a> {
+    pub fn oodeclexists<'a>(class_kind: OODeclExistsOp) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcodes::OODeclExists(class_kind)))
     }
 

@@ -209,6 +209,14 @@ pub mod ffi {
         MulEqualO,
     }
 
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone)]
+    enum OODeclExistsOp {
+        Class,
+        Interface,
+        Trait,
+    }
+
     unsafe extern "C++" {
         include!("hphp/hack/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.h");
         type BareThisOp;
@@ -222,6 +230,7 @@ pub mod ffi {
         type IsTypeOp;
         type MOpMode;
         type ObjMethodOp;
+        type OODeclExistsOp;
         type QueryMOp;
         type ReadonlyOp;
         type SetOpOp;

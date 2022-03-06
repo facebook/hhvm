@@ -9,7 +9,6 @@ use iterator::IterId;
 use label::Label;
 use local::{Local, LocalId};
 use oxidized::ast_defs::Pos;
-use runtime::TypedValue;
 use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -704,6 +703,18 @@ pub mod instr {
         instr(Instruct::Opcode(Opcodes::NewObjD(id)))
     }
 
+    pub fn vec<'a>(id: AdataId<'a>) -> InstrSeq<'a> {
+        instr(Instruct::Opcode(Opcodes::Vec(id)))
+    }
+
+    pub fn dict<'a>(id: AdataId<'a>) -> InstrSeq<'a> {
+        instr(Instruct::Opcode(Opcodes::Dict(id)))
+    }
+
+    pub fn keyset<'a>(id: AdataId<'a>) -> InstrSeq<'a> {
+        instr(Instruct::Opcode(Opcodes::Keyset(id)))
+    }
+
     pub fn newobjrd<'a>(id: ClassId<'a>) -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcodes::NewObjRD(id)))
     }
@@ -735,10 +746,6 @@ pub mod instr {
 
     pub fn entrynop<'a>() -> InstrSeq<'a> {
         instr(Instruct::Opcode(Opcodes::EntryNop))
-    }
-
-    pub fn typedvalue<'a>(xs: TypedValue<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Pseudo(Pseudo::TypedValue(xs)))
     }
 
     pub fn basel<'a>(local: Local<'a>, mode: MOpMode, readonly_op: ReadonlyOp) -> InstrSeq<'a> {

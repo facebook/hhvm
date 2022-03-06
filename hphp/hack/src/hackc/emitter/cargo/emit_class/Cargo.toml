@@ -9,6 +9,7 @@ path = "../../emit_class.rs"
 
 [dependencies]
 bumpalo = { version = "3.8", features = ["collections"] }
+emit_adata = { path = "../emit_adata" }
 emit_attribute = { path = "../emit_attribute" }
 emit_body = { path = "../emit_body" }
 emit_constant = { path = "../emit_constant" }

@@ -304,8 +304,7 @@ pub fn get_type_structure_for_hint<'arena, 'decl>(
         false,
         false,
     )?;
-    let i = Str::from(emit_adata::get_array_identifier(e, &tv));
-    Ok(instr::instr(Instruct::Opcode(Opcodes::Dict(i))))
+    emit_adata::typed_value_to_instr(e, &tv)
 }
 
 pub struct SetRange {
@@ -386,9 +385,12 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         | Expr_::Null
         | Expr_::False
         | Expr_::True => {
-            let v = ast_constant_folder::expr_to_typed_value(emitter, expression)
+            let tv = ast_constant_folder::expr_to_typed_value(emitter, expression)
                 .map_err(|_| unrecoverable("expr_to_typed_value failed"))?;
-            Ok(emit_pos_then(pos, instr::typedvalue(v)))
+            Ok(emit_pos_then(
+                pos,
+                emit_adata::typed_value_to_instr(emitter, &tv)?,
+            ))
         }
         Expr_::EnumClassLabel(label) => {
             // emitting E#A as __Systemlib\create_opaque_value(OpaqueValue::EnumClassLabel, "A")
@@ -1074,7 +1076,10 @@ fn emit_vec_collection<'a, 'arena, 'decl>(
     fields: &[ast::Afield],
 ) -> Result<InstrSeq<'arena>> {
     match ast_constant_folder::vec_to_typed_value(e, fields) {
-        Ok(tv) => emit_static_collection(env, None, pos, tv),
+        Ok(tv) => {
+            let instr = emit_adata::typed_value_to_instr(e, &tv)?;
+            emit_static_collection(env, None, pos, instr)
+        }
         Err(_) => emit_value_only_collection(e, env, pos, fields, |v| {
             Instruct::Opcode(Opcodes::NewVec(v))
         }),
@@ -1186,7 +1191,10 @@ fn emit_collection<'a, 'arena, 'decl>(
         e, expr, true,  /*allow_map*/
         false, /*force_class_const*/
     ) {
-        Ok(tv) => emit_static_collection(env, transform_to_collection, pos, tv),
+        Ok(tv) => {
+            let instr = emit_adata::typed_value_to_instr(e, &tv)?;
+            emit_static_collection(env, transform_to_collection, pos, instr)
+        }
         Err(_) => emit_dynamic_collection(e, env, expr, fields),
     }
 }
@@ -1195,7 +1203,7 @@ fn emit_static_collection<'a, 'arena>(
     _env: &Env<'a, 'arena>,
     transform_to_collection: Option<CollectionType>,
     pos: &Pos,
-    tv: TypedValue<'arena>,
+    instr: InstrSeq<'arena>,
 ) -> Result<InstrSeq<'arena>> {
     let transform_instr = match transform_to_collection {
         Some(collection_type) => instr::colfromarray(collection_type),
@@ -1203,7 +1211,7 @@ fn emit_static_collection<'a, 'arena>(
     };
     Ok(InstrSeq::gather(vec![
         emit_pos(pos),
-        instr::typedvalue(tv),
+        instr,
         transform_instr,
     ]))
 }
@@ -3282,10 +3290,11 @@ fn emit_call_expr<'a, 'arena, 'decl>(
             ensure_normal_paramkind(pk)?;
             // FIXME: This is not safe--string literals are binary strings.
             // There's no guarantee that they're valid UTF-8.
-            let v = TypedValue::mk_hhas_adata(
+            let tv = TypedValue::mk_hhas_adata(
                 alloc.alloc_str(unsafe { std::str::from_utf8_unchecked(data.as_ref()) }),
             );
-            Ok(emit_pos_then(pos, instr::typedvalue(v)))
+            let instr = emit_adata::typed_value_to_instr(e, &tv)?;
+            Ok(emit_pos_then(pos, instr))
         }
         (Expr_::Id(id), _, None) if id.1 == pseudo_functions::ISSET => {
             emit_call_isset_exprs(e, env, pos, args)

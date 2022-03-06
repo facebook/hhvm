@@ -14,7 +14,6 @@ ast_scope = { path = "../../../hhbc/cargo/ast_scope" }
 bitflags = "1.3"
 bumpalo = { version = "3.8", features = ["collections"] }
 decl_vars = { path = "../../../hhbc/cargo/decl_vars" }
-emit_adata = { path = "../emit_adata" }
 emit_expression = { path = "../emit_expression" }
 emit_fatal = { path = "../emit_fatal" }
 emit_param = { path = "../emit_param" }

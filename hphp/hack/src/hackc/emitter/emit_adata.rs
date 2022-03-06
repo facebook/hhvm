@@ -7,74 +7,56 @@ use adata_state::AdataState;
 use env::emitter::Emitter;
 use ffi::Str;
 use hhas_adata::{HhasAdata, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX};
-use hhbc_ast::*;
-use instruction_sequence::{Error, InstrSeq};
+use instruction_sequence::{instr, Error, InstrSeq, Result};
 use options::HhvmFlags;
 use runtime::TypedValue;
 
-pub fn rewrite_typed_values<'arena, 'decl>(
-    emitter: &mut Emitter<'arena, 'decl>,
-    instrseq: &mut InstrSeq<'arena>,
-) -> std::result::Result<(), instruction_sequence::Error> {
-    for instr in instrseq.iter_mut() {
-        rewrite_typed_value(emitter, instr)?;
-    }
-    Ok(())
-}
-
-fn rewrite_typed_value<'arena, 'decl>(
+pub fn typed_value_to_instr<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
-    instr: &mut Instruct<'arena>,
-) -> std::result::Result<(), instruction_sequence::Error> {
-    if let Instruct::Pseudo(Pseudo::TypedValue(tv)) = instr {
-        *instr = match &tv {
-            TypedValue::Uninit => {
-                return Err(Error::Unrecoverable("rewrite_typed_value: uninit".into()));
-            }
-            TypedValue::Null => Instruct::Opcode(Opcodes::Null),
-            TypedValue::Bool(true) => Instruct::Opcode(Opcodes::True),
-            TypedValue::Bool(false) => Instruct::Opcode(Opcodes::False),
-            TypedValue::Int(i) => Instruct::Opcode(Opcodes::Int(*i)),
-            TypedValue::String(s) => Instruct::Opcode(Opcodes::String(*s)),
-            TypedValue::LazyClass(s) => {
-                let classid: hhbc_ast::ClassId<'arena> =
-                    hhbc_id::class::ClassType::from_ast_name_and_mangle(e.alloc, s.unsafe_as_str());
-                Instruct::Opcode(Opcodes::LazyClass(classid))
-            }
-            TypedValue::Double(f) => Instruct::Opcode(Opcodes::Double(f.to_f64())),
-            TypedValue::Keyset(_) => {
-                let arrayid = Str::from(get_array_identifier(e, tv));
-                Instruct::Opcode(Opcodes::Keyset(arrayid))
-            }
-            TypedValue::Vec(_) => {
-                let arrayid = Str::from(get_array_identifier(e, tv));
-                Instruct::Opcode(Opcodes::Vec(arrayid))
-            }
-            TypedValue::Dict(_) => {
-                let arrayid = Str::from(get_array_identifier(e, tv));
-                Instruct::Opcode(Opcodes::Dict(arrayid))
-            }
-            TypedValue::HhasAdata(d) if d.is_empty() => {
-                return Err(Error::Unrecoverable("HhasAdata may not be empty".into()));
-            }
-            TypedValue::HhasAdata(d) => {
-                let arrayid = Str::from(get_array_identifier(e, tv));
-                let d = d.unsafe_as_str();
-                match &d[..1] {
-                    VARRAY_PREFIX | VEC_PREFIX => Instruct::Opcode(Opcodes::Vec(arrayid)),
-                    DARRAY_PREFIX | DICT_PREFIX => Instruct::Opcode(Opcodes::Dict(arrayid)),
-                    KEYSET_PREFIX => Instruct::Opcode(Opcodes::Keyset(arrayid)),
-                    _ => {
-                        return Err(Error::Unrecoverable(format!(
-                            "Unknown HhasAdata data: {}",
-                            d,
-                        )));
-                    }
-                }
+    tv: &TypedValue<'arena>,
+) -> Result<InstrSeq<'arena>> {
+    match &tv {
+        TypedValue::Uninit => Err(Error::Unrecoverable("rewrite_typed_value: uninit".into())),
+        TypedValue::Null => Ok(instr::null()),
+        TypedValue::Bool(true) => Ok(instr::true_()),
+        TypedValue::Bool(false) => Ok(instr::false_()),
+        TypedValue::Int(i) => Ok(instr::int(*i)),
+        TypedValue::String(s) => Ok(instr::string(e.alloc, s.unsafe_as_str())),
+        TypedValue::LazyClass(s) => {
+            let classid: hhbc_ast::ClassId<'arena> =
+                hhbc_id::class::ClassType::from_ast_name_and_mangle(e.alloc, s.unsafe_as_str());
+            Ok(instr::lazyclass(classid))
+        }
+        TypedValue::Double(f) => Ok(instr::double(f.to_f64())),
+        TypedValue::Keyset(_) => {
+            let arrayid = Str::from(get_array_identifier(e, tv));
+            Ok(instr::keyset(arrayid))
+        }
+        TypedValue::Vec(_) => {
+            let arrayid = Str::from(get_array_identifier(e, tv));
+            Ok(instr::vec(arrayid))
+        }
+        TypedValue::Dict(_) => {
+            let arrayid = Str::from(get_array_identifier(e, tv));
+            Ok(instr::dict(arrayid))
+        }
+        TypedValue::HhasAdata(d) if d.is_empty() => {
+            Err(Error::Unrecoverable("HhasAdata may not be empty".into()))
+        }
+        TypedValue::HhasAdata(d) => {
+            let arrayid = Str::from(get_array_identifier(e, tv));
+            let d = d.unsafe_as_str();
+            match &d[..1] {
+                VARRAY_PREFIX | VEC_PREFIX => Ok(instr::vec(arrayid)),
+                DARRAY_PREFIX | DICT_PREFIX => Ok(instr::dict(arrayid)),
+                KEYSET_PREFIX => Ok(instr::keyset(arrayid)),
+                _ => Err(Error::Unrecoverable(format!(
+                    "Unknown HhasAdata data: {}",
+                    d,
+                ))),
             }
         }
-    };
-    Ok(())
+    }
 }
 
 pub fn get_array_identifier<'arena, 'decl>(

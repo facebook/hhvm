@@ -15,7 +15,6 @@ iterator = { path = "../iterator" }
 label = { path = "../label" }
 local = { path = "../local" }
 oxidized = { path = "../../../../oxidized" }
-runtime = { path = "../runtime" }
 thiserror = "1.0.29"
 
 [dev-dependencies]

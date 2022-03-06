@@ -960,7 +960,6 @@ dependencies = [
  "bitflags",
  "bumpalo",
  "decl_vars",
- "emit_adata",
  "emit_expression",
  "emit_fatal",
  "emit_param",
@@ -1003,6 +1002,7 @@ name = "emit_class"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
+ "emit_adata",
  "emit_attribute",
  "emit_body",
  "emit_constant",
@@ -2127,7 +2127,6 @@ dependencies = [
  "local",
  "oxidized",
  "pretty_assertions",
- "runtime",
  "thiserror",
 ]
 

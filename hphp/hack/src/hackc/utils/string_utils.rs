@@ -264,10 +264,10 @@ pub mod float {
         // to Rust native formatting
         let res = sprintf(f).unwrap_or_else(|| f.to_string());
         match res.as_ref() {
-            "-nan" => "NAN".to_string(),
-            "nan" => "NAN".to_string(),
-            "-inf" => "-INF".to_string(),
-            "inf" => "INF".to_string(),
+            "-nan" => naming_special_names_rust::math::NAN.to_string(),
+            "nan" => naming_special_names_rust::math::NAN.to_string(),
+            "-inf" => naming_special_names_rust::math::NEG_INF.to_string(),
+            "inf" => naming_special_names_rust::math::INF.to_string(),
             _ => res,
         }
     }

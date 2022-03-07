@@ -21,7 +21,7 @@ use oxidized::{
     aast,
     aast_visitor::{AstParams, Node, Visitor},
     ast,
-    ast::Expr_ as E_,
+    ast::{Expr, Expr_},
     doc_comment::DocComment,
     errors::{Error as HHError, Naming, NastCheck},
     file_info,
@@ -993,30 +993,29 @@ fn p_afield<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Afield, Error> {
 }
 
 // We lower readonly lambda declarations as making the inner lambda have readonly_this.
-fn process_readonly_expr<'a>(env: &mut Env<'a>, mut e: ast::Expr) -> ast::Expr_ {
-    use aast::Expr_::*;
+fn process_readonly_expr<'a>(env: &mut Env<'a>, mut e: ast::Expr) -> Expr_ {
     match &mut e {
-        ast::Expr(_, _, Efun(ref mut efun)) if efun.0.readonly_this.is_none() => {
+        ast::Expr(_, _, Expr_::Efun(ref mut efun)) if efun.0.readonly_this.is_none() => {
             efun.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
             // The first readonly expression simply makes the closure readonly
             if env.is_typechecker() {
                 // remove once HHVM is released
-                E_::mk_readonly_expr(e)
+                Expr_::mk_readonly_expr(e)
             } else {
                 e.2
             }
         }
-        ast::Expr(_, _, Lfun(ref mut l)) if l.0.readonly_this.is_none() => {
+        ast::Expr(_, _, Expr_::Lfun(ref mut l)) if l.0.readonly_this.is_none() => {
             l.0.readonly_this = Some(ast::ReadonlyKind::Readonly);
             // The first readonly expression simply makes the closure readonly
             if env.is_typechecker() {
                 // remove once HHVM is released
-                E_::mk_readonly_expr(e)
+                Expr_::mk_readonly_expr(e)
             } else {
                 e.2
             }
         }
-        _ => E_::mk_readonly_expr(e),
+        _ => Expr_::mk_readonly_expr(e),
     }
 }
 
@@ -1318,7 +1317,7 @@ fn p_expr_with_loc<'a>(
             Ok(ast::Expr::new(
                 (),
                 pos,
-                ast::Expr_::ETSplice(Box::new(inner_expr)),
+                Expr_::ETSplice(Box::new(inner_expr)),
             ))
         }
         _ => {
@@ -1334,7 +1333,7 @@ fn p_expr_lit<'a>(
     _parent: S<'a>,
     expr: S<'a>,
     env: &mut Env<'a>,
-) -> Result<ast::Expr_, Error> {
+) -> Result<Expr_, Error> {
     match &expr.children {
         Token(_) => {
             let s = expr.text(env.indexed_source_text.source_text());
@@ -1345,7 +1344,7 @@ fn p_expr_lit<'a>(
             };
             match (location, token_kind(expr)) {
                 (ExprLocation::InDoubleQuotedString, _) if env.codegen() => {
-                    Ok(E_::String(mk_str(expr, env, unesc_dbl, s)))
+                    Ok(Expr_::String(mk_str(expr, env, unesc_dbl, s)))
                 }
                 (_, Some(TK::DecimalLiteral))
                 | (_, Some(TK::OctalLiteral))
@@ -1369,7 +1368,7 @@ fn p_expr_lit<'a>(
                         }
                         Ok(_) => {}
                     }
-                    Ok(E_::Int(s))
+                    Ok(Expr_::Int(s))
                 }
                 (_, Some(TK::FloatingLiteral)) => {
                     // f64::from_str accepts more string than Hacklang, invalid Hack float literal
@@ -1377,31 +1376,31 @@ fn p_expr_lit<'a>(
                     if f64::from_str(s).is_err() {
                         raise_parsing_error(expr, env, &syntax_error::out_of_float_range(s))
                     }
-                    Ok(E_::Float(s.into()))
+                    Ok(Expr_::Float(s.into()))
                 }
                 (_, Some(TK::SingleQuotedStringLiteral)) => {
-                    Ok(E_::String(mk_str(expr, env, unescape_single, s)))
+                    Ok(Expr_::String(mk_str(expr, env, unescape_single, s)))
                 }
                 (_, Some(TK::DoubleQuotedStringLiteral)) => {
-                    Ok(E_::String(mk_str(expr, env, unescape_double, s)))
+                    Ok(Expr_::String(mk_str(expr, env, unescape_double, s)))
                 }
                 (_, Some(TK::HeredocStringLiteral)) => {
-                    Ok(E_::String(mk_str(expr, env, unescape_heredoc, s)))
+                    Ok(Expr_::String(mk_str(expr, env, unescape_heredoc, s)))
                 }
                 (_, Some(TK::NowdocStringLiteral)) => {
-                    Ok(E_::String(mk_str(expr, env, unescape_nowdoc, s)))
+                    Ok(Expr_::String(mk_str(expr, env, unescape_nowdoc, s)))
                 }
                 (_, Some(TK::NullLiteral)) => {
                     check_lint_err(env, s, literal::NULL);
-                    Ok(E_::Null)
+                    Ok(Expr_::Null)
                 }
                 (_, Some(TK::BooleanLiteral)) => {
                     if s.eq_ignore_ascii_case(literal::FALSE) {
                         check_lint_err(env, s, literal::FALSE);
-                        Ok(E_::False)
+                        Ok(Expr_::False)
                     } else if s.eq_ignore_ascii_case(literal::TRUE) {
                         check_lint_err(env, s, literal::TRUE);
-                        Ok(E_::True)
+                        Ok(Expr_::True)
                     } else {
                         missing_syntax(&format!("boolean (not: {})", s), expr, env)
                     }
@@ -1409,7 +1408,7 @@ fn p_expr_lit<'a>(
                 _ => missing_syntax("literal", expr, env),
             }
         }
-        SyntaxList(ts) => Ok(E_::String2(p_string2(ts, env)?)),
+        SyntaxList(ts) => Ok(Expr_::String2(p_string2(ts, env)?)),
         _ => missing_syntax("literal expressoin", expr, env),
     }
 }
@@ -1419,7 +1418,7 @@ fn p_expr_recurse<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
     parent_pos: Option<Pos>,
-) -> Result<ast::Expr_, Error> {
+) -> Result<Expr_, Error> {
     if *env.exp_recursion_depth() >= EXP_RECURSION_LIMIT {
         Err(Error::Failwith("Expression recursion limit reached".into()))
     } else {
@@ -1460,41 +1459,40 @@ fn p_expr_impl<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
     parent_pos: Option<Pos>,
-) -> Result<ast::Expr_, Error> {
+) -> Result<Expr_, Error> {
     env.check_stack_limit();
-    use ast::Expr as E;
     let mk_lid = |p: Pos, s: String| ast::Lid(p, (0, s));
     let mk_name_lid = |name: S<'a>, env: &mut Env<'a>| {
         let name = pos_name(name, env)?;
         Ok(mk_lid(name.0, name.1))
     };
-    let mk_lvar = |name: S<'a>, env: &mut Env<'a>| Ok(E_::mk_lvar(mk_name_lid(name, env)?));
-    let mk_id_expr = |name: ast::Sid| E::new((), name.0.clone(), E_::mk_id(name));
+    let mk_lvar = |name: S<'a>, env: &mut Env<'a>| Ok(Expr_::mk_lvar(mk_name_lid(name, env)?));
+    let mk_id_expr = |name: ast::Sid| Expr::new((), name.0.clone(), Expr_::mk_id(name));
     let p_intri_expr = |kw, ty, v, e: &mut Env<'a>| {
         let hints = expand_type_args(ty, e)?;
         let hints = check_intrinsic_type_arg_varity(node, e, hints);
-        Ok(E_::mk_collection(
+        Ok(Expr_::mk_collection(
             pos_name(kw, e)?,
             hints,
             could_map(p_afield, v, e)?,
         ))
     };
-    let p_special_call = |recv: S<'a>, args: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr_, Error> {
+    let p_special_call = |recv: S<'a>, args: S<'a>, e: &mut Env<'a>| -> Result<Expr_, Error> {
         // Mark expression as CallReceiver so that we can correctly set
         // PropOrMethod field in ObjGet and ClassGet
         let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, e, None)?;
         let (args, varargs) = split_args_vararg(args, e)?;
-        Ok(E_::mk_call(recv, vec![], args, varargs))
+        Ok(Expr_::mk_call(recv, vec![], args, varargs))
     };
     let p_obj_get =
-        |recv: S<'a>, op: S<'a>, name: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr_, Error> {
+        |recv: S<'a>, op: S<'a>, name: S<'a>, e: &mut Env<'a>| -> Result<Expr_, Error> {
             if recv.is_object_creation_expression() && !e.codegen() {
                 raise_parsing_error(recv, e, &syntax_error::invalid_constructor_method_call);
             }
             let recv = p_expr(recv, e)?;
             let name = p_expr_with_loc(ExprLocation::MemberSelect, name, e, None)?;
             let op = p_null_flavor(op, e)?;
-            Ok(E_::mk_obj_get(
+            Ok(Expr_::mk_obj_get(
                 recv,
                 name,
                 op,
@@ -1573,7 +1571,7 @@ fn p_expr_impl<'a>(
                 external,
                 doc_comment: None,
             };
-            Ok(E_::mk_lfun(fun, vec![]))
+            Ok(Expr_::mk_lfun(fun, vec![]))
         }
         BracedExpression(c) => p_expr_recurse(location, &c.expression, env, None),
         EmbeddedBracedExpression(c) => p_expr_recurse(location, &c.expression, env, Some(pos)),
@@ -1593,7 +1591,7 @@ fn p_expr_impl<'a>(
                 }
                 _ => (pos_name(&c.name, env)?, None),
             };
-            Ok(E_::mk_collection(
+            Ok(Expr_::mk_collection(
                 collection_name,
                 hints,
                 could_map(p_afield, &c.initializers, env)?,
@@ -1607,17 +1605,20 @@ fn p_expr_impl<'a>(
                 None => None,
                 _ => missing_syntax("VarrayIntrinsicExpression type args", node, env)?,
             };
-            Ok(E_::mk_varray(targ, could_map(p_expr, &c.members, env)?))
+            Ok(Expr_::mk_varray(targ, could_map(p_expr, &c.members, env)?))
         }
         DarrayIntrinsicExpression(c) => {
             let hints = expand_type_args(&c.explicit_type, env)?;
             let hints = check_intrinsic_type_arg_varity(node, env, hints);
             match hints {
-                Some(ast::CollectionTarg::CollectionTKV(tk, tv)) => Ok(E_::mk_darray(
+                Some(ast::CollectionTarg::CollectionTKV(tk, tv)) => Ok(Expr_::mk_darray(
                     Some((tk, tv)),
                     could_map(p_member, &c.members, env)?,
                 )),
-                None => Ok(E_::mk_darray(None, could_map(p_member, &c.members, env)?)),
+                None => Ok(Expr_::mk_darray(
+                    None,
+                    could_map(p_member, &c.members, env)?,
+                )),
                 _ => missing_syntax("DarrayIntrinsicExpression type args", node, env),
             }
         }
@@ -1625,15 +1626,19 @@ fn p_expr_impl<'a>(
             /* TODO: Or tie in with other intrinsics and post-process to List */
             let p_binder_or_ignore = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr, Error> {
                 match &n.children {
-                    Missing => Ok(E::new((), e.mk_none_pos(), E_::Omitted)),
+                    Missing => Ok(Expr::new((), e.mk_none_pos(), Expr_::Omitted)),
                     _ => p_expr(n, e),
                 }
             };
-            Ok(E_::List(could_map(&p_binder_or_ignore, &c.members, env)?))
+            Ok(Expr_::List(could_map(
+                &p_binder_or_ignore,
+                &c.members,
+                env,
+            )?))
         }
         EvalExpression(c) => p_special_call(&c.keyword, &c.argument, env),
         IssetExpression(c) => p_special_call(&c.keyword, &c.argument_list, env),
-        TupleExpression(c) => Ok(E_::mk_tuple(could_map(p_expr, &c.items, env)?)),
+        TupleExpression(c) => Ok(Expr_::mk_tuple(could_map(p_expr, &c.items, env)?)),
         FunctionCallExpression(c) => {
             let recv = &c.receiver;
             let args = &c.argument_list;
@@ -1659,12 +1664,12 @@ fn p_expr_impl<'a>(
                     let literal_expression_pos = p_pos(expr, env);
                     let s = extract_unquoted_string(text_str(expr, env), 0, expr.width())
                         .map_err(|e| Error::Failwith(e.msg))?;
-                    Ok(E_::mk_call(
+                    Ok(Expr_::mk_call(
                         p_expr(recv, env)?,
                         vec![],
                         vec![(
                             ast::ParamKind::Pnormal,
-                            E::new((), literal_expression_pos, E_::String(s.into())),
+                            Expr::new((), literal_expression_pos, Expr_::String(s.into())),
                         )],
                         None,
                     ))
@@ -1696,12 +1701,12 @@ fn p_expr_impl<'a>(
                         let enum_class_label = ast::Expr::new(
                             (),
                             pos,
-                            E_::mk_enum_class_label(None, pos_name(&e.expression, env)?.1),
+                            Expr_::mk_enum_class_label(None, pos_name(&e.expression, env)?.1),
                         );
                         args.insert(0, (ast::ParamKind::Pnormal, enum_class_label));
                     }
 
-                    Ok(E_::mk_call(recv, targs, args, varargs))
+                    Ok(Expr_::mk_call(recv, targs, args, varargs))
                 }
             }
         }
@@ -1714,13 +1719,13 @@ fn p_expr_impl<'a>(
             let recv = p_expr(&c.receiver, env)?;
 
             match &recv.2 {
-                aast::Expr_::Id(id) => Ok(E_::mk_function_pointer(
+                Expr_::Id(id) => Ok(Expr_::mk_function_pointer(
                     aast::FunctionPtrId::FPId(*(id.to_owned())),
                     targs,
                 )),
-                aast::Expr_::ClassConst(c) => {
-                    if let aast::ClassId_::CIexpr(aast::Expr(_, _, aast::Expr_::Id(_))) = (c.0).2 {
-                        Ok(E_::mk_function_pointer(
+                Expr_::ClassConst(c) => {
+                    if let aast::ClassId_::CIexpr(Expr(_, _, Expr_::Id(_))) = (c.0).2 {
+                        Ok(Expr_::mk_function_pointer(
                             aast::FunctionPtrId::FPClassConst(c.0.to_owned(), c.1.to_owned()),
                             targs,
                         ))
@@ -1738,16 +1743,16 @@ fn p_expr_impl<'a>(
         QualifiedName(_) => match location {
             ExprLocation::InDoubleQuotedString => {
                 let ast::Id(_, n) = pos_qualified_name(node, env)?;
-                Ok(E_::String(n.into()))
+                Ok(Expr_::String(n.into()))
             }
-            _ => Ok(E_::mk_id(pos_qualified_name(node, env)?)),
+            _ => Ok(Expr_::mk_id(pos_qualified_name(node, env)?)),
         },
-        VariableExpression(c) => Ok(E_::mk_lvar(lid_from_pos_name(pos, &c.expression, env)?)),
-        PipeVariableExpression(_) => Ok(E_::mk_lvar(mk_lid(
+        VariableExpression(c) => Ok(Expr_::mk_lvar(lid_from_pos_name(pos, &c.expression, env)?)),
+        PipeVariableExpression(_) => Ok(Expr_::mk_lvar(mk_lid(
             pos,
             special_idents::DOLLAR_DOLLAR.into(),
         ))),
-        InclusionExpression(c) => Ok(E_::mk_import(
+        InclusionExpression(c) => Ok(Expr_::mk_import(
             p_import_flavor(&c.require, env)?,
             p_expr(&c.filename, env)?,
         )),
@@ -1769,7 +1774,7 @@ fn p_expr_impl<'a>(
              * fixities.
              */
             use ast::Uop::*;
-            let mk_unop = |op, e| Ok(E_::mk_unop(op, e));
+            let mk_unop = |op, e| Ok(Expr_::mk_unop(op, e));
             let op_kind = token_kind(op);
             if let Some(TK::At) = op_kind {
                 if env.parser_options.po_disallow_silence {
@@ -1795,12 +1800,12 @@ fn p_expr_impl<'a>(
                     Some(TK::Minus) => mk_unop(Uminus, expr),
                     Some(TK::Await) => Ok(lift_await(pos, expr, env, location)),
                     Some(TK::Readonly) => Ok(process_readonly_expr(env, expr)),
-                    Some(TK::Clone) => Ok(E_::mk_clone(expr)),
-                    Some(TK::Print) => Ok(E_::mk_call(
-                        E::new(
+                    Some(TK::Clone) => Ok(Expr_::mk_clone(expr)),
+                    Some(TK::Print) => Ok(Expr_::mk_call(
+                        Expr::new(
                             (),
                             pos.clone(),
-                            E_::mk_id(ast::Id(pos, special_functions::ECHO.into())),
+                            Expr_::mk_id(ast::Id(pos, special_functions::ECHO.into())),
                         ),
                         vec![],
                         vec![(ast::ParamKind::Pnormal, expr)],
@@ -1808,7 +1813,7 @@ fn p_expr_impl<'a>(
                     )),
                     Some(TK::Dollar) => {
                         raise_parsing_error(op, env, &syntax_error::invalid_variable_name);
-                        Ok(E_::Omitted)
+                        Ok(Expr_::Omitted)
                     }
                     _ => missing_syntax("unary operator", node, env),
                 }
@@ -1843,12 +1848,13 @@ fn p_expr_impl<'a>(
                 (MemberSelect, TK::Variable) => mk_lvar(node, env),
                 (InDoubleQuotedString, TK::HeredocStringLiteral)
                 | (InDoubleQuotedString, TK::HeredocStringLiteralHead)
-                | (InDoubleQuotedString, TK::HeredocStringLiteralTail) => Ok(E_::String(
+                | (InDoubleQuotedString, TK::HeredocStringLiteralTail) => Ok(Expr_::String(
                     wrap_unescaper(unescape_heredoc, text_str(node, env))?,
                 )),
-                (InDoubleQuotedString, _) => {
-                    Ok(E_::String(wrap_unescaper(unesc_dbl, text_str(node, env))?))
-                }
+                (InDoubleQuotedString, _) => Ok(Expr_::String(wrap_unescaper(
+                    unesc_dbl,
+                    text_str(node, env),
+                )?)),
                 (MemberSelect, _)
                 | (TopLevel, _)
                 | (AsStatement, _)
@@ -1856,7 +1862,7 @@ fn p_expr_impl<'a>(
                 | (RightOfAssignment, _)
                 | (RightOfAssignmentInUsingStatement, _)
                 | (RightOfReturn, _)
-                | (CallReceiver, _) => Ok(E_::mk_id(pos_name(node, env)?)),
+                | (CallReceiver, _) => Ok(Expr_::mk_id(pos_name(node, env)?)),
             }
         }
         YieldExpression(c) => {
@@ -1869,24 +1875,24 @@ fn p_expr_impl<'a>(
                 raise_parsing_error(node, env, &syntax_error::invalid_yield);
             }
             if c.operand.is_missing() {
-                Ok(E_::mk_yield(ast::Afield::AFvalue(E::new(
+                Ok(Expr_::mk_yield(ast::Afield::AFvalue(Expr::new(
                     (),
                     pos,
-                    E_::Null,
+                    Expr_::Null,
                 ))))
             } else {
-                Ok(E_::mk_yield(p_afield(&c.operand, env)?))
+                Ok(Expr_::mk_yield(p_afield(&c.operand, env)?))
             }
         }
         ScopeResolutionExpression(c) => {
             let qual = p_expr(&c.qualifier, env)?;
-            if let E_::Id(id) = &qual.2 {
+            if let Expr_::Id(id) = &qual.2 {
                 fail_if_invalid_reified_generic(node, env, &id.1);
             }
             match &c.name.children {
                 Token(token) if token.kind() == TK::Variable => {
                     let ast::Id(p, name) = pos_name(&c.name, env)?;
-                    Ok(E_::mk_class_get(
+                    Ok(Expr_::mk_class_get(
                         ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                         ast::ClassGetExpr::CGstring((p, name)),
                         match location {
@@ -1896,9 +1902,9 @@ fn p_expr_impl<'a>(
                     ))
                 }
                 _ => {
-                    let E(_, p, expr_) = p_expr(&c.name, env)?;
+                    let Expr(_, p, expr_) = p_expr(&c.name, env)?;
                     match expr_ {
-                        E_::String(id) => Ok(E_::mk_class_const(
+                        Expr_::String(id) => Ok(Expr_::mk_class_const(
                             ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                             (
                                 p,
@@ -1906,16 +1912,16 @@ fn p_expr_impl<'a>(
                                     .map_err(|e| Error::Failwith(e.to_string()))?,
                             ),
                         )),
-                        E_::Id(id) => {
+                        Expr_::Id(id) => {
                             let ast::Id(p, n) = *id;
-                            Ok(E_::mk_class_const(
+                            Ok(Expr_::mk_class_const(
                                 ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                                 (p, n),
                             ))
                         }
-                        E_::Lvar(id) => {
+                        Expr_::Lvar(id) => {
                             let ast::Lid(p, (_, n)) = *id;
-                            Ok(E_::mk_class_get(
+                            Ok(Expr_::mk_class_get(
                                 ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                                 ast::ClassGetExpr::CGstring((p, n)),
                                 match location {
@@ -1924,9 +1930,9 @@ fn p_expr_impl<'a>(
                                 },
                             ))
                         }
-                        _ => Ok(E_::mk_class_get(
+                        _ => Ok(Expr_::mk_class_get(
                             ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
-                            ast::ClassGetExpr::CGexpr(E((), p, expr_)),
+                            ast::ClassGetExpr::CGexpr(Expr((), p, expr_)),
                             match location {
                                 ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
                                 _ => ast::PropOrMethod::IsProp,
@@ -1936,7 +1942,7 @@ fn p_expr_impl<'a>(
                 }
             }
         }
-        CastExpression(c) => Ok(E_::mk_cast(
+        CastExpression(c) => Ok(Expr_::mk_cast(
             p_hint(&c.type_, env)?,
             p_expr(&c.operand, env)?,
         )),
@@ -1956,17 +1962,17 @@ fn p_expr_impl<'a>(
             let alter = p_expr(&c.alternative, env)?;
             let consequence = mp_optional(p_expr, &c.consequence, env)?;
             let condition = p_expr(&c.test, env)?;
-            Ok(E_::mk_eif(condition, consequence, alter))
+            Ok(Expr_::mk_eif(condition, consequence, alter))
         }
-        SubscriptExpression(c) => Ok(E_::mk_array_get(
+        SubscriptExpression(c) => Ok(Expr_::mk_array_get(
             p_expr(&c.receiver, env)?,
             mp_optional(p_expr, &c.index, env)?,
         )),
-        EmbeddedSubscriptExpression(c) => Ok(E_::mk_array_get(
+        EmbeddedSubscriptExpression(c) => Ok(Expr_::mk_array_get(
             p_expr(&c.receiver, env)?,
             mp_optional(|n, e| p_expr_with_loc(location, n, e, None), &c.index, env)?,
         )),
-        ShapeExpression(c) => Ok(E_::Shape(could_map(
+        ShapeExpression(c) => Ok(Expr_::Shape(could_map(
             |n: S<'a>, e: &mut Env<'a>| mp_shape_expression_field(&p_expr, n, e),
             &c.fields,
             env,
@@ -1989,11 +1995,11 @@ fn p_expr_impl<'a>(
                 }
                 _ => (p_expr(&c.type_, env)?, vec![]),
             };
-            if let E_::Id(name) = &e.2 {
+            if let Expr_::Id(name) = &e.2 {
                 fail_if_invalid_reified_generic(node, env, &name.1);
                 fail_if_invalid_class_creation(node, env, &name.1);
             }
-            Ok(E_::mk_new(
+            Ok(Expr_::mk_new(
                 ast::ClassId((), pos, ast::ClassId_::CIexpr(e)),
                 hl,
                 args.into_iter().map(|(_, e)| e).collect(),
@@ -2005,7 +2011,7 @@ fn p_expr_impl<'a>(
             if !c.argument_list.is_missing() {
                 raise_parsing_error(&c.argument_list, env, &syntax_error::targs_not_allowed)
             }
-            Ok(E_::mk_id(pos_name(&c.class_type, env)?))
+            Ok(Expr_::mk_id(pos_name(&c.class_type, env)?))
         }
         LiteralExpression(c) => p_expr_lit(location, node, &c.expression, env),
         PrefixedStringExpression(c) => {
@@ -2014,23 +2020,23 @@ fn p_expr_impl<'a>(
             if name_text != "re" {
                 raise_parsing_error(node, env, &syntax_error::non_re_prefix);
             }
-            Ok(E_::mk_prefixed_string(name_text, p_expr(&c.str, env)?))
+            Ok(Expr_::mk_prefixed_string(name_text, p_expr(&c.str, env)?))
         }
-        IsExpression(c) => Ok(E_::mk_is(
+        IsExpression(c) => Ok(Expr_::mk_is(
             p_expr(&c.left_operand, env)?,
             p_hint(&c.right_operand, env)?,
         )),
-        AsExpression(c) => Ok(E_::mk_as(
+        AsExpression(c) => Ok(Expr_::mk_as(
             p_expr(&c.left_operand, env)?,
             p_hint(&c.right_operand, env)?,
             false,
         )),
-        NullableAsExpression(c) => Ok(E_::mk_as(
+        NullableAsExpression(c) => Ok(Expr_::mk_as(
             p_expr(&c.left_operand, env)?,
             p_hint(&c.right_operand, env)?,
             true,
         )),
-        UpcastExpression(c) => Ok(E_::mk_upcast(
+        UpcastExpression(c) => Ok(Expr_::mk_upcast(
             p_expr(&c.left_operand, env)?,
             p_hint(&c.right_operand, env)?,
         )),
@@ -2082,7 +2088,7 @@ fn p_expr_impl<'a>(
                 doc_comment,
             };
             let uses = p_use(&c.use_, env).unwrap_or_else(|_| vec![]);
-            Ok(E_::mk_efun(fun, uses))
+            Ok(Expr_::mk_efun(fun, uses))
         }
         AwaitableCreationExpression(c) => {
             let suspension_kind = mk_suspension_kind(&c.async_);
@@ -2115,8 +2121,8 @@ fn p_expr_impl<'a>(
                 external,
                 doc_comment: None,
             };
-            Ok(E_::mk_call(
-                E::new((), pos, E_::mk_lfun(body, vec![])),
+            Ok(Expr_::mk_call(
+                Expr::new((), pos, Expr_::mk_lfun(body, vec![])),
                 vec![],
                 vec![],
                 None,
@@ -2137,7 +2143,7 @@ fn p_expr_impl<'a>(
                     ast::Id(name.0, String::from(":") + &name.1)
                 };
 
-                Ok(E_::mk_xml(
+                Ok(Expr_::mk_xml(
                     // TODO: update pos_name to support prefix
                     id, attrs, exprs,
                 ))
@@ -2154,10 +2160,10 @@ fn p_expr_impl<'a>(
              */
             let ast::Id(label_pos, label_name) = pos_name(&c.expression, env)?;
             if c.qualifier.is_missing() {
-                Ok(E_::mk_enum_class_label(None, label_name))
+                Ok(Expr_::mk_enum_class_label(None, label_name))
             } else if c.qualifier.is_name() {
                 let name = pos_name(&c.qualifier, env)?;
-                Ok(E_::mk_enum_class_label(Some(name), label_name))
+                Ok(Expr_::mk_enum_class_label(Some(name), label_name))
             } else if label_name.ends_with("AUTO332") {
                 // This can happen during parsing in auto-complete mode
                 // In such case, the "label_name" must end with AUTO332
@@ -2166,9 +2172,9 @@ fn p_expr_impl<'a>(
                 let recv = p_expr_with_loc(ExprLocation::CallReceiver, &c.qualifier, env, None);
                 match recv {
                     Ok(recv) => {
-                        let enum_class_label = E_::mk_enum_class_label(None, label_name);
+                        let enum_class_label = Expr_::mk_enum_class_label(None, label_name);
                         let enum_class_label = ast::Expr::new((), label_pos, enum_class_label);
-                        Ok(E_::mk_call(
+                        Ok(Expr_::mk_call(
                             recv,
                             vec![],
                             vec![(ast::ParamKind::Pnormal, enum_class_label)],
@@ -2178,48 +2184,71 @@ fn p_expr_impl<'a>(
                     Err(err) => Err(err),
                 }
             } else {
-                missing_syntax_(Some(E_::Null), "method call", node, env)
+                missing_syntax_(Some(Expr_::Null), "method call", node, env)
             }
         }
-        _ => missing_syntax_(Some(E_::Null), "expression", node, env),
+        _ => missing_syntax_(Some(Expr_::Null), "expression", node, env),
     }
 }
 
 fn check_lvalue<'a>(ast::Expr(_, p, expr_): &ast::Expr, env: &mut Env<'a>) {
-    use aast::Expr_::*;
     let mut raise = |s| raise_parsing_error_pos(p, env, s);
     match expr_ {
-        ObjGet(og) => {
+        Expr_::ObjGet(og) => {
             if og.as_ref().3 == ast::PropOrMethod::IsMethod {
                 raise("Invalid lvalue")
             } else {
                 match og.as_ref() {
-                    (_, ast::Expr(_, _, Id(_)), ast::OgNullFlavor::OGNullsafe, _) => {
+                    (_, ast::Expr(_, _, Expr_::Id(_)), ast::OgNullFlavor::OGNullsafe, _) => {
                         raise("?-> syntax is not supported for lvalues")
                     }
-                    (_, ast::Expr(_, _, Id(sid)), _, _) if sid.1.as_bytes()[0] == b':' => {
+                    (_, ast::Expr(_, _, Expr_::Id(sid)), _, _) if sid.1.as_bytes()[0] == b':' => {
                         raise("->: syntax is not supported for lvalues")
                     }
                     _ => {}
                 }
             }
         }
-        ArrayGet(ag) => {
-            if let ClassConst(_) = (ag.0).2 {
+        Expr_::ArrayGet(ag) => {
+            if let Expr_::ClassConst(_) = (ag.0).2 {
                 raise("Array-like class consts are not valid lvalues");
             }
         }
-        List(l) => {
+        Expr_::List(l) => {
             for i in l.iter() {
                 check_lvalue(i, env);
             }
         }
-        Darray(_) | Varray(_) | Shape(_) | Collection(_) | Null | True | False | Id(_)
-        | Clone(_) | ClassConst(_) | Int(_) | Float(_) | PrefixedString(_) | String(_)
-        | String2(_) | Yield(_) | Await(_) | Cast(_) | Unop(_) | Binop(_) | Eif(_) | New(_)
-        | Efun(_) | Lfun(_) | Xml(_) | Import(_) | Pipe(_) | Is(_) | As(_) | Call(_) => {
-            raise("Invalid lvalue")
-        }
+        Expr_::Darray(_)
+        | Expr_::Varray(_)
+        | Expr_::Shape(_)
+        | Expr_::Collection(_)
+        | Expr_::Null
+        | Expr_::True
+        | Expr_::False
+        | Expr_::Id(_)
+        | Expr_::Clone(_)
+        | Expr_::ClassConst(_)
+        | Expr_::Int(_)
+        | Expr_::Float(_)
+        | Expr_::PrefixedString(_)
+        | Expr_::String(_)
+        | Expr_::String2(_)
+        | Expr_::Yield(_)
+        | Expr_::Await(_)
+        | Expr_::Cast(_)
+        | Expr_::Unop(_)
+        | Expr_::Binop(_)
+        | Expr_::Eif(_)
+        | Expr_::New(_)
+        | Expr_::Efun(_)
+        | Expr_::Lfun(_)
+        | Expr_::Xml(_)
+        | Expr_::Import(_)
+        | Expr_::Pipe(_)
+        | Expr_::Is(_)
+        | Expr_::As(_)
+        | Expr_::Call(_) => raise("Invalid lvalue"),
         _ => {}
     }
 }
@@ -2234,16 +2263,16 @@ where
             /* for XHP string literals (attribute values) just extract
             value from quotes and decode HTML entities  */
             let text = html_entities::decode(get_quoted_content(node.full_text(env.source_text())));
-            Ok(ast::Expr::new((), p, E_::make_string(text)))
+            Ok(ast::Expr::new((), p, Expr_::make_string(text)))
         } else if env.codegen() && TK::XHPBody == kind {
             let p = p_pos(node, env);
             /* for XHP body - only decode HTML entities */
             let text = html_entities::decode(&unesc_xhp(node.full_text(env.source_text())));
-            Ok(ast::Expr::new((), p, E_::make_string(text)))
+            Ok(ast::Expr::new((), p, Expr_::make_string(text)))
         } else {
             let p = p_pos(node, env);
             let s = escaper(node.full_text(env.source_text()));
-            Ok(ast::Expr::new((), p, E_::make_string(s)))
+            Ok(ast::Expr::new((), p, Expr_::make_string(s)))
         }
     } else {
         p_expr(node, env)
@@ -2259,7 +2288,7 @@ fn p_xhp_attr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::XhpAttribute, E
                 && env.file_mode() == file_info::Mode::Mhhi
                 && !env.codegen()
             {
-                ast::Expr::new((), env.mk_none_pos(), E_::Null)
+                ast::Expr::new((), env.mk_none_pos(), Expr_::Null)
             } else {
                 p_xhp_embedded(unesc_xhp_attr, attr_expr, env)?
             };
@@ -2327,10 +2356,10 @@ fn p_bop<'a>(
     lhs: ast::Expr,
     rhs: ast::Expr,
     env: &mut Env<'a>,
-) -> Result<ast::Expr_, Error> {
+) -> Result<Expr_, Error> {
     use ast::Bop::*;
-    let mk = |op, l, r| Ok(E_::mk_binop(op, l, r));
-    let mk_eq = |op, l, r| Ok(E_::mk_binop(Eq(Some(Box::new(op))), l, r));
+    let mk = |op, l, r| Ok(Expr_::mk_binop(op, l, r));
+    let mk_eq = |op, l, r| Ok(Expr_::mk_binop(Eq(Some(Box::new(op))), l, r));
     match token_kind(node) {
         Some(TK::Equal) => mk(Eq(None), lhs, rhs),
         Some(TK::Bar) => mk(Bar, lhs, rhs),
@@ -2378,9 +2407,9 @@ fn p_bop<'a>(
         Some(TK::BarGreaterThan) => {
             let lid =
                 ast::Lid::from_counter(pos, env.next_local_id(), special_idents::DOLLAR_DOLLAR);
-            Ok(E_::mk_pipe(lid, lhs, rhs))
+            Ok(Expr_::mk_pipe(lid, lhs, rhs))
         }
-        Some(TK::QuestionColon) => Ok(E_::mk_eif(lhs, None, rhs)),
+        Some(TK::QuestionColon) => Ok(Expr_::mk_eif(lhs, None, rhs)),
         _ => missing_syntax("binary operator", node, env),
     }
 }
@@ -2570,11 +2599,11 @@ fn lift_await<'a>(
     expr: ast::Expr,
     env: &mut Env<'a>,
     location: ExprLocation,
-) -> ast::Expr_ {
+) -> Expr_ {
     use ExprLocation::{AsStatement, RightOfAssignmentInUsingStatement, UsingStatement};
     match (&env.lifted_awaits, location) {
         (_, UsingStatement) | (_, RightOfAssignmentInUsingStatement) | (None, _) => {
-            E_::mk_await(expr)
+            Expr_::mk_await(expr)
         }
         (Some(_), _) => {
             if location != AsStatement {
@@ -2585,12 +2614,12 @@ fn lift_await<'a>(
                 if let Some(aw) = env.lifted_awaits.as_mut() {
                     aw.awaits.push(await_)
                 }
-                E_::mk_lvar(lid)
+                Expr_::mk_lvar(lid)
             } else {
                 if let Some(aw) = env.lifted_awaits.as_mut() {
                     aw.awaits.push((None, expr))
                 }
-                E_::Null
+                Expr_::Null
             }
         }
     }
@@ -2858,7 +2887,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
                 let echo = match &c.keyword.children {
                     QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
                         let name = pos_name(&c.keyword, e)?;
-                        ast::Expr::new((), name.0.clone(), E_::mk_id(name))
+                        ast::Expr::new((), name.0.clone(), Expr_::mk_id(name))
                     }
                     _ => missing_syntax("id", &c.keyword, e)?,
                 };
@@ -2868,7 +2897,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
                     S_::mk_expr(ast::Expr::new(
                         (),
                         pos,
-                        E_::mk_call(echo, vec![], args, None),
+                        Expr_::mk_call(echo, vec![], args, None),
                     )),
                 ))
             };
@@ -2882,7 +2911,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
                 let unset = match &c.keyword.children {
                     QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
                         let name = pos_name(&c.keyword, e)?;
-                        ast::Expr::new((), name.0.clone(), E_::mk_id(name))
+                        ast::Expr::new((), name.0.clone(), Expr_::mk_id(name))
                     }
                     _ => missing_syntax("id", &c.keyword, e)?,
                 };
@@ -2891,7 +2920,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
                     S_::mk_expr(ast::Expr::new(
                         (),
                         pos,
-                        E_::mk_call(unset, vec![], args, None),
+                        Expr_::mk_call(unset, vec![], args, None),
                     )),
                 ))
             };
@@ -2906,7 +2935,6 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
             let stmt = match stmt {
                 S_::Block(stmts) => {
                     use ast::Bop::Eq;
-                    use ast::Expr as E;
                     /* Reuse tmp vars from lifted_awaits, this is safe because there will
                      * always be more awaits with tmp vars than statements with assignments */
                     let mut tmp_vars = lifted_awaits
@@ -2922,16 +2950,16 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
 
                         if let Some(tv) = tmp_vars.next() {
                             if let Stmt(p1, S_::Expr(expr)) = n {
-                                if let E(_, p2, E_::Binop(bop)) = *expr {
+                                if let Expr(_, p2, Expr_::Binop(bop)) = *expr {
                                     if let (Eq(op), e1, e2) = *bop {
-                                        let tmp_n = E::mk_lvar(&e2.1, &(tv.1));
+                                        let tmp_n = Expr::mk_lvar(&e2.1, &(tv.1));
                                         if tmp_n.lvar_name() != e2.lvar_name() {
                                             let new_n = new(
                                                 p1.clone(),
-                                                S_::mk_expr(E::new(
+                                                S_::mk_expr(Expr::new(
                                                     (),
                                                     p2.clone(),
-                                                    E_::mk_binop(
+                                                    Expr_::mk_binop(
                                                         Eq(None),
                                                         tmp_n.clone(),
                                                         e2.clone(),
@@ -2942,10 +2970,10 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
                                         }
                                         let assign_stmt = new(
                                             p1,
-                                            S_::mk_expr(E::new(
+                                            S_::mk_expr(Expr::new(
                                                 (),
                                                 p2,
-                                                E_::mk_binop(Eq(op), e1, tmp_n),
+                                                Expr_::mk_binop(Eq(op), e1, tmp_n),
                                             )),
                                         );
                                         assign_stmts.push(assign_stmt);
@@ -2982,8 +3010,8 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
 }
 fn check_mutate_class_const<'a>(e: &ast::Expr, node: S<'a>, env: &mut Env<'a>) {
     match &e.2 {
-        E_::ArrayGet(c) if c.1.is_some() => check_mutate_class_const(&c.0, node, env),
-        E_::ClassConst(_) => raise_parsing_error(node, env, &syntax_error::const_mutation),
+        Expr_::ArrayGet(c) if c.1.is_some() => check_mutate_class_const(&c.0, node, env),
+        Expr_::ClassConst(_) => raise_parsing_error(node, env, &syntax_error::const_mutation),
         _ => {}
     }
 }
@@ -4318,20 +4346,20 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                     }
                     _ => p.clone(),
                 };
-                let e = |expr_: ast::Expr_| -> ast::Expr { ast::Expr::new((), p.clone(), expr_) };
+                let e = |expr_: Expr_| -> ast::Expr { ast::Expr::new((), p.clone(), expr_) };
                 let lid = |s: &str| -> ast::Lid { ast::Lid(p.clone(), (0, s.to_string())) };
                 (
                     ast::Stmt::new(
                         p.clone(),
-                        ast::Stmt_::mk_expr(e(E_::mk_binop(
+                        ast::Stmt_::mk_expr(e(Expr_::mk_binop(
                             ast::Bop::Eq(None),
-                            e(E_::mk_obj_get(
-                                e(E_::mk_lvar(lid(special_idents::THIS))),
-                                e(E_::mk_id(ast::Id(p.clone(), cvname.to_string()))),
+                            e(Expr_::mk_obj_get(
+                                e(Expr_::mk_lvar(lid(special_idents::THIS))),
+                                e(Expr_::mk_id(ast::Id(p.clone(), cvname.to_string()))),
                                 ast::OgNullFlavor::OGNullthrows,
                                 ast::PropOrMethod::IsProp,
                             )),
-                            e(E_::mk_lvar(lid(&param.name))),
+                            e(Expr_::mk_lvar(lid(&param.name))),
                         ))),
                     ),
                     ast::ClassVar {
@@ -4541,9 +4569,9 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                                 let mut enum_vals = vec![];
                                 for val in vals.clone() {
                                     match val {
-                                        ast::Expr(_, _, E_::String(xev)) => enum_vals
+                                        ast::Expr(_, _, Expr_::String(xev)) => enum_vals
                                             .push(ast::XhpEnumValue::XEVString(xev.to_string())),
-                                        ast::Expr(_, _, E_::Int(xev)) => match xev.parse() {
+                                        ast::Expr(_, _, Expr_::Int(xev)) => match xev.parse() {
                                             Ok(n) => enum_vals.push(ast::XhpEnumValue::XEVInt(n)),
                                             Err(_) =>
                                                 // Since we have parse checks for

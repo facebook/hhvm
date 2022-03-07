@@ -242,9 +242,9 @@ impl Instruct<'_> {
             | Self::Opcode(Opcodes::FCallClsMethodSD(fcall_args, ..))
             | Self::Opcode(Opcodes::FCallCtor(fcall_args, ..))
             | Self::Opcode(Opcodes::FCallFunc(fcall_args))
-            | Self::Opcode(Opcodes::FCallFuncD { fcall_args, .. })
-            | Self::Opcode(Opcodes::FCallObjMethod { fcall_args, .. })
-            | Self::Opcode(Opcodes::FCallObjMethodD { fcall_args, .. }) => fcall_args.targets(),
+            | Self::Opcode(Opcodes::FCallFuncD(fcall_args, ..))
+            | Self::Opcode(Opcodes::FCallObjMethod(fcall_args, ..))
+            | Self::Opcode(Opcodes::FCallObjMethodD(fcall_args, ..)) => fcall_args.targets(),
             Self::Opcode(Opcodes::Jmp(x))
             | Self::Opcode(Opcodes::JmpNS(x))
             | Self::Opcode(Opcodes::JmpZ(x))
@@ -475,9 +475,9 @@ impl Instruct<'_> {
             | Self::Opcode(Opcodes::FCallClsMethodSD(fcall_args, ..))
             | Self::Opcode(Opcodes::FCallCtor(fcall_args, ..))
             | Self::Opcode(Opcodes::FCallFunc(fcall_args))
-            | Self::Opcode(Opcodes::FCallFuncD { fcall_args, .. })
-            | Self::Opcode(Opcodes::FCallObjMethod { fcall_args, .. })
-            | Self::Opcode(Opcodes::FCallObjMethodD { fcall_args, .. }) => fcall_args.targets_mut(),
+            | Self::Opcode(Opcodes::FCallFuncD(fcall_args, ..))
+            | Self::Opcode(Opcodes::FCallObjMethod(fcall_args, ..))
+            | Self::Opcode(Opcodes::FCallObjMethodD(fcall_args, ..)) => fcall_args.targets_mut(),
             Self::Opcode(Opcodes::Jmp(x))
             | Self::Opcode(Opcodes::JmpNS(x))
             | Self::Opcode(Opcodes::JmpZ(x))

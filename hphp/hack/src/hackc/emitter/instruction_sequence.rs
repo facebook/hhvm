@@ -905,14 +905,15 @@ pub mod instr {
     }
 
     pub fn fcallfuncd<'a>(fcall_args: FcallArgs<'a>, func: FunctionId<'a>) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::FCallFuncD { fcall_args, func }))
+        instr(Instruct::Opcode(Opcodes::FCallFuncD(fcall_args, func)))
     }
 
     pub fn fcallobjmethod<'a>(fcall_args: FcallArgs<'a>, flavor: ObjMethodOp) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::FCallObjMethod {
+        instr(Instruct::Opcode(Opcodes::FCallObjMethod(
             fcall_args,
+            Default::default(),
             flavor,
-        }))
+        )))
     }
 
     pub fn fcallobjmethodd<'a>(
@@ -920,11 +921,12 @@ pub mod instr {
         method: MethodId<'a>,
         flavor: ObjMethodOp,
     ) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::FCallObjMethodD {
+        instr(Instruct::Opcode(Opcodes::FCallObjMethodD(
             fcall_args,
+            Default::default(),
             flavor,
             method,
-        }))
+        )))
     }
 
     pub fn fcallobjmethodd_nullthrows<'a>(

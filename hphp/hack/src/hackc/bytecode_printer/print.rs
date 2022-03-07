@@ -1278,26 +1278,22 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
             w.write_all(b"FCallFunc ")?;
             print_fcall_args(w, fcall_args, dv_labels)
         }
-        Opcodes::FCallFuncD { fcall_args, func } => {
+        Opcodes::FCallFuncD(fcall_args, func) => {
             w.write_all(b"FCallFuncD ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(b" ")?;
             print_function_id(w, func)
         }
-        Opcodes::FCallObjMethod { fcall_args, flavor } => {
+        Opcodes::FCallObjMethod(fcall_args, hint, flavor) => {
             w.write_all(b"FCallObjMethod ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(br#" "" "#)?;
+            write_bytes!(w, r#" "{}" "#, hint)?;
             print_null_flavor(w, flavor)
         }
-        Opcodes::FCallObjMethodD {
-            fcall_args,
-            flavor,
-            method,
-        } => {
+        Opcodes::FCallObjMethodD(fcall_args, hint, flavor, method) => {
             w.write_all(b"FCallObjMethodD ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(br#" "" "#)?;
+            write_bytes!(w, r#" "{}" "#, hint)?;
             print_null_flavor(w, flavor)?;
             w.write_all(b" ")?;
             print_method_id(w, method)

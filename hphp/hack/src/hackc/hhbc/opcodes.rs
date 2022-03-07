@@ -107,19 +107,14 @@ pub enum Opcodes<'arena> {
     ),
     FCallCtor(FcallArgs<'arena>, Str<'arena>),
     FCallFunc(FcallArgs<'arena>),
-    FCallFuncD {
-        fcall_args: FcallArgs<'arena>,
-        func: FunctionId<'arena>,
-    },
-    FCallObjMethod {
-        fcall_args: FcallArgs<'arena>,
-        flavor: ObjMethodOp,
-    },
-    FCallObjMethodD {
-        fcall_args: FcallArgs<'arena>,
-        flavor: ObjMethodOp,
-        method: MethodId<'arena>,
-    },
+    FCallFuncD(FcallArgs<'arena>, FunctionId<'arena>),
+    FCallObjMethod(FcallArgs<'arena>, Str<'arena>, ObjMethodOp),
+    FCallObjMethodD(
+        FcallArgs<'arena>,
+        Str<'arena>,
+        ObjMethodOp,
+        MethodId<'arena>,
+    ),
     False,
     Fatal(FatalOp),
     File,

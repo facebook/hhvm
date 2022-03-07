@@ -10,12 +10,15 @@ use tempdir::TempDir;
 
 use fbinit::FacebookInit;
 use hackrs::{
-    decl_parser::DeclParser, folded_decl_provider::LazyFoldedDeclProvider,
-    naming_provider::SqliteNamingTable, reason::NReason,
-    shallow_decl_provider::LazyShallowDeclProvider, special_names::SpecialNames,
+    decl_parser::DeclParser,
+    folded_decl_provider::LazyFoldedDeclProvider,
+    naming_provider::SqliteNamingTable,
+    reason::BReason,
+    shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclCache},
+    special_names::SpecialNames,
 };
-use hackrs_test_utils::cache::{make_non_eviction_shallow_decl_cache, NonEvictingCache};
-use hh24_test::{create_naming_table, TestRepo};
+use hackrs_test_utils::cache::NonEvictingCache;
+use hh24_test::TestRepo;
 use pos::RelativePathCtx;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -30,10 +33,10 @@ struct TestContext {
     pub decl_parser: DeclParser,
 
     #[allow(dead_code)]
-    pub shallow_decl_provider: Arc<LazyShallowDeclProvider<NReason>>,
+    pub shallow_decl_provider: Arc<LazyShallowDeclProvider<BReason>>,
 
     #[allow(dead_code)]
-    pub folded_decl_provider: Arc<LazyFoldedDeclProvider<NReason>>,
+    pub folded_decl_provider: Arc<LazyFoldedDeclProvider<BReason>>,
 }
 
 impl TestContext {
@@ -42,7 +45,7 @@ impl TestContext {
         let tmpdir = TempDir::new("rupro_test")?;
         let root = TestRepo::new(&files)?;
         let naming_table = tmpdir.path().join("names.sql");
-        create_naming_table(&naming_table, &files)?;
+        hh24_test::create_naming_table(&naming_table, &files)?;
         let path_ctx = Arc::new(RelativePathCtx {
             root: root.path().to_path_buf(),
             hhi: PathBuf::new(),
@@ -51,7 +54,11 @@ impl TestContext {
         });
         let decl_parser = DeclParser::new(path_ctx);
         let shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(
-            Arc::new(make_non_eviction_shallow_decl_cache()),
+            Arc::new(ShallowDeclCache::with_no_member_caches(
+                Arc::new(NonEvictingCache::default()),
+                Box::new(NonEvictingCache::default()),
+                Box::new(NonEvictingCache::default()),
+            )),
             Arc::new(SqliteNamingTable::new(&naming_table).unwrap()),
             decl_parser.clone(),
         ));

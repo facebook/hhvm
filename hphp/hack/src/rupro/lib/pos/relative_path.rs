@@ -5,6 +5,7 @@
 
 use crate::ToOxidized;
 use intern::string::BytesId;
+use ocamlrep::{FromOcamlRep, ToOcamlRep};
 use std::ffi::OsStr;
 use std::fmt;
 use std::os::unix::ffi::OsStrExt;
@@ -12,7 +13,7 @@ use std::path::{Path, PathBuf};
 
 pub use oxidized::relative_path::Prefix;
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct RelativePath {
     prefix: Prefix,
     suffix: BytesId,
@@ -59,6 +60,20 @@ impl<'a> ToOxidized<'a> for RelativePath {
             self.prefix,
             Path::new(OsStr::from_bytes(self.suffix.as_bytes())),
         ))
+    }
+}
+
+impl ToOcamlRep for RelativePath {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
+        let arena = &bumpalo::Bump::new();
+        self.to_oxidized(arena).to_ocamlrep(alloc)
+    }
+}
+
+impl FromOcamlRep for RelativePath {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        let path = oxidized::relative_path::RelativePath::from_ocamlrep(value)?;
+        Ok(Self::from(&path))
     }
 }
 

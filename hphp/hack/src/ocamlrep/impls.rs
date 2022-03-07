@@ -10,6 +10,7 @@ use std::ffi::{OsStr, OsString};
 use std::mem::size_of;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
+use std::sync::Arc;
 
 use bstr::{BStr, BString};
 use bumpalo::Bump;
@@ -211,6 +212,7 @@ impl<T: ToOcamlRep + Sized> ToOcamlRep for &'_ T {
 
 impl<'a, T: FromOcamlRepIn<'a>> FromOcamlRepIn<'a> for &'a T {
     fn from_ocamlrep_in(value: Value<'_>, alloc: &'a Bump) -> Result<Self, FromError> {
+        // NB: We don't get any sharing this way.
         Ok(alloc.alloc(T::from_ocamlrep_in(value, alloc)?))
     }
 }
@@ -229,6 +231,23 @@ impl<T: FromOcamlRep> FromOcamlRep for Rc<T> {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
         // NB: We don't get any sharing this way.
         Ok(Rc::new(T::from_ocamlrep(value)?))
+    }
+}
+
+impl<T: ToOcamlRep + Sized> ToOcamlRep for Arc<T> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+        alloc.memoized(
+            self.as_ref() as *const T as usize,
+            size_of::<T>(),
+            |alloc| alloc.add(self.as_ref()),
+        )
+    }
+}
+
+impl<T: FromOcamlRep> FromOcamlRep for Arc<T> {
+    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
+        // NB: We don't get any sharing this way.
+        Ok(Arc::new(T::from_ocamlrep(value)?))
     }
 }
 

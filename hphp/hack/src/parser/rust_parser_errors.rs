@@ -24,7 +24,7 @@ use parser_core_types::{
         syntax::Syntax,
         syntax_variant_generated::{ListItemChildren, SyntaxVariant, SyntaxVariant::*},
     },
-    syntax_error::{self as errors, Error, ErrorType, LvalRoot, SyntaxError},
+    syntax_error::{self as errors, Error, ErrorType, LvalRoot, SyntaxError, SyntaxQuickfix},
     syntax_trait::SyntaxTrait,
     syntax_tree::SyntaxTree,
     token_kind::TokenKind,
@@ -689,6 +689,21 @@ fn make_error_from_nodes(
 
 fn make_error_from_node(node: S<'_>, error: errors::Error) -> SyntaxError {
     make_error_from_nodes(None, node, node, ErrorType::ParseError, error)
+}
+
+fn make_error_from_node_with_quickfix(
+    node: S<'_>,
+    error: errors::Error,
+    quickfix_title: &str,
+    new_text: &str,
+) -> SyntaxError {
+    let s = start_offset(node);
+    let e = end_offset(node);
+    let quickfixes = vec![SyntaxQuickfix {
+        title: quickfix_title.into(),
+        edits: vec![(s, e, new_text.into())],
+    }];
+    SyntaxError::make_with_child_and_type(None, s, e, ErrorType::ParseError, error, quickfixes)
 }
 
 fn make_error_from_node_with_type(
@@ -2112,12 +2127,14 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 self.methodish_memoize_lsb_on_non_static(node);
                 let async_annotation = extract_keyword(|x| x.is_async(), node).unwrap_or(node);
 
-                self.produce_error(
-                    |self_, x| self_.is_interface_and_async_method(x),
-                    node,
-                    || errors::error2046("a method in an interface"),
-                    async_annotation,
-                );
+                if self.is_interface_and_async_method(node) {
+                    self.errors.push(make_error_from_node_with_quickfix(
+                        async_annotation,
+                        errors::error2046("a method in an interface"),
+                        "Remove `async`",
+                        "",
+                    ))
+                }
 
                 self.produce_error(
                     |_, x| is_abstract_and_async_method(x),

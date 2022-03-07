@@ -10,6 +10,7 @@ use hackrs::{
     reason::{BReason, NReason, Reason},
     typing_decl_provider::{FoldingTypingDeclProvider, TypingDeclProvider},
 };
+use jwalk::WalkDir;
 use pos::{Prefix, RelativePath, RelativePathCtx};
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -49,9 +50,12 @@ struct CliOptions {
 fn main() {
     let mut opts = CliOptions::from_args();
 
+    let hhi_root = tempdir::TempDir::new("rupro_decl_file_hhi").unwrap();
+    hhi::write_hhi_files(hhi_root.path()).unwrap();
+
     let path_ctx = Arc::new(RelativePathCtx {
         root: opts.root.clone().unwrap_or_else(PathBuf::new),
-        hhi: PathBuf::new(),
+        hhi: hhi_root.path().into(),
         dummy: PathBuf::new(),
         tmp: PathBuf::new(),
     });
@@ -82,11 +86,17 @@ fn main() {
 }
 
 fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames: &[RelativePath]) {
+    let hhi_filenames = WalkDir::new(&ctx.hhi)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|e| !e.file_type().is_dir())
+        .map(|e| RelativePath::new(Prefix::Hhi, e.path().strip_prefix(&ctx.hhi).unwrap()))
+        .collect::<Vec<_>>();
     let decl_parser = DeclParser::new(ctx);
     let folded_decl_provider = hackrs_test_utils::decl_provider::make_folded_decl_provider(
         opts.naming_table.as_ref(),
         &decl_parser,
-        filenames.iter().copied(),
+        hhi_filenames.into_iter().chain(filenames.iter().copied()),
     );
     let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
         Arc::new(hackrs_test_utils::cache::NonEvictingCache::new()),

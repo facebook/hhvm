@@ -14,11 +14,12 @@ ocaml_ffi_with_arena! {
         let path_ctx = Arc::new(RelativePathCtx::default());
         let filename = RelativePath::new(Prefix::Dummy, filename.path());
         let decl_parser = DeclParser::new(path_ctx);
-        let folded_decl_provider: Arc<dyn folded_decl_provider::FoldedDeclProvider<BReason>> = hackrs_test_utils::decl_provider::make_folded_decl_provider(
-            None,
-            &decl_parser,
-            std::iter::once(filename),
-        );
+        let folded_decl_provider: Arc<dyn folded_decl_provider::FoldedDeclProvider<BReason>> =
+            hackrs_test_utils::decl_provider::make_folded_decl_provider(
+                None,
+                &decl_parser,
+                std::iter::once(filename),
+            );
 
         decl_parser
             .parse::<BReason>(filename)

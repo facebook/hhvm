@@ -1135,7 +1135,11 @@ let check_file ctx errors files_info ~profile_type_check_twice ~memtrace =
 
 let create_nasts ctx files_info =
   let build_nast fn _ =
-    let ast = Ast_provider.get_ast ~full:true ctx fn in
+    let (syntax_errors, ast) =
+      Ast_provider.get_ast_with_error ~full:true ctx fn
+    in
+    let error_list = Errors.get_sorted_error_list syntax_errors in
+    List.iter error_list ~f:Errors.add_error;
     Naming.program ctx ast
   in
   Relative_path.Map.mapi ~f:build_nast files_info

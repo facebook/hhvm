@@ -1235,6 +1235,7 @@ fn p_string2<'a>(
                     ExprLocation::InDoubleQuotedString,
                     &nodes[i + 1],
                     env,
+                    None,
                 )?);
                 i += 2;
                 continue;
@@ -1245,21 +1246,15 @@ fn p_string2<'a>(
             ExprLocation::InDoubleQuotedString,
             node,
             env,
+            None,
         )?);
         i += 1;
     }
     Ok(result)
 }
 
-fn p_expr_l<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Expr>, Error> {
-    let p_expr = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr, Error> {
-        p_expr_with_loc(ExprLocation::TopLevel, n, e)
-    };
-    could_map(p_expr, node, env)
-}
-
 fn p_expr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Expr, Error> {
-    p_expr_with_loc(ExprLocation::TopLevel, node, env)
+    p_expr_with_loc(ExprLocation::TopLevel, node, env, None)
 }
 
 fn p_expr_for_function_call_arguments<'a>(
@@ -1289,14 +1284,6 @@ fn p_expr_with_loc<'a>(
     location: ExprLocation,
     node: S<'a>,
     env: &mut Env<'a>,
-) -> Result<ast::Expr, Error> {
-    p_expr_impl(location, node, env, None)
-}
-
-fn p_expr_impl<'a>(
-    location: ExprLocation,
-    node: S<'a>,
-    env: &mut Env<'a>,
     parent_pos: Option<Pos>,
 ) -> Result<ast::Expr, Error> {
     // We use location=CallReceiver to set PropOrMethod::IsMethod on ObjGet
@@ -1319,14 +1306,14 @@ fn p_expr_impl<'a>(
             // or an XHP splice.
             //   <p id={$id}>hello</p>;
             // In both cases, unwrap, consistent with parentheses.
-            p_expr_impl(location, &c.expression, env, parent_pos)
+            p_expr_with_loc(location, &c.expression, env, parent_pos)
         }
-        ParenthesizedExpression(c) => p_expr_impl(location, &c.expression, env, parent_pos),
+        ParenthesizedExpression(c) => p_expr_with_loc(location, &c.expression, env, parent_pos),
         ETSpliceExpression(c) => {
             let pos = p_pos(node, env);
 
             let inner_pos = p_pos(&c.expression, env);
-            let inner_expr_ = p_expr_impl_(location, &c.expression, env, parent_pos)?;
+            let inner_expr_ = p_expr_recurse(location, &c.expression, env, parent_pos)?;
             let inner_expr = ast::Expr::new((), inner_pos, inner_expr_);
             Ok(ast::Expr::new(
                 (),
@@ -1336,7 +1323,7 @@ fn p_expr_impl<'a>(
         }
         _ => {
             let pos = p_pos(node, env);
-            let expr_ = p_expr_impl_(location, node, env, parent_pos)?;
+            let expr_ = p_expr_recurse(location, node, env, parent_pos)?;
             Ok(ast::Expr::new((), pos, expr_))
         }
     }
@@ -1427,15 +1414,7 @@ fn p_expr_lit<'a>(
     }
 }
 
-fn p_expr_with_loc_<'a>(
-    location: ExprLocation,
-    node: S<'a>,
-    env: &mut Env<'a>,
-) -> Result<ast::Expr_, Error> {
-    p_expr_impl_(location, node, env, None)
-}
-
-fn p_expr_impl_<'a>(
+fn p_expr_recurse<'a>(
     location: ExprLocation,
     node: S<'a>,
     env: &mut Env<'a>,
@@ -1445,7 +1424,7 @@ fn p_expr_impl_<'a>(
         Err(Error::Failwith("Expression recursion limit reached".into()))
     } else {
         *env.exp_recursion_depth() += 1;
-        let r = p_expr_impl__(location, node, env, parent_pos);
+        let r = p_expr_impl(location, node, env, parent_pos);
         *env.exp_recursion_depth() -= 1;
         r
     }
@@ -1476,7 +1455,7 @@ fn split_args_vararg<'a>(
     ))
 }
 
-fn p_expr_impl__<'a>(
+fn p_expr_impl<'a>(
     location: ExprLocation,
     node: S<'a>,
     env: &mut Env<'a>,
@@ -1501,8 +1480,9 @@ fn p_expr_impl__<'a>(
         ))
     };
     let p_special_call = |recv: S<'a>, args: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr_, Error> {
-        // Mark expression as CallReceiver so that we can correctly set PropOrMethod field in ObjGet and ClassGet
-        let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, e)?;
+        // Mark expression as CallReceiver so that we can correctly set
+        // PropOrMethod field in ObjGet and ClassGet
+        let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, e, None)?;
         let (args, varargs) = split_args_vararg(args, e)?;
         Ok(E_::mk_call(recv, vec![], args, varargs))
     };
@@ -1512,7 +1492,7 @@ fn p_expr_impl__<'a>(
                 raise_parsing_error(recv, e, &syntax_error::invalid_constructor_method_call);
             }
             let recv = p_expr(recv, e)?;
-            let name = p_expr_with_loc(ExprLocation::MemberSelect, name, e)?;
+            let name = p_expr_with_loc(ExprLocation::MemberSelect, name, e, None)?;
             let op = p_null_flavor(op, e)?;
             Ok(E_::mk_obj_get(
                 recv,
@@ -1595,9 +1575,9 @@ fn p_expr_impl__<'a>(
             };
             Ok(E_::mk_lfun(fun, vec![]))
         }
-        BracedExpression(c) => p_expr_with_loc_(location, &c.expression, env),
-        EmbeddedBracedExpression(c) => p_expr_impl_(location, &c.expression, env, Some(pos)),
-        ParenthesizedExpression(c) => p_expr_with_loc_(location, &c.expression, env),
+        BracedExpression(c) => p_expr_recurse(location, &c.expression, env, None),
+        EmbeddedBracedExpression(c) => p_expr_recurse(location, &c.expression, env, Some(pos)),
+        ParenthesizedExpression(c) => p_expr_recurse(location, &c.expression, env, None),
         DictionaryIntrinsicExpression(c) => {
             p_intri_expr(&c.keyword, &c.explicit_type, &c.members, env)
         }
@@ -1700,8 +1680,9 @@ fn p_expr_impl__<'a>(
                         _ => vec![],
                     };
 
-                    // Mark expression as CallReceiver so that we can correctly set PropOrMethod field in ObjGet and ClassGet
-                    let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, env)?;
+                    // Mark expression as CallReceiver so that we can correctly set
+                    // PropOrMethod field in ObjGet and ClassGet
+                    let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, env, None)?;
                     let (mut args, varargs) = split_args_vararg(args, env)?;
 
                     // If the function has an enum class label expression, that's
@@ -1798,7 +1779,7 @@ fn p_expr_impl__<'a>(
                     let expr = p_expr(operand, env)?;
                     mk_unop(Usilence, expr)
                 } else {
-                    let expr = p_expr_impl(ExprLocation::TopLevel, operand, env, Some(pos))?;
+                    let expr = p_expr_with_loc(ExprLocation::TopLevel, operand, env, Some(pos))?;
                     Ok(expr.2)
                 }
             } else {
@@ -1847,8 +1828,8 @@ fn p_expr_impl__<'a>(
             let bop_ast_node = p_bop(
                 pos,
                 &c.operator,
-                p_expr(&c.left_operand, env)?,
-                p_expr_with_loc(rlocation, &c.right_operand, env)?,
+                p_expr_with_loc(ExprLocation::TopLevel, &c.left_operand, env, None)?,
+                p_expr_with_loc(rlocation, &c.right_operand, env, None)?,
                 env,
             )?;
             if let Some((ast::Bop::Eq(_), lhs, _)) = bop_ast_node.as_binop() {
@@ -1983,14 +1964,14 @@ fn p_expr_impl__<'a>(
         )),
         EmbeddedSubscriptExpression(c) => Ok(E_::mk_array_get(
             p_expr(&c.receiver, env)?,
-            mp_optional(|n, e| p_expr_with_loc(location, n, e), &c.index, env)?,
+            mp_optional(|n, e| p_expr_with_loc(location, n, e, None), &c.index, env)?,
         )),
         ShapeExpression(c) => Ok(E_::Shape(could_map(
             |n: S<'a>, e: &mut Env<'a>| mp_shape_expression_field(&p_expr, n, e),
             &c.fields,
             env,
         )?)),
-        ObjectCreationExpression(c) => p_expr_impl_(location, &c.object, env, Some(pos)),
+        ObjectCreationExpression(c) => p_expr_recurse(location, &c.object, env, Some(pos)),
         ConstructorCall(c) => {
             let (args, varargs) = split_args_vararg(&c.argument_list, env)?;
             let (e, hl) = match &c.type_.children {
@@ -2180,8 +2161,9 @@ fn p_expr_impl__<'a>(
             } else if label_name.ends_with("AUTO332") {
                 // This can happen during parsing in auto-complete mode
                 // In such case, the "label_name" must end with AUTO332
-                // We want to treat this as a method call even though we haven't yet seen the arguments
-                let recv = p_expr_with_loc(ExprLocation::CallReceiver, &c.qualifier, env);
+                // We want to treat this as a method call even though we haven't
+                // yet seen the arguments
+                let recv = p_expr_with_loc(ExprLocation::CallReceiver, &c.qualifier, env, None);
                 match recv {
                     Ok(recv) => {
                         let enum_class_label = E_::mk_enum_class_label(None, label_name);
@@ -2406,7 +2388,7 @@ fn p_bop<'a>(
 fn p_exprs_with_loc<'a>(n: S<'a>, e: &mut Env<'a>) -> Result<(Pos, Vec<ast::Expr>), Error> {
     let loc = p_pos(n, e);
     let p_expr = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr, Error> {
-        p_expr_with_loc(ExprLocation::UsingStatement, n, e)
+        p_expr_with_loc(ExprLocation::UsingStatement, n, e, None)
     };
     Ok((loc, could_map(p_expr, n, e)?))
 }
@@ -2742,7 +2724,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
                 } else {
                     Ok(new(
                         pos,
-                        S_::mk_expr(p_expr_with_loc(ExprLocation::AsStatement, expr, e)?),
+                        S_::mk_expr(p_expr_with_loc(ExprLocation::AsStatement, expr, e, None)?),
                     ))
                 }
             };
@@ -2802,9 +2784,9 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
         }
         ForStatement(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt, Error> {
-                let ini = p_expr_l(&c.initializer, e)?;
+                let ini = could_map(p_expr, &c.initializer, e)?;
                 let ctr = mp_optional(p_expr, &c.control, e)?;
-                let eol = p_expr_l(&c.end_of_loop, e)?;
+                let eol = could_map(p_expr, &c.end_of_loop, e)?;
                 let blk = p_block(true, &c.body, e)?;
                 Ok(Stmt::new(pos, S_::mk_for(ini, ctr, eol, blk)))
             };
@@ -2859,6 +2841,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
                         ExprLocation::RightOfReturn,
                         &c.expression,
                         e,
+                        None,
                     )?),
                 };
                 Ok(ast::Stmt::new(pos, ast::Stmt_::mk_return(expr)))

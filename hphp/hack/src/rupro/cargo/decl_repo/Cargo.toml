@@ -18,3 +18,4 @@ pos = { path = "../../lib/pos" }
 procfs = "0.9"
 rayon = "1.2"
 structopt = "0.3.23"
+test_utils = { path = "../test_utils" }

@@ -12,3 +12,4 @@ path = "../../decl_file.rs"
 hackrs = { path = "../hackrs" }
 pos = { path = "../../lib/pos" }
 structopt = "0.3.23"
+test_utils = { path = "../test_utils" }

@@ -1,7 +1,7 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use hackrs::{decl_defs::shallow, decl_parser::DeclParser, reason::BReason};
+use hackrs::{decl_defs::shallow, decl_parser::DeclParser, folded_decl_provider, reason::BReason};
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
 use pos::{Prefix, RelativePath, RelativePathCtx, ToOxidized};
 use std::sync::Arc;
@@ -14,10 +14,10 @@ ocaml_ffi_with_arena! {
         let path_ctx = Arc::new(RelativePathCtx::default());
         let filename = RelativePath::new(Prefix::Dummy, filename.path());
         let decl_parser = DeclParser::new(path_ctx);
-        let folded_decl_provider = test_utils::decl_provider::make_folded_decl_provider::<BReason>(
+        let folded_decl_provider: Arc<dyn folded_decl_provider::FoldedDeclProvider<BReason>> = hackrs_test_utils::decl_provider::make_folded_decl_provider(
             None,
             &decl_parser,
-            &[filename.clone()],
+            std::iter::once(filename),
         );
 
         decl_parser

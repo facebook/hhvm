@@ -14,11 +14,11 @@ use hackrs::{
     naming_provider::SqliteNamingTable, reason::NReason,
     shallow_decl_provider::LazyShallowDeclProvider, special_names::SpecialNames,
 };
+use hackrs_test_utils::cache::{make_non_eviction_shallow_decl_cache, NonEvictingCache};
 use hh24_test::{create_naming_table, TestRepo};
 use pos::RelativePathCtx;
 use std::path::PathBuf;
 use std::sync::Arc;
-use test_utils::cache::{make_non_eviction_shallow_decl_cache, NonEvictingCache};
 
 mod test_file_missing_error;
 

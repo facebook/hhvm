@@ -68,7 +68,7 @@ fn main() {
 
 fn parse_repo<R: Reason>(ctx: Arc<RelativePathCtx>, filenames: &[RelativePath]) {
     let decl_parser = DeclParser::new(ctx);
-    let shallow_decl_cache = test_utils::cache::make_non_eviction_shallow_decl_cache::<R>();
+    let shallow_decl_cache = hackrs_test_utils::cache::make_non_eviction_shallow_decl_cache::<R>();
     let ((), time_taken) = time(|| {
         filenames
             .par_iter()

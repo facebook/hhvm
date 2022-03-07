@@ -21,10 +21,10 @@ use std::sync::Arc;
 fn make_shallow_decl_provider<R: Reason>(
     naming_table_path_opt: Option<&PathBuf>,
     decl_parser: &DeclParser,
-    filenames: &[RelativePath],
+    filenames: impl Iterator<Item = RelativePath>,
 ) -> Arc<dyn ShallowDeclProvider<R>> {
     let cache = Arc::new(make_non_eviction_shallow_decl_cache());
-    for &path in filenames {
+    for path in filenames {
         let decls = decl_parser.parse(path).unwrap();
         cache.add_decls(decls);
     }
@@ -42,7 +42,7 @@ fn make_shallow_decl_provider<R: Reason>(
 pub fn make_folded_decl_provider<R: Reason>(
     naming_table_path_opt: Option<&PathBuf>,
     decl_parser: &DeclParser,
-    filenames: &[RelativePath],
+    filenames: impl Iterator<Item = RelativePath>,
 ) -> Arc<dyn FoldedDeclProvider<R>> {
     let shallow_decl_provider =
         make_shallow_decl_provider(naming_table_path_opt, decl_parser, filenames);

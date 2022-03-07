@@ -30,8 +30,7 @@ fn test_file_missing_error(fb: FacebookInit) -> Result<()> {
         .parse::<NReason>(RelativePath::new(Prefix::Root, "d.php"))?
     {
         match decl {
-            shallow::Decl::Class(name, _decl) => {
-                let TypeName(cls) = name;
+            shallow::Decl::Class(TypeName(cls), _decl) => {
                 assert_eq!(cls.as_ref(), r#"\D"#);
             }
             _ => saw_err = true,

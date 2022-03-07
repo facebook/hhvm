@@ -14,7 +14,6 @@ use pos::{Prefix, RelativePath, RelativePathCtx};
 use std::path::PathBuf;
 use std::sync::Arc;
 use structopt::StructOpt;
-use test_utils::cache::NonEvictingCache;
 
 #[derive(StructOpt, Debug)]
 struct CliOptions {
@@ -84,13 +83,13 @@ fn main() {
 
 fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames: &[RelativePath]) {
     let decl_parser = DeclParser::new(ctx);
-    let folded_decl_provider = test_utils::decl_provider::make_folded_decl_provider(
+    let folded_decl_provider = hackrs_test_utils::decl_provider::make_folded_decl_provider(
         opts.naming_table.as_ref(),
         &decl_parser,
-        filenames,
+        filenames.iter().copied(),
     );
     let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
-        Arc::new(NonEvictingCache::new()),
+        Arc::new(hackrs_test_utils::cache::NonEvictingCache::new()),
         Arc::clone(&folded_decl_provider) as Arc<dyn FoldedDeclProvider<R>>,
     ));
 

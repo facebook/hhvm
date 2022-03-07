@@ -11,6 +11,7 @@ doctest = false
 
 [dependencies]
 hackrs = { path = "../hackrs" }
+hackrs_test_utils = { path = "../hackrs_test_utils" }
 ocaml_runtime = { path = "../../../utils/ocaml_runtime" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../ocamlrep_derive" }
@@ -18,4 +19,3 @@ ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
 pos = { path = "../../lib/pos" }
 structopt = "0.3.23"
-test_utils = { path = "../test_utils" }

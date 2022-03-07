@@ -17,13 +17,13 @@ use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
 use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
+use hackrs_test_utils::cache::{make_non_eviction_shallow_decl_cache, NonEvictingCache};
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
 use pos::{Prefix, RelativePath, RelativePathCtx};
 use std::path::PathBuf;
 use std::sync::Arc;
 use structopt::StructOpt;
-use test_utils::cache::{make_non_eviction_shallow_decl_cache, NonEvictingCache};
 
 // fn create_nast(path: PathBuf) -> oxidized::aast::Program<(), ()> {}
 

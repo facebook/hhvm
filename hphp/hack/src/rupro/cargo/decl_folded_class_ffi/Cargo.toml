@@ -12,7 +12,7 @@ doctest = false
 [dependencies]
 bumpalo = { version = "3.8", features = ["collections"] }
 hackrs = { path = "../hackrs" }
+hackrs_test_utils = { path = "../hackrs_test_utils" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 pos = { path = "../../lib/pos" }
-test_utils = { path = "../test_utils" }

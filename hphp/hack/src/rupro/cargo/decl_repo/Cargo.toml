@@ -12,10 +12,10 @@ test = false
 [dependencies]
 find_utils = { path = "../../../utils/find_utils" }
 hackrs = { path = "../hackrs" }
+hackrs_test_utils = { path = "../hackrs_test_utils" }
 indicatif = { version = "0.15", features = ["with_rayon"] }
 jwalk = "0.6"
 pos = { path = "../../lib/pos" }
 procfs = "0.9"
 rayon = "1.2"
 structopt = "0.3.23"
-test_utils = { path = "../test_utils" }

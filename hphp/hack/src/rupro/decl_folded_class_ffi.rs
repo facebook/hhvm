@@ -22,7 +22,7 @@ ocaml_ffi_with_arena! {
             );
 
         decl_parser
-            .parse::<BReason>(filename)
+            .parse(filename)
             .expect("failed to parse")
             .into_iter()
             .filter_map(|decl| match decl {

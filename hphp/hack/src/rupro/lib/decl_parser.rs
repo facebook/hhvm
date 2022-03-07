@@ -6,19 +6,27 @@
 use crate::decl_defs::shallow;
 use crate::reason::Reason;
 use pos::{RelativePath, RelativePathCtx};
+use std::marker::PhantomData;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
-pub struct DeclParser {
+pub struct DeclParser<R: Reason> {
     relative_path_ctx: Arc<RelativePathCtx>,
+    // We could make `parse` generic over `R` instead, but it's usually more
+    // convenient for callers (especially tests) to pin the decl parser to a
+    // single Reason type.
+    _phantom: PhantomData<R>,
 }
 
-impl DeclParser {
+impl<R: Reason> DeclParser<R> {
     pub fn new(relative_path_ctx: Arc<RelativePathCtx>) -> Self {
-        Self { relative_path_ctx }
+        Self {
+            relative_path_ctx,
+            _phantom: PhantomData,
+        }
     }
 
-    pub fn parse<R: Reason>(&self, path: RelativePath) -> std::io::Result<Vec<shallow::Decl<R>>> {
+    pub fn parse(&self, path: RelativePath) -> std::io::Result<Vec<shallow::Decl<R>>> {
         let arena = bumpalo::Bump::new();
         let absolute_path = path.to_absolute(&self.relative_path_ctx);
         let text = std::fs::read(&absolute_path)?;

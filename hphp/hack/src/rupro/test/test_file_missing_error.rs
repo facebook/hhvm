@@ -7,7 +7,7 @@
 
 use crate::{FacebookInit, TestContext};
 use anyhow::Result;
-use hackrs::{decl_defs::shallow, folded_decl_provider::FoldedDeclProvider, reason::BReason};
+use hackrs::{decl_defs::shallow, folded_decl_provider::FoldedDeclProvider};
 use maplit::btreemap;
 use pos::{Prefix, RelativePath, TypeName};
 use std::fs;
@@ -34,7 +34,7 @@ fn test_file_missing_error(fb: FacebookInit) -> Result<()> {
     // check we can decl parse 'd.php'
     for decl in ctx
         .decl_parser
-        .parse::<BReason>(RelativePath::new(Prefix::Root, "d.php"))?
+        .parse(RelativePath::new(Prefix::Root, "d.php"))?
     {
         match decl {
             shallow::Decl::Class(cls, _) => {

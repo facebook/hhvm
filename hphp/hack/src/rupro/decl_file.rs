@@ -106,7 +106,7 @@ fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames
     let mut saw_err = false;
 
     for &path in filenames {
-        for decl in decl_parser.parse::<R>(path).unwrap() {
+        for decl in decl_parser.parse(path).unwrap() {
             match decl {
                 shallow::Decl::Class(name, decl) => {
                     if opts.shallow {

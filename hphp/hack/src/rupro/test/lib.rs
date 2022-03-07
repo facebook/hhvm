@@ -30,7 +30,7 @@ struct TestContext {
     pub root: TestRepo,
 
     #[allow(dead_code)]
-    pub decl_parser: DeclParser,
+    pub decl_parser: DeclParser<BReason>,
 
     #[allow(dead_code)]
     pub shallow_decl_provider: Arc<LazyShallowDeclProvider<BReason>>,

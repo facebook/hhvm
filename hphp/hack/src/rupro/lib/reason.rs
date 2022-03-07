@@ -3,14 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hcons::{Conser, Hc};
+use hcons::Conser;
 use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
-use once_cell::sync::OnceCell;
+use once_cell::sync::Lazy;
 use pos::{BPos, NPos, Pos, Positioned, Symbol, ToOxidized, TypeConstName, TypeName};
 use std::hash::Hash;
 
 use crate::decl_defs::DeclTy_;
 use crate::typing_defs::{Ty, Ty_};
+use crate::typing_prop::{Constraint, ConstraintF, Prop, PropF};
 use crate::visitor::Walkable;
 
 pub use oxidized::typing_reason::{ArgPosition, BlameSource};
@@ -59,9 +60,10 @@ pub trait Reason:
 
     fn pos(&self) -> &Self::Pos;
 
-    fn cons_decl_ty(ty: DeclTy_<Self>) -> Hc<DeclTy_<Self>>;
-
-    fn cons_ty(ty: Ty_<Self, Ty<Self>>) -> Hc<Ty_<Self, Ty<Self>>>;
+    fn decl_ty_conser() -> &'static Conser<DeclTy_<Self>>;
+    fn ty_conser() -> &'static Conser<Ty_<Self, Ty<Self>>>;
+    fn prop_conser() -> &'static Conser<PropF<Self, Prop<Self>>>;
+    fn constraint_conser() -> &'static Conser<ConstraintF<Self, Constraint<Self>>>;
 
     fn from_oxidized(reason: oxidized_by_ref::typing_reason::T_<'_>) -> Self {
         Self::mk(|| {
@@ -362,15 +364,28 @@ impl Reason for BReason {
     }
 
     #[inline]
-    fn cons_decl_ty(ty: DeclTy_<BReason>) -> Hc<DeclTy_<BReason>> {
-        static CONSER: OnceCell<Conser<DeclTy_<BReason>>> = OnceCell::new();
-        CONSER.get_or_init(Conser::new).mk(ty)
+    fn decl_ty_conser() -> &'static Conser<DeclTy_<BReason>> {
+        static CONSER: Lazy<Conser<DeclTy_<BReason>>> = Lazy::new(Conser::new);
+        &CONSER
     }
 
     #[inline]
-    fn cons_ty(ty: Ty_<BReason, Ty<BReason>>) -> Hc<Ty_<BReason, Ty<BReason>>> {
-        static CONSER: OnceCell<Conser<Ty_<BReason, Ty<BReason>>>> = OnceCell::new();
-        CONSER.get_or_init(Conser::new).mk(ty)
+    fn ty_conser() -> &'static Conser<Ty_<BReason, Ty<BReason>>> {
+        static CONSER: Lazy<Conser<Ty_<BReason, Ty<BReason>>>> = Lazy::new(Conser::new);
+        &CONSER
+    }
+
+    #[inline]
+    fn prop_conser() -> &'static Conser<PropF<BReason, Prop<BReason>>> {
+        static CONSER: Lazy<Conser<PropF<BReason, Prop<BReason>>>> = Lazy::new(Conser::new);
+        &CONSER
+    }
+
+    #[inline]
+    fn constraint_conser() -> &'static Conser<ConstraintF<BReason, Constraint<BReason>>> {
+        static CONSER: Lazy<Conser<ConstraintF<BReason, Constraint<BReason>>>> =
+            Lazy::new(Conser::new);
+        &CONSER
     }
 }
 
@@ -595,15 +610,28 @@ impl Reason for NReason {
     }
 
     #[inline]
-    fn cons_decl_ty(ty: DeclTy_<NReason>) -> Hc<DeclTy_<NReason>> {
-        static CONSER: OnceCell<Conser<DeclTy_<NReason>>> = OnceCell::new();
-        CONSER.get_or_init(Conser::new).mk(ty)
+    fn decl_ty_conser() -> &'static Conser<DeclTy_<NReason>> {
+        static CONSER: Lazy<Conser<DeclTy_<NReason>>> = Lazy::new(Conser::new);
+        &CONSER
     }
 
     #[inline]
-    fn cons_ty(ty: Ty_<NReason, Ty<NReason>>) -> Hc<Ty_<NReason, Ty<NReason>>> {
-        static CONSER: OnceCell<Conser<Ty_<NReason, Ty<NReason>>>> = OnceCell::new();
-        CONSER.get_or_init(Conser::new).mk(ty)
+    fn ty_conser() -> &'static Conser<Ty_<NReason, Ty<NReason>>> {
+        static CONSER: Lazy<Conser<Ty_<NReason, Ty<NReason>>>> = Lazy::new(Conser::new);
+        &CONSER
+    }
+
+    #[inline]
+    fn prop_conser() -> &'static Conser<PropF<NReason, Prop<NReason>>> {
+        static CONSER: Lazy<Conser<PropF<NReason, Prop<NReason>>>> = Lazy::new(Conser::new);
+        &CONSER
+    }
+
+    #[inline]
+    fn constraint_conser() -> &'static Conser<ConstraintF<NReason, Constraint<NReason>>> {
+        static CONSER: Lazy<Conser<ConstraintF<NReason, Constraint<NReason>>>> =
+            Lazy::new(Conser::new);
+        &CONSER
     }
 }
 

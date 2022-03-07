@@ -23,7 +23,13 @@ pub enum ConstraintF<R: Reason, A> {
         name: Symbol,
         ty: Ty<R>,
         class_id: Symbol,
-        ty_args: Vec<TypeHint<R>>,
+        // TODO: oxidized::aast::TypeHint (along with most oxidized::aast types)
+        // can't be used in hash-consed values because it contains `Rc`s, which
+        // can't be shared across threads (and we share hash-consed values
+        // across threads). We'll need to map the oxidized `TypeHint` to our own
+        // representation which uses `R::Pos` (probably also `pos::Symbol`,
+        // `pos::TypeName`, etc).
+        ty_args: Vec<Ty<R>>, // was Vec<TypeHint<R>>
     },
     HasProp {
         name: Symbol,
@@ -59,6 +65,13 @@ impl<R: Reason, A> ConstraintF<R, A> {
     }
 }
 
+impl<R: Reason> hcons::Consable for ConstraintF<R, Constraint<R>> {
+    #[inline]
+    fn conser() -> &'static Conser<ConstraintF<R, Constraint<R>>> {
+        R::constraint_conser()
+    }
+}
+
 type Unfixed<R> = ConstraintF<R, Constraint<R>>;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -79,47 +92,37 @@ impl<R: Reason> Constraint<R> {
         &self.0
     }
 
-    pub fn union(&mut self, conser: &Conser<Unfixed<R>>, ty: Ty<R>, reason: R) -> Self {
-        Constraint(reason, conser.mk(ConstraintF::Union(ty, self.to_owned())))
+    pub fn union(&mut self, ty: Ty<R>, reason: R) -> Self {
+        Constraint(reason, Hc::new(ConstraintF::Union(ty, self.to_owned())))
     }
 
-    pub fn intersection(&mut self, conser: &Conser<Unfixed<R>>, ty: Ty<R>, reason: R) -> Self {
+    pub fn intersection(&mut self, ty: Ty<R>, reason: R) -> Self {
         Constraint(
             reason,
-            conser.mk(ConstraintF::Intersection(ty, self.to_owned())),
+            Hc::new(ConstraintF::Intersection(ty, self.to_owned())),
         )
     }
 
     pub fn has_member(
-        conser: &Conser<Unfixed<R>>,
         name: Symbol,
         ty: Ty<R>,
         class_id: Symbol,
-        ty_args: Vec<TypeHint<R>>,
+        _ty_args: Vec<TypeHint<R>>, // TODO
         reason: R,
     ) -> Self {
         Constraint(
             reason,
-            conser.mk(ConstraintF::HasMember {
+            Hc::new(ConstraintF::HasMember {
                 name,
                 ty,
                 class_id,
-                ty_args,
+                ty_args: vec![], // TODO
             }),
         )
     }
 
-    pub fn has_prop(
-        conser: &Conser<Unfixed<R>>,
-        name: Symbol,
-        ty: Ty<R>,
-        class_id: Symbol,
-        reason: R,
-    ) -> Self {
-        Constraint(
-            reason,
-            conser.mk(ConstraintF::HasProp { name, ty, class_id }),
-        )
+    pub fn has_prop(name: Symbol, ty: Ty<R>, class_id: Symbol, reason: R) -> Self {
+        Constraint(reason, Hc::new(ConstraintF::HasProp { name, ty, class_id }))
     }
 
     pub fn is_union(&self) -> bool {

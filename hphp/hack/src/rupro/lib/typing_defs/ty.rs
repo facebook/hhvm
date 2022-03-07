@@ -88,6 +88,13 @@ walkable!(impl<R: Reason, TY> for Ty_<R, TY> =>  {
     Ty_::Tvar(_) => [],
 });
 
+impl<R: Reason> hcons::Consable for Ty_<R, Ty<R>> {
+    #[inline]
+    fn conser() -> &'static hcons::Conser<Ty_<R, Ty<R>>> {
+        R::ty_conser()
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Ty<R: Reason>(R, Hc<Ty_<R, Ty<R>>>);
 
@@ -96,7 +103,7 @@ walkable!(Ty<R> as visit_ty => [0, 1]);
 impl<R: Reason> Ty<R> {
     #[inline]
     pub fn new(reason: R, ty: Ty_<R, Ty<R>>) -> Self {
-        Self(reason, R::cons_ty(ty))
+        Self(reason, Hc::new(ty))
     }
 
     pub fn prim(r: R, prim: Prim) -> Ty<R> {

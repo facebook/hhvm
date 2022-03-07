@@ -110,7 +110,7 @@ walkable!(DeclTy<R> as visit_decl_ty => [0, 1]);
 impl<R: Reason> DeclTy<R> {
     #[inline]
     pub fn new(reason: R, ty: DeclTy_<R>) -> Self {
-        Self(reason, R::cons_decl_ty(ty))
+        Self(reason, Hc::new(ty))
     }
 
     pub fn prim(r: R, prim: Prim) -> Self {
@@ -276,6 +276,13 @@ pub enum DeclTy_<R: Reason> {
 // regression.
 static_assertions::assert_eq_size!(DeclTy_<reason::NReason>, [usize; 3]);
 static_assertions::assert_eq_size!(DeclTy_<reason::BReason>, [usize; 3]);
+
+impl<R: Reason> hcons::Consable for DeclTy_<R> {
+    #[inline]
+    fn conser() -> &'static hcons::Conser<DeclTy_<R>> {
+        R::decl_ty_conser()
+    }
+}
 
 impl<R: Reason> crate::visitor::Walkable<R> for DeclTy_<R> {
     fn recurse(&self, v: &mut dyn crate::visitor::Visitor<R>) {

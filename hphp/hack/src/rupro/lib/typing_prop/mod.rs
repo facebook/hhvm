@@ -26,8 +26,15 @@ pub enum PropF<R: Reason, A> {
 }
 
 impl<R: Reason> PropF<R, Prop<R>> {
-    pub fn inj(self, conser: Conser<PropF<R, Prop<R>>>) -> Prop<R> {
-        Prop(conser.mk(self))
+    pub fn inj(self) -> Prop<R> {
+        Prop(Hc::new(self))
+    }
+}
+
+impl<R: Reason> hcons::Consable for PropF<R, Prop<R>> {
+    #[inline]
+    fn conser() -> &'static Conser<PropF<R, Prop<R>>> {
+        R::prop_conser()
     }
 }
 
@@ -43,12 +50,12 @@ impl<R: Reason> Deref for Prop<R> {
 }
 
 impl<R: Reason> Prop<R> {
-    pub fn valid(conser: Conser<PropF<R, Prop<R>>>) -> Self {
-        PropF::Conj(vec![]).inj(conser)
+    pub fn valid() -> Self {
+        PropF::Conj(vec![]).inj()
     }
 
-    pub fn invalid(conser: Conser<PropF<R, Prop<R>>>, fail: Option<TypingError<R>>) -> Self {
-        PropF::Disj(fail, vec![]).inj(conser)
+    pub fn invalid(fail: Option<TypingError<R>>) -> Self {
+        PropF::Disj(fail, vec![]).inj()
     }
 
     pub fn is_valid(&self) -> bool {

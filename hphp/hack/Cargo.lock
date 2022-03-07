@@ -959,6 +959,7 @@ dependencies = [
  "ast_scope",
  "bitflags",
  "bumpalo",
+ "decl_provider",
  "decl_vars",
  "emit_expression",
  "emit_fatal",

@@ -234,34 +234,55 @@ pub(crate) fn remove_erased_generics<'a, 'arena>(
 /// Warning: Experimental usage of decls in compilation.
 /// Given a hint, if the hint is an Happly(id, _), checks if the id is a class
 /// that has reified generics.
-pub(crate) fn happly_decl_has_no_reified_generics<'arena, 'decl>(
+pub(crate) fn happly_decl_has_reified_generics<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     aast::Hint(_, hint): &aast::Hint,
 ) -> bool {
     use aast::{Hint_, ReifyKind};
+    use file_info::NameType;
+    use shallow_decl_defs::Decl;
     match hint.as_ref() {
-        Hint_::Happly(Id(_, id), _) => {
-            if let Ok(shallow_decl_defs::Decl::Class(class_decl)) =
-                emitter.get_decl(file_info::NameType::Class, id)
-            {
-                if class_decl
+        Hint_::Happly(Id(_, id), _) => match emitter.get_decl(NameType::Class, id) {
+            Ok(Decl::Class(class_decl)) => {
+                // Found a class with a matching name. Does it's shallow decl have
+                // any reified tparams?
+                class_decl
                     .tparams
                     .iter()
-                    .all(|tparam| -> bool { tparam.reified == ReifyKind::Erased })
-                {
-                    return true;
-                }
+                    .any(|tparam| tparam.reified != ReifyKind::Erased)
             }
-            false
-        }
+            Ok(x @ Decl::Fun(_) | x @ Decl::Const(_)) => {
+                // We asked for a NameType::Class and got something weird back.
+                // This must be a bug because types/funcs/constants have different
+                // name kinds.
+                unreachable!(
+                    "Unexpected Decl kind from get_decl(NameType::Class): {:?}",
+                    x
+                )
+            }
+            Ok(Decl::Typedef(_)) => {
+                // TODO: `id` could be an alias for something without reified generics,
+                // but assume it has at least one, for now.
+                true
+            }
+            Err(decl_provider::Error::NotFound) => {
+                // The DeclProvider has no idea what `id` is.
+                true
+            }
+        },
         Hint_::Hoption(_)
         | Hint_::Hlike(_)
         | Hint_::Hfun(_)
         | Hint_::Htuple(_)
         | Hint_::Hshape(_)
         | Hint_::Haccess(_, _)
-        | Hint_::Hsoft(_) => false,
-        // The rest are not found on the AST at this stage
-        _ => false,
+        | Hint_::Hsoft(_) => {
+            // Assume any of these types could have reified generics.
+            true
+        }
+        x => {
+            // Other AST nodes are impossible here, must be a bug.
+            unreachable!("unexpected AST node: {:#?}", x)
+        }
     }
 }

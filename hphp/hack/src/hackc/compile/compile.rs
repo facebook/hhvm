@@ -6,7 +6,7 @@
 pub mod dump_expr_tree;
 
 use aast_parser::{
-    rust_aast_parser_types::{Env as AastEnv, Result as AastResult},
+    rust_aast_parser_types::{Env as AastEnv, ParserResult},
     AastParser, Error as AastError,
 };
 use anyhow::anyhow;
@@ -616,7 +616,7 @@ fn parse_file(
             Err(ParseError(pos, syntax_error.message.to_string(), false))
         }
         Ok(ast) => match ast {
-            AastResult { syntax_errors, .. } if !syntax_errors.is_empty() => {
+            ParserResult { syntax_errors, .. } if !syntax_errors.is_empty() => {
                 let error = syntax_errors
                     .iter()
                     .find(|e| e.error_type == ErrorType::RuntimeError)
@@ -628,11 +628,11 @@ fn parse_file(
                     error.error_type == ErrorType::RuntimeError,
                 ))
             }
-            AastResult { lowpri_errors, .. } if !lowpri_errors.is_empty() => {
+            ParserResult { lowpri_errors, .. } if !lowpri_errors.is_empty() => {
                 let (pos, msg) = lowpri_errors.into_iter().next().unwrap();
                 Err(ParseError(pos, msg, false))
             }
-            AastResult {
+            ParserResult {
                 errors,
                 aast,
                 scoured_comments,

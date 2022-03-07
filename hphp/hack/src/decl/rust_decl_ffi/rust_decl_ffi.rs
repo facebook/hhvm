@@ -6,6 +6,7 @@
 
 use bumpalo::Bump;
 
+use ast_and_decl_parser::{Env, ParserResult, Result};
 use ocamlrep::{bytes_from_ocamlrep, ptr::UnsafeOcamlPtr};
 use ocamlrep_caml_builtins::Int64;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
@@ -63,7 +64,6 @@ ocaml_ffi_with_arena! {
 #[no_mangle]
 unsafe extern "C" fn hh_parse_ast_and_decls_ffi(env: usize, source_text: usize) -> usize {
     fn inner(env: usize, source_text: usize) -> usize {
-        use ast_and_decl_parser::Env;
         use ocamlrep::FromOcamlRep;
         use ocamlrep_ocamlpool::to_ocaml;
         use parser_core_types::source_text::SourceText;
@@ -102,12 +102,9 @@ fn parse_decls<'a>(
 
 fn parse_ast_and_decls<'a>(
     arena: &'a Bump,
-    env: &'a ast_and_decl_parser::Env,
+    env: &'a Env,
     indexed_source_text: &'a IndexedSourceText<'a>,
-) -> (
-    ast_and_decl_parser::AastResult<ast_and_decl_parser::ParserResult>,
-    ParsedFile<'a>,
-) {
+) -> (Result<ParserResult>, ParsedFile<'a>) {
     stack_limit::with_elastic_stack(|stack_limit| {
         ast_and_decl_parser::from_text(env, indexed_source_text, arena, Some(stack_limit))
     })

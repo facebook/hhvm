@@ -10,15 +10,15 @@ use oxidized_by_ref::{decl_parser_options::DeclParserOptions, direct_decl_parser
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use stack_limit::StackLimit;
 
-pub use aast_parser::Result as AastResult;
-pub use rust_aast_parser_types::{Env, Result as ParserResult};
+pub use aast_parser::Result;
+pub use rust_aast_parser_types::{Env, ParserResult};
 
 pub fn from_text<'a>(
     env: &'a Env,
     indexed_source_text: &'a IndexedSourceText<'a>,
     arena: &'a Bump,
     stack_limit: Option<&StackLimit>,
-) -> (AastResult<ParserResult>, ParsedFile<'a>) {
+) -> (Result<ParserResult>, ParsedFile<'a>) {
     let source = indexed_source_text.source_text();
     let (language, mode, parser_env) = AastParser::make_parser_env(env, source);
     let opts = arena.alloc(DeclParserOptions::from_oxidized_parser_options(

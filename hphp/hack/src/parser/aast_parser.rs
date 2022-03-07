@@ -30,7 +30,7 @@ use parser_core_types::{
     syntax_error::SyntaxError,
     syntax_tree::SyntaxTree,
 };
-pub use rust_aast_parser_types::{Env, Result as ParserResult};
+pub use rust_aast_parser_types::{Env, ParserResult};
 use rust_parser_errors::parse_errors_with_text;
 use smart_constructors::NoState;
 use stack_limit::StackLimit;
@@ -51,7 +51,7 @@ impl<T: ToString> From<T> for Error {
     }
 }
 
-pub type Result<T> = std::result::Result<T, Error>;
+pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 pub struct AastParser;
 impl<'src> AastParser {

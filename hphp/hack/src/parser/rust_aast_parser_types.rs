@@ -3,10 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
-
+use file_info::Mode;
 use lint_rust::LintError;
-use oxidized::{aast, errors::Error as HHError, file_info, parser_options, pos, scoured_comments};
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use oxidized::{
+    aast::Program, errors::Error, file_info, parser_options::ParserOptions, pos::Pos,
+    scoured_comments::ScouredComments,
+};
 use parser_core_types::syntax_error::SyntaxError;
 
 #[derive(Clone, Debug, FromOcamlRep, ToOcamlRep, Default)]
@@ -20,17 +23,17 @@ pub struct Env {
     pub show_all_errors: bool,
     pub fail_open: bool,
     pub is_systemlib: bool,
-    pub parser_options: parser_options::ParserOptions,
+    pub parser_options: ParserOptions,
 }
 
 #[derive(Clone, Debug, FromOcamlRep, ToOcamlRep)]
-pub struct Result {
-    pub file_mode: file_info::Mode,
-    pub scoured_comments: scoured_comments::ScouredComments,
-    pub aast: std::result::Result<aast::Program<(), ()>, String>,
-    pub lowpri_errors: Vec<(pos::Pos, String)>,
+pub struct ParserResult {
+    pub file_mode: Mode,
+    pub scoured_comments: ScouredComments,
+    pub aast: Result<Program<(), ()>, String>,
+    pub lowpri_errors: Vec<(Pos, String)>,
     pub syntax_errors: Vec<SyntaxError>,
-    pub errors: Vec<HHError>,
+    pub errors: Vec<Error>,
     pub lint_errors: Vec<LintError>,
     pub parse_peak: i64,
     pub lower_peak: i64,

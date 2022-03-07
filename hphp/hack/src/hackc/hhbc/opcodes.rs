@@ -8,7 +8,7 @@ use crate::{
     FatalOp, FcallArgs, FunctionId, IncDecOp, InitPropOp, IsLogAsDynamicCallOp, IsTypeOp, IterArgs,
     IterId, Label, Local, LocalRange, MOpMode, MemberKey, MethodId, NumParams, OODeclExistsOp,
     ObjMethodOp, ParamId, PropId, QueryMOp, ReadonlyOp, RepoAuthType, SetOpOp, SetRangeOp,
-    SilenceOp, Slice, SpecialClsRef, StackIndex, Str, SwitchKind, TypeStructResolveOp,
+    SilenceOp, Slice, SpecialClsRef, StackIndex, Str, SwitchKind, Targets, TypeStructResolveOp,
 };
 
 #[derive(Clone, Debug)]
@@ -267,4 +267,458 @@ pub enum Opcodes<'arena> {
     WHResult,
     Yield,
     YieldK,
+}
+
+impl<'arena> Targets for Opcodes<'arena> {
+    fn targets(&self) -> &[Label] {
+        match self {
+            Opcodes::FCallClsMethod(fca, _, _) => fca.targets(),
+            Opcodes::FCallClsMethodD(fca, _, _, _) => fca.targets(),
+            Opcodes::FCallClsMethodS(fca, _, _) => fca.targets(),
+            Opcodes::FCallClsMethodSD(fca, _, _, _) => fca.targets(),
+            Opcodes::FCallCtor(fca, _) => fca.targets(),
+            Opcodes::FCallFunc(fca) => fca.targets(),
+            Opcodes::FCallFuncD(fca, _) => fca.targets(),
+            Opcodes::FCallObjMethod(fca, _, _) => fca.targets(),
+            Opcodes::FCallObjMethodD(fca, _, _, _) => fca.targets(),
+            Opcodes::IterInit(_, target2) => std::slice::from_ref(target2),
+            Opcodes::IterNext(_, target2) => std::slice::from_ref(target2),
+            Opcodes::Jmp(target1) => std::slice::from_ref(target1),
+            Opcodes::JmpNS(target1) => std::slice::from_ref(target1),
+            Opcodes::JmpNZ(target1) => std::slice::from_ref(target1),
+            Opcodes::JmpZ(target1) => std::slice::from_ref(target1),
+            Opcodes::MemoGet(target1, _) => std::slice::from_ref(target1),
+            Opcodes::MemoGetEager(target1, _) => target1,
+            Opcodes::SSwitch { cases: _, targets } => targets.as_ref(),
+            Opcodes::Switch {
+                kind: _,
+                base: _,
+                targets,
+            } => targets.as_ref(),
+
+            // Make sure new variants with branch target Labels are handled above
+            // before adding items to this catch-all.
+            Opcodes::AKExists
+            | Opcodes::Add
+            | Opcodes::AddElemC
+            | Opcodes::AddNewElemC
+            | Opcodes::AddO
+            | Opcodes::ArrayIdx
+            | Opcodes::ArrayMarkLegacy
+            | Opcodes::ArrayUnmarkLegacy
+            | Opcodes::AssertRATL(..)
+            | Opcodes::AssertRATStk(..)
+            | Opcodes::Await
+            | Opcodes::AwaitAll(..)
+            | Opcodes::BareThis(..)
+            | Opcodes::BaseC(..)
+            | Opcodes::BaseGC(..)
+            | Opcodes::BaseGL(..)
+            | Opcodes::BaseH
+            | Opcodes::BaseL(..)
+            | Opcodes::BaseSC(..)
+            | Opcodes::BitAnd
+            | Opcodes::BitNot
+            | Opcodes::BitOr
+            | Opcodes::BitXor
+            | Opcodes::BreakTraceHint
+            | Opcodes::CGetCUNop
+            | Opcodes::CGetG
+            | Opcodes::CGetL(..)
+            | Opcodes::CGetL2(..)
+            | Opcodes::CGetQuietL(..)
+            | Opcodes::CGetS(..)
+            | Opcodes::CUGetL(..)
+            | Opcodes::CastBool
+            | Opcodes::CastDict
+            | Opcodes::CastDouble
+            | Opcodes::CastInt
+            | Opcodes::CastKeyset
+            | Opcodes::CastString
+            | Opcodes::CastVec
+            | Opcodes::ChainFaults
+            | Opcodes::CheckProp(..)
+            | Opcodes::CheckReifiedGenericMismatch
+            | Opcodes::CheckThis
+            | Opcodes::ClassGetC
+            | Opcodes::ClassGetTS
+            | Opcodes::ClassName
+            | Opcodes::Clone
+            | Opcodes::ClsCns(..)
+            | Opcodes::ClsCnsD(..)
+            | Opcodes::ClsCnsL(..)
+            | Opcodes::Cmp
+            | Opcodes::CnsE(..)
+            | Opcodes::ColFromArray(..)
+            | Opcodes::CombineAndResolveTypeStruct(..)
+            | Opcodes::Concat
+            | Opcodes::ConcatN(..)
+            | Opcodes::ContCheck(..)
+            | Opcodes::ContCurrent
+            | Opcodes::ContEnter
+            | Opcodes::ContGetReturn
+            | Opcodes::ContKey
+            | Opcodes::ContRaise
+            | Opcodes::ContValid
+            | Opcodes::CreateCl(..)
+            | Opcodes::CreateCont
+            | Opcodes::Dict(..)
+            | Opcodes::Dim(..)
+            | Opcodes::Dir
+            | Opcodes::Div
+            | Opcodes::Double(..)
+            | Opcodes::Dup
+            | Opcodes::EntryNop
+            | Opcodes::Eq
+            | Opcodes::Eval
+            | Opcodes::Exit
+            | Opcodes::False
+            | Opcodes::Fatal(..)
+            | Opcodes::File
+            | Opcodes::FuncCred
+            | Opcodes::GetMemoKeyL(..)
+            | Opcodes::Gt
+            | Opcodes::Gte
+            | Opcodes::Idx
+            | Opcodes::IncDecG(..)
+            | Opcodes::IncDecL(..)
+            | Opcodes::IncDecM(..)
+            | Opcodes::IncDecS(..)
+            | Opcodes::Incl
+            | Opcodes::InclOnce
+            | Opcodes::InitProp(..)
+            | Opcodes::InstanceOf
+            | Opcodes::InstanceOfD(..)
+            | Opcodes::Int(..)
+            | Opcodes::IsLateBoundCls
+            | Opcodes::IsTypeC(..)
+            | Opcodes::IsTypeL(..)
+            | Opcodes::IsTypeStructC(..)
+            | Opcodes::IsUnsetL(..)
+            | Opcodes::IssetG
+            | Opcodes::IssetL(..)
+            | Opcodes::IssetS
+            | Opcodes::IterFree(..)
+            | Opcodes::Keyset(..)
+            | Opcodes::LateBoundCls
+            | Opcodes::LazyClass(..)
+            | Opcodes::LazyClassFromClass
+            | Opcodes::LockObj
+            | Opcodes::Lt
+            | Opcodes::Lte
+            | Opcodes::MemoSet(..)
+            | Opcodes::MemoSetEager(..)
+            | Opcodes::Method
+            | Opcodes::Mod
+            | Opcodes::Mul
+            | Opcodes::MulO
+            | Opcodes::NSame
+            | Opcodes::NativeImpl
+            | Opcodes::Neq
+            | Opcodes::NewCol(..)
+            | Opcodes::NewDictArray(..)
+            | Opcodes::NewKeysetArray(..)
+            | Opcodes::NewObj
+            | Opcodes::NewObjD(..)
+            | Opcodes::NewObjR
+            | Opcodes::NewObjRD(..)
+            | Opcodes::NewObjS(..)
+            | Opcodes::NewPair
+            | Opcodes::NewStructDict(..)
+            | Opcodes::NewVec(..)
+            | Opcodes::Nop
+            | Opcodes::Not
+            | Opcodes::Null
+            | Opcodes::NullUninit
+            | Opcodes::OODeclExists(..)
+            | Opcodes::ParentCls
+            | Opcodes::PopC
+            | Opcodes::PopL(..)
+            | Opcodes::PopU
+            | Opcodes::Pow
+            | Opcodes::Print
+            | Opcodes::PushL(..)
+            | Opcodes::QueryM(..)
+            | Opcodes::RaiseClassStringConversionWarning
+            | Opcodes::RecordReifiedGeneric
+            | Opcodes::Req
+            | Opcodes::ReqDoc
+            | Opcodes::ReqOnce
+            | Opcodes::ResolveClass(..)
+            | Opcodes::ResolveClsMethod(..)
+            | Opcodes::ResolveClsMethodD(..)
+            | Opcodes::ResolveClsMethodS(..)
+            | Opcodes::ResolveFunc(..)
+            | Opcodes::ResolveMethCaller(..)
+            | Opcodes::ResolveRClsMethod(..)
+            | Opcodes::ResolveRClsMethodD(..)
+            | Opcodes::ResolveRClsMethodS(..)
+            | Opcodes::ResolveRFunc(..)
+            | Opcodes::RetC
+            | Opcodes::RetCSuspended
+            | Opcodes::RetM(..)
+            | Opcodes::Same
+            | Opcodes::SelfCls
+            | Opcodes::SetG
+            | Opcodes::SetImplicitContextByValue
+            | Opcodes::SetL(..)
+            | Opcodes::SetM(..)
+            | Opcodes::SetOpG(..)
+            | Opcodes::SetOpL(..)
+            | Opcodes::SetOpM(..)
+            | Opcodes::SetOpS(..)
+            | Opcodes::SetRangeM(..)
+            | Opcodes::SetS(..)
+            | Opcodes::Shl
+            | Opcodes::Shr
+            | Opcodes::Silence(..)
+            | Opcodes::String(..)
+            | Opcodes::Sub
+            | Opcodes::SubO
+            | Opcodes::This
+            | Opcodes::Throw
+            | Opcodes::ThrowAsTypeStructException
+            | Opcodes::ThrowNonExhaustiveSwitch
+            | Opcodes::True
+            | Opcodes::UGetCUNop
+            | Opcodes::UnsetG
+            | Opcodes::UnsetL(..)
+            | Opcodes::UnsetM(..)
+            | Opcodes::Vec(..)
+            | Opcodes::VerifyOutType(..)
+            | Opcodes::VerifyParamType(..)
+            | Opcodes::VerifyParamTypeTS(..)
+            | Opcodes::VerifyRetTypeC
+            | Opcodes::VerifyRetTypeTS
+            | Opcodes::WHResult
+            | Opcodes::Yield
+            | Opcodes::YieldK => &[],
+        }
+    }
+
+    fn targets_mut(&mut self) -> &mut [Label] {
+        match self {
+            Opcodes::FCallClsMethod(fca, _, _) => fca.targets_mut(),
+            Opcodes::FCallClsMethodD(fca, _, _, _) => fca.targets_mut(),
+            Opcodes::FCallClsMethodS(fca, _, _) => fca.targets_mut(),
+            Opcodes::FCallClsMethodSD(fca, _, _, _) => fca.targets_mut(),
+            Opcodes::FCallCtor(fca, _) => fca.targets_mut(),
+            Opcodes::FCallFunc(fca) => fca.targets_mut(),
+            Opcodes::FCallFuncD(fca, _) => fca.targets_mut(),
+            Opcodes::FCallObjMethod(fca, _, _) => fca.targets_mut(),
+            Opcodes::FCallObjMethodD(fca, _, _, _) => fca.targets_mut(),
+            Opcodes::IterInit(_, target2) => std::slice::from_mut(target2),
+            Opcodes::IterNext(_, target2) => std::slice::from_mut(target2),
+            Opcodes::Jmp(target1) => std::slice::from_mut(target1),
+            Opcodes::JmpNS(target1) => std::slice::from_mut(target1),
+            Opcodes::JmpNZ(target1) => std::slice::from_mut(target1),
+            Opcodes::JmpZ(target1) => std::slice::from_mut(target1),
+            Opcodes::MemoGet(target1, _) => std::slice::from_mut(target1),
+            Opcodes::MemoGetEager(target1, _) => target1,
+            Opcodes::SSwitch { cases: _, targets } => targets.as_mut(),
+            Opcodes::Switch {
+                kind: _,
+                base: _,
+                targets,
+            } => targets.as_mut(),
+
+            // Make sure new variants with branch target Labels are handled above
+            // before adding items to this catch-all.
+            Opcodes::AKExists
+            | Opcodes::Add
+            | Opcodes::AddElemC
+            | Opcodes::AddNewElemC
+            | Opcodes::AddO
+            | Opcodes::ArrayIdx
+            | Opcodes::ArrayMarkLegacy
+            | Opcodes::ArrayUnmarkLegacy
+            | Opcodes::AssertRATL(..)
+            | Opcodes::AssertRATStk(..)
+            | Opcodes::Await
+            | Opcodes::AwaitAll(..)
+            | Opcodes::BareThis(..)
+            | Opcodes::BaseC(..)
+            | Opcodes::BaseGC(..)
+            | Opcodes::BaseGL(..)
+            | Opcodes::BaseH
+            | Opcodes::BaseL(..)
+            | Opcodes::BaseSC(..)
+            | Opcodes::BitAnd
+            | Opcodes::BitNot
+            | Opcodes::BitOr
+            | Opcodes::BitXor
+            | Opcodes::BreakTraceHint
+            | Opcodes::CGetCUNop
+            | Opcodes::CGetG
+            | Opcodes::CGetL(..)
+            | Opcodes::CGetL2(..)
+            | Opcodes::CGetQuietL(..)
+            | Opcodes::CGetS(..)
+            | Opcodes::CUGetL(..)
+            | Opcodes::CastBool
+            | Opcodes::CastDict
+            | Opcodes::CastDouble
+            | Opcodes::CastInt
+            | Opcodes::CastKeyset
+            | Opcodes::CastString
+            | Opcodes::CastVec
+            | Opcodes::ChainFaults
+            | Opcodes::CheckProp(..)
+            | Opcodes::CheckReifiedGenericMismatch
+            | Opcodes::CheckThis
+            | Opcodes::ClassGetC
+            | Opcodes::ClassGetTS
+            | Opcodes::ClassName
+            | Opcodes::Clone
+            | Opcodes::ClsCns(..)
+            | Opcodes::ClsCnsD(..)
+            | Opcodes::ClsCnsL(..)
+            | Opcodes::Cmp
+            | Opcodes::CnsE(..)
+            | Opcodes::ColFromArray(..)
+            | Opcodes::CombineAndResolveTypeStruct(..)
+            | Opcodes::Concat
+            | Opcodes::ConcatN(..)
+            | Opcodes::ContCheck(..)
+            | Opcodes::ContCurrent
+            | Opcodes::ContEnter
+            | Opcodes::ContGetReturn
+            | Opcodes::ContKey
+            | Opcodes::ContRaise
+            | Opcodes::ContValid
+            | Opcodes::CreateCl(..)
+            | Opcodes::CreateCont
+            | Opcodes::Dict(..)
+            | Opcodes::Dim(..)
+            | Opcodes::Dir
+            | Opcodes::Div
+            | Opcodes::Double(..)
+            | Opcodes::Dup
+            | Opcodes::EntryNop
+            | Opcodes::Eq
+            | Opcodes::Eval
+            | Opcodes::Exit
+            | Opcodes::False
+            | Opcodes::Fatal(..)
+            | Opcodes::File
+            | Opcodes::FuncCred
+            | Opcodes::GetMemoKeyL(..)
+            | Opcodes::Gt
+            | Opcodes::Gte
+            | Opcodes::Idx
+            | Opcodes::IncDecG(..)
+            | Opcodes::IncDecL(..)
+            | Opcodes::IncDecM(..)
+            | Opcodes::IncDecS(..)
+            | Opcodes::Incl
+            | Opcodes::InclOnce
+            | Opcodes::InitProp(..)
+            | Opcodes::InstanceOf
+            | Opcodes::InstanceOfD(..)
+            | Opcodes::Int(..)
+            | Opcodes::IsLateBoundCls
+            | Opcodes::IsTypeC(..)
+            | Opcodes::IsTypeL(..)
+            | Opcodes::IsTypeStructC(..)
+            | Opcodes::IsUnsetL(..)
+            | Opcodes::IssetG
+            | Opcodes::IssetL(..)
+            | Opcodes::IssetS
+            | Opcodes::IterFree(..)
+            | Opcodes::Keyset(..)
+            | Opcodes::LateBoundCls
+            | Opcodes::LazyClass(..)
+            | Opcodes::LazyClassFromClass
+            | Opcodes::LockObj
+            | Opcodes::Lt
+            | Opcodes::Lte
+            | Opcodes::MemoSet(..)
+            | Opcodes::MemoSetEager(..)
+            | Opcodes::Method
+            | Opcodes::Mod
+            | Opcodes::Mul
+            | Opcodes::MulO
+            | Opcodes::NSame
+            | Opcodes::NativeImpl
+            | Opcodes::Neq
+            | Opcodes::NewCol(..)
+            | Opcodes::NewDictArray(..)
+            | Opcodes::NewKeysetArray(..)
+            | Opcodes::NewObj
+            | Opcodes::NewObjD(..)
+            | Opcodes::NewObjR
+            | Opcodes::NewObjRD(..)
+            | Opcodes::NewObjS(..)
+            | Opcodes::NewPair
+            | Opcodes::NewStructDict(..)
+            | Opcodes::NewVec(..)
+            | Opcodes::Nop
+            | Opcodes::Not
+            | Opcodes::Null
+            | Opcodes::NullUninit
+            | Opcodes::OODeclExists(..)
+            | Opcodes::ParentCls
+            | Opcodes::PopC
+            | Opcodes::PopL(..)
+            | Opcodes::PopU
+            | Opcodes::Pow
+            | Opcodes::Print
+            | Opcodes::PushL(..)
+            | Opcodes::QueryM(..)
+            | Opcodes::RaiseClassStringConversionWarning
+            | Opcodes::RecordReifiedGeneric
+            | Opcodes::Req
+            | Opcodes::ReqDoc
+            | Opcodes::ReqOnce
+            | Opcodes::ResolveClass(..)
+            | Opcodes::ResolveClsMethod(..)
+            | Opcodes::ResolveClsMethodD(..)
+            | Opcodes::ResolveClsMethodS(..)
+            | Opcodes::ResolveFunc(..)
+            | Opcodes::ResolveMethCaller(..)
+            | Opcodes::ResolveRClsMethod(..)
+            | Opcodes::ResolveRClsMethodD(..)
+            | Opcodes::ResolveRClsMethodS(..)
+            | Opcodes::ResolveRFunc(..)
+            | Opcodes::RetC
+            | Opcodes::RetCSuspended
+            | Opcodes::RetM(..)
+            | Opcodes::Same
+            | Opcodes::SelfCls
+            | Opcodes::SetG
+            | Opcodes::SetImplicitContextByValue
+            | Opcodes::SetL(..)
+            | Opcodes::SetM(..)
+            | Opcodes::SetOpG(..)
+            | Opcodes::SetOpL(..)
+            | Opcodes::SetOpM(..)
+            | Opcodes::SetOpS(..)
+            | Opcodes::SetRangeM(..)
+            | Opcodes::SetS(..)
+            | Opcodes::Shl
+            | Opcodes::Shr
+            | Opcodes::Silence(..)
+            | Opcodes::String(..)
+            | Opcodes::Sub
+            | Opcodes::SubO
+            | Opcodes::This
+            | Opcodes::Throw
+            | Opcodes::ThrowAsTypeStructException
+            | Opcodes::ThrowNonExhaustiveSwitch
+            | Opcodes::True
+            | Opcodes::UGetCUNop
+            | Opcodes::UnsetG
+            | Opcodes::UnsetL(..)
+            | Opcodes::UnsetM(..)
+            | Opcodes::Vec(..)
+            | Opcodes::VerifyOutType(..)
+            | Opcodes::VerifyParamType(..)
+            | Opcodes::VerifyParamTypeTS(..)
+            | Opcodes::VerifyRetTypeC
+            | Opcodes::VerifyRetTypeTS
+            | Opcodes::WHResult
+            | Opcodes::Yield
+            | Opcodes::YieldK => &mut [],
+        }
+    }
 }

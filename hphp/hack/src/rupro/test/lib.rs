@@ -10,18 +10,15 @@ use tempdir::TempDir;
 
 use fbinit::FacebookInit;
 use hackrs::{
-    cache::NonEvictingCache,
-    decl_parser::DeclParser,
-    folded_decl_provider::LazyFoldedDeclProvider,
-    naming_provider::SqliteNamingTable,
-    reason::NReason,
-    shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclCache},
-    special_names::SpecialNames,
+    decl_parser::DeclParser, folded_decl_provider::LazyFoldedDeclProvider,
+    naming_provider::SqliteNamingTable, reason::NReason,
+    shallow_decl_provider::LazyShallowDeclProvider, special_names::SpecialNames,
 };
 use hh24_test::{create_naming_table, TestRepo};
 use pos::RelativePathCtx;
 use std::path::PathBuf;
 use std::sync::Arc;
+use test_utils::cache::{make_non_eviction_shallow_decl_cache, NonEvictingCache};
 
 mod test_file_missing_error;
 
@@ -54,7 +51,7 @@ impl TestContext {
         });
         let decl_parser = DeclParser::new(path_ctx);
         let shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(
-            Arc::new(ShallowDeclCache::with_no_eviction()),
+            Arc::new(make_non_eviction_shallow_decl_cache()),
             Arc::new(SqliteNamingTable::new(&naming_table).unwrap()),
             decl_parser.clone(),
         ));

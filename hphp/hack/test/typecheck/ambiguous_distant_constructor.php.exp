@@ -1,7 +1,5 @@
-File "ambiguous_distant_constructor.php", line 12, characters 7-7:
-Class `C` does not correctly implement all required members  (Typing[4341])
-  File "ambiguous_distant_constructor.php", line 13, characters 7-8:
-  Some members are incompatible with those declared in type `T1`
+File "ambiguous_distant_constructor.php", line 13, characters 7-8:
+Some members in class `C` are incompatible with those declared in type `T1` (Typing[4341])
   File "ambiguous_distant_constructor.php", line 9, characters 19-29:
   The method `__construct` is not compatible with the overridden method
   File "ambiguous_distant_constructor.php", line 9, characters 19-29:

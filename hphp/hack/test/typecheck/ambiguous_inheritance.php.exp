@@ -1,13 +1,9 @@
-File "ambiguous_inheritance.php", line 11, characters 16-16:
-Class `C` does not correctly implement all required members  (Typing[4341])
-  File "ambiguous_inheritance.php", line 11, characters 33-34:
-  Some members are incompatible with those declared in type `I2`
+File "ambiguous_inheritance.php", line 11, characters 33-34:
+Some members in class `C` are incompatible with those declared in type `I2` (Typing[4341])
   File "ambiguous_inheritance.php", line 4, characters 19-21:
   The method `foo` is not compatible with the overridden method
-  File "ambiguous_inheritance.php", line 11, characters 16-16:
-  Class `C` does not correctly implement all required members 
   File "ambiguous_inheritance.php", line 11, characters 33-34:
-  Some members are incompatible with those declared in type `I2`
+  Some members in class `C` are incompatible with those declared in type `I2`
   File "ambiguous_inheritance.php", line 4, characters 19-21:
   The method `foo` is not compatible with the overridden method
   File "ambiguous_inheritance.php", line 8, characters 26-28:

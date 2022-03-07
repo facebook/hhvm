@@ -1,7 +1,5 @@
-File "check_override_synthesized_traits.php", line 24, characters 7-7:
-Class `B` does not correctly implement all required members  (Typing[4341])
-  File "check_override_synthesized_traits.php", line 24, characters 17-17:
-  Some members are incompatible with those declared in type `A`
+File "check_override_synthesized_traits.php", line 24, characters 17-17:
+Some members in class `B` are incompatible with those declared in type `A` (Typing[4341])
   File "check_override_synthesized_traits.php", line 17, characters 19-21:
   The method `foo` is not compatible with the overridden method
   File "check_override_synthesized_traits.php", line 17, characters 23-28:

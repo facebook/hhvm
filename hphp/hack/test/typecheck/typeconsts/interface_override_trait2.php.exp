@@ -1,7 +1,5 @@
-File "interface_override_trait2.php", line 12, characters 16-16:
-Class `B` does not correctly implement all required members  (Typing[4374])
-  File "interface_override_trait2.php", line 12, characters 37-38:
-  Some members are incompatible with those declared in type `T1`
+File "interface_override_trait2.php", line 12, characters 37-38:
+Some members in class `B` are incompatible with those declared in type `T1` (Typing[4374])
   File "interface_override_trait2.php", line 9, characters 23-23:
   Concrete and abstract type constants with default values in an interface cannot conflict with inherited concrete or abstract type constants with default values.
   File "interface_override_trait2.php", line 5, characters 23-23:

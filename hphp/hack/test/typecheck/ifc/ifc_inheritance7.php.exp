@@ -1,13 +1,9 @@
-File "ifc_inheritance7.php", line 18, characters 7-7:
-Class `M` does not correctly implement all required members  (Typing[4341])
-  File "ifc_inheritance7.php", line 18, characters 17-17:
-  Some members are incompatible with those declared in type `N`
+File "ifc_inheritance7.php", line 18, characters 17-17:
+Some members in class `M` are incompatible with those declared in type `N` (Typing[4341])
   File "ifc_inheritance7.php", line 7, characters 19-21:
   The method `foo` is not compatible with the overridden method
-  File "ifc_inheritance7.php", line 18, characters 7-7:
-  Class `M` does not correctly implement all required members 
   File "ifc_inheritance7.php", line 18, characters 17-17:
-  Some members are incompatible with those declared in type `N`
+  Some members in class `M` are incompatible with those declared in type `N`
   File "ifc_inheritance7.php", line 7, characters 19-21:
   The method `foo` is not compatible with the overridden method
   File "ifc_inheritance7.php", line 7, characters 25-26:

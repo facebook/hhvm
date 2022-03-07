@@ -1537,7 +1537,6 @@ module Primary = struct
     | Bad_decl_override of {
         pos: Pos.t;
         name: string;
-        parent_pos: Pos.t;
         parent_name: string;
       }
     | Explain_where_constraint of {
@@ -2517,19 +2516,15 @@ module Primary = struct
     in
     (Error_code.BadConditionalSupportDynamic, claim, lazy [], [])
 
-  let bad_decl_override pos name parent_pos parent_name =
+  let bad_decl_override name parent_pos parent_name =
     ( Error_code.BadDeclOverride,
       lazy
-        ( pos,
-          "Class "
-          ^ (Render.strip_ns name |> Markdown_lite.md_codify)
-          ^ " does not correctly implement all required members " ),
-      lazy
-        [
-          ( Pos_or_decl.of_raw_pos parent_pos,
-            "Some members are incompatible with those declared in type "
-            ^ (Render.strip_ns parent_name |> Markdown_lite.md_codify) );
-        ],
+        ( parent_pos,
+          Printf.sprintf
+            "Some members in class %s are incompatible with those declared in type %s"
+            (Render.strip_ns name |> Markdown_lite.md_codify)
+            (Render.strip_ns parent_name |> Markdown_lite.md_codify) ),
+      lazy [],
       [] )
 
   let explain_where_constraint pos decl_pos in_class =
@@ -5247,8 +5242,8 @@ module Primary = struct
     | Bad_conditional_support_dynamic
         { pos; child; parent; ty_name; self_ty_name } ->
       bad_conditional_support_dynamic pos child parent ty_name self_ty_name
-    | Bad_decl_override { pos; name; parent_pos; parent_name } ->
-      bad_decl_override pos name parent_pos parent_name
+    | Bad_decl_override { pos; name; parent_name } ->
+      bad_decl_override name pos parent_name
     | Explain_where_constraint { pos; decl_pos; in_class } ->
       explain_where_constraint pos decl_pos in_class
     | Explain_constraint pos -> explain_constraint pos
@@ -7624,7 +7619,7 @@ and Reasons_callback : sig
     t
 
   val bad_decl_override :
-    Pos.t -> name:string -> parent_pos:Pos.t -> parent_name:string -> t
+    name:string -> parent_pos:Pos.t -> parent_name:string -> t
 
   val explain_where_constraint :
     Pos.t -> in_class:bool -> decl_pos:Pos_or_decl.t -> t
@@ -7913,11 +7908,11 @@ end = struct
     @@ Primary.Bad_conditional_support_dynamic
          { pos; child; parent; ty_name; self_ty_name }
 
-  let bad_decl_override pos ~name ~parent_pos ~parent_name =
+  let bad_decl_override ~name ~parent_pos ~parent_name =
     append_incoming_reasons
     @@ retain_quickfixes
     @@ of_primary_error
-    @@ Primary.Bad_decl_override { pos; name; parent_pos; parent_name }
+    @@ Primary.Bad_decl_override { name; pos = parent_pos; parent_name }
 
   let explain_where_constraint pos ~in_class ~decl_pos =
     append_incoming_reasons

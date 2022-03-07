@@ -1,7 +1,5 @@
-File "test_consts13.php--file2.php", line 2, characters 7-8:
-Class `C2` does not correctly implement all required members  (Typing[4348])
-  File "test_consts13.php--file2.php", line 2, characters 18-19:
-  Some members are incompatible with those declared in type `C1`
+File "test_consts13.php--file2.php", line 2, characters 18-19:
+Some members in class `C2` are incompatible with those declared in type `C1` (Typing[4348])
   File "test_consts13.php--file1.php", line 4, characters 18-20:
   Expected `int`
   File "test_consts13.php--file2.php", line 3, characters 9-14:

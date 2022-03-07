@@ -1,16 +1,12 @@
-File "interface2.php", line 10, characters 11-11:
-Class `I` does not correctly implement all required members  (Typing[4340])
 File "interface2.php", line 10, characters 25-26:
-Some members are incompatible with those declared in type `I2`
-File "interface2.php", line 10, characters 11-11:
-Class `I` does not correctly implement all required members 
-File "interface2.php", line 10, characters 25-26:
-Some members are incompatible with those declared in type `I2`
-File "interface2.php", line 4, characters 23-23:
-The constraint on this type constant is inconsistent with its parent
-File "interface2.php", line 7, characters 28-35:
-Expected `arraykey`
-File "interface2.php", line 4, characters 28-32:
-But got `mixed`
-File "interface2.php", line 4, characters 23-23:
-This declaration was inherited from an object of type `I1`. Redeclare this member in `I` with a compatible signature.
+Some members in class `I` are incompatible with those declared in type `I2` (Typing[4340])
+  File "interface2.php", line 10, characters 25-26:
+  Some members in class `I` are incompatible with those declared in type `I2`
+  File "interface2.php", line 4, characters 23-23:
+  The constraint on this type constant is inconsistent with its parent
+  File "interface2.php", line 7, characters 28-35:
+  Expected `arraykey`
+  File "interface2.php", line 4, characters 28-32:
+  But got `mixed`
+  File "interface2.php", line 4, characters 23-23:
+  This declaration was inherited from an object of type `I1`. Redeclare this member in `I` with a compatible signature.

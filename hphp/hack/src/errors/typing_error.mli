@@ -422,7 +422,6 @@ module Primary : sig
     | Bad_decl_override of {
         pos: Pos.t;
         name: string;
-        parent_pos: Pos.t;
         parent_name: string;
       }
     | Explain_where_constraint of {
@@ -1803,7 +1802,7 @@ module Reasons_callback : sig
     t
 
   val bad_decl_override :
-    Pos.t -> name:string -> parent_pos:Pos.t -> parent_name:string -> t
+    name:string -> parent_pos:Pos.t -> parent_name:string -> t
 
   val explain_where_constraint :
     Pos.t -> in_class:bool -> decl_pos:Pos_or_decl.t -> t

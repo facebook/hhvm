@@ -1,7 +1,5 @@
-File "abstract.bad.php", line 16, characters 12-12:
-Class `F` does not correctly implement all required members  (Typing[4348])
-  File "abstract.bad.php", line 16, characters 26-26:
-  Some members are incompatible with those declared in type `E`
+File "abstract.bad.php", line 16, characters 26-26:
+Some members in class `F` are incompatible with those declared in type `E` (Typing[4348])
   File "abstract.bad.php", line 11, characters 12-12:
   Expected `C`
   File "abstract.bad.php", line 17, characters 3-3:

@@ -1,7 +1,5 @@
-File "multiple_traits_require_implements.php", line 19, characters 7-7:
-Class `T` does not correctly implement all required members  (Typing[4341])
-  File "multiple_traits_require_implements.php", line 20, characters 7-8:
-  Some members are incompatible with those declared in type `T1`
+File "multiple_traits_require_implements.php", line 20, characters 7-8:
+Some members in class `T` are incompatible with those declared in type `T1` (Typing[4341])
   File "multiple_traits_require_implements.php", line 8, characters 19-21:
   The method `foo` is not compatible with the overridden method
   File "multiple_traits_require_implements.php", line 8, characters 23-28:

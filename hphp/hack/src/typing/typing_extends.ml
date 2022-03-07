@@ -1538,7 +1538,6 @@ let check_implements_extends_uses
       Typing_error.Reasons_callback.bad_enum_decl name_pos
     else
       Typing_error.Reasons_callback.bad_decl_override
-        name_pos
         ~name:(Cls.name class_)
         ~parent_pos:parent_name_pos
         ~parent_name

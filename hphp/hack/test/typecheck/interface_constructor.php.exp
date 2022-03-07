@@ -1,7 +1,5 @@
-File "interface_constructor.php--file2.php", line 2, characters 7-7:
-Class `A` does not correctly implement all required members  (Typing[4056])
-  File "interface_constructor.php--file2.php", line 2, characters 20-22:
-  Some members are incompatible with those declared in type `Foo`
+File "interface_constructor.php--file2.php", line 2, characters 20-22:
+Some members in class `A` are incompatible with those declared in type `Foo` (Typing[4056])
   File "interface_constructor.php--file1.php", line 13, characters 19-29:
   The constructor is not implemented
 File "interface_constructor.php--file2.php", line 2, characters 20-22:

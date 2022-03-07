@@ -1,7 +1,5 @@
-File "ambiguous_declaration_one_synthetic_2.php", line 19, characters 7-7:
-Class `B` does not correctly implement all required members  (Typing[4341])
-  File "ambiguous_declaration_one_synthetic_2.php", line 20, characters 7-8:
-  Some members are incompatible with those declared in type `T1`
+File "ambiguous_declaration_one_synthetic_2.php", line 20, characters 7-8:
+Some members in class `B` are incompatible with those declared in type `T1` (Typing[4341])
   File "ambiguous_declaration_one_synthetic_2.php", line 16, characters 19-21:
   The method `foo` is not compatible with the overridden method
   File "ambiguous_declaration_one_synthetic_2.php", line 16, characters 19-21:

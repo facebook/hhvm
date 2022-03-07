@@ -10,6 +10,8 @@ type t [@@deriving eq, ord, show]
 
 val make : title:string -> new_text:string -> Pos.t -> t
 
+val make_with_edits : title:string -> edits:(string * Pos.t) list -> t
+
 val make_classish : title:string -> new_text:string -> classish_name:string -> t
 
 val get_edits : classish_starts:Pos.t SMap.t -> t -> (string * Pos.t) list

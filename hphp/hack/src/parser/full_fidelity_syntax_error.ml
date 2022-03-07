@@ -14,20 +14,32 @@ type error_type =
   | RuntimeError
 [@@deriving show]
 
+type syntax_quickfix = {
+  title: string;
+  edits: (int * int * string) list;
+}
+[@@deriving show]
+
 type t = {
   child: t option;
   start_offset: int;
   end_offset: int;
   error_type: error_type;
   message: string;
+  quickfixes: syntax_quickfix list;
 }
 [@@deriving show]
 
 exception ParserFatal of t * Pos.t
 
 let make
-    ?(child = None) ?(error_type = ParseError) start_offset end_offset message =
-  { child; error_type; start_offset; end_offset; message }
+    ?(child = None)
+    ?(error_type = ParseError)
+    ?(quickfixes = [])
+    start_offset
+    end_offset
+    message =
+  { child; error_type; start_offset; end_offset; message; quickfixes }
 
 let rec to_positioned_string error offset_to_position =
   let child =

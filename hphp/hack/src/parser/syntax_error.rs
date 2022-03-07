@@ -29,6 +29,14 @@ pub enum LvalRoot {
     Foreach,
 }
 
+/// Equivalent to `Quickfix` but uses offsets rather than the `Pos` type,
+/// so this type is Send.
+#[derive(Debug, Clone, FromOcamlRep, ToOcamlRep, PartialEq, Eq)]
+pub struct SyntaxQuickfix {
+    pub title: String,
+    pub edits: Vec<(usize, usize, String)>,
+}
+
 #[derive(Debug, Clone, FromOcamlRep, ToOcamlRep, PartialEq, Eq)]
 pub struct SyntaxError {
     pub child: Option<Box<SyntaxError>>,
@@ -36,6 +44,7 @@ pub struct SyntaxError {
     pub end_offset: usize,
     pub error_type: ErrorType,
     pub message: Error,
+    pub quickfixes: Vec<SyntaxQuickfix>,
 }
 
 impl SyntaxError {
@@ -45,6 +54,7 @@ impl SyntaxError {
         end_offset: usize,
         error_type: ErrorType,
         message: Error,
+        quickfixes: Vec<SyntaxQuickfix>,
     ) -> Self {
         Self {
             child: child.map(Box::new),
@@ -52,16 +62,23 @@ impl SyntaxError {
             end_offset,
             error_type,
             message,
+            quickfixes,
         }
     }
 
-    pub fn make(start_offset: usize, end_offset: usize, message: Error) -> Self {
+    pub fn make(
+        start_offset: usize,
+        end_offset: usize,
+        message: Error,
+        quickfixes: Vec<SyntaxQuickfix>,
+    ) -> Self {
         Self::make_with_child_and_type(
             None,
             start_offset,
             end_offset,
             ErrorType::ParseError,
             message,
+            quickfixes,
         )
     }
 

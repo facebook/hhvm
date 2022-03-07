@@ -28,8 +28,12 @@ impl<'ast> Visitor<'ast> for Checker {
                 let msg = "Splice syntax ${...} can only occur inside expression trees Foo``...``.";
                 let p = e.1.clone();
                 let (start_offset, end_offset) = p.info_raw();
-                self.errors
-                    .push(SyntaxError::make(start_offset, end_offset, msg.into()));
+                self.errors.push(SyntaxError::make(
+                    start_offset,
+                    end_offset,
+                    msg.into(),
+                    vec![],
+                ));
 
                 // Don't recurse further on this subtree, to prevent
                 // cascading errors that are all the same issue.

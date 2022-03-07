@@ -12,19 +12,32 @@ type error_type =
   | RuntimeError
 [@@deriving show]
 
+type syntax_quickfix = {
+  title: string;
+  edits: (int * int * string) list;
+}
+[@@deriving show]
+
 type t = {
   child: t option;
   start_offset: int;
   end_offset: int;
   error_type: error_type;
   message: string;
+  quickfixes: syntax_quickfix list;
 }
 [@@deriving show]
 
 exception ParserFatal of t * Pos.t
 
 val make :
-  ?child:t option -> ?error_type:error_type -> int -> int -> string -> t
+  ?child:t option ->
+  ?error_type:error_type ->
+  ?quickfixes:syntax_quickfix list ->
+  int ->
+  int ->
+  string ->
+  t
 
 val to_positioned_string : t -> (int -> int * int) -> string
 

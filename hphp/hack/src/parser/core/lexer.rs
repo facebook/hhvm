@@ -189,7 +189,7 @@ where
     }
 
     fn with_error(&mut self, error: Error) {
-        let error = SyntaxError::make(self.start(), self.offset(), error);
+        let error = SyntaxError::make(self.start(), self.offset(), error, vec![]);
         self.errors.push(error)
     }
 

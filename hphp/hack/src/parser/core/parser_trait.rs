@@ -175,7 +175,7 @@ where
     // in cases like "flagging an entire token as an extra".
     fn with_error_impl(&mut self, on_whole_token: bool, message: Error) {
         let (start_offset, end_offset) = self.error_offsets(on_whole_token);
-        let error = SyntaxError::make(start_offset, end_offset, message);
+        let error = SyntaxError::make(start_offset, end_offset, message, vec![]);
         self.add_error(error)
     }
 

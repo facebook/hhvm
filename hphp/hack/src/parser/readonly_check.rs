@@ -499,7 +499,7 @@ impl Checker {
     fn add_error(&mut self, pos: &Pos, msg: ErrorMsg) {
         let (start_offset, end_offset) = pos.info_raw();
         self.errors
-            .push(SyntaxError::make(start_offset, end_offset, msg));
+            .push(SyntaxError::make(start_offset, end_offset, msg, vec![]));
     }
 
     fn subtype(&mut self, pos: &Pos, r_sub: &Rty, r_sup: &Rty, reason: &str) {

@@ -8,20 +8,21 @@ use crate::decl_defs::{DeclTy, FoldedClass};
 use crate::folded_decl_provider::{FoldedDeclProvider, Substitution};
 use crate::reason::Reason;
 use crate::typing_defs::ClassElt;
-use dashmap::DashMap;
-use once_cell::sync::OnceCell;
-use pos::{BuildMethodNameHasher, BuildPropNameHasher, MethodName, PropName, TypeName};
+use once_cell::unsync::OnceCell;
+use pos::{MethodName, MethodNameMap, PropName, PropNameMap, TypeName};
+use std::cell::RefCell;
 use std::fmt;
+use std::rc::Rc;
 use std::sync::Arc;
 
 /// c.f. OCaml type `Typing_classes_heap.eager_members`
 #[derive(Debug)]
 struct Members<R: Reason> {
-    props: DashMap<PropName, Arc<ClassElt<R>>, BuildPropNameHasher>,
-    static_props: DashMap<PropName, Arc<ClassElt<R>>, BuildPropNameHasher>,
-    methods: DashMap<MethodName, Arc<ClassElt<R>>, BuildMethodNameHasher>,
-    static_methods: DashMap<MethodName, Arc<ClassElt<R>>, BuildMethodNameHasher>,
-    constructor: OnceCell<Option<Arc<ClassElt<R>>>>,
+    props: PropNameMap<Rc<ClassElt<R>>>,
+    static_props: PropNameMap<Rc<ClassElt<R>>>,
+    methods: MethodNameMap<Rc<ClassElt<R>>>,
+    static_methods: MethodNameMap<Rc<ClassElt<R>>>,
+    constructor: OnceCell<Option<Rc<ClassElt<R>>>>,
 }
 
 /// A typing `ClassType` (c.f. the `Eager` variant of OCaml type
@@ -36,7 +37,7 @@ struct Members<R: Reason> {
 pub struct ClassType<R: Reason> {
     provider: Arc<dyn FoldedDeclProvider<R>>,
     class: Arc<FoldedClass<R>>,
-    members: Members<R>,
+    members: RefCell<Members<R>>,
 }
 
 impl<R: Reason> fmt::Debug for ClassType<R> {
@@ -44,7 +45,7 @@ impl<R: Reason> fmt::Debug for ClassType<R> {
         self.fetch_all_members().unwrap();
         f.debug_struct("ClassType")
             .field("class", &self.class)
-            .field("members", &self.members)
+            .field("members", &self.members.borrow())
             .finish()
     }
 }
@@ -52,10 +53,10 @@ impl<R: Reason> fmt::Debug for ClassType<R> {
 impl<R: Reason> Members<R> {
     fn new() -> Self {
         Self {
-            props: DashMap::default(),
-            static_props: DashMap::default(),
-            methods: DashMap::default(),
-            static_methods: DashMap::default(),
+            props: Default::default(),
+            static_props: Default::default(),
+            methods: Default::default(),
+            static_methods: Default::default(),
             constructor: OnceCell::new(),
         }
     }
@@ -66,7 +67,7 @@ impl<R: Reason> ClassType<R> {
         Self {
             provider,
             class,
-            members: Members::new(),
+            members: RefCell::new(Members::new()),
         }
     }
 
@@ -109,9 +110,9 @@ impl<R: Reason> ClassType<R> {
 }
 
 impl<R: Reason> Class<R> for ClassType<R> {
-    fn get_prop(&self, name: PropName) -> Result<Option<Arc<ClassElt<R>>>> {
-        if let Some(class_elt) = self.members.props.get(&name) {
-            return Ok(Some(Arc::clone(&class_elt)));
+    fn get_prop(&self, name: PropName) -> Result<Option<Rc<ClassElt<R>>>> {
+        if let Some(class_elt) = self.members.borrow().props.get(&name) {
+            return Ok(Some(Rc::clone(class_elt)));
         }
         let folded_elt = match self.class.props.get(&name) {
             Some(fe) => fe,
@@ -124,14 +125,17 @@ impl<R: Reason> Class<R> for ClassType<R> {
                 .unwrap_or_else(|| self.member_type_missing("property", origin, name)),
             origin,
         );
-        let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
-        self.members.props.insert(name, Arc::clone(&class_elt));
+        let class_elt = Rc::new(ClassElt::new(folded_elt, ty));
+        self.members
+            .borrow_mut()
+            .props
+            .insert(name, Rc::clone(&class_elt));
         Ok(Some(class_elt))
     }
 
-    fn get_static_prop(&self, name: PropName) -> Result<Option<Arc<ClassElt<R>>>> {
-        if let Some(class_elt) = self.members.static_props.get(&name) {
-            return Ok(Some(Arc::clone(&class_elt)));
+    fn get_static_prop(&self, name: PropName) -> Result<Option<Rc<ClassElt<R>>>> {
+        if let Some(class_elt) = self.members.borrow().static_props.get(&name) {
+            return Ok(Some(Rc::clone(class_elt)));
         }
         let folded_elt = match self.class.static_props.get(&name) {
             Some(fe) => fe,
@@ -144,16 +148,17 @@ impl<R: Reason> Class<R> for ClassType<R> {
                 .unwrap_or_else(|| self.member_type_missing("static property", origin, name)),
             origin,
         );
-        let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
+        let class_elt = Rc::new(ClassElt::new(folded_elt, ty));
         self.members
+            .borrow_mut()
             .static_props
-            .insert(name, Arc::clone(&class_elt));
+            .insert(name, Rc::clone(&class_elt));
         Ok(Some(class_elt))
     }
 
-    fn get_method(&self, name: MethodName) -> Result<Option<Arc<ClassElt<R>>>> {
-        if let Some(class_elt) = self.members.methods.get(&name) {
-            return Ok(Some(Arc::clone(&class_elt)));
+    fn get_method(&self, name: MethodName) -> Result<Option<Rc<ClassElt<R>>>> {
+        if let Some(class_elt) = self.members.borrow().methods.get(&name) {
+            return Ok(Some(Rc::clone(class_elt)));
         }
         let folded_elt = match self.class.methods.get(&name) {
             Some(fe) => fe,
@@ -166,14 +171,17 @@ impl<R: Reason> Class<R> for ClassType<R> {
                 .unwrap_or_else(|| self.member_type_missing("method", origin, name)),
             origin,
         );
-        let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
-        self.members.methods.insert(name, Arc::clone(&class_elt));
+        let class_elt = Rc::new(ClassElt::new(folded_elt, ty));
+        self.members
+            .borrow_mut()
+            .methods
+            .insert(name, Rc::clone(&class_elt));
         Ok(Some(class_elt))
     }
 
-    fn get_static_method(&self, name: MethodName) -> Result<Option<Arc<ClassElt<R>>>> {
-        if let Some(class_elt) = self.members.static_methods.get(&name) {
-            return Ok(Some(Arc::clone(&class_elt)));
+    fn get_static_method(&self, name: MethodName) -> Result<Option<Rc<ClassElt<R>>>> {
+        if let Some(class_elt) = self.members.borrow().static_methods.get(&name) {
+            return Ok(Some(Rc::clone(class_elt)));
         }
         let folded_elt = match self.class.static_methods.get(&name) {
             Some(fe) => fe,
@@ -186,16 +194,18 @@ impl<R: Reason> Class<R> for ClassType<R> {
                 .unwrap_or_else(|| self.member_type_missing("static method", origin, name)),
             origin,
         );
-        let class_elt = Arc::new(ClassElt::new(folded_elt, ty));
+        let class_elt = Rc::new(ClassElt::new(folded_elt, ty));
         self.members
+            .borrow_mut()
             .static_methods
-            .insert(name, Arc::clone(&class_elt));
+            .insert(name, Rc::clone(&class_elt));
         Ok(Some(class_elt))
     }
 
-    fn get_constructor(&self) -> Result<Option<Arc<ClassElt<R>>>> {
+    fn get_constructor(&self) -> Result<Option<Rc<ClassElt<R>>>> {
         Ok(self
             .members
+            .borrow_mut()
             .constructor
             .get_or_try_init::<_, Error>(|| {
                 let folded_elt = match &self.class.constructor {
@@ -211,9 +221,9 @@ impl<R: Reason> Class<R> for ClassType<R> {
                         }),
                     origin,
                 );
-                Ok(Some(Arc::new(ClassElt::new(folded_elt, ty))))
+                Ok(Some(Rc::new(ClassElt::new(folded_elt, ty))))
             })?
             .as_ref()
-            .map(Arc::clone))
+            .map(Rc::clone))
     }
 }

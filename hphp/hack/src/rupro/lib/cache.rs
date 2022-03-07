@@ -12,3 +12,11 @@ pub trait Cache<K: Copy, V>: Debug + Send + Sync {
     fn get(&self, key: K) -> Option<V>;
     fn insert(&self, key: K, val: V);
 }
+
+/// A thread-local cache, intended for decl caching in typechecker workers. The
+/// key type is intended to be a `Symbol` or tuple of `Symbol`s, and the value
+/// type is intended to be a ref-counted pointer (like `Rc`).
+pub trait LocalCache<K: Copy, V>: Debug {
+    fn get(&self, key: K) -> Option<V>;
+    fn insert(&mut self, key: K, val: V);
+}

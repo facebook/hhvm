@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 #![allow(dead_code)]
-use std::sync::Arc;
+use std::rc::Rc;
 
 use pos::Symbol;
 
@@ -22,7 +22,7 @@ use crate::typing_return::TypingReturn;
 use crate::tast;
 
 pub struct TypingToplevel<'a, R: Reason> {
-    ctx: Arc<TypingCtx<R>>,
+    ctx: Rc<TypingCtx<R>>,
     env: &'a TEnv<R>,
 }
 
@@ -152,10 +152,10 @@ impl<'a, R: Reason> TypingToplevel<'a, R> {
     }
 
     pub fn fun_def(
-        ctx: Arc<TypingCtx<R>>,
+        ctx: Rc<TypingCtx<R>>,
         fd: &oxidized::aast::FunDef<(), ()>,
     ) -> Result<(tast::FunDef<R>, Vec<TypingError<R>>)> {
-        let env = TEnv::fun_env(Arc::clone(&ctx), fd);
+        let env = TEnv::fun_env(Rc::clone(&ctx), fd);
         let def = TypingToplevel { ctx, env: &env }.fun_def_impl(fd)?;
         Ok((def, env.destruct()))
     }

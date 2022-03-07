@@ -4,11 +4,13 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{ClassType, Result, TypeDecl, TypingDeclProvider};
-use crate::cache::Cache;
+use crate::cache::LocalCache;
 use crate::decl_defs::{ConstDecl, FunDecl};
 use crate::folded_decl_provider::{self, FoldedDeclProvider};
 use crate::reason::Reason;
 use pos::{ConstName, FunName, TypeName};
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::sync::Arc;
 
 /// An implementation of TypingDeclProvider designed after the hh_server
@@ -21,17 +23,17 @@ use std::sync::Arc;
 /// 1000 classes into 1000 separate serialized blobs.
 #[derive(Debug)]
 pub struct FoldingTypingDeclProvider<R: Reason> {
-    cache: Arc<dyn Cache<TypeName, Arc<ClassType<R>>>>,
+    cache: RefCell<Box<dyn LocalCache<TypeName, Rc<ClassType<R>>>>>,
     folded_decl_provider: Arc<dyn FoldedDeclProvider<R>>,
 }
 
 impl<R: Reason> FoldingTypingDeclProvider<R> {
     pub fn new(
-        cache: Arc<dyn Cache<TypeName, Arc<ClassType<R>>>>,
+        cache: Box<dyn LocalCache<TypeName, Rc<ClassType<R>>>>,
         folded_decl_provider: Arc<dyn FoldedDeclProvider<R>>,
     ) -> Self {
         Self {
-            cache,
+            cache: RefCell::new(cache),
             folded_decl_provider,
         }
     }
@@ -47,22 +49,22 @@ impl<R: Reason> TypingDeclProvider<R> for FoldingTypingDeclProvider<R> {
     }
 
     fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
-        match self.cache.get(name) {
-            Some(arc) => Ok(Some(TypeDecl::Class(arc))),
-            None => match self.folded_decl_provider.get_type(name)? {
-                None => Ok(None),
-                Some(folded_decl_provider::TypeDecl::Typedef(decl)) => {
-                    Ok(Some(TypeDecl::Typedef(decl)))
-                }
-                Some(folded_decl_provider::TypeDecl::Class(folded_decl)) => {
-                    let cls = Arc::new(ClassType::new(
-                        Arc::clone(&self.folded_decl_provider),
-                        folded_decl,
-                    ));
-                    self.cache.insert(name, Arc::clone(&cls));
-                    Ok(Some(TypeDecl::Class(cls)))
-                }
-            },
+        if let Some(cls) = self.cache.borrow().get(name) {
+            return Ok(Some(TypeDecl::Class(cls)));
+        }
+        match self.folded_decl_provider.get_type(name)? {
+            None => Ok(None),
+            Some(folded_decl_provider::TypeDecl::Typedef(decl)) => {
+                Ok(Some(TypeDecl::Typedef(decl)))
+            }
+            Some(folded_decl_provider::TypeDecl::Class(folded_decl)) => {
+                let cls = Rc::new(ClassType::new(
+                    Arc::clone(&self.folded_decl_provider),
+                    folded_decl,
+                ));
+                self.cache.borrow_mut().insert(name, Rc::clone(&cls));
+                Ok(Some(TypeDecl::Class(cls)))
+            }
         }
     }
 }

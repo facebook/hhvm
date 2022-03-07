@@ -17,11 +17,14 @@ use hackrs::tast;
 use hackrs::typing_check_utils::TypingCheckUtils;
 use hackrs::typing_ctx::TypingCtx;
 use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
-use hackrs_test_utils::cache::{make_non_eviction_shallow_decl_cache, NonEvictingCache};
+use hackrs_test_utils::cache::{
+    make_non_eviction_shallow_decl_cache, NonEvictingCache, NonEvictingLocalCache,
+};
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
 use pos::{Prefix, RelativePath, RelativePathCtx};
 use std::path::PathBuf;
+use std::rc::Rc;
 use std::sync::Arc;
 use structopt::StructOpt;
 
@@ -80,12 +83,12 @@ pub extern "C" fn stc_main() {
         special_names,
         shallow_decl_provider,
     ));
-    let typing_decl_cache = Arc::new(NonEvictingCache::new());
-    let typing_decl_provider = Arc::new(FoldingTypingDeclProvider::new(
+    let typing_decl_cache = Box::new(NonEvictingLocalCache::new());
+    let typing_decl_provider = Rc::new(FoldingTypingDeclProvider::new(
         typing_decl_cache,
         folded_decl_provider,
     ));
-    let ctx = Arc::new(TypingCtx::new(typing_decl_provider, special_names));
+    let ctx = Rc::new(TypingCtx::new(typing_decl_provider, special_names));
 
     let filenames: Vec<RelativePath> = cli_options
         .filenames
@@ -103,7 +106,7 @@ pub extern "C" fn stc_main() {
     for fln in filenames {
         let (ast, errs) = ast_provider.get_ast(fln).unwrap();
         let (tast, errs) =
-            TypingCheckUtils::type_file::<NReason>(Arc::clone(&ctx), &ast, errs).unwrap();
+            TypingCheckUtils::type_file::<NReason>(Rc::clone(&ctx), &ast, errs).unwrap();
         if !errs.is_empty() {
             unimplemented!()
         }

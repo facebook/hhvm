@@ -1,4 +1,0 @@
-File "shapes_remove_key2.php", line 5, characters 21-22:
-This argument should be annotated with `inout` (Typing[4182])
-  File "Shapes.hhi", line 59, characters 13-18:
-  Because this is an `inout` parameter

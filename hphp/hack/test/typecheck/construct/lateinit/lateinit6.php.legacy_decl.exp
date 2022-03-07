@@ -1,4 +1,0 @@
-File "lateinit6.php", line 9, characters 10-12:
-Redeclared properties must be consistently declared `__LateInit` (Typing[4282])
-  File "lateinit6.php", line 4, characters 10-12:
-  The property is not declared `__LateInit` here

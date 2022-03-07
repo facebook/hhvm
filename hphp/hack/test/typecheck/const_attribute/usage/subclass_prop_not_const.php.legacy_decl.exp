@@ -1,4 +1,0 @@
-File "subclass_prop_not_const.php", line 9, characters 10-12:
-This property is not `__Const` (Typing[4204])
-  File "subclass_prop_not_const.php", line 5, characters 10-12:
-  This property is `__Const`

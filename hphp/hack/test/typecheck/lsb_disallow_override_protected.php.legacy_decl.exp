@@ -1,4 +1,0 @@
-File "lsb_disallow_override_protected.php", line 8, characters 20-22:
-Member `$x` may not override `__LSB` member of parent (Typing[4284])
-  File "lsb_disallow_override_protected.php", line 4, characters 30-32:
-  This is being overridden

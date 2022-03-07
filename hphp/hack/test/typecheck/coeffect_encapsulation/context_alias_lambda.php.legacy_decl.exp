@@ -1,6 +1,0 @@
-File "context_alias_lambda.php--g.php", line 8, characters 5-57:
-Invalid argument (Typing[4403])
-  File "context_alias_lambda.php--f.php", line 8, characters 16-22:
-  Expected a function that requires the capability Codegen
-  File "context_alias_lambda.php--g.php", line 6, characters 10-13:
-  But got a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, System, WriteProperty}

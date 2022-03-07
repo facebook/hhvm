@@ -1,6 +1,0 @@
-File "shape_idx_optional_field_return.php", line 5, characters 10-29:
-Invalid return type (Typing[4110])
-  File "shape_idx_optional_field_return.php", line 4, characters 66-68:
-  Expected `int`
-  File "Shapes.hhi", line 39, characters 26-28:
-  But got `?int`

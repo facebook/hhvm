@@ -1,2 +1,0 @@
-File "T89344857.php", line 13, characters 26-28:
-Read access to `$this->str` before initialization (Typing[4083])

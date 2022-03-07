@@ -1,8 +1,0 @@
-File "ctx-const-bounds_call-from-less-pure.php", line 23, characters 15-21:
-A lambda cannot have a polymorphic context (Parsing[1002])
-File "ctx-const-bounds_call-from-less-pure.php", line 19, characters 12-33:
-Invalid return type (Typing[4403])
-  File "ctx-const-bounds_call-from-less-pure.php", line 18, characters 55-55:
-  Expected a function that requires the capability this::C
-  File "ctx-const-bounds_call-from-less-pure.php", line 19, characters 15-25:
-  But got a function that requires the capability WriteProperty

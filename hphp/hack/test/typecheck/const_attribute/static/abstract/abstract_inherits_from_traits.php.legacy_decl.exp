@@ -1,8 +1,0 @@
-File "abstract_inherits_from_traits.php", line 13, characters 7-7:
-Some members in class `C` are incompatible with those declared in type `A` (Typing[4341])
-  File "abstract_inherits_from_traits.php", line 9, characters 38-40:
-  The property `$p` has the wrong type
-  File "abstract_inherits_from_traits.php", line 5, characters 38-40:
-  Expected `int`
-  File "abstract_inherits_from_traits.php", line 9, characters 38-40:
-  But got `num`

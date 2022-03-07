@@ -4,11 +4,11 @@ File "static_prop.php", line 15, characters 5-21:
 Invalid property assignment (Typing[4411])
   File "static_prop.php", line 15, characters 25-42:
   This expression is readonly
-  File "static_prop.php", line 8, characters 22-32:
+  File "static_prop.php", line 8, characters 17-20:
   But it's being assigned to a mutable property
 File "static_prop.php", line 21, characters 3-18:
 Invalid property assignment (Typing[4411])
   File "static_prop.php", line 21, characters 22-39:
   This expression is readonly
-  File "static_prop.php", line 8, characters 22-32:
+  File "static_prop.php", line 8, characters 17-20:
   But it's being assigned to a mutable property

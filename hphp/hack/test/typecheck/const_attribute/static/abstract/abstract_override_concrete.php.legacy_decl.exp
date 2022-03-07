@@ -1,4 +1,0 @@
-File "abstract_override_concrete.php", line 9, characters 38-43:
-Cannot re-declare this property as abstract (Typing[4142])
-  File "abstract_override_concrete.php", line 5, characters 29-34:
-  Previously defined here

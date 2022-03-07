@@ -1,4 +1,4 @@
-File "property_visibility_override_bad.php", line 4, characters 37-40:
+File "property_visibility_override_bad.php", line 4, characters 33-35:
 This member visibility is: `private` (Typing[4113])
-  File "property_visibility_override_bad.php", line 3, characters 24-27:
+  File "property_visibility_override_bad.php", line 3, characters 20-22:
   `public` was expected

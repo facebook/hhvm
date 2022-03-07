@@ -1,6 +1,0 @@
-File "context_alias_no_equals.php--g.php", line 7, characters 5-57:
-Invalid argument (Typing[4403])
-  File "context_alias_no_equals.php--f.php", line 8, characters 16-23:
-  Expected a function that requires the capability Codegen
-  File "context_alias_no_equals.php--g.php", line 5, characters 10-13:
-  But got a function that requires the capability set {AccessGlobals, IO, ImplicitPolicyLocal, RxLocal, System, WriteProperty}

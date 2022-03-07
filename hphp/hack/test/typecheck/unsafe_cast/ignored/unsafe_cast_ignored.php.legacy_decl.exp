@@ -1,6 +1,0 @@
-File "unsafe_cast_ignored.php", line 4, characters 10-47:
-Invalid return type (Typing[4110])
-  File "unsafe_cast_ignored.php", line 3, characters 24-26:
-  Expected `int`
-  File "unsafe_cast_ignored.php", line 3, characters 12-17:
-  But got `string`

@@ -90,19 +90,19 @@ let () =
       "typecheck"
       "--batch
       --flags
-      --shallow-class-decl
       --error-format raw"
       ~dep_files:files_tc
   in
-  let typecheck_legacy_decl =
+  let typecheck_shallow_decl =
     make_target
-      "typecheck_legacy_decl"
+      "typecheck_shallow_decl"
       "--batch
-      --out-extension .legacy_decl.out
-      --expect-extension .legacy_decl.exp
+      --out-extension .shallow_decl.out
+      --expect-extension .shallow_decl.exp
       --fallback-expect-extension .exp
       --flags
-      --out-extension .legacy_decl.out
+      --shallow-class-decl
+      --out-extension .shallow_decl.out
       --error-format raw"
       ~dep_files:files_tc
   in
@@ -131,13 +131,13 @@ let () =
   (deps
     (alias typecheck)
     (alias decl_compare)
-    (alias typecheck_legacy_decl)))"
+    (alias typecheck_shallow_decl)))"
   in
 
   let dune_file =
     header
     ^ typecheck
-    ^ typecheck_legacy_decl
+    ^ typecheck_shallow_decl
     ^ decl_compare
     ^ typecheck_w_timeout
     ^ run_tests

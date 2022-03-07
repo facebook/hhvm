@@ -1,6 +1,0 @@
-File "test_no_enforcement_on_non_static_coeffects_and_default.php", line 3, characters 1-32:
-Cannot use unstable feature: `context_alias_declaration_short` (Parsing[1002])
-File "test_no_enforcement_on_non_static_coeffects_and_default.php", line 13, characters 47-54:
-Unbound name: `HH\Contexts\Unsafe\nonsense` (Naming[2049])
-File "test_no_enforcement_on_non_static_coeffects_and_default.php", line 13, characters 47-54:
-Unbound name: `HH\Contexts\nonsense` (Naming[2049])

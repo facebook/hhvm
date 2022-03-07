@@ -1,6 +1,0 @@
-File "coeffect_subtyping.php--h.php", line 6, characters 10-50:
-Invalid argument (Typing[4403])
-  File "coeffect_subtyping.php--g.php", line 6, characters 33-37:
-  Expected a function that requires the capability First
-  File "coeffect_subtyping.php--h.php", line 5, characters 17-22:
-  But got a function that requires the capability Second

@@ -1,6 +1,0 @@
-File "unset_typechecks_arg.php", line 4, characters 9-13:
-Invalid index type for this dict (Typing[4449])
-  File "unset_typechecks_arg.php", line 3, characters 19-24:
-  This is a string
-  File "unset_typechecks_arg.php", line 4, characters 12-12:
-  It is incompatible with an int

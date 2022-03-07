@@ -91,25 +91,21 @@ pub enum Opcodes<'arena> {
     Eq,
     Eval,
     Exit,
-    FCallClsMethod {
-        fcall_args: FcallArgs<'arena>,
-        log: IsLogAsDynamicCallOp,
-    },
-    FCallClsMethodD {
-        fcall_args: FcallArgs<'arena>,
-        class: ClassId<'arena>,
-        method: MethodId<'arena>,
-    },
-    FCallClsMethodS {
-        fcall_args: FcallArgs<'arena>,
-        clsref: SpecialClsRef,
-    },
-    FCallClsMethodSD {
-        fcall_args: FcallArgs<'arena>,
-        clsref: SpecialClsRef,
-        method: MethodId<'arena>,
-    },
-    FCallCtor(FcallArgs<'arena>),
+    FCallClsMethod(FcallArgs<'arena>, Str<'arena>, IsLogAsDynamicCallOp),
+    FCallClsMethodD(
+        FcallArgs<'arena>,
+        Str<'arena>,
+        ClassId<'arena>,
+        MethodId<'arena>,
+    ),
+    FCallClsMethodS(FcallArgs<'arena>, Str<'arena>, SpecialClsRef),
+    FCallClsMethodSD(
+        FcallArgs<'arena>,
+        Str<'arena>,
+        SpecialClsRef,
+        MethodId<'arena>,
+    ),
+    FCallCtor(FcallArgs<'arena>, Str<'arena>),
     FCallFunc(FcallArgs<'arena>),
     FCallFuncD {
         fcall_args: FcallArgs<'arena>,

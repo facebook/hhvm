@@ -204,7 +204,8 @@ pub struct SrcLoc {
     pub col_end: isize,
 }
 
-/// These are pseudo instructions that HHVM doesn't know about.
+/// These are HHAS pseudo-instructions that are handled in the HHAS parser and
+/// do not have HHBC opcodes equivalents.
 #[derive(Clone, Debug)]
 #[repr(C)]
 pub enum Pseudo<'arena> {
@@ -226,7 +227,7 @@ pub enum Pseudo<'arena> {
 pub enum Instruct<'arena> {
     // HHVM opcodes.
     Opcode(Opcodes<'arena>),
-    // HackC pseudo-instructions.
+    // HHAS pseudo-instructions.
     Pseudo(Pseudo<'arena>),
 }
 
@@ -235,11 +236,11 @@ impl Instruct<'_> {
     /// This excludes the Label in an ILabel instruction, which is not a conditional branch.
     pub fn targets(&self) -> &[Label] {
         match self {
-            Self::Opcode(Opcodes::FCallClsMethod { fcall_args, .. })
-            | Self::Opcode(Opcodes::FCallClsMethodD { fcall_args, .. })
-            | Self::Opcode(Opcodes::FCallClsMethodS { fcall_args, .. })
-            | Self::Opcode(Opcodes::FCallClsMethodSD { fcall_args, .. })
-            | Self::Opcode(Opcodes::FCallCtor(fcall_args))
+            Self::Opcode(Opcodes::FCallClsMethod(fcall_args, ..))
+            | Self::Opcode(Opcodes::FCallClsMethodD(fcall_args, ..))
+            | Self::Opcode(Opcodes::FCallClsMethodS(fcall_args, ..))
+            | Self::Opcode(Opcodes::FCallClsMethodSD(fcall_args, ..))
+            | Self::Opcode(Opcodes::FCallCtor(fcall_args, ..))
             | Self::Opcode(Opcodes::FCallFunc(fcall_args))
             | Self::Opcode(Opcodes::FCallFuncD { fcall_args, .. })
             | Self::Opcode(Opcodes::FCallObjMethod { fcall_args, .. })
@@ -468,11 +469,11 @@ impl Instruct<'_> {
     /// This excludes the Label in an ILabel instruction, which is not a conditional branch.
     pub fn targets_mut(&mut self) -> &mut [Label] {
         match self {
-            Self::Opcode(Opcodes::FCallClsMethod { fcall_args, .. })
-            | Self::Opcode(Opcodes::FCallClsMethodD { fcall_args, .. })
-            | Self::Opcode(Opcodes::FCallClsMethodS { fcall_args, .. })
-            | Self::Opcode(Opcodes::FCallClsMethodSD { fcall_args, .. })
-            | Self::Opcode(Opcodes::FCallCtor(fcall_args))
+            Self::Opcode(Opcodes::FCallClsMethod(fcall_args, ..))
+            | Self::Opcode(Opcodes::FCallClsMethodD(fcall_args, ..))
+            | Self::Opcode(Opcodes::FCallClsMethodS(fcall_args, ..))
+            | Self::Opcode(Opcodes::FCallClsMethodSD(fcall_args, ..))
+            | Self::Opcode(Opcodes::FCallCtor(fcall_args, ..))
             | Self::Opcode(Opcodes::FCallFunc(fcall_args))
             | Self::Opcode(Opcodes::FCallFuncD { fcall_args, .. })
             | Self::Opcode(Opcodes::FCallObjMethod { fcall_args, .. })

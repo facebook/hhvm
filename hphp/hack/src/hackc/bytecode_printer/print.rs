@@ -1237,50 +1237,42 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
             print_sswitch(w, cases.as_ref(), targets.as_ref(), dv_labels)
         }
         Opcodes::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
-        Opcodes::FCallClsMethod { fcall_args, log } => {
+        Opcodes::FCallClsMethod(fcall_args, hint, log) => {
             w.write_all(b"FCallClsMethod ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(br#" "" "#)?;
+            write_bytes!(w, r#" "{}" "#, hint)?;
             w.write_all(match *log {
                 IsLogAsDynamicCallOp::LogAsDynamicCall => b"LogAsDynamicCall",
                 IsLogAsDynamicCallOp::DontLogAsDynamicCall => b"DontLogAsDynamicCall",
                 _ => panic!("Enum value does not match one of listed variants"),
             })
         }
-        Opcodes::FCallClsMethodD {
-            fcall_args,
-            class,
-            method,
-        } => {
+        Opcodes::FCallClsMethodD(fcall_args, hint, class, method) => {
             w.write_all(b"FCallClsMethodD ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(br#" "" "#)?;
+            write_bytes!(w, r#" "{}" "#, hint)?;
             print_class_id(w, class)?;
             w.write_all(b" ")?;
             print_method_id(w, method)
         }
-        Opcodes::FCallClsMethodS { fcall_args, clsref } => {
+        Opcodes::FCallClsMethodS(fcall_args, hint, clsref) => {
             w.write_all(b"FCallClsMethodS ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(br#" "" "#)?;
+            write_bytes!(w, r#" "{}" "#, hint)?;
             print_special_cls_ref(w, clsref)
         }
-        Opcodes::FCallClsMethodSD {
-            fcall_args,
-            clsref,
-            method,
-        } => {
+        Opcodes::FCallClsMethodSD(fcall_args, hint, clsref, method) => {
             w.write_all(b"FCallClsMethodSD ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(br#" "" "#)?;
+            write_bytes!(w, r#" "{}" "#, hint)?;
             print_special_cls_ref(w, clsref)?;
             w.write_all(b" ")?;
             print_method_id(w, method)
         }
-        Opcodes::FCallCtor(fcall_args) => {
+        Opcodes::FCallCtor(fcall_args, hint) => {
             w.write_all(b"FCallCtor ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
-            w.write_all(br#" """#)
+            write_bytes!(w, r#" "{}""#, hint)
         }
         Opcodes::FCallFunc(fcall_args) => {
             w.write_all(b"FCallFunc ")?;

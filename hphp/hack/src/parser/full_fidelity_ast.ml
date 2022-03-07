@@ -104,7 +104,8 @@ let process_lowpri_errors (env : env) (lowpri_errors : (Pos.t * string) list) =
   if should_surface_errors env then
     List.iter
       ~f:(fun (pos, msg) ->
-        Errors.add_parsing_error @@ Parsing_error.Parsing_error { pos; msg })
+        Errors.add_parsing_error
+        @@ Parsing_error.Parsing_error { pos; msg; quickfixes = [] })
       lowpri_errors
 
 let process_non_syntax_errors (_ : env) (errors : Errors.error list) =
@@ -130,10 +131,24 @@ let process_syntax_errors
     (source_text : SourceText.t)
     (errors : Full_fidelity_syntax_error.t list) =
   let relative_pos = pos_of_error env.file source_text in
+
+  let pos_of_offsets start_offset end_offset =
+    SourceText.relative_pos env.file source_text start_offset end_offset
+  in
+
   let report_error e =
+    let quickfixes =
+      List.map e.Full_fidelity_syntax_error.quickfixes ~f:(fun qf ->
+          let { Full_fidelity_syntax_error.title; edits } = qf in
+          let edits =
+            List.map edits ~f:(fun (start_offset, end_offset, new_text) ->
+                (new_text, pos_of_offsets start_offset end_offset))
+          in
+          Quickfix.make_with_edits ~title ~edits)
+    in
     Errors.add_parsing_error
     @@ Parsing_error.Parsing_error
-         { pos = relative_pos e; msg = SyntaxError.message e }
+         { pos = relative_pos e; msg = SyntaxError.message e; quickfixes }
   in
   List.iter ~f:report_error errors
 

@@ -704,6 +704,7 @@ where
                         start_offset,
                         end_offset,
                         Errors::illegal_interpolated_brace_with_embedded_dollar_expression,
+                        vec![],
                     );
                     self.add_error(error);
                 };

@@ -31,6 +31,7 @@
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/runtime/ext/facts/sqlite-autoload-db.h"
+#include "hphp/runtime/ext/facts/sqlite-key.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/symbol-map.h"
 #include "hphp/util/bstring.h"
@@ -289,8 +290,7 @@ protected:
             std::move(root),
             [dbPath]() -> AutoloadDB& {
               return SQLiteAutoloadDB::getThreadLocal(
-                  SQLiteAutoloadDB::Key::readWrite(
-                      dbPath, static_cast<::gid_t>(-1), 0644));
+                  SQLiteKey::readWrite(dbPath, static_cast<::gid_t>(-1), 0644));
             },
             std::move(indexedMethodAttributes)),
         std::move(exec)});

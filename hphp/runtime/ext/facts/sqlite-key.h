@@ -16,31 +16,43 @@
 
 #pragma once
 
-#include <memory>
+#include <string>
 #include <sys/types.h>
 
 #include <folly/experimental/io/FsUtil.h>
 
-#include "hphp/runtime/ext/facts/autoload-db.h"
-#include "hphp/runtime/ext/facts/sqlite-key.h"
-
 namespace HPHP {
 namespace Facts {
 
-class SQLiteAutoloadDB : public AutoloadDB {
-public:
-  /**
-   * Return a SQLiteAutoloadDB that can only be read
-   */
-  static std::unique_ptr<SQLiteAutoloadDB> readOnly(folly::fs::path path);
+/**
+ * Metadata about where a SQLite DB should be and what permissions it should
+ * have.
+ */
+struct SQLiteKey {
+
+  static SQLiteKey readOnly(folly::fs::path path);
+  static SQLiteKey readWrite(folly::fs::path path, ::gid_t gid, ::mode_t perms);
+
+  bool operator==(const SQLiteKey& rhs) const noexcept;
 
   /**
-   * Return a SQLiteAutoloadDB that you can write to
+   * Render the Key as a string
    */
-  static std::unique_ptr<SQLiteAutoloadDB>
-  readWrite(folly::fs::path path, ::gid_t gid, ::mode_t perms);
+  std::string toString() const;
 
-  static SQLiteAutoloadDB& getThreadLocal(const SQLiteKey& dbData);
+  /**
+   * Hash the Key into an int
+   */
+  size_t hash() const;
+
+  folly::fs::path m_path;
+  bool m_writable;
+  ::gid_t m_gid;
+  ::mode_t m_perms;
+
+private:
+  SQLiteKey() = delete;
+  SQLiteKey(folly::fs::path path, bool writable, ::gid_t gid, ::mode_t perms);
 };
 
 } // namespace Facts

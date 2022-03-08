@@ -55,6 +55,7 @@
 #include "hphp/runtime/ext/facts/facts-store.h"
 #include "hphp/runtime/ext/facts/logging.h"
 #include "hphp/runtime/ext/facts/sqlite-autoload-db.h"
+#include "hphp/runtime/ext/facts/sqlite-key.h"
 #include "hphp/runtime/ext/facts/string-ptr.h"
 #include "hphp/runtime/ext/facts/watchman-watcher.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -169,7 +170,7 @@ folly::fs::path getDBPath(const RepoOptions& repoOptions) {
   }
 }
 
-SQLiteAutoloadDB::Key getDBKey(
+SQLiteKey getDBKey(
     const folly::fs::path& root,
     const folly::dynamic& queryExpr,
     const RepoOptions& repoOptions) {
@@ -197,10 +198,9 @@ SQLiteAutoloadDB::Key getDBKey(
 
   if (trustedDBPath.empty()) {
     ::gid_t gid = getGroup();
-    return SQLiteAutoloadDB::Key::readWrite(
-        getDBPath(repoOptions), gid, getDBPerms());
+    return SQLiteKey::readWrite(getDBPath(repoOptions), gid, getDBPerms());
   } else {
-    return SQLiteAutoloadDB::Key::readOnly(std::move(trustedDBPath));
+    return SQLiteKey::readOnly(std::move(trustedDBPath));
   }
 }
 
@@ -282,14 +282,13 @@ struct WatchmanAutoloadMapKey {
    * 2. Read an existing database file somewhere
    */
   bool isAutoloadableRepo() const {
-    return m_queryExpr.isObject() ||
-           m_dbKey.m_rwMode == SQLite::OpenMode::ReadOnly;
+    return m_queryExpr.isObject() || !m_dbKey.m_writable;
   }
 
   folly::fs::path m_root;
   folly::dynamic m_queryExpr;
   std::vector<std::string> m_indexedMethodAttrs;
-  SQLiteAutoloadDB::Key m_dbKey;
+  SQLiteKey m_dbKey;
 };
 
 // Code to coerce a FileFacts into a userspace shape.
@@ -669,7 +668,7 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
     return SQLiteAutoloadDB::getThreadLocal(dbKey);
   };
 
-  if (mapKey->m_dbKey.m_rwMode == SQLite::OpenMode::ReadOnly) {
+  if (!mapKey->m_dbKey.m_writable) {
     XLOGF(
         DBG0,
         "Loading {} from trusted Autoload DB at {}",

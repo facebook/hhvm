@@ -19,11 +19,13 @@
 #include <exception>
 #include <fcntl.h>
 #include <grp.h>
+#include <memory>
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <utility>
+#include <vector>
 
 #include <folly/experimental/io/FsUtil.h>
 #include <folly/json.h>
@@ -34,7 +36,6 @@
 #include "hphp/runtime/ext/facts/sqlite-autoload-db.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-map.h"
-#include "hphp/util/hash.h"
 #include "hphp/util/sqlite-wrapper.h"
 #include "hphp/util/thread-local.h"
 
@@ -554,12 +555,14 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
 
   ~SQLiteAutoloadDBImpl() override = default;
 
-  static std::unique_ptr<SQLiteAutoloadDB>
-  get(const SQLiteAutoloadDB::Key& dbData) {
+  static std::unique_ptr<SQLiteAutoloadDB> get(const SQLiteKey& dbData) {
     assertx(dbData.m_path.is_absolute());
     auto db = [&]() {
       try {
-        return SQLite::connect(dbData.m_path.native(), dbData.m_rwMode);
+        return SQLite::connect(
+            dbData.m_path.native(),
+            dbData.m_writable ? SQLite::OpenMode::ReadWrite
+                              : SQLite::OpenMode::ReadOnly);
       } catch (SQLiteExc& e) {
         XLOGF(
             ERR,
@@ -572,7 +575,7 @@ struct SQLiteAutoloadDBImpl final : public SQLiteAutoloadDB {
       }
     }();
 
-    if (dbData.m_rwMode == SQLite::OpenMode::ReadWrite) {
+    if (dbData.m_writable) {
       // If writable, ensure the DB has the correct owner and permissions.
       setFilePerms(dbData.m_path, dbData.m_gid, dbData.m_perms);
       setFilePerms(
@@ -1219,50 +1222,18 @@ private:
 };
 
 using SQLiteAutoloadDBThreadLocal = hphp_hash_map<
-    std::tuple<std::string, SQLite::OpenMode>,
+    std::tuple<std::string, bool>,
     std::unique_ptr<SQLiteAutoloadDB>>;
 
 THREAD_LOCAL(SQLiteAutoloadDBThreadLocal, t_adb);
 
 } // namespace
 
-SQLiteAutoloadDB::Key::Key(
-    folly::fs::path path, SQLite::OpenMode rwMode, ::gid_t gid, ::mode_t perms)
-    : m_path{std::move(path)}, m_rwMode{rwMode}, m_gid{gid}, m_perms{perms} {
-  always_assert(m_path.is_absolute());
-
-  // Coerce DB permissions into unix owner/group/other bits
-  XLOGF(
-      DBG1,
-      "Coercing DB permission bits {:04o} to {:04o}",
-      m_perms,
-      (m_perms | 0600) & 0666);
-  m_perms |= 0600;
-  m_perms &= 0666;
-}
-
-bool SQLiteAutoloadDB::Key::operator==(const SQLiteAutoloadDB::Key& rhs) const {
-  return m_path == rhs.m_path && m_rwMode == rhs.m_rwMode &&
-         m_gid == rhs.m_gid && m_perms == rhs.m_perms;
-}
-
-std::string SQLiteAutoloadDB::Key::toString() const {
-  return folly::sformat(
-      "SQLiteAutoloadDB::Key({}, {}, {})", m_path.native(), m_gid, m_perms);
-}
-
-size_t SQLiteAutoloadDB::Key::hash() const {
-  return folly::hash::hash_combine(
-      hash_string_cs(m_path.native().c_str(), m_path.native().size()),
-      std::hash<gid_t>{}(m_gid),
-      std::hash<mode_t>{}(m_perms));
-}
-
-SQLiteAutoloadDB& SQLiteAutoloadDB::getThreadLocal(const Key& dbData) {
+SQLiteAutoloadDB& SQLiteAutoloadDB::getThreadLocal(const SQLiteKey& key) {
   SQLiteAutoloadDBThreadLocal& dbVault = *t_adb.get();
-  auto& dbPtr = dbVault[{dbData.m_path.native(), dbData.m_rwMode}];
+  auto& dbPtr = dbVault[{key.m_path.native(), key.m_writable}];
   if (!dbPtr) {
-    dbPtr = SQLiteAutoloadDBImpl::get(dbData);
+    dbPtr = SQLiteAutoloadDBImpl::get(key);
   }
   return *dbPtr;
 }

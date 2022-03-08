@@ -12,6 +12,7 @@ use crate::decl_defs::{
 };
 use crate::reason::Reason;
 use crate::special_names::SpecialNames;
+use crate::typing_error::{Primary, TypingError};
 use oxidized::global_options::GlobalOptions;
 use pos::{
     ClassConstName, ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap,
@@ -362,6 +363,22 @@ impl<R: Reason> DeclFolder<R> {
         }
     }
 
+    fn add_reused_trait_error(
+        &self,
+        errors: &mut Vec<TypingError<R>>,
+        parent_ty: &FoldedClass<R>,
+        sc: &ShallowClass<R>,
+        trait_name: TypeName,
+    ) {
+        errors.push(TypingError::primary(Primary::TraitReuse {
+            parent_pos: parent_ty.pos.clone(),
+            parent_name: parent_ty.name,
+            pos: sc.name.pos().clone(),
+            class_name: sc.name.id(),
+            trait_name,
+        }));
+    }
+
     // TODO: Thread errors through extends
     fn add_grandparents_or_traits(
         &self,
@@ -370,7 +387,7 @@ impl<R: Reason> DeclFolder<R> {
         _sc: &ShallowClass<R>,
         pass: Pass,
         extends: &mut TypeNameSet,
-        parent_type: &Arc<FoldedClass<R>>,
+        parent_type: &FoldedClass<R>,
     ) {
         // TODO: check_extend_kind
         if pass == Pass::Xhp {
@@ -389,6 +406,7 @@ impl<R: Reason> DeclFolder<R> {
         parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
         pass: Pass,
         extends: &mut TypeNameSet,
+        errors: &mut Vec<TypingError<R>>,
         ty: &DeclTy<R>,
     ) {
         // See comment on check_no_duplicate_traits for reasoning here
@@ -396,11 +414,14 @@ impl<R: Reason> DeclFolder<R> {
             pass != Pass::Xhp && sc.kind != oxidized::ast_defs::ClassishKind::Cinterface; /* TODO: && Based on env */
         if let Some((_, pos_id, _)) = ty.unwrap_class_type() {
             // If we already had this exact trait, we need to flag trait reuse
-            let _reused_trait = no_trait_reuse && extends.contains(&pos_id.id());
+            let reused_trait = no_trait_reuse && extends.contains(&pos_id.id());
             extends.insert(pos_id.id());
             // TODO: Use Decl_env.get_class_and_add_dep equivalent here instead of parent_cache.get
             if let Some(cls) = parent_cache.get(&pos_id.id()) {
-                // TODO: if reused_trait then report_reused_trait
+                // The parent class lives in Hack, so we can report reused traits
+                if reused_trait {
+                    self.add_reused_trait_error(errors, cls, sc, pos_id.id());
+                }
                 self.add_grandparents_or_traits(
                     no_trait_reuse,
                     pos_id.pos(),
@@ -417,13 +438,28 @@ impl<R: Reason> DeclFolder<R> {
         &self,
         sc: &ShallowClass<R>,
         parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
+        errors: &mut Vec<TypingError<R>>,
     ) -> TypeNameSet {
         let mut extends = TypeNameSet::new();
         for extend in sc.extends.iter() {
-            self.add_class_parent_or_trait(sc, parent_cache, Pass::Extends, &mut extends, extend)
+            self.add_class_parent_or_trait(
+                sc,
+                parent_cache,
+                Pass::Extends,
+                &mut extends,
+                errors,
+                extend,
+            )
         }
         for use_ in sc.uses.iter() {
-            self.add_class_parent_or_trait(sc, parent_cache, Pass::Traits, &mut extends, use_)
+            self.add_class_parent_or_trait(
+                sc,
+                parent_cache,
+                Pass::Traits,
+                &mut extends,
+                errors,
+                use_,
+            )
         }
         extends
     }
@@ -432,6 +468,7 @@ impl<R: Reason> DeclFolder<R> {
         &self,
         sc: &ShallowClass<R>,
         parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
+        errors: &mut Vec<TypingError<R>>,
     ) -> TypeNameSet {
         let mut xhp_attr_deps = TypeNameSet::new();
         for xhp_attr_use in sc.xhp_attr_uses.iter() {
@@ -440,6 +477,7 @@ impl<R: Reason> DeclFolder<R> {
                 parent_cache,
                 Pass::Xhp,
                 &mut xhp_attr_deps,
+                errors,
                 xhp_attr_use,
             )
         }
@@ -492,8 +530,9 @@ impl<R: Reason> DeclFolder<R> {
             .iter()
             .for_each(|tc| self.decl_type_const(&mut type_consts, &mut consts, sc, tc));
 
-        let extends = self.get_extends(sc, parents);
-        let xhp_attr_deps = self.get_xhp_attr_deps(sc, parents);
+        let mut errors = vec![];
+        let extends = self.get_extends(sc, parents, &mut errors);
+        let xhp_attr_deps = self.get_xhp_attr_deps(sc, parents, &mut errors);
 
         Arc::new(FoldedClass {
             name: sc.name.id(),
@@ -526,6 +565,7 @@ impl<R: Reason> DeclFolder<R> {
             xhp_enum_values: sc.xhp_enum_values.clone(),
             extends,
             xhp_attr_deps,
+            decl_errors: errors.into_boxed_slice(),
         })
     }
 }

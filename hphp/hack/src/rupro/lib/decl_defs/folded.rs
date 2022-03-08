@@ -9,6 +9,8 @@ use crate::decl_defs::{
 };
 use crate::folded_decl_provider::Subst;
 use crate::reason::Reason;
+use crate::typing_error::TypingError;
+
 use eq_modulo_pos::EqModuloPos;
 use pos::{
     Bytes, ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap, Symbol,
@@ -130,6 +132,7 @@ pub struct FoldedClass<R: Reason> {
     pub xhp_enum_values: BTreeMap<Symbol, Box<[XhpEnumValue]>>,
     pub extends: TypeNameSet,
     pub xhp_attr_deps: TypeNameSet,
+    pub decl_errors: Box<[TypingError<R>]>,
 }
 
 impl<R: Reason> FoldedClass<R> {

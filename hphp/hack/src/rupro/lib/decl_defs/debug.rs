@@ -171,6 +171,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             xhp_enum_values,
             extends,
             xhp_attr_deps,
+            decl_errors,
         } = self;
 
         let mut s = f.debug_struct("FoldedClass");
@@ -247,6 +248,10 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         if !xhp_attr_deps.is_empty() {
             s.field("xhp_attr_deps", &sorted_set(xhp_attr_deps));
         }
+        if !decl_errors.is_empty() {
+            s.field("decl_errors", decl_errors);
+        }
+
         s.finish()
     }
 }

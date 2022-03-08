@@ -7,6 +7,11 @@ function g(): int {
   return $x;
 }
 
+function h(): dict<string, int> {
+  return dict[];
+}
+
 function test(): void {
   f(inout g());
+  f(inout h()['foo']);
 }

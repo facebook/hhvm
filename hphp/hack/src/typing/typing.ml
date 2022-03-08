@@ -6440,11 +6440,6 @@ and dispatch_call
   let make_call env te tal tel typed_unpack_element ty =
     make_result env p (Aast.Call (te, tal, tel, typed_unpack_element)) ty
   in
-  (match valkind with
-  | `lvalue
-  | `lvalue_subexpr ->
-    Errors.add_typing_error Typing_error.(primary @@ Primary.Call_lvalue p)
-  | `other -> ());
   (* TODO: Avoid Tany annotations in TAST by eliminating `make_call_special` *)
   let make_call_special env id tel ty =
     make_call

@@ -99,6 +99,7 @@ let visitor ctx =
             Some Global_write_check.handler
           else
             None);
+          Some Call_in_subscript_check.handler;
         ])
 
 let program ctx = (visitor ctx)#go ctx

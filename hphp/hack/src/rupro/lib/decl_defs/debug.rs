@@ -5,7 +5,14 @@
 
 use super::{folded::FoldedClass, shallow::ShallowClass};
 use crate::reason::Reason;
+use std::collections::HashMap;
 use std::fmt;
+
+fn sorted_map<K: Ord, V>(map: &HashMap<K, V>) -> Vec<(&K, &V)> {
+    let mut res: Vec<_> = map.iter().collect();
+    res.sort_by_key(|x| x.0);
+    res
+}
 
 // Our Class structs have a lot of fields, but in a lot of cases, most of them
 // will have empty or default values, making Debug output very noisy. These
@@ -198,36 +205,35 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
 
         if !substs.is_empty() {
-            s.field("substs", substs);
+            s.field("substs", &sorted_map(substs));
         }
         if !ancestors.is_empty() {
-            s.field("ancestors", ancestors);
+            s.field("ancestors", &sorted_map(ancestors));
         }
         if !props.is_empty() {
-            s.field("props", props);
+            s.field("props", &sorted_map(props));
         }
         if !static_props.is_empty() {
-            s.field("static_props", static_props);
+            s.field("static_props", &sorted_map(static_props));
         }
         if !methods.is_empty() {
-            s.field("methods", methods);
+            s.field("methods", &sorted_map(methods));
         }
         if !static_methods.is_empty() {
-            s.field("static_methods", static_methods);
+            s.field("static_methods", &sorted_map(static_methods));
         }
         if let Some(constructor) = constructor {
             s.field("constructor", constructor);
         }
         if !consts.is_empty() {
-            s.field("consts", consts);
+            s.field("consts", &sorted_map(consts));
         }
         if !type_consts.is_empty() {
-            s.field("type_consts", type_consts);
+            s.field("type_consts", &sorted_map(type_consts));
         }
         if !xhp_enum_values.is_empty() {
             s.field("xhp_enum_values", xhp_enum_values);
         }
-
         s.finish()
     }
 }

@@ -77,7 +77,11 @@ impl<'src> AastParser {
         let arena = Bump::new();
         let (language, mode, tree) =
             Self::parse_text(&arena, env, indexed_source_text, stack_limit)?;
-        let parse_peak = stack_limit.map_or(0, |sl| sl.peak());
+        let parse_peak = stack_limit.map_or(0, |sl| {
+            let x = sl.peak();
+            sl.reset();
+            x
+        });
         Self::from_tree_with_namespace_env(
             env,
             ns,

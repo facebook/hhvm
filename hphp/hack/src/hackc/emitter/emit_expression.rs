@@ -378,6 +378,9 @@ pub fn emit_expr<'a, 'arena, 'decl>(
     use aast_defs::Lid;
     use ast::Expr_;
     let ast::Expr(_, pos, expr) = expression;
+    if let Some(sl) = emitter.stack_limit.as_ref() {
+        sl.panic_if_exceeded()
+    }
     match expr {
         Expr_::Float(_)
         | Expr_::String(_)

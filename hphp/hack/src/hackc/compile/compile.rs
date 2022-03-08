@@ -245,7 +245,7 @@ impl<S: AsRef<str>> NativeEnv<S> {
 /// (this avoids the need to read Options from OCaml, as
 /// they can be simply returned as NaNs to signal that
 /// they should _not_ be passed back as JSON to HHVM process)
-#[derive(Debug, Default, ToOcamlRep)]
+#[derive(Debug, Default, Clone, ToOcamlRep)]
 pub struct Profile {
     /// Time in seconds spent in parsing and lowering.
     pub parsing_t: f64,
@@ -267,6 +267,9 @@ pub struct Profile {
 
     /// Peak stack size during parsing and lowering.
     pub lower_peak: i64,
+
+    /// Peak stack size during codegen
+    pub codegen_peak: i64,
 }
 
 impl std::ops::AddAssign for Profile {
@@ -277,6 +280,7 @@ impl std::ops::AddAssign for Profile {
         self.codegen_bytes += p.codegen_bytes;
         self.parse_peak += p.parse_peak;
         self.lower_peak += p.lower_peak;
+        self.codegen_peak += p.codegen_peak;
     }
 }
 
@@ -309,6 +313,7 @@ pub fn emit_fatal_unit<S: AsRef<str>>(
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
         &alloc,
         None,
+        None,
     );
 
     let prog = emit_unit::emit_fatal_unit(&alloc, FatalOp::Parse, &Pos::make_none(), err_msg);
@@ -329,13 +334,13 @@ pub fn emit_fatal_unit<S: AsRef<str>>(
 pub fn from_text<'arena, 'decl, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
-    stack_limit: &StackLimit,
+    stack_limit: &'decl StackLimit,
     writer: &mut dyn std::io::Write,
     source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
 ) -> anyhow::Result<Option<Profile>> {
-    let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
+    let mut emitter = create_emitter(env, native_env, decl_provider, alloc, Some(stack_limit))?;
     let (unit, profile) = emit_unit_from_text(&mut emitter, env, stack_limit, source_text)?;
 
     let (print_result, printing_t) = time(|| {
@@ -389,12 +394,12 @@ fn rewrite<'p, 'arena, 'decl>(
 pub fn unit_from_text<'arena, 'decl, S: AsRef<str>>(
     alloc: &'arena bumpalo::Bump,
     env: &Env<S>,
-    stack_limit: &StackLimit,
+    stack_limit: &'decl StackLimit,
     source_text: SourceText<'_>,
     native_env: Option<&NativeEnv<S>>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
 ) -> anyhow::Result<(HackCUnit<'arena>, Option<Profile>)> {
-    let mut emitter = create_emitter(env, native_env, decl_provider, alloc)?;
+    let mut emitter = create_emitter(env, native_env, decl_provider, alloc, Some(stack_limit))?;
     emit_unit_from_text(&mut emitter, env, stack_limit, source_text)
 }
 
@@ -405,7 +410,7 @@ pub fn unit_to_string<W: std::io::Write, S: AsRef<str>>(
     program: &HackCUnit<'_>,
 ) -> anyhow::Result<()> {
     let alloc = bumpalo::Bump::new();
-    let emitter = create_emitter(env, native_env, None, &alloc)?;
+    let emitter = create_emitter(env, native_env, None, &alloc, None)?;
     let (print_result, _) = time(|| {
         print_unit(
             &Context::new(
@@ -474,9 +479,11 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
         Ok((mut ast, mut profile)) => {
             profile.parsing_t = parsing_t;
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
+            stack_limit.reset();
             match time(move || rewrite_and_emit(emitter, env, namespace_env, &mut ast)) {
                 (Ok(unit), codegen_t) => {
                     profile.codegen_t = codegen_t;
+                    profile.codegen_peak = stack_limit.peak() as i64;
                     (unit, profile)
                 }
                 (Err(e), _) => return Err(anyhow!("Unhandled Emitter error: {}", e)),
@@ -522,6 +529,7 @@ fn create_emitter<'arena, 'decl, S: AsRef<str>>(
     native_env: Option<&NativeEnv<S>>,
     decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     alloc: &'arena bumpalo::Bump,
+    stack_limit: Option<&'decl StackLimit>,
 ) -> anyhow::Result<Emitter<'arena, 'decl>> {
     let opts = match native_env {
         None => Options::from_configs(&env.config_jsons, &env.config_list)
@@ -534,6 +542,7 @@ fn create_emitter<'arena, 'decl, S: AsRef<str>>(
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
         alloc,
         decl_provider,
+        stack_limit,
     ))
 }
 
@@ -688,6 +697,7 @@ pub fn expr_to_string_lossy<S: AsRef<str>>(env: &Env<S>, expr: &ast::Expr) -> St
         env.flags.contains(EnvFlags::IS_SYSTEMLIB),
         env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
         &alloc,
+        None,
         None,
     );
     let ctx = Context::new(&emitter);

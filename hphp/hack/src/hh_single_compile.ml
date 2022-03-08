@@ -72,6 +72,7 @@ type debug_time = {
   codegen_bytes: int ref;
   parse_peak: int ref;
   lower_peak: int ref;
+  codegen_peak: int ref;
 }
 
 let new_debug_time () =
@@ -83,6 +84,7 @@ let new_debug_time () =
     codegen_bytes = ref 0;
     parse_peak = ref 0;
     lower_peak = ref 0;
+    codegen_peak = ref 0;
   }
 
 let prev_vm_hwm = ref 0

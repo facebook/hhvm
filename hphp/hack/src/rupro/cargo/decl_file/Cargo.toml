@@ -11,5 +11,8 @@ path = "../../decl_file.rs"
 [dependencies]
 hackrs = { path = "../hackrs" }
 hackrs_test_utils = { path = "../hackrs_test_utils" }
+hhi = { path = "../../../hhi/rust" }
+jwalk = "0.6"
 pos = { path = "../../lib/pos" }
 structopt = "0.3.23"
+tempdir = "0.3"

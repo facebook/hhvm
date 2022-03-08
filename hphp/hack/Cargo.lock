@@ -1430,6 +1430,7 @@ dependencies = [
  "options",
  "oxidized",
  "oxidized_by_ref",
+ "stack_limit",
  "statement_state",
  "symbol_refs_state",
 ]

@@ -82,36 +82,81 @@ fn to_hms(time: usize) -> String {
     }
 }
 
-fn report(wall: Duration, count: usize, profile: Profile, total: usize) {
+fn report(wall: Duration, count: usize, profile: Option<ProfileAcc>, total: usize) {
     let wall = wall.as_millis() as usize;
     let wall_per_sec = if wall > 0 { count * 1000 / wall } else { 0 };
 
-    let count_str = if total != count {
-        format!("{} / {}", count, total)
+    if let Some(profile) = profile {
+        // Done, print final stats.
+        eprintln!(
+            "\rProcessed {} in {:.3}s ({}/s) cpu={:.3}s arenas={:.3}MiB  ",
+            count,
+            wall as f64 / 1000.0,
+            wall_per_sec,
+            profile.sum.total_sec(),
+            profile.sum.codegen_bytes as f64 / (1024 * 1024) as f64,
+        );
+        eprintln!(
+            "parser stack peak {} in {}",
+            profile.max_parse.parse_peak,
+            profile.max_parse_file.display()
+        );
+        eprintln!(
+            "lowerer stack peak {} in {}",
+            profile.max_lower.lower_peak,
+            profile.max_lower_file.display()
+        );
+        eprint!(
+            "emitter stack peak {} in {}",
+            profile.max_codegen.codegen_peak,
+            profile.max_codegen_file.display()
+        );
     } else {
-        format!("{}", count)
-    };
-
-    let remaining = if wall_per_sec > 0 {
-        let left = (total - count) / wall_per_sec;
-        if left > 0 {
+        let remaining = if wall_per_sec > 0 {
+            let left = (total - count) / wall_per_sec;
             format!(", {} remaining", to_hms(left))
         } else {
             "".into()
-        }
-    } else {
-        "".into()
-    };
+        };
+        eprint!(
+            "\rProcessed {} / {} in {:.3}s ({}/s{})            ",
+            count,
+            total,
+            wall as f64 / 1000.0,
+            wall_per_sec,
+            remaining,
+        );
+    }
+}
 
-    eprint!(
-        "\rProcessed {} in {:.3}s ({}/s{}) cpu={:.3}s arenas={:.3}MiB  ",
-        count_str,
-        wall as f64 / 1000.0,
-        wall_per_sec,
-        remaining,
-        profile.total_sec(),
-        profile.codegen_bytes as f64 / (1024 * 1024) as f64,
-    );
+#[derive(Default)]
+struct ProfileAcc {
+    sum: Profile,
+    max_parse: Profile,
+    max_parse_file: PathBuf,
+    max_lower: Profile,
+    max_lower_file: PathBuf,
+    max_codegen: Profile,
+    max_codegen_file: PathBuf,
+}
+
+impl ProfileAcc {
+    fn fold(mut self, other: Self) -> Self {
+        self.sum += other.sum;
+        if other.max_parse.parse_peak > self.max_parse.parse_peak {
+            self.max_parse = other.max_parse;
+            self.max_parse_file = other.max_parse_file;
+        }
+        if other.max_lower.lower_peak > self.max_lower.lower_peak {
+            self.max_lower = other.max_lower;
+            self.max_lower_file = other.max_lower_file;
+        }
+        if other.max_codegen.codegen_peak > self.max_codegen.codegen_peak {
+            self.max_codegen = other.max_codegen;
+            self.max_codegen_file = other.max_codegen_file;
+        }
+        self
+    }
 }
 
 fn crc_files(writer: &SyncWrite, files: &[PathBuf], num_threads: usize) -> Result<()> {
@@ -125,38 +170,48 @@ fn crc_files(writer: &SyncWrite, files: &[PathBuf], num_threads: usize) -> Resul
         let finished = finished.clone();
         std::thread::spawn(move || {
             while !finished.load(Ordering::Acquire) {
-                report(
-                    start.elapsed(),
-                    count.load(Ordering::Acquire),
-                    Default::default(),
-                    total,
-                );
+                report(start.elapsed(), count.load(Ordering::Acquire), None, total);
                 std::thread::sleep(Duration::from_millis(1000));
             }
         })
     };
 
-    let count_one_file = |acc: Profile, f: &PathBuf| -> Result<Profile> {
+    let count_one_file = |acc: ProfileAcc, f: &PathBuf| -> Result<ProfileAcc> {
         let profile = process_one_file(writer, f.as_path())?;
         count.fetch_add(1, Ordering::Release);
-        Ok(acc + profile)
+        Ok(acc.fold(ProfileAcc {
+            sum: profile.clone(),
+            max_parse: profile.clone(),
+            max_parse_file: f.clone(),
+            max_lower: profile.clone(),
+            max_lower_file: f.clone(),
+            max_codegen: profile,
+            max_codegen_file: f.clone(),
+        }))
     };
 
     let profile = if num_threads == 1 {
-        files.iter().try_fold(Profile::default(), count_one_file)?
+        files
+            .iter()
+            .try_fold(ProfileAcc::default(), count_one_file)?
     } else {
         files
             .par_iter()
             .with_max_len(1)
-            .try_fold(Profile::default, count_one_file)
-            .try_reduce(Profile::default, |x, y| Ok(x + y))?
+            .try_fold(ProfileAcc::default, count_one_file)
+            .try_reduce(ProfileAcc::default, |x, y| Ok(x.fold(y)))?
     };
 
     finished.store(true, Ordering::Release);
     let duration = start.elapsed();
 
     status_handle.join().unwrap();
-    report(duration, count.load(Ordering::Acquire), profile, total);
+    report(
+        duration,
+        count.load(Ordering::Acquire),
+        Some(profile),
+        total,
+    );
     eprintln!();
 
     Ok(())

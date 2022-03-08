@@ -171,6 +171,8 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             xhp_enum_values,
             extends,
             xhp_attr_deps,
+            req_ancestors,
+            req_ancestors_extends,
             decl_errors,
         } = self;
 
@@ -247,6 +249,12 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
         if !xhp_attr_deps.is_empty() {
             s.field("xhp_attr_deps", &sorted_set(xhp_attr_deps));
+        }
+        if !req_ancestors.is_empty() {
+            s.field("req_ancestors", req_ancestors);
+        }
+        if !req_ancestors_extends.is_empty() {
+            s.field("req_ancestors_extends", &sorted_set(req_ancestors_extends));
         }
         if !decl_errors.is_empty() {
             s.field("decl_errors", decl_errors);

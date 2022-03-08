@@ -105,6 +105,22 @@ impl<R: Reason> ClassConst<R> {
     }
 }
 
+/// The position is that of the hint in the `use` / `implements` AST node
+/// that causes a class to have this requirement applied to it. E.g.
+///
+/// ```
+/// class Foo {}
+///
+/// interface Bar {
+///   require extends Foo; <- position of the decl_phase ty
+/// }
+///
+/// class Baz extends Foo implements Bar { <- position of the `implements`
+/// }
+/// ```
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Requirement<R: Reason>(R::Pos, DeclTy<R>);
+
 #[derive(Clone, Eq, EqModuloPos, PartialEq)]
 pub struct FoldedClass<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_defs.decl_class_type`
@@ -132,6 +148,8 @@ pub struct FoldedClass<R: Reason> {
     pub xhp_enum_values: BTreeMap<Symbol, Box<[XhpEnumValue]>>,
     pub extends: TypeNameSet,
     pub xhp_attr_deps: TypeNameSet,
+    pub req_ancestors: Box<[Requirement<R>]>,
+    pub req_ancestors_extends: TypeNameSet,
     pub decl_errors: Box<[TypingError<R>]>,
 }
 

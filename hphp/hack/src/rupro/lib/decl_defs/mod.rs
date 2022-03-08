@@ -12,7 +12,7 @@ pub mod folded;
 pub mod shallow;
 pub mod ty;
 
-pub use folded::{ClassConst, FoldedClass, FoldedElement, SubstContext, TypeConst};
+pub use folded::{ClassConst, FoldedClass, FoldedElement, Requirement, SubstContext, TypeConst};
 pub use shallow::{
     ConstDecl, FunDecl, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp,
     ShallowTypeconst, TypedefDecl,

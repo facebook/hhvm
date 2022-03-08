@@ -6,7 +6,7 @@
 use super::{inherit::Inherited, subst::Subst, subst::Substitution};
 use crate::decl_defs::{
     AbstractTypeconst, CeVisibility, ClassConst, ClassConstKind, ClassEltFlags, ClassEltFlagsArgs,
-    ClassishKind, ConsistentKind, DeclTy, FoldedClass, FoldedElement, ShallowClass,
+    ClassishKind, ConsistentKind, DeclTy, FoldedClass, FoldedElement, Requirement, ShallowClass,
     ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst, TaccessType, TypeConst,
     Typeconst, UserAttribute, Visibility,
 };
@@ -558,6 +558,40 @@ impl<R: Reason> DeclFolder<R> {
         xhp_attr_deps
     }
 
+    fn get_class_requirements(
+        &self,
+        sc: &ShallowClass<R>,
+        _parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
+    ) -> (Vec<Requirement<R>>, TypeNameSet) {
+        let req_ancestors = vec![];
+        let req_ancestors_extends = TypeNameSet::new();
+
+        for _req_extend in sc.req_extends.iter() {
+            // TODO: T113262613 declared_class_req
+        }
+
+        for _req_implement in sc.req_implements.iter() {
+            // TODO: declared_class_req
+        }
+
+        for _use_ in sc.uses.iter() {
+            // TODO: flatten_parent_class_reqs
+        }
+
+        if sc.kind.is_cinterface() {
+            for _extend in sc.extends.iter() {
+                // TODO: flatten_parent_class_reqs
+            }
+        } else {
+            for _implement in sc.implements.iter() {
+                // TODO: flatten_parent_class_rqs
+            }
+        }
+
+        // TODO: naive_dedup
+        (req_ancestors, req_ancestors_extends)
+    }
+
     pub fn decl_class(
         &self,
         sc: &ShallowClass<R>,
@@ -608,6 +642,8 @@ impl<R: Reason> DeclFolder<R> {
         let extends = self.get_extends(sc, parents, &mut errors);
         let xhp_attr_deps = self.get_xhp_attr_deps(sc, parents, &mut errors);
 
+        let (req_ancestors, req_ancestors_extends) = self.get_class_requirements(sc, parents);
+
         Arc::new(FoldedClass {
             name: sc.name.id(),
             pos: sc.name.pos().clone(),
@@ -639,6 +675,8 @@ impl<R: Reason> DeclFolder<R> {
             xhp_enum_values: sc.xhp_enum_values.clone(),
             extends,
             xhp_attr_deps,
+            req_ancestors: req_ancestors.into_boxed_slice(),
+            req_ancestors_extends,
             decl_errors: errors.into_boxed_slice(),
         })
     }

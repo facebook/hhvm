@@ -2986,8 +2986,15 @@ and expr_
     (* No need to check individual subtypes if expected type is mixed or any! *)
     | Tany _ -> (env, supertype, List.map tys ~f:(fun _ -> None))
     | _ ->
+      let really_coerce =
+        coerce_for_op
+        (* Don't do coercion when we are pessimising *)
+        && not
+             (can_pessimise
+             && TypecheckerOptions.pessimise_builtins (Env.get_tcopt env))
+      in
       let (env, expected_supertype) =
-        if coerce_for_op then
+        if really_coerce then
           ( env,
             Some
               (ExpectedTy.make_and_allow_coercion
@@ -3006,7 +3013,7 @@ and expr_
       let dyn_t = MakeType.dynamic (Reason.Rwitness use_pos) in
       let subtype_value env ty =
         let (env, ty) =
-          if coerce_for_op && Typing_utils.is_sub_type_for_union env dyn_t ty
+          if really_coerce && Typing_utils.is_sub_type_for_union env dyn_t ty
           then
             (* if we're coercing for a primop, and we're going to use the coercion
                (because the type of the arg is a supertype of dynamic), then we want
@@ -3020,7 +3027,7 @@ and expr_
             (env, ty)
         in
         check_expected_ty_res
-          ~coerce_for_op
+          ~coerce_for_op:really_coerce
           "Collection"
           env
           ty
@@ -3296,6 +3303,7 @@ and expr_
         ~use_pos:p
         ~reason:(Reason.URkey name)
         ~bound:(Some (MakeType.arraykey r))
+        ~can_pessimise:true
         ~coerce_for_op:true
         r
         env

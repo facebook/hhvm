@@ -1,5 +1,5 @@
 <?hh
-// (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+// (c) Meta Platforms, Inc. and affiliates. All Rights Reserved.
 
 function dump(mixed $m):void {
   $m = HH\FIXME\UNSAFE_CAST<mixed, dict<int, int>>($m);

@@ -1,4 +1,4 @@
-// (c) Facebook, Inc. and its affiliates. Confidential and proprietary.
+// (c) Facebook, Inc. and its affiliates.
 /*
    +----------------------------------------------------------------------+
    | HipHop for PHP                                                       |

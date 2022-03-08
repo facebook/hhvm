@@ -1,5 +1,5 @@
 <?hh
-// (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+// (c) Meta Platforms, Inc. and affiliates. All Rights Reserved.
 
 async function makeString():Awaitable<mixed> {
   return "3";

@@ -47,6 +47,7 @@ pub fn make_folded_decl_provider<R: Reason>(
     let shallow_decl_provider =
         make_shallow_decl_provider(naming_table_path_opt, decl_parser, filenames);
     Arc::new(LazyFoldedDeclProvider::new(
+        Arc::new(oxidized::global_options::GlobalOptions::default()),
         Arc::new(NonEvictingCache::new()),
         SpecialNames::new(),
         shallow_decl_provider,

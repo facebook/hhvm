@@ -11,7 +11,6 @@ path = "../../lib/mod.rs"
 aast_parser = { path = "../../../parser/cargo/aast_parser" }
 arena_collections = { path = "../../../arena_collections" }
 bumpalo = { version = "3.8", features = ["collections"] }
-dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }
 eq_modulo_pos = { path = "../../../utils/eq_modulo_pos" }
 hcons = { path = "../../../hcons" }

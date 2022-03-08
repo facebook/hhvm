@@ -10,14 +10,10 @@ use tempdir::TempDir;
 
 use fbinit::FacebookInit;
 use hackrs::{
-    decl_parser::DeclParser,
-    folded_decl_provider::LazyFoldedDeclProvider,
-    naming_provider::SqliteNamingTable,
-    reason::BReason,
-    shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclCache},
-    special_names::SpecialNames,
+    decl_parser::DeclParser, folded_decl_provider::LazyFoldedDeclProvider,
+    naming_provider::SqliteNamingTable, reason::BReason,
+    shallow_decl_provider::LazyShallowDeclProvider, special_names::SpecialNames,
 };
-use hackrs_test_utils::cache::NonEvictingCache;
 use hh24_test::TestRepo;
 use pos::RelativePathCtx;
 use std::path::PathBuf;
@@ -54,16 +50,13 @@ impl TestContext {
         });
         let decl_parser = DeclParser::new(path_ctx);
         let shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(
-            Arc::new(ShallowDeclCache::with_no_member_caches(
-                Arc::new(NonEvictingCache::default()),
-                Box::new(NonEvictingCache::default()),
-                Box::new(NonEvictingCache::default()),
-            )),
+            Arc::new(hackrs_test_utils::cache::make_non_eviction_shallow_decl_cache()),
             Arc::new(SqliteNamingTable::new(&naming_table).unwrap()),
             decl_parser.clone(),
         ));
         let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
-            Arc::new(NonEvictingCache::new()),
+            Arc::new(oxidized::global_options::GlobalOptions::default()),
+            Arc::new(hackrs_test_utils::cache::NonEvictingCache::new()),
             SpecialNames::new(),
             shallow_decl_provider.clone(),
         ));

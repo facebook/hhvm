@@ -9,6 +9,7 @@ use crate::decl_defs::{ConstDecl, DeclTy, DeclTy_, FoldedClass, FunDecl, Shallow
 use crate::reason::Reason;
 use crate::shallow_decl_provider::{self, ShallowDeclProvider};
 use crate::special_names::SpecialNames;
+use oxidized::global_options::GlobalOptions;
 use pos::{
     ConstName, FunName, MethodName, Positioned, PropName, TypeName, TypeNameMap, TypeNameSet,
 };
@@ -22,6 +23,7 @@ use std::sync::Arc;
 /// `ShallowDeclProvider`.
 #[derive(Debug)]
 pub struct LazyFoldedDeclProvider<R: Reason> {
+    opts: Arc<GlobalOptions>,
     cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
     special_names: &'static SpecialNames,
     shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
@@ -29,11 +31,13 @@ pub struct LazyFoldedDeclProvider<R: Reason> {
 
 impl<R: Reason> LazyFoldedDeclProvider<R> {
     pub fn new(
+        opts: Arc<GlobalOptions>,
         cache: Arc<dyn Cache<TypeName, Arc<FoldedClass<R>>>>,
         special_names: &'static SpecialNames,
         shallow_decl_provider: Arc<dyn ShallowDeclProvider<R>>,
     ) -> Self {
         Self {
+            opts,
             cache,
             special_names,
             shallow_decl_provider,
@@ -229,7 +233,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         stack.insert(name);
         let parents = self.decl_class_parents(stack, &shallow_class)?;
         stack.remove(&name);
-        let folder = DeclFolder::new(self.special_names);
+        let folder = DeclFolder::new(Arc::clone(&self.opts), self.special_names);
         Ok(Some(folder.decl_class(&shallow_class, &parents)))
     }
 

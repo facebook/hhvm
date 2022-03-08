@@ -12,6 +12,7 @@ use crate::decl_defs::{
 };
 use crate::reason::Reason;
 use crate::special_names::SpecialNames;
+use oxidized::global_options::GlobalOptions;
 use pos::{
     ClassConstName, ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap,
     TypeConstName, TypeConstNameMap, TypeName, TypeNameMap,
@@ -24,12 +25,14 @@ use std::sync::Arc;
 #[derive(Debug)]
 pub struct DeclFolder<R: Reason> {
     special_names: &'static SpecialNames,
+    _opts: Arc<GlobalOptions>,
     _phantom: PhantomData<R>,
 }
 
 impl<R: Reason> DeclFolder<R> {
-    pub fn new(special_names: &'static SpecialNames) -> Self {
+    pub fn new(opts: Arc<GlobalOptions>, special_names: &'static SpecialNames) -> Self {
         Self {
+            _opts: opts,
             special_names,
             _phantom: PhantomData,
         }

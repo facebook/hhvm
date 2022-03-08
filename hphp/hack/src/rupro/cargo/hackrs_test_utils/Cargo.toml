@@ -10,4 +10,6 @@ path = "../../test_utils/mod.rs"
 [dependencies]
 dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 hackrs = { path = "../hackrs" }
+hash = { path = "../../../utils/hash" }
+oxidized = { path = "../../../oxidized" }
 pos = { path = "../../lib/pos" }

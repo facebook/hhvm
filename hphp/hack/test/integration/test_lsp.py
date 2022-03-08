@@ -4391,14 +4391,14 @@ class TestLsp(TestCase[LspTestDriver]):
                     {
                         "range": {
                             "start": {"line": 0, "character": 0},
-                            "end": {"line": 12, "character": 0},
+                            "end": {"line": 11, "character": 0},
                         },
                         "newText": "<?hh //strict\n\nfunction x(): string {\n"
                         + '     $a = "this";\n\n'
                         + '     $b = "is";\n\n'
                         + '     $c = "messy";\n\n'
                         + '     $d = ".";\n'
-                        + '     return "$a"."$b"."$c"."d";\n}\n',
+                        + '     return "$a"."$b"."$c"."d";\n',
                     }
                 ],
             )

@@ -117,6 +117,84 @@ let expand_range_to_whole_rows content (range : File_content.range) :
 (* Two integers separated by a space. *)
 let range_regexp = Str.regexp "^\\([0-9]+\\) \\([0-9]+\\)$"
 
+let zip_with_index (xs : 'a list) (ys : 'b list) : (int * 'a * 'b option) list =
+  let rec aux acc i xs ys =
+    match (xs, ys) with
+    | (x :: xs, y :: ys) -> aux ((i, x, Some y) :: acc) (i + 1) xs ys
+    | (x :: xs, []) -> aux ((i, x, None) :: acc) (i + 1) xs ys
+    | ([], _) -> acc
+  in
+  List.rev (aux [] 0 xs ys)
+
+let opt_string_eq (x : string) (y : string option) : bool =
+  match y with
+  | Some y -> String.equal x y
+  | None -> false
+
+let first_changed_line_idx (old_lines : string list) (new_lines : string list) :
+    int option =
+  let numbered_lines = zip_with_index old_lines new_lines in
+  let first_novel_line =
+    List.find numbered_lines ~f:(fun (_, x, y) -> not (opt_string_eq x y))
+  in
+  match first_novel_line with
+  | Some (i, _, _) -> Some i
+  | None -> None
+
+let last_changed_line_idx (old_lines : string list) (new_lines : string list) :
+    int option =
+  match first_changed_line_idx (List.rev old_lines) (List.rev new_lines) with
+  | Some rev_idx -> Some (List.length old_lines - rev_idx)
+  | None -> None
+
+(* Drop the last [n] items in [xs]. *)
+let drop_tail (xs : 'a list) (n : int) : 'a list =
+  List.rev (List.drop (List.rev xs) n)
+
+(* An empty edit that has no effect. *)
+let noop_edit =
+  let range =
+    {
+      File_content.st = { File_content.line = 1; column = 1 };
+      ed = { File_content.line = 1; column = 1 };
+    }
+  in
+  {
+    ServerFormatTypes.new_text = "";
+    range = Ide_api_types.ide_range_from_fc range;
+  }
+
+(* Return an IDE text edit that doesn't include unchanged leading or trailing lines. *)
+let minimal_edit (old_src : string) (new_src : string) :
+    ServerFormatTypes.ide_response =
+  let old_src_lines = String.split_lines old_src in
+  let new_src_lines = String.split_lines new_src in
+
+  let range_start_line = first_changed_line_idx old_src_lines new_src_lines in
+  let range_end_line = last_changed_line_idx old_src_lines new_src_lines in
+
+  match (range_start_line, range_end_line) with
+  | (Some range_start_line, Some range_end_line) ->
+    let new_src_novel_lines =
+      drop_tail
+        (List.drop new_src_lines range_start_line)
+        (List.length old_src_lines - range_end_line)
+    in
+
+    let range =
+      {
+        File_content.st =
+          { File_content.line = range_start_line + 1; column = 1 };
+        ed = { File_content.line = range_end_line + 1; column = 1 };
+      }
+    in
+    {
+      ServerFormatTypes.new_text =
+        String.concat ~sep:"\n" new_src_novel_lines ^ "\n";
+      range = Ide_api_types.ide_range_from_fc range;
+    }
+  | _ -> noop_edit
+
 let go_ide
     ~(filename_for_logging : string)
     ~(content : string)
@@ -136,11 +214,9 @@ let go_ide
     (* `from0` and `to0` are zero-indexed, hence the name. *)
     let from0 = 0 in
     let to0 = String.length content in
-    let ed = offset_to_position content to0 in
-    let range = { st = { line = 1; column = 1 }; ed } in
     (* hackfmt currently takes one-indexed integers for range formatting. *)
     go ~filename_for_logging ~content (from0 + 1) (to0 + 1) options
-    |> convert_to_ide_result ~range
+    |> Result.map ~f:(fun new_text -> minimal_edit content new_text)
   | Range range ->
     let fc_range = Ide_api_types.ide_range_to_fc range in
     let (range, from0, to0) = expand_range_to_whole_rows content fc_range in

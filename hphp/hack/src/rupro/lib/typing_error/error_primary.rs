@@ -17,4 +17,12 @@ pub enum Primary<R: Reason> {
         class_name: TypeName,
         trait_name: TypeName,
     },
+    WrongExtendKind {
+        parent_pos: R::Pos,
+        parent_kind: oxidized::ast_defs::ClassishKind,
+        parent_name: TypeName,
+        pos: R::Pos,
+        kind: oxidized::ast_defs::ClassishKind,
+        name: TypeName,
+    },
 }

@@ -363,6 +363,41 @@ impl<R: Reason> DeclFolder<R> {
         }
     }
 
+    /// Check that the kind of a class is compatible with its parent
+    /// For example, a class cannot extend an interface, an interface cannot
+    /// extend a trait etc ...
+    /// TODO: T87242856
+    fn check_extend_kind(
+        &self,
+        parent_pos: &R::Pos,
+        parent_kind: ClassishKind,
+        parent_name: &TypeName,
+        child_pos: &R::Pos,
+        child_kind: ClassishKind,
+        child_name: &TypeName,
+        errors: &mut Vec<TypingError<R>>,
+    ) {
+        match (parent_kind, child_kind) {
+            // What is allowed
+            (ClassishKind::Cclass(_), ClassishKind::Cclass(_))
+            | (ClassishKind::Ctrait, ClassishKind::Ctrait)
+            | (ClassishKind::Cinterface, ClassishKind::Cinterface)
+            | (ClassishKind::CenumClass(_), ClassishKind::CenumClass(_)) => {}
+            // enums extend `BuiltinEnum` under the hood
+            (ClassishKind::Cclass(k), ClassishKind::Cenum | ClassishKind::CenumClass(_))
+                if k.is_abstract() => {}
+            // What is disallowed
+            _ => errors.push(TypingError::primary(Primary::WrongExtendKind {
+                parent_pos: parent_pos.clone(),
+                parent_kind,
+                parent_name: *parent_name,
+                pos: child_pos.clone(),
+                kind: child_kind,
+                name: *child_name,
+            })),
+        }
+    }
+
     fn add_reused_trait_error(
         &self,
         errors: &mut Vec<TypingError<R>>,
@@ -393,14 +428,24 @@ impl<R: Reason> DeclFolder<R> {
     fn add_grandparents_or_traits(
         &self,
         no_trait_reuse: bool,
-        _parent_pos: &R::Pos,
+        parent_pos: &R::Pos,
         sc: &ShallowClass<R>,
         pass: Pass,
         extends: &mut TypeNameSet,
         errors: &mut Vec<TypingError<R>>,
         parent_type: &FoldedClass<R>,
     ) {
-        // TODO: check_extend_kind
+        if pass == Pass::Extends {
+            self.check_extend_kind(
+                parent_pos,
+                parent_type.kind,
+                &parent_type.name,
+                sc.name.pos(),
+                sc.kind,
+                &sc.name.id(),
+                errors,
+            );
+        }
 
         // Get size and duplicates for potential errors before we add we add grandparents
         let class_size = extends.len();
@@ -439,8 +484,7 @@ impl<R: Reason> DeclFolder<R> {
         ty: &DeclTy<R>,
     ) {
         // See comment on add_grandparents_or_traits for reasoning here
-        let no_trait_reuse =
-            pass != Pass::Xhp && sc.kind != oxidized::ast_defs::ClassishKind::Cinterface; /* TODO: && Based on env */
+        let no_trait_reuse = pass != Pass::Xhp && sc.kind != ClassishKind::Cinterface; /* TODO: && Based on env */
         if let Some((_, pos_id, _)) = ty.unwrap_class_type() {
             // If we already had this exact trait, we need to flag trait reuse
             let reused_trait = no_trait_reuse && extends.contains(&pos_id.id());

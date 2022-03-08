@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl_defs::{self, DeclTy, DeclTy_};
-use crate::folded_decl_provider::DeclName;
 use crate::reason::Reason;
 use crate::typing::Result;
 use crate::typing_decl_provider::{Class, TypeDecl};
@@ -33,7 +32,7 @@ impl Phase {
                 match env
                     .ctx
                     .typing_decl_provider
-                    .get_type(DeclName::NoDeclName, pos_id.id())?
+                    .get_type(env.get_dependent(), pos_id.id())?
                 {
                     Some(TypeDecl::Class(cls)) => Self::localize_class_instantiation(
                         env,

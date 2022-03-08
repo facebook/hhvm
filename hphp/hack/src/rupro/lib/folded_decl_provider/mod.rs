@@ -51,7 +51,6 @@ pub enum TypeDecl<R: Reason> {
 // trait take a "who's asking?" symbol of this type.
 #[derive(Clone, Copy, Debug)]
 pub enum DeclName {
-    NoDeclName, //Will be removed in the next diff.
     Fun(FunName),
     Const(ConstName),
     Type(TypeName),

@@ -7,6 +7,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use crate::folded_decl_provider::DeclName;
 use crate::reason::Reason;
 use crate::tast::SavedEnv;
 use crate::typing_ctx::TypingCtx;
@@ -15,6 +16,8 @@ use crate::typing_error::TypingError;
 use crate::typing_local_types::{Local, LocalMap};
 use crate::typing_return::TypingReturnInfo;
 use crate::utils::core::{IdentGen, LocalId};
+
+use pos::FunName;
 
 use im::HashMap;
 
@@ -26,6 +29,8 @@ pub struct TEnv<R: Reason> {
 
     idents: IdentGen,
     errors: Rc<RefCell<Vec<TypingError<R>>>>,
+
+    dependent: DeclName,
 }
 
 struct TGEnv<R: Reason> {
@@ -99,7 +104,7 @@ impl<R: Reason> PerContEnv<R> {
 }
 
 impl<R: Reason> TEnv<R> {
-    pub fn new(ctx: Rc<TypingCtx<R>>) -> Self {
+    pub fn new(dependent: DeclName, ctx: Rc<TypingCtx<R>>) -> Self {
         let genv = Rc::new(TGEnv::new());
         Self {
             ctx,
@@ -109,7 +114,15 @@ impl<R: Reason> TEnv<R> {
 
             idents: IdentGen::new(),
             errors: Rc::new(RefCell::new(Vec::new())),
+            dependent,
         }
+    }
+
+    // The "dependency root" (`droot` in OCaml). That is, the symbol getting
+    // typed so that we might record any dependencies of that symbol on other
+    // symbols we encounter as we do so.
+    pub fn get_dependent(&self) -> DeclName {
+        self.dependent
     }
 
     pub fn destruct(self) -> Vec<TypingError<R>> {
@@ -123,8 +136,8 @@ impl<R: Reason> TEnv<R> {
         self.errors.borrow_mut().push(error)
     }
 
-    pub fn fun_env(ctx: Rc<TypingCtx<R>>, _fd: &oxidized::aast::FunDef<(), ()>) -> Self {
-        Self::new(ctx)
+    pub fn fun_env(ctx: Rc<TypingCtx<R>>, fd: &oxidized::aast::FunDef<(), ()>) -> Self {
+        Self::new(FunName::new(&fd.fun.name.1).into(), ctx)
     }
 
     pub fn set_param(&self, id: LocalId, ty: Ty<R>, pos: R::Pos, param_mode: ParamMode) {

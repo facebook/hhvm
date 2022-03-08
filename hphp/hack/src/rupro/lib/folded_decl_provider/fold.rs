@@ -558,6 +558,50 @@ impl<R: Reason> DeclFolder<R> {
         xhp_attr_deps
     }
 
+    /// Accumulate requirements so that we can successfully check the bodies
+    /// of trait methods / check that classes satisfy these requirements
+    fn flatten_parent_class_reqs(
+        &self,
+        parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
+        sc: &ShallowClass<R>,
+        req_ancestors: &mut Vec<Requirement<R>>,
+        req_ancestors_extends: &mut TypeNameSet,
+        parent_ty: &DeclTy<R>,
+    ) {
+        match parent_ty.unwrap_class_type() {
+            None => {}
+            Some((_, pos_id, parent_params)) => {
+                match parent_cache.get(&pos_id.id()) {
+                    None => {
+                        // The class lives in PHP
+                    }
+                    Some(cls) => {
+                        let subst = Subst::new(&cls.tparams, parent_params);
+                        let substitution = Substitution { subst: &subst };
+                        // TODO: Do we need to rev? Or was that just a limitation of OCaml's library?
+                        cls.req_ancestors.iter().rev().for_each(|req_ancestor| {
+                            let ty = substitution.instantiate(&req_ancestor.1);
+                            req_ancestors.push(Requirement(pos_id.pos().clone(), ty));
+                        });
+                        match sc.kind {
+                            ClassishKind::Cclass(_) => {
+                                // Not necessary to accumulate req_ancestors_extends for classes --
+                                // it's not used
+                            }
+                            ClassishKind::Ctrait | ClassishKind::Cinterface => {
+                                req_ancestors_extends
+                                    .extend(cls.req_ancestors_extends.iter().cloned());
+                            }
+                            ClassishKind::Cenum | ClassishKind::CenumClass(_) => {
+                                panic!();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     fn declared_class_req(
         &self,
         parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
@@ -620,17 +664,35 @@ impl<R: Reason> DeclFolder<R> {
             );
         }
 
-        for _use_ in sc.uses.iter() {
-            // TODO: flatten_parent_class_reqs
+        for use_ in sc.uses.iter() {
+            self.flatten_parent_class_reqs(
+                parent_cache,
+                sc,
+                &mut req_ancestors,
+                &mut req_ancestors_extends,
+                use_,
+            );
         }
 
         if sc.kind.is_cinterface() {
-            for _extend in sc.extends.iter() {
-                // TODO: flatten_parent_class_reqs
+            for extend in sc.extends.iter() {
+                self.flatten_parent_class_reqs(
+                    parent_cache,
+                    sc,
+                    &mut req_ancestors,
+                    &mut req_ancestors_extends,
+                    extend,
+                );
             }
         } else {
-            for _implement in sc.implements.iter() {
-                // TODO: flatten_parent_class_rqs
+            for implement in sc.implements.iter() {
+                self.flatten_parent_class_reqs(
+                    parent_cache,
+                    sc,
+                    &mut req_ancestors,
+                    &mut req_ancestors_extends,
+                    implement,
+                );
             }
         }
 

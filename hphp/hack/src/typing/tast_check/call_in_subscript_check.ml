@@ -8,6 +8,7 @@
 
 open Hh_prelude
 module Env = Tast_env
+module SN = Naming_special_names
 
 let rec check_for_call_expr (_, p, e) =
   match e with
@@ -104,9 +105,9 @@ let handler =
     method! at_expr _ (_, _, e) =
       match e with
       | Aast.Binop (Ast_defs.Eq _, lhs, _) -> check_for_call_expr lhs
-      (* This currently doesn't handle two other known lval cases:
-       * - `unset` statements
-       * - increment / decrement operators
-       *)
+      | Aast.Call ((_, _, Aast.Id (_, name)), _, el, _)
+        when String.equal name SN.PseudoFunctions.unset ->
+        let f (_, e) = check_for_call_expr e in
+        List.iter ~f el
       | _ -> ()
   end

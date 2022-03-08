@@ -558,20 +558,66 @@ impl<R: Reason> DeclFolder<R> {
         xhp_attr_deps
     }
 
+    fn declared_class_req(
+        &self,
+        parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
+        req_ancestors: &mut Vec<Requirement<R>>,
+        req_ancestors_extends: &mut TypeNameSet,
+        req_ty: &DeclTy<R>,
+    ) {
+        match req_ty.unwrap_class_type() {
+            None => {}
+            Some((_, pos_id, _)) => {
+                // Since the req is declared on this class, we should
+                // emphatically *not* substitute: a require extends Foo<T> is
+                // going to be this class's <T>
+                req_ancestors.push(Requirement(pos_id.pos().clone(), req_ty.clone()));
+                req_ancestors_extends.insert(pos_id.id());
+
+                // TODO: use Decl_env.get_class_and_add_dep equivalent
+                match parent_cache.get(&pos_id.id()) {
+                    None => {
+                        // The class lives in PHP : error??
+                    }
+                    Some(cls) => {
+                        // The parent class lives in Hack
+                        req_ancestors_extends.extend(cls.extends.iter().cloned());
+                        req_ancestors_extends.extend(cls.xhp_attr_deps.iter().cloned());
+                        // The req may be on an interface that has reqs of its own; the
+                        // flattened ancestry required by *those* reqs need to be added
+                        // in to, e.g., interpret accesses to protected functions inside
+                        // traits
+                        req_ancestors_extends.extend(cls.req_ancestors_extends.iter().cloned());
+                    }
+                }
+            }
+        }
+    }
+
     fn get_class_requirements(
         &self,
         sc: &ShallowClass<R>,
-        _parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
+        parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
     ) -> (Vec<Requirement<R>>, TypeNameSet) {
-        let req_ancestors = vec![];
-        let req_ancestors_extends = TypeNameSet::new();
+        let mut req_ancestors = vec![];
+        let mut req_ancestors_extends = TypeNameSet::new();
 
-        for _req_extend in sc.req_extends.iter() {
-            // TODO: T113262613 declared_class_req
+        for req_extend in sc.req_extends.iter() {
+            self.declared_class_req(
+                parent_cache,
+                &mut req_ancestors,
+                &mut req_ancestors_extends,
+                req_extend,
+            );
         }
 
-        for _req_implement in sc.req_implements.iter() {
-            // TODO: declared_class_req
+        for req_implement in sc.req_implements.iter() {
+            self.declared_class_req(
+                parent_cache,
+                &mut req_ancestors,
+                &mut req_ancestors_extends,
+                req_implement,
+            );
         }
 
         for _use_ in sc.uses.iter() {

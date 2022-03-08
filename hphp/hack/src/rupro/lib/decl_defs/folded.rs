@@ -119,7 +119,7 @@ impl<R: Reason> ClassConst<R> {
 /// }
 /// ```
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Requirement<R: Reason>(R::Pos, DeclTy<R>);
+pub struct Requirement<R: Reason>(pub R::Pos, pub DeclTy<R>);
 
 #[derive(Clone, Eq, EqModuloPos, PartialEq)]
 pub struct FoldedClass<R: Reason> {

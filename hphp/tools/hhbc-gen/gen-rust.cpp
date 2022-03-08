@@ -100,7 +100,7 @@ const char* fix_self(const char* name) {
 #define FLAGS_NF "InstrFlags::NF"
 #define FLAGS_CF "InstrFlags::CF"
 #define FLAGS_TF "InstrFlags::TF"
-#define FLAGS_CF_TF "InstrFlags::CF_TF"
+#define FLAGS_CF_TF "InstrFlags::CF | InstrFlags::TF"
 
 #define O(name, imms, in, out, flags)                    \
   printf("            OpcodeData{");                     \

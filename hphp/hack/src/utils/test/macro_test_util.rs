@@ -43,11 +43,13 @@ pub fn assert_pat_eq(a: Result<TokenStream>, b: TokenStream) {
             let t_b = t_b.unwrap();
 
             match (&t_a, &t_b) {
-                (TokenTree::Ident(_), TokenTree::Ident(_))
-                | (TokenTree::Literal(_), TokenTree::Literal(_))
-                | (TokenTree::Punct(_), TokenTree::Punct(_))
-                    if t_a.to_string() == t_b.to_string() => {}
-                (TokenTree::Group(ga), TokenTree::Group(gb)) => {
+                (TokenTree::Ident(a), TokenTree::Ident(b)) if *a == b.to_string() => {}
+                (TokenTree::Literal(a), TokenTree::Literal(b))
+                    if a.to_string() == b.to_string() => {}
+                (TokenTree::Punct(a), TokenTree::Punct(b)) if a.to_string() == b.to_string() => {}
+                (TokenTree::Group(ga), TokenTree::Group(gb))
+                    if ga.delimiter() == gb.delimiter() =>
+                {
                     inner_cmp(ga.stream(), gb.stream(), ax, bx);
                 }
                 (TokenTree::Group(_), _)

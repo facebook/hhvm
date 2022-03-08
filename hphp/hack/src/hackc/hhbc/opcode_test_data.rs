@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc::{FlavorDesc, ImmType, Inputs, InstrFlags, OpcodeData, Outputs};
+use hhbc::{ImmType, Inputs, InstrFlags, OpcodeData, Outputs};
 
 pub fn test_opcodes() -> Vec<OpcodeData> {
     vec![
@@ -41,10 +41,25 @@ pub fn test_opcodes() -> Vec<OpcodeData> {
         },
         // --------------------------------------------------
         OpcodeData {
+            name: "TestAsStruct",
+            immediates: vec![("str1", ImmType::SA), ("str2", ImmType::SA)],
+            inputs: Inputs::NOV,
+            outputs: Outputs::NOV,
+            flags: InstrFlags::AS_STRUCT,
+        },
+        // --------------------------------------------------
+        OpcodeData {
             name: "TestAA",
             immediates: vec![("arr1", ImmType::AA)],
             inputs: Inputs::NOV,
-            outputs: Outputs::Fixed([FlavorDesc::CV].into()),
+            outputs: Outputs::NOV,
+            flags: InstrFlags::NF,
+        },
+        OpcodeData {
+            name: "TestARR",
+            immediates: vec![("arr1", ImmType::ARR(Box::new(ImmType::SA)))],
+            inputs: Inputs::NOV,
+            outputs: Outputs::NOV,
             flags: InstrFlags::NF,
         },
         OpcodeData {
@@ -52,34 +67,41 @@ pub fn test_opcodes() -> Vec<OpcodeData> {
             immediates: vec![("target1", ImmType::BA)],
             inputs: Inputs::NOV,
             outputs: Outputs::NOV,
-            flags: InstrFlags::CF_TF,
+            flags: InstrFlags::CF | InstrFlags::TF,
+        },
+        OpcodeData {
+            name: "TestBA2",
+            immediates: vec![("target1", ImmType::BA2)],
+            inputs: Inputs::NOV,
+            outputs: Outputs::NOV,
+            flags: InstrFlags::CF | InstrFlags::TF,
         },
         OpcodeData {
             name: "TestBLA",
             immediates: vec![("targets", ImmType::BLA)],
-            inputs: Inputs::Fixed([FlavorDesc::CV].into()),
+            inputs: Inputs::NOV,
             outputs: Outputs::NOV,
-            flags: InstrFlags::CF_TF,
+            flags: InstrFlags::CF | InstrFlags::TF,
         },
         OpcodeData {
             name: "TestDA",
             immediates: vec![("dbl1", ImmType::DA)],
             inputs: Inputs::NOV,
-            outputs: Outputs::Fixed([FlavorDesc::CV].into()),
+            outputs: Outputs::NOV,
             flags: InstrFlags::NF,
         },
         OpcodeData {
             name: "TestFCA",
             immediates: vec![("fca", ImmType::FCA)],
-            inputs: Inputs::FCall { inp: 2, obj: 0 },
-            outputs: Outputs::FCall,
+            inputs: Inputs::NOV,
+            outputs: Outputs::NOV,
             flags: InstrFlags::CF,
         },
         OpcodeData {
             name: "TestI64A",
             immediates: vec![("arg1", ImmType::I64A)],
             inputs: Inputs::NOV,
-            outputs: Outputs::Fixed([FlavorDesc::CV].into()),
+            outputs: Outputs::NOV,
             flags: InstrFlags::NF,
         },
         OpcodeData {
@@ -99,7 +121,7 @@ pub fn test_opcodes() -> Vec<OpcodeData> {
         OpcodeData {
             name: "TestITA",
             immediates: vec![("ita", ImmType::ITA)],
-            inputs: Inputs::Fixed([FlavorDesc::CV].into()),
+            inputs: Inputs::NOV,
             outputs: Outputs::NOV,
             flags: InstrFlags::CF,
         },
@@ -107,7 +129,7 @@ pub fn test_opcodes() -> Vec<OpcodeData> {
             name: "TestIVA",
             immediates: vec![("arg1", ImmType::IVA)],
             inputs: Inputs::NOV,
-            outputs: Outputs::Fixed([FlavorDesc::CV].into()),
+            outputs: Outputs::NOV,
             flags: InstrFlags::NF,
         },
         OpcodeData {
@@ -120,7 +142,7 @@ pub fn test_opcodes() -> Vec<OpcodeData> {
         OpcodeData {
             name: "TestLA",
             immediates: vec![("loc1", ImmType::LA)],
-            inputs: Inputs::Fixed([FlavorDesc::CV].into()),
+            inputs: Inputs::NOV,
             outputs: Outputs::NOV,
             flags: InstrFlags::NF,
         },
@@ -128,21 +150,28 @@ pub fn test_opcodes() -> Vec<OpcodeData> {
             name: "TestLAR",
             immediates: vec![("locrange", ImmType::LAR)],
             inputs: Inputs::NOV,
-            outputs: Outputs::Fixed([FlavorDesc::CV].into()),
+            outputs: Outputs::NOV,
             flags: InstrFlags::CF,
         },
         OpcodeData {
             name: "TestNLA",
             immediates: vec![("nloc1", ImmType::NLA)],
             inputs: Inputs::NOV,
-            outputs: Outputs::Fixed([FlavorDesc::CV].into()),
+            outputs: Outputs::NOV,
             flags: InstrFlags::NF,
         },
         OpcodeData {
             name: "TestOA",
             immediates: vec![("subop1", ImmType::OA("OaSubType"))],
-            inputs: Inputs::Fixed([FlavorDesc::CV, FlavorDesc::CV].into()),
-            outputs: Outputs::Fixed([FlavorDesc::CV].into()),
+            inputs: Inputs::NOV,
+            outputs: Outputs::NOV,
+            flags: InstrFlags::NF,
+        },
+        OpcodeData {
+            name: "TestOAL",
+            immediates: vec![("subop1", ImmType::OAL("OaSubType"))],
+            inputs: Inputs::NOV,
+            outputs: Outputs::NOV,
             flags: InstrFlags::NF,
         },
         OpcodeData {
@@ -156,21 +185,21 @@ pub fn test_opcodes() -> Vec<OpcodeData> {
             name: "TestSA",
             immediates: vec![("str1", ImmType::SA)],
             inputs: Inputs::NOV,
-            outputs: Outputs::Fixed([FlavorDesc::CV].into()),
+            outputs: Outputs::NOV,
             flags: InstrFlags::NF,
         },
         OpcodeData {
             name: "TestSLA",
             immediates: vec![("targets", ImmType::SLA)],
-            inputs: Inputs::Fixed([FlavorDesc::CV].into()),
+            inputs: Inputs::NOV,
             outputs: Outputs::NOV,
-            flags: InstrFlags::CF_TF,
+            flags: InstrFlags::CF | InstrFlags::TF,
         },
         OpcodeData {
             name: "TestVSA",
             immediates: vec![("keys", ImmType::VSA)],
-            inputs: Inputs::SMany,
-            outputs: Outputs::Fixed([FlavorDesc::CV].into()),
+            inputs: Inputs::NOV,
+            outputs: Outputs::NOV,
             flags: InstrFlags::NF,
         },
     ]

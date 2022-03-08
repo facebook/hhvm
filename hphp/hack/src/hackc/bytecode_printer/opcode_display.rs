@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc::{ImmType, OpcodeData};
+use hhbc::{ImmType, InstrFlags, OpcodeData};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use syn::{DeriveInput, Result};
@@ -63,6 +63,8 @@ fn opcode_display(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStr
             name
         };
 
+        let is_struct = opcode.flags.contains(InstrFlags::AS_STRUCT);
+
         let mut parameters: Vec<Ident> = Vec::new();
         let mut immediates = Vec::new();
 
@@ -78,6 +80,8 @@ fn opcode_display(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStr
 
         let parameters = if parameters.is_empty() {
             TokenStream::new()
+        } else if is_struct {
+            quote!( {#(#parameters),*} )
         } else {
             quote!( (#(#parameters),*) )
         };
@@ -110,7 +114,12 @@ fn opcode_display(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStr
 fn convert_immediate(name: &Ident, imm: &ImmType) -> TokenStream {
     match imm {
         ImmType::AA => quote!(print_adata_id(f, #name)?;),
+        ImmType::ARR(_sub_ty) => {
+            let msg = format!("unsupported '{}'", name);
+            quote!(todo!(#msg);)
+        }
         ImmType::BA => quote!(print_label(f, #name)?;),
+        ImmType::BA2 => quote!(print_label2(f, #name)?;),
         ImmType::BLA => quote!(print_branch_labels(f, #name)?;),
         ImmType::DA => quote!(print_bytes(f, #name.as_bytes())?;),
         ImmType::FCA => quote!(print_fcall_args(f, #name)?;),
@@ -124,7 +133,7 @@ fn convert_immediate(name: &Ident, imm: &ImmType) -> TokenStream {
         ImmType::LAR => quote!(print_local_range(f, #name)?;),
         ImmType::NA => panic!("NA is not expected"),
         ImmType::NLA => quote!(print_local(f, #name)?;),
-        ImmType::OA(ty) => {
+        ImmType::OA(ty) | ImmType::OAL(ty) => {
             use convert_case::{Case, Casing};
             let handler = Ident::new(
                 &format!("print_{}", ty.to_case(Case::Snake)),
@@ -182,13 +191,28 @@ mod tests {
                                 print_bytes(f, str3.as_bytes())?;
                             }
                             // -------------------------------------------
+                            PrintMe::TestAsStruct { str1, str2 } => {
+                                f.write_str("TestAsStruct ")?;
+                                print_bytes(f, str1.as_bytes())?;
+                                f.write_str(" ")?;
+                                print_bytes(f, str2.as_bytes())?;
+                            }
+                            // -------------------------------------------
                             PrintMe::TestAA(arr1) => {
                                 f.write_str("TestAA ")?;
                                 print_adata_id(f, arr1)?;
                             }
+                            PrintMe::TestARR(arr1) => {
+                                f.write_str("TestARR ")?;
+                                todo!("unsupported 'arr1'");
+                            }
                             PrintMe::TestBA(target1) => {
                                 f.write_str("TestBA ")?;
                                 print_label(f, target1)?;
+                            }
+                            PrintMe::TestBA2(target1) => {
+                                f.write_str("TestBA2 ")?;
+                                print_label2(f, target1)?;
                             }
                             PrintMe::TestBLA(targets) => {
                                 f.write_str("TestBLA ")?;
@@ -240,6 +264,10 @@ mod tests {
                             }
                             PrintMe::TestOA(subop1) => {
                                 f.write_str("TestOA ")?;
+                                print_oa_sub_type(f, subop1)?;
+                            }
+                            PrintMe::TestOAL(subop1) => {
+                                f.write_str("TestOAL ")?;
                                 print_oa_sub_type(f, subop1)?;
                             }
                             PrintMe::TestRATA(rat) => {

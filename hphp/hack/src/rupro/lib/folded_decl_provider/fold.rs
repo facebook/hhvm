@@ -368,35 +368,64 @@ impl<R: Reason> DeclFolder<R> {
         errors: &mut Vec<TypingError<R>>,
         parent_ty: &FoldedClass<R>,
         sc: &ShallowClass<R>,
-        trait_name: TypeName,
+        trait_name: &TypeName,
     ) {
         errors.push(TypingError::primary(Primary::TraitReuse {
             parent_pos: parent_ty.pos.clone(),
             parent_name: parent_ty.name,
             pos: sc.name.pos().clone(),
             class_name: sc.name.id(),
-            trait_name,
+            trait_name: *trait_name,
         }));
     }
 
-    // TODO: Thread errors through extends
+    /// Also verifies that a class never reuses the same trait throughout its hierarchy.
+    ///
+    /// Since Hack only has single inheritance and we already put up a warning for
+    /// cyclic class hierachies, if there is any overlap between our extends and
+    /// our parents' extends, that overlap must be a trait.
+    ///
+    /// This does not hold for interfaces because they have multiple inheritance,
+    /// but interfaces cannot use traits in the first place.
+    ///
+    /// XHP attribute dependencies don't actually pull the trait into the class,
+    /// so we need to track them totally separately.
     fn add_grandparents_or_traits(
         &self,
-        _no_trait_reuse: bool,
+        no_trait_reuse: bool,
         _parent_pos: &R::Pos,
-        _sc: &ShallowClass<R>,
+        sc: &ShallowClass<R>,
         pass: Pass,
         extends: &mut TypeNameSet,
+        errors: &mut Vec<TypingError<R>>,
         parent_type: &FoldedClass<R>,
     ) {
         // TODO: check_extend_kind
+
+        // Get size and duplicates for potential errors before we add we add grandparents
+        let class_size = extends.len();
+        let mut duplicates = vec![];
+        for typename in parent_type.extends.iter() {
+            if extends.contains(typename) {
+                duplicates.push(typename);
+            }
+        }
+
         if pass == Pass::Xhp {
             // If we are crawling the xhp attribute deps, need to merge their xhp deps as well
-            extends.extend(&parent_type.xhp_attr_deps);
+            extends.extend(parent_type.xhp_attr_deps.iter().cloned());
         }
-        extends.extend(&parent_type.extends);
+        extends.extend(parent_type.extends.iter().cloned());
         // Verify that merging the parent's extends did not introduce trait reuse
-        // TODO: check_no_duplicate_traits
+        if no_trait_reuse {
+            let parents_size = parent_type.extends.len();
+            let full_size = extends.len();
+            if class_size + parents_size > full_size {
+                for duplicate in duplicates.iter() {
+                    self.add_reused_trait_error(errors, parent_type, sc, duplicate);
+                }
+            }
+        }
     }
 
     // Add types of passes
@@ -409,7 +438,7 @@ impl<R: Reason> DeclFolder<R> {
         errors: &mut Vec<TypingError<R>>,
         ty: &DeclTy<R>,
     ) {
-        // See comment on check_no_duplicate_traits for reasoning here
+        // See comment on add_grandparents_or_traits for reasoning here
         let no_trait_reuse =
             pass != Pass::Xhp && sc.kind != oxidized::ast_defs::ClassishKind::Cinterface; /* TODO: && Based on env */
         if let Some((_, pos_id, _)) = ty.unwrap_class_type() {
@@ -420,7 +449,7 @@ impl<R: Reason> DeclFolder<R> {
             if let Some(cls) = parent_cache.get(&pos_id.id()) {
                 // The parent class lives in Hack, so we can report reused traits
                 if reused_trait {
-                    self.add_reused_trait_error(errors, cls, sc, pos_id.id());
+                    self.add_reused_trait_error(errors, cls, sc, &pos_id.id());
                 }
                 self.add_grandparents_or_traits(
                     no_trait_reuse,
@@ -428,6 +457,7 @@ impl<R: Reason> DeclFolder<R> {
                     sc,
                     pass,
                     extends,
+                    errors,
                     cls,
                 );
             }

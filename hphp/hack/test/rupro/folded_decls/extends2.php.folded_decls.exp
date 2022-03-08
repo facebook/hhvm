@@ -57,3 +57,58 @@ FoldedClass {
         "\\A",
     ],
 }
+FoldedClass {
+    name: "\\C",
+    kind: Cclass(
+        Concrete,
+    ),
+    substs: [
+        (
+            "\\A",
+            SubstContext {
+                subst: Subst(
+                    {},
+                ),
+                class_context: "\\B",
+                from_req_extends: false,
+            },
+        ),
+        (
+            "\\B",
+            SubstContext {
+                subst: Subst(
+                    {},
+                ),
+                class_context: "\\C",
+                from_req_extends: false,
+            },
+        ),
+    ],
+    ancestors: [
+        (
+            "\\A",
+            A,
+        ),
+        (
+            "\\B",
+            B,
+        ),
+    ],
+    consts: [
+        (
+            "class",
+            ClassConst {
+                is_synthesized: true,
+                kind: CCConcrete,
+                pos: NPos,
+                ty: HH\classname<this>,
+                origin: "\\C",
+                refs: [],
+            },
+        ),
+    ],
+    extends: [
+        "\\A",
+        "\\B",
+    ],
+}

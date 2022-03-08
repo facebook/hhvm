@@ -5,13 +5,18 @@
 
 use super::{folded::FoldedClass, shallow::ShallowClass};
 use crate::reason::Reason;
-use std::collections::HashMap;
+use itertools::Itertools;
+use std::collections::{HashMap, HashSet};
 use std::fmt;
 
 fn sorted_map<K: Ord, V>(map: &HashMap<K, V>) -> Vec<(&K, &V)> {
     let mut res: Vec<_> = map.iter().collect();
     res.sort_by_key(|x| x.0);
     res
+}
+
+fn sorted_set<K: Ord>(set: &HashSet<K>) -> Vec<&K> {
+    set.iter().sorted().collect()
 }
 
 // Our Class structs have a lot of fields, but in a lot of cases, most of them
@@ -164,6 +169,8 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             consts,
             type_consts,
             xhp_enum_values,
+            extends,
+            xhp_attr_deps,
         } = self;
 
         let mut s = f.debug_struct("FoldedClass");
@@ -233,6 +240,12 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
         if !xhp_enum_values.is_empty() {
             s.field("xhp_enum_values", xhp_enum_values);
+        }
+        if !extends.is_empty() {
+            s.field("extends", &sorted_set(extends));
+        }
+        if !xhp_attr_deps.is_empty() {
+            s.field("xhp_attr_deps", &sorted_set(xhp_attr_deps));
         }
         s.finish()
     }

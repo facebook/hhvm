@@ -1,8 +1,9 @@
 FoldedClass {
-    name: "\\A",
+    name: "\\:quux",
     kind: Cclass(
         Concrete,
     ),
+    is_xhp: true,
     consts: [
         (
             "class",
@@ -11,35 +12,18 @@ FoldedClass {
                 kind: CCConcrete,
                 pos: NPos,
                 ty: HH\classname<this>,
-                origin: "\\A",
+                origin: "\\:quux",
                 refs: [],
             },
         ),
     ],
 }
 FoldedClass {
-    name: "\\B",
+    name: "\\:bar",
     kind: Cclass(
         Concrete,
     ),
-    substs: [
-        (
-            "\\A",
-            SubstContext {
-                subst: Subst(
-                    {},
-                ),
-                class_context: "\\B",
-                from_req_extends: false,
-            },
-        ),
-    ],
-    ancestors: [
-        (
-            "\\A",
-            A,
-        ),
-    ],
+    is_xhp: true,
     consts: [
         (
             "class",
@@ -48,12 +32,36 @@ FoldedClass {
                 kind: CCConcrete,
                 pos: NPos,
                 ty: HH\classname<this>,
-                origin: "\\B",
+                origin: "\\:bar",
                 refs: [],
             },
         ),
     ],
-    extends: [
-        "\\A",
+    xhp_attr_deps: [
+        "\\:quux",
+    ],
+}
+FoldedClass {
+    name: "\\:foo",
+    kind: Cclass(
+        Concrete,
+    ),
+    is_xhp: true,
+    consts: [
+        (
+            "class",
+            ClassConst {
+                is_synthesized: true,
+                kind: CCConcrete,
+                pos: NPos,
+                ty: HH\classname<this>,
+                origin: "\\:foo",
+                refs: [],
+            },
+        ),
+    ],
+    xhp_attr_deps: [
+        "\\:bar",
+        "\\:quux",
     ],
 }

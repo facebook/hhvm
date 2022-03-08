@@ -15,7 +15,7 @@ use crate::special_names::SpecialNames;
 use oxidized::global_options::GlobalOptions;
 use pos::{
     ClassConstName, ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap,
-    TypeConstName, TypeConstNameMap, TypeName, TypeNameMap,
+    TypeConstName, TypeConstNameMap, TypeName, TypeNameMap, TypeNameSet,
 };
 use std::marker::PhantomData;
 use std::sync::Arc;
@@ -27,6 +27,13 @@ pub struct DeclFolder<R: Reason> {
     special_names: &'static SpecialNames,
     _opts: Arc<GlobalOptions>,
     _phantom: PhantomData<R>,
+}
+
+#[derive(PartialEq)]
+enum Pass {
+    Extends,
+    Traits,
+    Xhp,
 }
 
 impl<R: Reason> DeclFolder<R> {
@@ -355,6 +362,90 @@ impl<R: Reason> DeclFolder<R> {
         }
     }
 
+    // TODO: Thread errors through extends
+    fn add_grandparents_or_traits(
+        &self,
+        _no_trait_reuse: bool,
+        _parent_pos: &R::Pos,
+        _sc: &ShallowClass<R>,
+        pass: Pass,
+        extends: &mut TypeNameSet,
+        parent_type: &Arc<FoldedClass<R>>,
+    ) {
+        // TODO: check_extend_kind
+        if pass == Pass::Xhp {
+            // If we are crawling the xhp attribute deps, need to merge their xhp deps as well
+            extends.extend(&parent_type.xhp_attr_deps);
+        }
+        extends.extend(&parent_type.extends);
+        // Verify that merging the parent's extends did not introduce trait reuse
+        // TODO: check_no_duplicate_traits
+    }
+
+    // Add types of passes
+    fn add_class_parent_or_trait(
+        &self,
+        sc: &ShallowClass<R>,
+        parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
+        pass: Pass,
+        extends: &mut TypeNameSet,
+        ty: &DeclTy<R>,
+    ) {
+        // See comment on check_no_duplicate_traits for reasoning here
+        let no_trait_reuse =
+            pass != Pass::Xhp && sc.kind != oxidized::ast_defs::ClassishKind::Cinterface; /* TODO: && Based on env */
+        if let Some((_, pos_id, _)) = ty.unwrap_class_type() {
+            // If we already had this exact trait, we need to flag trait reuse
+            let _reused_trait = no_trait_reuse && extends.contains(&pos_id.id());
+            extends.insert(pos_id.id());
+            // TODO: Use Decl_env.get_class_and_add_dep equivalent here instead of parent_cache.get
+            if let Some(cls) = parent_cache.get(&pos_id.id()) {
+                // TODO: if reused_trait then report_reused_trait
+                self.add_grandparents_or_traits(
+                    no_trait_reuse,
+                    pos_id.pos(),
+                    sc,
+                    pass,
+                    extends,
+                    cls,
+                );
+            }
+        }
+    }
+
+    fn get_extends(
+        &self,
+        sc: &ShallowClass<R>,
+        parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
+    ) -> TypeNameSet {
+        let mut extends = TypeNameSet::new();
+        for extend in sc.extends.iter() {
+            self.add_class_parent_or_trait(sc, parent_cache, Pass::Extends, &mut extends, extend)
+        }
+        for use_ in sc.uses.iter() {
+            self.add_class_parent_or_trait(sc, parent_cache, Pass::Traits, &mut extends, use_)
+        }
+        extends
+    }
+
+    fn get_xhp_attr_deps(
+        &self,
+        sc: &ShallowClass<R>,
+        parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
+    ) -> TypeNameSet {
+        let mut xhp_attr_deps = TypeNameSet::new();
+        for xhp_attr_use in sc.xhp_attr_uses.iter() {
+            self.add_class_parent_or_trait(
+                sc,
+                parent_cache,
+                Pass::Xhp,
+                &mut xhp_attr_deps,
+                xhp_attr_use,
+            )
+        }
+        xhp_attr_deps
+    }
+
     pub fn decl_class(
         &self,
         sc: &ShallowClass<R>,
@@ -401,6 +492,9 @@ impl<R: Reason> DeclFolder<R> {
             .iter()
             .for_each(|tc| self.decl_type_const(&mut type_consts, &mut consts, sc, tc));
 
+        let extends = self.get_extends(sc, parents);
+        let xhp_attr_deps = self.get_xhp_attr_deps(sc, parents);
+
         Arc::new(FoldedClass {
             name: sc.name.id(),
             pos: sc.name.pos().clone(),
@@ -430,6 +524,8 @@ impl<R: Reason> DeclFolder<R> {
             consts,
             type_consts,
             xhp_enum_values: sc.xhp_enum_values.clone(),
+            extends,
+            xhp_attr_deps,
         })
     }
 }

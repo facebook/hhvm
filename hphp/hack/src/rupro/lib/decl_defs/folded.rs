@@ -12,7 +12,7 @@ use crate::reason::Reason;
 use eq_modulo_pos::EqModuloPos;
 use pos::{
     Bytes, ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap, Symbol,
-    TypeConstName, TypeConstNameMap, TypeName, TypeNameMap,
+    TypeConstName, TypeConstNameMap, TypeName, TypeNameMap, TypeNameSet,
 };
 use std::collections::BTreeMap;
 
@@ -128,6 +128,8 @@ pub struct FoldedClass<R: Reason> {
     pub consts: ClassConstNameMap<ClassConst<R>>,
     pub type_consts: TypeConstNameMap<TypeConst<R>>,
     pub xhp_enum_values: BTreeMap<Symbol, Box<[XhpEnumValue]>>,
+    pub extends: TypeNameSet,
+    pub xhp_attr_deps: TypeNameSet,
 }
 
 impl<R: Reason> FoldedClass<R> {

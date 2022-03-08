@@ -28,7 +28,7 @@ ocaml_ffi_with_arena! {
             .filter_map(|decl| match decl {
                 shallow::Decl::Class(name, _) => Some(
                     folded_decl_provider
-                        .get_class(name)
+                        .get_class(name.into(), name)
                         .expect("failed to fold class")
                         .expect("failed to look up class"),
                 ),

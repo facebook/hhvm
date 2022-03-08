@@ -5,7 +5,7 @@
 
 use super::{Class, Error, Result};
 use crate::decl_defs::{DeclTy, FoldedClass};
-use crate::folded_decl_provider::{FoldedDeclProvider, Substitution};
+use crate::folded_decl_provider::{DeclName, FoldedDeclProvider, Substitution};
 use crate::reason::Reason;
 use crate::typing_defs::ClassElt;
 use once_cell::unsync::OnceCell;
@@ -73,18 +73,18 @@ impl<R: Reason> ClassType<R> {
 
     fn fetch_all_members(&self) -> Result<()> {
         for (&prop, _) in self.class.props.iter() {
-            self.get_prop(prop)?;
+            self.get_prop(self.class.name.into(), prop)?;
         }
         for (&prop, _) in self.class.static_props.iter() {
-            self.get_static_prop(prop)?;
+            self.get_static_prop(self.class.name.into(), prop)?;
         }
         for (&method, _) in self.class.methods.iter() {
-            self.get_method(method)?;
+            self.get_method(self.class.name.into(), method)?;
         }
         for (&method, _) in self.class.static_methods.iter() {
-            self.get_static_method(method)?;
+            self.get_static_method(self.class.name.into(), method)?;
         }
-        self.get_constructor()?;
+        self.get_constructor(self.class.name.into())?;
         Ok(())
     }
 
@@ -110,7 +110,7 @@ impl<R: Reason> ClassType<R> {
 }
 
 impl<R: Reason> Class<R> for ClassType<R> {
-    fn get_prop(&self, name: PropName) -> Result<Option<Rc<ClassElt<R>>>> {
+    fn get_prop(&self, dependent: DeclName, name: PropName) -> Result<Option<Rc<ClassElt<R>>>> {
         if let Some(class_elt) = self.members.borrow().props.get(&name) {
             return Ok(Some(Rc::clone(class_elt)));
         }
@@ -121,7 +121,7 @@ impl<R: Reason> Class<R> for ClassType<R> {
         let origin = folded_elt.origin;
         let ty = self.instantiate(
             self.provider
-                .get_shallow_property_type(origin, name)?
+                .get_shallow_property_type(dependent, origin, name)?
                 .unwrap_or_else(|| self.member_type_missing("property", origin, name)),
             origin,
         );
@@ -133,7 +133,11 @@ impl<R: Reason> Class<R> for ClassType<R> {
         Ok(Some(class_elt))
     }
 
-    fn get_static_prop(&self, name: PropName) -> Result<Option<Rc<ClassElt<R>>>> {
+    fn get_static_prop(
+        &self,
+        dependent: DeclName,
+        name: PropName,
+    ) -> Result<Option<Rc<ClassElt<R>>>> {
         if let Some(class_elt) = self.members.borrow().static_props.get(&name) {
             return Ok(Some(Rc::clone(class_elt)));
         }
@@ -144,7 +148,7 @@ impl<R: Reason> Class<R> for ClassType<R> {
         let origin = folded_elt.origin;
         let ty = self.instantiate(
             self.provider
-                .get_shallow_static_property_type(origin, name)?
+                .get_shallow_static_property_type(dependent, origin, name)?
                 .unwrap_or_else(|| self.member_type_missing("static property", origin, name)),
             origin,
         );
@@ -156,7 +160,7 @@ impl<R: Reason> Class<R> for ClassType<R> {
         Ok(Some(class_elt))
     }
 
-    fn get_method(&self, name: MethodName) -> Result<Option<Rc<ClassElt<R>>>> {
+    fn get_method(&self, dependent: DeclName, name: MethodName) -> Result<Option<Rc<ClassElt<R>>>> {
         if let Some(class_elt) = self.members.borrow().methods.get(&name) {
             return Ok(Some(Rc::clone(class_elt)));
         }
@@ -167,7 +171,7 @@ impl<R: Reason> Class<R> for ClassType<R> {
         let origin = folded_elt.origin;
         let ty = self.instantiate(
             self.provider
-                .get_shallow_method_type(origin, name)?
+                .get_shallow_method_type(dependent, origin, name)?
                 .unwrap_or_else(|| self.member_type_missing("method", origin, name)),
             origin,
         );
@@ -179,7 +183,11 @@ impl<R: Reason> Class<R> for ClassType<R> {
         Ok(Some(class_elt))
     }
 
-    fn get_static_method(&self, name: MethodName) -> Result<Option<Rc<ClassElt<R>>>> {
+    fn get_static_method(
+        &self,
+        dependent: DeclName,
+        name: MethodName,
+    ) -> Result<Option<Rc<ClassElt<R>>>> {
         if let Some(class_elt) = self.members.borrow().static_methods.get(&name) {
             return Ok(Some(Rc::clone(class_elt)));
         }
@@ -190,7 +198,7 @@ impl<R: Reason> Class<R> for ClassType<R> {
         let origin = folded_elt.origin;
         let ty = self.instantiate(
             self.provider
-                .get_shallow_static_method_type(origin, name)?
+                .get_shallow_static_method_type(dependent, origin, name)?
                 .unwrap_or_else(|| self.member_type_missing("static method", origin, name)),
             origin,
         );
@@ -202,7 +210,7 @@ impl<R: Reason> Class<R> for ClassType<R> {
         Ok(Some(class_elt))
     }
 
-    fn get_constructor(&self) -> Result<Option<Rc<ClassElt<R>>>> {
+    fn get_constructor(&self, dependent: DeclName) -> Result<Option<Rc<ClassElt<R>>>> {
         Ok(self
             .members
             .borrow_mut()
@@ -215,7 +223,7 @@ impl<R: Reason> Class<R> for ClassType<R> {
                 let origin = folded_elt.origin;
                 let ty = self.instantiate(
                     self.provider
-                        .get_shallow_constructor_type(origin)?
+                        .get_shallow_constructor_type(dependent, origin)?
                         .unwrap_or_else(|| {
                             self.member_type_missing("constructor", origin, "__construct")
                         }),

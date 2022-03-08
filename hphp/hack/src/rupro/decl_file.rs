@@ -113,7 +113,7 @@ fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames
                         println!("{:#?}", decl);
                     }
                     if opts.folded {
-                        match folded_decl_provider.get_class(name) {
+                        match folded_decl_provider.get_class(name.into(), name) {
                             Ok(decl) => println!("{:#?}", decl),
                             Err(e) => {
                                 saw_err = true;
@@ -122,7 +122,7 @@ fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames
                         }
                     }
                     if opts.typing {
-                        match typing_decl_provider.get_class(name) {
+                        match typing_decl_provider.get_class(name.into(), name) {
                             Ok(decl) => println!("{:#?}", decl),
                             Err(e) => {
                                 saw_err = true;

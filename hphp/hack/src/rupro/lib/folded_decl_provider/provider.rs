@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{fold::DeclFolder, Error, Result, TypeDecl};
+use super::{fold::DeclFolder, DeclName, Error, Result, TypeDecl};
 use crate::cache::Cache;
 use crate::decl_defs::{ConstDecl, DeclTy, DeclTy_, FoldedClass, FunDecl, ShallowClass};
 use crate::reason::Reason;
@@ -42,15 +42,19 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
 }
 
 impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
-    fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
+    fn get_fun(&self, _dependent: DeclName, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
         Ok(self.shallow_decl_provider.get_fun(name)?)
     }
 
-    fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
+    fn get_const(
+        &self,
+        _dependent: DeclName,
+        name: ConstName,
+    ) -> Result<Option<Arc<ConstDecl<R>>>> {
         Ok(self.shallow_decl_provider.get_const(name)?)
     }
 
-    fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
+    fn get_type(&self, _dependent: DeclName, name: TypeName) -> Result<Option<TypeDecl<R>>> {
         match self.shallow_decl_provider.get_type(name)? {
             None => Ok(None),
             Some(shallow_decl_provider::TypeDecl::Typedef(decl)) => {
@@ -67,6 +71,7 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 
     fn get_shallow_property_type(
         &self,
+        _dependent: DeclName,
         class_name: TypeName,
         property_name: PropName,
     ) -> Result<Option<DeclTy<R>>> {
@@ -77,6 +82,7 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 
     fn get_shallow_static_property_type(
         &self,
+        _dependent: DeclName,
         class_name: TypeName,
         property_name: PropName,
     ) -> Result<Option<DeclTy<R>>> {
@@ -87,6 +93,7 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 
     fn get_shallow_method_type(
         &self,
+        _dependent: DeclName,
         class_name: TypeName,
         method_name: MethodName,
     ) -> Result<Option<DeclTy<R>>> {
@@ -97,6 +104,7 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 
     fn get_shallow_static_method_type(
         &self,
+        _dependent: DeclName,
         class_name: TypeName,
         method_name: MethodName,
     ) -> Result<Option<DeclTy<R>>> {
@@ -105,7 +113,11 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
             .get_static_method_type(class_name, method_name)?)
     }
 
-    fn get_shallow_constructor_type(&self, class_name: TypeName) -> Result<Option<DeclTy<R>>> {
+    fn get_shallow_constructor_type(
+        &self,
+        _dependent: DeclName,
+        class_name: TypeName,
+    ) -> Result<Option<DeclTy<R>>> {
         Ok(self
             .shallow_decl_provider
             .get_constructor_type(class_name)?)

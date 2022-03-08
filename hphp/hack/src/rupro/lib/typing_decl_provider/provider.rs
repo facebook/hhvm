@@ -6,7 +6,7 @@
 use super::{ClassType, Result, TypeDecl, TypingDeclProvider};
 use crate::cache::LocalCache;
 use crate::decl_defs::{ConstDecl, FunDecl};
-use crate::folded_decl_provider::{self, FoldedDeclProvider};
+use crate::folded_decl_provider::{self, DeclName, FoldedDeclProvider};
 use crate::reason::Reason;
 use pos::{ConstName, FunName, TypeName};
 use std::cell::RefCell;
@@ -40,19 +40,19 @@ impl<R: Reason> FoldingTypingDeclProvider<R> {
 }
 
 impl<R: Reason> TypingDeclProvider<R> for FoldingTypingDeclProvider<R> {
-    fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
-        Ok(self.folded_decl_provider.get_fun(name)?)
+    fn get_fun(&self, dependent: DeclName, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
+        Ok(self.folded_decl_provider.get_fun(dependent, name)?)
     }
 
-    fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
-        Ok(self.folded_decl_provider.get_const(name)?)
+    fn get_const(&self, dependent: DeclName, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
+        Ok(self.folded_decl_provider.get_const(dependent, name)?)
     }
 
-    fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>> {
+    fn get_type(&self, dependent: DeclName, name: TypeName) -> Result<Option<TypeDecl<R>>> {
         if let Some(cls) = self.cache.borrow().get(name) {
             return Ok(Some(TypeDecl::Class(cls)));
         }
-        match self.folded_decl_provider.get_type(name)? {
+        match self.folded_decl_provider.get_type(dependent, name)? {
             None => Ok(None),
             Some(folded_decl_provider::TypeDecl::Typedef(decl)) => {
                 Ok(Some(TypeDecl::Typedef(decl)))

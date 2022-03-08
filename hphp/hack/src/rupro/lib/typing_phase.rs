@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl_defs::{self, DeclTy, DeclTy_};
+use crate::folded_decl_provider::DeclName;
 use crate::reason::Reason;
 use crate::typing::Result;
 use crate::typing_decl_provider::{Class, TypeDecl};
@@ -29,7 +30,11 @@ impl Phase {
             DTprim(p) => Ty::prim(r, *p),
             DTapply(id_and_args) => {
                 let (pos_id, tyl) = &**id_and_args;
-                match env.ctx.typing_decl_provider.get_type(pos_id.id())? {
+                match env
+                    .ctx
+                    .typing_decl_provider
+                    .get_type(DeclName::NoDeclName, pos_id.id())?
+                {
                     Some(TypeDecl::Class(cls)) => Self::localize_class_instantiation(
                         env,
                         ety_env,

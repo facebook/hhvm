@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl_defs::{ConstDecl, FunDecl, TypedefDecl};
+use crate::folded_decl_provider::DeclName;
 use crate::reason::Reason;
 use defs::ClassType;
 use pos::{ConstName, FunName, MethodName, PropName, TypeName};
@@ -39,18 +40,22 @@ pub enum TypeDecl<R: Reason> {
 /// the `Class` interface.
 pub trait TypingDeclProvider<R: Reason>: Debug {
     /// Fetch the declaration of the toplevel function with the given name.
-    fn get_fun(&self, name: FunName) -> Result<Option<Arc<FunDecl<R>>>>;
+    fn get_fun(&self, dependent: DeclName, name: FunName) -> Result<Option<Arc<FunDecl<R>>>>;
 
     /// Fetch the declaration of the global constant with the given name.
-    fn get_const(&self, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>>;
+    fn get_const(&self, dependent: DeclName, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>>;
 
     /// Fetch the declaration of the class or typedef with the given name.
-    fn get_type(&self, name: TypeName) -> Result<Option<TypeDecl<R>>>;
+    fn get_type(&self, dependent: DeclName, name: TypeName) -> Result<Option<TypeDecl<R>>>;
 
     /// Fetch the declaration of the typedef with the given name. If the given
     /// name is bound to a class rather than a typedef, return `None`.
-    fn get_typedef(&self, name: TypeName) -> Result<Option<Arc<TypedefDecl<R>>>> {
-        Ok(self.get_type(name)?.and_then(|decl| match decl {
+    fn get_typedef(
+        &self,
+        dependent: DeclName,
+        name: TypeName,
+    ) -> Result<Option<Arc<TypedefDecl<R>>>> {
+        Ok(self.get_type(dependent, name)?.and_then(|decl| match decl {
             TypeDecl::Typedef(td) => Some(td),
             TypeDecl::Class(..) => None,
         }))
@@ -58,8 +63,8 @@ pub trait TypingDeclProvider<R: Reason>: Debug {
 
     /// Fetch the declaration of the class with the given name. If the given
     /// name is bound to a typedef rather than a class, return `None`.
-    fn get_class(&self, name: TypeName) -> Result<Option<Rc<dyn Class<R>>>> {
-        Ok(self.get_type(name)?.and_then(|decl| match decl {
+    fn get_class(&self, dependent: DeclName, name: TypeName) -> Result<Option<Rc<dyn Class<R>>>> {
+        Ok(self.get_type(dependent, name)?.and_then(|decl| match decl {
             TypeDecl::Class(cls) => Some(cls),
             TypeDecl::Typedef(..) => None,
         }))
@@ -68,9 +73,17 @@ pub trait TypingDeclProvider<R: Reason>: Debug {
 
 /// Represents the complete folded declaration of a class.
 pub trait Class<R: Reason>: Debug {
-    fn get_prop(&self, name: PropName) -> Result<Option<Rc<ClassElt<R>>>>;
-    fn get_static_prop(&self, name: PropName) -> Result<Option<Rc<ClassElt<R>>>>;
-    fn get_method(&self, name: MethodName) -> Result<Option<Rc<ClassElt<R>>>>;
-    fn get_static_method(&self, name: MethodName) -> Result<Option<Rc<ClassElt<R>>>>;
-    fn get_constructor(&self) -> Result<Option<Rc<ClassElt<R>>>>;
+    fn get_prop(&self, dependent: DeclName, name: PropName) -> Result<Option<Rc<ClassElt<R>>>>;
+    fn get_static_prop(
+        &self,
+        dependent: DeclName,
+        name: PropName,
+    ) -> Result<Option<Rc<ClassElt<R>>>>;
+    fn get_method(&self, dependent: DeclName, name: MethodName) -> Result<Option<Rc<ClassElt<R>>>>;
+    fn get_static_method(
+        &self,
+        dependent: DeclName,
+        name: MethodName,
+    ) -> Result<Option<Rc<ClassElt<R>>>>;
+    fn get_constructor(&self, dependent: DeclName) -> Result<Option<Rc<ClassElt<R>>>>;
 }

@@ -37,7 +37,6 @@ pub enum Opcodes<'arena> {
     BitNot,
     BitOr,
     BitXor,
-    // Break(isize),
     BreakTraceHint,
     CGetCUNop,
     CGetG,
@@ -68,7 +67,6 @@ pub enum Opcodes<'arena> {
     CnsE(ConstId<'arena>),
     ColFromArray(CollectionType),
     CombineAndResolveTypeStruct(u32),
-    // Comment(Str<'arena>),
     Concat,
     ConcatN(u32),
     ContCheck(ContCheckOp),
@@ -78,9 +76,9 @@ pub enum Opcodes<'arena> {
     ContKey,
     ContRaise,
     ContValid,
-    // Continue(isize),
     CreateCl(NumParams, ClassNum),
     CreateCont,
+    DblAsBits,
     Dict(AdataId<'arena>),
     Dim(MOpMode, MemberKey<'arena>),
     Dir,
@@ -149,7 +147,9 @@ pub enum Opcodes<'arena> {
     JmpNZ(Label),
     JmpZ(Label),
     Keyset(AdataId<'arena>),
-    // Label(Label),
+    LIterFree(IterId, Local<'arena>),
+    LIterInit(IterArgs<'arena>, Local<'arena>, Label),
+    LIterNext(IterArgs<'arena>, Local<'arena>, Label),
     LateBoundCls,
     LazyClass(ClassId<'arena>),
     LazyClassFromClass,
@@ -168,7 +168,6 @@ pub enum Opcodes<'arena> {
     NativeImpl,
     Neq,
     NewCol(CollectionType),
-    /// capacity hint
     NewDictArray(u32),
     NewKeysetArray(u32),
     NewObj,
@@ -188,6 +187,7 @@ pub enum Opcodes<'arena> {
     PopC,
     PopL(Local<'arena>),
     PopU,
+    PopU2,
     Pow,
     Print,
     PushL(Local<'arena>),
@@ -219,6 +219,7 @@ pub enum Opcodes<'arena> {
         targets: BumpSliceMut<'arena, Label>,
     },
     Same,
+    Select,
     SelfCls,
     SetG,
     SetImplicitContextByValue,
@@ -233,27 +234,16 @@ pub enum Opcodes<'arena> {
     Shl,
     Shr,
     Silence(Local<'arena>, SilenceOp),
-    // SrcLoc(SrcLoc),
     String(Str<'arena>),
     Sub,
     SubO,
     /// Integer switch
-    Switch {
-        kind: SwitchKind,
-        base: i64,
-        targets: BumpSliceMut<'arena, Label>,
-    },
+    Switch(SwitchKind, i64, BumpSliceMut<'arena, Label>),
     This,
     Throw,
     ThrowAsTypeStructException,
     ThrowNonExhaustiveSwitch,
     True,
-    // TryCatchBegin,
-    // TryCatchEnd,
-    // TryCatchMiddle,
-    /// Pseudo instruction that will get translated into appropraite literal
-    /// bytecode, with possible reference to .adata *)
-    // TypedValue(runtime::TypedValue<'arena>),
     UGetCUNop,
     UnsetG,
     UnsetL(Local<'arena>),
@@ -262,6 +252,7 @@ pub enum Opcodes<'arena> {
     VerifyOutType(ParamId<'arena>),
     VerifyParamType(ParamId<'arena>),
     VerifyParamTypeTS(ParamId<'arena>),
+    VerifyRetNonNullC,
     VerifyRetTypeC,
     VerifyRetTypeTS,
     WHResult,
@@ -287,14 +278,12 @@ impl<'arena> Targets for Opcodes<'arena> {
             Opcodes::JmpNS(target1) => std::slice::from_ref(target1),
             Opcodes::JmpNZ(target1) => std::slice::from_ref(target1),
             Opcodes::JmpZ(target1) => std::slice::from_ref(target1),
+            Opcodes::LIterInit(_, _, target3) => std::slice::from_ref(target3),
+            Opcodes::LIterNext(_, _, target3) => std::slice::from_ref(target3),
             Opcodes::MemoGet(target1, _) => std::slice::from_ref(target1),
             Opcodes::MemoGetEager(target1, _) => target1,
             Opcodes::SSwitch { cases: _, targets } => targets.as_ref(),
-            Opcodes::Switch {
-                kind: _,
-                base: _,
-                targets,
-            } => targets.as_ref(),
+            Opcodes::Switch(_, _, targets) => targets.as_ref(),
 
             // Make sure new variants with branch target Labels are handled above
             // before adding items to this catch-all.
@@ -362,6 +351,7 @@ impl<'arena> Targets for Opcodes<'arena> {
             | Opcodes::ContValid
             | Opcodes::CreateCl(..)
             | Opcodes::CreateCont
+            | Opcodes::DblAsBits
             | Opcodes::Dict(..)
             | Opcodes::Dim(..)
             | Opcodes::Dir
@@ -400,6 +390,7 @@ impl<'arena> Targets for Opcodes<'arena> {
             | Opcodes::IssetS
             | Opcodes::IterFree(..)
             | Opcodes::Keyset(..)
+            | Opcodes::LIterFree(..)
             | Opcodes::LateBoundCls
             | Opcodes::LazyClass(..)
             | Opcodes::LazyClassFromClass
@@ -435,6 +426,7 @@ impl<'arena> Targets for Opcodes<'arena> {
             | Opcodes::PopC
             | Opcodes::PopL(..)
             | Opcodes::PopU
+            | Opcodes::PopU2
             | Opcodes::Pow
             | Opcodes::Print
             | Opcodes::PushL(..)
@@ -458,6 +450,7 @@ impl<'arena> Targets for Opcodes<'arena> {
             | Opcodes::RetCSuspended
             | Opcodes::RetM(..)
             | Opcodes::Same
+            | Opcodes::Select
             | Opcodes::SelfCls
             | Opcodes::SetG
             | Opcodes::SetImplicitContextByValue
@@ -488,6 +481,7 @@ impl<'arena> Targets for Opcodes<'arena> {
             | Opcodes::VerifyOutType(..)
             | Opcodes::VerifyParamType(..)
             | Opcodes::VerifyParamTypeTS(..)
+            | Opcodes::VerifyRetNonNullC
             | Opcodes::VerifyRetTypeC
             | Opcodes::VerifyRetTypeTS
             | Opcodes::WHResult
@@ -513,14 +507,12 @@ impl<'arena> Targets for Opcodes<'arena> {
             Opcodes::JmpNS(target1) => std::slice::from_mut(target1),
             Opcodes::JmpNZ(target1) => std::slice::from_mut(target1),
             Opcodes::JmpZ(target1) => std::slice::from_mut(target1),
+            Opcodes::LIterInit(_, _, target3) => std::slice::from_mut(target3),
+            Opcodes::LIterNext(_, _, target3) => std::slice::from_mut(target3),
             Opcodes::MemoGet(target1, _) => std::slice::from_mut(target1),
             Opcodes::MemoGetEager(target1, _) => target1,
             Opcodes::SSwitch { cases: _, targets } => targets.as_mut(),
-            Opcodes::Switch {
-                kind: _,
-                base: _,
-                targets,
-            } => targets.as_mut(),
+            Opcodes::Switch(_, _, targets) => targets.as_mut(),
 
             // Make sure new variants with branch target Labels are handled above
             // before adding items to this catch-all.
@@ -588,6 +580,7 @@ impl<'arena> Targets for Opcodes<'arena> {
             | Opcodes::ContValid
             | Opcodes::CreateCl(..)
             | Opcodes::CreateCont
+            | Opcodes::DblAsBits
             | Opcodes::Dict(..)
             | Opcodes::Dim(..)
             | Opcodes::Dir
@@ -626,6 +619,7 @@ impl<'arena> Targets for Opcodes<'arena> {
             | Opcodes::IssetS
             | Opcodes::IterFree(..)
             | Opcodes::Keyset(..)
+            | Opcodes::LIterFree(..)
             | Opcodes::LateBoundCls
             | Opcodes::LazyClass(..)
             | Opcodes::LazyClassFromClass
@@ -661,6 +655,7 @@ impl<'arena> Targets for Opcodes<'arena> {
             | Opcodes::PopC
             | Opcodes::PopL(..)
             | Opcodes::PopU
+            | Opcodes::PopU2
             | Opcodes::Pow
             | Opcodes::Print
             | Opcodes::PushL(..)
@@ -684,6 +679,7 @@ impl<'arena> Targets for Opcodes<'arena> {
             | Opcodes::RetCSuspended
             | Opcodes::RetM(..)
             | Opcodes::Same
+            | Opcodes::Select
             | Opcodes::SelfCls
             | Opcodes::SetG
             | Opcodes::SetImplicitContextByValue
@@ -714,6 +710,7 @@ impl<'arena> Targets for Opcodes<'arena> {
             | Opcodes::VerifyOutType(..)
             | Opcodes::VerifyParamType(..)
             | Opcodes::VerifyParamTypeTS(..)
+            | Opcodes::VerifyRetNonNullC
             | Opcodes::VerifyRetTypeC
             | Opcodes::VerifyRetTypeTS
             | Opcodes::WHResult

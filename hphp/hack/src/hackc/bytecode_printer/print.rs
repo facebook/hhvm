@@ -1212,11 +1212,9 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
         Opcodes::RetC => w.write_all(b"RetC"),
         Opcodes::RetCSuspended => w.write_all(b"RetCSuspended"),
         Opcodes::Throw => w.write_all(b"Throw"),
-        Opcodes::Switch {
-            kind,
-            base,
-            targets,
-        } => print_switch(w, kind, base, targets.as_ref(), dv_labels),
+        Opcodes::Switch(kind, base, targets) => {
+            print_switch(w, kind, base, targets.as_ref(), dv_labels)
+        }
         Opcodes::Jmp(l) => {
             w.write_all(b"Jmp ")?;
             print_label(w, l, dv_labels)
@@ -1650,6 +1648,13 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
         Opcodes::ReqOnce => w.write_all(b"ReqOnce"),
         Opcodes::ReqDoc => w.write_all(b"ReqDoc"),
         Opcodes::Eval => w.write_all(b"Eval"),
+        Opcodes::PopU2
+        | Opcodes::DblAsBits
+        | Opcodes::Select
+        | Opcodes::LIterInit(..)
+        | Opcodes::LIterNext(..)
+        | Opcodes::LIterFree(..)
+        | Opcodes::VerifyRetNonNullC => todo!(),
     }
 }
 

@@ -217,7 +217,139 @@ mod fixups {
     // These fixups define extra information to turn simple types (like IVA) to
     // a more complex type (like StackIndex).
     fn get_fixups() -> FixupTable {
-        hashmap! {}
+        hashmap! {
+            "AssertRATStk" => vec![
+                replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
+            ],
+            "BaseC" => vec![
+                replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
+            ],
+            "BaseGC" => vec![
+                replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex"))
+            ],
+            "BaseSC" => vec![
+                replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
+                replace_imm("arg2", ImmType::IVA, ImmType::OA("StackIndex"))
+            ],
+            "CheckProp" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("PropId")),
+            ],
+            "ClsCns" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ConstId"))
+            ],
+            "ClsCnsD" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ConstId")),
+                replace_imm("str2", ImmType::SA, ImmType::OAL("ClassId"))
+            ],
+            "CnsE" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ConstId")),
+            ],
+            "CreateCl" => vec![
+                replace_imm("arg1", ImmType::IVA, ImmType::OA("NumParams")),
+                replace_imm("arg2", ImmType::IVA, ImmType::OA("ClassNum")),
+            ],
+            "FCallClsMethodD" => vec![
+                replace_imm("str3", ImmType::SA, ImmType::OAL("ClassId")),
+                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodId")),
+            ],
+            "FCallClsMethodSD" => vec![
+                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodId")),
+            ],
+            "FCallFuncD" => vec![
+                replace_imm("str2", ImmType::SA, ImmType::OAL("FunctionId")),
+            ],
+            "FCallObjMethodD" => vec![
+                replace_imm("str4", ImmType::SA, ImmType::OAL("MethodId")),
+            ],
+            "IncDecM" => vec![
+                replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
+            ],
+            "InitProp" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("PropId")),
+            ],
+            "InstanceOfD" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassId")),
+            ],
+            "LazyClass" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassId")),
+            ],
+            "MemoGetEager" => vec![
+                replace_imm("target1", ImmType::BA, ImmType::BA2),
+                remove_imm("target2"),
+            ],
+            "NewObjD" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassId")),
+            ],
+            "NewObjRD" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassId")),
+            ],
+            "QueryM" => vec![
+                replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
+            ],
+            "ResolveClass" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassId")),
+            ],
+            "ResolveClsMethod" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("MethodId")),
+            ],
+            "ResolveClsMethodD" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassId")),
+                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodId")),
+            ],
+            "ResolveClsMethodS" => vec![
+                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodId")),
+            ],
+            "ResolveFunc" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("FunctionId")),
+            ],
+            "ResolveMethCaller" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("FunctionId")),
+            ],
+            "ResolveRClsMethod" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("MethodId")),
+            ],
+            "ResolveRClsMethodD" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("ClassId")),
+                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodId")),
+            ],
+            "ResolveRClsMethodS" => vec![
+                replace_imm("str2", ImmType::SA, ImmType::OAL("MethodId")),
+            ],
+            "ResolveRFunc" => vec![
+                replace_imm("str1", ImmType::SA, ImmType::OAL("FunctionId")),
+            ],
+            "RetM" => vec![
+                replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
+            ],
+            "SetM" => vec![
+                replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
+            ],
+            "SetOpM" => vec![
+                replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
+            ],
+            "SetRangeM" => vec![
+                replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
+            ],
+            "SSwitch" => vec![
+                // Instead of using a single [(String, Label)] field in HHAS we
+                // split the cases and targets.
+                add_flag(InstrFlags::AS_STRUCT),
+                insert_imm(0, "cases", ImmType::ARR(Box::new(ImmType::SA))),
+                replace_imm("targets", ImmType::SLA, ImmType::BLA),
+            ],
+            "UnsetM" => vec![
+                replace_imm("arg1", ImmType::IVA, ImmType::OA("StackIndex")),
+            ],
+            "VerifyOutType" => vec![
+                replace_imm("arg1", ImmType::IVA, ImmType::OAL("ParamId")),
+            ],
+            "VerifyParamType" => vec![
+                replace_imm("loc1", ImmType::ILA, ImmType::OAL("ParamId")),
+            ],
+            "VerifyParamTypeTS" => vec![
+                replace_imm("loc1", ImmType::ILA, ImmType::OAL("ParamId")),
+            ],
+        }
     }
 
     pub(crate) fn apply_fixups(opcode: &mut OpcodeData, fixups: &FixupTable) -> bool {

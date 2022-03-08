@@ -669,11 +669,11 @@ pub mod instr {
         alloc: &'a bumpalo::Bump,
         targets: bumpalo::collections::Vec<'a, Label>,
     ) -> InstrSeq<'a> {
-        instr(Instruct::Opcode(Opcodes::Switch {
-            kind: SwitchKind::Unbounded,
-            base: 0,
-            targets: BumpSliceMut::new(alloc, targets.into_bump_slice_mut()),
-        }))
+        instr(Instruct::Opcode(Opcodes::Switch(
+            SwitchKind::Unbounded,
+            0,
+            BumpSliceMut::new(alloc, targets.into_bump_slice_mut()),
+        )))
     }
 
     pub fn newobj<'a>() -> InstrSeq<'a> {

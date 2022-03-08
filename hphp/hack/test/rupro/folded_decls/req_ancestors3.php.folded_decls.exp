@@ -1,28 +1,19 @@
 FoldedClass {
-    name: "\\Z",
-    kind: Cclass(
-        Concrete,
-    ),
-    consts: [
-        (
-            "class",
-            ClassConst {
-                is_synthesized: true,
-                kind: CCConcrete,
-                pos: NPos,
-                ty: HH\classname<this>,
-                origin: "\\Z",
-                refs: [],
-            },
-        ),
-    ],
-}
-FoldedClass {
     name: "\\T1",
     kind: Ctrait,
     substs: [
         (
-            "\\Z",
+            "\\A",
+            SubstContext {
+                subst: Subst(
+                    {},
+                ),
+                class_context: "\\B",
+                from_req_extends: true,
+            },
+        ),
+        (
+            "\\B",
             SubstContext {
                 subst: Subst(
                     {},
@@ -48,11 +39,12 @@ FoldedClass {
     req_ancestors: [
         Requirement(
             NPos,
-            Z,
+            B,
         ),
     ],
     req_ancestors_extends: [
-        "\\Z",
+        "\\A",
+        "\\B",
     ],
 }
 FoldedClass {
@@ -148,16 +140,6 @@ FoldedClass {
                 from_req_extends: false,
             },
         ),
-        (
-            "\\Z",
-            SubstContext {
-                subst: Subst(
-                    {},
-                ),
-                class_context: "\\T1",
-                from_req_extends: true,
-            },
-        ),
     ],
     consts: [
         (
@@ -178,16 +160,11 @@ FoldedClass {
     req_ancestors: [
         Requirement(
             NPos,
-            Z,
-        ),
-        Requirement(
-            NPos,
             B,
         ),
     ],
     req_ancestors_extends: [
         "\\A",
         "\\B",
-        "\\Z",
     ],
 }

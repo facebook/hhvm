@@ -638,6 +638,53 @@ impl<R: Reason> DeclFolder<R> {
         }
     }
 
+    /// Cheap hack: we cannot do unification / subtyping in the decl phase because
+    /// the type arguments of the types that we are trying to unify may not have
+    /// been declared yet. See the test iface_require_circular.php for details.
+    ///
+    /// However, we don't want a super long req_extends list because of the perf
+    /// overhead. And while we can't do proper unification we can dedup types
+    /// that are syntactically equivalent.
+    ///
+    /// A nicer solution might be to add a phase in between type-decl and type-check
+    /// that prunes the list via proper subtyping, but that's a little more work
+    /// than I'm willing to do now.
+    fn naive_dedup(&self, req_ancestors: &mut Vec<Requirement<R>>) {
+        let mut seen_extends: TypeNameMap<Vec<DeclTy<R>>> = TypeNameMap::new();
+        // TODO: Do we need to rev. Seems the logic works forwards or backwards...
+        req_ancestors.reverse();
+        req_ancestors.retain(|req_extend| {
+            if let Some((_, pos_id, hl)) = req_extend.1.unwrap_class_type() {
+                let mut normalized_hl = vec![];
+                for h in hl {
+                    // TODO: Decl_pos_utils.NormalizeSig.ty h
+                    normalized_hl.push(h.clone());
+                }
+
+                if let Some(seen_hl) = seen_extends.get(&pos_id.id()) {
+                    // TODO: List.equal equal_decl_ty hl hl_
+                    if normalized_hl.len() == seen_hl.len()
+                        && normalized_hl.iter().zip(seen_hl).all(|(h1, h2)| {
+                            // TODO: equal_decl_ty h1 h2
+                            h1 == h2
+                        })
+                    {
+                        false
+                    } else {
+                        // TN: Replacing an existing hl_ that we didn't match seems not ideal
+                        seen_extends.insert(pos_id.id().clone(), normalized_hl);
+                        true
+                    }
+                } else {
+                    seen_extends.insert(pos_id.id().clone(), normalized_hl);
+                    true
+                }
+            } else {
+                true
+            }
+        });
+    }
+
     fn get_class_requirements(
         &self,
         sc: &ShallowClass<R>,
@@ -696,7 +743,7 @@ impl<R: Reason> DeclFolder<R> {
             }
         }
 
-        // TODO: naive_dedup
+        self.naive_dedup(&mut req_ancestors);
         (req_ancestors, req_ancestors_extends)
     }
 

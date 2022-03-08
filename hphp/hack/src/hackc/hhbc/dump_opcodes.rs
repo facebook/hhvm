@@ -12,17 +12,24 @@ use std::{
 };
 
 fn main() -> Result<()> {
-    let mut opcodes: Vec<OpcodeData> = hhbc::opcode_data().to_vec();
-    opcodes.sort_by(|a: &OpcodeData, b: &OpcodeData| a.name.cmp(b.name));
+    let mut opcode_data: Vec<OpcodeData> = hhbc::opcode_data().to_vec();
+    opcode_data.sort_by(|a: &OpcodeData, b: &OpcodeData| a.name.cmp(b.name));
 
-    let code = emit_opcodes::emit_opcodes(
+    let opcodes = emit_opcodes::emit_opcodes(
         quote!(
             enum Opcodes<'arena> {}
         ),
-        &opcodes,
+        &opcode_data,
     )?;
 
-    let output = format!("{}", code);
+    let targets = emit_opcodes::emit_impl_targets(
+        quote!(
+            enum Opcodes<'arena> {}
+        ),
+        &opcode_data,
+    )?;
+
+    let output = format!("{}\n\n{}", opcodes, targets);
 
     let mut child = Command::new("rustfmt")
         .args(["--emit", "stdout"])

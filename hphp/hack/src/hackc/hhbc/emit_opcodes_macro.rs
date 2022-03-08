@@ -20,6 +20,9 @@
 /// }
 /// ```
 ///
+/// If the 'Targets' derive is used then the Targets trait will be implemented
+/// as well.
+///
 /// See emit_opcodes::tests::test_basic() for a more detailed example output.
 ///
 #[proc_macro_attribute]
@@ -28,6 +31,14 @@ pub fn emit_opcodes(
     input: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     match emit_opcodes::emit_opcodes(input.into(), hhbc::opcode_data()) {
+        Ok(res) => res.into(),
+        Err(err) => err.into_compile_error().into(),
+    }
+}
+
+#[proc_macro_derive(Targets)]
+pub fn emit_targets(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    match emit_opcodes::emit_impl_targets(input.into(), hhbc::opcode_data()) {
         Ok(res) => res.into(),
         Err(err) => err.into_compile_error().into(),
     }

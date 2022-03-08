@@ -114,7 +114,10 @@ fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames
                     }
                     if opts.folded {
                         match folded_decl_provider.get_class(name.into(), name) {
-                            Ok(decl) => println!("{:#?}", decl),
+                            Ok(decl) => println!(
+                                "{:#?}",
+                                decl.expect("expected decl provider to return Some")
+                            ),
                             Err(e) => {
                                 saw_err = true;
                                 eprintln!("Error: {}", e);
@@ -123,7 +126,10 @@ fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames
                     }
                     if opts.typing {
                         match typing_decl_provider.get_class(name.into(), name) {
-                            Ok(decl) => println!("{:#?}", decl),
+                            Ok(decl) => println!(
+                                "{:#?}",
+                                decl.expect("expected decl provider to return Some")
+                            ),
                             Err(e) => {
                                 saw_err = true;
                                 eprintln!("Error: {}", e);

@@ -684,7 +684,7 @@ fn make_error_from_nodes(
 ) -> SyntaxError {
     let s = start_offset(start_node);
     let e = end_offset(end_node);
-    SyntaxError::make_with_child_and_type(child, s, e, error_type, error)
+    SyntaxError::make_with_child_and_type(child, s, e, error_type, error, vec![])
 }
 
 fn make_error_from_node(node: S<'_>, error: errors::Error) -> SyntaxError {
@@ -775,6 +775,7 @@ fn make_name_already_used_error(
         original_location.start_offset,
         original_location.end_offset,
         errors::original_definition,
+        vec![],
     );
 
     let s = start_offset(node);
@@ -785,6 +786,7 @@ fn make_name_already_used_error(
         e,
         ErrorType::ParseError,
         report_error(name, short_name),
+        vec![],
     )
 }
 
@@ -4678,6 +4680,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         start_offset,
                         end_offset,
                         errors::error2057,
+                        vec![],
                     ));
                     self.errors.push(SyntaxError::make_with_child_and_type(
                         child,
@@ -4685,6 +4688,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         e,
                         ErrorType::ParseError,
                         errors::error2052,
+                        vec![],
                     ))
                 }
             }
@@ -4700,6 +4704,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         start_offset,
                         end_offset,
                         errors::error2056,
+                        vec![],
                     ));
                     self.errors.push(SyntaxError::make_with_child_and_type(
                         child,
@@ -4707,6 +4712,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                         e,
                         ErrorType::ParseError,
                         errors::error2052,
+                        vec![],
                     ))
                 }
             }

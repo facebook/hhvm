@@ -246,15 +246,15 @@ mod tests {
     #[test]
     fn test_process_errors() {
         let mut test_errors = vec![
-            syntax_error::SyntaxError::make(0, 10, syntax_error::error0001),
-            syntax_error::SyntaxError::make(10, 20, syntax_error::error0001),
-            syntax_error::SyntaxError::make(0, 10, syntax_error::error0001),
+            syntax_error::SyntaxError::make(0, 10, syntax_error::error0001, vec![]),
+            syntax_error::SyntaxError::make(10, 20, syntax_error::error0001, vec![]),
+            syntax_error::SyntaxError::make(0, 10, syntax_error::error0001, vec![]),
         ];
         SyntaxTree::<(), ()>::process_errors(&mut test_errors);
         assert_eq!(
             vec![
-                syntax_error::SyntaxError::make(0, 10, syntax_error::error0001),
-                syntax_error::SyntaxError::make(10, 20, syntax_error::error0001),
+                syntax_error::SyntaxError::make(0, 10, syntax_error::error0001, vec![]),
+                syntax_error::SyntaxError::make(10, 20, syntax_error::error0001, vec![]),
             ],
             test_errors
         );

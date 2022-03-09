@@ -26,6 +26,12 @@ type t = {
 
 let make ~title ~new_text pos = { title; edits = [(new_text, Qpos pos)] }
 
+let make_with_edits ~title ~edits =
+  {
+    title;
+    edits = List.map edits ~f:(fun (new_text, pos) -> (new_text, Qpos pos));
+  }
+
 let make_classish ~title ~new_text ~classish_name =
   { title; edits = [(new_text, Qclassish_start classish_name)] }
 

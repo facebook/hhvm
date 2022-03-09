@@ -25,7 +25,7 @@ let create_path x = Relative_path.(create Root ("/" ^ x))
 let error_in file =
   Errors.add_parsing_error
   @@ Parsing_error.Parsing_error
-       { pos = Pos.make_from (create_path file); msg = "" }
+       { pos = Pos.make_from (create_path file); msg = ""; quickfixes = [] }
 
 let expect_error_in =
   Printf.sprintf "File \"/%s\", line 0, characters 0-0:\n (Parsing[1002])\n\n"
@@ -291,7 +291,7 @@ let test_phases () =
         Errors.run_in_context a_path Errors.Parsing (fun () ->
             Errors.add_parsing_error
             @@ Parsing_error.Parsing_error
-                 { pos = Pos.make_from a_path; msg = "" });
+                 { pos = Pos.make_from a_path; msg = ""; quickfixes = [] });
         Errors.run_in_context a_path Errors.Typing (fun () ->
             Errors.add_typing_error
               Typing_error.(

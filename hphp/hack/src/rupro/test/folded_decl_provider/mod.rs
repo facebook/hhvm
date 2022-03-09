@@ -7,13 +7,13 @@
 
 use crate::{FacebookInit, TestContext};
 use anyhow::Result;
-use hackrs::{decl_defs::shallow, folded_decl_provider::FoldedDeclProvider};
+use hackrs::decl_defs::shallow;
 use maplit::btreemap;
 use pos::{Prefix, RelativePath, TypeName};
 use std::fs;
 
 #[fbinit::test]
-fn fold_results_stable(fb: FacebookInit) -> Result<()> {
+fn results_stable(fb: FacebookInit) -> Result<()> {
     // Our use of `index_map::IndexMap` in strategic places implies folded class
     // maps are stable.
     for _ in 1..5 {
@@ -40,7 +40,7 @@ fn fold_results_stable(fb: FacebookInit) -> Result<()> {
 }
 
 #[fbinit::test]
-fn fold_when_file_missing_error(fb: FacebookInit) -> Result<()> {
+fn when_file_missing_error(fb: FacebookInit) -> Result<()> {
     let ctx = TestContext::new(
         fb,
         btreemap! {

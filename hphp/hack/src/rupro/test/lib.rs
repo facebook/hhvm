@@ -10,16 +10,19 @@ use tempdir::TempDir;
 
 use fbinit::FacebookInit;
 use hackrs::{
-    decl_parser::DeclParser, folded_decl_provider::LazyFoldedDeclProvider,
-    naming_provider::SqliteNamingTable, reason::BReason,
-    shallow_decl_provider::LazyShallowDeclProvider, special_names::SpecialNames,
+    decl_parser::DeclParser,
+    folded_decl_provider::{FoldedDeclProvider, LazyFoldedDeclProvider},
+    naming_provider::{NamingProvider, SqliteNamingTable},
+    reason::BReason,
+    shallow_decl_provider::{LazyShallowDeclProvider, ShallowDeclProvider},
+    special_names::SpecialNames,
+    typing_decl_provider::{FoldingTypingDeclProvider, TypingDeclProvider},
 };
 use hh24_test::TestRepo;
 use pos::RelativePathCtx;
-use std::path::PathBuf;
-use std::sync::Arc;
+use std::{path::PathBuf, rc::Rc, sync::Arc};
 
-mod test_file_missing_error;
+mod folded_decl_provider;
 
 struct TestContext {
     #[allow(dead_code)]
@@ -29,10 +32,16 @@ struct TestContext {
     pub decl_parser: DeclParser<BReason>,
 
     #[allow(dead_code)]
-    pub shallow_decl_provider: Arc<LazyShallowDeclProvider<BReason>>,
+    pub naming_provider: Arc<dyn NamingProvider>,
 
     #[allow(dead_code)]
-    pub folded_decl_provider: Arc<LazyFoldedDeclProvider<BReason>>,
+    pub shallow_decl_provider: Arc<dyn ShallowDeclProvider<BReason>>,
+
+    #[allow(dead_code)]
+    pub folded_decl_provider: Arc<dyn FoldedDeclProvider<BReason>>,
+
+    #[allow(dead_code)]
+    pub typing_decl_provider: Rc<dyn TypingDeclProvider<BReason>>,
 }
 
 impl TestContext {
@@ -49,23 +58,34 @@ impl TestContext {
             tmp: PathBuf::new(),
         });
         let decl_parser = DeclParser::new(path_ctx);
-        let shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(
-            Arc::new(hackrs_test_utils::cache::make_non_eviction_shallow_decl_cache()),
-            Arc::new(SqliteNamingTable::new(&naming_table).unwrap()),
-            decl_parser.clone(),
-        ));
-        let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
-            Arc::new(oxidized::global_options::GlobalOptions::default()),
-            Arc::new(hackrs_test_utils::cache::NonEvictingCache::new()),
-            SpecialNames::new(),
-            shallow_decl_provider.clone(),
-        ));
+        let naming_provider: Arc<dyn NamingProvider> =
+            Arc::new(SqliteNamingTable::new(&naming_table).unwrap());
+        let shallow_decl_provider: Arc<dyn ShallowDeclProvider<_>> =
+            Arc::new(LazyShallowDeclProvider::new(
+                Arc::new(hackrs_test_utils::cache::make_non_eviction_shallow_decl_cache()),
+                Arc::clone(&naming_provider),
+                decl_parser.clone(),
+            ));
+        let folded_decl_provider: Arc<dyn FoldedDeclProvider<_>> =
+            Arc::new(LazyFoldedDeclProvider::new(
+                Arc::new(oxidized::global_options::GlobalOptions::default()),
+                Arc::new(hackrs_test_utils::cache::NonEvictingCache::new()),
+                SpecialNames::new(),
+                Arc::clone(&shallow_decl_provider),
+            ));
+        let typing_decl_provider: Rc<dyn TypingDeclProvider<_>> =
+            Rc::new(FoldingTypingDeclProvider::new(
+                Box::new(hackrs_test_utils::cache::NonEvictingLocalCache::new()),
+                Arc::clone(&folded_decl_provider),
+            ));
 
         Ok(Self {
             root,
             decl_parser,
+            naming_provider,
             shallow_decl_provider,
             folded_decl_provider,
+            typing_decl_provider,
         })
     }
 }

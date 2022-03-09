@@ -2546,7 +2546,6 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
                 }
                 name
             }
-            TokenKind::Class => Node::Name(self.alloc((token_text(self), token_pos(self)))),
             TokenKind::Variable => Node::Variable(self.alloc((token_text(self), token_pos(self)))),
             // There are a few types whose string representations we have to
             // grab anyway, so just go ahead and treat them as generic names.
@@ -2690,6 +2689,7 @@ impl<'a, 'text, S: SourceTextAllocator<'text, 'a>>
             | TokenKind::Public
             | TokenKind::Reify
             | TokenKind::Static
+            | TokenKind::Class
             | TokenKind::Trait
             | TokenKind::Lateinit
             | TokenKind::RightBrace

@@ -984,10 +984,7 @@ fn print_fcall_args(
         w.write_all(b"-")?;
     }
     w.write_all(b" ")?;
-    match context {
-        Just(s) => quotes(w, |w| w.write_all(s)),
-        Nothing => w.write_all(b"\"\""),
-    }
+    quotes(w, |w| w.write_all(context))
 }
 
 fn print_special_cls_ref(w: &mut dyn Write, cls_ref: &SpecialClsRef) -> Result<()> {

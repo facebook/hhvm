@@ -283,27 +283,20 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         if args.flags.contains(Flags::IS_REIFIED) {
             fcall_flags |= FCallArgsFlags::HasGenerics;
         };
-        if args.flags.contains(Flags::IS_ASYNC) {
-            FcallArgs::new(
-                fcall_flags,
-                1,
-                param_count as u32,
-                Slice::empty(),
-                Slice::empty(),
-                Some(eager_set),
-                None,
-            )
+        let async_eager_target = if args.flags.contains(Flags::IS_ASYNC) {
+            Some(eager_set)
         } else {
-            FcallArgs::new(
-                fcall_flags,
-                1,
-                param_count as u32,
-                Slice::empty(),
-                Slice::empty(),
-                None,
-                None,
-            )
-        }
+            None
+        };
+        FcallArgs::new(
+            fcall_flags,
+            1,
+            param_count as u32,
+            Slice::empty(),
+            Slice::empty(),
+            async_eager_target,
+            None,
+        )
     };
     let (reified_get, reified_memokeym) = if !args.flags.contains(Flags::IS_REIFIED) {
         (instr::empty(), instr::empty())

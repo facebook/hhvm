@@ -55,12 +55,12 @@ pub struct FcallArgs<'arena> {
     pub inouts: ByRefs<'arena>,
     pub readonly: ByRefs<'arena>,
     pub async_eager_target: Maybe<Label>,
-    pub context: Maybe<Str<'arena>>,
+    pub context: Str<'arena>,
 }
 
 impl<'arena> FcallArgs<'arena> {
     pub fn new(
-        flags: FCallArgsFlags,
+        mut flags: FCallArgsFlags,
         num_rets: NumParams,
         num_args: NumParams,
         inouts: Slice<'arena, bool>,
@@ -69,10 +69,20 @@ impl<'arena> FcallArgs<'arena> {
         context: Option<&'arena str>,
     ) -> FcallArgs<'arena> {
         assert!(
-            (inouts.is_empty() || inouts.len() == num_args as usize)
-                && (readonly.is_empty() || readonly.len() == num_args as usize),
-            "length of by_refs must be either zero or num_args"
+            inouts.is_empty() || inouts.len() == num_args as usize,
+            "length of inouts must be either zero or num_args"
         );
+        assert!(
+            readonly.is_empty() || readonly.len() == num_args as usize,
+            "length of readonly must be either zero or num_args"
+        );
+        assert!(
+            context.map_or(true, |c| !c.is_empty()),
+            "unexpected empty context"
+        );
+        if context.is_some() {
+            flags |= FCallArgsFlags::ExplicitContext;
+        }
         FcallArgs {
             flags,
             num_args,
@@ -80,7 +90,7 @@ impl<'arena> FcallArgs<'arena> {
             inouts,
             readonly,
             async_eager_target: async_eager_target.into(),
-            context: context.map(|s| Str::new(s.as_bytes())).into(),
+            context: Str::new(context.unwrap_or("").as_bytes()),
         }
     }
 

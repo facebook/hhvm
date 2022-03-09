@@ -808,8 +808,28 @@ const void* __hot_end = nullptr;
 
 #define ALIGN_HUGE_PAGE   __attribute__((__aligned__(2 * 1024 * 1024)))
 
+#if defined(__has_attribute) && __has_attribute(__no_builtin__)
+#define NO_BUILTIN_MEMCPY __attribute__((__no_builtin__("memcpy")))
+#else
+#define NO_BUILTIN_MEMCPY
+#endif
+
+#if defined(__has_attribute) && __has_attribute(__optimize__)
+#define OPTIMIZE_2        __attribute__((__optimize__("2")))
+#else
+#define OPTIMIZE_2
+#endif
+
 static void
-NEVER_INLINE AT_END_OF_TEXT ALIGN_HUGE_PAGE __attribute__((__optimize__("2")))
+NEVER_INLINE AT_END_OF_TEXT NO_BUILTIN_MEMCPY OPTIMIZE_2
+hugifyMemcpy(uint64_t* dst, uint64_t* src, size_t sz) {
+  for (size_t cnt = 0; cnt < sz; cnt += sizeof(uint64_t)) {
+    *dst++ = *src++;
+  }
+}
+
+static void
+NEVER_INLINE AT_END_OF_TEXT ALIGN_HUGE_PAGE OPTIMIZE_2
 EXTERNALLY_VISIBLE
 hugifyText(char* from, char* to) {
 #if !FOLLY_SANITIZE && defined MADV_HUGEPAGE
@@ -862,7 +882,7 @@ hugifyText(char* from, char* to) {
   // functions thats been mapped out.
   // Needs the attribute((optimize("2")) to prevent
   // g++ from turning this back into memcpy(!)
-  wordcpy((uint64_t*)from, (uint64_t*)mem, sz / sizeof(uint64_t));
+  hugifyMemcpy((uint64_t*)from, (uint64_t*)mem, sz);
   mprotect(from, sz, PROT_READ | PROT_EXEC);
   free(mem);
   mlock(from, to - from);

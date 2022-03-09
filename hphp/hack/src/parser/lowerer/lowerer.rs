@@ -54,6 +54,7 @@ use std::{
     slice::Iter,
     str::FromStr,
 };
+use thiserror::Error;
 
 fn unescape_single(s: &str) -> Result<BString, escaper::InvalidString> {
     Ok(escaper::unescape_single(s)?.into())
@@ -371,14 +372,20 @@ impl<'a> AsMut<Env<'a>> for Env<'a> {
     }
 }
 
-#[derive(Debug)]
+type Result<T, E = Error> = std::result::Result<T, E>;
+
+#[derive(Debug, Error)]
 pub enum Error {
+    #[error(
+        "missing case in {expecting:?}.\n - pos: {pos:?}\n - unexpected: '{node_name:?}'\n - kind: {kind:?}\n"
+    )]
     MissingSyntax {
         expecting: String,
         pos: Pos,
         node_name: String,
         kind: syntax_kind::SyntaxKind,
     },
+    #[error("{0}")]
     Failwith(String),
 }
 
@@ -421,7 +428,7 @@ fn raise_lint_error(env: &mut Env<'_>, err: LintError) {
     env.lint_errors().push(err);
 }
 
-fn failwith<N>(msg: impl Into<String>) -> Result<N, Error> {
+fn failwith<N>(msg: impl Into<String>) -> Result<N> {
     Err(Error::Failwith(msg.into()))
 }
 
@@ -448,7 +455,7 @@ fn missing_syntax_<N>(
     expecting: &str,
     node: S<'_>,
     env: &mut Env<'_>,
-) -> Result<N, Error> {
+) -> Result<N> {
     let pos = p_pos(node, env);
     let text = text(node, env);
     lowering_error(env, &pos, &text, expecting);
@@ -465,13 +472,13 @@ fn missing_syntax_<N>(
     })
 }
 
-fn missing_syntax<'a, N>(expecting: &str, node: S<'a>, env: &mut Env<'a>) -> Result<N, Error> {
+fn missing_syntax<'a, N>(expecting: &str, node: S<'a>, env: &mut Env<'a>) -> Result<N> {
     missing_syntax_(None, expecting, node, env)
 }
 
-fn mp_optional<'a, F, R>(p: F, node: S<'a>, env: &mut Env<'a>) -> Result<Option<R>, Error>
+fn mp_optional<'a, F, R>(p: F, node: S<'a>, env: &mut Env<'a>) -> Result<Option<R>>
 where
-    F: FnOnce(S<'a>, &mut Env<'a>) -> Result<R, Error>,
+    F: FnOnce(S<'a>, &mut Env<'a>) -> Result<R>,
 {
     match &node.children {
         Missing => Ok(None),
@@ -479,7 +486,7 @@ where
     }
 }
 
-fn pos_qualified_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Sid, Error> {
+fn pos_qualified_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Sid> {
     if let QualifiedName(c) = &node.children {
         if let SyntaxList(l) = &c.parts.children {
             let p = p_pos(node, env);
@@ -499,21 +506,21 @@ fn pos_qualified_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Sid, Er
     missing_syntax("qualified name", node, env)
 }
 
-fn pos_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Sid, Error> {
+fn pos_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Sid> {
     pos_name_(node, env, None)
 }
 
-fn lid_from_pos_name<'a>(pos: Pos, name: S<'a>, env: &mut Env<'a>) -> Result<ast::Lid, Error> {
+fn lid_from_pos_name<'a>(pos: Pos, name: S<'a>, env: &mut Env<'a>) -> Result<ast::Lid> {
     let name = pos_name(name, env)?;
     Ok(ast::Lid::new(pos, name.1))
 }
 
-fn lid_from_name<'a>(name: S<'a>, env: &mut Env<'a>) -> Result<ast::Lid, Error> {
+fn lid_from_name<'a>(name: S<'a>, env: &mut Env<'a>) -> Result<ast::Lid> {
     let name = pos_name(name, env)?;
     Ok(ast::Lid::new(name.0, name.1))
 }
 
-fn p_pstring<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Pstring, Error> {
+fn p_pstring<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Pstring> {
     p_pstring_(node, env, None)
 }
 
@@ -521,7 +528,7 @@ fn p_pstring_<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
     drop_prefix: Option<char>,
-) -> Result<ast::Pstring, Error> {
+) -> Result<ast::Pstring> {
     let ast::Id(p, id) = pos_name_(node, env, drop_prefix)?;
     Ok((p, id))
 }
@@ -534,11 +541,7 @@ fn drop_prefix(s: &str, prefix: char) -> &str {
     }
 }
 
-fn pos_name_<'a>(
-    node: S<'a>,
-    env: &mut Env<'a>,
-    drop_prefix_c: Option<char>,
-) -> Result<ast::Sid, Error> {
+fn pos_name_<'a>(node: S<'a>, env: &mut Env<'a>, drop_prefix_c: Option<char>) -> Result<ast::Sid> {
     match &node.children {
         QualifiedName(_) => pos_qualified_name(node, env),
         SimpleTypeSpecifier(c) => pos_name_(&c.specifier, env, drop_prefix_c),
@@ -665,7 +668,7 @@ fn check_valid_reified_hint<'a>(env: &mut Env<'a>, node: S<'a>, hint: &ast::Hint
 fn p_closure_parameter<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
-) -> Result<(ast::Hint, Option<ast::HfParamInfo>), Error> {
+) -> Result<(ast::Hint, Option<ast::HfParamInfo>)> {
     match &node.children {
         ClosureParameterTypeSpecifier(c) => {
             let kind = p_param_kind(&c.call_convention, env)?;
@@ -682,9 +685,9 @@ fn mp_shape_expression_field<'a, F, R>(
     f: F,
     node: S<'a>,
     env: &mut Env<'a>,
-) -> Result<(ast::ShapeFieldName, R), Error>
+) -> Result<(ast::ShapeFieldName, R)>
 where
-    F: Fn(S<'a>, &mut Env<'a>) -> Result<R, Error>,
+    F: Fn(S<'a>, &mut Env<'a>) -> Result<R>,
 {
     match &node.children {
         FieldInitializer(c) => {
@@ -696,7 +699,7 @@ where
     }
 }
 
-fn p_shape_field_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFieldName, Error> {
+fn p_shape_field_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFieldName> {
     use ast::ShapeFieldName::*;
     let is_valid_shape_literal = |t: &PositionedToken<'a>| {
         let is_str =
@@ -735,7 +738,7 @@ fn p_shape_field_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFi
     }
 }
 
-fn p_shape_field<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFieldInfo, Error> {
+fn p_shape_field<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFieldInfo> {
     match &node.children {
         FieldSpecifier(c) => {
             let optional = !c.question.is_missing();
@@ -758,11 +761,11 @@ fn p_shape_field<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFieldIn
     }
 }
 
-fn p_targ<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Targ, Error> {
+fn p_targ<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Targ> {
     Ok(ast::Targ((), p_hint(node, env)?))
 }
 
-fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_, Error> {
+fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
     use ast::Hint_::*;
     let unary =
         |kw, ty, env: &mut Env<'a>| Ok(Happly(pos_name(kw, env)?, could_map(p_hint, ty, env)?));
@@ -953,7 +956,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_, Error> {
     }
 }
 
-fn p_hint<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint, Error> {
+fn p_hint<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint> {
     let hint_ = p_hint_(node, env)?;
     let pos = p_pos(node, env);
     let hint = ast::Hint::new(pos, hint_);
@@ -961,28 +964,28 @@ fn p_hint<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint, Error> {
     Ok(hint)
 }
 
-fn p_simple_initializer<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Expr, Error> {
+fn p_simple_initializer<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Expr> {
     match &node.children {
         SimpleInitializer(c) => p_expr(&c.value, env),
         _ => missing_syntax("simple initializer", node, env),
     }
 }
 
-fn p_member<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<(ast::Expr, ast::Expr), Error> {
+fn p_member<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<(ast::Expr, ast::Expr)> {
     match &node.children {
         ElementInitializer(c) => Ok((p_expr(&c.key, env)?, p_expr(&c.value, env)?)),
         _ => missing_syntax("darray intrinsic expression element", node, env),
     }
 }
 
-fn expand_type_args<'a>(ty: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Hint>, Error> {
+fn expand_type_args<'a>(ty: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Hint>> {
     match &ty.children {
         TypeArguments(c) => could_map(p_hint, &c.types, env),
         _ => Ok(vec![]),
     }
 }
 
-fn p_afield<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Afield, Error> {
+fn p_afield<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Afield> {
     match &node.children {
         ElementInitializer(c) => Ok(ast::Afield::AFkvalue(
             p_expr(&c.key, env)?,
@@ -1043,7 +1046,7 @@ fn check_intrinsic_type_arg_varity<'a>(
     }
 }
 
-fn p_import_flavor<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ImportFlavor, Error> {
+fn p_import_flavor<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ImportFlavor> {
     use ast::ImportFlavor::*;
     match token_kind(node) {
         Some(TK::Include) => Ok(Include),
@@ -1054,7 +1057,7 @@ fn p_import_flavor<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ImportFlav
     }
 }
 
-fn p_null_flavor<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::OgNullFlavor, Error> {
+fn p_null_flavor<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::OgNullFlavor> {
     use ast::OgNullFlavor::*;
     match token_kind(node) {
         Some(TK::QuestionMinusGreaterThan) => Ok(OGNullsafe),
@@ -1063,7 +1066,7 @@ fn p_null_flavor<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::OgNullFlavor
     }
 }
 
-fn wrap_unescaper<F>(unescaper: F, s: &str) -> Result<BString, Error>
+fn wrap_unescaper<F>(unescaper: F, s: &str) -> Result<BString>
 where
     F: FnOnce(&str) -> Result<BString, InvalidString>,
 {
@@ -1092,7 +1095,7 @@ fn fail_if_invalid_reified_generic<'a>(node: S<'a>, env: &mut Env<'a>, id: impl 
     }
 }
 
-fn rfind(s: &[u8], mut i: usize, c: u8) -> Result<usize, Error> {
+fn rfind(s: &[u8], mut i: usize, c: u8) -> Result<usize> {
     if i >= s.len() {
         return failwith("index out of range");
     }
@@ -1109,7 +1112,7 @@ fn rfind(s: &[u8], mut i: usize, c: u8) -> Result<usize, Error> {
 fn prep_string2<'a>(
     nodes: &'a [Syntax<'a, PositionedToken<'a>, PositionedValue<'a>>],
     env: &mut Env<'a>,
-) -> Result<(TokenOp, TokenOp), Error> {
+) -> Result<(TokenOp, TokenOp)> {
     use TokenOp::*;
     let is_qoute = |c| c == b'\"' || c == b'`';
     let start_is_qoute = |s: &[u8]| {
@@ -1175,11 +1178,7 @@ fn prep_string2<'a>(
     }
 }
 
-fn process_token_op<'a>(
-    env: &mut Env<'a>,
-    op: TokenOp,
-    node: S<'a>,
-) -> Result<Option<S<'a>>, Error> {
+fn process_token_op<'a>(env: &mut Env<'a>, op: TokenOp, node: S<'a>) -> Result<Option<S<'a>>> {
     use TokenOp::*;
     match op {
         LeftTrim(n) => match &node.children {
@@ -1205,7 +1204,7 @@ fn process_token_op<'a>(
 fn p_string2<'a>(
     nodes: &'a [Syntax<'a, PositionedToken<'a>, PositionedValue<'a>>],
     env: &mut Env<'a>,
-) -> Result<Vec<ast::Expr>, Error> {
+) -> Result<Vec<ast::Expr>> {
     use TokenOp::*;
     let (head_op, tail_op) = prep_string2(nodes, env)?;
     let mut result = Vec::with_capacity(nodes.len());
@@ -1252,14 +1251,14 @@ fn p_string2<'a>(
     Ok(result)
 }
 
-fn p_expr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Expr, Error> {
+fn p_expr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Expr> {
     p_expr_with_loc(ExprLocation::TopLevel, node, env, None)
 }
 
 fn p_expr_for_function_call_arguments<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
-) -> Result<(ast::ParamKind, ast::Expr), Error> {
+) -> Result<(ast::ParamKind, ast::Expr)> {
     match &node.children {
         DecoratedExpression(DecoratedExpressionChildren {
             decorator,
@@ -1275,7 +1274,7 @@ fn p_expr_for_function_call_arguments<'a>(
 fn p_expr_for_normal_argument<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
-) -> Result<(ast::ParamKind, ast::Expr), Error> {
+) -> Result<(ast::ParamKind, ast::Expr)> {
     Ok((ast::ParamKind::Pnormal, p_expr(node, env)?))
 }
 
@@ -1284,7 +1283,7 @@ fn p_expr_with_loc<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
     parent_pos: Option<Pos>,
-) -> Result<ast::Expr, Error> {
+) -> Result<ast::Expr> {
     // We use location=CallReceiver to set PropOrMethod::IsMethod on ObjGet
     // But only if it is the immediate node.
     let location = match (location, &node.children) {
@@ -1333,7 +1332,7 @@ fn p_expr_lit<'a>(
     _parent: S<'a>,
     expr: S<'a>,
     env: &mut Env<'a>,
-) -> Result<Expr_, Error> {
+) -> Result<Expr_> {
     match &expr.children {
         Token(_) => {
             let s = expr.text(env.indexed_source_text.source_text());
@@ -1418,7 +1417,7 @@ fn p_expr_recurse<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
     parent_pos: Option<Pos>,
-) -> Result<Expr_, Error> {
+) -> Result<Expr_> {
     if *env.exp_recursion_depth() >= EXP_RECURSION_LIMIT {
         Err(Error::Failwith("Expression recursion limit reached".into()))
     } else {
@@ -1432,7 +1431,7 @@ fn p_expr_recurse<'a>(
 fn split_args_vararg<'a>(
     arg_list_node: S<'a>,
     e: &mut Env<'a>,
-) -> Result<(Vec<(ast::ParamKind, ast::Expr)>, Option<ast::Expr>), Error> {
+) -> Result<(Vec<(ast::ParamKind, ast::Expr)>, Option<ast::Expr>)> {
     let mut arg_list: Vec<_> = arg_list_node.syntax_node_to_list_skip_separator().collect();
     if let Some(last_arg) = arg_list.last() {
         if let DecoratedExpression(c) = &last_arg.children {
@@ -1459,7 +1458,7 @@ fn p_expr_impl<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
     parent_pos: Option<Pos>,
-) -> Result<Expr_, Error> {
+) -> Result<Expr_> {
     env.check_stack_limit();
     let mk_lid = |p: Pos, s: String| ast::Lid(p, (0, s));
     let mk_name_lid = |name: S<'a>, env: &mut Env<'a>| {
@@ -1477,31 +1476,30 @@ fn p_expr_impl<'a>(
             could_map(p_afield, v, e)?,
         ))
     };
-    let p_special_call = |recv: S<'a>, args: S<'a>, e: &mut Env<'a>| -> Result<Expr_, Error> {
+    let p_special_call = |recv: S<'a>, args: S<'a>, e: &mut Env<'a>| -> Result<Expr_> {
         // Mark expression as CallReceiver so that we can correctly set
         // PropOrMethod field in ObjGet and ClassGet
         let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, e, None)?;
         let (args, varargs) = split_args_vararg(args, e)?;
         Ok(Expr_::mk_call(recv, vec![], args, varargs))
     };
-    let p_obj_get =
-        |recv: S<'a>, op: S<'a>, name: S<'a>, e: &mut Env<'a>| -> Result<Expr_, Error> {
-            if recv.is_object_creation_expression() && !e.codegen() {
-                raise_parsing_error(recv, e, &syntax_error::invalid_constructor_method_call);
-            }
-            let recv = p_expr(recv, e)?;
-            let name = p_expr_with_loc(ExprLocation::MemberSelect, name, e, None)?;
-            let op = p_null_flavor(op, e)?;
-            Ok(Expr_::mk_obj_get(
-                recv,
-                name,
-                op,
-                match location {
-                    ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
-                    _ => ast::PropOrMethod::IsProp,
-                },
-            ))
-        };
+    let p_obj_get = |recv: S<'a>, op: S<'a>, name: S<'a>, e: &mut Env<'a>| -> Result<Expr_> {
+        if recv.is_object_creation_expression() && !e.codegen() {
+            raise_parsing_error(recv, e, &syntax_error::invalid_constructor_method_call);
+        }
+        let recv = p_expr(recv, e)?;
+        let name = p_expr_with_loc(ExprLocation::MemberSelect, name, e, None)?;
+        let op = p_null_flavor(op, e)?;
+        Ok(Expr_::mk_obj_get(
+            recv,
+            name,
+            op,
+            match location {
+                ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
+                _ => ast::PropOrMethod::IsProp,
+            },
+        ))
+    };
     let pos = match parent_pos {
         None => p_pos(node, env),
         Some(p) => p,
@@ -1624,7 +1622,7 @@ fn p_expr_impl<'a>(
         }
         ListExpression(c) => {
             /* TODO: Or tie in with other intrinsics and post-process to List */
-            let p_binder_or_ignore = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr, Error> {
+            let p_binder_or_ignore = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr> {
                 match &n.children {
                     Missing => Ok(Expr::new((), e.mk_none_pos(), Expr_::Omitted)),
                     _ => p_expr(n, e),
@@ -2253,7 +2251,7 @@ fn check_lvalue<'a>(ast::Expr(_, p, expr_): &ast::Expr, env: &mut Env<'a>) {
     }
 }
 
-fn p_xhp_embedded<'a, F>(escaper: F, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Expr, Error>
+fn p_xhp_embedded<'a, F>(escaper: F, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Expr>
 where
     F: FnOnce(&[u8]) -> Vec<u8>,
 {
@@ -2279,7 +2277,7 @@ where
     }
 }
 
-fn p_xhp_attr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::XhpAttribute, Error> {
+fn p_xhp_attr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::XhpAttribute> {
     match &node.children {
         XHPSimpleAttribute(c) => {
             let attr_expr = &c.expression;
@@ -2307,7 +2305,7 @@ fn p_xhp_attr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::XhpAttribute, E
     }
 }
 
-fn aggregate_xhp_tokens<'a>(env: &mut Env<'a>, nodes: S<'a>) -> Result<Vec<S<'a>>, Error> {
+fn aggregate_xhp_tokens<'a>(env: &mut Env<'a>, nodes: S<'a>) -> Result<Vec<S<'a>>> {
     let nodes = nodes.syntax_node_to_list_skip_separator();
     let mut state = (None, None, vec![]); // (start, end, result)
     let mut combine = |state: &mut (Option<S<'a>>, Option<S<'a>>, Vec<S<'a>>)| {
@@ -2356,7 +2354,7 @@ fn p_bop<'a>(
     lhs: ast::Expr,
     rhs: ast::Expr,
     env: &mut Env<'a>,
-) -> Result<Expr_, Error> {
+) -> Result<Expr_> {
     use ast::Bop::*;
     let mk = |op, l, r| Ok(Expr_::mk_binop(op, l, r));
     let mk_eq = |op, l, r| Ok(Expr_::mk_binop(Eq(Some(Box::new(op))), l, r));
@@ -2414,9 +2412,9 @@ fn p_bop<'a>(
     }
 }
 
-fn p_exprs_with_loc<'a>(n: S<'a>, e: &mut Env<'a>) -> Result<(Pos, Vec<ast::Expr>), Error> {
+fn p_exprs_with_loc<'a>(n: S<'a>, e: &mut Env<'a>) -> Result<(Pos, Vec<ast::Expr>)> {
     let loc = p_pos(n, e);
-    let p_expr = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr, Error> {
+    let p_expr = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr> {
         p_expr_with_loc(ExprLocation::UsingStatement, n, e, None)
     };
     Ok((loc, could_map(p_expr, n, e)?))
@@ -2426,7 +2424,7 @@ fn p_stmt_list_<'a>(
     pos: &Pos,
     mut nodes: Iter<'_, S<'a>>,
     env: &mut Env<'a>,
-) -> Result<Vec<ast::Stmt>, Error> {
+) -> Result<Vec<ast::Stmt>> {
     let mut r = vec![];
     loop {
         match nodes.next() {
@@ -2457,7 +2455,7 @@ fn p_stmt_list_<'a>(
     }
 }
 
-fn handle_loop_body<'a>(pos: Pos, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
+fn handle_loop_body<'a>(pos: Pos, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
     let list: Vec<_> = node.syntax_node_to_list_skip_separator().collect();
     let blk: Vec<_> = p_stmt_list_(&pos, list.iter(), env)?
         .into_iter()
@@ -2498,12 +2496,9 @@ where
     result
 }
 
-fn with_new_concurrent_scope<'a, F, R>(
-    f: F,
-    env: &mut Env<'a>,
-) -> Result<(LiftedAwaitExprs, R), Error>
+fn with_new_concurrent_scope<'a, F, R>(f: F, env: &mut Env<'a>) -> Result<(LiftedAwaitExprs, R)>
 where
-    F: FnOnce(&mut Env<'a>) -> Result<R, Error>,
+    F: FnOnce(&mut Env<'a>) -> Result<R>,
 {
     let saved_lifted_awaits = env.lifted_awaits.replace(LiftedAwaits {
         awaits: vec![],
@@ -2519,7 +2514,7 @@ where
     Ok((awaits, result))
 }
 
-fn process_lifted_awaits(mut awaits: LiftedAwaits) -> Result<LiftedAwaitExprs, Error> {
+fn process_lifted_awaits(mut awaits: LiftedAwaits) -> Result<LiftedAwaitExprs> {
     for await_ in awaits.awaits.iter() {
         if (await_.1).1.is_none() {
             return failwith("none pos in lifted awaits");
@@ -2547,9 +2542,9 @@ where
     }
 }
 
-fn lift_awaits_in_statement<'a, F>(f: F, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error>
+fn lift_awaits_in_statement<'a, F>(f: F, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt>
 where
-    F: FnOnce(&mut Env<'a>) -> Result<ast::Stmt, Error>,
+    F: FnOnce(&mut Env<'a>) -> Result<ast::Stmt>,
 {
     lift_awaits_in_statement_(f, Either::Left(node), env)
 }
@@ -2558,9 +2553,9 @@ fn lift_awaits_in_statement_<'a, F>(
     f: F,
     pos: Either<S<'a>, &Pos>,
     env: &mut Env<'a>,
-) -> Result<ast::Stmt, Error>
+) -> Result<ast::Stmt>
 where
-    F: FnOnce(&mut Env<'a>) -> Result<ast::Stmt, Error>,
+    F: FnOnce(&mut Env<'a>) -> Result<ast::Stmt>,
 {
     use LiftedAwaitKind::*;
     let (lifted_awaits, result) = match env.lifted_awaits {
@@ -2625,7 +2620,7 @@ fn lift_await<'a>(
     }
 }
 
-fn p_stmt<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
+fn p_stmt<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
     clear_statement_scope(
         |e: &mut Env<'a>| {
             let docblock = extract_docblock(node, e);
@@ -2638,13 +2633,13 @@ fn p_stmt<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
     )
 }
 
-fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
+fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
     let pos = p_pos(node, env);
     use ast::{Stmt, Stmt_ as S_};
     let new = Stmt::new;
     match &node.children {
         SwitchStatement(c) => {
-            let p_label = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::GenCase, Error> {
+            let p_label = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::GenCase> {
                 match &n.children {
                     CaseLabel(c) => Ok(aast::GenCase::Case(aast::Case(
                         p_expr(&c.expression, e)?,
@@ -2657,7 +2652,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
                     _ => missing_syntax("switch label", n, e),
                 }
             };
-            let p_section = |n: S<'a>, e: &mut Env<'a>| -> Result<Vec<ast::GenCase>, Error> {
+            let p_section = |n: S<'a>, e: &mut Env<'a>| -> Result<Vec<ast::GenCase>> {
                 match &n.children {
                     SwitchSection(c) => {
                         let mut blk = could_map(p_stmt, &c.statements, e)?;
@@ -2676,7 +2671,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
                 }
             };
 
-            let f = |env: &mut Env<'a>| -> Result<ast::Stmt, Error> {
+            let f = |env: &mut Env<'a>| -> Result<ast::Stmt> {
                 let cases = itertools::concat(could_map(p_section, &c.sections, env)?);
 
                 let last_is_default = matches!(cases.last(), Some(aast::GenCase::Default(_)));
@@ -2718,7 +2713,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
             lift_awaits_in_statement(f, node, env)
         }
         IfStatement(c) => {
-            let p_else_if = |n: S<'a>, e: &mut Env<'a>| -> Result<(ast::Expr, ast::Block), Error> {
+            let p_else_if = |n: S<'a>, e: &mut Env<'a>| -> Result<(ast::Expr, ast::Block)> {
                 match &n.children {
                     ElseifClause(c) => {
                         Ok((p_expr(&c.condition, e)?, p_block(true, &c.statement, e)?))
@@ -2726,7 +2721,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
                     _ => missing_syntax("elseif clause", n, e),
                 }
             };
-            let f = |env: &mut Env<'a>| -> Result<ast::Stmt, Error> {
+            let f = |env: &mut Env<'a>| -> Result<ast::Stmt> {
                 let condition = p_expr(&c.condition, env)?;
                 let statement = p_block(true /* remove noop */, &c.statement, env)?;
                 let else_ = match &c.else_clause.children {
@@ -2747,7 +2742,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
         }
         ExpressionStatement(c) => {
             let expr = &c.expression;
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt, Error> {
+            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 if expr.is_missing() {
                     Ok(new(pos, S_::Noop))
                 } else {
@@ -2766,7 +2761,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
         CompoundStatement(c) => handle_loop_body(pos, &c.statements, env),
         SyntaxList(_) => handle_loop_body(pos, node, env),
         ThrowStatement(c) => lift_awaits_in_statement(
-            |e: &mut Env<'a>| -> Result<ast::Stmt, Error> {
+            |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 Ok(new(pos, S_::mk_throw(p_expr(&c.expression, e)?)))
             },
             node,
@@ -2784,7 +2779,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
             S_::mk_while(p_expr(&c.condition, env)?, p_block(true, &c.body, env)?),
         )),
         UsingStatementBlockScoped(c) => {
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt, Error> {
+            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 Ok(new(
                     pos,
                     S_::mk_using(ast::UsingStmt {
@@ -2798,7 +2793,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
             lift_awaits_in_statement(f, node, env)
         }
         UsingStatementFunctionScoped(c) => {
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt, Error> {
+            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 Ok(new(
                     pos,
                     S_::mk_using(ast::UsingStmt {
@@ -2812,7 +2807,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
             lift_awaits_in_statement(f, node, env)
         }
         ForStatement(c) => {
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt, Error> {
+            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 let ini = could_map(p_expr, &c.initializer, e)?;
                 let ctr = mp_optional(p_expr, &c.control, e)?;
                 let eol = could_map(p_expr, &c.end_of_loop, e)?;
@@ -2822,7 +2817,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
             lift_awaits_in_statement(f, node, env)
         }
         ForeachStatement(c) => {
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt, Error> {
+            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 let col = p_expr(&c.collection, e)?;
                 let akw = match token_kind(&c.await_keyword) {
                     Some(TK::Await) => Some(p_pos(&c.await_keyword, e)),
@@ -2863,7 +2858,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
             ),
         )),
         ReturnStatement(c) => {
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt, Error> {
+            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 let expr = match &c.expression.children {
                     Missing => None,
                     _ => Some(p_expr_with_loc(
@@ -2883,7 +2878,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
         }
         YieldBreakStatement(_) => Ok(ast::Stmt::new(pos, ast::Stmt_::mk_yield_break())),
         EchoStatement(c) => {
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt, Error> {
+            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 let echo = match &c.keyword.children {
                     QualifiedName(_) | SimpleTypeSpecifier(_) | Token(_) => {
                         let name = pos_name(&c.keyword, e)?;
@@ -2904,7 +2899,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
             lift_awaits_in_statement(f, node, env)
         }
         UnsetStatement(c) => {
-            let f = |e: &mut Env<'a>| -> Result<ast::Stmt, Error> {
+            let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 let args = could_map(p_expr_for_normal_argument, &c.variables, e)?;
                 args.iter()
                     .for_each(|(_, arg)| check_mutate_class_const(arg, node, e));
@@ -3016,7 +3011,7 @@ fn check_mutate_class_const<'a>(e: &ast::Expr, node: S<'a>, env: &mut Env<'a>) {
     }
 }
 
-fn p_markup<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt, Error> {
+fn p_markup<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
     match &node.children {
         MarkupSection(c) => {
             let markup_hashbang = &c.hashbang;
@@ -3051,7 +3046,7 @@ fn p_modifiers<'a, F: Fn(R, modifier::Kind) -> R, R>(
     mut init: R,
     node: S<'a>,
     env: &mut Env<'a>,
-) -> Result<(modifier::KindSet, R), Error> {
+) -> Result<(modifier::KindSet, R)> {
     let mut kind_set = modifier::KindSet::new();
     for n in node.syntax_node_to_list_skip_separator() {
         let token_kind = token_kind(n).and_then(modifier::from_token_kind);
@@ -3066,14 +3061,14 @@ fn p_modifiers<'a, F: Fn(R, modifier::Kind) -> R, R>(
     Ok((kind_set, init))
 }
 
-fn p_kinds<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<modifier::KindSet, Error> {
+fn p_kinds<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<modifier::KindSet> {
     p_modifiers(|_, _| {}, (), node, env).map(|r| r.0)
 }
 
 /// Apply `f` to every item in `node`, and build a vec of the values returned.
-fn could_map<'a, R, F>(f: F, node: S<'a>, env: &mut Env<'a>) -> Result<Vec<R>, Error>
+fn could_map<'a, R, F>(f: F, node: S<'a>, env: &mut Env<'a>) -> Result<Vec<R>>
 where
-    F: Fn(S<'a>, &mut Env<'a>) -> Result<R, Error>,
+    F: Fn(S<'a>, &mut Env<'a>) -> Result<R>,
 {
     let nodes = node.syntax_node_to_list_skip_separator();
     let mut res = Vec::with_capacity(nodes.size_hint().0);
@@ -3083,15 +3078,12 @@ where
     Ok(res)
 }
 
-fn p_visibility<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Option<ast::Visibility>, Error> {
+fn p_visibility<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Option<ast::Visibility>> {
     let first_vis = |r: Option<ast::Visibility>, kind| r.or_else(|| modifier::to_visibility(kind));
     p_modifiers(first_vis, None, node, env).map(|r| r.1)
 }
 
-fn p_visibility_last_win<'a>(
-    node: S<'a>,
-    env: &mut Env<'a>,
-) -> Result<Option<ast::Visibility>, Error> {
+fn p_visibility_last_win<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Option<ast::Visibility>> {
     let last_vis = |r, kind| modifier::to_visibility(kind).or(r);
     p_modifiers(last_vis, None, node, env).map(|r| r.1)
 }
@@ -3100,7 +3092,7 @@ fn p_visibility_last_win_or<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
     default: ast::Visibility,
-) -> Result<ast::Visibility, Error> {
+) -> Result<ast::Visibility> {
     p_visibility_last_win(node, env).map(|v| v.unwrap_or(default))
 }
 
@@ -3408,17 +3400,14 @@ fn rewrite_effect_polymorphism<'a>(
     }
 }
 
-fn p_fun_param_default_value<'a>(
-    node: S<'a>,
-    env: &mut Env<'a>,
-) -> Result<Option<ast::Expr>, Error> {
+fn p_fun_param_default_value<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Option<ast::Expr>> {
     match &node.children {
         SimpleInitializer(c) => mp_optional(p_expr, &c.value, env),
         _ => Ok(None),
     }
 }
 
-fn p_param_kind<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ParamKind, Error> {
+fn p_param_kind<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ParamKind> {
     match token_kind(node) {
         Some(TK::Inout) => Ok(ast::ParamKind::Pinout(p_pos(node, env))),
         None => Ok(ast::ParamKind::Pnormal),
@@ -3426,7 +3415,7 @@ fn p_param_kind<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ParamKind, Er
     }
 }
 
-fn p_readonly<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ReadonlyKind, Error> {
+fn p_readonly<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ReadonlyKind> {
     match token_kind(node) {
         Some(TK::Readonly) => Ok(ast::ReadonlyKind::Readonly),
         _ => missing_syntax("readonly", node, env),
@@ -3449,7 +3438,7 @@ fn param_template<'a>(node: S<'a>, env: &Env<'_>) -> ast::FunParam {
     }
 }
 
-fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam, Error> {
+fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
     match &node.children {
         ParameterDeclaration(ParameterDeclarationChildren {
             attribute,
@@ -3524,17 +3513,14 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam, Erro
     }
 }
 
-fn p_tconstraint_ty<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint, Error> {
+fn p_tconstraint_ty<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint> {
     match &node.children {
         TypeConstraint(c) => p_hint(&c.type_, env),
         _ => missing_syntax("type constraint", node, env),
     }
 }
 
-fn p_tconstraint<'a>(
-    node: S<'a>,
-    env: &mut Env<'a>,
-) -> Result<(ast::ConstraintKind, ast::Hint), Error> {
+fn p_tconstraint<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<(ast::ConstraintKind, ast::Hint)> {
     match &node.children {
         TypeConstraint(c) => Ok((
             match token_kind(&c.keyword) {
@@ -3549,7 +3535,7 @@ fn p_tconstraint<'a>(
     }
 }
 
-fn p_tparam<'a>(is_class: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Tparam, Error> {
+fn p_tparam<'a>(is_class: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Tparam> {
     match &node.children {
         TypeParameter(TypeParameterChildren {
             attribute_spec,
@@ -3597,11 +3583,7 @@ fn p_tparam<'a>(is_class: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast::T
     }
 }
 
-fn p_tparam_l<'a>(
-    is_class: bool,
-    node: S<'a>,
-    env: &mut Env<'a>,
-) -> Result<Vec<ast::Tparam>, Error> {
+fn p_tparam_l<'a>(is_class: bool, node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Tparam>> {
     match &node.children {
         Missing => Ok(vec![]),
         TypeParameters(c) => could_map(|n, e| p_tparam(is_class, n, e), &c.parameters, env),
@@ -3613,7 +3595,7 @@ fn p_tparam_l<'a>(
 fn p_ctx_constraints<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
-) -> Result<(Option<ast::Hint>, Option<ast::Hint>), Error> {
+) -> Result<(Option<ast::Hint>, Option<ast::Hint>)> {
     let constraints = could_map(
         |node, env| {
             if let ContextConstraint(c) = &node.children {
@@ -3658,7 +3640,7 @@ fn p_contexts<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
     error_on_polymorphic: Option<(&str, bool)>,
-) -> Result<Option<ast::Contexts>, Error> {
+) -> Result<Option<ast::Contexts>> {
     match &node.children {
         Missing => Ok(None),
         Contexts(c) => {
@@ -3687,12 +3669,12 @@ fn p_context_list_to_intersection<'a>(
     ctx_list: S<'a>,
     env: &mut Env<'a>,
     polymorphic_error: &str,
-) -> Result<Option<ast::Hint>, Error> {
+) -> Result<Option<ast::Hint>> {
     Ok(p_contexts(ctx_list, env, Some((polymorphic_error, false)))?
         .map(|t| ast::Hint::new(t.0, ast::Hint_::Hintersection(t.1))))
 }
 
-fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr, Error> {
+fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr> {
     match &node.children {
         FunctionDeclarationHeader(FunctionDeclarationHeaderChildren {
             modifiers,
@@ -3785,7 +3767,7 @@ fn p_fun_pos<'a>(node: S<'a>, env: &Env<'_>) -> Pos {
     }
 }
 
-fn p_block<'a>(remove_noop: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block, Error> {
+fn p_block<'a>(remove_noop: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block> {
     let ast::Stmt(p, stmt_) = p_stmt(node, env)?;
     if let ast::Stmt_::Block(blk) = stmt_ {
         if remove_noop && blk.len() == 1 && blk[0].1.is_noop() {
@@ -3801,9 +3783,9 @@ fn mk_noop(env: &Env<'_>) -> ast::Stmt {
     ast::Stmt::noop(env.mk_none_pos())
 }
 
-fn p_function_body<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block, Error> {
+fn p_function_body<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block> {
     let mk_noop_result = |e: &Env<'_>| Ok(vec![mk_noop(e)]);
-    let f = |e: &mut Env<'a>| -> Result<ast::Block, Error> {
+    let f = |e: &mut Env<'a>| -> Result<ast::Block> {
         match &node.children {
             Missing => Ok(vec![]),
             CompoundStatement(c) => {
@@ -3874,7 +3856,7 @@ fn process_attribute_constructor_call<'a>(
     constructor_call_argument_list: S<'a>,
     constructor_call_type: S<'a>,
     env: &mut Env<'a>,
-) -> Result<ast::UserAttribute, Error> {
+) -> Result<ast::UserAttribute> {
     let name = pos_name(constructor_call_type, env)?;
     if name.1.eq_ignore_ascii_case("__reified") || name.1.eq_ignore_ascii_case("__hasreifiedparent")
     {
@@ -3888,7 +3870,7 @@ fn process_attribute_constructor_call<'a>(
         raise_parsing_error(node, env, &syntax_error::soft_no_arguments);
     }
     let params = could_map(
-        |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr, Error> {
+        |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr> {
             is_valid_attribute_arg(n, e);
             p_expr(n, e)
         },
@@ -3965,8 +3947,8 @@ fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>) {
     }
 }
 
-fn p_user_attribute<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::UserAttribute>, Error> {
-    let p_attr = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::UserAttribute, Error> {
+fn p_user_attribute<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::UserAttribute>> {
+    let p_attr = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::UserAttribute> {
         match &n.children {
             ConstructorCall(c) => {
                 process_attribute_constructor_call(node, &c.argument_list, &c.type_, e)
@@ -3978,7 +3960,7 @@ fn p_user_attribute<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::UserA
         FileAttributeSpecification(c) => could_map(p_attr, &c.attributes, env),
         OldAttributeSpecification(c) => could_map(p_attr, &c.attributes, env),
         AttributeSpecification(c) => could_map(
-            |n: S<'a>, e: &mut Env<'a>| -> Result<ast::UserAttribute, Error> {
+            |n: S<'a>, e: &mut Env<'a>| -> Result<ast::UserAttribute> {
                 match &n.children {
                     Attribute(c) => p_attr(&c.attribute_name, e),
                     _ => missing_syntax("attribute", node, e),
@@ -3991,14 +3973,14 @@ fn p_user_attribute<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::UserA
     }
 }
 
-fn p_user_attributes<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::UserAttribute>, Error> {
+fn p_user_attributes<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::UserAttribute>> {
     let attributes = could_map(&p_user_attribute, node, env)?;
     Ok(attributes.into_iter().flatten().collect())
 }
 
-fn mp_yielding<'a, F, R>(p: F, node: S<'a>, env: &mut Env<'a>) -> Result<(R, bool), Error>
+fn mp_yielding<'a, F, R>(p: F, node: S<'a>, env: &mut Env<'a>) -> Result<(R, bool)>
 where
-    F: FnOnce(S<'a>, &mut Env<'a>) -> Result<R, Error>,
+    F: FnOnce(S<'a>, &mut Env<'a>) -> Result<R>,
 {
     let outer_saw_yield = env.saw_yield;
     env.saw_yield = false;
@@ -4092,7 +4074,7 @@ fn extract_docblock<'a>(node: S<'a>, env: &Env<'_>) -> Option<DocComment> {
     })
 }
 
-fn p_xhp_child<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::XhpChild, Error> {
+fn p_xhp_child<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::XhpChild> {
     use ast::XhpChild::*;
     use ast::XhpChildOp::*;
     match &node.children {
@@ -4124,7 +4106,7 @@ fn p_xhp_child<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::XhpChild, Erro
     }
 }
 
-fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> Result<(), Error> {
+fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> Result<()> {
     use ast::Visibility;
     let doc_comment_opt = extract_docblock(node, env);
     let has_fun_header =
@@ -4134,16 +4116,15 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 FunctionDeclarationHeader(_)
             )
         };
-    let p_method_vis =
-        |node: S<'a>, name_pos: &Pos, env: &mut Env<'a>| -> Result<Visibility, Error> {
-            match p_visibility_last_win(node, env)? {
-                None => {
-                    raise_hh_error(env, Naming::method_needs_visibility(name_pos.clone()));
-                    Ok(Visibility::Public)
-                }
-                Some(v) => Ok(v),
+    let p_method_vis = |node: S<'a>, name_pos: &Pos, env: &mut Env<'a>| -> Result<Visibility> {
+        match p_visibility_last_win(node, env)? {
+            None => {
+                raise_hh_error(env, Naming::method_needs_visibility(name_pos.clone()));
+                Ok(Visibility::Public)
             }
-        };
+            Some(v) => Ok(v),
+        }
+    };
     match &node.children {
         ConstDeclaration(c) => {
             let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
@@ -4155,7 +4136,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             // discard all lowered elements. So adding to class
             // must be at the last.
             let mut class_consts = could_map(
-                |n: S<'a>, e: &mut Env<'a>| -> Result<ast::ClassConst, Error> {
+                |n: S<'a>, e: &mut Env<'a>| -> Result<ast::ClassConst> {
                     match &n.children {
                         ConstantDeclarator(c) => {
                             let id = pos_name(&c.name, e)?;
@@ -4300,7 +4281,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 doc_comment_opt
             };
             let name_exprs = could_map(
-                |n, e| -> Result<(Pos, ast::Sid, Option<ast::Expr>), Error> {
+                |n, e| -> Result<(Pos, ast::Sid, Option<ast::Expr>)> {
                     match &n.children {
                         PropertyDeclarator(c) => {
                             let name = pos_name_(&c.name, e, Some('$'))?;
@@ -4438,7 +4419,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             Ok(class.methods.push(method))
         }
         TraitUseConflictResolution(c) => {
-            type Ret = Result<Either<ast::InsteadofAlias, ast::UseAsAlias>, Error>;
+            type Ret = Result<Either<ast::InsteadofAlias, ast::UseAsAlias>>;
             let p_item = |n: S<'a>, e: &mut Env<'a>| -> Ret {
                 match &n.children {
                     TraitUsePrecedenceItem(c) => {
@@ -4528,7 +4509,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             Ok(class.reqs.push((hint, require_kind)))
         }
         XHPClassAttributeDeclaration(c) => {
-            type Ret = Result<Either<ast::XhpAttr, ast::Hint>, Error>;
+            type Ret = Result<Either<ast::XhpAttr, ast::Hint>>;
             let p_attr = |node: S<'a>, env: &mut Env<'a>| -> Ret {
                 let mk_attr_use = |n: S<'a>, env: &mut Env<'a>| {
                     Ok(Either::Right(ast::Hint(
@@ -4648,7 +4629,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
     }
 }
 
-fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> Result<(), Error> {
+fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> Result<()> {
     let r = p_class_elt_(class, node, env);
     match r {
         // match ocaml behavior, don't throw if missing syntax when fail_open is true
@@ -4668,11 +4649,11 @@ fn p_where_constraint<'a>(
     parent: S<'a>,
     node: S<'a>,
     env: &mut Env<'a>,
-) -> Result<Vec<ast::WhereConstraintHint>, Error> {
+) -> Result<Vec<ast::WhereConstraintHint>> {
     match &node.children {
         Missing => Ok(vec![]),
         WhereClause(c) => {
-            let f = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::WhereConstraintHint, Error> {
+            let f = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::WhereConstraintHint> {
                 match &n.children {
                     WhereConstraint(c) => {
                         use ast::ConstraintKind::*;
@@ -4704,7 +4685,7 @@ fn p_where_constraint<'a>(
     }
 }
 
-fn p_namespace_use_kind<'a>(kind: S<'a>, env: &mut Env<'a>) -> Result<ast::NsKind, Error> {
+fn p_namespace_use_kind<'a>(kind: S<'a>, env: &mut Env<'a>) -> Result<ast::NsKind> {
     use ast::NsKind::*;
     match &kind.children {
         Missing => Ok(NSClassAndNamespace),
@@ -4720,10 +4701,10 @@ fn p_namespace_use_kind<'a>(kind: S<'a>, env: &mut Env<'a>) -> Result<ast::NsKin
 
 fn p_namespace_use_clause<'a>(
     prefix: Option<S<'a>>,
-    kind: Result<ast::NsKind, Error>,
+    kind: Result<ast::NsKind>,
     node: S<'a>,
     env: &mut Env<'a>,
-) -> Result<(ast::NsKind, ast::Sid, ast::Sid), Error> {
+) -> Result<(ast::NsKind, ast::Sid, ast::Sid)> {
     lazy_static! {
         static ref NAMESPACE_USE: regex::Regex = regex::Regex::new("[^\\\\]*$").unwrap();
     }
@@ -4852,7 +4833,7 @@ fn check_effect_polymorphic_reification<'a>(
     }
 }
 
-fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>, Error> {
+fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
     let doc_comment_opt = extract_docblock(node, env);
     match &node.children {
         FunctionDeclaration(FunctionDeclarationChildren {
@@ -5093,7 +5074,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>, Error> {
             })])
         }
         EnumDeclaration(c) => {
-            let p_enumerator = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::ClassConst, Error> {
+            let p_enumerator = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::ClassConst> {
                 match &n.children {
                     Enumerator(c) => Ok(ast::ClassConst {
                         user_attributes: vec![],
@@ -5108,7 +5089,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>, Error> {
 
             let mut includes = vec![];
 
-            let mut p_enum_use = |n: S<'a>, e: &mut Env<'a>| -> Result<(), Error> {
+            let mut p_enum_use = |n: S<'a>, e: &mut Env<'a>| -> Result<()> {
                 match &n.children {
                     EnumUse(c) => {
                         let mut uses = could_map(p_hint, &c.names, e)?;
@@ -5403,7 +5384,7 @@ fn post_process<'a>(env: &mut Env<'a>, program: Vec<ast::Def>, acc: &mut Vec<ast
     }
 }
 
-fn p_program<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Program, Error> {
+fn p_program<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Program> {
     let nodes = node.syntax_node_to_list_skip_separator();
     let mut acc = vec![];
     for n in nodes {
@@ -5421,7 +5402,7 @@ fn p_program<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Program, Error> 
     Ok(ast::Program(program))
 }
 
-fn p_script<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Program, Error> {
+fn p_script<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Program> {
     match &node.children {
         Script(c) => p_program(&c.declarations, env),
         _ => missing_syntax("script", node, env),
@@ -5429,16 +5410,5 @@ fn p_script<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Program, Error> {
 }
 
 pub fn lower<'a>(env: &mut Env<'a>, script: S<'a>) -> Result<ast::Program, String> {
-    p_script(script, env).map_err(|e| match e {
-        Error::MissingSyntax {
-            expecting,
-            pos,
-            node_name,
-            kind,
-        } => format!(
-            "missing case in {:?}.\n - pos: {:?}\n - unexpected: '{:?}'\n - kind: {:?}\n",
-            expecting, pos, node_name, kind,
-        ),
-        Error::Failwith(msg) => msg,
-    })
+    p_script(script, env).map_err(|e| e.to_string())
 }

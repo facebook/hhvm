@@ -2302,6 +2302,7 @@ dependencies = [
  "regex",
  "rescan_trivia",
  "stack_limit",
+ "thiserror",
 ]
 
 [[package]]

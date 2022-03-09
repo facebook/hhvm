@@ -478,6 +478,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ~tco_enable_disk_heap:local_config.ServerLocalConfig.enable_disk_heap
       ?tco_explicit_consistent_constructors:
         (int_opt "explicit_consistent_constructors" config)
+      ?tco_require_types_class_consts:
+        (int_opt "require_types_tco_require_types_class_consts" config)
       ?tco_type_printer_fuel:(int_opt "type_printer_fuel" config)
       ?tco_saved_state_manifold_api_key:
         (Some local_config.ServerLocalConfig.saved_state_manifold_api_key)

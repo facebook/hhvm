@@ -1295,6 +1295,14 @@ let class_const_def ~in_enum_class c env cc =
     | None ->
       begin
         match k with
+        | CCAbstract _
+          when (not (is_enum_or_enum_class c.c_kind))
+               && TypecheckerOptions.require_types_class_consts tcopt > 0 ->
+          Errors.add_naming_error @@ Naming_error.Missing_typehint (fst id)
+        | _
+          when (not (is_enum_or_enum_class c.c_kind))
+               && TypecheckerOptions.require_types_class_consts tcopt > 1 ->
+          Errors.add_naming_error @@ Naming_error.Missing_typehint (fst id)
         | CCAbstract None -> ()
         | CCAbstract (Some e (* default *))
         | CCConcrete e ->

@@ -300,6 +300,9 @@ type t = {
    * explicit constructor declaration. 0 does not raise, 1 raises for traits, 2 raises
    * for all classish *)
   tco_explicit_consistent_constructors: int;
+  (* Raises an error when a class constant is missing a type. 0 does not raise, 1 raises
+   * for abstract class constants, 2 raises for all. *)
+  tco_require_types_class_consts: int;
   (* Sets the amount of fuel that the type printer can use to display an
    * individual type. More of a type is printed as the value increases. *)
   tco_type_printer_fuel: int;
@@ -433,6 +436,7 @@ val make :
   ?tco_pessimise_builtins:bool ->
   ?tco_enable_disk_heap:bool ->
   ?tco_explicit_consistent_constructors:int ->
+  ?tco_require_types_class_consts:int ->
   ?tco_type_printer_fuel:int ->
   ?tco_log_saved_state_age_and_distance:bool ->
   ?tco_specify_manifold_api_key:bool ->
@@ -714,6 +718,8 @@ val tco_pessimise_builtins : t -> bool
 val tco_enable_disk_heap : t -> bool
 
 val tco_explicit_consistent_constructors : t -> int
+
+val tco_require_types_class_consts : t -> int
 
 val tco_type_printer_fuel : t -> int
 

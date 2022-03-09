@@ -258,6 +258,7 @@ let () =
       ignored_flag "--enable-sound-dynamic-type";
       ignored_flag "--pessimise-builtins";
       ignored_arg "--explicit-consistent-constructors";
+      ignored_arg "--require-types-class-consts";
     ]
     set_file
     usage;

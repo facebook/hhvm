@@ -126,6 +126,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     tco_pessimise_builtins: false,
     tco_enable_disk_heap: true,
     tco_explicit_consistent_constructors: 0,
+    tco_require_types_class_consts: 0,
     tco_type_printer_fuel: 100,
     tco_log_saved_state_age_and_distance: false,
     tco_specify_manifold_api_key: false,

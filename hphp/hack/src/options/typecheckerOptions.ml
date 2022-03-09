@@ -215,6 +215,8 @@ let enable_disk_heap = GlobalOptions.tco_enable_disk_heap
 let explicit_consistent_constructors =
   GlobalOptions.tco_explicit_consistent_constructors
 
+let require_types_class_consts = GlobalOptions.tco_require_types_class_consts
+
 let type_printer_fuel = GlobalOptions.tco_type_printer_fuel
 
 let log_saved_state_age_and_distance =

@@ -278,6 +278,7 @@ let parse_options () =
   let pessimise_builtins = ref false in
   let custom_hhi_path = ref None in
   let explicit_consistent_constructors = ref 0 in
+  let require_types_class_consts = ref 0 in
   let type_printer_fuel =
     ref (TypecheckerOptions.type_printer_fuel GlobalOptions.default)
   in
@@ -723,6 +724,10 @@ let parse_options () =
         Arg.Int (( := ) explicit_consistent_constructors),
         " Raise an error for <<__ConsistentConstruct>> without an explicit constructor; 1 for traits, 2 for all "
       );
+      ( "--require-types-class-consts",
+        Arg.Int (( := ) require_types_class_consts),
+        " Raise an error for class constants missing types; 1 for abstract constants, 2 for all "
+      );
       ( "--profile-type-check-twice",
         Arg.Set profile_type_check_twice,
         " Typecheck the file twice" );
@@ -904,6 +909,7 @@ let parse_options () =
       ~tco_everything_sdt:!everything_sdt
       ~tco_pessimise_builtins:!pessimise_builtins
       ~tco_explicit_consistent_constructors:!explicit_consistent_constructors
+      ~tco_require_types_class_consts:!require_types_class_consts
       ~tco_type_printer_fuel:!type_printer_fuel
       ~tco_profile_toplevel_definitions:!profile_toplevel_definitions
       ()

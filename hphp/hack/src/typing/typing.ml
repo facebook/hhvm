@@ -8380,6 +8380,7 @@ and call
         match opt_param with
         | Some param ->
           let rec set_params_variance env ty =
+            let ty = TUtils.strip_dynamic env ty in
             let (env, ty) = Env.expand_type env ty in
             match get_node ty with
             | Tunion [ty] -> set_params_variance env ty

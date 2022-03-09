@@ -394,7 +394,6 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             xhp_attr_deps: SSet::empty(),
             enum_type: None,
             decl_errors: None,
-            condition_types: SSet::empty(),
         }
     }
 }

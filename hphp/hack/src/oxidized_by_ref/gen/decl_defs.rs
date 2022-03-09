@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e808d10549e720c58d3c031f763b79db>>
+// @generated SignedSource<<cb5d2973128511517f229a63ef614cc7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -154,10 +154,6 @@ pub struct DeclClassType<'a> {
     pub enum_type: Option<&'a EnumType<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub decl_errors: Option<&'a errors::Errors<'a>>,
-    /// this field is used to prevent condition types being filtered
-    /// in Decl_redecl_service.is_dependent_class_of_any
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub condition_types: s_set::SSet<'a>,
 }
 impl<'a> TrivialDrop for DeclClassType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(DeclClassType<'arena>);

@@ -694,10 +694,9 @@ let method_decl_eager
     ~(ctx : Provider_context.t)
     ~(is_static : bool)
     (c : Shallow_decl_defs.shallow_class)
-    ((acc, condition_types) :
-      (Decl_defs.element * Typing_defs.fun_elt option) SMap.t * SSet.t)
+    (acc : (Decl_defs.element * Typing_defs.fun_elt option) SMap.t)
     (m : Shallow_decl_defs.shallow_method) :
-    (Decl_defs.element * Typing_defs.fun_elt option) SMap.t * SSet.t =
+    (Decl_defs.element * Typing_defs.fun_elt option) SMap.t =
   (* If method doesn't override anything but has the <<__Override>> attribute, then
    * set the override flag in ce_flags and let typing emit an appropriate error *)
   let superfluous_override =
@@ -735,7 +734,7 @@ let method_decl_eager
   in
   let fe = build_method_fun_elt ~ctx ~is_static ~elt_origin:elt.elt_origin m in
   let acc = SMap.add id (elt, Some fe) acc in
-  (acc, condition_types)
+  acc
 
 let method_decl_lazy
     ~(sh : SharedMem.uses)
@@ -843,10 +842,10 @@ and class_decl
     List.fold_left ~f:(prop_decl_eager ~ctx c) ~init:props c.sc_props
   in
   let inherited_methods = inherited.Decl_inherit.ih_methods in
-  let (methods, condition_types) =
+  let methods =
     List.fold_left
       ~f:(method_decl_eager ~ctx ~is_static:false c)
-      ~init:(inherited_methods, SSet.empty)
+      ~init:inherited_methods
       c.sc_methods
   in
   let consts = inherited.Decl_inherit.ih_consts in
@@ -874,11 +873,11 @@ and class_decl
     List.fold_left c.sc_sprops ~f:sclass_var ~init:inherited_static_props
   in
   let inherited_static_methods = inherited.Decl_inherit.ih_smethods in
-  let (static_methods, condition_types) =
+  let static_methods =
     List.fold_left
       c.sc_static_methods
       ~f:(method_decl_eager ~ctx ~is_static:true c)
-      ~init:(inherited_static_methods, condition_types)
+      ~init:inherited_static_methods
   in
   let parent_cstr = inherited.Decl_inherit.ih_cstr in
   let cstr = constructor_decl_eager ~sh ~ctx parent_cstr c in
@@ -990,7 +989,6 @@ and class_decl
       dc_req_ancestors_extends = req_ancestors_extends;
       dc_enum_type = enum;
       dc_decl_errors = None;
-      dc_condition_types = condition_types;
     }
   in
   let member_heaps_values =

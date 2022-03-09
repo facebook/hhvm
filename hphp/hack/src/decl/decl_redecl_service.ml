@@ -370,9 +370,7 @@ let is_dependent_class_of_any ctx classes (c : string) : bool =
       SMap.exists c.Decl_defs.dc_ancestors ~f:(fun c _ -> SSet.mem classes c)
       || intersection_nonempty c.Decl_defs.dc_extends classes
       || intersection_nonempty c.Decl_defs.dc_xhp_attr_deps classes
-      || intersection_nonempty c.Decl_defs.dc_condition_types classes
       || intersection_nonempty c.Decl_defs.dc_req_ancestors_extends classes
-      || intersection_nonempty c.Decl_defs.dc_condition_types classes
 
 let get_maybe_dependent_classes
     (get_classes : Relative_path.t -> SSet.t)

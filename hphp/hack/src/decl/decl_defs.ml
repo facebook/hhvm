@@ -189,9 +189,6 @@ type decl_class_type = {
   dc_xhp_enum_values: Ast_defs.xhp_enum_value list SMap.t;
   dc_enum_type: enum_type option;
   dc_decl_errors: Errors.t option; [@opaque]
-  dc_condition_types: SSet.t;
-      (** this field is used to prevent condition types being filtered
-          in Decl_redecl_service.is_dependent_class_of_any *)
 }
 [@@deriving show]
 

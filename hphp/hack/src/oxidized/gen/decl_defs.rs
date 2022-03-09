@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<22270168b938cd32b159fe155d0e6a0d>>
+// @generated SignedSource<<e381fdffc3ee471f71e072ae2fda1677>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -180,9 +180,6 @@ pub struct DeclClassType {
     pub xhp_enum_values: s_map::SMap<Vec<ast_defs::XhpEnumValue>>,
     pub enum_type: Option<EnumType>,
     pub decl_errors: Option<errors::Errors>,
-    /// this field is used to prevent condition types being filtered
-    /// in Decl_redecl_service.is_dependent_class_of_any
-    pub condition_types: s_set::SSet,
 }
 
 #[derive(

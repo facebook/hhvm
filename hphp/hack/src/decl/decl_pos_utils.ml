@@ -281,7 +281,6 @@ struct
       dc_support_dynamic_type = dc.dc_support_dynamic_type;
       dc_enum_type = Option.map dc.dc_enum_type ~f:enum_type;
       dc_decl_errors = None;
-      dc_condition_types = dc.dc_condition_types;
     }
 
   and requirement (p, t) = (pos_or_decl p, ty t)

@@ -37,7 +37,12 @@ struct CodePointBreakIterator : icu::BreakIterator {
     clearCurrentCharIter();
   }
 
-  UBool operator==(const BreakIterator& that) const override {
+#if U_ICU_VERSION_MAJOR_NUM >= 70
+  bool
+#else
+  UBool
+#endif
+  operator==(const BreakIterator& that) const override {
     if (typeid(*this) != typeid(that)) {
       return false;
     }

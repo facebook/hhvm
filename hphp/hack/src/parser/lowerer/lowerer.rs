@@ -768,7 +768,7 @@ fn p_targ<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Targ> {
 fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
     use ast::Hint_::*;
     let unary =
-        |kw, ty, env: &mut Env<'a>| Ok(Happly(pos_name(kw, env)?, could_map(p_hint, ty, env)?));
+        |kw, ty, env: &mut Env<'a>| Ok(Happly(pos_name(kw, env)?, could_map(ty, env, p_hint)?));
     let binary = |kw, key, ty, env: &mut Env<'a>| {
         let kw = pos_name(kw, env)?;
         let key = p_hint(key, env)?;
@@ -825,7 +825,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 }
             }
 
-            let field_map = could_map(p_shape_field, &c.fields, env)?;
+            let field_map = could_map(&c.fields, env, p_shape_field)?;
             let mut set = HashSet::default();
             for f in field_map.iter() {
                 if !set.insert(f.name.get_name()) {
@@ -838,12 +838,12 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 field_map,
             }))
         }
-        TupleTypeSpecifier(c) => Ok(Htuple(could_map(p_hint, &c.types, env)?)),
-        UnionTypeSpecifier(c) => Ok(Hunion(could_map(&p_hint, &c.types, env)?)),
-        IntersectionTypeSpecifier(c) => Ok(Hintersection(could_map(&p_hint, &c.types, env)?)),
+        TupleTypeSpecifier(c) => Ok(Htuple(could_map(&c.types, env, p_hint)?)),
+        UnionTypeSpecifier(c) => Ok(Hunion(could_map(&c.types, env, p_hint)?)),
+        IntersectionTypeSpecifier(c) => Ok(Hintersection(could_map(&c.types, env, p_hint)?)),
         KeysetTypeSpecifier(c) => Ok(Happly(
             pos_name(&c.keyword, env)?,
-            could_map(p_hint, &c.type_, env)?,
+            could_map(&c.type_, env, p_hint)?,
         )),
         VectorTypeSpecifier(c) => unary(&c.keyword, &c.type_, env),
         ClassnameTypeSpecifier(c) => unary(&c.keyword, &c.type_, env),
@@ -855,7 +855,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
             let name = pos_name(&c.class_type, env)?;
             let args = &c.argument_list;
             let type_args = match &args.children {
-                TypeArguments(c) => could_map(p_hint, &c.types, env)?,
+                TypeArguments(c) => could_map(&c.types, env, p_hint)?,
                 _ => missing_syntax("generic type arguments", args, env)?,
             };
             Ok(Happly(name, type_args))
@@ -980,7 +980,7 @@ fn p_member<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<(ast::Expr, ast::Expr)
 
 fn expand_type_args<'a>(ty: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Hint>> {
     match &ty.children {
-        TypeArguments(c) => could_map(p_hint, &c.types, env),
+        TypeArguments(c) => could_map(&c.types, env, p_hint),
         _ => Ok(vec![]),
     }
 }
@@ -1448,7 +1448,7 @@ fn split_args_vararg<'a>(
         }
     }
     Ok((
-        could_map(p_expr_for_function_call_arguments, arg_list_node, e)?,
+        could_map(arg_list_node, e, p_expr_for_function_call_arguments)?,
         None,
     ))
 }
@@ -1473,7 +1473,7 @@ fn p_expr_impl<'a>(
         Ok(Expr_::mk_collection(
             pos_name(kw, e)?,
             hints,
-            could_map(p_afield, v, e)?,
+            could_map(v, e, p_afield)?,
         ))
     };
     let p_special_call = |recv: S<'a>, args: S<'a>, e: &mut Env<'a>| -> Result<Expr_> {
@@ -1509,7 +1509,7 @@ fn p_expr_impl<'a>(
             let suspension_kind = mk_suspension_kind(&c.async_);
             let (params, (ctxs, unsafe_ctxs), readonly_ret, ret) = match &c.signature.children {
                 LambdaSignature(c) => {
-                    let params = could_map(p_fun_param, &c.parameters, env)?;
+                    let params = could_map(&c.parameters, env, p_fun_param)?;
                     let readonly_ret = mp_optional(p_readonly, &c.readonly_return, env)?;
                     let ctxs = p_contexts(
                         &c.contexts,
@@ -1592,7 +1592,7 @@ fn p_expr_impl<'a>(
             Ok(Expr_::mk_collection(
                 collection_name,
                 hints,
-                could_map(p_afield, &c.initializers, env)?,
+                could_map(&c.initializers, env, p_afield)?,
             ))
         }
         VarrayIntrinsicExpression(c) => {
@@ -1603,7 +1603,7 @@ fn p_expr_impl<'a>(
                 None => None,
                 _ => missing_syntax("VarrayIntrinsicExpression type args", node, env)?,
             };
-            Ok(Expr_::mk_varray(targ, could_map(p_expr, &c.members, env)?))
+            Ok(Expr_::mk_varray(targ, could_map(&c.members, env, p_expr)?))
         }
         DarrayIntrinsicExpression(c) => {
             let hints = expand_type_args(&c.explicit_type, env)?;
@@ -1611,11 +1611,11 @@ fn p_expr_impl<'a>(
             match hints {
                 Some(ast::CollectionTarg::CollectionTKV(tk, tv)) => Ok(Expr_::mk_darray(
                     Some((tk, tv)),
-                    could_map(p_member, &c.members, env)?,
+                    could_map(&c.members, env, p_member)?,
                 )),
                 None => Ok(Expr_::mk_darray(
                     None,
-                    could_map(p_member, &c.members, env)?,
+                    could_map(&c.members, env, p_member)?,
                 )),
                 _ => missing_syntax("DarrayIntrinsicExpression type args", node, env),
             }
@@ -1628,15 +1628,11 @@ fn p_expr_impl<'a>(
                     _ => p_expr(n, e),
                 }
             };
-            Ok(Expr_::List(could_map(
-                &p_binder_or_ignore,
-                &c.members,
-                env,
-            )?))
+            Ok(Expr_::List(could_map(&c.members, env, p_binder_or_ignore)?))
         }
         EvalExpression(c) => p_special_call(&c.keyword, &c.argument, env),
         IssetExpression(c) => p_special_call(&c.keyword, &c.argument_list, env),
-        TupleExpression(c) => Ok(Expr_::mk_tuple(could_map(p_expr, &c.items, env)?)),
+        TupleExpression(c) => Ok(Expr_::mk_tuple(could_map(&c.items, env, p_expr)?)),
         FunctionCallExpression(c) => {
             let recv = &c.receiver;
             let args = &c.argument_list;
@@ -1674,10 +1670,10 @@ fn p_expr_impl<'a>(
                 }
                 None => {
                     let targs = match (&recv.children, &c.type_args.children) {
-                        (_, TypeArguments(c)) => could_map(p_targ, &c.types, env)?,
+                        (_, TypeArguments(c)) => could_map(&c.types, env, p_targ)?,
                         /* TODO might not be needed */
                         (GenericTypeSpecifier(c), _) => match &c.argument_list.children {
-                            TypeArguments(c) => could_map(p_targ, &c.types, env)?,
+                            TypeArguments(c) => could_map(&c.types, env, p_targ)?,
                             _ => vec![],
                         },
                         _ => vec![],
@@ -1710,7 +1706,7 @@ fn p_expr_impl<'a>(
         }
         FunctionPointerExpression(c) => {
             let targs = match &c.type_args.children {
-                TypeArguments(c) => could_map(p_targ, &c.types, env)?,
+                TypeArguments(c) => could_map(&c.types, env, p_targ)?,
                 _ => vec![],
             };
 
@@ -1970,11 +1966,9 @@ fn p_expr_impl<'a>(
             p_expr(&c.receiver, env)?,
             mp_optional(|n, e| p_expr_with_loc(location, n, e, None), &c.index, env)?,
         )),
-        ShapeExpression(c) => Ok(Expr_::Shape(could_map(
-            |n: S<'a>, e: &mut Env<'a>| mp_shape_expression_field(&p_expr, n, e),
-            &c.fields,
-            env,
-        )?)),
+        ShapeExpression(c) => Ok(Expr_::Shape(could_map(&c.fields, env, |n, e| {
+            mp_shape_expression_field(p_expr, n, e)
+        })?)),
         ObjectCreationExpression(c) => p_expr_recurse(location, &c.object, env, Some(pos)),
         ConstructorCall(c) => {
             let (args, varargs) = split_args_vararg(&c.argument_list, env)?;
@@ -1982,7 +1976,7 @@ fn p_expr_impl<'a>(
                 GenericTypeSpecifier(c) => {
                     let name = pos_name(&c.class_type, env)?;
                     let hints = match &c.argument_list.children {
-                        TypeArguments(c) => could_map(p_targ, &c.types, env)?,
+                        TypeArguments(c) => could_map(&c.types, env, p_targ)?,
                         _ => missing_syntax("generic type arguments", &c.argument_list, env)?,
                     };
                     (mk_id_expr(name), hints)
@@ -2054,7 +2048,7 @@ fn p_expr_impl<'a>(
             )?;
             let unsafe_ctxs = ctxs.clone();
             let p_use = |n: S<'a>, e: &mut Env<'a>| match &n.children {
-                AnonymousFunctionUseClause(c) => could_map(p_arg, &c.variables, e),
+                AnonymousFunctionUseClause(c) => could_map(&c.variables, e, p_arg),
                 _ => Ok(vec![]),
             };
             let suspension_kind = mk_suspension_kind(&c.async_keyword);
@@ -2065,7 +2059,7 @@ fn p_expr_impl<'a>(
             let doc_comment = extract_docblock(node, env).or_else(|| env.top_docblock().clone());
             let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
             let external = c.body.is_external();
-            let params = could_map(p_fun_param, &c.parameters, env)?;
+            let params = could_map(&c.parameters, env, p_fun_param)?;
             let name_pos = p_fun_pos(node, env);
             let fun = ast::Fun_ {
                 span: p_pos(node, env),
@@ -2129,7 +2123,7 @@ fn p_expr_impl<'a>(
         XHPExpression(c) if c.open.is_xhp_open() => {
             if let XHPOpen(c1) = &c.open.children {
                 let name = pos_name(&c1.name, env)?;
-                let attrs = could_map(p_xhp_attr, &c1.attributes, env)?;
+                let attrs = could_map(&c1.attributes, env, p_xhp_attr)?;
                 let exprs = aggregate_xhp_tokens(env, &c.body)?
                     .iter()
                     .map(|n| p_xhp_embedded(unesc_xhp, n, env))
@@ -2413,11 +2407,12 @@ fn p_bop<'a>(
 }
 
 fn p_exprs_with_loc<'a>(n: S<'a>, e: &mut Env<'a>) -> Result<(Pos, Vec<ast::Expr>)> {
-    let loc = p_pos(n, e);
-    let p_expr = |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr> {
-        p_expr_with_loc(ExprLocation::UsingStatement, n, e, None)
-    };
-    Ok((loc, could_map(p_expr, n, e)?))
+    Ok((
+        p_pos(n, e),
+        could_map(n, e, |n, e| {
+            p_expr_with_loc(ExprLocation::UsingStatement, n, e, None)
+        })?,
+    ))
 }
 
 fn p_stmt_list_<'a>(
@@ -2655,11 +2650,11 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
             let p_section = |n: S<'a>, e: &mut Env<'a>| -> Result<Vec<ast::GenCase>> {
                 match &n.children {
                     SwitchSection(c) => {
-                        let mut blk = could_map(p_stmt, &c.statements, e)?;
+                        let mut blk = could_map(&c.statements, e, p_stmt)?;
                         if !c.fallthrough.is_missing() {
                             blk.push(new(e.mk_none_pos(), S_::Fallthrough));
                         }
-                        let mut labels = could_map(p_label, &c.labels, e)?;
+                        let mut labels = could_map(&c.labels, e, p_label)?;
                         match labels.last_mut() {
                             Some(aast::GenCase::Default(aast::DefaultCase(_, b))) => *b = blk,
                             Some(aast::GenCase::Case(aast::Case(_, b))) => *b = blk,
@@ -2672,7 +2667,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
             };
 
             let f = |env: &mut Env<'a>| -> Result<ast::Stmt> {
-                let cases = itertools::concat(could_map(p_section, &c.sections, env)?);
+                let cases = itertools::concat(could_map(&c.sections, env, p_section)?);
 
                 let last_is_default = matches!(cases.last(), Some(aast::GenCase::Default(_)));
 
@@ -2729,7 +2724,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
                     Missing => vec![mk_noop(env)],
                     _ => missing_syntax("else clause", &c.else_clause, env)?,
                 };
-                let else_ifs = could_map(p_else_if, &c.elseif_clauses, env)?;
+                let else_ifs = could_map(&c.elseif_clauses, env, p_else_if)?;
                 let else_if = else_ifs
                     .into_iter()
                     .rev()
@@ -2808,9 +2803,9 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         }
         ForStatement(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-                let ini = could_map(p_expr, &c.initializer, e)?;
+                let ini = could_map(&c.initializer, e, p_expr)?;
                 let ctr = mp_optional(p_expr, &c.control, e)?;
-                let eol = could_map(p_expr, &c.end_of_loop, e)?;
+                let eol = could_map(&c.end_of_loop, e, p_expr)?;
                 let blk = p_block(true, &c.body, e)?;
                 Ok(Stmt::new(pos, S_::mk_for(ini, ctr, eol, blk)))
             };
@@ -2839,18 +2834,14 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
             pos,
             S_::mk_try(
                 p_block(false, &c.compound_statement, env)?,
-                could_map(
-                    |n: S<'a>, e| match &n.children {
-                        CatchClause(c) => Ok(ast::Catch(
-                            pos_name(&c.type_, e)?,
-                            lid_from_name(&c.variable, e)?,
-                            p_block(true, &c.body, e)?,
-                        )),
-                        _ => missing_syntax("catch clause", n, e),
-                    },
-                    &c.catch_clauses,
-                    env,
-                )?,
+                could_map(&c.catch_clauses, env, |n, e| match &n.children {
+                    CatchClause(c) => Ok(ast::Catch(
+                        pos_name(&c.type_, e)?,
+                        lid_from_name(&c.variable, e)?,
+                        p_block(true, &c.body, e)?,
+                    )),
+                    _ => missing_syntax("catch clause", n, e),
+                })?,
                 match &c.finally_clause.children {
                     FinallyClause(c) => p_block(false, &c.body, env)?,
                     _ => vec![],
@@ -2886,7 +2877,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
                     }
                     _ => missing_syntax("id", &c.keyword, e)?,
                 };
-                let args = could_map(p_expr_for_normal_argument, &c.expressions, e)?;
+                let args = could_map(&c.expressions, e, p_expr_for_normal_argument)?;
                 Ok(new(
                     pos.clone(),
                     S_::mk_expr(ast::Expr::new(
@@ -2900,7 +2891,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         }
         UnsetStatement(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
-                let args = could_map(p_expr_for_normal_argument, &c.variables, e)?;
+                let args = could_map(&c.variables, e, p_expr_for_normal_argument)?;
                 args.iter()
                     .for_each(|(_, arg)| check_mutate_class_const(arg, node, e));
                 let unset = match &c.keyword.children {
@@ -3066,16 +3057,17 @@ fn p_kinds<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<modifier::KindSet> {
 }
 
 /// Apply `f` to every item in `node`, and build a vec of the values returned.
-fn could_map<'a, R, F>(f: F, node: S<'a>, env: &mut Env<'a>) -> Result<Vec<R>>
+fn could_map<'a, R, F>(node: S<'a>, env: &mut Env<'a>, f: F) -> Result<Vec<R>>
 where
     F: Fn(S<'a>, &mut Env<'a>) -> Result<R>,
 {
     let nodes = node.syntax_node_to_list_skip_separator();
-    let mut res = Vec::with_capacity(nodes.size_hint().0);
+    let (min, _) = nodes.size_hint();
+    let mut v = Vec::with_capacity(min);
     for n in nodes {
-        res.push(f(n, env)?);
+        v.push(f(n, env)?);
     }
-    Ok(res)
+    Ok(v)
 }
 
 fn p_visibility<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Option<ast::Visibility>> {
@@ -3574,7 +3566,7 @@ fn p_tparam<'a>(is_class: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast::T
                 variance,
                 name: pos_name(name, env)?,
                 parameters,
-                constraints: could_map(p_tconstraint, constraints, env)?,
+                constraints: could_map(constraints, env, p_tconstraint)?,
                 reified,
                 user_attributes,
             })
@@ -3586,7 +3578,7 @@ fn p_tparam<'a>(is_class: bool, node: S<'a>, env: &mut Env<'a>) -> Result<ast::T
 fn p_tparam_l<'a>(is_class: bool, node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Tparam>> {
     match &node.children {
         Missing => Ok(vec![]),
-        TypeParameters(c) => could_map(|n, e| p_tparam(is_class, n, e), &c.parameters, env),
+        TypeParameters(c) => could_map(&c.parameters, env, |n, e| p_tparam(is_class, n, e)),
         _ => missing_syntax("type parameter", node, env),
     }
 }
@@ -3596,29 +3588,25 @@ fn p_ctx_constraints<'a>(
     node: S<'a>,
     env: &mut Env<'a>,
 ) -> Result<(Option<ast::Hint>, Option<ast::Hint>)> {
-    let constraints = could_map(
-        |node, env| {
-            if let ContextConstraint(c) = &node.children {
-                if let Some(hint) = p_context_list_to_intersection(
-                    &c.ctx_list,
-                    env,
-                    "Contexts cannot be bounded by polymorphic contexts",
-                )? {
-                    Ok(match token_kind(&c.keyword) {
-                        Some(TK::Super) => Either::Left(hint),
-                        Some(TK::As) => Either::Right(hint),
-                        _ => missing_syntax("constraint operator", &c.keyword, env)?,
-                    })
-                } else {
-                    missing_syntax("contexts", &c.keyword, env)?
-                }
+    let constraints = could_map(node, env, |node, env| {
+        if let ContextConstraint(c) = &node.children {
+            if let Some(hint) = p_context_list_to_intersection(
+                &c.ctx_list,
+                env,
+                "Contexts cannot be bounded by polymorphic contexts",
+            )? {
+                Ok(match token_kind(&c.keyword) {
+                    Some(TK::Super) => Either::Left(hint),
+                    Some(TK::As) => Either::Right(hint),
+                    _ => missing_syntax("constraint operator", &c.keyword, env)?,
+                })
             } else {
-                missing_syntax("context constraint", node, env)?
+                missing_syntax("contexts", &c.keyword, env)?
             }
-        },
-        node,
-        env,
-    )?;
+        } else {
+            missing_syntax("context constraint", node, env)?
+        }
+    })?;
     let (super_constraint, as_constraint) = constraints.into_iter().partition_map(|x| x);
     let require_one = &mut |kind: &str, cs: Vec<_>| {
         if cs.len() > 1 {
@@ -3644,19 +3632,15 @@ fn p_contexts<'a>(
     match &node.children {
         Missing => Ok(None),
         Contexts(c) => {
-            let hints = could_map(
-                |node, env| {
-                    let h = p_hint(node, env)?;
-                    if let Some((e, ignore_this)) = error_on_polymorphic {
-                        if is_polymorphic_context(env, &h, ignore_this) {
-                            raise_parsing_error(node, env, e);
-                        }
+            let hints = could_map(&c.types, env, |node, env| {
+                let h = p_hint(node, env)?;
+                if let Some((e, ignore_this)) = error_on_polymorphic {
+                    if is_polymorphic_context(env, &h, ignore_this) {
+                        raise_parsing_error(node, env, e);
                     }
-                    Ok(h)
-                },
-                &c.types,
-                env,
-            )?;
+                }
+                Ok(h)
+            })?;
             let pos = p_pos(node, env);
             let ctxs = ast::Contexts(pos, hints);
             Ok(Some(ctxs))
@@ -3699,7 +3683,7 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr> {
             };
             let readonly_ret = mp_optional(p_readonly, readonly_return, env)?;
             let mut type_parameters = p_tparam_l(false, type_parameter_list, env)?;
-            let mut parameters = could_map(p_fun_param, parameter_list, env)?;
+            let mut parameters = could_map(parameter_list, env, p_fun_param)?;
             let contexts = p_contexts(contexts, env, None)?;
             let mut constrs = p_where_constraint(false, node, where_clause, env)?;
             rewrite_effect_polymorphism(
@@ -3736,7 +3720,7 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr> {
         }) => {
             let readonly_ret = mp_optional(p_readonly, readonly_return, env)?;
             let mut header = FunHdr::make_empty(env);
-            header.parameters = could_map(p_fun_param, parameters, env)?;
+            header.parameters = could_map(parameters, env, p_fun_param)?;
             let contexts = p_contexts(contexts, env, None)?;
             let unsafe_contexts = contexts.clone();
             header.contexts = contexts;
@@ -3869,14 +3853,10 @@ fn process_attribute_constructor_call<'a>(
     {
         raise_parsing_error(node, env, &syntax_error::soft_no_arguments);
     }
-    let params = could_map(
-        |n: S<'a>, e: &mut Env<'a>| -> Result<ast::Expr> {
-            is_valid_attribute_arg(n, e);
-            p_expr(n, e)
-        },
-        constructor_call_argument_list,
-        env,
-    )?;
+    let params = could_map(constructor_call_argument_list, env, |n, e| {
+        is_valid_attribute_arg(n, e);
+        p_expr(n, e)
+    })?;
     Ok(ast::UserAttribute { name, params })
 }
 
@@ -3885,14 +3865,10 @@ fn process_attribute_constructor_call<'a>(
 // concatenations, or tuples.
 fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>) {
     let mut is_valid_list = |nodes: S<'a>| {
-        let _ = could_map(
-            |n, e| {
-                is_valid_attribute_arg(n, e);
-                Ok(())
-            },
-            nodes,
-            env,
-        );
+        let _ = could_map(nodes, env, |n, e| {
+            is_valid_attribute_arg(n, e);
+            Ok(())
+        });
     };
     match &node.children {
         ParenthesizedExpression(c) => is_valid_attribute_arg(&c.expression, env),
@@ -3957,24 +3933,18 @@ fn p_user_attribute<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::UserA
         }
     };
     match &node.children {
-        FileAttributeSpecification(c) => could_map(p_attr, &c.attributes, env),
-        OldAttributeSpecification(c) => could_map(p_attr, &c.attributes, env),
-        AttributeSpecification(c) => could_map(
-            |n: S<'a>, e: &mut Env<'a>| -> Result<ast::UserAttribute> {
-                match &n.children {
-                    Attribute(c) => p_attr(&c.attribute_name, e),
-                    _ => missing_syntax("attribute", node, e),
-                }
-            },
-            &c.attributes,
-            env,
-        ),
+        FileAttributeSpecification(c) => could_map(&c.attributes, env, p_attr),
+        OldAttributeSpecification(c) => could_map(&c.attributes, env, p_attr),
+        AttributeSpecification(c) => could_map(&c.attributes, env, |n, e| match &n.children {
+            Attribute(c) => p_attr(&c.attribute_name, e),
+            _ => missing_syntax("attribute", node, e),
+        }),
         _ => missing_syntax("attribute specification", node, env),
     }
 }
 
 fn p_user_attributes<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::UserAttribute>> {
-    let attributes = could_map(&p_user_attribute, node, env)?;
+    let attributes = could_map(node, env, p_user_attribute)?;
     Ok(attributes.into_iter().flatten().collect())
 }
 
@@ -4135,31 +4105,25 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             // ocaml's behavior is that if anything throw, it will
             // discard all lowered elements. So adding to class
             // must be at the last.
-            let mut class_consts = could_map(
-                |n: S<'a>, e: &mut Env<'a>| -> Result<ast::ClassConst> {
-                    match &n.children {
-                        ConstantDeclarator(c) => {
-                            let id = pos_name(&c.name, e)?;
-                            use aast::ClassConstKind::*;
-                            let kind = if has_abstract {
-                                CCAbstract(mp_optional(p_simple_initializer, &c.initializer, e)?)
-                            } else {
-                                CCConcrete(p_simple_initializer(&c.initializer, e)?)
-                            };
-                            Ok(ast::ClassConst {
-                                user_attributes: user_attributes.clone(),
-                                type_: type_.clone(),
-                                id,
-                                kind,
-                                doc_comment: doc_comment_opt.clone(),
-                            })
-                        }
-                        _ => missing_syntax("constant declarator", n, e),
-                    }
-                },
-                &c.declarators,
-                env,
-            )?;
+            let mut class_consts = could_map(&c.declarators, env, |n, e| match &n.children {
+                ConstantDeclarator(c) => {
+                    let id = pos_name(&c.name, e)?;
+                    use aast::ClassConstKind::*;
+                    let kind = if has_abstract {
+                        CCAbstract(mp_optional(p_simple_initializer, &c.initializer, e)?)
+                    } else {
+                        CCConcrete(p_simple_initializer(&c.initializer, e)?)
+                    };
+                    Ok(ast::ClassConst {
+                        user_attributes: user_attributes.clone(),
+                        type_: type_.clone(),
+                        id,
+                        kind,
+                        doc_comment: doc_comment_opt.clone(),
+                    })
+                }
+                _ => missing_syntax("constant declarator", n, e),
+            })?;
             Ok(class.consts.append(&mut class_consts))
         }
         TypeConstDeclaration(c) => {
@@ -4280,21 +4244,15 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             } else {
                 doc_comment_opt
             };
-            let name_exprs = could_map(
-                |n, e| -> Result<(Pos, ast::Sid, Option<ast::Expr>)> {
-                    match &n.children {
-                        PropertyDeclarator(c) => {
-                            let name = pos_name_(&c.name, e, Some('$'))?;
-                            let pos = p_pos(n, e);
-                            let expr = mp_optional(p_simple_initializer, &c.initializer, e)?;
-                            Ok((pos, name, expr))
-                        }
-                        _ => missing_syntax("property declarator", n, e),
-                    }
-                },
-                &c.declarators,
-                env,
-            )?;
+            let name_exprs = could_map(&c.declarators, env, |n, e| match &n.children {
+                PropertyDeclarator(c) => {
+                    let name = pos_name_(&c.name, e, Some('$'))?;
+                    let pos = p_pos(n, e);
+                    let expr = mp_optional(p_simple_initializer, &c.initializer, e)?;
+                    Ok((pos, name, expr))
+                }
+                _ => missing_syntax("property declarator", n, e),
+            })?;
 
             for (i, name_expr) in name_exprs.into_iter().enumerate() {
                 class.vars.push(ast::ClassVar {
@@ -4429,7 +4387,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                             }
                             _ => missing_syntax("trait use precedence item", n, e)?,
                         };
-                        let removed_names = could_map(pos_name, &c.removed_names, e)?;
+                        let removed_names = could_map(&c.removed_names, e, pos_name)?;
                         raise_hh_error(e, Naming::unsupported_instead_of(name.0.clone()));
                         Ok(Either::Left(ast::InsteadofAlias(
                             qualifier,
@@ -4478,8 +4436,8 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                     _ => missing_syntax("trait use conflict resolution item", n, e),
                 }
             };
-            let mut uses = could_map(p_hint, &c.names, env)?;
-            let elts = could_map(p_item, &c.clauses, env)?;
+            let mut uses = could_map(&c.names, env, p_hint)?;
+            let elts = could_map(&c.clauses, env, p_item)?;
             class.uses.append(&mut uses);
             for elt in elts.into_iter() {
                 match elt {
@@ -4490,7 +4448,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             Ok(())
         }
         TraitUse(c) => {
-            let mut uses = could_map(p_hint, &c.names, env)?;
+            let mut uses = could_map(&c.names, env, p_hint)?;
             Ok(class.uses.append(&mut uses))
         }
         RequireClause(c) => {
@@ -4546,7 +4504,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                                     Missing => None,
                                     _ => Some(p_pos(&c1.like, env)),
                                 };
-                                let vals = could_map(p_expr, &c1.values, env)?;
+                                let vals = could_map(&c1.values, env, p_expr)?;
                                 let mut enum_vals = vec![];
                                 for val in vals.clone() {
                                     match val {
@@ -4600,7 +4558,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                     _ => missing_syntax("XHP attribute", node, env),
                 }
             };
-            let attrs = could_map(p_attr, &c.attributes, env)?;
+            let attrs = could_map(&c.attributes, env, p_attr)?;
             for attr in attrs.into_iter() {
                 match attr {
                     Either::Left(attr) => class.xhp_attrs.push(attr),
@@ -4617,7 +4575,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
         }
         XHPCategoryDeclaration(c) => {
             let p = p_pos(node, env);
-            let categories = could_map(|n, e| p_pstring_(n, e, Some('%')), &c.categories, env)?;
+            let categories = could_map(&c.categories, env, |n, e| p_pstring_(n, e, Some('%')))?;
             if let Some((_, cs)) = &class.xhp_category {
                 if let Some(category) = cs.first() {
                     raise_hh_error(env, NastCheck::multiple_xhp_category(category.0.clone()))
@@ -4907,12 +4865,12 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 Some(TK::Enum) => ast::ClassishKind::Cenum,
                 _ => missing_syntax("class kind", &c.keyword, env)?,
             };
-            let extends = could_map(p_hint, &c.extends_list, env)?;
+            let extends = could_map(&c.extends_list, env, p_hint)?;
             *env.parent_maybe_reified() = match extends.first().map(|h| h.1.as_ref()) {
                 Some(ast::Hint_::Happly(_, hl)) => !hl.is_empty(),
                 _ => false,
             };
-            let implements = could_map(p_hint, &c.implements_list, env)?;
+            let implements = could_map(&c.implements_list, env, p_hint)?;
             let where_constraints = p_where_constraint(true, node, &c.where_clause, env)?;
             let namespace = mk_empty_ns_env(env);
             let span = p_pos(node, env);
@@ -5092,7 +5050,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             let mut p_enum_use = |n: S<'a>, e: &mut Env<'a>| -> Result<()> {
                 match &n.children {
                     EnumUse(c) => {
-                        let mut uses = could_map(p_hint, &c.names, e)?;
+                        let mut uses = could_map(&c.names, e, p_hint)?;
                         Ok(includes.append(&mut uses))
                     }
                     _ => missing_syntax("enum_use", node, e),
@@ -5117,7 +5075,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 extends: vec![],
                 implements: vec![],
                 where_constraints: vec![],
-                consts: could_map(p_enumerator, &c.enumerators, env)?,
+                consts: could_map(&c.enumerators, env, p_enumerator)?,
                 namespace: mk_empty_ns_env(env),
                 span: p_pos(node, env),
                 enum_: Some(ast::Enum_ {
@@ -5175,7 +5133,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 ast::Hint::new(p, full_type)
             };
 
-            let extends = could_map(p_hint, &c.extends_list, env)?;
+            let extends = could_map(&c.extends_list, env, p_hint)?;
 
             let mut enum_class = ast::Class_ {
                 annotation: (),

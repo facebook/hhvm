@@ -139,10 +139,14 @@ let subtype_method_decl
   let old_tpenv = Env.get_tpenv env in
   let old_global_tpenv = Env.get_global_tpenv env in
   (* First extend the environment with the type parameters from the supertype, along
-   * with their bounds
+   * with their bounds and the function's where constraints
    *)
   let env =
-    Phase.localize_and_add_generic_parameters ~ety_env env ft_super.ft_tparams
+    Phase.localize_and_add_generic_parameters_and_where_constraints
+      ~ety_env
+      env
+      ft_super.ft_tparams
+      ft_super.ft_where_constraints
   in
   (* Localize the function type itself *)
   let (env, locl_ft_sub) =
@@ -151,12 +155,6 @@ let subtype_method_decl
   let (env, locl_ft_super) =
     Phase.localize_ft ~ety_env ~def_pos:p_super env ft_super
   in
-  let add_where_constraints env (cstrl : locl_where_constraint list) =
-    List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-        Typing_subtype.add_constraint env ck ty1 ty2 (Some on_error))
-  in
-  (* Now extend the environment with `where` constraints from the supertype *)
-  let env = add_where_constraints env locl_ft_super.ft_where_constraints in
   (* Finally apply contra/co subtyping on the function type, and check that
    * the constraints on the supertype entail the constraints on the subtype *)
   let env =

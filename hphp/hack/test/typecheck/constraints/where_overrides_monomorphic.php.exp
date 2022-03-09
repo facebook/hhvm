@@ -1,0 +1,8 @@
+File "where_overrides_monomorphic.php", line 15, characters 19-19:
+The method `f` is not compatible with the overridden method (Typing[4341])
+  File "where_overrides_monomorphic.php", line 10, characters 28-30:
+  Expected `num`
+  File "where_overrides_monomorphic.php", line 15, characters 31-31:
+  But got `T`
+  File "where_overrides_monomorphic.php", line 15, characters 31-31:
+  This type argument to `Contra` only allows supertypes (it is contravariant)

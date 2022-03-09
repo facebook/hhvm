@@ -1320,7 +1320,7 @@ let localize_targs_and_check_constraints_with_ty_err
  * transform these into a flat list of constraints of the form (ty1,ck,ty2)
  * where ck is as, super or =
  *)
-let localize_generic_parameters_with_bounds_with_ty_err
+let localize_and_add_generic_parameters_with_bounds_with_ty_err
     ~ety_env (env : env) (tparams : decl_tparam list) =
   let env = Env.add_generic_parameters env tparams in
   let localize_bound
@@ -1336,24 +1336,24 @@ let localize_generic_parameters_with_bounds_with_ty_err
         (env, (tparam_ty, ck, ty)))
       ~combine_ty_errs:Typing_error.multiple_opt
   in
-  let (env, cstrss) =
+  let ((env, ty_err_opt), cstrss) =
     List.map_env_ty_err_opt
       env
       tparams
       ~f:localize_bound
       ~combine_ty_errs:Typing_error.multiple_opt
   in
-  (env, List.concat cstrss)
+  let add_constraint env (ty1, ck, ty2) =
+    Typing_utils.add_constraint env ck ty1 ty2 ety_env.on_error
+  in
+  let env = List.fold_left (List.concat cstrss) ~f:add_constraint ~init:env in
+  (env, ty_err_opt)
 
 let localize_and_add_where_constraints_with_ty_err
     ~ety_env (env : env) where_constraints =
-  let add_constraint (env, ty_errs) (h1, ck, h2) =
-    let ((env, e1), ty1) =
-      localize_with_ty_err env (Decl_hint.hint env.decl_env h1) ~ety_env
-    in
-    let ((env, e2), ty2) =
-      localize_with_ty_err env (Decl_hint.hint env.decl_env h2) ~ety_env
-    in
+  let localize_and_add_constraint (env, ty_errs) (ty1, ck, ty2) =
+    let ((env, e1), ty1) = localize_with_ty_err env ty1 ~ety_env in
+    let ((env, e2), ty2) = localize_with_ty_err env ty2 ~ety_env in
     let env = TUtils.add_constraint env ck ty1 ty2 ety_env.on_error in
     let ty_errs =
       Option.(
@@ -1363,7 +1363,10 @@ let localize_and_add_where_constraints_with_ty_err
     (env, ty_errs)
   in
   let (env, ty_errs) =
-    List.fold_left where_constraints ~f:add_constraint ~init:(env, [])
+    List.fold_left
+      where_constraints
+      ~f:localize_and_add_constraint
+      ~init:(env, [])
   in
   (env, Typing_error.multiple_opt ty_errs)
 
@@ -1382,23 +1385,33 @@ let sub_type_decl_with_ty_err env ty1 ty2 on_error =
   in
   (env, ty_err_opt)
 
-let add_constraints env constraints on_error =
-  let add_constraint env (ty1, ck, ty2) =
-    Typing_utils.add_constraint env ck ty1 ty2 on_error
+let localize_and_add_generic_parameters_and_where_constraints_with_ty_err
+    ~ety_env env tparams where_constraints =
+  let (env, e1) =
+    localize_and_add_generic_parameters_with_bounds_with_ty_err
+      env
+      tparams
+      ~ety_env
   in
-  List.fold_left constraints ~f:add_constraint ~init:env
-
-let localize_and_add_generic_parameters_with_ty_err ~ety_env env tparams =
-  let ((env, ty_err_opt), constraints) =
-    localize_generic_parameters_with_bounds_with_ty_err env tparams ~ety_env
+  let (env, e2) =
+    localize_and_add_where_constraints_with_ty_err
+      env
+      where_constraints
+      ~ety_env
   in
-  let env = add_constraints env constraints ety_env.on_error in
-  (env, ty_err_opt)
+  (env, Option.merge e1 e2 ~f:Typing_error.both)
 
 let localize_and_add_ast_generic_parameters_and_where_constraints_with_ty_err
-    env ~ignore_errors tparams where_constraints =
+    env
+    ~ignore_errors
+    (tparams : Nast.tparam list)
+    (where_constraints : Aast_defs.where_constraint_hint list) =
   let tparams : decl_tparam list =
     List.map tparams ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
+  in
+  let where_constraints : decl_where_constraint list =
+    List.map where_constraints ~f:(fun (h1, ck, h2) ->
+        (Decl_hint.hint env.decl_env h1, ck, Decl_hint.hint env.decl_env h2))
   in
   let ety_env =
     if ignore_errors then
@@ -1407,16 +1420,11 @@ let localize_and_add_ast_generic_parameters_and_where_constraints_with_ty_err
       empty_expand_env_with_on_error
         (Env.invalid_type_hint_assert_primary_pos_in_current_decl env)
   in
-  let (env, e1) =
-    localize_and_add_generic_parameters_with_ty_err ~ety_env env tparams
-  in
-  let (env, e2) =
-    localize_and_add_where_constraints_with_ty_err
-      ~ety_env
-      env
-      where_constraints
-  in
-  (env, Option.merge e1 e2 ~f:Typing_error.both)
+  localize_and_add_generic_parameters_and_where_constraints_with_ty_err
+    ~ety_env
+    env
+    tparams
+    where_constraints
 
 (* ** Side effecting variants **********************************************  *)
 
@@ -1539,9 +1547,14 @@ let check_where_constraints
        env
        decl_where_constraints
 
-let localize_and_add_generic_parameters ~ety_env env tparams =
+let localize_and_add_generic_parameters_and_where_constraints
+    ~ety_env env tparams where_constraints =
   discharge_ty_err
-  @@ localize_and_add_generic_parameters_with_ty_err ~ety_env env tparams
+  @@ localize_and_add_generic_parameters_and_where_constraints_with_ty_err
+       ~ety_env
+       env
+       tparams
+       where_constraints
 
 let localize_and_add_ast_generic_parameters_and_where_constraints
     env ~ignore_errors tparams cstrs =

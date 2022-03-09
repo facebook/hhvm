@@ -5,11 +5,7 @@
 
 mod opcodes;
 
-use ffi::{
-    BumpSliceMut,
-    Maybe::{self, *},
-    Slice, Str,
-};
+use ffi::{BumpSliceMut, Maybe, Slice, Str};
 use iterator::IterId;
 use label::Label;
 use local::{Local, LocalId};
@@ -48,17 +44,17 @@ pub type ByRefs<'arena> = Slice<'arena, bool>;
 
 #[derive(Clone, Debug)]
 #[repr(C)]
-pub struct FcallArgs<'arena> {
+pub struct FCallArgs<'arena> {
     pub flags: FCallArgsFlags,
+    pub async_eager_target: Label,
     pub num_args: NumParams,
     pub num_rets: NumParams,
     pub inouts: ByRefs<'arena>,
     pub readonly: ByRefs<'arena>,
-    pub async_eager_target: Maybe<Label>,
     pub context: Str<'arena>,
 }
 
-impl<'arena> FcallArgs<'arena> {
+impl<'arena> FCallArgs<'arena> {
     pub fn new(
         mut flags: FCallArgsFlags,
         num_rets: NumParams,
@@ -67,7 +63,7 @@ impl<'arena> FcallArgs<'arena> {
         readonly: Slice<'arena, bool>,
         async_eager_target: Option<Label>,
         context: Option<&'arena str>,
-    ) -> FcallArgs<'arena> {
+    ) -> Self {
         assert!(
             inouts.is_empty() || inouts.len() == num_args as usize,
             "length of inouts must be either zero or num_args"
@@ -83,28 +79,41 @@ impl<'arena> FcallArgs<'arena> {
         if context.is_some() {
             flags |= FCallArgsFlags::ExplicitContext;
         }
-        FcallArgs {
+        let async_eager_target = match async_eager_target {
+            Some(label) => {
+                flags |= FCallArgsFlags::HasAsyncEagerOffset;
+                label
+            }
+            None => Label::INVALID,
+        };
+        Self {
             flags,
             num_args,
             num_rets,
             inouts,
             readonly,
-            async_eager_target: async_eager_target.into(),
+            async_eager_target,
             context: Str::new(context.unwrap_or("").as_bytes()),
         }
     }
 
+    pub fn has_async_eager_target(&self) -> bool {
+        self.flags.contains(FCallArgsFlags::HasAsyncEagerOffset)
+    }
+
     pub fn targets(&self) -> &[Label] {
-        match &self.async_eager_target {
-            Just(x) => std::slice::from_ref(x),
-            Nothing => &[],
+        if self.has_async_eager_target() {
+            std::slice::from_ref(&self.async_eager_target)
+        } else {
+            &[]
         }
     }
 
     pub fn targets_mut(&mut self) -> &mut [Label] {
-        match &mut self.async_eager_target {
-            Just(x) => std::slice::from_mut(x),
-            Nothing => &mut [],
+        if self.has_async_eager_target() {
+            std::slice::from_mut(&mut self.async_eager_target)
+        } else {
+            &mut []
         }
     }
 }

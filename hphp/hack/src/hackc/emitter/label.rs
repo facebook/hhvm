@@ -15,6 +15,10 @@ impl std::fmt::Display for Label {
     }
 }
 
+impl Label {
+    pub const INVALID: Label = Label(u32::MAX);
+}
+
 #[derive(Default, Debug)]
 pub struct Gen {
     next: Label,

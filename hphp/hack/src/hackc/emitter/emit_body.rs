@@ -18,7 +18,7 @@ use hash::HashSet;
 use hhas_body::{HhasBody, HhasBodyEnv};
 use hhas_param::HhasParam;
 use hhas_type::HhasTypeInfo;
-use hhbc_ast::{FCallArgsFlags, FcallArgs, Instruct, IsTypeOp, ParamId, Pseudo};
+use hhbc_ast::{FCallArgs, FCallArgsFlags, Instruct, IsTypeOp, ParamId, Pseudo};
 use hhbc_id::function;
 use hhbc_string_utils as string_utils;
 use instruction_sequence::{instr, unrecoverable, Error, InstrSeq, Result};
@@ -715,7 +715,7 @@ pub fn emit_deprecation_info<'a, 'arena>(
                     instr::int(sampling_rate),
                     instr::int(error_code),
                     instr::fcallfuncd(
-                        FcallArgs::new(
+                        FCallArgs::new(
                             FCallArgsFlags::default(),
                             1,
                             3,

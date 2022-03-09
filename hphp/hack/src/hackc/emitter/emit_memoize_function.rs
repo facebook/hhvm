@@ -14,7 +14,7 @@ use hhas_function::{HhasFunction, HhasFunctionFlags};
 use hhas_param::HhasParam;
 use hhas_pos::HhasSpan;
 use hhas_type::HhasTypeInfo;
-use hhbc_ast::{FCallArgsFlags, FcallArgs, LocalRange};
+use hhbc_ast::{FCallArgs, FCallArgsFlags, LocalRange};
 use hhbc_id::function;
 use hhbc_string_utils::reified;
 use hhvm_types_ffi::ffi::Attr;
@@ -199,7 +199,7 @@ fn make_memoize_function_with_params_code<'a, 'arena, 'decl>(
     let fcall_args = {
         let mut fcall_flags = FCallArgsFlags::default();
         fcall_flags.set(FCallArgsFlags::HasGenerics, is_reified);
-        FcallArgs::new(
+        FCallArgs::new(
             fcall_flags,
             1,
             param_count as u32,
@@ -292,7 +292,7 @@ fn make_memoize_function_no_params_code<'a, 'arena, 'decl>(
     let eager_set = e.label_gen_mut().next_regular();
     let deprecation_body =
         emit_body::emit_deprecation_info(alloc, &env.scope, deprecation_info, e.systemlib())?;
-    let fcall_args = FcallArgs::new(
+    let fcall_args = FCallArgs::new(
         FCallArgsFlags::default(),
         1,
         0,

@@ -16,7 +16,7 @@ use hhas_method::{HhasMethod, HhasMethodFlags};
 use hhas_param::HhasParam;
 use hhas_pos::HhasSpan;
 use hhas_type::HhasTypeInfo;
-use hhbc_ast::{FCallArgsFlags, FcallArgs, LocalRange, SpecialClsRef, Visibility};
+use hhbc_ast::{FCallArgs, FCallArgsFlags, LocalRange, SpecialClsRef, Visibility};
 use hhbc_id::{class, method};
 use hhbc_string_utils::reified;
 use instruction_sequence::{instr, InstrSeq, Result};
@@ -288,7 +288,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
         } else {
             None
         };
-        FcallArgs::new(
+        FCallArgs::new(
             fcall_flags,
             1,
             param_count as u32,
@@ -401,7 +401,7 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
         emitter.systemlib(),
     )?;
 
-    let fcall_args = FcallArgs::new(
+    let fcall_args = FCallArgs::new(
         FCallArgsFlags::default(),
         1,
         0,
@@ -497,7 +497,7 @@ fn make_wrapper<'a, 'arena, 'decl>(
 
 fn call_cls_method<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
-    fcall_args: FcallArgs<'arena>,
+    fcall_args: FCallArgs<'arena>,
     args: &Args<'_, 'a, 'arena>,
 ) -> InstrSeq<'arena> {
     let method_id =

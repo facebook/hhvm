@@ -948,7 +948,7 @@ fn inline_gena_call<'a, 'arena, 'decl>(
             instr::nulluninit(),
             instr::cgetl(arr_local),
             instr::fcallclsmethodd(
-                FcallArgs::new(
+                FCallArgs::new(
                     FCallArgsFlags::default(),
                     1,
                     1,
@@ -1864,10 +1864,10 @@ fn emit_call_default<'a, 'arena, 'decl>(
     targs: &[ast::Targ],
     args: &[(ParamKind, ast::Expr)],
     uarg: Option<&ast::Expr>,
-    fcall_args: FcallArgs<'arena>,
+    fcall_args: FCallArgs<'arena>,
 ) -> Result<InstrSeq<'arena>> {
     scope::with_unnamed_locals(e, |em| {
-        let FcallArgs { num_rets, .. } = &fcall_args;
+        let FCallArgs { num_rets, .. } = &fcall_args;
         let num_uninit = num_rets - 1;
         let (lhs, fcall) = emit_call_lhs_and_fcall(em, env, expr, fcall_args, targs, None)?;
         let (args, inout_setters) = emit_args_inout_setters(em, env, args)?;
@@ -2001,7 +2001,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     expr: &ast::Expr,
-    mut fcall_args: FcallArgs<'arena>,
+    mut fcall_args: FCallArgs<'arena>,
     targs: &[ast::Targ],
     caller_readonly_opt: Option<&Pos>,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
@@ -2009,7 +2009,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
     use ast::{Expr, Expr_};
     let alloc = env.arena;
     let emit_generics =
-        |e: &mut Emitter<'arena, 'decl>, env, fcall_args: &mut FcallArgs<'arena>| {
+        |e: &mut Emitter<'arena, 'decl>, env, fcall_args: &mut FCallArgs<'arena>| {
             let does_not_have_non_tparam_generics = !has_non_tparam_generics_targs(env, targs);
             if does_not_have_non_tparam_generics {
                 Ok(instr::empty())
@@ -2032,7 +2032,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
         e: &mut Emitter<'arena, 'decl>,
         env,
         expr: &ast::Expr,
-        fcall_args: FcallArgs<'arena>,
+        fcall_args: FCallArgs<'arena>,
         caller_readonly_opt: Option<&Pos>,
     | -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
         let tmp = e.local_gen_mut().get_unnamed();
@@ -2115,7 +2115,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
                             match fid {
                                 None => emit_id(e, &o.as_ref().0, &id.1, null_flavor, fcall_args),
                                 Some(fid) => {
-                                    let fcall_args = FcallArgs::new(
+                                    let fcall_args = FCallArgs::new(
                                         FCallArgsFlags::default(),
                                         1,
                                         1,
@@ -2338,7 +2338,7 @@ fn emit_call_lhs_and_fcall<'a, 'arena, 'decl>(
             })
         }
         Expr_::Id(id) => {
-            let FcallArgs {
+            let FCallArgs {
                 flags, num_args, ..
             } = fcall_args;
             let fq_id = match string_utils::strip_global_ns(&id.1) {
@@ -2521,7 +2521,7 @@ fn emit_args_inout_setters<'a, 'arena, 'decl>(
 ///   exclusively) object constructors
 ///
 /// This function abstracts over these two kinds of calls: given a list of arguments and two
-/// predicates (is this an `inout` argument, is this `readonly`) we build up an `FcallArgs` for the
+/// predicates (is this an `inout` argument, is this `readonly`) we build up an `FCallArgs` for the
 /// given function call.
 fn get_fcall_args_common<'arena, T>(
     alloc: &'arena bumpalo::Bump,
@@ -2534,7 +2534,7 @@ fn get_fcall_args_common<'arena, T>(
     readonly_this: bool,
     readonly_predicate: fn(&T) -> bool,
     is_inout_arg: fn(&T) -> bool,
-) -> FcallArgs<'arena> {
+) -> FCallArgs<'arena> {
     let mut flags = FCallArgsFlags::default();
     flags.set(FCallArgsFlags::HasUnpack, uarg.is_some());
     flags.set(FCallArgsFlags::LockWhileUnwinding, lock_while_unwinding);
@@ -2545,7 +2545,7 @@ fn get_fcall_args_common<'arena, T>(
     } else {
         Slice::empty()
     };
-    FcallArgs::new(
+    FCallArgs::new(
         flags,
         1 + args.iter().filter(|e| is_inout_arg(e)).count() as u32,
         args.len() as u32,
@@ -2566,7 +2566,7 @@ fn get_fcall_args_no_inout<'arena>(
     lock_while_unwinding: bool,
     readonly_return: bool,
     readonly_this: bool,
-) -> FcallArgs<'arena> {
+) -> FCallArgs<'arena> {
     get_fcall_args_common(
         alloc,
         args,
@@ -2590,7 +2590,7 @@ fn get_fcall_args<'arena>(
     lock_while_unwinding: bool,
     readonly_return: bool,
     readonly_this: bool,
-) -> FcallArgs<'arena> {
+) -> FCallArgs<'arena> {
     get_fcall_args_common(
         alloc,
         args,

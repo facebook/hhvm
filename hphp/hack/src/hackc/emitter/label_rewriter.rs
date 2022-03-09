@@ -91,7 +91,7 @@ fn rewrite_params_and_body<'arena>(
 }
 
 pub fn relabel_function<'arena>(
-    params: &mut Vec<(HhasParam<'arena>, Option<(Label, ast::Expr)>)>,
+    params: &mut [(HhasParam<'arena>, Option<(Label, ast::Expr)>)],
     body: &mut InstrSeq<'arena>,
 ) {
     let label_to_offset = create_label_to_offset_map(body);

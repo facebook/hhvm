@@ -6,7 +6,7 @@
 use emit_fatal::raise_fatal_runtime;
 use ffi::Str;
 use hhas_param::HhasParam;
-use hhbc_ast::{FCallArgsFlags, FcallArgs};
+use hhbc_ast::{FCallArgs, FCallArgsFlags};
 use hhbc_id::function;
 use instruction_sequence::{instr, InstrSeq, Result};
 use label::Label;
@@ -93,7 +93,7 @@ pub fn get_implicit_context_memo_key<'arena>(
         instr::nulluninit(),
         instr::nulluninit(),
         instr::fcallfuncd(
-            FcallArgs::new(
+            FCallArgs::new(
                 FCallArgsFlags::default(),
                 1,
                 0,

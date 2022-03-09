@@ -946,7 +946,7 @@ fn print_instructions(
 
 fn print_fcall_args(
     w: &mut dyn Write,
-    FcallArgs {
+    args @ FCallArgs {
         flags,
         num_args,
         num_rets,
@@ -954,7 +954,7 @@ fn print_fcall_args(
         readonly,
         async_eager_target,
         context,
-    }: &FcallArgs<'_>,
+    }: &FCallArgs<'_>,
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     angle(w, |w| {
@@ -978,8 +978,8 @@ fn print_fcall_args(
         })
     })?;
     w.write_all(b" ")?;
-    if let Just(label) = async_eager_target {
-        print_label(w, label, dv_labels)?;
+    if args.has_async_eager_target() {
+        print_label(w, async_eager_target, dv_labels)?;
     } else {
         w.write_all(b"-")?;
     }

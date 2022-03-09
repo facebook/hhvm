@@ -482,7 +482,7 @@ fn emit_using<'a, 'arena, 'decl>(
                     instr::cgetl(local),
                     instr::nulluninit(),
                     instr::fcallobjmethodd(
-                        FcallArgs::new(
+                        FCallArgs::new(
                             FCallArgsFlags::default(),
                             1,
                             0,
@@ -973,7 +973,7 @@ fn emit_foreach_await<'a, 'arena, 'decl>(
             instr::cgetl(iter_temp_local),
             instr::nulluninit(),
             instr::fcallobjmethodd(
-                FcallArgs::new(
+                FCallArgs::new(
                     FCallArgsFlags::default(),
                     1,
                     0,

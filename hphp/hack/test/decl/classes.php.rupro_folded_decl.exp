@@ -1,0 +1,378 @@
+--- ocaml
++++ rupro
+@@ -1,367 +1,330 @@
+-{ Decl_defs.dc_need_init = true; dc_abstract = false; dc_final = false;
++{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
+   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
+   dc_module = None; dc_name = "\\MyClass"; dc_pos = [3:7-14];
+   dc_tparams = []; dc_where_constraints = []; dc_substs = {};
+   dc_consts =
+   { "class" ->
+     { Typing_defs.cc_synthesized = true;
+       cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:7-14];
+       cc_type =
+       (Rclass_class ([3:7-14]),
+        (Tapply (([3:7-14], "\\HH\\classname"),
+           [(Rclass_class ([3:7-14]), Tthis)])));
+       cc_origin = "\\MyClass"; cc_refs = [] } };
+   dc_typeconsts = {};
+   dc_props =
+   { "instanceProperty" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> true;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> true;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\MyClass"; elt_visibility = Typing_defs_core.Vpublic;
+       elt_deprecated = None };
+     "p" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> true;
+         "Lateinit" -> true;
+         "Lsb" -> false;
+         "NeedsInit" -> true;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\MyClass"; elt_visibility = Typing_defs_core.Vpublic;
+       elt_deprecated = None };
+     "protectedProperty" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> true;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> true;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\MyClass";
+       elt_visibility = (Typing_defs_core.Vprotected "\\MyClass");
+       elt_deprecated = None } };
+   dc_sprops =
+   { "$staticProperty" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> true;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+-        "NeedsInit" -> false;
++        "NeedsInit" -> true;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\MyClass";
+       elt_visibility = (Typing_defs_core.Vprivate "\\MyClass");
+       elt_deprecated = None } };
+   dc_methods =
+   { "async_generator" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> false;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> false;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\MyClass"; elt_visibility = Typing_defs_core.Vpublic;
+       elt_deprecated = None };
+     "privateMethod" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> false;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> false;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\MyClass";
+       elt_visibility = (Typing_defs_core.Vprivate "\\MyClass");
+       elt_deprecated = None };
+     "protectedMethod" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> false;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> false;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\MyClass";
+       elt_visibility = (Typing_defs_core.Vprotected "\\MyClass");
+       elt_deprecated = None };
+     "publicMethod" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> false;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> false;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\MyClass"; elt_visibility = Typing_defs_core.Vpublic;
+       elt_deprecated = None } };
+-  dc_smethods = {};
+-  dc_construct =
+-  ((Some { Decl_defs.elt_flags =
+-           { "Abstract" -> false;
+-             "Const" -> false;
+-             "Dynamicallycallable" -> false;
+-             "Final" -> false;
+-             "Lateinit" -> false;
+-             "Lsb" -> false;
+-             "NeedsInit" -> false;
+-             "ReadonlyProp" -> false;
+-             "SuperfluousOverride" -> false;
+-             "SupportDynamicType" -> false;
+-             "Synthesized" -> false;
+-             "XaHasDefault" -> false;
+-             "XaTagLateinit" -> false;
+-             "XaTagRequired" -> false };
+-           elt_origin = "\\MyClass";
+-           elt_visibility = Typing_defs_core.Vpublic; elt_deprecated = None }),
+-   Typing_defs_core.Inconsistent);
++  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+   dc_decl_errors = <opaque>; dc_condition_types = {} }
+ { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
+   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+   dc_kind = (Cclass Abstract); dc_is_xhp = false; dc_has_xhp_keyword = false;
+   dc_module = None; dc_name = "\\MyAbstractClass"; dc_pos = [23:16-31];
+   dc_tparams = []; dc_where_constraints = []; dc_substs = {};
+   dc_consts =
+   { "class" ->
+     { Typing_defs.cc_synthesized = true;
+       cc_abstract = Typing_defs.CCConcrete; cc_pos = [23:16-31];
+       cc_type =
+       (Rclass_class ([23:16-31]),
+        (Tapply (([23:16-31], "\\HH\\classname"),
+           [(Rclass_class ([23:16-31]), Tthis)])));
+       cc_origin = "\\MyAbstractClass"; cc_refs = [] } };
+   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
+   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+   dc_decl_errors = <opaque>; dc_condition_types = {} }
+ { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = true;
+   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
+   dc_module = None; dc_name = "\\MyFinalClass"; dc_pos = [24:13-25];
+   dc_tparams = []; dc_where_constraints = []; dc_substs = {};
+   dc_consts =
+   { "class" ->
+     { Typing_defs.cc_synthesized = true;
+       cc_abstract = Typing_defs.CCConcrete; cc_pos = [24:13-25];
+       cc_type =
+       (Rclass_class ([24:13-25]),
+        (Tapply (([24:13-25], "\\HH\\classname"),
+           [(Rclass_class ([24:13-25]), Tthis)])));
+       cc_origin = "\\MyFinalClass"; cc_refs = [] } };
+   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
+-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.FinalClass);
++  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+   dc_decl_errors = <opaque>; dc_condition_types = {} }
+ { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = true;
+   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+   dc_kind = (Cclass Abstract); dc_is_xhp = false; dc_has_xhp_keyword = false;
+   dc_module = None; dc_name = "\\MyStaticClass"; dc_pos = [25:22-35];
+   dc_tparams = []; dc_where_constraints = []; dc_substs = {};
+   dc_consts =
+   { "class" ->
+     { Typing_defs.cc_synthesized = true;
+       cc_abstract = Typing_defs.CCConcrete; cc_pos = [25:22-35];
+       cc_type =
+       (Rclass_class ([25:22-35]),
+        (Tapply (([25:22-35], "\\HH\\classname"),
+           [(Rclass_class ([25:22-35]), Tthis)])));
+       cc_origin = "\\MyStaticClass"; cc_refs = [] } };
+   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
+-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.FinalClass);
++  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+   dc_decl_errors = <opaque>; dc_condition_types = {} }
+-{ Decl_defs.dc_need_init = true; dc_abstract = false; dc_final = false;
++{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
+   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
+   dc_module = None; dc_name = "\\MyConstructorPropertiesClass";
+   dc_pos = [27:7-35]; dc_tparams = []; dc_where_constraints = [];
+   dc_substs = {};
+   dc_consts =
+   { "class" ->
+     { Typing_defs.cc_synthesized = true;
+       cc_abstract = Typing_defs.CCConcrete; cc_pos = [27:7-35];
+       cc_type =
+       (Rclass_class ([27:7-35]),
+        (Tapply (([27:7-35], "\\HH\\classname"),
+           [(Rclass_class ([27:7-35]), Tthis)])));
+       cc_origin = "\\MyConstructorPropertiesClass"; cc_refs = [] } };
+   dc_typeconsts = {};
+   dc_props =
+   { "hasDefault" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> true;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> true;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\MyConstructorPropertiesClass";
+       elt_visibility = Typing_defs_core.Vpublic; elt_deprecated = None };
+     "private" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> true;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> true;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\MyConstructorPropertiesClass";
+       elt_visibility =
+       (Typing_defs_core.Vprivate "\\MyConstructorPropertiesClass");
+       elt_deprecated = None };
+     "protected" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> true;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> true;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\MyConstructorPropertiesClass";
+       elt_visibility =
+       (Typing_defs_core.Vprotected "\\MyConstructorPropertiesClass");
+       elt_deprecated = None };
+     "public" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> true;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> true;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\MyConstructorPropertiesClass";
+       elt_visibility = Typing_defs_core.Vpublic; elt_deprecated = None } };
+   dc_sprops = {}; dc_methods = {}; dc_smethods = {};
+-  dc_construct =
+-  ((Some { Decl_defs.elt_flags =
+-           { "Abstract" -> false;
+-             "Const" -> false;
+-             "Dynamicallycallable" -> false;
+-             "Final" -> false;
+-             "Lateinit" -> false;
+-             "Lsb" -> false;
+-             "NeedsInit" -> false;
+-             "ReadonlyProp" -> false;
+-             "SuperfluousOverride" -> false;
+-             "SupportDynamicType" -> false;
+-             "Synthesized" -> false;
+-             "XaHasDefault" -> false;
+-             "XaTagLateinit" -> false;
+-             "XaTagRequired" -> false };
+-           elt_origin = "\\MyConstructorPropertiesClass";
+-           elt_visibility = Typing_defs_core.Vpublic; elt_deprecated = None }),
+-   Typing_defs_core.Inconsistent);
+-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
++  dc_construct = (None, Typing_defs_core.Inconsistent); dc_ancestors = {};
++  dc_support_dynamic_type = false; dc_req_ancestors = [];
+   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+   dc_decl_errors = <opaque>; dc_condition_types = {} }

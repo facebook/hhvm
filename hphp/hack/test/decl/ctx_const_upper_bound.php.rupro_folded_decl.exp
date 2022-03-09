@@ -1,0 +1,103 @@
+{ Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
+  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+  dc_kind = (Cclass Abstract); dc_is_xhp = false; dc_has_xhp_keyword = false;
+  dc_module = None; dc_name = "\\C"; dc_pos = [3:16-17]; dc_tparams = [];
+  dc_where_constraints = []; dc_substs = {};
+  dc_consts =
+  { "C" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = (Typing_defs.CCAbstract false); cc_pos = [4:22-23];
+      cc_type =
+      (Rwitness_from_decl ([4:22-23]),
+       (Tapply (([4:22-23], "\\HH\\TypeStructure"),
+          [(Rwitness_from_decl ([4:22-23]),
+            (Taccess
+               ((Rwitness_from_decl ([4:22-23]), Tthis), [([4:22-23], "C")])))
+            ]
+          )));
+      cc_origin = "\\C"; cc_refs = [] };
+    "class" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:16-17];
+      cc_type =
+      (Rclass_class ([3:16-17]),
+       (Tapply (([3:16-17], "\\HH\\classname"),
+          [(Rclass_class ([3:16-17]), Tthis)])));
+      cc_origin = "\\C"; cc_refs = [] } };
+  dc_typeconsts =
+  { "C" ->
+    { Typing_defs.ttc_synthesized = false; ttc_name = ([4:22-23], "C");
+      ttc_kind =
+      (Typing_defs.TCAbstract
+         { Typing_defs.atc_as_constraint =
+           (Some (Rhint ([4:27-40]),
+                  (Tintersection
+                     [(Rhint ([4:28-39]),
+                       (Tapply (([4:28-39], "\\HH\\Contexts\\write_props"),
+                          [])))
+                       ])));
+           atc_super_constraint = None; atc_default = None });
+      ttc_origin = "\\C"; ttc_enforceable = ([Pos.none], false);
+      ttc_reifiable = None; ttc_concretized = false; ttc_is_ctx = true } };
+  dc_props = {}; dc_sprops = {}; dc_methods = {}; dc_smethods = {};
+  dc_construct = (None, Typing_defs_core.Inconsistent); dc_ancestors = {};
+  dc_support_dynamic_type = false; dc_req_ancestors = [];
+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+  dc_decl_errors = <opaque>; dc_condition_types = {} }
+{ Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
+  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+  dc_kind = (Cclass Abstract); dc_is_xhp = false; dc_has_xhp_keyword = false;
+  dc_module = None; dc_name = "\\D"; dc_pos = [7:16-17]; dc_tparams = [];
+  dc_where_constraints = []; dc_substs = {};
+  dc_consts =
+  { "C" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = (Typing_defs.CCAbstract true); cc_pos = [8:22-23];
+      cc_type =
+      (Rwitness_from_decl ([8:22-23]),
+       (Tapply (([8:22-23], "\\HH\\TypeStructure"),
+          [(Rwitness_from_decl ([8:22-23]),
+            (Taccess
+               ((Rwitness_from_decl ([8:22-23]), Tthis), [([8:22-23], "C")])))
+            ]
+          )));
+      cc_origin = "\\D"; cc_refs = [] };
+    "class" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [7:16-17];
+      cc_type =
+      (Rclass_class ([7:16-17]),
+       (Tapply (([7:16-17], "\\HH\\classname"),
+          [(Rclass_class ([7:16-17]), Tthis)])));
+      cc_origin = "\\D"; cc_refs = [] } };
+  dc_typeconsts =
+  { "C" ->
+    { Typing_defs.ttc_synthesized = false; ttc_name = ([8:22-23], "C");
+      ttc_kind =
+      (Typing_defs.TCAbstract
+         { Typing_defs.atc_as_constraint =
+           (Some (Rhint ([8:27-40]),
+                  (Tintersection
+                     [(Rhint ([8:28-39]),
+                       (Tapply (([8:28-39], "\\HH\\Contexts\\write_props"),
+                          [])))
+                       ])));
+           atc_super_constraint = None;
+           atc_default =
+           (Some (Rhint ([8:43-53]),
+                  (Tintersection
+                     [(Rhint ([8:44-52]),
+                       (Tapply (([8:44-52], "\\HH\\Contexts\\defaults"), [])))
+                       ])))
+           });
+      ttc_origin = "\\D"; ttc_enforceable = ([Pos.none], false);
+      ttc_reifiable = None; ttc_concretized = false; ttc_is_ctx = true } };
+  dc_props = {}; dc_sprops = {}; dc_methods = {}; dc_smethods = {};
+  dc_construct = (None, Typing_defs_core.Inconsistent); dc_ancestors = {};
+  dc_support_dynamic_type = false; dc_req_ancestors = [];
+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+  dc_decl_errors = <opaque>; dc_condition_types = {} }
+
+They matched!

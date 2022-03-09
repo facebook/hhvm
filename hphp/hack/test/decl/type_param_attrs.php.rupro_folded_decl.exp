@@ -1,0 +1,80 @@
+--- ocaml
++++ rupro
+@@ -1,74 +1,51 @@
+-{ Decl_defs.dc_need_init = true; dc_abstract = false; dc_final = false;
++{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
+   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
+   dc_module = None; dc_name = "\\A"; dc_pos = [3:7-8]; dc_tparams = [];
+   dc_where_constraints = []; dc_substs = {};
+   dc_consts =
+   { "class" ->
+     { Typing_defs.cc_synthesized = true;
+       cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:7-8];
+       cc_type =
+       (Rclass_class ([3:7-8]),
+        (Tapply (([3:7-8], "\\HH\\classname"),
+           [(Rclass_class ([3:7-8]), Tthis)])));
+       cc_origin = "\\A"; cc_refs = [] } };
+   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
+-  dc_smethods = {};
+-  dc_construct =
+-  ((Some { Decl_defs.elt_flags =
+-           { "Abstract" -> false;
+-             "Const" -> false;
+-             "Dynamicallycallable" -> false;
+-             "Final" -> false;
+-             "Lateinit" -> false;
+-             "Lsb" -> false;
+-             "NeedsInit" -> false;
+-             "ReadonlyProp" -> false;
+-             "SuperfluousOverride" -> false;
+-             "SupportDynamicType" -> false;
+-             "Synthesized" -> false;
+-             "XaHasDefault" -> false;
+-             "XaTagLateinit" -> false;
+-             "XaTagRequired" -> false };
+-           elt_origin = "\\A"; elt_visibility = Typing_defs_core.Vpublic;
+-           elt_deprecated = None }),
+-   Typing_defs_core.Inconsistent);
+-  dc_ancestors =
+-  { "\\HH\\TypeParameterAttribute" ->
+-    (Rhint ([3:20-45]),
+-     (Tapply (([3:20-45], "\\HH\\TypeParameterAttribute"), []))) };
+-  dc_support_dynamic_type = false; dc_req_ancestors = [];
++  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
++  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+   dc_decl_errors = <opaque>; dc_condition_types = {} }
+ { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
+   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
+   dc_module = None; dc_name = "\\C"; dc_pos = [7:7-8];
+   dc_tparams =
+   [{ Typing_defs_core.tp_variance = Invariant; tp_name = ([7:36-38], "T1");
+      tp_tparams = []; tp_constraints = []; tp_reified = Reified;
+      tp_user_attributes =
+      [{ Typing_defs_core.ua_name = ([7:26-27], "\\A");
+         ua_classname_params = [] };
+        { Typing_defs_core.ua_name = ([7:11-24], "__Enforceable");
+          ua_classname_params = [] }
+        ]
+      }
+     ];
+   dc_where_constraints = []; dc_substs = {};
+   dc_consts =
+   { "class" ->
+     { Typing_defs.cc_synthesized = true;
+       cc_abstract = Typing_defs.CCConcrete; cc_pos = [7:7-8];
+       cc_type =
+       (Rclass_class ([7:7-8]),
+        (Tapply (([7:7-8], "\\HH\\classname"),
+           [(Rclass_class ([7:7-8]), Tthis)])));
+       cc_origin = "\\C"; cc_refs = [] } };
+   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
+   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+   dc_decl_errors = <opaque>; dc_condition_types = {} }

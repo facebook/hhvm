@@ -344,3 +344,6 @@ let local_changes_push_sharedmem_stack () =
 
 let local_changes_pop_sharedmem_stack () =
   Decl_store.((get ()).pop_local_changes ())
+
+let declare_folded_class_in_file_FOR_TESTS_ONLY ctx fn cid =
+  fst (declare_folded_class_in_file ctx fn cid)

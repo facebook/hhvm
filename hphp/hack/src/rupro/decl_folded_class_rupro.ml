@@ -6,6 +6,8 @@
  *
  *)
 
-external decl_folded_class_in_file :
-  Relative_path.t -> Decl_defs.decl_class_type list
-  = "decl_folded_class_in_file_ffi"
+external fold_classes_in_files :
+  root:string ->
+  Relative_path.t list ->
+  Decl_defs.decl_class_type list Relative_path.Map.t
+  = "fold_classes_in_files_ffi"

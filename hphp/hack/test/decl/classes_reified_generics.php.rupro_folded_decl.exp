@@ -1,0 +1,95 @@
+{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
+  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
+  dc_module = None; dc_name = "\\C"; dc_pos = [3:7-8];
+  dc_tparams =
+  [{ Typing_defs_core.tp_variance = Invariant; tp_name = ([3:15-16], "T");
+     tp_tparams = []; tp_constraints = []; tp_reified = Reified;
+     tp_user_attributes = [] }
+    ];
+  dc_where_constraints = []; dc_substs = {};
+  dc_consts =
+  { "class" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:7-8];
+      cc_type =
+      (Rclass_class ([3:7-8]),
+       (Tapply (([3:7-8], "\\HH\\classname"),
+          [(Rclass_class ([3:7-8]), Tthis)])));
+      cc_origin = "\\C"; cc_refs = [] } };
+  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
+  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+  dc_decl_errors = <opaque>; dc_condition_types = {} }
+{ Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
+  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+  dc_kind = (Cclass Abstract); dc_is_xhp = false; dc_has_xhp_keyword = false;
+  dc_module = None; dc_name = "\\X"; dc_pos = [5:16-17]; dc_tparams = [];
+  dc_where_constraints = []; dc_substs = {};
+  dc_consts =
+  { "TFoo" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [7:14-18];
+      cc_type =
+      (Rwitness_from_decl ([7:14-18]),
+       (Tapply (([7:14-18], "\\HH\\TypeStructure"),
+          [(Rwitness_from_decl ([7:14-18]),
+            (Taccess
+               ((Rwitness_from_decl ([7:14-18]), Tthis),
+                [([7:14-18], "TFoo")])))
+            ]
+          )));
+      cc_origin = "\\X"; cc_refs = [] };
+    "X2" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [9:14-16];
+      cc_type =
+      (Rwitness_from_decl ([9:14-16]),
+       (Tapply (([9:14-16], "\\HH\\TypeStructure"),
+          [(Rwitness_from_decl ([9:14-16]),
+            (Taccess
+               ((Rwitness_from_decl ([9:14-16]), Tthis), [([9:14-16], "X2")])))
+            ]
+          )));
+      cc_origin = "\\X"; cc_refs = [] };
+    "class" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [5:16-17];
+      cc_type =
+      (Rclass_class ([5:16-17]),
+       (Tapply (([5:16-17], "\\HH\\classname"),
+          [(Rclass_class ([5:16-17]), Tthis)])));
+      cc_origin = "\\X"; cc_refs = [] } };
+  dc_typeconsts =
+  { "TFoo" ->
+    { Typing_defs.ttc_synthesized = false; ttc_name = ([7:14-18], "TFoo");
+      ttc_kind =
+      (Typing_defs.TCConcrete
+         { Typing_defs.tc_type = (Rhint ([7:21-24]), (Tprim Tint)) });
+      ttc_origin = "\\X"; ttc_enforceable = ([Pos.none], false);
+      ttc_reifiable = (Some [6:5-16]); ttc_concretized = false;
+      ttc_is_ctx = false };
+    "X2" ->
+    { Typing_defs.ttc_synthesized = false; ttc_name = ([9:14-16], "X2");
+      ttc_kind =
+      (Typing_defs.TCConcrete
+         { Typing_defs.tc_type =
+           (Rhint ([9:19-32]),
+            (Tapply (([9:19-20], "\\C"),
+               [(Rhint ([9:21-31]),
+                 (Taccess ((Rhint ([9:21-31]), Tthis), [([9:27-31], "TFoo")])))
+                 ]
+               )))
+           });
+      ttc_origin = "\\X"; ttc_enforceable = ([Pos.none], false);
+      ttc_reifiable = None; ttc_concretized = false; ttc_is_ctx = false } };
+  dc_props = {}; dc_sprops = {}; dc_methods = {}; dc_smethods = {};
+  dc_construct = (None, Typing_defs_core.Inconsistent); dc_ancestors = {};
+  dc_support_dynamic_type = false; dc_req_ancestors = [];
+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+  dc_decl_errors = <opaque>; dc_condition_types = {} }
+
+They matched!

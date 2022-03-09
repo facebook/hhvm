@@ -1,0 +1,246 @@
+--- ocaml
++++ rupro
+@@ -1,235 +1,224 @@
+ { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
+   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+   dc_kind = Ctrait; dc_is_xhp = false; dc_has_xhp_keyword = false;
+   dc_module = None; dc_name = "\\TMyTrait"; dc_pos = [3:7-15];
+   dc_tparams = []; dc_where_constraints = []; dc_substs = {};
+   dc_consts =
+   { "class" ->
+     { Typing_defs.cc_synthesized = true;
+       cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:7-15];
+       cc_type =
+       (Rclass_class ([3:7-15]),
+        (Tapply (([3:7-15], "\\HH\\classname"),
+           [(Rclass_class ([3:7-15]), Tthis)])));
+       cc_origin = "\\TMyTrait"; cc_refs = [] } };
+   dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
+   dc_methods =
+   { "doNothing" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> false;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> false;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\TMyTrait"; elt_visibility = Typing_defs_core.Vpublic;
+       elt_deprecated = None } };
+   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+   dc_decl_errors = <opaque>; dc_condition_types = {} }
+ { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
+   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+   dc_kind = Ctrait; dc_is_xhp = false; dc_has_xhp_keyword = false;
+   dc_module = None; dc_name = "\\TMyTrait2"; dc_pos = [7:7-16];
+   dc_tparams = []; dc_where_constraints = [];
+   dc_substs =
+   { "\\TMyTrait" ->
+     { Decl_defs.sc_subst = {}; sc_class_context = "\\TMyTrait2";
+       sc_from_req_extends = false } };
+   dc_consts =
+   { "class" ->
+     { Typing_defs.cc_synthesized = true;
+       cc_abstract = Typing_defs.CCConcrete; cc_pos = [7:7-16];
+       cc_type =
+       (Rclass_class ([7:7-16]),
+        (Tapply (([7:7-16], "\\HH\\classname"),
+           [(Rclass_class ([7:7-16]), Tthis)])));
+       cc_origin = "\\TMyTrait2"; cc_refs = [] } };
+   dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
+   dc_methods =
+   { "doMoreNothing" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> false;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> false;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\TMyTrait2"; elt_visibility = Typing_defs_core.Vpublic;
+       elt_deprecated = None };
+     "doNothing" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> false;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> false;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\TMyTrait"; elt_visibility = Typing_defs_core.Vpublic;
+       elt_deprecated = None } };
+   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+-  dc_ancestors =
+-  { "\\TMyTrait" ->
+-    (Rhint ([8:7-15]), (Tapply (([8:7-15], "\\TMyTrait"), []))) };
+-  dc_support_dynamic_type = false; dc_req_ancestors = [];
+-  dc_req_ancestors_extends = {}; dc_extends = { "\\TMyTrait" };
+-  dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
+-  dc_enum_type = None; dc_decl_errors = <opaque>; dc_condition_types = {} }
++  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
++  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
++  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
++  dc_decl_errors = <opaque>; dc_condition_types = {} }
+ { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
+   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+   dc_kind = Ctrait; dc_is_xhp = false; dc_has_xhp_keyword = false;
+   dc_module = None; dc_name = "\\TMyTrait3"; dc_pos = [13:7-16];
+   dc_tparams = []; dc_where_constraints = []; dc_substs = {};
+   dc_consts =
+   { "class" ->
+     { Typing_defs.cc_synthesized = true;
+       cc_abstract = Typing_defs.CCConcrete; cc_pos = [13:7-16];
+       cc_type =
+       (Rclass_class ([13:7-16]),
+        (Tapply (([13:7-16], "\\HH\\classname"),
+           [(Rclass_class ([13:7-16]), Tthis)])));
+       cc_origin = "\\TMyTrait3"; cc_refs = [] } };
+   dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
+   dc_methods =
+   { "doYetMoreNothing" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> false;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> false;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\TMyTrait3"; elt_visibility = Typing_defs_core.Vpublic;
+       elt_deprecated = None } };
+   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+   dc_decl_errors = <opaque>; dc_condition_types = {} }
+ { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
+   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
+   dc_module = None; dc_name = "\\MyTraitUsingClass"; dc_pos = [17:7-24];
+   dc_tparams = []; dc_where_constraints = [];
+   dc_substs =
+   { "\\TMyTrait" ->
+     { Decl_defs.sc_subst = {}; sc_class_context = "\\TMyTrait2";
+       sc_from_req_extends = false };
+     "\\TMyTrait2" ->
+     { Decl_defs.sc_subst = {}; sc_class_context = "\\MyTraitUsingClass";
+       sc_from_req_extends = false };
+     "\\TMyTrait3" ->
+     { Decl_defs.sc_subst = {}; sc_class_context = "\\MyTraitUsingClass";
+       sc_from_req_extends = false } };
+   dc_consts =
+   { "class" ->
+     { Typing_defs.cc_synthesized = true;
+       cc_abstract = Typing_defs.CCConcrete; cc_pos = [17:7-24];
+       cc_type =
+       (Rclass_class ([17:7-24]),
+        (Tapply (([17:7-24], "\\HH\\classname"),
+           [(Rclass_class ([17:7-24]), Tthis)])));
+       cc_origin = "\\MyTraitUsingClass"; cc_refs = [] } };
+   dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
+   dc_methods =
+   { "doMoreNothing" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> false;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> false;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\TMyTrait2"; elt_visibility = Typing_defs_core.Vpublic;
+       elt_deprecated = None };
+     "doNothing" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> false;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> false;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\TMyTrait"; elt_visibility = Typing_defs_core.Vpublic;
+       elt_deprecated = None };
+     "doYetMoreNothing" ->
+     { Decl_defs.elt_flags =
+       { "Abstract" -> false;
+         "Const" -> false;
+         "Dynamicallycallable" -> false;
+         "Final" -> false;
+         "Lateinit" -> false;
+         "Lsb" -> false;
+         "NeedsInit" -> false;
+         "ReadonlyProp" -> false;
+         "SuperfluousOverride" -> false;
+         "SupportDynamicType" -> false;
+         "Synthesized" -> false;
+         "XaHasDefault" -> false;
+         "XaTagLateinit" -> false;
+         "XaTagRequired" -> false };
+       elt_origin = "\\TMyTrait3"; elt_visibility = Typing_defs_core.Vpublic;
+       elt_deprecated = None } };
+   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+-  dc_ancestors =
+-  { "\\TMyTrait" ->
+-    (Rhint ([8:7-15]), (Tapply (([8:7-15], "\\TMyTrait"), [])));
+-    "\\TMyTrait2" ->
+-    (Rhint ([18:7-16]), (Tapply (([18:7-16], "\\TMyTrait2"), [])));
+-    "\\TMyTrait3" ->
+-    (Rhint ([19:7-16]), (Tapply (([19:7-16], "\\TMyTrait3"), []))) };
+-  dc_support_dynamic_type = false; dc_req_ancestors = [];
+-  dc_req_ancestors_extends = {};
+-  dc_extends = { "\\TMyTrait"; "\\TMyTrait2"; "\\TMyTrait3" };
+-  dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
+-  dc_enum_type = None; dc_decl_errors = <opaque>; dc_condition_types = {} }
++  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
++  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
++  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
++  dc_decl_errors = <opaque>; dc_condition_types = {} }

@@ -1,0 +1,22 @@
+{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
+  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+  dc_kind = (Cclass Concrete); dc_is_xhp = true; dc_has_xhp_keyword = true;
+  dc_module = None; dc_name = "\\foo"; dc_pos = [3:11-14]; dc_tparams = [];
+  dc_where_constraints = []; dc_substs = {};
+  dc_consts =
+  { "class" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:11-14];
+      cc_type =
+      (Rclass_class ([3:11-14]),
+       (Tapply (([3:11-14], "\\HH\\classname"),
+          [(Rclass_class ([3:11-14]), Tthis)])));
+      cc_origin = "\\foo"; cc_refs = [] } };
+  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
+  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+  dc_decl_errors = <opaque>; dc_condition_types = {} }
+
+They matched!

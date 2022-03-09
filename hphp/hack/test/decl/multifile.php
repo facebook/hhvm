@@ -1,9 +1,9 @@
 //// A.php
 <?hh // strict
 
-type A = int;
+class A {}
 
 //// B.php
 <?hh // strict
 
-type B = A;
+class B extends A {}

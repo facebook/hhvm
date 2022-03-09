@@ -4336,15 +4336,17 @@ module Primary = struct
       [] )
 
   let unbound_name_typing pos name class_exists =
+    let (_, start_column) = Pos.line_column pos in
+    
     let quickfixes =
       match class_exists with
       | true ->
-        let subst = String.sub name ~pos:1 ~len:(String.length name - 1) in
+        let newpos = Pos.set_col_end start_column pos in
         [
           Quickfix.make
             ~title:("Add " ^ Markdown_lite.md_codify "new")
-            ~new_text:("new " ^ subst)
-            pos;
+            ~new_text:("new ")
+            newpos;
         ]
       | false -> []
     in

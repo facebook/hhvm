@@ -414,10 +414,3 @@ impl<'a> ToOxidized<'a> for folded::FoldedElement {
         })
     }
 }
-
-impl<R: Reason> ocamlrep::ToOcamlRep for folded::FoldedClass<R> {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
-        let arena = &bumpalo::Bump::new();
-        self.to_oxidized(arena).to_ocamlrep(alloc)
-    }
-}

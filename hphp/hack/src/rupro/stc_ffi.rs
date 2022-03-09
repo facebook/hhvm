@@ -20,7 +20,6 @@ use hackrs::typing_decl_provider::FoldingTypingDeclProvider;
 use hackrs_test_utils::cache::{
     make_non_eviction_shallow_decl_cache, NonEvictingCache, NonEvictingLocalCache,
 };
-use ocamlrep_derive::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
 use pos::{Prefix, RelativePath, RelativePathCtx};
 use std::path::PathBuf;
@@ -31,20 +30,26 @@ use structopt::StructOpt;
 // fn create_nast(path: PathBuf) -> oxidized::aast::Program<(), ()> {}
 
 fn print_tast<R: Reason>(opts: &GlobalOptions, tast: &tast::Program<R>) {
-    #[derive(ToOcamlRep)]
-    struct StcFfiPrintTastArgs<'a, R: Reason> {
-        opts: &'a GlobalOptions,
-        tast: &'a tast::Program<R>,
-    }
-
-    let stc_ffi_print_tast = unsafe { ocaml_runtime::named_value("stc_ffi_print_tast").unwrap() };
-
-    let args = StcFfiPrintTastArgs { opts, tast };
-
     unsafe {
-        ocaml_runtime::callback_exn(stc_ffi_print_tast, ocamlrep_ocamlpool::to_ocaml(&args))
-            .unwrap();
+        let stc_ffi_print_tast = ocaml_runtime::named_value("stc_ffi_print_tast").unwrap();
+        ocaml_runtime::callback_exn(stc_ffi_print_tast, to_ocaml(&(opts, tast))).unwrap();
     }
+}
+
+/// Like `ocamlrep_ocamlpool::to_ocaml`, but uses `ocamlrep::Allocator::add`
+/// rather than `ocamlrep::Allocator::add_root`, allowing us to use `ToOxidized`
+/// in our implementation of `ToOcamlRep` (see impl of `ToOcamlRep` for
+/// `typing_defs::Ty`). This means no value-sharing is preserved on the OCaml
+/// side.
+///
+/// # Safety
+///
+/// No other thread may interact with the OCaml runtime or ocamlpool library
+/// during the execution of `to_ocaml`.
+unsafe fn to_ocaml<T: ocamlrep::ToOcamlRep>(value: &T) -> usize {
+    let mut pool = ocamlrep_ocamlpool::Pool::new();
+    let result = pool.add(value);
+    result.to_bits()
 }
 
 #[derive(StructOpt, Debug)]

@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hcons::Conser;
-use ocamlrep::{Allocator, OpaqueValue, ToOcamlRep};
 use once_cell::sync::Lazy;
 use pos::{BPos, NPos, Pos, Positioned, Symbol, ToOxidized, TypeConstName, TypeName};
 use std::hash::Hash;
@@ -20,7 +19,6 @@ pub trait Reason:
     Eq
     + Hash
     + Clone
-    + ToOcamlRep
     + Walkable<Self>
     + std::fmt::Debug
     + Send
@@ -583,13 +581,6 @@ impl<'a> ToOxidized<'a> for BReason {
     }
 }
 
-impl ToOcamlRep for BReason {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
-        let arena = &bumpalo::Bump::new();
-        self.to_oxidized(arena).to_ocamlrep(alloc)
-    }
-}
-
 /// A stateless sentinal Reason.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct NReason;
@@ -648,12 +639,5 @@ impl<'a> ToOxidized<'a> for NReason {
 
     fn to_oxidized(&self, _arena: &'a bumpalo::Bump) -> Self::Output {
         oxidized_by_ref::typing_reason::Reason::Rnone
-    }
-}
-
-impl ToOcamlRep for NReason {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
-        let arena = &bumpalo::Bump::new();
-        self.to_oxidized(arena).to_ocamlrep(alloc)
     }
 }

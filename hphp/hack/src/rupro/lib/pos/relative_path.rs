@@ -65,8 +65,10 @@ impl<'a> ToOxidized<'a> for RelativePath {
 
 impl ToOcamlRep for RelativePath {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::OpaqueValue<'a> {
-        let arena = &bumpalo::Bump::new();
-        self.to_oxidized(arena).to_ocamlrep(alloc)
+        alloc.add(&(
+            self.prefix,
+            Path::new(OsStr::from_bytes(self.suffix.as_bytes())),
+        ))
     }
 }
 

@@ -38,6 +38,12 @@ pub type Gconst<R> = oxidized::aast::Gconst<Ty<R>, SavedEnv>;
 
 impl ToOcamlRep for SavedEnv {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> OpaqueValue<'a> {
+        // This implementation of `to_ocamlrep` (which allocates in an arena,
+        // converts to OCaml, then drops the arena) violates a `ToOcamlRep`
+        // requirement: we may not drop values after passing them to `alloc.add`
+        // or invoking `to_ocamlrep`. See comment on impl of ToOcamlRep for Ty.
+        // We must take care not to use `ocamlrep::Allocator::add_root` on
+        // values containing this type.
         let bump = Bump::new();
         let saved_env = oxidized_by_ref::tast::SavedEnv {
             tcopt: oxidized_by_ref::global_options::GlobalOptions::default_ref(),

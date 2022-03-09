@@ -18,4 +18,5 @@ pos = { path = "../../lib/pos" }
 tempdir = "0.3"
 
 [dev-dependencies]
+itertools = "0.10.3"
 maplit = "1.0"

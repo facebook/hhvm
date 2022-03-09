@@ -11,7 +11,8 @@ use crate::shallow_decl_provider::{self, ShallowDeclProvider};
 use crate::special_names::SpecialNames;
 use oxidized::global_options::GlobalOptions;
 use pos::{
-    ConstName, FunName, MethodName, Positioned, PropName, TypeName, TypeNameMap, TypeNameSet,
+    ConstName, FunName, MethodName, Positioned, PropName, TypeName, TypeNameIndexMap,
+    TypeNameIndexSet,
 };
 use std::sync::Arc;
 
@@ -129,7 +130,11 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 }
 
 impl<R: Reason> LazyFoldedDeclProvider<R> {
-    fn detect_cycle(&self, stack: &mut TypeNameSet, pos_id: &Positioned<TypeName, R::Pos>) -> bool {
+    fn detect_cycle(
+        &self,
+        stack: &mut TypeNameIndexSet,
+        pos_id: &Positioned<TypeName, R::Pos>,
+    ) -> bool {
         if stack.contains(&pos_id.id()) {
             todo!("TODO(hrust): register error");
         }
@@ -138,8 +143,8 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
 
     fn decl_class_type(
         &self,
-        stack: &mut TypeNameSet,
-        acc: &mut TypeNameMap<Arc<FoldedClass<R>>>,
+        stack: &mut TypeNameIndexSet,
+        acc: &mut TypeNameIndexMap<Arc<FoldedClass<R>>>,
         ty: &DeclTy<R>,
     ) -> Result<()> {
         match &**ty.node() {
@@ -189,9 +194,9 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
     // note(sf, 2022-03-02): c.f. Decl_folded_class.class_parents_decl
     fn decl_class_parents(
         &self,
-        stack: &mut TypeNameSet,
+        stack: &mut TypeNameIndexSet,
         sc: &ShallowClass<R>,
-    ) -> Result<TypeNameMap<Arc<FoldedClass<R>>>> {
+    ) -> Result<TypeNameIndexMap<Arc<FoldedClass<R>>>> {
         let mut acc = Default::default();
         for ty in sc.extends.iter() {
             self.decl_class_type(stack, &mut acc, ty)
@@ -223,7 +228,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
 
     fn decl_class(
         &self,
-        stack: &mut TypeNameSet,
+        stack: &mut TypeNameIndexSet,
         name: TypeName,
     ) -> Result<Option<Arc<FoldedClass<R>>>> {
         let shallow_class = match self.shallow_decl_provider.get_class(name)? {
@@ -239,7 +244,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
 
     fn get_folded_class_impl(
         &self,
-        stack: &mut TypeNameSet,
+        stack: &mut TypeNameIndexSet,
         name: TypeName,
     ) -> Result<Option<Arc<FoldedClass<R>>>> {
         match self.cache.get(name) {

@@ -15,8 +15,9 @@ use crate::special_names::SpecialNames;
 use crate::typing_error::{Primary, TypingError};
 use oxidized::global_options::GlobalOptions;
 use pos::{
-    ClassConstName, ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap,
-    TypeConstName, TypeConstNameMap, TypeName, TypeNameMap, TypeNameSet,
+    ClassConstName, ClassConstNameIndexMap, MethodNameIndexMap, ModuleName, Positioned,
+    PropNameIndexMap, TypeConstName, TypeConstNameIndexMap, TypeName, TypeNameIndexMap,
+    TypeNameIndexSet,
 };
 use std::marker::PhantomData;
 use std::sync::Arc;
@@ -66,7 +67,7 @@ impl<R: Reason> DeclFolder<R> {
     /// accessing its fully qualified name as a string.
     fn decl_class_class(
         &self,
-        consts: &mut ClassConstNameMap<ClassConst<R>>,
+        consts: &mut ClassConstNameIndexMap<ClassConst<R>>,
         sc: &ShallowClass<R>,
     ) {
         // note(sf, 2022-02-08): c.f. Decl_folded_class.class_class_decl
@@ -134,8 +135,8 @@ impl<R: Reason> DeclFolder<R> {
 
     fn decl_type_const(
         &self,
-        type_consts: &mut TypeConstNameMap<TypeConst<R>>,
-        class_consts: &mut ClassConstNameMap<ClassConst<R>>,
+        type_consts: &mut TypeConstNameIndexMap<TypeConst<R>>,
+        class_consts: &mut ClassConstNameIndexMap<ClassConst<R>>,
         sc: &ShallowClass<R>,
         stc: &ShallowTypeconst<R>,
     ) {
@@ -165,7 +166,7 @@ impl<R: Reason> DeclFolder<R> {
 
     fn decl_class_const(
         &self,
-        consts: &mut ClassConstNameMap<ClassConst<R>>,
+        consts: &mut ClassConstNameIndexMap<ClassConst<R>>,
         sc: &ShallowClass<R>,
         c: &ShallowClassConst<R>,
     ) {
@@ -183,7 +184,7 @@ impl<R: Reason> DeclFolder<R> {
 
     fn decl_prop(
         &self,
-        props: &mut PropNameMap<FoldedElement>,
+        props: &mut PropNameIndexMap<FoldedElement>,
         sc: &ShallowClass<R>,
         sp: &ShallowProp<R>,
     ) {
@@ -217,7 +218,7 @@ impl<R: Reason> DeclFolder<R> {
 
     fn decl_static_prop(
         &self,
-        static_props: &mut PropNameMap<FoldedElement>,
+        static_props: &mut PropNameIndexMap<FoldedElement>,
         sc: &ShallowClass<R>,
         sp: &ShallowProp<R>,
     ) {
@@ -250,7 +251,7 @@ impl<R: Reason> DeclFolder<R> {
 
     fn decl_method(
         &self,
-        methods: &mut MethodNameMap<FoldedElement>,
+        methods: &mut MethodNameIndexMap<FoldedElement>,
         sc: &ShallowClass<R>,
         sm: &ShallowMethod<R>,
     ) {
@@ -338,9 +339,9 @@ impl<R: Reason> DeclFolder<R> {
 
     fn get_implements(
         &self,
-        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
+        parents: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
         ty: &DeclTy<R>,
-        ancestors: &mut TypeNameMap<DeclTy<R>>,
+        ancestors: &mut TypeNameIndexMap<DeclTy<R>>,
     ) {
         match ty.unwrap_class_type() {
             None => {}
@@ -431,7 +432,7 @@ impl<R: Reason> DeclFolder<R> {
         parent_pos: &R::Pos,
         sc: &ShallowClass<R>,
         pass: Pass,
-        extends: &mut TypeNameSet,
+        extends: &mut TypeNameIndexSet,
         errors: &mut Vec<TypingError<R>>,
         parent_type: &FoldedClass<R>,
     ) {
@@ -477,9 +478,9 @@ impl<R: Reason> DeclFolder<R> {
     fn add_class_parent_or_trait(
         &self,
         sc: &ShallowClass<R>,
-        parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
+        parent_cache: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
         pass: Pass,
-        extends: &mut TypeNameSet,
+        extends: &mut TypeNameIndexSet,
         errors: &mut Vec<TypingError<R>>,
         ty: &DeclTy<R>,
     ) {
@@ -511,10 +512,10 @@ impl<R: Reason> DeclFolder<R> {
     fn get_extends(
         &self,
         sc: &ShallowClass<R>,
-        parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
+        parent_cache: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
         errors: &mut Vec<TypingError<R>>,
-    ) -> TypeNameSet {
-        let mut extends = TypeNameSet::new();
+    ) -> TypeNameIndexSet {
+        let mut extends = TypeNameIndexSet::new();
         for extend in sc.extends.iter() {
             self.add_class_parent_or_trait(
                 sc,
@@ -541,10 +542,10 @@ impl<R: Reason> DeclFolder<R> {
     fn get_xhp_attr_deps(
         &self,
         sc: &ShallowClass<R>,
-        parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
+        parent_cache: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
         errors: &mut Vec<TypingError<R>>,
-    ) -> TypeNameSet {
-        let mut xhp_attr_deps = TypeNameSet::new();
+    ) -> TypeNameIndexSet {
+        let mut xhp_attr_deps = TypeNameIndexSet::new();
         for xhp_attr_use in sc.xhp_attr_uses.iter() {
             self.add_class_parent_or_trait(
                 sc,
@@ -562,10 +563,10 @@ impl<R: Reason> DeclFolder<R> {
     /// of trait methods / check that classes satisfy these requirements
     fn flatten_parent_class_reqs(
         &self,
-        parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
+        parent_cache: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
         sc: &ShallowClass<R>,
         req_ancestors: &mut Vec<Requirement<R>>,
-        req_ancestors_extends: &mut TypeNameSet,
+        req_ancestors_extends: &mut TypeNameIndexSet,
         parent_ty: &DeclTy<R>,
     ) {
         match parent_ty.unwrap_class_type() {
@@ -604,9 +605,9 @@ impl<R: Reason> DeclFolder<R> {
 
     fn declared_class_req(
         &self,
-        parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
+        parent_cache: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
         req_ancestors: &mut Vec<Requirement<R>>,
-        req_ancestors_extends: &mut TypeNameSet,
+        req_ancestors_extends: &mut TypeNameIndexSet,
         req_ty: &DeclTy<R>,
     ) {
         match req_ty.unwrap_class_type() {
@@ -650,7 +651,7 @@ impl<R: Reason> DeclFolder<R> {
     /// that prunes the list via proper subtyping, but that's a little more work
     /// than I'm willing to do now.
     fn naive_dedup(&self, req_ancestors: &mut Vec<Requirement<R>>) {
-        let mut seen_extends: TypeNameMap<Vec<DeclTy<R>>> = TypeNameMap::new();
+        let mut seen_extends: TypeNameIndexMap<Vec<DeclTy<R>>> = TypeNameIndexMap::new();
         // TODO: Do we need to rev. Seems the logic works forwards or backwards...
         req_ancestors.reverse();
         req_ancestors.retain(|req_extend| {
@@ -688,10 +689,10 @@ impl<R: Reason> DeclFolder<R> {
     fn get_class_requirements(
         &self,
         sc: &ShallowClass<R>,
-        parent_cache: &TypeNameMap<Arc<FoldedClass<R>>>,
-    ) -> (Vec<Requirement<R>>, TypeNameSet) {
+        parent_cache: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
+    ) -> (Vec<Requirement<R>>, TypeNameIndexSet) {
         let mut req_ancestors = vec![];
-        let mut req_ancestors_extends = TypeNameSet::new();
+        let mut req_ancestors_extends = TypeNameIndexSet::new();
 
         for req_extend in sc.req_extends.iter() {
             self.declared_class_req(
@@ -750,7 +751,7 @@ impl<R: Reason> DeclFolder<R> {
     pub fn decl_class(
         &self,
         sc: &ShallowClass<R>,
-        parents: &TypeNameMap<Arc<FoldedClass<R>>>,
+        parents: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
     ) -> Arc<FoldedClass<R>> {
         let inh = Inherited::make(sc, parents);
 

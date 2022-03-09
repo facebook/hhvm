@@ -149,3 +149,9 @@ impl_with_iter! {
 impl_with_iter! {
     <K, V> std::collections::HashMap<K, V>, len
 }
+impl_with_iter! {
+    <T> indexmap::IndexSet<T>, len
+}
+impl_with_iter! {
+    <K, V> indexmap::IndexMap<K, V>, len
+}

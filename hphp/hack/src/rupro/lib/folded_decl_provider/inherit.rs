@@ -9,10 +9,11 @@ use crate::decl_defs::{
     FoldedElement, ShallowClass, SubstContext, TypeConst, Typeconst,
 };
 use crate::reason::Reason;
+use indexmap::map::Entry;
 use pos::{
-    ClassConstNameMap, MethodName, MethodNameMap, PropNameMap, TypeConstNameMap, TypeNameMap,
+    ClassConstNameIndexMap, MethodName, MethodNameIndexMap, PropNameIndexMap,
+    TypeConstNameIndexMap, TypeNameIndexMap,
 };
-use std::collections::hash_map::Entry;
 use std::sync::Arc;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_inherit.ml
@@ -20,14 +21,14 @@ use std::sync::Arc;
 #[derive(Debug)]
 pub struct Inherited<R: Reason> {
     // note(sf, 2022-01-27): c.f. `Decl_inherit.inherited`
-    pub substs: TypeNameMap<SubstContext<R>>,
-    pub props: PropNameMap<FoldedElement>,
-    pub static_props: PropNameMap<FoldedElement>,
-    pub methods: MethodNameMap<FoldedElement>,
-    pub static_methods: MethodNameMap<FoldedElement>,
+    pub substs: TypeNameIndexMap<SubstContext<R>>,
+    pub props: PropNameIndexMap<FoldedElement>,
+    pub static_props: PropNameIndexMap<FoldedElement>,
+    pub methods: MethodNameIndexMap<FoldedElement>,
+    pub static_methods: MethodNameIndexMap<FoldedElement>,
     pub constructor: Option<FoldedElement>,
-    pub consts: ClassConstNameMap<ClassConst<R>>,
-    pub type_consts: TypeConstNameMap<TypeConst<R>>,
+    pub consts: ClassConstNameIndexMap<ClassConst<R>>,
+    pub type_consts: TypeConstNameIndexMap<TypeConst<R>>,
 }
 
 impl<R: Reason> Default for Inherited<R> {
@@ -71,7 +72,7 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
-    fn add_substs(&mut self, other_substs: TypeNameMap<SubstContext<R>>) {
+    fn add_substs(&mut self, other_substs: TypeNameIndexMap<SubstContext<R>>) {
         for (key, new_sc) in other_substs {
             match self.substs.entry(key) {
                 Entry::Vacant(e) => {
@@ -98,7 +99,7 @@ impl<R: Reason> Inherited<R> {
     }
 
     fn add_method(
-        methods: &mut MethodNameMap<FoldedElement>,
+        methods: &mut MethodNameIndexMap<FoldedElement>,
         (key, mut fe): (MethodName, FoldedElement),
     ) {
         match methods.entry(key) {
@@ -122,27 +123,27 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
-    fn add_methods(&mut self, other_methods: MethodNameMap<FoldedElement>) {
+    fn add_methods(&mut self, other_methods: MethodNameIndexMap<FoldedElement>) {
         for (key, fe) in other_methods {
             Self::add_method(&mut self.methods, (key, fe))
         }
     }
 
-    fn add_static_methods(&mut self, other_static_methods: MethodNameMap<FoldedElement>) {
+    fn add_static_methods(&mut self, other_static_methods: MethodNameIndexMap<FoldedElement>) {
         for (key, fe) in other_static_methods {
             Self::add_method(&mut self.static_methods, (key, fe))
         }
     }
 
-    fn add_props(&mut self, other_props: PropNameMap<FoldedElement>) {
+    fn add_props(&mut self, other_props: PropNameIndexMap<FoldedElement>) {
         self.props.extend(other_props)
     }
 
-    fn add_static_props(&mut self, other_static_props: PropNameMap<FoldedElement>) {
+    fn add_static_props(&mut self, other_static_props: PropNameIndexMap<FoldedElement>) {
         self.static_props.extend(other_static_props)
     }
 
-    fn add_consts(&mut self, other_consts: ClassConstNameMap<ClassConst<R>>) {
+    fn add_consts(&mut self, other_consts: ClassConstNameIndexMap<ClassConst<R>>) {
         for (name, new_const) in other_consts {
             match self.consts.entry(name) {
                 Entry::Vacant(e) => {
@@ -182,7 +183,7 @@ impl<R: Reason> Inherited<R> {
         }
     }
 
-    fn add_type_consts(&mut self, other_type_consts: TypeConstNameMap<TypeConst<R>>) {
+    fn add_type_consts(&mut self, other_type_consts: TypeConstNameIndexMap<TypeConst<R>>) {
         for (name, mut new_const) in other_type_consts {
             match self.type_consts.entry(name) {
                 Entry::Vacant(e) => {
@@ -307,7 +308,7 @@ impl<R: Reason> Inherited<R> {
 
 struct MemberFolder<'a, R: Reason> {
     child: &'a ShallowClass<R>,
-    parents: &'a TypeNameMap<Arc<FoldedClass<R>>>,
+    parents: &'a TypeNameIndexMap<Arc<FoldedClass<R>>>,
     members: Inherited<R>,
 }
 
@@ -347,12 +348,12 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
             if let Some(class) = self.parents.get(&pos_id.id()) {
                 let sig = Subst::new(&class.tparams, tyl);
                 let subst = Substitution { subst: &sig };
-                let consts: ClassConstNameMap<_> = class
+                let consts: ClassConstNameIndexMap<_> = class
                     .consts
                     .iter()
                     .map(|(name, cc)| (*name, subst.instantiate_class_const(cc)))
                     .collect();
-                let type_consts: TypeConstNameMap<_> = class
+                let type_consts: TypeConstNameIndexMap<_> = class
                     .type_consts
                     .iter()
                     .map(|(name, tc)| (*name, subst.instantiate_type_const(tc)))
@@ -460,7 +461,7 @@ impl<'a, R: Reason> MemberFolder<'a, R> {
 }
 
 impl<R: Reason> Inherited<R> {
-    pub fn make(child: &ShallowClass<R>, parents: &TypeNameMap<Arc<FoldedClass<R>>>) -> Self {
+    pub fn make(child: &ShallowClass<R>, parents: &TypeNameIndexMap<Arc<FoldedClass<R>>>) -> Self {
         let mut folder = MemberFolder {
             child,
             parents,

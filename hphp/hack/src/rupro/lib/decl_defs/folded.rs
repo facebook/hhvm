@@ -13,8 +13,8 @@ use crate::typing_error::TypingError;
 
 use eq_modulo_pos::EqModuloPos;
 use pos::{
-    Bytes, ClassConstNameMap, MethodNameMap, ModuleName, Positioned, PropNameMap, Symbol,
-    TypeConstName, TypeConstNameMap, TypeName, TypeNameMap, TypeNameSet,
+    Bytes, ClassConstNameIndexMap, MethodNameIndexMap, ModuleName, Positioned, PropNameIndexMap,
+    Symbol, TypeConstName, TypeConstNameIndexMap, TypeName, TypeNameIndexMap, TypeNameIndexSet,
 };
 use std::collections::BTreeMap;
 
@@ -136,20 +136,20 @@ pub struct FoldedClass<R: Reason> {
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub tparams: Box<[Tparam<R, DeclTy<R>>]>,
     pub where_constraints: Box<[WhereConstraint<DeclTy<R>>]>,
-    pub substs: TypeNameMap<SubstContext<R>>,
-    pub ancestors: TypeNameMap<DeclTy<R>>,
-    pub props: PropNameMap<FoldedElement>,
-    pub static_props: PropNameMap<FoldedElement>,
-    pub methods: MethodNameMap<FoldedElement>,
-    pub static_methods: MethodNameMap<FoldedElement>,
+    pub substs: TypeNameIndexMap<SubstContext<R>>,
+    pub ancestors: TypeNameIndexMap<DeclTy<R>>,
+    pub props: PropNameIndexMap<FoldedElement>,
+    pub static_props: PropNameIndexMap<FoldedElement>,
+    pub methods: MethodNameIndexMap<FoldedElement>,
+    pub static_methods: MethodNameIndexMap<FoldedElement>,
     pub constructor: Option<FoldedElement>,
-    pub consts: ClassConstNameMap<ClassConst<R>>,
-    pub type_consts: TypeConstNameMap<TypeConst<R>>,
+    pub consts: ClassConstNameIndexMap<ClassConst<R>>,
+    pub type_consts: TypeConstNameIndexMap<TypeConst<R>>,
     pub xhp_enum_values: BTreeMap<Symbol, Box<[XhpEnumValue]>>,
-    pub extends: TypeNameSet,
-    pub xhp_attr_deps: TypeNameSet,
+    pub extends: TypeNameIndexSet,
+    pub xhp_attr_deps: TypeNameIndexSet,
     pub req_ancestors: Box<[Requirement<R>]>,
-    pub req_ancestors_extends: TypeNameSet,
+    pub req_ancestors_extends: TypeNameIndexSet,
     pub decl_errors: Box<[TypingError<R>]>,
 }
 

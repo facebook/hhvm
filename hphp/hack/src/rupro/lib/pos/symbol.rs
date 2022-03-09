@@ -9,6 +9,7 @@
 
 use crate::ToOxidized;
 use eq_modulo_pos::EqModuloPos;
+use indexmap::{IndexMap, IndexSet};
 use intern::{
     string::{BytesId, StringId},
     BuildIdHasher,
@@ -18,6 +19,8 @@ use std::collections::{HashMap, HashSet};
 pub type BuildSymbolHasher = BuildIdHasher<u32>;
 pub type SymbolMap<V> = HashMap<Symbol, V, BuildSymbolHasher>;
 pub type SymbolSet = HashSet<Symbol, BuildSymbolHasher>;
+pub type SymbolIndexMap<V> = IndexMap<Symbol, V, BuildSymbolHasher>;
+pub type SymbolIndexSet = IndexSet<Symbol, BuildSymbolHasher>;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 pub struct Symbol(pub StringId);
@@ -243,6 +246,20 @@ macro_rules! common_impls {
             }
         }
     };
+    ($name:ident, $hashmap:ident, $indexmap:ident) => {
+        common_impls!($name, $hashmap);
+        impl<'a, V: ToOxidized<'a>> ToOxidized<'a> for $indexmap<V> {
+            type Output = oxidized_by_ref::s_map::SMap<'a, V::Output>;
+
+            fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+                oxidized_by_ref::s_map::SMap::from(
+                    arena,
+                    self.iter()
+                        .map(|(k, v)| (k.to_oxidized(arena), v.to_oxidized(arena))),
+                )
+            }
+        }
+    };
 }
 
 // The following newtype wrappers are all for name categories that are
@@ -256,12 +273,14 @@ macro_rules! common_impls {
 pub type BuildTypeNameHasher = BuildSymbolHasher;
 pub type TypeNameMap<V> = HashMap<TypeName, V>;
 pub type TypeNameSet = HashSet<TypeName>;
+pub type TypeNameIndexMap<V> = IndexMap<TypeName, V>;
+pub type TypeNameIndexSet = IndexSet<TypeName>;
 
 /// A TypeName is the name of a class, interface, trait, type parameter,
 /// type alias, newtype, or primitive type names like int, arraykey, etc.
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct TypeName(pub Symbol);
-common_impls!(TypeName, TypeNameMap);
+common_impls!(TypeName, TypeNameMap, TypeNameIndexMap);
 
 /// ModuleName is introduced by the experimental Modules feature and `internal`
 /// visibility. ModuleNames are not bindable names and are not indended
@@ -287,25 +306,33 @@ pub struct ClassConstName(pub Symbol);
 pub type BuildClassConstNameHasher = BuildSymbolHasher;
 pub type ClassConstNameMap<V> = HashMap<ClassConstName, V>;
 pub type ClassConstNameSet = HashSet<ClassConstName>;
-common_impls!(ClassConstName, ClassConstNameMap);
+pub type ClassConstNameIndexMap<V> = IndexMap<ClassConstName, V>;
+pub type ClassConstNameIndexSet = IndexSet<ClassConstName>;
+common_impls!(ClassConstName, ClassConstNameMap, ClassConstNameIndexMap);
 
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct TypeConstName(pub Symbol);
 pub type BuildTypeConstNameHasher = BuildSymbolHasher;
 pub type TypeConstNameMap<V> = HashMap<TypeConstName, V>;
 pub type TypeConstNameSet = HashSet<TypeConstName>;
-common_impls!(TypeConstName, TypeConstNameMap);
+pub type TypeConstNameIndexMap<V> = IndexMap<TypeConstName, V>;
+pub type TypeConstNameIndexSet = IndexSet<TypeConstName>;
+common_impls!(TypeConstName, TypeConstNameMap, TypeConstNameIndexMap);
 
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct MethodName(pub Symbol);
 pub type BuildMethodNameHasher = BuildSymbolHasher;
 pub type MethodNameMap<V> = HashMap<MethodName, V>;
 pub type MethodNameSet = HashSet<MethodName>;
-common_impls!(MethodName, MethodNameMap);
+pub type MethodNameIndexMap<V> = IndexMap<MethodName, V>;
+pub type MethodNameIndexSet = IndexSet<MethodName>;
+common_impls!(MethodName, MethodNameMap, MethodNameIndexMap);
 
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 pub struct PropName(pub Symbol);
 pub type BuildPropNameHasher = BuildSymbolHasher;
 pub type PropNameMap<V> = HashMap<PropName, V>;
 pub type PropNameSet = HashSet<PropName>;
-common_impls!(PropName, PropNameMap);
+pub type PropNameIndexMap<V> = IndexMap<PropName, V>;
+pub type PropNameIndexSet = IndexSet<PropName>;
+common_impls!(PropName, PropNameMap, PropNameIndexMap);

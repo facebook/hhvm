@@ -5,19 +5,7 @@
 
 use super::{folded::FoldedClass, shallow::ShallowClass};
 use crate::reason::Reason;
-use itertools::Itertools;
-use std::collections::{HashMap, HashSet};
 use std::fmt;
-
-fn sorted_map<K: Ord, V>(map: &HashMap<K, V>) -> Vec<(&K, &V)> {
-    let mut res: Vec<_> = map.iter().collect();
-    res.sort_by_key(|x| x.0);
-    res
-}
-
-fn sorted_set<K: Ord>(set: &HashSet<K>) -> Vec<&K> {
-    set.iter().sorted().collect()
-}
 
 // Our Class structs have a lot of fields, but in a lot of cases, most of them
 // will have empty or default values, making Debug output very noisy. These
@@ -215,46 +203,46 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
 
         if !substs.is_empty() {
-            s.field("substs", &sorted_map(substs));
+            s.field("substs", substs);
         }
         if !ancestors.is_empty() {
-            s.field("ancestors", &sorted_map(ancestors));
+            s.field("ancestors", ancestors);
         }
         if !props.is_empty() {
-            s.field("props", &sorted_map(props));
+            s.field("props", props);
         }
         if !static_props.is_empty() {
-            s.field("static_props", &sorted_map(static_props));
+            s.field("static_props", static_props);
         }
         if !methods.is_empty() {
-            s.field("methods", &sorted_map(methods));
+            s.field("methods", methods);
         }
         if !static_methods.is_empty() {
-            s.field("static_methods", &sorted_map(static_methods));
+            s.field("static_methods", static_methods);
         }
         if let Some(constructor) = constructor {
             s.field("constructor", constructor);
         }
         if !consts.is_empty() {
-            s.field("consts", &sorted_map(consts));
+            s.field("consts", consts);
         }
         if !type_consts.is_empty() {
-            s.field("type_consts", &sorted_map(type_consts));
+            s.field("type_consts", type_consts);
         }
         if !xhp_enum_values.is_empty() {
             s.field("xhp_enum_values", xhp_enum_values);
         }
         if !extends.is_empty() {
-            s.field("extends", &sorted_set(extends));
+            s.field("extends", extends);
         }
         if !xhp_attr_deps.is_empty() {
-            s.field("xhp_attr_deps", &sorted_set(xhp_attr_deps));
+            s.field("xhp_attr_deps", xhp_attr_deps);
         }
         if !req_ancestors.is_empty() {
             s.field("req_ancestors", req_ancestors);
         }
         if !req_ancestors_extends.is_empty() {
-            s.field("req_ancestors_extends", &sorted_set(req_ancestors_extends));
+            s.field("req_ancestors_extends", req_ancestors_extends);
         }
         if !decl_errors.is_empty() {
             s.field("decl_errors", decl_errors);

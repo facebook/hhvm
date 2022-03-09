@@ -16,6 +16,7 @@ eq_modulo_pos = { path = "../../../utils/eq_modulo_pos" }
 hcons = { path = "../../../hcons" }
 hh24_types = { path = "../../../facebook/utils/hh24_types" }
 im = { version = "14.2", features = ["rayon", "serde"] }
+indexmap = { version = "1.8.0", features = ["rayon", "serde-1"] }
 itertools = "0.10.3"
 lint_rust = { path = "../../../utils/lint" }
 names = { path = "../../../facebook/hh_decl/cargo/names" }

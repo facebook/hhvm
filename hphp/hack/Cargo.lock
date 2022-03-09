@@ -1465,6 +1465,7 @@ dependencies = [
  "arena_collections",
  "bstr",
  "eq_modulo_pos_derive",
+ "indexmap",
 ]
 
 [[package]]

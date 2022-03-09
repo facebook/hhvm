@@ -12,6 +12,7 @@ arena_trait = { path = "../../../arena_trait" }
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 eq_modulo_pos = { path = "../../../utils/eq_modulo_pos" }
+indexmap = { version = "1.8.0", features = ["rayon", "serde-1"] }
 intern = { path = "../../../../../../relay/oss/crates/intern" }
 ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }

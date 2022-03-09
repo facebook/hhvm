@@ -13,7 +13,34 @@ use pos::{Prefix, RelativePath, TypeName};
 use std::fs;
 
 #[fbinit::test]
-fn test_file_missing_error(fb: FacebookInit) -> Result<()> {
+fn fold_results_stable(fb: FacebookInit) -> Result<()> {
+    // Our use of `index_map::IndexMap` in strategic places implies folded class
+    // maps are stable.
+    for _ in 1..5 {
+        let ctx = TestContext::new(
+            fb,
+            btreemap! {
+                "a.php" => "class A {}",
+                "b.php" => "class B extends A {}",
+                "c.php" => "class C extends B {}",
+                "d.php" => "class D extends C {}",
+            },
+        )?;
+        let (a, b, c, d) = (
+            TypeName::new(r#"\A"#),
+            TypeName::new(r#"\B"#),
+            TypeName::new(r#"\C"#),
+            TypeName::new(r#"\D"#),
+        );
+        let decl = ctx.folded_decl_provider.get_class(d.into(), d)?.unwrap();
+        itertools::assert_equal(decl.ancestors.keys().copied(), [a, b, c].into_iter())
+    }
+
+    Ok(())
+}
+
+#[fbinit::test]
+fn fold_when_file_missing_error(fb: FacebookInit) -> Result<()> {
     let ctx = TestContext::new(
         fb,
         btreemap! {

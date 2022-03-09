@@ -4337,7 +4337,7 @@ module Primary = struct
 
   let unbound_name_typing pos name class_exists =
     let (_, start_column) = Pos.line_column pos in
-    
+
     let quickfixes =
       match class_exists with
       | true ->
@@ -4345,7 +4345,7 @@ module Primary = struct
         [
           Quickfix.make
             ~title:("Add " ^ Markdown_lite.md_codify "new")
-            ~new_text:("new ")
+            ~new_text:"new "
             newpos;
         ]
       | false -> []

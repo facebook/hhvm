@@ -48,7 +48,6 @@ module Fake = Typing_fake_members
 module ExpectedTy = Typing_helpers.ExpectedTy
 module ITySet = Internal_type_set
 
-
 type newable_class_info =
   env
   * Tast.targ list
@@ -258,9 +257,7 @@ let expr_any env p e =
 let unbound_name env (pos, name) e =
   let class_exists =
     let ctx = Env.get_ctx env in
-    let decl =
-      Decl_provider.get_class ctx name
-    in
+    let decl = Decl_provider.get_class ctx name in
     match decl with
     | None -> false
     | Some dc -> Ast_defs.is_c_class (Cls.kind dc)

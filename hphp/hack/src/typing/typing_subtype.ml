@@ -1338,13 +1338,12 @@ and simplify_subtype_i
            *   nonnull & supportdyn<t> <: u   iff
            *   supportdyn<nonnull & t> <: u
            *)
-          | ( (r_sub, Tnewtype (name, [tyarg1], bound)),
-              (Tintersection _ | Tvar _) )
+          | ((r_sub, Tnewtype (name, [tyarg1], _)), (Tintersection _ | Tvar _))
             when String.equal name SN.Classes.cSupportDyn ->
             let (env, ty_sub') =
               Inter.intersect env ~r:r_super tyarg1 (MakeType.nonnull r_super)
             in
-            let ty_sub' = mk (r_sub, Tnewtype (name, [ty_sub'], bound)) in
+            let ty_sub' = mk (r_sub, Tnewtype (name, [ty_sub'], ty_sub')) in
             simplify_subtype ~subtype_env ty_sub' ety env
           | ((_, Tnewtype (name_sub, _, _)), Tnewtype (name_sup, _, _))
             when String.equal name_sup name_sub ->

@@ -8,6 +8,7 @@ edition = "2021"
 path = "../../hhbc_ast.rs"
 
 [dependencies]
+emit_opcodes_macro = { path = "../emit_opcodes_macro" }
 ffi = { path = "../../../../utils/ffi" }
 hhbc_id = { path = "../hhbc_id" }
 hhvm_hhbc_defs_ffi = { path = "../../../hhvm_cxx/hhvm_hhbc_defs" }

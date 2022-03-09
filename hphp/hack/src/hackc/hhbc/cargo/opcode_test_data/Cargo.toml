@@ -6,3 +6,6 @@ edition = "2021"
 
 [lib]
 path = "../../opcode_test_data.rs"
+
+[dependencies]
+hhbc = { path = "../../../../../../tools/hhbc-gen/cargo/hhbc" }

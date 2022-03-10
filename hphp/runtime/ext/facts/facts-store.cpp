@@ -496,7 +496,12 @@ struct FactsStoreImpl final
 
   ~FactsStoreImpl() override {
     m_closing = true;
-    m_updateFuture.wlock()->getFuture().wait();
+    try {
+      m_updateFuture.wlock()->getFuture().wait();
+    } catch (...) {
+      // folly::Future::wait() might throw a FutureInvalid exception, but we're
+      // shutting down.
+    }
   }
 
   FactsStoreImpl(const FactsStoreImpl&) = delete;

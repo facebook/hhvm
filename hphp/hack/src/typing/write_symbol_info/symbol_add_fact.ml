@@ -15,23 +15,22 @@ module Predicate = Symbol_predicate
 module Fact_id = Symbol_fact_id
 module Fact_acc = Symbol_predicate.Fact_acc
 
-(* Add a namespace fact if the nsenv is non-empty; otherwise,
-return progress unchanged *)
-let namespace_decl nsenv progress =
-  match nsenv.Namespace_env.ns_name with
-  | None -> progress (* Global namespace *)
+let namespace_decl name progress =
+  let json_fields =
+    [("name", Build_json.build_namespaceqname_json_nested name)]
+  in
+  Fact_acc.add_fact
+    Predicate.(Hack NamespaceDeclaration)
+    (JSON_Object json_fields)
+    progress
+
+(* create a namespace fact from a namespace attribute in node. Name can be empty
+   in that case we simply ignore it *)
+let namespace_decl_opt name progress =
+  match name.Namespace_env.ns_name with
+  | None -> progress (* global name space *)
   | Some "" -> progress
-  | Some ns ->
-    let json_fields =
-      [("name", Build_json.build_namespaceqname_json_nested ns)]
-    in
-    let (_fid, prog) =
-      Fact_acc.add_fact
-        Predicate.(Hack NamespaceDeclaration)
-        (JSON_Object json_fields)
-        progress
-    in
-    prog
+  | Some name -> namespace_decl name progress |> snd
 
 let container_decl decl_pred name progress =
   let json = JSON_Object [("name", Build_json.build_qname_json_nested name)] in
@@ -47,7 +46,7 @@ let parent_decls ctx decls pred prog =
       (ref :: decl_refs, prog))
 
 let container_defn ctx source_text clss decl_id member_decls prog =
-  let prog = namespace_decl clss.c_namespace prog in
+  let prog = namespace_decl_opt clss.c_namespace prog in
   let tparams =
     List.map
       clss.c_tparams
@@ -333,7 +332,7 @@ let enum_decl name progress =
   Fact_acc.add_fact Predicate.(Hack EnumDeclaration) json progress
 
 let enum_defn ctx source_text enm enum_id enum_data enumerators progress =
-  let prog = namespace_decl enm.c_namespace progress in
+  let prog = namespace_decl_opt enm.c_namespace progress in
   let (includes, prog) =
     parent_decls ctx enum_data.e_includes Predicate.(Hack EnumDeclaration) prog
   in
@@ -382,7 +381,7 @@ let func_decl name progress =
 
 let func_defn ctx source_text fd decl_id progress =
   let elem = fd.fd_fun in
-  let prog = namespace_decl fd.fd_namespace progress in
+  let prog = namespace_decl_opt fd.fd_namespace progress in
   let tparams =
     List.map
       elem.f_tparams
@@ -416,7 +415,7 @@ let typedef_decl name progress =
   Fact_acc.add_fact Predicate.(Hack TypedefDeclaration) json progress
 
 let typedef_defn ctx source_text elem decl_id progress =
-  let prog = namespace_decl elem.t_namespace progress in
+  let prog = namespace_decl_opt elem.t_namespace progress in
   let is_transparent =
     match elem.t_vis with
     | Transparent -> true
@@ -449,7 +448,7 @@ let gconst_decl name progress =
   Fact_acc.add_fact Predicate.(Hack GlobalConstDeclaration) json progress
 
 let gconst_defn ctx source_text elem decl_id progress =
-  let prog = namespace_decl elem.cst_namespace progress in
+  let prog = namespace_decl_opt elem.cst_namespace progress in
   let value = Util.ast_expr_to_json source_text elem.cst_value in
   let req_fields =
     [("declaration", Build_json.build_id_json decl_id); ("value", value)]

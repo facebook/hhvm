@@ -307,6 +307,9 @@ let build_container_decl_json_ref container_type fact_id =
 let build_enum_decl_json_ref fact_id =
   build_container_decl_json_ref "enum_" fact_id
 
+let build_namespace_decl_json_ref fact_id =
+  JSON_Object [("namespace_", build_id_json fact_id)]
+
 let build_enumerator_decl_json_ref fact_id =
   JSON_Object [("enumerator", build_id_json fact_id)]
 

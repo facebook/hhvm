@@ -8,14 +8,19 @@
 
 type t = {
   path: Relative_path.t;
+  cst: Full_fidelity_positioned_syntax.t;
   tast: Tast.program;
   source_text: Full_fidelity_source_text.t;
 }
 
 let create ctx path =
   let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
+  let source_text = Ast_provider.compute_source_text ~entry in
   let { Tast_provider.Compute_tast.tast; _ } =
     Tast_provider.compute_tast_unquarantined ~ctx ~entry
   in
-  let source_text = Ast_provider.compute_source_text ~entry in
-  { path; tast; source_text }
+  let cst =
+    Provider_context.PositionedSyntaxTree.root
+      (Ast_provider.compute_cst ~ctx ~entry)
+  in
+  { path; tast; source_text; cst }

@@ -8,6 +8,7 @@
 
 type t = private {
   path: Relative_path.t;
+  cst: Full_fidelity_positioned_syntax.t;
   tast: Tast.program;
   source_text: Full_fidelity_source_text.t;
 }

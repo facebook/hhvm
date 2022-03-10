@@ -15,7 +15,7 @@ module Fact_id = Symbol_fact_id
 module Predicate = Symbol_predicate
 module Fact_acc = Symbol_predicate.Fact_acc
 
-val namespace_decl : Namespace_env.env -> Fact_acc.t -> Fact_acc.t
+val namespace_decl : string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
 
 val container_decl :
   Symbol_predicate.t -> string -> Fact_acc.t -> Fact_id.t * Fact_acc.t

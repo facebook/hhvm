@@ -112,3 +112,37 @@ let ast_expr_to_json source_text (_, pos, _) =
   Hh_json.JSON_String (strip_nested_quotes (source_at_span source_text pos))
 
 let ast_expr_to_string source_text (_, pos, _) = source_at_span source_text pos
+
+module Token = Full_fidelity_positioned_syntax.Token
+
+let tokens_to_pos_id st ~hd ~tl =
+  let path = st.Full_fidelity_source_text.file_path in
+  let start_offset = Token.leading_start_offset hd in
+  let name = String.concat ~sep:"\\" (List.map (hd :: tl) ~f:Token.text) in
+  let end_offset = start_offset + String.length name in
+  let pos =
+    Full_fidelity_source_text.relative_pos path st start_offset end_offset
+  in
+  (pos, name)
+
+exception Ast_error
+
+exception Empty_namespace
+
+let namespace_ast_to_pos_id ns_ast st =
+  let open Full_fidelity_positioned_syntax in
+  let f item =
+    match item.syntax with
+    | ListItem { list_item = { syntax = Token t; _ }; _ } -> t
+    | _ -> raise Ast_error
+  in
+  let (hd, tl) =
+    match ns_ast with
+    | Token t -> (t, [])
+    | QualifiedName
+        { qualified_name_parts = { syntax = SyntaxList (hd :: tl); _ } } ->
+      (f hd, List.map ~f tl)
+    | Missing -> raise Empty_namespace
+    | _ -> raise Ast_error
+  in
+  tokens_to_pos_id st ~hd ~tl

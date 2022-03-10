@@ -72,6 +72,8 @@ val build_container_decl_json_ref : string -> Fact_id.t -> Hh_json.json
 
 val build_enum_decl_json_ref : Fact_id.t -> Hh_json.json
 
+val build_namespace_decl_json_ref : Fact_id.t -> Hh_json.json
+
 val build_enumerator_decl_json_ref : Fact_id.t -> Hh_json.json
 
 val build_func_decl_json_ref : Fact_id.t -> Hh_json.json

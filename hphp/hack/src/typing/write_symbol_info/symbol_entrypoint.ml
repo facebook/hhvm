@@ -90,7 +90,6 @@ let go
     ~(root_path : string)
     ~(hhi_path : string)
     ~(files : Relative_path.t list) : unit =
-  ignore ownership;
   let num_workers =
     match workers with
     | Some w -> List.length w

@@ -15,6 +15,7 @@
   tast_provider
   typing
   typing_ast
+  parser
   procs_procs
   server_services
   utils_core

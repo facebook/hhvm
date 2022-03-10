@@ -44,3 +44,15 @@ val ast_expr_to_json :
 
 val ast_expr_to_string :
   Full_fidelity_source_text.t -> ('a, 'b) Aast.expr -> string
+
+exception Ast_error
+
+exception Empty_namespace
+
+(* Retrieve a namespace identifier and its position from an AST namespace node.
+   Raise Ast_error if the ast doesn't have the expected structure, and Empty_namespace
+   if the namespace is empty. ) *)
+val namespace_ast_to_pos_id :
+  Full_fidelity_positioned_syntax.syntax ->
+  Full_fidelity_source_text.t ->
+  Pos.t * string

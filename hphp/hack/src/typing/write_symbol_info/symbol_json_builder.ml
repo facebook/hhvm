@@ -403,22 +403,71 @@ let process_typedef_xref symbol_name pos (xrefs, prog) =
     pos
     (xrefs, prog)
 
-let process_decls ctx prog File_info.{ path; tast; source_text } =
-  let filepath = Relative_path.to_absolute path in
-  Fact_acc.set_ownership_unit prog (Some filepath);
-  let (file_decls, prog) =
-    let (_, prog) = Add_fact.file_lines filepath source_text prog in
-    List.fold tast ~init:([], prog) ~f:(fun acc def ->
-        match def with
-        | Class en when is_enum_or_enum_class en.c_kind ->
-          process_enum_decl ctx source_text en acc
-        | Class cd -> process_container_decl ctx source_text cd acc
-        | Constant gd -> process_gconst_decl ctx source_text gd acc
-        | Fun fd -> process_func_decl ctx source_text fd acc
-        | Typedef td -> process_typedef_decl ctx source_text td acc
-        | _ -> acc)
+let process_namespace_decl (pos, id) (all_decls, progress) =
+  let (decl_id, prog) =
+    process_decl_loc
+      Add_fact.namespace_decl
+      (fun () fid acc -> (fid, acc))
+      Build.build_namespace_decl_json_ref
+      pos
+      None
+      id
+      ()
+      None
+      progress
   in
-  Add_fact.file_decls filepath file_decls prog |> snd
+  (all_decls @ [Build.build_namespace_decl_json_ref decl_id], prog)
+
+let process_cst_decls st root (decls, prog) =
+  let open Full_fidelity_positioned_syntax in
+  match root.syntax with
+  | Script { script_declarations = { syntax = SyntaxList cst_decls; _ } } ->
+    List.fold cst_decls ~init:(decls, prog) ~f:(fun acc cst_decl ->
+        match cst_decl.syntax with
+        | NamespaceDeclaration
+            {
+              namespace_header =
+                {
+                  syntax =
+                    NamespaceDeclarationHeader
+                      { namespace_name = { syntax = ns_ast; _ }; _ };
+                  _;
+                };
+              _;
+            } ->
+          (try
+             let pos_id = Util.namespace_ast_to_pos_id ns_ast st in
+             process_namespace_decl pos_id acc
+           with
+          | Util.Empty_namespace -> acc
+          | Util.Ast_error ->
+            Hh_logger.log "Couldn't extract namespace from declaration";
+            acc)
+        | _ -> acc)
+  | _ ->
+    Hh_logger.log "Couldn't extract namespaces declarations";
+    (decls, prog)
+
+let process_tast_decls ctx tast source_text (decls, prog) =
+  List.fold tast ~init:(decls, prog) ~f:(fun acc def ->
+      match def with
+      | Class en when is_enum_or_enum_class en.c_kind ->
+        process_enum_decl ctx source_text en acc
+      | Class cd -> process_container_decl ctx source_text cd acc
+      | Constant gd -> process_gconst_decl ctx source_text gd acc
+      | Fun fd -> process_func_decl ctx source_text fd acc
+      | Typedef td -> process_typedef_decl ctx source_text td acc
+      | _ -> acc)
+
+let process_decls ctx prog File_info.{ path; tast; source_text; cst } =
+  let abspath = Relative_path.to_absolute path in
+  Fact_acc.set_ownership_unit prog (Some abspath);
+  let (_, prog) = Add_fact.file_lines abspath source_text prog in
+  let (decls, prog) =
+    process_tast_decls ctx tast source_text ([], prog)
+    |> process_cst_decls source_text cst
+  in
+  Add_fact.file_decls abspath decls prog |> snd
 
 let process_xrefs ctx prog File_info.{ path; tast; _ } =
   let open SymbolDefinition in

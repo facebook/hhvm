@@ -15,7 +15,8 @@
 */
 
 #include <cstdio>
-#include "hphp/runtime/vm/hhbc.h"
+#include <cstring>
+#include "hphp/runtime/vm/opcodes.h"
 
 using namespace HPHP;
 

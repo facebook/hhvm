@@ -6,11 +6,16 @@
 // NOTE: Most of the types in this file come from runtime/vm/hhbc.h and need to
 // be kept in sync.
 
-mod opcodes;
-
 use bitflags::bitflags;
 use once_cell::sync::OnceCell;
 use std::collections::{HashMap, HashSet};
+
+#[cfg(fbcode_build)]
+mod opcodes;
+#[cfg(not(fbcode_build))]
+mod opcodes {
+    include!(concat!(env!("CMAKE_BINARY_DIR"), "/hphp/tools/opcodes.rs"));
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum FlavorDesc {

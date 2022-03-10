@@ -199,7 +199,25 @@ let rec localize_with_ty_err ~(ety_env : expand_env) env (dty : decl_ty) =
     end
   | Toption ty ->
     let ((env, ty_err_opt), ty) = localize_with_ty_err ~ety_env env ty in
-    let (env, ty) = TUtils.union env (MakeType.null r) ty in
+    (* Calling into the union module here would cost 2% perf regression on a full init,
+     * so we use this lightweight version instead. *)
+    let union_null env ty =
+      let rec null_is_subtype_of ty =
+        match get_node ty with
+        | Toption _
+        | Tprim Aast.Tnull ->
+          true
+        | Tunion tyl -> List.exists tyl ~f:null_is_subtype_of
+        | Tintersection tyl -> List.for_all tyl ~f:null_is_subtype_of
+        | _ -> false
+      in
+      if null_is_subtype_of ty then
+        (env, ty)
+      else
+        Typing_make_type.nullable_locl r ty
+        |> TUtils.wrap_union_inter_ty_in_var env r
+    in
+    let (env, ty) = union_null env ty in
     ((env, ty_err_opt), ty)
   | Tlike ty ->
     let ((env, ty_err_opt), ty) = localize_with_ty_err ~ety_env env ty in

@@ -451,6 +451,11 @@ val contains_tvar_decl : Typing_defs.decl_ty -> bool
 
 val contains_generic_decl : Typing_defs.decl_ty -> Pos_or_decl.t option
 
+(** [wrap_union_inter_ty_in_var env r ty] wraps [ty] in a type variable
+  if [ty] is a union, intersection or option containing an unsolved type variable.
+  Wrapping in a type variable means a new type variable is created and mapped to [ty].
+  This is a way to mark [ty] as needing simplification when the unsolved type variable
+  later gets solved. *)
 val wrap_union_inter_ty_in_var :
   Typing_env_types.env ->
   Typing_defs.Reason.t ->

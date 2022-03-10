@@ -229,6 +229,7 @@ val reason : internal_type -> locl_phase Reason.t_
 
 val is_constraint_type : internal_type -> bool
 
+(** Whether the given type is a union, intersection or option. *)
 val is_union_or_inter_type : locl_ty -> bool
 
 module InternalType : sig

@@ -1,12 +1,16 @@
 File "yield_lambda2.php", line 16, characters 12-14:
 Invalid argument (Typing[4110])
-  File "classes.hhi", line 26, characters 24-26:
+  File "yield_lambda2.php", line 4, characters 20-23:
   Expected `null`
+  File "classes.hhi", line 26, characters 25-26:
+    via this generic `Ts`
   File "yield_lambda2.php", line 16, characters 12-14:
   But got `string`
 File "yield_lambda2.php", line 17, characters 12-12:
 Invalid argument (Typing[4110])
-  File "classes.hhi", line 26, characters 24-26:
+  File "yield_lambda2.php", line 4, characters 20-23:
   Expected `null`
+  File "classes.hhi", line 26, characters 25-26:
+    via this generic `Ts`
   File "yield_lambda2.php", line 17, characters 12-12:
   But got `int`

@@ -119,6 +119,16 @@ invoke_dune(hack_dune all)
 
 set(CARGO_BUILD "${CMAKE_SOURCE_DIR}/hphp/hack/scripts/build_rust_to_ocaml.sh")
 
+set(OPCODES "${CMAKE_SOURCE_DIR}/hphp/tools/hhbc-gen/opcodes.rs")
+
+add_executable(gen-rust1 "${CMAKE_SOURCE_DIR}/hphp/tools/hhbc-gen/gen-rust.cpp")
+target_link_libraries(gen-rust1 folly)
+add_custom_command(
+  OUTPUT "${OPCODES}"
+  COMMAND gen-rust1 >> "${OPCODES}"
+  COMMENT "Generating opcodes.rs"
+)
+
 if(DEFINED ENV{HACKDEBUG})
   set(PROFILE "debug")
 else()
@@ -196,7 +206,7 @@ add_custom_command(
     ${CARGO_BUILD} ffi_cbindgen ffi_cbindgen --exe
       --header "${HHBC_AST_HEADER}" --srcs "${HHBC_AST_SRC_ARG}" --namespaces "HPHP,hackc,hhbc"
       --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${FCALL_HEADER},${HHBC_HEADER}"
-  DEPENDS rustc cargo
+  DEPENDS rustc cargo "${OPCODES}"
   COMMENT "Generating hhbc-ast.h"
 )
 
@@ -230,7 +240,7 @@ function(build_cxx_bridge NAME FFI_BRIDGE_DIR)
         ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.cc" "${RUST_PART_CXX}" &&
         ${CMAKE_COMMAND} -E copy "${GENERATED}.rs.h" "${RUST_PART_HEADER}"
       WORKING_DIRECTORY ${FFI_BRIDGE_SRC}
-      DEPENDS rustc cargo
+      DEPENDS rustc cargo "${OPCODES}"
   )
   add_custom_target(
     "${NAME}_cxx"
@@ -254,7 +264,7 @@ build_cxx_bridge(hhvm_types "src/hackc/hhvm_cxx/hhvm_types" "${CMAKE_CURRENT_SOU
 build_cxx_bridge(hhvm_hhbc_defs "src/hackc/hhvm_cxx/hhvm_hhbc_defs" "${CMAKE_CURRENT_SOURCE_DIR}/src/hackc/hhvm_cxx/hhvm_hhbc_defs/as-hhbc-ffi.cpp")
 
 if (NOT LZ4_FOUND)
-  add_dependencies(hack_dune lz4)
+  add_dependencies(hack_dune lz4 )
   add_dependencies(hack_dune_debug lz4)
   add_dependencies(hack_dune_test lz4)
 endif()
@@ -264,8 +274,8 @@ endif()
 # you're working with Hack, but means that e.g. hhvm can't find
 # `hh_single_compile` in the source tree. Keep it around, but require it to be
 # explicitly used
-add_custom_target(hack ALL DEPENDS hack_dune)
-add_custom_target(hack_test DEPENDS hack_dune_test)
+add_custom_target(hack ALL DEPENDS hack_dune "${OPCODES}")
+add_custom_target(hack_test DEPENDS hack_dune_test "${OPCODES}")
 
 configure_file(dev_env.sh.in dev_env.sh ESCAPE_QUOTES @ONLY)
 configure_file(dev_env_common.sh.in dev_env_common.sh ESCAPE_QUOTES @ONLY)

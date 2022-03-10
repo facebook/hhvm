@@ -12,3 +12,4 @@ proc-macro = true
 
 [dependencies]
 emit_opcodes = { path = "../emit_opcodes" }
+hhbc = { path = "../../../../../../tools/hhbc-gen/cargo/hhbc" }

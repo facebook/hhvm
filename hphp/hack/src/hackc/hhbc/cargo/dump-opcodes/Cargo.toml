@@ -11,4 +11,5 @@ path = "../../dump_opcodes.rs"
 [dependencies]
 anyhow = "1.0.51"
 emit_opcodes = { path = "../emit_opcodes" }
+hhbc = { path = "../../../../../../tools/hhbc-gen/cargo/hhbc" }
 quote = "1.0"

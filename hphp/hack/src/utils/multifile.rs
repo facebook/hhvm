@@ -4,10 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::{anyhow, Result};
-use itertools::Either::*;
 use lazy_static::lazy_static;
 use regex::bytes::Regex;
 use std::{
+    borrow::Cow,
     ffi::OsStr,
     path::{Path, PathBuf},
     str,
@@ -20,7 +20,7 @@ use std::{
 pub fn to_files<'p, 't>(
     path: &'p Path,
     content: impl AsRef<[u8]> + Into<Vec<u8>> + 't,
-) -> Result<Vec<(impl AsRef<Path> + 'p, Vec<u8>)>> {
+) -> Result<Vec<(Cow<'p, Path>, Vec<u8>)>> {
     lazy_static! {
         static ref DELIM: Regex = Regex::new(r#"(?m)^////\s*(.*)\n"#).unwrap();
         static ref DIRECTORY: Regex =
@@ -47,7 +47,7 @@ pub fn to_files<'p, 't>(
             .map(|f| str::from_utf8(f))
             .collect::<std::result::Result<Vec<_>, _>>()?
             .into_iter()
-            .map(|f| Right(PathBuf::from(format!("{}--{}", path.display(), f))))
+            .map(|f| PathBuf::from(format!("{}--{}", path.display(), f)).into())
             .zip(contents.into_iter())
             .collect())
     } else if let Some(captures) = DIRECTORY.captures(content) {
@@ -62,9 +62,9 @@ pub fn to_files<'p, 't>(
         if let Some(b'\n') = content.last() {
             content.pop();
         }
-        Ok(vec![(Right(newpath), content)])
+        Ok(vec![(newpath.into(), content)])
     } else {
-        Ok(vec![(Left(path), content.into())])
+        Ok(vec![(path.into(), content.into())])
     }
 }
 

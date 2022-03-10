@@ -9,6 +9,7 @@ use crate::decl_defs::{ConstDecl, DeclTy, DeclTy_, FoldedClass, FunDecl, Shallow
 use crate::reason::Reason;
 use crate::shallow_decl_provider::{self, ShallowDeclProvider};
 use crate::special_names::SpecialNames;
+use crate::typing_error::{Primary, TypingError};
 use oxidized::global_options::GlobalOptions;
 use pos::{
     ConstName, FunName, MethodName, Positioned, PropName, TypeName, TypeNameIndexMap,
@@ -133,24 +134,31 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
     fn detect_cycle(
         &self,
         stack: &mut TypeNameIndexSet,
+        errors: &mut Vec<TypingError<R>>,
         pos_id: &Positioned<TypeName, R::Pos>,
     ) -> bool {
         if stack.contains(&pos_id.id()) {
-            todo!("TODO(hrust): register error");
+            errors.push(TypingError::primary(Primary::CyclicClassDef(
+                pos_id.pos().clone(),
+                stack.iter().copied().collect(),
+            )));
+            true
+        } else {
+            false
         }
-        false
     }
 
     fn decl_class_type(
         &self,
         stack: &mut TypeNameIndexSet,
         acc: &mut TypeNameIndexMap<Arc<FoldedClass<R>>>,
+        errors: &mut Vec<TypingError<R>>,
         ty: &DeclTy<R>,
     ) -> Result<()> {
         match &**ty.node() {
             DeclTy_::DTapply(id_and_args) => {
                 let pos_id = &id_and_args.0;
-                if !self.detect_cycle(stack, pos_id) {
+                if !self.detect_cycle(stack, errors, pos_id) {
                     if let Some(folded_decl) = self.get_folded_class_impl(stack, pos_id.id())? {
                         acc.insert(pos_id.id(), folded_decl);
                     }
@@ -195,31 +203,32 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
     fn decl_class_parents(
         &self,
         stack: &mut TypeNameIndexSet,
+        errors: &mut Vec<TypingError<R>>,
         sc: &ShallowClass<R>,
     ) -> Result<TypeNameIndexMap<Arc<FoldedClass<R>>>> {
         let mut acc = Default::default();
         for ty in sc.extends.iter() {
-            self.decl_class_type(stack, &mut acc, ty)
+            self.decl_class_type(stack, &mut acc, errors, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
         }
         for ty in sc.implements.iter() {
-            self.decl_class_type(stack, &mut acc, ty)
+            self.decl_class_type(stack, &mut acc, errors, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
         }
         for ty in sc.uses.iter() {
-            self.decl_class_type(stack, &mut acc, ty)
+            self.decl_class_type(stack, &mut acc, errors, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
         }
         for ty in sc.xhp_attr_uses.iter() {
-            self.decl_class_type(stack, &mut acc, ty)
+            self.decl_class_type(stack, &mut acc, errors, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
         }
         for ty in sc.req_extends.iter() {
-            self.decl_class_type(stack, &mut acc, ty)
+            self.decl_class_type(stack, &mut acc, errors, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
         }
         for ty in sc.req_implements.iter() {
-            self.decl_class_type(stack, &mut acc, ty)
+            self.decl_class_type(stack, &mut acc, errors, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
         }
         for ty in sc
@@ -228,7 +237,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
             .map_or([].as_slice(), |et| &et.includes)
             .iter()
         {
-            self.decl_class_type(stack, &mut acc, ty)
+            self.decl_class_type(stack, &mut acc, errors, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
         }
 
@@ -240,15 +249,16 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         stack: &mut TypeNameIndexSet,
         name: TypeName,
     ) -> Result<Option<Arc<FoldedClass<R>>>> {
+        let mut errors = vec![];
         let shallow_class = match self.shallow_decl_provider.get_class(name)? {
             None => return Ok(None),
             Some(c) => c,
         };
         stack.insert(name);
-        let parents = self.decl_class_parents(stack, &shallow_class)?;
+        let parents = self.decl_class_parents(stack, &mut errors, &shallow_class)?;
         stack.remove(&name);
         let folder = DeclFolder::new(Arc::clone(&self.opts), self.special_names);
-        Ok(Some(folder.decl_class(&shallow_class, &parents)))
+        Ok(Some(folder.decl_class(&shallow_class, &parents, errors)))
     }
 
     fn get_folded_class_impl(

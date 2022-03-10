@@ -10,6 +10,7 @@ pub enum Primary<R: Reason> {
     InvalidTypeHint(R::Pos),
     ExpectingTypeHint(R::Pos),
     ExpectingReturnTypeHint(R::Pos),
+    CyclicClassDef(R::Pos, Vec<TypeName>),
     TraitReuse {
         parent_pos: R::Pos,
         parent_name: TypeName,

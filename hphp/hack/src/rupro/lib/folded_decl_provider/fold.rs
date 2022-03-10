@@ -759,6 +759,7 @@ impl<R: Reason> DeclFolder<R> {
         &self,
         sc: &ShallowClass<R>,
         parents: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
+        mut errors: Vec<TypingError<R>>,
     ) -> Arc<FoldedClass<R>> {
         let inh = Inherited::make(sc, parents);
 
@@ -801,7 +802,6 @@ impl<R: Reason> DeclFolder<R> {
             .iter()
             .for_each(|tc| self.decl_type_const(&mut type_consts, &mut consts, sc, tc));
 
-        let mut errors = vec![];
         let extends = self.get_extends(sc, parents, &mut errors);
         let xhp_attr_deps = self.get_xhp_attr_deps(sc, parents, &mut errors);
 

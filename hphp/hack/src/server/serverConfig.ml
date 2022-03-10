@@ -482,6 +482,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ?tco_type_printer_fuel:(int_opt "type_printer_fuel" config)
       ?tco_saved_state_manifold_api_key:
         (Some local_config.ServerLocalConfig.saved_state_manifold_api_key)
+      ~tco_log_saved_state_age_and_distance:
+        local_config.ServerLocalConfig.log_saved_state_age_and_distance
       ~log_levels:(prepare_log_levels config)
       ()
   in

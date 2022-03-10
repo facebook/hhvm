@@ -1992,7 +1992,7 @@ where
         S!(make_prefix_unary_expression, self, dollar, operand)
     }
 
-    fn parse_is_as_helper<F>(&mut self, f: F, left: S::R, kw: TokenKind) -> S::R
+    fn parse_is_as_helper<F>(&mut self, left: S::R, kw: TokenKind, f: F) -> S::R
     where
         F: Fn(&mut Self, S::R, S::R, S::R) -> S::R,
     {
@@ -2010,11 +2010,9 @@ where
         //
         // is-subject:
         //   expression
-        self.parse_is_as_helper(
-            |p, x, y, z| S!(make_is_expression, p, x, y, z),
-            left,
-            TokenKind::Is,
-        )
+        self.parse_is_as_helper(left, TokenKind::Is, |p, x, y, z| {
+            S!(make_is_expression, p, x, y, z)
+        })
     }
 
     fn parse_as_expression(&mut self, left: S::R) -> S::R {
@@ -2024,22 +2022,18 @@ where
         //
         // as-subject:
         //   expression
-        self.parse_is_as_helper(
-            |p, x, y, z| S!(make_as_expression, p, x, y, z),
-            left,
-            TokenKind::As,
-        )
+        self.parse_is_as_helper(left, TokenKind::As, |p, x, y, z| {
+            S!(make_as_expression, p, x, y, z)
+        })
     }
 
     fn parse_nullable_as_expression(&mut self, left: S::R) -> S::R {
         // SPEC:
         // nullable-as-expression:
         //   as-subject  ?as  type-specifier
-        self.parse_is_as_helper(
-            |p, x, y, z| S!(make_nullable_as_expression, p, x, y, z),
-            left,
-            TokenKind::QuestionAs,
-        )
+        self.parse_is_as_helper(left, TokenKind::QuestionAs, |p, x, y, z| {
+            S!(make_nullable_as_expression, p, x, y, z)
+        })
     }
 
     fn parse_upcast_expression(&mut self, left: S::R) -> S::R {
@@ -2049,11 +2043,9 @@ where
         //
         // upcast-subject:
         //   expression
-        self.parse_is_as_helper(
-            |p, x, y, z| S!(make_upcast_expression, p, x, y, z),
-            left,
-            TokenKind::Upcast,
-        )
+        self.parse_is_as_helper(left, TokenKind::Upcast, |p, x, y, z| {
+            S!(make_upcast_expression, p, x, y, z)
+        })
     }
 
     // Avoid inlining to keep down the stack frame size of recursing functions.

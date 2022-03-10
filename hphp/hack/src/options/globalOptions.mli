@@ -145,8 +145,6 @@ type t = {
    * Flag to produce an error whenever the TAST contains unresolved type variables
    *)
   tco_disallow_unresolved_type_variables: bool;
-  (* Ban use of traits that are already used in parent classes. *)
-  tco_disallow_trait_reuse: bool;
   (* Enable class-level where clauses, i.e.
      class base<T> where T = int {} *)
   po_enable_class_level_where_clauses: bool;
@@ -367,7 +365,6 @@ val make :
   ?tco_check_xhp_attribute:bool ->
   ?tco_check_redundant_generics:bool ->
   ?tco_disallow_unresolved_type_variables:bool ->
-  ?tco_disallow_trait_reuse:bool ->
   ?po_enable_class_level_where_clauses:bool ->
   ?po_disable_legacy_soft_typehints:bool ->
   ?po_allowed_decl_fixme_codes:ISet.t ->
@@ -576,8 +573,6 @@ val tco_check_xhp_attribute : t -> bool
 val tco_check_redundant_generics : t -> bool
 
 val tco_disallow_unresolved_type_variables : t -> bool
-
-val tco_disallow_trait_reuse : t -> bool
 
 val po_enable_class_level_where_clauses : t -> bool
 

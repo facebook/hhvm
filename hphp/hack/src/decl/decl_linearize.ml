@@ -137,9 +137,6 @@ let empty_mro_element =
     mro_required_at = None;
   }
 
-let disallow_trait_reuse env =
-  TypecheckerOptions.disallow_trait_reuse (Decl_env.tcopt env.decl_env)
-
 let is_requirement (source : source_type) =
   match source with
   | ReqImpl
@@ -445,26 +442,7 @@ and next_state
         yield next (Next_ancestor { ancestors; synths })
       | next :: rest ->
         let skip_or_mark_trait_reuse was_emitted =
-          let is_trait class_name =
-            match Shallow_classes_provider.get (get_ctx env) class_name with
-            | Some { sc_kind; _ } -> Ast_defs.is_c_trait sc_kind
-            | _ -> false
-          in
-          if
-            disallow_trait_reuse env
-            && Option.is_none next.mro_trait_reuse
-            && is_trait next.mro_name
-          then
-            (* When the disallow_trait_reuse feature is enabled, we want to report
-               an error for reused traits. Instead of skipping trait
-               mro_elements when they are already present in the
-               linearization, we emit an element with the trait_reuse flag
-               set so that we can error later. *)
-            if name_was_emitted next then
-              Some { next with mro_trait_reuse = Some name }
-            else
-              Some next
-          else if was_emitted next then
+          if was_emitted next then
             None
           else
             Some next

@@ -224,7 +224,6 @@ let () =
       ignored_flag "--disallow-invalid-arraykey-constraint";
       ignored_flag "--disallow-php-lambdas";
       ignored_flag "--disallow-silence";
-      ignored_flag "--disallow-trait-reuse";
       ignored_flag "--enable-class-level-where-clauses";
       ignored_flag "--enable-higher-kinded-types";
       ignored_flag "--enable-systemlib-annotations";

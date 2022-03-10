@@ -82,9 +82,6 @@ let check_extend_kind
  *)
 (*****************************************************************************)
 
-let disallow_trait_reuse (env : Decl_env.env) : bool =
-  TypecheckerOptions.disallow_trait_reuse (Decl_env.tcopt env)
-
 let member_heaps_enabled (ctx : Provider_context.t) : bool =
   (* We can only disable member heaps when the direct decl parser is enabled,
      as there's no caching mechanism for shallow decls when the FFP is used
@@ -94,50 +91,6 @@ let member_heaps_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.(
     (not (use_direct_decl_parser tco)) || populate_member_heaps tco)
 
-let report_reused_trait
-    (parent_type : Decl_defs.decl_class_type)
-    (shallow_class : Shallow_decl_defs.shallow_class)
-    trait_name =
-  let (pos, class_name) =
-    Positioned.unsafe_to_raw_positioned shallow_class.sc_name
-  in
-  Errors.add_typing_error
-    Typing_error.(
-      primary
-      @@ Primary.Trait_reuse
-           {
-             parent_pos = parent_type.dc_pos;
-             parent_name = parent_type.dc_name;
-             pos;
-             class_name;
-             trait_name;
-           })
-
-(**
- * Verifies that a class never reuses the same trait throughout its hierarchy.
- *
- * Since Hack only has single inheritance and we already put up a warning for
- * cyclic class hierarchies, if there is any overlap between our extends and
- * our parents' extends, that overlap must be a trait.
- *
- * This does not hold for interfaces because they have multiple inheritance,
- * but interfaces cannot use traits in the first place.
- *
- * XHP attribute dependencies don't actually pull the trait into the class,
- * so we need to track them totally separately.
- *)
-let check_no_duplicate_traits
-    (parent_type : Decl_defs.decl_class_type)
-    (shallow_class : Shallow_decl_defs.shallow_class)
-    (c_extends : SSet.t)
-    (full_extends : SSet.t) : unit =
-  let class_size = SSet.cardinal c_extends in
-  let parents_size = SSet.cardinal parent_type.dc_extends in
-  let full_size = SSet.cardinal full_extends in
-  if class_size + parents_size > full_size then
-    let duplicates = SSet.inter c_extends parent_type.dc_extends in
-    SSet.iter (report_reused_trait parent_type shallow_class) duplicates
-
 (**
  * Adds the traits/classes which are part of a class' hierarchy.
  *
@@ -146,7 +99,6 @@ let check_no_duplicate_traits
  * declared as private/protected.
  *)
 let add_grand_parents_or_traits
-    (no_trait_reuse : bool)
     (parent_pos : Pos_or_decl.t)
     (shallow_class : Shallow_decl_defs.shallow_class)
     (acc : SSet.t * [> `Extends_pass | `Xhp_pass ])
@@ -173,9 +125,6 @@ let add_grand_parents_or_traits
       parent_type.dc_extends
   in
   let extends' = SSet.union extends parent_deps in
-  (* Verify that merging the parent's extends did not introduce trait reuse *)
-  if no_trait_reuse then
-    check_no_duplicate_traits parent_type shallow_class extends extends';
   (extends', pass)
 
 let get_class_parent_or_trait
@@ -184,15 +133,8 @@ let get_class_parent_or_trait
     (parent_cache : Decl_store.class_entries SMap.t)
     ((parents, pass) : SSet.t * [> `Extends_pass | `Xhp_pass ])
     (ty : Typing_defs.decl_phase Typing_defs.ty) : SSet.t * 'a =
-  (* See comment on check_no_duplicate_traits for reasoning here *)
-  let no_trait_reuse =
-    disallow_trait_reuse env
-    && (not (phys_equal pass `Xhp_pass))
-    && not Ast_defs.(is_c_interface shallow_class.sc_kind)
-  in
   let (_, (parent_pos, parent), _) = Decl_utils.unwrap_class_type ty in
   (* If we already had this exact trait, we need to flag trait reuse *)
-  let reused_trait = no_trait_reuse && SSet.mem parent parents in
   let parents = SSet.add parent parents in
   let parent_type =
     Decl_env.get_class_and_add_dep
@@ -205,15 +147,8 @@ let get_class_parent_or_trait
   match parent_type with
   | None -> (parents, pass)
   | Some parent_type ->
-    (* The parent class lives in Hack, so we can report reused traits *)
-    if reused_trait then report_reused_trait parent_type shallow_class parent;
     let acc = (parents, pass) in
-    add_grand_parents_or_traits
-      no_trait_reuse
-      parent_pos
-      shallow_class
-      acc
-      parent_type
+    add_grand_parents_or_traits parent_pos shallow_class acc parent_type
 
 let get_class_parents_and_traits
     (env : Decl_env.env)

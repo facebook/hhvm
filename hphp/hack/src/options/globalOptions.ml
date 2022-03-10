@@ -62,7 +62,6 @@ type t = {
   tco_check_xhp_attribute: bool;
   tco_check_redundant_generics: bool;
   tco_disallow_unresolved_type_variables: bool;
-  tco_disallow_trait_reuse: bool;
   po_enable_class_level_where_clauses: bool;
   po_disable_legacy_soft_typehints: bool;
   po_allowed_decl_fixme_codes: ISet.t;
@@ -247,7 +246,6 @@ let default =
     tco_check_xhp_attribute = false;
     tco_check_redundant_generics = false;
     tco_disallow_unresolved_type_variables = false;
-    tco_disallow_trait_reuse = false;
     po_enable_class_level_where_clauses = false;
     po_disable_legacy_soft_typehints = true;
     po_allowed_decl_fixme_codes = ISet.of_list [];
@@ -381,7 +379,6 @@ let make
     ?(tco_check_redundant_generics = default.tco_check_redundant_generics)
     ?(tco_disallow_unresolved_type_variables =
       default.tco_disallow_unresolved_type_variables)
-    ?(tco_disallow_trait_reuse = default.tco_disallow_trait_reuse)
     ?(po_enable_class_level_where_clauses =
       default.po_enable_class_level_where_clauses)
     ?(po_disable_legacy_soft_typehints =
@@ -530,7 +527,6 @@ let make
     tco_check_xhp_attribute;
     tco_check_redundant_generics;
     tco_disallow_unresolved_type_variables;
-    tco_disallow_trait_reuse;
     po_enable_class_level_where_clauses;
     po_disable_legacy_soft_typehints;
     po_allowed_decl_fixme_codes;
@@ -726,8 +722,6 @@ let tco_check_redundant_generics t = t.tco_check_redundant_generics
 
 let tco_disallow_unresolved_type_variables t =
   t.tco_disallow_unresolved_type_variables
-
-let tco_disallow_trait_reuse t = t.tco_disallow_trait_reuse
 
 let po_enable_class_level_where_clauses t =
   t.po_enable_class_level_where_clauses

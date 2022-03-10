@@ -130,8 +130,6 @@ let check_redundant_generics = GlobalOptions.tco_check_redundant_generics
 let disallow_unresolved_type_variables =
   GlobalOptions.tco_disallow_unresolved_type_variables
 
-let disallow_trait_reuse = GlobalOptions.tco_disallow_trait_reuse
-
 let const_static_props = GlobalOptions.tco_const_static_props
 
 let global_inference = GlobalOptions.tco_global_inference

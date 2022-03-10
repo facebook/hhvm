@@ -1,12 +1,8 @@
-File "override_final5.php", line 20, characters 7-16:
-Class `ChildClass` reuses trait `T` in its hierarchy (Typing[4186])
-File "override_final5.php", line 12, characters 7-7:
-It is already used through `T`
 File "override_final5.php", line 21, characters 7-7:
 Traits with final methods cannot be reused, and `T` is already used by `ParentClass`. (Typing[4186])
-File "override_final5.php", line 16, characters 7-17:
-`ParentClass` is defined here
-File "override_final5.php", line 17, characters 7-7:
-`ParentClass` uses `T`
-File "override_final5.php", line 13, characters 32-32:
-`T` has a final method `f`
+  File "override_final5.php", line 16, characters 7-17:
+  `ParentClass` is defined here
+  File "override_final5.php", line 17, characters 7-7:
+  `ParentClass` uses `T`
+  File "override_final5.php", line 13, characters 32-32:
+  `T` has a final method `f`

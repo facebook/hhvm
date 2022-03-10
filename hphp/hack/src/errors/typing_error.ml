@@ -1772,13 +1772,6 @@ module Primary = struct
         parent_cls_name: string;
         trace: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Trait_reuse of {
-        pos: Pos.t;
-        class_name: string;
-        trait_name: string;
-        parent_pos: Pos_or_decl.t;
-        parent_name: string;
-      }
     | Trait_reuse_inside_class of {
         pos: Pos.t;
         class_name: string;
@@ -3290,26 +3283,6 @@ module Primary = struct
             (Render.strip_ns parent_cls_name) )
     in
     (Error_code.TraitReuse, claim, trace, [])
-
-  let trait_reuse pos c_name trait_name parent_pos parent_name =
-    let claim =
-      lazy
-        (let c_name = Render.strip_ns c_name |> Markdown_lite.md_codify in
-         let trait = Render.strip_ns trait_name |> Markdown_lite.md_codify in
-         let err =
-           "Class " ^ c_name ^ " reuses trait " ^ trait ^ " in its hierarchy"
-         in
-         (pos, err))
-    in
-    let reason =
-      lazy
-        (let err' =
-           "It is already used through "
-           ^ (Render.strip_ns parent_name |> Markdown_lite.md_codify)
-         in
-         [(parent_pos, err')])
-    in
-    (Error_code.TraitReuse, claim, reason, [])
 
   let trait_reuse_inside_class c_pos c_name trait occurrences =
     let claim =
@@ -5395,8 +5368,6 @@ module Primary = struct
     | Trait_reuse_with_final_method { pos; trait_name; parent_cls_name; trace }
       ->
       trait_reuse_with_final_method pos trait_name parent_cls_name trace
-    | Trait_reuse { pos; class_name; trait_name; parent_pos; parent_name } ->
-      trait_reuse pos class_name trait_name parent_pos parent_name
     | Trait_reuse_inside_class { pos; class_name; trait_name; occurrences } ->
       trait_reuse_inside_class pos class_name trait_name occurrences
     | Invalid_is_as_expression_hint { pos; op; reasons } ->

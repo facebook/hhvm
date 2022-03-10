@@ -657,13 +657,6 @@ module Primary : sig
         parent_cls_name: string;
         trace: Pos_or_decl.t Message.t list Lazy.t;
       }
-    | Trait_reuse of {
-        pos: Pos.t;
-        class_name: string;
-        trait_name: string;
-        parent_pos: Pos_or_decl.t;
-        parent_name: string;
-      }
     | Trait_reuse_inside_class of {
         pos: Pos.t;
         class_name: string;

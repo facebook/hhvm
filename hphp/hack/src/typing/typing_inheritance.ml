@@ -167,39 +167,10 @@ let check_extend_kinds ctx class_pos shallow_class =
           classish_kind
           class_name)
 
-let disallow_trait_reuse env =
-  TypecheckerOptions.disallow_trait_reuse (Env.get_tcopt env)
-
-(** Check that a class does not reuse a trait in its hierarchy. *)
-let check_trait_reuse ctx class_pos cls =
-  Cls.linearization cls Decl_defs.Ancestor_types
-  |> List.iter ~f:(fun mro ->
-         match mro.mro_trait_reuse with
-         | None -> ()
-         | Some parent_name ->
-           let parent_pos =
-             Shallow_classes_provider.get ctx parent_name
-             |> Option.value_map ~default:Pos_or_decl.none ~f:(fun p ->
-                    fst p.sc_name)
-           in
-           Errors.add_typing_error
-             Typing_error.(
-               primary
-               @@ Primary.Trait_reuse
-                    {
-                      parent_pos;
-                      parent_name;
-                      pos = class_pos;
-                      class_name = Cls.name cls;
-                      trait_name = mro.mro_name;
-                    }))
-
 let check_class env class_pos cls =
   check_if_cyclic class_pos cls;
   let shallow_class = Cls.shallow_decl cls in
   check_extend_kinds (Env.get_ctx env) class_pos shallow_class;
-  if disallow_trait_reuse env then
-    check_trait_reuse (Env.get_ctx env) class_pos cls;
   if not Ast_defs.(is_c_trait (Cls.kind cls)) then (
     check_override_annotations env cls ~static:false;
     check_override_annotations env cls ~static:true

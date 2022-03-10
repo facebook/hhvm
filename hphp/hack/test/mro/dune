@@ -15,8 +15,7 @@
    --flags
    --mro
    --shallow-class-decl
-   --no-builtins
-   --disallow-trait-reuse)))
+   --no-builtins)))
 
 (alias
  (name runtest)

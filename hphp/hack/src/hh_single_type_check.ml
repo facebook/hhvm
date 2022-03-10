@@ -220,7 +220,6 @@ let parse_options () =
   let disallow_static_memoized = ref false in
   let enable_supportdyn_hint = ref false in
   let enable_class_level_where_clauses = ref false in
-  let disallow_trait_reuse = ref None in
   let disable_legacy_soft_typehints = ref false in
   let allow_new_attribute_syntax = ref false in
   let allow_toplevel_requires = ref false in
@@ -538,9 +537,6 @@ let parse_options () =
       ( "--enable-class-level-where-clauses",
         Arg.Set enable_class_level_where_clauses,
         " Enables support for class-level where clauses" );
-      ( "--disallow-trait-reuse",
-        Arg.Unit (set_bool disallow_trait_reuse),
-        " Forbid a class from using a trait already used in a parent class" );
       ( "--disable-legacy-soft-typehints",
         Arg.Set disable_legacy_soft_typehints,
         " Disables the legacy @ syntax for soft typehints (use __Soft instead)"
@@ -829,7 +825,6 @@ let parse_options () =
         (Option.value !allowed_fixme_codes_partial ~default:ISet.empty)
       ~codes_not_raised_partial:
         (Option.value !codes_not_raised_partial ~default:ISet.empty)
-      ?tco_disallow_trait_reuse:!disallow_trait_reuse
       ~tco_check_xhp_attribute:!check_xhp_attribute
       ~tco_check_redundant_generics:!check_redundant_generics
       ~tco_shallow_class_decl:!shallow_class_decl

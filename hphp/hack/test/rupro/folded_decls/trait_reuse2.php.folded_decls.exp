@@ -107,15 +107,4 @@ FoldedClass {
         "\\T",
         "\\T3",
     },
-    decl_errors: [
-        Primary(
-            TraitReuse {
-                parent_pos: NPos,
-                parent_name: "\\T3",
-                pos: NPos,
-                class_name: "\\A",
-                trait_name: "\\T",
-            },
-        ),
-    ],
 }

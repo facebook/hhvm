@@ -1,0 +1,146 @@
+FoldedClass {
+    name: "\\A",
+    kind: CenumClass(
+        Abstract,
+    ),
+    substs: {
+        "\\HH\\BuiltinAbstractEnumClass": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\A",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\HH\\BuiltinAbstractEnumClass": HH\BuiltinAbstractEnumClass,
+    },
+    static_methods: {
+        "nameOf": FoldedElement {
+            flags: (empty),
+            origin: "\\HH\\BuiltinAbstractEnumClass",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: HH\classname<this>,
+            origin: "\\A",
+            refs: [],
+        },
+        "fred": ClassConst {
+            is_synthesized: false,
+            kind: CCAbstract(
+                false,
+            ),
+            pos: NPos,
+            ty: HH\MemberOf<A, string>,
+            origin: "\\A",
+            refs: [],
+        },
+        "ginger": ClassConst {
+            is_synthesized: false,
+            kind: CCAbstract(
+                false,
+            ),
+            pos: NPos,
+            ty: HH\MemberOf<A, string>,
+            origin: "\\A",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\HH\\BuiltinAbstractEnumClass",
+    },
+}
+FoldedClass {
+    name: "\\E",
+    kind: CenumClass(
+        Concrete,
+    ),
+    substs: {
+        "\\HH\\BuiltinAbstractEnumClass": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\A",
+            from_req_extends: false,
+        },
+        "\\A": SubstContext {
+            subst: Subst(
+                {},
+            ),
+            class_context: "\\E",
+            from_req_extends: false,
+        },
+        "\\HH\\BuiltinEnumClass": SubstContext {
+            subst: Subst(
+                {
+                    "T": HH\MemberOf<E, string>,
+                },
+            ),
+            class_context: "\\E",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\HH\\BuiltinAbstractEnumClass": HH\BuiltinAbstractEnumClass,
+        "\\HH\\BuiltinEnumClass": HH\BuiltinEnumClass<HH\MemberOf<E, string>>,
+        "\\A": A,
+    },
+    static_methods: {
+        "nameOf": FoldedElement {
+            flags: (empty),
+            origin: "\\HH\\BuiltinAbstractEnumClass",
+            visibility: Public,
+            deprecated: None,
+        },
+        "getValues": FoldedElement {
+            flags: (empty),
+            origin: "\\HH\\BuiltinEnumClass",
+            visibility: Public,
+            deprecated: None,
+        },
+        "valueOf": FoldedElement {
+            flags: (empty),
+            origin: "\\HH\\BuiltinEnumClass",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: HH\classname<this>,
+            origin: "\\E",
+            refs: [],
+        },
+        "fred": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: HH\MemberOf<E, string>,
+            origin: "\\E",
+            refs: [],
+        },
+        "ginger": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: NPos,
+            ty: HH\MemberOf<E, string>,
+            origin: "\\E",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\HH\\BuiltinEnumClass",
+        "\\HH\\BuiltinAbstractEnumClass",
+        "\\A",
+    },
+}

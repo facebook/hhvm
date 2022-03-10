@@ -27,7 +27,8 @@ use std::sync::Arc;
 #[derive(Debug)]
 pub struct DeclFolder<R: Reason> {
     special_names: &'static SpecialNames,
-    _opts: Arc<GlobalOptions>,
+    #[allow(dead_code)] // This can be removed after this field's first use.
+    opts: Arc<GlobalOptions>,
     _phantom: PhantomData<R>,
 }
 
@@ -41,7 +42,7 @@ enum Pass {
 impl<R: Reason> DeclFolder<R> {
     pub fn new(opts: Arc<GlobalOptions>, special_names: &'static SpecialNames) -> Self {
         Self {
-            _opts: opts,
+            opts,
             special_names,
             _phantom: PhantomData,
         }
@@ -484,8 +485,14 @@ impl<R: Reason> DeclFolder<R> {
         errors: &mut Vec<TypingError<R>>,
         ty: &DeclTy<R>,
     ) {
-        // See comment on add_grandparents_or_traits for reasoning here
-        let no_trait_reuse = pass != Pass::Xhp && sc.kind != ClassishKind::Cinterface; /* TODO: && Based on env */
+        // See comment on add_grandparents_or_traits for reasoning here.
+
+        // note(sf, 2022-03-10): D34694803 removes `tco_disallow_trait_reuse` from
+        // `GlobalOptions` but this logic remains and should be removed.
+        #[rustfmt::skip]
+        #[allow(clippy::logic_bug)]
+        let no_trait_reuse = false /* D34694803*/ && pass != Pass::Xhp && sc.kind != ClassishKind::Cinterface;
+
         if let Some((_, pos_id, _)) = ty.unwrap_class_type() {
             // If we already had this exact trait, we need to flag trait reuse
             let reused_trait = no_trait_reuse && extends.contains(&pos_id.id());

@@ -222,7 +222,16 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
             self.decl_class_type(stack, &mut acc, ty)
                 .map_err(|err| Self::parent_error(sc, ty, err))?;
         }
-        //TODO: enum_includes
+        for ty in sc
+            .enum_type
+            .as_ref()
+            .map_or([].as_slice(), |et| &et.includes)
+            .iter()
+        {
+            self.decl_class_type(stack, &mut acc, ty)
+                .map_err(|err| Self::parent_error(sc, ty, err))?;
+        }
+
         Ok(acc)
     }
 

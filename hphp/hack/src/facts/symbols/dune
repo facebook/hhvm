@@ -6,7 +6,6 @@
   facts
   folly_stubs
   heap_shared_mem_hash
-  hhbc
   hhi
   parser
   process

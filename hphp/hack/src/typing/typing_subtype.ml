@@ -1237,7 +1237,7 @@ and simplify_subtype_i
       (match ety_sub with
       | ConstraintType cty when is_constraint_type_union cty ->
         default_subtype env
-      | ConstraintType _ -> simplify_sub_union env ty_sub tyl_super
+      | ConstraintType _ -> simplify_sub_union env ety_sub tyl_super
       | LoclType lty_sub ->
         (match
            simplify_subtype_arraykey_union
@@ -1307,12 +1307,12 @@ and simplify_subtype_i
                        B | C <: B | C
             *)
             if List.exists tyl_super ~f:(Typing_utils.is_tintersection env) then
-              simplify_sub_union env ty_sub tyl_super
+              simplify_sub_union env ety_sub tyl_super
             else if List.exists tyl_sub ~f:(Typing_utils.is_tunion env) then
               simplify_super_intersection env tyl_sub (LoclType ty_super)
             else
-              simplify_sub_union env ty_sub tyl_super
-          | _ -> simplify_sub_union env ty_sub tyl_super)))
+              simplify_sub_union env ety_sub tyl_super
+          | _ -> simplify_sub_union env ety_sub tyl_super)))
     | (r_super, Toption arg_ty_super) ->
       let (env, ety) = Env.expand_type env arg_ty_super in
       (* Toption(Tnonnull) encodes mixed, which is our top type.

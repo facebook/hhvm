@@ -97,11 +97,12 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
           env
           ty
       in
-      (* If a parameter hint has the form ~t, where t is enforced,
-       * then we know that the parameter has type t after enforcement *)
+      (* If a non-inout parameter hint has the form ~t, where t is enforced,
+       * then we know that the parameter has type t after enforcement.
+       *)
       let ty =
-        match (get_node ty, et_enforced) with
-        | (Tlike ty, Enforced) -> ty
+        match (get_node ty, et_enforced, param.param_callconv) with
+        | (Tlike ty, Enforced, Ast_defs.Pnormal) -> ty
         | _ -> ty
       in
       Phase.localize_no_subst env ~ignore_errors:false ty

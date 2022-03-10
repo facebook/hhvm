@@ -493,4 +493,14 @@ int main() {
         target_link_libraries(${target} ${VISIBILITY} xed)
     endif()
   endif()
+
+  if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang") # using Clang
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+      target_link_libraries(${target} ${VISIBILITY} c++fs)
+    endif()
+  elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
+      target_link_libraries(${target} ${VISIBILITY} stdc++fs)
+    endif()
+  endif()
 endmacro()

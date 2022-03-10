@@ -9,6 +9,7 @@ use std::ops::Deref;
 use std::sync::{Arc, Weak};
 
 use dashmap::{mapref::entry::Entry, DashMap};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 pub use once_cell::sync::Lazy;
 
@@ -111,6 +112,20 @@ impl<T: Ord> Ord for Hc<T> {
     #[inline]
     fn cmp(&self, other: &Hc<T>) -> std::cmp::Ordering {
         (**self).cmp(&**other)
+    }
+}
+
+impl<T: Serialize> Serialize for Hc<T> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        // TODO: The `intern` crate has a way of preserving sharing of interned
+        // values in serde output; we may want to do the same here.
+        (**self).serialize(serializer)
+    }
+}
+
+impl<'de, T: Deserialize<'de> + Consable> Deserialize<'de> for Hc<T> {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Deserialize::deserialize(deserializer).map(Hc::new)
     }
 }
 

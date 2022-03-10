@@ -755,6 +755,13 @@ impl<R: Reason> DeclFolder<R> {
         (req_ancestors, req_ancestors_extends)
     }
 
+    fn get_sealed_whitelist(&self, sc: &ShallowClass<R>) -> Option<TypeNameIndexSet> {
+        sc.user_attributes
+            .iter()
+            .find(|ua| ua.name.id() == self.special_names.user_attributes.uaSealed)
+            .map(|ua| ua.classname_params.iter().copied().collect())
+    }
+
     pub fn decl_class(
         &self,
         sc: &ShallowClass<R>,
@@ -807,6 +814,8 @@ impl<R: Reason> DeclFolder<R> {
 
         let (req_ancestors, req_ancestors_extends) = self.get_class_requirements(sc, parents);
 
+        let sealed_whitelist = self.get_sealed_whitelist(sc);
+
         Arc::new(FoldedClass {
             name: sc.name.id(),
             pos: sc.name.pos().clone(),
@@ -840,6 +849,7 @@ impl<R: Reason> DeclFolder<R> {
             xhp_attr_deps,
             req_ancestors: req_ancestors.into_boxed_slice(),
             req_ancestors_extends,
+            sealed_whitelist,
             decl_errors: errors.into_boxed_slice(),
         })
     }

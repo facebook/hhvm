@@ -161,6 +161,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             xhp_attr_deps,
             req_ancestors,
             req_ancestors_extends,
+            sealed_whitelist,
             decl_errors,
         } = self;
 
@@ -243,6 +244,9 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
         if !req_ancestors_extends.is_empty() {
             s.field("req_ancestors_extends", req_ancestors_extends);
+        }
+        if let Some(sealed_whitelist) = sealed_whitelist {
+            s.field("sealed_whitelist", sealed_whitelist);
         }
         if !decl_errors.is_empty() {
             s.field("decl_errors", decl_errors);

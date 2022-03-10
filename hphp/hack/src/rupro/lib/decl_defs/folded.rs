@@ -150,6 +150,7 @@ pub struct FoldedClass<R: Reason> {
     pub xhp_attr_deps: TypeNameIndexSet,
     pub req_ancestors: Box<[Requirement<R>]>,
     pub req_ancestors_extends: TypeNameIndexSet,
+    pub sealed_whitelist: Option<TypeNameIndexSet>,
     pub decl_errors: Box<[TypingError<R>]>,
 }
 

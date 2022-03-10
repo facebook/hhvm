@@ -1,14 +1,14 @@
 HHVM_DEFINE_EXTENSION("thrift"
   SOURCES
     adapter.cpp
-    field_adapter.cpp
+    field_wrapper.cpp
     binary.cpp
     compact.cpp
     ext_thrift.cpp
     spec-holder.cpp
   HEADERS
     adapter.h
-    field_adapter.h
+    field_wrapper.h
     util.h
     ext_thrift.h
     spec-holder.h

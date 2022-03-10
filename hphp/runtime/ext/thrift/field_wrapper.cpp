@@ -15,22 +15,51 @@
    +----------------------------------------------------------------------+
 */
 
-#pragma once
+#include "hphp/runtime/ext/thrift/adapter.h"
 
-#include "hphp/runtime/base/type-array.h"
-#include "hphp/runtime/base/type-variant.h"
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/ext/thrift/util.h"
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
 namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
 
-Class* getFieldAdapter(const Array& spec);
+void setThriftType(Variant value, const Object& obj, const String& fieldName) {
+  auto getter_name = "get_" + fieldName;
+  auto field_val =
+      obj->o_invoke_few_args(getter_name, RuntimeCoeffects::pure(), 0);
+  if (field_val.isObject()) {
+    auto wrapped_obj = field_val.toObject();
+    wrapped_obj->o_invoke_few_args(
+        "setValue_DO_NOT_USE_THRIFT_INTERNAL",
+        RuntimeCoeffects::write_this_props(),
+        1,
+        value);
+  } else {
+    thrift_error(
+        folly::sformat("Method {} returned a non-object.", getter_name),
+        ERR_INVALID_DATA);
+  }
+}
 
-void
-setThriftType(Variant value, const Object& obj, const String& fieldName);
-
-Variant getThriftType(const Object& obj, const String& fieldName);
+Variant getThriftType(const Object& obj, const String& fieldName) {
+  auto getter_name = "get_" + fieldName;
+  auto field_val =
+      obj->o_invoke_few_args(getter_name, RuntimeCoeffects::pure(), 0);
+  if (field_val.isObject()) {
+    auto wrapped_obj = field_val.toObject();
+    return wrapped_obj->o_invoke_few_args(
+        "getValue_DO_NOT_USE_THRIFT_INTERNAL",
+        RuntimeCoeffects::write_this_props(),
+        0);
+  }
+  thrift_error(
+      folly::sformat("Method {} returned a non-object.", getter_name),
+      ERR_INVALID_DATA);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace thrift

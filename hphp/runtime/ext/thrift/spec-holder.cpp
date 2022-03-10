@@ -23,7 +23,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/thrift/adapter.h"
-#include "hphp/runtime/ext/thrift/field_adapter.h"
+#include "hphp/runtime/ext/thrift/field_wrapper.h"
 #include "hphp/runtime/ext/thrift/util.h"
 #include "hphp/util/hash-map.h"
 
@@ -46,7 +46,8 @@ const StaticString
   s_vtype("vtype"),
   s_etype("etype"),
   s_format("format"),
-  s_SPEC("SPEC");
+  s_SPEC("SPEC"),
+  s_isWrapped("is_wrapped");
 
 Array get_tspec(const Class* cls) {
   auto lookup = cls->clsCnsGet(s_SPEC.get());
@@ -246,7 +247,8 @@ FieldSpec FieldSpec::compile(const Array& fieldSpec, bool topLevel) {
     break;
   }
   field.adapter = getAdapter(fieldSpec);
-  field.field_adapter = getFieldAdapter(fieldSpec);
+  field.isWrapped = tvCastToBoolean(
+      fieldSpec.lookup(s_isWrapped, AccessFlags::Key));
   return field;
 }
 

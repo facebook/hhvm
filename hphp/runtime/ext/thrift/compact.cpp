@@ -28,7 +28,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/thrift/adapter.h"
-#include "hphp/runtime/ext/thrift/field_adapter.h"
+#include "hphp/runtime/ext/thrift/field_wrapper.h"
 #include "hphp/runtime/ext/thrift/spec-holder.h"
 #include "hphp/runtime/ext/thrift/transport.h"
 #include "hphp/runtime/ext/thrift/util.h"
@@ -246,7 +246,7 @@ struct CompactWriter {
       INC_TPC(thrift_write_slow);
       StrNR fieldName(field.name);
       Variant fieldVal;
-      if (field.field_adapter) {
+      if (field.isWrapped) {
         fieldVal = getThriftType(obj, fieldName);
       } else {
         fieldVal = obj->o_get(fieldName, true, obj->getClassName());
@@ -292,7 +292,7 @@ struct CompactWriter {
             fieldInfo.prop = &prop[slot];
             fieldInfo.fieldNum = fields[slot].fieldNum;
 
-            if (fields[slot].field_adapter) {
+            if (fields[slot].isWrapped) {
               auto value = getThriftType(obj, StrNR(fields[slot].name));
               writeField(value, fields[slot], fieldType, fieldInfo);
             } else {
@@ -666,7 +666,7 @@ struct CompactReader {
           if (typesAreCompatible(fieldType, fieldSpec->type)) {
             readComplete = true;
             Variant fieldValue = readField(*fieldSpec, fieldType);
-            if (fieldSpec->field_adapter) {
+            if (fieldSpec->isWrapped) {
               setThriftType(fieldValue, dest, StrNR(fieldSpec->name));
             } else {
               dest->o_set(
@@ -732,7 +732,7 @@ struct CompactReader {
         }
         auto index = cls->propSlotToIndex(slot);
         auto value = readField(fields[slot], fieldType);
-        if (fields[slot].field_adapter) {
+        if (fields[slot].isWrapped) {
           setThriftType(value, dest, StrNR(fields[slot].name));
         } else {
           tvSet(*value.asTypedValue(), objProp->at(index));

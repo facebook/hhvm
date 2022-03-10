@@ -15,45 +15,20 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/thrift/adapter.h"
+#pragma once
 
-#include "hphp/runtime/base/datatype.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/type-string.h"
-#include "hphp/runtime/ext/thrift/util.h"
+#include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/class.h"
 
 namespace HPHP {
 namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
 
-const StaticString s_fieldAdapter("field_adapter");
-
-Class* getFieldAdapter(const Array& spec) {
-  const auto adapterName = spec.lookup(s_fieldAdapter, AccessFlags::Key);
-  if (isNullType(adapterName.type())) {
-    return nullptr;
-  }
-  const auto adapterNameString = tvCastToString(adapterName);
-  const auto adapter = Class::load(adapterNameString.get());
-  if (!adapter) {
-    thrift_error(
-        folly::sformat("adapter class {} doesn't exist", adapterNameString),
-        ERR_INVALID_DATA);
-  }
-  return adapter;
-}
-
 void
-setThriftType(Variant value, const Object& obj, const String& fieldName) {
-  auto setter_name = "set_" + fieldName;
-  obj->o_invoke_few_args(setter_name, RuntimeCoeffects::defaults(), 1,value);
-}
+setThriftType(Variant value, const Object& obj, const String& fieldName);
 
-Variant getThriftType(const Object& obj, const String& fieldName) {
-  auto getter_name = "get_" + fieldName;
-  return obj->o_invoke_few_args(getter_name, RuntimeCoeffects::defaults(), 0);
-}
+Variant getThriftType(const Object& obj, const String& fieldName);
 
 ///////////////////////////////////////////////////////////////////////////////
 } // namespace thrift

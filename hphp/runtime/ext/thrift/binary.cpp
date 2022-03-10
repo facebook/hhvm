@@ -26,7 +26,7 @@
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/thrift/adapter.h"
-#include "hphp/runtime/ext/thrift/field_adapter.h"
+#include "hphp/runtime/ext/thrift/field_wrapper.h"
 #include "hphp/runtime/ext/thrift/ext_thrift.h"
 #include "hphp/runtime/ext/thrift/spec-holder.h"
 #include "hphp/runtime/ext/thrift/transport.h"
@@ -410,7 +410,7 @@ void binary_deserialize_slow(const Object& zthis,
     if (const auto* fieldspec = getFieldSlow(spec, fieldno)) {
       if (ttypes_are_compatible(ttype, fieldspec->type)) {
         Variant rv = binary_deserialize(ttype, transport, *fieldspec, options);
-        if (fieldspec->field_adapter) {
+        if (fieldspec->isWrapped) {
           setThriftType(rv, zthis, StrNR(fieldspec->name));
         } else {
           zthis->o_set(StrNR(fieldspec->name), rv, zthis->getClassName());
@@ -480,7 +480,7 @@ Object binary_deserialize_struct(const String& clsName,
     }
     auto index = cls->propSlotToIndex(i);
     auto value = binary_deserialize(fieldType, transport, fields[i], options);
-    if (fields[i].field_adapter) {
+    if (fields[i].isWrapped) {
       setThriftType(value, dest, StrNR(fields[i].name));
     } else {
       tvSet(*value.asTypedValue(), objProps->at(index));
@@ -615,7 +615,7 @@ void binary_serialize_slow(const FieldSpec& field,
   INC_TPC(thrift_write_slow);
   StrNR fieldName(field.name);
   Variant fieldVal;
-  if (field.field_adapter) {
+  if (field.isWrapped) {
     fieldVal = getThriftType(obj, fieldName);
   } else {
      fieldVal = obj->o_get(fieldName, true, obj->getClassName());
@@ -643,7 +643,7 @@ void binary_serialize_struct(const Object& obj, PHPOutputTransport& transport) {
       auto index = cls->propSlotToIndex(slot);
       VarNR fieldWrapper(objProps->at(index).tv());
       Variant fieldVal;
-      if (fields[slot].field_adapter) {
+      if (fields[slot].isWrapped) {
         fieldVal = getThriftType(obj, StrNR(fields[slot].name));
       } else {
         fieldVal = fieldWrapper;

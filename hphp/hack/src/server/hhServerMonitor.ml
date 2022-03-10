@@ -45,7 +45,10 @@ let monitor_daemon_main
      and handle requests. *)
   (if not (ServerArgs.check_mode options) then
     let lock_file = ServerFiles.lock_file www_root in
-    if not (Lock.grab lock_file) then Exit.exit Exit_status.No_error);
+    if not (Lock.grab lock_file) then (
+      Printf.eprintf "Monitor lock file already exists: %s\n%!" lock_file;
+      Exit.exit Exit_status.No_error
+    ));
 
   (* Daemon mode (should_detach): --daemon means the caller already spawned
      us in a new process, and it's now our responsibility to establish a logfile

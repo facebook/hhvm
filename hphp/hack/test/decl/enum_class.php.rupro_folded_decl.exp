@@ -1,166 +1,161 @@
---- ocaml
-+++ rupro
-@@ -1,159 +1,153 @@
- { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cenum_class Concrete); dc_is_xhp = false;
-   dc_has_xhp_keyword = false; dc_module = None; dc_name = "\\A";
-   dc_pos = [5:12-13]; dc_tparams = []; dc_where_constraints = [];
-   dc_substs = {};
-   dc_consts =
-   { "W" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [9:7-8];
-       cc_type =
-       (Rhint ([9:7-8]),
-        (Tapply (([9:7-8], "\\HH\\MemberOf"),
-           [(Rhint ([9:7-8]), (Tapply (([9:7-8], "\\A"), [])));
-             (Rhint ([9:3-6]), (Tprim Tint))]
-           )));
-       cc_origin = "\\A"; cc_refs = [((Typing_defs.From "\\C"), "w")] };
-     "X" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [6:7-8];
-       cc_type =
-       (Rhint ([6:7-8]),
-        (Tapply (([6:7-8], "\\HH\\MemberOf"),
-           [(Rhint ([6:7-8]), (Tapply (([6:7-8], "\\A"), [])));
-             (Rhint ([6:3-6]), (Tprim Tint))]
-           )));
-       cc_origin = "\\A"; cc_refs = [] };
-     "Y" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [7:7-8];
-       cc_type =
-       (Rhint ([7:7-8]),
-        (Tapply (([7:7-8], "\\HH\\MemberOf"),
-           [(Rhint ([7:7-8]), (Tapply (([7:7-8], "\\A"), [])));
-             (Rhint ([7:3-6]), (Tprim Tint))]
-           )));
-       cc_origin = "\\A"; cc_refs = [((Typing_defs.From "\\B"), "Y")] };
-     "Z" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [8:7-8];
-       cc_type =
-       (Rhint ([8:7-8]),
-        (Tapply (([8:7-8], "\\HH\\MemberOf"),
-           [(Rhint ([8:7-8]), (Tapply (([8:7-8], "\\A"), [])));
-             (Rhint ([8:3-6]), (Tprim Tint))]
-           )));
-       cc_origin = "\\A"; cc_refs = [((Typing_defs.From "\\B"), "Y")] };
-     "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [5:12-13];
-       cc_type =
-       (Rclass_class ([5:12-13]),
-        (Tapply (([5:12-13], "\\HH\\classname"),
-           [(Rclass_class ([5:12-13]), Tthis)])));
-       cc_origin = "\\A"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors =
-   { "\\HH\\BuiltinEnumClass" ->
-     (Rhint ([5:12-13]),
-      (Tapply (([5:12-13], "\\HH\\BuiltinEnumClass"),
-         [(Rhint ([5:12-13]),
-           (Tapply (([5:12-13], "\\HH\\MemberOf"),
-              [(Rhint ([5:12-13]), (Tapply (([5:12-13], "\\A"), [])));
-                (Rhint ([5:14-22]), (Tprim Tarraykey))]
-              )))
-           ]
-         ))) };
-   dc_support_dynamic_type = false; dc_req_ancestors = [];
--  dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnumClass" };
--  dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
--  dc_enum_type =
--  (Some { Typing_defs.te_base = (Rhint ([5:14-22]), (Tprim Tarraykey));
--          te_constraint = None; te_includes = [] });
-+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cenum_class Concrete); dc_is_xhp = false;
-   dc_has_xhp_keyword = false; dc_module = None; dc_name = "\\B";
-   dc_pos = [11:12-13]; dc_tparams = []; dc_where_constraints = [];
-   dc_substs = {};
-   dc_consts =
-   { "Y" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [12:12-13];
-       cc_type =
-       (Rhint ([12:12-13]),
-        (Tapply (([12:12-13], "\\HH\\MemberOf"),
-           [(Rhint ([12:12-13]), (Tapply (([12:12-13], "\\B"), [])));
-             (Rhint ([12:3-11]), (Tprim Tarraykey))]
-           )));
-       cc_origin = "\\B"; cc_refs = [] };
-     "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [11:12-13];
-       cc_type =
-       (Rclass_class ([11:12-13]),
-        (Tapply (([11:12-13], "\\HH\\classname"),
-           [(Rclass_class ([11:12-13]), Tthis)])));
-       cc_origin = "\\B"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors =
-   { "\\HH\\BuiltinEnumClass" ->
-     (Rhint ([11:12-13]),
-      (Tapply (([11:12-13], "\\HH\\BuiltinEnumClass"),
-         [(Rhint ([11:12-13]),
-           (Tapply (([11:12-13], "\\HH\\MemberOf"),
-              [(Rhint ([11:12-13]), (Tapply (([11:12-13], "\\B"), [])));
-                (Rhint ([11:14-20]), (Tprim Tstring))]
-              )))
-           ]
-         ))) };
-   dc_support_dynamic_type = false; dc_req_ancestors = [];
--  dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnumClass" };
--  dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
--  dc_enum_type =
--  (Some { Typing_defs.te_base = (Rhint ([11:14-20]), (Tprim Tstring));
--          te_constraint = None; te_includes = [] });
-+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\C"; dc_pos = [14:7-8]; dc_tparams = [];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [14:7-8];
-       cc_type =
-       (Rclass_class ([14:7-8]),
-        (Tapply (([14:7-8], "\\HH\\classname"),
-           [(Rclass_class ([14:7-8]), Tthis)])));
-       cc_origin = "\\C"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-   dc_smethods =
-   { "w" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
-   dc_construct = (None, Typing_defs_core.Inconsistent); dc_ancestors = {};
-   dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
+{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
+  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+  dc_kind = (Cenum_class Concrete); dc_is_xhp = false;
+  dc_has_xhp_keyword = false; dc_module = None; dc_name = "\\A";
+  dc_pos = [5:12-13]; dc_tparams = []; dc_where_constraints = [];
+  dc_substs = {};
+  dc_consts =
+  { "W" ->
+    { Typing_defs.cc_synthesized = false;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [9:7-8];
+      cc_type =
+      (Rhint ([9:7-8]),
+       (Tapply (([9:7-8], "\\HH\\MemberOf"),
+          [(Rhint ([9:7-8]), (Tapply (([9:7-8], "\\A"), [])));
+            (Rhint ([9:3-6]), (Tprim Tint))]
+          )));
+      cc_origin = "\\A"; cc_refs = [((Typing_defs.From "\\C"), "w")] };
+    "X" ->
+    { Typing_defs.cc_synthesized = false;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [6:7-8];
+      cc_type =
+      (Rhint ([6:7-8]),
+       (Tapply (([6:7-8], "\\HH\\MemberOf"),
+          [(Rhint ([6:7-8]), (Tapply (([6:7-8], "\\A"), [])));
+            (Rhint ([6:3-6]), (Tprim Tint))]
+          )));
+      cc_origin = "\\A"; cc_refs = [] };
+    "Y" ->
+    { Typing_defs.cc_synthesized = false;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [7:7-8];
+      cc_type =
+      (Rhint ([7:7-8]),
+       (Tapply (([7:7-8], "\\HH\\MemberOf"),
+          [(Rhint ([7:7-8]), (Tapply (([7:7-8], "\\A"), [])));
+            (Rhint ([7:3-6]), (Tprim Tint))]
+          )));
+      cc_origin = "\\A"; cc_refs = [((Typing_defs.From "\\B"), "Y")] };
+    "Z" ->
+    { Typing_defs.cc_synthesized = false;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [8:7-8];
+      cc_type =
+      (Rhint ([8:7-8]),
+       (Tapply (([8:7-8], "\\HH\\MemberOf"),
+          [(Rhint ([8:7-8]), (Tapply (([8:7-8], "\\A"), [])));
+            (Rhint ([8:3-6]), (Tprim Tint))]
+          )));
+      cc_origin = "\\A"; cc_refs = [((Typing_defs.From "\\B"), "Y")] };
+    "class" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [5:12-13];
+      cc_type =
+      (Rclass_class ([5:12-13]),
+       (Tapply (([5:12-13], "\\HH\\classname"),
+          [(Rclass_class ([5:12-13]), Tthis)])));
+      cc_origin = "\\A"; cc_refs = [] } };
+  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
+  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+  dc_ancestors =
+  { "\\HH\\BuiltinEnumClass" ->
+    (Rhint ([5:12-13]),
+     (Tapply (([5:12-13], "\\HH\\BuiltinEnumClass"),
+        [(Rhint ([5:12-13]),
+          (Tapply (([5:12-13], "\\HH\\MemberOf"),
+             [(Rhint ([5:12-13]), (Tapply (([5:12-13], "\\A"), [])));
+               (Rhint ([5:14-22]), (Tprim Tarraykey))]
+             )))
+          ]
+        ))) };
+  dc_support_dynamic_type = false; dc_req_ancestors = [];
+  dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnumClass" };
+  dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
+  dc_enum_type =
+  (Some { Typing_defs.te_base = (Rhint ([5:14-22]), (Tprim Tarraykey));
+          te_constraint = None; te_includes = [] });
+  dc_decl_errors = <opaque> }
+{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
+  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+  dc_kind = (Cenum_class Concrete); dc_is_xhp = false;
+  dc_has_xhp_keyword = false; dc_module = None; dc_name = "\\B";
+  dc_pos = [11:12-13]; dc_tparams = []; dc_where_constraints = [];
+  dc_substs = {};
+  dc_consts =
+  { "Y" ->
+    { Typing_defs.cc_synthesized = false;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [12:12-13];
+      cc_type =
+      (Rhint ([12:12-13]),
+       (Tapply (([12:12-13], "\\HH\\MemberOf"),
+          [(Rhint ([12:12-13]), (Tapply (([12:12-13], "\\B"), [])));
+            (Rhint ([12:3-11]), (Tprim Tarraykey))]
+          )));
+      cc_origin = "\\B"; cc_refs = [] };
+    "class" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [11:12-13];
+      cc_type =
+      (Rclass_class ([11:12-13]),
+       (Tapply (([11:12-13], "\\HH\\classname"),
+          [(Rclass_class ([11:12-13]), Tthis)])));
+      cc_origin = "\\B"; cc_refs = [] } };
+  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
+  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+  dc_ancestors =
+  { "\\HH\\BuiltinEnumClass" ->
+    (Rhint ([11:12-13]),
+     (Tapply (([11:12-13], "\\HH\\BuiltinEnumClass"),
+        [(Rhint ([11:12-13]),
+          (Tapply (([11:12-13], "\\HH\\MemberOf"),
+             [(Rhint ([11:12-13]), (Tapply (([11:12-13], "\\B"), [])));
+               (Rhint ([11:14-20]), (Tprim Tstring))]
+             )))
+          ]
+        ))) };
+  dc_support_dynamic_type = false; dc_req_ancestors = [];
+  dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnumClass" };
+  dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
+  dc_enum_type =
+  (Some { Typing_defs.te_base = (Rhint ([11:14-20]), (Tprim Tstring));
+          te_constraint = None; te_includes = [] });
+  dc_decl_errors = <opaque> }
+{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
+  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
+  dc_module = None; dc_name = "\\C"; dc_pos = [14:7-8]; dc_tparams = [];
+  dc_where_constraints = []; dc_substs = {};
+  dc_consts =
+  { "class" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [14:7-8];
+      cc_type =
+      (Rclass_class ([14:7-8]),
+       (Tapply (([14:7-8], "\\HH\\classname"),
+          [(Rclass_class ([14:7-8]), Tthis)])));
+      cc_origin = "\\C"; cc_refs = [] } };
+  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
+  dc_smethods =
+  { "w" ->
+    { Decl_defs.elt_flags =
+      { "Abstract" -> false;
+        "Const" -> false;
+        "Dynamicallycallable" -> false;
+        "Final" -> false;
+        "Lateinit" -> false;
+        "Lsb" -> false;
+        "NeedsInit" -> false;
+        "ReadonlyProp" -> false;
+        "SuperfluousOverride" -> false;
+        "SupportDynamicType" -> false;
+        "Synthesized" -> false;
+        "XaHasDefault" -> false;
+        "XaTagLateinit" -> false;
+        "XaTagRequired" -> false };
+      elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
+      elt_deprecated = None } };
+  dc_construct = (None, Typing_defs_core.Inconsistent); dc_ancestors = {};
+  dc_support_dynamic_type = false; dc_req_ancestors = [];
+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+  dc_decl_errors = <opaque> }
+
+They matched!

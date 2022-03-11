@@ -136,12 +136,9 @@
    dc_ancestors =
    { "\\A" -> (Rhint ([8:17-18]), (Tapply (([8:17-18], "\\A"), []))) };
    dc_support_dynamic_type = false; dc_req_ancestors = [];
--  dc_req_ancestors_extends = {}; dc_extends = { "\\A" };
--  dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
--  dc_enum_type = None; dc_decl_errors = <opaque> }
-+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-+  dc_decl_errors = <opaque> }
+   dc_req_ancestors_extends = {}; dc_extends = { "\\A" };
+   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
+   dc_enum_type = None; dc_decl_errors = <opaque> }
  { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
    dc_const = false; dc_internal = false; dc_deferred_init_members = {};
    dc_kind = Cinterface; dc_is_xhp = false; dc_has_xhp_keyword = false;
@@ -241,12 +238,9 @@
    dc_ancestors =
    { "\\C" -> (Rhint ([17:21-22]), (Tapply (([17:21-22], "\\C"), []))) };
    dc_support_dynamic_type = false; dc_req_ancestors = [];
--  dc_req_ancestors_extends = {}; dc_extends = { "\\C" };
--  dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
--  dc_enum_type = None; dc_decl_errors = <opaque> }
-+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-+  dc_decl_errors = <opaque> }
+   dc_req_ancestors_extends = {}; dc_extends = { "\\C" };
+   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
+   dc_enum_type = None; dc_decl_errors = <opaque> }
  { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
    dc_const = false; dc_internal = false; dc_deferred_init_members = {};
    dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
@@ -352,9 +346,6 @@
 -    "\\E" -> (Rhint ([25:17-18]), (Tapply (([25:17-18], "\\E"), []))) };
 +  { "\\E" -> (Rhint ([25:17-18]), (Tapply (([25:17-18], "\\E"), []))) };
    dc_support_dynamic_type = false; dc_req_ancestors = [];
--  dc_req_ancestors_extends = {}; dc_extends = { "\\E" };
--  dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
--  dc_enum_type = None; dc_decl_errors = <opaque> }
-+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-+  dc_decl_errors = <opaque> }
+   dc_req_ancestors_extends = {}; dc_extends = { "\\E" };
+   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
+   dc_enum_type = None; dc_decl_errors = <opaque> }

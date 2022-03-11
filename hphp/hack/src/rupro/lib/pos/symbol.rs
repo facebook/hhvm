@@ -87,18 +87,6 @@ impl<'a> ToOxidized<'a> for Symbol {
     }
 }
 
-impl<'a, V: ToOxidized<'a>> ToOxidized<'a> for SymbolMap<V> {
-    type Output = oxidized_by_ref::s_map::SMap<'a, V::Output>;
-
-    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-        oxidized_by_ref::s_map::SMap::from(
-            arena,
-            self.iter()
-                .map(|(k, v)| (k.to_oxidized(arena), v.to_oxidized(arena))),
-        )
-    }
-}
-
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub struct Bytes(pub BytesId);
@@ -235,34 +223,6 @@ macro_rules! common_impls {
             }
         }
     };
-    ($name:ident, $map:ident) => {
-        common_impls!($name);
-        impl<'a, V: ToOxidized<'a>> ToOxidized<'a> for $map<V> {
-            type Output = oxidized_by_ref::s_map::SMap<'a, V::Output>;
-
-            fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-                oxidized_by_ref::s_map::SMap::from(
-                    arena,
-                    self.iter()
-                        .map(|(k, v)| (k.to_oxidized(arena), v.to_oxidized(arena))),
-                )
-            }
-        }
-    };
-    ($name:ident, $hashmap:ident, $indexmap:ident) => {
-        common_impls!($name, $hashmap);
-        impl<'a, V: ToOxidized<'a>> ToOxidized<'a> for $indexmap<V> {
-            type Output = oxidized_by_ref::s_map::SMap<'a, V::Output>;
-
-            fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
-                oxidized_by_ref::s_map::SMap::from(
-                    arena,
-                    self.iter()
-                        .map(|(k, v)| (k.to_oxidized(arena), v.to_oxidized(arena))),
-                )
-            }
-        }
-    };
 }
 
 // The following newtype wrappers are all for name categories that are
@@ -284,7 +244,7 @@ pub type TypeNameIndexSet = IndexSet<TypeName>;
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub struct TypeName(pub Symbol);
-common_impls!(TypeName, TypeNameMap, TypeNameIndexMap);
+common_impls!(TypeName);
 
 /// ModuleName is introduced by the experimental Modules feature and `internal`
 /// visibility. ModuleNames are not bindable names and are not indended
@@ -316,7 +276,7 @@ pub type ClassConstNameMap<V> = HashMap<ClassConstName, V>;
 pub type ClassConstNameSet = HashSet<ClassConstName>;
 pub type ClassConstNameIndexMap<V> = IndexMap<ClassConstName, V>;
 pub type ClassConstNameIndexSet = IndexSet<ClassConstName>;
-common_impls!(ClassConstName, ClassConstNameMap, ClassConstNameIndexMap);
+common_impls!(ClassConstName);
 
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
@@ -326,7 +286,7 @@ pub type TypeConstNameMap<V> = HashMap<TypeConstName, V>;
 pub type TypeConstNameSet = HashSet<TypeConstName>;
 pub type TypeConstNameIndexMap<V> = IndexMap<TypeConstName, V>;
 pub type TypeConstNameIndexSet = IndexSet<TypeConstName>;
-common_impls!(TypeConstName, TypeConstNameMap, TypeConstNameIndexMap);
+common_impls!(TypeConstName);
 
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
@@ -336,7 +296,7 @@ pub type MethodNameMap<V> = HashMap<MethodName, V>;
 pub type MethodNameSet = HashSet<MethodName>;
 pub type MethodNameIndexMap<V> = IndexMap<MethodName, V>;
 pub type MethodNameIndexSet = IndexSet<MethodName>;
-common_impls!(MethodName, MethodNameMap, MethodNameIndexMap);
+common_impls!(MethodName);
 
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
@@ -346,4 +306,4 @@ pub type PropNameMap<V> = HashMap<PropName, V>;
 pub type PropNameSet = HashSet<PropName>;
 pub type PropNameIndexMap<V> = IndexMap<PropName, V>;
 pub type PropNameIndexSet = IndexSet<PropName>;
-common_impls!(PropName, PropNameMap, PropNameIndexMap);
+common_impls!(PropName);

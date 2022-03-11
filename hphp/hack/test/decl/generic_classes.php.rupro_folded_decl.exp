@@ -1,242 +1,234 @@
---- ocaml
-+++ rupro
-@@ -1,232 +1,176 @@
--{ Decl_defs.dc_need_init = true; dc_abstract = false; dc_final = false;
-+{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\Bag"; dc_pos = [3:7-10];
-   dc_tparams =
-   [{ Typing_defs_core.tp_variance = Invariant; tp_name = ([3:11-12], "T");
-      tp_tparams = []; tp_constraints = []; tp_reified = Erased;
-      tp_user_attributes = [] }
-     ];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:7-10];
-       cc_type =
-       (Rclass_class ([3:7-10]),
-        (Tapply (([3:7-10], "\\HH\\classname"),
-           [(Rclass_class ([3:7-10]), Tthis)])));
-       cc_origin = "\\Bag"; cc_refs = [] } };
-   dc_typeconsts = {};
-   dc_props =
-   { "data" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> true;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> true;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\Bag";
-       elt_visibility = (Typing_defs_core.Vprivate "\\Bag");
-       elt_deprecated = None } };
-   dc_sprops = {};
-   dc_methods =
-   { "get" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\Bag"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
--  dc_smethods = {};
--  dc_construct =
--  ((Some { Decl_defs.elt_flags =
--           { "Abstract" -> false;
--             "Const" -> false;
--             "Dynamicallycallable" -> false;
--             "Final" -> false;
--             "Lateinit" -> false;
--             "Lsb" -> false;
--             "NeedsInit" -> false;
--             "ReadonlyProp" -> false;
--             "SuperfluousOverride" -> false;
--             "SupportDynamicType" -> false;
--             "Synthesized" -> false;
--             "XaHasDefault" -> false;
--             "XaTagLateinit" -> false;
--             "XaTagRequired" -> false };
--           elt_origin = "\\Bag"; elt_visibility = Typing_defs_core.Vpublic;
--           elt_deprecated = None }),
--   Typing_defs_core.Inconsistent);
-+  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
--{ Decl_defs.dc_need_init = true; dc_abstract = false; dc_final = false;
-+{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\ContravariantBag"; dc_pos = [15:7-23];
-   dc_tparams =
-   [{ Typing_defs_core.tp_variance = Contravariant;
-      tp_name = ([15:25-26], "T"); tp_tparams = []; tp_constraints = [];
-      tp_reified = Erased; tp_user_attributes = [] }
-     ];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [15:7-23];
-       cc_type =
-       (Rclass_class ([15:7-23]),
-        (Tapply (([15:7-23], "\\HH\\classname"),
-           [(Rclass_class ([15:7-23]), Tthis)])));
-       cc_origin = "\\ContravariantBag"; cc_refs = [] } };
-   dc_typeconsts = {};
-   dc_props =
-   { "data" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> true;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> true;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\ContravariantBag";
-       elt_visibility = (Typing_defs_core.Vprivate "\\ContravariantBag");
-       elt_deprecated = None } };
-   dc_sprops = {}; dc_methods = {}; dc_smethods = {};
--  dc_construct =
--  ((Some { Decl_defs.elt_flags =
--           { "Abstract" -> false;
--             "Const" -> false;
--             "Dynamicallycallable" -> false;
--             "Final" -> false;
--             "Lateinit" -> false;
--             "Lsb" -> false;
--             "NeedsInit" -> false;
--             "ReadonlyProp" -> false;
--             "SuperfluousOverride" -> false;
--             "SupportDynamicType" -> false;
--             "Synthesized" -> false;
--             "XaHasDefault" -> false;
--             "XaTagLateinit" -> false;
--             "XaTagRequired" -> false };
--           elt_origin = "\\ContravariantBag";
--           elt_visibility = Typing_defs_core.Vpublic; elt_deprecated = None }),
--   Typing_defs_core.Inconsistent);
--  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-+  dc_construct = (None, Typing_defs_core.Inconsistent); dc_ancestors = {};
-+  dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
--{ Decl_defs.dc_need_init = true; dc_abstract = false; dc_final = false;
-+{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\CovariantBag"; dc_pos = [23:7-19];
-   dc_tparams =
-   [{ Typing_defs_core.tp_variance = Covariant; tp_name = ([23:21-22], "T");
-      tp_tparams = []; tp_constraints = []; tp_reified = Erased;
-      tp_user_attributes = [] }
-     ];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [23:7-19];
-       cc_type =
-       (Rclass_class ([23:7-19]),
-        (Tapply (([23:7-19], "\\HH\\classname"),
-           [(Rclass_class ([23:7-19]), Tthis)])));
-       cc_origin = "\\CovariantBag"; cc_refs = [] } };
-   dc_typeconsts = {};
-   dc_props =
-   { "data" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> true;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> true;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\CovariantBag";
-       elt_visibility = (Typing_defs_core.Vprivate "\\CovariantBag");
-       elt_deprecated = None } };
-   dc_sprops = {};
-   dc_methods =
-   { "get" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\CovariantBag";
-       elt_visibility = Typing_defs_core.Vpublic; elt_deprecated = None } };
--  dc_smethods = {};
--  dc_construct =
--  ((Some { Decl_defs.elt_flags =
--           { "Abstract" -> false;
--             "Const" -> false;
--             "Dynamicallycallable" -> false;
--             "Final" -> false;
--             "Lateinit" -> false;
--             "Lsb" -> false;
--             "NeedsInit" -> false;
--             "ReadonlyProp" -> false;
--             "SuperfluousOverride" -> false;
--             "SupportDynamicType" -> false;
--             "Synthesized" -> false;
--             "XaHasDefault" -> false;
--             "XaTagLateinit" -> false;
--             "XaTagRequired" -> false };
--           elt_origin = "\\CovariantBag";
--           elt_visibility = Typing_defs_core.Vpublic; elt_deprecated = None }),
--   Typing_defs_core.Inconsistent);
-+  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
+{ Decl_defs.dc_need_init = true; dc_abstract = false; dc_final = false;
+  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
+  dc_module = None; dc_name = "\\Bag"; dc_pos = [3:7-10];
+  dc_tparams =
+  [{ Typing_defs_core.tp_variance = Invariant; tp_name = ([3:11-12], "T");
+     tp_tparams = []; tp_constraints = []; tp_reified = Erased;
+     tp_user_attributes = [] }
+    ];
+  dc_where_constraints = []; dc_substs = {};
+  dc_consts =
+  { "class" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:7-10];
+      cc_type =
+      (Rclass_class ([3:7-10]),
+       (Tapply (([3:7-10], "\\HH\\classname"),
+          [(Rclass_class ([3:7-10]), Tthis)])));
+      cc_origin = "\\Bag"; cc_refs = [] } };
+  dc_typeconsts = {};
+  dc_props =
+  { "data" ->
+    { Decl_defs.elt_flags =
+      { "Abstract" -> false;
+        "Const" -> false;
+        "Dynamicallycallable" -> false;
+        "Final" -> true;
+        "Lateinit" -> false;
+        "Lsb" -> false;
+        "NeedsInit" -> true;
+        "ReadonlyProp" -> false;
+        "SuperfluousOverride" -> false;
+        "SupportDynamicType" -> false;
+        "Synthesized" -> false;
+        "XaHasDefault" -> false;
+        "XaTagLateinit" -> false;
+        "XaTagRequired" -> false };
+      elt_origin = "\\Bag";
+      elt_visibility = (Typing_defs_core.Vprivate "\\Bag");
+      elt_deprecated = None } };
+  dc_sprops = {};
+  dc_methods =
+  { "get" ->
+    { Decl_defs.elt_flags =
+      { "Abstract" -> false;
+        "Const" -> false;
+        "Dynamicallycallable" -> false;
+        "Final" -> false;
+        "Lateinit" -> false;
+        "Lsb" -> false;
+        "NeedsInit" -> false;
+        "ReadonlyProp" -> false;
+        "SuperfluousOverride" -> false;
+        "SupportDynamicType" -> false;
+        "Synthesized" -> false;
+        "XaHasDefault" -> false;
+        "XaTagLateinit" -> false;
+        "XaTagRequired" -> false };
+      elt_origin = "\\Bag"; elt_visibility = Typing_defs_core.Vpublic;
+      elt_deprecated = None } };
+  dc_smethods = {};
+  dc_construct =
+  ((Some { Decl_defs.elt_flags =
+           { "Abstract" -> false;
+             "Const" -> false;
+             "Dynamicallycallable" -> false;
+             "Final" -> false;
+             "Lateinit" -> false;
+             "Lsb" -> false;
+             "NeedsInit" -> false;
+             "ReadonlyProp" -> false;
+             "SuperfluousOverride" -> false;
+             "SupportDynamicType" -> false;
+             "Synthesized" -> false;
+             "XaHasDefault" -> false;
+             "XaTagLateinit" -> false;
+             "XaTagRequired" -> false };
+           elt_origin = "\\Bag"; elt_visibility = Typing_defs_core.Vpublic;
+           elt_deprecated = None }),
+   Typing_defs_core.Inconsistent);
+  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+  dc_decl_errors = <opaque> }
+{ Decl_defs.dc_need_init = true; dc_abstract = false; dc_final = false;
+  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
+  dc_module = None; dc_name = "\\ContravariantBag"; dc_pos = [15:7-23];
+  dc_tparams =
+  [{ Typing_defs_core.tp_variance = Contravariant;
+     tp_name = ([15:25-26], "T"); tp_tparams = []; tp_constraints = [];
+     tp_reified = Erased; tp_user_attributes = [] }
+    ];
+  dc_where_constraints = []; dc_substs = {};
+  dc_consts =
+  { "class" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [15:7-23];
+      cc_type =
+      (Rclass_class ([15:7-23]),
+       (Tapply (([15:7-23], "\\HH\\classname"),
+          [(Rclass_class ([15:7-23]), Tthis)])));
+      cc_origin = "\\ContravariantBag"; cc_refs = [] } };
+  dc_typeconsts = {};
+  dc_props =
+  { "data" ->
+    { Decl_defs.elt_flags =
+      { "Abstract" -> false;
+        "Const" -> false;
+        "Dynamicallycallable" -> false;
+        "Final" -> true;
+        "Lateinit" -> false;
+        "Lsb" -> false;
+        "NeedsInit" -> true;
+        "ReadonlyProp" -> false;
+        "SuperfluousOverride" -> false;
+        "SupportDynamicType" -> false;
+        "Synthesized" -> false;
+        "XaHasDefault" -> false;
+        "XaTagLateinit" -> false;
+        "XaTagRequired" -> false };
+      elt_origin = "\\ContravariantBag";
+      elt_visibility = (Typing_defs_core.Vprivate "\\ContravariantBag");
+      elt_deprecated = None } };
+  dc_sprops = {}; dc_methods = {}; dc_smethods = {};
+  dc_construct =
+  ((Some { Decl_defs.elt_flags =
+           { "Abstract" -> false;
+             "Const" -> false;
+             "Dynamicallycallable" -> false;
+             "Final" -> false;
+             "Lateinit" -> false;
+             "Lsb" -> false;
+             "NeedsInit" -> false;
+             "ReadonlyProp" -> false;
+             "SuperfluousOverride" -> false;
+             "SupportDynamicType" -> false;
+             "Synthesized" -> false;
+             "XaHasDefault" -> false;
+             "XaTagLateinit" -> false;
+             "XaTagRequired" -> false };
+           elt_origin = "\\ContravariantBag";
+           elt_visibility = Typing_defs_core.Vpublic; elt_deprecated = None }),
+   Typing_defs_core.Inconsistent);
+  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+  dc_decl_errors = <opaque> }
+{ Decl_defs.dc_need_init = true; dc_abstract = false; dc_final = false;
+  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
+  dc_module = None; dc_name = "\\CovariantBag"; dc_pos = [23:7-19];
+  dc_tparams =
+  [{ Typing_defs_core.tp_variance = Covariant; tp_name = ([23:21-22], "T");
+     tp_tparams = []; tp_constraints = []; tp_reified = Erased;
+     tp_user_attributes = [] }
+    ];
+  dc_where_constraints = []; dc_substs = {};
+  dc_consts =
+  { "class" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [23:7-19];
+      cc_type =
+      (Rclass_class ([23:7-19]),
+       (Tapply (([23:7-19], "\\HH\\classname"),
+          [(Rclass_class ([23:7-19]), Tthis)])));
+      cc_origin = "\\CovariantBag"; cc_refs = [] } };
+  dc_typeconsts = {};
+  dc_props =
+  { "data" ->
+    { Decl_defs.elt_flags =
+      { "Abstract" -> false;
+        "Const" -> false;
+        "Dynamicallycallable" -> false;
+        "Final" -> true;
+        "Lateinit" -> false;
+        "Lsb" -> false;
+        "NeedsInit" -> true;
+        "ReadonlyProp" -> false;
+        "SuperfluousOverride" -> false;
+        "SupportDynamicType" -> false;
+        "Synthesized" -> false;
+        "XaHasDefault" -> false;
+        "XaTagLateinit" -> false;
+        "XaTagRequired" -> false };
+      elt_origin = "\\CovariantBag";
+      elt_visibility = (Typing_defs_core.Vprivate "\\CovariantBag");
+      elt_deprecated = None } };
+  dc_sprops = {};
+  dc_methods =
+  { "get" ->
+    { Decl_defs.elt_flags =
+      { "Abstract" -> false;
+        "Const" -> false;
+        "Dynamicallycallable" -> false;
+        "Final" -> false;
+        "Lateinit" -> false;
+        "Lsb" -> false;
+        "NeedsInit" -> false;
+        "ReadonlyProp" -> false;
+        "SuperfluousOverride" -> false;
+        "SupportDynamicType" -> false;
+        "Synthesized" -> false;
+        "XaHasDefault" -> false;
+        "XaTagLateinit" -> false;
+        "XaTagRequired" -> false };
+      elt_origin = "\\CovariantBag";
+      elt_visibility = Typing_defs_core.Vpublic; elt_deprecated = None } };
+  dc_smethods = {};
+  dc_construct =
+  ((Some { Decl_defs.elt_flags =
+           { "Abstract" -> false;
+             "Const" -> false;
+             "Dynamicallycallable" -> false;
+             "Final" -> false;
+             "Lateinit" -> false;
+             "Lsb" -> false;
+             "NeedsInit" -> false;
+             "ReadonlyProp" -> false;
+             "SuperfluousOverride" -> false;
+             "SupportDynamicType" -> false;
+             "Synthesized" -> false;
+             "XaHasDefault" -> false;
+             "XaTagLateinit" -> false;
+             "XaTagRequired" -> false };
+           elt_origin = "\\CovariantBag";
+           elt_visibility = Typing_defs_core.Vpublic; elt_deprecated = None }),
+   Typing_defs_core.Inconsistent);
+  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+  dc_decl_errors = <opaque> }
+
+They matched!

@@ -1,8 +1,7 @@
 --- ocaml
 +++ rupro
-@@ -1,58 +1,40 @@
--{ Decl_defs.dc_need_init = true; dc_abstract = false; dc_final = true;
-+{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = true;
+@@ -1,58 +1,58 @@
+ { Decl_defs.dc_need_init = true; dc_abstract = false; dc_final = true;
    dc_const = false; dc_internal = false; dc_deferred_init_members = {};
    dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
    dc_module = None; dc_name = "\\C"; dc_pos = [9:13-14]; dc_tparams = [];
@@ -37,28 +36,27 @@
        elt_origin = "\\C"; elt_visibility = (Typing_defs_core.Vprivate "\\C");
        elt_deprecated = None } };
    dc_sprops = {}; dc_methods = {}; dc_smethods = {};
--  dc_construct =
--  ((Some { Decl_defs.elt_flags =
--           { "Abstract" -> false;
--             "Const" -> false;
--             "Dynamicallycallable" -> false;
--             "Final" -> false;
--             "Lateinit" -> false;
--             "Lsb" -> false;
--             "NeedsInit" -> false;
--             "ReadonlyProp" -> false;
--             "SuperfluousOverride" -> false;
--             "SupportDynamicType" -> false;
--             "Synthesized" -> false;
--             "XaHasDefault" -> false;
--             "XaTagLateinit" -> false;
--             "XaTagRequired" -> false };
--           elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
--           elt_deprecated = None }),
+   dc_construct =
+   ((Some { Decl_defs.elt_flags =
+            { "Abstract" -> false;
+              "Const" -> false;
+              "Dynamicallycallable" -> false;
+              "Final" -> false;
+              "Lateinit" -> false;
+              "Lsb" -> false;
+              "NeedsInit" -> false;
+              "ReadonlyProp" -> false;
+              "SuperfluousOverride" -> false;
+              "SupportDynamicType" -> false;
+              "Synthesized" -> false;
+              "XaHasDefault" -> false;
+              "XaTagLateinit" -> false;
+              "XaTagRequired" -> false };
+            elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
+            elt_deprecated = None }),
 -   Typing_defs_core.FinalClass);
--  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-+  dc_construct = (None, Typing_defs_core.Inconsistent); dc_ancestors = {};
-+  dc_support_dynamic_type = false; dc_req_ancestors = [];
++   Typing_defs_core.Inconsistent);
+   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
    dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
    dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
    dc_decl_errors = <opaque> }

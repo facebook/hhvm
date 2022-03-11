@@ -45,11 +45,8 @@
 -  { "\\NS1\\NS2\\MyTrait" ->
 -    (Rhint ([13:9-20]), (Tapply (([13:9-20], "\\NS1\\NS2\\MyTrait"), []))) };
 -  dc_support_dynamic_type = false; dc_req_ancestors = [];
--  dc_req_ancestors_extends = {}; dc_extends = { "\\NS1\\NS2\\MyTrait" };
--  dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
--  dc_enum_type = None; dc_decl_errors = <opaque> }
 +  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
 +  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-+  dc_decl_errors = <opaque> }
+   dc_req_ancestors_extends = {}; dc_extends = { "\\NS1\\NS2\\MyTrait" };
+   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
+   dc_enum_type = None; dc_decl_errors = <opaque> }

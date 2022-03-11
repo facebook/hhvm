@@ -1,6 +1,6 @@
 --- ocaml
 +++ rupro
-@@ -1,139 +1,132 @@
+@@ -1,139 +1,139 @@
  { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
    dc_const = false; dc_internal = false; dc_deferred_init_members = {};
    dc_kind = (Cenum_class Concrete); dc_is_xhp = false;
@@ -50,13 +50,11 @@
            ]
          ))) };
    dc_support_dynamic_type = false; dc_req_ancestors = [];
--  dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnumClass" };
--  dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
--  dc_enum_type =
--  (Some { Typing_defs.te_base = (Rhint ([3:14-22]), (Tprim Tarraykey));
--          te_constraint = None; te_includes = [] });
-+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+   dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnumClass" };
+   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
+   dc_enum_type =
+   (Some { Typing_defs.te_base = (Rhint ([3:14-22]), (Tprim Tarraykey));
+           te_constraint = None; te_includes = [] });
    dc_decl_errors = <opaque> }
  { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
    dc_const = false; dc_internal = false; dc_deferred_init_members = {};
@@ -99,14 +97,12 @@
       (Tapply (([8:6-7], "\\HH\\BuiltinEnum"),
          [(Rhint ([8:6-7]), (Tapply (([8:6-7], "\\B"), [])))]))) };
    dc_support_dynamic_type = false; dc_req_ancestors = [];
--  dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnum" };
--  dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
--  dc_enum_type =
--  (Some { Typing_defs.te_base = (Rhint ([8:8-11]), (Tprim Tint));
--          te_constraint = (Some (Rhint ([8:15-23]), (Tprim Tarraykey)));
--          te_includes = [] });
-+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+   dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnum" };
+   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
+   dc_enum_type =
+   (Some { Typing_defs.te_base = (Rhint ([8:8-11]), (Tprim Tint));
+           te_constraint = (Some (Rhint ([8:15-23]), (Tprim Tarraykey)));
+           te_includes = [] });
    dc_decl_errors = <opaque> }
  { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
    dc_const = false; dc_internal = false; dc_deferred_init_members = {};

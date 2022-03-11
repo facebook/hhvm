@@ -6,7 +6,7 @@
 use super::{folded, ty::*};
 use crate::folded_decl_provider::Subst;
 use crate::reason::Reason;
-use oxidized_by_ref::{ast::Id, s_set::SSet};
+use oxidized_by_ref::ast::Id;
 use pos::{Pos, ToOxidized};
 
 use oxidized_by_ref as obr;
@@ -305,6 +305,18 @@ impl<'a, R: Reason> ToOxidized<'a> for Typeconst<R> {
     }
 }
 
+impl<'a, R: Reason> ToOxidized<'a> for EnumType<R> {
+    type Output = &'a obr::typing_defs::EnumType<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        arena.alloc(obr::typing_defs::EnumType {
+            base: self.base.to_oxidized(arena),
+            constraint: self.constraint.as_ref().map(|c| c.to_oxidized(arena)),
+            includes: self.includes.to_oxidized(arena),
+        })
+    }
+}
+
 impl<'a, R: Reason> ToOxidized<'a> for folded::SubstContext<R> {
     type Output = &'a obr::decl_defs::SubstContext<'a>;
 
@@ -352,6 +364,16 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::ClassConst<R> {
         })
     }
 }
+impl<'a, R: Reason> ToOxidized<'a> for folded::Requirement<R> {
+    type Output = &'a obr::decl_defs::Requirement<'a>;
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        arena.alloc(obr::decl_defs::Requirement(
+            self.0.to_oxidized(arena),
+            self.1.to_oxidized(arena),
+        ))
+    }
+}
 
 impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
     type Output = obr::decl_defs::DeclClassType<'a>;
@@ -383,17 +405,19 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             consts: self.consts.to_oxidized(arena),
             typeconsts: self.type_consts.to_oxidized(arena),
             xhp_enum_values: self.xhp_enum_values.to_oxidized(arena),
-            // TODO(milliechen): implement the rest
-            construct: (None, obr::typing_defs::ConsistentKind::Inconsistent),
-            need_init: false,
-            deferred_init_members: SSet::empty(),
-            req_ancestors: &[],
-            req_ancestors_extends: SSet::empty(),
-            extends: SSet::empty(),
-            sealed_whitelist: None,
-            xhp_attr_deps: SSet::empty(),
-            enum_type: None,
-            decl_errors: None,
+            construct: (
+                self.constructor.to_oxidized(arena),
+                obr::typing_defs::ConsistentKind::Inconsistent, // TODO
+            ),
+            need_init: self.need_init,
+            deferred_init_members: self.deferred_init_members.to_oxidized(arena),
+            req_ancestors: self.req_ancestors.to_oxidized(arena),
+            req_ancestors_extends: self.req_ancestors_extends.to_oxidized(arena),
+            extends: self.extends.to_oxidized(arena),
+            sealed_whitelist: self.sealed_whitelist.to_oxidized(arena),
+            xhp_attr_deps: self.xhp_attr_deps.to_oxidized(arena),
+            enum_type: self.enum_type.as_ref().map(|et| et.to_oxidized(arena)),
+            decl_errors: None, // TODO
         }
     }
 }

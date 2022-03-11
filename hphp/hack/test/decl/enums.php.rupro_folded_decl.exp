@@ -1,6 +1,6 @@
 --- ocaml
 +++ rupro
-@@ -1,49 +1,45 @@
+@@ -1,49 +1,49 @@
  { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
    dc_const = false; dc_internal = false; dc_deferred_init_members = {};
    dc_kind = Cenum; dc_is_xhp = false; dc_has_xhp_keyword = false;
@@ -49,12 +49,10 @@
       (Tapply (([3:6-9], "\\HH\\BuiltinEnum"),
          [(Rhint ([3:6-9]), (Tapply (([3:6-9], "\\Foo"), [])))]))) };
    dc_support_dynamic_type = false; dc_req_ancestors = [];
--  dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnum" };
--  dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
--  dc_enum_type =
--  (Some { Typing_defs.te_base = (Rhint ([3:11-14]), (Tprim Tint));
--          te_constraint = (Some (Rhint ([3:18-21]), (Tprim Tint)));
--          te_includes = [] });
-+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+   dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnum" };
+   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
+   dc_enum_type =
+   (Some { Typing_defs.te_base = (Rhint ([3:11-14]), (Tprim Tint));
+           te_constraint = (Some (Rhint ([3:18-21]), (Tprim Tint)));
+           te_includes = [] });
    dc_decl_errors = <opaque> }

@@ -395,30 +395,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
                 emit_adata::typed_value_to_instr(emitter, &tv)?,
             ))
         }
-        Expr_::EnumClassLabel(label) => {
-            // emitting E#A as __Systemlib\create_opaque_value(OpaqueValue::EnumClassLabel, "A")
-            let create_opaque_value = "__Systemlib\\create_opaque_value".to_string();
-            let create_opaque_value = ast_defs::Id(pos.clone(), create_opaque_value);
-            let create_opaque_value = Expr_::Id(Box::new(create_opaque_value));
-            let create_opaque_value = ast::Expr((), pos.clone(), create_opaque_value);
-            // OpaqueValue::EnumClassLabel = 0 defined in
-            // hphp/runtime/ext/hh/ext_hh.php
-            let enum_class_label_index = Expr_::Int("0".to_string());
-            let enum_class_label_index = ast::Expr((), pos.clone(), enum_class_label_index);
-            let label_string = label.1.to_string();
-            let label = Expr_::String(bstr::BString::from(label_string));
-            let label = ast::Expr((), pos.clone(), label);
-            let call_expr = (
-                create_opaque_value,
-                vec![],
-                vec![
-                    (ParamKind::Pnormal, enum_class_label_index),
-                    (ParamKind::Pnormal, label),
-                ],
-                None,
-            );
-            emit_call_expr(emitter, env, pos, None, false, &call_expr)
-        }
+        Expr_::EnumClassLabel(label) => emit_label(emitter, env, pos, label),
         Expr_::PrefixedString(e) => emit_expr(emitter, env, &e.1),
         Expr_::Lvar(e) => {
             let Lid(pos, _) = &**e;
@@ -3264,6 +3241,38 @@ fn has_reified_types<'a, 'arena>(env: &Env<'a, 'arena>) -> bool {
         }
     }
     false
+}
+
+fn emit_label<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    label: &'a Box<(Option<aast_defs::ClassName>, String)>,
+) -> Result<InstrSeq<'arena>> {
+    use ast::Expr_;
+
+    // emitting E#A as __Systemlib\create_opaque_value(OpaqueValue::EnumClassLabel, "A")
+    let create_opaque_value = "__Systemlib\\create_opaque_value".to_string();
+    let create_opaque_value = ast_defs::Id(pos.clone(), create_opaque_value);
+    let create_opaque_value = Expr_::Id(Box::new(create_opaque_value));
+    let create_opaque_value = ast::Expr((), pos.clone(), create_opaque_value);
+    // OpaqueValue::EnumClassLabel = 0 defined in
+    // hphp/runtime/ext/hh/ext_hh.php
+    let enum_class_label_index = Expr_::Int("0".to_string());
+    let enum_class_label_index = ast::Expr((), pos.clone(), enum_class_label_index);
+    let label_string = label.1.to_string();
+    let label = Expr_::String(bstr::BString::from(label_string));
+    let label = ast::Expr((), pos.clone(), label);
+    let call_expr = (
+        create_opaque_value,
+        vec![],
+        vec![
+            (ParamKind::Pnormal, enum_class_label_index),
+            (ParamKind::Pnormal, label),
+        ],
+        None,
+    );
+    emit_call_expr(emitter, env, pos, None, false, &call_expr)
 }
 
 fn emit_call_expr<'a, 'arena, 'decl>(

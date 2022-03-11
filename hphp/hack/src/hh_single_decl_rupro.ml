@@ -68,33 +68,6 @@ let init popt : Provider_context.t =
 
   ctx
 
-let rec shallow_declare_ast ctx decls prog =
-  List.fold prog ~init:decls ~f:(fun decls def ->
-      let open Aast in
-      match def with
-      | Namespace (_, prog) -> shallow_declare_ast ctx decls prog
-      | NamespaceUse _ -> decls
-      | SetNamespaceEnv _ -> decls
-      | FileAttributes _ -> decls
-      | Fun f ->
-        let (name, decl) = Decl_nast.fun_naming_and_decl_DEPRECATED ctx f in
-        (name, Shallow_decl_defs.Fun decl) :: decls
-      | Class c ->
-        let decl = Shallow_classes_provider.decl_DEPRECATED ctx c in
-        let (_, name) = decl.Shallow_decl_defs.sc_name in
-        (name, Shallow_decl_defs.Class decl) :: decls
-      | Typedef typedef ->
-        let (name, decl) =
-          Decl_nast.typedef_naming_and_decl_DEPRECATED ctx typedef
-        in
-        (name, Shallow_decl_defs.Typedef decl) :: decls
-      | Stmt _ -> decls
-      | Constant cst ->
-        let (name, decl) = Decl_nast.const_naming_and_decl_DEPRECATED ctx cst in
-        (name, Shallow_decl_defs.Const decl) :: decls
-      (* TODO(T108206307) *)
-      | Module _ -> decls)
-
 let direct_decl_parse ctx fn text =
   let popt = Provider_context.get_popt ctx in
   let opts = DeclParserOptions.from_parser_options popt in
@@ -151,21 +124,11 @@ let compare_folded ctx rupro_decls filename text =
       ~actual_contents:rupro_folded;
   matched
 
-type modes = CompareRuproDeclFolder
-
 let () =
-  let usage =
-    Printf.sprintf "Usage: %s [OPTIONS] mode filename\n" Sys.argv.(0)
-  in
+  let usage = Printf.sprintf "Usage: %s [OPTIONS] filename\n" Sys.argv.(0) in
   let usage_and_exit () =
     prerr_endline usage;
     exit 1
-  in
-  let mode = ref None in
-  let set_mode m () =
-    match !mode with
-    | None -> mode := Some m
-    | Some _ -> usage_and_exit ()
   in
   let file = ref None in
   let set_file f =
@@ -173,9 +136,6 @@ let () =
     | None -> file := Some f
     | Some _ -> usage_and_exit ()
   in
-  let skip_if_errors = ref false in
-  let expect_extension = ref ".exp" in
-  let set_expect_extension s = expect_extension := s in
   let auto_namespace_map = ref [] in
   let enable_xhp_class_modifier = ref false in
   let disable_xhp_element_mangling = ref false in
@@ -188,17 +148,6 @@ let () =
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
   Arg.parse
     [
-      ( "--compare-rupro-decl-folder",
-        Arg.Unit (set_mode CompareRuproDeclFolder),
-        "(mode) Runs the rupro folding algorithm against the existing OCaml one and compares the results"
-      );
-      ( "--skip-if-errors",
-        Arg.Set skip_if_errors,
-        "Skip comparison if the corresponding .exp file has errors" );
-      ( "--expect-extension",
-        Arg.String set_expect_extension,
-        "The extension with which the output of the legacy pipeline should be written"
-      );
       ( "--auto-namespace-map",
         Arg.String
           (fun m ->
@@ -285,116 +234,98 @@ let () =
     ]
     set_file
     usage;
-  match !mode with
+  match !file with
   | None -> usage_and_exit ()
-  | Some CompareRuproDeclFolder ->
-    begin
-      match !file with
-      | None -> usage_and_exit ()
-      | Some file ->
-        let () =
-          if
-            !skip_if_errors
-            && not
-               @@ String_utils.is_substring
-                    "No errors"
-                    (RealDisk.cat (file ^ ".exp"))
-          then begin
-            print_endline "Skipping because input file has errors";
-            exit 0
-          end
-        in
-        let file = Path.make file in
-        let auto_namespace_map = !auto_namespace_map in
-        let enable_xhp_class_modifier = !enable_xhp_class_modifier in
-        let disable_xhp_element_mangling = !disable_xhp_element_mangling in
-        let disable_enum_classes = !disable_enum_classes in
-        let enable_enum_supertyping = !enable_enum_supertyping in
-        let interpret_soft_types_as_like_types =
-          !interpret_soft_types_as_like_types
-        in
-        let everything_sdt = !everything_sdt in
-        let popt =
-          popt
-            ~auto_namespace_map
-            ~enable_xhp_class_modifier
-            ~disable_xhp_element_mangling
-            ~disable_enum_classes
-            ~enable_enum_supertyping
-            ~interpret_soft_types_as_like_types
-            ~everything_sdt
-        in
-        let tco_experimental_features =
-          if !disallow_static_memoized then
-            SSet.singleton
-              GlobalOptions.tco_experimental_disallow_static_memoized
-          else
-            SSet.empty
-        in
-        let popt = { popt with GlobalOptions.tco_experimental_features } in
-        (* Temporarily set the root to the location of the test file so that
-           Multifile will strip the dirname prefix. *)
-        Relative_path.(set_path_prefix Root (Path.dirname file));
-        let file = Relative_path.(create Root (Path.to_string file)) in
-        let files =
-          Multifile.file_to_file_list file
-          |> List.map ~f:(fun (file, contents) ->
-                 (Relative_path.to_absolute file, contents))
-        in
-        Tempfile.with_real_tempdir @@ fun tmpdir ->
-        (* Set the Relative_path root to the tmpdir. *)
-        Relative_path.(set_path_prefix Root tmpdir);
-        (* Write the files to a tempdir so that rupro can read them, then map
-           them to relative paths. *)
-        let files =
-          List.map files ~f:(fun (filename, contents) ->
-              let tmpdir = Path.to_string tmpdir in
-              let basename = Filename.basename filename in
-              let filename = Filename.concat tmpdir basename in
-              Disk.write_file ~file:filename ~contents;
-              (Relative_path.(create Root filename), contents))
-        in
-        let ctx = init popt in
-        let iter_files f =
-          let num_files = List.length files in
-          let (all_matched, _) =
-            List.fold
-              files
-              ~init:(true, true)
-              ~f:(fun (matched, is_first) (filename, contents) ->
-                (* All output is printed to stderr because that's the output
-                   channel Ppxlib_print_diff prints to. *)
-                if not is_first then Printf.eprintf "\n%!";
-                if num_files > 1 then
-                  Printf.eprintf
-                    "File %s\n%!"
-                    (Relative_path.storage_to_string filename);
-                let matched =
-                  Provider_utils.respect_but_quarantine_unsaved_changes
-                    ~ctx
-                    ~f:(fun () -> f filename contents)
-                  && matched
-                in
-                (matched, false))
-          in
-          all_matched
-        in
-        let all_matched =
-          let files = List.map files ~f:fst in
-          (* Compute OCaml folded decls *)
-          List.iter files ~f:(fun filename ->
-              Errors.run_in_context filename Errors.Decl (fun () ->
-                  Decl.make_env ~sh:SharedMem.Uses ctx filename));
-          (* Compute rupro folded decls *)
-          let rupro_decls =
-            Decl_folded_class_rupro.fold_classes_in_files
-              ~root:(Path.to_string tmpdir)
-              files
-          in
-          iter_files (compare_folded ctx rupro_decls)
-        in
-        if all_matched then
-          Printf.eprintf "\nThey matched!\n%!"
-        else
-          exit 1
-    end
+  | Some file ->
+    let file = Path.make file in
+    let auto_namespace_map = !auto_namespace_map in
+    let enable_xhp_class_modifier = !enable_xhp_class_modifier in
+    let disable_xhp_element_mangling = !disable_xhp_element_mangling in
+    let disable_enum_classes = !disable_enum_classes in
+    let enable_enum_supertyping = !enable_enum_supertyping in
+    let interpret_soft_types_as_like_types =
+      !interpret_soft_types_as_like_types
+    in
+    let everything_sdt = !everything_sdt in
+    let popt =
+      popt
+        ~auto_namespace_map
+        ~enable_xhp_class_modifier
+        ~disable_xhp_element_mangling
+        ~disable_enum_classes
+        ~enable_enum_supertyping
+        ~interpret_soft_types_as_like_types
+        ~everything_sdt
+    in
+    let tco_experimental_features =
+      if !disallow_static_memoized then
+        SSet.singleton GlobalOptions.tco_experimental_disallow_static_memoized
+      else
+        SSet.empty
+    in
+    let popt = { popt with GlobalOptions.tco_experimental_features } in
+    (* Temporarily set the root to the location of the test file so that
+       Multifile will strip the dirname prefix. *)
+    Relative_path.(set_path_prefix Root (Path.dirname file));
+    let file = Relative_path.(create Root (Path.to_string file)) in
+    let files =
+      Multifile.file_to_file_list file
+      |> List.map ~f:(fun (file, contents) ->
+             (Relative_path.to_absolute file, contents))
+    in
+    Tempfile.with_real_tempdir @@ fun tmpdir ->
+    (* Set the Relative_path root to the tmpdir. *)
+    Relative_path.(set_path_prefix Root tmpdir);
+    (* Write the files to a tempdir so that rupro can read them, then map
+       them to relative paths. *)
+    let files =
+      List.map files ~f:(fun (filename, contents) ->
+          let tmpdir = Path.to_string tmpdir in
+          let basename = Filename.basename filename in
+          let filename = Filename.concat tmpdir basename in
+          Disk.write_file ~file:filename ~contents;
+          (Relative_path.(create Root filename), contents))
+    in
+    let ctx = init popt in
+    let iter_files f =
+      let num_files = List.length files in
+      let (all_matched, _) =
+        List.fold
+          files
+          ~init:(true, true)
+          ~f:(fun (matched, is_first) (filename, contents) ->
+            (* All output is printed to stderr because that's the output
+               channel Ppxlib_print_diff prints to. *)
+            if not is_first then Printf.eprintf "\n%!";
+            if num_files > 1 then
+              Printf.eprintf
+                "File %s\n%!"
+                (Relative_path.storage_to_string filename);
+            let matched =
+              Provider_utils.respect_but_quarantine_unsaved_changes
+                ~ctx
+                ~f:(fun () -> f filename contents)
+              && matched
+            in
+            (matched, false))
+      in
+      all_matched
+    in
+    let all_matched =
+      let files = List.map files ~f:fst in
+      (* Compute OCaml folded decls *)
+      List.iter files ~f:(fun filename ->
+          Errors.run_in_context filename Errors.Decl (fun () ->
+              Decl.make_env ~sh:SharedMem.Uses ctx filename));
+      (* Compute rupro folded decls *)
+      let rupro_decls =
+        Decl_folded_class_rupro.fold_classes_in_files
+          ~root:(Path.to_string tmpdir)
+          files
+      in
+      iter_files (compare_folded ctx rupro_decls)
+    in
+    if all_matched then
+      Printf.eprintf "\nThey matched!\n%!"
+    else
+      exit 1

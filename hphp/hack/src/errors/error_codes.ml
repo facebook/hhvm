@@ -663,6 +663,7 @@ module Typing = struct
     | DiamondTraitProperty [@value 4462]
     | ConstructNotInstanceMethod [@value 4463]
     | InvalidMethCallerReadonlyReturn [@value 4464]
+    | AbstractMemberInConcreteClass [@value 4465]
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

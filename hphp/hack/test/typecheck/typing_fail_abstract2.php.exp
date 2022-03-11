@@ -1,6 +1,6 @@
 File "typing_fail_abstract2.php", line 14, characters 7-7:
 Class `A` contains an abstract method and must therefore be declared `abstract` (Parsing[1002])
-File "typing_fail_abstract2.php", line 14, characters 7-7:
-This class must be declared `abstract`, or provide an implementation for the abstract method `f` (Typing[4047])
 File "typing_fail_abstract2.php", line 15, characters 28-28:
-Declaration is here
+Method `f` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
+  File "typing_fail_abstract2.php", line 14, characters 7-7:
+  Or make the class abstract.

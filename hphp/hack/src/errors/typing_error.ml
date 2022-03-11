@@ -2260,6 +2260,13 @@ module Primary = struct
         kind: [ `meth | `prop | `const | `ty_const ];
         quickfixes: Quickfix.t list;
       }
+    | Abstract_member_in_concrete_class of {
+        pos: Pos.t;
+        class_name_pos: Pos.t;
+        is_final: bool;
+        member_kind: [ `method_ | `property | `constant | `type_constant ];
+        member_name: string;
+      }
     | Generic_static of {
         pos: Pos.t;
         typaram_name: string;
@@ -4775,6 +4782,41 @@ module Primary = struct
       lazy [(pos2, "Declaration is here")],
       qfxs )
 
+  let abstract_member_in_concrete_class
+      ~member_pos ~class_name_pos ~is_final member_kind member_name =
+    let claim =
+      lazy
+        ( member_pos,
+          Printf.sprintf
+            "%s `%s%s` is abstract but the class is %s. Either provide an implementation here."
+            (match member_kind with
+            | `method_ -> "Method"
+            | `property -> "Property"
+            | `constant -> "Constant"
+            | `type_constant -> "Type constant")
+            (match member_kind with
+            | `property -> "$"
+            | _ -> "")
+            member_name
+            (if is_final then
+              "final"
+            else
+              "concrete") )
+    in
+    let reasons =
+      lazy
+        [
+          ( Pos_or_decl.of_raw_pos class_name_pos,
+            Printf.sprintf
+              "Or make the class abstract%s."
+              (if is_final then
+                " and not final"
+              else
+                "") );
+        ]
+    in
+    (Error_code.AbstractMemberInConcreteClass, claim, reasons, [])
+
   let generic_static pos x =
     ( Error_code.GenericStatic,
       lazy
@@ -5676,6 +5718,14 @@ module Primary = struct
       read_before_write (pos, member_name)
     | Implement_abstract { pos; is_final; decl_pos; name; kind; quickfixes } ->
       implement_abstract pos is_final decl_pos name kind quickfixes
+    | Abstract_member_in_concrete_class
+        { pos; class_name_pos; is_final; member_kind; member_name } ->
+      abstract_member_in_concrete_class
+        ~member_pos:pos
+        ~class_name_pos
+        ~is_final
+        member_kind
+        member_name
     | Generic_static { pos; typaram_name } -> generic_static pos typaram_name
     | Ellipsis_strict_mode { pos; require } -> ellipsis_strict_mode pos require
     | Untyped_lambda_strict_mode pos -> untyped_lambda_strict_mode pos

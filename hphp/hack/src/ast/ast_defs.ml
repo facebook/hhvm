@@ -194,6 +194,15 @@ let is_c_normal = function
   | Cinterface ->
     false
 
+let is_c_concrete = function
+  | Cclass k
+  | Cenum_class k ->
+    is_concrete k
+  | Cinterface
+  | Ctrait
+  | Cenum ->
+    false
+
 let is_c_abstract = function
   | Cclass c -> is_abstract c
   | Cinterface

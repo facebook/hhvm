@@ -2,7 +2,7 @@ File "abstract_final.php", line 12, characters 7-9:
 Class `Foo` contains an abstract method and must therefore be declared `abstract` (Parsing[1002])
 File "abstract_final.php", line 13, characters 3-7:
 Cannot declare abstract method `Foo::bar` `final` (Parsing[1002])
-File "abstract_final.php", line 12, characters 7-9:
-This class must be declared `abstract`, or provide an implementation for the abstract method `bar` (Typing[4047])
 File "abstract_final.php", line 13, characters 44-46:
-Declaration is here
+Method `bar` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
+  File "abstract_final.php", line 12, characters 7-9:
+  Or make the class abstract.

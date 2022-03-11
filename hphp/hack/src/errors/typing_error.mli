@@ -1145,6 +1145,13 @@ module Primary : sig
         kind: [ `meth | `prop | `const | `ty_const ];
         quickfixes: Quickfix.t list;
       }
+    | Abstract_member_in_concrete_class of {
+        pos: Pos.t;
+        class_name_pos: Pos.t;
+        is_final: bool;
+        member_kind: [ `method_ | `property | `constant | `type_constant ];
+        member_name: string;
+      }
     | Generic_static of {
         pos: Pos.t;
         typaram_name: string;

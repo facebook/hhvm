@@ -13,7 +13,6 @@
  * variables, and checks that all the types are correct (aka
  * consistent) *)
 open Hh_prelude
-open Option.Monad_infix
 open Common
 open Aast
 open Typing_defs
@@ -994,135 +993,6 @@ let check_static_class_element get_dyn_elt element_name static_pos ~elt_type =
                elt = elt_type;
              })
 
-(** Error if there are abstract methods that this class is supposed to provide
-    an implementation for. *)
-let check_extend_abstract_meth ~is_final ~is_static c_name seq =
-  List.iter seq ~f:(fun (meth_name, ce) ->
-      match ce.ce_type with
-      | (lazy ty) when get_ce_abstract ce && is_fun ty ->
-        let title =
-          Printf.sprintf
-            "Add stub method %s"
-            (Markdown_lite.md_codify
-               (Utils.strip_ns ce.ce_origin ^ "::" ^ meth_name))
-        in
-        let new_text =
-          Typing_skeleton.of_method meth_name ce ~is_static ~is_override:true
-        in
-        let quickfixes =
-          [Quickfix.make_classish ~title ~new_text ~classish_name:(snd c_name)]
-        in
-        Errors.add_typing_error
-          Typing_error.(
-            primary
-            @@ Primary.Implement_abstract
-                 {
-                   quickfixes;
-                   is_final;
-                   pos = fst c_name;
-                   decl_pos = get_pos ty;
-                   kind = `meth;
-                   name = meth_name;
-                 })
-      | _ -> ())
-
-let check_extend_abstract_prop ~is_final p seq =
-  List.iter seq ~f:(fun (x, ce) ->
-      if get_ce_abstract ce then
-        let ce_pos = Lazy.force ce.ce_type |> get_pos in
-        Errors.add_typing_error
-          Typing_error.(
-            primary
-            @@ Primary.Implement_abstract
-                 {
-                   is_final;
-                   pos = p;
-                   decl_pos = ce_pos;
-                   kind = `prop;
-                   name = x;
-                   quickfixes = [];
-                 }))
-
-(* Type constants must be bound to a concrete type for non-abstract classes.
- *)
-let check_extend_abstract_typeconst ~is_final p seq =
-  List.iter seq ~f:(fun (x, tc) ->
-      match tc.ttc_kind with
-      | TCAbstract _ ->
-        Errors.add_typing_error
-          Typing_error.(
-            primary
-            @@ Primary.Implement_abstract
-                 {
-                   is_final;
-                   pos = p;
-                   decl_pos = fst tc.ttc_name;
-                   kind = `ty_const;
-                   name = x;
-                   quickfixes = [];
-                 })
-      | _ -> ())
-
-let check_extend_abstract_const ~is_final p seq =
-  List.iter seq ~f:(fun (x, cc) ->
-      match cc.cc_abstract with
-      | CCAbstract _ when not cc.cc_synthesized ->
-        let cc_pos = get_pos cc.cc_type in
-        Errors.add_typing_error
-          Typing_error.(
-            primary
-            @@ Primary.Implement_abstract
-                 {
-                   is_final;
-                   pos = p;
-                   decl_pos = cc_pos;
-                   kind = `const;
-                   name = x;
-                   quickfixes = [];
-                 })
-      | _ -> ())
-
-(** Error if there are abstract members that this class is supposed to provide
-    implementation for. *)
-let check_extend_abstract c_name tc =
-  let is_concrete =
-    let open Ast_defs in
-    match Cls.kind tc with
-    | Cclass k
-    | Cenum_class k ->
-      is_concrete k
-    | Cinterface
-    | Ctrait
-    | Cenum ->
-      false
-  in
-  let is_final = Cls.final tc in
-  if is_concrete || is_final then (
-    let constructor_as_list cstr =
-      fst cstr
-      >>| (fun cstr -> (SN.Members.__construct, cstr))
-      |> Option.to_list
-    in
-    check_extend_abstract_meth
-      ~is_final
-      ~is_static:false
-      c_name
-      (Cls.methods tc);
-    check_extend_abstract_meth
-      ~is_final
-      ~is_static:false
-      c_name
-      (Cls.construct tc |> constructor_as_list);
-    check_extend_abstract_meth
-      ~is_final
-      ~is_static:true
-      c_name
-      (Cls.smethods tc);
-    check_extend_abstract_prop ~is_final (fst c_name) (Cls.sprops tc);
-    check_extend_abstract_const ~is_final (fst c_name) (Cls.consts tc);
-    check_extend_abstract_typeconst ~is_final (fst c_name) (Cls.typeconsts tc)
-  )
-
 (** Check whether the type of a static property (class variable) contains
     any generic type parameters. Outside of traits, this is illegal as static
      * properties are shared across all generic instantiations. *)
@@ -1964,7 +1834,6 @@ let class_hierarchy_checks env c tc (parents : class_parents) =
     let (_ : env) =
       check_generic_class_with_SupportDynamicType env c (extends @ implements)
     in
-    check_extend_abstract c.c_name tc;
     if Cls.const tc then
       List.iter c.c_uses ~f:(check_non_const_trait_members pc env);
     check_static_keyword_override c tc;
@@ -1983,7 +1852,7 @@ let class_hierarchy_checks env c tc (parents : class_parents) =
         env
         ~implements:(List.map implements ~f:snd)
         ~parents:impl
-        (pc, tc)
+        (c, tc)
     in
     if Typing_disposable.is_disposable_class env tc then
       List.iter

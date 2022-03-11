@@ -56,6 +56,15 @@ module MemberKind = struct
   let is_constructor = function
     | Constructor _ -> true
     | _ -> false
+
+  let is_static = function
+    | Property
+    | Method
+    | Constructor _ ->
+      false
+    | Static_property
+    | Static_method ->
+      true
 end
 
 module MemberKindMap = WrappedMap.Make (MemberKind)
@@ -186,20 +195,12 @@ let check_class_elt_visibility parent_class_elt class_elt on_error =
   let (lazy pos) = class_elt.ce_pos in
   check_visibility parent_vis c_vis parent_pos pos on_error
 
-let is_static = function
-  | MemberKind.Property
-  | MemberKind.Method
-  | MemberKind.Constructor _ ->
-    false
-  | MemberKind.Static_property
-  | MemberKind.Static_method ->
-    true
-
 let stub_meth_quickfix
-    (class_name : string)
-    (parent_name : string)
-    (meth_name : string)
+    ~(class_name : string)
+    ~(parent_name : string)
+    ~(meth_name : string)
     (meth : class_elt)
+    ~(is_override : bool)
     (member_kind : MemberKind.t) : Quickfix.t =
   let title =
     Printf.sprintf
@@ -210,8 +211,8 @@ let stub_meth_quickfix
     Typing_skeleton.of_method
       meth_name
       meth
-      ~is_static:(is_static member_kind)
-      ~is_override:false
+      ~is_static:(MemberKind.is_static member_kind)
+      ~is_override
   in
   Quickfix.make_classish ~title ~new_text ~classish_name:class_name
 
@@ -228,7 +229,13 @@ let member_not_implemented_error
   let (lazy defn_pos) = class_elt.ce_pos in
   let quickfixes =
     [
-      stub_meth_quickfix class_name parent_name member_name class_elt member_kind;
+      stub_meth_quickfix
+        ~class_name
+        ~parent_name
+        ~meth_name:member_name
+        class_elt
+        member_kind
+        ~is_override:false;
     ]
   in
   let err =
@@ -699,19 +706,42 @@ let conflict_with_declared_interface_or_trait
   | Ast_defs.Cenum ->
     false
 
+let check_abstract_const_in_concrete_class
+    (class_pos, class_) (const_name, class_const) =
+  let is_final = Cls.final class_ in
+  if Ast_defs.is_c_concrete (Cls.kind class_) || is_final then
+    match class_const.cc_abstract with
+    | CCAbstract _ ->
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Implement_abstract
+               {
+                 is_final;
+                 pos = class_pos;
+                 decl_pos = class_const.cc_pos;
+                 kind = `const;
+                 name = const_name;
+                 quickfixes = [];
+               })
+    | Typing_defs.CCConcrete -> ()
+
 let check_const_override
     env
     implements
     const_name
     parent_class
-    class_
+    (class_pos, class_)
     psubst
     parent_class_const
     class_const
     on_error =
-  if String.equal parent_class_const.cc_origin class_const.cc_origin then
+  if String.equal parent_class_const.cc_origin class_const.cc_origin then (
+    check_abstract_const_in_concrete_class
+      (class_pos, class_)
+      (const_name, class_const);
     env
-  else
+  ) else
     let parent_class_const = Inst.instantiate_cc psubst parent_class_const in
     let parent_kind = Cls.kind parent_class in
     let class_kind = Cls.kind class_ in
@@ -876,6 +906,42 @@ let check_inherited_member_is_dynamically_callable
     | Ast_defs.Cenum ->
       ()
 
+let check_abstract_member_in_concrete_class
+    (class_pos, class_) (member_kind, class_elt_name, class_elt) =
+  let is_final = Cls.final class_ in
+  if
+    (Ast_defs.is_c_concrete (Cls.kind class_) || is_final)
+    && Typing_defs_flags.ClassElt.is_abstract class_elt.ce_flags
+  then
+    Errors.add_typing_error
+      Typing_error.(
+        primary
+        @@ Primary.Implement_abstract
+             {
+               is_final;
+               pos = class_pos;
+               decl_pos = Lazy.force class_elt.ce_pos;
+               kind =
+                 (if MemberKind.is_functional member_kind then
+                   `meth
+                 else
+                   `prop);
+               name = class_elt_name;
+               quickfixes =
+                 (if MemberKind.is_functional member_kind then
+                   [
+                     stub_meth_quickfix
+                       ~class_name:(Cls.name class_)
+                       ~parent_name:class_elt.ce_origin
+                       ~meth_name:class_elt_name
+                       class_elt
+                       member_kind
+                       ~is_override:true;
+                   ]
+                 else
+                   []);
+             })
+
 let check_class_against_parent_class_elt
     (on_error : Pos.t * string -> Typing_error.Reasons_callback.t)
     (class_pos, class_)
@@ -893,6 +959,9 @@ let check_class_against_parent_class_elt
         (class_pos, class_)
         parent_class
         (member_kind, member_name, parent_class_elt);
+      check_abstract_member_in_concrete_class
+        (class_pos, class_)
+        (member_kind, member_name, class_elt);
       env
     ) else
       (* We can skip this check if the class elements have the same origin, as we are
@@ -1237,11 +1306,38 @@ let tconst_subsumption
          (opt_type__LEGACY child_typeconst)
          ~f:(check env)
 
+let check_abstract_typeconst_in_concrete_class (class_pos, class_) tconst =
+  let is_final = Cls.final class_ in
+  if Ast_defs.is_c_concrete (Cls.kind class_) || is_final then
+    match tconst.ttc_kind with
+    | TCAbstract _ ->
+      let (typeconst_pos, typeconst_name) = tconst.ttc_name in
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Implement_abstract
+               {
+                 is_final;
+                 pos = class_pos;
+                 decl_pos = typeconst_pos;
+                 kind = `ty_const;
+                 name = typeconst_name;
+                 quickfixes = [];
+               })
+    | TCConcrete _ -> ()
+
 let check_typeconst_override
-    env implements class_ parent_tconst tconst parent_class on_error =
-  if String.equal parent_tconst.ttc_origin tconst.ttc_origin then
     env
-  else
+    implements
+    (class_pos, class_)
+    parent_tconst
+    tconst
+    parent_class
+    on_error =
+  if String.equal parent_tconst.ttc_origin tconst.ttc_origin then (
+    check_abstract_typeconst_in_concrete_class (class_pos, class_) tconst;
+    env
+  ) else
     let tconst_check parent_tconst tconst () =
       let parent_tconst_enforceable =
         (* We know that this typeconst exists in the parent (else we would not
@@ -1335,10 +1431,9 @@ let check_typeconsts
     env
     implements
     (parent_class : (Pos.t * string) * decl_ty list * Cls.t)
-    class_
+    (class_pos, class_)
     on_error =
   let ((parent_pos, _), _, parent_class) = parent_class in
-  let (_pos, class_) = class_ in
   let ptypeconsts = Cls.typeconsts parent_class in
   List.fold ptypeconsts ~init:env ~f:(fun env (tconst_name, parent_tconst) ->
       match Cls.get_typeconst class_ tconst_name with
@@ -1346,7 +1441,7 @@ let check_typeconsts
         check_typeconst_override
           env
           implements
-          class_
+          (class_pos, class_)
           parent_tconst
           tconst
           parent_class
@@ -1369,7 +1464,12 @@ let check_typeconsts
         env)
 
 let check_consts
-    env implements (parent_pos, parent_class) class_ psubst on_error =
+    env
+    implements
+    (parent_pos, parent_class)
+    (class_pos, class_)
+    psubst
+    on_error =
   let pconsts = Cls.consts parent_class in
   List.fold pconsts ~init:env ~f:(fun env (const_name, parent_const) ->
       if String.( <> ) const_name SN.Members.mClass then (
@@ -1383,7 +1483,7 @@ let check_consts
               implements
               const_name
               parent_class
-              class_
+              (class_pos, class_)
               psubst
               parent_const
               const
@@ -1426,7 +1526,7 @@ let check_class_extends_parent_consts
       env
       implements
       (parent_pos, parent_class)
-      class_
+      (name_pos, class_)
       psubst
       on_error
   in
@@ -1496,6 +1596,97 @@ let check_class_extends_parents_members
   in
   check_members_from_all_parents env (class_name_pos, class_) on_error members
 
+let check_consts_are_not_abstract
+    ~is_final ~class_name_pos (consts : Nast.class_const list) =
+  List.iter consts ~f:(fun const ->
+      match const.Aast.cc_kind with
+      | Aast.CCAbstract _ ->
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Abstract_member_in_concrete_class
+                 {
+                   pos = fst const.Aast.cc_id;
+                   class_name_pos;
+                   is_final;
+                   member_kind = `constant;
+                   member_name = snd const.Aast.cc_id;
+                 })
+      | Aast.CCConcrete _ -> ())
+
+let check_typeconsts_are_not_abstract ~is_final ~class_name_pos typeconsts =
+  List.iter typeconsts ~f:(fun tc ->
+      match tc.Aast.c_tconst_kind with
+      | Aast.TCAbstract _ ->
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Abstract_member_in_concrete_class
+                 {
+                   pos = fst tc.Aast.c_tconst_name;
+                   class_name_pos;
+                   is_final;
+                   member_kind = `type_constant;
+                   member_name = snd tc.Aast.c_tconst_name;
+                 })
+      | Aast.TCConcrete _ -> ())
+
+let check_properties_are_not_abstract
+    ~is_final ~class_name_pos (properties : Nast.class_var list) =
+  List.iter properties ~f:(fun property ->
+      if property.Aast.cv_abstract then
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Abstract_member_in_concrete_class
+                 {
+                   pos = fst property.Aast.cv_id;
+                   class_name_pos;
+                   is_final;
+                   member_kind = `property;
+                   member_name = snd property.Aast.cv_id;
+                 }))
+
+let check_methods_are_not_abstract
+    ~is_final ~class_name_pos (methods : Nast.method_ list) =
+  List.iter methods ~f:(fun (method_ : (unit, unit) Aast.method_) ->
+      if method_.Aast.m_abstract then
+        Errors.add_typing_error
+          Typing_error.(
+            primary
+            @@ Primary.Abstract_member_in_concrete_class
+                 {
+                   pos = fst method_.Aast.m_name;
+                   class_name_pos;
+                   is_final;
+                   member_kind = `method_;
+                   member_name = snd method_.Aast.m_name;
+                 }))
+
+(** Error if there are abstract members in a concrete class' AST. *)
+let check_concrete_has_no_abstract_members (class_ : Nast.class_) =
+  let {
+    Aast.c_kind;
+    c_final = is_final;
+    c_typeconsts;
+    c_consts;
+    c_vars;
+    c_methods;
+    c_name = (class_name_pos, _);
+    _;
+  } =
+    class_
+  in
+  if Ast_defs.is_c_concrete c_kind || is_final then (
+    check_consts_are_not_abstract ~class_name_pos ~is_final c_consts;
+    check_typeconsts_are_not_abstract ~class_name_pos ~is_final c_typeconsts;
+    check_properties_are_not_abstract ~class_name_pos ~is_final c_vars;
+    check_methods_are_not_abstract ~class_name_pos ~is_final c_methods
+  );
+  (* Checking that a concrete class does not inherit abstract members is checked
+   * when checking against a class' parents. *)
+  ()
+
 (*****************************************************************************)
 (* The externally visible function *)
 (*****************************************************************************)
@@ -1522,7 +1713,8 @@ let check_implements_extends_uses
     env
     ~implements
     ~(parents : (Aast.hint * Typing_defs.decl_ty) list)
-    (name_pos, class_) =
+    (class_ast, class_) =
+  let (name_pos, name) = class_ast.Aast.c_name in
   let implements =
     let decl_ty_to_cls x =
       let (_, (pos, name), _) = TUtils.unwrap_class_type x in
@@ -1538,7 +1730,7 @@ let check_implements_extends_uses
       Typing_error.Reasons_callback.bad_enum_decl name_pos
     else
       Typing_error.Reasons_callback.bad_decl_override
-        ~name:(Cls.name class_)
+        ~name
         ~parent_pos:parent_name_pos
         ~parent_name
   in
@@ -1561,4 +1753,5 @@ let check_implements_extends_uses
   let env =
     check_class_extends_parents_members env (name_pos, class_) parents on_error
   in
+  check_concrete_has_no_abstract_members class_ast;
   env

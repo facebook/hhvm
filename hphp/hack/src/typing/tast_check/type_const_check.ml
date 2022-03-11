@@ -18,31 +18,12 @@ let handler =
   object
     inherit Tast_visitor.handler_base
 
-    method! at_class_typeconst_def
-        env { c_tconst_kind; c_tconst_name = (p, name); _ } =
+    method! at_class_typeconst_def env { c_tconst_name = (_, name); _ } =
       Option.(
         let cls_opt = Tast_env.get_self_id env >>= Tast_env.get_class env in
         match cls_opt with
         | None -> ()
         | Some cls ->
-          begin
-            if Ast_defs.is_c_normal (Cls.kind cls) then
-              match c_tconst_kind with
-              | TCAbstract _ ->
-                Errors.add_typing_error
-                  Typing_error.(
-                    primary
-                    @@ Primary.Implement_abstract
-                         {
-                           is_final = Cls.final cls;
-                           pos = Cls.pos cls |> Pos_or_decl.unsafe_to_raw_pos;
-                           decl_pos = p |> Pos_or_decl.of_raw_pos;
-                           kind = `ty_const;
-                           name;
-                           quickfixes = [];
-                         })
-              | _ -> ()
-          end;
           begin
             match Cls.get_typeconst cls name with
             | None -> ()

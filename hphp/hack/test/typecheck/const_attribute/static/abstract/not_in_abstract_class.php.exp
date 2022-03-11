@@ -1,8 +1,8 @@
-File "not_in_abstract_class.php", line 4, characters 7-7:
-This class must be declared `abstract`, or provide an implementation for the abstract property `$l` (Typing[4047])
-File "not_in_abstract_class.php", line 6, characters 26-28:
-Declaration is here
-File "not_in_abstract_class.php", line 4, characters 7-7:
-This class must be declared `abstract`, or provide an implementation for the abstract property `$p` (Typing[4047])
-File "not_in_abstract_class.php", line 5, characters 38-40:
-Declaration is here
+File "not_in_abstract_class.php", line 5, characters 42-43:
+Property `$p` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
+  File "not_in_abstract_class.php", line 4, characters 7-7:
+  Or make the class abstract.
+File "not_in_abstract_class.php", line 6, characters 30-31:
+Property `$l` is abstract but the class is concrete. Either provide an implementation here. (Typing[4465])
+  File "not_in_abstract_class.php", line 4, characters 7-7:
+  Or make the class abstract.

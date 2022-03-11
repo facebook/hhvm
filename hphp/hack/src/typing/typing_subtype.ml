@@ -1212,7 +1212,7 @@ and simplify_subtype_i
                         ty_sub
                         (LoclType ty)
                 in
-                env |> simplify_pushed_like)
+                env |> simplify_pushed_like ||| finish)
           else
             finish env
         in

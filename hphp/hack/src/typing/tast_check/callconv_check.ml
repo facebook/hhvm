@@ -25,7 +25,8 @@ let check_types env (_, p, te) =
           true
         | Tvec_or_dict _
         | Ttuple _
-        | Tshape _ ->
+        | Tshape _
+        | Tdynamic ->
           true
         | Tclass ((_, cn), _, _)
           when String.equal cn SN.Collections.cDict

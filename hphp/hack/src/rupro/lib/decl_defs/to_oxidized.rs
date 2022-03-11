@@ -409,7 +409,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
                 self.constructor.to_oxidized(arena),
                 obr::typing_defs::ConsistentKind::Inconsistent, // TODO
             ),
-            need_init: self.need_init,
+            need_init: self.has_concrete_constructor(),
             deferred_init_members: self.deferred_init_members.to_oxidized(arena),
             req_ancestors: self.req_ancestors.to_oxidized(arena),
             req_ancestors_extends: self.req_ancestors_extends.to_oxidized(arena),

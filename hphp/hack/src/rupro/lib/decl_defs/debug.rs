@@ -143,7 +143,6 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             is_internal,
             is_xhp,
             has_xhp_keyword,
-            need_init,
             support_dynamic_type,
             enum_type,
             module,
@@ -192,9 +191,6 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
         if *has_xhp_keyword {
             s.field("has_xhp_keyword", has_xhp_keyword);
-        }
-        if *need_init {
-            s.field("need_init", need_init);
         }
         if *support_dynamic_type {
             s.field("support_dynamic_type", support_dynamic_type);

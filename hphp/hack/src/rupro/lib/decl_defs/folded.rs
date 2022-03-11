@@ -140,7 +140,6 @@ pub struct FoldedClass<R: Reason> {
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     pub support_dynamic_type: bool,
-    pub need_init: bool,
     pub enum_type: Option<EnumType<R>>,
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub tparams: Box<[Tparam<R, DeclTy<R>>]>,
@@ -174,9 +173,21 @@ impl<R: Reason> FoldedClass<R> {
             ClassishKind::Cinterface | ClassishKind::Ctrait | ClassishKind::Cenum => true,
         }
     }
+
+    // c.f. `Decl_defs.dc_need_init`, via `has_concrete_cstr` in `Decl_folded_class.class_decl`
+    pub fn has_concrete_constructor(&self) -> bool {
+        match &self.constructor {
+            Some(elt) => elt.is_concrete(),
+            None => false,
+        }
+    }
 }
 
 impl FoldedElement {
+    pub fn is_concrete(&self) -> bool {
+        !self.is_abstract()
+    }
+
     pub fn is_abstract(&self) -> bool {
         self.flags.contains(ClassEltFlags::ABSTRACT)
     }

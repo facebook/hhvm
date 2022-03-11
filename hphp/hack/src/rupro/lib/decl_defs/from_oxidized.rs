@@ -496,7 +496,6 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
             is_xhp: cls.is_xhp,
             has_xhp_keyword: cls.has_xhp_keyword,
             support_dynamic_type: cls.support_dynamic_type,
-            need_init: cls.need_init,
             enum_type: cls.enum_type.map(Into::into),
             module: cls.module.map(Into::into),
             tparams: slice(cls.tparams),

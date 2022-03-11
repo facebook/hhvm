@@ -792,7 +792,7 @@ impl<R: Reason> DeclFolder<R> {
             }
             .filter_map(|ty| ty.unwrap_class_type())
             .filter_map(|(_, pos_id, _)| parents.get(&pos_id.id()))
-            .find(|parent| parent.need_init && parent.constructor.is_some())
+            .find(|parent| parent.has_concrete_constructor())
             .map(|_| PropName(self.special_names.members.parentConstruct))
         };
 
@@ -855,11 +855,6 @@ impl<R: Reason> DeclFolder<R> {
         let mut constructor = inh.constructor;
         self.decl_constructor(&mut constructor, sc);
 
-        let need_init = match constructor {
-            Some(ref e) if !e.is_abstract() => true,
-            _ => false,
-        };
-
         let mut ancestors = Default::default();
         sc.extends
             .iter()
@@ -899,7 +894,6 @@ impl<R: Reason> DeclFolder<R> {
                 .iter()
                 .any(|ua| ua.name.id() == self.special_names.user_attributes.uaInternal),
             is_xhp: sc.is_xhp,
-            need_init,
             support_dynamic_type: sc.support_dynamic_type,
             enum_type: sc.enum_type.clone(),
             has_xhp_keyword: sc.has_xhp_keyword,

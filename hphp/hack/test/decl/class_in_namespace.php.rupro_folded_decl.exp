@@ -36,6 +36,6 @@
   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque>; dc_condition_types = {} }
+  dc_decl_errors = <opaque> }
 
 They matched!

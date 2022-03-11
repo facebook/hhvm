@@ -386,14 +386,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         | Expr_::Int(_)
         | Expr_::Null
         | Expr_::False
-        | Expr_::True => {
-            let tv = ast_constant_folder::expr_to_typed_value(emitter, expression)
-                .map_err(|_| unrecoverable("expr_to_typed_value failed"))?;
-            Ok(emit_pos_then(
-                pos,
-                emit_adata::typed_value_to_instr(emitter, &tv)?,
-            ))
-        }
+        | Expr_::True => emit_lit(emitter, env, pos, expression),
         Expr_::EnumClassLabel(label) => emit_label(emitter, env, pos, label),
         Expr_::PrefixedString(e) => emit_expr(emitter, env, &e.1),
         Expr_::Lvar(e) => emit_lvar(emitter, env, pos, e),
@@ -3248,6 +3241,20 @@ fn emit_lvar<'a, 'arena, 'decl>(
         emit_pos(pos),
         emit_local(emitter, env, BareThisOp::Notice, e)?,
     ]))
+}
+
+fn emit_lit<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    _env: &Env<'a, 'arena>,
+    pos: &Pos,
+    expression: &ast::Expr,
+) -> Result<InstrSeq<'arena>> {
+    let tv = ast_constant_folder::expr_to_typed_value(emitter, expression)
+        .map_err(|_| unrecoverable("expr_to_typed_value failed"))?;
+    Ok(emit_pos_then(
+        pos,
+        emit_adata::typed_value_to_instr(emitter, &tv)?,
+    ))
 }
 
 fn emit_label<'a, 'arena, 'decl>(

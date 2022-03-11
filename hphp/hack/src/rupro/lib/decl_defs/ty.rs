@@ -9,6 +9,7 @@ use eq_modulo_pos::EqModuloPos;
 use hcons::Hc;
 use oxidized::{aast, ast_defs};
 use pos::{Bytes, ModuleName, Positioned, Symbol, TypeConstName, TypeName};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::fmt;
 
@@ -22,13 +23,13 @@ pub use oxidized::{
 };
 
 // c.f. ast_defs::XhpEnumValue
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 pub enum XhpEnumValue {
     XEVInt(isize),
     XEVString(Symbol),
 }
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 pub enum CeVisibility {
     Public,
     Private(TypeName),
@@ -36,7 +37,7 @@ pub enum CeVisibility {
     Internal(ModuleName),
 }
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 pub enum IfcFunDecl {
     FDPolicied(Option<Symbol>),
     FDInferFlows,
@@ -57,6 +58,7 @@ pub enum IfcFunDecl {
 // Instead, we omit the positions from these keys, and store the field name's
 // position as part of the map's value (in a `ShapeFieldNamePos`).
 #[derive(Copy, Clone, Debug, Eq, EqModuloPos, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Serialize, Deserialize)]
 pub enum TshapeFieldName {
     TSFlitInt(Symbol),
     TSFlitStr(Bytes),
@@ -69,23 +71,25 @@ walkable!(TshapeFieldName);
 /// `shape('a' => int)`, or the positions of `Foo` and `X` in
 /// `shape(Foo::X => int)`.
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Serialize, Deserialize)]
 pub enum ShapeFieldNamePos<P> {
     Simple(P),
     ClassConst(P, P),
 }
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 pub enum DependentType {
     DTexpr(Ident),
 }
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 pub struct UserAttribute<P> {
     pub name: Positioned<TypeName, P>,
     pub classname_params: Box<[TypeName]>,
 }
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason, TY: Serialize + DeserializeOwned")]
 pub struct Tparam<R: Reason, TY> {
     pub variance: ast_defs::Variance,
     pub name: Positioned<TypeName, R::Pos>,
@@ -97,12 +101,13 @@ pub struct Tparam<R: Reason, TY> {
 
 walkable!(impl<R: Reason, TY> for Tparam<R, TY> => [tparams, constraints]);
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 pub struct WhereConstraint<TY>(pub TY, pub ast_defs::ConstraintKind, pub TY);
 
 walkable!(impl<R: Reason, TY> for WhereConstraint<TY> => [0, 1, 2]);
 
-#[derive(Clone, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
 pub struct DeclTy<R: Reason>(R, Hc<DeclTy_<R>>);
 
 walkable!(DeclTy<R> as visit_decl_ty => [0, 1]);
@@ -180,7 +185,8 @@ impl<R: Reason> DeclTy<R> {
 ///
 /// With this definition, the field 'a' may be unprovided in a shape. In this
 /// case, the field 'a' would have sf_optional set to true.
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
 pub struct ShapeFieldType<R: Reason> {
     pub field_name_pos: ShapeFieldNamePos<R::Pos>,
     pub optional: bool,
@@ -189,7 +195,8 @@ pub struct ShapeFieldType<R: Reason> {
 
 walkable!(ShapeFieldType<R> => [ty]);
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
 pub enum DeclTy_<R: Reason> {
     /// The late static bound type of a class
     DTthis,
@@ -315,7 +322,8 @@ impl<R: Reason> crate::visitor::Walkable<R> for DeclTy_<R> {
 }
 
 /// A Type const access expression of the form <type expr>::C.
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason, TY: Serialize + DeserializeOwned")]
 pub struct TaccessType<R: Reason, TY> {
     /// Type expression to the left of `::`
     pub ty: TY,
@@ -326,7 +334,8 @@ pub struct TaccessType<R: Reason, TY> {
 
 walkable!(impl<R: Reason, TY> for TaccessType<R, TY> => [ty]);
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason, TY: Serialize + DeserializeOwned")]
 pub enum Capability<R: Reason, TY> {
     CapDefaults(R::Pos),
     CapTy(TY),
@@ -339,7 +348,8 @@ walkable!(impl<R: Reason, TY> for Capability<R, TY> => {
 
 /// Companion to fun_params type, intended to consolidate checking of
 /// implicit params for functions.
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason, TY: Serialize + DeserializeOwned")]
 pub struct FunImplicitParams<R: Reason, TY> {
     pub capability: Capability<R, TY>,
 }
@@ -347,7 +357,8 @@ pub struct FunImplicitParams<R: Reason, TY> {
 walkable!(impl<R: Reason, TY> for FunImplicitParams<R, TY> => [capability]);
 
 /// The type of a function AND a method.
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason, TY: Serialize + DeserializeOwned")]
 pub struct FunType<R: Reason, TY> {
     pub tparams: Box<[Tparam<R, TY>]>,
     pub where_constraints: Box<[WhereConstraint<TY>]>,
@@ -363,7 +374,8 @@ walkable!(impl<R: Reason, TY> for FunType<R, TY> => [
     tparams, where_constraints, params, implicit_params, ret
 ]);
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "TY: Serialize + DeserializeOwned")]
 pub struct PossiblyEnforcedTy<TY> {
     /// True if consumer of this type enforces it at runtime
     pub enforced: Enforcement,
@@ -372,7 +384,8 @@ pub struct PossiblyEnforcedTy<TY> {
 
 walkable!(impl<R: Reason, TY> for PossiblyEnforcedTy<TY> => [ty]);
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason, TY: Serialize + DeserializeOwned")]
 pub struct FunParam<R: Reason, TY> {
     pub pos: R::Pos,
     pub name: Option<Symbol>,
@@ -398,7 +411,7 @@ pub type FunParams<R, TY> = Box<[FunParam<R, TY>]>;
 /// like D::A, or self references using self::A.
 ///
 /// class_const_from encodes the origin (class vs self).
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 pub enum ClassConstFrom {
     Self_,
     From(TypeName),
@@ -416,10 +429,11 @@ pub enum ClassConstFrom {
 ///
 /// Currently the syntax of constants allows direct references to another class
 /// like D::A, or self references using self::A.
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 pub struct ClassConstRef(pub ClassConstFrom, pub Symbol);
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
 pub struct ConstDecl<R: Reason> {
     pub pos: R::Pos,
     pub ty: DeclTy<R>,
@@ -427,7 +441,8 @@ pub struct ConstDecl<R: Reason> {
 
 walkable!(ConstDecl<R> => [ty]);
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
 pub struct FunElt<R: Reason> {
     pub deprecated: Option<Bytes>,
     pub module: Option<Positioned<ModuleName, R::Pos>>,
@@ -441,7 +456,8 @@ pub struct FunElt<R: Reason> {
 
 walkable!(FunElt<R> => [ty]);
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
 pub struct AbstractTypeconst<R: Reason> {
     pub as_constraint: Option<DeclTy<R>>,
     pub super_constraint: Option<DeclTy<R>>,
@@ -450,14 +466,16 @@ pub struct AbstractTypeconst<R: Reason> {
 
 walkable!(AbstractTypeconst<R> => [as_constraint, super_constraint, default]);
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
 pub struct ConcreteTypeconst<R: Reason> {
     pub ty: DeclTy<R>,
 }
 
 walkable!(ConcreteTypeconst<R> => [ty]);
 
-#[derive(Clone, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
 pub enum Typeconst<R: Reason> {
     TCAbstract(AbstractTypeconst<R>),
     TCConcrete(ConcreteTypeconst<R>),
@@ -477,7 +495,8 @@ impl<R: Reason> fmt::Debug for Typeconst<R> {
     }
 }
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
 pub struct EnumType<R: Reason> {
     pub base: DeclTy<R>,
     pub constraint: Option<DeclTy<R>>,
@@ -486,7 +505,8 @@ pub struct EnumType<R: Reason> {
 
 walkable!(EnumType<R> => [base, constraint, includes]);
 
-#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
 pub struct TypedefType<R: Reason> {
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub pos: R::Pos,

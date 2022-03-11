@@ -6,6 +6,7 @@
 use hcons::Conser;
 use once_cell::sync::Lazy;
 use pos::{BPos, NPos, Pos, Positioned, Symbol, ToOxidized, TypeConstName, TypeName};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::hash::Hash;
 
 use crate::decl_defs::DeclTy_;
@@ -23,6 +24,8 @@ pub trait Reason:
     + std::fmt::Debug
     + Send
     + Sync
+    + Serialize
+    + DeserializeOwned
     + for<'a> From<oxidized_by_ref::typing_reason::T_<'a>>
     + for<'a> ToOxidized<'a, Output = oxidized_by_ref::typing_reason::T_<'a>>
     + 'static
@@ -195,10 +198,10 @@ pub trait Reason:
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Blame<P>(pub P, pub BlameSource);
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ExprDepTypeReason {
     ERexpr(isize),
     ERstatic,
@@ -238,7 +241,7 @@ impl<'a> ToOxidized<'a> for ExprDepTypeReason {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum ReasonImpl<R, P> {
     Rnone,
     Rwitness(P),
@@ -337,7 +340,7 @@ pub enum ReasonImpl<R, P> {
     RrigidTvarEscape(P, Symbol, Symbol, R),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct BReason(Box<ReasonImpl<BReason, BPos>>);
 
 impl Reason for BReason {
@@ -582,7 +585,7 @@ impl<'a> ToOxidized<'a> for BReason {
 }
 
 /// A stateless sentinal Reason.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct NReason;
 
 impl Reason for NReason {

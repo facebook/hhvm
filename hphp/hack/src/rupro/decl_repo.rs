@@ -17,6 +17,9 @@ use structopt::StructOpt;
 
 use hackrs::decl_parser::DeclParser;
 use hackrs::reason::{BReason, NReason, Reason};
+use hackrs::shallow_decl_provider::ShallowDeclCache;
+use hackrs_test_utils::cache::NonEvictingCache;
+use hackrs_test_utils::SerializingCache;
 use pos::{Prefix, RelativePath, RelativePathCtx};
 
 #[derive(StructOpt, Debug)]
@@ -27,20 +30,28 @@ struct CliOptions {
     /// Allocate decls with positions instead of allocating position-free decls.
     #[structopt(long)]
     with_pos: bool,
+
+    /// Store decls in a data store which serializes and compresses them.
+    #[structopt(long)]
+    serialize: bool,
+
+    /// If `--serialize` was given, disable compression.
+    #[structopt(long)]
+    no_compress: bool,
 }
 
 fn main() {
-    let cli_options = CliOptions::from_args();
+    let opts = CliOptions::from_args();
 
     let path_ctx = Arc::new(RelativePathCtx {
-        root: cli_options.root.clone(),
+        root: opts.root.clone(),
         hhi: PathBuf::new(),
         dummy: PathBuf::new(),
         tmp: PathBuf::new(),
     });
 
     let (filenames, time_taken) = time(|| {
-        WalkDir::new(cli_options.root)
+        WalkDir::new(opts.root.clone())
             .into_iter()
             .filter_map(|e| e.ok())
             .filter(|e| !e.file_type().is_dir() && find_utils::is_hack(&e.path()))
@@ -59,16 +70,38 @@ fn main() {
         time_taken
     );
 
-    if cli_options.with_pos {
-        parse_repo::<BReason>(path_ctx, &filenames);
+    if opts.with_pos {
+        parse_repo::<BReason>(&opts, path_ctx, &filenames);
     } else {
-        parse_repo::<NReason>(path_ctx, &filenames);
+        parse_repo::<NReason>(&opts, path_ctx, &filenames);
     }
 }
 
-fn parse_repo<R: Reason>(ctx: Arc<RelativePathCtx>, filenames: &[RelativePath]) {
-    let decl_parser = DeclParser::new(ctx);
-    let shallow_decl_cache = hackrs_test_utils::cache::make_non_eviction_shallow_decl_cache::<R>();
+fn parse_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames: &[RelativePath]) {
+    let decl_parser = DeclParser::<R>::new(ctx);
+    let shallow_decl_cache = if opts.serialize {
+        let compression = if opts.no_compress {
+            hackrs_test_utils::serde_cache::Compression::None
+        } else {
+            Default::default()
+        };
+        ShallowDeclCache::new(
+            Arc::new(SerializingCache::with_compression(compression)), // types
+            Box::new(SerializingCache::with_compression(compression)), // funs
+            Box::new(SerializingCache::with_compression(compression)), // consts
+            Box::new(SerializingCache::with_compression(compression)), // properties
+            Box::new(SerializingCache::with_compression(compression)), // static_properties
+            Box::new(SerializingCache::with_compression(compression)), // methods
+            Box::new(SerializingCache::with_compression(compression)), // static_methods
+            Box::new(SerializingCache::with_compression(compression)), // constructors
+        )
+    } else {
+        ShallowDeclCache::with_no_member_caches(
+            Arc::new(NonEvictingCache::default()),
+            Box::new(NonEvictingCache::default()),
+            Box::new(NonEvictingCache::default()),
+        )
+    };
     let ((), time_taken) = time(|| {
         filenames
             .par_iter()

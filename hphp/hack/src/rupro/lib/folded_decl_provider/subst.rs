@@ -10,12 +10,14 @@ use crate::decl_defs::{
 use crate::reason::Reason;
 use eq_modulo_pos::EqModuloPos;
 use pos::{TypeName, TypeNameMap};
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 // note(sf, 2022-02-14): c.f. `Decl_subst`, `Decl_instantiate`
 
 /// Maps type names to types with which to replace them.
-#[derive(Debug, Clone, Eq, EqModuloPos, PartialEq)]
+#[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
 pub struct Subst<R: Reason>(pub TypeNameMap<DeclTy<R>>);
 
 impl<R: Reason> From<TypeNameMap<DeclTy<R>>> for Subst<R> {

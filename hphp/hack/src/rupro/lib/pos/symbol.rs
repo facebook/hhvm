@@ -14,6 +14,7 @@ use intern::{
     string::{BytesId, StringId},
     BuildIdHasher,
 };
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
 pub type BuildSymbolHasher = BuildIdHasher<u32>;
@@ -23,6 +24,7 @@ pub type SymbolIndexMap<V> = IndexMap<Symbol, V, BuildSymbolHasher>;
 pub type SymbolIndexSet = IndexSet<Symbol, BuildSymbolHasher>;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[derive(Serialize, Deserialize)]
 pub struct Symbol(pub StringId);
 // nb: StringId implements Hash & Eq using the u32 id, and Ord
 // using the underlying string after a fast check for equal ids.
@@ -98,6 +100,7 @@ impl<'a, V: ToOxidized<'a>> ToOxidized<'a> for SymbolMap<V> {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
+#[derive(Serialize, Deserialize)]
 pub struct Bytes(pub BytesId);
 // nb: BytesId implements Hash & Eq using the u32 id, and Ord
 // using the underlying bytestring after a fast check for equal ids.
@@ -279,6 +282,7 @@ pub type TypeNameIndexSet = IndexSet<TypeName>;
 /// A TypeName is the name of a class, interface, trait, type parameter,
 /// type alias, newtype, or primitive type names like int, arraykey, etc.
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Serialize, Deserialize)]
 pub struct TypeName(pub Symbol);
 common_impls!(TypeName, TypeNameMap, TypeNameIndexMap);
 
@@ -286,22 +290,26 @@ common_impls!(TypeName, TypeNameMap, TypeNameIndexMap);
 /// visibility. ModuleNames are not bindable names and are not indended
 /// to be interchangeable with any other kind of name.
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Serialize, Deserialize)]
 pub struct ModuleName(pub Symbol);
 common_impls!(ModuleName);
 
 /// Name of a top level constant.
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Serialize, Deserialize)]
 pub struct ConstName(pub Symbol);
 common_impls!(ConstName);
 
 /// Name of a top level function.
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Serialize, Deserialize)]
 pub struct FunName(pub Symbol);
 common_impls!(FunName);
 
 /// ClassConstName is the name of a class const, which are disjoint from
 /// global constants, type constants, and other class members.
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Serialize, Deserialize)]
 pub struct ClassConstName(pub Symbol);
 pub type BuildClassConstNameHasher = BuildSymbolHasher;
 pub type ClassConstNameMap<V> = HashMap<ClassConstName, V>;
@@ -311,6 +319,7 @@ pub type ClassConstNameIndexSet = IndexSet<ClassConstName>;
 common_impls!(ClassConstName, ClassConstNameMap, ClassConstNameIndexMap);
 
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Serialize, Deserialize)]
 pub struct TypeConstName(pub Symbol);
 pub type BuildTypeConstNameHasher = BuildSymbolHasher;
 pub type TypeConstNameMap<V> = HashMap<TypeConstName, V>;
@@ -320,6 +329,7 @@ pub type TypeConstNameIndexSet = IndexSet<TypeConstName>;
 common_impls!(TypeConstName, TypeConstNameMap, TypeConstNameIndexMap);
 
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Serialize, Deserialize)]
 pub struct MethodName(pub Symbol);
 pub type BuildMethodNameHasher = BuildSymbolHasher;
 pub type MethodNameMap<V> = HashMap<MethodName, V>;
@@ -329,6 +339,7 @@ pub type MethodNameIndexSet = IndexSet<MethodName>;
 common_impls!(MethodName, MethodNameMap, MethodNameIndexMap);
 
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Serialize, Deserialize)]
 pub struct PropName(pub Symbol);
 pub type BuildPropNameHasher = BuildSymbolHasher;
 pub type PropNameMap<V> = HashMap<PropName, V>;

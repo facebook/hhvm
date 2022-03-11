@@ -9,6 +9,7 @@ use intern::string::BytesId;
 use oxidized::file_pos_small::FilePosSmall;
 use oxidized::pos_span_raw::PosSpanRaw;
 use oxidized::pos_span_tiny::PosSpanTiny;
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::fmt;
 use std::hash::Hash;
 
@@ -19,6 +20,8 @@ pub trait Pos:
     + Hash
     + Clone
     + std::fmt::Debug
+    + Serialize
+    + DeserializeOwned
     + for<'a> From<&'a oxidized::pos::Pos>
     + for<'a> From<&'a oxidized_by_ref::pos::Pos<'a>>
     + for<'a> ToOxidized<'a, Output = &'a oxidized_by_ref::pos::Pos<'a>>
@@ -45,7 +48,7 @@ pub trait Pos:
 }
 
 /// Represents a closed-ended range [start, end] in a file.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 enum PosImpl {
     Small {
         prefix: Prefix,
@@ -66,7 +69,7 @@ enum PosImpl {
 
 static_assertions::assert_eq_size!(PosImpl, u128);
 
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct BPos(PosImpl);
 
 impl Pos for BPos {
@@ -210,7 +213,7 @@ impl<'a> ToOxidized<'a> for BPos {
 }
 
 /// A stateless sentinel Pos.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct NPos;
 
 impl Pos for NPos {
@@ -245,7 +248,7 @@ impl<'a> ToOxidized<'a> for NPos {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Positioned<S, P> {
     // Caution: field order will matter if we ever derive
     // `ToOcamlRep`/`FromOcamlRep` for this type.

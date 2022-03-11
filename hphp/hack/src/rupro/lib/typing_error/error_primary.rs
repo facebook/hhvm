@@ -4,8 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::reason::Reason;
 use pos::TypeName;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
+#[serde(bound = "R: Reason")]
 pub enum Primary<R: Reason> {
     InvalidTypeHint(R::Pos),
     ExpectingTypeHint(R::Pos),

@@ -32,7 +32,8 @@ pub enum Error {
     },
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(bound = "R: Reason")]
 pub enum TypeDecl<R: Reason> {
     Class(Arc<ShallowClass<R>>),
     Typedef(Arc<TypedefDecl<R>>),

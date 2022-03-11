@@ -476,7 +476,7 @@ fn missing_syntax<'a, N>(expecting: &str, node: S<'a>, env: &mut Env<'a>) -> Res
     missing_syntax_(None, expecting, node, env)
 }
 
-fn mp_optional<'a, F, R>(p: F, node: S<'a>, env: &mut Env<'a>) -> Result<Option<R>>
+fn map_optional<'a, F, R>(node: S<'a>, env: &mut Env<'a>, p: F) -> Result<Option<R>>
 where
     F: FnOnce(S<'a>, &mut Env<'a>) -> Result<R>,
 {
@@ -672,7 +672,7 @@ fn p_closure_parameter<'a>(
     match &node.children {
         ClosureParameterTypeSpecifier(c) => {
             let kind = p_param_kind(&c.call_convention, env)?;
-            let readonlyness = mp_optional(p_readonly, &c.readonly, env)?;
+            let readonlyness = map_optional(&c.readonly, env, p_readonly)?;
             let info = Some(ast::HfParamInfo { kind, readonlyness });
             let hint = p_hint(&c.type_, env)?;
             Ok((hint, info))
@@ -681,10 +681,10 @@ fn p_closure_parameter<'a>(
     }
 }
 
-fn mp_shape_expression_field<'a, F, R>(
-    f: F,
+fn map_shape_expression_field<'a, F, R>(
     node: S<'a>,
     env: &mut Env<'a>,
+    f: F,
 ) -> Result<(ast::ShapeFieldName, R)>
 where
     F: Fn(S<'a>, &mut Env<'a>) -> Result<R>,
@@ -751,7 +751,7 @@ fn p_shape_field<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFieldIn
             })
         }
         _ => {
-            let (name, hint) = mp_shape_expression_field(p_hint, node, env)?;
+            let (name, hint) = map_shape_expression_field(node, env, p_hint)?;
             Ok(ast::ShapeFieldInfo {
                 optional: false,
                 name,
@@ -904,13 +904,13 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 )),
             )?;
             Ok(Hfun(ast::HintFun {
-                is_readonly: mp_optional(p_readonly, &c.readonly_keyword, env)?,
+                is_readonly: map_optional(&c.readonly_keyword, env, p_readonly)?,
                 param_tys: type_hints,
                 param_info: info,
                 variadic_ty: variadic_hints.into_iter().next().unwrap_or(None),
                 ctxs,
                 return_ty: p_hint(&c.return_type, env)?,
-                is_readonly_return: mp_optional(p_readonly, &c.readonly_return, env)?,
+                is_readonly_return: map_optional(&c.readonly_return, env, p_readonly)?,
             }))
         }
         AttributizedSpecifier(c) => {
@@ -1510,7 +1510,7 @@ fn p_expr_impl<'a>(
             let (params, (ctxs, unsafe_ctxs), readonly_ret, ret) = match &c.signature.children {
                 LambdaSignature(c) => {
                     let params = could_map(&c.parameters, env, p_fun_param)?;
-                    let readonly_ret = mp_optional(p_readonly, &c.readonly_return, env)?;
+                    let readonly_ret = map_optional(&c.readonly_return, env, p_readonly)?;
                     let ctxs = p_contexts(
                         &c.contexts,
                         env,
@@ -1518,7 +1518,7 @@ fn p_expr_impl<'a>(
                         Some((&syntax_error::lambda_effect_polymorphic("A lambda"), false)),
                     )?;
                     let unsafe_ctxs = ctxs.clone();
-                    let ret = mp_optional(p_hint, &c.type_, env)?;
+                    let ret = map_optional(&c.type_, env, p_hint)?;
                     (params, (ctxs, unsafe_ctxs), readonly_ret, ret)
                 }
                 Token(_) => {
@@ -1545,10 +1545,10 @@ fn p_expr_impl<'a>(
             };
 
             let (body, yield_) = if !c.body.is_compound_statement() {
-                mp_yielding(p_function_body, &c.body, env)?
+                map_yielding(&c.body, env, p_function_body)?
             } else {
                 let mut env1 = Env::clone_and_unset_toplevel_if_toplevel(env);
-                mp_yielding(&p_function_body, &c.body, env1.as_mut())?
+                map_yielding(&c.body, env1.as_mut(), p_function_body)?
             };
             let external = c.body.is_external();
             let fun = ast::Fun_ {
@@ -1954,20 +1954,20 @@ fn p_expr_impl<'a>(
         }
         ConditionalExpression(c) => {
             let alter = p_expr(&c.alternative, env)?;
-            let consequence = mp_optional(p_expr, &c.consequence, env)?;
+            let consequence = map_optional(&c.consequence, env, p_expr)?;
             let condition = p_expr(&c.test, env)?;
             Ok(Expr_::mk_eif(condition, consequence, alter))
         }
         SubscriptExpression(c) => Ok(Expr_::mk_array_get(
             p_expr(&c.receiver, env)?,
-            mp_optional(p_expr, &c.index, env)?,
+            map_optional(&c.index, env, p_expr)?,
         )),
         EmbeddedSubscriptExpression(c) => Ok(Expr_::mk_array_get(
             p_expr(&c.receiver, env)?,
-            mp_optional(|n, e| p_expr_with_loc(location, n, e, None), &c.index, env)?,
+            map_optional(&c.index, env, |n, e| p_expr_with_loc(location, n, e, None))?,
         )),
         ShapeExpression(c) => Ok(Expr_::Shape(could_map(&c.fields, env, |n, e| {
-            mp_shape_expression_field(p_expr, n, e)
+            map_shape_expression_field(n, e, p_expr)
         })?)),
         ObjectCreationExpression(c) => p_expr_recurse(location, &c.object, env, Some(pos)),
         ConstructorCall(c) => {
@@ -2054,7 +2054,7 @@ fn p_expr_impl<'a>(
             let suspension_kind = mk_suspension_kind(&c.async_keyword);
             let (body, yield_) = {
                 let mut env1 = Env::clone_and_unset_toplevel_if_toplevel(env);
-                mp_yielding(&p_function_body, &c.body, env1.as_mut())?
+                map_yielding(&c.body, env1.as_mut(), p_function_body)?
             };
             let doc_comment = extract_docblock(node, env).or_else(|| env.top_docblock().clone());
             let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
@@ -2065,8 +2065,8 @@ fn p_expr_impl<'a>(
                 span: p_pos(node, env),
                 readonly_this: None, // set in process_readonly_expr
                 annotation: (),
-                readonly_ret: mp_optional(p_readonly, &c.readonly_return, env)?,
-                ret: ast::TypeHint((), mp_optional(p_hint, &c.type_, env)?),
+                readonly_ret: map_optional(&c.readonly_return, env, p_readonly)?,
+                ret: ast::TypeHint((), map_optional(&c.type_, env, p_hint)?),
                 name: ast::Id(name_pos, String::from(";anonymous")),
                 tparams: vec![],
                 where_constraints: vec![],
@@ -2084,7 +2084,7 @@ fn p_expr_impl<'a>(
         }
         AwaitableCreationExpression(c) => {
             let suspension_kind = mk_suspension_kind(&c.async_);
-            let (blk, yld) = mp_yielding(&p_function_body, &c.compound_statement, env)?;
+            let (blk, yld) = map_yielding(&c.compound_statement, env, p_function_body)?;
             let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
             let external = c.compound_statement.is_external();
             let name_pos = p_fun_pos(node, env);
@@ -2804,7 +2804,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
         ForStatement(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
                 let ini = could_map(&c.initializer, e, p_expr)?;
-                let ctr = mp_optional(p_expr, &c.control, e)?;
+                let ctr = map_optional(&c.control, e, p_expr)?;
                 let eol = could_map(&c.end_of_loop, e, p_expr)?;
                 let blk = p_block(true, &c.body, e)?;
                 Ok(Stmt::new(pos, S_::mk_for(ini, ctr, eol, blk)))
@@ -3394,7 +3394,7 @@ fn rewrite_effect_polymorphism<'a>(
 
 fn p_fun_param_default_value<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Option<ast::Expr>> {
     match &node.children {
-        SimpleInitializer(c) => mp_optional(p_expr, &c.value, env),
+        SimpleInitializer(c) => map_optional(&c.value, env, p_expr),
         _ => Ok(None),
     }
 }
@@ -3464,7 +3464,7 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
             let user_attributes = p_user_attributes(attribute, env)?;
             let pos = p_pos(name, env);
             let name = text(name, env);
-            let hint = mp_optional(p_hint, type_, env)?;
+            let hint = map_optional(type_, env, p_hint)?;
             let hint = hint.map(|h| soften_hint(&user_attributes, h));
 
             if is_variadic && !user_attributes.is_empty() {
@@ -3483,7 +3483,7 @@ fn p_fun_param<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::FunParam> {
                 name,
                 expr: p_fun_param_default_value(default_value, env)?,
                 callconv: p_param_kind(call_convention, env)?,
-                readonly: mp_optional(p_readonly, readonly, env)?,
+                readonly: map_optional(readonly, env, p_readonly)?,
                 /* implicit field via constructor parameter.
                  * This is always None except for constructors and the modifier
                  * can be only Public or Protected or Private.
@@ -3681,7 +3681,7 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr> {
             } else {
                 None
             };
-            let readonly_ret = mp_optional(p_readonly, readonly_return, env)?;
+            let readonly_ret = map_optional(readonly_return, env, p_readonly)?;
             let mut type_parameters = p_tparam_l(false, type_parameter_list, env)?;
             let mut parameters = could_map(parameter_list, env, p_fun_param)?;
             let contexts = p_contexts(contexts, env, None)?;
@@ -3693,7 +3693,7 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr> {
                 contexts.as_ref(),
                 &mut constrs,
             );
-            let return_type = mp_optional(p_hint, type_, env)?;
+            let return_type = map_optional(type_, env, p_hint)?;
             let suspension_kind = mk_suspension_kind_(has_async);
             let name = pos_name(name, env)?;
             let unsafe_contexts = contexts.clone();
@@ -3718,14 +3718,14 @@ fn p_fun_hdr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<FunHdr> {
             readonly_return,
             ..
         }) => {
-            let readonly_ret = mp_optional(p_readonly, readonly_return, env)?;
+            let readonly_ret = map_optional(readonly_return, env, p_readonly)?;
             let mut header = FunHdr::make_empty(env);
             header.parameters = could_map(parameters, env, p_fun_param)?;
             let contexts = p_contexts(contexts, env, None)?;
             let unsafe_contexts = contexts.clone();
             header.contexts = contexts;
             header.unsafe_contexts = unsafe_contexts;
-            header.return_type = mp_optional(p_hint, type_, env)?;
+            header.return_type = map_optional(type_, env, p_hint)?;
             header.readonly_return = readonly_ret;
             Ok(header)
         }
@@ -3948,7 +3948,7 @@ fn p_user_attributes<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::User
     Ok(attributes.into_iter().flatten().collect())
 }
 
-fn mp_yielding<'a, F, R>(p: F, node: S<'a>, env: &mut Env<'a>) -> Result<(R, bool)>
+fn map_yielding<'a, F, R>(node: S<'a>, env: &mut Env<'a>, p: F) -> Result<(R, bool)>
 where
     F: FnOnce(S<'a>, &mut Env<'a>) -> Result<R>,
 {
@@ -4101,7 +4101,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             let kinds = p_kinds(&c.modifiers, env)?;
             let has_abstract = kinds.has(modifier::ABSTRACT);
             // TODO: make wrap `type_` `doc_comment` by `Rc` in ClassConst to avoid clone
-            let type_ = mp_optional(p_hint, &c.type_specifier, env)?;
+            let type_ = map_optional(&c.type_specifier, env, p_hint)?;
             // ocaml's behavior is that if anything throw, it will
             // discard all lowered elements. So adding to class
             // must be at the last.
@@ -4110,7 +4110,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                     let id = pos_name(&c.name, e)?;
                     use aast::ClassConstKind::*;
                     let kind = if has_abstract {
-                        CCAbstract(mp_optional(p_simple_initializer, &c.initializer, e)?)
+                        CCAbstract(map_optional(&c.initializer, e, p_simple_initializer)?)
                     } else {
                         CCConcrete(p_simple_initializer(&c.initializer, e)?)
                     };
@@ -4132,11 +4132,11 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 raise_parsing_error(node, env, &syntax_error::tparams_in_tconst);
             }
             let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
-            let type__ = mp_optional(p_hint, &c.type_specifier, env)?
+            let type__ = map_optional(&c.type_specifier, env, p_hint)?
                 .map(|hint| soften_hint(&user_attributes, hint));
             let kinds = p_kinds(&c.modifiers, env)?;
             let name = pos_name(&c.name, env)?;
-            let as_constraint = mp_optional(p_tconstraint_ty, &c.type_constraint, env)?;
+            let as_constraint = map_optional(&c.type_constraint, env, p_tconstraint_ty)?;
             let span = p_pos(node, env);
             let has_abstract = kinds.has(modifier::ABSTRACT);
             let kind = if has_abstract {
@@ -4236,7 +4236,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
         PropertyDeclaration(c) => {
             let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
             let type_ =
-                mp_optional(p_hint, &c.type_, env)?.map(|t| soften_hint(&user_attributes, t));
+                map_optional(&c.type_, env, p_hint)?.map(|t| soften_hint(&user_attributes, t));
             let kinds = p_kinds(&c.modifiers, env)?;
             let vis = p_visibility_last_win_or(&c.modifiers, env, Visibility::Public)?;
             let doc_comment = if env.quick_mode {
@@ -4248,7 +4248,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                 PropertyDeclarator(c) => {
                     let name = pos_name_(&c.name, e, Some('$'))?;
                     let pos = p_pos(n, e);
-                    let expr = mp_optional(p_simple_initializer, &c.initializer, e)?;
+                    let expr = map_optional(&c.initializer, e, p_simple_initializer)?;
                     Ok((pos, name, expr))
                 }
                 _ => missing_syntax("property declarator", n, e),
@@ -4340,7 +4340,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
             let readonly_this = kinds.has(modifier::READONLY);
             *env.in_static_method() = is_static;
             check_effect_polymorphic_reification(hdr.contexts.as_ref(), env, node);
-            let (mut body, body_has_yield) = mp_yielding(p_function_body, &c.function_body, env)?;
+            let (mut body, body_has_yield) = map_yielding(&c.function_body, env, p_function_body)?;
             if env.codegen() {
                 member_init.reverse();
             }
@@ -4526,7 +4526,7 @@ fn p_class_elt_<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) -> 
                             }
                             _ => (Some(p_hint(&c.type_, env)?), None, vec![], None),
                         };
-                        let init_expr = mp_optional(p_simple_initializer, &c.initializer, env)?;
+                        let init_expr = map_optional(&c.initializer, env, p_simple_initializer)?;
                         let xhp_attr = ast::XhpAttr(
                             ast::TypeHint((), hint.clone()),
                             ast::ClassVar {
@@ -4807,7 +4807,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             let (block, yield_) = if is_external {
                 (vec![], false)
             } else {
-                mp_yielding(&p_function_body, body, env)?
+                map_yielding(body, env, p_function_body)?
             };
             let user_attributes = p_user_attributes(attribute_spec, env)?;
             check_effect_memoized(hdr.contexts.as_ref(), &user_attributes, "function", env);
@@ -4931,7 +4931,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                             annotation: (),
                             mode: env.file_mode(),
                             name: pos_name(name, env)?,
-                            type_: mp_optional(p_hint, ty, env)?,
+                            type_: map_optional(ty, env, p_hint)?,
                             value: p_simple_initializer(init, env)?,
                             namespace: mk_empty_ns_env(env),
                             span: p_pos(node, env),
@@ -4956,7 +4956,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 annotation: (),
                 name: pos_name(&c.name, env)?,
                 tparams,
-                constraint: mp_optional(p_tconstraint, &c.constraint, env)?.map(|x| x.1),
+                constraint: map_optional(&c.constraint, env, p_tconstraint)?.map(|x| x.1),
                 user_attributes: itertools::concat(
                     c.attribute_spec
                         .syntax_node_to_list_skip_separator()
@@ -5080,7 +5080,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 span: p_pos(node, env),
                 enum_: Some(ast::Enum_ {
                     base: p_hint(&c.base, env)?,
-                    constraint: mp_optional(p_tconstraint_ty, &c.type_, env)?,
+                    constraint: map_optional(&c.type_, env, p_tconstraint_ty)?,
                     includes,
                 }),
                 doc_comment: doc_comment_opt,

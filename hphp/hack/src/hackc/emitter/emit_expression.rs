@@ -375,7 +375,6 @@ pub fn emit_expr<'a, 'arena, 'decl>(
     env: &Env<'a, 'arena>,
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    use aast_defs::Lid;
     use ast::Expr_;
     let ast::Expr(_, pos, expr) = expression;
     if let Some(sl) = emitter.stack_limit.as_ref() {
@@ -397,13 +396,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         }
         Expr_::EnumClassLabel(label) => emit_label(emitter, env, pos, label),
         Expr_::PrefixedString(e) => emit_expr(emitter, env, &e.1),
-        Expr_::Lvar(e) => {
-            let Lid(pos, _) = &**e;
-            Ok(InstrSeq::gather(vec![
-                emit_pos(pos),
-                emit_local(emitter, env, BareThisOp::Notice, e)?,
-            ]))
-        }
+        Expr_::Lvar(e) => emit_lvar(emitter, env, pos, e),
         Expr_::ClassConst(e) => emit_class_const(emitter, env, pos, &e.0, &e.1),
         Expr_::Unop(e) => emit_unop(emitter, env, pos, e),
         Expr_::Binop(_) => emit_binop(emitter, env, pos, expression),
@@ -3241,6 +3234,20 @@ fn has_reified_types<'a, 'arena>(env: &Env<'a, 'arena>) -> bool {
         }
     }
     false
+}
+
+fn emit_lvar<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    _pos: &Pos,
+    e: &'a Box<aast_defs::Lid>,
+) -> Result<InstrSeq<'arena>> {
+    use aast_defs::Lid;
+    let Lid(pos, _) = &**e;
+    Ok(InstrSeq::gather(vec![
+        emit_pos(pos),
+        emit_local(emitter, env, BareThisOp::Notice, e)?,
+    ]))
 }
 
 fn emit_label<'a, 'arena, 'decl>(

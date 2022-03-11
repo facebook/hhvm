@@ -142,6 +142,7 @@ pub struct Collections {
 pub struct Members {
     pub mGetInstanceKey: Symbol,
     pub mClass: Symbol,
+    pub parentConstruct: Symbol,
     pub __construct: Symbol,
     pub __destruct: Symbol,
     pub __call: Symbol,
@@ -545,6 +546,7 @@ impl Members {
         Self {
             mGetInstanceKey: Symbol::new(sn::members::M_GET_INSTANCE_KEY),
             mClass: Symbol::new(sn::members::M_CLASS),
+            parentConstruct: Symbol::new("parent::".to_owned() + sn::members::__CONSTRUCT),
             __construct: Symbol::new(sn::members::__CONSTRUCT),
             __destruct: Symbol::new(sn::members::__DESTRUCT),
             __call: Symbol::new(sn::members::__CALL),

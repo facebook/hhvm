@@ -15,9 +15,9 @@ use crate::special_names::SpecialNames;
 use crate::typing_error::{Primary, TypingError};
 use oxidized::global_options::GlobalOptions;
 use pos::{
-    ClassConstName, ClassConstNameIndexMap, MethodNameIndexMap, ModuleName, Positioned,
-    PropNameIndexMap, TypeConstName, TypeConstNameIndexMap, TypeName, TypeNameIndexMap,
-    TypeNameIndexSet,
+    ClassConstName, ClassConstNameIndexMap, MethodNameIndexMap, ModuleName, Positioned, PropName,
+    PropNameIndexMap, PropNameIndexSet, TypeConstName, TypeConstNameIndexMap, TypeName,
+    TypeNameIndexMap, TypeNameIndexSet,
 };
 use std::marker::PhantomData;
 use std::sync::Arc;
@@ -762,6 +762,68 @@ impl<R: Reason> DeclFolder<R> {
             .map(|ua| ua.classname_params.iter().copied().collect())
     }
 
+    fn get_deferred_init_members_helper(
+        &self,
+        parents: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
+        sc: &ShallowClass<R>,
+    ) -> PropNameIndexSet {
+        let shallow_props = sc
+            .props
+            .iter()
+            .filter(|prop| prop.xhp_attr.is_none())
+            .filter(|prop| !prop.flags.is_lateinit())
+            .filter(|prop| prop.flags.needs_init())
+            .map(|prop| prop.name.id());
+
+        let extends_props = sc
+            .extends
+            .iter()
+            .filter_map(|extend| extend.unwrap_class_type())
+            .filter_map(|(_, pos_id, _)| parents.get(&pos_id.id()))
+            .flat_map(|ty| ty.deferred_init_members.iter().copied());
+
+        let parent_construct = if sc.mode == oxidized::file_info::Mode::Mhhi {
+            None
+        } else {
+            if sc.kind == ClassishKind::Ctrait {
+                sc.req_extends.iter()
+            } else {
+                sc.extends.iter()
+            }
+            .filter_map(|ty| ty.unwrap_class_type())
+            .filter_map(|(_, pos_id, _)| parents.get(&pos_id.id()))
+            .find(|parent| parent.need_init && parent.constructor.is_some())
+            .map(|_| PropName(self.special_names.members.parentConstruct))
+        };
+
+        shallow_props
+            .chain(extends_props)
+            .chain(parent_construct.into_iter())
+            .collect()
+    }
+
+    /// Return all init-requiring props of the class and its ancestors from the
+    /// given shallow class decl and the ancestors' folded decls.
+    fn get_deferred_init_members(
+        &self,
+        cstr: &Option<FoldedElement>,
+        parents: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
+        sc: &ShallowClass<R>,
+    ) -> PropNameIndexSet {
+        let has_concrete_cstr = match cstr {
+            Some(e) if !e.is_abstract() => true,
+            _ => false,
+        };
+        let has_own_cstr = has_concrete_cstr && sc.constructor.is_some();
+        match sc.kind {
+            ClassishKind::Cclass(cls) if cls.is_abstract() && !has_own_cstr => {
+                self.get_deferred_init_members_helper(parents, sc)
+            }
+            ClassishKind::Ctrait => self.get_deferred_init_members_helper(parents, sc),
+            _ => PropNameIndexSet::default(),
+        }
+    }
+
     pub fn decl_class(
         &self,
         sc: &ShallowClass<R>,
@@ -793,6 +855,11 @@ impl<R: Reason> DeclFolder<R> {
         let mut constructor = inh.constructor;
         self.decl_constructor(&mut constructor, sc);
 
+        let need_init = match constructor {
+            Some(ref e) if !e.is_abstract() => true,
+            _ => false,
+        };
+
         let mut ancestors = Default::default();
         sc.extends
             .iter()
@@ -816,6 +883,8 @@ impl<R: Reason> DeclFolder<R> {
 
         let sealed_whitelist = self.get_sealed_whitelist(sc);
 
+        let deferred_init_members = self.get_deferred_init_members(&constructor, parents, sc);
+
         Arc::new(FoldedClass {
             name: sc.name.id(),
             pos: sc.name.pos().clone(),
@@ -830,6 +899,7 @@ impl<R: Reason> DeclFolder<R> {
                 .iter()
                 .any(|ua| ua.name.id() == self.special_names.user_attributes.uaInternal),
             is_xhp: sc.is_xhp,
+            need_init,
             support_dynamic_type: sc.support_dynamic_type,
             has_xhp_keyword: sc.has_xhp_keyword,
             module: sc.module.clone(),
@@ -850,6 +920,7 @@ impl<R: Reason> DeclFolder<R> {
             req_ancestors: req_ancestors.into_boxed_slice(),
             req_ancestors_extends,
             sealed_whitelist,
+            deferred_init_members,
             decl_errors: errors.into_boxed_slice(),
         })
     }

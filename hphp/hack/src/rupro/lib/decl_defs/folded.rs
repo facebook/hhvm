@@ -15,7 +15,8 @@ use serde::{Deserialize, Serialize};
 use eq_modulo_pos::EqModuloPos;
 use pos::{
     Bytes, ClassConstNameIndexMap, MethodNameIndexMap, ModuleName, Positioned, PropNameIndexMap,
-    Symbol, TypeConstName, TypeConstNameIndexMap, TypeName, TypeNameIndexMap, TypeNameIndexSet,
+    PropNameIndexSet, Symbol, TypeConstName, TypeConstNameIndexMap, TypeName, TypeNameIndexMap,
+    TypeNameIndexSet,
 };
 use std::collections::BTreeMap;
 
@@ -139,6 +140,7 @@ pub struct FoldedClass<R: Reason> {
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     pub support_dynamic_type: bool,
+    pub need_init: bool,
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub tparams: Box<[Tparam<R, DeclTy<R>>]>,
     pub where_constraints: Box<[WhereConstraint<DeclTy<R>>]>,
@@ -157,6 +159,7 @@ pub struct FoldedClass<R: Reason> {
     pub req_ancestors: Box<[Requirement<R>]>,
     pub req_ancestors_extends: TypeNameIndexSet,
     pub sealed_whitelist: Option<TypeNameIndexSet>,
+    pub deferred_init_members: PropNameIndexSet,
     pub decl_errors: Box<[TypingError<R>]>,
 }
 

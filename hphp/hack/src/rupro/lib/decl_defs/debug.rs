@@ -143,6 +143,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             is_internal,
             is_xhp,
             has_xhp_keyword,
+            need_init,
             support_dynamic_type,
             module,
             tparams,
@@ -162,6 +163,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             req_ancestors,
             req_ancestors_extends,
             sealed_whitelist,
+            deferred_init_members,
             decl_errors,
         } = self;
 
@@ -189,6 +191,9 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
         if *has_xhp_keyword {
             s.field("has_xhp_keyword", has_xhp_keyword);
+        }
+        if *need_init {
+            s.field("need_init", need_init);
         }
         if *support_dynamic_type {
             s.field("support_dynamic_type", support_dynamic_type);
@@ -247,6 +252,9 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
         if let Some(sealed_whitelist) = sealed_whitelist {
             s.field("sealed_whitelist", sealed_whitelist);
+        }
+        if !deferred_init_members.is_empty() {
+            s.field("deferred_init_members", deferred_init_members);
         }
         if !decl_errors.is_empty() {
             s.field("decl_errors", decl_errors);

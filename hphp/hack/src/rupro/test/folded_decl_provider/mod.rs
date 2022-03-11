@@ -7,10 +7,37 @@
 
 use crate::{FacebookInit, TestContext};
 use anyhow::Result;
-use hackrs::decl_defs::shallow;
+use hackrs::{decl_defs::shallow, typing_error::Primary, typing_error::TypingError};
 use maplit::btreemap;
 use pos::{Prefix, RelativePath, TypeName};
 use std::fs;
+
+#[fbinit::test]
+fn when_cyclic_class_error(fb: FacebookInit) -> Result<()> {
+    let ctx = TestContext::new(
+        fb,
+        btreemap! {
+            "a.php" => "class A extends B {}",
+            "b.php" => "class B extends A {}"
+        },
+    )?;
+    let (a, b) = (TypeName::new(r#"\A"#), TypeName::new(r#"\B"#));
+    // To declare B, we'll first declare A. During the declaring of A, the
+    // dependency on B will be noted as a cycle in A's errors.
+    ctx.folded_decl_provider.get_class(b.into(), b)?;
+    // Since we already declared A incidentally above, this next line will
+    // simply pull it from cache.
+    let decl = ctx.folded_decl_provider.get_class(a.into(), a)?.unwrap();
+    // Now check that A has recorded the cyclic class error as we predict.
+    match decl.decl_errors.first().unwrap() {
+        TypingError::Primary(Primary::CyclicClassDef(_, ts)) => {
+            itertools::assert_equal(ts.iter().copied(), [b, a].into_iter())
+        }
+        _ => panic!(),
+    };
+
+    Ok(())
+}
 
 #[fbinit::test]
 fn results_stable(fb: FacebookInit) -> Result<()> {

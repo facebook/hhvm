@@ -60,7 +60,7 @@ let typedef_def ctx typedef =
       ~report_cycle:(t_pos, t_name)
       hint
   in
-  let env =
+  let (env, ty_err_opt) =
     match tcstr with
     | Some tcstr ->
       let (env, cstr) =
@@ -73,7 +73,7 @@ let typedef_def ctx typedef =
         ty
         cstr
         Typing_error.Callback.newtype_alias_must_satisfy_constraint
-    | _ -> env
+    | _ -> (env, None)
   in
   let env =
     match hint with
@@ -96,6 +96,7 @@ let typedef_def ctx typedef =
   let (env, file_attributes) =
     Typing.file_attributes env typedef.t_file_attributes
   in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   {
     Aast.t_annotation = Env.save (Env.get_tpenv env) env;
     Aast.t_name = typedef.t_name;

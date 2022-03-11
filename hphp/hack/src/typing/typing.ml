@@ -573,31 +573,32 @@ let as_expr env ty1 pe e =
       (env, union_coercion_errs errs)
     | _ ->
       if SubType.is_sub_type_for_union env ty (MakeType.dynamic Reason.Rnone)
-      then
-        let env =
+      then (
+        let (env, e1) =
           SubType.sub_type env ty tk
           @@ Some (Typing_error.Reasons_callback.unify_error_at pe)
         in
-        let env =
+        let (env, e2) =
           SubType.sub_type env ty tv
           @@ Some (Typing_error.Reasons_callback.unify_error_at pe)
         in
+        Option.(
+          iter ~f:Errors.add_typing_error @@ merge e1 e2 ~f:Typing_error.both);
         (env, Ok ty)
-      else
+      ) else
         let ur = Reason.URforeach in
-        let (env, err) =
-          Result.fold
-            ~ok:(fun env -> (env, Ok ty))
-            ~error:(fun env -> (env, Error (ty, expected_ty)))
-          @@ Type.sub_type_res
-               pe
-               ur
-               env
-               ty
-               expected_ty
-               Typing_error.Callback.unify_error
+        let (env, ty_err_opt) =
+          Type.sub_type
+            pe
+            ur
+            env
+            ty
+            expected_ty
+            Typing_error.Callback.unify_error
         in
-        (env, err)
+        Option.iter ~f:Errors.add_typing_error ty_err_opt;
+        let ty_mismatch = mk_ty_mismatch_res ty expected_ty ty_err_opt in
+        (env, ty_mismatch)
   in
 
   let (env, err_res) = distribute_union ~expected_ty env ty1 in
@@ -643,23 +644,27 @@ let do_hh_expect ~equivalent env use_pos explicit_targs p tys =
     (match tys with
     | [expr_ty] ->
       let res =
-        SubType.sub_type_res env expr_ty right_expected_ty
+        SubType.sub_type env expr_ty right_expected_ty
         @@ Some
              Typing_error.(
                Reasons_callback.of_primary_error
                @@ Primary.Hh_expect { pos = p; equivalent })
       in
-      (match res with
-      | Ok env ->
-        if equivalent then
-          SubType.sub_type env expected_ty expr_ty
-          @@ Some
-               Typing_error.(
-                 Reasons_callback.of_primary_error
-                 @@ Primary.Hh_expect { pos = p; equivalent })
-        else
-          env
-      | Error env -> env)
+      let (env, ty_err_opt) =
+        match res with
+        | (env, None) ->
+          if equivalent then
+            SubType.sub_type env expected_ty expr_ty
+            @@ Some
+                 Typing_error.(
+                   Reasons_callback.of_primary_error
+                   @@ Primary.Hh_expect { pos = p; equivalent })
+          else
+            (env, None)
+        | env_err -> env_err
+      in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
+      env
     | _ -> env)
   | _ ->
     (Errors.add_typing_error
@@ -1330,10 +1335,10 @@ let call_param
     | Ast_defs.Pnormal -> pos
     | Ast_defs.Pinout pk_pos -> Pos.merge pk_pos pos
   in
-  let (env, dep_ty) =
+  let ((env, e1), dep_ty) =
     if in_supportdyn then
       let dyn_ty = MakeType.dynamic (get_reason dep_ty) in
-      let env =
+      let (env, e1) =
         (* If in_supportdyn is set, then the function type is supportdyn<t1 ... tn -> t>
            and we are trying to call it as though it were dynamic. Hence all of the
            arguments must be subtypes of dynamic, regardless of whether they have
@@ -1345,17 +1350,18 @@ let call_param
           dyn_ty
         @@ Some (Typing_error.Reasons_callback.unify_error_at pos)
       in
-      (env, strip_dynamic env dep_ty)
+      ((env, e1), strip_dynamic env dep_ty)
     else
-      (env, dep_ty)
+      ((env, None), dep_ty)
   in
+
   (* TODO: iterate over thee returned error rather than side effecting in
      the callback *)
   let eff () =
     if env.in_support_dynamic_type_method_check then
       Typing_log.log_pessimise_param env param.fp_pos param.fp_name
   in
-  let (env, ty_err_opt) =
+  let (env, e2) =
     Typing_coercion.coerce_type
       pos
       Reason.URparam
@@ -1365,10 +1371,8 @@ let call_param
       Typing_error.Callback.(
         (with_side_effect ~eff unify_error [@alert "-deprecated"]))
   in
-  Option.iter ty_err_opt ~f:Errors.add_typing_error;
-  let ty_mismatch_opt =
-    mk_ty_mismatch_opt dep_ty param.fp_type.et_type ty_err_opt
-  in
+  let ty_mismatch_opt = mk_ty_mismatch_opt dep_ty param.fp_type.et_type e2 in
+  Option.(iter ~f:Errors.add_typing_error @@ merge e1 e2 ~f:Typing_error.both);
   (env, ty_mismatch_opt)
 
 let bad_call env p ty =
@@ -2961,7 +2965,7 @@ and expr_
       r
       env
       tys =
-    let (env, supertype) =
+    let ((env, ty_err_opt), supertype) =
       match expected with
       | None ->
         let (env, supertype) = Env.fresh_type_reason env use_pos r in
@@ -2973,15 +2977,17 @@ and expr_
         in
         let env =
           match bound with
-          | None -> env
+          | None -> (env, None)
           | Some ty ->
             (* There can't be an error because the type is fresh *)
             SubType.sub_type env supertype ty
             @@ Some (Typing_error.Reasons_callback.always error)
         in
         (env, supertype)
-      | Some ExpectedTy.{ ty = { et_type = ty; _ }; _ } -> (env, ty)
+      | Some ExpectedTy.{ ty = { et_type = ty; _ }; _ } -> ((env, None), ty)
     in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+
     match get_node supertype with
     (* No need to check individual subtypes if expected type is mixed or any! *)
     | Tany _ -> (env, supertype, List.map tys ~f:(fun _ -> None))
@@ -3966,7 +3972,7 @@ and expr_
     in
     let (env, te2, ty2) = expr ?expected env e2 ~allow_awaitable:true in
     let (env, ty1') = Env.fresh_type env e1_pos in
-    let env =
+    let (env, e1) =
       SubType.sub_type env ty1 (MakeType.nullable_locl Reason.Rnone ty1')
       @@ Some (Typing_error.Reasons_callback.unify_error_at e1_pos)
     in
@@ -3975,14 +3981,18 @@ and expr_
      * That way we let the constraint solver take care of the union logic.
      *)
     let (env, ty_result) = Env.fresh_type env e2_pos in
-    let env =
+    let (env, e2) =
       SubType.sub_type env ty1' ty_result
       @@ Some (Typing_error.Reasons_callback.unify_error_at p)
     in
-    let env =
+    let (env, e3) =
       SubType.sub_type env ty2 ty_result
       @@ Some (Typing_error.Reasons_callback.unify_error_at p)
     in
+    let ty_err_opt =
+      Typing_error.multiple_opt @@ List.filter_map ~f:Fn.id [e1; e2; e3]
+    in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
     make_result
       env
       p
@@ -4225,11 +4235,11 @@ and expr_
         ~explicit_targs:None
     in
     let lty1 = LoclType ty1 in
-    let (env, result_ty, err_opt) =
+    let ((env, ty_err_opt), result_ty, err_opt) =
       match nullsafe with
       | None ->
-        let env_res =
-          Type.sub_type_i_res
+        let (env, ty_err_opt) =
+          Type.sub_type_i
             p1
             Reason.URnone
             env
@@ -4237,13 +4247,10 @@ and expr_
             has_member_ty
             Typing_error.Callback.unify_error
         in
-        let (env, err_opt) =
-          Result.fold
-            env_res
-            ~ok:(fun env -> (env, None))
-            ~error:(fun env -> (env, Some (ty1, MakeType.nothing Reason.none)))
+        let ty_mismatch =
+          mk_ty_mismatch_opt ty1 (MakeType.nothing Reason.none) ty_err_opt
         in
-        (env, mem_ty, err_opt)
+        ((env, ty_err_opt), mem_ty, ty_mismatch)
       | Some _ ->
         (* In that case ty1 is a subtype of ?Thas_member(m, #1)
            and the result is ?#1 if ty1 is nullable. *)
@@ -4252,8 +4259,8 @@ and expr_
         let (env, null_has_mem_ty) =
           Union.union_i env r has_member_ty null_ty
         in
-        let env_res =
-          Type.sub_type_i_res
+        let (env, ty_err_opt) =
+          Type.sub_type_i
             p1
             Reason.URnone
             env
@@ -4261,19 +4268,18 @@ and expr_
             null_has_mem_ty
             Typing_error.Callback.unify_error
         in
-        let (env, err_opt) =
-          Result.fold
-            env_res
-            ~ok:(fun env -> (env, None))
-            ~error:(fun env -> (env, Some (ty1, MakeType.nothing Reason.none)))
+        let ty_mismatch =
+          mk_ty_mismatch_opt ty1 (MakeType.nothing Reason.none) ty_err_opt
         in
         let (env, null_or_nothing_ty) = Inter.intersect env ~r null_ty ty1 in
         let (env, result_ty) = Union.union env null_or_nothing_ty mem_ty in
-        (env, result_ty, err_opt)
+        ((env, ty_err_opt), result_ty, ty_mismatch)
     in
+
     let (env, result_ty) =
       Env.FakeMembers.check_instance_invalid env e1 (snd m) result_ty
     in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
     make_result
       env
       p
@@ -4416,7 +4422,7 @@ and expr_
   | Cast (hint, e) ->
     let (env, te, ty2) = expr ?in_await env e in
     let env = might_throw env in
-    let env =
+    let (env, ty_err_opt) =
       if
         TypecheckerOptions.experimental_feature_enabled
           (Env.get_tcopt env)
@@ -4434,11 +4440,12 @@ and expr_
                       ty_pos = get_pos ty2;
                     })
       else
-        env
+        (env, None)
     in
     let (env, ty) =
       Phase.localize_hint_no_subst env ~ignore_errors:false hint
     in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
     make_result env p (Aast.Cast (hint, te)) ty
   | ExpressionTree et -> expression_tree env p et
   | Is (e, hint) ->
@@ -4466,9 +4473,9 @@ and expr_
     let enable_sound_dynamic =
       TypecheckerOptions.enable_sound_dynamic env.genv.tcopt
     in
-    let (env, hint_ty) =
+    let ((env, ty_err_opt), hint_ty) =
       if Typing_defs.is_dynamic hint_ty then
-        let env =
+        let (env, ty_err_opt) =
           if enable_sound_dynamic then
             SubType.sub_type
               ~coerce:(Some Typing_logic.CoerceToDynamic)
@@ -4477,7 +4484,7 @@ and expr_
               hint_ty
             @@ Some (Typing_error.Reasons_callback.unify_error_at p)
           else
-            env
+            (env, None)
         in
         let (env, locl) = make_a_local_of ~include_this:true env e in
         let env =
@@ -4485,29 +4492,31 @@ and expr_
           | Some ivar -> set_local env ivar hint_ty
           | None -> env
         in
-        (env, hint_ty)
+        ((env, ty_err_opt), hint_ty)
       else if is_nullable then
         let (_, e_p, _) = e in
         let (env, hint_ty) = refine_type env e_p expr_ty hint_ty in
-        (env, MakeType.nullable_locl (Reason.Rwitness p) hint_ty)
+        ((env, None), MakeType.nullable_locl (Reason.Rwitness p) hint_ty)
       else
         let (env, locl) = make_a_local_of ~include_this:true env e in
         match locl with
         | Some ((ivar_pos, _) as ivar) ->
           let (env, hint_ty) = refine_type env ivar_pos expr_ty hint_ty in
           let env = set_local env ivar hint_ty in
-          (env, hint_ty)
+          ((env, None), hint_ty)
         | None ->
           let (_, e_p, _) = e in
-          refine_type env e_p expr_ty hint_ty
+          let (env, ty) = refine_type env e_p expr_ty hint_ty in
+          ((env, None), ty)
     in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
     make_result env p (Aast.As (te, hint, is_nullable)) hint_ty
   | Upcast (e, hint) ->
     let (env, te, expr_ty) = expr env e in
     let (env, hint_ty) =
       Phase.localize_hint_no_subst env ~ignore_errors:false hint
     in
-    let env =
+    let (env, ty_err_opt) =
       SubType.sub_type
         ~coerce:(Some Typing_logic.CoerceToDynamic)
         env
@@ -4515,6 +4524,7 @@ and expr_
         hint_ty
       @@ Some (Typing_error.Reasons_callback.unify_error_at p)
     in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
     make_result env p (Aast.Upcast (te, hint)) hint_ty
   | Efun (f, idl) -> lambda ~is_anon:true ?expected p env f idl
   | Lfun (f, idl) -> lambda ~is_anon:false ?expected p env f idl
@@ -5640,10 +5650,11 @@ and et_splice env p e =
   let spliceable_type =
     MakeType.spliceable (Reason.Rsplice p) ty_visitor ty_res ty_infer
   in
-  let env =
+  let (env, ty_err_opt) =
     SubType.sub_type env ty spliceable_type
     @@ Some (Typing_error.Reasons_callback.unify_error_at p)
   in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   make_result env p (Aast.ET_Splice te) ty_infer
 
 (*****************************************************************************)
@@ -5809,7 +5820,7 @@ and new_object
        * for generic and dependent types to be correctly carried
        * through the 'new $foo()' iff the constructed obj_ty is a
        * supertype of the variable-dictated c_ty *)
-      let env =
+      let (env, ty_err_opt) =
         Typing_ops.sub_type
           p
           Reason.URnone
@@ -5818,6 +5829,7 @@ and new_object
           obj_ty
           Typing_error.Callback.unify_error
       in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
       ( (env, tel, typed_unpack_element, should_forget_fakes_acc),
         (c_ty, ctor_fty) )
   in
@@ -6024,30 +6036,33 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
          in the ok case were the destrucutring succeeded, the fresh vars
          now have types so we can subtype each element, accumulate the errors
          and pack back into the rhs structure as our expected type *)
-      Result.fold
-        ~ok:(fun env ->
-          let (env, te, ty, subty_errs) = type_list_elem env in
-          let err_opt =
-            if List.for_all subty_errs ~f:Option.is_none then
-              None
-            else
-              Some (ty2, pack_errs pos2 ty2 (subty_errs, None))
-          in
-          (env, te, ty, err_opt))
-        ~error:(fun env ->
-          let (env, te, ty, _) = type_list_elem env in
-          let nothing =
-            MakeType.nothing @@ Reason.Rsolve_fail (Pos_or_decl.of_raw_pos pos2)
-          in
-          (env, te, ty, Some (ty2, nothing)))
-      @@ Result.map ~f:(fun env -> Env.set_tyvar_variance_i env destructure_ty)
-      @@ Type.sub_type_i_res
-           p
-           ur
-           env
-           lty2
-           destructure_ty
-           Typing_error.Callback.unify_error
+      let (env, ty_err_opt) =
+        Type.sub_type_i
+          p
+          ur
+          env
+          lty2
+          destructure_ty
+          Typing_error.Callback.unify_error
+      in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
+      (match ty_err_opt with
+      | None ->
+        let env = Env.set_tyvar_variance_i env destructure_ty in
+        let (env, te, ty, subty_errs) = type_list_elem env in
+        let err_opt =
+          if List.for_all subty_errs ~f:Option.is_none then
+            None
+          else
+            Some (ty2, pack_errs pos2 ty2 (subty_errs, None))
+        in
+        (env, te, ty, err_opt)
+      | Some _ ->
+        let (env, te, ty, _) = type_list_elem env in
+        let nothing =
+          MakeType.nothing @@ Reason.Rsolve_fail (Pos_or_decl.of_raw_pos pos2)
+        in
+        (env, te, ty, Some (ty2, nothing)))
     | ( _,
         pobj,
         Obj_get
@@ -6358,7 +6373,7 @@ and check_parent_construct pos env el unpacked_element env_parent =
       unpacked_element
   in
   (* Not sure why we need to equate these types *)
-  let env =
+  let (env, e1) =
     Type.sub_type
       pos
       Reason.URnone
@@ -6367,7 +6382,7 @@ and check_parent_construct pos env el unpacked_element env_parent =
       parent
       Typing_error.Callback.unify_error
   in
-  let env =
+  let (env, e2) =
     Type.sub_type
       pos
       Reason.URnone
@@ -6376,6 +6391,7 @@ and check_parent_construct pos env el unpacked_element env_parent =
       env_parent
       Typing_error.Callback.unify_error
   in
+  Option.(iter ~f:Errors.add_typing_error @@ merge e1 e2 ~f:Typing_error.both);
   ( env,
     tel,
     typed_unpack_element,
@@ -6571,24 +6587,30 @@ and dispatch_call
             (Reason.Rwitness pos)
             [MakeType.dynamic (Reason.Rwitness pos); arraykey_ty]
         in
-        let (env, rev_tel) =
+        let ((env, ty_errs), rev_tel) =
           List.fold
             tel
-            ~init:(env, [])
-            ~f:(fun (env, tel) (pk, ((ty, pos, _) as te)) ->
-              let (env, err_opt) =
-                Result.fold
-                  ~ok:(fun env -> (env, None))
-                  ~error:(fun env -> (env, Some (ty, arraykey_ty)))
-                @@ SubType.sub_type_res env ty like_ak_ty
+            ~init:((env, []), [])
+            ~f:(fun ((env, ty_errs), tel) (pk, ((ty, pos, _) as te)) ->
+              let (env, ty_err_opt) =
+                SubType.sub_type env ty like_ak_ty
                 @@ Some
                      (Typing_error.Reasons_callback.invalid_echo_argument_at
                         pos)
               in
-              (env, (pk, hole_on_err ~err_opt te) :: tel))
+              let ty_mismatch = mk_ty_mismatch_opt ty arraykey_ty ty_err_opt in
+              let ty_errs =
+                Option.value_map
+                  ~default:ty_errs
+                  ~f:(fun e -> e :: ty_errs)
+                  ty_err_opt
+              in
+              ((env, ty_errs), (pk, hole_on_err ~err_opt:ty_mismatch te) :: tel))
         in
         let tel = List.rev rev_tel in
         let should_forget_fakes = false in
+        let ty_err_opt = Typing_error.multiple_opt ty_errs in
+        Option.iter ~f:Errors.add_typing_error ty_err_opt;
         ( make_call_special env id tel (MakeType.void (Reason.Rwitness pos)),
           should_forget_fakes )
       (* `unsafe_cast` *)
@@ -6654,7 +6676,7 @@ and dispatch_call
               @@ Primary.Unpacking_disallowed_builtin_function
                    { pos = p; fn_name = unset });
         let env = Typing_local_ops.check_unset_target env tel in
-        let env =
+        let (env, ty_err_opt) =
           match (el, unpacked_element) with
           | ([(Ast_defs.Pnormal, (_, _, Array_get (ea, Some _)))], None) ->
             let (env, _te, ty) = expr env ea in
@@ -6682,13 +6704,14 @@ and dispatch_call
                  Typing_error.(
                    primary @@ Primary.Unset_nonidx_in_strict { pos = p; reason })
           | _ ->
-            (Errors.add_typing_error
-            @@ Typing_error.(
-                 primary
-                 @@ Primary.Unset_nonidx_in_strict { pos = p; reason = lazy [] })
-            );
-            env
+            let ty_err =
+              Typing_error.(
+                primary
+                @@ Primary.Unset_nonidx_in_strict { pos = p; reason = lazy [] })
+            in
+            (env, Some ty_err)
         in
+        Option.iter ~f:Errors.add_typing_error ty_err_opt;
         let should_forget_fakes = false in
         let result =
           match el with
@@ -7022,8 +7045,8 @@ and dispatch_call
         Union.union_i env r has_method_ty null_ty
     in
     let (_, receiver_pos, _) = receiver in
-    let env_res =
-      Type.sub_type_i_res
+    let (env, ty_err_opt) =
+      Type.sub_type_i
         receiver_pos
         Reason.URnone
         env
@@ -7031,13 +7054,9 @@ and dispatch_call
         has_method_super_ty
         Typing_error.Callback.unify_error
     in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
     let ty_nothing = MakeType.nothing Reason.none in
-    let (env, err_opt) =
-      Result.fold
-        env_res
-        ~ok:(fun env -> (env, None))
-        ~error:(fun env -> (env, Some (receiver_ty, ty_nothing)))
-    in
+    let err_opt = mk_ty_mismatch_opt receiver_ty ty_nothing ty_err_opt in
 
     (* Perhaps solve for `method_ty`. Opening and closing a scope is too coarse
        here - type parameters are localised to fresh type variables over the
@@ -8051,8 +8070,11 @@ and call
   in
   if List.is_empty tyl then begin
     bad_call env pos fty;
-    let env = call_untyped_unpack env (get_pos fty) unpacked_element in
+    let (env, ty_err_opt) =
+      call_untyped_unpack env (get_pos fty) unpacked_element
+    in
     let should_forget_fakes = true in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
     (env, ([], None, err_witness env pos, should_forget_fakes))
   end else
     let (env, fty) =
@@ -8089,8 +8111,12 @@ and call
           Reason.URparam
           ty
       in
-      let (env, tel) =
-        List.map_env env el ~f:(fun env (pk, elt) ->
+      let ((env, e1), tel) =
+        List.map_env_ty_err_opt
+          env
+          el
+          ~combine_ty_errs:Typing_error.multiple_opt
+          ~f:(fun env (pk, elt) ->
             let (env, te, e_ty) =
               match elt with
               (* Special case for unqualified enum class label: treat as dynamic *)
@@ -8112,21 +8138,23 @@ and call
                 env
               | Ast_defs.Pnormal -> env
             in
-            let (env, err_opt) =
-              Result.fold
-                ~ok:(fun env -> (env, None))
-                ~error:(fun env -> (env, Some (e_ty, ty)))
-              @@ Typing_subtype.sub_type_res
-                   ~coerce:(Some Typing_logic.CoerceToDynamic)
-                   env
-                   e_ty
-                   ty
+            let (env, ty_err_opt) =
+              Typing_subtype.sub_type
+                ~coerce:(Some Typing_logic.CoerceToDynamic)
+                env
+                e_ty
+                ty
               @@ Some (Typing_error.Reasons_callback.unify_error_at pos)
             in
-            (env, (pk, hole_on_err ~err_opt te)))
+            let ty_mismatch = mk_ty_mismatch_opt e_ty ty ty_err_opt in
+            ((env, ty_err_opt), (pk, hole_on_err ~err_opt:ty_mismatch te)))
       in
-      let env = call_untyped_unpack env (Reason.to_pos r) unpacked_element in
+      let (env, e2) =
+        call_untyped_unpack env (Reason.to_pos r) unpacked_element
+      in
       let should_forget_fakes = true in
+      let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
       (env, (tel, None, ty, should_forget_fakes))
     | (r, ((Tprim Tnull | Tdynamic | Terr | Tany _ | Tunion []) as ty))
       when match ty with
@@ -8179,7 +8207,9 @@ and call
             in
             (env, (pk, hole_on_err ~err_opt te)))
       in
-      let env = call_untyped_unpack env (Reason.to_pos r) unpacked_element in
+      let (env, ty_err_opt) =
+        call_untyped_unpack env (Reason.to_pos r) unpacked_element
+      in
       let ty =
         match ty with
         | Tprim Tnull -> mk (r, Tprim Tnull)
@@ -8192,6 +8222,7 @@ and call
           mk (r, Tunion [])
       in
       let should_forget_fakes = true in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
       (env, (tel, None, ty, should_forget_fakes))
     | (_, Tunion [ty]) ->
       call ~expected ~nullsafe ?in_await pos env ty el unpacked_element
@@ -8428,7 +8459,7 @@ and call
           Typing_coeffects.get_type ft.ft_implicit_params.capability
         in
         if not (TypecheckerOptions.call_coeffects (Env.get_tcopt env)) then
-          env
+          (env, None)
         else
           let env_capability =
             Env.get_local_check_defined env (pos, Typing_coeffects.capability_id)
@@ -8483,7 +8514,8 @@ and call
         let l = List.map rl ~f:get_param in
         List.unzip l
       in
-      let env = check_implicit_args env in
+      let (env, ty_err_opt) = check_implicit_args env in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
       let (env, typed_unpack_element, arity, did_unpack) =
         match unpacked_element with
         | None -> (env, None, List.length el, false)
@@ -8525,8 +8557,8 @@ and call
           in
           let (env, te, ty) = expr env e in
           (* Populate the type variables from the expression in the splat *)
-          let env_res =
-            Type.sub_type_i_res
+          let (env, ty_err_opt) =
+            Type.sub_type_i
               p1
               Reason.URparam
               env
@@ -8535,8 +8567,8 @@ and call
               Typing_error.Callback.unify_error
           in
           let (env, te) =
-            match env_res with
-            | Error env ->
+            match ty_err_opt with
+            | Some _ ->
               (* Our type cannot be destructured, add a hole with `nothing`
                  as expected type *)
               let ty_expect =
@@ -8544,7 +8576,7 @@ and call
                 @@ Reason.Rsolve_fail (Pos_or_decl.of_raw_pos pos)
               in
               (env, mk_hole te ~ty_have:ty ~ty_expect)
-            | Ok env ->
+            | None ->
               (* We have a type that can be destructured so continue and use
                  the type variables for the remaining parameters *)
               let (env, err_opts) =
@@ -8604,7 +8636,7 @@ and call
               in
               (env, te)
           in
-
+          Option.iter ~f:Errors.add_typing_error ty_err_opt;
           ( env,
             Some te,
             List.length el + List.length d_required,
@@ -8716,7 +8748,7 @@ and call
       let (env, fun_type, return_ty) =
         mk_function_supertype env pos (type_of_el, type_of_unpacked_element)
       in
-      let env =
+      let (env, ty_err_opt) =
         Type.sub_type
           pos
           Reason.URnone
@@ -8726,6 +8758,7 @@ and call
           Typing_error.Callback.unify_error
       in
       let should_forget_fakes = true in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
       (env, (typed_el, typed_unpacked_element, return_ty, should_forget_fakes))
     | (_, Tnewtype (name, [ty], _))
       when String.equal name SN.Classes.cSupportDyn ->
@@ -8744,8 +8777,11 @@ and call
             unpacked_element)
     | _ ->
       bad_call env pos efty;
-      let env = call_untyped_unpack env (get_pos efty) unpacked_element in
+      let (env, ty_err_opt) =
+        call_untyped_unpack env (get_pos efty) unpacked_element
+      in
       let should_forget_fakes = true in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
       (env, ([], None, err_witness env pos, should_forget_fakes))
 
 and call_supportdyn ~expected ~nullsafe ?in_await pos env ty el unpacked_element
@@ -8779,7 +8815,7 @@ and call_untyped_unpack env f_pos unpacked_element =
   (* In the event that we don't have a known function call type, we can still
    * verify that any unpacked arguments (`...$args`) are something that can
    * be actually unpacked. *)
-  | None -> env
+  | None -> (env, None)
   | Some e ->
     let (env, _, ety) = expr env e ~allow_awaitable:(*?*) false in
     let (_, p, _) = e in
@@ -8914,7 +8950,7 @@ and string2 env idl =
         if
           TypecheckerOptions.enable_strict_string_concat_interp
             (Env.get_tcopt env)
-        then
+        then (
           let r = Reason.Rinterp_operand p in
           let (env, formatter_tyvar) = Env.fresh_type_invariant env p in
           let stringlike =
@@ -8926,20 +8962,19 @@ and string2 env idl =
                 MakeType.hh_formatstring r formatter_tyvar;
               ]
           in
-          let (env, err_opt) =
-            Result.fold
-              ~ok:(fun env -> (env, None))
-              ~error:(fun env -> (env, Some (ty, stringlike)))
-            @@ Typing_ops.sub_type_res
-                 p
-                 Reason.URstr_interp
-                 env
-                 ty
-                 stringlike
-                 Typing_error.Callback.strict_str_interp_type_mismatch
+          let (env, ty_err_opt) =
+            Typing_ops.sub_type
+              p
+              Reason.URstr_interp
+              env
+              ty
+              stringlike
+              Typing_error.Callback.strict_str_interp_type_mismatch
           in
-          (env, hole_on_err ~err_opt te :: tel)
-        else
+          let ty_mismatch = mk_ty_mismatch_opt ty stringlike ty_err_opt in
+          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          (env, hole_on_err ~err_opt:ty_mismatch te :: tel)
+        ) else
           let env = Typing_substring.sub_string p env ty in
           (env, te :: tel))
   in

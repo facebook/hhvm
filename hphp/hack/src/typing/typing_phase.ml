@@ -1397,7 +1397,7 @@ let sub_type_decl_with_ty_err env ty1 ty2 on_error =
   let ((env, e2), ty2) =
     localize_no_subst_with_ty_err env ~ignore_errors:true ty2
   in
-  let (env, e3) = TUtils.sub_type_with_ty_err env ty1 ty2 on_error in
+  let (env, e3) = TUtils.sub_type env ty1 ty2 on_error in
   let ty_err_opt =
     Typing_error.multiple_opt @@ List.filter_map ~f:Fn.id [e1; e2; e3]
   in

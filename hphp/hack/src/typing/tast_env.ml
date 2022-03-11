@@ -183,7 +183,11 @@ let get_enforceable = Typing_env.get_enforceable
 let get_newable = Typing_env.get_newable
 
 let assert_subtype p reason env ty_have ty_expect on_error =
-  Typing_ops.sub_type p reason env ty_have ty_expect on_error
+  let (env, ty_err_opt) =
+    Typing_ops.sub_type p reason env ty_have ty_expect on_error
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  env
 
 let is_sub_type env ty_sub ty_super =
   Typing_subtype.is_sub_type env ty_sub ty_super

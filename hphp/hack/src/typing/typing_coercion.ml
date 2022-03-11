@@ -59,14 +59,9 @@ let coerce_type_impl
           (Reason.Rdynamic_coercion (get_reason ty_expect.et_type))
           ty_expect.et_type
       in
-      Typing_utils.sub_type_with_ty_err ~coerce:None env ty_have tunion on_error
+      Typing_utils.sub_type ~coerce:None env ty_have tunion on_error
     else
-      Typing_utils.sub_type_with_ty_err
-        ~coerce
-        env
-        ty_have
-        ty_expect.et_type
-        on_error
+      Typing_utils.sub_type ~coerce env ty_have ty_expect.et_type on_error
   else
     let complex_coercion =
       TypecheckerOptions.complex_coercion (Typing_env.get_tcopt env)
@@ -77,7 +72,7 @@ let coerce_type_impl
     | (_, Tdynamic) -> (env, None)
     | (Tdynamic, _) when is_expected_enforced -> (env, None)
     | _ when is_expected_enforced ->
-      Typing_utils.sub_type_with_dynamic_as_bottom_with_ty_err
+      Typing_utils.sub_type_with_dynamic_as_bottom
         env
         ty_have
         ty_expect.et_type
@@ -86,13 +81,12 @@ let coerce_type_impl
       when (((not is_expected_enforced) && env.Typing_env_types.pessimize)
            || Typing_utils.is_dynamic env ety_expect)
            && complex_coercion ->
-      Typing_utils.sub_type_with_dynamic_as_bottom_with_ty_err
+      Typing_utils.sub_type_with_dynamic_as_bottom
         env
         ty_have
         ty_expect.et_type
         on_error
-    | _ ->
-      Typing_utils.sub_type_with_ty_err env ty_have ty_expect.et_type on_error
+    | _ -> Typing_utils.sub_type env ty_have ty_expect.et_type on_error
 
 let coerce_type
     ?(coerce_for_op = false)

@@ -52,37 +52,11 @@ type sub_type =
   locl_ty ->
   locl_ty ->
   Typing_error.Reasons_callback.t option ->
-  env
+  env * Typing_error.t option
 
 let (sub_type_ref : sub_type ref) = ref (not_implemented "sub_type")
 
 let sub_type x = !sub_type_ref x
-
-type sub_type_with_ty_err =
-  env ->
-  ?coerce:Typing_logic.coercion_direction option ->
-  ?is_coeffect:bool ->
-  locl_ty ->
-  locl_ty ->
-  Typing_error.Reasons_callback.t option ->
-  env * Typing_error.t option
-
-let (sub_type_with_ty_err_ref : sub_type_with_ty_err ref) =
-  ref (not_implemented "sub_type_with_errors")
-
-let sub_type_with_ty_err x = !sub_type_with_ty_err_ref x
-
-type sub_type_res =
-  env ->
-  ?coerce:Typing_logic.coercion_direction option ->
-  locl_ty ->
-  locl_ty ->
-  Typing_error.Reasons_callback.t option ->
-  (env, env) result
-
-let (sub_type_res_ref : sub_type_res ref) = ref (not_implemented "sub_type_res")
-
-let sub_type_res x = !sub_type_res_ref x
 
 type sub_type_i =
   env ->
@@ -90,60 +64,24 @@ type sub_type_i =
   internal_type ->
   internal_type ->
   Typing_error.Reasons_callback.t option ->
-  env
+  env * Typing_error.t option
 
 let (sub_type_i_ref : sub_type_i ref) = ref (not_implemented "sub_type_i")
 
 let sub_type_i env ?(is_coeffect = false) x = !sub_type_i_ref env ~is_coeffect x
 
-type sub_type_i_res =
-  env ->
-  internal_type ->
-  internal_type ->
-  Typing_error.Reasons_callback.t option ->
-  (env, env) result
-
-let (sub_type_i_res_ref : sub_type_i_res ref) =
-  ref (not_implemented "sub_type_i_res")
-
-let sub_type_i_res x = !sub_type_i_res_ref x
-
 type sub_type_with_dynamic_as_bottom =
-  env -> locl_ty -> locl_ty -> Typing_error.Reasons_callback.t option -> env
-
-let (sub_type_with_dynamic_as_bottom_ref : sub_type_with_dynamic_as_bottom ref)
-    =
-  ref (not_implemented "sub_type_with_dynamic_as_bottom")
-
-let sub_type_with_dynamic_as_bottom x = !sub_type_with_dynamic_as_bottom_ref x
-
-type sub_type_with_dynamic_as_bottom_with_ty_err =
   env ->
   locl_ty ->
   locl_ty ->
   Typing_error.Reasons_callback.t option ->
   env * Typing_error.t option
 
-let (sub_type_with_dynamic_as_bottom_with_ty_err_ref :
-      sub_type_with_dynamic_as_bottom_with_ty_err ref) =
-  ref (not_implemented "sub_type_with_dynamic_as_bottom_with_errors")
+let (sub_type_with_dynamic_as_bottom_ref : sub_type_with_dynamic_as_bottom ref)
+    =
+  ref (not_implemented "sub_type_with_dynamic_as_bottom")
 
-let sub_type_with_dynamic_as_bottom_with_ty_err x =
-  !sub_type_with_dynamic_as_bottom_with_ty_err_ref x
-
-type sub_type_with_dynamic_as_bottom_res =
-  env ->
-  locl_ty ->
-  locl_ty ->
-  Typing_error.Reasons_callback.t option ->
-  (env, env) result
-
-let (sub_type_with_dynamic_as_bottom_res_ref :
-      sub_type_with_dynamic_as_bottom_res ref) =
-  ref (not_implemented "sub_type_with_dynamic_as_bottom_res")
-
-let sub_type_with_dynamic_as_bottom_res x =
-  !sub_type_with_dynamic_as_bottom_res_ref x
+let sub_type_with_dynamic_as_bottom x = !sub_type_with_dynamic_as_bottom_ref x
 
 type is_sub_type_type = env -> locl_ty -> locl_ty -> bool
 

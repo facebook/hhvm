@@ -247,9 +247,7 @@ let bind_to_lower_bound_with_ty_err ~freshen env r var lower_bounds =
               (Typing_error.Reasons_callback.unify_error_at
               @@ Env.get_tyvar_pos env var)
           in
-          let (env, ty_err_opt) =
-            Typing_utils.sub_type_with_ty_err env ty newty on_error
-          in
+          let (env, ty_err_opt) = Typing_utils.sub_type env ty newty on_error in
           (env, ty_err_opt, newty)
         else
           (env, None, ty)
@@ -432,10 +430,10 @@ let try_bind_to_equal_bound_with_ty_err ~freshen env r var =
                 @@ Env.get_tyvar_pos env var)
             in
             let (env, ty_sub_err_opt) =
-              Typing_utils.sub_type_with_ty_err env ty var_ty on_error
+              Typing_utils.sub_type env ty var_ty on_error
             in
             let (env, ty_sup_err_opt) =
-              Typing_utils.sub_type_with_ty_err env var_ty ty on_error
+              Typing_utils.sub_type env var_ty ty on_error
             in
             let (env, ty) =
               union_any_if_any_in_lower_bounds env ty lower_bounds
@@ -822,7 +820,7 @@ let expand_type_and_narrow_with_ty_err
           expand_type_and_solve_with_ty_err env ~description_of_expected p ty
         else
           let res =
-            Typing_utils.sub_type_with_ty_err env ty widened_ty
+            Typing_utils.sub_type env ty widened_ty
             @@ Some (Typing_error.Reasons_callback.unify_error_at p)
           in
           match res with

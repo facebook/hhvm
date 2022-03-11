@@ -137,7 +137,7 @@ let force_return_kind ?(is_toplevel = true) env p ty =
     (env, ty)
   | _ ->
     let (env, wrapped_ty) = make_fresh_return_type env p in
-    let env =
+    let (env, ty_err_opt) =
       Typing_ops.sub_type
         p
         Reason.URreturn
@@ -146,6 +146,7 @@ let force_return_kind ?(is_toplevel = true) env p ty =
         ty
         Typing_error.Callback.unify_error
     in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
     (env, wrapped_ty)
 
 let make_default_return ~is_method env name =
@@ -162,44 +163,65 @@ let implicit_return env pos ~expected ~actual =
     Typing_error.Primary.(Wellformedness (Wellformedness.Missing_return pos))
   in
   let open Typing_env_types in
-  if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
-    Typing_utils.sub_type
-      env
-      ~coerce:(Some Typing_logic.CoerceToDynamic)
-      actual
-      expected
-    @@ Some (Typing_error.Reasons_callback.of_primary_error error)
-  else
-    Typing_ops.sub_type pos reason env actual expected
-    @@ Typing_error.Callback.of_primary_error error
+  let (env, ty_err_opt) =
+    if TypecheckerOptions.enable_sound_dynamic env.genv.tcopt then
+      Typing_utils.sub_type
+        env
+        ~coerce:(Some Typing_logic.CoerceToDynamic)
+        actual
+        expected
+      @@ Some (Typing_error.Reasons_callback.of_primary_error error)
+    else
+      Typing_ops.sub_type pos reason env actual expected
+      @@ Typing_error.Callback.of_primary_error error
+  in
+
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  env
 
 let check_inout_return ret_pos env =
   let params = Local_id.Map.elements (Env.get_params env) in
-  List.fold params ~init:env ~f:(fun env (id, (ty, param_pos, mode)) ->
-      match mode with
-      | FPinout ->
-        (* Whenever the function exits normally, we require that each local
-         * corresponding to an inout parameter be compatible with the original
-         * type for the parameter (under subtyping rules). *)
-        let (local_ty, local_pos) = Env.get_local_pos env id in
-        let (env, ety) = Env.expand_type env local_ty in
-        let pos =
-          if not (Pos.equal Pos.none local_pos) then
-            local_pos
-          else if not (Pos.equal Pos.none ret_pos) then
-            ret_pos
-          else
-            param_pos
-        in
-        let param_ty = mk (Reason.Rinout_param (get_pos ty), get_node ty) in
-        Typing_ops.sub_type
-          pos
-          Reason.URassign_inout
-          env
-          ety
-          param_ty
-          Typing_error.Callback.inout_return_type_mismatch
-      | _ -> env)
+  let (env, ty_errs) =
+    List.fold
+      params
+      ~init:(env, [])
+      ~f:(fun (env, ty_errs) (id, (ty, param_pos, mode)) ->
+        match mode with
+        | FPinout ->
+          (* Whenever the function exits normally, we require that each local
+           * corresponding to an inout parameter be compatible with the original
+           * type for the parameter (under subtyping rules). *)
+          let (local_ty, local_pos) = Env.get_local_pos env id in
+          let (env, ety) = Env.expand_type env local_ty in
+          let pos =
+            if not (Pos.equal Pos.none local_pos) then
+              local_pos
+            else if not (Pos.equal Pos.none ret_pos) then
+              ret_pos
+            else
+              param_pos
+          in
+          let param_ty = mk (Reason.Rinout_param (get_pos ty), get_node ty) in
+          let (env, ty_err_opt) =
+            Typing_ops.sub_type
+              pos
+              Reason.URassign_inout
+              env
+              ety
+              param_ty
+              Typing_error.Callback.inout_return_type_mismatch
+          in
+          let ty_errs =
+            Option.value_map
+              ~default:ty_errs
+              ~f:(fun e -> e :: ty_errs)
+              ty_err_opt
+          in
+          (env, ty_errs)
+        | _ -> (env, ty_errs))
+  in
+  Option.iter ~f:Errors.add_typing_error @@ Typing_error.multiple_opt ty_errs;
+  env
 
 let rec remove_like_for_return env ty =
   match TUtils.try_strip_dynamic env ty with

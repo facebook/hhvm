@@ -34,8 +34,8 @@ let make_type_const_equal_with_ty_err
           ~f:Typing_error.Reasons_callback.type_constant_mismatch
           on_error
       in
-      let (env, e2) = Utils.sub_type_with_ty_err env tytconst tconstty error in
-      let (env, e3) = Utils.sub_type_with_ty_err env tconstty tytconst error in
+      let (env, e2) = Utils.sub_type env tytconst tconstty error in
+      let (env, e3) = Utils.sub_type env tconstty tytconst error in
       (env, Typing_error.multiple_opt @@ List.filter_map ~f:Fn.id [e1; e2; e3])
     | ConstraintType ty ->
       (match deref_constraint_type ty with

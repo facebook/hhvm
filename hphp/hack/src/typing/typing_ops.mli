@@ -15,16 +15,7 @@ val sub_type_i :
   Typing_defs.internal_type ->
   Typing_defs.internal_type ->
   Typing_error.Callback.t ->
-  Typing_env_types.env
-
-val sub_type_i_res :
-  Pos.t ->
-  Typing_reason.ureason ->
-  Typing_env_types.env ->
-  Typing_defs.internal_type ->
-  Typing_defs.internal_type ->
-  Typing_error.Callback.t ->
-  (Typing_env_types.env, Typing_env_types.env) result
+  Typing_env_types.env * Typing_error.t option
 
 val sub_type :
   Pos.t ->
@@ -33,16 +24,7 @@ val sub_type :
   Typing_defs.locl_ty ->
   Typing_defs.locl_ty ->
   Typing_error.Callback.t ->
-  Typing_env_types.env
-
-val sub_type_res :
-  Pos.t ->
-  Typing_reason.ureason ->
-  Typing_env_types.env ->
-  Typing_defs.locl_ty ->
-  Typing_defs.locl_ty ->
-  Typing_error.Callback.t ->
-  (Typing_env_types.env, Typing_env_types.env) result
+  Typing_env_types.env * Typing_error.t option
 
 val sub_type_decl :
   ?is_coeffect:bool ->
@@ -52,7 +34,7 @@ val sub_type_decl :
   Typing_env_types.env ->
   Typing_defs.decl_ty ->
   Typing_defs.decl_ty ->
-  Typing_env_types.env
+  Typing_env_types.env * Typing_error.t option
 
 val unify_decl :
   Pos_or_decl.t ->
@@ -61,4 +43,4 @@ val unify_decl :
   Typing_error.Reasons_callback.t ->
   Typing_defs.decl_ty ->
   Typing_defs.decl_ty ->
-  Typing_env_types.env
+  Typing_env_types.env * Typing_error.t option

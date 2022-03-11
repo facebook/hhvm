@@ -50,20 +50,8 @@ let sub_type_i
           on_error
           ~claim:(lazy (p, Reason.string_of_ureason ur)))
 
-let sub_type_i_res p ur env ty_sub ty_super (on_error : Typing_error.Callback.t)
-    =
-  log_sub_type env p ty_sub ty_super;
-  Typing_utils.sub_type_i_res env ty_sub ty_super
-  @@ Some
-       (Typing_error.Reasons_callback.with_claim
-          on_error
-          ~claim:(lazy (p, Reason.string_of_ureason ur)))
-
 let sub_type p ur env ty_sub ty_super on_error =
   sub_type_i p ur env (LoclType ty_sub) (LoclType ty_super) on_error
-
-let sub_type_res p ur env ty_sub ty_super on_error =
-  sub_type_i_res p ur env (LoclType ty_sub) (LoclType ty_super) on_error
 
 let sub_type_decl ?(is_coeffect = false) ~on_error p ur env ty_sub ty_super =
   let localize_no_subst = Typing_utils.localize_no_subst ~ignore_errors:true in
@@ -84,12 +72,13 @@ let unify_decl p ur env on_error ty1 ty2 =
   let (env, ty1) = localize_no_subst env ty1 in
   let (env, ty2) = localize_no_subst env ty2 in
   let reason = lazy (p, Reason.string_of_ureason ur) in
-  let env =
+  let (env, e1) =
     Typing_utils.sub_type env ty2 ty1
     @@ Some (Typing_error.Reasons_callback.prepend_reason on_error ~reason)
   in
-  let env =
+  let (env, e2) =
     Typing_utils.sub_type env ty1 ty2
     @@ Some (Typing_error.Reasons_callback.prepend_reason on_error ~reason)
   in
-  env
+
+  (env, Option.merge e1 e2 ~f:Typing_error.both)

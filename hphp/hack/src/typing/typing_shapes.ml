@@ -248,7 +248,7 @@ let idx
         let (env, res) = TUtils.union env res (MakeType.null fun_pos) in
         ((env, ty_err_opt), res)
       | Some (default_pos, default_ty) ->
-        let (env, ty_err_opt) =
+        let (env, e1) =
           Typing_coercion.coerce_type
             shape_pos
             Reason.URparam
@@ -257,7 +257,7 @@ let idx
             { et_type = super_shape; et_enforced = Unenforced }
             Typing_error.Callback.unify_error
         in
-        let env =
+        let (env, e2) =
           Type.sub_type
             default_pos
             Reason.URparam
@@ -266,7 +266,7 @@ let idx
             res
             Typing_error.Callback.unify_error
         in
-        ((env, ty_err_opt), res))
+        ((env, Option.merge e1 e2 ~f:Typing_error.both), res))
   in
   Option.iter ty_err_opt ~f:Errors.add_typing_error;
   make_locl_like_type env res
@@ -451,7 +451,7 @@ let check_shape_keys_validity env keys =
               Typing_phase.localize_no_subst ~ignore_errors:true env cc_type
             in
             let r = Reason.Rwitness key_pos in
-            let env =
+            let (env, e2) =
               Type.sub_type key_pos Reason.URnone env ty (MakeType.arraykey r)
               @@ Typing_error.(
                    Callback.always
@@ -465,6 +465,7 @@ let check_shape_keys_validity env keys =
                               trail = [];
                             })))
             in
+            Option.iter ~f:Errors.add_typing_error e2;
             (env, key_pos, Some (cls, ty)))
       end
   in

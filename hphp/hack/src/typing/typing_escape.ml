@@ -415,38 +415,44 @@ let refresh_tvar tv (on_error : Typing_error.Reasons_callback.t) renv =
         @@ retain_code
         @@ retain_quickfixes on_error)
   in
-  let renv =
+  let (renv, e1) =
     let ubs = Env.get_tyvar_upper_bounds renv.env tv in
     let var = Ast_defs.Contravariant in
-    let add_bound env (ity, pos, name) =
-      TUtils.sub_type_i env tv_ity ity (elim_on_error pos name)
+    let add_bound (env, ty_errs) (ity, pos, name) =
+      match TUtils.sub_type_i env tv_ity ity (elim_on_error pos name) with
+      | (env, None) -> (env, ty_errs)
+      | (env, Some ty_err) -> (env, ty_err :: ty_errs)
     in
     let (renv, del, add) = refresh_bounds renv var ubs in
     if ITySet.is_empty del && List.is_empty add then
-      renv
+      (renv, None)
     else
       let ubs = Env.get_tyvar_upper_bounds renv.env tv in
       let ubs = ITySet.diff ubs del in
       let env = Env.set_tyvar_upper_bounds renv.env tv ubs in
-      let env = List.fold ~init:env ~f:add_bound add in
-      { renv with env }
+      let (env, ty_errs) = List.fold ~init:(env, []) ~f:add_bound add in
+
+      ({ renv with env }, Typing_error.multiple_opt ty_errs)
   in
-  let renv =
+  let (renv, e2) =
     let lbs = Env.get_tyvar_lower_bounds renv.env tv in
     let var = Ast_defs.Covariant in
-    let add_bound env (ity, pos, name) =
-      TUtils.sub_type_i env ity tv_ity (elim_on_error pos name)
+    let add_bound (env, ty_errs) (ity, pos, name) =
+      match TUtils.sub_type_i env ity tv_ity (elim_on_error pos name) with
+      | (env, None) -> (env, ty_errs)
+      | (env, Some ty_err) -> (env, ty_err :: ty_errs)
     in
     let (renv, del, add) = refresh_bounds renv var lbs in
     if ITySet.is_empty del && List.is_empty add then
-      renv
+      (renv, None)
     else
       let lbs = Env.get_tyvar_lower_bounds renv.env tv in
       let lbs = ITySet.diff lbs del in
       let env = Env.set_tyvar_lower_bounds renv.env tv lbs in
-      let env = List.fold ~init:env ~f:add_bound add in
-      { renv with env }
+      let (env, ty_errs) = List.fold ~init:(env, []) ~f:add_bound add in
+      ({ renv with env }, Typing_error.multiple_opt ty_errs)
   in
+  Option.(iter ~f:Errors.add_typing_error @@ merge e1 e2 ~f:Typing_error.both);
   renv
 
 let rec refresh_tvars seen renv =

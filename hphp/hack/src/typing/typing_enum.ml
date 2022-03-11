@@ -117,41 +117,45 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     | Tneg _ ->
       false
   in
-  match ty_interface with
-  | Some interface ->
-    (if not (is_valid_base interface) then
-      Errors.add_typing_error
-      @@ Typing_error.(
-           enum
-           @@ Primary.Enum.Enum_type_bad
-                {
-                  pos = Pos_or_decl.unsafe_to_raw_pos pos;
-                  is_enum_class = true;
-                  ty_name = lazy (Typing_print.full_strip_ns env interface);
-                  trail = [];
-                }));
-    env
-  | None ->
-    let callback =
-      let open Typing_error in
-      Callback.always
-        Primary.(
-          Enum
-            (Enum.Enum_type_bad
-               {
-                 pos = Pos_or_decl.unsafe_to_raw_pos pos;
-                 is_enum_class = false;
-                 ty_name = lazy (Typing_print.full_strip_ns env ty);
-                 trail = [];
-               }))
-    in
-    Typing_ops.sub_type
-      (Pos_or_decl.unsafe_to_raw_pos pos)
-      ur
-      env
-      ty
-      ty_arraykey
-      callback
+  let (env, ty_err_opt) =
+    match ty_interface with
+    | Some interface ->
+      (if not (is_valid_base interface) then
+        Errors.add_typing_error
+        @@ Typing_error.(
+             enum
+             @@ Primary.Enum.Enum_type_bad
+                  {
+                    pos = Pos_or_decl.unsafe_to_raw_pos pos;
+                    is_enum_class = true;
+                    ty_name = lazy (Typing_print.full_strip_ns env interface);
+                    trail = [];
+                  }));
+      (env, None)
+    | None ->
+      let callback =
+        let open Typing_error in
+        Callback.always
+          Primary.(
+            Enum
+              (Enum.Enum_type_bad
+                 {
+                   pos = Pos_or_decl.unsafe_to_raw_pos pos;
+                   is_enum_class = false;
+                   ty_name = lazy (Typing_print.full_strip_ns env ty);
+                   trail = [];
+                 }))
+      in
+      Typing_ops.sub_type
+        (Pos_or_decl.unsafe_to_raw_pos pos)
+        ur
+        env
+        ty
+        ty_arraykey
+        callback
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  env
 
 (* Check an enum declaration of the form
  *    enum E : <ty_exp> as <ty_constraint>
@@ -181,56 +185,72 @@ let enum_class_check env tc consts const_types =
         | TCAbstract { atc_default = None; _ } -> None)
       ~get_ancestor:(Cls.get_ancestor tc)
   in
-  match enum_info_opt with
-  | Some
-      {
-        Decl_enum.base = ty_exp;
-        type_ = _;
-        constraint_ = ty_constraint;
-        interface = ty_interface;
-      } ->
-    let (env, ty_exp) =
-      Phase.localize_no_subst env ~ignore_errors:false ty_exp
-    in
-    let (env, ty_interface) =
-      match ty_interface with
-      | Some dty ->
-        let (env, lty) = Phase.localize_no_subst env ~ignore_errors:false dty in
-        (env, Some lty)
-      | None -> (env, None)
-    in
-    (* Check that ty_exp <: arraykey *)
-    let env =
-      enum_check_type
-        env
-        pos
-        Reason.URenum_underlying
-        ty_interface
-        ty_exp
-        Typing_error.Callback.enum_underlying_type_must_be_arraykey
-    in
-    (* Check that ty_exp <: ty_constraint <: arraykey *)
-    let env =
-      match ty_constraint with
-      | None -> env
-      | Some ty ->
-        let (env, ty) = Phase.localize_no_subst env ~ignore_errors:false ty in
-        let env =
-          enum_check_type
-            env
-            pos
-            Reason.URenum_cstr
-            None (* Enum classes do not have constraints *)
-            ty
-            Typing_error.Callback.enum_constraint_must_be_arraykey
-        in
-        Typing_ops.sub_type
-          (Pos_or_decl.unsafe_to_raw_pos pos)
-          Reason.URenum_incompatible_cstr
+  let (env, ty_err_opt) =
+    match enum_info_opt with
+    | Some
+        {
+          Decl_enum.base = ty_exp;
+          type_ = _;
+          constraint_ = ty_constraint;
+          interface = ty_interface;
+        } ->
+      let (env, ty_exp) =
+        Phase.localize_no_subst env ~ignore_errors:false ty_exp
+      in
+      let (env, ty_interface) =
+        match ty_interface with
+        | Some dty ->
+          let (env, lty) =
+            Phase.localize_no_subst env ~ignore_errors:false dty
+          in
+          (env, Some lty)
+        | None -> (env, None)
+      in
+      (* Check that ty_exp <: arraykey *)
+      let env =
+        enum_check_type
           env
+          pos
+          Reason.URenum_underlying
+          ty_interface
           ty_exp
-          ty
-          Typing_error.Callback.enum_subtype_must_have_compatible_constraint
-    in
-    List.fold2_exn ~f:(enum_check_const ty_exp) ~init:env consts const_types
-  | None -> env
+          Typing_error.Callback.enum_underlying_type_must_be_arraykey
+      in
+      (* Check that ty_exp <: ty_constraint <: arraykey *)
+      let (env, ty_err_opt) =
+        match ty_constraint with
+        | None -> (env, None)
+        | Some ty ->
+          let (env, ty) = Phase.localize_no_subst env ~ignore_errors:false ty in
+          let env =
+            enum_check_type
+              env
+              pos
+              Reason.URenum_cstr
+              None (* Enum classes do not have constraints *)
+              ty
+              Typing_error.Callback.enum_constraint_must_be_arraykey
+          in
+          Typing_ops.sub_type
+            (Pos_or_decl.unsafe_to_raw_pos pos)
+            Reason.URenum_incompatible_cstr
+            env
+            ty_exp
+            ty
+            Typing_error.Callback.enum_subtype_must_have_compatible_constraint
+      in
+      let (env, ty_errs) =
+        List.fold2_exn
+          ~f:(fun (env, ty_errs) c cty ->
+            match enum_check_const ty_exp env c cty with
+            | (env, Some ty_err) -> (env, ty_err :: ty_errs)
+            | (env, _) -> (env, ty_errs))
+          ~init:(env, Option.to_list ty_err_opt)
+          consts
+          const_types
+      in
+      (env, Typing_error.multiple_opt ty_errs)
+    | None -> (env, None)
+  in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  env

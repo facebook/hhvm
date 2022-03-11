@@ -7,6 +7,7 @@
  *
  *)
 
+open Hh_prelude
 open Typing_defs
 open Typing_env_types
 module Reason = Typing_reason
@@ -35,19 +36,21 @@ let sub_string_err (p : Pos.t) (env : env) (ty : locl_ty) :
   in
   let stringish = MakeType.class_type r SN.Classes.cStringish [] in
   let stringlike = MakeType.nullable_locl r (MakeType.union r tyl) in
-  Result.fold
-    ~ok:(fun env -> (env, None))
-    ~error:(fun env -> (env, Some (ty, stringlike)))
-  @@ Typing_subtype.sub_type_or_fail_res env ty stringlike
-  @@ Some
-       Typing_error.(
-         primary
-         @@
-         if Typing_solver.is_sub_type env ty stringish then
-           Primary.Object_string_deprecated p
-         else
-           Primary.Invalid_substring
-             { pos = p; ty_name = lazy (Typing_print.error env ty) })
+  let (env, ty_err_opt) =
+    Typing_subtype.sub_type_or_fail env ty stringlike
+    @@ Some
+         Typing_error.(
+           primary
+           @@
+           if Typing_solver.is_sub_type env ty stringish then
+             Primary.Object_string_deprecated p
+           else
+             Primary.Invalid_substring
+               { pos = p; ty_name = lazy (Typing_print.error env ty) })
+  in
+  let ty_mismatch = Option.map ty_err_opt ~f:(Fn.const (ty, stringlike)) in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
+  (env, ty_mismatch)
 
 let sub_string (p : Pos.t) (env : env) (ty : locl_ty) : env =
   fst @@ sub_string_err p env ty

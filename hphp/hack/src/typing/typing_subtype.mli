@@ -50,15 +50,6 @@ val sub_type :
   locl_ty ->
   locl_ty ->
   Typing_error.Reasons_callback.t option ->
-  env
-
-val sub_type_with_ty_err :
-  env ->
-  ?coerce:Typing_logic.coercion_direction option ->
-  ?is_coeffect:bool ->
-  locl_ty ->
-  locl_ty ->
-  Typing_error.Reasons_callback.t option ->
   env * Typing_error.t option
 
 (**
@@ -66,40 +57,18 @@ val sub_type_with_ty_err :
  * code and message list provided by subtyping.
  *)
 val sub_type_or_fail :
-  env -> locl_ty -> locl_ty -> Typing_error.Error.t option -> env
-
-(** As above but with a `result` type indicating if subtyping failed *)
-val sub_type_or_fail_res :
-  env -> locl_ty -> locl_ty -> Typing_error.Error.t option -> (env, env) result
-
-(**
- * As above but only return the modified environment as [Ok] when the assertion
- * is satisfiable and the original environment as [Err] otherwise.
-*)
-val sub_type_res :
   env ->
-  ?coerce:Typing_logic.coercion_direction option ->
   locl_ty ->
   locl_ty ->
-  Typing_error.Reasons_callback.t option ->
-  (env, env) result
+  Typing_error.Error.t option ->
+  env * Typing_error.t option
 
 val sub_type_with_dynamic_as_bottom :
-  env -> locl_ty -> locl_ty -> Typing_error.Reasons_callback.t option -> env
-
-val sub_type_with_dynamic_as_bottom_with_ty_err :
   env ->
   locl_ty ->
   locl_ty ->
   Typing_error.Reasons_callback.t option ->
   env * Typing_error.t option
-
-val sub_type_with_dynamic_as_bottom_res :
-  env ->
-  locl_ty ->
-  locl_ty ->
-  Typing_error.Reasons_callback.t option ->
-  (env, env) result
 
 val sub_type_i :
   env ->
@@ -107,14 +76,7 @@ val sub_type_i :
   internal_type ->
   internal_type ->
   Typing_error.Reasons_callback.t option ->
-  env
-
-val sub_type_i_res :
-  env ->
-  internal_type ->
-  internal_type ->
-  Typing_error.Reasons_callback.t option ->
-  (env, env) result
+  env * Typing_error.t option
 
 val add_constraint :
   env ->
@@ -146,7 +108,7 @@ val subtype_funs :
   Reason.t ->
   locl_fun_type ->
   env ->
-  env
+  env * Typing_error.t option
 
 (* Given a subtype proposition, resolve conjunctions of subtype assertions
  * of the form #v <: t or t <: #v by adding bounds to #v in env. Close env

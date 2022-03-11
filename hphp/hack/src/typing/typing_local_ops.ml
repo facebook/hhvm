@@ -15,12 +15,16 @@ module SN = Naming_special_names
 
 let check_local_capability (mk_required : env -> env * locl_ty) mk_err_opt env =
   (* gate the check behavior on coeffects TC option *)
-  if TypecheckerOptions.local_coeffects (Env.get_tcopt env) then
+  if TypecheckerOptions.local_coeffects (Env.get_tcopt env) then (
     let available = Env.get_local env Typing_coeffects.local_capability_id in
     let (env, required) = mk_required env in
     let err_opt = mk_err_opt available required in
-    Typing_subtype.sub_type_or_fail env available required err_opt
-  else
+    let (env, ty_err_opt) =
+      Typing_subtype.sub_type_or_fail env available required err_opt
+    in
+    Option.iter ~f:Errors.add_typing_error ty_err_opt;
+    env
+  ) else
     env
 
 let enforce_local_capability

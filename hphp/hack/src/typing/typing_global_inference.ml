@@ -206,8 +206,18 @@ module StateConstraintGraph = struct
     let ty = MakeType.tyvar Reason.Rnone var
     and ty' = MakeType.tyvar Reason.Rnone var' in
     let on_err = StateErrors.add errors var in
-    let env = catch_exc on_err env (Sub.sub_type env ty ty') in
-    let env = catch_exc on_err env (Sub.sub_type env ty' ty) in
+    let env =
+      catch_exc on_err env (fun on_err ->
+          let (env, ty_err_opt) = Sub.sub_type env ty ty' on_err in
+          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          env)
+    in
+    let env =
+      catch_exc on_err env (fun on_err ->
+          let (env, ty_err_opt) = Sub.sub_type env ty' ty on_err in
+          Option.iter ~f:Errors.add_typing_error ty_err_opt;
+          env)
+    in
     let (env, vars_in_lower_bounds, vars_in_upper_bounds) =
       let get_unsolved_tyvars tyset =
         ITySet.fold

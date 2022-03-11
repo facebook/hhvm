@@ -628,13 +628,17 @@ let check_override
     if get_ce_const class_elt then
       Typing_phase.sub_type_decl env fty_child fty_parent @@ Some on_error
     else
-      Typing_ops.unify_decl
-        pos
-        Typing_reason.URnone
-        env
-        on_error
-        fty_parent
-        fty_child
+      let (env, ty_err_opt) =
+        Typing_ops.unify_decl
+          pos
+          Typing_reason.URnone
+          env
+          on_error
+          fty_parent
+          fty_child
+      in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
+      env
 
 (* Constants and type constants with declared values in declared interfaces can never be
  * overridden by other inherited constants.
@@ -1180,7 +1184,7 @@ let tconst_subsumption
       parent_typeconst.ttc_is_ctx || child_typeconst.ttc_is_ctx
     in
     let check_cstrs reason env sub super =
-      Option.value ~default:env
+      Option.value ~default:(env, None)
       @@ Option.map2
            sub
            super
@@ -1208,15 +1212,29 @@ let tconst_subsumption
             let c_as_opt = Some (Option.value c_as_opt ~default) in
             let c_super_opt = Some (Option.value c_super_opt ~default) in
 
-            let env =
+            let (env, e1) =
               check_cstrs Reason.URsubsume_tconst_cstr env c_as_opt p_as_opt
             in
-            check_cstrs Reason.URsubsume_tconst_cstr env p_super_opt c_super_opt
+            let (env, e2) =
+              check_cstrs
+                Reason.URsubsume_tconst_cstr
+                env
+                p_super_opt
+                c_super_opt
+            in
+            let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+            Option.iter ~f:Errors.add_typing_error ty_err_opt;
+            env
           | TCConcrete { tc_type = c_t } ->
-            let env =
+            let (env, e1) =
               check_cstrs Reason.URtypeconst_cstr env (Some c_t) p_as_opt
             in
-            check_cstrs Reason.URtypeconst_cstr env p_super_opt (Some c_t)
+            let (env, e2) =
+              check_cstrs Reason.URtypeconst_cstr env p_super_opt (Some c_t)
+            in
+            let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+            Option.iter ~f:Errors.add_typing_error ty_err_opt;
+            env
         end
       | TCConcrete _ ->
         begin
@@ -1300,11 +1318,15 @@ let tconst_subsumption
       | TCConcrete { tc_type = t } -> Some t
       | TCAbstract _ -> None
     in
-    Option.value ~default:env
-    @@ Option.map2
-         (opt_type__LEGACY parent_typeconst)
-         (opt_type__LEGACY child_typeconst)
-         ~f:(check env)
+    let (env, ty_err_opt) =
+      Option.value ~default:(env, None)
+      @@ Option.map2
+           (opt_type__LEGACY parent_typeconst)
+           (opt_type__LEGACY child_typeconst)
+           ~f:(check env)
+    in
+    Option.iter ty_err_opt ~f:Errors.add_typing_error;
+    env
 
 let check_abstract_typeconst_in_concrete_class (class_pos, class_) tconst =
   let is_final = Cls.final class_ in

@@ -27,7 +27,7 @@ let subtype_method
     (ft_super : locl_fun_type)
     (on_error : Typing_error.Reasons_callback.t) : env =
   (* This is (1) and (2) below *)
-  let env =
+  let (env, ty_err_opt) =
     subtype_funs
       ~on_error:(Some on_error)
       ~check_return
@@ -37,6 +37,7 @@ let subtype_method
       ft_super
       env
   in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   (* This is (3) below *)
   let check_tparams_constraints env tparams =
     let check_tparam_constraints

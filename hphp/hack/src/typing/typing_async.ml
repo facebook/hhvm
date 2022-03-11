@@ -32,20 +32,32 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
     in
     match get_node e_opt_ty with
     | Tunion tyl ->
-      let (env, tyl) = List.fold_map ~init:env ~f:extract_inner tyl in
-      TUtils.union_list env r tyl
+      let ((env, ty_errs), tyl) =
+        List.fold_map
+          ~init:(env, [])
+          ~f:(fun (env, ty_errs) ty ->
+            match extract_inner env ty with
+            | ((env, Some ty_err), ty) -> ((env, ty_err :: ty_errs), ty)
+            | ((env, _), ty) -> ((env, ty_errs), ty))
+          tyl
+      in
+      let (env, ty) = TUtils.union_list env r tyl in
+      ((env, Typing_error.multiple_opt ty_errs), ty)
     | Toption ty ->
       (* We want to try to avoid easy double nullables here, so we handle Toption
        * with some special logic. *)
-      let (env, ty) = extract_inner env ty in
-      TUtils.union env (MakeType.null r) ty
+      let ((env, ty_err_opt), ty) = extract_inner env ty in
+      let (env, ty) = TUtils.union env (MakeType.null r) ty in
+      ((env, ty_err_opt), ty)
     | Tintersection tyl ->
-      let (env, rtyl) = TUtils.run_on_intersection env tyl ~f:extract_inner in
+      let (env, rtyl) =
+        TUtils.run_on_intersection_with_ty_err env tyl ~f:extract_inner
+      in
       (env, MakeType.intersection r rtyl)
-    | Tprim Aast.Tnull -> (env, e_opt_ty)
+    | Tprim Aast.Tnull -> ((env, None), e_opt_ty)
     | Tdynamic ->
       (* Awaiting a dynamic results in a new dynamic *)
-      (env, MakeType.dynamic r)
+      ((env, None), MakeType.dynamic r)
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | Terr
@@ -102,8 +114,9 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
       (env, return_type)
   in
   let env = Env.open_tyvars env p in
-  let (env, ty) = extract_inner env opt_ty_maybe in
+  let ((env, ty_err_opt), ty) = extract_inner env opt_ty_maybe in
   let env = Typing_solver.close_tyvars_and_solve env in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   (env, ty)
 
 let overload_extract_from_awaitable_list env p tyl =

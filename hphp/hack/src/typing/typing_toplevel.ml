@@ -1057,7 +1057,7 @@ let typeconst_def
 
   let name = snd cls.c_name ^ "::" ^ snd id in
   (* Check constraints and report cycles through the definition *)
-  let env =
+  let (env, ty_err_opt) =
     match c_tconst_kind with
     | TCAbstract
         { c_atc_as_constraint; c_atc_super_constraint; c_atc_default = Some ty }
@@ -1069,7 +1069,7 @@ let typeconst_def
           env
           ty
       in
-      let env =
+      let (env, e1) =
         match c_atc_as_constraint with
         | Some as_ ->
           let (env, as_) =
@@ -1082,9 +1082,9 @@ let typeconst_def
             ty
             as_
             Typing_error.Callback.unify_error
-        | None -> env
+        | None -> (env, None)
       in
-      let env =
+      let (env, e2) =
         match c_atc_super_constraint with
         | Some super ->
           let (env, super) =
@@ -1097,9 +1097,10 @@ let typeconst_def
             super
             ty
             Typing_error.Callback.unify_error
-        | None -> env
+        | None -> (env, None)
       in
-      env
+
+      (env, Option.merge e1 e2 ~f:Typing_error.both)
     | TCConcrete { c_tc_type = ty } ->
       let (env, _ty) =
         Phase.localize_hint_no_subst
@@ -1108,10 +1109,10 @@ let typeconst_def
           env
           ty
       in
-      env
-    | _ -> env
+      (env, None)
+    | _ -> (env, None)
   in
-
+  Option.iter ty_err_opt ~f:Errors.add_typing_error;
   (* TODO(T88552052): should this check be happening for defaults
    * Does this belong here at all? *)
   let env =
@@ -1473,7 +1474,7 @@ let check_generic_class_with_SupportDynamicType env c parents =
     TypecheckerOptions.enable_sound_dynamic
       (Provider_context.get_tcopt (Env.get_ctx env))
     && check_support_dynamic_type
-  then
+  then (
     (* Any class that extends a class or implements an interface
      * that declares <<__SupportDynamicType>> must itself declare
      * <<__SupportDynamicType>>. This is checked elsewhere. But if any generic
@@ -1487,48 +1488,59 @@ let check_generic_class_with_SupportDynamicType env c parents =
     let dynamic_ty =
       MakeType.dynamic (Reason.Rdynamic_coercion (Reason.Rwitness pc))
     in
-    let env =
-      List.fold parents ~init:env ~f:(fun env (_, ty) ->
+    let (env, ty_errs) =
+      List.fold parents ~init:(env, []) ~f:(fun (env, ty_errs) (_, ty) ->
           let (env, lty) = Phase.localize_no_subst env ~ignore_errors:true ty in
-          match get_node lty with
-          | Tclass ((_, name), _, _) ->
-            begin
-              match Env.get_class env name with
-              | Some c when Cls.get_support_dynamic_type c ->
-                let env_with_assumptions =
-                  Typing_subtype.add_constraint
-                    env
-                    Ast_defs.Constraint_as
-                    lty
-                    dynamic_ty
-                  @@ Some (Typing_error.Reasons_callback.unify_error_at pc)
-                in
-                begin
-                  match Env.get_self_ty env with
-                  | Some self_ty ->
-                    TUtils.sub_type
-                      ~coerce:(Some Typing_logic.CoerceToDynamic)
-                      env_with_assumptions
-                      self_ty
+          let (env, ty_err_opt) =
+            match get_node lty with
+            | Tclass ((_, name), _, _) ->
+              begin
+                match Env.get_class env name with
+                | Some c when Cls.get_support_dynamic_type c ->
+                  let env_with_assumptions =
+                    Typing_subtype.add_constraint
+                      env
+                      Ast_defs.Constraint_as
+                      lty
                       dynamic_ty
-                    @@ Some
-                         (Typing_error.Reasons_callback
-                          .bad_conditional_support_dynamic
-                            pc
-                            ~child:c_name
-                            ~parent:name
-                            ~ty_name:
-                              (lazy (Typing_print.full_strip_ns_decl env ty))
-                            ~self_ty_name:
-                              (lazy (Typing_print.full_strip_ns env self_ty)))
-                  | _ -> env
-                end
-              | _ -> env
-            end
-          | _ -> env)
+                    @@ Some (Typing_error.Reasons_callback.unify_error_at pc)
+                  in
+                  begin
+                    match Env.get_self_ty env with
+                    | Some self_ty ->
+                      TUtils.sub_type
+                        ~coerce:(Some Typing_logic.CoerceToDynamic)
+                        env_with_assumptions
+                        self_ty
+                        dynamic_ty
+                      @@ Some
+                           (Typing_error.Reasons_callback
+                            .bad_conditional_support_dynamic
+                              pc
+                              ~child:c_name
+                              ~parent:name
+                              ~ty_name:
+                                (lazy (Typing_print.full_strip_ns_decl env ty))
+                              ~self_ty_name:
+                                (lazy (Typing_print.full_strip_ns env self_ty)))
+                    | _ -> (env, None)
+                  end
+                | _ -> (env, None)
+              end
+            | _ -> (env, None)
+          in
+          let ty_errs =
+            Option.value_map
+              ~default:ty_errs
+              ~f:(fun e -> e :: ty_errs)
+              ty_err_opt
+          in
+          (env, ty_errs))
     in
+    Option.(
+      iter ~f:Errors.add_typing_error @@ Typing_error.multiple_opt ty_errs);
     env
-  else
+  ) else
     env
 
 let check_SupportDynamicType env c =

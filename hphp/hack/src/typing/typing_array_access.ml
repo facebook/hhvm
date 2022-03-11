@@ -272,7 +272,7 @@ let pessimised_tup_assign p env arg_ty =
   let (env, ty) = Env.fresh_type env p in
   let (env, pess_ty) = pessimise_type env ty in
   (* There can't be an error since the type variable is fresh *)
-  let env =
+  let (env, ty_err_opt) =
     SubType.sub_type env arg_ty pess_ty
     @@ Some
          Typing_error.(
@@ -281,6 +281,7 @@ let pessimised_tup_assign p env arg_ty =
            @@ Primary.Internal_error
                 { pos = p; msg = "Subtype of fresh type variable" })
   in
+  Option.iter ~f:Errors.add_typing_error ty_err_opt;
   (env, ty)
 
 (* Assignment into a pessimised vec or dict should behave as though it has type
@@ -534,17 +535,16 @@ let rec array_get
         when Typing_env_types.(
                TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
         let tv = Typing_make_type.dynamic r in
-        let (env, idx_err_res) =
-          Result.fold
-            ~ok:(fun env -> (env, Ok ty2))
-            ~error:(fun env -> (env, Error (ty2, tv)))
-          @@ Typing_utils.sub_type_res
-               env
-               ~coerce:(Some Typing_logic.CoerceToDynamic)
-               ty2
-               tv
+        let (env, idx_ty_err_opt) =
+          Typing_utils.sub_type
+            env
+            ~coerce:(Some Typing_logic.CoerceToDynamic)
+            ty2
+            tv
           @@ Some (Typing_error.Reasons_callback.unify_error_at expr_pos)
         in
+        Option.iter ~f:Errors.add_typing_error idx_ty_err_opt;
+        let idx_err_res = mk_ty_mismatch_res ty2 tv idx_ty_err_opt in
         (env, ty1, idx_err_res, dflt_arr_res)
       | Tdynamic -> (env, ty1, Ok ty2, dflt_arr_res)
       | Tany _ -> (env, TUtils.mk_tany env expr_pos, dflt_arr_res, Ok ty2)
@@ -797,14 +797,13 @@ let rec array_get
       | Tvar _ ->
         let (env, value) = Env.fresh_type env expr_pos in
         let keyed_container = MakeType.keyed_container r ty2 value in
-        let (env, arr_res) =
-          Result.fold
-            ~ok:(fun env -> (env, Ok ty1))
-            ~error:(fun env -> (env, Error (ty1, keyed_container)))
-          @@ SubType.sub_type_res env ty1 keyed_container
+        let (env, arr_ty_err_opt) =
+          SubType.sub_type env ty1 keyed_container
           @@ Some
                (Typing_error.Reasons_callback.index_type_mismatch_at expr_pos)
         in
+        Option.iter ~f:Errors.add_typing_error arr_ty_err_opt;
+        let arr_res = mk_ty_mismatch_res ty1 keyed_container arr_ty_err_opt in
         (env, value, arr_res, Ok ty2))
 
 (* Given a type `ty` known to be a lower bound on the type of the array operand
@@ -845,18 +844,17 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
       | (_, Tclass ((_, n), _, [tv])) when String.equal n SN.Collections.cVector
         ->
         let (env, tv) = maybe_pessimise_type env tv in
-        let (env, val_err_res) =
-          Result.fold
-            ~ok:(fun env -> (env, Ok ty2))
-            ~error:(fun env -> (env, Error (ty2, tv)))
-          @@ Typing_ops.sub_type_res
-               expr_pos
-               ur
-               env
-               ty2
-               tv
-               Typing_error.Callback.unify_error
+        let (env, val_ty_err_opt) =
+          Typing_ops.sub_type
+            expr_pos
+            ur
+            env
+            ty2
+            tv
+            Typing_error.Callback.unify_error
         in
+        Option.iter ~f:Errors.add_typing_error val_ty_err_opt;
+        let val_err_res = mk_ty_mismatch_res ty2 tv val_ty_err_opt in
         (env, ty1, Ok ty1, val_err_res)
       (* Handle the case where Vector or Set was used as a typehint
          without type parameters *)
@@ -953,17 +951,16 @@ let assign_array_append_with_err ~array_pos ~expr_pos ur env ty1 ty2 =
         when Typing_env_types.(
                TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
         let tv = Typing_make_type.dynamic r in
-        let (env, val_err_res) =
-          Result.fold
-            ~ok:(fun env -> (env, Ok ty2))
-            ~error:(fun env -> (env, Error (ty2, tv)))
-          @@ Typing_utils.sub_type_res
-               env
-               ~coerce:(Some Typing_logic.CoerceToDynamic)
-               ty2
-               tv
+        let (env, val_ty_err_opt) =
+          Typing_utils.sub_type
+            env
+            ~coerce:(Some Typing_logic.CoerceToDynamic)
+            ty2
+            tv
           @@ Some (Typing_error.Reasons_callback.unify_error_at expr_pos)
         in
+        Option.iter ~f:Errors.add_typing_error val_ty_err_opt;
+        let val_err_res = mk_ty_mismatch_res ty2 tv val_ty_err_opt in
         (env, ty1, Ok ty1, val_err_res)
       | (_, Tdynamic) -> (env, ty1, Ok ty1, Ok ty2)
       | (_, Tunapplied_alias _) ->
@@ -1069,19 +1066,18 @@ let assign_array_get_with_err
         let ((env, e1), idx_err) =
           type_index env expr_pos tkey tk (Reason.index_class cn)
         in
-        let (env, err_res) =
-          Result.fold
-            ~ok:(fun env -> (env, Ok ty2))
-            ~error:(fun env -> (env, Error (ty2, tv)))
-          @@ Typing_ops.sub_type_res
-               expr_pos
-               ur
-               env
-               ty2
-               tv
-               Typing_error.Callback.unify_error
+        let (env, e2) =
+          Typing_ops.sub_type
+            expr_pos
+            ur
+            env
+            ty2
+            tv
+            Typing_error.Callback.unify_error
         in
-        Option.iter e1 ~f:Errors.add_typing_error;
+        let err_res = mk_ty_mismatch_res ty2 tv e2 in
+        Option.(
+          iter ~f:Errors.add_typing_error @@ merge e1 e2 ~f:Typing_error.both);
         (env, ety1, Ok ety1, idx_err, err_res)
       | Tclass (((_, cn) as id), e, argl)
         when String.equal cn SN.Collections.cVec ->
@@ -1142,19 +1138,18 @@ let assign_array_get_with_err
           | (Error _, _) -> idx_err1
           | _ -> idx_err2
         in
-        let (env, err_res) =
-          Result.fold
-            ~ok:(fun env -> (env, Ok ty2))
-            ~error:(fun env -> (env, Error (ty2, tv)))
-          @@ Typing_ops.sub_type_res
-               expr_pos
-               ur
-               env
-               ty2
-               tv
-               Typing_error.Callback.unify_error
+        let (env, e2) =
+          Typing_ops.sub_type
+            expr_pos
+            ur
+            env
+            ty2
+            tv
+            Typing_error.Callback.unify_error
         in
-        Option.iter e1 ~f:Errors.add_typing_error;
+        let err_res = mk_ty_mismatch_res ty2 tv e2 in
+        Option.(
+          iter ~f:Errors.add_typing_error @@ merge e1 e2 ~f:Typing_error.both);
         (env, ety1, Ok ety1, idx_err, err_res)
       | Tclass (((_, cn) as id), e, argl)
         when String.equal cn SN.Collections.cDict ->
@@ -1266,28 +1261,26 @@ let assign_array_get_with_err
         when Typing_env_types.(
                TypecheckerOptions.enable_sound_dynamic env.genv.tcopt) ->
         let tv = Typing_make_type.dynamic r in
-        let (env, idx_err_res) =
-          Result.fold
-            ~ok:(fun env -> (env, Ok tkey))
-            ~error:(fun env -> (env, Error (tkey, tv)))
-          @@ Typing_utils.sub_type_res
-               ~coerce:(Some Typing_logic.CoerceToDynamic)
-               env
-               tkey
-               tv
+        let (env, e1) =
+          Typing_utils.sub_type
+            ~coerce:(Some Typing_logic.CoerceToDynamic)
+            env
+            tkey
+            tv
           @@ Some (Typing_error.Reasons_callback.unify_error_at expr_pos)
         in
-        let (env, val_err_res) =
-          Result.fold
-            ~ok:(fun env -> (env, Ok ty2))
-            ~error:(fun env -> (env, Error (ty2, tv)))
-          @@ Typing_utils.sub_type_res
-               ~coerce:(Some Typing_logic.CoerceToDynamic)
-               env
-               ty2
-               tv
+        let idx_err_res = mk_ty_mismatch_res tkey tv e1 in
+        let (env, e2) =
+          Typing_utils.sub_type
+            ~coerce:(Some Typing_logic.CoerceToDynamic)
+            env
+            ty2
+            tv
           @@ Some (Typing_error.Reasons_callback.unify_error_at expr_pos)
         in
+        let val_err_res = mk_ty_mismatch_res tkey tv e2 in
+        Option.(
+          iter ~f:Errors.add_typing_error @@ merge e1 e2 ~f:Typing_error.both);
         (env, ety1, Ok ety1, idx_err_res, val_err_res)
       | Tdynamic -> (env, ety1, Ok ety1, Ok tkey, Ok ty2)
       | Tany _ -> (env, ety1, Ok ety1, Ok tkey, Ok ty2)
@@ -1298,19 +1291,18 @@ let assign_array_get_with_err
         let ((env, e1), idx_err) =
           type_index env expr_pos tkey tk Reason.index_array
         in
-        let (env, err_res) =
-          Result.fold
-            ~ok:(fun env -> (env, Ok ty2))
-            ~error:(fun env -> (env, Error (ty2, tv)))
-          @@ Typing_ops.sub_type_res
-               expr_pos
-               ur
-               env
-               ty2
-               tv
-               Typing_error.Callback.unify_error
+        let (env, e2) =
+          Typing_ops.sub_type
+            expr_pos
+            ur
+            env
+            ty2
+            tv
+            Typing_error.Callback.unify_error
         in
-        Option.iter e1 ~f:Errors.add_typing_error;
+        let err_res = mk_ty_mismatch_res ty2 tv e2 in
+        Option.(
+          iter ~f:Errors.add_typing_error @@ merge e1 e2 ~f:Typing_error.both);
         (env, ety1, Ok ety1, idx_err, err_res)
       | Ttuple tyl ->
         let fail key_err reason =

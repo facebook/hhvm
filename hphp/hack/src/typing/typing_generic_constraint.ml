@@ -32,7 +32,7 @@ let check_constraint_with_ty_err
     let (env, ecstr_ty) = Env.expand_type env cstr_ty in
     match ck with
     | Ast_defs.Constraint_as ->
-      TUtils.sub_type_with_ty_err
+      TUtils.sub_type
         ~coerce:(Some Typing_logic.CoerceToDynamic)
         env
         ety
@@ -45,7 +45,7 @@ let check_constraint_with_ty_err
        * both sides of the equation simultaniously, to preserve an
        * easier convergence indication. *)
       let (env, e1) =
-        TUtils.sub_type_with_ty_err
+        TUtils.sub_type
           ~coerce:(Some Typing_logic.CoerceToDynamic)
           env
           ecstr_ty
@@ -53,7 +53,7 @@ let check_constraint_with_ty_err
           on_error
       in
       let (env, e2) =
-        TUtils.sub_type_with_ty_err
+        TUtils.sub_type
           ~coerce:(Some Typing_logic.CoerceToDynamic)
           env
           ety
@@ -62,7 +62,7 @@ let check_constraint_with_ty_err
       in
       (env, Option.merge e1 e2 ~f:Typing_error.both)
     | Ast_defs.Constraint_super ->
-      TUtils.sub_type_with_ty_err
+      TUtils.sub_type
         ~coerce:(Some Typing_logic.CoerceToDynamic)
         env
         ecstr_ty

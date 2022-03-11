@@ -311,45 +311,41 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             ConsistentKind::Inconsistent
         };
 
-        match &self.child.constructor {
-            None => {}
-            Some(sm) => {
-                let cls = self.child.name.id();
-                let vis = self.visibility(
-                    cls,
-                    self.child.module.as_ref().map(Positioned::id),
-                    sm.visibility,
-                );
-                let meth_flags = &sm.flags;
-                let flag_args = ClassEltFlagsArgs {
-                    xhp_attr: None,
-                    is_abstract: meth_flags.is_abstract(),
-                    is_final: meth_flags.is_final(),
-                    is_superfluous_override: false,
-                    is_lsb: false,
-                    is_synthesized: false,
-                    is_const: false,
-                    is_lateinit: false,
-                    is_dynamicallycallable: false,
-                    is_readonly_prop: false,
-                    supports_dynamic_type: false,
-                    needs_init: false,
-                };
-                let elt = FoldedElement {
-                    origin: self.child.name.id(),
-                    visibility: vis,
-                    deprecated: sm.deprecated,
-                    flags: ClassEltFlags::new(flag_args),
-                };
-                *constructor = Some(elt)
-            }
+        if let Some(sm) = &self.child.constructor {
+            let cls = self.child.name.id();
+            let vis = self.visibility(
+                cls,
+                self.child.module.as_ref().map(Positioned::id),
+                sm.visibility,
+            );
+            let meth_flags = &sm.flags;
+            let flag_args = ClassEltFlagsArgs {
+                xhp_attr: None,
+                is_abstract: meth_flags.is_abstract(),
+                is_final: meth_flags.is_final(),
+                is_superfluous_override: false,
+                is_lsb: false,
+                is_synthesized: false,
+                is_const: false,
+                is_lateinit: false,
+                is_dynamicallycallable: false,
+                is_readonly_prop: false,
+                supports_dynamic_type: false,
+                needs_init: false,
+            };
+            let elt = FoldedElement {
+                origin: self.child.name.id(),
+                visibility: vis,
+                deprecated: sm.deprecated,
+                flags: ClassEltFlags::new(flag_args),
+            };
+            *constructor = Some(elt)
         }
     }
 
     fn get_implements(&self, ty: &DeclTy<R>, ancestors: &mut TypeNameIndexMap<DeclTy<R>>) {
-        match ty.unwrap_class_type() {
-            None => {}
-            Some((_, pos_id, tyl)) => match self.parents.get(&pos_id.id()) {
+        if let Some((_, pos_id, tyl)) = ty.unwrap_class_type() {
+            match self.parents.get(&pos_id.id()) {
                 None => {
                     // The class lives in PHP land.
                     ancestors.insert(pos_id.id(), ty.clone());
@@ -364,7 +360,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                     // Now add `ty`.
                     ancestors.insert(pos_id.id(), ty.clone());
                 }
-            },
+            }
         }
     }
 
@@ -525,34 +521,25 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         req_ancestors_extends: &mut TypeNameIndexSet,
         parent_ty: &DeclTy<R>,
     ) {
-        match parent_ty.unwrap_class_type() {
-            None => {}
-            Some((_, pos_id, parent_params)) => {
-                match self.parents.get(&pos_id.id()) {
-                    None => {
-                        // The class lives in PHP
+        if let Some((_, pos_id, parent_params)) = parent_ty.unwrap_class_type() {
+            if let Some(cls) = self.parents.get(&pos_id.id()) {
+                let subst = Subst::new(&cls.tparams, parent_params);
+                let substitution = Substitution { subst: &subst };
+                // TODO: Do we need to rev? Or was that just a limitation of OCaml's library?
+                cls.req_ancestors.iter().rev().for_each(|req_ancestor| {
+                    let ty = substitution.instantiate(&req_ancestor.1);
+                    req_ancestors.push(Requirement(pos_id.pos().clone(), ty));
+                });
+                match self.child.kind {
+                    ClassishKind::Cclass(_) => {
+                        // Not necessary to accumulate req_ancestors_extends for classes --
+                        // it's not used
                     }
-                    Some(cls) => {
-                        let subst = Subst::new(&cls.tparams, parent_params);
-                        let substitution = Substitution { subst: &subst };
-                        // TODO: Do we need to rev? Or was that just a limitation of OCaml's library?
-                        cls.req_ancestors.iter().rev().for_each(|req_ancestor| {
-                            let ty = substitution.instantiate(&req_ancestor.1);
-                            req_ancestors.push(Requirement(pos_id.pos().clone(), ty));
-                        });
-                        match self.child.kind {
-                            ClassishKind::Cclass(_) => {
-                                // Not necessary to accumulate req_ancestors_extends for classes --
-                                // it's not used
-                            }
-                            ClassishKind::Ctrait | ClassishKind::Cinterface => {
-                                req_ancestors_extends
-                                    .extend(cls.req_ancestors_extends.iter().cloned());
-                            }
-                            ClassishKind::Cenum | ClassishKind::CenumClass(_) => {
-                                panic!();
-                            }
-                        }
+                    ClassishKind::Ctrait | ClassishKind::Cinterface => {
+                        req_ancestors_extends.extend(cls.req_ancestors_extends.iter().cloned());
+                    }
+                    ClassishKind::Cenum | ClassishKind::CenumClass(_) => {
+                        panic!();
                     }
                 }
             }
@@ -565,30 +552,21 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         req_ancestors_extends: &mut TypeNameIndexSet,
         req_ty: &DeclTy<R>,
     ) {
-        match req_ty.unwrap_class_type() {
-            None => {}
-            Some((_, pos_id, _)) => {
-                // Since the req is declared on this class, we should
-                // emphatically *not* substitute: a require extends Foo<T> is
-                // going to be this class's <T>
-                req_ancestors.push(Requirement(pos_id.pos().clone(), req_ty.clone()));
-                req_ancestors_extends.insert(pos_id.id());
+        if let Some((_, pos_id, _)) = req_ty.unwrap_class_type() {
+            // Since the req is declared on this class, we should
+            // emphatically *not* substitute: a require extends Foo<T> is
+            // going to be this class's <T>
+            req_ancestors.push(Requirement(pos_id.pos().clone(), req_ty.clone()));
+            req_ancestors_extends.insert(pos_id.id());
 
-                match self.parents.get(&pos_id.id()) {
-                    None => {
-                        // The class lives in PHP : error??
-                    }
-                    Some(cls) => {
-                        // The parent class lives in Hack
-                        req_ancestors_extends.extend(cls.extends.iter().cloned());
-                        req_ancestors_extends.extend(cls.xhp_attr_deps.iter().cloned());
-                        // The req may be on an interface that has reqs of its own; the
-                        // flattened ancestry required by *those* reqs need to be added
-                        // in to, e.g., interpret accesses to protected functions inside
-                        // traits
-                        req_ancestors_extends.extend(cls.req_ancestors_extends.iter().cloned());
-                    }
-                }
+            if let Some(cls) = self.parents.get(&pos_id.id()) {
+                req_ancestors_extends.extend(cls.extends.iter().cloned());
+                req_ancestors_extends.extend(cls.xhp_attr_deps.iter().cloned());
+                // The req may be on an interface that has reqs of its own; the
+                // flattened ancestry required by *those* reqs need to be added
+                // in to, e.g., interpret accesses to protected functions inside
+                // traits
+                req_ancestors_extends.extend(cls.req_ancestors_extends.iter().cloned());
             }
         }
     }

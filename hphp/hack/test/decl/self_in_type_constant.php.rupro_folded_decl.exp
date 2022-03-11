@@ -197,8 +197,7 @@
    dc_methods =
    { "f" ->
      { Decl_defs.elt_flags =
--      { "Abstract" -> true;
-+      { "Abstract" -> false;
+       { "Abstract" -> true;
          "Const" -> false;
          "Dynamicallycallable" -> false;
          "Final" -> false;

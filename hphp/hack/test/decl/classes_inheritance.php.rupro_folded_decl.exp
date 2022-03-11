@@ -160,8 +160,7 @@
    dc_methods =
    { "c" ->
      { Decl_defs.elt_flags =
--      { "Abstract" -> true;
-+      { "Abstract" -> false;
+       { "Abstract" -> true;
          "Const" -> false;
          "Dynamicallycallable" -> false;
          "Final" -> false;
@@ -204,8 +203,7 @@
    dc_methods =
    { "c" ->
      { Decl_defs.elt_flags =
--      { "Abstract" -> true;
-+      { "Abstract" -> false;
+       { "Abstract" -> true;
          "Const" -> false;
          "Dynamicallycallable" -> false;
          "Final" -> false;
@@ -223,8 +221,7 @@
        elt_deprecated = None };
      "d" ->
      { Decl_defs.elt_flags =
--      { "Abstract" -> true;
-+      { "Abstract" -> false;
+       { "Abstract" -> true;
          "Const" -> false;
          "Dynamicallycallable" -> false;
          "Final" -> false;

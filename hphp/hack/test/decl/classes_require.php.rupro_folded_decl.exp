@@ -76,8 +76,7 @@
    dc_methods =
    { "fly" ->
      { Decl_defs.elt_flags =
--      { "Abstract" -> true;
-+      { "Abstract" -> false;
+       { "Abstract" -> true;
          "Const" -> false;
          "Dynamicallycallable" -> false;
          "Final" -> false;
@@ -141,8 +140,7 @@
        elt_deprecated = None };
      "fly" ->
      { Decl_defs.elt_flags =
--      { "Abstract" -> true;
-+      { "Abstract" -> false;
+       { "Abstract" -> true;
          "Const" -> false;
          "Dynamicallycallable" -> false;
          "Final" -> false;

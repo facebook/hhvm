@@ -1,164 +1,162 @@
---- ocaml
-+++ rupro
-@@ -1,160 +1,160 @@
- { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\C"; dc_pos = [4:7-8]; dc_tparams = [];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "T" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [5:14-15];
-       cc_type =
-       (Rwitness_from_decl ([5:14-15]),
-        (Tapply (([5:14-15], "\\HH\\TypeStructure"),
-           [(Rwitness_from_decl ([5:14-15]),
-             (Taccess
-                ((Rwitness_from_decl ([5:14-15]), Tthis), [([5:14-15], "T")])))
-             ]
-           )));
-       cc_origin = "\\C"; cc_refs = [] };
-     "T2" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [15:14-16];
-       cc_type =
-       (Rwitness_from_decl ([15:14-16]),
-        (Tapply (([15:14-16], "\\HH\\TypeStructure"),
-           [(Rwitness_from_decl ([15:14-16]),
-             (Taccess
-                ((Rwitness_from_decl ([15:14-16]), Tthis),
-                 [([15:14-16], "T2")])))
-             ]
-           )));
-       cc_origin = "\\C"; cc_refs = [] };
-     "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [4:7-8];
-       cc_type =
-       (Rclass_class ([4:7-8]),
-        (Tapply (([4:7-8], "\\HH\\classname"),
-           [(Rclass_class ([4:7-8]), Tthis)])));
-       cc_origin = "\\C"; cc_refs = [] } };
-   dc_typeconsts =
-   { "T" ->
-     { Typing_defs.ttc_synthesized = false; ttc_name = ([5:14-15], "T");
-       ttc_kind =
-       (Typing_defs.TCConcrete
-          { Typing_defs.tc_type = (Rhint ([5:18-21]), (Tprim Tint)) });
-       ttc_origin = "\\C"; ttc_enforceable = ([Pos.none], false);
-       ttc_reifiable = None; ttc_concretized = false; ttc_is_ctx = false };
-     "T2" ->
-     { Typing_defs.ttc_synthesized = false; ttc_name = ([15:14-16], "T2");
-       ttc_kind =
-       (Typing_defs.TCConcrete
-          { Typing_defs.tc_type = (Rhint ([15:19-25]), (Tprim Tstring)) });
-       ttc_origin = "\\C"; ttc_enforceable = ([Pos.none], false);
-       ttc_reifiable = None; ttc_concretized = false; ttc_is_ctx = false } };
-   dc_props = {}; dc_sprops = {};
-   dc_methods =
-   { "f" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None };
-     "g" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Abstract); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\C2"; dc_pos = [18:16-18]; dc_tparams = [];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "TConstType" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = (Typing_defs.CCAbstract false); cc_pos = [19:23-33];
-       cc_type =
-       (Rwitness_from_decl ([19:23-33]),
-        (Tapply (([19:23-33], "\\HH\\TypeStructure"),
-           [(Rwitness_from_decl ([19:23-33]),
-             (Taccess
-                ((Rwitness_from_decl ([19:23-33]), Tthis),
-                 [([19:23-33], "TConstType")])))
-             ]
-           )));
-       cc_origin = "\\C2"; cc_refs = [] };
-     "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [18:16-18];
-       cc_type =
-       (Rclass_class ([18:16-18]),
-        (Tapply (([18:16-18], "\\HH\\classname"),
-           [(Rclass_class ([18:16-18]), Tthis)])));
-       cc_origin = "\\C2"; cc_refs = [] } };
-   dc_typeconsts =
-   { "TConstType" ->
-     { Typing_defs.ttc_synthesized = false;
-       ttc_name = ([19:23-33], "TConstType");
-       ttc_kind =
-       (Typing_defs.TCAbstract
-          { Typing_defs.atc_as_constraint =
-            (Some (Rhint ([19:37-38]), (Tapply (([19:37-38], "\\C"), []))));
-            atc_super_constraint = None; atc_default = None });
-       ttc_origin = "\\C2"; ttc_enforceable = ([Pos.none], false);
-       ttc_reifiable = None; ttc_concretized = false; ttc_is_ctx = false } };
-   dc_props = {}; dc_sprops = {};
-   dc_methods =
-   { "instantiate" ->
-     { Decl_defs.elt_flags =
--      { "Abstract" -> true;
-+      { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\C2"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
+{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
+  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
+  dc_module = None; dc_name = "\\C"; dc_pos = [4:7-8]; dc_tparams = [];
+  dc_where_constraints = []; dc_substs = {};
+  dc_consts =
+  { "T" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [5:14-15];
+      cc_type =
+      (Rwitness_from_decl ([5:14-15]),
+       (Tapply (([5:14-15], "\\HH\\TypeStructure"),
+          [(Rwitness_from_decl ([5:14-15]),
+            (Taccess
+               ((Rwitness_from_decl ([5:14-15]), Tthis), [([5:14-15], "T")])))
+            ]
+          )));
+      cc_origin = "\\C"; cc_refs = [] };
+    "T2" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [15:14-16];
+      cc_type =
+      (Rwitness_from_decl ([15:14-16]),
+       (Tapply (([15:14-16], "\\HH\\TypeStructure"),
+          [(Rwitness_from_decl ([15:14-16]),
+            (Taccess
+               ((Rwitness_from_decl ([15:14-16]), Tthis),
+                [([15:14-16], "T2")])))
+            ]
+          )));
+      cc_origin = "\\C"; cc_refs = [] };
+    "class" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [4:7-8];
+      cc_type =
+      (Rclass_class ([4:7-8]),
+       (Tapply (([4:7-8], "\\HH\\classname"),
+          [(Rclass_class ([4:7-8]), Tthis)])));
+      cc_origin = "\\C"; cc_refs = [] } };
+  dc_typeconsts =
+  { "T" ->
+    { Typing_defs.ttc_synthesized = false; ttc_name = ([5:14-15], "T");
+      ttc_kind =
+      (Typing_defs.TCConcrete
+         { Typing_defs.tc_type = (Rhint ([5:18-21]), (Tprim Tint)) });
+      ttc_origin = "\\C"; ttc_enforceable = ([Pos.none], false);
+      ttc_reifiable = None; ttc_concretized = false; ttc_is_ctx = false };
+    "T2" ->
+    { Typing_defs.ttc_synthesized = false; ttc_name = ([15:14-16], "T2");
+      ttc_kind =
+      (Typing_defs.TCConcrete
+         { Typing_defs.tc_type = (Rhint ([15:19-25]), (Tprim Tstring)) });
+      ttc_origin = "\\C"; ttc_enforceable = ([Pos.none], false);
+      ttc_reifiable = None; ttc_concretized = false; ttc_is_ctx = false } };
+  dc_props = {}; dc_sprops = {};
+  dc_methods =
+  { "f" ->
+    { Decl_defs.elt_flags =
+      { "Abstract" -> false;
+        "Const" -> false;
+        "Dynamicallycallable" -> false;
+        "Final" -> false;
+        "Lateinit" -> false;
+        "Lsb" -> false;
+        "NeedsInit" -> false;
+        "ReadonlyProp" -> false;
+        "SuperfluousOverride" -> false;
+        "SupportDynamicType" -> false;
+        "Synthesized" -> false;
+        "XaHasDefault" -> false;
+        "XaTagLateinit" -> false;
+        "XaTagRequired" -> false };
+      elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
+      elt_deprecated = None };
+    "g" ->
+    { Decl_defs.elt_flags =
+      { "Abstract" -> false;
+        "Const" -> false;
+        "Dynamicallycallable" -> false;
+        "Final" -> false;
+        "Lateinit" -> false;
+        "Lsb" -> false;
+        "NeedsInit" -> false;
+        "ReadonlyProp" -> false;
+        "SuperfluousOverride" -> false;
+        "SupportDynamicType" -> false;
+        "Synthesized" -> false;
+        "XaHasDefault" -> false;
+        "XaTagLateinit" -> false;
+        "XaTagRequired" -> false };
+      elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
+      elt_deprecated = None } };
+  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+  dc_decl_errors = <opaque> }
+{ Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
+  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
+  dc_kind = (Cclass Abstract); dc_is_xhp = false; dc_has_xhp_keyword = false;
+  dc_module = None; dc_name = "\\C2"; dc_pos = [18:16-18]; dc_tparams = [];
+  dc_where_constraints = []; dc_substs = {};
+  dc_consts =
+  { "TConstType" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = (Typing_defs.CCAbstract false); cc_pos = [19:23-33];
+      cc_type =
+      (Rwitness_from_decl ([19:23-33]),
+       (Tapply (([19:23-33], "\\HH\\TypeStructure"),
+          [(Rwitness_from_decl ([19:23-33]),
+            (Taccess
+               ((Rwitness_from_decl ([19:23-33]), Tthis),
+                [([19:23-33], "TConstType")])))
+            ]
+          )));
+      cc_origin = "\\C2"; cc_refs = [] };
+    "class" ->
+    { Typing_defs.cc_synthesized = true;
+      cc_abstract = Typing_defs.CCConcrete; cc_pos = [18:16-18];
+      cc_type =
+      (Rclass_class ([18:16-18]),
+       (Tapply (([18:16-18], "\\HH\\classname"),
+          [(Rclass_class ([18:16-18]), Tthis)])));
+      cc_origin = "\\C2"; cc_refs = [] } };
+  dc_typeconsts =
+  { "TConstType" ->
+    { Typing_defs.ttc_synthesized = false;
+      ttc_name = ([19:23-33], "TConstType");
+      ttc_kind =
+      (Typing_defs.TCAbstract
+         { Typing_defs.atc_as_constraint =
+           (Some (Rhint ([19:37-38]), (Tapply (([19:37-38], "\\C"), []))));
+           atc_super_constraint = None; atc_default = None });
+      ttc_origin = "\\C2"; ttc_enforceable = ([Pos.none], false);
+      ttc_reifiable = None; ttc_concretized = false; ttc_is_ctx = false } };
+  dc_props = {}; dc_sprops = {};
+  dc_methods =
+  { "instantiate" ->
+    { Decl_defs.elt_flags =
+      { "Abstract" -> true;
+        "Const" -> false;
+        "Dynamicallycallable" -> false;
+        "Final" -> false;
+        "Lateinit" -> false;
+        "Lsb" -> false;
+        "NeedsInit" -> false;
+        "ReadonlyProp" -> false;
+        "SuperfluousOverride" -> false;
+        "SupportDynamicType" -> false;
+        "Synthesized" -> false;
+        "XaHasDefault" -> false;
+        "XaTagLateinit" -> false;
+        "XaTagRequired" -> false };
+      elt_origin = "\\C2"; elt_visibility = Typing_defs_core.Vpublic;
+      elt_deprecated = None } };
+  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
+  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
+  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
+  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
+  dc_decl_errors = <opaque> }
+
+They matched!

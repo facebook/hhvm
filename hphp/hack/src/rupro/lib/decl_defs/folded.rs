@@ -7,7 +7,6 @@ use crate::decl_defs::{
     ty::XhpEnumValue, CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, EnumType,
     Tparam, Typeconst, WhereConstraint, XhpAttribute,
 };
-use crate::folded_decl_provider::Subst;
 use crate::reason::Reason;
 use crate::typing_error::TypingError;
 use serde::{Deserialize, Serialize};
@@ -20,6 +19,7 @@ use pos::{
 };
 use std::collections::BTreeMap;
 
+pub use crate::folded_decl_provider::Subst;
 pub use oxidized::ast_defs::{Abstraction, ClassishKind};
 
 #[derive(Debug, Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
@@ -79,7 +79,7 @@ pub struct TypeConst<R: Reason> {
     pub origin: TypeName,
     pub enforceable: Option<R::Pos>, // When Some, points to __Enforceable attribute
     pub reifiable: Option<R::Pos>,   // When Some, points to __Reifiable attribute
-    pub is_concreteized: bool,
+    pub is_concretized: bool,
     pub is_ctx: bool,
 }
 

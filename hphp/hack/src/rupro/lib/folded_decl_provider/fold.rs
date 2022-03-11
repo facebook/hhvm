@@ -156,7 +156,7 @@ impl<R: Reason> DeclFolder<R> {
                     origin: sc.name.id(),
                     enforceable: stc.enforceable.as_ref().or(ptc_enforceable).cloned(),
                     reifiable: stc.reifiable.as_ref().or(ptc_reifiable).cloned(),
-                    is_concreteized: false,
+                    is_concretized: false,
                     is_ctx: stc.is_ctx,
                 };
                 type_consts.insert(TypeConstName(name), type_const);

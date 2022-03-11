@@ -282,7 +282,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
             origin: tc.origin,
             enforceable: tc.enforceable.clone(),
             reifiable: tc.reifiable.clone(),
-            is_concreteized: tc.is_concreteized,
+            is_concretized: tc.is_concretized,
             is_ctx: tc.is_ctx,
         }
     }

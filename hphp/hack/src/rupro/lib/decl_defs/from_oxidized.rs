@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{self, shallow, ty, DeclTy, DeclTy_};
+use crate::decl_defs::{self, folded, shallow, ty, DeclTy, DeclTy_};
 use crate::reason::Reason;
 use pos::Pos;
 
@@ -14,12 +14,34 @@ fn slice<T: Copy + Into<U>, U>(items: &[T]) -> Box<[U]> {
     items.iter().copied().map(Into::into).collect()
 }
 
+#[inline]
+fn map<'a, K1, V1, K2, V2, M>(items: impl Iterator<Item = (&'a K1, &'a V1)>) -> M
+where
+    K1: Copy + Into<K2> + 'a,
+    V1: Copy + Into<V2> + 'a,
+    M: FromIterator<(K2, V2)>,
+{
+    items.map(|(&k, &v)| (k.into(), v.into())).collect()
+}
+
 impl From<obr::ast_defs::XhpEnumValue<'_>> for ty::XhpEnumValue {
     fn from(x: obr::ast_defs::XhpEnumValue<'_>) -> Self {
         use obr::ast_defs::XhpEnumValue as Obr;
         match x {
             Obr::XEVInt(i) => Self::XEVInt(i),
             Obr::XEVString(s) => Self::XEVString(s.into()),
+        }
+    }
+}
+
+impl From<obr::typing_defs::CeVisibility<'_>> for ty::CeVisibility {
+    fn from(x: obr::typing_defs::CeVisibility<'_>) -> Self {
+        use obr::typing_defs::CeVisibility as Obr;
+        match x {
+            Obr::Vpublic => Self::Public,
+            Obr::Vprivate(s) => Self::Private(s.into()),
+            Obr::Vprotected(s) => Self::Protected(s.into()),
+            Obr::Vinternal(s) => Self::Internal(s.into()),
         }
     }
 }
@@ -399,6 +421,112 @@ impl<R: Reason> From<(&str, obr::shallow_decl_defs::Decl<'_>)> for shallow::Decl
             (name, Obr::Fun(x)) => Self::Fun(name.into(), x.into()),
             (name, Obr::Typedef(x)) => Self::Typedef(name.into(), x.into()),
             (name, Obr::Const(x)) => Self::Const(name.into(), x.into()),
+        }
+    }
+}
+
+impl From<&obr::decl_defs::Element<'_>> for folded::FoldedElement {
+    fn from(x: &obr::decl_defs::Element<'_>) -> Self {
+        Self {
+            flags: x.flags,
+            origin: x.origin.into(),
+            visibility: x.visibility.into(),
+            deprecated: x.deprecated.map(Into::into),
+        }
+    }
+}
+
+impl<R: Reason> From<&obr::decl_defs::SubstContext<'_>> for folded::SubstContext<R> {
+    fn from(x: &obr::decl_defs::SubstContext<'_>) -> Self {
+        Self {
+            subst: folded::Subst(map(x.subst.iter())),
+            class_context: x.class_context.into(),
+            from_req_extends: x.from_req_extends,
+        }
+    }
+}
+
+impl<R: Reason> From<&obr::typing_defs::TypeconstType<'_>> for folded::TypeConst<R> {
+    fn from(x: &obr::typing_defs::TypeconstType<'_>) -> Self {
+        Self {
+            is_synthesized: x.synthesized,
+            name: x.name.into(),
+            kind: x.kind.into(),
+            origin: x.origin.into(),
+            enforceable: if x.enforceable.1 {
+                Some(x.enforceable.0.into())
+            } else {
+                None
+            },
+            reifiable: x.reifiable.map(Into::into),
+            is_concretized: x.concretized,
+            is_ctx: x.is_ctx,
+        }
+    }
+}
+
+impl<R: Reason> From<&obr::typing_defs::ClassConst<'_>> for folded::ClassConst<R> {
+    fn from(x: &obr::typing_defs::ClassConst<'_>) -> Self {
+        Self {
+            is_synthesized: x.synthesized,
+            kind: x.abstract_,
+            pos: x.pos.into(),
+            ty: x.type_.into(),
+            origin: x.origin.into(),
+            refs: slice(x.refs),
+        }
+    }
+}
+
+impl<R: Reason> From<&obr::decl_defs::Requirement<'_>> for folded::Requirement<R> {
+    fn from(req: &obr::decl_defs::Requirement<'_>) -> Self {
+        Self(req.0.into(), req.1.into())
+    }
+}
+
+impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass<R> {
+    fn from(cls: &obr::decl_defs::DeclClassType<'_>) -> Self {
+        Self {
+            name: cls.name.into(),
+            pos: cls.pos.into(),
+            kind: cls.kind,
+            is_final: cls.final_,
+            is_const: cls.const_,
+            is_internal: cls.internal,
+            is_xhp: cls.is_xhp,
+            has_xhp_keyword: cls.has_xhp_keyword,
+            support_dynamic_type: cls.support_dynamic_type,
+            need_init: cls.need_init,
+            enum_type: cls.enum_type.map(Into::into),
+            module: cls.module.map(Into::into),
+            tparams: slice(cls.tparams),
+            where_constraints: slice(cls.where_constraints),
+            substs: map(cls.substs.iter()),
+            ancestors: map(cls.ancestors.iter()),
+            props: map(cls.props.iter()),
+            static_props: map(cls.sprops.iter()),
+            methods: map(cls.methods.iter()),
+            static_methods: map(cls.smethods.iter()),
+            constructor: cls.construct.0.map(Into::into), // TODO: ConsistentKind
+            consts: map(cls.consts.iter()),
+            type_consts: map(cls.typeconsts.iter()),
+            xhp_enum_values: (cls.xhp_enum_values.iter())
+                .map(|(&s, &evs)| (s.into(), slice(evs)))
+                .collect(),
+            extends: cls.extends.iter().copied().map(Into::into).collect(),
+            xhp_attr_deps: cls.xhp_attr_deps.iter().copied().map(Into::into).collect(),
+            req_ancestors: cls.req_ancestors.iter().copied().map(Into::into).collect(),
+            req_ancestors_extends: (cls.req_ancestors_extends.iter())
+                .copied()
+                .map(Into::into)
+                .collect(),
+            sealed_whitelist: (cls.sealed_whitelist)
+                .map(|l| l.iter().copied().map(Into::into).collect()),
+            deferred_init_members: (cls.deferred_init_members.iter())
+                .copied()
+                .map(Into::into)
+                .collect(),
+            decl_errors: [].into(), // TODO
         }
     }
 }

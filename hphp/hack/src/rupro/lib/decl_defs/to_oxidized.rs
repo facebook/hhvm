@@ -324,7 +324,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::TypeConst<R> {
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         arena.alloc(obr::typing_defs::TypeconstType {
             synthesized: self.is_synthesized,
-            concretized: self.is_concreteized,
+            concretized: self.is_concretized,
             is_ctx: self.is_ctx,
             enforceable: self.enforceable.as_ref().map_or_else(
                 || (obr::pos::Pos::none(), false),

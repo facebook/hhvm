@@ -394,11 +394,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::Unop(e) => emit_unop(emitter, env, pos, e),
         Expr_::Binop(_) => emit_binop(emitter, env, pos, expression),
         Expr_::Pipe(e) => emit_pipe(emitter, env, e),
-        Expr_::Is(is_expr) => {
-            let (e, h) = &**is_expr;
-            let is = emit_is(emitter, env, pos, h)?;
-            Ok(InstrSeq::gather(vec![emit_expr(emitter, env, e)?, is]))
-        }
+        Expr_::Is(is_expr) => emit_is_expr(emitter, env, pos, is_expr),
         Expr_::As(e) => emit_as(emitter, env, pos, e),
         Expr_::Upcast(e) => emit_expr(emitter, env, &e.0),
         Expr_::Cast(e) => emit_cast(emitter, env, pos, &(e.0).1, &e.1),
@@ -3255,6 +3251,17 @@ fn emit_lit<'a, 'arena, 'decl>(
         pos,
         emit_adata::typed_value_to_instr(emitter, &tv)?,
     ))
+}
+
+fn emit_is_expr<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    is_expr: &Box<(ast::Expr, aast::Hint)>,
+) -> Result<InstrSeq<'arena>> {
+    let (e, h) = &**is_expr;
+    let is = emit_is(emitter, env, pos, h)?;
+    Ok(InstrSeq::gather(vec![emit_expr(emitter, env, e)?, is]))
 }
 
 fn emit_label<'a, 'arena, 'decl>(

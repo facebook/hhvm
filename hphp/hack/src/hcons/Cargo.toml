@@ -11,3 +11,4 @@ path = "lib.rs"
 dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 fnv = "1.0"
 once_cell = "1.8"
+serde = { version = "1.0.126", features = ["derive", "rc"] }

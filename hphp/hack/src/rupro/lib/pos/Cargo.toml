@@ -17,4 +17,5 @@ intern = { path = "../../../../../../relay/oss/crates/intern" }
 ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
+serde = { version = "1.0.126", features = ["derive", "rc"] }
 static_assertions = "1.1.0"

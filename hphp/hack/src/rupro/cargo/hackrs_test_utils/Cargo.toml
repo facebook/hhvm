@@ -8,8 +8,12 @@ edition = "2021"
 path = "../../test_utils/mod.rs"
 
 [dependencies]
+bincode = "1.3.3"
 dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 hackrs = { path = "../hackrs" }
 hash = { path = "../../../utils/hash" }
+intern = { path = "../../../../../../relay/oss/crates/intern" }
+lz4 = "1.23.1"
 oxidized = { path = "../../../oxidized" }
 pos = { path = "../../lib/pos" }
+serde = { version = "1.0.126", features = ["derive", "rc"] }

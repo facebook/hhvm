@@ -1254,6 +1254,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "emit_opcodes"
+version = "0.0.0"
+dependencies = [
+ "hhbc",
+ "macro_test_util",
+ "opcode_test_data",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "emit_opcodes_macro"
+version = "0.0.0"
+dependencies = [
+ "emit_opcodes",
+ "hhbc",
+]
+
+[[package]]
 name = "emit_param"
 version = "0.0.0"
 dependencies = [
@@ -2000,6 +2020,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hhbc"
+version = "0.0.0"
+dependencies = [
+ "bitflags",
+ "maplit",
+ "once_cell",
+]
+
+[[package]]
 name = "hhbc_assertion_utils"
 version = "0.0.0"
 dependencies = [
@@ -2012,6 +2041,7 @@ dependencies = [
 name = "hhbc_ast"
 version = "0.0.0"
 dependencies = [
+ "emit_opcodes_macro",
  "ffi",
  "hhbc_id",
  "hhvm_hhbc_defs_ffi",
@@ -2336,6 +2366,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "macro_test_util"
+version = "0.0.0"
+dependencies = [
+ "proc-macro2",
+ "syn",
+]
+
+[[package]]
+name = "maplit"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3e2e65a1a2e43cfcb47a895c4c8b10d1f4a61097f9f254f183aee60cad9c651d"
+
+[[package]]
 name = "md-5"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2386,7 +2430,6 @@ name = "multifile_rust"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "itertools 0.10.3",
  "lazy_static",
  "pretty_assertions",
  "regex",
@@ -2561,6 +2604,13 @@ name = "opaque-debug"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2839e79665f131bdb5782e51f2c6c9599c133c6098982a54c794358bf432529c"
+
+[[package]]
+name = "opcode_test_data"
+version = "0.0.0"
+dependencies = [
+ "hhbc",
+]
 
 [[package]]
 name = "operator"

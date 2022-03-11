@@ -19,17 +19,21 @@ use pos::{
     PropNameIndexMap, PropNameIndexSet, TypeConstName, TypeConstNameIndexMap, TypeName,
     TypeNameIndexMap, TypeNameIndexSet,
 };
-use std::marker::PhantomData;
 use std::sync::Arc;
 
 // note(sf, 2022-02-03): c.f. hphp/hack/src/decl/decl_folded_class.ml
 
 #[derive(Debug)]
-pub struct DeclFolder<R: Reason> {
+pub struct DeclFolder<'a, R: Reason> {
     special_names: &'static SpecialNames,
     #[allow(dead_code)] // This can be removed after this field's first use.
-    opts: Arc<GlobalOptions>,
-    _phantom: PhantomData<R>,
+    opts: &'a GlobalOptions,
+    /// The class whose folded decl we are producing.
+    child: &'a ShallowClass<R>,
+    /// The folded decls of all (recursive) ancestors of `child`.
+    parents: &'a TypeNameIndexMap<Arc<FoldedClass<R>>>,
+    /// Hack errors which will be written to `child`'s folded decl.
+    errors: Vec<TypingError<R>>,
 }
 
 #[derive(PartialEq)]
@@ -39,13 +43,22 @@ enum Pass {
     Xhp,
 }
 
-impl<R: Reason> DeclFolder<R> {
-    pub fn new(opts: Arc<GlobalOptions>, special_names: &'static SpecialNames) -> Self {
-        Self {
+impl<'a, R: Reason> DeclFolder<'a, R> {
+    pub fn decl_class(
+        opts: &'a GlobalOptions,
+        special_names: &'static SpecialNames,
+        child: &'a ShallowClass<R>,
+        parents: &'a TypeNameIndexMap<Arc<FoldedClass<R>>>,
+        errors: Vec<TypingError<R>>,
+    ) -> Arc<FoldedClass<R>> {
+        let this = Self {
             opts,
             special_names,
-            _phantom: PhantomData,
-        }
+            child,
+            parents,
+            errors,
+        };
+        this.decl_class_impl()
     }
 
     fn visibility(
@@ -66,14 +79,10 @@ impl<R: Reason> DeclFolder<R> {
 
     /// Every class, interface, and trait implicitly defines a `::class` to allow
     /// accessing its fully qualified name as a string.
-    fn decl_class_class(
-        &self,
-        consts: &mut ClassConstNameIndexMap<ClassConst<R>>,
-        sc: &ShallowClass<R>,
-    ) {
+    fn decl_class_class(&self, consts: &mut ClassConstNameIndexMap<ClassConst<R>>) {
         // note(sf, 2022-02-08): c.f. Decl_folded_class.class_class_decl
-        let pos = sc.name.pos();
-        let name = sc.name.id();
+        let pos = self.child.name.pos();
+        let name = self.child.name.id();
         let reason = R::class_class(pos.clone(), name);
         let classname_ty = DeclTy::apply(
             reason.clone(),
@@ -96,11 +105,7 @@ impl<R: Reason> DeclFolder<R> {
 
     /// Each concrete type constant `T = τ` implicitly defines a class
     /// constant of the same name `T` having type `TypeStructure<τ>`.
-    fn type_const_structure(
-        &self,
-        sc: &ShallowClass<R>,
-        stc: &ShallowTypeconst<R>,
-    ) -> ClassConst<R> {
+    fn type_const_structure(&self, stc: &ShallowTypeconst<R>) -> ClassConst<R> {
         let pos = stc.name.pos();
         let r = R::witness_from_decl(pos.clone());
         let tsid = Positioned::new(pos.clone(), TypeName(self.special_names.fb.cTypeStructure));
@@ -129,7 +134,7 @@ impl<R: Reason> DeclFolder<R> {
             kind,
             pos: pos.clone(),
             ty: ts_ty,
-            origin: sc.name.id(),
+            origin: self.child.name.id(),
             refs: Default::default(),
         }
     }
@@ -138,11 +143,10 @@ impl<R: Reason> DeclFolder<R> {
         &self,
         type_consts: &mut TypeConstNameIndexMap<TypeConst<R>>,
         class_consts: &mut ClassConstNameIndexMap<ClassConst<R>>,
-        sc: &ShallowClass<R>,
         stc: &ShallowTypeconst<R>,
     ) {
         // note(sf, 2022-02-10): c.f. Decl_folded_class.typeconst_fold
-        match sc.kind {
+        match self.child.kind {
             ClassishKind::Cenum | ClassishKind::CenumClass(_) => {}
             ClassishKind::Ctrait | ClassishKind::Cinterface | ClassishKind::Cclass(_) => {
                 let TypeConstName(name) = stc.name.id();
@@ -153,14 +157,14 @@ impl<R: Reason> DeclFolder<R> {
                     is_synthesized: false,
                     name: stc.name.clone(),
                     kind: stc.kind.clone(),
-                    origin: sc.name.id(),
+                    origin: self.child.name.id(),
                     enforceable: stc.enforceable.as_ref().or(ptc_enforceable).cloned(),
                     reifiable: stc.reifiable.as_ref().or(ptc_reifiable).cloned(),
                     is_concretized: false,
                     is_ctx: stc.is_ctx,
                 };
                 type_consts.insert(TypeConstName(name), type_const);
-                class_consts.insert(ClassConstName(name), self.type_const_structure(sc, stc));
+                class_consts.insert(ClassConstName(name), self.type_const_structure(stc));
             }
         }
     }
@@ -168,7 +172,6 @@ impl<R: Reason> DeclFolder<R> {
     fn decl_class_const(
         &self,
         consts: &mut ClassConstNameIndexMap<ClassConst<R>>,
-        sc: &ShallowClass<R>,
         c: &ShallowClassConst<R>,
     ) {
         // note(sf, 2022-02-10): c.f. Decl_folded_class.class_const_fold
@@ -177,22 +180,21 @@ impl<R: Reason> DeclFolder<R> {
             kind: c.kind,
             pos: c.name.pos().clone(),
             ty: c.ty.clone(),
-            origin: sc.name.id(),
+            origin: self.child.name.id(),
             refs: c.refs.clone(),
         };
         consts.insert(c.name.id(), class_const);
     }
 
-    fn decl_prop(
-        &self,
-        props: &mut PropNameIndexMap<FoldedElement>,
-        sc: &ShallowClass<R>,
-        sp: &ShallowProp<R>,
-    ) {
+    fn decl_prop(&self, props: &mut PropNameIndexMap<FoldedElement>, sp: &ShallowProp<R>) {
         // note(sf, 2022-02-08): c.f. Decl_folded_class.prop_decl
-        let cls = sc.name.id();
+        let cls = self.child.name.id();
         let prop = sp.name.id();
-        let vis = self.visibility(cls, sc.module.as_ref().map(Positioned::id), sp.visibility);
+        let vis = self.visibility(
+            cls,
+            self.child.module.as_ref().map(Positioned::id),
+            sp.visibility,
+        );
         let prop_flags = &sp.flags;
         let flag_args = ClassEltFlagsArgs {
             xhp_attr: sp.xhp_attr,
@@ -209,7 +211,7 @@ impl<R: Reason> DeclFolder<R> {
             needs_init: prop_flags.needs_init(),
         };
         let elt = FoldedElement {
-            origin: sc.name.id(),
+            origin: self.child.name.id(),
             visibility: vis,
             deprecated: None,
             flags: ClassEltFlags::new(flag_args),
@@ -220,12 +222,15 @@ impl<R: Reason> DeclFolder<R> {
     fn decl_static_prop(
         &self,
         static_props: &mut PropNameIndexMap<FoldedElement>,
-        sc: &ShallowClass<R>,
         sp: &ShallowProp<R>,
     ) {
-        let cls = sc.name.id();
+        let cls = self.child.name.id();
         let prop = sp.name.id();
-        let vis = self.visibility(cls, sc.module.as_ref().map(Positioned::id), sp.visibility);
+        let vis = self.visibility(
+            cls,
+            self.child.module.as_ref().map(Positioned::id),
+            sp.visibility,
+        );
         let prop_flags = &sp.flags;
         let flag_args = ClassEltFlagsArgs {
             xhp_attr: sp.xhp_attr,
@@ -242,7 +247,7 @@ impl<R: Reason> DeclFolder<R> {
             needs_init: prop_flags.needs_init(),
         };
         let elt = FoldedElement {
-            origin: sc.name.id(),
+            origin: self.child.name.id(),
             visibility: vis,
             deprecated: None,
             flags: ClassEltFlags::new(flag_args),
@@ -250,13 +255,8 @@ impl<R: Reason> DeclFolder<R> {
         static_props.insert(prop, elt);
     }
 
-    fn decl_method(
-        &self,
-        methods: &mut MethodNameIndexMap<FoldedElement>,
-        sc: &ShallowClass<R>,
-        sm: &ShallowMethod<R>,
-    ) {
-        let cls = sc.name.id();
+    fn decl_method(&self, methods: &mut MethodNameIndexMap<FoldedElement>, sm: &ShallowMethod<R>) {
+        let cls = self.child.name.id();
         let meth = sm.name.id();
         let vis = match (methods.get(&meth), sm.visibility) {
             (
@@ -266,7 +266,7 @@ impl<R: Reason> DeclFolder<R> {
                 }),
                 Visibility::Protected,
             ) => CeVisibility::Protected(*cls),
-            (_, v) => self.visibility(cls, sc.module.as_ref().map(Positioned::id), v),
+            (_, v) => self.visibility(cls, self.child.module.as_ref().map(Positioned::id), v),
         };
 
         let meth_flags = &sm.flags;
@@ -294,24 +294,32 @@ impl<R: Reason> DeclFolder<R> {
         methods.insert(meth, elt);
     }
 
-    fn decl_constructor(&self, constructor: &mut Option<FoldedElement>, sc: &ShallowClass<R>) {
-        // Constructors in children of `sc` must be consistent?
-        let _consistent_kind = if sc.is_final {
+    fn decl_constructor(&self, constructor: &mut Option<FoldedElement>) {
+        // Constructors in children of `self.child` must be consistent?
+        let _consistent_kind = if self.child.is_final {
             ConsistentKind::FinalClass
-        } else if sc.user_attributes.iter().any(|UserAttribute { name, .. }| {
-            name.id() == self.special_names.user_attributes.uaConsistentConstruct
-        }) {
+        } else if self
+            .child
+            .user_attributes
+            .iter()
+            .any(|UserAttribute { name, .. }| {
+                name.id() == self.special_names.user_attributes.uaConsistentConstruct
+            })
+        {
             ConsistentKind::ConsistentConstruct
         } else {
             ConsistentKind::Inconsistent
         };
 
-        match &sc.constructor {
+        match &self.child.constructor {
             None => {}
             Some(sm) => {
-                let cls = sc.name.id();
-                let vis =
-                    self.visibility(cls, sc.module.as_ref().map(Positioned::id), sm.visibility);
+                let cls = self.child.name.id();
+                let vis = self.visibility(
+                    cls,
+                    self.child.module.as_ref().map(Positioned::id),
+                    sm.visibility,
+                );
                 let meth_flags = &sm.flags;
                 let flag_args = ClassEltFlagsArgs {
                     xhp_attr: None,
@@ -328,7 +336,7 @@ impl<R: Reason> DeclFolder<R> {
                     needs_init: false,
                 };
                 let elt = FoldedElement {
-                    origin: sc.name.id(),
+                    origin: self.child.name.id(),
                     visibility: vis,
                     deprecated: sm.deprecated,
                     flags: ClassEltFlags::new(flag_args),
@@ -338,15 +346,10 @@ impl<R: Reason> DeclFolder<R> {
         }
     }
 
-    fn get_implements(
-        &self,
-        parents: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
-        ty: &DeclTy<R>,
-        ancestors: &mut TypeNameIndexMap<DeclTy<R>>,
-    ) {
+    fn get_implements(&self, ty: &DeclTy<R>, ancestors: &mut TypeNameIndexMap<DeclTy<R>>) {
         match ty.unwrap_class_type() {
             None => {}
-            Some((_, pos_id, tyl)) => match parents.get(&pos_id.id()) {
+            Some((_, pos_id, tyl)) => match self.parents.get(&pos_id.id()) {
                 None => {
                     // The class lives in PHP land.
                     ancestors.insert(pos_id.id(), ty.clone());
@@ -370,14 +373,13 @@ impl<R: Reason> DeclFolder<R> {
     /// extend a trait etc ...
     /// TODO: T87242856
     fn check_extend_kind(
-        &self,
+        &mut self,
         parent_pos: &R::Pos,
         parent_kind: ClassishKind,
         parent_name: &TypeName,
         child_pos: &R::Pos,
         child_kind: ClassishKind,
         child_name: &TypeName,
-        errors: &mut Vec<TypingError<R>>,
     ) {
         match (parent_kind, child_kind) {
             // What is allowed
@@ -389,29 +391,25 @@ impl<R: Reason> DeclFolder<R> {
             (ClassishKind::Cclass(k), ClassishKind::Cenum | ClassishKind::CenumClass(_))
                 if k.is_abstract() => {}
             // What is disallowed
-            _ => errors.push(TypingError::primary(Primary::WrongExtendKind {
-                parent_pos: parent_pos.clone(),
-                parent_kind,
-                parent_name: *parent_name,
-                pos: child_pos.clone(),
-                kind: child_kind,
-                name: *child_name,
-            })),
+            _ => self
+                .errors
+                .push(TypingError::primary(Primary::WrongExtendKind {
+                    parent_pos: parent_pos.clone(),
+                    parent_kind,
+                    parent_name: *parent_name,
+                    pos: child_pos.clone(),
+                    kind: child_kind,
+                    name: *child_name,
+                })),
         }
     }
 
-    fn add_reused_trait_error(
-        &self,
-        errors: &mut Vec<TypingError<R>>,
-        parent_ty: &FoldedClass<R>,
-        sc: &ShallowClass<R>,
-        trait_name: &TypeName,
-    ) {
-        errors.push(TypingError::primary(Primary::TraitReuse {
+    fn add_reused_trait_error(&mut self, parent_ty: &FoldedClass<R>, trait_name: &TypeName) {
+        self.errors.push(TypingError::primary(Primary::TraitReuse {
             parent_pos: parent_ty.pos.clone(),
             parent_name: parent_ty.name,
-            pos: sc.name.pos().clone(),
-            class_name: sc.name.id(),
+            pos: self.child.name.pos().clone(),
+            class_name: self.child.name.id(),
             trait_name: *trait_name,
         }));
     }
@@ -428,13 +426,11 @@ impl<R: Reason> DeclFolder<R> {
     /// XHP attribute dependencies don't actually pull the trait into the class,
     /// so we need to track them totally separately.
     fn add_grandparents_or_traits(
-        &self,
+        &mut self,
         no_trait_reuse: bool,
         parent_pos: &R::Pos,
-        sc: &ShallowClass<R>,
         pass: Pass,
         extends: &mut TypeNameIndexSet,
-        errors: &mut Vec<TypingError<R>>,
         parent_type: &FoldedClass<R>,
     ) {
         if pass == Pass::Extends {
@@ -442,10 +438,9 @@ impl<R: Reason> DeclFolder<R> {
                 parent_pos,
                 parent_type.kind,
                 &parent_type.name,
-                sc.name.pos(),
-                sc.kind,
-                &sc.name.id(),
-                errors,
+                self.child.name.pos(),
+                self.child.kind,
+                &self.child.name.id(),
             );
         }
 
@@ -469,7 +464,7 @@ impl<R: Reason> DeclFolder<R> {
             let full_size = extends.len();
             if class_size + parents_size > full_size {
                 for duplicate in duplicates.iter() {
-                    self.add_reused_trait_error(errors, parent_type, sc, duplicate);
+                    self.add_reused_trait_error(parent_type, duplicate);
                 }
             }
         }
@@ -477,91 +472,47 @@ impl<R: Reason> DeclFolder<R> {
 
     // Add types of passes
     fn add_class_parent_or_trait(
-        &self,
-        sc: &ShallowClass<R>,
-        parent_cache: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
+        &mut self,
         pass: Pass,
         extends: &mut TypeNameIndexSet,
-        errors: &mut Vec<TypingError<R>>,
         ty: &DeclTy<R>,
     ) {
         // See comment on add_grandparents_or_traits for reasoning here.
 
         // note(sf, 2022-03-10): D34694803 removes `tco_disallow_trait_reuse` from
         // `GlobalOptions` but this logic remains and should be removed.
-        #[rustfmt::skip]
         #[allow(clippy::logic_bug)]
-        let no_trait_reuse = false /* D34694803*/ && pass != Pass::Xhp && sc.kind != ClassishKind::Cinterface;
+        let no_trait_reuse = false /* D34694803*/ && pass != Pass::Xhp && self.child.kind != ClassishKind::Cinterface;
 
         if let Some((_, pos_id, _)) = ty.unwrap_class_type() {
             // If we already had this exact trait, we need to flag trait reuse
             let reused_trait = no_trait_reuse && extends.contains(&pos_id.id());
             extends.insert(pos_id.id());
-            // TODO: Use Decl_env.get_class_and_add_dep equivalent here instead of parent_cache.get
-            if let Some(cls) = parent_cache.get(&pos_id.id()) {
+            if let Some(cls) = self.parents.get(&pos_id.id()) {
                 // The parent class lives in Hack, so we can report reused traits
                 if reused_trait {
-                    self.add_reused_trait_error(errors, cls, sc, &pos_id.id());
+                    self.add_reused_trait_error(cls, &pos_id.id());
                 }
-                self.add_grandparents_or_traits(
-                    no_trait_reuse,
-                    pos_id.pos(),
-                    sc,
-                    pass,
-                    extends,
-                    errors,
-                    cls,
-                );
+                self.add_grandparents_or_traits(no_trait_reuse, pos_id.pos(), pass, extends, cls);
             }
         }
     }
 
-    fn get_extends(
-        &self,
-        sc: &ShallowClass<R>,
-        parent_cache: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
-        errors: &mut Vec<TypingError<R>>,
-    ) -> TypeNameIndexSet {
+    fn get_extends(&mut self) -> TypeNameIndexSet {
         let mut extends = TypeNameIndexSet::new();
-        for extend in sc.extends.iter() {
-            self.add_class_parent_or_trait(
-                sc,
-                parent_cache,
-                Pass::Extends,
-                &mut extends,
-                errors,
-                extend,
-            )
+        for extend in self.child.extends.iter() {
+            self.add_class_parent_or_trait(Pass::Extends, &mut extends, extend)
         }
-        for use_ in sc.uses.iter() {
-            self.add_class_parent_or_trait(
-                sc,
-                parent_cache,
-                Pass::Traits,
-                &mut extends,
-                errors,
-                use_,
-            )
+        for use_ in self.child.uses.iter() {
+            self.add_class_parent_or_trait(Pass::Traits, &mut extends, use_)
         }
         extends
     }
 
-    fn get_xhp_attr_deps(
-        &self,
-        sc: &ShallowClass<R>,
-        parent_cache: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
-        errors: &mut Vec<TypingError<R>>,
-    ) -> TypeNameIndexSet {
+    fn get_xhp_attr_deps(&mut self) -> TypeNameIndexSet {
         let mut xhp_attr_deps = TypeNameIndexSet::new();
-        for xhp_attr_use in sc.xhp_attr_uses.iter() {
-            self.add_class_parent_or_trait(
-                sc,
-                parent_cache,
-                Pass::Xhp,
-                &mut xhp_attr_deps,
-                errors,
-                xhp_attr_use,
-            )
+        for xhp_attr_use in self.child.xhp_attr_uses.iter() {
+            self.add_class_parent_or_trait(Pass::Xhp, &mut xhp_attr_deps, xhp_attr_use)
         }
         xhp_attr_deps
     }
@@ -570,8 +521,6 @@ impl<R: Reason> DeclFolder<R> {
     /// of trait methods / check that classes satisfy these requirements
     fn flatten_parent_class_reqs(
         &self,
-        parent_cache: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
-        sc: &ShallowClass<R>,
         req_ancestors: &mut Vec<Requirement<R>>,
         req_ancestors_extends: &mut TypeNameIndexSet,
         parent_ty: &DeclTy<R>,
@@ -579,7 +528,7 @@ impl<R: Reason> DeclFolder<R> {
         match parent_ty.unwrap_class_type() {
             None => {}
             Some((_, pos_id, parent_params)) => {
-                match parent_cache.get(&pos_id.id()) {
+                match self.parents.get(&pos_id.id()) {
                     None => {
                         // The class lives in PHP
                     }
@@ -591,7 +540,7 @@ impl<R: Reason> DeclFolder<R> {
                             let ty = substitution.instantiate(&req_ancestor.1);
                             req_ancestors.push(Requirement(pos_id.pos().clone(), ty));
                         });
-                        match sc.kind {
+                        match self.child.kind {
                             ClassishKind::Cclass(_) => {
                                 // Not necessary to accumulate req_ancestors_extends for classes --
                                 // it's not used
@@ -612,7 +561,6 @@ impl<R: Reason> DeclFolder<R> {
 
     fn declared_class_req(
         &self,
-        parent_cache: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
         req_ancestors: &mut Vec<Requirement<R>>,
         req_ancestors_extends: &mut TypeNameIndexSet,
         req_ty: &DeclTy<R>,
@@ -626,8 +574,7 @@ impl<R: Reason> DeclFolder<R> {
                 req_ancestors.push(Requirement(pos_id.pos().clone(), req_ty.clone()));
                 req_ancestors_extends.insert(pos_id.id());
 
-                // TODO: use Decl_env.get_class_and_add_dep equivalent
-                match parent_cache.get(&pos_id.id()) {
+                match self.parents.get(&pos_id.id()) {
                     None => {
                         // The class lives in PHP : error??
                     }
@@ -693,57 +640,37 @@ impl<R: Reason> DeclFolder<R> {
         });
     }
 
-    fn get_class_requirements(
-        &self,
-        sc: &ShallowClass<R>,
-        parent_cache: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
-    ) -> (Vec<Requirement<R>>, TypeNameIndexSet) {
+    fn get_class_requirements(&self) -> (Vec<Requirement<R>>, TypeNameIndexSet) {
         let mut req_ancestors = vec![];
         let mut req_ancestors_extends = TypeNameIndexSet::new();
 
-        for req_extend in sc.req_extends.iter() {
-            self.declared_class_req(
-                parent_cache,
-                &mut req_ancestors,
-                &mut req_ancestors_extends,
-                req_extend,
-            );
+        for req_extend in self.child.req_extends.iter() {
+            self.declared_class_req(&mut req_ancestors, &mut req_ancestors_extends, req_extend);
         }
 
-        for req_implement in sc.req_implements.iter() {
+        for req_implement in self.child.req_implements.iter() {
             self.declared_class_req(
-                parent_cache,
                 &mut req_ancestors,
                 &mut req_ancestors_extends,
                 req_implement,
             );
         }
 
-        for use_ in sc.uses.iter() {
-            self.flatten_parent_class_reqs(
-                parent_cache,
-                sc,
-                &mut req_ancestors,
-                &mut req_ancestors_extends,
-                use_,
-            );
+        for use_ in self.child.uses.iter() {
+            self.flatten_parent_class_reqs(&mut req_ancestors, &mut req_ancestors_extends, use_);
         }
 
-        if sc.kind.is_cinterface() {
-            for extend in sc.extends.iter() {
+        if self.child.kind.is_cinterface() {
+            for extend in self.child.extends.iter() {
                 self.flatten_parent_class_reqs(
-                    parent_cache,
-                    sc,
                     &mut req_ancestors,
                     &mut req_ancestors_extends,
                     extend,
                 );
             }
         } else {
-            for implement in sc.implements.iter() {
+            for implement in self.child.implements.iter() {
                 self.flatten_parent_class_reqs(
-                    parent_cache,
-                    sc,
                     &mut req_ancestors,
                     &mut req_ancestors_extends,
                     implement,
@@ -755,19 +682,17 @@ impl<R: Reason> DeclFolder<R> {
         (req_ancestors, req_ancestors_extends)
     }
 
-    fn get_sealed_whitelist(&self, sc: &ShallowClass<R>) -> Option<TypeNameIndexSet> {
-        sc.user_attributes
+    fn get_sealed_whitelist(&self) -> Option<TypeNameIndexSet> {
+        self.child
+            .user_attributes
             .iter()
             .find(|ua| ua.name.id() == self.special_names.user_attributes.uaSealed)
             .map(|ua| ua.classname_params.iter().copied().collect())
     }
 
-    fn get_deferred_init_members_helper(
-        &self,
-        parents: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
-        sc: &ShallowClass<R>,
-    ) -> PropNameIndexSet {
-        let shallow_props = sc
+    fn get_deferred_init_members_helper(&self) -> PropNameIndexSet {
+        let shallow_props = self
+            .child
             .props
             .iter()
             .filter(|prop| prop.xhp_attr.is_none())
@@ -775,23 +700,24 @@ impl<R: Reason> DeclFolder<R> {
             .filter(|prop| prop.flags.needs_init())
             .map(|prop| prop.name.id());
 
-        let extends_props = sc
+        let extends_props = self
+            .child
             .extends
             .iter()
             .filter_map(|extend| extend.unwrap_class_type())
-            .filter_map(|(_, pos_id, _)| parents.get(&pos_id.id()))
+            .filter_map(|(_, pos_id, _)| self.parents.get(&pos_id.id()))
             .flat_map(|ty| ty.deferred_init_members.iter().copied());
 
-        let parent_construct = if sc.mode == oxidized::file_info::Mode::Mhhi {
+        let parent_construct = if self.child.mode == oxidized::file_info::Mode::Mhhi {
             None
         } else {
-            if sc.kind == ClassishKind::Ctrait {
-                sc.req_extends.iter()
+            if self.child.kind == ClassishKind::Ctrait {
+                self.child.req_extends.iter()
             } else {
-                sc.extends.iter()
+                self.child.extends.iter()
             }
             .filter_map(|ty| ty.unwrap_class_type())
-            .filter_map(|(_, pos_id, _)| parents.get(&pos_id.id()))
+            .filter_map(|(_, pos_id, _)| self.parents.get(&pos_id.id()))
             .find(|parent| parent.has_concrete_constructor())
             .map(|_| PropName(self.special_names.members.parentConstruct))
         };
@@ -804,102 +730,101 @@ impl<R: Reason> DeclFolder<R> {
 
     /// Return all init-requiring props of the class and its ancestors from the
     /// given shallow class decl and the ancestors' folded decls.
-    fn get_deferred_init_members(
-        &self,
-        cstr: &Option<FoldedElement>,
-        parents: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
-        sc: &ShallowClass<R>,
-    ) -> PropNameIndexSet {
+    fn get_deferred_init_members(&self, cstr: &Option<FoldedElement>) -> PropNameIndexSet {
         let has_concrete_cstr = match cstr {
             Some(e) if !e.is_abstract() => true,
             _ => false,
         };
-        let has_own_cstr = has_concrete_cstr && sc.constructor.is_some();
-        match sc.kind {
+        let has_own_cstr = has_concrete_cstr && self.child.constructor.is_some();
+        match self.child.kind {
             ClassishKind::Cclass(cls) if cls.is_abstract() && !has_own_cstr => {
-                self.get_deferred_init_members_helper(parents, sc)
+                self.get_deferred_init_members_helper()
             }
-            ClassishKind::Ctrait => self.get_deferred_init_members_helper(parents, sc),
+            ClassishKind::Ctrait => self.get_deferred_init_members_helper(),
             _ => PropNameIndexSet::default(),
         }
     }
 
-    pub fn decl_class(
-        &self,
-        sc: &ShallowClass<R>,
-        parents: &TypeNameIndexMap<Arc<FoldedClass<R>>>,
-        mut errors: Vec<TypingError<R>>,
-    ) -> Arc<FoldedClass<R>> {
-        let inh = Inherited::make(sc, parents);
+    fn decl_class_impl(mut self) -> Arc<FoldedClass<R>> {
+        let inh = Inherited::make(self.child, self.parents);
 
         let mut props = inh.props;
-        sc.props
+        self.child
+            .props
             .iter()
-            .for_each(|sp| self.decl_prop(&mut props, sc, sp));
+            .for_each(|sp| self.decl_prop(&mut props, sp));
 
         let mut static_props = inh.static_props;
-        sc.static_props
+        self.child
+            .static_props
             .iter()
-            .for_each(|ssp| self.decl_static_prop(&mut static_props, sc, ssp));
+            .for_each(|ssp| self.decl_static_prop(&mut static_props, ssp));
 
         let mut methods = inh.methods;
-        sc.methods
+        self.child
+            .methods
             .iter()
-            .for_each(|sm| self.decl_method(&mut methods, sc, sm));
+            .for_each(|sm| self.decl_method(&mut methods, sm));
 
         let mut static_methods = inh.static_methods;
-        sc.static_methods
+        self.child
+            .static_methods
             .iter()
-            .for_each(|sm| self.decl_method(&mut static_methods, sc, sm));
+            .for_each(|sm| self.decl_method(&mut static_methods, sm));
 
         let mut constructor = inh.constructor;
-        self.decl_constructor(&mut constructor, sc);
+        self.decl_constructor(&mut constructor);
 
         let mut ancestors = Default::default();
-        sc.extends
+        self.child
+            .extends
             .iter()
-            .for_each(|ty| self.get_implements(parents, ty, &mut ancestors));
+            .for_each(|ty| self.get_implements(ty, &mut ancestors));
 
         let mut consts = inh.consts;
-        sc.consts
+        self.child
+            .consts
             .iter()
-            .for_each(|c| self.decl_class_const(&mut consts, sc, c));
-        self.decl_class_class(&mut consts, sc);
+            .for_each(|c| self.decl_class_const(&mut consts, c));
+        self.decl_class_class(&mut consts);
 
         let mut type_consts = inh.type_consts;
-        sc.typeconsts
+        self.child
+            .typeconsts
             .iter()
-            .for_each(|tc| self.decl_type_const(&mut type_consts, &mut consts, sc, tc));
+            .for_each(|tc| self.decl_type_const(&mut type_consts, &mut consts, tc));
 
-        let extends = self.get_extends(sc, parents, &mut errors);
-        let xhp_attr_deps = self.get_xhp_attr_deps(sc, parents, &mut errors);
+        let extends = self.get_extends();
+        let xhp_attr_deps = self.get_xhp_attr_deps();
 
-        let (req_ancestors, req_ancestors_extends) = self.get_class_requirements(sc, parents);
+        let (req_ancestors, req_ancestors_extends) = self.get_class_requirements();
 
-        let sealed_whitelist = self.get_sealed_whitelist(sc);
+        let sealed_whitelist = self.get_sealed_whitelist();
 
-        let deferred_init_members = self.get_deferred_init_members(&constructor, parents, sc);
+        let deferred_init_members = self.get_deferred_init_members(&constructor);
 
         Arc::new(FoldedClass {
-            name: sc.name.id(),
-            pos: sc.name.pos().clone(),
-            kind: sc.kind,
-            is_final: sc.is_final,
-            is_const: sc
+            name: self.child.name.id(),
+            pos: self.child.name.pos().clone(),
+            kind: self.child.kind,
+            is_final: self.child.is_final,
+            is_const: self
+                .child
                 .user_attributes
                 .iter()
                 .any(|ua| ua.name.id() == self.special_names.user_attributes.uaConst),
-            is_internal: sc
+            is_internal: self
+                .child
                 .user_attributes
                 .iter()
                 .any(|ua| ua.name.id() == self.special_names.user_attributes.uaInternal),
-            is_xhp: sc.is_xhp,
-            support_dynamic_type: sc.support_dynamic_type,
-            enum_type: sc.enum_type.clone(),
-            has_xhp_keyword: sc.has_xhp_keyword,
-            module: sc.module.clone(),
-            tparams: sc.tparams.clone(),
-            where_constraints: sc.where_constraints.clone(),
+            is_xhp: self.child.is_xhp,
+            support_dynamic_type: self.child.support_dynamic_type,
+            enum_type: self.child.enum_type.clone(),
+            has_xhp_keyword: self.child.has_xhp_keyword,
+            module: self.child.module.clone(),
+            tparams: self.child.tparams.clone(),
+            where_constraints: self.child.where_constraints.clone(),
             substs: inh.substs,
             ancestors,
             props,
@@ -909,14 +834,14 @@ impl<R: Reason> DeclFolder<R> {
             constructor,
             consts,
             type_consts,
-            xhp_enum_values: sc.xhp_enum_values.clone(),
+            xhp_enum_values: self.child.xhp_enum_values.clone(),
             extends,
             xhp_attr_deps,
             req_ancestors: req_ancestors.into_boxed_slice(),
             req_ancestors_extends,
             sealed_whitelist,
             deferred_init_members,
-            decl_errors: errors.into_boxed_slice(),
+            decl_errors: self.errors.into_boxed_slice(),
         })
     }
 }

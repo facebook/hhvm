@@ -257,8 +257,13 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         stack.insert(name);
         let parents = self.decl_class_parents(stack, &mut errors, &shallow_class)?;
         stack.remove(&name);
-        let folder = DeclFolder::new(Arc::clone(&self.opts), self.special_names);
-        Ok(Some(folder.decl_class(&shallow_class, &parents, errors)))
+        Ok(Some(DeclFolder::decl_class(
+            &self.opts,
+            self.special_names,
+            &shallow_class,
+            &parents,
+            errors,
+        )))
     }
 
     fn get_folded_class_impl(

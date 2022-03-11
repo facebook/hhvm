@@ -1,0 +1,4 @@
+
+Fatal error: Uncaught exception 'ReadonlyViolationException' with message '__invoke() returns readonly, but the caller expects a mutable value' in %s:11
+Stack trace:
+%A

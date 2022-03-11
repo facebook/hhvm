@@ -467,7 +467,7 @@ fn make_closure(
         body: fd.body.clone(),
         fun_kind: fd.fun_kind,
         user_attributes: fd.user_attributes.clone(),
-        readonly_ret: None, // readonly_ret on closure_convert
+        readonly_ret: fd.readonly_ret,
         ret: fd.ret.clone(),
         external: false,
         doc_comment: fd.doc_comment.clone(),

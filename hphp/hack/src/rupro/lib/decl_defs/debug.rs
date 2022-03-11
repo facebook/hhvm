@@ -145,6 +145,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             has_xhp_keyword,
             need_init,
             support_dynamic_type,
+            enum_type,
             module,
             tparams,
             where_constraints,
@@ -197,6 +198,9 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
         if *support_dynamic_type {
             s.field("support_dynamic_type", support_dynamic_type);
+        }
+        if let Some(enum_type) = enum_type {
+            s.field("enum_type", enum_type);
         }
         if let Some(module) = module {
             s.field("module", module);

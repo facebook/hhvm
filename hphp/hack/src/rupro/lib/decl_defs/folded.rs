@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl_defs::{
-    ty::XhpEnumValue, CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, Tparam,
-    Typeconst, WhereConstraint, XhpAttribute,
+    ty::XhpEnumValue, CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, EnumType,
+    Tparam, Typeconst, WhereConstraint, XhpAttribute,
 };
 use crate::folded_decl_provider::Subst;
 use crate::reason::Reason;
@@ -141,6 +141,7 @@ pub struct FoldedClass<R: Reason> {
     pub has_xhp_keyword: bool,
     pub support_dynamic_type: bool,
     pub need_init: bool,
+    pub enum_type: Option<EnumType<R>>,
     pub module: Option<Positioned<ModuleName, R::Pos>>,
     pub tparams: Box<[Tparam<R, DeclTy<R>>]>,
     pub where_constraints: Box<[WhereConstraint<DeclTy<R>>]>,

@@ -901,6 +901,7 @@ impl<R: Reason> DeclFolder<R> {
             is_xhp: sc.is_xhp,
             need_init,
             support_dynamic_type: sc.support_dynamic_type,
+            enum_type: sc.enum_type.clone(),
             has_xhp_keyword: sc.has_xhp_keyword,
             module: sc.module.clone(),
             tparams: sc.tparams.clone(),

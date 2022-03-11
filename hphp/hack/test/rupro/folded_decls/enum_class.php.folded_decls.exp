@@ -3,6 +3,11 @@ FoldedClass {
     kind: CenumClass(
         Abstract,
     ),
+    enum_type: EnumType {
+        base: string,
+        constraint: None,
+        includes: [],
+    },
     substs: {
         "\\HH\\BuiltinAbstractEnumClass": SubstContext {
             subst: Subst(
@@ -62,6 +67,13 @@ FoldedClass {
     kind: CenumClass(
         Concrete,
     ),
+    enum_type: EnumType {
+        base: string,
+        constraint: None,
+        includes: [
+            A,
+        ],
+    },
     substs: {
         "\\HH\\BuiltinAbstractEnumClass": SubstContext {
             subst: Subst(

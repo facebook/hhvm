@@ -1,152 +1,165 @@
 File root|module_hint.php--here.php
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = true; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = (Some ([3:54-60], "here")); dc_name = "\\C"; dc_pos = [6:7-8];
-  dc_tparams = []; dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [6:7-8];
-      cc_type =
-      (Rclass_class ([6:7-8]),
-       (Tapply (([6:7-8], "\\HH\\classname"),
-          [(Rclass_class ([6:7-8]), Tthis)])));
-      cc_origin = "\\C"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
-  dc_methods =
-  { "bar" ->
-    { Decl_defs.elt_flags =
-      { "Abstract" -> false;
-        "Const" -> false;
-        "Dynamicallycallable" -> false;
-        "Final" -> false;
-        "Lateinit" -> false;
-        "Lsb" -> false;
-        "NeedsInit" -> false;
-        "ReadonlyProp" -> false;
-        "SuperfluousOverride" -> false;
-        "SupportDynamicType" -> false;
-        "Synthesized" -> false;
-        "XaHasDefault" -> false;
-        "XaTagLateinit" -> false;
-        "XaTagRequired" -> false };
-      elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
-      elt_deprecated = None } };
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
+FoldedClass {
+    name: "\\C",
+    pos: Pos(root|module_hint.php--here.php, 6:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    is_internal: true,
+    module: (
+        Pos(root|module_hint.php--here.php, 3:54-60),
+        "here",
+    ),
+    methods: {
+        "bar": FoldedElement {
+            flags: (empty),
+            origin: "\\C",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|module_hint.php--here.php, 6:7-8),
+            ty: HH\classname<this>,
+            origin: "\\C",
+            refs: [],
+        },
+    },
+}
 
 File root|module_hint.php--there.php
 --- ocaml
 +++ rupro
-@@ -1,79 +1,79 @@
- { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = true; dc_deferred_init_members = {};
-   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = (Some ([2:54-61], "there")); dc_name = "\\D"; dc_pos = [5:7-8];
-   dc_tparams = []; dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [5:7-8];
-       cc_type =
-       (Rclass_class ([5:7-8]),
-        (Tapply (([5:7-8], "\\HH\\classname"),
-           [(Rclass_class ([5:7-8]), Tthis)])));
-       cc_origin = "\\D"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = true; dc_deferred_init_members = {};
-   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = (Some ([2:54-61], "there")); dc_name = "\\G"; dc_pos = [8:7-8];
-   dc_tparams =
-   [{ Typing_defs_core.tp_variance = Invariant; tp_name = ([8:9-10], "T");
-      tp_tparams = []; tp_constraints = []; tp_reified = Erased;
-      tp_user_attributes = [] }
-     ];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [8:7-8];
-       cc_type =
-       (Rclass_class ([8:7-8]),
-        (Tapply (([8:7-8], "\\HH\\classname"),
-           [(Rclass_class ([8:7-8]), Tthis)])));
-       cc_origin = "\\G"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-   dc_const = false; dc_internal = true; dc_deferred_init_members = {};
-   dc_kind = Cenum; dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = (Some ([2:54-61], "there")); dc_name = "\\E";
-   dc_pos = [11:6-7]; dc_tparams = []; dc_where_constraints = [];
-   dc_substs = {};
-   dc_consts =
-   { "A" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [12:3-4];
--      cc_type = (Rhint ([11:10-13]), (Tapply (([11:6-7], "\\E"), [])));
-+      cc_type = (Rwitness_from_decl ([12:7-8]), (Tprim Tint));
-       cc_origin = "\\E"; cc_refs = [] };
-     "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [11:6-7];
-       cc_type =
-       (Rclass_class ([11:6-7]),
-        (Tapply (([11:6-7], "\\HH\\classname"),
-           [(Rclass_class ([11:6-7]), Tthis)])));
-       cc_origin = "\\E"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors =
-   { "\\HH\\BuiltinEnum" ->
-     (Rhint ([11:6-7]),
-      (Tapply (([11:6-7], "\\HH\\BuiltinEnum"),
-         [(Rhint ([11:6-7]), (Tapply (([11:6-7], "\\E"), [])))]))) };
-   dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnum" };
-   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
-   dc_enum_type =
-   (Some { Typing_defs.te_base = (Rhint ([11:10-13]), (Tprim Tint));
-           te_constraint = None; te_includes = [] });
-   dc_decl_errors = <opaque> }
+@@ -1,96 +1,96 @@
+ FoldedClass {
+     name: "\\D",
+     pos: Pos(root|module_hint.php--there.php, 5:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_internal: true,
+     module: (
+         Pos(root|module_hint.php--there.php, 2:54-61),
+         "there",
+     ),
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|module_hint.php--there.php, 5:7-8),
+             ty: HH\classname<this>,
+             origin: "\\D",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\G",
+     pos: Pos(root|module_hint.php--there.php, 8:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     is_internal: true,
+     module: (
+         Pos(root|module_hint.php--there.php, 2:54-61),
+         "there",
+     ),
+     tparams: [
+         Tparam {
+             variance: Invariant,
+             name: (
+                 Pos(root|module_hint.php--there.php, 8:9-10),
+                 "T",
+             ),
+             tparams: [],
+             constraints: [],
+             reified: Erased,
+             user_attributes: [],
+         },
+     ],
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|module_hint.php--there.php, 8:7-8),
+             ty: HH\classname<this>,
+             origin: "\\G",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\E",
+     pos: Pos(root|module_hint.php--there.php, 11:6-7),
+     kind: Cenum,
+     is_internal: true,
+     enum_type: EnumType {
+         base: int,
+         constraint: None,
+         includes: [],
+     },
+     module: (
+         Pos(root|module_hint.php--there.php, 2:54-61),
+         "there",
+     ),
+     ancestors: {
+         "\\HH\\BuiltinEnum": HH\BuiltinEnum<E>,
+     },
+     consts: {
+         "A": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|module_hint.php--there.php, 12:3-4),
+-            ty: E,
++            ty: int,
+             origin: "\\E",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|module_hint.php--there.php, 11:6-7),
+             ty: HH\classname<this>,
+             origin: "\\E",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\HH\\BuiltinEnum",
+     },
+ }
 
 File root|module_hint.php--everywhere.php
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\MyList"; dc_pos = [5:7-13];
-  dc_tparams =
-  [{ Typing_defs_core.tp_variance = Invariant; tp_name = ([5:14-15], "T");
-     tp_tparams = []; tp_constraints = []; tp_reified = Erased;
-     tp_user_attributes = [] }
-    ];
-  dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [5:7-13];
-      cc_type =
-      (Rclass_class ([5:7-13]),
-       (Tapply (([5:7-13], "\\HH\\classname"),
-          [(Rclass_class ([5:7-13]), Tthis)])));
-      cc_origin = "\\MyList"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
+FoldedClass {
+    name: "\\MyList",
+    pos: Pos(root|module_hint.php--everywhere.php, 5:7-13),
+    kind: Cclass(
+        Concrete,
+    ),
+    tparams: [
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|module_hint.php--everywhere.php, 5:14-15),
+                "T",
+            ),
+            tparams: [],
+            constraints: [],
+            reified: Erased,
+            user_attributes: [],
+        },
+    ],
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|module_hint.php--everywhere.php, 5:7-13),
+            ty: HH\classname<this>,
+            origin: "\\MyList",
+            refs: [],
+        },
+    },
+}

@@ -1,58 +1,81 @@
 --- ocaml
 +++ rupro
-@@ -1,49 +1,49 @@
- { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = Cenum; dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\Foo"; dc_pos = [3:6-9]; dc_tparams = [];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "BAR" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [5:3-6];
--      cc_type = (Rhint ([3:11-14]), (Tapply (([3:6-9], "\\Foo"), [])));
-+      cc_type = (Rwitness_from_decl ([5:9-11]), (Tprim Tint));
-       cc_origin = "\\Foo"; cc_refs = [] };
-     "BAZ" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [6:3-6];
--      cc_type = (Rhint ([3:11-14]), (Tapply (([3:6-9], "\\Foo"), [])));
--      cc_origin = "\\Foo"; cc_refs = [((Typing_defs.From "\\Foo"), "FOO")] };
-+      cc_type = (Rwitness_from_decl ([6:3-6]), Tany); cc_origin = "\\Foo";
-+      cc_refs = [((Typing_defs.From "\\Foo"), "FOO")] };
-     "FOO" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [4:3-6];
--      cc_type = (Rhint ([3:11-14]), (Tapply (([3:6-9], "\\Foo"), [])));
-+      cc_type = (Rwitness_from_decl ([4:9-10]), (Tprim Tint));
-       cc_origin = "\\Foo"; cc_refs = [] };
-     "QUX" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [7:3-6];
--      cc_type = (Rhint ([3:11-14]), (Tapply (([3:6-9], "\\Foo"), [])));
--      cc_origin = "\\Foo"; cc_refs = [((Typing_defs.From "\\Foo"), "BAR")] };
-+      cc_type = (Rwitness_from_decl ([7:3-6]), Tany); cc_origin = "\\Foo";
-+      cc_refs = [((Typing_defs.From "\\Foo"), "BAR")] };
-     "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:6-9];
-       cc_type =
-       (Rclass_class ([3:6-9]),
-        (Tapply (([3:6-9], "\\HH\\classname"),
-           [(Rclass_class ([3:6-9]), Tthis)])));
-       cc_origin = "\\Foo"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors =
-   { "\\HH\\BuiltinEnum" ->
-     (Rhint ([3:6-9]),
-      (Tapply (([3:6-9], "\\HH\\BuiltinEnum"),
-         [(Rhint ([3:6-9]), (Tapply (([3:6-9], "\\Foo"), [])))]))) };
-   dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnum" };
-   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
-   dc_enum_type =
-   (Some { Typing_defs.te_base = (Rhint ([3:11-14]), (Tprim Tint));
-           te_constraint = (Some (Rhint ([3:18-21]), (Tprim Tint)));
-           te_includes = [] });
-   dc_decl_errors = <opaque> }
+@@ -1,74 +1,74 @@
+ FoldedClass {
+     name: "\\Foo",
+     pos: Pos(root|enums.php, 3:6-9),
+     kind: Cenum,
+     enum_type: EnumType {
+         base: int,
+         constraint: Some(
+             int,
+         ),
+         includes: [],
+     },
+     ancestors: {
+         "\\HH\\BuiltinEnum": HH\BuiltinEnum<Foo>,
+     },
+     consts: {
+         "BAR": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|enums.php, 5:3-6),
+-            ty: Foo,
++            ty: int,
+             origin: "\\Foo",
+             refs: [],
+         },
+         "BAZ": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|enums.php, 6:3-6),
+-            ty: Foo,
++            ty: _,
+             origin: "\\Foo",
+             refs: [
+                 ClassConstRef(
+                     From(
+                         "\\Foo",
+                     ),
+                     "FOO",
+                 ),
+             ],
+         },
+         "FOO": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|enums.php, 4:3-6),
+-            ty: Foo,
++            ty: int,
+             origin: "\\Foo",
+             refs: [],
+         },
+         "QUX": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|enums.php, 7:3-6),
+-            ty: Foo,
++            ty: _,
+             origin: "\\Foo",
+             refs: [
+                 ClassConstRef(
+                     From(
+                         "\\Foo",
+                     ),
+                     "BAR",
+                 ),
+             ],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|enums.php, 3:6-9),
+             ty: HH\classname<this>,
+             origin: "\\Foo",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\HH\\BuiltinEnum",
+     },
+ }

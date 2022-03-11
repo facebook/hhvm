@@ -1,57 +1,52 @@
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\TestClass"; dc_pos = [3:7-16];
-  dc_tparams = []; dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "KEY" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [4:16-19];
-      cc_type = (Rhint ([4:9-15]), (Tprim Tstring));
-      cc_origin = "\\TestClass"; cc_refs = [] };
-    "TClassType" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [6:14-24];
-      cc_type =
-      (Rwitness_from_decl ([6:14-24]),
-       (Tapply (([6:14-24], "\\HH\\TypeStructure"),
-          [(Rwitness_from_decl ([6:14-24]),
-            (Taccess
-               ((Rwitness_from_decl ([6:14-24]), Tthis),
-                [([6:14-24], "TClassType")])))
-            ]
-          )));
-      cc_origin = "\\TestClass"; cc_refs = [] };
-    "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:7-16];
-      cc_type =
-      (Rclass_class ([3:7-16]),
-       (Tapply (([3:7-16], "\\HH\\classname"),
-          [(Rclass_class ([3:7-16]), Tthis)])));
-      cc_origin = "\\TestClass"; cc_refs = [] } };
-  dc_typeconsts =
-  { "TClassType" ->
-    { Typing_defs.ttc_synthesized = false;
-      ttc_name = ([6:14-24], "TClassType");
-      ttc_kind =
-      (Typing_defs.TCConcrete
-         { Typing_defs.tc_type =
-           (Rhint ([6:27-8:4]),
-            (Tshape (Typing_defs_core.Closed_shape,
-               { (Typing_defs_core.TSFclass_const (([7:5-9], "\\TestClass"),
-                    ([7:11-14], "KEY"))) ->
-                 { sft_optional = false;
-                   sft_ty = (Rhint ([7:18-21]), (Tprim Tint)) } }
-               )))
-           });
-      ttc_origin = "\\TestClass"; ttc_enforceable = ([Pos.none], false);
-      ttc_reifiable = None; ttc_concretized = false; ttc_is_ctx = false } };
-  dc_props = {}; dc_sprops = {}; dc_methods = {}; dc_smethods = {};
-  dc_construct = (None, Typing_defs_core.Inconsistent); dc_ancestors = {};
-  dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
+FoldedClass {
+    name: "\\TestClass",
+    pos: Pos(root|shape_self.php, 3:7-16),
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "KEY": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|shape_self.php, 4:16-19),
+            ty: string,
+            origin: "\\TestClass",
+            refs: [],
+        },
+        "TClassType": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|shape_self.php, 6:14-24),
+            ty: HH\TypeStructure<this::TClassType>,
+            origin: "\\TestClass",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|shape_self.php, 3:7-16),
+            ty: HH\classname<this>,
+            origin: "\\TestClass",
+            refs: [],
+        },
+    },
+    type_consts: {
+        "TClassType": TypeConst {
+            is_synthesized: false,
+            name: (
+                Pos(root|shape_self.php, 6:14-24),
+                "TClassType",
+            ),
+            kind: ConcreteTypeconst {
+                ty: shape(TestClass::KEY => int),
+            },
+            origin: "\\TestClass",
+            enforceable: None,
+            reifiable: None,
+            is_concretized: false,
+            is_ctx: false,
+        },
+    },
+}
 
 They matched!

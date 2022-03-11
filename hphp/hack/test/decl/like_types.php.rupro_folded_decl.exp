@@ -1,64 +1,58 @@
-{ Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Abstract); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\X"; dc_pos = [10:16-17]; dc_tparams = [];
-  dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "T" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = (Typing_defs.CCAbstract false); cc_pos = [11:23-24];
-      cc_type =
-      (Rwitness_from_decl ([11:23-24]),
-       (Tapply (([11:23-24], "\\HH\\TypeStructure"),
-          [(Rwitness_from_decl ([11:23-24]),
-            (Taccess
-               ((Rwitness_from_decl ([11:23-24]), Tthis), [([11:23-24], "T")])))
-            ]
-          )));
-      cc_origin = "\\X"; cc_refs = [] };
-    "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [10:16-17];
-      cc_type =
-      (Rclass_class ([10:16-17]),
-       (Tapply (([10:16-17], "\\HH\\classname"),
-          [(Rclass_class ([10:16-17]), Tthis)])));
-      cc_origin = "\\X"; cc_refs = [] } };
-  dc_typeconsts =
-  { "T" ->
-    { Typing_defs.ttc_synthesized = false; ttc_name = ([11:23-24], "T");
-      ttc_kind =
-      (Typing_defs.TCAbstract
-         { Typing_defs.atc_as_constraint =
-           (Some (Rhint ([11:28-32]),
-                  (Tlike (Rhint ([11:29-32]), (Tprim Tint)))));
-           atc_super_constraint = None; atc_default = None });
-      ttc_origin = "\\X"; ttc_enforceable = ([Pos.none], false);
-      ttc_reifiable = None; ttc_concretized = false; ttc_is_ctx = false } };
-  dc_props = {}; dc_sprops = {};
-  dc_methods =
-  { "f" ->
-    { Decl_defs.elt_flags =
-      { "Abstract" -> false;
-        "Const" -> false;
-        "Dynamicallycallable" -> false;
-        "Final" -> false;
-        "Lateinit" -> false;
-        "Lsb" -> false;
-        "NeedsInit" -> false;
-        "ReadonlyProp" -> false;
-        "SuperfluousOverride" -> false;
-        "SupportDynamicType" -> false;
-        "Synthesized" -> false;
-        "XaHasDefault" -> false;
-        "XaTagLateinit" -> false;
-        "XaTagRequired" -> false };
-      elt_origin = "\\X"; elt_visibility = Typing_defs_core.Vpublic;
-      elt_deprecated = None } };
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
+FoldedClass {
+    name: "\\X",
+    pos: Pos(root|like_types.php, 10:16-17),
+    kind: Cclass(
+        Abstract,
+    ),
+    methods: {
+        "f": FoldedElement {
+            flags: (empty),
+            origin: "\\X",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "T": ClassConst {
+            is_synthesized: true,
+            kind: CCAbstract(
+                false,
+            ),
+            pos: Pos(root|like_types.php, 11:23-24),
+            ty: HH\TypeStructure<this::T>,
+            origin: "\\X",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|like_types.php, 10:16-17),
+            ty: HH\classname<this>,
+            origin: "\\X",
+            refs: [],
+        },
+    },
+    type_consts: {
+        "T": TypeConst {
+            is_synthesized: false,
+            name: (
+                Pos(root|like_types.php, 11:23-24),
+                "T",
+            ),
+            kind: AbstractTypeconst {
+                as_constraint: Some(
+                    ~int,
+                ),
+                super_constraint: None,
+                default: None,
+            },
+            origin: "\\X",
+            enforceable: None,
+            reifiable: None,
+            is_concretized: false,
+            is_ctx: false,
+        },
+    },
+}
 
 They matched!

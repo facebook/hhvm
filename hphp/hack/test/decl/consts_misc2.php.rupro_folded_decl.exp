@@ -1,238 +1,290 @@
 --- ocaml
 +++ rupro
-@@ -1,231 +1,231 @@
- { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = true;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Abstract); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\TestC"; dc_pos = [3:22-27]; dc_tparams = [];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:22-27];
-       cc_type =
-       (Rclass_class ([3:22-27]),
-        (Tapply (([3:22-27], "\\HH\\classname"),
-           [(Rclass_class ([3:22-27]), Tthis)])));
-       cc_origin = "\\TestC"; cc_refs = [] };
-     "i" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [5:13-14];
-       cc_type = (Rhint ([5:9-12]), (Tprim Tint)); cc_origin = "\\TestC";
-       cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-   dc_smethods =
-   { "i" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\TestC"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
--  dc_construct = (None, Typing_defs_core.FinalClass); dc_ancestors = {};
-+  dc_construct = (None, Typing_defs_core.Inconsistent); dc_ancestors = {};
-   dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = Cenum; dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\TestE"; dc_pos = [7:6-11]; dc_tparams = [];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "X" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [7:25-26];
--      cc_type = (Rhint ([7:13-16]), (Tapply (([7:6-11], "\\TestE"), [])));
-+      cc_type = (Rwitness_from_decl ([7:29-30]), (Tprim Tint));
-       cc_origin = "\\TestE"; cc_refs = [] };
-     "Y" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [7:32-33];
--      cc_type = (Rhint ([7:13-16]), (Tapply (([7:6-11], "\\TestE"), [])));
-+      cc_type = (Rwitness_from_decl ([7:36-37]), (Tprim Tint));
-       cc_origin = "\\TestE"; cc_refs = [] };
-     "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [7:6-11];
-       cc_type =
-       (Rclass_class ([7:6-11]),
-        (Tapply (([7:6-11], "\\HH\\classname"),
-           [(Rclass_class ([7:6-11]), Tthis)])));
-       cc_origin = "\\TestE"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors =
-   { "\\HH\\BuiltinEnum" ->
-     (Rhint ([7:6-11]),
-      (Tapply (([7:6-11], "\\HH\\BuiltinEnum"),
-         [(Rhint ([7:6-11]), (Tapply (([7:6-11], "\\TestE"), [])))]))) };
-   dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnum" };
-   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
-   dc_enum_type =
-   (Some { Typing_defs.te_base = (Rhint ([7:13-16]), (Tprim Tint));
-           te_constraint = (Some (Rhint ([7:20-23]), (Tprim Tint)));
-           te_includes = [] });
-   dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = true;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Abstract); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\TestRefs1"; dc_pos = [9:22-31];
-   dc_tparams = []; dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "A" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [10:15-16];
-       cc_type = (Rhint ([10:9-14]), Tmixed); cc_origin = "\\TestRefs1";
-       cc_refs = [((Typing_defs.From "\\TestE"), "X")] };
-     "B" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [11:15-16];
-       cc_type = (Rhint ([11:9-14]), Tmixed); cc_origin = "\\TestRefs1";
-       cc_refs =
-       [((Typing_defs.From "\\TestE"), "X");
-         ((Typing_defs.From "\\TestE"), "Y")]
-       };
-     "C" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [12:15-16];
-       cc_type = (Rhint ([12:9-14]), Tmixed); cc_origin = "\\TestRefs1";
-       cc_refs = [((Typing_defs.From "\\TestE"), "X")] };
-     "D" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [13:15-16];
-       cc_type = (Rhint ([13:9-14]), Tmixed); cc_origin = "\\TestRefs1";
-       cc_refs = [((Typing_defs.From "\\TestE"), "X")] };
-     "E" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [14:15-16];
-       cc_type = (Rhint ([14:9-14]), Tmixed); cc_origin = "\\TestRefs1";
-       cc_refs = [((Typing_defs.From "\\TestC"), "class")] };
-     "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [9:22-31];
-       cc_type =
-       (Rclass_class ([9:22-31]),
-        (Tapply (([9:22-31], "\\HH\\classname"),
-           [(Rclass_class ([9:22-31]), Tthis)])));
-       cc_origin = "\\TestRefs1"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
--  dc_smethods = {}; dc_construct = (None, Typing_defs_core.FinalClass);
-+  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cenum_class Concrete); dc_is_xhp = false;
-   dc_has_xhp_keyword = false; dc_module = None; dc_name = "\\TestRefs2";
-   dc_pos = [17:12-21]; dc_tparams = []; dc_where_constraints = [];
-   dc_substs = {};
-   dc_consts =
-   { "B" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [20:9-10];
-       cc_type =
-       (Rhint ([20:9-10]),
-        (Tapply (([20:9-10], "\\HH\\MemberOf"),
-           [(Rhint ([20:9-10]), (Tapply (([20:9-10], "\\TestRefs2"), [])));
-             (Rhint ([20:3-8]), Tmixed)]
-           )));
-       cc_origin = "\\TestRefs2";
-       cc_refs =
-       [(Typing_defs.Self, "K2"); ((Typing_defs.From "\\TestRefs2"), "K1")] };
-     "F" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [21:9-10];
-       cc_type =
-       (Rhint ([21:9-10]),
-        (Tapply (([21:9-10], "\\HH\\MemberOf"),
-           [(Rhint ([21:9-10]), (Tapply (([21:9-10], "\\TestRefs2"), [])));
-             (Rhint ([21:3-8]), Tmixed)]
-           )));
-       cc_origin = "\\TestRefs2";
-       cc_refs = [((Typing_defs.From "\\TestC"), "i")] };
-     "G" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [22:9-10];
-       cc_type =
-       (Rhint ([22:9-10]),
-        (Tapply (([22:9-10], "\\HH\\MemberOf"),
-           [(Rhint ([22:9-10]), (Tapply (([22:9-10], "\\TestRefs2"), [])));
-             (Rhint ([22:3-8]), Tmixed)]
-           )));
-       cc_origin = "\\TestRefs2";
-       cc_refs = [((Typing_defs.From "\\TestC"), "i")] };
-     "H" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [23:9-10];
-       cc_type =
-       (Rhint ([23:9-10]),
-        (Tapply (([23:9-10], "\\HH\\MemberOf"),
-           [(Rhint ([23:9-10]), (Tapply (([23:9-10], "\\TestRefs2"), [])));
-             (Rhint ([23:3-8]), Tmixed)]
-           )));
-       cc_origin = "\\TestRefs2";
-       cc_refs = [((Typing_defs.From "\\TestC"), "i")] };
-     "K1" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [18:10-12];
-       cc_type =
-       (Rhint ([18:10-12]),
-        (Tapply (([18:10-12], "\\HH\\MemberOf"),
-           [(Rhint ([18:10-12]), (Tapply (([18:10-12], "\\TestRefs2"), [])));
-             (Rhint ([18:3-9]), (Tprim Tstring))]
-           )));
-       cc_origin = "\\TestRefs2"; cc_refs = [] };
-     "K2" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [19:10-12];
-       cc_type =
-       (Rhint ([19:10-12]),
-        (Tapply (([19:10-12], "\\HH\\MemberOf"),
-           [(Rhint ([19:10-12]), (Tapply (([19:10-12], "\\TestRefs2"), [])));
-             (Rhint ([19:3-9]), (Tprim Tstring))]
-           )));
-       cc_origin = "\\TestRefs2"; cc_refs = [] };
-     "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [17:12-21];
-       cc_type =
-       (Rclass_class ([17:12-21]),
-        (Tapply (([17:12-21], "\\HH\\classname"),
-           [(Rclass_class ([17:12-21]), Tthis)])));
-       cc_origin = "\\TestRefs2"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors =
-   { "\\HH\\BuiltinEnumClass" ->
-     (Rhint ([17:12-21]),
-      (Tapply (([17:12-21], "\\HH\\BuiltinEnumClass"),
-         [(Rhint ([17:12-21]),
-           (Tapply (([17:12-21], "\\HH\\MemberOf"),
-              [(Rhint ([17:12-21]), (Tapply (([17:12-21], "\\TestRefs2"), [])));
-                (Rhint ([17:22-27]), Tmixed)]
-              )))
-           ]
-         ))) };
-   dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnumClass" };
-   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
-   dc_enum_type =
-   (Some { Typing_defs.te_base = (Rhint ([17:22-27]), Tmixed);
-           te_constraint = None; te_includes = [] });
-   dc_decl_errors = <opaque> }
+@@ -1,285 +1,285 @@
+ FoldedClass {
+     name: "\\TestC",
+     pos: Pos(root|consts_misc2.php, 3:22-27),
+     kind: Cclass(
+         Abstract,
+     ),
+     is_final: true,
+     static_methods: {
+         "i": FoldedElement {
+             flags: (empty),
+             origin: "\\TestC",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 3:22-27),
+             ty: HH\classname<this>,
+             origin: "\\TestC",
+             refs: [],
+         },
+         "i": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 5:13-14),
+             ty: int,
+             origin: "\\TestC",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\TestE",
+     pos: Pos(root|consts_misc2.php, 7:6-11),
+     kind: Cenum,
+     enum_type: EnumType {
+         base: int,
+         constraint: Some(
+             int,
+         ),
+         includes: [],
+     },
+     ancestors: {
+         "\\HH\\BuiltinEnum": HH\BuiltinEnum<TestE>,
+     },
+     consts: {
+         "X": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 7:25-26),
+-            ty: TestE,
++            ty: int,
+             origin: "\\TestE",
+             refs: [],
+         },
+         "Y": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 7:32-33),
+-            ty: TestE,
++            ty: int,
+             origin: "\\TestE",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 7:6-11),
+             ty: HH\classname<this>,
+             origin: "\\TestE",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\HH\\BuiltinEnum",
+     },
+ }
+ FoldedClass {
+     name: "\\TestRefs1",
+     pos: Pos(root|consts_misc2.php, 9:22-31),
+     kind: Cclass(
+         Abstract,
+     ),
+     is_final: true,
+     consts: {
+         "A": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 10:15-16),
+             ty: mixed,
+             origin: "\\TestRefs1",
+             refs: [
+                 ClassConstRef(
+                     From(
+                         "\\TestE",
+                     ),
+                     "X",
+                 ),
+             ],
+         },
+         "B": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 11:15-16),
+             ty: mixed,
+             origin: "\\TestRefs1",
+             refs: [
+                 ClassConstRef(
+                     From(
+                         "\\TestE",
+                     ),
+                     "X",
+                 ),
+                 ClassConstRef(
+                     From(
+                         "\\TestE",
+                     ),
+                     "Y",
+                 ),
+             ],
+         },
+         "C": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 12:15-16),
+             ty: mixed,
+             origin: "\\TestRefs1",
+             refs: [
+                 ClassConstRef(
+                     From(
+                         "\\TestE",
+                     ),
+                     "X",
+                 ),
+             ],
+         },
+         "D": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 13:15-16),
+             ty: mixed,
+             origin: "\\TestRefs1",
+             refs: [
+                 ClassConstRef(
+                     From(
+                         "\\TestE",
+                     ),
+                     "X",
+                 ),
+             ],
+         },
+         "E": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 14:15-16),
+             ty: mixed,
+             origin: "\\TestRefs1",
+             refs: [
+                 ClassConstRef(
+                     From(
+                         "\\TestC",
+                     ),
+                     "class",
+                 ),
+             ],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 9:22-31),
+             ty: HH\classname<this>,
+             origin: "\\TestRefs1",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\TestRefs2",
+     pos: Pos(root|consts_misc2.php, 17:12-21),
+     kind: CenumClass(
+         Concrete,
+     ),
+     enum_type: EnumType {
+         base: mixed,
+         constraint: None,
+         includes: [],
+     },
+     ancestors: {
+         "\\HH\\BuiltinEnumClass": HH\BuiltinEnumClass<HH\MemberOf<TestRefs2, mixed>>,
+     },
+     consts: {
+         "B": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 20:9-10),
+             ty: HH\MemberOf<TestRefs2, mixed>,
+             origin: "\\TestRefs2",
+             refs: [
+                 ClassConstRef(
+                     Self_,
+                     "K2",
+                 ),
+                 ClassConstRef(
+                     From(
+                         "\\TestRefs2",
+                     ),
+                     "K1",
+                 ),
+             ],
+         },
+         "F": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 21:9-10),
+             ty: HH\MemberOf<TestRefs2, mixed>,
+             origin: "\\TestRefs2",
+             refs: [
+                 ClassConstRef(
+                     From(
+                         "\\TestC",
+                     ),
+                     "i",
+                 ),
+             ],
+         },
+         "G": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 22:9-10),
+             ty: HH\MemberOf<TestRefs2, mixed>,
+             origin: "\\TestRefs2",
+             refs: [
+                 ClassConstRef(
+                     From(
+                         "\\TestC",
+                     ),
+                     "i",
+                 ),
+             ],
+         },
+         "H": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 23:9-10),
+             ty: HH\MemberOf<TestRefs2, mixed>,
+             origin: "\\TestRefs2",
+             refs: [
+                 ClassConstRef(
+                     From(
+                         "\\TestC",
+                     ),
+                     "i",
+                 ),
+             ],
+         },
+         "K1": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 18:10-12),
+             ty: HH\MemberOf<TestRefs2, string>,
+             origin: "\\TestRefs2",
+             refs: [],
+         },
+         "K2": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 19:10-12),
+             ty: HH\MemberOf<TestRefs2, string>,
+             origin: "\\TestRefs2",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|consts_misc2.php, 17:12-21),
+             ty: HH\classname<this>,
+             origin: "\\TestRefs2",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\HH\\BuiltinEnumClass",
+     },
+ }

@@ -1,332 +1,296 @@
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\DictConsts"; dc_pos = [4:7-17];
-  dc_tparams = []; dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "CDICT" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [5:27-32];
-      cc_type =
-      (Rhint ([5:9-26]),
-       (Tapply (([5:9-13], "\\HH\\dict"),
-          [(Rhint ([5:14-17]), (Tprim Tint));
-            (Rhint ([5:19-25]), (Tprim Tstring))]
-          )));
-      cc_origin = "\\DictConsts"; cc_refs = [] };
-    "CNESTED_DICT" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [6:38-50];
-      cc_type =
-      (Rhint ([6:9-37]),
-       (Tapply (([6:9-13], "\\HH\\dict"),
-          [(Rhint ([6:14-17]), (Tprim Tint));
-            (Rhint ([6:19-36]),
-             (Tapply (([6:19-23], "\\HH\\dict"),
-                [(Rhint ([6:24-27]), (Tprim Tint));
-                  (Rhint ([6:29-35]), (Tprim Tstring))]
-                )))
-            ]
-          )));
-      cc_origin = "\\DictConsts"; cc_refs = [] };
-    "CNESTED_DICT_FLOAT" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [8:37-55];
-      cc_type =
-      (Rhint ([8:9-36]),
-       (Tapply (([8:9-13], "\\HH\\dict"),
-          [(Rhint ([8:14-17]), (Tprim Tint));
-            (Rhint ([8:19-35]),
-             (Tapply (([8:19-23], "\\HH\\dict"),
-                [(Rhint ([8:24-27]), (Tprim Tint));
-                  (Rhint ([8:29-34]), (Tprim Tfloat))]
-                )))
-            ]
-          )));
-      cc_origin = "\\DictConsts"; cc_refs = [] };
-    "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [4:7-17];
-      cc_type =
-      (Rclass_class ([4:7-17]),
-       (Tapply (([4:7-17], "\\HH\\classname"),
-          [(Rclass_class ([4:7-17]), Tthis)])));
-      cc_origin = "\\DictConsts"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
-{ Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Abstract); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\AbstractConsts"; dc_pos = [12:16-30];
-  dc_tparams = []; dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "CABSTRACT_INT" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = (Typing_defs.CCAbstract false); cc_pos = [13:22-35];
-      cc_type = (Rhint ([13:18-21]), (Tprim Tint));
-      cc_origin = "\\AbstractConsts"; cc_refs = [] };
-    "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [12:16-30];
-      cc_type =
-      (Rclass_class ([12:16-30]),
-       (Tapply (([12:16-30], "\\HH\\classname"),
-          [(Rclass_class ([12:16-30]), Tthis)])));
-      cc_origin = "\\AbstractConsts"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\VecConsts"; dc_pos = [16:7-16];
-  dc_tparams = []; dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "CNESTED_VEC" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [18:23-34];
-      cc_type =
-      (Rhint ([18:9-22]),
-       (Tapply (([18:9-12], "\\HH\\vec"),
-          [(Rhint ([18:13-21]),
-            (Tapply (([18:13-16], "\\HH\\vec"),
-               [(Rhint ([18:17-20]), (Tprim Tint))])))
-            ]
-          )));
-      cc_origin = "\\VecConsts"; cc_refs = [] };
-    "CVEC" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [17:18-22];
-      cc_type =
-      (Rhint ([17:9-17]),
-       (Tapply (([17:9-12], "\\HH\\vec"),
-          [(Rhint ([17:13-16]), (Tprim Tint))])));
-      cc_origin = "\\VecConsts"; cc_refs = [] };
-    "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [16:7-16];
-      cc_type =
-      (Rclass_class ([16:7-16]),
-       (Tapply (([16:7-16], "\\HH\\classname"),
-          [(Rclass_class ([16:7-16]), Tthis)])));
-      cc_origin = "\\VecConsts"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\ArrayConsts"; dc_pos = [21:7-18];
-  dc_tparams = []; dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "CCLASSNAME_KEYSET" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [24:27-44];
-      cc_type =
-      (Rhint ([24:9-26]),
-       (Tapply (([24:9-15], "\\HH\\keyset"),
-          [(Rhint ([24:16-25]), (Tprim Tstring))])));
-      cc_origin = "\\ArrayConsts"; cc_refs = [] };
-    "CDARRAY" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [22:29-36];
-      cc_type =
-      (Rhint ([22:9-28]),
-       (Tapply (([22:9-15], "\\HH\\dict"),
-          [(Rhint ([22:16-22]), (Tprim Tstring));
-            (Rhint ([22:24-27]), (Tprim Tint))]
-          )));
-      cc_origin = "\\ArrayConsts"; cc_refs = [] };
-    "CKEYSET" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [23:24-31];
-      cc_type =
-      (Rhint ([23:9-23]),
-       (Tapply (([23:9-15], "\\HH\\keyset"),
-          [(Rhint ([23:16-22]), (Tprim Tstring))])));
-      cc_origin = "\\ArrayConsts"; cc_refs = [] };
-    "CVARRAY" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [25:24-31];
-      cc_type =
-      (Rhint ([25:9-23]),
-       (Tapply (([25:9-15], "\\HH\\vec"),
-          [(Rhint ([25:16-22]), (Tprim Tstring))])));
-      cc_origin = "\\ArrayConsts"; cc_refs = [] };
-    "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [21:7-18];
-      cc_type =
-      (Rclass_class ([21:7-18]),
-       (Tapply (([21:7-18], "\\HH\\classname"),
-          [(Rclass_class ([21:7-18]), Tthis)])));
-      cc_origin = "\\ArrayConsts"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\BinopConsts"; dc_pos = [28:7-18];
-  dc_tparams = []; dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "CBOOL" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [32:14-19];
-      cc_type = (Rhint ([32:9-13]), (Tprim Tbool));
-      cc_origin = "\\BinopConsts"; cc_refs = [] };
-    "CFLOAT" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [30:15-21];
-      cc_type = (Rhint ([30:9-14]), (Tprim Tfloat));
-      cc_origin = "\\BinopConsts"; cc_refs = [] };
-    "CINT" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [29:13-17];
-      cc_type = (Rhint ([29:9-12]), (Tprim Tint));
-      cc_origin = "\\BinopConsts"; cc_refs = [] };
-    "CSTRING" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [31:16-23];
-      cc_type = (Rhint ([31:9-15]), (Tprim Tstring));
-      cc_origin = "\\BinopConsts"; cc_refs = [] };
-    "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [28:7-18];
-      cc_type =
-      (Rclass_class ([28:7-18]),
-       (Tapply (([28:7-18], "\\HH\\classname"),
-          [(Rclass_class ([28:7-18]), Tthis)])));
-      cc_origin = "\\BinopConsts"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\ShapeConsts"; dc_pos = [35:7-18];
-  dc_tparams = []; dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "CSHAPE" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [36:47-53];
-      cc_type =
-      (Rhint ([36:9-46]),
-       (Tshape (Typing_defs_core.Open_shape,
-          { (Typing_defs_core.TSFlit_str ([36:15-18], "a")) ->
-            { sft_optional = false;
-              sft_ty = (Rhint ([36:22-25]), (Tprim Tint)) };
-            (Typing_defs_core.TSFlit_str ([36:27-30], "b")) ->
-            { sft_optional = false;
-              sft_ty = (Rhint ([36:34-40]), (Tprim Tstring)) } }
-          )));
-      cc_origin = "\\ShapeConsts"; cc_refs = [] };
-    "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [35:7-18];
-      cc_type =
-      (Rclass_class ([35:7-18]),
-       (Tapply (([35:7-18], "\\HH\\classname"),
-          [(Rclass_class ([35:7-18]), Tthis)])));
-      cc_origin = "\\ShapeConsts"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\TupleConsts"; dc_pos = [40:7-18];
-  dc_tparams = []; dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "COPTION" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [41:33-40];
-      cc_type =
-      (Rhint ([41:9-32]),
-       (Ttuple
-          [(Rhint ([41:10-13]), (Tprim Tint));
-            (Rhint ([41:15-31]),
-             (Toption
-                (Rhint ([41:16-31]),
-                 (Ttuple
-                    [(Rhint ([41:17-23]), (Tprim Tstring));
-                      (Rhint ([41:25-30]), (Tprim Tfloat))]))))
-            ]));
-      cc_origin = "\\TupleConsts"; cc_refs = [] };
-    "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [40:7-18];
-      cc_type =
-      (Rclass_class ([40:7-18]),
-       (Tapply (([40:7-18], "\\HH\\classname"),
-          [(Rclass_class ([40:7-18]), Tthis)])));
-      cc_origin = "\\TupleConsts"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\ClassnameConsts"; dc_pos = [44:7-22];
-  dc_tparams = []; dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "CCLASSNAME" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [45:32-42];
-      cc_type =
-      (Rhint ([45:9-31]),
-       (Tapply (([45:9-18], "\\HH\\classname"),
-          [(Rhint ([45:19-30]), (Tapply (([45:19-30], "\\TupleConsts"), [])))
-            ]
-          )));
-      cc_origin = "\\ClassnameConsts";
-      cc_refs = [((Typing_defs.From "\\TupleConsts"), "class")] };
-    "CCLASSNAME2" ->
-    { Typing_defs.cc_synthesized = false;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [46:36-47];
-      cc_type =
-      (Rhint ([46:9-35]),
-       (Tapply (([46:9-18], "\\HH\\classname"),
-          [(Rhint ([46:19-34]),
-            (Tapply (([46:19-34], "\\ClassnameConsts"), [])))]
-          )));
-      cc_origin = "\\ClassnameConsts";
-      cc_refs = [(Typing_defs.Self, "class")] };
-    "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [44:7-22];
-      cc_type =
-      (Rclass_class ([44:7-22]),
-       (Tapply (([44:7-22], "\\HH\\classname"),
-          [(Rclass_class ([44:7-22]), Tthis)])));
-      cc_origin = "\\ClassnameConsts"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
+FoldedClass {
+    name: "\\DictConsts",
+    pos: Pos(root|classes_const_keyword.php, 4:7-17),
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "CDICT": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 5:27-32),
+            ty: HH\dict<int, string>,
+            origin: "\\DictConsts",
+            refs: [],
+        },
+        "CNESTED_DICT": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 6:38-50),
+            ty: HH\dict<int, HH\dict<int, string>>,
+            origin: "\\DictConsts",
+            refs: [],
+        },
+        "CNESTED_DICT_FLOAT": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 8:37-55),
+            ty: HH\dict<int, HH\dict<int, float>>,
+            origin: "\\DictConsts",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 4:7-17),
+            ty: HH\classname<this>,
+            origin: "\\DictConsts",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\AbstractConsts",
+    pos: Pos(root|classes_const_keyword.php, 12:16-30),
+    kind: Cclass(
+        Abstract,
+    ),
+    consts: {
+        "CABSTRACT_INT": ClassConst {
+            is_synthesized: false,
+            kind: CCAbstract(
+                false,
+            ),
+            pos: Pos(root|classes_const_keyword.php, 13:22-35),
+            ty: int,
+            origin: "\\AbstractConsts",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 12:16-30),
+            ty: HH\classname<this>,
+            origin: "\\AbstractConsts",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\VecConsts",
+    pos: Pos(root|classes_const_keyword.php, 16:7-16),
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "CNESTED_VEC": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 18:23-34),
+            ty: HH\vec<HH\vec<int>>,
+            origin: "\\VecConsts",
+            refs: [],
+        },
+        "CVEC": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 17:18-22),
+            ty: HH\vec<int>,
+            origin: "\\VecConsts",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 16:7-16),
+            ty: HH\classname<this>,
+            origin: "\\VecConsts",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\ArrayConsts",
+    pos: Pos(root|classes_const_keyword.php, 21:7-18),
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "CCLASSNAME_KEYSET": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 24:27-44),
+            ty: HH\keyset<string>,
+            origin: "\\ArrayConsts",
+            refs: [],
+        },
+        "CDARRAY": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 22:29-36),
+            ty: HH\dict<string, int>,
+            origin: "\\ArrayConsts",
+            refs: [],
+        },
+        "CKEYSET": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 23:24-31),
+            ty: HH\keyset<string>,
+            origin: "\\ArrayConsts",
+            refs: [],
+        },
+        "CVARRAY": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 25:24-31),
+            ty: HH\vec<string>,
+            origin: "\\ArrayConsts",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 21:7-18),
+            ty: HH\classname<this>,
+            origin: "\\ArrayConsts",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\BinopConsts",
+    pos: Pos(root|classes_const_keyword.php, 28:7-18),
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "CBOOL": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 32:14-19),
+            ty: bool,
+            origin: "\\BinopConsts",
+            refs: [],
+        },
+        "CFLOAT": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 30:15-21),
+            ty: float,
+            origin: "\\BinopConsts",
+            refs: [],
+        },
+        "CINT": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 29:13-17),
+            ty: int,
+            origin: "\\BinopConsts",
+            refs: [],
+        },
+        "CSTRING": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 31:16-23),
+            ty: string,
+            origin: "\\BinopConsts",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 28:7-18),
+            ty: HH\classname<this>,
+            origin: "\\BinopConsts",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\ShapeConsts",
+    pos: Pos(root|classes_const_keyword.php, 35:7-18),
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "CSHAPE": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 36:47-53),
+            ty: shape('a' => int, 'b' => string, ...),
+            origin: "\\ShapeConsts",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 35:7-18),
+            ty: HH\classname<this>,
+            origin: "\\ShapeConsts",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\TupleConsts",
+    pos: Pos(root|classes_const_keyword.php, 40:7-18),
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "COPTION": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 41:33-40),
+            ty: (int, ?(string, float)),
+            origin: "\\TupleConsts",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 40:7-18),
+            ty: HH\classname<this>,
+            origin: "\\TupleConsts",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\ClassnameConsts",
+    pos: Pos(root|classes_const_keyword.php, 44:7-22),
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "CCLASSNAME": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 45:32-42),
+            ty: HH\classname<TupleConsts>,
+            origin: "\\ClassnameConsts",
+            refs: [
+                ClassConstRef(
+                    From(
+                        "\\TupleConsts",
+                    ),
+                    "class",
+                ),
+            ],
+        },
+        "CCLASSNAME2": ClassConst {
+            is_synthesized: false,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 46:36-47),
+            ty: HH\classname<ClassnameConsts>,
+            origin: "\\ClassnameConsts",
+            refs: [
+                ClassConstRef(
+                    Self_,
+                    "class",
+                ),
+            ],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|classes_const_keyword.php, 44:7-22),
+            ty: HH\classname<this>,
+            origin: "\\ClassnameConsts",
+            refs: [],
+        },
+    },
+}
 
 They matched!

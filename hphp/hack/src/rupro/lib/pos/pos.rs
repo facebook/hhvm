@@ -128,8 +128,8 @@ impl fmt::Debug for BPos {
                     "Pos({:?}, {}:{}-{})",
                     &self.file(),
                     &start_line,
-                    &start_col,
-                    &end_col,
+                    &(start_col + 1),
+                    &(end_col + 1),
                 )
             } else {
                 write!(
@@ -137,9 +137,9 @@ impl fmt::Debug for BPos {
                     "Pos({:?}, {}:{}-{}:{})",
                     &self.file(),
                     &start_line,
-                    &start_col,
+                    &(start_col + 1),
                     &end_line,
-                    &end_col,
+                    &(end_col + 1),
                 )
             }
         };

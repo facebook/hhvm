@@ -1,155 +1,128 @@
-{ Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Abstract); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\C"; dc_pos = [3:16-17]; dc_tparams = [];
-  dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "C0" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = (Typing_defs.CCAbstract true); cc_pos = [4:22-24];
-      cc_type =
-      (Rwitness_from_decl ([4:22-24]),
-       (Tapply (([4:22-24], "\\HH\\TypeStructure"),
-          [(Rwitness_from_decl ([4:22-24]),
-            (Taccess
-               ((Rwitness_from_decl ([4:22-24]), Tthis), [([4:22-24], "C0")])))
-            ]
-          )));
-      cc_origin = "\\C"; cc_refs = [] };
-    "C1" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = (Typing_defs.CCAbstract true); cc_pos = [5:22-24];
-      cc_type =
-      (Rwitness_from_decl ([5:22-24]),
-       (Tapply (([5:22-24], "\\HH\\TypeStructure"),
-          [(Rwitness_from_decl ([5:22-24]),
-            (Taccess
-               ((Rwitness_from_decl ([5:22-24]), Tthis), [([5:22-24], "C1")])))
-            ]
-          )));
-      cc_origin = "\\C"; cc_refs = [] };
-    "C2" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = (Typing_defs.CCAbstract true); cc_pos = [6:22-24];
-      cc_type =
-      (Rwitness_from_decl ([6:22-24]),
-       (Tapply (([6:22-24], "\\HH\\TypeStructure"),
-          [(Rwitness_from_decl ([6:22-24]),
-            (Taccess
-               ((Rwitness_from_decl ([6:22-24]), Tthis), [([6:22-24], "C2")])))
-            ]
-          )));
-      cc_origin = "\\C"; cc_refs = [] };
-    "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:16-17];
-      cc_type =
-      (Rclass_class ([3:16-17]),
-       (Tapply (([3:16-17], "\\HH\\classname"),
-          [(Rclass_class ([3:16-17]), Tthis)])));
-      cc_origin = "\\C"; cc_refs = [] } };
-  dc_typeconsts =
-  { "C0" ->
-    { Typing_defs.ttc_synthesized = false; ttc_name = ([4:22-24], "C0");
-      ttc_kind =
-      (Typing_defs.TCAbstract
-         { Typing_defs.atc_as_constraint = None; atc_super_constraint = None;
-           atc_default = (Some (Rhint ([4:27-29]), (Tintersection []))) });
-      ttc_origin = "\\C"; ttc_enforceable = ([Pos.none], false);
-      ttc_reifiable = None; ttc_concretized = false; ttc_is_ctx = true };
-    "C1" ->
-    { Typing_defs.ttc_synthesized = false; ttc_name = ([5:22-24], "C1");
-      ttc_kind =
-      (Typing_defs.TCAbstract
-         { Typing_defs.atc_as_constraint = None; atc_super_constraint = None;
-           atc_default =
-           (Some (Rhint ([5:27-42]),
-                  (Tintersection
-                     [(Rhint ([5:28-41]),
-                       (Tapply (([5:28-41], "\\HH\\Contexts\\zoned_shallow"),
-                          [])))
-                       ])))
-           });
-      ttc_origin = "\\C"; ttc_enforceable = ([Pos.none], false);
-      ttc_reifiable = None; ttc_concretized = false; ttc_is_ctx = true };
-    "C2" ->
-    { Typing_defs.ttc_synthesized = false; ttc_name = ([6:22-24], "C2");
-      ttc_kind =
-      (Typing_defs.TCAbstract
-         { Typing_defs.atc_as_constraint = None; atc_super_constraint = None;
-           atc_default =
-           (Some (Rhint ([6:27-54]),
-                  (Tintersection
-                     [(Rhint ([6:28-41]),
-                       (Tapply (([6:28-41], "\\HH\\Contexts\\zoned_shallow"),
-                          [])));
-                       (Rhint ([6:43-53]),
-                        (Tapply (([6:43-53], "\\HH\\Contexts\\rx_shallow"),
-                           [])))
-                       ])))
-           });
-      ttc_origin = "\\C"; ttc_enforceable = ([Pos.none], false);
-      ttc_reifiable = None; ttc_concretized = false; ttc_is_ctx = true } };
-  dc_props = {}; dc_sprops = {};
-  dc_methods =
-  { "f0" ->
-    { Decl_defs.elt_flags =
-      { "Abstract" -> true;
-        "Const" -> false;
-        "Dynamicallycallable" -> false;
-        "Final" -> false;
-        "Lateinit" -> false;
-        "Lsb" -> false;
-        "NeedsInit" -> false;
-        "ReadonlyProp" -> false;
-        "SuperfluousOverride" -> false;
-        "SupportDynamicType" -> false;
-        "Synthesized" -> false;
-        "XaHasDefault" -> false;
-        "XaTagLateinit" -> false;
-        "XaTagRequired" -> false };
-      elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
-      elt_deprecated = None };
-    "f1" ->
-    { Decl_defs.elt_flags =
-      { "Abstract" -> true;
-        "Const" -> false;
-        "Dynamicallycallable" -> false;
-        "Final" -> false;
-        "Lateinit" -> false;
-        "Lsb" -> false;
-        "NeedsInit" -> false;
-        "ReadonlyProp" -> false;
-        "SuperfluousOverride" -> false;
-        "SupportDynamicType" -> false;
-        "Synthesized" -> false;
-        "XaHasDefault" -> false;
-        "XaTagLateinit" -> false;
-        "XaTagRequired" -> false };
-      elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
-      elt_deprecated = None };
-    "f2" ->
-    { Decl_defs.elt_flags =
-      { "Abstract" -> true;
-        "Const" -> false;
-        "Dynamicallycallable" -> false;
-        "Final" -> false;
-        "Lateinit" -> false;
-        "Lsb" -> false;
-        "NeedsInit" -> false;
-        "ReadonlyProp" -> false;
-        "SuperfluousOverride" -> false;
-        "SupportDynamicType" -> false;
-        "Synthesized" -> false;
-        "XaHasDefault" -> false;
-        "XaTagLateinit" -> false;
-        "XaTagRequired" -> false };
-      elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
-      elt_deprecated = None } };
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
+FoldedClass {
+    name: "\\C",
+    pos: Pos(root|coeffect_contexts.php, 3:16-17),
+    kind: Cclass(
+        Abstract,
+    ),
+    methods: {
+        "f0": FoldedElement {
+            flags: ABSTRACT,
+            origin: "\\C",
+            visibility: Public,
+            deprecated: None,
+        },
+        "f1": FoldedElement {
+            flags: ABSTRACT,
+            origin: "\\C",
+            visibility: Public,
+            deprecated: None,
+        },
+        "f2": FoldedElement {
+            flags: ABSTRACT,
+            origin: "\\C",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "C0": ClassConst {
+            is_synthesized: true,
+            kind: CCAbstract(
+                true,
+            ),
+            pos: Pos(root|coeffect_contexts.php, 4:22-24),
+            ty: HH\TypeStructure<this::C0>,
+            origin: "\\C",
+            refs: [],
+        },
+        "C1": ClassConst {
+            is_synthesized: true,
+            kind: CCAbstract(
+                true,
+            ),
+            pos: Pos(root|coeffect_contexts.php, 5:22-24),
+            ty: HH\TypeStructure<this::C1>,
+            origin: "\\C",
+            refs: [],
+        },
+        "C2": ClassConst {
+            is_synthesized: true,
+            kind: CCAbstract(
+                true,
+            ),
+            pos: Pos(root|coeffect_contexts.php, 6:22-24),
+            ty: HH\TypeStructure<this::C2>,
+            origin: "\\C",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|coeffect_contexts.php, 3:16-17),
+            ty: HH\classname<this>,
+            origin: "\\C",
+            refs: [],
+        },
+    },
+    type_consts: {
+        "C0": TypeConst {
+            is_synthesized: false,
+            name: (
+                Pos(root|coeffect_contexts.php, 4:22-24),
+                "C0",
+            ),
+            kind: AbstractTypeconst {
+                as_constraint: None,
+                super_constraint: None,
+                default: Some(
+                    &(),
+                ),
+            },
+            origin: "\\C",
+            enforceable: None,
+            reifiable: None,
+            is_concretized: false,
+            is_ctx: true,
+        },
+        "C1": TypeConst {
+            is_synthesized: false,
+            name: (
+                Pos(root|coeffect_contexts.php, 5:22-24),
+                "C1",
+            ),
+            kind: AbstractTypeconst {
+                as_constraint: None,
+                super_constraint: None,
+                default: Some(
+                    &(HH\Contexts\zoned_shallow),
+                ),
+            },
+            origin: "\\C",
+            enforceable: None,
+            reifiable: None,
+            is_concretized: false,
+            is_ctx: true,
+        },
+        "C2": TypeConst {
+            is_synthesized: false,
+            name: (
+                Pos(root|coeffect_contexts.php, 6:22-24),
+                "C2",
+            ),
+            kind: AbstractTypeconst {
+                as_constraint: None,
+                super_constraint: None,
+                default: Some(
+                    (HH\Contexts\zoned_shallow & HH\Contexts\rx_shallow),
+                ),
+            },
+            origin: "\\C",
+            enforceable: None,
+            reifiable: None,
+            is_concretized: false,
+            is_ctx: true,
+        },
+    },
+}
 
 They matched!

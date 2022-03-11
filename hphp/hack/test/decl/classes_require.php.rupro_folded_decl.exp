@@ -1,326 +1,219 @@
 --- ocaml
 +++ rupro
-@@ -1,315 +1,312 @@
- { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Abstract); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\Machine"; dc_pos = [3:16-23];
-   dc_tparams = []; dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:16-23];
-       cc_type =
-       (Rclass_class ([3:16-23]),
-        (Tapply (([3:16-23], "\\HH\\classname"),
-           [(Rclass_class ([3:16-23]), Tthis)])));
-       cc_origin = "\\Machine"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
-   dc_methods =
-   { "closeDoors" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\Machine"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None };
-     "openDoors" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\Machine"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = Cinterface; dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\Fliers"; dc_pos = [8:11-17];
-   dc_tparams = []; dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [8:11-17];
-       cc_type =
-       (Rclass_class ([8:11-17]),
-        (Tapply (([8:11-17], "\\HH\\classname"),
-           [(Rclass_class ([8:11-17]), Tthis)])));
-       cc_origin = "\\Fliers"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
-   dc_methods =
-   { "fly" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> true;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\Fliers"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = Ctrait; dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\Plane"; dc_pos = [12:7-12]; dc_tparams = [];
-   dc_where_constraints = [];
-   dc_substs =
-   { "\\Fliers" ->
-     { Decl_defs.sc_subst = {}; sc_class_context = "\\Plane";
-       sc_from_req_extends = false };
-     "\\Machine" ->
-     { Decl_defs.sc_subst = {}; sc_class_context = "\\Plane";
-       sc_from_req_extends = true } };
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [12:7-12];
-       cc_type =
-       (Rclass_class ([12:7-12]),
-        (Tapply (([12:7-12], "\\HH\\classname"),
-           [(Rclass_class ([12:7-12]), Tthis)])));
-       cc_origin = "\\Plane"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
-   dc_methods =
-   { "closeDoors" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> true;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\Machine"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None };
-     "fly" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> true;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\Fliers"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None };
-     "openDoors" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> true;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\Machine"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None };
-     "takeOff" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\Plane"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors = {}; dc_support_dynamic_type = false;
-   dc_req_ancestors =
--  [([13:19-26],
--    (Rhint ([13:19-26]), (Tapply (([13:19-26], "\\Machine"), []))));
--    ([14:22-28],
--     (Rhint ([14:22-28]), (Tapply (([14:22-28], "\\Fliers"), []))))
-+  [([14:22-28], (Rhint ([14:22-28]), (Tapply (([14:22-28], "\\Fliers"), []))));
-+    ([13:19-26],
-+     (Rhint ([13:19-26]), (Tapply (([13:19-26], "\\Machine"), []))))
-     ];
-   dc_req_ancestors_extends = { "\\Fliers"; "\\Machine" }; dc_extends = {};
-   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
-   dc_enum_type = None; dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\AirBus"; dc_pos = [23:7-13];
-   dc_tparams = []; dc_where_constraints = [];
-   dc_substs =
-   { "\\Fliers" ->
-     { Decl_defs.sc_subst = {}; sc_class_context = "\\Plane";
-       sc_from_req_extends = false };
-     "\\Machine" ->
-     { Decl_defs.sc_subst = {}; sc_class_context = "\\AirBus";
-       sc_from_req_extends = false };
-     "\\Plane" ->
-     { Decl_defs.sc_subst = {}; sc_class_context = "\\AirBus";
-       sc_from_req_extends = false } };
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [23:7-13];
-       cc_type =
-       (Rclass_class ([23:7-13]),
-        (Tapply (([23:7-13], "\\HH\\classname"),
-           [(Rclass_class ([23:7-13]), Tthis)])));
-       cc_origin = "\\AirBus"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
-   dc_methods =
-   { "closeDoors" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\Machine"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None };
-     "fly" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\AirBus"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None };
-     "openDoors" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\Machine"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None };
-     "takeOff" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\Plane"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors =
--  { "\\Fliers" ->
--    (Rhint ([23:41-47]), (Tapply (([23:41-47], "\\Fliers"), [])));
--    "\\Machine" ->
--    (Rhint ([23:22-29]), (Tapply (([23:22-29], "\\Machine"), [])));
--    "\\Plane" -> (Rhint ([24:7-12]), (Tapply (([24:7-12], "\\Plane"), []))) };
-+  { "\\Machine" ->
-+    (Rhint ([23:22-29]), (Tapply (([23:22-29], "\\Machine"), []))) };
-   dc_support_dynamic_type = false;
-   dc_req_ancestors =
--  [([24:7-12], (Rhint ([13:19-26]), (Tapply (([13:19-26], "\\Machine"), []))));
--    ([24:7-12], (Rhint ([14:22-28]), (Tapply (([14:22-28], "\\Fliers"), []))))
-+  [([24:7-12], (Rhint ([14:22-28]), (Tapply (([14:22-28], "\\Fliers"), []))));
-+    ([24:7-12],
-+     (Rhint ([13:19-26]), (Tapply (([13:19-26], "\\Machine"), []))))
-     ];
-   dc_req_ancestors_extends = {}; dc_extends = { "\\Machine"; "\\Plane" };
-   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
-   dc_enum_type = None; dc_decl_errors = <opaque> }
+@@ -1,210 +1,208 @@
+ FoldedClass {
+     name: "\\Machine",
+     pos: Pos(root|classes_require.php, 3:16-23),
+     kind: Cclass(
+         Abstract,
+     ),
+     methods: {
+         "closeDoors": FoldedElement {
+             flags: (empty),
+             origin: "\\Machine",
+             visibility: Public,
+             deprecated: None,
+         },
+         "openDoors": FoldedElement {
+             flags: (empty),
+             origin: "\\Machine",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|classes_require.php, 3:16-23),
+             ty: HH\classname<this>,
+             origin: "\\Machine",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\Fliers",
+     pos: Pos(root|classes_require.php, 8:11-17),
+     kind: Cinterface,
+     methods: {
+         "fly": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\Fliers",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|classes_require.php, 8:11-17),
+             ty: HH\classname<this>,
+             origin: "\\Fliers",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\Plane",
+     pos: Pos(root|classes_require.php, 12:7-12),
+     kind: Ctrait,
+     substs: {
+         "\\Fliers": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\Plane",
+             from_req_extends: false,
+         },
+         "\\Machine": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\Plane",
+             from_req_extends: true,
+         },
+     },
+     methods: {
+         "closeDoors": FoldedElement {
+             flags: SYNTHESIZED,
+             origin: "\\Machine",
+             visibility: Public,
+             deprecated: None,
+         },
+         "fly": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\Fliers",
+             visibility: Public,
+             deprecated: None,
+         },
+         "openDoors": FoldedElement {
+             flags: SYNTHESIZED,
+             origin: "\\Machine",
+             visibility: Public,
+             deprecated: None,
+         },
+         "takeOff": FoldedElement {
+             flags: (empty),
+             origin: "\\Plane",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|classes_require.php, 12:7-12),
+             ty: HH\classname<this>,
+             origin: "\\Plane",
+             refs: [],
+         },
+     },
+     req_ancestors: [
+         Requirement(
+-            Pos(root|classes_require.php, 13:19-26),
+-            Machine,
+-        ),
+-        Requirement(
+             Pos(root|classes_require.php, 14:22-28),
+             Fliers,
+         ),
++        Requirement(
++            Pos(root|classes_require.php, 13:19-26),
++            Machine,
++        ),
+     ],
+     req_ancestors_extends: {
+         "\\Fliers",
+         "\\Machine",
+     },
+ }
+ FoldedClass {
+     name: "\\AirBus",
+     pos: Pos(root|classes_require.php, 23:7-13),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\Fliers": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\Plane",
+             from_req_extends: false,
+         },
+         "\\Machine": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\AirBus",
+             from_req_extends: false,
+         },
+         "\\Plane": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\AirBus",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+-        "\\Fliers": Fliers,
+         "\\Machine": Machine,
+-        "\\Plane": Plane,
+     },
+     methods: {
+         "closeDoors": FoldedElement {
+             flags: (empty),
+             origin: "\\Machine",
+             visibility: Public,
+             deprecated: None,
+         },
+         "fly": FoldedElement {
+             flags: (empty),
+             origin: "\\AirBus",
+             visibility: Public,
+             deprecated: None,
+         },
+         "openDoors": FoldedElement {
+             flags: (empty),
+             origin: "\\Machine",
+             visibility: Public,
+             deprecated: None,
+         },
+         "takeOff": FoldedElement {
+             flags: (empty),
+             origin: "\\Plane",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|classes_require.php, 23:7-13),
+             ty: HH\classname<this>,
+             origin: "\\AirBus",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\Machine",
+         "\\Plane",
+     },
+     req_ancestors: [
+         Requirement(
+             Pos(root|classes_require.php, 24:7-12),
+-            Machine,
++            Fliers,
+         ),
+         Requirement(
+             Pos(root|classes_require.php, 24:7-12),
+-            Fliers,
++            Machine,
+         ),
+     ],
+ }

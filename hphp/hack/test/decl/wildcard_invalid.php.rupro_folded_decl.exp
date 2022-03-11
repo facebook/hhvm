@@ -1,62 +1,36 @@
---- ocaml
-+++ rupro
-@@ -1,58 +1,58 @@
- { Decl_defs.dc_need_init = true; dc_abstract = false; dc_final = true;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\C"; dc_pos = [9:13-14]; dc_tparams = [];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [9:13-14];
-       cc_type =
-       (Rclass_class ([9:13-14]),
-        (Tapply (([9:13-14], "\\HH\\classname"),
-           [(Rclass_class ([9:13-14]), Tthis)])));
-       cc_origin = "\\C"; cc_refs = [] } };
-   dc_typeconsts = {};
-   dc_props =
-   { "foo" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> true;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> true;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\C"; elt_visibility = (Typing_defs_core.Vprivate "\\C");
-       elt_deprecated = None } };
-   dc_sprops = {}; dc_methods = {}; dc_smethods = {};
-   dc_construct =
-   ((Some { Decl_defs.elt_flags =
-            { "Abstract" -> false;
-              "Const" -> false;
-              "Dynamicallycallable" -> false;
-              "Final" -> false;
-              "Lateinit" -> false;
-              "Lsb" -> false;
-              "NeedsInit" -> false;
-              "ReadonlyProp" -> false;
-              "SuperfluousOverride" -> false;
-              "SupportDynamicType" -> false;
-              "Synthesized" -> false;
-              "XaHasDefault" -> false;
-              "XaTagLateinit" -> false;
-              "XaTagRequired" -> false };
-            elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
-            elt_deprecated = None }),
--   Typing_defs_core.FinalClass);
-+   Typing_defs_core.Inconsistent);
-   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
+FoldedClass {
+    name: "\\C",
+    pos: Pos(root|wildcard_invalid.php, 9:13-14),
+    kind: Cclass(
+        Concrete,
+    ),
+    is_final: true,
+    props: {
+        "foo": FoldedElement {
+            flags: FINAL | NEEDS_INIT,
+            origin: "\\C",
+            visibility: Private(
+                "\\C",
+            ),
+            deprecated: None,
+        },
+    },
+    constructor: FoldedElement {
+        flags: (empty),
+        origin: "\\C",
+        visibility: Public,
+        deprecated: None,
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|wildcard_invalid.php, 9:13-14),
+            ty: HH\classname<this>,
+            origin: "\\C",
+            refs: [],
+        },
+    },
+}
+
+They matched!

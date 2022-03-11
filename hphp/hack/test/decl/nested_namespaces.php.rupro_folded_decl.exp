@@ -1,25 +1,19 @@
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None;
-  dc_name = "\\MyNamespace\\Very\\Inner\\Namespace\\MyClass";
-  dc_pos = [20:11-18]; dc_tparams = []; dc_where_constraints = [];
-  dc_substs = {};
-  dc_consts =
-  { "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [20:11-18];
-      cc_type =
-      (Rclass_class ([20:11-18]),
-       (Tapply (([20:11-18], "\\HH\\classname"),
-          [(Rclass_class ([20:11-18]), Tthis)])));
-      cc_origin = "\\MyNamespace\\Very\\Inner\\Namespace\\MyClass";
-      cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
+FoldedClass {
+    name: "\\MyNamespace\\Very\\Inner\\Namespace\\MyClass",
+    pos: Pos(root|nested_namespaces.php, 20:11-18),
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|nested_namespaces.php, 20:11-18),
+            ty: HH\classname<this>,
+            origin: "\\MyNamespace\\Very\\Inner\\Namespace\\MyClass",
+            refs: [],
+        },
+    },
+}
 
 They matched!

@@ -11,3 +11,6 @@ external fold_classes_in_files :
   Relative_path.t list ->
   Decl_defs.decl_class_type list Relative_path.Map.t
   = "fold_classes_in_files_ffi"
+
+external show_decl_class_type : Decl_defs.decl_class_type -> string
+  = "show_decl_class_type_ffi"

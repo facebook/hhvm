@@ -108,7 +108,7 @@ let compare_folded ctx rupro_decls filename text =
   let rupro_folded_classes = Relative_path.Map.find rupro_decls filename in
   let show_folded_decls decls =
     decls
-    |> List.map ~f:Decl_defs.show_decl_class_type
+    |> List.map ~f:Decl_folded_class_rupro.show_decl_class_type
     |> String.concat ~sep:"\n"
   in
   let folded = show_folded_decls ocaml_folded_classes in

@@ -1,110 +1,98 @@
-{ Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = Cinterface; dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\WithLowerThenUpperBound";
-  dc_pos = [3:11-34]; dc_tparams = []; dc_where_constraints = [];
-  dc_substs = {};
-  dc_consts =
-  { "C" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = (Typing_defs.CCAbstract false); cc_pos = [4:22-23];
-      cc_type =
-      (Rwitness_from_decl ([4:22-23]),
-       (Tapply (([4:22-23], "\\HH\\TypeStructure"),
-          [(Rwitness_from_decl ([4:22-23]),
-            (Taccess
-               ((Rwitness_from_decl ([4:22-23]), Tthis), [([4:22-23], "C")])))
-            ]
-          )));
-      cc_origin = "\\WithLowerThenUpperBound"; cc_refs = [] };
-    "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:11-34];
-      cc_type =
-      (Rclass_class ([3:11-34]),
-       (Tapply (([3:11-34], "\\HH\\classname"),
-          [(Rclass_class ([3:11-34]), Tthis)])));
-      cc_origin = "\\WithLowerThenUpperBound"; cc_refs = [] } };
-  dc_typeconsts =
-  { "C" ->
-    { Typing_defs.ttc_synthesized = false; ttc_name = ([4:22-23], "C");
-      ttc_kind =
-      (Typing_defs.TCAbstract
-         { Typing_defs.atc_as_constraint =
-           (Some (Rhint ([4:44-48]),
-                  (Tintersection
-                     [(Rhint ([4:45-47]),
-                       (Tapply (([4:45-47], "\\HH\\Contexts\\rx"), [])))])));
-           atc_super_constraint =
-           (Some (Rhint ([4:30-40]),
-                  (Tintersection
-                     [(Rhint ([4:31-39]),
-                       (Tapply (([4:31-39], "\\HH\\Contexts\\defaults"), [])))
-                       ])));
-           atc_default = None });
-      ttc_origin = "\\WithLowerThenUpperBound";
-      ttc_enforceable = ([Pos.none], false); ttc_reifiable = None;
-      ttc_concretized = false; ttc_is_ctx = true } };
-  dc_props = {}; dc_sprops = {}; dc_methods = {}; dc_smethods = {};
-  dc_construct = (None, Typing_defs_core.Inconsistent); dc_ancestors = {};
-  dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
-{ Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = Cinterface; dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\WithUpperThenLowerBound";
-  dc_pos = [7:11-34]; dc_tparams = []; dc_where_constraints = [];
-  dc_substs = {};
-  dc_consts =
-  { "C" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = (Typing_defs.CCAbstract false); cc_pos = [8:22-23];
-      cc_type =
-      (Rwitness_from_decl ([8:22-23]),
-       (Tapply (([8:22-23], "\\HH\\TypeStructure"),
-          [(Rwitness_from_decl ([8:22-23]),
-            (Taccess
-               ((Rwitness_from_decl ([8:22-23]), Tthis), [([8:22-23], "C")])))
-            ]
-          )));
-      cc_origin = "\\WithUpperThenLowerBound"; cc_refs = [] };
-    "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [7:11-34];
-      cc_type =
-      (Rclass_class ([7:11-34]),
-       (Tapply (([7:11-34], "\\HH\\classname"),
-          [(Rclass_class ([7:11-34]), Tthis)])));
-      cc_origin = "\\WithUpperThenLowerBound"; cc_refs = [] } };
-  dc_typeconsts =
-  { "C" ->
-    { Typing_defs.ttc_synthesized = false; ttc_name = ([8:22-23], "C");
-      ttc_kind =
-      (Typing_defs.TCAbstract
-         { Typing_defs.atc_as_constraint =
-           (Some (Rhint ([8:27-40]),
-                  (Tintersection
-                     [(Rhint ([8:28-39]),
-                       (Tapply (([8:28-39], "\\HH\\Contexts\\write_props"),
-                          [])))
-                       ])));
-           atc_super_constraint =
-           (Some (Rhint ([8:47-57]),
-                  (Tintersection
-                     [(Rhint ([8:48-56]),
-                       (Tapply (([8:48-56], "\\HH\\Contexts\\defaults"), [])))
-                       ])));
-           atc_default = None });
-      ttc_origin = "\\WithUpperThenLowerBound";
-      ttc_enforceable = ([Pos.none], false); ttc_reifiable = None;
-      ttc_concretized = false; ttc_is_ctx = true } };
-  dc_props = {}; dc_sprops = {}; dc_methods = {}; dc_smethods = {};
-  dc_construct = (None, Typing_defs_core.Inconsistent); dc_ancestors = {};
-  dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
+FoldedClass {
+    name: "\\WithLowerThenUpperBound",
+    pos: Pos(root|ctx_const_both_bounds.php, 3:11-34),
+    kind: Cinterface,
+    consts: {
+        "C": ClassConst {
+            is_synthesized: true,
+            kind: CCAbstract(
+                false,
+            ),
+            pos: Pos(root|ctx_const_both_bounds.php, 4:22-23),
+            ty: HH\TypeStructure<this::C>,
+            origin: "\\WithLowerThenUpperBound",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|ctx_const_both_bounds.php, 3:11-34),
+            ty: HH\classname<this>,
+            origin: "\\WithLowerThenUpperBound",
+            refs: [],
+        },
+    },
+    type_consts: {
+        "C": TypeConst {
+            is_synthesized: false,
+            name: (
+                Pos(root|ctx_const_both_bounds.php, 4:22-23),
+                "C",
+            ),
+            kind: AbstractTypeconst {
+                as_constraint: Some(
+                    &(HH\Contexts\rx),
+                ),
+                super_constraint: Some(
+                    &(HH\Contexts\defaults),
+                ),
+                default: None,
+            },
+            origin: "\\WithLowerThenUpperBound",
+            enforceable: None,
+            reifiable: None,
+            is_concretized: false,
+            is_ctx: true,
+        },
+    },
+}
+FoldedClass {
+    name: "\\WithUpperThenLowerBound",
+    pos: Pos(root|ctx_const_both_bounds.php, 7:11-34),
+    kind: Cinterface,
+    consts: {
+        "C": ClassConst {
+            is_synthesized: true,
+            kind: CCAbstract(
+                false,
+            ),
+            pos: Pos(root|ctx_const_both_bounds.php, 8:22-23),
+            ty: HH\TypeStructure<this::C>,
+            origin: "\\WithUpperThenLowerBound",
+            refs: [],
+        },
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|ctx_const_both_bounds.php, 7:11-34),
+            ty: HH\classname<this>,
+            origin: "\\WithUpperThenLowerBound",
+            refs: [],
+        },
+    },
+    type_consts: {
+        "C": TypeConst {
+            is_synthesized: false,
+            name: (
+                Pos(root|ctx_const_both_bounds.php, 8:22-23),
+                "C",
+            ),
+            kind: AbstractTypeconst {
+                as_constraint: Some(
+                    &(HH\Contexts\write_props),
+                ),
+                super_constraint: Some(
+                    &(HH\Contexts\defaults),
+                ),
+                default: None,
+            },
+            origin: "\\WithUpperThenLowerBound",
+            enforceable: None,
+            reifiable: None,
+            is_concretized: false,
+            is_ctx: true,
+        },
+    },
+}
 
 They matched!

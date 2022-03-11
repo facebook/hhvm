@@ -1,186 +1,279 @@
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\E"; dc_pos = [3:7-8];
-  dc_tparams =
-  [{ Typing_defs_core.tp_variance = Invariant; tp_name = ([3:9-11], "Ta");
-     tp_tparams = []; tp_constraints = []; tp_reified = Erased;
-     tp_user_attributes = [] };
-    { Typing_defs_core.tp_variance = Invariant; tp_name = ([3:13-15], "Tb");
-      tp_tparams = []; tp_constraints = []; tp_reified = Erased;
-      tp_user_attributes = [] }
-    ];
-  dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:7-8];
-      cc_type =
-      (Rclass_class ([3:7-8]),
-       (Tapply (([3:7-8], "\\HH\\classname"),
-          [(Rclass_class ([3:7-8]), Tthis)])));
-      cc_origin = "\\E"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
-{ Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = Cinterface; dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\I"; dc_pos = [5:11-12];
-  dc_tparams =
-  [{ Typing_defs_core.tp_variance = Invariant; tp_name = ([6:3-5], "Ta");
-     tp_tparams = [];
-     tp_constraints =
-     [(Constraint_as, (Rhint ([6:9-17]), (Tprim Tarraykey)))];
-     tp_reified = Erased; tp_user_attributes = [] };
-    { Typing_defs_core.tp_variance = Invariant; tp_name = ([7:3-5], "Tb");
-      tp_tparams = [];
-      tp_constraints =
-      [(Constraint_as, (Rhint ([7:9-11]), (Tgeneric ("Ta", []))))];
-      tp_reified = Erased; tp_user_attributes = [] };
-    { Typing_defs_core.tp_variance = Invariant; tp_name = ([8:3-5], "Tc");
-      tp_tparams = [];
-      tp_constraints =
-      [(Constraint_as, (Rhint ([8:9-11]), (Tgeneric ("Td", []))))];
-      tp_reified = Erased; tp_user_attributes = [] };
-    { Typing_defs_core.tp_variance = Invariant; tp_name = ([9:3-5], "Td");
-      tp_tparams = [];
-      tp_constraints =
-      [(Constraint_as,
-        (Rhint ([9:9-18]),
-         (Tapply (([9:9-10], "\\E"),
-            [(Rhint ([9:11-13]), (Tgeneric ("Ta", [])));
-              (Rhint ([9:15-17]), (Tgeneric ("Tf", [])))]
-            ))))
-        ];
-      tp_reified = Erased; tp_user_attributes = [] };
-    { Typing_defs_core.tp_variance = Invariant; tp_name = ([10:3-5], "Tf");
-      tp_tparams = []; tp_constraints = []; tp_reified = Erased;
-      tp_user_attributes = [] };
-    { Typing_defs_core.tp_variance = Invariant; tp_name = ([11:3-7], "Tarr");
-      tp_tparams = [];
-      tp_constraints =
-      [(Constraint_as,
-        (Rhint ([11:11-21]),
-         (Tapply (([11:11-17], "\\HH\\vec"),
-            [(Rhint ([11:18-20]), (Tgeneric ("Ta", [])))]))))
-        ];
-      tp_reified = Erased; tp_user_attributes = [] };
-    { Typing_defs_core.tp_variance = Invariant;
-      tp_name = ([12:3-8], "Tlike"); tp_tparams = [];
-      tp_constraints =
-      [(Constraint_as,
-        (Rhint ([12:12-15]),
-         (Tlike (Rhint ([12:13-15]), (Tgeneric ("Ta", []))))))
-        ];
-      tp_reified = Erased; tp_user_attributes = [] };
-    { Typing_defs_core.tp_variance = Invariant; tp_name = ([13:3-7], "Topt");
-      tp_tparams = [];
-      tp_constraints =
-      [(Constraint_as,
-        (Rhint ([13:11-14]),
-         (Toption (Rhint ([13:12-14]), (Tgeneric ("Ta", []))))))
-        ];
-      tp_reified = Erased; tp_user_attributes = [] };
-    { Typing_defs_core.tp_variance = Invariant; tp_name = ([14:3-7], "Tfun");
-      tp_tparams = [];
-      tp_constraints =
-      [(Constraint_as,
-        (Rhint ([14:11-29]),
-         (Tfun
-            { ft_tparams = []; ft_where_constraints = [];
-              ft_params =
-              [{ fp_pos = [14:21-23]; fp_name = None;
-                 fp_type =
-                 { et_enforced = Typing_defs_core.Unenforced;
-                   et_type = (Rhint ([14:21-23]), (Tgeneric ("Ta", []))) };
-                 fp_flags =
-                 (make_fp_flags ~accept_disposable:false ~has_default:false
-                   ~mode:Typing_defs_core.FPnormal ~ifc_external:false
-                   ~ifc_can_call:false ~readonly:false);
-                  }
-                ];
-              ft_implicit_params = { capability = (CapDefaults [14:11-29]) };
-              ft_ret =
-              { et_enforced = Typing_defs_core.Unenforced;
-                et_type = (Rhint ([14:26-28]), (Tgeneric ("Tb", []))) };
-              ft_flags =
-              (make_ft_flags FSync ~return_disposable:false
-                ~returns_readonly:false ~support_dynamic_type:false
-                ~readonly_this:false ~is_memoized:false ~variadic:false);
-              ft_ifc_decl = FDPolicied {PUBLIC} })))
-        ];
-      tp_reified = Erased; tp_user_attributes = [] };
-    { Typing_defs_core.tp_variance = Invariant;
-      tp_name = ([15:3-9], "Tshape"); tp_tparams = [];
-      tp_constraints =
-      [(Constraint_as,
-        (Rhint ([15:13-29]),
-         (Tshape (Typing_defs_core.Closed_shape,
-            { (Typing_defs_core.TSFlit_str ([15:19-22], "a")) ->
-              { sft_optional = false;
-                sft_ty = (Rhint ([15:26-28]), (Tgeneric ("Ta", []))) } }
-            ))))
-        ];
-      tp_reified = Erased; tp_user_attributes = [] };
-    { Typing_defs_core.tp_variance = Invariant;
-      tp_name = ([16:3-8], "Tdarr"); tp_tparams = [];
-      tp_constraints =
-      [(Constraint_as,
-        (Rhint ([16:12-26]),
-         (Tapply (([16:12-18], "\\HH\\dict"),
-            [(Rhint ([16:19-21]), (Tgeneric ("Ta", [])));
-              (Rhint ([16:23-25]), (Tgeneric ("Tb", [])))]
-            ))))
-        ];
-      tp_reified = Erased; tp_user_attributes = [] };
-    { Typing_defs_core.tp_variance = Invariant;
-      tp_name = ([17:3-8], "Tvarr"); tp_tparams = [];
-      tp_constraints =
-      [(Constraint_as,
-        (Rhint ([17:12-22]),
-         (Tapply (([17:12-18], "\\HH\\vec"),
-            [(Rhint ([17:19-21]), (Tgeneric ("Ta", [])))]))))
-        ];
-      tp_reified = Erased; tp_user_attributes = [] };
-    { Typing_defs_core.tp_variance = Invariant;
-      tp_name = ([18:3-9], "Tvdarr"); tp_tparams = [];
-      tp_constraints =
-      [(Constraint_as,
-        (Rhint ([18:13-37]),
-         (Tvec_or_dict (Rhint ([18:30-32]), (Tgeneric ("Ta", []))),
-            (Rhint ([18:34-36]), (Tgeneric ("Tb", []))))))
-        ];
-      tp_reified = Erased; tp_user_attributes = [] };
-    { Typing_defs_core.tp_variance = Invariant;
-      tp_name = ([19:3-9], "Ttuple"); tp_tparams = [];
-      tp_constraints =
-      [(Constraint_as,
-        (Rhint ([19:13-21]),
-         (Ttuple
-            [(Rhint ([19:14-16]), (Tgeneric ("Ta", [])));
-              (Rhint ([19:18-20]), (Tgeneric ("Tb", [])))])))
-        ];
-      tp_reified = Erased; tp_user_attributes = [] }
-    ];
-  dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [5:11-12];
-      cc_type =
-      (Rclass_class ([5:11-12]),
-       (Tapply (([5:11-12], "\\HH\\classname"),
-          [(Rclass_class ([5:11-12]), Tthis)])));
-      cc_origin = "\\I"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
+FoldedClass {
+    name: "\\E",
+    pos: Pos(root|constraints_mentioning_tparams_in_same_list.php, 3:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    tparams: [
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 3:9-11),
+                "Ta",
+            ),
+            tparams: [],
+            constraints: [],
+            reified: Erased,
+            user_attributes: [],
+        },
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 3:13-15),
+                "Tb",
+            ),
+            tparams: [],
+            constraints: [],
+            reified: Erased,
+            user_attributes: [],
+        },
+    ],
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|constraints_mentioning_tparams_in_same_list.php, 3:7-8),
+            ty: HH\classname<this>,
+            origin: "\\E",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\I",
+    pos: Pos(root|constraints_mentioning_tparams_in_same_list.php, 5:11-12),
+    kind: Cinterface,
+    tparams: [
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 6:3-5),
+                "Ta",
+            ),
+            tparams: [],
+            constraints: [
+                (
+                    ConstraintAs,
+                    arraykey,
+                ),
+            ],
+            reified: Erased,
+            user_attributes: [],
+        },
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 7:3-5),
+                "Tb",
+            ),
+            tparams: [],
+            constraints: [
+                (
+                    ConstraintAs,
+                    Ta,
+                ),
+            ],
+            reified: Erased,
+            user_attributes: [],
+        },
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 8:3-5),
+                "Tc",
+            ),
+            tparams: [],
+            constraints: [
+                (
+                    ConstraintAs,
+                    Td,
+                ),
+            ],
+            reified: Erased,
+            user_attributes: [],
+        },
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 9:3-5),
+                "Td",
+            ),
+            tparams: [],
+            constraints: [
+                (
+                    ConstraintAs,
+                    E<Ta, Tf>,
+                ),
+            ],
+            reified: Erased,
+            user_attributes: [],
+        },
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 10:3-5),
+                "Tf",
+            ),
+            tparams: [],
+            constraints: [],
+            reified: Erased,
+            user_attributes: [],
+        },
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 11:3-7),
+                "Tarr",
+            ),
+            tparams: [],
+            constraints: [
+                (
+                    ConstraintAs,
+                    HH\vec<Ta>,
+                ),
+            ],
+            reified: Erased,
+            user_attributes: [],
+        },
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 12:3-8),
+                "Tlike",
+            ),
+            tparams: [],
+            constraints: [
+                (
+                    ConstraintAs,
+                    ~Ta,
+                ),
+            ],
+            reified: Erased,
+            user_attributes: [],
+        },
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 13:3-7),
+                "Topt",
+            ),
+            tparams: [],
+            constraints: [
+                (
+                    ConstraintAs,
+                    ?Ta,
+                ),
+            ],
+            reified: Erased,
+            user_attributes: [],
+        },
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 14:3-7),
+                "Tfun",
+            ),
+            tparams: [],
+            constraints: [
+                (
+                    ConstraintAs,
+                    (function(Ta): Tb),
+                ),
+            ],
+            reified: Erased,
+            user_attributes: [],
+        },
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 15:3-9),
+                "Tshape",
+            ),
+            tparams: [],
+            constraints: [
+                (
+                    ConstraintAs,
+                    shape('a' => Ta),
+                ),
+            ],
+            reified: Erased,
+            user_attributes: [],
+        },
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 16:3-8),
+                "Tdarr",
+            ),
+            tparams: [],
+            constraints: [
+                (
+                    ConstraintAs,
+                    HH\dict<Ta, Tb>,
+                ),
+            ],
+            reified: Erased,
+            user_attributes: [],
+        },
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 17:3-8),
+                "Tvarr",
+            ),
+            tparams: [],
+            constraints: [
+                (
+                    ConstraintAs,
+                    HH\vec<Ta>,
+                ),
+            ],
+            reified: Erased,
+            user_attributes: [],
+        },
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 18:3-9),
+                "Tvdarr",
+            ),
+            tparams: [],
+            constraints: [
+                (
+                    ConstraintAs,
+                    vec_or_dict<Ta, Tb>,
+                ),
+            ],
+            reified: Erased,
+            user_attributes: [],
+        },
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|constraints_mentioning_tparams_in_same_list.php, 19:3-9),
+                "Ttuple",
+            ),
+            tparams: [],
+            constraints: [
+                (
+                    ConstraintAs,
+                    (Ta, Tb),
+                ),
+            ],
+            reified: Erased,
+            user_attributes: [],
+        },
+    ],
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|constraints_mentioning_tparams_in_same_list.php, 5:11-12),
+            ty: HH\classname<this>,
+            origin: "\\I",
+            refs: [],
+        },
+    },
+}
 
 They matched!

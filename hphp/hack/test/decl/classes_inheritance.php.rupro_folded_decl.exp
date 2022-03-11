@@ -1,351 +1,229 @@
 --- ocaml
 +++ rupro
-@@ -1,346 +1,342 @@
- { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\A"; dc_pos = [3:7-8]; dc_tparams = [];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:7-8];
-       cc_type =
-       (Rclass_class ([3:7-8]),
-        (Tapply (([3:7-8], "\\HH\\classname"),
-           [(Rclass_class ([3:7-8]), Tthis)])));
-       cc_origin = "\\A"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
-   dc_methods =
-   { "a" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\A"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None };
-     "b" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\A"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\B"; dc_pos = [8:7-8]; dc_tparams = [];
-   dc_where_constraints = [];
-   dc_substs =
-   { "\\A" ->
-     { Decl_defs.sc_subst = {}; sc_class_context = "\\B";
-       sc_from_req_extends = false } };
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [8:7-8];
-       cc_type =
-       (Rclass_class ([8:7-8]),
-        (Tapply (([8:7-8], "\\HH\\classname"),
-           [(Rclass_class ([8:7-8]), Tthis)])));
-       cc_origin = "\\B"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
-   dc_methods =
-   { "a" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\A"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None };
-     "b" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\B"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None };
-     "c" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\B"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors =
-   { "\\A" -> (Rhint ([8:17-18]), (Tapply (([8:17-18], "\\A"), []))) };
-   dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = { "\\A" };
-   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
-   dc_enum_type = None; dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = Cinterface; dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\C"; dc_pos = [13:11-12]; dc_tparams = [];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [13:11-12];
-       cc_type =
-       (Rclass_class ([13:11-12]),
-        (Tapply (([13:11-12], "\\HH\\classname"),
-           [(Rclass_class ([13:11-12]), Tthis)])));
-       cc_origin = "\\C"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
-   dc_methods =
-   { "c" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> true;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = Cinterface; dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\D"; dc_pos = [17:11-12]; dc_tparams = [];
-   dc_where_constraints = [];
-   dc_substs =
-   { "\\C" ->
-     { Decl_defs.sc_subst = {}; sc_class_context = "\\D";
-       sc_from_req_extends = false } };
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [17:11-12];
-       cc_type =
-       (Rclass_class ([17:11-12]),
-        (Tapply (([17:11-12], "\\HH\\classname"),
-           [(Rclass_class ([17:11-12]), Tthis)])));
-       cc_origin = "\\D"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
-   dc_methods =
-   { "c" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> true;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\C"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None };
-     "d" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> true;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\D"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors =
-   { "\\C" -> (Rhint ([17:21-22]), (Tapply (([17:21-22], "\\C"), []))) };
-   dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = { "\\C" };
-   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
-   dc_enum_type = None; dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\E"; dc_pos = [21:7-8]; dc_tparams = [];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [21:7-8];
-       cc_type =
-       (Rclass_class ([21:7-8]),
-        (Tapply (([21:7-8], "\\HH\\classname"),
-           [(Rclass_class ([21:7-8]), Tthis)])));
-       cc_origin = "\\E"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
-   dc_methods =
-   { "c" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\E"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
--  dc_ancestors =
--  { "\\C" -> (Rhint ([21:20-21]), (Tapply (([21:20-21], "\\C"), []))) };
--  dc_support_dynamic_type = false; dc_req_ancestors = [];
-+  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\F"; dc_pos = [25:7-8]; dc_tparams = [];
-   dc_where_constraints = [];
-   dc_substs =
-   { "\\E" ->
-     { Decl_defs.sc_subst = {}; sc_class_context = "\\F";
-       sc_from_req_extends = false } };
-   dc_consts =
-   { "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [25:7-8];
-       cc_type =
-       (Rclass_class ([25:7-8]),
-        (Tapply (([25:7-8], "\\HH\\classname"),
-           [(Rclass_class ([25:7-8]), Tthis)])));
-       cc_origin = "\\F"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
-   dc_methods =
-   { "c" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\E"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None };
-     "d" ->
-     { Decl_defs.elt_flags =
-       { "Abstract" -> false;
-         "Const" -> false;
-         "Dynamicallycallable" -> false;
-         "Final" -> false;
-         "Lateinit" -> false;
-         "Lsb" -> false;
-         "NeedsInit" -> false;
-         "ReadonlyProp" -> false;
-         "SuperfluousOverride" -> false;
-         "SupportDynamicType" -> false;
-         "Synthesized" -> false;
-         "XaHasDefault" -> false;
-         "XaTagLateinit" -> false;
-         "XaTagRequired" -> false };
-       elt_origin = "\\F"; elt_visibility = Typing_defs_core.Vpublic;
-       elt_deprecated = None } };
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors =
--  { "\\C" -> (Rhint ([21:20-21]), (Tapply (([21:20-21], "\\C"), [])));
--    "\\D" -> (Rhint ([25:30-31]), (Tapply (([25:30-31], "\\D"), [])));
--    "\\E" -> (Rhint ([25:17-18]), (Tapply (([25:17-18], "\\E"), []))) };
-+  { "\\E" -> (Rhint ([25:17-18]), (Tapply (([25:17-18], "\\E"), []))) };
-   dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = { "\\E" };
-   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
-   dc_enum_type = None; dc_decl_errors = <opaque> }
+@@ -1,226 +1,221 @@
+ FoldedClass {
+     name: "\\A",
+     pos: Pos(root|classes_inheritance.php, 3:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     methods: {
+         "a": FoldedElement {
+             flags: (empty),
+             origin: "\\A",
+             visibility: Public,
+             deprecated: None,
+         },
+         "b": FoldedElement {
+             flags: (empty),
+             origin: "\\A",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|classes_inheritance.php, 3:7-8),
+             ty: HH\classname<this>,
+             origin: "\\A",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\B",
+     pos: Pos(root|classes_inheritance.php, 8:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\A": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\B",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\A": A,
+     },
+     methods: {
+         "a": FoldedElement {
+             flags: (empty),
+             origin: "\\A",
+             visibility: Public,
+             deprecated: None,
+         },
+         "b": FoldedElement {
+             flags: (empty),
+             origin: "\\B",
+             visibility: Public,
+             deprecated: None,
+         },
+         "c": FoldedElement {
+             flags: (empty),
+             origin: "\\B",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|classes_inheritance.php, 8:7-8),
+             ty: HH\classname<this>,
+             origin: "\\B",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\A",
+     },
+ }
+ FoldedClass {
+     name: "\\C",
+     pos: Pos(root|classes_inheritance.php, 13:11-12),
+     kind: Cinterface,
+     methods: {
+         "c": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\C",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|classes_inheritance.php, 13:11-12),
+             ty: HH\classname<this>,
+             origin: "\\C",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\D",
+     pos: Pos(root|classes_inheritance.php, 17:11-12),
+     kind: Cinterface,
+     substs: {
+         "\\C": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\D",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+         "\\C": C,
+     },
+     methods: {
+         "c": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\C",
+             visibility: Public,
+             deprecated: None,
+         },
+         "d": FoldedElement {
+             flags: ABSTRACT,
+             origin: "\\D",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|classes_inheritance.php, 17:11-12),
+             ty: HH\classname<this>,
+             origin: "\\D",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\C",
+     },
+ }
+ FoldedClass {
+     name: "\\E",
+     pos: Pos(root|classes_inheritance.php, 21:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+-    ancestors: {
+-        "\\C": C,
+-    },
+     methods: {
+         "c": FoldedElement {
+             flags: (empty),
+             origin: "\\E",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|classes_inheritance.php, 21:7-8),
+             ty: HH\classname<this>,
+             origin: "\\E",
+             refs: [],
+         },
+     },
+ }
+ FoldedClass {
+     name: "\\F",
+     pos: Pos(root|classes_inheritance.php, 25:7-8),
+     kind: Cclass(
+         Concrete,
+     ),
+     substs: {
+         "\\E": SubstContext {
+             subst: Subst(
+                 {},
+             ),
+             class_context: "\\F",
+             from_req_extends: false,
+         },
+     },
+     ancestors: {
+-        "\\C": C,
+-        "\\D": D,
+         "\\E": E,
+     },
+     methods: {
+         "c": FoldedElement {
+             flags: (empty),
+             origin: "\\E",
+             visibility: Public,
+             deprecated: None,
+         },
+         "d": FoldedElement {
+             flags: (empty),
+             origin: "\\F",
+             visibility: Public,
+             deprecated: None,
+         },
+     },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|classes_inheritance.php, 25:7-8),
+             ty: HH\classname<this>,
+             origin: "\\F",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\E",
+     },
+ }

@@ -1,152 +1,142 @@
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\Cov"; dc_pos = [3:7-10];
-  dc_tparams =
-  [{ Typing_defs_core.tp_variance = Covariant; tp_name = ([3:12-14], "Tc");
-     tp_tparams = []; tp_constraints = []; tp_reified = Erased;
-     tp_user_attributes = [] }
-    ];
-  dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:7-10];
-      cc_type =
-      (Rclass_class ([3:7-10]),
-       (Tapply (([3:7-10], "\\HH\\classname"),
-          [(Rclass_class ([3:7-10]), Tthis)])));
-      cc_origin = "\\Cov"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\A"; dc_pos = [4:7-8]; dc_tparams = [];
-  dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [4:7-8];
-      cc_type =
-      (Rclass_class ([4:7-8]),
-       (Tapply (([4:7-8], "\\HH\\classname"),
-          [(Rclass_class ([4:7-8]), Tthis)])));
-      cc_origin = "\\A"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\Base"; dc_pos = [6:7-11];
-  dc_tparams =
-  [{ Typing_defs_core.tp_variance = Invariant; tp_name = ([6:12-14], "Tb");
-     tp_tparams = []; tp_constraints = []; tp_reified = Erased;
-     tp_user_attributes = [] }
-    ];
-  dc_where_constraints = []; dc_substs = {};
-  dc_consts =
-  { "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [6:7-11];
-      cc_type =
-      (Rclass_class ([6:7-11]),
-       (Tapply (([6:7-11], "\\HH\\classname"),
-          [(Rclass_class ([6:7-11]), Tthis)])));
-      cc_origin = "\\Base"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
-  dc_methods =
-  { "foo" ->
-    { Decl_defs.elt_flags =
-      { "Abstract" -> false;
-        "Const" -> false;
-        "Dynamicallycallable" -> false;
-        "Final" -> false;
-        "Lateinit" -> false;
-        "Lsb" -> false;
-        "NeedsInit" -> false;
-        "ReadonlyProp" -> false;
-        "SuperfluousOverride" -> false;
-        "SupportDynamicType" -> false;
-        "Synthesized" -> false;
-        "XaHasDefault" -> false;
-        "XaTagLateinit" -> false;
-        "XaTagRequired" -> false };
-      elt_origin = "\\Base"; elt_visibility = Typing_defs_core.Vpublic;
-      elt_deprecated = None } };
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-  dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-  dc_decl_errors = <opaque> }
-{ Decl_defs.dc_need_init = false; dc_abstract = false; dc_final = false;
-  dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-  dc_kind = (Cclass Concrete); dc_is_xhp = false; dc_has_xhp_keyword = false;
-  dc_module = None; dc_name = "\\Derived"; dc_pos = [10:7-14];
-  dc_tparams =
-  [{ Typing_defs_core.tp_variance = Invariant; tp_name = ([10:15-17], "Td");
-     tp_tparams = []; tp_constraints = []; tp_reified = Erased;
-     tp_user_attributes = [] }
-    ];
-  dc_where_constraints = [];
-  dc_substs =
-  { "\\Base" ->
-    { Decl_defs.sc_subst =
-      { "Tb" ->
-        (Rhint ([10:32-39]),
-         (Tapply (([10:32-35], "\\Cov"),
-            [(Rhint ([10:36-38]), (Tgeneric ("Td", [])))]))) };
-      sc_class_context = "\\Derived"; sc_from_req_extends = false } };
-  dc_consts =
-  { "class" ->
-    { Typing_defs.cc_synthesized = true;
-      cc_abstract = Typing_defs.CCConcrete; cc_pos = [10:7-14];
-      cc_type =
-      (Rclass_class ([10:7-14]),
-       (Tapply (([10:7-14], "\\HH\\classname"),
-          [(Rclass_class ([10:7-14]), Tthis)])));
-      cc_origin = "\\Derived"; cc_refs = [] } };
-  dc_typeconsts = {}; dc_props = {}; dc_sprops = {};
-  dc_methods =
-  { "foo" ->
-    { Decl_defs.elt_flags =
-      { "Abstract" -> false;
-        "Const" -> false;
-        "Dynamicallycallable" -> false;
-        "Final" -> false;
-        "Lateinit" -> false;
-        "Lsb" -> false;
-        "NeedsInit" -> false;
-        "ReadonlyProp" -> false;
-        "SuperfluousOverride" -> false;
-        "SupportDynamicType" -> false;
-        "Synthesized" -> false;
-        "XaHasDefault" -> false;
-        "XaTagLateinit" -> false;
-        "XaTagRequired" -> false };
-      elt_origin = "\\Derived"; elt_visibility = Typing_defs_core.Vpublic;
-      elt_deprecated = None } };
-  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-  dc_ancestors =
-  { "\\Base" ->
-    (Rhint ([10:27-40]),
-     (Tapply (([10:27-31], "\\Base"),
-        [(Rhint ([10:32-39]),
-          (Tapply (([10:32-35], "\\Cov"),
-             [(Rhint ([10:36-38]), (Tgeneric ("Td", [])))])))
-          ]
-        ))) };
-  dc_support_dynamic_type = false; dc_req_ancestors = [];
-  dc_req_ancestors_extends = {}; dc_extends = { "\\Base" };
-  dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
-  dc_enum_type = None; dc_decl_errors = <opaque> }
+FoldedClass {
+    name: "\\Cov",
+    pos: Pos(root|function_where_constraints.php, 3:7-10),
+    kind: Cclass(
+        Concrete,
+    ),
+    tparams: [
+        Tparam {
+            variance: Covariant,
+            name: (
+                Pos(root|function_where_constraints.php, 3:12-14),
+                "Tc",
+            ),
+            tparams: [],
+            constraints: [],
+            reified: Erased,
+            user_attributes: [],
+        },
+    ],
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|function_where_constraints.php, 3:7-10),
+            ty: HH\classname<this>,
+            origin: "\\Cov",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\A",
+    pos: Pos(root|function_where_constraints.php, 4:7-8),
+    kind: Cclass(
+        Concrete,
+    ),
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|function_where_constraints.php, 4:7-8),
+            ty: HH\classname<this>,
+            origin: "\\A",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\Base",
+    pos: Pos(root|function_where_constraints.php, 6:7-11),
+    kind: Cclass(
+        Concrete,
+    ),
+    tparams: [
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|function_where_constraints.php, 6:12-14),
+                "Tb",
+            ),
+            tparams: [],
+            constraints: [],
+            reified: Erased,
+            user_attributes: [],
+        },
+    ],
+    methods: {
+        "foo": FoldedElement {
+            flags: (empty),
+            origin: "\\Base",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|function_where_constraints.php, 6:7-11),
+            ty: HH\classname<this>,
+            origin: "\\Base",
+            refs: [],
+        },
+    },
+}
+FoldedClass {
+    name: "\\Derived",
+    pos: Pos(root|function_where_constraints.php, 10:7-14),
+    kind: Cclass(
+        Concrete,
+    ),
+    tparams: [
+        Tparam {
+            variance: Invariant,
+            name: (
+                Pos(root|function_where_constraints.php, 10:15-17),
+                "Td",
+            ),
+            tparams: [],
+            constraints: [],
+            reified: Erased,
+            user_attributes: [],
+        },
+    ],
+    substs: {
+        "\\Base": SubstContext {
+            subst: Subst(
+                {
+                    "Tb": Cov<Td>,
+                },
+            ),
+            class_context: "\\Derived",
+            from_req_extends: false,
+        },
+    },
+    ancestors: {
+        "\\Base": Base<Cov<Td>>,
+    },
+    methods: {
+        "foo": FoldedElement {
+            flags: (empty),
+            origin: "\\Derived",
+            visibility: Public,
+            deprecated: None,
+        },
+    },
+    consts: {
+        "class": ClassConst {
+            is_synthesized: true,
+            kind: CCConcrete,
+            pos: Pos(root|function_where_constraints.php, 10:7-14),
+            ty: HH\classname<this>,
+            origin: "\\Derived",
+            refs: [],
+        },
+    },
+    extends: {
+        "\\Base",
+    },
+}
 
 They matched!

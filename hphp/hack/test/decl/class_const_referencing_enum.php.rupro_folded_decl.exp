@@ -1,81 +1,87 @@
 --- ocaml
 +++ rupro
-@@ -1,75 +1,74 @@
- { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = Cenum; dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\Words"; dc_pos = [3:6-11]; dc_tparams = [];
-   dc_where_constraints = []; dc_substs = {};
-   dc_consts =
-   { "BAR" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [5:3-6];
--      cc_type = (Rhint ([3:13-19]), (Tapply (([3:6-11], "\\Words"), [])));
-+      cc_type = (Rwitness_from_decl ([5:9-14]), (Tprim Tstring));
-       cc_origin = "\\Words"; cc_refs = [] };
-     "FOO" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [4:3-6];
--      cc_type = (Rhint ([3:13-19]), (Tapply (([3:6-11], "\\Words"), [])));
-+      cc_type = (Rwitness_from_decl ([4:9-14]), (Tprim Tstring));
-       cc_origin = "\\Words"; cc_refs = [] };
-     "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [3:6-11];
-       cc_type =
-       (Rclass_class ([3:6-11]),
-        (Tapply (([3:6-11], "\\HH\\classname"),
-           [(Rclass_class ([3:6-11]), Tthis)])));
-       cc_origin = "\\Words"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
-   dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors =
-   { "\\HH\\BuiltinEnum" ->
-     (Rhint ([3:6-11]),
-      (Tapply (([3:6-11], "\\HH\\BuiltinEnum"),
-         [(Rhint ([3:6-11]), (Tapply (([3:6-11], "\\Words"), [])))]))) };
-   dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = { "\\HH\\BuiltinEnum" };
-   dc_sealed_whitelist = None; dc_xhp_attr_deps = {}; dc_xhp_enum_values = {};
-   dc_enum_type =
-   (Some { Typing_defs.te_base = (Rhint ([3:13-19]), (Tprim Tstring));
-           te_constraint = (Some (Rhint ([3:23-29]), (Tprim Tstring)));
-           te_includes = [] });
-   dc_decl_errors = <opaque> }
- { Decl_defs.dc_need_init = false; dc_abstract = true; dc_final = false;
-   dc_const = false; dc_internal = false; dc_deferred_init_members = {};
-   dc_kind = (Cclass Abstract); dc_is_xhp = false; dc_has_xhp_keyword = false;
-   dc_module = None; dc_name = "\\TestClassConstReferencingEnum";
-   dc_pos = [9:16-45]; dc_tparams = []; dc_where_constraints = [];
-   dc_substs = {};
-   dc_consts =
-   { "WORD_VALUES" ->
-     { Typing_defs.cc_synthesized = false;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [10:28-39];
-       cc_type =
-       (Rhint ([10:9-27]),
-        (Tapply (([10:9-13], "\\HH\\dict"),
-           [(Rhint ([10:14-19]), (Tapply (([10:14-19], "\\Words"), [])));
-             (Rhint ([10:21-26]), (Tprim Tfloat))]
-           )));
-       cc_origin = "\\TestClassConstReferencingEnum";
-       cc_refs =
-       [((Typing_defs.From "\\Words"), "BAR");
-         ((Typing_defs.From "\\Words"), "FOO")]
-       };
-     "class" ->
-     { Typing_defs.cc_synthesized = true;
-       cc_abstract = Typing_defs.CCConcrete; cc_pos = [9:16-45];
-       cc_type =
-       (Rclass_class ([9:16-45]),
-        (Tapply (([9:16-45], "\\HH\\classname"),
-           [(Rclass_class ([9:16-45]), Tthis)])));
-       cc_origin = "\\TestClassConstReferencingEnum"; cc_refs = [] } };
-   dc_typeconsts = {}; dc_props = {}; dc_sprops = {}; dc_methods = {};
--  dc_smethods = {};
--  dc_construct = (None, Typing_defs_core.ConsistentConstruct);
-+  dc_smethods = {}; dc_construct = (None, Typing_defs_core.Inconsistent);
-   dc_ancestors = {}; dc_support_dynamic_type = false; dc_req_ancestors = [];
-   dc_req_ancestors_extends = {}; dc_extends = {}; dc_sealed_whitelist = None;
-   dc_xhp_attr_deps = {}; dc_xhp_enum_values = {}; dc_enum_type = None;
-   dc_decl_errors = <opaque> }
+@@ -1,82 +1,82 @@
+ FoldedClass {
+     name: "\\Words",
+     pos: Pos(root|class_const_referencing_enum.php, 3:6-11),
+     kind: Cenum,
+     enum_type: EnumType {
+         base: string,
+         constraint: Some(
+             string,
+         ),
+         includes: [],
+     },
+     ancestors: {
+         "\\HH\\BuiltinEnum": HH\BuiltinEnum<Words>,
+     },
+     consts: {
+         "BAR": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|class_const_referencing_enum.php, 5:3-6),
+-            ty: Words,
++            ty: string,
+             origin: "\\Words",
+             refs: [],
+         },
+         "FOO": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|class_const_referencing_enum.php, 4:3-6),
+-            ty: Words,
++            ty: string,
+             origin: "\\Words",
+             refs: [],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|class_const_referencing_enum.php, 3:6-11),
+             ty: HH\classname<this>,
+             origin: "\\Words",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\HH\\BuiltinEnum",
+     },
+ }
+ FoldedClass {
+     name: "\\TestClassConstReferencingEnum",
+     pos: Pos(root|class_const_referencing_enum.php, 9:16-45),
+     kind: Cclass(
+         Abstract,
+     ),
+     consts: {
+         "WORD_VALUES": ClassConst {
+             is_synthesized: false,
+             kind: CCConcrete,
+             pos: Pos(root|class_const_referencing_enum.php, 10:28-39),
+             ty: HH\dict<Words, float>,
+             origin: "\\TestClassConstReferencingEnum",
+             refs: [
+                 ClassConstRef(
+                     From(
+                         "\\Words",
+                     ),
+                     "BAR",
+                 ),
+                 ClassConstRef(
+                     From(
+                         "\\Words",
+                     ),
+                     "FOO",
+                 ),
+             ],
+         },
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|class_const_referencing_enum.php, 9:16-45),
+             ty: HH\classname<this>,
+             origin: "\\TestClassConstReferencingEnum",
+             refs: [],
+         },
+     },
+ }

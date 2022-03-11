@@ -2,7 +2,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hackrs::{decl_defs::shallow, decl_parser::DeclParser, folded_decl_provider, reason::BReason};
+use hackrs::{
+    decl_defs::{folded::FoldedClass, shallow},
+    decl_parser::DeclParser,
+    folded_decl_provider,
+    reason::BReason,
+};
 use ocamlrep_ocamlpool::{ocaml_ffi_with_arena, Bump};
 use oxidized_by_ref::decl_defs::DeclClassType;
 use pos::{RelativePath, RelativePathCtx, ToOxidized};
@@ -51,5 +56,10 @@ ocaml_ffi_with_arena! {
                 )
             })
             .collect()
+    }
+
+    fn show_decl_class_type_ffi<'a>(arena: &'a Bump, decl: &'a DeclClassType<'a>) -> String {
+        let decl = <FoldedClass<BReason>>::from(decl);
+        format!("{:#?}", decl)
     }
 }

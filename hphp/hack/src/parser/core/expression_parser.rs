@@ -371,14 +371,16 @@ where
                 let str_maybe = parser1.next_token_no_trailing();
                 match str_maybe.kind() {
                     TokenKind::NowdocStringLiteral | TokenKind::HeredocStringLiteral => {
-                        // for now, try generic type argument list with attributes before resorting to bad prefix
+                        // for now, try generic type argument list with attributes before
+                        // resorting to bad prefix
                         match self.try_parse_specified_function_call(&qualified_name) {
                             Some((type_arguments, p)) => {
                                 self.continue_from(p);
-                                self.do_parse_specified_function_call(
+                                let result = self.do_parse_specified_function_call(
                                     qualified_name,
                                     type_arguments,
-                                )
+                                );
+                                self.parse_remaining_expression(result)
                             }
                             _ => {
                                 self.with_error(Errors::prefixed_invalid_string_kind);
@@ -1143,7 +1145,7 @@ where
     }
 
     fn do_parse_specified_function_call(&mut self, term: S::R, type_arguments: S::R) -> S::R {
-        let result = match self.peek_token_kind() {
+        match self.peek_token_kind() {
             TokenKind::ColonColon => {
                 // handle a<type-args>::... case
                 let type_specifier = S!(make_generic_type_specifier, self, term, type_arguments);
@@ -1167,8 +1169,7 @@ where
                 )
             }
             _ => S!(make_function_pointer_expression, self, term, type_arguments),
-        };
-        self.parse_remaining_expression(result)
+        }
     }
 
     fn can_be_used_as_lvalue(t: &S::R) -> bool {
@@ -1283,7 +1284,7 @@ where
                     BinaryExpressionPrefixKind::PrefixLessThan((type_args, parser1)) => {
                         self.continue_from(parser1);
                         let result = self.do_parse_specified_function_call(term, type_args);
-                        ParseContinuation::Done(result)
+                        ParseContinuation::Reparse(result)
                     }
                     BinaryExpressionPrefixKind::PrefixNone
                         if self.operator_has_lower_precedence(token) =>
@@ -1342,19 +1343,19 @@ where
                         }
                         TokenKind::Is => {
                             let result = self.parse_is_expression(term);
-                            ParseContinuation::Done(result)
+                            ParseContinuation::Reparse(result)
                         }
                         TokenKind::As if self.allow_as_expressions() => {
                             let result = self.parse_as_expression(term);
-                            ParseContinuation::Done(result)
+                            ParseContinuation::Reparse(result)
                         }
                         TokenKind::QuestionAs => {
                             let result = self.parse_nullable_as_expression(term);
-                            ParseContinuation::Done(result)
+                            ParseContinuation::Reparse(result)
                         }
                         TokenKind::Upcast => {
                             let result = self.parse_upcast_expression(term);
-                            ParseContinuation::Done(result)
+                            ParseContinuation::Reparse(result)
                         }
                         TokenKind::QuestionMinusGreaterThan | TokenKind::MinusGreaterThan => {
                             let result = self.parse_member_selection_expression(term);
@@ -1371,16 +1372,16 @@ where
                         TokenKind::Hash => {
                             let result =
                                 self.parse_function_call_or_enum_class_label_expression(term);
-                            ParseContinuation::Done(result)
+                            ParseContinuation::Reparse(result)
                         }
                         TokenKind::LeftParen => {
                             let missing = S!(make_missing, self, self.pos());
                             let result = self.parse_function_call(missing, term);
-                            ParseContinuation::Done(result)
+                            ParseContinuation::Reparse(result)
                         }
                         TokenKind::LeftBracket | TokenKind::LeftBrace => {
                             let result = self.parse_subscript(term);
-                            ParseContinuation::Done(result)
+                            ParseContinuation::Reparse(result)
                         }
                         TokenKind::Question => {
                             let token = self.assert_token(TokenKind::Question);
@@ -1471,8 +1472,7 @@ where
                 let left = S!(make_token, self, left);
                 let missing = S!(make_missing, self, self.pos());
                 let right = S!(make_token, self, right);
-                let result = S!(make_subscript_expression, self, term, left, missing, right);
-                self.parse_remaining_expression(result)
+                S!(make_subscript_expression, self, term, left, missing, right)
             }
             (left_kind, _) => {
                 let left_token = S!(make_token, self, left);
@@ -1483,15 +1483,14 @@ where
                     TokenKind::LeftBracket => self.require_right_bracket(),
                     _ => self.require_right_brace(),
                 };
-                let result = S!(
+                S!(
                     make_subscript_expression,
                     self,
                     term,
                     left_token,
                     index,
                     right
-                );
-                self.parse_remaining_expression(result)
+                )
             }
         }
     }
@@ -1671,7 +1670,8 @@ where
                 hash,
                 label_name
             );
-            self.parse_function_call(enum_class_label, term)
+            let result = self.parse_function_call(enum_class_label, term);
+            self.parse_remaining_expression(result)
         } else {
             S!(
                 make_enum_class_label_expression,
@@ -1681,7 +1681,7 @@ where
                 label_name
             )
         };
-        self.parse_remaining_expression(result)
+        result
     }
 
     fn parse_function_call(&mut self, enum_class_label: S::R, receiver: S::R) -> S::R {
@@ -1703,7 +1703,7 @@ where
             right
         );
         self.allow_as_expressions = old_enabled;
-        self.parse_remaining_expression(result)
+        result
     }
 
     fn parse_variable_or_lambda(&mut self) -> S::R {
@@ -1999,8 +1999,7 @@ where
         let op = self.assert_token(kw);
         let right =
             self.with_type_parser(|p: &mut TypeParser<'a, S>| p.parse_type_specifier(false, true));
-        let result = f(self, left, op, right);
-        self.parse_remaining_expression(result)
+        f(self, left, op, right)
     }
 
     fn parse_is_expression(&mut self, left: S::R) -> S::R {

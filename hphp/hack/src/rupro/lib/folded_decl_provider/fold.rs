@@ -400,96 +400,33 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         }
     }
 
-    fn add_reused_trait_error(&mut self, parent_ty: &FoldedClass<R>, trait_name: &TypeName) {
-        self.errors.push(TypingError::primary(Primary::TraitReuse {
-            parent_pos: parent_ty.pos.clone(),
-            parent_name: parent_ty.name,
-            pos: self.child.name.pos().clone(),
-            class_name: self.child.name.id(),
-            trait_name: *trait_name,
-        }));
-    }
-
-    /// Also verifies that a class never reuses the same trait throughout its hierarchy.
-    ///
-    /// Since Hack only has single inheritance and we already put up a warning for
-    /// cyclic class hierachies, if there is any overlap between our extends and
-    /// our parents' extends, that overlap must be a trait.
-    ///
-    /// This does not hold for interfaces because they have multiple inheritance,
-    /// but interfaces cannot use traits in the first place.
-    ///
-    /// XHP attribute dependencies don't actually pull the trait into the class,
-    /// so we need to track them totally separately.
-    fn add_grandparents_or_traits(
-        &mut self,
-        no_trait_reuse: bool,
-        parent_pos: &R::Pos,
-        pass: Pass,
-        extends: &mut TypeNameIndexSet,
-        parent_type: &FoldedClass<R>,
-    ) {
-        if pass == Pass::Extends {
-            self.check_extend_kind(
-                parent_pos,
-                parent_type.kind,
-                &parent_type.name,
-                self.child.name.pos(),
-                self.child.kind,
-                &self.child.name.id(),
-            );
-        }
-
-        // Get size and duplicates for potential errors before we add we add grandparents
-        let class_size = extends.len();
-        let mut duplicates = vec![];
-        for typename in parent_type.extends.iter() {
-            if extends.contains(typename) {
-                duplicates.push(typename);
-            }
-        }
-
-        if pass == Pass::Xhp {
-            // If we are crawling the xhp attribute deps, need to merge their xhp deps as well
-            extends.extend(parent_type.xhp_attr_deps.iter().cloned());
-        }
-        extends.extend(parent_type.extends.iter().cloned());
-        // Verify that merging the parent's extends did not introduce trait reuse
-        if no_trait_reuse {
-            let parents_size = parent_type.extends.len();
-            let full_size = extends.len();
-            if class_size + parents_size > full_size {
-                for duplicate in duplicates.iter() {
-                    self.add_reused_trait_error(parent_type, duplicate);
-                }
-            }
-        }
-    }
-
-    // Add types of passes
     fn add_class_parent_or_trait(
         &mut self,
         pass: Pass,
         extends: &mut TypeNameIndexSet,
         ty: &DeclTy<R>,
     ) {
-        // See comment on add_grandparents_or_traits for reasoning here.
-
-        // note(sf, 2022-03-10): D34694803 removes `tco_disallow_trait_reuse` from
-        // `GlobalOptions` but this logic remains and should be removed.
-        #[allow(clippy::logic_bug)]
-        let no_trait_reuse = false /* D34694803*/ && pass != Pass::Xhp && self.child.kind != ClassishKind::Cinterface;
-
         if let Some((_, pos_id, _)) = ty.unwrap_class_type() {
-            // If we already had this exact trait, we need to flag trait reuse
-            let reused_trait = no_trait_reuse && extends.contains(&pos_id.id());
             extends.insert(pos_id.id());
             if let Some(cls) = self.parents.get(&pos_id.id()) {
-                // The parent class lives in Hack, so we can report reused traits
-                if reused_trait {
-                    self.add_reused_trait_error(cls, &pos_id.id());
+                if pass == Pass::Extends {
+                    self.check_extend_kind(
+                        pos_id.pos(),
+                        cls.kind,
+                        &cls.name,
+                        self.child.name.pos(),
+                        self.child.kind,
+                        &self.child.name.id(),
+                    );
                 }
-                self.add_grandparents_or_traits(no_trait_reuse, pos_id.pos(), pass, extends, cls);
+
+                if pass == Pass::Xhp {
+                    // If we are crawling the xhp attribute deps, need to merge their xhp deps as well
+                    // XHP attribute dependencies don't actually pull the trait into the class,
+                    // so we need to track them totally separately.
+                    extends.extend(cls.xhp_attr_deps.iter().cloned());
+                }
+                extends.extend(cls.extends.iter().cloned());
             }
         }
     }

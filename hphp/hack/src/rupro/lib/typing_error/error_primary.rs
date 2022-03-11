@@ -13,13 +13,6 @@ pub enum Primary<R: Reason> {
     ExpectingTypeHint(R::Pos),
     ExpectingReturnTypeHint(R::Pos),
     CyclicClassDef(R::Pos, Vec<TypeName>),
-    TraitReuse {
-        parent_pos: R::Pos,
-        parent_name: TypeName,
-        pos: R::Pos,
-        class_name: TypeName,
-        trait_name: TypeName,
-    },
     WrongExtendKind {
         parent_pos: R::Pos,
         parent_kind: oxidized::ast_defs::ClassishKind,

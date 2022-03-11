@@ -19,7 +19,7 @@ use hackrs::decl_parser::DeclParser;
 use hackrs::reason::{BReason, NReason, Reason};
 use hackrs::shallow_decl_provider::ShallowDeclCache;
 use hackrs_test_utils::cache::NonEvictingCache;
-use hackrs_test_utils::SerializingCache;
+use hackrs_test_utils::serde_cache::{Compression, SerializingCache};
 use pos::{Prefix, RelativePath, RelativePathCtx};
 
 #[derive(StructOpt, Debug)]
@@ -35,9 +35,9 @@ struct CliOptions {
     #[structopt(long)]
     serialize: bool,
 
-    /// If `--serialize` was given, disable compression.
-    #[structopt(long)]
-    no_compress: bool,
+    /// If `--serialize` was given, use the given compression algorithm.
+    #[structopt(default_value, long)]
+    compression: Compression,
 }
 
 fn main() {
@@ -80,20 +80,15 @@ fn main() {
 fn parse_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames: &[RelativePath]) {
     let decl_parser = DeclParser::<R>::new(ctx);
     let shallow_decl_cache = if opts.serialize {
-        let compression = if opts.no_compress {
-            hackrs_test_utils::serde_cache::Compression::None
-        } else {
-            Default::default()
-        };
         ShallowDeclCache::new(
-            Arc::new(SerializingCache::with_compression(compression)), // types
-            Box::new(SerializingCache::with_compression(compression)), // funs
-            Box::new(SerializingCache::with_compression(compression)), // consts
-            Box::new(SerializingCache::with_compression(compression)), // properties
-            Box::new(SerializingCache::with_compression(compression)), // static_properties
-            Box::new(SerializingCache::with_compression(compression)), // methods
-            Box::new(SerializingCache::with_compression(compression)), // static_methods
-            Box::new(SerializingCache::with_compression(compression)), // constructors
+            Arc::new(SerializingCache::with_compression(opts.compression)), // types
+            Box::new(SerializingCache::with_compression(opts.compression)), // funs
+            Box::new(SerializingCache::with_compression(opts.compression)), // consts
+            Box::new(SerializingCache::with_compression(opts.compression)), // properties
+            Box::new(SerializingCache::with_compression(opts.compression)), // static_properties
+            Box::new(SerializingCache::with_compression(opts.compression)), // methods
+            Box::new(SerializingCache::with_compression(opts.compression)), // static_methods
+            Box::new(SerializingCache::with_compression(opts.compression)), // constructors
         )
     } else {
         ShallowDeclCache::with_no_member_caches(

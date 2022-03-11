@@ -28,28 +28,27 @@ namespace HPHP {
 
 struct UTF8To16Decoder {
   UTF8To16Decoder(const char *utf8, int length, bool loose)
-    : m_str(utf8), m_strlen(length), m_cursor(0), m_loose(loose),
-      m_low_surrogate(0) {}
+    : m_cursor(utf8), m_end(utf8 + length), m_index(utf8), m_loose(loose) {}
 
   int decodeTail();
   int decodeAsUTF8();
 
   int decode() {
-    if (UNLIKELY(m_low_surrogate)) {
-      int ret = m_low_surrogate;
-      m_low_surrogate = 0;
-      return ret;
-    }
-
-    int pos = m_cursor;
-    if (UNLIKELY(pos >= m_strlen)) {
+    const char *pos = m_cursor;
+    if (UNLIKELY(pos >= m_end)) {
+      if (m_low_surrogate != 0) {
+        int ret = m_low_surrogate;
+        m_low_surrogate = 0;
+        m_cursor = m_surrogate_saved_cursor;
+        return ret;
+      }
       m_cursor = pos + 1;
       return UTF8_END;
     }
 
-    unsigned char c = m_str[pos];
+    unsigned char c = *pos;
     if (LIKELY(c < 0x80)) {
-      m_cursor++;
+      m_cursor = pos + 1;
       return c;
     }
     return decodeTail();
@@ -58,14 +57,12 @@ struct UTF8To16Decoder {
 private:
   int getNext();
   unsigned int getNextChar();
-  const char *m_str;
-  int m_strlen;
-  int m_cursor;
-  int m_loose; // Faceook: json_utf8_loose
-  union {
-    int m_low_surrogate; // used for decode
-    int m_index; // used for decodeAsUTF8
-  };
+  const char *m_cursor;
+  const char *m_end;
+  const char *m_index; // used for decodeAsUTF8
+  const char *m_surrogate_saved_cursor;
+  int m_low_surrogate = 0; // used for decode
+  bool m_loose; // Facebook: json_utf8_loose
 };
 
 ///////////////////////////////////////////////////////////////////////////////

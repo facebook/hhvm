@@ -155,12 +155,6 @@ abstract class ResumableWaitHandle<<<__RequireDynamic>> +T> extends WaitableWait
 
 <<__SupportDynamicType>>
 final class AwaitAllWaitHandle extends WaitableWaitHandle<void> {
-  public static function fromVArray(
-    varray<Awaitable<mixed>> $deps
-  )[]: Awaitable<void>;
-  public static function fromDArray(
-    darray<arraykey, Awaitable<mixed>> $deps
-  )[]: Awaitable<void>;
   public static function fromDict(
     dict<arraykey, Awaitable<mixed>> $deps
   )[]: Awaitable<void>;

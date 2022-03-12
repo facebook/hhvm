@@ -50,7 +50,7 @@ let test () =
   in
   let symbols = IdentifySymbolService.all_symbols ctx tast in
   Asserter.Int_asserter.assert_equals
-    6
+    7
     (List.length symbols)
     "symbol count for error file";
   ()

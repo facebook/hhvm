@@ -139,7 +139,7 @@
  (modules symbolDefinition symbolOccurrence)
  (preprocess
   (pps lwt_ppx ppx_deriving.std ppx_deriving.enum))
- (libraries naming_special_names pos))
+ (libraries annotated_ast naming_special_names pos))
 
 (library
  (name server_load_flag)

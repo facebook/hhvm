@@ -1,0 +1,6 @@
+dynamic
+Any value at all. Unlike `mixed`, the type checker allows any operation on a `dynamic` value, even if e.g. a method doesn't actually exist.
+
+All operations on a `dynamic` value return another `dynamic` value. Prefer more specific types so the type checker can help you.
+
+To convert a `generic` value to something specific, use `$foo as SomeSpecificType`. This will check the type at runtime and the type checker will verify types after this point.

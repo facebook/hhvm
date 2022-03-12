@@ -238,6 +238,45 @@ let make_hover_attr_docs name =
     ]
   | _ -> []
 
+let built_in_type_info (bt : SymbolOccurrence.built_in_type_hint) : string =
+  match bt with
+  | SymbolOccurrence.BIprimitive prim ->
+    (match prim with
+    | Aast_defs.Tnull -> "The value `null`. The opposite of `nonnull`."
+    | Aast_defs.Tvoid ->
+      "A `void` return type indicates a function that never returns a value. `void` functions usually have side effects."
+    | Aast_defs.Tint -> "A 64-bit integer."
+    | Aast_defs.Tbool -> "A boolean value, `true` or `false`."
+    | Aast_defs.Tfloat -> "A 64-bit floating-point number."
+    | Aast_defs.Tstring -> "A sequence of characters."
+    | Aast_defs.Tresource ->
+      "An external resource, such as a file handle or database connection."
+    | Aast_defs.Tnum -> "An `int` or a `float`."
+    | Aast_defs.Tarraykey ->
+      "An `int` or a `string`. `arraykey` is a common key type for `dict`s."
+    | Aast_defs.Tnoreturn ->
+      "A `noreturn` function always errors or loops forever.")
+  | SymbolOccurrence.BImixed ->
+    "Any value at all. It's usually better to use a more specific type, or a generic."
+  | SymbolOccurrence.BIdynamic ->
+    "Any value at all. Unlike `mixed`, the type checker allows any operation on a `dynamic` value, even if e.g. a method doesn't actually exist.\n\n"
+    ^ "All operations on a `dynamic` value return another `dynamic` value. Prefer more specific types so the type checker can help you.\n\n"
+    ^ "To convert a `generic` value to something specific, use `$foo as SomeSpecificType`. This will check the type at runtime and the "
+    ^ "type checker will verify types after this point."
+  | SymbolOccurrence.BInothing ->
+    "The `nothing` type has no values, it's the empty type.\n\nA function returning `nothing` either loops forever or throws an exception. A `vec<nothing>` is always empty."
+  | SymbolOccurrence.BInonnull -> "Any value except `null`."
+  | SymbolOccurrence.BIshape ->
+    "A shape is a key-value data structure where the keys are known."
+    ^ " Shapes are value types, just like `dict` and `vec`.\n\n"
+    ^ " A closed shape, such as `shape('x' => int)`, has a fixed number of keys. "
+    ^ " An open shape, such as `shape('x' => int, ...)`, may have additional keys."
+  | SymbolOccurrence.BIthis ->
+    "`this` represents the current class.\n\n"
+    ^ "`this` refers to the type of the current instance at runtime. In a child class, `this` refers to the child class, even if the method is defined in the parent."
+  | SymbolOccurrence.BIoption ->
+    "The type `?Foo` allows either `Foo` or `null`."
+
 let keyword_info (khi : SymbolOccurrence.keyword_with_hover_docs) : string =
   let await_explanation =
     "\n\nThis does not give you threads. Only one function is running at any point in time."
@@ -341,6 +380,7 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
               make_hover_const_definition entry def_opt;
             ]
         | { type_ = Keyword info; _ } -> [keyword_info info]
+        | { type_ = BuiltInType bt; _ } -> [built_in_type_info bt]
         | _ ->
           List.concat
             [

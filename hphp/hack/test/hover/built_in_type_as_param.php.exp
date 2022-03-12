@@ -1,0 +1,2 @@
+arraykey
+An `int` or a `string`. `arraykey` is a common key type for `dict`s.

@@ -421,6 +421,71 @@ let visitor =
         | (pos, Aast.Habstr (name, _)) ->
           Result_set.singleton
             { name; type_ = TypeVar; is_declaration = false; pos }
+        | (pos, Aast.Hprim prim) ->
+          let name = Aast_defs.string_of_tprim prim in
+          Result_set.singleton
+            {
+              name;
+              type_ = BuiltInType (BIprimitive prim);
+              is_declaration = false;
+              pos;
+            }
+        | (pos, Aast.Hnothing) ->
+          Result_set.singleton
+            {
+              name = "nothing";
+              type_ = BuiltInType BInothing;
+              is_declaration = false;
+              pos;
+            }
+        | (pos, Aast.Hmixed) ->
+          Result_set.singleton
+            {
+              name = "mixed";
+              type_ = BuiltInType BImixed;
+              is_declaration = false;
+              pos;
+            }
+        | (pos, Aast.Hnonnull) ->
+          Result_set.singleton
+            {
+              name = "nonnull";
+              type_ = BuiltInType BInonnull;
+              is_declaration = false;
+              pos;
+            }
+        | (pos, Aast.Hdynamic) ->
+          Result_set.singleton
+            {
+              name = "dynamic";
+              type_ = BuiltInType BIdynamic;
+              is_declaration = false;
+              pos;
+            }
+        | (pos, Aast.Hshape _) ->
+          Result_set.singleton
+            {
+              name = "shape";
+              type_ = BuiltInType BIshape;
+              is_declaration = false;
+              pos;
+            }
+        | (pos, Aast.Hthis) ->
+          Result_set.singleton
+            {
+              name = "this";
+              type_ = BuiltInType BIthis;
+              is_declaration = false;
+              pos;
+            }
+        | (pos, Aast.Hoption _) ->
+          Result_set.singleton
+            {
+              name = "?";
+              type_ = BuiltInType BIoption;
+              is_declaration = false;
+              pos;
+            }
         | _ -> Result_set.empty
       in
       self#plus acc (super#on_hint env h)

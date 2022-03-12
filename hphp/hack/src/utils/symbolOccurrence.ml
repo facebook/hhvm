@@ -41,8 +41,21 @@ type keyword_with_hover_docs =
   | Concurrent
 [@@deriving ord, eq]
 
+type built_in_type_hint =
+  | BIprimitive of Aast_defs.tprim
+  | BImixed
+  | BIdynamic
+  | BInothing
+  | BInonnull
+  | BIshape
+  (* TODO: support self and static too.*)
+  | BIthis
+  | BIoption
+[@@deriving ord, eq]
+
 type kind =
   | Class of class_id_type
+  | BuiltInType of built_in_type_hint
   | Function
   | Method of receiver_class * string
   | LocalVar
@@ -72,6 +85,7 @@ let to_absolute x = { x with pos = Pos.to_absolute x.pos }
 
 let kind_to_string = function
   | Class _ -> "class"
+  | BuiltInType _ -> "built_in_type"
   | Method _ -> "method"
   | Function -> "function"
   | LocalVar -> "local"

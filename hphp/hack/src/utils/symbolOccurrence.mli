@@ -47,8 +47,20 @@ type keyword_with_hover_docs =
   | Concurrent
 [@@deriving ord, eq]
 
+type built_in_type_hint =
+  | BIprimitive of Aast_defs.tprim
+  | BImixed
+  | BIdynamic
+  | BInothing
+  | BInonnull
+  | BIshape
+  | BIthis
+  | BIoption
+[@@deriving eq]
+
 type kind =
   | Class of class_id_type
+  | BuiltInType of built_in_type_hint
   | Function
   | Method of receiver_class * string
   | LocalVar

@@ -195,6 +195,7 @@ let get_action symbol (filename, file_content, line, char) =
   | SO.TypeVar -> None
   | SO.Attribute _ -> Some (Class name)
   | SO.Keyword _
+  | SO.BuiltInType _
   | SO.Method (SO.UnknownClass, _)
   | SO.Property (SO.UnknownClass, _)
   | SO.ClassConst (SO.UnknownClass, _) ->

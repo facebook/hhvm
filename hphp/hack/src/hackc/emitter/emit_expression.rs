@@ -408,11 +408,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::Varray(e) => emit_varray(emitter, env, pos, e, expression),
         Expr_::Collection(e) => emit_named_collection_str(emitter, env, expression, e),
         Expr_::ValCollection(e) => emit_val_collection(emitter, env, pos, e, expression),
-        Expr_::Pair(e) => {
-            let (_, e1, e2) = (**e).to_owned();
-            let fields = mk_afvalues(&[e1, e2]);
-            emit_named_collection(emitter, env, pos, expression, &fields, CollectionType::Pair)
-        }
+        Expr_::Pair(e) => emit_pair(emitter, env, pos, e, expression),
         Expr_::KeyValCollection(e) => emit_keyval_collection_expr(emitter, env, pos, e, expression),
         Expr_::Clone(e) => Ok(emit_pos_then(pos, emit_clone(emitter, env, e)?)),
         Expr_::Shape(e) => Ok(emit_pos_then(pos, emit_shape(emitter, env, expression, e)?)),
@@ -3225,6 +3221,18 @@ fn emit_array_get_expr<'a, 'arena, 'decl>(
         false,
     )?
     .0)
+}
+
+fn emit_pair<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    e: &Box<(Option<(ast::Targ, ast::Targ)>, ast::Expr, ast::Expr)>,
+    expression: &ast::Expr,
+) -> Result<InstrSeq<'arena>> {
+    let (_, e1, e2) = (**e).to_owned();
+    let fields = mk_afvalues(&[e1, e2]);
+    emit_named_collection(emitter, env, pos, expression, &fields, CollectionType::Pair)
 }
 
 fn emit_keyval_collection_expr<'a, 'arena, 'decl>(

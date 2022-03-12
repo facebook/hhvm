@@ -407,18 +407,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::Darray(e) => emit_darray(emitter, env, pos, e, expression),
         Expr_::Varray(e) => emit_varray(emitter, env, pos, e, expression),
         Expr_::Collection(e) => emit_named_collection_str(emitter, env, expression, e),
-        Expr_::ValCollection(e) => {
-            let (kind, _, es) = &**e;
-            let fields = mk_afvalues(es);
-            let collection_typ = match kind {
-                aast_defs::VcKind::Vector => CollectionType::Vector,
-                aast_defs::VcKind::ImmVector => CollectionType::ImmVector,
-                aast_defs::VcKind::Set => CollectionType::Set,
-                aast_defs::VcKind::ImmSet => CollectionType::ImmSet,
-                _ => return emit_collection(emitter, env, expression, &fields, None),
-            };
-            emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
-        }
+        Expr_::ValCollection(e) => emit_val_collection(emitter, env, pos, e, expression),
         Expr_::Pair(e) => {
             let (_, e1, e2) = (**e).to_owned();
             let fields = mk_afvalues(&[e1, e2]);
@@ -3252,6 +3241,25 @@ fn emit_array_get_expr<'a, 'arena, 'decl>(
         false,
     )?
     .0)
+}
+
+fn emit_val_collection<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    e: &Box<(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>)>,
+    expression: &ast::Expr,
+) -> Result<InstrSeq<'arena>> {
+    let (kind, _, es) = &**e;
+    let fields = mk_afvalues(es);
+    let collection_typ = match kind {
+        aast_defs::VcKind::Vector => CollectionType::Vector,
+        aast_defs::VcKind::ImmVector => CollectionType::ImmVector,
+        aast_defs::VcKind::Set => CollectionType::Set,
+        aast_defs::VcKind::ImmSet => CollectionType::ImmSet,
+        _ => return emit_collection(emitter, env, expression, &fields, None),
+    };
+    emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
 }
 
 fn emit_varray<'a, 'arena, 'decl>(

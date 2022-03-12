@@ -416,17 +416,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::ReadonlyExpr(e) => emit_readonly_expr(emitter, env, pos, e),
         Expr_::Yield(e) => emit_yield(emitter, env, pos, e),
         Expr_::Efun(e) => Ok(emit_pos_then(pos, emit_lambda(emitter, env, &e.0, &e.1)?)),
-        Expr_::ClassGet(e) => {
-            // class gets without a readonly expression must be mutable
-            emit_class_get(
-                emitter,
-                env,
-                QueryMOp::CGet,
-                &e.0,
-                &e.1,
-                ReadonlyOp::Mutable,
-            )
-        }
+        Expr_::ClassGet(e) => emit_class_get_expr(emitter, env, pos, e),
 
         Expr_::String2(es) => emit_string2(emitter, env, pos, es),
         Expr_::Id(e) => Ok(emit_pos_then(pos, emit_id(emitter, env, e)?)),
@@ -3293,6 +3283,23 @@ fn emit_varray<'a, 'arena, 'decl>(
         pos,
         emit_collection(emitter, env, expression, &mk_afvalues(&e.1), None)?,
     ))
+}
+
+fn emit_class_get_expr<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    _pos: &Pos,
+    e: &Box<(ast::ClassId, ast::ClassGetExpr, ast::PropOrMethod)>,
+) -> Result<InstrSeq<'arena>> {
+    // class gets without a readonly expression must be mutable
+    emit_class_get(
+        emitter,
+        env,
+        QueryMOp::CGet,
+        &e.0,
+        &e.1,
+        ReadonlyOp::Mutable,
+    )
 }
 
 fn emit_darray<'a, 'arena, 'decl>(

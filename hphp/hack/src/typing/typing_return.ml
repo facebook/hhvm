@@ -159,6 +159,7 @@ let make_default_return ~is_method env name =
 
 let implicit_return env pos ~expected ~actual =
   let reason = Reason.URreturn in
+  (* getting called here *)
   let error =
     Typing_error.Primary.(Wellformedness (Wellformedness.Missing_return pos))
   in

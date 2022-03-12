@@ -5794,6 +5794,10 @@ module Primary = struct
     let (code, _, _, _) = to_error_ err in
     code
 
+  let quickfixes err =
+    let (_, _, _, qfs) = to_error_ err in
+    qfs
+
   let to_user_error t =
     Option.map ~f:(fun (code, claim, reasons, quickfixes) ->
         User_error.make
@@ -7435,7 +7439,7 @@ end = struct
   type t =
     | Always of Primary.t
     | With_claim_as_reason of t * Primary.t
-    | With_code of Error_code.t
+    | With_code of Error_code.t * Quickfix.t list
     | Retain_code of t
     | With_side_effect of t * (unit -> unit)
 
@@ -7489,7 +7493,10 @@ end = struct
       in
       eval err { st with claim_opt; reasons }
     | Retain_code t -> eval t { st with code_opt = None }
-    | With_code default -> with_code (Option.value ~default st.code_opt) st
+    | With_code (code, qfs) ->
+      with_code
+        (Option.value ~default:code st.code_opt)
+        { st with quickfixes = qfs }
 
   let apply ?code ?(reasons = lazy []) ?(quickfixes = []) t ~claim =
     let st = { code_opt = code; claim_opt = Some claim; reasons; quickfixes } in
@@ -7503,9 +7510,14 @@ end = struct
 
   let with_side_effect t ~eff = (With_side_effect (t, eff) [@alert.deprecated])
 
-  let with_code ~code = With_code code
+  let with_code_and_quickfixes ~code ~quickfixes = With_code (code, quickfixes)
 
-  let of_primary_error err = with_code ~code:(Primary.code err)
+  let with_code ~code = With_code (code, [])
+
+  let of_primary_error err =
+    with_code_and_quickfixes
+      ~code:(Primary.code err)
+      ~quickfixes:(Primary.quickfixes err)
 
   let retain_code t = Retain_code t
 

@@ -255,10 +255,17 @@ let expr_any env p e =
   (env, with_type ty Tast.dummy_saved_env e, ty)
 
 let unbound_name env (pos, name) e =
+  let class_exists =
+    let ctx = Env.get_ctx env in
+    let decl = Decl_provider.get_class ctx name in
+    match decl with
+    | None -> false
+    | Some dc -> Ast_defs.is_c_class (Cls.kind dc)
+  in
   match Env.get_mode env with
   | FileInfo.Mstrict ->
     Errors.add_typing_error
-      Typing_error.(primary @@ Primary.Unbound_name { pos; name });
+      Typing_error.(primary @@ Primary.Unbound_name { pos; name; class_exists });
     expr_error env (Reason.Rwitness pos) e
   | FileInfo.Mhhi -> expr_any env pos e
 

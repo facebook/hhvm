@@ -2097,6 +2097,7 @@ module Primary = struct
     | Unbound_name of {
         pos: Pos.t;
         name: string;
+        class_exists: bool;
       }
     | Previous_default of Pos.t
     | Return_in_void of {
@@ -4314,14 +4315,28 @@ module Primary = struct
       lazy [(pos2, "Mixed with this kind of field (key => value)")],
       [] )
 
-  let unbound_name_typing pos name =
+  let unbound_name_typing pos name class_exists =
+    let (_, start_column) = Pos.line_column pos in
+
+    let quickfixes =
+      match class_exists with
+      | true ->
+        let newpos = Pos.set_col_end start_column pos in
+        [
+          Quickfix.make
+            ~title:("Add " ^ Markdown_lite.md_codify "new")
+            ~new_text:"new "
+            newpos;
+        ]
+      | false -> []
+    in
     ( Error_code.UnboundNameTyping,
       lazy
         ( pos,
           "Unbound name (typing): "
           ^ Markdown_lite.md_codify (Render.strip_ns name) ),
       lazy [],
-      [] )
+      quickfixes )
 
   let previous_default p =
     ( Error_code.PreviousDefault,
@@ -5653,7 +5668,8 @@ module Primary = struct
     | Escaping_this pos -> escaping_this pos
     | Must_extend_disposable pos -> must_extend_disposable pos
     | Field_kinds { pos; decl_pos } -> field_kinds pos decl_pos
-    | Unbound_name { pos; name } -> unbound_name_typing pos name
+    | Unbound_name { pos; name; class_exists } ->
+      unbound_name_typing pos name class_exists
     | Previous_default pos -> previous_default pos
     | Return_in_void { pos; decl_pos } -> return_in_void pos decl_pos
     | This_var_outside_class pos -> this_var_outside_class pos

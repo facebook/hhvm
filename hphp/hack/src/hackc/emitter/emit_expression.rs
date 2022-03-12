@@ -404,10 +404,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, false, c),
         Expr_::New(e) => emit_new(emitter, env, pos, e, false),
         Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, pos, &fp.0, &fp.1),
-        Expr_::Darray(e) => Ok(emit_pos_then(
-            pos,
-            emit_collection(emitter, env, expression, &mk_afkvalues(&e.1), None)?,
-        )),
+        Expr_::Darray(e) => emit_darray(emitter, env, pos, e, expression),
         Expr_::Varray(e) => Ok(emit_pos_then(
             pos,
             emit_collection(emitter, env, expression, &mk_afvalues(&e.1), None)?,
@@ -3258,6 +3255,19 @@ fn emit_array_get_expr<'a, 'arena, 'decl>(
         false,
     )?
     .0)
+}
+
+fn emit_darray<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    e: &Box<(Option<(ast::Targ, ast::Targ)>, Vec<(ast::Expr, ast::Expr)>)>,
+    expression: &ast::Expr,
+) -> Result<InstrSeq<'arena>> {
+    Ok(emit_pos_then(
+        pos,
+        emit_collection(emitter, env, expression, &mk_afkvalues(&e.1), None)?,
+    ))
 }
 
 fn emit_obj_get_expr<'a, 'arena, 'decl>(

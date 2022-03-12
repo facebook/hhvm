@@ -15,3 +15,4 @@ instruction_sequence = { path = "../../../emitter/cargo/instruction_sequence" }
 ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }
 rewrite_xml = { path = "../rewrite_xml" }
+stack_limit = { path = "../../../../utils/stack_limit" }

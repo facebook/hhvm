@@ -436,6 +436,7 @@ dependencies = [
  "ocamlrep",
  "options",
  "oxidized",
+ "stack_limit",
  "unique_id_builder",
 ]
 
@@ -3094,6 +3095,7 @@ dependencies = [
  "ocamlrep",
  "oxidized",
  "rewrite_xml",
+ "stack_limit",
 ]
 
 [[package]]

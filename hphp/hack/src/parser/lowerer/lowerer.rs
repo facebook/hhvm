@@ -556,7 +556,7 @@ fn pos_name_<'a>(node: S<'a>, env: &mut Env<'a>, drop_prefix_c: Option<char>) ->
     }
 }
 
-fn mk_str<'a, F>(node: S<'a>, env: &mut Env<'a>, unescaper: F, mut content: &str) -> BString
+fn mk_str<'a, F>(node: S<'a>, env: &mut Env<'a>, mut content: &str, unescaper: F) -> BString
 where
     F: Fn(&str) -> Result<BString, InvalidString>,
 {
@@ -717,7 +717,7 @@ fn p_shape_field_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFi
                 } else {
                     unesc_dbl
                 };
-                let str_ = mk_str(node, env, unescp, &n);
+                let str_ = mk_str(node, env, &n, unescp);
                 if int_of_string_opt(&str_).is_some() {
                     raise_parsing_error(node, env, &syntax_error::shape_field_int_like_string)
                 }
@@ -733,7 +733,7 @@ fn p_shape_field_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFi
         _ => {
             raise_parsing_error(node, env, &syntax_error::invalid_shape_field_name);
             let ast::Id(p, n) = pos_name(node, env)?;
-            Ok(SFlitStr((p, mk_str(node, env, unesc_dbl, &n))))
+            Ok(SFlitStr((p, mk_str(node, env, &n, unesc_dbl))))
         }
     }
 }
@@ -1066,7 +1066,7 @@ fn p_null_flavor<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::OgNullFlavor
     }
 }
 
-fn wrap_unescaper<F>(unescaper: F, s: &str) -> Result<BString>
+fn wrap_unescaper<F>(s: &str, unescaper: F) -> Result<BString>
 where
     F: FnOnce(&str) -> Result<BString, InvalidString>,
 {
@@ -1343,7 +1343,7 @@ fn p_expr_lit<'a>(
             };
             match (location, token_kind(expr)) {
                 (ExprLocation::InDoubleQuotedString, _) if env.codegen() => {
-                    Ok(Expr_::String(mk_str(expr, env, unesc_dbl, s)))
+                    Ok(Expr_::String(mk_str(expr, env, s, unesc_dbl)))
                 }
                 (_, Some(TK::DecimalLiteral))
                 | (_, Some(TK::OctalLiteral))
@@ -1378,16 +1378,16 @@ fn p_expr_lit<'a>(
                     Ok(Expr_::Float(s.into()))
                 }
                 (_, Some(TK::SingleQuotedStringLiteral)) => {
-                    Ok(Expr_::String(mk_str(expr, env, unescape_single, s)))
+                    Ok(Expr_::String(mk_str(expr, env, s, unescape_single)))
                 }
                 (_, Some(TK::DoubleQuotedStringLiteral)) => {
-                    Ok(Expr_::String(mk_str(expr, env, unescape_double, s)))
+                    Ok(Expr_::String(mk_str(expr, env, s, unescape_double)))
                 }
                 (_, Some(TK::HeredocStringLiteral)) => {
-                    Ok(Expr_::String(mk_str(expr, env, unescape_heredoc, s)))
+                    Ok(Expr_::String(mk_str(expr, env, s, unescape_heredoc)))
                 }
                 (_, Some(TK::NowdocStringLiteral)) => {
-                    Ok(Expr_::String(mk_str(expr, env, unescape_nowdoc, s)))
+                    Ok(Expr_::String(mk_str(expr, env, s, unescape_nowdoc)))
                 }
                 (_, Some(TK::NullLiteral)) => {
                     check_lint_err(env, s, literal::NULL);
@@ -1843,11 +1843,11 @@ fn p_expr_impl<'a>(
                 (InDoubleQuotedString, TK::HeredocStringLiteral)
                 | (InDoubleQuotedString, TK::HeredocStringLiteralHead)
                 | (InDoubleQuotedString, TK::HeredocStringLiteralTail) => Ok(Expr_::String(
-                    wrap_unescaper(unescape_heredoc, text_str(node, env))?,
+                    wrap_unescaper(text_str(node, env), unescape_heredoc)?,
                 )),
                 (InDoubleQuotedString, _) => Ok(Expr_::String(wrap_unescaper(
-                    unesc_dbl,
                     text_str(node, env),
+                    unesc_dbl,
                 )?)),
                 (MemberSelect, _)
                 | (TopLevel, _)
@@ -2126,7 +2126,7 @@ fn p_expr_impl<'a>(
                 let attrs = could_map(&c1.attributes, env, p_xhp_attr)?;
                 let exprs = aggregate_xhp_tokens(env, &c.body)?
                     .iter()
-                    .map(|n| p_xhp_embedded(unesc_xhp, n, env))
+                    .map(|n| p_xhp_embedded(n, env, unesc_xhp))
                     .collect::<Result<Vec<_>, _>>()?;
 
                 let id = if env.empty_ns_env.disable_xhp_element_mangling {
@@ -2245,7 +2245,7 @@ fn check_lvalue<'a>(ast::Expr(_, p, expr_): &ast::Expr, env: &mut Env<'a>) {
     }
 }
 
-fn p_xhp_embedded<'a, F>(escaper: F, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Expr>
+fn p_xhp_embedded<'a, F>(node: S<'a>, env: &mut Env<'a>, escaper: F) -> Result<ast::Expr>
 where
     F: FnOnce(&[u8]) -> Vec<u8>,
 {
@@ -2282,7 +2282,7 @@ fn p_xhp_attr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::XhpAttribute> {
             {
                 ast::Expr::new((), env.mk_none_pos(), Expr_::Null)
             } else {
-                p_xhp_embedded(unesc_xhp_attr, attr_expr, env)?
+                p_xhp_embedded(attr_expr, env, unesc_xhp_attr)?
             };
             let xhp_simple = ast::XhpSimple {
                 name,
@@ -2292,7 +2292,7 @@ fn p_xhp_attr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::XhpAttribute> {
             Ok(ast::XhpAttribute::XhpSimple(xhp_simple))
         }
         XHPSpreadAttribute(c) => {
-            let expr = p_xhp_embedded(unesc_xhp, &c.expression, env)?;
+            let expr = p_xhp_embedded(&c.expression, env, unesc_xhp)?;
             Ok(ast::XhpAttribute::XhpSpread(expr))
         }
         _ => missing_syntax("XHP attribute", node, env),
@@ -2437,7 +2437,7 @@ fn p_stmt_list_<'a>(
                             }),
                         ))
                     };
-                    let using = lift_awaits_in_statement_(f, Either::Right(pos), env)?;
+                    let using = lift_awaits_in_statement_(Either::Right(pos), env, f)?;
                     r.push(using);
                     break Ok(r);
                 }
@@ -2481,7 +2481,7 @@ fn is_simple_await_expression<'a>(node: S<'a>) -> bool {
     }
 }
 
-fn with_new_nonconcurrent_scope<'a, F, R>(f: F, env: &mut Env<'a>) -> R
+fn with_new_nonconcurrent_scope<'a, F, R>(env: &mut Env<'a>, f: F) -> R
 where
     F: FnOnce(&mut Env<'a>) -> R,
 {
@@ -2491,7 +2491,7 @@ where
     result
 }
 
-fn with_new_concurrent_scope<'a, F, R>(f: F, env: &mut Env<'a>) -> Result<(LiftedAwaitExprs, R)>
+fn with_new_concurrent_scope<'a, F, R>(env: &mut Env<'a>, f: F) -> Result<(LiftedAwaitExprs, R)>
 where
     F: FnOnce(&mut Env<'a>) -> Result<R>,
 {
@@ -2521,7 +2521,7 @@ fn process_lifted_awaits(mut awaits: LiftedAwaits) -> Result<LiftedAwaitExprs> {
     Ok(awaits.awaits)
 }
 
-fn clear_statement_scope<'a, F, R>(f: F, env: &mut Env<'a>) -> R
+fn clear_statement_scope<'a, F, R>(env: &mut Env<'a>, f: F) -> R
 where
     F: FnOnce(&mut Env<'a>) -> R,
 {
@@ -2537,17 +2537,17 @@ where
     }
 }
 
-fn lift_awaits_in_statement<'a, F>(f: F, node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt>
+fn lift_awaits_in_statement<'a, F>(node: S<'a>, env: &mut Env<'a>, f: F) -> Result<ast::Stmt>
 where
     F: FnOnce(&mut Env<'a>) -> Result<ast::Stmt>,
 {
-    lift_awaits_in_statement_(f, Either::Left(node), env)
+    lift_awaits_in_statement_(Either::Left(node), env, f)
 }
 
 fn lift_awaits_in_statement_<'a, F>(
-    f: F,
     pos: Either<S<'a>, &Pos>,
     env: &mut Env<'a>,
+    f: F,
 ) -> Result<ast::Stmt>
 where
     F: FnOnce(&mut Env<'a>) -> Result<ast::Stmt>,
@@ -2616,16 +2616,13 @@ fn lift_await<'a>(
 }
 
 fn p_stmt<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
-    clear_statement_scope(
-        |e: &mut Env<'a>| {
-            let docblock = extract_docblock(node, e);
-            e.push_docblock(docblock);
-            let result = p_stmt_(node, e);
-            e.pop_docblock();
-            result
-        },
-        env,
-    )
+    clear_statement_scope(env, |e| {
+        let docblock = extract_docblock(node, e);
+        e.push_docblock(docblock);
+        let result = p_stmt_(node, e);
+        e.pop_docblock();
+        result
+    })
 }
 
 fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
@@ -2705,7 +2702,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
                     S_::mk_switch(p_expr(&c.expression, env)?, cases, default),
                 ))
             };
-            lift_awaits_in_statement(f, node, env)
+            lift_awaits_in_statement(node, env, f)
         }
         IfStatement(c) => {
             let p_else_if = |n: S<'a>, e: &mut Env<'a>| -> Result<(ast::Expr, ast::Block)> {
@@ -2733,7 +2730,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
                     });
                 Ok(new(pos, S_::mk_if(condition, statement, else_if)))
             };
-            lift_awaits_in_statement(f, node, env)
+            lift_awaits_in_statement(node, env, f)
         }
         ExpressionStatement(c) => {
             let expr = &c.expression;
@@ -2750,18 +2747,14 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
             if is_simple_assignment_await_expression(expr) || is_simple_await_expression(expr) {
                 f(env)
             } else {
-                lift_awaits_in_statement(f, node, env)
+                lift_awaits_in_statement(node, env, f)
             }
         }
         CompoundStatement(c) => handle_loop_body(pos, &c.statements, env),
         SyntaxList(_) => handle_loop_body(pos, node, env),
-        ThrowStatement(c) => lift_awaits_in_statement(
-            |e: &mut Env<'a>| -> Result<ast::Stmt> {
-                Ok(new(pos, S_::mk_throw(p_expr(&c.expression, e)?)))
-            },
-            node,
-            env,
-        ),
+        ThrowStatement(c) => lift_awaits_in_statement(node, env, |e| {
+            Ok(new(pos, S_::mk_throw(p_expr(&c.expression, e)?)))
+        }),
         DoStatement(c) => Ok(new(
             pos,
             S_::mk_do(
@@ -2785,7 +2778,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
                     }),
                 ))
             };
-            lift_awaits_in_statement(f, node, env)
+            lift_awaits_in_statement(node, env, f)
         }
         UsingStatementFunctionScoped(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -2799,7 +2792,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
                     }),
                 ))
             };
-            lift_awaits_in_statement(f, node, env)
+            lift_awaits_in_statement(node, env, f)
         }
         ForStatement(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -2809,7 +2802,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
                 let blk = p_block(true, &c.body, e)?;
                 Ok(Stmt::new(pos, S_::mk_for(ini, ctr, eol, blk)))
             };
-            lift_awaits_in_statement(f, node, env)
+            lift_awaits_in_statement(node, env, f)
         }
         ForeachStatement(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -2828,7 +2821,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
                 let blk = p_block(true, &c.body, e)?;
                 Ok(new(pos, S_::mk_foreach(col, akv, blk)))
             };
-            lift_awaits_in_statement(f, node, env)
+            lift_awaits_in_statement(node, env, f)
         }
         TryStatement(c) => Ok(new(
             pos,
@@ -2864,7 +2857,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
             if is_simple_await_expression(&c.expression) {
                 f(env)
             } else {
-                lift_awaits_in_statement(f, node, env)
+                lift_awaits_in_statement(node, env, f)
             }
         }
         YieldBreakStatement(_) => Ok(ast::Stmt::new(pos, ast::Stmt_::mk_yield_break())),
@@ -2887,7 +2880,7 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
                     )),
                 ))
             };
-            lift_awaits_in_statement(f, node, env)
+            lift_awaits_in_statement(node, env, f)
         }
         UnsetStatement(c) => {
             let f = |e: &mut Env<'a>| -> Result<ast::Stmt> {
@@ -2910,14 +2903,14 @@ fn p_stmt_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
                     )),
                 ))
             };
-            lift_awaits_in_statement(f, node, env)
+            lift_awaits_in_statement(node, env, f)
         }
         BreakStatement(_) => Ok(new(pos, S_::Break)),
         ContinueStatement(_) => Ok(new(pos, S_::Continue)),
         ConcurrentStatement(c) => {
             let keyword_pos = p_pos(&c.keyword, env);
             let (lifted_awaits, Stmt(stmt_pos, stmt)) =
-                with_new_concurrent_scope(|e: &mut Env<'a>| p_stmt(&c.statement, e), env)?;
+                with_new_concurrent_scope(env, |e| p_stmt(&c.statement, e))?;
             let stmt = match stmt {
                 S_::Block(stmts) => {
                     use ast::Bop::Eq;
@@ -3804,12 +3797,12 @@ fn p_function_body<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Block> {
                 if is_simple_await_expression(node) {
                     Ok(vec![f(e)?])
                 } else {
-                    Ok(vec![lift_awaits_in_statement(f, node, e)?])
+                    Ok(vec![lift_awaits_in_statement(node, e, f)?])
                 }
             }
         }
     };
-    with_new_nonconcurrent_scope(f, env)
+    with_new_nonconcurrent_scope(env, f)
 }
 
 fn mk_suspension_kind<'a>(async_keyword: S<'a>) -> SuspensionKind {

@@ -3157,10 +3157,10 @@ fn emit_lvar<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     _pos: &Pos,
-    e: &'a Box<aast_defs::Lid>,
+    e: &'a aast_defs::Lid,
 ) -> Result<InstrSeq<'arena>> {
     use aast_defs::Lid;
-    let Lid(pos, _) = &**e;
+    let Lid(pos, _) = e;
     Ok(InstrSeq::gather(vec![
         emit_pos(pos),
         emit_local(emitter, env, BareThisOp::Notice, e)?,
@@ -3185,9 +3185,9 @@ fn emit_is_expr<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    is_expr: &Box<(ast::Expr, aast::Hint)>,
+    is_expr: &'a (ast::Expr, aast::Hint),
 ) -> Result<InstrSeq<'arena>> {
-    let (e, h) = &**is_expr;
+    let (e, h) = is_expr;
     let is = emit_is(emitter, env, pos, h)?;
     Ok(InstrSeq::gather(vec![emit_expr(emitter, env, e)?, is]))
 }
@@ -3196,9 +3196,9 @@ fn emit_array_get_expr<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    e: &'a Box<(ast::Expr, Option<ast::Expr>)>,
+    e: &'a (ast::Expr, Option<ast::Expr>),
 ) -> Result<InstrSeq<'arena>> {
-    let (base_expr, opt_elem_expr) = &**e;
+    let (base_expr, opt_elem_expr) = e;
     Ok(emit_array_get(
         emitter,
         env,
@@ -3217,10 +3217,10 @@ fn emit_pair<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    e: &Box<(Option<(ast::Targ, ast::Targ)>, ast::Expr, ast::Expr)>,
+    e: &'a (Option<(ast::Targ, ast::Targ)>, ast::Expr, ast::Expr),
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let (_, e1, e2) = (**e).to_owned();
+    let (_, e1, e2) = e.to_owned();
     let fields = mk_afvalues(&[e1, e2]);
     emit_named_collection(emitter, env, pos, expression, &fields, CollectionType::Pair)
 }
@@ -3229,14 +3229,14 @@ fn emit_keyval_collection_expr<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    e: &Box<(
+    e: &'a (
         ast::KvcKind,
         Option<(ast::Targ, ast::Targ)>,
         Vec<ast::Field>,
-    )>,
+    ),
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let (kind, _, fields) = &**e;
+    let (kind, _, fields) = e;
     let fields = mk_afkvalues(
         fields
             .to_owned()
@@ -3257,10 +3257,10 @@ fn emit_val_collection<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    e: &Box<(ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>)>,
+    e: &'a (ast::VcKind, Option<ast::Targ>, Vec<ast::Expr>),
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
-    let (kind, _, es) = &**e;
+    let (kind, _, es) = e;
     let fields = mk_afvalues(es);
     let collection_typ = match kind {
         aast_defs::VcKind::Vector => CollectionType::Vector,
@@ -3276,7 +3276,7 @@ fn emit_varray<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    e: &Box<(Option<ast::Targ>, Vec<ast::Expr>)>,
+    e: &'a (Option<ast::Targ>, Vec<ast::Expr>),
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     Ok(emit_pos_then(
@@ -3289,7 +3289,7 @@ fn emit_class_get_expr<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     _pos: &Pos,
-    e: &Box<(ast::ClassId, ast::ClassGetExpr, ast::PropOrMethod)>,
+    e: &'a (ast::ClassId, ast::ClassGetExpr, ast::PropOrMethod),
 ) -> Result<InstrSeq<'arena>> {
     // class gets without a readonly expression must be mutable
     emit_class_get(
@@ -3306,7 +3306,7 @@ fn emit_darray<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    e: &Box<(Option<(ast::Targ, ast::Targ)>, Vec<(ast::Expr, ast::Expr)>)>,
+    e: &'a (Option<(ast::Targ, ast::Targ)>, Vec<(ast::Expr, ast::Expr)>),
     expression: &ast::Expr,
 ) -> Result<InstrSeq<'arena>> {
     Ok(emit_pos_then(
@@ -3319,12 +3319,12 @@ fn emit_obj_get_expr<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    e: &Box<(
+    e: &'a (
         ast::Expr,
         ast::Expr,
         aast_defs::OgNullFlavor,
         aast_defs::PropOrMethod,
-    )>,
+    ),
 ) -> Result<InstrSeq<'arena>> {
     Ok(emit_obj_get(
         emitter,
@@ -3344,7 +3344,7 @@ fn emit_label<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<'a, 'arena>,
     pos: &Pos,
-    label: &'a Box<(Option<aast_defs::ClassName>, String)>,
+    label: &'a (Option<aast_defs::ClassName>, String),
 ) -> Result<InstrSeq<'arena>> {
     use ast::Expr_;
 

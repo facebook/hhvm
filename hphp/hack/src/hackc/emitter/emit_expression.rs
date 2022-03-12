@@ -413,23 +413,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
             let fields = mk_afvalues(&[e1, e2]);
             emit_named_collection(emitter, env, pos, expression, &fields, CollectionType::Pair)
         }
-        Expr_::KeyValCollection(e) => {
-            let (kind, _, fields) = &**e;
-            let fields = mk_afkvalues(
-                fields
-                    .to_owned()
-                    .into_iter()
-                    .map(|ast::Field(e1, e2)| (e1, e2))
-                    .collect::<Vec<_>>()
-                    .as_slice(),
-            );
-            let collection_typ = match kind {
-                aast_defs::KvcKind::Map => CollectionType::Map,
-                aast_defs::KvcKind::ImmMap => CollectionType::ImmMap,
-                _ => return emit_collection(emitter, env, expression, &fields, None),
-            };
-            emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
-        }
+        Expr_::KeyValCollection(e) => emit_keyval_collection_expr(emitter, env, pos, e, expression),
         Expr_::Clone(e) => Ok(emit_pos_then(pos, emit_clone(emitter, env, e)?)),
         Expr_::Shape(e) => Ok(emit_pos_then(pos, emit_shape(emitter, env, expression, e)?)),
         Expr_::Await(e) => emit_await(emitter, env, pos, e),
@@ -3241,6 +3225,34 @@ fn emit_array_get_expr<'a, 'arena, 'decl>(
         false,
     )?
     .0)
+}
+
+fn emit_keyval_collection_expr<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    e: &Box<(
+        ast::KvcKind,
+        Option<(ast::Targ, ast::Targ)>,
+        Vec<ast::Field>,
+    )>,
+    expression: &ast::Expr,
+) -> Result<InstrSeq<'arena>> {
+    let (kind, _, fields) = &**e;
+    let fields = mk_afkvalues(
+        fields
+            .to_owned()
+            .into_iter()
+            .map(|ast::Field(e1, e2)| (e1, e2))
+            .collect::<Vec<_>>()
+            .as_slice(),
+    );
+    let collection_typ = match kind {
+        aast_defs::KvcKind::Map => CollectionType::Map,
+        aast_defs::KvcKind::ImmMap => CollectionType::ImmMap,
+        _ => return emit_collection(emitter, env, expression, &fields, None),
+    };
+    emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
 }
 
 fn emit_val_collection<'a, 'arena, 'decl>(

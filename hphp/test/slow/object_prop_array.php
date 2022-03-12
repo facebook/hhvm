@@ -21,10 +21,26 @@ class D extends C {
   public $r;
 }
 
+class E {
+  private $p;
+  protected $q;
+  public $r;
+
+  <<__LateInit>> private $pl;
+  <<__LateInit>> protected $ql;
+  <<__LateInit>> public $rl;
+}
 
 <<__EntryPoint>>
 function main_object_prop_array() {
 var_dump(HH\object_prop_array(new C()));
 var_dump(HH\object_prop_array(new D()));
 var_dump(is_darray(HH\object_prop_array(new D())));
+
+try {
+  var_dump(HH\object_prop_array(new E(), true /* ignore_late_init */));
+  var_dump(HH\object_prop_array(new E())); // should throw
+} catch (Exception $e) {
+  var_dump(get_class($e), $e->getMessage(), $e->getLine());
+}
 }

@@ -288,9 +288,13 @@ namespace HH {
   /*
    * This function returns an array of an object's properties in the same manner
    * as casting the object to an array.
+   *
+   * if ignore_late_init, just ignore unset late init members rather than
+   * throwing an exception
    */
   <<__Native>>
-  function object_prop_array(object $obj)[]: darray;
+  function object_prop_array(object $obj,
+                             bool $ignore_late_init = false)[]: darray;
 
   /*
    * Return true if the <<__LateInit>> property (with name $prop) on the given

@@ -195,8 +195,10 @@ bool HHVM_FUNCTION(HH_is_meth_caller, TypedValue v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Array HHVM_FUNCTION(HH_object_prop_array, const Object& obj) {
-  return obj.toArray().toDict();
+Array HHVM_FUNCTION(HH_object_prop_array,
+                    const Object& obj,
+                    bool ignore_late_init /* = false */) {
+  return obj.toArray(ignore_late_init).toDict();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

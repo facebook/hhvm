@@ -63,7 +63,7 @@ function import_request_variables(string $types, string $prefix = "");
 
 namespace HH {
 <<__PHPStdLib>>
-function object_prop_array(/*object*/mixed $obj)[]: darray<arraykey, mixed>;
+function object_prop_array(/*object*/mixed $obj, bool $ignore_late_init = false)[]: darray<arraykey, mixed>;
 }
 
 namespace HH\Lib\_Private\Native {

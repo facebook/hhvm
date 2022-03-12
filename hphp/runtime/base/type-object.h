@@ -136,7 +136,7 @@ public:
   int64_t toInt64  () const { return m_obj ? m_obj->toInt64() : 0; }
   double  toDouble () const { return m_obj ? m_obj->toDouble() : 0; }
   String  toString () const;
-  Array   toArray  () const;
+  Array   toArray  (bool ignore_late_init = false) const;
 
   // Transfer ownership of our reference to this object.
   ObjectData *detach() { return m_obj.detach(); }
@@ -197,4 +197,3 @@ ALWAYS_INLINE const Object& asCObjRef(tv_rval tv) {
 }
 
 }
-

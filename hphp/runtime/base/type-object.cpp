@@ -39,8 +39,8 @@ void ObjNR::compileTimeAssertions() {
   static_assert(offsetof(ObjNR, m_px) == kExpectedMPxOffset, "");
 }
 
-Array Object::toArray() const {
-  return m_obj ? m_obj->toArray() : Array();
+Array Object::toArray(bool ignore_late_init /* = false */) const {
+  return m_obj ? m_obj->toArray(/* pubOnly */ false, ignore_late_init) : Array();
 }
 
 String Object::toString() const {

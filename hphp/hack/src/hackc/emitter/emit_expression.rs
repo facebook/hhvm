@@ -399,21 +399,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::Upcast(e) => emit_expr(emitter, env, &e.0),
         Expr_::Cast(e) => emit_cast(emitter, env, pos, &(e.0).1, &e.1),
         Expr_::Eif(e) => emit_conditional_expr(emitter, env, pos, &e.0, e.1.as_ref(), &e.2),
-        Expr_::ArrayGet(e) => {
-            let (base_expr, opt_elem_expr) = &**e;
-            Ok(emit_array_get(
-                emitter,
-                env,
-                pos,
-                None,
-                QueryMOp::CGet,
-                base_expr,
-                opt_elem_expr.as_ref(),
-                false,
-                false,
-            )?
-            .0)
-        }
+        Expr_::ArrayGet(e) => emit_array_get_expr(emitter, env, pos, e),
         Expr_::ObjGet(e) => Ok(emit_obj_get(
             emitter,
             env,
@@ -3262,6 +3248,27 @@ fn emit_is_expr<'a, 'arena, 'decl>(
     let (e, h) = &**is_expr;
     let is = emit_is(emitter, env, pos, h)?;
     Ok(InstrSeq::gather(vec![emit_expr(emitter, env, e)?, is]))
+}
+
+fn emit_array_get_expr<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    e: &'a Box<(ast::Expr, Option<ast::Expr>)>,
+) -> Result<InstrSeq<'arena>> {
+    let (base_expr, opt_elem_expr) = &**e;
+    Ok(emit_array_get(
+        emitter,
+        env,
+        pos,
+        None,
+        QueryMOp::CGet,
+        base_expr,
+        opt_elem_expr.as_ref(),
+        false,
+        false,
+    )?
+    .0)
 }
 
 fn emit_label<'a, 'arena, 'decl>(

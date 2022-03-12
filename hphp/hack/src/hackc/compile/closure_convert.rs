@@ -29,6 +29,7 @@ use oxidized::{
     relative_path::{Prefix, RelativePath},
     s_map::SMap,
 };
+use stack_limit::StackLimit;
 use std::path::PathBuf;
 use unique_id_builder::*;
 
@@ -66,6 +67,9 @@ struct Env<'a, 'arena> {
     options: &'a Options,
     /// For debugger eval
     for_debugger_eval: bool,
+
+    /// For checking elastic_stack and restarting if necessary.
+    stack_limit: &'a StackLimit,
 }
 
 #[derive(Default, Clone)]
@@ -80,6 +84,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
         defs: &[Def],
         options: &'a Options,
         for_debugger_eval: bool,
+        stack_limit: &'a StackLimit,
     ) -> Result<Self> {
         let scope = Scope::toplevel();
         let all_vars = get_vars(&[], Either::Left(defs))?;
@@ -96,6 +101,7 @@ impl<'a, 'arena> Env<'a, 'arena> {
             in_using: false,
             options,
             for_debugger_eval,
+            stack_limit,
         })
     }
 
@@ -1238,6 +1244,7 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
 
     //TODO(hrust): do we need special handling for Awaitall?
     fn visit_expr(&mut self, env: &mut Env<'a, 'arena>, Expr(_, pos, e): &mut Expr) -> Result<()> {
+        env.stack_limit.panic_if_exceeded();
         let null = Expr_::mk_null();
         let mut e_owned = std::mem::replace(e, null);
         /*
@@ -1373,8 +1380,8 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
                                         pc,
                                         mangled_class_name,
                                         pf,
-                                        // FIXME: This is not safe--string literals are binary strings.
-                                        // There's no guarantee that they're valid UTF-8.
+                                        // FIXME: This is not safe--string literals are binary
+                                        // strings. There's no guarantee that they're valid UTF-8.
                                         unsafe { std::str::from_utf8_unchecked(fname.as_slice()) },
                                     )
                                 }
@@ -1513,8 +1520,9 @@ impl<'ast, 'a, 'arena> VisitorMut<'ast> for ClosureConvertVisitor<'a, 'arena> {
             }
             Expr_::ClassGet(mut x) => {
                 if let ClassGetExpr::CGstring(id) = &x.1 {
-                    // T43412864 claims that this does not need to be added into the closure and can be removed
-                    // There are no relevant HHVM tests checking for it, but there are flib test failures when you try
+                    // T43412864 claims that this does not need to be added into the
+                    // closure and can be removed. There are no relevant HHVM tests
+                    // checking for it, but there are flib test failures when you try
                     // to remove it.
                     add_var(env, &mut self.state, &id.1);
                 };
@@ -1723,6 +1731,7 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     defs: &mut Program,
     namespace_env: RcOc<namespace_env::Env>,
+    stack_limit: &'decl StackLimit,
 ) -> Result<()> {
     if e.options()
         .hack_compiler_flags
@@ -1738,6 +1747,7 @@ pub fn convert_toplevel_prog<'arena, 'decl>(
         defs.as_slice(),
         e.options(),
         e.for_debugger_eval,
+        stack_limit,
     )?;
     *defs = flatten_ns(defs);
     if e.for_debugger_eval {

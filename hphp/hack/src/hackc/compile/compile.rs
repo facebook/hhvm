@@ -368,9 +368,10 @@ fn rewrite_and_emit<'p, 'arena, 'decl, S: AsRef<str>>(
     env: &Env<S>,
     namespace_env: RcOc<NamespaceEnv>,
     ast: &'p mut ast::Program,
+    stack_limit: &'decl StackLimit,
 ) -> Result<HackCUnit<'arena>, Error> {
     // First rewrite.
-    let result = rewrite(emitter, ast, RcOc::clone(&namespace_env)); // Modifies `ast` in place.
+    let result = rewrite(emitter, ast, RcOc::clone(&namespace_env), stack_limit); // Modifies `ast` in place.
     match result {
         Ok(()) => {
             // Rewrite ok, now emit.
@@ -387,8 +388,9 @@ fn rewrite<'p, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,
     ast: &'p mut ast::Program,
     namespace_env: RcOc<NamespaceEnv>,
+    stack_limit: &'decl StackLimit,
 ) -> Result<(), Error> {
-    rewrite_program(emitter, ast, namespace_env)
+    rewrite_program(emitter, ast, namespace_env, stack_limit)
 }
 
 pub fn unit_from_text<'arena, 'decl, S: AsRef<str>>(
@@ -448,7 +450,7 @@ fn emit_unit_from_ast<'p, 'arena, 'decl, S: AsRef<str>>(
 fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
     emitter: &mut Emitter<'arena, 'decl>,
     env: &Env<S>,
-    stack_limit: &StackLimit,
+    stack_limit: &'decl StackLimit,
     source_text: SourceText<'_>,
 ) -> anyhow::Result<(HackCUnit<'arena>, Option<Profile>)> {
     let log_extern_compiler_perf = emitter.options().log_extern_compiler_perf();
@@ -480,7 +482,8 @@ fn emit_unit_from_text<'arena, 'decl, S: AsRef<str>>(
             profile.parsing_t = parsing_t;
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace_env), &mut ast);
             stack_limit.reset();
-            match time(move || rewrite_and_emit(emitter, env, namespace_env, &mut ast)) {
+            match time(move || rewrite_and_emit(emitter, env, namespace_env, &mut ast, stack_limit))
+            {
                 (Ok(unit), codegen_t) => {
                     profile.codegen_t = codegen_t;
                     profile.codegen_peak = stack_limit.peak() as i64;

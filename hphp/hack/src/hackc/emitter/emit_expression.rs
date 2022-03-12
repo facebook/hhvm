@@ -400,18 +400,7 @@ pub fn emit_expr<'a, 'arena, 'decl>(
         Expr_::Cast(e) => emit_cast(emitter, env, pos, &(e.0).1, &e.1),
         Expr_::Eif(e) => emit_conditional_expr(emitter, env, pos, &e.0, e.1.as_ref(), &e.2),
         Expr_::ArrayGet(e) => emit_array_get_expr(emitter, env, pos, e),
-        Expr_::ObjGet(e) => Ok(emit_obj_get(
-            emitter,
-            env,
-            pos,
-            QueryMOp::CGet,
-            &e.0,
-            &e.1,
-            &e.2,
-            false,
-            false,
-        )?
-        .0),
+        Expr_::ObjGet(e) => emit_obj_get_expr(emitter, env, pos, e),
         Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, false, c),
         Expr_::New(e) => emit_new(emitter, env, pos, e, false),
         Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, pos, &fp.0, &fp.1),
@@ -3265,6 +3254,31 @@ fn emit_array_get_expr<'a, 'arena, 'decl>(
         QueryMOp::CGet,
         base_expr,
         opt_elem_expr.as_ref(),
+        false,
+        false,
+    )?
+    .0)
+}
+
+fn emit_obj_get_expr<'a, 'arena, 'decl>(
+    emitter: &mut Emitter<'arena, 'decl>,
+    env: &Env<'a, 'arena>,
+    pos: &Pos,
+    e: &Box<(
+        ast::Expr,
+        ast::Expr,
+        aast_defs::OgNullFlavor,
+        aast_defs::PropOrMethod,
+    )>,
+) -> Result<InstrSeq<'arena>> {
+    Ok(emit_obj_get(
+        emitter,
+        env,
+        pos,
+        QueryMOp::CGet,
+        &e.0,
+        &e.1,
+        &e.2,
         false,
         false,
     )?

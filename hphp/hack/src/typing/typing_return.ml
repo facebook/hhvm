@@ -258,10 +258,14 @@ let fun_implicit_return env pos ret =
     let env = check_inout_return Pos.none env in
     let r = Reason.Rno_return pos in
     let rty = MakeType.void r in
+    let ret_pos = Typing_defs_core.get_pos ret in
+    let () = printf "Sync Ret_pos: %s\n" (Pos_or_decl.show ret_pos) in
     implicit_return env pos ~expected:ret ~actual:rty
   | Ast_defs.FAsync ->
     (* An async function without a terminal block has an implicit return;
      * the Awaitable<void> type *)
     let r = Reason.Rno_return_async pos in
     let rty = MakeType.awaitable r (MakeType.void r) in
+    let ret_pos = Typing_defs_core.get_pos ret in
+    let () = printf "Async Ret_pos: %s\n" (Pos_or_decl.show ret_pos) in
     implicit_return env pos ~expected:ret ~actual:rty

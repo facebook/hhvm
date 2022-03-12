@@ -1297,7 +1297,10 @@ module Primary = struct
 
     let missing_return pos =
       let claim = lazy (pos, "Invalid return type") in
-      (Error_code.MissingReturnInNonVoidFunction, claim, lazy [], [])
+      let quickfixes =
+        [Quickfix.make ~title:"Test if quickfix appears" ~new_text:"test" pos]
+      in
+      (Error_code.MissingReturnInNonVoidFunction, claim, lazy [], quickfixes)
 
     let dollardollar_lvalue pos =
       let claim =

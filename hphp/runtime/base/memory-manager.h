@@ -995,6 +995,11 @@ struct MemoryManager {
 
   /////////////////////////////////////////////////////////////////////////////
 
+#ifndef USE_JEMALLOC
+  static __thread uint64_t g_threadAllocated;
+  static __thread uint64_t g_threadDeallocated;
+#endif
+
 private:
   friend struct req::root_handle; // access m_root_handles
 
@@ -1024,7 +1029,6 @@ private:
   void  updateBigStats();
   void  freeSmallIndexSlow(void* ptr, size_t index, size_t bytes);
 
-  static void threadStatsInit();
   static void threadStats(uint64_t*&, uint64_t*&);
   void refreshStats();
   void refreshStatsImpl(MemoryUsageStats& stats);
@@ -1079,7 +1083,8 @@ private:
   // Peak memory threshold callback (installed via setMemThresholdCallback)
   size_t m_memThresholdCallbackPeakUsage{SIZE_MAX};
 
-  // pointers to jemalloc-maintained allocation counters
+  // pointers to allocation counters, either from jemalloc, or tracked
+  // manually
   uint64_t* m_allocated;
   uint64_t* m_deallocated;
 
@@ -1091,9 +1096,6 @@ private:
   // An adjustment to take credit for freeing memory allocated by this thread
   // and freed on another thread.
   uint64_t m_freedOnOtherThread;
-
-  // true if mallctlnametomib() setup succeeded, which requires jemalloc
-  static bool s_statsEnabled;
 
   int64_t m_req_start_micros;
 

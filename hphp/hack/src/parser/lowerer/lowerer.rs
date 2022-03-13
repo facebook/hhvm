@@ -1462,72 +1462,7 @@ fn p_expr_impl<'a>(
     env.check_stack_limit();
     let pos = parent_pos.unwrap_or_else(|| p_pos(node, env));
     match &node.children {
-        LambdaExpression(c) => {
-            let suspension_kind = mk_suspension_kind(&c.async_);
-            let (params, (ctxs, unsafe_ctxs), readonly_ret, ret) = match &c.signature.children {
-                LambdaSignature(c) => {
-                    let params = could_map(&c.parameters, env, p_fun_param)?;
-                    let readonly_ret = map_optional(&c.readonly_return, env, p_readonly)?;
-                    let ctxs = p_contexts(
-                        &c.contexts,
-                        env,
-                        // TODO(coeffects) Lambdas may be able to support this:: contexts
-                        Some((&syntax_error::lambda_effect_polymorphic("A lambda"), false)),
-                    )?;
-                    let unsafe_ctxs = ctxs.clone();
-                    let ret = map_optional(&c.type_, env, p_hint)?;
-                    (params, (ctxs, unsafe_ctxs), readonly_ret, ret)
-                }
-                Token(_) => {
-                    let ast::Id(p, n) = pos_name(&c.signature, env)?;
-                    (
-                        vec![ast::FunParam {
-                            annotation: (),
-                            type_hint: ast::TypeHint((), None),
-                            is_variadic: false,
-                            pos: p,
-                            name: n,
-                            expr: None,
-                            callconv: ast::ParamKind::Pnormal,
-                            readonly: None,
-                            user_attributes: vec![],
-                            visibility: None,
-                        }],
-                        (None, None),
-                        None,
-                        None,
-                    )
-                }
-                _ => missing_syntax("lambda signature", &c.signature, env)?,
-            };
-
-            let (body, yield_) = if !c.body.is_compound_statement() {
-                map_yielding(&c.body, env, p_function_body)?
-            } else {
-                let mut env1 = Env::clone_and_unset_toplevel_if_toplevel(env);
-                map_yielding(&c.body, env1.as_mut(), p_function_body)?
-            };
-            let external = c.body.is_external();
-            let fun = ast::Fun_ {
-                span: pos.clone(),
-                readonly_this: None, // filled in by mk_unop
-                annotation: (),
-                readonly_ret,
-                ret: ast::TypeHint((), ret),
-                name: ast::Id(pos, String::from(";anonymous")),
-                tparams: vec![],
-                where_constraints: vec![],
-                body: ast::FuncBody { fb_ast: body },
-                fun_kind: mk_fun_kind(suspension_kind, yield_),
-                params,
-                ctxs,
-                unsafe_ctxs,
-                user_attributes: p_user_attributes(&c.attribute_spec, env)?,
-                external,
-                doc_comment: None,
-            };
-            Ok(Expr_::mk_lfun(fun, vec![]))
-        }
+        LambdaExpression(c) => p_lambda_expression(c, env, pos),
         BracedExpression(c) => p_expr_recurse(location, &c.expression, env, None),
         EmbeddedBracedExpression(c) => p_expr_recurse(location, &c.expression, env, Some(pos)),
         ParenthesizedExpression(c) => p_expr_recurse(location, &c.expression, env, None),
@@ -2146,6 +2081,77 @@ fn p_expr_impl<'a>(
         }
         _ => missing_syntax_(Some(Expr_::Null), "expression", node, env),
     }
+}
+
+fn p_lambda_expression<'a>(
+    c: &'a LambdaExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+    pos: Pos,
+) -> Result<Expr_> {
+    let suspension_kind = mk_suspension_kind(&c.async_);
+    let (params, (ctxs, unsafe_ctxs), readonly_ret, ret) = match &c.signature.children {
+        LambdaSignature(c) => {
+            let params = could_map(&c.parameters, env, p_fun_param)?;
+            let readonly_ret = map_optional(&c.readonly_return, env, p_readonly)?;
+            let ctxs = p_contexts(
+                &c.contexts,
+                env,
+                // TODO(coeffects) Lambdas may be able to support this:: contexts
+                Some((&syntax_error::lambda_effect_polymorphic("A lambda"), false)),
+            )?;
+            let unsafe_ctxs = ctxs.clone();
+            let ret = map_optional(&c.type_, env, p_hint)?;
+            (params, (ctxs, unsafe_ctxs), readonly_ret, ret)
+        }
+        Token(_) => {
+            let ast::Id(p, n) = pos_name(&c.signature, env)?;
+            (
+                vec![ast::FunParam {
+                    annotation: (),
+                    type_hint: ast::TypeHint((), None),
+                    is_variadic: false,
+                    pos: p,
+                    name: n,
+                    expr: None,
+                    callconv: ast::ParamKind::Pnormal,
+                    readonly: None,
+                    user_attributes: vec![],
+                    visibility: None,
+                }],
+                (None, None),
+                None,
+                None,
+            )
+        }
+        _ => missing_syntax("lambda signature", &c.signature, env)?,
+    };
+
+    let (body, yield_) = if !c.body.is_compound_statement() {
+        map_yielding(&c.body, env, p_function_body)?
+    } else {
+        let mut env1 = Env::clone_and_unset_toplevel_if_toplevel(env);
+        map_yielding(&c.body, env1.as_mut(), p_function_body)?
+    };
+    let external = c.body.is_external();
+    let fun = ast::Fun_ {
+        span: pos.clone(),
+        readonly_this: None, // filled in by mk_unop
+        annotation: (),
+        readonly_ret,
+        ret: ast::TypeHint((), ret),
+        name: ast::Id(pos, String::from(";anonymous")),
+        tparams: vec![],
+        where_constraints: vec![],
+        body: ast::FuncBody { fb_ast: body },
+        fun_kind: mk_fun_kind(suspension_kind, yield_),
+        params,
+        ctxs,
+        unsafe_ctxs,
+        user_attributes: p_user_attributes(&c.attribute_spec, env)?,
+        external,
+        doc_comment: None,
+    };
+    Ok(Expr_::mk_lfun(fun, vec![]))
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {

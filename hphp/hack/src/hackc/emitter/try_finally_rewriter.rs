@@ -8,7 +8,7 @@ use crate::reified_generics_helpers as reified;
 use bitflags::bitflags;
 use emit_pos::emit_pos;
 use env::{emitter::Emitter, jump_targets as jt, Env};
-use hhbc_ast::{self as hhbc_ast, Instruct, IsTypeOp, Opcodes, Pseudo};
+use hhbc_ast::{self as hhbc_ast, Instruct, IsTypeOp, Opcode, Pseudo};
 use indexmap::IndexSet;
 use instruction_sequence::{instr, InstrSeq, Result};
 use iterator::IterId;
@@ -48,7 +48,7 @@ impl<'a, 'arena> JumpInstructions<'a, 'arena> {
                 Instruct::Pseudo(Pseudo::Continue(level)) => {
                     acc.insert(get_label_id(jt_gen, false, level as Level), instr);
                 }
-                Instruct::Opcode(Opcodes::RetC | Opcodes::RetCSuspended | Opcodes::RetM(_)) => {
+                Instruct::Opcode(Opcode::RetC | Opcode::RetCSuspended | Opcode::RetM(_)) => {
                     acc.insert(jt_gen.get_id_for_return(), instr);
                 }
                 _ => {}
@@ -64,7 +64,7 @@ pub(super) fn cleanup_try_body<'arena>(mut is: InstrSeq<'arena>) -> InstrSeq<'ar
         !matches!(
             instr,
             Instruct::Pseudo(Pseudo::Continue(_) | Pseudo::Break(_))
-                | Instruct::Opcode(Opcodes::RetC | Opcodes::RetCSuspended | Opcodes::RetM(_))
+                | Instruct::Opcode(Opcode::RetC | Opcode::RetCSuspended | Opcode::RetM(_))
         )
     });
     is
@@ -268,7 +268,7 @@ pub(super) fn emit_finally_epilogue<'a, 'b, 'arena, 'decl>(
             panic!("unexpected instruction: only Ret* or Break/Continue/Jmp(Named) are expected")
         };
         match *i {
-            Instruct::Opcode(Opcodes::RetC | Opcodes::RetCSuspended | Opcodes::RetM(_)) => {
+            Instruct::Opcode(Opcode::RetC | Opcode::RetCSuspended | Opcode::RetM(_)) => {
                 emit_return(e, true, env)
             }
             Instruct::Pseudo(Pseudo::Break(level)) => Ok(emit_break_or_continue(

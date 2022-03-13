@@ -1004,142 +1004,142 @@ fn print_null_flavor(w: &mut dyn Write, f: &ObjMethodOp) -> Result<()> {
     })
 }
 
-fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
+fn print_opcode(w: &mut dyn Write, instr: &Opcode<'_>, dv_labels: &HashSet<Label>) -> Result<()> {
     match instr {
-        Opcodes::IterInit(iter_args, label) => {
+        Opcode::IterInit(iter_args, label) => {
             w.write_all(b"IterInit ")?;
             print_iter_args(w, iter_args)?;
             w.write_all(b" ")?;
             print_label(w, label, dv_labels)
         }
-        Opcodes::IterNext(iter_args, label) => {
+        Opcode::IterNext(iter_args, label) => {
             w.write_all(b"IterNext ")?;
             print_iter_args(w, iter_args)?;
             w.write_all(b" ")?;
             print_label(w, label, dv_labels)
         }
-        Opcodes::IterFree(id) => {
+        Opcode::IterFree(id) => {
             w.write_all(b"IterFree ")?;
             print_iterator_id(w, id)
         }
-        Opcodes::Nop => w.write_all(b"Nop"),
-        Opcodes::EntryNop => w.write_all(b"EntryNop"),
-        Opcodes::PopC => w.write_all(b"PopC"),
-        Opcodes::PopU => w.write_all(b"PopU"),
-        Opcodes::Dup => w.write_all(b"Dup"),
-        Opcodes::Null => w.write_all(b"Null"),
-        Opcodes::Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
-        Opcodes::String(s) => {
+        Opcode::Nop => w.write_all(b"Nop"),
+        Opcode::EntryNop => w.write_all(b"EntryNop"),
+        Opcode::PopC => w.write_all(b"PopC"),
+        Opcode::PopU => w.write_all(b"PopU"),
+        Opcode::Dup => w.write_all(b"Dup"),
+        Opcode::Null => w.write_all(b"Null"),
+        Opcode::Int(i) => concat_str_by(w, " ", ["Int", i.to_string().as_str()]),
+        Opcode::String(s) => {
             w.write_all(b"String ")?;
             quotes(w, |w| w.write_all(&escaper::escape_bstr(s.as_bstr())))
         }
-        Opcodes::LazyClass(id) => {
+        Opcode::LazyClass(id) => {
             w.write_all(b"LazyClass ")?;
             print_class_id(w, id)
         }
-        Opcodes::True => w.write_all(b"True"),
-        Opcodes::False => w.write_all(b"False"),
-        Opcodes::Double(d) => write!(w, "Double {}", float::to_string(*d)),
-        Opcodes::AddElemC => w.write_all(b"AddElemC"),
-        Opcodes::AddNewElemC => w.write_all(b"AddNewElemC"),
-        Opcodes::NewPair => w.write_all(b"NewPair"),
-        Opcodes::File => w.write_all(b"File"),
-        Opcodes::Dir => w.write_all(b"Dir"),
-        Opcodes::Method => w.write_all(b"Method"),
-        Opcodes::FuncCred => w.write_all(b"FuncCred"),
-        Opcodes::Dict(id) => {
+        Opcode::True => w.write_all(b"True"),
+        Opcode::False => w.write_all(b"False"),
+        Opcode::Double(d) => write!(w, "Double {}", float::to_string(*d)),
+        Opcode::AddElemC => w.write_all(b"AddElemC"),
+        Opcode::AddNewElemC => w.write_all(b"AddNewElemC"),
+        Opcode::NewPair => w.write_all(b"NewPair"),
+        Opcode::File => w.write_all(b"File"),
+        Opcode::Dir => w.write_all(b"Dir"),
+        Opcode::Method => w.write_all(b"Method"),
+        Opcode::FuncCred => w.write_all(b"FuncCred"),
+        Opcode::Dict(id) => {
             w.write_all(b"Dict ")?;
             print_adata_id(w, id)
         }
-        Opcodes::Keyset(id) => {
+        Opcode::Keyset(id) => {
             w.write_all(b"Keyset ")?;
             print_adata_id(w, id)
         }
-        Opcodes::Vec(id) => {
+        Opcode::Vec(id) => {
             w.write_all(b"Vec ")?;
             print_adata_id(w, id)
         }
-        Opcodes::NewDictArray(i) => concat_str_by(w, " ", ["NewDictArray", i.to_string().as_str()]),
-        Opcodes::NewVec(i) => concat_str_by(w, " ", ["NewVec", i.to_string().as_str()]),
-        Opcodes::NewKeysetArray(i) => {
+        Opcode::NewDictArray(i) => concat_str_by(w, " ", ["NewDictArray", i.to_string().as_str()]),
+        Opcode::NewVec(i) => concat_str_by(w, " ", ["NewVec", i.to_string().as_str()]),
+        Opcode::NewKeysetArray(i) => {
             concat_str_by(w, " ", ["NewKeysetArray", i.to_string().as_str()])
         }
-        Opcodes::NewStructDict(l) => {
+        Opcode::NewStructDict(l) => {
             let ls: Vec<&str> = l.as_ref().iter().map(|s| s.unsafe_as_str()).collect();
             w.write_all(b"NewStructDict ")?;
             angle(w, |w| print_shape_fields(w, &ls[0..]))
         }
-        Opcodes::CnsE(id) => {
+        Opcode::CnsE(id) => {
             w.write_all(b"CnsE ")?;
             print_const_id(w, id)
         }
-        Opcodes::ClsCns(id) => {
+        Opcode::ClsCns(id) => {
             w.write_all(b"ClsCns ")?;
             print_const_id(w, id)
         }
-        Opcodes::ClsCnsD(const_id, cid) => {
+        Opcode::ClsCnsD(const_id, cid) => {
             w.write_all(b"ClsCnsD ")?;
             print_const_id(w, const_id)?;
             w.write_all(b" ")?;
             print_class_id(w, cid)
         }
-        Opcodes::ClsCnsL(id) => {
+        Opcode::ClsCnsL(id) => {
             w.write_all(b"ClsCnsL ")?;
             print_local(w, id)
         }
-        Opcodes::NewCol(ct) => {
+        Opcode::NewCol(ct) => {
             w.write_all(b"NewCol ")?;
             print_collection_type(w, ct)
         }
-        Opcodes::ColFromArray(ct) => {
+        Opcode::ColFromArray(ct) => {
             w.write_all(b"ColFromArray ")?;
             print_collection_type(w, ct)
         }
-        Opcodes::NullUninit => w.write_all(b"NullUninit"),
-        Opcodes::Concat => w.write_all(b"Concat"),
-        Opcodes::ConcatN(n) => concat_str_by(w, " ", ["ConcatN", n.to_string().as_str()]),
-        Opcodes::Add => w.write_all(b"Add"),
-        Opcodes::Sub => w.write_all(b"Sub"),
-        Opcodes::Mul => w.write_all(b"Mul"),
-        Opcodes::AddO => w.write_all(b"AddO"),
-        Opcodes::SubO => w.write_all(b"SubO"),
-        Opcodes::MulO => w.write_all(b"MulO"),
-        Opcodes::Div => w.write_all(b"Div"),
-        Opcodes::Mod => w.write_all(b"Mod"),
-        Opcodes::Pow => w.write_all(b"Pow"),
-        Opcodes::Not => w.write_all(b"Not"),
-        Opcodes::Same => w.write_all(b"Same"),
-        Opcodes::NSame => w.write_all(b"NSame"),
-        Opcodes::Eq => w.write_all(b"Eq"),
-        Opcodes::Neq => w.write_all(b"Neq"),
-        Opcodes::Lt => w.write_all(b"Lt"),
-        Opcodes::Lte => w.write_all(b"Lte"),
-        Opcodes::Gt => w.write_all(b"Gt"),
-        Opcodes::Gte => w.write_all(b"Gte"),
-        Opcodes::Cmp => w.write_all(b"Cmp"),
-        Opcodes::BitAnd => w.write_all(b"BitAnd"),
-        Opcodes::BitOr => w.write_all(b"BitOr"),
-        Opcodes::BitXor => w.write_all(b"BitXor"),
-        Opcodes::BitNot => w.write_all(b"BitNot"),
-        Opcodes::Shl => w.write_all(b"Shl"),
-        Opcodes::Shr => w.write_all(b"Shr"),
-        Opcodes::CastBool => w.write_all(b"CastBool"),
-        Opcodes::CastInt => w.write_all(b"CastInt"),
-        Opcodes::CastDouble => w.write_all(b"CastDouble"),
-        Opcodes::CastString => w.write_all(b"CastString"),
-        Opcodes::CastVec => w.write_all(b"CastVec"),
-        Opcodes::CastDict => w.write_all(b"CastDict"),
-        Opcodes::CastKeyset => w.write_all(b"CastKeyset"),
-        Opcodes::InstanceOf => w.write_all(b"InstanceOf"),
-        Opcodes::Print => w.write_all(b"Print"),
-        Opcodes::Clone => w.write_all(b"Clone"),
-        Opcodes::Exit => w.write_all(b"Exit"),
-        Opcodes::InstanceOfD(id) => {
+        Opcode::NullUninit => w.write_all(b"NullUninit"),
+        Opcode::Concat => w.write_all(b"Concat"),
+        Opcode::ConcatN(n) => concat_str_by(w, " ", ["ConcatN", n.to_string().as_str()]),
+        Opcode::Add => w.write_all(b"Add"),
+        Opcode::Sub => w.write_all(b"Sub"),
+        Opcode::Mul => w.write_all(b"Mul"),
+        Opcode::AddO => w.write_all(b"AddO"),
+        Opcode::SubO => w.write_all(b"SubO"),
+        Opcode::MulO => w.write_all(b"MulO"),
+        Opcode::Div => w.write_all(b"Div"),
+        Opcode::Mod => w.write_all(b"Mod"),
+        Opcode::Pow => w.write_all(b"Pow"),
+        Opcode::Not => w.write_all(b"Not"),
+        Opcode::Same => w.write_all(b"Same"),
+        Opcode::NSame => w.write_all(b"NSame"),
+        Opcode::Eq => w.write_all(b"Eq"),
+        Opcode::Neq => w.write_all(b"Neq"),
+        Opcode::Lt => w.write_all(b"Lt"),
+        Opcode::Lte => w.write_all(b"Lte"),
+        Opcode::Gt => w.write_all(b"Gt"),
+        Opcode::Gte => w.write_all(b"Gte"),
+        Opcode::Cmp => w.write_all(b"Cmp"),
+        Opcode::BitAnd => w.write_all(b"BitAnd"),
+        Opcode::BitOr => w.write_all(b"BitOr"),
+        Opcode::BitXor => w.write_all(b"BitXor"),
+        Opcode::BitNot => w.write_all(b"BitNot"),
+        Opcode::Shl => w.write_all(b"Shl"),
+        Opcode::Shr => w.write_all(b"Shr"),
+        Opcode::CastBool => w.write_all(b"CastBool"),
+        Opcode::CastInt => w.write_all(b"CastInt"),
+        Opcode::CastDouble => w.write_all(b"CastDouble"),
+        Opcode::CastString => w.write_all(b"CastString"),
+        Opcode::CastVec => w.write_all(b"CastVec"),
+        Opcode::CastDict => w.write_all(b"CastDict"),
+        Opcode::CastKeyset => w.write_all(b"CastKeyset"),
+        Opcode::InstanceOf => w.write_all(b"InstanceOf"),
+        Opcode::Print => w.write_all(b"Print"),
+        Opcode::Clone => w.write_all(b"Clone"),
+        Opcode::Exit => w.write_all(b"Exit"),
+        Opcode::InstanceOfD(id) => {
             w.write_all(b"InstanceOfD ")?;
             print_class_id(w, id)
         }
-        Opcodes::IsLateBoundCls => w.write_all(b"IsLateBoundCls"),
-        Opcodes::IsTypeStructC(op) => concat_str_by(
+        Opcode::IsLateBoundCls => w.write_all(b"IsLateBoundCls"),
+        Opcode::IsTypeStructC(op) => concat_str_by(
             w,
             " ",
             [
@@ -1151,88 +1151,88 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
                 },
             ],
         ),
-        Opcodes::ThrowAsTypeStructException => w.write_all(b"ThrowAsTypeStructException"),
-        Opcodes::CombineAndResolveTypeStruct(n) => concat_str_by(
+        Opcode::ThrowAsTypeStructException => w.write_all(b"ThrowAsTypeStructException"),
+        Opcode::CombineAndResolveTypeStruct(n) => concat_str_by(
             w,
             " ",
             ["CombineAndResolveTypeStruct", n.to_string().as_str()],
         ),
-        Opcodes::ResolveFunc(id) => {
+        Opcode::ResolveFunc(id) => {
             w.write_all(b"ResolveFunc ")?;
             print_function_id(w, id)
         }
-        Opcodes::ResolveRFunc(id) => {
+        Opcode::ResolveRFunc(id) => {
             w.write_all(b"ResolveRFunc ")?;
             print_function_id(w, id)
         }
-        Opcodes::ResolveMethCaller(id) => {
+        Opcode::ResolveMethCaller(id) => {
             w.write_all(b"ResolveMethCaller ")?;
             print_function_id(w, id)
         }
-        Opcodes::ResolveClsMethod(mid) => {
+        Opcode::ResolveClsMethod(mid) => {
             w.write_all(b"ResolveClsMethod ")?;
             print_method_id(w, mid)
         }
-        Opcodes::ResolveClsMethodD(cid, mid) => {
+        Opcode::ResolveClsMethodD(cid, mid) => {
             w.write_all(b"ResolveClsMethodD ")?;
             print_class_id(w, cid)?;
             w.write_all(b" ")?;
             print_method_id(w, mid)
         }
-        Opcodes::ResolveClsMethodS(r, mid) => {
+        Opcode::ResolveClsMethodS(r, mid) => {
             w.write_all(b"ResolveClsMethodS ")?;
             print_special_cls_ref(w, r)?;
             w.write_all(b" ")?;
             print_method_id(w, mid)
         }
-        Opcodes::ResolveRClsMethod(mid) => {
+        Opcode::ResolveRClsMethod(mid) => {
             w.write_all(b"ResolveRClsMethod ")?;
             print_method_id(w, mid)
         }
-        Opcodes::ResolveRClsMethodD(cid, mid) => {
+        Opcode::ResolveRClsMethodD(cid, mid) => {
             w.write_all(b"ResolveRClsMethodD ")?;
             print_class_id(w, cid)?;
             w.write_all(b" ")?;
             print_method_id(w, mid)
         }
-        Opcodes::ResolveRClsMethodS(r, mid) => {
+        Opcode::ResolveRClsMethodS(r, mid) => {
             w.write_all(b"ResolveRClsMethodS ")?;
             print_special_cls_ref(w, r)?;
             w.write_all(b" ")?;
             print_method_id(w, mid)
         }
-        Opcodes::ResolveClass(id) => {
+        Opcode::ResolveClass(id) => {
             w.write_all(b"ResolveClass ")?;
             print_class_id(w, id)
         }
-        Opcodes::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
-        Opcodes::RetC => w.write_all(b"RetC"),
-        Opcodes::RetCSuspended => w.write_all(b"RetCSuspended"),
-        Opcodes::Throw => w.write_all(b"Throw"),
-        Opcodes::Switch(kind, base, targets) => {
+        Opcode::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
+        Opcode::RetC => w.write_all(b"RetC"),
+        Opcode::RetCSuspended => w.write_all(b"RetCSuspended"),
+        Opcode::Throw => w.write_all(b"Throw"),
+        Opcode::Switch(kind, base, targets) => {
             print_switch(w, kind, base, targets.as_ref(), dv_labels)
         }
-        Opcodes::Jmp(l) => {
+        Opcode::Jmp(l) => {
             w.write_all(b"Jmp ")?;
             print_label(w, l, dv_labels)
         }
-        Opcodes::JmpNS(l) => {
+        Opcode::JmpNS(l) => {
             w.write_all(b"JmpNS ")?;
             print_label(w, l, dv_labels)
         }
-        Opcodes::JmpZ(l) => {
+        Opcode::JmpZ(l) => {
             w.write_all(b"JmpZ ")?;
             print_label(w, l, dv_labels)
         }
-        Opcodes::JmpNZ(l) => {
+        Opcode::JmpNZ(l) => {
             w.write_all(b"JmpNZ ")?;
             print_label(w, l, dv_labels)
         }
-        Opcodes::SSwitch { cases, targets } => {
+        Opcode::SSwitch { cases, targets } => {
             print_sswitch(w, cases.as_ref(), targets.as_ref(), dv_labels)
         }
-        Opcodes::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
-        Opcodes::FCallClsMethod(fcall_args, hint, log) => {
+        Opcode::RetM(p) => concat_str_by(w, " ", ["RetM", p.to_string().as_str()]),
+        Opcode::FCallClsMethod(fcall_args, hint, log) => {
             w.write_all(b"FCallClsMethod ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
             write_bytes!(w, r#" "{}" "#, hint)?;
@@ -1242,7 +1242,7 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
                 _ => panic!("Enum value does not match one of listed variants"),
             })
         }
-        Opcodes::FCallClsMethodD(fcall_args, hint, class, method) => {
+        Opcode::FCallClsMethodD(fcall_args, hint, class, method) => {
             w.write_all(b"FCallClsMethodD ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
             write_bytes!(w, r#" "{}" "#, hint)?;
@@ -1250,13 +1250,13 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_method_id(w, method)
         }
-        Opcodes::FCallClsMethodS(fcall_args, hint, clsref) => {
+        Opcode::FCallClsMethodS(fcall_args, hint, clsref) => {
             w.write_all(b"FCallClsMethodS ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
             write_bytes!(w, r#" "{}" "#, hint)?;
             print_special_cls_ref(w, clsref)
         }
-        Opcodes::FCallClsMethodSD(fcall_args, hint, clsref, method) => {
+        Opcode::FCallClsMethodSD(fcall_args, hint, clsref, method) => {
             w.write_all(b"FCallClsMethodSD ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
             write_bytes!(w, r#" "{}" "#, hint)?;
@@ -1264,28 +1264,28 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_method_id(w, method)
         }
-        Opcodes::FCallCtor(fcall_args, hint) => {
+        Opcode::FCallCtor(fcall_args, hint) => {
             w.write_all(b"FCallCtor ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
             write_bytes!(w, r#" "{}""#, hint)
         }
-        Opcodes::FCallFunc(fcall_args) => {
+        Opcode::FCallFunc(fcall_args) => {
             w.write_all(b"FCallFunc ")?;
             print_fcall_args(w, fcall_args, dv_labels)
         }
-        Opcodes::FCallFuncD(fcall_args, func) => {
+        Opcode::FCallFuncD(fcall_args, func) => {
             w.write_all(b"FCallFuncD ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
             w.write_all(b" ")?;
             print_function_id(w, func)
         }
-        Opcodes::FCallObjMethod(fcall_args, hint, flavor) => {
+        Opcode::FCallObjMethod(fcall_args, hint, flavor) => {
             w.write_all(b"FCallObjMethod ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
             write_bytes!(w, r#" "{}" "#, hint)?;
             print_null_flavor(w, flavor)
         }
-        Opcodes::FCallObjMethodD(fcall_args, hint, flavor, method) => {
+        Opcode::FCallObjMethodD(fcall_args, hint, flavor, method) => {
             w.write_all(b"FCallObjMethodD ")?;
             print_fcall_args(w, fcall_args, dv_labels)?;
             write_bytes!(w, r#" "{}" "#, hint)?;
@@ -1293,56 +1293,56 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_method_id(w, method)
         }
-        Opcodes::NewObj => w.write_all(b"NewObj"),
-        Opcodes::NewObjR => w.write_all(b"NewObjR"),
-        Opcodes::NewObjD(cid) => {
+        Opcode::NewObj => w.write_all(b"NewObj"),
+        Opcode::NewObjR => w.write_all(b"NewObjR"),
+        Opcode::NewObjD(cid) => {
             w.write_all(b"NewObjD ")?;
             print_class_id(w, cid)
         }
-        Opcodes::NewObjRD(cid) => {
+        Opcode::NewObjRD(cid) => {
             w.write_all(b"NewObjRD ")?;
             print_class_id(w, cid)
         }
-        Opcodes::NewObjS(r) => {
+        Opcode::NewObjS(r) => {
             w.write_all(b"NewObjS ")?;
             print_special_cls_ref(w, r)
         }
-        Opcodes::This => w.write_all(b"This"),
-        Opcodes::CheckThis => w.write_all(b"CheckThis"),
-        Opcodes::ChainFaults => w.write_all(b"ChainFaults"),
-        Opcodes::SetImplicitContextByValue => w.write_all(b"SetImplicitContextByValue"),
-        Opcodes::VerifyRetTypeC => w.write_all(b"VerifyRetTypeC"),
-        Opcodes::VerifyRetTypeTS => w.write_all(b"VerifyRetTypeTS"),
-        Opcodes::SelfCls => w.write_all(b"SelfCls"),
-        Opcodes::ParentCls => w.write_all(b"ParentCls"),
-        Opcodes::LateBoundCls => w.write_all(b"LateBoundCls"),
-        Opcodes::ClassName => w.write_all(b"ClassName"),
-        Opcodes::LazyClassFromClass => w.write_all(b"LazyClassFromClass"),
-        Opcodes::RecordReifiedGeneric => w.write_all(b"RecordReifiedGeneric"),
-        Opcodes::CheckReifiedGenericMismatch => w.write_all(b"CheckReifiedGenericMismatch"),
-        Opcodes::NativeImpl => w.write_all(b"NativeImpl"),
-        Opcodes::AKExists => w.write_all(b"AKExists"),
-        Opcodes::Idx => w.write_all(b"Idx"),
-        Opcodes::ArrayIdx => w.write_all(b"ArrayIdx"),
-        Opcodes::ArrayMarkLegacy => w.write_all(b"ArrayMarkLegacy"),
-        Opcodes::ArrayUnmarkLegacy => w.write_all(b"ArrayUnmarkLegacy"),
-        Opcodes::BreakTraceHint => w.write_all(b"BreakTraceHint"),
-        Opcodes::CGetCUNop => w.write_all(b"CGetCUNop"),
-        Opcodes::UGetCUNop => w.write_all(b"UGetCUNop"),
-        Opcodes::LockObj => w.write_all(b"LockObj"),
-        Opcodes::ThrowNonExhaustiveSwitch => w.write_all(b"ThrowNonExhaustiveSwitch"),
-        Opcodes::RaiseClassStringConversionWarning => {
+        Opcode::This => w.write_all(b"This"),
+        Opcode::CheckThis => w.write_all(b"CheckThis"),
+        Opcode::ChainFaults => w.write_all(b"ChainFaults"),
+        Opcode::SetImplicitContextByValue => w.write_all(b"SetImplicitContextByValue"),
+        Opcode::VerifyRetTypeC => w.write_all(b"VerifyRetTypeC"),
+        Opcode::VerifyRetTypeTS => w.write_all(b"VerifyRetTypeTS"),
+        Opcode::SelfCls => w.write_all(b"SelfCls"),
+        Opcode::ParentCls => w.write_all(b"ParentCls"),
+        Opcode::LateBoundCls => w.write_all(b"LateBoundCls"),
+        Opcode::ClassName => w.write_all(b"ClassName"),
+        Opcode::LazyClassFromClass => w.write_all(b"LazyClassFromClass"),
+        Opcode::RecordReifiedGeneric => w.write_all(b"RecordReifiedGeneric"),
+        Opcode::CheckReifiedGenericMismatch => w.write_all(b"CheckReifiedGenericMismatch"),
+        Opcode::NativeImpl => w.write_all(b"NativeImpl"),
+        Opcode::AKExists => w.write_all(b"AKExists"),
+        Opcode::Idx => w.write_all(b"Idx"),
+        Opcode::ArrayIdx => w.write_all(b"ArrayIdx"),
+        Opcode::ArrayMarkLegacy => w.write_all(b"ArrayMarkLegacy"),
+        Opcode::ArrayUnmarkLegacy => w.write_all(b"ArrayUnmarkLegacy"),
+        Opcode::BreakTraceHint => w.write_all(b"BreakTraceHint"),
+        Opcode::CGetCUNop => w.write_all(b"CGetCUNop"),
+        Opcode::UGetCUNop => w.write_all(b"UGetCUNop"),
+        Opcode::LockObj => w.write_all(b"LockObj"),
+        Opcode::ThrowNonExhaustiveSwitch => w.write_all(b"ThrowNonExhaustiveSwitch"),
+        Opcode::RaiseClassStringConversionWarning => {
             w.write_all(b"RaiseClassStringConversionWarning")
         }
-        Opcodes::VerifyParamType(id) => {
+        Opcode::VerifyParamType(id) => {
             w.write_all(b"VerifyParamType ")?;
             print_param_id(w, id)
         }
-        Opcodes::VerifyParamTypeTS(id) => {
+        Opcode::VerifyParamTypeTS(id) => {
             w.write_all(b"VerifyParamTypeTS ")?;
             print_param_id(w, id)
         }
-        Opcodes::Silence(local, op) => {
+        Opcode::Silence(local, op) => {
             w.write_all(b"Silence ")?;
             print_local(w, local)?;
             w.write_all(b" ")?;
@@ -1352,16 +1352,16 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
                 _ => panic!("Enum value does not match one of listed variants"),
             }
         }
-        Opcodes::VerifyOutType(id) => {
+        Opcode::VerifyOutType(id) => {
             w.write_all(b"VerifyOutType ")?;
             print_param_id(w, id)
         }
-        Opcodes::CreateCl(n, cid) => concat_str_by(
+        Opcode::CreateCl(n, cid) => concat_str_by(
             w,
             " ",
             ["CreateCl", n.to_string().as_str(), cid.to_string().as_str()],
         ),
-        Opcodes::BareThis(op) => concat_str_by(
+        Opcode::BareThis(op) => concat_str_by(
             w,
             " ",
             [
@@ -1375,17 +1375,17 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
             ],
         ),
 
-        Opcodes::MemoGet(label, range) => {
+        Opcode::MemoGet(label, range) => {
             w.write_all(b"MemoGet ")?;
             print_label(w, label, dv_labels)?;
             write!(w, " L:{}+{}", range.start, range.len)
         }
 
-        Opcodes::MemoSet(range) => {
+        Opcode::MemoSet(range) => {
             write!(w, "MemoSet L:{}+{}", range.start, range.len)
         }
 
-        Opcodes::MemoGetEager([label1, label2], range) => {
+        Opcode::MemoGetEager([label1, label2], range) => {
             w.write_all(b"MemoGetEager ")?;
             print_label(w, label1, dv_labels)?;
             w.write_all(b" ")?;
@@ -1393,11 +1393,11 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
             write!(w, " L:{}+{}", range.start, range.len)
         }
 
-        Opcodes::MemoSetEager(range) => {
+        Opcode::MemoSetEager(range) => {
             write!(w, "MemoSetEager L:{}+{}", range.start, range.len)
         }
 
-        Opcodes::OODeclExists(k) => concat_str_by(
+        Opcode::OODeclExists(k) => concat_str_by(
             w,
             " ",
             [
@@ -1410,97 +1410,97 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
                 },
             ],
         ),
-        Opcodes::AssertRATL(local, s) => {
+        Opcode::AssertRATL(local, s) => {
             w.write_all(b"AssertRATL ")?;
             print_local(w, local)?;
             w.write_all(b" ")?;
             w.write_all(s)
         }
-        Opcodes::AssertRATStk(n, s) => {
+        Opcode::AssertRATStk(n, s) => {
             write_bytes!(w, "AssertRATStk {} {}", n, s,)
         }
-        Opcodes::GetMemoKeyL(local) => {
+        Opcode::GetMemoKeyL(local) => {
             w.write_all(b"GetMemoKeyL ")?;
             print_local(w, local)
         }
-        Opcodes::CGetL(id) => {
+        Opcode::CGetL(id) => {
             w.write_all(b"CGetL ")?;
             print_local(w, id)
         }
-        Opcodes::CGetQuietL(id) => {
+        Opcode::CGetQuietL(id) => {
             w.write_all(b"CGetQuietL ")?;
             print_local(w, id)
         }
-        Opcodes::CGetL2(id) => {
+        Opcode::CGetL2(id) => {
             w.write_all(b"CGetL2 ")?;
             print_local(w, id)
         }
-        Opcodes::CUGetL(id) => {
+        Opcode::CUGetL(id) => {
             w.write_all(b"CUGetL ")?;
             print_local(w, id)
         }
-        Opcodes::PushL(id) => {
+        Opcode::PushL(id) => {
             w.write_all(b"PushL ")?;
             print_local(w, id)
         }
-        Opcodes::CGetG => w.write_all(b"CGetG"),
-        Opcodes::CGetS(op) => {
+        Opcode::CGetG => w.write_all(b"CGetG"),
+        Opcode::CGetS(op) => {
             w.write_all(b"CGetS ")?;
             print_readonly_op(w, op)
         }
-        Opcodes::ClassGetC => w.write_all(b"ClassGetC"),
-        Opcodes::ClassGetTS => w.write_all(b"ClassGetTS"),
-        Opcodes::SetL(local) => {
+        Opcode::ClassGetC => w.write_all(b"ClassGetC"),
+        Opcode::ClassGetTS => w.write_all(b"ClassGetTS"),
+        Opcode::SetL(local) => {
             w.write_all(b"SetL ")?;
             print_local(w, local)
         }
-        Opcodes::PopL(id) => {
+        Opcode::PopL(id) => {
             w.write_all(b"PopL ")?;
             print_local(w, id)
         }
-        Opcodes::SetG => w.write_all(b"SetG"),
-        Opcodes::SetS(op) => {
+        Opcode::SetG => w.write_all(b"SetG"),
+        Opcode::SetS(op) => {
             w.write_all(b"SetS ")?;
             print_readonly_op(w, op)
         }
-        Opcodes::SetOpL(id, op) => {
+        Opcode::SetOpL(id, op) => {
             w.write_all(b"SetOpL ")?;
             print_local(w, id)?;
             w.write_all(b" ")?;
             print_eq_op(w, op)
         }
-        Opcodes::SetOpG(op) => {
+        Opcode::SetOpG(op) => {
             w.write_all(b"SetOpG ")?;
             print_eq_op(w, op)
         }
-        Opcodes::SetOpS(op) => {
+        Opcode::SetOpS(op) => {
             w.write_all(b"SetOpS ")?;
             print_eq_op(w, op)
         }
-        Opcodes::IncDecL(id, op) => {
+        Opcode::IncDecL(id, op) => {
             w.write_all(b"IncDecL ")?;
             print_local(w, id)?;
             w.write_all(b" ")?;
             print_incdec_op(w, op)
         }
-        Opcodes::IncDecG(op) => {
+        Opcode::IncDecG(op) => {
             w.write_all(b"IncDecG ")?;
             print_incdec_op(w, op)
         }
-        Opcodes::IncDecS(op) => {
+        Opcode::IncDecS(op) => {
             w.write_all(b"IncDecS ")?;
             print_incdec_op(w, op)
         }
-        Opcodes::UnsetL(id) => {
+        Opcode::UnsetL(id) => {
             w.write_all(b"UnsetL ")?;
             print_local(w, id)
         }
-        Opcodes::UnsetG => w.write_all(b"UnsetG"),
-        Opcodes::CheckProp(id) => {
+        Opcode::UnsetG => w.write_all(b"UnsetG"),
+        Opcode::CheckProp(id) => {
             w.write_all(b"CheckProp ")?;
             print_prop_id(w, id)
         }
-        Opcodes::InitProp(id, op) => {
+        Opcode::InitProp(id, op) => {
             w.write_all(b"InitProp ")?;
             print_prop_id(w, id)?;
             w.write_all(b" ")?;
@@ -1511,39 +1511,39 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
             }?;
             w.write_all(b" ")
         }
-        Opcodes::IssetL(local) => {
+        Opcode::IssetL(local) => {
             w.write_all(b"IssetL ")?;
             print_local(w, local)
         }
-        Opcodes::IsUnsetL(local) => {
+        Opcode::IsUnsetL(local) => {
             w.write_all(b"IsUnsetL ")?;
             print_local(w, local)
         }
-        Opcodes::IssetG => w.write_all(b"IssetG"),
-        Opcodes::IssetS => w.write_all(b"IssetS"),
-        Opcodes::IsTypeC(op) => {
+        Opcode::IssetG => w.write_all(b"IssetG"),
+        Opcode::IssetS => w.write_all(b"IssetS"),
+        Opcode::IsTypeC(op) => {
             w.write_all(b"IsTypeC ")?;
             print_istype_op(w, op)
         }
-        Opcodes::IsTypeL(local, op) => {
+        Opcode::IsTypeL(local, op) => {
             w.write_all(b"IsTypeL ")?;
             print_local(w, local)?;
             w.write_all(b" ")?;
             print_istype_op(w, op)
         }
-        Opcodes::BaseGC(si, m) => {
+        Opcode::BaseGC(si, m) => {
             w.write_all(b"BaseGC ")?;
             print_stack_index(w, si)?;
             w.write_all(b" ")?;
             print_member_opmode(w, m)
         }
-        Opcodes::BaseGL(id, m) => {
+        Opcode::BaseGL(id, m) => {
             w.write_all(b"BaseGL ")?;
             print_local(w, id)?;
             w.write_all(b" ")?;
             print_member_opmode(w, m)
         }
-        Opcodes::BaseSC(si1, si2, m, op) => {
+        Opcode::BaseSC(si1, si2, m, op) => {
             w.write_all(b"BaseSC ")?;
             print_stack_index(w, si1)?;
             w.write_all(b" ")?;
@@ -1553,7 +1553,7 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
-        Opcodes::BaseL(id, m, op) => {
+        Opcode::BaseL(id, m, op) => {
             w.write_all(b"BaseL ")?;
             print_local(w, id)?;
             w.write_all(b" ")?;
@@ -1561,20 +1561,20 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_readonly_op(w, op)
         }
-        Opcodes::BaseC(si, m) => {
+        Opcode::BaseC(si, m) => {
             w.write_all(b"BaseC ")?;
             print_stack_index(w, si)?;
             w.write_all(b" ")?;
             print_member_opmode(w, m)
         }
-        Opcodes::BaseH => w.write_all(b"BaseH"),
-        Opcodes::Dim(m, mk) => {
+        Opcode::BaseH => w.write_all(b"BaseH"),
+        Opcode::Dim(m, mk) => {
             w.write_all(b"Dim ")?;
             print_member_opmode(w, m)?;
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
-        Opcodes::QueryM(n, op, mk) => {
+        Opcode::QueryM(n, op, mk) => {
             w.write_all(b"QueryM ")?;
             print_int(w, n)?;
             w.write_all(b" ")?;
@@ -1582,19 +1582,19 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
-        Opcodes::UnsetM(n, mk) => {
+        Opcode::UnsetM(n, mk) => {
             w.write_all(b"UnsetM ")?;
             print_int(w, n)?;
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
-        Opcodes::SetM(i, mk) => {
+        Opcode::SetM(i, mk) => {
             w.write_all(b"SetM ")?;
             print_int(w, i)?;
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
-        Opcodes::SetOpM(i, op, mk) => {
+        Opcode::SetOpM(i, op, mk) => {
             w.write_all(b"SetOpM ")?;
             print_int(w, i)?;
             w.write_all(b" ")?;
@@ -1602,7 +1602,7 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
-        Opcodes::IncDecM(i, op, mk) => {
+        Opcode::IncDecM(i, op, mk) => {
             w.write_all(b"IncDecM ")?;
             print_int(w, i)?;
             w.write_all(b" ")?;
@@ -1610,7 +1610,7 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
             w.write_all(b" ")?;
             print_member_key(w, mk)
         }
-        Opcodes::SetRangeM(i, s, op) => {
+        Opcode::SetRangeM(i, s, op) => {
             w.write_all(b"SetRangeM ")?;
             print_int(w, i)?;
             w.write_all(b" ")?;
@@ -1622,36 +1622,36 @@ fn print_opcode(w: &mut dyn Write, instr: &Opcodes<'_>, dv_labels: &HashSet<Labe
                 _ => panic!("Enum value does not match one of listed variants"),
             })
         }
-        Opcodes::WHResult => w.write_all(b"WHResult"),
-        Opcodes::Await => w.write_all(b"Await"),
-        Opcodes::AwaitAll(range) => {
+        Opcode::WHResult => w.write_all(b"WHResult"),
+        Opcode::Await => w.write_all(b"Await"),
+        Opcode::AwaitAll(range) => {
             write!(w, "AwaitAll L:{}+{}", range.start, range.len)
         }
-        Opcodes::CreateCont => w.write_all(b"CreateCont"),
-        Opcodes::ContEnter => w.write_all(b"ContEnter"),
-        Opcodes::ContRaise => w.write_all(b"ContRaise"),
-        Opcodes::Yield => w.write_all(b"Yield"),
-        Opcodes::YieldK => w.write_all(b"YieldK"),
-        Opcodes::ContCheck(ContCheckOp::IgnoreStarted) => w.write_all(b"ContCheck IgnoreStarted"),
-        Opcodes::ContCheck(ContCheckOp::CheckStarted) => w.write_all(b"ContCheck CheckStarted"),
-        Opcodes::ContCheck(_) => panic!("invalid ContCheck value"),
-        Opcodes::ContValid => w.write_all(b"ContValid"),
-        Opcodes::ContKey => w.write_all(b"ContKey"),
-        Opcodes::ContGetReturn => w.write_all(b"ContGetReturn"),
-        Opcodes::ContCurrent => w.write_all(b"ContCurrent"),
-        Opcodes::Incl => w.write_all(b"Incl"),
-        Opcodes::InclOnce => w.write_all(b"InclOnce"),
-        Opcodes::Req => w.write_all(b"Req"),
-        Opcodes::ReqOnce => w.write_all(b"ReqOnce"),
-        Opcodes::ReqDoc => w.write_all(b"ReqDoc"),
-        Opcodes::Eval => w.write_all(b"Eval"),
-        Opcodes::PopU2
-        | Opcodes::DblAsBits
-        | Opcodes::Select
-        | Opcodes::LIterInit(..)
-        | Opcodes::LIterNext(..)
-        | Opcodes::LIterFree(..)
-        | Opcodes::VerifyRetNonNullC => todo!(),
+        Opcode::CreateCont => w.write_all(b"CreateCont"),
+        Opcode::ContEnter => w.write_all(b"ContEnter"),
+        Opcode::ContRaise => w.write_all(b"ContRaise"),
+        Opcode::Yield => w.write_all(b"Yield"),
+        Opcode::YieldK => w.write_all(b"YieldK"),
+        Opcode::ContCheck(ContCheckOp::IgnoreStarted) => w.write_all(b"ContCheck IgnoreStarted"),
+        Opcode::ContCheck(ContCheckOp::CheckStarted) => w.write_all(b"ContCheck CheckStarted"),
+        Opcode::ContCheck(_) => panic!("invalid ContCheck value"),
+        Opcode::ContValid => w.write_all(b"ContValid"),
+        Opcode::ContKey => w.write_all(b"ContKey"),
+        Opcode::ContGetReturn => w.write_all(b"ContGetReturn"),
+        Opcode::ContCurrent => w.write_all(b"ContCurrent"),
+        Opcode::Incl => w.write_all(b"Incl"),
+        Opcode::InclOnce => w.write_all(b"InclOnce"),
+        Opcode::Req => w.write_all(b"Req"),
+        Opcode::ReqOnce => w.write_all(b"ReqOnce"),
+        Opcode::ReqDoc => w.write_all(b"ReqDoc"),
+        Opcode::Eval => w.write_all(b"Eval"),
+        Opcode::PopU2
+        | Opcode::DblAsBits
+        | Opcode::Select
+        | Opcode::LIterInit(..)
+        | Opcode::LIterNext(..)
+        | Opcode::LIterFree(..)
+        | Opcode::VerifyRetNonNullC => todo!(),
     }
 }
 

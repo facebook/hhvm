@@ -506,11 +506,11 @@ fn emit_id<'a, 'arena, 'decl>(
     let alloc = env.arena; // Should this be emitter.alloc?
     let ast_defs::Id(p, s) = id;
     match s.as_str() {
-        pseudo_consts::G__FILE__ => Ok(instr::instr(Instruct::Opcode(Opcodes::File))),
-        pseudo_consts::G__DIR__ => Ok(instr::instr(Instruct::Opcode(Opcodes::Dir))),
-        pseudo_consts::G__METHOD__ => Ok(instr::instr(Instruct::Opcode(Opcodes::Method))),
+        pseudo_consts::G__FILE__ => Ok(instr::instr(Instruct::Opcode(Opcode::File))),
+        pseudo_consts::G__DIR__ => Ok(instr::instr(Instruct::Opcode(Opcode::Dir))),
+        pseudo_consts::G__METHOD__ => Ok(instr::instr(Instruct::Opcode(Opcode::Method))),
         pseudo_consts::G__FUNCTION_CREDENTIAL__ => {
-            Ok(instr::instr(Instruct::Opcode(Opcodes::FuncCred)))
+            Ok(instr::instr(Instruct::Opcode(Opcode::FuncCred)))
         }
         pseudo_consts::G__CLASS__ => {
             Ok(InstrSeq::gather(vec![instr::selfcls(), instr::classname()]))
@@ -534,7 +534,7 @@ fn emit_id<'a, 'arena, 'decl>(
             emit_symbol_refs::add_constant(emitter, cid.clone());
             Ok(emit_pos_then(
                 p,
-                instr::instr(Instruct::Opcode(Opcodes::CnsE(cid))),
+                instr::instr(Instruct::Opcode(Opcode::CnsE(cid))),
             ))
         }
     }
@@ -970,9 +970,9 @@ fn emit_vec_collection<'a, 'arena, 'decl>(
             let instr = emit_adata::typed_value_to_instr(e, &tv)?;
             emit_static_collection(env, None, pos, instr)
         }
-        Err(_) => emit_value_only_collection(e, env, pos, fields, |v| {
-            Instruct::Opcode(Opcodes::NewVec(v))
-        }),
+        Err(_) => {
+            emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
+        }
     }
 }
 
@@ -1388,7 +1388,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 Ok(instr::newstructdict(alloc, x))
             })
         } else {
-            let ctor = Instruct::Opcode(Opcodes::NewDictArray(count));
+            let ctor = Instruct::Opcode(Opcode::NewDictArray(count));
             emit_array(e, env, pos, fields, ctor)
         }
     };
@@ -1402,33 +1402,29 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 instr::colfromarray(ctype),
             ]))
         } else {
-            let ctor = Instruct::Opcode(Opcodes::NewDictArray(count));
+            let ctor = Instruct::Opcode(Opcode::NewDictArray(count));
             emit_keyvalue_collection(e, env, pos, fields, ctype, ctor)
         }
     };
     use ast::Expr_;
     match &expr.2 {
         Expr_::ValCollection(v) if v.0 == ast::VcKind::Vec => {
-            emit_value_only_collection(e, env, pos, fields, |v| {
-                Instruct::Opcode(Opcodes::NewVec(v))
-            })
+            emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
         }
         Expr_::Collection(v) if (v.0).1 == "vec" => {
-            emit_value_only_collection(e, env, pos, fields, |v| {
-                Instruct::Opcode(Opcodes::NewVec(v))
-            })
+            emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
         }
-        Expr_::Tuple(_) => emit_value_only_collection(e, env, pos, fields, |v| {
-            Instruct::Opcode(Opcodes::NewVec(v))
-        }),
+        Expr_::Tuple(_) => {
+            emit_value_only_collection(e, env, pos, fields, |v| Instruct::Opcode(Opcode::NewVec(v)))
+        }
         Expr_::ValCollection(v) if v.0 == ast::VcKind::Keyset => {
             emit_value_only_collection(e, env, pos, fields, |v| {
-                Instruct::Opcode(Opcodes::NewKeysetArray(v))
+                Instruct::Opcode(Opcode::NewKeysetArray(v))
             })
         }
         Expr_::Collection(v) if (v.0).1 == "keyset" => {
             emit_value_only_collection(e, env, pos, fields, |v| {
-                Instruct::Opcode(Opcodes::NewKeysetArray(v))
+                Instruct::Opcode(Opcode::NewKeysetArray(v))
             })
         }
         Expr_::Collection(v) if (v.0).1 == "dict" => emit_dict(e),
@@ -1459,7 +1455,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
         }
         Expr_::Varray(_) => {
             let instrs = emit_value_only_collection(e, env, pos, fields, |v| {
-                Instruct::Opcode(Opcodes::NewVec(v))
+                Instruct::Opcode(Opcode::NewVec(v))
             });
             Ok(instrs?)
         }
@@ -1471,7 +1467,7 @@ fn emit_dynamic_collection<'a, 'arena, 'decl>(
                 });
                 Ok(instrs?)
             } else {
-                let constr = Instruct::Opcode(Opcodes::NewDictArray(count));
+                let constr = Instruct::Opcode(Opcode::NewDictArray(count));
                 let instrs = emit_array(e, env, pos, fields, constr);
                 Ok(instrs?)
             }
@@ -1668,9 +1664,9 @@ fn emit_array_mark_legacy<'a, 'arena, 'decl>(
         instr::empty()
     };
     let mark = if legacy {
-        instr::instr(Instruct::Opcode(Opcodes::ArrayMarkLegacy))
+        instr::instr(Instruct::Opcode(Opcode::ArrayMarkLegacy))
     } else {
-        instr::instr(Instruct::Opcode(Opcodes::ArrayUnmarkLegacy))
+        instr::instr(Instruct::Opcode(Opcode::ArrayUnmarkLegacy))
     };
     Ok(InstrSeq::gather(vec![
         emit_exprs_and_error_on_inout(e, env, es, "HH\\array_mark_legacy")?,
@@ -2982,24 +2978,24 @@ fn get_call_builtin_func_info<'arena, 'decl>(
     id: impl AsRef<str>,
 ) -> Option<(usize, Instruct<'arena>)> {
     match id.as_ref() {
-        "array_key_exists" => Some((2, Instruct::Opcode(Opcodes::AKExists))),
-        "hphp_array_idx" => Some((3, Instruct::Opcode(Opcodes::ArrayIdx))),
-        "intval" => Some((1, Instruct::Opcode(Opcodes::CastInt))),
-        "boolval" => Some((1, Instruct::Opcode(Opcodes::CastBool))),
-        "strval" => Some((1, Instruct::Opcode(Opcodes::CastString))),
-        "floatval" | "doubleval" => Some((1, Instruct::Opcode(Opcodes::CastDouble))),
-        "HH\\vec" => Some((1, Instruct::Opcode(Opcodes::CastVec))),
-        "HH\\keyset" => Some((1, Instruct::Opcode(Opcodes::CastKeyset))),
-        "HH\\dict" => Some((1, Instruct::Opcode(Opcodes::CastDict))),
-        "HH\\varray" => Some((1, Instruct::Opcode(Opcodes::CastVec))),
-        "HH\\darray" => Some((1, Instruct::Opcode(Opcodes::CastDict))),
+        "array_key_exists" => Some((2, Instruct::Opcode(Opcode::AKExists))),
+        "hphp_array_idx" => Some((3, Instruct::Opcode(Opcode::ArrayIdx))),
+        "intval" => Some((1, Instruct::Opcode(Opcode::CastInt))),
+        "boolval" => Some((1, Instruct::Opcode(Opcode::CastBool))),
+        "strval" => Some((1, Instruct::Opcode(Opcode::CastString))),
+        "floatval" | "doubleval" => Some((1, Instruct::Opcode(Opcode::CastDouble))),
+        "HH\\vec" => Some((1, Instruct::Opcode(Opcode::CastVec))),
+        "HH\\keyset" => Some((1, Instruct::Opcode(Opcode::CastKeyset))),
+        "HH\\dict" => Some((1, Instruct::Opcode(Opcode::CastDict))),
+        "HH\\varray" => Some((1, Instruct::Opcode(Opcode::CastVec))),
+        "HH\\darray" => Some((1, Instruct::Opcode(Opcode::CastDict))),
         "HH\\ImplicitContext\\_Private\\set_implicit_context_by_value" if e.systemlib() => {
-            Some((1, Instruct::Opcode(Opcodes::SetImplicitContextByValue)))
+            Some((1, Instruct::Opcode(Opcode::SetImplicitContextByValue)))
         }
         // TODO: enforce that this returns readonly
-        "HH\\global_readonly_get" => Some((1, Instruct::Opcode(Opcodes::CGetG))),
-        "HH\\global_get" => Some((1, Instruct::Opcode(Opcodes::CGetG))),
-        "HH\\global_isset" => Some((1, Instruct::Opcode(Opcodes::IssetG))),
+        "HH\\global_readonly_get" => Some((1, Instruct::Opcode(Opcode::CGetG))),
+        "HH\\global_get" => Some((1, Instruct::Opcode(Opcode::CGetG))),
+        "HH\\global_isset" => Some((1, Instruct::Opcode(Opcode::IssetG))),
         _ => None,
     }
 }
@@ -5112,7 +5108,7 @@ pub fn emit_set_range_expr<'a, 'arena, 'decl>(
         emit_expr(e, env, src)?,
         count_instrs,
         base_setup,
-        instr::instr(Instruct::Opcode(Opcodes::SetRangeM(
+        instr::instr(Instruct::Opcode(Opcode::SetRangeM(
             (base_stack + cls_stack)
                 .try_into()
                 .expect("StackIndex overflow"),

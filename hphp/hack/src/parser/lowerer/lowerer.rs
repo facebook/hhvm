@@ -1460,50 +1460,7 @@ fn p_expr_impl<'a>(
     parent_pos: Option<Pos>,
 ) -> Result<Expr_> {
     env.check_stack_limit();
-    let mk_lid = |p: Pos, s: String| ast::Lid(p, (0, s));
-    let mk_name_lid = |name: S<'a>, env: &mut Env<'a>| {
-        let name = pos_name(name, env)?;
-        Ok(mk_lid(name.0, name.1))
-    };
-    let mk_lvar = |name: S<'a>, env: &mut Env<'a>| Ok(Expr_::mk_lvar(mk_name_lid(name, env)?));
-    let mk_id_expr = |name: ast::Sid| Expr::new((), name.0.clone(), Expr_::mk_id(name));
-    let p_intri_expr = |kw, ty, v, e: &mut Env<'a>| {
-        let hints = expand_type_args(ty, e)?;
-        let hints = check_intrinsic_type_arg_varity(node, e, hints);
-        Ok(Expr_::mk_collection(
-            pos_name(kw, e)?,
-            hints,
-            could_map(v, e, p_afield)?,
-        ))
-    };
-    let p_special_call = |recv: S<'a>, args: S<'a>, e: &mut Env<'a>| -> Result<Expr_> {
-        // Mark expression as CallReceiver so that we can correctly set
-        // PropOrMethod field in ObjGet and ClassGet
-        let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, e, None)?;
-        let (args, varargs) = split_args_vararg(args, e)?;
-        Ok(Expr_::mk_call(recv, vec![], args, varargs))
-    };
-    let p_obj_get = |recv: S<'a>, op: S<'a>, name: S<'a>, e: &mut Env<'a>| -> Result<Expr_> {
-        if recv.is_object_creation_expression() && !e.codegen() {
-            raise_parsing_error(recv, e, &syntax_error::invalid_constructor_method_call);
-        }
-        let recv = p_expr(recv, e)?;
-        let name = p_expr_with_loc(ExprLocation::MemberSelect, name, e, None)?;
-        let op = p_null_flavor(op, e)?;
-        Ok(Expr_::mk_obj_get(
-            recv,
-            name,
-            op,
-            match location {
-                ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
-                _ => ast::PropOrMethod::IsProp,
-            },
-        ))
-    };
-    let pos = match parent_pos {
-        None => p_pos(node, env),
-        Some(p) => p,
-    };
+    let pos = parent_pos.unwrap_or_else(|| p_pos(node, env));
     match &node.children {
         LambdaExpression(c) => {
             let suspension_kind = mk_suspension_kind(&c.async_);
@@ -1575,10 +1532,14 @@ fn p_expr_impl<'a>(
         EmbeddedBracedExpression(c) => p_expr_recurse(location, &c.expression, env, Some(pos)),
         ParenthesizedExpression(c) => p_expr_recurse(location, &c.expression, env, None),
         DictionaryIntrinsicExpression(c) => {
-            p_intri_expr(&c.keyword, &c.explicit_type, &c.members, env)
+            p_intri_expr(node, &c.keyword, &c.explicit_type, &c.members, env)
         }
-        KeysetIntrinsicExpression(c) => p_intri_expr(&c.keyword, &c.explicit_type, &c.members, env),
-        VectorIntrinsicExpression(c) => p_intri_expr(&c.keyword, &c.explicit_type, &c.members, env),
+        KeysetIntrinsicExpression(c) => {
+            p_intri_expr(node, &c.keyword, &c.explicit_type, &c.members, env)
+        }
+        VectorIntrinsicExpression(c) => {
+            p_intri_expr(node, &c.keyword, &c.explicit_type, &c.members, env)
+        }
         CollectionLiteralExpression(c) => {
             let (collection_name, hints) = match &c.name.children {
                 SimpleTypeSpecifier(c) => (pos_name(&c.specifier, env)?, None),
@@ -1750,9 +1711,13 @@ fn p_expr_impl<'a>(
             p_import_flavor(&c.require, env)?,
             p_expr(&c.filename, env)?,
         )),
-        MemberSelectionExpression(c) => p_obj_get(&c.object, &c.operator, &c.name, env),
-        SafeMemberSelectionExpression(c) => p_obj_get(&c.object, &c.operator, &c.name, env),
-        EmbeddedMemberSelectionExpression(c) => p_obj_get(&c.object, &c.operator, &c.name, env),
+        MemberSelectionExpression(c) => p_obj_get(location, &c.object, &c.operator, &c.name, env),
+        SafeMemberSelectionExpression(c) => {
+            p_obj_get(location, &c.object, &c.operator, &c.name, env)
+        }
+        EmbeddedMemberSelectionExpression(c) => {
+            p_obj_get(location, &c.object, &c.operator, &c.name, env)
+        }
         PrefixUnaryExpression(_) | PostfixUnaryExpression(_) | DecoratedExpression(_) => {
             let (operand, op, postfix) = match &node.children {
                 PrefixUnaryExpression(c) => (&c.operand, &c.operator, false),
@@ -2181,6 +2146,65 @@ fn p_expr_impl<'a>(
         }
         _ => missing_syntax_(Some(Expr_::Null), "expression", node, env),
     }
+}
+
+fn mk_lid(p: Pos, s: String) -> ast::Lid {
+    ast::Lid(p, (0, s))
+}
+
+fn mk_name_lid<'a>(name: S<'a>, env: &mut Env<'a>) -> Result<ast::Lid> {
+    let name = pos_name(name, env)?;
+    Ok(mk_lid(name.0, name.1))
+}
+
+fn mk_lvar<'a>(name: S<'a>, env: &mut Env<'a>) -> Result<Expr_> {
+    Ok(Expr_::mk_lvar(mk_name_lid(name, env)?))
+}
+
+fn mk_id_expr(name: ast::Sid) -> ast::Expr {
+    ast::Expr::new((), name.0.clone(), Expr_::mk_id(name))
+}
+
+fn p_intri_expr<'a>(node: S<'a>, kw: S<'a>, ty: S<'a>, v: S<'a>, e: &mut Env<'a>) -> Result<Expr_> {
+    let hints = expand_type_args(ty, e)?;
+    let hints = check_intrinsic_type_arg_varity(node, e, hints);
+    Ok(Expr_::mk_collection(
+        pos_name(kw, e)?,
+        hints,
+        could_map(v, e, p_afield)?,
+    ))
+}
+
+fn p_special_call<'a>(recv: S<'a>, args: S<'a>, e: &mut Env<'a>) -> Result<Expr_> {
+    // Mark expression as CallReceiver so that we can correctly set
+    // PropOrMethod field in ObjGet and ClassGet
+    let recv = p_expr_with_loc(ExprLocation::CallReceiver, recv, e, None)?;
+    let (args, varargs) = split_args_vararg(args, e)?;
+    Ok(Expr_::mk_call(recv, vec![], args, varargs))
+}
+
+fn p_obj_get<'a>(
+    location: ExprLocation,
+    recv: S<'a>,
+    op: S<'a>,
+    name: S<'a>,
+    e: &mut Env<'a>,
+) -> Result<Expr_> {
+    if recv.is_object_creation_expression() && !e.codegen() {
+        raise_parsing_error(recv, e, &syntax_error::invalid_constructor_method_call);
+    }
+    let recv = p_expr(recv, e)?;
+    let name = p_expr_with_loc(ExprLocation::MemberSelect, name, e, None)?;
+    let op = p_null_flavor(op, e)?;
+    Ok(Expr_::mk_obj_get(
+        recv,
+        name,
+        op,
+        match location {
+            ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
+            _ => ast::PropOrMethod::IsProp,
+        },
+    ))
 }
 
 fn check_lvalue<'a>(ast::Expr(_, p, expr_): &ast::Expr, env: &mut Env<'a>) {

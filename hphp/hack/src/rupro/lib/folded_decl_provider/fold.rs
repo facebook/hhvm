@@ -5,10 +5,10 @@
 
 use super::{inherit::Inherited, subst::Subst, subst::Substitution};
 use crate::decl_defs::{
-    AbstractTypeconst, CeVisibility, ClassConst, ClassConstKind, ClassEltFlags, ClassEltFlagsArgs,
-    ClassishKind, ConsistentKind, DeclTy, FoldedClass, FoldedElement, Requirement, ShallowClass,
-    ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst, TaccessType, TypeConst,
-    Typeconst, UserAttribute, Visibility,
+    folded::Constructor, AbstractTypeconst, CeVisibility, ClassConst, ClassConstKind,
+    ClassEltFlags, ClassEltFlagsArgs, ClassishKind, ConsistentKind, DeclTy, FoldedClass,
+    FoldedElement, Requirement, ShallowClass, ShallowClassConst, ShallowMethod, ShallowProp,
+    ShallowTypeconst, TaccessType, TypeConst, Typeconst, Visibility,
 };
 use crate::reason::Reason;
 use crate::special_names::SpecialNames;
@@ -294,24 +294,19 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         methods.insert(meth, elt);
     }
 
-    fn decl_constructor(&self, constructor: &mut Option<FoldedElement>) {
+    fn decl_constructor(&self, constructor: &mut Constructor) {
         // Constructors in children of `self.child` must be consistent?
-        let _consistent_kind = if self.child.is_final {
+        let consistency = if self.child.is_final {
             ConsistentKind::FinalClass
-        } else if self
-            .child
-            .user_attributes
-            .iter()
-            .any(|UserAttribute { name, .. }| {
-                name.id() == self.special_names.user_attributes.uaConsistentConstruct
-            })
+        } else if (self.child.user_attributes.iter())
+            .any(|ua| ua.name.id() == self.special_names.user_attributes.uaConsistentConstruct)
         {
             ConsistentKind::ConsistentConstruct
         } else {
             ConsistentKind::Inconsistent
         };
 
-        if let Some(sm) = &self.child.constructor {
+        let elt = self.child.constructor.as_ref().map(|sm| {
             let cls = self.child.name.id();
             let vis = self.visibility(
                 cls,
@@ -333,14 +328,17 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 supports_dynamic_type: false,
                 needs_init: false,
             };
-            let elt = FoldedElement {
+            FoldedElement {
                 origin: self.child.name.id(),
                 visibility: vis,
                 deprecated: sm.deprecated,
                 flags: ClassEltFlags::new(flag_args),
-            };
-            *constructor = Some(elt)
-        }
+            }
+        });
+        *constructor = Constructor::new(
+            elt,
+            ConsistentKind::coalesce(constructor.consistency, consistency),
+        )
     }
 
     fn get_implements(&self, ty: &DeclTy<R>, ancestors: &mut TypeNameIndexMap<DeclTy<R>>) {
@@ -716,7 +714,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
 
         let sealed_whitelist = self.get_sealed_whitelist();
 
-        let deferred_init_members = self.get_deferred_init_members(&constructor);
+        let deferred_init_members = self.get_deferred_init_members(&constructor.elt);
 
         Arc::new(FoldedClass {
             name: self.child.name.id(),

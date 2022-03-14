@@ -33,12 +33,15 @@ FoldedClass {
     ancestors: {
         "\\C1": C1,
     },
-    constructor: FoldedElement {
-        flags: (empty),
-        origin: "\\C2",
-        visibility: Public,
-        deprecated: None,
-    },
+    constructor: (
+        FoldedElement {
+            flags: (empty),
+            origin: "\\C2",
+            visibility: Public,
+            deprecated: None,
+        },
+        ConsistentConstruct,
+    ),
     consts: {
         "class": ClassConst {
             is_synthesized: true,

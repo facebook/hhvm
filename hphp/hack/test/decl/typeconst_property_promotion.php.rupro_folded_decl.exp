@@ -14,12 +14,15 @@ FoldedClass {
             deprecated: None,
         },
     },
-    constructor: FoldedElement {
-        flags: (empty),
-        origin: "\\C",
-        visibility: Public,
-        deprecated: None,
-    },
+    constructor: (
+        FoldedElement {
+            flags: (empty),
+            origin: "\\C",
+            visibility: Public,
+            deprecated: None,
+        },
+        Inconsistent,
+    ),
     consts: {
         "T": ClassConst {
             is_synthesized: true,

@@ -4,8 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::decl_defs::{
-    ty::XhpEnumValue, CeVisibility, ClassConstKind, ClassConstRef, ClassEltFlags, DeclTy, EnumType,
-    Tparam, Typeconst, WhereConstraint, XhpAttribute,
+    ty::ConsistentKind, ty::XhpEnumValue, CeVisibility, ClassConstKind, ClassConstRef,
+    ClassEltFlags, DeclTy, EnumType, Tparam, Typeconst, WhereConstraint, XhpAttribute,
 };
 use crate::reason::Reason;
 use crate::typing_error::TypingError;
@@ -127,6 +127,12 @@ impl<R: Reason> ClassConst<R> {
 #[serde(bound = "R: Reason")]
 pub struct Requirement<R: Reason>(pub R::Pos, pub DeclTy<R>);
 
+#[derive(Clone, Debug, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
+pub struct Constructor {
+    pub elt: Option<FoldedElement>,
+    pub consistency: ConsistentKind,
+}
+
 #[derive(Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
 pub struct FoldedClass<R: Reason> {
@@ -150,7 +156,7 @@ pub struct FoldedClass<R: Reason> {
     pub static_props: PropNameIndexMap<FoldedElement>,
     pub methods: MethodNameIndexMap<FoldedElement>,
     pub static_methods: MethodNameIndexMap<FoldedElement>,
-    pub constructor: Option<FoldedElement>,
+    pub constructor: Constructor,
     pub consts: ClassConstNameIndexMap<ClassConst<R>>,
     pub type_consts: TypeConstNameIndexMap<TypeConst<R>>,
     pub xhp_enum_values: BTreeMap<Symbol, Box<[XhpEnumValue]>>,
@@ -176,7 +182,7 @@ impl<R: Reason> FoldedClass<R> {
 
     // c.f. `Decl_defs.dc_need_init`, via `has_concrete_cstr` in `Decl_folded_class.class_decl`
     pub fn has_concrete_constructor(&self) -> bool {
-        match &self.constructor {
+        match &self.constructor.elt {
             Some(elt) => elt.is_concrete(),
             None => false,
         }
@@ -278,5 +284,11 @@ impl FoldedElement {
 
     pub fn get_xhp_attr(&self) -> Option<XhpAttribute> {
         self.flags.get_xhp_attr()
+    }
+}
+
+impl Constructor {
+    pub fn new(elt: Option<FoldedElement>, consistency: ConsistentKind) -> Self {
+        Self { elt, consistency }
     }
 }

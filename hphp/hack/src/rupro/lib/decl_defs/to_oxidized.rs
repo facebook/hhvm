@@ -364,6 +364,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::ClassConst<R> {
         })
     }
 }
+
 impl<'a, R: Reason> ToOxidized<'a> for folded::Requirement<R> {
     type Output = &'a obr::decl_defs::Requirement<'a>;
 
@@ -372,6 +373,14 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::Requirement<R> {
             self.0.to_oxidized(arena),
             self.1.to_oxidized(arena),
         ))
+    }
+}
+
+impl<'a> ToOxidized<'a> for folded::Constructor {
+    type Output = (Option<&'a obr::decl_defs::Element<'a>>, ConsistentKind);
+
+    fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
+        (self.elt.to_oxidized(arena), self.consistency)
     }
 }
 
@@ -405,10 +414,7 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::FoldedClass<R> {
             consts: self.consts.to_oxidized(arena),
             typeconsts: self.type_consts.to_oxidized(arena),
             xhp_enum_values: self.xhp_enum_values.to_oxidized(arena),
-            construct: (
-                self.constructor.to_oxidized(arena),
-                obr::typing_defs::ConsistentKind::Inconsistent, // TODO
-            ),
+            construct: self.constructor.to_oxidized(arena),
             need_init: self.has_concrete_constructor(),
             deferred_init_members: self.deferred_init_members.to_oxidized(arena),
             req_ancestors: self.req_ancestors.to_oxidized(arena),

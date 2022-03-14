@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::decl_defs::{ConstDecl, FunDecl, TypedefDecl};
+use crate::decl_defs::{ty::ConsistentKind, ConstDecl, FunDecl, TypedefDecl};
 use crate::folded_decl_provider::DeclName;
 use crate::reason::Reason;
 use defs::ClassType;
@@ -74,16 +74,23 @@ pub trait TypingDeclProvider<R: Reason>: Debug {
 /// Represents the complete folded declaration of a class.
 pub trait Class<R: Reason>: Debug {
     fn get_prop(&self, dependent: DeclName, name: PropName) -> Result<Option<Rc<ClassElt<R>>>>;
+
     fn get_static_prop(
         &self,
         dependent: DeclName,
         name: PropName,
     ) -> Result<Option<Rc<ClassElt<R>>>>;
+
     fn get_method(&self, dependent: DeclName, name: MethodName) -> Result<Option<Rc<ClassElt<R>>>>;
+
     fn get_static_method(
         &self,
         dependent: DeclName,
         name: MethodName,
     ) -> Result<Option<Rc<ClassElt<R>>>>;
-    fn get_constructor(&self, dependent: DeclName) -> Result<Option<Rc<ClassElt<R>>>>;
+
+    fn get_constructor(
+        &self,
+        dependent: DeclName,
+    ) -> Result<(Option<Rc<ClassElt<R>>>, ConsistentKind)>;
 }

@@ -43,12 +43,15 @@ FoldedClass {
             deprecated: None,
         },
     },
-    constructor: FoldedElement {
-        flags: (empty),
-        origin: "\\Bar",
-        visibility: Public,
-        deprecated: None,
-    },
+    constructor: (
+        FoldedElement {
+            flags: (empty),
+            origin: "\\Bar",
+            visibility: Public,
+            deprecated: None,
+        },
+        Inconsistent,
+    ),
     consts: {
         "class": ClassConst {
             is_synthesized: true,

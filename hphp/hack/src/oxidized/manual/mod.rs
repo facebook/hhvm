@@ -34,6 +34,7 @@ pub mod shape_map;
 pub mod symbol_name;
 pub mod t_shape_map;
 pub mod tany_sentinel;
+pub mod typing_defs_core_impl;
 pub mod typing_defs_flags;
 pub mod typing_logic;
 pub mod typing_set;

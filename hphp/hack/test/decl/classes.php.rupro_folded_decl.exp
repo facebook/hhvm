@@ -1,6 +1,6 @@
 --- ocaml
 +++ rupro
-@@ -1,191 +1,191 @@
+@@ -1,197 +1,197 @@
  FoldedClass {
      name: "\\MyClass",
      pos: Pos(root|classes.php, 3:7-14),
@@ -70,12 +70,15 @@
              deprecated: None,
          },
      },
-     constructor: FoldedElement {
-         flags: (empty),
-         origin: "\\MyClass",
-         visibility: Public,
-         deprecated: None,
-     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\MyClass",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
      consts: {
          "class": ClassConst {
              is_synthesized: true,
@@ -176,12 +179,15 @@
              deprecated: None,
          },
      },
-     constructor: FoldedElement {
-         flags: (empty),
-         origin: "\\MyConstructorPropertiesClass",
-         visibility: Public,
-         deprecated: None,
-     },
+     constructor: (
+         FoldedElement {
+             flags: (empty),
+             origin: "\\MyConstructorPropertiesClass",
+             visibility: Public,
+             deprecated: None,
+         },
+         Inconsistent,
+     ),
      consts: {
          "class": ClassConst {
              is_synthesized: true,

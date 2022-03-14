@@ -484,6 +484,12 @@ impl<R: Reason> From<&obr::decl_defs::Requirement<'_>> for folded::Requirement<R
     }
 }
 
+impl From<(Option<&obr::decl_defs::Element<'_>>, ty::ConsistentKind)> for folded::Constructor {
+    fn from(construct: (Option<&obr::decl_defs::Element<'_>>, ty::ConsistentKind)) -> Self {
+        Self::new(construct.0.map(Into::into), construct.1)
+    }
+}
+
 impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass<R> {
     fn from(cls: &obr::decl_defs::DeclClassType<'_>) -> Self {
         Self {
@@ -506,7 +512,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
             static_props: map(cls.sprops.iter()),
             methods: map(cls.methods.iter()),
             static_methods: map(cls.smethods.iter()),
-            constructor: cls.construct.0.map(Into::into), // TODO: ConsistentKind
+            constructor: cls.construct.into(),
             consts: map(cls.consts.iter()),
             type_consts: map(cls.typeconsts.iter()),
             xhp_enum_values: (cls.xhp_enum_values.iter())

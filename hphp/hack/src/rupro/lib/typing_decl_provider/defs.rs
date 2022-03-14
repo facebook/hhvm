@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use super::{Class, Error, Result};
-use crate::decl_defs::{DeclTy, FoldedClass};
+use crate::decl_defs::{ty::ConsistentKind, DeclTy, FoldedClass};
 use crate::folded_decl_provider::{DeclName, FoldedDeclProvider, Substitution};
 use crate::reason::Reason;
 use crate::typing_defs::ClassElt;
@@ -210,13 +210,16 @@ impl<R: Reason> Class<R> for ClassType<R> {
         Ok(Some(class_elt))
     }
 
-    fn get_constructor(&self, dependent: DeclName) -> Result<Option<Rc<ClassElt<R>>>> {
-        Ok(self
+    fn get_constructor(
+        &self,
+        dependent: DeclName,
+    ) -> Result<(Option<Rc<ClassElt<R>>>, ConsistentKind)> {
+        let elt = self
             .members
             .borrow_mut()
             .constructor
             .get_or_try_init::<_, Error>(|| {
-                let folded_elt = match &self.class.constructor {
+                let folded_elt = match &self.class.constructor.elt {
                     Some(fe) => fe,
                     None => return Ok(None),
                 };
@@ -232,6 +235,7 @@ impl<R: Reason> Class<R> for ClassType<R> {
                 Ok(Some(Rc::new(ClassElt::new(folded_elt, ty))))
             })?
             .as_ref()
-            .map(Rc::clone))
+            .map(Rc::clone);
+        Ok((elt, self.class.constructor.consistency))
     }
 }

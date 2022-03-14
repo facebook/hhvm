@@ -32,6 +32,8 @@ pub trait Pos:
     /// it will call cons() to obtain interned values to construct the instance.
     fn mk(cons: impl FnOnce() -> (RelativePath, FilePosLarge, FilePosLarge)) -> Self;
 
+    fn none() -> Self;
+
     fn from_ast(pos: &oxidized::pos::Pos) -> Self {
         Self::mk(|| {
             let PosSpanRaw { start, end } = pos.to_raw_span();
@@ -77,6 +79,10 @@ impl Pos for BPos {
         let (file, start, end) = cons();
         Self::new(file, start, end)
     }
+
+    fn none() -> Self {
+        BPos::none()
+    }
 }
 
 impl BPos {
@@ -110,7 +116,23 @@ impl BPos {
         })
     }
 
-    pub fn file(&self) -> RelativePath {
+    pub const fn none() -> Self {
+        let file = RelativePath::empty();
+        Self(PosImpl::Tiny {
+            prefix: file.prefix(),
+            suffix: file.suffix(),
+            span: PosSpanTiny::make_dummy(),
+        })
+    }
+
+    pub fn is_none(&self) -> bool {
+        match self {
+            BPos(PosImpl::Tiny { span, .. }) => span.is_dummy() && self.file().is_empty(),
+            _ => false,
+        }
+    }
+
+    pub const fn file(&self) -> RelativePath {
         match self.0 {
             PosImpl::Small { prefix, suffix, .. }
             | PosImpl::Large { prefix, suffix, .. }
@@ -143,6 +165,9 @@ impl fmt::Debug for BPos {
                 )
             }
         };
+        if self.is_none() {
+            return write!(f, "Pos(None)");
+        }
         match &self.0 {
             PosImpl::Small { span, .. } => {
                 let (start, end) = &**span;
@@ -218,6 +243,10 @@ pub struct NPos;
 
 impl Pos for NPos {
     fn mk(_cons: impl FnOnce() -> (RelativePath, FilePosLarge, FilePosLarge)) -> Self {
+        NPos
+    }
+
+    fn none() -> Self {
         NPos
     }
 }

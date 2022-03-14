@@ -25,17 +25,28 @@ impl RelativePath {
         Self::from_bytes_id(prefix, suffix)
     }
 
-    pub fn from_bytes_id(prefix: Prefix, suffix: BytesId) -> Self {
+    pub const fn empty() -> Self {
+        Self {
+            prefix: Prefix::Dummy,
+            suffix: BytesId::EMPTY,
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.prefix == Prefix::Dummy && self.suffix == BytesId::EMPTY
+    }
+
+    pub const fn from_bytes_id(prefix: Prefix, suffix: BytesId) -> Self {
         Self { prefix, suffix }
     }
 
     #[inline]
-    pub fn prefix(&self) -> Prefix {
+    pub const fn prefix(&self) -> Prefix {
         self.prefix
     }
 
     #[inline]
-    pub fn suffix(&self) -> BytesId {
+    pub const fn suffix(&self) -> BytesId {
         self.suffix
     }
 

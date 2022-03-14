@@ -89,7 +89,7 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let pos = &stmt.0;
     match &stmt.1 {
-        a::Stmt_::YieldBreak => Ok(InstrSeq::gather(vec![instr::null(), emit_return(e, env)?])),
+        a::Stmt_::YieldBreak => emit_yieldbreak(e, env, pos),
         a::Stmt_::Expr(e_) => match &e_.2 {
             a::Expr_::Await(a) => emit_await_(e, env, e_, pos, a),
             a::Expr_::Call(c) => emit_call(e, env, e_, pos, c),
@@ -105,21 +105,8 @@ pub fn emit_stmt<'a, 'arena, 'decl>(
         a::Stmt_::Continue => Ok(emit_continue(e, env, pos)),
         a::Stmt_::Do(x) => emit_do(e, env, &x.0, &x.1),
         a::Stmt_::For(x) => emit_for(e, env, &x.0, x.1.as_ref(), &x.2, &x.3),
-        a::Stmt_::Throw(x) => Ok(InstrSeq::gather(vec![
-            emit_expr::emit_expr(e, env, x)?,
-            emit_pos(pos),
-            instr::throw(),
-        ])),
-        a::Stmt_::Try(x) => {
-            let (try_block, catch_list, finally_block) = &**x;
-            if catch_list.is_empty() {
-                emit_try_finally(e, env, pos, try_block, finally_block)
-            } else if finally_block.is_empty() {
-                emit_try_catch(e, env, pos, try_block, &catch_list[..])
-            } else {
-                emit_try_catch_finally(e, env, pos, try_block, &catch_list[..], finally_block)
-            }
-        }
+        a::Stmt_::Throw(x) => emit_throw(e, env, x, pos),
+        a::Stmt_::Try(x) => emit_try(e, env, x, pos),
         a::Stmt_::Switch(x) => emit_switch(e, env, pos, &x.0, &x.1, &x.2),
         a::Stmt_::Foreach(x) => emit_foreach(e, env, pos, &x.0, &x.1, &x.2),
         a::Stmt_::Awaitall(x) => emit_awaitall(e, env, pos, &x.0, &x.1),
@@ -185,6 +172,43 @@ fn emit_binop<'a, 'arena, 'decl>(
     } else {
         emit_expr::emit_ignored_expr(e, env, pos, e_)
     }
+}
+
+fn emit_yieldbreak<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    _pos: &Pos,
+) -> Result<InstrSeq<'arena>> {
+    Ok(InstrSeq::gather(vec![instr::null(), emit_return(e, env)?]))
+}
+
+fn emit_try<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    x: &(ast::Block, Vec<ast::Catch>, ast::Block),
+    pos: &Pos,
+) -> Result<InstrSeq<'arena>> {
+    let (try_block, catch_list, finally_block) = x;
+    if catch_list.is_empty() {
+        emit_try_finally(e, env, pos, try_block, finally_block)
+    } else if finally_block.is_empty() {
+        emit_try_catch(e, env, pos, try_block, &catch_list[..])
+    } else {
+        emit_try_catch_finally(e, env, pos, try_block, &catch_list[..], finally_block)
+    }
+}
+
+fn emit_throw<'a, 'arena, 'decl>(
+    e: &mut Emitter<'arena, 'decl>,
+    env: &mut Env<'a, 'arena>,
+    x: &ast::Expr,
+    pos: &Pos,
+) -> Result<InstrSeq<'arena>> {
+    Ok(InstrSeq::gather(vec![
+        emit_expr::emit_expr(e, env, x)?,
+        emit_pos(pos),
+        instr::throw(),
+    ]))
 }
 
 fn emit_return_<'a, 'arena, 'decl>(

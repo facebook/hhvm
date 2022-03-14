@@ -277,7 +277,7 @@ impl<'a> ToOxidized<'a> for NPos {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
 pub struct Positioned<S, P> {
     // Caution: field order will matter if we ever derive
     // `ToOcamlRep`/`FromOcamlRep` for this type.

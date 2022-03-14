@@ -9,7 +9,14 @@ use synstructure::{decl_derive, Structure};
 
 decl_derive!([EqModuloPos] => derive_eq_modulo_pos);
 
-fn derive_eq_modulo_pos(s: Structure<'_>) -> TokenStream {
+fn derive_eq_modulo_pos(mut s: Structure<'_>) -> TokenStream {
+    // By default, if you are deriving an impl of trait Foo for generic type
+    // X<T>, synstructure will add Foo as a bound not only for the type
+    // parameter T, but also for every type which appears as a field in X. This
+    // is not necessary for our use case--we can just require that the type
+    // parameters implement our trait.
+    s.add_bounds(synstructure::AddBounds::Generics);
+
     let body = derive_body(&s);
     s.gen_impl(quote! {
         gen impl EqModuloPos for @Self {

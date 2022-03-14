@@ -756,6 +756,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "dashmap"
+version = "4.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e77a43b28d0668df09411cb0bc9a8c2adc40f9a048afe863e05fd43251e8e39c"
+dependencies = [
+ "cfg-if",
+ "num_cpus",
+ "rayon",
+ "serde",
+]
+
+[[package]]
 name = "decl_mode_parser"
 version = "0.0.0"
 dependencies = [
@@ -1486,6 +1498,7 @@ dependencies = [
  "arena_collections",
  "bstr",
  "eq_modulo_pos_derive",
+ "hcons",
  "indexmap",
 ]
 
@@ -1718,6 +1731,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7249a3129cbc1ffccd74857f81464a323a152173cdb134e0fd81bc803b29facf"
 dependencies = [
  "hashbrown",
+]
+
+[[package]]
+name = "hcons"
+version = "0.0.0"
+dependencies = [
+ "dashmap",
+ "fnv",
+ "once_cell",
+ "serde",
 ]
 
 [[package]]

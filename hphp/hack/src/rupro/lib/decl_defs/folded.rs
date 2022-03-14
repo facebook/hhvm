@@ -123,7 +123,7 @@ impl<R: Reason> ClassConst<R> {
 /// class Baz extends Foo implements Bar { <- position of the `implements`
 /// }
 /// ```
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
 pub struct Requirement<R: Reason>(pub R::Pos, pub DeclTy<R>);
 

@@ -1,26 +1,26 @@
 File "supportdyn.bad.php", line 7, characters 3-8:
 This is not an object of type `KeyedContainer`, this is a nonnull value (Typing[4005])
-  File "supportdynamic.hhi", line 6, characters 29-29:
+  File "supportdyn.bad.php", line 6, characters 26-32:
   Definition is here
 File "supportdyn.bad.php", line 8, characters 3-11:
 a nonnull value does not allow array append (Typing[4006])
-  File "supportdynamic.hhi", line 6, characters 29-29:
+  File "supportdyn.bad.php", line 6, characters 26-32:
   Definition is here
 File "supportdyn.bad.php", line 9, characters 3-5:
 Was expecting a class, but got a nonnull value (Typing[4026])
 File "supportdyn.bad.php", line 10, characters 8-8:
 You are trying to access the method `m` but this is a nonnull value. Use a **specific** class or interface name. (Typing[4062])
-  File "supportdynamic.hhi", line 6, characters 29-29:
+  File "supportdyn.bad.php", line 6, characters 26-32:
   Definition is here
 File "supportdyn.bad.php", line 11, characters 9-9:
 You are trying to access the method `m` but this is a nonnull value. Use a **specific** class or interface name. (Typing[4062])
-  File "supportdynamic.hhi", line 6, characters 29-29:
+  File "supportdyn.bad.php", line 6, characters 26-32:
   Definition is here
 File "supportdyn.bad.php", line 12, characters 3-5:
 Typing error (Typing[4062])
   File "supportdyn.bad.php", line 12, characters 8-8:
   You are trying to access the property `p` but this is a nonnull value. Use a **specific** class or interface name.
-  File "supportdynamic.hhi", line 6, characters 29-29:
+  File "supportdyn.bad.php", line 6, characters 26-32:
   Definition is here
 File "supportdyn.bad.php", line 13, characters 3-5:
 Typing error (Typing[4110])

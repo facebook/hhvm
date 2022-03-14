@@ -684,6 +684,10 @@ let normalize_union env ?on_tyvar tyl :
           normalize_union env tyl' r_null (orr r_union r) r_dyn
         | ((r, Tdynamic), _) ->
           normalize_union env [] r_null r_union (orr r_dyn r)
+        | ((r, Tnewtype (n, [ty], _)), _)
+          when String.equal n Naming_special_names.Classes.cSupportDyn ->
+          let (env, ty) = Utils.simplify_intersections env ty ?on_tyvar in
+          proceed env (mk (r, Tnewtype (n, [ty], ty)))
         | ((_, Tintersection _), _) ->
           let (env, ty) = Utils.simplify_intersections env ty ?on_tyvar in
           let (env, ety) = Env.expand_type env ty in

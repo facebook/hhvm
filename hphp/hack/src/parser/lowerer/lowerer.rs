@@ -1504,64 +1504,7 @@ fn p_expr_impl<'a>(
         BinaryExpression(c) => p_binary_expr(c, env, pos, location),
         Token(t) => p_token(node, t, env, location),
         YieldExpression(c) => p_yield_expr(node, c, env, pos, location),
-        ScopeResolutionExpression(c) => {
-            let qual = p_expr(&c.qualifier, env)?;
-            if let Expr_::Id(id) = &qual.2 {
-                fail_if_invalid_reified_generic(node, env, &id.1);
-            }
-            match &c.name.children {
-                Token(token) if token.kind() == TK::Variable => {
-                    let ast::Id(p, name) = pos_name(&c.name, env)?;
-                    Ok(Expr_::mk_class_get(
-                        ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
-                        ast::ClassGetExpr::CGstring((p, name)),
-                        match location {
-                            ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
-                            _ => ast::PropOrMethod::IsProp,
-                        },
-                    ))
-                }
-                _ => {
-                    let Expr(_, p, expr_) = p_expr(&c.name, env)?;
-                    match expr_ {
-                        Expr_::String(id) => Ok(Expr_::mk_class_const(
-                            ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
-                            (
-                                p,
-                                String::from_utf8(id.into())
-                                    .map_err(|e| Error::Failwith(e.to_string()))?,
-                            ),
-                        )),
-                        Expr_::Id(id) => {
-                            let ast::Id(p, n) = *id;
-                            Ok(Expr_::mk_class_const(
-                                ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
-                                (p, n),
-                            ))
-                        }
-                        Expr_::Lvar(id) => {
-                            let ast::Lid(p, (_, n)) = *id;
-                            Ok(Expr_::mk_class_get(
-                                ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
-                                ast::ClassGetExpr::CGstring((p, n)),
-                                match location {
-                                    ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
-                                    _ => ast::PropOrMethod::IsProp,
-                                },
-                            ))
-                        }
-                        _ => Ok(Expr_::mk_class_get(
-                            ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
-                            ast::ClassGetExpr::CGexpr(Expr((), p, expr_)),
-                            match location {
-                                ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
-                                _ => ast::PropOrMethod::IsProp,
-                            },
-                        )),
-                    }
-                }
-            }
-        }
+        ScopeResolutionExpression(c) => p_scope_resolution_expr(node, c, env, pos, location),
         CastExpression(c) => Ok(Expr_::mk_cast(
             p_hint(&c.type_, env)?,
             p_expr(&c.operand, env)?,
@@ -2242,6 +2185,70 @@ fn p_yield_expr<'a>(
         ))))
     } else {
         Ok(Expr_::mk_yield(p_afield(&c.operand, env)?))
+    }
+}
+
+fn p_scope_resolution_expr<'a>(
+    node: S<'a>,
+    c: &'a ScopeResolutionExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+    pos: Pos,
+    location: ExprLocation,
+) -> Result<Expr_> {
+    let qual = p_expr(&c.qualifier, env)?;
+    if let Expr_::Id(id) = &qual.2 {
+        fail_if_invalid_reified_generic(node, env, &id.1);
+    }
+    match &c.name.children {
+        Token(token) if token.kind() == TK::Variable => {
+            let ast::Id(p, name) = pos_name(&c.name, env)?;
+            Ok(Expr_::mk_class_get(
+                ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
+                ast::ClassGetExpr::CGstring((p, name)),
+                match location {
+                    ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
+                    _ => ast::PropOrMethod::IsProp,
+                },
+            ))
+        }
+        _ => {
+            let Expr(_, p, expr_) = p_expr(&c.name, env)?;
+            match expr_ {
+                Expr_::String(id) => Ok(Expr_::mk_class_const(
+                    ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
+                    (
+                        p,
+                        String::from_utf8(id.into()).map_err(|e| Error::Failwith(e.to_string()))?,
+                    ),
+                )),
+                Expr_::Id(id) => {
+                    let ast::Id(p, n) = *id;
+                    Ok(Expr_::mk_class_const(
+                        ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
+                        (p, n),
+                    ))
+                }
+                Expr_::Lvar(id) => {
+                    let ast::Lid(p, (_, n)) = *id;
+                    Ok(Expr_::mk_class_get(
+                        ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
+                        ast::ClassGetExpr::CGstring((p, n)),
+                        match location {
+                            ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
+                            _ => ast::PropOrMethod::IsProp,
+                        },
+                    ))
+                }
+                _ => Ok(Expr_::mk_class_get(
+                    ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
+                    ast::ClassGetExpr::CGexpr(Expr((), p, expr_)),
+                    match location {
+                        ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
+                        _ => ast::PropOrMethod::IsProp,
+                    },
+                )),
+            }
+        }
     }
 }
 

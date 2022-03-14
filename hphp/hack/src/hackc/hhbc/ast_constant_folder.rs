@@ -317,6 +317,9 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
     allow_maps: bool,
     force_class_const: bool,
 ) -> Result<TypedValue<'arena>, Error> {
+    if let Some(sl) = emitter.stack_limit.as_ref() {
+        sl.panic_if_exceeded();
+    }
     // TODO: ML equivalent has this as an implicit parameter that defaults to false.
     use ast::Expr_;
     match &expr.2 {

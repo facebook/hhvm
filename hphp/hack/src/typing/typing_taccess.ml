@@ -498,7 +498,7 @@ let rec expand ctx env root =
     ((env, ty_err_opt), result)
   | Tvar n ->
     let (env, ty) =
-      Typing_subtype_tconst.get_tyvar_type_const_with_ty_err
+      Typing_subtype_tconst.get_tyvar_type_const
         env
         n
         ctx.id

@@ -3228,7 +3228,7 @@ and add_tyvar_upper_bound_and_close
     ITySet.fold
       (fun upper_bound (env, prop) ->
         let (env, ty_err_opt) =
-          Typing_subtype_tconst.make_all_type_consts_equal_with_ty_err
+          Typing_subtype_tconst.make_all_type_consts_equal
             env
             var
             upper_bound
@@ -3283,7 +3283,7 @@ and add_tyvar_lower_bound_and_close
     ITySet.fold
       (fun lower_bound (env, prop) ->
         let (env, ty_err_opt) =
-          Typing_subtype_tconst.make_all_type_consts_equal_with_ty_err
+          Typing_subtype_tconst.make_all_type_consts_equal
             env
             var
             lower_bound

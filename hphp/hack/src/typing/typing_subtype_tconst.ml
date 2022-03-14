@@ -7,7 +7,7 @@ module Utils = Typing_utils
 (** Make tconstty (usually a type variable representing the type constant of
 another type variable v) equal to ty::tconstid (where ty is usually a bound
 of v) *)
-let make_type_const_equal_with_ty_err
+let make_type_const_equal
     env
     tconstty
     (ty : internal_type)
@@ -69,7 +69,7 @@ let add_tyvar_type_const env var tconstid ty ~on_error =
     ITySet.fold
       (fun bound (env, ty_errs) ->
         match
-          make_type_const_equal_with_ty_err
+          make_type_const_equal
             env
             ty
             bound
@@ -87,7 +87,7 @@ let add_tyvar_type_const env var tconstid ty ~on_error =
     ITySet.fold
       (fun bound (env, ty_errs) ->
         match
-          make_type_const_equal_with_ty_err
+          make_type_const_equal
             env
             ty
             bound
@@ -103,7 +103,7 @@ let add_tyvar_type_const env var tconstid ty ~on_error =
   (env, Typing_error.multiple_opt ty_errs)
 
 (** For all type constants T of var, make its type equal to ty::T *)
-let make_all_type_consts_equal_with_ty_err
+let make_all_type_consts_equal
     env var (ty : internal_type) ~on_error ~as_tyvar_with_cnstr =
   let var_pos = Env.get_tyvar_pos env var in
   let as_tyvar_with_cnstr =
@@ -116,7 +116,7 @@ let make_all_type_consts_equal_with_ty_err
     SMap.fold
       (fun _ (tconstid, tconstty) (env, ty_errs) ->
         match
-          make_type_const_equal_with_ty_err
+          make_type_const_equal
             env
             tconstty
             ty
@@ -132,7 +132,7 @@ let make_all_type_consts_equal_with_ty_err
   (env, Typing_error.multiple_opt ty_errs)
 
 (** `p` is the position where var::tconstid was encountered. *)
-let get_tyvar_type_const_with_ty_err env var tconstid ~on_error =
+let get_tyvar_type_const env var tconstid ~on_error =
   match Env.get_tyvar_type_const env var tconstid with
   | Some (_pos, ty) -> ((env, None), ty)
   | None ->
@@ -141,22 +141,3 @@ let get_tyvar_type_const_with_ty_err env var tconstid ~on_error =
     Typing_log.log_new_tvar_for_tconst env (var_pos, var) tconstid tvar;
     let env = add_tyvar_type_const env var tconstid tvar ~on_error in
     (env, tvar)
-
-(* == Side effecting variants =============================================== *)
-
-let discharge_ty_err (env, ty_err_opt) =
-  Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  env
-
-let make_all_type_consts_equal env id ity ~on_error ~as_tyvar_with_cnstr =
-  discharge_ty_err
-  @@ make_all_type_consts_equal_with_ty_err
-       env
-       id
-       ity
-       ~on_error
-       ~as_tyvar_with_cnstr
-
-let get_tyvar_type_const env id pos_id ~on_error =
-  Tuple2.map_fst ~f:discharge_ty_err
-  @@ get_tyvar_type_const_with_ty_err env id pos_id ~on_error

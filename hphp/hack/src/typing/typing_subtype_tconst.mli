@@ -9,14 +9,6 @@ val make_all_type_consts_equal :
   internal_type ->
   on_error:Typing_error.Reasons_callback.t option ->
   as_tyvar_with_cnstr:bool ->
-  env
-
-val make_all_type_consts_equal_with_ty_err :
-  env ->
-  Ident.t ->
-  internal_type ->
-  on_error:Typing_error.Reasons_callback.t option ->
-  as_tyvar_with_cnstr:bool ->
   env * Typing_error.t option
 
 (** Get the type of a type constant of a type variable by looking it up in the
@@ -25,15 +17,6 @@ If that type constant is not present, make a fresh invariant
 type variable and add it as the type of the type constant in the environment.
 *)
 val get_tyvar_type_const :
-  env ->
-  Ident.t ->
-  pos_id ->
-  on_error:Typing_error.Reasons_callback.t option ->
-  env * locl_ty
-
-(** Like [get_tyvar_type_const] but returns an optional `Typing_error.t`
-    rather than side effecting  *)
-val get_tyvar_type_const_with_ty_err :
   env ->
   Ident.t ->
   pos_id ->

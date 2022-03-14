@@ -1013,6 +1013,10 @@ class ReflectionMethod extends ReflectionFunctionAbstract {
     return new ReflectionClass($this->getDeclaringClassname());
   }
 
+  public function getOriginalClassname()[]: string {
+    return (string)$this->originalClass;
+  }
+
   <<__Native>>
   private function getDeclaringClassname()[]: string;
 

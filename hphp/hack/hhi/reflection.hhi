@@ -198,6 +198,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract implements Reflector {
   public function invoke($object, ...$args);
   public function invokeArgs($object, varray $args);
   public function getDeclaringClass()[];
+  public function getOriginalClassname()[]: string;
   public function getPrototype()[];
   public function setAccessible(bool $accessible)[write_props]: void;
   final public function getAttributeClass<T as HH\MethodAttribute>(classname<T> $c)[]: ?T;

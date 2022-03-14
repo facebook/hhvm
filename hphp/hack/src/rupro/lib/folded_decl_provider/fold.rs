@@ -590,27 +590,19 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     }
 
     fn get_sealed_whitelist(&self) -> Option<TypeNameIndexSet> {
-        self.child
-            .user_attributes
-            .iter()
+        (self.child.user_attributes.iter())
             .find(|ua| ua.name.id() == self.special_names.user_attributes.uaSealed)
             .map(|ua| ua.classname_params.iter().copied().collect())
     }
 
     fn get_deferred_init_members_helper(&self) -> PropNameIndexSet {
-        let shallow_props = self
-            .child
-            .props
-            .iter()
+        let shallow_props = (self.child.props.iter())
             .filter(|prop| prop.xhp_attr.is_none())
             .filter(|prop| !prop.flags.is_lateinit())
             .filter(|prop| prop.flags.needs_init())
             .map(|prop| prop.name.id());
 
-        let extends_props = self
-            .child
-            .extends
-            .iter()
+        let extends_props = (self.child.extends.iter())
             .filter_map(|extend| extend.unwrap_class_type())
             .filter_map(|(_, pos_id, _)| self.parents.get(&pos_id.id()))
             .flat_map(|ty| ty.deferred_init_members.iter().copied());
@@ -653,34 +645,40 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     }
 
     fn decl_class_impl(mut self) -> Arc<FoldedClass<R>> {
-        let inh = Inherited::make(self.child, self.parents);
+        let Inherited {
+            substs,
+            mut props,
+            mut static_props,
+            mut methods,
+            mut static_methods,
+            mut constructor,
+            mut consts,
+            mut type_consts,
+        } = Inherited::make(self.child, self.parents);
 
-        let mut props = inh.props;
-        self.child
-            .props
-            .iter()
-            .for_each(|sp| self.decl_prop(&mut props, sp));
+        for sp in self.child.props.iter() {
+            self.decl_prop(&mut props, sp);
+        }
+        for sp in self.child.static_props.iter() {
+            self.decl_static_prop(&mut static_props, sp);
+        }
+        for sm in self.child.methods.iter() {
+            self.decl_method(&mut methods, sm);
+        }
+        for sm in self.child.static_methods.iter() {
+            self.decl_method(&mut static_methods, sm);
+        }
 
-        let mut static_props = inh.static_props;
-        self.child
-            .static_props
-            .iter()
-            .for_each(|ssp| self.decl_static_prop(&mut static_props, ssp));
-
-        let mut methods = inh.methods;
-        self.child
-            .methods
-            .iter()
-            .for_each(|sm| self.decl_method(&mut methods, sm));
-
-        let mut static_methods = inh.static_methods;
-        self.child
-            .static_methods
-            .iter()
-            .for_each(|sm| self.decl_method(&mut static_methods, sm));
-
-        let mut constructor = inh.constructor;
         self.decl_constructor(&mut constructor);
+
+        for c in self.child.consts.iter() {
+            self.decl_class_const(&mut consts, c);
+        }
+        self.decl_class_class(&mut consts);
+
+        for tc in self.child.typeconsts.iter() {
+            self.decl_type_const(&mut type_consts, &mut consts, tc);
+        }
 
         let direct_ancestors = (self.child.extends.iter())
             .chain(self.child.implements.iter())
@@ -690,19 +688,6 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         for ty in direct_ancestors.rev() {
             self.get_implements(ty, &mut ancestors);
         }
-
-        let mut consts = inh.consts;
-        self.child
-            .consts
-            .iter()
-            .for_each(|c| self.decl_class_const(&mut consts, c));
-        self.decl_class_class(&mut consts);
-
-        let mut type_consts = inh.type_consts;
-        self.child
-            .typeconsts
-            .iter()
-            .for_each(|tc| self.decl_type_const(&mut type_consts, &mut consts, tc));
 
         let extends = self.get_extends();
         let xhp_attr_deps = self.get_xhp_attr_deps();
@@ -718,15 +703,9 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             pos: self.child.name.pos().clone(),
             kind: self.child.kind,
             is_final: self.child.is_final,
-            is_const: self
-                .child
-                .user_attributes
-                .iter()
+            is_const: (self.child.user_attributes.iter())
                 .any(|ua| ua.name.id() == self.special_names.user_attributes.uaConst),
-            is_internal: self
-                .child
-                .user_attributes
-                .iter()
+            is_internal: (self.child.user_attributes.iter())
                 .any(|ua| ua.name.id() == self.special_names.user_attributes.uaInternal),
             is_xhp: self.child.is_xhp,
             support_dynamic_type: self.child.support_dynamic_type,
@@ -735,7 +714,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             module: self.child.module.clone(),
             tparams: self.child.tparams.clone(),
             where_constraints: self.child.where_constraints.clone(),
-            substs: inh.substs,
+            substs,
             ancestors,
             props,
             static_props,

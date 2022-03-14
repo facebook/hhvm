@@ -101,12 +101,13 @@ let union_errs env errs =
 (*  Here we have a function returns the updated environment, a local type
     and results indicating type errors for both and index expression and
     the rhs expression of an assignment *)
-let apply_rules_with_array_index_value_errs
+let apply_rules_with_array_index_value_ty_mismatches
     ?(ignore_type_structure = false) env ty f =
   let rec iter ~is_nonnull env ty =
     let (env, ety) = Env.expand_type env ty in
     (* This is the base case: not a union or intersection or bounded abstract type *)
     let default () = f env ty in
+
     match deref ety with
     (* For intersections, collect up all successful applications and compute
      * the intersection of the types and intersection of errors
@@ -115,25 +116,23 @@ let apply_rules_with_array_index_value_errs
       let is_nonnull =
         Typing_solver.is_sub_type env ty (Typing_make_type.nonnull Reason.none)
       in
-      let (env, tys, arr_errs, key_errs, val_errs) =
-        Typing_utils.run_on_intersection_array_key_value_res
-          env
-          ~f:(iter ~is_nonnull)
-          tyl
+      let (env, res) =
+        Typing_utils.run_on_intersection env ~f:(iter ~is_nonnull) tyl
       in
-      let (env, arr_err_res) = intersect_errs env arr_errs in
-      let (env, key_err_res) = intersect_errs env key_errs in
-      let (env, val_err_res) = intersect_errs env val_errs in
+      let (tys, arr_errs, key_errs, val_errs) = List.unzip4 res in
+      let (env, arr_ty_mismatch) = intersect_errs env arr_errs in
+      let (env, key_ty_mismatch) = intersect_errs env key_errs in
+      let (env, val_ty_mismatch) = intersect_errs env val_errs in
       let (env, ty) = Typing_intersection.intersect_list env r tys in
-      (env, ty, arr_err_res, key_err_res, val_err_res)
+      (env, (ty, arr_ty_mismatch, key_ty_mismatch, val_ty_mismatch))
     (* Preserve supportdyn<_> across operation *)
     | (r, Tnewtype (cid, _, bound)) when String.equal cid SN.Classes.cSupportDyn
       ->
-      let (env, ty, arr_errs, key_errs, val_errs) =
+      let (env, (ty, arr_errs, key_errs, val_errs)) =
         iter ~is_nonnull env bound
       in
       let (env, ty) = Env.expand_type env ty in
-      (env, Typing_make_type.supportdyn r ty, arr_errs, key_errs, val_errs)
+      (env, (Typing_make_type.supportdyn r ty, arr_errs, key_errs, val_errs))
     (* For unions, just apply rule of components and compute union of result *)
     | (r, Tunion tyl) ->
       let (env, tys, arr_errs, key_errs, val_errs) =
@@ -141,7 +140,7 @@ let apply_rules_with_array_index_value_errs
           tyl
           ~init:(env, [], [], [], [])
           ~f:(fun (env, tys, arr_errs, key_errs, val_errs) ty ->
-            let (env, ty, arr_err, key_err, val_err) =
+            let (env, (ty, arr_err, key_err, val_err)) =
               iter ~is_nonnull env ty
             in
             ( env,
@@ -150,11 +149,11 @@ let apply_rules_with_array_index_value_errs
               key_err :: key_errs,
               val_err :: val_errs ))
       in
-      let (env, arr_err_res) = union_errs env arr_errs in
-      let (env, key_err_res) = union_errs env key_errs in
-      let (env, val_err_res) = union_errs env val_errs in
+      let (env, arr_ty_mismatch) = union_errs env arr_errs in
+      let (env, key_ty_mismatch) = union_errs env key_errs in
+      let (env, val_ty_mismatch) = union_errs env val_errs in
       let (env, ty) = Typing_union.union_list env r tys in
-      (env, ty, arr_err_res, key_err_res, val_err_res)
+      (env, (ty, arr_ty_mismatch, key_ty_mismatch, val_ty_mismatch))
     (* Special case for `TypeStructure<_> as shape { ... }`, because some clients care about the
      * fact that we have the special type TypeStructure *)
     | (_, Tnewtype (cid, _, bound))
@@ -184,43 +183,49 @@ let apply_rules_with_array_index_value_errs
         iter ~is_nonnull env ty
     | _ -> default ()
   in
-  let (env, ty, arr_err_res, key_err_res, val_err_res) =
+  let (env, (ty, arr_ty_mismatch, key_ty_mismatch, val_ty_mismatch)) =
     iter ~is_nonnull:false env ty
   in
   let opt_of_res =
     Result.fold ~ok:(fun _ -> None) ~error:(fun tys -> Some tys)
   in
-  let arr_err_opt = opt_of_res arr_err_res
-  and key_err_opt = opt_of_res key_err_res
-  and val_err_opt = opt_of_res val_err_res in
-  (env, ty, arr_err_opt, key_err_opt, val_err_opt)
+  let arr_err_opt = opt_of_res arr_ty_mismatch
+  and key_err_opt = opt_of_res key_ty_mismatch
+  and val_err_opt = opt_of_res val_ty_mismatch in
+  (env, (ty, arr_err_opt, key_err_opt, val_err_opt))
 
-let apply_rules_with_index_value_errs ?ignore_type_structure env ty f =
+let apply_rules_with_index_value_ty_mismatches ?ignore_type_structure env ty f =
   let g env ty =
-    let (env, ty, idx_err_res, val_err_res) = f env ty in
-    (env, ty, Ok ty, idx_err_res, val_err_res)
+    let (env, (ty, idx_ty_mismatch, val_ty_mismatch)) = f env ty in
+    (env, (ty, Ok ty, idx_ty_mismatch, val_ty_mismatch))
   in
-  let (env, ty, _, idx_err_res, val_err_res) =
-    apply_rules_with_array_index_value_errs ?ignore_type_structure env ty g
+  let (env, (ty, _, idx_ty_mismatch, val_ty_mismatch)) =
+    apply_rules_with_array_index_value_ty_mismatches
+      ?ignore_type_structure
+      env
+      ty
+      g
   in
-  (env, ty, idx_err_res, val_err_res)
+  (env, (ty, idx_ty_mismatch, val_ty_mismatch))
 
 (*  Here we have a function returns the updated environment, a local type
     and a result indicating type errors for the rhs of an assignment *)
-let apply_rules_with_err ?ignore_type_structure env ty f =
+let apply_rules_with_ty_mismatch ?ignore_type_structure env ty f =
   let g env ty =
-    let (env, ty, err_res) = f env ty in
-    (env, ty, Ok ty, err_res)
+    let (env, (ty, ty_mismatch)) = f env ty in
+    (env, (ty, Ok ty, ty_mismatch))
   in
-  let (env, ty, _, err_res) =
-    apply_rules_with_index_value_errs ?ignore_type_structure env ty g
+  let (env, (ty, _, ty_mismatch)) =
+    apply_rules_with_index_value_ty_mismatches ?ignore_type_structure env ty g
   in
-  (env, ty, err_res)
+  (env, (ty, ty_mismatch))
 
 let apply_rules ?ignore_type_structure env ty f =
   let g env ty =
     let (env, ty) = f env ty in
-    (env, ty, Ok ty)
+    (env, (ty, Ok ty))
   in
-  let (env, ty, _) = apply_rules_with_err ?ignore_type_structure env ty g in
+  let (env, (ty, _)) =
+    apply_rules_with_ty_mismatch ?ignore_type_structure env ty g
+  in
   (env, ty)

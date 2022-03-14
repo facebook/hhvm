@@ -3875,7 +3875,7 @@ and expr_
     let env = might_throw env in
     let is_lvalue = is_lvalue valkind in
     let (_, p1, _) = e1 in
-    let (env, ty, arr_err_opt, key_err_opt) =
+    let (env, (ty, arr_err_opt, key_err_opt)) =
       Typing_array_access.array_get
         ~array_pos:p1
         ~expr_pos:p
@@ -6173,8 +6173,8 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
     | (_, pos, Array_get (e1, None)) ->
       let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
       let (_, p1, _) = e1 in
-      let (env, ty1', arr_err_opt, val_err_opt) =
-        Typing_array_access.assign_array_append_with_err
+      let (env, (ty1', arr_err_opt, val_err_opt)) =
+        Typing_array_access.assign_array_append
           ~array_pos:p1
           ~expr_pos:p
           ur
@@ -6204,8 +6204,8 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       let (env, te, ty) = expr env e ~allow_awaitable in
       let env = might_throw env in
       let (_, p1, _) = e1 in
-      let (env, ty1', arr_err_opt, key_err_opt, val_err_opt) =
-        Typing_array_access.assign_array_get_with_err
+      let (env, (ty1', arr_err_opt, key_err_opt, val_err_opt)) =
+        Typing_array_access.assign_array_get
           ~array_pos:p1
           ~expr_pos:p
           ur

@@ -480,7 +480,10 @@ impl<R: Reason> From<&obr::typing_defs::ClassConst<'_>> for folded::ClassConst<R
 
 impl<R: Reason> From<&obr::decl_defs::Requirement<'_>> for folded::Requirement<R> {
     fn from(req: &obr::decl_defs::Requirement<'_>) -> Self {
-        Self(req.0.into(), req.1.into())
+        Self {
+            pos: req.0.into(),
+            ty: req.1.into(),
+        }
     }
 }
 

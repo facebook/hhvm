@@ -13,6 +13,7 @@ use crate::decl_defs::{
 use crate::reason::Reason;
 use crate::special_names::SpecialNames;
 use crate::typing_error::{Primary, TypingError};
+use eq_modulo_pos::EqModuloPos;
 use oxidized::global_options::GlobalOptions;
 use pos::{
     ClassConstName, ClassConstNameIndexMap, MethodNameIndexMap, ModuleName, Positioned, PropName,
@@ -462,8 +463,8 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
                 let substitution = Substitution { subst: &subst };
                 // TODO: Do we need to rev? Or was that just a limitation of OCaml's library?
                 cls.req_ancestors.iter().rev().for_each(|req_ancestor| {
-                    let ty = substitution.instantiate(&req_ancestor.1);
-                    req_ancestors.push(Requirement(pos_id.pos().clone(), ty));
+                    let ty = substitution.instantiate(&req_ancestor.ty);
+                    req_ancestors.push(Requirement::new(pos_id.pos().clone(), ty));
                 });
                 match self.child.kind {
                     ClassishKind::Cclass(_) => {
@@ -491,7 +492,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             // Since the req is declared on this class, we should
             // emphatically *not* substitute: a require extends Foo<T> is
             // going to be this class's <T>
-            req_ancestors.push(Requirement(pos_id.pos().clone(), req_ty.clone()));
+            req_ancestors.push(Requirement::new(pos_id.pos().clone(), req_ty.clone()));
             req_ancestors_extends.insert(pos_id.id());
 
             if let Some(cls) = self.parents.get(&pos_id.id()) {
@@ -518,39 +519,32 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     /// that prunes the list via proper subtyping, but that's a little more work
     /// than I'm willing to do now.
     fn naive_dedup(&self, req_ancestors: &mut Vec<Requirement<R>>) {
-        let mut seen_extends: TypeNameIndexMap<Vec<DeclTy<R>>> = TypeNameIndexMap::new();
-        // TODO: Do we need to rev. Seems the logic works forwards or backwards...
+        let mut seen_reqs: TypeNameIndexMap<Vec<DeclTy<R>>> = TypeNameIndexMap::new();
+        // Reverse to match the OCaml ordering for building the seen_reqs map
+        // (since OCaml uses `rev_filter_map` for perf reasons)
         req_ancestors.reverse();
         req_ancestors.retain(|req_extend| {
-            if let Some((_, pos_id, hl)) = req_extend.1.unwrap_class_type() {
-                let mut normalized_hl = vec![];
-                for h in hl {
-                    // TODO: Decl_pos_utils.NormalizeSig.ty h
-                    normalized_hl.push(h.clone());
-                }
-
-                if let Some(seen_hl) = seen_extends.get(&pos_id.id()) {
-                    // TODO: List.equal equal_decl_ty hl hl_
-                    if normalized_hl.len() == seen_hl.len()
-                        && normalized_hl.iter().zip(seen_hl).all(|(h1, h2)| {
-                            // TODO: equal_decl_ty h1 h2
-                            h1 == h2
-                        })
-                    {
+            if let Some((_, pos_id, targs)) = req_extend.ty.unwrap_class_type() {
+                if let Some(seen_targs) = seen_reqs.get(&pos_id.id()) {
+                    if targs.eq_modulo_pos(seen_targs) {
                         false
                     } else {
-                        // TN: Replacing an existing hl_ that we didn't match seems not ideal
-                        seen_extends.insert(pos_id.id().clone(), normalized_hl);
+                        // Seems odd to replace the existing targs list when we
+                        // see a different one, but the OCaml does it, so we
+                        // need to as well
+                        seen_reqs.insert(pos_id.id(), targs.to_vec());
                         true
                     }
                 } else {
-                    seen_extends.insert(pos_id.id().clone(), normalized_hl);
+                    seen_reqs.insert(pos_id.id(), targs.to_vec());
                     true
                 }
             } else {
                 true
             }
         });
+        // Reverse again to match the OCaml ordering for the returned list
+        req_ancestors.reverse();
     }
 
     fn get_class_requirements(&self) -> (Vec<Requirement<R>>, TypeNameIndexSet) {

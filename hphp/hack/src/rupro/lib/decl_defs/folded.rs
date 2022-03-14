@@ -18,6 +18,7 @@ use pos::{
     TypeNameIndexSet,
 };
 use std::collections::BTreeMap;
+use std::fmt;
 
 pub use crate::folded_decl_provider::Subst;
 pub use oxidized::ast_defs::{Abstraction, ClassishKind};
@@ -123,9 +124,12 @@ impl<R: Reason> ClassConst<R> {
 /// class Baz extends Foo implements Bar { <- position of the `implements`
 /// }
 /// ```
-#[derive(Clone, Debug, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
 #[serde(bound = "R: Reason")]
-pub struct Requirement<R: Reason>(pub R::Pos, pub DeclTy<R>);
+pub struct Requirement<R: Reason> {
+    pub pos: R::Pos,
+    pub ty: DeclTy<R>,
+}
 
 #[derive(Clone, Debug, Eq, EqModuloPos, PartialEq, Serialize, Deserialize)]
 pub struct Constructor {
@@ -284,6 +288,21 @@ impl FoldedElement {
 
     pub fn get_xhp_attr(&self) -> Option<XhpAttribute> {
         self.flags.get_xhp_attr()
+    }
+}
+
+impl<R: Reason> Requirement<R> {
+    pub fn new(pos: R::Pos, ty: DeclTy<R>) -> Self {
+        Self { pos, ty }
+    }
+}
+
+impl<R: Reason> fmt::Debug for Requirement<R> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("Requirement")
+            .field(&self.pos)
+            .field(&self.ty)
+            .finish()
     }
 }
 

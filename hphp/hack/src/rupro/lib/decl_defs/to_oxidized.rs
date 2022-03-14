@@ -370,8 +370,8 @@ impl<'a, R: Reason> ToOxidized<'a> for folded::Requirement<R> {
 
     fn to_oxidized(&self, arena: &'a bumpalo::Bump) -> Self::Output {
         arena.alloc(obr::decl_defs::Requirement(
-            self.0.to_oxidized(arena),
-            self.1.to_oxidized(arena),
+            self.pos.to_oxidized(arena),
+            self.ty.to_oxidized(arena),
         ))
     }
 }

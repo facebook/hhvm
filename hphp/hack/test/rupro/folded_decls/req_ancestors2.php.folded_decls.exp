@@ -142,11 +142,11 @@ FoldedClass {
     req_ancestors: [
         Requirement(
             NPos,
-            Z,
+            B,
         ),
         Requirement(
             NPos,
-            B,
+            Z,
         ),
     ],
     req_ancestors_extends: {

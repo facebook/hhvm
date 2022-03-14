@@ -113,17 +113,13 @@
      },
      req_ancestors: [
          Requirement(
--            Pos(root|classes_require.php, 13:19-26),
--            Machine,
--        ),
--        Requirement(
+             Pos(root|classes_require.php, 13:19-26),
+             Machine,
+         ),
+         Requirement(
              Pos(root|classes_require.php, 14:22-28),
              Fliers,
          ),
-+        Requirement(
-+            Pos(root|classes_require.php, 13:19-26),
-+            Machine,
-+        ),
      ],
      req_ancestors_extends: {
          "\\Fliers",

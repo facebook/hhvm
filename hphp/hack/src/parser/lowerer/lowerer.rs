@@ -1502,29 +1502,7 @@ fn p_expr_impl<'a>(
             p_pre_post_unary_decorated_expr(node, env, pos, location)
         }
         BinaryExpression(c) => p_binary_expr(c, env, pos, location),
-        Token(t) => {
-            use ExprLocation::*;
-            match (location, t.kind()) {
-                (MemberSelect, TK::Variable) => mk_lvar(node, env),
-                (InDoubleQuotedString, TK::HeredocStringLiteral)
-                | (InDoubleQuotedString, TK::HeredocStringLiteralHead)
-                | (InDoubleQuotedString, TK::HeredocStringLiteralTail) => Ok(Expr_::String(
-                    wrap_unescaper(text_str(node, env), unescape_heredoc)?,
-                )),
-                (InDoubleQuotedString, _) => Ok(Expr_::String(wrap_unescaper(
-                    text_str(node, env),
-                    unesc_dbl,
-                )?)),
-                (MemberSelect, _)
-                | (TopLevel, _)
-                | (AsStatement, _)
-                | (UsingStatement, _)
-                | (RightOfAssignment, _)
-                | (RightOfAssignmentInUsingStatement, _)
-                | (RightOfReturn, _)
-                | (CallReceiver, _) => Ok(Expr_::mk_id(pos_name(node, env)?)),
-            }
-        }
+        Token(t) => p_token(node, t, env, location),
         YieldExpression(c) => {
             use ExprLocation::*;
             env.saw_yield = true;
@@ -2228,6 +2206,35 @@ fn p_binary_expr<'a>(
         check_lvalue(lhs, env);
     }
     Ok(bop_ast_node)
+}
+
+fn p_token<'a>(
+    node: S<'a>,
+    t: &'a PositionedToken<'_>,
+    env: &mut Env<'a>,
+    location: ExprLocation,
+) -> Result<Expr_> {
+    use ExprLocation::*;
+    match (location, t.kind()) {
+        (MemberSelect, TK::Variable) => mk_lvar(node, env),
+        (InDoubleQuotedString, TK::HeredocStringLiteral)
+        | (InDoubleQuotedString, TK::HeredocStringLiteralHead)
+        | (InDoubleQuotedString, TK::HeredocStringLiteralTail) => Ok(Expr_::String(
+            wrap_unescaper(text_str(node, env), unescape_heredoc)?,
+        )),
+        (InDoubleQuotedString, _) => Ok(Expr_::String(wrap_unescaper(
+            text_str(node, env),
+            unesc_dbl,
+        )?)),
+        (MemberSelect, _)
+        | (TopLevel, _)
+        | (AsStatement, _)
+        | (UsingStatement, _)
+        | (RightOfAssignment, _)
+        | (RightOfAssignmentInUsingStatement, _)
+        | (RightOfReturn, _)
+        | (CallReceiver, _) => Ok(Expr_::mk_id(pos_name(node, env)?)),
+    }
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {

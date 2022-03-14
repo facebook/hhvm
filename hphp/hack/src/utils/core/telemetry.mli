@@ -29,8 +29,8 @@ val string_ : ?truncate:int -> key:string -> value:string -> t -> t
 val string_opt : ?truncate:int -> key:string -> value:string option -> t -> t
 
 val string_list :
-  ?truncate_elems:int ->
-  ?truncate_len:int ->
+  ?truncate_list:int ->
+  ?truncate_each_string:int ->
   key:string ->
   value:string list ->
   t ->
@@ -44,7 +44,7 @@ val int_ : key:string -> value:int -> t -> t
 
 val int_opt : key:string -> value:int option -> t -> t
 
-val int_list : ?truncate_elems:int -> key:string -> value:int list -> t -> t
+val int_list : ?truncate_list:int -> key:string -> value:int list -> t -> t
 
 val json_ : key:string -> value:Hh_json.json -> t -> t
 

@@ -49,21 +49,21 @@ let string_opt
   | Some value -> string_ ?truncate telemetry ~key ~value
 
 let string_list
-    ?(truncate_elems : int option)
-    ?(truncate_len : int option)
+    ?(truncate_list : int option)
+    ?(truncate_each_string : int option)
     ~(key : string)
     ~(value : string list)
     (telemetry : t) : t =
   let value =
-    match truncate_elems with
+    match truncate_list with
     | None -> value
-    | Some truncate_elems -> List.take value truncate_elems
+    | Some truncate_list -> List.take value truncate_list
   in
   let value =
-    match truncate_len with
+    match truncate_each_string with
     | None -> value
-    | Some truncate_len ->
-      List.map ~f:(fun s -> String_utils.truncate truncate_len s) value
+    | Some truncate_each_string ->
+      List.map ~f:(fun s -> String_utils.truncate truncate_each_string s) value
   in
   let value = List.map ~f:(fun s -> Hh_json.JSON_String s) value in
   (key, Hh_json.JSON_Array value) :: telemetry
@@ -84,14 +84,14 @@ let int_opt ~(key : string) ~(value : int option) (telemetry : t) : t =
   | Some value -> int_ telemetry ~key ~value
 
 let int_list
-    ?(truncate_elems : int option)
+    ?(truncate_list : int option)
     ~(key : string)
     ~(value : int list)
     (telemetry : t) : t =
   let value =
-    match truncate_elems with
+    match truncate_list with
     | None -> value
-    | Some truncate_elems -> List.take value truncate_elems
+    | Some truncate_list -> List.take value truncate_list
   in
   let value = List.map ~f:(fun i -> Hh_json.int_ i) value in
   (key, Hh_json.JSON_Array value) :: telemetry

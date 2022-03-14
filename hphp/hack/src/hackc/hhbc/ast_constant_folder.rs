@@ -324,15 +324,7 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
         Expr_::True => Ok(TypedValue::Bool(true)),
         Expr_::False => Ok(TypedValue::Bool(false)),
         Expr_::Null => Ok(TypedValue::Null),
-        Expr_::String(s) => {
-            // FIXME: This is not safe--string literals are binary strings.
-            // There's no guarantee that they're valid UTF-8.
-            Ok(TypedValue::mk_string(
-                emitter
-                    .alloc
-                    .alloc_str(unsafe { std::str::from_utf8_unchecked(s) }),
-            ))
-        }
+        Expr_::String(s) => string_expr_to_typed_value(emitter, s),
         Expr_::Float(s) => {
             if s == math::INF {
                 Ok(TypedValue::double(std::f64::INFINITY))
@@ -493,6 +485,19 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
         }
         _ => Err(Error::NotLiteral),
     }
+}
+
+fn string_expr_to_typed_value<'arena, 'decl>(
+    emitter: &Emitter<'arena, 'decl>,
+    s: &[u8],
+) -> Result<TypedValue<'arena>, Error> {
+    // FIXME: This is not safe--string literals are binary strings.
+    // There's no guarantee that they're valid UTF-8.
+    Ok(TypedValue::mk_string(
+        emitter
+            .alloc
+            .alloc_str(unsafe { std::str::from_utf8_unchecked(s) }),
+    ))
 }
 
 fn int_expr_to_typed_value<'arena>(s: &str) -> Result<TypedValue<'arena>, Error> {

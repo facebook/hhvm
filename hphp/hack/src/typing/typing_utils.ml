@@ -25,14 +25,6 @@ let not_implemented s _ =
   failwith (Printf.sprintf "Function %s not implemented" s)
 
 type expand_typedef =
-  expand_env -> env -> Reason.t -> string -> locl_ty list -> env * locl_ty
-
-let (expand_typedef_ref : expand_typedef ref) =
-  ref (not_implemented "expand_typedef")
-
-let expand_typedef x = !expand_typedef_ref x
-
-type expand_typedef_with_ty_err =
   expand_env ->
   env ->
   Reason.t ->
@@ -40,10 +32,10 @@ type expand_typedef_with_ty_err =
   locl_ty list ->
   (env * Typing_error.t option) * locl_ty
 
-let (expand_typedef_with_ty_err_ref : expand_typedef_with_ty_err ref) =
-  ref (not_implemented "expand_typedef_with_ty_err")
+let (expand_typedef_ref : expand_typedef ref) =
+  ref (not_implemented "expand_typedef")
 
-let expand_typedef_with_ty_err x = !expand_typedef_with_ty_err_ref x
+let expand_typedef x = !expand_typedef_ref x
 
 type sub_type =
   env ->

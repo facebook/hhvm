@@ -31,7 +31,10 @@ let check_param : env -> Nast.fun_param -> unit =
      fun env ty ->
       let (env, ty) = Env.expand_type env ty in
       let ety_env = empty_expand_env in
-      let (env, ty, _) = Typing_tdef.force_expand_typedef ~ety_env env ty in
+      let ((env, ty_err_opt), ty, _) =
+        Typing_tdef.force_expand_typedef ~ety_env env ty
+      in
+      Option.iter ~f:Errors.add_typing_error ty_err_opt;
       match get_node ty with
       | Tprim (Tnull | Tarraykey | Tbool | Tint | Tfloat | Tstring | Tnum) -> ()
       | Tnonnull

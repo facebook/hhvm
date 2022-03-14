@@ -541,7 +541,7 @@ and localize_typedef_instantiation_with_ty_err
         nkinds
     in
     let ((env, e2), lty) =
-      TUtils.expand_typedef_with_ty_err ety_env env r type_name tyargs
+      TUtils.expand_typedef ety_env env r type_name tyargs
     in
     let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
     ((env, ty_err_opt), lty)

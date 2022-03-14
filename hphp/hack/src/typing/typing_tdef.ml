@@ -21,8 +21,7 @@ module MakeType = Typing_make_type
 (* Expanding type definition *)
 (*****************************************************************************)
 
-let expand_typedef_with_ty_err_
-    ?(force_expand = false) ety_env env r (x : string) argl =
+let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
   let pos = Reason.to_pos r in
   let td = unsafe_opt @@ Typing_env.get_typedef env x in
   let {
@@ -87,20 +86,18 @@ let expand_typedef_with_ty_err_
     in
     (env, (ety_env, with_reason expanded_ty r))
 
-let expand_typedef_with_ty_err ety_env env r type_name argl =
-  let (env, (_ety_env, ty)) =
-    expand_typedef_with_ty_err_ ety_env env r type_name argl
-  in
+let expand_typedef ety_env env r type_name argl =
+  let (env, (_ety_env, ty)) = expand_typedef_ ety_env env r type_name argl in
   (env, ty)
 
 (* Expand a typedef, smashing abstraction and collecting a trail
  * of where the typedefs come from. *)
-let force_expand_typedef_with_ty_err ~ety_env env (t : locl_ty) =
+let force_expand_typedef ~ety_env env (t : locl_ty) =
   let rec aux e1 ety_env env t =
     match deref t with
     | (r, Tnewtype (x, argl, _)) when not (Env.is_enum env x) ->
       let ((env, e2), (ety_env, ty)) =
-        expand_typedef_with_ty_err_ ~force_expand:true ety_env env r x argl
+        expand_typedef_ ~force_expand:true ety_env env r x argl
       in
       aux (Option.merge e1 e2 ~f:Typing_error.both) ety_env env ty
     | _ ->
@@ -110,21 +107,4 @@ let force_expand_typedef_with_ty_err ~ety_env env (t : locl_ty) =
   in
   aux None ety_env env t
 
-(*****************************************************************************)
-(*****************************************************************************)
-
-let discharge_ty_err (env, ty_err_opt) =
-  Option.iter ty_err_opt ~f:Errors.add_typing_error;
-  env
-
-let force_expand_typedef ~ety_env env t =
-  Tuple3.map_fst ~f:discharge_ty_err
-  @@ force_expand_typedef_with_ty_err ~ety_env env t
-
-let expand_typedef ety_env env r type_name argl =
-  Tuple2.map_fst ~f:discharge_ty_err
-  @@ expand_typedef_with_ty_err ety_env env r type_name argl
-
 let () = TUtils.expand_typedef_ref := expand_typedef
-
-let () = TUtils.expand_typedef_with_ty_err_ref := expand_typedef_with_ty_err

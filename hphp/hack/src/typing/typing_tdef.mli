@@ -12,4 +12,6 @@ val force_expand_typedef :
   ety_env:Typing_defs.expand_env ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
-  Typing_env_types.env * Typing_defs.locl_ty * Pos_or_decl.t list
+  (Typing_env_types.env * Typing_error.t option)
+  * Typing_defs.locl_ty
+  * Pos_or_decl.t list

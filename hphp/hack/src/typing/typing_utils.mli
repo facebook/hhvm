@@ -12,29 +12,11 @@ type expand_typedef =
   Typing_reason.t ->
   string ->
   Typing_defs.locl_ty list ->
-  Typing_env_types.env * Typing_defs.locl_ty
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
 val expand_typedef_ref : expand_typedef ref
 
 val expand_typedef :
-  Typing_defs.expand_env ->
-  Typing_env_types.env ->
-  Typing_reason.t ->
-  string ->
-  Typing_defs.locl_ty list ->
-  Typing_env_types.env * Typing_defs.locl_ty
-
-type expand_typedef_with_ty_err =
-  Typing_defs.expand_env ->
-  Typing_env_types.env ->
-  Typing_reason.t ->
-  string ->
-  Typing_defs.locl_ty list ->
-  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
-
-val expand_typedef_with_ty_err_ref : expand_typedef_with_ty_err ref
-
-val expand_typedef_with_ty_err :
   Typing_defs.expand_env ->
   Typing_env_types.env ->
   Typing_reason.t ->

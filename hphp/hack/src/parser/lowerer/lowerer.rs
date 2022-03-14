@@ -1503,25 +1503,7 @@ fn p_expr_impl<'a>(
         }
         BinaryExpression(c) => p_binary_expr(c, env, pos, location),
         Token(t) => p_token(node, t, env, location),
-        YieldExpression(c) => {
-            use ExprLocation::*;
-            env.saw_yield = true;
-            if location != AsStatement
-                && location != RightOfAssignment
-                && location != RightOfAssignmentInUsingStatement
-            {
-                raise_parsing_error(node, env, &syntax_error::invalid_yield);
-            }
-            if c.operand.is_missing() {
-                Ok(Expr_::mk_yield(ast::Afield::AFvalue(Expr::new(
-                    (),
-                    pos,
-                    Expr_::Null,
-                ))))
-            } else {
-                Ok(Expr_::mk_yield(p_afield(&c.operand, env)?))
-            }
-        }
+        YieldExpression(c) => p_yield_expr(node, c, env, pos, location),
         ScopeResolutionExpression(c) => {
             let qual = p_expr(&c.qualifier, env)?;
             if let Expr_::Id(id) = &qual.2 {
@@ -2234,6 +2216,32 @@ fn p_token<'a>(
         | (RightOfAssignmentInUsingStatement, _)
         | (RightOfReturn, _)
         | (CallReceiver, _) => Ok(Expr_::mk_id(pos_name(node, env)?)),
+    }
+}
+
+fn p_yield_expr<'a>(
+    node: S<'a>,
+    c: &'a YieldExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+    pos: Pos,
+    location: ExprLocation,
+) -> Result<Expr_> {
+    use ExprLocation::*;
+    env.saw_yield = true;
+    if location != AsStatement
+        && location != RightOfAssignment
+        && location != RightOfAssignmentInUsingStatement
+    {
+        raise_parsing_error(node, env, &syntax_error::invalid_yield);
+    }
+    if c.operand.is_missing() {
+        Ok(Expr_::mk_yield(ast::Afield::AFvalue(Expr::new(
+            (),
+            pos,
+            Expr_::Null,
+        ))))
+    } else {
+        Ok(Expr_::mk_yield(p_afield(&c.operand, env)?))
     }
 }
 

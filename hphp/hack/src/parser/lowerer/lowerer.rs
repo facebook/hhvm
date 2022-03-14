@@ -1515,82 +1515,12 @@ fn p_expr_impl<'a>(
         ConstructorCall(c) => p_constructor_call(node, c, env, pos),
         GenericTypeSpecifier(c) => p_generic_type_specifier(c, env),
         LiteralExpression(c) => p_expr_lit(location, node, &c.expression, env),
-        PrefixedStringExpression(c) => {
-            /* Temporarily allow only`re`- prefixed strings */
-            let name_text = text(&c.name, env);
-            if name_text != "re" {
-                raise_parsing_error(node, env, &syntax_error::non_re_prefix);
-            }
-            Ok(Expr_::mk_prefixed_string(name_text, p_expr(&c.str, env)?))
-        }
-        IsExpression(c) => Ok(Expr_::mk_is(
-            p_expr(&c.left_operand, env)?,
-            p_hint(&c.right_operand, env)?,
-        )),
-        AsExpression(c) => Ok(Expr_::mk_as(
-            p_expr(&c.left_operand, env)?,
-            p_hint(&c.right_operand, env)?,
-            false,
-        )),
-        NullableAsExpression(c) => Ok(Expr_::mk_as(
-            p_expr(&c.left_operand, env)?,
-            p_hint(&c.right_operand, env)?,
-            true,
-        )),
-        UpcastExpression(c) => Ok(Expr_::mk_upcast(
-            p_expr(&c.left_operand, env)?,
-            p_hint(&c.right_operand, env)?,
-        )),
-        AnonymousFunction(c) => {
-            let p_arg = |n: S<'a>, e: &mut Env<'a>| match &n.children {
-                Token(_) => mk_name_lid(n, e),
-                _ => missing_syntax("use variable", n, e),
-            };
-            let ctxs = p_contexts(
-                &c.ctx_list,
-                env,
-                // TODO(coeffects) Anonymous functions may be able to support this:: contexts
-                Some((
-                    &syntax_error::lambda_effect_polymorphic("An anonymous function"),
-                    false,
-                )),
-            )?;
-            let unsafe_ctxs = ctxs.clone();
-            let p_use = |n: S<'a>, e: &mut Env<'a>| match &n.children {
-                AnonymousFunctionUseClause(c) => could_map(&c.variables, e, p_arg),
-                _ => Ok(vec![]),
-            };
-            let suspension_kind = mk_suspension_kind(&c.async_keyword);
-            let (body, yield_) = {
-                let mut env1 = Env::clone_and_unset_toplevel_if_toplevel(env);
-                map_yielding(&c.body, env1.as_mut(), p_function_body)?
-            };
-            let doc_comment = extract_docblock(node, env).or_else(|| env.top_docblock().clone());
-            let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
-            let external = c.body.is_external();
-            let params = could_map(&c.parameters, env, p_fun_param)?;
-            let name_pos = p_fun_pos(node, env);
-            let fun = ast::Fun_ {
-                span: p_pos(node, env),
-                readonly_this: None, // set in process_readonly_expr
-                annotation: (),
-                readonly_ret: map_optional(&c.readonly_return, env, p_readonly)?,
-                ret: ast::TypeHint((), map_optional(&c.type_, env, p_hint)?),
-                name: ast::Id(name_pos, String::from(";anonymous")),
-                tparams: vec![],
-                where_constraints: vec![],
-                body: ast::FuncBody { fb_ast: body },
-                fun_kind: mk_fun_kind(suspension_kind, yield_),
-                params,
-                ctxs,
-                unsafe_ctxs,
-                user_attributes,
-                external,
-                doc_comment,
-            };
-            let uses = p_use(&c.use_, env).unwrap_or_else(|_| vec![]);
-            Ok(Expr_::mk_efun(fun, uses))
-        }
+        PrefixedStringExpression(c) => p_prefixed_string_expr(node, c, env),
+        IsExpression(c) => p_is_expr(&c.left_operand, &c.right_operand, env),
+        AsExpression(c) => p_as_expr(&c.left_operand, &c.right_operand, env, false),
+        NullableAsExpression(c) => p_as_expr(&c.left_operand, &c.right_operand, env, true),
+        UpcastExpression(c) => p_upcast_expr(&c.left_operand, &c.right_operand, env),
+        AnonymousFunction(c) => p_anonymous_function(node, c, env),
         AwaitableCreationExpression(c) => {
             let suspension_kind = mk_suspension_kind(&c.async_);
             let (blk, yld) = map_yielding(&c.compound_statement, env, p_function_body)?;
@@ -2301,6 +2231,90 @@ fn p_shape_expr<'a>(
     Ok(Expr_::Shape(could_map(&c.fields, env, |n, e| {
         map_shape_expression_field(n, e, p_expr)
     })?))
+}
+
+fn p_prefixed_string_expr<'a>(
+    node: S<'a>,
+    c: &'a PrefixedStringExpressionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    /* Temporarily allow only`re`- prefixed strings */
+    let name_text = text(&c.name, env);
+    if name_text != "re" {
+        raise_parsing_error(node, env, &syntax_error::non_re_prefix);
+    }
+    Ok(Expr_::mk_prefixed_string(name_text, p_expr(&c.str, env)?))
+}
+
+fn p_is_expr<'a>(left: S<'a>, right: S<'a>, env: &mut Env<'a>) -> Result<Expr_> {
+    Ok(Expr_::mk_is(p_expr(left, env)?, p_hint(right, env)?))
+}
+
+fn p_as_expr<'a>(left: S<'a>, right: S<'a>, env: &mut Env<'a>, nullable: bool) -> Result<Expr_> {
+    Ok(Expr_::mk_as(
+        p_expr(left, env)?,
+        p_hint(right, env)?,
+        nullable,
+    ))
+}
+
+fn p_upcast_expr<'a>(left: S<'a>, right: S<'a>, env: &mut Env<'a>) -> Result<Expr_> {
+    Ok(Expr_::mk_upcast(p_expr(left, env)?, p_hint(right, env)?))
+}
+
+fn p_anonymous_function<'a>(
+    node: S<'a>,
+    c: &'a AnonymousFunctionChildren<'_, PositionedToken<'_>, PositionedValue<'_>>,
+    env: &mut Env<'a>,
+) -> Result<Expr_> {
+    let p_arg = |n: S<'a>, e: &mut Env<'a>| match &n.children {
+        Token(_) => mk_name_lid(n, e),
+        _ => missing_syntax("use variable", n, e),
+    };
+    let ctxs = p_contexts(
+        &c.ctx_list,
+        env,
+        // TODO(coeffects) Anonymous functions may be able to support this:: contexts
+        Some((
+            &syntax_error::lambda_effect_polymorphic("An anonymous function"),
+            false,
+        )),
+    )?;
+    let unsafe_ctxs = ctxs.clone();
+    let p_use = |n: S<'a>, e: &mut Env<'a>| match &n.children {
+        AnonymousFunctionUseClause(c) => could_map(&c.variables, e, p_arg),
+        _ => Ok(vec![]),
+    };
+    let suspension_kind = mk_suspension_kind(&c.async_keyword);
+    let (body, yield_) = {
+        let mut env1 = Env::clone_and_unset_toplevel_if_toplevel(env);
+        map_yielding(&c.body, env1.as_mut(), p_function_body)?
+    };
+    let doc_comment = extract_docblock(node, env).or_else(|| env.top_docblock().clone());
+    let user_attributes = p_user_attributes(&c.attribute_spec, env)?;
+    let external = c.body.is_external();
+    let params = could_map(&c.parameters, env, p_fun_param)?;
+    let name_pos = p_fun_pos(node, env);
+    let fun = ast::Fun_ {
+        span: p_pos(node, env),
+        readonly_this: None, // set in process_readonly_expr
+        annotation: (),
+        readonly_ret: map_optional(&c.readonly_return, env, p_readonly)?,
+        ret: ast::TypeHint((), map_optional(&c.type_, env, p_hint)?),
+        name: ast::Id(name_pos, String::from(";anonymous")),
+        tparams: vec![],
+        where_constraints: vec![],
+        body: ast::FuncBody { fb_ast: body },
+        fun_kind: mk_fun_kind(suspension_kind, yield_),
+        params,
+        ctxs,
+        unsafe_ctxs,
+        user_attributes,
+        external,
+        doc_comment,
+    };
+    let uses = p_use(&c.use_, env).unwrap_or_else(|_| vec![]);
+    Ok(Expr_::mk_efun(fun, uses))
 }
 
 fn mk_lid(p: Pos, s: String) -> ast::Lid {
